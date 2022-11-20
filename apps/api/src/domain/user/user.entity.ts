@@ -49,4 +49,12 @@ export class UserEntity extends TimestampEntity {
     entity.passwordEnc = props.passwordEnc;
     return entity;
   }
+
+  public isSuperAdmin(): boolean {
+    return this.authorities.includes(Authorities.ROLE_SUPERADMIN);
+  }
+
+  public isAdmin(): boolean {
+    return this.isSuperAdmin() || this.authorities.includes(Authorities.ROLE_ADMIN);
+  }
 }

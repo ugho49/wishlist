@@ -3,7 +3,7 @@ import { HealthCheck, HealthCheckService, TypeOrmHealthIndicator } from '@nestjs
 import { Public } from '../../domain/auth';
 import { ApiTags } from '@nestjs/swagger';
 
-@ApiTags('health')
+@ApiTags('Health')
 @Controller('health')
 export class HealthController {
   constructor(
