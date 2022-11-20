@@ -1,0 +1,16 @@
+version: '3.7'
+
+services:
+  db:
+    image: postgres:14.5-alpine
+    environment:
+      POSTGRES_USER: "service"
+      POSTGRES_PASSWORD: "service"
+      POSTGRES_DB: "wishlist-api"
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: "pg_isready -d wishlist-api -U service"
+      interval: 2s
+      timeout: 5s
+      retries: 10
