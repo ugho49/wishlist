@@ -6,13 +6,12 @@ import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify
 import { AppModule } from './app.module';
 import { bootstrapSwagger } from './swagger';
 
-async function createApp(prefix: string) {
+async function createApp() {
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter());
 
   app.useGlobalPipes(new ValidationPipe({ transform: true, stopAtFirstError: true }));
   app.enableCors();
   app.enableShutdownHooks();
-  app.setGlobalPrefix(prefix);
 
   await app.register(helmet, {
     contentSecurityPolicy: {
@@ -33,15 +32,13 @@ async function createApp(prefix: string) {
 async function start() {
   Logger.log('Starting server...');
 
-  const globalPrefix = 'api/v1';
-
-  const app = await createApp(globalPrefix);
+  const app = await createApp();
   const configService = app.get(ConfigService);
   const port = configService.get('PORT');
 
   await app.listen(port, '0.0.0.0');
 
-  Logger.log(`🚀 Application is running on: http://localhost:${port}/${globalPrefix}`);
+  Logger.log(`🚀 Application is running on: http://localhost:${port}/api`);
 }
 
 void start();

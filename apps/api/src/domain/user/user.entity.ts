@@ -1,6 +1,6 @@
 import { Column, Entity, PrimaryColumn } from 'typeorm';
 import { TimestampEntity, uuid } from '../../core/database';
-import { UserDto } from './user.dto';
+import { Authorities } from '@wishlist/common-types';
 
 @Entity('user')
 export class UserEntity extends TimestampEntity {
@@ -11,34 +11,42 @@ export class UserEntity extends TimestampEntity {
   email: string;
 
   @Column()
-  firstname: string;
+  firstName: string;
 
   @Column()
-  lastname: string;
+  lastName: string;
+
+  @Column()
+  birthday?: Date;
 
   @Column()
   passwordEnc: string;
 
   @Column()
-  isActive: boolean = true;
+  isEnabled: boolean = true;
 
-  public static create(props: { email: string; firstname: string; lastname: string; passwordEnc: string }): UserEntity {
+  @Column('text', { array: true })
+  authorities: Authorities[] = [Authorities.ROLE_USER];
+
+  @Column()
+  lastIp?: string;
+
+  @Column()
+  lastConnectedAt?: Date;
+
+  public static create(props: {
+    email: string;
+    firstName: string;
+    lastName: string;
+    birthday?: Date;
+    passwordEnc: string;
+  }): UserEntity {
     const entity = new UserEntity();
     entity.email = props.email;
-    entity.firstname = props.firstname;
-    entity.lastname = props.lastname;
+    entity.firstName = props.firstName;
+    entity.lastName = props.lastName;
+    entity.birthday = props.birthday;
     entity.passwordEnc = props.passwordEnc;
     return entity;
-  }
-
-  public toDto(): UserDto {
-    return {
-      id: this.id,
-      firstname: this.firstname,
-      lastname: this.lastname,
-      email: this.email,
-      created_at: this.createdAt.toISOString(),
-      updated_at: this.updatedAt.toISOString(),
-    };
   }
 }

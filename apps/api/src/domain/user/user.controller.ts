@@ -2,7 +2,7 @@ import { Body, Controller, Get, Post } from '@nestjs/common';
 import { CurrentUser, Public } from '../auth';
 import { UserService } from './user.service';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { RegisterUserDto, UserDto } from './user.dto';
+import { RegisterUserInputDto, UserDto } from '@wishlist/common-types';
 
 @ApiTags('user')
 @Controller('user')
@@ -18,7 +18,7 @@ export class UserController {
   @Public()
   @ApiOperation({ summary: 'Register a User' })
   @Post('register')
-  async register(@Body() dto: RegisterUserDto): Promise<UserDto> {
+  async register(@Body() dto: RegisterUserInputDto): Promise<UserDto> {
     return this.userService.save(dto);
   }
 }

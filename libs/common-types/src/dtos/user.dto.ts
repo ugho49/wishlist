@@ -9,7 +9,7 @@ export class UserDto {
   updated_at: string;
 }
 
-export class RegisterUserDto {
+export class RegisterUserInputDto {
   @IsString()
   @IsNotEmpty()
   @MinLength(2)

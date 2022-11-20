@@ -3,8 +3,8 @@ import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { UserEntity } from '../user/user.entity';
 import { PasswordManager } from './util/password-manager';
-import { LoginInputDto, LoginOutputDto } from './auth.dto';
 import { JwtPayload } from './auth.interface';
+import { LoginInputDto, LoginOutputDto } from '@wishlist/common-types';
 
 @Injectable()
 export class AuthService {
@@ -12,7 +12,13 @@ export class AuthService {
 
   async login(user: LoginInputDto): Promise<LoginOutputDto> {
     const userEntity = await this.validateUser(user.email, user.password);
-    const payload: JwtPayload = { id: userEntity.id, email: user.email, sub: userEntity.id, authorities: [] }; // TODO: add authorities
+    const payload: JwtPayload = {
+      id: userEntity.id,
+      email: user.email,
+      sub: userEntity.id,
+      authorities: userEntity.authorities,
+    };
+
     return {
       access_token: this.jwtService.sign(payload),
     };
@@ -20,7 +26,7 @@ export class AuthService {
 
   private async validateUser(email: string, password: string): Promise<UserEntity> {
     const user = await this.usersService.findEntityByEmail(email);
-    if (user && (await PasswordManager.verify(user.passwordEnc, password))) {
+    if (user && user.isEnabled && (await PasswordManager.verify(user.passwordEnc, password))) {
       return user;
     }
     throw new UnauthorizedException('Incorrect login');

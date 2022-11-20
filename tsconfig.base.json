@@ -15,7 +15,7 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "wishlist/common-types": ["libs/common-types/src/index.ts"]
+      "@wishlist/common-types": ["libs/common-types/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

@@ -2,8 +2,9 @@ import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { UserEntity } from './user.entity';
-import { RegisterUserDto, UserDto } from './user.dto';
+import { RegisterUserInputDto, UserDto } from '@wishlist/common-types';
 import { PasswordManager } from '../auth';
+import { toDto } from './user.mapper';
 
 @Injectable()
 export class UserService {
@@ -13,29 +14,29 @@ export class UserService {
   ) {}
 
   findById(id: string): Promise<UserDto> {
-    return this.userRepository.findOneBy({ id }).then((entity) => entity.toDto());
+    return this.userRepository.findOneBy({ id }).then((entity) => toDto(entity));
   }
 
   findByIds(ids: string[]): Promise<UserDto[]> {
-    return this.userRepository.findBy({ id: In(ids) }).then((entities) => entities.map((entity) => entity.toDto()));
+    return this.userRepository.findBy({ id: In(ids) }).then((entities) => entities.map((entity) => toDto(entity)));
   }
 
   findEntityByEmail(email: string): Promise<UserEntity> {
     return this.userRepository.findOneBy({ email });
   }
 
-  async save(dto: RegisterUserDto): Promise<UserDto> {
+  async save(dto: RegisterUserInputDto): Promise<UserDto> {
     try {
       return await this.userRepository
         .save(
           UserEntity.create({
             email: dto.email,
-            firstname: dto.firstname,
-            lastname: dto.lastname,
+            firstName: dto.firstname,
+            lastName: dto.lastname,
             passwordEnc: await PasswordManager.hash(dto.password),
           })
         )
-        .then((entity) => entity.toDto());
+        .then((entity) => toDto(entity));
     } catch (e) {
       throw new UnprocessableEntityException();
     }
