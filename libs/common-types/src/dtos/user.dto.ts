@@ -1,10 +1,13 @@
-import { IsDateString, IsEmail, IsNotEmpty, IsString, MaxDate, MaxLength, MinLength } from 'class-validator';
+import { IsBoolean, IsDateString, IsEmail, IsNotEmpty, IsString, MaxDate, MaxLength, MinLength } from 'class-validator';
 
-export class UserDto {
+export class MiniUserDto {
   id: string;
   firstname: string;
   lastname: string;
   email: string;
+}
+
+export class UserDto extends MiniUserDto {
   birthday?: string;
   admin: boolean;
   is_enabled: boolean;
@@ -12,6 +15,16 @@ export class UserDto {
   last_ip?: string;
   created_at: string;
   updated_at: string;
+}
+
+export class UserEmailSettingsDto {
+  daily_new_item_notification: boolean;
+}
+
+export class UpdateUserEmailSettingsInputDto {
+  @IsBoolean()
+  @IsNotEmpty()
+  daily_new_item_notification: boolean;
 }
 
 export class RegisterUserInputDto {

@@ -1,7 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { UserService } from '../user/user.service';
+import { UserEntity, UserService } from '../user';
 import { JwtService } from '@nestjs/jwt';
-import { UserEntity } from '../user/user.entity';
 import { PasswordManager } from './util/password-manager';
 import { JwtPayload } from './auth.interface';
 import { LoginInputDto, LoginOutputDto } from '@wishlist/common-types';

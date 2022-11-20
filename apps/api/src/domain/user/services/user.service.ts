@@ -1,15 +1,17 @@
 import { BadRequestException, Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { UserEntity } from './user.entity';
+import { Brackets, Not, Repository } from 'typeorm';
+import { UserEntity } from '../entities/user.entity';
 import {
   ChangeUserPasswordInputDto,
+  MiniUserDto,
   RegisterUserInputDto,
   UpdateUserProfileInputDto,
   UserDto,
 } from '@wishlist/common-types';
-import { PasswordManager } from '../auth';
-import { toDto } from './user.mapper';
+import { PasswordManager } from '../../auth';
+import { toMiniUserDto, toUserDto } from '../mappers/user.mapper';
+import { isEmpty } from 'lodash';
 
 @Injectable()
 export class UserService {
@@ -19,18 +21,14 @@ export class UserService {
   ) {}
 
   findById(id: string): Promise<UserDto> {
-    return this.userRepository.findOneByOrFail({ id }).then((entity) => toDto(entity));
+    return this.userRepository.findOneByOrFail({ id }).then((entity) => toUserDto(entity));
   }
-
-  // findByIds(ids: string[]): Promise<UserDto[]> {
-  //   return this.userRepository.findBy({ id: In(ids) }).then((entities) => entities.map((entity) => toDto(entity)));
-  // }
 
   findEntityByEmail(email: string): Promise<UserEntity> {
     return this.userRepository.findOneBy({ email });
   }
 
-  async save(dto: RegisterUserInputDto): Promise<UserDto> {
+  async create(dto: RegisterUserInputDto): Promise<UserDto> {
     try {
       const entity = UserEntity.create({
         email: dto.email,
@@ -39,7 +37,7 @@ export class UserService {
         passwordEnc: await PasswordManager.hash(dto.password),
       });
 
-      return await this.userRepository.save(entity).then((e) => toDto(e));
+      return await this.userRepository.save(entity).then((e) => toUserDto(e));
     } catch (e) {
       throw new UnprocessableEntityException();
     }
@@ -71,5 +69,32 @@ export class UserService {
         passwordEnc: newPassword,
       }
     );
+  }
+
+  async searchByKeyword(id: string, criteria: string): Promise<MiniUserDto[]> {
+    if (isEmpty(criteria) || criteria.trim().length < 2) {
+      throw new BadRequestException('Invalid search criteria');
+    }
+
+    const searchKey = criteria.trim().toLowerCase().normalize('NFC');
+
+    const query = this.userRepository
+      .createQueryBuilder('u')
+      .where({ id: Not(id) })
+      .andWhere(
+        new Brackets((cb) =>
+          cb
+            .where('lower(u.firstName) like :search')
+            .orWhere('lower(u.lastName) like :search')
+            .orWhere('lower(u.email) like :search')
+        )
+      )
+      .setParameter('search', `%${searchKey}%`)
+      .limit(10)
+      .orderBy('u.firstName', 'ASC');
+
+    const list = await query.getMany();
+
+    return list.map((entity) => toMiniUserDto(entity));
   }
 }
