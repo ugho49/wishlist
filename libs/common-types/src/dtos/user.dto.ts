@@ -1,4 +1,5 @@
 import { IsBoolean, IsDateString, IsEmail, IsNotEmpty, IsString, MaxDate, MaxLength, MinLength } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export class MiniUserDto {
   id: string;
@@ -42,6 +43,7 @@ export class RegisterUserInputDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(200)
+  @Transform(({ value }) => value.toLowerCase())
   email: string;
 
   @IsString()
@@ -83,6 +85,7 @@ export class ResetPasswordInputDto {
   @IsEmail()
   @IsString()
   @IsNotEmpty()
+  @Transform(({ value }) => value.toLowerCase())
   email: string;
 }
 
@@ -90,6 +93,7 @@ export class ResetPasswordValidationInputDto {
   @IsEmail()
   @IsString()
   @IsNotEmpty()
+  @Transform(({ value }) => value.toLowerCase())
   email: string;
 
   @IsString()

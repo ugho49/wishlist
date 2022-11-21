@@ -3,6 +3,7 @@
   "version": 2,
   "projects": {
     "api": "apps/api",
+    "common": "libs/common",
     "common-types": "libs/common-types"
   }
 }

@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post, Put, Query } from '@nestjs/common';
-import { CurrentUser, Public } from '../../auth';
-import { UserService } from '../services/user.service';
+import { CurrentUser, Public } from '../auth';
+import { UserService } from './user.service';
 import { ApiTags } from '@nestjs/swagger';
 import {
   ChangeUserPasswordInputDto,

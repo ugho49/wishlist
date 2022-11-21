@@ -1,2 +1,2 @@
-export { UserEntity } from './entities/user.entity';
-export { UserService } from './services/user.service';
+export { UserEntity } from './user.entity';
+export { UserService } from './user.service';

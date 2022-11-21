@@ -2,11 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UpdateUserEmailSettingsInputDto, UserEmailSettingsDto } from '@wishlist/common-types';
-import { UserEmailSettingEntity } from '../entities/user-email-settings.entity';
-import { toDto } from '../mappers/user-email-settings.mapper';
+import { UserEmailSettingEntity } from './email-settings.entity';
+import { toDto } from './email-settings.mapper';
 
 @Injectable()
-export class UserEmailSettingsService {
+export class EmailSettingsService {
   constructor(
     @InjectRepository(UserEmailSettingEntity)
     private readonly emailSettingEntityRepository: Repository<UserEmailSettingEntity>

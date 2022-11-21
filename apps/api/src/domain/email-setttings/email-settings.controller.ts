@@ -1,13 +1,13 @@
 import { Body, Controller, Get, Put } from '@nestjs/common';
-import { CurrentUser } from '../../auth';
+import { CurrentUser } from '../auth';
 import { ApiTags } from '@nestjs/swagger';
 import { UpdateUserEmailSettingsInputDto, UserEmailSettingsDto } from '@wishlist/common-types';
-import { UserEmailSettingsService } from '../services/user-email-settings.service';
+import { EmailSettingsService } from './email-settings.service';
 
 @ApiTags('User Email settings')
 @Controller('/user/email-settings')
-export class UserEmailSettingsController {
-  constructor(private readonly userEmailSettingsService: UserEmailSettingsService) {}
+export class EmailSettingsController {
+  constructor(private readonly userEmailSettingsService: EmailSettingsService) {}
 
   @Get()
   async getEmailSettings(@CurrentUser('id') id: string): Promise<UserEmailSettingsDto> {

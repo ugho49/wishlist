@@ -1,5 +1,5 @@
 import { MiniUserDto, UserDto } from '@wishlist/common-types';
-import { UserEntity } from '../entities/user.entity';
+import { UserEntity } from './user.entity';
 import { DateTime } from 'luxon';
 
 export function toUserDto(entity: UserEntity): UserDto {

@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Brackets, Not, Repository } from 'typeorm';
-import { UserEntity } from '../entities/user.entity';
+import { UserEntity } from './user.entity';
 import {
   ChangeUserPasswordInputDto,
   MiniUserDto,
@@ -9,8 +9,8 @@ import {
   UpdateUserProfileInputDto,
   UserDto,
 } from '@wishlist/common-types';
-import { PasswordManager } from '../../auth';
-import { toMiniUserDto, toUserDto } from '../mappers/user.mapper';
+import { PasswordManager } from '../auth';
+import { toMiniUserDto, toUserDto } from './user.mapper';
 import { isEmpty } from 'lodash';
 
 @Injectable()
@@ -24,7 +24,7 @@ export class UserService {
     return this.userRepository.findOneByOrFail({ id }).then((entity) => toUserDto(entity));
   }
 
-  findEntityByEmail(email: string): Promise<UserEntity> {
+  findEntityByEmail(email: string): Promise<UserEntity | null> {
     return this.userRepository.findOneBy({ email });
   }
 
