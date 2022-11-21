@@ -1,5 +1,5 @@
 import { Body, Controller, Post } from '@nestjs/common';
-import { Public } from './decorator/public.metadata';
+import { Public } from './decorators/public.metadata';
 import { AuthService } from './auth.service';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { LoginInputDto, LoginOutputDto } from '@wishlist/common-types';

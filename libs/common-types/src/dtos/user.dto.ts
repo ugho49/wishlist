@@ -106,3 +106,30 @@ export class ResetPasswordValidationInputDto {
   @MaxLength(50)
   new_password: string;
 }
+
+export class UpdateFullUserProfileInputDto {
+  @IsEmail()
+  @IsString()
+  @MaxLength(200)
+  email?: string;
+
+  @IsString()
+  @MinLength(8)
+  @MaxLength(50)
+  new_password?: string;
+
+  @IsString()
+  @MaxLength(50)
+  firstname?: string;
+
+  @IsString()
+  @MaxLength(50)
+  lastname?: string;
+
+  @MaxDate(new Date())
+  @IsDateString()
+  birthday?: string;
+
+  @IsBoolean()
+  is_enabled?: boolean;
+}
