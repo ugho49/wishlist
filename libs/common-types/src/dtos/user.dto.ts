@@ -1,4 +1,15 @@
-import { IsBoolean, IsDateString, IsEmail, IsNotEmpty, IsString, MaxDate, MaxLength, MinLength } from 'class-validator';
+import {
+  IsBoolean,
+  IsDateString,
+  IsEmail,
+  IsInt,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MaxDate,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export class MiniUserDto {
@@ -111,25 +122,42 @@ export class UpdateFullUserProfileInputDto {
   @IsEmail()
   @IsString()
   @MaxLength(200)
+  @IsOptional()
   email?: string;
 
   @IsString()
   @MinLength(8)
   @MaxLength(50)
+  @IsOptional()
   new_password?: string;
 
   @IsString()
   @MaxLength(50)
+  @IsOptional()
   firstname?: string;
 
   @IsString()
   @MaxLength(50)
+  @IsOptional()
   lastname?: string;
 
   @MaxDate(new Date())
   @IsDateString()
+  @IsOptional()
   birthday?: string;
 
   @IsBoolean()
+  @IsOptional()
   is_enabled?: boolean;
+}
+
+export class GetAllUsersQueryDto {
+  @IsInt()
+  @IsOptional()
+  @Transform(({ value }) => parseInt(value, 10))
+  p?: number = 0;
+
+  @IsString()
+  @IsOptional()
+  q?: string = '';
 }

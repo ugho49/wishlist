@@ -5,13 +5,16 @@ import { UserEntity } from './user.entity';
 import {
   ChangeUserPasswordInputDto,
   MiniUserDto,
+  PagedResponse,
   RegisterUserInputDto,
+  UpdateFullUserProfileInputDto,
   UpdateUserProfileInputDto,
   UserDto,
 } from '@wishlist/common-types';
 import { PasswordManager } from '../auth';
 import { toMiniUserDto, toUserDto } from './user.mapper';
 import { isEmpty } from 'lodash';
+import { DEFAULT_RESULT_NUMBER } from '@wishlist/common';
 
 @Injectable()
 export class UserService {
@@ -81,14 +84,7 @@ export class UserService {
     const query = this.userRepository
       .createQueryBuilder('u')
       .where({ id: Not(id) })
-      .andWhere(
-        new Brackets((cb) =>
-          cb
-            .where('lower(u.firstName) like :search')
-            .orWhere('lower(u.lastName) like :search')
-            .orWhere('lower(u.email) like :search')
-        )
-      )
+      .andWhere(this.findByNameOrEmail())
       .setParameter('search', `%${searchKey}%`)
       .limit(10)
       .orderBy('u.firstName', 'ASC');
@@ -96,5 +92,53 @@ export class UserService {
     const list = await query.getMany();
 
     return list.map((entity) => toMiniUserDto(entity));
+  }
+
+  async findAllByCriteriaPaginated(props: { pageNumber?: number; criteria?: string }): Promise<PagedResponse<UserDto>> {
+    const { criteria, pageNumber } = props;
+    const pageSize = DEFAULT_RESULT_NUMBER;
+
+    if (criteria && criteria.trim().length < 2) {
+      throw new BadRequestException('Invalid search criteria');
+    }
+
+    const query = this.userRepository
+      .createQueryBuilder('u')
+      .addOrderBy('u.createdAt', 'DESC')
+      .limit(pageSize)
+      .offset(pageSize * (pageNumber || 0));
+
+    if (criteria) {
+      query.where(this.findByNameOrEmail()).setParameter('search', `%${criteria}%`);
+    }
+
+    const [entities, count] = await query.getManyAndCount();
+
+    return {
+      resources: entities.map((entity) => toUserDto(entity)),
+      pagination: {
+        number: pageNumber,
+        current_index: pageNumber,
+        total_elements: count,
+        total_pages: Math.ceil(count / pageSize),
+      },
+    };
+  }
+
+  async updateProfileAsAdmin(id: string, currentUserId: string, dto: UpdateFullUserProfileInputDto) {
+    // TODO
+  }
+
+  async delete(id: string, currentUserId: string) {
+    // TODO
+  }
+
+  private findByNameOrEmail() {
+    return new Brackets((cb) =>
+      cb
+        .where('lower(u.firstName) like :search')
+        .orWhere('lower(u.lastName) like :search')
+        .orWhere('lower(u.email) like :search')
+    );
   }
 }

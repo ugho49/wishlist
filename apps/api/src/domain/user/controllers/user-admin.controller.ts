@@ -1,11 +1,11 @@
-import { Body, Controller, Get, Param, Patch } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Query } from '@nestjs/common';
 import { UserService } from '../user.service';
 import { ApiTags } from '@nestjs/swagger';
-import { UpdateFullUserProfileInputDto, UserDto } from '@wishlist/common-types';
-import { Admin, CurrentUser } from '../../auth';
+import { GetAllUsersQueryDto, PagedResponse, UpdateFullUserProfileInputDto, UserDto } from '@wishlist/common-types';
+import { CurrentUser, IsAdmin } from '../../auth';
 
-@Admin()
-@ApiTags('User')
+@IsAdmin()
+@ApiTags('ADMIN - User')
 @Controller('/admin/user')
 export class UserAdminController {
   constructor(private readonly userService: UserService) {}
@@ -15,33 +15,22 @@ export class UserAdminController {
     return this.userService.findById(id);
   }
 
+  @Get()
+  async getAllPaginated(@Query() queryParams: GetAllUsersQueryDto): Promise<PagedResponse<UserDto>> {
+    return this.userService.findAllByCriteriaPaginated({ pageNumber: queryParams.p, criteria: queryParams.q });
+  }
+
   @Patch('/:id')
   async updateFullUserProfile(
     @Param('id') id: string,
     @Body() dto: UpdateFullUserProfileInputDto,
     @CurrentUser('id') currentUserId: string
   ): Promise<void> {
-    // this.userService.findById(id);
+    await this.userService.updateProfileAsAdmin(id, currentUserId, dto);
   }
 
-  /*
-      @GetMapping
-    public PagedResponse<User> getAllPaginated(@RequestParam(name = "p", required = false, defaultValue = "0") int pageNumber,
-                                               @RequestParam(name = "q", required = false, defaultValue = "") String criteria) {
-        return getUserUseCase.findAllByCriteriaPaginated(pageNumber, criteria);
-    }
-
-    @PatchMapping("/{userId}")
-    public ResponseEntity<Void> updateFullUserProfile(@LoggedUser CurrentUser currentUser, @PathVariable("userId") UUID userId,
-                                                      @Valid @RequestBody UpdateFullUserProfileRequest body) {
-        updateUserUseCase.updateProfileAsAdmin(userId, currentUser, body);
-        return ResponseEntity.accepted().build();
-    }
-
-    @DeleteMapping("/{userId}")
-    public ResponseEntity<Void> deleteUserById(@LoggedUser CurrentUser currentUser, @PathVariable("userId") UUID userId) {
-        deleteUserUseCase.delete(userId, currentUser);
-        return ResponseEntity.accepted().build();
-    }
-   */
+  @Delete('/:id')
+  async deleteUserById(@Param('id') id: string, @CurrentUser('id') currentUserId: string): Promise<void> {
+    await this.userService.delete(id, currentUserId);
+  }
 }
