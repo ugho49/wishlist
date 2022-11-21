@@ -5,13 +5,13 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { LoginInputDto, LoginOutputDto } from '@wishlist/common-types';
 
 @ApiTags('Auth')
-@Controller('auth')
+@Controller('/auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Public()
   @ApiOperation({ summary: 'Get a access token' })
-  @Post('login')
+  @Post('/login')
   async login(@Body() dto: LoginInputDto): Promise<LoginOutputDto> {
     return this.authService.login(dto);
   }

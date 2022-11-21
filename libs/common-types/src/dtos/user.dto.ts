@@ -78,3 +78,27 @@ export class ChangeUserPasswordInputDto {
   @MaxLength(50)
   new_password: string;
 }
+
+export class ResetPasswordInputDto {
+  @IsEmail()
+  @IsString()
+  @IsNotEmpty()
+  email: string;
+}
+
+export class ResetPasswordValidationInputDto {
+  @IsEmail()
+  @IsString()
+  @IsNotEmpty()
+  email: string;
+
+  @IsString()
+  @IsNotEmpty()
+  token: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(8)
+  @MaxLength(50)
+  new_password: string;
+}
