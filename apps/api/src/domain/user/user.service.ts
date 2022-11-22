@@ -27,6 +27,10 @@ export class UserService {
     return this.userRepository.findOneByOrFail({ id }).then((entity) => toUserDto(entity));
   }
 
+  findEntityById(id: string): Promise<UserEntity | null> {
+    return this.userRepository.findOneBy({ id });
+  }
+
   findEntityByEmail(email: string): Promise<UserEntity | null> {
     return this.userRepository.findOneBy({ email });
   }

@@ -1,7 +1,12 @@
-import { IsEmail, IsNotEmpty, MaxLength } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, MaxLength } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export class LoginOutputDto {
+  access_token: string;
+  refresh_token: string;
+}
+
+export class RefreshTokenOutputDto {
   access_token: string;
 }
 
@@ -14,4 +19,10 @@ export class LoginInputDto {
 
   @IsNotEmpty()
   password: string;
+}
+
+export class RefreshTokenInputDto {
+  @IsString()
+  @IsNotEmpty()
+  token: string;
 }

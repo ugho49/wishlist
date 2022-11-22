@@ -3,4 +3,4 @@ export { HasAuthorities } from './decorators/authority.decorator';
 export { Public } from './decorators/public.metadata';
 export { CurrentUser } from './decorators/user.decorator';
 export { PasswordManager } from './util/password-manager';
-export { JwtPayload, ICurrentUser } from './auth.interface';
+export { AccessTokenJwtPayload, ICurrentUser } from './auth.interface';

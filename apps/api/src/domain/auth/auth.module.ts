@@ -19,8 +19,12 @@ import { AuthGuard } from './guards/auth.guard';
       imports: [ConfigModule.forFeature(authConfig)],
       inject: [authConfig.KEY],
       useFactory: (config: ConfigType<typeof authConfig>) => ({
-        secret: config.secret,
-        signOptions: { expiresIn: config.duration, algorithm: config.algorithm, issuer: config.issuer },
+        secret: config.accessToken.secret,
+        signOptions: {
+          expiresIn: config.accessToken.duration,
+          algorithm: config.accessToken.algorithm,
+          issuer: config.issuer,
+        },
       }),
     }),
   ],

@@ -1,10 +1,14 @@
 import { Authorities } from '@wishlist/common-types';
 
-export interface JwtPayload {
+export interface AccessTokenJwtPayload {
   id: string;
   sub: string; // TODO: deprecate this field in favor of id
   email: string;
   authorities: Authorities[];
+}
+
+export interface RefreshTokenJwtPayload {
+  sub: string;
 }
 
 export interface ICurrentUser {
