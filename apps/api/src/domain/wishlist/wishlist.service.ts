@@ -19,22 +19,11 @@ export class WishlistService {
   ) {}
 
   async findById(props: { currentUserId: string; wishlistId: string }): Promise<DetailledWishlistDto> {
-    /*
-            SELECT distinct w, e, o FROM Wishlist w
-        LEFT JOIN FETCH w.events e
-        LEFT JOIN FETCH w.owner o
-        LEFT OUTER JOIN Attendee a ON a.event.id = e.id
-        WHERE w.id = :wishlistId
-        AND (e.creator.id = :userId OR a.user.id = :userId)
-     */
-
-    // TODO: check on this -->
-
     return this.wishlistRepository
       .createQueryBuilder('w')
       .leftJoinAndSelect('w.events', 'e')
       .leftJoinAndSelect('w.owner', 'o')
-      .leftJoin('attendee', 'a', 'ON a.event.id = e.id')
+      .leftJoin('e.attendees', 'a')
       .where('w.id = :wishlistId', { wishlistId: props.wishlistId })
       .andWhere('(e.creator.id = :userId OR a.user.id = :userId)', { userId: props.currentUserId })
       .getOneOrFail()
