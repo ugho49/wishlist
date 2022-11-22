@@ -2,7 +2,6 @@ import {
   IsBoolean,
   IsDate,
   IsEmail,
-  IsInt,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -11,6 +10,7 @@ import {
   MinLength,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
+import { GetPaginationQueryDto } from './common.dto';
 
 export class MiniUserDto {
   id: string;
@@ -155,12 +155,7 @@ export class UpdateFullUserProfileInputDto {
   is_enabled?: boolean;
 }
 
-export class GetAllUsersQueryDto {
-  @IsInt()
-  @IsOptional()
-  @Transform(({ value }) => parseInt(value, 10))
-  p?: number = 0;
-
+export class GetAllUsersQueryDto extends GetPaginationQueryDto {
   @IsString()
   @IsOptional()
   q?: string = '';

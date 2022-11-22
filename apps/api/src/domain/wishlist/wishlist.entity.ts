@@ -1,0 +1,47 @@
+import { Column, Entity, ManyToMany, ManyToOne, OneToMany, PrimaryColumn, RelationId } from 'typeorm';
+import { TimestampEntity, uuid } from '../../core/database';
+import { UserEntity } from '../user';
+import { ItemEntity } from '../item/item.entity';
+import { EventEntity } from '../event/entities/event.entity';
+
+@Entity('wishlist')
+export class WishlistEntity extends TimestampEntity {
+  @PrimaryColumn()
+  id: string = uuid();
+
+  @Column()
+  title: string;
+
+  @Column()
+  description?: string;
+
+  @Column()
+  hideItems: boolean;
+
+  @ManyToOne(() => UserEntity)
+  readonly owner: Promise<UserEntity>;
+
+  @Column()
+  @RelationId((entity: WishlistEntity) => entity.owner)
+  ownerId: string;
+
+  @OneToMany(() => ItemEntity, (item) => item.wishlist)
+  items: Promise<ItemEntity[]>;
+
+  @ManyToMany(() => EventEntity, (event) => event.wishlists)
+  events: Promise<EventEntity[]>;
+
+  public static create(props: {
+    title: string;
+    description?: string;
+    ownerId: string;
+    hideItems: boolean;
+  }): WishlistEntity {
+    const entity = new WishlistEntity();
+    entity.title = props.title;
+    entity.description = props.description;
+    entity.ownerId = props.ownerId;
+    entity.hideItems = props.hideItems;
+    return entity;
+  }
+}

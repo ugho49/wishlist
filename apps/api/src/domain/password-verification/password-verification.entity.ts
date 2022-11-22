@@ -8,7 +8,7 @@ export class PasswordVerificationEntity extends TimestampEntity {
   id: string = uuid();
 
   @ManyToOne(() => UserEntity)
-  readonly user: UserEntity;
+  readonly user: Promise<UserEntity>;
 
   @Column()
   @RelationId((entity: PasswordVerificationEntity) => entity.user)

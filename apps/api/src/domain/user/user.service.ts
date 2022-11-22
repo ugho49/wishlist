@@ -4,6 +4,7 @@ import { Brackets, Not, Repository } from 'typeorm';
 import { UserEntity } from './user.entity';
 import {
   ChangeUserPasswordInputDto,
+  createPagedResponse,
   MiniUserDto,
   PagedResponse,
   RegisterUserInputDto,
@@ -98,8 +99,7 @@ export class UserService {
     const query = this.userRepository
       .createQueryBuilder('u')
       .where({ id: Not(id) })
-      .andWhere(this.findByNameOrEmail())
-      .setParameter('search', `%${searchKey}%`)
+      .andWhere(this.findByNameOrEmail(searchKey))
       .limit(10)
       .orderBy('u.firstName', 'ASC');
 
@@ -123,20 +123,15 @@ export class UserService {
       .offset(pageSize * (pageNumber || 0));
 
     if (criteria) {
-      query.where(this.findByNameOrEmail()).setParameter('search', `%${criteria}%`);
+      query.where(this.findByNameOrEmail(criteria));
     }
 
-    const [entities, count] = await query.getManyAndCount();
+    const [entities, totalElements] = await query.getManyAndCount();
 
-    return {
+    return createPagedResponse({
       resources: entities.map((entity) => toUserDto(entity)),
-      pagination: {
-        number: pageNumber,
-        current_index: pageNumber,
-        total_elements: count,
-        total_pages: Math.ceil(count / pageSize),
-      },
-    };
+      options: { pageSize, totalElements, currentIndex: pageNumber },
+    });
   }
 
   async updateProfileAsAdmin(id: string, currentUser: ICurrentUser, dto: UpdateFullUserProfileInputDto): Promise<void> {
@@ -185,12 +180,14 @@ export class UserService {
     await this.userRepository.delete({ id });
   }
 
-  private findByNameOrEmail() {
+  private findByNameOrEmail(search: string) {
+    const searchKey = `%${search}%`;
+
     return new Brackets((cb) =>
       cb
-        .where('lower(u.firstName) like :search')
-        .orWhere('lower(u.lastName) like :search')
-        .orWhere('lower(u.email) like :search')
+        .where('lower(u.firstName) like :search', { search: searchKey })
+        .orWhere('lower(u.lastName) like :search', { search: searchKey })
+        .orWhere('lower(u.email) like :search', { search: searchKey })
     );
   }
 }

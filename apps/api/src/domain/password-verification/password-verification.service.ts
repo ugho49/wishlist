@@ -52,10 +52,12 @@ export class PasswordVerificationService {
   }
 
   async resetPassword(dto: ResetPasswordValidationInputDto) {
-    const entity = await this.verificationEntityRepository.findOneByOrFail({
-      token: dto.token,
-      user: { email: dto.email },
-    });
+    const entity = await this.verificationEntityRepository
+      .createQueryBuilder('v')
+      .innerJoinAndSelect('v.user', 'u')
+      .where('v.token = :token', { token: dto.token })
+      .andWhere('u.email = :email', { email: dto.email })
+      .getOneOrFail();
 
     if (DateTime.now() > DateTime.fromJSDate(entity.expiredAt)) {
       throw new UnauthorizedException('This reset code is not valid anymore');
