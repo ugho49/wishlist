@@ -57,6 +57,16 @@ export class UserService {
     );
   }
 
+  async updateLogin(id: string, props: { lastIp: string; lastConnectedAt: Date }): Promise<void> {
+    await this.userRepository.update(
+      { id },
+      {
+        lastIp: props.lastIp,
+        lastConnectedAt: props.lastConnectedAt,
+      }
+    );
+  }
+
   async changeUserPassword(id: string, dto: ChangeUserPasswordInputDto) {
     const entity = await this.userRepository.findOneByOrFail({ id });
 

@@ -9,7 +9,7 @@ import { LoginInputDto, LoginOutputDto } from '@wishlist/common-types';
 export class AuthService {
   constructor(private usersService: UserService, private jwtService: JwtService) {}
 
-  async login(user: LoginInputDto): Promise<LoginOutputDto> {
+  async login(user: LoginInputDto, ip: string): Promise<LoginOutputDto> {
     const userEntity = await this.validateUser(user.email, user.password);
     const payload: JwtPayload = {
       id: userEntity.id,
@@ -17,6 +17,11 @@ export class AuthService {
       sub: userEntity.id,
       authorities: userEntity.authorities,
     };
+
+    await this.usersService.updateLogin(userEntity.id, {
+      lastIp: ip,
+      lastConnectedAt: new Date(),
+    });
 
     return {
       access_token: this.jwtService.sign(payload),

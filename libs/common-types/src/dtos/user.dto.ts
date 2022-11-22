@@ -1,6 +1,6 @@
 import {
   IsBoolean,
-  IsDateString,
+  IsDate,
   IsEmail,
   IsInt,
   IsNotEmpty,
@@ -76,9 +76,10 @@ export class UpdateUserProfileInputDto {
   lastname: string;
 
   @MaxDate(new Date())
-  @IsDateString()
+  @IsDate()
+  @IsOptional()
   @Transform(({ value }) => new Date(value))
-  birthday: Date;
+  birthday?: Date;
 }
 
 export class ChangeUserPasswordInputDto {
@@ -144,7 +145,7 @@ export class UpdateFullUserProfileInputDto {
   lastname?: string;
 
   @MaxDate(new Date())
-  @IsDateString()
+  @IsDate()
   @IsOptional()
   @Transform(({ value }) => new Date(value))
   birthday?: Date;
