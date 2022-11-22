@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, UnprocessableEntityException } from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException, UnprocessableEntityException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Brackets, Not, Repository } from 'typeorm';
 import { UserEntity } from './user.entity';
@@ -11,7 +11,7 @@ import {
   UpdateUserProfileInputDto,
   UserDto,
 } from '@wishlist/common-types';
-import { PasswordManager } from '../auth';
+import { ICurrentUser, PasswordManager } from '../auth';
 import { toMiniUserDto, toUserDto } from './user.mapper';
 import { isEmpty } from 'lodash';
 import { DEFAULT_RESULT_NUMBER } from '@wishlist/common';
@@ -125,12 +125,50 @@ export class UserService {
     };
   }
 
-  async updateProfileAsAdmin(id: string, currentUserId: string, dto: UpdateFullUserProfileInputDto) {
-    // TODO
+  async updateProfileAsAdmin(id: string, currentUser: ICurrentUser, dto: UpdateFullUserProfileInputDto): Promise<void> {
+    if (id === currentUser.id) {
+      throw new UnauthorizedException('You cannot upadte yourself');
+    }
+
+    const userToUpdate = await this.userRepository.findOneByOrFail({ id });
+
+    const canUpdateUser = (currentUser.isSuperAdmin && !userToUpdate.isSuperAdmin()) || !userToUpdate.isAdmin();
+
+    if (!canUpdateUser) {
+      throw new UnauthorizedException('You cannot update this user');
+    }
+
+    if (dto.email && userToUpdate.email !== dto.email) {
+      if ((await this.userRepository.count({ where: { email: dto.email } })) > 0) {
+        throw new BadRequestException('A user already exist with this email');
+      }
+
+      userToUpdate.email = dto.email;
+    }
+
+    if (dto.new_password) userToUpdate.passwordEnc = await PasswordManager.hash(dto.new_password);
+    if (dto.firstname) userToUpdate.firstName = dto.firstname;
+    if (dto.lastname) userToUpdate.lastName = dto.lastname;
+    if (dto.birthday) userToUpdate.birthday = dto.birthday;
+    if (dto.is_enabled !== undefined) userToUpdate.isEnabled = dto.is_enabled;
+
+    await this.userRepository.update({ id }, userToUpdate);
   }
 
-  async delete(id: string, currentUserId: string) {
-    // TODO
+  async delete(id: string, currentUser: ICurrentUser): Promise<void> {
+    if (id === currentUser.id) {
+      throw new UnauthorizedException('You cannot delete yourself');
+    }
+
+    const userToDelete = await this.userRepository.findOneByOrFail({ id });
+
+    const canDeleteUser = (currentUser.isSuperAdmin && !userToDelete.isSuperAdmin()) || !userToDelete.isAdmin();
+
+    if (!canDeleteUser) {
+      throw new UnauthorizedException('You cannot delete this user');
+    }
+
+    await this.userRepository.delete({ id });
   }
 
   private findByNameOrEmail() {

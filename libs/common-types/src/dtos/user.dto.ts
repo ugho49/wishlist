@@ -77,7 +77,8 @@ export class UpdateUserProfileInputDto {
 
   @MaxDate(new Date())
   @IsDateString()
-  birthday: string;
+  @Transform(({ value }) => new Date(value))
+  birthday: Date;
 }
 
 export class ChangeUserPasswordInputDto {
@@ -123,6 +124,7 @@ export class UpdateFullUserProfileInputDto {
   @IsString()
   @MaxLength(200)
   @IsOptional()
+  @Transform(({ value }) => value.toLowerCase())
   email?: string;
 
   @IsString()
@@ -144,7 +146,8 @@ export class UpdateFullUserProfileInputDto {
   @MaxDate(new Date())
   @IsDateString()
   @IsOptional()
-  birthday?: string;
+  @Transform(({ value }) => new Date(value))
+  birthday?: Date;
 
   @IsBoolean()
   @IsOptional()

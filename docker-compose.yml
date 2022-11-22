@@ -14,3 +14,14 @@ services:
       interval: 2s
       timeout: 5s
       retries: 10
+
+  mail:
+    image: maildev/maildev:2.0.5
+    ports:
+      - '1080:1080'
+      - '1025:1025'
+    healthcheck:
+      test: wget --spider http://localhost:1080 || exit 1
+      interval: 2s
+      timeout: 5s
+      retries: 10

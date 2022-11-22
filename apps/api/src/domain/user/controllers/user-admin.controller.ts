@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, Param, Patch, Query } from '@nestjs/comm
 import { UserService } from '../user.service';
 import { ApiTags } from '@nestjs/swagger';
 import { GetAllUsersQueryDto, PagedResponse, UpdateFullUserProfileInputDto, UserDto } from '@wishlist/common-types';
-import { CurrentUser, IsAdmin } from '../../auth';
+import { CurrentUser, ICurrentUser, IsAdmin } from '../../auth';
 
 @IsAdmin()
 @ApiTags('ADMIN - User')
@@ -24,13 +24,13 @@ export class UserAdminController {
   async updateFullUserProfile(
     @Param('id') id: string,
     @Body() dto: UpdateFullUserProfileInputDto,
-    @CurrentUser('id') currentUserId: string
+    @CurrentUser() currentUser: ICurrentUser
   ): Promise<void> {
-    await this.userService.updateProfileAsAdmin(id, currentUserId, dto);
+    await this.userService.updateProfileAsAdmin(id, currentUser, dto);
   }
 
   @Delete('/:id')
-  async deleteUserById(@Param('id') id: string, @CurrentUser('id') currentUserId: string): Promise<void> {
-    await this.userService.delete(id, currentUserId);
+  async deleteUserById(@Param('id') id: string, @CurrentUser() currentUser: ICurrentUser): Promise<void> {
+    await this.userService.delete(id, currentUser);
   }
 }
