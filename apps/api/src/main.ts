@@ -38,7 +38,8 @@ async function start() {
 
   await app.listen(port, '0.0.0.0');
 
-  Logger.log(`🚀 Application is running on: http://localhost:${port}/api`);
+  Logger.log(`📚 Swagger available on: http://localhost:${port}/api`);
+  Logger.log(`🚀 Application is running on: http://localhost:${port}`);
 }
 
 void start();

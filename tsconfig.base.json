@@ -16,7 +16,8 @@
     "baseUrl": ".",
     "paths": {
       "@wishlist/common": ["libs/common/src/index.ts"],
-      "@wishlist/common-types": ["libs/common-types/src/index.ts"]
+      "@wishlist/common-types": ["libs/common-types/src/index.ts"],
+      "@wishlist/common-front": ["libs/common-front/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
