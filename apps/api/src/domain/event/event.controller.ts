@@ -1,8 +1,15 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { EventService } from './event.service';
-import { EventWithCountsDto, GetPaginationQueryDto, PagedResponse } from '@wishlist/common-types';
-import { CurrentUser } from '../auth';
+import {
+  CreateEventInputDto,
+  DetailledEventDto,
+  EventWithCountsDto,
+  GetPaginationQueryDto,
+  MiniEventDto,
+  PagedResponse,
+} from '@wishlist/common-types';
+import { CurrentUser, ICurrentUser } from '../auth';
 
 @ApiTags('Event')
 @Controller('/event')
@@ -16,31 +23,17 @@ export class EventController {
   ): Promise<PagedResponse<EventWithCountsDto>> {
     return this.eventService.getUserEventsPaginated({ pageNumber: queryParams.p, currentUserId });
   }
-  //
-  // @Get('/:id')
-  // async getWishlistById(
-  //   @Param('id') wishlistId: string,
-  //   @CurrentUser('id') currentUserId: string
-  // ): Promise<DetailledWishlistDto> {
-  //   return this.wishlistService.findById({ wishlistId, currentUserId });
-  // }
 
-  /*
-      @GetMapping
-    public PagedResponse<MyEventResponse> getMyEvents(@UserId UUID currentUserId,
-                                                      @RequestParam(name = "p", required = false, defaultValue = "0") int p) {
-        return getEventUseCase.getUserEventsPaginated(currentUserId, p);
-    }
+  @Get('/:id')
+  async getEventById(
+    @Param('id') eventId: string,
+    @CurrentUser('id') currentUserId: string
+  ): Promise<DetailledEventDto> {
+    return this.eventService.findById({ eventId, currentUserId });
+  }
 
-    @GetMapping("/{eventId}")
-    public Event getEventById(@UserId UUID currentUserId, @PathVariable("eventId") UUID eventId) {
-        return getEventUseCase.getById(eventId, currentUserId);
-    }
-
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public CreatedResponse createEvent(@LoggedUser CurrentUser currentUser, @Valid @RequestBody CreateEventRequest body) {
-        return createEventUseCase.create(currentUser, body);
-    }
-   */
+  @Post()
+  async createEvent(@CurrentUser() currentUser: ICurrentUser, @Body() dto: CreateEventInputDto): Promise<MiniEventDto> {
+    return this.eventService.create({ dto, currentUser });
+  }
 }

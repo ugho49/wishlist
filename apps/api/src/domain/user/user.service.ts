@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, UnauthorizedException, UnprocessableEntityException } from '@nestjs/common';
-import { Brackets, Not } from 'typeorm';
+import { Brackets, In, Not } from 'typeorm';
 import { UserEntity } from './user.entity';
 import {
   ChangeUserPasswordInputDto,
@@ -31,6 +31,10 @@ export class UserService {
 
   findEntityByEmail(email: string): Promise<UserEntity | null> {
     return this.userRepository.findOneBy({ email });
+  }
+
+  async findEntitiesByEmail(emails: string[]): Promise<UserEntity[]> {
+    return this.userRepository.findBy({ email: In(emails) });
   }
 
   async create(dto: RegisterUserInputDto): Promise<UserDto> {

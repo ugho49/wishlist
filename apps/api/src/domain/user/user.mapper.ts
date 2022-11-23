@@ -6,7 +6,7 @@ export function toUserDto(entity: UserEntity): UserDto {
   return {
     ...toMiniUserDto(entity),
     admin: entity.isAdmin(),
-    birthday: entity.birthday && DateTime.fromJSDate(entity.birthday).toLocaleString(DateTime.DATETIME_SHORT),
+    birthday: entity.birthday && DateTime.fromJSDate(entity.birthday).toISODate(),
     is_enabled: entity.isEnabled,
     last_connected_at: entity.lastConnectedAt?.toISOString(),
     last_ip: entity.lastIp,

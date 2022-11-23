@@ -28,7 +28,7 @@ export class EventEntity extends TimestampEntity {
   wishlists: Promise<WishlistEntity[]>;
 
   @OneToMany(() => AttendeeEntity, (entity) => entity.event)
-  attendees: Promise<AttendeeEntity[]>;
+  attendees: Promise<AttendeeEntity[] | undefined>;
 
   @Column()
   @RelationId((entity: EventEntity) => entity.creator)
@@ -36,4 +36,13 @@ export class EventEntity extends TimestampEntity {
 
   @ManyToOne(() => UserEntity)
   readonly creator: Promise<UserEntity>;
+
+  static create(param: { title: string; description?: string; eventDate: Date; creatorId: string }): EventEntity {
+    const entity = new EventEntity();
+    entity.title = param.title;
+    entity.description = param.description;
+    entity.eventDate = param.eventDate;
+    entity.creatorId = param.creatorId;
+    return entity;
+  }
 }

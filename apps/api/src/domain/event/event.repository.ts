@@ -37,4 +37,14 @@ export class EventRepository extends BaseRepository(EventEntity) {
 
     return await Promise.all([fetchQuery, countQuery]);
   }
+
+  findByIdAndUserId(params: { eventId: string; userId: string }): Promise<EventEntity | null> {
+    return this.createQueryBuilder('e')
+      .leftJoinAndSelect('e.wishlists', 'w')
+      .leftJoinAndSelect('e.creator', 'c')
+      .leftJoinAndSelect('e.attendees', 'a')
+      .where('e.id = :eventId', { eventId: params.eventId })
+      .andWhere('(e.creator.id = :userId OR a.user.id = :userId)', { userId: params.userId })
+      .getOne();
+  }
 }
