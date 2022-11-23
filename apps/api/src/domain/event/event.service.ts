@@ -17,34 +17,13 @@ export class EventService {
 
     const offset = pageSize * (pageNumber || 0);
 
-    const fetchQuery = this.eventEntityRepository.query(
-      `SELECT * FROM (
-          SELECT * FROM (
-            SELECT DISTINCT e.* FROM event e
-            LEFT OUTER JOIN event_attendee a ON a.event_id = e.id
-            WHERE (e.creator_id = $1 OR a.user_id = $1) AND e.event_date >= CURRENT_DATE
-            ORDER BY e.event_date, e.updated_at DESC
-          ) AS future_events
-          UNION ALL
-          SELECT * FROM (
-            SELECT DISTINCT e.* FROM event e
-            LEFT OUTER JOIN event_attendee a ON a.event_id = e.id
-            WHERE (e.creator_id = $1 OR a.user_id = $1) AND e.event_date < CURRENT_DATE
-            ORDER BY e.event_date DESC
-          ) AS past_events
-      ) AS all_events LIMIT $2 OFFSET $3`,
-      [currentUserId, pageSize, offset]
-    );
+    const [entities, totalElements] = await this.eventEntityRepository.getUserEventsPaginated({
+      userId: currentUserId,
+      pageSize,
+      offset,
+    });
 
-    const countQuery = this.eventEntityRepository
-      .createQueryBuilder('e')
-      .leftJoin('e.attendees', 'a')
-      .where('e.creator_id = :userId OR a.user_id = :userId', { userId: currentUserId })
-      .getCount();
-
-    const [list, totalElements] = await Promise.all([fetchQuery, countQuery]);
-
-    const dtos = await Promise.all(list.map((entity) => toEventWithCountsDtoDto(entity)));
+    const dtos = await Promise.all(entities.map((entity) => toEventWithCountsDtoDto(entity)));
 
     return createPagedResponse({
       resources: dtos,

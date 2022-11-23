@@ -1,6 +1,5 @@
 import { Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, MoreThan, Repository } from 'typeorm';
+import { MoreThan } from 'typeorm';
 import { PasswordVerificationEntity } from './password-verification.entity';
 import { ResetPasswordInputDto, ResetPasswordValidationInputDto } from '@wishlist/common-types';
 import { randomString } from '@wishlist/common';
@@ -9,16 +8,15 @@ import { DateTime } from 'luxon';
 import { ConfigType } from '@nestjs/config';
 import { PasswordManager } from '../auth';
 import passwordVerificationConfig from './password-verification.config';
+import { PasswordVerificationRepository } from './password-verification.repository';
 
 @Injectable()
 export class PasswordVerificationService {
   constructor(
-    @InjectRepository(PasswordVerificationEntity)
-    private readonly verificationEntityRepository: Repository<PasswordVerificationEntity>,
+    private readonly verificationEntityRepository: PasswordVerificationRepository,
     private readonly userService: UserService,
     @Inject(passwordVerificationConfig.KEY)
-    private readonly config: ConfigType<typeof passwordVerificationConfig>,
-    private readonly dataSource: DataSource
+    private readonly config: ConfigType<typeof passwordVerificationConfig>
   ) {}
 
   async sendResetEmail(dto: ResetPasswordInputDto) {
@@ -63,7 +61,7 @@ export class PasswordVerificationService {
       throw new UnauthorizedException('This reset code is not valid anymore');
     }
 
-    await this.dataSource.transaction(async (em) => {
+    await this.verificationEntityRepository.transaction(async (em) => {
       await em.update(
         UserEntity,
         { id: entity.userId },

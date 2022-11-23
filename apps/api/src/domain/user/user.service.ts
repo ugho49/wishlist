@@ -1,6 +1,5 @@
 import { BadRequestException, Injectable, UnauthorizedException, UnprocessableEntityException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Brackets, Not, Repository } from 'typeorm';
+import { Brackets, Not } from 'typeorm';
 import { UserEntity } from './user.entity';
 import {
   ChangeUserPasswordInputDto,
@@ -16,13 +15,11 @@ import { ICurrentUser, PasswordManager } from '../auth';
 import { toMiniUserDto, toUserDto } from './user.mapper';
 import { isEmpty } from 'lodash';
 import { DEFAULT_RESULT_NUMBER } from '@wishlist/common';
+import { UserRepository } from './user.repository';
 
 @Injectable()
 export class UserService {
-  constructor(
-    @InjectRepository(UserEntity)
-    private readonly userRepository: Repository<UserEntity>
-  ) {}
+  constructor(private readonly userRepository: UserRepository) {}
 
   findById(id: string): Promise<UserDto> {
     return this.userRepository.findOneByOrFail({ id }).then((entity) => toUserDto(entity));

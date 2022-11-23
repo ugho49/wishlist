@@ -1,16 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { UpdateUserEmailSettingsInputDto, UserEmailSettingsDto } from '@wishlist/common-types';
 import { UserEmailSettingEntity } from './email-settings.entity';
 import { toDto } from './email-settings.mapper';
+import { EmailSettingsRepository } from './email-settings.repository';
 
 @Injectable()
 export class EmailSettingsService {
-  constructor(
-    @InjectRepository(UserEmailSettingEntity)
-    private readonly emailSettingEntityRepository: Repository<UserEmailSettingEntity>
-  ) {}
+  constructor(private readonly emailSettingEntityRepository: EmailSettingsRepository) {}
 
   async findByUserId(userId: string): Promise<UserEmailSettingsDto> {
     return this.findByUserIdOrCreateDefault(userId).then((entity) => toDto(entity));
