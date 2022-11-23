@@ -1,17 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { EventEntity } from './entities/event.entity';
 import { createPagedResponse, EventWithCountsDto, PagedResponse } from '@wishlist/common-types';
 import { DEFAULT_RESULT_NUMBER } from '@wishlist/common';
 import { toEventWithCountsDtoDto } from './event.mapper';
+import { EventRepository } from './event.repository';
 
 @Injectable()
 export class EventService {
-  constructor(
-    @InjectRepository(EventEntity)
-    private readonly eventEntityRepository: Repository<EventEntity>
-  ) {}
+  constructor(private readonly eventEntityRepository: EventRepository) {}
 
   async getUserEventsPaginated(param: {
     pageNumber: number;

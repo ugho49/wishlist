@@ -1,5 +1,5 @@
 import { Column, Entity, ManyToOne, PrimaryColumn, RelationId } from 'typeorm';
-import { uuid } from '../../../core/database';
+import { uuid } from '@wishlist/common';
 import { EventEntity } from './event.entity';
 import { UserEntity } from '../../user';
 

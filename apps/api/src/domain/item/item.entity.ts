@@ -1,5 +1,6 @@
 import { Column, Entity, ManyToOne, PrimaryColumn, RelationId } from 'typeorm';
-import { TimestampEntity, uuid } from '../../core/database';
+import { uuid } from '@wishlist/common';
+import { TimestampEntity } from '@wishlist/common-database';
 import { WishlistEntity } from '../wishlist/wishlist.entity';
 
 @Entity('item')

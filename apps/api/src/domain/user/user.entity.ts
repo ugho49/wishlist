@@ -1,5 +1,6 @@
 import { Column, Entity, PrimaryColumn } from 'typeorm';
-import { TimestampEntity, uuid } from '../../core/database';
+import { uuid } from '@wishlist/common';
+import { TimestampEntity } from '@wishlist/common-database';
 import { Authorities } from '@wishlist/common-types';
 
 @Entity('user')

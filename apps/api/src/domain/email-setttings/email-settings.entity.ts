@@ -1,5 +1,6 @@
 import { Column, Entity, PrimaryColumn } from 'typeorm';
-import { TimestampEntity, uuid } from '../../core/database';
+import { uuid } from '@wishlist/common';
+import { TimestampEntity } from '@wishlist/common-database';
 
 @Entity('user_email_setting')
 export class UserEmailSettingEntity extends TimestampEntity {

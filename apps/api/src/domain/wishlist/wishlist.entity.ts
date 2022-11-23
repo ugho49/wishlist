@@ -1,5 +1,6 @@
 import { Column, Entity, ManyToMany, ManyToOne, OneToMany, PrimaryColumn, RelationId } from 'typeorm';
-import { TimestampEntity, uuid } from '../../core/database';
+import { uuid } from '@wishlist/common';
+import { TimestampEntity } from '@wishlist/common-database';
 import { UserEntity } from '../user';
 import { ItemEntity } from '../item/item.entity';
 import { EventEntity } from '../event/entities/event.entity';

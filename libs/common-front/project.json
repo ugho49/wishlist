@@ -1,4 +1,5 @@
 {
+  "name": "common-front",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/common-front/src",
   "projectType": "library",

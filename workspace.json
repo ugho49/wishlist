@@ -6,6 +6,7 @@
     "common": "libs/common",
     "common-types": "libs/common-types",
     "common-front": "libs/common-front",
+    "common-database": "libs/common-database",
     "front": "apps/front"
   }
 }
