@@ -1,8 +1,7 @@
 import { Authorities } from '@wishlist/common-types';
 
 export interface AccessTokenJwtPayload {
-  id: string;
-  sub: string; // TODO: deprecate this field in favor of id
+  sub: string;
   email: string;
   authorities: Authorities[];
 }

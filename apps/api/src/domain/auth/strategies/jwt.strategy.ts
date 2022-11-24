@@ -24,7 +24,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     const isAdmin = hasAuthority(Authorities.ROLE_ADMIN) || isSuperAdmin;
 
     return {
-      id: payload.id,
+      id: payload.sub,
       email: payload.email,
       authorities: authorities,
       hasAuthority,

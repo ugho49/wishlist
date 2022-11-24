@@ -54,9 +54,8 @@ export class AuthService {
 
   private async createAccessToken(userEntity: UserEntity, ip: string): Promise<string> {
     const payload: AccessTokenJwtPayload = {
-      id: userEntity.id,
-      email: userEntity.email,
       sub: userEntity.id,
+      email: userEntity.email,
       authorities: userEntity.authorities,
     };
 
