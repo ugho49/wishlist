@@ -22,15 +22,15 @@ export class UserAdminController {
 
   @Patch('/:id')
   async updateFullUserProfile(
-    @Param('id') id: string,
+    @Param('id') userId: string,
     @Body() dto: UpdateFullUserProfileInputDto,
     @CurrentUser() currentUser: ICurrentUser
   ): Promise<void> {
-    await this.userService.updateProfileAsAdmin(id, currentUser, dto);
+    await this.userService.updateProfileAsAdmin({ userId, currentUser, dto });
   }
 
   @Delete('/:id')
-  async deleteUserById(@Param('id') id: string, @CurrentUser() currentUser: ICurrentUser): Promise<void> {
-    await this.userService.delete(id, currentUser);
+  async deleteUserById(@Param('id') userId: string, @CurrentUser() currentUser: ICurrentUser): Promise<void> {
+    await this.userService.delete({ userId, currentUser });
   }
 }

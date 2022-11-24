@@ -11,14 +11,14 @@ import { DEFAULT_RESULT_NUMBER } from '@wishlist/common';
 import { toDetailledEventDto, toEventWithCountsDtoDto, toMiniEventDto } from './mappers/event.mapper';
 import { EventRepository } from './event.repository';
 import { ICurrentUser } from '../auth';
-import { UserService } from '../user';
 import { uniq } from 'lodash';
 import { AttendeeEntity } from './entities/attendee.entity';
 import { EventEntity } from './entities/event.entity';
+import { UserRepository } from '../user/user.repository';
 
 @Injectable()
 export class EventService {
-  constructor(private readonly eventRepository: EventRepository, private readonly userService: UserService) {}
+  constructor(private readonly eventRepository: EventRepository, private readonly userRepository: UserRepository) {}
 
   async getUserEventsPaginated(param: {
     pageNumber: number;
@@ -60,7 +60,7 @@ export class EventService {
     const { currentUser, dto } = param;
     const attendees = dto.attendees.filter((a) => a.email !== currentUser.email);
     const attendeeEmails = uniq(attendees.map((a) => a.email));
-    const existingUsers = await this.userService.findEntitiesByEmail(attendeeEmails);
+    const existingUsers = await this.userRepository.findByEmails(attendeeEmails);
     const attendeeEntities: AttendeeEntity[] = [];
 
     const eventEntity = EventEntity.create({

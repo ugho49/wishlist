@@ -1,5 +1,4 @@
 import { BadRequestException, Injectable, UnauthorizedException, UnprocessableEntityException } from '@nestjs/common';
-import { Brackets, In, Not } from 'typeorm';
 import { UserEntity } from './user.entity';
 import {
   ChangeUserPasswordInputDto,
@@ -25,18 +24,6 @@ export class UserService {
     return this.userRepository.findOneByOrFail({ id }).then((entity) => toUserDto(entity));
   }
 
-  findEntityById(id: string): Promise<UserEntity | null> {
-    return this.userRepository.findOneBy({ id });
-  }
-
-  findEntityByEmail(email: string): Promise<UserEntity | null> {
-    return this.userRepository.findOneBy({ email });
-  }
-
-  async findEntitiesByEmail(emails: string[]): Promise<UserEntity[]> {
-    return this.userRepository.findBy({ email: In(emails) });
-  }
-
   async create(dto: RegisterUserInputDto): Promise<UserDto> {
     try {
       const entity = UserEntity.create({
@@ -52,29 +39,20 @@ export class UserService {
     }
   }
 
-  async update(id: string, dto: UpdateUserProfileInputDto): Promise<void> {
-    await this.userRepository.update(
-      { id },
-      {
-        firstName: dto.firstname,
-        lastName: dto.lastname,
-        birthday: dto.birthday,
-      }
-    );
+  async update(param: { currentUserId: string; dto: UpdateUserProfileInputDto }): Promise<void> {
+    const { dto, currentUserId } = param;
+
+    await this.userRepository.updateById(currentUserId, {
+      firstName: dto.firstname,
+      lastName: dto.lastname,
+      birthday: dto.birthday,
+    });
   }
 
-  async updateLogin(id: string, props: { lastIp: string; lastConnectedAt: Date }): Promise<void> {
-    await this.userRepository.update(
-      { id },
-      {
-        lastIp: props.lastIp,
-        lastConnectedAt: props.lastConnectedAt,
-      }
-    );
-  }
+  async changeUserPassword(param: { currentUserId: string; dto: ChangeUserPasswordInputDto }) {
+    const { dto, currentUserId } = param;
 
-  async changeUserPassword(id: string, dto: ChangeUserPasswordInputDto) {
-    const entity = await this.userRepository.findOneByOrFail({ id });
+    const entity = await this.userRepository.findOneByOrFail({ id: currentUserId });
 
     if (!(await PasswordManager.verify(entity.passwordEnc, dto.old_password))) {
       throw new BadRequestException("Old password don't match with user password");
@@ -82,52 +60,37 @@ export class UserService {
 
     const newPassword = await PasswordManager.hash(dto.new_password);
 
-    await this.userRepository.update(
-      { id },
-      {
-        passwordEnc: newPassword,
-      }
-    );
+    await this.userRepository.updateById(currentUserId, {
+      passwordEnc: newPassword,
+    });
   }
 
-  async searchByKeyword(id: string, criteria: string): Promise<MiniUserDto[]> {
+  async searchByKeyword(param: { currentUserId: string; criteria: string }): Promise<MiniUserDto[]> {
+    const { criteria, currentUserId } = param;
+
     if (isEmpty(criteria) || criteria.trim().length < 2) {
       throw new BadRequestException('Invalid search criteria');
     }
 
-    const searchKey = criteria.trim().toLowerCase().normalize('NFC');
+    const entities = await this.userRepository.searchByKeyword({ userId: currentUserId, keyword: criteria });
 
-    const query = this.userRepository
-      .createQueryBuilder('u')
-      .where({ id: Not(id) })
-      .andWhere(this.findByNameOrEmail(searchKey))
-      .limit(10)
-      .orderBy('u.firstName', 'ASC');
-
-    const list = await query.getMany();
-
-    return list.map((entity) => toMiniUserDto(entity));
+    return entities.map((entity) => toMiniUserDto(entity));
   }
 
   async findAllByCriteriaPaginated(props: { pageNumber?: number; criteria?: string }): Promise<PagedResponse<UserDto>> {
     const { criteria, pageNumber } = props;
     const pageSize = DEFAULT_RESULT_NUMBER;
+    const offset = pageSize * (pageNumber || 0);
 
     if (criteria && criteria.trim().length < 2) {
       throw new BadRequestException('Invalid search criteria');
     }
 
-    const query = this.userRepository
-      .createQueryBuilder('u')
-      .addOrderBy('u.createdAt', 'DESC')
-      .limit(pageSize)
-      .offset(pageSize * (pageNumber || 0));
-
-    if (criteria) {
-      query.where(this.findByNameOrEmail(criteria));
-    }
-
-    const [entities, totalElements] = await query.getManyAndCount();
+    const [entities, totalElements] = await this.userRepository.findAllByCriteriaPaginated({
+      criteria,
+      pageSize,
+      offset,
+    });
 
     return createPagedResponse({
       resources: entities.map((entity) => toUserDto(entity)),
@@ -135,12 +98,17 @@ export class UserService {
     });
   }
 
-  async updateProfileAsAdmin(id: string, currentUser: ICurrentUser, dto: UpdateFullUserProfileInputDto): Promise<void> {
-    if (id === currentUser.id) {
-      throw new UnauthorizedException('You cannot upadte yourself');
+  async updateProfileAsAdmin(param: {
+    userId: string;
+    currentUser: ICurrentUser;
+    dto: UpdateFullUserProfileInputDto;
+  }): Promise<void> {
+    const { currentUser, userId, dto } = param;
+    if (userId === currentUser.id) {
+      throw new UnauthorizedException('You cannot update yourself');
     }
 
-    const userToUpdate = await this.userRepository.findOneByOrFail({ id });
+    const userToUpdate = await this.userRepository.findOneByOrFail({ id: userId });
 
     const canUpdateUser = (currentUser.isSuperAdmin && !userToUpdate.isSuperAdmin()) || !userToUpdate.isAdmin();
 
@@ -162,15 +130,17 @@ export class UserService {
     if (dto.birthday) userToUpdate.birthday = dto.birthday;
     if (dto.is_enabled !== undefined) userToUpdate.isEnabled = dto.is_enabled;
 
-    await this.userRepository.update({ id }, userToUpdate);
+    await this.userRepository.updateById(userId, userToUpdate);
   }
 
-  async delete(id: string, currentUser: ICurrentUser): Promise<void> {
-    if (id === currentUser.id) {
+  async delete(param: { userId: string; currentUser: ICurrentUser }): Promise<void> {
+    const { currentUser, userId } = param;
+
+    if (userId === currentUser.id) {
       throw new UnauthorizedException('You cannot delete yourself');
     }
 
-    const userToDelete = await this.userRepository.findOneByOrFail({ id });
+    const userToDelete = await this.userRepository.findOneByOrFail({ id: userId });
 
     const canDeleteUser = (currentUser.isSuperAdmin && !userToDelete.isSuperAdmin()) || !userToDelete.isAdmin();
 
@@ -178,17 +148,6 @@ export class UserService {
       throw new UnauthorizedException('You cannot delete this user');
     }
 
-    await this.userRepository.delete({ id });
-  }
-
-  private findByNameOrEmail(search: string) {
-    const searchKey = `%${search}%`;
-
-    return new Brackets((cb) =>
-      cb
-        .where('lower(u.firstName) like :search', { search: searchKey })
-        .orWhere('lower(u.lastName) like :search', { search: searchKey })
-        .orWhere('lower(u.email) like :search', { search: searchKey })
-    );
+    await this.userRepository.delete({ id: userId });
   }
 }

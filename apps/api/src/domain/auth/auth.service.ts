@@ -1,16 +1,17 @@
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
-import { UserEntity, UserService } from '../user';
+import { UserEntity } from '../user';
 import { JwtService } from '@nestjs/jwt';
 import { PasswordManager } from './util/password-manager';
 import { AccessTokenJwtPayload, RefreshTokenJwtPayload } from './auth.interface';
 import { LoginInputDto, LoginOutputDto, RefreshTokenInputDto, RefreshTokenOutputDto } from '@wishlist/common-types';
 import authConfig from './auth.config';
 import { ConfigType } from '@nestjs/config';
+import { UserRepository } from '../user/user.repository';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private usersService: UserService,
+    private userRepository: UserRepository,
     private jwtService: JwtService,
     @Inject(authConfig.KEY) private readonly config: ConfigType<typeof authConfig>
   ) {}
@@ -26,7 +27,7 @@ export class AuthService {
 
   async refresh(dto: RefreshTokenInputDto, ip: string): Promise<RefreshTokenOutputDto> {
     const refreshPayload = this.validateRefreshToken(dto.token);
-    const userEntity = await this.usersService.findEntityById(refreshPayload.sub);
+    const userEntity = await this.userRepository.findById(refreshPayload.sub);
 
     if (!userEntity) {
       throw new UnauthorizedException('User not found');
@@ -61,7 +62,7 @@ export class AuthService {
 
     const token = this.jwtService.sign(payload);
 
-    await this.usersService.updateLogin(userEntity.id, {
+    await this.userRepository.updateById(userEntity.id, {
       lastIp: ip,
       lastConnectedAt: new Date(),
     });
@@ -80,7 +81,7 @@ export class AuthService {
   }
 
   private async validateUser(email: string, password: string): Promise<UserEntity> {
-    const user = await this.usersService.findEntityByEmail(email);
+    const user = await this.userRepository.findByEmail(email);
 
     if (user && !user.isEnabled) {
       throw new UnauthorizedException('User is disabled');

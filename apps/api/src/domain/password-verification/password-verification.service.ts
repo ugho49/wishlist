@@ -3,24 +3,25 @@ import { MoreThan } from 'typeorm';
 import { PasswordVerificationEntity } from './password-verification.entity';
 import { ResetPasswordInputDto, ResetPasswordValidationInputDto } from '@wishlist/common-types';
 import { randomString } from '@wishlist/common';
-import { UserEntity, UserService } from '../user';
+import { UserEntity } from '../user';
 import { DateTime } from 'luxon';
 import { ConfigType } from '@nestjs/config';
 import { PasswordManager } from '../auth';
 import passwordVerificationConfig from './password-verification.config';
 import { PasswordVerificationRepository } from './password-verification.repository';
+import { UserRepository } from '../user/user.repository';
 
 @Injectable()
 export class PasswordVerificationService {
   constructor(
     private readonly verificationEntityRepository: PasswordVerificationRepository,
-    private readonly userService: UserService,
+    private readonly userRepository: UserRepository,
     @Inject(passwordVerificationConfig.KEY)
     private readonly config: ConfigType<typeof passwordVerificationConfig>
   ) {}
 
   async sendResetEmail(dto: ResetPasswordInputDto) {
-    const userEntity = await this.userService.findEntityByEmail(dto.email);
+    const userEntity = await this.userRepository.findByEmail(dto.email);
 
     if (!userEntity) {
       throw new NotFoundException('User not found');
