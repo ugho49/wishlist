@@ -53,7 +53,7 @@ export class CreateEventInputDto {
   @IsDate()
   @IsNotEmpty()
   @Transform(({ value }) => new Date(value))
-  event_date?: Date;
+  event_date: Date;
 
   @ArrayNotEmpty()
   @ValidateNested({ each: true })

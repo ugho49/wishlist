@@ -26,10 +26,14 @@ export class WishlistEntity extends TimestampEntity {
   @RelationId((entity: WishlistEntity) => entity.owner)
   ownerId: string;
 
-  @OneToMany(() => ItemEntity, (item) => item.wishlist)
+  @OneToMany(() => ItemEntity, (item) => item.wishlist, {
+    cascade: true,
+  })
   items: Promise<ItemEntity[]>;
 
-  @ManyToMany(() => EventEntity, (event) => event.wishlists)
+  @ManyToMany(() => EventEntity, (event) => event.wishlists, {
+    cascade: true,
+  })
   events: Promise<EventEntity[]>;
 
   public static create(props: {

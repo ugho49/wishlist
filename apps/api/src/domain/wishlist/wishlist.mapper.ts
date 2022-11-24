@@ -1,4 +1,9 @@
-import { DetailledWishlistDto, WishlistWithEventsDto, WishlistWithOwnerDto } from '@wishlist/common-types';
+import {
+  DetailledWishlistDto,
+  MiniWishlistDto,
+  WishlistWithEventsDto,
+  WishlistWithOwnerDto,
+} from '@wishlist/common-types';
 import { WishlistEntity } from './wishlist.entity';
 import { toMiniUserDto } from '../user/user.mapper';
 import { toMiniEventDto } from '../event/mappers/event.mapper';
@@ -7,13 +12,19 @@ function getConfig(entity: WishlistEntity) {
   return { hideItems: entity.hideItems };
 }
 
-export async function toDetailledWishlistDto(entity: WishlistEntity): Promise<DetailledWishlistDto> {
-  const [owner, events] = await Promise.all([entity.owner, entity.events]);
-
+export function toMiniWishlistDto(entity: WishlistEntity): MiniWishlistDto {
   return {
     id: entity.id,
     title: entity.title,
     description: entity.description,
+  };
+}
+
+export async function toDetailledWishlistDto(entity: WishlistEntity): Promise<DetailledWishlistDto> {
+  const [owner, events] = await Promise.all([entity.owner, entity.events]);
+
+  return {
+    ...toMiniWishlistDto(entity),
     owner: toMiniUserDto(owner),
     items: [], // TODO
     events: events.map((event) => toMiniEventDto(event)),
@@ -27,9 +38,7 @@ export async function toWishlistWithEventsDto(entity: WishlistEntity): Promise<W
   const events = await entity.events;
 
   return {
-    id: entity.id,
-    title: entity.title,
-    description: entity.description,
+    ...toMiniWishlistDto(entity),
     config: getConfig(entity),
     events: events.map((event) => toMiniEventDto(event)),
     created_at: entity.createdAt.toISOString(),
@@ -41,9 +50,7 @@ export async function toWishlistWithOwnerDto(entity: WishlistEntity): Promise<Wi
   const owner = await entity.owner;
 
   return {
-    id: entity.id,
-    title: entity.title,
-    description: entity.description,
+    ...toMiniWishlistDto(entity),
     config: getConfig(entity),
     owner: toMiniUserDto(owner),
     created_at: entity.createdAt.toISOString(),

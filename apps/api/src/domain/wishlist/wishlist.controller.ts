@@ -1,10 +1,13 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { WishlistService } from './wishlist.service';
 import { CurrentUser } from '../auth';
 import {
+  CreateWishlistInputDto,
   DetailledWishlistDto,
   GetPaginationQueryDto,
+  MiniEventDto,
+  MiniWishlistDto,
   PagedResponse,
   WishlistWithEventsDto,
 } from '@wishlist/common-types';
@@ -28,5 +31,13 @@ export class WishlistController {
     @CurrentUser('id') currentUserId: string
   ): Promise<DetailledWishlistDto> {
     return this.wishlistService.findById({ wishlistId, currentUserId });
+  }
+
+  @Post()
+  async createWishlist(
+    @CurrentUser('id') currentUserId: string,
+    @Body() dto: CreateWishlistInputDto
+  ): Promise<MiniWishlistDto> {
+    return this.wishlistService.create({ dto, currentUserId });
   }
 }

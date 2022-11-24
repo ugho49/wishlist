@@ -27,8 +27,10 @@ export class EventEntity extends TimestampEntity {
   })
   wishlists: Promise<WishlistEntity[]>;
 
-  @OneToMany(() => AttendeeEntity, (entity) => entity.event)
-  attendees: Promise<AttendeeEntity[] | undefined>;
+  @OneToMany(() => AttendeeEntity, (entity) => entity.event, {
+    cascade: true,
+  })
+  attendees: Promise<AttendeeEntity[]>;
 
   @Column()
   @RelationId((entity: EventEntity) => entity.creator)

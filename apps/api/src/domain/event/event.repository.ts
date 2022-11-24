@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { EventEntity } from './entities/event.entity';
 import { BaseRepository } from '@wishlist/common-database';
-import { Brackets } from 'typeorm';
+import { Brackets, In } from 'typeorm';
 
 @Injectable()
 export class EventRepository extends BaseRepository(EventEntity) {
-  async getUserEventsPaginated(params: {
+  getUserEventsPaginated(params: {
     userId: string;
     pageSize: number;
     offset: number;
@@ -30,7 +30,7 @@ export class EventRepository extends BaseRepository(EventEntity) {
       .where(this.whereCreatorIdOrAttendee(userId))
       .getCount();
 
-    return await Promise.all([fetchQuery, countQuery]);
+    return Promise.all([fetchQuery, countQuery]);
   }
 
   findByIdAndUserId(params: { eventId: string; userId: string }): Promise<EventEntity | null> {
@@ -41,6 +41,14 @@ export class EventRepository extends BaseRepository(EventEntity) {
       .where('e.id = :eventId', { eventId: params.eventId })
       .andWhere(this.whereCreatorIdOrAttendee(params.userId))
       .getOne();
+  }
+
+  findByIdsAndUserId(params: { eventIds: string[]; userId: string }): Promise<EventEntity[]> {
+    return this.createQueryBuilder('e')
+      .leftJoin('e.attendees', 'a')
+      .where({ id: In(params.eventIds) })
+      .andWhere(this.whereCreatorIdOrAttendee(params.userId))
+      .getMany();
   }
 
   private whereCreatorIdOrAttendee(userId: string) {

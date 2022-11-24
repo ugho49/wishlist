@@ -80,10 +80,9 @@ export class EventService {
       attendeeEntities.push(attendeeEntity);
     }
 
-    await this.eventRepository.transaction(async (em) => {
-      await em.insert(EventEntity, eventEntity);
-      await em.insert(AttendeeEntity, attendeeEntities);
-    });
+    eventEntity.attendees = Promise.resolve(attendeeEntities);
+
+    await this.eventRepository.save(eventEntity);
 
     /*
     TODO: -->

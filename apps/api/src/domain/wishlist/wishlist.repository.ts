@@ -14,7 +14,7 @@ export class WishlistRepository extends BaseRepository(WishlistEntity) {
       .getOne();
   }
 
-  async getMyWishlistPaginated(params: {
+  getMyWishlistPaginated(params: {
     ownerId: string;
     pageSize: number;
     offset: number;
@@ -30,6 +30,6 @@ export class WishlistRepository extends BaseRepository(WishlistEntity) {
 
     const countQuery = this.countBy({ ownerId });
 
-    return await Promise.all([fetchQuery, countQuery]);
+    return Promise.all([fetchQuery, countQuery]);
   }
 }

@@ -11,5 +11,6 @@ import { UserModule } from '../user/user.module';
   imports: [TypeOrmModule.forFeature([EventEntity, AttendeeEntity]), UserModule],
   controllers: [EventController],
   providers: [EventService, EventRepository],
+  exports: [EventService, EventRepository],
 })
 export class EventModule {}
