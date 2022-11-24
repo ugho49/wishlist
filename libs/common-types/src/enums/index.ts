@@ -1,5 +1,2 @@
-export enum Authorities {
-  ROLE_USER = 'ROLE_USER',
-  ROLE_ADMIN = 'ROLE_ADMIN',
-  ROLE_SUPERADMIN = 'ROLE_SUPERADMIN',
-}
+export * from './auth.enum';
+export * from './attendee.enum';

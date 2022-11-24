@@ -1,21 +1,14 @@
 import { MiniUserDto } from './user.dto';
-import { IsEmail, IsNotEmpty, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
+import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
 import { Transform } from 'class-transformer';
+import { AttendeeRole } from '../enums';
 
 export class AttendeeDto {
   id: string;
   user?: MiniUserDto;
   pending_email?: string;
-  role: string; //AttendeeRole;
+  role: string;
 }
-
-/*
-TODO ->
-public enum AttendeeRole {
-    USER("user"),
-    EDITOR("editor"),
-    ADMIN("admin");
- */
 
 export class AddEventAttendeeInputDto {
   @IsEmail()
@@ -25,9 +18,9 @@ export class AddEventAttendeeInputDto {
   @Transform(({ value }) => value.toLowerCase())
   email: string;
 
-  @IsString()
+  @IsEnum(AttendeeRole)
   @IsOptional()
-  role: string = 'user'; // TODO --> change with AttendeeRole.USER
+  role?: AttendeeRole = AttendeeRole.USER;
 }
 
 export class AddEventAttendeeForEventInputDto extends AddEventAttendeeInputDto {

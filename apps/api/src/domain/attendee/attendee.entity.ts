@@ -2,6 +2,7 @@ import { Column, Entity, ManyToOne, PrimaryColumn, RelationId } from 'typeorm';
 import { uuid } from '@wishlist/common';
 import { EventEntity } from '../event/event.entity';
 import { UserEntity } from '../user';
+import { AttendeeRole } from '@wishlist/common-types';
 
 @Entity('event_attendee')
 export class AttendeeEntity {
@@ -25,14 +26,10 @@ export class AttendeeEntity {
   @Column({ name: 'temp_user_email' })
   email?: string;
 
-  // TODO -->
-  // @Convert(converter = AttendeeRoleConverter.class)
   @Column()
-  role: string;
+  role: AttendeeRole;
 
-  // TODO
-
-  static createFromExistingUser(param: { eventId: string; userId: string; role: string }): AttendeeEntity {
+  static createFromExistingUser(param: { eventId: string; userId: string; role: AttendeeRole }): AttendeeEntity {
     const entity = new AttendeeEntity();
     entity.eventId = param.eventId;
     entity.userId = param.userId;
@@ -40,7 +37,7 @@ export class AttendeeEntity {
     return entity;
   }
 
-  static createFromNonExistingUser(param: { eventId: string; email: string; role: string }): AttendeeEntity {
+  static createFromNonExistingUser(param: { eventId: string; email: string; role: AttendeeRole }): AttendeeEntity {
     const entity = new AttendeeEntity();
     entity.eventId = param.eventId;
     entity.email = param.email;
