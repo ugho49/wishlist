@@ -15,8 +15,7 @@ export class GetPaginationQueryDto {
 export class PaginationDto {
   total_pages: number;
   total_elements: number;
-  current_index: number;
-  number: number; // TODO: later remove in favor of `current_index`
+  page_number: number;
 }
 
 export class PagedResponse<T> {

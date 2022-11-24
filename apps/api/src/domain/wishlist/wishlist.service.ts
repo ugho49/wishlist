@@ -44,7 +44,7 @@ export class WishlistService {
 
     return createPagedResponse({
       resources: dtos,
-      options: { pageSize, totalElements, currentIndex: pageNumber },
+      options: { pageSize, totalElements, pageNumber },
     });
   }
 }

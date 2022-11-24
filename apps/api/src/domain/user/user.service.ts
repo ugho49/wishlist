@@ -131,7 +131,7 @@ export class UserService {
 
     return createPagedResponse({
       resources: entities.map((entity) => toUserDto(entity)),
-      options: { pageSize, totalElements, currentIndex: pageNumber },
+      options: { pageSize, totalElements, pageNumber },
     });
   }
 

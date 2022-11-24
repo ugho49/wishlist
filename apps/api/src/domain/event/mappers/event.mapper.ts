@@ -17,9 +17,6 @@ export function toMiniEventDto(entity: EventEntity): MiniEventDto {
 export async function toEventWithCountsDtoDto(entity: EventEntity): Promise<EventWithCountsDto> {
   const [wishlists, attendees] = await Promise.all([entity.wishlists, entity.attendees]);
 
-  // TODO fix this
-  console.log('entity', entity);
-
   return {
     id: entity.id,
     title: entity.title,

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EventEntity } from './entities/event.entity';
 import { BaseRepository } from '@wishlist/common-database';
+import { Brackets } from 'typeorm';
 
 @Injectable()
 export class EventRepository extends BaseRepository(EventEntity) {
@@ -11,28 +12,22 @@ export class EventRepository extends BaseRepository(EventEntity) {
   }): Promise<[EventEntity[], number]> {
     const { userId, offset, pageSize } = params;
 
-    const fetchQuery = this.query(
-      `SELECT * FROM (
-          SELECT * FROM (
-            SELECT DISTINCT e.* FROM event e
-            LEFT OUTER JOIN event_attendee a ON a.event_id = e.id
-            WHERE (e.creator_id = $1 OR a.user_id = $1) AND e.event_date >= CURRENT_DATE
-            ORDER BY e.event_date, e.updated_at DESC
-          ) AS future_events
-          UNION ALL
-          SELECT * FROM (
-            SELECT DISTINCT e.* FROM event e
-            LEFT OUTER JOIN event_attendee a ON a.event_id = e.id
-            WHERE (e.creator_id = $1 OR a.user_id = $1) AND e.event_date < CURRENT_DATE
-            ORDER BY e.event_date DESC
-          ) AS past_events
-      ) AS all_events LIMIT $2 OFFSET $3`,
-      [userId, pageSize, offset]
-    );
+    // TODO Change with union all when available -->
+
+    const fetchQuery = this.createQueryBuilder('e')
+      .leftJoinAndSelect('e.wishlists', 'w')
+      .leftJoinAndSelect('e.creator', 'c')
+      .leftJoinAndSelect('e.attendees', 'a')
+      .where(this.whereCreatorIdOrAttendee(userId))
+      .andWhere('e.eventDate >= CURRENT_DATE')
+      .orderBy('e.eventDate, e.updatedAt', 'DESC')
+      .limit(pageSize)
+      .offset(offset)
+      .getMany();
 
     const countQuery = this.createQueryBuilder('e')
       .leftJoin('e.attendees', 'a')
-      .where('e.creator_id = :userId OR a.user_id = :userId', { userId })
+      .where(this.whereCreatorIdOrAttendee(userId))
       .getCount();
 
     return await Promise.all([fetchQuery, countQuery]);
@@ -44,7 +39,13 @@ export class EventRepository extends BaseRepository(EventEntity) {
       .leftJoinAndSelect('e.creator', 'c')
       .leftJoinAndSelect('e.attendees', 'a')
       .where('e.id = :eventId', { eventId: params.eventId })
-      .andWhere('(e.creator.id = :userId OR a.user.id = :userId)', { userId: params.userId })
+      .andWhere(this.whereCreatorIdOrAttendee(params.userId))
       .getOne();
+  }
+
+  private whereCreatorIdOrAttendee(userId: string) {
+    return new Brackets((cb) =>
+      cb.where('e.creatorId = :userId', { userId }).orWhere('a.userId = :userId', { userId })
+    );
   }
 }
