@@ -1,4 +1,4 @@
-import { IsInt, IsNotEmpty, IsOptional, IsString, IsUrl, Max, MaxLength, Min } from 'class-validator';
+import { IsInt, IsNotEmpty, IsOptional, IsString, IsUrl, IsUUID, Max, MaxLength, Min } from 'class-validator';
 import { MiniUserDto } from './user.dto';
 
 export class ItemDto {
@@ -13,7 +13,7 @@ export class ItemDto {
   created_at: string;
 }
 
-export class AddSingleItemInputDto {
+export class AddItemInputDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(40)
@@ -34,4 +34,11 @@ export class AddSingleItemInputDto {
   @Max(5)
   @IsOptional()
   score?: number;
+}
+
+export class AddItemForListInputDto extends AddItemInputDto {
+  @IsUUID()
+  @IsString()
+  @IsNotEmpty()
+  wishlist_id: string;
 }

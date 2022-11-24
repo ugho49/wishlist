@@ -58,4 +58,12 @@ export class ItemEntity extends TimestampEntity {
     entity.score = param.score;
     return entity;
   }
+
+  isNotSuggested() {
+    return !this.isSuggested;
+  }
+
+  isTakenBySomeone() {
+    return this.takerId !== undefined && this.takerId !== null;
+  }
 }

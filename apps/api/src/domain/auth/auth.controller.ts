@@ -11,12 +11,12 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('/login')
-  async login(@Body() dto: LoginInputDto, @Ip() ip: string): Promise<LoginOutputDto> {
+  login(@Body() dto: LoginInputDto, @Ip() ip: string): Promise<LoginOutputDto> {
     return this.authService.login(dto, ip);
   }
 
   @Post('/refresh')
-  async refresh(@Body() dto: RefreshTokenInputDto, @Ip() ip: string): Promise<RefreshTokenOutputDto> {
+  refresh(@Body() dto: RefreshTokenInputDto, @Ip() ip: string): Promise<RefreshTokenOutputDto> {
     return this.authService.refresh(dto, ip);
   }
 }

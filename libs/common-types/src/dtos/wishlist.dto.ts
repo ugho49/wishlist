@@ -11,7 +11,7 @@ import {
   MaxLength,
   ValidateNested,
 } from 'class-validator';
-import { AddSingleItemInputDto, ItemDto } from './item.dto';
+import { AddItemInputDto, ItemDto } from './item.dto';
 import { Type } from 'class-transformer';
 
 export class WishlistConfigDto {
@@ -69,6 +69,6 @@ export class CreateWishlistInputDto {
   @IsArray()
   @IsNotEmpty()
   @ValidateNested({ each: true })
-  @Type(() => AddSingleItemInputDto)
-  items: AddSingleItemInputDto[] = [];
+  @Type(() => AddItemInputDto)
+  items: AddItemInputDto[] = [];
 }

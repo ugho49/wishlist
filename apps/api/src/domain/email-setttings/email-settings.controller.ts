@@ -10,15 +10,15 @@ export class EmailSettingsController {
   constructor(private readonly userEmailSettingsService: EmailSettingsService) {}
 
   @Get()
-  async getEmailSettings(@CurrentUser('id') id: string): Promise<UserEmailSettingsDto> {
-    return await this.userEmailSettingsService.findByUserId(id);
+  getEmailSettings(@CurrentUser('id') id: string): Promise<UserEmailSettingsDto> {
+    return this.userEmailSettingsService.findByUserId(id);
   }
 
   @Put()
-  async updateEmailSettings(
+  updateEmailSettings(
     @CurrentUser('id') id: string,
     @Body() dto: UpdateUserEmailSettingsInputDto
   ): Promise<UserEmailSettingsDto> {
-    return await this.userEmailSettingsService.update(id, dto);
+    return this.userEmailSettingsService.update(id, dto);
   }
 }

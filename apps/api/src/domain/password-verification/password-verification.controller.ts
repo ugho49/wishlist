@@ -11,12 +11,12 @@ export class PasswordVerificationController {
   constructor(private readonly verificationService: PasswordVerificationService) {}
 
   @Post('/send-reset-email')
-  async sendResetPasswordEmail(@Body() dto: ResetPasswordInputDto): Promise<void> {
-    await this.verificationService.sendResetEmail(dto);
+  sendResetPasswordEmail(@Body() dto: ResetPasswordInputDto): Promise<void> {
+    return this.verificationService.sendResetEmail(dto);
   }
 
   @Post('/reset')
-  async resetPassword(@Body() dto: ResetPasswordValidationInputDto): Promise<void> {
-    await this.verificationService.resetPassword(dto);
+  resetPassword(@Body() dto: ResetPasswordValidationInputDto): Promise<void> {
+    return this.verificationService.resetPassword(dto);
   }
 }

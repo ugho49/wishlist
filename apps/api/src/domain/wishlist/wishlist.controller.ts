@@ -17,7 +17,7 @@ export class WishlistController {
   constructor(private readonly wishlistService: WishlistService) {}
 
   @Get()
-  async getMyWishlists(
+  getMyWishlists(
     @Query() queryParams: GetPaginationQueryDto,
     @CurrentUser('id') currentUserId: string
   ): Promise<PagedResponse<WishlistWithEventsDto>> {
@@ -25,7 +25,7 @@ export class WishlistController {
   }
 
   @Get('/:id')
-  async getWishlistById(
+  getWishlistById(
     @Param('id') wishlistId: string,
     @CurrentUser('id') currentUserId: string
   ): Promise<DetailedWishlistDto> {
@@ -33,7 +33,7 @@ export class WishlistController {
   }
 
   @Post()
-  async createWishlist(
+  createWishlist(
     @CurrentUser('id') currentUserId: string,
     @Body() dto: CreateWishlistInputDto
   ): Promise<MiniWishlistDto> {

@@ -16,34 +16,31 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
-  async getInfos(@CurrentUser('id') currentUserId: string): Promise<UserDto> {
+  getInfos(@CurrentUser('id') currentUserId: string): Promise<UserDto> {
     return this.userService.findById(currentUserId);
   }
 
   @Public()
   @Post('/register')
-  async register(@Body() dto: RegisterUserInputDto): Promise<UserDto> {
+  register(@Body() dto: RegisterUserInputDto): Promise<UserDto> {
     return this.userService.create(dto);
   }
 
   @Put()
-  async update(@CurrentUser('id') currentUserId: string, @Body() dto: UpdateUserProfileInputDto): Promise<void> {
-    await this.userService.update({ currentUserId, dto });
+  update(@CurrentUser('id') currentUserId: string, @Body() dto: UpdateUserProfileInputDto): Promise<void> {
+    return this.userService.update({ currentUserId, dto });
   }
 
   @Put('/change-password')
-  async changePassword(
-    @CurrentUser('id') currentUserId: string,
-    @Body() dto: ChangeUserPasswordInputDto
-  ): Promise<void> {
-    await this.userService.changeUserPassword({ currentUserId, dto });
+  changePassword(@CurrentUser('id') currentUserId: string, @Body() dto: ChangeUserPasswordInputDto): Promise<void> {
+    return this.userService.changeUserPassword({ currentUserId, dto });
   }
 
   @Get('/search')
-  async searchByKeyword(
+  searchByKeyword(
     @CurrentUser('id') currentUserId: string,
     @Query('keyword') criteria: string
   ): Promise<MiniUserDto[]> {
-    return await this.userService.searchByKeyword({ currentUserId, criteria });
+    return this.userService.searchByKeyword({ currentUserId, criteria });
   }
 }

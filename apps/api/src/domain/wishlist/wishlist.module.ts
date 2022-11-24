@@ -10,5 +10,6 @@ import { EventModule } from '../event/event.module';
   imports: [TypeOrmModule.forFeature([WishlistEntity]), EventModule],
   controllers: [WishlistController],
   providers: [WishlistService, WishlistRepository],
+  exports: [WishlistRepository],
 })
 export class WishlistModule {}

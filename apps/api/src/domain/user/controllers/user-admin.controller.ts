@@ -11,26 +11,26 @@ export class UserAdminController {
   constructor(private readonly userService: UserService) {}
 
   @Get('/:id')
-  async getUserById(@Param('id') id: string): Promise<UserDto> {
+  getUserById(@Param('id') id: string): Promise<UserDto> {
     return this.userService.findById(id);
   }
 
   @Get()
-  async getAllPaginated(@Query() queryParams: GetAllUsersQueryDto): Promise<PagedResponse<UserDto>> {
+  getAllPaginated(@Query() queryParams: GetAllUsersQueryDto): Promise<PagedResponse<UserDto>> {
     return this.userService.findAllByCriteriaPaginated({ pageNumber: queryParams.p, criteria: queryParams.q });
   }
 
   @Patch('/:id')
-  async updateFullUserProfile(
+  updateFullUserProfile(
     @Param('id') userId: string,
     @Body() dto: UpdateFullUserProfileInputDto,
     @CurrentUser() currentUser: ICurrentUser
   ): Promise<void> {
-    await this.userService.updateProfileAsAdmin({ userId, currentUser, dto });
+    return this.userService.updateProfileAsAdmin({ userId, currentUser, dto });
   }
 
   @Delete('/:id')
-  async deleteUserById(@Param('id') userId: string, @CurrentUser() currentUser: ICurrentUser): Promise<void> {
-    await this.userService.delete({ userId, currentUser });
+  deleteUserById(@Param('id') userId: string, @CurrentUser() currentUser: ICurrentUser): Promise<void> {
+    return this.userService.delete({ userId, currentUser });
   }
 }

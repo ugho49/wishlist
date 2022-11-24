@@ -17,7 +17,7 @@ export class EventController {
   constructor(private readonly eventService: EventService) {}
 
   @Get()
-  async getMyEvents(
+  getMyEvents(
     @Query() queryParams: GetPaginationQueryDto,
     @CurrentUser('id') currentUserId: string
   ): Promise<PagedResponse<EventWithCountsDto>> {
@@ -25,15 +25,12 @@ export class EventController {
   }
 
   @Get('/:id')
-  async getEventById(
-    @Param('id') eventId: string,
-    @CurrentUser('id') currentUserId: string
-  ): Promise<DetailedEventDto> {
+  getEventById(@Param('id') eventId: string, @CurrentUser('id') currentUserId: string): Promise<DetailedEventDto> {
     return this.eventService.findById({ eventId, currentUserId });
   }
 
   @Post()
-  async createEvent(@CurrentUser() currentUser: ICurrentUser, @Body() dto: CreateEventInputDto): Promise<MiniEventDto> {
+  createEvent(@CurrentUser() currentUser: ICurrentUser, @Body() dto: CreateEventInputDto): Promise<MiniEventDto> {
     return this.eventService.create({ dto, currentUser });
   }
 }
