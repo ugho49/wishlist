@@ -2,6 +2,7 @@ import { MiniUserDto } from './user.dto';
 import { MiniEventDto } from './event.dto';
 import {
   ArrayNotEmpty,
+  ArrayUnique,
   IsArray,
   IsBoolean,
   IsNotEmpty,
@@ -9,9 +10,8 @@ import {
   IsString,
   MaxLength,
   ValidateNested,
-  ArrayUnique,
 } from 'class-validator';
-import { AddSingleItemInputDto } from './item.dto';
+import { AddSingleItemInputDto, ItemDto } from './item.dto';
 import { Type } from 'class-transformer';
 
 export class WishlistConfigDto {
@@ -24,9 +24,9 @@ export class MiniWishlistDto {
   description?: string;
 }
 
-export class DetailledWishlistDto extends MiniWishlistDto {
+export class DetailedWishlistDto extends MiniWishlistDto {
   owner: MiniUserDto;
-  items: any[]; // TODO: ItemDto
+  items: ItemDto[];
   events: MiniEventDto[];
   config: WishlistConfigDto;
   created_at: string;

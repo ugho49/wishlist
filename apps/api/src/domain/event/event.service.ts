@@ -2,13 +2,13 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import {
   CreateEventInputDto,
   createPagedResponse,
-  DetailledEventDto,
+  DetailedEventDto,
   EventWithCountsDto,
   MiniEventDto,
   PagedResponse,
 } from '@wishlist/common-types';
 import { DEFAULT_RESULT_NUMBER } from '@wishlist/common';
-import { toDetailledEventDto, toEventWithCountsDtoDto, toMiniEventDto } from './mappers/event.mapper';
+import { toDetailedEventDto, toEventWithCountsDtoDto, toMiniEventDto } from './mappers/event.mapper';
 import { EventRepository } from './event.repository';
 import { ICurrentUser } from '../auth';
 import { uniq } from 'lodash';
@@ -43,7 +43,7 @@ export class EventService {
     });
   }
 
-  async findById(param: { eventId: string; currentUserId: string }): Promise<DetailledEventDto> {
+  async findById(param: { eventId: string; currentUserId: string }): Promise<DetailedEventDto> {
     const entity = await this.eventRepository.findByIdAndUserId({
       eventId: param.eventId,
       userId: param.currentUserId,
@@ -53,7 +53,7 @@ export class EventService {
       throw new NotFoundException('Event not found');
     }
 
-    return toDetailledEventDto(entity);
+    return toDetailedEventDto(entity);
   }
 
   async create(param: { currentUser: ICurrentUser; dto: CreateEventInputDto }): Promise<MiniEventDto> {

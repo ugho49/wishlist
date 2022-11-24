@@ -4,7 +4,7 @@ import { WishlistService } from './wishlist.service';
 import { CurrentUser } from '../auth';
 import {
   CreateWishlistInputDto,
-  DetailledWishlistDto,
+  DetailedWishlistDto,
   GetPaginationQueryDto,
   MiniEventDto,
   MiniWishlistDto,
@@ -29,7 +29,7 @@ export class WishlistController {
   async getWishlistById(
     @Param('id') wishlistId: string,
     @CurrentUser('id') currentUserId: string
-  ): Promise<DetailledWishlistDto> {
+  ): Promise<DetailedWishlistDto> {
     return this.wishlistService.findById({ wishlistId, currentUserId });
   }
 

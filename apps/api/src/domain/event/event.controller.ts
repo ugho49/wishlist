@@ -3,7 +3,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { EventService } from './event.service';
 import {
   CreateEventInputDto,
-  DetailledEventDto,
+  DetailedEventDto,
   EventWithCountsDto,
   GetPaginationQueryDto,
   MiniEventDto,
@@ -28,7 +28,7 @@ export class EventController {
   async getEventById(
     @Param('id') eventId: string,
     @CurrentUser('id') currentUserId: string
-  ): Promise<DetailledEventDto> {
+  ): Promise<DetailedEventDto> {
     return this.eventService.findById({ eventId, currentUserId });
   }
 

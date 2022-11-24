@@ -77,8 +77,8 @@ export class UserService {
     return entities.map((entity) => toMiniUserDto(entity));
   }
 
-  async findAllByCriteriaPaginated(props: { pageNumber?: number; criteria?: string }): Promise<PagedResponse<UserDto>> {
-    const { criteria, pageNumber } = props;
+  async findAllByCriteriaPaginated(param: { pageNumber?: number; criteria?: string }): Promise<PagedResponse<UserDto>> {
+    const { criteria, pageNumber } = param;
     const pageSize = DEFAULT_RESULT_NUMBER;
     const offset = pageSize * (pageNumber || 0);
 

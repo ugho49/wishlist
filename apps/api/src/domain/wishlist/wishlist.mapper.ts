@@ -1,5 +1,5 @@
 import {
-  DetailledWishlistDto,
+  DetailedWishlistDto,
   MiniWishlistDto,
   WishlistWithEventsDto,
   WishlistWithOwnerDto,
@@ -7,6 +7,7 @@ import {
 import { WishlistEntity } from './wishlist.entity';
 import { toMiniUserDto } from '../user/user.mapper';
 import { toMiniEventDto } from '../event/mappers/event.mapper';
+import { toItemDto } from '../item/item.mapper';
 
 function getConfig(entity: WishlistEntity) {
   return { hideItems: entity.hideItems };
@@ -20,13 +21,20 @@ export function toMiniWishlistDto(entity: WishlistEntity): MiniWishlistDto {
   };
 }
 
-export async function toDetailledWishlistDto(entity: WishlistEntity): Promise<DetailledWishlistDto> {
-  const [owner, events] = await Promise.all([entity.owner, entity.events]);
+export async function toDetailedWishlistDto(param: {
+  entity: WishlistEntity;
+  currentUserId: string;
+}): Promise<DetailedWishlistDto> {
+  const { currentUserId, entity } = param;
+  const [owner, events, itemEntities] = await Promise.all([entity.owner, entity.events, entity.items]);
+
+  // TODO: Filter to get only item you need to see
+  const items = await Promise.all(itemEntities.map((item) => toItemDto(item)));
 
   return {
     ...toMiniWishlistDto(entity),
     owner: toMiniUserDto(owner),
-    items: [], // TODO
+    items,
     events: events.map((event) => toMiniEventDto(event)),
     config: getConfig(entity),
     created_at: entity.createdAt.toISOString(),

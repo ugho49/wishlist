@@ -35,11 +35,11 @@ export class ItemEntity extends TimestampEntity {
   wishlistId: string;
 
   @ManyToOne(() => UserEntity)
-  readonly taker: Promise<UserEntity>;
+  readonly taker?: Promise<UserEntity>;
 
   @Column()
   @RelationId((entity: ItemEntity) => entity.taker)
-  takerId: string;
+  takerId?: string;
 
   static create(param: {
     name: string;

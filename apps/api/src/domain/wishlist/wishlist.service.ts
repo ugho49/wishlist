@@ -2,12 +2,12 @@ import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/co
 import {
   createPagedResponse,
   CreateWishlistInputDto,
-  DetailledWishlistDto,
+  DetailedWishlistDto,
   MiniWishlistDto,
   PagedResponse,
   WishlistWithEventsDto,
 } from '@wishlist/common-types';
-import { toDetailledWishlistDto, toMiniWishlistDto, toWishlistWithEventsDto } from './wishlist.mapper';
+import { toDetailedWishlistDto, toMiniWishlistDto, toWishlistWithEventsDto } from './wishlist.mapper';
 import { DEFAULT_RESULT_NUMBER } from '@wishlist/common';
 import { WishlistRepository } from './wishlist.repository';
 import { EventRepository } from '../event/event.repository';
@@ -21,17 +21,17 @@ export class WishlistService {
     private readonly eventRepository: EventRepository
   ) {}
 
-  async findById(props: { currentUserId: string; wishlistId: string }): Promise<DetailledWishlistDto> {
+  async findById(param: { currentUserId: string; wishlistId: string }): Promise<DetailedWishlistDto> {
     const entity = await this.wishlistRepository.findByIdAndUserId({
-      userId: props.currentUserId,
-      wishlistId: props.wishlistId,
+      userId: param.currentUserId,
+      wishlistId: param.wishlistId,
     });
 
     if (!entity) {
       throw new NotFoundException('Wishlist not found');
     }
 
-    return toDetailledWishlistDto(entity);
+    return toDetailedWishlistDto({ entity, currentUserId: param.currentUserId });
   }
 
   async getMyWishlistPaginated(param: {
