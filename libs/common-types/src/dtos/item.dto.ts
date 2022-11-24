@@ -7,7 +7,7 @@ export class ItemDto {
   description?: string;
   url?: string;
   score?: number;
-  is_suggested: boolean;
+  is_suggested?: boolean;
   taken_by?: MiniUserDto;
   taken_at?: string;
   created_at: string;

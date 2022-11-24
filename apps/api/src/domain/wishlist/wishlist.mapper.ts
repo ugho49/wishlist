@@ -8,6 +8,7 @@ import { WishlistEntity } from './wishlist.entity';
 import { toMiniUserDto } from '../user/user.mapper';
 import { toMiniEventDto } from '../event/mappers/event.mapper';
 import { toItemDto } from '../item/item.mapper';
+import { displayItemSensitiveInformations, showItem } from '../item/item.utils';
 
 function getConfig(entity: WishlistEntity) {
   return { hideItems: entity.hideItems };
@@ -18,27 +19,6 @@ export function toMiniWishlistDto(entity: WishlistEntity): MiniWishlistDto {
     id: entity.id,
     title: entity.title,
     description: entity.description,
-  };
-}
-
-export async function toDetailedWishlistDto(param: {
-  entity: WishlistEntity;
-  currentUserId: string;
-}): Promise<DetailedWishlistDto> {
-  const { currentUserId, entity } = param;
-  const [owner, events, itemEntities] = await Promise.all([entity.owner, entity.events, entity.items]);
-
-  // TODO: Filter to get only item you need to see
-  const items = await Promise.all(itemEntities.map((item) => toItemDto(item)));
-
-  return {
-    ...toMiniWishlistDto(entity),
-    owner: toMiniUserDto(owner),
-    items,
-    events: events.map((event) => toMiniEventDto(event)),
-    config: getConfig(entity),
-    created_at: entity.createdAt.toISOString(),
-    updated_at: entity.updatedAt.toISOString(),
   };
 }
 
@@ -61,6 +41,37 @@ export async function toWishlistWithOwnerDto(entity: WishlistEntity): Promise<Wi
     ...toMiniWishlistDto(entity),
     config: getConfig(entity),
     owner: toMiniUserDto(owner),
+    created_at: entity.createdAt.toISOString(),
+    updated_at: entity.updatedAt.toISOString(),
+  };
+}
+
+export async function toDetailedWishlistDto(param: {
+  entity: WishlistEntity;
+  currentUserId: string;
+}): Promise<DetailedWishlistDto> {
+  const { currentUserId, entity } = param;
+  const [owner, events, itemEntities] = await Promise.all([entity.owner, entity.events, entity.items]);
+
+  const displayUserAndSuggested = displayItemSensitiveInformations({ wishlist: entity, currentUserId });
+
+  const items = await Promise.all(
+    itemEntities
+      .filter((item) => showItem({ item, wishlist: entity, currentUserId }))
+      .map((item) =>
+        toItemDto({
+          entity: item,
+          displayUserAndSuggested,
+        })
+      )
+  );
+
+  return {
+    ...toMiniWishlistDto(entity),
+    owner: toMiniUserDto(owner),
+    items,
+    events: events.map((event) => toMiniEventDto(event)),
+    config: getConfig(entity),
     created_at: entity.createdAt.toISOString(),
     updated_at: entity.updatedAt.toISOString(),
   };
