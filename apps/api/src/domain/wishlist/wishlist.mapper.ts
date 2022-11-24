@@ -6,7 +6,7 @@ import {
 } from '@wishlist/common-types';
 import { WishlistEntity } from './wishlist.entity';
 import { toMiniUserDto } from '../user/user.mapper';
-import { toMiniEventDto } from '../event/mappers/event.mapper';
+import { toMiniEventDto } from '../event/event.mapper';
 import { toItemDto } from '../item/item.mapper';
 import { displayItemSensitiveInformations, showItem } from '../item/item.utils';
 

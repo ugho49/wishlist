@@ -8,12 +8,12 @@ import {
   PagedResponse,
 } from '@wishlist/common-types';
 import { DEFAULT_RESULT_NUMBER } from '@wishlist/common';
-import { toDetailedEventDto, toEventWithCountsDtoDto, toMiniEventDto } from './mappers/event.mapper';
+import { toDetailedEventDto, toEventWithCountsDtoDto, toMiniEventDto } from './event.mapper';
 import { EventRepository } from './event.repository';
 import { ICurrentUser } from '../auth';
 import { uniq } from 'lodash';
-import { AttendeeEntity } from './entities/attendee.entity';
-import { EventEntity } from './entities/event.entity';
+import { AttendeeEntity } from '../attendee/attendee.entity';
+import { EventEntity } from './event.entity';
 import { UserRepository } from '../user/user.repository';
 
 @Injectable()

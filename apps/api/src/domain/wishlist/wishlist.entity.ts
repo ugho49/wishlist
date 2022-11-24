@@ -3,7 +3,7 @@ import { uuid } from '@wishlist/common';
 import { TimestampEntity } from '@wishlist/common-database';
 import { UserEntity } from '../user';
 import { ItemEntity } from '../item/item.entity';
-import { EventEntity } from '../event/entities/event.entity';
+import { EventEntity } from '../event/event.entity';
 
 @Entity('wishlist')
 export class WishlistEntity extends TimestampEntity {

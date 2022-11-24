@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { EventEntity } from './entities/event.entity';
+import { EventEntity } from './event.entity';
 import { BaseRepository } from '@wishlist/common-database';
 import { Brackets, In } from 'typeorm';
 

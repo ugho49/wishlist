@@ -1,7 +1,7 @@
 import { Column, Entity, ManyToOne, PrimaryColumn, RelationId } from 'typeorm';
 import { uuid } from '@wishlist/common';
-import { EventEntity } from './event.entity';
-import { UserEntity } from '../../user';
+import { EventEntity } from '../event/event.entity';
+import { UserEntity } from '../user';
 
 @Entity('event_attendee')
 export class AttendeeEntity {

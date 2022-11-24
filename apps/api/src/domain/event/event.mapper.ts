@@ -1,8 +1,8 @@
 import { DetailedEventDto, EventWithCountsDto, MiniEventDto } from '@wishlist/common-types';
-import { EventEntity } from '../entities/event.entity';
-import { toMiniUserDto } from '../../user/user.mapper';
-import { toAttendeeDto } from './attendee.mapper';
-import { toWishlistWithOwnerDto } from '../../wishlist/wishlist.mapper';
+import { EventEntity } from './event.entity';
+import { toMiniUserDto } from '../user/user.mapper';
+import { toAttendeeDto } from '../attendee/attendee.mapper';
+import { toWishlistWithOwnerDto } from '../wishlist/wishlist.mapper';
 import { DateTime } from 'luxon';
 
 export function toMiniEventDto(entity: EventEntity): MiniEventDto {

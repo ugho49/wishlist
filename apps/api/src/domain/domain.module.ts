@@ -6,6 +6,7 @@ import { PasswordVerificationModule } from './password-verification/password-ver
 import { WishlistModule } from './wishlist/wishlist.module';
 import { ItemModule } from './item/item.module';
 import { EventModule } from './event/event.module';
+import { AttendeeModule } from './attendee/attendee.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { EventModule } from './event/event.module';
     WishlistModule,
     ItemModule,
     EventModule,
+    AttendeeModule,
   ],
 })
 export class DomainModule {}

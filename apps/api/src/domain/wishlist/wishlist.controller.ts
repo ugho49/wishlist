@@ -6,7 +6,6 @@ import {
   CreateWishlistInputDto,
   DetailedWishlistDto,
   GetPaginationQueryDto,
-  MiniEventDto,
   MiniWishlistDto,
   PagedResponse,
   WishlistWithEventsDto,
