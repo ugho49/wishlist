@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { BaseRepository } from '@wishlist/common-database';
 import { WishlistEntity } from './wishlist.entity';
 
@@ -31,5 +31,15 @@ export class WishlistRepository extends BaseRepository(WishlistEntity) {
     const countQuery = this.countBy({ ownerId });
 
     return Promise.all([fetchQuery, countQuery]);
+  }
+
+  async findByIdOrThrow(wishlistId: string): Promise<WishlistEntity> {
+    const entity = await this.findOneBy({ id: wishlistId });
+
+    if (!entity) {
+      throw new NotFoundException('Wishlist not found');
+    }
+
+    return entity;
   }
 }

@@ -13,6 +13,7 @@ import { WishlistRepository } from './wishlist.repository';
 import { EventRepository } from '../event/event.repository';
 import { WishlistEntity } from './wishlist.entity';
 import { ItemEntity } from '../item/item.entity';
+import { ICurrentUser } from '../auth';
 
 @Injectable()
 export class WishlistService {
@@ -91,5 +92,17 @@ export class WishlistService {
     await this.wishlistRepository.save(wishlistEntity);
 
     return toMiniWishlistDto(wishlistEntity);
+  }
+
+  async deleteWishlist(param: { currentUser: ICurrentUser; wishlistId: string }): Promise<void> {
+    const { currentUser, wishlistId } = param;
+    const entity = await this.wishlistRepository.findByIdOrThrow(wishlistId);
+    const userCanDeleteList = entity.ownerId === currentUser.id || currentUser.isAdmin;
+
+    if (!userCanDeleteList) {
+      throw new UnauthorizedException('Only the owner of the list can delete it');
+    }
+
+    await this.wishlistRepository.delete({ id: wishlistId });
   }
 }
