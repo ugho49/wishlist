@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { EventService } from './event.service';
 import {
@@ -32,5 +32,10 @@ export class EventController {
   @Post()
   createEvent(@CurrentUser() currentUser: ICurrentUser, @Body() dto: CreateEventInputDto): Promise<MiniEventDto> {
     return this.eventService.create({ dto, currentUser });
+  }
+
+  @Delete('/:id')
+  deleteEvent(@Param('id') eventId: string, @CurrentUser() currentUser: ICurrentUser): Promise<void> {
+    return this.eventService.deleteEvent({ eventId, currentUser });
   }
 }

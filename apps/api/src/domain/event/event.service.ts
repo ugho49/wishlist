@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import {
   CreateEventInputDto,
   createPagedResponse,
@@ -15,6 +15,8 @@ import { uniq } from 'lodash';
 import { AttendeeEntity } from '../attendee/attendee.entity';
 import { EventEntity } from './event.entity';
 import { UserRepository } from '../user/user.repository';
+import { WishlistEntity } from '../wishlist/wishlist.entity';
+import { EntityManager } from 'typeorm';
 
 @Injectable()
 export class EventService {
@@ -91,5 +93,54 @@ export class EventService {
      */
 
     return toMiniEventDto(eventEntity);
+  }
+
+  async deleteEvent(param: { eventId: string; currentUser: ICurrentUser }): Promise<void> {
+    const { currentUser, eventId } = param;
+    const eventEntity = await this.eventRepository.findOneBy({ id: eventId });
+
+    if (!eventId) {
+      throw new NotFoundException('Event not found');
+    }
+
+    const creator = await eventEntity.creator;
+    const userCanDeleteEvent = creator.id === currentUser.id || currentUser.isAdmin;
+
+    if (!userCanDeleteEvent) {
+      throw new UnauthorizedException('Only the creator of the event can delete it');
+    }
+
+    await this.eventRepository.getDataSource().transaction(async (em) => {
+      const wishlists = await eventEntity.wishlists;
+      for (const wishlistEntity of wishlists) {
+        await this.removeEventOfWishlist(em, { wishlistEntity, eventEntity });
+      }
+      await em.delete(EventEntity, { id: eventId });
+    });
+  }
+
+  async removeEventOfWishlist(
+    em: EntityManager,
+    param: { wishlistEntity: WishlistEntity; eventEntity: EventEntity }
+  ): Promise<void> {
+    const { wishlistEntity, eventEntity } = param;
+    const events = await wishlistEntity.events;
+    const eventIds = events.map((e) => e.id);
+
+    if (!eventIds.includes(eventEntity.id)) {
+      return;
+    }
+
+    if (eventIds.length == 1) {
+      // delete list, because a list cannot be alone
+      // she must always be attached to at least one event
+      await em.delete(WishlistEntity, { id: wishlistEntity.id });
+      return;
+    }
+
+    const newEvents = events.filter((e) => e.id !== eventEntity.id);
+    wishlistEntity.events = Promise.resolve(newEvents);
+
+    await em.save(WishlistEntity, wishlistEntity);
   }
 }
