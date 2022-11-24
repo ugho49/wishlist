@@ -1,7 +1,7 @@
 import jwt_decode from 'jwt-decode';
 
 export enum LS_KEYS {
-  ACCESS_TOKEN = 'baby_tracker_access_token',
+  ACCESS_TOKEN = 'wl_v2_access_token',
 }
 
 export class AuthService {
