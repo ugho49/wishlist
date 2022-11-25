@@ -5,11 +5,7 @@ import { Brackets, In } from 'typeorm';
 
 @Injectable()
 export class EventRepository extends BaseRepository(EventEntity) {
-  getUserEventsPaginated(params: {
-    userId: string;
-    pageSize: number;
-    offset: number;
-  }): Promise<[EventEntity[], number]> {
+  findAllForUserid(params: { userId: string; pageSize: number; offset: number }): Promise<[EventEntity[], number]> {
     const { userId, offset, pageSize } = params;
 
     // TODO Change with union all when available -->

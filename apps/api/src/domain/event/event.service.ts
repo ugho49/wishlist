@@ -33,7 +33,7 @@ export class EventService {
 
     const offset = pageSize * (pageNumber || 0);
 
-    const [entities, totalElements] = await this.eventRepository.getUserEventsPaginated({
+    const [entities, totalElements] = await this.eventRepository.findAllForUserid({
       userId: currentUserId,
       pageSize,
       offset,

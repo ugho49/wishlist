@@ -4,6 +4,14 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { ConfigModule, ConfigType } from '@nestjs/config';
 import mailConfig from './mail.config';
+import type { HelperDeclareSpec } from 'handlebars';
+
+const helpers: HelperDeclareSpec = {
+  eq: (a, b) => a === b,
+  eqNum: (a, b) => parseInt(a, 10) === parseInt(b, 10),
+  ne: (a, b) => a !== b,
+  neNum: (a, b) => parseInt(a, 10) !== parseInt(b, 10),
+};
 
 @Module({
   imports: [
@@ -25,7 +33,7 @@ import mailConfig from './mail.config';
         },
         template: {
           dir: __dirname + '/templates',
-          adapter: new HandlebarsAdapter(),
+          adapter: new HandlebarsAdapter(helpers),
           options: {
             strict: true,
           },

@@ -9,19 +9,19 @@ export class UserEntity extends TimestampEntity {
   id: string = uuid();
 
   @Column()
-  email!: string;
+  email: string;
 
   @Column()
-  firstName!: string;
+  firstName: string;
 
   @Column()
-  lastName!: string;
+  lastName: string;
 
   @Column({ type: 'date', nullable: true })
   birthday?: Date | null;
 
   @Column()
-  passwordEnc!: string;
+  passwordEnc: string;
 
   @Column()
   isEnabled: boolean = true;

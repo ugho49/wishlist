@@ -15,6 +15,7 @@ export default registerAs(
     namingStrategy: new SnakeNamingStrategy(),
     autoLoadEntities: true,
     synchronize: false, // Setting synchronize: true shouldn't be used in production - otherwise you can lose production data.
+    migrationsTableName: 'typeorm_migrations',
     migrationsRun: true,
     migrations,
     logging: process.env.DB_VERBOSE === 'true' || false,

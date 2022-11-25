@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { EventService } from './event.service';
+import { EventService } from '../event.service';
 import {
   CreateEventInputDto,
   DetailedEventDto,
@@ -10,7 +10,7 @@ import {
   PagedResponse,
   UpdateEventInputDto,
 } from '@wishlist/common-types';
-import { CurrentUser, ICurrentUser } from '../auth';
+import { CurrentUser, ICurrentUser } from '../../auth';
 
 @ApiTags('Event')
 @Controller('/event')

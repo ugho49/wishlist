@@ -18,10 +18,10 @@ export class AttendeeEntity {
   userId?: string | null;
 
   @ManyToOne(() => EventEntity, (entity) => entity.attendees)
-  readonly event!: Promise<EventEntity>;
+  readonly event: Promise<EventEntity>;
 
   @ManyToOne(() => UserEntity)
-  readonly user?: Promise<UserEntity> | null;
+  readonly user: Promise<UserEntity>;
 
   @Column({ name: 'temp_user_email', type: 'varchar', nullable: true })
   email?: string | null;

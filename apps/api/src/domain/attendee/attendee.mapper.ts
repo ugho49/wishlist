@@ -3,7 +3,7 @@ import { AttendeeEntity } from './attendee.entity';
 import { toMiniUserDto } from '../user/user.mapper';
 
 export async function toAttendeeDto(entity: AttendeeEntity): Promise<AttendeeDto> {
-  const user = entity.user ? await entity.user : null;
+  const user = await entity.user;
 
   return {
     id: entity.id,

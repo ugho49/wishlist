@@ -42,4 +42,24 @@ export class WishlistRepository extends BaseRepository(WishlistEntity) {
 
     return entity;
   }
+
+  findEmailsToNotify(param: { ownerId: string; wishlistId: string }): Promise<string[]> {
+    const { ownerId, wishlistId } = param;
+
+    return this.query(
+      `
+        SELECT u.email
+        FROM wishlist w
+               LEFT OUTER JOIN event_wishlist ew ON w.id = ew.wishlist_id
+               LEFT OUTER JOIN event e on e.id = ew.event_id
+               LEFT OUTER JOIN event_attendee ea on e.id = ea.event_id
+               LEFT OUTER JOIN "user" u on ea.user_id = u.id or e.creator_id = u.id
+               LEFT OUTER JOIN user_email_setting ues on u.id = ues.user_id
+        WHERE w.id = $1
+          AND u.id != $2
+          AND (ues IS NULL OR ues.daily_new_item_notification IS TRUE)
+      `,
+      [wishlistId, ownerId]
+    ).then((list: Array<{ email: string }>) => list.reduce<string[]>((acc, val) => [...acc, val.email], []));
+  }
 }

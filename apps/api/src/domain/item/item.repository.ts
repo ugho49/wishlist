@@ -2,6 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { BaseRepository } from '@wishlist/common-database';
 import { ItemEntity } from './item.entity';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
+import { NewItemsForWishlist } from './item.interface';
+import { camelCaseKeys } from '@wishlist/common';
 
 @Injectable()
 export class ItemRepository extends BaseRepository(ItemEntity) {
@@ -23,5 +25,23 @@ export class ItemRepository extends BaseRepository(ItemEntity) {
 
   updateById(id: string, partialEntity: QueryDeepPartialEntity<ItemEntity>) {
     return this.update({ id }, partialEntity);
+  }
+
+  findAllNewItems(): Promise<NewItemsForWishlist[]> {
+    return this.query(
+      `
+      SELECT i.wishlist_id                          AS wishlist_id,
+             w.title                                AS wishlist_title,
+             w.owner_id                             AS owner_id,
+             CONCAT(u.first_name, ' ', u.last_name) AS owner_name,
+             COUNT(i)                               AS nb_new_items
+      FROM item i
+             INNER JOIN wishlist w ON w.id = i.wishlist_id
+             INNER JOIN "user" u on w.owner_id = u.id
+      WHERE i.is_suggested = FALSE
+        AND i.created_at > NOW() - INTERVAL '1 DAY'
+      GROUP BY wishlist_id, wishlist_title, owner_id, owner_name
+    `
+    ).then((list) => list.map((element: unknown) => camelCaseKeys(element)));
   }
 }
