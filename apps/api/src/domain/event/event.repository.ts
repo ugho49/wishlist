@@ -5,6 +5,23 @@ import { Brackets, In } from 'typeorm';
 
 @Injectable()
 export class EventRepository extends BaseRepository(EventEntity) {
+  findAll(params: { pageSize: number; offset: number }): Promise<[EventEntity[], number]> {
+    const { offset, pageSize } = params;
+
+    const fetchQuery = this.createQueryBuilder('e')
+      .leftJoinAndSelect('e.wishlists', 'w')
+      .leftJoinAndSelect('e.creator', 'c')
+      .leftJoinAndSelect('e.attendees', 'a')
+      .orderBy('e.createdAt', 'DESC')
+      .limit(pageSize)
+      .offset(offset)
+      .getMany();
+
+    const countQuery = this.createQueryBuilder('e').getCount();
+
+    return Promise.all([fetchQuery, countQuery]);
+  }
+
   findAllForUserid(params: { userId: string; pageSize: number; offset: number }): Promise<[EventEntity[], number]> {
     const { userId, offset, pageSize } = params;
 

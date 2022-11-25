@@ -31,6 +31,10 @@ export class EventWithCountsDto {
   updated_at: string;
 }
 
+export class EventWithCountsAndCreatorDto extends EventWithCountsDto {
+  created_by: MiniUserDto;
+}
+
 export class DetailedEventDto extends MiniEventDto {
   created_by: MiniUserDto;
   wishlists: WishlistWithOwnerDto[];

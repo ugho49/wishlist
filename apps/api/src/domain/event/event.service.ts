@@ -4,13 +4,19 @@ import {
   CreateEventInputDto,
   createPagedResponse,
   DetailedEventDto,
+  EventWithCountsAndCreatorDto,
   EventWithCountsDto,
   MiniEventDto,
   PagedResponse,
   UpdateEventInputDto,
 } from '@wishlist/common-types';
 import { DEFAULT_RESULT_NUMBER } from '@wishlist/common';
-import { toDetailedEventDto, toEventWithCountsDtoDto, toMiniEventDto } from './event.mapper';
+import {
+  toDetailedEventDto,
+  toEventWithCountsAndCreatorDto,
+  toEventWithCountsDto,
+  toMiniEventDto,
+} from './event.mapper';
 import { EventRepository } from './event.repository';
 import { ICurrentUser } from '../auth';
 import { uniq } from 'lodash';
@@ -23,6 +29,23 @@ import { EntityManager } from 'typeorm';
 @Injectable()
 export class EventService {
   constructor(private readonly eventRepository: EventRepository, private readonly userRepository: UserRepository) {}
+
+  async getAllByUserIdPaginated(pageNumber: number): Promise<PagedResponse<EventWithCountsAndCreatorDto>> {
+    const pageSize = DEFAULT_RESULT_NUMBER;
+    const offset = pageSize * (pageNumber || 0);
+
+    const [entities, totalElements] = await this.eventRepository.findAll({
+      pageSize,
+      offset,
+    });
+
+    const dtos = await Promise.all(entities.map((entity) => toEventWithCountsAndCreatorDto(entity)));
+
+    return createPagedResponse({
+      resources: dtos,
+      options: { pageSize, totalElements, pageNumber },
+    });
+  }
 
   async getUserEventsPaginated(param: {
     pageNumber: number;
@@ -39,7 +62,7 @@ export class EventService {
       offset,
     });
 
-    const dtos = await Promise.all(entities.map((entity) => toEventWithCountsDtoDto(entity)));
+    const dtos = await Promise.all(entities.map((entity) => toEventWithCountsDto(entity)));
 
     return createPagedResponse({
       resources: dtos,
@@ -52,6 +75,16 @@ export class EventService {
       eventId: param.eventId,
       userId: param.currentUserId,
     });
+
+    if (!entity) {
+      throw new NotFoundException('Event not found');
+    }
+
+    return toDetailedEventDto(entity);
+  }
+
+  async findByIdForAdmin(eventId: string): Promise<DetailedEventDto> {
+    const entity = await this.eventRepository.findOneBy({ id: eventId });
 
     if (!entity) {
       throw new NotFoundException('Event not found');

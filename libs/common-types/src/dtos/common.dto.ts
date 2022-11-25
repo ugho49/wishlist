@@ -1,8 +1,9 @@
-import { IsInt, IsOptional } from 'class-validator';
+import { IsInt, IsOptional, Min } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export class GetPaginationQueryDto {
   @IsInt()
+  @Min(0)
   @IsOptional()
   @Transform(({ value }) => parseInt(value, 10))
   p?: number;
