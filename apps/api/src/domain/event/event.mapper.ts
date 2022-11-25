@@ -9,7 +9,7 @@ export function toMiniEventDto(entity: EventEntity): MiniEventDto {
   return {
     id: entity.id,
     title: entity.title,
-    description: entity.description,
+    description: entity.description || undefined,
     event_date: DateTime.fromJSDate(entity.eventDate).toISODate(),
   };
 }
@@ -18,10 +18,7 @@ export async function toEventWithCountsDtoDto(entity: EventEntity): Promise<Even
   const [wishlists, attendees] = await Promise.all([entity.wishlists, entity.attendees]);
 
   return {
-    id: entity.id,
-    title: entity.title,
-    description: entity.description,
-    event_date: DateTime.fromJSDate(entity.eventDate).toISODate(),
+    ...toMiniEventDto(entity),
     nb_wishlists: wishlists.length,
     nb_attendees: attendees.length,
     created_at: entity.createdAt.toISOString(),
@@ -36,10 +33,7 @@ export async function toDetailedEventDto(entity: EventEntity): Promise<DetailedE
   const attendeesDto = await Promise.all(attendees.map((attendee) => toAttendeeDto(attendee)));
 
   return {
-    id: entity.id,
-    title: entity.title,
-    description: entity.description,
-    event_date: DateTime.fromJSDate(entity.eventDate).toISODate(),
+    ...toMiniEventDto(entity),
     created_by: toMiniUserDto(creator),
     wishlists: wishlistsDto,
     attendees: attendeesDto,

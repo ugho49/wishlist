@@ -7,8 +7,8 @@ export async function toAttendeeDto(entity: AttendeeEntity): Promise<AttendeeDto
 
   return {
     id: entity.id,
-    user: user && toMiniUserDto(user),
-    pending_email: entity.email,
+    user: user ? toMiniUserDto(user) : undefined,
+    pending_email: entity.email || undefined,
     role: entity.role,
   };
 }

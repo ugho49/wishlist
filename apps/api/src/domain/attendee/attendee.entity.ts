@@ -11,23 +11,23 @@ export class AttendeeEntity {
 
   @Column()
   @RelationId((entity: AttendeeEntity) => entity.event)
-  eventId: string;
+  eventId!: string;
 
-  @Column()
+  @Column({ type: 'varchar', nullable: true })
   @RelationId((entity: AttendeeEntity) => entity.user)
-  userId?: string;
+  userId?: string | null;
 
   @ManyToOne(() => EventEntity, (entity) => entity.attendees)
-  readonly event: Promise<EventEntity>;
+  readonly event!: Promise<EventEntity>;
 
   @ManyToOne(() => UserEntity)
-  readonly user?: Promise<UserEntity | null>;
+  readonly user?: Promise<UserEntity> | null;
 
-  @Column({ name: 'temp_user_email' })
-  email?: string;
+  @Column({ name: 'temp_user_email', type: 'varchar', nullable: true })
+  email?: string | null;
 
   @Column()
-  role: AttendeeRole;
+  role!: AttendeeRole;
 
   static createFromExistingUser(param: { eventId: string; userId: string; role: AttendeeRole }): AttendeeEntity {
     const entity = new AttendeeEntity();

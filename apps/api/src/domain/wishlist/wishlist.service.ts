@@ -72,7 +72,7 @@ export class WishlistService {
       title: dto.title,
       description: dto.description,
       ownerId: currentUserId,
-      hideItems: dto.hide_items,
+      hideItems: dto.hide_items === undefined ? true : dto.hide_items,
     });
 
     const itemEntities = dto.items.map((item) =>

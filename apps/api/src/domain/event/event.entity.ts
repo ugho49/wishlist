@@ -11,13 +11,13 @@ export class EventEntity extends TimestampEntity {
   id: string = uuid();
 
   @Column()
-  title: string;
+  title!: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  description?: string | null;
 
   @Column()
-  description?: string;
-
-  @Column()
-  eventDate: Date;
+  eventDate!: Date;
 
   @ManyToMany(() => WishlistEntity, (entity) => entity.events)
   @JoinTable({
@@ -25,19 +25,19 @@ export class EventEntity extends TimestampEntity {
     joinColumn: { name: 'event_id' },
     inverseJoinColumn: { name: 'wishlist_id' },
   })
-  wishlists: Promise<WishlistEntity[]>;
+  wishlists!: Promise<WishlistEntity[]>;
 
   @OneToMany(() => AttendeeEntity, (entity) => entity.event, {
     cascade: true,
   })
-  attendees: Promise<AttendeeEntity[]>;
+  attendees!: Promise<AttendeeEntity[]>;
 
   @Column()
   @RelationId((entity: EventEntity) => entity.creator)
-  creatorId: string;
+  creatorId!: string;
 
   @ManyToOne(() => UserEntity)
-  readonly creator: Promise<UserEntity>;
+  readonly creator!: Promise<UserEntity>;
 
   static create(param: { title: string; description?: string; eventDate: Date; creatorId: string }): EventEntity {
     const entity = new EventEntity();

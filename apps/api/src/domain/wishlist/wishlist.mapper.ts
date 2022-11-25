@@ -18,7 +18,7 @@ export function toMiniWishlistDto(entity: WishlistEntity): MiniWishlistDto {
   return {
     id: entity.id,
     title: entity.title,
-    description: entity.description,
+    description: entity.description || undefined,
   };
 }
 

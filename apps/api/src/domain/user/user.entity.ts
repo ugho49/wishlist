@@ -9,19 +9,19 @@ export class UserEntity extends TimestampEntity {
   id: string = uuid();
 
   @Column()
-  email: string;
+  email!: string;
 
   @Column()
-  firstName: string;
+  firstName!: string;
 
   @Column()
-  lastName: string;
+  lastName!: string;
+
+  @Column({ type: 'date', nullable: true })
+  birthday?: Date | null;
 
   @Column()
-  birthday?: Date;
-
-  @Column()
-  passwordEnc: string;
+  passwordEnc!: string;
 
   @Column()
   isEnabled: boolean = true;
@@ -29,11 +29,11 @@ export class UserEntity extends TimestampEntity {
   @Column('text', { array: true })
   authorities: Authorities[] = [Authorities.ROLE_USER];
 
-  @Column()
-  lastIp?: string;
+  @Column({ type: 'varchar', nullable: true })
+  lastIp?: string | null;
 
-  @Column()
-  lastConnectedAt?: Date;
+  @Column({ type: 'timestamptz', nullable: true })
+  lastConnectedAt?: Date | null;
 
   public static create(props: {
     email: string;

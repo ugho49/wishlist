@@ -10,36 +10,36 @@ export class ItemEntity extends TimestampEntity {
   id: string = uuid();
 
   @Column()
-  name: string;
+  name!: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  description?: string | null;
+
+  @Column({ type: 'varchar', nullable: true })
+  url?: string | null;
 
   @Column()
-  description?: string;
+  isSuggested!: boolean;
 
-  @Column()
-  url?: string;
+  @Column({ type: 'integer', nullable: true })
+  score?: number | null;
 
-  @Column()
-  isSuggested: boolean;
-
-  @Column()
-  score?: number;
-
-  @Column()
-  takenAt?: Date;
+  @Column({ type: 'timestamptz', nullable: true })
+  takenAt?: Date | null;
 
   @ManyToOne(() => WishlistEntity)
-  readonly wishlist: Promise<WishlistEntity>;
+  readonly wishlist!: Promise<WishlistEntity>;
 
   @Column()
   @RelationId((entity: ItemEntity) => entity.wishlist)
-  wishlistId: string;
+  wishlistId!: string;
 
   @ManyToOne(() => UserEntity)
-  readonly taker?: Promise<UserEntity>;
+  readonly taker?: Promise<UserEntity> | null;
 
   @Column()
   @RelationId((entity: ItemEntity) => entity.taker)
-  takerId?: string;
+  takerId?: string | null;
 
   static create(param: {
     name: string;

@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { AttendeeRepository } from './attendee.repository';
 import { ICurrentUser } from '../auth';
-import { AddEventAttendeeForEventInputDto, AttendeeDto } from '@wishlist/common-types';
+import { AddEventAttendeeForEventInputDto, AttendeeDto, AttendeeRole } from '@wishlist/common-types';
 import { EventRepository } from '../event/event.repository';
 import { UserRepository } from '../user/user.repository';
 import { AttendeeEntity } from './attendee.entity';
@@ -47,7 +47,7 @@ export class AttendeeService {
 
     const user = await this.userRepository.findByEmail(dto.email);
 
-    const baseParams = { eventId: eventEntity.id, role: dto.role };
+    const baseParams = { eventId: eventEntity.id, role: dto.role || AttendeeRole.USER };
 
     const attendeeEntity = user
       ? AttendeeEntity.createFromExistingUser({ ...baseParams, userId: user.id })

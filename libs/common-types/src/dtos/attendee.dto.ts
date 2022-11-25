@@ -20,7 +20,7 @@ export class AddEventAttendeeInputDto {
 
   @IsEnum(AttendeeRole)
   @IsOptional()
-  role?: AttendeeRole = AttendeeRole.USER;
+  role?: AttendeeRole;
 }
 
 export class AddEventAttendeeForEventInputDto extends AddEventAttendeeInputDto {

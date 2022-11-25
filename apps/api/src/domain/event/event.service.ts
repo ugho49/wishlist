@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import {
+  AttendeeRole,
   CreateEventInputDto,
   createPagedResponse,
   DetailedEventDto,
@@ -74,7 +75,7 @@ export class EventService {
 
     for (const attendee of attendees) {
       const user = existingUsers.find((u) => u.email === attendee.email);
-      const baseParams = { eventId: eventEntity.id, role: attendee.role };
+      const baseParams = { eventId: eventEntity.id, role: attendee.role || AttendeeRole.USER };
       const attendeeEntity = user
         ? AttendeeEntity.createFromExistingUser({ ...baseParams, userId: user.id })
         : AttendeeEntity.createFromNonExistingUser({ ...baseParams, email: attendee.email });
@@ -99,7 +100,7 @@ export class EventService {
     const { currentUser, eventId } = param;
     const eventEntity = await this.eventRepository.findOneBy({ id: eventId });
 
-    if (!eventId) {
+    if (!eventEntity) {
       throw new NotFoundException('Event not found');
     }
 

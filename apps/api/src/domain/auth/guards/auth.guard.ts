@@ -9,7 +9,7 @@ export class AuthGuard extends PassportAuthGuard('jwt') {
     super();
   }
 
-  canActivate(context: ExecutionContext) {
+  override canActivate(context: ExecutionContext) {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),
@@ -22,7 +22,8 @@ export class AuthGuard extends PassportAuthGuard('jwt') {
     return super.canActivate(context);
   }
 
-  handleRequest(err, user, info, context: ExecutionContext) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  override handleRequest(err: any, user: any, info: any) {
     // You can throw an exception based on either "info" or "err" arguments
     if (err || !user) {
       throw err || new UnauthorizedException(info?.name || 'Invalid token');
