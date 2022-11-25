@@ -56,9 +56,9 @@ export class ItemService {
 
     await this.itemRepository.updateById(itemId, {
       name: dto.name,
-      description: dto.description,
-      url: dto.url,
-      score: dto.score,
+      description: dto.description || null,
+      url: dto.url || null,
+      score: dto.score || null,
     });
   }
 

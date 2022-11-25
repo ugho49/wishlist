@@ -45,7 +45,7 @@ export class UserService {
     await this.userRepository.updateById(currentUserId, {
       firstName: dto.firstname,
       lastName: dto.lastname,
-      birthday: dto.birthday,
+      birthday: dto.birthday || null,
     });
   }
 

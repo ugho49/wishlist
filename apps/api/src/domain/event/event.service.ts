@@ -7,6 +7,7 @@ import {
   EventWithCountsDto,
   MiniEventDto,
   PagedResponse,
+  UpdateEventInputDto,
 } from '@wishlist/common-types';
 import { DEFAULT_RESULT_NUMBER } from '@wishlist/common';
 import { toDetailedEventDto, toEventWithCountsDtoDto, toMiniEventDto } from './event.mapper';
@@ -107,6 +108,7 @@ export class EventService {
     const creator = await eventEntity.creator;
     const userCanDeleteEvent = creator.id === currentUser.id || currentUser.isAdmin;
 
+    // TODO: handle role EDITOR or ADMIN
     if (!userCanDeleteEvent) {
       throw new UnauthorizedException('Only the creator of the event can delete it');
     }
@@ -118,6 +120,33 @@ export class EventService {
       }
       await em.delete(EventEntity, { id: eventId });
     });
+  }
+
+  async updateEvent(param: { eventId: string; currentUser: ICurrentUser; dto: UpdateEventInputDto }): Promise<void> {
+    const { currentUser, eventId, dto } = param;
+
+    const eventEntity = await this.eventRepository.findOneBy({ id: eventId });
+
+    if (!eventEntity) {
+      throw new NotFoundException('Event not found');
+    }
+
+    const creator = await eventEntity.creator;
+    const userCanUpdateEvent = creator.id === currentUser.id || currentUser.isAdmin;
+
+    // TODO: handle role EDITOR or ADMIN
+    if (!userCanUpdateEvent) {
+      throw new UnauthorizedException('Only the creator of the event can update it');
+    }
+
+    await this.eventRepository.update(
+      { id: eventId },
+      {
+        title: dto.title,
+        description: dto.description || null,
+        eventDate: dto.event_date,
+      }
+    );
   }
 
   async removeEventOfWishlist(

@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { EventService } from './event.service';
 import {
@@ -8,6 +8,7 @@ import {
   GetPaginationQueryDto,
   MiniEventDto,
   PagedResponse,
+  UpdateEventInputDto,
 } from '@wishlist/common-types';
 import { CurrentUser, ICurrentUser } from '../auth';
 
@@ -32,6 +33,15 @@ export class EventController {
   @Post()
   createEvent(@CurrentUser() currentUser: ICurrentUser, @Body() dto: CreateEventInputDto): Promise<MiniEventDto> {
     return this.eventService.create({ dto, currentUser });
+  }
+
+  @Put('/:id')
+  updateEvent(
+    @Param('id') eventId: string,
+    @CurrentUser() currentUser: ICurrentUser,
+    @Body() dto: UpdateEventInputDto
+  ): Promise<void> {
+    return this.eventService.updateEvent({ eventId, currentUser, dto });
   }
 
   @Delete('/:id')

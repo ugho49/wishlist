@@ -39,7 +39,7 @@ export class DetailedEventDto extends MiniEventDto {
   updated_at: string;
 }
 
-export class CreateEventInputDto {
+export class UpdateEventInputDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(100)
@@ -54,7 +54,9 @@ export class CreateEventInputDto {
   @IsNotEmpty()
   @Transform(({ value }) => new Date(value))
   event_date: Date;
+}
 
+export class CreateEventInputDto extends UpdateEventInputDto {
   @ArrayNotEmpty()
   @ValidateNested({ each: true })
   @Type(() => AddEventAttendeeInputDto)
