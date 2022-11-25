@@ -129,4 +129,68 @@ export class WishlistService {
 
     await this.wishlistRepository.delete({ id: wishlistId });
   }
+
+  async linkWishlistToAnEvent(param: { eventId: string; currentUserId: string; wishlistId: string }): Promise<void> {
+    const { currentUserId, wishlistId, eventId } = param;
+
+    const wishlistEntity = await this.wishlistRepository.findByIdOrThrow(wishlistId);
+    const isOwner = wishlistEntity.ownerId === currentUserId;
+
+    if (!isOwner) {
+      throw new UnauthorizedException('Only the owner of the list can update it');
+    }
+
+    const events = await wishlistEntity.events;
+    const eventIds = events.map((e) => e.id);
+
+    if (eventIds.length === 5) {
+      throw new UnauthorizedException('You cannot link your list to more than 5 events');
+    }
+
+    const eventEntity = await this.eventRepository.findByIdAndUserId({ eventId, userId: currentUserId });
+
+    if (!eventEntity) {
+      throw new NotFoundException('Event not found');
+    }
+
+    if (eventIds.includes(eventId)) {
+      throw new UnauthorizedException('This wishlist is already attached to this event');
+    }
+
+    wishlistEntity.events = Promise.resolve([...events, eventEntity]);
+
+    await this.wishlistRepository.save(wishlistEntity);
+  }
+
+  async unlinkWishlistToAnEvent(param: { eventId: string; currentUserId: string; wishlistId: string }): Promise<void> {
+    const { currentUserId, wishlistId, eventId } = param;
+
+    const entity = await this.wishlistRepository.findByIdOrThrow(wishlistId);
+
+    /*
+            WishlistEntity entity = wishlistRepository.findById(wishlistId).orElseThrow(() -> new WishlistNotFoundException(wishlistId));
+
+        if (!entity.isOwner(userId)) {
+            // Only the owner of the list can update it
+            throw new UpdateWishlistNotAllowedException();
+        }
+
+        if (!entity.containEvent(eventId)) {
+            // This wishlist is not attach to this event
+            throw new WishlistNotAttachException();
+        }
+
+        if (entity.getEvents().size() == 1) {
+            // You cannot unlink this wishlist for this event, because she have only one event. However you can delete it if you want.
+            throw new WishlistUnlinkEventException();
+        }
+
+        final EventEntity event = eventRepository.findById(eventId).orElseThrow(() -> new EventNotFoundException(eventId));
+        entity.removeEvent(event);
+        wishlistRepository.save(entity);
+     */
+
+    // TODO
+    return Promise.resolve(undefined);
+  }
 }

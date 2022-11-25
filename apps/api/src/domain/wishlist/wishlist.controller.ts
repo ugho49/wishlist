@@ -1,11 +1,12 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { WishlistService } from './wishlist.service';
 import { CurrentUser, ICurrentUser } from '../auth';
 import {
   CreateWishlistInputDto,
   DetailedWishlistDto,
   GetPaginationQueryDto,
+  LinkUnlinkWishlistInputDto,
   MiniWishlistDto,
   PagedResponse,
   UpdateWishlistInputDto,
@@ -53,5 +54,25 @@ export class WishlistController {
   @Delete('/:id')
   deleteWishlist(@Param('id') wishlistId: string, @CurrentUser() currentUser: ICurrentUser): Promise<void> {
     return this.wishlistService.deleteWishlist({ wishlistId, currentUser });
+  }
+
+  @Post('/:id/link-event')
+  @ApiOperation({ summary: 'This endpoint has for purpose to link a wishlist for a given event' })
+  linkWishlistToAnEvent(
+    @Param('id') wishlistId: string,
+    @Body() dto: LinkUnlinkWishlistInputDto,
+    @CurrentUser('id') currentUserId: string
+  ): Promise<void> {
+    return this.wishlistService.linkWishlistToAnEvent({ wishlistId, currentUserId, eventId: dto.event_id });
+  }
+
+  @Post('/:id/unlink-event')
+  @ApiOperation({ summary: 'This endpoint has for purpose to unlink a wishlist for a given event' })
+  unlinkWishlistToAnEvent(
+    @Param('id') wishlistId: string,
+    @Body() dto: LinkUnlinkWishlistInputDto,
+    @CurrentUser('id') currentUserId: string
+  ): Promise<void> {
+    return this.wishlistService.unlinkWishlistToAnEvent({ wishlistId, currentUserId, eventId: dto.event_id });
   }
 }
