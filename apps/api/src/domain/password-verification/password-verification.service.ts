@@ -10,6 +10,7 @@ import { PasswordManager } from '../auth';
 import passwordVerificationConfig from './password-verification.config';
 import { PasswordVerificationRepository } from './password-verification.repository';
 import { UserRepository } from '../user/user.repository';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class PasswordVerificationService {
@@ -17,7 +18,8 @@ export class PasswordVerificationService {
     private readonly verificationEntityRepository: PasswordVerificationRepository,
     private readonly userRepository: UserRepository,
     @Inject(passwordVerificationConfig.KEY)
-    private readonly config: ConfigType<typeof passwordVerificationConfig>
+    private readonly config: ConfigType<typeof passwordVerificationConfig>,
+    private readonly mailerService: MailerService
   ) {}
 
   async sendResetEmail(dto: ResetPasswordInputDto) {
@@ -45,9 +47,18 @@ export class PasswordVerificationService {
       expiredAt: tokenExpireDate.toJSDate(),
     });
 
-    await this.verificationEntityRepository.insert(entity);
+    await this.verificationEntityRepository.transaction(async (em) => {
+      await em.insert(PasswordVerificationEntity, entity);
 
-    // TODO: sendResetPasswordMail(body.getEmail(), token);
+      await this.mailerService.sendMail({
+        to: dto.email,
+        subject: '[Wishlist] Reinitialiser le mot de passe',
+        template: 'reset-password',
+        context: {
+          url: this.generateResetPasswordUrl({ email: userEntity.email, token }),
+        },
+      });
+    });
   }
 
   async resetPassword(dto: ResetPasswordValidationInputDto) {
@@ -72,5 +83,12 @@ export class PasswordVerificationService {
       );
       await em.delete(PasswordVerificationEntity, { id: entity.id });
     });
+  }
+
+  private generateResetPasswordUrl(param: { email: string; token: string }) {
+    const url = new URL(this.config.renewUrl);
+    url.searchParams.append('email', param.email);
+    url.searchParams.append('token', param.token);
+    return url.toString();
   }
 }

@@ -19,7 +19,13 @@
             "name": "@nestjs/swagger/plugin"
           }
         ],
-        "assets": []
+        "assets": [
+          {
+            "input": "apps/api/templates",
+            "glob": "**/*.hbs",
+            "output": "templates"
+          }
+        ]
       },
       "configurations": {
         "production": {

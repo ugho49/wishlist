@@ -56,7 +56,7 @@ export class AttendeeService {
     await this.attendeeRepository.insert(attendeeEntity);
 
     /*
-      TODO: -->
+      TODO: --> Send Emails
       if (user) {
           sendEmailForExistingAttendee(Collections.singletonList(body.getEmail()), event, currentUser);
       } else {
