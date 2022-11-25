@@ -41,6 +41,7 @@ export class UserEntity extends TimestampEntity {
     lastName: string;
     birthday?: Date;
     passwordEnc: string;
+    ip: string;
   }): UserEntity {
     const entity = new UserEntity();
     entity.email = props.email;
@@ -48,6 +49,8 @@ export class UserEntity extends TimestampEntity {
     entity.lastName = props.lastName;
     entity.birthday = props.birthday;
     entity.passwordEnc = props.passwordEnc;
+    entity.lastIp = props.ip;
+    entity.lastConnectedAt = new Date();
     return entity;
   }
 
