@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { WishlistService } from './wishlist.service';
 import { CurrentUser, ICurrentUser } from '../auth';
@@ -8,6 +8,7 @@ import {
   GetPaginationQueryDto,
   MiniWishlistDto,
   PagedResponse,
+  UpdateWishlistInputDto,
   WishlistWithEventsDto,
 } from '@wishlist/common-types';
 
@@ -38,6 +39,15 @@ export class WishlistController {
     @Body() dto: CreateWishlistInputDto
   ): Promise<MiniWishlistDto> {
     return this.wishlistService.create({ dto, currentUserId });
+  }
+
+  @Put('/:id')
+  updateWishlist(
+    @Param('id') wishlistId: string,
+    @CurrentUser() currentUser: ICurrentUser,
+    @Body() dto: UpdateWishlistInputDto
+  ): Promise<void> {
+    return this.wishlistService.updateWishlist({ wishlistId, currentUser, dto });
   }
 
   @Delete('/:id')

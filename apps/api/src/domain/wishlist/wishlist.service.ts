@@ -5,6 +5,7 @@ import {
   DetailedWishlistDto,
   MiniWishlistDto,
   PagedResponse,
+  UpdateWishlistInputDto,
   WishlistWithEventsDto,
 } from '@wishlist/common-types';
 import { toDetailedWishlistDto, toMiniWishlistDto, toWishlistWithEventsDto } from './wishlist.mapper';
@@ -92,6 +93,29 @@ export class WishlistService {
     await this.wishlistRepository.save(wishlistEntity);
 
     return toMiniWishlistDto(wishlistEntity);
+  }
+
+  async updateWishlist(param: {
+    currentUser: ICurrentUser;
+    wishlistId: string;
+    dto: UpdateWishlistInputDto;
+  }): Promise<void> {
+    const { currentUser, wishlistId, dto } = param;
+
+    const entity = await this.wishlistRepository.findByIdOrThrow(wishlistId);
+    const isOwner = entity.ownerId === currentUser.id;
+
+    if (!isOwner) {
+      throw new UnauthorizedException('Only the owner of the list can update it');
+    }
+
+    await this.wishlistRepository.update(
+      { id: wishlistId },
+      {
+        title: dto.title,
+        description: dto.description || null,
+      }
+    );
   }
 
   async deleteWishlist(param: { currentUser: ICurrentUser; wishlistId: string }): Promise<void> {

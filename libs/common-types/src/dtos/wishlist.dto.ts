@@ -47,7 +47,7 @@ export class WishlistWithOwnerDto extends MiniWishlistDto {
   updated_at: string;
 }
 
-export class CreateWishlistInputDto {
+export class UpdateWishlistInputDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(100)
@@ -56,7 +56,9 @@ export class CreateWishlistInputDto {
   @IsString()
   @IsOptional()
   description?: string;
+}
 
+export class CreateWishlistInputDto extends UpdateWishlistInputDto {
   @IsBoolean()
   @IsOptional()
   hide_items?: boolean;
