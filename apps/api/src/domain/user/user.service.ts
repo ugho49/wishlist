@@ -1,4 +1,10 @@
-import { BadRequestException, Injectable, UnauthorizedException, UnprocessableEntityException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  UnauthorizedException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { UserEntity } from './user.entity';
 import {
   ChangeUserPasswordInputDto,
@@ -15,10 +21,13 @@ import { toMiniUserDto, toUserDto } from './user.mapper';
 import { isEmpty } from 'lodash';
 import { DEFAULT_RESULT_NUMBER } from '@wishlist/common';
 import { UserRepository } from './user.repository';
+import { UserMailer } from './user.mailer';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly userRepository: UserRepository) {}
+  private readonly logger = new Logger(UserService.name);
+
+  constructor(private readonly userRepository: UserRepository, private readonly userMailer: UserMailer) {}
 
   findById(id: string): Promise<UserDto> {
     return this.userRepository.findOneByOrFail({ id }).then((entity) => toUserDto(entity));
@@ -33,7 +42,32 @@ export class UserService {
         passwordEnc: await PasswordManager.hash(dto.password),
       });
 
-      return await this.userRepository.save(entity).then((e) => toUserDto(e));
+      const userDto = await this.userRepository.save(entity).then((e) => toUserDto(e));
+
+      /*
+      TODO -->
+                  var userEntity = new UserEntity(body.getFirstname(), body.getLastname(), body.getEmail(), passwordEnc);
+            RequestUtil.getCurrentIp().ifPresent(lastIp -> {
+                userEntity.setLastIp(lastIp);
+                userEntity.setLastConnectedAt(Instant.now());
+            });
+            userRepository.save(userEntity);
+            attendeeRepository.findAllByEmail(body.getEmail()).forEach(attendee -> {
+                attendee.setEmail(null);
+                attendee.setUser(userEntity);
+                attendeeRepository.save(attendee);
+            });
+            var emailSetting = new UserEmailSettingEntity(userEntity.getId());
+            userEmailSettingRepository.save(emailSetting);
+       */
+
+      try {
+        await this.userMailer.sendWelcomeMail({ email: entity.email, firstName: entity.firstName });
+      } catch (e) {
+        this.logger.error('Fail to send welcome mail to user');
+      }
+
+      return userDto;
     } catch (e) {
       throw new UnprocessableEntityException();
     }
