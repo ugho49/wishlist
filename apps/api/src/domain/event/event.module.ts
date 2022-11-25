@@ -6,11 +6,12 @@ import { EventService } from './event.service';
 import { EventRepository } from './event.repository';
 import { UserModule } from '../user/user.module';
 import { EventAdminController } from './controllers/event-admin.controller';
+import { EventMailer } from './event.mailer';
 
 @Module({
   imports: [TypeOrmModule.forFeature([EventEntity]), UserModule],
   controllers: [EventController, EventAdminController],
-  providers: [EventService, EventRepository],
-  exports: [EventRepository],
+  providers: [EventService, EventRepository, EventMailer],
+  exports: [EventRepository, EventMailer],
 })
 export class EventModule {}

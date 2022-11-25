@@ -5,7 +5,11 @@ export class PasswordManager {
     return argon2.hash(plainPassword);
   }
 
-  public static verify(hash: string, plainPassword: string): Promise<boolean> {
-    return argon2.verify(hash, plainPassword);
+  public static async verify(hash: string, plainPassword: string): Promise<boolean> {
+    try {
+      return await argon2.verify(hash.replace('{argon2}', ''), plainPassword);
+    } catch (e) {
+      return false;
+    }
   }
 }

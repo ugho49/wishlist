@@ -3,7 +3,7 @@ import { Cron } from '@nestjs/schedule';
 import { ItemRepository } from './item.repository';
 import { NewItemsForWishlist } from './item.interface';
 import { WishlistRepository } from '../wishlist/wishlist.repository';
-import { MailerService } from '@nestjs-modules/mailer';
+import { ItemMailer } from './item.mailer';
 
 @Injectable()
 export class ItemScheduler {
@@ -12,7 +12,7 @@ export class ItemScheduler {
   constructor(
     private readonly itemRepository: ItemRepository,
     private readonly wishlistRepository: WishlistRepository,
-    private readonly mailerService: MailerService
+    private readonly itemMailer: ItemMailer
   ) {}
 
   // Fire at 10:15 AM every day
@@ -44,16 +44,11 @@ export class ItemScheduler {
 
       this.logger.log(`Notify ${allEmailToNotify.length} peoples for new items in wishlist ${dto.wishlistId}`);
 
-      await this.mailerService.sendMail({
-        to: allEmailToNotify,
-        subject: '[Wishlist] Des souhaits ont été ajoutés !!',
-        template: 'new-items-reminder',
-        context: {
-          wishlistTitle: dto.wishlistTitle,
-          wishlistUrl: `https://wishlistapp.fr/wishlists/${dto.wishlistId}`,
-          nbItems: dto.nbNewItems,
-          userName: dto.ownerName,
-        },
+      await this.itemMailer.sendNotifyEmail({
+        emails: allEmailToNotify,
+        nbNewItems: dto.nbNewItems,
+        wishlist: { id: dto.wishlistId, title: dto.wishlistTitle },
+        ownerName: dto.ownerName,
       });
     } catch (e) {
       this.logger.error(`Fail to notify new items for wishlist ${dto.wishlistId}`, e);

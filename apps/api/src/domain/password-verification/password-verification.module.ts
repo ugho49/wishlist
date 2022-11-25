@@ -7,6 +7,7 @@ import { ConfigModule } from '@nestjs/config';
 import passwordVerificationConfig from './password-verification.config';
 import { UserModule } from '../user/user.module';
 import { PasswordVerificationRepository } from './password-verification.repository';
+import { PasswordVerificationMailer } from './password-verification.mailer';
 
 @Module({
   imports: [
@@ -15,6 +16,6 @@ import { PasswordVerificationRepository } from './password-verification.reposito
     ConfigModule.forFeature(passwordVerificationConfig),
   ],
   controllers: [PasswordVerificationController],
-  providers: [PasswordVerificationService, PasswordVerificationRepository],
+  providers: [PasswordVerificationService, PasswordVerificationRepository, PasswordVerificationMailer],
 })
 export class PasswordVerificationModule {}

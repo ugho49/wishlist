@@ -10,7 +10,7 @@ import { PasswordManager } from '../auth';
 import passwordVerificationConfig from './password-verification.config';
 import { PasswordVerificationRepository } from './password-verification.repository';
 import { UserRepository } from '../user/user.repository';
-import { MailerService } from '@nestjs-modules/mailer';
+import { PasswordVerificationMailer } from './password-verification.mailer';
 
 @Injectable()
 export class PasswordVerificationService {
@@ -19,7 +19,7 @@ export class PasswordVerificationService {
     private readonly userRepository: UserRepository,
     @Inject(passwordVerificationConfig.KEY)
     private readonly config: ConfigType<typeof passwordVerificationConfig>,
-    private readonly mailerService: MailerService
+    private readonly mailerService: PasswordVerificationMailer
   ) {}
 
   async sendResetEmail(dto: ResetPasswordInputDto) {
@@ -50,13 +50,9 @@ export class PasswordVerificationService {
     await this.verificationEntityRepository.transaction(async (em) => {
       await em.insert(PasswordVerificationEntity, entity);
 
-      await this.mailerService.sendMail({
-        to: dto.email,
-        subject: '[Wishlist] Reinitialiser le mot de passe',
-        template: 'reset-password',
-        context: {
-          url: this.generateResetPasswordUrl({ email: userEntity.email, token }),
-        },
+      await this.mailerService.sendResetEmail({
+        email: dto.email,
+        url: this.generateResetPasswordUrl({ email: userEntity.email, token }),
       });
     });
   }

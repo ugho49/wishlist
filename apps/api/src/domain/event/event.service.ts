@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import {
   AttendeeRole,
   CreateEventInputDto,
@@ -25,10 +25,17 @@ import { EventEntity } from './event.entity';
 import { UserRepository } from '../user/user.repository';
 import { WishlistEntity } from '../wishlist/wishlist.entity';
 import { EntityManager } from 'typeorm';
+import { EventMailer } from './event.mailer';
 
 @Injectable()
 export class EventService {
-  constructor(private readonly eventRepository: EventRepository, private readonly userRepository: UserRepository) {}
+  private readonly logger = new Logger(EventService.name);
+
+  constructor(
+    private readonly eventRepository: EventRepository,
+    private readonly userRepository: UserRepository,
+    private readonly eventMailer: EventMailer
+  ) {}
 
   async getAllByUserIdPaginated(pageNumber: number): Promise<PagedResponse<EventWithCountsAndCreatorDto>> {
     const pageSize = DEFAULT_RESULT_NUMBER;
@@ -121,11 +128,28 @@ export class EventService {
 
     await this.eventRepository.save(eventEntity);
 
-    /*
-    TODO: -->
-        sendEmailForExistingAttendee(existingAttendeeEmails, event, currentUser);
-        sendEmailForNotExistingAttendee(notExistingAttendeeEmails, event, currentUser);
-     */
+    const creator = await this.userRepository.findOneByOrFail({ id: currentUser.id });
+
+    const existingAttendeeEmails = existingUsers.map((e) => e.email);
+    const notExistingAttendeeEmails = attendeeEntities
+      .filter((a) => a.email !== undefined && a.email !== null)
+      .map((a) => a.email) as string[];
+
+    try {
+      await this.eventMailer.sendEmailForExistingAttendee({
+        emails: existingAttendeeEmails,
+        event: eventEntity,
+        creator,
+      });
+
+      await this.eventMailer.sendEmailForNotExistingAttendee({
+        emails: notExistingAttendeeEmails,
+        event: eventEntity,
+        creator,
+      });
+    } catch (e) {
+      this.logger.error('Fail to send mail to event attendees', e);
+    }
 
     return toMiniEventDto(eventEntity);
   }

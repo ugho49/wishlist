@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  Logger,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -12,13 +13,17 @@ import { EventRepository } from '../event/event.repository';
 import { UserRepository } from '../user/user.repository';
 import { AttendeeEntity } from './attendee.entity';
 import { toAttendeeDto } from './attendee.mapper';
+import { EventMailer } from '../event/event.mailer';
 
 @Injectable()
 export class AttendeeService {
+  private readonly logger = new Logger(AttendeeService.name);
+
   constructor(
     private readonly attendeeRepository: AttendeeRepository,
     private readonly eventRepository: EventRepository,
-    private readonly userRepository: UserRepository
+    private readonly userRepository: UserRepository,
+    private readonly eventMailer: EventMailer
   ) {}
 
   async addAttendee(param: { currentUser: ICurrentUser; dto: AddEventAttendeeForEventInputDto }): Promise<AttendeeDto> {
@@ -55,14 +60,16 @@ export class AttendeeService {
 
     await this.attendeeRepository.insert(attendeeEntity);
 
-    /*
-      TODO: --> Send Emails
+    try {
       if (user) {
-          sendEmailForExistingAttendee(Collections.singletonList(body.getEmail()), event, currentUser);
+        await this.eventMailer.sendEmailForExistingAttendee({ emails: dto.email, event: eventEntity, creator });
       } else {
-          sendEmailForNotExistingAttendee(Collections.singletonList(body.getEmail()), event, currentUser);
+        await this.eventMailer.sendEmailForNotExistingAttendee({ emails: dto.email, event: eventEntity, creator });
       }
-     */
+    } catch (e) {
+      this.logger.error('Fail to send mail to new attendee', e);
+    }
+
     return toAttendeeDto(attendeeEntity);
   }
 
