@@ -165,32 +165,28 @@ export class WishlistService {
   async unlinkWishlistToAnEvent(param: { eventId: string; currentUserId: string; wishlistId: string }): Promise<void> {
     const { currentUserId, wishlistId, eventId } = param;
 
-    const entity = await this.wishlistRepository.findByIdOrThrow(wishlistId);
+    const wishlistEntity = await this.wishlistRepository.findByIdOrThrow(wishlistId);
+    const isOwner = wishlistEntity.ownerId === currentUserId;
 
-    /*
-            WishlistEntity entity = wishlistRepository.findById(wishlistId).orElseThrow(() -> new WishlistNotFoundException(wishlistId));
+    if (!isOwner) {
+      throw new UnauthorizedException('Only the owner of the list can update it');
+    }
 
-        if (!entity.isOwner(userId)) {
-            // Only the owner of the list can update it
-            throw new UpdateWishlistNotAllowedException();
-        }
+    const events = await wishlistEntity.events;
+    const eventIds = events.map((e) => e.id);
 
-        if (!entity.containEvent(eventId)) {
-            // This wishlist is not attach to this event
-            throw new WishlistNotAttachException();
-        }
+    if (!eventIds.includes(eventId)) {
+      throw new UnauthorizedException('This wishlist is not attach to this event');
+    }
 
-        if (entity.getEvents().size() == 1) {
-            // You cannot unlink this wishlist for this event, because she have only one event. However you can delete it if you want.
-            throw new WishlistUnlinkEventException();
-        }
+    if (eventIds.length === 1) {
+      throw new UnauthorizedException(
+        'You cannot unlink this wishlist for this event, because she have only one event. However you can delete it if you want.'
+      );
+    }
 
-        final EventEntity event = eventRepository.findById(eventId).orElseThrow(() -> new EventNotFoundException(eventId));
-        entity.removeEvent(event);
-        wishlistRepository.save(entity);
-     */
+    wishlistEntity.events = Promise.resolve(events.filter((e) => e.id !== eventId));
 
-    // TODO
-    return Promise.resolve(undefined);
+    await this.wishlistRepository.save(wishlistEntity);
   }
 }
