@@ -34,11 +34,11 @@ const PrivateRouteContainerOutlet = () => (
   </>
 );
 
-const mapState = (state: RootState) => ({ token: state.auth.token });
+const mapState = (state: RootState) => ({ accessToken: state.auth.accessToken });
 
 export const App = () => {
-  const { token } = useSelector(mapState);
-  const isLoggedIn = token !== undefined;
+  const { accessToken } = useSelector(mapState);
+  const isLoggedIn = accessToken !== undefined;
   const api = useApi(wishlistApiRef);
   const dispatch = useDispatch();
 
@@ -51,7 +51,7 @@ export const App = () => {
       //   .then((res) => dispatch(setBabies(res.data)))
       //   .finally(() => dispatch(setLoadBabies(false)));
     }
-  }, [token]);
+  }, [accessToken]);
 
   return (
     <Routes>

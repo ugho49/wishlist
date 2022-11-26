@@ -1,25 +1,43 @@
 import jwt_decode from 'jwt-decode';
+import { AccessTokenJwtPayload, RefreshTokenJwtPayload } from '@wishlist/common-types';
 
 export enum LS_KEYS {
   ACCESS_TOKEN = 'wl_v2_access_token',
+  REFRESH_TOKEN = 'wl_v2_refresh_token',
 }
 
+export type TokenContent<T> = {
+  rawToken: string;
+  payload: T;
+};
+
 export class AuthService {
-  getAccessTokenFromLocalStorage = (): string | undefined => {
-    const token = localStorage.getItem(LS_KEYS.ACCESS_TOKEN);
-    if (!token) {
-      return undefined;
-    }
+  public readonly accessTokenService = new TokenService<AccessTokenJwtPayload>(LS_KEYS.ACCESS_TOKEN);
+  public readonly refreshTokenService = new TokenService<RefreshTokenJwtPayload>(LS_KEYS.REFRESH_TOKEN);
+}
+
+class TokenService<T> {
+  constructor(private readonly STORAGE_KEY: string) {}
+
+  getTokenFromLocalStorage = (): undefined | TokenContent<T> => {
+    const token = localStorage.getItem(this.STORAGE_KEY);
+    if (!token) return undefined;
     try {
-      jwt_decode(token);
+      const payload = jwt_decode(token) as T;
+      return {
+        rawToken: token,
+        payload,
+      };
     } catch (e) {
-      console.error(e);
       return undefined;
     }
-    return token;
   };
 
-  tokenIsExpired(token: string): boolean {
+  decodeToken = (token: string): T => {
+    return jwt_decode(token) as T;
+  };
+
+  isExpired(token: string): boolean {
     try {
       const { exp } = jwt_decode(token) as any;
       return Date.now() >= exp * 1000;
@@ -28,11 +46,11 @@ export class AuthService {
     }
   }
 
-  storeAccessTokenInLocalStorage = (token: string) => {
-    localStorage.setItem(LS_KEYS.ACCESS_TOKEN, token);
+  storeTokenInLocalStorage = (token: string) => {
+    localStorage.setItem(this.STORAGE_KEY, token);
   };
 
-  removeAccessToken = () => {
-    localStorage.removeItem(LS_KEYS.ACCESS_TOKEN);
+  removeTokenFromStorage = () => {
+    localStorage.removeItem(this.STORAGE_KEY);
   };
 }

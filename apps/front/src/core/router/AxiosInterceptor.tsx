@@ -8,11 +8,11 @@ import { AuthService } from '../services/auth.service';
 import { logout } from '../store/features';
 import { wishlistApiRef } from '../api/wishlist.api';
 
-const mapState = (state: RootState) => ({ token: state.auth.token });
-const authService = new AuthService();
+const mapState = (state: RootState) => ({ accessToken: state.auth.accessToken });
+const accessTokenService = new AuthService().accessTokenService;
 
 export const AxiosInterceptor: React.FC = () => {
-  const { token } = useSelector(mapState);
+  const { accessToken } = useSelector(mapState);
   const { axios } = useApi(wishlistApiRef);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -21,7 +21,7 @@ export const AxiosInterceptor: React.FC = () => {
 
   // Check token expiration every seconds ->
   useInterval(() => {
-    if (token && authService.tokenIsExpired(token)) {
+    if (accessToken && accessTokenService.isExpired(accessToken)) {
       // TODO: TOAST "You have been disconnected"
       logout(dispatch);
       redirectToLogin();
@@ -29,12 +29,12 @@ export const AxiosInterceptor: React.FC = () => {
   }, 1000);
 
   useEffect(() => {
-    if (token) {
-      axios.setAuthorizationHeader(`Bearer ${token}`);
+    if (accessToken) {
+      axios.setAuthorizationHeader(`Bearer ${accessToken}`);
     } else {
       axios.removeAuthorizationHeader();
     }
-  }, [axios, token]);
+  }, [axios, accessToken]);
 
   return null;
 };

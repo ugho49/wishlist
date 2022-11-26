@@ -3,7 +3,7 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import { RouterLink, useApi } from '@wishlist/common-front';
 import { useDispatch } from 'react-redux';
 import { useState } from 'react';
-import { setToken } from '../core/store/features';
+import { setTokens } from '../core/store/features';
 import { AxiosError } from 'axios';
 import { wishlistApiRef } from '../core/api/wishlist.api';
 import { LoginInputDto } from '@wishlist/common-types';
@@ -19,7 +19,12 @@ export const LoginPage = () => {
     setErrors([]);
     try {
       const data = await api.auth.login(form);
-      dispatch(setToken(data.access_token));
+      dispatch(
+        setTokens({
+          accessToken: data.access_token,
+          refreshToken: data.refresh_token,
+        })
+      );
     } catch (e) {
       const error = e as AxiosError;
       const data = error?.response?.data as any;

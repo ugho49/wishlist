@@ -3,7 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import authConfig from '../auth.config';
 import { ConfigType } from '@nestjs/config';
-import { Authorities, AccessTokenJwtPayload, ICurrentUser } from '@wishlist/common-types';
+import { AccessTokenJwtPayload, createCurrentUserFromPayload } from '@wishlist/common-types';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -16,19 +16,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  validate(payload: AccessTokenJwtPayload): ICurrentUser {
-    const authorities = payload.authorities;
-    const hasAuthority = (authority: Authorities) => authorities.includes(authority);
-    const isSuperAdmin = hasAuthority(Authorities.ROLE_SUPERADMIN);
-    const isAdmin = hasAuthority(Authorities.ROLE_ADMIN) || isSuperAdmin;
-
-    return {
-      id: payload.sub,
-      email: payload.email,
-      authorities: authorities,
-      hasAuthority,
-      isAdmin,
-      isSuperAdmin,
-    };
+  validate(payload: AccessTokenJwtPayload) {
+    return createCurrentUserFromPayload(payload);
   }
 }
