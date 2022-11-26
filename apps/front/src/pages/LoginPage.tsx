@@ -18,7 +18,7 @@ export const LoginPage = () => {
     e.preventDefault();
     setErrors([]);
     try {
-      const { data } = await api.login(form);
+      const data = await api.auth.login(form);
       dispatch(setToken(data.access_token));
     } catch (e) {
       const error = e as AxiosError;

@@ -13,7 +13,7 @@ const authService = new AuthService();
 
 export const AxiosInterceptor: React.FC = () => {
   const { token } = useSelector(mapState);
-  const { instance } = useApi(wishlistApiRef);
+  const { axios } = useApi(wishlistApiRef);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -30,11 +30,11 @@ export const AxiosInterceptor: React.FC = () => {
 
   useEffect(() => {
     if (token) {
-      instance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      axios.setAuthorizationHeader(`Bearer ${token}`);
     } else {
-      delete instance.defaults.headers.common['Authorization'];
+      axios.removeAuthorizationHeader();
     }
-  }, [instance, token]);
+  }, [axios, token]);
 
   return null;
 };

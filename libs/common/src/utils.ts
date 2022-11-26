@@ -9,3 +9,5 @@ export const uuid = () => v4();
 export function camelCaseKeys(object: any) {
   return Object.entries(object).reduce((acc, [key, value]) => ({ ...acc, [camelCase(key)]: value }), {});
 }
+
+export const sleep = (x: number) => new Promise((r) => setTimeout(r, x));
