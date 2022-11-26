@@ -14,7 +14,7 @@ import { WishlistRepository } from './wishlist.repository';
 import { EventRepository } from '../event/event.repository';
 import { WishlistEntity } from './wishlist.entity';
 import { ItemEntity } from '../item/item.entity';
-import { ICurrentUser } from '../auth';
+import { ICurrentUser } from '@wishlist/common-types';
 
 @Injectable()
 export class WishlistService {

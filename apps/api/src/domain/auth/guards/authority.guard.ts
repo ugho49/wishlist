@@ -1,6 +1,6 @@
 import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { ICurrentUser } from '../auth.interface';
+import { ICurrentUser } from '@wishlist/common-types';
 import { HasAuthoritiesMetadataKey, HasAuthoritiesMetadataParamType } from '../decorators/authority.decorator';
 
 @Injectable()

@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { WishlistService } from './wishlist.service';
-import { CurrentUser, ICurrentUser } from '../auth';
+import { CurrentUser } from '../auth';
 import {
   CreateWishlistInputDto,
   DetailedWishlistDto,
@@ -11,6 +11,7 @@ import {
   PagedResponse,
   UpdateWishlistInputDto,
   WishlistWithEventsDto,
+  ICurrentUser,
 } from '@wishlist/common-types';
 
 @ApiTags('Wishlist')

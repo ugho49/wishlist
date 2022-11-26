@@ -1,4 +1,4 @@
-import { Authorities } from '@wishlist/common-types';
+import { Authorities } from '../enums';
 
 export interface AccessTokenJwtPayload {
   sub: string;

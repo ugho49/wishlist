@@ -2,8 +2,14 @@ import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { UserEntity } from '../user';
 import { JwtService } from '@nestjs/jwt';
 import { PasswordManager } from './util/password-manager';
-import { AccessTokenJwtPayload, RefreshTokenJwtPayload } from './auth.interface';
-import { LoginInputDto, LoginOutputDto, RefreshTokenInputDto, RefreshTokenOutputDto } from '@wishlist/common-types';
+import {
+  LoginInputDto,
+  LoginOutputDto,
+  RefreshTokenInputDto,
+  RefreshTokenOutputDto,
+  AccessTokenJwtPayload,
+  RefreshTokenJwtPayload,
+} from '@wishlist/common-types';
 import authConfig from './auth.config';
 import { ConfigType } from '@nestjs/config';
 import { UserRepository } from '../user/user.repository';

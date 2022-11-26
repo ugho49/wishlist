@@ -1,8 +1,14 @@
 import { Body, Controller, Delete, Get, Param, Patch, Query } from '@nestjs/common';
 import { UserService } from '../user.service';
 import { ApiTags } from '@nestjs/swagger';
-import { GetAllUsersQueryDto, PagedResponse, UpdateFullUserProfileInputDto, UserDto } from '@wishlist/common-types';
-import { CurrentUser, ICurrentUser, IsAdmin } from '../../auth';
+import {
+  GetAllUsersQueryDto,
+  PagedResponse,
+  UpdateFullUserProfileInputDto,
+  UserDto,
+  ICurrentUser,
+} from '@wishlist/common-types';
+import { CurrentUser, IsAdmin } from '../../auth';
 
 @IsAdmin()
 @ApiTags('ADMIN - User')

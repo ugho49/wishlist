@@ -8,7 +8,7 @@ import { useApi } from '@wishlist/common-front';
 import { RootState } from './core';
 import { useEffect } from 'react';
 import { wishlistApiRef } from './core/api/wishlist.api';
-// import { Navbar } from './components/Navbar';
+import { Navbar } from './components/Navbar';
 
 const AnonymousRouteContainerOutlet = () => (
   <Container component="main" maxWidth="xs">
@@ -27,19 +27,7 @@ const AnonymousRouteContainerOutlet = () => (
 
 const PrivateRouteContainerOutlet = () => (
   <>
-    <Box
-      id="backdrop"
-      sx={{
-        backgroundColor: '#f5f5f5',
-        position: 'fixed',
-        width: '100vw',
-        height: '100vh',
-        top: 0,
-        left: 0,
-        zIndex: -1,
-      }}
-    />
-    {/*<Navbar />*/}
+    <Navbar />
     <Box component="main">
       <Outlet />
     </Box>

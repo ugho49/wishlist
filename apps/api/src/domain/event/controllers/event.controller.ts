@@ -9,8 +9,9 @@ import {
   MiniEventDto,
   PagedResponse,
   UpdateEventInputDto,
+  ICurrentUser,
 } from '@wishlist/common-types';
-import { CurrentUser, ICurrentUser } from '../../auth';
+import { CurrentUser } from '../../auth';
 
 @ApiTags('Event')
 @Controller('/event')

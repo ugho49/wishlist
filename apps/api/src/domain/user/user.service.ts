@@ -15,8 +15,9 @@ import {
   UpdateFullUserProfileInputDto,
   UpdateUserProfileInputDto,
   UserDto,
+  ICurrentUser,
 } from '@wishlist/common-types';
-import { ICurrentUser, PasswordManager } from '../auth';
+import { PasswordManager } from '../auth';
 import { toMiniUserDto, toUserDto } from './user.mapper';
 import { isEmpty } from 'lodash';
 import { DEFAULT_RESULT_NUMBER } from '@wishlist/common';

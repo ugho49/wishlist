@@ -7,8 +7,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { AttendeeRepository } from './attendee.repository';
-import { ICurrentUser } from '../auth';
-import { AddEventAttendeeForEventInputDto, AttendeeDto, AttendeeRole } from '@wishlist/common-types';
+import { AddEventAttendeeForEventInputDto, AttendeeDto, AttendeeRole, ICurrentUser } from '@wishlist/common-types';
 import { EventRepository } from '../event/event.repository';
 import { UserRepository } from '../user/user.repository';
 import { AttendeeEntity } from './attendee.entity';

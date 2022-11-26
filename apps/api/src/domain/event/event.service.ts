@@ -9,6 +9,7 @@ import {
   MiniEventDto,
   PagedResponse,
   UpdateEventInputDto,
+  ICurrentUser,
 } from '@wishlist/common-types';
 import { DEFAULT_RESULT_NUMBER } from '@wishlist/common';
 import {
@@ -18,7 +19,6 @@ import {
   toMiniEventDto,
 } from './event.mapper';
 import { EventRepository } from './event.repository';
-import { ICurrentUser } from '../auth';
 import { uniq } from 'lodash';
 import { AttendeeEntity } from '../attendee/attendee.entity';
 import { EventEntity } from './event.entity';
