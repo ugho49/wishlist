@@ -4,6 +4,13 @@ import { createTheme } from '@mui/material/styles';
 export const theme = createTheme({
   palette: {
     mode: 'light',
+    text: {
+      secondary: '#4e4e4e',
+    },
+    background: {
+      default: '#fafafa',
+      paper: '#ffffff',
+    },
     primary: {
       main: '#255376',
     },
