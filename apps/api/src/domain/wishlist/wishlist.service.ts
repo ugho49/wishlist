@@ -38,16 +38,16 @@ export class WishlistService {
 
   async getMyWishlistPaginated(param: {
     currentUserId: string;
-    pageNumber?: number;
+    pageNumber: number;
   }): Promise<PagedResponse<WishlistWithEventsDto>> {
     const pageSize = DEFAULT_RESULT_NUMBER;
     const { pageNumber, currentUserId } = param;
-    const offset = pageSize * (pageNumber || 0);
+    const skip = pageSize * (pageNumber - 1);
 
     const [entities, totalElements] = await this.wishlistRepository.getMyWishlistPaginated({
       ownerId: currentUserId,
-      pageSize,
-      offset,
+      take: pageSize,
+      skip,
     });
 
     const dtos = await Promise.all(entities.map((entity) => toWishlistWithEventsDto(entity)));

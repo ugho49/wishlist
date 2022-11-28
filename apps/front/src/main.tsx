@@ -7,24 +7,26 @@ import { apis, store } from './core';
 import { App } from './App';
 import { theme } from './theme';
 import { AxiosInterceptor } from './core/router/AxiosInterceptor';
-import './styles.scss';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon';
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 
 root.render(
-  <ApiProvider apis={apis}>
-    <Provider store={store}>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <LocalizationProvider dateAdapter={AdapterLuxon} adapterLocale="fr">
-          <BrowserRouter>
-            <AxiosInterceptor />
-            <App />
-          </BrowserRouter>
-        </LocalizationProvider>
-      </ThemeProvider>
-    </Provider>
-  </ApiProvider>
+  <>
+    <CssBaseline />
+    <ApiProvider apis={apis}>
+      <Provider store={store}>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <LocalizationProvider dateAdapter={AdapterLuxon} adapterLocale="fr">
+            <BrowserRouter>
+              <AxiosInterceptor />
+              <App />
+            </BrowserRouter>
+          </LocalizationProvider>
+        </ThemeProvider>
+      </Provider>
+    </ApiProvider>
+  </>
 );

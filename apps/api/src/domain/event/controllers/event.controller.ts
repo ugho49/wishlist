@@ -23,7 +23,7 @@ export class EventController {
     @Query() queryParams: GetPaginationQueryDto,
     @CurrentUser('id') currentUserId: string
   ): Promise<PagedResponse<EventWithCountsDto>> {
-    return this.eventService.getUserEventsPaginated({ pageNumber: queryParams.p || 0, currentUserId });
+    return this.eventService.getUserEventsPaginated({ pageNumber: queryParams.p || 1, currentUserId });
   }
 
   @Get('/:id')

@@ -113,10 +113,10 @@ export class UserService {
     return entities.map((entity) => toMiniUserDto(entity));
   }
 
-  async findAllByCriteriaPaginated(param: { pageNumber?: number; criteria?: string }): Promise<PagedResponse<UserDto>> {
+  async findAllByCriteriaPaginated(param: { pageNumber: number; criteria?: string }): Promise<PagedResponse<UserDto>> {
     const { criteria, pageNumber } = param;
     const pageSize = DEFAULT_RESULT_NUMBER;
-    const offset = pageSize * (pageNumber || 0);
+    const skip = pageSize * (pageNumber - 1);
 
     if (criteria && criteria.trim().length < 2) {
       throw new BadRequestException('Invalid search criteria');
@@ -124,8 +124,8 @@ export class UserService {
 
     const [entities, totalElements] = await this.userRepository.findAllByCriteriaPaginated({
       criteria,
-      pageSize,
-      offset,
+      take: pageSize,
+      skip,
     });
 
     return createPagedResponse({

@@ -3,7 +3,7 @@ import { Transform } from 'class-transformer';
 
 export class GetPaginationQueryDto {
   @IsInt()
-  @Min(0)
+  @Min(1)
   @IsOptional()
   @Transform(({ value }) => parseInt(value, 10))
   p?: number;

@@ -39,11 +39,11 @@ export class EventService {
 
   async getAllByUserIdPaginated(pageNumber: number): Promise<PagedResponse<EventWithCountsAndCreatorDto>> {
     const pageSize = DEFAULT_RESULT_NUMBER;
-    const offset = pageSize * (pageNumber || 0);
+    const skip = pageSize * (pageNumber - 1);
 
     const [entities, totalElements] = await this.eventRepository.findAll({
-      pageSize,
-      offset,
+      take: pageSize,
+      skip,
     });
 
     const dtos = await Promise.all(entities.map((entity) => toEventWithCountsAndCreatorDto(entity)));
@@ -61,12 +61,12 @@ export class EventService {
     const pageSize = DEFAULT_RESULT_NUMBER;
     const { pageNumber, currentUserId } = param;
 
-    const offset = pageSize * (pageNumber || 0);
+    const skip = pageSize * (pageNumber - 1);
 
     const [entities, totalElements] = await this.eventRepository.findAllForUserid({
       userId: currentUserId,
-      pageSize,
-      offset,
+      take: pageSize,
+      skip,
     });
 
     const dtos = await Promise.all(entities.map((entity) => toEventWithCountsDto(entity)));

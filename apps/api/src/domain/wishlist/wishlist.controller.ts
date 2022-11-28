@@ -24,7 +24,7 @@ export class WishlistController {
     @Query() queryParams: GetPaginationQueryDto,
     @CurrentUser('id') currentUserId: string
   ): Promise<PagedResponse<WishlistWithEventsDto>> {
-    return this.wishlistService.getMyWishlistPaginated({ pageNumber: queryParams.p, currentUserId });
+    return this.wishlistService.getMyWishlistPaginated({ pageNumber: queryParams.p || 1, currentUserId });
   }
 
   @Get('/:id')

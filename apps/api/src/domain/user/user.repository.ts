@@ -34,13 +34,13 @@ export class UserRepository extends BaseRepository(UserEntity) {
   }
 
   findAllByCriteriaPaginated(params: {
-    pageSize: number;
-    offset: number;
+    take: number;
+    skip: number;
     criteria?: string;
   }): Promise<[UserEntity[], number]> {
-    const { criteria, offset, pageSize } = params;
+    const { criteria, take, skip } = params;
 
-    const query = this.createQueryBuilder('u').addOrderBy('u.createdAt', 'DESC').limit(pageSize).offset(offset);
+    const query = this.createQueryBuilder('u').addOrderBy('u.createdAt', 'DESC').take(take).skip(skip);
 
     if (criteria) {
       query.where(this.findByNameOrEmail(criteria));

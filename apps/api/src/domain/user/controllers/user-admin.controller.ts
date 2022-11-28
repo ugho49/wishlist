@@ -23,7 +23,7 @@ export class UserAdminController {
 
   @Get()
   getAllPaginated(@Query() queryParams: GetAllUsersQueryDto): Promise<PagedResponse<UserDto>> {
-    return this.userService.findAllByCriteriaPaginated({ pageNumber: queryParams.p, criteria: queryParams.q });
+    return this.userService.findAllByCriteriaPaginated({ pageNumber: queryParams.p || 1, criteria: queryParams.q });
   }
 
   @Patch('/:id')

@@ -2,13 +2,13 @@ import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { Box, Container } from '@mui/material';
-import { HomePage } from './pages/HomePage';
-import { useDispatch, useSelector } from 'react-redux';
-import { useApi } from '@wishlist/common-front';
+import { EventListPage } from './pages/EventListPage';
+import { useSelector } from 'react-redux';
 import { RootState } from './core';
-import { useEffect } from 'react';
-import { wishlistApiRef } from './core/api/wishlist.api';
 import { Navbar } from './components/Navbar';
+import { Footer } from './components/Footer';
+import { UserProfilePage } from './pages/UserProfilePage';
+import { WishlistListPage } from './pages/WishlistListPage';
 
 const AnonymousRouteContainerOutlet = () => (
   <Container component="main" maxWidth="xs">
@@ -27,10 +27,25 @@ const AnonymousRouteContainerOutlet = () => (
 
 const PrivateRouteContainerOutlet = () => (
   <>
+    <Box
+      id="backdrop"
+      sx={{
+        backgroundColor: '#fafafa',
+        position: 'fixed',
+        width: '100vw',
+        height: '100vh',
+        top: 0,
+        left: 0,
+        zIndex: -1,
+      }}
+    />
     <Navbar />
     <Box component="main">
-      <Outlet />
+      <Container component="section" maxWidth="xs" sx={{ mt: 2, mb: '80px' }}>
+        <Outlet />
+      </Container>
     </Box>
+    <Footer />
   </>
 );
 
@@ -39,19 +54,6 @@ const mapState = (state: RootState) => ({ accessToken: state.auth.accessToken })
 export const App = () => {
   const { accessToken } = useSelector(mapState);
   const isLoggedIn = accessToken !== undefined;
-  const api = useApi(wishlistApiRef);
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    if (isLoggedIn) {
-      // api.getUserInfos().then((res) => dispatch(setUser(res.data)));
-      // dispatch(setLoadBabies(true));
-      // api
-      //   .getAllMyBabies()
-      //   .then((res) => dispatch(setBabies(res.data)))
-      //   .finally(() => dispatch(setLoadBabies(false)));
-    }
-  }, [accessToken]);
 
   return (
     <Routes>
@@ -62,13 +64,42 @@ export const App = () => {
           <Route element={<AnonymousRouteContainerOutlet />}>
             <Route path="login" element={<LoginPage />} />
             <Route path="register" element={<RegisterPage />} />
+            {/*TODO -->*/}
+            {/*<Route path="/forgot-password" element={<ForgotPassword />} />*/}
+            {/*<Route path="/forgot-password/renew" element={<RenewForgotPassword />} />*/}
           </Route>
         </>
       )}
 
       {isLoggedIn && (
         <Route element={<PrivateRouteContainerOutlet />}>
-          <Route path="/" element={<HomePage />} />
+          <Route path="/" element={<Navigate replace to="/events" />} />
+
+          <Route path="user">
+            <Route path="profile" element={<UserProfilePage />} />
+          </Route>
+
+          <Route path="events">
+            <Route index element={<EventListPage />} />
+            {/*<Route path="new" element={<CreateEvent />} />*/}
+            {/*<Route path=":eventId" element={<EventDetails />} />*/}
+            {/*<Route path=":eventId/edit" element={<EditEvent />} />*/}
+          </Route>
+
+          <Route path="wishlists">
+            <Route index element={<WishlistListPage />} />
+            {/*<Route path="new" element={<WishlistForm />} />*/}
+            {/*<Route path=":wishlistId" element={<WishlistDetails />} />*/}
+            {/*<Route path=":wishlistId/edit" element={<EditWishlist />} />*/}
+          </Route>
+
+          {/*<Route path="admin" element={<AdminRouteOutlet />}>*/}
+          {/*  <Route index element={<Admin />} />*/}
+          {/*  <Route path="users" element={<AdminListUsers />} />*/}
+          {/*  <Route path="users/:userId" element={<AdminEditUser />} />*/}
+          {/*  <Route path="events" element={<AdminListEvents />} />*/}
+          {/*  <Route path="events/:eventId" element={<AdminEditEvent />} />*/}
+          {/*</Route>*/}
         </Route>
       )}
 

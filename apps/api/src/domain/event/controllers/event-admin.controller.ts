@@ -22,6 +22,6 @@ export class EventAdminController {
 
   @Get()
   getAllPaginated(@Query() queryParams: GetPaginationQueryDto): Promise<PagedResponse<EventWithCountsAndCreatorDto>> {
-    return this.eventService.getAllByUserIdPaginated(queryParams.p || 0);
+    return this.eventService.getAllByUserIdPaginated(queryParams.p || 1);
   }
 }

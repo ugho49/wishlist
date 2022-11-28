@@ -5,16 +5,16 @@ import { Brackets, In } from 'typeorm';
 
 @Injectable()
 export class EventRepository extends BaseRepository(EventEntity) {
-  findAll(params: { pageSize: number; offset: number }): Promise<[EventEntity[], number]> {
-    const { offset, pageSize } = params;
+  findAll(params: { take: number; skip: number }): Promise<[EventEntity[], number]> {
+    const { take, skip } = params;
 
     const fetchQuery = this.createQueryBuilder('e')
       .leftJoinAndSelect('e.wishlists', 'w')
       .leftJoinAndSelect('e.creator', 'c')
       .leftJoinAndSelect('e.attendees', 'a')
       .orderBy('e.createdAt', 'DESC')
-      .limit(pageSize)
-      .offset(offset)
+      .take(take)
+      .skip(skip)
       .getMany();
 
     const countQuery = this.createQueryBuilder('e').getCount();
@@ -22,8 +22,8 @@ export class EventRepository extends BaseRepository(EventEntity) {
     return Promise.all([fetchQuery, countQuery]);
   }
 
-  findAllForUserid(params: { userId: string; pageSize: number; offset: number }): Promise<[EventEntity[], number]> {
-    const { userId, offset, pageSize } = params;
+  findAllForUserid(params: { userId: string; take: number; skip: number }): Promise<[EventEntity[], number]> {
+    const { userId, take, skip } = params;
 
     // TODO Change with union all when available -->
 
@@ -32,10 +32,10 @@ export class EventRepository extends BaseRepository(EventEntity) {
       .leftJoinAndSelect('e.creator', 'c')
       .leftJoinAndSelect('e.attendees', 'a')
       .where(this.whereCreatorIdOrAttendee(userId))
-      .andWhere('e.eventDate >= CURRENT_DATE')
-      .orderBy('e.eventDate, e.updatedAt', 'DESC')
-      .limit(pageSize)
-      .offset(offset)
+      .orderBy('e.updatedAt', 'DESC')
+      .addOrderBy('e.eventDate', 'DESC')
+      .take(take)
+      .skip(skip)
       .getMany();
 
     const countQuery = this.createQueryBuilder('e')

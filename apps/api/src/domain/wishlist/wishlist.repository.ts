@@ -14,18 +14,14 @@ export class WishlistRepository extends BaseRepository(WishlistEntity) {
       .getOne();
   }
 
-  getMyWishlistPaginated(params: {
-    ownerId: string;
-    pageSize: number;
-    offset: number;
-  }): Promise<[WishlistEntity[], number]> {
-    const { ownerId, offset, pageSize } = params;
+  getMyWishlistPaginated(params: { ownerId: string; take: number; skip: number }): Promise<[WishlistEntity[], number]> {
+    const { ownerId, take, skip } = params;
 
     const fetchQuery = this.createQueryBuilder('w')
       .leftJoinAndSelect('w.events', 'e')
       .where('w.ownerId = :ownerId', { ownerId })
-      .limit(pageSize)
-      .offset(offset)
+      .take(take)
+      .skip(skip)
       .getMany();
 
     const countQuery = this.countBy({ ownerId });
