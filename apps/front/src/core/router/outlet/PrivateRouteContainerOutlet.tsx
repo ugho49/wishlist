@@ -19,7 +19,7 @@ export const PrivateRouteContainerOutlet = () => (
     />
     <Navbar />
     <Box component="main">
-      <Container component="section" maxWidth="xs" sx={{ mt: 2, mb: '80px' }}>
+      <Container fixed component="section" maxWidth="lg" sx={{ mt: 2, mb: '80px' }}>
         <Outlet />
       </Container>
     </Box>

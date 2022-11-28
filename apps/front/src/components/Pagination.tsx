@@ -4,7 +4,7 @@ import { makeStyles } from '@mui/styles';
 
 const useStyles = makeStyles((theme) => ({
   pagination: {
-    marginTop: '20px',
+    marginTop: '30px',
     '& > *': {
       justifyContent: 'center',
       display: 'flex',

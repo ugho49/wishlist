@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import { useApi, useCustomSearchParams } from '@wishlist/common-front';
 import { wishlistApiRef } from '../core/api/wishlist.api';
 import { useAsync } from 'react-use';
-import { Box } from '@mui/material';
+import { Box, Grid } from '@mui/material';
 import { Title } from '../components/Title';
 import { EventCard } from '../components/event/EventCard';
 import { Pagination } from '../components/Pagination';
@@ -32,9 +32,13 @@ export const EventListPage = () => {
     <Box>
       <Title>Évènements</Title>
 
-      {(value?.resources || []).map((event) => (
-        <EventCard key={event.id} event={event} />
-      ))}
+      <Grid container spacing={2}>
+        {(value?.resources || []).map((event) => (
+          <Grid item xs={12} md={6} key={event.id}>
+            <EventCard event={event} />
+          </Grid>
+        ))}
+      </Grid>
 
       {/*  TODO: Hide Pagination when no elements */}
       <Pagination

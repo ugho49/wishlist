@@ -13,20 +13,17 @@ import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon';
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 
 root.render(
-  <>
-    <CssBaseline />
-    <ApiProvider apis={apis}>
-      <Provider store={store}>
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
-          <LocalizationProvider dateAdapter={AdapterLuxon} adapterLocale="fr">
-            <BrowserRouter>
-              <AxiosInterceptor />
-              <App />
-            </BrowserRouter>
-          </LocalizationProvider>
-        </ThemeProvider>
-      </Provider>
-    </ApiProvider>
-  </>
+  <ApiProvider apis={apis}>
+    <Provider store={store}>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <LocalizationProvider dateAdapter={AdapterLuxon} adapterLocale="fr">
+          <BrowserRouter>
+            <AxiosInterceptor />
+            <App />
+          </BrowserRouter>
+        </LocalizationProvider>
+      </ThemeProvider>
+    </Provider>
+  </ApiProvider>
 );
