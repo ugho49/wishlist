@@ -4,8 +4,14 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import PersonIcon from '@mui/icons-material/Person';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import { RootState } from '../core';
+import { useSelector } from 'react-redux';
+
+const mapState = (state: RootState) => ({ user: state.auth.user });
 
 export const Footer = () => {
+  const { user } = useSelector(mapState);
   const [currentNavigation, setCurrentNavigation] = useState('');
   const navigate = useNavigate();
   const location = useLocation();
@@ -26,6 +32,7 @@ export const Footer = () => {
         <BottomNavigationAction label="Évènements" value="/events" icon={<CalendarMonthIcon />} />
         <BottomNavigationAction label="Mes listes" value="/wishlists" icon={<FormatListBulletedIcon />} />
         <BottomNavigationAction label="Mon profil" value="/user/profile" icon={<PersonIcon />} />
+        {user?.isAdmin && <BottomNavigationAction label="Admin" value="/admin" icon={<AdminPanelSettingsIcon />} />}
       </BottomNavigation>
     </Paper>
   );

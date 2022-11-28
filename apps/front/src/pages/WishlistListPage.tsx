@@ -1,9 +1,10 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
-import { Box, Pagination } from '@mui/material';
+import { Box } from '@mui/material';
 import { Title } from '../components/Title';
 import { useApi, useCustomSearchParams } from '@wishlist/common-front';
 import { wishlistApiRef } from '../core/api/wishlist.api';
 import { useAsync } from 'react-use';
+import { Pagination } from '../components/Pagination';
 
 type SearchType = { page: string };
 
@@ -34,13 +35,12 @@ export const WishlistListPage = () => {
         <div key={event.id}>{event.title}</div>
       ))}
 
-      {/*  TODO: Hide Pagination when not needed */}
+      {/*  TODO: Hide Pagination when no elements */}
       <Pagination
-        count={value?.pagination.total_pages || 1}
-        page={currentPage}
-        color="primary"
+        totalPage={value?.pagination.total_pages}
+        currentPage={currentPage}
         disabled={loading}
-        onChange={(_, value) => setCurrentPage(value)}
+        onChange={(value) => setCurrentPage(value)}
       />
       {/*  TODO: Floating button*/}
     </Box>
