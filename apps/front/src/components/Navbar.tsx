@@ -15,6 +15,7 @@ import {
 } from '@mui/material';
 import { RouterLink } from '@wishlist/common-front';
 import { RootState } from '../core';
+import { ReactComponent as IconSvg } from '../assets/icon.svg';
 
 const mapState = (state: RootState) => ({ user: state.auth.user });
 
@@ -55,7 +56,7 @@ export const Navbar = () => {
               textDecoration: 'none',
             }}
           >
-            <img style={{ margin: '10px', height: '2.2rem' }} alt="" src="/logo.png" />
+            <IconSvg style={{ margin: '10px', height: '1.7rem' }} />
             <Typography variant="h5" noWrap>
               Wishlist
             </Typography>
@@ -64,11 +65,9 @@ export const Navbar = () => {
           <Box sx={{ display: { xs: 'flex' }, flexGrow: 1 }} />
 
           <Box sx={{ flexGrow: 0 }}>
-            <Tooltip title="Open settings">
-              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                {/*<Avatar alt={`${user?.firstname} ${user?.lastname}`} />*/}
-              </IconButton>
-            </Tooltip>
+            <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+              <Avatar alt={`${user?.email}`} />
+            </IconButton>
             <Menu
               sx={{ mt: '45px' }}
               id="menu-appbar"

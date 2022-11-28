@@ -19,8 +19,11 @@ export const AxiosInterceptor: React.FC = () => {
 
   const redirectToLogin = () => navigate('/login');
 
+  // TODO get new accessToken from refreshToken when expired
+
   // Check token expiration every seconds ->
   useInterval(() => {
+    // TODO change this to refreshToken -->
     if (accessToken && accessTokenService.isExpired(accessToken)) {
       // TODO: TOAST "You have been disconnected"
       logout(dispatch);
