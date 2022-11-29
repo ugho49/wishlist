@@ -1,51 +1,91 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { logout } from '../core/store/features';
 import { useDispatch } from 'react-redux';
-import { AppBar, Box, Button, Container, IconButton, Stack, Toolbar, Typography, useTheme } from '@mui/material';
+import { AppBar, Box, Button, Container, IconButton, Stack, Theme, Toolbar, Typography } from '@mui/material';
 import LogoutIcon from '@mui/icons-material/Logout';
-import { RouterLink } from '@wishlist/common-front';
-import { ReactComponent as IconSvg } from '../assets/icon.svg';
-import { ReactComponent as TextSvg } from '../assets/logo_text.svg';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { useHistoryStack } from '@wishlist/common-front';
+import { ReactComponent as IconSvg } from '../assets/icons/icon.svg';
+import { ReactComponent as TextSvg } from '../assets/icons/logo_text.svg';
+import { makeStyles } from '@mui/styles';
+import { Link, useNavigate } from 'react-router-dom';
+
+const useStyles = makeStyles((theme: Theme) => ({
+  logo: {
+    flexGrow: 1,
+    [theme.breakpoints.down('sm')]: {
+      justifyContent: 'center',
+    },
+  },
+  logoLink: {
+    display: 'flex',
+    alignItems: 'center',
+    color: theme.palette.secondary.main,
+  },
+  leftNavbar: {
+    display: 'flex',
+    flexBasis: '20%',
+    marginLeft: '-15px',
+    [theme.breakpoints.up('sm')]: {
+      display: 'none',
+    },
+  },
+}));
+
+const GoBack = () => {
+  const navigate = useNavigate();
+  const { history } = useHistoryStack();
+
+  if (history.length === 0) {
+    return null;
+  }
+
+  return (
+    <IconButton color="inherit" onClick={() => navigate(-1)}>
+      <ArrowBackIcon />
+    </IconButton>
+  );
+};
 
 export const Navbar = () => {
+  const classes = useStyles();
   const dispatch = useDispatch();
-  const theme = useTheme();
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     // TODO: Toast "Hope to see you soon"
     logout(dispatch);
-  };
+  }, [dispatch]);
 
   return (
     <AppBar position="sticky">
       <Container maxWidth="xl">
         <Toolbar>
-          <Stack
-            to="/"
-            component={RouterLink}
-            alignItems="center"
-            direction="row"
-            flexGrow={1}
-            color={theme.palette.secondary.main}
-          >
-            <IconSvg style={{ marginRight: '10px', height: '24px' }} />
-            <TextSvg style={{ height: '44px' }} />
+          <Box className={classes.leftNavbar}>
+            <GoBack />
+          </Box>
+
+          <Stack alignItems="center" direction="row" className={classes.logo}>
+            <Link to="/" className={classes.logoLink}>
+              <IconSvg style={{ marginRight: '10px', height: '24px' }} />
+              <TextSvg style={{ height: '44px' }} />
+            </Link>
           </Stack>
 
-          <Box sx={{ flexGrow: 0 }}>
-            <Button
-              color="inherit"
-              startIcon={<LogoutIcon />}
-              onClick={handleLogout}
-              sx={{ display: { xs: 'none', sm: 'flex' } }}
-            >
+          <Box sx={{ display: { xs: 'none', sm: 'flex' } }}>
+            <Button color="inherit" startIcon={<LogoutIcon />} onClick={handleLogout}>
               <Typography variant="inherit">Déconnexion</Typography>
             </Button>
-            <IconButton
-              color="inherit"
-              onClick={handleLogout}
-              sx={{ display: { xs: 'flex', sm: 'none' }, marginRight: '-15px' }}
-            >
+          </Box>
+
+          <Box
+            sx={{
+              display: { xs: 'flex', sm: 'none' },
+              flexBasis: '20%',
+              marginRight: '-15px',
+              justifyContent: 'flex-end',
+            }}
+          >
+            <IconButton color="inherit" onClick={handleLogout}>
               <LogoutIcon />
             </IconButton>
           </Box>

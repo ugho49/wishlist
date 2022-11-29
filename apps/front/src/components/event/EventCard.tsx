@@ -1,16 +1,21 @@
 import React from 'react';
 import { EventWithCountsDto } from '@wishlist/common-types';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
+import HistoryIcon from '@mui/icons-material/History';
 import { DateTime } from 'luxon';
 import { makeStyles } from '@mui/styles';
 import { Card } from '../Card';
 import { Stack, Theme } from '@mui/material';
+import clsx from 'clsx';
 
 export type EventCardProps = {
   event: EventWithCountsDto;
 };
 
 const useStyles = makeStyles((theme: Theme) => ({
+  root: {
+    position: 'relative',
+  },
   event: {
     color: theme.palette.text.secondary,
     flexGrow: 1,
@@ -41,6 +46,18 @@ const useStyles = makeStyles((theme: Theme) => ({
     alignItems: 'center',
     flexBasis: '5%',
   },
+  past: {
+    position: 'absolute',
+    right: '-5px',
+    top: '-5px',
+    color: theme.palette.warning.light,
+  },
+  disabled: {
+    backgroundColor: '#f7f7f7',
+    '& > *': {
+      opacity: '.6',
+    },
+  },
 }));
 
 export const EventCard = ({ event }: EventCardProps) => {
@@ -49,7 +66,7 @@ export const EventCard = ({ event }: EventCardProps) => {
   const past = new Date(event.event_date) < new Date();
 
   return (
-    <Card to={`/events/${event.id}`}>
+    <Card to={`/events/${event.id}`} className={clsx(classes.root, past && classes.disabled, 'animated fadeIn fast')}>
       <Stack direction="row" justifyContent="space-between">
         <div className={classes.event}>
           <div className={classes.title}>{event.title}</div>
@@ -57,7 +74,7 @@ export const EventCard = ({ event }: EventCardProps) => {
             <div>
               {numberOfAttendees} {numberOfAttendees > 1 ? 'participants' : 'participant'}
             </div>
-            <div className="only-large-screen">
+            <div>
               {event.nb_wishlists} {event.nb_wishlists > 1 ? 'listes' : 'liste'}
             </div>
             <div>{DateTime.fromISO(event.event_date).toLocaleString(DateTime.DATE_MED)}</div>
@@ -67,6 +84,11 @@ export const EventCard = ({ event }: EventCardProps) => {
           <KeyboardArrowRightIcon />
         </div>
       </Stack>
+      {past && (
+        <div className={classes.past}>
+          <HistoryIcon />
+        </div>
+      )}
     </Card>
   );
 };

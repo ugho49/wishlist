@@ -18,4 +18,7 @@ export const theme = createTheme({
       main: '#ffd21c',
     },
   },
+  shape: {
+    borderRadius: 4,
+  },
 });

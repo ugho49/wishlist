@@ -1,0 +1,96 @@
+/**
+    Inspired by https://github.com/daneden/animate.css
+*/
+.animated {
+    animation-duration: 1s;
+    animation-fill-mode: both;
+
+    &.infinite {
+        animation-iteration-count: infinite;
+    }
+
+    &.delay-1s {
+        animation-delay: 1s;
+    }
+
+    &.delay-2s {
+        animation-delay: 2s;
+    }
+
+    &.delay-3s {
+        animation-delay: 3s;
+    }
+
+    &.delay-4s {
+        animation-delay: 4s;
+    }
+
+    &.delay-5s {
+        animation-delay: 5s;
+    }
+
+    &.fast {
+        animation-duration: 800ms;
+    }
+
+    &.faster {
+        animation-duration: 300ms;
+    }
+
+    &.slow {
+        animation-duration: 2s;
+    }
+
+    &.slower {
+        animation-duration: 3s;
+    }
+
+    @media (print), (prefers-reduced-motion: reduce) {
+        animation-duration: 1ms !important;
+        transition-duration: 1ms !important;
+        animation-iteration-count: 1 !important;
+    }
+}
+
+.fadeIn {
+    animation-name: fadeIn;
+}
+
+.zoomIn {
+    animation-name: zoomIn;
+}
+
+.growWidth {
+    animation-name: growWidth;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes zoomIn {
+    from {
+        opacity: 0;
+        transform: scale3d(0.3, 0.3, 0.3);
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+@keyframes growWidth {
+    from {
+        width: 0;
+    }
+
+    to {
+        width: 100%;
+    }
+}
