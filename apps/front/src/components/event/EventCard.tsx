@@ -1,7 +1,7 @@
 import React from 'react';
 import { EventWithCountsDto } from '@wishlist/common-types';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
-import HistoryIcon from '@mui/icons-material/History';
+import TaskAltIcon from '@mui/icons-material/TaskAlt';
 import { DateTime } from 'luxon';
 import { makeStyles } from '@mui/styles';
 import { Card } from '../Card';
@@ -47,10 +47,11 @@ const useStyles = makeStyles((theme: Theme) => ({
     flexBasis: '5%',
   },
   past: {
+    display: 'flex',
     position: 'absolute',
     right: '-5px',
     top: '-5px',
-    color: theme.palette.warning.light,
+    color: theme.palette.success.light,
   },
   disabled: {
     backgroundColor: '#f7f7f7',
@@ -86,7 +87,7 @@ export const EventCard = ({ event }: EventCardProps) => {
       </Stack>
       {past && (
         <div className={classes.past}>
-          <HistoryIcon />
+          <TaskAltIcon />
         </div>
       )}
     </Card>

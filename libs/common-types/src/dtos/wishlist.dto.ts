@@ -16,7 +16,7 @@ import { AddItemInputDto, ItemDto } from './item.dto';
 import { Type } from 'class-transformer';
 
 export class WishlistConfigDto {
-  hideItems: boolean;
+  hide_items: boolean;
 }
 
 export class MiniWishlistDto {

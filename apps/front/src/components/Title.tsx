@@ -10,6 +10,9 @@ const useStyles = makeStyles((theme: Theme) => ({
     fontSize: '1.6rem',
     letterSpacing: '.05em',
     textAlign: 'center',
+    [theme.breakpoints.up('sm')]: {
+      marginBottom: '60px',
+    },
   },
 }));
 

@@ -1,6 +1,7 @@
 import {
   DetailedWishlistDto,
   MiniWishlistDto,
+  WishlistConfigDto,
   WishlistWithEventsDto,
   WishlistWithOwnerDto,
 } from '@wishlist/common-types';
@@ -10,8 +11,8 @@ import { toMiniEventDto } from '../event/event.mapper';
 import { toItemDto } from '../item/item.mapper';
 import { displayItemSensitiveInformations, showItem } from '../item/item.utils';
 
-function getConfig(entity: WishlistEntity) {
-  return { hideItems: entity.hideItems };
+function getConfig(entity: WishlistEntity): WishlistConfigDto {
+  return { hide_items: entity.hideItems };
 }
 
 export function toMiniWishlistDto(entity: WishlistEntity): MiniWishlistDto {
