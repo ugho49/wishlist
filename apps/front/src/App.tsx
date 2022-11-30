@@ -1,17 +1,17 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
-import { LoginPage } from './pages/LoginPage';
-import { RegisterPage } from './pages/RegisterPage';
-import { EventListPage } from './pages/EventListPage';
+import { LoginPage } from './components/auth/LoginPage';
+import { RegisterPage } from './components/auth/RegisterPage';
+import { EventListPage } from './components/event/EventListPage';
 import { useSelector } from 'react-redux';
 import { RootState } from './core';
-import { UserProfilePage } from './pages/UserProfilePage';
-import { WishlistListPage } from './pages/WishlistListPage';
+import { UserProfilePage } from './components/user/UserProfilePage';
+import { WishlistListPage } from './components/wishlist/WishlistListPage';
 import { AnonymousRouteContainerOutlet } from './core/router/outlet/AnonymousRouteContainerOutlet';
 import { PrivateRouteContainerOutlet } from './core/router/outlet/PrivateRouteContainerOutlet';
 import { AdminRouteOutlet } from './core/router/outlet/AdminRouteOutlet';
-import { AdminPage } from './pages/AdminPage';
-import { WishlistPage } from './pages/WishlistPage';
-import { EventPage } from './pages/EventPage';
+import { AdminPage } from './components/admin/AdminPage';
+import { WishlistPage } from './components/wishlist/WishlistPage';
+import { EventPage } from './components/event/EventPage';
 
 const mapState = (state: RootState) => ({ accessToken: state.auth.accessToken });
 

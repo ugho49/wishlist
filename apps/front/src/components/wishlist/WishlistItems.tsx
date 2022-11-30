@@ -1,30 +1,49 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { DetailedWishlistDto } from '@wishlist/common-types';
 import { ItemCard } from '../item/ItemCard';
-import { Box, Button } from '@mui/material';
+import { Box, Button, Grid, Stack } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import { AutoExtendedFab } from '../AutoExtendedFab';
+import { AutoExtendedFab } from '../common/AutoExtendedFab';
+import { ItemFormDialog } from '../item/ItemFormDialog';
 
-export type WishlistItemsProps = {
+export type WishlistTabItemsProps = {
   wishlist: DetailedWishlistDto;
 };
 
-export const WishlistItems = ({ wishlist }: WishlistItemsProps) => {
+export const WishlistItems = ({ wishlist }: WishlistTabItemsProps) => {
+  const [openItemFormDialog, setOpenItemFormDialog] = useState(false);
+  const nbOfItems = wishlist.items.length;
+
+  const addItem = () => {
+    setOpenItemFormDialog(true);
+  };
+
   return (
     <Box className="items">
-      {wishlist.items.map((item) => (
-        <ItemCard item={item} key={item.id} />
-      ))}
+      {nbOfItems > 0 && (
+        <>
+          <Grid container spacing={2}>
+            {wishlist.items.map((item) => (
+              <Grid item xs={12} md={6} key={item.id}>
+                <ItemCard item={item} />
+              </Grid>
+            ))}
+          </Grid>
 
-      {wishlist.items.length === 0 && (
-        <Box>
-          {/*TODO -->*/}
-          <div>Aucun souhaits</div>
-          <Button>Ajouter un souhait</Button>
-        </Box>
+          <AutoExtendedFab label="Ajouter un souhait" icon={<AddIcon />} color="secondary" onClick={() => addItem()} />
+        </>
       )}
 
-      {wishlist.items.length > 0 && <AutoExtendedFab label="Ajouter un souhait" icon={<AddIcon />} color="secondary" />}
+      {nbOfItems === 0 && (
+        <Stack alignItems="center" gap={2} sx={{ marginTop: '50px' }}>
+          <Button variant="contained" color="secondary" onClick={() => addItem()}>
+            Ajouter un souhait
+          </Button>
+          <span>Cette liste ne contient aucun souhait.</span>
+        </Stack>
+      )}
+
+      <ItemFormDialog mode="create" open={openItemFormDialog} handleClose={() => setOpenItemFormDialog(false)} />
     </Box>
   );
 };

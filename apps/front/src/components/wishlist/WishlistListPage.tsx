@@ -1,16 +1,18 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Box, Grid } from '@mui/material';
-import { Title } from '../components/Title';
-import { useApi, useCustomSearchParams } from '@wishlist/common-front';
-import { wishlistApiRef } from '../core/api/wishlist.api';
+import { Box, Button, Grid, Stack } from '@mui/material';
+import { Title } from '../common/Title';
+import { RouterLink, useApi, useCustomSearchParams } from '@wishlist/common-front';
+import { wishlistApiRef } from '../../core/api/wishlist.api';
 import { useAsync } from 'react-use';
-import { Pagination } from '../components/Pagination';
-import { WishlistCard } from '../components/wishlist/WishlistCard';
-import { Loader } from '../components/Loader';
+import { Pagination } from '../common/Pagination';
+import { WishlistCard } from './WishlistCard';
+import { Loader } from '../common/Loader';
 import AddIcon from '@mui/icons-material/Add';
-import { AutoExtendedFab } from '../components/AutoExtendedFab';
+import { AutoExtendedFab } from '../common/AutoExtendedFab';
 
 type SearchType = { page: string };
+
+const CREATE_LIST_ROUTE = '/wishlists/new';
 
 export const WishlistListPage = () => {
   const api = useApi(wishlistApiRef);
@@ -56,16 +58,17 @@ export const WishlistListPage = () => {
             onChange={(value) => setCurrentPage(value)}
           />
 
-          <AutoExtendedFab label="Créer une liste" icon={<AddIcon />} color="secondary" to="/wishlists/new" />
+          <AutoExtendedFab label="Créer une liste" icon={<AddIcon />} color="secondary" to={CREATE_LIST_ROUTE} />
         </>
       )}
 
       {totalElements === 0 && !loading && (
-        <div>
-          {/*TODO: Message when no elements*/}
-          Vous n'avez pas de liste
-          <button>Ajouter une liste</button>
-        </div>
+        <Stack alignItems="center" gap={2} sx={{ marginTop: '50px' }}>
+          <span>Vous n'avez aucune liste pour le moment.</span>
+          <Button component={RouterLink} variant="contained" color="secondary" to={CREATE_LIST_ROUTE}>
+            Ajouter une liste
+          </Button>
+        </Stack>
       )}
     </Box>
   );

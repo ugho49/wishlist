@@ -4,7 +4,7 @@ import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import TaskAltIcon from '@mui/icons-material/TaskAlt';
 import { DateTime } from 'luxon';
 import { makeStyles } from '@mui/styles';
-import { Card } from '../Card';
+import { Card } from '../common/Card';
 import { Stack, Theme } from '@mui/material';
 import clsx from 'clsx';
 

@@ -1,16 +1,18 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useApi, useCustomSearchParams } from '@wishlist/common-front';
-import { wishlistApiRef } from '../core/api/wishlist.api';
+import { RouterLink, useApi, useCustomSearchParams } from '@wishlist/common-front';
+import { wishlistApiRef } from '../../core/api/wishlist.api';
 import { useAsync } from 'react-use';
-import { Box, Grid } from '@mui/material';
-import { Title } from '../components/Title';
-import { EventCard } from '../components/event/EventCard';
-import { Pagination } from '../components/Pagination';
-import { Loader } from '../components/Loader';
+import { Box, Button, Grid, Stack } from '@mui/material';
+import { Title } from '../common/Title';
+import { EventCard } from './EventCard';
+import { Pagination } from '../common/Pagination';
+import { Loader } from '../common/Loader';
 import AddIcon from '@mui/icons-material/Add';
-import { AutoExtendedFab } from '../components/AutoExtendedFab';
+import { AutoExtendedFab } from '../common/AutoExtendedFab';
 
 type SearchType = { page: string };
+
+const CREATE_EVENT_ROUTE = '/events/new';
 
 export const EventListPage = () => {
   const api = useApi(wishlistApiRef);
@@ -56,16 +58,17 @@ export const EventListPage = () => {
             onChange={(value) => setCurrentPage(value)}
           />
 
-          <AutoExtendedFab label="Créer un évènement" icon={<AddIcon />} color="secondary" to="/events/new" />
+          <AutoExtendedFab label="Créer un évènement" icon={<AddIcon />} color="secondary" to={CREATE_EVENT_ROUTE} />
         </>
       )}
 
       {totalElements === 0 && !loading && (
-        <div>
-          {/*TODO: Message when no elements*/}
-          Vous n'avez pas d'évènements
-          <button>Ajouter un évènement</button>
-        </div>
+        <Stack alignItems="center" gap={2} sx={{ marginTop: '50px' }}>
+          <span>Vous n'avez pas d'évènements pour le moment.</span>
+          <Button component={RouterLink} variant="contained" color="secondary" to={CREATE_EVENT_ROUTE}>
+            Ajouter un évènement
+          </Button>
+        </Stack>
       )}
     </Box>
   );

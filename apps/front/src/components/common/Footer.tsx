@@ -5,7 +5,7 @@ import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import PersonIcon from '@mui/icons-material/Person';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
-import { RootState } from '../core';
+import { RootState } from '../../core';
 import { useSelector } from 'react-redux';
 import { makeStyles } from '@mui/styles';
 

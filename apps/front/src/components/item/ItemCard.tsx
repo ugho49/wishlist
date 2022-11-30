@@ -1,5 +1,6 @@
 import React from 'react';
 import { ItemDto } from '@wishlist/common-types';
+import { Card } from '../common/Card';
 
 export type ItemCardProps = {
   item: ItemDto;
@@ -7,9 +8,9 @@ export type ItemCardProps = {
 
 export const ItemCard = ({ item }: ItemCardProps) => {
   return (
-    <div>
+    <Card>
       <span>{item.name}</span>
       <p>{item.description}</p>
-    </div>
+    </Card>
   );
 };

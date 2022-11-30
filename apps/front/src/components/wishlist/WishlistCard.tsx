@@ -1,29 +1,13 @@
-import React from 'react';
-import { MiniEventDto, WishlistWithEventsDto, WishlistWithOwnerDto } from '@wishlist/common-types';
+import React, { useState } from 'react';
+import { WishlistWithEventsDto, WishlistWithOwnerDto } from '@wishlist/common-types';
 import { makeStyles } from '@mui/styles';
-import { Card } from '../Card';
-import {
-  Avatar,
-  Chip,
-  Dialog,
-  DialogTitle,
-  IconButton,
-  List,
-  ListItemAvatar,
-  ListItemButton,
-  ListItemText,
-  Stack,
-  Theme,
-  Tooltip,
-  useTheme,
-} from '@mui/material';
+import { Card } from '../common/Card';
+import { Chip, Stack, Theme, Tooltip } from '@mui/material';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import PublicIcon from '@mui/icons-material/Public';
-import CloseIcon from '@mui/icons-material/Close';
 import PersonIcon from '@mui/icons-material/Person';
-import { useNavigate } from 'react-router-dom';
-import { DateTime } from 'luxon';
+import { WishlistEventsDialog } from './WishlistEventsDialog';
 
 export type WishlistCardProps = {
   wishlist: WishlistWithEventsDto | WishlistWithOwnerDto;
@@ -56,52 +40,9 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
 }));
 
-interface EventDialogProps {
-  open: boolean;
-  handleClose: () => void;
-  events: MiniEventDto[];
-}
-
-function EventsDialog({ open, events, handleClose }: EventDialogProps) {
-  const theme = useTheme();
-  const navigate = useNavigate();
-
-  const handleEventClick = (eventId: string) => {
-    navigate(`/events/${eventId}`);
-  };
-
-  return (
-    <Dialog onClose={() => handleClose()} open={open}>
-      <DialogTitle>
-        <Stack direction="row" alignItems="center" justifyContent="space-between">
-          <span>Sélectionner un évènement</span>
-          <IconButton onClick={() => handleClose()}>
-            <CloseIcon />
-          </IconButton>
-        </Stack>
-      </DialogTitle>
-      <List sx={{ pt: 0 }}>
-        {events.map((event) => (
-          <ListItemButton onClick={() => handleEventClick(event.id)} key={event.id}>
-            <ListItemAvatar>
-              <Avatar sx={{ bgcolor: theme.palette.primary.light, color: theme.palette.background.paper }}>
-                <CalendarMonthIcon />
-              </Avatar>
-            </ListItemAvatar>
-            <ListItemText
-              primary={event.title}
-              secondary={DateTime.fromISO(event.event_date).toLocaleString(DateTime.DATE_MED)}
-            />
-          </ListItemButton>
-        ))}
-      </List>
-    </Dialog>
-  );
-}
-
 export const WishlistCard = ({ wishlist }: WishlistCardProps) => {
   const classes = useStyles();
-  const [openEventDialog, setOpenEventDialog] = React.useState(false);
+  const [openEventDialog, setOpenEventDialog] = useState(false);
 
   // TODO: Add opacity and checkmark if all events are pasts
 
@@ -145,7 +86,11 @@ export const WishlistCard = ({ wishlist }: WishlistCardProps) => {
         </Stack>
       </Card>
       {'events' in wishlist && (
-        <EventsDialog open={openEventDialog} handleClose={() => setOpenEventDialog(false)} events={wishlist.events} />
+        <WishlistEventsDialog
+          open={openEventDialog}
+          handleClose={() => setOpenEventDialog(false)}
+          events={wishlist.events}
+        />
       )}
     </>
   );
