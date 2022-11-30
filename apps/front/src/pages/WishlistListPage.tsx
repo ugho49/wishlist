@@ -48,9 +48,7 @@ export const WishlistListPage = () => {
     <Box>
       <Title>Mes listes</Title>
 
-      {loading && <Loader />}
-
-      {!loading && (
+      <Loader loading={loading}>
         <Grid container spacing={2}>
           {(value?.resources || []).map((wishlist) => (
             <Grid item xs={12} md={6} key={wishlist.id}>
@@ -58,7 +56,7 @@ export const WishlistListPage = () => {
             </Grid>
           ))}
         </Grid>
-      )}
+      </Loader>
 
       {totalElements > 0 && (
         <>

@@ -10,6 +10,7 @@ import { AnonymousRouteContainerOutlet } from './core/router/outlet/AnonymousRou
 import { PrivateRouteContainerOutlet } from './core/router/outlet/PrivateRouteContainerOutlet';
 import { AdminRouteOutlet } from './core/router/outlet/AdminRouteOutlet';
 import { AdminPage } from './pages/AdminPage';
+import { WishlistPage } from './pages/WishlistPage';
 
 const mapState = (state: RootState) => ({ accessToken: state.auth.accessToken });
 
@@ -50,7 +51,7 @@ export const App = () => {
           <Route path="wishlists">
             <Route index element={<WishlistListPage />} />
             {/*<Route path="new" element={<WishlistForm />} />*/}
-            {/*<Route path=":wishlistId" element={<WishlistDetails />} />*/}
+            <Route path=":wishlistId" element={<WishlistPage />} />
             {/*<Route path=":wishlistId/edit" element={<EditWishlist />} />*/}
           </Route>
 

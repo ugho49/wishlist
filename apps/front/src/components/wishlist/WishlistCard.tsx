@@ -14,9 +14,9 @@ import {
   ListItemText,
   Stack,
   Theme,
+  Tooltip,
   useTheme,
 } from '@mui/material';
-import clsx from 'clsx';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import PublicIcon from '@mui/icons-material/Public';
@@ -29,16 +29,6 @@ export type WishlistCardProps = {
 };
 
 const useStyles = makeStyles((theme: Theme) => ({
-  root: {
-    position: 'relative',
-  },
-  public: {
-    display: 'flex',
-    position: 'absolute',
-    right: '-5px',
-    top: '-5px',
-    color: theme.palette.info.light,
-  },
   wishlist: {
     color: theme.palette.text.secondary,
     flexGrow: 1,
@@ -116,11 +106,16 @@ export const WishlistCard = ({ wishlist }: WishlistCardProps) => {
 
   return (
     <>
-      <Card to={`/wishlists/${wishlist.id}`} className={clsx(classes.root, 'animated fadeIn fast')}>
+      <Card to={`/wishlists/${wishlist.id}`} className="animated fadeIn fast">
         <Stack direction="row" justifyContent="space-between">
           <div className={classes.wishlist}>
             <div className={classes.title}>{wishlist.title}</div>
-            <Stack alignItems="center">
+            <Stack direction="row" justifyContent="center" alignItems="center" gap={1}>
+              {!wishlist.config.hide_items && (
+                <Tooltip title="Tout le monde peut ajouter, cocher ou voir les souhaits cochés, même le créateur de la liste">
+                  <Chip label="Publique" color="info" size="small" icon={<PublicIcon />} />
+                </Tooltip>
+              )}
               {'events' in wishlist && (
                 <Chip
                   color="default"
@@ -145,11 +140,6 @@ export const WishlistCard = ({ wishlist }: WishlistCardProps) => {
             <KeyboardArrowRightIcon />
           </div>
         </Stack>
-        {!wishlist.config.hide_items && (
-          <div className={classes.public}>
-            <PublicIcon />
-          </div>
-        )}
       </Card>
       {'events' in wishlist && (
         <EventsDialog open={openEventDialog} handleClose={() => setOpenEventDialog(false)} events={wishlist.events} />

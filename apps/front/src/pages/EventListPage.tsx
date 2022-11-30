@@ -48,9 +48,7 @@ export const EventListPage = () => {
     <Box>
       <Title>Évènements</Title>
 
-      {loading && <Loader />}
-
-      {!loading && (
+      <Loader loading={loading}>
         <Grid container spacing={2}>
           {(value?.resources || []).map((event) => (
             <Grid item xs={12} md={6} key={event.id}>
@@ -58,7 +56,7 @@ export const EventListPage = () => {
             </Grid>
           ))}
         </Grid>
-      )}
+      </Loader>
 
       {totalElements > 0 && (
         <>

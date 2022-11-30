@@ -1,6 +1,7 @@
 import React, { PropsWithChildren } from 'react';
 import { Theme } from '@mui/material';
 import { makeStyles } from '@mui/styles';
+import clsx from 'clsx';
 
 const useStyles = makeStyles((theme: Theme) => ({
   title: {
@@ -10,14 +11,20 @@ const useStyles = makeStyles((theme: Theme) => ({
     fontSize: '1.6rem',
     letterSpacing: '.05em',
     textAlign: 'center',
-    [theme.breakpoints.up('sm')]: {
-      marginBottom: '60px',
+    '&:not(.smallMarginBottom)': {
+      [theme.breakpoints.up('sm')]: {
+        marginBottom: '60px',
+      },
     },
   },
 }));
 
-export const Title = ({ children }: PropsWithChildren) => {
+export type TitleProps = {
+  smallMarginBottom?: boolean;
+};
+
+export const Title = ({ children, smallMarginBottom = false }: PropsWithChildren<TitleProps>) => {
   const classes = useStyles();
 
-  return <h1 className={classes.title}>{children}</h1>;
+  return <h1 className={clsx(classes.title, smallMarginBottom && 'smallMarginBottom')}>{children}</h1>;
 };
