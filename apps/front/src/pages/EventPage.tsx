@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Chip, Stack, Tab, tabClasses, Tabs, Theme } from '@mui/material';
+import { Box, Chip, Grid, Stack, Tab, tabClasses, Tabs, Theme } from '@mui/material';
 import { Title } from '../components/Title';
 import { Loader } from '../components/Loader';
 import { useParams } from 'react-router-dom';
@@ -11,6 +11,9 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { makeStyles } from '@mui/styles';
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
+import { WishlistCard } from '../components/wishlist/WishlistCard';
+import { AutoExtendedFab } from '../components/AutoExtendedFab';
+import AddIcon from '@mui/icons-material/Add';
 
 enum TabTypes {
   lists,
@@ -102,7 +105,19 @@ export const EventPage = () => {
               {/*  TODO: Add settings page for owner of the Event */}
             </Tabs>
 
-            {tabType === TabTypes.lists && <div>Lists</div>}
+            {tabType === TabTypes.lists && (
+              <>
+                <Grid container spacing={2}>
+                  {event.wishlists.map((wishlist) => (
+                    <Grid item xs={12} md={6} key={wishlist.id}>
+                      <WishlistCard wishlist={wishlist} />
+                    </Grid>
+                  ))}
+                </Grid>
+
+                <AutoExtendedFab label="Ajouter une liste" color="secondary" icon={<AddIcon />} />
+              </>
+            )}
             {tabType === TabTypes.details && <div>Details</div>}
           </>
         )}

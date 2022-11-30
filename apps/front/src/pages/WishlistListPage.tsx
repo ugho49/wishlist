@@ -1,29 +1,18 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Box, Fab, fabClasses, Grid } from '@mui/material';
+import { Box, Grid } from '@mui/material';
 import { Title } from '../components/Title';
-import { RouterLink, useApi, useCustomSearchParams } from '@wishlist/common-front';
+import { useApi, useCustomSearchParams } from '@wishlist/common-front';
 import { wishlistApiRef } from '../core/api/wishlist.api';
 import { useAsync } from 'react-use';
 import { Pagination } from '../components/Pagination';
 import { WishlistCard } from '../components/wishlist/WishlistCard';
 import { Loader } from '../components/Loader';
 import AddIcon from '@mui/icons-material/Add';
-import { makeStyles } from '@mui/styles';
+import { AutoExtendedFab } from '../components/AutoExtendedFab';
 
 type SearchType = { page: string };
 
-const useStyles = makeStyles(() => ({
-  fab: {
-    [`&.${fabClasses.root}`]: {
-      position: 'fixed',
-      bottom: 72,
-      right: 16,
-    },
-  },
-}));
-
 export const WishlistListPage = () => {
-  const classes = useStyles();
   const api = useApi(wishlistApiRef);
   const [totalElements, setTotalElements] = useState(0);
   const [queryParams, setQueryParams] = useCustomSearchParams<SearchType>({ page: '1' });
@@ -67,27 +56,7 @@ export const WishlistListPage = () => {
             onChange={(value) => setCurrentPage(value)}
           />
 
-          <Fab
-            className={classes.fab}
-            sx={{ display: { xs: 'none', md: 'flex' } }}
-            color="secondary"
-            component={RouterLink}
-            to="/wishlists/new"
-            variant="extended"
-          >
-            <AddIcon sx={{ mr: 1 }} />
-            Créer une liste
-          </Fab>
-
-          <Fab
-            className={classes.fab}
-            sx={{ display: { xs: 'flex', md: 'none' } }}
-            color="secondary"
-            component={RouterLink}
-            to="/wishlists/new"
-          >
-            <AddIcon />
-          </Fab>
+          <AutoExtendedFab label="Créer une liste" icon={<AddIcon />} color="secondary" to="/wishlists/new" />
         </>
       )}
 

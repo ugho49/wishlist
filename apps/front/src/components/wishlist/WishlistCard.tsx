@@ -21,6 +21,7 @@ import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import PublicIcon from '@mui/icons-material/Public';
 import CloseIcon from '@mui/icons-material/Close';
+import PersonIcon from '@mui/icons-material/Person';
 import { useNavigate } from 'react-router-dom';
 import { DateTime } from 'luxon';
 
@@ -129,10 +130,12 @@ export const WishlistCard = ({ wishlist }: WishlistCardProps) => {
                 />
               )}
               {'owner' in wishlist && (
-                <>
-                  {/* TODO --> */}
-                  {/*<div className="owner">{`${wishlist.owner.firstname} ${wishlist.owner.lastname}`}</div>*/}
-                </>
+                <Chip
+                  color="default"
+                  size="small"
+                  icon={<PersonIcon />}
+                  label={`${wishlist.owner.firstname} ${wishlist.owner.lastname}`}
+                />
               )}
             </Stack>
           </div>
