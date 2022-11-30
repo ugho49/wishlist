@@ -11,6 +11,7 @@ import { PrivateRouteContainerOutlet } from './core/router/outlet/PrivateRouteCo
 import { AdminRouteOutlet } from './core/router/outlet/AdminRouteOutlet';
 import { AdminPage } from './pages/AdminPage';
 import { WishlistPage } from './pages/WishlistPage';
+import { EventPage } from './pages/EventPage';
 
 const mapState = (state: RootState) => ({ accessToken: state.auth.accessToken });
 
@@ -44,7 +45,7 @@ export const App = () => {
           <Route path="events">
             <Route index element={<EventListPage />} />
             {/*<Route path="new" element={<CreateEvent />} />*/}
-            {/*<Route path=":eventId" element={<EventDetails />} />*/}
+            <Route path=":eventId" element={<EventPage />} />
             {/*<Route path=":eventId/edit" element={<EditEvent />} />*/}
           </Route>
 

@@ -59,7 +59,7 @@ export function buildApi(): WishlistApi {
     },
     event: {
       getAll: (params) => client.get(`/event`, { params }).then((res) => res.data),
-      geById: (eventId) => client.get(`/event/${eventId}`).then((res) => res.data),
+      getById: (eventId) => client.get(`/event/${eventId}`).then((res) => res.data),
       create: (data) => client.post('/event', data).then((res) => res.data),
       update: (eventId, data) => client.put(`/event/${eventId}`, data),
       delete: (eventId) => client.delete(`/event/${eventId}`),

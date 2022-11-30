@@ -65,7 +65,7 @@ export type WishlistApi = {
   };
 
   event: {
-    geById: (eventId: string) => Promise<DetailedEventDto>;
+    getById: (eventId: string) => Promise<DetailedEventDto>;
     getAll: (params: GetPaginationQueryDto) => Promise<PagedResponse<EventWithCountsDto>>;
     create: (data: CreateEventInputDto) => Promise<MiniEventDto>;
     update: (eventId: string, data: UpdateEventInputDto) => Promise<void>;

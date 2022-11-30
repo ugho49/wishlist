@@ -110,7 +110,7 @@ export const WishlistCard = ({ wishlist }: WishlistCardProps) => {
         <Stack direction="row" justifyContent="space-between">
           <div className={classes.wishlist}>
             <div className={classes.title}>{wishlist.title}</div>
-            <Stack direction="row" justifyContent="center" alignItems="center" gap={1}>
+            <Stack direction="row" justifyContent="center" alignItems="center" flexWrap="wrap" gap={1}>
               {!wishlist.config.hide_items && (
                 <Tooltip title="Tout le monde peut ajouter, cocher ou voir les souhaits cochés, même le créateur de la liste">
                   <Chip label="Publique" color="info" size="small" icon={<PublicIcon />} />

@@ -1,22 +1,19 @@
 import React, { useState } from 'react';
-import { Box, Chip, Stack, Tab, tabClasses, Tabs, Theme, Tooltip } from '@mui/material';
+import { Box, Chip, Stack, Tab, tabClasses, Tabs, Theme } from '@mui/material';
 import { Title } from '../components/Title';
 import { Loader } from '../components/Loader';
 import { useParams } from 'react-router-dom';
-import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck';
 import { useAsync } from 'react-use';
 import { useApi } from '@wishlist/common-front';
 import { wishlistApiRef } from '../core/api/wishlist.api';
-import { WishlistItems } from '../components/wishlist/WishlistItems';
-import { WishlistDetails } from '../components/wishlist/WishlistDetails';
+import PeopleIcon from '@mui/icons-material/People';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { makeStyles } from '@mui/styles';
-import PublicIcon from '@mui/icons-material/Public';
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 
 enum TabTypes {
-  items,
+  lists,
   details,
 }
 
@@ -36,26 +33,27 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
 }));
 
-export const WishlistPage = () => {
+export const EventPage = () => {
   const classes = useStyles();
-  const [tabType, setTabType] = useState<TabTypes>(TabTypes.items);
-  const params = useParams<'wishlistId'>();
-  const wishlistId = params.wishlistId || '';
+  const [tabType, setTabType] = useState<TabTypes>(TabTypes.lists);
+  const params = useParams<'eventId'>();
+  const eventId = params.eventId || '';
   const api = useApi(wishlistApiRef);
-  const { value: wishlist, loading } = useAsync(() => api.wishlist.getById(wishlistId), [wishlistId]);
+  const { value: event, loading } = useAsync(() => api.event.getById(eventId), [eventId]);
+  const nbAttendees = (event?.attendees || []).length + 1;
 
   return (
     <Box>
       <Loader loading={loading}>
-        {!wishlist && (
+        {!event && (
           <div>
             {/* TODO --> */}
-            <span>List not found</span>
+            <span>Event not found</span>
           </div>
         )}
-        {wishlist && (
+        {event && (
           <>
-            <Title smallMarginBottom>{wishlist.title}</Title>
+            <Title smallMarginBottom>{event.title}</Title>
 
             <Stack
               direction="row"
@@ -65,26 +63,21 @@ export const WishlistPage = () => {
               sx={{ marginBottom: '20px' }}
               gap={1}
             >
-              {!wishlist.config.hide_items && (
-                <Tooltip title="Tout le monde peut ajouter, cocher ou voir les souhaits cochés, même le créateur de la liste">
-                  <Chip label="Publique" color="info" variant="outlined" size="small" icon={<PublicIcon />} />
-                </Tooltip>
-              )}
               <Chip
                 variant="outlined"
                 size="small"
                 icon={<PersonOutlineOutlinedIcon />}
-                label={`Créée par ${wishlist.owner.firstname} ${wishlist.owner.lastname}`}
+                label={`Créée par ${event.created_by.firstname} ${event.created_by.lastname}`}
               />
               <Chip
                 variant="outlined"
                 size="small"
-                icon={<CalendarMonthIcon />}
-                label={`${wishlist.events.length} ${wishlist.events.length > 1 ? 'évènements' : 'évènement'}`}
+                icon={<PeopleIcon />}
+                label={`${nbAttendees} ${nbAttendees > 1 ? 'participants' : 'participant'}`}
               />
             </Stack>
 
-            {wishlist.description && <Box className={classes.description}>{wishlist.description}</Box>}
+            {event.description && <Box className={classes.description}>{event.description}</Box>}
 
             <Tabs
               value={tabType}
@@ -94,9 +87,9 @@ export const WishlistPage = () => {
             >
               <Tab
                 className={classes.tab}
-                icon={<PlaylistAddCheckIcon />}
-                value={TabTypes.items}
-                label="Souhaits"
+                icon={<FormatListBulletedIcon />}
+                value={TabTypes.lists}
+                label="Listes"
                 iconPosition="start"
               />
               <Tab
@@ -106,11 +99,11 @@ export const WishlistPage = () => {
                 label="Détails"
                 iconPosition="start"
               />
-              {/*  TODO: Add settings page for owner of the list */}
+              {/*  TODO: Add settings page for owner of the Event */}
             </Tabs>
 
-            {tabType === TabTypes.items && <WishlistItems wishlist={wishlist} />}
-            {tabType === TabTypes.details && <WishlistDetails wishlist={wishlist} />}
+            {tabType === TabTypes.lists && <div>Lists</div>}
+            {tabType === TabTypes.details && <div>Details</div>}
           </>
         )}
       </Loader>
