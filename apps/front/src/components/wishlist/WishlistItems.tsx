@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { DetailedWishlistDto } from '@wishlist/common-types';
+import React, { useEffect, useMemo, useState } from 'react';
+import { DetailedWishlistDto, ItemDto } from '@wishlist/common-types';
 import { ItemCard } from '../item/ItemCard';
 import { Box, Button, Grid, Stack } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
@@ -12,7 +12,12 @@ export type WishlistTabItemsProps = {
 
 export const WishlistItems = ({ wishlist }: WishlistTabItemsProps) => {
   const [openItemFormDialog, setOpenItemFormDialog] = useState(false);
-  const nbOfItems = wishlist.items.length;
+  const [items, setItems] = useState<ItemDto[]>([]);
+  const nbOfItems = useMemo(() => items.length, [items]);
+
+  useEffect(() => {
+    setItems(wishlist.items);
+  }, [wishlist]);
 
   const addItem = () => {
     setOpenItemFormDialog(true);
@@ -23,7 +28,7 @@ export const WishlistItems = ({ wishlist }: WishlistTabItemsProps) => {
       {nbOfItems > 0 && (
         <>
           <Grid container spacing={2}>
-            {wishlist.items.map((item) => (
+            {items.map((item) => (
               <Grid item xs={12} md={6} key={item.id}>
                 <ItemCard item={item} />
               </Grid>
@@ -43,7 +48,13 @@ export const WishlistItems = ({ wishlist }: WishlistTabItemsProps) => {
         </Stack>
       )}
 
-      <ItemFormDialog mode="create" open={openItemFormDialog} handleClose={() => setOpenItemFormDialog(false)} />
+      <ItemFormDialog
+        mode="create"
+        wishlistId={wishlist.id}
+        open={openItemFormDialog}
+        handleClose={() => setOpenItemFormDialog(false)}
+        handleCreate={(item) => setItems((prevState) => [item, ...prevState])}
+      />
     </Box>
   );
 };

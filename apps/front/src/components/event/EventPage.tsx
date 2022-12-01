@@ -13,6 +13,8 @@ import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 import { EventTabWishlists } from './EventTabWishlists';
 import { Description } from '../common/Description';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import { DateTime } from 'luxon';
 
 enum TabTypes {
   lists,
@@ -68,6 +70,12 @@ export const EventPage = () => {
                 size="small"
                 icon={<PeopleIcon />}
                 label={`${nbAttendees} ${nbAttendees > 1 ? 'participants' : 'participant'}`}
+              />
+              <Chip
+                variant="outlined"
+                size="small"
+                icon={<AccessTimeIcon />}
+                label={DateTime.fromISO(event.event_date).toLocaleString(DateTime.DATE_HUGE)}
               />
             </Stack>
 

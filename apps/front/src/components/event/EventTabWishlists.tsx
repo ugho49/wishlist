@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { DetailedEventDto } from '@wishlist/common-types';
 import { Box, Button, Grid, Stack } from '@mui/material';
 import { WishlistCard } from '../wishlist/WishlistCard';
@@ -11,8 +11,8 @@ export type EventTabWishlistsProps = {
 };
 
 export const EventTabWishlists = ({ event }: EventTabWishlistsProps) => {
-  const nbOfItems = event.wishlists.length;
-  const addListRoute = `/wishlists/new?from-event=${event.id}`;
+  const nbOfItems = useMemo(() => event.wishlists.length, [event]);
+  const addListRoute = useMemo(() => `/wishlists/new?from-event=${event.id}`, [event]);
 
   return (
     <Box className="wishlists">
