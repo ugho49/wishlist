@@ -7,9 +7,14 @@ function convertToUrlSearchParam<T>(params?: ParamType<T>): URLSearchParamsInit 
   const urlSearchParams = new URLSearchParams();
   if (params) {
     Object.entries(params).forEach(([key, value]) => {
-      if (value) {
-        // @ts-ignore
+      if (value && typeof value === 'string') {
         urlSearchParams.append(key, value);
+      }
+
+      if (value && Array.isArray(value)) {
+        for (const v of value) {
+          urlSearchParams.append(key, v);
+        }
       }
     });
   }
@@ -23,7 +28,6 @@ export const useCustomSearchParams = <T>(defaultParams?: ParamType<T>): CustomSe
   const [search, setSearch] = useSearchParams(convertToUrlSearchParam(defaultParams));
 
   const searchAsObject = useMemo(() => {
-    // @ts-ignore
     return Object.fromEntries(new URLSearchParams(search)) as T;
   }, [search]);
 
