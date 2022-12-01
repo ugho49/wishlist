@@ -7,6 +7,7 @@ import { useInterval } from 'usehooks-ts';
 import { AuthService } from '../services/auth.service';
 import { logout } from '../store/features';
 import { wishlistApiRef } from '../api/wishlist.api';
+import { useSnackbar } from 'notistack';
 
 const mapState = (state: RootState) => ({ accessToken: state.auth.accessToken });
 const accessTokenService = new AuthService().accessTokenService;
@@ -16,6 +17,7 @@ export const AxiosInterceptor: React.FC = () => {
   const { axios } = useApi(wishlistApiRef);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { enqueueSnackbar } = useSnackbar();
 
   const redirectToLogin = () => navigate('/login');
 
@@ -25,7 +27,7 @@ export const AxiosInterceptor: React.FC = () => {
   useInterval(() => {
     // TODO change this to refreshToken -->
     if (accessToken && accessTokenService.isExpired(accessToken)) {
-      // TODO: TOAST "You have been disconnected"
+      enqueueSnackbar('Votre session à expiré', { variant: 'warning' });
       logout(dispatch);
       redirectToLogin();
     }

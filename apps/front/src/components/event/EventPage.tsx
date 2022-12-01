@@ -9,7 +9,6 @@ import { wishlistApiRef } from '../../core/api/wishlist.api';
 import PeopleIcon from '@mui/icons-material/People';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { makeStyles } from '@mui/styles';
-import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 import { EventTabWishlists } from './EventTabWishlists';
 import { Description } from '../common/Description';
@@ -59,12 +58,6 @@ export const EventPage = () => {
               sx={{ marginBottom: '20px' }}
               gap={1}
             >
-              <Chip
-                variant="outlined"
-                size="small"
-                icon={<PersonOutlineOutlinedIcon />}
-                label={`Créée par ${event.created_by.firstname} ${event.created_by.lastname}`}
-              />
               <Chip
                 variant="outlined"
                 size="small"

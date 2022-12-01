@@ -1,24 +1,28 @@
-import { Alert, Avatar, Box, Button, Checkbox, FormControlLabel, Grid, TextField, Typography } from '@mui/material';
+import { Alert, Avatar, Box, Button, Grid, TextField, Typography } from '@mui/material';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import { RouterLink, useApi } from '@wishlist/common-front';
 import { useDispatch } from 'react-redux';
-import { useState } from 'react';
+import { FormEvent, useState } from 'react';
 import { setTokens } from '../../core/store/features';
 import { AxiosError } from 'axios';
 import { wishlistApiRef } from '../../core/api/wishlist.api';
 import { LoginInputDto } from '@wishlist/common-types';
+import { useSnackbar } from 'notistack';
 
 export const LoginPage = () => {
   const api = useApi(wishlistApiRef);
   const dispatch = useDispatch();
+  const { enqueueSnackbar } = useSnackbar();
   const [form, setForm] = useState<LoginInputDto>({ email: '', password: '' });
   const [errors, setErrors] = useState<string[]>([]);
 
-  async function onSubmit(e: any) {
+  async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setErrors([]);
     try {
       const data = await api.auth.login(form);
+      enqueueSnackbar('Heureux de vous revoir 🤓', { variant: 'default' });
+
       dispatch(
         setTokens({
           accessToken: data.access_token,
@@ -73,7 +77,6 @@ export const LoginPage = () => {
           value={form.password}
           onChange={(e) => setForm({ ...form, password: e.target.value })}
         />
-        <FormControlLabel control={<Checkbox value="remember" color="primary" />} label="Remember me" />
         <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
           Sign In
         </Button>

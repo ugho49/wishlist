@@ -8,7 +8,7 @@ import { Pagination } from '../common/Pagination';
 import { WishlistCard } from './WishlistCard';
 import { Loader } from '../common/Loader';
 import AddIcon from '@mui/icons-material/Add';
-import { AutoExtendedFab } from '../common/AutoExtendedFab';
+import { FabAutoGrow } from '../common/FabAutoGrow';
 
 type SearchType = { page: string };
 
@@ -58,7 +58,7 @@ export const WishlistListPage = () => {
             onChange={(value) => setCurrentPage(value)}
           />
 
-          <AutoExtendedFab label="Créer une liste" icon={<AddIcon />} color="secondary" to={CREATE_LIST_ROUTE} />
+          <FabAutoGrow label="Créer une liste" icon={<AddIcon />} color="secondary" to={CREATE_LIST_ROUTE} />
         </>
       )}
 

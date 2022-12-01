@@ -1,9 +1,9 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { DetailedWishlistDto, ItemDto } from '@wishlist/common-types';
 import { ItemCard } from '../item/ItemCard';
 import { Box, Button, Grid, Stack } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import { AutoExtendedFab } from '../common/AutoExtendedFab';
+import { FabAutoGrow } from '../common/FabAutoGrow';
 import { ItemFormDialog } from '../item/ItemFormDialog';
 
 export type WishlistTabItemsProps = {
@@ -23,6 +23,16 @@ export const WishlistItems = ({ wishlist }: WishlistTabItemsProps) => {
     setOpenItemFormDialog(true);
   };
 
+  const updateItem = useCallback(
+    (updatedItem: ItemDto) => {
+      const copy = [...items];
+      const index = copy.findIndex((item) => item.id === updatedItem.id);
+      copy[index] = updatedItem;
+      setItems(copy);
+    },
+    [items]
+  );
+
   return (
     <Box className="items">
       {nbOfItems > 0 && (
@@ -30,12 +40,17 @@ export const WishlistItems = ({ wishlist }: WishlistTabItemsProps) => {
           <Grid container spacing={2}>
             {items.map((item) => (
               <Grid item xs={12} md={6} key={item.id}>
-                <ItemCard item={item} />
+                <ItemCard
+                  wishlistId={wishlist.id}
+                  item={item}
+                  handleUpdate={(newValue) => updateItem(newValue)}
+                  handleDelete={() => setItems((prevState) => prevState.filter((i) => i.id !== item.id))}
+                />
               </Grid>
             ))}
           </Grid>
 
-          <AutoExtendedFab label="Ajouter un souhait" icon={<AddIcon />} color="secondary" onClick={() => addItem()} />
+          <FabAutoGrow label="Ajouter un souhait" icon={<AddIcon />} color="secondary" onClick={() => addItem()} />
         </>
       )}
 

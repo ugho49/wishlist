@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { DetailedEventDto } from '@wishlist/common-types';
 import { Box, Button, Grid, Stack } from '@mui/material';
 import { WishlistCard } from '../wishlist/WishlistCard';
-import { AutoExtendedFab } from '../common/AutoExtendedFab';
+import { FabAutoGrow } from '../common/FabAutoGrow';
 import AddIcon from '@mui/icons-material/Add';
 import { RouterLink } from '@wishlist/common-front';
 
@@ -26,7 +26,7 @@ export const EventTabWishlists = ({ event }: EventTabWishlistsProps) => {
             ))}
           </Grid>
 
-          <AutoExtendedFab label="Ajouter une liste" color="secondary" icon={<AddIcon />} to={addListRoute} />
+          <FabAutoGrow label="Ajouter une liste" color="secondary" icon={<AddIcon />} to={addListRoute} />
         </>
       )}
 

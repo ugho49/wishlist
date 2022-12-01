@@ -1,5 +1,5 @@
-import React, { FormEvent, forwardRef, useState } from 'react';
-import { ItemDto } from '@wishlist/common-types';
+import React, { FormEvent, forwardRef, useEffect, useState } from 'react';
+import { AddItemInputDto, ItemDto } from '@wishlist/common-types';
 import {
   AppBar,
   Box,
@@ -10,7 +10,6 @@ import {
   Slide,
   Stack,
   TextField,
-  Theme,
   Toolbar,
   Typography,
 } from '@mui/material';
@@ -18,20 +17,29 @@ import { TransitionProps } from '@mui/material/transitions';
 import CloseIcon from '@mui/icons-material/Close';
 import SaveIcon from '@mui/icons-material/Save';
 import { CharsRemaining } from '../common/CharsRemaining';
-import { makeStyles } from '@mui/styles';
 import { InputLabel } from '../common/InputLabel';
 import { LoadingButton } from '@mui/lab';
 import { useApi } from '@wishlist/common-front';
 import { wishlistApiRef } from '../../core/api/wishlist.api';
+import { useSnackbar } from 'notistack';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { ConfirmButton } from '../common/ConfirmButton';
 
 const Transition = forwardRef((props: TransitionProps & { children: React.ReactElement }, ref: React.Ref<unknown>) => {
-  return <Slide direction="up" ref={ref} {...props} />;
+  const { children, ...other } = props;
+  return <Slide direction="up" ref={ref} {...other} children={children} />;
 });
 
 type ModeProps<T> = T extends 'create'
-  ? { mode: 'create'; item?: never; handleCreate: (item: ItemDto) => void; handleUpdate?: never }
+  ? { mode: 'create'; item?: never; handleCreate: (item: ItemDto) => void; handleUpdate?: never; handleDelete?: never }
   : T extends 'edit'
-  ? { mode: 'edit'; item: ItemDto; handleCreate?: never; handleUpdate: (item: ItemDto) => void }
+  ? {
+      mode: 'edit';
+      item: ItemDto;
+      handleCreate?: never;
+      handleUpdate: (item: ItemDto) => void;
+      handleDelete: () => void;
+    }
   : never;
 
 export type ItemFormDialogProps = (ModeProps<'create'> | ModeProps<'edit'>) & {
@@ -40,8 +48,6 @@ export type ItemFormDialogProps = (ModeProps<'create'> | ModeProps<'edit'>) & {
   handleClose: () => void;
 };
 
-const useStyles = makeStyles((theme: Theme) => ({}));
-
 export const ItemFormDialog = ({
   open,
   item,
@@ -49,9 +55,10 @@ export const ItemFormDialog = ({
   handleClose,
   handleCreate,
   handleUpdate,
+  handleDelete,
   wishlistId,
 }: ItemFormDialogProps) => {
-  const classes = useStyles();
+  const { enqueueSnackbar } = useSnackbar();
   const api = useApi(wishlistApiRef);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -73,35 +80,63 @@ export const ItemFormDialog = ({
     setLoading(true);
 
     try {
+      const base: AddItemInputDto = {
+        name,
+        description: description === '' ? undefined : description,
+        url: url === '' ? undefined : url,
+        score: score || undefined,
+      };
+
       if (mode === 'create') {
         const newItem = await api.item.create({
-          name,
           wishlist_id: wishlistId,
-          description: description === '' ? undefined : description,
-          url: url === '' ? undefined : url,
-          score: score || undefined,
+          ...base,
         });
 
         resetForm();
         handleCreate(newItem);
+        enqueueSnackbar('Souhait créé avec succès', { variant: 'success' });
       }
 
       if (mode === 'edit') {
-        // const { data } = await api.updateBabyTimeline(babyId, editState.id, {
-        //   type: timelineType,
-        //   details: typeFormState,
-        //   occurredAt: occurredAt.toISO(),
-        // });
-        // dispatch(editTimelineEntry(data));
+        await api.item.update(item.id, base);
+        handleUpdate({ ...item, ...base });
+        enqueueSnackbar('Le souhait à bien été modifié', { variant: 'success' });
       }
 
       handleClose();
     } catch (e) {
-      console.error(e); // TODO handle error properly
+      enqueueSnackbar("Une erreur s'est produite", { variant: 'error' });
     } finally {
       setLoading(false);
     }
   };
+
+  const deleteItem = async () => {
+    if (mode !== 'edit') {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await api.item.delete(item.id);
+      enqueueSnackbar('Le souhait à bien été supprimé', { variant: 'success' });
+      handleClose();
+      handleDelete();
+    } catch (e) {
+      setLoading(false);
+      enqueueSnackbar("Une erreur s'est produite", { variant: 'error' });
+    }
+  };
+
+  useEffect(() => {
+    if (!item) return;
+
+    setName(item.name);
+    setDescription(item.description || '');
+    setUrl(item.url || '');
+    setScore(item.score || null);
+  }, [item]);
 
   return (
     <Dialog fullScreen open={open} onClose={handleClose} TransitionComponent={Transition}>
@@ -181,22 +216,27 @@ export const ItemFormDialog = ({
           >
             {mode === 'create' ? 'Ajouter' : 'Modifier'}
           </LoadingButton>
-          {/* TODO --> */}
-          {/*{mode === 'edit' && (*/}
-          {/*  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>*/}
-          {/*    <Button*/}
-          {/*      variant="outlined"*/}
-          {/*      color="error"*/}
-          {/*      aria-label="delete"*/}
-          {/*      disabled={loading}*/}
-          {/*      size="small"*/}
-          {/*      startIcon={<DeleteIcon />}*/}
-          {/*      onClick={() => deleteEntry()}*/}
-          {/*    >*/}
-          {/*      Supprimer*/}
-          {/*    </Button>*/}
-          {/*  </Box>*/}
-          {/*)}*/}
+          {mode === 'edit' && (
+            <Stack alignItems="center" justifyContent="center" sx={{ marginTop: '50px' }}>
+              <ConfirmButton
+                confirmTitle="Supprimer le souhait"
+                confirmText={
+                  <span>
+                    Êtes-vous sûr de vouloir supprimer le souhait <b>{name}</b> ?
+                  </span>
+                }
+                variant="outlined"
+                color="error"
+                size="small"
+                loading={loading}
+                disabled={loading}
+                startIcon={<DeleteIcon />}
+                onClick={() => deleteItem()}
+              >
+                Supprimer
+              </ConfirmButton>
+            </Stack>
+          )}
         </Stack>
       </Container>
     </Dialog>

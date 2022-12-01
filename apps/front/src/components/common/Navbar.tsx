@@ -9,6 +9,7 @@ import { ReactComponent as IconSvg } from '../../assets/icons/icon.svg';
 import { ReactComponent as TextSvg } from '../../assets/icons/logo_text.svg';
 import { makeStyles } from '@mui/styles';
 import { Link, useNavigate } from 'react-router-dom';
+import { useSnackbar } from 'notistack';
 
 const useStyles = makeStyles((theme: Theme) => ({
   logo: {
@@ -50,9 +51,10 @@ const GoBack = () => {
 export const Navbar = () => {
   const classes = useStyles();
   const dispatch = useDispatch();
+  const { enqueueSnackbar } = useSnackbar();
 
   const handleLogout = useCallback(() => {
-    // TODO: Toast "Hope to see you soon"
+    enqueueSnackbar('A bientôt 👋', { variant: 'default' });
     logout(dispatch);
   }, [dispatch]);
 

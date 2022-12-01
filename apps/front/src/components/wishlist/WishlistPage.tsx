@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Box, Chip, Stack, Tooltip } from '@mui/material';
 import { Title } from '../common/Title';
 import { Loader } from '../common/Loader';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useAsync } from 'react-use';
 import { useApi } from '@wishlist/common-front';
 import { wishlistApiRef } from '../../core/api/wishlist.api';
@@ -12,13 +12,34 @@ import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import { Description } from '../common/Description';
 import { WishlistEventsDialog } from './WishlistEventsDialog';
+import { ConfirmButton } from '../common/ConfirmButton';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { RootState } from '../../core';
+import { useSelector } from 'react-redux';
+import { useSnackbar } from 'notistack';
+
+const mapState = (state: RootState) => ({ currentUserId: state.auth.user?.id });
 
 export const WishlistPage = () => {
+  const { enqueueSnackbar } = useSnackbar();
+  const { currentUserId } = useSelector(mapState);
   const [openEventDialog, setOpenEventDialog] = useState(false);
   const params = useParams<'wishlistId'>();
   const wishlistId = params.wishlistId || '';
   const api = useApi(wishlistApiRef);
+  const navigate = useNavigate();
+
   const { value: wishlist, loading } = useAsync(() => api.wishlist.getById(wishlistId), [wishlistId]);
+
+  const deleteWishlist = async () => {
+    try {
+      await api.wishlist.delete(wishlistId);
+      enqueueSnackbar('La liste à bien été supprimée', { variant: 'success' });
+      navigate('/wishlists');
+    } catch (e) {
+      enqueueSnackbar("Une erreur s'est produite", { variant: 'error' });
+    }
+  };
 
   return (
     <Box>
@@ -71,6 +92,26 @@ export const WishlistPage = () => {
               handleClose={() => setOpenEventDialog(false)}
               events={wishlist.events}
             />
+
+            {wishlist.owner.id === currentUserId && (
+              <Stack alignItems="center" justifyContent="center" sx={{ marginTop: '100px' }}>
+                <ConfirmButton
+                  confirmTitle="Supprimer la liste"
+                  confirmText={
+                    <span>
+                      Êtes-vous sûr de vouloir supprimer la liste <b>{wishlist.title}</b> ?
+                    </span>
+                  }
+                  variant="outlined"
+                  color="error"
+                  size="small"
+                  startIcon={<DeleteIcon />}
+                  onClick={() => deleteWishlist()}
+                >
+                  Supprimer la liste
+                </ConfirmButton>
+              </Stack>
+            )}
           </>
         )}
       </Loader>

@@ -8,7 +8,7 @@ import { EventCard } from './EventCard';
 import { Pagination } from '../common/Pagination';
 import { Loader } from '../common/Loader';
 import AddIcon from '@mui/icons-material/Add';
-import { AutoExtendedFab } from '../common/AutoExtendedFab';
+import { FabAutoGrow } from '../common/FabAutoGrow';
 
 type SearchType = { page: string };
 
@@ -58,7 +58,7 @@ export const EventListPage = () => {
             onChange={(value) => setCurrentPage(value)}
           />
 
-          <AutoExtendedFab label="Créer un évènement" icon={<AddIcon />} color="secondary" to={CREATE_EVENT_ROUTE} />
+          <FabAutoGrow label="Créer un évènement" icon={<AddIcon />} color="secondary" to={CREATE_EVENT_ROUTE} />
         </>
       )}
 

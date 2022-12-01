@@ -46,6 +46,7 @@
     "luxon": "3.1.1",
     "node-gyp": "9.3.0",
     "nodemailer": "6.8.0",
+    "notistack": "2.0.8",
     "passport": "0.6.0",
     "passport-jwt": "4.0.0",
     "pg": "8.8.0",

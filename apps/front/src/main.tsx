@@ -9,6 +9,7 @@ import { theme } from './theme';
 import { AxiosInterceptor } from './core/router/AxiosInterceptor';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon';
+import { SnackbarProvider } from 'notistack';
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 
@@ -19,8 +20,15 @@ root.render(
         <CssBaseline />
         <LocalizationProvider dateAdapter={AdapterLuxon} adapterLocale="fr">
           <BrowserRouter>
-            <AxiosInterceptor />
-            <App />
+            <SnackbarProvider
+              maxSnack={3}
+              autoHideDuration={5000}
+              anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+              preventDuplicate
+            >
+              <AxiosInterceptor />
+              <App />
+            </SnackbarProvider>
           </BrowserRouter>
         </LocalizationProvider>
       </ThemeProvider>

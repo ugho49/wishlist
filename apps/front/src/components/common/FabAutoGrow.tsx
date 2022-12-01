@@ -14,7 +14,7 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-export type AutoExtendedFabProps = {
+export type FabAutoGrowProps = {
   to?: string;
   onClick?: () => void;
   color?: FabTypeMap['props']['color'];
@@ -22,7 +22,7 @@ export type AutoExtendedFabProps = {
   icon: React.ReactNode;
 };
 
-export const AutoExtendedFab = ({ to, onClick, label, color, icon }: AutoExtendedFabProps) => {
+export const FabAutoGrow = ({ to, onClick, label, color, icon }: FabAutoGrowProps) => {
   const classes = useStyles();
   const BaseProps = { onClick, color, className: classes.fab };
   const Props = to ? { ...BaseProps, component: RouterLink, to } : BaseProps;
