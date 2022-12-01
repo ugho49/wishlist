@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosInstance } from 'axios';
 import { createApiRef } from '@wishlist/common-front';
 import { environment } from '../../environments/environment';
 import { WishlistApi } from '../../@types/api.type';
@@ -7,11 +7,15 @@ export const wishlistApiRef = createApiRef<WishlistApi>({
   id: 'wishlist-api',
 });
 
-export function buildApi(): WishlistApi {
-  const client = axios.create({
+function getNewInstance(): AxiosInstance {
+  return axios.create({
     baseURL: environment.baseUrl,
     timeout: 30000, // 30 seconds
   });
+}
+
+export function buildApi(): WishlistApi {
+  const client = getNewInstance();
 
   function setAuthorizationHeader(value: string) {
     client.defaults.headers.common['Authorization'] = value;
@@ -25,6 +29,7 @@ export function buildApi(): WishlistApi {
     axios: {
       setAuthorizationHeader,
       removeAuthorizationHeader,
+      getNewInstance,
     },
     auth: {
       login: (data) => client.post(`/auth/login`, data).then((res) => res.data),

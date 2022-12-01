@@ -1,3 +1,4 @@
+import { AxiosInstance } from 'axios';
 import type {
   AddEventAttendeeForEventInputDto,
   AddItemForListInputDto,
@@ -39,6 +40,7 @@ export type WishlistApi = {
   axios: {
     setAuthorizationHeader: (value: string) => void;
     removeAuthorizationHeader: () => void;
+    getNewInstance: () => AxiosInstance;
   };
 
   auth: {
