@@ -8,31 +8,15 @@ import { Theme } from '@mui/material/styles';
 export type CardProps = {
   to?: string;
   onClick?: () => void;
-  noPadding?: boolean;
   className?: string;
   sx?: SxProps<Theme>;
 };
 
-export const Card = ({
-  onClick,
-  to,
-  children,
-  noPadding = false,
-  className,
-  sx = {},
-}: PropsWithChildren<CardProps>) => {
+export const Card = ({ onClick, to, children, className, sx }: PropsWithChildren<CardProps>) => {
   const LinkProps = to ? { component: Link, to } : {};
 
   return (
-    <Box
-      className={clsx('card', (to || onClick) && 'clickable', className)}
-      {...LinkProps}
-      onClick={onClick}
-      sx={{
-        padding: noPadding ? 'inherit' : '16px',
-        ...sx,
-      }}
-    >
+    <Box className={clsx('card', (to || onClick) && 'clickable', className)} {...LinkProps} onClick={onClick} sx={sx}>
       {children}
     </Box>
   );

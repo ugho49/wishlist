@@ -35,6 +35,7 @@ import type {
   UserEmailSettingsDto,
   WishlistWithEventsDto,
 } from '@wishlist/common-types';
+import { ToggleItemOutputDto } from '@wishlist/common-types';
 
 export type WishlistApi = {
   axios: {
@@ -87,7 +88,7 @@ export type WishlistApi = {
     create: (data: AddItemForListInputDto) => Promise<ItemDto>;
     update: (itemId: string, data: AddItemInputDto) => Promise<void>;
     delete: (itemId: string) => Promise<void>;
-    toggle: (itemId: string) => Promise<void>;
+    toggle: (itemId: string) => Promise<ToggleItemOutputDto>;
   };
 
   wishlist: {

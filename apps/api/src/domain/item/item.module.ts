@@ -7,9 +7,10 @@ import { ItemRepository } from './item.repository';
 import { WishlistModule } from '../wishlist/wishlist.module';
 import { ItemScheduler } from './item.scheduler';
 import { ItemMailer } from './item.mailer';
+import { UserModule } from '../user/user.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ItemEntity]), WishlistModule],
+  imports: [TypeOrmModule.forFeature([ItemEntity]), WishlistModule, UserModule],
   controllers: [ItemController],
   providers: [ItemService, ItemRepository, ItemScheduler, ItemMailer],
 })

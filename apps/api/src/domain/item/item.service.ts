@@ -1,13 +1,19 @@
 import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { ItemRepository } from './item.repository';
-import { AddItemForListInputDto, AddItemInputDto, ItemDto } from '@wishlist/common-types';
+import { AddItemForListInputDto, AddItemInputDto, ItemDto, ToggleItemOutputDto } from '@wishlist/common-types';
 import { WishlistRepository } from '../wishlist/wishlist.repository';
 import { ItemEntity } from './item.entity';
 import { toItemDto } from './item.mapper';
+import { UserRepository } from '../user/user.repository';
+import { toMiniUserDto } from '../user/user.mapper';
 
 @Injectable()
 export class ItemService {
-  constructor(private readonly itemRepository: ItemRepository, private wishlistRepository: WishlistRepository) {}
+  constructor(
+    private readonly itemRepository: ItemRepository,
+    private wishlistRepository: WishlistRepository,
+    private readonly userRepository: UserRepository
+  ) {}
 
   async create(param: { currentUserId: string; dto: AddItemForListInputDto }): Promise<ItemDto> {
     const { dto, currentUserId } = param;
@@ -88,7 +94,7 @@ export class ItemService {
     await this.itemRepository.delete({ id: itemId });
   }
 
-  async toggleItem(param: { itemId: string; currentUserId: string }): Promise<void> {
+  async toggleItem(param: { itemId: string; currentUserId: string }): Promise<ToggleItemOutputDto> {
     const { itemId, currentUserId } = param;
     const itemEntity = await this.itemRepository.findByIdAndUserIdOrFail({ itemId, userId: currentUserId });
     const wishlistEntity = await itemEntity.wishlist;
@@ -97,8 +103,14 @@ export class ItemService {
 
     if (itemEntity.isTakenBySomeone()) {
       await this.uncheck({ itemEntity, isOwnerOfList, hideItems });
+      return {};
     } else {
-      await this.check({ itemEntity, isOwnerOfList, currentUserId, hideItems });
+      const takenAt = await this.check({ itemEntity, isOwnerOfList, currentUserId, hideItems });
+      const user = await this.userRepository.findById(currentUserId);
+      return {
+        taken_by: user ? toMiniUserDto(user) : undefined,
+        taken_at: takenAt.toISOString(),
+      };
     }
   }
 
@@ -107,7 +119,7 @@ export class ItemService {
     itemEntity: ItemEntity;
     isOwnerOfList: boolean;
     hideItems: boolean;
-  }): Promise<void> {
+  }): Promise<Date> {
     const { itemEntity, hideItems, isOwnerOfList, currentUserId } = params;
 
     if (isOwnerOfList && hideItems) {
@@ -120,10 +132,14 @@ export class ItemService {
       }
     }
 
+    const takenAt = new Date();
+
     await this.itemRepository.updateById(itemEntity.id, {
       takerId: currentUserId,
-      takenAt: new Date(),
+      takenAt,
     });
+
+    return takenAt;
   }
 
   private async uncheck(params: { itemEntity: ItemEntity; isOwnerOfList: boolean; hideItems: boolean }): Promise<void> {

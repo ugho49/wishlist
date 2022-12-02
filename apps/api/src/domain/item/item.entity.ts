@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne, PrimaryColumn, RelationId } from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryColumn, RelationId, JoinColumn } from 'typeorm';
 import { uuid } from '@wishlist/common';
 import { TimestampEntity } from '@wishlist/common-database';
 import { WishlistEntity } from '../wishlist/wishlist.entity';
@@ -27,17 +27,17 @@ export class ItemEntity extends TimestampEntity {
   @Column({ type: 'timestamptz', nullable: true })
   takenAt?: Date | null;
 
-  @ManyToOne(() => WishlistEntity)
+  @ManyToOne(() => WishlistEntity, { lazy: true })
   readonly wishlist: Promise<WishlistEntity>;
 
   @Column()
   @RelationId((entity: ItemEntity) => entity.wishlist)
   wishlistId: string;
 
-  @ManyToOne(() => UserEntity)
+  @ManyToOne(() => UserEntity, { lazy: true })
   readonly taker?: Promise<UserEntity> | null;
 
-  @Column()
+  @Column({ nullable: true })
   @RelationId((entity: ItemEntity) => entity.taker)
   takerId?: string | null;
 

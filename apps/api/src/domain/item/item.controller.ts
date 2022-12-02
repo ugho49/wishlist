@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Param, Post, Put } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ItemService } from './item.service';
-import { AddItemForListInputDto, AddItemInputDto, ItemDto } from '@wishlist/common-types';
+import { AddItemForListInputDto, AddItemInputDto, ItemDto, ToggleItemOutputDto } from '@wishlist/common-types';
 import { CurrentUser } from '../auth';
 
 @ApiTags('Item')
@@ -29,7 +29,7 @@ export class ItemController {
   }
 
   @Post('/:id/toggle')
-  toggleItem(@Param('id') itemId: string, @CurrentUser('id') currentUserId: string): Promise<void> {
+  toggleItem(@Param('id') itemId: string, @CurrentUser('id') currentUserId: string): Promise<ToggleItemOutputDto> {
     return this.itemService.toggleItem({ itemId, currentUserId });
   }
 }

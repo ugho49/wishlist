@@ -6,7 +6,6 @@ import {
   Container,
   Dialog,
   IconButton,
-  Rating,
   Slide,
   Stack,
   TextField,
@@ -22,8 +21,7 @@ import { LoadingButton } from '@mui/lab';
 import { useApi } from '@wishlist/common-front';
 import { wishlistApiRef } from '../../core/api/wishlist.api';
 import { useSnackbar } from 'notistack';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { ConfirmButton } from '../common/ConfirmButton';
+import { Rating } from '../common/Rating';
 
 const Transition = forwardRef((props: TransitionProps & { children: React.ReactElement }, ref: React.Ref<unknown>) => {
   const { children, ...other } = props;
@@ -31,31 +29,26 @@ const Transition = forwardRef((props: TransitionProps & { children: React.ReactE
 });
 
 type ModeProps<T> = T extends 'create'
-  ? { mode: 'create'; item?: never; handleCreate: (item: ItemDto) => void; handleUpdate?: never; handleDelete?: never }
+  ? { mode: 'create'; item?: never; handleCreate: (item: ItemDto) => void; handleUpdate?: never }
   : T extends 'edit'
-  ? {
-      mode: 'edit';
-      item: ItemDto;
-      handleCreate?: never;
-      handleUpdate: (item: ItemDto) => void;
-      handleDelete: () => void;
-    }
+  ? { mode: 'edit'; item: ItemDto; handleCreate?: never; handleUpdate: (item: ItemDto) => void }
   : never;
 
 export type ItemFormDialogProps = (ModeProps<'create'> | ModeProps<'edit'>) & {
   open: boolean;
   wishlistId: string;
+  title: string;
   handleClose: () => void;
 };
 
 export const ItemFormDialog = ({
+  title,
   open,
   item,
   mode,
   handleClose,
   handleCreate,
   handleUpdate,
-  handleDelete,
   wishlistId,
 }: ItemFormDialogProps) => {
   const { enqueueSnackbar } = useSnackbar();
@@ -84,7 +77,7 @@ export const ItemFormDialog = ({
         name,
         description: description === '' ? undefined : description,
         url: url === '' ? undefined : url,
-        score: score || undefined,
+        score: score === null ? undefined : score,
       };
 
       if (mode === 'create') {
@@ -112,23 +105,6 @@ export const ItemFormDialog = ({
     }
   };
 
-  const deleteItem = async () => {
-    if (mode !== 'edit') {
-      return;
-    }
-
-    try {
-      setLoading(true);
-      await api.item.delete(item.id);
-      enqueueSnackbar('Le souhait à bien été supprimé', { variant: 'success' });
-      handleClose();
-      handleDelete();
-    } catch (e) {
-      setLoading(false);
-      enqueueSnackbar("Une erreur s'est produite", { variant: 'error' });
-    }
-  };
-
   useEffect(() => {
     if (!item) return;
 
@@ -143,7 +119,7 @@ export const ItemFormDialog = ({
       <AppBar sx={{ position: 'relative' }}>
         <Toolbar sx={{ justifyContent: 'space-between' }}>
           <Typography sx={{ ml: 2, flex: 1, textTransform: 'uppercase' }} variant="h6" component="div">
-            {mode === 'create' ? 'Ajouter un souhait' : 'Modifier le souhait'}
+            {title}
           </Typography>
           <IconButton edge="start" color="inherit" disabled={loading} onClick={handleClose} aria-label="close">
             <CloseIcon />
@@ -216,27 +192,6 @@ export const ItemFormDialog = ({
           >
             {mode === 'create' ? 'Ajouter' : 'Modifier'}
           </LoadingButton>
-          {mode === 'edit' && (
-            <Stack alignItems="center" justifyContent="center" sx={{ marginTop: '50px' }}>
-              <ConfirmButton
-                confirmTitle="Supprimer le souhait"
-                confirmText={
-                  <span>
-                    Êtes-vous sûr de vouloir supprimer le souhait <b>{name}</b> ?
-                  </span>
-                }
-                variant="outlined"
-                color="error"
-                size="small"
-                loading={loading}
-                disabled={loading}
-                startIcon={<DeleteIcon />}
-                onClick={() => deleteItem()}
-              >
-                Supprimer
-              </ConfirmButton>
-            </Stack>
-          )}
         </Stack>
       </Container>
     </Dialog>

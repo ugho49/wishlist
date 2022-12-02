@@ -13,6 +13,11 @@ export class ItemDto {
   created_at: string;
 }
 
+export class ToggleItemOutputDto {
+  taken_by?: MiniUserDto;
+  taken_at?: string;
+}
+
 export class AddItemInputDto {
   @IsString()
   @IsNotEmpty()
