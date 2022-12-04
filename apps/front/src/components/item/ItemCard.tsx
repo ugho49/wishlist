@@ -2,7 +2,18 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { ItemDto, MiniUserDto } from '@wishlist/common-types';
 import { Card } from '../common/Card';
 import { ItemFormDialog } from './ItemFormDialog';
-import { Box, Checkbox, Chip, chipClasses, IconButton, Link, Stack, svgIconClasses, Theme } from '@mui/material';
+import {
+  Box,
+  Checkbox,
+  Chip,
+  chipClasses,
+  CircularProgress,
+  IconButton,
+  Link,
+  Stack,
+  svgIconClasses,
+  Theme,
+} from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import clsx from 'clsx';
 import EditIcon from '@mui/icons-material/Edit';
@@ -167,8 +178,15 @@ export const ItemCard = ({ item, handleDelete, handleUpdate, wishlist }: ItemCar
       >
         {displayCheckbox && (
           <Stack className={classes.checkContainer}>
-            {/* TODO: disable checkbox when check by someone else than me */}
-            <Checkbox color="secondary" disabled={loading} checked={isTaken} onClick={() => toggleItem()} />
+            {loading && <CircularProgress size="1.2rem" />}
+            {!loading && (
+              <Checkbox
+                color="secondary"
+                disabled={loading && takenBy?.id !== currentUserId}
+                checked={isTaken}
+                onClick={() => toggleItem()}
+              />
+            )}
           </Stack>
         )}
 

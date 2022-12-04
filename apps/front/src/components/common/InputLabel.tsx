@@ -12,6 +12,8 @@ export type InputLabelProps = {
 const useStyles = makeStyles((theme: Theme) => ({
   label: {
     [`&.${inputLabelClasses.root}`]: {
+      display: 'flex',
+      alignItems: 'center',
       color: theme.palette.primary.main,
       fontWeight: '500',
       marginBottom: '8px',

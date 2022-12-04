@@ -1,36 +1,27 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { DetailedWishlistDto, ItemDto } from '@wishlist/common-types';
 import { ItemCard } from '../item/ItemCard';
-import { Box, Button, Grid, inputBaseClasses, MenuItem, Select, Stack } from '@mui/material';
+import { Box, Button, Grid, Stack } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import { FabAutoGrow } from '../common/FabAutoGrow';
 import { ItemFormDialog } from '../item/ItemFormDialog';
 import { RootState } from '../../core';
 import { useSelector } from 'react-redux';
-import { InputLabel } from '../common/InputLabel';
-import { makeStyles } from '@mui/styles';
-import { Theme } from '@mui/material/styles';
+import { FilterType, SortType, WishlistFilterAndSortItems } from './WishlistFilterAndSortItems';
 
 export type WishlistTabItemsProps = {
   wishlist: DetailedWishlistDto;
 };
 
-const useStyles = makeStyles((theme: Theme) => ({
-  select: {
-    [`&.${inputBaseClasses.root}`]: {
-      width: '100%',
-      height: '35px',
-    },
-  },
-}));
-
 const mapState = (state: RootState) => ({ currentUserId: state.auth.user?.id });
 
 export const WishlistItems = ({ wishlist }: WishlistTabItemsProps) => {
-  const classes = useStyles();
   const { currentUserId } = useSelector(mapState);
   const [openItemFormDialog, setOpenItemFormDialog] = useState(false);
+  const [sort, setSort] = useState<SortType>(SortType.CREATED_AT_DESC);
+  const [filter, setFilter] = useState<FilterType>(FilterType.NONE);
   const [items, setItems] = useState<ItemDto[]>([]);
+  const [itemsFilteredAndSorted, setItemsFilteredAndSorted] = useState<ItemDto[]>([]);
   const nbOfItems = useMemo(() => items.length, [items]);
   const ownerOfTheList = currentUserId === wishlist.owner.id;
 
@@ -56,34 +47,18 @@ export const WishlistItems = ({ wishlist }: WishlistTabItemsProps) => {
     <Box className="items">
       {nbOfItems > 0 && (
         <>
-          <Grid container spacing={2} sx={{ marginBottom: '40px' }}>
-            <Grid item xs={12} md={6}>
-              {/* TODO --> trier par */}
-              <InputLabel>Trier par</InputLabel>
-              <Select displayEmpty defaultValue="" className={classes.select}>
-                <MenuItem value="">
-                  <em>Aucun tri</em>
-                </MenuItem>
-                <MenuItem value={10}>Ten</MenuItem>
-                <MenuItem value={20}>Twenty</MenuItem>
-                <MenuItem value={30}>Thirty</MenuItem>
-              </Select>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              {/* TODO --> filtrer par */}
-              <InputLabel>Filtrer par</InputLabel>
-              <Select displayEmpty defaultValue="" className={classes.select}>
-                <MenuItem value="">
-                  <em>Aucun filtre</em>
-                </MenuItem>
-                <MenuItem value={10}>Ten</MenuItem>
-                <MenuItem value={20}>Twenty</MenuItem>
-                <MenuItem value={30}>Thirty</MenuItem>
-              </Select>
-            </Grid>
-          </Grid>
+          <WishlistFilterAndSortItems
+            displayFilterSelect={!ownerOfTheList}
+            items={items}
+            sort={sort}
+            filter={filter}
+            onChange={(newItems) => setItemsFilteredAndSorted(newItems)}
+            onSortChange={(newSort) => setSort(newSort)}
+            onFilterChange={(newFilter) => setFilter(newFilter)}
+          />
+
           <Grid container spacing={2}>
-            {items.map((item) => (
+            {itemsFilteredAndSorted.map((item) => (
               <Grid item xs={12} md={6} key={item.id}>
                 <ItemCard
                   wishlist={{ id: wishlist.id, ownerId: wishlist.owner.id, hideItems: wishlist.config.hide_items }}
