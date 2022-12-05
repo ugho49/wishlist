@@ -171,6 +171,8 @@ export const ItemFormDialog = ({
               helperText={url && <CharsRemaining max={1000} value={url} />}
               onChange={(e) => setUrl(e.target.value)}
             />
+
+            {/*  TODO: show error when url badly formatted & block submit*/}
           </Box>
 
           <Box>

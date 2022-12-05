@@ -1,41 +1,43 @@
-import React, { useState } from 'react';
-import { Box, Chip, Stack, Tab, tabClasses, Tabs, Theme } from '@mui/material';
+import React from 'react';
+import { Box, Chip, Stack } from '@mui/material';
 import { Title } from '../common/Title';
 import { Loader } from '../common/Loader';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useAsync } from 'react-use';
 import { useApi } from '@wishlist/common-front';
 import { wishlistApiRef } from '../../core/api/wishlist.api';
 import PeopleIcon from '@mui/icons-material/People';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import { makeStyles } from '@mui/styles';
-import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
-import { EventTabWishlists } from './EventTabWishlists';
+import { EventWishlists } from './EventWishlists';
 import { Description } from '../common/Description';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import { DateTime } from 'luxon';
+import { ConfirmButton } from '../common/ConfirmButton';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { RootState } from '../../core';
+import { useSnackbar } from 'notistack';
+import { useSelector } from 'react-redux';
 
-enum TabTypes {
-  lists,
-  details,
-}
-
-const useStyles = makeStyles((theme: Theme) => ({
-  tab: {
-    [`&.${tabClasses.root}`]: {
-      minHeight: '50px',
-    },
-  },
-}));
+const mapState = (state: RootState) => ({ currentUserId: state.auth.user?.id });
 
 export const EventPage = () => {
-  const classes = useStyles();
-  const [tabType, setTabType] = useState<TabTypes>(TabTypes.lists);
+  const { currentUserId } = useSelector(mapState);
+  const { enqueueSnackbar } = useSnackbar();
   const params = useParams<'eventId'>();
   const eventId = params.eventId || '';
   const api = useApi(wishlistApiRef);
   const { value: event, loading } = useAsync(() => api.event.getById(eventId), [eventId]);
   const nbAttendees = (event?.attendees || []).length + 1;
+  const navigate = useNavigate();
+
+  const deleteEvent = async () => {
+    try {
+      await api.event.delete(eventId);
+      enqueueSnackbar("L'évènement à bien été supprimée", { variant: 'success' });
+      navigate('/events');
+    } catch (e) {
+      enqueueSnackbar("Une erreur s'est produite", { variant: 'error' });
+    }
+  };
 
   return (
     <Box>
@@ -74,28 +76,28 @@ export const EventPage = () => {
 
             {event.description && <Description text={event.description} />}
 
-            <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: '20px' }}>
-              <Tabs value={tabType} onChange={(_, value) => setTabType(value)} variant="fullWidth">
-                <Tab
-                  className={classes.tab}
-                  icon={<FormatListBulletedIcon />}
-                  value={TabTypes.lists}
-                  label="Listes"
-                  iconPosition="start"
-                />
-                <Tab
-                  className={classes.tab}
-                  icon={<InfoOutlinedIcon />}
-                  value={TabTypes.details}
-                  label="Détails"
-                  iconPosition="start"
-                />
-                {/*  TODO: Add settings page for owner of the Event */}
-              </Tabs>
-            </Box>
+            <EventWishlists event={event} />
 
-            {tabType === TabTypes.lists && <EventTabWishlists event={event} />}
-            {tabType === TabTypes.details && <div>Details</div>}
+            {event.created_by.id === currentUserId && (
+              <Stack alignItems="center" justifyContent="center" sx={{ marginTop: '100px' }}>
+                <ConfirmButton
+                  confirmTitle="Supprimer l'évènement"
+                  confirmText={
+                    <span>
+                      Etes vous sûr de supprimer l'évènement <b>{event.title}</b> ? Cela supprimera toutes les listes
+                      associés !
+                    </span>
+                  }
+                  variant="outlined"
+                  color="error"
+                  size="small"
+                  startIcon={<DeleteIcon />}
+                  onClick={() => deleteEvent()}
+                >
+                  Supprimer l'évènement
+                </ConfirmButton>
+              </Stack>
+            )}
           </>
         )}
       </Loader>

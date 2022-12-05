@@ -51,6 +51,7 @@ export class UpdateEventInputDto {
 
   @IsString()
   @IsOptional()
+  @MaxLength(2000)
   description?: string;
 
   @MinDate(new Date(new Date().toDateString()))

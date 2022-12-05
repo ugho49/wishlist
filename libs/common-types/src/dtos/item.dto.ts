@@ -32,7 +32,7 @@ export class AddItemInputDto {
   @IsUrl()
   @IsOptional()
   @MaxLength(1000)
-  url?: string;
+  url?: string; // TODO: sanitize URL: amazon, utm, etc ...
 
   @IsInt()
   @Min(0)

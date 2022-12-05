@@ -34,7 +34,7 @@ export const useCustomSearchParams = <T>(defaultParams?: ParamType<T>): CustomSe
   const setSearchObjects = useCallback(
     (nextParams?: NextParams<T>) => {
       const newParams = typeof nextParams === 'function' ? nextParams(searchAsObject) : nextParams;
-      setSearch(convertToUrlSearchParam(newParams));
+      setSearch(convertToUrlSearchParam(newParams), { replace: true });
     },
     [searchAsObject, setSearch]
   );

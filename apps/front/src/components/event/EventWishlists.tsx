@@ -10,7 +10,7 @@ export type EventTabWishlistsProps = {
   event: DetailedEventDto;
 };
 
-export const EventTabWishlists = ({ event }: EventTabWishlistsProps) => {
+export const EventWishlists = ({ event }: EventTabWishlistsProps) => {
   const nbOfItems = useMemo(() => event.wishlists.length, [event]);
   const addListRoute = useMemo(() => `/wishlists/new?from-event=${event.id}`, [event]);
 

@@ -11,8 +11,12 @@ export function useHistoryStack() {
       setStack((prevState) => prevState.slice(0, prevState.length - 1));
     } else if (type === 'PUSH') {
       setStack((prevState) => [...prevState, pathname]);
-    } else {
-      setStack((prevState) => [...prevState.slice(0, prevState.length - 1), pathname]);
+    } else if (type === 'REPLACE') {
+      setStack((prevState) => {
+        // We cannot replace if no previous stack
+        if (prevState.length === 0) return prevState;
+        return [...prevState.slice(0, prevState.length - 1), pathname];
+      });
     }
   }, [pathname, type, setStack]);
 
