@@ -1,0 +1,115 @@
+version: 2.1
+
+orbs:
+  nx: nrwl/nx@1.6.1
+  continuation: circleci/continuation@0.3.1
+
+setup: true
+
+parameters:
+  continue-config:
+    description: Path to the internally-used config for continuation
+    type: string
+    default: .circleci/continuation.yml
+  continue-config-parameters:
+    description: Path to the internally-used parameters for continuation
+    type: string
+    default: .circleci/continue-config-parameters.json
+
+references:
+  setup_env_node: &setup_env_node
+    docker:
+      - image: cimg/node:18.10.0
+  attach_workspace: &attach_workspace
+    at: ~/project
+  nx/set-shas: &nx_set_shas_option
+    error-on-no-successful-workflow: false
+    main-branch-name: main
+    workflow-name: build-and-release
+  save_node_cache: &save_node_cache
+    key: node-module-cache-{{ checksum "./yarn.lock" }}
+    paths:
+      - node_modules
+  restore_node_cache: &restore_node_cache
+    keys:
+      - node-module-cache-{{ checksum "./yarn.lock" }}
+
+jobs:
+  install-dependencies:
+    <<: *setup_env_node
+    steps:
+      - checkout
+      - restore_cache: *restore_node_cache
+      - run: yarn --frozen-lockfile
+      - save_cache: *save_node_cache
+      - persist_to_workspace:
+          root: .
+          paths:
+            - node_modules
+
+  test:
+    <<: *setup_env_node
+    steps:
+      - checkout
+      - attach_workspace: *attach_workspace
+      - nx/set-shas: *nx_set_shas_option
+      - run: yarn nx affected --target=test --base=$NX_BASE --head=$NX_HEAD --parallel --max-parallel=3
+
+  lint:
+    <<: *setup_env_node
+    steps:
+      - checkout
+      - attach_workspace: *attach_workspace
+      - nx/set-shas: *nx_set_shas_option
+      - run: yarn nx affected --target=lint --base=$NX_BASE --head=$NX_HEAD --parallel --max-parallel=3
+
+  continuation:
+    <<: *setup_env_node
+    parameters:
+      continue-config:
+        type: string
+        default: << pipeline.parameters.continue-config >>
+      continue-config-parameters:
+        type: string
+        default: << pipeline.parameters.continue-config-parameters >>
+    steps:
+      - checkout
+      - attach_workspace: *attach_workspace
+      - nx/set-shas: *nx_set_shas_option
+      - run:
+          name: Generate the parameters based on affected apps
+          command: |
+            DATA="{}"
+
+            # Using https://nx.dev/nx/affected#base and https://nx.dev/nx/affected#head options for nx to compute diffs and determine which apps changes
+            AFFECTED_RAW=$(npx nx affected:apps --base=$NX_BASE --head=$NX_HEAD --plain)
+            IFS=' ' read -ra APPS \<<< "$AFFECTED_RAW"
+
+            # Store list in file to be passed to following jobs
+            for app in "${APPS[@]}"; do
+              DATA=$(echo "${DATA}" | jq '. + {"workflow-'${app}'": true}')
+            done
+
+            # Add Json to parameter file
+            echo $DATA >> << parameters.continue-config-parameters >>
+
+            # Print parameters
+            cat << parameters.continue-config-parameters >>
+      - continuation/continue:
+          configuration_path: << parameters.continue-config >>
+          parameters: << parameters.continue-config-parameters >>
+
+workflows:
+  setup-workflow:
+    jobs:
+      - install-dependencies
+      - lint:
+          requires:
+            - install-dependencies
+      - test:
+          requires:
+            - install-dependencies
+      - continuation:
+          requires:
+            - lint
+            - test
