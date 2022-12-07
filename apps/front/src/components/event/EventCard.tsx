@@ -64,7 +64,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 export const EventCard = ({ event }: EventCardProps) => {
   const classes = useStyles();
   const numberOfAttendees = event.nb_attendees + 1;
-  const past = new Date(event.event_date) < new Date();
+  const past = DateTime.fromISO(event.event_date) < DateTime.now().minus({ days: 1 });
 
   return (
     <Card to={`/events/${event.id}`} className={clsx(classes.root, past && classes.disabled, 'animated fadeIn fast')}>

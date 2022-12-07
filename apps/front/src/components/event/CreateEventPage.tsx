@@ -21,7 +21,7 @@ import { CharsRemaining } from '../common/CharsRemaining';
 import { MobileDatePicker } from '@mui/x-date-pickers';
 import { DateTime } from 'luxon';
 import PersonIcon from '@mui/icons-material/Person';
-import { blue } from '@mui/material/colors';
+import { blue, orange } from '@mui/material/colors';
 import { SearchUserSelect } from '../user/SearchUserSelect';
 import { AttendeeRole, MiniUserDto } from '@wishlist/common-types';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -33,6 +33,8 @@ import { wishlistApiRef } from '../../core/api/wishlist.api';
 import { useNavigate } from 'react-router-dom';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
+import { RootState } from '../../core';
+import { useSelector } from 'react-redux';
 
 const steps = ['Informations', 'Participants'];
 
@@ -41,15 +43,18 @@ type Attendee = {
   role: AttendeeRole;
 };
 
+const mapState = (state: RootState) => ({ currentUserEmail: state.auth.user?.email });
+
 export const CreateEventPage = () => {
   const api = useApi(wishlistApiRef);
+  const { currentUserEmail } = useSelector(mapState);
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [eventDate, setEventDate] = useState<DateTime | null>(null);
+  const [eventDate, setEventDate] = useState<DateTime | null>(DateTime.now());
   const [attendees, setAttendees] = useState<Attendee[]>([]);
 
   const attendeeEmails = useMemo(
@@ -156,7 +161,7 @@ export const CreateEventPage = () => {
                   },
                 ])
               }
-              excludedEmails={attendeeEmails}
+              excludedEmails={[...attendeeEmails, currentUserEmail || '']}
             />
             <List sx={{ pt: 0 }}>
               {attendees.map((attendee) => (
@@ -173,17 +178,22 @@ export const CreateEventPage = () => {
                   }
                 >
                   <ListItemAvatar>
-                    <Avatar sx={{ bgcolor: blue[100], color: blue[600] }}>
+                    <Avatar
+                      sx={{
+                        bgcolor: typeof attendee.user === 'string' ? orange[100] : blue[100],
+                        color: typeof attendee.user === 'string' ? orange[600] : blue[600],
+                      }}
+                    >
                       <PersonIcon />
                     </Avatar>
                   </ListItemAvatar>
                   <ListItemText
                     primary={
                       typeof attendee.user === 'string'
-                        ? attendee.user
+                        ? 'Inviter le participant'
                         : `${attendee.user.firstname} ${attendee.user.lastname}`
                     }
-                    secondary={typeof attendee.user === 'string' ? '' : attendee.user.email}
+                    secondary={typeof attendee.user === 'string' ? attendee.user : attendee.user.email}
                   />
                 </ListItem>
               ))}

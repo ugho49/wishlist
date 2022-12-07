@@ -1,61 +1,74 @@
 import React, { useState } from 'react';
-import { Autocomplete, TextField } from '@mui/material';
+import { Autocomplete, createFilterOptions, TextField } from '@mui/material';
 import { MiniUserDto } from '@wishlist/common-types';
-import { debounce } from 'lodash';
-import { useApi } from '@wishlist/common-front';
+import { debounce, merge, uniqBy } from 'lodash';
+import { isValidEmail, useApi } from '@wishlist/common-front';
 import { wishlistApiRef } from '../../core/api/wishlist.api';
 
+type UserOptionType = MiniUserDto | string;
+const filter = createFilterOptions<UserOptionType>();
+
 export type SearchUserSelectProps = {
-  value?: MiniUserDto;
   disabled?: boolean;
-  onChange: (values: MiniUserDto | string) => void;
+  onChange: (value: UserOptionType) => void;
   excludedEmails: string[];
 };
 
-export const SearchUserSelect = ({ disabled, onChange, excludedEmails, value }: SearchUserSelectProps) => {
+export const SearchUserSelect = ({ disabled, onChange, excludedEmails }: SearchUserSelectProps) => {
   const api = useApi(wishlistApiRef);
-  const [currentValue, setCurrentValue] = useState<MiniUserDto | null>(value || null);
   const [loading, setLoading] = useState(false);
-  const [options, setOptions] = useState<MiniUserDto[]>([]);
+  const [options, setOptions] = useState<UserOptionType[]>([]);
 
   const searchUser = async (inputValue: string) => {
     setLoading(true);
     try {
       if (inputValue.trim() === '' || inputValue.trim().length < 2) {
-        setOptions([]);
         return;
       }
       const users = await api.user.searchUserByKeyword(inputValue);
-      setOptions(users);
-    } catch (e) {
-      setOptions([]);
+      setOptions((prev) => uniqBy(merge(prev, users), (v) => v.id));
     } finally {
       setLoading(false);
     }
   };
 
-  const searchUserDebounced = debounce(searchUser, 500);
-
-  // TODO: handle create new user
+  const searchUserDebounced = debounce(searchUser, 400);
 
   return (
     <Autocomplete
       fullWidth
       clearOnBlur
       blurOnSelect={true}
-      value={currentValue}
-      onChange={(_, value) => {
-        if (value) onChange(value);
-        setCurrentValue(null);
-      }}
+      value={null}
+      loadingText="Chargement..."
+      noOptionsText="Aucun résultat"
       disabled={disabled}
       options={options}
       loading={loading}
-      loadingText="Chargement..."
-      noOptionsText="Aucun résultat"
-      filterOptions={(values) => values.filter((opt) => !excludedEmails.includes(opt.email))}
+      onChange={(_, value) => {
+        if (value) onChange(value);
+      }}
+      filterOptions={(values, params) => {
+        const filtered = filter(values, params);
+        const { inputValue } = params;
+
+        const containValue = filtered.some((option) => {
+          if (typeof option === 'string') return option === inputValue;
+          return option.email === inputValue;
+        });
+
+        if (!containValue && inputValue && isValidEmail(inputValue)) {
+          filtered.push(inputValue.toLowerCase());
+        }
+
+        return filtered;
+      }}
+      getOptionDisabled={(option) => {
+        if (typeof option === 'string') return excludedEmails.includes(option);
+        return excludedEmails.includes(option.email);
+      }}
       getOptionLabel={(option) => {
-        if (typeof option === 'string') return option;
+        if (typeof option === 'string') return `Inviter le participant par son email: ${option}`;
         return `${option.firstname} ${option.lastname} (${option.email})`;
       }}
       renderInput={(params) => (
