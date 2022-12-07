@@ -5,6 +5,7 @@ import { WishlistCard } from '../wishlist/WishlistCard';
 import { FabAutoGrow } from '../common/FabAutoGrow';
 import AddIcon from '@mui/icons-material/Add';
 import { RouterLink } from '@wishlist/common-front';
+import { InputLabel } from '../common/InputLabel';
 
 export type EventTabWishlistsProps = {
   event: DetailedEventDto;
@@ -18,6 +19,9 @@ export const EventWishlists = ({ event }: EventTabWishlistsProps) => {
     <Box className="wishlists">
       {nbOfItems > 0 && (
         <>
+          {/* TODO*/}
+          <InputLabel sx={{ mb: '10px', fontSize: '1.1rem' }}>Listes</InputLabel>
+
           <Grid container spacing={2}>
             {event.wishlists.map((wishlist) => (
               <Grid item xs={12} md={6} key={wishlist.id}>

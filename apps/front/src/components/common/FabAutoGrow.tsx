@@ -34,8 +34,9 @@ export const FabAutoGrow = ({ to, onClick, label, color, icon }: FabAutoGrowProp
         <Box sx={{ ml: 1 }}>{label}</Box>
       </Fab>
 
-      <Fab sx={{ display: { xs: 'flex', md: 'none' } }} {...Props}>
+      <Fab sx={{ display: { xs: 'flex', md: 'none' } }} variant="extended" {...Props} size="medium">
         {icon}
+        <Box sx={{ ml: 1 }}>{label}</Box>
       </Fab>
     </>
   );
