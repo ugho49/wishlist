@@ -18,7 +18,7 @@ import SaveIcon from '@mui/icons-material/Save';
 import { CharsRemaining } from '../common/CharsRemaining';
 import { InputLabel } from '../common/InputLabel';
 import { LoadingButton } from '@mui/lab';
-import { useApi } from '@wishlist/common-front';
+import { isValidUrl, useApi } from '@wishlist/common-front';
 import { wishlistApiRef } from '../../core/api/wishlist.api';
 import { useSnackbar } from 'notistack';
 import { Rating } from '../common/Rating';
@@ -59,7 +59,8 @@ export const ItemFormDialog = ({
   const [score, setScore] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const formIsValid = name.trim() !== '';
+  const invalidUrl = url !== '' && !isValidUrl(url);
+  const formIsValid = name.trim() !== '' && !invalidUrl;
 
   const resetForm = () => {
     setName('');
@@ -137,9 +138,10 @@ export const ItemFormDialog = ({
               value={name}
               inputProps={{ maxLength: 40 }}
               placeholder="Nom du souhait"
-              helperText={name && <CharsRemaining max={40} value={name} />}
+              helperText={<CharsRemaining max={40} value={name} />}
               onChange={(e) => setName(e.target.value)}
             />
+            {/* TODO: suggested add size if it's clothe */}
           </Box>
 
           <Box>
@@ -152,9 +154,10 @@ export const ItemFormDialog = ({
               value={description}
               inputProps={{ maxLength: 60 }}
               placeholder="Ajouter du détail à votre souhait"
-              helperText={description && <CharsRemaining max={60} value={description} />}
+              helperText={<CharsRemaining max={60} value={description} />}
               onChange={(e) => setDescription(e.target.value)}
             />
+            {/* TODO: suggested add size if it's clothe */}
           </Box>
 
           <Box>
@@ -168,11 +171,15 @@ export const ItemFormDialog = ({
               value={url}
               inputProps={{ maxLength: 1000 }}
               placeholder="Ex: https://www.google.com"
-              helperText={url && <CharsRemaining max={1000} value={url} />}
+              error={invalidUrl}
+              helperText={
+                <>
+                  {invalidUrl && <span>L'url saisie n'est pas valide</span>}
+                  {!invalidUrl && <CharsRemaining max={1000} value={url} />}
+                </>
+              }
               onChange={(e) => setUrl(e.target.value)}
             />
-
-            {/*  TODO: show error when url badly formatted & block submit*/}
           </Box>
 
           <Box>

@@ -109,7 +109,7 @@ export const CreateEventPage = () => {
                 value={title}
                 inputProps={{ maxLength: 100 }}
                 placeholder="La titre de votre évènement"
-                helperText={title && <CharsRemaining max={100} value={title} />}
+                helperText={<CharsRemaining max={100} value={title} />}
                 onChange={(e) => setTitle(e.target.value)}
               />
             </Box>
@@ -137,7 +137,7 @@ export const CreateEventPage = () => {
                 value={description}
                 inputProps={{ maxLength: 2000 }}
                 placeholder="Une petite description ..."
-                helperText={description && <CharsRemaining max={2000} value={description} />}
+                helperText={<CharsRemaining max={2000} value={description} />}
                 onChange={(e) => setDescription(e.target.value)}
               />
             </Box>
