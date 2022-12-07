@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Box, Chip, Stack } from '@mui/material';
 import { Title } from '../common/Title';
 import { Loader } from '../common/Loader';
@@ -16,6 +16,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { RootState } from '../../core';
 import { useSnackbar } from 'notistack';
 import { useSelector } from 'react-redux';
+import { EventAttendeesDialog } from './EventAttendeesDialog';
 
 const mapState = (state: RootState) => ({ currentUserId: state.auth.user?.id });
 
@@ -28,6 +29,7 @@ export const EventPage = () => {
   const { value: event, loading } = useAsync(() => api.event.getById(eventId), [eventId]);
   const nbAttendees = (event?.attendees || []).length + 1;
   const navigate = useNavigate();
+  const [openAttendeesDialog, setOpenAttendeesDialog] = useState(false);
 
   const deleteEvent = async () => {
     try {
@@ -63,20 +65,28 @@ export const EventPage = () => {
               <Chip
                 variant="outlined"
                 size="small"
-                icon={<PeopleIcon />}
-                label={`${nbAttendees} ${nbAttendees > 1 ? 'participants' : 'participant'}`}
+                icon={<AccessTimeIcon />}
+                label={DateTime.fromISO(event.event_date).toLocaleString(DateTime.DATE_HUGE)}
               />
               <Chip
                 variant="outlined"
                 size="small"
-                icon={<AccessTimeIcon />}
-                label={DateTime.fromISO(event.event_date).toLocaleString(DateTime.DATE_HUGE)}
+                icon={<PeopleIcon />}
+                onClick={() => setOpenAttendeesDialog(true)}
+                label={`${nbAttendees} ${nbAttendees > 1 ? 'participants' : 'participant'}`}
               />
             </Stack>
 
             {event.description && <Description text={event.description} />}
 
             <EventWishlists event={event} />
+
+            <EventAttendeesDialog
+              open={openAttendeesDialog}
+              handleClose={() => setOpenAttendeesDialog(false)}
+              creator={event.created_by}
+              attendees={event.attendees}
+            />
 
             {event.created_by.id === currentUserId && (
               <Stack alignItems="center" justifyContent="center" sx={{ marginTop: '100px' }}>
