@@ -35,6 +35,7 @@ import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import { RootState } from '../../core';
 import { useSelector } from 'react-redux';
+import { Card } from '../common/Card';
 
 const steps = ['Informations', 'Participants'];
 
@@ -66,7 +67,7 @@ export const CreateEventPage = () => {
     [attendees]
   );
 
-  const step2Enabled = title?.trim() !== '' && eventDate !== null;
+  const nextStepEnabled = title?.trim() !== '' && eventDate !== null;
   const createEnabled = attendees.length > 0;
 
   const createEvent = async () => {
@@ -151,51 +152,57 @@ export const CreateEventPage = () => {
 
         {step === 2 && (
           <Stack gap={3}>
-            <SearchUserSelect
-              onChange={(val) =>
-                setAttendees((prevState) => [
-                  ...prevState,
-                  {
-                    user: val,
-                    role: AttendeeRole.USER,
-                  },
-                ])
-              }
-              excludedEmails={[...attendeeEmails, currentUserEmail || '']}
-            />
-            <List sx={{ pt: 0 }}>
+            <Box>
+              <InputLabel required>Gérer les participants</InputLabel>
+
+              <SearchUserSelect
+                disabled={loading}
+                onChange={(val) =>
+                  setAttendees((prevState) => [
+                    ...prevState,
+                    {
+                      user: val,
+                      role: AttendeeRole.USER,
+                    },
+                  ])
+                }
+                excludedEmails={[...attendeeEmails, currentUserEmail || '']}
+              />
+            </Box>
+            <List sx={{ pt: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {attendees.map((attendee) => (
-                <ListItem
-                  key={typeof attendee.user === 'string' ? attendee.user : attendee.user.id}
-                  secondaryAction={
-                    <IconButton
-                      edge="end"
-                      aria-label="delete"
-                      onClick={() => setAttendees((prev) => prev.filter((value) => value !== attendee))}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  }
-                >
-                  <ListItemAvatar>
-                    <Avatar
-                      sx={{
-                        bgcolor: typeof attendee.user === 'string' ? orange[100] : blue[100],
-                        color: typeof attendee.user === 'string' ? orange[600] : blue[600],
-                      }}
-                    >
-                      <PersonIcon />
-                    </Avatar>
-                  </ListItemAvatar>
-                  <ListItemText
-                    primary={
-                      typeof attendee.user === 'string'
-                        ? 'Inviter le participant'
-                        : `${attendee.user.firstname} ${attendee.user.lastname}`
+                <Card sx={{ padding: 0 }} key={typeof attendee.user === 'string' ? attendee.user : attendee.user.id}>
+                  <ListItem
+                    secondaryAction={
+                      <IconButton
+                        edge="end"
+                        aria-label="delete"
+                        onClick={() => setAttendees((prev) => prev.filter((value) => value !== attendee))}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
                     }
-                    secondary={typeof attendee.user === 'string' ? attendee.user : attendee.user.email}
-                  />
-                </ListItem>
+                  >
+                    <ListItemAvatar>
+                      <Avatar
+                        sx={{
+                          bgcolor: typeof attendee.user === 'string' ? orange[100] : blue[100],
+                          color: typeof attendee.user === 'string' ? orange[600] : blue[600],
+                        }}
+                      >
+                        <PersonIcon />
+                      </Avatar>
+                    </ListItemAvatar>
+                    <ListItemText
+                      primary={
+                        typeof attendee.user === 'string'
+                          ? 'Inviter le participant'
+                          : `${attendee.user.firstname} ${attendee.user.lastname}`
+                      }
+                      secondary={typeof attendee.user === 'string' ? attendee.user : attendee.user.email}
+                    />
+                  </ListItem>
+                </Card>
               ))}
             </List>
           </Stack>
@@ -212,7 +219,7 @@ export const CreateEventPage = () => {
           {step === 1 && (
             <Button
               onClick={() => setStep((prev) => prev + 1)}
-              disabled={!step2Enabled}
+              disabled={!nextStepEnabled}
               endIcon={<KeyboardArrowRightIcon />}
             >
               Suivant
@@ -222,7 +229,7 @@ export const CreateEventPage = () => {
             <LoadingButton
               loading={loading}
               loadingPosition="start"
-              disabled={!createEnabled}
+              disabled={!createEnabled || loading}
               startIcon={<SaveIcon />}
               onClick={() => createEvent()}
             >

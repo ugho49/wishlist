@@ -80,7 +80,7 @@ export const SearchUserSelect = ({ disabled, onChange, excludedEmails }: SearchU
             if (value.length > 1) setLoading(true);
             searchUserDebounced(value);
           }}
-          label="Rechercher un participant ..."
+          placeholder="Rechercher un participant ..."
           helperText="Si vous ne trouvez pas le participant, vous pouvez l'inviter sur wishlist en entrant son email dans la barre de recherche"
         />
       )}

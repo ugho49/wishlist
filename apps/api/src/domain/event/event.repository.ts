@@ -22,12 +22,17 @@ export class EventRepository extends BaseRepository(EventEntity) {
     return Promise.all([fetchQuery, countQuery]);
   }
 
-  findAllForUserid(params: { userId: string; take: number; skip: number }): Promise<[EventEntity[], number]> {
-    const { userId, take, skip } = params;
+  findAllForUserid(params: {
+    userId: string;
+    take: number;
+    skip: number;
+    onlyFuture: boolean;
+  }): Promise<[EventEntity[], number]> {
+    const { userId, take, skip, onlyFuture } = params;
 
     // TODO Change with union all when available -->
 
-    const fetchQuery = this.createQueryBuilder('e')
+    const fetchQueryBuilder = this.createQueryBuilder('e')
       .leftJoinAndSelect('e.wishlists', 'w')
       .leftJoinAndSelect('e.creator', 'c')
       .leftJoinAndSelect('e.attendees', 'a')
@@ -35,15 +40,18 @@ export class EventRepository extends BaseRepository(EventEntity) {
       .orderBy('e.updatedAt', 'DESC')
       .addOrderBy('e.eventDate', 'DESC')
       .take(take)
-      .skip(skip)
-      .getMany();
+      .skip(skip);
 
-    const countQuery = this.createQueryBuilder('e')
+    const countQueryBuilder = this.createQueryBuilder('e')
       .leftJoin('e.attendees', 'a')
-      .where(this.whereCreatorIdOrAttendee(userId))
-      .getCount();
+      .where(this.whereCreatorIdOrAttendee(userId));
 
-    return Promise.all([fetchQuery, countQuery]);
+    if (onlyFuture) {
+      fetchQueryBuilder.andWhere('e.eventDate >= CURRENT_DATE');
+      countQueryBuilder.andWhere('e.eventDate >= CURRENT_DATE');
+    }
+
+    return Promise.all([fetchQueryBuilder.getMany(), countQueryBuilder.getCount()]);
   }
 
   findByIdAndUserId(params: { eventId: string; userId: string }): Promise<EventEntity | null> {

@@ -1,6 +1,7 @@
 import { MiniUserDto } from './user.dto';
 import { MiniEventDto } from './event.dto';
 import {
+  ArrayMaxSize,
   ArrayNotEmpty,
   ArrayUnique,
   IsArray,
@@ -14,6 +15,7 @@ import {
 } from 'class-validator';
 import { AddItemInputDto, ItemDto } from './item.dto';
 import { Type } from 'class-transformer';
+import { MAX_EVENTS_BY_LIST } from '../constants';
 
 export class WishlistConfigDto {
   hide_items: boolean;
@@ -62,6 +64,7 @@ export class UpdateWishlistInputDto {
 
   @IsString()
   @IsOptional()
+  @MaxLength(2000)
   description?: string;
 }
 
@@ -72,6 +75,7 @@ export class CreateWishlistInputDto extends UpdateWishlistInputDto {
 
   @ArrayUnique()
   @ArrayNotEmpty()
+  @ArrayMaxSize(MAX_EVENTS_BY_LIST)
   @IsString({ each: true })
   event_ids: string[];
 

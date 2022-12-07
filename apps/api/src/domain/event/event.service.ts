@@ -55,11 +55,13 @@ export class EventService {
   }
 
   async getUserEventsPaginated(param: {
+    limit?: number;
+    onlyFuture: boolean;
     pageNumber: number;
     currentUserId: string;
   }): Promise<PagedResponse<EventWithCountsDto>> {
-    const pageSize = DEFAULT_RESULT_NUMBER;
-    const { pageNumber, currentUserId } = param;
+    const { pageNumber, currentUserId, limit, onlyFuture } = param;
+    const pageSize = limit !== undefined ? limit : DEFAULT_RESULT_NUMBER;
 
     const skip = pageSize * (pageNumber - 1);
 
@@ -67,6 +69,7 @@ export class EventService {
       userId: currentUserId,
       take: pageSize,
       skip,
+      onlyFuture,
     });
 
     const dtos = await Promise.all(entities.map((entity) => toEventWithCountsDto(entity)));

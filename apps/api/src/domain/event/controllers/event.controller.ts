@@ -5,11 +5,11 @@ import {
   CreateEventInputDto,
   DetailedEventDto,
   EventWithCountsDto,
-  GetPaginationQueryDto,
+  GetEventsQueryDto,
+  ICurrentUser,
   MiniEventDto,
   PagedResponse,
   UpdateEventInputDto,
-  ICurrentUser,
 } from '@wishlist/common-types';
 import { CurrentUser } from '../../auth';
 
@@ -20,10 +20,15 @@ export class EventController {
 
   @Get()
   getMyEvents(
-    @Query() queryParams: GetPaginationQueryDto,
+    @Query() queryParams: GetEventsQueryDto,
     @CurrentUser('id') currentUserId: string
   ): Promise<PagedResponse<EventWithCountsDto>> {
-    return this.eventService.getUserEventsPaginated({ pageNumber: queryParams.p || 1, currentUserId });
+    return this.eventService.getUserEventsPaginated({
+      pageNumber: queryParams.p || 1,
+      currentUserId,
+      limit: queryParams.limit,
+      onlyFuture: queryParams.only_future === undefined ? false : queryParams.only_future,
+    });
   }
 
   @Get('/:id')
