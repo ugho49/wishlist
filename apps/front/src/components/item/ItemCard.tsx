@@ -5,6 +5,7 @@ import { ItemFormDialog } from './ItemFormDialog';
 import {
   Box,
   Checkbox,
+  checkboxClasses,
   Chip,
   chipClasses,
   CircularProgress,
@@ -107,6 +108,11 @@ const useStyles = makeStyles((theme: Theme) => ({
     paddingLeft: '5px',
     justifyContent: 'space-evenly',
   },
+  checkbox: {
+    [`&.${checkboxClasses.disabled} .${svgIconClasses.root}`]: {
+      color: theme.palette.secondary.dark,
+    },
+  },
 }));
 
 const mapState = (state: RootState) => ({ currentUserId: state.auth.user?.id });
@@ -182,7 +188,8 @@ export const ItemCard = ({ item, handleDelete, handleUpdate, wishlist }: ItemCar
             {!loading && (
               <Checkbox
                 color="secondary"
-                disabled={loading && takenBy?.id !== currentUserId}
+                className={classes.checkbox}
+                disabled={loading || (takenBy?.id !== currentUserId && takenBy?.id !== undefined)}
                 checked={isTaken}
                 onClick={() => toggleItem()}
               />

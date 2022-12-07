@@ -102,7 +102,7 @@ export class ItemService {
     const isOwnerOfList = wishlistEntity.ownerId === currentUserId;
 
     if (itemEntity.isTakenBySomeone()) {
-      await this.uncheck({ itemEntity, isOwnerOfList, hideItems });
+      await this.uncheck({ itemEntity, isOwnerOfList, hideItems, currentUserId });
       return {};
     } else {
       const takenAt = await this.check({ itemEntity, isOwnerOfList, currentUserId, hideItems });
@@ -142,8 +142,17 @@ export class ItemService {
     return takenAt;
   }
 
-  private async uncheck(params: { itemEntity: ItemEntity; isOwnerOfList: boolean; hideItems: boolean }): Promise<void> {
-    const { itemEntity, hideItems, isOwnerOfList } = params;
+  private async uncheck(params: {
+    itemEntity: ItemEntity;
+    isOwnerOfList: boolean;
+    hideItems: boolean;
+    currentUserId: string;
+  }): Promise<void> {
+    const { itemEntity, hideItems, isOwnerOfList, currentUserId } = params;
+
+    if (itemEntity.takerId !== currentUserId) {
+      throw new UnauthorizedException('You cannot uncheck this item, you are not the one who as check it');
+    }
 
     if (isOwnerOfList && hideItems) {
       if (itemEntity.isSuggested) {
