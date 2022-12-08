@@ -141,7 +141,7 @@ export const ItemFormDialog = ({
               helperText={<CharsRemaining max={40} value={name} />}
               onChange={(e) => setName(e.target.value)}
             />
-            {/* TODO: suggested add size if it's clothe */}
+            {/* TODO: suggest to "add size" if it's clothe */}
           </Box>
 
           <Box>
@@ -157,7 +157,7 @@ export const ItemFormDialog = ({
               helperText={<CharsRemaining max={60} value={description} />}
               onChange={(e) => setDescription(e.target.value)}
             />
-            {/* TODO: suggested add size if it's clothe */}
+            {/* TODO: suggest to "add size" if it's clothe */}
           </Box>
 
           <Box>

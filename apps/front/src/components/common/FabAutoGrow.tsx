@@ -3,6 +3,8 @@ import { Box, Fab, fabClasses } from '@mui/material';
 import { RouterLink } from '@wishlist/common-front';
 import { makeStyles } from '@mui/styles';
 import { FabTypeMap } from '@mui/material/Fab/Fab';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { useTheme } from '@mui/material/styles';
 
 const useStyles = makeStyles(() => ({
   fab: {
@@ -23,21 +25,16 @@ export type FabAutoGrowProps = {
 };
 
 export const FabAutoGrow = ({ to, onClick, label, color, icon }: FabAutoGrowProps) => {
+  const theme = useTheme();
+  const smallScreen = useMediaQuery(theme.breakpoints.down('md'));
   const classes = useStyles();
   const BaseProps = { onClick, color, className: classes.fab };
   const Props = to ? { ...BaseProps, component: RouterLink, to } : BaseProps;
 
   return (
-    <>
-      <Fab sx={{ display: { xs: 'none', md: 'flex' } }} variant="extended" {...Props}>
-        {icon}
-        <Box sx={{ ml: 1 }}>{label}</Box>
-      </Fab>
-
-      <Fab sx={{ display: { xs: 'flex', md: 'none' } }} variant="extended" {...Props} size="medium">
-        {icon}
-        <Box sx={{ ml: 1 }}>{label}</Box>
-      </Fab>
-    </>
+    <Fab variant="extended" {...Props} size={smallScreen ? 'medium' : 'large'}>
+      {icon}
+      <Box sx={{ ml: 1 }}>{label}</Box>
+    </Fab>
   );
 };
