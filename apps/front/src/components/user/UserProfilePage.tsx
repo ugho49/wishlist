@@ -9,6 +9,7 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import { UserTabInformations } from './UserTabInformations';
 import { UserTabNotifications } from './UserTabNotifications';
 import { UserTabPassword } from './UserTabPassword';
+import { Card } from '../common/Card';
 
 const tabs = [
   {
@@ -55,11 +56,11 @@ export const UserProfilePage = () => {
           ))}
         </Tabs>
       </Box>
-      <Box>
+      <Card>
         {currentTab === 1 && <UserTabInformations />}
         {currentTab === 2 && <UserTabNotifications />}
         {currentTab === 3 && <UserTabPassword />}
-      </Box>
+      </Card>
     </Box>
   );
 };

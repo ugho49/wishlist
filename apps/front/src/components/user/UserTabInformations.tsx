@@ -1,5 +1,4 @@
 import React, { FormEvent, useEffect, useState } from 'react';
-import { UserDto } from '@wishlist/common-types';
 import { Box, Stack, TextField } from '@mui/material';
 import { useApi } from '@wishlist/common-front';
 import { wishlistApiRef } from '../../core/api/wishlist.api';
@@ -12,8 +11,12 @@ import SaveIcon from '@mui/icons-material/Save';
 import { useSnackbar } from 'notistack';
 import { useAsync } from 'react-use';
 import { Loader } from '../common/Loader';
+import { useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
 
 export const UserTabInformations = () => {
+  const theme = useTheme();
+  const smallScreen = useMediaQuery(theme.breakpoints.down('md'));
   const api = useApi(wishlistApiRef);
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
@@ -54,39 +57,41 @@ export const UserTabInformations = () => {
 
   return (
     <Loader loading={loadingUser}>
-      <Stack component="form" onSubmit={onSubmit} noValidate gap={3}>
+      <Stack component="form" onSubmit={onSubmit} noValidate gap={smallScreen ? 2 : 3}>
         <Box>
           <InputLabel required>Email</InputLabel>
           <TextField autoComplete="off" disabled={true} fullWidth value={email} inputProps={{ readOnly: true }} />
         </Box>
 
-        <Box>
-          <InputLabel required>Prénom</InputLabel>
-          <TextField
-            autoComplete="off"
-            disabled={loading}
-            fullWidth
-            value={firstname}
-            inputProps={{ maxLength: 50 }}
-            placeholder="John"
-            helperText={<CharsRemaining max={50} value={firstname} />}
-            onChange={(e) => setFirstname(e.target.value)}
-          />
-        </Box>
+        <Stack direction="row" flexWrap="wrap" gap={smallScreen ? 2 : 3}>
+          <Box sx={{ flexGrow: 1 }}>
+            <InputLabel required>Prénom</InputLabel>
+            <TextField
+              autoComplete="off"
+              disabled={loading}
+              fullWidth
+              value={firstname}
+              inputProps={{ maxLength: 50 }}
+              placeholder="John"
+              helperText={<CharsRemaining max={50} value={firstname} />}
+              onChange={(e) => setFirstname(e.target.value)}
+            />
+          </Box>
 
-        <Box>
-          <InputLabel required>Nom</InputLabel>
-          <TextField
-            autoComplete="off"
-            disabled={loading}
-            fullWidth
-            value={lastname}
-            inputProps={{ maxLength: 50 }}
-            placeholder="Doe"
-            helperText={<CharsRemaining max={50} value={lastname} />}
-            onChange={(e) => setLastname(e.target.value)}
-          />
-        </Box>
+          <Box sx={{ flexGrow: 1 }}>
+            <InputLabel required>Nom</InputLabel>
+            <TextField
+              autoComplete="off"
+              disabled={loading}
+              fullWidth
+              value={lastname}
+              inputProps={{ maxLength: 50 }}
+              placeholder="Doe"
+              helperText={<CharsRemaining max={50} value={lastname} />}
+              onChange={(e) => setLastname(e.target.value)}
+            />
+          </Box>
+        </Stack>
 
         <Stack>
           <InputLabel>Date de naissance</InputLabel>
@@ -102,6 +107,7 @@ export const UserTabInformations = () => {
         </Stack>
 
         <LoadingButton
+          sx={{ marginTop: '20px' }}
           type="submit"
           fullWidth
           variant="contained"
@@ -112,7 +118,7 @@ export const UserTabInformations = () => {
           disabled={loading || !formIsValid}
           startIcon={<SaveIcon />}
         >
-          Enregistrer
+          Mettre à jour
         </LoadingButton>
       </Stack>
     </Loader>

@@ -22,6 +22,8 @@ import { isValidUrl, useApi } from '@wishlist/common-front';
 import { wishlistApiRef } from '../../core/api/wishlist.api';
 import { useSnackbar } from 'notistack';
 import { Rating } from '../common/Rating';
+import { useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
 
 const Transition = forwardRef((props: TransitionProps & { children: React.ReactElement }, ref: React.Ref<unknown>) => {
   const { children, ...other } = props;
@@ -51,6 +53,8 @@ export const ItemFormDialog = ({
   handleUpdate,
   wishlistId,
 }: ItemFormDialogProps) => {
+  const theme = useTheme();
+  const smallScreen = useMediaQuery(theme.breakpoints.down('md'));
   const { enqueueSnackbar } = useSnackbar();
   const api = useApi(wishlistApiRef);
   const [name, setName] = useState('');
@@ -128,7 +132,7 @@ export const ItemFormDialog = ({
         </Toolbar>
       </AppBar>
       <Container maxWidth="sm" sx={{ marginTop: '40px' }}>
-        <Stack component="form" onSubmit={onSubmit} noValidate gap={3}>
+        <Stack component="form" onSubmit={onSubmit} noValidate gap={smallScreen ? 2 : 3}>
           <Box>
             <InputLabel required>Nom</InputLabel>
             <TextField

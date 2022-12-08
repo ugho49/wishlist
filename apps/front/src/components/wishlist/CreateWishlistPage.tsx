@@ -108,129 +108,140 @@ export const CreateWishlistPage = () => {
         </Stepper>
       </Box>
       <Container maxWidth="sm" sx={{ marginTop: '40px' }}>
-        {step === 1 && (
-          <Stack component="form" noValidate gap={3}>
-            <Box>
-              <InputLabel required>Titre</InputLabel>
-              <TextField
-                autoComplete="off"
-                disabled={loading}
-                fullWidth
-                value={title}
-                inputProps={{ maxLength: 100 }}
-                placeholder="Ma super liste"
-                helperText={<CharsRemaining max={100} value={title} />}
-                onChange={(e) => setTitle(e.target.value)}
-              />
-            </Box>
+        <Card>
+          {step === 1 && (
+            <Stack component="form" noValidate gap={3}>
+              <Box>
+                <InputLabel required>Titre</InputLabel>
+                <TextField
+                  autoComplete="off"
+                  disabled={loading}
+                  fullWidth
+                  value={title}
+                  inputProps={{ maxLength: 100 }}
+                  placeholder="Ma super liste"
+                  helperText={<CharsRemaining max={100} value={title} />}
+                  onChange={(e) => setTitle(e.target.value)}
+                />
+              </Box>
 
-            <Box>
-              <InputLabel>Description</InputLabel>
-              <TextField
-                autoComplete="off"
-                disabled={loading}
-                fullWidth
-                multiline
-                minRows={4}
-                value={description}
-                inputProps={{ maxLength: 2000 }}
-                placeholder="Une petite description ..."
-                helperText={<CharsRemaining max={2000} value={description} />}
-                onChange={(e) => setDescription(e.target.value)}
-              />
-            </Box>
+              <Box>
+                <InputLabel>Description</InputLabel>
+                <TextField
+                  autoComplete="off"
+                  disabled={loading}
+                  fullWidth
+                  multiline
+                  minRows={4}
+                  value={description}
+                  inputProps={{ maxLength: 2000 }}
+                  placeholder="Une petite description ..."
+                  helperText={<CharsRemaining max={2000} value={description} />}
+                  onChange={(e) => setDescription(e.target.value)}
+                />
+              </Box>
 
-            <Box>
-              <InputLabel>Paramètres avancés</InputLabel>
-              <FormControlLabel
-                control={
-                  <Checkbox checked={!hideItems} onChange={(e) => setHideItems(!e.target.checked)} disabled={loading} />
-                }
-                label={
-                  <Stack gap={1}>
-                    <Typography variant="body1">Rendre cette liste publique (Voir les éléments cochés ?)</Typography>
-                    <Typography variant="caption">
-                      <b>Attention</b> ce paramètre ne pourra pas être changé après la création. Ce paramètre est utile
-                      pour gérer la liste de quelqu'un d'autre, un enfant, etc ...
-                    </Typography>
-                  </Stack>
-                }
-              />
-            </Box>
-          </Stack>
-        )}
-
-        {step === 2 && (
-          <Stack gap={3}>
-            <Box>
-              <InputLabel required>Gérer les évènements</InputLabel>
-
-              <SearchEventSelect
-                disabled={loading}
-                options={availableEvents}
-                excludedEventIds={events.map((e) => e.id)}
-                onChange={(val) => setEvents((prevState) => [...prevState, val])}
-              />
-            </Box>
-            <List sx={{ pt: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {events.map((event) => (
-                <Card sx={{ padding: 0 }} key={event.id}>
-                  <ListItem
-                    secondaryAction={
-                      <IconButton
-                        edge="end"
-                        aria-label="delete"
-                        onClick={() => setEvents((prev) => prev.filter((value) => value.id !== event.id))}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    }
-                  >
-                    <ListItemAvatar>
-                      <Avatar sx={{ bgcolor: theme.palette.primary.light, color: theme.palette.background.paper }}>
-                        <CalendarMonthIcon />
-                      </Avatar>
-                    </ListItemAvatar>
-                    <ListItemText
-                      primary={event.title}
-                      secondary={DateTime.fromISO(event.event_date).toLocaleString(DateTime.DATE_MED)}
+              <Box>
+                <InputLabel>Paramètres avancés</InputLabel>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={!hideItems}
+                      onChange={(e) => setHideItems(!e.target.checked)}
+                      disabled={loading}
                     />
-                  </ListItem>
-                </Card>
-              ))}
-            </List>
-          </Stack>
-        )}
+                  }
+                  label={
+                    <Stack gap={1}>
+                      <Typography variant="body1">Rendre cette liste publique (Voir les éléments cochés ?)</Typography>
+                      <Typography variant="caption">
+                        <b>Attention</b> ce paramètre ne pourra pas être changé après la création. Ce paramètre est
+                        utile pour gérer la liste de quelqu'un d'autre, un enfant, etc ...
+                      </Typography>
+                    </Stack>
+                  }
+                />
+              </Box>
+            </Stack>
+          )}
 
-        <Stack direction="row" justifyContent="space-between" alignItems="center" marginTop={3}>
-          <Button
-            onClick={() => setStep((prev) => prev - 1)}
-            disabled={step === 1}
-            startIcon={<KeyboardArrowLeftIcon />}
-          >
-            Précédent
-          </Button>
-          {step !== 2 && (
-            <Button
-              onClick={() => setStep((prev) => prev + 1)}
-              disabled={!nextStepEnabled}
-              endIcon={<KeyboardArrowRightIcon />}
-            >
-              Suivant
-            </Button>
-          )}
           {step === 2 && (
-            <LoadingButton
-              loading={loading}
-              loadingPosition="start"
-              disabled={!createEnabled || loading}
-              startIcon={<SaveIcon />}
-              onClick={() => createWishlist()}
-            >
-              Créer
-            </LoadingButton>
+            <Stack gap={3}>
+              <Box>
+                <InputLabel required>Gérer les évènements</InputLabel>
+
+                <SearchEventSelect
+                  disabled={loading}
+                  options={availableEvents}
+                  excludedEventIds={events.map((e) => e.id)}
+                  onChange={(val) => setEvents((prevState) => [...prevState, val])}
+                />
+              </Box>
+              <List sx={{ pt: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {events.map((event) => (
+                  <Card variant="outlined" sx={{ padding: 0 }} key={event.id}>
+                    <ListItem
+                      secondaryAction={
+                        <IconButton
+                          edge="end"
+                          aria-label="delete"
+                          onClick={() => setEvents((prev) => prev.filter((value) => value.id !== event.id))}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      }
+                    >
+                      <ListItemAvatar>
+                        <Avatar sx={{ bgcolor: theme.palette.primary.light, color: theme.palette.background.paper }}>
+                          <CalendarMonthIcon />
+                        </Avatar>
+                      </ListItemAvatar>
+                      <ListItemText
+                        primary={event.title}
+                        secondary={DateTime.fromISO(event.event_date).toLocaleString(DateTime.DATE_MED)}
+                      />
+                    </ListItem>
+                  </Card>
+                ))}
+              </List>
+            </Stack>
           )}
-        </Stack>
+
+          <Stack direction="row" justifyContent="space-between" alignItems="center" marginTop={3}>
+            <Box>
+              {step > 1 && (
+                <Button
+                  onClick={() => setStep((prev) => prev - 1)}
+                  disabled={step === 1}
+                  startIcon={<KeyboardArrowLeftIcon />}
+                >
+                  Précédent
+                </Button>
+              )}
+            </Box>
+            {step !== 2 && (
+              <Button
+                onClick={() => setStep((prev) => prev + 1)}
+                disabled={!nextStepEnabled}
+                endIcon={<KeyboardArrowRightIcon />}
+              >
+                Suivant
+              </Button>
+            )}
+            {step === 2 && (
+              <LoadingButton
+                variant="contained"
+                loading={loading}
+                loadingPosition="start"
+                disabled={!createEnabled || loading}
+                endIcon={<SaveIcon />}
+                onClick={() => createWishlist()}
+              >
+                Créer
+              </LoadingButton>
+            )}
+          </Stack>
+        </Card>
       </Container>
     </Box>
   );

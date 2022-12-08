@@ -42,7 +42,7 @@ export function buildApi(): WishlistApi {
       changePassword: (data) => client.put(`/user/change-password`, data),
       searchUserByKeyword: (keyword) => client.get(`/user/search`, { params: { keyword } }).then((res) => res.data),
       getEmailSettings: () => client.get('/user/email-settings').then((res) => res.data),
-      updateUserEmailSettings: (data) => client.post('/user/email-settings', data).then((res) => res.data),
+      updateUserEmailSettings: (data) => client.put('/user/email-settings', data).then((res) => res.data),
       sendResetUserPasswordEmail: (data) =>
         client.post('/user/forgot-password/send-reset-email', data).then((res) => res.data),
       validateResetPassword: (data) => client.post('/user/forgot-password/reset', data).then((res) => res.data),
