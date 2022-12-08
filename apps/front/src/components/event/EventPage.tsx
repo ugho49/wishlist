@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Box, Chip, Stack } from '@mui/material';
+import { Box, Button, Chip, Stack } from '@mui/material';
 import { Title } from '../common/Title';
 import { Loader } from '../common/Loader';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAsync } from 'react-use';
-import { useApi } from '@wishlist/common-front';
+import { RouterLink, useApi } from '@wishlist/common-front';
 import { wishlistApiRef } from '../../core/api/wishlist.api';
 import PeopleIcon from '@mui/icons-material/People';
 import { EventWishlists } from './EventWishlists';
@@ -17,6 +17,7 @@ import { RootState } from '../../core';
 import { useSnackbar } from 'notistack';
 import { useSelector } from 'react-redux';
 import { EventAttendeesDialog } from './EventAttendeesDialog';
+import EditIcon from '@mui/icons-material/Edit';
 
 const mapState = (state: RootState) => ({ currentUserId: state.auth.user?.id });
 
@@ -54,6 +55,44 @@ export const EventPage = () => {
           <>
             <Title smallMarginBottom>{event.title}</Title>
 
+            {event.created_by.id === currentUserId && (
+              <Stack
+                direction="row"
+                alignItems="center"
+                justifyContent="center"
+                gap={1}
+                flexWrap="wrap"
+                sx={{ marginBottom: '20px' }}
+              >
+                <ConfirmButton
+                  confirmTitle="Supprimer l'évènement"
+                  confirmText={
+                    <span>
+                      Etes vous sûr de supprimer l'évènement <b>{event.title}</b> ? Cela supprimera toutes les listes
+                      associés !
+                    </span>
+                  }
+                  variant="outlined"
+                  color="error"
+                  size="small"
+                  startIcon={<DeleteIcon />}
+                  onClick={() => deleteEvent()}
+                >
+                  Supprimer l'évènement
+                </ConfirmButton>
+                <Button
+                  component={RouterLink}
+                  to={`/events/${eventId}/edit`}
+                  variant="outlined"
+                  color="info"
+                  size="small"
+                  startIcon={<EditIcon />}
+                >
+                  Modifier l'évènement
+                </Button>
+              </Stack>
+            )}
+
             <Stack
               direction="row"
               justifyContent="center"
@@ -87,27 +126,6 @@ export const EventPage = () => {
               creator={event.created_by}
               attendees={event.attendees}
             />
-
-            {event.created_by.id === currentUserId && (
-              <Stack alignItems="center" justifyContent="center" sx={{ marginTop: '100px' }}>
-                <ConfirmButton
-                  confirmTitle="Supprimer l'évènement"
-                  confirmText={
-                    <span>
-                      Etes vous sûr de supprimer l'évènement <b>{event.title}</b> ? Cela supprimera toutes les listes
-                      associés !
-                    </span>
-                  }
-                  variant="outlined"
-                  color="error"
-                  size="small"
-                  startIcon={<DeleteIcon />}
-                  onClick={() => deleteEvent()}
-                >
-                  Supprimer l'évènement
-                </ConfirmButton>
-              </Stack>
-            )}
           </>
         )}
       </Loader>

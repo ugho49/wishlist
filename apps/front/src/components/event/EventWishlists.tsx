@@ -6,6 +6,7 @@ import { FabAutoGrow } from '../common/FabAutoGrow';
 import AddIcon from '@mui/icons-material/Add';
 import { RouterLink } from '@wishlist/common-front';
 import { InputLabel } from '../common/InputLabel';
+import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 
 export type EventTabWishlistsProps = {
   event: DetailedEventDto;
@@ -19,8 +20,10 @@ export const EventWishlists = ({ event }: EventTabWishlistsProps) => {
     <Box className="wishlists">
       {nbOfItems > 0 && (
         <>
-          {/* TODO*/}
-          <InputLabel sx={{ mb: '10px', fontSize: '1.1rem' }}>Listes</InputLabel>
+          <InputLabel sx={{ gap: '6px' }}>
+            <FormatListBulletedIcon fontSize="small" />
+            <span>Listes</span>
+          </InputLabel>
 
           <Grid container spacing={2}>
             {event.wishlists.map((wishlist) => (

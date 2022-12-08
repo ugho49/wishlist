@@ -2,6 +2,8 @@ import React, { PropsWithChildren, useCallback, useState } from 'react';
 import { LoadingButton } from '@mui/lab';
 import { LoadingButtonTypeMap } from '@mui/lab/LoadingButton/LoadingButton';
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
+import { SxProps } from '@mui/system';
+import { Theme } from '@mui/material/styles';
 
 export type ConfirmButtonProps = {
   confirmTitle: string | React.ReactNode;
@@ -15,6 +17,7 @@ export type ConfirmButtonProps = {
   color?: LoadingButtonTypeMap['props']['color'];
   size?: LoadingButtonTypeMap['props']['size'];
   variant?: LoadingButtonTypeMap['props']['variant'];
+  sx?: SxProps<Theme>;
 };
 
 export const ConfirmButton = ({
@@ -30,6 +33,7 @@ export const ConfirmButton = ({
   color,
   variant,
   startIcon,
+  sx,
 }: PropsWithChildren<ConfirmButtonProps>) => {
   const [openDialog, setOpenDialog] = useState(false);
 
@@ -38,6 +42,7 @@ export const ConfirmButton = ({
   return (
     <>
       <LoadingButton
+        sx={sx}
         variant={variant}
         color={color}
         size={size}
@@ -49,7 +54,7 @@ export const ConfirmButton = ({
       >
         {children}
       </LoadingButton>
-      <Dialog open={openDialog} onClose={() => closeDialog()}>
+      <Dialog open={openDialog} onClose={() => closeDialog()} disableScrollLock keepMounted>
         <DialogTitle>{confirmTitle}</DialogTitle>
         <DialogContent>
           <DialogContentText>{confirmText}</DialogContentText>

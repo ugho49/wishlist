@@ -17,10 +17,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   container: {
     [`&.${containerClasses.root}`]: {
       marginTop: 2,
-      marginBottom: '80px',
-      [theme.breakpoints.down('md')]: {
-        marginBottom: '130px',
-      },
+      marginBottom: '130px',
     },
   },
 }));

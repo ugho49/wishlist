@@ -10,7 +10,7 @@ export const wishlistApiRef = createApiRef<WishlistApi>({
 function getNewInstance(): AxiosInstance {
   return axios.create({
     baseURL: environment.baseUrl,
-    timeout: 30000, // 30 seconds
+    timeout: 10_000, // 10 seconds
   });
 }
 

@@ -187,13 +187,14 @@ export const WishlistFilterAndSortItems = ({
   }, [items, sort, filter]);
 
   return (
-    <Grid container spacing={2} sx={{ marginBottom: '40px' }}>
+    <Grid container spacing={2} sx={{ marginBottom: '30px' }}>
       {displaySortSelect && (
         <Grid item xs={12} md={6}>
           <InputLabel sx={{ gap: '6px' }}>
             <SortIcon fontSize="small" />
             <span>Trier par</span>
           </InputLabel>
+
           <Select
             className={classes.select}
             displayEmpty
