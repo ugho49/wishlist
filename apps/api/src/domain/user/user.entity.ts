@@ -17,7 +17,7 @@ export class UserEntity extends TimestampEntity {
   @Column()
   lastName: string;
 
-  @Column({ type: 'date', nullable: true })
+  @Column({ type: 'timestamp', nullable: true })
   birthday?: Date | null;
 
   @Column()
