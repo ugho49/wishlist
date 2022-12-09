@@ -1,5 +1,5 @@
 import { Box, Tab, Tabs } from '@mui/material';
-import React, { useState } from 'react';
+import React from 'react';
 import { Title } from '../common/Title';
 import LockIcon from '@mui/icons-material/Lock';
 import PortraitIcon from '@mui/icons-material/Portrait';
@@ -10,28 +10,37 @@ import { UserTabInformations } from './UserTabInformations';
 import { UserTabNotifications } from './UserTabNotifications';
 import { UserTabPassword } from './UserTabPassword';
 import { Card } from '../common/Card';
+import { useCustomSearchParams } from '@wishlist/common-front';
+
+enum TabValues {
+  informations = 'informations',
+  notifications = 'notifications',
+  password = 'password',
+}
 
 const tabs = [
   {
-    value: 1,
+    value: TabValues.informations,
     label: 'Informations',
     icon: <PortraitIcon />,
   },
   {
-    value: 2,
+    value: TabValues.notifications,
     label: 'Notifications',
     icon: <NotificationsIcon />,
   },
   {
-    value: 3,
+    value: TabValues.password,
     label: 'Mot de passe',
     icon: <LockIcon />,
   },
 ];
 
+type SearchParamType = { tab: TabValues };
+
 export const UserProfilePage = () => {
-  const [currentTab, setCurrentTab] = useState(1);
   const theme = useTheme();
+  const [queryParams, setQueryParams] = useCustomSearchParams<SearchParamType>({ tab: tabs[0].value });
   const smallScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
   return (
@@ -39,8 +48,8 @@ export const UserProfilePage = () => {
       <Title smallMarginBottom>Mon Profil</Title>
       <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: '20px' }}>
         <Tabs
-          value={currentTab}
-          onChange={(_, newValue) => setCurrentTab(newValue)}
+          value={queryParams.tab}
+          onChange={(_, newValue) => setQueryParams({ tab: newValue })}
           variant="fullWidth"
           scrollButtons="auto"
           allowScrollButtonsMobile
@@ -57,9 +66,9 @@ export const UserProfilePage = () => {
         </Tabs>
       </Box>
       <Card>
-        {currentTab === 1 && <UserTabInformations />}
-        {currentTab === 2 && <UserTabNotifications />}
-        {currentTab === 3 && <UserTabPassword />}
+        {queryParams.tab === TabValues.informations && <UserTabInformations />}
+        {queryParams.tab === TabValues.notifications && <UserTabNotifications />}
+        {queryParams.tab === TabValues.password && <UserTabPassword />}
       </Card>
     </Box>
   );

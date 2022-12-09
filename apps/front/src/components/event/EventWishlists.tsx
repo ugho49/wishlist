@@ -8,11 +8,11 @@ import { RouterLink } from '@wishlist/common-front';
 import { InputLabel } from '../common/InputLabel';
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 
-export type EventTabWishlistsProps = {
+export type EventWishlistsProps = {
   event: DetailedEventDto;
 };
 
-export const EventWishlists = ({ event }: EventTabWishlistsProps) => {
+export const EventWishlists = ({ event }: EventWishlistsProps) => {
   const nbOfItems = useMemo(() => event.wishlists.length, [event]);
   const addListRoute = useMemo(() => `/wishlists/new?from-event=${event.id}`, [event]);
 

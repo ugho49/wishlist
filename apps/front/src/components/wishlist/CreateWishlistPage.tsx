@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useApi, useCustomSearchParams } from '@wishlist/common-front';
-import { MiniEventDto } from '@wishlist/common-types';
+import { MAX_EVENTS_BY_LIST, MiniEventDto } from '@wishlist/common-types';
 import { wishlistApiRef } from '../../core/api/wishlist.api';
 import { useAsync } from 'react-use';
 import { Title } from '../common/Title';
@@ -46,7 +46,7 @@ export const CreateWishlistPage = () => {
   const theme = useTheme();
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
-  const [queryParams, setQueryParams] = useCustomSearchParams<QueryParamType>();
+  const [queryParams] = useCustomSearchParams<QueryParamType>();
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1);
   const [title, setTitle] = useState('');
@@ -171,7 +171,7 @@ export const CreateWishlistPage = () => {
                 <InputLabel required>Gérer les évènements</InputLabel>
 
                 <SearchEventSelect
-                  disabled={loading}
+                  disabled={loading || events.length === MAX_EVENTS_BY_LIST}
                   options={availableEvents}
                   excludedEventIds={events.map((e) => e.id)}
                   onChange={(val) => setEvents((prevState) => [...prevState, val])}
