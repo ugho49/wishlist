@@ -1,18 +1,17 @@
 import { Alert, Avatar, Box, Button, Grid, TextField, Typography } from '@mui/material';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
-import { RouterLink, useApi } from '@wishlist/common-front';
+import { RouterLink, useApi, useToast } from '@wishlist/common-front';
 import { useDispatch } from 'react-redux';
 import { FormEvent, useState } from 'react';
 import { setTokens } from '../../core/store/features';
 import { AxiosError } from 'axios';
 import { wishlistApiRef } from '../../core/api/wishlist.api';
 import { LoginInputDto } from '@wishlist/common-types';
-import { useSnackbar } from 'notistack';
 
 export const LoginPage = () => {
   const api = useApi(wishlistApiRef);
   const dispatch = useDispatch();
-  const { enqueueSnackbar } = useSnackbar();
+  const { addToast } = useToast();
   const [form, setForm] = useState<LoginInputDto>({ email: '', password: '' });
   const [errors, setErrors] = useState<string[]>([]);
 
@@ -21,7 +20,7 @@ export const LoginPage = () => {
     setErrors([]);
     try {
       const data = await api.auth.login(form);
-      enqueueSnackbar('Heureux de vous revoir 🤓', { variant: 'default' });
+      addToast({ message: 'Heureux de vous revoir 🤓', variant: 'default' });
 
       dispatch(
         setTokens({

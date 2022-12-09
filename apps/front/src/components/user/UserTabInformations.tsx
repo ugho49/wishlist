@@ -1,6 +1,6 @@
 import React, { FormEvent, useEffect, useState } from 'react';
 import { Box, Stack, TextField } from '@mui/material';
-import { useApi } from '@wishlist/common-front';
+import { useApi, useToast } from '@wishlist/common-front';
 import { wishlistApiRef } from '../../core/api/wishlist.api';
 import { InputLabel } from '../common/InputLabel';
 import { CharsRemaining } from '../common/CharsRemaining';
@@ -8,7 +8,6 @@ import { DateTime } from 'luxon';
 import { MobileDatePicker } from '@mui/x-date-pickers';
 import { LoadingButton } from '@mui/lab';
 import SaveIcon from '@mui/icons-material/Save';
-import { useSnackbar } from 'notistack';
 import { useAsync } from 'react-use';
 import { Loader } from '../common/Loader';
 import { useTheme } from '@mui/material/styles';
@@ -23,7 +22,7 @@ export const UserTabInformations = () => {
   const [firstname, setFirstname] = useState('');
   const [lastname, setLastname] = useState('');
   const [birthday, setBirthday] = useState<DateTime | null>(null);
-  const { enqueueSnackbar } = useSnackbar();
+  const { addToast } = useToast();
   const { value, loading: loadingUser } = useAsync(() => api.user.getInfo(), []);
 
   useEffect(() => {
@@ -47,9 +46,9 @@ export const UserTabInformations = () => {
         birthday: birthday !== null ? birthday.toJSDate() : undefined,
       });
 
-      enqueueSnackbar('Profil mis à jour', { variant: 'info' });
+      addToast({ message: 'Profil mis à jour', variant: 'info' });
     } catch (e) {
-      enqueueSnackbar("Une erreur s'est produite", { variant: 'error' });
+      addToast({ message: "Une erreur s'est produite", variant: 'error' });
     } finally {
       setLoading(false);
     }

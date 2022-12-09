@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useApi, useCustomSearchParams } from '@wishlist/common-front';
+import { useApi, useCustomSearchParams, useToast } from '@wishlist/common-front';
 import { MAX_EVENTS_BY_LIST, MiniEventDto } from '@wishlist/common-types';
 import { wishlistApiRef } from '../../core/api/wishlist.api';
 import { useAsync } from 'react-use';
@@ -24,7 +24,6 @@ import {
   Typography,
   useTheme,
 } from '@mui/material';
-import { useSnackbar } from 'notistack';
 import { useNavigate } from 'react-router-dom';
 import { InputLabel } from '../common/InputLabel';
 import { CharsRemaining } from '../common/CharsRemaining';
@@ -44,7 +43,7 @@ const steps = ['Informations', 'Evènements'];
 
 export const CreateWishlistPage = () => {
   const theme = useTheme();
-  const { enqueueSnackbar } = useSnackbar();
+  const { addToast } = useToast();
   const navigate = useNavigate();
   const [queryParams] = useCustomSearchParams<QueryParamType>();
   const [loading, setLoading] = useState(false);
@@ -87,10 +86,10 @@ export const CreateWishlistPage = () => {
         items: [],
       });
 
-      enqueueSnackbar('Liste créé avec succès', { variant: 'success' });
+      addToast({ message: 'Liste créé avec succès', variant: 'success' });
       navigate(`/wishlists/${wishlist.id}`);
     } catch (e) {
-      enqueueSnackbar("Une erreur s'est produite", { variant: 'error' });
+      addToast({ message: "Une erreur s'est produite", variant: 'error' });
       setLoading(false);
     }
   };

@@ -1,8 +1,7 @@
 import { Box, Checkbox, FormControlLabel, Stack, Typography } from '@mui/material';
 import React, { FormEvent, useEffect, useState } from 'react';
-import { useApi } from '@wishlist/common-front';
+import { useApi, useToast } from '@wishlist/common-front';
 import { wishlistApiRef } from '../../core/api/wishlist.api';
-import { useSnackbar } from 'notistack';
 import { useAsync } from 'react-use';
 import { Loader } from '../common/Loader';
 import { InputLabel } from '../common/InputLabel';
@@ -10,7 +9,7 @@ import { LoadingButton } from '@mui/lab';
 import SaveIcon from '@mui/icons-material/Save';
 
 export const UserTabNotifications = () => {
-  const { enqueueSnackbar } = useSnackbar();
+  const { addToast } = useToast();
   const api = useApi(wishlistApiRef);
   const [loading, setLoading] = useState(false);
   const [dailyNewItemNotification, setDailyNewItemNotification] = useState(true);
@@ -31,9 +30,9 @@ export const UserTabNotifications = () => {
         daily_new_item_notification: dailyNewItemNotification,
       });
 
-      enqueueSnackbar('Préférences de notification mis à jour', { variant: 'info' });
+      addToast({ message: 'Préférences de notification mis à jour', variant: 'info' });
     } catch (e) {
-      enqueueSnackbar("Une erreur s'est produite", { variant: 'error' });
+      addToast({ message: "Une erreur s'est produite", variant: 'error' });
     } finally {
       setLoading(false);
     }

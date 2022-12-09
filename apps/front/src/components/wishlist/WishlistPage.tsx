@@ -4,7 +4,7 @@ import { Title } from '../common/Title';
 import { Loader } from '../common/Loader';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAsync } from 'react-use';
-import { RouterLink, useApi } from '@wishlist/common-front';
+import { RouterLink, useApi, useToast } from '@wishlist/common-front';
 import { wishlistApiRef } from '../../core/api/wishlist.api';
 import { WishlistItems } from './WishlistItems';
 import PublicIcon from '@mui/icons-material/Public';
@@ -16,14 +16,13 @@ import { ConfirmButton } from '../common/ConfirmButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { RootState } from '../../core';
 import { useSelector } from 'react-redux';
-import { useSnackbar } from 'notistack';
 import EditIcon from '@mui/icons-material/Edit';
 import { WishlistNotFound } from './WishlistNotFound';
 
 const mapState = (state: RootState) => ({ currentUserId: state.auth.user?.id });
 
 export const WishlistPage = () => {
-  const { enqueueSnackbar } = useSnackbar();
+  const { addToast } = useToast();
   const { currentUserId } = useSelector(mapState);
   const [openEventDialog, setOpenEventDialog] = useState(false);
   const params = useParams<'wishlistId'>();
@@ -36,10 +35,10 @@ export const WishlistPage = () => {
   const deleteWishlist = async () => {
     try {
       await api.wishlist.delete(wishlistId);
-      enqueueSnackbar('La liste à bien été supprimée', { variant: 'success' });
+      addToast({ message: 'La liste à bien été supprimée', variant: 'success' });
       navigate('/wishlists');
     } catch (e) {
-      enqueueSnackbar("Une erreur s'est produite", { variant: 'error' });
+      addToast({ message: "Une erreur s'est produite", variant: 'error' });
     }
   };
 

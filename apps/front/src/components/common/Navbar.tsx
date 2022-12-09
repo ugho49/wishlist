@@ -4,12 +4,11 @@ import { useDispatch } from 'react-redux';
 import { AppBar, Box, Button, Container, IconButton, Stack, Theme, Toolbar, Typography } from '@mui/material';
 import LogoutIcon from '@mui/icons-material/Logout';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { useHistoryStack } from '@wishlist/common-front';
+import { useHistoryStack, useToast } from '@wishlist/common-front';
 import { ReactComponent as IconSvg } from '../../assets/icons/icon.svg';
 import { ReactComponent as TextSvg } from '../../assets/icons/logo_text.svg';
 import { makeStyles } from '@mui/styles';
 import { Link, useNavigate } from 'react-router-dom';
-import { useSnackbar } from 'notistack';
 
 const useStyles = makeStyles((theme: Theme) => ({
   logo: {
@@ -51,10 +50,10 @@ const GoBack = () => {
 export const Navbar = () => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const { enqueueSnackbar } = useSnackbar();
+  const { addToast } = useToast();
 
   const handleLogout = useCallback(() => {
-    enqueueSnackbar('A bientôt 👋', { variant: 'default' });
+    addToast({ message: 'A bientôt 👋', variant: 'default' });
     logout(dispatch);
   }, [dispatch]);
 

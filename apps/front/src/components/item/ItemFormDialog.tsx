@@ -18,9 +18,8 @@ import SaveIcon from '@mui/icons-material/Save';
 import { CharsRemaining } from '../common/CharsRemaining';
 import { InputLabel } from '../common/InputLabel';
 import { LoadingButton } from '@mui/lab';
-import { isValidUrl, useApi } from '@wishlist/common-front';
+import { isValidUrl, useApi, useToast } from '@wishlist/common-front';
 import { wishlistApiRef } from '../../core/api/wishlist.api';
-import { useSnackbar } from 'notistack';
 import { Rating } from '../common/Rating';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
@@ -55,7 +54,7 @@ export const ItemFormDialog = ({
 }: ItemFormDialogProps) => {
   const theme = useTheme();
   const smallScreen = useMediaQuery(theme.breakpoints.down('md'));
-  const { enqueueSnackbar } = useSnackbar();
+  const { addToast } = useToast();
   const api = useApi(wishlistApiRef);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -93,18 +92,18 @@ export const ItemFormDialog = ({
 
         resetForm();
         handleCreate(newItem);
-        enqueueSnackbar('Souhait créé avec succès', { variant: 'success' });
+        addToast({ message: 'Souhait créé avec succès', variant: 'success' });
       }
 
       if (mode === 'edit') {
         await api.item.update(item.id, base);
         handleUpdate({ ...item, ...base });
-        enqueueSnackbar('Le souhait à bien été modifié', { variant: 'success' });
+        addToast({ message: 'Le souhait à bien été modifié', variant: 'success' });
       }
 
       handleClose();
     } catch (e) {
-      enqueueSnackbar("Une erreur s'est produite", { variant: 'error' });
+      addToast({ message: "Une erreur s'est produite", variant: 'error' });
     } finally {
       setLoading(false);
     }

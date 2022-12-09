@@ -1,9 +1,8 @@
 import React, { FormEvent, useState } from 'react';
 import { DetailedWishlistDto, UpdateWishlistInputDto } from '@wishlist/common-types';
 import { Box, Stack, TextField } from '@mui/material';
-import { useApi } from '@wishlist/common-front';
+import { useApi, useToast } from '@wishlist/common-front';
 import { wishlistApiRef } from '../../core/api/wishlist.api';
-import { useSnackbar } from 'notistack';
 import { InputLabel } from '../common/InputLabel';
 import { CharsRemaining } from '../common/CharsRemaining';
 import { LoadingButton } from '@mui/lab';
@@ -17,7 +16,7 @@ export type EditWishlistInformationsProps = {
 export const EditWishlistInformations = ({ wishlist, onChange }: EditWishlistInformationsProps) => {
   const [loading, setLoading] = useState(false);
   const api = useApi(wishlistApiRef);
-  const { enqueueSnackbar } = useSnackbar();
+  const { addToast } = useToast();
   const [title, setTitle] = useState(wishlist.title);
   const [description, setDescription] = useState(wishlist.description);
 
@@ -28,9 +27,9 @@ export const EditWishlistInformations = ({ wishlist, onChange }: EditWishlistInf
       const body: UpdateWishlistInputDto = { title, description: description === '' ? undefined : description };
       await api.wishlist.update(wishlist.id, body);
       onChange(body);
-      enqueueSnackbar('Liste mis à jour', { variant: 'info' });
+      addToast({ message: 'Liste mis à jour', variant: 'info' });
     } catch (e) {
-      enqueueSnackbar("Une erreur s'est produite", { variant: 'error' });
+      addToast({ message: "Une erreur s'est produite", variant: 'error' });
     } finally {
       setLoading(false);
     }

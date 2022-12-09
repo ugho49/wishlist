@@ -1,7 +1,6 @@
 import React, { FormEvent, useState } from 'react';
-import { useApi } from '@wishlist/common-front';
+import { useApi, useToast } from '@wishlist/common-front';
 import { wishlistApiRef } from '../../core/api/wishlist.api';
-import { useSnackbar } from 'notistack';
 import { Alert, Box, Stack, TextField } from '@mui/material';
 import { InputLabel } from '../common/InputLabel';
 import { LoadingButton } from '@mui/lab';
@@ -12,7 +11,7 @@ export const UserTabPassword = () => {
   const [loading, setLoading] = useState(false);
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
-  const { enqueueSnackbar } = useSnackbar();
+  const { addToast } = useToast();
 
   const formIsValid =
     oldPassword.trim() !== '' && newPassword.trim() !== '' && newPassword.length >= 8 && oldPassword !== newPassword;
@@ -29,9 +28,9 @@ export const UserTabPassword = () => {
       setNewPassword('');
       setOldPassword('');
 
-      enqueueSnackbar('Mot de passe mis à jour', { variant: 'info' });
+      addToast({ message: 'Mot de passe mis à jour', variant: 'info' });
     } catch (e) {
-      enqueueSnackbar("Une erreur s'est produite", { variant: 'error' });
+      addToast({ message: "Une erreur s'est produite", variant: 'error' });
     } finally {
       setLoading(false);
     }

@@ -1,26 +1,13 @@
 import React, { useMemo, useState } from 'react';
 import { MAX_EVENTS_BY_LIST, MiniEventDto } from '@wishlist/common-types';
 import { Card } from '../common/Card';
-import {
-  Avatar,
-  Box,
-  Button,
-  Divider,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  Stack,
-  useTheme,
-} from '@mui/material';
+import { Avatar, Box, Divider, List, ListItem, ListItemAvatar, ListItemText, Stack, useTheme } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import { DateTime } from 'luxon';
 import { ConfirmIconButton } from '../common/ConfirmIconButton';
-import { useApi } from '@wishlist/common-front';
+import { useApi, useToast } from '@wishlist/common-front';
 import { wishlistApiRef } from '../../core/api/wishlist.api';
-import { useSnackbar } from 'notistack';
-import AddIcon from '@mui/icons-material/Add';
 import { SearchEventSelect } from '../event/SearchEventSelect';
 import { useAsync } from 'react-use';
 import { InputLabel } from '../common/InputLabel';
@@ -35,7 +22,7 @@ export const EditWishlistEvent = ({ wishlistId, events, onChange }: EditWishlist
   const api = useApi(wishlistApiRef);
   const theme = useTheme();
   const [loading, setLoading] = useState(false);
-  const { enqueueSnackbar } = useSnackbar();
+  const { addToast } = useToast();
   const { value } = useAsync(() => api.event.getAll({ limit: 100, only_future: true }), []);
   const availableEvents = useMemo(() => value?.resources || [], [value]);
 
@@ -45,9 +32,9 @@ export const EditWishlistEvent = ({ wishlistId, events, onChange }: EditWishlist
     try {
       await api.wishlist.linkWishlistToAnEvent(wishlistId, { event_id: event.id });
       onChange([event, ...events]);
-      enqueueSnackbar('La liaison entre cette liste et cet évènement à été ajoutée !', { variant: 'info' });
+      addToast({ message: 'La liaison entre cette liste et cet évènement à été ajoutée !', variant: 'info' });
     } catch (e) {
-      enqueueSnackbar("Impossible d'ajouter la liaison entre cette liste et cet évènement", { variant: 'error' });
+      addToast({ message: "Impossible d'ajouter la liaison entre cette liste et cet évènement", variant: 'error' });
     } finally {
       setLoading(false);
     }
@@ -59,9 +46,9 @@ export const EditWishlistEvent = ({ wishlistId, events, onChange }: EditWishlist
     try {
       await api.wishlist.unlinkWishlistToAnEvent(wishlistId, { event_id: event.id });
       onChange([...events].filter((e) => e.id !== event.id));
-      enqueueSnackbar('La liaison entre cette liste et cet évènement à été supprimée !', { variant: 'info' });
+      addToast({ message: 'La liaison entre cette liste et cet évènement à été supprimée !', variant: 'info' });
     } catch (e) {
-      enqueueSnackbar('Impossible de supprimer la liaison entre cette liste et cet évènement', { variant: 'error' });
+      addToast({ message: 'Impossible de supprimer la liaison entre cette liste et cet évènement', variant: 'error' });
     } finally {
       setLoading(false);
     }

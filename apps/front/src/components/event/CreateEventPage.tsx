@@ -27,8 +27,7 @@ import { AttendeeRole, MiniUserDto } from '@wishlist/common-types';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { LoadingButton } from '@mui/lab';
 import SaveIcon from '@mui/icons-material/Save';
-import { useSnackbar } from 'notistack';
-import { useApi } from '@wishlist/common-front';
+import { useApi, useToast } from '@wishlist/common-front';
 import { wishlistApiRef } from '../../core/api/wishlist.api';
 import { useNavigate } from 'react-router-dom';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
@@ -49,7 +48,7 @@ const mapState = (state: RootState) => ({ currentUserEmail: state.auth.user?.ema
 export const CreateEventPage = () => {
   const api = useApi(wishlistApiRef);
   const { currentUserEmail } = useSelector(mapState);
-  const { enqueueSnackbar } = useSnackbar();
+  const { addToast } = useToast();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1);
@@ -83,10 +82,10 @@ export const CreateEventPage = () => {
         })),
       });
 
-      enqueueSnackbar('Evènement créé avec succès', { variant: 'success' });
+      addToast({ message: 'Evènement créé avec succès', variant: 'success' });
       navigate(`/events/${event.id}`);
     } catch (e) {
-      enqueueSnackbar("Une erreur s'est produite", { variant: 'error' });
+      addToast({ message: "Une erreur s'est produite", variant: 'error' });
       setLoading(false);
     }
   };

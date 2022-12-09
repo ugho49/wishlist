@@ -20,9 +20,8 @@ import clsx from 'clsx';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { ConfirmIconButton } from '../common/ConfirmIconButton';
-import { useApi } from '@wishlist/common-front';
+import { useApi, useToast } from '@wishlist/common-front';
 import { wishlistApiRef } from '../../core/api/wishlist.api';
-import { useSnackbar } from 'notistack';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { DateTime } from 'luxon';
 import { Rating } from '../common/Rating';
@@ -121,7 +120,7 @@ export const ItemCard = ({ item, handleDelete, handleUpdate, wishlist }: ItemCar
   const classes = useStyles();
   const { currentUserId } = useSelector(mapState);
   const api = useApi(wishlistApiRef);
-  const { enqueueSnackbar } = useSnackbar();
+  const { addToast } = useToast();
   const [openDialog, setOpenDialog] = useState(false);
   const [loading, setLoading] = useState(false);
   const [takenBy, setTakenBy] = useState<MiniUserDto | undefined>(item.taken_by);
@@ -135,11 +134,11 @@ export const ItemCard = ({ item, handleDelete, handleUpdate, wishlist }: ItemCar
     setLoading(true);
     try {
       await api.item.delete(item.id);
-      enqueueSnackbar('Le souhait à bien été supprimé', { variant: 'success' });
+      addToast({ message: 'Le souhait à bien été supprimé', variant: 'success' });
       handleDelete();
     } catch (e) {
       setLoading(false);
-      enqueueSnackbar("Une erreur s'est produite", { variant: 'error' });
+      addToast({ message: "Une erreur s'est produite", variant: 'error' });
     }
   };
 
@@ -151,22 +150,26 @@ export const ItemCard = ({ item, handleDelete, handleUpdate, wishlist }: ItemCar
       setTakenBy(res.taken_by);
 
       if (action === 'check') {
-        enqueueSnackbar(
-          <span>
-            Vous avez coché : <b>{item.name}</b>
-          </span>,
-          { variant: 'success' }
-        );
+        addToast({
+          message: (
+            <span>
+              Vous avez coché : <b>{item.name}</b>
+            </span>
+          ),
+          variant: 'success',
+        });
       } else {
-        enqueueSnackbar(
-          <span>
-            Le souhait <b>{item.name}</b> est à nouveau disponible
-          </span>,
-          { variant: 'info' }
-        );
+        addToast({
+          message: (
+            <span>
+              Le souhait <b>{item.name}</b> est à nouveau disponible
+            </span>
+          ),
+          variant: 'info',
+        });
       }
     } catch (e) {
-      enqueueSnackbar("Une erreur s'est produite", { variant: 'error' });
+      addToast({ message: "Une erreur s'est produite", variant: 'error' });
     }
     setLoading(false);
   }, [isTaken, item]);

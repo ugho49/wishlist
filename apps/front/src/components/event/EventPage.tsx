@@ -4,7 +4,7 @@ import { Title } from '../common/Title';
 import { Loader } from '../common/Loader';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAsync } from 'react-use';
-import { RouterLink, useApi } from '@wishlist/common-front';
+import { RouterLink, useApi, useToast } from '@wishlist/common-front';
 import { wishlistApiRef } from '../../core/api/wishlist.api';
 import PeopleIcon from '@mui/icons-material/People';
 import { EventWishlists } from './EventWishlists';
@@ -14,7 +14,6 @@ import { DateTime } from 'luxon';
 import { ConfirmButton } from '../common/ConfirmButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { RootState } from '../../core';
-import { useSnackbar } from 'notistack';
 import { useSelector } from 'react-redux';
 import { EventAttendeesDialog } from './EventAttendeesDialog';
 import EditIcon from '@mui/icons-material/Edit';
@@ -24,7 +23,7 @@ const mapState = (state: RootState) => ({ currentUserId: state.auth.user?.id });
 
 export const EventPage = () => {
   const { currentUserId } = useSelector(mapState);
-  const { enqueueSnackbar } = useSnackbar();
+  const { addToast } = useToast();
   const params = useParams<'eventId'>();
   const eventId = params.eventId || '';
   const api = useApi(wishlistApiRef);
@@ -36,10 +35,10 @@ export const EventPage = () => {
   const deleteEvent = async () => {
     try {
       await api.event.delete(eventId);
-      enqueueSnackbar("L'évènement à bien été supprimée", { variant: 'success' });
+      addToast({ message: "L'évènement à bien été supprimée", variant: 'success' });
       navigate('/events');
     } catch (e) {
-      enqueueSnackbar("Une erreur s'est produite", { variant: 'error' });
+      addToast({ message: "Une erreur s'est produite", variant: 'error' });
     }
   };
 

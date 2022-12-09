@@ -2,12 +2,11 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { RootState } from '../store';
-import { useApi } from '@wishlist/common-front';
+import { useApi, useToast } from '@wishlist/common-front';
 import { useInterval } from 'usehooks-ts';
 import { AuthService } from '../services/auth.service';
 import { logout } from '../store/features';
 import { wishlistApiRef } from '../api/wishlist.api';
-import { useSnackbar } from 'notistack';
 
 const mapState = (state: RootState) => ({ accessToken: state.auth.accessToken });
 const accessTokenService = new AuthService().accessTokenService;
@@ -17,7 +16,7 @@ export const AxiosInterceptor: React.FC = () => {
   const { axios } = useApi(wishlistApiRef);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { enqueueSnackbar } = useSnackbar();
+  const { addToast } = useToast();
 
   const redirectToLogin = () => navigate('/login');
 
@@ -27,7 +26,7 @@ export const AxiosInterceptor: React.FC = () => {
   useInterval(() => {
     // TODO change this to refreshToken -->
     if (accessToken && accessTokenService.isExpired(accessToken)) {
-      enqueueSnackbar('Votre session à expiré', { variant: 'warning' });
+      addToast({ message: 'Votre session à expiré', variant: 'warning' });
       logout(dispatch);
       redirectToLogin();
     }
