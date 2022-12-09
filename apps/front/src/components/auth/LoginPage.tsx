@@ -36,6 +36,8 @@ export const LoginPage = () => {
     }
   }
 
+  // TODO: refacto page
+
   return (
     <>
       <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>

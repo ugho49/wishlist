@@ -14,6 +14,8 @@ import { WishlistPage } from './components/wishlist/WishlistPage';
 import { EventPage } from './components/event/EventPage';
 import { CreateEventPage } from './components/event/CreateEventPage';
 import { CreateWishlistPage } from './components/wishlist/CreateWishlistPage';
+import { EditWishlistPage } from './components/wishlist/EditWishlistPage';
+import { EditEventPage } from './components/event/EditEventPage';
 
 const mapState = (state: RootState) => ({ accessToken: state.auth.accessToken });
 
@@ -48,14 +50,14 @@ export const App = () => {
             <Route index element={<EventListPage />} />
             <Route path="new" element={<CreateEventPage />} />
             <Route path=":eventId" element={<EventPage />} />
-            {/*<Route path=":eventId/edit" element={<EditEvent />} />*/}
+            <Route path=":eventId/edit" element={<EditEventPage />} />
           </Route>
 
           <Route path="wishlists">
             <Route index element={<WishlistListPage />} />
             <Route path="new" element={<CreateWishlistPage />} />
             <Route path=":wishlistId" element={<WishlistPage />} />
-            {/*<Route path=":wishlistId/edit" element={<EditWishlist />} />*/}
+            <Route path=":wishlistId/edit" element={<EditWishlistPage />} />
           </Route>
 
           <Route path="admin" element={<AdminRouteOutlet />}>

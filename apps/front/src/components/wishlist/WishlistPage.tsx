@@ -18,6 +18,7 @@ import { RootState } from '../../core';
 import { useSelector } from 'react-redux';
 import { useSnackbar } from 'notistack';
 import EditIcon from '@mui/icons-material/Edit';
+import { WishlistNotFound } from './WishlistNotFound';
 
 const mapState = (state: RootState) => ({ currentUserId: state.auth.user?.id });
 
@@ -45,12 +46,7 @@ export const WishlistPage = () => {
   return (
     <Box>
       <Loader loading={loading}>
-        {!wishlist && (
-          <div>
-            {/* TODO --> */}
-            <span>List not found</span>
-          </div>
-        )}
+        {!wishlist && <WishlistNotFound />}
 
         {wishlist && (
           <>

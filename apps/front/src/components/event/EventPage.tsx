@@ -18,6 +18,7 @@ import { useSnackbar } from 'notistack';
 import { useSelector } from 'react-redux';
 import { EventAttendeesDialog } from './EventAttendeesDialog';
 import EditIcon from '@mui/icons-material/Edit';
+import { EventNotFound } from './EventNotFound';
 
 const mapState = (state: RootState) => ({ currentUserId: state.auth.user?.id });
 
@@ -45,12 +46,7 @@ export const EventPage = () => {
   return (
     <Box>
       <Loader loading={loading}>
-        {!event && (
-          <div>
-            {/* TODO --> */}
-            <span>Event not found</span>
-          </div>
-        )}
+        {!event && <EventNotFound />}
         {event && (
           <>
             <Title smallMarginBottom>{event.title}</Title>

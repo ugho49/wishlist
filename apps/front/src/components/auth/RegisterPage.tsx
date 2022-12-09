@@ -1,3 +1,4 @@
-export type RegisterPageProps = unknown;
-
-export const RegisterPage = (props: RegisterPageProps) => <div>RegisterPage</div>;
+export const RegisterPage = () => {
+  // TODO create page
+  return <div>RegisterPage</div>;
+};
