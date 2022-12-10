@@ -43,9 +43,7 @@ export const EditWishlistPage = () => {
   const { value, loading } = useAsync(() => api.wishlist.getById(wishlistId), [wishlistId]);
 
   useEffect(() => {
-    if (value) {
-      setWishlist(value);
-    }
+    if (value) setWishlist(value);
   }, [value]);
 
   return (

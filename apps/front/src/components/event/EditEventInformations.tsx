@@ -1,35 +1,42 @@
 import React, { FormEvent, useState } from 'react';
-import { DetailedWishlistDto, UpdateWishlistInputDto } from '@wishlist/common-types';
-import { Box, Stack, TextField } from '@mui/material';
+import { DetailedEventDto, UpdateEventInputDto } from '@wishlist/common-types';
 import { useApi, useToast } from '@wishlist/common-front';
 import { wishlistApiRef } from '../../core/api/wishlist.api';
+import { DateTime } from 'luxon';
+import { Box, Stack, TextField } from '@mui/material';
 import { InputLabel } from '../common/InputLabel';
 import { CharsRemaining } from '../common/CharsRemaining';
 import { LoadingButton } from '@mui/lab';
 import SaveIcon from '@mui/icons-material/Save';
+import { MobileDatePicker } from '@mui/x-date-pickers';
 
-export type EditWishlistInformationsProps = {
-  wishlist: DetailedWishlistDto;
-  onChange: (updatedValues: UpdateWishlistInputDto) => void;
+export type EditEventInformationsProps = {
+  event: DetailedEventDto;
+  onChange: (updatedValues: Omit<UpdateEventInputDto, 'event_date'> & { event_date: string }) => void;
 };
 
-export const EditWishlistInformations = ({ wishlist, onChange }: EditWishlistInformationsProps) => {
+export const EditEventInformations = ({ event, onChange }: EditEventInformationsProps) => {
   const [loading, setLoading] = useState(false);
   const api = useApi(wishlistApiRef);
   const { addToast } = useToast();
-  const [title, setTitle] = useState(wishlist.title);
-  const [description, setDescription] = useState(wishlist.description);
+  const [title, setTitle] = useState(event.title);
+  const [description, setDescription] = useState(event.description);
+  const [eventDate, setEventDate] = useState<DateTime | null>(DateTime.fromISO(event.event_date));
 
-  const updateEnabled = title.trim() !== '';
+  const updateEnabled = title.trim() !== '' && eventDate !== null;
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const body: UpdateWishlistInputDto = { title, description: description === '' ? undefined : description };
-      await api.wishlist.update(wishlist.id, body);
-      onChange(body);
-      addToast({ message: 'Liste mis à jour', variant: 'info' });
+      const body: UpdateEventInputDto = {
+        title,
+        description: description === '' ? undefined : description,
+        event_date: eventDate?.toJSDate() || DateTime.now().toJSDate(),
+      };
+      await api.event.update(event.id, body);
+      onChange({ ...body, event_date: body.event_date.toISOString() });
+      addToast({ message: 'Évènement mis à jour', variant: 'info' });
     } catch (e) {
       addToast({ message: "Une erreur s'est produite", variant: 'error' });
     } finally {
@@ -48,7 +55,7 @@ export const EditWishlistInformations = ({ wishlist, onChange }: EditWishlistInf
           required
           value={title}
           inputProps={{ maxLength: 100 }}
-          placeholder="Ma super liste"
+          placeholder="La titre de votre évènement"
           helperText={<CharsRemaining max={100} value={title} />}
           onChange={(e) => setTitle(e.target.value)}
         />
@@ -69,6 +76,18 @@ export const EditWishlistInformations = ({ wishlist, onChange }: EditWishlistInf
           onChange={(e) => setDescription(e.target.value)}
         />
       </Box>
+
+      <Stack>
+        <InputLabel required>Date de l'évènement</InputLabel>
+        <MobileDatePicker
+          inputFormat="DDDD"
+          value={eventDate}
+          disabled={loading}
+          onChange={(date) => setEventDate(date)}
+          disablePast={true}
+          renderInput={(params) => <TextField {...params} placeholder="Choisir une date pour votre évènement" />}
+        />
+      </Stack>
 
       <LoadingButton
         type="submit"
