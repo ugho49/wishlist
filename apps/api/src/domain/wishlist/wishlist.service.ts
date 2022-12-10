@@ -3,6 +3,7 @@ import {
   createPagedResponse,
   CreateWishlistInputDto,
   DetailedWishlistDto,
+  MAX_EVENTS_BY_LIST,
   MiniWishlistDto,
   PagedResponse,
   UpdateWishlistInputDto,
@@ -143,8 +144,8 @@ export class WishlistService {
     const events = await wishlistEntity.events;
     const eventIds = events.map((e) => e.id);
 
-    if (eventIds.length === 5) {
-      throw new UnauthorizedException('You cannot link your list to more than 5 events');
+    if (eventIds.length === MAX_EVENTS_BY_LIST) {
+      throw new UnauthorizedException(`You cannot link your list to more than ${MAX_EVENTS_BY_LIST} events`);
     }
 
     const eventEntity = await this.eventRepository.findByIdAndUserId({ eventId, userId: currentUserId });
@@ -157,9 +158,7 @@ export class WishlistService {
       throw new UnauthorizedException('This wishlist is already attached to this event');
     }
 
-    wishlistEntity.events = Promise.resolve([...events, eventEntity]);
-
-    await this.wishlistRepository.save(wishlistEntity);
+    await this.wishlistRepository.linkEvent({ wishlistId, eventId });
   }
 
   async unlinkWishlistToAnEvent(param: { eventId: string; currentUserId: string; wishlistId: string }): Promise<void> {
@@ -185,8 +184,6 @@ export class WishlistService {
       );
     }
 
-    wishlistEntity.events = Promise.resolve(events.filter((e) => e.id !== eventId));
-
-    await this.wishlistRepository.save(wishlistEntity);
+    await this.wishlistRepository.unlinkEvent({ wishlistId, eventId });
   }
 }

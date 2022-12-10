@@ -6,11 +6,18 @@ import { DateTime } from 'luxon';
 export type SearchEventSelectProps = {
   options: MiniEventDto[];
   disabled?: boolean;
+  error?: boolean;
   onChange: (value: MiniEventDto) => void;
   excludedEventIds: string[];
 };
 
-export const SearchEventSelect = ({ excludedEventIds, onChange, options, disabled }: SearchEventSelectProps) => {
+export const SearchEventSelect = ({
+  excludedEventIds,
+  onChange,
+  options,
+  disabled,
+  error = false,
+}: SearchEventSelectProps) => {
   return (
     <Autocomplete
       fullWidth
@@ -32,6 +39,7 @@ export const SearchEventSelect = ({ excludedEventIds, onChange, options, disable
           {...params}
           inputProps={{ ...params.inputProps }}
           placeholder="Sélectionner un évènement"
+          error={error}
           helperText={`Vous ne pouvez pas séléctionner plus de ${MAX_EVENTS_BY_LIST} évènements auxquels vous souhaitez que cette liste apparaisse`}
         />
       )}

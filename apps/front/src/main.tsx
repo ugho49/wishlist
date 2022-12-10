@@ -22,7 +22,7 @@ root.render(
           <BrowserRouter>
             <SnackbarProvider
               maxSnack={3}
-              autoHideDuration={5000}
+              autoHideDuration={3_000}
               anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
               preventDuplicate
             >

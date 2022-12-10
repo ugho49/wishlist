@@ -60,6 +60,7 @@ export const EditWishlistEvent = ({ wishlistId, events, onChange }: EditWishlist
         <InputLabel>Ajouter un nouvel évènement sur la liste ?</InputLabel>
 
         <SearchEventSelect
+          error={events.length === MAX_EVENTS_BY_LIST}
           options={availableEvents}
           disabled={loading || events.length === MAX_EVENTS_BY_LIST}
           onChange={(value) => attacheEventToWishlist(value)}
