@@ -40,7 +40,7 @@ export const EventAttendeesDialog = ({ open, attendees, creator, handleClose }: 
               <PersonIcon />
             </Avatar>
           </ListItemAvatar>
-          <ListItemText primary={`${creator.firstname} ${creator.lastname}`} secondary={creator.email} />
+          <ListItemText primary={<b>{`${creator.firstname} ${creator.lastname}`}</b>} secondary={creator.email} />
         </ListItem>
         {attendees.map((attendee) => (
           <ListItem key={attendee.id}>
@@ -55,7 +55,11 @@ export const EventAttendeesDialog = ({ open, attendees, creator, handleClose }: 
               </Avatar>
             </ListItemAvatar>
             <ListItemText
-              primary={attendee.pending_email ? 'Invitation' : `${attendee.user?.firstname} ${attendee.user?.lastname}`}
+              primary={
+                <b>
+                  {attendee.pending_email ? 'Invitation' : `${attendee.user?.firstname} ${attendee.user?.lastname}`}
+                </b>
+              }
               secondary={attendee.pending_email ? attendee.pending_email : attendee.user?.email}
             />
           </ListItem>

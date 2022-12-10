@@ -8,6 +8,7 @@ import {
   DialogTitle,
   IconButton,
   IconButtonTypeMap,
+  Tooltip,
 } from '@mui/material';
 
 export type ConfirmIconButtonProps = {
@@ -38,9 +39,11 @@ export const ConfirmIconButton = ({
 
   return (
     <>
-      <IconButton color={color} size={size} disabled={disabled} onClick={() => setOpenDialog(true)}>
-        {children}
-      </IconButton>
+      <Tooltip title={confirmTitle}>
+        <IconButton color={color} size={size} disabled={disabled} onClick={() => setOpenDialog(true)}>
+          {children}
+        </IconButton>
+      </Tooltip>
       <Dialog open={openDialog} onClose={() => closeDialog()}>
         <DialogTitle>{confirmTitle}</DialogTitle>
         <DialogContent>

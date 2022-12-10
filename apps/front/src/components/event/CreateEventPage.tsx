@@ -201,9 +201,11 @@ export const CreateEventPage = () => {
                       </ListItemAvatar>
                       <ListItemText
                         primary={
-                          typeof attendee.user === 'string'
-                            ? 'Inviter le participant'
-                            : `${attendee.user.firstname} ${attendee.user.lastname}`
+                          <b>
+                            {typeof attendee.user === 'string'
+                              ? 'Inviter le participant'
+                              : `${attendee.user.firstname} ${attendee.user.lastname}`}
+                          </b>
                         }
                         secondary={typeof attendee.user === 'string' ? attendee.user : attendee.user.email}
                       />

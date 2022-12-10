@@ -78,6 +78,7 @@ export const EditEventPage = () => {
               {queryParams.tab === TabValues.attendees && (
                 <EditEventAttendees
                   eventId={event.id}
+                  creator={event.created_by}
                   attendees={event.attendees}
                   onChange={(attendees) => setEvent({ ...event, attendees })}
                 />

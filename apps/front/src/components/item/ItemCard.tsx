@@ -14,6 +14,7 @@ import {
   Stack,
   svgIconClasses,
   Theme,
+  Tooltip,
 } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import clsx from 'clsx';
@@ -221,9 +222,11 @@ export const ItemCard = ({ item, handleDelete, handleUpdate, wishlist }: ItemCar
         </Stack>
         {displayActions && (
           <Stack className={clsx(classes.actions, 'animated zoomIn faster')}>
-            <IconButton color="info" onClick={() => setOpenDialog(true)} disabled={loading || isTaken} size="small">
-              <EditIcon />
-            </IconButton>
+            <Tooltip title="Modifier le souhait">
+              <IconButton color="info" onClick={() => setOpenDialog(true)} disabled={loading || isTaken} size="small">
+                <EditIcon />
+              </IconButton>
+            </Tooltip>
             <ConfirmIconButton
               color="error"
               size="small"

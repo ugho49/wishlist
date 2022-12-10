@@ -196,7 +196,7 @@ export const CreateWishlistPage = () => {
                         </Avatar>
                       </ListItemAvatar>
                       <ListItemText
-                        primary={event.title}
+                        primary={<b>{event.title}</b>}
                         secondary={DateTime.fromISO(event.event_date).toLocaleString(DateTime.DATE_MED)}
                       />
                     </ListItem>
