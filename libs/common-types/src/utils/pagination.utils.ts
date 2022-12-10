@@ -13,6 +13,7 @@ export function createPagedResponse<T>(params: {
       page_number: pageNumber || 0,
       total_elements: totalElements,
       total_pages: Math.ceil(totalElements / pageSize),
+      pages_size: pageSize,
     },
   };
 }

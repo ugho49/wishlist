@@ -13,6 +13,7 @@ export class PaginationDto {
   total_pages: number;
   total_elements: number;
   page_number: number;
+  pages_size: number;
 }
 
 export class PagedResponse<T> {

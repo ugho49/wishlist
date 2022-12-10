@@ -4,6 +4,9 @@ import { Title } from '../common/Title';
 import { useCustomSearchParams } from '@wishlist/common-front';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import GroupsIcon from '@mui/icons-material/Groups';
+import { Card } from '../common/Card';
+import { AdminListUsers } from './AdminListUsers';
+import { AdminListEvents } from './AdminListEvents';
 
 enum TabValues {
   users = 'users',
@@ -44,6 +47,10 @@ export const AdminPage = () => {
           ))}
         </Tabs>
       </Box>
+      <Card>
+        {queryParams.tab === TabValues.users && <AdminListUsers />}
+        {queryParams.tab === TabValues.events && <AdminListEvents />}
+      </Card>
     </Box>
   );
 };
