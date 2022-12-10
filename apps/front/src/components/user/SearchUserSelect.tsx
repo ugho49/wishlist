@@ -32,6 +32,8 @@ export const SearchUserSelect = ({ disabled, onChange, excludedEmails }: SearchU
     }
   };
 
+  // TODO: first call previous "friend" or "usual" user endpoint
+
   const searchUserDebounced = debounce(searchUser, 400);
 
   return (

@@ -16,7 +16,7 @@ const columns: GridColDef<UserDto>[] = [
     width: 20,
     sortable: false,
     filterable: false,
-    renderCell: ({ row }) => <Status color={row.is_enabled ? 'success' : 'error'} />,
+    renderCell: ({ row: user }) => <Status color={user.is_enabled ? 'success' : 'error'} />,
   },
   { field: 'firstname', headerName: 'First name', width: 170 },
   { field: 'lastname', headerName: 'Last name', width: 170 },
@@ -32,7 +32,7 @@ const columns: GridColDef<UserDto>[] = [
     headerName: 'Created At',
     type: 'dateTime',
     width: 150,
-    valueGetter: (params) => DateTime.fromISO(params.row.created_at).toLocaleString(DateTime.DATETIME_MED),
+    valueGetter: ({ row: user }) => DateTime.fromISO(user.created_at).toLocaleString(DateTime.DATETIME_MED),
   },
   {
     field: 'id',
@@ -42,7 +42,7 @@ const columns: GridColDef<UserDto>[] = [
     flex: 1,
     headerAlign: 'center',
     align: 'center',
-    renderCell: ({ row }) => <RouterLink to={`/admin/users/${row.id}`}>Voir</RouterLink>,
+    renderCell: ({ row: user }) => <RouterLink to={`/admin/users/${user.id}`}>Voir</RouterLink>,
   },
 ];
 

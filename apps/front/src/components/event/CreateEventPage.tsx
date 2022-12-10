@@ -157,6 +157,11 @@ export const CreateEventPage = () => {
               <Box>
                 <InputLabel required>Gérer les participants</InputLabel>
 
+                {/*TODO: add a way to add all attendees from a specific event
+                - Open a dialog, select previous events
+                - Get all attendees (add possibility to delete attendees if we don't want them)
+                */}
+
                 <SearchUserSelect
                   disabled={loading}
                   onChange={(val) =>
