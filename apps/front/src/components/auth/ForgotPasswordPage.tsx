@@ -1,7 +1,6 @@
 import React, { FormEvent, useState } from 'react';
 import { RouterLink, useApi, useToast } from '@wishlist/common-front';
 import { wishlistApiRef } from '../../core/api/wishlist.api';
-import { useDispatch } from 'react-redux';
 import { Card } from '../common/Card';
 import { Subtitle } from '../common/Subtitle';
 import { Box, Stack, TextField } from '@mui/material';
@@ -11,7 +10,6 @@ import AttachEmailIcon from '@mui/icons-material/AttachEmail';
 
 export const ForgotPasswordPage = () => {
   const api = useApi(wishlistApiRef);
-  const dispatch = useDispatch();
   const { addToast } = useToast();
   const [email, setEmail] = useState('');
   const [resetCodeSent, setResetCodeSent] = useState(false);

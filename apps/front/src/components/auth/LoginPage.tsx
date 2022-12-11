@@ -1,5 +1,5 @@
 import { Box, Stack, TextField } from '@mui/material';
-import { RouterLink, useApi, useToast } from '@wishlist/common-front';
+import { getUrlParameter, RouterLink, useApi, useToast } from '@wishlist/common-front';
 import { useDispatch } from 'react-redux';
 import React, { FormEvent, useState } from 'react';
 import { setTokens } from '../../core/store/features';
@@ -14,7 +14,7 @@ export const LoginPage = () => {
   const api = useApi(wishlistApiRef);
   const dispatch = useDispatch();
   const { addToast } = useToast();
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(getUrlParameter('email') || '');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -59,7 +59,7 @@ export const LoginPage = () => {
               disabled={loading}
               placeholder="john@doe.fr"
               autoComplete="email"
-              autoFocus
+              autoFocus={email === ''}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -71,6 +71,7 @@ export const LoginPage = () => {
               fullWidth
               placeholder="********"
               type="password"
+              autoFocus={email !== ''}
               disabled={loading}
               autoComplete="current-password"
               value={password}
@@ -79,7 +80,6 @@ export const LoginPage = () => {
           </Box>
           <LoadingButton
             type="submit"
-            fullWidth
             variant="contained"
             size="large"
             color="secondary"

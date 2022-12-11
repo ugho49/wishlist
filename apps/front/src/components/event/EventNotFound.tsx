@@ -1,6 +1,22 @@
 import React from 'react';
+import { Box, Button, Stack } from '@mui/material';
+import { Title } from '../common/Title';
+import { RouterLink } from '@wishlist/common-front';
 
 export const EventNotFound = () => {
-  // TODO
-  return <div>EventNotFound</div>;
+  return (
+    <Box>
+      <Title>Évènement introuvable</Title>
+      <Stack alignItems="center">
+        <p>Cet évènement n'existe pas ou bien n'est pas accessible</p>
+        <p>
+          <b>Plusieurs raison possible :</b> celui ci à été supprimé, vous n'avez pas les droits pour y accéder ou bien
+          il n'existe pas.
+        </p>
+        <Button variant="contained" component={RouterLink} to="/events" color="secondary">
+          Voir mes évènements
+        </Button>
+      </Stack>
+    </Box>
+  );
 };

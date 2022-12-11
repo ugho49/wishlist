@@ -107,7 +107,8 @@ export const RegisterPage = () => {
               placeholder="********"
               type="password"
               disabled={loading}
-              autoComplete="current-password"
+              autoComplete="new-password"
+              helperText="8 caractères minimum"
               value={password}
               inputProps={{ maxLength: 50, minLength: 8 }}
               onChange={(e) => setPassword(e.target.value)}
