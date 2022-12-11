@@ -37,7 +37,7 @@ export function buildApi(): WishlistApi {
     },
     user: {
       getInfo: () => client.get(`/user`).then((res) => res.data),
-      register: (data) => client.post(`/user`, data).then((res) => res.data),
+      register: (data) => client.post(`/user/register`, data).then((res) => res.data),
       update: (data) => client.put(`/user`, data),
       changePassword: (data) => client.put(`/user/change-password`, data),
       searchUserByKeyword: (keyword) => client.get(`/user/search`, { params: { keyword } }).then((res) => res.data),

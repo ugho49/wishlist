@@ -1,27 +1,28 @@
-import { Box, Grid, Stack, TextField } from '@mui/material';
+import { Box, Stack, TextField } from '@mui/material';
 import { RouterLink, useApi, useToast } from '@wishlist/common-front';
 import { useDispatch } from 'react-redux';
 import React, { FormEvent, useState } from 'react';
 import { setTokens } from '../../core/store/features';
 import { wishlistApiRef } from '../../core/api/wishlist.api';
-import { LoginInputDto } from '@wishlist/common-types';
 import { Card } from '../common/Card';
 import { LoadingButton } from '@mui/lab';
-import SaveIcon from '@mui/icons-material/Save';
 import { InputLabel } from '../common/InputLabel';
+import { Subtitle } from '../common/Subtitle';
+import LoginIcon from '@mui/icons-material/Login';
 
 export const LoginPage = () => {
   const api = useApi(wishlistApiRef);
   const dispatch = useDispatch();
   const { addToast } = useToast();
-  const [form, setForm] = useState<LoginInputDto>({ email: '', password: '' });
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const data = await api.auth.login(form);
+      const data = await api.auth.login({ email, password });
       addToast({ message: 'Heureux de vous revoir 🤓', variant: 'default' });
 
       dispatch(
@@ -47,6 +48,7 @@ export const LoginPage = () => {
   return (
     <>
       <Card sx={{ width: '100%' }}>
+        <Subtitle>Connexion</Subtitle>
         <Stack component="form" onSubmit={onSubmit} gap={3}>
           <Box>
             <InputLabel required>Email</InputLabel>
@@ -58,8 +60,8 @@ export const LoginPage = () => {
               placeholder="john@doe.fr"
               autoComplete="email"
               autoFocus
-              value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
           </Box>
           <Box>
@@ -71,8 +73,8 @@ export const LoginPage = () => {
               type="password"
               disabled={loading}
               autoComplete="current-password"
-              value={form.password}
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
             />
           </Box>
           <LoadingButton
@@ -83,10 +85,10 @@ export const LoginPage = () => {
             color="secondary"
             loading={loading}
             loadingPosition="start"
+            startIcon={<LoginIcon />}
             disabled={loading}
-            startIcon={<SaveIcon />}
           >
-            Connexion
+            Me connecter
           </LoadingButton>
         </Stack>
       </Card>
