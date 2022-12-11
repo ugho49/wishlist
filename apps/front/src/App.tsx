@@ -16,6 +16,8 @@ import { CreateEventPage } from './components/event/CreateEventPage';
 import { CreateWishlistPage } from './components/wishlist/CreateWishlistPage';
 import { EditWishlistPage } from './components/wishlist/EditWishlistPage';
 import { EditEventPage } from './components/event/EditEventPage';
+import { ForgotPasswordPage } from './components/auth/ForgotPasswordPage';
+import { RenewForgotPasswordPage } from './components/auth/RenewForgotPasswordPage';
 
 const mapState = (state: RootState) => ({ accessToken: state.auth.accessToken });
 
@@ -32,8 +34,8 @@ export const App = () => {
           <Route element={<AnonymousRouteContainerOutlet />}>
             <Route path="login" element={<LoginPage />} />
             <Route path="register" element={<RegisterPage />} />
-            {/*<Route path="/forgot-password" element={<ForgotPassword />} />*/}
-            {/*<Route path="/forgot-password/renew" element={<RenewForgotPassword />} />*/}
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/forgot-password/renew" element={<RenewForgotPasswordPage />} />
           </Route>
         </>
       )}
