@@ -1,23 +1,25 @@
-import { Alert, Avatar, Box, Button, Grid, TextField, Typography } from '@mui/material';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import { Box, Grid, Stack, TextField } from '@mui/material';
 import { RouterLink, useApi, useToast } from '@wishlist/common-front';
 import { useDispatch } from 'react-redux';
-import { FormEvent, useState } from 'react';
+import React, { FormEvent, useState } from 'react';
 import { setTokens } from '../../core/store/features';
-import { AxiosError } from 'axios';
 import { wishlistApiRef } from '../../core/api/wishlist.api';
 import { LoginInputDto } from '@wishlist/common-types';
+import { Card } from '../common/Card';
+import { LoadingButton } from '@mui/lab';
+import SaveIcon from '@mui/icons-material/Save';
+import { InputLabel } from '../common/InputLabel';
 
 export const LoginPage = () => {
   const api = useApi(wishlistApiRef);
   const dispatch = useDispatch();
   const { addToast } = useToast();
   const [form, setForm] = useState<LoginInputDto>({ email: '', password: '' });
-  const [errors, setErrors] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  async function onSubmit(e: FormEvent) {
+  const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setErrors([]);
+    setLoading(true);
     try {
       const data = await api.auth.login(form);
       addToast({ message: 'Heureux de vous revoir 🤓', variant: 'default' });
@@ -29,71 +31,72 @@ export const LoginPage = () => {
         })
       );
     } catch (e) {
-      const error = e as AxiosError;
-      const data = error?.response?.data as any;
-      setErrors(Array.isArray(data?.message) ? data?.message : [data?.message]);
+      addToast({
+        message: (
+          <>
+            <span>Une erreur s'est produite. Vérifiez vos identifiants</span>&nbsp;<b>email / mot de passe</b>
+          </>
+        ),
+        variant: 'error',
+      });
+    } finally {
+      setLoading(false);
     }
-  }
-
-  // TODO: refacto page
+  };
 
   return (
     <>
-      <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
-        <LockOutlinedIcon />
-      </Avatar>
-      <Typography component="h1" variant="h5">
-        Sign in
-      </Typography>
-      <Box component="form" onSubmit={onSubmit} noValidate sx={{ mt: 1 }}>
-        {errors.length > 0 && (
-          <Alert severity="error" sx={{ mt: 1, mb: 1 }} onClose={() => setErrors([])}>
-            {errors.map((e, i) => (
-              <div key={i}>{e}</div>
-            ))}
-          </Alert>
-        )}
-        <TextField
-          margin="normal"
-          type="email"
-          required
-          fullWidth
-          id="email"
-          label="Email Address"
-          name="email"
-          autoComplete="email"
-          autoFocus
-          value={form.email}
-          onChange={(e) => setForm({ ...form, email: e.target.value })}
-        />
-        <TextField
-          margin="normal"
-          required
-          fullWidth
-          name="password"
-          label="Password"
-          type="password"
-          id="password"
-          autoComplete="current-password"
-          value={form.password}
-          onChange={(e) => setForm({ ...form, password: e.target.value })}
-        />
-        <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
-          Sign In
-        </Button>
-        <Grid container>
-          <Grid item xs>
-            <RouterLink to="#" variant="body2">
-              Forgot password?
-            </RouterLink>
-          </Grid>
-          <Grid item>
-            <RouterLink to="/register" variant="body2">
-              Don't have an account? Sign Up
-            </RouterLink>
-          </Grid>
-        </Grid>
-      </Box>
+      <Card sx={{ width: '100%' }}>
+        <Stack component="form" onSubmit={onSubmit} gap={3}>
+          <Box>
+            <InputLabel required>Email</InputLabel>
+            <TextField
+              type="email"
+              required
+              fullWidth
+              disabled={loading}
+              placeholder="john@doe.fr"
+              autoComplete="email"
+              autoFocus
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+            />
+          </Box>
+          <Box>
+            <InputLabel required>Mot de passe</InputLabel>
+            <TextField
+              required
+              fullWidth
+              placeholder="********"
+              type="password"
+              disabled={loading}
+              autoComplete="current-password"
+              value={form.password}
+              onChange={(e) => setForm({ ...form, password: e.target.value })}
+            />
+          </Box>
+          <LoadingButton
+            type="submit"
+            fullWidth
+            variant="contained"
+            size="large"
+            color="secondary"
+            loading={loading}
+            loadingPosition="start"
+            disabled={loading}
+            startIcon={<SaveIcon />}
+          >
+            Connexion
+          </LoadingButton>
+        </Stack>
+      </Card>
+      <Stack sx={{ marginTop: '20px' }} gap={1} alignItems="center">
+        <Stack direction="row" alignItems="center" gap={1}>
+          <Box>Pas encore inscrit ?</Box>
+          <RouterLink to="/register">Inscription</RouterLink>
+        </Stack>
+        <RouterLink to="/forgot-password">Mot de passe oublié ?</RouterLink>
+      </Stack>
     </>
   );
 };

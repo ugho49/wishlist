@@ -49,7 +49,7 @@ export const UserTabPassword = () => {
           disabled={loading}
           fullWidth
           value={oldPassword}
-          placeholder="••••••••"
+          placeholder="********"
           onChange={(e) => setOldPassword(e.target.value)}
         />
       </Box>
@@ -62,7 +62,7 @@ export const UserTabPassword = () => {
           fullWidth
           value={newPassword}
           inputProps={{ maxLength: 50 }}
-          placeholder="••••••••"
+          placeholder="********"
           error={newPassword.length > 0 && newPassword.length < 8}
           helperText="8 caractères minimum"
           onChange={(e) => setNewPassword(e.target.value)}
