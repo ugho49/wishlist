@@ -9,7 +9,6 @@ export class AttendeeRepository extends BaseRepository(AttendeeEntity) {
       .leftJoin('a.user', 'u')
       .where({ eventId: param.eventId })
       .andWhere('(u.email = :email OR a.email = :email)', { email: param.email })
-      .getCount()
-      .then((count) => count > 0);
+      .getExists();
   }
 }

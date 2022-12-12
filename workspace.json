@@ -4,9 +4,9 @@
   "projects": {
     "api": "apps/api",
     "common": "libs/common",
-    "common-types": "libs/common-types",
-    "common-front": "libs/common-front",
     "common-database": "libs/common-database",
+    "common-front": "libs/common-front",
+    "common-types": "libs/common-types",
     "front": "apps/front"
   }
 }
