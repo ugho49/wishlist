@@ -153,7 +153,7 @@ export class UserService {
     }
 
     if (dto.email && userToUpdate.email !== dto.email) {
-      if ((await this.userRepository.count({ where: { email: dto.email } })) > 0) {
+      if (await this.userRepository.exist({ where: { email: dto.email } })) {
         throw new BadRequestException('A user already exist with this email');
       }
 

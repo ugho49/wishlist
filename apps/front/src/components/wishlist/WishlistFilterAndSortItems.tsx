@@ -181,7 +181,6 @@ export const WishlistFilterAndSortItems = ({
   const classes = useStyles();
 
   useEffect(() => {
-    console.log('update');
     const newItems = items.filter((item) => applyFilter(item, filter)).sort((a, b) => applySort(a, b, sort));
     onChange(newItems);
   }, [items, sort, filter]);
