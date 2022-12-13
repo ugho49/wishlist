@@ -18,6 +18,8 @@ import { EditWishlistPage } from './components/wishlist/EditWishlistPage';
 import { EditEventPage } from './components/event/EditEventPage';
 import { ForgotPasswordPage } from './components/auth/ForgotPasswordPage';
 import { RenewForgotPasswordPage } from './components/auth/RenewForgotPasswordPage';
+import { NavigateToLoginWithContext } from './core/router/NavigateToLoginWithContext';
+import { NavigateToAuthenticatedWithContext } from './core/router/NavigateToAuthenticatedWithContext';
 
 const mapState = (state: RootState) => ({ accessToken: state.auth.accessToken });
 
@@ -29,7 +31,7 @@ export const App = () => {
     <Routes>
       {!isLoggedIn && (
         <>
-          <Route path="/" element={<Navigate replace to="/login" />} />
+          <Route path="*" element={<NavigateToLoginWithContext />} />
 
           <Route element={<AnonymousRouteContainerOutlet />}>
             <Route path="login" element={<LoginPage />} />
@@ -41,36 +43,38 @@ export const App = () => {
       )}
 
       {isLoggedIn && (
-        <Route element={<PrivateRouteContainerOutlet />}>
-          <Route path="/" element={<Navigate replace to="/events" />} />
+        <>
+          <Route path="*" element={<NavigateToAuthenticatedWithContext />} />
 
-          <Route path="user">
-            <Route path="profile" element={<UserProfilePage />} />
-          </Route>
+          <Route element={<PrivateRouteContainerOutlet />}>
+            <Route path="/" element={<Navigate replace to="/events" />} />
 
-          <Route path="events">
-            <Route index element={<EventListPage />} />
-            <Route path="new" element={<CreateEventPage />} />
-            <Route path=":eventId" element={<EventPage />} />
-            <Route path=":eventId/edit" element={<EditEventPage />} />
-          </Route>
+            <Route path="user">
+              <Route path="profile" element={<UserProfilePage />} />
+            </Route>
 
-          <Route path="wishlists">
-            <Route index element={<WishlistListPage />} />
-            <Route path="new" element={<CreateWishlistPage />} />
-            <Route path=":wishlistId" element={<WishlistPage />} />
-            <Route path=":wishlistId/edit" element={<EditWishlistPage />} />
-          </Route>
+            <Route path="events">
+              <Route index element={<EventListPage />} />
+              <Route path="new" element={<CreateEventPage />} />
+              <Route path=":eventId" element={<EventPage />} />
+              <Route path=":eventId/edit" element={<EditEventPage />} />
+            </Route>
 
-          <Route path="admin" element={<AdminRouteOutlet />}>
-            <Route index element={<AdminPage />} />
-            {/*<Route path="users/:userId" element={<AdminEditUser />} />*/}
-            {/*<Route path="events/:eventId" element={<AdminEditEvent />} />*/}
+            <Route path="wishlists">
+              <Route index element={<WishlistListPage />} />
+              <Route path="new" element={<CreateWishlistPage />} />
+              <Route path=":wishlistId" element={<WishlistPage />} />
+              <Route path=":wishlistId/edit" element={<EditWishlistPage />} />
+            </Route>
+
+            <Route path="admin" element={<AdminRouteOutlet />}>
+              <Route index element={<AdminPage />} />
+              {/*<Route path="users/:userId" element={<AdminEditUser />} />*/}
+              {/*<Route path="events/:eventId" element={<AdminEditEvent />} />*/}
+            </Route>
           </Route>
-        </Route>
+        </>
       )}
-
-      <Route path="*" element={<Navigate replace to="/" />} />
     </Routes>
   );
 };

@@ -51,10 +51,14 @@ export const Navbar = () => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const { addToast } = useToast();
+  const navigate = useNavigate();
+
+  const redirectToLogin = () => navigate('/login');
 
   const handleLogout = useCallback(() => {
     addToast({ message: 'A bientôt 👋', variant: 'default' });
     logout(dispatch);
+    redirectToLogin();
   }, [dispatch]);
 
   return (
