@@ -14,7 +14,6 @@ export interface ICurrentUser {
   id: string;
   email: string;
   authorities: Authorities[];
-  hasAuthority: (authority: Authorities) => boolean;
   isAdmin: boolean;
   isSuperAdmin: boolean;
 }

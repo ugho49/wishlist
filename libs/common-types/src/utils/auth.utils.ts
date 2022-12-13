@@ -11,7 +11,6 @@ export function createCurrentUserFromPayload(payload: AccessTokenJwtPayload): IC
     id: payload.sub,
     email: payload.email,
     authorities: authorities,
-    hasAuthority,
     isAdmin,
     isSuperAdmin,
   };
