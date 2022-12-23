@@ -1,0 +1,13 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:base",
+    ":skipStatusChecks",
+    ":maintainLockFilesWeekly",
+    ":docker"
+  ],
+  "lockFileMaintenance": { "enabled": true },
+  "updateLockFiles": true,
+  "labels": ["dependencies"],
+  "prConcurrentLimit": 10
+}
