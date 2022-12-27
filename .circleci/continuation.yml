@@ -65,11 +65,11 @@ jobs:
     steps:
       - add_ssh_keys:
           fingerprints:
-            - "10:c3:aa:c7:e1:8d:9e:bb:ae:3f:d9:77:25:9d:c2:44"
+            - "dc:fe:f2:aa:b8:c3:82:22:25:d5:75:ce:5e:55:ba:6a"
       - run:
           name: Deploy on Server
           command: |
-            ssh -o "StrictHostKeyChecking no" -i ~/.ssh/id_rsa_7e5b045c0f50fbd1720fa122cfb92dc7 $OVH_SERVER_USER@$OVH_SERVER_URL -p $OVH_SERVER_PORT "cd /home/circleci/wishlist-api && ./deploy.sh $CIRCLE_SHA1"
+            ssh -o "StrictHostKeyChecking no" -i ~/.ssh/id_rsa_dcfef2aab8c3822225d575ce5e55ba6a $OVH_SERVER_USER@$OVH_SERVER_URL -p $OVH_SERVER_PORT "cd /home/circleci/wishlist-api && ./deploy.sh $CIRCLE_SHA1"
       - run:
           name: Check Health
           command: |

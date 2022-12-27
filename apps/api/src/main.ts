@@ -30,7 +30,7 @@ async function createApp() {
 }
 
 async function start() {
-  Logger.log('Starting server...');
+  Logger.log('Starting server ...');
 
   const app = await createApp();
   const configService = app.get(ConfigService);
