@@ -1,0 +1,131 @@
+version: 2.1
+
+orbs:
+  docker: circleci/docker@2.1.5
+
+parameters:
+  workflow-api:
+    type: boolean
+    default: false
+  workflow-front:
+    type: boolean
+    default: false
+
+references:
+  setup_env_node: &setup_env_node
+    docker:
+      - image: cimg/node:18.10.0
+  attach_workspace: &attach_workspace
+    at: ~/project
+  restore_node_cache: &restore_node_cache
+    keys:
+      - node-module-cache-{{ checksum "./yarn.lock" }}
+
+jobs:
+  get-dependencies-from-cache:
+    <<: *setup_env_node
+    steps:
+      - checkout
+      - restore_cache: *restore_node_cache
+      - persist_to_workspace:
+          root: .
+          paths:
+            - node_modules
+
+  build-front:
+    <<: *setup_env_node
+    steps:
+      - checkout
+      - attach_workspace: *attach_workspace
+      - run: mkdir -p dist
+      - run: yarn nx build front
+      - persist_to_workspace:
+          root: .
+          paths:
+            - dist
+
+  deploy-front:
+    <<: *setup_env_node
+    steps:
+      - checkout
+      - attach_workspace: *attach_workspace
+      - run:
+          name: Install firebase-tools
+          command: curl -sL https://firebase.tools | bash
+      - run:
+          name: Deploy application
+          command: |
+            echo $FIREBASE_JSON > firebase_auth.json
+            export GOOGLE_APPLICATION_CREDENTIALS="$(pwd)/firebase_auth.json"
+            firebase deploy -P production -m "Workflow $CIRCLE_WORKFLOW_ID, build $CIRCLE_WORKFLOW_JOB_ID" --non-interactive
+
+  deploy-back:
+    docker:
+      - image: cimg/base:2022.10-22.04
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "10:c3:aa:c7:e1:8d:9e:bb:ae:3f:d9:77:25:9d:c2:44"
+      - run:
+          name: Deploy on Server
+          command: |
+            ssh -o "StrictHostKeyChecking no" -i ~/.ssh/id_rsa_7e5b045c0f50fbd1720fa122cfb92dc7 $OVH_SERVER_USER@$OVH_SERVER_URL -p $OVH_SERVER_PORT "cd /home/circleci/wishlist-api && ./deploy.sh $CIRCLE_SHA1"
+      - run:
+          name: Check Health
+          command: |
+            HEALTH_URL="https://api.wishlistapp.fr/health"
+            counter=0
+            max_tries=20
+            while [[ $(curl -s -f $HEALTH_URL | grep "UP") == "" ]] && [[ $counter -lt $max_tries ]]; do
+              echo 'API not ready, retrying in 5s...'
+              sleep 5
+              ((counter=counter+1))
+            done
+            if [[ $counter -eq $max_tries ]]; then
+              echo 'Too many attempts'
+              exit 1
+            fi
+            echo 'API is up, exiting'
+            exit 0
+
+workflows:
+  build-and-release-api:
+    when: << pipeline.parameters.workflow-api >>
+    jobs:
+      - docker/publish:
+          name: build-and-publish
+          image: ughoste/wishlist-api
+          attach-at: ~/project
+          dockerfile: 'apps/api/Dockerfile'
+          context:
+            - DOCKER_CREDENDIALS
+          tag: '${CIRCLE_SHA1},latest'
+          filters:
+            branches:
+              only:
+                - main
+      - deploy-back:
+          name: deploy
+          filters:
+            branches:
+              only:
+                - main
+          requires:
+            - build-and-publish
+
+  build-and-release-front:
+    when: << pipeline.parameters.workflow-front >>
+    jobs:
+      - get-dependencies-from-cache
+      - build-front:
+          name: build
+          requires:
+            - get-dependencies-from-cache
+      - deploy-front:
+          name: deploy
+          filters:
+            branches:
+              only:
+                - main
+          requires:
+            - build
