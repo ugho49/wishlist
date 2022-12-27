@@ -1,0 +1,73 @@
+version: '3.7'
+
+services:
+  db:
+    image: postgres:14.5-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+    healthcheck:
+      test: "pg_isready -d $DB_NAME -U $DB_USER"
+
+  pgbackups:
+    image: prodrigestivill/postgres-backup-local:13-alpine
+    restart: always
+    volumes:
+      - /pgbackups:/backups
+    depends_on:
+      - db
+    environment:
+      POSTGRES_HOST: "db"
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_EXTRA_OPTS: "-Z9 --schema=public --blobs"
+      SCHEDULE: "@daily"
+      BACKUP_KEEP_DAYS: 7
+      BACKUP_KEEP_WEEKS: 4
+      BACKUP_KEEP_MONTHS: 2
+    healthcheck:
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    image: ughoste/wishlist-api:${API_VERSION}
+    restart: always
+    ports:
+      - '8080:8080'
+    environment:
+      DB_HOST: "db"
+      DB_PORT: 5432
+      DB_USERNAME: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      AUTH_ISSUER: "Wishlist API"
+      AUTH_ACCESS_TOKEN_SECRET: ${AUTH_ACCESS_TOKEN_SECRET}
+      AUTH_ACCESS_TOKEN_DURATION: ${AUTH_ACCESS_TOKEN_DURATION}
+      AUTH_ACCESS_TOKEN_ALGORITHM: ${AUTH_ACCESS_TOKEN_ALGORITHM}
+      AUTH_REFRESH_TOKEN_SECRET: ${AUTH_REFRESH_TOKEN_SECRET}
+      AUTH_REFRESH_TOKEN_DURATION: ${AUTH_REFRESH_TOKEN_DURATION}
+      AUTH_REFRESH_TOKEN_ALGORITHM: ${AUTH_REFRESH_TOKEN_ALGORITHM}
+      RESET_PASSWORD_TOKEN_DURATION_IN_MIN: 15
+      RESET_PASSWORD_RENEW_URL: "https://wishlistapp.fr/forgot-password/renew"
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_PORT: ${MAIL_PORT}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+    depends_on:
+      - "db"
+    healthcheck:
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+
+volumes:
+  db-data:

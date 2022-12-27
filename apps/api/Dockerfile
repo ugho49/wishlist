@@ -1,5 +1,7 @@
 FROM node:18.10.0-alpine AS builder
 
+RUN apk add --update --no-cache g++ make py3-pip
+
 WORKDIR /usr/src/app
 
 COPY package.json ./

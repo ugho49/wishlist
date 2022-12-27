@@ -69,6 +69,7 @@ export const App = () => {
 
             <Route path="admin" element={<AdminRouteOutlet />}>
               <Route index element={<AdminPage />} />
+              {/*TODO:*/}
               {/*<Route path="users/:userId" element={<AdminEditUser />} />*/}
               {/*<Route path="events/:eventId" element={<AdminEditEvent />} />*/}
             </Route>
