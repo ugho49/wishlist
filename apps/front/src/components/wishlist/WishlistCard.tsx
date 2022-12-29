@@ -1,19 +1,22 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { WishlistWithEventsDto, WishlistWithOwnerDto } from '@wishlist/common-types';
 import { makeStyles } from '@mui/styles';
 import { Card } from '../common/Card';
-import { Chip, Stack, Theme, Tooltip } from '@mui/material';
+import { Chip, Stack, Theme } from '@mui/material';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import PublicIcon from '@mui/icons-material/Public';
 import PersonIcon from '@mui/icons-material/Person';
-import { WishlistEventsDialog } from './WishlistEventsDialog';
+import clsx from 'clsx';
 
 export type WishlistCardProps = {
   wishlist: WishlistWithEventsDto | WishlistWithOwnerDto;
 };
 
 const useStyles = makeStyles((theme: Theme) => ({
+  card: {
+    height: '100%',
+  },
   wishlist: {
     color: theme.palette.text.secondary,
     flexGrow: 1,
@@ -24,8 +27,6 @@ const useStyles = makeStyles((theme: Theme) => ({
   title: {
     color: theme.palette.primary.main,
     fontWeight: 400,
-    marginBottom: '10px',
-    textAlign: 'center',
     overflow: 'hidden',
     maxWidth: '100%',
     textOverflow: 'ellipsis',
@@ -42,56 +43,46 @@ const useStyles = makeStyles((theme: Theme) => ({
 
 export const WishlistCard = ({ wishlist }: WishlistCardProps) => {
   const classes = useStyles();
-  const [openEventDialog, setOpenEventDialog] = useState(false);
 
   // TODO: Add opacity and checkmark if all events are pasts
 
   return (
-    <>
-      <Card to={`/wishlists/${wishlist.id}`} className="animated fadeIn fast">
-        <Stack direction="row" justifyContent="space-between">
-          <div className={classes.wishlist}>
-            <div className={classes.title}>{wishlist.title}</div>
-            <Stack direction="row" justifyContent="center" alignItems="center" flexWrap="wrap" gap={1}>
-              {!wishlist.config.hide_items && (
-                <Tooltip title="Tout le monde peut ajouter, cocher ou voir les souhaits cochés, même le créateur de la liste">
-                  <Chip label="Publique" color="info" size="small" icon={<PublicIcon />} />
-                </Tooltip>
-              )}
-              {'events' in wishlist && (
-                <Chip
-                  color="default"
-                  size="small"
-                  icon={<CalendarMonthIcon />}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setOpenEventDialog(true);
-                  }}
-                  label={`${wishlist.events.length} ${wishlist.events.length > 1 ? 'évènements' : 'évènement'}`}
-                />
-              )}
-              {'owner' in wishlist && (
-                <Chip
-                  color="default"
-                  size="small"
-                  icon={<PersonIcon />}
-                  label={`${wishlist.owner.firstname} ${wishlist.owner.lastname}`}
-                />
-              )}
-            </Stack>
-          </div>
-          <div className={classes.arrow}>
-            <KeyboardArrowRightIcon />
-          </div>
-        </Stack>
-      </Card>
-      {'events' in wishlist && (
-        <WishlistEventsDialog
-          open={openEventDialog}
-          handleClose={() => setOpenEventDialog(false)}
-          events={wishlist.events}
-        />
-      )}
-    </>
+    <Card to={`/wishlists/${wishlist.id}`} className={clsx(classes.card, 'animated fadeIn fast')}>
+      <Stack direction="row" justifyContent="space-between">
+        <div className={classes.wishlist}>
+          <Stack direction="row" alignItems="center" justifyContent="center" marginBottom="10px" gap={1}>
+            {!wishlist.config.hide_items && <PublicIcon fontSize="small" color="info" />}
+            <span className={classes.title}>{wishlist.title}</span>
+          </Stack>
+          <Stack direction="row" justifyContent="center" alignItems="center" flexWrap="wrap" gap={1} marginTop="14px">
+            {'events' in wishlist && (
+              <>
+                {wishlist.events.map((event) => (
+                  <Chip
+                    key={event.id}
+                    color="default"
+                    size="small"
+                    icon={<CalendarMonthIcon />}
+                    sx={{ cursor: 'pointer' }}
+                    label={event.title}
+                  />
+                ))}
+              </>
+            )}
+            {'owner' in wishlist && (
+              <Chip
+                color="default"
+                size="small"
+                icon={<PersonIcon />}
+                label={`${wishlist.owner.firstname} ${wishlist.owner.lastname}`}
+              />
+            )}
+          </Stack>
+        </div>
+        <div className={classes.arrow}>
+          <KeyboardArrowRightIcon />
+        </div>
+      </Stack>
+    </Card>
   );
 };

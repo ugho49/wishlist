@@ -8,8 +8,6 @@ import { ItemFormDialog } from '../item/ItemFormDialog';
 import { RootState } from '../../core';
 import { useSelector } from 'react-redux';
 import { FilterType, SortType, WishlistFilterAndSortItems } from './WishlistFilterAndSortItems';
-import { InputLabel } from '../common/InputLabel';
-import CategoryIcon from '@mui/icons-material/Category';
 
 export type WishlistTabItemsProps = {
   wishlist: DetailedWishlistDto;
@@ -59,12 +57,7 @@ export const WishlistItems = ({ wishlist }: WishlistTabItemsProps) => {
             onFilterChange={(newFilter) => setFilter(newFilter)}
           />
 
-          <InputLabel sx={{ gap: '6px' }}>
-            <CategoryIcon fontSize="small" />
-            <span>Souhaits</span>
-          </InputLabel>
-
-          <Grid container spacing={2}>
+          <Grid container spacing={3}>
             {itemsFilteredAndSorted.map((item) => (
               <Grid item xs={12} md={6} key={item.id}>
                 <ItemCard

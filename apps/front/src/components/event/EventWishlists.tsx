@@ -25,7 +25,7 @@ export const EventWishlists = ({ event }: EventWishlistsProps) => {
             <span>Listes</span>
           </InputLabel>
 
-          <Grid container spacing={2}>
+          <Grid container spacing={3}>
             {event.wishlists
               .sort((a, b) => a.title.localeCompare(b.title))
               .map((wishlist) => (

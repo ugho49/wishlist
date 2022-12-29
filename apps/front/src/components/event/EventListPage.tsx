@@ -40,7 +40,7 @@ export const EventListPage = () => {
       <Title>Évènements</Title>
 
       <Loader loading={loading}>
-        <Grid container spacing={2}>
+        <Grid container spacing={3}>
           {(value?.resources || []).map((event) => (
             <Grid item xs={12} md={6} key={event.id}>
               <EventCard event={event} />
@@ -55,6 +55,7 @@ export const EventListPage = () => {
             totalPage={value?.pagination.total_pages}
             currentPage={currentPage}
             disabled={loading}
+            hide={value?.pagination.total_pages === 1}
             onChange={(value) => setCurrentPage(value)}
           />
 
