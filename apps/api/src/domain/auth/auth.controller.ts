@@ -1,8 +1,9 @@
-import { Body, Controller, Ip, Post } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { Public } from './decorators/public.metadata';
 import { AuthService } from './auth.service';
 import { ApiTags } from '@nestjs/swagger';
 import { LoginInputDto, LoginOutputDto, RefreshTokenInputDto, RefreshTokenOutputDto } from '@wishlist/common-types';
+import { RealIP } from 'nestjs-real-ip';
 
 @Public()
 @ApiTags('Auth')
@@ -11,12 +12,12 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('/login')
-  login(@Body() dto: LoginInputDto, @Ip() ip: string): Promise<LoginOutputDto> {
+  login(@Body() dto: LoginInputDto, @RealIP() ip: string): Promise<LoginOutputDto> {
     return this.authService.login(dto, ip);
   }
 
   @Post('/refresh')
-  refresh(@Body() dto: RefreshTokenInputDto, @Ip() ip: string): Promise<RefreshTokenOutputDto> {
+  refresh(@Body() dto: RefreshTokenInputDto, @RealIP() ip: string): Promise<RefreshTokenOutputDto> {
     return this.authService.refresh(dto, ip);
   }
 }

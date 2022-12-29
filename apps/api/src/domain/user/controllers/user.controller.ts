@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Ip, Post, Put, Query } from '@nestjs/common';
+import { Body, Controller, Get, Post, Put, Query } from '@nestjs/common';
 import { CurrentUser, Public } from '../../auth';
 import { UserService } from '../user.service';
 import { ApiTags } from '@nestjs/swagger';
@@ -9,6 +9,7 @@ import {
   UpdateUserProfileInputDto,
   UserDto,
 } from '@wishlist/common-types';
+import { RealIP } from 'nestjs-real-ip';
 
 @ApiTags('User')
 @Controller('/user')
@@ -22,7 +23,7 @@ export class UserController {
 
   @Public()
   @Post('/register')
-  register(@Body() dto: RegisterUserInputDto, @Ip() ip: string): Promise<MiniUserDto> {
+  register(@Body() dto: RegisterUserInputDto, @RealIP() ip: string): Promise<MiniUserDto> {
     return this.userService.create({ dto, ip });
   }
 
