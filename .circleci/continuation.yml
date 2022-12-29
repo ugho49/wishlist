@@ -104,14 +104,14 @@ workflows:
             branches:
               only:
                 - main
-      - deploy-back:
-          name: deploy
-          filters:
-            branches:
-              only:
-                - main
-          requires:
-            - build-and-publish
+#      - deploy-back:
+#          name: deploy
+#          filters:
+#            branches:
+#              only:
+#                - main
+#          requires:
+#            - build-and-publish
 
   build-and-release-front:
     when: << pipeline.parameters.workflow-front >>
