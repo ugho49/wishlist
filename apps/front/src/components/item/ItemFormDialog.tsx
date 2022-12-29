@@ -23,6 +23,7 @@ import { wishlistApiRef } from '../../core/api/wishlist.api';
 import { Rating } from '../common/Rating';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
+import { TidyURL } from 'tidy-url';
 
 const Transition = forwardRef((props: TransitionProps & { children: React.ReactElement }, ref: React.Ref<unknown>) => {
   const { children, ...other } = props;
@@ -80,7 +81,7 @@ export const ItemFormDialog = ({
       const base: AddItemInputDto = {
         name,
         description: description === '' ? undefined : description,
-        url: url === '' ? undefined : url,
+        url: url === '' ? undefined : TidyURL.clean(url).url,
         score: score === null ? undefined : score,
       };
 

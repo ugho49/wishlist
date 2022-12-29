@@ -1,5 +1,7 @@
 import { IsInt, IsNotEmpty, IsOptional, IsString, IsUrl, IsUUID, Max, MaxLength, Min } from 'class-validator';
 import { MiniUserDto } from './user.dto';
+import { Transform } from 'class-transformer';
+import { TidyURL } from 'tidy-url';
 
 export class ItemDto {
   id: string;
@@ -32,7 +34,8 @@ export class AddItemInputDto {
   @IsUrl()
   @IsOptional()
   @MaxLength(1000)
-  url?: string; // TODO: sanitize URL: amazon, utm, etc ...
+  @Transform(({ value }) => TidyURL.clean(value).url)
+  url?: string;
 
   @IsInt()
   @Min(0)

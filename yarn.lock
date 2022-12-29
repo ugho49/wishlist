@@ -13513,6 +13513,11 @@ thunky@^1.0.2:
   resolved "https://registry.yarnpkg.com/thunky/-/thunky-1.1.0.tgz#5abaf714a9405db0504732bbccd2cedd9ef9537d"
   integrity sha512-eHY7nBftgThBqOyHGVN+l8gF0BucP09fMo0oO/Lb0w1OF80dJv+lDVpXG60WMQvkcxAkNybKsrEIE3ZtKGmPrA==
 
+tidy-url@1.6.5:
+  version "1.6.5"
+  resolved "https://registry.yarnpkg.com/tidy-url/-/tidy-url-1.6.5.tgz#957b385c284b185eaf2098125565f6190ac426e8"
+  integrity sha512-DD9soWdbj2uT02Ma5ey1skSG7NvXHFCL429MS/GqkBoY/Js7fIo8Vazvxq97Udl8EMKF16uOWYi+HjeMvBGalw==
+
 tiny-lru@^10.0.0:
   version "10.0.1"
   resolved "https://registry.yarnpkg.com/tiny-lru/-/tiny-lru-10.0.1.tgz#aaf5d22207e641ed1b176ac2e616d6cc2fc9ef66"
