@@ -28,6 +28,7 @@ const columns: GridColDef<EventWithCountsAndCreatorDto>[] = [
     headerName: '# Attendees',
     type: 'number',
     width: 100,
+    valueGetter: ({ row: event }) => event.nb_attendees + 1,
   },
   {
     field: 'created_by',

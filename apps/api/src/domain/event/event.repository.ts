@@ -35,7 +35,7 @@ export class EventRepository extends BaseRepository(EventEntity) {
     const fetchQueryBuilder = this.createQueryBuilder('e')
       .leftJoinAndSelect('e.wishlists', 'w')
       .leftJoinAndSelect('e.creator', 'c')
-      .leftJoinAndSelect('e.attendees', 'a')
+      .leftJoin('e.attendees', 'a')
       .where(this.whereCreatorIdOrAttendee(userId))
       .orderBy('e.updatedAt', 'DESC')
       .addOrderBy('e.eventDate', 'DESC')
@@ -58,7 +58,7 @@ export class EventRepository extends BaseRepository(EventEntity) {
     return this.createQueryBuilder('e')
       .leftJoinAndSelect('e.wishlists', 'w')
       .leftJoinAndSelect('e.creator', 'c')
-      .leftJoinAndSelect('e.attendees', 'a')
+      .leftJoin('e.attendees', 'a')
       .where('e.id = :eventId', { eventId: params.eventId })
       .andWhere(this.whereCreatorIdOrAttendee(params.userId))
       .getOne();

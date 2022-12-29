@@ -37,7 +37,7 @@ export class EventService {
     private readonly eventMailer: EventMailer
   ) {}
 
-  async getAllByUserIdPaginated(pageNumber: number): Promise<PagedResponse<EventWithCountsAndCreatorDto>> {
+  async getAllPaginated(pageNumber: number): Promise<PagedResponse<EventWithCountsAndCreatorDto>> {
     const pageSize = DEFAULT_RESULT_NUMBER;
     const skip = pageSize * (pageNumber - 1);
 

@@ -26,11 +26,13 @@ export const EventWishlists = ({ event }: EventWishlistsProps) => {
           </InputLabel>
 
           <Grid container spacing={2}>
-            {event.wishlists.map((wishlist) => (
-              <Grid item xs={12} md={6} key={wishlist.id}>
-                <WishlistCard wishlist={wishlist} />
-              </Grid>
-            ))}
+            {event.wishlists
+              .sort((a, b) => a.title.localeCompare(b.title))
+              .map((wishlist) => (
+                <Grid item xs={12} md={6} key={wishlist.id}>
+                  <WishlistCard wishlist={wishlist} />
+                </Grid>
+              ))}
           </Grid>
 
           <FabAutoGrow label="Ajouter une liste" color="secondary" icon={<AddIcon />} to={addListRoute} />
