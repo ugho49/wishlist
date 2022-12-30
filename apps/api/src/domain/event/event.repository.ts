@@ -30,15 +30,13 @@ export class EventRepository extends BaseRepository(EventEntity) {
   }): Promise<[EventEntity[], number]> {
     const { userId, take, skip, onlyFuture } = params;
 
-    // TODO Change with union all when available -->
-
     const fetchQueryBuilder = this.createQueryBuilder('e')
       .leftJoinAndSelect('e.wishlists', 'w')
       .leftJoinAndSelect('e.creator', 'c')
       .leftJoin('e.attendees', 'a')
       .where(this.whereCreatorIdOrAttendee(userId))
-      .orderBy('e.updatedAt', 'DESC')
-      .addOrderBy('e.eventDate', 'DESC')
+      .orderBy('e.eventDate', 'DESC')
+      .addOrderBy('e.createdAt', 'DESC')
       .take(take)
       .skip(skip);
 

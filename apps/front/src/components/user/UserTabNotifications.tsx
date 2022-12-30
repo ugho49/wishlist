@@ -62,19 +62,20 @@ export const UserTabNotifications = () => {
           />
         </Box>
 
-        <LoadingButton
-          type="submit"
-          fullWidth
-          variant="contained"
-          size="large"
-          color="secondary"
-          loading={loading}
-          loadingPosition="start"
-          disabled={loading}
-          startIcon={<SaveIcon />}
-        >
-          Changer les paramètres de notifications
-        </LoadingButton>
+        <Stack direction="row" justifyContent="center">
+          <LoadingButton
+            type="submit"
+            variant="contained"
+            size="large"
+            color="secondary"
+            loading={loading}
+            loadingPosition="start"
+            disabled={loading}
+            startIcon={<SaveIcon />}
+          >
+            Changer les paramètres de notifications
+          </LoadingButton>
+        </Stack>
       </Stack>
     </Loader>
   );

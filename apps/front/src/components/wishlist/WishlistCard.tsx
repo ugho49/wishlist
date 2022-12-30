@@ -8,6 +8,7 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import PublicIcon from '@mui/icons-material/Public';
 import PersonIcon from '@mui/icons-material/Person';
 import clsx from 'clsx';
+import { DateTime } from 'luxon';
 
 export type WishlistCardProps = {
   wishlist: WishlistWithEventsDto | WishlistWithOwnerDto;
@@ -39,16 +40,28 @@ const useStyles = makeStyles((theme: Theme) => ({
     alignItems: 'center',
     flexBasis: '5%',
   },
+  disabled: {
+    backgroundColor: '#f7f7f7',
+    '& > *': {
+      opacity: '.6',
+    },
+  },
 }));
 
 export const WishlistCard = ({ wishlist }: WishlistCardProps) => {
   const classes = useStyles();
-
-  // TODO: Add opacity and checkmark if all events are pasts
+  const past =
+    'events' in wishlist
+      ? wishlist.events.filter((e) => DateTime.fromISO(e.event_date) < DateTime.now().minus({ days: 1 })).length ===
+        wishlist.events.length
+      : false;
 
   return (
-    <Card to={`/wishlists/${wishlist.id}`} className={clsx(classes.card, 'animated fadeIn fast')}>
-      <Stack direction="row" justifyContent="space-between">
+    <Card
+      to={`/wishlists/${wishlist.id}`}
+      className={clsx(classes.card, past && classes.disabled, 'animated fadeIn fast')}
+    >
+      <Stack direction="row" justifyContent="space-between" height="100%">
         <div className={classes.wishlist}>
           <Stack direction="row" alignItems="center" justifyContent="center" marginBottom="10px" gap={1}>
             {!wishlist.config.hide_items && <PublicIcon fontSize="small" color="info" />}

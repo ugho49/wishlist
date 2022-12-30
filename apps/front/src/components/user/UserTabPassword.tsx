@@ -68,19 +68,20 @@ export const UserTabPassword = () => {
           onChange={(e) => setNewPassword(e.target.value)}
         />
       </Box>
-      <LoadingButton
-        type="submit"
-        fullWidth
-        variant="contained"
-        size="large"
-        color="secondary"
-        loading={loading}
-        loadingPosition="start"
-        disabled={loading || !formIsValid}
-        startIcon={<SaveIcon />}
-      >
-        Changer le mot de passe
-      </LoadingButton>
+      <Stack direction="row" justifyContent="center">
+        <LoadingButton
+          type="submit"
+          variant="contained"
+          size="large"
+          color="secondary"
+          loading={loading}
+          loadingPosition="start"
+          disabled={loading || !formIsValid}
+          startIcon={<SaveIcon />}
+        >
+          Changer le mot de passe
+        </LoadingButton>
+      </Stack>
     </Stack>
   );
 };

@@ -1,11 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { RouterLink, useApi, useCustomSearchParams } from '@wishlist/common-front';
-import { wishlistApiRef } from '../../core/api/wishlist.api';
+import { wishlistApiRef } from '../../../core/api/wishlist.api';
 import { useAsync } from 'react-use';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { UserDto } from '@wishlist/common-types';
 import { DateTime } from 'luxon';
-import { Status } from '../common/Status';
+import { Status } from '../../common/Status';
 
 type SearchType = { page: string; search: string };
 

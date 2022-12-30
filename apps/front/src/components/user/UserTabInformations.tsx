@@ -57,11 +57,6 @@ export const UserTabInformations = () => {
   return (
     <Loader loading={loadingUser}>
       <Stack component="form" onSubmit={onSubmit} noValidate gap={smallScreen ? 2 : 3}>
-        <Box>
-          <InputLabel required>Email</InputLabel>
-          <TextField autoComplete="off" disabled={true} fullWidth value={email} inputProps={{ readOnly: true }} />
-        </Box>
-
         <Stack direction="row" flexWrap="wrap" gap={smallScreen ? 2 : 3}>
           <Box sx={{ flexGrow: 1 }}>
             <InputLabel required>Prénom</InputLabel>
@@ -92,6 +87,18 @@ export const UserTabInformations = () => {
           </Box>
         </Stack>
 
+        <Box>
+          <InputLabel>Email</InputLabel>
+          <TextField
+            autoComplete="off"
+            disabled={true}
+            fullWidth
+            value={email}
+            inputProps={{ readOnly: true }}
+            helperText="Ce champ n'est pas modifiable pour le moment"
+          />
+        </Box>
+
         <Stack>
           <InputLabel>Date de naissance</InputLabel>
           <MobileDatePicker
@@ -105,20 +112,21 @@ export const UserTabInformations = () => {
           />
         </Stack>
 
-        <LoadingButton
-          sx={{ marginTop: '20px' }}
-          type="submit"
-          fullWidth
-          variant="contained"
-          size="large"
-          color="secondary"
-          loading={loading}
-          loadingPosition="start"
-          disabled={loading || !formIsValid}
-          startIcon={<SaveIcon />}
-        >
-          Mettre à jour
-        </LoadingButton>
+        <Stack direction="row" justifyContent="center">
+          <LoadingButton
+            sx={{ marginTop: '20px' }}
+            type="submit"
+            variant="contained"
+            size="large"
+            color="secondary"
+            loading={loading}
+            loadingPosition="start"
+            disabled={loading || !formIsValid}
+            startIcon={<SaveIcon />}
+          >
+            Mettre à jour
+          </LoadingButton>
+        </Stack>
       </Stack>
     </Loader>
   );

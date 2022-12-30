@@ -1,7 +1,6 @@
 import React from 'react';
 import { EventWithCountsDto } from '@wishlist/common-types';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
-import TaskAltIcon from '@mui/icons-material/TaskAlt';
 import { DateTime } from 'luxon';
 import { makeStyles } from '@mui/styles';
 import { Card } from '../common/Card';
@@ -85,11 +84,6 @@ export const EventCard = ({ event }: EventCardProps) => {
           <KeyboardArrowRightIcon />
         </div>
       </Stack>
-      {past && (
-        <div className={classes.past}>
-          <TaskAltIcon />
-        </div>
-      )}
     </Card>
   );
 };

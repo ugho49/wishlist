@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { RouterLink, useApi, useCustomSearchParams } from '@wishlist/common-front';
-import { wishlistApiRef } from '../../core/api/wishlist.api';
+import { wishlistApiRef } from '../../../core/api/wishlist.api';
 import { useAsync } from 'react-use';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { EventWithCountsAndCreatorDto } from '@wishlist/common-types';

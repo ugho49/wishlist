@@ -5,8 +5,8 @@ import { useCustomSearchParams } from '@wishlist/common-front';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import GroupsIcon from '@mui/icons-material/Groups';
 import { Card } from '../common/Card';
-import { AdminListUsers } from './AdminListUsers';
-import { AdminListEvents } from './AdminListEvents';
+import { AdminListUsers } from '../user/admin/AdminListUsers';
+import { AdminListEvents } from '../event/admin/AdminListEvents';
 
 enum TabValues {
   users = 'users',

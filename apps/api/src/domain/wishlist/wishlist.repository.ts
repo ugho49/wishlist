@@ -20,7 +20,8 @@ export class WishlistRepository extends BaseRepository(WishlistEntity) {
     const fetchQuery = this.createQueryBuilder('w')
       .leftJoinAndSelect('w.events', 'e')
       .where('w.ownerId = :ownerId', { ownerId })
-      .orderBy('w.createdAt', 'DESC')
+      .orderBy('e.eventDate', 'DESC')
+      .addOrderBy('w.createdAt', 'DESC')
       .take(take)
       .skip(skip)
       .getMany();
