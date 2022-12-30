@@ -1,13 +1,13 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { RouterLink, useApi, useCustomSearchParams } from '@wishlist/common-front';
+import React, { FormEvent, useEffect, useState } from 'react';
+import { RouterLink, useApi } from '@wishlist/common-front';
 import { wishlistApiRef } from '../../../core/api/wishlist.api';
 import { useAsync } from 'react-use';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { UserDto } from '@wishlist/common-types';
 import { DateTime } from 'luxon';
 import { Status } from '../../common/Status';
-
-type SearchType = { page: string; search: string };
+import { Box, Button, Stack, TextField } from '@mui/material';
+import { InputLabel } from '../../common/InputLabel';
 
 const columns: GridColDef<UserDto>[] = [
   {
@@ -50,25 +50,12 @@ export const AdminListUsers = () => {
   const api = useApi(wishlistApiRef);
   const [totalElements, setTotalElements] = useState(0);
   const [pageSize, setPageSize] = useState(0);
-  const [queryParams, setQueryParams] = useCustomSearchParams<SearchType>({ page: '1', search: '' });
-  const currentPage = useMemo(() => parseInt(queryParams.page, 10), [queryParams]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [inputSearch, setInputSearch] = useState('');
+  const [search, setSearch] = useState('');
   const { value, loading } = useAsync(
-    () => api.user.admin.getAll({ p: currentPage, q: queryParams.search }),
-    [currentPage, queryParams.search]
-  );
-
-  const setCurrentPage = useCallback(
-    (page: number) => {
-      setQueryParams((prevState) => ({ ...prevState, page: `${page}` }));
-    },
-    [setQueryParams]
-  );
-
-  const setSearch = useCallback(
-    (search: string) => {
-      setQueryParams((prevState) => ({ ...prevState, q: search, page: '1' }));
-    },
-    [setQueryParams]
+    () => api.user.admin.getAll({ p: currentPage, q: search }),
+    [currentPage, search]
   );
 
   useEffect(() => {
@@ -79,8 +66,30 @@ export const AdminListUsers = () => {
     }
   }, [value]);
 
+  const applySearch = (e: FormEvent) => {
+    e.preventDefault();
+    setSearch(inputSearch);
+  };
+
   return (
     <div style={{ width: '100%' }}>
+      <Box component="form" noValidate onSubmit={applySearch}>
+        <InputLabel>Rechercher un utilisateur</InputLabel>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" gap={2} mb={2}>
+          <Stack flexGrow={1}>
+            <TextField
+              size="small"
+              fullWidth
+              placeholder="John Doe, john@doe.fr, john, etc..."
+              value={inputSearch}
+              onChange={(e) => setInputSearch(e.target.value)}
+            />
+          </Stack>
+          <Button variant="outlined" type="submit">
+            Rechercher
+          </Button>
+        </Stack>
+      </Box>
       <DataGrid
         autoHeight
         isRowSelectable={() => false}

@@ -20,6 +20,7 @@ import { ForgotPasswordPage } from './components/auth/ForgotPasswordPage';
 import { RenewForgotPasswordPage } from './components/auth/RenewForgotPasswordPage';
 import { NavigateToLoginWithContext } from './core/router/NavigateToLoginWithContext';
 import { NavigateToAuthenticatedWithContext } from './core/router/NavigateToAuthenticatedWithContext';
+import { AdminEditUserPage } from './components/user/admin/AdminEditUserPage';
 
 const mapState = (state: RootState) => ({ accessToken: state.auth.accessToken });
 
@@ -69,8 +70,7 @@ export const App = () => {
 
             <Route path="admin" element={<AdminRouteOutlet />}>
               <Route index element={<AdminPage />} />
-              {/*TODO:*/}
-              {/*<Route path="users/:userId" element={<AdminEditUser />} />*/}
+              <Route path="users/:userId" element={<AdminEditUserPage />} />
               {/*<Route path="events/:eventId" element={<AdminEditEvent />} />*/}
             </Route>
           </Route>
