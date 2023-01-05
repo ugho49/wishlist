@@ -1,5 +1,5 @@
 import React, { FormEvent, useEffect, useState } from 'react';
-import { Box, Stack, TextField } from '@mui/material';
+import { Avatar, Box, Stack, TextField } from '@mui/material';
 import { useApi, useToast } from '@wishlist/common-front';
 import { wishlistApiRef } from '../../core/api/wishlist.api';
 import { InputLabel } from '../common/InputLabel';
@@ -12,8 +12,13 @@ import { useAsync } from 'react-use';
 import { Loader } from '../common/Loader';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
+import { RootState } from '../../core';
+import { useSelector } from 'react-redux';
+
+const mapState = (state: RootState) => ({ pictureUrl: state.userProfile.pictureUrl });
 
 export const UserTabInformations = () => {
+  const { pictureUrl } = useSelector(mapState);
   const theme = useTheme();
   const smallScreen = useMediaQuery(theme.breakpoints.down('md'));
   const api = useApi(wishlistApiRef);
@@ -58,6 +63,23 @@ export const UserTabInformations = () => {
     <Loader loading={loadingUser}>
       <Stack component="form" onSubmit={onSubmit} noValidate gap={smallScreen ? 2 : 3}>
         <Stack direction="row" flexWrap="wrap" gap={smallScreen ? 2 : 3}>
+          <Stack justifyContent="center" alignItems="center" sx={smallScreen ? { width: '100%' } : undefined}>
+            <Avatar alt={firstname} src={pictureUrl} />
+          </Stack>
+          <Box sx={{ flexGrow: 1 }}>
+            <InputLabel>Email</InputLabel>
+            <TextField
+              autoComplete="off"
+              disabled={true}
+              fullWidth
+              value={email}
+              inputProps={{ readOnly: true }}
+              helperText="Ce champ n'est pas modifiable pour le moment"
+            />
+          </Box>
+        </Stack>
+
+        <Stack direction="row" flexWrap="wrap" gap={smallScreen ? 2 : 3}>
           <Box sx={{ flexGrow: 1 }}>
             <InputLabel required>Prénom</InputLabel>
             <TextField
@@ -86,18 +108,6 @@ export const UserTabInformations = () => {
             />
           </Box>
         </Stack>
-
-        <Box>
-          <InputLabel>Email</InputLabel>
-          <TextField
-            autoComplete="off"
-            disabled={true}
-            fullWidth
-            value={email}
-            inputProps={{ readOnly: true }}
-            helperText="Ce champ n'est pas modifiable pour le moment"
-          />
-        </Box>
 
         <Stack>
           <InputLabel>Date de naissance</InputLabel>

@@ -99,7 +99,7 @@ export const LoginPage = () => {
               onChange={(e) => setPassword(e.target.value)}
             />
           </Box>
-          <Stack alignItems="center" gap={1}>
+          <Stack alignItems="center" gap={2}>
             <LoadingButton
               type="submit"
               variant="contained"

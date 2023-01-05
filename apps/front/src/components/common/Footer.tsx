@@ -1,4 +1,11 @@
-import { BottomNavigation, BottomNavigationAction, bottomNavigationActionClasses, Paper, Theme } from '@mui/material';
+import {
+  Avatar,
+  BottomNavigation,
+  BottomNavigationAction,
+  bottomNavigationActionClasses,
+  Paper,
+  Theme,
+} from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
@@ -6,10 +13,13 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import PersonIcon from '@mui/icons-material/Person';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import { RootState } from '../../core';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles } from '@mui/styles';
+import { useApi } from '@wishlist/common-front';
+import { wishlistApiRef } from '../../core/api/wishlist.api';
+import { setUser } from '../../core/store/features';
 
-const mapState = (state: RootState) => ({ user: state.auth.user });
+const mapState = (state: RootState) => ({ user: state.auth.user, pictureUrl: state.userProfile.pictureUrl });
 
 const useStyles = makeStyles((theme: Theme) => ({
   bottomNavigationAction: {
@@ -35,10 +45,20 @@ const useStyles = makeStyles((theme: Theme) => ({
 
 export const Footer = () => {
   const classes = useStyles();
-  const { user } = useSelector(mapState);
+  const { user, pictureUrl } = useSelector(mapState);
   const [currentNavigation, setCurrentNavigation] = useState('');
   const navigate = useNavigate();
   const location = useLocation();
+  const api = useApi(wishlistApiRef);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    api.user
+      .getInfo()
+      .then((user) =>
+        dispatch(setUser({ firstName: user.firstname, lastName: user.lastname, pictureUrl: user.picture_url }))
+      );
+  }, [api, dispatch]);
 
   const handleChange = (event: React.SyntheticEvent, newValue: string) => {
     navigate(newValue);
@@ -65,12 +85,6 @@ export const Footer = () => {
           value="/wishlists"
           icon={<FormatListBulletedIcon />}
         />
-        <BottomNavigationAction
-          className={classes.bottomNavigationAction}
-          label="Mon profil"
-          value="/user/profile"
-          icon={<PersonIcon />}
-        />
         {user?.isAdmin && (
           <BottomNavigationAction
             className={classes.bottomNavigationAction}
@@ -79,6 +93,12 @@ export const Footer = () => {
             icon={<AdminPanelSettingsIcon />}
           />
         )}
+        <BottomNavigationAction
+          className={classes.bottomNavigationAction}
+          label="Mon profil"
+          value="/user/profile"
+          icon={pictureUrl ? <Avatar src={pictureUrl} sx={{ height: '24px', width: '24px' }} /> : <PersonIcon />}
+        />
       </BottomNavigation>
     </Paper>
   );

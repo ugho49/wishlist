@@ -45,10 +45,6 @@ export class AuthService {
       throw new UnauthorizedException('Your token is not valid');
     }
 
-    if (!payload.email_verified) {
-      throw new UnauthorizedException('Email must be verified');
-    }
-
     let userSocial = await this.userSocialRepository.findOneBy({
       socialId: payload.sub,
       socialType: UserSocialType.GOOGLE,
@@ -56,6 +52,9 @@ export class AuthService {
     let userEntity;
 
     if (!userSocial) {
+      if (!payload.email_verified) {
+        throw new UnauthorizedException('Email must be verified');
+      }
       userEntity = await this.validateUser(payload.email || '', 'email');
       userSocial = UserSocialEntity.create({
         userId: userEntity.id,
