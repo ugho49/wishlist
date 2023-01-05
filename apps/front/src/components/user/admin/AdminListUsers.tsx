@@ -11,6 +11,7 @@ import { InputLabel } from '../../common/InputLabel';
 
 const columns: GridColDef<UserDto>[] = [
   {
+    // TODO: add avatar with pin
     field: 'is_enabled',
     headerName: '',
     width: 20,

@@ -11,10 +11,13 @@ import { UserTabNotifications } from './UserTabNotifications';
 import { UserTabPassword } from './UserTabPassword';
 import { Card } from '../common/Card';
 import { useCustomSearchParams } from '@wishlist/common-front';
+import { UserTabSocial } from './UserTabSocial';
+import ConnectWithoutContactIcon from '@mui/icons-material/ConnectWithoutContact';
 
 enum TabValues {
   informations = 'informations',
   notifications = 'notifications',
+  social = 'social',
   password = 'password',
 }
 
@@ -23,6 +26,11 @@ const tabs = [
     value: TabValues.informations,
     label: 'Informations',
     icon: <PortraitIcon />,
+  },
+  {
+    value: TabValues.social,
+    label: 'Connexion social',
+    icon: <ConnectWithoutContactIcon />,
   },
   {
     value: TabValues.notifications,
@@ -68,6 +76,7 @@ export const UserProfilePage = () => {
       <Card>
         {queryParams.tab === TabValues.informations && <UserTabInformations />}
         {queryParams.tab === TabValues.notifications && <UserTabNotifications />}
+        {queryParams.tab === TabValues.social && <UserTabSocial />}
         {queryParams.tab === TabValues.password && <UserTabPassword />}
       </Card>
     </Box>

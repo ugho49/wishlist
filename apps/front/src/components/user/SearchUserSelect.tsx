@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { Autocomplete, createFilterOptions, TextField } from '@mui/material';
+import { Autocomplete, Avatar, createFilterOptions, Stack, TextField } from '@mui/material';
 import { MiniUserDto } from '@wishlist/common-types';
 import { debounce, merge, uniqBy } from 'lodash';
 import { isValidEmail, useApi } from '@wishlist/common-front';
 import { wishlistApiRef } from '../../core/api/wishlist.api';
+import { blue, orange } from '@mui/material/colors';
+import PersonIcon from '@mui/icons-material/Person';
 
 type UserOptionType = MiniUserDto | string;
 const filter = createFilterOptions<UserOptionType>();
@@ -73,6 +75,36 @@ export const SearchUserSelect = ({ disabled, onChange, excludedEmails }: SearchU
         if (typeof option === 'string') return `Inviter le participant par son email: ${option}`;
         return `${option.firstname} ${option.lastname} (${option.email})`;
       }}
+      renderOption={(props, option) => (
+        <li {...props}>
+          <Stack direction="row" gap={1} alignItems="center">
+            <Avatar
+              sx={{
+                width: '30px',
+                height: '30px',
+                bgcolor: typeof option === 'string' ? orange[100] : blue[100],
+                color: typeof option === 'string' ? orange[600] : blue[600],
+              }}
+              src={typeof option !== 'string' ? option?.picture_url : undefined}
+            >
+              <PersonIcon />
+            </Avatar>
+            {typeof option === 'string' ? (
+              <>
+                <span>Inviter le participant par son email:</span>
+                <b>{option}</b>
+              </>
+            ) : (
+              <>
+                <b>
+                  {option.firstname} {option.lastname}
+                </b>
+                <span>({option.email})</span>
+              </>
+            )}
+          </Stack>
+        </li>
+      )}
       renderInput={(params) => (
         <TextField
           {...params}
