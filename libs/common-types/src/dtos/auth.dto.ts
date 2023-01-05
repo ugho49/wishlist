@@ -21,6 +21,12 @@ export class LoginInputDto {
   password: string;
 }
 
+export class LoginWithGoogleInputDto {
+  @IsString()
+  @IsNotEmpty()
+  credential: string;
+}
+
 export class RefreshTokenInputDto {
   @IsString()
   @IsNotEmpty()

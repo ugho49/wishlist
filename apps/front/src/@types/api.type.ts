@@ -37,6 +37,7 @@ import type {
   GetEventsQueryDto,
   ToggleItemOutputDto,
 } from '@wishlist/common-types';
+import { LoginWithGoogleInputDto, RegisterUserWithGoogleInputDto } from '@wishlist/common-types';
 
 export type WishlistApi = {
   axios: {
@@ -47,12 +48,14 @@ export type WishlistApi = {
 
   auth: {
     login: (data: LoginInputDto) => Promise<LoginOutputDto>;
+    loginWithGoogle: (data: LoginWithGoogleInputDto) => Promise<LoginOutputDto>;
     refreshToken: (data: RefreshTokenInputDto) => Promise<RefreshTokenOutputDto>;
   };
 
   user: {
     getInfo: () => Promise<UserDto>;
     register: (data: RegisterUserInputDto) => Promise<MiniUserDto>;
+    registerWithGoogle: (data: RegisterUserWithGoogleInputDto) => Promise<MiniUserDto>;
     update: (data: UpdateUserProfileInputDto) => Promise<void>;
     changePassword: (data: ChangeUserPasswordInputDto) => Promise<void>;
     searchUserByKeyword: (keyword: string) => Promise<MiniUserDto[]>;

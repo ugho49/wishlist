@@ -35,6 +35,9 @@ export class UserEntity extends TimestampEntity {
   @Column({ type: 'timestamptz', nullable: true })
   lastConnectedAt?: Date | null;
 
+  @Column({ type: 'varchar', nullable: true })
+  pictureUrl?: string | null;
+
   public static create(props: {
     email: string;
     firstName: string;
@@ -42,6 +45,7 @@ export class UserEntity extends TimestampEntity {
     birthday?: Date;
     passwordEnc: string;
     ip: string;
+    pictureUrl?: string;
   }): UserEntity {
     const entity = new UserEntity();
     entity.email = props.email;
@@ -51,6 +55,7 @@ export class UserEntity extends TimestampEntity {
     entity.passwordEnc = props.passwordEnc;
     entity.lastIp = props.ip;
     entity.lastConnectedAt = new Date();
+    entity.pictureUrl = props.pictureUrl;
     return entity;
   }
 

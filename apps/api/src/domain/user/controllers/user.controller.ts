@@ -6,6 +6,7 @@ import {
   ChangeUserPasswordInputDto,
   MiniUserDto,
   RegisterUserInputDto,
+  RegisterUserWithGoogleInputDto,
   UpdateUserProfileInputDto,
   UserDto,
 } from '@wishlist/common-types';
@@ -25,6 +26,12 @@ export class UserController {
   @Post('/register')
   register(@Body() dto: RegisterUserInputDto, @RealIP() ip: string): Promise<MiniUserDto> {
     return this.userService.create({ dto, ip });
+  }
+
+  @Public()
+  @Post('/register/google')
+  registerWithGoogle(@Body() dto: RegisterUserWithGoogleInputDto, @RealIP() ip: string): Promise<MiniUserDto> {
+    return this.userService.createFromGoogle({ dto, ip });
   }
 
   @Put()

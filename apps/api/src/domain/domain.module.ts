@@ -7,10 +7,12 @@ import { WishlistModule } from './wishlist/wishlist.module';
 import { ItemModule } from './item/item.module';
 import { EventModule } from './event/event.module';
 import { AttendeeModule } from './attendee/attendee.module';
+import { AuthSocialModule } from './auth-social/auth-social.module';
 
 @Module({
   imports: [
     AuthModule,
+    AuthSocialModule,
     UserModule,
     EmailSettingsModule,
     PasswordVerificationModule,

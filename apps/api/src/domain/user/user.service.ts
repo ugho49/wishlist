@@ -9,35 +9,47 @@ import { UserEntity } from './user.entity';
 import {
   ChangeUserPasswordInputDto,
   createPagedResponse,
+  ICurrentUser,
   MiniUserDto,
   PagedResponse,
   RegisterUserInputDto,
+  RegisterUserWithGoogleInputDto,
   UpdateFullUserProfileInputDto,
   UpdateUserProfileInputDto,
   UserDto,
-  ICurrentUser,
+  UserSocialType,
 } from '@wishlist/common-types';
 import { PasswordManager } from '../auth';
 import { toMiniUserDto, toUserDto } from './user.mapper';
 import { isEmpty } from 'lodash';
-import { DEFAULT_RESULT_NUMBER } from '@wishlist/common';
+import { DEFAULT_RESULT_NUMBER, randomString } from '@wishlist/common';
 import { UserRepository } from './user.repository';
 import { UserMailer } from './user.mailer';
 import { UserEmailSettingEntity } from '../email-setttings/email-settings.entity';
 import { AttendeeEntity } from '../attendee/attendee.entity';
+import { GoogleAuthService } from '../auth-social';
+import { UserSocialEntity } from './user-social.entity';
 
 @Injectable()
 export class UserService {
   private readonly logger = new Logger(UserService.name);
 
-  constructor(private readonly userRepository: UserRepository, private readonly userMailer: UserMailer) {}
+  constructor(
+    private readonly userRepository: UserRepository,
+    private readonly userMailer: UserMailer,
+    private readonly googleAuthService: GoogleAuthService
+  ) {}
 
   findById(id: string): Promise<UserDto> {
     return this.userRepository.findOneByOrFail({ id }).then((entity) => toUserDto(entity));
   }
 
-  async create(param: { dto: RegisterUserInputDto; ip: string }): Promise<MiniUserDto> {
-    const { dto, ip } = param;
+  async create(param: {
+    dto: RegisterUserInputDto;
+    ip: string;
+    social?: (userId: string) => UserSocialEntity;
+  }): Promise<MiniUserDto> {
+    const { dto, ip, social } = param;
 
     try {
       const entity = UserEntity.create({
@@ -50,9 +62,16 @@ export class UserService {
 
       const settings = UserEmailSettingEntity.create({ userId: entity.id });
 
+      const socialEntity = social ? social(entity.id) : undefined;
+
+      if (socialEntity) entity.pictureUrl = socialEntity.pictureUrl;
+
       await this.userRepository.transaction(async (em) => {
         await em.save(UserEntity, entity);
         await em.save(UserEmailSettingEntity, settings);
+        if (socialEntity) {
+          await em.save(UserSocialEntity, socialEntity);
+        }
         await em.update(
           AttendeeEntity,
           { email: entity.email },
@@ -73,6 +92,35 @@ export class UserService {
     } catch (e) {
       throw new UnprocessableEntityException();
     }
+  }
+
+  async createFromGoogle(param: { ip: string; dto: RegisterUserWithGoogleInputDto }): Promise<MiniUserDto> {
+    const payload = await this.googleAuthService.verify(param.dto.credential);
+
+    if (!payload) {
+      throw new UnauthorizedException('Your token is not valid');
+    }
+
+    if (!payload.email_verified) {
+      throw new UnauthorizedException('Email must be verified');
+    }
+
+    return this.create({
+      ip: param.ip,
+      dto: {
+        email: payload.email || '',
+        firstname: payload.given_name || '',
+        lastname: payload.family_name || '',
+        password: randomString(50),
+      },
+      social: (userId) =>
+        UserSocialEntity.create({
+          userId,
+          socialId: payload.sub,
+          socialType: UserSocialType.GOOGLE,
+          pictureUrl: payload.picture,
+        }),
+    });
   }
 
   async update(param: { currentUserId: string; dto: UpdateUserProfileInputDto }): Promise<void> {

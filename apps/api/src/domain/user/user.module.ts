@@ -6,11 +6,14 @@ import { UserController } from './controllers/user.controller';
 import { UserAdminController } from './controllers/user-admin.controller';
 import { UserRepository } from './user.repository';
 import { UserMailer } from './user.mailer';
+import { AuthSocialModule } from '../auth-social/auth-social.module';
+import { UserSocialEntity } from './user-social.entity';
+import { UserSocialRepository } from './user-social.repository';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([UserEntity])],
+  imports: [TypeOrmModule.forFeature([UserEntity, UserSocialEntity]), AuthSocialModule],
   controllers: [UserController, UserAdminController],
-  providers: [UserService, UserRepository, UserMailer],
-  exports: [UserRepository],
+  providers: [UserService, UserRepository, UserSocialRepository, UserMailer],
+  exports: [UserRepository, UserSocialRepository],
 })
 export class UserModule {}

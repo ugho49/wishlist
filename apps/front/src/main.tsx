@@ -10,6 +10,8 @@ import { AxiosInterceptor } from './core/router/AxiosInterceptor';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon';
 import { SnackbarProvider } from 'notistack';
+import { GoogleOAuthProvider } from '@react-oauth/google';
+import { environment } from './environments/environment';
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 
@@ -27,7 +29,9 @@ root.render(
               preventDuplicate
             >
               <AxiosInterceptor />
-              <App />
+              <GoogleOAuthProvider clientId={environment.googleClientId}>
+                <App />
+              </GoogleOAuthProvider>
             </SnackbarProvider>
           </BrowserRouter>
         </LocalizationProvider>

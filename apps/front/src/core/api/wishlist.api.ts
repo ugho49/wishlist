@@ -33,11 +33,13 @@ export function buildApi(): WishlistApi {
     },
     auth: {
       login: (data) => client.post(`/auth/login`, data).then((res) => res.data),
+      loginWithGoogle: (data) => client.post(`/auth/login/google`, data).then((res) => res.data),
       refreshToken: (data) => client.post(`/auth/refresh`, data).then((res) => res.data),
     },
     user: {
       getInfo: () => client.get(`/user`).then((res) => res.data),
       register: (data) => client.post(`/user/register`, data).then((res) => res.data),
+      registerWithGoogle: (data) => client.post(`/user/register/google`, data).then((res) => res.data),
       update: (data) => client.put(`/user`, data),
       changePassword: (data) => client.put(`/user/change-password`, data),
       searchUserByKeyword: (keyword) => client.get(`/user/search`, { params: { keyword } }).then((res) => res.data),

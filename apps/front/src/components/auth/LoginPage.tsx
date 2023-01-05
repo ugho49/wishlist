@@ -9,6 +9,8 @@ import { LoadingButton } from '@mui/lab';
 import { InputLabel } from '../common/InputLabel';
 import { Subtitle } from '../common/Subtitle';
 import LoginIcon from '@mui/icons-material/Login';
+import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
+import { LoginOutputDto } from '@wishlist/common-types';
 
 export const LoginPage = () => {
   const api = useApi(wishlistApiRef);
@@ -18,19 +20,23 @@ export const LoginPage = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const handleLoginSuccess = (param: LoginOutputDto) => {
+    addToast({ message: 'Heureux de vous revoir 🤓', variant: 'default' });
+
+    dispatch(
+      setTokens({
+        accessToken: param.access_token,
+        refreshToken: param.refresh_token,
+      })
+    );
+  };
+
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
       const data = await api.auth.login({ email, password });
-      addToast({ message: 'Heureux de vous revoir 🤓', variant: 'default' });
-
-      dispatch(
-        setTokens({
-          accessToken: data.access_token,
-          refreshToken: data.refresh_token,
-        })
-      );
+      handleLoginSuccess(data);
     } catch (e) {
       addToast({
         message: (
@@ -43,6 +49,21 @@ export const LoginPage = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const onGoogleLoginSuccess = async (credentialResponse: CredentialResponse) => {
+    try {
+      setLoading(true);
+      const data = await api.auth.loginWithGoogle({ credential: credentialResponse.credential || '' });
+      handleLoginSuccess(data);
+    } catch (e) {
+      setLoading(false);
+      addToast({ message: "Une erreur s'est produite", variant: 'error' });
+    }
+  };
+
+  const onGoogleLoginFailure = () => {
+    addToast({ message: "Une erreur s'est produite", variant: 'error' });
   };
 
   return (
@@ -78,18 +99,26 @@ export const LoginPage = () => {
               onChange={(e) => setPassword(e.target.value)}
             />
           </Box>
-          <LoadingButton
-            type="submit"
-            variant="contained"
-            size="large"
-            color="secondary"
-            loading={loading}
-            loadingPosition="start"
-            startIcon={<LoginIcon />}
-            disabled={loading}
-          >
-            Me connecter
-          </LoadingButton>
+          <Stack alignItems="center" gap={1}>
+            <LoadingButton
+              type="submit"
+              variant="contained"
+              size="large"
+              color="secondary"
+              loading={loading}
+              loadingPosition="start"
+              startIcon={<LoginIcon />}
+              disabled={loading}
+            >
+              Me connecter
+            </LoadingButton>
+            <GoogleLogin
+              onSuccess={onGoogleLoginSuccess}
+              onError={onGoogleLoginFailure}
+              text="signin_with"
+              locale="fr"
+            />
+          </Stack>
         </Stack>
       </Card>
       <Stack sx={{ marginTop: '20px' }} gap={1} alignItems="center">

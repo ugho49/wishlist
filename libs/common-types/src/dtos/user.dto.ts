@@ -12,11 +12,21 @@ import {
 import { Transform } from 'class-transformer';
 import { GetPaginationQueryDto } from './common.dto';
 
+export class UserSocialDto {
+  id: string;
+  social_id: string;
+  social_type: string;
+  picture_url?: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export class MiniUserDto {
   id: string;
   firstname: string;
   lastname: string;
   email: string;
+  picture_url?: string;
 }
 
 export class UserDto extends MiniUserDto {
@@ -25,6 +35,7 @@ export class UserDto extends MiniUserDto {
   is_enabled: boolean;
   last_connected_at?: string;
   last_ip?: string;
+  social: UserSocialDto[];
   created_at: string;
   updated_at: string;
 }
@@ -62,6 +73,12 @@ export class RegisterUserInputDto {
   @MinLength(8)
   @MaxLength(50)
   password: string;
+}
+
+export class RegisterUserWithGoogleInputDto {
+  @IsString()
+  @IsNotEmpty()
+  credential: string;
 }
 
 export class UpdateUserProfileInputDto {

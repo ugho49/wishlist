@@ -9,9 +9,11 @@ import { JwtModule } from '@nestjs/jwt';
 import { AuthController } from './auth.controller';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './guards/auth.guard';
+import { AuthSocialModule } from '../auth-social/auth-social.module';
 
 @Module({
   imports: [
+    AuthSocialModule,
     ConfigModule.forFeature(authConfig),
     UserModule,
     PassportModule,

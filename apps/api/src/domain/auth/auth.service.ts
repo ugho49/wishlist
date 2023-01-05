@@ -9,25 +9,74 @@ import {
   RefreshTokenOutputDto,
   AccessTokenJwtPayload,
   RefreshTokenJwtPayload,
+  LoginWithGoogleInputDto,
+  UserSocialType,
 } from '@wishlist/common-types';
 import authConfig from './auth.config';
 import { ConfigType } from '@nestjs/config';
 import { UserRepository } from '../user/user.repository';
+import { GoogleAuthService } from '../auth-social';
+import { UserSocialRepository } from '../user/user-social.repository';
+import { UserSocialEntity } from '../user/user-social.entity';
 
 @Injectable()
 export class AuthService {
   constructor(
     private userRepository: UserRepository,
+    private userSocialRepository: UserSocialRepository,
+    private googleAuthService: GoogleAuthService,
     private jwtService: JwtService,
     @Inject(authConfig.KEY) private readonly config: ConfigType<typeof authConfig>
   ) {}
 
   async login(user: LoginInputDto, ip: string): Promise<LoginOutputDto> {
-    const userEntity = await this.validateUser(user.email, user.password);
+    const userEntity = await this.validateUser(user.email, 'email', user.password);
 
     return {
       refresh_token: this.createRefreshToken(userEntity.id),
-      access_token: await this.createAccessToken(userEntity, ip),
+      access_token: await this.createAccessTokenAndUpdateUser(userEntity, { ip }),
+    };
+  }
+
+  async loginWithGoogle(dto: LoginWithGoogleInputDto, ip: string): Promise<LoginOutputDto> {
+    const payload = await this.googleAuthService.verify(dto.credential);
+
+    if (!payload) {
+      throw new UnauthorizedException('Your token is not valid');
+    }
+
+    if (!payload.email_verified) {
+      throw new UnauthorizedException('Email must be verified');
+    }
+
+    let userSocial = await this.userSocialRepository.findOneBy({
+      socialId: payload.sub,
+      socialType: UserSocialType.GOOGLE,
+    });
+    let userEntity;
+
+    if (!userSocial) {
+      userEntity = await this.validateUser(payload.email || '', 'email');
+      userSocial = UserSocialEntity.create({
+        userId: userEntity.id,
+        socialId: payload.sub,
+        socialType: UserSocialType.GOOGLE,
+        pictureUrl: payload.picture,
+      });
+      await this.userSocialRepository.insert(userSocial);
+    } else {
+      userEntity = await this.validateUser(userSocial.userId, 'id');
+      await this.userSocialRepository.update(
+        { id: userSocial.id },
+        {
+          pictureUrl: payload.picture,
+        }
+      );
+    }
+
+    return {
+      refresh_token: this.createRefreshToken(userEntity.id),
+      access_token: await this.createAccessTokenAndUpdateUser(userEntity, { ip, pictureUrl: payload.picture }),
     };
   }
 
@@ -44,21 +93,17 @@ export class AuthService {
     }
 
     return {
-      access_token: await this.createAccessToken(userEntity, ip),
+      access_token: await this.createAccessTokenAndUpdateUser(userEntity, { ip }),
     };
   }
 
-  private validateRefreshToken(token: string): RefreshTokenJwtPayload {
-    try {
-      return this.jwtService.verify<RefreshTokenJwtPayload>(token, {
-        secret: this.config.refreshToken.secret,
-      });
-    } catch (e) {
-      throw new UnauthorizedException('Invalid token');
+  private async createAccessTokenAndUpdateUser(
+    userEntity: UserEntity,
+    newValues: {
+      ip: string;
+      pictureUrl?: string;
     }
-  }
-
-  private async createAccessToken(userEntity: UserEntity, ip: string): Promise<string> {
+  ): Promise<string> {
     const payload: AccessTokenJwtPayload = {
       sub: userEntity.id,
       email: userEntity.email,
@@ -68,7 +113,8 @@ export class AuthService {
     const token = this.jwtService.sign(payload);
 
     await this.userRepository.updateById(userEntity.id, {
-      lastIp: ip,
+      pictureUrl: newValues.pictureUrl,
+      lastIp: newValues.ip,
       lastConnectedAt: new Date(),
     });
 
@@ -85,17 +131,35 @@ export class AuthService {
     });
   }
 
-  private async validateUser(email: string, password: string): Promise<UserEntity> {
-    const user = await this.userRepository.findByEmail(email);
+  private validateRefreshToken(token: string): RefreshTokenJwtPayload {
+    try {
+      return this.jwtService.verify<RefreshTokenJwtPayload>(token, {
+        secret: this.config.refreshToken.secret,
+      });
+    } catch (e) {
+      throw new UnauthorizedException('Invalid token');
+    }
+  }
 
-    if (user && !user.isEnabled) {
+  private async validateUser(id: string, type: 'email' | 'id', password?: string): Promise<UserEntity> {
+    const user = await (type === 'email' ? this.userRepository.findByEmail(id) : this.userRepository.findById(id));
+
+    if (!user) {
+      throw new UnauthorizedException('Incorrect login');
+    }
+
+    if (!user.isEnabled) {
       throw new UnauthorizedException('User is disabled');
     }
 
-    if (user && (await PasswordManager.verify(user.passwordEnc, password))) {
-      return user;
+    if (password) {
+      const passwordVerified = await PasswordManager.verify(user.passwordEnc, password);
+
+      if (!passwordVerified) {
+        throw new UnauthorizedException('Incorrect login');
+      }
     }
 
-    throw new UnauthorizedException('Incorrect login');
+    return user;
   }
 }

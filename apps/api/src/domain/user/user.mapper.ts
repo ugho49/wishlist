@@ -10,6 +10,7 @@ export function toUserDto(entity: UserEntity): UserDto {
     is_enabled: entity.isEnabled,
     last_connected_at: entity.lastConnectedAt?.toISOString(),
     last_ip: entity.lastIp || undefined,
+    social: [], // TODO
     created_at: entity.createdAt.toISOString(),
     updated_at: entity.updatedAt.toISOString(),
   };
@@ -21,5 +22,6 @@ export function toMiniUserDto(entity: UserEntity): MiniUserDto {
     firstname: entity.firstName,
     lastname: entity.lastName,
     email: entity.email,
+    picture_url: entity.pictureUrl || undefined,
   };
 }

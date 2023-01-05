@@ -10,6 +10,8 @@ import { Subtitle } from '../common/Subtitle';
 import { CharsRemaining } from '../common/CharsRemaining';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import { setTokens } from '../../core/store/features';
+import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
+import { LoginOutputDto } from '@wishlist/common-types';
 
 export const RegisterPage = () => {
   const api = useApi(wishlistApiRef);
@@ -20,6 +22,17 @@ export const RegisterPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const handleRegisterSuccess = (param: LoginOutputDto) => {
+    addToast({ message: 'Bienvenue sur wishlist 👋', variant: 'default' });
+
+    dispatch(
+      setTokens({
+        accessToken: param.access_token,
+        refreshToken: param.refresh_token,
+      })
+    );
+  };
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -32,18 +45,27 @@ export const RegisterPage = () => {
         password,
       });
       const data = await api.auth.login({ email, password });
-      addToast({ message: 'Bienvenue sur wishlist 👋', variant: 'default' });
-
-      dispatch(
-        setTokens({
-          accessToken: data.access_token,
-          refreshToken: data.refresh_token,
-        })
-      );
+      handleRegisterSuccess(data);
     } catch (e) {
       addToast({ message: "Une erreur s'est produite", variant: 'error' });
       setLoading(false);
     }
+  };
+
+  const onGoogleRegisterSuccess = async (credentialResponse: CredentialResponse) => {
+    setLoading(true);
+    try {
+      await api.user.registerWithGoogle({ credential: credentialResponse.credential || '' });
+      const data = await api.auth.loginWithGoogle({ credential: credentialResponse.credential || '' });
+      handleRegisterSuccess(data);
+    } catch (e) {
+      addToast({ message: "Une erreur s'est produite", variant: 'error' });
+      setLoading(false);
+    }
+  };
+
+  const onGoogleRegisterFailure = () => {
+    addToast({ message: "Une erreur s'est produite", variant: 'error' });
   };
 
   return (
@@ -114,19 +136,26 @@ export const RegisterPage = () => {
               onChange={(e) => setPassword(e.target.value)}
             />
           </Box>
-          <LoadingButton
-            type="submit"
-            fullWidth
-            variant="contained"
-            size="large"
-            color="secondary"
-            loading={loading}
-            loadingPosition="start"
-            startIcon={<PersonAddIcon />}
-            disabled={loading}
-          >
-            M'inscrire
-          </LoadingButton>
+          <Stack alignItems="center" gap={1}>
+            <LoadingButton
+              type="submit"
+              variant="contained"
+              size="large"
+              color="secondary"
+              loading={loading}
+              loadingPosition="start"
+              startIcon={<PersonAddIcon />}
+              disabled={loading}
+            >
+              M'inscrire
+            </LoadingButton>
+            <GoogleLogin
+              onSuccess={onGoogleRegisterSuccess}
+              onError={onGoogleRegisterFailure}
+              text="signup_with"
+              locale="fr"
+            />
+          </Stack>
         </Stack>
       </Card>
       <Stack sx={{ marginTop: '20px' }} gap={1} alignItems="center">
