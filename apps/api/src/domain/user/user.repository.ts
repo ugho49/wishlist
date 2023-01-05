@@ -43,7 +43,8 @@ export class UserRepository extends BaseRepository(UserEntity) {
     const query = this.createQueryBuilder('u').addOrderBy('u.createdAt', 'DESC').take(take).skip(skip);
 
     if (criteria) {
-      query.where(this.findByNameOrEmail(criteria));
+      const searchKey = criteria.trim().toLowerCase().normalize('NFC');
+      query.where(this.findByNameOrEmail(searchKey));
     }
 
     return query.getManyAndCount();
