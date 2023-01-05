@@ -85,7 +85,7 @@ export const EditEventAttendees = ({ eventId, creator, attendees, onChange }: Ed
         <Card variant="outlined" sx={{ padding: 0 }}>
           <ListItem>
             <ListItemAvatar>
-              <Avatar sx={{ bgcolor: green[100], color: green[600] }}>
+              <Avatar sx={{ bgcolor: green[100], color: green[600] }} src={creator.picture_url}>
                 <PersonIcon />
               </Avatar>
             </ListItemAvatar>
@@ -121,6 +121,7 @@ export const EditEventAttendees = ({ eventId, creator, attendees, onChange }: Ed
                     bgcolor: attendee.pending_email ? orange[100] : blue[100],
                     color: attendee.pending_email ? orange[600] : blue[600],
                   }}
+                  src={attendee.user?.picture_url}
                 >
                   <PersonIcon />
                 </Avatar>

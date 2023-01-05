@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   Avatar,
   Box,
@@ -164,15 +164,16 @@ export const CreateEventPage = () => {
 
                 <SearchUserSelect
                   disabled={loading}
-                  onChange={(val) =>
+                  onChange={(val) => {
+                    console.log('newval', val);
                     setAttendees((prevState) => [
-                      ...prevState,
                       {
                         user: val,
                         role: AttendeeRole.USER,
                       },
-                    ])
-                  }
+                      ...prevState,
+                    ]);
+                  }}
                   excludedEmails={[...attendeeEmails, currentUserEmail || '']}
                 />
               </Box>
@@ -200,6 +201,7 @@ export const CreateEventPage = () => {
                             bgcolor: typeof attendee.user === 'string' ? orange[100] : blue[100],
                             color: typeof attendee.user === 'string' ? orange[600] : blue[600],
                           }}
+                          src={typeof attendee.user !== 'string' ? attendee.user.picture_url : undefined}
                         >
                           <PersonIcon />
                         </Avatar>
@@ -246,7 +248,7 @@ export const CreateEventPage = () => {
               <LoadingButton
                 variant="contained"
                 loading={loading}
-                loadingPosition="start"
+                loadingPosition="end"
                 disabled={!createEnabled || loading}
                 endIcon={<SaveIcon />}
                 onClick={() => createEvent()}

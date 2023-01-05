@@ -26,7 +26,7 @@ export const SearchUserSelect = ({ disabled, onChange, excludedEmails }: SearchU
         return;
       }
       const users = await api.user.searchUserByKeyword(inputValue);
-      setOptions((prev) => uniqBy(merge(prev, users), (v) => v.id));
+      setOptions((prev) => uniqBy([...(prev as MiniUserDto[]), ...users], (v) => v.id));
     } finally {
       setLoading(false);
     }

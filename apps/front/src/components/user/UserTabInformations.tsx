@@ -64,7 +64,7 @@ export const UserTabInformations = () => {
       <Stack component="form" onSubmit={onSubmit} noValidate gap={smallScreen ? 2 : 3}>
         <Stack direction="row" flexWrap="wrap" gap={smallScreen ? 2 : 3}>
           <Stack justifyContent="center" alignItems="center" sx={smallScreen ? { width: '100%' } : undefined}>
-            <Avatar alt={firstname} src={pictureUrl} />
+            <Avatar alt={firstname} src={pictureUrl} sx={{ width: '60px', height: '60px' }} />
           </Stack>
           <Box sx={{ flexGrow: 1 }}>
             <InputLabel>Email</InputLabel>

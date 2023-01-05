@@ -89,6 +89,8 @@ export class AttendeeService {
       throw new UnauthorizedException('Only the creator of the event can delete an attendee');
     }
 
+    // TODO: do not allow attendee deletion if he have a list and only one event
+
     await this.attendeeRepository.delete({ id: attendeeId });
   }
 }

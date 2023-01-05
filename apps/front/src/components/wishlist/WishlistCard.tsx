@@ -2,7 +2,7 @@ import React from 'react';
 import { WishlistWithEventsDto, WishlistWithOwnerDto } from '@wishlist/common-types';
 import { makeStyles } from '@mui/styles';
 import { Card } from '../common/Card';
-import { Chip, Stack, Theme } from '@mui/material';
+import { Avatar, Chip, Stack, Theme } from '@mui/material';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import PublicIcon from '@mui/icons-material/Public';
@@ -86,7 +86,7 @@ export const WishlistCard = ({ wishlist }: WishlistCardProps) => {
               <Chip
                 color="default"
                 size="small"
-                icon={<PersonIcon />}
+                avatar={wishlist.owner.picture_url ? <Avatar src={wishlist.owner.picture_url} /> : <PersonIcon />}
                 label={`${wishlist.owner.firstname} ${wishlist.owner.lastname}`}
               />
             )}
