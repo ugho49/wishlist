@@ -73,7 +73,7 @@ export const UserTabNotifications = () => {
             disabled={loading}
             startIcon={<SaveIcon />}
           >
-            Changer les paramètres de notifications
+            Mettre à jour
           </LoadingButton>
         </Stack>
       </Stack>

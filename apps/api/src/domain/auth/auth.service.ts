@@ -50,6 +50,7 @@ export class AuthService {
       socialType: UserSocialType.GOOGLE,
     });
     let userEntity;
+    let needUpdateProfilePicture = false;
 
     if (!userSocial) {
       if (!payload.email_verified) {
@@ -63,8 +64,11 @@ export class AuthService {
         pictureUrl: payload.picture,
       });
       await this.userSocialRepository.insert(userSocial);
+      if (!userEntity.pictureUrl) needUpdateProfilePicture = true;
     } else {
       userEntity = await this.validateUser(userSocial.userId, 'id');
+      if (userEntity.pictureUrl === userSocial.pictureUrl && payload.picture !== userSocial.pictureUrl)
+        needUpdateProfilePicture = true;
       await this.userSocialRepository.update(
         { id: userSocial.id },
         {
@@ -75,7 +79,10 @@ export class AuthService {
 
     return {
       refresh_token: this.createRefreshToken(userEntity.id),
-      access_token: await this.createAccessTokenAndUpdateUser(userEntity, { ip, pictureUrl: payload.picture }),
+      access_token: await this.createAccessTokenAndUpdateUser(userEntity, {
+        ip,
+        pictureUrl: needUpdateProfilePicture ? payload.picture : undefined,
+      }),
     };
   }
 

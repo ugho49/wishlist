@@ -1,14 +1,19 @@
-import { Column, Entity, PrimaryColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryColumn, RelationId } from 'typeorm';
 import { uuid } from '@wishlist/common';
 import { TimestampEntity } from '@wishlist/common-database';
 import { UserSocialType } from '@wishlist/common-types';
+import { UserEntity } from './user.entity';
 
 @Entity('user_social')
 export class UserSocialEntity extends TimestampEntity {
   @PrimaryColumn()
   id: string = uuid();
 
+  @ManyToOne(() => UserEntity, { lazy: true })
+  readonly user: Promise<UserEntity>;
+
   @Column()
+  @RelationId((entity: UserSocialEntity) => entity.user)
   userId: string;
 
   @Column()

@@ -1,16 +1,33 @@
-import { Body, Controller, Get, Post, Put, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  FileTypeValidator,
+  Get,
+  MaxFileSizeValidator,
+  ParseFilePipe,
+  Post,
+  Put,
+  Query,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { CurrentUser, Public } from '../../auth';
 import { UserService } from '../user.service';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import {
   ChangeUserPasswordInputDto,
   MiniUserDto,
   RegisterUserInputDto,
   RegisterUserWithGoogleInputDto,
+  UpdateUserPictureOutputDto,
   UpdateUserProfileInputDto,
   UserDto,
 } from '@wishlist/common-types';
 import { RealIP } from 'nestjs-real-ip';
+import { Express } from 'express';
+import 'multer';
 
 @ApiTags('User')
 @Controller('/user')
@@ -50,5 +67,31 @@ export class UserController {
     @Query('keyword') criteria: string
   ): Promise<MiniUserDto[]> {
     return this.userService.searchByKeyword({ currentUserId, criteria });
+  }
+
+  @Post('/upload-picture')
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadPicture(
+    @CurrentUser('id') currentUserId: string,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new FileTypeValidator({ fileType: '.(png|jpeg|jpg)' }),
+          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 4 }),
+        ],
+      })
+    )
+    file: Express.Multer.File
+  ): Promise<UpdateUserPictureOutputDto> {
+    return this.userService.uploadPicture({
+      currentUserId,
+      file,
+    });
+  }
+
+  @Delete('/picture')
+  async removePicture(@CurrentUser('id') currentUserId: string) {
+    await this.userService.removePicture({ currentUserId });
   }
 }

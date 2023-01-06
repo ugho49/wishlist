@@ -12,6 +12,10 @@ import {
 import { Transform } from 'class-transformer';
 import { GetPaginationQueryDto } from './common.dto';
 
+export class UpdateUserPictureOutputDto {
+  picture_url: string;
+}
+
 export class UserSocialDto {
   id: string;
   social_id: string;

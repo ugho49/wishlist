@@ -4,6 +4,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { HealthModule } from './health/health.module';
 import { DatabaseModule } from './database/database.module';
 import { MailModule } from './mail/mail.module';
+import { BucketModule } from './bucket/bucket.module';
 
 @Module({
   imports: [
@@ -11,6 +12,7 @@ import { MailModule } from './mail/mail.module';
     HealthModule,
     DatabaseModule,
     MailModule,
+    BucketModule,
     ConfigModule.forRoot({
       envFilePath: ['.env'],
       expandVariables: true,
