@@ -1,4 +1,4 @@
-FROM node:18.10.0-alpine AS builder
+FROM node:19.4.0-alpine AS builder
 
 RUN apk add --update --no-cache g++ make py3-pip
 
@@ -16,7 +16,7 @@ RUN yarn nx run api:build:production
 # remove dev deps
 RUN yarn --frozen-lockfile --production && yarn cache clean
 
-FROM node:18.10.0-alpine as production
+FROM node:19.4.0-alpine as production
 
 WORKDIR /usr/src/app
 
