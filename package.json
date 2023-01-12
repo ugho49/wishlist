@@ -19,7 +19,7 @@
     "@mui/lab": "5.0.0-alpha.99",
     "@mui/material": "5.11.3",
     "@mui/styles": "5.11.2",
-    "@mui/x-data-grid": "5.17.17",
+    "@mui/x-data-grid": "5.17.18",
     "@mui/x-date-pickers": "5.0.12",
     "@nestjs-modules/mailer": "1.8.1",
     "@nestjs/common": "9.2.1",
