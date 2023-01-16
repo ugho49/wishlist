@@ -2,7 +2,9 @@ import { MiniUserDto, UserDto } from '@wishlist/common-types';
 import { UserEntity } from './user.entity';
 import { DateTime } from 'luxon';
 
-export function toUserDto(entity: UserEntity): UserDto {
+export async function toUserDto(entity: UserEntity): Promise<UserDto> {
+  const socials = await entity.socials;
+
   return {
     ...toMiniUserDto(entity),
     admin: entity.isAdmin(),
@@ -10,7 +12,14 @@ export function toUserDto(entity: UserEntity): UserDto {
     is_enabled: entity.isEnabled,
     last_connected_at: entity.lastConnectedAt?.toISOString(),
     last_ip: entity.lastIp || undefined,
-    social: [], // TODO
+    social: socials.map((social) => ({
+      id: social.id,
+      social_id: social.socialId,
+      social_type: social.socialType,
+      picture_url: social.pictureUrl ? social.pictureUrl : undefined,
+      created_at: social.createdAt.toISOString(),
+      updated_at: social.updatedAt.toISOString(),
+    })),
     created_at: entity.createdAt.toISOString(),
     updated_at: entity.updatedAt.toISOString(),
   };

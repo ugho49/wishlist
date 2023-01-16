@@ -9,9 +9,10 @@ import { UserMailer } from './user.mailer';
 import { AuthSocialModule } from '../auth-social/auth-social.module';
 import { UserSocialEntity } from './user-social.entity';
 import { UserSocialRepository } from './user-social.repository';
+import { BucketModule } from '../../core/bucket/bucket.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([UserEntity, UserSocialEntity]), AuthSocialModule],
+  imports: [TypeOrmModule.forFeature([UserEntity, UserSocialEntity]), AuthSocialModule, BucketModule],
   controllers: [UserController, UserAdminController],
   providers: [UserService, UserRepository, UserSocialRepository, UserMailer],
   exports: [UserRepository, UserSocialRepository],

@@ -1,7 +1,8 @@
-import { Column, Entity, PrimaryColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
 import { uuid } from '@wishlist/common';
 import { TimestampEntity } from '@wishlist/common-database';
 import { Authorities } from '@wishlist/common-types';
+import { UserSocialEntity } from './user-social.entity';
 
 @Entity('user')
 export class UserEntity extends TimestampEntity {
@@ -37,6 +38,12 @@ export class UserEntity extends TimestampEntity {
 
   @Column({ type: 'varchar', nullable: true })
   pictureUrl?: string | null;
+
+  @OneToMany(() => UserSocialEntity, (social) => social.user, {
+    cascade: true,
+    lazy: true,
+  })
+  socials: Promise<UserSocialEntity[]>;
 
   public static create(props: {
     email: string;

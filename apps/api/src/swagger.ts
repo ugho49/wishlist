@@ -1,7 +1,7 @@
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { NestFastifyApplication } from '@nestjs/platform-fastify';
+import { INestApplication } from '@nestjs/common';
 
-export function bootstrapSwagger(app: NestFastifyApplication) {
+export function bootstrapSwagger(app: INestApplication) {
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Wishlist')
     .setDescription('The Wishlist API')

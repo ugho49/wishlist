@@ -79,7 +79,7 @@ export const UserTabPassword = () => {
           disabled={loading || !formIsValid}
           startIcon={<SaveIcon />}
         >
-          Changer le mot de passe
+          Mettre à jour
         </LoadingButton>
       </Stack>
     </Stack>

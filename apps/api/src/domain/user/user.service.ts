@@ -15,6 +15,7 @@ import {
   RegisterUserInputDto,
   RegisterUserWithGoogleInputDto,
   UpdateFullUserProfileInputDto,
+  UpdateUserPictureOutputDto,
   UpdateUserProfileInputDto,
   UserDto,
   UserSocialType,
@@ -22,13 +23,14 @@ import {
 import { PasswordManager } from '../auth';
 import { toMiniUserDto, toUserDto } from './user.mapper';
 import { isEmpty } from 'lodash';
-import { DEFAULT_RESULT_NUMBER, randomString } from '@wishlist/common';
+import { DEFAULT_RESULT_NUMBER, randomString, uuid } from '@wishlist/common';
 import { UserRepository } from './user.repository';
 import { UserMailer } from './user.mailer';
 import { UserEmailSettingEntity } from '../email-setttings/email-settings.entity';
 import { AttendeeEntity } from '../attendee/attendee.entity';
 import { GoogleAuthService } from '../auth-social';
 import { UserSocialEntity } from './user-social.entity';
+import { BucketService } from '../../core/bucket/bucket.service';
 
 @Injectable()
 export class UserService {
@@ -37,7 +39,8 @@ export class UserService {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly userMailer: UserMailer,
-    private readonly googleAuthService: GoogleAuthService
+    private readonly googleAuthService: GoogleAuthService,
+    private readonly bucketService: BucketService
   ) {}
 
   findById(id: string): Promise<UserDto> {
@@ -177,7 +180,7 @@ export class UserService {
     });
 
     return createPagedResponse({
-      resources: entities.map((entity) => toUserDto(entity)),
+      resources: await Promise.all(entities.map((entity) => toUserDto(entity))),
       options: { pageSize, totalElements, pageNumber },
     });
   }
@@ -233,5 +236,33 @@ export class UserService {
     }
 
     await this.userRepository.delete({ id: userId });
+  }
+
+  async uploadPicture(param: {
+    currentUserId: string;
+    file: Express.Multer.File;
+  }): Promise<UpdateUserPictureOutputDto> {
+    const { currentUserId, file } = param;
+    await this.bucketService.removeIfExist({ destination: `pictures/${currentUserId}/` });
+    const publicUrl = await this.bucketService.upload({
+      destination: `pictures/${currentUserId}/${uuid()}`,
+      data: file.buffer,
+      contentType: file.mimetype,
+    });
+    await this.userRepository.update(
+      { id: currentUserId },
+      {
+        pictureUrl: publicUrl,
+      }
+    );
+    return {
+      picture_url: publicUrl,
+    };
+  }
+
+  async removePicture(param: { currentUserId: string }): Promise<void> {
+    const { currentUserId } = param;
+    await this.bucketService.removeIfExist({ destination: `pictures/${currentUserId}/` });
+    await this.userRepository.update({ id: currentUserId }, { pictureUrl: null });
   }
 }
