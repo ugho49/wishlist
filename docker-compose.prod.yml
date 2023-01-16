@@ -42,6 +42,8 @@ services:
     restart: always
     ports:
       - '8080:8080'
+    volumes:
+      - ./firebase:/usr/src/app/dist/apps/api/main/firebase
     environment:
       PORT: 8080
       DB_HOST: "db"
