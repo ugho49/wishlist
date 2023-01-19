@@ -43,7 +43,7 @@ services:
     ports:
       - '8080:8080'
     volumes:
-      - ./firebase:/usr/src/app/dist/apps/api/main/firebase
+      - ./firebase:/usr/src/app/dist/apps/api/firebase
     environment:
       PORT: 8080
       DB_HOST: "db"
@@ -64,6 +64,8 @@ services:
       MAIL_PORT: ${MAIL_PORT}
       MAIL_PASSWORD: ${MAIL_PASSWORD}
       MAIL_USERNAME: ${MAIL_USERNAME}
+      FIREBASE_SERVICE_ACCOUNT_KEY_PATH: ${FIREBASE_SERVICE_ACCOUNT_KEY_PATH}
+      FIREBASE_BUCKET_NAME: ${FIREBASE_BUCKET_NAME}
     depends_on:
       - "db"
     healthcheck:
