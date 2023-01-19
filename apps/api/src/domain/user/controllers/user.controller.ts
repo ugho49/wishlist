@@ -90,7 +90,7 @@ export class UserController {
     });
   }
 
-  @Put('/picture-from-social')
+  @Put('/picture')
   async updatePictureFromSocial(@CurrentUser('id') currentUserId: string, @Query('social_id') socialId: string) {
     await this.userService.updatePictureFromSocial({ currentUserId, socialId });
   }

@@ -36,8 +36,10 @@ import type {
   WishlistWithEventsDto,
   GetEventsQueryDto,
   ToggleItemOutputDto,
+  LoginWithGoogleInputDto,
+  RegisterUserWithGoogleInputDto,
+  UpdateUserPictureOutputDto,
 } from '@wishlist/common-types';
-import { LoginWithGoogleInputDto, RegisterUserWithGoogleInputDto } from '@wishlist/common-types';
 
 export type WishlistApi = {
   axios: {
@@ -63,6 +65,9 @@ export type WishlistApi = {
     validateResetPassword: (data: ResetPasswordValidationInputDto) => Promise<void>;
     getEmailSettings: () => Promise<UserEmailSettingsDto>;
     updateUserEmailSettings: (data: UpdateUserEmailSettingsInputDto) => Promise<UserEmailSettingsDto>;
+    uploadPicture: (file: File) => Promise<UpdateUserPictureOutputDto>;
+    updatePictureFromSocial: (socialId: string) => Promise<void>;
+    deletePicture: () => Promise<void>;
     admin: {
       getById: (userId: string) => Promise<UserDto>;
       getAll: (params: GetAllUsersQueryDto) => Promise<PagedResponse<UserDto>>;

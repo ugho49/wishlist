@@ -17,6 +17,9 @@ export const userProfileSlice = createSlice({
       state.lastName = action.payload.lastName;
       state.pictureUrl = action.payload.pictureUrl;
     },
+    updatePicture: (state, action: PayloadAction<UserProfileState['pictureUrl']>) => {
+      state.pictureUrl = action.payload;
+    },
     resetUserState: (state) => {
       state.firstName = undefined;
       state.lastName = undefined;
@@ -25,4 +28,4 @@ export const userProfileSlice = createSlice({
   },
 });
 
-export const { setUser, resetUserState } = userProfileSlice.actions;
+export const { setUser, resetUserState, updatePicture } = userProfileSlice.actions;

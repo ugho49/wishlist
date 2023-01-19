@@ -14,6 +14,7 @@ import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { RootState } from '../../core';
 import { useSelector } from 'react-redux';
+import { AvatarUpdateButton } from './AvatarUpdateButton';
 
 const mapState = (state: RootState) => ({ pictureUrl: state.userProfile.pictureUrl });
 
@@ -64,8 +65,7 @@ export const UserTabInformations = () => {
       <Stack component="form" onSubmit={onSubmit} noValidate gap={smallScreen ? 2 : 3}>
         <Stack direction="row" flexWrap="wrap" gap={smallScreen ? 2 : 3}>
           <Stack justifyContent="center" alignItems="center" sx={smallScreen ? { width: '100%' } : undefined}>
-            {/* TODO: add possibility to upload a picture */}
-            <Avatar alt={firstname} src={pictureUrl} sx={{ width: '60px', height: '60px' }} />
+            <AvatarUpdateButton firstname={firstname} pictureUrl={pictureUrl} socials={value?.social || []} />
           </Stack>
           <Box sx={{ flexGrow: 1 }}>
             <InputLabel>Email</InputLabel>

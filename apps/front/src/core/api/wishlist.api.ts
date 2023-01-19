@@ -48,6 +48,16 @@ export function buildApi(): WishlistApi {
       sendResetUserPasswordEmail: (data) =>
         client.post('/user/forgot-password/send-reset-email', data).then((res) => res.data),
       validateResetPassword: (data) => client.post('/user/forgot-password/reset', data).then((res) => res.data),
+      uploadPicture: (file) => {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        return client
+          .post('/user/upload-picture', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+          .then((res) => res.data);
+      },
+      deletePicture: () => client.delete(`/user/picture`),
+      updatePictureFromSocial: (socialId) => client.put(`/user/picture`, {}, { params: { social_id: socialId } }),
       admin: {
         getById: (userId) => client.get(`/admin/user/${userId}`).then((res) => res.data),
         getAll: (params) => client.get(`/admin/user`, { params }).then((res) => res.data),
