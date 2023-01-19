@@ -90,6 +90,11 @@ export class UserController {
     });
   }
 
+  @Put('/picture-from-social')
+  async updatePictureFromSocial(@CurrentUser('id') currentUserId: string, @Query('social_id') socialId: string) {
+    await this.userService.updatePictureFromSocial({ currentUserId, socialId });
+  }
+
   @Delete('/picture')
   async removePicture(@CurrentUser('id') currentUserId: string) {
     await this.userService.removePicture({ currentUserId });

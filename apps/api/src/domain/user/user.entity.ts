@@ -21,8 +21,8 @@ export class UserEntity extends TimestampEntity {
   @Column({ type: 'timestamp', nullable: true })
   birthday?: Date | null;
 
-  @Column()
-  passwordEnc: string;
+  @Column({ type: 'varchar', nullable: true })
+  passwordEnc?: string | null;
 
   @Column()
   isEnabled: boolean = true;
@@ -50,7 +50,7 @@ export class UserEntity extends TimestampEntity {
     firstName: string;
     lastName: string;
     birthday?: Date;
-    passwordEnc: string;
+    passwordEnc?: string;
     ip: string;
     pictureUrl?: string;
   }): UserEntity {

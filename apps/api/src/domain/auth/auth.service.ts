@@ -159,7 +159,10 @@ export class AuthService {
     }
 
     if (password) {
-      const passwordVerified = await PasswordManager.verify(user.passwordEnc, password);
+      const passwordVerified = await PasswordManager.verify({
+        hash: user.passwordEnc || undefined,
+        plainPassword: password,
+      });
 
       if (!passwordVerified) {
         throw new UnauthorizedException('Incorrect login');

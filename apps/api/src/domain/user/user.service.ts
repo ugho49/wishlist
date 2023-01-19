@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   Logger,
+  NotFoundException,
   UnauthorizedException,
   UnprocessableEntityException,
 } from '@nestjs/common';
@@ -23,7 +24,7 @@ import {
 import { PasswordManager } from '../auth';
 import { toMiniUserDto, toUserDto } from './user.mapper';
 import { isEmpty } from 'lodash';
-import { DEFAULT_RESULT_NUMBER, randomString, uuid } from '@wishlist/common';
+import { DEFAULT_RESULT_NUMBER, uuid } from '@wishlist/common';
 import { UserRepository } from './user.repository';
 import { UserMailer } from './user.mailer';
 import { UserEmailSettingEntity } from '../email-setttings/email-settings.entity';
@@ -48,7 +49,7 @@ export class UserService {
   }
 
   async create(param: {
-    dto: RegisterUserInputDto;
+    dto: Omit<RegisterUserInputDto, 'password'> & { password?: string };
     ip: string;
     social?: (userId: string) => UserSocialEntity;
   }): Promise<MiniUserDto> {
@@ -59,7 +60,7 @@ export class UserService {
         email: dto.email,
         firstName: dto.firstname,
         lastName: dto.lastname,
-        passwordEnc: await PasswordManager.hash(dto.password),
+        passwordEnc: dto.password ? await PasswordManager.hash(dto.password) : undefined,
         ip,
       });
 
@@ -114,7 +115,6 @@ export class UserService {
         email: payload.email || '',
         firstname: payload.given_name || '',
         lastname: payload.family_name || '',
-        password: randomString(50),
       },
       social: (userId) =>
         UserSocialEntity.create({
@@ -141,7 +141,12 @@ export class UserService {
 
     const entity = await this.userRepository.findOneByOrFail({ id: currentUserId });
 
-    if (!(await PasswordManager.verify(entity.passwordEnc, dto.old_password))) {
+    if (
+      !(await PasswordManager.verify({
+        hash: entity.passwordEnc || undefined,
+        plainPassword: dto.old_password,
+      }))
+    ) {
       throw new BadRequestException("Old password don't match with user password");
     }
 
@@ -264,5 +269,20 @@ export class UserService {
     const { currentUserId } = param;
     await this.bucketService.removeIfExist({ destination: `pictures/${currentUserId}/` });
     await this.userRepository.update({ id: currentUserId }, { pictureUrl: null });
+  }
+
+  async updatePictureFromSocial(param: { currentUserId: string; socialId: string }) {
+    const { currentUserId, socialId } = param;
+    const user = await this.userRepository.findOneByOrFail({ id: currentUserId });
+    const socials = await user.socials;
+    const social = socials.find((s) => s.id === socialId);
+
+    if (!social) throw new NotFoundException('This social id does not exist');
+
+    if (user.pictureUrl) {
+      await this.bucketService.removeIfExist({ destination: `pictures/${currentUserId}/` });
+    }
+
+    await this.userRepository.update({ id: currentUserId }, { pictureUrl: social.pictureUrl });
   }
 }

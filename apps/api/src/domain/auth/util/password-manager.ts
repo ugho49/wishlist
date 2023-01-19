@@ -6,7 +6,11 @@ export class PasswordManager {
     return argon2.hash(plainPassword);
   }
 
-  public static async verify(hash: string, plainPassword: string): Promise<boolean> {
+  public static async verify(params: { hash?: string; plainPassword: string }): Promise<boolean> {
+    const { hash, plainPassword } = params;
+
+    if (!hash) return false;
+
     try {
       if (hash.startsWith('{bcrypt}')) {
         return await bcrypt.compare(plainPassword, hash.replace('{bcrypt}', ''));
