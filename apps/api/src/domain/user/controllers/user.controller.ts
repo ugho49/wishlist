@@ -28,6 +28,7 @@ import {
 import { RealIP } from 'nestjs-real-ip';
 import { Express } from 'express';
 import 'multer';
+import { ResizeImagePipe } from '../../../core/bucket/resize-image.pipe';
 
 @ApiTags('User')
 @Controller('/user')
@@ -80,7 +81,8 @@ export class UserController {
           new FileTypeValidator({ fileType: '.(png|jpeg|jpg)' }),
           new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 4 }),
         ],
-      })
+      }),
+      new ResizeImagePipe({ width: 500, height: 500 })
     )
     file: Express.Multer.File
   ): Promise<UpdateUserPictureOutputDto> {
