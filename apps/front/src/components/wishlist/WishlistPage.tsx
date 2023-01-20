@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Button, Chip, Stack, Tooltip } from '@mui/material';
+import { Avatar, Box, Button, Chip, Stack, Tooltip } from '@mui/material';
 import { Title } from '../common/Title';
 import { Loader } from '../common/Loader';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -18,6 +18,7 @@ import { RootState } from '../../core';
 import { useSelector } from 'react-redux';
 import EditIcon from '@mui/icons-material/Edit';
 import { WishlistNotFound } from './WishlistNotFound';
+import PersonIcon from '@mui/icons-material/Person';
 
 const mapState = (state: RootState) => ({ currentUserId: state.auth.user?.id });
 
@@ -104,7 +105,13 @@ export const WishlistPage = () => {
               <Chip
                 variant="outlined"
                 size="small"
-                icon={<PersonOutlineOutlinedIcon />}
+                avatar={
+                  wishlist.owner.picture_url ? (
+                    <Avatar src={wishlist.owner.picture_url} />
+                  ) : (
+                    <PersonOutlineOutlinedIcon />
+                  )
+                }
                 label={`Créée par ${wishlist.owner.firstname} ${wishlist.owner.lastname}`}
               />
               <Chip
