@@ -231,7 +231,7 @@ export const CreateWishlistPage = () => {
               <LoadingButton
                 variant="contained"
                 loading={loading}
-                loadingPosition="start"
+                loadingPosition="end"
                 disabled={!createEnabled || loading}
                 endIcon={<SaveIcon />}
                 onClick={() => createWishlist()}
