@@ -7,8 +7,12 @@ export class ResizeImagePipe implements PipeTransform<Express.Multer.File, Promi
   constructor(private readonly options: OptionsResizeImagePipe) {}
 
   async transform(image: Express.Multer.File): Promise<any> {
-    const buffer = await sharp(image.buffer)
-      .resize(this.options.width, this.options.height)
+    const buffer = await sharp(image.buffer, { failOn: 'none' })
+      .resize({
+        width: this.options.width,
+        height: this.options.height,
+        fit: 'cover',
+      })
       .webp({ effort: 3 })
       .toBuffer();
 
