@@ -8,6 +8,7 @@ import { useDispatch } from 'react-redux';
 import { updatePicture as updatePictureAction } from '../../core/store/features';
 import GoogleIcon from '@mui/icons-material/Google';
 import { UserSocialDto } from '@wishlist/common-types';
+import { AxiosError } from 'axios';
 
 export type AvatarUpdateButtonProps = {
   firstname: string;
@@ -55,7 +56,8 @@ export const AvatarUpdateButton = ({ pictureUrl, firstname, socials }: AvatarUpd
       const res = await api.user.uploadPicture(file);
       dispatch(updatePictureAction(res.picture_url));
     } catch (e) {
-      addToast({ message: "Une erreur s'est produite", variant: 'error' });
+      const error = ((e as AxiosError)?.response?.data as any)?.message;
+      addToast({ message: error || "Une erreur s'est produite", variant: 'error' });
     } finally {
       setLoading(false);
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -99,7 +101,7 @@ export const AvatarUpdateButton = ({ pictureUrl, firstname, socials }: AvatarUpd
         ref={inputFileRef}
         type="file"
         hidden
-        accept="image/png, image/jpg, image/jpeg"
+        accept="image/png, image/jpeg, image/jpg, image/webp, image/gif, image/avif, image/tiff, image/tif, image/svg"
         onChange={onFileInputChange}
       />
       <Menu anchorEl={anchorElMenu} open={Boolean(anchorElMenu)} onClose={closeMenu}>

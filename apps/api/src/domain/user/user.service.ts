@@ -248,7 +248,11 @@ export class UserService {
     file: Express.Multer.File;
   }): Promise<UpdateUserPictureOutputDto> {
     const { currentUserId, file } = param;
-    await this.bucketService.removeIfExist({ destination: `pictures/${currentUserId}/` });
+    try {
+      await this.bucketService.removeIfExist({ destination: `pictures/${currentUserId}/` });
+    } catch (e) {
+      this.logger.error('Fail to delete existing picture for user', currentUserId, e);
+    }
     const publicUrl = await this.bucketService.upload({
       destination: `pictures/${currentUserId}/${uuid()}`,
       data: file.buffer,
