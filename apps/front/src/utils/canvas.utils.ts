@@ -24,15 +24,6 @@ function rotateSize(width: number, height: number, rotation: number) {
   };
 }
 
-const blobToFile = (theBlob: Blob, fileName: string): File => {
-  const b: any = theBlob;
-  //A Blob() is almost a File() - it's just missing the two properties below which we will add
-  b.lastModifiedDate = new Date();
-  b.name = fileName;
-
-  return theBlob as File;
-};
-
 /**
  * This function was adapted from the one in the ReadMe of https://github.com/DominicTobias/react-image-crop
  */
@@ -83,10 +74,11 @@ export async function getCroppedImg(
   return new Promise((resolve, reject) => {
     canvas.toBlob(
       (blob) => {
-        resolve(blobToFile(blob as Blob, `${uuid()}.webp`));
+        const file = new File([blob as Blob], `${uuid()}.webp`, { type: 'image/webp' });
+        resolve(file);
       },
       'image/webp',
-      0.8
+      0.7
     );
   });
 }
