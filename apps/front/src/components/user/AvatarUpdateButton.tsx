@@ -9,6 +9,10 @@ import { updatePicture as updatePictureAction } from '../../core/store/features'
 import GoogleIcon from '@mui/icons-material/Google';
 import { UserSocialDto } from '@wishlist/common-types';
 import { AxiosError } from 'axios';
+import { AvatarCropperModal } from './AvatarCropperModal';
+import { readFileToURL } from '../../utils/images.utils';
+import { getRotatedImage } from '../../utils/canvas.utils';
+import { getOrientation } from 'get-orientation/browser';
 
 export type AvatarUpdateButtonProps = {
   firstname: string;
@@ -16,8 +20,20 @@ export type AvatarUpdateButtonProps = {
   socials: UserSocialDto[];
 };
 
+const ORIENTATION_TO_ANGLE = {
+  '1': null,
+  '2': null,
+  '3': 180,
+  '4': null,
+  '5': null,
+  '6': 90,
+  '7': null,
+  '8': -90,
+};
+
 export const AvatarUpdateButton = ({ pictureUrl, firstname, socials }: AvatarUpdateButtonProps) => {
   const [loading, setLoading] = useState(false);
+  const [imageSrc, setImageSrc] = useState<string | undefined>(undefined);
   const [anchorElMenu, setAnchorElMenu] = useState<null | HTMLElement>(null);
   const api = useApi(wishlistApiRef);
   const { addToast } = useToast();
@@ -48,9 +64,28 @@ export const AvatarUpdateButton = ({ pictureUrl, firstname, socials }: AvatarUpd
   const onFileInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
 
-    setLoading(true);
-
     const file = e.target.files[0];
+    let imageDataUrl = await readFileToURL(file);
+
+    try {
+      // apply rotation if needed
+      const orientation = await getOrientation(file);
+      const rotation = ORIENTATION_TO_ANGLE[`${orientation}`];
+      if (rotation) {
+        imageDataUrl = await getRotatedImage(imageDataUrl, rotation);
+      }
+    } catch (e) {
+      console.warn('failed to detect the orientation');
+    }
+
+    setImageSrc(imageDataUrl);
+
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    inputFileRef.current!.value = '';
+  };
+
+  const uploadProfilePicture = async (file: File) => {
+    setLoading(true);
 
     try {
       const res = await api.user.uploadPicture(file);
@@ -60,8 +95,6 @@ export const AvatarUpdateButton = ({ pictureUrl, firstname, socials }: AvatarUpd
       addToast({ message: error || "Une erreur s'est produite", variant: 'error' });
     } finally {
       setLoading(false);
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      inputFileRef.current!.value = '';
     }
   };
 
@@ -84,6 +117,16 @@ export const AvatarUpdateButton = ({ pictureUrl, firstname, socials }: AvatarUpd
 
   return (
     <>
+      {imageSrc && (
+        <AvatarCropperModal
+          imageSrc={imageSrc}
+          handleClose={() => setImageSrc(undefined)}
+          handleSave={(file) => {
+            setImageSrc(undefined);
+            uploadProfilePicture(file);
+          }}
+        />
+      )}
       {!loading && (
         <Avatar
           alt={firstname}
@@ -97,13 +140,7 @@ export const AvatarUpdateButton = ({ pictureUrl, firstname, socials }: AvatarUpd
           <CircularProgress color="inherit" size="18px" thickness={5} />
         </Avatar>
       )}
-      <input
-        ref={inputFileRef}
-        type="file"
-        hidden
-        accept="image/png, image/jpeg, image/jpg, image/webp, image/gif, image/avif, image/tiff, image/tif, image/svg"
-        onChange={onFileInputChange}
-      />
+      <input ref={inputFileRef} type="file" hidden accept="image/*" onChange={onFileInputChange} />
       <Menu anchorEl={anchorElMenu} open={Boolean(anchorElMenu)} onClose={closeMenu}>
         <MenuItem onClick={() => selectAPicture()}>
           <ListItemIcon>
