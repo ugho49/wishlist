@@ -81,9 +81,13 @@ export async function getCroppedImg(
 
   // As a blob
   return new Promise((resolve, reject) => {
-    canvas.toBlob((blob) => {
-      resolve(blobToFile(blob as Blob, `${uuid()}.png`));
-    }, 'image/png');
+    canvas.toBlob(
+      (blob) => {
+        resolve(blobToFile(blob as Blob, `${uuid()}.webp`));
+      },
+      'image/webp',
+      0.8
+    );
   });
 }
 

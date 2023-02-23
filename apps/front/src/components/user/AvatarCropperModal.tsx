@@ -22,11 +22,11 @@ const useStyles = makeStyles((theme: Theme) => ({
     backgroundColor: theme.palette.background.paper,
     padding: 4,
     borderRadius: 5,
-    height: 300,
-    width: 300,
+    height: '90vh',
+    width: '90vw',
     [theme.breakpoints.up('sm')]: {
-      height: 500,
-      width: 500,
+      height: 600,
+      width: 600,
     },
   },
   cropContainer: {
@@ -152,6 +152,14 @@ export const AvatarCropperModal = ({ handleClose, imageSrc, handleSave }: Avatar
             onClick={() => getCroppedImage()}
           >
             Sauvegarder
+          </Button>
+          <Button
+            variant="contained"
+            color="inherit"
+            sx={{ margin: 2, display: { sm: 'none' } }}
+            onClick={() => handleClose()}
+          >
+            Annuler
           </Button>
         </div>
       </Box>
