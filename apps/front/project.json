@@ -5,65 +5,37 @@
   "projectType": "application",
   "targets": {
     "build": {
-      "executor": "@nrwl/webpack:webpack",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "executor": "@nrwl/vite:build",
+      "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
-        "compiler": "babel",
-        "outputPath": "dist/apps/front",
-        "index": "apps/front/public/index.html",
-        "baseHref": "/",
-        "main": "apps/front/src/main.tsx",
-        "polyfills": "apps/front/src/polyfills.ts",
-        "tsConfig": "apps/front/tsconfig.app.json",
-        "assets": [
-          {
-            "input": "apps/front/public",
-            "glob": "**/*",
-            "output": "."
-          }
-        ],
-        "styles": [
-          "apps/front/src/styles.scss"
-        ],
-        "scripts": [],
-        "webpackConfig": "@nrwl/react/plugins/webpack"
+        "outputPath": "dist/apps/front"
       },
       "configurations": {
         "development": {
-          "extractLicenses": false,
-          "optimization": false,
-          "sourceMap": true,
-          "vendorChunk": true
+          "mode": "development"
         },
         "production": {
+          "mode": "production",
           "fileReplacements": [
             {
               "replace": "apps/front/src/environments/environment.ts",
               "with": "apps/front/src/environments/environment.prod.ts"
             }
-          ],
-          "optimization": true,
-          "outputHashing": "all",
-          "sourceMap": false,
-          "namedChunks": false,
-          "extractLicenses": true,
-          "vendorChunk": false
+          ]
         }
       }
     },
     "serve": {
-      "executor": "@nrwl/webpack:dev-server",
+      "executor": "@nrwl/vite:dev-server",
       "defaultConfiguration": "development",
       "options": {
-        "buildTarget": "front:build",
-        "hmr": true
+        "buildTarget": "front:build"
       },
       "configurations": {
         "development": {
-          "buildTarget": "front:build:development"
+          "buildTarget": "front:build:development",
+          "hmr": true
         },
         "production": {
           "buildTarget": "front:build:production",
@@ -73,23 +45,32 @@
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "apps/front/**/*.{ts,tsx,js,jsx}"
-        ]
+        "lintFilePatterns": ["apps/front/**/*.{ts,tsx,js,jsx}"]
       }
     },
     "test": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": [
-        "coverage/apps/front"
-      ],
+      "executor": "@nrwl/vite:test",
+      "outputs": ["coverage/apps/front"],
       "options": {
-        "jestConfig": "apps/front/jest.config.ts",
-        "passWithNoTests": true
+        "passWithNoTests": true,
+        "reportsDirectory": "../../coverage/apps/front"
+      }
+    },
+    "preview": {
+      "executor": "@nrwl/vite:preview-server",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "front:build"
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "front:build:development"
+        },
+        "production": {
+          "buildTarget": "front:build:production"
+        }
       }
     }
   },
