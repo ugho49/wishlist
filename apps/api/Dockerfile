@@ -1,4 +1,4 @@
-FROM node:18.10.0-alpine AS builder
+FROM node:18.16-alpine AS builder
 
 RUN apk add --update --no-cache g++ make py3-pip
 
@@ -12,18 +12,13 @@ RUN yarn --frozen-lockfile
 COPY . .
 
 RUN yarn nx run api:build:production
+RUN mv node_modules dist/apps/api/node_modules
+RUN cd dist/apps/api && yarn --frozen-lockfile --production
 
-# remove dev deps
-RUN yarn --frozen-lockfile --production && yarn cache clean
-
-FROM node:18.10.0-alpine as production
+FROM node:18.16-alpine as production
 
 WORKDIR /usr/src/app
 
-COPY package.json ./
-COPY yarn.lock ./
-
-COPY --from=builder /usr/src/app/node_modules node_modules
 COPY --from=builder /usr/src/app/dist ./dist
 
 CMD ["node", "dist/apps/api/main"]
