@@ -4,6 +4,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { bootstrapSwagger } from './swagger';
 import helmet from 'helmet';
+import 'pg';
 
 async function createApp() {
   const app = await NestFactory.create(AppModule);
