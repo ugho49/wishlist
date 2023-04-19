@@ -15,7 +15,7 @@ export function toMiniEventDto(entity: EventEntity): MiniEventDto {
     id: entity.id,
     title: entity.title,
     description: entity.description || undefined,
-    event_date: DateTime.fromJSDate(entity.eventDate).toISODate(),
+    event_date: DateTime.fromJSDate(entity.eventDate).toISODate() || '',
   };
 }
 

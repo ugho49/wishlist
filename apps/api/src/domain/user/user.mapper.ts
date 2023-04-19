@@ -8,7 +8,7 @@ export async function toUserDto(entity: UserEntity): Promise<UserDto> {
   return {
     ...toMiniUserDto(entity),
     admin: entity.isAdmin(),
-    birthday: entity.birthday ? DateTime.fromJSDate(entity.birthday).toISODate() : undefined,
+    birthday: entity.birthday ? DateTime.fromJSDate(entity.birthday).toISODate() || '' : undefined,
     is_enabled: entity.isEnabled,
     last_connected_at: entity.lastConnectedAt?.toISOString(),
     last_ip: entity.lastIp || undefined,
