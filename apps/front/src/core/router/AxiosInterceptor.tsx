@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { RootState } from '../store';
@@ -18,18 +18,25 @@ export const AxiosInterceptor: React.FC = () => {
   const navigate = useNavigate();
   const { addToast } = useToast();
 
-  const redirectToLogin = () => navigate('/login');
+  const redirectToLogin = useCallback(() => navigate('/login'), [navigate]);
 
-  // TODO get new accessToken from refreshToken when expired
-
-  // Check token expiration every seconds ->
-  useInterval(() => {
+  const checkTokenExpiration = useCallback(() => {
     // TODO change this to refreshToken -->
     if (accessToken && accessTokenService.isExpired(accessToken)) {
+      // TODO get new accessToken from refreshToken when expired
       addToast({ message: 'Votre session à expiré', variant: 'warning' });
       logout(dispatch);
       redirectToLogin();
     }
+  }, [accessToken, addToast, dispatch, redirectToLogin]);
+
+  useEffect(() => {
+    checkTokenExpiration();
+  }, [checkTokenExpiration]);
+
+  // Check token expiration every seconds ->
+  useInterval(() => {
+    checkTokenExpiration();
   }, 1000);
 
   useEffect(() => {
