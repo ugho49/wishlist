@@ -16,7 +16,7 @@ services:
       test: "pg_isready -d $DB_NAME -U $DB_USER"
 
   pgbackups:
-    image: prodrigestivill/postgres-backup-local:14-alpine
+    image: prodrigestivill/postgres-backup-local:15-alpine
     restart: always
     volumes:
       - /pgbackups:/backups
