@@ -1,11 +1,11 @@
-/// <reference types="vitest" />
 import { defineConfig, splitVendorChunkPlugin } from 'vite';
+import { mergeConfig, defineConfig as defineTestConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import svgr from 'vite-plugin-svgr';
 import viteTsConfigPaths from 'vite-tsconfig-paths';
 import browserslistToEsbuild from 'browserslist-to-esbuild';
 
-export default defineConfig({
+const viteConfig = defineConfig({
   cacheDir: '../../node_modules/.vite/front',
 
   server: {
@@ -39,7 +39,9 @@ export default defineConfig({
   //    }),
   //  ],
   // },
+});
 
+const vitestConfig = defineTestConfig({
   test: {
     globals: true,
     cache: {
@@ -49,3 +51,5 @@ export default defineConfig({
     include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
   },
 });
+
+export default mergeConfig(viteConfig, vitestConfig);
