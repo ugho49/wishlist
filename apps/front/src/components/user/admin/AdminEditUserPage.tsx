@@ -243,13 +243,11 @@ export const AdminEditUserPage = () => {
             <Stack>
               <InputLabel>Date de naissance</InputLabel>
               <MobileDatePicker
-                inputFormat="DDD"
                 value={birthday}
                 disabled={loading || isCurrentUser}
                 defaultCalendarMonth={DateTime.now().minus({ year: 30 })}
                 onChange={(date) => setBirthday(date)}
                 disableFuture={true}
-                renderInput={(params) => <TextField {...params} placeholder="Date d'anniversaire" />}
               />
             </Stack>
 

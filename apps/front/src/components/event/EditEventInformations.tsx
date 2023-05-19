@@ -80,12 +80,11 @@ export const EditEventInformations = ({ event, onChange }: EditEventInformations
       <Stack>
         <InputLabel required>Date de l'évènement</InputLabel>
         <MobileDatePicker
-          inputFormat="DDDD"
+          format="DDDD"
           value={eventDate}
           disabled={loading}
           onChange={(date) => setEventDate(date)}
           disablePast={true}
-          renderInput={(params) => <TextField {...params} placeholder="Choisir une date pour votre évènement" />}
         />
       </Stack>
 

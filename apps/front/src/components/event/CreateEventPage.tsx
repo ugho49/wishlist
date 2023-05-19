@@ -123,14 +123,11 @@ export const CreateEventPage = () => {
               <Stack>
                 <InputLabel required>Date de l'évènement</InputLabel>
                 <MobileDatePicker
-                  inputFormat="DDDD"
+                  format="DDDD"
                   value={eventDate}
                   disabled={loading}
                   onChange={(date) => setEventDate(date)}
                   disablePast={true}
-                  renderInput={(params) => (
-                    <TextField {...params} placeholder="Choisir une date pour votre évènement" />
-                  )}
                 />
               </Stack>
 
@@ -165,7 +162,6 @@ export const CreateEventPage = () => {
                 <SearchUserSelect
                   disabled={loading}
                   onChange={(val) => {
-                    console.log('newval', val);
                     setAttendees((prevState) => [
                       {
                         user: val,

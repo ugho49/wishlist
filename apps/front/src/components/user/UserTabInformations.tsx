@@ -1,5 +1,5 @@
 import React, { FormEvent, useEffect, useState } from 'react';
-import { Avatar, Box, Stack, TextField } from '@mui/material';
+import { Box, Stack, TextField } from '@mui/material';
 import { useApi, useToast } from '@wishlist/common-front';
 import { wishlistApiRef } from '../../core/api/wishlist.api';
 import { InputLabel } from '../common/InputLabel';
@@ -113,13 +113,11 @@ export const UserTabInformations = () => {
         <Stack>
           <InputLabel>Date de naissance</InputLabel>
           <MobileDatePicker
-            inputFormat="DDD"
             value={birthday}
             disabled={loading}
             defaultCalendarMonth={DateTime.now().minus({ year: 30 })}
             onChange={(date) => setBirthday(date)}
             disableFuture={true}
-            renderInput={(params) => <TextField {...params} placeholder="Renseigner votre date d'anniversaire" />}
           />
         </Stack>
 
