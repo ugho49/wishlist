@@ -91,7 +91,7 @@ export const AdminEditUserPage = () => {
       await api.user.admin.update(userId, {
         firstname,
         lastname,
-        birthday: birthday !== null ? birthday.toJSDate() : undefined,
+        birthday: birthday !== null ? new Date(birthday.toISODate() || '') : undefined,
         email,
       });
 

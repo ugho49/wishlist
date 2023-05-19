@@ -49,7 +49,7 @@ export const UserTabInformations = () => {
       await api.user.update({
         firstname,
         lastname,
-        birthday: birthday !== null ? birthday.toJSDate() : undefined,
+        birthday: birthday !== null ? new Date(birthday.toISODate() || '') : undefined,
       });
 
       addToast({ message: 'Profil mis à jour', variant: 'info' });

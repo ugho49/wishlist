@@ -29,10 +29,11 @@ export const EditEventInformations = ({ event, onChange }: EditEventInformations
     e.preventDefault();
     setLoading(true);
     try {
+      const isoDate = eventDate?.toISODate() || DateTime.now().toISODate() || '';
       const body: UpdateEventInputDto = {
         title,
         description: description === '' ? undefined : description,
-        event_date: eventDate?.toJSDate() || DateTime.now().toJSDate(),
+        event_date: new Date(isoDate),
       };
       await api.event.update(event.id, body);
       onChange({ ...body, event_date: body.event_date.toISOString() });

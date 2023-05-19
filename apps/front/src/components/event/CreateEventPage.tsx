@@ -72,10 +72,11 @@ export const CreateEventPage = () => {
   const createEvent = async () => {
     setLoading(true);
     try {
+      const isoDate = eventDate?.toISODate() || DateTime.now().toISODate() || '';
       const event = await api.event.create({
         title,
         description: description === '' ? undefined : description,
-        event_date: eventDate?.toJSDate() || DateTime.now().toJSDate(),
+        event_date: new Date(isoDate),
         attendees: attendees.map((attendee) => ({
           email: typeof attendee.user === 'string' ? attendee.user : attendee.user.email,
           role: attendee.role,
