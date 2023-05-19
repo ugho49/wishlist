@@ -14,7 +14,7 @@
     },
     "test": {
       "executor": "@nx/jest:jest",
-      "outputs": ["coverage/libs/common-front"],
+      "outputs": ["{workspaceRoot}/coverage/libs/common-front"],
       "options": {
         "jestConfig": "libs/common-front/jest.config.ts",
         "passWithNoTests": true

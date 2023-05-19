@@ -52,7 +52,7 @@
     },
     "test": {
       "executor": "@nx/vite:test",
-      "outputs": ["coverage/apps/front"],
+      "outputs": ["{workspaceRoot}/coverage/apps/front"],
       "options": {
         "passWithNoTests": true,
         "reportsDirectory": "../../coverage/apps/front"
