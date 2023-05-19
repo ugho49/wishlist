@@ -82,7 +82,7 @@ jobs:
             DATA="{}"
 
             # Using https://nx.dev/nx/affected#base and https://nx.dev/nx/affected#head options for nx to compute diffs and determine which apps changes
-            AFFECTED_RAW=$(npx nx affected:apps --base=$NX_BASE --head=$NX_HEAD --plain)
+            AFFECTED_RAW=$(npx nx print-affected --type=app --base=$NX_BASE --head=$NX_HEAD | jq -r '.projects | join(" ")')
             IFS=' ' read -ra APPS \<<< "$AFFECTED_RAW"
 
             # Store list in file to be passed to following jobs
