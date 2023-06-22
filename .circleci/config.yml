@@ -25,7 +25,7 @@ references:
   nx/set-shas: &nx_set_shas_option
     error-on-no-successful-workflow: false
     main-branch-name: main
-    workflow-name: build-and-release
+    workflow-name: setup-workflow
   save_node_cache: &save_node_cache
     key: node-module-cache-{{ checksum "./yarn.lock" }}
     paths:

@@ -1,0 +1,6 @@
+{
+  "**/*.d.ts": ["prettier --write"],
+  "**/!(*.d).{ts,tsx}": ["eslint --fix", "prettier --write"],
+  "**/jest.config.ts": ["prettier --write"],
+  "**/*.{json,css,mdx}": ["prettier --write"]
+}
