@@ -3,9 +3,9 @@ import { ItemDto, MiniUserDto } from '@wishlist/common-types';
 import { Card } from '../common/Card';
 import { ItemFormDialog } from './ItemFormDialog';
 import {
+  Avatar,
   Box,
   Checkbox,
-  checkboxClasses,
   Chip,
   chipClasses,
   CircularProgress,
@@ -43,25 +43,18 @@ export type ItemCardProps = {
 const useStyles = makeStyles((theme: Theme) => ({
   card: {
     display: 'flex',
+    flexGrow: 1,
     flexDirection: 'row',
-    padding: '10px 0 10px 0',
+    padding: '10px 0 10px 10px',
     height: '100%',
     color: theme.palette.primary.main,
     borderBottom: '3px solid transparent',
     '&.selected': {
       borderBottomColor: theme.palette.secondary.main,
     },
-    '&.hideCheckbox': {
-      paddingLeft: '10px',
-    },
     '&.hideActions': {
       paddingRight: '10px',
     },
-  },
-  checkContainer: {
-    minWidth: '50px',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   name: {
     paddingLeft: '4px',
@@ -96,11 +89,6 @@ const useStyles = makeStyles((theme: Theme) => ({
   info: {
     flexGrow: 1,
   },
-  takenBy: {
-    fontSize: '10px',
-    fontStyle: 'italic',
-    fontWeight: 500,
-  },
   actions: {
     borderLeft: `1px solid ${theme.palette.divider}`,
     marginLeft: '10px',
@@ -109,9 +97,11 @@ const useStyles = makeStyles((theme: Theme) => ({
     justifyContent: 'space-evenly',
   },
   checkbox: {
-    [`&.${checkboxClasses.disabled} .${svgIconClasses.root}`]: {
-      color: theme.palette.secondary.dark,
-    },
+    margin: 0,
+  },
+  takerAvatar: {
+    border: `2px solid ${theme.palette.secondary.main}`,
+    margin: '5px',
   },
 }));
 
@@ -123,6 +113,7 @@ export const ItemCard = ({ item, handleDelete, handleUpdate, wishlist }: ItemCar
   const api = useApi(wishlistApiRef);
   const { addToast } = useToast();
   const [openDialog, setOpenDialog] = useState(false);
+  const [pictureHover, setPictureHover] = useState(false);
   const [loading, setLoading] = useState(false);
   const [takenBy, setTakenBy] = useState<MiniUserDto | undefined>(item.taken_by);
   const NameProps = item.url ? { component: Link, href: item.url, target: '_blank', rel: 'noopener noreferrer' } : {};
@@ -175,75 +166,104 @@ export const ItemCard = ({ item, handleDelete, handleUpdate, wishlist }: ItemCar
     setLoading(false);
   }, [isTaken, item]);
 
+  const hoverTakerPicture = () => {
+    if (takenBy?.id !== currentUserId && takenBy?.id !== undefined) return;
+    setPictureHover(true);
+  };
+
   return (
     <>
-      <Card
-        className={clsx(
-          classes.card,
-          'animated zoomIn faster',
-          isTaken && 'selected',
-          !displayCheckbox && 'hideCheckbox',
-          !displayActions && 'hideActions',
-        )}
+      <Stack
+        direction="row"
+        gap={1}
+        sx={{ height: '100%' }}
+        onMouseEnter={hoverTakerPicture}
+        onMouseLeave={() => setPictureHover(false)}
       >
         {displayCheckbox && (
-          <Stack className={classes.checkContainer}>
-            {loading && <CircularProgress size="1.2rem" />}
-            {!loading && (
-              <Checkbox
-                color="secondary"
-                className={classes.checkbox}
-                disabled={loading || (takenBy?.id !== currentUserId && takenBy?.id !== undefined)}
-                checked={isTaken}
-                onClick={() => toggleItem()}
-              />
-            )}
+          <Stack justifyContent="center">
+            <>
+              {isTaken && !pictureHover && (
+                <Tooltip title={`pris par ${takenBy?.firstname}`} arrow>
+                  <Avatar
+                    className={classes.takerAvatar}
+                    src={takenBy?.picture_url || '/broken-image.jpg'}
+                    alt={takenBy?.firstname}
+                    sx={{ height: '32px', width: '32px' }}
+                  />
+                </Tooltip>
+              )}
+              {(!isTaken || pictureHover) && (
+                <>
+                  {loading && (
+                    <Box sx={{ margin: '6px' }}>
+                      <CircularProgress size="30px" />
+                    </Box>
+                  )}
+                  {!loading && (
+                    <Checkbox
+                      color="secondary"
+                      className={classes.checkbox}
+                      disabled={loading || (takenBy?.id !== currentUserId && takenBy?.id !== undefined)}
+                      checked={isTaken}
+                      onClick={() => toggleItem()}
+                    />
+                  )}
+                </>
+              )}
+            </>
           </Stack>
         )}
+        <Card
+          className={clsx(
+            classes.card,
+            'animated zoomIn faster',
+            isTaken && 'selected',
+            !displayActions && 'hideActions',
+          )}
+        >
+          <Stack className={classes.info}>
+            <Box className={classes.name} {...NameProps}>
+              <span>{item.name}</span>
+              {item.url && <OpenInNewIcon />}
+            </Box>
+            <Box className={classes.description}>{item.description}</Box>
+            <Stack className={classes.footerInfo} direction="row" alignItems="center" justifyContent="space-between">
+              <Box className={classes.date}>{DateTime.fromISO(item.created_at).toRelative()}</Box>
+            </Stack>
+            <Stack alignItems="center" direction="row" justifyContent="space-between">
+              <Rating value={item.score} size="medium" readOnly />
+              {item.is_suggested && (
+                <Chip className={classes.suggested} label="Souhait suggéré" color="primary" variant="outlined" />
+              )}
+            </Stack>
+          </Stack>
+          {displayActions && (
+            <Stack className={clsx(classes.actions, 'animated zoomIn faster')}>
+              <Tooltip title="Modifier le souhait">
+                <IconButton color="info" onClick={() => setOpenDialog(true)} disabled={loading || isTaken} size="small">
+                  <EditIcon />
+                </IconButton>
+              </Tooltip>
+              <ConfirmIconButton
+                color="error"
+                size="small"
+                disabled={loading || isTaken}
+                confirmTitle="Supprimer le souhait"
+                onClick={() => deleteItem()}
+                confirmText={
+                  <span>
+                    Êtes-vous sûr de vouloir supprimer le souhait <b>{item.name}</b> ?
+                  </span>
+                }
+              >
+                <DeleteIcon />
+              </ConfirmIconButton>
+            </Stack>
+          )}
+        </Card>
+      </Stack>
 
-        <Stack className={classes.info}>
-          <Box className={classes.name} {...NameProps}>
-            <span>{item.name}</span>
-            {item.url && <OpenInNewIcon />}
-          </Box>
-          <Box className={classes.description}>{item.description}</Box>
-          <Stack className={classes.footerInfo} direction="row" alignItems="center" justifyContent="space-between">
-            <Box className={classes.date}>{DateTime.fromISO(item.created_at).toRelative()}</Box>
-            {item.is_suggested && <Chip className={classes.suggested} label="Souhait suggéré" color="secondary" />}
-          </Stack>
-          <Stack alignItems="center" direction="row" justifyContent="space-between">
-            <Rating value={item.score} size="medium" readOnly />
-            {isTaken && (
-              <Box className={classes.takenBy}>
-                (pris par {takenBy?.id === currentUserId ? 'moi' : takenBy?.firstname})
-              </Box>
-            )}
-          </Stack>
-        </Stack>
-        {displayActions && (
-          <Stack className={clsx(classes.actions, 'animated zoomIn faster')}>
-            <Tooltip title="Modifier le souhait">
-              <IconButton color="info" onClick={() => setOpenDialog(true)} disabled={loading || isTaken} size="small">
-                <EditIcon />
-              </IconButton>
-            </Tooltip>
-            <ConfirmIconButton
-              color="error"
-              size="small"
-              disabled={loading || isTaken}
-              confirmTitle="Supprimer le souhait"
-              onClick={() => deleteItem()}
-              confirmText={
-                <span>
-                  Êtes-vous sûr de vouloir supprimer le souhait <b>{item.name}</b> ?
-                </span>
-              }
-            >
-              <DeleteIcon />
-            </ConfirmIconButton>
-          </Stack>
-        )}
-      </Card>
       <ItemFormDialog
         mode="edit"
         title="Modifier le souhait"
