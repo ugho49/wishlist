@@ -2,7 +2,7 @@ import { defineConfig, splitVendorChunkPlugin } from 'vite';
 import { mergeConfig, defineConfig as defineTestConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import svgr from 'vite-plugin-svgr';
-import viteTsConfigPaths from 'vite-tsconfig-paths';
+import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
 import browserslistToEsbuild from 'browserslist-to-esbuild';
 
 const viteConfig = defineConfig({
@@ -22,14 +22,7 @@ const viteConfig = defineConfig({
     target: browserslistToEsbuild(),
   },
 
-  plugins: [
-    react(),
-    svgr(),
-    splitVendorChunkPlugin(),
-    viteTsConfigPaths({
-      root: '../../',
-    }),
-  ],
+  plugins: [react(), svgr(), splitVendorChunkPlugin(), nxViteTsPaths()],
 
   // Uncomment this if you are using workers.
   // worker: {
