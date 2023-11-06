@@ -41,7 +41,7 @@ export class ItemRepository extends BaseRepository(ItemEntity) {
       WHERE i.is_suggested = FALSE
         AND i.created_at > NOW() - INTERVAL '1 DAY'
       GROUP BY wishlist_id, wishlist_title, owner_id, owner_name
-    `
-    ).then((list) => list.map((element: unknown) => camelCaseKeys(element)));
+    `,
+    ).then((list) => list.map((element: Record<string, unknown>) => camelCaseKeys(element)));
   }
 }

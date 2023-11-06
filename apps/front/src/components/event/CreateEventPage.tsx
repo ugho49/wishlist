@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   Avatar,
   Box,
@@ -63,7 +63,7 @@ export const CreateEventPage = () => {
         if (typeof attendee.user === 'string') return attendee.user;
         return attendee.user.email;
       }),
-    [attendees]
+    [attendees],
   );
 
   const nextStepEnabled = title?.trim() !== '' && eventDate !== null;

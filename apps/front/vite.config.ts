@@ -40,6 +40,9 @@ const vitestConfig = defineTestConfig({
     cache: {
       dir: '../../node_modules/.vitest',
     },
+    coverage: {
+      provider: 'v8',
+    },
     environment: 'jsdom',
     include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
   },

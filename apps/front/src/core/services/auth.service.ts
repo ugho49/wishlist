@@ -1,4 +1,4 @@
-import jwt_decode from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 import { AccessTokenJwtPayload, RefreshTokenJwtPayload } from '@wishlist/common-types';
 
 export enum LS_KEYS {
@@ -23,7 +23,7 @@ class TokenService<T> {
     const token = localStorage.getItem(this.STORAGE_KEY);
     if (!token) return undefined;
     try {
-      const payload = jwt_decode(token) as T;
+      const payload = jwtDecode(token) as T;
       return {
         rawToken: token,
         payload,
@@ -34,12 +34,12 @@ class TokenService<T> {
   };
 
   decodeToken = (token: string): T => {
-    return jwt_decode(token) as T;
+    return jwtDecode(token) as T;
   };
 
   isExpired(token: string): boolean {
     try {
-      const { exp } = jwt_decode(token) as any;
+      const { exp } = jwtDecode(token) as { exp: number };
       return Date.now() >= exp * 1000;
     } catch (e) {
       return true;

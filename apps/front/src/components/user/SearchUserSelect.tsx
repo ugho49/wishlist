@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Autocomplete, Avatar, createFilterOptions, Stack, TextField } from '@mui/material';
 import { MiniUserDto } from '@wishlist/common-types';
-import { debounce, merge, uniqBy } from 'lodash';
+import { debounce, uniqBy } from 'lodash';
 import { isValidEmail, useApi } from '@wishlist/common-front';
 import { wishlistApiRef } from '../../core/api/wishlist.api';
 import { blue, orange } from '@mui/material/colors';

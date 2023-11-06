@@ -8,7 +8,6 @@ import { useDispatch } from 'react-redux';
 import { updatePicture as updatePictureAction } from '../../core/store/features';
 import GoogleIcon from '@mui/icons-material/Google';
 import { UserSocialDto } from '@wishlist/common-types';
-import { AxiosError } from 'axios';
 import { AvatarCropperModal } from './AvatarCropperModal';
 import { readFileToURL } from '../../utils/images.utils';
 import { getRotatedImage } from '../../utils/canvas.utils';
@@ -91,7 +90,8 @@ export const AvatarUpdateButton = ({ pictureUrl, firstname, socials }: AvatarUpd
       const res = await api.user.uploadPicture(file);
       dispatch(updatePictureAction(res.picture_url));
     } catch (e) {
-      const error = ((e as AxiosError)?.response?.data as any)?.message;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const error = (e as any)?.response?.data?.message as string;
       addToast({ message: error || "Une erreur s'est produite", variant: 'error' });
     } finally {
       setLoading(false);

@@ -1,9 +1,10 @@
+/// <reference types="vite-plugin-svgr/client" />
 import { Container, Stack, Theme } from '@mui/material';
 import { Outlet } from 'react-router-dom';
 import { makeStyles } from '@mui/styles';
 import React from 'react';
-import { ReactComponent as IconSvg } from '../../../assets/icons/icon.svg';
-import { ReactComponent as TextSvg } from '../../../assets/icons/logo_text.svg';
+import IconSvg from '../../../assets/icons/icon.svg?react';
+import TextSvg from '../../../assets/icons/logo_text.svg?react';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {

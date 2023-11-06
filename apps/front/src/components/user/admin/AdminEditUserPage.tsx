@@ -41,7 +41,6 @@ export const AdminEditUserPage = () => {
   const [firstname, setFirstname] = useState('');
   const [lastname, setLastname] = useState('');
   const [enabled, setEnabled] = useState(true);
-  const [admin, setAdmin] = useState(true);
   const [birthday, setBirthday] = useState<DateTime | null>(null);
   const [updatePasswordModalOpen, setUpdatePasswordModalOpen] = useState(false);
 
@@ -54,7 +53,6 @@ export const AdminEditUserPage = () => {
       setLastname(value.lastname);
       setBirthday(value?.birthday ? DateTime.fromISO(value.birthday) : null);
       setEnabled(value.is_enabled);
-      setAdmin(value.admin);
     }
   }, [value]);
 
@@ -133,7 +131,7 @@ export const AdminEditUserPage = () => {
                 <ListItemText
                   primary="Inscrit le"
                   secondary={DateTime.fromISO(value?.created_at || '').toLocaleString(
-                    DateTime.DATETIME_MED_WITH_SECONDS
+                    DateTime.DATETIME_MED_WITH_SECONDS,
                   )}
                 />
               </ListItem>
@@ -147,7 +145,7 @@ export const AdminEditUserPage = () => {
                 <ListItemText
                   primary="Dernière connexion le"
                   secondary={DateTime.fromISO(value?.last_connected_at || '').toLocaleString(
-                    DateTime.DATETIME_MED_WITH_SECONDS
+                    DateTime.DATETIME_MED_WITH_SECONDS,
                   )}
                 />
               </ListItem>

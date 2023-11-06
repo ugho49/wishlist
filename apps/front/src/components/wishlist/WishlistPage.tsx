@@ -18,7 +18,6 @@ import { RootState } from '../../core';
 import { useSelector } from 'react-redux';
 import EditIcon from '@mui/icons-material/Edit';
 import { WishlistNotFound } from './WishlistNotFound';
-import PersonIcon from '@mui/icons-material/Person';
 
 const mapState = (state: RootState) => ({ currentUserId: state.auth.user?.id });
 

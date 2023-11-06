@@ -77,12 +77,13 @@ export const AdminListEvents = () => {
         rows={value?.resources || []}
         loading={loading}
         columns={columns}
-        pageSize={pageSize}
         paginationMode="server"
         rowCount={totalElements}
-        page={currentPage - 1}
-        onPageChange={(page) => setCurrentPage(page + 1)}
-        rowsPerPageOptions={[pageSize]}
+        paginationModel={{
+          page: currentPage - 1,
+          pageSize,
+        }}
+        onPaginationModelChange={({ page }) => setCurrentPage(page + 1)}
       />
     </div>
   );

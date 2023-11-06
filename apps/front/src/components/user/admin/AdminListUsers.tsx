@@ -56,7 +56,7 @@ export const AdminListUsers = () => {
   const [search, setSearch] = useState('');
   const { value, loading } = useAsync(
     () => api.user.admin.getAll({ p: currentPage, q: search }),
-    [currentPage, search]
+    [currentPage, search],
   );
 
   useEffect(() => {
@@ -98,12 +98,13 @@ export const AdminListUsers = () => {
         rows={value?.resources || []}
         loading={loading}
         columns={columns}
-        pageSize={pageSize}
         paginationMode="server"
         rowCount={totalElements}
-        page={currentPage - 1}
-        onPageChange={(page) => setCurrentPage(page + 1)}
-        rowsPerPageOptions={[pageSize]}
+        paginationModel={{
+          page: currentPage - 1,
+          pageSize,
+        }}
+        onPaginationModelChange={({ page }) => setCurrentPage(page + 1)}
       />
     </div>
   );

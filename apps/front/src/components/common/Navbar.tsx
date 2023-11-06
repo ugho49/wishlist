@@ -1,3 +1,4 @@
+/// <reference types="vite-plugin-svgr/client" />
 import React, { useCallback } from 'react';
 import { logout } from '../../core/store/features';
 import { useDispatch } from 'react-redux';
@@ -5,8 +6,8 @@ import { AppBar, Box, Button, Container, IconButton, Stack, Theme, Toolbar, Typo
 import LogoutIcon from '@mui/icons-material/Logout';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useHistoryStack, useToast } from '@wishlist/common-front';
-import { ReactComponent as IconSvg } from '../../assets/icons/icon.svg';
-import { ReactComponent as TextSvg } from '../../assets/icons/logo_text.svg';
+import IconSvg from '../../assets/icons/icon.svg?react';
+import TextSvg from '../../assets/icons/logo_text.svg?react';
 import { makeStyles } from '@mui/styles';
 import { Link, useNavigate } from 'react-router-dom';
 

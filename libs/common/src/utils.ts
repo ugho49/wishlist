@@ -6,7 +6,7 @@ export const randomString = (length: number) =>
 
 export const uuid = () => v4();
 
-export function camelCaseKeys(object: any) {
+export function camelCaseKeys(object: Record<string, unknown>) {
   return Object.entries(object).reduce((acc, [key, value]) => ({ ...acc, [camelCase(key)]: value }), {});
 }
 

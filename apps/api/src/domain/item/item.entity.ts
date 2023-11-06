@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne, PrimaryColumn, RelationId, JoinColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryColumn, RelationId } from 'typeorm';
 import { uuid } from '@wishlist/common';
 import { TimestampEntity } from '@wishlist/common-database';
 import { WishlistEntity } from '../wishlist/wishlist.entity';

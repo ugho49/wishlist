@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { AddEventAttendeeInputDto, AttendeeDto, AttendeeRole, MiniUserDto } from '@wishlist/common-types';
 import { useApi, useToast } from '@wishlist/common-front';
 import { wishlistApiRef } from '../../core/api/wishlist.api';
-import { Avatar, Box, Divider, List, ListItem, ListItemAvatar, ListItemText, Stack, useTheme } from '@mui/material';
+import { Avatar, Box, Divider, List, ListItem, ListItemAvatar, ListItemText, Stack } from '@mui/material';
 import { InputLabel } from '../common/InputLabel';
 import { SearchUserSelect } from '../user/SearchUserSelect';
 import { RootState } from '../../core';
@@ -30,7 +30,7 @@ export const EditEventAttendees = ({ eventId, creator, attendees, onChange }: Ed
 
   const attendeeEmails = useMemo(
     () => attendees.map((attendee) => (attendee.pending_email ? attendee.pending_email : attendee.user?.email || '')),
-    [attendees]
+    [attendees],
   );
 
   const addAttendee = async (attendee: AddEventAttendeeInputDto) => {
