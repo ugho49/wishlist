@@ -22,22 +22,12 @@ references:
       - node-module-cache-{{ checksum "./yarn.lock" }}
 
 jobs:
-  get-dependencies-from-cache:
-    <<: *setup_env_node
-    steps:
-      - checkout
-      - restore_cache: *restore_node_cache
-      - persist_to_workspace:
-          root: .
-          paths:
-            - node_modules
-
   build-front:
     <<: *setup_env_node
     steps:
       - checkout
       - attach_workspace: *attach_workspace
-      - run: mkdir -p dist
+      - restore_cache: *restore_node_cache
       - run: yarn nx build front
       - persist_to_workspace:
           root: .
@@ -59,7 +49,15 @@ jobs:
             export GOOGLE_APPLICATION_CREDENTIALS="$(pwd)/firebase_auth.json"
             firebase deploy -P production -m "Workflow $CIRCLE_WORKFLOW_ID, build $CIRCLE_WORKFLOW_JOB_ID" --non-interactive
 
-  deploy-back:
+  build-api:
+    <<: *setup_env_node
+    steps:
+      - checkout
+      - attach_workspace: *attach_workspace
+      - restore_cache: *restore_node_cache
+      - run: yarn nx build api
+
+  deploy-api:
     docker:
       - image: cimg/base:2022.10-22.04
     steps:
@@ -92,6 +90,13 @@ workflows:
   build-and-release-api:
     when: << pipeline.parameters.workflow-api >>
     jobs:
+      - build-api:
+          name: build
+          filters:
+            branches:
+              ignore:
+                - main
+
       - docker/publish:
           name: build-and-publish
           image: ughoste/wishlist-api
@@ -104,7 +109,7 @@ workflows:
             branches:
               only:
                 - main
-#      - deploy-back:
+#      - deploy-api:
 #          name: deploy
 #          filters:
 #            branches:
@@ -116,11 +121,9 @@ workflows:
   build-and-release-front:
     when: << pipeline.parameters.workflow-front >>
     jobs:
-      - get-dependencies-from-cache
       - build-front:
           name: build
-          requires:
-            - get-dependencies-from-cache
+
       - deploy-front:
           name: deploy
           filters:
