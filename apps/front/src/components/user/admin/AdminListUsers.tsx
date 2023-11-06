@@ -33,7 +33,8 @@ const columns: GridColDef<UserDto>[] = [
     headerName: 'Created At',
     type: 'dateTime',
     width: 150,
-    valueGetter: ({ row: user }) => DateTime.fromISO(user.created_at).toLocaleString(DateTime.DATETIME_MED),
+    valueGetter: ({ row: user }) => new Date(user.created_at),
+    renderCell: ({ value }) => DateTime.fromJSDate(value).toLocaleString(DateTime.DATETIME_MED),
   },
   {
     field: 'id',

@@ -13,7 +13,8 @@ const columns: GridColDef<EventWithCountsAndCreatorDto>[] = [
     headerName: 'Event Date',
     type: 'dateTime',
     width: 100,
-    valueGetter: ({ row: event }) => DateTime.fromISO(event.event_date).toLocaleString(DateTime.DATE_SHORT),
+    valueGetter: ({ row: event }) => new Date(event.event_date),
+    renderCell: ({ value }) => DateTime.fromJSDate(value).toLocaleString(DateTime.DATE_SHORT),
   },
   {
     field: 'nb_wishlists',
@@ -39,7 +40,8 @@ const columns: GridColDef<EventWithCountsAndCreatorDto>[] = [
     headerName: 'Created At',
     type: 'dateTime',
     width: 150,
-    valueGetter: ({ row: event }) => DateTime.fromISO(event.created_at).toLocaleString(DateTime.DATETIME_MED),
+    valueGetter: ({ row: event }) => new Date(event.created_at),
+    renderCell: ({ value }) => DateTime.fromJSDate(value).toLocaleString(DateTime.DATETIME_MED),
   },
   {
     field: 'id',
