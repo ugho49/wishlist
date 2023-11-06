@@ -65,7 +65,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
   name: {
     paddingLeft: '4px',
-    fontWeight: 500,
+    fontWeight: '500 !important',
     textTransform: 'uppercase',
     letterSpacing: '.05em',
     [`& .${svgIconClasses.root}`]: {
@@ -183,7 +183,7 @@ export const ItemCard = ({ item, handleDelete, handleUpdate, wishlist }: ItemCar
           'animated zoomIn faster',
           isTaken && 'selected',
           !displayCheckbox && 'hideCheckbox',
-          !displayActions && 'hideActions'
+          !displayActions && 'hideActions',
         )}
       >
         {displayCheckbox && (

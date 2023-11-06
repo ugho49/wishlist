@@ -24,7 +24,7 @@ export interface EventAttendeesDialogDialog {
 
 export const EventAttendeesDialog = ({ open, attendees, creator, handleClose }: EventAttendeesDialogDialog) => {
   return (
-    <Dialog onClose={() => handleClose()} open={open}>
+    <Dialog onClose={() => handleClose()} open={open} fullWidth maxWidth="xs">
       <DialogTitle>
         <Stack direction="row" alignItems="center" justifyContent="space-between">
           <span>Participants</span>
