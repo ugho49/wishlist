@@ -4,20 +4,14 @@ import {
   CreateEventInputDto,
   createPagedResponse,
   DetailedEventDto,
-  EventWithCountsAndCreatorDto,
   EventWithCountsDto,
+  ICurrentUser,
   MiniEventDto,
   PagedResponse,
   UpdateEventInputDto,
-  ICurrentUser,
 } from '@wishlist/common-types';
 import { DEFAULT_RESULT_NUMBER } from '@wishlist/common';
-import {
-  toDetailedEventDto,
-  toEventWithCountsAndCreatorDto,
-  toEventWithCountsDto,
-  toMiniEventDto,
-} from './event.mapper';
+import { toDetailedEventDto, toEventWithCountsDto, toMiniEventDto } from './event.mapper';
 import { EventRepository } from './event.repository';
 import { uniq } from 'lodash';
 import { AttendeeEntity } from '../attendee/attendee.entity';
@@ -34,10 +28,10 @@ export class EventService {
   constructor(
     private readonly eventRepository: EventRepository,
     private readonly userRepository: UserRepository,
-    private readonly eventMailer: EventMailer
+    private readonly eventMailer: EventMailer,
   ) {}
 
-  async getAllPaginated(pageNumber: number): Promise<PagedResponse<EventWithCountsAndCreatorDto>> {
+  async getAllPaginated(pageNumber: number): Promise<PagedResponse<EventWithCountsDto>> {
     const pageSize = DEFAULT_RESULT_NUMBER;
     const skip = pageSize * (pageNumber - 1);
 
@@ -46,7 +40,7 @@ export class EventService {
       skip,
     });
 
-    const dtos = await Promise.all(entities.map((entity) => toEventWithCountsAndCreatorDto(entity)));
+    const dtos = await Promise.all(entities.map((entity) => toEventWithCountsDto(entity)));
 
     return createPagedResponse({
       resources: dtos,
@@ -205,13 +199,13 @@ export class EventService {
         title: dto.title,
         description: dto.description || null,
         eventDate: dto.event_date,
-      }
+      },
     );
   }
 
   async removeEventOfWishlist(
     em: EntityManager,
-    param: { wishlistEntity: WishlistEntity; eventEntity: EventEntity }
+    param: { wishlistEntity: WishlistEntity; eventEntity: EventEntity },
   ): Promise<void> {
     const { wishlistEntity, eventEntity } = param;
     const events = await wishlistEntity.events;

@@ -1,9 +1,4 @@
-import {
-  DetailedEventDto,
-  EventWithCountsAndCreatorDto,
-  EventWithCountsDto,
-  MiniEventDto,
-} from '@wishlist/common-types';
+import { DetailedEventDto, EventWithCountsDto, MiniEventDto } from '@wishlist/common-types';
 import { EventEntity } from './event.entity';
 import { toMiniUserDto } from '../user/user.mapper';
 import { toAttendeeDto } from '../attendee/attendee.mapper';
@@ -20,24 +15,17 @@ export function toMiniEventDto(entity: EventEntity): MiniEventDto {
 }
 
 export async function toEventWithCountsDto(entity: EventEntity): Promise<EventWithCountsDto> {
-  const [wishlists, attendees] = await Promise.all([entity.wishlists, entity.attendees]);
+  const [wishlists, attendees, creator] = await Promise.all([entity.wishlists, entity.attendees, entity.creator]);
+  const attendeesDto = await Promise.all(attendees.map((attendee) => toAttendeeDto(attendee)));
 
   return {
     ...toMiniEventDto(entity),
+    created_by: toMiniUserDto(creator),
     nb_wishlists: wishlists.length,
     nb_attendees: attendees.length,
+    attendees: attendeesDto,
     created_at: entity.createdAt.toISOString(),
     updated_at: entity.updatedAt.toISOString(),
-  };
-}
-
-export async function toEventWithCountsAndCreatorDto(entity: EventEntity): Promise<EventWithCountsAndCreatorDto> {
-  const baseDto = await toEventWithCountsDto(entity);
-  const creator = await entity.creator;
-
-  return {
-    ...baseDto,
-    created_by: toMiniUserDto(creator),
   };
 }
 
