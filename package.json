@@ -91,7 +91,7 @@
     "@nx/webpack": "17.0.3",
     "@nx/workspace": "17.0.3",
     "@testing-library/react": "14.0.0",
-    "@types/bcrypt": "5.0.1",
+    "@types/bcrypt": "5.0.2",
     "@types/cron": "2.4.0",
     "@types/jest": "29.5.7",
     "@types/lodash": "4.14.200",
