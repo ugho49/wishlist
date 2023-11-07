@@ -3,10 +3,10 @@ import { RouterLink, useApi } from '@wishlist/common-front';
 import { wishlistApiRef } from '../../../core/api/wishlist.api';
 import { useAsync } from 'react-use';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { EventWithCountsAndCreatorDto } from '@wishlist/common-types';
+import { EventWithCountsDto } from '@wishlist/common-types';
 import { DateTime } from 'luxon';
 
-const columns: GridColDef<EventWithCountsAndCreatorDto>[] = [
+const columns: GridColDef<EventWithCountsDto>[] = [
   { field: 'title', headerName: 'Title', width: 170 },
   {
     field: 'event_date',

@@ -30,14 +30,13 @@ export class EventWithCountsDto {
   title: string;
   description?: string;
   event_date: string;
+  created_by: MiniUserDto;
   nb_wishlists: number;
+  // Deprecated
   nb_attendees: number;
+  attendees: AttendeeDto[];
   created_at: string;
   updated_at: string;
-}
-
-export class EventWithCountsAndCreatorDto extends EventWithCountsDto {
-  created_by: MiniUserDto;
 }
 
 export class DetailedEventDto extends MiniEventDto {

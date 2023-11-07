@@ -1,12 +1,7 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { EventService } from '../event.service';
-import {
-  DetailedEventDto,
-  EventWithCountsAndCreatorDto,
-  GetPaginationQueryDto,
-  PagedResponse,
-} from '@wishlist/common-types';
+import { DetailedEventDto, EventWithCountsDto, GetPaginationQueryDto, PagedResponse } from '@wishlist/common-types';
 import { IsAdmin } from '../../auth';
 
 @IsAdmin()
@@ -21,7 +16,7 @@ export class EventAdminController {
   }
 
   @Get()
-  getAllPaginated(@Query() queryParams: GetPaginationQueryDto): Promise<PagedResponse<EventWithCountsAndCreatorDto>> {
+  getAllPaginated(@Query() queryParams: GetPaginationQueryDto): Promise<PagedResponse<EventWithCountsDto>> {
     return this.eventService.getAllPaginated(queryParams.p || 1);
   }
 }

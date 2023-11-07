@@ -9,7 +9,6 @@ import type {
   CreateWishlistInputDto,
   DetailedEventDto,
   DetailedWishlistDto,
-  EventWithCountsAndCreatorDto,
   EventWithCountsDto,
   GetAllUsersQueryDto,
   GetPaginationQueryDto,
@@ -84,7 +83,7 @@ export type WishlistApi = {
     delete: (eventId: string) => Promise<void>;
     admin: {
       getById: (eventId: string) => Promise<DetailedEventDto>;
-      getAll: (params: GetPaginationQueryDto) => Promise<PagedResponse<EventWithCountsAndCreatorDto>>;
+      getAll: (params: GetPaginationQueryDto) => Promise<PagedResponse<EventWithCountsDto>>;
     };
   };
 
