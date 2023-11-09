@@ -98,7 +98,7 @@
     "@types/luxon": "3.3.3",
     "@types/multer": "1.4.9",
     "@types/node": "20.8.10",
-    "@types/passport-jwt": "3.0.12",
+    "@types/passport-jwt": "3.0.13",
     "@types/react": "18.2.36",
     "@types/react-dom": "18.2.14",
     "@types/react-router-dom": "5.3.3",
