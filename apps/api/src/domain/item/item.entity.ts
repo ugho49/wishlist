@@ -18,6 +18,9 @@ export class ItemEntity extends TimestampEntity {
   @Column({ type: 'varchar', nullable: true })
   url?: string | null;
 
+  @Column({ type: 'varchar', nullable: true })
+  pictureUrl?: string | null;
+
   @Column()
   isSuggested: boolean;
 

@@ -10,6 +10,7 @@ export class ItemDto {
   url?: string;
   score?: number;
   is_suggested?: boolean;
+  picture_url?: string;
   taken_by?: MiniUserDto;
   taken_at?: string;
   created_at: string;

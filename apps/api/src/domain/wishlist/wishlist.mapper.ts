@@ -20,6 +20,7 @@ export function toMiniWishlistDto(entity: WishlistEntity): MiniWishlistDto {
     id: entity.id,
     title: entity.title,
     description: entity.description || undefined,
+    logo_url: entity.logoUrl || undefined,
   };
 }
 
@@ -63,8 +64,8 @@ export async function toDetailedWishlistDto(param: {
         toItemDto({
           entity: item,
           displayUserAndSuggested,
-        })
-      )
+        }),
+      ),
   );
 
   return {

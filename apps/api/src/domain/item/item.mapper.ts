@@ -12,6 +12,7 @@ export async function toItemDto(param: { entity: ItemEntity; displayUserAndSugge
     description: entity.description || undefined,
     score: entity.score || undefined,
     url: entity.url || undefined,
+    picture_url: entity.pictureUrl || undefined,
     is_suggested: displayUserAndSuggested ? entity.isSuggested : undefined,
     taken_by: displayUserAndSuggested && user ? toMiniUserDto(user) : undefined,
     taken_at: displayUserAndSuggested ? entity.takenAt?.toISOString() : undefined,
