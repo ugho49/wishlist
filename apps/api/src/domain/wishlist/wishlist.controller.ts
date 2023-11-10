@@ -97,7 +97,7 @@ export class WishlistController {
     });
   }
 
-  @Delete('/:id/upload-logo')
+  @Delete('/:id/logo')
   async removeLogo(@Param('id') wishlistId: string, @CurrentUser('id') currentUserId: string): Promise<void> {
     await this.wishlistService.removeLogo({ wishlistId, currentUserId });
   }

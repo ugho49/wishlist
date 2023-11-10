@@ -38,6 +38,7 @@ import type {
   LoginWithGoogleInputDto,
   RegisterUserWithGoogleInputDto,
   UpdateUserPictureOutputDto,
+  UpdateWishlistLogoOutputDto,
 } from '@wishlist/common-types';
 
 export type WishlistApi = {
@@ -109,5 +110,7 @@ export type WishlistApi = {
     delete: (wishlistId: string) => Promise<void>;
     linkWishlistToAnEvent: (wishlistId: string, data: LinkUnlinkWishlistInputDto) => Promise<void>;
     unlinkWishlistToAnEvent: (wishlistId: string, data: LinkUnlinkWishlistInputDto) => Promise<void>;
+    uploadLogo: (wishlistId: string, file: File) => Promise<UpdateWishlistLogoOutputDto>;
+    removeLogo: (wishlistId: string) => Promise<void>;
   };
 };

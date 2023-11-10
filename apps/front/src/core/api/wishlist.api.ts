@@ -84,6 +84,17 @@ export function buildApi(): WishlistApi {
       delete: (wishlistId) => client.delete(`/wishlist/${wishlistId}`),
       linkWishlistToAnEvent: (wishlistId, data) => client.post(`/wishlist/${wishlistId}/link-event`, data),
       unlinkWishlistToAnEvent: (wishlistId, data) => client.post(`/wishlist/${wishlistId}/unlink-event`, data),
+      uploadLogo: (wishlistId, file) => {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        return client
+          .post(`/wishlist/${wishlistId}/upload-logo`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+          })
+          .then((res) => res.data);
+      },
+      removeLogo: (wishlistId) => client.delete(`/wishlist/${wishlistId}/logo`),
     },
     event: {
       getAll: (params) => client.get(`/event`, { params }).then((res) => res.data),
