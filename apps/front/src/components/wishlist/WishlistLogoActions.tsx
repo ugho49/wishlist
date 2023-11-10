@@ -1,9 +1,10 @@
 import { AvatarCropperModal } from '../common/AvatarCropperModal';
-import { Avatar, Box, Button, Stack, useTheme } from '@mui/material';
+import { Avatar, Box, Button, Stack } from '@mui/material';
 import { InputLabel } from '../common/InputLabel';
-import RedeemIcon from '@mui/icons-material/Redeem';
+import PersonIcon from '@mui/icons-material/Person';
 import React, { useState } from 'react';
 import { sanitizeImgToUrl } from '../../utils/images.utils';
+import { grey } from '@mui/material/colors';
 
 type WishlistLogoActionsProps = {
   logoUrl?: string;
@@ -14,7 +15,6 @@ type WishlistLogoActionsProps = {
 
 export const WishlistLogoActions = (props: WishlistLogoActionsProps) => {
   const { logoUrl, loading, onLogoChange, onLogoRemove } = props;
-  const theme = useTheme();
   const [tmpLogoSrc, setTmpLogoSrc] = useState<string | undefined>();
 
   const onLogoInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -43,8 +43,8 @@ export const WishlistLogoActions = (props: WishlistLogoActionsProps) => {
       <Box>
         <InputLabel>Logo</InputLabel>
         <Stack direction="row" gap={2}>
-          <Avatar src={logoUrl} sx={{ width: 70, height: 70, bgcolor: theme.palette.primary.light }}>
-            <RedeemIcon fontSize="large" />
+          <Avatar src={logoUrl} sx={{ width: 70, height: 70, bgcolor: grey[200], color: grey[400] }}>
+            <PersonIcon fontSize="large" />
           </Avatar>
 
           <Stack direction="column" justifyContent="center" gap={1} marginLeft={5}>
