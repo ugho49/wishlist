@@ -11,6 +11,14 @@ import { InputLabel } from '../../common/InputLabel';
 
 const columns: GridColDef<UserDto>[] = [
   {
+    field: 'is_enabled',
+    headerName: '',
+    width: 20,
+    sortable: false,
+    filterable: false,
+    renderCell: ({ row: user }) => <Status color={user.is_enabled ? 'success' : 'error'} />,
+  },
+  {
     field: 'picture_url',
     headerName: '',
     width: 20,
@@ -21,14 +29,6 @@ const columns: GridColDef<UserDto>[] = [
         {user.firstname.substring(0, 1).toUpperCase()}
       </Avatar>
     ),
-  },
-  {
-    field: 'is_enabled',
-    headerName: '',
-    width: 20,
-    sortable: false,
-    filterable: false,
-    renderCell: ({ row: user }) => <Status color={user.is_enabled ? 'success' : 'error'} />,
   },
   { field: 'firstname', headerName: 'First name', width: 170 },
   { field: 'lastname', headerName: 'Last name', width: 170 },
