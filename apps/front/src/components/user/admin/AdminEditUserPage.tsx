@@ -1,4 +1,4 @@
-import { Box, Button, List, ListItem, ListItemIcon, ListItemText, Stack, TextField } from '@mui/material';
+import { Avatar, Box, Button, List, ListItem, ListItemIcon, ListItemText, Stack, TextField } from '@mui/material';
 import React, { FormEvent, useEffect, useState } from 'react';
 import { Loader } from '../../common/Loader';
 import { Title } from '../../common/Title';
@@ -14,7 +14,6 @@ import { Card } from '../../common/Card';
 import { Subtitle } from '../../common/Subtitle';
 import { LoadingButton } from '@mui/lab';
 import SaveIcon from '@mui/icons-material/Save';
-import PersonIcon from '@mui/icons-material/Person';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import LanguageIcon from '@mui/icons-material/Language';
 import useMediaQuery from '@mui/material/useMediaQuery';
@@ -40,6 +39,7 @@ export const AdminEditUserPage = () => {
   const [email, setEmail] = useState('');
   const [firstname, setFirstname] = useState('');
   const [lastname, setLastname] = useState('');
+  const [pictureUrl, setPictureUrl] = useState('');
   const [enabled, setEnabled] = useState(true);
   const [birthday, setBirthday] = useState<DateTime | null>(null);
   const [updatePasswordModalOpen, setUpdatePasswordModalOpen] = useState(false);
@@ -53,6 +53,7 @@ export const AdminEditUserPage = () => {
       setLastname(value.lastname);
       setBirthday(value?.birthday ? DateTime.fromISO(value.birthday) : null);
       setEnabled(value.is_enabled);
+      setPictureUrl(value.picture_url || '');
     }
   }, [value]);
 
@@ -120,7 +121,9 @@ export const AdminEditUserPage = () => {
             <List dense sx={{ flexGrow: 1 }}>
               <ListItem>
                 <ListItemIcon>
-                  <PersonIcon />
+                  <Avatar src={pictureUrl} sx={{ width: '30px', height: '30px' }}>
+                    {`${firstname.substring(0, 1).toUpperCase()}${lastname.substring(0, 1).toUpperCase()}`}
+                  </Avatar>
                 </ListItemIcon>
                 <ListItemText primary={`${firstname} ${lastname}`} secondary={email} />
               </ListItem>

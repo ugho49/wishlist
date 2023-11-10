@@ -6,12 +6,23 @@ import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { UserDto } from '@wishlist/common-types';
 import { DateTime } from 'luxon';
 import { Status } from '../../common/Status';
-import { Box, Button, Stack, TextField } from '@mui/material';
+import { Avatar, Box, Button, Stack, TextField } from '@mui/material';
 import { InputLabel } from '../../common/InputLabel';
 
 const columns: GridColDef<UserDto>[] = [
   {
-    // TODO: add avatar with pin
+    field: 'picture_url',
+    headerName: '',
+    width: 20,
+    sortable: false,
+    filterable: false,
+    renderCell: ({ row: user }) => (
+      <Avatar src={user.picture_url} sx={{ width: '30px', height: '30px' }}>
+        {user.firstname.substring(0, 1).toUpperCase()}
+      </Avatar>
+    ),
+  },
+  {
     field: 'is_enabled',
     headerName: '',
     width: 20,
