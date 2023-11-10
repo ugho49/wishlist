@@ -1,12 +1,12 @@
 import React, { useMemo } from 'react';
 import { DetailedEventDto } from '@wishlist/common-types';
 import { Box, Button, Grid, Stack } from '@mui/material';
-import { WishlistCard } from '../wishlist/WishlistCard';
 import { FabAutoGrow } from '../common/FabAutoGrow';
 import AddIcon from '@mui/icons-material/Add';
 import { RouterLink } from '@wishlist/common-front';
 import { InputLabel } from '../common/InputLabel';
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
+import { WishlistCardWithOwner } from '../wishlist/WishlistCardWithOwner';
 
 export type EventWishlistsProps = {
   event: DetailedEventDto;
@@ -30,7 +30,7 @@ export const EventWishlists = ({ event }: EventWishlistsProps) => {
               .sort((a, b) => a.title.localeCompare(b.title))
               .map((wishlist) => (
                 <Grid item xs={12} md={6} key={wishlist.id}>
-                  <WishlistCard wishlist={wishlist} />
+                  <WishlistCardWithOwner wishlist={wishlist} />
                 </Grid>
               ))}
           </Grid>

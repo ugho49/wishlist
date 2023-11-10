@@ -5,10 +5,10 @@ import { RouterLink, useApi, useCustomSearchParams } from '@wishlist/common-fron
 import { wishlistApiRef } from '../../core/api/wishlist.api';
 import { useAsync } from 'react-use';
 import { Pagination } from '../common/Pagination';
-import { WishlistCard } from './WishlistCard';
 import { Loader } from '../common/Loader';
 import AddIcon from '@mui/icons-material/Add';
 import { FabAutoGrow } from '../common/FabAutoGrow';
+import { WishlistCardWithEvents } from './WishlistCardWithEvents';
 
 type SearchType = { page: string };
 
@@ -25,7 +25,7 @@ export const WishlistListPage = () => {
     (page: number) => {
       setQueryParams((prevState) => ({ ...prevState, page: `${page}` }));
     },
-    [setQueryParams]
+    [setQueryParams],
   );
 
   useEffect(() => {
@@ -43,7 +43,7 @@ export const WishlistListPage = () => {
         <Grid container spacing={3}>
           {(value?.resources || []).map((wishlist) => (
             <Grid item xs={12} md={6} key={wishlist.id}>
-              <WishlistCard wishlist={wishlist} />
+              <WishlistCardWithEvents wishlist={wishlist} />
             </Grid>
           ))}
         </Grid>
