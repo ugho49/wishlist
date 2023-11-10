@@ -64,12 +64,8 @@ export class WishlistService {
     });
   }
 
-  async create(param: {
-    currentUserId: string;
-    dto: CreateWishlistInputDto;
-    fileLogo?: Express.Multer.File;
-  }): Promise<MiniWishlistDto> {
-    const { currentUserId, dto, fileLogo } = param;
+  async create(param: { currentUserId: string; dto: CreateWishlistInputDto }): Promise<MiniWishlistDto> {
+    const { currentUserId, dto } = param;
     const eventEntities = await this.eventRepository.findByIdsAndUserId({
       eventIds: dto.event_ids,
       userId: currentUserId,
@@ -99,11 +95,6 @@ export class WishlistService {
 
     wishlistEntity.events = Promise.resolve(eventEntities);
     wishlistEntity.items = Promise.resolve(itemEntities);
-
-    if (fileLogo) {
-      const destination = this.getLogoDestination(wishlistEntity.id);
-      wishlistEntity.logoUrl = await this.uploadToBucket(destination, fileLogo);
-    }
 
     await this.wishlistRepository.save(wishlistEntity);
 

@@ -40,14 +40,11 @@ export class WishlistController {
   }
 
   @Post()
-  @ApiConsumes('multipart/form-data')
-  @UseInterceptors(FileInterceptor('logo'))
   createWishlist(
     @CurrentUser('id') currentUserId: string,
     @Body() dto: CreateWishlistInputDto,
-    @UploadedFile(wishlistLogoFileValidators(false), wishlistLogoResizePipe) logo?: Express.Multer.File,
   ): Promise<MiniWishlistDto> {
-    return this.wishlistService.create({ dto, currentUserId, fileLogo: logo });
+    return this.wishlistService.create({ dto, currentUserId });
   }
 
   @Put('/:id')
