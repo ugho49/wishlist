@@ -36,6 +36,7 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import { DateTime } from 'luxon';
 import { SearchEventSelect } from '../event/SearchEventSelect';
 import { Card } from '../common/Card';
+import { WishlistLogoActions } from './WishlistLogoActions';
 
 type QueryParamType = { 'from-event'?: string };
 
@@ -52,6 +53,7 @@ export const CreateWishlistPage = () => {
   const [description, setDescription] = useState('');
   const [hideItems, setHideItems] = useState(true);
   const [events, setEvents] = useState<MiniEventDto[]>([]);
+  const [logo, setLogo] = useState<File | undefined>();
   const api = useApi(wishlistApiRef);
 
   const { value } = useAsync(() => api.event.getAll({ limit: 100, only_future: true }), []);
@@ -65,7 +67,7 @@ export const CreateWishlistPage = () => {
       setTitle((prev) => {
         if (prev !== '') return prev;
         return `Liste de ${user.firstname}`;
-      })
+      }),
     );
   }, [api.user]);
 
@@ -86,7 +88,12 @@ export const CreateWishlistPage = () => {
         items: [],
       });
 
+      if (logo && !hideItems) {
+        await api.wishlist.uploadLogo(wishlist.id, logo);
+      }
+
       addToast({ message: 'Liste créé avec succès', variant: 'success' });
+
       navigate(`/wishlists/${wishlist.id}`);
     } catch (e) {
       addToast({ message: "Une erreur s'est produite", variant: 'error' });
@@ -161,6 +168,15 @@ export const CreateWishlistPage = () => {
                   }
                 />
               </Box>
+
+              {!hideItems && (
+                <WishlistLogoActions
+                  logoUrl={logo ? URL.createObjectURL(logo) : undefined}
+                  loading={loading}
+                  onLogoChange={(file) => setLogo(file)}
+                  onLogoRemove={() => setLogo(undefined)}
+                />
+              )}
             </Stack>
           )}
 

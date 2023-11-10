@@ -124,11 +124,20 @@ workflows:
       - build-front:
           name: build
 
-      - deploy-front:
-          name: deploy
+      - deploy-front-trigger:
+          name: deploy-trigger
+          type: approval
           filters:
             branches:
               only:
                 - main
+
+      - deploy-front:
+          name: deploy
           requires:
             - build
+            - deploy-trigger
+          filters:
+            branches:
+              only:
+                - main

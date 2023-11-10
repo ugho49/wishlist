@@ -12,7 +12,7 @@ import {
   WishlistWithEventsDto,
 } from '@wishlist/common-types';
 import { toDetailedWishlistDto, toMiniWishlistDto, toWishlistWithEventsDto } from './wishlist.mapper';
-import { DEFAULT_RESULT_NUMBER } from '@wishlist/common';
+import { DEFAULT_RESULT_NUMBER, uuid } from '@wishlist/common';
 import { WishlistRepository } from './wishlist.repository';
 import { EventRepository } from '../event/event.repository';
 import { WishlistEntity } from './wishlist.entity';
@@ -245,7 +245,7 @@ export class WishlistService {
 
   private async uploadToBucket(destination: string, file: Express.Multer.File) {
     return await this.bucketService.upload({
-      destination,
+      destination: `${destination}/${uuid()}`,
       data: file.buffer,
       contentType: file.mimetype,
     });

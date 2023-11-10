@@ -5,10 +5,8 @@ import NoPhotographyIcon from '@mui/icons-material/NoPhotography';
 import { useToast } from '@wishlist/common-front';
 import GoogleIcon from '@mui/icons-material/Google';
 import { UpdateUserPictureOutputDto, UserSocialDto } from '@wishlist/common-types';
-import { AvatarCropperModal } from './AvatarCropperModal';
-import { readFileToURL } from '../../utils/images.utils';
-import { getRotatedImage } from '../../utils/canvas.utils';
-import { getOrientation } from 'get-orientation/browser';
+import { AvatarCropperModal } from '../common/AvatarCropperModal';
+import { sanitizeImgToUrl } from '../../utils/images.utils';
 
 export type AvatarUpdateButtonProps = {
   firstname: string;
@@ -20,17 +18,6 @@ export type AvatarUpdateButtonProps = {
   pictureUrl?: string;
   socials: UserSocialDto[];
   size?: string;
-};
-
-const ORIENTATION_TO_ANGLE = {
-  '1': null,
-  '2': null,
-  '3': 180,
-  '4': null,
-  '5': null,
-  '6': 90,
-  '7': null,
-  '8': -90,
 };
 
 export const AvatarUpdateButton = ({
@@ -75,23 +62,11 @@ export const AvatarUpdateButton = ({
     if (!e.target.files) return;
 
     const file = e.target.files[0];
-    let imageDataUrl = await readFileToURL(file);
-
-    try {
-      // apply rotation if needed
-      const orientation = await getOrientation(file);
-      const rotation = ORIENTATION_TO_ANGLE[`${orientation}`];
-      if (rotation) {
-        imageDataUrl = await getRotatedImage(imageDataUrl, rotation);
-      }
-    } catch (e) {
-      console.warn('failed to detect the orientation');
-    }
+    const imageDataUrl = await sanitizeImgToUrl(file);
 
     setImageSrc(imageDataUrl);
 
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    inputFileRef.current!.value = '';
+    e.target.value = '';
   };
 
   const uploadProfilePicture = async (file: File) => {
