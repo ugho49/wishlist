@@ -64,8 +64,12 @@ export class WishlistService {
     });
   }
 
-  async create(param: { currentUserId: string; dto: CreateWishlistInputDto }): Promise<MiniWishlistDto> {
-    const { currentUserId, dto } = param;
+  async create(param: {
+    currentUserId: string;
+    dto: CreateWishlistInputDto;
+    fileLogo?: Express.Multer.File;
+  }): Promise<MiniWishlistDto> {
+    const { currentUserId, dto, fileLogo } = param;
     const eventEntities = await this.eventRepository.findByIdsAndUserId({
       eventIds: dto.event_ids,
       userId: currentUserId,
@@ -95,6 +99,11 @@ export class WishlistService {
 
     wishlistEntity.events = Promise.resolve(eventEntities);
     wishlistEntity.items = Promise.resolve(itemEntities);
+
+    if (fileLogo) {
+      const destination = this.getLogoDestination(wishlistEntity.id);
+      wishlistEntity.logoUrl = await this.uploadToBucket(destination, fileLogo);
+    }
 
     await this.wishlistRepository.save(wishlistEntity);
 
@@ -134,6 +143,9 @@ export class WishlistService {
     }
 
     await this.wishlistRepository.delete({ id: wishlistId });
+
+    const logoDest = this.getLogoDestination(wishlistId);
+    await this.bucketService.removeIfExist({ destination: logoDest });
   }
 
   async linkWishlistToAnEvent(param: { eventId: string; currentUserId: string; wishlistId: string }): Promise<void> {
@@ -200,7 +212,7 @@ export class WishlistService {
     const { currentUserId, wishlistId, file } = param;
     const wishlistEntity = await this.wishlistRepository.findByIdOrThrow(wishlistId);
     const isOwner = wishlistEntity.ownerId === currentUserId;
-    const destination = `pictures/wishlists/${wishlistId}/logo`;
+    const destination = this.getLogoDestination(wishlistId);
 
     if (!isOwner) {
       throw new UnauthorizedException('Only the owner of the list can upload a logo');
@@ -212,11 +224,7 @@ export class WishlistService {
       this.logger.error('Fail to delete existing logo for wishlist', wishlistId, e);
     }
 
-    const publicUrl = await this.bucketService.upload({
-      destination,
-      data: file.buffer,
-      contentType: file.mimetype,
-    });
+    const publicUrl = await this.uploadToBucket(destination, file);
 
     await this.wishlistRepository.update({ id: wishlistId }, { logoUrl: publicUrl });
 
@@ -238,5 +246,17 @@ export class WishlistService {
     await this.bucketService.removeIfExist({ destination });
 
     await this.wishlistRepository.update({ id: wishlistId }, { logoUrl: null });
+  }
+
+  private getLogoDestination(wishlistId: string) {
+    return `pictures/wishlists/${wishlistId}/logo`;
+  }
+
+  private async uploadToBucket(destination: string, file: Express.Multer.File) {
+    return await this.bucketService.upload({
+      destination,
+      data: file.buffer,
+      contentType: file.mimetype,
+    });
   }
 }
