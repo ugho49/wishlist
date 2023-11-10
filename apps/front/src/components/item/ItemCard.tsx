@@ -187,10 +187,11 @@ export const ItemCard = ({ item, handleDelete, handleUpdate, wishlist }: ItemCar
                 <Tooltip title={`pris par ${takenBy?.firstname}`} arrow>
                   <Avatar
                     className={classes.takerAvatar}
-                    src={takenBy?.picture_url || '/broken-image.jpg'}
-                    alt={takenBy?.firstname}
+                    src={takenBy?.picture_url}
                     sx={{ height: '32px', width: '32px' }}
-                  />
+                  >
+                    {takenBy?.firstname?.toUpperCase()?.charAt(0)}
+                  </Avatar>
                 </Tooltip>
               )}
               {(!isTaken || pictureHover) && (
