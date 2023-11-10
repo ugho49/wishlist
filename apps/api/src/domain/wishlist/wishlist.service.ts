@@ -1,12 +1,14 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import {
   createPagedResponse,
   CreateWishlistInputDto,
   DetailedWishlistDto,
+  ICurrentUser,
   MAX_EVENTS_BY_LIST,
   MiniWishlistDto,
   PagedResponse,
   UpdateWishlistInputDto,
+  UpdateWishlistLogoOutputDto,
   WishlistWithEventsDto,
 } from '@wishlist/common-types';
 import { toDetailedWishlistDto, toMiniWishlistDto, toWishlistWithEventsDto } from './wishlist.mapper';
@@ -15,13 +17,16 @@ import { WishlistRepository } from './wishlist.repository';
 import { EventRepository } from '../event/event.repository';
 import { WishlistEntity } from './wishlist.entity';
 import { ItemEntity } from '../item/item.entity';
-import { ICurrentUser } from '@wishlist/common-types';
+import { BucketService } from '../../core/bucket/bucket.service';
 
 @Injectable()
 export class WishlistService {
+  private readonly logger = new Logger(WishlistService.name);
+
   constructor(
     private readonly wishlistRepository: WishlistRepository,
-    private readonly eventRepository: EventRepository
+    private readonly eventRepository: EventRepository,
+    private readonly bucketService: BucketService,
   ) {}
 
   async findById(param: { currentUserId: string; wishlistId: string }): Promise<DetailedWishlistDto> {
@@ -85,7 +90,7 @@ export class WishlistService {
         score: item.score,
         isSuggested: false,
         wishlistId: wishlistEntity.id,
-      })
+      }),
     );
 
     wishlistEntity.events = Promise.resolve(eventEntities);
@@ -115,7 +120,7 @@ export class WishlistService {
       {
         title: dto.title,
         description: dto.description || null,
-      }
+      },
     );
   }
 
@@ -180,10 +185,58 @@ export class WishlistService {
 
     if (eventIds.length === 1) {
       throw new UnauthorizedException(
-        'You cannot unlink this wishlist for this event, because she have only one event. However you can delete it if you want.'
+        'You cannot unlink this wishlist for this event, because she have only one event. However you can delete it if you want.',
       );
     }
 
     await this.wishlistRepository.unlinkEvent({ wishlistId, eventId });
+  }
+
+  async uploadLogo(param: {
+    currentUserId: string;
+    file: Express.Multer.File;
+    wishlistId: string;
+  }): Promise<UpdateWishlistLogoOutputDto> {
+    const { currentUserId, wishlistId, file } = param;
+    const wishlistEntity = await this.wishlistRepository.findByIdOrThrow(wishlistId);
+    const isOwner = wishlistEntity.ownerId === currentUserId;
+    const destination = `pictures/wishlists/${wishlistId}/logo`;
+
+    if (!isOwner) {
+      throw new UnauthorizedException('Only the owner of the list can upload a logo');
+    }
+
+    try {
+      await this.bucketService.removeIfExist({ destination });
+    } catch (e) {
+      this.logger.error('Fail to delete existing logo for wishlist', wishlistId, e);
+    }
+
+    const publicUrl = await this.bucketService.upload({
+      destination,
+      data: file.buffer,
+      contentType: file.mimetype,
+    });
+
+    await this.wishlistRepository.update({ id: wishlistId }, { logoUrl: publicUrl });
+
+    return {
+      logo_url: publicUrl,
+    };
+  }
+
+  async removeLogo(param: { currentUserId: string; wishlistId: string }): Promise<void> {
+    const { currentUserId, wishlistId } = param;
+    const wishlistEntity = await this.wishlistRepository.findByIdOrThrow(wishlistId);
+    const isOwner = wishlistEntity.ownerId === currentUserId;
+    const destination = `pictures/wishlists/${wishlistId}/logo`;
+
+    if (!isOwner) {
+      throw new UnauthorizedException('Only the owner of the list can remove a logo');
+    }
+
+    await this.bucketService.removeIfExist({ destination });
+
+    await this.wishlistRepository.update({ id: wishlistId }, { logoUrl: null });
   }
 }

@@ -1,5 +1,5 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { WishlistService } from './wishlist.service';
 import { CurrentUser } from '../auth';
 import {
@@ -12,7 +12,11 @@ import {
   UpdateWishlistInputDto,
   WishlistWithEventsDto,
   ICurrentUser,
+  UpdateWishlistLogoOutputDto,
 } from '@wishlist/common-types';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Express } from 'express';
+import { wishlistLogoFileValidators, wishlistLogoResizePipe } from './wishlist.validator';
 
 @ApiTags('Wishlist')
 @Controller('/wishlist')
@@ -22,7 +26,7 @@ export class WishlistController {
   @Get()
   getMyWishlists(
     @Query() queryParams: GetPaginationQueryDto,
-    @CurrentUser('id') currentUserId: string
+    @CurrentUser('id') currentUserId: string,
   ): Promise<PagedResponse<WishlistWithEventsDto>> {
     return this.wishlistService.getMyWishlistPaginated({ pageNumber: queryParams.p || 1, currentUserId });
   }
@@ -30,7 +34,7 @@ export class WishlistController {
   @Get('/:id')
   getWishlistById(
     @Param('id') wishlistId: string,
-    @CurrentUser('id') currentUserId: string
+    @CurrentUser('id') currentUserId: string,
   ): Promise<DetailedWishlistDto> {
     return this.wishlistService.findById({ wishlistId, currentUserId });
   }
@@ -38,7 +42,7 @@ export class WishlistController {
   @Post()
   createWishlist(
     @CurrentUser('id') currentUserId: string,
-    @Body() dto: CreateWishlistInputDto
+    @Body() dto: CreateWishlistInputDto,
   ): Promise<MiniWishlistDto> {
     return this.wishlistService.create({ dto, currentUserId });
   }
@@ -47,7 +51,7 @@ export class WishlistController {
   updateWishlist(
     @Param('id') wishlistId: string,
     @CurrentUser() currentUser: ICurrentUser,
-    @Body() dto: UpdateWishlistInputDto
+    @Body() dto: UpdateWishlistInputDto,
   ): Promise<void> {
     return this.wishlistService.updateWishlist({ wishlistId, currentUser, dto });
   }
@@ -62,7 +66,7 @@ export class WishlistController {
   linkWishlistToAnEvent(
     @Param('id') wishlistId: string,
     @Body() dto: LinkUnlinkWishlistInputDto,
-    @CurrentUser('id') currentUserId: string
+    @CurrentUser('id') currentUserId: string,
   ): Promise<void> {
     return this.wishlistService.linkWishlistToAnEvent({ wishlistId, currentUserId, eventId: dto.event_id });
   }
@@ -72,8 +76,29 @@ export class WishlistController {
   unlinkWishlistToAnEvent(
     @Param('id') wishlistId: string,
     @Body() dto: LinkUnlinkWishlistInputDto,
-    @CurrentUser('id') currentUserId: string
+    @CurrentUser('id') currentUserId: string,
   ): Promise<void> {
     return this.wishlistService.unlinkWishlistToAnEvent({ wishlistId, currentUserId, eventId: dto.event_id });
+  }
+
+  @Post('/:id/upload-logo')
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadLogo(
+    @Param('id') wishlistId: string,
+    @CurrentUser('id') currentUserId: string,
+    @UploadedFile(wishlistLogoFileValidators, wishlistLogoResizePipe)
+    file: Express.Multer.File,
+  ): Promise<UpdateWishlistLogoOutputDto> {
+    return this.wishlistService.uploadLogo({
+      wishlistId,
+      currentUserId,
+      file,
+    });
+  }
+
+  @Delete('/:id/upload-logo')
+  async removeLogo(@Param('id') wishlistId: string, @CurrentUser('id') currentUserId: string): Promise<void> {
+    await this.wishlistService.removeLogo({ wishlistId, currentUserId });
   }
 }

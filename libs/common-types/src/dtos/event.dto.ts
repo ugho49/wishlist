@@ -25,11 +25,7 @@ export class MiniEventDto {
   event_date: string;
 }
 
-export class EventWithCountsDto {
-  id: string;
-  title: string;
-  description?: string;
-  event_date: string;
+export class EventWithCountsDto extends MiniEventDto {
   created_by: MiniUserDto;
   nb_wishlists: number;
   // Deprecated

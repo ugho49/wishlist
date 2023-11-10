@@ -246,12 +246,13 @@ export class UserService {
   async uploadPicture(param: { userId: string; file: Express.Multer.File }): Promise<UpdateUserPictureOutputDto> {
     const { userId, file } = param;
     try {
-      await this.bucketService.removeIfExist({ destination: `pictures/${userId}/` });
+      await this.bucketService.removeIfExist({ destination: `pictures/${userId}/` }); // TODO: to be removed
+      await this.bucketService.removeIfExist({ destination: `pictures/users/${userId}/` });
     } catch (e) {
       this.logger.error('Fail to delete existing picture for user', userId, e);
     }
     const publicUrl = await this.bucketService.upload({
-      destination: `pictures/${userId}/${uuid()}`,
+      destination: `pictures/users/${userId}/${uuid()}`,
       data: file.buffer,
       contentType: file.mimetype,
     });
@@ -268,7 +269,8 @@ export class UserService {
 
   async removePicture(param: { userId: string }): Promise<void> {
     const { userId } = param;
-    await this.bucketService.removeIfExist({ destination: `pictures/${userId}/` });
+    await this.bucketService.removeIfExist({ destination: `pictures/${userId}/` }); // TODO: to be removed
+    await this.bucketService.removeIfExist({ destination: `pictures/users${userId}/` });
     await this.userRepository.update({ id: userId }, { pictureUrl: null });
   }
 
@@ -281,7 +283,8 @@ export class UserService {
     if (!social) throw new NotFoundException('This social id does not exist');
 
     if (user.pictureUrl) {
-      await this.bucketService.removeIfExist({ destination: `pictures/${currentUserId}/` });
+      await this.bucketService.removeIfExist({ destination: `pictures/${currentUserId}/` }); // TODO: to be removed
+      await this.bucketService.removeIfExist({ destination: `pictures/users/${currentUserId}/` });
     }
 
     await this.userRepository.update({ id: currentUserId }, { pictureUrl: social.pictureUrl });

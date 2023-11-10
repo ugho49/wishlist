@@ -16,6 +16,9 @@ export class WishlistEntity extends TimestampEntity {
   @Column({ type: 'varchar', nullable: true })
   description?: string | null;
 
+  @Column({ type: 'varchar', nullable: true })
+  logoUrl?: string | null;
+
   @Column()
   hideItems: boolean;
 

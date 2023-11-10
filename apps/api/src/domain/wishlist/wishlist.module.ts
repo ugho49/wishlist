@@ -5,9 +5,10 @@ import { WishlistEntity } from './wishlist.entity';
 import { WishlistService } from './wishlist.service';
 import { WishlistRepository } from './wishlist.repository';
 import { EventModule } from '../event/event.module';
+import { BucketModule } from '../../core/bucket/bucket.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([WishlistEntity]), EventModule],
+  imports: [TypeOrmModule.forFeature([WishlistEntity]), EventModule, BucketModule],
   controllers: [WishlistController],
   providers: [WishlistService, WishlistRepository],
   exports: [WishlistRepository],

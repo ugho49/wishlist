@@ -21,10 +21,15 @@ export class WishlistConfigDto {
   hide_items: boolean;
 }
 
+export class UpdateWishlistLogoOutputDto {
+  logo_url: string;
+}
+
 export class MiniWishlistDto {
   id: string;
   title: string;
   description?: string;
+  logo_url?: string;
 }
 
 export class DetailedWishlistDto extends MiniWishlistDto {
