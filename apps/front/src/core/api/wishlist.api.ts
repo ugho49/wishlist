@@ -63,6 +63,17 @@ export function buildApi(): WishlistApi {
         getAll: (params) => client.get(`/admin/user`, { params }).then((res) => res.data),
         update: (userId, data) => client.patch(`/admin/user/${userId}`, data),
         delete: (userId) => client.delete(`/admin/user/${userId}`),
+        uploadPicture: (userId, file) => {
+          const formData = new FormData();
+          formData.append('file', file);
+
+          return client
+            .post(`/admin/user/${userId}/upload-picture`, formData, {
+              headers: { 'Content-Type': 'multipart/form-data' },
+            })
+            .then((res) => res.data);
+        },
+        deletePicture: (userId) => client.delete(`/admin/user/${userId}/picture`),
       },
     },
     wishlist: {

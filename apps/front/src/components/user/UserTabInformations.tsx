@@ -5,6 +5,7 @@ import { wishlistApiRef } from '../../core/api/wishlist.api';
 import { InputLabel } from '../common/InputLabel';
 import { CharsRemaining } from '../common/CharsRemaining';
 import { DateTime } from 'luxon';
+import { useDispatch } from 'react-redux';
 import { MobileDatePicker } from '@mui/x-date-pickers';
 import { LoadingButton } from '@mui/lab';
 import SaveIcon from '@mui/icons-material/Save';
@@ -15,12 +16,14 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import { RootState } from '../../core';
 import { useSelector } from 'react-redux';
 import { AvatarUpdateButton } from './AvatarUpdateButton';
+import { updatePicture as updatePictureAction } from '../../core/store/features';
 
 const mapState = (state: RootState) => ({ pictureUrl: state.userProfile.pictureUrl });
 
 export const UserTabInformations = () => {
   const { pictureUrl } = useSelector(mapState);
   const theme = useTheme();
+  const dispatch = useDispatch();
   const smallScreen = useMediaQuery(theme.breakpoints.down('md'));
   const api = useApi(wishlistApiRef);
   const [loading, setLoading] = useState(false);
@@ -65,7 +68,16 @@ export const UserTabInformations = () => {
       <Stack component="form" onSubmit={onSubmit} noValidate gap={smallScreen ? 2 : 3}>
         <Stack direction="row" flexWrap="wrap" gap={smallScreen ? 2 : 3}>
           <Stack justifyContent="center" alignItems="center" sx={smallScreen ? { width: '100%' } : undefined}>
-            <AvatarUpdateButton firstname={firstname} pictureUrl={pictureUrl} socials={value?.social || []} />
+            <AvatarUpdateButton
+              firstname={firstname}
+              lastname={lastname}
+              pictureUrl={pictureUrl}
+              socials={value?.social || []}
+              onPictureUpdated={(pictureUrl) => dispatch(updatePictureAction(pictureUrl))}
+              uploadPictureHandler={api.user.uploadPicture}
+              updatePictureFromSocialHandler={api.user.updatePictureFromSocial}
+              deletePictureHandler={api.user.deletePicture}
+            />
           </Stack>
           <Box sx={{ flexGrow: 1 }}>
             <InputLabel>Email</InputLabel>

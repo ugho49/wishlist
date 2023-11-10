@@ -41,7 +41,7 @@ export class UserService {
     private readonly userRepository: UserRepository,
     private readonly userMailer: UserMailer,
     private readonly googleAuthService: GoogleAuthService,
-    private readonly bucketService: BucketService
+    private readonly bucketService: BucketService,
   ) {}
 
   findById(id: string): Promise<UserDto> {
@@ -82,7 +82,7 @@ export class UserService {
           {
             email: null,
             userId: entity.id,
-          }
+          },
         );
       });
 
@@ -243,36 +243,33 @@ export class UserService {
     await this.userRepository.delete({ id: userId });
   }
 
-  async uploadPicture(param: {
-    currentUserId: string;
-    file: Express.Multer.File;
-  }): Promise<UpdateUserPictureOutputDto> {
-    const { currentUserId, file } = param;
+  async uploadPicture(param: { userId: string; file: Express.Multer.File }): Promise<UpdateUserPictureOutputDto> {
+    const { userId, file } = param;
     try {
-      await this.bucketService.removeIfExist({ destination: `pictures/${currentUserId}/` });
+      await this.bucketService.removeIfExist({ destination: `pictures/${userId}/` });
     } catch (e) {
-      this.logger.error('Fail to delete existing picture for user', currentUserId, e);
+      this.logger.error('Fail to delete existing picture for user', userId, e);
     }
     const publicUrl = await this.bucketService.upload({
-      destination: `pictures/${currentUserId}/${uuid()}`,
+      destination: `pictures/${userId}/${uuid()}`,
       data: file.buffer,
       contentType: file.mimetype,
     });
     await this.userRepository.update(
-      { id: currentUserId },
+      { id: userId },
       {
         pictureUrl: publicUrl,
-      }
+      },
     );
     return {
       picture_url: publicUrl,
     };
   }
 
-  async removePicture(param: { currentUserId: string }): Promise<void> {
-    const { currentUserId } = param;
-    await this.bucketService.removeIfExist({ destination: `pictures/${currentUserId}/` });
-    await this.userRepository.update({ id: currentUserId }, { pictureUrl: null });
+  async removePicture(param: { userId: string }): Promise<void> {
+    const { userId } = param;
+    await this.bucketService.removeIfExist({ destination: `pictures/${userId}/` });
+    await this.userRepository.update({ id: userId }, { pictureUrl: null });
   }
 
   async updatePictureFromSocial(param: { currentUserId: string; socialId: string }) {

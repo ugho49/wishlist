@@ -1,14 +1,30 @@
-import { Body, Controller, Delete, Get, Param, Patch, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
 import { UserService } from '../user.service';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import {
   GetAllUsersQueryDto,
+  ICurrentUser,
   PagedResponse,
   UpdateFullUserProfileInputDto,
+  UpdateUserPictureOutputDto,
   UserDto,
-  ICurrentUser,
 } from '@wishlist/common-types';
 import { CurrentUser, IsAdmin } from '../../auth';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { userPictureFileValidators, userPictureResizePipe } from '../user.validator';
+import 'multer';
+import { Express } from 'express';
 
 @IsAdmin()
 @ApiTags('ADMIN - User')
@@ -30,7 +46,7 @@ export class UserAdminController {
   updateFullUserProfile(
     @Param('id') userId: string,
     @Body() dto: UpdateFullUserProfileInputDto,
-    @CurrentUser() currentUser: ICurrentUser
+    @CurrentUser() currentUser: ICurrentUser,
   ): Promise<void> {
     return this.userService.updateProfileAsAdmin({ userId, currentUser, dto });
   }
@@ -38,5 +54,24 @@ export class UserAdminController {
   @Delete('/:id')
   deleteUserById(@Param('id') userId: string, @CurrentUser() currentUser: ICurrentUser): Promise<void> {
     return this.userService.delete({ userId, currentUser });
+  }
+
+  @Post('/:id/upload-picture')
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadPicture(
+    @Param('id') userId: string,
+    @UploadedFile(userPictureFileValidators, userPictureResizePipe)
+    file: Express.Multer.File,
+  ): Promise<UpdateUserPictureOutputDto> {
+    return this.userService.uploadPicture({
+      userId,
+      file,
+    });
+  }
+
+  @Delete('/:id/picture')
+  async removePicture(@Param('id') userId: string) {
+    await this.userService.removePicture({ userId });
   }
 }

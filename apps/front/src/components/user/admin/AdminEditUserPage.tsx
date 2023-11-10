@@ -1,4 +1,4 @@
-import { Avatar, Box, Button, List, ListItem, ListItemIcon, ListItemText, Stack, TextField } from '@mui/material';
+import { Box, Button, List, ListItem, ListItemIcon, ListItemText, Stack, TextField } from '@mui/material';
 import React, { FormEvent, useEffect, useState } from 'react';
 import { Loader } from '../../common/Loader';
 import { Title } from '../../common/Title';
@@ -23,6 +23,7 @@ import { ConfirmButton } from '../../common/ConfirmButton';
 import { RootState } from '../../../core';
 import { useSelector } from 'react-redux';
 import { UpdatePasswordModal } from './UpdatePasswordModal';
+import { AvatarUpdateButton } from '../AvatarUpdateButton';
 
 const mapState = (state: RootState) => ({ currentUser: state.auth.user });
 
@@ -121,9 +122,17 @@ export const AdminEditUserPage = () => {
             <List dense sx={{ flexGrow: 1 }}>
               <ListItem>
                 <ListItemIcon>
-                  <Avatar src={pictureUrl} sx={{ width: '30px', height: '30px' }}>
-                    {`${firstname.substring(0, 1).toUpperCase()}${lastname.substring(0, 1).toUpperCase()}`}
-                  </Avatar>
+                  <AvatarUpdateButton
+                    size="30px"
+                    firstname={firstname}
+                    lastname={lastname}
+                    pictureUrl={pictureUrl}
+                    socials={[]}
+                    onPictureUpdated={(url) => setPictureUrl(url || '')}
+                    uploadPictureHandler={(file) => api.user.admin.uploadPicture(userId, file)}
+                    updatePictureFromSocialHandler={() => Promise.resolve()}
+                    deletePictureHandler={() => api.user.admin.deletePicture(userId)}
+                  />
                 </ListItemIcon>
                 <ListItemText primary={`${firstname} ${lastname}`} secondary={email} />
               </ListItem>

@@ -1,15 +1,4 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  ParseFilePipe,
-  Post,
-  Put,
-  Query,
-  UploadedFile,
-  UseInterceptors,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Post, Put, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CurrentUser, Public } from '../../auth';
 import { UserService } from '../user.service';
@@ -26,7 +15,7 @@ import {
 import { RealIP } from 'nestjs-real-ip';
 import { Express } from 'express';
 import 'multer';
-import { FileTypeValidator, MaxFileSizeValidator, ResizeImagePipe } from '../../../core/bucket';
+import { userPictureFileValidators, userPictureResizePipe } from '../user.validator';
 
 @ApiTags('User')
 @Controller('/user')
@@ -63,7 +52,7 @@ export class UserController {
   @Get('/search')
   searchByKeyword(
     @CurrentUser('id') currentUserId: string,
-    @Query('keyword') criteria: string
+    @Query('keyword') criteria: string,
   ): Promise<MiniUserDto[]> {
     return this.userService.searchByKeyword({ currentUserId, criteria });
   }
@@ -73,25 +62,11 @@ export class UserController {
   @UseInterceptors(FileInterceptor('file'))
   async uploadPicture(
     @CurrentUser('id') currentUserId: string,
-    @UploadedFile(
-      new ParseFilePipe({
-        validators: [
-          new FileTypeValidator({
-            fileType: 'image/(png|jpeg|jpg|webp|gif|avif|tiff|tif|svg)',
-            errorMessage: "Le fichier n'est pas une image supportée par le serveur",
-          }),
-          new MaxFileSizeValidator({
-            maxSize: 1024 * 1024 * 6,
-            errorMessage: 'Le fichier doit faire 6 Mo au maximum',
-          }),
-        ],
-      }),
-      new ResizeImagePipe({ width: 500, height: 500 })
-    )
-    file: Express.Multer.File
+    @UploadedFile(userPictureFileValidators, userPictureResizePipe)
+    file: Express.Multer.File,
   ): Promise<UpdateUserPictureOutputDto> {
     return this.userService.uploadPicture({
-      currentUserId,
+      userId: currentUserId,
       file,
     });
   }
@@ -103,6 +78,6 @@ export class UserController {
 
   @Delete('/picture')
   async removePicture(@CurrentUser('id') currentUserId: string) {
-    await this.userService.removePicture({ currentUserId });
+    await this.userService.removePicture({ userId: currentUserId });
   }
 }

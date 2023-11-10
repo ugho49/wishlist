@@ -72,6 +72,8 @@ export type WishlistApi = {
       getAll: (params: GetAllUsersQueryDto) => Promise<PagedResponse<UserDto>>;
       update: (userId: string, data: UpdateFullUserProfileInputDto) => Promise<void>;
       delete: (userId: string) => Promise<void>;
+      uploadPicture: (userId: string, file: File) => Promise<UpdateUserPictureOutputDto>;
+      deletePicture: (userId: string) => Promise<void>;
     };
   };
 

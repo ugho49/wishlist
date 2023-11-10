@@ -2,12 +2,9 @@ import React, { useRef, useState } from 'react';
 import { Avatar, CircularProgress, ListItemIcon, ListItemText, Menu, MenuItem } from '@mui/material';
 import PortraitIcon from '@mui/icons-material/Portrait';
 import NoPhotographyIcon from '@mui/icons-material/NoPhotography';
-import { useApi, useToast } from '@wishlist/common-front';
-import { wishlistApiRef } from '../../core/api/wishlist.api';
-import { useDispatch } from 'react-redux';
-import { updatePicture as updatePictureAction } from '../../core/store/features';
+import { useToast } from '@wishlist/common-front';
 import GoogleIcon from '@mui/icons-material/Google';
-import { UserSocialDto } from '@wishlist/common-types';
+import { UpdateUserPictureOutputDto, UserSocialDto } from '@wishlist/common-types';
 import { AvatarCropperModal } from './AvatarCropperModal';
 import { readFileToURL } from '../../utils/images.utils';
 import { getRotatedImage } from '../../utils/canvas.utils';
@@ -15,8 +12,14 @@ import { getOrientation } from 'get-orientation/browser';
 
 export type AvatarUpdateButtonProps = {
   firstname: string;
+  lastname: string;
+  uploadPictureHandler: (file: File) => Promise<UpdateUserPictureOutputDto>;
+  updatePictureFromSocialHandler: (socialId: string) => Promise<void>;
+  deletePictureHandler: () => Promise<void>;
+  onPictureUpdated: (pictureUrl: string | undefined) => void;
   pictureUrl?: string;
   socials: UserSocialDto[];
+  size?: string;
 };
 
 const ORIENTATION_TO_ANGLE = {
@@ -30,13 +33,21 @@ const ORIENTATION_TO_ANGLE = {
   '8': -90,
 };
 
-export const AvatarUpdateButton = ({ pictureUrl, firstname, socials }: AvatarUpdateButtonProps) => {
+export const AvatarUpdateButton = ({
+  pictureUrl,
+  firstname,
+  lastname,
+  socials,
+  uploadPictureHandler,
+  updatePictureFromSocialHandler,
+  deletePictureHandler,
+  onPictureUpdated,
+  size = '60px',
+}: AvatarUpdateButtonProps) => {
   const [loading, setLoading] = useState(false);
   const [imageSrc, setImageSrc] = useState<string | undefined>(undefined);
   const [anchorElMenu, setAnchorElMenu] = useState<null | HTMLElement>(null);
-  const api = useApi(wishlistApiRef);
   const { addToast } = useToast();
-  const dispatch = useDispatch();
   const inputFileRef = useRef<HTMLInputElement | null>(null);
 
   const openMenu = (event: React.MouseEvent<HTMLElement>) => setAnchorElMenu(event.currentTarget);
@@ -46,8 +57,8 @@ export const AvatarUpdateButton = ({ pictureUrl, firstname, socials }: AvatarUpd
     setLoading(true);
     closeMenu();
     try {
-      await api.user.deletePicture();
-      dispatch(updatePictureAction(undefined));
+      await deletePictureHandler();
+      onPictureUpdated(undefined);
     } catch (e) {
       addToast({ message: "Une erreur s'est produite", variant: 'error' });
     } finally {
@@ -87,8 +98,8 @@ export const AvatarUpdateButton = ({ pictureUrl, firstname, socials }: AvatarUpd
     setLoading(true);
 
     try {
-      const res = await api.user.uploadPicture(file);
-      dispatch(updatePictureAction(res.picture_url));
+      const res = await uploadPictureHandler(file);
+      onPictureUpdated(res.picture_url);
     } catch (e) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const error = (e as any)?.response?.data?.message as string;
@@ -106,8 +117,8 @@ export const AvatarUpdateButton = ({ pictureUrl, firstname, socials }: AvatarUpd
     setLoading(true);
 
     try {
-      await api.user.updatePictureFromSocial(social.id);
-      dispatch(updatePictureAction(social.picture_url));
+      await updatePictureFromSocialHandler(social.id);
+      onPictureUpdated(social.picture_url!);
     } catch (e) {
       addToast({ message: "Une erreur s'est produite", variant: 'error' });
     } finally {
@@ -129,14 +140,15 @@ export const AvatarUpdateButton = ({ pictureUrl, firstname, socials }: AvatarUpd
       )}
       {!loading && (
         <Avatar
-          alt={firstname}
           src={pictureUrl}
           onClick={openMenu}
-          sx={{ width: '60px', height: '60px', ':hover': { opacity: 0.7, cursor: 'pointer' } }}
-        />
+          sx={{ width: size, height: size, ':hover': { opacity: 0.7, cursor: 'pointer' } }}
+        >
+          {`${firstname.substring(0, 1).toUpperCase()}${lastname.substring(0, 1).toUpperCase()}`}
+        </Avatar>
       )}
       {loading && (
-        <Avatar sx={{ width: '60px', height: '60px' }}>
+        <Avatar sx={{ width: size, height: size }}>
           <CircularProgress color="inherit" size="18px" thickness={5} />
         </Avatar>
       )}
