@@ -3,7 +3,7 @@ import { Avatar, Box, Button, Stack } from '@mui/material';
 import { InputLabel } from '../common/InputLabel';
 import PersonIcon from '@mui/icons-material/Person';
 import React, { useState } from 'react';
-import { sanitizeImgToUrl } from '../../utils/images.utils';
+import { ACCEPT_IMG, sanitizeImgToUrl } from '../../utils/images.utils';
 import { grey } from '@mui/material/colors';
 
 type WishlistLogoActionsProps = {
@@ -51,7 +51,7 @@ export const WishlistLogoActions = (props: WishlistLogoActionsProps) => {
             <Box>
               <Button variant="outlined" component="label" disabled={loading} size="small">
                 Choisir un logo
-                <input type="file" hidden accept="image/*" onChange={onLogoInputChange} />
+                <input type="file" hidden accept={ACCEPT_IMG} onChange={onLogoInputChange} />
               </Button>
             </Box>
 

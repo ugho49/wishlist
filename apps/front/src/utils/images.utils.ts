@@ -1,5 +1,8 @@
 import { getOrientation } from 'get-orientation/browser';
 import { getRotatedImage } from './canvas.utils';
+import { ACCEPTED_IMG_FORMATS } from '@wishlist/common-types';
+
+export const ACCEPT_IMG = ACCEPTED_IMG_FORMATS.map((fmt) => `image/${fmt}`).join(',');
 
 const ORIENTATION_TO_ANGLE = {
   '1': null,

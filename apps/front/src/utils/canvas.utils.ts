@@ -24,6 +24,18 @@ function rotateSize(width: number, height: number, rotation: number) {
   };
 }
 
+export const dataURLtoFile = (dataurl: string, filename: string) => {
+  const arr = dataurl.split(',');
+  const mime = (arr[0] || '').match(/:(.*?);/)?.[1];
+  const bstr = atob(arr[1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+
+  while (n--) u8arr[n] = bstr.charCodeAt(n);
+
+  return new File([u8arr], filename, { type: mime });
+};
+
 /**
  * This function was adapted from the one in the ReadMe of https://github.com/DominicTobias/react-image-crop
  */
@@ -31,7 +43,7 @@ export async function getCroppedImg(
   imageSrc: string,
   pixelCrop: Area,
   rotation = 0,
-  flip = { horizontal: false, vertical: false }
+  flip = { horizontal: false, vertical: false },
 ): Promise<File> {
   const image = await createImage(imageSrc);
   const canvas = document.createElement('canvas');
@@ -71,16 +83,9 @@ export async function getCroppedImg(
   ctx.putImageData(data, 0, 0);
 
   // As a blob
-  return new Promise((resolve, reject) => {
-    canvas.toBlob(
-      (blob) => {
-        const file = new File([blob as Blob], `${uuid()}.webp`, { type: 'image/webp' });
-        resolve(file);
-      },
-      'image/webp',
-      0.7
-    );
-  });
+  const url = canvas.toDataURL('image/jpeg');
+  const file = dataURLtoFile(url, `${uuid()}.jpeg`);
+  return file;
 }
 
 export async function getRotatedImage(imageSrc: string, rotation = 0): Promise<string> {
@@ -105,9 +110,5 @@ export async function getRotatedImage(imageSrc: string, rotation = 0): Promise<s
   ctx.rotate((rotation * Math.PI) / 180);
   ctx.drawImage(image, -image.width / 2, -image.height / 2);
 
-  return new Promise((resolve) => {
-    canvas.toBlob((blob) => {
-      resolve(URL.createObjectURL(blob as Blob));
-    }, 'image/png');
-  });
+  return canvas.toDataURL('image/jpeg');
 }

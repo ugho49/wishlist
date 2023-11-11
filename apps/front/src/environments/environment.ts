@@ -5,6 +5,6 @@ import { Environment } from '../@types/environment.type';
 
 export const environment: Environment = {
   production: false,
-  baseUrl: 'http://localhost:8080',
+  baseUrl: 'https://api.wishlistapp.fr',
   googleClientId: '746810988919-huhupt1qtdliht08e5s5m4f5ruqueemb.apps.googleusercontent.com',
 };

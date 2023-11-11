@@ -6,7 +6,7 @@ import { useToast } from '@wishlist/common-front';
 import GoogleIcon from '@mui/icons-material/Google';
 import { UpdateUserPictureOutputDto, UserSocialDto } from '@wishlist/common-types';
 import { AvatarCropperModal } from '../common/AvatarCropperModal';
-import { sanitizeImgToUrl } from '../../utils/images.utils';
+import { ACCEPT_IMG, sanitizeImgToUrl } from '../../utils/images.utils';
 
 export type AvatarUpdateButtonProps = {
   firstname: string;
@@ -127,7 +127,7 @@ export const AvatarUpdateButton = ({
           <CircularProgress color="inherit" size="18px" thickness={5} />
         </Avatar>
       )}
-      <input ref={inputFileRef} type="file" hidden accept="image/*" onChange={onFileInputChange} />
+      <input ref={inputFileRef} type="file" hidden accept={ACCEPT_IMG} onChange={onFileInputChange} />
       <Menu anchorEl={anchorElMenu} open={Boolean(anchorElMenu)} onClose={closeMenu}>
         <MenuItem onClick={() => selectAPicture()}>
           <ListItemIcon>
