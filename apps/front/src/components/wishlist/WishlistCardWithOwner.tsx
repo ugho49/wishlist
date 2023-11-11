@@ -27,12 +27,10 @@ const useStyles = makeStyles((theme: Theme) => ({
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
     textTransform: 'uppercase',
+    marginInline: '16px',
   },
   arrow: {
-    display: 'flex',
     color: theme.palette.primary.light,
-    alignItems: 'center',
-    flexBasis: '5%',
   },
 }));
 

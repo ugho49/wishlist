@@ -18,14 +18,14 @@ export const EventListPage = () => {
   const api = useApi(wishlistApiRef);
   const [totalElements, setTotalElements] = useState(0);
   const [queryParams, setQueryParams] = useCustomSearchParams<SearchType>({ page: '1' });
-  const currentPage = useMemo(() => parseInt(queryParams.page, 10), [queryParams]);
+  const currentPage = useMemo(() => parseInt(queryParams.page || '1', 10), [queryParams]);
   const { value, loading } = useAsync(() => api.event.getAll({ p: currentPage }), [currentPage]);
 
   const setCurrentPage = useCallback(
     (page: number) => {
       setQueryParams((prevState) => ({ ...prevState, page: `${page}` }));
     },
-    [setQueryParams]
+    [setQueryParams],
   );
 
   useEffect(() => {
@@ -34,6 +34,8 @@ export const EventListPage = () => {
       setCurrentPage(value.pagination.page_number);
     }
   }, [value]);
+
+  console.log({ queryParams });
 
   return (
     <Box>
