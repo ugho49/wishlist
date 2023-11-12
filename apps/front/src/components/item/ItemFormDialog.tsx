@@ -2,6 +2,7 @@ import React, { FormEvent, forwardRef, useEffect, useState } from 'react';
 import { AddItemInputDto, ItemDto } from '@wishlist/common-types';
 import {
   AppBar,
+  Avatar,
   Box,
   Container,
   Dialog,
@@ -12,6 +13,7 @@ import {
   Toolbar,
   Typography,
 } from '@mui/material';
+import CameraAltIcon from '@mui/icons-material/CameraAlt';
 import { TransitionProps } from '@mui/material/transitions';
 import CloseIcon from '@mui/icons-material/Close';
 import SaveIcon from '@mui/icons-material/Save';
@@ -60,16 +62,19 @@ export const ItemFormDialog = ({
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [url, setUrl] = useState('');
+  const [pictureUrl, setPictureUrl] = useState('');
+  const [validPictureUrl, setValidPictureUrl] = useState<boolean | undefined>(true);
   const [score, setScore] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
 
   const invalidUrl = url !== '' && !isValidUrl(url);
-  const formIsValid = name.trim() !== '' && !invalidUrl;
+  const formIsValid = name.trim() !== '' && !invalidUrl && ((pictureUrl && validPictureUrl === true) || !pictureUrl);
 
   const resetForm = () => {
     setName('');
     setDescription('');
     setUrl('');
+    setPictureUrl('');
     setScore(null);
   };
 
@@ -82,6 +87,7 @@ export const ItemFormDialog = ({
         name,
         description: description === '' ? undefined : description,
         url: url === '' ? undefined : TidyURL.clean(url).url,
+        picture_url: pictureUrl === '' ? undefined : pictureUrl,
         score: score === null ? undefined : score,
       };
 
@@ -185,6 +191,51 @@ export const ItemFormDialog = ({
               onChange={(e) => setUrl(e.target.value)}
             />
           </Box>
+
+          <Stack direction="row" flexWrap="wrap" gap={2}>
+            <Box sx={{ flexGrow: 1 }}>
+              <InputLabel>URL de photo</InputLabel>
+
+              <TextField
+                type="url"
+                autoComplete="off"
+                disabled={loading}
+                fullWidth
+                value={pictureUrl}
+                inputProps={{ maxLength: 1000 }}
+                placeholder="Ex: https://www.google.com"
+                error={validPictureUrl === false}
+                helperText={
+                  <>
+                    {validPictureUrl === false && <span>L'url saisie ne contient pas une image</span>}
+                    {validPictureUrl === true && <CharsRemaining max={1000} value={url} />}
+                  </>
+                }
+                onChange={(e) => {
+                  setValidPictureUrl(undefined);
+                  setPictureUrl(e.target.value);
+                }}
+              />
+            </Box>
+
+            {pictureUrl && validPictureUrl !== false && (
+              <Box>
+                <InputLabel>Preview</InputLabel>
+
+                <Avatar
+                  src={pictureUrl}
+                  sx={(theme) => ({
+                    height: '56px',
+                    width: '56px',
+                  })}
+                  onLoad={() => setValidPictureUrl(true)}
+                  onError={() => setValidPictureUrl(false)}
+                >
+                  <CameraAltIcon fontSize="small" />
+                </Avatar>
+              </Box>
+            )}
+          </Stack>
 
           <Box>
             <InputLabel>Niveau de préférence</InputLabel>

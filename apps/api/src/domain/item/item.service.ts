@@ -12,7 +12,7 @@ export class ItemService {
   constructor(
     private readonly itemRepository: ItemRepository,
     private wishlistRepository: WishlistRepository,
-    private readonly userRepository: UserRepository
+    private readonly userRepository: UserRepository,
   ) {}
 
   async create(param: { currentUserId: string; dto: AddItemForListInputDto }): Promise<ItemDto> {
@@ -33,6 +33,7 @@ export class ItemService {
       description: dto.description,
       score: dto.score,
       url: dto.url,
+      pictureUrl: dto.picture_url,
       isSuggested,
       wishlistId: wishlistEntity.id,
     });
@@ -64,6 +65,7 @@ export class ItemService {
       name: dto.name,
       description: dto.description || null,
       url: dto.url || null,
+      pictureUrl: dto.picture_url || null,
       score: dto.score || null,
     });
   }
