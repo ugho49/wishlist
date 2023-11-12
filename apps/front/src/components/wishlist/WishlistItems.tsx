@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { DetailedWishlistDto, ItemDto } from '@wishlist/common-types';
-import { ItemCard } from '../item/ItemCard';
-import { Box, Button, Divider, Grid, Stack } from '@mui/material';
+import { Box, Button, Grid, Stack } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import { FabAutoGrow } from '../common/FabAutoGrow';
 import { ItemFormDialog } from '../item/ItemFormDialog';
@@ -71,20 +70,20 @@ export const WishlistItems = ({ wishlist }: WishlistTabItemsProps) => {
             ))}
           </Grid>
 
-          <Divider sx={{ color: '#fff', margin: 5 }} />
+          {/*<Divider sx={{ color: '#fff', margin: 5 }} />*/}
 
-          <Grid container spacing={3}>
-            {itemsFilteredAndSorted.map((item) => (
-              <Grid item xs={12} md={6} key={item.id}>
-                <ItemCard
-                  wishlist={{ id: wishlist.id, ownerId: wishlist.owner.id, hideItems: wishlist.config.hide_items }}
-                  item={item}
-                  handleUpdate={(newValue) => updateItem(newValue)}
-                  handleDelete={() => setItems((prevState) => prevState.filter((i) => i.id !== item.id))}
-                />
-              </Grid>
-            ))}
-          </Grid>
+          {/*<Grid container spacing={3}>*/}
+          {/*  {itemsFilteredAndSorted.map((item) => (*/}
+          {/*    <Grid item xs={12} md={6} key={item.id}>*/}
+          {/*      <ItemCard*/}
+          {/*        wishlist={{ id: wishlist.id, ownerId: wishlist.owner.id, hideItems: wishlist.config.hide_items }}*/}
+          {/*        item={item}*/}
+          {/*        handleUpdate={(newValue) => updateItem(newValue)}*/}
+          {/*        handleDelete={() => setItems((prevState) => prevState.filter((i) => i.id !== item.id))}*/}
+          {/*      />*/}
+          {/*    </Grid>*/}
+          {/*  ))}*/}
+          {/*</Grid>*/}
 
           <FabAutoGrow
             label={ownerOfTheList ? 'Ajouter un souhait' : 'Suggérer un souhait'}
