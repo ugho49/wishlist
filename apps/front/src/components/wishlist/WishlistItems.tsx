@@ -1,13 +1,14 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { DetailedWishlistDto, ItemDto } from '@wishlist/common-types';
 import { ItemCard } from '../item/ItemCard';
-import { Box, Button, Grid, Stack } from '@mui/material';
+import { Box, Button, Divider, Grid, Stack } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import { FabAutoGrow } from '../common/FabAutoGrow';
 import { ItemFormDialog } from '../item/ItemFormDialog';
 import { RootState } from '../../core';
 import { useSelector } from 'react-redux';
 import { FilterType, SortType, WishlistFilterAndSortItems } from './WishlistFilterAndSortItems';
+import { NewItemCard } from '../item/NewItemCard';
 
 export type WishlistTabItemsProps = {
   wishlist: DetailedWishlistDto;
@@ -40,7 +41,7 @@ export const WishlistItems = ({ wishlist }: WishlistTabItemsProps) => {
       copy[index] = updatedItem;
       setItems(copy);
     },
-    [items]
+    [items],
   );
 
   return (
@@ -56,6 +57,21 @@ export const WishlistItems = ({ wishlist }: WishlistTabItemsProps) => {
             onSortChange={(newSort) => setSort(newSort)}
             onFilterChange={(newFilter) => setFilter(newFilter)}
           />
+
+          <Grid container spacing={3}>
+            {itemsFilteredAndSorted.map((item) => (
+              <Grid item xs={12} sm={6} md={4} lg={3} key={item.id}>
+                <NewItemCard
+                  wishlist={{ id: wishlist.id, ownerId: wishlist.owner.id, hideItems: wishlist.config.hide_items }}
+                  item={item}
+                  handleUpdate={(newValue) => updateItem(newValue)}
+                  handleDelete={() => setItems((prevState) => prevState.filter((i) => i.id !== item.id))}
+                />
+              </Grid>
+            ))}
+          </Grid>
+
+          <Divider sx={{ color: '#fff', margin: 5 }} />
 
           <Grid container spacing={3}>
             {itemsFilteredAndSorted.map((item) => (

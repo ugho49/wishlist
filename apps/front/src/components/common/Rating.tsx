@@ -1,6 +1,8 @@
 import React from 'react';
 import { Rating as MuiRating, ratingClasses, RatingProps as MuiRatingProps, Theme } from '@mui/material';
 import { makeStyles } from '@mui/styles';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 
 export type RatingProps = {
   value: MuiRatingProps['value'];
@@ -32,6 +34,8 @@ export const Rating = ({ value, disabled, onChange, size, readOnly }: RatingProp
       onChange={onChange}
       size={size}
       readOnly={readOnly}
+      icon={<FavoriteIcon fontSize="inherit" />}
+      emptyIcon={<FavoriteBorderIcon fontSize="inherit" />}
     />
   );
 };
