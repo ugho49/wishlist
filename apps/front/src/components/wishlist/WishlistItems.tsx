@@ -59,7 +59,7 @@ export const WishlistItems = ({ wishlist }: WishlistTabItemsProps) => {
 
           <Grid container spacing={3}>
             {itemsFilteredAndSorted.map((item) => (
-              <Grid item xs={12} sm={6} md={4} lg={3} key={item.id}>
+              <Grid item xs={6} md={4} lg={3} key={item.id}>
                 <NewItemCard
                   wishlist={{ id: wishlist.id, ownerId: wishlist.owner.id, hideItems: wishlist.config.hide_items }}
                   item={item}
