@@ -4,11 +4,15 @@ import { MAX_EVENTS_BY_LIST, MiniEventDto } from '@wishlist/common-types';
 import { wishlistApiRef } from '../../core/api/wishlist.api';
 import { useAsync } from 'react-use';
 import { Title } from '../common/Title';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import Link from '@mui/material/Link';
 import {
   Avatar,
   Box,
   Button,
   Container,
+  FormControlLabel,
   IconButton,
   List,
   ListItem,
@@ -34,6 +38,8 @@ import { DateTime } from 'luxon';
 import { SearchEventSelect } from '../event/SearchEventSelect';
 import { Card } from '../common/Card';
 import { WishlistLogoActions } from './WishlistLogoActions';
+import { ConfirmCheckbox } from '../common/ConfirmCheckbox';
+import Collapse from '@mui/material/Collapse';
 
 type QueryParamType = { 'from-event'?: string };
 
@@ -48,8 +54,8 @@ export const CreateWishlistPage = () => {
   const [step, setStep] = useState(1);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  // const [hideItems, setHideItems] = useState(true);
-  const hideItems = true;
+  const [showAdvancedParams, setShowAdvancedParams] = useState(false);
+  const [hideItems, setHideItems] = useState(true);
   const [events, setEvents] = useState<MiniEventDto[]>([]);
   const [logo, setLogo] = useState<File | undefined>();
   const api = useApi(wishlistApiRef);
@@ -145,44 +151,62 @@ export const CreateWishlistPage = () => {
                 />
               </Box>
 
-              {/*<Box>*/}
-              {/*  <InputLabel>Paramètres avancés</InputLabel>*/}
-              {/*  <FormControlLabel*/}
-              {/*    control={*/}
-              {/*      <ConfirmCheckbox*/}
-              {/*        checked={!hideItems}*/}
-              {/*        onChange={(checked) => setHideItems(!checked)}*/}
-              {/*        disabled={loading}*/}
-              {/*        confirmTitle="⚠️Êtes-vous sûr ? ⚠️"*/}
-              {/*        confirmText={*/}
-              {/*          <>*/}
-              {/*            <p>*/}
-              {/*              Cette action a pour conséquence de vous montrer les souhaits de votre liste qui ont été*/}
-              {/*              réservés par les autres. Cela enlève toute la surprise de la liste.*/}
-              {/*            </p>*/}
-              {/*            <p>Dans la majorité des cas ce paramètre ne vous est pas utile.</p>*/}
-              {/*            <p>*/}
-              {/*              <b>Exemple de cas d'utilisation:</b> Gérer la liste d'un enfant qui n'a pas de compte*/}
-              {/*            </p>*/}
-              {/*            <p>*/}
-              {/*              <b>Attention</b> ce paramètre ne pourra pas être changé après la création.*/}
-              {/*            </p>*/}
-              {/*          </>*/}
-              {/*        }*/}
-              {/*      />*/}
-              {/*    }*/}
-              {/*    label="Rendre visible les souhaits réservés"*/}
-              {/*  />*/}
-              {/*</Box>*/}
+              <Stack alignItems="center">
+                <Link
+                  variant="body2"
+                  component="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setShowAdvancedParams(!showAdvancedParams);
+                  }}
+                  sx={{ display: 'flex', alignItems: 'center' }}
+                >
+                  {showAdvancedParams ? 'Masquer les paramètres avancés' : 'Afficher les paramètres avancés'}
+                  {showAdvancedParams ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                </Link>
+              </Stack>
 
-              {!hideItems && (
-                <WishlistLogoActions
-                  logoUrl={logo ? URL.createObjectURL(logo) : undefined}
-                  loading={loading}
-                  onLogoChange={(file) => setLogo(file)}
-                  onLogoRemove={() => setLogo(undefined)}
-                />
-              )}
+              <Collapse in={showAdvancedParams}>
+                <Stack gap={3}>
+                  <Box>
+                    <InputLabel>Révéler les Sélections</InputLabel>
+                    <FormControlLabel
+                      control={
+                        <ConfirmCheckbox
+                          checked={!hideItems}
+                          onChange={(checked) => setHideItems(!checked)}
+                          disabled={loading}
+                          confirmTitle="⚠️Préférez-vous garder la surprise ? ⚠️"
+                          confirmText={
+                            <>
+                              <p>
+                                Cette action a pour conséquence de vous montrer les souhaits de votre liste qui ont été
+                                réservés par les autres. Cela enlève toute la surprise de la liste.
+                              </p>
+                              <p>Dans la majorité des cas ce paramètre ne vous est pas utile.</p>
+                              <p>
+                                <b>Exemple de cas d'utilisation:</b> Gérer la liste d'un enfant qui n'a pas de compte
+                              </p>
+                              <p>
+                                <b>Attention</b> ce paramètre ne pourra pas être changé après la création.
+                              </p>
+                            </>
+                          }
+                        />
+                      }
+                      label="Cochez cette case pour découvrir qui a sélectionné des souhaits sur votre liste"
+                    />
+                  </Box>
+                  {!hideItems && (
+                    <WishlistLogoActions
+                      logoUrl={logo ? URL.createObjectURL(logo) : undefined}
+                      loading={loading}
+                      onLogoChange={(file) => setLogo(file)}
+                      onLogoRemove={() => setLogo(undefined)}
+                    />
+                  )}
+                </Stack>
+              </Collapse>
             </Stack>
           )}
 
@@ -228,7 +252,7 @@ export const CreateWishlistPage = () => {
             </Stack>
           )}
 
-          <Stack direction="row" justifyContent="space-between" alignItems="center" marginTop={3}>
+          <Stack direction="row" justifyContent="space-between" alignItems="center">
             <Box>
               {step > 1 && (
                 <Button
