@@ -49,6 +49,7 @@ export class ItemEntity extends TimestampEntity {
     wishlistId: string;
     description?: string;
     url?: string;
+    pictureUrl?: string;
     isSuggested: boolean;
     score?: number;
   }): ItemEntity {
@@ -57,6 +58,7 @@ export class ItemEntity extends TimestampEntity {
     entity.wishlistId = param.wishlistId;
     entity.description = param.description;
     entity.url = param.url;
+    entity.pictureUrl = param.pictureUrl;
     entity.isSuggested = param.isSuggested;
     entity.score = param.score;
     return entity;

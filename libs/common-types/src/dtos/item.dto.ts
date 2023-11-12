@@ -43,6 +43,11 @@ export class AddItemInputDto {
   @Max(5)
   @IsOptional()
   score?: number;
+
+  @IsUrl()
+  @IsOptional()
+  @MaxLength(1000)
+  picture_url?: string;
 }
 
 export class AddItemForListInputDto extends AddItemInputDto {
