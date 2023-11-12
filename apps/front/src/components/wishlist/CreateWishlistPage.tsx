@@ -8,7 +8,6 @@ import {
   Avatar,
   Box,
   Button,
-  Checkbox,
   Container,
   FormControlLabel,
   IconButton,
@@ -21,7 +20,6 @@ import {
   StepLabel,
   Stepper,
   TextField,
-  Typography,
   useTheme,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
@@ -37,6 +35,7 @@ import { DateTime } from 'luxon';
 import { SearchEventSelect } from '../event/SearchEventSelect';
 import { Card } from '../common/Card';
 import { WishlistLogoActions } from './WishlistLogoActions';
+import { ConfirmCheckbox } from '../common/ConfirmCheckbox';
 
 type QueryParamType = { 'from-event'?: string };
 
@@ -151,21 +150,29 @@ export const CreateWishlistPage = () => {
                 <InputLabel>Paramètres avancés</InputLabel>
                 <FormControlLabel
                   control={
-                    <Checkbox
+                    <ConfirmCheckbox
                       checked={!hideItems}
-                      onChange={(e) => setHideItems(!e.target.checked)}
+                      onChange={(checked) => setHideItems(!checked)}
                       disabled={loading}
+                      confirmTitle="⚠️Êtes-vous sûr ? ⚠️"
+                      confirmText={
+                        <>
+                          <p>
+                            Cette action a pour conséquence de vous montrer les souhaits de votre liste qui ont été
+                            réservés par les autres. Cela enlève toute la surprise de la liste.
+                          </p>
+                          <p>Dans la majorité des cas ce paramètre ne vous est pas utile.</p>
+                          <p>
+                            <b>Exemple de cas d'utilisation:</b> Gérer la liste d'un enfant qui n'a pas de compte
+                          </p>
+                          <p>
+                            <b>Attention</b> ce paramètre ne pourra pas être changé après la création.
+                          </p>
+                        </>
+                      }
                     />
                   }
-                  label={
-                    <Stack gap={1}>
-                      <Typography variant="body1">Rendre cette liste publique (Voir les éléments cochés ?)</Typography>
-                      <Typography variant="caption">
-                        <b>Attention</b> ce paramètre ne pourra pas être changé après la création. Ce paramètre est
-                        utile pour gérer la liste de quelqu'un d'autre, un enfant, etc ...
-                      </Typography>
-                    </Stack>
-                  }
+                  label="Rendre visible les souhaits réservés"
                 />
               </Box>
 
