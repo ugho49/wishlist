@@ -32,6 +32,8 @@ import { RootState } from '../../core';
 import { useSelector } from 'react-redux';
 import { LoadingButton } from '@mui/lab';
 import { ConfirmMenuItem } from '../common/ConfirmMenuItem';
+import { useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
 
 export type NewItemCardProps = {
   wishlist: {
@@ -54,8 +56,8 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
   actions: {
     position: 'absolute',
-    top: '10px',
-    right: '10px',
+    top: '6px',
+    right: '6px',
   },
   name: {
     fontWeight: '500 !important',
@@ -98,6 +100,8 @@ const mapState = (state: RootState) => ({ currentUserId: state.auth.user?.id });
 const capitalizeFirstLetter = (str: string) => str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 
 export const NewItemCard = ({ item, handleDelete, handleUpdate, wishlist }: NewItemCardProps) => {
+  const theme = useTheme();
+  const smallScreen = useMediaQuery(theme.breakpoints.only('xs'));
   const classes = useStyles();
   const { currentUserId } = useSelector(mapState);
   const api = useApi(wishlistApiRef);
@@ -221,8 +225,8 @@ export const NewItemCard = ({ item, handleDelete, handleUpdate, wishlist }: NewI
           <Avatar
             src={item.picture_url}
             sx={(theme) => ({
-              height: '120px',
-              width: '120px',
+              height: smallScreen ? '80px' : '120px',
+              width: smallScreen ? '80px' : '120px',
               bgcolor: theme.palette.grey[200],
               color: theme.palette.grey[500],
               boxShadow: '0 0 1px 0 rgba(87, 113, 149, 0.3), 0 2px 4px -2px rgba(87, 113, 149, 0.5)',
