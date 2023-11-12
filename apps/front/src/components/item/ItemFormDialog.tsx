@@ -122,6 +122,7 @@ export const ItemFormDialog = ({
     setName(item.name);
     setDescription(item.description || '');
     setUrl(item.url || '');
+    setPictureUrl(item.picture_url || '');
     setScore(item.score || null);
   }, [item]);
 
