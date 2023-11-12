@@ -9,7 +9,6 @@ import {
   Box,
   Button,
   Container,
-  FormControlLabel,
   IconButton,
   List,
   ListItem,
@@ -35,7 +34,6 @@ import { DateTime } from 'luxon';
 import { SearchEventSelect } from '../event/SearchEventSelect';
 import { Card } from '../common/Card';
 import { WishlistLogoActions } from './WishlistLogoActions';
-import { ConfirmCheckbox } from '../common/ConfirmCheckbox';
 
 type QueryParamType = { 'from-event'?: string };
 
@@ -50,7 +48,8 @@ export const CreateWishlistPage = () => {
   const [step, setStep] = useState(1);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [hideItems, setHideItems] = useState(true);
+  // const [hideItems, setHideItems] = useState(true);
+  const hideItems = true;
   const [events, setEvents] = useState<MiniEventDto[]>([]);
   const [logo, setLogo] = useState<File | undefined>();
   const api = useApi(wishlistApiRef);
@@ -146,35 +145,35 @@ export const CreateWishlistPage = () => {
                 />
               </Box>
 
-              <Box>
-                <InputLabel>Paramètres avancés</InputLabel>
-                <FormControlLabel
-                  control={
-                    <ConfirmCheckbox
-                      checked={!hideItems}
-                      onChange={(checked) => setHideItems(!checked)}
-                      disabled={loading}
-                      confirmTitle="⚠️Êtes-vous sûr ? ⚠️"
-                      confirmText={
-                        <>
-                          <p>
-                            Cette action a pour conséquence de vous montrer les souhaits de votre liste qui ont été
-                            réservés par les autres. Cela enlève toute la surprise de la liste.
-                          </p>
-                          <p>Dans la majorité des cas ce paramètre ne vous est pas utile.</p>
-                          <p>
-                            <b>Exemple de cas d'utilisation:</b> Gérer la liste d'un enfant qui n'a pas de compte
-                          </p>
-                          <p>
-                            <b>Attention</b> ce paramètre ne pourra pas être changé après la création.
-                          </p>
-                        </>
-                      }
-                    />
-                  }
-                  label="Rendre visible les souhaits réservés"
-                />
-              </Box>
+              {/*<Box>*/}
+              {/*  <InputLabel>Paramètres avancés</InputLabel>*/}
+              {/*  <FormControlLabel*/}
+              {/*    control={*/}
+              {/*      <ConfirmCheckbox*/}
+              {/*        checked={!hideItems}*/}
+              {/*        onChange={(checked) => setHideItems(!checked)}*/}
+              {/*        disabled={loading}*/}
+              {/*        confirmTitle="⚠️Êtes-vous sûr ? ⚠️"*/}
+              {/*        confirmText={*/}
+              {/*          <>*/}
+              {/*            <p>*/}
+              {/*              Cette action a pour conséquence de vous montrer les souhaits de votre liste qui ont été*/}
+              {/*              réservés par les autres. Cela enlève toute la surprise de la liste.*/}
+              {/*            </p>*/}
+              {/*            <p>Dans la majorité des cas ce paramètre ne vous est pas utile.</p>*/}
+              {/*            <p>*/}
+              {/*              <b>Exemple de cas d'utilisation:</b> Gérer la liste d'un enfant qui n'a pas de compte*/}
+              {/*            </p>*/}
+              {/*            <p>*/}
+              {/*              <b>Attention</b> ce paramètre ne pourra pas être changé après la création.*/}
+              {/*            </p>*/}
+              {/*          </>*/}
+              {/*        }*/}
+              {/*      />*/}
+              {/*    }*/}
+              {/*    label="Rendre visible les souhaits réservés"*/}
+              {/*  />*/}
+              {/*</Box>*/}
 
               {!hideItems && (
                 <WishlistLogoActions
