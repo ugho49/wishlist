@@ -146,6 +146,7 @@ export class ScrapperService {
     const keywords = [
       '<title>Attention Required! | Cloudflare</title>',
       '<p id="cmsg">Please enable JS and disable any ad blocker</p>',
+      'To discuss automated access to Amazon data please contact api-services-support@amazon.com.',
     ];
     return keywords.some((keyword) => html.includes(keyword));
   }
@@ -169,8 +170,13 @@ export class ScrapperService {
     try {
       this.logger.log('Scrap img for => ', { url });
 
-      const response = await this.fetch(url);
+      const response = await this.fetch(url, { timeout: 3_000, method: 'GET' });
       const html = await response.text();
+
+      if (!html) {
+        this.logger.warn('No html found');
+        return null;
+      }
 
       if (this.hasBotDetection(html)) {
         this.logger.log('Bot detection detected.');
@@ -189,9 +195,13 @@ export class ScrapperService {
         return await this.sanitizeAndCheckUrl({ imageUrl: ogImageUrl, websiteUrl: url });
       }
 
-      const titleImageElements: Cheerio<Element> = $(
-        `img[alt*="${title}"], img[alt*="${title.split(' : Amazon')[0]}"], img[alt*="${title.substring(0, 20)}"]`,
-      );
+      let titleImageElements: Cheerio<Element> = $(`img[alt*="${title}"]`);
+      if (titleImageElements.length === 0) {
+        titleImageElements = $(`img[alt*="${title.split(' : Amazon')[0]}"]`);
+      }
+      if (titleImageElements.length === 0) {
+        titleImageElements = $(`img[alt*="${title.substring(0, 20)}"]`);
+      }
       const titleImageUrl = this.getBiggestImage(titleImageElements);
 
       if (titleImageUrl) {
