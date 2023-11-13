@@ -5,8 +5,8 @@
   "private": true,
   "scripts": {
     "serve:all": "nx run-many --target=serve",
-    "serve:front": "nx run-many --target=front",
-    "serve:api": "nx run-many --target=api",
+    "serve:front": "nx serve front",
+    "serve:api": "nx serve api",
     "build": "nx run-many --target=build",
     "test": "nx run-many --target=test",
     "lint": "nx run-many --target=lint",

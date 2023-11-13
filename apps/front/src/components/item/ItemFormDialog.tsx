@@ -209,7 +209,7 @@ export const ItemFormDialog = ({
                 helperText={
                   <>
                     {validPictureUrl === false && <span>L'url saisie ne contient pas une image</span>}
-                    {validPictureUrl === true && <CharsRemaining max={1000} value={url} />}
+                    {validPictureUrl === true && <CharsRemaining max={1000} value={pictureUrl} />}
                   </>
                 }
                 onChange={(e) => {
