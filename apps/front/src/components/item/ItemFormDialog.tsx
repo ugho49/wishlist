@@ -129,35 +129,36 @@ export const ItemFormDialog = ({
     setScore(item.score || null);
   }, [item]);
 
-  const scanUrl = useCallback(async () => {
-    if (scanUrlLoading) return;
-    if (!url) return;
-    if (url === 'https://translate.google.com/') return;
-    if (!isValidUrl(url)) return;
+  const scanUrl = useCallback(
+    async (urlToScan: string) => {
+      if (scanUrlLoading) return;
+      if (!urlToScan) return;
+      if (!isValidUrl(urlToScan)) return;
 
-    setScanUrlLoading(true);
+      setScanUrlLoading(true);
 
-    try {
-      const { picture_url } = await api.item.scanUrl({ url });
+      try {
+        const { picture_url } = await api.item.scanUrl({ url: urlToScan });
 
-      if (picture_url) {
-        setPictureUrl(picture_url);
-      } else {
-        addToast({ message: 'Aucune image trouvée', variant: 'info' });
-        setPictureUrl('');
+        if (picture_url) {
+          setPictureUrl(picture_url);
+        } else {
+          setPictureUrl('');
+        }
+      } catch (e) {
+        addToast({ message: "Une erreur s'est produite", variant: 'error' });
+      } finally {
+        setScanUrlLoading(false);
       }
-    } catch (e) {
-      addToast({ message: "Une erreur s'est produite", variant: 'error' });
-    } finally {
-      setScanUrlLoading(false);
-    }
-  }, [url, scanUrlLoading]);
+    },
+    [scanUrlLoading],
+  );
 
-  useEffect(() => {
-    if (!pictureUrl) {
-      scanUrl();
-    }
-  }, [url]);
+  // useEffect(() => {
+  //   if (url === 'https://translate.google.com/') {
+  //     setUrl('');
+  //   }
+  // }, [url]);
 
   return (
     <Dialog fullScreen open={open} onClose={handleClose} TransitionComponent={Transition}>
@@ -229,7 +230,7 @@ export const ItemFormDialog = ({
                           disabled={loading || scanUrlLoading}
                           onClick={(e) => {
                             e.preventDefault();
-                            scanUrl();
+                            scanUrl(url);
                           }}
                         >
                           Scanner l'url
@@ -239,7 +240,13 @@ export const ItemFormDialog = ({
                   )}
                 </>
               }
-              onChange={(e) => setUrl(e.target.value)}
+              onChange={(e) => {
+                const newVal = e.target.value;
+                if (pictureUrl === '' && url === '') {
+                  scanUrl(newVal);
+                }
+                setUrl(newVal);
+              }}
             />
           </Box>
 
