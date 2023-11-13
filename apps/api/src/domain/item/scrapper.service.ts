@@ -208,7 +208,7 @@ export class ScrapperService {
         return await this.sanitizeAndCheckUrl({ imageUrl: titleImageUrl, websiteUrl: url });
       }
 
-      this.logger.log('Aucune image principale trouvée.');
+      this.logger.log('Aucune image principale trouvée.', response);
       return null;
     } catch (error) {
       this.logger.error("Une erreur s'est produite lors de la récupération de l'image:", error);
