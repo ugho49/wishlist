@@ -40,6 +40,7 @@ import type {
   UpdateUserPictureOutputDto,
   UpdateWishlistLogoOutputDto,
 } from '@wishlist/common-types';
+import { ScanItemInputDto, ScanItemOutputDto } from '@wishlist/common-types';
 
 export type WishlistApi = {
   axios: {
@@ -100,6 +101,7 @@ export type WishlistApi = {
     update: (itemId: string, data: AddItemInputDto) => Promise<void>;
     delete: (itemId: string) => Promise<void>;
     toggle: (itemId: string) => Promise<ToggleItemOutputDto>;
+    scanUrl: (data: ScanItemInputDto) => Promise<ScanItemOutputDto>;
   };
 
   wishlist: {

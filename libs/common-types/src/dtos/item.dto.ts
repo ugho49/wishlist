@@ -21,6 +21,10 @@ export class ToggleItemOutputDto {
   taken_at?: string;
 }
 
+export class ScanItemOutputDto {
+  picture_url: string | null;
+}
+
 export class AddItemInputDto {
   @IsString()
   @IsNotEmpty()
@@ -55,4 +59,10 @@ export class AddItemForListInputDto extends AddItemInputDto {
   @IsString()
   @IsNotEmpty()
   wishlist_id: string;
+}
+
+export class ScanItemInputDto {
+  @IsString()
+  @IsNotEmpty()
+  url: string;
 }

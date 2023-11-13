@@ -112,6 +112,7 @@ export function buildApi(): WishlistApi {
       update: (itemId, data) => client.put(`/item/${itemId}`, data),
       delete: (itemId) => client.delete(`/item/${itemId}`),
       toggle: (itemId) => client.post(`/item/${itemId}/toggle`).then((res) => res.data),
+      scanUrl: (data) => client.post('/item/scan-url', data).then((res) => res.data),
     },
     attendee: {
       addAttendee: (data) => client.post('/attendee', data).then((res) => res.data),

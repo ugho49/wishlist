@@ -1,13 +1,31 @@
 import { Body, Controller, Delete, Param, Post, Put } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ItemService } from './item.service';
-import { AddItemForListInputDto, AddItemInputDto, ItemDto, ToggleItemOutputDto } from '@wishlist/common-types';
+import {
+  AddItemForListInputDto,
+  AddItemInputDto,
+  ItemDto,
+  ScanItemInputDto,
+  ScanItemOutputDto,
+  ToggleItemOutputDto,
+} from '@wishlist/common-types';
 import { CurrentUser } from '../auth';
+import { ScrapperService } from './scrapper.service';
 
 @ApiTags('Item')
 @Controller('/item')
 export class ItemController {
-  constructor(private readonly itemService: ItemService) {}
+  constructor(
+    private readonly itemService: ItemService,
+    private readonly scrapperService: ScrapperService,
+  ) {}
+
+  @Post('/scan-url')
+  async scanUrl(@Body() dto: ScanItemInputDto): Promise<ScanItemOutputDto> {
+    return this.scrapperService.scanUrl(dto.url).then((picture_url) => ({
+      picture_url,
+    }));
+  }
 
   @Post()
   createItem(@CurrentUser('id') currentUserId: string, @Body() dto: AddItemForListInputDto): Promise<ItemDto> {
@@ -18,7 +36,7 @@ export class ItemController {
   updateItem(
     @Param('id') itemId: string,
     @CurrentUser('id') currentUserId: string,
-    @Body() dto: AddItemInputDto
+    @Body() dto: AddItemInputDto,
   ): Promise<void> {
     return this.itemService.update({ itemId, dto, currentUserId });
   }

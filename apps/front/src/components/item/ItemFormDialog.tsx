@@ -1,4 +1,4 @@
-import React, { FormEvent, forwardRef, useEffect, useState } from 'react';
+import React, { FormEvent, forwardRef, useCallback, useEffect, useState } from 'react';
 import { AddItemInputDto, ItemDto } from '@wishlist/common-types';
 import {
   AppBar,
@@ -7,6 +7,7 @@ import {
   Container,
   Dialog,
   IconButton,
+  Link,
   Slide,
   Stack,
   TextField,
@@ -66,9 +67,11 @@ export const ItemFormDialog = ({
   const [validPictureUrl, setValidPictureUrl] = useState<boolean | undefined>(true);
   const [score, setScore] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
+  const [scanUrlLoading, setScanUrlLoading] = useState(false);
 
   const invalidUrl = url !== '' && !isValidUrl(url);
-  const formIsValid = name.trim() !== '' && !invalidUrl && ((pictureUrl && validPictureUrl === true) || !pictureUrl);
+  const formIsValid =
+    name.trim() !== '' && !invalidUrl && ((pictureUrl && validPictureUrl === true) || !pictureUrl) && !scanUrlLoading;
 
   const resetForm = () => {
     setName('');
@@ -126,6 +129,36 @@ export const ItemFormDialog = ({
     setScore(item.score || null);
   }, [item]);
 
+  const scanUrl = useCallback(async () => {
+    if (scanUrlLoading) return;
+    if (!url) return;
+    if (url === 'https://translate.google.com/') return;
+    if (!isValidUrl(url)) return;
+
+    setScanUrlLoading(true);
+
+    try {
+      const { picture_url } = await api.item.scanUrl({ url });
+
+      if (picture_url) {
+        setPictureUrl(picture_url);
+      } else {
+        addToast({ message: 'Aucune image trouvée', variant: 'info' });
+        setPictureUrl('');
+      }
+    } catch (e) {
+      addToast({ message: "Une erreur s'est produite", variant: 'error' });
+    } finally {
+      setScanUrlLoading(false);
+    }
+  }, [url, scanUrlLoading]);
+
+  useEffect(() => {
+    if (!pictureUrl) {
+      scanUrl();
+    }
+  }, [url]);
+
   return (
     <Dialog fullScreen open={open} onClose={handleClose} TransitionComponent={Transition}>
       <AppBar sx={{ position: 'relative' }}>
@@ -177,7 +210,7 @@ export const ItemFormDialog = ({
             <TextField
               type="url"
               autoComplete="off"
-              disabled={loading}
+              disabled={loading || scanUrlLoading}
               fullWidth
               value={url}
               inputProps={{ maxLength: 1000 }}
@@ -186,7 +219,24 @@ export const ItemFormDialog = ({
               helperText={
                 <>
                   {invalidUrl && <span>L'url saisie n'est pas valide</span>}
-                  {!invalidUrl && <CharsRemaining max={1000} value={url} />}
+                  {!invalidUrl && (
+                    <Stack direction="row" alignItems="center" justifyContent="space-between">
+                      <CharsRemaining max={1000} value={url} />
+                      {url && (
+                        <Link
+                          variant="body1"
+                          component="button"
+                          disabled={loading || scanUrlLoading}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            scanUrl();
+                          }}
+                        >
+                          Scanner l'url
+                        </Link>
+                      )}
+                    </Stack>
+                  )}
                 </>
               }
               onChange={(e) => setUrl(e.target.value)}
@@ -200,7 +250,7 @@ export const ItemFormDialog = ({
               <TextField
                 type="url"
                 autoComplete="off"
-                disabled={loading}
+                disabled={loading || scanUrlLoading}
                 fullWidth
                 value={pictureUrl}
                 inputProps={{ maxLength: 1000 }}
@@ -221,7 +271,7 @@ export const ItemFormDialog = ({
 
             {pictureUrl && validPictureUrl !== false && (
               <Box>
-                <InputLabel>Preview</InputLabel>
+                <InputLabel sx={{ visibility: 'hidden' }}>Preview</InputLabel>
 
                 <Avatar
                   src={pictureUrl}
