@@ -169,7 +169,7 @@ export class ScrapperService {
     try {
       this.logger.log('Scrap img for => ', { url });
 
-      const response = await fetch(url);
+      const response = await this.fetch(url);
       const html = await response.text();
 
       if (this.hasBotDetection(html)) {
