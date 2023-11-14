@@ -224,6 +224,7 @@ export const NewItemCard = ({ item, handleDelete, handleUpdate, wishlist }: NewI
         <Stack alignItems="center">
           <Avatar
             src={item.picture_url}
+            variant="square"
             sx={(theme) => ({
               height: smallScreen ? '80px' : '120px',
               width: smallScreen ? '80px' : '120px',
