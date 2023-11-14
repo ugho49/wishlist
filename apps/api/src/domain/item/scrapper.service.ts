@@ -131,11 +131,11 @@ export class ScrapperService {
     this.logger.log('Image principale trouvée:', rightPart);
 
     // Vérifier si l'image est accessible
-    const imageResponse = await this.fetch(rightPart, { method: 'HEAD', timeout: 1_500 });
-    if (!(imageResponse.status >= 200 && imageResponse.status < 300)) {
-      this.logger.warn("L'image n'est pas accessible. Statut:", imageResponse.status);
-      return null;
-    }
+    // const imageResponse = await this.fetch(rightPart, { method: 'HEAD', timeout: 1_500 });
+    // if (!(imageResponse.status >= 200 && imageResponse.status < 300)) {
+    //   this.logger.warn("L'image n'est pas accessible. Statut:", imageResponse.status);
+    //   return null;
+    // }
 
     this.logger.log("L'image est accessible.");
 
