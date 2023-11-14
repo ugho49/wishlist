@@ -19,6 +19,7 @@ export class ScrapperService {
           'Accept-Encoding': 'gzip, deflate, br',
           'Accept-Language': 'en,fr;q=0.9,fr-FR;q=0.8',
           Referer: 'https://www.google.com/',
+          Authority: new URL(url).hostname,
           'Cache-Control': 'max-age=0',
           Connection: 'keep-alive',
           'Upgrade-Insecure-Requests': '1',
