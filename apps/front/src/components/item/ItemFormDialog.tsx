@@ -282,6 +282,7 @@ export const ItemFormDialog = ({
 
                 <Avatar
                   src={pictureUrl}
+                  variant="square"
                   sx={(theme) => ({
                     height: '56px',
                     width: '56px',
