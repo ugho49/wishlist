@@ -7,7 +7,7 @@ import { ItemFormDialog } from '../item/ItemFormDialog';
 import { RootState } from '../../core';
 import { useSelector } from 'react-redux';
 import { FilterType, SortType, WishlistFilterAndSortItems } from './WishlistFilterAndSortItems';
-import { NewItemCard } from '../item/NewItemCard';
+import { ItemCard } from '../item/ItemCard';
 
 export type WishlistTabItemsProps = {
   wishlist: DetailedWishlistDto;
@@ -60,7 +60,7 @@ export const WishlistItems = ({ wishlist }: WishlistTabItemsProps) => {
           <Grid container spacing={3}>
             {itemsFilteredAndSorted.map((item) => (
               <Grid item xs={6} md={4} lg={3} key={item.id}>
-                <NewItemCard
+                <ItemCard
                   wishlist={{ id: wishlist.id, ownerId: wishlist.owner.id, hideItems: wishlist.config.hide_items }}
                   item={item}
                   handleUpdate={(newValue) => updateItem(newValue)}
@@ -69,21 +69,6 @@ export const WishlistItems = ({ wishlist }: WishlistTabItemsProps) => {
               </Grid>
             ))}
           </Grid>
-
-          {/*<Divider sx={{ color: '#fff', margin: 5 }} />*/}
-
-          {/*<Grid container spacing={3}>*/}
-          {/*  {itemsFilteredAndSorted.map((item) => (*/}
-          {/*    <Grid item xs={12} md={6} key={item.id}>*/}
-          {/*      <ItemCard*/}
-          {/*        wishlist={{ id: wishlist.id, ownerId: wishlist.owner.id, hideItems: wishlist.config.hide_items }}*/}
-          {/*        item={item}*/}
-          {/*        handleUpdate={(newValue) => updateItem(newValue)}*/}
-          {/*        handleDelete={() => setItems((prevState) => prevState.filter((i) => i.id !== item.id))}*/}
-          {/*      />*/}
-          {/*    </Grid>*/}
-          {/*  ))}*/}
-          {/*</Grid>*/}
 
           <FabAutoGrow
             label={ownerOfTheList ? 'Ajouter un souhait' : 'Suggérer un souhait'}
