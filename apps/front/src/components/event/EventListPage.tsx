@@ -35,8 +35,6 @@ export const EventListPage = () => {
     }
   }, [value]);
 
-  console.log({ queryParams });
-
   return (
     <Box>
       <Title>Évènements</Title>

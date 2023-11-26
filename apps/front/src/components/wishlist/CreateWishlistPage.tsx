@@ -129,7 +129,7 @@ export const CreateWishlistPage = () => {
                   fullWidth
                   value={title}
                   inputProps={{ maxLength: 100 }}
-                  placeholder="Ma super liste"
+                  placeholder="Nom de ma liste"
                   helperText={<CharsRemaining max={100} value={title} />}
                   onChange={(e) => setTitle(e.target.value)}
                 />
