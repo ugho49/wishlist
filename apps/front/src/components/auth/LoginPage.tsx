@@ -27,7 +27,7 @@ export const LoginPage = () => {
       setTokens({
         accessToken: param.access_token,
         refreshToken: param.refresh_token,
-      })
+      }),
     );
   };
 
@@ -78,7 +78,7 @@ export const LoginPage = () => {
               required
               fullWidth
               disabled={loading}
-              placeholder="john@doe.fr"
+              placeholder="Entrer l'email que vous avez utilisé lors de l'inscription"
               autoComplete="email"
               autoFocus={email === ''}
               value={email}
@@ -90,7 +90,7 @@ export const LoginPage = () => {
             <TextField
               required
               fullWidth
-              placeholder="********"
+              placeholder="Mon mot de passe"
               type="password"
               autoFocus={email !== ''}
               disabled={loading}

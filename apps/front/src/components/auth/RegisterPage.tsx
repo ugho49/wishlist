@@ -30,7 +30,7 @@ export const RegisterPage = () => {
       setTokens({
         accessToken: param.access_token,
         refreshToken: param.refresh_token,
-      })
+      }),
     );
   };
 
@@ -83,7 +83,7 @@ export const RegisterPage = () => {
                 value={firstname}
                 autoFocus
                 inputProps={{ maxLength: 50 }}
-                placeholder="John"
+                placeholder="Mon Prénom"
                 autoComplete="given-name"
                 helperText={<CharsRemaining max={50} value={firstname} />}
                 onChange={(e) => setFirstname(e.target.value)}
@@ -98,7 +98,7 @@ export const RegisterPage = () => {
                 fullWidth
                 value={lastname}
                 inputProps={{ maxLength: 50 }}
-                placeholder="Doe"
+                placeholder="Mon Nom"
                 autoComplete="family-name"
                 helperText={<CharsRemaining max={50} value={lastname} />}
                 onChange={(e) => setLastname(e.target.value)}
@@ -113,7 +113,7 @@ export const RegisterPage = () => {
               required
               fullWidth
               disabled={loading}
-              placeholder="john@doe.fr"
+              placeholder="Mon adresse email"
               autoComplete="email"
               value={email}
               inputProps={{ maxLength: 200 }}
@@ -126,7 +126,7 @@ export const RegisterPage = () => {
             <TextField
               required
               fullWidth
-              placeholder="********"
+              placeholder="Un super mot de passe"
               type="password"
               disabled={loading}
               autoComplete="new-password"
