@@ -49,6 +49,7 @@ export class AddSecretSanta1701015853620 implements MigrationInterface {
             columnNames: ['event_id'],
             referencedTableName: 'event',
             referencedColumnNames: ['id'],
+            onDelete: 'CASCADE',
           },
         ],
       }),
@@ -79,6 +80,11 @@ export class AddSecretSanta1701015853620 implements MigrationInterface {
             isNullable: false,
           },
           {
+            name: 'draw_user_id',
+            type: 'uuid',
+            isNullable: true,
+          },
+          {
             name: 'exclusions',
             type: 'uuid[]',
             isNullable: false,
@@ -102,6 +108,13 @@ export class AddSecretSanta1701015853620 implements MigrationInterface {
             columnNames: ['secret_santa_id'],
             referencedTableName: 'secret_santa',
             referencedColumnNames: ['id'],
+            onDelete: 'CASCADE',
+          },
+          {
+            columnNames: ['draw_user_id'],
+            referencedTableName: 'secret_santa_user',
+            referencedColumnNames: ['id'],
+            onDelete: 'SET NULL',
           },
         ],
       }),

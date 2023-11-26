@@ -8,6 +8,7 @@ import { ItemModule } from './item/item.module';
 import { EventModule } from './event/event.module';
 import { AttendeeModule } from './attendee/attendee.module';
 import { AuthSocialModule } from './auth-social/auth-social.module';
+import { SecretSantaModule } from './secret-santa/secret-santa.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { AuthSocialModule } from './auth-social/auth-social.module';
     ItemModule,
     EventModule,
     AttendeeModule,
+    SecretSantaModule,
   ],
 })
 export class DomainModule {}
