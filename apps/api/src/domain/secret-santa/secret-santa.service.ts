@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { EventRepository } from '../event/event.repository';
 import { SecretSantaRepository, SecretSantaUserRepository } from './secret-santa.repository';
 import {
@@ -101,7 +101,22 @@ export class SecretSantaService {
   }
 
   async startSecretSanta(param: { currentUserId: string; secretSantaId: string }): Promise<void> {
-    throw new Error('Not implemented');
+    const secretSanta = await this.secretSantaRepository.getSecretSantaForUserOrFail({
+      id: param.secretSantaId,
+      userId: param.currentUserId,
+    });
+
+    await this.checkSecretSantaNotStarted(secretSanta);
+
+    const secretSantaUsers = await this.secretSantaUserRepository.findBy({ secretSantaId: secretSanta.id });
+
+    if (secretSantaUsers.length < 2) {
+      throw new UnprocessableEntityException('Not enough attendees for secret santa');
+    }
+
+    // Assign a draw user to each secret santa user randomly
+    // Also check if the secret santa user is not in the exclusions list
+    // If the draw is not possible in any case, throw an error
   }
 
   async cancelSecretSanta(param: { currentUserId: string; secretSantaId: string }): Promise<void> {
