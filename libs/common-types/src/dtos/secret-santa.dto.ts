@@ -1,12 +1,13 @@
 import { IsNumber, IsOptional, IsPositive, IsString } from 'class-validator';
 import { SecretSantaStatus } from '../enums';
-import { MiniEventDto } from '../dtos';
+import { AttendeeDto, MiniEventDto } from '../dtos';
+import { Transform } from 'class-transformer';
+import { uniq } from 'lodash';
 
 export class SecretSantaUserDto {
   id: string;
-  name: string;
-  email: string;
-  exclusions: SecretSantaUserDto[];
+  attendee: AttendeeDto;
+  exclusions: string[];
 }
 
 export class SecretSantaDto {
@@ -16,6 +17,8 @@ export class SecretSantaDto {
   budget?: number;
   status: SecretSantaStatus;
   users: SecretSantaUserDto[];
+  created_at: string;
+  updated_at: string;
 }
 
 export class UpdateSecretSantaInputDto {
@@ -26,23 +29,21 @@ export class UpdateSecretSantaInputDto {
   @IsNumber()
   @IsPositive()
   @IsOptional()
-  budget?: boolean;
+  budget?: number;
 }
 
 export class CreateSecretSantaInputDto extends UpdateSecretSantaInputDto {
   @IsString()
-  eventId: string;
+  event_id: string;
 }
 
 export class CreateSecretSantaUserInputDto {
   @IsString()
-  name: string;
-
-  @IsString()
-  email: string;
+  attendee_id: string;
 }
 
-export class UpdateSecretSantaUserInputDto extends CreateSecretSantaUserInputDto {
+export class UpdateSecretSantaUserInputDto {
   @IsString({ each: true })
+  @Transform(({ value }) => uniq(value))
   exclusions: string[];
 }

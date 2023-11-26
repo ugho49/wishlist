@@ -1,8 +1,9 @@
-import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn, RelationId } from 'typeorm';
+import { Column, Entity, ManyToOne, OneToMany, OneToOne, PrimaryColumn, RelationId } from 'typeorm';
 import { uuid } from '@wishlist/common';
 import { TimestampEntity } from '@wishlist/common-database';
 import { EventEntity } from '../event/event.entity';
 import { SecretSantaStatus } from '@wishlist/common-types';
+import { AttendeeEntity } from '../attendee/attendee.entity';
 
 @Entity('secret_santa')
 export class SecretSantaEntity extends TimestampEntity {
@@ -18,7 +19,7 @@ export class SecretSantaEntity extends TimestampEntity {
   @Column('varchar')
   status: SecretSantaStatus = SecretSantaStatus.CREATED;
 
-  @ManyToOne(() => EventEntity)
+  @OneToOne(() => EventEntity)
   readonly event: Promise<EventEntity>;
 
   @Column()
@@ -44,11 +45,12 @@ export class SecretSantaUserEntity extends TimestampEntity {
   @PrimaryColumn()
   id: string = uuid();
 
-  @Column()
-  name: string;
+  @ManyToOne(() => AttendeeEntity)
+  readonly attendee: Promise<AttendeeEntity>;
 
   @Column()
-  email: string;
+  @RelationId((entity: SecretSantaUserEntity) => entity.attendee)
+  attendeeId: string;
 
   @ManyToOne(() => SecretSantaUserEntity)
   readonly drawUser: Promise<SecretSantaUserEntity | null>;
@@ -67,10 +69,9 @@ export class SecretSantaUserEntity extends TimestampEntity {
   @Column('uuid', { array: true })
   exclusions: string[] = [];
 
-  public static create(props: { name: string; email: string; secretSantaId: string }): SecretSantaUserEntity {
+  public static create(props: { attendeeId: string; secretSantaId: string }): SecretSantaUserEntity {
     const entity = new SecretSantaUserEntity();
-    entity.name = props.name;
-    entity.email = props.email;
+    entity.attendeeId = props.attendeeId;
     entity.secretSantaId = props.secretSantaId;
     return entity;
   }

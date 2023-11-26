@@ -11,9 +11,9 @@ export class AttendeeEntity {
 
   @Column()
   @RelationId((entity: AttendeeEntity) => entity.event)
-  eventId!: string;
+  eventId: string;
 
-  @Column({ type: 'varchar', nullable: true })
+  @Column({ type: 'uuid', nullable: true })
   @RelationId((entity: AttendeeEntity) => entity.user)
   userId?: string | null;
 
@@ -21,7 +21,7 @@ export class AttendeeEntity {
   readonly event: Promise<EventEntity>;
 
   @ManyToOne(() => UserEntity)
-  readonly user: Promise<UserEntity>;
+  readonly user: Promise<UserEntity | null>;
 
   @Column({ name: 'temp_user_email', type: 'varchar', nullable: true })
   email?: string | null;

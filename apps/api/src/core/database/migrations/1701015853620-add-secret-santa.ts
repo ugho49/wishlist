@@ -52,6 +52,7 @@ export class AddSecretSanta1701015853620 implements MigrationInterface {
             onDelete: 'CASCADE',
           },
         ],
+        uniques: [{ columnNames: ['event_id'] }],
       }),
     );
 
@@ -70,13 +71,8 @@ export class AddSecretSanta1701015853620 implements MigrationInterface {
             isNullable: false,
           },
           {
-            name: 'name',
-            type: 'varchar(100)',
-            isNullable: false,
-          },
-          {
-            name: 'email',
-            type: 'varchar(200)',
+            name: 'attendee_id',
+            type: 'uuid',
             isNullable: false,
           },
           {
@@ -116,7 +112,13 @@ export class AddSecretSanta1701015853620 implements MigrationInterface {
             referencedColumnNames: ['id'],
             onDelete: 'SET NULL',
           },
+          {
+            columnNames: ['attendee_id'],
+            referencedTableName: 'user',
+            referencedColumnNames: ['id'],
+          },
         ],
+        uniques: [{ columnNames: ['secret_santa_id', 'attendee_id'] }],
       }),
     );
   }
