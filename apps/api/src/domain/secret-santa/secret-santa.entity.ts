@@ -1,6 +1,6 @@
-import { Column, Entity, ManyToOne, OneToMany, OneToOne, PrimaryColumn, RelationId } from 'typeorm';
+import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn, RelationId } from 'typeorm';
 import { uuid } from '@wishlist/common';
-import { TimestampEntity } from '@wishlist/common-database';
+import { ColumnNumericTransformer, TimestampEntity } from '@wishlist/common-database';
 import { EventEntity } from '../event/event.entity';
 import { SecretSantaStatus } from '@wishlist/common-types';
 import { AttendeeEntity } from '../attendee/attendee.entity';
@@ -13,13 +13,13 @@ export class SecretSantaEntity extends TimestampEntity {
   @Column({ type: 'varchar', nullable: true })
   description?: string | null;
 
-  @Column({ type: 'decimal', nullable: true })
+  @Column({ type: 'numeric', nullable: true, transformer: new ColumnNumericTransformer() })
   budget?: number | null;
 
   @Column('varchar')
   status: SecretSantaStatus = SecretSantaStatus.CREATED;
 
-  @OneToOne(() => EventEntity)
+  @ManyToOne(() => EventEntity)
   readonly event: Promise<EventEntity>;
 
   @Column()

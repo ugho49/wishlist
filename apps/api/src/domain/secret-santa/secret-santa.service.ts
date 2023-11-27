@@ -111,6 +111,12 @@ export class SecretSantaService {
 
     await this.checkSecretSantaNotStarted(secretSanta);
 
+    const event = await secretSanta.event;
+
+    if (event.eventDate < new Date()) {
+      throw new BadRequestException('Event is already finished');
+    }
+
     const secretSantaUsers = await this.secretSantaUserRepository.findBy({ secretSantaId: secretSanta.id });
 
     try {
@@ -128,6 +134,8 @@ export class SecretSantaService {
     } catch (e) {
       throw new UnprocessableEntityException('Failed to draw secret santa, please try again');
     }
+
+    // TODO: Send email to all users
   }
 
   async cancelSecretSanta(param: { currentUserId: string; secretSantaId: string }): Promise<void> {

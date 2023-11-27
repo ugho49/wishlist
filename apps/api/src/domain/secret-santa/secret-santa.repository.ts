@@ -9,7 +9,7 @@ export class SecretSantaRepository extends BaseRepository(SecretSantaEntity) {
     return this.createQueryBuilder('ss')
       .leftJoinAndSelect('ss.users', 'u')
       .innerJoinAndSelect('ss.event', 'e')
-      .where('ss.eventId = :eventId', { eventId })
+      .where('e.id = :eventId', { eventId })
       .andWhere('e.creatorId = :userId', { userId })
       .getOne();
   }
@@ -32,20 +32,19 @@ export class SecretSantaUserRepository extends BaseRepository(SecretSantaUserEnt
     userId: string;
   }): Promise<SecretSantaUserEntity | null> {
     const { eventId, userId } = param;
-    const currentUser = await this.createQueryBuilder('ssu')
+    const currentSantaUser = await this.createQueryBuilder('ssu')
       .select('ssu.id')
       .innerJoin('ssu.attendee', 'a')
       .innerJoin('ssu.secretSanta', 'ss')
-      .innerJoin('ss.event', 'e')
       .leftJoin('a.user', 'u')
       .where('ss.eventId = :eventId', { eventId })
       .andWhere('u.id = :userId', { userId })
       .getOne();
 
-    if (!currentUser) {
+    if (!currentSantaUser) {
       return null;
     }
 
-    return await this.findOneBy({ id: currentUser.id });
+    return await this.findOneBy({ id: currentSantaUser.id });
   }
 }
