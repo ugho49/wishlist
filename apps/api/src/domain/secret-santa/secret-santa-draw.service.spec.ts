@@ -1,5 +1,7 @@
 import { SecretSantaDrawService } from './secret-santa-draw.service';
 import { SecretSantaUserEntity } from './secret-santa.entity';
+import { toIncludeAllMembers, toBeArrayOfSize } from 'jest-extended';
+expect.extend({ toIncludeAllMembers, toBeArrayOfSize });
 
 describe('SecretSantaDrawService', () => {
   const drawService = new SecretSantaDrawService();
@@ -22,8 +24,10 @@ describe('SecretSantaDrawService', () => {
     const assignedUsers = drawService.assignSecretSantas(secretSantaUsers);
 
     // Then
-    expect(assignedUsers[0]).toEqual({ userId: '1', drawUserId: '2' });
-    expect(assignedUsers[1]).toEqual({ userId: '2', drawUserId: '1' });
+    expect(assignedUsers).toIncludeAllMembers([
+      { userId: '1', drawUserId: '2' },
+      { userId: '2', drawUserId: '1' },
+    ]);
   });
 
   it('should throw error when secret Santas for 2 attendees with exceptions', () => {
@@ -48,9 +52,55 @@ describe('SecretSantaDrawService', () => {
     const assignedUsers = drawService.assignSecretSantas(secretSantaUsers);
 
     // Then
-    expect(assignedUsers[0].drawUserId).toEqual('3');
-    expect(assignedUsers[1].drawUserId).toEqual('1');
-    expect(assignedUsers[2].drawUserId).toEqual('2');
+    expect(assignedUsers).toIncludeAllMembers([
+      { userId: '1', drawUserId: '3' },
+      { userId: '2', drawUserId: '1' },
+      { userId: '3', drawUserId: '2' },
+    ]);
+  });
+
+  it('should throw error if 2 attendee have the same uniq draw', () => {
+    // Given
+    const secretSantaUsers: SecretSantaUserEntity[] = [
+      getUserEntity('1', []),
+      getUserEntity('2', ['1']),
+      getUserEntity('3', ['1']),
+    ];
+
+    // When Then
+    expect(() => drawService.assignSecretSantas(secretSantaUsers)).toThrowError(
+      'Impossible de tirer au sort un utilisateur en raison des exclusions.',
+    );
+  });
+
+  it('should throw error if 3 attendee have the same uniq draw', () => {
+    // Given
+    const secretSantaUsers: SecretSantaUserEntity[] = [
+      getUserEntity('1', []),
+      getUserEntity('2', ['1']),
+      getUserEntity('3', ['1']),
+      getUserEntity('4', ['1']),
+    ];
+
+    // When Then
+    expect(() => drawService.assignSecretSantas(secretSantaUsers)).toThrowError(
+      'Impossible de tirer au sort un utilisateur en raison des exclusions.',
+    );
+  });
+
+  it('should assign secret Santas for 4 attendees', () => {
+    // Given
+    const secretSantaUsers: SecretSantaUserEntity[] = [
+      getUserEntity('1', []),
+      getUserEntity('2', []),
+      getUserEntity('3', []),
+      getUserEntity('4', []),
+    ];
+
+    // When
+    const assignedUsers = drawService.assignSecretSantas(secretSantaUsers);
+
+    expect(assignedUsers).toBeArrayOfSize(4);
   });
 });
 
