@@ -1,5 +1,4 @@
-import { SecretSantaDrawService } from './secret-santa-draw.service';
-import { SecretSantaUserEntity } from './secret-santa.entity';
+import { SecretSantaDrawService, SecretSantaUser } from './secret-santa-draw.service';
 import { toIncludeAllMembers, toBeArrayOfSize } from 'jest-extended';
 expect.extend({ toIncludeAllMembers, toBeArrayOfSize });
 
@@ -8,7 +7,7 @@ describe('SecretSantaDrawService', () => {
 
   it('should throw error if not enough attendees', () => {
     // Given
-    const secretSantaUsers: SecretSantaUserEntity[] = [getUserEntity('1', [])];
+    const secretSantaUsers: SecretSantaUser[] = [getUserEntity('1', [])];
 
     // When Then
     expect(() => drawService.assignSecretSantas(secretSantaUsers)).toThrowError(
@@ -18,7 +17,7 @@ describe('SecretSantaDrawService', () => {
 
   it('should assign secret Santas for 2 attendees without exceptions', () => {
     // Given
-    const secretSantaUsers: SecretSantaUserEntity[] = [getUserEntity('1', []), getUserEntity('2', [])];
+    const secretSantaUsers: SecretSantaUser[] = [getUserEntity('1', []), getUserEntity('2', [])];
 
     // When
     const assignedUsers = drawService.assignSecretSantas(secretSantaUsers);
@@ -32,7 +31,7 @@ describe('SecretSantaDrawService', () => {
 
   it('should throw error when secret Santas for 2 attendees with exceptions', () => {
     // Given
-    const secretSantaUsers: SecretSantaUserEntity[] = [getUserEntity('1', ['2']), getUserEntity('2', [])];
+    const secretSantaUsers: SecretSantaUser[] = [getUserEntity('1', ['2']), getUserEntity('2', [])];
 
     // When Then
     expect(() => drawService.assignSecretSantas(secretSantaUsers)).toThrowError(
@@ -42,7 +41,7 @@ describe('SecretSantaDrawService', () => {
 
   it('should assign secret Santas for 3 attendees with only 1 exception', () => {
     // Given
-    const secretSantaUsers: SecretSantaUserEntity[] = [
+    const secretSantaUsers: SecretSantaUser[] = [
       getUserEntity('1', []),
       getUserEntity('2', []),
       getUserEntity('3', ['1']),
@@ -61,7 +60,7 @@ describe('SecretSantaDrawService', () => {
 
   it('should throw error if 2 attendee have the same uniq draw', () => {
     // Given
-    const secretSantaUsers: SecretSantaUserEntity[] = [
+    const secretSantaUsers: SecretSantaUser[] = [
       getUserEntity('1', []),
       getUserEntity('2', ['1']),
       getUserEntity('3', ['1']),
@@ -75,7 +74,7 @@ describe('SecretSantaDrawService', () => {
 
   it('should throw error if 3 attendee have the same uniq draw', () => {
     // Given
-    const secretSantaUsers: SecretSantaUserEntity[] = [
+    const secretSantaUsers: SecretSantaUser[] = [
       getUserEntity('1', []),
       getUserEntity('2', ['1']),
       getUserEntity('3', ['1']),
@@ -90,7 +89,7 @@ describe('SecretSantaDrawService', () => {
 
   it('should assign secret Santas for 4 attendees', () => {
     // Given
-    const secretSantaUsers: SecretSantaUserEntity[] = [
+    const secretSantaUsers: SecretSantaUser[] = [
       getUserEntity('1', []),
       getUserEntity('2', []),
       getUserEntity('3', []),
@@ -104,9 +103,6 @@ describe('SecretSantaDrawService', () => {
   });
 });
 
-function getUserEntity(id: string, exclusions: string[]): SecretSantaUserEntity {
-  const entity = new SecretSantaUserEntity();
-  entity.id = id;
-  entity.exclusions = exclusions;
-  return entity;
+function getUserEntity(id: string, exclusions: string[]): SecretSantaUser {
+  return { id, exclusions };
 }

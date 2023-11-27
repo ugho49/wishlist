@@ -1,9 +1,8 @@
-import { SecretSantaUserEntity } from './secret-santa.entity';
-
-type SecretSantaAssign = { userId: string; drawUserId: string };
+export type SecretSantaUser = { id: string; exclusions: string[] };
+export type SecretSantaAssign = { userId: string; drawUserId: string };
 
 export class SecretSantaDrawService {
-  public assignSecretSantas(users: SecretSantaUserEntity[]): SecretSantaAssign[] {
+  public assignSecretSantas(users: SecretSantaUser[]): SecretSantaAssign[] {
     if (users.length < 2) {
       throw new Error("Pas assez d'utilisateurs pour tirer au sort.");
     }
@@ -13,9 +12,8 @@ export class SecretSantaDrawService {
     return this.draw(possibleDraws);
   }
 
-  private getPossibleDraws(users: SecretSantaUserEntity[]) {
+  private getPossibleDraws(users: SecretSantaUser[]) {
     const sortedUsers = [...users].sort((a, b) => a.exclusions.length - b.exclusions.length);
-    sortedUsers.forEach((user) => (user.drawUserId = undefined));
 
     const possibleDraws: { userId: string; possibleDrawIds: string[] }[] = [];
     const drawUserIds = new Set<string>();

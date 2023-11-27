@@ -15,7 +15,7 @@ import { toSecretSantaDto, toSecretSantaUserDto } from './secret-santa.mapper';
 import { toAttendeeDto } from '../attendee/attendee.mapper';
 import { SecretSantaEntity, SecretSantaUserEntity } from './secret-santa.entity';
 import { In } from 'typeorm';
-import { SecretSantaDrawService } from './secret-santa-draw.service';
+import { SecretSantaDrawService } from '@wishlist/common';
 
 @Injectable()
 export class SecretSantaService {
@@ -114,7 +114,9 @@ export class SecretSantaService {
     const secretSantaUsers = await this.secretSantaUserRepository.findBy({ secretSantaId: secretSanta.id });
 
     try {
-      const assignedUsers = this.drawService.assignSecretSantas(secretSantaUsers);
+      const assignedUsers = this.drawService.assignSecretSantas(
+        secretSantaUsers.map((ss) => ({ id: ss.id, exclusions: ss.exclusions })),
+      );
 
       await this.secretSantaRepository.transaction(async (em) => {
         for (const user of assignedUsers) {
