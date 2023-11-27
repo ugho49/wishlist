@@ -15,9 +15,12 @@ import { toSecretSantaDto, toSecretSantaUserDto } from './secret-santa.mapper';
 import { toAttendeeDto } from '../attendee/attendee.mapper';
 import { SecretSantaEntity, SecretSantaUserEntity } from './secret-santa.entity';
 import { In } from 'typeorm';
+import { SecretSantaDrawService } from './secret-santa-draw.service';
 
 @Injectable()
 export class SecretSantaService {
+  private readonly drawService = new SecretSantaDrawService();
+
   constructor(
     private readonly eventRepository: EventRepository,
     private readonly secretSantaRepository: SecretSantaRepository,
@@ -114,9 +117,19 @@ export class SecretSantaService {
       throw new UnprocessableEntityException('Not enough attendees for secret santa');
     }
 
-    // Assign a draw user to each secret santa user randomly
-    // Also check if the secret santa user is not in the exclusions list
-    // If the draw is not possible in any case, throw an error
+    try {
+      const assignedUsers = this.drawService.assignSecretSantas(secretSantaUsers);
+
+      await this.secretSantaRepository.transaction(async (em) => {
+        for (const user of assignedUsers) {
+          await em.update(SecretSantaUserEntity, { id: user.id }, { drawUserId: user.drawUserId });
+        }
+
+        await em.update(SecretSantaEntity, { id: secretSanta.id }, { status: SecretSantaStatus.STARTED });
+      });
+    } catch (e) {
+      throw new UnprocessableEntityException('Failed to draw secret santa, please try again');
+    }
   }
 
   async cancelSecretSanta(param: { currentUserId: string; secretSantaId: string }): Promise<void> {
@@ -193,6 +206,10 @@ export class SecretSantaService {
           });
 
     const exclusionsIds = secretSantaUsers.map((u) => u.id);
+
+    if (exclusionsIds.includes(param.secretSantaUserId)) {
+      throw new BadRequestException('Secret santa user cannot exclude himself');
+    }
 
     await this.secretSantaUserRepository.update(
       { id: param.secretSantaUserId },
