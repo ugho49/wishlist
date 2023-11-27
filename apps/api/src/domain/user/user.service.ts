@@ -7,6 +7,8 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { UserEntity } from './user.entity';
+import { Express } from 'express';
+import 'multer';
 import {
   ChangeUserPasswordInputDto,
   createPagedResponse,

@@ -113,16 +113,12 @@ export class SecretSantaService {
 
     const secretSantaUsers = await this.secretSantaUserRepository.findBy({ secretSantaId: secretSanta.id });
 
-    if (secretSantaUsers.length < 2) {
-      throw new UnprocessableEntityException('Not enough attendees for secret santa');
-    }
-
     try {
       const assignedUsers = this.drawService.assignSecretSantas(secretSantaUsers);
 
       await this.secretSantaRepository.transaction(async (em) => {
         for (const user of assignedUsers) {
-          await em.update(SecretSantaUserEntity, { id: user.id }, { drawUserId: user.drawUserId });
+          await em.update(SecretSantaUserEntity, { id: user.userId }, { drawUserId: user.drawUserId });
         }
 
         await em.update(SecretSantaEntity, { id: secretSanta.id }, { status: SecretSantaStatus.STARTED });

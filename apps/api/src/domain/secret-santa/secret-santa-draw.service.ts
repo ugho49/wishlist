@@ -1,5 +1,7 @@
 import { SecretSantaUserEntity } from './secret-santa.entity';
 
+type SecretSantaAssign = { userId: string; drawUserId: string };
+
 export class SecretSantaDrawService {
   private isValidDraw(user: SecretSantaUserEntity, drawUser: SecretSantaUserEntity): boolean {
     return !user.exclusions.includes(drawUser.id);
@@ -43,7 +45,11 @@ export class SecretSantaDrawService {
     return undefined;
   }
 
-  public assignSecretSantas(secretSantaUsers: SecretSantaUserEntity[]): SecretSantaUserEntity[] {
+  public assignSecretSantas(secretSantaUsers: SecretSantaUserEntity[]): SecretSantaAssign[] {
+    if (secretSantaUsers.length < 2) {
+      throw new Error("Pas assez d'utilisateurs pour tirer au sort.");
+    }
+
     const sortedUsers = [...secretSantaUsers].sort((a, b) => a.exclusions.length - b.exclusions.length);
 
     sortedUsers.forEach((user) => (user.drawUserId = undefined));
@@ -54,10 +60,12 @@ export class SecretSantaDrawService {
       throw new Error('Impossible de tirer au sort un utilisateur en raison des exclusions.');
     }
 
+    const result: SecretSantaAssign[] = [];
+
     for (let i = 0; i < sortedUsers.length; i++) {
-      sortedUsers[i].drawUserId = validDraw[i].id;
+      result.push({ userId: sortedUsers[i].id, drawUserId: validDraw[i].id });
     }
 
-    return sortedUsers;
+    return result;
   }
 }
