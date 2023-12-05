@@ -16,7 +16,7 @@ services:
       retries: 10
 
   mail:
-    image: maildev/maildev:2.0.5
+    image: maildev/maildev:2.1.0
     ports:
       - '1080:1080'
       - '1025:1025'
