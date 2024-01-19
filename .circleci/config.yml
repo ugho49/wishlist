@@ -30,6 +30,7 @@ references:
     key: node-module-cache-{{ checksum "./yarn.lock" }}
     paths:
       - node_modules
+      - .yarn
   restore_node_cache: &restore_node_cache
     keys:
       - node-module-cache-{{ checksum "./yarn.lock" }}
@@ -40,7 +41,7 @@ jobs:
     steps:
       - checkout
       - restore_cache: *restore_node_cache
-      - run: yarn --frozen-lockfile
+      - run: yarn install --immutable
       - save_cache: *save_node_cache
       - persist_to_workspace:
           root: .
