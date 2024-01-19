@@ -1,27 +1,43 @@
 import { Card } from '../common/Card';
-import { Box, Stack, TextField } from '@mui/material';
+import { Alert, Box, Stack, TextField } from '@mui/material';
 import { InputLabel } from '../common/InputLabel';
 import { LoadingButton } from '@mui/lab';
 import { RouterLink, useApi, useToast } from '@wishlist/common-front';
-import React, { FormEvent, useState } from 'react';
+import React, { useState } from 'react';
 import { wishlistApiRef } from '../../core/api/wishlist.api';
 import { useDispatch } from 'react-redux';
 import { Subtitle } from '../common/Subtitle';
-import { CharsRemaining } from '../common/CharsRemaining';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import { setTokens } from '../../core/store/features';
 import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
 import { LoginOutputDto } from '@wishlist/common-types';
+import { z } from 'zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { AxiosError } from 'axios';
+
+const schema = z.object({
+  email: z.string().email({ message: 'Email invalide' }).max(200, { message: '200 caractères maximum' }),
+  password: z.string().min(8, { message: '8 caractères minimum' }).max(50, { message: '50 caractères maximum' }),
+  firstname: z.string().min(1, { message: '1 caractère minimum' }).max(50, { message: '50 caractères maximum' }),
+  lastname: z.string().min(1, { message: '1 caractère minimum' }).max(50, { message: '50 caractères maximum' }),
+});
+
+type FormFields = z.infer<typeof schema>;
 
 export const RegisterPage = () => {
   const api = useApi(wishlistApiRef);
   const dispatch = useDispatch();
   const { addToast } = useToast();
-  const [firstname, setFirstname] = useState('');
-  const [lastname, setLastname] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [socialLoading, setSocialLoading] = useState(false);
+  const {
+    register,
+    setError,
+    handleSubmit,
+    formState: { isSubmitting, errors: formErrors },
+  } = useForm<FormFields>({
+    resolver: zodResolver(schema),
+  });
 
   const handleRegisterSuccess = (param: LoginOutputDto) => {
     addToast({ message: 'Bienvenue sur wishlist 👋', variant: 'default' });
@@ -34,37 +50,34 @@ export const RegisterPage = () => {
     );
   };
 
-  const onSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  const onSubmit = async (data: FormFields) => {
     try {
-      await api.user.register({
-        email,
-        firstname,
-        lastname,
-        password,
-      });
-      const data = await api.auth.login({ email, password });
-      handleRegisterSuccess(data);
+      await api.user.register(data);
+      const result = await api.auth.login({ email: data.email, password: data.password });
+      handleRegisterSuccess(result);
     } catch (e) {
-      addToast({ message: "Une erreur s'est produite", variant: 'error' });
-      setLoading(false);
+      if (e instanceof AxiosError && e.response?.status === 422) {
+        setError('root', { message: 'Cet email est déjà utilisé' });
+      } else {
+        setError('root', { message: "Une erreur s'est produite." });
+      }
     }
   };
 
   const onGoogleRegisterSuccess = async (credentialResponse: CredentialResponse) => {
-    setLoading(true);
+    setSocialLoading(true);
     try {
       await api.user.registerWithGoogle({ credential: credentialResponse.credential || '' });
       const data = await api.auth.loginWithGoogle({ credential: credentialResponse.credential || '' });
       handleRegisterSuccess(data);
     } catch (e) {
       addToast({ message: "Une erreur s'est produite", variant: 'error' });
-      setLoading(false);
+      setSocialLoading(false);
     }
   };
 
   const onGoogleRegisterFailure = () => {
+    setSocialLoading(false);
     addToast({ message: "Une erreur s'est produite", variant: 'error' });
   };
 
@@ -72,36 +85,32 @@ export const RegisterPage = () => {
     <>
       <Card sx={{ width: '100%' }}>
         <Subtitle>Inscription</Subtitle>
-        <Stack component="form" onSubmit={onSubmit} gap={3}>
+        <Stack component="form" onSubmit={handleSubmit(onSubmit)} gap={3}>
+          {formErrors.root && <Alert severity="error">{formErrors.root.message}</Alert>}
+
           <Stack direction="row" flexWrap="wrap" gap={3}>
             <Box sx={{ flexGrow: 1 }}>
               <InputLabel required>Prénom</InputLabel>
               <TextField
-                required
-                disabled={loading}
+                {...register('firstname')}
                 fullWidth
-                value={firstname}
                 autoFocus
-                inputProps={{ maxLength: 50 }}
                 placeholder="Mon Prénom"
                 autoComplete="given-name"
-                helperText={<CharsRemaining max={50} value={firstname} />}
-                onChange={(e) => setFirstname(e.target.value)}
+                error={!!formErrors.firstname}
+                helperText={formErrors.firstname?.message}
               />
             </Box>
 
             <Box sx={{ flexGrow: 1 }}>
               <InputLabel required>Nom</InputLabel>
               <TextField
-                required
-                disabled={loading}
+                {...register('lastname')}
                 fullWidth
-                value={lastname}
-                inputProps={{ maxLength: 50 }}
                 placeholder="Mon Nom"
                 autoComplete="family-name"
-                helperText={<CharsRemaining max={50} value={lastname} />}
-                onChange={(e) => setLastname(e.target.value)}
+                error={!!formErrors.lastname}
+                helperText={formErrors.lastname?.message}
               />
             </Box>
           </Stack>
@@ -109,31 +118,25 @@ export const RegisterPage = () => {
           <Box>
             <InputLabel required>Email</InputLabel>
             <TextField
+              {...register('email')}
               type="email"
-              required
               fullWidth
-              disabled={loading}
               placeholder="Mon adresse email"
               autoComplete="email"
-              value={email}
-              inputProps={{ maxLength: 200 }}
-              helperText={<CharsRemaining max={200} value={email} />}
-              onChange={(e) => setEmail(e.target.value)}
+              error={!!formErrors.email}
+              helperText={formErrors.email?.message}
             />
           </Box>
           <Box>
             <InputLabel required>Mot de passe</InputLabel>
             <TextField
-              required
+              {...register('password')}
               fullWidth
               placeholder="Un super mot de passe"
               type="password"
-              disabled={loading}
               autoComplete="new-password"
-              helperText="8 caractères minimum"
-              value={password}
-              inputProps={{ maxLength: 50, minLength: 8 }}
-              onChange={(e) => setPassword(e.target.value)}
+              error={!!formErrors.password}
+              helperText={formErrors.password?.message}
             />
           </Box>
           <Stack alignItems="center" gap={2}>
@@ -142,10 +145,10 @@ export const RegisterPage = () => {
               variant="contained"
               size="large"
               color="secondary"
-              loading={loading}
+              loading={isSubmitting}
               loadingPosition="start"
               startIcon={<PersonAddIcon />}
-              disabled={loading}
+              disabled={isSubmitting || socialLoading}
             >
               M'inscrire
             </LoadingButton>

@@ -1,7 +1,7 @@
-import { Box, Stack, TextField } from '@mui/material';
+import { Alert, Box, Stack, TextField } from '@mui/material';
 import { getUrlParameter, RouterLink, useApi, useToast } from '@wishlist/common-front';
 import { useDispatch } from 'react-redux';
-import React, { FormEvent, useState } from 'react';
+import React, { useState } from 'react';
 import { setTokens } from '../../core/store/features';
 import { wishlistApiRef } from '../../core/api/wishlist.api';
 import { Card } from '../common/Card';
@@ -11,14 +11,35 @@ import { Subtitle } from '../common/Subtitle';
 import LoginIcon from '@mui/icons-material/Login';
 import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
 import { LoginOutputDto } from '@wishlist/common-types';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { AxiosError } from 'axios';
+
+const schema = z.object({
+  email: z.string().email({ message: 'Email invalide' }),
+  password: z.string().min(1, { message: '1 caractère minimum' }),
+});
+
+type FormFields = z.infer<typeof schema>;
 
 export const LoginPage = () => {
   const api = useApi(wishlistApiRef);
   const dispatch = useDispatch();
   const { addToast } = useToast();
-  const [email, setEmail] = useState(getUrlParameter('email') || '');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [socialLoading, setSocialLoading] = useState(false);
+  const {
+    register,
+    setError,
+    handleSubmit,
+    formState: { isSubmitting, errors: formErrors },
+  } = useForm<FormFields>({
+    resolver: zodResolver(schema),
+    values: {
+      email: getUrlParameter('email') || '',
+      password: '',
+    },
+  });
 
   const handleLoginSuccess = (param: LoginOutputDto) => {
     addToast({ message: 'Heureux de vous revoir 🤓', variant: 'default' });
@@ -31,38 +52,32 @@ export const LoginPage = () => {
     );
   };
 
-  const onSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  const onSubmit = async (data: FormFields) => {
     try {
-      const data = await api.auth.login({ email, password });
-      handleLoginSuccess(data);
+      const result = await api.auth.login(data);
+      handleLoginSuccess(result);
     } catch (e) {
-      addToast({
-        message: (
-          <>
-            <span>Une erreur s'est produite. Vérifiez vos identifiants</span>&nbsp;<b>email / mot de passe</b>
-          </>
-        ),
-        variant: 'error',
-      });
-    } finally {
-      setLoading(false);
+      if (e instanceof AxiosError && (e.response?.status === 401 || e.response?.status === 403)) {
+        setError('root', { message: 'Email ou mot de passe incorrect' });
+      } else {
+        setError('root', { message: "Une erreur s'est produite." });
+      }
     }
   };
 
   const onGoogleLoginSuccess = async (credentialResponse: CredentialResponse) => {
     try {
-      setLoading(true);
+      setSocialLoading(true);
       const data = await api.auth.loginWithGoogle({ credential: credentialResponse.credential || '' });
       handleLoginSuccess(data);
     } catch (e) {
-      setLoading(false);
+      setSocialLoading(false);
       addToast({ message: "Une erreur s'est produite", variant: 'error' });
     }
   };
 
   const onGoogleLoginFailure = () => {
+    setSocialLoading(false);
     addToast({ message: "Une erreur s'est produite", variant: 'error' });
   };
 
@@ -70,33 +85,32 @@ export const LoginPage = () => {
     <>
       <Card sx={{ width: '100%' }}>
         <Subtitle>Connexion</Subtitle>
-        <Stack component="form" onSubmit={onSubmit} gap={3}>
+
+        <Stack component="form" onSubmit={handleSubmit(onSubmit)} gap={3}>
+          {formErrors.root && <Alert severity="error">{formErrors.root.message}</Alert>}
+
           <Box>
             <InputLabel required>Email</InputLabel>
             <TextField
+              {...register('email')}
               type="email"
-              required
               fullWidth
-              disabled={loading}
               placeholder="Entrer l'email que vous avez utilisé lors de l'inscription"
               autoComplete="email"
-              autoFocus={email === ''}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              error={!!formErrors.email}
+              helperText={formErrors.email?.message}
             />
           </Box>
           <Box>
             <InputLabel required>Mot de passe</InputLabel>
             <TextField
-              required
+              {...register('password')}
+              type="password"
               fullWidth
               placeholder="Mon mot de passe"
-              type="password"
-              autoFocus={email !== ''}
-              disabled={loading}
               autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              error={!!formErrors.password}
+              helperText={formErrors.password?.message}
             />
           </Box>
           <Stack alignItems="center" gap={2}>
@@ -105,10 +119,10 @@ export const LoginPage = () => {
               variant="contained"
               size="large"
               color="secondary"
-              loading={loading}
+              loading={isSubmitting}
               loadingPosition="start"
               startIcon={<LoginIcon />}
-              disabled={loading}
+              disabled={isSubmitting || socialLoading}
             >
               Me connecter
             </LoadingButton>
