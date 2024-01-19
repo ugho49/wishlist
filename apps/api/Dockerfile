@@ -11,13 +11,15 @@ COPY . .
 RUN yarn --immutable
 
 RUN yarn nx run api:build:production
-RUN mv node_modules dist/apps/api/node_modules
-RUN cd dist/apps/api && yarn workspaces focus --production
+
+RUN yarn workspaces focus --production
 
 FROM base as production
 
 WORKDIR /usr/src/app
 
+COPY --from=builder /usr/src/app/package.json ./package.json
+COPY --from=builder /usr/src/app/node_modules node_modules
 COPY --from=builder /usr/src/app/dist ./dist
 
 CMD ["node", "dist/apps/api/main"]
