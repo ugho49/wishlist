@@ -13,11 +13,8 @@
       "inputs": ["default", "^default"],
       "cache": true
     },
-    "lint": {
+    "@nx/eslint:lint": {
       "inputs": ["default", "{workspaceRoot}/.eslintrc.json", "{workspaceRoot}/.eslintignore"],
-      "cache": true
-    },
-    "e2e": {
       "cache": true
     }
   },
