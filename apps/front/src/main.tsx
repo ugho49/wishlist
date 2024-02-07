@@ -14,14 +14,18 @@ import { SnackbarProvider } from 'notistack';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { environment } from './environments/environment';
 
-const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
+function main() {
+  const needRedirect =
+    window.location.hostname === 'wishlist-stephan.web.app' ||
+    window.location.hostname === 'wishlist-stephan.firebaseapp.com';
 
-if (
-  window.location.hostname === 'wishlist-stephan.web.app' ||
-  window.location.hostname === 'wishlist-stephan.firebaseapp.com'
-) {
-  window.location.href = 'https://wishlistapp.fr';
-} else {
+  if (needRedirect) {
+    window.location.href = 'https://wishlistapp.fr';
+    return;
+  }
+
+  const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
+
   root.render(
     <ApiProvider apis={apis}>
       <Provider store={store}>
@@ -44,6 +48,8 @@ if (
           </LocalizationProvider>
         </ThemeProvider>
       </Provider>
-    </ApiProvider>
+    </ApiProvider>,
   );
 }
+
+main();
