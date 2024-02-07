@@ -1,4 +1,4 @@
-export { ClientService } from './client.service';
+export { ApiClient } from './api-client';
 
 export type { AuthService } from './modules/auth.service';
 export type { UserService } from './modules/user.service';

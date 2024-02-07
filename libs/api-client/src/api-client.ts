@@ -13,7 +13,7 @@ type ClientServiceParams = {
   timeoutInMs?: number;
 };
 
-export class ClientService {
+export class ApiClient {
   private client: AxiosInstance;
 
   constructor(private readonly params: ClientServiceParams) {

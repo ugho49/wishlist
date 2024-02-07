@@ -13,7 +13,8 @@ import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon';
 import { SnackbarProvider } from 'notistack';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { environment } from './environments/environment';
-import { ClientService } from '@wishlist/api-client';
+import { ApiClient } from '@wishlist/api-client';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 function main() {
   const needRedirect =
@@ -26,34 +27,37 @@ function main() {
   }
 
   const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
-  const api = new ClientService({
+  const queryClient = new QueryClient();
+  const api = new ApiClient({
     baseURL: environment.baseUrl,
     timeoutInMs: 10_000, // 10 seconds
   });
 
   root.render(
-    <ApiProvider api={api}>
-      <ReduxProvider store={store}>
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
-          <LocalizationProvider dateAdapter={AdapterLuxon} adapterLocale="fr">
-            <BrowserRouter>
-              <SnackbarProvider
-                maxSnack={3}
-                autoHideDuration={3_000}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                preventDuplicate
-              >
-                <AxiosInterceptor />
-                <GoogleOAuthProvider clientId={environment.googleClientId}>
-                  <App />
-                </GoogleOAuthProvider>
-              </SnackbarProvider>
-            </BrowserRouter>
-          </LocalizationProvider>
-        </ThemeProvider>
-      </ReduxProvider>
-    </ApiProvider>,
+    <QueryClientProvider client={queryClient}>
+      <ApiProvider api={api}>
+        <ReduxProvider store={store}>
+          <ThemeProvider theme={theme}>
+            <CssBaseline />
+            <LocalizationProvider dateAdapter={AdapterLuxon} adapterLocale="fr">
+              <BrowserRouter>
+                <SnackbarProvider
+                  maxSnack={3}
+                  autoHideDuration={3_000}
+                  anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                  preventDuplicate
+                >
+                  <AxiosInterceptor />
+                  <GoogleOAuthProvider clientId={environment.googleClientId}>
+                    <App />
+                  </GoogleOAuthProvider>
+                </SnackbarProvider>
+              </BrowserRouter>
+            </LocalizationProvider>
+          </ThemeProvider>
+        </ReduxProvider>
+      </ApiProvider>
+    </QueryClientProvider>,
   );
 }
 
