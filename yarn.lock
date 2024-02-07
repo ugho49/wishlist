@@ -4806,6 +4806,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tanstack/query-core@npm:5.18.1":
+  version: 5.18.1
+  resolution: "@tanstack/query-core@npm:5.18.1"
+  checksum: 10c0/3fca6ae577ce39a14971ac60c8540f04a0c5a22e96cecaed1da7b47bdba79f2d8dc09c572995d068e2dc9bf685edb4114f1ca1317680b3acb398ceabd95a74bb
+  languageName: node
+  linkType: hard
+
+"@tanstack/react-query@npm:5.18.1":
+  version: 5.18.1
+  resolution: "@tanstack/react-query@npm:5.18.1"
+  dependencies:
+    "@tanstack/query-core": "npm:5.18.1"
+  peerDependencies:
+    react: ^18.0.0
+  checksum: 10c0/e017f6d3f57a7690707868955c1a630838f5225f42ea4c63d41a2ed15813b2b156a4e2be99f3c4a4590916564d289d4c8f084e68ef12c68bce9216215b0026ff
+  languageName: node
+  linkType: hard
+
 "@testing-library/dom@npm:^9.0.0":
   version: 9.3.3
   resolution: "@testing-library/dom@npm:9.3.3"
@@ -20798,6 +20816,7 @@ __metadata:
     "@nx/workspace": "npm:17.1.3"
     "@react-oauth/google": "npm:0.12.1"
     "@reduxjs/toolkit": "npm:1.9.7"
+    "@tanstack/react-query": "npm:5.18.1"
     "@testing-library/react": "npm:14.1.2"
     "@types/bcrypt": "npm:5.0.2"
     "@types/cron": "npm:2.4.0"

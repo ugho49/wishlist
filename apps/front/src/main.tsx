@@ -13,37 +13,47 @@ import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon';
 import { SnackbarProvider } from 'notistack';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { environment } from './environments/environment';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
+function main() {
+  const needRedirect =
+    window.location.hostname === 'wishlist-stephan.web.app' ||
+    window.location.hostname === 'wishlist-stephan.firebaseapp.com';
 
-if (
-  window.location.hostname === 'wishlist-stephan.web.app' ||
-  window.location.hostname === 'wishlist-stephan.firebaseapp.com'
-) {
-  window.location.href = 'https://wishlistapp.fr';
-} else {
+  if (needRedirect) {
+    window.location.href = 'https://wishlistapp.fr';
+    return;
+  }
+
+  const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
+  const queryClient = new QueryClient();
+
   root.render(
     <ApiProvider apis={apis}>
-      <Provider store={store}>
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
-          <LocalizationProvider dateAdapter={AdapterLuxon} adapterLocale="fr">
-            <BrowserRouter>
-              <SnackbarProvider
-                maxSnack={3}
-                autoHideDuration={3_000}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                preventDuplicate
-              >
-                <AxiosInterceptor />
-                <GoogleOAuthProvider clientId={environment.googleClientId}>
-                  <App />
-                </GoogleOAuthProvider>
-              </SnackbarProvider>
-            </BrowserRouter>
-          </LocalizationProvider>
-        </ThemeProvider>
-      </Provider>
-    </ApiProvider>
+      <QueryClientProvider client={queryClient}>
+        <Provider store={store}>
+          <ThemeProvider theme={theme}>
+            <CssBaseline />
+            <LocalizationProvider dateAdapter={AdapterLuxon} adapterLocale="fr">
+              <BrowserRouter>
+                <SnackbarProvider
+                  maxSnack={3}
+                  autoHideDuration={3_000}
+                  anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                  preventDuplicate
+                >
+                  <AxiosInterceptor />
+                  <GoogleOAuthProvider clientId={environment.googleClientId}>
+                    <App />
+                  </GoogleOAuthProvider>
+                </SnackbarProvider>
+              </BrowserRouter>
+            </LocalizationProvider>
+          </ThemeProvider>
+        </Provider>
+      </QueryClientProvider>
+    </ApiProvider>,
   );
 }
+
+main();
