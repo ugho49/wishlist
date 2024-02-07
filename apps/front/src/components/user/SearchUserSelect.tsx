@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { Autocomplete, Avatar, createFilterOptions, Stack, TextField } from '@mui/material';
 import { MiniUserDto } from '@wishlist/common-types';
 import { debounce, uniqBy } from 'lodash';
-import { isValidEmail, useApi } from '@wishlist/common-front';
-import { wishlistApiRef } from '../../core/api/wishlist.api';
+import { isValidEmail } from '@wishlist/common-front';
+import { useApi } from '@wishlist-front/hooks';
 import { blue, orange } from '@mui/material/colors';
 import PersonIcon from '@mui/icons-material/Person';
 
@@ -17,7 +17,7 @@ export type SearchUserSelectProps = {
 };
 
 export const SearchUserSelect = ({ disabled, onChange, excludedEmails }: SearchUserSelectProps) => {
-  const api = useApi(wishlistApiRef);
+  const api = useApi();
   const [loading, setLoading] = useState(false);
   const [options, setOptions] = useState<UserOptionType[]>([]);
 

@@ -1,13 +1,13 @@
 import React, { FormEvent, useState } from 'react';
-import { useApi, useToast } from '@wishlist/common-front';
-import { wishlistApiRef } from '../../core/api/wishlist.api';
+import { useToast } from '@wishlist/common-front';
+import { useApi } from '@wishlist-front/hooks';
 import { Alert, Box, Stack, TextField } from '@mui/material';
 import { InputLabel } from '../common/InputLabel';
 import { LoadingButton } from '@mui/lab';
 import SaveIcon from '@mui/icons-material/Save';
 
 export const UserTabPassword = () => {
-  const api = useApi(wishlistApiRef);
+  const api = useApi();
   const [loading, setLoading] = useState(false);
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');

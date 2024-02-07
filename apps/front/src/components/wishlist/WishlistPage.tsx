@@ -4,8 +4,8 @@ import { Title } from '../common/Title';
 import { Loader } from '../common/Loader';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAsync } from 'react-use';
-import { RouterLink, useApi, useToast } from '@wishlist/common-front';
-import { wishlistApiRef } from '../../core/api/wishlist.api';
+import { RouterLink, useToast } from '@wishlist/common-front';
+import { useApi } from '@wishlist-front/hooks';
 import { WishlistItems } from './WishlistItems';
 import PublicIcon from '@mui/icons-material/Public';
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
@@ -27,7 +27,7 @@ export const WishlistPage = () => {
   const [openEventDialog, setOpenEventDialog] = useState(false);
   const params = useParams<'wishlistId'>();
   const wishlistId = params.wishlistId || '';
-  const api = useApi(wishlistApiRef);
+  const api = useApi();
   const navigate = useNavigate();
 
   const { value: wishlist, loading } = useAsync(() => api.wishlist.getById(wishlistId), [wishlistId]);

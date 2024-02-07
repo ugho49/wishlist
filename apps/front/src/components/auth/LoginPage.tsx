@@ -1,9 +1,8 @@
 import { Alert, Box, Stack, TextField } from '@mui/material';
-import { getUrlParameter, RouterLink, useApi, useToast } from '@wishlist/common-front';
+import { getUrlParameter, RouterLink, useToast } from '@wishlist/common-front';
 import { useDispatch } from 'react-redux';
 import React, { useState } from 'react';
 import { setTokens } from '../../core/store/features';
-import { wishlistApiRef } from '../../core/api/wishlist.api';
 import { Card } from '../common/Card';
 import { LoadingButton } from '@mui/lab';
 import { InputLabel } from '../common/InputLabel';
@@ -15,6 +14,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { AxiosError } from 'axios';
+import { useApi } from '@wishlist-front/hooks';
 
 const schema = z.object({
   email: z.string().email({ message: 'Email invalide' }),
@@ -24,7 +24,7 @@ const schema = z.object({
 type FormFields = z.infer<typeof schema>;
 
 export const LoginPage = () => {
-  const api = useApi(wishlistApiRef);
+  const api = useApi();
   const dispatch = useDispatch();
   const { addToast } = useToast();
   const [socialLoading, setSocialLoading] = useState(false);

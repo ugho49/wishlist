@@ -1,4 +1,4 @@
-export { ClientService, ClientServiceParams } from './client.service';
+export { ClientService } from './client.service';
 
 export type { AuthService } from './modules/auth.service';
 export type { UserService } from './modules/user.service';

@@ -27,14 +27,14 @@ import { AttendeeRole, MiniUserDto } from '@wishlist/common-types';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { LoadingButton } from '@mui/lab';
 import SaveIcon from '@mui/icons-material/Save';
-import { useApi, useToast } from '@wishlist/common-front';
-import { wishlistApiRef } from '../../core/api/wishlist.api';
+import { useToast } from '@wishlist/common-front';
 import { useNavigate } from 'react-router-dom';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import { RootState } from '../../core';
 import { useSelector } from 'react-redux';
 import { Card } from '../common/Card';
+import { useApi } from '@wishlist-front/hooks';
 
 const steps = ['Informations', 'Participants'];
 
@@ -46,7 +46,7 @@ type Attendee = {
 const mapState = (state: RootState) => ({ currentUserEmail: state.auth.user?.email });
 
 export const CreateEventPage = () => {
-  const api = useApi(wishlistApiRef);
+  const api = useApi();
   const { currentUserEmail } = useSelector(mapState);
   const { addToast } = useToast();
   const navigate = useNavigate();

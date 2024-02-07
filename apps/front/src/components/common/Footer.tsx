@@ -15,8 +15,7 @@ import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import { RootState } from '../../core';
 import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles } from '@mui/styles';
-import { useApi } from '@wishlist/common-front';
-import { wishlistApiRef } from '../../core/api/wishlist.api';
+import { useApi } from '@wishlist-front/hooks';
 import { setUser } from '../../core/store/features';
 
 const mapState = (state: RootState) => ({ user: state.auth.user, pictureUrl: state.userProfile.pictureUrl });
@@ -49,14 +48,14 @@ export const Footer = () => {
   const [currentNavigation, setCurrentNavigation] = useState('');
   const navigate = useNavigate();
   const location = useLocation();
-  const api = useApi(wishlistApiRef);
+  const api = useApi();
   const dispatch = useDispatch();
 
   useEffect(() => {
     api.user
       .getInfo()
       .then((user) =>
-        dispatch(setUser({ firstName: user.firstname, lastName: user.lastname, pictureUrl: user.picture_url }))
+        dispatch(setUser({ firstName: user.firstname, lastName: user.lastname, pictureUrl: user.picture_url })),
       );
   }, [api, dispatch]);
 

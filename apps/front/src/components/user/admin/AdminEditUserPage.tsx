@@ -3,8 +3,8 @@ import React, { FormEvent, useEffect, useState } from 'react';
 import { Loader } from '../../common/Loader';
 import { Title } from '../../common/Title';
 import { useAsync } from 'react-use';
-import { useApi, useToast } from '@wishlist/common-front';
-import { wishlistApiRef } from '../../../core/api/wishlist.api';
+import { useToast } from '@wishlist/common-front';
+import { useApi } from '@wishlist-front/hooks';
 import { useParams } from 'react-router-dom';
 import { InputLabel } from '../../common/InputLabel';
 import { DateTime } from 'luxon';
@@ -32,11 +32,11 @@ export const AdminEditUserPage = () => {
   const { currentUser } = useSelector(mapState);
   const params = useParams<'userId'>();
   const userId = params.userId || '';
-  const api = useApi(wishlistApiRef);
+  const { admin: api } = useApi();
   const theme = useTheme();
   const smallScreen = useMediaQuery(theme.breakpoints.down('md'));
   const [loading, setLoading] = useState(false);
-  const { value, loading: loadingUser } = useAsync(() => api.user.admin.getById(userId), [userId]);
+  const { value, loading: loadingUser } = useAsync(() => api.user.getById(userId), [userId]);
   const [email, setEmail] = useState('');
   const [firstname, setFirstname] = useState('');
   const [lastname, setLastname] = useState('');
@@ -62,7 +62,7 @@ export const AdminEditUserPage = () => {
     setLoading(true);
     setEnabled(false);
     try {
-      await api.user.admin.update(userId, { is_enabled: false });
+      await api.user.update(userId, { is_enabled: false });
       addToast({ message: 'Utilisateur désactivé', variant: 'success' });
     } catch (e) {
       addToast({ message: "Une erreur s'est produite", variant: 'error' });
@@ -75,7 +75,7 @@ export const AdminEditUserPage = () => {
     setLoading(true);
     setEnabled(true);
     try {
-      await api.user.admin.update(userId, { is_enabled: true });
+      await api.user.update(userId, { is_enabled: true });
       addToast({ message: 'Utilisateur activé', variant: 'success' });
     } catch (e) {
       addToast({ message: "Une erreur s'est produite", variant: 'error' });
@@ -88,7 +88,7 @@ export const AdminEditUserPage = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      await api.user.admin.update(userId, {
+      await api.user.update(userId, {
         firstname,
         lastname,
         birthday: birthday !== null ? new Date(birthday.toISODate() || '') : undefined,
@@ -129,9 +129,9 @@ export const AdminEditUserPage = () => {
                     pictureUrl={pictureUrl}
                     socials={[]}
                     onPictureUpdated={(url) => setPictureUrl(url || '')}
-                    uploadPictureHandler={(file) => api.user.admin.uploadPicture(userId, file)}
+                    uploadPictureHandler={(file) => api.user.uploadPicture(userId, file)}
                     updatePictureFromSocialHandler={() => Promise.resolve()}
-                    deletePictureHandler={() => api.user.admin.deletePicture(userId)}
+                    deletePictureHandler={() => api.user.deletePicture(userId)}
                   />
                 </ListItemIcon>
                 <ListItemText primary={`${firstname} ${lastname}`} secondary={email} />

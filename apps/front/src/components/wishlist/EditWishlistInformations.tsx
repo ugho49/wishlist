@@ -1,8 +1,8 @@
 import React, { FormEvent, useState } from 'react';
 import { DetailedWishlistDto, UpdateWishlistInputDto } from '@wishlist/common-types';
 import { Box, Stack, TextField } from '@mui/material';
-import { useApi, useToast } from '@wishlist/common-front';
-import { wishlistApiRef } from '../../core/api/wishlist.api';
+import { useToast } from '@wishlist/common-front';
+import { useApi } from '@wishlist-front/hooks';
 import { InputLabel } from '../common/InputLabel';
 import { CharsRemaining } from '../common/CharsRemaining';
 import { LoadingButton } from '@mui/lab';
@@ -16,7 +16,7 @@ export type EditWishlistInformationsProps = {
 
 export const EditWishlistInformations = ({ wishlist, onChange }: EditWishlistInformationsProps) => {
   const [loading, setLoading] = useState(false);
-  const api = useApi(wishlistApiRef);
+  const api = useApi();
   const { addToast } = useToast();
   const [title, setTitle] = useState(wishlist.title);
   const [description, setDescription] = useState(wishlist.description);

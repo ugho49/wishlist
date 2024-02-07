@@ -1,7 +1,7 @@
 import React, { FormEvent, useEffect, useState } from 'react';
 import { Box, Stack, TextField } from '@mui/material';
-import { useApi, useToast } from '@wishlist/common-front';
-import { wishlistApiRef } from '../../core/api/wishlist.api';
+import { useToast } from '@wishlist/common-front';
+import { useApi } from '@wishlist-front/hooks';
 import { InputLabel } from '../common/InputLabel';
 import { CharsRemaining } from '../common/CharsRemaining';
 import { DateTime } from 'luxon';
@@ -25,7 +25,7 @@ export const UserTabInformations = () => {
   const theme = useTheme();
   const dispatch = useDispatch();
   const smallScreen = useMediaQuery(theme.breakpoints.down('md'));
-  const api = useApi(wishlistApiRef);
+  const api = useApi();
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [firstname, setFirstname] = useState('');

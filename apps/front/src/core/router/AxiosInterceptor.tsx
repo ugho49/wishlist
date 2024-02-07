@@ -2,18 +2,18 @@ import React, { useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { RootState } from '../store';
-import { useApi, useToast } from '@wishlist/common-front';
+import { useToast } from '@wishlist/common-front';
 import { useInterval } from 'usehooks-ts';
 import { AuthService } from '../services/auth.service';
 import { logout } from '../store/features';
-import { wishlistApiRef } from '../api/wishlist.api';
+import { useApi } from '@wishlist-front/hooks';
 
 const mapState = (state: RootState) => ({ accessToken: state.auth.accessToken });
 const accessTokenService = new AuthService().accessTokenService;
 
 export const AxiosInterceptor: React.FC = () => {
   const { accessToken } = useSelector(mapState);
-  const { axios } = useApi(wishlistApiRef);
+  const api = useApi();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { addToast } = useToast();
@@ -41,11 +41,11 @@ export const AxiosInterceptor: React.FC = () => {
 
   useEffect(() => {
     if (accessToken) {
-      axios.setAuthorizationHeader(`Bearer ${accessToken}`);
+      api.setAccessToken(accessToken);
     } else {
-      axios.removeAuthorizationHeader();
+      api.removeUserToken();
     }
-  }, [axios, accessToken]);
+  }, [api, accessToken]);
 
   return null;
 };

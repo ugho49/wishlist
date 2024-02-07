@@ -8,7 +8,7 @@ import { EventService } from './modules/event.service';
 import { ItemService } from './modules/item.service';
 import { AttendeeService } from './modules/attendee.service';
 
-export type ClientServiceParams = {
+type ClientServiceParams = {
   baseURL: string;
   timeoutInMs?: number;
 };
@@ -20,31 +20,31 @@ export class ClientService {
     this.client = this.getNewInstance({});
   }
 
-  auth() {
+  get auth() {
     return new AuthService({ getClient: () => this.client });
   }
 
-  user() {
+  get user() {
     return new UserService({ getClient: () => this.client });
   }
 
-  wishlist() {
+  get wishlist() {
     return new WishlistService({ getClient: () => this.client });
   }
 
-  event() {
+  get event() {
     return new EventService({ getClient: () => this.client });
   }
 
-  item() {
+  get item() {
     return new ItemService({ getClient: () => this.client });
   }
 
-  attendee() {
+  get attendee() {
     return new AttendeeService({ getClient: () => this.client });
   }
 
-  admin() {
+  get admin() {
     return {
       user: new AdminUserService({ getClient: () => this.client }),
       event: new AdminEventService({ getClient: () => this.client }),

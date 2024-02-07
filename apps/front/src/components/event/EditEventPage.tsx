@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useApi, useCustomSearchParams } from '@wishlist/common-front';
-import { wishlistApiRef } from '../../core/api/wishlist.api';
+import { useCustomSearchParams } from '@wishlist/common-front';
 import { useAsync } from 'react-use';
 import { Box, Tab, Tabs } from '@mui/material';
 import { Loader } from '../common/Loader';
@@ -13,6 +12,7 @@ import PeopleIcon from '@mui/icons-material/People';
 import { EditEventInformations } from './EditEventInformations';
 import { DetailedEventDto } from '@wishlist/common-types';
 import { EditEventAttendees } from './EditEventAttendees';
+import { useApi } from '@wishlist-front/hooks';
 
 enum TabValues {
   informations = 'informations',
@@ -37,7 +37,7 @@ type SearchParamType = { tab: TabValues };
 export const EditEventPage = () => {
   const params = useParams<'eventId'>();
   const eventId = params.eventId || '';
-  const api = useApi(wishlistApiRef);
+  const api = useApi();
   const [event, setEvent] = useState<DetailedEventDto | undefined>(undefined);
   const [queryParams, setQueryParams] = useCustomSearchParams<SearchParamType>({ tab: tabs[0].value });
   const { value, loading } = useAsync(() => api.event.getById(eventId), [eventId]);

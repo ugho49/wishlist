@@ -1,13 +1,13 @@
 import React, { FormEvent, useState } from 'react';
-import { RouterLink, useApi, useCustomSearchParams, useToast } from '@wishlist/common-front';
+import { RouterLink, useCustomSearchParams, useToast } from '@wishlist/common-front';
 import { Card } from '../common/Card';
 import { Box, Stack, TextField } from '@mui/material';
 import { Subtitle } from '../common/Subtitle';
 import { InputLabel } from '../common/InputLabel';
 import { LoadingButton } from '@mui/lab';
-import { wishlistApiRef } from '../../core/api/wishlist.api';
 import SaveAsIcon from '@mui/icons-material/SaveAs';
 import { useNavigate } from 'react-router-dom';
+import { useApi } from '@wishlist-front/hooks';
 
 type SearchParamsType = {
   email?: string;
@@ -16,7 +16,7 @@ type SearchParamsType = {
 
 export const RenewForgotPasswordPage = () => {
   const [loading, setLoading] = useState(false);
-  const api = useApi(wishlistApiRef);
+  const api = useApi();
   const { addToast } = useToast();
   const navigate = useNavigate();
   const [queryParams] = useCustomSearchParams<SearchParamsType>();

@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { RouterLink, useApi } from '@wishlist/common-front';
-import { wishlistApiRef } from '../../../core/api/wishlist.api';
+import { RouterLink } from '@wishlist/common-front';
 import { useAsync } from 'react-use';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { EventWithCountsDto } from '@wishlist/common-types';
 import { DateTime } from 'luxon';
 import { Avatar, Stack } from '@mui/material';
+import { useApi } from '@wishlist-front/hooks';
 
 const columns: GridColDef<EventWithCountsDto>[] = [
   { field: 'title', headerName: 'Title', width: 170 },
@@ -65,11 +65,11 @@ const columns: GridColDef<EventWithCountsDto>[] = [
 ];
 
 export const AdminListEvents = () => {
-  const api = useApi(wishlistApiRef);
+  const { admin: api } = useApi();
   const [totalElements, setTotalElements] = useState(0);
   const [pageSize, setPageSize] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
-  const { value, loading } = useAsync(() => api.event.admin.getAll({ p: currentPage }), [currentPage]);
+  const { value, loading } = useAsync(() => api.event.getAll({ p: currentPage }), [currentPage]);
 
   useEffect(() => {
     if (value) {

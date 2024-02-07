@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { RouterLink, useApi, useCustomSearchParams } from '@wishlist/common-front';
-import { wishlistApiRef } from '../../core/api/wishlist.api';
+import { RouterLink, useCustomSearchParams } from '@wishlist/common-front';
 import { useAsync } from 'react-use';
 import { Box, Button, Grid, Stack } from '@mui/material';
 import { Title } from '../common/Title';
@@ -9,13 +8,14 @@ import { Pagination } from '../common/Pagination';
 import { Loader } from '../common/Loader';
 import AddIcon from '@mui/icons-material/Add';
 import { FabAutoGrow } from '../common/FabAutoGrow';
+import { useApi } from '@wishlist-front/hooks';
 
 type SearchType = { page: string };
 
 const CREATE_EVENT_ROUTE = '/events/new';
 
 export const EventListPage = () => {
-  const api = useApi(wishlistApiRef);
+  const api = useApi();
   const [totalElements, setTotalElements] = useState(0);
   const [queryParams, setQueryParams] = useCustomSearchParams<SearchType>({ page: '1' });
   const currentPage = useMemo(() => parseInt(queryParams.page || '1', 10), [queryParams]);

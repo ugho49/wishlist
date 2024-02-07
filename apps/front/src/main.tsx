@@ -1,10 +1,10 @@
 import 'reflect-metadata';
 import * as ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
-import { Provider } from 'react-redux';
+import { Provider as ReduxProvider } from 'react-redux';
 import { CssBaseline, ThemeProvider } from '@mui/material';
-import { ApiProvider } from '@wishlist/common-front';
-import { apis, store } from './core';
+import { store } from './core';
+import { ApiProvider } from './context/ApiContext';
 import { App } from './App';
 import { theme } from './theme';
 import { AxiosInterceptor } from './core/router/AxiosInterceptor';
@@ -13,6 +13,7 @@ import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon';
 import { SnackbarProvider } from 'notistack';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { environment } from './environments/environment';
+import { ClientService } from '@wishlist/api-client';
 
 function main() {
   const needRedirect =
@@ -25,10 +26,14 @@ function main() {
   }
 
   const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
+  const api = new ClientService({
+    baseURL: environment.baseUrl,
+    timeoutInMs: 10_000, // 10 seconds
+  });
 
   root.render(
-    <ApiProvider apis={apis}>
-      <Provider store={store}>
+    <ApiProvider api={api}>
+      <ReduxProvider store={store}>
         <ThemeProvider theme={theme}>
           <CssBaseline />
           <LocalizationProvider dateAdapter={AdapterLuxon} adapterLocale="fr">
@@ -47,7 +52,7 @@ function main() {
             </BrowserRouter>
           </LocalizationProvider>
         </ThemeProvider>
-      </Provider>
+      </ReduxProvider>
     </ApiProvider>,
   );
 }
