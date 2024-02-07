@@ -21,12 +21,12 @@ import SaveIcon from '@mui/icons-material/Save';
 import { CharsRemaining } from '../common/CharsRemaining';
 import { InputLabel } from '../common/InputLabel';
 import { LoadingButton } from '@mui/lab';
-import { isValidUrl } from '@wishlist/common-front';
 import { Rating } from '../common/Rating';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { TidyURL } from 'tidy-url';
 import { useApi, useToast } from '@wishlist-front/hooks';
+import { isValidUrl } from '../../utils/router.utils';
 
 const Transition = forwardRef((props: TransitionProps & { children: React.ReactElement }, ref: React.Ref<unknown>) => {
   const { children, ...other } = props;

@@ -1,5 +1,5 @@
 import React, { FormEvent, useState } from 'react';
-import { RouterLink } from '@wishlist/common-front';
+import { RouterLink } from '../common/RouterLink';
 import { Card } from '../common/Card';
 import { Box, Stack, TextField } from '@mui/material';
 import { Subtitle } from '../common/Subtitle';

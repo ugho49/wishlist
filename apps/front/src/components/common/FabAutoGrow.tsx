@@ -1,10 +1,10 @@
 import React from 'react';
 import { Box, Fab, fabClasses } from '@mui/material';
-import { RouterLink } from '@wishlist/common-front';
 import { makeStyles } from '@mui/styles';
 import { FabTypeMap } from '@mui/material/Fab/Fab';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
+import { RouterLink } from './RouterLink';
 
 const useStyles = makeStyles(() => ({
   fab: {

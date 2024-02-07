@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { RouterLink } from '@wishlist/common-front';
+import { RouterLink } from '../../common/RouterLink';
 import { useAsync } from 'react-use';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { EventWithCountsDto } from '@wishlist/common-types';

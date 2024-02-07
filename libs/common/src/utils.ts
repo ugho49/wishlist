@@ -11,3 +11,12 @@ export function camelCaseKeys(object: Record<string, unknown>) {
 }
 
 export const sleep = (x: number) => new Promise((r) => setTimeout(r, x));
+
+export const isValidEmail = (value: string): boolean => {
+  if (value.trim() === '') {
+    return false;
+  }
+  const emailRegexp =
+    /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  return emailRegexp.test(value);
+};

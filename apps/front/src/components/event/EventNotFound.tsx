@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Button, Stack } from '@mui/material';
 import { Title } from '../common/Title';
-import { RouterLink } from '@wishlist/common-front';
+import { RouterLink } from '../common/RouterLink';
 
 export const EventNotFound = () => {
   return (

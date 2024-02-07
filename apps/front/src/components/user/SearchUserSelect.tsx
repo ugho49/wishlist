@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Autocomplete, Avatar, createFilterOptions, Stack, TextField } from '@mui/material';
 import { MiniUserDto } from '@wishlist/common-types';
 import { debounce, uniqBy } from 'lodash';
-import { isValidEmail } from '@wishlist/common-front';
+import { isValidEmail } from '@wishlist/common';
 import { useApi } from '@wishlist-front/hooks';
 import { blue, orange } from '@mui/material/colors';
 import PersonIcon from '@mui/icons-material/Person';

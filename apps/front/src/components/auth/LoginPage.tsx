@@ -1,5 +1,5 @@
 import { Alert, Box, Stack, TextField } from '@mui/material';
-import { getUrlParameter, RouterLink } from '@wishlist/common-front';
+import { RouterLink } from '../common/RouterLink';
 import { useDispatch } from 'react-redux';
 import React, { useState } from 'react';
 import { setTokens } from '../../core/store/features';
@@ -15,6 +15,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { AxiosError } from 'axios';
 import { useApi, useToast } from '@wishlist-front/hooks';
+import { getUrlParameter } from '../../utils/router.utils';
 
 const schema = z.object({
   email: z.string().email({ message: 'Email invalide' }),

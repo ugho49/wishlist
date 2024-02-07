@@ -3,7 +3,7 @@ import { DetailedEventDto } from '@wishlist/common-types';
 import { Box, Button, Grid, Stack } from '@mui/material';
 import { FabAutoGrow } from '../common/FabAutoGrow';
 import AddIcon from '@mui/icons-material/Add';
-import { RouterLink } from '@wishlist/common-front';
+import { RouterLink } from '../common/RouterLink';
 import { InputLabel } from '../common/InputLabel';
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 import { WishlistCardWithOwner } from '../wishlist/WishlistCardWithOwner';

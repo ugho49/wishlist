@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Box, Button, Grid, Stack } from '@mui/material';
 import { Title } from '../common/Title';
-import { RouterLink } from '@wishlist/common-front';
+import { RouterLink } from '../common/RouterLink';
 import { useApi, useCustomSearchParams } from '@wishlist-front/hooks';
 import { useAsync } from 'react-use';
 import { Pagination } from '../common/Pagination';

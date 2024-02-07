@@ -1,7 +1,7 @@
 import { Box, Button, Stack } from '@mui/material';
 import React from 'react';
 import { Title } from '../common/Title';
-import { RouterLink } from '@wishlist/common-front';
+import { RouterLink } from '../common/RouterLink';
 
 export const WishlistNotFound = () => {
   return (

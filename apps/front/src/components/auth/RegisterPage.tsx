@@ -2,7 +2,7 @@ import { Card } from '../common/Card';
 import { Alert, Box, Stack, TextField } from '@mui/material';
 import { InputLabel } from '../common/InputLabel';
 import { LoadingButton } from '@mui/lab';
-import { RouterLink } from '@wishlist/common-front';
+import { RouterLink } from '../common/RouterLink';
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Subtitle } from '../common/Subtitle';

@@ -1,5 +1,5 @@
 import React, { FormEvent, useEffect, useState } from 'react';
-import { RouterLink } from '@wishlist/common-front';
+import { RouterLink } from '../../common/RouterLink';
 import { useApi } from '@wishlist-front/hooks';
 import { useAsync } from 'react-use';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';

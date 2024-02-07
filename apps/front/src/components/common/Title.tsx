@@ -2,7 +2,7 @@ import React, { PropsWithChildren } from 'react';
 import { linkClasses, Stack, Theme } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import clsx from 'clsx';
-import { RouterLink } from '@wishlist/common-front';
+import { RouterLink } from './RouterLink';
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 
 const useStyles = makeStyles((theme: Theme) => ({
