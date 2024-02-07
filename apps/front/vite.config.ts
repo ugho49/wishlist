@@ -1,12 +1,13 @@
+/// <reference types='vitest' />
 import { defineConfig, splitVendorChunkPlugin } from 'vite';
-import { defineConfig as defineTestConfig, mergeConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import svgr from 'vite-plugin-svgr';
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
 import browserslistToEsbuild from 'browserslist-to-esbuild';
 
-const viteConfig = defineConfig({
-  cacheDir: '../../node_modules/.vite/front',
+export default defineConfig({
+  root: __dirname,
+  cacheDir: '../../node_modules/.vite/apps/front',
 
   server: {
     port: 4200,
@@ -24,32 +25,32 @@ const viteConfig = defineConfig({
 
   build: {
     target: browserslistToEsbuild(),
+    outDir: '../../dist/apps/front',
+    reportCompressedSize: true,
+    commonjsOptions: {
+      transformMixedEsModules: true,
+    },
   },
 
   plugins: [react(), svgr(), splitVendorChunkPlugin(), nxViteTsPaths()],
 
   // Uncomment this if you are using workers.
   // worker: {
-  //  plugins: [
-  //    viteTsConfigPaths({
-  //      root: '../../',
-  //    }),
-  //  ],
+  //  plugins: [ nxViteTsPaths() ],
   // },
-});
 
-const vitestConfig = defineTestConfig({
   test: {
     globals: true,
     cache: {
       dir: '../../node_modules/.vitest',
     },
-    coverage: {
-      provider: 'v8',
-    },
     environment: 'jsdom',
     include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+
+    reporters: ['default'],
+    coverage: {
+      reportsDirectory: '../../coverage/apps/front',
+      provider: 'v8',
+    },
   },
 });
-
-export default mergeConfig(viteConfig, vitestConfig);

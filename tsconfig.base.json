@@ -17,11 +17,11 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
+      "@wishlist-front/hooks": ["apps/front/src/hooks/index.ts"],
+      "@wishlist/api-client": ["libs/api-client/src/index.ts"],
       "@wishlist/common": ["libs/common/src/index.ts"],
       "@wishlist/common-database": ["libs/common-database/src/index.ts"],
-      "@wishlist/common-types": ["libs/common-types/src/index.ts"],
-      "@wishlist/api-client": ["libs/api-client/src/index.ts"],
-      "@wishlist-front/hooks": ["apps/front/src/hooks/index.ts"]
+      "@wishlist/common-types": ["libs/common-types/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
