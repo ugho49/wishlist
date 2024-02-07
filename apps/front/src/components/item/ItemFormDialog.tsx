@@ -21,12 +21,12 @@ import SaveIcon from '@mui/icons-material/Save';
 import { CharsRemaining } from '../common/CharsRemaining';
 import { InputLabel } from '../common/InputLabel';
 import { LoadingButton } from '@mui/lab';
-import { isValidUrl, useApi, useToast } from '@wishlist/common-front';
-import { wishlistApiRef } from '../../core/api/wishlist.api';
+import { isValidUrl, useToast } from '@wishlist/common-front';
 import { Rating } from '../common/Rating';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { TidyURL } from 'tidy-url';
+import { useApi } from '@wishlist-front/hooks';
 
 const Transition = forwardRef((props: TransitionProps & { children: React.ReactElement }, ref: React.Ref<unknown>) => {
   const { children, ...other } = props;
@@ -36,8 +36,8 @@ const Transition = forwardRef((props: TransitionProps & { children: React.ReactE
 type ModeProps<T> = T extends 'create'
   ? { mode: 'create'; item?: never; handleCreate: (item: ItemDto) => void; handleUpdate?: never }
   : T extends 'edit'
-  ? { mode: 'edit'; item: ItemDto; handleCreate?: never; handleUpdate: (item: ItemDto) => void }
-  : never;
+    ? { mode: 'edit'; item: ItemDto; handleCreate?: never; handleUpdate: (item: ItemDto) => void }
+    : never;
 
 export type ItemFormDialogProps = (ModeProps<'create'> | ModeProps<'edit'>) & {
   open: boolean;
@@ -59,7 +59,7 @@ export const ItemFormDialog = ({
   const theme = useTheme();
   const smallScreen = useMediaQuery(theme.breakpoints.down('md'));
   const { addToast } = useToast();
-  const api = useApi(wishlistApiRef);
+  const api = useApi();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [url, setUrl] = useState('');

@@ -1,7 +1,7 @@
 import { Box, Checkbox, FormControlLabel, Stack, Typography } from '@mui/material';
 import React, { FormEvent, useEffect, useState } from 'react';
-import { useApi, useToast } from '@wishlist/common-front';
-import { wishlistApiRef } from '../../core/api/wishlist.api';
+import { useToast } from '@wishlist/common-front';
+import { useApi } from '@wishlist-front/hooks';
 import { useAsync } from 'react-use';
 import { Loader } from '../common/Loader';
 import { InputLabel } from '../common/InputLabel';
@@ -10,7 +10,7 @@ import SaveIcon from '@mui/icons-material/Save';
 
 export const UserTabNotifications = () => {
   const { addToast } = useToast();
-  const api = useApi(wishlistApiRef);
+  const api = useApi();
   const [loading, setLoading] = useState(false);
   const [dailyNewItemNotification, setDailyNewItemNotification] = useState(true);
 

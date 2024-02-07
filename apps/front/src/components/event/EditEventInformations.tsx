@@ -1,7 +1,6 @@
 import React, { FormEvent, useState } from 'react';
 import { DetailedEventDto, UpdateEventInputDto } from '@wishlist/common-types';
-import { useApi, useToast } from '@wishlist/common-front';
-import { wishlistApiRef } from '../../core/api/wishlist.api';
+import { useToast } from '@wishlist/common-front';
 import { DateTime } from 'luxon';
 import { Box, Stack, TextField } from '@mui/material';
 import { InputLabel } from '../common/InputLabel';
@@ -9,6 +8,7 @@ import { CharsRemaining } from '../common/CharsRemaining';
 import { LoadingButton } from '@mui/lab';
 import SaveIcon from '@mui/icons-material/Save';
 import { MobileDatePicker } from '@mui/x-date-pickers';
+import { useApi } from '@wishlist-front/hooks';
 
 export type EditEventInformationsProps = {
   event: DetailedEventDto;
@@ -17,7 +17,7 @@ export type EditEventInformationsProps = {
 
 export const EditEventInformations = ({ event, onChange }: EditEventInformationsProps) => {
   const [loading, setLoading] = useState(false);
-  const api = useApi(wishlistApiRef);
+  const api = useApi();
   const { addToast } = useToast();
   const [title, setTitle] = useState(event.title);
   const [description, setDescription] = useState(event.description);

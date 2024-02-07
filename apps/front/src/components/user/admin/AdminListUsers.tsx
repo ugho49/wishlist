@@ -1,6 +1,6 @@
 import React, { FormEvent, useEffect, useState } from 'react';
-import { RouterLink, useApi } from '@wishlist/common-front';
-import { wishlistApiRef } from '../../../core/api/wishlist.api';
+import { RouterLink } from '@wishlist/common-front';
+import { useApi } from '@wishlist-front/hooks';
 import { useAsync } from 'react-use';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { UserDto } from '@wishlist/common-types';
@@ -60,16 +60,13 @@ const columns: GridColDef<UserDto>[] = [
 ];
 
 export const AdminListUsers = () => {
-  const api = useApi(wishlistApiRef);
+  const { admin: api } = useApi();
   const [totalElements, setTotalElements] = useState(0);
   const [pageSize, setPageSize] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [inputSearch, setInputSearch] = useState('');
   const [search, setSearch] = useState('');
-  const { value, loading } = useAsync(
-    () => api.user.admin.getAll({ p: currentPage, q: search }),
-    [currentPage, search],
-  );
+  const { value, loading } = useAsync(() => api.user.getAll({ p: currentPage, q: search }), [currentPage, search]);
 
   useEffect(() => {
     if (value) {

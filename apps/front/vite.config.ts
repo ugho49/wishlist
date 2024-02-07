@@ -1,5 +1,5 @@
 import { defineConfig, splitVendorChunkPlugin } from 'vite';
-import { mergeConfig, defineConfig as defineTestConfig } from 'vitest/config';
+import { defineConfig as defineTestConfig, mergeConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import svgr from 'vite-plugin-svgr';
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';

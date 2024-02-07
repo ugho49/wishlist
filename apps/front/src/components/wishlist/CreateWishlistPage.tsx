@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useApi, useCustomSearchParams, useToast } from '@wishlist/common-front';
+import { useCustomSearchParams, useToast } from '@wishlist/common-front';
 import { MAX_EVENTS_BY_LIST, MiniEventDto } from '@wishlist/common-types';
-import { wishlistApiRef } from '../../core/api/wishlist.api';
+import { useApi } from '@wishlist-front/hooks';
 import { useAsync } from 'react-use';
 import { Title } from '../common/Title';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
@@ -58,7 +58,7 @@ export const CreateWishlistPage = () => {
   const [hideItems, setHideItems] = useState(true);
   const [events, setEvents] = useState<MiniEventDto[]>([]);
   const [logo, setLogo] = useState<File | undefined>();
-  const api = useApi(wishlistApiRef);
+  const api = useApi();
 
   const { value } = useAsync(() => api.event.getAll({ limit: 100, only_future: true }), []);
   const availableEvents = useMemo(() => value?.resources || [], [value]);

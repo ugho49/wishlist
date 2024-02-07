@@ -1,7 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { AddEventAttendeeInputDto, AttendeeDto, AttendeeRole, MiniUserDto } from '@wishlist/common-types';
-import { useApi, useToast } from '@wishlist/common-front';
-import { wishlistApiRef } from '../../core/api/wishlist.api';
+import { useToast } from '@wishlist/common-front';
 import { Avatar, Box, Divider, List, ListItem, ListItemAvatar, ListItemText, Stack } from '@mui/material';
 import { InputLabel } from '../common/InputLabel';
 import { SearchUserSelect } from '../user/SearchUserSelect';
@@ -12,6 +11,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { blue, green, orange } from '@mui/material/colors';
 import PersonIcon from '@mui/icons-material/Person';
 import { ConfirmIconButton } from '../common/ConfirmIconButton';
+import { useApi } from '@wishlist-front/hooks';
 
 export type EditEventAttendeesProps = {
   eventId: string;
@@ -24,7 +24,7 @@ const mapState = (state: RootState) => ({ currentUserEmail: state.auth.user?.ema
 
 export const EditEventAttendees = ({ eventId, creator, attendees, onChange }: EditEventAttendeesProps) => {
   const { currentUserEmail } = useSelector(mapState);
-  const api = useApi(wishlistApiRef);
+  const api = useApi();
   const [loading, setLoading] = useState(false);
   const { addToast } = useToast();
 

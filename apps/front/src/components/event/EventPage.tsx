@@ -4,8 +4,7 @@ import { Title } from '../common/Title';
 import { Loader } from '../common/Loader';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAsync } from 'react-use';
-import { RouterLink, useApi, useToast } from '@wishlist/common-front';
-import { wishlistApiRef } from '../../core/api/wishlist.api';
+import { RouterLink, useToast } from '@wishlist/common-front';
 import PeopleIcon from '@mui/icons-material/People';
 import { EventWishlists } from './EventWishlists';
 import { Description } from '../common/Description';
@@ -17,6 +16,7 @@ import { RootState } from '../../core';
 import { useSelector } from 'react-redux';
 import { EventAttendeesDialog } from './EventAttendeesDialog';
 import EditIcon from '@mui/icons-material/Edit';
+import { useApi } from '@wishlist-front/hooks';
 import { EventNotFound } from './EventNotFound';
 
 const mapState = (state: RootState) => ({ currentUserId: state.auth.user?.id });
@@ -26,7 +26,7 @@ export const EventPage = () => {
   const { addToast } = useToast();
   const params = useParams<'eventId'>();
   const eventId = params.eventId || '';
-  const api = useApi(wishlistApiRef);
+  const api = useApi();
   const { value: event, loading } = useAsync(() => api.event.getById(eventId), [eventId]);
   const nbAttendees = (event?.attendees || []).length + 1;
   const navigate = useNavigate();

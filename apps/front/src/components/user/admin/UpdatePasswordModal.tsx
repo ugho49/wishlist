@@ -9,8 +9,8 @@ import {
   TextField,
 } from '@mui/material';
 import React, { FormEvent, useState } from 'react';
-import { useApi, useToast } from '@wishlist/common-front';
-import { wishlistApiRef } from '../../../core/api/wishlist.api';
+import { useToast } from '@wishlist/common-front';
+import { useApi } from '@wishlist-front/hooks';
 
 export type UpdatePasswordModalProps = {
   open: boolean;
@@ -19,7 +19,7 @@ export type UpdatePasswordModalProps = {
 };
 
 export const UpdatePasswordModal = ({ onClose, open, userId }: UpdatePasswordModalProps) => {
-  const api = useApi(wishlistApiRef);
+  const { admin: api } = useApi();
   const [newPassword, setNewPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const { addToast } = useToast();
@@ -28,7 +28,7 @@ export const UpdatePasswordModal = ({ onClose, open, userId }: UpdatePasswordMod
     e.preventDefault();
     setLoading(true);
     try {
-      await api.user.admin.update(userId, { new_password: newPassword });
+      await api.user.update(userId, { new_password: newPassword });
       addToast({ message: 'Mot de passe mis à jour', variant: 'success' });
       setLoading(false);
       setNewPassword('');

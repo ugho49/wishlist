@@ -6,8 +6,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import { DateTime } from 'luxon';
 import { ConfirmIconButton } from '../common/ConfirmIconButton';
-import { useApi, useToast } from '@wishlist/common-front';
-import { wishlistApiRef } from '../../core/api/wishlist.api';
+import { useToast } from '@wishlist/common-front';
+import { useApi } from '@wishlist-front/hooks';
 import { SearchEventSelect } from '../event/SearchEventSelect';
 import { useAsync } from 'react-use';
 import { InputLabel } from '../common/InputLabel';
@@ -19,7 +19,7 @@ export type EditWishlistEventsProps = {
 };
 
 export const EditWishlistEvent = ({ wishlistId, events, onChange }: EditWishlistEventsProps) => {
-  const api = useApi(wishlistApiRef);
+  const api = useApi();
   const theme = useTheme();
   const [loading, setLoading] = useState(false);
   const { addToast } = useToast();

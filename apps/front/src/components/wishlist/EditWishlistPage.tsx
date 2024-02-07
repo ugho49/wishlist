@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useApi, useCustomSearchParams } from '@wishlist/common-front';
-import { wishlistApiRef } from '../../core/api/wishlist.api';
+import { useCustomSearchParams } from '@wishlist/common-front';
+import { useApi } from '@wishlist-front/hooks';
 import { useAsync } from 'react-use';
 import { Box, Tab, Tabs } from '@mui/material';
 import { Loader } from '../common/Loader';
@@ -37,7 +37,7 @@ type SearchParamType = { tab: TabValues };
 export const EditWishlistPage = () => {
   const params = useParams<'wishlistId'>();
   const wishlistId = params.wishlistId || '';
-  const api = useApi(wishlistApiRef);
+  const api = useApi();
   const [queryParams, setQueryParams] = useCustomSearchParams<SearchParamType>({ tab: tabs[0].value });
   const [wishlist, setWishlist] = useState<DetailedWishlistDto | undefined>(undefined);
   const { value, loading } = useAsync(() => api.wishlist.getById(wishlistId), [wishlistId]);

@@ -2,9 +2,8 @@ import { Card } from '../common/Card';
 import { Alert, Box, Stack, TextField } from '@mui/material';
 import { InputLabel } from '../common/InputLabel';
 import { LoadingButton } from '@mui/lab';
-import { RouterLink, useApi, useToast } from '@wishlist/common-front';
+import { RouterLink, useToast } from '@wishlist/common-front';
 import React, { useState } from 'react';
-import { wishlistApiRef } from '../../core/api/wishlist.api';
 import { useDispatch } from 'react-redux';
 import { Subtitle } from '../common/Subtitle';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
@@ -15,6 +14,7 @@ import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AxiosError } from 'axios';
+import { useApi } from '@wishlist-front/hooks';
 
 const schema = z.object({
   email: z.string().email({ message: 'Email invalide' }).max(200, { message: '200 caractères maximum' }),
@@ -26,7 +26,7 @@ const schema = z.object({
 type FormFields = z.infer<typeof schema>;
 
 export const RegisterPage = () => {
-  const api = useApi(wishlistApiRef);
+  const api = useApi();
   const dispatch = useDispatch();
   const { addToast } = useToast();
   const [socialLoading, setSocialLoading] = useState(false);
