@@ -1,6 +1,5 @@
 import React, { useMemo, useState } from 'react';
 import { AddEventAttendeeInputDto, AttendeeDto, AttendeeRole, MiniUserDto } from '@wishlist/common-types';
-import { useToast } from '@wishlist/common-front';
 import { Avatar, Box, Divider, List, ListItem, ListItemAvatar, ListItemText, Stack } from '@mui/material';
 import { InputLabel } from '../common/InputLabel';
 import { SearchUserSelect } from '../user/SearchUserSelect';
@@ -11,7 +10,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { blue, green, orange } from '@mui/material/colors';
 import PersonIcon from '@mui/icons-material/Person';
 import { ConfirmIconButton } from '../common/ConfirmIconButton';
-import { useApi } from '@wishlist-front/hooks';
+import { useApi, useToast } from '@wishlist-front/hooks';
 
 export type EditEventAttendeesProps = {
   eventId: string;

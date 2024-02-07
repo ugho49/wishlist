@@ -1,5 +1,5 @@
 import { Alert, Box, Stack, TextField } from '@mui/material';
-import { getUrlParameter, RouterLink, useToast } from '@wishlist/common-front';
+import { getUrlParameter, RouterLink } from '@wishlist/common-front';
 import { useDispatch } from 'react-redux';
 import React, { useState } from 'react';
 import { setTokens } from '../../core/store/features';
@@ -14,7 +14,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { AxiosError } from 'axios';
-import { useApi } from '@wishlist-front/hooks';
+import { useApi, useToast } from '@wishlist-front/hooks';
 
 const schema = z.object({
   email: z.string().email({ message: 'Email invalide' }),

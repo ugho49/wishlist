@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useCustomSearchParams } from '@wishlist/common-front';
 import { useAsync } from 'react-use';
 import { Box, Tab, Tabs } from '@mui/material';
 import { Loader } from '../common/Loader';
@@ -12,7 +11,7 @@ import PeopleIcon from '@mui/icons-material/People';
 import { EditEventInformations } from './EditEventInformations';
 import { DetailedEventDto } from '@wishlist/common-types';
 import { EditEventAttendees } from './EditEventAttendees';
-import { useApi } from '@wishlist-front/hooks';
+import { useApi, useCustomSearchParams } from '@wishlist-front/hooks';
 
 enum TabValues {
   informations = 'informations',

@@ -1,6 +1,5 @@
 import React, { FormEvent, useState } from 'react';
-import { useToast } from '@wishlist/common-front';
-import { useApi } from '@wishlist-front/hooks';
+import { useApi, useToast } from '@wishlist-front/hooks';
 import { Alert, Box, Stack, TextField } from '@mui/material';
 import { InputLabel } from '../common/InputLabel';
 import { LoadingButton } from '@mui/lab';

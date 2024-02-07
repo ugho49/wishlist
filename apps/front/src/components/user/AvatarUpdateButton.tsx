@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import { Avatar, CircularProgress, ListItemIcon, ListItemText, Menu, MenuItem } from '@mui/material';
 import PortraitIcon from '@mui/icons-material/Portrait';
 import NoPhotographyIcon from '@mui/icons-material/NoPhotography';
-import { useToast } from '@wishlist/common-front';
+import { useToast } from '@wishlist-front/hooks';
 import GoogleIcon from '@mui/icons-material/Google';
 import { UpdateUserPictureOutputDto, UserSocialDto } from '@wishlist/common-types';
 import { AvatarCropperModal } from '../common/AvatarCropperModal';

@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Box, Button, Grid, Stack } from '@mui/material';
 import { Title } from '../common/Title';
-import { RouterLink, useCustomSearchParams } from '@wishlist/common-front';
-import { useApi } from '@wishlist-front/hooks';
+import { RouterLink } from '@wishlist/common-front';
+import { useApi, useCustomSearchParams } from '@wishlist-front/hooks';
 import { useAsync } from 'react-use';
 import { Pagination } from '../common/Pagination';
 import { Loader } from '../common/Loader';

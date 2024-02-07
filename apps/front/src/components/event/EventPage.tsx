@@ -4,7 +4,7 @@ import { Title } from '../common/Title';
 import { Loader } from '../common/Loader';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAsync } from 'react-use';
-import { RouterLink, useToast } from '@wishlist/common-front';
+import { RouterLink } from '@wishlist/common-front';
 import PeopleIcon from '@mui/icons-material/People';
 import { EventWishlists } from './EventWishlists';
 import { Description } from '../common/Description';
@@ -16,7 +16,7 @@ import { RootState } from '../../core';
 import { useSelector } from 'react-redux';
 import { EventAttendeesDialog } from './EventAttendeesDialog';
 import EditIcon from '@mui/icons-material/Edit';
-import { useApi } from '@wishlist-front/hooks';
+import { useApi, useToast } from '@wishlist-front/hooks';
 import { EventNotFound } from './EventNotFound';
 
 const mapState = (state: RootState) => ({ currentUserId: state.auth.user?.id });

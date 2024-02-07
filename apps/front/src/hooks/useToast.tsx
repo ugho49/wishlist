@@ -32,7 +32,7 @@ export function useToast() {
         },
       };
     },
-    [enqueueSnackbar, closeSnackbar]
+    [enqueueSnackbar, closeSnackbar],
   );
 
   return { addToast };

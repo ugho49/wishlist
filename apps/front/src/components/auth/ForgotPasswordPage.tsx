@@ -1,12 +1,12 @@
 import React, { FormEvent, useState } from 'react';
-import { RouterLink, useToast } from '@wishlist/common-front';
+import { RouterLink } from '@wishlist/common-front';
 import { Card } from '../common/Card';
 import { Subtitle } from '../common/Subtitle';
 import { Box, Stack, TextField } from '@mui/material';
 import { InputLabel } from '../common/InputLabel';
 import { LoadingButton } from '@mui/lab';
 import AttachEmailIcon from '@mui/icons-material/AttachEmail';
-import { useApi } from '@wishlist-front/hooks';
+import { useApi, useToast } from '@wishlist-front/hooks';
 
 export const ForgotPasswordPage = () => {
   const api = useApi();

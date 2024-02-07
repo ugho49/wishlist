@@ -2,7 +2,7 @@ import { Card } from '../common/Card';
 import { Alert, Box, Stack, TextField } from '@mui/material';
 import { InputLabel } from '../common/InputLabel';
 import { LoadingButton } from '@mui/lab';
-import { RouterLink, useToast } from '@wishlist/common-front';
+import { RouterLink } from '@wishlist/common-front';
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Subtitle } from '../common/Subtitle';
@@ -14,7 +14,7 @@ import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AxiosError } from 'axios';
-import { useApi } from '@wishlist-front/hooks';
+import { useApi, useToast } from '@wishlist-front/hooks';
 
 const schema = z.object({
   email: z.string().email({ message: 'Email invalide' }).max(200, { message: '200 caractères maximum' }),

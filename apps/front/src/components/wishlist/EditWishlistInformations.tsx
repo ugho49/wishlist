@@ -1,8 +1,7 @@
 import React, { FormEvent, useState } from 'react';
 import { DetailedWishlistDto, UpdateWishlistInputDto } from '@wishlist/common-types';
 import { Box, Stack, TextField } from '@mui/material';
-import { useToast } from '@wishlist/common-front';
-import { useApi } from '@wishlist-front/hooks';
+import { useApi, useToast } from '@wishlist-front/hooks';
 import { InputLabel } from '../common/InputLabel';
 import { CharsRemaining } from '../common/CharsRemaining';
 import { LoadingButton } from '@mui/lab';

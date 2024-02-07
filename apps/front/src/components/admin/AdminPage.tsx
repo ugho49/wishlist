@@ -1,7 +1,7 @@
 import { Box, Tab, Tabs } from '@mui/material';
 import React from 'react';
 import { Title } from '../common/Title';
-import { useCustomSearchParams } from '@wishlist/common-front';
+import { useCustomSearchParams } from '@wishlist-front/hooks';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import GroupsIcon from '@mui/icons-material/Groups';
 import { Card } from '../common/Card';

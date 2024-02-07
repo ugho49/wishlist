@@ -27,14 +27,13 @@ import { AttendeeRole, MiniUserDto } from '@wishlist/common-types';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { LoadingButton } from '@mui/lab';
 import SaveIcon from '@mui/icons-material/Save';
-import { useToast } from '@wishlist/common-front';
 import { useNavigate } from 'react-router-dom';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import { RootState } from '../../core';
 import { useSelector } from 'react-redux';
 import { Card } from '../common/Card';
-import { useApi } from '@wishlist-front/hooks';
+import { useApi, useToast } from '@wishlist-front/hooks';
 
 const steps = ['Informations', 'Participants'];
 

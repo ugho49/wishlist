@@ -5,7 +5,7 @@ import { useDispatch } from 'react-redux';
 import { AppBar, Box, Button, Container, IconButton, Stack, Theme, Toolbar, Typography } from '@mui/material';
 import LogoutIcon from '@mui/icons-material/Logout';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { useHistoryStack, useToast } from '@wishlist/common-front';
+import { useHistoryStack, useToast } from '@wishlist-front/hooks';
 import IconSvg from '../../assets/icons/icon.svg?react';
 import TextSvg from '../../assets/icons/logo_text.svg?react';
 import { makeStyles } from '@mui/styles';

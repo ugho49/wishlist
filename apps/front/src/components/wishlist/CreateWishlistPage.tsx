@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useCustomSearchParams, useToast } from '@wishlist/common-front';
 import { MAX_EVENTS_BY_LIST, MiniEventDto } from '@wishlist/common-types';
-import { useApi } from '@wishlist-front/hooks';
+import { useApi, useCustomSearchParams, useToast } from '@wishlist-front/hooks';
 import { useAsync } from 'react-use';
 import { Title } from '../common/Title';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';

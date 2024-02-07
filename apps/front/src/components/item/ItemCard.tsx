@@ -24,8 +24,7 @@ import {
 } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import clsx from 'clsx';
-import { useToast } from '@wishlist/common-front';
-import { useApi } from '@wishlist-front/hooks';
+import { useApi, useToast } from '@wishlist-front/hooks';
 import { DateTime } from 'luxon';
 import { Rating } from '../common/Rating';
 import { RootState } from '../../core';

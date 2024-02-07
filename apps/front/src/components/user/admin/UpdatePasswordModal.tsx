@@ -9,8 +9,7 @@ import {
   TextField,
 } from '@mui/material';
 import React, { FormEvent, useState } from 'react';
-import { useToast } from '@wishlist/common-front';
-import { useApi } from '@wishlist-front/hooks';
+import { useApi, useToast } from '@wishlist-front/hooks';
 
 export type UpdatePasswordModalProps = {
   open: boolean;

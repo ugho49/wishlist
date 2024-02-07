@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useCustomSearchParams } from '@wishlist/common-front';
-import { useApi } from '@wishlist-front/hooks';
+import { useApi, useCustomSearchParams } from '@wishlist-front/hooks';
 import { useAsync } from 'react-use';
 import { Box, Tab, Tabs } from '@mui/material';
 import { Loader } from '../common/Loader';

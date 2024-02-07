@@ -1,7 +1,6 @@
 import { Box, Checkbox, FormControlLabel, Stack, Typography } from '@mui/material';
 import React, { FormEvent, useEffect, useState } from 'react';
-import { useToast } from '@wishlist/common-front';
-import { useApi } from '@wishlist-front/hooks';
+import { useApi, useToast } from '@wishlist-front/hooks';
 import { useAsync } from 'react-use';
 import { Loader } from '../common/Loader';
 import { InputLabel } from '../common/InputLabel';

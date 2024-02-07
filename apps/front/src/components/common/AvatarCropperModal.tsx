@@ -3,7 +3,7 @@ import React, { useCallback, useState } from 'react';
 import { makeStyles } from '@mui/styles';
 import Cropper, { Area } from 'react-easy-crop';
 import { getCroppedImg } from '../../utils/canvas.utils';
-import { useToast } from '@wishlist/common-front';
+import { useToast } from '@wishlist-front/hooks';
 
 export type AvatarCropperModalProps = {
   imageSrc: string;

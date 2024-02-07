@@ -2,11 +2,10 @@ import React, { useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { RootState } from '../store';
-import { useToast } from '@wishlist/common-front';
 import { useInterval } from 'usehooks-ts';
 import { AuthService } from '../services/auth.service';
 import { logout } from '../store/features';
-import { useApi } from '@wishlist-front/hooks';
+import { useApi, useToast } from '@wishlist-front/hooks';
 
 const mapState = (state: RootState) => ({ accessToken: state.auth.accessToken });
 const accessTokenService = new AuthService().accessTokenService;

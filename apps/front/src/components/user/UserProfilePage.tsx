@@ -10,7 +10,7 @@ import { UserTabInformations } from './UserTabInformations';
 import { UserTabNotifications } from './UserTabNotifications';
 import { UserTabPassword } from './UserTabPassword';
 import { Card } from '../common/Card';
-import { useCustomSearchParams } from '@wishlist/common-front';
+import { useCustomSearchParams } from '@wishlist-front/hooks';
 import { UserTabSocial } from './UserTabSocial';
 import ConnectWithoutContactIcon from '@mui/icons-material/ConnectWithoutContact';
 
