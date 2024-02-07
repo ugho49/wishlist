@@ -5234,10 +5234,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/luxon@npm:3.3.5":
-  version: 3.3.5
-  resolution: "@types/luxon@npm:3.3.5"
-  checksum: 10c0/ff78fc4e31967098d28def1f9ff9a24158089498fc82ad75adcd6425ad77d13d9c957bec0ad6ce0628fdd3ac56838bf315876c3b31d0c759a8bb2f1c7ad3e87a
+"@types/luxon@npm:3.4.2":
+  version: 3.4.2
+  resolution: "@types/luxon@npm:3.4.2"
+  checksum: 10c0/d835467de3daf7e17ba78b50bb5a14efd94272439ca067990d71332a54b311544459c69623eddd243b511b28d70194c9591a9ee8cf9c038962c965f991affd7e
   languageName: node
   linkType: hard
 
@@ -20803,7 +20803,7 @@ __metadata:
     "@types/cron": "npm:2.4.0"
     "@types/jest": "npm:29.5.10"
     "@types/lodash": "npm:4.14.202"
-    "@types/luxon": "npm:3.3.5"
+    "@types/luxon": "npm:3.4.2"
     "@types/multer": "npm:1.4.11"
     "@types/node": "npm:20.10.0"
     "@types/passport-jwt": "npm:3.0.13"
