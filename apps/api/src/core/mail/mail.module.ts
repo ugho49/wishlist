@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { ConfigModule, ConfigType } from '@nestjs/config';
@@ -33,7 +32,7 @@ const helpers: HelperDeclareSpec = {
         },
         template: {
           dir: __dirname + '/templates',
-          adapter: new HandlebarsAdapter(helpers),
+          adapter: new HandlebarsAdapter(helpers, { inlineCssEnabled: false }),
           options: {
             strict: true,
           },
