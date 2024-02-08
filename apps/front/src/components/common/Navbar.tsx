@@ -1,11 +1,9 @@
 /// <reference types="vite-plugin-svgr/client" />
 import React, { useCallback } from 'react';
-import { logout } from '../../core/store/features';
-import { useDispatch } from 'react-redux';
 import { AppBar, Box, Button, Container, IconButton, Stack, Theme, Toolbar, Typography } from '@mui/material';
 import LogoutIcon from '@mui/icons-material/Logout';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { useHistoryStack, useToast } from '@wishlist-front/hooks';
+import { useHistoryStack, useLogout, useToast } from '@wishlist-front/hooks';
 import IconSvg from '../../assets/icons/icon.svg?react';
 import TextSvg from '../../assets/icons/logo_text.svg?react';
 import { makeStyles } from '@mui/styles';
@@ -50,17 +48,13 @@ const GoBack = () => {
 
 export const Navbar = () => {
   const classes = useStyles();
-  const dispatch = useDispatch();
   const { addToast } = useToast();
-  const navigate = useNavigate();
+  const logout = useLogout();
 
-  const redirectToLogin = () => navigate('/login');
-
-  const handleLogout = useCallback(() => {
+  const handleLogout = useCallback(async () => {
     addToast({ message: 'A bientôt 👋', variant: 'default' });
-    logout(dispatch);
-    redirectToLogin();
-  }, [dispatch]);
+    await logout();
+  }, [addToast, logout]);
 
   return (
     <AppBar position="sticky">

@@ -3,12 +3,12 @@ import { Box, Button, Grid, Stack } from '@mui/material';
 import { Title } from '../common/Title';
 import { RouterLink } from '../common/RouterLink';
 import { useApi, useCustomSearchParams } from '@wishlist-front/hooks';
-import { useAsync } from 'react-use';
 import { Pagination } from '../common/Pagination';
 import { Loader } from '../common/Loader';
 import AddIcon from '@mui/icons-material/Add';
 import { FabAutoGrow } from '../common/FabAutoGrow';
 import { WishlistCardWithEvents } from './WishlistCardWithEvents';
+import { useQuery } from '@tanstack/react-query';
 
 type SearchType = { page: string };
 
@@ -19,7 +19,10 @@ export const WishlistListPage = () => {
   const [totalElements, setTotalElements] = useState(0);
   const [queryParams, setQueryParams] = useCustomSearchParams<SearchType>({ page: '1' });
   const currentPage = useMemo(() => parseInt(queryParams.page || '1', 10), [queryParams]);
-  const { value, loading } = useAsync(() => api.wishlist.getAll({ p: currentPage }), [currentPage]);
+  const { data: value, isLoading: loading } = useQuery({
+    queryKey: ['wishlists', { p: currentPage }],
+    queryFn: () => api.wishlist.getAll({ p: currentPage }),
+  });
 
   const setCurrentPage = useCallback(
     (page: number) => {

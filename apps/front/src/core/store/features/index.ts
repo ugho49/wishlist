@@ -5,7 +5,7 @@ import { resetUserState } from './userProfileSlice';
 export * from './authSlice';
 export * from './userProfileSlice';
 
-export const logout = (dispatch: Dispatch) => {
+export const resetStore = (dispatch: Dispatch) => {
   dispatch(resetAuthState());
   dispatch(resetUserState());
 };
