@@ -12,7 +12,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon';
 import { SnackbarProvider } from 'notistack';
 import { GoogleOAuthProvider } from '@react-oauth/google';
-import { environment } from './environments/environment';
+import { environment } from './environment';
 import { ApiClient } from '@wishlist/api-client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
