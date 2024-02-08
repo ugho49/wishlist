@@ -134,7 +134,7 @@ export const UserTabInformations = () => {
           <MobileDatePicker
             value={birthday}
             disabled={loading}
-            defaultCalendarMonth={DateTime.now().minus({ year: 30 })}
+            referenceDate={DateTime.now().minus({ year: 30 })}
             onChange={(date) => setBirthday(date)}
             disableFuture={true}
           />

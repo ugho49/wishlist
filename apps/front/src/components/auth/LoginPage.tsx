@@ -9,13 +9,14 @@ import { InputLabel } from '../common/InputLabel';
 import { Subtitle } from '../common/Subtitle';
 import LoginIcon from '@mui/icons-material/Login';
 import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
-import { LoginOutputDto } from '@wishlist/common-types';
+import { LoginInputDto, LoginOutputDto } from '@wishlist/common-types';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { AxiosError } from 'axios';
 import { useApi, useToast } from '@wishlist-front/hooks';
 import { getUrlParameter } from '../../utils/router.utils';
+import { useMutation } from '@tanstack/react-query';
 
 const schema = z.object({
   email: z.string().email({ message: 'Email invalide' }),
@@ -53,18 +54,20 @@ export const LoginPage = () => {
     );
   };
 
-  const onSubmit = async (data: FormFields) => {
-    try {
-      const result = await api.auth.login(data);
-      handleLoginSuccess(result);
-    } catch (e) {
+  const { mutateAsync: login } = useMutation({
+    mutationKey: ['login'],
+    mutationFn: (data: LoginInputDto) => api.auth.login(data),
+    onSuccess: (data) => handleLoginSuccess(data),
+    onError: (e) => {
       if (e instanceof AxiosError && (e.response?.status === 401 || e.response?.status === 403)) {
         setError('root', { message: 'Email ou mot de passe incorrect' });
       } else {
         setError('root', { message: "Une erreur s'est produite." });
       }
-    }
-  };
+    },
+  });
+
+  const onSubmit = (data: FormFields) => login(data);
 
   const onGoogleLoginSuccess = async (credentialResponse: CredentialResponse) => {
     try {

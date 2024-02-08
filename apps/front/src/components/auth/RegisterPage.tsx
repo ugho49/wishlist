@@ -15,6 +15,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AxiosError } from 'axios';
 import { useApi, useToast } from '@wishlist-front/hooks';
+import { useMutation } from '@tanstack/react-query';
 
 const schema = z.object({
   email: z.string().email({ message: 'Email invalide' }).max(200, { message: '200 caractères maximum' }),
@@ -50,19 +51,23 @@ export const RegisterPage = () => {
     );
   };
 
-  const onSubmit = async (data: FormFields) => {
-    try {
+  const { mutateAsync: registerUser } = useMutation({
+    mutationKey: ['register'],
+    mutationFn: async (data: FormFields) => {
       await api.user.register(data);
-      const result = await api.auth.login({ email: data.email, password: data.password });
-      handleRegisterSuccess(result);
-    } catch (e) {
+      return api.auth.login({ email: data.email, password: data.password });
+    },
+    onSuccess: (data) => handleRegisterSuccess(data),
+    onError: (e) => {
       if (e instanceof AxiosError && e.response?.status === 422) {
         setError('root', { message: 'Cet email est déjà utilisé' });
       } else {
         setError('root', { message: "Une erreur s'est produite." });
       }
-    }
-  };
+    },
+  });
+
+  const onSubmit = (data: FormFields) => registerUser(data);
 
   const onGoogleRegisterSuccess = async (credentialResponse: CredentialResponse) => {
     setSocialLoading(true);
