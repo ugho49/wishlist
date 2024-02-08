@@ -1,19 +1,17 @@
 import React, { FormEvent, useEffect, useState } from 'react';
 import { Box, Stack, TextField } from '@mui/material';
-import { useApi, useToast } from '@wishlist-front/hooks';
+import { useApi, useFetchUserInfo, useToast } from '@wishlist-front/hooks';
 import { InputLabel } from '../common/InputLabel';
 import { CharsRemaining } from '../common/CharsRemaining';
 import { DateTime } from 'luxon';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { MobileDatePicker } from '@mui/x-date-pickers';
 import { LoadingButton } from '@mui/lab';
 import SaveIcon from '@mui/icons-material/Save';
-import { useAsync } from 'react-use';
 import { Loader } from '../common/Loader';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { RootState } from '../../core';
-import { useSelector } from 'react-redux';
 import { AvatarUpdateButton } from './AvatarUpdateButton';
 import { updatePicture as updatePictureAction } from '../../core/store/features';
 
@@ -31,16 +29,16 @@ export const UserTabInformations = () => {
   const [lastname, setLastname] = useState('');
   const [birthday, setBirthday] = useState<DateTime | null>(null);
   const { addToast } = useToast();
-  const { value, loading: loadingUser } = useAsync(() => api.user.getInfo(), []);
+  const { user, loading: loadingUser } = useFetchUserInfo();
 
   useEffect(() => {
-    if (value) {
-      setEmail(value.email);
-      setFirstname(value.firstname);
-      setLastname(value.lastname);
-      setBirthday(value?.birthday ? DateTime.fromISO(value.birthday) : null);
+    if (user) {
+      setEmail(user.email);
+      setFirstname(user.firstname);
+      setLastname(user.lastname);
+      setBirthday(user?.birthday ? DateTime.fromISO(user.birthday) : null);
     }
-  }, [value]);
+  }, [user]);
 
   const formIsValid = firstname.trim() !== '' && lastname.trim() !== '';
 
@@ -71,7 +69,7 @@ export const UserTabInformations = () => {
               firstname={firstname}
               lastname={lastname}
               pictureUrl={pictureUrl}
-              socials={value?.social || []}
+              socials={user?.social || []}
               onPictureUpdated={(pictureUrl) => dispatch(updatePictureAction(pictureUrl))}
               uploadPictureHandler={api.user.uploadPicture}
               updatePictureFromSocialHandler={api.user.updatePictureFromSocial}

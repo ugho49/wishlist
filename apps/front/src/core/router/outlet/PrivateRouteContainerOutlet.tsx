@@ -1,8 +1,12 @@
 import { Box, Container, containerClasses } from '@mui/material';
 import { Navbar } from '../../../components/common/Navbar';
 import { Outlet } from 'react-router-dom';
-import { Footer } from '../../../components/common/Footer';
+import { BottomNavigation } from '../../../components/common/BottomNavigation';
 import { makeStyles } from '@mui/styles';
+import { useFetchUserInfo } from '@wishlist-front/hooks';
+import { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { setUser } from '../../store/features';
 
 const useStyles = makeStyles(() => ({
   container: {
@@ -15,6 +19,14 @@ const useStyles = makeStyles(() => ({
 
 export const PrivateRouteContainerOutlet = () => {
   const classes = useStyles();
+  const { user } = useFetchUserInfo();
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (user) {
+      dispatch(setUser({ firstName: user.firstname, lastName: user.lastname, pictureUrl: user.picture_url }));
+    }
+  }, [user, dispatch]);
 
   return (
     <>
@@ -24,7 +36,7 @@ export const PrivateRouteContainerOutlet = () => {
           <Outlet />
         </Container>
       </Box>
-      <Footer />
+      <BottomNavigation />
     </>
   );
 };
