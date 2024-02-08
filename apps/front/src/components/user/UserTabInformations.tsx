@@ -13,7 +13,9 @@ import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { RootState } from '../../core';
 import { AvatarUpdateButton } from './AvatarUpdateButton';
-import { updatePicture as updatePictureAction } from '../../core/store/features';
+import { updatePicture as updatePictureAction, updateUser as updateUserAction } from '../../core/store/features';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { UpdateUserProfileInputDto, UserDto } from '@wishlist/common-types';
 
 const mapState = (state: RootState) => state.userProfile.pictureUrl;
 
@@ -23,13 +25,13 @@ export const UserTabInformations = () => {
   const dispatch = useDispatch();
   const smallScreen = useMediaQuery(theme.breakpoints.down('md'));
   const api = useApi();
-  const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [firstname, setFirstname] = useState('');
   const [lastname, setLastname] = useState('');
   const [birthday, setBirthday] = useState<DateTime | null>(null);
   const { addToast } = useToast();
   const { user, loading: loadingUser } = useFetchUserInfo();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (user) {
@@ -42,22 +44,30 @@ export const UserTabInformations = () => {
 
   const formIsValid = firstname.trim() !== '' && lastname.trim() !== '';
 
+  const { mutateAsync: update, isPending: loading } = useMutation({
+    mutationKey: ['user.update'],
+    mutationFn: (data: UpdateUserProfileInputDto) => api.user.update(data),
+    onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
+    onSuccess: (_output, data) => {
+      addToast({ message: 'Profil mis à jour', variant: 'info' });
+
+      queryClient.setQueryData(['user'], (old: UserDto) => ({
+        ...old,
+        ...data,
+        birthday: data.birthday ? DateTime.fromJSDate(data.birthday) : null,
+      }));
+
+      dispatch(updateUserAction({ firstName: data.firstname, lastName: data.lastname }));
+    },
+  });
+
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    try {
-      await api.user.update({
-        firstname,
-        lastname,
-        birthday: birthday !== null ? new Date(birthday.toISODate() || '') : undefined,
-      });
-
-      addToast({ message: 'Profil mis à jour', variant: 'info' });
-    } catch (e) {
-      addToast({ message: "Une erreur s'est produite", variant: 'error' });
-    } finally {
-      setLoading(false);
-    }
+    await update({
+      firstname,
+      lastname,
+      birthday: birthday !== null ? new Date(birthday.toISODate() || '') : undefined,
+    });
   };
 
   return (

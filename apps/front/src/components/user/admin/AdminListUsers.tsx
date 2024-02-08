@@ -1,13 +1,13 @@
 import React, { FormEvent, useEffect, useState } from 'react';
 import { RouterLink } from '../../common/RouterLink';
 import { useApi } from '@wishlist-front/hooks';
-import { useAsync } from 'react-use';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { UserDto } from '@wishlist/common-types';
 import { DateTime } from 'luxon';
 import { Status } from '../../common/Status';
 import { Avatar, Box, Button, Stack, TextField } from '@mui/material';
 import { InputLabel } from '../../common/InputLabel';
+import { useQuery } from '@tanstack/react-query';
 
 const columns: GridColDef<UserDto>[] = [
   {
@@ -66,7 +66,11 @@ export const AdminListUsers = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [inputSearch, setInputSearch] = useState('');
   const [search, setSearch] = useState('');
-  const { value, loading } = useAsync(() => api.user.getAll({ p: currentPage, q: search }), [currentPage, search]);
+
+  const { data: value, isLoading: loading } = useQuery({
+    queryKey: ['admin', 'users', { page: currentPage, search }],
+    queryFn: () => api.user.getAll({ p: currentPage, q: search }),
+  });
 
   useEffect(() => {
     if (value) {

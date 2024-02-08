@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { DetailedWishlistDto, ItemDto } from '@wishlist/common-types';
 import { Box, Button, Grid, Stack } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
@@ -20,28 +20,13 @@ export const WishlistItems = ({ wishlist }: WishlistTabItemsProps) => {
   const [openItemFormDialog, setOpenItemFormDialog] = useState(false);
   const [sort, setSort] = useState<SortType>(SortType.CREATED_AT_DESC);
   const [filter, setFilter] = useState<FilterType>(FilterType.NONE);
-  const [items, setItems] = useState<ItemDto[]>([]);
   const [itemsFilteredAndSorted, setItemsFilteredAndSorted] = useState<ItemDto[]>([]);
-  const nbOfItems = useMemo(() => items.length, [items]);
+  const nbOfItems = useMemo(() => wishlist.items.length, [wishlist.items]);
   const ownerOfTheList = currentUserId === wishlist.owner.id;
-
-  useEffect(() => {
-    setItems(wishlist.items);
-  }, [wishlist]);
 
   const addItem = () => {
     setOpenItemFormDialog(true);
   };
-
-  const updateItem = useCallback(
-    (updatedItem: ItemDto) => {
-      const copy = [...items];
-      const index = copy.findIndex((item) => item.id === updatedItem.id);
-      copy[index] = updatedItem;
-      setItems(copy);
-    },
-    [items],
-  );
 
   return (
     <Box className="items">
@@ -49,7 +34,7 @@ export const WishlistItems = ({ wishlist }: WishlistTabItemsProps) => {
         <>
           <WishlistFilterAndSortItems
             displayFilterSelect={!ownerOfTheList}
-            items={items}
+            items={wishlist.items}
             sort={sort}
             filter={filter}
             onChange={(newItems) => setItemsFilteredAndSorted(newItems)}
@@ -63,8 +48,6 @@ export const WishlistItems = ({ wishlist }: WishlistTabItemsProps) => {
                 <ItemCard
                   wishlist={{ id: wishlist.id, ownerId: wishlist.owner.id, hideItems: wishlist.config.hide_items }}
                   item={item}
-                  handleUpdate={(newValue) => updateItem(newValue)}
-                  handleDelete={() => setItems((prevState) => prevState.filter((i) => i.id !== item.id))}
                 />
               </Grid>
             ))}
@@ -94,7 +77,6 @@ export const WishlistItems = ({ wishlist }: WishlistTabItemsProps) => {
         wishlistId={wishlist.id}
         open={openItemFormDialog}
         handleClose={() => setOpenItemFormDialog(false)}
-        handleCreate={(item) => setItems((prevState) => [item, ...prevState])}
       />
     </Box>
   );

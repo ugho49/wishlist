@@ -1,5 +1,5 @@
-import React, { useCallback, useMemo, useState } from 'react';
-import { ItemDto, MiniUserDto } from '@wishlist/common-types';
+import React, { useMemo, useState } from 'react';
+import { DetailedWishlistDto, ItemDto, MiniUserDto } from '@wishlist/common-types';
 import { Card } from '../common/Card';
 import RedeemIcon from '@mui/icons-material/Redeem';
 import { ItemFormDialog } from './ItemFormDialog';
@@ -33,6 +33,7 @@ import { LoadingButton } from '@mui/lab';
 import { ConfirmMenuItem } from '../common/ConfirmMenuItem';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 export type ItemCardProps = {
   wishlist: {
@@ -41,8 +42,6 @@ export type ItemCardProps = {
     hideItems: boolean;
   };
   item: ItemDto;
-  handleUpdate: (newValue: ItemDto) => void;
-  handleDelete: () => void;
 };
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -99,7 +98,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 
 const mapState = (state: RootState) => state.auth.user?.id;
 
-export const ItemCard = ({ item, handleDelete, handleUpdate, wishlist }: ItemCardProps) => {
+export const ItemCard = ({ item, wishlist }: ItemCardProps) => {
   const theme = useTheme();
   const smallScreen = useMediaQuery(theme.breakpoints.only('xs'));
   const classes = useStyles();
@@ -108,34 +107,36 @@ export const ItemCard = ({ item, handleDelete, handleUpdate, wishlist }: ItemCar
   const { addToast } = useToast();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [openDialog, setOpenDialog] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [takenBy, setTakenBy] = useState<MiniUserDto | undefined>(item.taken_by);
   const NameProps = item.url ? { component: Link, href: item.url, target: '_blank', rel: 'noopener noreferrer' } : {};
   const isTaken = useMemo(() => takenBy !== undefined, [takenBy]);
   const ownerOfTheList = currentUserId === wishlist.ownerId;
   const displayCheckButton = !ownerOfTheList || !wishlist.hideItems;
   const displayActions = (ownerOfTheList || item.is_suggested) && !isTaken;
+  const queryClient = useQueryClient();
 
   const openMenu = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
   const closeMenu = () => setAnchorEl(null);
 
-  const deleteItem = async () => {
-    setLoading(true);
-    try {
-      await api.item.delete(item.id);
+  const { mutateAsync: deleteItem, isPending: deleteItemPending } = useMutation({
+    mutationKey: ['item.delete', { id: item.id }],
+    mutationFn: () => api.item.delete(item.id),
+    onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
+    onSuccess: () => {
       addToast({ message: 'Le souhait à bien été supprimé', variant: 'success' });
-      handleDelete();
-    } catch (e) {
-      setLoading(false);
-      addToast({ message: "Une erreur s'est produite", variant: 'error' });
-    }
-  };
+      queryClient.setQueryData(['wishlist', { id: wishlist.id }], (old: DetailedWishlistDto) => ({
+        ...old,
+        items: old.items.filter((i) => i.id !== item.id),
+      }));
+    },
+  });
 
-  const toggleItem = useCallback(async () => {
-    setLoading(true);
-    try {
-      const action = isTaken ? 'uncheck' : 'check';
-      const res = await api.item.toggle(item.id);
+  const { mutateAsync: toggleItem, isPending: toggleItemPending } = useMutation({
+    mutationKey: ['item.toggle', { id: item.id }],
+    mutationFn: () => api.item.toggle(item.id),
+    onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
+    onSuccess: (res) => {
+      const action = res.taken_by !== undefined ? 'check' : 'uncheck';
       setTakenBy(res.taken_by);
 
       if (action === 'check') {
@@ -157,11 +158,10 @@ export const ItemCard = ({ item, handleDelete, handleUpdate, wishlist }: ItemCar
           variant: 'info',
         });
       }
-    } catch (e) {
-      addToast({ message: "Une erreur s'est produite", variant: 'error' });
-    }
-    setLoading(false);
-  }, [isTaken, item]);
+    },
+  });
+
+  const loading = useMemo(() => deleteItemPending || toggleItemPending, [deleteItemPending, toggleItemPending]);
 
   return (
     <>
@@ -297,7 +297,6 @@ export const ItemCard = ({ item, handleDelete, handleUpdate, wishlist }: ItemCar
         wishlistId={wishlist.id}
         open={openDialog}
         handleClose={() => setOpenDialog(false)}
-        handleUpdate={(updatedItem) => handleUpdate(updatedItem)}
       />
     </>
   );

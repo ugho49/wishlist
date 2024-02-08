@@ -1,19 +1,33 @@
 import { Box, Checkbox, FormControlLabel, Stack, Typography } from '@mui/material';
 import React, { FormEvent, useEffect, useState } from 'react';
 import { useApi, useToast } from '@wishlist-front/hooks';
-import { useAsync } from 'react-use';
 import { Loader } from '../common/Loader';
 import { InputLabel } from '../common/InputLabel';
 import { LoadingButton } from '@mui/lab';
 import SaveIcon from '@mui/icons-material/Save';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import type { UpdateUserEmailSettingsInputDto } from '@wishlist/common-types';
 
 export const UserTabNotifications = () => {
   const { addToast } = useToast();
   const api = useApi();
-  const [loading, setLoading] = useState(false);
+  const queryClient = useQueryClient();
   const [dailyNewItemNotification, setDailyNewItemNotification] = useState(true);
 
-  const { value, loading: loadingNotificationSettings } = useAsync(() => api.user.getEmailSettings(), []);
+  const { data: value, isLoading: loadingNotificationSettings } = useQuery({
+    queryKey: ['user.getEmailSettings'],
+    queryFn: () => api.user.getEmailSettings(),
+  });
+
+  const { mutateAsync: updateEmailSettings, isPending: loading } = useMutation({
+    mutationKey: ['user.updateEmailSettings'],
+    mutationFn: (data: UpdateUserEmailSettingsInputDto) => api.user.updateUserEmailSettings(data),
+    onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
+    onSuccess: (output) => {
+      addToast({ message: 'Préférences de notification mis à jour', variant: 'info' });
+      queryClient.setQueryData(['user.getEmailSettings'], output);
+    },
+  });
 
   useEffect(() => {
     if (value) {
@@ -23,18 +37,10 @@ export const UserTabNotifications = () => {
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    try {
-      await api.user.updateUserEmailSettings({
-        daily_new_item_notification: dailyNewItemNotification,
-      });
 
-      addToast({ message: 'Préférences de notification mis à jour', variant: 'info' });
-    } catch (e) {
-      addToast({ message: "Une erreur s'est produite", variant: 'error' });
-    } finally {
-      setLoading(false);
-    }
+    await updateEmailSettings({
+      daily_new_item_notification: dailyNewItemNotification,
+    });
   };
 
   return (
