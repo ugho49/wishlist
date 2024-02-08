@@ -6,38 +6,28 @@ import {
   type ScanItemOutputDto,
   type ToggleItemOutputDto,
 } from '@wishlist/common-types';
-import { ServiceConstructor } from '../modules.type';
+import { AxiosInstance } from 'axios';
 
 export class ItemService {
-  private getClient: ServiceConstructor['getClient'];
-
-  constructor(params: ServiceConstructor) {
-    this.getClient = params.getClient;
-  }
+  constructor(private readonly client: AxiosInstance) {}
 
   create(data: AddItemForListInputDto): Promise<ItemDto> {
-    return this.getClient()
-      .post('/item', data)
-      .then((res) => res.data);
+    return this.client.post('/item', data).then((res) => res.data);
   }
 
   async update(itemId: string, data: AddItemInputDto): Promise<void> {
-    await this.getClient().put(`/item/${itemId}`, data);
+    await this.client.put(`/item/${itemId}`, data);
   }
 
   async delete(itemId: string): Promise<void> {
-    await this.getClient().delete(`/item/${itemId}`);
+    await this.client.delete(`/item/${itemId}`);
   }
 
   async toggle(itemId: string): Promise<ToggleItemOutputDto> {
-    return this.getClient()
-      .post(`/item/${itemId}/toggle`)
-      .then((res) => res.data);
+    return this.client.post(`/item/${itemId}/toggle`).then((res) => res.data);
   }
 
   async scanUrl(data: ScanItemInputDto): Promise<ScanItemOutputDto> {
-    return this.getClient()
-      .post('/item/scan-url', data)
-      .then((res) => res.data);
+    return this.client.post('/item/scan-url', data).then((res) => res.data);
   }
 }

@@ -4,24 +4,16 @@ import {
   type GetEventsQueryDto,
   type PagedResponse,
 } from '@wishlist/common-types';
-import { ServiceConstructor } from '../modules.type';
+import { AxiosInstance } from 'axios';
 
 export class AdminEventService {
-  private getClient: ServiceConstructor['getClient'];
-
-  constructor(params: ServiceConstructor) {
-    this.getClient = params.getClient;
-  }
+  constructor(private readonly client: AxiosInstance) {}
 
   getById(eventId: string): Promise<DetailedEventDto> {
-    return this.getClient()
-      .get(`/admin/event/${eventId}`)
-      .then((res) => res.data);
+    return this.client.get(`/admin/event/${eventId}`).then((res) => res.data);
   }
 
   getAll(params: GetEventsQueryDto): Promise<PagedResponse<EventWithCountsDto>> {
-    return this.getClient()
-      .get(`/admin/event`, { params })
-      .then((res) => res.data);
+    return this.client.get(`/admin/event`, { params }).then((res) => res.data);
   }
 }

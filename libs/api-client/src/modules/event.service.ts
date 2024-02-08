@@ -7,42 +7,28 @@ import {
   type PagedResponse,
   type UpdateEventInputDto,
 } from '@wishlist/common-types';
-import { ServiceConstructor } from '../modules.type';
+import { AxiosInstance } from 'axios';
 
 export class EventService {
-  private getClient: ServiceConstructor['getClient'];
-
-  constructor(params: ServiceConstructor) {
-    this.getClient = params.getClient;
-  }
+  constructor(private readonly client: AxiosInstance) {}
 
   getById(eventId: string): Promise<DetailedEventDto> {
-    return this.getClient()
-      .get(`/event/${eventId}`)
-      .then((res) => res.data);
+    return this.client.get(`/event/${eventId}`).then((res) => res.data);
   }
 
   getAll(params: GetEventsQueryDto): Promise<PagedResponse<EventWithCountsDto>> {
-    return this.getClient()
-      .get(`/event`, { params })
-      .then((res) => res.data);
+    return this.client.get(`/event`, { params }).then((res) => res.data);
   }
 
   create(data: CreateEventInputDto): Promise<MiniEventDto> {
-    return this.getClient()
-      .post('/event', data)
-      .then((res) => res.data);
+    return this.client.post('/event', data).then((res) => res.data);
   }
 
   async update(eventId: string, data: UpdateEventInputDto): Promise<void> {
-    await this.getClient()
-      .put(`/event/${eventId}`, data)
-      .then((res) => res.data);
+    await this.client.put(`/event/${eventId}`, data).then((res) => res.data);
   }
 
   async delete(eventId: string): Promise<void> {
-    await this.getClient()
-      .delete(`/event/${eventId}`)
-      .then((res) => res.data);
+    await this.client.delete(`/event/${eventId}`).then((res) => res.data);
   }
 }

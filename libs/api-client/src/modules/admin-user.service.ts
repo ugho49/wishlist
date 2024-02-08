@@ -5,44 +5,32 @@ import {
   type UpdateUserPictureOutputDto,
   type UserDto,
 } from '@wishlist/common-types';
-import { ServiceConstructor } from '../modules.type';
+import { AxiosInstance } from 'axios';
 
 export class AdminUserService {
-  private getClient: ServiceConstructor['getClient'];
-
-  constructor(params: ServiceConstructor) {
-    this.getClient = params.getClient;
-  }
+  constructor(private readonly client: AxiosInstance) {}
 
   getById(userId: string): Promise<UserDto> {
-    return this.getClient()
-      .get(`/admin/user/${userId}`)
-      .then((res) => res.data);
+    return this.client.get(`/admin/user/${userId}`).then((res) => res.data);
   }
 
   getAll(params: GetAllUsersQueryDto): Promise<PagedResponse<UserDto>> {
-    return this.getClient()
-      .get(`/admin/user`, { params })
-      .then((res) => res.data);
+    return this.client.get(`/admin/user`, { params }).then((res) => res.data);
   }
 
   async update(userId: string, data: UpdateFullUserProfileInputDto): Promise<void> {
-    await this.getClient()
-      .patch(`/admin/user/${userId}`, data)
-      .then((res) => res.data);
+    await this.client.patch(`/admin/user/${userId}`, data).then((res) => res.data);
   }
 
   async delete(userId: string): Promise<void> {
-    await this.getClient()
-      .delete(`/admin/user/${userId}`)
-      .then((res) => res.data);
+    await this.client.delete(`/admin/user/${userId}`).then((res) => res.data);
   }
 
   async uploadPicture(userId: string, file: File): Promise<UpdateUserPictureOutputDto> {
     const formData = new FormData();
     formData.append('file', file);
 
-    return this.getClient()
+    return this.client
       .post(`/admin/user/${userId}/upload-picture`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       })
@@ -50,8 +38,6 @@ export class AdminUserService {
   }
 
   async deletePicture(userId: string): Promise<void> {
-    await this.getClient()
-      .delete(`/admin/user/${userId}/picture`)
-      .then((res) => res.data);
+    await this.client.delete(`/admin/user/${userId}/picture`).then((res) => res.data);
   }
 }

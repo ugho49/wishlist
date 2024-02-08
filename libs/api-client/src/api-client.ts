@@ -14,67 +14,57 @@ type ClientServiceParams = {
 };
 
 export class ApiClient {
-  private client: AxiosInstance;
+  private readonly client: AxiosInstance;
 
   constructor(private readonly params: ClientServiceParams) {
-    this.client = this.getNewInstance({});
-  }
-
-  get auth() {
-    return new AuthService({ getClient: () => this.client });
-  }
-
-  get user() {
-    return new UserService({ getClient: () => this.client });
-  }
-
-  get wishlist() {
-    return new WishlistService({ getClient: () => this.client });
-  }
-
-  get event() {
-    return new EventService({ getClient: () => this.client });
-  }
-
-  get item() {
-    return new ItemService({ getClient: () => this.client });
-  }
-
-  get attendee() {
-    return new AttendeeService({ getClient: () => this.client });
-  }
-
-  get admin() {
-    return {
-      user: new AdminUserService({ getClient: () => this.client }),
-      event: new AdminEventService({ getClient: () => this.client }),
-    };
-  }
-
-  setAccessToken(token: string) {
-    this.client = this.getNewInstance({ accessToken: token });
-  }
-
-  removeUserToken() {
-    this.client = this.getNewInstance({});
-  }
-
-  private getNewInstance(params: { accessToken?: string }): AxiosInstance {
-    const { accessToken } = params;
-    let config: CreateAxiosDefaults = {
+    const config: CreateAxiosDefaults = {
       baseURL: this.params.baseURL,
       timeout: this.params?.timeoutInMs ?? 10_000, // 10 seconds
     };
 
-    if (accessToken) {
-      config = {
-        ...config,
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      };
-    }
+    this.client = axios.create(config);
+  }
 
-    return axios.create(config);
+  get auth() {
+    return new AuthService(this.client);
+  }
+
+  get user() {
+    return new UserService(this.client);
+  }
+
+  user2() {
+    return new UserService(this.client);
+  }
+
+  get wishlist() {
+    return new WishlistService(this.client);
+  }
+
+  get event() {
+    return new EventService(this.client);
+  }
+
+  get item() {
+    return new ItemService(this.client);
+  }
+
+  get attendee() {
+    return new AttendeeService(this.client);
+  }
+
+  get admin() {
+    return {
+      user: new AdminUserService(this.client),
+      event: new AdminEventService(this.client),
+    };
+  }
+
+  setAccessToken(token: string) {
+    this.client.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  }
+
+  removeUserToken() {
+    delete this.client.defaults.headers.common['Authorization'];
   }
 }

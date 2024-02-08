@@ -9,62 +9,44 @@ import {
   type UpdateWishlistLogoOutputDto,
   type WishlistWithEventsDto,
 } from '@wishlist/common-types';
-import { ServiceConstructor } from '../modules.type';
+import { AxiosInstance } from 'axios';
 
 export class WishlistService {
-  private getClient: ServiceConstructor['getClient'];
-
-  constructor(params: ServiceConstructor) {
-    this.getClient = params.getClient;
-  }
+  constructor(private readonly client: AxiosInstance) {}
 
   getAll(params: GetPaginationQueryDto): Promise<PagedResponse<WishlistWithEventsDto>> {
-    return this.getClient()
-      .get('/wishlist', { params })
-      .then((res) => res.data);
+    return this.client.get('/wishlist', { params }).then((res) => res.data);
   }
 
   getById(wishlistId: string): Promise<DetailedWishlistDto> {
-    return this.getClient()
-      .get(`/wishlist/${wishlistId}`)
-      .then((res) => res.data);
+    return this.client.get(`/wishlist/${wishlistId}`).then((res) => res.data);
   }
 
   create(data: CreateWishlistInputDto): Promise<MiniWishlistDto> {
-    return this.getClient()
-      .post('/wishlist', data)
-      .then((res) => res.data);
+    return this.client.post('/wishlist', data).then((res) => res.data);
   }
 
   async update(wishlistId: string, data: UpdateWishlistInputDto): Promise<void> {
-    await this.getClient()
-      .put(`/wishlist/${wishlistId}`, data)
-      .then((res) => res.data);
+    await this.client.put(`/wishlist/${wishlistId}`, data).then((res) => res.data);
   }
 
   async delete(wishlistId: string): Promise<void> {
-    await this.getClient()
-      .delete(`/wishlist/${wishlistId}`)
-      .then((res) => res.data);
+    await this.client.delete(`/wishlist/${wishlistId}`).then((res) => res.data);
   }
 
   async linkWishlistToAnEvent(wishlistId: string, data: LinkUnlinkWishlistInputDto): Promise<void> {
-    await this.getClient()
-      .post(`/wishlist/${wishlistId}/link-event`, data)
-      .then((res) => res.data);
+    await this.client.post(`/wishlist/${wishlistId}/link-event`, data).then((res) => res.data);
   }
 
   async unlinkWishlistToAnEvent(wishlistId: string, data: LinkUnlinkWishlistInputDto): Promise<void> {
-    await this.getClient()
-      .post(`/wishlist/${wishlistId}/unlink-event`, data)
-      .then((res) => res.data);
+    await this.client.post(`/wishlist/${wishlistId}/unlink-event`, data).then((res) => res.data);
   }
 
   async uploadLogo(wishlistId: string, file: File): Promise<UpdateWishlistLogoOutputDto> {
     const formData = new FormData();
     formData.append('file', file);
 
-    return this.getClient()
+    return this.client
       .post(`/wishlist/${wishlistId}/upload-logo`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       })
@@ -72,8 +54,6 @@ export class WishlistService {
   }
 
   async removeLogo(wishlistId: string): Promise<void> {
-    await this.getClient()
-      .delete(`/wishlist/${wishlistId}/logo`)
-      .then((res) => res.data);
+    await this.client.delete(`/wishlist/${wishlistId}/logo`).then((res) => res.data);
   }
 }
