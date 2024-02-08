@@ -6,6 +6,7 @@ import { DateTime } from 'luxon';
 export type SearchEventSelectProps = {
   options: MiniEventDto[];
   disabled?: boolean;
+  loading?: boolean;
   error?: boolean;
   onChange: (value: MiniEventDto) => void;
   excludedEventIds: string[];
@@ -17,11 +18,13 @@ export const SearchEventSelect = ({
   options,
   disabled,
   error = false,
+  loading = false,
 }: SearchEventSelectProps) => {
   return (
     <Autocomplete
       fullWidth
       clearOnBlur
+      loading={loading}
       blurOnSelect={true}
       value={null}
       noOptionsText="Aucun résultat"

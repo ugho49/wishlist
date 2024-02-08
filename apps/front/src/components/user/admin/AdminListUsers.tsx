@@ -113,6 +113,7 @@ export const AdminListUsers = () => {
           page: currentPage - 1,
           pageSize,
         }}
+        pageSizeOptions={[pageSize]}
         onPaginationModelChange={({ page }) => setCurrentPage(page + 1)}
       />
     </div>

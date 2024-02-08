@@ -20,7 +20,7 @@ export const WishlistListPage = () => {
   const [queryParams, setQueryParams] = useCustomSearchParams<SearchType>({ page: '1' });
   const currentPage = useMemo(() => parseInt(queryParams.page || '1', 10), [queryParams]);
   const { data: value, isLoading: loading } = useQuery({
-    queryKey: ['wishlists', { p: currentPage }],
+    queryKey: ['wishlists', { page: currentPage }],
     queryFn: () => api.wishlist.getAll({ p: currentPage }),
   });
 
@@ -36,7 +36,7 @@ export const WishlistListPage = () => {
       setTotalElements(value.pagination.total_elements);
       setCurrentPage(value.pagination.page_number);
     }
-  }, [value]);
+  }, [setCurrentPage, value]);
 
   return (
     <Box>

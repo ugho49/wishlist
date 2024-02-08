@@ -3,10 +3,10 @@ import { useSelector } from 'react-redux';
 import { Navigate, Outlet } from 'react-router-dom';
 import { RootState } from '../../store';
 
-const mapState = (state: RootState) => ({ user: state.auth.user });
+const mapState = (state: RootState) => state.auth.user;
 
 export const AdminRouteOutlet: React.FC = () => {
-  const { user } = useSelector(mapState);
+  const user = useSelector(mapState);
   const isAdmin = user?.isAdmin || false;
 
   return isAdmin ? <Outlet /> : <Navigate to="/" replace />;

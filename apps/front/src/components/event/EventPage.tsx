@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Box, Button, Chip, Stack } from '@mui/material';
 import { Title } from '../common/Title';
 import { Loader } from '../common/Loader';
 import { RouterLink } from '../common/RouterLink';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useAsync } from 'react-use';
 import PeopleIcon from '@mui/icons-material/People';
 import { EventWishlists } from './EventWishlists';
 import { Description } from '../common/Description';
@@ -16,8 +15,9 @@ import { RootState } from '../../core';
 import { useSelector } from 'react-redux';
 import { EventAttendeesDialog } from './EventAttendeesDialog';
 import EditIcon from '@mui/icons-material/Edit';
-import { useApi, useToast } from '@wishlist-front/hooks';
+import { useApi, useEventById, useToast } from '@wishlist-front/hooks';
 import { EventNotFound } from './EventNotFound';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 const mapState = (state: RootState) => state.auth.user?.id;
 
@@ -27,14 +27,25 @@ export const EventPage = () => {
   const params = useParams<'eventId'>();
   const eventId = params.eventId || '';
   const api = useApi();
-  const { value: event, loading } = useAsync(() => api.event.getById(eventId), [eventId]);
-  const nbAttendees = (event?.attendees || []).length + 1;
   const navigate = useNavigate();
   const [openAttendeesDialog, setOpenAttendeesDialog] = useState(false);
+  const queryClient = useQueryClient();
+
+  const { event, loading } = useEventById(eventId);
+
+  const { mutateAsync: handleDelete } = useMutation({
+    mutationKey: ['event.delete', { id: eventId }],
+    mutationFn: () => api.event.delete(eventId),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['events'] });
+    },
+  });
+
+  const nbAttendees = useMemo(() => (event?.attendees || []).length + 1, [event]);
 
   const deleteEvent = async () => {
     try {
-      await api.event.delete(eventId);
+      await handleDelete();
       addToast({ message: "L'évènement à bien été supprimée", variant: 'success' });
       navigate('/events');
     } catch (e) {

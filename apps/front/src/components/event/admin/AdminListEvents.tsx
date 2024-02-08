@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { RouterLink } from '../../common/RouterLink';
-import { useAsync } from 'react-use';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { EventWithCountsDto } from '@wishlist/common-types';
 import { DateTime } from 'luxon';
 import { Avatar, Stack } from '@mui/material';
 import { useApi } from '@wishlist-front/hooks';
+import { useQuery } from '@tanstack/react-query';
 
 const columns: GridColDef<EventWithCountsDto>[] = [
   { field: 'title', headerName: 'Title', width: 170 },
@@ -69,7 +69,11 @@ export const AdminListEvents = () => {
   const [totalElements, setTotalElements] = useState(0);
   const [pageSize, setPageSize] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
-  const { value, loading } = useAsync(() => api.event.getAll({ p: currentPage }), [currentPage]);
+
+  const { data: value, isLoading: loading } = useQuery({
+    queryKey: ['admin', 'events', { page: currentPage }],
+    queryFn: () => api.event.getAll({ p: currentPage }),
+  });
 
   useEffect(() => {
     if (value) {
@@ -94,6 +98,7 @@ export const AdminListEvents = () => {
           page: currentPage - 1,
           pageSize,
         }}
+        pageSizeOptions={[pageSize]}
         onPaginationModelChange={({ page }) => setCurrentPage(page + 1)}
       />
     </div>

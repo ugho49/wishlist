@@ -8,40 +8,46 @@ import { LoadingButton } from '@mui/lab';
 import SaveIcon from '@mui/icons-material/Save';
 import { MobileDatePicker } from '@mui/x-date-pickers';
 import { useApi, useToast } from '@wishlist-front/hooks';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 export type EditEventInformationsProps = {
   event: DetailedEventDto;
-  onChange: (updatedValues: Omit<UpdateEventInputDto, 'event_date'> & { event_date: string }) => void;
 };
 
-export const EditEventInformations = ({ event, onChange }: EditEventInformationsProps) => {
-  const [loading, setLoading] = useState(false);
+export const EditEventInformations = ({ event }: EditEventInformationsProps) => {
   const api = useApi();
   const { addToast } = useToast();
   const [title, setTitle] = useState(event.title);
   const [description, setDescription] = useState(event.description);
   const [eventDate, setEventDate] = useState<DateTime | null>(DateTime.fromISO(event.event_date));
+  const queryClient = useQueryClient();
 
   const updateEnabled = title.trim() !== '' && eventDate !== null;
 
+  const { mutateAsync: updateEvent, isPending: loading } = useMutation({
+    mutationKey: ['event.update', { id: event.id }],
+    mutationFn: (data: UpdateEventInputDto) => api.event.update(event.id, data),
+    onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
+    onSuccess: (_output, data) => {
+      addToast({ message: 'Évènement mis à jour', variant: 'info' });
+
+      queryClient.setQueryData(['event', { id: event.id }], (old: DetailedEventDto) => ({
+        ...old,
+        ...data,
+        event_date: data.event_date.toISOString(),
+      }));
+    },
+  });
+
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    try {
-      const isoDate = eventDate?.toISODate() || DateTime.now().toISODate() || '';
-      const body: UpdateEventInputDto = {
-        title,
-        description: description === '' ? undefined : description,
-        event_date: new Date(isoDate),
-      };
-      await api.event.update(event.id, body);
-      onChange({ ...body, event_date: body.event_date.toISOString() });
-      addToast({ message: 'Évènement mis à jour', variant: 'info' });
-    } catch (e) {
-      addToast({ message: "Une erreur s'est produite", variant: 'error' });
-    } finally {
-      setLoading(false);
-    }
+    const isoDate = eventDate?.toISODate() || DateTime.now().toISODate() || '';
+    const body: UpdateEventInputDto = {
+      title,
+      description: description === '' ? undefined : description,
+      event_date: new Date(isoDate),
+    };
+    await updateEvent(body);
   };
 
   return (
