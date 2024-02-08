@@ -17,10 +17,10 @@ import { useSelector } from 'react-redux';
 import { AvatarUpdateButton } from './AvatarUpdateButton';
 import { updatePicture as updatePictureAction } from '../../core/store/features';
 
-const mapState = (state: RootState) => ({ pictureUrl: state.userProfile.pictureUrl });
+const mapState = (state: RootState) => state.userProfile.pictureUrl;
 
 export const UserTabInformations = () => {
-  const { pictureUrl } = useSelector(mapState);
+  const pictureUrl = useSelector(mapState);
   const theme = useTheme();
   const dispatch = useDispatch();
   const smallScreen = useMediaQuery(theme.breakpoints.down('md'));

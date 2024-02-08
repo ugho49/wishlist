@@ -18,7 +18,8 @@ import { makeStyles } from '@mui/styles';
 import { useApi } from '@wishlist-front/hooks';
 import { setUser } from '../../core/store/features';
 
-const mapState = (state: RootState) => ({ user: state.auth.user, pictureUrl: state.userProfile.pictureUrl });
+const mapAuthState = (state: RootState) => state.auth;
+const mapUserProfileState = (state: RootState) => state.userProfile;
 
 const useStyles = makeStyles((theme: Theme) => ({
   bottomNavigationAction: {
@@ -44,7 +45,8 @@ const useStyles = makeStyles((theme: Theme) => ({
 
 export const Footer = () => {
   const classes = useStyles();
-  const { user, pictureUrl } = useSelector(mapState);
+  const { user } = useSelector(mapAuthState);
+  const { pictureUrl } = useSelector(mapUserProfileState);
   const [currentNavigation, setCurrentNavigation] = useState('');
   const navigate = useNavigate();
   const location = useLocation();

@@ -97,13 +97,13 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
 }));
 
-const mapState = (state: RootState) => ({ currentUserId: state.auth.user?.id });
+const mapState = (state: RootState) => state.auth.user?.id;
 
 export const ItemCard = ({ item, handleDelete, handleUpdate, wishlist }: ItemCardProps) => {
   const theme = useTheme();
   const smallScreen = useMediaQuery(theme.breakpoints.only('xs'));
   const classes = useStyles();
-  const { currentUserId } = useSelector(mapState);
+  const currentUserId = useSelector(mapState);
   const api = useApi();
   const { addToast } = useToast();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);

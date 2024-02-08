@@ -13,10 +13,10 @@ export type WishlistTabItemsProps = {
   wishlist: DetailedWishlistDto;
 };
 
-const mapState = (state: RootState) => ({ currentUserId: state.auth.user?.id });
+const mapState = (state: RootState) => state.auth.user?.id;
 
 export const WishlistItems = ({ wishlist }: WishlistTabItemsProps) => {
-  const { currentUserId } = useSelector(mapState);
+  const currentUserId = useSelector(mapState);
   const [openItemFormDialog, setOpenItemFormDialog] = useState(false);
   const [sort, setSort] = useState<SortType>(SortType.CREATED_AT_DESC);
   const [filter, setFilter] = useState<FilterType>(FilterType.NONE);

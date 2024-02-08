@@ -19,10 +19,10 @@ export type EditEventAttendeesProps = {
   onChange: (attendees: AttendeeDto[]) => void;
 };
 
-const mapState = (state: RootState) => ({ currentUserEmail: state.auth.user?.email });
+const mapState = (state: RootState) => state.auth.user?.email;
 
 export const EditEventAttendees = ({ eventId, creator, attendees, onChange }: EditEventAttendeesProps) => {
-  const { currentUserEmail } = useSelector(mapState);
+  const currentUserEmail = useSelector(mapState);
   const api = useApi();
   const [loading, setLoading] = useState(false);
   const { addToast } = useToast();

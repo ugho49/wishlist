@@ -22,10 +22,10 @@ import { NavigateToLoginWithContext } from './core/router/NavigateToLoginWithCon
 import { NavigateToAuthenticatedWithContext } from './core/router/NavigateToAuthenticatedWithContext';
 import { AdminEditUserPage } from './components/user/admin/AdminEditUserPage';
 
-const mapState = (state: RootState) => ({ accessToken: state.auth.accessToken });
+const mapAuthState = (state: RootState) => state.auth;
 
 export const App = () => {
-  const { accessToken } = useSelector(mapState);
+  const { accessToken } = useSelector(mapAuthState);
   const isLoggedIn = accessToken !== undefined;
 
   return (

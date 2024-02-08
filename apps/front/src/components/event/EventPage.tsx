@@ -19,10 +19,10 @@ import EditIcon from '@mui/icons-material/Edit';
 import { useApi, useToast } from '@wishlist-front/hooks';
 import { EventNotFound } from './EventNotFound';
 
-const mapState = (state: RootState) => ({ currentUserId: state.auth.user?.id });
+const mapState = (state: RootState) => state.auth.user?.id;
 
 export const EventPage = () => {
-  const { currentUserId } = useSelector(mapState);
+  const currentUserId = useSelector(mapState);
   const { addToast } = useToast();
   const params = useParams<'eventId'>();
   const eventId = params.eventId || '';

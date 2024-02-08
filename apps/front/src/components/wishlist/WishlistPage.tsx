@@ -19,11 +19,11 @@ import { useSelector } from 'react-redux';
 import EditIcon from '@mui/icons-material/Edit';
 import { WishlistNotFound } from './WishlistNotFound';
 
-const mapState = (state: RootState) => ({ currentUserId: state.auth.user?.id });
+const mapState = (state: RootState) => state.auth.user?.id;
 
 export const WishlistPage = () => {
   const { addToast } = useToast();
-  const { currentUserId } = useSelector(mapState);
+  const currentUserId = useSelector(mapState);
   const [openEventDialog, setOpenEventDialog] = useState(false);
   const params = useParams<'wishlistId'>();
   const wishlistId = params.wishlistId || '';

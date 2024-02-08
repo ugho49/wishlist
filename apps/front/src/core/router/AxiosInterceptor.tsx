@@ -7,11 +7,11 @@ import { AuthService } from '../services/auth.service';
 import { logout } from '../store/features';
 import { useApi, useToast } from '@wishlist-front/hooks';
 
-const mapState = (state: RootState) => ({ accessToken: state.auth.accessToken });
+const mapAuthState = (state: RootState) => state.auth;
 const accessTokenService = new AuthService().accessTokenService;
 
 export const AxiosInterceptor: React.FC = () => {
-  const { accessToken } = useSelector(mapState);
+  const { accessToken } = useSelector(mapAuthState);
   const api = useApi();
   const dispatch = useDispatch();
   const navigate = useNavigate();

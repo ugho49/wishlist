@@ -24,11 +24,11 @@ import { useSelector } from 'react-redux';
 import { UpdatePasswordModal } from './UpdatePasswordModal';
 import { AvatarUpdateButton } from '../AvatarUpdateButton';
 
-const mapState = (state: RootState) => ({ currentUser: state.auth.user });
+const mapState = (state: RootState) => state.auth;
 
 export const AdminEditUserPage = () => {
   const { addToast } = useToast();
-  const { currentUser } = useSelector(mapState);
+  const { user: currentUser } = useSelector(mapState);
   const params = useParams<'userId'>();
   const userId = params.userId || '';
   const { admin: api } = useApi();

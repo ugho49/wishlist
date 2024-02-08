@@ -42,11 +42,11 @@ type Attendee = {
   role: AttendeeRole;
 };
 
-const mapState = (state: RootState) => ({ currentUserEmail: state.auth.user?.email });
+const mapState = (state: RootState) => state.auth.user?.email;
 
 export const CreateEventPage = () => {
   const api = useApi();
-  const { currentUserEmail } = useSelector(mapState);
+  const currentUserEmail = useSelector(mapState);
   const { addToast } = useToast();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
