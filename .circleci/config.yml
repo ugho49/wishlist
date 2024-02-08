@@ -19,7 +19,7 @@ parameters:
 references:
   setup_env_node: &setup_env_node
     docker:
-      - image: cimg/node:20.8
+      - image: cimg/node:20.11
   attach_workspace: &attach_workspace
     at: ~/project
   nx/set-shas: &nx_set_shas_option

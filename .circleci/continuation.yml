@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  docker: circleci/docker@2.4.0
+  docker: circleci/docker@2.5.0
 
 parameters:
   workflow-api:
@@ -14,7 +14,7 @@ parameters:
 references:
   setup_env_node: &setup_env_node
     docker:
-      - image: cimg/node:20.8
+      - image: cimg/node:20.11
   attach_workspace: &attach_workspace
     at: ~/project
   restore_node_cache: &restore_node_cache
@@ -59,7 +59,7 @@ jobs:
 
   deploy-api:
     docker:
-      - image: cimg/base:2022.10-22.04
+      - image: cimg/base:2024.01
     steps:
       - add_ssh_keys:
           fingerprints:
