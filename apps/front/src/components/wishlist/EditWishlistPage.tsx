@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useParams } from 'react-router-dom';
-import { useApi, useCustomSearchParams } from '@wishlist-front/hooks';
-import { useAsync } from 'react-use';
+import { useCustomSearchParams, useWishlistById } from '@wishlist-front/hooks';
 import { Box, Tab, Tabs } from '@mui/material';
 import { Loader } from '../common/Loader';
 import { WishlistNotFound } from './WishlistNotFound';
@@ -11,7 +10,6 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { Card } from '../common/Card';
 import { EditWishlistInformations } from './EditWishlistInformations';
 import { EditWishlistEvent } from './EditWishlistEvents';
-import { DetailedWishlistDto } from '@wishlist/common-types';
 
 enum TabValues {
   informations = 'informations',
@@ -36,14 +34,8 @@ type SearchParamType = { tab: TabValues };
 export const EditWishlistPage = () => {
   const params = useParams<'wishlistId'>();
   const wishlistId = params.wishlistId || '';
-  const api = useApi();
   const [queryParams, setQueryParams] = useCustomSearchParams<SearchParamType>({ tab: tabs[0].value });
-  const [wishlist, setWishlist] = useState<DetailedWishlistDto | undefined>(undefined);
-  const { value, loading } = useAsync(() => api.wishlist.getById(wishlistId), [wishlistId]);
-
-  useEffect(() => {
-    if (value) setWishlist(value);
-  }, [value]);
+  const { wishlist, loading } = useWishlistById(wishlistId);
 
   return (
     <Box>
@@ -68,18 +60,9 @@ export const EditWishlistPage = () => {
               </Tabs>
             </Box>
             <Card>
-              {queryParams.tab === TabValues.informations && (
-                <EditWishlistInformations
-                  wishlist={wishlist}
-                  onChange={(updatedValues) => setWishlist({ ...wishlist, ...updatedValues })}
-                />
-              )}
+              {queryParams.tab === TabValues.informations && <EditWishlistInformations wishlist={wishlist} />}
               {queryParams.tab === TabValues.events && (
-                <EditWishlistEvent
-                  wishlistId={wishlist.id}
-                  events={wishlist.events}
-                  onChange={(events) => setWishlist({ ...wishlist, events })}
-                />
+                <EditWishlistEvent wishlistId={wishlist.id} events={wishlist.events} />
               )}
             </Card>
           </>

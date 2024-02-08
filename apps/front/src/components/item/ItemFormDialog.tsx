@@ -1,5 +1,5 @@
-import React, { FormEvent, forwardRef, useCallback, useEffect, useState } from 'react';
-import { AddItemInputDto, ItemDto } from '@wishlist/common-types';
+import React, { FormEvent, forwardRef, useCallback, useEffect, useMemo, useState } from 'react';
+import { type AddItemForListInputDto, AddItemInputDto, DetailedWishlistDto, ItemDto } from '@wishlist/common-types';
 import {
   AppBar,
   Avatar,
@@ -27,6 +27,7 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import { TidyURL } from 'tidy-url';
 import { useApi, useToast } from '@wishlist-front/hooks';
 import { isValidUrl } from '../../utils/router.utils';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 const Transition = forwardRef((props: TransitionProps & { children: React.ReactElement }, ref: React.Ref<unknown>) => {
   const { children, ...other } = props;
@@ -34,9 +35,9 @@ const Transition = forwardRef((props: TransitionProps & { children: React.ReactE
 });
 
 type ModeProps<T> = T extends 'create'
-  ? { mode: 'create'; item?: never; handleCreate: (item: ItemDto) => void; handleUpdate?: never }
+  ? { mode: 'create'; item?: never }
   : T extends 'edit'
-    ? { mode: 'edit'; item: ItemDto; handleCreate?: never; handleUpdate: (item: ItemDto) => void }
+    ? { mode: 'edit'; item: ItemDto }
     : never;
 
 export type ItemFormDialogProps = (ModeProps<'create'> | ModeProps<'edit'>) & {
@@ -46,16 +47,7 @@ export type ItemFormDialogProps = (ModeProps<'create'> | ModeProps<'edit'>) & {
   handleClose: () => void;
 };
 
-export const ItemFormDialog = ({
-  title,
-  open,
-  item,
-  mode,
-  handleClose,
-  handleCreate,
-  handleUpdate,
-  wishlistId,
-}: ItemFormDialogProps) => {
+export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistId }: ItemFormDialogProps) => {
   const theme = useTheme();
   const smallScreen = useMediaQuery(theme.breakpoints.down('md'));
   const { addToast } = useToast();
@@ -66,8 +58,8 @@ export const ItemFormDialog = ({
   const [pictureUrl, setPictureUrl] = useState('');
   const [validPictureUrl, setValidPictureUrl] = useState<boolean | undefined>(true);
   const [score, setScore] = useState<number | null>(null);
-  const [loading, setLoading] = useState(false);
   const [scanUrlLoading, setScanUrlLoading] = useState(false);
+  const queryClient = useQueryClient();
 
   const invalidUrl = url !== '' && !isValidUrl(url);
   const formIsValid =
@@ -81,42 +73,59 @@ export const ItemFormDialog = ({
     setScore(null);
   };
 
+  const { mutateAsync: createItem, isPending: createItemPending } = useMutation({
+    mutationKey: ['item.create'],
+    mutationFn: (data: AddItemForListInputDto) => api.item.create(data),
+    onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
+    onSuccess: (newItem) => {
+      addToast({ message: 'Souhait créé avec succès', variant: 'success' });
+      queryClient.setQueryData(['wishlist', { id: wishlistId }], (old: DetailedWishlistDto) => ({
+        ...old,
+        items: [...old.items, newItem],
+      }));
+      resetForm();
+    },
+  });
+
+  const { mutateAsync: updateItem, isPending: updateItemPending } = useMutation({
+    mutationKey: ['item.update', { id: item?.id }],
+    mutationFn: (props: { itemId: string; data: AddItemInputDto }) => api.item.update(props.itemId, props.data),
+    onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
+    onSuccess: (_output, props) => {
+      const { itemId, data } = props;
+      addToast({ message: 'Le souhait à bien été modifié', variant: 'success' });
+      queryClient.setQueryData(['wishlist', { id: wishlistId }], (old: DetailedWishlistDto) => ({
+        ...old,
+        items: old.items.map((item) => (item.id === itemId ? { ...item, ...data } : item)),
+      }));
+    },
+  });
+
+  const loading = useMemo(() => createItemPending || updateItemPending, [createItemPending, updateItemPending]);
+
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setLoading(true);
 
-    try {
-      const base: AddItemInputDto = {
-        name,
-        description: description === '' ? undefined : description,
-        url: url === '' ? undefined : TidyURL.clean(url).url,
-        picture_url: pictureUrl === '' ? undefined : pictureUrl,
-        score: score === null ? undefined : score,
-      };
+    const base: AddItemInputDto = {
+      name,
+      description: description === '' ? undefined : description,
+      url: url === '' ? undefined : TidyURL.clean(url).url,
+      picture_url: pictureUrl === '' ? undefined : pictureUrl,
+      score: score === null ? undefined : score,
+    };
 
-      if (mode === 'create') {
-        const newItem = await api.item.create({
-          wishlist_id: wishlistId,
-          ...base,
-        });
-
-        resetForm();
-        handleCreate(newItem);
-        addToast({ message: 'Souhait créé avec succès', variant: 'success' });
-      }
-
-      if (mode === 'edit') {
-        await api.item.update(item.id, base);
-        handleUpdate({ ...item, ...base });
-        addToast({ message: 'Le souhait à bien été modifié', variant: 'success' });
-      }
-
-      handleClose();
-    } catch (e) {
-      addToast({ message: "Une erreur s'est produite", variant: 'error' });
-    } finally {
-      setLoading(false);
+    if (mode === 'create') {
+      await createItem({
+        wishlist_id: wishlistId,
+        ...base,
+      });
     }
+
+    if (mode === 'edit') {
+      await updateItem({ itemId: item.id, data: base });
+    }
+
+    handleClose();
   };
 
   useEffect(() => {
@@ -153,12 +162,6 @@ export const ItemFormDialog = ({
     },
     [scanUrlLoading],
   );
-
-  // useEffect(() => {
-  //   if (url === 'https://translate.google.com/') {
-  //     setUrl('');
-  //   }
-  // }, [url]);
 
   return (
     <Dialog fullScreen open={open} onClose={handleClose} TransitionComponent={Transition}>
@@ -220,23 +223,18 @@ export const ItemFormDialog = ({
               helperText={
                 <>
                   {invalidUrl && <span>L'url saisie n'est pas valide</span>}
-                  {!invalidUrl && (
-                    <Stack direction="row" alignItems="center" justifyContent="space-between">
-                      <CharsRemaining max={1000} value={url} />
-                      {url && (
-                        <Link
-                          variant="body1"
-                          component="button"
-                          disabled={loading || scanUrlLoading}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            scanUrl(url);
-                          }}
-                        >
-                          Scanner l'url
-                        </Link>
-                      )}
-                    </Stack>
+                  {!invalidUrl && url && (
+                    <Link
+                      variant="body1"
+                      component="button"
+                      disabled={loading || scanUrlLoading}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        scanUrl(url);
+                      }}
+                    >
+                      Scanner l'url
+                    </Link>
                   )}
                 </>
               }

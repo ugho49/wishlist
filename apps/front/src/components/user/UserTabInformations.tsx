@@ -1,21 +1,21 @@
 import React, { FormEvent, useEffect, useState } from 'react';
 import { Box, Stack, TextField } from '@mui/material';
-import { useApi, useToast } from '@wishlist-front/hooks';
+import { useApi, useFetchUserInfo, useToast } from '@wishlist-front/hooks';
 import { InputLabel } from '../common/InputLabel';
 import { CharsRemaining } from '../common/CharsRemaining';
 import { DateTime } from 'luxon';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { MobileDatePicker } from '@mui/x-date-pickers';
 import { LoadingButton } from '@mui/lab';
 import SaveIcon from '@mui/icons-material/Save';
-import { useAsync } from 'react-use';
 import { Loader } from '../common/Loader';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { RootState } from '../../core';
-import { useSelector } from 'react-redux';
 import { AvatarUpdateButton } from './AvatarUpdateButton';
-import { updatePicture as updatePictureAction } from '../../core/store/features';
+import { updatePicture as updatePictureAction, updateUser as updateUserAction } from '../../core/store/features';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { UpdateUserProfileInputDto, UserDto } from '@wishlist/common-types';
 
 const mapState = (state: RootState) => state.userProfile.pictureUrl;
 
@@ -25,41 +25,49 @@ export const UserTabInformations = () => {
   const dispatch = useDispatch();
   const smallScreen = useMediaQuery(theme.breakpoints.down('md'));
   const api = useApi();
-  const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [firstname, setFirstname] = useState('');
   const [lastname, setLastname] = useState('');
   const [birthday, setBirthday] = useState<DateTime | null>(null);
   const { addToast } = useToast();
-  const { value, loading: loadingUser } = useAsync(() => api.user.getInfo(), []);
+  const { user, loading: loadingUser } = useFetchUserInfo();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
-    if (value) {
-      setEmail(value.email);
-      setFirstname(value.firstname);
-      setLastname(value.lastname);
-      setBirthday(value?.birthday ? DateTime.fromISO(value.birthday) : null);
+    if (user) {
+      setEmail(user.email);
+      setFirstname(user.firstname);
+      setLastname(user.lastname);
+      setBirthday(user?.birthday ? DateTime.fromISO(user.birthday) : null);
     }
-  }, [value]);
+  }, [user]);
 
   const formIsValid = firstname.trim() !== '' && lastname.trim() !== '';
 
+  const { mutateAsync: update, isPending: loading } = useMutation({
+    mutationKey: ['user.update'],
+    mutationFn: (data: UpdateUserProfileInputDto) => api.user.update(data),
+    onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
+    onSuccess: (_output, data) => {
+      addToast({ message: 'Profil mis à jour', variant: 'info' });
+
+      queryClient.setQueryData(['user'], (old: UserDto) => ({
+        ...old,
+        ...data,
+        birthday: data.birthday ? DateTime.fromJSDate(data.birthday) : null,
+      }));
+
+      dispatch(updateUserAction({ firstName: data.firstname, lastName: data.lastname }));
+    },
+  });
+
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    try {
-      await api.user.update({
-        firstname,
-        lastname,
-        birthday: birthday !== null ? new Date(birthday.toISODate() || '') : undefined,
-      });
-
-      addToast({ message: 'Profil mis à jour', variant: 'info' });
-    } catch (e) {
-      addToast({ message: "Une erreur s'est produite", variant: 'error' });
-    } finally {
-      setLoading(false);
-    }
+    await update({
+      firstname,
+      lastname,
+      birthday: birthday !== null ? new Date(birthday.toISODate() || '') : undefined,
+    });
   };
 
   return (
@@ -71,7 +79,7 @@ export const UserTabInformations = () => {
               firstname={firstname}
               lastname={lastname}
               pictureUrl={pictureUrl}
-              socials={value?.social || []}
+              socials={user?.social || []}
               onPictureUpdated={(pictureUrl) => dispatch(updatePictureAction(pictureUrl))}
               uploadPictureHandler={api.user.uploadPicture}
               updatePictureFromSocialHandler={api.user.updatePictureFromSocial}

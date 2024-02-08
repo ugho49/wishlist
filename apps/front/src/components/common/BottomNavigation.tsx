@@ -1,6 +1,6 @@
 import {
   Avatar,
-  BottomNavigation,
+  BottomNavigation as MuiBottomNavigation,
   BottomNavigationAction,
   bottomNavigationActionClasses,
   Paper,
@@ -13,10 +13,8 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import PersonIcon from '@mui/icons-material/Person';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import { RootState } from '../../core';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { makeStyles } from '@mui/styles';
-import { useApi } from '@wishlist-front/hooks';
-import { setUser } from '../../core/store/features';
 
 const mapAuthState = (state: RootState) => state.auth;
 const mapUserProfileState = (state: RootState) => state.userProfile;
@@ -43,23 +41,13 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
 }));
 
-export const Footer = () => {
+export const BottomNavigation = () => {
   const classes = useStyles();
   const { user } = useSelector(mapAuthState);
   const { pictureUrl } = useSelector(mapUserProfileState);
   const [currentNavigation, setCurrentNavigation] = useState('');
   const navigate = useNavigate();
   const location = useLocation();
-  const api = useApi();
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    api.user
-      .getInfo()
-      .then((user) =>
-        dispatch(setUser({ firstName: user.firstname, lastName: user.lastname, pictureUrl: user.picture_url })),
-      );
-  }, [api, dispatch]);
 
   const handleChange = (event: React.SyntheticEvent, newValue: string) => {
     navigate(newValue);
@@ -73,7 +61,7 @@ export const Footer = () => {
 
   return (
     <Paper sx={{ position: 'fixed', bottom: 0, left: 0, right: 0 }} elevation={3} component="nav">
-      <BottomNavigation showLabels value={currentNavigation} onChange={handleChange}>
+      <MuiBottomNavigation showLabels value={currentNavigation} onChange={handleChange}>
         <BottomNavigationAction
           className={classes.bottomNavigationAction}
           label="Évènements"
@@ -100,7 +88,7 @@ export const Footer = () => {
           value="/user/profile"
           icon={pictureUrl ? <Avatar src={pictureUrl} sx={{ height: '24px', width: '24px' }} /> : <PersonIcon />}
         />
-      </BottomNavigation>
+      </MuiBottomNavigation>
     </Paper>
   );
 };

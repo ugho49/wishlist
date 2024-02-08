@@ -4,10 +4,11 @@ import { Alert, Box, Stack, TextField } from '@mui/material';
 import { InputLabel } from '../common/InputLabel';
 import { LoadingButton } from '@mui/lab';
 import SaveIcon from '@mui/icons-material/Save';
+import { useMutation } from '@tanstack/react-query';
+import type { ChangeUserPasswordInputDto } from '@wishlist/common-types';
 
 export const UserTabPassword = () => {
   const api = useApi();
-  const [loading, setLoading] = useState(false);
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const { addToast } = useToast();
@@ -15,24 +16,23 @@ export const UserTabPassword = () => {
   const formIsValid =
     oldPassword.trim() !== '' && newPassword.trim() !== '' && newPassword.length >= 8 && oldPassword !== newPassword;
 
-  const onSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      await api.user.changePassword({
-        new_password: newPassword,
-        old_password: oldPassword,
-      });
-
+  const { mutateAsync: changePassword, isPending: loading } = useMutation({
+    mutationKey: ['user.changePassword'],
+    mutationFn: (data: ChangeUserPasswordInputDto) => api.user.changePassword(data),
+    onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
+    onSuccess: () => {
+      addToast({ message: 'Mot de passe mis à jour', variant: 'info' });
       setNewPassword('');
       setOldPassword('');
+    },
+  });
 
-      addToast({ message: 'Mot de passe mis à jour', variant: 'info' });
-    } catch (e) {
-      addToast({ message: "Une erreur s'est produite", variant: 'error' });
-    } finally {
-      setLoading(false);
-    }
+  const onSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    await changePassword({
+      new_password: newPassword,
+      old_password: oldPassword,
+    });
   };
 
   return (

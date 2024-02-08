@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { MAX_EVENTS_BY_LIST, MiniEventDto } from '@wishlist/common-types';
-import { useApi, useCustomSearchParams, useToast } from '@wishlist-front/hooks';
-import { useAsync } from 'react-use';
+import { useApi, useAvailableEvents, useCustomSearchParams, useEventById, useToast } from '@wishlist-front/hooks';
 import { Title } from '../common/Title';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
@@ -39,17 +38,22 @@ import { Card } from '../common/Card';
 import { WishlistLogoActions } from './WishlistLogoActions';
 import { ConfirmCheckbox } from '../common/ConfirmCheckbox';
 import Collapse from '@mui/material/Collapse';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../core';
+import { useMutation } from '@tanstack/react-query';
 
 type QueryParamType = { 'from-event'?: string };
 
 const steps = ['Informations', 'Evènements'];
 
+const mapState = (state: RootState) => state.userProfile.firstName;
+
 export const CreateWishlistPage = () => {
   const theme = useTheme();
   const { addToast } = useToast();
   const navigate = useNavigate();
+  const userFirstName = useSelector(mapState);
   const [queryParams] = useCustomSearchParams<QueryParamType>();
-  const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -59,50 +63,56 @@ export const CreateWishlistPage = () => {
   const [logo, setLogo] = useState<File | undefined>();
   const api = useApi();
 
-  const { value } = useAsync(() => api.event.getAll({ limit: 100, only_future: true }), []);
-  const availableEvents = useMemo(() => value?.resources || [], [value]);
+  const { events: availableEvents, loading: availableEventsLoading } = useAvailableEvents();
+  const { event: eventFromUrl } = useEventById(queryParams['from-event']);
 
   const nextStepEnabled = title?.trim() !== '';
   const createEnabled = events.length > 0;
 
   useEffect(() => {
-    api.user.getInfo().then((user) =>
-      setTitle((prev) => {
-        if (prev !== '') return prev;
-        return `Liste de ${user.firstname}`;
-      }),
-    );
-  }, [api.user]);
+    setTitle((prev) => {
+      if (prev !== '' || !userFirstName) return prev;
+      return `Liste de ${userFirstName}`;
+    });
+  }, [userFirstName]);
 
   useEffect(() => {
-    if (queryParams['from-event']) {
-      api.event.getById(queryParams['from-event']).then((value) => setEvents((prev) => [...prev, value]));
+    if (eventFromUrl !== undefined) {
+      setEvents((prev) => [...prev, eventFromUrl]);
     }
-  }, [api, queryParams]);
+  }, [eventFromUrl]);
 
-  const createWishlist = async () => {
-    setLoading(true);
-    try {
-      const wishlist = await api.wishlist.create({
+  const { mutateAsync: uploadLogo, isPending: uploadLogoLoading } = useMutation({
+    mutationKey: ['wishlist.create.uploadLogo'],
+    mutationFn: (data: { wishlistId: string; file: File }) => api.wishlist.uploadLogo(data.wishlistId, data.file),
+    onError: () => addToast({ message: "Une erreur s'est produite lors de l'envoi du logo", variant: 'error' }),
+  });
+
+  const { mutateAsync: createWishlist, isPending: createWishlistLoading } = useMutation({
+    mutationKey: ['wishlist.create'],
+    mutationFn: () =>
+      api.wishlist.create({
         title,
         description: description === '' ? undefined : description,
         hide_items: hideItems,
         event_ids: events.map((e) => e.id),
         items: [],
-      });
+      }),
+    onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
+    onSuccess: async (output) => {
+      const wishlistId = output.id;
 
       if (logo && !hideItems) {
-        await api.wishlist.uploadLogo(wishlist.id, logo);
+        await uploadLogo({ wishlistId, file: logo });
       }
 
       addToast({ message: 'Liste créé avec succès', variant: 'success' });
 
-      navigate(`/wishlists/${wishlist.id}`);
-    } catch (e) {
-      addToast({ message: "Une erreur s'est produite", variant: 'error' });
-      setLoading(false);
-    }
-  };
+      navigate(`/wishlists/${wishlistId}`);
+    },
+  });
+
+  const loading = useMemo(() => createWishlistLoading || uploadLogoLoading, [createWishlistLoading, uploadLogoLoading]);
 
   return (
     <Box>
@@ -215,6 +225,7 @@ export const CreateWishlistPage = () => {
                 <InputLabel required>Gérer les évènements</InputLabel>
 
                 <SearchEventSelect
+                  loading={availableEventsLoading}
                   disabled={loading || events.length === MAX_EVENTS_BY_LIST}
                   options={availableEvents}
                   excludedEventIds={events.map((e) => e.id)}

@@ -1,57 +1,62 @@
-import React, { useMemo, useState } from 'react';
-import { MAX_EVENTS_BY_LIST, MiniEventDto } from '@wishlist/common-types';
+import React, { useMemo } from 'react';
+import { DetailedWishlistDto, MAX_EVENTS_BY_LIST, MiniEventDto } from '@wishlist/common-types';
 import { Card } from '../common/Card';
 import { Avatar, Box, Divider, List, ListItem, ListItemAvatar, ListItemText, Stack, useTheme } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import { DateTime } from 'luxon';
 import { ConfirmIconButton } from '../common/ConfirmIconButton';
-import { useApi, useToast } from '@wishlist-front/hooks';
+import { useApi, useAvailableEvents, useToast } from '@wishlist-front/hooks';
 import { SearchEventSelect } from '../event/SearchEventSelect';
-import { useAsync } from 'react-use';
 import { InputLabel } from '../common/InputLabel';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 export type EditWishlistEventsProps = {
   wishlistId: string;
   events: MiniEventDto[];
-  onChange: (events: MiniEventDto[]) => void;
 };
 
-export const EditWishlistEvent = ({ wishlistId, events, onChange }: EditWishlistEventsProps) => {
+export const EditWishlistEvent = ({ wishlistId, events }: EditWishlistEventsProps) => {
   const api = useApi();
   const theme = useTheme();
-  const [loading, setLoading] = useState(false);
   const { addToast } = useToast();
-  const { value } = useAsync(() => api.event.getAll({ limit: 100, only_future: true }), []);
-  const availableEvents = useMemo(() => value?.resources || [], [value]);
+  const queryClient = useQueryClient();
+  const { events: availableEvents, loading: availableEventsLoading } = useAvailableEvents();
 
-  const attacheEventToWishlist = async (event: MiniEventDto) => {
-    setLoading(true);
-
-    try {
-      await api.wishlist.linkWishlistToAnEvent(wishlistId, { event_id: event.id });
-      onChange([event, ...events]);
+  const { mutateAsync: attachEventToWishlist, isPending: attachEventToWishlistPending } = useMutation({
+    mutationKey: ['wishlist.linkEvent', { id: wishlistId }],
+    mutationFn: (event: MiniEventDto) => api.wishlist.linkWishlistToAnEvent(wishlistId, { event_id: event.id }),
+    onSuccess: (_output, event) => {
       addToast({ message: 'La liaison entre cette liste et cet évènement à été ajoutée !', variant: 'info' });
-    } catch (e) {
-      addToast({ message: "Impossible d'ajouter la liaison entre cette liste et cet évènement", variant: 'error' });
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  const detachEventFromWishlist = async (event: MiniEventDto) => {
-    setLoading(true);
+      queryClient.setQueryData(['wishlist', { id: wishlistId }], (old: DetailedWishlistDto) => ({
+        ...old,
+        events: [event, ...old.events],
+      }));
+    },
+    onError: () =>
+      addToast({ message: "Impossible d'ajouter la liaison entre cette liste et cet évènement", variant: 'error' }),
+  });
 
-    try {
-      await api.wishlist.unlinkWishlistToAnEvent(wishlistId, { event_id: event.id });
-      onChange([...events].filter((e) => e.id !== event.id));
+  const { mutateAsync: detachEventFromWishlist, isPending: detachEventFromWishlistPending } = useMutation({
+    mutationKey: ['wishlist.unlinkEvent', { id: wishlistId }],
+    mutationFn: (event: MiniEventDto) => api.wishlist.unlinkWishlistToAnEvent(wishlistId, { event_id: event.id }),
+    onSuccess: (_output, event) => {
       addToast({ message: 'La liaison entre cette liste et cet évènement à été supprimée !', variant: 'info' });
-    } catch (e) {
-      addToast({ message: 'Impossible de supprimer la liaison entre cette liste et cet évènement', variant: 'error' });
-    } finally {
-      setLoading(false);
-    }
-  };
+
+      queryClient.setQueryData(['wishlist', { id: wishlistId }], (old: DetailedWishlistDto) => ({
+        ...old,
+        events: [...events].filter((e) => e.id !== event.id),
+      }));
+    },
+    onError: () =>
+      addToast({ message: 'Impossible de supprimer la liaison entre cette liste et cet évènement', variant: 'error' }),
+  });
+
+  const loading = useMemo(
+    () => attachEventToWishlistPending || detachEventFromWishlistPending,
+    [attachEventToWishlistPending, detachEventFromWishlistPending],
+  );
 
   return (
     <Stack>
@@ -59,10 +64,11 @@ export const EditWishlistEvent = ({ wishlistId, events, onChange }: EditWishlist
         <InputLabel>Ajouter un nouvel évènement sur la liste ?</InputLabel>
 
         <SearchEventSelect
+          loading={availableEventsLoading}
           error={events.length === MAX_EVENTS_BY_LIST}
           options={availableEvents}
           disabled={loading || events.length === MAX_EVENTS_BY_LIST}
-          onChange={(value) => attacheEventToWishlist(value)}
+          onChange={(value) => attachEventToWishlist(value)}
           excludedEventIds={events.map((e) => e.id)}
         />
       </Box>

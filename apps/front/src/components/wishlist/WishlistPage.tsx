@@ -4,8 +4,7 @@ import { Title } from '../common/Title';
 import { Loader } from '../common/Loader';
 import { RouterLink } from '../common/RouterLink';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useAsync } from 'react-use';
-import { useApi, useToast } from '@wishlist-front/hooks';
+import { useApi, useToast, useWishlistById } from '@wishlist-front/hooks';
 import { WishlistItems } from './WishlistItems';
 import PublicIcon from '@mui/icons-material/Public';
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
@@ -18,6 +17,7 @@ import { RootState } from '../../core';
 import { useSelector } from 'react-redux';
 import EditIcon from '@mui/icons-material/Edit';
 import { WishlistNotFound } from './WishlistNotFound';
+import { useMutation } from '@tanstack/react-query';
 
 const mapState = (state: RootState) => state.auth.user?.id;
 
@@ -30,11 +30,16 @@ export const WishlistPage = () => {
   const api = useApi();
   const navigate = useNavigate();
 
-  const { value: wishlist, loading } = useAsync(() => api.wishlist.getById(wishlistId), [wishlistId]);
+  const { wishlist, loading } = useWishlistById(wishlistId);
+
+  const { mutateAsync: handleDelete } = useMutation({
+    mutationKey: ['wishlist.delete', { id: wishlistId }],
+    mutationFn: () => api.wishlist.delete(wishlistId),
+  });
 
   const deleteWishlist = async () => {
     try {
-      await api.wishlist.delete(wishlistId);
+      await handleDelete();
       addToast({ message: 'La liste à bien été supprimée', variant: 'success' });
       navigate('/wishlists');
     } catch (e) {

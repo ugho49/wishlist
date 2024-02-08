@@ -1,4 +1,4 @@
-import React, { FormEvent, useState } from 'react';
+import React, { FormEvent, useMemo, useState } from 'react';
 import { DetailedWishlistDto, UpdateWishlistInputDto } from '@wishlist/common-types';
 import { Box, Stack, TextField } from '@mui/material';
 import { useApi, useToast } from '@wishlist-front/hooks';
@@ -7,15 +7,15 @@ import { CharsRemaining } from '../common/CharsRemaining';
 import { LoadingButton } from '@mui/lab';
 import SaveIcon from '@mui/icons-material/Save';
 import { WishlistLogoActions } from './WishlistLogoActions';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 export type EditWishlistInformationsProps = {
   wishlist: DetailedWishlistDto;
-  onChange: (updatedValues: UpdateWishlistInputDto) => void;
 };
 
-export const EditWishlistInformations = ({ wishlist, onChange }: EditWishlistInformationsProps) => {
-  const [loading, setLoading] = useState(false);
+export const EditWishlistInformations = ({ wishlist }: EditWishlistInformationsProps) => {
   const api = useApi();
+  const queryClient = useQueryClient();
   const { addToast } = useToast();
   const [title, setTitle] = useState(wishlist.title);
   const [description, setDescription] = useState(wishlist.description);
@@ -23,48 +23,58 @@ export const EditWishlistInformations = ({ wishlist, onChange }: EditWishlistInf
 
   const updateEnabled = title.trim() !== '';
 
-  const onSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      const body: UpdateWishlistInputDto = { title, description: description === '' ? undefined : description };
-      await api.wishlist.update(wishlist.id, body);
-      onChange(body);
+  const { mutateAsync: updateWishlist, isPending: updateWishlistPending } = useMutation({
+    mutationKey: ['wishlist.update', { id: wishlist.id }],
+    mutationFn: (data: UpdateWishlistInputDto) => api.wishlist.update(wishlist.id, data),
+    onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
+    onSuccess: (_output, data) => {
       addToast({ message: 'Liste mis à jour', variant: 'info' });
-    } catch (e) {
-      addToast({ message: "Une erreur s'est produite", variant: 'error' });
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  const onLogoChange = async (file: File) => {
-    setLoading(true);
+      queryClient.setQueryData(['wishlist', { id: wishlist.id }], (old: DetailedWishlistDto) => ({
+        ...old,
+        ...data,
+      }));
+    },
+  });
 
-    try {
-      const res = await api.wishlist.uploadLogo(wishlist.id, file);
-      setLogoUrl(res.logo_url);
+  const { mutateAsync: uploadLogo, isPending: uploadLogoPending } = useMutation({
+    mutationKey: ['wishlist.uploadLogo', { id: wishlist.id }],
+    mutationFn: (file: File) => api.wishlist.uploadLogo(wishlist.id, file),
+    onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
+    onSuccess: (output) => {
+      setLogoUrl(output.logo_url);
       addToast({ message: 'Logo mis à jour', variant: 'info' });
-    } catch (e) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const error = (e as any)?.response?.data?.message as string;
-      addToast({ message: error || "Une erreur s'est produite", variant: 'error' });
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  const onLogoRemove = async () => {
-    setLoading(true);
-    try {
-      await api.wishlist.removeLogo(wishlist.id);
+      queryClient.setQueryData(['wishlist', { id: wishlist.id }], (old: DetailedWishlistDto) => ({
+        ...old,
+        logo_url: output.logo_url,
+      }));
+    },
+  });
+
+  const { mutateAsync: removeLogo, isPending: removeLogoPending } = useMutation({
+    mutationKey: ['wishlist.removeLogo', { id: wishlist.id }],
+    mutationFn: () => api.wishlist.removeLogo(wishlist.id),
+    onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
+    onSuccess: () => {
       setLogoUrl(undefined);
       addToast({ message: 'Logo supprimé', variant: 'info' });
-    } catch (e) {
-      addToast({ message: "Une erreur s'est produite", variant: 'error' });
-    } finally {
-      setLoading(false);
-    }
+      queryClient.setQueryData(['wishlist', { id: wishlist.id }], (old: DetailedWishlistDto) => ({
+        ...old,
+        logo_url: undefined,
+      }));
+    },
+  });
+
+  const loading = useMemo(
+    () => removeLogoPending || uploadLogoPending || updateWishlistPending,
+    [removeLogoPending, uploadLogoPending, updateWishlistPending],
+  );
+
+  const onSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    const body: UpdateWishlistInputDto = { title, description: description === '' ? undefined : description };
+    await updateWishlist(body);
   };
 
   return (
@@ -74,8 +84,8 @@ export const EditWishlistInformations = ({ wishlist, onChange }: EditWishlistInf
           <WishlistLogoActions
             loading={loading}
             logoUrl={logoUrl}
-            onLogoChange={(file) => onLogoChange(file)}
-            onLogoRemove={() => onLogoRemove()}
+            onLogoChange={(file) => uploadLogo(file)}
+            onLogoRemove={() => removeLogo()}
           />
         </Box>
       )}

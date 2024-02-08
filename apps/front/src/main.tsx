@@ -15,6 +15,7 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import { environment } from './environment';
 import { ApiClient } from '@wishlist/api-client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 function main() {
   const needRedirect =
@@ -27,7 +28,16 @@ function main() {
   }
 
   const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
-  const queryClient = new QueryClient();
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: 1,
+      },
+      mutations: {
+        retry: false,
+      },
+    },
+  });
   const api = new ApiClient({
     baseURL: environment.baseUrl,
     timeoutInMs: 10_000, // 10 seconds
@@ -57,6 +67,7 @@ function main() {
           </ThemeProvider>
         </ReduxProvider>
       </ApiProvider>
+      <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>,
   );
 }

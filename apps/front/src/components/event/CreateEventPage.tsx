@@ -34,6 +34,7 @@ import { RootState } from '../../core';
 import { useSelector } from 'react-redux';
 import { Card } from '../common/Card';
 import { useApi, useToast } from '@wishlist-front/hooks';
+import { useMutation } from '@tanstack/react-query';
 
 const steps = ['Informations', 'Participants'];
 
@@ -49,7 +50,6 @@ export const CreateEventPage = () => {
   const currentUserEmail = useSelector(mapState);
   const { addToast } = useToast();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -68,11 +68,11 @@ export const CreateEventPage = () => {
   const nextStepEnabled = title?.trim() !== '' && eventDate !== null;
   const createEnabled = attendees.length > 0;
 
-  const createEvent = async () => {
-    setLoading(true);
-    try {
+  const { mutateAsync: createEvent, isPending: loading } = useMutation({
+    mutationKey: ['event.create'],
+    mutationFn: () => {
       const isoDate = eventDate?.toISODate() || DateTime.now().toISODate() || '';
-      const event = await api.event.create({
+      return api.event.create({
         title,
         description: description === '' ? undefined : description,
         event_date: new Date(isoDate),
@@ -81,14 +81,14 @@ export const CreateEventPage = () => {
           role: attendee.role,
         })),
       });
-
+    },
+    onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
+    onSuccess: async (output) => {
       addToast({ message: 'Evènement créé avec succès', variant: 'success' });
-      navigate(`/events/${event.id}`);
-    } catch (e) {
-      addToast({ message: "Une erreur s'est produite", variant: 'error' });
-      setLoading(false);
-    }
-  };
+
+      navigate(`/events/${output.id}`);
+    },
+  });
 
   return (
     <Box>

@@ -1,5 +1,11 @@
-import React, { useMemo, useState } from 'react';
-import { AddEventAttendeeInputDto, AttendeeDto, AttendeeRole, MiniUserDto } from '@wishlist/common-types';
+import React, { useMemo } from 'react';
+import {
+  AddEventAttendeeInputDto,
+  AttendeeDto,
+  AttendeeRole,
+  DetailedEventDto,
+  MiniUserDto,
+} from '@wishlist/common-types';
 import { Avatar, Box, Divider, List, ListItem, ListItemAvatar, ListItemText, Stack } from '@mui/material';
 import { InputLabel } from '../common/InputLabel';
 import { SearchUserSelect } from '../user/SearchUserSelect';
@@ -11,20 +17,19 @@ import { blue, green, orange } from '@mui/material/colors';
 import PersonIcon from '@mui/icons-material/Person';
 import { ConfirmIconButton } from '../common/ConfirmIconButton';
 import { useApi, useToast } from '@wishlist-front/hooks';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 export type EditEventAttendeesProps = {
   eventId: string;
   creator: MiniUserDto;
   attendees: AttendeeDto[];
-  onChange: (attendees: AttendeeDto[]) => void;
 };
 
 const mapState = (state: RootState) => state.auth.user?.email;
 
-export const EditEventAttendees = ({ eventId, creator, attendees, onChange }: EditEventAttendeesProps) => {
+export const EditEventAttendees = ({ eventId, creator, attendees }: EditEventAttendeesProps) => {
   const currentUserEmail = useSelector(mapState);
   const api = useApi();
-  const [loading, setLoading] = useState(false);
   const { addToast } = useToast();
 
   const attendeeEmails = useMemo(
@@ -32,37 +37,45 @@ export const EditEventAttendees = ({ eventId, creator, attendees, onChange }: Ed
     [attendees],
   );
 
-  const addAttendee = async (attendee: AddEventAttendeeInputDto) => {
-    setLoading(true);
+  const queryClient = useQueryClient();
 
-    try {
-      const newAttendee = await api.attendee.addAttendee({
+  const { mutateAsync: addAttendee, isPending: addAttendeePending } = useMutation({
+    mutationKey: ['event.addAttendee', { id: eventId }],
+    mutationFn: (attendee: AddEventAttendeeInputDto) =>
+      api.attendee.addAttendee({
         event_id: eventId,
         email: attendee.email,
         role: attendee.role,
-      });
-      onChange([newAttendee, ...attendees]);
+      }),
+    onSuccess: (newAttendee, event) => {
       addToast({ message: "Participant ajouté à l'évènement !", variant: 'info' });
-    } catch (e) {
-      addToast({ message: "Impossible d'ajouter ce participant", variant: 'error' });
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  const deleteAttendee = async (attendee: AttendeeDto) => {
-    setLoading(true);
+      queryClient.setQueryData(['event', { id: eventId }], (old: DetailedEventDto) => ({
+        ...old,
+        attendees: [newAttendee, ...attendees],
+      }));
+    },
+    onError: () => addToast({ message: "Impossible d'ajouter ce participant", variant: 'error' }),
+  });
 
-    try {
-      await api.attendee.deleteAttendee(attendee.id);
-      onChange([...attendees].filter((a) => a.id !== attendee.id));
+  const { mutateAsync: deleteAttendee, isPending: deleteAttendeePending } = useMutation({
+    mutationKey: ['event.deleteAttendee', { id: eventId }],
+    mutationFn: (attendeeId: string) => api.attendee.deleteAttendee(attendeeId),
+    onSuccess: (_, attendeeId) => {
       addToast({ message: "Participant supprimé de l'évènement !", variant: 'info' });
-    } catch (e) {
-      addToast({ message: 'Impossible de supprimer ce participant', variant: 'error' });
-    } finally {
-      setLoading(false);
-    }
-  };
+
+      queryClient.setQueryData(['event', { id: eventId }], (old: DetailedEventDto) => ({
+        ...old,
+        attendees: [...attendees].filter((a) => a.id !== attendeeId),
+      }));
+    },
+    onError: () => addToast({ message: 'Impossible de supprimer ce participant', variant: 'error' }),
+  });
+
+  const loading = useMemo(
+    () => addAttendeePending || deleteAttendeePending,
+    [addAttendeePending, deleteAttendeePending],
+  );
 
   return (
     <Stack>
@@ -108,7 +121,7 @@ export const EditEventAttendees = ({ eventId, creator, attendees, onChange }: Ed
                       de l'évènement ?
                     </>
                   }
-                  onClick={() => deleteAttendee(attendee)}
+                  onClick={() => deleteAttendee(attendee.id)}
                 >
                   <DeleteIcon />
                 </ConfirmIconButton>

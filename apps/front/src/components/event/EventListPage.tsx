@@ -20,7 +20,7 @@ export const EventListPage = () => {
   const [queryParams, setQueryParams] = useCustomSearchParams<SearchType>({ page: '1' });
   const currentPage = useMemo(() => parseInt(queryParams.page || '1', 10), [queryParams]);
   const { data: value, isLoading: loading } = useQuery({
-    queryKey: ['events', { p: currentPage }],
+    queryKey: ['events', { page: currentPage }],
     queryFn: () => api.event.getAll({ p: currentPage }),
   });
 

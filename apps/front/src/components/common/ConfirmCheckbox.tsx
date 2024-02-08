@@ -50,7 +50,7 @@ export const ConfirmCheckbox = ({
       <Dialog open={openDialog} onClose={() => closeDialog()} disableScrollLock keepMounted>
         <DialogTitle>{confirmTitle}</DialogTitle>
         <DialogContent>
-          <DialogContentText>{confirmText}</DialogContentText>
+          <DialogContentText component="div">{confirmText}</DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => closeDialog()}>{cancelButton || 'Annuler'}</Button>

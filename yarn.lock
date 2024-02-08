@@ -5904,6 +5904,25 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tanstack/query-devtools@npm:5.18.1":
+  version: 5.18.1
+  resolution: "@tanstack/query-devtools@npm:5.18.1"
+  checksum: 10c0/ba2103b4ce56221ab57ccf026bb127cb58aba490cff9755074422ab4c657d0ef8e4bd22b1d292a027ac68b53f7c74084a9dcaf79c3c3d18f5724a8455225cb10
+  languageName: node
+  linkType: hard
+
+"@tanstack/react-query-devtools@npm:5.18.1":
+  version: 5.18.1
+  resolution: "@tanstack/react-query-devtools@npm:5.18.1"
+  dependencies:
+    "@tanstack/query-devtools": "npm:5.18.1"
+  peerDependencies:
+    "@tanstack/react-query": ^5.18.1
+    react: ^18.0.0
+  checksum: 10c0/ccd77c27516764c73374b4917f9a6b203acbbf5e844d5796f2469eef16ffd73168e88745af291bc16d9bbc169336888c435c258fae396f7f39b3d648e315f276
+  languageName: node
+  linkType: hard
+
 "@tanstack/react-query@npm:5.18.1":
   version: 5.18.1
   resolution: "@tanstack/react-query@npm:5.18.1"
@@ -22013,6 +22032,7 @@ __metadata:
     "@swc/core": "npm:1.4.0"
     "@swc/helpers": "npm:0.5.6"
     "@tanstack/react-query": "npm:5.18.1"
+    "@tanstack/react-query-devtools": "npm:5.18.1"
     "@testing-library/react": "npm:14.2.1"
     "@types/bcrypt": "npm:5.0.2"
     "@types/cron": "npm:2.4.0"

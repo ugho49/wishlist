@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useParams } from 'react-router-dom';
-import { useAsync } from 'react-use';
 import { Box, Tab, Tabs } from '@mui/material';
 import { Loader } from '../common/Loader';
 import { EventNotFound } from './EventNotFound';
@@ -9,9 +8,8 @@ import { Card } from '../common/Card';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import PeopleIcon from '@mui/icons-material/People';
 import { EditEventInformations } from './EditEventInformations';
-import { DetailedEventDto } from '@wishlist/common-types';
 import { EditEventAttendees } from './EditEventAttendees';
-import { useApi, useCustomSearchParams } from '@wishlist-front/hooks';
+import { useCustomSearchParams, useEventById } from '@wishlist-front/hooks';
 
 enum TabValues {
   informations = 'informations',
@@ -36,14 +34,8 @@ type SearchParamType = { tab: TabValues };
 export const EditEventPage = () => {
   const params = useParams<'eventId'>();
   const eventId = params.eventId || '';
-  const api = useApi();
-  const [event, setEvent] = useState<DetailedEventDto | undefined>(undefined);
   const [queryParams, setQueryParams] = useCustomSearchParams<SearchParamType>({ tab: tabs[0].value });
-  const { value, loading } = useAsync(() => api.event.getById(eventId), [eventId]);
-
-  useEffect(() => {
-    if (value) setEvent(value);
-  }, [value]);
+  const { event, loading } = useEventById(eventId);
 
   return (
     <Box>
@@ -68,19 +60,9 @@ export const EditEventPage = () => {
               </Tabs>
             </Box>
             <Card>
-              {queryParams.tab === TabValues.informations && (
-                <EditEventInformations
-                  event={event}
-                  onChange={(updatedValues) => setEvent({ ...event, ...updatedValues })}
-                />
-              )}
+              {queryParams.tab === TabValues.informations && <EditEventInformations event={event} />}
               {queryParams.tab === TabValues.attendees && (
-                <EditEventAttendees
-                  eventId={event.id}
-                  creator={event.created_by}
-                  attendees={event.attendees}
-                  onChange={(attendees) => setEvent({ ...event, attendees })}
-                />
+                <EditEventAttendees eventId={event.id} creator={event.created_by} attendees={event.attendees} />
               )}
             </Card>
           </>
