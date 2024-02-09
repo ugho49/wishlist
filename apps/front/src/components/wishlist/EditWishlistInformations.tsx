@@ -1,29 +1,47 @@
-import React, { FormEvent, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { DetailedWishlistDto, UpdateWishlistInputDto } from '@wishlist/common-types';
 import { Box, Stack, TextField } from '@mui/material';
 import { useApi, useToast } from '@wishlist-front/hooks';
 import { InputLabel } from '../common/InputLabel';
-import { CharsRemaining } from '../common/CharsRemaining';
 import { LoadingButton } from '@mui/lab';
 import SaveIcon from '@mui/icons-material/Save';
 import { WishlistLogoActions } from './WishlistLogoActions';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { z } from 'zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { zodRequiredString } from '../../utils/validation';
 
 export type EditWishlistInformationsProps = {
   wishlist: DetailedWishlistDto;
 };
 
+const schema = z.object({
+  title: zodRequiredString().max(100, '100 caractères maximum'),
+  description: z.string().max(2000, '2000 caractères maximum').optional(),
+});
+
+type FormFields = z.infer<typeof schema>;
+
 export const EditWishlistInformations = ({ wishlist }: EditWishlistInformationsProps) => {
   const api = useApi();
   const queryClient = useQueryClient();
   const { addToast } = useToast();
-  const [title, setTitle] = useState(wishlist.title);
-  const [description, setDescription] = useState(wishlist.description);
   const [logoUrl, setLogoUrl] = useState(wishlist.logo_url);
 
-  const updateEnabled = title.trim() !== '';
+  const {
+    register,
+    handleSubmit,
+    formState: { isSubmitting, errors: formErrors },
+  } = useForm<FormFields>({
+    resolver: zodResolver(schema),
+    values: {
+      title: wishlist.title || '',
+      description: wishlist.description,
+    },
+  });
 
-  const { mutateAsync: updateWishlist, isPending: updateWishlistPending } = useMutation({
+  const { mutateAsync: updateWishlist } = useMutation({
     mutationKey: ['wishlist.update', { id: wishlist.id }],
     mutationFn: (data: UpdateWishlistInputDto) => api.wishlist.update(wishlist.id, data),
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
@@ -66,15 +84,15 @@ export const EditWishlistInformations = ({ wishlist }: EditWishlistInformationsP
     },
   });
 
-  const loading = useMemo(
-    () => removeLogoPending || uploadLogoPending || updateWishlistPending,
-    [removeLogoPending, uploadLogoPending, updateWishlistPending],
+  const loadingLogoUpdate = useMemo(
+    () => removeLogoPending || uploadLogoPending,
+    [removeLogoPending, uploadLogoPending],
   );
 
-  const onSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    const body: UpdateWishlistInputDto = { title, description: description === '' ? undefined : description };
-    await updateWishlist(body);
+  const onSubmit = async (data: FormFields) => {
+    console.log({ data });
+    // const body: UpdateWishlistInputDto = { title, description: description === '' ? undefined : description };
+    // await updateWishlist(body);
   };
 
   return (
@@ -82,42 +100,37 @@ export const EditWishlistInformations = ({ wishlist }: EditWishlistInformationsP
       {!wishlist.config.hide_items && (
         <Box marginBottom={3}>
           <WishlistLogoActions
-            loading={loading}
+            loading={loadingLogoUpdate}
             logoUrl={logoUrl}
             onLogoChange={(file) => uploadLogo(file)}
             onLogoRemove={() => removeLogo()}
           />
         </Box>
       )}
-      <Stack component="form" onSubmit={onSubmit} gap={3}>
+      <Stack component="form" onSubmit={handleSubmit(onSubmit)} gap={3}>
         <Box>
           <InputLabel required>Titre</InputLabel>
           <TextField
+            {...register('title')}
             autoComplete="off"
-            disabled={loading}
             fullWidth
-            required
-            value={title}
-            inputProps={{ maxLength: 100 }}
             placeholder="Ma super liste"
-            helperText={<CharsRemaining max={100} value={title} />}
-            onChange={(e) => setTitle(e.target.value)}
+            error={!!formErrors.title}
+            helperText={formErrors.title?.message}
           />
         </Box>
 
         <Box>
           <InputLabel>Description</InputLabel>
           <TextField
+            {...register('description')}
             autoComplete="off"
-            disabled={loading}
             fullWidth
             multiline
             minRows={4}
-            value={description}
-            inputProps={{ maxLength: 2000 }}
             placeholder="Une petite description ..."
-            helperText={<CharsRemaining max={2000} value={description} />}
-            onChange={(e) => setDescription(e.target.value)}
+            error={!!formErrors.description}
+            helperText={formErrors.description?.message}
           />
         </Box>
 
@@ -127,9 +140,9 @@ export const EditWishlistInformations = ({ wishlist }: EditWishlistInformationsP
           variant="contained"
           size="large"
           color="secondary"
-          loading={loading}
+          loading={isSubmitting}
           loadingPosition="start"
-          disabled={loading || !updateEnabled}
+          disabled={isSubmitting}
           startIcon={<SaveIcon />}
         >
           Mettre à jour

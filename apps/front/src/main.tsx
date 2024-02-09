@@ -53,7 +53,7 @@ function main() {
               <BrowserRouter>
                 <SnackbarProvider
                   maxSnack={3}
-                  autoHideDuration={3_000}
+                  autoHideDuration={1_500}
                   anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
                   preventDuplicate
                 >

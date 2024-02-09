@@ -11,11 +11,10 @@ import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
-import { LoginInputDto, type ResetPasswordInputDto } from '@wishlist/common-types';
-import { AxiosError } from 'axios';
+import { type ResetPasswordInputDto } from '@wishlist/common-types';
 
 const schema = z.object({
-  email: z.string().email({ message: 'Email invalide' }).max(200, { message: '200 caractères maximum' }),
+  email: z.string().email('Email invalide').max(200, '200 caractères maximum'),
 });
 
 type FormFields = z.infer<typeof schema>;

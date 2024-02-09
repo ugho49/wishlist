@@ -11,8 +11,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 const schema = z.object({
-  oldPassword: z.string().min(1, { message: '1 caractère minimum' }),
-  newPassword: z.string().min(8, { message: '8 caractères minimum' }).max(50, { message: '50 caractères maximum' }),
+  oldPassword: z.string().min(1, 'Ce champ ne peut pas être vide'),
+  newPassword: z.string().min(8, '8 caractères minimum').max(50, '50 caractères maximum'),
 });
 
 type FormFields = z.infer<typeof schema>;

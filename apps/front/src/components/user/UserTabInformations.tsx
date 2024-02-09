@@ -18,12 +18,13 @@ import { UpdateUserProfileInputDto, UserDto } from '@wishlist/common-types';
 import { z } from 'zod';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { zodRequiredString } from '../../utils/validation';
 
 const mapState = (state: RootState) => state.userProfile.pictureUrl;
 
 const schema = z.object({
-  firstname: z.string().min(1, { message: '1 caractère minimum' }).max(50, { message: '50 caractères maximum' }),
-  lastname: z.string().min(1, { message: '1 caractère minimum' }).max(50, { message: '50 caractères maximum' }),
+  firstname: zodRequiredString().max(50, '50 caractères maximum'),
+  lastname: zodRequiredString().max(50, '50 caractères maximum'),
   birthday: z.custom<DateTime>().nullable(),
 });
 
