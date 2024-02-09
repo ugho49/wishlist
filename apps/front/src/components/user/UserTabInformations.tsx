@@ -1,8 +1,7 @@
-import React, { FormEvent, useEffect, useState } from 'react';
+import React from 'react';
 import { Box, Stack, TextField } from '@mui/material';
 import { useApi, useFetchUserInfo, useToast } from '@wishlist-front/hooks';
 import { InputLabel } from '../common/InputLabel';
-import { CharsRemaining } from '../common/CharsRemaining';
 import { DateTime } from 'luxon';
 import { useDispatch, useSelector } from 'react-redux';
 import { MobileDatePicker } from '@mui/x-date-pickers';
@@ -16,8 +15,19 @@ import { AvatarUpdateButton } from './AvatarUpdateButton';
 import { updatePicture as updatePictureAction, updateUser as updateUserAction } from '../../core/store/features';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { UpdateUserProfileInputDto, UserDto } from '@wishlist/common-types';
+import { z } from 'zod';
+import { Controller, useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 const mapState = (state: RootState) => state.userProfile.pictureUrl;
+
+const schema = z.object({
+  firstname: z.string().min(1, { message: '1 caractère minimum' }).max(50, { message: '50 caractères maximum' }),
+  lastname: z.string().min(1, { message: '1 caractère minimum' }).max(50, { message: '50 caractères maximum' }),
+  birthday: z.custom<DateTime>().nullable(),
+});
+
+type FormFields = z.infer<typeof schema>;
 
 export const UserTabInformations = () => {
   const pictureUrl = useSelector(mapState);
@@ -25,26 +35,25 @@ export const UserTabInformations = () => {
   const dispatch = useDispatch();
   const smallScreen = useMediaQuery(theme.breakpoints.down('md'));
   const api = useApi();
-  const [email, setEmail] = useState('');
-  const [firstname, setFirstname] = useState('');
-  const [lastname, setLastname] = useState('');
-  const [birthday, setBirthday] = useState<DateTime | null>(null);
   const { addToast } = useToast();
   const { user, loading: loadingUser } = useFetchUserInfo();
   const queryClient = useQueryClient();
 
-  useEffect(() => {
-    if (user) {
-      setEmail(user.email);
-      setFirstname(user.firstname);
-      setLastname(user.lastname);
-      setBirthday(user?.birthday ? DateTime.fromISO(user.birthday) : null);
-    }
-  }, [user]);
+  const {
+    register,
+    control,
+    handleSubmit,
+    formState: { isSubmitting, errors: formErrors },
+  } = useForm<FormFields>({
+    resolver: zodResolver(schema),
+    values: {
+      firstname: user?.firstname || '',
+      lastname: user?.lastname || '',
+      birthday: user?.birthday ? DateTime.fromISO(user.birthday) : null,
+    },
+  });
 
-  const formIsValid = firstname.trim() !== '' && lastname.trim() !== '';
-
-  const { mutateAsync: update, isPending: loading } = useMutation({
+  const { mutateAsync: update } = useMutation({
     mutationKey: ['user.update'],
     mutationFn: (data: UpdateUserProfileInputDto) => api.user.update(data),
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
@@ -61,23 +70,21 @@ export const UserTabInformations = () => {
     },
   });
 
-  const onSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    await update({
-      firstname,
-      lastname,
-      birthday: birthday !== null ? new Date(birthday.toISODate() || '') : undefined,
+  const onSubmit = (data: FormFields) =>
+    update({
+      firstname: data.firstname,
+      lastname: data.lastname,
+      birthday: data.birthday !== null ? new Date(data.birthday.toISODate() || '') : undefined,
     });
-  };
 
   return (
     <Loader loading={loadingUser}>
-      <Stack component="form" onSubmit={onSubmit} noValidate gap={smallScreen ? 2 : 3}>
+      <Stack component="form" onSubmit={handleSubmit(onSubmit)} noValidate gap={smallScreen ? 2 : 3}>
         <Stack direction="row" flexWrap="wrap" gap={smallScreen ? 2 : 3}>
           <Stack justifyContent="center" alignItems="center" sx={smallScreen ? { width: '100%' } : undefined}>
             <AvatarUpdateButton
-              firstname={firstname}
-              lastname={lastname}
+              firstname={user?.firstname || ''}
+              lastname={user?.lastname || ''}
               pictureUrl={pictureUrl}
               socials={user?.social || []}
               onPictureUpdated={(pictureUrl) => dispatch(updatePictureAction(pictureUrl))}
@@ -92,7 +99,7 @@ export const UserTabInformations = () => {
               autoComplete="off"
               disabled={true}
               fullWidth
-              value={email}
+              value={user?.email || ''}
               inputProps={{ readOnly: true }}
               helperText="Ce champ n'est pas modifiable pour le moment"
             />
@@ -103,40 +110,44 @@ export const UserTabInformations = () => {
           <Box sx={{ flexGrow: 1 }}>
             <InputLabel required>Prénom</InputLabel>
             <TextField
+              {...register('firstname')}
               autoComplete="off"
-              disabled={loading}
               fullWidth
-              value={firstname}
-              inputProps={{ maxLength: 50 }}
               placeholder="John"
-              helperText={<CharsRemaining max={50} value={firstname} />}
-              onChange={(e) => setFirstname(e.target.value)}
+              error={!!formErrors.firstname}
+              helperText={formErrors.firstname?.message}
             />
           </Box>
 
           <Box sx={{ flexGrow: 1 }}>
             <InputLabel required>Nom</InputLabel>
             <TextField
+              {...register('lastname')}
               autoComplete="off"
-              disabled={loading}
               fullWidth
-              value={lastname}
-              inputProps={{ maxLength: 50 }}
               placeholder="Doe"
-              helperText={<CharsRemaining max={50} value={lastname} />}
-              onChange={(e) => setLastname(e.target.value)}
+              error={!!formErrors.lastname}
+              helperText={formErrors.lastname?.message}
             />
           </Box>
         </Stack>
 
         <Stack>
           <InputLabel>Date de naissance</InputLabel>
-          <MobileDatePicker
-            value={birthday}
-            disabled={loading}
-            referenceDate={DateTime.now().minus({ year: 30 })}
-            onChange={(date) => setBirthday(date)}
-            disableFuture={true}
+
+          <Controller
+            control={control}
+            name="birthday"
+            render={({ field }) => (
+              <MobileDatePicker
+                value={field.value}
+                inputRef={field.ref}
+                disabled={field.disabled}
+                referenceDate={DateTime.now().minus({ year: 30 })}
+                onChange={(date) => field.onChange(date)}
+                disableFuture={true}
+              />
+            )}
           />
         </Stack>
 
@@ -147,9 +158,9 @@ export const UserTabInformations = () => {
             variant="contained"
             size="large"
             color="secondary"
-            loading={loading}
+            loading={isSubmitting}
             loadingPosition="start"
-            disabled={loading || !formIsValid}
+            disabled={isSubmitting}
             startIcon={<SaveIcon />}
           >
             Mettre à jour

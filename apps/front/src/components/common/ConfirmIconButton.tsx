@@ -45,9 +45,9 @@ export const ConfirmIconButton = ({
         </IconButton>
       </Tooltip>
       <Dialog open={openDialog} onClose={() => closeDialog()}>
-        <DialogTitle>{confirmTitle}</DialogTitle>
+        <DialogTitle component="div">{confirmTitle}</DialogTitle>
         <DialogContent>
-          <DialogContentText>{confirmText}</DialogContentText>
+          <DialogContentText component="div">{confirmText}</DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => closeDialog()}>{cancelButton || 'Annuler'}</Button>
