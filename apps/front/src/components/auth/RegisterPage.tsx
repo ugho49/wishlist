@@ -36,9 +36,7 @@ export const RegisterPage = () => {
     setError,
     handleSubmit,
     formState: { isSubmitting, errors: formErrors },
-  } = useForm<FormFields>({
-    resolver: zodResolver(schema),
-  });
+  } = useForm<FormFields>({ resolver: zodResolver(schema) });
 
   const handleRegisterSuccess = (param: LoginOutputDto) => {
     addToast({ message: 'Bienvenue sur wishlist 👋', variant: 'default' });

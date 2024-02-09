@@ -29,9 +29,7 @@ export const ForgotPasswordPage = () => {
     register,
     handleSubmit,
     formState: { isSubmitting, errors: formErrors },
-  } = useForm<FormFields>({
-    resolver: zodResolver(schema),
-  });
+  } = useForm<FormFields>({ resolver: zodResolver(schema) });
 
   const { mutateAsync: sendResetPasswordEmail } = useMutation({
     mutationKey: ['user.sendResetPasswordEmail'],

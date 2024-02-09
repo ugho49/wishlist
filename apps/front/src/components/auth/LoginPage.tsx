@@ -37,10 +37,7 @@ export const LoginPage = () => {
     formState: { isSubmitting, errors: formErrors },
   } = useForm<FormFields>({
     resolver: zodResolver(schema),
-    values: {
-      email: getUrlParameter('email') || '',
-      password: '',
-    },
+    defaultValues: { email: getUrlParameter('email') || '' },
   });
 
   const handleLoginSuccess = (param: LoginOutputDto) => {

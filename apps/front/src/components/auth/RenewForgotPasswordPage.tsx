@@ -1,4 +1,4 @@
-import React, { FormEvent, useState } from 'react';
+import React from 'react';
 import { RouterLink } from '../common/RouterLink';
 import { Card } from '../common/Card';
 import { Box, Stack, TextField } from '@mui/material';
@@ -8,30 +8,41 @@ import { LoadingButton } from '@mui/lab';
 import SaveAsIcon from '@mui/icons-material/SaveAs';
 import { useNavigate } from 'react-router-dom';
 import { useApi, useCustomSearchParams, useToast } from '@wishlist-front/hooks';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { useMutation } from '@tanstack/react-query';
+import type { ResetPasswordValidationInputDto } from '@wishlist/common-types';
 
 type SearchParamsType = {
   email?: string;
   token?: string;
 };
 
+const schema = z.object({
+  password: z.string().min(8, { message: '8 caractères minimum' }).max(50, { message: '50 caractères maximum' }),
+});
+
+type FormFields = z.infer<typeof schema>;
+
 export const RenewForgotPasswordPage = () => {
-  const [loading, setLoading] = useState(false);
   const api = useApi();
   const { addToast } = useToast();
   const navigate = useNavigate();
   const [queryParams] = useCustomSearchParams<SearchParamsType>();
   const { email, token } = queryParams;
-  const [password, setPassword] = useState('');
 
-  const onSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      await api.user.validateResetPassword({
-        email: email || '',
-        token: token || '',
-        new_password: password,
-      });
+  const {
+    register,
+    handleSubmit,
+    formState: { isSubmitting, errors: formErrors },
+  } = useForm<FormFields>({ resolver: zodResolver(schema) });
+
+  const { mutateAsync: validateResetPassword } = useMutation({
+    mutationKey: ['user.validateResetPassword'],
+    mutationFn: (data: ResetPasswordValidationInputDto) => api.user.validateResetPassword(data),
+    onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
+    onSuccess: () => {
       addToast({
         message: 'Le mot de passe à été réinitialisé avec succès. Vous pouvez maintenant vous connecter.',
         variant: 'success',
@@ -39,11 +50,15 @@ export const RenewForgotPasswordPage = () => {
       const searchParam = new URLSearchParams();
       searchParam.append('email', email || '');
       navigate({ pathname: '/login', search: searchParam.toString() });
-    } catch (e) {
-      addToast({ message: "Une erreur s'est produite", variant: 'error' });
-      setLoading(false);
-    }
-  };
+    },
+  });
+
+  const onSubmit = (data: FormFields) =>
+    validateResetPassword({
+      email: email || '',
+      token: token || '',
+      new_password: data.password,
+    });
 
   if (!email || !token) {
     return <div>Cette url n'est pas valide</div>;
@@ -53,7 +68,7 @@ export const RenewForgotPasswordPage = () => {
     <>
       <Card sx={{ width: '100%' }}>
         <Subtitle>Mot de passe oublié</Subtitle>
-        <Stack component="form" onSubmit={onSubmit} gap={3}>
+        <Stack component="form" onSubmit={handleSubmit(onSubmit)} gap={3}>
           <Box>
             <InputLabel>Email</InputLabel>
             <TextField autoComplete="off" fullWidth value={email} inputProps={{ readOnly: true }} disabled />
@@ -61,16 +76,13 @@ export const RenewForgotPasswordPage = () => {
           <Box>
             <InputLabel required>Nouveau mot de passe</InputLabel>
             <TextField
-              required
+              {...register('password')}
               fullWidth
-              placeholder="********"
+              placeholder="Un super mot de passe"
               type="password"
-              disabled={loading}
               autoComplete="new-password"
-              value={password}
-              helperText="8 caractères minimum"
-              inputProps={{ maxLength: 50, minLength: 8 }}
-              onChange={(e) => setPassword(e.target.value)}
+              error={!!formErrors.password}
+              helperText={formErrors.password?.message}
             />
           </Box>
           <LoadingButton
@@ -79,10 +91,10 @@ export const RenewForgotPasswordPage = () => {
             variant="contained"
             size="large"
             color="secondary"
-            loading={loading}
+            loading={isSubmitting}
             loadingPosition="start"
             startIcon={<SaveAsIcon />}
-            disabled={loading}
+            disabled={isSubmitting}
           >
             Changer mon mot de passe
           </LoadingButton>
