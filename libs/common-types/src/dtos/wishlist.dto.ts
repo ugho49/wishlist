@@ -85,7 +85,6 @@ export class CreateWishlistInputDto extends UpdateWishlistInputDto {
   event_ids: string[];
 
   @IsArray()
-  @IsNotEmpty()
   @ValidateNested({ each: true })
   @Type(() => AddItemInputDto)
   items: AddItemInputDto[] = [];

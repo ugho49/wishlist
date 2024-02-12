@@ -89,11 +89,8 @@ export const EditWishlistInformations = ({ wishlist }: EditWishlistInformationsP
     [removeLogoPending, uploadLogoPending],
   );
 
-  const onSubmit = async (data: FormFields) => {
-    console.log({ data });
-    // const body: UpdateWishlistInputDto = { title, description: description === '' ? undefined : description };
-    // await updateWishlist(body);
-  };
+  const onSubmit = (data: FormFields) =>
+    updateWishlist({ title: data.title, description: data.description === '' ? undefined : data.description });
 
   return (
     <Stack>

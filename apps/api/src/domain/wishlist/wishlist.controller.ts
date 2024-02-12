@@ -6,17 +6,17 @@ import {
   CreateWishlistInputDto,
   DetailedWishlistDto,
   GetPaginationQueryDto,
+  ICurrentUser,
   LinkUnlinkWishlistInputDto,
-  MiniWishlistDto,
   PagedResponse,
   UpdateWishlistInputDto,
-  WishlistWithEventsDto,
-  ICurrentUser,
   UpdateWishlistLogoOutputDto,
+  WishlistWithEventsDto,
 } from '@wishlist/common-types';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Express } from 'express';
 import { wishlistLogoFileValidators, wishlistLogoResizePipe } from './wishlist.validator';
+import { ValidJsonBody } from '../../common/common.decorator';
 
 @ApiTags('Wishlist')
 @Controller('/wishlist')
@@ -40,11 +40,15 @@ export class WishlistController {
   }
 
   @Post()
-  createWishlist(
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('image'))
+  createWishlistWithLogo(
     @CurrentUser('id') currentUserId: string,
-    @Body() dto: CreateWishlistInputDto,
-  ): Promise<MiniWishlistDto> {
-    return this.wishlistService.create({ dto, currentUserId });
+    @ValidJsonBody('data') dto: CreateWishlistInputDto,
+    @UploadedFile(wishlistLogoFileValidators(false), wishlistLogoResizePipe(false))
+    imageFile?: Express.Multer.File,
+  ): Promise<unknown> {
+    return this.wishlistService.create({ dto, currentUserId, imageFile });
   }
 
   @Put('/:id')
@@ -87,7 +91,7 @@ export class WishlistController {
   async uploadLogo(
     @Param('id') wishlistId: string,
     @CurrentUser('id') currentUserId: string,
-    @UploadedFile(wishlistLogoFileValidators(true), wishlistLogoResizePipe)
+    @UploadedFile(wishlistLogoFileValidators(true), wishlistLogoResizePipe(true))
     file: Express.Multer.File,
   ): Promise<UpdateWishlistLogoOutputDto> {
     return this.wishlistService.uploadLogo({

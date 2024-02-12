@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { MAX_EVENTS_BY_LIST, MiniEventDto } from '@wishlist/common-types';
 import { useApi, useAvailableEvents, useCustomSearchParams, useEventById, useToast } from '@wishlist-front/hooks';
 import { Title } from '../common/Title';
@@ -82,37 +82,25 @@ export const CreateWishlistPage = () => {
     }
   }, [eventFromUrl]);
 
-  const { mutateAsync: uploadLogo, isPending: uploadLogoLoading } = useMutation({
-    mutationKey: ['wishlist.create.uploadLogo'],
-    mutationFn: (data: { wishlistId: string; file: File }) => api.wishlist.uploadLogo(data.wishlistId, data.file),
-    onError: () => addToast({ message: "Une erreur s'est produite lors de l'envoi du logo", variant: 'error' }),
-  });
-
-  const { mutateAsync: createWishlist, isPending: createWishlistLoading } = useMutation({
+  const { mutateAsync: createWishlist, isPending: loading } = useMutation({
     mutationKey: ['wishlist.create'],
     mutationFn: () =>
-      api.wishlist.create({
-        title,
-        description: description === '' ? undefined : description,
-        hide_items: hideItems,
-        event_ids: events.map((e) => e.id),
-        items: [],
-      }),
+      api.wishlist.create(
+        {
+          title,
+          description: description === '' ? undefined : description,
+          hide_items: hideItems,
+          event_ids: events.map((e) => e.id),
+          items: [],
+        },
+        logo,
+      ),
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-    onSuccess: async (output) => {
-      const wishlistId = output.id;
-
-      if (logo && !hideItems) {
-        await uploadLogo({ wishlistId, file: logo });
-      }
-
+    onSuccess: (wishlist) => {
       addToast({ message: 'Liste créé avec succès', variant: 'success' });
-
-      navigate(`/wishlists/${wishlistId}`);
+      navigate(`/wishlists/${wishlist.id}`);
     },
   });
-
-  const loading = useMemo(() => createWishlistLoading || uploadLogoLoading, [createWishlistLoading, uploadLogoLoading]);
 
   return (
     <Box>
