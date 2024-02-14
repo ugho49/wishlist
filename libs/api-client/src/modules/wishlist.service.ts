@@ -22,8 +22,18 @@ export class WishlistService {
     return this.client.get(`/wishlist/${wishlistId}`).then((res) => res.data);
   }
 
-  create(data: CreateWishlistInputDto): Promise<MiniWishlistDto> {
-    return this.client.post('/wishlist', data).then((res) => res.data);
+  create(data: CreateWishlistInputDto, file?: File): Promise<MiniWishlistDto> {
+    const formData = new FormData();
+    formData.append('data', JSON.stringify(data));
+    if (file !== undefined) {
+      formData.append('image', file);
+    }
+
+    return this.client
+      .post('/wishlist', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      .then((res) => res.data);
   }
 
   async update(wishlistId: string, data: UpdateWishlistInputDto): Promise<void> {

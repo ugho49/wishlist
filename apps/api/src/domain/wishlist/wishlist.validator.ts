@@ -17,4 +17,5 @@ export const wishlistLogoFileValidators = (fileIsRequired: boolean) =>
     fileIsRequired,
   });
 
-export const wishlistLogoResizePipe = new ResizeImagePipe({ width: 500, height: 500 });
+export const wishlistLogoResizePipe = (fileIsRequired: boolean) =>
+  new ResizeImagePipe({ width: 500, height: 500 }, fileIsRequired);

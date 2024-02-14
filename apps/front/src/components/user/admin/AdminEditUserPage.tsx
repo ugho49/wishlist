@@ -2,7 +2,6 @@ import { Box, Button, List, ListItem, ListItemIcon, ListItemText, Stack, TextFie
 import React, { FormEvent, useEffect, useState } from 'react';
 import { Loader } from '../../common/Loader';
 import { Title } from '../../common/Title';
-import { useAsync } from 'react-use';
 import { useApi, useToast } from '@wishlist-front/hooks';
 import { useParams } from 'react-router-dom';
 import { InputLabel } from '../../common/InputLabel';
@@ -23,6 +22,7 @@ import { RootState } from '../../../core';
 import { useSelector } from 'react-redux';
 import { UpdatePasswordModal } from './UpdatePasswordModal';
 import { AvatarUpdateButton } from '../AvatarUpdateButton';
+import { useQuery } from '@tanstack/react-query';
 
 const mapState = (state: RootState) => state.auth;
 
@@ -35,7 +35,6 @@ export const AdminEditUserPage = () => {
   const theme = useTheme();
   const smallScreen = useMediaQuery(theme.breakpoints.down('md'));
   const [loading, setLoading] = useState(false);
-  const { value, loading: loadingUser } = useAsync(() => api.user.getById(userId), [userId]);
   const [email, setEmail] = useState('');
   const [firstname, setFirstname] = useState('');
   const [lastname, setLastname] = useState('');
@@ -43,6 +42,10 @@ export const AdminEditUserPage = () => {
   const [enabled, setEnabled] = useState(true);
   const [birthday, setBirthday] = useState<DateTime | null>(null);
   const [updatePasswordModalOpen, setUpdatePasswordModalOpen] = useState(false);
+  const { data: value, isLoading: loadingUser } = useQuery({
+    queryKey: ['admin', 'user', { id: userId }],
+    queryFn: () => api.user.getById(userId),
+  });
 
   const isCurrentUser = currentUser?.id === userId;
 

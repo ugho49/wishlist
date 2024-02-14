@@ -5,10 +5,19 @@ type OptionsResizeImagePipe = { width: number; height: number };
 
 export class ResizeImagePipe implements PipeTransform<Express.Multer.File> {
   private readonly logger = new Logger(ResizeImagePipe.name);
+  private readonly fileIsRequired: boolean;
 
-  constructor(private readonly options: OptionsResizeImagePipe) {}
+  constructor(
+    private readonly options: OptionsResizeImagePipe,
+    fileIsRequired?: boolean,
+  ) {
+    this.fileIsRequired = fileIsRequired ?? true;
+  }
 
   async transform(image: Express.Multer.File): Promise<Express.Multer.File> {
+    if (!this.fileIsRequired && image === undefined) {
+      return image;
+    }
     try {
       const buffer = await sharp(image.buffer, { failOn: 'none' })
         .resize({

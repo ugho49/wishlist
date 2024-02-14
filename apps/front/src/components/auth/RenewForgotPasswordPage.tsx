@@ -20,7 +20,7 @@ type SearchParamsType = {
 };
 
 const schema = z.object({
-  password: z.string().min(8, { message: '8 caractères minimum' }).max(50, { message: '50 caractères maximum' }),
+  password: z.string().min(8, '8 caractères minimum').max(50, '50 caractères maximum'),
 });
 
 type FormFields = z.infer<typeof schema>;

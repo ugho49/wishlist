@@ -16,12 +16,13 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { AxiosError } from 'axios';
 import { useApi, useToast } from '@wishlist-front/hooks';
 import { useMutation } from '@tanstack/react-query';
+import { zodRequiredString } from '../../utils/validation';
 
 const schema = z.object({
-  email: z.string().email({ message: 'Email invalide' }).max(200, { message: '200 caractères maximum' }),
-  password: z.string().min(8, { message: '8 caractères minimum' }).max(50, { message: '50 caractères maximum' }),
-  firstname: z.string().min(1, { message: '1 caractère minimum' }).max(50, { message: '50 caractères maximum' }),
-  lastname: z.string().min(1, { message: '1 caractère minimum' }).max(50, { message: '50 caractères maximum' }),
+  email: z.string().email({ message: 'Email invalide' }).max(200, '200 caractères maximum'),
+  password: z.string().min(8, '8 caractères minimum').max(50, '50 caractères maximum'),
+  firstname: zodRequiredString().max(50, '50 caractères maximum'),
+  lastname: zodRequiredString().max(50, '50 caractères maximum'),
 });
 
 type FormFields = z.infer<typeof schema>;

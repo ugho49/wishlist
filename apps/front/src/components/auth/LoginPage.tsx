@@ -19,8 +19,8 @@ import { getUrlParameter } from '../../utils/router.utils';
 import { useMutation } from '@tanstack/react-query';
 
 const schema = z.object({
-  email: z.string().email({ message: 'Email invalide' }),
-  password: z.string().min(1, { message: '1 caractère minimum' }),
+  email: z.string().email('Email invalide'),
+  password: z.string().min(1, 'Ce champ ne peut pas être vide'),
 });
 
 type FormFields = z.infer<typeof schema>;
