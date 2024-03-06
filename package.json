@@ -64,6 +64,7 @@
     "passport": "0.7.0",
     "passport-jwt": "4.0.1",
     "pg": "8.11.3",
+    "posthog-js": "^1.111.2",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-easy-crop": "5.0.5",

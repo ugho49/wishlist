@@ -21,12 +21,19 @@ import { RenewForgotPasswordPage } from './components/auth/RenewForgotPasswordPa
 import { NavigateToLoginWithContext } from './core/router/NavigateToLoginWithContext';
 import { NavigateToAuthenticatedWithContext } from './core/router/NavigateToAuthenticatedWithContext';
 import { AdminEditUserPage } from './components/user/admin/AdminEditUserPage';
+import { useFeatureFlagEnabled } from 'posthog-js/react';
+import { MaintenancePage } from './components/common/MaintenancePage';
 
 const mapAuthState = (state: RootState) => state.auth;
 
 export const App = () => {
   const { accessToken } = useSelector(mapAuthState);
   const isLoggedIn = accessToken !== undefined;
+  const flagEnabled = useFeatureFlagEnabled('frontend-maintenance-page-enabled');
+
+  if (flagEnabled) {
+    return <MaintenancePage />;
+  }
 
   return (
     <Routes>
