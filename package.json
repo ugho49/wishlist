@@ -79,7 +79,7 @@
     "tslib": "2.6.2",
     "typeorm": "0.3.20",
     "typeorm-naming-strategies": "4.1.0",
-    "usehooks-ts": "2.13.0",
+    "usehooks-ts": "2.16.0",
     "uuid": "9.0.1",
     "zod": "3.22.4"
   },
