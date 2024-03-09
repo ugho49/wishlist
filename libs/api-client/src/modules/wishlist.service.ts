@@ -9,7 +9,7 @@ import {
   type UpdateWishlistLogoOutputDto,
   type WishlistWithEventsDto,
 } from '@wishlist/common-types';
-import { AxiosInstance } from 'axios';
+import AxiosInstance from 'xior';
 
 export class WishlistService {
   constructor(private readonly client: AxiosInstance) {}

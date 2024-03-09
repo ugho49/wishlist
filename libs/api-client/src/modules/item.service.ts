@@ -6,7 +6,7 @@ import {
   type ScanItemOutputDto,
   type ToggleItemOutputDto,
 } from '@wishlist/common-types';
-import { AxiosInstance } from 'axios';
+import AxiosInstance from 'xior';
 
 export class ItemService {
   constructor(private readonly client: AxiosInstance) {}

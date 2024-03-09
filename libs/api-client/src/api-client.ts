@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, CreateAxiosDefaults } from 'axios';
+import axios, { XiorRequestConfig as CreateAxiosDefaults } from 'xior';
 import { AuthService } from './modules/auth.service';
 import { UserService } from './modules/user.service';
 import { AdminUserService } from './modules/admin-user.service';
@@ -14,7 +14,7 @@ type ClientServiceParams = {
 };
 
 export class ApiClient {
-  private readonly client: AxiosInstance;
+  private readonly client: axios;
 
   constructor(private readonly params: ClientServiceParams) {
     const config: CreateAxiosDefaults = {
@@ -61,10 +61,10 @@ export class ApiClient {
   }
 
   setAccessToken(token: string) {
-    this.client.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    this.client.defaults.headers['Authorization'] = `Bearer ${token}`;
   }
 
   removeUserToken() {
-    delete this.client.defaults.headers.common['Authorization'];
+    delete this.client.defaults.headers['Authorization'];
   }
 }
