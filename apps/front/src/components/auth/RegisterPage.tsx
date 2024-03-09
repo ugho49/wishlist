@@ -13,7 +13,7 @@ import { LoginOutputDto } from '@wishlist/common-types';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AxiosError } from 'axios';
+import { XiorError as AxiosError } from 'xior';
 import { useApi, useToast } from '@wishlist-front/hooks';
 import { useMutation } from '@tanstack/react-query';
 import { zodRequiredString } from '../../utils/validation';

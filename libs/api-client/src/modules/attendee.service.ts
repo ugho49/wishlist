@@ -1,5 +1,5 @@
 import { type AddEventAttendeeForEventInputDto, type AttendeeDto } from '@wishlist/common-types';
-import { AxiosInstance } from 'axios';
+import AxiosInstance from 'xior';
 
 export class AttendeeService {
   constructor(private readonly client: AxiosInstance) {}

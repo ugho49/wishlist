@@ -5,7 +5,7 @@ import {
   RefreshTokenInputDto,
   RefreshTokenOutputDto,
 } from '@wishlist/common-types';
-import { AxiosInstance } from 'axios';
+import AxiosInstance from 'xior';
 
 export class AuthService {
   constructor(private readonly client: AxiosInstance) {}

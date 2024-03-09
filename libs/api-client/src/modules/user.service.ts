@@ -11,7 +11,7 @@ import {
   type UserDto,
   type UserEmailSettingsDto,
 } from '@wishlist/common-types';
-import { AxiosInstance } from 'axios';
+import AxiosInstance from 'xior';
 
 export class UserService {
   constructor(private readonly client: AxiosInstance) {}

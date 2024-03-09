@@ -4,7 +4,7 @@ import {
   type GetEventsQueryDto,
   type PagedResponse,
 } from '@wishlist/common-types';
-import { AxiosInstance } from 'axios';
+import AxiosInstance from 'xior';
 
 export class AdminEventService {
   constructor(private readonly client: AxiosInstance) {}
