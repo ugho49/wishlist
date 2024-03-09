@@ -21905,7 +21905,7 @@ __metadata:
     vite-plugin-svgr: "npm:4.2.0"
     vite-tsconfig-paths: "npm:4.3.1"
     vitest: "npm:1.2.2"
-    xior: "npm:0.1.3"
+    xior: "npm:0.1.4"
     zod: "npm:3.22.4"
   languageName: unknown
   linkType: soft
@@ -22009,13 +22009,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"xior@npm:0.1.3":
-  version: 0.1.3
-  resolution: "xior@npm:0.1.3"
+"xior@npm:0.1.4":
+  version: 0.1.4
+  resolution: "xior@npm:0.1.4"
   dependencies:
     tiny-lru: "npm:^11.2.5"
     ts-deepmerge: "npm:^7.0.0"
-  checksum: 10c0/e53ca2a5e5b33438e5e1efe833142f4c9b19ba3fe2b9d49bcb5bf027a4e55a0571f08460dfc01133cef513e99be68fbb11f56463d1cdde9514ebd7396f736313
+  checksum: 10c0/59073f40b4146568a97e61bdffdd7305bfd3dee1c70e844e6c6eb80011daaebc8f665fa3c66dcd686dec36c2c0f47c27d63ba6f670424619ab24147574c8670e
   languageName: node
   linkType: hard
 

@@ -61,14 +61,10 @@ export class ApiClient {
   }
 
   setAccessToken(token: string) {
-    if (!this.client.config?.headers) {
-      this.client.config = this.client.config || {};
-      this.client.config.headers = {};
-    }
-    this.client.config.headers['Authorization'] = `Bearer ${token}`;
+    this.client.defaults.headers['Authorization'] = `Bearer ${token}`;
   }
 
   removeUserToken() {
-    delete this.client.config?.headers?.['Authorization'];
+    delete this.client.defaults.headers['Authorization'];
   }
 }
