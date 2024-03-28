@@ -6409,7 +6409,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:20.11.16, @types/node@npm:^20.10.3":
+"@types/node@npm:20.11.30":
+  version: 20.11.30
+  resolution: "@types/node@npm:20.11.30"
+  dependencies:
+    undici-types: "npm:~5.26.4"
+  checksum: 10c0/867cfaf969c6d8850d8d7304e7ab739898a50ecb1395b61ff2335644f5f48d7a46fbc4a14cee967aed65ec134b61a746edae70d1f32f11321ccf29165e3bc4e6
+  languageName: node
+  linkType: hard
+
+"@types/node@npm:^20.10.3":
   version: 20.11.16
   resolution: "@types/node@npm:20.11.16"
   dependencies:
@@ -21812,7 +21821,7 @@ __metadata:
     "@types/lodash": "npm:4.14.202"
     "@types/luxon": "npm:3.4.2"
     "@types/multer": "npm:1.4.11"
-    "@types/node": "npm:20.11.16"
+    "@types/node": "npm:20.11.30"
     "@types/passport-jwt": "npm:4.0.1"
     "@types/react": "npm:18.2.55"
     "@types/react-dom": "npm:18.2.19"
