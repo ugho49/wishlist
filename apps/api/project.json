@@ -4,59 +4,10 @@
   "sourceRoot": "apps/api/src",
   "projectType": "application",
   "targets": {
-    "build": {
-      "executor": "@nx/webpack:webpack",
-      "outputs": ["{options.outputPath}"],
-      "defaultConfiguration": "production",
-      "options": {
-        "target": "node",
-        "compiler": "tsc",
-        "outputPath": "dist/apps/api",
-        "main": "apps/api/src/main.ts",
-        "tsConfig": "apps/api/tsconfig.app.json",
-        "webpackConfig": "apps/api/webpack.config.cjs",
-        "tsPlugins": [
-          {
-            "name": "@nestjs/swagger/plugin"
-          }
-        ],
-        "assets": [
-          {
-            "input": "apps/api/templates",
-            "glob": "**/*.hbs",
-            "output": "templates"
-          },
-          {
-            "input": "apps/api/firebase",
-            "glob": "**/*",
-            "output": "firebase"
-          }
-        ]
-      },
-      "configurations": {
-        "production": {
-          "optimization": true,
-          "extractLicenses": true,
-          "inspect": false,
-          "generatePackageJson": true,
-          "fileReplacements": []
-        },
-        "development": {}
-      }
-    },
     "serve": {
       "executor": "@nx/js:node",
-      "defaultConfiguration": "development",
       "options": {
         "buildTarget": "api:build"
-      },
-      "configurations": {
-        "development": {
-          "buildTarget": "api:build:development"
-        },
-        "production": {
-          "buildTarget": "api:build:production"
-        }
       }
     },
     "typeorm-generate-migration": {

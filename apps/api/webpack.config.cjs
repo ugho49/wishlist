@@ -1,8 +1,32 @@
-const { composePlugins, withNx } = require('@nx/webpack');
+const { NxAppWebpackPlugin } = require('@nx/webpack/app-plugin')
+const { join } = require('path')
 
-// Nx plugins for webpack.
-module.exports = composePlugins(withNx(), (config) => {
-  // Update the webpack config as needed here.
-  // e.g. `config.plugins.push(new MyPlugin())`
-  return config;
-});
+module.exports = {
+  output: {
+    path: join(__dirname, '../../dist/apps/api'),
+  },
+  plugins: [
+    new NxAppWebpackPlugin({
+      target: 'node',
+      compiler: 'tsc',
+      main: './src/main.ts',
+      tsConfig: './tsconfig.app.json',
+      optimization: false,
+      outputHashing: 'none',
+      generatePackageJson: true,
+      transformers: [{ name: '@nestjs/swagger/plugin' }],
+      assets: [
+        {
+          "input": "apps/api/templates",
+          "glob": "**/*.hbs",
+          "output": "templates"
+        },
+        {
+          "input": "apps/api/firebase",
+          "glob": "**/*",
+          "output": "firebase"
+        }
+      ],
+    }),
+  ],
+}
