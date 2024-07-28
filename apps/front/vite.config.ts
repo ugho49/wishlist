@@ -1,11 +1,16 @@
-/// <reference types='vitest' />
+import { resolve } from 'node:path'
+import type { UserConfig } from 'vite'
+import type { InlineConfig } from 'vitest'
+
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin'
 import react from '@vitejs/plugin-react'
 import browserslistToEsbuild from 'browserslist-to-esbuild'
-import { defineConfig, splitVendorChunkPlugin } from 'vite'
+import { defineConfig } from 'vite'
 import svgr from 'vite-plugin-svgr'
 
-export default defineConfig({
+type ViteConfig = UserConfig & { test: InlineConfig }
+
+const config: ViteConfig = {
   root: __dirname,
   cacheDir: '../../node_modules/.vite/apps/front',
 
@@ -27,12 +32,17 @@ export default defineConfig({
     target: browserslistToEsbuild(),
     outDir: '../../dist/apps/front',
     reportCompressedSize: true,
+    rollupOptions: {
+      input: {
+        main: resolve(__dirname, 'index.html'),
+      },
+    },
     commonjsOptions: {
       transformMixedEsModules: true,
     },
   },
 
-  plugins: [react(), svgr(), splitVendorChunkPlugin(), nxViteTsPaths()],
+  plugins: [react(), svgr(), nxViteTsPaths()],
 
   // Uncomment this if you are using workers.
   // worker: {
@@ -41,17 +51,17 @@ export default defineConfig({
 
   test: {
     globals: true,
-    cache: {
-      dir: '../../node_modules/.vitest',
-    },
     environment: 'jsdom',
     include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
 
     reporters: ['default'],
     passWithNoTests: true,
+    watch: false,
     coverage: {
       reportsDirectory: '../../coverage/apps/front',
       provider: 'v8',
     },
   },
-})
+}
+
+export default defineConfig(config)
