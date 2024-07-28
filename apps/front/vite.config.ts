@@ -1,4 +1,3 @@
-import { resolve } from 'node:path'
 import type { UserConfig } from 'vite'
 import type { InlineConfig } from 'vitest'
 
@@ -33,10 +32,15 @@ const config: ViteConfig = {
     outDir: '../../dist/apps/front',
     reportCompressedSize: true,
     rollupOptions: {
-      input: {
-        main: resolve(__dirname, 'index.html'),
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            return id.toString().split('node_modules/')[1].split('/')[0].toString()
+          }
+        },
       },
     },
+    emptyOutDir: true,
     commonjsOptions: {
       transformMixedEsModules: true,
     },
