@@ -1,13 +1,13 @@
-import React, { PropsWithChildren } from 'react';
-import { InputLabel as MuiInputLabel, inputLabelClasses } from '@mui/material';
-import { SxProps } from '@mui/system';
-import { Theme } from '@mui/material/styles';
-import { makeStyles } from '@mui/styles';
+import { inputLabelClasses, InputLabel as MuiInputLabel } from '@mui/material'
+import { Theme } from '@mui/material/styles'
+import { makeStyles } from '@mui/styles'
+import { SxProps } from '@mui/system'
+import React, { PropsWithChildren } from 'react'
 
 export type InputLabelProps = {
-  required?: boolean;
-  sx?: SxProps<Theme>;
-};
+  required?: boolean
+  sx?: SxProps<Theme>
+}
 
 const useStyles = makeStyles((theme: Theme) => ({
   label: {
@@ -24,14 +24,14 @@ const useStyles = makeStyles((theme: Theme) => ({
       },
     },
   },
-}));
+}))
 
 export const InputLabel = ({ required = false, children, sx }: PropsWithChildren<InputLabelProps>) => {
-  const classes = useStyles();
+  const classes = useStyles()
 
   return (
     <MuiInputLabel required={required} sx={sx} className={classes.label}>
       {children}
     </MuiInputLabel>
-  );
-};
+  )
+}

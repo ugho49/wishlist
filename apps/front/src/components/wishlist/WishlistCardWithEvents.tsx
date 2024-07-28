@@ -1,17 +1,18 @@
-import React from 'react';
-import { WishlistWithEventsDto } from '@wishlist/common-types';
-import { makeStyles } from '@mui/styles';
-import { Card } from '../common/Card';
-import { Chip, Stack, Theme } from '@mui/material';
-import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import PublicIcon from '@mui/icons-material/Public';
-import clsx from 'clsx';
-import { DateTime } from 'luxon';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'
+import PublicIcon from '@mui/icons-material/Public'
+import { Chip, Stack, Theme } from '@mui/material'
+import { makeStyles } from '@mui/styles'
+import { WishlistWithEventsDto } from '@wishlist/common-types'
+import clsx from 'clsx'
+import { DateTime } from 'luxon'
+import React from 'react'
+
+import { Card } from '../common/Card'
 
 export type WishlistCardWithEventsProps = {
-  wishlist: WishlistWithEventsDto;
-};
+  wishlist: WishlistWithEventsDto
+}
 
 const useStyles = makeStyles((theme: Theme) => ({
   card: {
@@ -45,13 +46,13 @@ const useStyles = makeStyles((theme: Theme) => ({
       opacity: '.6',
     },
   },
-}));
+}))
 
 export const WishlistCardWithEvents = ({ wishlist }: WishlistCardWithEventsProps) => {
-  const classes = useStyles();
+  const classes = useStyles()
   const past =
-    wishlist.events.filter((e) => DateTime.fromISO(e.event_date) < DateTime.now().minus({ days: 1 })).length ===
-    wishlist.events.length;
+    wishlist.events.filter(e => DateTime.fromISO(e.event_date) < DateTime.now().minus({ days: 1 })).length ===
+    wishlist.events.length
 
   return (
     <Card
@@ -65,7 +66,7 @@ export const WishlistCardWithEvents = ({ wishlist }: WishlistCardWithEventsProps
             <span className={classes.title}>{wishlist.title}</span>
           </Stack>
           <Stack direction="row" justifyContent="center" alignItems="center" flexWrap="wrap" gap={1} marginTop="14px">
-            {wishlist.events.map((event) => (
+            {wishlist.events.map(event => (
               <Chip
                 key={event.id}
                 color="default"
@@ -82,5 +83,5 @@ export const WishlistCardWithEvents = ({ wishlist }: WishlistCardWithEventsProps
         </div>
       </Stack>
     </Card>
-  );
-};
+  )
+}

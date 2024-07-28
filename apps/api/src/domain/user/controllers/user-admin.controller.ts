@@ -1,17 +1,6 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-  Query,
-  UploadedFile,
-  UseInterceptors,
-} from '@nestjs/common';
-import { UserService } from '../user.service';
-import { ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UploadedFile, UseInterceptors } from '@nestjs/common'
+import { FileInterceptor } from '@nestjs/platform-express'
+import { ApiConsumes, ApiTags } from '@nestjs/swagger'
 import {
   GetAllUsersQueryDto,
   ICurrentUser,
@@ -19,12 +8,15 @@ import {
   UpdateFullUserProfileInputDto,
   UpdateUserPictureOutputDto,
   UserDto,
-} from '@wishlist/common-types';
-import { CurrentUser, IsAdmin } from '../../auth';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { userPictureFileValidators, userPictureResizePipe } from '../user.validator';
-import 'multer';
-import { Express } from 'express';
+} from '@wishlist/common-types'
+
+import { CurrentUser, IsAdmin } from '../../auth'
+import { UserService } from '../user.service'
+import { userPictureFileValidators, userPictureResizePipe } from '../user.validator'
+
+import 'multer'
+
+import { Express } from 'express'
 
 @IsAdmin()
 @ApiTags('ADMIN - User')
@@ -34,12 +26,12 @@ export class UserAdminController {
 
   @Get('/:id')
   getUserById(@Param('id') id: string): Promise<UserDto> {
-    return this.userService.findById(id);
+    return this.userService.findById(id)
   }
 
   @Get()
   getAllPaginated(@Query() queryParams: GetAllUsersQueryDto): Promise<PagedResponse<UserDto>> {
-    return this.userService.findAllByCriteriaPaginated({ pageNumber: queryParams.p || 1, criteria: queryParams.q });
+    return this.userService.findAllByCriteriaPaginated({ pageNumber: queryParams.p || 1, criteria: queryParams.q })
   }
 
   @Patch('/:id')
@@ -48,12 +40,12 @@ export class UserAdminController {
     @Body() dto: UpdateFullUserProfileInputDto,
     @CurrentUser() currentUser: ICurrentUser,
   ): Promise<void> {
-    return this.userService.updateProfileAsAdmin({ userId, currentUser, dto });
+    return this.userService.updateProfileAsAdmin({ userId, currentUser, dto })
   }
 
   @Delete('/:id')
   deleteUserById(@Param('id') userId: string, @CurrentUser() currentUser: ICurrentUser): Promise<void> {
-    return this.userService.delete({ userId, currentUser });
+    return this.userService.delete({ userId, currentUser })
   }
 
   @Post('/:id/upload-picture')
@@ -67,11 +59,11 @@ export class UserAdminController {
     return this.userService.uploadPicture({
       userId,
       file,
-    });
+    })
   }
 
   @Delete('/:id/picture')
   async removePicture(@Param('id') userId: string) {
-    await this.userService.removePicture({ userId });
+    await this.userService.removePicture({ userId })
   }
 }

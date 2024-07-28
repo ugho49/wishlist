@@ -1,12 +1,13 @@
-import { Box, Container, containerClasses } from '@mui/material';
-import { Navbar } from '../../../components/common/Navbar';
-import { Outlet } from 'react-router-dom';
-import { BottomNavigation } from '../../../components/common/BottomNavigation';
-import { makeStyles } from '@mui/styles';
-import { useFetchUserInfo } from '@wishlist-front/hooks';
-import { useEffect } from 'react';
-import { useDispatch } from 'react-redux';
-import { setUser } from '../../store/features';
+import { Box, Container, containerClasses } from '@mui/material'
+import { makeStyles } from '@mui/styles'
+import { useEffect } from 'react'
+import { useDispatch } from 'react-redux'
+import { Outlet } from 'react-router-dom'
+
+import { BottomNavigation } from '../../../components/common/BottomNavigation'
+import { Navbar } from '../../../components/common/Navbar'
+import { useFetchUserInfo } from '../../../hooks/domain/useFetchUserInfo'
+import { setUser } from '../../store/features'
 
 const useStyles = makeStyles(() => ({
   container: {
@@ -15,18 +16,18 @@ const useStyles = makeStyles(() => ({
       marginBottom: '130px',
     },
   },
-}));
+}))
 
 export const PrivateRouteContainerOutlet = () => {
-  const classes = useStyles();
-  const { user } = useFetchUserInfo();
-  const dispatch = useDispatch();
+  const classes = useStyles()
+  const { user } = useFetchUserInfo()
+  const dispatch = useDispatch()
 
   useEffect(() => {
     if (user) {
-      dispatch(setUser({ firstName: user.firstname, lastName: user.lastname, pictureUrl: user.picture_url }));
+      dispatch(setUser({ firstName: user.firstname, lastName: user.lastname, pictureUrl: user.picture_url }))
     }
-  }, [user, dispatch]);
+  }, [user, dispatch])
 
   return (
     <>
@@ -38,5 +39,5 @@ export const PrivateRouteContainerOutlet = () => {
       </Box>
       <BottomNavigation />
     </>
-  );
-};
+  )
+}

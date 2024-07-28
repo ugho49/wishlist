@@ -1,38 +1,39 @@
-import { Navigate, Route, Routes } from 'react-router-dom';
-import { LoginPage } from './components/auth/LoginPage';
-import { RegisterPage } from './components/auth/RegisterPage';
-import { EventListPage } from './components/event/EventListPage';
-import { useSelector } from 'react-redux';
-import { RootState } from './core';
-import { UserProfilePage } from './components/user/UserProfilePage';
-import { WishlistListPage } from './components/wishlist/WishlistListPage';
-import { AnonymousRouteContainerOutlet } from './core/router/outlet/AnonymousRouteContainerOutlet';
-import { PrivateRouteContainerOutlet } from './core/router/outlet/PrivateRouteContainerOutlet';
-import { AdminRouteOutlet } from './core/router/outlet/AdminRouteOutlet';
-import { AdminPage } from './components/admin/AdminPage';
-import { WishlistPage } from './components/wishlist/WishlistPage';
-import { EventPage } from './components/event/EventPage';
-import { CreateEventPage } from './components/event/CreateEventPage';
-import { CreateWishlistPage } from './components/wishlist/CreateWishlistPage';
-import { EditWishlistPage } from './components/wishlist/EditWishlistPage';
-import { EditEventPage } from './components/event/EditEventPage';
-import { ForgotPasswordPage } from './components/auth/ForgotPasswordPage';
-import { RenewForgotPasswordPage } from './components/auth/RenewForgotPasswordPage';
-import { NavigateToLoginWithContext } from './core/router/NavigateToLoginWithContext';
-import { NavigateToAuthenticatedWithContext } from './core/router/NavigateToAuthenticatedWithContext';
-import { AdminEditUserPage } from './components/user/admin/AdminEditUserPage';
-import { useFeatureFlagEnabled } from 'posthog-js/react';
-import { MaintenancePage } from './components/common/MaintenancePage';
+import { useFeatureFlagEnabled } from 'posthog-js/react'
+import { useSelector } from 'react-redux'
+import { Navigate, Route, Routes } from 'react-router-dom'
 
-const mapAuthState = (state: RootState) => state.auth;
+import { AdminPage } from './components/admin/AdminPage'
+import { ForgotPasswordPage } from './components/auth/ForgotPasswordPage'
+import { LoginPage } from './components/auth/LoginPage'
+import { RegisterPage } from './components/auth/RegisterPage'
+import { RenewForgotPasswordPage } from './components/auth/RenewForgotPasswordPage'
+import { MaintenancePage } from './components/common/MaintenancePage'
+import { CreateEventPage } from './components/event/CreateEventPage'
+import { EditEventPage } from './components/event/EditEventPage'
+import { EventListPage } from './components/event/EventListPage'
+import { EventPage } from './components/event/EventPage'
+import { AdminEditUserPage } from './components/user/admin/AdminEditUserPage'
+import { UserProfilePage } from './components/user/UserProfilePage'
+import { CreateWishlistPage } from './components/wishlist/CreateWishlistPage'
+import { EditWishlistPage } from './components/wishlist/EditWishlistPage'
+import { WishlistListPage } from './components/wishlist/WishlistListPage'
+import { WishlistPage } from './components/wishlist/WishlistPage'
+import { RootState } from './core'
+import { NavigateToAuthenticatedWithContext } from './core/router/NavigateToAuthenticatedWithContext'
+import { NavigateToLoginWithContext } from './core/router/NavigateToLoginWithContext'
+import { AdminRouteOutlet } from './core/router/outlet/AdminRouteOutlet'
+import { AnonymousRouteContainerOutlet } from './core/router/outlet/AnonymousRouteContainerOutlet'
+import { PrivateRouteContainerOutlet } from './core/router/outlet/PrivateRouteContainerOutlet'
+
+const mapAuthState = (state: RootState) => state.auth
 
 export const App = () => {
-  const { accessToken } = useSelector(mapAuthState);
-  const isLoggedIn = accessToken !== undefined;
-  const flagEnabled = useFeatureFlagEnabled('frontend-maintenance-page-enabled');
+  const { accessToken } = useSelector(mapAuthState)
+  const isLoggedIn = accessToken !== undefined
+  const flagEnabled = useFeatureFlagEnabled('frontend-maintenance-page-enabled')
 
   if (flagEnabled) {
-    return <MaintenancePage />;
+    return <MaintenancePage />
   }
 
   return (
@@ -84,5 +85,5 @@ export const App = () => {
         </>
       )}
     </Routes>
-  );
-};
+  )
+}

@@ -1,41 +1,42 @@
-import { Column, Entity, ManyToOne, PrimaryColumn, RelationId } from 'typeorm';
-import { uuid } from '@wishlist/common';
-import { TimestampEntity } from '@wishlist/common-database';
-import { UserSocialType } from '@wishlist/common-types';
-import { UserEntity } from './user.entity';
+import { uuid } from '@wishlist/common'
+import { TimestampEntity } from '@wishlist/common-database'
+import { UserSocialType } from '@wishlist/common-types'
+import { Column, Entity, ManyToOne, PrimaryColumn, RelationId } from 'typeorm'
+
+import { UserEntity } from './user.entity'
 
 @Entity('user_social')
 export class UserSocialEntity extends TimestampEntity {
   @PrimaryColumn()
-  id: string = uuid();
+  id: string = uuid()
 
   @ManyToOne(() => UserEntity, { lazy: true })
-  readonly user: Promise<UserEntity>;
+  readonly user: Promise<UserEntity>
 
   @Column()
   @RelationId((entity: UserSocialEntity) => entity.user)
-  userId: string;
+  userId: string
 
   @Column()
-  socialId: string;
+  socialId: string
 
   @Column()
-  socialType: UserSocialType;
+  socialType: UserSocialType
 
   @Column({ type: 'varchar', nullable: true })
-  pictureUrl?: string | null;
+  pictureUrl?: string | null
 
   public static create(props: {
-    userId: string;
-    socialId: string;
-    socialType: UserSocialType;
-    pictureUrl?: string;
+    userId: string
+    socialId: string
+    socialType: UserSocialType
+    pictureUrl?: string
   }): UserSocialEntity {
-    const entity = new UserSocialEntity();
-    entity.userId = props.userId;
-    entity.socialId = props.socialId;
-    entity.socialType = props.socialType;
-    entity.pictureUrl = props.pictureUrl;
-    return entity;
+    const entity = new UserSocialEntity()
+    entity.userId = props.userId
+    entity.socialId = props.socialId
+    entity.socialType = props.socialType
+    entity.pictureUrl = props.pictureUrl
+    return entity
   }
 }

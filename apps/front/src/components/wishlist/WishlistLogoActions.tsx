@@ -1,32 +1,33 @@
-import { AvatarCropperModal } from '../common/AvatarCropperModal';
-import { Avatar, Box, Button, Stack } from '@mui/material';
-import { InputLabel } from '../common/InputLabel';
-import PersonIcon from '@mui/icons-material/Person';
-import React, { useState } from 'react';
-import { ACCEPT_IMG, sanitizeImgToUrl } from '../../utils/images.utils';
-import { grey } from '@mui/material/colors';
+import PersonIcon from '@mui/icons-material/Person'
+import { Avatar, Box, Button, Stack } from '@mui/material'
+import { grey } from '@mui/material/colors'
+import React, { useState } from 'react'
+
+import { ACCEPT_IMG, sanitizeImgToUrl } from '../../utils/images.utils'
+import { AvatarCropperModal } from '../common/AvatarCropperModal'
+import { InputLabel } from '../common/InputLabel'
 
 type WishlistLogoActionsProps = {
-  logoUrl?: string;
-  loading: boolean;
-  onLogoChange: (file: File) => void;
-  onLogoRemove: () => void;
-};
+  logoUrl?: string
+  loading: boolean
+  onLogoChange: (file: File) => void
+  onLogoRemove: () => void
+}
 
 export const WishlistLogoActions = (props: WishlistLogoActionsProps) => {
-  const { logoUrl, loading, onLogoChange, onLogoRemove } = props;
-  const [tmpLogoSrc, setTmpLogoSrc] = useState<string | undefined>();
+  const { logoUrl, loading, onLogoChange, onLogoRemove } = props
+  const [tmpLogoSrc, setTmpLogoSrc] = useState<string | undefined>()
 
   const onLogoInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files) return;
+    if (!e.target.files) return
 
-    const file = e.target.files[0];
-    const imageDataUrl = await sanitizeImgToUrl(file);
+    const file = e.target.files[0]
+    const imageDataUrl = await sanitizeImgToUrl(file)
 
-    setTmpLogoSrc(imageDataUrl);
+    setTmpLogoSrc(imageDataUrl)
 
-    e.target.value = '';
-  };
+    e.target.value = ''
+  }
 
   return (
     <>
@@ -34,9 +35,9 @@ export const WishlistLogoActions = (props: WishlistLogoActionsProps) => {
         <AvatarCropperModal
           imageSrc={tmpLogoSrc}
           handleClose={() => setTmpLogoSrc(undefined)}
-          handleSave={(file) => {
-            setTmpLogoSrc(undefined);
-            onLogoChange(file);
+          handleSave={file => {
+            setTmpLogoSrc(undefined)
+            onLogoChange(file)
           }}
         />
       )}
@@ -71,5 +72,5 @@ export const WishlistLogoActions = (props: WishlistLogoActionsProps) => {
         </Stack>
       </Box>
     </>
-  );
-};
+  )
+}

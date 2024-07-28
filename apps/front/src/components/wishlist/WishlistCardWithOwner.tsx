@@ -1,17 +1,18 @@
-import React from 'react';
-import { WishlistWithOwnerDto } from '@wishlist/common-types';
-import { makeStyles } from '@mui/styles';
-import { Card } from '../common/Card';
-import { Avatar, Badge, Stack, Theme } from '@mui/material';
-import clsx from 'clsx';
-import PersonIcon from '@mui/icons-material/Person';
-import PublicIcon from '@mui/icons-material/Public';
-import { grey } from '@mui/material/colors';
-import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'
+import PersonIcon from '@mui/icons-material/Person'
+import PublicIcon from '@mui/icons-material/Public'
+import { Avatar, Badge, Stack, Theme } from '@mui/material'
+import { grey } from '@mui/material/colors'
+import { makeStyles } from '@mui/styles'
+import { WishlistWithOwnerDto } from '@wishlist/common-types'
+import clsx from 'clsx'
+import React from 'react'
+
+import { Card } from '../common/Card'
 
 export type WishlistCardWithOwnerProps = {
-  wishlist: WishlistWithOwnerDto;
-};
+  wishlist: WishlistWithOwnerDto
+}
 
 const useStyles = makeStyles((theme: Theme) => ({
   card: {
@@ -32,12 +33,12 @@ const useStyles = makeStyles((theme: Theme) => ({
   arrow: {
     color: theme.palette.primary.light,
   },
-}));
+}))
 
-const logoSize = 60;
+const logoSize = 60
 
 export const WishlistCardWithOwner = ({ wishlist }: WishlistCardWithOwnerProps) => {
-  const classes = useStyles();
+  const classes = useStyles()
 
   return (
     <Card to={`/wishlists/${wishlist.id}`} className={clsx(classes.card, 'animated fadeIn fast')}>
@@ -73,5 +74,5 @@ export const WishlistCardWithOwner = ({ wishlist }: WishlistCardWithOwnerProps) 
         </div>
       </Stack>
     </Card>
-  );
-};
+  )
+}

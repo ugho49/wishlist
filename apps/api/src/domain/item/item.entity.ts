@@ -1,74 +1,75 @@
-import { Column, Entity, ManyToOne, PrimaryColumn, RelationId } from 'typeorm';
-import { uuid } from '@wishlist/common';
-import { TimestampEntity } from '@wishlist/common-database';
-import { WishlistEntity } from '../wishlist/wishlist.entity';
-import { UserEntity } from '../user';
+import { uuid } from '@wishlist/common'
+import { TimestampEntity } from '@wishlist/common-database'
+import { Column, Entity, ManyToOne, PrimaryColumn, RelationId } from 'typeorm'
+
+import { UserEntity } from '../user'
+import { WishlistEntity } from '../wishlist/wishlist.entity'
 
 @Entity('item')
 export class ItemEntity extends TimestampEntity {
   @PrimaryColumn()
-  id: string = uuid();
+  id: string = uuid()
 
   @Column()
-  name: string;
+  name: string
 
   @Column({ type: 'varchar', nullable: true })
-  description?: string | null;
+  description?: string | null
 
   @Column({ type: 'varchar', nullable: true })
-  url?: string | null;
+  url?: string | null
 
   @Column({ type: 'varchar', nullable: true })
-  pictureUrl?: string | null;
+  pictureUrl?: string | null
 
   @Column()
-  isSuggested: boolean;
+  isSuggested: boolean
 
   @Column({ type: 'integer', nullable: true })
-  score?: number | null;
+  score?: number | null
 
   @Column({ type: 'timestamptz', nullable: true })
-  takenAt?: Date | null;
+  takenAt?: Date | null
 
   @ManyToOne(() => WishlistEntity, { lazy: true })
-  readonly wishlist: Promise<WishlistEntity>;
+  readonly wishlist: Promise<WishlistEntity>
 
   @Column()
   @RelationId((entity: ItemEntity) => entity.wishlist)
-  wishlistId: string;
+  wishlistId: string
 
   @ManyToOne(() => UserEntity, { lazy: true })
-  readonly taker?: Promise<UserEntity> | null;
+  readonly taker?: Promise<UserEntity> | null
 
   @Column({ nullable: true })
   @RelationId((entity: ItemEntity) => entity.taker)
-  takerId?: string | null;
+  takerId?: string | null
 
   static create(param: {
-    name: string;
-    wishlistId: string;
-    description?: string;
-    url?: string;
-    pictureUrl?: string;
-    isSuggested: boolean;
-    score?: number;
+    name: string
+    wishlistId: string
+    description?: string
+    url?: string
+    pictureUrl?: string
+    isSuggested: boolean
+    score?: number
   }): ItemEntity {
-    const entity = new ItemEntity();
-    entity.name = param.name;
-    entity.wishlistId = param.wishlistId;
-    entity.description = param.description;
-    entity.url = param.url;
-    entity.pictureUrl = param.pictureUrl;
-    entity.isSuggested = param.isSuggested;
-    entity.score = param.score;
-    return entity;
+    const entity = new ItemEntity()
+    entity.name = param.name
+    entity.wishlistId = param.wishlistId
+    entity.description = param.description
+    entity.url = param.url
+    entity.pictureUrl = param.pictureUrl
+    entity.isSuggested = param.isSuggested
+    entity.score = param.score
+    return entity
   }
 
   isNotSuggested() {
-    return !this.isSuggested;
+    return !this.isSuggested
   }
 
   isTakenBySomeone() {
-    return this.takerId !== undefined && this.takerId !== null;
+    return this.takerId !== undefined && this.takerId !== null
   }
 }

@@ -1,8 +1,9 @@
-import { applyDecorators, SetMetadata, UseGuards } from '@nestjs/common';
-import { AuthorityGuard } from '../guards/authority.guard';
-import { HasAuthoritiesMetadataKey, HasAuthoritiesMetadataParamType } from './authority.decorator';
-import { Authorities } from '@wishlist/common-types';
-import { ApiExcludeController } from '@nestjs/swagger';
+import { applyDecorators, SetMetadata, UseGuards } from '@nestjs/common'
+import { ApiExcludeController } from '@nestjs/swagger'
+import { Authorities } from '@wishlist/common-types'
+
+import { AuthorityGuard } from '../guards/authority.guard'
+import { HasAuthoritiesMetadataKey, HasAuthoritiesMetadataParamType } from './authority.decorator'
 
 export function IsAdmin() {
   return applyDecorators(
@@ -11,6 +12,6 @@ export function IsAdmin() {
       condition: 'OR',
     }),
     UseGuards(AuthorityGuard),
-    ApiExcludeController()
-  );
+    ApiExcludeController(),
+  )
 }

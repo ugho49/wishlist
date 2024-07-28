@@ -1,9 +1,9 @@
 /// <reference types='vitest' />
-import { defineConfig, splitVendorChunkPlugin } from 'vite';
-import react from '@vitejs/plugin-react';
-import svgr from 'vite-plugin-svgr';
-import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
-import browserslistToEsbuild from 'browserslist-to-esbuild';
+import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin'
+import react from '@vitejs/plugin-react'
+import browserslistToEsbuild from 'browserslist-to-esbuild'
+import { defineConfig, splitVendorChunkPlugin } from 'vite'
+import svgr from 'vite-plugin-svgr'
 
 export default defineConfig({
   root: __dirname,
@@ -48,9 +48,10 @@ export default defineConfig({
     include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
 
     reporters: ['default'],
+    passWithNoTests: true,
     coverage: {
       reportsDirectory: '../../coverage/apps/front',
       provider: 'v8',
     },
   },
-});
+})

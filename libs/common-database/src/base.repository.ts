@@ -1,34 +1,34 @@
-import { Type } from '@nestjs/common';
-import { DataSource, ObjectLiteral, Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
-import { EntityManager } from 'typeorm/entity-manager/EntityManager';
+import { Type } from '@nestjs/common'
+import { InjectRepository } from '@nestjs/typeorm'
+import { DataSource, ObjectLiteral, Repository } from 'typeorm'
+import { EntityManager } from 'typeorm/entity-manager/EntityManager'
 
-type BaseRepositoryConstructor<T> = new (...args: unknown[]) => T;
+type BaseRepositoryConstructor<T> = new (...args: unknown[]) => T
 
 export type IBaseRepository<T extends ObjectLiteral> = Repository<T> & {
-  getDataSource: () => DataSource;
-  transaction: <I>(runInTransaction: (entityManager: EntityManager) => Promise<I>) => Promise<I>;
-};
+  getDataSource: () => DataSource
+  transaction: <I>(runInTransaction: (entityManager: EntityManager) => Promise<I>) => Promise<I>
+}
 
 export function BaseRepository<T extends ObjectLiteral>(
-  entity: BaseRepositoryConstructor<T>
+  entity: BaseRepositoryConstructor<T>,
 ): Type<IBaseRepository<T>> {
   class BaseRepositoryClass extends Repository<T> implements IBaseRepository<T> {
     constructor(
       @InjectRepository(entity) private readonly repository: Repository<T>,
-      private readonly dataSource: DataSource
+      private readonly dataSource: DataSource,
     ) {
-      super(repository.target, repository.manager, repository.queryRunner);
+      super(repository.target, repository.manager, repository.queryRunner)
     }
 
     getDataSource() {
-      return this.dataSource;
+      return this.dataSource
     }
 
     transaction<I>(runInTransaction: (entityManager: EntityManager) => Promise<I>): Promise<I> {
-      return this.dataSource.transaction(runInTransaction);
+      return this.dataSource.transaction(runInTransaction)
     }
   }
 
-  return BaseRepositoryClass;
+  return BaseRepositoryClass
 }

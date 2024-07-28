@@ -1,15 +1,16 @@
-import { Module } from '@nestjs/common';
-import { UserService } from './user.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { UserEntity } from './user.entity';
-import { UserController } from './controllers/user.controller';
-import { UserAdminController } from './controllers/user-admin.controller';
-import { UserRepository } from './user.repository';
-import { UserMailer } from './user.mailer';
-import { AuthSocialModule } from '../auth-social/auth-social.module';
-import { UserSocialEntity } from './user-social.entity';
-import { UserSocialRepository } from './user-social.repository';
-import { BucketModule } from '../../core/bucket/bucket.module';
+import { Module } from '@nestjs/common'
+import { TypeOrmModule } from '@nestjs/typeorm'
+
+import { BucketModule } from '../../core/bucket/bucket.module'
+import { AuthSocialModule } from '../auth-social/auth-social.module'
+import { UserAdminController } from './controllers/user-admin.controller'
+import { UserController } from './controllers/user.controller'
+import { UserSocialEntity } from './user-social.entity'
+import { UserSocialRepository } from './user-social.repository'
+import { UserEntity } from './user.entity'
+import { UserMailer } from './user.mailer'
+import { UserRepository } from './user.repository'
+import { UserService } from './user.service'
 
 @Module({
   imports: [TypeOrmModule.forFeature([UserEntity, UserSocialEntity]), AuthSocialModule, BucketModule],

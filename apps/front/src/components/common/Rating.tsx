@@ -1,16 +1,16 @@
-import React from 'react';
-import { Rating as MuiRating, ratingClasses, RatingProps as MuiRatingProps, Theme } from '@mui/material';
-import { makeStyles } from '@mui/styles';
-import FavoriteIcon from '@mui/icons-material/Favorite';
-import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import FavoriteIcon from '@mui/icons-material/Favorite'
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder'
+import { Rating as MuiRating, RatingProps as MuiRatingProps, ratingClasses, Theme } from '@mui/material'
+import { makeStyles } from '@mui/styles'
+import React from 'react'
 
 export type RatingProps = {
-  value: MuiRatingProps['value'];
-  disabled?: MuiRatingProps['disabled'];
-  onChange?: MuiRatingProps['onChange'];
-  size?: MuiRatingProps['size'];
-  readOnly?: MuiRatingProps['readOnly'];
-};
+  value: MuiRatingProps['value']
+  disabled?: MuiRatingProps['disabled']
+  onChange?: MuiRatingProps['onChange']
+  size?: MuiRatingProps['size']
+  readOnly?: MuiRatingProps['readOnly']
+}
 
 const useStyles = makeStyles((theme: Theme) => ({
   rating: {
@@ -21,10 +21,10 @@ const useStyles = makeStyles((theme: Theme) => ({
       color: theme.palette.primary.main,
     },
   },
-}));
+}))
 
 export const Rating = ({ value, disabled, onChange, size, readOnly }: RatingProps) => {
-  const classes = useStyles();
+  const classes = useStyles()
 
   return (
     <MuiRating
@@ -37,5 +37,5 @@ export const Rating = ({ value, disabled, onChange, size, readOnly }: RatingProp
       icon={<FavoriteIcon fontSize="inherit" />}
       emptyIcon={<FavoriteBorderIcon fontSize="inherit" />}
     />
-  );
-};
+  )
+}

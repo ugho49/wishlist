@@ -1,15 +1,17 @@
-import React from 'react';
-import { useParams } from 'react-router-dom';
-import { Box, Tab, Tabs } from '@mui/material';
-import { Loader } from '../common/Loader';
-import { EventNotFound } from './EventNotFound';
-import { Title } from '../common/Title';
-import { Card } from '../common/Card';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import PeopleIcon from '@mui/icons-material/People';
-import { EditEventInformations } from './EditEventInformations';
-import { EditEventAttendees } from './EditEventAttendees';
-import { useCustomSearchParams, useEventById } from '@wishlist-front/hooks';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
+import PeopleIcon from '@mui/icons-material/People'
+import { Box, Tab, Tabs } from '@mui/material'
+import React from 'react'
+import { useParams } from 'react-router-dom'
+
+import { useEventById } from '../../hooks/domain/useEventById'
+import { useCustomSearchParams } from '../../hooks/useCustomSearchParams'
+import { Card } from '../common/Card'
+import { Loader } from '../common/Loader'
+import { Title } from '../common/Title'
+import { EditEventAttendees } from './EditEventAttendees'
+import { EditEventInformations } from './EditEventInformations'
+import { EventNotFound } from './EventNotFound'
 
 enum TabValues {
   informations = 'informations',
@@ -27,15 +29,15 @@ const tabs = [
     label: 'Participants',
     icon: <PeopleIcon />,
   },
-];
+]
 
-type SearchParamType = { tab: TabValues };
+type SearchParamType = { tab: TabValues }
 
 export const EditEventPage = () => {
-  const params = useParams<'eventId'>();
-  const eventId = params.eventId || '';
-  const [queryParams, setQueryParams] = useCustomSearchParams<SearchParamType>({ tab: tabs[0].value });
-  const { event, loading } = useEventById(eventId);
+  const params = useParams<'eventId'>()
+  const eventId = params.eventId || ''
+  const [queryParams, setQueryParams] = useCustomSearchParams<SearchParamType>({ tab: tabs[0].value })
+  const { event, loading } = useEventById(eventId)
 
   return (
     <Box>
@@ -54,7 +56,7 @@ export const EditEventPage = () => {
                 scrollButtons="auto"
                 allowScrollButtonsMobile
               >
-                {tabs.map((tab) => (
+                {tabs.map(tab => (
                   <Tab key={tab.value} value={tab.value} label={tab.label} iconPosition="start" icon={tab.icon} />
                 ))}
               </Tabs>
@@ -69,5 +71,5 @@ export const EditEventPage = () => {
         )}
       </Loader>
     </Box>
-  );
-};
+  )
+}

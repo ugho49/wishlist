@@ -1,9 +1,10 @@
-import React, { PropsWithChildren } from 'react';
-import { linkClasses, Stack, Theme } from '@mui/material';
-import { makeStyles } from '@mui/styles';
-import clsx from 'clsx';
-import { RouterLink } from './RouterLink';
-import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
+import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft'
+import { linkClasses, Stack, Theme } from '@mui/material'
+import { makeStyles } from '@mui/styles'
+import clsx from 'clsx'
+import React, { PropsWithChildren } from 'react'
+
+import { RouterLink } from './RouterLink'
 
 const useStyles = makeStyles((theme: Theme) => ({
   title: {
@@ -29,15 +30,15 @@ const useStyles = makeStyles((theme: Theme) => ({
       color: theme.palette.text.primary,
     },
   },
-}));
+}))
 
 export type TitleProps = {
-  smallMarginBottom?: boolean;
-  goBackLink?: { to: string; title: string };
-};
+  smallMarginBottom?: boolean
+  goBackLink?: { to: string; title: string }
+}
 
 export const Title = ({ children, smallMarginBottom = false, goBackLink }: PropsWithChildren<TitleProps>) => {
-  const classes = useStyles();
+  const classes = useStyles()
 
   return (
     <Stack gap={1} alignItems="center" className={clsx(classes.title, smallMarginBottom && 'smallMarginBottom')}>
@@ -49,5 +50,5 @@ export const Title = ({ children, smallMarginBottom = false, goBackLink }: Props
         </RouterLink>
       )}
     </Stack>
-  );
-};
+  )
+}

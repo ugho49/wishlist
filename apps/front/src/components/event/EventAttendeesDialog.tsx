@@ -1,5 +1,5 @@
-import React from 'react';
-import { AttendeeDto, MiniUserDto } from '@wishlist/common-types';
+import CloseIcon from '@mui/icons-material/Close'
+import PersonIcon from '@mui/icons-material/Person'
 import {
   Avatar,
   Dialog,
@@ -10,16 +10,16 @@ import {
   ListItemAvatar,
   ListItemText,
   Stack,
-} from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
-import { blue, orange, green } from '@mui/material/colors';
-import PersonIcon from '@mui/icons-material/Person';
+} from '@mui/material'
+import { blue, green, orange } from '@mui/material/colors'
+import { AttendeeDto, MiniUserDto } from '@wishlist/common-types'
+import React from 'react'
 
 export interface EventAttendeesDialogDialog {
-  open: boolean;
-  handleClose: () => void;
-  creator: MiniUserDto;
-  attendees: AttendeeDto[];
+  open: boolean
+  handleClose: () => void
+  creator: MiniUserDto
+  attendees: AttendeeDto[]
 }
 
 export const EventAttendeesDialog = ({ open, attendees, creator, handleClose }: EventAttendeesDialogDialog) => {
@@ -42,7 +42,7 @@ export const EventAttendeesDialog = ({ open, attendees, creator, handleClose }: 
           </ListItemAvatar>
           <ListItemText primary={<b>{`${creator.firstname} ${creator.lastname}`}</b>} secondary={creator.email} />
         </ListItem>
-        {attendees.map((attendee) => (
+        {attendees.map(attendee => (
           <ListItem key={attendee.id}>
             <ListItemAvatar>
               <Avatar
@@ -67,5 +67,5 @@ export const EventAttendeesDialog = ({ open, attendees, creator, handleClose }: 
         ))}
       </List>
     </Dialog>
-  );
-};
+  )
+}

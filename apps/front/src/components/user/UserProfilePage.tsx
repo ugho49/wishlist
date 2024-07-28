@@ -1,18 +1,19 @@
-import { Box, Tab, Tabs } from '@mui/material';
-import React from 'react';
-import { Title } from '../common/Title';
-import LockIcon from '@mui/icons-material/Lock';
-import PortraitIcon from '@mui/icons-material/Portrait';
-import NotificationsIcon from '@mui/icons-material/Notifications';
-import { useTheme } from '@mui/material/styles';
-import useMediaQuery from '@mui/material/useMediaQuery';
-import { UserTabInformations } from './UserTabInformations';
-import { UserTabNotifications } from './UserTabNotifications';
-import { UserTabPassword } from './UserTabPassword';
-import { Card } from '../common/Card';
-import { useCustomSearchParams } from '@wishlist-front/hooks';
-import { UserTabSocial } from './UserTabSocial';
-import ConnectWithoutContactIcon from '@mui/icons-material/ConnectWithoutContact';
+import ConnectWithoutContactIcon from '@mui/icons-material/ConnectWithoutContact'
+import LockIcon from '@mui/icons-material/Lock'
+import NotificationsIcon from '@mui/icons-material/Notifications'
+import PortraitIcon from '@mui/icons-material/Portrait'
+import { Box, Tab, Tabs } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
+import useMediaQuery from '@mui/material/useMediaQuery'
+import React from 'react'
+
+import { useCustomSearchParams } from '../../hooks/useCustomSearchParams'
+import { Card } from '../common/Card'
+import { Title } from '../common/Title'
+import { UserTabInformations } from './UserTabInformations'
+import { UserTabNotifications } from './UserTabNotifications'
+import { UserTabPassword } from './UserTabPassword'
+import { UserTabSocial } from './UserTabSocial'
 
 enum TabValues {
   informations = 'informations',
@@ -42,14 +43,14 @@ const tabs = [
     label: 'Mot de passe',
     icon: <LockIcon />,
   },
-];
+]
 
-type SearchParamType = { tab: TabValues };
+type SearchParamType = { tab: TabValues }
 
 export const UserProfilePage = () => {
-  const theme = useTheme();
-  const [queryParams, setQueryParams] = useCustomSearchParams<SearchParamType>({ tab: tabs[0].value });
-  const smallScreen = useMediaQuery(theme.breakpoints.down('sm'));
+  const theme = useTheme()
+  const [queryParams, setQueryParams] = useCustomSearchParams<SearchParamType>({ tab: tabs[0].value })
+  const smallScreen = useMediaQuery(theme.breakpoints.down('sm'))
 
   return (
     <Box>
@@ -62,7 +63,7 @@ export const UserProfilePage = () => {
           scrollButtons="auto"
           allowScrollButtonsMobile
         >
-          {tabs.map((tab) => (
+          {tabs.map(tab => (
             <Tab
               key={tab.value}
               value={tab.value}
@@ -80,5 +81,5 @@ export const UserProfilePage = () => {
         {queryParams.tab === TabValues.password && <UserTabPassword />}
       </Card>
     </Box>
-  );
-};
+  )
+}

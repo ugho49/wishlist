@@ -1,17 +1,19 @@
-import { Logger, ValidationPipe } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { bootstrapSwagger } from './swagger';
-import helmet from 'helmet';
-import 'pg';
+import { Logger, ValidationPipe } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
+import { NestFactory } from '@nestjs/core'
+import helmet from 'helmet'
+
+import { AppModule } from './app.module'
+import { bootstrapSwagger } from './swagger'
+
+import 'pg'
 
 async function createApp() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule)
 
-  app.useGlobalPipes(new ValidationPipe({ transform: true, stopAtFirstError: true }));
-  app.enableCors();
-  app.enableShutdownHooks();
+  app.useGlobalPipes(new ValidationPipe({ transform: true, stopAtFirstError: true }))
+  app.enableCors()
+  app.enableShutdownHooks()
 
   app.use(
     helmet({
@@ -23,25 +25,25 @@ async function createApp() {
           scriptSrc: [`'self'`, `https: 'unsafe-inline'`],
         },
       },
-    })
-  );
+    }),
+  )
 
-  bootstrapSwagger(app);
+  bootstrapSwagger(app)
 
-  return app;
+  return app
 }
 
 async function start() {
-  Logger.log('Starting server ...');
+  Logger.log('Starting server ...')
 
-  const app = await createApp();
-  const configService = app.get(ConfigService);
-  const port = configService.get('PORT');
+  const app = await createApp()
+  const configService = app.get(ConfigService)
+  const port = configService.get('PORT')
 
-  await app.listen(port, '0.0.0.0');
+  await app.listen(port, '0.0.0.0')
 
-  Logger.log(`📚 Swagger available on: http://localhost:${port}/api`);
-  Logger.log(`🚀 Application is running on: http://localhost:${port}`);
+  Logger.log(`📚 Swagger available on: http://localhost:${port}/api`)
+  Logger.log(`🚀 Application is running on: http://localhost:${port}`)
 }
 
-void start();
+void start()

@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { RouterLink } from '../../common/RouterLink';
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { EventWithCountsDto } from '@wishlist/common-types';
-import { DateTime } from 'luxon';
-import { Avatar, Stack } from '@mui/material';
-import { useApi } from '@wishlist-front/hooks';
-import { useQuery } from '@tanstack/react-query';
+import { Avatar, Stack } from '@mui/material'
+import { DataGrid, GridColDef } from '@mui/x-data-grid'
+import { useQuery } from '@tanstack/react-query'
+import { EventWithCountsDto } from '@wishlist/common-types'
+import { DateTime } from 'luxon'
+import React, { useEffect, useState } from 'react'
+
+import { useApi } from '../../../hooks/useApi'
+import { RouterLink } from '../../common/RouterLink'
 
 const columns: GridColDef<EventWithCountsDto>[] = [
   { field: 'title', headerName: 'Title', width: 170 },
@@ -14,7 +15,7 @@ const columns: GridColDef<EventWithCountsDto>[] = [
     headerName: 'Event Date',
     type: 'dateTime',
     width: 100,
-    valueGetter: ({ row: event }) => new Date(event.event_date),
+    valueGetter: (_, row) => new Date(row.event_date),
     renderCell: ({ value }) => DateTime.fromJSDate(value).toLocaleString(DateTime.DATE_SHORT),
   },
   {
@@ -28,13 +29,13 @@ const columns: GridColDef<EventWithCountsDto>[] = [
     headerName: '# Attendees',
     type: 'number',
     width: 100,
-    valueGetter: ({ row: event }) => event.nb_attendees + 1,
+    valueGetter: (_, row) => row.nb_attendees + 1,
   },
   {
     field: 'created_by',
     headerName: 'Created By',
     width: 250,
-    valueGetter: ({ row: event }) => event.created_by.email,
+    valueGetter: (_, row) => row.created_by.email,
     renderCell: ({ row: event }) => (
       <Stack direction="row" gap={1} alignItems="center">
         <Avatar src={event.created_by.picture_url} sx={{ width: '30px', height: '30px' }}>
@@ -49,7 +50,7 @@ const columns: GridColDef<EventWithCountsDto>[] = [
     headerName: 'Created At',
     type: 'dateTime',
     width: 150,
-    valueGetter: ({ row: event }) => new Date(event.created_at),
+    valueGetter: (_, row) => new Date(row.created_at),
     renderCell: ({ value }) => DateTime.fromJSDate(value).toLocaleString(DateTime.DATETIME_MED),
   },
   {
@@ -62,26 +63,26 @@ const columns: GridColDef<EventWithCountsDto>[] = [
     align: 'center',
     renderCell: ({ row: event }) => <RouterLink to={`/admin/events/${event.id}`}>Voir</RouterLink>,
   },
-];
+]
 
 export const AdminListEvents = () => {
-  const { admin: api } = useApi();
-  const [totalElements, setTotalElements] = useState(0);
-  const [pageSize, setPageSize] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
+  const { admin: api } = useApi()
+  const [totalElements, setTotalElements] = useState(0)
+  const [pageSize, setPageSize] = useState(0)
+  const [currentPage, setCurrentPage] = useState(1)
 
   const { data: value, isLoading: loading } = useQuery({
     queryKey: ['admin', 'events', { page: currentPage }],
     queryFn: () => api.event.getAll({ p: currentPage }),
-  });
+  })
 
   useEffect(() => {
     if (value) {
-      setTotalElements(value.pagination.total_elements);
-      setCurrentPage(value.pagination.page_number);
-      setPageSize(value.pagination.pages_size);
+      setTotalElements(value.pagination.total_elements)
+      setCurrentPage(value.pagination.page_number)
+      setPageSize(value.pagination.pages_size)
     }
-  }, [value]);
+  }, [value])
 
   return (
     <div style={{ width: '100%' }}>
@@ -102,5 +103,5 @@ export const AdminListEvents = () => {
         onPaginationModelChange={({ page }) => setCurrentPage(page + 1)}
       />
     </div>
-  );
-};
+  )
+}

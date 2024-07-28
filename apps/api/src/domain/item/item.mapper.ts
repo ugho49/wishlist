@@ -1,10 +1,11 @@
-import { ItemDto } from '@wishlist/common-types';
-import { toMiniUserDto } from '../user/user.mapper';
-import { ItemEntity } from './item.entity';
+import { ItemDto } from '@wishlist/common-types'
+
+import { toMiniUserDto } from '../user/user.mapper'
+import { ItemEntity } from './item.entity'
 
 export async function toItemDto(param: { entity: ItemEntity; displayUserAndSuggested: boolean }): Promise<ItemDto> {
-  const { displayUserAndSuggested, entity } = param;
-  const user = entity.taker ? await entity.taker : null;
+  const { displayUserAndSuggested, entity } = param
+  const user = entity.taker ? await entity.taker : null
 
   return {
     id: entity.id,
@@ -17,5 +18,5 @@ export async function toItemDto(param: { entity: ItemEntity; displayUserAndSugge
     taken_by: displayUserAndSuggested && user ? toMiniUserDto(user) : undefined,
     taken_at: displayUserAndSuggested ? entity.takenAt?.toISOString() : undefined,
     created_at: entity.createdAt.toISOString(),
-  };
+  }
 }

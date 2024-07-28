@@ -1,15 +1,16 @@
-import React from 'react';
-import { EventWithCountsDto } from '@wishlist/common-types';
-import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
-import { DateTime } from 'luxon';
-import { makeStyles } from '@mui/styles';
-import { Card } from '../common/Card';
-import { Stack, Theme } from '@mui/material';
-import clsx from 'clsx';
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'
+import { Stack, Theme } from '@mui/material'
+import { makeStyles } from '@mui/styles'
+import { EventWithCountsDto } from '@wishlist/common-types'
+import clsx from 'clsx'
+import { DateTime } from 'luxon'
+import React from 'react'
+
+import { Card } from '../common/Card'
 
 export type EventCardProps = {
-  event: EventWithCountsDto;
-};
+  event: EventWithCountsDto
+}
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -58,12 +59,12 @@ const useStyles = makeStyles((theme: Theme) => ({
       opacity: '.6',
     },
   },
-}));
+}))
 
 export const EventCard = ({ event }: EventCardProps) => {
-  const classes = useStyles();
-  const numberOfAttendees = event.nb_attendees + 1;
-  const past = DateTime.fromISO(event.event_date) < DateTime.now().minus({ days: 1 });
+  const classes = useStyles()
+  const numberOfAttendees = event.nb_attendees + 1
+  const past = DateTime.fromISO(event.event_date) < DateTime.now().minus({ days: 1 })
 
   return (
     <Card to={`/events/${event.id}`} className={clsx(classes.root, past && classes.disabled, 'animated fadeIn fast')}>
@@ -85,5 +86,5 @@ export const EventCard = ({ event }: EventCardProps) => {
         </div>
       </Stack>
     </Card>
-  );
-};
+  )
+}

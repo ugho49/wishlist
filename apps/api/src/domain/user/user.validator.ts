@@ -1,6 +1,7 @@
-import { ParseFilePipe } from '@nestjs/common';
-import { FileTypeValidator, MaxFileSizeValidator, ResizeImagePipe } from '../../core/bucket';
-import { ACCEPTED_IMG_FORMATS } from '@wishlist/common-types';
+import { ParseFilePipe } from '@nestjs/common'
+import { ACCEPTED_IMG_FORMATS } from '@wishlist/common-types'
+
+import { FileTypeValidator, MaxFileSizeValidator, ResizeImagePipe } from '../../core/bucket'
 
 export const userPictureFileValidators = new ParseFilePipe({
   validators: [
@@ -13,6 +14,6 @@ export const userPictureFileValidators = new ParseFilePipe({
       errorMessage: 'Le fichier doit faire 6 Mo au maximum',
     }),
   ],
-});
+})
 
-export const userPictureResizePipe = new ResizeImagePipe({ width: 500, height: 500 });
+export const userPictureResizePipe = new ResizeImagePipe({ width: 500, height: 500 })

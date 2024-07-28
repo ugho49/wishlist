@@ -1,16 +1,16 @@
-import React from 'react';
-import { MAX_EVENTS_BY_LIST, MiniEventDto } from '@wishlist/common-types';
-import { Autocomplete, TextField } from '@mui/material';
-import { DateTime } from 'luxon';
+import { Autocomplete, TextField } from '@mui/material'
+import { MAX_EVENTS_BY_LIST, MiniEventDto } from '@wishlist/common-types'
+import { DateTime } from 'luxon'
+import React from 'react'
 
 export type SearchEventSelectProps = {
-  options: MiniEventDto[];
-  disabled?: boolean;
-  loading?: boolean;
-  error?: boolean;
-  onChange: (value: MiniEventDto) => void;
-  excludedEventIds: string[];
-};
+  options: MiniEventDto[]
+  disabled?: boolean
+  loading?: boolean
+  error?: boolean
+  onChange: (value: MiniEventDto) => void
+  excludedEventIds: string[]
+}
 
 export const SearchEventSelect = ({
   excludedEventIds,
@@ -31,13 +31,13 @@ export const SearchEventSelect = ({
       disabled={disabled}
       options={options}
       onChange={(_, value) => {
-        if (value) onChange(value);
+        if (value) onChange(value)
       }}
-      getOptionDisabled={(option) => excludedEventIds.includes(option.id)}
-      getOptionLabel={(option) =>
+      getOptionDisabled={option => excludedEventIds.includes(option.id)}
+      getOptionLabel={option =>
         `${option.title} - ${DateTime.fromISO(option.event_date).toLocaleString(DateTime.DATE_MED)}`
       }
-      renderInput={(params) => (
+      renderInput={params => (
         <TextField
           {...params}
           inputProps={{ ...params.inputProps }}
@@ -47,5 +47,5 @@ export const SearchEventSelect = ({
         />
       )}
     />
-  );
-};
+  )
+}

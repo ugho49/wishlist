@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { MailerService } from '@nestjs-modules/mailer';
+import { MailerService } from '@nestjs-modules/mailer'
+import { Injectable } from '@nestjs/common'
 
 @Injectable()
 export class PasswordVerificationMailer {
@@ -13,6 +13,6 @@ export class PasswordVerificationMailer {
       context: {
         url: param.url,
       },
-    });
+    })
   }
 }

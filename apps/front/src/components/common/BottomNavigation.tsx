@@ -1,23 +1,24 @@
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings'
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
+import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted'
+import PersonIcon from '@mui/icons-material/Person'
 import {
   Avatar,
-  BottomNavigation as MuiBottomNavigation,
   BottomNavigationAction,
   bottomNavigationActionClasses,
+  BottomNavigation as MuiBottomNavigation,
   Paper,
   Theme,
-} from '@mui/material';
-import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import PersonIcon from '@mui/icons-material/Person';
-import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
-import { RootState } from '../../core';
-import { useSelector } from 'react-redux';
-import { makeStyles } from '@mui/styles';
+} from '@mui/material'
+import { makeStyles } from '@mui/styles'
+import React, { useEffect, useState } from 'react'
+import { useSelector } from 'react-redux'
+import { useLocation, useNavigate } from 'react-router-dom'
 
-const mapAuthState = (state: RootState) => state.auth;
-const mapUserProfileState = (state: RootState) => state.userProfile;
+import { RootState } from '../../core'
+
+const mapAuthState = (state: RootState) => state.auth
+const mapUserProfileState = (state: RootState) => state.userProfile
 
 const useStyles = makeStyles((theme: Theme) => ({
   bottomNavigationAction: {
@@ -39,25 +40,25 @@ const useStyles = makeStyles((theme: Theme) => ({
       transform: 'scaleX(1)',
     },
   },
-}));
+}))
 
 export const BottomNavigation = () => {
-  const classes = useStyles();
-  const { user } = useSelector(mapAuthState);
-  const { pictureUrl } = useSelector(mapUserProfileState);
-  const [currentNavigation, setCurrentNavigation] = useState('');
-  const navigate = useNavigate();
-  const location = useLocation();
+  const classes = useStyles()
+  const { user } = useSelector(mapAuthState)
+  const { pictureUrl } = useSelector(mapUserProfileState)
+  const [currentNavigation, setCurrentNavigation] = useState('')
+  const navigate = useNavigate()
+  const location = useLocation()
 
   const handleChange = (event: React.SyntheticEvent, newValue: string) => {
-    navigate(newValue);
-    setCurrentNavigation(newValue);
-  };
+    navigate(newValue)
+    setCurrentNavigation(newValue)
+  }
 
   useEffect(() => {
-    const { pathname } = location;
-    setCurrentNavigation(pathname);
-  }, [location]);
+    const { pathname } = location
+    setCurrentNavigation(pathname)
+  }, [location])
 
   return (
     <Paper sx={{ position: 'fixed', bottom: 0, left: 0, right: 0 }} elevation={3} component="nav">
@@ -90,5 +91,5 @@ export const BottomNavigation = () => {
         />
       </MuiBottomNavigation>
     </Paper>
-  );
-};
+  )
+}

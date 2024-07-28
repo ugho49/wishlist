@@ -1,89 +1,91 @@
-import { Card } from '../common/Card';
-import { Alert, Box, Stack, TextField } from '@mui/material';
-import { InputLabel } from '../common/InputLabel';
-import { LoadingButton } from '@mui/lab';
-import { RouterLink } from '../common/RouterLink';
-import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { Subtitle } from '../common/Subtitle';
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import { setTokens } from '../../core/store/features';
-import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
-import { LoginOutputDto } from '@wishlist/common-types';
-import { z } from 'zod';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { AxiosError } from 'axios';
-import { useApi, useToast } from '@wishlist-front/hooks';
-import { useMutation } from '@tanstack/react-query';
-import { zodRequiredString } from '../../utils/validation';
+import { zodResolver } from '@hookform/resolvers/zod'
+import PersonAddIcon from '@mui/icons-material/PersonAdd'
+import { LoadingButton } from '@mui/lab'
+import { Alert, Box, Stack, TextField } from '@mui/material'
+import { CredentialResponse, GoogleLogin } from '@react-oauth/google'
+import { useMutation } from '@tanstack/react-query'
+import { LoginOutputDto } from '@wishlist/common-types'
+import { AxiosError } from 'axios'
+import React, { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { useDispatch } from 'react-redux'
+import { z } from 'zod'
+
+import { setTokens } from '../../core/store/features'
+import { useApi } from '../../hooks/useApi'
+import { useToast } from '../../hooks/useToast'
+import { zodRequiredString } from '../../utils/validation'
+import { Card } from '../common/Card'
+import { InputLabel } from '../common/InputLabel'
+import { RouterLink } from '../common/RouterLink'
+import { Subtitle } from '../common/Subtitle'
 
 const schema = z.object({
   email: z.string().email({ message: 'Email invalide' }).max(200, '200 caractères maximum'),
   password: z.string().min(8, '8 caractères minimum').max(50, '50 caractères maximum'),
   firstname: zodRequiredString().max(50, '50 caractères maximum'),
   lastname: zodRequiredString().max(50, '50 caractères maximum'),
-});
+})
 
-type FormFields = z.infer<typeof schema>;
+type FormFields = z.infer<typeof schema>
 
 export const RegisterPage = () => {
-  const api = useApi();
-  const dispatch = useDispatch();
-  const { addToast } = useToast();
-  const [socialLoading, setSocialLoading] = useState(false);
+  const api = useApi()
+  const dispatch = useDispatch()
+  const { addToast } = useToast()
+  const [socialLoading, setSocialLoading] = useState(false)
   const {
     register,
     setError,
     handleSubmit,
     formState: { isSubmitting, errors: formErrors },
-  } = useForm<FormFields>({ resolver: zodResolver(schema) });
+  } = useForm<FormFields>({ resolver: zodResolver(schema) })
 
   const handleRegisterSuccess = (param: LoginOutputDto) => {
-    addToast({ message: 'Bienvenue sur wishlist 👋', variant: 'default' });
+    addToast({ message: 'Bienvenue sur wishlist 👋', variant: 'default' })
 
     dispatch(
       setTokens({
         accessToken: param.access_token,
         refreshToken: param.refresh_token,
       }),
-    );
-  };
+    )
+  }
 
   const { mutateAsync: registerUser } = useMutation({
     mutationKey: ['register'],
     mutationFn: async (data: FormFields) => {
-      await api.user.register(data);
-      return api.auth.login({ email: data.email, password: data.password });
+      await api.user.register(data)
+      return api.auth.login({ email: data.email, password: data.password })
     },
-    onSuccess: (data) => handleRegisterSuccess(data),
-    onError: (e) => {
+    onSuccess: data => handleRegisterSuccess(data),
+    onError: e => {
       if (e instanceof AxiosError && e.response?.status === 422) {
-        setError('root', { message: 'Cet email est déjà utilisé' });
+        setError('root', { message: 'Cet email est déjà utilisé' })
       } else {
-        setError('root', { message: "Une erreur s'est produite." });
+        setError('root', { message: "Une erreur s'est produite." })
       }
     },
-  });
+  })
 
-  const onSubmit = (data: FormFields) => registerUser(data);
+  const onSubmit = (data: FormFields) => registerUser(data)
 
   const onGoogleRegisterSuccess = async (credentialResponse: CredentialResponse) => {
-    setSocialLoading(true);
+    setSocialLoading(true)
     try {
-      await api.user.registerWithGoogle({ credential: credentialResponse.credential || '' });
-      const data = await api.auth.loginWithGoogle({ credential: credentialResponse.credential || '' });
-      handleRegisterSuccess(data);
+      await api.user.registerWithGoogle({ credential: credentialResponse.credential || '' })
+      const data = await api.auth.loginWithGoogle({ credential: credentialResponse.credential || '' })
+      handleRegisterSuccess(data)
     } catch (e) {
-      addToast({ message: "Une erreur s'est produite", variant: 'error' });
-      setSocialLoading(false);
+      addToast({ message: "Une erreur s'est produite", variant: 'error' })
+      setSocialLoading(false)
     }
-  };
+  }
 
   const onGoogleRegisterFailure = () => {
-    setSocialLoading(false);
-    addToast({ message: "Une erreur s'est produite", variant: 'error' });
-  };
+    setSocialLoading(false)
+    addToast({ message: "Une erreur s'est produite", variant: 'error' })
+  }
 
   return (
     <>
@@ -173,5 +175,5 @@ export const RegisterPage = () => {
         <RouterLink to="/forgot-password">Mot de passe oublié ?</RouterLink>
       </Stack>
     </>
-  );
-};
+  )
+}

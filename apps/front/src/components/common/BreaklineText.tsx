@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'
 
 export const BreaklineText = ({ text }: { text: string }) => {
   return (
@@ -10,5 +10,5 @@ export const BreaklineText = ({ text }: { text: string }) => {
         </React.Fragment>
       ))}
     </>
-  );
-};
+  )
+}

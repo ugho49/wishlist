@@ -1,20 +1,21 @@
-import React, { useMemo } from 'react';
-import { DetailedEventDto } from '@wishlist/common-types';
-import { Box, Button, Grid, Stack } from '@mui/material';
-import { FabAutoGrow } from '../common/FabAutoGrow';
-import AddIcon from '@mui/icons-material/Add';
-import { RouterLink } from '../common/RouterLink';
-import { InputLabel } from '../common/InputLabel';
-import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
-import { WishlistCardWithOwner } from '../wishlist/WishlistCardWithOwner';
+import AddIcon from '@mui/icons-material/Add'
+import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted'
+import { Box, Button, Grid, Stack } from '@mui/material'
+import { DetailedEventDto } from '@wishlist/common-types'
+import React, { useMemo } from 'react'
+
+import { FabAutoGrow } from '../common/FabAutoGrow'
+import { InputLabel } from '../common/InputLabel'
+import { RouterLink } from '../common/RouterLink'
+import { WishlistCardWithOwner } from '../wishlist/WishlistCardWithOwner'
 
 export type EventWishlistsProps = {
-  event: DetailedEventDto;
-};
+  event: DetailedEventDto
+}
 
 export const EventWishlists = ({ event }: EventWishlistsProps) => {
-  const nbOfItems = useMemo(() => event.wishlists.length, [event]);
-  const addListRoute = useMemo(() => `/wishlists/new?from-event=${event.id}`, [event]);
+  const nbOfItems = useMemo(() => event.wishlists.length, [event])
+  const addListRoute = useMemo(() => `/wishlists/new?from-event=${event.id}`, [event])
 
   return (
     <Box className="wishlists">
@@ -28,7 +29,7 @@ export const EventWishlists = ({ event }: EventWishlistsProps) => {
           <Grid container spacing={3}>
             {event.wishlists
               .sort((a, b) => a.title.localeCompare(b.title))
-              .map((wishlist) => (
+              .map(wishlist => (
                 <Grid item xs={12} md={6} key={wishlist.id}>
                   <WishlistCardWithOwner wishlist={wishlist} />
                 </Grid>
@@ -48,5 +49,5 @@ export const EventWishlists = ({ event }: EventWishlistsProps) => {
         </Stack>
       )}
     </Box>
-  );
-};
+  )
+}

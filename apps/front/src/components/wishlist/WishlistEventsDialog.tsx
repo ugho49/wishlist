@@ -1,5 +1,5 @@
-import React from 'react';
-import { MiniEventDto } from '@wishlist/common-types';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
+import CloseIcon from '@mui/icons-material/Close'
 import {
   Avatar,
   Dialog,
@@ -11,25 +11,25 @@ import {
   ListItemText,
   Stack,
   useTheme,
-} from '@mui/material';
-import { useNavigate } from 'react-router-dom';
-import CloseIcon from '@mui/icons-material/Close';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import { DateTime } from 'luxon';
+} from '@mui/material'
+import { MiniEventDto } from '@wishlist/common-types'
+import { DateTime } from 'luxon'
+import React from 'react'
+import { useNavigate } from 'react-router-dom'
 
 export interface EventDialogProps {
-  open: boolean;
-  handleClose: () => void;
-  events: MiniEventDto[];
+  open: boolean
+  handleClose: () => void
+  events: MiniEventDto[]
 }
 
 export const WishlistEventsDialog = ({ open, events, handleClose }: EventDialogProps) => {
-  const theme = useTheme();
-  const navigate = useNavigate();
+  const theme = useTheme()
+  const navigate = useNavigate()
 
   const handleEventClick = (eventId: string) => {
-    navigate(`/events/${eventId}`);
-  };
+    navigate(`/events/${eventId}`)
+  }
 
   return (
     <Dialog onClose={() => handleClose()} open={open}>
@@ -42,7 +42,7 @@ export const WishlistEventsDialog = ({ open, events, handleClose }: EventDialogP
         </Stack>
       </DialogTitle>
       <List sx={{ pt: 0 }}>
-        {events.map((event) => (
+        {events.map(event => (
           <ListItemButton onClick={() => handleEventClick(event.id)} key={event.id}>
             <ListItemAvatar>
               <Avatar sx={{ bgcolor: theme.palette.primary.light, color: theme.palette.background.paper }}>
@@ -57,5 +57,5 @@ export const WishlistEventsDialog = ({ open, events, handleClose }: EventDialogP
         ))}
       </List>
     </Dialog>
-  );
-};
+  )
+}

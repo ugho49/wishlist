@@ -1,9 +1,9 @@
-import { CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { CreateDateColumn, UpdateDateColumn } from 'typeorm'
 
 export abstract class TimestampEntity {
   @CreateDateColumn()
-  createdAt: Date = new Date();
+  createdAt: Date = new Date()
 
   @UpdateDateColumn()
-  updatedAt: Date = new Date();
+  updatedAt: Date = new Date()
 }

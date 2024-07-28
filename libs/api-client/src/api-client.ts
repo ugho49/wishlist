@@ -1,70 +1,71 @@
-import axios, { AxiosInstance, CreateAxiosDefaults } from 'axios';
-import { AuthService } from './modules/auth.service';
-import { UserService } from './modules/user.service';
-import { AdminUserService } from './modules/admin-user.service';
-import { WishlistService } from './modules/wishlist.service';
-import { AdminEventService } from './modules/admin-event.service';
-import { EventService } from './modules/event.service';
-import { ItemService } from './modules/item.service';
-import { AttendeeService } from './modules/attendee.service';
+import axios, { AxiosInstance, CreateAxiosDefaults } from 'axios'
+
+import { AdminEventService } from './modules/admin-event.service'
+import { AdminUserService } from './modules/admin-user.service'
+import { AttendeeService } from './modules/attendee.service'
+import { AuthService } from './modules/auth.service'
+import { EventService } from './modules/event.service'
+import { ItemService } from './modules/item.service'
+import { UserService } from './modules/user.service'
+import { WishlistService } from './modules/wishlist.service'
 
 type ClientServiceParams = {
-  baseURL: string;
-  timeoutInMs?: number;
-};
+  baseURL: string
+  timeoutInMs?: number
+}
 
 export class ApiClient {
-  private readonly client: AxiosInstance;
+  private readonly client: AxiosInstance
 
   constructor(private readonly params: ClientServiceParams) {
     const config: CreateAxiosDefaults = {
       baseURL: this.params.baseURL,
       timeout: this.params?.timeoutInMs ?? 10_000, // 10 seconds
-    };
+    }
 
-    this.client = axios.create(config);
+    this.client = axios.create(config)
   }
 
   get auth() {
-    return new AuthService(this.client);
+    return new AuthService(this.client)
   }
 
   get user() {
-    return new UserService(this.client);
+    return new UserService(this.client)
   }
 
   user2() {
-    return new UserService(this.client);
+    return new UserService(this.client)
   }
 
   get wishlist() {
-    return new WishlistService(this.client);
+    return new WishlistService(this.client)
   }
 
   get event() {
-    return new EventService(this.client);
+    return new EventService(this.client)
   }
 
   get item() {
-    return new ItemService(this.client);
+    return new ItemService(this.client)
   }
 
   get attendee() {
-    return new AttendeeService(this.client);
+    return new AttendeeService(this.client)
   }
 
   get admin() {
     return {
       user: new AdminUserService(this.client),
       event: new AdminEventService(this.client),
-    };
+    }
   }
 
   setAccessToken(token: string) {
-    this.client.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    this.client.defaults.headers.common['Authorization'] = `Bearer ${token}`
   }
 
   removeUserToken() {
-    delete this.client.defaults.headers.common['Authorization'];
+    delete this.client.defaults.headers.common['Authorization']
   }
 }

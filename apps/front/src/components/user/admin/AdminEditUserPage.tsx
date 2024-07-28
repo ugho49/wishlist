@@ -1,109 +1,111 @@
-import { Box, Button, List, ListItem, ListItemIcon, ListItemText, Stack, TextField } from '@mui/material';
-import React, { FormEvent, useEffect, useState } from 'react';
-import { Loader } from '../../common/Loader';
-import { Title } from '../../common/Title';
-import { useApi, useToast } from '@wishlist-front/hooks';
-import { useParams } from 'react-router-dom';
-import { InputLabel } from '../../common/InputLabel';
-import { DateTime } from 'luxon';
-import { MobileDatePicker } from '@mui/x-date-pickers';
-import { CharsRemaining } from '../../common/CharsRemaining';
-import { Card } from '../../common/Card';
-import { Subtitle } from '../../common/Subtitle';
-import { LoadingButton } from '@mui/lab';
-import SaveIcon from '@mui/icons-material/Save';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import LanguageIcon from '@mui/icons-material/Language';
-import useMediaQuery from '@mui/material/useMediaQuery';
-import { useTheme } from '@mui/material/styles';
-import HistoryIcon from '@mui/icons-material/History';
-import { ConfirmButton } from '../../common/ConfirmButton';
-import { RootState } from '../../../core';
-import { useSelector } from 'react-redux';
-import { UpdatePasswordModal } from './UpdatePasswordModal';
-import { AvatarUpdateButton } from '../AvatarUpdateButton';
-import { useQuery } from '@tanstack/react-query';
+import AccessTimeIcon from '@mui/icons-material/AccessTime'
+import HistoryIcon from '@mui/icons-material/History'
+import LanguageIcon from '@mui/icons-material/Language'
+import SaveIcon from '@mui/icons-material/Save'
+import { LoadingButton } from '@mui/lab'
+import { Box, Button, List, ListItem, ListItemIcon, ListItemText, Stack, TextField } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
+import useMediaQuery from '@mui/material/useMediaQuery'
+import { MobileDatePicker } from '@mui/x-date-pickers'
+import { useQuery } from '@tanstack/react-query'
+import { DateTime } from 'luxon'
+import React, { FormEvent, useEffect, useState } from 'react'
+import { useSelector } from 'react-redux'
+import { useParams } from 'react-router-dom'
 
-const mapState = (state: RootState) => state.auth;
+import { RootState } from '../../../core'
+import { useApi } from '../../../hooks/useApi'
+import { useToast } from '../../../hooks/useToast'
+import { Card } from '../../common/Card'
+import { CharsRemaining } from '../../common/CharsRemaining'
+import { ConfirmButton } from '../../common/ConfirmButton'
+import { InputLabel } from '../../common/InputLabel'
+import { Loader } from '../../common/Loader'
+import { Subtitle } from '../../common/Subtitle'
+import { Title } from '../../common/Title'
+import { AvatarUpdateButton } from '../AvatarUpdateButton'
+import { UpdatePasswordModal } from './UpdatePasswordModal'
+
+const mapState = (state: RootState) => state.auth
 
 export const AdminEditUserPage = () => {
-  const { addToast } = useToast();
-  const { user: currentUser } = useSelector(mapState);
-  const params = useParams<'userId'>();
-  const userId = params.userId || '';
-  const { admin: api } = useApi();
-  const theme = useTheme();
-  const smallScreen = useMediaQuery(theme.breakpoints.down('md'));
-  const [loading, setLoading] = useState(false);
-  const [email, setEmail] = useState('');
-  const [firstname, setFirstname] = useState('');
-  const [lastname, setLastname] = useState('');
-  const [pictureUrl, setPictureUrl] = useState('');
-  const [enabled, setEnabled] = useState(true);
-  const [birthday, setBirthday] = useState<DateTime | null>(null);
-  const [updatePasswordModalOpen, setUpdatePasswordModalOpen] = useState(false);
+  const { addToast } = useToast()
+  const { user: currentUser } = useSelector(mapState)
+  const params = useParams<'userId'>()
+  const userId = params.userId || ''
+  const { admin: api } = useApi()
+  const theme = useTheme()
+  const smallScreen = useMediaQuery(theme.breakpoints.down('md'))
+  const [loading, setLoading] = useState(false)
+  const [email, setEmail] = useState('')
+  const [firstname, setFirstname] = useState('')
+  const [lastname, setLastname] = useState('')
+  const [pictureUrl, setPictureUrl] = useState('')
+  const [enabled, setEnabled] = useState(true)
+  const [birthday, setBirthday] = useState<DateTime | null>(null)
+  const [updatePasswordModalOpen, setUpdatePasswordModalOpen] = useState(false)
   const { data: value, isLoading: loadingUser } = useQuery({
     queryKey: ['admin', 'user', { id: userId }],
     queryFn: () => api.user.getById(userId),
-  });
+  })
 
-  const isCurrentUser = currentUser?.id === userId;
+  const isCurrentUser = currentUser?.id === userId
 
   useEffect(() => {
     if (value) {
-      setEmail(value.email);
-      setFirstname(value.firstname);
-      setLastname(value.lastname);
-      setBirthday(value?.birthday ? DateTime.fromISO(value.birthday) : null);
-      setEnabled(value.is_enabled);
-      setPictureUrl(value.picture_url || '');
+      setEmail(value.email)
+      setFirstname(value.firstname)
+      setLastname(value.lastname)
+      setBirthday(value?.birthday ? DateTime.fromISO(value.birthday) : null)
+      setEnabled(value.is_enabled)
+      setPictureUrl(value.picture_url || '')
     }
-  }, [value]);
+  }, [value])
 
   const disableUser = async () => {
-    setLoading(true);
-    setEnabled(false);
+    setLoading(true)
+    setEnabled(false)
     try {
-      await api.user.update(userId, { is_enabled: false });
-      addToast({ message: 'Utilisateur désactivé', variant: 'success' });
+      await api.user.update(userId, { is_enabled: false })
+      addToast({ message: 'Utilisateur désactivé', variant: 'success' })
     } catch (e) {
-      addToast({ message: "Une erreur s'est produite", variant: 'error' });
+      addToast({ message: "Une erreur s'est produite", variant: 'error' })
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const enableUser = async () => {
-    setLoading(true);
-    setEnabled(true);
+    setLoading(true)
+    setEnabled(true)
     try {
-      await api.user.update(userId, { is_enabled: true });
-      addToast({ message: 'Utilisateur activé', variant: 'success' });
+      await api.user.update(userId, { is_enabled: true })
+      addToast({ message: 'Utilisateur activé', variant: 'success' })
     } catch (e) {
-      addToast({ message: "Une erreur s'est produite", variant: 'error' });
+      addToast({ message: "Une erreur s'est produite", variant: 'error' })
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const updateProfile = async (e: FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+    e.preventDefault()
+    setLoading(true)
     try {
       await api.user.update(userId, {
         firstname,
         lastname,
         birthday: birthday !== null ? new Date(birthday.toISODate() || '') : undefined,
         email,
-      });
+      })
 
-      addToast({ message: 'Profil mis à jour', variant: 'success' });
+      addToast({ message: 'Profil mis à jour', variant: 'success' })
     } catch (e) {
-      addToast({ message: "Une erreur s'est produite", variant: 'error' });
+      addToast({ message: "Une erreur s'est produite", variant: 'error' })
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
     <Loader loading={loadingUser}>
@@ -130,8 +132,8 @@ export const AdminEditUserPage = () => {
                     lastname={lastname}
                     pictureUrl={pictureUrl}
                     socials={[]}
-                    onPictureUpdated={(url) => setPictureUrl(url || '')}
-                    uploadPictureHandler={(file) => api.user.uploadPicture(userId, file)}
+                    onPictureUpdated={url => setPictureUrl(url || '')}
+                    uploadPictureHandler={file => api.user.uploadPicture(userId, file)}
                     updatePictureFromSocialHandler={() => Promise.resolve()}
                     deletePictureHandler={() => api.user.deletePicture(userId)}
                   />
@@ -218,7 +220,7 @@ export const AdminEditUserPage = () => {
                   placeholder="John"
                   required
                   helperText={<CharsRemaining max={50} value={firstname} />}
-                  onChange={(e) => setFirstname(e.target.value)}
+                  onChange={e => setFirstname(e.target.value)}
                 />
               </Box>
 
@@ -233,7 +235,7 @@ export const AdminEditUserPage = () => {
                   placeholder="Doe"
                   required
                   helperText={<CharsRemaining max={50} value={lastname} />}
-                  onChange={(e) => setLastname(e.target.value)}
+                  onChange={e => setLastname(e.target.value)}
                 />
               </Box>
             </Stack>
@@ -248,7 +250,7 @@ export const AdminEditUserPage = () => {
                 value={email}
                 placeholder="john@doe.fr"
                 required
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={e => setEmail(e.target.value)}
               />
             </Box>
 
@@ -257,8 +259,8 @@ export const AdminEditUserPage = () => {
               <MobileDatePicker
                 value={birthday}
                 disabled={loading || isCurrentUser}
-                defaultCalendarMonth={DateTime.now().minus({ year: 30 })}
-                onChange={(date) => setBirthday(date)}
+                // defaultCalendarMonth={DateTime.now().minus({ year: 30 })}
+                onChange={date => setBirthday(date)}
                 disableFuture={true}
               />
             </Stack>
@@ -284,5 +286,5 @@ export const AdminEditUserPage = () => {
         </Card>
       </Box>
     </Loader>
-  );
-};
+  )
+}

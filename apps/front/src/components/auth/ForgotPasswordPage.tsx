@@ -1,46 +1,49 @@
-import React, { useState } from 'react';
-import { RouterLink } from '../common/RouterLink';
-import { Card } from '../common/Card';
-import { Subtitle } from '../common/Subtitle';
-import { Box, Stack, TextField } from '@mui/material';
-import { InputLabel } from '../common/InputLabel';
-import { LoadingButton } from '@mui/lab';
-import AttachEmailIcon from '@mui/icons-material/AttachEmail';
-import { useApi, useToast } from '@wishlist-front/hooks';
-import { z } from 'zod';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation } from '@tanstack/react-query';
-import { type ResetPasswordInputDto } from '@wishlist/common-types';
+import type { ResetPasswordInputDto } from '@wishlist/common-types'
+
+import { zodResolver } from '@hookform/resolvers/zod'
+import AttachEmailIcon from '@mui/icons-material/AttachEmail'
+import { LoadingButton } from '@mui/lab'
+import { Box, Stack, TextField } from '@mui/material'
+import { useMutation } from '@tanstack/react-query'
+import React, { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
+
+import { useApi } from '../../hooks/useApi'
+import { useToast } from '../../hooks/useToast'
+import { Card } from '../common/Card'
+import { InputLabel } from '../common/InputLabel'
+import { RouterLink } from '../common/RouterLink'
+import { Subtitle } from '../common/Subtitle'
 
 const schema = z.object({
   email: z.string().email('Email invalide').max(200, '200 caractères maximum'),
-});
+})
 
-type FormFields = z.infer<typeof schema>;
+type FormFields = z.infer<typeof schema>
 
 export const ForgotPasswordPage = () => {
-  const api = useApi();
-  const { addToast } = useToast();
-  const [resetCodeSent, setResetCodeSent] = useState(false);
+  const api = useApi()
+  const { addToast } = useToast()
+  const [resetCodeSent, setResetCodeSent] = useState(false)
 
   const {
     register,
     handleSubmit,
     formState: { isSubmitting, errors: formErrors },
-  } = useForm<FormFields>({ resolver: zodResolver(schema) });
+  } = useForm<FormFields>({ resolver: zodResolver(schema) })
 
   const { mutateAsync: sendResetPasswordEmail } = useMutation({
     mutationKey: ['user.sendResetPasswordEmail'],
     mutationFn: (data: ResetPasswordInputDto) => api.user.sendResetUserPasswordEmail(data),
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
     onSuccess: () => {
-      setResetCodeSent(true);
-      addToast({ message: 'Un email vient de vous être envoyé pour réinitialiser le mot de passe', variant: 'info' });
+      setResetCodeSent(true)
+      addToast({ message: 'Un email vient de vous être envoyé pour réinitialiser le mot de passe', variant: 'info' })
     },
-  });
+  })
 
-  const onSubmit = (data: FormFields) => sendResetPasswordEmail(data);
+  const onSubmit = (data: FormFields) => sendResetPasswordEmail(data)
 
   return (
     <>
@@ -95,5 +98,5 @@ export const ForgotPasswordPage = () => {
         </Stack>
       </Stack>
     </>
-  );
-};
+  )
+}

@@ -1,21 +1,21 @@
-import { Column, Entity, PrimaryColumn } from 'typeorm';
-import { uuid } from '@wishlist/common';
-import { TimestampEntity } from '@wishlist/common-database';
+import { uuid } from '@wishlist/common'
+import { TimestampEntity } from '@wishlist/common-database'
+import { Column, Entity, PrimaryColumn } from 'typeorm'
 
 @Entity('user_email_setting')
 export class UserEmailSettingEntity extends TimestampEntity {
   @PrimaryColumn()
-  id: string = uuid();
+  id: string = uuid()
 
   @Column()
-  userId: string;
+  userId: string
 
   @Column()
-  dailyNewItemNotification: boolean = true;
+  dailyNewItemNotification: boolean = true
 
   public static create(props: { userId: string }): UserEmailSettingEntity {
-    const entity = new UserEmailSettingEntity();
-    entity.userId = props.userId;
-    return entity;
+    const entity = new UserEmailSettingEntity()
+    entity.userId = props.userId
+    return entity
   }
 }

@@ -1,34 +1,36 @@
-import 'reflect-metadata';
-import * as ReactDOM from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
-import { Provider as ReduxProvider } from 'react-redux';
-import { CssBaseline, ThemeProvider } from '@mui/material';
-import { store } from './core';
-import { ApiProvider } from './context/ApiContext';
-import { App } from './App';
-import { theme } from './theme';
-import { AxiosInterceptor } from './core/router/AxiosInterceptor';
-import { LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon';
-import { SnackbarProvider } from 'notistack';
-import { GoogleOAuthProvider } from '@react-oauth/google';
-import { environment } from './environment';
-import { ApiClient } from '@wishlist/api-client';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { PostHogProvider } from 'posthog-js/react';
+import 'reflect-metadata'
+
+import { CssBaseline, ThemeProvider } from '@mui/material'
+import { LocalizationProvider } from '@mui/x-date-pickers'
+import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon'
+import { GoogleOAuthProvider } from '@react-oauth/google'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import { ApiClient } from '@wishlist/api-client'
+import { SnackbarProvider } from 'notistack'
+import { PostHogProvider } from 'posthog-js/react'
+import * as ReactDOM from 'react-dom/client'
+import { Provider as ReduxProvider } from 'react-redux'
+import { BrowserRouter } from 'react-router-dom'
+
+import { App } from './App'
+import { ApiProvider } from './context/ApiContext'
+import { store } from './core'
+import { AxiosInterceptor } from './core/router/AxiosInterceptor'
+import { environment } from './environment'
+import { theme } from './theme'
 
 function main() {
   const needRedirect =
     window.location.hostname === 'wishlist-stephan.web.app' ||
-    window.location.hostname === 'wishlist-stephan.firebaseapp.com';
+    window.location.hostname === 'wishlist-stephan.firebaseapp.com'
 
   if (needRedirect) {
-    window.location.href = 'https://wishlistapp.fr';
-    return;
+    window.location.href = 'https://wishlistapp.fr'
+    return
   }
 
-  const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
+  const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -38,11 +40,11 @@ function main() {
         retry: false,
       },
     },
-  });
+  })
   const api = new ApiClient({
     baseURL: environment.baseUrl,
     timeoutInMs: 10_000, // 10 seconds
-  });
+  })
 
   root.render(
     <PostHogProvider apiKey={environment.posthogKey} options={{ api_host: environment.posthogHost }}>
@@ -72,7 +74,7 @@ function main() {
         <ReactQueryDevtools initialIsOpen={false} />
       </QueryClientProvider>
     </PostHogProvider>,
-  );
+  )
 }
 
-main();
+main()

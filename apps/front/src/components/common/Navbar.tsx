@@ -1,13 +1,16 @@
 /// <reference types="vite-plugin-svgr/client" />
-import React, { useCallback } from 'react';
-import { AppBar, Box, Button, Container, IconButton, Stack, Theme, Toolbar, Typography } from '@mui/material';
-import LogoutIcon from '@mui/icons-material/Logout';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { useHistoryStack, useLogout, useToast } from '@wishlist-front/hooks';
-import IconSvg from '../../assets/icons/icon.svg?react';
-import TextSvg from '../../assets/icons/logo_text.svg?react';
-import { makeStyles } from '@mui/styles';
-import { Link, useNavigate } from 'react-router-dom';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+import LogoutIcon from '@mui/icons-material/Logout'
+import { AppBar, Box, Button, Container, IconButton, Stack, Theme, Toolbar, Typography } from '@mui/material'
+import { makeStyles } from '@mui/styles'
+import { useCallback } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+
+import IconSvg from '../../assets/icons/icon.svg?react'
+import TextSvg from '../../assets/icons/logo_text.svg?react'
+import { useHistoryStack } from '../../hooks/useHistoryStack'
+import { useLogout } from '../../hooks/useLogout'
+import { useToast } from '../../hooks/useToast'
 
 const useStyles = makeStyles((theme: Theme) => ({
   logo: {
@@ -29,32 +32,32 @@ const useStyles = makeStyles((theme: Theme) => ({
       display: 'none',
     },
   },
-}));
+}))
 
 const GoBack = () => {
-  const navigate = useNavigate();
-  const { history } = useHistoryStack();
+  const navigate = useNavigate()
+  const { history } = useHistoryStack()
 
   if (history.length === 0) {
-    return null;
+    return null
   }
 
   return (
     <IconButton color="inherit" onClick={() => navigate(-1)}>
       <ArrowBackIcon />
     </IconButton>
-  );
-};
+  )
+}
 
 export const Navbar = () => {
-  const classes = useStyles();
-  const { addToast } = useToast();
-  const logout = useLogout();
+  const classes = useStyles()
+  const { addToast } = useToast()
+  const logout = useLogout()
 
   const handleLogout = useCallback(async () => {
-    addToast({ message: 'A bientôt 👋', variant: 'default' });
-    await logout();
-  }, [addToast, logout]);
+    addToast({ message: 'A bientôt 👋', variant: 'default' })
+    await logout()
+  }, [addToast, logout])
 
   return (
     <AppBar position="sticky">
@@ -92,5 +95,5 @@ export const Navbar = () => {
         </Toolbar>
       </Container>
     </AppBar>
-  );
-};
+  )
+}

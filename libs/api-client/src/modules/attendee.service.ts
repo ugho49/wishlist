@@ -1,14 +1,14 @@
-import { type AddEventAttendeeForEventInputDto, type AttendeeDto } from '@wishlist/common-types';
-import { AxiosInstance } from 'axios';
+import { type AddEventAttendeeForEventInputDto, type AttendeeDto } from '@wishlist/common-types'
+import { AxiosInstance } from 'axios'
 
 export class AttendeeService {
   constructor(private readonly client: AxiosInstance) {}
 
   addAttendee(data: AddEventAttendeeForEventInputDto): Promise<AttendeeDto> {
-    return this.client.post('/attendee', data).then((res) => res.data);
+    return this.client.post('/attendee', data).then(res => res.data)
   }
 
   async deleteAttendee(attendeeId: string): Promise<void> {
-    await this.client.delete(`/attendee/${attendeeId}`);
+    await this.client.delete(`/attendee/${attendeeId}`)
   }
 }

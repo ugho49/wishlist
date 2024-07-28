@@ -1,8 +1,8 @@
-import React from 'react';
-import { makeStyles } from '@mui/styles';
-import Typography from '@mui/material/Typography';
-import { Theme } from '@mui/material';
-import ConstructionIcon from '@mui/icons-material/Construction';
+import ConstructionIcon from '@mui/icons-material/Construction'
+import { Theme } from '@mui/material'
+import Typography from '@mui/material/Typography'
+import { makeStyles } from '@mui/styles'
+import React from 'react'
 
 // Styles for the component
 const useStyles = makeStyles((theme: Theme) => ({
@@ -19,10 +19,10 @@ const useStyles = makeStyles((theme: Theme) => ({
   icon: {
     marginBottom: theme.spacing(2),
   },
-}));
+}))
 
 export const MaintenancePage = () => {
-  const classes = useStyles();
+  const classes = useStyles()
 
   return (
     <div className={classes.root}>
@@ -34,5 +34,5 @@ export const MaintenancePage = () => {
         <Typography variant="body1">Nous sommes désolés pour le dérangement. Veuillez réessayer plus tard.</Typography>
       </div>
     </div>
-  );
-};
+  )
+}
