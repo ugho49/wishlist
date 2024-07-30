@@ -19,7 +19,7 @@ parameters:
 references:
   setup_env_node: &setup_env_node
     docker:
-      - image: cimg/node:20.11
+      - image: cimg/node:20.16
   attach_workspace: &attach_workspace
     at: ~/project
   nx/set-shas: &nx_set_shas_option
@@ -82,8 +82,7 @@ jobs:
           command: |
             DATA="{}"
 
-            # Using https://nx.dev/nx/affected#base and https://nx.dev/nx/affected#head options for nx to compute diffs and determine which apps changes
-            AFFECTED_RAW=$(npx nx print-affected --type=app --base=$NX_BASE --head=$NX_HEAD | jq -r '.projects | join(" ")')
+            AFFECTED_RAW=$(npx nx show projects --type=app --affected --base=$NX_BASE --head=$NX_HEAD --json | jq -r '. | join(" ")')
             IFS=' ' read -ra APPS \<<< "$AFFECTED_RAW"
 
             # Store list in file to be passed to following jobs
