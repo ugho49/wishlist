@@ -1,9 +1,10 @@
-import { MailerService } from '@nestjs-modules/mailer'
 import { Injectable } from '@nestjs/common'
+
+import { MailService } from '../../core/mail/mail.service'
 
 @Injectable()
 export class EventMailer {
-  constructor(private readonly mailerService: MailerService) {}
+  constructor(private readonly mailService: MailService) {}
 
   async sendEmailForExistingAttendee(params: {
     emails: string[] | string
@@ -14,7 +15,7 @@ export class EventMailer {
       return
     }
 
-    await this.mailerService.sendMail({
+    await this.mailService.sendMail({
       to: params.emails,
       subject: '[Wishlist] Vous participez à un nouvel événement',
       template: 'added-to-event',
@@ -35,7 +36,7 @@ export class EventMailer {
       return
     }
 
-    await this.mailerService.sendMail({
+    await this.mailService.sendMail({
       to: params.emails,
       subject: '[Wishlist] Vous participez à un nouvel événement',
       template: 'added-to-event-new-user',

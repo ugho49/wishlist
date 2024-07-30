@@ -1,12 +1,24 @@
 import { Module } from '@nestjs/common'
-import { ConfigModule } from '@nestjs/config'
 
-import bucketConfig from './bucket.config'
+import { BucketConfig } from './bucket.config'
+import { BucketMockService } from './bucket.mock.service'
+import { BUCKET_CONFIG_TOKEN, ConfigurableBucketModule } from './bucket.module-definitions'
+import { BucketRealService } from './bucket.real.service'
 import { BucketService } from './bucket.service'
 
 @Module({
-  imports: [ConfigModule.forFeature(bucketConfig)],
-  providers: [BucketService],
+  providers: [
+    {
+      provide: BucketService,
+      inject: [BUCKET_CONFIG_TOKEN],
+      useFactory: (bucketConfig: BucketConfig) => {
+        if (bucketConfig.isMock) {
+          return new BucketMockService()
+        }
+        return new BucketRealService(bucketConfig)
+      },
+    },
+  ],
   exports: [BucketService],
 })
-export class BucketModule {}
+export class BucketModule extends ConfigurableBucketModule {}

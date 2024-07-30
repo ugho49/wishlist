@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 
-import { BucketModule } from '../../core/bucket/bucket.module'
 import { AuthSocialModule } from '../auth-social/auth-social.module'
 import { UserAdminController } from './controllers/user-admin.controller'
 import { UserController } from './controllers/user.controller'
@@ -13,7 +12,7 @@ import { UserRepository } from './user.repository'
 import { UserService } from './user.service'
 
 @Module({
-  imports: [TypeOrmModule.forFeature([UserEntity, UserSocialEntity]), AuthSocialModule, BucketModule],
+  imports: [TypeOrmModule.forFeature([UserEntity, UserSocialEntity]), AuthSocialModule],
   controllers: [UserController, UserAdminController],
   providers: [UserService, UserRepository, UserSocialRepository, UserMailer],
   exports: [UserRepository, UserSocialRepository],

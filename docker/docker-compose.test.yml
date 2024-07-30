@@ -1,0 +1,8 @@
+services:
+  db:
+    ports:
+      - "5432"
+
+  mail:
+    ports:
+      - '1025'

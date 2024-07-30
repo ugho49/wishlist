@@ -1,0 +1,15 @@
+services:
+  db:
+    ports:
+      - "5432:5432"
+
+  mail:
+    ports:
+      - '1080:1080'
+      - '1025:1025'
+
+  adminer:
+    image: adminer:4.8.1
+    restart: always
+    ports:
+      - '3333:3333'

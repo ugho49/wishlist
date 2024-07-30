@@ -10,11 +10,18 @@
         "buildTarget": "api:build"
       }
     },
-    "typeorm-generate-migration": {
+    "test:int": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/api",
+        "command": "jest --config=jest.int.config.ts",
+        "color": true
+      }
+    },
+    "db:generate-migration": {
       "executor": "nx:run-commands",
       "options": {
         "cwd": "apps/api/src/core/database/migrations",
-        "parallel": false,
         "command": "typeorm migration:create",
         "color": true
       }

@@ -1,9 +1,10 @@
-import { MailerService } from '@nestjs-modules/mailer'
 import { Injectable } from '@nestjs/common'
+
+import { MailService } from '../../core/mail/mail.service'
 
 @Injectable()
 export class ItemMailer {
-  constructor(private readonly mailerService: MailerService) {}
+  constructor(private readonly mailService: MailService) {}
 
   async sendNotifyEmail(param: {
     emails: string[]
@@ -11,7 +12,7 @@ export class ItemMailer {
     ownerName: string
     nbNewItems: number
   }) {
-    await this.mailerService.sendMail({
+    await this.mailService.sendMail({
       to: param.emails,
       subject: '[Wishlist] Des souhaits ont été ajoutés !!',
       template: 'new-items-reminder',

@@ -48,13 +48,44 @@ jobs:
           paths:
             - node_modules
 
-  test:
+  test-unit:
     <<: *setup_env_node
     steps:
       - checkout
       - attach_workspace: *attach_workspace
       - nx/set-shas: *nx_set_shas_option
-      - run: yarn nx affected --target=test --base=$NX_BASE --head=$NX_HEAD --parallel --max-parallel=3
+      - run:
+          command: yarn nx affected --target=test --base=$NX_BASE --head=$NX_HEAD --parallel --max-parallel=3  --output-style=stream
+          environment:
+            JEST_JUNIT_OUTPUT_DIR: ./reports/unit
+            JEST_JUNIT_UNIQUE_OUTPUT_NAME: 'true'
+            JEST_JUNIT_ADD_FILE_ATTRIBUTE: 'true'
+      - store_test_results:
+          path: ./reports/unit
+
+  test-int:
+    <<: *setup_env_node
+    environment:
+      TESTCONTAINERS_HOST_OVERRIDE: "localhost"
+    steps:
+      - checkout
+      - attach_workspace: *attach_workspace
+      - nx/set-shas: *nx_set_shas_option
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run:
+          name: Testcontainers tunnel
+          background: true
+          command: .circleci/autoforward.py
+      - run:
+          command: yarn nx affected --target=test:int --base=$NX_BASE --head=$NX_HEAD --parallel --max-parallel=3  --output-style=stream
+          environment:
+            JEST_JUNIT_OUTPUT_DIR: ./reports/integration
+            JEST_JUNIT_UNIQUE_OUTPUT_NAME: 'true'
+            JEST_JUNIT_ADD_FILE_ATTRIBUTE: 'true'
+      - store_test_results:
+          path: ./reports/integration
+
 
   lint:
     <<: *setup_env_node
@@ -62,7 +93,7 @@ jobs:
       - checkout
       - attach_workspace: *attach_workspace
       - nx/set-shas: *nx_set_shas_option
-      - run: yarn nx affected --target=lint --base=$NX_BASE --head=$NX_HEAD --parallel --max-parallel=3
+      - run: yarn nx affected --target=lint --base=$NX_BASE --head=$NX_HEAD --parallel --max-parallel=3  --output-style=stream
 
   continuation:
     <<: *setup_env_node
@@ -106,10 +137,14 @@ workflows:
       - lint:
           requires:
             - install-dependencies
-      - test:
+      - test-unit:
+          requires:
+            - install-dependencies
+      - test-int:
           requires:
             - install-dependencies
       - continuation:
           requires:
             - lint
-            - test
+            - test-unit
+            - test-int

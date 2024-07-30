@@ -1,46 +1,10 @@
-import type { HelperDeclareSpec } from 'handlebars'
-
-import { MailerModule } from '@nestjs-modules/mailer'
-import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter'
 import { Module } from '@nestjs/common'
-import { ConfigModule, ConfigType } from '@nestjs/config'
 
-import mailConfig from './mail.config'
-
-const helpers: HelperDeclareSpec = {
-  eq: (a, b) => a === b,
-  eqNum: (a, b) => parseInt(a, 10) === parseInt(b, 10),
-  ne: (a, b) => a !== b,
-  neNum: (a, b) => parseInt(a, 10) !== parseInt(b, 10),
-}
+import { ConfigurableMailModule } from './mail.module-definitions'
+import { MailService } from './mail.service'
 
 @Module({
-  imports: [
-    ConfigModule.forFeature(mailConfig),
-    MailerModule.forRootAsync({
-      imports: [ConfigModule.forFeature(mailConfig)],
-      inject: [mailConfig.KEY],
-      useFactory: (config: ConfigType<typeof mailConfig>) => ({
-        transport: {
-          host: config.host,
-          port: config.port,
-          auth: {
-            user: config.auth.username,
-            pass: config.auth.password,
-          },
-        },
-        defaults: {
-          from: config.from,
-        },
-        template: {
-          dir: __dirname + '/templates',
-          adapter: new HandlebarsAdapter(helpers, { inlineCssEnabled: false }),
-          options: {
-            strict: true,
-          },
-        },
-      }),
-    }),
-  ],
+  providers: [MailService],
+  exports: [MailService],
 })
-export class MailModule {}
+export class MailModule extends ConfigurableMailModule {}

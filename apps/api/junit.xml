@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="4" failures="0" errors="0" time="6.922">
+  <testsuite name="AuthController" errors="0" failures="0" skipped="0" timestamp="2024-07-31T23:19:25" time="6.086" tests="3">
+    <testcase classname="AuthController POST /login should return 400 with invalid input" name="AuthController POST /login should return 400 with invalid input" time="0.198">
+    </testcase>
+    <testcase classname="AuthController POST /login should return 401 with not existing user" name="AuthController POST /login should return 401 with not existing user" time="0.165">
+    </testcase>
+    <testcase classname="AuthController POST /login should return 401 with invalid credentials" name="AuthController POST /login should return 401 with invalid credentials" time="0.336">
+    </testcase>
+  </testsuite>
+  <testsuite name="HealthController" errors="0" failures="0" skipped="0" timestamp="2024-07-31T23:19:31" time="0.732" tests="1">
+    <testcase classname="HealthController GET /health" name="HealthController GET /health" time="0.187">
+    </testcase>
+  </testsuite>
+</testsuites>
