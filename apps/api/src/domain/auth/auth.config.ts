@@ -1,5 +1,5 @@
-import { registerAs } from '@nestjs/config';
-import { Algorithm } from 'jsonwebtoken';
+import { registerAs } from '@nestjs/config'
+import { Algorithm } from 'jsonwebtoken'
 
 export default registerAs('auth', () => ({
   issuer: process.env.AUTH_ISSUER || '',
@@ -13,4 +13,4 @@ export default registerAs('auth', () => ({
     duration: process.env.AUTH_REFRESH_TOKEN_DURATION || '1d',
     algorithm: (process.env.AUTH_REFRESH_TOKEN_ALGORITHM || 'HS512') as Algorithm,
   },
-}));
+}))

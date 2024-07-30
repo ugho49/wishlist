@@ -1,8 +1,9 @@
-import { Body, Controller, Get, Put } from '@nestjs/common';
-import { CurrentUser } from '../auth';
-import { ApiTags } from '@nestjs/swagger';
-import { UpdateUserEmailSettingsInputDto, UserEmailSettingsDto } from '@wishlist/common-types';
-import { EmailSettingsService } from './email-settings.service';
+import { Body, Controller, Get, Put } from '@nestjs/common'
+import { ApiTags } from '@nestjs/swagger'
+import { UpdateUserEmailSettingsInputDto, UserEmailSettingsDto } from '@wishlist/common-types'
+
+import { CurrentUser } from '../auth'
+import { EmailSettingsService } from './email-settings.service'
 
 @ApiTags('User Email settings')
 @Controller('/user/email-settings')
@@ -11,14 +12,14 @@ export class EmailSettingsController {
 
   @Get()
   getEmailSettings(@CurrentUser('id') id: string): Promise<UserEmailSettingsDto> {
-    return this.userEmailSettingsService.findByUserId(id);
+    return this.userEmailSettingsService.findByUserId(id)
   }
 
   @Put()
   updateEmailSettings(
     @CurrentUser('id') id: string,
-    @Body() dto: UpdateUserEmailSettingsInputDto
+    @Body() dto: UpdateUserEmailSettingsInputDto,
   ): Promise<UserEmailSettingsDto> {
-    return this.userEmailSettingsService.update(id, dto);
+    return this.userEmailSettingsService.update(id, dto)
   }
 }

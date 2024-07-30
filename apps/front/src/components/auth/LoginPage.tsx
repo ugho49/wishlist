@@ -1,35 +1,37 @@
-import { Alert, Box, Stack, TextField } from '@mui/material';
-import { RouterLink } from '../common/RouterLink';
-import { useDispatch } from 'react-redux';
-import React, { useState } from 'react';
-import { setTokens } from '../../core/store/features';
-import { Card } from '../common/Card';
-import { LoadingButton } from '@mui/lab';
-import { InputLabel } from '../common/InputLabel';
-import { Subtitle } from '../common/Subtitle';
-import LoginIcon from '@mui/icons-material/Login';
-import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
-import { LoginInputDto, LoginOutputDto } from '@wishlist/common-types';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { AxiosError } from 'axios';
-import { useApi, useToast } from '@wishlist-front/hooks';
-import { getUrlParameter } from '../../utils/router.utils';
-import { useMutation } from '@tanstack/react-query';
+import { zodResolver } from '@hookform/resolvers/zod'
+import LoginIcon from '@mui/icons-material/Login'
+import { LoadingButton } from '@mui/lab'
+import { Alert, Box, Stack, TextField } from '@mui/material'
+import { CredentialResponse, GoogleLogin } from '@react-oauth/google'
+import { useMutation } from '@tanstack/react-query'
+import { LoginInputDto, LoginOutputDto } from '@wishlist/common-types'
+import { AxiosError } from 'axios'
+import React, { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { useDispatch } from 'react-redux'
+import { z } from 'zod'
+
+import { setTokens } from '../../core/store/features'
+import { useApi } from '../../hooks/useApi'
+import { useToast } from '../../hooks/useToast'
+import { getUrlParameter } from '../../utils/router.utils'
+import { Card } from '../common/Card'
+import { InputLabel } from '../common/InputLabel'
+import { RouterLink } from '../common/RouterLink'
+import { Subtitle } from '../common/Subtitle'
 
 const schema = z.object({
   email: z.string().email('Email invalide'),
   password: z.string().min(1, 'Ce champ ne peut pas être vide'),
-});
+})
 
-type FormFields = z.infer<typeof schema>;
+type FormFields = z.infer<typeof schema>
 
 export const LoginPage = () => {
-  const api = useApi();
-  const dispatch = useDispatch();
-  const { addToast } = useToast();
-  const [socialLoading, setSocialLoading] = useState(false);
+  const api = useApi()
+  const dispatch = useDispatch()
+  const { addToast } = useToast()
+  const [socialLoading, setSocialLoading] = useState(false)
   const {
     register,
     setError,
@@ -38,49 +40,49 @@ export const LoginPage = () => {
   } = useForm<FormFields>({
     resolver: zodResolver(schema),
     defaultValues: { email: getUrlParameter('email') || '' },
-  });
+  })
 
   const handleLoginSuccess = (param: LoginOutputDto) => {
-    addToast({ message: 'Heureux de vous revoir 🤓', variant: 'default' });
+    addToast({ message: 'Heureux de vous revoir 🤓', variant: 'default' })
 
     dispatch(
       setTokens({
         accessToken: param.access_token,
         refreshToken: param.refresh_token,
       }),
-    );
-  };
+    )
+  }
 
   const { mutateAsync: login } = useMutation({
     mutationKey: ['login'],
     mutationFn: (data: LoginInputDto) => api.auth.login(data),
-    onSuccess: (data) => handleLoginSuccess(data),
-    onError: (e) => {
+    onSuccess: data => handleLoginSuccess(data),
+    onError: e => {
       if (e instanceof AxiosError && (e.response?.status === 401 || e.response?.status === 403)) {
-        setError('root', { message: 'Email ou mot de passe incorrect' });
+        setError('root', { message: 'Email ou mot de passe incorrect' })
       } else {
-        setError('root', { message: "Une erreur s'est produite." });
+        setError('root', { message: "Une erreur s'est produite." })
       }
     },
-  });
+  })
 
-  const onSubmit = (data: FormFields) => login(data);
+  const onSubmit = (data: FormFields) => login(data)
 
   const onGoogleLoginSuccess = async (credentialResponse: CredentialResponse) => {
     try {
-      setSocialLoading(true);
-      const data = await api.auth.loginWithGoogle({ credential: credentialResponse.credential || '' });
-      handleLoginSuccess(data);
+      setSocialLoading(true)
+      const data = await api.auth.loginWithGoogle({ credential: credentialResponse.credential || '' })
+      handleLoginSuccess(data)
     } catch (e) {
-      setSocialLoading(false);
-      addToast({ message: "Une erreur s'est produite", variant: 'error' });
+      setSocialLoading(false)
+      addToast({ message: "Une erreur s'est produite", variant: 'error' })
     }
-  };
+  }
 
   const onGoogleLoginFailure = () => {
-    setSocialLoading(false);
-    addToast({ message: "Une erreur s'est produite", variant: 'error' });
-  };
+    setSocialLoading(false)
+    addToast({ message: "Une erreur s'est produite", variant: 'error' })
+  }
 
   return (
     <>
@@ -144,5 +146,5 @@ export const LoginPage = () => {
         <RouterLink to="/forgot-password">Mot de passe oublié ?</RouterLink>
       </Stack>
     </>
-  );
-};
+  )
+}

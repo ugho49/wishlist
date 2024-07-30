@@ -1,4 +1,3 @@
-import React, { PropsWithChildren, useCallback, useState } from 'react';
 import {
   Button,
   Dialog,
@@ -9,18 +8,19 @@ import {
   IconButton,
   IconButtonTypeMap,
   Tooltip,
-} from '@mui/material';
+} from '@mui/material'
+import React, { PropsWithChildren, useCallback, useState } from 'react'
 
 export type ConfirmIconButtonProps = {
-  confirmTitle: string | React.ReactNode;
-  confirmText: string | React.ReactNode;
-  confirmButton?: string;
-  cancelButton?: string;
-  onClick: () => void;
-  disabled?: boolean;
-  color?: IconButtonTypeMap['props']['color'];
-  size?: IconButtonTypeMap['props']['size'];
-};
+  confirmTitle: string | React.ReactNode
+  confirmText: string | React.ReactNode
+  confirmButton?: string
+  cancelButton?: string
+  onClick: () => void
+  disabled?: boolean
+  color?: IconButtonTypeMap['props']['color']
+  size?: IconButtonTypeMap['props']['size']
+}
 
 export const ConfirmIconButton = ({
   confirmTitle,
@@ -33,9 +33,9 @@ export const ConfirmIconButton = ({
   size,
   color,
 }: PropsWithChildren<ConfirmIconButtonProps>) => {
-  const [openDialog, setOpenDialog] = useState(false);
+  const [openDialog, setOpenDialog] = useState(false)
 
-  const closeDialog = useCallback(() => setOpenDialog(false), []);
+  const closeDialog = useCallback(() => setOpenDialog(false), [])
 
   return (
     <>
@@ -53,8 +53,8 @@ export const ConfirmIconButton = ({
           <Button onClick={() => closeDialog()}>{cancelButton || 'Annuler'}</Button>
           <Button
             onClick={() => {
-              closeDialog();
-              onClick();
+              closeDialog()
+              onClick()
             }}
             autoFocus
           >
@@ -63,5 +63,5 @@ export const ConfirmIconButton = ({
         </DialogActions>
       </Dialog>
     </>
-  );
-};
+  )
+}

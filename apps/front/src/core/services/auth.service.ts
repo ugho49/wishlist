@@ -1,5 +1,5 @@
-import { jwtDecode } from 'jwt-decode';
-import { AccessTokenJwtPayload, RefreshTokenJwtPayload } from '@wishlist/common-types';
+import { AccessTokenJwtPayload, RefreshTokenJwtPayload } from '@wishlist/common-types'
+import { jwtDecode } from 'jwt-decode'
 
 export enum LS_KEYS {
   ACCESS_TOKEN = 'wl_v2_access_token',
@@ -7,50 +7,50 @@ export enum LS_KEYS {
 }
 
 export type TokenContent<T> = {
-  rawToken: string;
-  payload: T;
-};
+  rawToken: string
+  payload: T
+}
 
 export class AuthService {
-  public readonly accessTokenService = new TokenService<AccessTokenJwtPayload>(LS_KEYS.ACCESS_TOKEN);
-  public readonly refreshTokenService = new TokenService<RefreshTokenJwtPayload>(LS_KEYS.REFRESH_TOKEN);
+  public readonly accessTokenService = new TokenService<AccessTokenJwtPayload>(LS_KEYS.ACCESS_TOKEN)
+  public readonly refreshTokenService = new TokenService<RefreshTokenJwtPayload>(LS_KEYS.REFRESH_TOKEN)
 }
 
 class TokenService<T> {
   constructor(private readonly STORAGE_KEY: string) {}
 
   getTokenFromLocalStorage = (): undefined | TokenContent<T> => {
-    const token = localStorage.getItem(this.STORAGE_KEY);
-    if (!token) return undefined;
+    const token = localStorage.getItem(this.STORAGE_KEY)
+    if (!token) return undefined
     try {
-      const payload = jwtDecode(token) as T;
+      const payload = jwtDecode(token) as T
       return {
         rawToken: token,
         payload,
-      };
+      }
     } catch (e) {
-      return undefined;
+      return undefined
     }
-  };
+  }
 
   decodeToken = (token: string): T => {
-    return jwtDecode(token) as T;
-  };
+    return jwtDecode(token) as T
+  }
 
   isExpired(token: string): boolean {
     try {
-      const { exp } = jwtDecode(token) as { exp: number };
-      return Date.now() >= exp * 1000;
+      const { exp } = jwtDecode(token) as { exp: number }
+      return Date.now() >= exp * 1000
     } catch (e) {
-      return true;
+      return true
     }
   }
 
   storeTokenInLocalStorage = (token: string) => {
-    localStorage.setItem(this.STORAGE_KEY, token);
-  };
+    localStorage.setItem(this.STORAGE_KEY, token)
+  }
 
   removeTokenFromStorage = () => {
-    localStorage.removeItem(this.STORAGE_KEY);
-  };
+    localStorage.removeItem(this.STORAGE_KEY)
+  }
 }

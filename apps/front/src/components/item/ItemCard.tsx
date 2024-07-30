@@ -1,12 +1,9 @@
-import React, { useMemo, useState } from 'react';
-import { DetailedWishlistDto, ItemDto, MiniUserDto } from '@wishlist/common-types';
-import { Card } from '../common/Card';
-import RedeemIcon from '@mui/icons-material/Redeem';
-import { ItemFormDialog } from './ItemFormDialog';
-import EditTwoToneIcon from '@mui/icons-material/EditTwoTone';
-import DeleteForeverTwoToneIcon from '@mui/icons-material/DeleteForeverTwoTone';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
-import TipsAndUpdatesTwoToneIcon from '@mui/icons-material/TipsAndUpdatesTwoTone';
+import DeleteForeverTwoToneIcon from '@mui/icons-material/DeleteForeverTwoTone'
+import EditTwoToneIcon from '@mui/icons-material/EditTwoTone'
+import MoreVertIcon from '@mui/icons-material/MoreVert'
+import RedeemIcon from '@mui/icons-material/Redeem'
+import TipsAndUpdatesTwoToneIcon from '@mui/icons-material/TipsAndUpdatesTwoTone'
+import { LoadingButton } from '@mui/lab'
 import {
   Avatar,
   Box,
@@ -21,28 +18,33 @@ import {
   Stack,
   Theme,
   Tooltip,
-} from '@mui/material';
-import { makeStyles } from '@mui/styles';
-import clsx from 'clsx';
-import { useApi, useToast } from '@wishlist-front/hooks';
-import { DateTime } from 'luxon';
-import { Rating } from '../common/Rating';
-import { RootState } from '../../core';
-import { useSelector } from 'react-redux';
-import { LoadingButton } from '@mui/lab';
-import { ConfirmMenuItem } from '../common/ConfirmMenuItem';
-import { useTheme } from '@mui/material/styles';
-import useMediaQuery from '@mui/material/useMediaQuery';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+} from '@mui/material'
+import { useTheme } from '@mui/material/styles'
+import useMediaQuery from '@mui/material/useMediaQuery'
+import { makeStyles } from '@mui/styles'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { DetailedWishlistDto, ItemDto, MiniUserDto } from '@wishlist/common-types'
+import clsx from 'clsx'
+import { DateTime } from 'luxon'
+import React, { useMemo, useState } from 'react'
+import { useSelector } from 'react-redux'
+
+import { RootState } from '../../core'
+import { useApi } from '../../hooks/useApi'
+import { useToast } from '../../hooks/useToast'
+import { Card } from '../common/Card'
+import { ConfirmMenuItem } from '../common/ConfirmMenuItem'
+import { Rating } from '../common/Rating'
+import { ItemFormDialog } from './ItemFormDialog'
 
 export type ItemCardProps = {
   wishlist: {
-    id: string;
-    ownerId: string;
-    hideItems: boolean;
-  };
-  item: ItemDto;
-};
+    id: string
+    ownerId: string
+    hideItems: boolean
+  }
+  item: ItemDto
+}
 
 const useStyles = makeStyles((theme: Theme) => ({
   card: {
@@ -94,50 +96,50 @@ const useStyles = makeStyles((theme: Theme) => ({
     height: '45px',
     boxShadow: '0 0 1px 0 rgba(87, 113, 149, 0.3), 0 2px 4px -2px rgba(87, 113, 149, 0.5)',
   },
-}));
+}))
 
-const mapState = (state: RootState) => state.auth.user?.id;
+const mapState = (state: RootState) => state.auth.user?.id
 
 export const ItemCard = ({ item, wishlist }: ItemCardProps) => {
-  const theme = useTheme();
-  const smallScreen = useMediaQuery(theme.breakpoints.only('xs'));
-  const classes = useStyles();
-  const currentUserId = useSelector(mapState);
-  const api = useApi();
-  const { addToast } = useToast();
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const [openDialog, setOpenDialog] = useState(false);
-  const [takenBy, setTakenBy] = useState<MiniUserDto | undefined>(item.taken_by);
-  const NameProps = item.url ? { component: Link, href: item.url, target: '_blank', rel: 'noopener noreferrer' } : {};
-  const isTaken = useMemo(() => takenBy !== undefined, [takenBy]);
-  const ownerOfTheList = currentUserId === wishlist.ownerId;
-  const displayCheckButton = !ownerOfTheList || !wishlist.hideItems;
-  const displayActions = (ownerOfTheList || item.is_suggested) && !isTaken;
-  const queryClient = useQueryClient();
+  const theme = useTheme()
+  const smallScreen = useMediaQuery(theme.breakpoints.only('xs'))
+  const classes = useStyles()
+  const currentUserId = useSelector(mapState)
+  const api = useApi()
+  const { addToast } = useToast()
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
+  const [openDialog, setOpenDialog] = useState(false)
+  const [takenBy, setTakenBy] = useState<MiniUserDto | undefined>(item.taken_by)
+  const NameProps = item.url ? { component: Link, href: item.url, target: '_blank', rel: 'noopener noreferrer' } : {}
+  const isTaken = useMemo(() => takenBy !== undefined, [takenBy])
+  const ownerOfTheList = currentUserId === wishlist.ownerId
+  const displayCheckButton = !ownerOfTheList || !wishlist.hideItems
+  const displayActions = (ownerOfTheList || item.is_suggested) && !isTaken
+  const queryClient = useQueryClient()
 
-  const openMenu = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
-  const closeMenu = () => setAnchorEl(null);
+  const openMenu = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget)
+  const closeMenu = () => setAnchorEl(null)
 
   const { mutateAsync: deleteItem, isPending: deleteItemPending } = useMutation({
     mutationKey: ['item.delete', { id: item.id }],
     mutationFn: () => api.item.delete(item.id),
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
     onSuccess: () => {
-      addToast({ message: 'Le souhait à bien été supprimé', variant: 'success' });
+      addToast({ message: 'Le souhait à bien été supprimé', variant: 'success' })
       queryClient.setQueryData(['wishlist', { id: wishlist.id }], (old: DetailedWishlistDto) => ({
         ...old,
-        items: old.items.filter((i) => i.id !== item.id),
-      }));
+        items: old.items.filter(i => i.id !== item.id),
+      }))
     },
-  });
+  })
 
   const { mutateAsync: toggleItem, isPending: toggleItemPending } = useMutation({
     mutationKey: ['item.toggle', { id: item.id }],
     mutationFn: () => api.item.toggle(item.id),
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-    onSuccess: (res) => {
-      const action = res.taken_by !== undefined ? 'check' : 'uncheck';
-      setTakenBy(res.taken_by);
+    onSuccess: res => {
+      const action = res.taken_by !== undefined ? 'check' : 'uncheck'
+      setTakenBy(res.taken_by)
 
       if (action === 'check') {
         addToast({
@@ -147,7 +149,7 @@ export const ItemCard = ({ item, wishlist }: ItemCardProps) => {
             </span>
           ),
           variant: 'success',
-        });
+        })
       } else {
         addToast({
           message: (
@@ -156,12 +158,12 @@ export const ItemCard = ({ item, wishlist }: ItemCardProps) => {
             </span>
           ),
           variant: 'info',
-        });
+        })
       }
     },
-  });
+  })
 
-  const loading = useMemo(() => deleteItemPending || toggleItemPending, [deleteItemPending, toggleItemPending]);
+  const loading = useMemo(() => deleteItemPending || toggleItemPending, [deleteItemPending, toggleItemPending])
 
   return (
     <>
@@ -201,8 +203,8 @@ export const ItemCard = ({ item, wishlist }: ItemCardProps) => {
                 <Menu id="basic-menu" anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={closeMenu}>
                   <MenuItem
                     onClick={() => {
-                      closeMenu();
-                      setOpenDialog(true);
+                      closeMenu()
+                      setOpenDialog(true)
                     }}
                   >
                     <ListItemIcon>
@@ -233,7 +235,7 @@ export const ItemCard = ({ item, wishlist }: ItemCardProps) => {
             <Avatar
               src={item.picture_url}
               variant="square"
-              sx={(theme) => ({
+              sx={theme => ({
                 height: smallScreen ? '80px' : '120px',
                 width: smallScreen ? '80px' : '120px',
                 bgcolor: theme.palette.grey[200],
@@ -299,5 +301,5 @@ export const ItemCard = ({ item, wishlist }: ItemCardProps) => {
         handleClose={() => setOpenDialog(false)}
       />
     </>
-  );
-};
+  )
+}

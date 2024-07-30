@@ -1,31 +1,32 @@
-import { Column, Entity, ManyToOne, PrimaryColumn, RelationId } from 'typeorm';
-import { uuid } from '@wishlist/common';
-import { TimestampEntity } from '@wishlist/common-database';
-import { UserEntity } from '../user';
+import { uuid } from '@wishlist/common'
+import { TimestampEntity } from '@wishlist/common-database'
+import { Column, Entity, ManyToOne, PrimaryColumn, RelationId } from 'typeorm'
+
+import { UserEntity } from '../user'
 
 @Entity('user_password_verification')
 export class PasswordVerificationEntity extends TimestampEntity {
   @PrimaryColumn()
-  id: string = uuid();
+  id: string = uuid()
 
   @ManyToOne(() => UserEntity)
-  readonly user: Promise<UserEntity>;
+  readonly user: Promise<UserEntity>
 
   @Column()
   @RelationId((entity: PasswordVerificationEntity) => entity.user)
-  userId: string;
+  userId: string
 
   @Column()
-  token: string;
+  token: string
 
   @Column()
-  expiredAt: Date;
+  expiredAt: Date
 
   public static create(props: { user: string; token: string; expiredAt: Date }): PasswordVerificationEntity {
-    const entity = new PasswordVerificationEntity();
-    entity.userId = props.user;
-    entity.token = props.token;
-    entity.expiredAt = props.expiredAt;
-    return entity;
+    const entity = new PasswordVerificationEntity()
+    entity.userId = props.user
+    entity.token = props.token
+    entity.expiredAt = props.expiredAt
+    return entity
   }
 }

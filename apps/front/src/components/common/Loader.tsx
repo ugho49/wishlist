@@ -1,9 +1,9 @@
-import React, { PropsWithChildren } from 'react';
-import { CircularProgress, Stack } from '@mui/material';
+import { CircularProgress, Stack } from '@mui/material'
+import React, { PropsWithChildren } from 'react'
 
 type LoaderProps = {
-  loading: boolean;
-};
+  loading: boolean
+}
 
 export const Loader = ({ children, loading }: PropsWithChildren<LoaderProps>) => {
   if (loading) {
@@ -11,8 +11,8 @@ export const Loader = ({ children, loading }: PropsWithChildren<LoaderProps>) =>
       <Stack sx={{ alignItems: 'center', justifyContent: 'center', marginTop: '100px', marginBottom: '100px' }}>
         <CircularProgress />
       </Stack>
-    );
+    )
   }
 
-  return <>{children}</>;
-};
+  return <>{children}</>
+}

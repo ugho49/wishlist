@@ -1,42 +1,45 @@
-import React from 'react';
-import { RouterLink } from '../common/RouterLink';
-import { Card } from '../common/Card';
-import { Box, Stack, TextField } from '@mui/material';
-import { Subtitle } from '../common/Subtitle';
-import { InputLabel } from '../common/InputLabel';
-import { LoadingButton } from '@mui/lab';
-import SaveAsIcon from '@mui/icons-material/SaveAs';
-import { useNavigate } from 'react-router-dom';
-import { useApi, useCustomSearchParams, useToast } from '@wishlist-front/hooks';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useMutation } from '@tanstack/react-query';
-import type { ResetPasswordValidationInputDto } from '@wishlist/common-types';
+import type { ResetPasswordValidationInputDto } from '@wishlist/common-types'
+
+import { zodResolver } from '@hookform/resolvers/zod'
+import SaveAsIcon from '@mui/icons-material/SaveAs'
+import { LoadingButton } from '@mui/lab'
+import { Box, Stack, TextField } from '@mui/material'
+import { useMutation } from '@tanstack/react-query'
+import { useForm } from 'react-hook-form'
+import { useNavigate } from 'react-router-dom'
+import { z } from 'zod'
+
+import { useApi } from '../../hooks/useApi'
+import { useCustomSearchParams } from '../../hooks/useCustomSearchParams'
+import { useToast } from '../../hooks/useToast'
+import { Card } from '../common/Card'
+import { InputLabel } from '../common/InputLabel'
+import { RouterLink } from '../common/RouterLink'
+import { Subtitle } from '../common/Subtitle'
 
 type SearchParamsType = {
-  email?: string;
-  token?: string;
-};
+  email?: string
+  token?: string
+}
 
 const schema = z.object({
   password: z.string().min(8, '8 caractères minimum').max(50, '50 caractères maximum'),
-});
+})
 
-type FormFields = z.infer<typeof schema>;
+type FormFields = z.infer<typeof schema>
 
 export const RenewForgotPasswordPage = () => {
-  const api = useApi();
-  const { addToast } = useToast();
-  const navigate = useNavigate();
-  const [queryParams] = useCustomSearchParams<SearchParamsType>();
-  const { email, token } = queryParams;
+  const api = useApi()
+  const { addToast } = useToast()
+  const navigate = useNavigate()
+  const [queryParams] = useCustomSearchParams<SearchParamsType>()
+  const { email, token } = queryParams
 
   const {
     register,
     handleSubmit,
     formState: { isSubmitting, errors: formErrors },
-  } = useForm<FormFields>({ resolver: zodResolver(schema) });
+  } = useForm<FormFields>({ resolver: zodResolver(schema) })
 
   const { mutateAsync: validateResetPassword } = useMutation({
     mutationKey: ['user.validateResetPassword'],
@@ -46,22 +49,22 @@ export const RenewForgotPasswordPage = () => {
       addToast({
         message: 'Le mot de passe à été réinitialisé avec succès. Vous pouvez maintenant vous connecter.',
         variant: 'success',
-      });
-      const searchParam = new URLSearchParams();
-      searchParam.append('email', email || '');
-      navigate({ pathname: '/login', search: searchParam.toString() });
+      })
+      const searchParam = new URLSearchParams()
+      searchParam.append('email', email || '')
+      navigate({ pathname: '/login', search: searchParam.toString() })
     },
-  });
+  })
 
   const onSubmit = (data: FormFields) =>
     validateResetPassword({
       email: email || '',
       token: token || '',
       new_password: data.password,
-    });
+    })
 
   if (!email || !token) {
-    return <div>Cette url n'est pas valide</div>;
+    return <div>Cette url n'est pas valide</div>
   }
 
   return (
@@ -107,5 +110,5 @@ export const RenewForgotPasswordPage = () => {
         </Stack>
       </Stack>
     </>
-  );
-};
+  )
+}

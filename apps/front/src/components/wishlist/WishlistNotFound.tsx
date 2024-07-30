@@ -1,7 +1,8 @@
-import { Box, Button, Stack } from '@mui/material';
-import React from 'react';
-import { Title } from '../common/Title';
-import { RouterLink } from '../common/RouterLink';
+import { Box, Button, Stack } from '@mui/material'
+import React from 'react'
+
+import { RouterLink } from '../common/RouterLink'
+import { Title } from '../common/Title'
 
 export const WishlistNotFound = () => {
   return (
@@ -18,5 +19,5 @@ export const WishlistNotFound = () => {
         </Button>
       </Stack>
     </Box>
-  );
-};
+  )
+}

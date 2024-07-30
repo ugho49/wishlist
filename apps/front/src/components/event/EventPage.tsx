@@ -1,57 +1,60 @@
-import React, { useMemo, useState } from 'react';
-import { Box, Button, Chip, Stack } from '@mui/material';
-import { Title } from '../common/Title';
-import { Loader } from '../common/Loader';
-import { RouterLink } from '../common/RouterLink';
-import { useNavigate, useParams } from 'react-router-dom';
-import PeopleIcon from '@mui/icons-material/People';
-import { EventWishlists } from './EventWishlists';
-import { Description } from '../common/Description';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import { DateTime } from 'luxon';
-import { ConfirmButton } from '../common/ConfirmButton';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { RootState } from '../../core';
-import { useSelector } from 'react-redux';
-import { EventAttendeesDialog } from './EventAttendeesDialog';
-import EditIcon from '@mui/icons-material/Edit';
-import { useApi, useEventById, useToast } from '@wishlist-front/hooks';
-import { EventNotFound } from './EventNotFound';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import AccessTimeIcon from '@mui/icons-material/AccessTime'
+import DeleteIcon from '@mui/icons-material/Delete'
+import EditIcon from '@mui/icons-material/Edit'
+import PeopleIcon from '@mui/icons-material/People'
+import { Box, Button, Chip, Stack } from '@mui/material'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { DateTime } from 'luxon'
+import React, { useMemo, useState } from 'react'
+import { useSelector } from 'react-redux'
+import { useNavigate, useParams } from 'react-router-dom'
 
-const mapState = (state: RootState) => state.auth.user?.id;
+import { RootState } from '../../core'
+import { useEventById } from '../../hooks/domain/useEventById'
+import { useApi } from '../../hooks/useApi'
+import { useToast } from '../../hooks/useToast'
+import { ConfirmButton } from '../common/ConfirmButton'
+import { Description } from '../common/Description'
+import { Loader } from '../common/Loader'
+import { RouterLink } from '../common/RouterLink'
+import { Title } from '../common/Title'
+import { EventAttendeesDialog } from './EventAttendeesDialog'
+import { EventNotFound } from './EventNotFound'
+import { EventWishlists } from './EventWishlists'
+
+const mapState = (state: RootState) => state.auth.user?.id
 
 export const EventPage = () => {
-  const currentUserId = useSelector(mapState);
-  const { addToast } = useToast();
-  const params = useParams<'eventId'>();
-  const eventId = params.eventId || '';
-  const api = useApi();
-  const navigate = useNavigate();
-  const [openAttendeesDialog, setOpenAttendeesDialog] = useState(false);
-  const queryClient = useQueryClient();
+  const currentUserId = useSelector(mapState)
+  const { addToast } = useToast()
+  const params = useParams<'eventId'>()
+  const eventId = params.eventId || ''
+  const api = useApi()
+  const navigate = useNavigate()
+  const [openAttendeesDialog, setOpenAttendeesDialog] = useState(false)
+  const queryClient = useQueryClient()
 
-  const { event, loading } = useEventById(eventId);
+  const { event, loading } = useEventById(eventId)
 
   const { mutateAsync: handleDelete } = useMutation({
     mutationKey: ['event.delete', { id: eventId }],
     mutationFn: () => api.event.delete(eventId),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['events'] });
+      await queryClient.invalidateQueries({ queryKey: ['events'] })
     },
-  });
+  })
 
-  const nbAttendees = useMemo(() => (event?.attendees || []).length + 1, [event]);
+  const nbAttendees = useMemo(() => (event?.attendees || []).length + 1, [event])
 
   const deleteEvent = async () => {
     try {
-      await handleDelete();
-      addToast({ message: "L'évènement à bien été supprimée", variant: 'success' });
-      navigate('/events');
+      await handleDelete()
+      addToast({ message: "L'évènement à bien été supprimée", variant: 'success' })
+      navigate('/events')
     } catch (e) {
-      addToast({ message: "Une erreur s'est produite", variant: 'error' });
+      addToast({ message: "Une erreur s'est produite", variant: 'error' })
     }
-  };
+  }
 
   return (
     <Box>
@@ -136,5 +139,5 @@ export const EventPage = () => {
         )}
       </Loader>
     </Box>
-  );
-};
+  )
+}

@@ -1,43 +1,45 @@
-import React, { useMemo } from 'react';
+import DeleteIcon from '@mui/icons-material/Delete'
+import PersonIcon from '@mui/icons-material/Person'
+import { Avatar, Box, Divider, List, ListItem, ListItemAvatar, ListItemText, Stack } from '@mui/material'
+import { blue, green, orange } from '@mui/material/colors'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   AddEventAttendeeInputDto,
   AttendeeDto,
   AttendeeRole,
   DetailedEventDto,
   MiniUserDto,
-} from '@wishlist/common-types';
-import { Avatar, Box, Divider, List, ListItem, ListItemAvatar, ListItemText, Stack } from '@mui/material';
-import { InputLabel } from '../common/InputLabel';
-import { SearchUserSelect } from '../user/SearchUserSelect';
-import { RootState } from '../../core';
-import { useSelector } from 'react-redux';
-import { Card } from '../common/Card';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { blue, green, orange } from '@mui/material/colors';
-import PersonIcon from '@mui/icons-material/Person';
-import { ConfirmIconButton } from '../common/ConfirmIconButton';
-import { useApi, useToast } from '@wishlist-front/hooks';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+} from '@wishlist/common-types'
+import React, { useMemo } from 'react'
+import { useSelector } from 'react-redux'
+
+import { RootState } from '../../core'
+import { useApi } from '../../hooks/useApi'
+import { useToast } from '../../hooks/useToast'
+import { Card } from '../common/Card'
+import { ConfirmIconButton } from '../common/ConfirmIconButton'
+import { InputLabel } from '../common/InputLabel'
+import { SearchUserSelect } from '../user/SearchUserSelect'
 
 export type EditEventAttendeesProps = {
-  eventId: string;
-  creator: MiniUserDto;
-  attendees: AttendeeDto[];
-};
+  eventId: string
+  creator: MiniUserDto
+  attendees: AttendeeDto[]
+}
 
-const mapState = (state: RootState) => state.auth.user?.email;
+const mapState = (state: RootState) => state.auth.user?.email
 
 export const EditEventAttendees = ({ eventId, creator, attendees }: EditEventAttendeesProps) => {
-  const currentUserEmail = useSelector(mapState);
-  const api = useApi();
-  const { addToast } = useToast();
+  const currentUserEmail = useSelector(mapState)
+  const api = useApi()
+  const { addToast } = useToast()
 
   const attendeeEmails = useMemo(
-    () => attendees.map((attendee) => (attendee.pending_email ? attendee.pending_email : attendee.user?.email || '')),
+    () => attendees.map(attendee => (attendee.pending_email ? attendee.pending_email : attendee.user?.email || '')),
     [attendees],
-  );
+  )
 
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient()
 
   const { mutateAsync: addAttendee, isPending: addAttendeePending } = useMutation({
     mutationKey: ['event.addAttendee', { id: eventId }],
@@ -47,35 +49,35 @@ export const EditEventAttendees = ({ eventId, creator, attendees }: EditEventAtt
         email: attendee.email,
         role: attendee.role,
       }),
-    onSuccess: (newAttendee, event) => {
-      addToast({ message: "Participant ajouté à l'évènement !", variant: 'info' });
+    onSuccess: newAttendee => {
+      addToast({ message: "Participant ajouté à l'évènement !", variant: 'info' })
 
       queryClient.setQueryData(['event', { id: eventId }], (old: DetailedEventDto) => ({
         ...old,
         attendees: [newAttendee, ...attendees],
-      }));
+      }))
     },
     onError: () => addToast({ message: "Impossible d'ajouter ce participant", variant: 'error' }),
-  });
+  })
 
   const { mutateAsync: deleteAttendee, isPending: deleteAttendeePending } = useMutation({
     mutationKey: ['event.deleteAttendee', { id: eventId }],
     mutationFn: (attendeeId: string) => api.attendee.deleteAttendee(attendeeId),
     onSuccess: (_, attendeeId) => {
-      addToast({ message: "Participant supprimé de l'évènement !", variant: 'info' });
+      addToast({ message: "Participant supprimé de l'évènement !", variant: 'info' })
 
       queryClient.setQueryData(['event', { id: eventId }], (old: DetailedEventDto) => ({
         ...old,
-        attendees: [...attendees].filter((a) => a.id !== attendeeId),
-      }));
+        attendees: [...attendees].filter(a => a.id !== attendeeId),
+      }))
     },
     onError: () => addToast({ message: 'Impossible de supprimer ce participant', variant: 'error' }),
-  });
+  })
 
   const loading = useMemo(
     () => addAttendeePending || deleteAttendeePending,
     [addAttendeePending, deleteAttendeePending],
-  );
+  )
 
   return (
     <Stack>
@@ -85,7 +87,7 @@ export const EditEventAttendees = ({ eventId, creator, attendees }: EditEventAtt
         <SearchUserSelect
           disabled={loading}
           excludedEmails={[...attendeeEmails, currentUserEmail || '']}
-          onChange={(value) =>
+          onChange={value =>
             addAttendee({ email: typeof value === 'string' ? value : value.email, role: AttendeeRole.USER })
           }
         />
@@ -104,7 +106,7 @@ export const EditEventAttendees = ({ eventId, creator, attendees }: EditEventAtt
             <ListItemText primary={<b>{`${creator.firstname} ${creator.lastname}`}</b>} secondary={creator.email} />
           </ListItem>
         </Card>
-        {attendees.map((attendee) => (
+        {attendees.map(attendee => (
           <Card variant="outlined" sx={{ padding: 0 }} key={attendee.id}>
             <ListItem
               secondaryAction={
@@ -153,5 +155,5 @@ export const EditEventAttendees = ({ eventId, creator, attendees }: EditEventAtt
         ))}
       </List>
     </Stack>
-  );
-};
+  )
+}

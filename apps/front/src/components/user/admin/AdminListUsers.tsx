@@ -1,13 +1,14 @@
-import React, { FormEvent, useEffect, useState } from 'react';
-import { RouterLink } from '../../common/RouterLink';
-import { useApi } from '@wishlist-front/hooks';
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { UserDto } from '@wishlist/common-types';
-import { DateTime } from 'luxon';
-import { Status } from '../../common/Status';
-import { Avatar, Box, Button, Stack, TextField } from '@mui/material';
-import { InputLabel } from '../../common/InputLabel';
-import { useQuery } from '@tanstack/react-query';
+import { Avatar, Box, Button, Stack, TextField } from '@mui/material'
+import { DataGrid, GridColDef } from '@mui/x-data-grid'
+import { useQuery } from '@tanstack/react-query'
+import { UserDto } from '@wishlist/common-types'
+import { DateTime } from 'luxon'
+import React, { FormEvent, useEffect, useState } from 'react'
+
+import { useApi } from '../../../hooks/useApi'
+import { InputLabel } from '../../common/InputLabel'
+import { RouterLink } from '../../common/RouterLink'
+import { Status } from '../../common/Status'
 
 const columns: GridColDef<UserDto>[] = [
   {
@@ -44,7 +45,7 @@ const columns: GridColDef<UserDto>[] = [
     headerName: 'Created At',
     type: 'dateTime',
     width: 150,
-    valueGetter: ({ row: user }) => new Date(user.created_at),
+    valueGetter: (_, row) => new Date(row.created_at),
     renderCell: ({ value }) => DateTime.fromJSDate(value).toLocaleString(DateTime.DATETIME_MED),
   },
   {
@@ -57,33 +58,33 @@ const columns: GridColDef<UserDto>[] = [
     align: 'center',
     renderCell: ({ row: user }) => <RouterLink to={`/admin/users/${user.id}`}>Voir</RouterLink>,
   },
-];
+]
 
 export const AdminListUsers = () => {
-  const { admin: api } = useApi();
-  const [totalElements, setTotalElements] = useState(0);
-  const [pageSize, setPageSize] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [inputSearch, setInputSearch] = useState('');
-  const [search, setSearch] = useState('');
+  const { admin: api } = useApi()
+  const [totalElements, setTotalElements] = useState(0)
+  const [pageSize, setPageSize] = useState(0)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [inputSearch, setInputSearch] = useState('')
+  const [search, setSearch] = useState('')
 
   const { data: value, isLoading: loading } = useQuery({
     queryKey: ['admin', 'users', { page: currentPage, search }],
     queryFn: () => api.user.getAll({ p: currentPage, q: search }),
-  });
+  })
 
   useEffect(() => {
     if (value) {
-      setTotalElements(value.pagination.total_elements);
-      setCurrentPage(value.pagination.page_number);
-      setPageSize(value.pagination.pages_size);
+      setTotalElements(value.pagination.total_elements)
+      setCurrentPage(value.pagination.page_number)
+      setPageSize(value.pagination.pages_size)
     }
-  }, [value]);
+  }, [value])
 
   const applySearch = (e: FormEvent) => {
-    e.preventDefault();
-    setSearch(inputSearch);
-  };
+    e.preventDefault()
+    setSearch(inputSearch)
+  }
 
   return (
     <div style={{ width: '100%' }}>
@@ -96,7 +97,7 @@ export const AdminListUsers = () => {
               fullWidth
               placeholder="John Doe, john@doe.fr, john, etc..."
               value={inputSearch}
-              onChange={(e) => setInputSearch(e.target.value)}
+              onChange={e => setInputSearch(e.target.value)}
             />
           </Stack>
           <Button variant="outlined" type="submit">
@@ -121,5 +122,5 @@ export const AdminListUsers = () => {
         onPaginationModelChange={({ page }) => setCurrentPage(page + 1)}
       />
     </div>
-  );
-};
+  )
+}

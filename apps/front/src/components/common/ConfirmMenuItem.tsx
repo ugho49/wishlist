@@ -1,18 +1,18 @@
-import React, { PropsWithChildren, useCallback, useState } from 'react';
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, MenuItem } from '@mui/material';
-import { SxProps } from '@mui/system';
-import { Theme } from '@mui/material/styles';
+import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, MenuItem } from '@mui/material'
+import { Theme } from '@mui/material/styles'
+import { SxProps } from '@mui/system'
+import React, { PropsWithChildren, useCallback, useState } from 'react'
 
 export type ConfirmMenuItemProps = {
-  confirmTitle: string | React.ReactNode;
-  confirmText: string | React.ReactNode;
-  confirmButton?: string;
-  cancelButton?: string;
-  onClick: () => void;
-  onCancel?: () => void;
-  disabled?: boolean;
-  sx?: SxProps<Theme>;
-};
+  confirmTitle: string | React.ReactNode
+  confirmText: string | React.ReactNode
+  confirmButton?: string
+  cancelButton?: string
+  onClick: () => void
+  onCancel?: () => void
+  disabled?: boolean
+  sx?: SxProps<Theme>
+}
 
 export const ConfirmMenuItem = ({
   confirmTitle,
@@ -25,12 +25,12 @@ export const ConfirmMenuItem = ({
   onCancel,
   sx,
 }: PropsWithChildren<ConfirmMenuItemProps>) => {
-  const [openDialog, setOpenDialog] = useState(false);
+  const [openDialog, setOpenDialog] = useState(false)
 
   const closeDialog = useCallback(() => {
-    setOpenDialog(false);
-    onCancel && onCancel();
-  }, []);
+    setOpenDialog(false)
+    onCancel && onCancel()
+  }, [])
 
   return (
     <>
@@ -46,8 +46,8 @@ export const ConfirmMenuItem = ({
           <Button onClick={() => closeDialog()}>{cancelButton || 'Annuler'}</Button>
           <Button
             onClick={() => {
-              closeDialog();
-              onClick();
+              closeDialog()
+              onClick()
             }}
             autoFocus
           >
@@ -56,5 +56,5 @@ export const ConfirmMenuItem = ({
         </DialogActions>
       </Dialog>
     </>
-  );
-};
+  )
+}

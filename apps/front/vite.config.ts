@@ -1,11 +1,15 @@
-/// <reference types='vitest' />
-import { defineConfig, splitVendorChunkPlugin } from 'vite';
-import react from '@vitejs/plugin-react';
-import svgr from 'vite-plugin-svgr';
-import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
-import browserslistToEsbuild from 'browserslist-to-esbuild';
+import type { UserConfig } from 'vite'
+import type { InlineConfig } from 'vitest'
 
-export default defineConfig({
+import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin'
+import react from '@vitejs/plugin-react'
+import browserslistToEsbuild from 'browserslist-to-esbuild'
+import { defineConfig } from 'vite'
+import svgr from 'vite-plugin-svgr'
+
+type ViteConfig = UserConfig & { test: InlineConfig }
+
+const config: ViteConfig = {
   root: __dirname,
   cacheDir: '../../node_modules/.vite/apps/front',
 
@@ -27,12 +31,22 @@ export default defineConfig({
     target: browserslistToEsbuild(),
     outDir: '../../dist/apps/front',
     reportCompressedSize: true,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            return id.toString().split('node_modules/')[1].split('/')[0].toString()
+          }
+        },
+      },
+    },
+    emptyOutDir: true,
     commonjsOptions: {
       transformMixedEsModules: true,
     },
   },
 
-  plugins: [react(), svgr(), splitVendorChunkPlugin(), nxViteTsPaths()],
+  plugins: [react(), svgr(), nxViteTsPaths()],
 
   // Uncomment this if you are using workers.
   // worker: {
@@ -41,16 +55,17 @@ export default defineConfig({
 
   test: {
     globals: true,
-    cache: {
-      dir: '../../node_modules/.vitest',
-    },
     environment: 'jsdom',
     include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
 
     reporters: ['default'],
+    passWithNoTests: true,
+    watch: false,
     coverage: {
       reportsDirectory: '../../coverage/apps/front',
       provider: 'v8',
     },
   },
-});
+}
+
+export default defineConfig(config)

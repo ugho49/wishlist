@@ -1,12 +1,13 @@
-import { Box, Tab, Tabs } from '@mui/material';
-import React from 'react';
-import { Title } from '../common/Title';
-import { useCustomSearchParams } from '@wishlist-front/hooks';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import GroupsIcon from '@mui/icons-material/Groups';
-import { Card } from '../common/Card';
-import { AdminListUsers } from '../user/admin/AdminListUsers';
-import { AdminListEvents } from '../event/admin/AdminListEvents';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
+import GroupsIcon from '@mui/icons-material/Groups'
+import { Box, Tab, Tabs } from '@mui/material'
+import React from 'react'
+
+import { useCustomSearchParams } from '../../hooks/useCustomSearchParams'
+import { Card } from '../common/Card'
+import { Title } from '../common/Title'
+import { AdminListEvents } from '../event/admin/AdminListEvents'
+import { AdminListUsers } from '../user/admin/AdminListUsers'
 
 enum TabValues {
   users = 'users',
@@ -24,12 +25,12 @@ const tabs = [
     label: 'Évènements',
     icon: <CalendarMonthIcon />,
   },
-];
+]
 
-type SearchParamType = { tab: TabValues };
+type SearchParamType = { tab: TabValues }
 
 export const AdminPage = () => {
-  const [queryParams, setQueryParams] = useCustomSearchParams<SearchParamType>({ tab: tabs[0].value });
+  const [queryParams, setQueryParams] = useCustomSearchParams<SearchParamType>({ tab: tabs[0].value })
 
   return (
     <Box>
@@ -42,7 +43,7 @@ export const AdminPage = () => {
           scrollButtons="auto"
           allowScrollButtonsMobile
         >
-          {tabs.map((tab) => (
+          {tabs.map(tab => (
             <Tab key={tab.value} value={tab.value} iconPosition="start" icon={tab.icon} label={tab.label} />
           ))}
         </Tabs>
@@ -52,5 +53,5 @@ export const AdminPage = () => {
         {queryParams.tab === TabValues.events && <AdminListEvents />}
       </Card>
     </Box>
-  );
-};
+  )
+}

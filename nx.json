@@ -1,62 +1,57 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
-  "affected": {
-    "defaultBase": "main"
+  "defaultBase": "main",
+  "defaultProject": "api",
+  "workspaceLayout": {
+    "appsDir": "apps",
+    "libsDir": "libs"
   },
   "targetDefaults": {
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["production", "^production"],
       "cache": true
-    },
-    "test": {
-      "inputs": ["default", "^default"],
-      "cache": true
-    },
-    "@nx/eslint:lint": {
-      "inputs": ["default", "{workspaceRoot}/.eslintrc.json", "{workspaceRoot}/.eslintignore"],
-      "cache": true
-    },
-    "@nx/vite:test": {
-      "cache": true,
-      "inputs": ["default", "^production"]
-    },
-    "@nx/vite:build": {
-      "cache": true,
-      "dependsOn": ["^build"],
-      "inputs": ["production", "^production"]
     }
   },
-  "workspaceLayout": {
-    "appsDir": "apps",
-    "libsDir": "libs"
-  },
-  "defaultProject": "api",
-  "generators": {
-    "@nx/react": {
-      "application": {
-        "babel": true,
-        "style": "scss",
-        "linter": "eslint",
-        "bundler": "vite"
-      },
-      "component": {
-        "style": "scss"
-      },
-      "library": {
-        "style": "scss",
-        "linter": "eslint"
+  "plugins": [
+    {
+      "plugin": "@nx/eslint/plugin",
+      "options": {
+        "targetName": "lint"
+      }
+    },
+    {
+      "plugin": "@nx/jest/plugin",
+      "options": {
+        "targetName": "test"
+      }
+    },
+    {
+      "plugin": "@nx/webpack/plugin",
+      "options": {
+        "buildTargetName": "build",
+        "serveTargetName": "webpack:serve",
+        "serveStaticTargetName": "webpack:serve-static",
+        "previewTargetName": "webpack:preview"
+      }
+    },
+    {
+      "plugin": "@nx/vite/plugin",
+      "options": {
+        "buildTargetName": "build",
+        "previewTargetName": "preview",
+        "testTargetName": "test",
+        "serveTargetName": "serve",
+        "serveStaticTargetName": "vite:serve-static"
       }
     }
-  },
+  ],
   "namedInputs": {
     "default": ["{projectRoot}/**/*", "sharedGlobals"],
-    "sharedGlobals": ["{workspaceRoot}/yarn.lock", "{workspaceRoot}/.circleci"],
-    "production": [
-      "default",
-      "!{projectRoot}/src/test-setup.[jt]s",
-      "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
-      "!{projectRoot}/tsconfig.spec.json"
-    ]
+    "sharedGlobals": [
+      "{workspaceRoot}/yarn.lock",
+      "{workspaceRoot}/.circleci/*"
+    ],
+    "production": ["default"]
   }
 }

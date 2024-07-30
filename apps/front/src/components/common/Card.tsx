@@ -1,18 +1,18 @@
-import { Box } from '@mui/material';
-import React, { PropsWithChildren } from 'react';
-import { Link } from 'react-router-dom';
-import clsx from 'clsx';
-import { SxProps } from '@mui/system';
-import { Theme } from '@mui/material/styles';
-import { makeStyles } from '@mui/styles';
+import { Box } from '@mui/material'
+import { Theme } from '@mui/material/styles'
+import { makeStyles } from '@mui/styles'
+import { SxProps } from '@mui/system'
+import clsx from 'clsx'
+import React, { PropsWithChildren } from 'react'
+import { Link } from 'react-router-dom'
 
 export type CardProps = {
-  to?: string;
-  onClick?: () => void;
-  className?: string;
-  sx?: SxProps<Theme>;
-  variant?: 'outlined' | 'contained';
-};
+  to?: string
+  onClick?: () => void
+  className?: string
+  sx?: SxProps<Theme>
+  variant?: 'outlined' | 'contained'
+}
 
 const useStyles = makeStyles((theme: Theme) => ({
   card: {
@@ -21,11 +21,11 @@ const useStyles = makeStyles((theme: Theme) => ({
       padding: '24px',
     },
   },
-}));
+}))
 
 export const Card = ({ onClick, to, children, className, sx, variant = 'contained' }: PropsWithChildren<CardProps>) => {
-  const LinkProps = to ? { component: Link, to } : {};
-  const classes = useStyles();
+  const LinkProps = to ? { component: Link, to } : {}
+  const classes = useStyles()
 
   return (
     <Box
@@ -34,7 +34,7 @@ export const Card = ({ onClick, to, children, className, sx, variant = 'containe
         variant === 'contained' && 'card',
         variant === 'outlined' && 'card-outlined',
         (to || onClick) && 'clickable',
-        className
+        className,
       )}
       {...LinkProps}
       onClick={onClick}
@@ -42,5 +42,5 @@ export const Card = ({ onClick, to, children, className, sx, variant = 'containe
     >
       {children}
     </Box>
-  );
-};
+  )
+}

@@ -1,4 +1,9 @@
-import React, { useMemo, useState } from 'react';
+import DeleteIcon from '@mui/icons-material/Delete'
+import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft'
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'
+import PersonIcon from '@mui/icons-material/Person'
+import SaveIcon from '@mui/icons-material/Save'
+import { LoadingButton } from '@mui/lab'
 import {
   Avatar,
   Box,
@@ -14,81 +19,78 @@ import {
   StepLabel,
   Stepper,
   TextField,
-} from '@mui/material';
-import { Title } from '../common/Title';
-import { InputLabel } from '../common/InputLabel';
-import { CharsRemaining } from '../common/CharsRemaining';
-import { MobileDatePicker } from '@mui/x-date-pickers';
-import { DateTime } from 'luxon';
-import PersonIcon from '@mui/icons-material/Person';
-import { blue, orange } from '@mui/material/colors';
-import { SearchUserSelect } from '../user/SearchUserSelect';
-import { AttendeeRole, MiniUserDto } from '@wishlist/common-types';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { LoadingButton } from '@mui/lab';
-import SaveIcon from '@mui/icons-material/Save';
-import { useNavigate } from 'react-router-dom';
-import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
-import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
-import { RootState } from '../../core';
-import { useSelector } from 'react-redux';
-import { Card } from '../common/Card';
-import { useApi, useToast } from '@wishlist-front/hooks';
-import { useMutation } from '@tanstack/react-query';
+} from '@mui/material'
+import { blue, orange } from '@mui/material/colors'
+import { MobileDatePicker } from '@mui/x-date-pickers'
+import { useMutation } from '@tanstack/react-query'
+import { AttendeeRole, MiniUserDto } from '@wishlist/common-types'
+import { DateTime } from 'luxon'
+import React, { useMemo, useState } from 'react'
+import { useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 
-const steps = ['Informations', 'Participants'];
+import { RootState } from '../../core'
+import { useApi } from '../../hooks/useApi'
+import { useToast } from '../../hooks/useToast'
+import { Card } from '../common/Card'
+import { CharsRemaining } from '../common/CharsRemaining'
+import { InputLabel } from '../common/InputLabel'
+import { Title } from '../common/Title'
+import { SearchUserSelect } from '../user/SearchUserSelect'
+
+const steps = ['Informations', 'Participants']
 
 type Attendee = {
-  user: string | MiniUserDto;
-  role: AttendeeRole;
-};
+  user: string | MiniUserDto
+  role: AttendeeRole
+}
 
-const mapState = (state: RootState) => state.auth.user?.email;
+const mapState = (state: RootState) => state.auth.user?.email
 
 export const CreateEventPage = () => {
-  const api = useApi();
-  const currentUserEmail = useSelector(mapState);
-  const { addToast } = useToast();
-  const navigate = useNavigate();
-  const [step, setStep] = useState(1);
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [eventDate, setEventDate] = useState<DateTime | null>(DateTime.now());
-  const [attendees, setAttendees] = useState<Attendee[]>([]);
+  const api = useApi()
+  const currentUserEmail = useSelector(mapState)
+  const { addToast } = useToast()
+  const navigate = useNavigate()
+  const [step, setStep] = useState(1)
+  const [title, setTitle] = useState('')
+  const [description, setDescription] = useState('')
+  const [eventDate, setEventDate] = useState<DateTime | null>(DateTime.now())
+  const [attendees, setAttendees] = useState<Attendee[]>([])
 
   const attendeeEmails = useMemo(
     () =>
-      attendees.map((attendee) => {
-        if (typeof attendee.user === 'string') return attendee.user;
-        return attendee.user.email;
+      attendees.map(attendee => {
+        if (typeof attendee.user === 'string') return attendee.user
+        return attendee.user.email
       }),
     [attendees],
-  );
+  )
 
-  const nextStepEnabled = title?.trim() !== '' && eventDate !== null;
-  const createEnabled = attendees.length > 0;
+  const nextStepEnabled = title?.trim() !== '' && eventDate !== null
+  const createEnabled = attendees.length > 0
 
   const { mutateAsync: createEvent, isPending: loading } = useMutation({
     mutationKey: ['event.create'],
     mutationFn: () => {
-      const isoDate = eventDate?.toISODate() || DateTime.now().toISODate() || '';
+      const isoDate = eventDate?.toISODate() || DateTime.now().toISODate() || ''
       return api.event.create({
         title,
         description: description === '' ? undefined : description,
         event_date: new Date(isoDate),
-        attendees: attendees.map((attendee) => ({
+        attendees: attendees.map(attendee => ({
           email: typeof attendee.user === 'string' ? attendee.user : attendee.user.email,
           role: attendee.role,
         })),
-      });
+      })
     },
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-    onSuccess: async (output) => {
-      addToast({ message: 'Evènement créé avec succès', variant: 'success' });
+    onSuccess: async output => {
+      addToast({ message: 'Evènement créé avec succès', variant: 'success' })
 
-      navigate(`/events/${output.id}`);
+      navigate(`/events/${output.id}`)
     },
-  });
+  })
 
   return (
     <Box>
@@ -116,7 +118,7 @@ export const CreateEventPage = () => {
                   inputProps={{ maxLength: 100 }}
                   placeholder="La titre de votre évènement"
                   helperText={<CharsRemaining max={100} value={title} />}
-                  onChange={(e) => setTitle(e.target.value)}
+                  onChange={e => setTitle(e.target.value)}
                 />
               </Box>
 
@@ -126,7 +128,7 @@ export const CreateEventPage = () => {
                   format="DDDD"
                   value={eventDate}
                   disabled={loading}
-                  onChange={(date) => setEventDate(date)}
+                  onChange={date => setEventDate(date)}
                   disablePast={true}
                 />
               </Stack>
@@ -143,7 +145,7 @@ export const CreateEventPage = () => {
                   inputProps={{ maxLength: 2000 }}
                   placeholder="Une petite description ..."
                   helperText={<CharsRemaining max={2000} value={description} />}
-                  onChange={(e) => setDescription(e.target.value)}
+                  onChange={e => setDescription(e.target.value)}
                 />
               </Box>
             </Stack>
@@ -161,20 +163,20 @@ export const CreateEventPage = () => {
 
                 <SearchUserSelect
                   disabled={loading}
-                  onChange={(val) => {
-                    setAttendees((prevState) => [
+                  onChange={val => {
+                    setAttendees(prevState => [
                       {
                         user: val,
                         role: AttendeeRole.USER,
                       },
                       ...prevState,
-                    ]);
+                    ])
                   }}
                   excludedEmails={[...attendeeEmails, currentUserEmail || '']}
                 />
               </Box>
               <List sx={{ pt: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {attendees.map((attendee) => (
+                {attendees.map(attendee => (
                   <Card
                     variant="outlined"
                     sx={{ padding: 0 }}
@@ -185,7 +187,7 @@ export const CreateEventPage = () => {
                         <IconButton
                           edge="end"
                           aria-label="delete"
-                          onClick={() => setAttendees((prev) => prev.filter((value) => value !== attendee))}
+                          onClick={() => setAttendees(prev => prev.filter(value => value !== attendee))}
                         >
                           <DeleteIcon />
                         </IconButton>
@@ -223,7 +225,7 @@ export const CreateEventPage = () => {
             <Box>
               {step > 1 && (
                 <Button
-                  onClick={() => setStep((prev) => prev - 1)}
+                  onClick={() => setStep(prev => prev - 1)}
                   disabled={step === 1}
                   startIcon={<KeyboardArrowLeftIcon />}
                 >
@@ -233,7 +235,7 @@ export const CreateEventPage = () => {
             </Box>
             {step === 1 && (
               <Button
-                onClick={() => setStep((prev) => prev + 1)}
+                onClick={() => setStep(prev => prev + 1)}
                 disabled={!nextStepEnabled}
                 endIcon={<KeyboardArrowRightIcon />}
               >
@@ -256,5 +258,5 @@ export const CreateEventPage = () => {
         </Card>
       </Container>
     </Box>
-  );
-};
+  )
+}

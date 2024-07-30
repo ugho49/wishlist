@@ -1,51 +1,54 @@
-import React, { useState } from 'react';
-import { Avatar, Box, Button, Chip, Stack, Tooltip } from '@mui/material';
-import { Title } from '../common/Title';
-import { Loader } from '../common/Loader';
-import { RouterLink } from '../common/RouterLink';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useApi, useToast, useWishlistById } from '@wishlist-front/hooks';
-import { WishlistItems } from './WishlistItems';
-import PublicIcon from '@mui/icons-material/Public';
-import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import { Description } from '../common/Description';
-import { WishlistEventsDialog } from './WishlistEventsDialog';
-import { ConfirmButton } from '../common/ConfirmButton';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { RootState } from '../../core';
-import { useSelector } from 'react-redux';
-import EditIcon from '@mui/icons-material/Edit';
-import { WishlistNotFound } from './WishlistNotFound';
-import { useMutation } from '@tanstack/react-query';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
+import DeleteIcon from '@mui/icons-material/Delete'
+import EditIcon from '@mui/icons-material/Edit'
+import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined'
+import PublicIcon from '@mui/icons-material/Public'
+import { Avatar, Box, Button, Chip, Stack, Tooltip } from '@mui/material'
+import { useMutation } from '@tanstack/react-query'
+import React, { useState } from 'react'
+import { useSelector } from 'react-redux'
+import { useNavigate, useParams } from 'react-router-dom'
 
-const mapState = (state: RootState) => state.auth.user?.id;
+import { RootState } from '../../core'
+import { useWishlistById } from '../../hooks/domain/useWishlistById'
+import { useApi } from '../../hooks/useApi'
+import { useToast } from '../../hooks/useToast'
+import { ConfirmButton } from '../common/ConfirmButton'
+import { Description } from '../common/Description'
+import { Loader } from '../common/Loader'
+import { RouterLink } from '../common/RouterLink'
+import { Title } from '../common/Title'
+import { WishlistEventsDialog } from './WishlistEventsDialog'
+import { WishlistItems } from './WishlistItems'
+import { WishlistNotFound } from './WishlistNotFound'
+
+const mapState = (state: RootState) => state.auth.user?.id
 
 export const WishlistPage = () => {
-  const { addToast } = useToast();
-  const currentUserId = useSelector(mapState);
-  const [openEventDialog, setOpenEventDialog] = useState(false);
-  const params = useParams<'wishlistId'>();
-  const wishlistId = params.wishlistId || '';
-  const api = useApi();
-  const navigate = useNavigate();
+  const { addToast } = useToast()
+  const currentUserId = useSelector(mapState)
+  const [openEventDialog, setOpenEventDialog] = useState(false)
+  const params = useParams<'wishlistId'>()
+  const wishlistId = params.wishlistId || ''
+  const api = useApi()
+  const navigate = useNavigate()
 
-  const { wishlist, loading } = useWishlistById(wishlistId);
+  const { wishlist, loading } = useWishlistById(wishlistId)
 
   const { mutateAsync: handleDelete } = useMutation({
     mutationKey: ['wishlist.delete', { id: wishlistId }],
     mutationFn: () => api.wishlist.delete(wishlistId),
-  });
+  })
 
   const deleteWishlist = async () => {
     try {
-      await handleDelete();
-      addToast({ message: 'La liste à bien été supprimée', variant: 'success' });
-      navigate('/wishlists');
+      await handleDelete()
+      addToast({ message: 'La liste à bien été supprimée', variant: 'success' })
+      navigate('/wishlists')
     } catch (e) {
-      addToast({ message: "Une erreur s'est produite", variant: 'error' });
+      addToast({ message: "Une erreur s'est produite", variant: 'error' })
     }
-  };
+  }
 
   return (
     <Box>
@@ -140,5 +143,5 @@ export const WishlistPage = () => {
         )}
       </Loader>
     </Box>
-  );
-};
+  )
+}

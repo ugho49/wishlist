@@ -1,2 +1,2 @@
-export { BaseRepository } from './base.repository';
-export { TimestampEntity } from './timestamp.entity';
+export { BaseRepository } from './base.repository'
+export { TimestampEntity } from './timestamp.entity'

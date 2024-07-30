@@ -1,15 +1,15 @@
-import { Injectable } from '@nestjs/common';
-import { MailerService } from '@nestjs-modules/mailer';
+import { MailerService } from '@nestjs-modules/mailer'
+import { Injectable } from '@nestjs/common'
 
 @Injectable()
 export class ItemMailer {
   constructor(private readonly mailerService: MailerService) {}
 
   async sendNotifyEmail(param: {
-    emails: string[];
-    wishlist: { id: string; title: string };
-    ownerName: string;
-    nbNewItems: number;
+    emails: string[]
+    wishlist: { id: string; title: string }
+    ownerName: string
+    nbNewItems: number
   }) {
     await this.mailerService.sendMail({
       to: param.emails,
@@ -21,6 +21,6 @@ export class ItemMailer {
         nbItems: param.nbNewItems,
         userName: param.ownerName,
       },
-    });
+    })
   }
 }

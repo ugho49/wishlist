@@ -1,13 +1,14 @@
-import { Module } from '@nestjs/common';
-import { AuthModule } from './auth/auth.module';
-import { UserModule } from './user/user.module';
-import { EmailSettingsModule } from './email-setttings/email-settings.module';
-import { PasswordVerificationModule } from './password-verification/password-verification.module';
-import { WishlistModule } from './wishlist/wishlist.module';
-import { ItemModule } from './item/item.module';
-import { EventModule } from './event/event.module';
-import { AttendeeModule } from './attendee/attendee.module';
-import { AuthSocialModule } from './auth-social/auth-social.module';
+import { Module } from '@nestjs/common'
+
+import { AttendeeModule } from './attendee/attendee.module'
+import { AuthSocialModule } from './auth-social/auth-social.module'
+import { AuthModule } from './auth/auth.module'
+import { EmailSettingsModule } from './email-setttings/email-settings.module'
+import { EventModule } from './event/event.module'
+import { ItemModule } from './item/item.module'
+import { PasswordVerificationModule } from './password-verification/password-verification.module'
+import { UserModule } from './user/user.module'
+import { WishlistModule } from './wishlist/wishlist.module'
 
 @Module({
   imports: [

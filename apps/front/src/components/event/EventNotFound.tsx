@@ -1,7 +1,8 @@
-import React from 'react';
-import { Box, Button, Stack } from '@mui/material';
-import { Title } from '../common/Title';
-import { RouterLink } from '../common/RouterLink';
+import { Box, Button, Stack } from '@mui/material'
+import React from 'react'
+
+import { RouterLink } from '../common/RouterLink'
+import { Title } from '../common/Title'
 
 export const EventNotFound = () => {
   return (
@@ -18,5 +19,5 @@ export const EventNotFound = () => {
         </Button>
       </Stack>
     </Box>
-  );
-};
+  )
+}

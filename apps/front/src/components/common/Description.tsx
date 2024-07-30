@@ -1,7 +1,8 @@
-import React from 'react';
-import { Box, Theme } from '@mui/material';
-import { makeStyles } from '@mui/styles';
-import { BreaklineText } from './BreaklineText';
+import { Box, Theme } from '@mui/material'
+import { makeStyles } from '@mui/styles'
+import React from 'react'
+
+import { BreaklineText } from './BreaklineText'
 
 const useStyles = makeStyles((theme: Theme) => ({
   description: {
@@ -13,14 +14,14 @@ const useStyles = makeStyles((theme: Theme) => ({
     border: `2px solid ${theme.palette.secondary.main}`,
     backgroundColor: 'rgb(255 210 28 / 5%)',
   },
-}));
+}))
 
 export const Description = ({ text }: { text: string }) => {
-  const classes = useStyles();
+  const classes = useStyles()
 
   return (
     <Box className={classes.description}>
       <BreaklineText text={text} />
     </Box>
-  );
-};
+  )
+}

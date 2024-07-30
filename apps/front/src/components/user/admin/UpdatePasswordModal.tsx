@@ -7,35 +7,37 @@ import {
   DialogContentText,
   DialogTitle,
   TextField,
-} from '@mui/material';
-import React, { FormEvent, useState } from 'react';
-import { useApi, useToast } from '@wishlist-front/hooks';
+} from '@mui/material'
+import React, { FormEvent, useState } from 'react'
+
+import { useApi } from '../../../hooks/useApi'
+import { useToast } from '../../../hooks/useToast'
 
 export type UpdatePasswordModalProps = {
-  open: boolean;
-  onClose: () => void;
-  userId: string;
-};
+  open: boolean
+  onClose: () => void
+  userId: string
+}
 
 export const UpdatePasswordModal = ({ onClose, open, userId }: UpdatePasswordModalProps) => {
-  const { admin: api } = useApi();
-  const [newPassword, setNewPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const { addToast } = useToast();
+  const { admin: api } = useApi()
+  const [newPassword, setNewPassword] = useState('')
+  const [loading, setLoading] = useState(false)
+  const { addToast } = useToast()
 
   const onSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+    e.preventDefault()
+    setLoading(true)
     try {
-      await api.user.update(userId, { new_password: newPassword });
-      addToast({ message: 'Mot de passe mis à jour', variant: 'success' });
-      setLoading(false);
-      setNewPassword('');
-      onClose();
+      await api.user.update(userId, { new_password: newPassword })
+      addToast({ message: 'Mot de passe mis à jour', variant: 'success' })
+      setLoading(false)
+      setNewPassword('')
+      onClose()
     } catch (e) {
-      addToast({ message: "Une erreur s'est produite", variant: 'error' });
+      addToast({ message: "Une erreur s'est produite", variant: 'error' })
     }
-  };
+  }
 
   return (
     <Dialog open={open} onClose={() => onClose()}>
@@ -45,7 +47,7 @@ export const UpdatePasswordModal = ({ onClose, open, userId }: UpdatePasswordMod
           <DialogContentText>Entrer ci dessous le nouveau mot de passe de l'utilisateur</DialogContentText>
           <TextField
             autoFocus
-            onChange={(e) => setNewPassword(e.target.value)}
+            onChange={e => setNewPassword(e.target.value)}
             value={newPassword}
             margin="normal"
             type="password"
@@ -69,5 +71,5 @@ export const UpdatePasswordModal = ({ onClose, open, userId }: UpdatePasswordMod
         </DialogActions>
       </Box>
     </Dialog>
-  );
-};
+  )
+}

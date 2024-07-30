@@ -1,7 +1,8 @@
-import { registerAs } from '@nestjs/config';
-import { TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
-import migrations from './migrations';
+import { registerAs } from '@nestjs/config'
+import { TypeOrmModuleOptions } from '@nestjs/typeorm'
+import { SnakeNamingStrategy } from 'typeorm-naming-strategies'
+
+import migrations from './migrations'
 
 export default registerAs(
   'db',
@@ -20,5 +21,5 @@ export default registerAs(
     migrations,
     logging: process.env.DB_VERBOSE === 'true' || false,
     // dropSchema: true, // ⚠️⚠️ DEV MODE ONLY ⚠️⚠️ Uncomment this if you want to drop all database
-  })
-);
+  }),
+)

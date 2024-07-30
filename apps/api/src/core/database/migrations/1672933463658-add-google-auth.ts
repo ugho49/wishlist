@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner, TableColumn } from 'typeorm';
+import { MigrationInterface, QueryRunner, TableColumn } from 'typeorm'
 
 export class addGoogleAuth1672933463658 implements MigrationInterface {
   public async up(runner: QueryRunner): Promise<void> {
@@ -17,13 +17,13 @@ export class addGoogleAuth1672933463658 implements MigrationInterface {
           UNIQUE (user_id, social_type),
           UNIQUE (social_id, social_type)
       )
-    `);
+    `)
 
-    await runner.addColumn('user', new TableColumn({ name: 'picture_url', type: 'varchar(1000)', isNullable: true }));
+    await runner.addColumn('user', new TableColumn({ name: 'picture_url', type: 'varchar(1000)', isNullable: true }))
   }
 
   public async down(runner: QueryRunner): Promise<void> {
-    await runner.dropTable('user_social');
-    await runner.dropColumn('user', 'picture_url');
+    await runner.dropTable('user_social')
+    await runner.dropColumn('user', 'picture_url')
   }
 }

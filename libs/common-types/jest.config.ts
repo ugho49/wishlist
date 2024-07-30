@@ -1,7 +1,6 @@
-/* eslint-disable */
 export default {
   displayName: 'common-types',
-  preset: '../../jest.preset.js',
+  preset: '../../jest.preset.cjs',
   globals: {
     'ts-jest': {
       tsconfig: '<rootDir>/tsconfig.spec.json',
@@ -13,4 +12,4 @@ export default {
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../../coverage/packages/common-types',
-};
+}

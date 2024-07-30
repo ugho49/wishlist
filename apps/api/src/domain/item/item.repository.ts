@@ -1,9 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { BaseRepository } from '@wishlist/common-database';
-import { ItemEntity } from './item.entity';
-import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
-import { NewItemsForWishlist } from './item.interface';
-import { camelCaseKeys } from '@wishlist/common';
+import { Injectable, NotFoundException } from '@nestjs/common'
+import { camelCaseKeys } from '@wishlist/common'
+import { BaseRepository } from '@wishlist/common-database'
+import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
+
+import { ItemEntity } from './item.entity'
+import { NewItemsForWishlist } from './item.interface'
 
 @Injectable()
 export class ItemRepository extends BaseRepository(ItemEntity) {
@@ -14,17 +15,17 @@ export class ItemRepository extends BaseRepository(ItemEntity) {
       .innerJoin('e.attendees', 'a')
       .where({ id: param.itemId })
       .andWhere('(e.creatorId = :userId OR a.userId = :userId)', { userId: param.userId })
-      .getOne();
+      .getOne()
 
     if (!entity) {
-      throw new NotFoundException('Item not found');
+      throw new NotFoundException('Item not found')
     }
 
-    return entity;
+    return entity
   }
 
   updateById(id: string, partialEntity: QueryDeepPartialEntity<ItemEntity>) {
-    return this.update({ id }, partialEntity);
+    return this.update({ id }, partialEntity)
   }
 
   findAllNewItems(): Promise<NewItemsForWishlist[]> {
@@ -42,6 +43,6 @@ export class ItemRepository extends BaseRepository(ItemEntity) {
         AND i.created_at > NOW() - INTERVAL '1 DAY'
       GROUP BY wishlist_id, wishlist_title, owner_id, owner_name
     `,
-    ).then((list) => list.map((element: Record<string, unknown>) => camelCaseKeys(element)));
+    ).then(list => list.map((element: Record<string, unknown>) => camelCaseKeys(element)))
   }
 }

@@ -1,4 +1,4 @@
-import { registerAs } from '@nestjs/config';
+import { registerAs } from '@nestjs/config'
 
 export default registerAs('mail', () => ({
   from: 'Wishlist App <contact@wishlistapp.fr>',
@@ -8,4 +8,4 @@ export default registerAs('mail', () => ({
     username: process.env.MAIL_USERNAME || '',
     password: process.env.MAIL_PASSWORD || '',
   },
-}));
+}))

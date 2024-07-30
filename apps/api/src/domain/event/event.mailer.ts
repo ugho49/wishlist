@@ -1,17 +1,17 @@
-import { Injectable } from '@nestjs/common';
-import { MailerService } from '@nestjs-modules/mailer';
+import { MailerService } from '@nestjs-modules/mailer'
+import { Injectable } from '@nestjs/common'
 
 @Injectable()
 export class EventMailer {
   constructor(private readonly mailerService: MailerService) {}
 
   async sendEmailForExistingAttendee(params: {
-    emails: string[] | string;
-    event: { id: string; title: string };
-    creator: { firstName: string; lastName: string };
+    emails: string[] | string
+    event: { id: string; title: string }
+    creator: { firstName: string; lastName: string }
   }): Promise<void> {
     if (params.emails.length === 0) {
-      return;
+      return
     }
 
     await this.mailerService.sendMail({
@@ -23,16 +23,16 @@ export class EventMailer {
         eventUrl: `https://wishlistapp.fr/events/${params.event.id}`,
         createdBy: params.creator.firstName + ' ' + params.creator.lastName,
       },
-    });
+    })
   }
 
   async sendEmailForNotExistingAttendee(params: {
-    emails: string[] | string;
-    event: { id: string; title: string };
-    creator: { firstName: string; lastName: string };
+    emails: string[] | string
+    event: { id: string; title: string }
+    creator: { firstName: string; lastName: string }
   }): Promise<void> {
     if (params.emails.length === 0) {
-      return;
+      return
     }
 
     await this.mailerService.sendMail({
@@ -44,6 +44,6 @@ export class EventMailer {
         registerUrl: 'https://wishlistapp.fr/register',
         createdBy: params.creator.firstName + ' ' + params.creator.lastName,
       },
-    });
+    })
   }
 }

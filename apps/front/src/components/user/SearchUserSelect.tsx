@@ -1,42 +1,43 @@
-import React, { useState } from 'react';
-import { Autocomplete, Avatar, createFilterOptions, Stack, TextField } from '@mui/material';
-import { MiniUserDto } from '@wishlist/common-types';
-import { debounce, uniqBy } from 'lodash';
-import { isValidEmail } from '@wishlist/common';
-import { useApi } from '@wishlist-front/hooks';
-import { blue, orange } from '@mui/material/colors';
-import PersonIcon from '@mui/icons-material/Person';
+import PersonIcon from '@mui/icons-material/Person'
+import { Autocomplete, Avatar, createFilterOptions, Stack, TextField } from '@mui/material'
+import { blue, orange } from '@mui/material/colors'
+import { isValidEmail } from '@wishlist/common'
+import { MiniUserDto } from '@wishlist/common-types'
+import { debounce, uniqBy } from 'lodash'
+import React, { useState } from 'react'
 
-type UserOptionType = MiniUserDto | string;
-const filter = createFilterOptions<UserOptionType>();
+import { useApi } from '../../hooks/useApi'
+
+type UserOptionType = MiniUserDto | string
+const filter = createFilterOptions<UserOptionType>()
 
 export type SearchUserSelectProps = {
-  disabled?: boolean;
-  onChange: (value: UserOptionType) => void;
-  excludedEmails: string[];
-};
+  disabled?: boolean
+  onChange: (value: UserOptionType) => void
+  excludedEmails: string[]
+}
 
 export const SearchUserSelect = ({ disabled, onChange, excludedEmails }: SearchUserSelectProps) => {
-  const api = useApi();
-  const [loading, setLoading] = useState(false);
-  const [options, setOptions] = useState<UserOptionType[]>([]);
+  const api = useApi()
+  const [loading, setLoading] = useState(false)
+  const [options, setOptions] = useState<UserOptionType[]>([])
 
   const searchUser = async (inputValue: string) => {
-    setLoading(true);
+    setLoading(true)
     try {
       if (inputValue.trim() === '' || inputValue.trim().length < 2) {
-        return;
+        return
       }
-      const users = await api.user.searchUserByKeyword(inputValue);
-      setOptions((prev) => uniqBy([...(prev as MiniUserDto[]), ...users], (v) => v.id));
+      const users = await api.user.searchUserByKeyword(inputValue)
+      setOptions(prev => uniqBy([...(prev as MiniUserDto[]), ...users], v => v.id))
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   // TODO: first call previous "friend" or "usual" user endpoint
 
-  const searchUserDebounced = debounce(searchUser, 400);
+  const searchUserDebounced = debounce(searchUser, 400)
 
   return (
     <Autocomplete
@@ -50,30 +51,30 @@ export const SearchUserSelect = ({ disabled, onChange, excludedEmails }: SearchU
       options={options}
       loading={loading}
       onChange={(_, value) => {
-        if (value) onChange(value);
+        if (value) onChange(value)
       }}
       filterOptions={(values, params) => {
-        const filtered = filter(values, params);
-        const { inputValue } = params;
+        const filtered = filter(values, params)
+        const { inputValue } = params
 
-        const containValue = filtered.some((option) => {
-          if (typeof option === 'string') return option === inputValue;
-          return option.email === inputValue;
-        });
+        const containValue = filtered.some(option => {
+          if (typeof option === 'string') return option === inputValue
+          return option.email === inputValue
+        })
 
         if (!containValue && inputValue && isValidEmail(inputValue)) {
-          filtered.push(inputValue.toLowerCase());
+          filtered.push(inputValue.toLowerCase())
         }
 
-        return filtered;
+        return filtered
       }}
-      getOptionDisabled={(option) => {
-        if (typeof option === 'string') return excludedEmails.includes(option);
-        return excludedEmails.includes(option.email);
+      getOptionDisabled={option => {
+        if (typeof option === 'string') return excludedEmails.includes(option)
+        return excludedEmails.includes(option.email)
       }}
-      getOptionLabel={(option) => {
-        if (typeof option === 'string') return `Inviter le participant par son email: ${option}`;
-        return `${option.firstname} ${option.lastname} (${option.email})`;
+      getOptionLabel={option => {
+        if (typeof option === 'string') return `Inviter le participant par son email: ${option}`
+        return `${option.firstname} ${option.lastname} (${option.email})`
       }}
       renderOption={(props, option) => (
         <li {...props}>
@@ -105,19 +106,19 @@ export const SearchUserSelect = ({ disabled, onChange, excludedEmails }: SearchU
           </Stack>
         </li>
       )}
-      renderInput={(params) => (
+      renderInput={params => (
         <TextField
           {...params}
           inputProps={{ ...params.inputProps }}
-          onChange={(e) => {
-            const value = e.target.value;
-            if (value.length > 1) setLoading(true);
-            searchUserDebounced(value);
+          onChange={e => {
+            const value = e.target.value
+            if (value.length > 1) setLoading(true)
+            searchUserDebounced(value)
           }}
           placeholder="Rechercher un participant ..."
           helperText="Si vous ne trouvez pas le participant, vous pouvez l'inviter sur wishlist en entrant son email dans la barre de recherche"
         />
       )}
     />
-  );
-};
+  )
+}

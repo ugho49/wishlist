@@ -1,15 +1,17 @@
-import React from 'react';
-import { useParams } from 'react-router-dom';
-import { useCustomSearchParams, useWishlistById } from '@wishlist-front/hooks';
-import { Box, Tab, Tabs } from '@mui/material';
-import { Loader } from '../common/Loader';
-import { WishlistNotFound } from './WishlistNotFound';
-import { Title } from '../common/Title';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import { Card } from '../common/Card';
-import { EditWishlistInformations } from './EditWishlistInformations';
-import { EditWishlistEvent } from './EditWishlistEvents';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
+import { Box, Tab, Tabs } from '@mui/material'
+import React from 'react'
+import { useParams } from 'react-router-dom'
+
+import { useWishlistById } from '../../hooks/domain/useWishlistById'
+import { useCustomSearchParams } from '../../hooks/useCustomSearchParams'
+import { Card } from '../common/Card'
+import { Loader } from '../common/Loader'
+import { Title } from '../common/Title'
+import { EditWishlistEvent } from './EditWishlistEvents'
+import { EditWishlistInformations } from './EditWishlistInformations'
+import { WishlistNotFound } from './WishlistNotFound'
 
 enum TabValues {
   informations = 'informations',
@@ -27,15 +29,15 @@ const tabs = [
     label: 'Evènements',
     icon: <CalendarMonthIcon />,
   },
-];
+]
 
-type SearchParamType = { tab: TabValues };
+type SearchParamType = { tab: TabValues }
 
 export const EditWishlistPage = () => {
-  const params = useParams<'wishlistId'>();
-  const wishlistId = params.wishlistId || '';
-  const [queryParams, setQueryParams] = useCustomSearchParams<SearchParamType>({ tab: tabs[0].value });
-  const { wishlist, loading } = useWishlistById(wishlistId);
+  const params = useParams<'wishlistId'>()
+  const wishlistId = params.wishlistId || ''
+  const [queryParams, setQueryParams] = useCustomSearchParams<SearchParamType>({ tab: tabs[0].value })
+  const { wishlist, loading } = useWishlistById(wishlistId)
 
   return (
     <Box>
@@ -54,7 +56,7 @@ export const EditWishlistPage = () => {
                 scrollButtons="auto"
                 allowScrollButtonsMobile
               >
-                {tabs.map((tab) => (
+                {tabs.map(tab => (
                   <Tab key={tab.value} value={tab.value} label={tab.label} iconPosition="start" icon={tab.icon} />
                 ))}
               </Tabs>
@@ -69,5 +71,5 @@ export const EditWishlistPage = () => {
         )}
       </Loader>
     </Box>
-  );
-};
+  )
+}

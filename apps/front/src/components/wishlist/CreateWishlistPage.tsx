@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import { MAX_EVENTS_BY_LIST, MiniEventDto } from '@wishlist/common-types';
-import { useApi, useAvailableEvents, useCustomSearchParams, useEventById, useToast } from '@wishlist-front/hooks';
-import { Title } from '../common/Title';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import Link from '@mui/material/Link';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
+import DeleteIcon from '@mui/icons-material/Delete'
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
+import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft'
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp'
+import SaveIcon from '@mui/icons-material/Save'
+import { LoadingButton } from '@mui/lab'
 import {
   Avatar,
   Box,
@@ -22,65 +23,69 @@ import {
   Stepper,
   TextField,
   useTheme,
-} from '@mui/material';
-import { useNavigate } from 'react-router-dom';
-import { InputLabel } from '../common/InputLabel';
-import { CharsRemaining } from '../common/CharsRemaining';
-import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
-import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
-import { LoadingButton } from '@mui/lab';
-import SaveIcon from '@mui/icons-material/Save';
-import DeleteIcon from '@mui/icons-material/Delete';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import { DateTime } from 'luxon';
-import { SearchEventSelect } from '../event/SearchEventSelect';
-import { Card } from '../common/Card';
-import { WishlistLogoActions } from './WishlistLogoActions';
-import { ConfirmCheckbox } from '../common/ConfirmCheckbox';
-import Collapse from '@mui/material/Collapse';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../core';
-import { useMutation } from '@tanstack/react-query';
+} from '@mui/material'
+import Collapse from '@mui/material/Collapse'
+import Link from '@mui/material/Link'
+import { useMutation } from '@tanstack/react-query'
+import { MAX_EVENTS_BY_LIST, MiniEventDto } from '@wishlist/common-types'
+import { DateTime } from 'luxon'
+import React, { useEffect, useState } from 'react'
+import { useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 
-type QueryParamType = { 'from-event'?: string };
+import { RootState } from '../../core'
+import { useAvailableEvents } from '../../hooks/domain/useAvailableEvents'
+import { useEventById } from '../../hooks/domain/useEventById'
+import { useApi } from '../../hooks/useApi'
+import { useCustomSearchParams } from '../../hooks/useCustomSearchParams'
+import { useToast } from '../../hooks/useToast'
+import { Card } from '../common/Card'
+import { CharsRemaining } from '../common/CharsRemaining'
+import { ConfirmCheckbox } from '../common/ConfirmCheckbox'
+import { InputLabel } from '../common/InputLabel'
+import { Title } from '../common/Title'
+import { SearchEventSelect } from '../event/SearchEventSelect'
+import { WishlistLogoActions } from './WishlistLogoActions'
 
-const steps = ['Informations', 'Evènements'];
+type QueryParamType = { 'from-event'?: string }
 
-const mapState = (state: RootState) => state.userProfile.firstName;
+const steps = ['Informations', 'Evènements']
+
+const mapState = (state: RootState) => state.userProfile.firstName
 
 export const CreateWishlistPage = () => {
-  const theme = useTheme();
-  const { addToast } = useToast();
-  const navigate = useNavigate();
-  const userFirstName = useSelector(mapState);
-  const [queryParams] = useCustomSearchParams<QueryParamType>();
-  const [step, setStep] = useState(1);
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [showAdvancedParams, setShowAdvancedParams] = useState(false);
-  const [hideItems, setHideItems] = useState(true);
-  const [events, setEvents] = useState<MiniEventDto[]>([]);
-  const [logo, setLogo] = useState<File | undefined>();
-  const api = useApi();
+  const theme = useTheme()
+  const { addToast } = useToast()
+  const navigate = useNavigate()
+  const userFirstName = useSelector(mapState)
+  const [queryParams] = useCustomSearchParams<QueryParamType>()
+  const [step, setStep] = useState(1)
+  const [title, setTitle] = useState('')
+  const [description, setDescription] = useState('')
+  const [showAdvancedParams, setShowAdvancedParams] = useState(false)
+  const [hideItems, setHideItems] = useState(true)
+  const [events, setEvents] = useState<MiniEventDto[]>([])
+  const [logo, setLogo] = useState<File | undefined>()
+  const api = useApi()
 
-  const { events: availableEvents, loading: availableEventsLoading } = useAvailableEvents();
-  const { event: eventFromUrl } = useEventById(queryParams['from-event']);
+  const { events: availableEvents, loading: availableEventsLoading } = useAvailableEvents()
+  const { event: eventFromUrl } = useEventById(queryParams['from-event'])
 
-  const nextStepEnabled = title?.trim() !== '';
-  const createEnabled = events.length > 0;
+  const nextStepEnabled = title?.trim() !== ''
+  const createEnabled = events.length > 0
 
   useEffect(() => {
-    setTitle((prev) => {
-      if (prev !== '' || !userFirstName) return prev;
-      return `Liste de ${userFirstName}`;
-    });
-  }, [userFirstName]);
+    setTitle(prev => {
+      if (prev !== '' || !userFirstName) return prev
+      return `Liste de ${userFirstName}`
+    })
+  }, [userFirstName])
 
   useEffect(() => {
     if (eventFromUrl !== undefined) {
-      setEvents((prev) => [...prev, eventFromUrl]);
+      setEvents(prev => [...prev, eventFromUrl])
     }
-  }, [eventFromUrl]);
+  }, [eventFromUrl])
 
   const { mutateAsync: createWishlist, isPending: loading } = useMutation({
     mutationKey: ['wishlist.create'],
@@ -90,17 +95,17 @@ export const CreateWishlistPage = () => {
           title,
           description: description === '' ? undefined : description,
           hide_items: hideItems,
-          event_ids: events.map((e) => e.id),
+          event_ids: events.map(e => e.id),
           items: [],
         },
         logo,
       ),
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-    onSuccess: (wishlist) => {
-      addToast({ message: 'Liste créé avec succès', variant: 'success' });
-      navigate(`/wishlists/${wishlist.id}`);
+    onSuccess: wishlist => {
+      addToast({ message: 'Liste créé avec succès', variant: 'success' })
+      navigate(`/wishlists/${wishlist.id}`)
     },
-  });
+  })
 
   return (
     <Box>
@@ -128,7 +133,7 @@ export const CreateWishlistPage = () => {
                   inputProps={{ maxLength: 100 }}
                   placeholder="Nom de ma liste"
                   helperText={<CharsRemaining max={100} value={title} />}
-                  onChange={(e) => setTitle(e.target.value)}
+                  onChange={e => setTitle(e.target.value)}
                 />
               </Box>
 
@@ -144,7 +149,7 @@ export const CreateWishlistPage = () => {
                   inputProps={{ maxLength: 2000 }}
                   placeholder="Une petite description ..."
                   helperText={<CharsRemaining max={2000} value={description} />}
-                  onChange={(e) => setDescription(e.target.value)}
+                  onChange={e => setDescription(e.target.value)}
                 />
               </Box>
 
@@ -152,9 +157,9 @@ export const CreateWishlistPage = () => {
                 <Link
                   variant="body2"
                   component="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setShowAdvancedParams(!showAdvancedParams);
+                  onClick={e => {
+                    e.preventDefault()
+                    setShowAdvancedParams(!showAdvancedParams)
                   }}
                   sx={{ display: 'flex', alignItems: 'center' }}
                 >
@@ -171,7 +176,7 @@ export const CreateWishlistPage = () => {
                       control={
                         <ConfirmCheckbox
                           checked={!hideItems}
-                          onChange={(checked) => setHideItems(!checked)}
+                          onChange={checked => setHideItems(!checked)}
                           disabled={loading}
                           confirmTitle="⚠️Préférez-vous garder la surprise ? ⚠️"
                           confirmText={
@@ -198,7 +203,7 @@ export const CreateWishlistPage = () => {
                     <WishlistLogoActions
                       logoUrl={logo ? URL.createObjectURL(logo) : undefined}
                       loading={loading}
-                      onLogoChange={(file) => setLogo(file)}
+                      onLogoChange={file => setLogo(file)}
                       onLogoRemove={() => setLogo(undefined)}
                     />
                   )}
@@ -216,19 +221,19 @@ export const CreateWishlistPage = () => {
                   loading={availableEventsLoading}
                   disabled={loading || events.length === MAX_EVENTS_BY_LIST}
                   options={availableEvents}
-                  excludedEventIds={events.map((e) => e.id)}
-                  onChange={(val) => setEvents((prevState) => [...prevState, val])}
+                  excludedEventIds={events.map(e => e.id)}
+                  onChange={val => setEvents(prevState => [...prevState, val])}
                 />
               </Box>
               <List sx={{ pt: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {events.map((event) => (
+                {events.map(event => (
                   <Card variant="outlined" sx={{ padding: 0 }} key={event.id}>
                     <ListItem
                       secondaryAction={
                         <IconButton
                           edge="end"
                           aria-label="delete"
-                          onClick={() => setEvents((prev) => prev.filter((value) => value.id !== event.id))}
+                          onClick={() => setEvents(prev => prev.filter(value => value.id !== event.id))}
                         >
                           <DeleteIcon />
                         </IconButton>
@@ -254,7 +259,7 @@ export const CreateWishlistPage = () => {
             <Box>
               {step > 1 && (
                 <Button
-                  onClick={() => setStep((prev) => prev - 1)}
+                  onClick={() => setStep(prev => prev - 1)}
                   disabled={step === 1}
                   startIcon={<KeyboardArrowLeftIcon />}
                 >
@@ -264,7 +269,7 @@ export const CreateWishlistPage = () => {
             </Box>
             {step !== 2 && (
               <Button
-                onClick={() => setStep((prev) => prev + 1)}
+                onClick={() => setStep(prev => prev + 1)}
                 disabled={!nextStepEnabled}
                 endIcon={<KeyboardArrowRightIcon />}
               >
@@ -287,5 +292,5 @@ export const CreateWishlistPage = () => {
         </Card>
       </Container>
     </Box>
-  );
-};
+  )
+}

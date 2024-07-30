@@ -1,1 +1,1 @@
-export { GoogleAuthService } from './google-auth.service';
+export { GoogleAuthService } from './google-auth.service'

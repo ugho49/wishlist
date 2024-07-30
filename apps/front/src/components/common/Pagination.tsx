@@ -1,8 +1,8 @@
-import React, { useMemo } from 'react';
-import { Pagination as MuiPagination } from '@mui/material';
-import { makeStyles } from '@mui/styles';
+import { Pagination as MuiPagination } from '@mui/material'
+import { makeStyles } from '@mui/styles'
+import React, { useMemo } from 'react'
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
   pagination: {
     marginTop: '30px',
     '& > *': {
@@ -10,22 +10,22 @@ const useStyles = makeStyles((theme) => ({
       display: 'flex',
     },
   },
-}));
+}))
 
 export type PaginationProps = {
-  totalPage?: number;
-  currentPage?: number;
-  disabled?: boolean;
-  hide?: boolean;
-  onChange: (newPage: number) => void;
-};
+  totalPage?: number
+  currentPage?: number
+  disabled?: boolean
+  hide?: boolean
+  onChange: (newPage: number) => void
+}
 
 export const Pagination = (props: PaginationProps) => {
-  const classes = useStyles();
-  const totalPage = useMemo(() => props.totalPage || 1, [props.totalPage]);
-  const currentPage = useMemo(() => props.currentPage || 1, [props.currentPage]);
+  const classes = useStyles()
+  const totalPage = useMemo(() => props.totalPage || 1, [props.totalPage])
+  const currentPage = useMemo(() => props.currentPage || 1, [props.currentPage])
 
-  if (props.hide) return null;
+  if (props.hide) return null
 
   return (
     <div className={classes.pagination}>
@@ -38,5 +38,5 @@ export const Pagination = (props: PaginationProps) => {
         onChange={(_, value) => props.onChange(value)}
       />
     </div>
-  );
-};
+  )
+}

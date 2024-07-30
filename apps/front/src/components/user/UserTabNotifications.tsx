@@ -1,47 +1,50 @@
-import { Box, Checkbox, FormControlLabel, Stack, Typography } from '@mui/material';
-import React, { FormEvent, useEffect, useState } from 'react';
-import { useApi, useToast } from '@wishlist-front/hooks';
-import { Loader } from '../common/Loader';
-import { InputLabel } from '../common/InputLabel';
-import { LoadingButton } from '@mui/lab';
-import SaveIcon from '@mui/icons-material/Save';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { UpdateUserEmailSettingsInputDto } from '@wishlist/common-types';
+import type { UpdateUserEmailSettingsInputDto } from '@wishlist/common-types'
+
+import SaveIcon from '@mui/icons-material/Save'
+import { LoadingButton } from '@mui/lab'
+import { Box, Checkbox, FormControlLabel, Stack, Typography } from '@mui/material'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import React, { FormEvent, useEffect, useState } from 'react'
+
+import { useApi } from '../../hooks/useApi'
+import { useToast } from '../../hooks/useToast'
+import { InputLabel } from '../common/InputLabel'
+import { Loader } from '../common/Loader'
 
 export const UserTabNotifications = () => {
-  const { addToast } = useToast();
-  const api = useApi();
-  const queryClient = useQueryClient();
-  const [dailyNewItemNotification, setDailyNewItemNotification] = useState(true);
+  const { addToast } = useToast()
+  const api = useApi()
+  const queryClient = useQueryClient()
+  const [dailyNewItemNotification, setDailyNewItemNotification] = useState(true)
 
   const { data: value, isLoading: loadingNotificationSettings } = useQuery({
     queryKey: ['user.getEmailSettings'],
     queryFn: () => api.user.getEmailSettings(),
-  });
+  })
 
   const { mutateAsync: updateEmailSettings, isPending: loading } = useMutation({
     mutationKey: ['user.updateEmailSettings'],
     mutationFn: (data: UpdateUserEmailSettingsInputDto) => api.user.updateUserEmailSettings(data),
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-    onSuccess: (output) => {
-      addToast({ message: 'Préférences de notification mis à jour', variant: 'info' });
-      queryClient.setQueryData(['user.getEmailSettings'], output);
+    onSuccess: output => {
+      addToast({ message: 'Préférences de notification mis à jour', variant: 'info' })
+      queryClient.setQueryData(['user.getEmailSettings'], output)
     },
-  });
+  })
 
   useEffect(() => {
     if (value) {
-      setDailyNewItemNotification(value.daily_new_item_notification);
+      setDailyNewItemNotification(value.daily_new_item_notification)
     }
-  }, [value]);
+  }, [value])
 
   const onSubmit = async (e: FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
 
     await updateEmailSettings({
       daily_new_item_notification: dailyNewItemNotification,
-    });
-  };
+    })
+  }
 
   return (
     <Loader loading={loadingNotificationSettings}>
@@ -52,7 +55,7 @@ export const UserTabNotifications = () => {
             control={
               <Checkbox
                 checked={dailyNewItemNotification}
-                onChange={(e) => setDailyNewItemNotification(e.target.checked)}
+                onChange={e => setDailyNewItemNotification(e.target.checked)}
                 disabled={loading}
               />
             }
@@ -83,5 +86,5 @@ export const UserTabNotifications = () => {
         </Stack>
       </Stack>
     </Loader>
-  );
-};
+  )
+}

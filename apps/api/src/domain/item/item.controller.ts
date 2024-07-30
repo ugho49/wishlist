@@ -1,6 +1,5 @@
-import { Body, Controller, Delete, Param, Post, Put } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
-import { ItemService } from './item.service';
+import { Body, Controller, Delete, Param, Post, Put } from '@nestjs/common'
+import { ApiTags } from '@nestjs/swagger'
 import {
   AddItemForListInputDto,
   AddItemInputDto,
@@ -8,9 +7,11 @@ import {
   ScanItemInputDto,
   ScanItemOutputDto,
   ToggleItemOutputDto,
-} from '@wishlist/common-types';
-import { CurrentUser } from '../auth';
-import { ScrapperService } from './scrapper.service';
+} from '@wishlist/common-types'
+
+import { CurrentUser } from '../auth'
+import { ItemService } from './item.service'
+import { ScrapperService } from './scrapper.service'
 
 @ApiTags('Item')
 @Controller('/item')
@@ -22,14 +23,14 @@ export class ItemController {
 
   @Post('/scan-url')
   async scanUrl(@Body() dto: ScanItemInputDto): Promise<ScanItemOutputDto> {
-    return this.scrapperService.scanUrl(dto.url).then((picture_url) => ({
+    return this.scrapperService.scanUrl(dto.url).then(picture_url => ({
       picture_url,
-    }));
+    }))
   }
 
   @Post()
   createItem(@CurrentUser('id') currentUserId: string, @Body() dto: AddItemForListInputDto): Promise<ItemDto> {
-    return this.itemService.create({ dto, currentUserId });
+    return this.itemService.create({ dto, currentUserId })
   }
 
   @Put('/:id')
@@ -38,16 +39,16 @@ export class ItemController {
     @CurrentUser('id') currentUserId: string,
     @Body() dto: AddItemInputDto,
   ): Promise<void> {
-    return this.itemService.update({ itemId, dto, currentUserId });
+    return this.itemService.update({ itemId, dto, currentUserId })
   }
 
   @Delete('/:id')
   deleteItem(@Param('id') itemId: string, @CurrentUser('id') currentUserId: string): Promise<void> {
-    return this.itemService.deleteItem({ itemId, currentUserId });
+    return this.itemService.deleteItem({ itemId, currentUserId })
   }
 
   @Post('/:id/toggle')
   toggleItem(@Param('id') itemId: string, @CurrentUser('id') currentUserId: string): Promise<ToggleItemOutputDto> {
-    return this.itemService.toggleItem({ itemId, currentUserId });
+    return this.itemService.toggleItem({ itemId, currentUserId })
   }
 }

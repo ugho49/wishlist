@@ -1,11 +1,12 @@
-import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { WishlistController } from './wishlist.controller';
-import { WishlistEntity } from './wishlist.entity';
-import { WishlistService } from './wishlist.service';
-import { WishlistRepository } from './wishlist.repository';
-import { EventModule } from '../event/event.module';
-import { BucketModule } from '../../core/bucket/bucket.module';
+import { Module } from '@nestjs/common'
+import { TypeOrmModule } from '@nestjs/typeorm'
+
+import { BucketModule } from '../../core/bucket/bucket.module'
+import { EventModule } from '../event/event.module'
+import { WishlistController } from './wishlist.controller'
+import { WishlistEntity } from './wishlist.entity'
+import { WishlistRepository } from './wishlist.repository'
+import { WishlistService } from './wishlist.service'
 
 @Module({
   imports: [TypeOrmModule.forFeature([WishlistEntity]), EventModule, BucketModule],

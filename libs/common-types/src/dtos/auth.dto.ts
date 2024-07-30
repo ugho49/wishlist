@@ -1,13 +1,13 @@
-import { IsEmail, IsNotEmpty, IsString, MaxLength } from 'class-validator';
-import { Transform } from 'class-transformer';
+import { Transform } from 'class-transformer'
+import { IsEmail, IsNotEmpty, IsString, MaxLength } from 'class-validator'
 
 export class LoginOutputDto {
-  access_token: string;
-  refresh_token: string;
+  access_token: string
+  refresh_token: string
 }
 
 export class RefreshTokenOutputDto {
-  access_token: string;
+  access_token: string
 }
 
 export class LoginInputDto {
@@ -15,20 +15,20 @@ export class LoginInputDto {
   @IsNotEmpty()
   @MaxLength(200)
   @Transform(({ value }) => value.toLowerCase())
-  email: string;
+  email: string
 
   @IsNotEmpty()
-  password: string;
+  password: string
 }
 
 export class LoginWithGoogleInputDto {
   @IsString()
   @IsNotEmpty()
-  credential: string;
+  credential: string
 }
 
 export class RefreshTokenInputDto {
   @IsString()
   @IsNotEmpty()
-  token: string;
+  token: string
 }

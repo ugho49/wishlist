@@ -1,8 +1,9 @@
-import { Body, Controller, Post } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
-import { PasswordVerificationService } from './password-verification.service';
-import { Public } from '../auth';
-import { ResetPasswordInputDto, ResetPasswordValidationInputDto } from '@wishlist/common-types';
+import { Body, Controller, Post } from '@nestjs/common'
+import { ApiTags } from '@nestjs/swagger'
+import { ResetPasswordInputDto, ResetPasswordValidationInputDto } from '@wishlist/common-types'
+
+import { Public } from '../auth'
+import { PasswordVerificationService } from './password-verification.service'
 
 @Public()
 @ApiTags('User Password Validation')
@@ -12,11 +13,11 @@ export class PasswordVerificationController {
 
   @Post('/send-reset-email')
   sendResetPasswordEmail(@Body() dto: ResetPasswordInputDto): Promise<void> {
-    return this.verificationService.sendResetEmail(dto);
+    return this.verificationService.sendResetEmail(dto)
   }
 
   @Post('/reset')
   resetPassword(@Body() dto: ResetPasswordValidationInputDto): Promise<void> {
-    return this.verificationService.resetPassword(dto);
+    return this.verificationService.resetPassword(dto)
   }
 }
