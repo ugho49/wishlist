@@ -2,7 +2,7 @@ import { afterAll, beforeAll, beforeEach } from '@jest/globals'
 import { INestApplication } from '@nestjs/common'
 import { DataSource } from 'typeorm'
 
-import { createApp } from '../bootstrap'
+import { createApp } from '../../bootstrap'
 import { TableAssert } from './table-assert'
 
 export function useTestApp() {
@@ -26,7 +26,7 @@ export function useTestApp() {
 
   return {
     getHttpServer: () => app.getHttpServer(),
-    runQuery: (query: string, parameters?: unknown[]) => datasource.query(query, parameters),
+    getDatasource: () => datasource,
     expectTable: (table: string) => new TableAssert(datasource, table),
   }
 }

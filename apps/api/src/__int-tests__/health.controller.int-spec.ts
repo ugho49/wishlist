@@ -1,6 +1,6 @@
 import * as request from 'supertest'
 
-import { useTestApp } from '../../__test__'
+import { useTestApp } from './utils'
 
 describe('HealthController', () => {
   const { getHttpServer } = useTestApp()
