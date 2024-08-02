@@ -1,17 +1,18 @@
-import { uuid } from '@wishlist/common'
-import * as request from 'supertest'
-
 import 'jest-extended'
 
-import { PasswordManager } from '../domain/auth'
-import { insertUser, USER_TABLE, useTestApp } from './utils'
+import { BASE_USER_EMAIL, DEFAULT_USER_PASSWORD, insertBaseUser, RequestApp, USER_TABLE, useTestApp } from './utils'
 
 describe('AuthController', () => {
-  const { getHttpServer, expectTable, getDatasource } = useTestApp()
+  const { getRequest, expectTable, getDatasource } = useTestApp()
+  let request: RequestApp
+
+  beforeEach(async () => {
+    request = await getRequest()
+  })
 
   describe('POST /login', () => {
-    it('should return 400 with invalid input', () => {
-      return request(getHttpServer())
+    it('should return 400 with invalid input', async () => {
+      await request
         .post('/auth/login')
         .send({ email: 'invalid-email', password: '' })
         .expect(400)
@@ -21,45 +22,29 @@ describe('AuthController', () => {
     it('should return 401 with not existing user', async () => {
       await expectTable(USER_TABLE).hasNumberOfRows(0).check()
 
-      await request(getHttpServer())
+      await request
         .post('/auth/login')
-        .send({ email: 'test@test.fr', password: 'password' })
+        .send({ email: BASE_USER_EMAIL, password: DEFAULT_USER_PASSWORD })
         .expect(401)
         .expect(({ body }) => expect(body).toMatchObject({ error: 'Unauthorized', message: 'Incorrect login' }))
     })
 
     it('should return 401 with invalid credentials', async () => {
-      const datasource = getDatasource()
+      await insertBaseUser(getDatasource())
 
-      await insertUser(datasource, {
-        id: uuid(),
-        email: 'test@test.fr',
-        firstname: 'John',
-        lastname: 'Doe',
-        password_enc: await PasswordManager.hash('password'),
-      })
-
-      await request(getHttpServer())
+      await request
         .post('/auth/login')
-        .send({ email: 'test@test.fr', password: 'invalid-password' })
+        .send({ email: BASE_USER_EMAIL, password: 'invalid-password' })
         .expect(401)
         .expect(({ body }) => expect(body).toMatchObject({ error: 'Unauthorized', message: 'Incorrect login' }))
     })
 
     it('should return tokens with valid credentials', async () => {
-      const datasource = getDatasource()
+      await insertBaseUser(getDatasource())
 
-      await insertUser(datasource, {
-        id: uuid(),
-        email: 'test@test.fr',
-        firstname: 'John',
-        lastname: 'Doe',
-        password_enc: await PasswordManager.hash('password'),
-      })
-
-      await request(getHttpServer())
+      await request
         .post('/auth/login')
-        .send({ email: 'test@test.fr', password: 'password' })
+        .send({ email: BASE_USER_EMAIL, password: DEFAULT_USER_PASSWORD })
         .expect(200)
         .expect(({ body }) =>
           expect(body).toMatchObject({ access_token: expect.toBeString(), refresh_token: expect.toBeString() }),

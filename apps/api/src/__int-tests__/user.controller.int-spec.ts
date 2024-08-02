@@ -1,24 +1,66 @@
-import * as request from 'supertest'
-
 import 'jest-extended'
 
 import { uuid } from '@wishlist/common'
+import { DateTime } from 'luxon'
 
 import {
+  BASE_USER_EMAIL,
+  DEFAULT_USER_PASSWORD,
   EVENT_ATTENDEE_TABLE,
+  insertAdminUser,
+  insertBaseUser,
   insertEvent,
   insertPendingAttendee,
-  insertUser,
+  RequestApp,
   USER_EMAIL_SETTING_TABLE,
   USER_TABLE,
   useTestApp,
 } from './utils'
 
 describe('UserController', () => {
-  const { getHttpServer, expectTable, getDatasource } = useTestApp()
+  const { getRequest, expectTable, getDatasource } = useTestApp()
+
+  describe('GET /user', () => {
+    const path = '/user'
+
+    it('should return unauthorized if not authenticated', async () => {
+      const request = await getRequest()
+
+      await request.get(path).expect(401)
+    })
+
+    it('should return user infos if authenticated', async () => {
+      const request = await getRequest({ signedAs: 'BASE_USER' })
+
+      await request
+        .get(path)
+        .expect(200)
+        .expect(({ body }) =>
+          expect(body).toEqual({
+            id: expect.toBeString(),
+            email: BASE_USER_EMAIL,
+            firstname: 'John',
+            lastname: 'Doe',
+            last_connected_at: expect.toBeDateString(),
+            last_ip: expect.toBeString(),
+            is_enabled: true,
+            admin: false,
+            social: [],
+            created_at: expect.toBeDateString(),
+            updated_at: expect.toBeDateString(),
+          }),
+        )
+    })
+  })
 
   describe('POST /user/register', () => {
     const path = '/user/register'
+
+    let request: RequestApp
+
+    beforeEach(async () => {
+      request = await getRequest()
+    })
 
     it.each([
       {
@@ -55,7 +97,7 @@ describe('UserController', () => {
         ],
       },
     ])('should return 400 when invalid input: $case', async ({ body, message }) => {
-      await request(getHttpServer())
+      await request
         .post(path)
         .send(body)
         .expect(400)
@@ -67,22 +109,14 @@ describe('UserController', () => {
     })
 
     describe('when valid input', () => {
-      const input = { email: 'test@test.fr', password: 'Password123', firstname: 'John', lastname: 'Doe' }
+      const input = { email: BASE_USER_EMAIL, password: DEFAULT_USER_PASSWORD, firstname: 'John', lastname: 'Doe' }
 
       it('should fail when email already exists', async () => {
-        const dataSource = getDatasource()
-
-        await insertUser(dataSource, {
-          id: uuid(),
-          email: 'test@test.fr',
-          firstname: 'John',
-          lastname: 'Doe',
-          password_enc: 'password_enc',
-        })
+        await insertBaseUser(getDatasource())
 
         await expectTable(USER_TABLE).hasNumberOfRows(1).check()
 
-        await request(getHttpServer())
+        await request
           .post(path)
           .send(input)
           .expect(422)
@@ -94,14 +128,14 @@ describe('UserController', () => {
       it('should create user', async () => {
         await expectTable(USER_TABLE).hasNumberOfRows(0).check()
 
-        const res = await request(getHttpServer())
+        const res = await request
           .post(path)
           .send(input)
           .expect(201)
           .expect(({ body }) =>
             expect(body).toEqual({
               id: expect.toBeString(),
-              email: 'test@test.fr',
+              email: BASE_USER_EMAIL,
               firstname: 'John',
               lastname: 'Doe',
             }),
@@ -114,7 +148,7 @@ describe('UserController', () => {
           .row(0)
           .toMatchObject({
             id: userId,
-            email: 'test@test.fr',
+            email: BASE_USER_EMAIL,
             first_name: 'John',
             last_name: 'Doe',
             authorities: ['ROLE_USER'],
@@ -143,19 +177,12 @@ describe('UserController', () => {
       })
 
       it('should create user and join event if invited as pending', async () => {
-        const dataSource = getDatasource()
+        const datasource = getDatasource()
 
-        const creatorId = uuid()
-        await insertUser(dataSource, {
-          id: creatorId,
-          email: 'admin@admin.fr',
-          firstname: 'John',
-          lastname: 'Doe',
-          password_enc: 'password_enc',
-        })
+        const creatorId = await insertAdminUser(datasource)
 
         const eventId = uuid()
-        await insertEvent(dataSource, {
+        await insertEvent(datasource, {
           id: eventId,
           title: 'Event',
           description: 'Description',
@@ -164,29 +191,19 @@ describe('UserController', () => {
         })
 
         const attendeeId = uuid()
-        await insertPendingAttendee(dataSource, {
+        await insertPendingAttendee(datasource, {
           id: attendeeId,
           eventId: eventId,
-          tempUserEmail: 'test@test.fr',
+          tempUserEmail: BASE_USER_EMAIL,
         })
 
         await expectTable(USER_TABLE).hasNumberOfRows(1).check()
 
-        const res = await request(getHttpServer())
-          .post(path)
-          .send(input)
-          .expect(201)
-          .expect(({ body }) =>
-            expect(body).toEqual({
-              id: expect.toBeString(),
-              email: 'test@test.fr',
-              firstname: 'John',
-              lastname: 'Doe',
-            }),
-          )
+        const res = await request.post(path).send(input).expect(201)
 
         await expectTable(USER_TABLE).hasNumberOfRows(2).check()
         await expectTable(USER_EMAIL_SETTING_TABLE).hasNumberOfRows(1).check()
+
         await expectTable(EVENT_ATTENDEE_TABLE)
           .hasNumberOfRows(1)
           .row(0)
@@ -198,6 +215,89 @@ describe('UserController', () => {
           })
           .check()
       })
+    })
+  })
+
+  describe('PUT /user', () => {
+    const path = '/user'
+
+    it('should return unauthorized if not authenticated', async () => {
+      const request = await getRequest()
+
+      await request.put(path).expect(401)
+    })
+
+    it.each([
+      {
+        body: {},
+        case: 'empty body',
+        message: [
+          'firstname must be shorter than or equal to 50 characters',
+          'lastname must be shorter than or equal to 50 characters',
+        ],
+      },
+      {
+        body: {
+          firstname: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+        },
+        case: 'too long firstname',
+        message: ['firstname must be shorter than or equal to 50 characters'],
+      },
+      {
+        body: {
+          lastname: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+        },
+        case: 'too long firstname',
+        message: ['lastname must be shorter than or equal to 50 characters'],
+      },
+      {
+        body: {
+          birthday: 'not-a-day',
+        },
+        case: 'birthday not a date',
+        message: ['birthday must be a Date instance'],
+      },
+      {
+        body: {
+          birthday: DateTime.now().plus({ days: 1 }).toISODate(),
+        },
+        case: 'birthday in future',
+        message: [expect.stringMatching('maximal allowed date for birthday is')],
+      },
+    ])('should return 400 when invalid input: $case', async ({ body, message }) => {
+      const request = await getRequest({ signedAs: 'BASE_USER' })
+
+      await request
+        .put(path)
+        .send(body)
+        .expect(400)
+        .expect(({ body }) =>
+          expect(body).toMatchObject({ error: 'Bad Request', message: expect.arrayContaining(message) }),
+        )
+    })
+
+    it('should update user when valid input', async () => {
+      const request = await getRequest({ signedAs: 'BASE_USER' })
+
+      // const birthday = DateTime.fromObject({ year: 1993, month: 11, day: 15 }).toISODate()
+      await request
+        .put(path)
+        .send({
+          firstname: 'Updated',
+          lastname: 'UPDATED',
+          // birthday,
+        })
+        .expect(200)
+
+      await expectTable(USER_TABLE)
+        .hasNumberOfRows(1)
+        .row(0)
+        .toMatchObject({
+          first_name: 'Updated',
+          last_name: 'UPDATED',
+          // birthday,
+        })
+        .check()
     })
   })
 })

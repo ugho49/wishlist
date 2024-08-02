@@ -1,12 +1,12 @@
-import * as request from 'supertest'
-
 import { useTestApp } from './utils'
 
 describe('HealthController', () => {
-  const { getHttpServer } = useTestApp()
+  const { getRequest } = useTestApp()
 
-  it('GET /health', () => {
-    return request(getHttpServer())
+  it('GET /health', async () => {
+    const request = await getRequest()
+
+    await request
       .get('/health')
       .expect(200)
       .expect({
