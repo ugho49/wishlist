@@ -29,7 +29,7 @@ export const ConfirmMenuItem = ({
 
   const closeDialog = useCallback(() => {
     setOpenDialog(false)
-    onCancel && onCancel()
+    onCancel?.()
   }, [])
 
   return (

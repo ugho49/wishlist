@@ -94,7 +94,7 @@ export class UserService {
       }
 
       return toMiniUserDto(entity)
-    } catch (e) {
+    } catch {
       throw new UnprocessableEntityException()
     }
   }

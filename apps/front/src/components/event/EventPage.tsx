@@ -51,7 +51,7 @@ export const EventPage = () => {
       await handleDelete()
       addToast({ message: "L'évènement à bien été supprimée", variant: 'success' })
       navigate('/events')
-    } catch (e) {
+    } catch {
       addToast({ message: "Une erreur s'est produite", variant: 'error' })
     }
   }

@@ -68,7 +68,7 @@ export const AdminEditUserPage = () => {
     try {
       await api.user.update(userId, { is_enabled: false })
       addToast({ message: 'Utilisateur désactivé', variant: 'success' })
-    } catch (e) {
+    } catch {
       addToast({ message: "Une erreur s'est produite", variant: 'error' })
     } finally {
       setLoading(false)
@@ -81,7 +81,7 @@ export const AdminEditUserPage = () => {
     try {
       await api.user.update(userId, { is_enabled: true })
       addToast({ message: 'Utilisateur activé', variant: 'success' })
-    } catch (e) {
+    } catch {
       addToast({ message: "Une erreur s'est produite", variant: 'error' })
     } finally {
       setLoading(false)
@@ -100,7 +100,7 @@ export const AdminEditUserPage = () => {
       })
 
       addToast({ message: 'Profil mis à jour', variant: 'success' })
-    } catch (e) {
+    } catch {
       addToast({ message: "Une erreur s'est produite", variant: 'error' })
     } finally {
       setLoading(false)

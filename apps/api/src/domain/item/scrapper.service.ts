@@ -30,7 +30,7 @@ export class ScrapperService {
           'Sec-Fetch-User': '?1',
         },
       })
-    } catch (e) {
+    } catch {
       throw new Error(`Timeout: ${timeout}ms`)
     } finally {
       clearTimeout(id)
@@ -107,7 +107,7 @@ export class ScrapperService {
     try {
       new URL(url)
       return true
-    } catch (e) {
+    } catch {
       return false
     }
   }

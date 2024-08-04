@@ -28,7 +28,7 @@ class TokenService<T> {
         rawToken: token,
         payload,
       }
-    } catch (e) {
+    } catch {
       return undefined
     }
   }
@@ -41,7 +41,7 @@ class TokenService<T> {
     try {
       const { exp } = jwtDecode(token) as { exp: number }
       return Date.now() >= exp * 1000
-    } catch (e) {
+    } catch {
       return true
     }
   }

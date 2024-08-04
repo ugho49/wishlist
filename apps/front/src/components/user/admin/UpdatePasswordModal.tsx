@@ -34,7 +34,7 @@ export const UpdatePasswordModal = ({ onClose, open, userId }: UpdatePasswordMod
       setLoading(false)
       setNewPassword('')
       onClose()
-    } catch (e) {
+    } catch {
       addToast({ message: "Une erreur s'est produite", variant: 'error' })
     }
   }

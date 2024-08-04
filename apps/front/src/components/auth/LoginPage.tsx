@@ -73,7 +73,7 @@ export const LoginPage = () => {
       setSocialLoading(true)
       const data = await api.auth.loginWithGoogle({ credential: credentialResponse.credential || '' })
       handleLoginSuccess(data)
-    } catch (e) {
+    } catch {
       setSocialLoading(false)
       addToast({ message: "Une erreur s'est produite", variant: 'error' })
     }

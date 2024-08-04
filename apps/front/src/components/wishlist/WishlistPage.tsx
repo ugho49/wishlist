@@ -45,7 +45,7 @@ export const WishlistPage = () => {
       await handleDelete()
       addToast({ message: 'La liste à bien été supprimée', variant: 'success' })
       navigate('/wishlists')
-    } catch (e) {
+    } catch {
       addToast({ message: "Une erreur s'est produite", variant: 'error' })
     }
   }

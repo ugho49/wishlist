@@ -160,7 +160,7 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
         } else {
           setPictureUrl('')
         }
-      } catch (e) {
+      } catch {
         addToast({ message: "Une erreur s'est produite", variant: 'error' })
       } finally {
         setScanUrlLoading(false)
