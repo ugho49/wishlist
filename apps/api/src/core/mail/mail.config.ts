@@ -1,11 +1,21 @@
-import { registerAs } from '@nestjs/config'
+import { IsNumber, IsString } from 'class-validator'
 
-export default registerAs('mail', () => ({
-  from: 'Wishlist App <contact@wishlistapp.fr>',
-  host: process.env.MAIL_HOST || 'localhost',
-  port: parseInt(process.env.MAIL_PORT || '1025', 10),
-  auth: {
-    username: process.env.MAIL_USERNAME || '',
-    password: process.env.MAIL_PASSWORD || '',
-  },
-}))
+export class MailConfig {
+  @IsString()
+  from: string
+
+  @IsString()
+  host: string
+
+  @IsNumber()
+  port: number
+
+  @IsString()
+  username: string
+
+  @IsString()
+  password: string
+
+  @IsString()
+  templateDir: string
+}

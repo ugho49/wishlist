@@ -1,39 +1,11 @@
-import { Logger, ValidationPipe } from '@nestjs/common'
+import { Logger } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
-import { NestFactory } from '@nestjs/core'
-import helmet from 'helmet'
-
-import { AppModule } from './app.module'
-import { bootstrapSwagger } from './swagger'
 
 import 'pg'
 
-async function createApp() {
-  const app = await NestFactory.create(AppModule)
+import { createApp } from './bootstrap'
 
-  app.useGlobalPipes(new ValidationPipe({ transform: true, stopAtFirstError: true }))
-  app.enableCors()
-  app.enableShutdownHooks()
-
-  app.use(
-    helmet({
-      contentSecurityPolicy: {
-        directives: {
-          defaultSrc: [`'self'`],
-          styleSrc: [`'self'`, `'unsafe-inline'`],
-          imgSrc: [`'self'`, 'data:', 'validator.swagger.io'],
-          scriptSrc: [`'self'`, `https: 'unsafe-inline'`],
-        },
-      },
-    }),
-  )
-
-  bootstrapSwagger(app)
-
-  return app
-}
-
-async function start() {
+;(async function () {
   Logger.log('Starting server ...')
 
   const app = await createApp()
@@ -44,6 +16,4 @@ async function start() {
 
   Logger.log(`📚 Swagger available on: http://localhost:${port}/api`)
   Logger.log(`🚀 Application is running on: http://localhost:${port}`)
-}
-
-void start()
+})()

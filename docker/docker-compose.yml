@@ -5,8 +5,6 @@ services:
       POSTGRES_USER: "service"
       POSTGRES_PASSWORD: "service"
       POSTGRES_DB: "wishlist-api"
-    ports:
-      - "5432:5432"
     healthcheck:
       test: "pg_isready -d wishlist-api -U service"
       interval: 2s
@@ -15,17 +13,8 @@ services:
 
   mail:
     image: maildev/maildev:2.0.5
-    ports:
-      - '1080:1080'
-      - '1025:1025'
     healthcheck:
       test: wget --spider http://localhost:1080 || exit 1
       interval: 2s
       timeout: 5s
       retries: 10
-
-  adminer:
-    image: adminer:4.8.1
-    restart: always
-    ports:
-      - 3333:8080

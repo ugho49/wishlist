@@ -1,17 +1,31 @@
 import { Module } from '@nestjs/common'
-import { ConfigModule, ConfigType } from '@nestjs/config'
+import { ConfigService } from '@nestjs/config'
 import { TypeOrmModule } from '@nestjs/typeorm'
+import { SnakeNamingStrategy } from 'typeorm-naming-strategies'
 
-import dbConfig from './database.config'
+import migrations from './migrations'
+
+const typeOrmModule = TypeOrmModule.forRootAsync({
+  inject: [ConfigService],
+  useFactory: (config: ConfigService) => ({
+    type: 'postgres',
+    host: config.get<string>('DB_HOST', ''),
+    port: parseInt(config.get<string>('DB_PORT', '5432'), 10),
+    username: config.get<string>('DB_USERNAME', ''),
+    password: config.get<string>('DB_PASSWORD', ''),
+    database: config.get<string>('DB_NAME', ''),
+    namingStrategy: new SnakeNamingStrategy(),
+    autoLoadEntities: true,
+    synchronize: false, // Setting synchronize: true shouldn't be used in production - otherwise you can lose production data.
+    migrationsTableName: 'typeorm_migrations',
+    migrationsRun: true,
+    migrations,
+    logging: config.get<string>('DB_VERBOSE', 'false') === 'true',
+    // dropSchema: true, // ⚠️⚠️ DEV MODE ONLY ⚠️⚠️ Uncomment this if you want to drop all database
+  }),
+})
 
 @Module({
-  imports: [
-    ConfigModule.forFeature(dbConfig),
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule.forFeature(dbConfig)],
-      inject: [dbConfig.KEY],
-      useFactory: (config: ConfigType<typeof dbConfig>) => config,
-    }),
-  ],
+  imports: [typeOrmModule],
 })
 export class DatabaseModule {}

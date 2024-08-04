@@ -1,12 +1,12 @@
-import { join } from 'path'
+import { IsBoolean, IsString } from 'class-validator'
 
-import { registerAs } from '@nestjs/config'
+export class BucketConfig {
+  @IsString()
+  firebaseServiceAccountKeyPath: string
 
-export default registerAs('bucket', () => {
-  const firebaseServiceAccountKeyPath = process.env.FIREBASE_SERVICE_ACCOUNT_KEY_PATH || ''
+  @IsString()
+  bucketName: string
 
-  return {
-    firebaseServiceAccountKeyPath: join(__dirname, firebaseServiceAccountKeyPath),
-    bucketName: process.env.FIREBASE_BUCKET_NAME || '',
-  }
-})
+  @IsBoolean()
+  isMock: boolean
+}
