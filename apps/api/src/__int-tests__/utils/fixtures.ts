@@ -3,87 +3,129 @@ import { Authorities } from '@wishlist/common-types'
 import { DataSource } from 'typeorm'
 
 import { PasswordManager } from '../../domain/auth'
+import { SignedAs } from './use-test-app'
 
-export const USER_TABLE = '"user"'
-export const USER_EMAIL_SETTING_TABLE = 'user_email_setting'
-export const EVENT_TABLE = 'event'
-export const EVENT_ATTENDEE_TABLE = 'event_attendee'
+export class Fixtures {
+  static readonly USER_TABLE = '"user"'
+  static readonly USER_EMAIL_SETTING_TABLE = 'user_email_setting'
+  static readonly USER_PASSWORD_VERIFICATION_TABLE = 'user_password_verification'
+  static readonly EVENT_TABLE = 'event'
+  static readonly EVENT_ATTENDEE_TABLE = 'event_attendee'
+  static readonly DEFAULT_USER_PASSWORD = 'Password123'
+  static readonly BASE_USER_EMAIL = 'test@test.fr'
+  static readonly ADMIN_USER_EMAIL = 'admin@admin.fr'
 
-export const DEFAULT_USER_PASSWORD = 'Password123'
-export const BASE_USER_EMAIL = 'test@test.fr'
-export const ADMIN_USER_EMAIL = 'admin@admin.fr'
+  private constructor(private readonly datasource: DataSource) {}
 
-export const insertUser = (
-  datasource: DataSource,
-  parameters: {
-    id: string
+  static create(datasource: DataSource): Fixtures {
+    return new Fixtures(datasource)
+  }
+
+  async getSignedUserId(signedAs: SignedAs): Promise<string> {
+    let email = ''
+
+    switch (signedAs) {
+      case 'BASE_USER':
+        email = Fixtures.BASE_USER_EMAIL
+        break
+      case 'ADMIN_USER':
+        email = Fixtures.ADMIN_USER_EMAIL
+        break
+      default:
+        throw new Error(`Unknown signedAs value: ${signedAs}`)
+    }
+
+    const result = await this.datasource.query(`SELECT id FROM ${Fixtures.USER_TABLE} WHERE email = $1`, [email])
+
+    if (result.length > 1) {
+      throw new Error(`Multiple users found for email: ${email}`)
+    }
+
+    if (result.length === 0) {
+      throw new Error(`No user found for email: ${email}`)
+    }
+
+    return result[0]['id']
+  }
+
+  async insertUser(parameters: {
     email: string
     firstname: string
     lastname: string
-    password_enc: string
+    password?: string
     authorities?: Authorities[]
-  },
-) => {
-  const query = `INSERT INTO ${USER_TABLE} (id, email, first_name, last_name, password_enc, authorities) VALUES ($1, $2, $3, $4, $5, $6)`
-  const { id, email, firstname, lastname, password_enc, authorities } = parameters
-  return datasource.query(query, [id, email, firstname, lastname, password_enc, authorities ?? [Authorities.ROLE_USER]])
-}
+  }): Promise<string> {
+    const query = `INSERT INTO ${Fixtures.USER_TABLE} (id, email, first_name, last_name, password_enc, authorities) VALUES ($1, $2, $3, $4, $5, $6)`
+    const id = uuid()
+    const { email, firstname, lastname, password, authorities } = parameters
+    const passwordEnc = await PasswordManager.hash(password ?? Fixtures.DEFAULT_USER_PASSWORD)
+    await this.datasource.query(query, [
+      id,
+      email,
+      firstname,
+      lastname,
+      passwordEnc,
+      authorities ?? [Authorities.ROLE_USER],
+    ])
+    return id
+  }
 
-export const insertAdminUser = async (datasource: DataSource): Promise<string> => {
-  const passwordEnc = await PasswordManager.hash(DEFAULT_USER_PASSWORD)
-  const id = uuid()
+  async insertAdminUser(): Promise<string> {
+    return this.insertUser({
+      email: Fixtures.ADMIN_USER_EMAIL,
+      firstname: 'Admin',
+      lastname: 'ADMIN',
+      authorities: [Authorities.ROLE_ADMIN],
+    })
+  }
 
-  await insertUser(datasource, {
-    id,
-    email: ADMIN_USER_EMAIL,
-    firstname: 'Admin',
-    lastname: 'ADMIN',
-    password_enc: passwordEnc,
-    authorities: [Authorities.ROLE_ADMIN],
-  })
+  async insertBaseUser(): Promise<string> {
+    return this.insertUser({
+      email: Fixtures.BASE_USER_EMAIL,
+      firstname: 'John',
+      lastname: 'Doe',
+      authorities: [Authorities.ROLE_USER],
+    })
+  }
 
-  return id
-}
+  async insertEvent(parameters: {
+    title: string
+    description: string
+    eventDate: Date
+    creatorId: string
+  }): Promise<string> {
+    const query = `INSERT INTO ${Fixtures.EVENT_TABLE} (id, title, description, event_date, creator_id) VALUES ($1, $2, $3, $4, $5)`
+    const { title, description, eventDate, creatorId } = parameters
+    const id = uuid()
+    await this.datasource.query(query, [id, title, description, eventDate, creatorId])
+    return id
+  }
 
-export const insertBaseUser = async (datasource: DataSource): Promise<string> => {
-  const passwordEnc = await PasswordManager.hash(DEFAULT_USER_PASSWORD)
-  const id = uuid()
+  async insertPendingAttendee(parameters: { eventId: string; tempUserEmail: string }): Promise<string> {
+    const query = `INSERT INTO ${Fixtures.EVENT_ATTENDEE_TABLE} (id, event_id, temp_user_email) VALUES ($1, $2, $3)`
+    const id = uuid()
+    const { eventId, tempUserEmail } = parameters
+    await this.datasource.query(query, [id, eventId, tempUserEmail])
+    return id
+  }
 
-  await insertUser(datasource, {
-    id,
-    email: BASE_USER_EMAIL,
-    firstname: 'John',
-    lastname: 'Doe',
-    password_enc: passwordEnc,
-    authorities: [Authorities.ROLE_USER],
-  })
+  async insertActiveAttendee(parameters: { eventId: string; userId: string }): Promise<string> {
+    const query = `INSERT INTO ${Fixtures.EVENT_ATTENDEE_TABLE} (id, event_id, user_id) VALUES ($1, $2, $3)`
+    const id = uuid()
+    const { eventId, userId } = parameters
+    await this.datasource.query(query, [id, eventId, userId])
+    return id
+  }
 
-  return id
-}
-
-export const insertEvent = (
-  datasource: DataSource,
-  parameters: { id: string; title: string; description: string; eventDate: Date; creatorId: string },
-) => {
-  const query = `INSERT INTO ${EVENT_TABLE} (id, title, description, event_date, creator_id) VALUES ($1, $2, $3, $4, $5)`
-  const { id, title, description, eventDate, creatorId } = parameters
-  return datasource.query(query, [id, title, description, eventDate, creatorId])
-}
-
-export const insertPendingAttendee = (
-  datasource: DataSource,
-  parameters: { id: string; eventId: string; tempUserEmail: string },
-) => {
-  const query = `INSERT INTO ${EVENT_ATTENDEE_TABLE} (id, event_id, temp_user_email) VALUES ($1, $2, $3)`
-  const { id, eventId, tempUserEmail } = parameters
-  return datasource.query(query, [id, eventId, tempUserEmail])
-}
-
-export const insertActiveAttendee = (
-  datasource: DataSource,
-  parameters: { id: string; eventId: string; userId: string },
-) => {
-  const query = `INSERT INTO ${EVENT_ATTENDEE_TABLE} (id, event_id, user_id) VALUES ($1, $2, $3)`
-  const { id, eventId, userId } = parameters
-  return datasource.query(query, [id, eventId, userId])
+  async insertUserPasswordVerification(parameters: {
+    userId: string
+    token: string
+    expiredAt: Date
+  }): Promise<string> {
+    const query = `INSERT INTO ${Fixtures.USER_PASSWORD_VERIFICATION_TABLE} (id, user_id, token, expired_at) VALUES ($1, $2, $3, $4)`
+    const { userId, token, expiredAt } = parameters
+    const id = uuid()
+    await this.datasource.query(query, [id, userId, token, expiredAt])
+    return id
+  }
 }

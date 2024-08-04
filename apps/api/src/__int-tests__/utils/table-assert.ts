@@ -13,6 +13,7 @@ type FetchValueResult = {
 
 export class TableAssert {
   private assertions = new Set<DbAssertion>()
+  private cachedRows = new Map<number, FetchValueResult['value']>()
 
   constructor(
     private readonly datasource: DataSource,
@@ -50,13 +51,21 @@ export class TableAssert {
   }
 
   private async fetchValue(index: number): Promise<FetchValueResult> {
-    const result = await this.datasource.query(`SELECT * FROM ${this.tableName} OFFSET ${index} LIMIT 1`)
-
-    return {
-      value: result.length === 1 ? result[0] : undefined,
+    const returnValue: FetchValueResult = {
+      value: undefined,
       index,
       tableName: this.tableName,
     }
+
+    if (this.cachedRows.has(index)) {
+      return { ...returnValue, value: this.cachedRows.get(index) }
+    }
+
+    const result = await this.datasource.query(`SELECT * FROM ${this.tableName} OFFSET ${index} LIMIT 1`)
+    const value = result.length === 1 ? result[0] : undefined
+    this.cachedRows.set(index, value)
+
+    return { ...returnValue, value }
   }
 }
 
@@ -66,18 +75,6 @@ class TableRowAssert {
     private readonly fetchValue: () => Promise<FetchValueResult>,
     private readonly addAssertion: (assertion: DbAssertion) => void,
   ) {}
-
-  toMatchObject(expected: Record<string, unknown>): TableAssert {
-    this.addAssertion(async () => {
-      const { value, index, tableName } = await this.fetchValue()
-      expect(value, `Wrong value for row[${index}] of table ${tableName}`, {
-        showPrefix: false,
-        showStack: false,
-      }).toMatchObject(expected)
-    })
-
-    return this.parent
-  }
 
   toEqual(expected: Record<string, unknown>): TableAssert {
     this.addAssertion(async () => {
@@ -89,5 +86,36 @@ class TableRowAssert {
     })
 
     return this.parent
+  }
+
+  toMatchObject(expected: Record<string, unknown>): this {
+    this.addAssertion(async () => {
+      const { value, index, tableName } = await this.fetchValue()
+      expect(value, `Wrong value for row[${index}] of table ${tableName}`, {
+        showPrefix: false,
+        showStack: false,
+      }).toMatchObject(expected)
+    })
+
+    return this
+  }
+
+  expectColumn<T>(columnName: string, checker: (value: T | undefined) => unknown | Promise<unknown>): this {
+    this.addAssertion(async () => {
+      const { value } = await this.fetchValue()
+      const columnValue = value?.[columnName] as T | undefined
+
+      await checker(columnValue)
+    })
+
+    return this
+  }
+
+  row(index: number = 0): TableRowAssert {
+    return this.parent.row(index)
+  }
+
+  check() {
+    return this.parent.check()
   }
 }

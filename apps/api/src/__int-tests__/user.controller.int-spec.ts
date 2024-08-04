@@ -1,23 +1,15 @@
-import { uuid } from '@wishlist/common'
 import { DateTime } from 'luxon'
 
-import {
-  BASE_USER_EMAIL,
-  DEFAULT_USER_PASSWORD,
-  EVENT_ATTENDEE_TABLE,
-  insertAdminUser,
-  insertBaseUser,
-  insertEvent,
-  insertPendingAttendee,
-  RequestApp,
-  USER_EMAIL_SETTING_TABLE,
-  USER_TABLE,
-  useTestApp,
-  useTestMail,
-} from './utils'
+import { PasswordManager } from '../domain/auth'
+import { Fixtures, RequestApp, useTestApp, useTestMail } from './utils'
 
 describe('UserController', () => {
-  const { getRequest, expectTable, getDatasource } = useTestApp()
+  const { getRequest, expectTable, getFixtures } = useTestApp()
+  let fixtures: Fixtures
+
+  beforeEach(() => {
+    fixtures = getFixtures()
+  })
 
   describe('GET /user', () => {
     const path = '/user'
@@ -37,7 +29,7 @@ describe('UserController', () => {
         .expect(({ body }) =>
           expect(body).toEqual({
             id: expect.toBeString(),
-            email: BASE_USER_EMAIL,
+            email: Fixtures.BASE_USER_EMAIL,
             firstname: 'John',
             lastname: 'Doe',
             last_connected_at: expect.toBeDateString(),
@@ -104,17 +96,22 @@ describe('UserController', () => {
           expect(body).toMatchObject({ error: 'Bad Request', message: expect.arrayContaining(message) }),
         )
 
-      await expectTable(USER_TABLE).hasNumberOfRows(0).check()
+      await expectTable(Fixtures.USER_TABLE).hasNumberOfRows(0).check()
     })
 
     describe('when valid input', () => {
       const { expectMail } = useTestMail()
-      const input = { email: BASE_USER_EMAIL, password: DEFAULT_USER_PASSWORD, firstname: 'John', lastname: 'Doe' }
+      const input = {
+        email: Fixtures.BASE_USER_EMAIL,
+        password: Fixtures.DEFAULT_USER_PASSWORD,
+        firstname: 'John',
+        lastname: 'Doe',
+      }
 
       it('should fail when email already exists', async () => {
-        await insertBaseUser(getDatasource())
+        await fixtures.insertBaseUser()
 
-        await expectTable(USER_TABLE).hasNumberOfRows(1).check()
+        await expectTable(Fixtures.USER_TABLE).hasNumberOfRows(1).check()
 
         await request
           .post(path)
@@ -122,11 +119,11 @@ describe('UserController', () => {
           .expect(422)
           .expect(({ body }) => expect(body).toMatchObject({ message: 'Unprocessable Entity' }))
 
-        await expectTable(USER_TABLE).hasNumberOfRows(1).check()
+        await expectTable(Fixtures.USER_TABLE).hasNumberOfRows(1).check()
       })
 
       it('should create user', async () => {
-        await expectTable(USER_TABLE).hasNumberOfRows(0).check()
+        await expectTable(Fixtures.USER_TABLE).hasNumberOfRows(0).check()
 
         const res = await request
           .post(path)
@@ -135,7 +132,7 @@ describe('UserController', () => {
           .expect(({ body }) =>
             expect(body).toEqual({
               id: expect.toBeString(),
-              email: BASE_USER_EMAIL,
+              email: Fixtures.BASE_USER_EMAIL,
               firstname: 'John',
               lastname: 'Doe',
             }),
@@ -143,25 +140,28 @@ describe('UserController', () => {
 
         const userId = res.body.id
 
-        await expectTable(USER_TABLE)
+        await expectTable(Fixtures.USER_TABLE)
           .hasNumberOfRows(1)
           .row(0)
           .toMatchObject({
             id: userId,
-            email: BASE_USER_EMAIL,
+            email: Fixtures.BASE_USER_EMAIL,
             first_name: 'John',
             last_name: 'Doe',
             authorities: ['ROLE_USER'],
             is_enabled: true,
-            password_enc: expect.toBeString(),
             picture_url: null,
             last_connected_at: expect.toBeDateString(),
             created_at: expect.toBeDateString(),
             updated_at: expect.toBeDateString(),
           })
+          .expectColumn<string>('password_enc', async value => {
+            const res = await PasswordManager.verify({ hash: value, plainPassword: input.password })
+            expect(res, 'Password should match').toBe(true)
+          })
           .check()
 
-        await expectTable(USER_EMAIL_SETTING_TABLE)
+        await expectTable(Fixtures.USER_EMAIL_SETTING_TABLE)
           .hasNumberOfRows(1)
           .row(0)
           .toEqual({
@@ -174,44 +174,38 @@ describe('UserController', () => {
           .check()
 
         await expectMail()
-          .waitFor(1000)
+          .waitFor(500)
           .hasNumberOfEmails(1)
           .mail(0)
           .hasSubject('[Wishlist] Bienvenue !!!')
           .hasSender('contact@wishlistapp.fr')
-          .hasReceiver(BASE_USER_EMAIL)
+          .hasReceiver(Fixtures.BASE_USER_EMAIL)
           .check()
       })
 
       it('should create user and join event if invited as pending', async () => {
-        const datasource = getDatasource()
+        const creatorId = await fixtures.insertAdminUser()
 
-        const creatorId = await insertAdminUser(datasource)
-
-        const eventId = uuid()
-        await insertEvent(datasource, {
-          id: eventId,
+        const eventId = await fixtures.insertEvent({
           title: 'Event',
           description: 'Description',
           eventDate: new Date(),
           creatorId,
         })
 
-        const attendeeId = uuid()
-        await insertPendingAttendee(datasource, {
-          id: attendeeId,
+        const attendeeId = await fixtures.insertPendingAttendee({
           eventId: eventId,
-          tempUserEmail: BASE_USER_EMAIL,
+          tempUserEmail: Fixtures.BASE_USER_EMAIL,
         })
 
-        await expectTable(USER_TABLE).hasNumberOfRows(1).check()
+        await expectTable(Fixtures.USER_TABLE).hasNumberOfRows(1).check()
 
         const res = await request.post(path).send(input).expect(201)
 
-        await expectTable(USER_TABLE).hasNumberOfRows(2).check()
-        await expectTable(USER_EMAIL_SETTING_TABLE).hasNumberOfRows(1).check()
+        await expectTable(Fixtures.USER_TABLE).hasNumberOfRows(2).check()
+        await expectTable(Fixtures.USER_EMAIL_SETTING_TABLE).hasNumberOfRows(1).check()
 
-        await expectTable(EVENT_ATTENDEE_TABLE)
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE)
           .hasNumberOfRows(1)
           .row(0)
           .toMatchObject({
@@ -296,13 +290,99 @@ describe('UserController', () => {
         })
         .expect(200)
 
-      await expectTable(USER_TABLE)
+      await expectTable(Fixtures.USER_TABLE)
         .hasNumberOfRows(1)
         .row(0)
         .toMatchObject({
           first_name: 'Updated',
           last_name: 'UPDATED',
           // birthday,
+        })
+        .check()
+    })
+  })
+
+  describe('PUT /user/change-password', () => {
+    const path = '/user/change-password'
+    const newPassword = 'NewPassword123'
+
+    it('should return unauthorized if not authenticated', async () => {
+      const request = await getRequest()
+
+      await request.put(path).expect(401)
+    })
+
+    it.each([
+      {
+        body: {},
+        case: 'empty body',
+        message: ['old_password should not be empty', 'new_password must be shorter than or equal to 50 characters'],
+      },
+      {
+        body: {
+          old_password: 123456789,
+        },
+        case: 'old_password not a string',
+        message: ['old_password must be a string'],
+      },
+      {
+        body: {
+          new_password: '2small',
+        },
+        case: 'new_password too short',
+        message: ['new_password must be longer than or equal to 8 characters'],
+      },
+    ])('should return 400 when invalid input: $case', async ({ body, message }) => {
+      const request = await getRequest({ signedAs: 'BASE_USER' })
+
+      await request
+        .put(path)
+        .send(body)
+        .expect(400)
+        .expect(({ body }) =>
+          expect(body).toMatchObject({ error: 'Bad Request', message: expect.arrayContaining(message) }),
+        )
+    })
+
+    it('should not update user password when old password not match', async () => {
+      const request = await getRequest({ signedAs: 'BASE_USER' })
+
+      await request
+        .put(path)
+        .send({
+          old_password: 'wrong-password',
+          new_password: newPassword,
+        })
+        .expect(400)
+        .expect(({ body }) =>
+          expect(body).toMatchObject({ error: 'Bad Request', message: "Old password don't match with user password" }),
+        )
+
+      await expectTable(Fixtures.USER_TABLE)
+        .row(0)
+        .expectColumn<string>('password_enc', async value => {
+          const res = await PasswordManager.verify({ hash: value, plainPassword: Fixtures.DEFAULT_USER_PASSWORD })
+          expect(res, 'Password should match').toBe(true)
+        })
+        .check()
+    })
+
+    it('should update user password when valid input', async () => {
+      const request = await getRequest({ signedAs: 'BASE_USER' })
+
+      await request
+        .put(path)
+        .send({
+          old_password: Fixtures.DEFAULT_USER_PASSWORD,
+          new_password: newPassword,
+        })
+        .expect(200)
+
+      await expectTable(Fixtures.USER_TABLE)
+        .row(0)
+        .expectColumn<string>('password_enc', async value => {
+          const res = await PasswordManager.verify({ hash: value, plainPassword: newPassword })
+          expect(res, 'Password should match').toBe(true)
         })
         .check()
     })
