@@ -76,7 +76,7 @@ export const RegisterPage = () => {
       await api.user.registerWithGoogle({ credential: credentialResponse.credential || '' })
       const data = await api.auth.loginWithGoogle({ credential: credentialResponse.credential || '' })
       handleRegisterSuccess(data)
-    } catch (e) {
+    } catch {
       addToast({ message: "Une erreur s'est produite", variant: 'error' })
       setSocialLoading(false)
     }

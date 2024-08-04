@@ -88,7 +88,7 @@ export const AvatarCropperModal = ({ handleClose, imageSrc, handleSave }: Avatar
     try {
       const croppedImage = await getCroppedImg(imageSrc, croppedAreaPixels, rotation)
       handleSave(croppedImage)
-    } catch (e) {
+    } catch {
       addToast({ message: "Une erreur s'est produite lors du redimensionnement de l'image", variant: 'error' })
       handleClose()
     } finally {

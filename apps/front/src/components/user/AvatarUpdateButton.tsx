@@ -47,7 +47,7 @@ export const AvatarUpdateButton = ({
     try {
       await deletePictureHandler()
       onPictureUpdated(undefined)
-    } catch (e) {
+    } catch {
       addToast({ message: "Une erreur s'est produite", variant: 'error' })
     } finally {
       setLoading(false)
@@ -95,7 +95,7 @@ export const AvatarUpdateButton = ({
     try {
       await updatePictureFromSocialHandler(social.id)
       onPictureUpdated(social.picture_url!)
-    } catch (e) {
+    } catch {
       addToast({ message: "Une erreur s'est produite", variant: 'error' })
     } finally {
       setLoading(false)

@@ -21,7 +21,7 @@ export class PasswordManager {
       }
 
       return await argon2.verify(hash, plainPassword)
-    } catch (e) {
+    } catch {
       return false
     }
   }

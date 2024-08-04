@@ -143,7 +143,7 @@ export class AuthService {
       return this.jwtService.verify<RefreshTokenJwtPayload>(token, {
         secret: this.config.refreshToken.secret,
       })
-    } catch (e) {
+    } catch {
       throw new UnauthorizedException('Invalid token')
     }
   }

@@ -34,7 +34,7 @@ export async function sanitizeImgToUrl(file: File) {
     if (rotation) {
       imageDataUrl = await getRotatedImage(imageDataUrl, rotation)
     }
-  } catch (e) {
+  } catch {
     console.warn('failed to detect the orientation')
   }
   return imageDataUrl
