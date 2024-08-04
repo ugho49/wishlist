@@ -6,3 +6,4 @@ services:
   mail:
     ports:
       - '1025'
+      - '1080'

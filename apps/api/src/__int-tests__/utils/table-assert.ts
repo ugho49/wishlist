@@ -1,14 +1,18 @@
-import { expect } from '@jest/globals'
-import { DataSource } from 'typeorm'
-
+import 'jest'
 import 'jest-expect-message'
 
-type Assertion = () => Promise<unknown>
+import { DataSource } from 'typeorm'
 
-type FetchValueResult = Record<string, unknown> | undefined
+type DbAssertion = () => Promise<unknown>
+
+type FetchValueResult = {
+  value: Record<string, unknown> | undefined
+  index: number
+  tableName: string
+}
 
 export class TableAssert {
-  private assertions = new Set<Assertion>()
+  private assertions = new Set<DbAssertion>()
 
   constructor(
     private readonly datasource: DataSource,
@@ -21,13 +25,17 @@ export class TableAssert {
         .query(`SELECT COUNT(*) FROM ${this.tableName}`)
         .then(result => parseInt(result[0].count, 10))
 
-      expect(count).toEqual(expected)
+      expect(count, `Wrong number of rows for table ${this.tableName}`, {
+        showMatcherMessage: false,
+        showPrefix: false,
+        showStack: false,
+      }).toEqual(expected)
     })
 
     return this
   }
 
-  row(index: number): TableRowAssert {
+  row(index: number = 0): TableRowAssert {
     return new TableRowAssert(
       this,
       () => this.fetchValue(index),
@@ -43,32 +51,43 @@ export class TableAssert {
 
   private async fetchValue(index: number): Promise<FetchValueResult> {
     const result = await this.datasource.query(`SELECT * FROM ${this.tableName} OFFSET ${index} LIMIT 1`)
-    return result.length === 1 ? result[0] : undefined
+
+    return {
+      value: result.length === 1 ? result[0] : undefined,
+      index,
+      tableName: this.tableName,
+    }
   }
 }
 
 class TableRowAssert {
   constructor(
-    private readonly tableAssert: TableAssert,
+    private readonly parent: TableAssert,
     private readonly fetchValue: () => Promise<FetchValueResult>,
-    private readonly addAssertion: (assertion: Assertion) => void,
+    private readonly addAssertion: (assertion: DbAssertion) => void,
   ) {}
 
   toMatchObject(expected: Record<string, unknown>): TableAssert {
     this.addAssertion(async () => {
-      const value = await this.fetchValue()
-      expect(value).toMatchObject(expected)
+      const { value, index, tableName } = await this.fetchValue()
+      expect(value, `Wrong value for row[${index}] of table ${tableName}`, {
+        showPrefix: false,
+        showStack: false,
+      }).toMatchObject(expected)
     })
 
-    return this.tableAssert
+    return this.parent
   }
 
   toEqual(expected: Record<string, unknown>): TableAssert {
     this.addAssertion(async () => {
-      const value = await this.fetchValue()
-      expect(value).toEqual(expected)
+      const { value, index, tableName } = await this.fetchValue()
+      expect(value, `Wrong value for row[${index}] of table ${tableName}`, {
+        showPrefix: false,
+        showStack: false,
+      }).toEqual(expected)
     })
 
-    return this.tableAssert
+    return this.parent
   }
 }
