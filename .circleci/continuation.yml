@@ -59,7 +59,7 @@ jobs:
 
   deploy-api:
     docker:
-      - image: cimg/base:2024.07
+      - image: cimg/base:2024.08
     steps:
       - add_ssh_keys:
           fingerprints:
