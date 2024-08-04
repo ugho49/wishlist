@@ -1,5 +1,3 @@
-import 'jest-extended'
-
 import { BASE_USER_EMAIL, DEFAULT_USER_PASSWORD, insertBaseUser, RequestApp, USER_TABLE, useTestApp } from './utils'
 
 describe('AuthController', () => {

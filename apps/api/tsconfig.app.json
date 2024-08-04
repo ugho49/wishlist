@@ -18,7 +18,8 @@
     "jest.config.ts",
     "jest.int.config.ts",
     "src/**/*.spec.ts",
-    "src/**/*.int-spec.ts"
+    "src/**/*.int-spec.ts",
+    "src/__int-tests__/**/*.ts",
   ],
   "include": ["**/*.ts"]
 }

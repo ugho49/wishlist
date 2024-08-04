@@ -1,5 +1,3 @@
-import 'jest-extended'
-
 import { uuid } from '@wishlist/common'
 import { DateTime } from 'luxon'
 
@@ -15,6 +13,7 @@ import {
   USER_EMAIL_SETTING_TABLE,
   USER_TABLE,
   useTestApp,
+  useTestMail,
 } from './utils'
 
 describe('UserController', () => {
@@ -109,6 +108,7 @@ describe('UserController', () => {
     })
 
     describe('when valid input', () => {
+      const { expectMail } = useTestMail()
       const input = { email: BASE_USER_EMAIL, password: DEFAULT_USER_PASSWORD, firstname: 'John', lastname: 'Doe' }
 
       it('should fail when email already exists', async () => {
@@ -173,7 +173,14 @@ describe('UserController', () => {
           })
           .check()
 
-        // TODO: assert WelcomeEmail Sent
+        await expectMail()
+          .waitFor(1000)
+          .hasNumberOfEmails(1)
+          .mail(0)
+          .hasSubject('[Wishlist] Bienvenue !!!')
+          .hasSender('contact@wishlistapp.fr')
+          .hasReceiver(BASE_USER_EMAIL)
+          .check()
       })
 
       it('should create user and join event if invited as pending', async () => {
