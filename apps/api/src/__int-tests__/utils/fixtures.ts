@@ -11,6 +11,8 @@ export class Fixtures {
   static readonly USER_PASSWORD_VERIFICATION_TABLE = 'user_password_verification'
   static readonly EVENT_TABLE = 'event'
   static readonly EVENT_ATTENDEE_TABLE = 'event_attendee'
+  static readonly EVENT_WISHLIST_TABLE = 'event_wishlist'
+  static readonly WISHLIST_TABLE = 'wishlist'
   static readonly DEFAULT_USER_PASSWORD = 'Password123'
   static readonly BASE_USER_EMAIL = 'test@test.fr'
   static readonly ADMIN_USER_EMAIL = 'admin@admin.fr'
@@ -98,6 +100,22 @@ export class Fixtures {
     const { title, description, eventDate, creatorId } = parameters
     const id = uuid()
     await this.datasource.query(query, [id, title, description, eventDate, creatorId])
+    return id
+  }
+
+  async insertWishlist(parameters: {
+    eventId: string
+    userId: string
+    title: string
+    description?: string
+    hideItems?: boolean
+  }): Promise<string> {
+    const insertWishlistQuery = `INSERT INTO ${Fixtures.WISHLIST_TABLE} (id, title, description, owner_id, hide_items) VALUES ($1, $2, $3, $4, $5)`
+    const insertEventWishlistQuery = `INSERT INTO ${Fixtures.EVENT_WISHLIST_TABLE} (event_id, wishlist_id) VALUES ($1, $2)`
+    const id = uuid()
+    const { eventId, title, description, userId, hideItems } = parameters
+    await this.datasource.query(insertWishlistQuery, [id, title, description ?? null, userId, hideItems ?? true])
+    await this.datasource.query(insertEventWishlistQuery, [eventId, id])
     return id
   }
 
