@@ -23,7 +23,6 @@ export async function toEventWithCountsDto(entity: EventEntity): Promise<EventWi
     ...toMiniEventDto(entity),
     created_by: toMiniUserDto(creator),
     nb_wishlists: wishlists.length,
-    nb_attendees: attendees.length,
     attendees: attendeesDto,
     created_at: entity.createdAt.toISOString(),
     updated_at: entity.updatedAt.toISOString(),

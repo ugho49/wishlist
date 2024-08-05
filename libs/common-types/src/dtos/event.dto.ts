@@ -29,8 +29,6 @@ export class MiniEventDto {
 export class EventWithCountsDto extends MiniEventDto {
   created_by: MiniUserDto
   nb_wishlists: number
-  // Deprecated
-  nb_attendees: number
   attendees: AttendeeDto[]
   created_at: string
   updated_at: string

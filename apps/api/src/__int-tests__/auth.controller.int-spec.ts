@@ -1,52 +1,58 @@
-import { BASE_USER_EMAIL, DEFAULT_USER_PASSWORD, insertBaseUser, RequestApp, USER_TABLE, useTestApp } from './utils'
+import { Fixtures, RequestApp, useTestApp } from './utils'
 
 describe('AuthController', () => {
-  const { getRequest, expectTable, getDatasource } = useTestApp()
+  const { getRequest, expectTable, getFixtures } = useTestApp()
   let request: RequestApp
+  let fixtures: Fixtures
 
   beforeEach(async () => {
     request = await getRequest()
+    fixtures = getFixtures()
   })
 
-  describe('POST /login', () => {
+  describe('POST /auth/login', () => {
+    const path = '/auth/login'
+
     it('should return 400 with invalid input', async () => {
       await request
-        .post('/auth/login')
+        .post(path)
         .send({ email: 'invalid-email', password: '' })
         .expect(400)
         .expect(({ body }) => expect(body).toMatchObject({ error: 'Bad Request' }))
     })
 
     it('should return 401 with not existing user', async () => {
-      await expectTable(USER_TABLE).hasNumberOfRows(0).check()
+      await expectTable(Fixtures.USER_TABLE).hasNumberOfRows(0).check()
 
       await request
-        .post('/auth/login')
-        .send({ email: BASE_USER_EMAIL, password: DEFAULT_USER_PASSWORD })
+        .post(path)
+        .send({ email: Fixtures.BASE_USER_EMAIL, password: Fixtures.DEFAULT_USER_PASSWORD })
         .expect(401)
         .expect(({ body }) => expect(body).toMatchObject({ error: 'Unauthorized', message: 'Incorrect login' }))
     })
 
     it('should return 401 with invalid credentials', async () => {
-      await insertBaseUser(getDatasource())
+      await fixtures.insertBaseUser()
 
       await request
-        .post('/auth/login')
-        .send({ email: BASE_USER_EMAIL, password: 'invalid-password' })
+        .post(path)
+        .send({ email: Fixtures.BASE_USER_EMAIL, password: 'invalid-password' })
         .expect(401)
         .expect(({ body }) => expect(body).toMatchObject({ error: 'Unauthorized', message: 'Incorrect login' }))
     })
 
     it('should return tokens with valid credentials', async () => {
-      await insertBaseUser(getDatasource())
+      await fixtures.insertBaseUser()
 
       await request
-        .post('/auth/login')
-        .send({ email: BASE_USER_EMAIL, password: DEFAULT_USER_PASSWORD })
+        .post(path)
+        .send({ email: Fixtures.BASE_USER_EMAIL, password: Fixtures.DEFAULT_USER_PASSWORD })
         .expect(200)
         .expect(({ body }) =>
           expect(body).toMatchObject({ access_token: expect.toBeString(), refresh_token: expect.toBeString() }),
         )
     })
   })
+
+  // TODO POST /auth/refresh
 })
