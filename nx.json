@@ -42,7 +42,7 @@
         "previewTargetName": "preview",
         "testTargetName": "test",
         "serveTargetName": "serve",
-        "serveStaticTargetName": "vite:serve-static"
+        "serveStaticTargetName": "serve-static"
       }
     }
   ],
