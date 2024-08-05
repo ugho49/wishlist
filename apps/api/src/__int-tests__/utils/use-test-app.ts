@@ -5,7 +5,7 @@ import { DataSource } from 'typeorm'
 
 import { createApp } from '../../bootstrap'
 import { Fixtures } from './fixtures'
-import { TableAssert } from './table-assert'
+import { TableAssert, TableAssertSortOptions } from './table-assert'
 
 export type RequestApp = InstanceType<(typeof request)['agent']>
 
@@ -31,7 +31,8 @@ export function useTestApp() {
   })
 
   return {
-    expectTable: (table: string) => new TableAssert(datasource, table),
+    expectTable: (table: string, sortOptions?: TableAssertSortOptions) =>
+      new TableAssert(datasource, table, sortOptions),
     getFixtures: () => Fixtures.create(datasource),
     getRequest: async (options?: { signedAs?: SignedAs }): Promise<RequestApp> => {
       const requestAppServer = request.agent(app.getHttpServer())

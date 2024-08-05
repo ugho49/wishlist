@@ -1,9 +1,9 @@
 import { uuid } from '@wishlist/common'
 import { TimestampEntity } from '@wishlist/common-database'
-import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryColumn, RelationId } from 'typeorm'
+import { AttendeeRole } from '@wishlist/common-types'
+import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryColumn } from 'typeorm'
 
 import { AttendeeEntity } from '../attendee/attendee.entity'
-import { UserEntity } from '../user'
 import { WishlistEntity } from '../wishlist/wishlist.entity'
 
 @Entity('event')
@@ -33,19 +33,18 @@ export class EventEntity extends TimestampEntity {
   })
   attendees: Promise<AttendeeEntity[]>
 
-  @Column()
-  @RelationId((entity: EventEntity) => entity.creator)
-  creatorId: string
-
-  @ManyToOne(() => UserEntity)
-  readonly creator: Promise<UserEntity>
-
-  static create(param: { title: string; description?: string; eventDate: Date; creatorId: string }): EventEntity {
+  static create(param: { title: string; description?: string; eventDate: Date }): EventEntity {
     const entity = new EventEntity()
     entity.title = param.title
     entity.description = param.description
     entity.eventDate = param.eventDate
-    entity.creatorId = param.creatorId
     return entity
+  }
+
+  async canEdit(currentUser: { id: string; isAdmin: boolean }): Promise<boolean> {
+    const attendees = await this.attendees
+    const attendee = attendees.find(a => a.userId === currentUser.id)
+    if (!attendee) return false
+    return currentUser.isAdmin || [AttendeeRole.MAINTAINER].includes(attendee.role)
   }
 }

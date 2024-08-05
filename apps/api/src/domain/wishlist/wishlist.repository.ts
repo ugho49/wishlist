@@ -11,7 +11,7 @@ export class WishlistRepository extends BaseRepository(WishlistEntity) {
       .leftJoinAndSelect('w.owner', 'o')
       .leftJoin('e.attendees', 'a')
       .where('w.id = :wishlistId', { wishlistId: params.wishlistId })
-      .andWhere('(e.creator.id = :userId OR a.user.id = :userId)', { userId: params.userId })
+      .andWhere('a.user.id = :userId', { userId: params.userId })
       .getOne()
   }
 
@@ -52,7 +52,7 @@ export class WishlistRepository extends BaseRepository(WishlistEntity) {
                LEFT OUTER JOIN event_wishlist ew ON w.id = ew.wishlist_id
                LEFT OUTER JOIN event e on e.id = ew.event_id
                LEFT OUTER JOIN event_attendee ea on e.id = ea.event_id
-               LEFT OUTER JOIN "user" u on ea.user_id = u.id or e.creator_id = u.id
+               LEFT OUTER JOIN "user" u on ea.user_id = u.id
                LEFT OUTER JOIN user_email_setting ues on u.id = ues.user_id
         WHERE w.id = $1
           AND u.id != $2

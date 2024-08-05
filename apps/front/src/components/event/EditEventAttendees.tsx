@@ -1,15 +1,7 @@
 import DeleteIcon from '@mui/icons-material/Delete'
-import PersonIcon from '@mui/icons-material/Person'
-import { Avatar, Box, Divider, List, ListItem, ListItemAvatar, ListItemText, Stack } from '@mui/material'
-import { blue, green, orange } from '@mui/material/colors'
+import { Box, Divider, List, ListItem, Stack } from '@mui/material'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import {
-  AddEventAttendeeInputDto,
-  AttendeeDto,
-  AttendeeRole,
-  DetailedEventDto,
-  MiniUserDto,
-} from '@wishlist/common-types'
+import { AddEventAttendeeInputDto, AttendeeDto, AttendeeRole, DetailedEventDto } from '@wishlist/common-types'
 import React, { useMemo } from 'react'
 import { useSelector } from 'react-redux'
 
@@ -20,17 +12,17 @@ import { Card } from '../common/Card'
 import { ConfirmIconButton } from '../common/ConfirmIconButton'
 import { InputLabel } from '../common/InputLabel'
 import { SearchUserSelect } from '../user/SearchUserSelect'
+import { ListItemAttendee } from './ListItemAttendee'
 
 export type EditEventAttendeesProps = {
   eventId: string
-  creator: MiniUserDto
   attendees: AttendeeDto[]
 }
 
-const mapState = (state: RootState) => state.auth.user?.email
+const mapState = (state: RootState) => ({ email: state.auth.user?.email, id: state.auth.user?.id })
 
-export const EditEventAttendees = ({ eventId, creator, attendees }: EditEventAttendeesProps) => {
-  const currentUserEmail = useSelector(mapState)
+export const EditEventAttendees = ({ eventId, attendees }: EditEventAttendeesProps) => {
+  const { id: currentUserId, email: currentUserEmail } = useSelector(mapState)
   const api = useApi()
   const { addToast } = useToast()
 
@@ -96,21 +88,12 @@ export const EditEventAttendees = ({ eventId, creator, attendees }: EditEventAtt
       <Divider sx={{ marginBlock: '20px' }} />
 
       <List sx={{ pt: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        <Card variant="outlined" sx={{ padding: 0 }}>
-          <ListItem>
-            <ListItemAvatar>
-              <Avatar sx={{ bgcolor: green[100], color: green[600] }} src={creator.picture_url}>
-                <PersonIcon />
-              </Avatar>
-            </ListItemAvatar>
-            <ListItemText primary={<b>{`${creator.firstname} ${creator.lastname}`}</b>} secondary={creator.email} />
-          </ListItem>
-        </Card>
         {attendees.map(attendee => (
           <Card variant="outlined" sx={{ padding: 0 }} key={attendee.id}>
             <ListItem
               secondaryAction={
                 <ConfirmIconButton
+                  disabled={attendee?.user?.id === currentUserId}
                   confirmTitle="Enlever ce participant ?"
                   confirmText={
                     <>
@@ -129,26 +112,12 @@ export const EditEventAttendees = ({ eventId, creator, attendees }: EditEventAtt
                 </ConfirmIconButton>
               }
             >
-              <ListItemAvatar>
-                <Avatar
-                  sx={{
-                    bgcolor: attendee.pending_email ? orange[100] : blue[100],
-                    color: attendee.pending_email ? orange[600] : blue[600],
-                  }}
-                  src={attendee.user?.picture_url}
-                >
-                  <PersonIcon />
-                </Avatar>
-              </ListItemAvatar>
-              <ListItemText
-                primary={
-                  <b>
-                    {attendee.pending_email
-                      ? 'Inviter le participant'
-                      : `${attendee.user?.firstname} ${attendee.user?.lastname}`}
-                  </b>
-                }
-                secondary={attendee.pending_email ? attendee.pending_email : attendee.user?.email}
+              <ListItemAttendee
+                role={attendee.role as AttendeeRole}
+                userName={`${attendee.user?.firstname} ${attendee.user?.lastname}`}
+                isPending={!!attendee.pending_email}
+                email={attendee.pending_email ?? attendee.user?.email ?? ''}
+                pictureUrl={attendee.user?.picture_url}
               />
             </ListItem>
           </Card>

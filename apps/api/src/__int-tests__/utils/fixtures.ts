@@ -1,5 +1,5 @@
 import { uuid } from '@wishlist/common'
-import { Authorities } from '@wishlist/common-types'
+import { AttendeeRole, Authorities } from '@wishlist/common-types'
 import { DataSource } from 'typeorm'
 
 import { PasswordManager } from '../../domain/auth'
@@ -90,17 +90,23 @@ export class Fixtures {
     })
   }
 
-  async insertEvent(parameters: {
+  async insertEvent(parameters: { title: string; description: string; eventDate: Date }): Promise<string> {
+    const query = `INSERT INTO ${Fixtures.EVENT_TABLE} (id, title, description, event_date) VALUES ($1, $2, $3, $4)`
+    const { title, description, eventDate } = parameters
+    const id = uuid()
+    await this.datasource.query(query, [id, title, description, eventDate])
+    return id
+  }
+
+  async insertEventWithMaintainer(parameters: {
     title: string
     description: string
     eventDate: Date
-    creatorId: string
-  }): Promise<string> {
-    const query = `INSERT INTO ${Fixtures.EVENT_TABLE} (id, title, description, event_date, creator_id) VALUES ($1, $2, $3, $4, $5)`
-    const { title, description, eventDate, creatorId } = parameters
-    const id = uuid()
-    await this.datasource.query(query, [id, title, description, eventDate, creatorId])
-    return id
+    maintainerId: string
+  }): Promise<{ eventId: string; attendeeId: string }> {
+    const eventId = await this.insertEvent(parameters)
+    const attendeeId = await this.insertMaintainerAttendee({ eventId, userId: parameters.maintainerId })
+    return { eventId, attendeeId }
   }
 
   async insertWishlist(parameters: {
@@ -119,20 +125,32 @@ export class Fixtures {
     return id
   }
 
-  async insertPendingAttendee(parameters: { eventId: string; tempUserEmail: string }): Promise<string> {
-    const query = `INSERT INTO ${Fixtures.EVENT_ATTENDEE_TABLE} (id, event_id, temp_user_email) VALUES ($1, $2, $3)`
+  async insertPendingAttendee(parameters: {
+    eventId: string
+    tempUserEmail: string
+    role?: AttendeeRole
+  }): Promise<string> {
+    const query = `INSERT INTO ${Fixtures.EVENT_ATTENDEE_TABLE} (id, event_id, temp_user_email, role) VALUES ($1, $2, $3, $4)`
     const id = uuid()
-    const { eventId, tempUserEmail } = parameters
-    await this.datasource.query(query, [id, eventId, tempUserEmail])
+    const { eventId, tempUserEmail, role } = parameters
+    await this.datasource.query(query, [id, eventId, tempUserEmail, role ?? AttendeeRole.USER])
     return id
   }
 
-  async insertActiveAttendee(parameters: { eventId: string; userId: string }): Promise<string> {
-    const query = `INSERT INTO ${Fixtures.EVENT_ATTENDEE_TABLE} (id, event_id, user_id) VALUES ($1, $2, $3)`
+  async insertActiveAttendee(parameters: { eventId: string; userId: string; role?: AttendeeRole }): Promise<string> {
+    const query = `INSERT INTO ${Fixtures.EVENT_ATTENDEE_TABLE} (id, event_id, user_id, role) VALUES ($1, $2, $3, $4)`
     const id = uuid()
-    const { eventId, userId } = parameters
-    await this.datasource.query(query, [id, eventId, userId])
+    const { eventId, userId, role } = parameters
+    await this.datasource.query(query, [id, eventId, userId, role ?? AttendeeRole.USER])
     return id
+  }
+
+  async insertMaintainerAttendee(parameters: { eventId: string; userId: string }): Promise<string> {
+    return this.insertActiveAttendee({
+      eventId: parameters.eventId,
+      userId: parameters.userId,
+      role: AttendeeRole.MAINTAINER,
+    })
   }
 
   async insertUserPasswordVerification(parameters: {

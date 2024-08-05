@@ -11,6 +11,8 @@ type FetchValueResult = {
   tableName: string
 }
 
+export type TableAssertSortOptions = Record<string, 'ASC' | 'DESC'>
+
 export class TableAssert {
   private assertions = new Set<DbAssertion>()
   private cachedRows = new Map<number, FetchValueResult['value']>()
@@ -18,6 +20,7 @@ export class TableAssert {
   constructor(
     private readonly datasource: DataSource,
     private readonly tableName: string,
+    private readonly sortOptions?: TableAssertSortOptions,
   ) {}
 
   hasNumberOfRows(expected: number): this {
@@ -61,7 +64,13 @@ export class TableAssert {
       return { ...returnValue, value: this.cachedRows.get(index) }
     }
 
-    const result = await this.datasource.query(`SELECT * FROM ${this.tableName} OFFSET ${index} LIMIT 1`)
+    const orderBy = this.sortOptions
+      ? `ORDER BY ${Object.entries(this.sortOptions)
+          .map(([column, order]) => `${column} ${order}`)
+          .join(', ')}`
+      : ''
+
+    const result = await this.datasource.query(`SELECT * FROM ${this.tableName} ${orderBy} OFFSET ${index} LIMIT 1`)
     const value = result.length === 1 ? result[0] : undefined
     this.cachedRows.set(index, value)
 

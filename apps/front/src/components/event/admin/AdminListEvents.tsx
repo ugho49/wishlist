@@ -1,4 +1,3 @@
-import { Avatar, Stack } from '@mui/material'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
 import { useQuery } from '@tanstack/react-query'
 import { EventWithCountsDto } from '@wishlist/common-types'
@@ -30,20 +29,6 @@ const columns: GridColDef<EventWithCountsDto>[] = [
     type: 'number',
     width: 100,
     valueGetter: (_, row) => row.attendees.length + 1,
-  },
-  {
-    field: 'created_by',
-    headerName: 'Created By',
-    width: 250,
-    valueGetter: (_, row) => row.created_by.email,
-    renderCell: ({ row: event }) => (
-      <Stack direction="row" gap={1} alignItems="center">
-        <Avatar src={event.created_by.picture_url} sx={{ width: '30px', height: '30px' }}>
-          {event.created_by.firstname.substring(0, 1).toUpperCase()}
-        </Avatar>
-        <span>{event.created_by.email}</span>
-      </Stack>
-    ),
   },
   {
     field: 'created_at',

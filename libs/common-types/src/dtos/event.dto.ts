@@ -1,6 +1,5 @@
 import { Transform, Type } from 'class-transformer'
 import {
-  ArrayNotEmpty,
   IsBoolean,
   IsDate,
   IsInt,
@@ -16,7 +15,6 @@ import {
 
 import { AddEventAttendeeInputDto, AttendeeDto } from './attendee.dto'
 import { GetPaginationQueryDto } from './common.dto'
-import { MiniUserDto } from './user.dto'
 import { WishlistWithOwnerDto } from './wishlist.dto'
 
 export class MiniEventDto {
@@ -27,7 +25,6 @@ export class MiniEventDto {
 }
 
 export class EventWithCountsDto extends MiniEventDto {
-  created_by: MiniUserDto
   nb_wishlists: number
   attendees: AttendeeDto[]
   created_at: string
@@ -35,7 +32,6 @@ export class EventWithCountsDto extends MiniEventDto {
 }
 
 export class DetailedEventDto extends MiniEventDto {
-  created_by: MiniUserDto
   wishlists: WishlistWithOwnerDto[]
   attendees: AttendeeDto[]
   created_at: string
@@ -61,10 +57,9 @@ export class UpdateEventInputDto {
 }
 
 export class CreateEventInputDto extends UpdateEventInputDto {
-  @ArrayNotEmpty()
   @ValidateNested({ each: true })
   @Type(() => AddEventAttendeeInputDto)
-  attendees: AddEventAttendeeInputDto[]
+  attendees?: AddEventAttendeeInputDto[]
 }
 
 export class GetEventsQueryDto extends GetPaginationQueryDto {

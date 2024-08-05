@@ -2,7 +2,6 @@ import { DetailedEventDto, EventWithCountsDto, MiniEventDto } from '@wishlist/co
 import { DateTime } from 'luxon'
 
 import { toAttendeeDto } from '../attendee/attendee.mapper'
-import { toMiniUserDto } from '../user/user.mapper'
 import { toWishlistWithOwnerDto } from '../wishlist/wishlist.mapper'
 import { EventEntity } from './event.entity'
 
@@ -16,12 +15,11 @@ export function toMiniEventDto(entity: EventEntity): MiniEventDto {
 }
 
 export async function toEventWithCountsDto(entity: EventEntity): Promise<EventWithCountsDto> {
-  const [wishlists, attendees, creator] = await Promise.all([entity.wishlists, entity.attendees, entity.creator])
+  const [wishlists, attendees] = await Promise.all([entity.wishlists, entity.attendees])
   const attendeesDto = await Promise.all(attendees.map(attendee => toAttendeeDto(attendee)))
 
   return {
     ...toMiniEventDto(entity),
-    created_by: toMiniUserDto(creator),
     nb_wishlists: wishlists.length,
     attendees: attendeesDto,
     created_at: entity.createdAt.toISOString(),
@@ -30,14 +28,13 @@ export async function toEventWithCountsDto(entity: EventEntity): Promise<EventWi
 }
 
 export async function toDetailedEventDto(entity: EventEntity): Promise<DetailedEventDto> {
-  const [wishlists, attendees, creator] = await Promise.all([entity.wishlists, entity.attendees, entity.creator])
+  const [wishlists, attendees] = await Promise.all([entity.wishlists, entity.attendees])
 
   const wishlistsDto = await Promise.all(wishlists.map(wishlist => toWishlistWithOwnerDto(wishlist)))
   const attendeesDto = await Promise.all(attendees.map(attendee => toAttendeeDto(attendee)))
 
   return {
     ...toMiniEventDto(entity),
-    created_by: toMiniUserDto(creator),
     wishlists: wishlistsDto,
     attendees: attendeesDto,
     created_at: entity.createdAt.toISOString(),

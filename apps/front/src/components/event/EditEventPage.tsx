@@ -64,7 +64,7 @@ export const EditEventPage = () => {
             <Card>
               {queryParams.tab === TabValues.informations && <EditEventInformations event={event} />}
               {queryParams.tab === TabValues.attendees && (
-                <EditEventAttendees eventId={event.id} creator={event.created_by} attendees={event.attendees} />
+                <EditEventAttendees eventId={event.id} attendees={event.attendees} />
               )}
             </Card>
           </>

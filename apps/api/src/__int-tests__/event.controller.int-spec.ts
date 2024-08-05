@@ -29,88 +29,23 @@ describe('EventController', () => {
         currentUserId = await fixtures.getSignedUserId('BASE_USER')
       })
 
-      it('should return events when user is creator', async () => {
-        const userId2 = await fixtures.insertUser({
-          email: 'user2@user2.fr',
-          firstname: 'User2',
-          lastname: 'USER2',
-        })
-
+      it('should return events when user is maintainer attendee', async () => {
         const event1Date = DateTime.now().plus({ days: 1 })
-        const eventId1 = await fixtures.insertEvent({
+        const { eventId: eventId1, attendeeId: maintainerAttendeeId } = await fixtures.insertEventWithMaintainer({
           title: 'Event1',
           description: 'Description1',
           eventDate: event1Date.toJSDate(),
-          creatorId: currentUserId,
+          maintainerId: currentUserId,
         })
 
-        const event2Date = DateTime.now().plus({ year: 1 }).toJSDate()
-        await fixtures.insertEvent({
-          title: 'Event2',
-          description: 'Description2',
-          eventDate: event2Date,
-          creatorId: userId2,
-        })
-
-        await request
-          .get(path)
-          .expect(200)
-          .expect(({ body }) =>
-            expect(body).toEqual({
-              resources: [
-                {
-                  id: eventId1,
-                  title: 'Event1',
-                  description: 'Description1',
-                  event_date: event1Date.toISODate(),
-                  created_by: {
-                    id: currentUserId,
-                    email: Fixtures.BASE_USER_EMAIL,
-                    firstname: 'John',
-                    lastname: 'Doe',
-                  },
-                  nb_wishlists: 0,
-                  attendees: [],
-                  created_at: expect.toBeDateString(),
-                  updated_at: expect.toBeDateString(),
-                },
-              ],
-              pagination: { page_number: 1, total_elements: 1, total_pages: 1, pages_size: 10 },
-            }),
-          )
-      })
-
-      it('should return events when user is attendee', async () => {
-        const event1CreatorId = await fixtures.insertUser({
-          email: 'user2@user2.fr',
-          firstname: 'User2',
-          lastname: 'USER2',
-        })
-        const event2CreatorId = await fixtures.insertUser({
-          email: 'user3@user3.fr',
-          firstname: 'User3',
-          lastname: 'USER3',
-        })
-
-        const event1Date = DateTime.now().plus({ days: 1 })
-        const eventId1 = await fixtures.insertEvent({
-          title: 'Event1',
-          description: 'Description1',
-          eventDate: event1Date.toJSDate(),
-          creatorId: event1CreatorId,
-        })
-
-        const attendeeId1 = await fixtures.insertActiveAttendee({ eventId: eventId1, userId: currentUserId })
-        const attendeeId2 = await fixtures.insertPendingAttendee({ eventId: eventId1, tempUserEmail: 'temp@temp.fr' })
+        const attendeeId1 = await fixtures.insertPendingAttendee({ eventId: eventId1, tempUserEmail: 'temp@temp.fr' })
 
         await fixtures.insertWishlist({ eventId: eventId1, userId: currentUserId, title: 'Wishlist1' })
 
-        const event2Date = DateTime.now().plus({ year: 1 }).toJSDate()
         await fixtures.insertEvent({
           title: 'Event2',
           description: 'Description2',
-          eventDate: event2Date,
-          creatorId: event2CreatorId,
+          eventDate: new Date(),
         })
 
         await request
@@ -127,8 +62,8 @@ describe('EventController', () => {
                   nb_wishlists: 1,
                   attendees: [
                     {
-                      id: attendeeId1,
-                      role: 'user',
+                      id: maintainerAttendeeId,
+                      role: 'maintainer',
                       user: {
                         id: currentUserId,
                         email: Fixtures.BASE_USER_EMAIL,
@@ -137,12 +72,11 @@ describe('EventController', () => {
                       },
                     },
                     {
-                      id: attendeeId2,
+                      id: attendeeId1,
                       pending_email: 'temp@temp.fr',
                       role: 'user',
                     },
                   ],
-                  created_by: expect.objectContaining({ id: event1CreatorId }),
                   created_at: expect.toBeDateString(),
                   updated_at: expect.toBeDateString(),
                 },
@@ -152,26 +86,26 @@ describe('EventController', () => {
           )
       })
 
-      it('should return events when user is creator or attendee', async () => {
+      it('should return events when user is attendee of 2 different events', async () => {
+        const event1Date = DateTime.now().plus({ days: 1 })
+        const { eventId: eventId1 } = await fixtures.insertEventWithMaintainer({
+          title: 'Event1',
+          description: 'Description1',
+          eventDate: event1Date.toJSDate(),
+          maintainerId: currentUserId,
+        })
+
         const event2CreatorId = await fixtures.insertUser({
           email: 'user2@user2.fr',
           firstname: 'User2',
           lastname: 'USER2',
         })
-        const event1Date = DateTime.now().plus({ days: 1 })
-        const eventId1 = await fixtures.insertEvent({
-          title: 'Event1',
-          description: 'Description1',
-          eventDate: event1Date.toJSDate(),
-          creatorId: currentUserId,
-        })
-
         const event2Date = DateTime.now().plus({ year: 1 }).toJSDate()
-        const eventId2 = await fixtures.insertEvent({
+        const { eventId: eventId2 } = await fixtures.insertEventWithMaintainer({
           title: 'Event2',
           description: 'Description2',
           eventDate: event2Date,
-          creatorId: event2CreatorId,
+          maintainerId: event2CreatorId,
         })
 
         await fixtures.insertActiveAttendee({ eventId: eventId2, userId: currentUserId })
@@ -202,18 +136,18 @@ describe('EventController', () => {
           lastname: 'USER3',
         })
 
-        await fixtures.insertEvent({
+        await fixtures.insertEventWithMaintainer({
           title: 'Event1',
           description: 'Description1',
           eventDate: new Date(),
-          creatorId: event1CreatorId,
+          maintainerId: event1CreatorId,
         })
 
-        await fixtures.insertEvent({
+        await fixtures.insertEventWithMaintainer({
           title: 'Event2',
           description: 'Description2',
           eventDate: new Date(),
-          creatorId: event2CreatorId,
+          maintainerId: event2CreatorId,
         })
 
         await request
@@ -232,11 +166,11 @@ describe('EventController', () => {
           const eventPromises = []
           for (let i = 0; i < 6; i++) {
             eventPromises.push(
-              fixtures.insertEvent({
+              fixtures.insertEventWithMaintainer({
                 title: `Event${i}`,
                 description: `Description${i}`,
                 eventDate: new Date(),
-                creatorId: currentUserId,
+                maintainerId: currentUserId,
               }),
             )
           }
@@ -261,11 +195,11 @@ describe('EventController', () => {
           const eventPromises = []
           for (let i = 0; i < 6; i++) {
             eventPromises.push(
-              fixtures.insertEvent({
+              fixtures.insertEventWithMaintainer({
                 title: `Event${i}`,
                 description: `Description${i}`,
                 eventDate: new Date(),
-                creatorId: currentUserId,
+                maintainerId: currentUserId,
               }),
             )
           }
@@ -290,14 +224,14 @@ describe('EventController', () => {
           const eventPromises = []
           for (let i = 0; i < 6; i++) {
             eventPromises.push(
-              fixtures.insertEvent({
+              fixtures.insertEventWithMaintainer({
                 title: `Event${i}`,
                 description: `Description${i}`,
                 eventDate:
                   i % 2 === 0
                     ? DateTime.now().plus({ days: 1 }).toJSDate()
                     : DateTime.now().minus({ days: 1 }).toJSDate(),
-                creatorId: currentUserId,
+                maintainerId: currentUserId,
               }),
             )
           }
@@ -343,35 +277,28 @@ describe('EventController', () => {
         await request.get(path(uuid())).expect(404)
       })
 
-      it('should return error when user not part of event', async () => {
-        const creatorId = await fixtures.insertUser({
-          email: 'user2@user2.fr',
-          firstname: 'User2',
-          lastname: 'USER2',
-        })
-
+      it('should return error when current user not part of event', async () => {
         const eventId = await fixtures.insertEvent({
           title: 'Event1',
           description: 'Description1',
           eventDate: new Date(),
-          creatorId: creatorId,
         })
 
         await request.get(path(eventId)).expect(404)
       })
 
-      it('should return event when user is creator', async () => {
+      it('should return event when current user is attendee MAINTAINER', async () => {
         const userId2 = await fixtures.insertUser({
           email: 'user2@user2.fr',
           firstname: 'User2',
           lastname: 'USER2',
         })
         const eventDate = DateTime.now().plus({ days: 1 })
-        const eventId = await fixtures.insertEvent({
+        const { eventId, attendeeId: maintainerAttendeeId } = await fixtures.insertEventWithMaintainer({
           title: 'Event1',
           description: 'Description1',
           eventDate: eventDate.toJSDate(),
-          creatorId: currentUserId,
+          maintainerId: currentUserId,
         })
 
         const wishlistId = await fixtures.insertWishlist({ eventId, userId: currentUserId, title: 'Wishlist1' })
@@ -393,12 +320,6 @@ describe('EventController', () => {
               title: 'Event1',
               description: 'Description1',
               event_date: eventDate.toISODate(),
-              created_by: {
-                id: currentUserId,
-                email: Fixtures.BASE_USER_EMAIL,
-                firstname: 'John',
-                lastname: 'Doe',
-              },
               wishlists: [
                 {
                   id: wishlistId,
@@ -416,7 +337,17 @@ describe('EventController', () => {
                   updated_at: expect.toBeDateString(),
                 },
               ],
-              attendees: [
+              attendees: expect.toIncludeSameMembers([
+                {
+                  id: maintainerAttendeeId,
+                  role: 'maintainer',
+                  user: {
+                    id: currentUserId,
+                    email: Fixtures.BASE_USER_EMAIL,
+                    firstname: 'John',
+                    lastname: 'Doe',
+                  },
+                },
                 {
                   id: activeAttendeeId,
                   role: 'user',
@@ -432,24 +363,24 @@ describe('EventController', () => {
                   pending_email: 'temp@temp.fr',
                   role: 'user',
                 },
-              ],
+              ]),
               created_at: expect.toBeDateString(),
               updated_at: expect.toBeDateString(),
             }),
           )
       })
 
-      it('should return event when user is attendee', async () => {
+      it('should return event when current user is attendee USER', async () => {
         const creatorId = await fixtures.insertUser({
           email: 'user2@user2.fr',
           firstname: 'User2',
           lastname: 'USER2',
         })
-        const eventId = await fixtures.insertEvent({
+        const { eventId } = await fixtures.insertEventWithMaintainer({
           title: 'Event1',
           description: 'Description1',
           eventDate: new Date(),
-          creatorId,
+          maintainerId: creatorId,
         })
         await fixtures.insertActiveAttendee({
           eventId,
