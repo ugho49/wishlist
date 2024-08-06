@@ -249,7 +249,7 @@ export class SecretSantaService {
     await this.secretSantaUserRepository.delete({ id: param.secretSantaUserId })
   }
 
-  private async checkSecretSantaNotStarted(secretSanta: SecretSantaEntity) {
+  private checkSecretSantaNotStarted(secretSanta: SecretSantaEntity) {
     if (secretSanta.status === SecretSantaStatus.STARTED) {
       throw new ForbiddenException('Secret santa already started')
     }

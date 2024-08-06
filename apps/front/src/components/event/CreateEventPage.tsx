@@ -80,7 +80,7 @@ export const CreateEventPage = () => {
       })
     },
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-    onSuccess: async output => {
+    onSuccess: output => {
       addToast({ message: 'Evènement créé avec succès', variant: 'success' })
 
       navigate(`/events/${output.id}`)

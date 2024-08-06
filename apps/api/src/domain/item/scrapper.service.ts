@@ -112,7 +112,7 @@ export class ScrapperService {
     }
   }
 
-  private async sanitizeAndCheckUrl(params: { imageUrl: string; websiteUrl: string }) {
+  private sanitizeAndCheckUrl(params: { imageUrl: string; websiteUrl: string }) {
     let sanitizedImageUrl = params.imageUrl
 
     if (sanitizedImageUrl.startsWith('//')) {

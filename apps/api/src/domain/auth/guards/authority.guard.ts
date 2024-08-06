@@ -8,7 +8,7 @@ import { HasAuthoritiesMetadataKey, HasAuthoritiesMetadataParamType } from '../d
 export class AuthorityGuard implements CanActivate {
   constructor(private readonly reflector: Reflector) {}
 
-  async canActivate(context: ExecutionContext): Promise<boolean> {
+  canActivate(context: ExecutionContext) {
     const { authorities, condition } = this.reflector.getAllAndOverride<HasAuthoritiesMetadataParamType>(
       HasAuthoritiesMetadataKey,
       [context.getHandler(), context.getClass()],

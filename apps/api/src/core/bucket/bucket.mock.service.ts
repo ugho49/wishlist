@@ -8,12 +8,13 @@ export class BucketMockService extends BucketService {
     super('mock')
   }
 
-  async removeIfExist(param: { destination: string }): Promise<void> {
+  removeIfExist(param: { destination: string }): Promise<void> {
     this.logger.log({ destination: param.destination }, 'Remove file')
+    return Promise.resolve()
   }
 
-  async upload(param: { destination: string; data: Buffer; contentType: string }): Promise<string> {
+  upload(param: { destination: string; data: Buffer; contentType: string }): Promise<string> {
     this.logger.log({ destination: param.destination }, 'Upload file')
-    return param.destination
+    return Promise.resolve(param.destination)
   }
 }

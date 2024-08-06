@@ -25,8 +25,16 @@ module.exports = [
       '@nx': nxPlugin,
       security: pluginSecurity,
     },
+    languageOptions: {
+      parserOptions: {
+        tsconfigRootDir: __dirname,
+        project: './tsconfig.base.json',
+      },
+    },
     rules: {
       'security/detect-non-literal-fs-filename': 'off',
+      'require-await': 'off',
+      '@typescript-eslint/require-await': 'error',
       // Conflict with prettier
       '@typescript-eslint/arrow-parens': 'off',
       '@typescript-eslint/no-explicit-any': 'warn',
