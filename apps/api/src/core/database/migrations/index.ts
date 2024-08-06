@@ -3,6 +3,7 @@ import { addGoogleAuth1672933463658 } from './1672933463658-add-google-auth'
 import { addWishlistLogo1699627478472 } from './1699627478472-add-wishlist-logo'
 import { addItemImage1699629898987 } from './1699629898987-add-item-image'
 import { ReplaceCreatorOfEventByAttendee1722894610304 } from './1722894610304-replace-creator-of-event-by-attendee'
+import { AddSecretSanta1722950220717 } from './1722950220717-add-secret-santa'
 
 // To create a new migration run `nx run api:typeorm-generate-migration NAME_OF_MIGRATION`
 export default [
@@ -11,4 +12,5 @@ export default [
   addWishlistLogo1699627478472,
   addItemImage1699629898987,
   ReplaceCreatorOfEventByAttendee1722894610304,
+  AddSecretSanta1722950220717,
 ]
