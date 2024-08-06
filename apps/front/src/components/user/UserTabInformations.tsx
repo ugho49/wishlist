@@ -92,9 +92,9 @@ export const UserTabInformations = () => {
               pictureUrl={pictureUrl}
               socials={user?.social || []}
               onPictureUpdated={pictureUrl => dispatch(updatePictureAction(pictureUrl))}
-              uploadPictureHandler={api.user.uploadPicture}
-              updatePictureFromSocialHandler={api.user.updatePictureFromSocial}
-              deletePictureHandler={api.user.deletePicture}
+              uploadPictureHandler={file => api.user.uploadPicture(file)}
+              updatePictureFromSocialHandler={socialId => api.user.updatePictureFromSocial(socialId)}
+              deletePictureHandler={() => api.user.deletePicture()}
             />
           </Stack>
           <Box sx={{ flexGrow: 1 }}>
