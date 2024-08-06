@@ -1,9 +1,5 @@
-import {
-  type DetailedEventDto,
-  type EventWithCountsDto,
-  type GetEventsQueryDto,
-  type PagedResponse,
-} from '@wishlist/common-types'
+import type { DetailedEventDto, EventWithCountsDto, GetEventsQueryDto, PagedResponse } from '@wishlist/common-types'
+
 import { AxiosInstance } from 'axios'
 
 export class AdminEventService {

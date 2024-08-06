@@ -6,6 +6,7 @@ import { AttendeeService } from './modules/attendee.service'
 import { AuthService } from './modules/auth.service'
 import { EventService } from './modules/event.service'
 import { ItemService } from './modules/item.service'
+import { SecretSantaService } from './modules/secret-santa.service'
 import { UserService } from './modules/user.service'
 import { WishlistService } from './modules/wishlist.service'
 
@@ -52,6 +53,10 @@ export class ApiClient {
 
   get attendee() {
     return new AttendeeService(this.client)
+  }
+
+  get secretSanta() {
+    return new SecretSantaService(this.client)
   }
 
   get admin() {

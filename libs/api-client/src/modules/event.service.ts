@@ -1,12 +1,13 @@
-import {
-  type CreateEventInputDto,
-  type DetailedEventDto,
-  type EventWithCountsDto,
-  type GetEventsQueryDto,
-  type MiniEventDto,
-  type PagedResponse,
-  type UpdateEventInputDto,
+import type {
+  CreateEventInputDto,
+  DetailedEventDto,
+  EventWithCountsDto,
+  GetEventsQueryDto,
+  MiniEventDto,
+  PagedResponse,
+  UpdateEventInputDto,
 } from '@wishlist/common-types'
+
 import { AxiosInstance } from 'axios'
 
 export class EventService {

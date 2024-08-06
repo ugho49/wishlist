@@ -1,14 +1,15 @@
-import {
-  type CreateWishlistInputDto,
-  type DetailedWishlistDto,
-  type GetPaginationQueryDto,
-  type LinkUnlinkWishlistInputDto,
-  type MiniWishlistDto,
-  type PagedResponse,
-  type UpdateWishlistInputDto,
-  type UpdateWishlistLogoOutputDto,
-  type WishlistWithEventsDto,
+import type {
+  CreateWishlistInputDto,
+  DetailedWishlistDto,
+  GetPaginationQueryDto,
+  LinkUnlinkWishlistInputDto,
+  MiniWishlistDto,
+  PagedResponse,
+  UpdateWishlistInputDto,
+  UpdateWishlistLogoOutputDto,
+  WishlistWithEventsDto,
 } from '@wishlist/common-types'
+
 import { AxiosInstance } from 'axios'
 
 export class WishlistService {

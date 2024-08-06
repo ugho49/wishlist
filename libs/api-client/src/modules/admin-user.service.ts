@@ -1,10 +1,11 @@
-import {
-  type GetAllUsersQueryDto,
-  type PagedResponse,
-  type UpdateFullUserProfileInputDto,
-  type UpdateUserPictureOutputDto,
-  type UserDto,
+import type {
+  GetAllUsersQueryDto,
+  PagedResponse,
+  UpdateFullUserProfileInputDto,
+  UpdateUserPictureOutputDto,
+  UserDto,
 } from '@wishlist/common-types'
+
 import { AxiosInstance } from 'axios'
 
 export class AdminUserService {

@@ -1,11 +1,12 @@
-import {
-  type AddItemForListInputDto,
-  type AddItemInputDto,
-  type ItemDto,
-  type ScanItemInputDto,
-  type ScanItemOutputDto,
-  type ToggleItemOutputDto,
+import type {
+  AddItemForListInputDto,
+  AddItemInputDto,
+  ItemDto,
+  ScanItemInputDto,
+  ScanItemOutputDto,
+  ToggleItemOutputDto,
 } from '@wishlist/common-types'
+
 import { AxiosInstance } from 'axios'
 
 export class ItemService {

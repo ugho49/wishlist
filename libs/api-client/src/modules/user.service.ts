@@ -1,16 +1,17 @@
-import {
-  type ChangeUserPasswordInputDto,
-  type MiniUserDto,
-  type RegisterUserInputDto,
-  type RegisterUserWithGoogleInputDto,
-  type ResetPasswordInputDto,
-  type ResetPasswordValidationInputDto,
-  type UpdateUserEmailSettingsInputDto,
-  type UpdateUserPictureOutputDto,
-  type UpdateUserProfileInputDto,
-  type UserDto,
-  type UserEmailSettingsDto,
+import type {
+  ChangeUserPasswordInputDto,
+  MiniUserDto,
+  RegisterUserInputDto,
+  RegisterUserWithGoogleInputDto,
+  ResetPasswordInputDto,
+  ResetPasswordValidationInputDto,
+  UpdateUserEmailSettingsInputDto,
+  UpdateUserPictureOutputDto,
+  UpdateUserProfileInputDto,
+  UserDto,
+  UserEmailSettingsDto,
 } from '@wishlist/common-types'
+
 import { AxiosInstance } from 'axios'
 
 export class UserService {

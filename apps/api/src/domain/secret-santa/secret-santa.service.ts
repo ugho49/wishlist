@@ -34,7 +34,7 @@ export class SecretSantaService {
     private readonly secretSantaUserRepository: SecretSantaUserRepository,
   ) {}
 
-  async getSecretSantaForEvent(param: { eventId: string; currentUserId: string }): Promise<SecretSantaDto | null> {
+  async getForEvent(param: { eventId: string; currentUserId: string }): Promise<SecretSantaDto | null> {
     return this.secretSantaRepository
       .getSecretSantaForEventAndUser({
         eventId: param.eventId,
@@ -43,7 +43,7 @@ export class SecretSantaService {
       .then(entity => (entity ? toSecretSantaDto(entity) : null))
   }
 
-  async getMySecretSantaUserForEvent(param: { eventId: string; currentUserId: string }): Promise<AttendeeDto | null> {
+  async getMyDrawForEvent(param: { eventId: string; currentUserId: string }): Promise<AttendeeDto | null> {
     return this.secretSantaUserRepository
       .getDrawSecretSantaUserForEvent({
         eventId: param.eventId,
@@ -53,10 +53,7 @@ export class SecretSantaService {
       .then(entity => (entity ? toAttendeeDto(entity) : null))
   }
 
-  async createSecretSantaForEvent(param: {
-    currentUserId: string
-    dto: CreateSecretSantaInputDto
-  }): Promise<SecretSantaDto> {
+  async createForEvent(param: { currentUserId: string; dto: CreateSecretSantaInputDto }): Promise<SecretSantaDto> {
     const alreadyExists = await this.secretSantaRepository.exist({ where: { eventId: param.dto.event_id } })
 
     if (alreadyExists) {

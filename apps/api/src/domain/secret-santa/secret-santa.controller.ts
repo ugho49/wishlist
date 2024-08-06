@@ -19,11 +19,11 @@ export class SecretSantaController {
   constructor(private readonly secretSantaService: SecretSantaService) {}
 
   @Get('/user/draw')
-  getMySecretSantaUserForEvent(
+  getMySecretSantaDrawForEvent(
     @CurrentUser('id') currentUserId: string,
     @Query('eventId') eventId: string,
   ): Promise<AttendeeDto | null> {
-    return this.secretSantaService.getMySecretSantaUserForEvent({ currentUserId, eventId })
+    return this.secretSantaService.getMyDrawForEvent({ currentUserId, eventId })
   }
 
   @Get('/')
@@ -31,7 +31,7 @@ export class SecretSantaController {
     @CurrentUser('id') currentUserId: string,
     @Query('eventId') eventId: string,
   ): Promise<SecretSantaDto | null> {
-    return this.secretSantaService.getSecretSantaForEvent({ currentUserId, eventId })
+    return this.secretSantaService.getForEvent({ currentUserId, eventId })
   }
 
   @Post('/')
@@ -39,7 +39,7 @@ export class SecretSantaController {
     @CurrentUser('id') currentUserId: string,
     @Body() dto: CreateSecretSantaInputDto,
   ): Promise<SecretSantaDto> {
-    return this.secretSantaService.createSecretSantaForEvent({ currentUserId, dto })
+    return this.secretSantaService.createForEvent({ currentUserId, dto })
   }
 
   @Put('/:id')
