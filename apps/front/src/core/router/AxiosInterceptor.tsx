@@ -1,8 +1,8 @@
-import React, { useCallback, useEffect } from 'react'
+import React, { useCallback, useContext, useEffect } from 'react'
 import { useSelector } from 'react-redux'
 import { useInterval } from 'usehooks-ts'
 
-import { useApi } from '../../hooks/useApi'
+import { ApiContext } from '../../context/ApiContext'
 import { useLogout } from '../../hooks/useLogout'
 import { useToast } from '../../hooks/useToast'
 import { AuthService } from '../services/auth.service'
@@ -13,7 +13,7 @@ const accessTokenService = new AuthService().accessTokenService
 
 export const AxiosInterceptor: React.FC = () => {
   const { accessToken } = useSelector(mapAuthState)
-  const api = useApi()
+  const { setAccessToken, unsetTokens } = useContext(ApiContext)
   const { addToast } = useToast()
   const logout = useLogout()
 
@@ -37,11 +37,11 @@ export const AxiosInterceptor: React.FC = () => {
 
   useEffect(() => {
     if (accessToken) {
-      api.setAccessToken(accessToken)
+      setAccessToken(accessToken)
     } else {
-      api.removeUserToken()
+      unsetTokens()
     }
-  }, [api, accessToken])
+  }, [accessToken])
 
   return null
 }

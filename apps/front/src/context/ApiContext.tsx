@@ -1,12 +1,28 @@
 import { ApiClient } from '@wishlist/api-client'
-import React, { createContext, PropsWithChildren } from 'react'
+import React, { createContext, PropsWithChildren, useMemo, useState } from 'react'
 
-type ApiContextProps = { api: ApiClient }
+import { environment } from '../environment'
+
+type ApiContextProps = { api: ApiClient; setAccessToken: (token: string) => void; unsetTokens: () => void }
 
 export const ApiContext = createContext<ApiContextProps>({} as ApiContextProps)
 
-export type ApiProviderProps = PropsWithChildren<{ api: ApiClient }>
+export const ApiProvider = ({ children }: PropsWithChildren) => {
+  const [accessToken, setAccessToken] = useState<string>()
 
-export const ApiProvider = ({ api, children }: ApiProviderProps) => {
-  return <ApiContext.Provider value={{ api }}>{children}</ApiContext.Provider>
+  const api = useMemo(
+    () =>
+      ApiClient.create({
+        baseURL: environment.baseUrl,
+        timeoutInMs: 10_000, // 10 seconds
+        accessToken,
+      }),
+    [accessToken],
+  )
+
+  return (
+    <ApiContext.Provider value={{ api, setAccessToken, unsetTokens: () => setAccessToken(undefined) }}>
+      {children}
+    </ApiContext.Provider>
+  )
 }

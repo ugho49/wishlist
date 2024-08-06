@@ -1,76 +1,60 @@
-import axios, { AxiosInstance, CreateAxiosDefaults } from 'axios'
+import axios, { CreateAxiosDefaults } from 'axios'
 
-import { AdminEventService } from './modules/admin-event.service'
-import { AdminUserService } from './modules/admin-user.service'
-import { AttendeeService } from './modules/attendee.service'
-import { AuthService } from './modules/auth.service'
-import { EventService } from './modules/event.service'
-import { ItemService } from './modules/item.service'
-import { SecretSantaService } from './modules/secret-santa.service'
-import { UserService } from './modules/user.service'
-import { WishlistService } from './modules/wishlist.service'
+import { AdminEventService } from './services/admin-event.service'
+import { AdminUserService } from './services/admin-user.service'
+import { AttendeeService } from './services/attendee.service'
+import { AuthService } from './services/auth.service'
+import { EventService } from './services/event.service'
+import { ItemService } from './services/item.service'
+import { SecretSantaService } from './services/secret-santa.service'
+import { UserService } from './services/user.service'
+import { WishlistService } from './services/wishlist.service'
 
 type ClientServiceParams = {
   baseURL: string
   timeoutInMs?: number
+  accessToken?: string
 }
 
 export class ApiClient {
-  private readonly client: AxiosInstance
+  private constructor(
+    public readonly auth: AuthService,
+    public readonly user: UserService,
+    public readonly wishlist: WishlistService,
+    public readonly event: EventService,
+    public readonly item: ItemService,
+    public readonly attendee: AttendeeService,
+    public readonly secretSanta: SecretSantaService,
+    public readonly admin: {
+      user: AdminUserService
+      event: AdminEventService
+    },
+  ) {}
 
-  constructor(private readonly params: ClientServiceParams) {
+  static create(params: ClientServiceParams) {
     const config: CreateAxiosDefaults = {
-      baseURL: this.params.baseURL,
-      timeout: this.params?.timeoutInMs ?? 10_000, // 10 seconds
+      baseURL: params.baseURL,
+      timeout: params?.timeoutInMs ?? 10_000, // 10 seconds
     }
 
-    this.client = axios.create(config)
-  }
-
-  get auth() {
-    return new AuthService(this.client)
-  }
-
-  get user() {
-    return new UserService(this.client)
-  }
-
-  user2() {
-    return new UserService(this.client)
-  }
-
-  get wishlist() {
-    return new WishlistService(this.client)
-  }
-
-  get event() {
-    return new EventService(this.client)
-  }
-
-  get item() {
-    return new ItemService(this.client)
-  }
-
-  get attendee() {
-    return new AttendeeService(this.client)
-  }
-
-  get secretSanta() {
-    return new SecretSantaService(this.client)
-  }
-
-  get admin() {
-    return {
-      user: new AdminUserService(this.client),
-      event: new AdminEventService(this.client),
+    if (params.accessToken) {
+      config.headers = { Authorization: `Bearer ${params.accessToken}` }
     }
-  }
 
-  setAccessToken(token: string) {
-    this.client.defaults.headers.common['Authorization'] = `Bearer ${token}`
-  }
+    const client = axios.create(config)
 
-  removeUserToken() {
-    delete this.client.defaults.headers.common['Authorization']
+    return new ApiClient(
+      new AuthService(client),
+      new UserService(client),
+      new WishlistService(client),
+      new EventService(client),
+      new ItemService(client),
+      new AttendeeService(client),
+      new SecretSantaService(client),
+      {
+        user: new AdminUserService(client),
+        event: new AdminEventService(client),
+      },
+    )
   }
 }

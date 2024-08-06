@@ -6,7 +6,6 @@ import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon'
 import { GoogleOAuthProvider } from '@react-oauth/google'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
-import { ApiClient } from '@wishlist/api-client'
 import { SnackbarProvider } from 'notistack'
 import { PostHogProvider } from 'posthog-js/react'
 import * as ReactDOM from 'react-dom/client'
@@ -41,15 +40,11 @@ function main() {
       },
     },
   })
-  const api = new ApiClient({
-    baseURL: environment.baseUrl,
-    timeoutInMs: 10_000, // 10 seconds
-  })
 
   root.render(
     <PostHogProvider apiKey={environment.posthogKey} options={{ api_host: environment.posthogHost }}>
       <QueryClientProvider client={queryClient}>
-        <ApiProvider api={api}>
+        <ApiProvider>
           <ReduxProvider store={store}>
             <ThemeProvider theme={theme}>
               <CssBaseline />

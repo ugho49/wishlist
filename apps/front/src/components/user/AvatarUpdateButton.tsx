@@ -77,6 +77,7 @@ export const AvatarUpdateButton = ({
       const res = await uploadPictureHandler(file)
       onPictureUpdated(res.picture_url)
     } catch (e) {
+      console.error(e) // TODO
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const error = (e as any)?.response?.data?.message as string
       addToast({ message: error || "Une erreur s'est produite", variant: 'error' })
