@@ -7,6 +7,7 @@ import { EmailSettingsModule } from './email-setttings/email-settings.module'
 import { EventModule } from './event/event.module'
 import { ItemModule } from './item/item.module'
 import { PasswordVerificationModule } from './password-verification/password-verification.module'
+import { SecretSantaModule } from './secret-santa/secret-santa.module'
 import { UserModule } from './user/user.module'
 import { WishlistModule } from './wishlist/wishlist.module'
 
@@ -21,6 +22,7 @@ import { WishlistModule } from './wishlist/wishlist.module'
     ItemModule,
     EventModule,
     AttendeeModule,
+    SecretSantaModule,
   ],
 })
 export class DomainModule {}
