@@ -6,7 +6,6 @@ import { useParams } from 'react-router-dom'
 
 import { useEventById } from '../../hooks/domain/useEventById'
 import { useCustomSearchParams } from '../../hooks/useCustomSearchParams'
-import { Card } from '../common/Card'
 import { Loader } from '../common/Loader'
 import { Title } from '../common/Title'
 import { EditEventAttendees } from './EditEventAttendees'
@@ -61,12 +60,12 @@ export const EditEventPage = () => {
                 ))}
               </Tabs>
             </Box>
-            <Card>
+            <>
               {queryParams.tab === TabValues.informations && <EditEventInformations event={event} />}
               {queryParams.tab === TabValues.attendees && (
                 <EditEventAttendees eventId={event.id} attendees={event.attendees} />
               )}
-            </Card>
+            </>
           </>
         )}
       </Loader>

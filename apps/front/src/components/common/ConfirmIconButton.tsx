@@ -39,11 +39,9 @@ export const ConfirmIconButton = ({
 
   return (
     <>
-      <Tooltip title={confirmTitle}>
-        <IconButton color={color} size={size} disabled={disabled} onClick={() => setOpenDialog(true)}>
-          {children}
-        </IconButton>
-      </Tooltip>
+      <IconButton color={color} size={size} disabled={disabled} onClick={() => setOpenDialog(true)}>
+        <Tooltip title={confirmTitle} children={children as React.ReactElement} />
+      </IconButton>
       <Dialog open={openDialog} onClose={() => closeDialog()}>
         <DialogTitle component="div">{confirmTitle}</DialogTitle>
         <DialogContent>

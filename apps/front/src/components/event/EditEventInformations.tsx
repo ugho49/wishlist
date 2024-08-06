@@ -1,3 +1,4 @@
+import DeleteIcon from '@mui/icons-material/Delete'
 import SaveIcon from '@mui/icons-material/Save'
 import { LoadingButton } from '@mui/lab'
 import { Box, Stack, TextField } from '@mui/material'
@@ -6,10 +7,13 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { DetailedEventDto, UpdateEventInputDto } from '@wishlist/common-types'
 import { DateTime } from 'luxon'
 import React, { FormEvent, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 import { useApi } from '../../hooks/useApi'
 import { useToast } from '../../hooks/useToast'
+import { Card } from '../common/Card'
 import { CharsRemaining } from '../common/CharsRemaining'
+import { ConfirmButton } from '../common/ConfirmButton'
 import { InputLabel } from '../common/InputLabel'
 
 export type EditEventInformationsProps = {
@@ -23,6 +27,7 @@ export const EditEventInformations = ({ event }: EditEventInformationsProps) => 
   const [description, setDescription] = useState(event.description)
   const [eventDate, setEventDate] = useState<DateTime | null>(DateTime.fromISO(event.event_date))
   const queryClient = useQueryClient()
+  const navigate = useNavigate()
 
   const updateEnabled = title.trim() !== '' && eventDate !== null
 
@@ -41,6 +46,14 @@ export const EditEventInformations = ({ event }: EditEventInformationsProps) => 
     },
   })
 
+  const { mutateAsync: handleDelete } = useMutation({
+    mutationKey: ['event.delete', { id: event.id }],
+    mutationFn: () => api.event.delete(event.id),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['events'] })
+    },
+  })
+
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault()
     const isoDate = eventDate?.toISODate() || DateTime.now().toISODate() || ''
@@ -52,63 +65,97 @@ export const EditEventInformations = ({ event }: EditEventInformationsProps) => 
     await updateEvent(body)
   }
 
+  const deleteEvent = async () => {
+    try {
+      await handleDelete()
+      addToast({ message: "L'évènement à bien été supprimée", variant: 'success' })
+      navigate('/events')
+    } catch {
+      addToast({ message: "Une erreur s'est produite", variant: 'error' })
+    }
+  }
+
   return (
-    <Stack component="form" onSubmit={onSubmit} gap={3}>
-      <Box>
-        <InputLabel required>Titre</InputLabel>
-        <TextField
-          autoComplete="off"
-          disabled={loading}
-          fullWidth
-          required
-          value={title}
-          inputProps={{ maxLength: 100 }}
-          placeholder="La titre de votre évènement"
-          helperText={<CharsRemaining max={100} value={title} />}
-          onChange={e => setTitle(e.target.value)}
-        />
-      </Box>
+    <Stack gap={3}>
+      <Card>
+        <Stack component="form" onSubmit={onSubmit} gap={3}>
+          <Box>
+            <InputLabel required>Titre</InputLabel>
+            <TextField
+              autoComplete="off"
+              disabled={loading}
+              fullWidth
+              required
+              value={title}
+              inputProps={{ maxLength: 100 }}
+              placeholder="La titre de votre évènement"
+              helperText={<CharsRemaining max={100} value={title} />}
+              onChange={e => setTitle(e.target.value)}
+            />
+          </Box>
 
-      <Box>
-        <InputLabel>Description</InputLabel>
-        <TextField
-          autoComplete="off"
-          disabled={loading}
-          fullWidth
-          multiline
-          minRows={4}
-          value={description}
-          inputProps={{ maxLength: 2000 }}
-          placeholder="Une petite description ..."
-          helperText={<CharsRemaining max={2000} value={description} />}
-          onChange={e => setDescription(e.target.value)}
-        />
-      </Box>
+          <Box>
+            <InputLabel>Description</InputLabel>
+            <TextField
+              autoComplete="off"
+              disabled={loading}
+              fullWidth
+              multiline
+              minRows={4}
+              value={description}
+              inputProps={{ maxLength: 2000 }}
+              placeholder="Une petite description ..."
+              helperText={<CharsRemaining max={2000} value={description} />}
+              onChange={e => setDescription(e.target.value)}
+            />
+          </Box>
 
-      <Stack>
-        <InputLabel required>Date de l'évènement</InputLabel>
-        <MobileDatePicker
-          format="DDDD"
-          value={eventDate}
-          disabled={loading}
-          onChange={date => setEventDate(date)}
-          disablePast={true}
-        />
+          <Stack>
+            <InputLabel required>Date de l'évènement</InputLabel>
+            <MobileDatePicker
+              format="DDDD"
+              value={eventDate}
+              disabled={loading}
+              onChange={date => setEventDate(date)}
+              disablePast={true}
+            />
+          </Stack>
+
+          <LoadingButton
+            type="submit"
+            fullWidth
+            variant="contained"
+            size="large"
+            color="secondary"
+            loading={loading}
+            loadingPosition="start"
+            disabled={loading || !updateEnabled}
+            startIcon={<SaveIcon />}
+          >
+            Mettre à jour
+          </LoadingButton>
+        </Stack>
+      </Card>
+      <Stack alignItems="center">
+        <Box>
+          <ConfirmButton
+            confirmTitle="Supprimer l'évènement"
+            confirmText={
+              <span>
+                Etes vous sûr de supprimer l'évènement <b>{event.title}</b> ? Cela supprimera toutes les listes associés
+                !
+              </span>
+            }
+            variant="outlined"
+            color="error"
+            size="small"
+            startIcon={<DeleteIcon />}
+            onClick={() => deleteEvent()}
+          >
+            Supprimer l'évènement
+          </ConfirmButton>
+        </Box>
       </Stack>
-
-      <LoadingButton
-        type="submit"
-        fullWidth
-        variant="contained"
-        size="large"
-        color="secondary"
-        loading={loading}
-        loadingPosition="start"
-        disabled={loading || !updateEnabled}
-        startIcon={<SaveIcon />}
-      >
-        Mettre à jour
-      </LoadingButton>
     </Stack>
   )
 }

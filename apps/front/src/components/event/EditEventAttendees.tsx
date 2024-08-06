@@ -72,57 +72,59 @@ export const EditEventAttendees = ({ eventId, attendees }: EditEventAttendeesPro
   )
 
   return (
-    <Stack>
-      <Box>
-        <InputLabel>Ajouter un nouveau participant à l'évènement ?</InputLabel>
+    <Card>
+      <Stack>
+        <Box>
+          <InputLabel>Ajouter un nouveau participant à l'évènement ?</InputLabel>
 
-        <SearchUserSelect
-          disabled={loading}
-          excludedEmails={[...attendeeEmails, currentUserEmail || '']}
-          onChange={value =>
-            addAttendee({ email: typeof value === 'string' ? value : value.email, role: AttendeeRole.USER })
-          }
-        />
-      </Box>
+          <SearchUserSelect
+            disabled={loading}
+            excludedEmails={[...attendeeEmails, currentUserEmail || '']}
+            onChange={value =>
+              addAttendee({ email: typeof value === 'string' ? value : value.email, role: AttendeeRole.USER })
+            }
+          />
+        </Box>
 
-      <Divider sx={{ marginBlock: '20px' }} />
+        <Divider sx={{ marginBlock: '20px' }} />
 
-      <List sx={{ pt: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        {attendees.map(attendee => (
-          <Card variant="outlined" sx={{ padding: 0 }} key={attendee.id}>
-            <ListItem
-              secondaryAction={
-                <ConfirmIconButton
-                  disabled={attendee?.user?.id === currentUserId}
-                  confirmTitle="Enlever ce participant ?"
-                  confirmText={
-                    <>
-                      Êtes-vous sur de retirer le participant{' '}
-                      <b>
-                        {attendee.pending_email
-                          ? attendee.pending_email
-                          : `${attendee.user?.firstname} ${attendee.user?.lastname}`}
-                      </b>{' '}
-                      de l'évènement ?
-                    </>
-                  }
-                  onClick={() => deleteAttendee(attendee.id)}
-                >
-                  <DeleteIcon />
-                </ConfirmIconButton>
-              }
-            >
-              <ListItemAttendee
-                role={attendee.role as AttendeeRole}
-                userName={`${attendee.user?.firstname} ${attendee.user?.lastname}`}
-                isPending={!!attendee.pending_email}
-                email={attendee.pending_email ?? attendee.user?.email ?? ''}
-                pictureUrl={attendee.user?.picture_url}
-              />
-            </ListItem>
-          </Card>
-        ))}
-      </List>
-    </Stack>
+        <List sx={{ pt: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          {attendees.map(attendee => (
+            <Card variant="outlined" sx={{ padding: 0 }} key={attendee.id}>
+              <ListItem
+                secondaryAction={
+                  <ConfirmIconButton
+                    disabled={attendee?.user?.id === currentUserId}
+                    confirmTitle="Enlever ce participant ?"
+                    confirmText={
+                      <>
+                        Êtes-vous sur de retirer le participant{' '}
+                        <b>
+                          {attendee.pending_email
+                            ? attendee.pending_email
+                            : `${attendee.user?.firstname} ${attendee.user?.lastname}`}
+                        </b>{' '}
+                        de l'évènement ?
+                      </>
+                    }
+                    onClick={() => deleteAttendee(attendee.id)}
+                  >
+                    <DeleteIcon />
+                  </ConfirmIconButton>
+                }
+              >
+                <ListItemAttendee
+                  role={attendee.role as AttendeeRole}
+                  userName={`${attendee.user?.firstname} ${attendee.user?.lastname}`}
+                  isPending={!!attendee.pending_email}
+                  email={attendee.pending_email ?? attendee.user?.email ?? ''}
+                  pictureUrl={attendee.user?.picture_url}
+                />
+              </ListItem>
+            </Card>
+          ))}
+        </List>
+      </Stack>
+    </Card>
   )
 }
