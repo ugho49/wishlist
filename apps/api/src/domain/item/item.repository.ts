@@ -14,7 +14,7 @@ export class ItemRepository extends BaseRepository(ItemEntity) {
       .innerJoin('w.events', 'e')
       .innerJoin('e.attendees', 'a')
       .where({ id: param.itemId })
-      .andWhere('(e.creatorId = :userId OR a.userId = :userId)', { userId: param.userId })
+      .andWhere('a.userId = :userId', { userId: param.userId })
       .getOne()
 
     if (!entity) {

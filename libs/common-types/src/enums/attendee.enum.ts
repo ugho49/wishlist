@@ -1,5 +1,4 @@
 export enum AttendeeRole {
+  MAINTAINER = 'maintainer',
   USER = 'user',
-  EDITOR = 'editor',
-  ADMIN = 'admin',
 }

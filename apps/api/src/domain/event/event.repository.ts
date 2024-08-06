@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { BaseRepository } from '@wishlist/common-database'
-import { Brackets, In } from 'typeorm'
+import { In } from 'typeorm'
 
 import { EventEntity } from './event.entity'
 
@@ -11,7 +11,6 @@ export class EventRepository extends BaseRepository(EventEntity) {
 
     const fetchQuery = this.createQueryBuilder('e')
       .leftJoinAndSelect('e.wishlists', 'w')
-      .leftJoinAndSelect('e.creator', 'c')
       .leftJoinAndSelect('e.attendees', 'a')
       .orderBy('e.createdAt', 'DESC')
       .take(take)
@@ -33,9 +32,8 @@ export class EventRepository extends BaseRepository(EventEntity) {
 
     const fetchQueryBuilder = this.createQueryBuilder('e')
       .leftJoinAndSelect('e.wishlists', 'w')
-      .leftJoinAndSelect('e.creator', 'c')
       .leftJoin('e.attendees', 'a')
-      .where(this.whereCreatorIdOrAttendee(userId))
+      .where('a.userId = :userId', { userId })
       .orderBy('e.eventDate', 'DESC')
       .addOrderBy('e.createdAt', 'DESC')
       .take(take)
@@ -43,7 +41,7 @@ export class EventRepository extends BaseRepository(EventEntity) {
 
     const countQueryBuilder = this.createQueryBuilder('e')
       .leftJoin('e.attendees', 'a')
-      .where(this.whereCreatorIdOrAttendee(userId))
+      .where('a.userId = :userId', { userId })
 
     if (onlyFuture) {
       fetchQueryBuilder.andWhere('e.eventDate >= CURRENT_DATE')
@@ -56,10 +54,9 @@ export class EventRepository extends BaseRepository(EventEntity) {
   findByIdAndUserId(params: { eventId: string; userId: string }): Promise<EventEntity | null> {
     return this.createQueryBuilder('e')
       .leftJoinAndSelect('e.wishlists', 'w')
-      .leftJoinAndSelect('e.creator', 'c')
       .leftJoin('e.attendees', 'a')
       .where('e.id = :eventId', { eventId: params.eventId })
-      .andWhere(this.whereCreatorIdOrAttendee(params.userId))
+      .andWhere('a.userId = :userId', { userId: params.userId })
       .getOne()
   }
 
@@ -67,11 +64,7 @@ export class EventRepository extends BaseRepository(EventEntity) {
     return this.createQueryBuilder('e')
       .leftJoin('e.attendees', 'a')
       .where({ id: In(params.eventIds) })
-      .andWhere(this.whereCreatorIdOrAttendee(params.userId))
+      .andWhere('a.userId = :userId', { userId: params.userId })
       .getMany()
-  }
-
-  private whereCreatorIdOrAttendee(userId: string) {
-    return new Brackets(cb => cb.where('e.creatorId = :userId', { userId }).orWhere('a.userId = :userId', { userId }))
   }
 }

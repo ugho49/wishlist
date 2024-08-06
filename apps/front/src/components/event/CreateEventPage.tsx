@@ -1,26 +1,21 @@
 import DeleteIcon from '@mui/icons-material/Delete'
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft'
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'
-import PersonIcon from '@mui/icons-material/Person'
 import SaveIcon from '@mui/icons-material/Save'
 import { LoadingButton } from '@mui/lab'
 import {
-  Avatar,
   Box,
   Button,
   Container,
   IconButton,
   List,
   ListItem,
-  ListItemAvatar,
-  ListItemText,
   Stack,
   Step,
   StepLabel,
   Stepper,
   TextField,
 } from '@mui/material'
-import { blue, orange } from '@mui/material/colors'
 import { MobileDatePicker } from '@mui/x-date-pickers'
 import { useMutation } from '@tanstack/react-query'
 import { AttendeeRole, MiniUserDto } from '@wishlist/common-types'
@@ -37,6 +32,7 @@ import { CharsRemaining } from '../common/CharsRemaining'
 import { InputLabel } from '../common/InputLabel'
 import { Title } from '../common/Title'
 import { SearchUserSelect } from '../user/SearchUserSelect'
+import { ListItemAttendee } from './ListItemAttendee'
 
 const steps = ['Informations', 'Participants']
 
@@ -68,7 +64,6 @@ export const CreateEventPage = () => {
   )
 
   const nextStepEnabled = title?.trim() !== '' && eventDate !== null
-  const createEnabled = attendees.length > 0
 
   const { mutateAsync: createEvent, isPending: loading } = useMutation({
     mutationKey: ['event.create'],
@@ -154,7 +149,7 @@ export const CreateEventPage = () => {
           {step === 2 && (
             <Stack gap={3}>
               <Box>
-                <InputLabel required>Gérer les participants</InputLabel>
+                <InputLabel>Gérer les participants</InputLabel>
 
                 {/*TODO: add a way to add all attendees from a specific event
                 - Open a dialog, select previous events
@@ -193,26 +188,16 @@ export const CreateEventPage = () => {
                         </IconButton>
                       }
                     >
-                      <ListItemAvatar>
-                        <Avatar
-                          sx={{
-                            bgcolor: typeof attendee.user === 'string' ? orange[100] : blue[100],
-                            color: typeof attendee.user === 'string' ? orange[600] : blue[600],
-                          }}
-                          src={typeof attendee.user !== 'string' ? attendee.user.picture_url : undefined}
-                        >
-                          <PersonIcon />
-                        </Avatar>
-                      </ListItemAvatar>
-                      <ListItemText
-                        primary={
-                          <b>
-                            {typeof attendee.user === 'string'
-                              ? 'Inviter le participant'
-                              : `${attendee.user.firstname} ${attendee.user.lastname}`}
-                          </b>
+                      <ListItemAttendee
+                        role={attendee.role}
+                        userName={
+                          typeof attendee.user !== 'string'
+                            ? `${attendee.user?.firstname} ${attendee.user?.lastname}`
+                            : ''
                         }
-                        secondary={typeof attendee.user === 'string' ? attendee.user : attendee.user.email}
+                        isPending={typeof attendee.user === 'string'}
+                        email={typeof attendee.user === 'string' ? attendee.user : attendee.user.email}
+                        pictureUrl={typeof attendee.user !== 'string' ? attendee.user.picture_url : undefined}
                       />
                     </ListItem>
                   </Card>
@@ -247,7 +232,7 @@ export const CreateEventPage = () => {
                 variant="contained"
                 loading={loading}
                 loadingPosition="end"
-                disabled={!createEnabled || loading}
+                disabled={loading}
                 endIcon={<SaveIcon />}
                 onClick={() => createEvent()}
               >

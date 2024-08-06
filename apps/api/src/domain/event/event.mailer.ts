@@ -9,7 +9,7 @@ export class EventMailer {
   async sendEmailForExistingAttendee(params: {
     emails: string[] | string
     event: { id: string; title: string }
-    creator: { firstName: string; lastName: string }
+    invitedBy: { firstName: string; lastName: string }
   }): Promise<void> {
     if (params.emails.length === 0) {
       return
@@ -22,7 +22,7 @@ export class EventMailer {
       context: {
         eventTitle: params.event.title,
         eventUrl: `https://wishlistapp.fr/events/${params.event.id}`,
-        createdBy: params.creator.firstName + ' ' + params.creator.lastName,
+        invitedBy: params.invitedBy.firstName + ' ' + params.invitedBy.lastName,
       },
     })
   }
@@ -30,7 +30,7 @@ export class EventMailer {
   async sendEmailForNotExistingAttendee(params: {
     emails: string[] | string
     event: { id: string; title: string }
-    creator: { firstName: string; lastName: string }
+    invitedBy: { firstName: string; lastName: string }
   }): Promise<void> {
     if (params.emails.length === 0) {
       return
@@ -43,7 +43,7 @@ export class EventMailer {
       context: {
         eventTitle: params.event.title,
         registerUrl: 'https://wishlistapp.fr/register',
-        createdBy: params.creator.firstName + ' ' + params.creator.lastName,
+        invitedBy: params.invitedBy.firstName + ' ' + params.invitedBy.lastName,
       },
     })
   }

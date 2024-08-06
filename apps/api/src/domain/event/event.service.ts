@@ -100,7 +100,7 @@ export class EventService {
 
   async create(param: { currentUser: ICurrentUser; dto: CreateEventInputDto }): Promise<MiniEventDto> {
     const { currentUser, dto } = param
-    const attendees = dto.attendees.filter(a => a.email !== currentUser.email)
+    const attendees = dto.attendees ?? []
     const attendeeEmails = uniq(attendees.map(a => a.email))
     const existingUsers = await this.userRepository.findByEmails(attendeeEmails)
     const attendeeEntities: AttendeeEntity[] = []
@@ -109,12 +109,19 @@ export class EventService {
       title: dto.title,
       description: dto.description,
       eventDate: dto.event_date,
-      creatorId: currentUser.id,
     })
+
+    attendeeEntities.push(
+      AttendeeEntity.createFromExistingUser({
+        eventId: eventEntity.id,
+        userId: currentUser.id,
+        role: AttendeeRole.MAINTAINER,
+      }),
+    )
 
     for (const attendee of attendees) {
       const user = existingUsers.find(u => u.email === attendee.email)
-      const baseParams = { eventId: eventEntity.id, role: attendee.role || AttendeeRole.USER }
+      const baseParams = { eventId: eventEntity.id, role: attendee.role ?? AttendeeRole.USER }
       const attendeeEntity = user
         ? AttendeeEntity.createFromExistingUser({ ...baseParams, userId: user.id })
         : AttendeeEntity.createFromNonExistingUser({ ...baseParams, email: attendee.email })
@@ -137,44 +144,19 @@ export class EventService {
       await this.eventMailer.sendEmailForExistingAttendee({
         emails: existingAttendeeEmails,
         event: eventEntity,
-        creator,
+        invitedBy: creator,
       })
 
       await this.eventMailer.sendEmailForNotExistingAttendee({
         emails: notExistingAttendeeEmails,
         event: eventEntity,
-        creator,
+        invitedBy: creator,
       })
     } catch (e) {
       this.logger.error('Fail to send mail to event attendees', e)
     }
 
     return toMiniEventDto(eventEntity)
-  }
-
-  async deleteEvent(param: { eventId: string; currentUser: ICurrentUser }): Promise<void> {
-    const { currentUser, eventId } = param
-    const eventEntity = await this.eventRepository.findOneBy({ id: eventId })
-
-    if (!eventEntity) {
-      throw new NotFoundException('Event not found')
-    }
-
-    const creator = await eventEntity.creator
-    const userCanDeleteEvent = creator.id === currentUser.id || currentUser.isAdmin
-
-    // TODO: handle role EDITOR or ADMIN
-    if (!userCanDeleteEvent) {
-      throw new UnauthorizedException('Only the creator of the event can delete it')
-    }
-
-    await this.eventRepository.getDataSource().transaction(async em => {
-      const wishlists = await eventEntity.wishlists
-      for (const wishlistEntity of wishlists) {
-        await this.removeEventOfWishlist(em, { wishlistEntity, eventEntity })
-      }
-      await em.delete(EventEntity, { id: eventId })
-    })
   }
 
   async updateEvent(param: { eventId: string; currentUser: ICurrentUser; dto: UpdateEventInputDto }): Promise<void> {
@@ -186,12 +168,10 @@ export class EventService {
       throw new NotFoundException('Event not found')
     }
 
-    const creator = await eventEntity.creator
-    const userCanUpdateEvent = creator.id === currentUser.id || currentUser.isAdmin
+    const canEdit = await eventEntity.canEdit(currentUser)
 
-    // TODO: handle role EDITOR or ADMIN
-    if (!userCanUpdateEvent) {
-      throw new UnauthorizedException('Only the creator of the event can update it')
+    if (!canEdit) {
+      throw new UnauthorizedException('Only maintainers of the event can update it')
     }
 
     await this.eventRepository.update(
@@ -204,7 +184,30 @@ export class EventService {
     )
   }
 
-  async removeEventOfWishlist(
+  async deleteEvent(param: { eventId: string; currentUser: ICurrentUser }): Promise<void> {
+    const { currentUser, eventId } = param
+    const eventEntity = await this.eventRepository.findOneBy({ id: eventId })
+
+    if (!eventEntity) {
+      throw new NotFoundException('Event not found')
+    }
+
+    const canEdit = await eventEntity.canEdit(currentUser)
+
+    if (!canEdit) {
+      throw new UnauthorizedException('Only maintainers of the event can delete it')
+    }
+
+    await this.eventRepository.getDataSource().transaction(async em => {
+      const wishlists = await eventEntity.wishlists
+      for (const wishlistEntity of wishlists) {
+        await this.removeEventOfWishlist(em, { wishlistEntity, eventEntity })
+      }
+      await em.delete(EventEntity, { id: eventId })
+    })
+  }
+
+  private async removeEventOfWishlist(
     em: EntityManager,
     param: { wishlistEntity: WishlistEntity; eventEntity: EventEntity },
   ): Promise<void> {

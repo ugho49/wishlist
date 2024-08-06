@@ -186,28 +186,34 @@ describe('UserController', () => {
       it('should create user and join event if invited as pending', async () => {
         const creatorId = await fixtures.insertAdminUser()
 
-        const eventId = await fixtures.insertEvent({
+        const { eventId } = await fixtures.insertEventWithMaintainer({
           title: 'Event',
           description: 'Description',
           eventDate: new Date(),
-          creatorId,
+          maintainerId: creatorId,
         })
 
         const attendeeId = await fixtures.insertPendingAttendee({
-          eventId: eventId,
+          eventId,
           tempUserEmail: Fixtures.BASE_USER_EMAIL,
         })
 
-        await expectTable(Fixtures.USER_TABLE).hasNumberOfRows(1).check()
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE)
+          .hasNumberOfRows(2)
+          .row(1)
+          .toMatchObject({
+            id: attendeeId,
+            event_id: eventId,
+            user_id: null,
+            temp_user_email: Fixtures.BASE_USER_EMAIL,
+          })
+          .check()
 
         const res = await request.post(path).send(input).expect(201)
 
-        await expectTable(Fixtures.USER_TABLE).hasNumberOfRows(2).check()
-        await expectTable(Fixtures.USER_EMAIL_SETTING_TABLE).hasNumberOfRows(1).check()
-
         await expectTable(Fixtures.EVENT_ATTENDEE_TABLE)
-          .hasNumberOfRows(1)
-          .row(0)
+          .hasNumberOfRows(2)
+          .row(1)
           .toMatchObject({
             id: attendeeId,
             event_id: eventId,

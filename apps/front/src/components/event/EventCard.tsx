@@ -63,7 +63,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 
 export const EventCard = ({ event }: EventCardProps) => {
   const classes = useStyles()
-  const numberOfAttendees = event.attendees.length + 1
+  const numberOfAttendees = event.attendees.length
   const past = DateTime.fromISO(event.event_date) < DateTime.now().minus({ days: 1 })
 
   return (

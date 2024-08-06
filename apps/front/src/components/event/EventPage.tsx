@@ -4,6 +4,7 @@ import EditIcon from '@mui/icons-material/Edit'
 import PeopleIcon from '@mui/icons-material/People'
 import { Box, Button, Chip, Stack } from '@mui/material'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { canEditEvent } from '@wishlist/common-types'
 import { DateTime } from 'luxon'
 import React, { useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
@@ -44,7 +45,7 @@ export const EventPage = () => {
     },
   })
 
-  const nbAttendees = useMemo(() => (event?.attendees || []).length + 1, [event])
+  const attendees = useMemo(() => event?.attendees || [], [event])
 
   const deleteEvent = async () => {
     try {
@@ -64,7 +65,7 @@ export const EventPage = () => {
           <>
             <Title smallMarginBottom>{event.title}</Title>
 
-            {event.created_by.id === currentUserId && (
+            {canEditEvent(attendees, currentUserId ?? '') && (
               <Stack
                 direction="row"
                 alignItems="center"
@@ -121,7 +122,7 @@ export const EventPage = () => {
                 size="small"
                 icon={<PeopleIcon />}
                 onClick={() => setOpenAttendeesDialog(true)}
-                label={`${nbAttendees} ${nbAttendees > 1 ? 'participants' : 'participant'}`}
+                label={`${attendees.length} ${attendees.length > 1 ? 'participants' : 'participant'}`}
               />
             </Stack>
 
@@ -132,7 +133,6 @@ export const EventPage = () => {
             <EventAttendeesDialog
               open={openAttendeesDialog}
               handleClose={() => setOpenAttendeesDialog(false)}
-              creator={event.created_by}
               attendees={event.attendees}
             />
           </>
