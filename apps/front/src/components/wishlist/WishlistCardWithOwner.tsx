@@ -56,7 +56,7 @@ export const WishlistCardWithOwner = ({ wishlist }: WishlistCardWithOwnerProps) 
               overlap="circular"
               anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
               badgeContent={
-                <PublicIcon fontSize="small" color="info" sx={{ background: 'white', borderRadius: '50%' }} />
+                <PublicIcon fontSize="small" color="primary" sx={{ background: 'white', borderRadius: '50%' }} />
               }
             >
               <Avatar

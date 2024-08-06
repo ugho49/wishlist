@@ -6,7 +6,6 @@ import { useParams } from 'react-router-dom'
 
 import { useWishlistById } from '../../hooks/domain/useWishlistById'
 import { useCustomSearchParams } from '../../hooks/useCustomSearchParams'
-import { Card } from '../common/Card'
 import { Loader } from '../common/Loader'
 import { Title } from '../common/Title'
 import { EditWishlistEvent } from './EditWishlistEvents'
@@ -61,12 +60,10 @@ export const EditWishlistPage = () => {
                 ))}
               </Tabs>
             </Box>
-            <Card>
-              {queryParams.tab === TabValues.informations && <EditWishlistInformations wishlist={wishlist} />}
-              {queryParams.tab === TabValues.events && (
-                <EditWishlistEvent wishlistId={wishlist.id} events={wishlist.events} />
-              )}
-            </Card>
+            {queryParams.tab === TabValues.informations && <EditWishlistInformations wishlist={wishlist} />}
+            {queryParams.tab === TabValues.events && (
+              <EditWishlistEvent wishlistId={wishlist.id} events={wishlist.events} />
+            )}
           </>
         )}
       </Loader>

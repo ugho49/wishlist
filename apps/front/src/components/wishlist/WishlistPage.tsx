@@ -1,22 +1,16 @@
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
-import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined'
 import PublicIcon from '@mui/icons-material/Public'
-import { Avatar, Box, Button, Chip, Stack, Tooltip } from '@mui/material'
-import { useMutation } from '@tanstack/react-query'
-import React, { useState } from 'react'
+import { Avatar, Box, Chip, Stack, Tooltip } from '@mui/material'
+import React, { useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useNavigate, useParams } from 'react-router-dom'
 
 import { RootState } from '../../core'
 import { useWishlistById } from '../../hooks/domain/useWishlistById'
-import { useApi } from '../../hooks/useApi'
-import { useToast } from '../../hooks/useToast'
-import { ConfirmButton } from '../common/ConfirmButton'
 import { Description } from '../common/Description'
 import { Loader } from '../common/Loader'
-import { RouterLink } from '../common/RouterLink'
 import { Title } from '../common/Title'
 import { WishlistEventsDialog } from './WishlistEventsDialog'
 import { WishlistItems } from './WishlistItems'
@@ -25,30 +19,15 @@ import { WishlistNotFound } from './WishlistNotFound'
 const mapState = (state: RootState) => state.auth.user?.id
 
 export const WishlistPage = () => {
-  const { addToast } = useToast()
   const currentUserId = useSelector(mapState)
   const [openEventDialog, setOpenEventDialog] = useState(false)
   const params = useParams<'wishlistId'>()
   const wishlistId = params.wishlistId || ''
-  const api = useApi()
   const navigate = useNavigate()
 
   const { wishlist, loading } = useWishlistById(wishlistId)
 
-  const { mutateAsync: handleDelete } = useMutation({
-    mutationKey: ['wishlist.delete', { id: wishlistId }],
-    mutationFn: () => api.wishlist.delete(wishlistId),
-  })
-
-  const deleteWishlist = async () => {
-    try {
-      await handleDelete()
-      addToast({ message: 'La liste à bien été supprimée', variant: 'success' })
-      navigate('/wishlists')
-    } catch {
-      addToast({ message: "Une erreur s'est produite", variant: 'error' })
-    }
-  }
+  const currentUserCanEdit = useMemo(() => wishlist?.owner.id === currentUserId, [currentUserId, wishlist])
 
   return (
     <Box>
@@ -59,75 +38,52 @@ export const WishlistPage = () => {
           <>
             <Title smallMarginBottom>{wishlist.title}</Title>
 
-            {wishlist.owner.id === currentUserId && (
-              <Stack
-                direction="row"
-                alignItems="center"
-                justifyContent="center"
-                gap={1}
-                flexWrap="wrap"
-                sx={{ marginBottom: '20px' }}
-              >
-                <ConfirmButton
-                  confirmTitle="Supprimer la liste"
-                  confirmText={
-                    <span>
-                      Êtes-vous sûr de vouloir supprimer la liste <b>{wishlist.title}</b> ?
-                    </span>
-                  }
-                  variant="outlined"
-                  color="error"
-                  size="small"
-                  startIcon={<DeleteIcon />}
-                  onClick={() => deleteWishlist()}
-                >
-                  Supprimer la liste
-                </ConfirmButton>
-                <Button
-                  component={RouterLink}
-                  to={`/wishlists/${wishlistId}/edit`}
-                  variant="outlined"
-                  color="info"
-                  size="small"
-                  startIcon={<EditIcon />}
-                >
-                  Modifier la liste
-                </Button>
-              </Stack>
-            )}
-
             <Stack
-              direction="row"
+              direction="column"
               justifyContent="center"
               alignItems="center"
               flexWrap="wrap"
               sx={{ marginBottom: '20px' }}
               gap={1}
             >
-              {!wishlist.config.hide_items && (
-                <Tooltip title="Tout le monde peut ajouter, cocher ou voir les souhaits cochés, même le créateur de la liste">
-                  <Chip label="Publique" color="info" variant="outlined" size="small" icon={<PublicIcon />} />
-                </Tooltip>
+              <Stack direction="row" gap={1}>
+                {!wishlist.config.hide_items && (
+                  <Tooltip title="Tout le monde peut ajouter, cocher ou voir les souhaits cochés, même le créateur de la liste">
+                    <Chip label="Publique" color="primary" variant="outlined" size="small" icon={<PublicIcon />} />
+                  </Tooltip>
+                )}
+                <Chip
+                  variant="outlined"
+                  size="small"
+                  avatar={
+                    wishlist.owner.picture_url ? (
+                      <Avatar src={wishlist.owner.picture_url} />
+                    ) : (
+                      <PersonOutlineOutlinedIcon />
+                    )
+                  }
+                  label={`Créée par ${wishlist.owner.firstname} ${wishlist.owner.lastname}`}
+                />
+                <Chip
+                  variant="outlined"
+                  size="small"
+                  icon={<CalendarMonthIcon />}
+                  onClick={() => setOpenEventDialog(true)}
+                  label={`${wishlist.events.length} ${wishlist.events.length > 1 ? 'évènements' : 'évènement'}`}
+                />
+              </Stack>
+              {currentUserCanEdit && (
+                <Stack direction="row" gap={1}>
+                  <Chip
+                    color="info"
+                    variant="outlined"
+                    size="small"
+                    icon={<EditIcon />}
+                    onClick={() => navigate(`/wishlists/${wishlistId}/edit`)}
+                    label="Modifier"
+                  />
+                </Stack>
               )}
-              <Chip
-                variant="outlined"
-                size="small"
-                avatar={
-                  wishlist.owner.picture_url ? (
-                    <Avatar src={wishlist.owner.picture_url} />
-                  ) : (
-                    <PersonOutlineOutlinedIcon />
-                  )
-                }
-                label={`Créée par ${wishlist.owner.firstname} ${wishlist.owner.lastname}`}
-              />
-              <Chip
-                variant="outlined"
-                size="small"
-                icon={<CalendarMonthIcon />}
-                onClick={() => setOpenEventDialog(true)}
-                label={`${wishlist.events.length} ${wishlist.events.length > 1 ? 'évènements' : 'évènement'}`}
-              />
             </Stack>
 
             {wishlist.description && <Description text={wishlist.description} />}
@@ -137,7 +93,9 @@ export const WishlistPage = () => {
             <WishlistEventsDialog
               open={openEventDialog}
               handleClose={() => setOpenEventDialog(false)}
+              wishlistId={wishlist.id}
               events={wishlist.events}
+              currentUserCanEdit={currentUserCanEdit}
             />
           </>
         )}

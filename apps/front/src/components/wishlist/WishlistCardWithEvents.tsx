@@ -62,7 +62,7 @@ export const WishlistCardWithEvents = ({ wishlist }: WishlistCardWithEventsProps
       <Stack direction="row" justifyContent="space-between" height="100%">
         <div className={classes.wishlist}>
           <Stack direction="row" alignItems="center" justifyContent="center" marginBottom="10px" gap={1}>
-            {!wishlist.config.hide_items && <PublicIcon fontSize="small" color="info" />}
+            {!wishlist.config.hide_items && <PublicIcon fontSize="small" color="primary" />}
             <span className={classes.title}>{wishlist.title}</span>
           </Stack>
           <Stack direction="row" justifyContent="center" alignItems="center" flexWrap="wrap" gap={1} marginTop="14px">
