@@ -7271,7 +7271,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:22.1.0":
+"@types/node@npm:22.1.0, @types/node@npm:^22.0.1":
   version: 22.1.0
   resolution: "@types/node@npm:22.1.0"
   dependencies:
@@ -7286,15 +7286,6 @@ __metadata:
   dependencies:
     undici-types: "npm:~5.26.4"
   checksum: 10c0/eaacbbcb376748bddaf6cd04569ebf3f0069a1b6f821db4f85ef9f60c2c63608ddcaf3e67a3c44e1cd8111a26e9da7c83d54ae7c41dd21e7b35cbab9436bfe1e
-  languageName: node
-  linkType: hard
-
-"@types/node@npm:^20.10.3":
-  version: 20.11.16
-  resolution: "@types/node@npm:20.11.16"
-  dependencies:
-    undici-types: "npm:~5.26.4"
-  checksum: 10c0/4886b90278e9c877a84efd3edd4667cd990e032d77268d2a798b99ebc1901ea336fa7dfbe9eaf4ad6ad1da9ce2ec31baf300038a3905838692362eb19904ebde
   languageName: node
   linkType: hard
 
@@ -12945,16 +12936,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"firebase-admin@npm:12.3.0":
-  version: 12.3.0
-  resolution: "firebase-admin@npm:12.3.0"
+"firebase-admin@npm:12.3.1":
+  version: 12.3.1
+  resolution: "firebase-admin@npm:12.3.1"
   dependencies:
     "@fastify/busboy": "npm:^3.0.0"
     "@firebase/database-compat": "npm:^1.0.2"
     "@firebase/database-types": "npm:^1.0.0"
     "@google-cloud/firestore": "npm:^7.7.0"
     "@google-cloud/storage": "npm:^7.7.0"
-    "@types/node": "npm:^20.10.3"
+    "@types/node": "npm:^22.0.1"
     farmhash-modern: "npm:^1.1.0"
     jsonwebtoken: "npm:^9.0.0"
     jwks-rsa: "npm:^3.1.0"
@@ -12965,7 +12956,7 @@ __metadata:
       optional: true
     "@google-cloud/storage":
       optional: true
-  checksum: 10c0/f7dd1dac01781f0db53cba2e4d7f2400fed22966c87d12ae5ea17e84cedf779c44038b641370acd982e8bfac96ccd51eab27471d927ea9cf4def1e8f62541f95
+  checksum: 10c0/9d26c79902765471b1bbdb3a88a7704a3dacf441ceb9fda46877f92e6da86eb4804ba1d8d4ec1681bea07f7966a3105edf544d6d7a46c474a2d363d7529b2ad4
   languageName: node
   linkType: hard
 
@@ -23586,7 +23577,7 @@ __metadata:
     eslint-plugin-prettier: "npm:5.2.1"
     eslint-plugin-react: "npm:7.35.0"
     eslint-plugin-security: "npm:3.0.1"
-    firebase-admin: "npm:12.3.0"
+    firebase-admin: "npm:12.3.1"
     get-orientation: "npm:1.1.2"
     globals: "npm:15.9.0"
     google-auth-library: "npm:9.13.0"

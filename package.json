@@ -51,7 +51,7 @@
     "class-validator": "0.14.1",
     "clsx": "2.1.1",
     "core-js": "3.38.0",
-    "firebase-admin": "12.3.0",
+    "firebase-admin": "12.3.1",
     "get-orientation": "1.1.2",
     "google-auth-library": "9.13.0",
     "handlebars": "4.7.8",
