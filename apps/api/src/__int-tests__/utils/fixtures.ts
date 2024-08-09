@@ -2,8 +2,8 @@ import { uuid } from '@wishlist/common'
 import { AttendeeRole, Authorities } from '@wishlist/common-types'
 import { DataSource } from 'typeorm'
 
-import { PasswordManager } from '../../domain/auth'
-import { SignedAs } from './use-test-app'
+import { PasswordManager } from '../../domain/auth.js'
+import { SignedAs } from './use-test-app.js'
 
 export class Fixtures {
   static readonly USER_TABLE = '"user"'

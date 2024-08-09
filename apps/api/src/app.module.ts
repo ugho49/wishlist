@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 
-import { CoreModule } from './core/core.module'
-import { DomainModule } from './domain/domain.module'
+import { CoreModule } from './core/core.module.js'
+import { DomainModule } from './domain/domain.module.js'
 
 @Module({
   imports: [

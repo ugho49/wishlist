@@ -1,4 +1,4 @@
-import { SecretSantaDrawService, SecretSantaUser } from './secret-santa-draw.service'
+import { SecretSantaDrawService, SecretSantaUser } from './secret-santa-draw.service.js'
 
 describe('SecretSantaDrawService', () => {
   const drawService = new SecretSantaDrawService()

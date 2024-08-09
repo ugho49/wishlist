@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { BaseRepository } from '@wishlist/common-database'
 
-import { WishlistEntity } from './wishlist.entity'
+import { WishlistEntity } from './wishlist.entity.js'
 
 @Injectable()
 export class WishlistRepository extends BaseRepository(WishlistEntity) {

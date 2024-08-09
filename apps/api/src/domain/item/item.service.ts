@@ -1,12 +1,12 @@
 import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common'
 import { AddItemForListInputDto, AddItemInputDto, ItemDto, ToggleItemOutputDto } from '@wishlist/common-types'
 
-import { toMiniUserDto } from '../user/user.mapper'
-import { UserRepository } from '../user/user.repository'
-import { WishlistRepository } from '../wishlist/wishlist.repository'
-import { ItemEntity } from './item.entity'
-import { toItemDto } from './item.mapper'
-import { ItemRepository } from './item.repository'
+import { toMiniUserDto } from '../user/user.mapper.js'
+import { UserRepository } from '../user/user.repository.js'
+import { WishlistRepository } from '../wishlist/wishlist.repository.js'
+import { ItemEntity } from './item.entity.js'
+import { toItemDto } from './item.mapper.js'
+import { ItemRepository } from './item.repository.js'
 
 @Injectable()
 export class ItemService {

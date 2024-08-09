@@ -12,13 +12,13 @@ import {
   UserSocialType,
 } from '@wishlist/common-types'
 
-import { GoogleAuthService } from '../auth-social'
-import { UserEntity } from '../user'
-import { UserSocialEntity } from '../user/user-social.entity'
-import { UserSocialRepository } from '../user/user-social.repository'
-import { UserRepository } from '../user/user.repository'
-import authConfig from './auth.config'
-import { PasswordManager } from './util/password-manager'
+import { GoogleAuthService } from '../auth-social/index.js'
+import { UserEntity } from '../user/index.js'
+import { UserSocialEntity } from '../user/user-social.entity.js'
+import { UserSocialRepository } from '../user/user-social.repository.js'
+import { UserRepository } from '../user/user.repository.js'
+import authConfig from './auth.config.js'
+import { PasswordManager } from './util/password-manager.js'
 
 @Injectable()
 export class AuthService {

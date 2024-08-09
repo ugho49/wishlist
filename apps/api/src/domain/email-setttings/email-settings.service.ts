@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common'
 import { UpdateUserEmailSettingsInputDto, UserEmailSettingsDto } from '@wishlist/common-types'
 
-import { UserEmailSettingEntity } from './email-settings.entity'
-import { toDto } from './email-settings.mapper'
-import { EmailSettingsRepository } from './email-settings.repository'
+import { UserEmailSettingEntity } from './email-settings.entity.js'
+import { toDto } from './email-settings.mapper.js'
+import { EmailSettingsRepository } from './email-settings.repository.js'
 
 @Injectable()
 export class EmailSettingsService {

@@ -1,7 +1,7 @@
 import { uuid } from '@wishlist/common'
 import { DateTime } from 'luxon'
 
-import { Fixtures, RequestApp, useTestApp } from './utils'
+import { Fixtures, RequestApp, useTestApp } from './utils.js'
 
 describe('EventController', () => {
   const { getRequest, getFixtures } = useTestApp()

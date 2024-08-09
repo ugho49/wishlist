@@ -11,7 +11,7 @@ import {
   MinLength,
 } from 'class-validator'
 
-import { GetPaginationQueryDto } from './common.dto'
+import { GetPaginationQueryDto } from './common.dto.js'
 
 export class UpdateUserPictureOutputDto {
   picture_url: string

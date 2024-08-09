@@ -1,5 +1,5 @@
-import { Authorities } from '../enums'
-import { AccessTokenJwtPayload, ICurrentUser } from '../interfaces'
+import { Authorities } from '../enums/index.js'
+import { AccessTokenJwtPayload, ICurrentUser } from '../interfaces/index.js'
 
 export function createCurrentUserFromPayload(payload: AccessTokenJwtPayload): ICurrentUser {
   const authorities = payload.authorities

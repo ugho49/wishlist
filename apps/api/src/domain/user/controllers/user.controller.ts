@@ -24,12 +24,12 @@ import {
 import { Express } from 'express'
 import { RealIP } from 'nestjs-real-ip'
 
-import { CurrentUser, Public } from '../../auth'
-import { UserService } from '../user.service'
+import { CurrentUser, Public } from '../../auth/index.js'
+import { UserService } from '../user.service.js'
 
 import 'multer'
 
-import { userPictureFileValidators, userPictureResizePipe } from '../user.validator'
+import { userPictureFileValidators, userPictureResizePipe } from '../user.validator.js'
 
 @ApiTags('User')
 @Controller('/user')

@@ -13,10 +13,10 @@ import {
   ValidateNested,
 } from 'class-validator'
 
-import { MAX_EVENTS_BY_LIST } from '../constants'
-import { MiniEventDto } from './event.dto'
-import { AddItemInputDto, ItemDto } from './item.dto'
-import { MiniUserDto } from './user.dto'
+import { MAX_EVENTS_BY_LIST } from '../constants.js'
+import { MiniEventDto } from './event.dto.js'
+import { AddItemInputDto, ItemDto } from './item.dto.js'
+import { MiniUserDto } from './user.dto.js'
 
 export class WishlistConfigDto {
   hide_items: boolean

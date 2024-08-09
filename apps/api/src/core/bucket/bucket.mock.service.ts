@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 
-import { BucketService } from './bucket.service'
+import { BucketService } from './bucket.service.js'
 
 @Injectable()
 export class BucketMockService extends BucketService {

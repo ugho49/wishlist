@@ -2,7 +2,7 @@ import { uuid } from '@wishlist/common'
 import { TimestampEntity } from '@wishlist/common-database'
 import { Column, Entity, ManyToOne, PrimaryColumn, RelationId } from 'typeorm'
 
-import { UserEntity } from '../user'
+import { UserEntity } from '../user/index.js'
 
 @Entity('user_password_verification')
 export class PasswordVerificationEntity extends TimestampEntity {

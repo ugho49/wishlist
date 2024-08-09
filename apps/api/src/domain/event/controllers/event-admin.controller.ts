@@ -2,8 +2,8 @@ import { Controller, Get, Param, Query } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 import { DetailedEventDto, EventWithCountsDto, GetPaginationQueryDto, PagedResponse } from '@wishlist/common-types'
 
-import { IsAdmin } from '../../auth'
-import { EventService } from '../event.service'
+import { IsAdmin } from '../../auth/index.js'
+import { EventService } from '../event.service.js'
 
 @IsAdmin()
 @ApiTags('ADMIN - Event')

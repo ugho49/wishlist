@@ -4,13 +4,13 @@ import { APP_GUARD } from '@nestjs/core'
 import { JwtModule } from '@nestjs/jwt'
 import { PassportModule } from '@nestjs/passport'
 
-import { AuthSocialModule } from '../auth-social/auth-social.module'
-import { UserModule } from '../user/user.module'
-import authConfig from './auth.config'
-import { AuthController } from './auth.controller'
-import { AuthService } from './auth.service'
-import { AuthGuard } from './guards/auth.guard'
-import { JwtStrategy } from './strategies/jwt.strategy'
+import { AuthSocialModule } from '../auth-social/auth-social.module.js'
+import { UserModule } from '../user/user.module.js'
+import authConfig from './auth.config.js'
+import { AuthController } from './auth.controller.js'
+import { AuthService } from './auth.service.js'
+import { AuthGuard } from './guards/auth.guard.js'
+import { JwtStrategy } from './strategies/jwt.strategy.js'
 
 @Module({
   imports: [

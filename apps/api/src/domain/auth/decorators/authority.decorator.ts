@@ -1,7 +1,7 @@
 import { applyDecorators, SetMetadata, UseGuards } from '@nestjs/common'
 import { Authorities } from '@wishlist/common-types'
 
-import { AuthorityGuard } from '../guards/authority.guard'
+import { AuthorityGuard } from '../guards/authority.guard.js'
 
 export const HasAuthoritiesMetadataKey = 'has_authorities'
 

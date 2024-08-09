@@ -9,9 +9,9 @@ import {
   ToggleItemOutputDto,
 } from '@wishlist/common-types'
 
-import { CurrentUser } from '../auth'
-import { ItemService } from './item.service'
-import { ScrapperService } from './scrapper.service'
+import { CurrentUser } from '../auth/index.js'
+import { ItemService } from './item.service.js'
+import { ScrapperService } from './scrapper.service.js'
 
 @ApiTags('Item')
 @Controller('/item')

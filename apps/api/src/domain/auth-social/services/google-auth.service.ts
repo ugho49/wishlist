@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common'
 import { ConfigType } from '@nestjs/config'
 import { OAuth2Client } from 'google-auth-library'
 
-import authSocialConfig from '../auth-social.config'
+import authSocialConfig from '../auth-social.config.js'
 
 @Injectable()
 export class GoogleAuthService {

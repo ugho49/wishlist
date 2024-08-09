@@ -13,12 +13,12 @@ import {
   WishlistWithEventsDto,
 } from '@wishlist/common-types'
 
-import { BucketService } from '../../core/bucket/bucket.service'
-import { EventRepository } from '../event/event.repository'
-import { ItemEntity } from '../item/item.entity'
-import { WishlistEntity } from './wishlist.entity'
-import { toDetailedWishlistDto, toMiniWishlistDto, toWishlistWithEventsDto } from './wishlist.mapper'
-import { WishlistRepository } from './wishlist.repository'
+import { BucketService } from '../../core/bucket/bucket.service.js'
+import { EventRepository } from '../event/event.repository.js'
+import { ItemEntity } from '../item/item.entity.js'
+import { WishlistEntity } from './wishlist.entity.js'
+import { toDetailedWishlistDto, toMiniWishlistDto, toWishlistWithEventsDto } from './wishlist.mapper.js'
+import { WishlistRepository } from './wishlist.repository.js'
 
 @Injectable()
 export class WishlistService {

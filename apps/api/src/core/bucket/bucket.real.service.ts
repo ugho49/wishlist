@@ -2,9 +2,9 @@ import { Inject, Injectable } from '@nestjs/common'
 import { cert, initializeApp } from 'firebase-admin/app'
 import { getStorage, Storage } from 'firebase-admin/storage'
 
-import { BucketConfig } from './bucket.config'
-import { BUCKET_CONFIG_TOKEN } from './bucket.module-definitions'
-import { BucketService } from './bucket.service'
+import { BucketConfig } from './bucket.config.js'
+import { BUCKET_CONFIG_TOKEN } from './bucket.module-definitions.js'
+import { BucketService } from './bucket.service.js'
 
 @Injectable()
 export class BucketRealService extends BucketService {

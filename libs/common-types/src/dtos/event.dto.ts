@@ -13,9 +13,9 @@ import {
   ValidateNested,
 } from 'class-validator'
 
-import { AddEventAttendeeInputDto, AttendeeDto } from './attendee.dto'
-import { GetPaginationQueryDto } from './common.dto'
-import { WishlistWithOwnerDto } from './wishlist.dto'
+import { AddEventAttendeeInputDto, AttendeeDto } from './attendee.dto.js'
+import { GetPaginationQueryDto } from './common.dto.js'
+import { WishlistWithOwnerDto } from './wishlist.dto.js'
 
 export class MiniEventDto {
   id: string

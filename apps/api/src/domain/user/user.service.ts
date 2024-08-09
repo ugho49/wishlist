@@ -23,16 +23,16 @@ import {
 } from '@wishlist/common-types'
 import { isEmpty } from 'lodash'
 
-import { BucketService } from '../../core/bucket/bucket.service'
-import { AttendeeEntity } from '../attendee/attendee.entity'
-import { PasswordManager } from '../auth'
-import { GoogleAuthService } from '../auth-social'
-import { UserEmailSettingEntity } from '../email-setttings/email-settings.entity'
-import { UserSocialEntity } from './user-social.entity'
-import { UserEntity } from './user.entity'
-import { UserMailer } from './user.mailer'
-import { toMiniUserDto, toUserDto } from './user.mapper'
-import { UserRepository } from './user.repository'
+import { BucketService } from '../../core/bucket/bucket.service.js'
+import { AttendeeEntity } from '../attendee/attendee.entity.js'
+import { GoogleAuthService } from '../auth-social/index.js'
+import { PasswordManager } from '../auth/index.js'
+import { UserEmailSettingEntity } from '../email-setttings/email-settings.entity.js'
+import { UserSocialEntity } from './user-social.entity.js'
+import { UserEntity } from './user.entity.js'
+import { UserMailer } from './user.mailer.js'
+import { toMiniUserDto, toUserDto } from './user.mapper.js'
+import { UserRepository } from './user.repository.js'
 
 @Injectable()
 export class UserService {

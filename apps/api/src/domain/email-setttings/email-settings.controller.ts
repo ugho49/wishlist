@@ -2,8 +2,8 @@ import { Body, Controller, Get, Put } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 import { UpdateUserEmailSettingsInputDto, UserEmailSettingsDto } from '@wishlist/common-types'
 
-import { CurrentUser } from '../auth'
-import { EmailSettingsService } from './email-settings.service'
+import { CurrentUser } from '../auth/index.js'
+import { EmailSettingsService } from './email-settings.service.js'
 
 @ApiTags('User Email settings')
 @Controller('/user/email-settings')

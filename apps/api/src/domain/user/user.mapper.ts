@@ -1,7 +1,7 @@
 import { MiniUserDto, UserDto } from '@wishlist/common-types'
 import { DateTime } from 'luxon'
 
-import { UserEntity } from './user.entity'
+import { UserEntity } from './user.entity.js'
 
 export async function toUserDto(entity: UserEntity): Promise<UserDto> {
   const socials = await entity.socials

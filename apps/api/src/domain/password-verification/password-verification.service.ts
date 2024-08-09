@@ -5,13 +5,13 @@ import { ResetPasswordInputDto, ResetPasswordValidationInputDto } from '@wishlis
 import { DateTime } from 'luxon'
 import { MoreThan } from 'typeorm'
 
-import { PasswordManager } from '../auth'
-import { UserEntity } from '../user'
-import { UserRepository } from '../user/user.repository'
-import passwordVerificationConfig from './password-verification.config'
-import { PasswordVerificationEntity } from './password-verification.entity'
-import { PasswordVerificationMailer } from './password-verification.mailer'
-import { PasswordVerificationRepository } from './password-verification.repository'
+import { PasswordManager } from '../auth/index.js'
+import { UserEntity } from '../user/index.js'
+import { UserRepository } from '../user/user.repository.js'
+import passwordVerificationConfig from './password-verification.config.js'
+import { PasswordVerificationEntity } from './password-verification.entity.js'
+import { PasswordVerificationMailer } from './password-verification.mailer.js'
+import { PasswordVerificationRepository } from './password-verification.repository.js'
 
 @Injectable()
 export class PasswordVerificationService {

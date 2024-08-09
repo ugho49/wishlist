@@ -2,7 +2,7 @@ import { Transform } from 'class-transformer'
 import { IsInt, IsNotEmpty, IsOptional, IsString, IsUrl, IsUUID, Max, MaxLength, Min } from 'class-validator'
 import { TidyURL } from 'tidy-url'
 
-import { MiniUserDto } from './user.dto'
+import { MiniUserDto } from './user.dto.js'
 
 export class ItemDto {
   id: string

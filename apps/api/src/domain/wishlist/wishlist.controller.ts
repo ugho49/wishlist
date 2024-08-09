@@ -14,10 +14,10 @@ import {
 } from '@wishlist/common-types'
 import { Express } from 'express'
 
-import { ValidJsonBody } from '../../common/common.decorator'
-import { CurrentUser } from '../auth'
-import { WishlistService } from './wishlist.service'
-import { wishlistLogoFileValidators, wishlistLogoResizePipe } from './wishlist.validator'
+import { ValidJsonBody } from '../../common/common.decorator.js'
+import { CurrentUser } from '../auth/index.js'
+import { WishlistService } from './wishlist.service.js'
+import { wishlistLogoFileValidators, wishlistLogoResizePipe } from './wishlist.validator.js'
 
 @ApiTags('Wishlist')
 @Controller('/wishlist')

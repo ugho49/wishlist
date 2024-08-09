@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies'
 
-import migrations from './migrations'
+import migrations from './migrations/index.js'
 
 const typeOrmModule = TypeOrmModule.forRootAsync({
   inject: [ConfigService],

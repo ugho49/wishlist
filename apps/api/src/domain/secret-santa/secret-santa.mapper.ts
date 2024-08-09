@@ -1,8 +1,8 @@
 import { SecretSantaDto, SecretSantaUserDto } from '@wishlist/common-types'
 
-import { toAttendeeDto } from '../attendee/attendee.mapper'
-import { toMiniEventDto } from '../event/event.mapper'
-import { SecretSantaEntity, SecretSantaUserEntity } from './secret-santa.entity'
+import { toAttendeeDto } from '../attendee/attendee.mapper.js'
+import { toMiniEventDto } from '../event/event.mapper.js'
+import { SecretSantaEntity, SecretSantaUserEntity } from './secret-santa.entity.js'
 
 export async function toSecretSantaDto(entity: SecretSantaEntity): Promise<SecretSantaDto> {
   const [event, users] = await Promise.all([entity.event, entity.users])

@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon'
 
-import { PasswordManager } from '../domain/auth'
-import { Fixtures, useTestApp, useTestMail } from './utils'
+import { PasswordManager } from '../domain/auth.js'
+import { Fixtures, useTestApp, useTestMail } from './utils.js'
 
 describe('PasswordVerificationController', () => {
   const { getRequest, expectTable, getFixtures } = useTestApp()

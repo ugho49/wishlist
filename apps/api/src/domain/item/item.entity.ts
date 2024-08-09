@@ -2,8 +2,8 @@ import { uuid } from '@wishlist/common'
 import { TimestampEntity } from '@wishlist/common-database'
 import { Column, Entity, ManyToOne, PrimaryColumn, RelationId } from 'typeorm'
 
-import { UserEntity } from '../user'
-import { WishlistEntity } from '../wishlist/wishlist.entity'
+import { UserEntity } from '../user/index.js'
+import { WishlistEntity } from '../wishlist/wishlist.entity.js'
 
 @Entity('item')
 export class ItemEntity extends TimestampEntity {

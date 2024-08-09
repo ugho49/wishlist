@@ -6,11 +6,11 @@ import {
   WishlistWithOwnerDto,
 } from '@wishlist/common-types'
 
-import { toMiniEventDto } from '../event/event.mapper'
-import { toItemDto } from '../item/item.mapper'
-import { displayItemSensitiveInformations, showItem } from '../item/item.utils'
-import { toMiniUserDto } from '../user/user.mapper'
-import { WishlistEntity } from './wishlist.entity'
+import { toMiniEventDto } from '../event/event.mapper.js'
+import { toItemDto } from '../item/item.mapper.js'
+import { displayItemSensitiveInformations, showItem } from '../item/item.utils.js'
+import { toMiniUserDto } from '../user/user.mapper.js'
+import { WishlistEntity } from './wishlist.entity.js'
 
 function getConfig(entity: WishlistEntity): WishlistConfigDto {
   return { hide_items: entity.hideItems }

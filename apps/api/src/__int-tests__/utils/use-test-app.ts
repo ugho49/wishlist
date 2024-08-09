@@ -3,9 +3,9 @@ import { INestApplication } from '@nestjs/common'
 import * as request from 'supertest'
 import { DataSource } from 'typeorm'
 
-import { createApp } from '../../bootstrap'
-import { Fixtures } from './fixtures'
-import { TableAssert, TableAssertSortOptions } from './table-assert'
+import { createApp } from '../../bootstrap.js'
+import { Fixtures } from './fixtures.js'
+import { TableAssert, TableAssertSortOptions } from './table-assert.js'
 
 export type RequestApp = InstanceType<(typeof request)['agent']>
 

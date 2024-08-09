@@ -1,4 +1,4 @@
-import { Fixtures, RequestApp, useTestApp } from './utils'
+import { Fixtures, RequestApp, useTestApp } from './utils.js'
 
 describe('AuthController', () => {
   const { getRequest, expectTable, getFixtures } = useTestApp()

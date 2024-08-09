@@ -10,8 +10,8 @@ import {
   UpdateSecretSantaUserInputDto,
 } from '@wishlist/common-types'
 
-import { CurrentUser } from '../auth'
-import { SecretSantaService } from './secret-santa.service'
+import { CurrentUser } from '../auth/index.js'
+import { SecretSantaService } from './secret-santa.service.js'
 
 @ApiTags('Secret Santa')
 @Controller('/secret-santa')

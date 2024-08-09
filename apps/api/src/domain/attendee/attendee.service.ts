@@ -8,12 +8,12 @@ import {
 } from '@nestjs/common'
 import { AddEventAttendeeForEventInputDto, AttendeeDto, AttendeeRole, ICurrentUser } from '@wishlist/common-types'
 
-import { EventMailer } from '../event/event.mailer'
-import { EventRepository } from '../event/event.repository'
-import { UserRepository } from '../user/user.repository'
-import { AttendeeEntity } from './attendee.entity'
-import { toAttendeeDto } from './attendee.mapper'
-import { AttendeeRepository } from './attendee.repository'
+import { EventMailer } from '../event/event.mailer.js'
+import { EventRepository } from '../event/event.repository.js'
+import { UserRepository } from '../user/user.repository.js'
+import { AttendeeEntity } from './attendee.entity.js'
+import { toAttendeeDto } from './attendee.mapper.js'
+import { AttendeeRepository } from './attendee.repository.js'
 
 @Injectable()
 export class AttendeeService {

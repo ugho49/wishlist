@@ -1,1 +1,1 @@
-export * from './secret-santa-draw.service'
+export * from './secret-santa-draw.service.js'

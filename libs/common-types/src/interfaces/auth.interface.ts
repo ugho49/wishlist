@@ -1,4 +1,4 @@
-import { Authorities } from '../enums'
+import { Authorities } from '../enums/index.js'
 
 export interface AccessTokenJwtPayload {
   sub: string

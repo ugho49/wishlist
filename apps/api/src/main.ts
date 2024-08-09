@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config'
 
 import 'pg'
 
-import { createApp } from './bootstrap'
+import { createApp } from './bootstrap.js'
 
 ;(async function () {
   Logger.log('Starting server ...')

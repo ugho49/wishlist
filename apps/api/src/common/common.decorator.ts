@@ -1,6 +1,6 @@
 import { createParamDecorator, ExecutionContext, ValidationPipe } from '@nestjs/common'
 
-import { ParseJsonPipe } from './common.pipe'
+import { ParseJsonPipe } from './common.pipe.js'
 
 const TransformDataJsonBody = createParamDecorator((property: string, ctx: ExecutionContext): any => {
   const request = ctx.switchToHttp().getRequest()

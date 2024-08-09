@@ -1,5 +1,5 @@
-import { WishlistEntity } from '../wishlist/wishlist.entity'
-import { ItemEntity } from './item.entity'
+import { WishlistEntity } from '../wishlist/wishlist.entity.js'
+import { ItemEntity } from './item.entity.js'
 
 export function showItem(param: { item: ItemEntity; currentUserId: string; wishlist: WishlistEntity }): boolean {
   const { item, currentUserId, wishlist } = param

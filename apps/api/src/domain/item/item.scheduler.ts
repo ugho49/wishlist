@@ -1,10 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { Cron } from '@nestjs/schedule'
 
-import { WishlistRepository } from '../wishlist/wishlist.repository'
-import { NewItemsForWishlist } from './item.interface'
-import { ItemMailer } from './item.mailer'
-import { ItemRepository } from './item.repository'
+import { WishlistRepository } from '../wishlist/wishlist.repository.js'
+import { NewItemsForWishlist } from './item.interface.js'
+import { ItemMailer } from './item.mailer.js'
+import { ItemRepository } from './item.repository.js'
 
 @Injectable()
 export class ItemScheduler {

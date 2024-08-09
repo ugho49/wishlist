@@ -2,8 +2,8 @@ import { Body, Controller, Post } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 import { ResetPasswordInputDto, ResetPasswordValidationInputDto } from '@wishlist/common-types'
 
-import { Public } from '../auth'
-import { PasswordVerificationService } from './password-verification.service'
+import { Public } from '../auth/index.js'
+import { PasswordVerificationService } from './password-verification.service.js'
 
 @Public()
 @ApiTags('User Password Validation')

@@ -1,6 +1,6 @@
 import { ConfigurableModuleBuilder } from '@nestjs/common'
 
-import { BucketConfig } from './bucket.config'
+import { BucketConfig } from './bucket.config.js'
 
 export const { ConfigurableModuleClass: ConfigurableBucketModule, MODULE_OPTIONS_TOKEN: BUCKET_CONFIG_TOKEN } =
   new ConfigurableModuleBuilder<BucketConfig>()

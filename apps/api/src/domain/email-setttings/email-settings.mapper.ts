@@ -1,6 +1,6 @@
 import { UserEmailSettingsDto } from '@wishlist/common-types'
 
-import { UserEmailSettingEntity } from './email-settings.entity'
+import { UserEmailSettingEntity } from './email-settings.entity.js'
 
 export function toDto(entity: UserEmailSettingEntity): UserEmailSettingsDto {
   return {

@@ -4,10 +4,10 @@ import { Global, Module } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { ScheduleModule } from '@nestjs/schedule'
 
-import { BucketModule } from './bucket/bucket.module'
-import { DatabaseModule } from './database/database.module'
-import { HealthModule } from './health/health.module'
-import { MailModule } from './mail/mail.module'
+import { BucketModule } from './bucket/bucket.module.js'
+import { DatabaseModule } from './database/database.module.js'
+import { HealthModule } from './health/health.module.js'
+import { MailModule } from './mail/mail.module.js'
 
 const bucketModule = BucketModule.registerAsync({
   isGlobal: true,

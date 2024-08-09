@@ -1,4 +1,4 @@
-import { useTestApp } from './utils'
+import { useTestApp } from './utils.js'
 
 describe('HealthController', () => {
   const { getRequest } = useTestApp()

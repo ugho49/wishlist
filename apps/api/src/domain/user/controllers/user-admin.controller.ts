@@ -10,9 +10,9 @@ import {
   UserDto,
 } from '@wishlist/common-types'
 
-import { CurrentUser, IsAdmin } from '../../auth'
-import { UserService } from '../user.service'
-import { userPictureFileValidators, userPictureResizePipe } from '../user.validator'
+import { CurrentUser, IsAdmin } from '../../auth/index.js'
+import { UserService } from '../user.service.js'
+import { userPictureFileValidators, userPictureResizePipe } from '../user.validator.js'
 
 import 'multer'
 

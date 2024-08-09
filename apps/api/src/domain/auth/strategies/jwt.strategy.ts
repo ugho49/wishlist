@@ -4,7 +4,7 @@ import { PassportStrategy } from '@nestjs/passport'
 import { AccessTokenJwtPayload, createCurrentUserFromPayload } from '@wishlist/common-types'
 import { ExtractJwt, Strategy } from 'passport-jwt'
 
-import authConfig from '../auth.config'
+import authConfig from '../auth.config.js'
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {

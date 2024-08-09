@@ -2,8 +2,8 @@ import { uuid } from '@wishlist/common'
 import { AttendeeRole } from '@wishlist/common-types'
 import { Column, Entity, ManyToOne, PrimaryColumn, RelationId } from 'typeorm'
 
-import { EventEntity } from '../event/event.entity'
-import { UserEntity } from '../user'
+import { EventEntity } from '../event/event.entity.js'
+import { UserEntity } from '../user/index.js'
 
 @Entity('event_attendee')
 export class AttendeeEntity {

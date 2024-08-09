@@ -9,8 +9,8 @@ import {
 } from '@wishlist/common-types'
 import { RealIP } from 'nestjs-real-ip'
 
-import { AuthService } from './auth.service'
-import { Public } from './decorators/public.metadata'
+import { AuthService } from './auth.service.js'
+import { Public } from './decorators/public.metadata.js'
 
 @Public()
 @ApiTags('Auth')

@@ -1,8 +1,8 @@
 import { Transform } from 'class-transformer'
 import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator'
 
-import { AttendeeRole } from '../enums'
-import { MiniUserDto } from './user.dto'
+import { AttendeeRole } from '../enums/index.js'
+import { MiniUserDto } from './user.dto.js'
 
 export class AttendeeDto {
   id: string

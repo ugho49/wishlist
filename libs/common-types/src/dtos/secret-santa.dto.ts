@@ -2,8 +2,8 @@ import { Transform } from 'class-transformer'
 import { IsNumber, IsOptional, IsPositive, IsString } from 'class-validator'
 import { uniq } from 'lodash'
 
-import { AttendeeDto, MiniEventDto } from '../dtos'
-import { SecretSantaStatus } from '../enums'
+import { AttendeeDto, MiniEventDto } from '../dtos/index.js'
+import { SecretSantaStatus } from '../enums/index.js'
 
 export class SecretSantaUserDto {
   id: string

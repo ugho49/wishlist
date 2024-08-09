@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { BaseRepository } from '@wishlist/common-database'
 import { In } from 'typeorm'
 
-import { EventEntity } from './event.entity'
+import { EventEntity } from './event.entity.js'
 
 @Injectable()
 export class EventRepository extends BaseRepository(EventEntity) {

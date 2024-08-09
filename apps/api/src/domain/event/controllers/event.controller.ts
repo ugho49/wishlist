@@ -11,8 +11,8 @@ import {
   UpdateEventInputDto,
 } from '@wishlist/common-types'
 
-import { CurrentUser } from '../../auth'
-import { EventService } from '../event.service'
+import { CurrentUser } from '../../auth/index.js'
+import { EventService } from '../event.service.js'
 
 @ApiTags('Event')
 @Controller('/event')

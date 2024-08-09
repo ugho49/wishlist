@@ -1,10 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { camelCaseKeys } from '@wishlist/common'
 import { BaseRepository } from '@wishlist/common-database'
-import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
 
-import { ItemEntity } from './item.entity'
-import { NewItemsForWishlist } from './item.interface'
+import { ItemEntity } from './item.entity.js'
+import { NewItemsForWishlist } from './item.interface.js'
 
 @Injectable()
 export class ItemRepository extends BaseRepository(ItemEntity) {
@@ -24,7 +23,7 @@ export class ItemRepository extends BaseRepository(ItemEntity) {
     return entity
   }
 
-  updateById(id: string, partialEntity: QueryDeepPartialEntity<ItemEntity>) {
+  updateById(id: string, partialEntity: Partial<ItemEntity>) {
     return this.update({ id }, partialEntity)
   }
 

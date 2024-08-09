@@ -3,7 +3,7 @@ import { TimestampEntity } from '@wishlist/common-database'
 import { UserSocialType } from '@wishlist/common-types'
 import { Column, Entity, ManyToOne, PrimaryColumn, RelationId } from 'typeorm'
 
-import { UserEntity } from './user.entity'
+import { UserEntity } from './user.entity.js'
 
 @Entity('user_social')
 export class UserSocialEntity extends TimestampEntity {

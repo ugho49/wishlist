@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { BaseRepository } from '@wishlist/common-database'
 
-import { AttendeeEntity } from './attendee.entity'
+import { AttendeeEntity } from './attendee.entity.js'
 
 @Injectable()
 export class AttendeeRepository extends BaseRepository(AttendeeEntity) {

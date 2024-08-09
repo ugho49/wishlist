@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common'
 
-import { BucketConfig } from './bucket.config'
-import { BucketMockService } from './bucket.mock.service'
-import { BUCKET_CONFIG_TOKEN, ConfigurableBucketModule } from './bucket.module-definitions'
-import { BucketRealService } from './bucket.real.service'
-import { BucketService } from './bucket.service'
+import { BucketConfig } from './bucket.config.js'
+import { BucketMockService } from './bucket.mock.service.js'
+import { BUCKET_CONFIG_TOKEN, ConfigurableBucketModule } from './bucket.module-definitions.js'
+import { BucketRealService } from './bucket.real.service.js'
+import { BucketService } from './bucket.service.js'
 
 @Module({
   providers: [

@@ -14,13 +14,13 @@ import {
 import { uniq } from 'lodash'
 import { EntityManager } from 'typeorm'
 
-import { AttendeeEntity } from '../attendee/attendee.entity'
-import { UserRepository } from '../user/user.repository'
-import { WishlistEntity } from '../wishlist/wishlist.entity'
-import { EventEntity } from './event.entity'
-import { EventMailer } from './event.mailer'
-import { toDetailedEventDto, toEventWithCountsDto, toMiniEventDto } from './event.mapper'
-import { EventRepository } from './event.repository'
+import { AttendeeEntity } from '../attendee/attendee.entity.js'
+import { UserRepository } from '../user/user.repository.js'
+import { WishlistEntity } from '../wishlist/wishlist.entity.js'
+import { EventEntity } from './event.entity.js'
+import { EventMailer } from './event.mailer.js'
+import { toDetailedEventDto, toEventWithCountsDto, toMiniEventDto } from './event.mapper.js'
+import { EventRepository } from './event.repository.js'
 
 @Injectable()
 export class EventService {

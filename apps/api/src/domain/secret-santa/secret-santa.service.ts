@@ -18,11 +18,11 @@ import {
 } from '@wishlist/common-types'
 import { In } from 'typeorm'
 
-import { toAttendeeDto } from '../attendee/attendee.mapper'
-import { EventRepository } from '../event/event.repository'
-import { SecretSantaEntity, SecretSantaUserEntity } from './secret-santa.entity'
-import { toSecretSantaDto, toSecretSantaUserDto } from './secret-santa.mapper'
-import { SecretSantaRepository, SecretSantaUserRepository } from './secret-santa.repository'
+import { toAttendeeDto } from '../attendee/attendee.mapper.js'
+import { EventRepository } from '../event/event.repository.js'
+import { SecretSantaEntity, SecretSantaUserEntity } from './secret-santa.entity.js'
+import { toSecretSantaDto, toSecretSantaUserDto } from './secret-santa.mapper.js'
+import { SecretSantaRepository, SecretSantaUserRepository } from './secret-santa.repository.js'
 
 @Injectable()
 export class SecretSantaService {

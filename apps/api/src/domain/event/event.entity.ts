@@ -3,8 +3,8 @@ import { TimestampEntity } from '@wishlist/common-database'
 import { AttendeeRole } from '@wishlist/common-types'
 import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryColumn } from 'typeorm'
 
-import { AttendeeEntity } from '../attendee/attendee.entity'
-import { WishlistEntity } from '../wishlist/wishlist.entity'
+import { AttendeeEntity } from '../attendee/attendee.entity.js'
+import { WishlistEntity } from '../wishlist/wishlist.entity.js'
 
 @Entity('event')
 export class EventEntity extends TimestampEntity {

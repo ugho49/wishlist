@@ -3,7 +3,7 @@ import type { AxiosInstance } from 'axios'
 import { beforeEach } from '@jest/globals'
 import axios from 'axios'
 
-import { MailsAssert } from './mail-assert'
+import { MailsAssert } from './mail-assert.js'
 
 export function useTestMail() {
   const http: AxiosInstance = axios.create({

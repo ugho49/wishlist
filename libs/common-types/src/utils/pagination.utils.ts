@@ -1,4 +1,4 @@
-import { PagedResponse } from '../dtos'
+import { PagedResponse } from '../dtos/index.js'
 
 export function createPagedResponse<T>(params: {
   resources: T[]

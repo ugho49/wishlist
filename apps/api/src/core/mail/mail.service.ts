@@ -7,9 +7,9 @@ import { Inject, Injectable } from '@nestjs/common'
 import * as Handlebars from 'handlebars'
 import { createTransport } from 'nodemailer'
 
-import { MailConfig } from './mail.config'
-import { MAIL_CONFIG_TOKEN } from './mail.module-definitions'
-import { helpers } from './mail.utils'
+import { MailConfig } from './mail.config.js'
+import { MAIL_CONFIG_TOKEN } from './mail.module-definitions.js'
+import { helpers } from './mail.utils.js'
 
 @Injectable()
 export class MailService {

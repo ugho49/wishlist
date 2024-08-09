@@ -1,3 +1,3 @@
-export * from './pagination.utils'
-export * from './event.utils'
-export * from './auth.utils'
+export * from './pagination.utils.js'
+export * from './event.utils.js'
+export * from './auth.utils.js'
