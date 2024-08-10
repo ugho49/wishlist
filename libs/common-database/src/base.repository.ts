@@ -1,7 +1,6 @@
 import { Type } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { DataSource, ObjectLiteral, Repository } from 'typeorm'
-import { EntityManager } from 'typeorm/entity-manager/EntityManager'
+import { DataSource, EntityManager, ObjectLiteral, Repository } from 'typeorm'
 
 type BaseRepositoryConstructor<T> = new (...args: unknown[]) => T
 

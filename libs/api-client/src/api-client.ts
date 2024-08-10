@@ -1,14 +1,16 @@
 import axios, { CreateAxiosDefaults } from 'axios'
 
-import { AdminEventService } from './services/admin-event.service'
-import { AdminUserService } from './services/admin-user.service'
-import { AttendeeService } from './services/attendee.service'
-import { AuthService } from './services/auth.service'
-import { EventService } from './services/event.service'
-import { ItemService } from './services/item.service'
-import { SecretSantaService } from './services/secret-santa.service'
-import { UserService } from './services/user.service'
-import { WishlistService } from './services/wishlist.service'
+import {
+  AdminEventService,
+  AdminUserService,
+  AttendeeService,
+  AuthService,
+  EventService,
+  ItemService,
+  SecretSantaService,
+  UserService,
+  WishlistService,
+} from './services'
 
 type ClientServiceParams = {
   baseURL: string

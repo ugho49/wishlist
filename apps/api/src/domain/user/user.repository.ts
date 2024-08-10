@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common'
-import { BaseRepository } from '@wishlist/common-database'
+import { BaseRepository, PartialEntity } from '@wishlist/common-database'
 import { Brackets, In, Not } from 'typeorm'
-import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
 
 import { UserEntity } from './user.entity'
 
@@ -19,7 +18,7 @@ export class UserRepository extends BaseRepository(UserEntity) {
     return this.findBy({ email: In(emails) })
   }
 
-  updateById(id: string, partialEntity: QueryDeepPartialEntity<UserEntity>) {
+  updateById(id: string, partialEntity: PartialEntity<UserEntity>) {
     return this.update({ id }, partialEntity)
   }
 
