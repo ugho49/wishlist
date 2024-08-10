@@ -1,4 +1,3 @@
-import { useFeatureFlagEnabled } from 'posthog-js/react'
 import { useSelector } from 'react-redux'
 import { Navigate, Route, Routes } from 'react-router-dom'
 
@@ -12,6 +11,7 @@ import { CreateEventPage } from './components/event/CreateEventPage'
 import { EditEventPage } from './components/event/EditEventPage'
 import { EventListPage } from './components/event/EventListPage'
 import { EventPage } from './components/event/EventPage'
+import { SecretSantaPage } from './components/event/secret-santa/SecretSantaPage'
 import { AdminEditUserPage } from './components/user/admin/AdminEditUserPage'
 import { UserProfilePage } from './components/user/UserProfilePage'
 import { CreateWishlistPage } from './components/wishlist/CreateWishlistPage'
@@ -24,13 +24,14 @@ import { NavigateToLoginWithContext } from './core/router/NavigateToLoginWithCon
 import { AdminRouteOutlet } from './core/router/outlet/AdminRouteOutlet'
 import { AnonymousRouteContainerOutlet } from './core/router/outlet/AnonymousRouteContainerOutlet'
 import { PrivateRouteContainerOutlet } from './core/router/outlet/PrivateRouteContainerOutlet'
+import { FEATURE_FLAGS, useFeatureFlag } from './hooks/useFeatureFlag'
 
 const mapAuthState = (state: RootState) => state.auth
 
 export const App = () => {
   const { accessToken } = useSelector(mapAuthState)
   const isLoggedIn = accessToken !== undefined
-  const flagEnabled = useFeatureFlagEnabled('frontend-maintenance-page-enabled')
+  const flagEnabled = useFeatureFlag(FEATURE_FLAGS.MAINTENACE_PAGE_ENABLED)
 
   if (flagEnabled) {
     return <MaintenancePage />
@@ -67,6 +68,9 @@ export const App = () => {
               <Route path="new" element={<CreateEventPage />} />
               <Route path=":eventId" element={<EventPage />} />
               <Route path=":eventId/edit" element={<EditEventPage />} />
+              <Route path=":eventId/secret-santa">
+                <Route index element={<SecretSantaPage />} />
+              </Route>
             </Route>
 
             <Route path="wishlists">

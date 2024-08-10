@@ -38,15 +38,8 @@ export const WishlistPage = () => {
           <>
             <Title smallMarginBottom>{wishlist.title}</Title>
 
-            <Stack
-              direction="column"
-              justifyContent="center"
-              alignItems="center"
-              flexWrap="wrap"
-              sx={{ marginBottom: '20px' }}
-              gap={1}
-            >
-              <Stack direction="row" gap={1}>
+            <Stack direction="column" sx={{ marginBottom: '20px' }} gap={1} justifyContent="center" alignItems="center">
+              <Stack direction="row" gap={1} flexWrap="wrap" justifyContent="center" alignItems="center">
                 {!wishlist.config.hide_items && (
                   <Tooltip title="Tout le monde peut ajouter, cocher ou voir les souhaits cochés, même le créateur de la liste">
                     <Chip label="Publique" color="primary" variant="outlined" size="small" icon={<PublicIcon />} />
@@ -76,9 +69,10 @@ export const WishlistPage = () => {
                 <Stack direction="row" gap={1}>
                   <Chip
                     color="info"
-                    variant="outlined"
-                    size="small"
-                    icon={<EditIcon />}
+                    variant="filled"
+                    size="medium"
+                    sx={{ boxShadow: '0 0 0px 0 rgba(87, 113, 149, 0.3),0 2px 3px 1px rgba(87, 113, 149, 0.5)' }}
+                    icon={<EditIcon fontSize="small" />}
                     onClick={() => navigate(`/wishlists/${wishlistId}/edit`)}
                     label="Modifier"
                   />

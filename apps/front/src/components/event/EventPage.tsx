@@ -11,6 +11,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 
 import { RootState } from '../../core'
 import { useEventById } from '../../hooks/domain/useEventById'
+import { FEATURE_FLAGS, useFeatureFlag } from '../../hooks/useFeatureFlag'
 import { Description } from '../common/Description'
 import { Loader } from '../common/Loader'
 import { Title } from '../common/Title'
@@ -27,7 +28,7 @@ export const EventPage = () => {
   const navigate = useNavigate()
   const [openAttendeesDialog, setOpenAttendeesDialog] = useState(false)
   const { event, loading } = useEventById(eventId)
-
+  const secretSantaEnabled = true //useFeatureFlag(FEATURE_FLAGS.SECRET_SANTA_ENABLED)
   const attendees = useMemo(() => event?.attendees || [], [event])
   const currentUserCanEdit = useMemo(() => canEditEvent(attendees, currentUserId ?? ''), [attendees, currentUserId])
 
@@ -64,20 +65,23 @@ export const EventPage = () => {
               </Stack>
               {currentUserCanEdit && (
                 <Stack direction="row" gap={1}>
-                  <Chip
-                    color="success"
-                    variant="outlined"
-                    size="small"
-                    icon={<ForestIcon />}
-                    onClick={() => navigate(`/events/${eventId}/secret-santa`)}
-                    disabled={true}
-                    label="Secret Santa (Soon)"
-                  />
+                  {secretSantaEnabled && (
+                    <Chip
+                      color="success"
+                      variant="filled"
+                      size="medium"
+                      sx={{ boxShadow: '0 0 0px 0 rgba(87, 113, 149, 0.3),0 2px 3px 1px rgba(87, 113, 149, 0.5)' }}
+                      icon={<ForestIcon fontSize="small" />}
+                      onClick={() => navigate(`/events/${eventId}/secret-santa`)}
+                      label="Secret Santa"
+                    />
+                  )}
                   <Chip
                     color="info"
-                    variant="outlined"
-                    size="small"
-                    icon={<EditIcon />}
+                    variant="filled"
+                    size="medium"
+                    sx={{ boxShadow: '0 0 0px 0 rgba(87, 113, 149, 0.3),0 2px 3px 1px rgba(87, 113, 149, 0.5)' }}
+                    icon={<EditIcon fontSize="small" />}
                     onClick={() => navigate(`/events/${eventId}/edit`)}
                     label="Modifier"
                   />
