@@ -3646,10 +3646,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@golevelup/ts-jest@npm:0.5.1":
-  version: 0.5.1
-  resolution: "@golevelup/ts-jest@npm:0.5.1"
-  checksum: 10c0/1f6b93ac64566f15bfbe7feb983d09fc52cdc6ad562343b09f011067e962a21bb9d9f6347ef56ca9d2388234c746390b7cd56811e34edd8465365de36f53b783
+"@golevelup/ts-jest@npm:0.5.5":
+  version: 0.5.5
+  resolution: "@golevelup/ts-jest@npm:0.5.5"
+  checksum: 10c0/81ae5663bb049ac9befa2f796610868277d6caa578c3e2f9061c544bc7fc3e45a8e7a86d8aef7a4ed3fed036dcae7afa4aa5999e704a908048d23c303cab1ac4
   languageName: node
   linkType: hard
 
@@ -23583,7 +23583,7 @@ __metadata:
     "@emotion/react": "npm:11.13.0"
     "@emotion/styled": "npm:11.13.0"
     "@eslint/js": "npm:9.8.0"
-    "@golevelup/ts-jest": "npm:0.5.1"
+    "@golevelup/ts-jest": "npm:0.5.5"
     "@hookform/resolvers": "npm:3.9.0"
     "@ianvs/prettier-plugin-sort-imports": "npm:4.3.1"
     "@mui/icons-material": "npm:5.16.7"
