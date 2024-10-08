@@ -1,0 +1,12 @@
+# All this files will be ignored by NX
+# This will be used by the nx affected command to avoid building and testing all the
+# apps and libs in the workspace when theses files changed
+
+.husky/
+.vscode/
+.github/
+docker/
+.lintstagedrc.json
+commitlint.config.cjs
+eslint.config.cjs
+prettier.config.cjs
