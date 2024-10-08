@@ -19048,14 +19048,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"posthog-js@npm:1.155.0":
-  version: 1.155.0
-  resolution: "posthog-js@npm:1.155.0"
+"posthog-js@npm:1.167.0":
+  version: 1.167.0
+  resolution: "posthog-js@npm:1.167.0"
   dependencies:
     fflate: "npm:^0.4.8"
     preact: "npm:^10.19.3"
     web-vitals: "npm:^4.0.1"
-  checksum: 10c0/0bc8001b686d0d15fb32111b090d95244273f409fe4ed5e80a887df85fad06214d133e7c394816cec11ad2eda3142d6b5e690b5c22cf2d5358eae9623d6fc2d7
+  checksum: 10c0/464c3157cf0f69ab62791b70574b39d49bd4ede69ab054c7ac5a9c8b52566adf905c8fbf7a7b35acaa7f29a9c4996bd816817889de18338b818f1adfc7c2d454
   languageName: node
   linkType: hard
 
@@ -23684,7 +23684,7 @@ __metadata:
     passport: "npm:0.7.0"
     passport-jwt: "npm:4.0.1"
     pg: "npm:8.12.0"
-    posthog-js: "npm:1.155.0"
+    posthog-js: "npm:1.167.0"
     prettier: "npm:3.3.3"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
