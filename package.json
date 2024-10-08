@@ -88,7 +88,7 @@
   "devDependencies": {
     "@commitlint/cli": "19.4.0",
     "@commitlint/config-conventional": "19.2.2",
-    "@eslint/js": "9.8.0",
+    "@eslint/js": "9.12.0",
     "@golevelup/ts-jest": "0.5.1",
     "@ianvs/prettier-plugin-sort-imports": "4.3.1",
     "@nestjs/schematics": "10.1.3",
@@ -128,7 +128,7 @@
     "@vitest/coverage-v8": "2.0.5",
     "@vitest/ui": "2.0.5",
     "browserslist-to-esbuild": "2.1.1",
-    "eslint": "9.8.0",
+    "eslint": "9.12.0",
     "eslint-config-prettier": "9.1.0",
     "eslint-plugin-jest": "28.8.0",
     "eslint-plugin-jsx-a11y": "6.9.0",
