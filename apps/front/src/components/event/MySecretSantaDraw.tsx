@@ -2,7 +2,7 @@ import { Box, Stack, Theme } from '@mui/material'
 import { makeStyles } from '@mui/styles'
 import React from 'react'
 
-import { useMySecretSantaDraw } from '../../../hooks/domain/useMySecretSantaDraw'
+import { useMySecretSantaDraw } from '../../hooks/domain/useMySecretSantaDraw'
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
@@ -25,16 +25,18 @@ type MySecretSantaDrawProps = {
 
 export const MySecretSantaDraw = ({ eventId }: MySecretSantaDrawProps) => {
   const classes = useStyles()
-  const { mySecretSantaDraw } = useMySecretSantaDraw(eventId)
+  const { mySecretSantaDraw: draw } = useMySecretSantaDraw(eventId)
 
-  if (!mySecretSantaDraw) {
+  if (!draw) {
     return
   }
 
   return (
     <Stack direction="column" alignItems="center" gap={1} className={classes.container}>
       <Box>Votre Secret Santa est</Box>
-      <Box className={classes.drawName}>Ugho STEPHAN</Box>
+      <Box className={classes.drawName}>
+        {draw.pending_email ? draw.pending_email : `${draw.user?.firstname} ${draw.user?.lastname}`}
+      </Box>
     </Stack>
   )
 }

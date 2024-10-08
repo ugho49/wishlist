@@ -12,6 +12,7 @@ import { CreateEventPage } from './components/event/CreateEventPage'
 import { EditEventPage } from './components/event/EditEventPage'
 import { EventListPage } from './components/event/EventListPage'
 import { EventPage } from './components/event/EventPage'
+import { SecretSantaPage } from './components/secret-santa/SecretSantaPage'
 import { AdminEditUserPage } from './components/user/admin/AdminEditUserPage'
 import { UserProfilePage } from './components/user/UserProfilePage'
 import { CreateWishlistPage } from './components/wishlist/CreateWishlistPage'
@@ -67,6 +68,7 @@ export const App = () => {
               <Route path="new" element={<CreateEventPage />} />
               <Route path=":eventId" element={<EventPage />} />
               <Route path=":eventId/edit" element={<EditEventPage />} />
+              <Route path=":eventId/secret-santa" element={<SecretSantaPage />} />
             </Route>
 
             <Route path="wishlists">

@@ -75,27 +75,27 @@ export class SecretSantaController {
     return this.secretSantaService.addSecretSantaUser({ secretSantaId, currentUserId, dto })
   }
 
-  @Put('/:id/user/:userId')
+  @Put('/:id/user/:secretSantaUserId')
   updateSecretSantaUser(
     @Param('id') secretSantaId: string,
-    @Param('userId') userId: string,
+    @Param('secretSantaUserId') secretSantaUserId: string,
     @CurrentUser('id') currentUserId: string,
     @Body() dto: UpdateSecretSantaUserInputDto,
   ): Promise<void> {
     return this.secretSantaService.updateSecretSantaUser({
       secretSantaId,
-      secretSantaUserId: userId,
+      secretSantaUserId,
       currentUserId,
       dto,
     })
   }
 
-  @Delete('/:id/user/:userId')
+  @Delete('/:id/user/:secretSantaUserId')
   deleteSecretSantaUser(
     @Param('id') secretSantaId: string,
-    @Param('userId') userId: string,
+    @Param('secretSantaUserId') secretSantaUserId: string,
     @CurrentUser('id') currentUserId: string,
   ): Promise<void> {
-    return this.secretSantaService.deleteSecretSantaUser({ secretSantaId, secretSantaUserId: userId, currentUserId })
+    return this.secretSantaService.deleteSecretSantaUser({ secretSantaId, secretSantaUserId, currentUserId })
   }
 }

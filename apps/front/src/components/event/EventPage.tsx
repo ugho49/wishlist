@@ -17,7 +17,7 @@ import { Title } from '../common/Title'
 import { EventAttendeesDialog } from './EventAttendeesDialog'
 import { EventNotFound } from './EventNotFound'
 import { EventWishlists } from './EventWishlists'
-import { MySecretSantaDraw } from './secret-santa/MySecretSantaDraw'
+import { MySecretSantaDraw } from './MySecretSantaDraw'
 
 const mapState = (state: RootState) => state.auth.user?.id
 

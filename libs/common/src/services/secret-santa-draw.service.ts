@@ -2,18 +2,29 @@ export type SecretSantaUser = { id: string; exclusions: string[] }
 export type SecretSantaAssign = { userId: string; drawUserId: string }
 
 export class SecretSantaDrawService {
-  public assignSecretSantas(users: SecretSantaUser[]): SecretSantaAssign[] {
-    if (users.length < 2) {
+  constructor(private readonly users: SecretSantaUser[]) {}
+
+  public assignSecretSantas(): SecretSantaAssign[] {
+    if (this.users.length < 2) {
       throw new Error("Pas assez d'utilisateurs pour tirer au sort.")
     }
 
-    const possibleDraws = this.getPossibleDraws(users)
+    const possibleDraws = this.getPossibleDraws()
 
     return this.draw(possibleDraws)
   }
 
-  private getPossibleDraws(users: SecretSantaUser[]) {
-    const sortedUsers = [...users].sort((a, b) => a.exclusions.length - b.exclusions.length)
+  public isDrawPossible(): boolean {
+    try {
+      this.getPossibleDraws()
+      return true
+    } catch {
+      return false
+    }
+  }
+
+  private getPossibleDraws() {
+    const sortedUsers = [...this.users].sort((a, b) => a.exclusions.length - b.exclusions.length)
 
     const possibleDraws: { userId: string; possibleDrawIds: string[] }[] = []
     const drawUserIds = new Set<string>()
@@ -30,7 +41,7 @@ export class SecretSantaDrawService {
       possibleDraws.push({ userId: user.id, possibleDrawIds })
     }
 
-    if (drawUserIds.size !== users.length) {
+    if (drawUserIds.size !== this.users.length) {
       throw new Error('Impossible de tirer au sort un utilisateur en raison des exclusions.')
     }
 

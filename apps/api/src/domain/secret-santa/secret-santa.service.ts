@@ -26,8 +26,6 @@ import { SecretSantaRepository, SecretSantaUserRepository } from './secret-santa
 
 @Injectable()
 export class SecretSantaService {
-  private readonly drawService = new SecretSantaDrawService()
-
   constructor(
     private readonly eventRepository: EventRepository,
     private readonly secretSantaRepository: SecretSantaRepository,
@@ -54,7 +52,7 @@ export class SecretSantaService {
   }
 
   async createForEvent(param: { currentUserId: string; dto: CreateSecretSantaInputDto }): Promise<SecretSantaDto> {
-    const alreadyExists = await this.secretSantaRepository.exist({ where: { eventId: param.dto.event_id } })
+    const alreadyExists = await this.secretSantaRepository.exists({ where: { eventId: param.dto.event_id } })
 
     if (alreadyExists) {
       throw new BadRequestException('Secret santa already exists for event')
@@ -90,7 +88,7 @@ export class SecretSantaService {
       userId: param.currentUserId,
     })
 
-    await this.checkSecretSantaNotStarted(secretSanta)
+    this.checkSecretSantaNotStarted(secretSanta)
 
     await this.secretSantaRepository.update(
       { id: secretSanta.id },
@@ -107,7 +105,7 @@ export class SecretSantaService {
       userId: param.currentUserId,
     })
 
-    await this.checkSecretSantaNotStarted(secretSanta)
+    this.checkSecretSantaNotStarted(secretSanta)
 
     await this.secretSantaRepository.delete({ id: secretSanta.id })
   }
@@ -118,7 +116,7 @@ export class SecretSantaService {
       userId: param.currentUserId,
     })
 
-    await this.checkSecretSantaNotStarted(secretSanta)
+    this.checkSecretSantaNotStarted(secretSanta)
 
     const event = await secretSanta.event
 
@@ -129,9 +127,10 @@ export class SecretSantaService {
     const secretSantaUsers = await this.secretSantaUserRepository.findBy({ secretSantaId: secretSanta.id })
 
     try {
-      const assignedUsers = this.drawService.assignSecretSantas(
+      const drawService = new SecretSantaDrawService(
         secretSantaUsers.map(ss => ({ id: ss.id, exclusions: ss.exclusions })),
       )
+      const assignedUsers = drawService.assignSecretSantas()
 
       await this.secretSantaRepository.transaction(async em => {
         for (const user of assignedUsers) {
@@ -173,7 +172,7 @@ export class SecretSantaService {
       userId: param.currentUserId,
     })
 
-    await this.checkSecretSantaNotStarted(secretSanta)
+    this.checkSecretSantaNotStarted(secretSanta)
 
     const alreadyExists = await this.secretSantaUserRepository.exists({
       where: { secretSantaId: secretSanta.id, attendeeId: param.dto.attendee_id },
@@ -210,7 +209,7 @@ export class SecretSantaService {
       userId: param.currentUserId,
     })
 
-    await this.checkSecretSantaNotStarted(secretSanta)
+    this.checkSecretSantaNotStarted(secretSanta)
 
     const secretSantaUsers =
       param.dto.exclusions.length === 0
@@ -244,7 +243,7 @@ export class SecretSantaService {
       userId: param.currentUserId,
     })
 
-    await this.checkSecretSantaNotStarted(secretSanta)
+    this.checkSecretSantaNotStarted(secretSanta)
 
     await this.secretSantaUserRepository.delete({ id: param.secretSantaUserId })
   }
