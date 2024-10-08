@@ -1,11 +1,12 @@
-import { LoadingButton } from '@mui/lab'
 import { Box, Stack } from '@mui/material'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { SecretSantaDrawService } from '@wishlist/common'
 import { SecretSantaDto, SecretSantaStatus } from '@wishlist/common-types'
-import React from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 
 import { useApi } from '../../hooks/useApi'
 import { useToast } from '../../hooks/useToast'
+import { ConfirmButton } from '../common/ConfirmButton'
 
 type SecretSantaProps = {
   secretSanta: SecretSantaDto
@@ -16,14 +17,30 @@ export const SecretSanta = ({ secretSanta, eventId }: SecretSantaProps) => {
   const queryClient = useQueryClient()
   const api = useApi()
   const { addToast } = useToast()
+  const [status, setStatus] = useState(secretSanta.status)
+  const [users, setUsers] = useState(secretSanta.users || [])
+
+  const { mutateAsync: startSecretSantaMutation, isPending: loadingStart } = useMutation({
+    mutationKey: ['secret-santa.start', { id: secretSanta.id }],
+    mutationFn: () => api.secretSanta.start(secretSanta.id),
+    onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
+    onSuccess: () => {
+      addToast({
+        message:
+          'Le tirage a été effectué, chaque participant vas recevoir un email avec le résultat du tirage qui lui est associé',
+        variant: 'success',
+      })
+      setStatus(SecretSantaStatus.STARTED)
+    },
+  })
 
   const { mutateAsync: cancelSecretSanta, isPending: loadingCancel } = useMutation({
     mutationKey: ['secret-santa.cancel', { id: secretSanta.id }],
     mutationFn: () => api.secretSanta.cancel(secretSanta.id),
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-    onSuccess: async () => {
-      addToast({ message: 'Secret santa annulé avec succès', variant: 'success' })
-      await queryClient.invalidateQueries({ queryKey: ['secret-santa', { eventId }] })
+    onSuccess: () => {
+      addToast({ message: 'Le tirage a été annulé', variant: 'success' })
+      setStatus(SecretSantaStatus.CREATED)
     },
   })
 
@@ -37,11 +54,28 @@ export const SecretSanta = ({ secretSanta, eventId }: SecretSantaProps) => {
     },
   })
 
+  const startSecretSanta = useCallback(async () => {
+    const secretSantaService = new SecretSantaDrawService(users)
+    const { reason, isPossible } = secretSantaService.isDrawPossible()
+
+    if (!isPossible) {
+      addToast({ message: reason, variant: 'warning' })
+      return
+    }
+
+    await startSecretSantaMutation()
+  }, [users])
+
+  const loading = useMemo(
+    () => loadingStart || loadingCancel || loadingDelete,
+    [loadingStart, loadingCancel, loadingDelete],
+  )
+
   return (
     <Stack>
       <Box>
         <b>Status:</b>
-        <span>{secretSanta.status}</span>
+        <span>{status}</span>
       </Box>
       <Box>
         <b>Description:</b>
@@ -51,18 +85,40 @@ export const SecretSanta = ({ secretSanta, eventId }: SecretSantaProps) => {
         <b>Budget Max:</b>
         <span>{secretSanta.budget ?? '-'}€</span>
       </Box>
-      {secretSanta.status === SecretSantaStatus.CREATED && (
-        <LoadingButton loading={loadingDelete} disabled={loadingDelete} onClick={() => deleteSecretSanta()}>
-          Supprimer le secret santa
-        </LoadingButton>
+      {status === SecretSantaStatus.CREATED && (
+        <>
+          <ConfirmButton
+            confirmTitle="Confirmer le lancement du tirage"
+            confirmText="Êtes-vous sûr de vouloir lancer le tirage ?"
+            loading={loading}
+            disabled={loading}
+            onClick={() => startSecretSanta()}
+          >
+            Lancer le tirage
+          </ConfirmButton>
 
-        //TODO: add button to start secret santa
+          <ConfirmButton
+            confirmTitle="Confirmer la suppression du secret santa"
+            confirmText="Êtes-vous sûr de vouloir supprimer le secret santa ? Cette action est irréversible."
+            loading={loading}
+            disabled={loading}
+            onClick={() => deleteSecretSanta()}
+          >
+            Supprimer le secret santa
+          </ConfirmButton>
+        </>
       )}
 
-      {secretSanta.status === SecretSantaStatus.STARTED && (
-        <LoadingButton loading={loadingCancel} disabled={loadingCancel} onClick={() => cancelSecretSanta()}>
-          Annuler le secret santa
-        </LoadingButton>
+      {status === SecretSantaStatus.STARTED && (
+        <ConfirmButton
+          confirmTitle="Confirmer l'annulation du tirage"
+          confirmText="Êtes-vous sûr de vouloir annuler le tirage ? Cette action est irréversible."
+          loading={loading}
+          disabled={loading}
+          onClick={() => cancelSecretSanta()}
+        >
+          Annuler le tirage
+        </ConfirmButton>
       )}
     </Stack>
   )

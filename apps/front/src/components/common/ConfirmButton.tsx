@@ -47,7 +47,7 @@ export const ConfirmButton = ({
         color={color}
         size={size}
         loading={loading}
-        loadingPosition="start"
+        loadingPosition={startIcon ? 'start' : undefined}
         disabled={disabled}
         startIcon={startIcon}
         onClick={() => setOpenDialog(true)}
