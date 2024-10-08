@@ -1,3 +1,6 @@
+import type { UpdateSecretSantaInputDto } from '@wishlist/common-types'
+
+import { LoadingButton } from '@mui/lab'
 import { Box, Stack } from '@mui/material'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { SecretSantaDrawService } from '@wishlist/common'
@@ -7,6 +10,7 @@ import React, { useCallback, useMemo, useState } from 'react'
 import { useApi } from '../../hooks/useApi'
 import { useToast } from '../../hooks/useToast'
 import { ConfirmButton } from '../common/ConfirmButton'
+import { EditSecretSantaFormDialog } from './EditSecretSantaFormDialog'
 
 type SecretSantaProps = {
   secretSanta: SecretSantaDto
@@ -17,7 +21,10 @@ export const SecretSanta = ({ secretSanta, eventId }: SecretSantaProps) => {
   const queryClient = useQueryClient()
   const api = useApi()
   const { addToast } = useToast()
+  const [openModal, setOpenModal] = useState(false)
   const [status, setStatus] = useState(secretSanta.status)
+  const [description, setDescription] = useState(secretSanta.description)
+  const [budget, setBudget] = useState(secretSanta.budget)
   const [users, setUsers] = useState(secretSanta.users || [])
 
   const { mutateAsync: startSecretSantaMutation, isPending: loadingStart } = useMutation({
@@ -31,6 +38,17 @@ export const SecretSanta = ({ secretSanta, eventId }: SecretSantaProps) => {
         variant: 'success',
       })
       setStatus(SecretSantaStatus.STARTED)
+    },
+  })
+
+  const { mutateAsync: updateSecretSanta, isPending: loadingUpdate } = useMutation({
+    mutationKey: ['secret-santa.update', { id: secretSanta.id }],
+    mutationFn: (input: UpdateSecretSantaInputDto) => api.secretSanta.update(secretSanta.id, input),
+    onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
+    onSuccess: (_, input) => {
+      setBudget(input.budget)
+      setDescription(input.description)
+      addToast({ message: 'Le secret santa a été modifié', variant: 'success' })
     },
   })
 
@@ -67,8 +85,8 @@ export const SecretSanta = ({ secretSanta, eventId }: SecretSantaProps) => {
   }, [users])
 
   const loading = useMemo(
-    () => loadingStart || loadingCancel || loadingDelete,
-    [loadingStart, loadingCancel, loadingDelete],
+    () => loadingStart || loadingCancel || loadingDelete || loadingUpdate,
+    [loadingStart, loadingCancel, loadingDelete, loadingUpdate],
   )
 
   return (
@@ -79,14 +97,34 @@ export const SecretSanta = ({ secretSanta, eventId }: SecretSantaProps) => {
       </Box>
       <Box>
         <b>Description:</b>
-        <span>{secretSanta.description}</span>
+        <span>{description}</span>
       </Box>
       <Box>
         <b>Budget Max:</b>
-        <span>{secretSanta.budget ?? '-'}€</span>
+        <span>{budget ?? '-'}€</span>
+      </Box>
+      <Box>
+        <b>Participants</b>
+        <span>{JSON.stringify(users)}</span>
       </Box>
       {status === SecretSantaStatus.CREATED && (
         <>
+          <EditSecretSantaFormDialog
+            title="Modifier le secret santa"
+            open={openModal}
+            saveButtonText="Modifier"
+            handleSubmit={input => {
+              setOpenModal(false)
+              void updateSecretSanta(input)
+            }}
+            handleClose={() => setOpenModal(false)}
+            input={{ budget, description }}
+          />
+
+          <LoadingButton loading={loading} disabled={loading} onClick={() => setOpenModal(true)}>
+            Modifier le secret santa
+          </LoadingButton>
+
           <ConfirmButton
             confirmTitle="Confirmer le lancement du tirage"
             confirmText="Êtes-vous sûr de vouloir lancer le tirage ?"

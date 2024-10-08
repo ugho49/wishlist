@@ -26,7 +26,7 @@ export class SecretSantaService {
   }
 
   async update(secretSantaId: string, data: UpdateSecretSantaInputDto): Promise<void> {
-    await this.client.put(`/secret-santa/${secretSantaId}`, data)
+    await this.client.patch(`/secret-santa/${secretSantaId}`, data)
   }
 
   async start(secretSantaId: string): Promise<void> {

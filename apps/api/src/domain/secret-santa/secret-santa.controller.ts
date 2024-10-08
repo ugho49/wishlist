@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common'
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 import {
   AttendeeDto,
@@ -42,7 +42,7 @@ export class SecretSantaController {
     return this.secretSantaService.createForEvent({ currentUserId, dto })
   }
 
-  @Put('/:id')
+  @Patch('/:id')
   updateSecretSanta(
     @Param('id') secretSantaId: string,
     @CurrentUser('id') currentUserId: string,

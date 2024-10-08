@@ -1,10 +1,13 @@
+import type { UpdateSecretSantaInputDto } from '@wishlist/common-types'
+
 import { LoadingButton } from '@mui/lab'
 import { Box, Stack } from '@mui/material'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import React from 'react'
+import React, { useState } from 'react'
 
 import { useApi } from '../../hooks/useApi'
 import { useToast } from '../../hooks/useToast'
+import { EditSecretSantaFormDialog } from './EditSecretSantaFormDialog'
 
 type NoSecretSantaProps = {
   eventId: string
@@ -14,14 +17,14 @@ export const NoSecretSanta = ({ eventId }: NoSecretSantaProps) => {
   const queryClient = useQueryClient()
   const api = useApi()
   const { addToast } = useToast()
+  const [openModal, setOpenModal] = useState(false)
 
   const { mutateAsync: createSecretSanta, isPending: loading } = useMutation({
     mutationKey: ['secret-santa.create', { eventId }],
-    mutationFn: () => {
+    mutationFn: (input: UpdateSecretSantaInputDto) => {
       return api.secretSanta.create({
         event_id: eventId,
-        description: 'ssss', // TODO: add description
-        budget: 1, // TODO: add budget
+        ...input,
       })
     },
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
@@ -37,7 +40,18 @@ export const NoSecretSanta = ({ eventId }: NoSecretSantaProps) => {
         Aucun secret santa n'est en cours pour cet évènement. Vous pouvez en créer un en cliquant sur le bouton
         ci-dessous.
       </Box>
-      <LoadingButton loading={loading} disabled={loading} onClick={() => createSecretSanta()}>
+      <EditSecretSantaFormDialog
+        title="Créer un secret santa"
+        open={openModal}
+        saveButtonText="Créer"
+        handleSubmit={input => {
+          setOpenModal(false)
+          void createSecretSanta(input)
+        }}
+        handleClose={() => setOpenModal(false)}
+        input={{}}
+      />
+      <LoadingButton loading={loading} disabled={loading} onClick={() => setOpenModal(true)}>
         Créer un secret santa
       </LoadingButton>
     </Stack>
