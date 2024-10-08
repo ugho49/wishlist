@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "license": "MIT",
   "private": true,
-  "packageManager": "yarn@4.4.0",
+  "packageManager": "yarn@4.5.0",
   "scripts": {
     "serve:all": "nx run-many --target=serve",
     "serve:front": "nx serve front",
