@@ -1,7 +1,10 @@
 import type { DetailedEventDto } from '@wishlist/common-types'
 
+import DeleteIcon from '@mui/icons-material/Delete'
+import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt'
+import PersonOffIcon from '@mui/icons-material/PersonOff'
 import { LoadingButton } from '@mui/lab'
-import { Avatar, Box, Button, Stack } from '@mui/material'
+import { Avatar, Box, Button, IconButton, Stack, Tooltip } from '@mui/material'
 import { DataGrid } from '@mui/x-data-grid'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { SecretSantaDrawService } from '@wishlist/common'
@@ -11,6 +14,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useApi } from '../../hooks/useApi'
 import { useToast } from '../../hooks/useToast'
 import { ConfirmButton } from '../common/ConfirmButton'
+import { ConfirmIconButton } from '../common/ConfirmIconButton'
 import { AddSecretSantaUsersFormDialog } from './AddSecretSantaUsersFormDialog'
 import { EditSecretSantaFormDialog } from './EditSecretSantaFormDialog'
 import { ManageUserExclusionsDialog } from './ManageUserExclusionsDialog'
@@ -220,11 +224,11 @@ export const SecretSanta = ({ secretSanta, event }: SecretSantaProps) => {
           <span>{budget ?? '-'}€</span>
         </Box>
         <Box>
-          <b>Participants:</b>
           <Button
             variant="contained"
             disabled={status === SecretSantaStatus.STARTED}
             onClick={() => setOpenSecretSantaUsersModal(true)}
+            startIcon={<PersonAddAltIcon />}
           >
             Ajouter un participant
           </Button>
@@ -260,30 +264,30 @@ export const SecretSanta = ({ secretSanta, event }: SecretSantaProps) => {
                 sortable: false,
                 filterable: false,
                 headerName: '',
-                flex: 1,
                 display: 'flex',
-                headerAlign: 'center',
                 align: 'center',
+                flex: 1,
                 renderCell: ({ row }) => (
                   <>
                     {status === SecretSantaStatus.CREATED && (
-                      <Stack>
+                      <Stack flexDirection="row" gap={1}>
                         {secretSantaUsers.length > 1 && (
-                          <Button color="info" size="small" onClick={() => setCurrentUserIdModalExclusion(row.id)}>
-                            Gérer les exclusions
-                          </Button>
+                          <IconButton color="info" size="small" onClick={() => setCurrentUserIdModalExclusion(row.id)}>
+                            <Tooltip title="Gérer les exclusions">
+                              <PersonOffIcon />
+                            </Tooltip>
+                          </IconButton>
                         )}
-                        <ConfirmButton
-                          confirmTitle="Confirmer la suppression du participant"
+                        <ConfirmIconButton
+                          confirmTitle="Supprimer le participant"
                           confirmText={`Êtes-vous sûr de vouloir supprimer ce participant ?`}
                           onClick={() => removeSecretSantaUser(row.id)}
                           disabled={loading}
-                          loading={loading}
                           size="small"
                           color="error"
                         >
-                          Supprimer
-                        </ConfirmButton>
+                          <DeleteIcon />
+                        </ConfirmIconButton>
                       </Stack>
                     )}
                   </>

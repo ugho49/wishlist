@@ -1,11 +1,12 @@
 import CloseIcon from '@mui/icons-material/Close'
+import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt'
 import { LoadingButton } from '@mui/lab'
 import { AppBar, Avatar, Container, Dialog, IconButton, Slide, Stack, Toolbar, Typography } from '@mui/material'
 import { TransitionProps } from '@mui/material/transitions'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { AttendeeDto, SecretSantaUserDto } from '@wishlist/common-types'
-import React, { forwardRef, useMemo, useState } from 'react'
+import React, { forwardRef, useEffect, useMemo, useState } from 'react'
 
 import { useApi } from '../../hooks/useApi'
 import { useToast } from '../../hooks/useToast'
@@ -89,6 +90,12 @@ export const AddSecretSantaUsersFormDialog = ({
     },
   })
 
+  useEffect(() => {
+    if (!open) {
+      setSelectedIds([])
+    }
+  }, [open])
+
   const rows = useMemo(() => {
     return eventAttendees
       .filter(a => !secretSantaAttendees.find(s => s.id === a.id))
@@ -128,6 +135,7 @@ export const AddSecretSantaUsersFormDialog = ({
             variant="contained"
             color="primary"
             onClick={() => addUsers()}
+            startIcon={<PersonAddAltIcon />}
           >
             Ajouter {selectedIds.length} participant{selectedIds.length > 1 ? 's' : ''}
           </LoadingButton>
