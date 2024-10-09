@@ -275,7 +275,7 @@ export const SecretSanta = ({ secretSanta, event }: SecretSantaProps) => {
                         )}
                         <ConfirmButton
                           confirmTitle="Confirmer la suppression du participant"
-                          confirmText={`Êtes-vous sûr de vouloir supprimer ${row.firstname} ${row.lastname} ?`} //TODO: change this text
+                          confirmText={`Êtes-vous sûr de vouloir supprimer ce participant ?`}
                           onClick={() => removeSecretSantaUser(row.id)}
                           disabled={loading}
                           loading={loading}

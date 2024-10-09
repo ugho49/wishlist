@@ -6,8 +6,9 @@
 - [ ] Backend: send a mail when the secret santa has been cancelled
 - [ ] Backend BONUS: add an endpoint to delete multiple users at once
 
-- [ ] Frontend: secret santa page, user list, delete user button, handle pending user name
-- [ ] Frontend: secret santa page, handle actions buttons disposition
+- [x] Frontend: secret santa page, handle pending user name in delete user button
+- [ ] Frontend: secret santa page, handle actions buttons disposition in user list
+- [ ] Frontend: secret santa page, change design of description & budget
 - [ ] Frontend: no secret santa page
 - [ ] Frontend: event page, change design of secret santa my draw
 - [ ] Frontend: add helperTexts and text in `EditSecretSantaFormDialog`
