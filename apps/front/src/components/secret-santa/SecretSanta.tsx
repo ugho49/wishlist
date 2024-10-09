@@ -1,3 +1,5 @@
+import type { DetailedEventDto } from '@wishlist/common-types'
+
 import { LoadingButton } from '@mui/lab'
 import { Avatar, Box, Button, Stack } from '@mui/material'
 import { DataGrid } from '@mui/x-data-grid'
@@ -6,7 +8,6 @@ import { SecretSantaDrawService } from '@wishlist/common'
 import { SecretSantaDto, SecretSantaStatus, UpdateSecretSantaInputDto } from '@wishlist/common-types'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
-import { useEventById } from '../../hooks/domain/useEventById'
 import { useApi } from '../../hooks/useApi'
 import { useToast } from '../../hooks/useToast'
 import { ConfirmButton } from '../common/ConfirmButton'
@@ -16,10 +17,10 @@ import { ManageUserExclusionsDialog } from './ManageUserExclusionsDialog'
 
 type SecretSantaProps = {
   secretSanta: SecretSantaDto
-  eventId: string
+  event: DetailedEventDto
 }
 
-export const SecretSanta = ({ secretSanta, eventId }: SecretSantaProps) => {
+export const SecretSanta = ({ secretSanta, event }: SecretSantaProps) => {
   const queryClient = useQueryClient()
   const api = useApi()
   const { addToast } = useToast()
@@ -30,8 +31,8 @@ export const SecretSanta = ({ secretSanta, eventId }: SecretSantaProps) => {
   const [budget, setBudget] = useState(secretSanta.budget)
   const [currentUserIdModalExclusion, setCurrentUserIdModalExclusion] = useState<string | undefined>()
   const [secretSantaUsers, setSecretSantaUsers] = useState(secretSanta.users || [])
-  const event = useEventById(eventId)
-  const eventAttendees = useMemo(() => event.event?.attendees || [], [event])
+  const eventAttendees = useMemo(() => event.attendees || [], [event])
+  const eventId = event.id
 
   useEffect(() => {
     setStatus(secretSanta.status)
