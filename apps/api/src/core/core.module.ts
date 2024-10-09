@@ -18,7 +18,7 @@ const bucketModule = BucketModule.registerAsync({
     return {
       firebaseServiceAccountKeyPath: join(__dirname, firebaseServiceAccountKeyPath),
       bucketName: config.get<string>('FIREBASE_BUCKET_NAME', ''),
-      isMock: config.get<boolean>('FIREBASE_BUCKET_MOCK', false),
+      isMock: config.get<string>('FIREBASE_BUCKET_MOCK', 'false') === 'true',
     }
   },
 })

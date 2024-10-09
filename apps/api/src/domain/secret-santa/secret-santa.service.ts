@@ -9,14 +9,14 @@ import { SecretSantaDrawService } from '@wishlist/common'
 import {
   AttendeeDto,
   CreateSecretSantaInputDto,
-  CreateSecretSantaUserInputDto,
+  CreateSecretSantaUsersInputDto,
+  CreateSecretSantaUsersOutputDto,
   SecretSantaDto,
   SecretSantaStatus,
-  SecretSantaUserDto,
   UpdateSecretSantaInputDto,
   UpdateSecretSantaUserInputDto,
 } from '@wishlist/common-types'
-import { In } from 'typeorm'
+import { ArrayContains, In } from 'typeorm'
 
 import { toAttendeeDto } from '../attendee/attendee.mapper'
 import { EventRepository } from '../event/event.repository'
@@ -162,11 +162,11 @@ export class SecretSantaService {
     })
   }
 
-  async addSecretSantaUser(param: {
+  async addSecretSantaUsers(param: {
     currentUserId: string
     secretSantaId: string
-    dto: CreateSecretSantaUserInputDto
-  }): Promise<SecretSantaUserDto> {
+    dto: CreateSecretSantaUsersInputDto
+  }): Promise<CreateSecretSantaUsersOutputDto> {
     const secretSanta = await this.secretSantaRepository.getSecretSantaForUserOrFail({
       id: param.secretSantaId,
       userId: param.currentUserId,
@@ -174,28 +174,35 @@ export class SecretSantaService {
 
     this.checkSecretSantaNotStarted(secretSanta)
 
-    const alreadyExists = await this.secretSantaUserRepository.exists({
-      where: { secretSantaId: secretSanta.id, attendeeId: param.dto.attendee_id },
+    const alreadyExists = await this.secretSantaUserRepository.attendeesExistsForSecretSanta({
+      secretSantaId: secretSanta.id,
+      attendeeIds: param.dto.attendee_ids,
     })
 
     if (alreadyExists) {
-      throw new BadRequestException('Secret santa already exists for event')
+      throw new BadRequestException('One attendee is already in the secret santa')
     }
 
     const eventAttendees = await secretSanta.event.then(event => event.attendees)
 
-    if (!eventAttendees.some(a => a.id === param.dto.attendee_id)) {
-      throw new BadRequestException('Attendee not found for event')
+    for (const attendeeId of param.dto.attendee_ids) {
+      if (!eventAttendees.some(a => a.id === attendeeId)) {
+        throw new BadRequestException(`Attendee ${attendeeId} not found for event`)
+      }
     }
 
-    const entity = SecretSantaUserEntity.create({
-      secretSantaId: secretSanta.id,
-      attendeeId: param.dto.attendee_id,
-    })
+    const entities = param.dto.attendee_ids.map(attendeeId =>
+      SecretSantaUserEntity.create({
+        secretSantaId: secretSanta.id,
+        attendeeId,
+      }),
+    )
 
-    await this.secretSantaUserRepository.save(entity)
+    await this.secretSantaUserRepository.save(entities)
 
-    return toSecretSantaUserDto(entity)
+    const users = await Promise.all(entities.map(entity => toSecretSantaUserDto(entity)))
+
+    return { users }
   }
 
   async updateSecretSantaUser(param: {
@@ -245,7 +252,14 @@ export class SecretSantaService {
 
     this.checkSecretSantaNotStarted(secretSanta)
 
-    await this.secretSantaUserRepository.delete({ id: param.secretSantaUserId })
+    await this.secretSantaUserRepository.transaction(async em => {
+      await em.delete(SecretSantaUserEntity, { id: param.secretSantaUserId })
+      await em.update(
+        SecretSantaUserEntity,
+        { exclusions: ArrayContains([param.secretSantaUserId]) },
+        { exclusions: () => `array_remove(exclusions, '${param.secretSantaUserId}')` },
+      )
+    })
   }
 
   private checkSecretSantaNotStarted(secretSanta: SecretSantaEntity) {

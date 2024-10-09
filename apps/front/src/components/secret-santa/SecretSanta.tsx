@@ -1,18 +1,16 @@
-import type { UpdateSecretSantaInputDto } from '@wishlist/common-types'
-
 import { LoadingButton } from '@mui/lab'
-import { Box, Stack } from '@mui/material'
+import { Avatar, Box, Button, Stack } from '@mui/material'
 import { DataGrid } from '@mui/x-data-grid'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { SecretSantaDrawService } from '@wishlist/common'
-import { SecretSantaDto, SecretSantaStatus } from '@wishlist/common-types'
+import { SecretSantaDto, SecretSantaStatus, UpdateSecretSantaInputDto } from '@wishlist/common-types'
 import React, { useCallback, useMemo, useState } from 'react'
 
 import { useEventById } from '../../hooks/domain/useEventById'
 import { useApi } from '../../hooks/useApi'
 import { useToast } from '../../hooks/useToast'
 import { ConfirmButton } from '../common/ConfirmButton'
-import { RouterLink } from '../common/RouterLink'
+import { AddSecretSantaUsersFormDialog } from './AddSecretSantaUsersFormDialog'
 import { EditSecretSantaFormDialog } from './EditSecretSantaFormDialog'
 
 type SecretSantaProps = {
@@ -24,7 +22,8 @@ export const SecretSanta = ({ secretSanta, eventId }: SecretSantaProps) => {
   const queryClient = useQueryClient()
   const api = useApi()
   const { addToast } = useToast()
-  const [openModal, setOpenModal] = useState(false)
+  const [openEditModal, setOpenEditModal] = useState(false)
+  const [openSecretSantaUsersModal, setOpenSecretSantaUsersModal] = useState(false)
   const [status, setStatus] = useState(secretSanta.status)
   const [description, setDescription] = useState(secretSanta.description)
   const [budget, setBudget] = useState(secretSanta.budget)
@@ -77,6 +76,15 @@ export const SecretSanta = ({ secretSanta, eventId }: SecretSantaProps) => {
     },
   })
 
+  const { mutateAsync: removeSecretSantaUser, isPending: loadingRemoveUser } = useMutation({
+    mutationKey: ['secret-santa.user.remove', { id: secretSanta.id }],
+    mutationFn: (secretSantaUserId: string) => api.secretSanta.deleteUser(secretSanta.id, secretSantaUserId),
+    onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
+    onSuccess: (_, secretSantaUserId) => {
+      setSecretSantaUsers(prev => prev.filter(u => u.id !== secretSantaUserId))
+    },
+  })
+
   const startSecretSanta = useCallback(async () => {
     const secretSantaService = new SecretSantaDrawService(secretSantaUsers)
     const { reason, isPossible } = secretSantaService.isDrawPossible()
@@ -90,33 +98,43 @@ export const SecretSanta = ({ secretSanta, eventId }: SecretSantaProps) => {
   }, [secretSantaUsers])
 
   const loading = useMemo(
-    () => loadingStart || loadingCancel || loadingDelete || loadingUpdate,
-    [loadingStart, loadingCancel, loadingDelete, loadingUpdate],
+    () => loadingStart || loadingCancel || loadingDelete || loadingUpdate || loadingRemoveUser,
+    [loadingStart, loadingCancel, loadingDelete, loadingUpdate, loadingRemoveUser],
   )
 
   return (
     <Stack>
       {status === SecretSantaStatus.CREATED && (
-        <>
+        <Stack gap={2} flexDirection="row" mb={4} justifyContent="center">
           <EditSecretSantaFormDialog
             title="Modifier le secret santa"
-            open={openModal}
+            open={openEditModal}
             saveButtonText="Modifier"
             handleSubmit={input => {
-              setOpenModal(false)
+              setOpenEditModal(false)
               void updateSecretSanta(input)
             }}
-            handleClose={() => setOpenModal(false)}
+            handleClose={() => setOpenEditModal(false)}
             input={{ budget, description }}
           />
 
-          <LoadingButton loading={loading} disabled={loading} onClick={() => setOpenModal(true)}>
-            Modifier le secret santa
-          </LoadingButton>
+          <AddSecretSantaUsersFormDialog
+            open={openSecretSantaUsersModal}
+            handleSubmit={newSecretSantaUsers => {
+              setSecretSantaUsers(prev => [...prev, ...newSecretSantaUsers])
+              setOpenSecretSantaUsersModal(false)
+            }}
+            handleClose={() => setOpenSecretSantaUsersModal(false)}
+            secretSantaId={secretSanta.id}
+            eventAttendees={eventAttendees}
+            secretSantaAttendees={secretSantaUsers.map(u => u.attendee)}
+          />
 
           <ConfirmButton
             confirmTitle="Confirmer le lancement du tirage"
             confirmText="Êtes-vous sûr de vouloir lancer le tirage ?"
+            variant="contained"
+            color="info"
             loading={loading}
             disabled={loading}
             onClick={() => startSecretSanta()}
@@ -124,16 +142,28 @@ export const SecretSanta = ({ secretSanta, eventId }: SecretSantaProps) => {
             Lancer le tirage
           </ConfirmButton>
 
+          <LoadingButton
+            variant="contained"
+            color="primary"
+            loading={loading}
+            disabled={loading}
+            onClick={() => setOpenEditModal(true)}
+          >
+            Modifier le secret santa
+          </LoadingButton>
+
           <ConfirmButton
             confirmTitle="Confirmer la suppression du secret santa"
             confirmText="Êtes-vous sûr de vouloir supprimer le secret santa ? Cette action est irréversible."
+            variant="contained"
+            color="error"
             loading={loading}
             disabled={loading}
             onClick={() => deleteSecretSanta()}
           >
             Supprimer le secret santa
           </ConfirmButton>
-        </>
+        </Stack>
       )}
 
       {status === SecretSantaStatus.STARTED && (
@@ -163,11 +193,37 @@ export const SecretSanta = ({ secretSanta, eventId }: SecretSantaProps) => {
         </Box>
         <Box>
           <b>Participants:</b>
+          <Button
+            variant="contained"
+            disabled={status === SecretSantaStatus.STARTED}
+            onClick={() => setOpenSecretSantaUsersModal(true)}
+          >
+            Ajouter un participant
+          </Button>
           <DataGrid
-            rows={secretSantaUsers} // TODO map this
+            localeText={{
+              noRowsLabel: 'Aucun participant',
+            }}
+            rows={secretSantaUsers.map(u => ({
+              id: u.id,
+              firstname: u.attendee.user?.firstname,
+              lastname: u.attendee.user?.lastname,
+              email: u.attendee.user?.email ?? u.attendee.pending_email,
+              pictureUrl: u.attendee.user?.picture_url,
+            }))}
             columns={[
-              { field: 'firstname', headerName: 'Prénom', width: 150 },
-              { field: 'lastname', headerName: 'Nom', width: 150 },
+              {
+                field: 'pictureUrl',
+                headerName: '',
+                sortable: false,
+                filterable: false,
+                width: 60,
+                display: 'flex',
+                align: 'center',
+                renderCell: ({ row }) => <Avatar src={row.pictureUrl} sx={{ width: '30px', height: '30px' }} />,
+              },
+              { field: 'firstname', headerName: 'Prénom', width: 170, valueGetter: value => value ?? '-' },
+              { field: 'lastname', headerName: 'Nom', width: 170, valueGetter: value => value ?? '-' },
               { field: 'email', headerName: 'Email', width: 250 },
               {
                 field: 'id',
@@ -175,11 +231,30 @@ export const SecretSanta = ({ secretSanta, eventId }: SecretSantaProps) => {
                 filterable: false,
                 headerName: '',
                 flex: 1,
+                display: 'flex',
                 headerAlign: 'center',
                 align: 'center',
-                renderCell: ({ row: user }) => (
-                  // TODO: change this
-                  <RouterLink to={`/admin/users/${user.id}`}>Voir les exclusions</RouterLink>
+                renderCell: ({ row }) => (
+                  <>
+                    {status === SecretSantaStatus.CREATED && (
+                      <Stack>
+                        <Button color="info" size="small">
+                          Gérer les exclusions
+                        </Button>
+                        <ConfirmButton
+                          confirmTitle="Confirmer la suppression du participant"
+                          confirmText={`Êtes-vous sûr de vouloir supprimer ${row.firstname} ${row.lastname} ?`} //TODO: change this text
+                          onClick={() => removeSecretSantaUser(row.id)}
+                          disabled={loading}
+                          loading={loading}
+                          size="small"
+                          color="error"
+                        >
+                          Supprimer
+                        </ConfirmButton>
+                      </Stack>
+                    )}
+                  </>
                 ),
               },
             ]}

@@ -114,7 +114,7 @@ export class AddSecretSanta1722950220717 implements MigrationInterface {
           },
           {
             columnNames: ['attendee_id'],
-            referencedTableName: 'user',
+            referencedTableName: 'event_attendee',
             referencedColumnNames: ['id'],
           },
         ],

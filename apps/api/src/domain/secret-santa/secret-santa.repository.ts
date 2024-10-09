@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { BaseRepository } from '@wishlist/common-database'
+import { ArrayContains, In } from 'typeorm'
 
 import { SecretSantaEntity, SecretSantaUserEntity } from './secret-santa.entity'
 
@@ -49,5 +50,11 @@ export class SecretSantaUserRepository extends BaseRepository(SecretSantaUserEnt
     }
 
     return await this.findOneBy({ id: currentSantaUser.id })
+  }
+
+  attendeesExistsForSecretSanta(param: { secretSantaId: string; attendeeIds: string[] }): Promise<boolean> {
+    return this.exists({
+      where: { secretSantaId: param.secretSantaId, attendeeId: In(param.attendeeIds) },
+    })
   }
 }

@@ -3,7 +3,8 @@ import { ApiTags } from '@nestjs/swagger'
 import {
   AttendeeDto,
   CreateSecretSantaInputDto,
-  CreateSecretSantaUserInputDto,
+  CreateSecretSantaUsersInputDto,
+  CreateSecretSantaUsersOutputDto,
   SecretSantaDto,
   SecretSantaUserDto,
   UpdateSecretSantaInputDto,
@@ -66,13 +67,13 @@ export class SecretSantaController {
     return this.secretSantaService.cancelSecretSanta({ secretSantaId, currentUserId })
   }
 
-  @Post('/:id/user')
-  addSecretSantaUser(
+  @Post('/:id/users')
+  addSecretSantaUsers(
     @Param('id') secretSantaId: string,
     @CurrentUser('id') currentUserId: string,
-    @Body() dto: CreateSecretSantaUserInputDto,
-  ): Promise<SecretSantaUserDto> {
-    return this.secretSantaService.addSecretSantaUser({ secretSantaId, currentUserId, dto })
+    @Body() dto: CreateSecretSantaUsersInputDto,
+  ): Promise<CreateSecretSantaUsersOutputDto> {
+    return this.secretSantaService.addSecretSantaUsers({ secretSantaId, currentUserId, dto })
   }
 
   @Put('/:id/user/:secretSantaUserId')
