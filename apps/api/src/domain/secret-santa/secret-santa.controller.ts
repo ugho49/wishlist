@@ -6,7 +6,6 @@ import {
   CreateSecretSantaUsersInputDto,
   CreateSecretSantaUsersOutputDto,
   SecretSantaDto,
-  SecretSantaUserDto,
   UpdateSecretSantaInputDto,
   UpdateSecretSantaUserInputDto,
 } from '@wishlist/common-types'

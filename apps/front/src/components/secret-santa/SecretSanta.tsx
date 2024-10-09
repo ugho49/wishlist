@@ -35,13 +35,14 @@ export const SecretSanta = ({ secretSanta, eventId }: SecretSantaProps) => {
     mutationKey: ['secret-santa.start', { id: secretSanta.id }],
     mutationFn: () => api.secretSanta.start(secretSanta.id),
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-    onSuccess: () => {
+    onSuccess: async () => {
       addToast({
         message:
           'Le tirage a été effectué, chaque participant vas recevoir un email avec le résultat du tirage qui lui est associé',
         variant: 'success',
       })
       setStatus(SecretSantaStatus.STARTED)
+      await queryClient.invalidateQueries({ queryKey: ['secret-santa', { eventId }] })
     },
   })
 
@@ -49,10 +50,11 @@ export const SecretSanta = ({ secretSanta, eventId }: SecretSantaProps) => {
     mutationKey: ['secret-santa.update', { id: secretSanta.id }],
     mutationFn: (input: UpdateSecretSantaInputDto) => api.secretSanta.update(secretSanta.id, input),
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-    onSuccess: (_, input) => {
+    onSuccess: async (_, input) => {
       setBudget(input.budget)
       setDescription(input.description)
       addToast({ message: 'Le secret santa a été modifié', variant: 'success' })
+      await queryClient.invalidateQueries({ queryKey: ['secret-santa', { eventId }] })
     },
   })
 
@@ -60,9 +62,10 @@ export const SecretSanta = ({ secretSanta, eventId }: SecretSantaProps) => {
     mutationKey: ['secret-santa.cancel', { id: secretSanta.id }],
     mutationFn: () => api.secretSanta.cancel(secretSanta.id),
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-    onSuccess: () => {
+    onSuccess: async () => {
       addToast({ message: 'Le tirage a été annulé', variant: 'success' })
       setStatus(SecretSantaStatus.CREATED)
+      await queryClient.invalidateQueries({ queryKey: ['secret-santa', { eventId }] })
     },
   })
 
@@ -80,8 +83,9 @@ export const SecretSanta = ({ secretSanta, eventId }: SecretSantaProps) => {
     mutationKey: ['secret-santa.user.remove', { id: secretSanta.id }],
     mutationFn: (secretSantaUserId: string) => api.secretSanta.deleteUser(secretSanta.id, secretSantaUserId),
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-    onSuccess: (_, secretSantaUserId) => {
+    onSuccess: async (_, secretSantaUserId) => {
       setSecretSantaUsers(prev => prev.filter(u => u.id !== secretSantaUserId))
+      await queryClient.invalidateQueries({ queryKey: ['secret-santa', { eventId }] })
     },
   })
 
@@ -104,79 +108,84 @@ export const SecretSanta = ({ secretSanta, eventId }: SecretSantaProps) => {
 
   return (
     <Stack>
-      {status === SecretSantaStatus.CREATED && (
-        <Stack gap={2} flexDirection="row" mb={4} justifyContent="center">
-          <EditSecretSantaFormDialog
-            title="Modifier le secret santa"
-            open={openEditModal}
-            saveButtonText="Modifier"
-            handleSubmit={input => {
-              setOpenEditModal(false)
-              void updateSecretSanta(input)
-            }}
-            handleClose={() => setOpenEditModal(false)}
-            input={{ budget, description }}
-          />
+      <Stack gap={2} flexDirection="row" mb={4} justifyContent="center">
+        {status === SecretSantaStatus.CREATED && (
+          <>
+            <EditSecretSantaFormDialog
+              title="Modifier le secret santa"
+              open={openEditModal}
+              saveButtonText="Modifier"
+              handleSubmit={input => {
+                setOpenEditModal(false)
+                void updateSecretSanta(input)
+              }}
+              handleClose={() => setOpenEditModal(false)}
+              input={{ budget, description }}
+            />
 
-          <AddSecretSantaUsersFormDialog
-            open={openSecretSantaUsersModal}
-            handleSubmit={newSecretSantaUsers => {
-              setSecretSantaUsers(prev => [...prev, ...newSecretSantaUsers])
-              setOpenSecretSantaUsersModal(false)
-            }}
-            handleClose={() => setOpenSecretSantaUsersModal(false)}
-            secretSantaId={secretSanta.id}
-            eventAttendees={eventAttendees}
-            secretSantaAttendees={secretSantaUsers.map(u => u.attendee)}
-          />
+            <AddSecretSantaUsersFormDialog
+              open={openSecretSantaUsersModal}
+              handleSubmit={newSecretSantaUsers => {
+                setSecretSantaUsers(prev => [...prev, ...newSecretSantaUsers])
+                setOpenSecretSantaUsersModal(false)
+              }}
+              handleClose={() => setOpenSecretSantaUsersModal(false)}
+              secretSantaId={secretSanta.id}
+              eventId={eventId}
+              eventAttendees={eventAttendees}
+              secretSantaAttendees={secretSantaUsers.map(u => u.attendee)}
+            />
 
+            <ConfirmButton
+              confirmTitle="Confirmer le lancement du tirage"
+              confirmText="Êtes-vous sûr de vouloir lancer le tirage ?"
+              variant="contained"
+              color="info"
+              loading={loading}
+              disabled={loading}
+              onClick={() => startSecretSanta()}
+            >
+              Lancer le tirage
+            </ConfirmButton>
+
+            <LoadingButton
+              variant="contained"
+              color="primary"
+              loading={loading}
+              disabled={loading}
+              onClick={() => setOpenEditModal(true)}
+            >
+              Modifier le secret santa
+            </LoadingButton>
+
+            <ConfirmButton
+              confirmTitle="Confirmer la suppression du secret santa"
+              confirmText="Êtes-vous sûr de vouloir supprimer le secret santa ? Cette action est irréversible."
+              variant="contained"
+              color="error"
+              loading={loading}
+              disabled={loading}
+              onClick={() => deleteSecretSanta()}
+            >
+              Supprimer le secret santa
+            </ConfirmButton>
+          </>
+        )}
+
+        {status === SecretSantaStatus.STARTED && (
           <ConfirmButton
-            confirmTitle="Confirmer le lancement du tirage"
-            confirmText="Êtes-vous sûr de vouloir lancer le tirage ?"
-            variant="contained"
-            color="info"
-            loading={loading}
-            disabled={loading}
-            onClick={() => startSecretSanta()}
-          >
-            Lancer le tirage
-          </ConfirmButton>
-
-          <LoadingButton
-            variant="contained"
-            color="primary"
-            loading={loading}
-            disabled={loading}
-            onClick={() => setOpenEditModal(true)}
-          >
-            Modifier le secret santa
-          </LoadingButton>
-
-          <ConfirmButton
-            confirmTitle="Confirmer la suppression du secret santa"
-            confirmText="Êtes-vous sûr de vouloir supprimer le secret santa ? Cette action est irréversible."
-            variant="contained"
+            confirmTitle="Confirmer l'annulation du tirage"
+            confirmText="Êtes-vous sûr de vouloir annuler le tirage ? Cette action est irréversible."
+            variant="text"
             color="error"
             loading={loading}
             disabled={loading}
-            onClick={() => deleteSecretSanta()}
+            onClick={() => cancelSecretSanta()}
           >
-            Supprimer le secret santa
+            Annuler le tirage
           </ConfirmButton>
-        </Stack>
-      )}
-
-      {status === SecretSantaStatus.STARTED && (
-        <ConfirmButton
-          confirmTitle="Confirmer l'annulation du tirage"
-          confirmText="Êtes-vous sûr de vouloir annuler le tirage ? Cette action est irréversible."
-          loading={loading}
-          disabled={loading}
-          onClick={() => cancelSecretSanta()}
-        >
-          Annuler le tirage
-        </ConfirmButton>
-      )}
+        )}
+      </Stack>
 
       <Stack>
         <Box>

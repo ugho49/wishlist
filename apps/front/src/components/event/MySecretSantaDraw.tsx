@@ -1,4 +1,4 @@
-import { Box, Stack, Theme } from '@mui/material'
+import { Avatar, Box, Stack, Theme } from '@mui/material'
 import { makeStyles } from '@mui/styles'
 import React from 'react'
 
@@ -34,9 +34,12 @@ export const MySecretSantaDraw = ({ eventId }: MySecretSantaDrawProps) => {
   return (
     <Stack direction="column" alignItems="center" gap={1} className={classes.container}>
       <Box>Votre Secret Santa est</Box>
-      <Box className={classes.drawName}>
-        {draw.pending_email ? draw.pending_email : `${draw.user?.firstname} ${draw.user?.lastname}`}
-      </Box>
+      <Stack flexDirection="row" gap={1} alignItems="center">
+        <Avatar src={draw.user?.picture_url} sx={{ width: '30px', height: '30px' }} />
+        <Box className={classes.drawName}>
+          {draw.pending_email ? draw.pending_email : `${draw.user?.firstname} ${draw.user?.lastname}`}
+        </Box>
+      </Stack>
     </Stack>
   )
 }

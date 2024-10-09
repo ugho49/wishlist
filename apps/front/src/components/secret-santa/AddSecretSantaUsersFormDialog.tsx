@@ -3,7 +3,7 @@ import { LoadingButton } from '@mui/lab'
 import { AppBar, Avatar, Container, Dialog, IconButton, Slide, Stack, Toolbar, Typography } from '@mui/material'
 import { TransitionProps } from '@mui/material/transitions'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { AttendeeDto, SecretSantaUserDto } from '@wishlist/common-types'
 import React, { forwardRef, useMemo, useState } from 'react'
 
@@ -21,6 +21,7 @@ const Transition = forwardRef(function Transition(
 
 export type AddSecretSantaUsersFormDialogProps = {
   open: boolean
+  eventId: string
   secretSantaId: string
   eventAttendees: AttendeeDto[]
   secretSantaAttendees: AttendeeDto[]
@@ -50,19 +51,23 @@ const columns: GridColDef<RowType>[] = [
   },
   { field: 'firstname', headerName: 'Prénom', width: 170, valueGetter: value => value ?? '-' },
   { field: 'lastname', headerName: 'Nom', width: 170, valueGetter: value => value ?? '-' },
-  { field: 'email', headerName: 'Email', flex: 1 },
+  { field: 'email', headerName: 'Email', width: 250 },
   {
     field: 'isPending',
     headerName: 'Invitation',
     display: 'flex',
     sortable: false,
     filterable: false,
+    flex: 1,
+    headerAlign: 'center',
+    align: 'right',
     renderCell: ({ row }) => <Status color={row.isPending ? 'warning' : 'success'} />,
   },
 ]
 
 export const AddSecretSantaUsersFormDialog = ({
   open,
+  eventId,
   secretSantaId,
   eventAttendees,
   secretSantaAttendees,
@@ -70,6 +75,7 @@ export const AddSecretSantaUsersFormDialog = ({
   handleClose,
 }: AddSecretSantaUsersFormDialogProps) => {
   const api = useApi()
+  const queryClient = useQueryClient()
   const { addToast } = useToast()
   const [selectedIds, setSelectedIds] = useState<string[]>([])
 
@@ -77,8 +83,9 @@ export const AddSecretSantaUsersFormDialog = ({
     mutationKey: ['secret-santa.add-users', { id: secretSantaId }],
     mutationFn: () => api.secretSanta.addUsers(secretSantaId, { attendee_ids: selectedIds }),
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-    onSuccess: data => {
+    onSuccess: async data => {
       handleSubmit(data.users)
+      await queryClient.invalidateQueries({ queryKey: ['secret-santa', { eventId }] })
     },
   })
 
@@ -94,24 +101,6 @@ export const AddSecretSantaUsersFormDialog = ({
         isPending: !!a.pending_email,
       }))
   }, [eventAttendees, secretSantaAttendees])
-
-  const AddButton = () => {
-    if (selectedIds.length === 0) return
-
-    return (
-      <Stack alignItems="center">
-        <LoadingButton
-          disabled={loading}
-          loading={loading}
-          variant="contained"
-          color="primary"
-          onClick={() => addUsers()}
-        >
-          Ajouter {selectedIds.length} participant{selectedIds.length > 1 ? 's' : ''}
-        </LoadingButton>
-      </Stack>
-    )
-  }
 
   return (
     <Dialog
@@ -132,7 +121,18 @@ export const AddSecretSantaUsersFormDialog = ({
         </Toolbar>
       </AppBar>
       <Container sx={{ marginTop: '40px' }}>
-        <AddButton />
+        <Stack alignItems="center">
+          <LoadingButton
+            disabled={loading || selectedIds.length === 0}
+            loading={loading}
+            variant="contained"
+            color="primary"
+            onClick={() => addUsers()}
+          >
+            Ajouter {selectedIds.length} participant{selectedIds.length > 1 ? 's' : ''}
+          </LoadingButton>
+        </Stack>
+
         <DataGrid
           sx={{ marginBlock: '20px' }}
           localeText={{
@@ -147,7 +147,6 @@ export const AddSecretSantaUsersFormDialog = ({
           disableColumnMenu
           hideFooter
         />
-        <AddButton />
       </Container>
     </Dialog>
   )
