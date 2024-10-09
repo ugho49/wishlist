@@ -4,7 +4,7 @@ import { DataGrid } from '@mui/x-data-grid'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { SecretSantaDrawService } from '@wishlist/common'
 import { SecretSantaDto, SecretSantaStatus, UpdateSecretSantaInputDto } from '@wishlist/common-types'
-import React, { useCallback, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { useEventById } from '../../hooks/domain/useEventById'
 import { useApi } from '../../hooks/useApi'
@@ -12,6 +12,7 @@ import { useToast } from '../../hooks/useToast'
 import { ConfirmButton } from '../common/ConfirmButton'
 import { AddSecretSantaUsersFormDialog } from './AddSecretSantaUsersFormDialog'
 import { EditSecretSantaFormDialog } from './EditSecretSantaFormDialog'
+import { ManageUserExclusionsDialog } from './ManageUserExclusionsDialog'
 
 type SecretSantaProps = {
   secretSanta: SecretSantaDto
@@ -27,9 +28,17 @@ export const SecretSanta = ({ secretSanta, eventId }: SecretSantaProps) => {
   const [status, setStatus] = useState(secretSanta.status)
   const [description, setDescription] = useState(secretSanta.description)
   const [budget, setBudget] = useState(secretSanta.budget)
+  const [currentUserIdModalExclusion, setCurrentUserIdModalExclusion] = useState<string | undefined>()
   const [secretSantaUsers, setSecretSantaUsers] = useState(secretSanta.users || [])
   const event = useEventById(eventId)
   const eventAttendees = useMemo(() => event.event?.attendees || [], [event])
+
+  useEffect(() => {
+    setStatus(secretSanta.status)
+    setDescription(secretSanta.description)
+    setBudget(secretSanta.budget)
+    setSecretSantaUsers(secretSanta.users || [])
+  }, [secretSanta])
 
   const { mutateAsync: startSecretSantaMutation, isPending: loadingStart } = useMutation({
     mutationKey: ['secret-santa.start', { id: secretSanta.id }],
@@ -80,7 +89,7 @@ export const SecretSanta = ({ secretSanta, eventId }: SecretSantaProps) => {
   })
 
   const { mutateAsync: removeSecretSantaUser, isPending: loadingRemoveUser } = useMutation({
-    mutationKey: ['secret-santa.user.remove', { id: secretSanta.id }],
+    mutationKey: ['secret-santa.user.remove', { secretSantaId: secretSanta.id }],
     mutationFn: (secretSantaUserId: string) => api.secretSanta.deleteUser(secretSanta.id, secretSantaUserId),
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
     onSuccess: async (_, secretSantaUserId) => {
@@ -134,6 +143,15 @@ export const SecretSanta = ({ secretSanta, eventId }: SecretSantaProps) => {
               eventId={eventId}
               eventAttendees={eventAttendees}
               secretSantaAttendees={secretSantaUsers.map(u => u.attendee)}
+            />
+
+            <ManageUserExclusionsDialog
+              open={currentUserIdModalExclusion !== undefined}
+              eventId={eventId}
+              secretSantaId={secretSanta.id}
+              secretSantaUser={secretSantaUsers.find(u => u.id === currentUserIdModalExclusion)}
+              handleClose={() => setCurrentUserIdModalExclusion(undefined)}
+              otherSecretSantaUser={secretSantaUsers.filter(u => u.id !== currentUserIdModalExclusion)}
             />
 
             <ConfirmButton
@@ -219,6 +237,7 @@ export const SecretSanta = ({ secretSanta, eventId }: SecretSantaProps) => {
               lastname: u.attendee.user?.lastname,
               email: u.attendee.user?.email ?? u.attendee.pending_email,
               pictureUrl: u.attendee.user?.picture_url,
+              exclusions: u.exclusions.length,
             }))}
             columns={[
               {
@@ -234,6 +253,7 @@ export const SecretSanta = ({ secretSanta, eventId }: SecretSantaProps) => {
               { field: 'firstname', headerName: 'Prénom', width: 170, valueGetter: value => value ?? '-' },
               { field: 'lastname', headerName: 'Nom', width: 170, valueGetter: value => value ?? '-' },
               { field: 'email', headerName: 'Email', width: 250 },
+              { field: 'exclusions', headerName: 'Exclusions', headerAlign: 'center', align: 'center', width: 100 },
               {
                 field: 'id',
                 sortable: false,
@@ -247,9 +267,11 @@ export const SecretSanta = ({ secretSanta, eventId }: SecretSantaProps) => {
                   <>
                     {status === SecretSantaStatus.CREATED && (
                       <Stack>
-                        <Button color="info" size="small">
-                          Gérer les exclusions
-                        </Button>
+                        {secretSantaUsers.length > 1 && (
+                          <Button color="info" size="small" onClick={() => setCurrentUserIdModalExclusion(row.id)}>
+                            Gérer les exclusions
+                          </Button>
+                        )}
                         <ConfirmButton
                           confirmTitle="Confirmer la suppression du participant"
                           confirmText={`Êtes-vous sûr de vouloir supprimer ${row.firstname} ${row.lastname} ?`} //TODO: change this text

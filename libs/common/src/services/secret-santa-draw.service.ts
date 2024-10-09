@@ -65,7 +65,7 @@ export class SecretSantaDrawService {
     const drawnIds: string[] = []
 
     if (retryCount > 10) {
-      throw new SecretSantaDrawError('Trop de tentatives de tirage au sort, le tirage ne semble pas correcte.')
+      throw new SecretSantaDrawError('Le tirage ne semble pas correcte.')
     }
 
     for (const possibleDraw of possibleDraws) {

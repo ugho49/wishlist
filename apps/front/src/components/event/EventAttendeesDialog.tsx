@@ -16,7 +16,7 @@ import React from 'react'
 import { RouterLink } from '../common/RouterLink'
 import { ListItemAttendee } from './ListItemAttendee'
 
-export interface EventAttendeesDialogDialog {
+export interface EventAttendeesDialogProps {
   open: boolean
   handleClose: () => void
   eventId: string
@@ -30,7 +30,7 @@ export const EventAttendeesDialog = ({
   handleClose,
   eventId,
   currentUserCanEdit,
-}: EventAttendeesDialogDialog) => {
+}: EventAttendeesDialogProps) => {
   return (
     <Dialog onClose={() => handleClose()} open={open} fullWidth maxWidth="xs">
       <DialogTitle>
