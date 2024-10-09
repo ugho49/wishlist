@@ -1,10 +1,12 @@
 import type { UpdateSecretSantaInputDto } from '@wishlist/common-types'
 
+import { Image } from '@mui/icons-material'
 import { LoadingButton } from '@mui/lab'
-import { Box, Stack } from '@mui/material'
+import { Box, Stack, Typography } from '@mui/material'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React, { useState } from 'react'
 
+import SecretSanta from '../../assets/illustrations/secret_santa.png'
 import { useApi } from '../../hooks/useApi'
 import { useToast } from '../../hooks/useToast'
 import { EditSecretSantaFormDialog } from './EditSecretSantaFormDialog'
@@ -35,11 +37,25 @@ export const NoSecretSanta = ({ eventId }: NoSecretSantaProps) => {
   })
 
   return (
-    <Stack>
-      <Box>
-        Aucun secret santa n'est en cours pour cet évènement. Vous pouvez en créer un en cliquant sur le bouton
-        ci-dessous.
-      </Box>
+    <>
+      <Stack flexDirection="row">
+        <Stack justifyContent="center" gap={4}>
+          <Box>
+            <Typography variant="h5" color="primary">
+              Aucun secret santa n'est en cours pour cet évènement
+            </Typography>
+          </Box>
+          <Box>Vous pouvez en créer un en cliquant sur le bouton ci-dessous.</Box>
+          <Box>
+            <LoadingButton loading={loading} disabled={loading} onClick={() => setOpenModal(true)} variant="contained">
+              Créer un secret santa
+            </LoadingButton>
+          </Box>
+        </Stack>
+        <Stack>
+          <img src={SecretSanta} alt="secret santa" style={{ width: '35vw' }} />
+        </Stack>
+      </Stack>
       <EditSecretSantaFormDialog
         title="Créer un secret santa"
         open={openModal}
@@ -51,9 +67,6 @@ export const NoSecretSanta = ({ eventId }: NoSecretSantaProps) => {
         handleClose={() => setOpenModal(false)}
         input={{}}
       />
-      <LoadingButton loading={loading} disabled={loading} onClick={() => setOpenModal(true)}>
-        Créer un secret santa
-      </LoadingButton>
-    </Stack>
+    </>
   )
 }
