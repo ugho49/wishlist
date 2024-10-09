@@ -34,9 +34,14 @@ const Transition = forwardRef(function Transition(
 })
 
 const schema = z.object({
-  // TODO: fix why this value is mandatory even if it's optional
-  budget: z.coerce.number().gt(0, 'Le budget doit être supérieur à 0').optional(),
-  description: z.string().max(2000, 'Nombre de caractères maximum 2000').optional(),
+  budget: z
+    .union([z.coerce.number().gt(0, 'Le budget doit être supérieur à 0'), z.literal('').transform(() => undefined)])
+    .optional(),
+  description: z
+    .string()
+    .max(2000, 'Nombre de caractères maximum 2000')
+    .transform(v => (v === '' ? undefined : v))
+    .optional(),
 })
 
 type FormFields = z.infer<typeof schema>
@@ -46,7 +51,7 @@ export type EditSecretSantaFormDialogProps = {
   title: string
   saveButtonText: string
   input: UpdateSecretSantaInputDto
-  handleSubmit: (output: FormFields) => void
+  handleSubmit: (output: UpdateSecretSantaInputDto) => void
   handleClose: () => void
 }
 
@@ -75,7 +80,10 @@ export const EditSecretSantaFormDialog = ({
   })
 
   const onSubmit = (data: FormFields) => {
-    handleSubmit(data)
+    handleSubmit({
+      budget: data.budget ?? undefined,
+      description: data.description ?? undefined,
+    })
   }
 
   const onClose = () => {
