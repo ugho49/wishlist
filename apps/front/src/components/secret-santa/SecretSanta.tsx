@@ -2,14 +2,17 @@ import type { UpdateSecretSantaInputDto } from '@wishlist/common-types'
 
 import { LoadingButton } from '@mui/lab'
 import { Box, Stack } from '@mui/material'
+import { DataGrid } from '@mui/x-data-grid'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { SecretSantaDrawService } from '@wishlist/common'
 import { SecretSantaDto, SecretSantaStatus } from '@wishlist/common-types'
 import React, { useCallback, useMemo, useState } from 'react'
 
+import { useEventById } from '../../hooks/domain/useEventById'
 import { useApi } from '../../hooks/useApi'
 import { useToast } from '../../hooks/useToast'
 import { ConfirmButton } from '../common/ConfirmButton'
+import { RouterLink } from '../common/RouterLink'
 import { EditSecretSantaFormDialog } from './EditSecretSantaFormDialog'
 
 type SecretSantaProps = {
@@ -25,7 +28,9 @@ export const SecretSanta = ({ secretSanta, eventId }: SecretSantaProps) => {
   const [status, setStatus] = useState(secretSanta.status)
   const [description, setDescription] = useState(secretSanta.description)
   const [budget, setBudget] = useState(secretSanta.budget)
-  const [users, setUsers] = useState(secretSanta.users || [])
+  const [secretSantaUsers, setSecretSantaUsers] = useState(secretSanta.users || [])
+  const event = useEventById(eventId)
+  const eventAttendees = useMemo(() => event.event?.attendees || [], [event])
 
   const { mutateAsync: startSecretSantaMutation, isPending: loadingStart } = useMutation({
     mutationKey: ['secret-santa.start', { id: secretSanta.id }],
@@ -73,7 +78,7 @@ export const SecretSanta = ({ secretSanta, eventId }: SecretSantaProps) => {
   })
 
   const startSecretSanta = useCallback(async () => {
-    const secretSantaService = new SecretSantaDrawService(users)
+    const secretSantaService = new SecretSantaDrawService(secretSantaUsers)
     const { reason, isPossible } = secretSantaService.isDrawPossible()
 
     if (!isPossible) {
@@ -82,7 +87,7 @@ export const SecretSanta = ({ secretSanta, eventId }: SecretSantaProps) => {
     }
 
     await startSecretSantaMutation()
-  }, [users])
+  }, [secretSantaUsers])
 
   const loading = useMemo(
     () => loadingStart || loadingCancel || loadingDelete || loadingUpdate,
@@ -91,22 +96,6 @@ export const SecretSanta = ({ secretSanta, eventId }: SecretSantaProps) => {
 
   return (
     <Stack>
-      <Box>
-        <b>Status:</b>
-        <span>{status}</span>
-      </Box>
-      <Box>
-        <b>Description:</b>
-        <span>{description}</span>
-      </Box>
-      <Box>
-        <b>Budget Max:</b>
-        <span>{budget ?? '-'}€</span>
-      </Box>
-      <Box>
-        <b>Participants</b>
-        <span>{JSON.stringify(users)}</span>
-      </Box>
       {status === SecretSantaStatus.CREATED && (
         <>
           <EditSecretSantaFormDialog
@@ -158,6 +147,48 @@ export const SecretSanta = ({ secretSanta, eventId }: SecretSantaProps) => {
           Annuler le tirage
         </ConfirmButton>
       )}
+
+      <Stack>
+        <Box>
+          <b>Status:</b>
+          <span>{status}</span>
+        </Box>
+        <Box>
+          <b>Description:</b>
+          <span>{description}</span>
+        </Box>
+        <Box>
+          <b>Budget Max:</b>
+          <span>{budget ?? '-'}€</span>
+        </Box>
+        <Box>
+          <b>Participants:</b>
+          <DataGrid
+            rows={secretSantaUsers} // TODO map this
+            columns={[
+              { field: 'firstname', headerName: 'Prénom', width: 150 },
+              { field: 'lastname', headerName: 'Nom', width: 150 },
+              { field: 'email', headerName: 'Email', width: 250 },
+              {
+                field: 'id',
+                sortable: false,
+                filterable: false,
+                headerName: '',
+                flex: 1,
+                headerAlign: 'center',
+                align: 'center',
+                renderCell: ({ row: user }) => (
+                  // TODO: change this
+                  <RouterLink to={`/admin/users/${user.id}`}>Voir les exclusions</RouterLink>
+                ),
+              },
+            ]}
+            hideFooter
+            autoHeight
+            disableColumnMenu
+          />
+        </Box>
+      </Stack>
     </Stack>
   )
 }
