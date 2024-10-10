@@ -37,4 +37,19 @@ export class SecretSantaMailer {
       )
     }
   }
+
+  async sendCancelSecretSantaEmails(params: { eventTitle: string; eventId: string; attendeeEmails: string[] }) {
+    const { eventTitle, eventId, attendeeEmails } = params
+    const eventUrl = `https://wishlistapp.fr/events/${eventId}`
+
+    await this.mailService.sendMail({
+      to: attendeeEmails,
+      subject: "[Wishlist] Le secret santa viens d'être annulé",
+      template: 'secret-santa-cancel',
+      context: {
+        eventTitle,
+        eventUrl,
+      },
+    })
+  }
 }

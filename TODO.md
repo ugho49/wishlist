@@ -1,9 +1,13 @@
 # TODO
 
+## General
+
+- [ ] Backend: refacto mailer templating. Try react-mail or MJML
+
 ## Secret Santa
 
-- [ ] Backend: send a mail when the secret santa has started
-- [ ] Backend: send a mail when the secret santa has been cancelled
+- [x] Backend: send a mail when the secret santa has started
+- [x] Backend: send a mail when the secret santa has been cancelled
 - [ ] Backend BONUS: add an endpoint to delete multiple users at once
 
 - [x] Frontend: secret santa page, handle pending user name in delete user button

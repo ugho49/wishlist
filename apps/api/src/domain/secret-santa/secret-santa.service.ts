@@ -172,6 +172,16 @@ export class SecretSantaService {
       await em.update(SecretSantaEntity, { id: secretSanta.id }, { status: SecretSantaStatus.CREATED })
       await em.update(SecretSantaUserEntity, { secretSantaId: secretSanta.id }, { drawUserId: null })
     })
+
+    const event = await secretSanta.event
+    const users = await secretSanta.users
+    const attendees = await Promise.all(users.map(u => u.attendee.then(toAttendeeDto)))
+
+    await this.mailer.sendCancelSecretSantaEmails({
+      eventTitle: event.title,
+      eventId: event.id,
+      attendeeEmails: attendees.map(a => a.pending_email ?? a.user?.email ?? ''),
+    })
   }
 
   async addSecretSantaUsers(param: {
