@@ -4,6 +4,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import CloseIcon from '@mui/icons-material/Close'
 import SaveIcon from '@mui/icons-material/Save'
 import {
+  Alert,
+  AlertTitle,
   AppBar,
   Box,
   Button,
@@ -112,8 +114,22 @@ export const EditSecretSantaFormDialog = ({
       </AppBar>
       <Container maxWidth="sm" sx={{ marginTop: '40px' }}>
         <Stack component="form" onSubmit={handleFormSubmit(onSubmit)} noValidate gap={smallScreen ? 2 : 3}>
+          <Alert severity="info">
+            <AlertTitle>Toutes les valeurs sont optionnelles</AlertTitle>
+            <Typography variant="body2">
+              Vous pouvez modifier le budget maximum et la description de votre secret santa. Ces informations seront
+              transmises aux participants par mail lors de la révélation des tirages.
+            </Typography>
+          </Alert>
+          <Alert severity="warning">
+            <AlertTitle>Ces valeurs ne pourront plus être modifiées après le tirage</AlertTitle>
+            <Typography variant="body2">
+              Une fois le tirage effectué, les valeurs de budget et de description seront figées et ne pourront plus
+              être modifiées. Vous devrez alors annuler le tirage pour pouvoir les modifier.
+            </Typography>
+          </Alert>
           <Box>
-            <InputLabel>Budget Max</InputLabel>
+            <InputLabel>Budget Max (€)</InputLabel>
             <TextField
               {...register('budget')}
               fullWidth
@@ -132,7 +148,7 @@ export const EditSecretSantaFormDialog = ({
               fullWidth
               multiline
               minRows={4}
-              placeholder="Une petite description ..."
+              placeholder="Une petite description à mettre dans le mail lors du tirage..."
               error={!!formErrors.description}
               helperText={formErrors.description?.message}
             />

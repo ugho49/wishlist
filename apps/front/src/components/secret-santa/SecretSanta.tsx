@@ -9,7 +9,7 @@ import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt'
 import PersonOffIcon from '@mui/icons-material/PersonOff'
 import TuneIcon from '@mui/icons-material/Tune'
 import { LoadingButton } from '@mui/lab'
-import { Avatar, Button, Chip, IconButton, Stack, Tooltip } from '@mui/material'
+import { Alert, AlertTitle, Avatar, Button, Chip, IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import { DataGrid } from '@mui/x-data-grid'
@@ -44,6 +44,7 @@ export const SecretSanta = ({ secretSanta, event }: SecretSantaProps) => {
   const smallScreen = useMediaQuery(theme.breakpoints.down('md'))
   const [openEditModal, setOpenEditModal] = useState(false)
   const [openSecretSantaUsersModal, setOpenSecretSantaUsersModal] = useState(false)
+  const [drawFinishedPopup, setDrawFinishedPopup] = useState(false)
   const [status, setStatus] = useState(secretSanta.status)
   const [description, setDescription] = useState(secretSanta.description)
   const [budget, setBudget] = useState(secretSanta.budget)
@@ -64,12 +65,9 @@ export const SecretSanta = ({ secretSanta, event }: SecretSantaProps) => {
     mutationFn: () => api.secretSanta.start(secretSanta.id),
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
     onSuccess: async () => {
-      addToast({
-        message:
-          'Le tirage a été effectué, chaque participant vas recevoir un email avec le résultat du tirage qui lui est associé',
-        variant: 'success',
-      })
       setStatus(SecretSantaStatus.STARTED)
+      setDrawFinishedPopup(true)
+      setTimeout(() => setDrawFinishedPopup(false), 10000)
       await queryClient.invalidateQueries({ queryKey: ['secret-santa', { eventId }] })
     },
   })
@@ -171,6 +169,15 @@ export const SecretSanta = ({ secretSanta, event }: SecretSantaProps) => {
           otherSecretSantaUser={secretSantaUsers.filter(u => u.id !== currentUserIdModalExclusion)}
         />
       </>
+      {drawFinishedPopup && (
+        <Stack mb={4}>
+          <Alert severity="success" className="animated zoomIn faster">
+            <AlertTitle>Tirage effectué avec succès !</AlertTitle>
+            <Typography variant="body2">Les participants ont reçu un email avec leur tirage secret santa.</Typography>
+          </Alert>
+        </Stack>
+      )}
+
       <Stack flexDirection="row" alignItems="start" justifyContent="space-between" mb={4} gap={1}>
         <Stack alignItems="start" gap={1}>
           <Stack flexDirection="row" alignItems="center" gap={1} flexWrap="wrap">
