@@ -1,5 +1,6 @@
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance'
 import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt'
+import CancelIcon from '@mui/icons-material/Cancel'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import DeleteIcon from '@mui/icons-material/Delete'
 import GroupIcon from '@mui/icons-material/Group'
@@ -9,6 +10,8 @@ import PersonOffIcon from '@mui/icons-material/PersonOff'
 import TuneIcon from '@mui/icons-material/Tune'
 import { LoadingButton } from '@mui/lab'
 import { Avatar, Button, Chip, IconButton, Stack, Tooltip } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
+import useMediaQuery from '@mui/material/useMediaQuery'
 import { DataGrid } from '@mui/x-data-grid'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { SecretSantaDrawService } from '@wishlist/common'
@@ -37,6 +40,8 @@ export const SecretSanta = ({ secretSanta, event }: SecretSantaProps) => {
   const queryClient = useQueryClient()
   const api = useApi()
   const { addToast } = useToast()
+  const theme = useTheme()
+  const smallScreen = useMediaQuery(theme.breakpoints.down('md'))
   const [openEditModal, setOpenEditModal] = useState(false)
   const [openSecretSantaUsersModal, setOpenSecretSantaUsersModal] = useState(false)
   const [status, setStatus] = useState(secretSanta.status)
@@ -166,9 +171,9 @@ export const SecretSanta = ({ secretSanta, event }: SecretSantaProps) => {
           otherSecretSantaUser={secretSantaUsers.filter(u => u.id !== currentUserIdModalExclusion)}
         />
       </>
-      <Stack flexDirection="row" alignItems="start" justifyContent="space-between" mb={4}>
+      <Stack flexDirection="row" alignItems="start" justifyContent="space-between" mb={4} gap={1}>
         <Stack alignItems="start" gap={1}>
-          <Stack flexDirection="row" alignItems="center" gap={1}>
+          <Stack flexDirection="row" alignItems="center" gap={1} flexWrap="wrap">
             <Chip
               variant="outlined"
               size="small"
@@ -191,10 +196,10 @@ export const SecretSanta = ({ secretSanta, event }: SecretSantaProps) => {
             />
           )}
         </Stack>
-        <Stack flexDirection="row" alignItems="center" gap={4}>
+        <Stack flexDirection="row" alignItems="center" gap={smallScreen ? 2 : 4} flexWrap="wrap" justifyContent="end">
           {status === SecretSantaStatus.CREATED && (
             <>
-              <Stack flexDirection="row" alignItems="center" gap={0.5}>
+              <Stack flexDirection="row" alignItems="center" gap={1} flexWrap="wrap" justifyContent="end">
                 <ConfirmButton
                   confirmTitle="Confirmer la suppression du secret santa"
                   confirmText="Êtes-vous sûr de vouloir supprimer le secret santa ? Cette action est irréversible."
@@ -242,8 +247,10 @@ export const SecretSanta = ({ secretSanta, event }: SecretSantaProps) => {
             <ConfirmButton
               confirmTitle="Confirmer l'annulation du tirage"
               confirmText="Êtes-vous sûr de vouloir annuler le tirage ? Cette action est irréversible."
-              variant="text"
-              color="error"
+              color="warning"
+              variant="contained"
+              size="small"
+              startIcon={<CancelIcon />}
               loading={loading}
               disabled={loading}
               onClick={() => cancelSecretSanta()}
@@ -300,7 +307,7 @@ export const SecretSanta = ({ secretSanta, event }: SecretSantaProps) => {
               display: 'flex',
               headerAlign: 'center',
               align: 'center',
-              flex: 1,
+              width: 150,
               renderCell: ({ row }) => (
                 <>
                   {status === SecretSantaStatus.CREATED && (
@@ -333,21 +340,6 @@ export const SecretSanta = ({ secretSanta, event }: SecretSantaProps) => {
           disableColumnMenu
         />
       </Stack>
-
-      {/*<Stack>*/}
-      {/*  <Box>*/}
-      {/*    <b>Status:</b>*/}
-      {/*    <span>{status}</span>*/}
-      {/*  </Box>*/}
-      {/*  <Box>*/}
-      {/*    <b>Description:</b>*/}
-      {/*    <span>{description}</span>*/}
-      {/*  </Box>*/}
-      {/*  <Box>*/}
-      {/*    <b>Budget Max:</b>*/}
-      {/*    <span>{budget ?? '-'}€</span>*/}
-      {/*  </Box>*/}
-      {/*</Stack>*/}
     </Stack>
   )
 }

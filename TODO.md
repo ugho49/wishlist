@@ -8,7 +8,7 @@
 
 - [x] Frontend: secret santa page, handle pending user name in delete user button
 - [x] Frontend: secret santa page, handle actions buttons disposition in user list
-- [ ] Frontend: secret santa page, change design of description & budget
+- [x] Frontend: secret santa page, change design of description & budget
 - [x] Frontend: no secret santa page
 - [ ] Frontend: event page, change design of secret santa my draw
 - [ ] Frontend: add helperTexts and text in `EditSecretSantaFormDialog`
