@@ -24,7 +24,7 @@ export class SecretSantaMailer {
       currency: 'EUR',
     })
     const budgetFormatted = budget ? eurosFormatter.format(budget) : 'non défini'
-    const descriptionFormatted = description || '-'
+    const descriptionFormatted = description || 'non définie'
 
     const chunks = createChunks(drawns, 10)
 
