@@ -21,7 +21,8 @@ import { ArrayContains, In } from 'typeorm'
 import { toAttendeeDto } from '../attendee/attendee.mapper'
 import { EventRepository } from '../event/event.repository'
 import { SecretSantaEntity, SecretSantaUserEntity } from './secret-santa.entity'
-import { toSecretSantaDto, toSecretSantaUserDto } from './secret-santa.mapper'
+import { SecretSantaMailer } from './secret-santa.mailer'
+import { toSecretSantaDto, toSecretSantaUserDto, toSecretSantaUserWithDrawDto } from './secret-santa.mapper'
 import { SecretSantaRepository, SecretSantaUserRepository } from './secret-santa.repository'
 
 @Injectable()
@@ -30,6 +31,7 @@ export class SecretSantaService {
     private readonly eventRepository: EventRepository,
     private readonly secretSantaRepository: SecretSantaRepository,
     private readonly secretSantaUserRepository: SecretSantaUserRepository,
+    private readonly mailer: SecretSantaMailer,
   ) {}
 
   async getForEvent(param: { eventId: string; currentUserId: string }): Promise<SecretSantaDto | null> {
@@ -124,7 +126,7 @@ export class SecretSantaService {
       throw new BadRequestException('Event is already finished')
     }
 
-    const secretSantaUsers = await this.secretSantaUserRepository.findBy({ secretSantaId: secretSanta.id })
+    let secretSantaUsers = await this.secretSantaUserRepository.findBy({ secretSantaId: secretSanta.id })
 
     try {
       const drawService = new SecretSantaDrawService(
@@ -143,7 +145,17 @@ export class SecretSantaService {
       throw new UnprocessableEntityException('Failed to draw secret santa, please try again')
     }
 
-    // TODO: Send email to all users
+    secretSantaUsers = await this.secretSantaUserRepository.findBy({ secretSantaId: secretSanta.id })
+    const secretSantaDto = await Promise.all(secretSantaUsers.map(ss => toSecretSantaUserWithDrawDto(ss)))
+
+    await this.mailer.sendDrawnEmails({
+      eventTitle: event.title,
+      eventId: event.id,
+      drawns: secretSantaDto.map(ss => ({
+        email: ss.attendee.pending_email ?? ss.attendee.user?.email ?? '',
+        secretSantaName: ss.draw?.pending_email ?? `${ss.draw?.user?.firstname} ${ss.draw?.user?.lastname}`,
+      })),
+    })
   }
 
   async cancelSecretSanta(param: { currentUserId: string; secretSantaId: string }): Promise<void> {

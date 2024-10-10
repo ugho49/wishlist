@@ -11,6 +11,10 @@ export class SecretSantaUserDto {
   exclusions: string[]
 }
 
+export class SecretSantaUserWithDrawDto extends SecretSantaUserDto {
+  draw?: AttendeeDto
+}
+
 export class SecretSantaDto {
   id: string
   event: MiniEventDto

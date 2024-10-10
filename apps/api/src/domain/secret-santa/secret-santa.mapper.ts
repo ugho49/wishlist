@@ -1,4 +1,4 @@
-import { SecretSantaDto, SecretSantaUserDto } from '@wishlist/common-types'
+import { SecretSantaDto, SecretSantaUserDto, SecretSantaUserWithDrawDto } from '@wishlist/common-types'
 
 import { toAttendeeDto } from '../attendee/attendee.mapper'
 import { toMiniEventDto } from '../event/event.mapper'
@@ -26,5 +26,15 @@ export async function toSecretSantaUserDto(entity: SecretSantaUserEntity): Promi
     id: entity.id,
     attendee,
     exclusions: entity.exclusions,
+  }
+}
+
+export async function toSecretSantaUserWithDrawDto(entity: SecretSantaUserEntity): Promise<SecretSantaUserWithDrawDto> {
+  const base = await toSecretSantaUserDto(entity)
+  const draw = await entity.drawUser.then(user => user?.attendee.then(toAttendeeDto))
+
+  return {
+    ...base,
+    draw,
   }
 }
