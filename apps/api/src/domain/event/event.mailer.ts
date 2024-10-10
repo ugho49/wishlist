@@ -19,7 +19,6 @@ export class EventMailer {
       to: params.emails,
       subject: '[Wishlist] Vous participez à un nouvel événement',
       template: 'added-to-event',
-      useMjml: true,
       context: {
         eventTitle: params.event.title,
         eventUrl: `https://wishlistapp.fr/events/${params.event.id}`,

@@ -11,7 +11,6 @@ export class UserMailer {
       to: params.email,
       subject: '[Wishlist] Bienvenue !!!',
       template: 'welcome-user',
-      useMjml: true,
       context: {
         mainUrl: 'https://wishlistapp.fr/',
       },

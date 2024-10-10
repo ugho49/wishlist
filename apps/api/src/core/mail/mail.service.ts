@@ -34,18 +34,12 @@ export class MailService {
     })
   }
 
-  async sendMail(param: {
-    to: string | string[]
-    subject: string
-    template: string
-    useMjml?: boolean
-    context?: Record<string, any>
-  }) {
-    const templatePath = join(this.config.templateDir, `${param.template}.${param.useMjml ? 'mjml' : 'hbs'}`)
+  async sendMail(param: { to: string | string[]; subject: string; template: string; context?: Record<string, any> }) {
+    const templatePath = join(this.config.templateDir, `${param.template}.mjml`)
 
     if (!this.templateCache.has(templatePath)) {
       const fileContent = await readFile(templatePath, 'utf8')
-      const templatedContent = param.useMjml ? mjml2html(fileContent).html : fileContent
+      const templatedContent = mjml2html(fileContent).html
       this.templateCache.set(templatePath, templatedContent)
     }
 

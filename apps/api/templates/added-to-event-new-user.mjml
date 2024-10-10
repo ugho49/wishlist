@@ -1,0 +1,23 @@
+<mjml>
+  <mj-body background-color="#F4F4F4">
+    <mj-section padding="20px 0" text-align="center">
+      <mj-column>
+        <mj-image align="center" src="https://wishlistapp.fr/icon.png" width="80px"/>
+        <mj-image align="center" src="https://wishlistapp.fr/logo_text.png" width="160px"/>
+      </mj-column>
+    </mj-section>
+    <mj-section background-color="#ffffff" background-repeat="repeat" padding="30px 20px" text-align="center">
+      <mj-column>
+        <mj-text align="left" color="#224158" font-family="Arial, sans-serif" font-size="24px" line-height="28px" padding-bottom="40px" text-transform="uppercase">Hello</mj-text>
+        <mj-text align="left" color="#55575d" font-family="Arial, sans-serif" font-size="16px" line-height="24px">Tu as été ajouté en tant que membre de l'événement <b>{{eventTitle}}</b> par l'utilisateur <u>{{invitedBy}}</u>.</mj-text>
+        <mj-text align="left" color="#55575d" font-family="Arial, sans-serif" font-size="16px" line-height="24px">Tu peux te rendre à l'adresse ci-dessous afin de créer ton compte et voir l'évènement auquel tu as été ajouté.</mj-text>
+        <mj-button href="{{registerUrl}}" background-color="#224158" font-size="16px" padding-top="25px">M'inscrire</mj-button>
+      </mj-column>
+    </mj-section>
+    <mj-section padding="5px 0 10px 0" text-align="center">
+      <mj-column>
+        <mj-text align="center" color="#9d9d9d" font-family="Arial, sans-serif" font-size="10px" line-height="24px" padding="15px 25px 15px 25px">Cet mail à été envoyé automatiquement, merci de ne pas y répondre.</mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>
