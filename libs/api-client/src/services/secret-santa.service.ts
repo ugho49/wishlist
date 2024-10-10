@@ -1,13 +1,13 @@
-import type {
+import {
   AttendeeDto,
   CreateSecretSantaInputDto,
-  CreateSecretSantaUserInputDto,
+  CreateSecretSantaUsersInputDto,
+  CreateSecretSantaUsersOutputDto,
   SecretSantaDto,
   SecretSantaUserDto,
   UpdateSecretSantaInputDto,
   UpdateSecretSantaUserInputDto,
 } from '@wishlist/common-types'
-
 import { AxiosInstance } from 'axios'
 
 export class SecretSantaService {
@@ -26,7 +26,7 @@ export class SecretSantaService {
   }
 
   async update(secretSantaId: string, data: UpdateSecretSantaInputDto): Promise<void> {
-    await this.client.put(`/secret-santa/${secretSantaId}`, data)
+    await this.client.patch(`/secret-santa/${secretSantaId}`, data)
   }
 
   async start(secretSantaId: string): Promise<void> {
@@ -41,8 +41,8 @@ export class SecretSantaService {
     await this.client.delete(`/secret-santa/${secretSantaId}`)
   }
 
-  addUser(secretSantaId: string, data: CreateSecretSantaUserInputDto): Promise<SecretSantaUserDto> {
-    return this.client.post(`/secret-santa/${secretSantaId}/user`, data).then(res => res.data)
+  addUsers(secretSantaId: string, data: CreateSecretSantaUsersInputDto): Promise<CreateSecretSantaUsersOutputDto> {
+    return this.client.post(`/secret-santa/${secretSantaId}/users`, data).then(res => res.data)
   }
 
   async updateUser(

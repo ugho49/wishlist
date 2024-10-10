@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { BaseRepository } from '@wishlist/common-database'
+import { ArrayContains, In } from 'typeorm'
 
 import { SecretSantaEntity, SecretSantaUserEntity } from './secret-santa.entity'
 
@@ -36,7 +37,6 @@ export class SecretSantaUserRepository extends BaseRepository(SecretSantaUserEnt
   }): Promise<SecretSantaUserEntity | null> {
     const { eventId, userId } = param
     const currentSantaUser = await this.createQueryBuilder('ssu')
-      .select('ssu.id')
       .innerJoin('ssu.attendee', 'a')
       .innerJoin('ssu.secretSanta', 'ss')
       .leftJoin('a.user', 'u')
@@ -44,10 +44,16 @@ export class SecretSantaUserRepository extends BaseRepository(SecretSantaUserEnt
       .andWhere('u.id = :userId', { userId })
       .getOne()
 
-    if (!currentSantaUser) {
+    if (!currentSantaUser?.drawUserId) {
       return null
     }
 
-    return await this.findOneBy({ id: currentSantaUser.id })
+    return await this.findOneBy({ id: currentSantaUser.drawUserId })
+  }
+
+  attendeesExistsForSecretSanta(param: { secretSantaId: string; attendeeIds: string[] }): Promise<boolean> {
+    return this.exists({
+      where: { secretSantaId: param.secretSantaId, attendeeId: In(param.attendeeIds) },
+    })
   }
 }

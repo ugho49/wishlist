@@ -17,6 +17,7 @@ const columns: GridColDef<UserDto>[] = [
     width: 20,
     sortable: false,
     filterable: false,
+    display: 'flex',
     renderCell: ({ row: user }) => <Status color={user.is_enabled ? 'success' : 'error'} />,
   },
   {
@@ -25,6 +26,7 @@ const columns: GridColDef<UserDto>[] = [
     width: 20,
     sortable: false,
     filterable: false,
+    display: 'flex',
     renderCell: ({ row: user }) => (
       <Avatar src={user.picture_url} sx={{ width: '30px', height: '30px' }}>
         {user.firstname.substring(0, 1).toUpperCase()}

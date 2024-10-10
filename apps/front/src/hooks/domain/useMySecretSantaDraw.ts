@@ -1,0 +1,14 @@
+import { useQuery } from '@tanstack/react-query'
+
+import { useApi } from '../useApi'
+
+export const useMySecretSantaDraw = (eventId: string) => {
+  const api = useApi()
+
+  const { data, isLoading } = useQuery({
+    queryKey: ['secret-santa.draw', { eventId }],
+    queryFn: () => api.secretSanta.getMyDraw(eventId),
+  })
+
+  return { mySecretSantaDraw: data, loading: isLoading }
+}

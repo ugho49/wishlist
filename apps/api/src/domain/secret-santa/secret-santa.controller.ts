@@ -1,11 +1,11 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common'
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 import {
   AttendeeDto,
   CreateSecretSantaInputDto,
-  CreateSecretSantaUserInputDto,
+  CreateSecretSantaUsersInputDto,
+  CreateSecretSantaUsersOutputDto,
   SecretSantaDto,
-  SecretSantaUserDto,
   UpdateSecretSantaInputDto,
   UpdateSecretSantaUserInputDto,
 } from '@wishlist/common-types'
@@ -42,7 +42,7 @@ export class SecretSantaController {
     return this.secretSantaService.createForEvent({ currentUserId, dto })
   }
 
-  @Put('/:id')
+  @Patch('/:id')
   updateSecretSanta(
     @Param('id') secretSantaId: string,
     @CurrentUser('id') currentUserId: string,
@@ -66,36 +66,36 @@ export class SecretSantaController {
     return this.secretSantaService.cancelSecretSanta({ secretSantaId, currentUserId })
   }
 
-  @Post('/:id/user')
-  addSecretSantaUser(
+  @Post('/:id/users')
+  addSecretSantaUsers(
     @Param('id') secretSantaId: string,
     @CurrentUser('id') currentUserId: string,
-    @Body() dto: CreateSecretSantaUserInputDto,
-  ): Promise<SecretSantaUserDto> {
-    return this.secretSantaService.addSecretSantaUser({ secretSantaId, currentUserId, dto })
+    @Body() dto: CreateSecretSantaUsersInputDto,
+  ): Promise<CreateSecretSantaUsersOutputDto> {
+    return this.secretSantaService.addSecretSantaUsers({ secretSantaId, currentUserId, dto })
   }
 
-  @Put('/:id/user/:userId')
+  @Put('/:id/user/:secretSantaUserId')
   updateSecretSantaUser(
     @Param('id') secretSantaId: string,
-    @Param('userId') userId: string,
+    @Param('secretSantaUserId') secretSantaUserId: string,
     @CurrentUser('id') currentUserId: string,
     @Body() dto: UpdateSecretSantaUserInputDto,
   ): Promise<void> {
     return this.secretSantaService.updateSecretSantaUser({
       secretSantaId,
-      secretSantaUserId: userId,
+      secretSantaUserId,
       currentUserId,
       dto,
     })
   }
 
-  @Delete('/:id/user/:userId')
+  @Delete('/:id/user/:secretSantaUserId')
   deleteSecretSantaUser(
     @Param('id') secretSantaId: string,
-    @Param('userId') userId: string,
+    @Param('secretSantaUserId') secretSantaUserId: string,
     @CurrentUser('id') currentUserId: string,
   ): Promise<void> {
-    return this.secretSantaService.deleteSecretSantaUser({ secretSantaId, secretSantaUserId: userId, currentUserId })
+    return this.secretSantaService.deleteSecretSantaUser({ secretSantaId, secretSantaUserId, currentUserId })
   }
 }

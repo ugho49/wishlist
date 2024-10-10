@@ -1,24 +1,22 @@
 import { SecretSantaDrawService, SecretSantaUser } from './secret-santa-draw.service'
 
 describe('SecretSantaDrawService', () => {
-  const drawService = new SecretSantaDrawService()
-
   it('should throw error if not enough attendees', () => {
     // Given
     const secretSantaUsers: SecretSantaUser[] = [getUserEntity('1', [])]
+    const drawService = new SecretSantaDrawService(secretSantaUsers)
 
     // When Then
-    expect(() => drawService.assignSecretSantas(secretSantaUsers)).toThrowError(
-      "Pas assez d'utilisateurs pour tirer au sort.",
-    )
+    expect(() => drawService.assignSecretSantas()).toThrowError("Pas assez d'utilisateurs pour tirer au sort.")
   })
 
   it('should assign secret Santas for 2 attendees without exceptions', () => {
     // Given
     const secretSantaUsers: SecretSantaUser[] = [getUserEntity('1', []), getUserEntity('2', [])]
+    const drawService = new SecretSantaDrawService(secretSantaUsers)
 
     // When
-    const assignedUsers = drawService.assignSecretSantas(secretSantaUsers)
+    const assignedUsers = drawService.assignSecretSantas()
 
     // Then
     expect(assignedUsers).toIncludeAllMembers([
@@ -30,9 +28,10 @@ describe('SecretSantaDrawService', () => {
   it('should throw error when secret Santas for 2 attendees with exceptions', () => {
     // Given
     const secretSantaUsers: SecretSantaUser[] = [getUserEntity('1', ['2']), getUserEntity('2', [])]
+    const drawService = new SecretSantaDrawService(secretSantaUsers)
 
     // When Then
-    expect(() => drawService.assignSecretSantas(secretSantaUsers)).toThrowError(
+    expect(() => drawService.assignSecretSantas()).toThrowError(
       'Impossible de tirer au sort un utilisateur en raison des exclusions.',
     )
   })
@@ -44,9 +43,10 @@ describe('SecretSantaDrawService', () => {
       getUserEntity('2', []),
       getUserEntity('3', ['1']),
     ]
+    const drawService = new SecretSantaDrawService(secretSantaUsers)
 
     // When
-    const assignedUsers = drawService.assignSecretSantas(secretSantaUsers)
+    const assignedUsers = drawService.assignSecretSantas()
 
     // Then
     expect(assignedUsers).toIncludeAllMembers([
@@ -63,9 +63,10 @@ describe('SecretSantaDrawService', () => {
       getUserEntity('2', ['1']),
       getUserEntity('3', ['1']),
     ]
+    const drawService = new SecretSantaDrawService(secretSantaUsers)
 
     // When Then
-    expect(() => drawService.assignSecretSantas(secretSantaUsers)).toThrowError(
+    expect(() => drawService.assignSecretSantas()).toThrowError(
       'Impossible de tirer au sort un utilisateur en raison des exclusions.',
     )
   })
@@ -78,9 +79,10 @@ describe('SecretSantaDrawService', () => {
       getUserEntity('3', ['1']),
       getUserEntity('4', ['1']),
     ]
+    const drawService = new SecretSantaDrawService(secretSantaUsers)
 
     // When Then
-    expect(() => drawService.assignSecretSantas(secretSantaUsers)).toThrowError(
+    expect(() => drawService.assignSecretSantas()).toThrowError(
       'Impossible de tirer au sort un utilisateur en raison des exclusions.',
     )
   })
@@ -93,9 +95,10 @@ describe('SecretSantaDrawService', () => {
       getUserEntity('3', []),
       getUserEntity('4', []),
     ]
+    const drawService = new SecretSantaDrawService(secretSantaUsers)
 
     // When
-    const assignedUsers = drawService.assignSecretSantas(secretSantaUsers)
+    const assignedUsers = drawService.assignSecretSantas()
 
     expect(assignedUsers).toBeArrayOfSize(4)
   })

@@ -11,6 +11,10 @@ export class SecretSantaUserDto {
   exclusions: string[]
 }
 
+export class SecretSantaUserWithDrawDto extends SecretSantaUserDto {
+  draw?: AttendeeDto
+}
+
 export class SecretSantaDto {
   id: string
   event: MiniEventDto
@@ -38,13 +42,18 @@ export class CreateSecretSantaInputDto extends UpdateSecretSantaInputDto {
   event_id: string
 }
 
-export class CreateSecretSantaUserInputDto {
-  @IsString()
-  attendee_id: string
+export class CreateSecretSantaUsersInputDto {
+  @IsString({ each: true })
+  @Transform(({ value }) => uniq(value))
+  attendee_ids: string[]
 }
 
 export class UpdateSecretSantaUserInputDto {
   @IsString({ each: true })
   @Transform(({ value }) => uniq(value))
   exclusions: string[]
+}
+
+export class CreateSecretSantaUsersOutputDto {
+  users: SecretSantaUserDto[]
 }
