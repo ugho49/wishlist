@@ -17,3 +17,8 @@
 ## Event
 
 - [ ] Frontend: allow to have multiple maintainers in order to manager the lists
+- [ ] Frontend: change description card design
+
+## Wishlist
+
+- [ ] Frontend: change description card design
