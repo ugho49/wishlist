@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { BaseRepository } from '@wishlist/common-database'
+import { EntityManager } from 'typeorm'
 
 import { WishlistEntity } from './wishlist.entity'
 
@@ -69,8 +70,9 @@ export class WishlistRepository extends BaseRepository(WishlistEntity) {
     ])
   }
 
-  async unlinkEvent(params: { wishlistId: string; eventId: string }): Promise<void> {
-    await this.query('DELETE FROM event_wishlist WHERE event_id = $1 AND wishlist_id = $2', [
+  async unlinkEvent(params: { wishlistId: string; eventId: string; em?: EntityManager }): Promise<void> {
+    const manager = params.em || this.manager
+    await manager.query('DELETE FROM event_wishlist WHERE event_id = $1 AND wishlist_id = $2', [
       params.eventId,
       params.wishlistId,
     ])

@@ -11,6 +11,8 @@ import { AddEventAttendeeForEventInputDto, AttendeeDto, AttendeeRole, ICurrentUs
 import { EventMailer } from '../event/event.mailer'
 import { EventRepository } from '../event/event.repository'
 import { UserRepository } from '../user/user.repository'
+import { WishlistEntity } from '../wishlist/wishlist.entity'
+import { WishlistRepository } from '../wishlist/wishlist.repository'
 import { AttendeeEntity } from './attendee.entity'
 import { toAttendeeDto } from './attendee.mapper'
 import { AttendeeRepository } from './attendee.repository'
@@ -23,6 +25,7 @@ export class AttendeeService {
     private readonly attendeeRepository: AttendeeRepository,
     private readonly eventRepository: EventRepository,
     private readonly userRepository: UserRepository,
+    private readonly wishlistRepository: WishlistRepository,
     private readonly eventMailer: EventMailer,
   ) {}
 
@@ -95,8 +98,30 @@ export class AttendeeService {
       throw new ConflictException('You cannot delete yourself from the event')
     }
 
-    // TODO: do not allow attendee deletion if he have a list in this event and the list have only this event attached
+    const event = await attendeeEntity.event
+    const wishlists = await event.wishlists.then(wishlists =>
+      wishlists.filter(wishlist => wishlist.ownerId === attendeeEntity.userId),
+    )
 
-    await this.attendeeRepository.delete({ id: attendeeId })
+    await this.attendeeRepository.transaction(async em => {
+      for (const wishlist of wishlists) {
+        const [events, items] = await Promise.all([wishlist.events, wishlist.items])
+
+        if (events.length > 1) {
+          await this.wishlistRepository.unlinkEvent({ wishlistId: wishlist.id, eventId: event.id, em })
+          continue
+        }
+
+        if (events.length === 1 && items.length > 0) {
+          throw new ConflictException(
+            'You remove this attendee from the event because he have a list in this event and the list have only this event attached',
+          )
+        }
+
+        await em.delete(WishlistEntity, { id: wishlist.id })
+      }
+
+      await em.delete(AttendeeEntity, { id: attendeeId })
+    })
   }
 }
