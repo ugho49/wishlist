@@ -88,7 +88,7 @@ export class UserService {
       })
 
       try {
-        await this.userMailer.sendWelcomeMail({ email: entity.email, firstName: entity.firstName })
+        await this.userMailer.sendWelcomeMail({ email: entity.email })
       } catch (e) {
         this.logger.error('Fail to send welcome mail to user', e)
       }
