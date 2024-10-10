@@ -44,13 +44,13 @@ export const EditEventPage = () => {
   const params = useParams<'eventId'>()
   const eventId = params.eventId || ''
   const [queryParams, setQueryParams] = useCustomSearchParams<SearchParamType>({ tab: tabs[0].value })
-  const { event, loading } = useEventById(eventId)
+  const { event, loading, currentUserCanEdit } = useEventById(eventId)
 
   return (
     <Box>
       <Loader loading={loading}>
-        {!event && <EventNotFound />}{' '}
-        {event && (
+        {(!event || !currentUserCanEdit) && <EventNotFound />}
+        {event && currentUserCanEdit && (
           <>
             <Title smallMarginBottom goBackLink={{ to: `/events/${eventId}`, title: "Revenir à l'évènement" }}>
               Modifier l'évènement

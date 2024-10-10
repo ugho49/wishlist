@@ -36,13 +36,13 @@ export const EditWishlistPage = () => {
   const params = useParams<'wishlistId'>()
   const wishlistId = params.wishlistId || ''
   const [queryParams, setQueryParams] = useCustomSearchParams<SearchParamType>({ tab: tabs[0].value })
-  const { wishlist, loading } = useWishlistById(wishlistId)
+  const { wishlist, loading, currentUserCanEdit } = useWishlistById(wishlistId)
 
   return (
     <Box>
       <Loader loading={loading}>
-        {!wishlist && <WishlistNotFound />}
-        {wishlist && (
+        {(!wishlist || !currentUserCanEdit) && <WishlistNotFound />}
+        {wishlist && currentUserCanEdit && (
           <>
             <Title smallMarginBottom goBackLink={{ to: `/wishlists/${wishlistId}`, title: 'Revenir à la liste' }}>
               Modifier la liste
