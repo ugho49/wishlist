@@ -10,13 +10,21 @@ export class SecretSantaMailer {
   async sendDrawnEmails(params: {
     eventTitle: string
     eventId: string
+    description?: string
+    budget?: number
     drawns: Array<{
       email: string
       secretSantaName: string
     }>
   }) {
-    const { eventTitle, eventId, drawns } = params
+    const { eventTitle, eventId, drawns, budget, description } = params
     const eventUrl = `https://wishlistapp.fr/events/${eventId}`
+    const eurosFormatter = Intl.NumberFormat('fr-FR', {
+      style: 'currency',
+      currency: 'EUR',
+    })
+    const budgetFormatted = budget ? eurosFormatter.format(budget) : 'non défini'
+    const descriptionFormatted = description || '-'
 
     const chunks = createChunks(drawns, 10)
 
@@ -31,6 +39,8 @@ export class SecretSantaMailer {
               eventTitle,
               eventUrl,
               secretSantaName,
+              budget: budgetFormatted,
+              description: descriptionFormatted,
             },
           }),
         ),

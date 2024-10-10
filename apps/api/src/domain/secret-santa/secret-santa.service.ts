@@ -151,6 +151,8 @@ export class SecretSantaService {
     await this.mailer.sendDrawnEmails({
       eventTitle: event.title,
       eventId: event.id,
+      budget: secretSanta.budget ?? undefined,
+      description: secretSanta.description ?? undefined,
       drawns: secretSantaDto.map(ss => ({
         email: ss.attendee.pending_email ?? ss.attendee.user?.email ?? '',
         secretSantaName: ss.draw?.pending_email ?? `${ss.draw?.user?.firstname} ${ss.draw?.user?.lastname}`,
