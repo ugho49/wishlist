@@ -55,14 +55,19 @@ const columns: GridColDef<RowType>[] = [
   { field: 'email', headerName: 'Email', width: 250 },
   {
     field: 'isPending',
-    headerName: 'Invitation',
+    headerName: 'Status',
     display: 'flex',
-    sortable: false,
+    sortable: true,
     filterable: false,
     flex: 1,
     headerAlign: 'center',
-    align: 'right',
-    renderCell: ({ row }) => <Status color={row.isPending ? 'warning' : 'success'} />,
+    align: 'center',
+    renderCell: ({ row }) => (
+      <Status
+        color={row.isPending ? 'warning' : 'success'}
+        text={row.isPending ? 'Invitation en attente' : 'Inscrit'}
+      />
+    ),
   },
 ]
 

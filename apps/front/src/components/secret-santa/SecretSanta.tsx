@@ -1,14 +1,18 @@
-import type { DetailedEventDto } from '@wishlist/common-types'
-
+import AccountBalanceIcon from '@mui/icons-material/AccountBalance'
+import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt'
+import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import DeleteIcon from '@mui/icons-material/Delete'
+import GroupIcon from '@mui/icons-material/Group'
+import InfoIcon from '@mui/icons-material/Info'
 import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt'
 import PersonOffIcon from '@mui/icons-material/PersonOff'
+import TuneIcon from '@mui/icons-material/Tune'
 import { LoadingButton } from '@mui/lab'
-import { Avatar, Box, Button, IconButton, Stack, Tooltip } from '@mui/material'
+import { Avatar, Button, Chip, IconButton, Stack, Tooltip } from '@mui/material'
 import { DataGrid } from '@mui/x-data-grid'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { SecretSantaDrawService } from '@wishlist/common'
-import { SecretSantaDto, SecretSantaStatus, UpdateSecretSantaInputDto } from '@wishlist/common-types'
+import { DetailedEventDto, SecretSantaDto, SecretSantaStatus, UpdateSecretSantaInputDto } from '@wishlist/common-types'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { useApi } from '../../hooks/useApi'
@@ -23,6 +27,11 @@ type SecretSantaProps = {
   secretSanta: SecretSantaDto
   event: DetailedEventDto
 }
+
+const eurosFormatter = Intl.NumberFormat('fr-FR', {
+  style: 'currency',
+  currency: 'EUR',
+})
 
 export const SecretSanta = ({ secretSanta, event }: SecretSantaProps) => {
   const queryClient = useQueryClient()
@@ -122,184 +131,223 @@ export const SecretSanta = ({ secretSanta, event }: SecretSantaProps) => {
 
   return (
     <Stack>
-      <Stack gap={2} flexDirection="row" mb={4} justifyContent="center">
-        {status === SecretSantaStatus.CREATED && (
-          <>
-            <EditSecretSantaFormDialog
-              title="Modifier le secret santa"
-              open={openEditModal}
-              saveButtonText="Modifier"
-              handleSubmit={input => {
-                setOpenEditModal(false)
-                void updateSecretSanta(input)
-              }}
-              handleClose={() => setOpenEditModal(false)}
-              input={{ budget, description }}
-            />
+      <>
+        <EditSecretSantaFormDialog
+          title="Modifier le secret santa"
+          open={openEditModal}
+          saveButtonText="Modifier"
+          handleSubmit={input => {
+            setOpenEditModal(false)
+            void updateSecretSanta(input)
+          }}
+          handleClose={() => setOpenEditModal(false)}
+          input={{ budget, description }}
+        />
 
-            <AddSecretSantaUsersFormDialog
-              open={openSecretSantaUsersModal}
-              handleSubmit={newSecretSantaUsers => {
-                setSecretSantaUsers(prev => [...prev, ...newSecretSantaUsers])
-                setOpenSecretSantaUsersModal(false)
-              }}
-              handleClose={() => setOpenSecretSantaUsersModal(false)}
-              secretSantaId={secretSanta.id}
-              eventId={eventId}
-              eventAttendees={eventAttendees}
-              secretSantaAttendees={secretSantaUsers.map(u => u.attendee)}
-            />
+        <AddSecretSantaUsersFormDialog
+          open={openSecretSantaUsersModal}
+          handleSubmit={newSecretSantaUsers => {
+            setSecretSantaUsers(prev => [...prev, ...newSecretSantaUsers])
+            setOpenSecretSantaUsersModal(false)
+          }}
+          handleClose={() => setOpenSecretSantaUsersModal(false)}
+          secretSantaId={secretSanta.id}
+          eventId={eventId}
+          eventAttendees={eventAttendees}
+          secretSantaAttendees={secretSantaUsers.map(u => u.attendee)}
+        />
 
-            <ManageUserExclusionsDialog
-              open={currentUserIdModalExclusion !== undefined}
-              eventId={eventId}
-              secretSantaId={secretSanta.id}
-              secretSantaUser={secretSantaUsers.find(u => u.id === currentUserIdModalExclusion)}
-              handleClose={() => setCurrentUserIdModalExclusion(undefined)}
-              otherSecretSantaUser={secretSantaUsers.filter(u => u.id !== currentUserIdModalExclusion)}
+        <ManageUserExclusionsDialog
+          open={currentUserIdModalExclusion !== undefined}
+          eventId={eventId}
+          secretSantaId={secretSanta.id}
+          secretSantaUser={secretSantaUsers.find(u => u.id === currentUserIdModalExclusion)}
+          handleClose={() => setCurrentUserIdModalExclusion(undefined)}
+          otherSecretSantaUser={secretSantaUsers.filter(u => u.id !== currentUserIdModalExclusion)}
+        />
+      </>
+      <Stack flexDirection="row" alignItems="start" justifyContent="space-between" mb={4}>
+        <Stack alignItems="start" gap={1}>
+          <Stack flexDirection="row" alignItems="center" gap={1}>
+            <Chip
+              variant="outlined"
+              size="small"
+              icon={status === SecretSantaStatus.CREATED ? <InfoIcon /> : <CheckCircleIcon />}
+              label={status === SecretSantaStatus.CREATED ? 'Brouillon' : 'Tirage effectué'}
             />
+            <Chip
+              variant="outlined"
+              size="small"
+              icon={<GroupIcon />}
+              label={`${secretSantaUsers.length} participant${secretSantaUsers.length > 1 ? 's' : ''}`}
+            />
+          </Stack>
+          {budget && (
+            <Chip
+              variant="outlined"
+              size="small"
+              icon={<AccountBalanceIcon />}
+              label={`Budget Max: ${eurosFormatter.format(budget)}`}
+            />
+          )}
+        </Stack>
+        <Stack flexDirection="row" alignItems="center" gap={4}>
+          {status === SecretSantaStatus.CREATED && (
+            <>
+              <Stack flexDirection="row" alignItems="center" gap={0.5}>
+                <ConfirmButton
+                  confirmTitle="Confirmer la suppression du secret santa"
+                  confirmText="Êtes-vous sûr de vouloir supprimer le secret santa ? Cette action est irréversible."
+                  variant="contained"
+                  color="error"
+                  size="small"
+                  startIcon={<DeleteIcon />}
+                  loading={loading}
+                  disabled={loading}
+                  onClick={() => deleteSecretSanta()}
+                >
+                  Supprimer
+                </ConfirmButton>
 
+                <LoadingButton
+                  variant="contained"
+                  color="primary"
+                  size="small"
+                  startIcon={<TuneIcon />}
+                  loading={loading}
+                  disabled={loading}
+                  onClick={() => setOpenEditModal(true)}
+                >
+                  Modifier
+                </LoadingButton>
+              </Stack>
+
+              <ConfirmButton
+                confirmTitle="Confirmer le lancement du tirage"
+                confirmText="Êtes-vous sûr de vouloir lancer le tirage ?"
+                variant="contained"
+                color="info"
+                size="small"
+                endIcon={<ArrowRightAltIcon />}
+                loading={loading}
+                disabled={loading}
+                onClick={() => startSecretSanta()}
+              >
+                Lancer le tirage
+              </ConfirmButton>
+            </>
+          )}
+
+          {status === SecretSantaStatus.STARTED && (
             <ConfirmButton
-              confirmTitle="Confirmer le lancement du tirage"
-              confirmText="Êtes-vous sûr de vouloir lancer le tirage ?"
-              variant="contained"
-              color="info"
-              loading={loading}
-              disabled={loading}
-              onClick={() => startSecretSanta()}
-            >
-              Lancer le tirage
-            </ConfirmButton>
-
-            <LoadingButton
-              variant="contained"
-              color="primary"
-              loading={loading}
-              disabled={loading}
-              onClick={() => setOpenEditModal(true)}
-            >
-              Modifier le secret santa
-            </LoadingButton>
-
-            <ConfirmButton
-              confirmTitle="Confirmer la suppression du secret santa"
-              confirmText="Êtes-vous sûr de vouloir supprimer le secret santa ? Cette action est irréversible."
-              variant="contained"
+              confirmTitle="Confirmer l'annulation du tirage"
+              confirmText="Êtes-vous sûr de vouloir annuler le tirage ? Cette action est irréversible."
+              variant="text"
               color="error"
               loading={loading}
               disabled={loading}
-              onClick={() => deleteSecretSanta()}
+              onClick={() => cancelSecretSanta()}
             >
-              Supprimer le secret santa
+              Annuler le tirage
             </ConfirmButton>
-          </>
-        )}
-
-        {status === SecretSantaStatus.STARTED && (
-          <ConfirmButton
-            confirmTitle="Confirmer l'annulation du tirage"
-            confirmText="Êtes-vous sûr de vouloir annuler le tirage ? Cette action est irréversible."
-            variant="text"
-            color="error"
-            loading={loading}
-            disabled={loading}
-            onClick={() => cancelSecretSanta()}
-          >
-            Annuler le tirage
-          </ConfirmButton>
-        )}
+          )}
+        </Stack>
       </Stack>
 
       <Stack>
-        <Box>
-          <b>Status:</b>
-          <span>{status}</span>
-        </Box>
-        <Box>
-          <b>Description:</b>
-          <span>{description}</span>
-        </Box>
-        <Box>
-          <b>Budget Max:</b>
-          <span>{budget ?? '-'}€</span>
-        </Box>
-        <Box>
-          <Button
-            variant="contained"
-            disabled={status === SecretSantaStatus.STARTED}
-            onClick={() => setOpenSecretSantaUsersModal(true)}
-            startIcon={<PersonAddAltIcon />}
-          >
-            Ajouter un participant
-          </Button>
-          <DataGrid
-            localeText={{
-              noRowsLabel: 'Aucun participant',
-            }}
-            rows={secretSantaUsers.map(u => ({
-              id: u.id,
-              firstname: u.attendee.user?.firstname,
-              lastname: u.attendee.user?.lastname,
-              email: u.attendee.user?.email ?? u.attendee.pending_email,
-              pictureUrl: u.attendee.user?.picture_url,
-              exclusions: u.exclusions.length,
-            }))}
-            columns={[
-              {
-                field: 'pictureUrl',
-                headerName: '',
-                sortable: false,
-                filterable: false,
-                width: 60,
-                display: 'flex',
-                align: 'center',
-                renderCell: ({ row }) => <Avatar src={row.pictureUrl} sx={{ width: '30px', height: '30px' }} />,
-              },
-              { field: 'firstname', headerName: 'Prénom', width: 170, valueGetter: value => value ?? '-' },
-              { field: 'lastname', headerName: 'Nom', width: 170, valueGetter: value => value ?? '-' },
-              { field: 'email', headerName: 'Email', width: 250 },
-              { field: 'exclusions', headerName: 'Exclusions', headerAlign: 'center', align: 'center', width: 100 },
-              {
-                field: 'id',
-                sortable: false,
-                filterable: false,
-                headerName: '',
-                display: 'flex',
-                align: 'center',
-                flex: 1,
-                renderCell: ({ row }) => (
-                  <>
-                    {status === SecretSantaStatus.CREATED && (
-                      <Stack flexDirection="row" gap={1}>
-                        {secretSantaUsers.length > 1 && (
-                          <IconButton color="info" size="small" onClick={() => setCurrentUserIdModalExclusion(row.id)}>
-                            <Tooltip title="Gérer les exclusions">
-                              <PersonOffIcon />
-                            </Tooltip>
-                          </IconButton>
-                        )}
-                        <ConfirmIconButton
-                          confirmTitle="Supprimer le participant"
-                          confirmText={`Êtes-vous sûr de vouloir supprimer ce participant ?`}
-                          onClick={() => removeSecretSantaUser(row.id)}
-                          disabled={loading}
-                          size="small"
-                          color="error"
-                        >
-                          <DeleteIcon />
-                        </ConfirmIconButton>
-                      </Stack>
-                    )}
-                  </>
-                ),
-              },
-            ]}
-            hideFooter
-            autoHeight
-            disableColumnMenu
-          />
-        </Box>
+        <Button
+          fullWidth
+          variant="text"
+          disabled={status === SecretSantaStatus.STARTED}
+          onClick={() => setOpenSecretSantaUsersModal(true)}
+          startIcon={<PersonAddAltIcon />}
+        >
+          Ajouter un participant
+        </Button>
+
+        <DataGrid
+          localeText={{
+            noRowsLabel: 'Aucun participant',
+          }}
+          rows={secretSantaUsers.map(u => ({
+            id: u.id,
+            firstname: u.attendee.user?.firstname,
+            lastname: u.attendee.user?.lastname,
+            email: u.attendee.user?.email ?? u.attendee.pending_email,
+            pictureUrl: u.attendee.user?.picture_url,
+            exclusions: u.exclusions.length,
+          }))}
+          columns={[
+            {
+              field: 'pictureUrl',
+              headerName: '',
+              sortable: false,
+              filterable: false,
+              width: 60,
+              display: 'flex',
+              align: 'center',
+              renderCell: ({ row }) => <Avatar src={row.pictureUrl} sx={{ width: '30px', height: '30px' }} />,
+            },
+            { field: 'firstname', headerName: 'Prénom', width: 170, valueGetter: value => value ?? '-' },
+            { field: 'lastname', headerName: 'Nom', width: 170, valueGetter: value => value ?? '-' },
+            { field: 'email', headerName: 'Email', width: 250 },
+            { field: 'exclusions', headerName: 'Exclusions', headerAlign: 'center', align: 'center', width: 100 },
+            {
+              field: 'id',
+              sortable: false,
+              filterable: false,
+              headerName: 'Actions',
+              display: 'flex',
+              headerAlign: 'center',
+              align: 'center',
+              flex: 1,
+              renderCell: ({ row }) => (
+                <>
+                  {status === SecretSantaStatus.CREATED && (
+                    <Stack flexDirection="row" gap={1}>
+                      {secretSantaUsers.length > 1 && (
+                        <IconButton color="info" size="small" onClick={() => setCurrentUserIdModalExclusion(row.id)}>
+                          <Tooltip title="Gérer les exclusions">
+                            <PersonOffIcon />
+                          </Tooltip>
+                        </IconButton>
+                      )}
+                      <ConfirmIconButton
+                        confirmTitle="Supprimer le participant"
+                        confirmText={`Êtes-vous sûr de vouloir supprimer ce participant ?`}
+                        onClick={() => removeSecretSantaUser(row.id)}
+                        disabled={loading}
+                        size="small"
+                        color="error"
+                      >
+                        <DeleteIcon />
+                      </ConfirmIconButton>
+                    </Stack>
+                  )}
+                </>
+              ),
+            },
+          ]}
+          hideFooter
+          autoHeight
+          disableColumnMenu
+        />
       </Stack>
+
+      {/*<Stack>*/}
+      {/*  <Box>*/}
+      {/*    <b>Status:</b>*/}
+      {/*    <span>{status}</span>*/}
+      {/*  </Box>*/}
+      {/*  <Box>*/}
+      {/*    <b>Description:</b>*/}
+      {/*    <span>{description}</span>*/}
+      {/*  </Box>*/}
+      {/*  <Box>*/}
+      {/*    <b>Budget Max:</b>*/}
+      {/*    <span>{budget ?? '-'}€</span>*/}
+      {/*  </Box>*/}
+      {/*</Stack>*/}
     </Stack>
   )
 }

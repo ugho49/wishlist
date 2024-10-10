@@ -3,7 +3,7 @@ import { LoadingButtonTypeMap } from '@mui/lab/LoadingButton/LoadingButton'
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material'
 import { Theme } from '@mui/material/styles'
 import { SxProps } from '@mui/system'
-import React, { PropsWithChildren, useCallback, useState } from 'react'
+import React, { PropsWithChildren, useCallback, useMemo, useState } from 'react'
 
 export type ConfirmButtonProps = {
   confirmTitle: string | React.ReactNode
@@ -14,6 +14,7 @@ export type ConfirmButtonProps = {
   disabled?: boolean
   loading?: boolean
   startIcon?: LoadingButtonTypeMap['props']['startIcon']
+  endIcon?: LoadingButtonTypeMap['props']['endIcon']
   color?: LoadingButtonTypeMap['props']['color']
   size?: LoadingButtonTypeMap['props']['size']
   variant?: LoadingButtonTypeMap['props']['variant']
@@ -33,11 +34,18 @@ export const ConfirmButton = ({
   color,
   variant,
   startIcon,
+  endIcon,
   sx,
 }: PropsWithChildren<ConfirmButtonProps>) => {
   const [openDialog, setOpenDialog] = useState(false)
 
   const closeDialog = useCallback(() => setOpenDialog(false), [])
+
+  const loadingPosition = useMemo(() => {
+    if (startIcon) return 'start'
+    if (endIcon) return 'end'
+    return undefined
+  }, [startIcon, endIcon])
 
   return (
     <>
@@ -47,9 +55,10 @@ export const ConfirmButton = ({
         color={color}
         size={size}
         loading={loading}
-        loadingPosition={startIcon ? 'start' : undefined}
+        loadingPosition={loadingPosition}
         disabled={disabled}
         startIcon={startIcon}
+        endIcon={endIcon}
         onClick={() => setOpenDialog(true)}
       >
         {children}
