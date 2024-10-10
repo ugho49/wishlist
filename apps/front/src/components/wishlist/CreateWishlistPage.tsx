@@ -11,11 +11,13 @@ import {
   Box,
   Button,
   Container,
+  Divider,
   FormControlLabel,
   IconButton,
   List,
   ListItem,
   ListItemAvatar,
+  ListItemButton,
   ListItemText,
   Stack,
   Step,
@@ -213,7 +215,7 @@ export const CreateWishlistPage = () => {
           )}
 
           {step === 2 && (
-            <Stack gap={3}>
+            <Stack>
               <Box>
                 <InputLabel required>Gérer les évènements</InputLabel>
 
@@ -225,37 +227,48 @@ export const CreateWishlistPage = () => {
                   onChange={val => setEvents(prevState => [...prevState, val])}
                 />
               </Box>
-              <List sx={{ pt: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {events.map(event => (
-                  <Card variant="outlined" sx={{ padding: 0 }} key={event.id}>
-                    <ListItem
-                      secondaryAction={
-                        <IconButton
-                          edge="end"
-                          aria-label="delete"
-                          onClick={() => setEvents(prev => prev.filter(value => value.id !== event.id))}
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      }
-                    >
-                      <ListItemAvatar>
-                        <Avatar sx={{ bgcolor: theme.palette.primary.light, color: theme.palette.background.paper }}>
-                          <CalendarMonthIcon />
-                        </Avatar>
-                      </ListItemAvatar>
-                      <ListItemText
-                        primary={<b>{event.title}</b>}
-                        secondary={DateTime.fromISO(event.event_date).toLocaleString(DateTime.DATE_MED)}
-                      />
-                    </ListItem>
-                  </Card>
-                ))}
-              </List>
+              {events.length > 0 && (
+                <>
+                  <Divider sx={{ marginTop: '20px', marginBottom: '10px' }} />
+
+                  <List>
+                    {events.map(event => (
+                      <ListItem
+                        key={event.id}
+                        disablePadding
+                        className="animated zoomIn fast"
+                        secondaryAction={
+                          <IconButton
+                            edge="end"
+                            aria-label="delete"
+                            onClick={() => setEvents(prev => prev.filter(value => value.id !== event.id))}
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        }
+                      >
+                        <ListItemButton>
+                          <ListItemAvatar>
+                            <Avatar
+                              sx={{ bgcolor: theme.palette.primary.light, color: theme.palette.background.paper }}
+                            >
+                              <CalendarMonthIcon />
+                            </Avatar>
+                          </ListItemAvatar>
+                          <ListItemText
+                            primary={<b>{event.title}</b>}
+                            secondary={DateTime.fromISO(event.event_date).toLocaleString(DateTime.DATE_MED)}
+                          />
+                        </ListItemButton>
+                      </ListItem>
+                    ))}
+                  </List>
+                </>
+              )}
             </Stack>
           )}
 
-          <Stack direction="row" justifyContent="space-between" alignItems="center">
+          <Stack direction="row" justifyContent="space-between" alignItems="center" marginTop={3}>
             <Box>
               {step > 1 && (
                 <Button

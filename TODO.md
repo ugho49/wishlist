@@ -25,6 +25,10 @@
 - [ ] Frontend: change description card design
 - [x] Frontend: Dans l'onglet "Modifier l'évènement", ajouter un tab qui redirige vers le secret santa associé à l'évènement
 
+## Attendee
+
+- [ ] Backend: in "AttendeeService" fix the TODO
+
 ## Wishlist
 
 - [ ] Frontend: change description card design
