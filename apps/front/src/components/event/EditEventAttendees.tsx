@@ -1,5 +1,5 @@
 import DeleteIcon from '@mui/icons-material/Delete'
-import { Box, Divider, List, ListItem, Stack } from '@mui/material'
+import { Box, Divider, List, ListItem, ListItemButton, Stack } from '@mui/material'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { AddEventAttendeeInputDto, AttendeeDto, AttendeeRole, DetailedEventDto } from '@wishlist/common-types'
 import React, { useMemo } from 'react'
@@ -88,31 +88,34 @@ export const EditEventAttendees = ({ eventId, attendees }: EditEventAttendeesPro
 
         <Divider sx={{ marginBlock: '20px' }} />
 
-        <List sx={{ pt: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <List>
           {attendees.map(attendee => (
-            <Card variant="outlined" sx={{ padding: 0 }} key={attendee.id}>
-              <ListItem
-                secondaryAction={
-                  <ConfirmIconButton
-                    disabled={attendee?.user?.id === currentUserId}
-                    confirmTitle="Enlever ce participant ?"
-                    confirmText={
-                      <>
-                        Êtes-vous sur de retirer le participant{' '}
-                        <b>
-                          {attendee.pending_email
-                            ? attendee.pending_email
-                            : `${attendee.user?.firstname} ${attendee.user?.lastname}`}
-                        </b>{' '}
-                        de l'évènement ?
-                      </>
-                    }
-                    onClick={() => deleteAttendee(attendee.id)}
-                  >
-                    <DeleteIcon />
-                  </ConfirmIconButton>
-                }
-              >
+            <ListItem
+              key={attendee.id}
+              className="animated zoomIn fast"
+              disablePadding
+              secondaryAction={
+                <ConfirmIconButton
+                  disabled={attendee?.user?.id === currentUserId}
+                  confirmTitle="Enlever ce participant ?"
+                  confirmText={
+                    <>
+                      Êtes-vous sur de retirer le participant{' '}
+                      <b>
+                        {attendee.pending_email
+                          ? attendee.pending_email
+                          : `${attendee.user?.firstname} ${attendee.user?.lastname}`}
+                      </b>{' '}
+                      de l'évènement ?
+                    </>
+                  }
+                  onClick={() => deleteAttendee(attendee.id)}
+                >
+                  <DeleteIcon />
+                </ConfirmIconButton>
+              }
+            >
+              <ListItemButton>
                 <ListItemAttendee
                   role={attendee.role as AttendeeRole}
                   userName={`${attendee.user?.firstname} ${attendee.user?.lastname}`}
@@ -120,8 +123,8 @@ export const EditEventAttendees = ({ eventId, attendees }: EditEventAttendeesPro
                   email={attendee.pending_email ?? attendee.user?.email ?? ''}
                   pictureUrl={attendee.user?.picture_url}
                 />
-              </ListItem>
-            </Card>
+              </ListItemButton>
+            </ListItem>
           ))}
         </List>
       </Stack>

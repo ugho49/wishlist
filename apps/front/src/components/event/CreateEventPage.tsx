@@ -7,9 +7,11 @@ import {
   Box,
   Button,
   Container,
+  Divider,
   IconButton,
   List,
   ListItem,
+  ListItemButton,
   Stack,
   Step,
   StepLabel,
@@ -147,7 +149,7 @@ export const CreateEventPage = () => {
           )}
 
           {step === 2 && (
-            <Stack gap={3}>
+            <Stack>
               <Box>
                 <InputLabel>Gérer les participants</InputLabel>
 
@@ -170,39 +172,45 @@ export const CreateEventPage = () => {
                   excludedEmails={[...attendeeEmails, currentUserEmail || '']}
                 />
               </Box>
-              <List sx={{ pt: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {attendees.map(attendee => (
-                  <Card
-                    variant="outlined"
-                    sx={{ padding: 0 }}
-                    key={typeof attendee.user === 'string' ? attendee.user : attendee.user.id}
-                  >
-                    <ListItem
-                      secondaryAction={
-                        <IconButton
-                          edge="end"
-                          aria-label="delete"
-                          onClick={() => setAttendees(prev => prev.filter(value => value !== attendee))}
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      }
-                    >
-                      <ListItemAttendee
-                        role={attendee.role}
-                        userName={
-                          typeof attendee.user !== 'string'
-                            ? `${attendee.user?.firstname} ${attendee.user?.lastname}`
-                            : ''
+
+              {attendees.length > 0 && (
+                <>
+                  <Divider sx={{ marginTop: '20px', marginBottom: '10px' }} />
+
+                  <List sx={{ maxHeight: '250px', overflow: 'auto' }}>
+                    {attendees.map(attendee => (
+                      <ListItem
+                        className="animated zoomIn fast"
+                        key={typeof attendee.user === 'string' ? attendee.user : attendee.user.id}
+                        disablePadding
+                        secondaryAction={
+                          <IconButton
+                            edge="end"
+                            aria-label="delete"
+                            onClick={() => setAttendees(prev => prev.filter(value => value !== attendee))}
+                          >
+                            <DeleteIcon />
+                          </IconButton>
                         }
-                        isPending={typeof attendee.user === 'string'}
-                        email={typeof attendee.user === 'string' ? attendee.user : attendee.user.email}
-                        pictureUrl={typeof attendee.user !== 'string' ? attendee.user.picture_url : undefined}
-                      />
-                    </ListItem>
-                  </Card>
-                ))}
-              </List>
+                      >
+                        <ListItemButton>
+                          <ListItemAttendee
+                            role={attendee.role}
+                            userName={
+                              typeof attendee.user !== 'string'
+                                ? `${attendee.user?.firstname} ${attendee.user?.lastname}`
+                                : ''
+                            }
+                            isPending={typeof attendee.user === 'string'}
+                            email={typeof attendee.user === 'string' ? attendee.user : attendee.user.email}
+                            pictureUrl={typeof attendee.user !== 'string' ? attendee.user.picture_url : undefined}
+                          />
+                        </ListItemButton>
+                      </ListItem>
+                    ))}
+                  </List>
+                </>
+              )}
             </Stack>
           )}
 

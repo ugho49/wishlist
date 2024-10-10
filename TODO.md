@@ -23,7 +23,7 @@
 
 - [ ] Frontend: allow to have multiple maintainers in order to manager the lists
 - [ ] Frontend: change description card design
-- [ ] Frontend: Dans l'onglet "Modifier l'évènement", ajouter un tab qui redirige vers le secret santa associé à l'évènement
+- [x] Frontend: Dans l'onglet "Modifier l'évènement", ajouter un tab qui redirige vers le secret santa associé à l'évènement
 
 ## Wishlist
 
