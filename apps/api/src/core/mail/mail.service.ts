@@ -11,6 +11,9 @@ import { MailConfig } from './mail.config'
 import { MAIL_CONFIG_TOKEN } from './mail.module-definitions'
 import { helpers } from './mail.utils'
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+import mjml2html = require('mjml')
+
 @Injectable()
 export class MailService {
   private transporter: Transporter<SMTPTransport.SentMessageInfo>
@@ -31,8 +34,14 @@ export class MailService {
     })
   }
 
-  async sendMail(param: { to: string | string[]; subject: string; template: string; context?: Record<string, any> }) {
-    const templatePath = join(this.config.templateDir, `${param.template}.hbs`)
+  async sendMail(param: {
+    to: string | string[]
+    subject: string
+    template: string
+    useMjml?: boolean
+    context?: Record<string, any>
+  }) {
+    const templatePath = join(this.config.templateDir, `${param.template}.${param.useMjml ? 'mjml' : 'hbs'}`)
 
     if (!this.templateCache.has(templatePath)) {
       const fileContent = await readFile(templatePath, 'utf8')
@@ -41,7 +50,8 @@ export class MailService {
 
     const templateSource = this.templateCache.get(templatePath)
     const template = Handlebars.compile(templateSource, { strict: true })
-    const html = template(param.context, { helpers })
+    const computedTemplate = template(param.context, { helpers })
+    const html = param.useMjml ? mjml2html(computedTemplate).html : computedTemplate
 
     await this.transporter.sendMail({
       from: this.config.from,

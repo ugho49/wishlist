@@ -27,6 +27,7 @@ export class SecretSantaMailer {
             to: email,
             subject: '[Wishlist] Votre tirage au sort secret santa',
             template: 'secret-santa-draw',
+            useMjml: true,
             context: {
               eventTitle,
               eventUrl,
@@ -46,6 +47,7 @@ export class SecretSantaMailer {
       to: attendeeEmails,
       subject: "[Wishlist] Le secret santa viens d'être annulé",
       template: 'secret-santa-cancel',
+      useMjml: true,
       context: {
         eventTitle,
         eventUrl,

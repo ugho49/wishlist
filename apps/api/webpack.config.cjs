@@ -17,15 +17,15 @@ module.exports = {
       transformers: [{ name: '@nestjs/swagger/plugin' }],
       assets: [
         {
-          "input": "apps/api/templates",
-          "glob": "**/*.hbs",
-          "output": "templates"
+          input: 'apps/api/templates',
+          glob: '**/*.(hbs|mjml)',
+          output: 'templates',
         },
         {
-          "input": "apps/api/firebase",
-          "glob": "**/*",
-          "output": "firebase"
-        }
+          input: 'apps/api/firebase',
+          glob: '**/*',
+          output: 'firebase',
+        },
       ],
     }),
   ],
