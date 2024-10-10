@@ -1,3 +1,4 @@
+import ForestIcon from '@mui/icons-material/Forest'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import PeopleIcon from '@mui/icons-material/People'
 import { Box, Tab, Tabs } from '@mui/material'
@@ -10,11 +11,13 @@ import { Loader } from '../common/Loader'
 import { Title } from '../common/Title'
 import { EditEventAttendees } from './EditEventAttendees'
 import { EditEventInformations } from './EditEventInformations'
+import { EditSecretSanta } from './EditSecretSanta'
 import { EventNotFound } from './EventNotFound'
 
 enum TabValues {
   informations = 'informations',
   attendees = 'attendees',
+  secretSanta = 'secret_santa',
 }
 
 const tabs = [
@@ -27,6 +30,11 @@ const tabs = [
     value: TabValues.attendees,
     label: 'Participants',
     icon: <PeopleIcon />,
+  },
+  {
+    value: TabValues.secretSanta,
+    label: 'Secret Santa',
+    icon: <ForestIcon />,
   },
 ]
 
@@ -65,6 +73,7 @@ export const EditEventPage = () => {
               {queryParams.tab === TabValues.attendees && (
                 <EditEventAttendees eventId={event.id} attendees={event.attendees} />
               )}
+              {queryParams.tab === TabValues.secretSanta && <EditSecretSanta eventId={event.id} />}
             </>
           </>
         )}

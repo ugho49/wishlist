@@ -59,7 +59,7 @@ const columns: GridColDef<RowType>[] = [
     display: 'flex',
     sortable: true,
     filterable: false,
-    flex: 1,
+    width: 200,
     headerAlign: 'center',
     align: 'center',
     renderCell: ({ row }) => (
