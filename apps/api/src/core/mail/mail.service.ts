@@ -45,13 +45,13 @@ export class MailService {
 
     if (!this.templateCache.has(templatePath)) {
       const fileContent = await readFile(templatePath, 'utf8')
-      this.templateCache.set(templatePath, fileContent)
+      const templatedContent = param.useMjml ? mjml2html(fileContent).html : fileContent
+      this.templateCache.set(templatePath, templatedContent)
     }
 
     const templateSource = this.templateCache.get(templatePath)
     const template = Handlebars.compile(templateSource, { strict: true })
-    const computedTemplate = template(param.context, { helpers })
-    const html = param.useMjml ? mjml2html(computedTemplate).html : computedTemplate
+    const html = template(param.context, { helpers })
 
     await this.transporter.sendMail({
       from: this.config.from,

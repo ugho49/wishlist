@@ -11,6 +11,7 @@ export class PasswordVerificationMailer {
       to: param.email,
       subject: '[Wishlist] Reinitialiser le mot de passe',
       template: 'reset-password',
+      useMjml: true,
       context: {
         url: param.url,
       },

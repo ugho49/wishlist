@@ -6,9 +6,9 @@
         <mj-image align="center" src="https://wishlistapp.fr/logo_text.png" width="160px"/>
       </mj-column>
     </mj-section>
-    <mj-section background-color="#ffffff" background-repeat="repeat" padding="0 0 20px 0" text-align="center">
+    <mj-section background-color="#ffffff" background-repeat="repeat" padding="30px 20px" text-align="center">
       <mj-column>
-        <mj-text align="left" color="#224158" font-family="Arial, sans-serif" font-size="24px" line-height="28px" padding="25px" padding-bottom="40px" text-transform="uppercase">Bienvenue sur wishlist</mj-text>
+        <mj-text align="left" color="#224158" font-family="Arial, sans-serif" font-size="24px" line-height="28px" padding-bottom="40px" text-transform="uppercase">Bienvenue sur wishlist</mj-text>
         <mj-text align="left" color="#55575d" font-family="Arial, sans-serif" font-size="16px" line-height="24px">Tu viens de t'inscrire sur wishlist, le site qui te permet de créer des évènements et de partager des listes de cadeaux avec tes amis.</mj-text>
         <mj-text align="left" color="#55575d" font-family="Arial, sans-serif" font-size="16px" line-height="24px">Amuse toi bien et n'hésite pas à faire des retours sur cette expérience.</mj-text>
         <mj-button href="{{mainUrl}}" background-color="#224158" font-size="16px" padding-top="25px">Accèder à wishlist</mj-button>
