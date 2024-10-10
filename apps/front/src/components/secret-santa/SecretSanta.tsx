@@ -16,6 +16,7 @@ import { DataGrid } from '@mui/x-data-grid'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { SecretSantaDrawService } from '@wishlist/common'
 import { DetailedEventDto, SecretSantaDto, SecretSantaStatus, UpdateSecretSantaInputDto } from '@wishlist/common-types'
+import { DateTime } from 'luxon'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { useApi } from '../../hooks/useApi'
@@ -52,6 +53,7 @@ export const SecretSanta = ({ secretSanta, event }: SecretSantaProps) => {
   const [secretSantaUsers, setSecretSantaUsers] = useState(secretSanta.users || [])
   const eventAttendees = useMemo(() => event.attendees || [], [event])
   const eventId = event.id
+  const eventInPast = DateTime.fromISO(event.event_date) < DateTime.now()
 
   useEffect(() => {
     setStatus(secretSanta.status)
@@ -178,6 +180,15 @@ export const SecretSanta = ({ secretSanta, event }: SecretSantaProps) => {
         </Stack>
       )}
 
+      {eventInPast && (
+        <Stack mb={4}>
+          <Alert severity="warning" className="animated zoomIn faster">
+            <AlertTitle>L'événement est passé</AlertTitle>
+            <Typography variant="body2">Vous ne pouvez plus lancer le tirage secret santa.</Typography>
+          </Alert>
+        </Stack>
+      )}
+
       <Stack flexDirection="row" alignItems="start" justifyContent="space-between" mb={4} gap={1}>
         <Stack alignItems="start" gap={1}>
           <Stack flexDirection="row" alignItems="center" gap={1} flexWrap="wrap">
@@ -242,7 +253,7 @@ export const SecretSanta = ({ secretSanta, event }: SecretSantaProps) => {
                 size="small"
                 endIcon={<ArrowRightAltIcon />}
                 loading={loading}
-                disabled={loading}
+                disabled={loading || eventInPast}
                 onClick={() => startSecretSanta()}
               >
                 Lancer le tirage

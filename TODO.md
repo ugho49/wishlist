@@ -2,7 +2,9 @@
 
 ## General
 
-- [ ] Backend: refacto mailer templating. Try react-mail or MJML
+- [x] Backend: refacto mailer templating. Try react-mail or MJML
+- [ ] Try Nx Cloud
+- [ ] Add versioning github with tags using `nx release`
 
 ## Secret Santa
 
