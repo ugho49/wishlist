@@ -7,7 +7,7 @@ export const useFetchUserInfo = () => {
 
   const { data, isLoading } = useQuery({
     queryKey: ['user'],
-    queryFn: () => api.user.getInfo(),
+    queryFn: ({ signal }) => api.user.getInfo({ signal }),
   })
 
   return { user: data, loading: isLoading }

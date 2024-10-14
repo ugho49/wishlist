@@ -19,7 +19,7 @@ export const UserTabNotifications = () => {
 
   const { data: value, isLoading: loadingNotificationSettings } = useQuery({
     queryKey: ['user.getEmailSettings'],
-    queryFn: () => api.user.getEmailSettings(),
+    queryFn: ({ signal }) => api.user.getEmailSettings({ signal }),
   })
 
   const { mutateAsync: updateEmailSettings, isPending: loading } = useMutation({

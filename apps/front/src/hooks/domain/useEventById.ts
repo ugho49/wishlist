@@ -15,9 +15,9 @@ export const useEventById = (eventId?: string) => {
 
   const { data, isLoading } = useQuery({
     queryKey: ['event', { id: eventId ?? 'undefined' }],
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       if (!eventId) throw new Error('eventId is required')
-      const event = await api.event.getById(eventId)
+      const event = await api.event.getById(eventId, { signal })
       const canEdit = canEditEvent(event.attendees, currentUserId || '')
       setCurrentUserCanEdit(canEdit)
       return event

@@ -46,7 +46,7 @@ export const AdminEditUserPage = () => {
   const [updatePasswordModalOpen, setUpdatePasswordModalOpen] = useState(false)
   const { data: value, isLoading: loadingUser } = useQuery({
     queryKey: ['admin', 'user', { id: userId }],
-    queryFn: () => api.user.getById(userId),
+    queryFn: ({ signal }) => api.user.getById(userId, { signal }),
   })
 
   const isCurrentUser = currentUser?.id === userId
@@ -66,6 +66,7 @@ export const AdminEditUserPage = () => {
     setLoading(true)
     setEnabled(false)
     try {
+      // TODO: useMutation
       await api.user.update(userId, { is_enabled: false })
       addToast({ message: 'Utilisateur désactivé', variant: 'success' })
     } catch {
@@ -79,6 +80,7 @@ export const AdminEditUserPage = () => {
     setLoading(true)
     setEnabled(true)
     try {
+      // TODO: useMutation
       await api.user.update(userId, { is_enabled: true })
       addToast({ message: 'Utilisateur activé', variant: 'success' })
     } catch {
@@ -92,6 +94,7 @@ export const AdminEditUserPage = () => {
     e.preventDefault()
     setLoading(true)
     try {
+      // TODO: useMutation
       await api.user.update(userId, {
         firstname,
         lastname,
@@ -133,9 +136,15 @@ export const AdminEditUserPage = () => {
                     pictureUrl={pictureUrl}
                     socials={[]}
                     onPictureUpdated={url => setPictureUrl(url || '')}
-                    uploadPictureHandler={file => api.user.uploadPicture(userId, file)}
+                    uploadPictureHandler={file =>
+                      // TODO: useMutation
+                      api.user.uploadPicture(userId, file)
+                    }
                     updatePictureFromSocialHandler={() => Promise.resolve()}
-                    deletePictureHandler={() => api.user.deletePicture(userId)}
+                    deletePictureHandler={() =>
+                      // TODO: useMutation
+                      api.user.deletePicture(userId)
+                    }
                   />
                 </ListItemIcon>
                 <ListItemText primary={`${firstname} ${lastname}`} secondary={email} />

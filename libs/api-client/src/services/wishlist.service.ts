@@ -12,15 +12,17 @@ import type {
 
 import { AxiosInstance } from 'axios'
 
+import { CommonRequestOptions } from './common'
+
 export class WishlistService {
   constructor(private readonly client: AxiosInstance) {}
 
-  getAll(params: GetPaginationQueryDto): Promise<PagedResponse<WishlistWithEventsDto>> {
-    return this.client.get('/wishlist', { params }).then(res => res.data)
+  getAll(params: GetPaginationQueryDto, options?: CommonRequestOptions): Promise<PagedResponse<WishlistWithEventsDto>> {
+    return this.client.get('/wishlist', { params, signal: options?.signal }).then(res => res.data)
   }
 
-  getById(wishlistId: string): Promise<DetailedWishlistDto> {
-    return this.client.get(`/wishlist/${wishlistId}`).then(res => res.data)
+  getById(wishlistId: string, options?: CommonRequestOptions): Promise<DetailedWishlistDto> {
+    return this.client.get(`/wishlist/${wishlistId}`, { signal: options?.signal }).then(res => res.data)
   }
 
   create(data: CreateWishlistInputDto, file?: File): Promise<MiniWishlistDto> {

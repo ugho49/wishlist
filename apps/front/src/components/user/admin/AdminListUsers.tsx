@@ -72,7 +72,7 @@ export const AdminListUsers = () => {
 
   const { data: value, isLoading: loading } = useQuery({
     queryKey: ['admin', 'users', { page: currentPage, search }],
-    queryFn: () => api.user.getAll({ p: currentPage, q: search }),
+    queryFn: ({ signal }) => api.user.getAll({ p: currentPage, q: search }, { signal }),
   })
 
   useEffect(() => {
