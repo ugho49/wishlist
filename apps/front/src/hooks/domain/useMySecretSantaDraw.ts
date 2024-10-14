@@ -7,7 +7,7 @@ export const useMySecretSantaDraw = (eventId: string) => {
 
   const { data, isLoading } = useQuery({
     queryKey: ['secret-santa.draw', { eventId }],
-    queryFn: () => api.secretSanta.getMyDraw(eventId),
+    queryFn: ({ signal }) => api.secretSanta.getMyDraw(eventId, { signal }),
   })
 
   return { mySecretSantaDraw: data, loading: isLoading }

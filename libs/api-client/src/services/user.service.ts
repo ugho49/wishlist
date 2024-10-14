@@ -14,11 +14,13 @@ import type {
 
 import { AxiosInstance } from 'axios'
 
+import { CommonRequestOptions } from './common'
+
 export class UserService {
   constructor(private readonly client: AxiosInstance) {}
 
-  getInfo(): Promise<UserDto> {
-    return this.client.get(`/user`).then(res => res.data)
+  getInfo(options?: CommonRequestOptions): Promise<UserDto> {
+    return this.client.get(`/user`, { signal: options?.signal }).then(res => res.data)
   }
 
   register(data: RegisterUserInputDto): Promise<MiniUserDto> {
@@ -49,8 +51,8 @@ export class UserService {
     await this.client.post(`/user/forgot-password/reset`, data).then(res => res.data)
   }
 
-  getEmailSettings(): Promise<UserEmailSettingsDto> {
-    return this.client.get('/user/email-settings').then(res => res.data)
+  getEmailSettings(options?: CommonRequestOptions): Promise<UserEmailSettingsDto> {
+    return this.client.get('/user/email-settings', { signal: options?.signal }).then(res => res.data)
   }
 
   updateUserEmailSettings(data: UpdateUserEmailSettingsInputDto): Promise<UserEmailSettingsDto> {
@@ -62,7 +64,9 @@ export class UserService {
     formData.append('file', file)
 
     return this.client
-      .post('/user/upload-picture', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+      .post('/user/upload-picture', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
       .then(res => res.data)
   }
 

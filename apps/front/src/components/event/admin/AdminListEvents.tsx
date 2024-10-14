@@ -58,7 +58,7 @@ export const AdminListEvents = () => {
 
   const { data: value, isLoading: loading } = useQuery({
     queryKey: ['admin', 'events', { page: currentPage }],
-    queryFn: () => api.event.getAll({ p: currentPage }),
+    queryFn: ({ signal }) => api.event.getAll({ p: currentPage }, { signal }),
   })
 
   useEffect(() => {

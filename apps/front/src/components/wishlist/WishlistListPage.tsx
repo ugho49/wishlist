@@ -23,7 +23,7 @@ export const WishlistListPage = () => {
   const currentPage = useMemo(() => parseInt(queryParams.page || '1', 10), [queryParams])
   const { data: value, isLoading: loading } = useQuery({
     queryKey: ['wishlists', { page: currentPage }],
-    queryFn: () => api.wishlist.getAll({ p: currentPage }),
+    queryFn: ({ signal }) => api.wishlist.getAll({ p: currentPage }, { signal }),
   })
 
   const setCurrentPage = useCallback(

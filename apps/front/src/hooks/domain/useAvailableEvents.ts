@@ -7,7 +7,7 @@ export const useAvailableEvents = () => {
 
   const { data, isLoading } = useQuery({
     queryKey: ['events', { limit: 100, only_future: true }],
-    queryFn: () => api.event.getAll({ limit: 100, only_future: true }),
+    queryFn: ({ signal }) => api.event.getAll({ limit: 100, only_future: true }, { signal }),
   })
 
   return { events: data?.resources || [], loading: isLoading }

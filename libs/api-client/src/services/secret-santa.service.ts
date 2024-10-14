@@ -4,21 +4,24 @@ import {
   CreateSecretSantaUsersInputDto,
   CreateSecretSantaUsersOutputDto,
   SecretSantaDto,
-  SecretSantaUserDto,
   UpdateSecretSantaInputDto,
   UpdateSecretSantaUserInputDto,
 } from '@wishlist/common-types'
 import { AxiosInstance } from 'axios'
 
+import { CommonRequestOptions } from './common'
+
 export class SecretSantaService {
   constructor(private readonly client: AxiosInstance) {}
 
-  getMyDraw(eventId: string): Promise<AttendeeDto | null> {
-    return this.client.get(`/secret-santa/user/draw`, { params: { eventId } }).then(res => res.data)
+  getMyDraw(eventId: string, options?: CommonRequestOptions): Promise<AttendeeDto | null> {
+    return this.client
+      .get(`/secret-santa/user/draw`, { params: { eventId }, signal: options?.signal })
+      .then(res => res.data)
   }
 
-  get(eventId: string): Promise<SecretSantaDto | null> {
-    return this.client.get(`/secret-santa`, { params: { eventId } }).then(res => res.data)
+  get(eventId: string, options?: CommonRequestOptions): Promise<SecretSantaDto | null> {
+    return this.client.get(`/secret-santa`, { params: { eventId }, signal: options?.signal }).then(res => res.data)
   }
 
   create(data: CreateSecretSantaInputDto): Promise<SecretSantaDto> {

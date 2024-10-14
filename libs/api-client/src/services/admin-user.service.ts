@@ -8,15 +8,17 @@ import type {
 
 import { AxiosInstance } from 'axios'
 
+import { CommonRequestOptions } from './common'
+
 export class AdminUserService {
   constructor(private readonly client: AxiosInstance) {}
 
-  getById(userId: string): Promise<UserDto> {
-    return this.client.get(`/admin/user/${userId}`).then(res => res.data)
+  getById(userId: string, options?: CommonRequestOptions): Promise<UserDto> {
+    return this.client.get(`/admin/user/${userId}`, { signal: options?.signal }).then(res => res.data)
   }
 
-  getAll(params: GetAllUsersQueryDto): Promise<PagedResponse<UserDto>> {
-    return this.client.get(`/admin/user`, { params }).then(res => res.data)
+  getAll(params: GetAllUsersQueryDto, options?: CommonRequestOptions): Promise<PagedResponse<UserDto>> {
+    return this.client.get(`/admin/user`, { params, signal: options?.signal }).then(res => res.data)
   }
 
   async update(userId: string, data: UpdateFullUserProfileInputDto): Promise<void> {
