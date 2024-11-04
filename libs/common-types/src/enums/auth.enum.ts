@@ -1,5 +1,4 @@
-export enum Authorities {
-  ROLE_USER = 'ROLE_USER',
-  ROLE_ADMIN = 'ROLE_ADMIN',
-  ROLE_SUPERADMIN = 'ROLE_SUPERADMIN',
-}
+/**
+ * @deprecated: use from "@wishlist/domain"
+ */
+export { Authorities } from '@wishlist/domain'

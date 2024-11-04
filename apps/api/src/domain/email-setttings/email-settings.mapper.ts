@@ -1,9 +1,27 @@
+import { UserEmailSettingTable } from '@wishlist/common-database'
 import { UserEmailSettingsDto } from '@wishlist/common-types'
+import { UserEmailSettings } from '@wishlist/domain'
+import { Insertable, Selectable } from 'kysely'
 
-import { UserEmailSettingEntity } from './email-settings.entity'
-
-export function toDto(entity: UserEmailSettingEntity): UserEmailSettingsDto {
-  return {
-    daily_new_item_notification: entity.dailyNewItemNotification,
-  }
+export const UserEmailSettingsMapper = {
+  toDto: (settings: UserEmailSettings): UserEmailSettingsDto => ({
+    daily_new_item_notification: settings.dailyNewItemNotification,
+  }),
+  toDomain: (params: Selectable<UserEmailSettingTable>): UserEmailSettings =>
+    new UserEmailSettings({
+      id: params.id,
+      userId: params.user_id,
+      dailyNewItemNotification: params.daily_new_item_notification,
+      createdAt: params.created_at,
+      updatedAt: params.updated_at,
+    }),
+  toInsertable(settings: UserEmailSettings): Insertable<UserEmailSettingTable> {
+    return {
+      id: settings.id,
+      user_id: settings.userId,
+      daily_new_item_notification: settings.dailyNewItemNotification,
+      created_at: settings.createdAt,
+      updated_at: settings.updatedAt,
+    }
+  },
 }

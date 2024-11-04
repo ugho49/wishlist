@@ -133,7 +133,7 @@ export class EventService {
 
     await this.eventRepository.save(eventEntity)
 
-    const creator = await this.userRepository.findOneByOrFail({ id: currentUser.id })
+    const creator = await this.userRepository.findByIdOrFail(currentUser.id)
 
     const existingAttendeeEmails = existingUsers.map(e => e.email)
     const notExistingAttendeeEmails = attendeeEntities

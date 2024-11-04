@@ -24,14 +24,14 @@ export class PasswordVerificationService {
   ) {}
 
   async sendResetEmail(dto: ResetPasswordInputDto) {
-    const userEntity = await this.userRepository.findByEmail(dto.email)
+    const user = await this.userRepository.findByEmail(dto.email)
 
-    if (!userEntity) {
+    if (!user) {
       throw new NotFoundException('User not found')
     }
 
     const previousValidPasswordValidations = await this.verificationEntityRepository.findBy({
-      userId: userEntity.id,
+      userId: user.id,
       expiredAt: MoreThan(new Date()),
     })
 
@@ -43,7 +43,7 @@ export class PasswordVerificationService {
     const tokenExpireDate = DateTime.now().plus({ minute: this.config.resetPasswordTokenDurationInMinutes })
 
     const entity = PasswordVerificationEntity.create({
-      user: userEntity.id,
+      user: user.id,
       token: token,
       expiredAt: tokenExpireDate.toJSDate(),
     })
@@ -53,7 +53,7 @@ export class PasswordVerificationService {
 
       await this.mailerService.sendResetEmail({
         email: dto.email,
-        url: this.generateResetPasswordUrl({ email: userEntity.email, token }),
+        url: this.generateResetPasswordUrl({ email: user.email, token }),
       })
     })
   }

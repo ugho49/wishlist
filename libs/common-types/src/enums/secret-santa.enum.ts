@@ -1,4 +1,4 @@
-export enum SecretSantaStatus {
-  CREATED = 'created',
-  STARTED = 'started',
-}
+/**
+ * @deprecated: use from "@wishlist/domain"
+ */
+export { SecretSantaStatus } from '@wishlist/domain'

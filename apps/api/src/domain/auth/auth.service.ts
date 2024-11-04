@@ -11,10 +11,9 @@ import {
   RefreshTokenOutputDto,
   UserSocialType,
 } from '@wishlist/common-types'
+import { User, UserId, UserSocial } from '@wishlist/domain'
 
 import { GoogleAuthService } from '../auth-social'
-import { UserEntity } from '../user'
-import { UserSocialEntity } from '../user/user-social.entity'
 import { UserSocialRepository } from '../user/user-social.repository'
 import { UserRepository } from '../user/user.repository'
 import authConfig from './auth.config'
@@ -30,12 +29,12 @@ export class AuthService {
     @Inject(authConfig.KEY) private readonly config: ConfigType<typeof authConfig>,
   ) {}
 
-  async login(user: LoginInputDto, ip: string): Promise<LoginOutputDto> {
-    const userEntity = await this.validateUser(user.email, 'email', user.password)
+  async login(dto: LoginInputDto, ip: string): Promise<LoginOutputDto> {
+    const user = await this.validateUserByEmailAndPassword(dto.email, dto.password)
 
     return {
-      refresh_token: this.createRefreshToken(userEntity.id),
-      access_token: await this.createAccessTokenAndUpdateUser(userEntity, { ip }),
+      refresh_token: this.createRefreshToken(user.id),
+      access_token: await this.createAccessTokenAndUpdateUser(user, { ip }),
     }
   }
 
@@ -46,41 +45,38 @@ export class AuthService {
       throw new UnauthorizedException('Your token is not valid')
     }
 
-    let userSocial = await this.userSocialRepository.findOneBy({
+    let userSocial = await this.userSocialRepository.findBy({
       socialId: payload.sub,
       socialType: UserSocialType.GOOGLE,
     })
-    let userEntity
+    let user: User
     let needUpdateProfilePicture = false
 
     if (!userSocial) {
       if (!payload.email_verified) {
         throw new UnauthorizedException('Email must be verified')
       }
-      userEntity = await this.validateUser(payload.email || '', 'email')
-      userSocial = UserSocialEntity.create({
-        userId: userEntity.id,
-        socialId: payload.sub,
+      user = await this.checkUserExistByEmail(payload.email ?? '')
+      userSocial = new UserSocial({
+        id: UserSocial.getNewId(),
+        externalProviderId: payload.sub,
         socialType: UserSocialType.GOOGLE,
         pictureUrl: payload.picture,
+        userId: user.id,
       })
       await this.userSocialRepository.insert(userSocial)
-      if (!userEntity.pictureUrl) needUpdateProfilePicture = true
+      if (!user.pictureUrl) needUpdateProfilePicture = true
     } else {
-      userEntity = await this.validateUser(userSocial.userId, 'id')
-      if (userEntity.pictureUrl === userSocial.pictureUrl && payload.picture !== userSocial.pictureUrl)
+      user = await this.checkUserExistById(userSocial.userId)
+      if (user.pictureUrl === userSocial.pictureUrl && payload.picture !== userSocial.pictureUrl) {
         needUpdateProfilePicture = true
-      await this.userSocialRepository.update(
-        { id: userSocial.id },
-        {
-          pictureUrl: payload.picture,
-        },
-      )
+        await this.userSocialRepository.update(userSocial.id, { picture_url: payload.picture })
+      }
     }
 
     return {
-      refresh_token: this.createRefreshToken(userEntity.id),
-      access_token: await this.createAccessTokenAndUpdateUser(userEntity, {
+      refresh_token: this.createRefreshToken(user.id),
+      access_token: await this.createAccessTokenAndUpdateUser(user, {
         ip,
         pictureUrl: needUpdateProfilePicture ? payload.picture : undefined,
       }),
@@ -89,46 +85,46 @@ export class AuthService {
 
   async refresh(dto: RefreshTokenInputDto, ip: string): Promise<RefreshTokenOutputDto> {
     const refreshPayload = this.validateRefreshToken(dto.token)
-    const userEntity = await this.userRepository.findById(refreshPayload.sub)
+    const user = await this.userRepository.findById(refreshPayload.sub)
 
-    if (!userEntity) {
+    if (!user) {
       throw new UnauthorizedException('User not found')
     }
 
-    if (!userEntity.isEnabled) {
+    if (!user.isEnabled) {
       throw new UnauthorizedException('User is disabled')
     }
 
     return {
-      access_token: await this.createAccessTokenAndUpdateUser(userEntity, { ip }),
+      access_token: await this.createAccessTokenAndUpdateUser(user, { ip }),
     }
   }
 
   private async createAccessTokenAndUpdateUser(
-    userEntity: UserEntity,
+    user: User,
     newValues: {
       ip: string
       pictureUrl?: string
     },
   ): Promise<string> {
     const payload: AccessTokenJwtPayload = {
-      sub: userEntity.id,
-      email: userEntity.email,
-      authorities: userEntity.authorities,
+      sub: user.id,
+      email: user.email,
+      authorities: user.authorities,
     }
 
     const token = this.jwtService.sign(payload)
 
-    await this.userRepository.updateById(userEntity.id, {
-      pictureUrl: newValues.pictureUrl,
-      lastIp: newValues.ip,
-      lastConnectedAt: new Date(),
+    await this.userRepository.update(user.id, {
+      picture_url: newValues.pictureUrl,
+      last_ip: newValues.ip,
+      last_connected_at: new Date(),
     })
 
     return token
   }
 
-  private createRefreshToken(userId: string): string {
+  private createRefreshToken(userId: UserId): string {
     const payload: RefreshTokenJwtPayload = { sub: userId }
 
     return this.jwtService.sign(payload, {
@@ -148,28 +144,54 @@ export class AuthService {
     }
   }
 
-  private async validateUser(id: string, type: 'email' | 'id', password?: string): Promise<UserEntity> {
-    const user = await (type === 'email' ? this.userRepository.findByEmail(id) : this.userRepository.findById(id))
+  private async checkUserExistById(id: UserId): Promise<User> {
+    const user = await this.userRepository.findById(id)
 
     if (!user) {
       throw new UnauthorizedException('Incorrect login')
     }
 
-    if (!user.isEnabled) {
-      throw new UnauthorizedException('User is disabled')
+    this.checkUserIsEnabled(user)
+
+    return user
+  }
+
+  private async checkUserExistByEmail(email: string): Promise<User> {
+    const user = await this.userRepository.findByEmail(email)
+
+    if (!user) {
+      throw new UnauthorizedException('Incorrect login')
     }
 
-    if (password) {
-      const passwordVerified = await PasswordManager.verify({
-        hash: user.passwordEnc || undefined,
-        plainPassword: password,
-      })
+    this.checkUserIsEnabled(user)
 
-      if (!passwordVerified) {
-        throw new UnauthorizedException('Incorrect login')
-      }
+    return user
+  }
+
+  private async validateUserByEmailAndPassword(email: string, password: string): Promise<User> {
+    const user = await this.userRepository.findByEmail(email)
+
+    if (!user) {
+      throw new UnauthorizedException('Incorrect login')
+    }
+
+    this.checkUserIsEnabled(user)
+
+    const passwordVerified = await PasswordManager.verify({
+      hash: user.passwordEnc ?? undefined,
+      plainPassword: password,
+    })
+
+    if (!passwordVerified) {
+      throw new UnauthorizedException('Incorrect login')
     }
 
     return user
+  }
+
+  private checkUserIsEnabled(user: User): void {
+    if (!user.isEnabled) {
+      throw new UnauthorizedException('User is disabled')
+    }
   }
 }

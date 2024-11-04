@@ -8,6 +8,7 @@ import {
   ScanItemOutputDto,
   ToggleItemOutputDto,
 } from '@wishlist/common-types'
+import { ItemId, UserId } from '@wishlist/domain'
 
 import { CurrentUser } from '../auth'
 import { ItemService } from './item.service'
@@ -29,26 +30,26 @@ export class ItemController {
   }
 
   @Post()
-  createItem(@CurrentUser('id') currentUserId: string, @Body() dto: AddItemForListInputDto): Promise<ItemDto> {
+  createItem(@CurrentUser('id') currentUserId: UserId, @Body() dto: AddItemForListInputDto): Promise<ItemDto> {
     return this.itemService.create({ dto, currentUserId })
   }
 
   @Put('/:id')
   updateItem(
-    @Param('id') itemId: string,
-    @CurrentUser('id') currentUserId: string,
+    @Param('id') itemId: ItemId,
+    @CurrentUser('id') currentUserId: UserId,
     @Body() dto: AddItemInputDto,
   ): Promise<void> {
     return this.itemService.update({ itemId, dto, currentUserId })
   }
 
   @Delete('/:id')
-  deleteItem(@Param('id') itemId: string, @CurrentUser('id') currentUserId: string): Promise<void> {
+  deleteItem(@Param('id') itemId: ItemId, @CurrentUser('id') currentUserId: UserId): Promise<void> {
     return this.itemService.deleteItem({ itemId, currentUserId })
   }
 
   @Post('/:id/toggle')
-  toggleItem(@Param('id') itemId: string, @CurrentUser('id') currentUserId: string): Promise<ToggleItemOutputDto> {
+  toggleItem(@Param('id') itemId: ItemId, @CurrentUser('id') currentUserId: UserId): Promise<ToggleItemOutputDto> {
     return this.itemService.toggleItem({ itemId, currentUserId })
   }
 }

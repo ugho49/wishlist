@@ -1,4 +1,4 @@
-export enum AttendeeRole {
-  MAINTAINER = 'maintainer',
-  USER = 'user',
-}
+/**
+ * @deprecated: use from "@wishlist/domain"
+ */
+export { AttendeeRole } from '@wishlist/domain'

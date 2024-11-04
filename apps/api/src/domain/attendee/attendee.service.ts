@@ -56,7 +56,7 @@ export class AttendeeService {
       : AttendeeEntity.createFromNonExistingUser({ ...baseParams, email: dto.email })
 
     await this.attendeeRepository.insert(attendeeEntity)
-    const invitedBy = await this.userRepository.findOneByOrFail({ id: currentUser.id })
+    const invitedBy = await this.userRepository.findByIdOrFail(currentUser.id)
 
     try {
       if (user) {

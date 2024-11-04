@@ -21,16 +21,16 @@ import { ArrayContains, In } from 'typeorm'
 import { toAttendeeDto } from '../attendee/attendee.mapper'
 import { EventRepository } from '../event/event.repository'
 import { SecretSantaEntity, SecretSantaUserEntity } from './secret-santa.entity'
+import { LegacySecretSantaRepository, LegacySecretSantaUserRepository } from './secret-santa.legacy-repository'
 import { SecretSantaMailer } from './secret-santa.mailer'
 import { toSecretSantaDto, toSecretSantaUserDto, toSecretSantaUserWithDrawDto } from './secret-santa.mapper'
-import { SecretSantaRepository, SecretSantaUserRepository } from './secret-santa.repository'
 
 @Injectable()
 export class SecretSantaService {
   constructor(
     private readonly eventRepository: EventRepository,
-    private readonly secretSantaRepository: SecretSantaRepository,
-    private readonly secretSantaUserRepository: SecretSantaUserRepository,
+    private readonly secretSantaRepository: LegacySecretSantaRepository,
+    private readonly secretSantaUserRepository: LegacySecretSantaUserRepository,
     private readonly mailer: SecretSantaMailer,
   ) {}
 

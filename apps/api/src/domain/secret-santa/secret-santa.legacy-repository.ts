@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common'
 import { BaseRepository } from '@wishlist/common-database'
-import { ArrayContains, In } from 'typeorm'
+import { In } from 'typeorm'
 
 import { SecretSantaEntity, SecretSantaUserEntity } from './secret-santa.entity'
 
 @Injectable()
-export class SecretSantaRepository extends BaseRepository(SecretSantaEntity) {
+export class LegacySecretSantaRepository extends BaseRepository(SecretSantaEntity) {
   getSecretSantaForEventAndUser(param: { eventId: string; userId: string }): Promise<SecretSantaEntity | null> {
     const { eventId, userId } = param
     return this.createQueryBuilder('ss')
@@ -30,7 +30,7 @@ export class SecretSantaRepository extends BaseRepository(SecretSantaEntity) {
 }
 
 @Injectable()
-export class SecretSantaUserRepository extends BaseRepository(SecretSantaUserEntity) {
+export class LegacySecretSantaUserRepository extends BaseRepository(SecretSantaUserEntity) {
   async getDrawSecretSantaUserForEvent(param: {
     eventId: string
     userId: string

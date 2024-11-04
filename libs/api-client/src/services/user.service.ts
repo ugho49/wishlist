@@ -32,11 +32,11 @@ export class UserService {
   }
 
   async update(data: UpdateUserProfileInputDto): Promise<void> {
-    await this.client.put(`/user`, data).then(res => res.data)
+    await this.client.put(`/user`, data)
   }
 
   async changePassword(data: ChangeUserPasswordInputDto): Promise<void> {
-    await this.client.put(`/user/change-password`, data).then(res => res.data)
+    await this.client.put(`/user/change-password`, data)
   }
 
   searchUserByKeyword(keyword: string): Promise<MiniUserDto[]> {
@@ -44,19 +44,19 @@ export class UserService {
   }
 
   async sendResetUserPasswordEmail(data: ResetPasswordInputDto): Promise<void> {
-    await this.client.post(`/user/forgot-password/send-reset-email`, data).then(res => res.data)
+    await this.client.post(`/user/forgot-password/send-reset-email`, data)
   }
 
   async validateResetPassword(data: ResetPasswordValidationInputDto): Promise<void> {
-    await this.client.post(`/user/forgot-password/reset`, data).then(res => res.data)
+    await this.client.post(`/user/forgot-password/reset`, data)
   }
 
   getEmailSettings(options?: CommonRequestOptions): Promise<UserEmailSettingsDto> {
     return this.client.get('/user/email-settings', { signal: options?.signal }).then(res => res.data)
   }
 
-  updateUserEmailSettings(data: UpdateUserEmailSettingsInputDto): Promise<UserEmailSettingsDto> {
-    return this.client.put('/user/email-settings', data).then(res => res.data)
+  updateUserEmailSettings(data: UpdateUserEmailSettingsInputDto): Promise<void> {
+    return this.client.put('/user/email-settings', data)
   }
 
   uploadPicture(file: File): Promise<UpdateUserPictureOutputDto> {
@@ -71,10 +71,10 @@ export class UserService {
   }
 
   async updatePictureFromSocial(socialId: string): Promise<void> {
-    await this.client.put(`/user/picture`, {}, { params: { social_id: socialId } }).then(res => res.data)
+    await this.client.put(`/user/picture`, {}, { params: { social_id: socialId } })
   }
 
   async deletePicture(): Promise<void> {
-    await this.client.delete(`/user/picture`).then(res => res.data)
+    await this.client.delete(`/user/picture`)
   }
 }
