@@ -1,6 +1,8 @@
+import type { RatingProps as MuiRatingProps, Theme } from '@mui/material'
+
 import FavoriteIcon from '@mui/icons-material/Favorite'
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder'
-import { Rating as MuiRating, RatingProps as MuiRatingProps, ratingClasses, Theme } from '@mui/material'
+import { Rating as MuiRating, ratingClasses } from '@mui/material'
 import { makeStyles } from '@mui/styles'
 import React from 'react'
 

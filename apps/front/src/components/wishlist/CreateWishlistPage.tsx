@@ -1,3 +1,7 @@
+import type { MiniEventDto } from '@wishlist/common-types'
+
+import type { RootState } from '../../core'
+
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import DeleteIcon from '@mui/icons-material/Delete'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
@@ -29,13 +33,12 @@ import {
 import Collapse from '@mui/material/Collapse'
 import Link from '@mui/material/Link'
 import { useMutation } from '@tanstack/react-query'
-import { MAX_EVENTS_BY_LIST, MiniEventDto } from '@wishlist/common-types'
+import { MAX_EVENTS_BY_LIST } from '@wishlist/common-types'
 import { DateTime } from 'luxon'
 import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 
-import { RootState } from '../../core'
 import { useAvailableEvents } from '../../hooks/domain/useAvailableEvents'
 import { useEventById } from '../../hooks/domain/useEventById'
 import { useApi } from '../../hooks/useApi'

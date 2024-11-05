@@ -1,18 +1,16 @@
-import type { UpdateSecretSantaInputDto } from '@wishlist/common-types'
+import type { EventId, UpdateSecretSantaInputDto } from '@wishlist/common-types'
 
-import { Image } from '@mui/icons-material'
 import { LoadingButton } from '@mui/lab'
 import { Box, Stack, Typography } from '@mui/material'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React, { useState } from 'react'
 
 import SecretSanta from '../../assets/illustrations/secret_santa.png'
-import { useApi } from '../../hooks/useApi'
-import { useToast } from '../../hooks/useToast'
+import { useApi, useToast } from '../../hooks'
 import { EditSecretSantaFormDialog } from './EditSecretSantaFormDialog'
 
 type NoSecretSantaProps = {
-  eventId: string
+  eventId: EventId
 }
 
 export const NoSecretSanta = ({ eventId }: NoSecretSantaProps) => {

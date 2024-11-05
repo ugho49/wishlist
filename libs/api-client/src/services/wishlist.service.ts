@@ -9,10 +9,9 @@ import type {
   UpdateWishlistLogoOutputDto,
   WishlistWithEventsDto,
 } from '@wishlist/common-types'
+import type { AxiosInstance } from 'axios'
 
-import { AxiosInstance } from 'axios'
-
-import { CommonRequestOptions } from './common'
+import type { CommonRequestOptions } from './common'
 
 export class WishlistService {
   constructor(private readonly client: AxiosInstance) {}

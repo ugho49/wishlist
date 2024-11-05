@@ -1,13 +1,15 @@
+import type { AddEventAttendeeInputDto, AttendeeDto, DetailedEventDto, EventId } from '@wishlist/common-types'
+
+import type { RootState } from '../../core'
+
 import DeleteIcon from '@mui/icons-material/Delete'
 import { Box, Divider, List, ListItem, ListItemButton, Stack } from '@mui/material'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { AddEventAttendeeInputDto, AttendeeDto, AttendeeRole, DetailedEventDto } from '@wishlist/common-types'
+import { AttendeeRole } from '@wishlist/common-types'
 import React, { useMemo } from 'react'
 import { useSelector } from 'react-redux'
 
-import { RootState } from '../../core'
-import { useApi } from '../../hooks/useApi'
-import { useToast } from '../../hooks/useToast'
+import { useApi, useToast } from '../../hooks'
 import { Card } from '../common/Card'
 import { ConfirmIconButton } from '../common/ConfirmIconButton'
 import { InputLabel } from '../common/InputLabel'
@@ -15,7 +17,7 @@ import { SearchUserSelect } from '../user/SearchUserSelect'
 import { ListItemAttendee } from './ListItemAttendee'
 
 export type EditEventAttendeesProps = {
-  eventId: string
+  eventId: EventId
   attendees: AttendeeDto[]
 }
 

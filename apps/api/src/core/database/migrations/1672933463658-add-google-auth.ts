@@ -1,4 +1,6 @@
-import { MigrationInterface, QueryRunner, TableColumn } from 'typeorm'
+import type { MigrationInterface, QueryRunner } from 'typeorm'
+
+import { TableColumn } from 'typeorm'
 
 export class addGoogleAuth1672933463658 implements MigrationInterface {
   public async up(runner: QueryRunner): Promise<void> {

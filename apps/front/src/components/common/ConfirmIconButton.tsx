@@ -1,3 +1,6 @@
+import type { IconButtonTypeMap } from '@mui/material'
+import type { PropsWithChildren } from 'react'
+
 import {
   Button,
   Dialog,
@@ -6,10 +9,9 @@ import {
   DialogContentText,
   DialogTitle,
   IconButton,
-  IconButtonTypeMap,
   Tooltip,
 } from '@mui/material'
-import React, { PropsWithChildren, useCallback, useState } from 'react'
+import React, { useCallback, useState } from 'react'
 
 export type ConfirmIconButtonProps = {
   confirmTitle: string | React.ReactNode

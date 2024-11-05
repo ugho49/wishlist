@@ -1,6 +1,8 @@
-import { DataGrid, GridColDef } from '@mui/x-data-grid'
+import type { GridColDef } from '@mui/x-data-grid'
+import type { EventWithCountsDto } from '@wishlist/common-types'
+
+import { DataGrid } from '@mui/x-data-grid'
 import { useQuery } from '@tanstack/react-query'
-import { EventWithCountsDto } from '@wishlist/common-types'
 import { DateTime } from 'luxon'
 import React, { useEffect, useState } from 'react'
 

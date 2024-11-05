@@ -1,4 +1,4 @@
-import {
+import type {
   AttendeeDto,
   CreateSecretSantaInputDto,
   CreateSecretSantaUsersInputDto,
@@ -7,9 +7,9 @@ import {
   UpdateSecretSantaInputDto,
   UpdateSecretSantaUserInputDto,
 } from '@wishlist/common-types'
-import { AxiosInstance } from 'axios'
+import type { AxiosInstance } from 'axios'
 
-import { CommonRequestOptions } from './common'
+import type { CommonRequestOptions } from './common'
 
 export class SecretSantaService {
   constructor(private readonly client: AxiosInstance) {}

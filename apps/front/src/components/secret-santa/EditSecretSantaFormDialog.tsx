@@ -1,3 +1,4 @@
+import type { TransitionProps } from '@mui/material/transitions'
 import type { UpdateSecretSantaInputDto } from '@wishlist/common-types'
 
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -19,7 +20,6 @@ import {
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { TransitionProps } from '@mui/material/transitions'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import React, { forwardRef, useEffect } from 'react'
 import { useForm } from 'react-hook-form'

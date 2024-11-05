@@ -1,8 +1,11 @@
+import type { Theme } from '@mui/material'
+import type { PropsWithChildren } from 'react'
+
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft'
-import { linkClasses, Stack, Theme } from '@mui/material'
+import { linkClasses, Stack } from '@mui/material'
 import { makeStyles } from '@mui/styles'
 import clsx from 'clsx'
-import React, { PropsWithChildren } from 'react'
+import React from 'react'
 
 import { RouterLink } from './RouterLink'
 

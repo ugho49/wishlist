@@ -1,6 +1,7 @@
 {
   "**/*.d.ts": ["prettier --write"],
-  "**/!(*.d).{ts,tsx}": ["eslint --fix", "prettier --write"],
+  "**/!(*.d).{ts,tsx}": ["prettier --write"],
   "**/jest.config.ts": ["prettier --write"],
+  "**/eslint.config.{cjs,js,ts,mjs}": ["prettier --write"],
   "**/*.{json,css,mdx}": ["prettier --write"]
 }

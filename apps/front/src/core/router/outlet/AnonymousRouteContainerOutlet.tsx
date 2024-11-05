@@ -1,5 +1,7 @@
 /// <reference types="vite-plugin-svgr/client" />
-import { Container, Stack, Theme } from '@mui/material'
+import type { Theme } from '@mui/material'
+
+import { Container, Stack } from '@mui/material'
 import { makeStyles } from '@mui/styles'
 import React from 'react'
 import { Outlet } from 'react-router-dom'

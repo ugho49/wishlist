@@ -1,7 +1,9 @@
+import type { Theme } from '@mui/material'
+import type { EventWithCountsDto } from '@wishlist/common-types'
+
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'
-import { Stack, Theme } from '@mui/material'
+import { Stack } from '@mui/material'
 import { makeStyles } from '@mui/styles'
-import { EventWithCountsDto } from '@wishlist/common-types'
 import clsx from 'clsx'
 import { DateTime } from 'luxon'
 import React from 'react'

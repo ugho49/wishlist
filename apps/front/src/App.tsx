@@ -1,3 +1,5 @@
+import type { RootState } from './core'
+
 import { useFeatureFlagEnabled } from 'posthog-js/react'
 import { useSelector } from 'react-redux'
 import { Navigate, Route, Routes } from 'react-router-dom'
@@ -19,7 +21,6 @@ import { CreateWishlistPage } from './components/wishlist/CreateWishlistPage'
 import { EditWishlistPage } from './components/wishlist/EditWishlistPage'
 import { WishlistListPage } from './components/wishlist/WishlistListPage'
 import { WishlistPage } from './components/wishlist/WishlistPage'
-import { RootState } from './core'
 import { NavigateToAuthenticatedWithContext } from './core/router/NavigateToAuthenticatedWithContext'
 import { NavigateToLoginWithContext } from './core/router/NavigateToLoginWithContext'
 import { AdminRouteOutlet } from './core/router/outlet/AdminRouteOutlet'

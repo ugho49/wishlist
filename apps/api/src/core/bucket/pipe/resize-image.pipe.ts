@@ -1,4 +1,6 @@
-import { Logger, PipeTransform } from '@nestjs/common'
+import type { PipeTransform } from '@nestjs/common'
+
+import { Logger } from '@nestjs/common'
 import * as sharp from 'sharp'
 
 type OptionsResizeImagePipe = { width: number; height: number }

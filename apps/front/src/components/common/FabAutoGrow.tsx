@@ -1,5 +1,6 @@
+import type { FabTypeMap } from '@mui/material/Fab/Fab'
+
 import { Box, Fab, fabClasses } from '@mui/material'
-import { FabTypeMap } from '@mui/material/Fab/Fab'
 import { useTheme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import { makeStyles } from '@mui/styles'

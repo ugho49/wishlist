@@ -1,4 +1,12 @@
-import type { AddItemForListInputDto, AddItemInputDto, DetailedWishlistDto, ItemDto } from '@wishlist/common-types'
+import type { TransitionProps } from '@mui/material/transitions'
+import type {
+  AddItemForListInputDto,
+  AddItemInputDto,
+  DetailedWishlistDto,
+  ItemDto,
+  WishlistId,
+} from '@wishlist/common-types'
+import type { FormEvent } from 'react'
 
 import CameraAltIcon from '@mui/icons-material/CameraAlt'
 import CloseIcon from '@mui/icons-material/Close'
@@ -19,14 +27,12 @@ import {
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { TransitionProps } from '@mui/material/transitions'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import React, { FormEvent, forwardRef, useCallback, useEffect, useMemo, useState } from 'react'
+import React, { forwardRef, useCallback, useEffect, useMemo, useState } from 'react'
 import { TidyURL } from 'tidy-url'
 
-import { useApi } from '../../hooks/useApi'
-import { useToast } from '../../hooks/useToast'
+import { useApi, useToast } from '../../hooks'
 import { isValidUrl } from '../../utils/router.utils'
 import { CharsRemaining } from '../common/CharsRemaining'
 import { InputLabel } from '../common/InputLabel'
@@ -48,7 +54,7 @@ type ModeProps<T> = T extends 'create'
 
 export type ItemFormDialogProps = (ModeProps<'create'> | ModeProps<'edit'>) & {
   open: boolean
-  wishlistId: string
+  wishlistId: WishlistId
   title: string
   handleClose: () => void
 }

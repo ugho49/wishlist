@@ -1,4 +1,6 @@
-import { SecretSantaDrawService, SecretSantaUser } from './secret-santa-draw.service'
+import type { SecretSantaUser } from './secret-santa-draw.service'
+
+import { SecretSantaDrawService } from './secret-santa-draw.service'
 
 describe('SecretSantaDrawService', () => {
   it('should throw error if not enough attendees', () => {

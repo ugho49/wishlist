@@ -1,11 +1,10 @@
+/* eslint-disable */
 const eslint = require('@eslint/js')
 const tslint = require('typescript-eslint')
 const jestPlugin = require('eslint-plugin-jest')
 const prettierPlugin = require('eslint-plugin-prettier/recommended')
 const nxPlugin = require('@nx/eslint-plugin')
 const pluginSecurity = require('eslint-plugin-security')
-const reactPlugin = require('eslint-plugin-react')
-const globals = require('globals');
 
 const typescriptPlugin = tslint.plugin
 
@@ -38,9 +37,10 @@ module.exports = [
       // Conflict with prettier
       '@typescript-eslint/arrow-parens': 'off',
       '@typescript-eslint/no-explicit-any': 'warn',
-      '@typescript-eslint/no-unused-vars': [
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/consistent-type-imports': [
         'error',
-        { argsIgnorePattern: '^_' },
+        { prefer: 'type-imports', fixStyle: 'separate-type-imports' },
       ],
       '@nx/enforce-module-boundaries': [
         'error',
@@ -62,23 +62,5 @@ module.exports = [
     plugins: {
       jest: jestPlugin,
     },
-  },
-  {
-    files: ['**/*.{jsx,tsx}'],
-    ...reactPlugin.configs.flat.recommended,
-    languageOptions: {
-      ...reactPlugin.configs.flat.recommended.languageOptions,
-      globals: {
-        ...globals.serviceworker,
-        ...globals.browser,
-      },
-    },
-    rules: {
-      ...reactPlugin.configs.flat.recommended.rules,
-      'react/react-in-jsx-scope': 0,
-      'react/jsx-uses-react': 0,
-      'react/no-unescaped-entities': 0,
-      'react/no-children-prop': 0
-    }
   },
 ]

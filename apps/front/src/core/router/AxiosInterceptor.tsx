@@ -1,4 +1,8 @@
-import React, { useCallback, useContext, useEffect } from 'react'
+import type React from 'react'
+
+import type { RootState } from '../store'
+
+import { useCallback, useContext, useEffect } from 'react'
 import { useSelector } from 'react-redux'
 import { useInterval } from 'usehooks-ts'
 
@@ -6,7 +10,6 @@ import { ApiContext } from '../../context/ApiContext'
 import { useLogout } from '../../hooks/useLogout'
 import { useToast } from '../../hooks/useToast'
 import { AuthService } from '../services/auth.service'
-import { RootState } from '../store'
 
 const mapAuthState = (state: RootState) => state.auth
 const accessTokenService = new AuthService().accessTokenService

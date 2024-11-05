@@ -1,3 +1,8 @@
+import type { Theme } from '@mui/material'
+import type { DetailedWishlistDto, ItemDto, MiniUserDto, WishlistId } from '@wishlist/common-types'
+
+import type { RootState } from '../../core'
+
 import DeleteForeverTwoToneIcon from '@mui/icons-material/DeleteForeverTwoTone'
 import EditTwoToneIcon from '@mui/icons-material/EditTwoTone'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
@@ -16,22 +21,18 @@ import {
   Menu,
   MenuItem,
   Stack,
-  Theme,
   Tooltip,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import { makeStyles } from '@mui/styles'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { DetailedWishlistDto, ItemDto, MiniUserDto } from '@wishlist/common-types'
 import clsx from 'clsx'
 import { DateTime } from 'luxon'
 import React, { useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
 
-import { RootState } from '../../core'
-import { useApi } from '../../hooks/useApi'
-import { useToast } from '../../hooks/useToast'
+import { useApi, useToast } from '../../hooks'
 import { Card } from '../common/Card'
 import { ConfirmMenuItem } from '../common/ConfirmMenuItem'
 import { Rating } from '../common/Rating'
@@ -39,7 +40,7 @@ import { ItemFormDialog } from './ItemFormDialog'
 
 export type ItemCardProps = {
   wishlist: {
-    id: string
+    id: WishlistId
     ownerId: string
     hideItems: boolean
   }

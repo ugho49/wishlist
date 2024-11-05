@@ -1,6 +1,8 @@
+import type { SnackbarMessage, VariantType } from 'notistack'
+
 import CloseIcon from '@mui/icons-material/Close'
 import { IconButton } from '@mui/material'
-import { SnackbarMessage, useSnackbar, VariantType } from 'notistack'
+import { useSnackbar } from 'notistack'
 import { useCallback } from 'react'
 
 type AddToastInput = {

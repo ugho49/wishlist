@@ -1,4 +1,4 @@
-import { UserId, WishlistId } from '@wishlist/common-types'
+import type { UserId, WishlistId } from '@wishlist/common-types'
 
 export interface NewItemsForWishlist {
   wishlistId: WishlistId

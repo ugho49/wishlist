@@ -1,9 +1,11 @@
+import type { Theme } from '@mui/material'
+import type { WishlistWithEventsDto } from '@wishlist/common-types'
+
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'
 import PublicIcon from '@mui/icons-material/Public'
-import { Chip, Stack, Theme } from '@mui/material'
+import { Chip, Stack } from '@mui/material'
 import { makeStyles } from '@mui/styles'
-import { WishlistWithEventsDto } from '@wishlist/common-types'
 import clsx from 'clsx'
 import { DateTime } from 'luxon'
 import React from 'react'

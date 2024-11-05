@@ -48,10 +48,8 @@
   ],
   "namedInputs": {
     "default": ["{projectRoot}/**/*", "sharedGlobals"],
-    "sharedGlobals": [
-      "{workspaceRoot}/yarn.lock",
-      "{workspaceRoot}/.circleci/*"
-    ],
+    "sharedGlobals": ["{workspaceRoot}/yarn.lock", "{workspaceRoot}/.circleci/*"],
     "production": ["default"]
-  }
+  },
+  "useLegacyCache": true
 }

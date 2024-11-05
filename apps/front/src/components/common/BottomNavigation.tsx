@@ -1,3 +1,7 @@
+import type { Theme } from '@mui/material'
+
+import type { RootState } from '../../core'
+
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings'
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted'
@@ -8,14 +12,11 @@ import {
   bottomNavigationActionClasses,
   BottomNavigation as MuiBottomNavigation,
   Paper,
-  Theme,
 } from '@mui/material'
 import { makeStyles } from '@mui/styles'
 import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useLocation, useNavigate } from 'react-router-dom'
-
-import { RootState } from '../../core'
 
 const mapAuthState = (state: RootState) => state.auth
 const mapUserProfileState = (state: RootState) => state.userProfile

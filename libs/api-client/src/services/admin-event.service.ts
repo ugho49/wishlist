@@ -1,8 +1,7 @@
 import type { DetailedEventDto, EventWithCountsDto, GetEventsQueryDto, PagedResponse } from '@wishlist/common-types'
+import type { AxiosInstance } from 'axios'
 
-import { AxiosInstance } from 'axios'
-
-import { CommonRequestOptions } from './common'
+import type { CommonRequestOptions } from './common'
 
 export class AdminEventService {
   constructor(private readonly client: AxiosInstance) {}

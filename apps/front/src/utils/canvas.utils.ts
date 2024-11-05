@@ -1,5 +1,6 @@
+import type { Area } from 'react-easy-crop'
+
 import { uuid } from '@wishlist/common'
-import { Area } from 'react-easy-crop'
 
 const createImage = (url: string): Promise<HTMLImageElement> =>
   new Promise((resolve, reject) => {

@@ -1,11 +1,14 @@
+import type { INestApplication } from '@nestjs/common'
+
+import type { TableAssertSortOptions } from './table-assert'
+
 import { afterAll, beforeAll, beforeEach } from '@jest/globals'
-import { INestApplication } from '@nestjs/common'
 import * as request from 'supertest'
 import { DataSource } from 'typeorm'
 
 import { createApp } from '../../bootstrap'
 import { Fixtures } from './fixtures'
-import { TableAssert, TableAssertSortOptions } from './table-assert'
+import { TableAssert } from './table-assert'
 
 export type RequestApp = InstanceType<(typeof request)['agent']>
 

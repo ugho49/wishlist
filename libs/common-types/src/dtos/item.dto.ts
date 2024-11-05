@@ -1,12 +1,13 @@
+import type { ItemId, WishlistId } from '../ids'
+
 import { Transform } from 'class-transformer'
 import { IsInt, IsNotEmpty, IsOptional, IsString, IsUrl, Max, MaxLength, Min } from 'class-validator'
 import { TidyURL } from 'tidy-url'
 
-import { WishlistId } from '../ids'
 import { MiniUserDto } from './user.dto'
 
 export class ItemDto {
-  id: string
+  id: ItemId
   name: string
   description?: string
   url?: string

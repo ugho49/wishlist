@@ -1,9 +1,11 @@
-import { DetailedEventDto, EventWithCountsDto, MiniEventDto } from '@wishlist/common-types'
+import type { DetailedEventDto, EventWithCountsDto, MiniEventDto } from '@wishlist/common-types'
+
+import type { EventEntity } from './event.entity'
+
 import { DateTime } from 'luxon'
 
 import { toAttendeeDto } from '../attendee/attendee.mapper'
 import { toWishlistWithOwnerDto } from '../wishlist/wishlist.mapper'
-import { EventEntity } from './event.entity'
 
 export function toMiniEventDto(entity: EventEntity): MiniEventDto {
   return {

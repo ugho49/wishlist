@@ -1,7 +1,8 @@
-import { ItemDto } from '@wishlist/common-types'
+import type { ItemDto } from '@wishlist/common-types'
+
+import type { ItemEntity } from './item.entity'
 
 import { toMiniUserDto } from '../user/user.mapper'
-import { ItemEntity } from './item.entity'
 
 export async function toItemDto(param: { entity: ItemEntity; displayUserAndSuggested: boolean }): Promise<ItemDto> {
   const { displayUserAndSuggested, entity } = param

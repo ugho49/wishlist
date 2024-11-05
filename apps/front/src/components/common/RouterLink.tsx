@@ -1,7 +1,9 @@
+import type { LinkProps } from '@mui/material/Link/Link'
+import type { LinkProps as ReactRouterLinkProps } from 'react-router-dom'
+
 import { Link } from '@mui/material'
-import { LinkProps } from '@mui/material/Link/Link'
 import { forwardRef } from 'react'
-import { Link as ReactRouterLink, LinkProps as ReactRouterLinkProps } from 'react-router-dom'
+import { Link as ReactRouterLink } from 'react-router-dom'
 
 type RouterLinkProps = Omit<ReactRouterLinkProps & LinkProps, 'href'>
 

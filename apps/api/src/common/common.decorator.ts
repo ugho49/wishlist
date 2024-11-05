@@ -1,4 +1,6 @@
-import { createParamDecorator, ExecutionContext, ValidationPipe } from '@nestjs/common'
+import type { ExecutionContext } from '@nestjs/common'
+
+import { createParamDecorator, ValidationPipe } from '@nestjs/common'
 
 import { ParseJsonPipe } from './common.pipe'
 

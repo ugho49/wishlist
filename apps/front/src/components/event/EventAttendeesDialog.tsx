@@ -1,3 +1,5 @@
+import type { AttendeeDto, AttendeeRole } from '@wishlist/common-types'
+
 import CloseIcon from '@mui/icons-material/Close'
 import {
   Button,
@@ -10,7 +12,6 @@ import {
   ListItem,
   Stack,
 } from '@mui/material'
-import { AttendeeDto, AttendeeRole } from '@wishlist/common-types'
 import React from 'react'
 
 import { RouterLink } from '../common/RouterLink'

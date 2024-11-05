@@ -1,15 +1,16 @@
+import type { AttendeeId, EventId, SecretSantaUserId } from '../ids'
+
 import { Transform } from 'class-transformer'
 import { IsNumber, IsOptional, IsPositive, IsString } from 'class-validator'
 import { uniq } from 'lodash'
 
 import { AttendeeDto, MiniEventDto } from '../dtos'
 import { SecretSantaStatus } from '../enums'
-import { AttendeeId, EventId } from '../ids'
 
 export class SecretSantaUserDto {
-  id: string
+  id: SecretSantaUserId
   attendee: AttendeeDto
-  exclusions: string[]
+  exclusions: SecretSantaUserId[]
 }
 
 export class SecretSantaUserWithDrawDto extends SecretSantaUserDto {

@@ -1,5 +1,7 @@
+import type { PropsWithChildren } from 'react'
+
 import { CircularProgress, Stack } from '@mui/material'
-import React, { PropsWithChildren } from 'react'
+import React from 'react'
 
 type LoaderProps = {
   loading: boolean

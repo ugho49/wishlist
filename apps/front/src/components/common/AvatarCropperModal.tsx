@@ -1,7 +1,10 @@
-import { Box, Button, Modal, Slider, Theme, Typography } from '@mui/material'
+import type { Theme } from '@mui/material'
+import type { Area } from 'react-easy-crop'
+
+import { Box, Button, Modal, Slider, Typography } from '@mui/material'
 import { makeStyles } from '@mui/styles'
 import React, { useCallback, useState } from 'react'
-import Cropper, { Area } from 'react-easy-crop'
+import Cropper from 'react-easy-crop'
 
 import { useToast } from '../../hooks/useToast'
 import { getCroppedImg } from '../../utils/canvas.utils'

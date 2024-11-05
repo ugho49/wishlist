@@ -1,12 +1,13 @@
+import type { AttendeeId, EventId } from '../ids'
+
 import { Transform } from 'class-transformer'
 import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator'
 
 import { AttendeeRole } from '../enums'
-import { EventId } from '../ids'
 import { MiniUserDto } from './user.dto'
 
 export class AttendeeDto {
-  id: string
+  id: AttendeeId
   user?: MiniUserDto
   pending_email?: string
   role: string
