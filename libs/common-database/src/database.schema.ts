@@ -1,10 +1,11 @@
 import {
+  AttendeeId,
   AttendeeRole,
   Authorities,
-  EventAttendeeId,
   EventId,
   ItemId,
   SecretSantaId,
+  SecretSantaStatus,
   SecretSantaUserId,
   UserEmailSettingId,
   UserId,
@@ -16,8 +17,9 @@ import {
 import { type ColumnType, type Kysely } from 'kysely'
 
 type GeneratedId<B> = ColumnType<B, B, never>
-type CreatedAt = ColumnType<Date, Date, never>
-type UpdatedAt = ColumnType<Date, Date, Date>
+type DateColumn = ColumnType<Date | string>
+type CreatedAt = ColumnType<Date | string, Date, never>
+type UpdatedAt = ColumnType<Date | string, Date, Date>
 
 export const DATABASE = Symbol('DATABASE')
 
@@ -25,26 +27,26 @@ export interface EventTable {
   id: GeneratedId<EventId>
   title: string
   description: string | null
-  event_date: Date
+  event_date: DateColumn
   created_at: CreatedAt
   updated_at: UpdatedAt
 }
 
 export interface EventAttendeeTable {
-  id: GeneratedId<EventAttendeeId>
+  id: GeneratedId<AttendeeId>
   event_id: EventId
   role: AttendeeRole
   temp_user_email: string | null
-  user_id: string | null
+  user_id: UserId | null
 }
 
 export interface WishlistTable {
   id: GeneratedId<WishlistId>
+  title: string
   description: string | null
   hide_items: boolean
   logo_url: string | null
-  owner_id: string
-  title: string
+  owner_id: UserId
   created_at: CreatedAt
   updated_at: UpdatedAt
 }
@@ -62,7 +64,7 @@ export interface ItemTable {
   picture_url: string | null
   score: number | null
   taken_at: Date | null
-  taker_id: string | null
+  taker_id: UserId | null
   url: string | null
   wishlist_id: WishlistId
   updated_at: UpdatedAt
@@ -86,7 +88,7 @@ export interface UserTable {
 }
 export interface SecretSantaTable {
   id: GeneratedId<SecretSantaId>
-  status: string
+  status: SecretSantaStatus
   budget: number | null
   description: string | null
   event_id: EventId
@@ -97,8 +99,8 @@ export interface SecretSantaTable {
 export interface SecretSantaUserTable {
   id: GeneratedId<SecretSantaUserId>
   secret_santa_id: SecretSantaId
-  draw_user_id: SecretSantaUserTable | null
-  attendee_id: EventAttendeeId
+  draw_user_id: SecretSantaUserId | null
+  attendee_id: AttendeeId
   exclusions: SecretSantaUserId[]
   created_at: CreatedAt
   updated_at: UpdatedAt

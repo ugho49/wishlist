@@ -1,8 +1,10 @@
 import { Global, Module } from '@nestjs/common'
+import { Logger } from '@nestjs/common/services/logger.service'
 import { ConfigService } from '@nestjs/config'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { DATABASE, DatabaseSchema } from '@wishlist/common-database'
 import { Kysely, PostgresDialect } from 'kysely'
+import { LogConfig } from 'kysely/dist/cjs/util/log'
 import { Pool } from 'pg'
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies'
 
@@ -69,9 +71,16 @@ const typeOrmModule = TypeOrmModule.forRootAsync({
 
         // TODO: migrations: using Migrator
 
+        const log: LogConfig = event => {
+          Logger.log(event.query.sql, event.query.parameters)
+
+          if (event.level === 'error') {
+            Logger.error(event.error)
+          }
+        }
         return new Kysely<DatabaseSchema>({
           dialect,
-          // TODO: in case of verbose, log all queries with parameters
+          log,
         })
       },
     },

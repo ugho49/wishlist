@@ -12,8 +12,8 @@ export const UserEmailSettingsMapper = {
       id: params.id,
       userId: params.user_id,
       dailyNewItemNotification: params.daily_new_item_notification,
-      createdAt: params.created_at,
-      updatedAt: params.updated_at,
+      createdAt: new Date(params.created_at),
+      updatedAt: new Date(params.updated_at),
     }),
   toInsertable(settings: UserEmailSettings): Insertable<UserEmailSettingTable> {
     return {

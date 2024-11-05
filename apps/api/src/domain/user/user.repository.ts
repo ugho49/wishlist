@@ -29,6 +29,7 @@ export class UserRepository {
   }
 
   async findByEmails(emails: string[]): Promise<User[]> {
+    if (emails.length === 0) return []
     const users = await this.getSelectQueryBuilder().where('email', 'in', emails).execute()
     return users.map(UserMapper.toDomain)
   }

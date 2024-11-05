@@ -16,6 +16,7 @@ import {
   UpdateSecretSantaInputDto,
   UpdateSecretSantaUserInputDto,
 } from '@wishlist/common-types'
+import { EventId, SecretSantaId, SecretSantaUserId, UserId } from '@wishlist/domain'
 import { ArrayContains, In } from 'typeorm'
 
 import { toAttendeeDto } from '../attendee/attendee.mapper'
@@ -24,18 +25,20 @@ import { SecretSantaEntity, SecretSantaUserEntity } from './secret-santa.entity'
 import { LegacySecretSantaRepository, LegacySecretSantaUserRepository } from './secret-santa.legacy-repository'
 import { SecretSantaMailer } from './secret-santa.mailer'
 import { toSecretSantaDto, toSecretSantaUserDto, toSecretSantaUserWithDrawDto } from './secret-santa.mapper'
+import { SecretSantaUserRepository } from './secret-santa.repository'
 
 @Injectable()
 export class SecretSantaService {
   constructor(
     private readonly eventRepository: EventRepository,
-    private readonly secretSantaRepository: LegacySecretSantaRepository,
-    private readonly secretSantaUserRepository: LegacySecretSantaUserRepository,
+    private readonly legacySecretSantaRepository: LegacySecretSantaRepository,
+    private readonly legacySecretSantaUserRepository: LegacySecretSantaUserRepository,
+    private readonly secretSantaUserRepository: SecretSantaUserRepository,
     private readonly mailer: SecretSantaMailer,
   ) {}
 
-  async getForEvent(param: { eventId: string; currentUserId: string }): Promise<SecretSantaDto | null> {
-    return this.secretSantaRepository
+  async getForEvent(param: { eventId: EventId; currentUserId: UserId }): Promise<SecretSantaDto | null> {
+    return this.legacySecretSantaRepository
       .getSecretSantaForEventAndUser({
         eventId: param.eventId,
         userId: param.currentUserId,
@@ -43,8 +46,8 @@ export class SecretSantaService {
       .then(entity => (entity ? toSecretSantaDto(entity) : null))
   }
 
-  async getMyDrawForEvent(param: { eventId: string; currentUserId: string }): Promise<AttendeeDto | null> {
-    return this.secretSantaUserRepository
+  async getMyDrawForEvent(param: { eventId: EventId; currentUserId: UserId }): Promise<AttendeeDto | null> {
+    return this.legacySecretSantaUserRepository
       .getDrawSecretSantaUserForEvent({
         eventId: param.eventId,
         userId: param.currentUserId,
@@ -53,8 +56,8 @@ export class SecretSantaService {
       .then(entity => (entity ? toAttendeeDto(entity) : null))
   }
 
-  async createForEvent(param: { currentUserId: string; dto: CreateSecretSantaInputDto }): Promise<SecretSantaDto> {
-    const alreadyExists = await this.secretSantaRepository.exists({ where: { eventId: param.dto.event_id } })
+  async createForEvent(param: { currentUserId: UserId; dto: CreateSecretSantaInputDto }): Promise<SecretSantaDto> {
+    const alreadyExists = await this.legacySecretSantaRepository.exists({ where: { eventId: param.dto.event_id } })
 
     if (alreadyExists) {
       throw new BadRequestException('Secret santa already exists for event')
@@ -75,24 +78,24 @@ export class SecretSantaService {
       description: param.dto.description,
     })
 
-    await this.secretSantaRepository.save(entity)
+    await this.legacySecretSantaRepository.save(entity)
 
     return toSecretSantaDto(entity)
   }
 
   async updateSecretSanta(param: {
-    currentUserId: string
-    secretSantaId: string
+    currentUserId: UserId
+    secretSantaId: SecretSantaId
     dto: UpdateSecretSantaInputDto
   }): Promise<void> {
-    const secretSanta = await this.secretSantaRepository.getSecretSantaForUserOrFail({
+    const secretSanta = await this.legacySecretSantaRepository.getSecretSantaForUserOrFail({
       id: param.secretSantaId,
       userId: param.currentUserId,
     })
 
     this.checkSecretSantaNotStarted(secretSanta)
 
-    await this.secretSantaRepository.update(
+    await this.legacySecretSantaRepository.update(
       { id: secretSanta.id },
       {
         description: param.dto.description ?? null,
@@ -101,19 +104,19 @@ export class SecretSantaService {
     )
   }
 
-  async deleteSecretSanta(param: { currentUserId: string; secretSantaId: string }): Promise<void> {
-    const secretSanta = await this.secretSantaRepository.getSecretSantaForUserOrFail({
+  async deleteSecretSanta(param: { currentUserId: UserId; secretSantaId: SecretSantaId }): Promise<void> {
+    const secretSanta = await this.legacySecretSantaRepository.getSecretSantaForUserOrFail({
       id: param.secretSantaId,
       userId: param.currentUserId,
     })
 
     this.checkSecretSantaNotStarted(secretSanta)
 
-    await this.secretSantaRepository.delete({ id: secretSanta.id })
+    await this.legacySecretSantaRepository.delete({ id: secretSanta.id })
   }
 
-  async startSecretSanta(param: { currentUserId: string; secretSantaId: string }): Promise<void> {
-    const secretSanta = await this.secretSantaRepository.getSecretSantaForUserOrFail({
+  async startSecretSanta(param: { currentUserId: UserId; secretSantaId: SecretSantaId }): Promise<void> {
+    const secretSanta = await this.legacySecretSantaRepository.getSecretSantaForUserOrFail({
       id: param.secretSantaId,
       userId: param.currentUserId,
     })
@@ -126,7 +129,7 @@ export class SecretSantaService {
       throw new BadRequestException('Event is already finished')
     }
 
-    let secretSantaUsers = await this.secretSantaUserRepository.findBy({ secretSantaId: secretSanta.id })
+    let secretSantaUsers = await this.legacySecretSantaUserRepository.findBy({ secretSantaId: secretSanta.id })
 
     try {
       const drawService = new SecretSantaDrawService(
@@ -134,7 +137,7 @@ export class SecretSantaService {
       )
       const assignedUsers = drawService.assignSecretSantas()
 
-      await this.secretSantaRepository.transaction(async em => {
+      await this.legacySecretSantaRepository.transaction(async em => {
         for (const user of assignedUsers) {
           await em.update(SecretSantaUserEntity, { id: user.userId }, { drawUserId: user.drawUserId })
         }
@@ -145,7 +148,7 @@ export class SecretSantaService {
       throw new UnprocessableEntityException('Failed to draw secret santa, please try again')
     }
 
-    secretSantaUsers = await this.secretSantaUserRepository.findBy({ secretSantaId: secretSanta.id })
+    secretSantaUsers = await this.legacySecretSantaUserRepository.findBy({ secretSantaId: secretSanta.id })
     const secretSantaDto = await Promise.all(secretSantaUsers.map(ss => toSecretSantaUserWithDrawDto(ss)))
 
     await this.mailer.sendDrawnEmails({
@@ -160,8 +163,8 @@ export class SecretSantaService {
     })
   }
 
-  async cancelSecretSanta(param: { currentUserId: string; secretSantaId: string }): Promise<void> {
-    const secretSanta = await this.secretSantaRepository.getSecretSantaForUserOrFail({
+  async cancelSecretSanta(param: { currentUserId: UserId; secretSantaId: SecretSantaId }): Promise<void> {
+    const secretSanta = await this.legacySecretSantaRepository.getSecretSantaForUserOrFail({
       id: param.secretSantaId,
       userId: param.currentUserId,
     })
@@ -170,7 +173,7 @@ export class SecretSantaService {
       throw new BadRequestException('Secret santa not yet started')
     }
 
-    await this.secretSantaRepository.transaction(async em => {
+    await this.legacySecretSantaRepository.transaction(async em => {
       await em.update(SecretSantaEntity, { id: secretSanta.id }, { status: SecretSantaStatus.CREATED })
       await em.update(SecretSantaUserEntity, { secretSantaId: secretSanta.id }, { drawUserId: null })
     })
@@ -187,18 +190,18 @@ export class SecretSantaService {
   }
 
   async addSecretSantaUsers(param: {
-    currentUserId: string
-    secretSantaId: string
+    currentUserId: UserId
+    secretSantaId: SecretSantaId
     dto: CreateSecretSantaUsersInputDto
   }): Promise<CreateSecretSantaUsersOutputDto> {
-    const secretSanta = await this.secretSantaRepository.getSecretSantaForUserOrFail({
+    const secretSanta = await this.legacySecretSantaRepository.getSecretSantaForUserOrFail({
       id: param.secretSantaId,
       userId: param.currentUserId,
     })
 
     this.checkSecretSantaNotStarted(secretSanta)
 
-    const alreadyExists = await this.secretSantaUserRepository.attendeesExistsForSecretSanta({
+    const alreadyExists = await this.legacySecretSantaUserRepository.attendeesExistsForSecretSanta({
       secretSantaId: secretSanta.id,
       attendeeIds: param.dto.attendee_ids,
     })
@@ -222,7 +225,7 @@ export class SecretSantaService {
       }),
     )
 
-    await this.secretSantaUserRepository.save(entities)
+    await this.legacySecretSantaUserRepository.save(entities)
 
     const users = await Promise.all(entities.map(entity => toSecretSantaUserDto(entity)))
 
@@ -230,12 +233,12 @@ export class SecretSantaService {
   }
 
   async updateSecretSantaUser(param: {
-    currentUserId: string
-    secretSantaId: string
-    secretSantaUserId: string
+    currentUserId: UserId
+    secretSantaId: SecretSantaId
+    secretSantaUserId: SecretSantaUserId
     dto: UpdateSecretSantaUserInputDto
   }): Promise<void> {
-    const secretSanta = await this.secretSantaRepository.getSecretSantaForUserOrFail({
+    const secretSanta = await this.legacySecretSantaRepository.getSecretSantaForUserOrFail({
       id: param.secretSantaId,
       userId: param.currentUserId,
     })
@@ -245,7 +248,7 @@ export class SecretSantaService {
     const secretSantaUsers =
       param.dto.exclusions.length === 0
         ? []
-        : await this.secretSantaUserRepository.findBy({
+        : await this.legacySecretSantaUserRepository.findBy({
             id: In(param.dto.exclusions),
             secretSantaId: param.secretSantaId,
           })
@@ -256,7 +259,7 @@ export class SecretSantaService {
       throw new BadRequestException('Secret santa user cannot exclude himself')
     }
 
-    await this.secretSantaUserRepository.update(
+    await this.legacySecretSantaUserRepository.update(
       { id: param.secretSantaUserId },
       {
         exclusions: exclusionsIds,
@@ -265,18 +268,18 @@ export class SecretSantaService {
   }
 
   async deleteSecretSantaUser(param: {
-    currentUserId: string
-    secretSantaId: string
-    secretSantaUserId: string
+    currentUserId: UserId
+    secretSantaId: SecretSantaId
+    secretSantaUserId: SecretSantaUserId
   }): Promise<void> {
-    const secretSanta = await this.secretSantaRepository.getSecretSantaForUserOrFail({
+    const secretSanta = await this.legacySecretSantaRepository.getSecretSantaForUserOrFail({
       id: param.secretSantaId,
       userId: param.currentUserId,
     })
 
     this.checkSecretSantaNotStarted(secretSanta)
 
-    await this.secretSantaUserRepository.transaction(async em => {
+    await this.legacySecretSantaUserRepository.transaction(async em => {
       await em.delete(SecretSantaUserEntity, { id: param.secretSantaUserId })
       await em.update(
         SecretSantaUserEntity,

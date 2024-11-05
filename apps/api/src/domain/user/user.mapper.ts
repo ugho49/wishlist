@@ -59,8 +59,8 @@ export const UserMapper = {
       passwordEnc: params.password_enc ?? undefined,
       pictureUrl: params.picture_url ?? undefined,
       socials: params.socials.map(social => UserSocialMapper.toDomain(social)),
-      createdAt: params.created_at,
-      updatedAt: params.updated_at,
+      createdAt: new Date(params.created_at),
+      updatedAt: new Date(params.updated_at),
     }),
   toInsertable(user: User): Insertable<UserTable> {
     return {
@@ -89,8 +89,8 @@ export const UserSocialMapper = {
       externalProviderId: params.social_id,
       socialType: params.social_type,
       pictureUrl: params.picture_url ?? undefined,
-      createdAt: params.created_at,
-      updatedAt: params.updated_at,
+      createdAt: new Date(params.created_at),
+      updatedAt: new Date(params.updated_at),
     }),
   toInsertable(social: UserSocial): Insertable<UserSocialTable> {
     return {

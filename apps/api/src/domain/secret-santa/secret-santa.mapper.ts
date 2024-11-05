@@ -38,3 +38,7 @@ export async function toSecretSantaUserWithDrawDto(entity: SecretSantaUserEntity
     draw,
   }
 }
+
+export const SecretSantaMapper = {}
+
+export const SecretSantaUserMapper = {}
