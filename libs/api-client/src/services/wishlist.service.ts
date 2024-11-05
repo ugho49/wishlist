@@ -39,19 +39,19 @@ export class WishlistService {
   }
 
   async update(wishlistId: string, data: UpdateWishlistInputDto): Promise<void> {
-    await this.client.put(`/wishlist/${wishlistId}`, data).then(res => res.data)
+    await this.client.put(`/wishlist/${wishlistId}`, data)
   }
 
   async delete(wishlistId: string): Promise<void> {
-    await this.client.delete(`/wishlist/${wishlistId}`).then(res => res.data)
+    await this.client.delete(`/wishlist/${wishlistId}`)
   }
 
   async linkWishlistToAnEvent(wishlistId: string, data: LinkUnlinkWishlistInputDto): Promise<void> {
-    await this.client.post(`/wishlist/${wishlistId}/link-event`, data).then(res => res.data)
+    await this.client.post(`/wishlist/${wishlistId}/link-event`, data)
   }
 
   async unlinkWishlistToAnEvent(wishlistId: string, data: LinkUnlinkWishlistInputDto): Promise<void> {
-    await this.client.post(`/wishlist/${wishlistId}/unlink-event`, data).then(res => res.data)
+    await this.client.post(`/wishlist/${wishlistId}/unlink-event`, data)
   }
 
   async uploadLogo(wishlistId: string, file: File): Promise<UpdateWishlistLogoOutputDto> {
@@ -66,6 +66,6 @@ export class WishlistService {
   }
 
   async removeLogo(wishlistId: string): Promise<void> {
-    await this.client.delete(`/wishlist/${wishlistId}/logo`).then(res => res.data)
+    await this.client.delete(`/wishlist/${wishlistId}/logo`)
   }
 }

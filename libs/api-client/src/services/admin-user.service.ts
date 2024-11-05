@@ -21,11 +21,11 @@ export class AdminUserService {
   }
 
   async update(userId: string, data: UpdateFullUserProfileInputDto): Promise<void> {
-    await this.client.patch(`/admin/user/${userId}`, data).then(res => res.data)
+    await this.client.patch(`/admin/user/${userId}`, data)
   }
 
   async delete(userId: string): Promise<void> {
-    await this.client.delete(`/admin/user/${userId}`).then(res => res.data)
+    await this.client.delete(`/admin/user/${userId}`)
   }
 
   async uploadPicture(userId: string, file: File): Promise<UpdateUserPictureOutputDto> {
@@ -40,6 +40,6 @@ export class AdminUserService {
   }
 
   async deletePicture(userId: string): Promise<void> {
-    await this.client.delete(`/admin/user/${userId}/picture`).then(res => res.data)
+    await this.client.delete(`/admin/user/${userId}/picture`)
   }
 }

@@ -27,10 +27,10 @@ export class EventService {
   }
 
   async update(eventId: string, data: UpdateEventInputDto): Promise<void> {
-    await this.client.put(`/event/${eventId}`, data).then(res => res.data)
+    await this.client.put(`/event/${eventId}`, data)
   }
 
   async delete(eventId: string): Promise<void> {
-    await this.client.delete(`/event/${eventId}`).then(res => res.data)
+    await this.client.delete(`/event/${eventId}`)
   }
 }
