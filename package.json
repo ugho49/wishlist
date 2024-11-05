@@ -146,7 +146,7 @@
     "jest-extended": "4.0.2",
     "jest-junit": "16.0.0",
     "jsdom": "24.1.1",
-    "lint-staged": "15.2.8",
+    "lint-staged": "15.2.10",
     "nx": "20.0.8",
     "prettier": "3.3.3",
     "react-refresh": "0.14.2",
