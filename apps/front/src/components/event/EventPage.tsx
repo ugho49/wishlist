@@ -1,15 +1,18 @@
+import type { AttendeeDto } from '@wishlist/common-types'
+
+import type { RootState } from '../../core'
+
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import EditIcon from '@mui/icons-material/Edit'
 import ForestIcon from '@mui/icons-material/Forest'
 import PeopleIcon from '@mui/icons-material/People'
 import { Box, Chip, Stack } from '@mui/material'
-import { AttendeeDto, canEditEvent } from '@wishlist/common-types'
+import { canEditEvent } from '@wishlist/common-types'
 import { DateTime } from 'luxon'
 import React, { useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useNavigate, useParams } from 'react-router-dom'
 
-import { RootState } from '../../core'
 import { useEventById } from '../../hooks/domain/useEventById'
 import { Description } from '../common/Description'
 import { Loader } from '../common/Loader'

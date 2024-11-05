@@ -1,4 +1,6 @@
-import axios, { CreateAxiosDefaults } from 'axios'
+import type { CreateAxiosDefaults } from 'axios'
+
+import axios from 'axios'
 
 import {
   AdminEventService,

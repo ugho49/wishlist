@@ -1,3 +1,5 @@
+import type { UserId, UserSocialId } from '../ids'
+
 import { Transform } from 'class-transformer'
 import {
   IsBoolean,
@@ -18,7 +20,7 @@ export class UpdateUserPictureOutputDto {
 }
 
 export class UserSocialDto {
-  id: string
+  id: UserSocialId
   social_id: string
   social_type: string
   picture_url?: string
@@ -27,7 +29,7 @@ export class UserSocialDto {
 }
 
 export class MiniUserDto {
-  id: string
+  id: UserId
   firstname: string
   lastname: string
   email: string

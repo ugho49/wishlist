@@ -6,8 +6,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React, { useState } from 'react'
 
 import SecretSanta from '../../assets/illustrations/secret_santa.png'
-import { useApi } from '../../hooks/useApi'
-import { useToast } from '../../hooks/useToast'
+import { useApi, useToast } from '../../hooks'
 import { EditSecretSantaFormDialog } from './EditSecretSantaFormDialog'
 
 type NoSecretSantaProps = {

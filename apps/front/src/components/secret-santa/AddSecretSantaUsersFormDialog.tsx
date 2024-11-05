@@ -1,15 +1,16 @@
+import type { TransitionProps } from '@mui/material/transitions'
+import type { GridColDef } from '@mui/x-data-grid'
+import type { AttendeeDto, AttendeeId, SecretSantaUserDto } from '@wishlist/common-types'
+
 import CloseIcon from '@mui/icons-material/Close'
 import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt'
 import { LoadingButton } from '@mui/lab'
 import { AppBar, Avatar, Container, Dialog, IconButton, Slide, Stack, Toolbar, Typography } from '@mui/material'
-import { TransitionProps } from '@mui/material/transitions'
-import { DataGrid, GridColDef } from '@mui/x-data-grid'
+import { DataGrid } from '@mui/x-data-grid'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { AttendeeDto, SecretSantaUserDto } from '@wishlist/common-types'
 import React, { forwardRef, useEffect, useMemo, useState } from 'react'
 
-import { useApi } from '../../hooks/useApi'
-import { useToast } from '../../hooks/useToast'
+import { useApi, useToast } from '../../hooks'
 import { Status } from '../common/Status'
 
 const Transition = forwardRef(function Transition(
@@ -83,7 +84,7 @@ export const AddSecretSantaUsersFormDialog = ({
   const api = useApi()
   const queryClient = useQueryClient()
   const { addToast } = useToast()
-  const [selectedIds, setSelectedIds] = useState<string[]>([])
+  const [selectedIds, setSelectedIds] = useState<AttendeeId[]>([])
 
   const { mutateAsync: addUsers, isPending: loading } = useMutation({
     mutationKey: ['secret-santa.add-users', { id: secretSantaId }],
@@ -153,7 +154,7 @@ export const AddSecretSantaUsersFormDialog = ({
           }}
           checkboxSelection
           isRowSelectable={() => !loading}
-          onRowSelectionModelChange={newRowSelectionModel => setSelectedIds(newRowSelectionModel as string[])}
+          onRowSelectionModelChange={newRowSelectionModel => setSelectedIds(newRowSelectionModel as AttendeeId[])}
           rows={rows}
           columns={columns}
           autoHeight

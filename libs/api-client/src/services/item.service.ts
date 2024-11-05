@@ -6,8 +6,7 @@ import type {
   ScanItemOutputDto,
   ToggleItemOutputDto,
 } from '@wishlist/common-types'
-
-import { AxiosInstance } from 'axios'
+import type { AxiosInstance } from 'axios'
 
 export class ItemService {
   constructor(private readonly client: AxiosInstance) {}

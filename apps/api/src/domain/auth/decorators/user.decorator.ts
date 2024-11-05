@@ -1,5 +1,7 @@
-import { createParamDecorator, ExecutionContext } from '@nestjs/common'
-import { ICurrentUser } from '@wishlist/common-types'
+import type { ExecutionContext } from '@nestjs/common'
+import type { ICurrentUser } from '@wishlist/common-types'
+
+import { createParamDecorator } from '@nestjs/common'
 
 export const CurrentUser = createParamDecorator((data: keyof ICurrentUser, ctx: ExecutionContext) => {
   const request = ctx.switchToHttp().getRequest()

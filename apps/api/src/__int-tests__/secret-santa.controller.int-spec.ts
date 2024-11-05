@@ -1,7 +1,9 @@
+import type { RequestApp } from './utils'
+
 import { DateTime } from 'luxon'
 
 import { PasswordManager } from '../domain/auth'
-import { Fixtures, RequestApp, useTestApp, useTestMail } from './utils'
+import { Fixtures, useTestApp, useTestMail } from './utils'
 
 describe('UserController', () => {
   const { getRequest, expectTable, getFixtures } = useTestApp()

@@ -1,3 +1,5 @@
+import type { EventId, WishlistId } from '../ids'
+
 import { Type } from 'class-transformer'
 import {
   ArrayMaxSize,
@@ -13,7 +15,6 @@ import {
 } from 'class-validator'
 
 import { MAX_EVENTS_BY_LIST } from '../constants'
-import { EventId } from '../ids'
 import { MiniEventDto } from './event.dto'
 import { AddItemInputDto, ItemDto } from './item.dto'
 import { MiniUserDto } from './user.dto'
@@ -27,7 +28,7 @@ export class UpdateWishlistLogoOutputDto {
 }
 
 export class MiniWishlistDto {
-  id: string
+  id: WishlistId
   title: string
   description?: string
   logo_url?: string

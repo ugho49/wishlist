@@ -1,5 +1,5 @@
-import { Authorities } from '../enums'
-import { UserId } from '../ids'
+import type { Authorities } from '../enums'
+import type { UserId } from '../ids'
 
 export interface AccessTokenJwtPayload {
   sub: UserId

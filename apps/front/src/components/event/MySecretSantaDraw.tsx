@@ -1,4 +1,6 @@
-import { Avatar, Box, Stack, Theme } from '@mui/material'
+import type { Theme } from '@mui/material'
+
+import { Avatar, Box, Stack } from '@mui/material'
 import { makeStyles } from '@mui/styles'
 import React from 'react'
 

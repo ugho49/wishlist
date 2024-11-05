@@ -1,8 +1,9 @@
+import type { RootState } from '../../core'
+
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useSelector } from 'react-redux'
 
-import { RootState } from '../../core'
 import { useApi } from '../useApi'
 
 const mapState = (state: RootState) => state.auth.user?.id

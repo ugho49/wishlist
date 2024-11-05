@@ -1,7 +1,9 @@
 /// <reference types="vite-plugin-svgr/client" />
+import type { Theme } from '@mui/material'
+
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import LogoutIcon from '@mui/icons-material/Logout'
-import { AppBar, Box, Button, Container, IconButton, Stack, Theme, Toolbar, Typography } from '@mui/material'
+import { AppBar, Box, Button, Container, IconButton, Stack, Toolbar, Typography } from '@mui/material'
 import { makeStyles } from '@mui/styles'
 import { useCallback } from 'react'
 import { Link, useNavigate } from 'react-router-dom'

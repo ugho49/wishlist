@@ -1,3 +1,5 @@
+import type { SecretSantaUserDto } from '@wishlist/common-types'
+
 import CloseIcon from '@mui/icons-material/Close'
 import { LoadingButton } from '@mui/lab'
 import {
@@ -17,11 +19,9 @@ import {
   Typography,
 } from '@mui/material'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { SecretSantaUserDto } from '@wishlist/common-types'
 import { useCallback, useEffect, useState } from 'react'
 
-import { useApi } from '../../hooks/useApi'
-import { useToast } from '../../hooks/useToast'
+import { useApi, useToast } from '../../hooks'
 
 export interface ManageUserExclusionsDialogProps {
   open: boolean

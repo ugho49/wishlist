@@ -11,7 +11,7 @@ const typescriptPlugin = tslint.plugin
 /** @type {import('@typescript-eslint/utils').TSESLint.FlatConfig.ConfigFile} */
 module.exports = [
   {
-    ignores: ['**/dist/**', '**/coverage/**', '**/*.cjs', '**/*/eslint.config.js'],
+    ignores: ['**/dist/**', '**/coverage/**', '**/*.cjs'],
   },
   eslint.configs.recommended,
   ...tslint.configs.recommended,
@@ -38,6 +38,10 @@ module.exports = [
       '@typescript-eslint/arrow-parens': 'off',
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/consistent-type-imports': [
+        'error',
+        { prefer: 'type-imports', fixStyle: 'separate-type-imports' },
+      ],
       '@nx/enforce-module-boundaries': [
         'error',
         {

@@ -1,3 +1,7 @@
+import type { MiniUserDto } from '@wishlist/common-types'
+
+import type { RootState } from '../../core'
+
 import DeleteIcon from '@mui/icons-material/Delete'
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft'
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'
@@ -20,13 +24,12 @@ import {
 } from '@mui/material'
 import { MobileDatePicker } from '@mui/x-date-pickers'
 import { useMutation } from '@tanstack/react-query'
-import { AttendeeRole, MiniUserDto } from '@wishlist/common-types'
+import { AttendeeRole } from '@wishlist/common-types'
 import { DateTime } from 'luxon'
 import React, { useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 
-import { RootState } from '../../core'
 import { useApi } from '../../hooks/useApi'
 import { useToast } from '../../hooks/useToast'
 import { Card } from '../common/Card'

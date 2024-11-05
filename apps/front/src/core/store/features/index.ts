@@ -1,4 +1,4 @@
-import { Dispatch } from '@reduxjs/toolkit'
+import type { Dispatch } from '@reduxjs/toolkit'
 
 import { resetAuthState } from './authSlice'
 import { resetUserState } from './userProfileSlice'

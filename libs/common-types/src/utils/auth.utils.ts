@@ -1,5 +1,6 @@
+import type { AccessTokenJwtPayload, ICurrentUser } from '../interfaces'
+
 import { Authorities } from '../enums'
-import { AccessTokenJwtPayload, ICurrentUser } from '../interfaces'
 
 export function createCurrentUserFromPayload(payload: AccessTokenJwtPayload): ICurrentUser {
   const authorities = payload.authorities

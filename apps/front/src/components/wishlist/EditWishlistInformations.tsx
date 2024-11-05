@@ -1,10 +1,11 @@
+import type { DetailedWishlistDto, UpdateWishlistInputDto } from '@wishlist/common-types'
+
 import { zodResolver } from '@hookform/resolvers/zod'
 import DeleteIcon from '@mui/icons-material/Delete'
 import SaveIcon from '@mui/icons-material/Save'
 import { LoadingButton } from '@mui/lab'
 import { Box, Stack, TextField } from '@mui/material'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { DetailedWishlistDto, UpdateWishlistInputDto } from '@wishlist/common-types'
 import React, { useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'

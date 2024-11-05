@@ -1,6 +1,8 @@
+import type { PropsWithChildren } from 'react'
+
 import { Box, Stack, useTheme } from '@mui/material'
 import { makeStyles } from '@mui/styles'
-import React, { PropsWithChildren } from 'react'
+import React from 'react'
 
 export type StatusProps = {
   color?: 'primary' | 'secondary' | 'success' | 'error' | 'info' | 'warning'

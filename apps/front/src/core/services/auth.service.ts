@@ -1,4 +1,5 @@
-import { AccessTokenJwtPayload, RefreshTokenJwtPayload } from '@wishlist/common-types'
+import type { AccessTokenJwtPayload, RefreshTokenJwtPayload } from '@wishlist/common-types'
+
 import { jwtDecode } from 'jwt-decode'
 
 export enum LS_KEYS {

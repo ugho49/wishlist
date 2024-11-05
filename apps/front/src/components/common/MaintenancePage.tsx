@@ -1,5 +1,6 @@
+import type { Theme } from '@mui/material'
+
 import ConstructionIcon from '@mui/icons-material/Construction'
-import { Theme } from '@mui/material'
 import Typography from '@mui/material/Typography'
 import { makeStyles } from '@mui/styles'
 import React from 'react'

@@ -1,7 +1,9 @@
+import type { Theme } from '@mui/material/styles'
+import type { SxProps } from '@mui/system'
+import type { PropsWithChildren } from 'react'
+
 import { Typography, useTheme } from '@mui/material'
-import { Theme } from '@mui/material/styles'
-import { SxProps } from '@mui/system'
-import React, { PropsWithChildren } from 'react'
+import React from 'react'
 
 export type SubtitleProps = {
   sx?: SxProps<Theme>

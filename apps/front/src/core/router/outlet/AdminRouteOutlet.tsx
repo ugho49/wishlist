@@ -1,8 +1,8 @@
+import type { RootState } from '../../store'
+
 import React from 'react'
 import { useSelector } from 'react-redux'
 import { Navigate, Outlet } from 'react-router-dom'
-
-import { RootState } from '../../store'
 
 const mapState = (state: RootState) => state.auth.user
 

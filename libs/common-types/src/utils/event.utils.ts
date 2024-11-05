@@ -1,4 +1,5 @@
-import { AttendeeDto } from '../dtos'
+import type { AttendeeDto } from '../dtos'
+
 import { AttendeeRole } from '../enums'
 
 export function canEditEvent(attendees: AttendeeDto[], userId: string): boolean {

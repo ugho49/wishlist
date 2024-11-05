@@ -1,8 +1,10 @@
+import type { Theme } from '@mui/material/styles'
+import type { SxProps } from '@mui/system'
+import type { PropsWithChildren } from 'react'
+
 import { inputLabelClasses, InputLabel as MuiInputLabel } from '@mui/material'
-import { Theme } from '@mui/material/styles'
 import { makeStyles } from '@mui/styles'
-import { SxProps } from '@mui/system'
-import React, { PropsWithChildren } from 'react'
+import React from 'react'
 
 export type InputLabelProps = {
   required?: boolean

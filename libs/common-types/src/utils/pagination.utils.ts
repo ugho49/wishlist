@@ -1,4 +1,4 @@
-import { PagedResponse } from '../dtos'
+import type { PagedResponse } from '../dtos'
 
 export function createPagedResponse<T>(params: {
   resources: T[]

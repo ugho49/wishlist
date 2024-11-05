@@ -1,8 +1,9 @@
+import type { UpdateUserPictureOutputDto, UserSocialDto } from '@wishlist/common-types'
+
 import GoogleIcon from '@mui/icons-material/Google'
 import NoPhotographyIcon from '@mui/icons-material/NoPhotography'
 import PortraitIcon from '@mui/icons-material/Portrait'
 import { Avatar, CircularProgress, ListItemIcon, ListItemText, Menu, MenuItem } from '@mui/material'
-import { UpdateUserPictureOutputDto, UserSocialDto } from '@wishlist/common-types'
 import React, { useRef, useState } from 'react'
 
 import { useToast } from '../../hooks/useToast'

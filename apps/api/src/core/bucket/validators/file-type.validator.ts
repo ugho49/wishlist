@@ -1,7 +1,6 @@
-import {
-  FileTypeValidator as NestFileTypeValidator,
-  FileTypeValidatorOptions as NestFileTypeValidatorOptions,
-} from '@nestjs/common'
+import type { FileTypeValidatorOptions as NestFileTypeValidatorOptions } from '@nestjs/common'
+
+import { FileTypeValidator as NestFileTypeValidator } from '@nestjs/common'
 
 export type FileTypeValidatorOptions = NestFileTypeValidatorOptions & {
   errorMessage?: string

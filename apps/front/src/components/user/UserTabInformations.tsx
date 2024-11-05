@@ -1,3 +1,7 @@
+import type { UpdateUserProfileInputDto, UserDto } from '@wishlist/common-types'
+
+import type { RootState } from '../../core'
+
 import { zodResolver } from '@hookform/resolvers/zod'
 import SaveIcon from '@mui/icons-material/Save'
 import { LoadingButton } from '@mui/lab'
@@ -6,14 +10,12 @@ import { useTheme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import { MobileDatePicker } from '@mui/x-date-pickers'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { UpdateUserProfileInputDto, UserDto } from '@wishlist/common-types'
 import { DateTime } from 'luxon'
 import React from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
 import { z } from 'zod'
 
-import { RootState } from '../../core'
 import { updatePicture as updatePictureAction, updateUser as updateUserAction } from '../../core/store/features'
 import { useFetchUserInfo } from '../../hooks/domain/useFetchUserInfo'
 import { useApi } from '../../hooks/useApi'

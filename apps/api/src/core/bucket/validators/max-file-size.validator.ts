@@ -1,7 +1,6 @@
-import {
-  MaxFileSizeValidator as NestMaxFileSizeValidator,
-  MaxFileSizeValidatorOptions as NestMaxFileSizeValidatorOptions,
-} from '@nestjs/common'
+import type { MaxFileSizeValidatorOptions as NestMaxFileSizeValidatorOptions } from '@nestjs/common'
+
+import { MaxFileSizeValidator as NestMaxFileSizeValidator } from '@nestjs/common'
 
 export type MaxFileSizeValidatorOptions = NestMaxFileSizeValidatorOptions & {
   errorMessage?: string

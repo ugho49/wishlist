@@ -5,10 +5,9 @@ import type {
   UpdateUserPictureOutputDto,
   UserDto,
 } from '@wishlist/common-types'
+import type { AxiosInstance } from 'axios'
 
-import { AxiosInstance } from 'axios'
-
-import { CommonRequestOptions } from './common'
+import type { CommonRequestOptions } from './common'
 
 export class AdminUserService {
   constructor(private readonly client: AxiosInstance) {}

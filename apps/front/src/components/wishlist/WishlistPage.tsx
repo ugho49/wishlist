@@ -1,3 +1,5 @@
+import type { RootState } from '../../core'
+
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import EditIcon from '@mui/icons-material/Edit'
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined'
@@ -7,7 +9,6 @@ import React, { useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useNavigate, useParams } from 'react-router-dom'
 
-import { RootState } from '../../core'
 import { useWishlistById } from '../../hooks/domain/useWishlistById'
 import { Description } from '../common/Description'
 import { Loader } from '../common/Loader'

@@ -1,12 +1,14 @@
+import type { DetailedEventDto, UpdateEventInputDto } from '@wishlist/common-types'
+import type { FormEvent } from 'react'
+
 import DeleteIcon from '@mui/icons-material/Delete'
 import SaveIcon from '@mui/icons-material/Save'
 import { LoadingButton } from '@mui/lab'
 import { Box, Stack, TextField } from '@mui/material'
 import { MobileDatePicker } from '@mui/x-date-pickers'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { DetailedEventDto, UpdateEventInputDto } from '@wishlist/common-types'
 import { DateTime } from 'luxon'
-import React, { FormEvent, useState } from 'react'
+import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { useApi } from '../../hooks/useApi'

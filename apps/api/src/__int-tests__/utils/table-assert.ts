@@ -1,7 +1,7 @@
 import 'jest'
 import 'jest-expect-message'
 
-import { DataSource } from 'typeorm'
+import type { DataSource } from 'typeorm'
 
 type DbAssertion = () => Promise<unknown>
 

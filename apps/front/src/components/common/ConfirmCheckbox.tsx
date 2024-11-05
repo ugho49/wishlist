@@ -1,6 +1,7 @@
+import type { Theme } from '@mui/material/styles'
+import type { SxProps } from '@mui/system'
+
 import { Button, Checkbox, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material'
-import { Theme } from '@mui/material/styles'
-import { SxProps } from '@mui/system'
 import React, { useCallback, useState } from 'react'
 
 export type ConfirmCheckboxProps = {

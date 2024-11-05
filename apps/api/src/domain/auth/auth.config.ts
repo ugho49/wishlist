@@ -1,5 +1,6 @@
+import type { Algorithm } from 'jsonwebtoken'
+
 import { registerAs } from '@nestjs/config'
-import { Algorithm } from 'jsonwebtoken'
 
 export default registerAs('auth', () => ({
   issuer: process.env.AUTH_ISSUER || '',

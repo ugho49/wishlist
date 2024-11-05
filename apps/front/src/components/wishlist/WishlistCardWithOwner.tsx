@@ -1,10 +1,12 @@
+import type { Theme } from '@mui/material'
+import type { WishlistWithOwnerDto } from '@wishlist/common-types'
+
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'
 import PersonIcon from '@mui/icons-material/Person'
 import PublicIcon from '@mui/icons-material/Public'
-import { Avatar, Badge, Stack, Theme } from '@mui/material'
+import { Avatar, Badge, Stack } from '@mui/material'
 import { grey } from '@mui/material/colors'
 import { makeStyles } from '@mui/styles'
-import { WishlistWithOwnerDto } from '@wishlist/common-types'
 import clsx from 'clsx'
 import React from 'react'
 

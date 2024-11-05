@@ -1,7 +1,8 @@
-import { AttendeeDto } from '@wishlist/common-types'
+import type { AttendeeDto } from '@wishlist/common-types'
+
+import type { AttendeeEntity } from './attendee.entity'
 
 import { toMiniUserDto } from '../user/user.mapper'
-import { AttendeeEntity } from './attendee.entity'
 
 export async function toAttendeeDto(entity: AttendeeEntity): Promise<AttendeeDto> {
   const user = await entity.user

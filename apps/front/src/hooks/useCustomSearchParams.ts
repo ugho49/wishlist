@@ -1,5 +1,7 @@
+import type { URLSearchParamsInit } from 'react-router-dom'
+
 import { useCallback, useMemo } from 'react'
-import { URLSearchParamsInit, useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 
 type ParamType<T> = T & { [key: string]: string | string[] | undefined }
 

@@ -1,3 +1,5 @@
+import type { FormEvent } from 'react'
+
 import {
   Box,
   Button,
@@ -8,7 +10,7 @@ import {
   DialogTitle,
   TextField,
 } from '@mui/material'
-import React, { FormEvent, useState } from 'react'
+import React, { useState } from 'react'
 
 import { useApi } from '../../../hooks/useApi'
 import { useToast } from '../../../hooks/useToast'
