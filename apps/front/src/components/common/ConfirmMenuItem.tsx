@@ -1,5 +1,4 @@
-import type { Theme } from '@mui/material/styles'
-import type { SxProps } from '@mui/system'
+import type { SxProps, Theme } from '@mui/material/styles'
 import type { PropsWithChildren } from 'react'
 
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, MenuItem } from '@mui/material'

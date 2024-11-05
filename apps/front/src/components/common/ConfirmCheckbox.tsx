@@ -1,5 +1,4 @@
-import type { Theme } from '@mui/material/styles'
-import type { SxProps } from '@mui/system'
+import type { SxProps, Theme } from '@mui/material/styles'
 
 import { Button, Checkbox, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material'
 import React, { useCallback, useState } from 'react'
