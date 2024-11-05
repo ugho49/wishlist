@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common'
+import { EventId } from '@wishlist/common-types'
 
 import { MailService } from '../../core/mail/mail.service'
 
@@ -8,7 +9,7 @@ export class EventMailer {
 
   async sendEmailForExistingAttendee(params: {
     emails: string[] | string
-    event: { id: string; title: string }
+    event: { id: EventId; title: string }
     invitedBy: { firstName: string; lastName: string }
   }): Promise<void> {
     if (params.emails.length === 0) {
@@ -29,7 +30,7 @@ export class EventMailer {
 
   async sendEmailForNotExistingAttendee(params: {
     emails: string[] | string
-    event: { id: string; title: string }
+    event: { id: EventId; title: string }
     invitedBy: { firstName: string; lastName: string }
   }): Promise<void> {
     if (params.emails.length === 0) {

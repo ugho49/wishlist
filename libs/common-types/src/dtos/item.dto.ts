@@ -2,6 +2,7 @@ import { Transform } from 'class-transformer'
 import { IsInt, IsNotEmpty, IsOptional, IsString, IsUrl, Max, MaxLength, Min } from 'class-validator'
 import { TidyURL } from 'tidy-url'
 
+import { WishlistId } from '../ids'
 import { MiniUserDto } from './user.dto'
 
 export class ItemDto {
@@ -58,7 +59,7 @@ export class AddItemInputDto {
 export class AddItemForListInputDto extends AddItemInputDto {
   @IsString()
   @IsNotEmpty()
-  wishlist_id: string
+  wishlist_id: WishlistId
 }
 
 export class ScanItemInputDto {

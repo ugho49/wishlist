@@ -11,10 +11,14 @@ import {
   CreateSecretSantaInputDto,
   CreateSecretSantaUsersInputDto,
   CreateSecretSantaUsersOutputDto,
+  EventId,
   SecretSantaDto,
+  SecretSantaId,
   SecretSantaStatus,
+  SecretSantaUserId,
   UpdateSecretSantaInputDto,
   UpdateSecretSantaUserInputDto,
+  UserId,
 } from '@wishlist/common-types'
 import { ArrayContains, In } from 'typeorm'
 
@@ -34,7 +38,7 @@ export class SecretSantaService {
     private readonly mailer: SecretSantaMailer,
   ) {}
 
-  async getForEvent(param: { eventId: string; currentUserId: string }): Promise<SecretSantaDto | null> {
+  async getForEvent(param: { eventId: EventId; currentUserId: UserId }): Promise<SecretSantaDto | null> {
     return this.secretSantaRepository
       .getSecretSantaForEventAndUser({
         eventId: param.eventId,
@@ -43,7 +47,7 @@ export class SecretSantaService {
       .then(entity => (entity ? toSecretSantaDto(entity) : null))
   }
 
-  async getMyDrawForEvent(param: { eventId: string; currentUserId: string }): Promise<AttendeeDto | null> {
+  async getMyDrawForEvent(param: { eventId: EventId; currentUserId: UserId }): Promise<AttendeeDto | null> {
     return this.secretSantaUserRepository
       .getDrawSecretSantaUserForEvent({
         eventId: param.eventId,
@@ -53,7 +57,7 @@ export class SecretSantaService {
       .then(entity => (entity ? toAttendeeDto(entity) : null))
   }
 
-  async createForEvent(param: { currentUserId: string; dto: CreateSecretSantaInputDto }): Promise<SecretSantaDto> {
+  async createForEvent(param: { currentUserId: UserId; dto: CreateSecretSantaInputDto }): Promise<SecretSantaDto> {
     const alreadyExists = await this.secretSantaRepository.exists({ where: { eventId: param.dto.event_id } })
 
     if (alreadyExists) {
@@ -81,8 +85,8 @@ export class SecretSantaService {
   }
 
   async updateSecretSanta(param: {
-    currentUserId: string
-    secretSantaId: string
+    currentUserId: UserId
+    secretSantaId: SecretSantaId
     dto: UpdateSecretSantaInputDto
   }): Promise<void> {
     const secretSanta = await this.secretSantaRepository.getSecretSantaForUserOrFail({
@@ -101,7 +105,7 @@ export class SecretSantaService {
     )
   }
 
-  async deleteSecretSanta(param: { currentUserId: string; secretSantaId: string }): Promise<void> {
+  async deleteSecretSanta(param: { currentUserId: UserId; secretSantaId: SecretSantaId }): Promise<void> {
     const secretSanta = await this.secretSantaRepository.getSecretSantaForUserOrFail({
       id: param.secretSantaId,
       userId: param.currentUserId,
@@ -112,7 +116,7 @@ export class SecretSantaService {
     await this.secretSantaRepository.delete({ id: secretSanta.id })
   }
 
-  async startSecretSanta(param: { currentUserId: string; secretSantaId: string }): Promise<void> {
+  async startSecretSanta(param: { currentUserId: UserId; secretSantaId: SecretSantaId }): Promise<void> {
     const secretSanta = await this.secretSantaRepository.getSecretSantaForUserOrFail({
       id: param.secretSantaId,
       userId: param.currentUserId,
@@ -160,7 +164,7 @@ export class SecretSantaService {
     })
   }
 
-  async cancelSecretSanta(param: { currentUserId: string; secretSantaId: string }): Promise<void> {
+  async cancelSecretSanta(param: { currentUserId: UserId; secretSantaId: SecretSantaId }): Promise<void> {
     const secretSanta = await this.secretSantaRepository.getSecretSantaForUserOrFail({
       id: param.secretSantaId,
       userId: param.currentUserId,
@@ -187,8 +191,8 @@ export class SecretSantaService {
   }
 
   async addSecretSantaUsers(param: {
-    currentUserId: string
-    secretSantaId: string
+    currentUserId: UserId
+    secretSantaId: SecretSantaId
     dto: CreateSecretSantaUsersInputDto
   }): Promise<CreateSecretSantaUsersOutputDto> {
     const secretSanta = await this.secretSantaRepository.getSecretSantaForUserOrFail({
@@ -230,9 +234,9 @@ export class SecretSantaService {
   }
 
   async updateSecretSantaUser(param: {
-    currentUserId: string
-    secretSantaId: string
-    secretSantaUserId: string
+    currentUserId: UserId
+    secretSantaId: SecretSantaId
+    secretSantaUserId: SecretSantaUserId
     dto: UpdateSecretSantaUserInputDto
   }): Promise<void> {
     const secretSanta = await this.secretSantaRepository.getSecretSantaForUserOrFail({
@@ -265,9 +269,9 @@ export class SecretSantaService {
   }
 
   async deleteSecretSantaUser(param: {
-    currentUserId: string
-    secretSantaId: string
-    secretSantaUserId: string
+    currentUserId: UserId
+    secretSantaId: SecretSantaId
+    secretSantaUserId: SecretSantaUserId
   }): Promise<void> {
     const secretSanta = await this.secretSantaRepository.getSecretSantaForUserOrFail({
       id: param.secretSantaId,

@@ -1,12 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { BaseRepository } from '@wishlist/common-database'
+import { EventId, UserId, WishlistId } from '@wishlist/common-types'
 import { EntityManager } from 'typeorm'
 
 import { WishlistEntity } from './wishlist.entity'
 
 @Injectable()
 export class WishlistRepository extends BaseRepository(WishlistEntity) {
-  findByIdAndUserId(params: { userId: string; wishlistId: string }): Promise<WishlistEntity | null> {
+  findByIdAndUserId(params: { userId: UserId; wishlistId: WishlistId }): Promise<WishlistEntity | null> {
     return this.createQueryBuilder('w')
       .leftJoinAndSelect('w.events', 'e')
       .leftJoinAndSelect('w.owner', 'o')
@@ -16,7 +17,7 @@ export class WishlistRepository extends BaseRepository(WishlistEntity) {
       .getOne()
   }
 
-  getMyWishlistPaginated(params: { ownerId: string; take: number; skip: number }): Promise<[WishlistEntity[], number]> {
+  getMyWishlistPaginated(params: { ownerId: UserId; take: number; skip: number }): Promise<[WishlistEntity[], number]> {
     const { ownerId, take, skip } = params
 
     const fetchQuery = this.createQueryBuilder('w')
@@ -33,7 +34,7 @@ export class WishlistRepository extends BaseRepository(WishlistEntity) {
     return Promise.all([fetchQuery, countQuery])
   }
 
-  async findByIdOrThrow(wishlistId: string): Promise<WishlistEntity> {
+  async findByIdOrThrow(wishlistId: WishlistId): Promise<WishlistEntity> {
     const entity = await this.findOneBy({ id: wishlistId })
 
     if (!entity) {
@@ -43,7 +44,7 @@ export class WishlistRepository extends BaseRepository(WishlistEntity) {
     return entity
   }
 
-  findEmailsToNotify(param: { ownerId: string; wishlistId: string }): Promise<string[]> {
+  findEmailsToNotify(param: { ownerId: UserId; wishlistId: WishlistId }): Promise<string[]> {
     const { ownerId, wishlistId } = param
 
     return this.query(
@@ -63,14 +64,14 @@ export class WishlistRepository extends BaseRepository(WishlistEntity) {
     ).then((list: Array<{ email: string }>) => list.reduce<string[]>((acc, val) => [...acc, val.email], []))
   }
 
-  async linkEvent(params: { wishlistId: string; eventId: string }): Promise<void> {
+  async linkEvent(params: { wishlistId: WishlistId; eventId: EventId }): Promise<void> {
     await this.query('INSERT INTO event_wishlist ("event_id","wishlist_id") VALUES ($1, $2)', [
       params.eventId,
       params.wishlistId,
     ])
   }
 
-  async unlinkEvent(params: { wishlistId: string; eventId: string; em?: EntityManager }): Promise<void> {
+  async unlinkEvent(params: { wishlistId: WishlistId; eventId: EventId; em?: EntityManager }): Promise<void> {
     const manager = params.em || this.manager
     await manager.query('DELETE FROM event_wishlist WHERE event_id = $1 AND wishlist_id = $2', [
       params.eventId,

@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common'
 import { BaseRepository } from '@wishlist/common-database'
-import { ArrayContains, In } from 'typeorm'
+import { AttendeeId, EventId, SecretSantaId, UserId } from '@wishlist/common-types'
+import { In } from 'typeorm'
 
 import { SecretSantaEntity, SecretSantaUserEntity } from './secret-santa.entity'
 
 @Injectable()
 export class SecretSantaRepository extends BaseRepository(SecretSantaEntity) {
-  getSecretSantaForEventAndUser(param: { eventId: string; userId: string }): Promise<SecretSantaEntity | null> {
+  getSecretSantaForEventAndUser(param: { eventId: EventId; userId: UserId }): Promise<SecretSantaEntity | null> {
     const { eventId, userId } = param
     return this.createQueryBuilder('ss')
       .leftJoinAndSelect('ss.users', 'u')
@@ -17,7 +18,7 @@ export class SecretSantaRepository extends BaseRepository(SecretSantaEntity) {
       .getOne()
   }
 
-  getSecretSantaForUserOrFail(param: { id: string; userId: string }): Promise<SecretSantaEntity> {
+  getSecretSantaForUserOrFail(param: { id: SecretSantaId; userId: UserId }): Promise<SecretSantaEntity> {
     const { id, userId } = param
     return this.createQueryBuilder('ss')
       .leftJoinAndSelect('ss.users', 'u')
@@ -32,8 +33,8 @@ export class SecretSantaRepository extends BaseRepository(SecretSantaEntity) {
 @Injectable()
 export class SecretSantaUserRepository extends BaseRepository(SecretSantaUserEntity) {
   async getDrawSecretSantaUserForEvent(param: {
-    eventId: string
-    userId: string
+    eventId: EventId
+    userId: UserId
   }): Promise<SecretSantaUserEntity | null> {
     const { eventId, userId } = param
     const currentSantaUser = await this.createQueryBuilder('ssu')
@@ -51,7 +52,7 @@ export class SecretSantaUserRepository extends BaseRepository(SecretSantaUserEnt
     return await this.findOneBy({ id: currentSantaUser.drawUserId })
   }
 
-  attendeesExistsForSecretSanta(param: { secretSantaId: string; attendeeIds: string[] }): Promise<boolean> {
+  attendeesExistsForSecretSanta(param: { secretSantaId: SecretSantaId; attendeeIds: AttendeeId[] }): Promise<boolean> {
     return this.exists({
       where: { secretSantaId: param.secretSantaId, attendeeId: In(param.attendeeIds) },
     })

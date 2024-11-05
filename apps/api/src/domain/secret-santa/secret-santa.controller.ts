@@ -5,9 +5,13 @@ import {
   CreateSecretSantaInputDto,
   CreateSecretSantaUsersInputDto,
   CreateSecretSantaUsersOutputDto,
+  EventId,
   SecretSantaDto,
+  SecretSantaId,
+  SecretSantaUserId,
   UpdateSecretSantaInputDto,
   UpdateSecretSantaUserInputDto,
+  UserId,
 } from '@wishlist/common-types'
 
 import { CurrentUser } from '../auth'
@@ -20,23 +24,23 @@ export class SecretSantaController {
 
   @Get('/user/draw')
   getMySecretSantaDrawForEvent(
-    @CurrentUser('id') currentUserId: string,
-    @Query('eventId') eventId: string,
+    @CurrentUser('id') currentUserId: UserId,
+    @Query('eventId') eventId: EventId,
   ): Promise<AttendeeDto | null> {
     return this.secretSantaService.getMyDrawForEvent({ currentUserId, eventId })
   }
 
   @Get('/')
   getSecretSantaForEvent(
-    @CurrentUser('id') currentUserId: string,
-    @Query('eventId') eventId: string,
+    @CurrentUser('id') currentUserId: UserId,
+    @Query('eventId') eventId: EventId,
   ): Promise<SecretSantaDto | null> {
     return this.secretSantaService.getForEvent({ currentUserId, eventId })
   }
 
   @Post('/')
   createSecretSantaForEvent(
-    @CurrentUser('id') currentUserId: string,
+    @CurrentUser('id') currentUserId: UserId,
     @Body() dto: CreateSecretSantaInputDto,
   ): Promise<SecretSantaDto> {
     return this.secretSantaService.createForEvent({ currentUserId, dto })
@@ -44,32 +48,38 @@ export class SecretSantaController {
 
   @Patch('/:id')
   updateSecretSanta(
-    @Param('id') secretSantaId: string,
-    @CurrentUser('id') currentUserId: string,
+    @Param('id') secretSantaId: SecretSantaId,
+    @CurrentUser('id') currentUserId: UserId,
     @Body() dto: UpdateSecretSantaInputDto,
   ): Promise<void> {
     return this.secretSantaService.updateSecretSanta({ secretSantaId, currentUserId, dto })
   }
 
   @Delete('/:id')
-  deleteSecretSanta(@Param('id') secretSantaId: string, @CurrentUser('id') currentUserId: string): Promise<void> {
+  deleteSecretSanta(
+    @Param('id') secretSantaId: SecretSantaId,
+    @CurrentUser('id') currentUserId: UserId,
+  ): Promise<void> {
     return this.secretSantaService.deleteSecretSanta({ secretSantaId, currentUserId })
   }
 
   @Post('/:id/start')
-  startSecretSanta(@Param('id') secretSantaId: string, @CurrentUser('id') currentUserId: string): Promise<void> {
+  startSecretSanta(@Param('id') secretSantaId: SecretSantaId, @CurrentUser('id') currentUserId: UserId): Promise<void> {
     return this.secretSantaService.startSecretSanta({ secretSantaId, currentUserId })
   }
 
   @Post('/:id/cancel')
-  cancelSecretSanta(@Param('id') secretSantaId: string, @CurrentUser('id') currentUserId: string): Promise<void> {
+  cancelSecretSanta(
+    @Param('id') secretSantaId: SecretSantaId,
+    @CurrentUser('id') currentUserId: UserId,
+  ): Promise<void> {
     return this.secretSantaService.cancelSecretSanta({ secretSantaId, currentUserId })
   }
 
   @Post('/:id/users')
   addSecretSantaUsers(
-    @Param('id') secretSantaId: string,
-    @CurrentUser('id') currentUserId: string,
+    @Param('id') secretSantaId: SecretSantaId,
+    @CurrentUser('id') currentUserId: UserId,
     @Body() dto: CreateSecretSantaUsersInputDto,
   ): Promise<CreateSecretSantaUsersOutputDto> {
     return this.secretSantaService.addSecretSantaUsers({ secretSantaId, currentUserId, dto })
@@ -77,9 +87,9 @@ export class SecretSantaController {
 
   @Put('/:id/user/:secretSantaUserId')
   updateSecretSantaUser(
-    @Param('id') secretSantaId: string,
-    @Param('secretSantaUserId') secretSantaUserId: string,
-    @CurrentUser('id') currentUserId: string,
+    @Param('id') secretSantaId: SecretSantaId,
+    @Param('secretSantaUserId') secretSantaUserId: SecretSantaUserId,
+    @CurrentUser('id') currentUserId: UserId,
     @Body() dto: UpdateSecretSantaUserInputDto,
   ): Promise<void> {
     return this.secretSantaService.updateSecretSantaUser({
@@ -92,9 +102,9 @@ export class SecretSantaController {
 
   @Delete('/:id/user/:secretSantaUserId')
   deleteSecretSantaUser(
-    @Param('id') secretSantaId: string,
-    @Param('secretSantaUserId') secretSantaUserId: string,
-    @CurrentUser('id') currentUserId: string,
+    @Param('id') secretSantaId: SecretSantaId,
+    @Param('secretSantaUserId') secretSantaUserId: SecretSantaUserId,
+    @CurrentUser('id') currentUserId: UserId,
   ): Promise<void> {
     return this.secretSantaService.deleteSecretSantaUser({ secretSantaId, secretSantaUserId, currentUserId })
   }

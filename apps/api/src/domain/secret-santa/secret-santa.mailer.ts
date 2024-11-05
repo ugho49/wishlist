@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common'
+import { EventId } from '@wishlist/common-types'
 import { chunk as createChunks } from 'lodash'
 
 import { MailService } from '../../core/mail/mail.service'
@@ -9,7 +10,7 @@ export class SecretSantaMailer {
 
   async sendDrawnEmails(params: {
     eventTitle: string
-    eventId: string
+    eventId: EventId
     description?: string
     budget?: number
     drawns: Array<{
@@ -48,7 +49,7 @@ export class SecretSantaMailer {
     }
   }
 
-  async sendCancelSecretSantaEmails(params: { eventTitle: string; eventId: string; attendeeEmails: string[] }) {
+  async sendCancelSecretSantaEmails(params: { eventTitle: string; eventId: EventId; attendeeEmails: string[] }) {
     const { eventTitle, eventId, attendeeEmails } = params
     const eventUrl = `https://wishlistapp.fr/events/${eventId}`
 

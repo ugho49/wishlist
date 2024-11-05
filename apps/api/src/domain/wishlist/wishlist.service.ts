@@ -4,12 +4,15 @@ import {
   createPagedResponse,
   CreateWishlistInputDto,
   DetailedWishlistDto,
+  EventId,
   ICurrentUser,
   MAX_EVENTS_BY_LIST,
   MiniWishlistDto,
   PagedResponse,
   UpdateWishlistInputDto,
   UpdateWishlistLogoOutputDto,
+  UserId,
+  WishlistId,
   WishlistWithEventsDto,
 } from '@wishlist/common-types'
 
@@ -30,7 +33,7 @@ export class WishlistService {
     private readonly bucketService: BucketService,
   ) {}
 
-  async findById(param: { currentUserId: string; wishlistId: string }): Promise<DetailedWishlistDto> {
+  async findById(param: { currentUserId: UserId; wishlistId: WishlistId }): Promise<DetailedWishlistDto> {
     const entity = await this.wishlistRepository.findByIdAndUserId({
       userId: param.currentUserId,
       wishlistId: param.wishlistId,
@@ -44,7 +47,7 @@ export class WishlistService {
   }
 
   async getMyWishlistPaginated(param: {
-    currentUserId: string
+    currentUserId: UserId
     pageNumber: number
   }): Promise<PagedResponse<WishlistWithEventsDto>> {
     const pageSize = DEFAULT_RESULT_NUMBER
@@ -66,7 +69,7 @@ export class WishlistService {
   }
 
   async create(params: {
-    currentUserId: string
+    currentUserId: UserId
     dto: CreateWishlistInputDto
     imageFile?: Express.Multer.File
   }): Promise<MiniWishlistDto> {
@@ -120,7 +123,7 @@ export class WishlistService {
 
   async updateWishlist(param: {
     currentUser: ICurrentUser
-    wishlistId: string
+    wishlistId: WishlistId
     dto: UpdateWishlistInputDto
   }): Promise<void> {
     const { currentUser, wishlistId, dto } = param
@@ -141,7 +144,7 @@ export class WishlistService {
     )
   }
 
-  async deleteWishlist(param: { currentUser: ICurrentUser; wishlistId: string }): Promise<void> {
+  async deleteWishlist(param: { currentUser: ICurrentUser; wishlistId: WishlistId }): Promise<void> {
     const { currentUser, wishlistId } = param
     const entity = await this.wishlistRepository.findByIdOrThrow(wishlistId)
     const userCanDeleteList = entity.ownerId === currentUser.id || currentUser.isAdmin
@@ -156,7 +159,11 @@ export class WishlistService {
     await this.bucketService.removeIfExist({ destination: logoDest })
   }
 
-  async linkWishlistToAnEvent(param: { eventId: string; currentUserId: string; wishlistId: string }): Promise<void> {
+  async linkWishlistToAnEvent(param: {
+    eventId: EventId
+    currentUserId: UserId
+    wishlistId: WishlistId
+  }): Promise<void> {
     const { currentUserId, wishlistId, eventId } = param
 
     const wishlistEntity = await this.wishlistRepository.findByIdOrThrow(wishlistId)
@@ -186,7 +193,11 @@ export class WishlistService {
     await this.wishlistRepository.linkEvent({ wishlistId, eventId })
   }
 
-  async unlinkWishlistToAnEvent(param: { eventId: string; currentUserId: string; wishlistId: string }): Promise<void> {
+  async unlinkWishlistToAnEvent(param: {
+    eventId: EventId
+    currentUserId: UserId
+    wishlistId: WishlistId
+  }): Promise<void> {
     const { currentUserId, wishlistId, eventId } = param
 
     const wishlistEntity = await this.wishlistRepository.findByIdOrThrow(wishlistId)
@@ -213,9 +224,9 @@ export class WishlistService {
   }
 
   async uploadLogo(param: {
-    currentUserId: string
+    currentUserId: UserId
     file: Express.Multer.File
-    wishlistId: string
+    wishlistId: WishlistId
   }): Promise<UpdateWishlistLogoOutputDto> {
     const { currentUserId, wishlistId, file } = param
     const wishlistEntity = await this.wishlistRepository.findByIdOrThrow(wishlistId)
@@ -241,7 +252,7 @@ export class WishlistService {
     }
   }
 
-  async removeLogo(param: { currentUserId: string; wishlistId: string }): Promise<void> {
+  async removeLogo(param: { currentUserId: UserId; wishlistId: WishlistId }): Promise<void> {
     const { currentUserId, wishlistId } = param
     const wishlistEntity = await this.wishlistRepository.findByIdOrThrow(wishlistId)
     const isOwner = wishlistEntity.ownerId === currentUserId
@@ -256,7 +267,7 @@ export class WishlistService {
     await this.wishlistRepository.update({ id: wishlistId }, { logoUrl: null })
   }
 
-  private getLogoDestination(wishlistId: string) {
+  private getLogoDestination(wishlistId: WishlistId) {
     return `pictures/wishlists/${wishlistId}/logo`
   }
 

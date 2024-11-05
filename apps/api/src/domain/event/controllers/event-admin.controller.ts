@@ -1,6 +1,12 @@
 import { Controller, Get, Param, Query } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
-import { DetailedEventDto, EventWithCountsDto, GetPaginationQueryDto, PagedResponse } from '@wishlist/common-types'
+import {
+  DetailedEventDto,
+  EventId,
+  EventWithCountsDto,
+  GetPaginationQueryDto,
+  PagedResponse,
+} from '@wishlist/common-types'
 
 import { IsAdmin } from '../../auth'
 import { EventService } from '../event.service'
@@ -12,7 +18,7 @@ export class EventAdminController {
   constructor(private readonly eventService: EventService) {}
 
   @Get('/:id')
-  getById(@Param('id') id: string): Promise<DetailedEventDto> {
+  getById(@Param('id') id: EventId): Promise<DetailedEventDto> {
     return this.eventService.findByIdForAdmin(id)
   }
 
