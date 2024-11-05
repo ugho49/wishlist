@@ -4,6 +4,7 @@ import { uniq } from 'lodash'
 
 import { AttendeeDto, MiniEventDto } from '../dtos'
 import { SecretSantaStatus } from '../enums'
+import { AttendeeId, EventId } from '../ids'
 
 export class SecretSantaUserDto {
   id: string
@@ -39,13 +40,13 @@ export class UpdateSecretSantaInputDto {
 
 export class CreateSecretSantaInputDto extends UpdateSecretSantaInputDto {
   @IsString()
-  event_id: string
+  event_id: EventId
 }
 
 export class CreateSecretSantaUsersInputDto {
   @IsString({ each: true })
   @Transform(({ value }) => uniq(value))
-  attendee_ids: string[]
+  attendee_ids: AttendeeId[]
 }
 
 export class UpdateSecretSantaUserInputDto {

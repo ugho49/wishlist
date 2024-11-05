@@ -8,12 +8,12 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
-  IsUUID,
   MaxLength,
   ValidateNested,
 } from 'class-validator'
 
 import { MAX_EVENTS_BY_LIST } from '../constants'
+import { EventId } from '../ids'
 import { MiniEventDto } from './event.dto'
 import { AddItemInputDto, ItemDto } from './item.dto'
 import { MiniUserDto } from './user.dto'
@@ -57,9 +57,9 @@ export class WishlistWithOwnerDto extends MiniWishlistDto {
 }
 
 export class LinkUnlinkWishlistInputDto {
-  @IsUUID()
+  @IsString()
   @IsNotEmpty()
-  event_id: string
+  event_id: EventId
 }
 
 export class UpdateWishlistInputDto {
@@ -83,7 +83,7 @@ export class CreateWishlistInputDto extends UpdateWishlistInputDto {
   @ArrayNotEmpty()
   @ArrayMaxSize(MAX_EVENTS_BY_LIST)
   @IsString({ each: true })
-  event_ids: string[]
+  event_ids: EventId[]
 
   @IsArray()
   @ValidateNested({ each: true })

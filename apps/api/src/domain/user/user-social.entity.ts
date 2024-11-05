@@ -1,6 +1,6 @@
 import { uuid } from '@wishlist/common'
 import { TimestampEntity } from '@wishlist/common-database'
-import { UserSocialType } from '@wishlist/common-types'
+import { UserId, UserSocialId, UserSocialType } from '@wishlist/common-types'
 import { Column, Entity, ManyToOne, PrimaryColumn, RelationId } from 'typeorm'
 
 import { UserEntity } from './user.entity'
@@ -8,14 +8,14 @@ import { UserEntity } from './user.entity'
 @Entity('user_social')
 export class UserSocialEntity extends TimestampEntity {
   @PrimaryColumn()
-  id: string = uuid()
+  id: UserSocialId = uuid() as UserSocialId
 
   @ManyToOne(() => UserEntity, { lazy: true })
   readonly user: Promise<UserEntity>
 
   @Column()
   @RelationId((entity: UserSocialEntity) => entity.user)
-  userId: string
+  userId: UserId
 
   @Column()
   socialId: string
@@ -27,7 +27,7 @@ export class UserSocialEntity extends TimestampEntity {
   pictureUrl?: string | null
 
   public static create(props: {
-    userId: string
+    userId: UserId
     socialId: string
     socialType: UserSocialType
     pictureUrl?: string

@@ -1,5 +1,12 @@
 import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common'
-import { AddItemForListInputDto, AddItemInputDto, ItemDto, ToggleItemOutputDto } from '@wishlist/common-types'
+import {
+  AddItemForListInputDto,
+  AddItemInputDto,
+  ItemDto,
+  ItemId,
+  ToggleItemOutputDto,
+  UserId,
+} from '@wishlist/common-types'
 
 import { toMiniUserDto } from '../user/user.mapper'
 import { UserRepository } from '../user/user.repository'
@@ -16,7 +23,7 @@ export class ItemService {
     private readonly userRepository: UserRepository,
   ) {}
 
-  async create(param: { currentUserId: string; dto: AddItemForListInputDto }): Promise<ItemDto> {
+  async create(param: { currentUserId: UserId; dto: AddItemForListInputDto }): Promise<ItemDto> {
     const { dto, currentUserId } = param
     const wishlistEntity = await this.wishlistRepository.findByIdAndUserId({
       wishlistId: dto.wishlist_id,
@@ -44,7 +51,7 @@ export class ItemService {
     return toItemDto({ entity: itemEntity, displayUserAndSuggested: true })
   }
 
-  async update(param: { itemId: string; currentUserId: string; dto: AddItemInputDto }): Promise<void> {
+  async update(param: { itemId: ItemId; currentUserId: UserId; dto: AddItemInputDto }): Promise<void> {
     const { itemId, dto, currentUserId } = param
     const itemEntity = await this.itemRepository.findByIdAndUserIdOrFail({ itemId, userId: currentUserId })
     const wishlistEntity = await itemEntity.wishlist
@@ -71,7 +78,7 @@ export class ItemService {
     })
   }
 
-  async deleteItem(param: { itemId: string; currentUserId: string }): Promise<void> {
+  async deleteItem(param: { itemId: ItemId; currentUserId: UserId }): Promise<void> {
     const { itemId, currentUserId } = param
     const itemEntity = await this.itemRepository.findByIdAndUserIdOrFail({ itemId, userId: currentUserId })
     const wishlistEntity = await itemEntity.wishlist
@@ -97,7 +104,7 @@ export class ItemService {
     await this.itemRepository.delete({ id: itemId })
   }
 
-  async toggleItem(param: { itemId: string; currentUserId: string }): Promise<ToggleItemOutputDto> {
+  async toggleItem(param: { itemId: ItemId; currentUserId: UserId }): Promise<ToggleItemOutputDto> {
     const { itemId, currentUserId } = param
     const itemEntity = await this.itemRepository.findByIdAndUserIdOrFail({ itemId, userId: currentUserId })
     const wishlistEntity = await itemEntity.wishlist
@@ -118,7 +125,7 @@ export class ItemService {
   }
 
   private async check(params: {
-    currentUserId: string
+    currentUserId: UserId
     itemEntity: ItemEntity
     isOwnerOfList: boolean
     hideItems: boolean

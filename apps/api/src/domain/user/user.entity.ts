@@ -1,6 +1,6 @@
 import { uuid } from '@wishlist/common'
 import { TimestampEntity } from '@wishlist/common-database'
-import { Authorities } from '@wishlist/common-types'
+import { Authorities, UserId } from '@wishlist/common-types'
 import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm'
 
 import { UserSocialEntity } from './user-social.entity'
@@ -8,7 +8,7 @@ import { UserSocialEntity } from './user-social.entity'
 @Entity('user')
 export class UserEntity extends TimestampEntity {
   @PrimaryColumn()
-  id: string = uuid()
+  id: UserId = uuid() as UserId
 
   @Column()
   email: string

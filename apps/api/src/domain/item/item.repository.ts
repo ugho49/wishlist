@@ -1,13 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { camelCaseKeys } from '@wishlist/common'
 import { BaseRepository, PartialEntity } from '@wishlist/common-database'
+import { ItemId, UserId } from '@wishlist/common-types'
 
 import { ItemEntity } from './item.entity'
 import { NewItemsForWishlist } from './item.interface'
 
 @Injectable()
 export class ItemRepository extends BaseRepository(ItemEntity) {
-  async findByIdAndUserIdOrFail(param: { itemId: string; userId: string }): Promise<ItemEntity> {
+  async findByIdAndUserIdOrFail(param: { itemId: ItemId; userId: UserId }): Promise<ItemEntity> {
     const entity = await this.createQueryBuilder('i')
       .innerJoin('i.wishlist', 'w')
       .innerJoin('w.events', 'e')
@@ -23,7 +24,7 @@ export class ItemRepository extends BaseRepository(ItemEntity) {
     return entity
   }
 
-  updateById(id: string, partialEntity: PartialEntity<ItemEntity>) {
+  updateById(id: ItemId, partialEntity: PartialEntity<ItemEntity>) {
     return this.update({ id }, partialEntity)
   }
 

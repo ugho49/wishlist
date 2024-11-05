@@ -1,5 +1,5 @@
 import { uuid } from '@wishlist/common'
-import { AttendeeRole } from '@wishlist/common-types'
+import { AttendeeId, AttendeeRole, EventId, UserId } from '@wishlist/common-types'
 import { Column, Entity, ManyToOne, PrimaryColumn, RelationId } from 'typeorm'
 
 import { EventEntity } from '../event/event.entity'
@@ -8,15 +8,15 @@ import { UserEntity } from '../user'
 @Entity('event_attendee')
 export class AttendeeEntity {
   @PrimaryColumn()
-  id: string = uuid()
+  id: AttendeeId = uuid() as AttendeeId
 
   @Column()
   @RelationId((entity: AttendeeEntity) => entity.event)
-  eventId: string
+  eventId: EventId
 
   @Column({ type: 'uuid', nullable: true })
   @RelationId((entity: AttendeeEntity) => entity.user)
-  userId?: string | null
+  userId?: UserId | null
 
   @ManyToOne(() => EventEntity, entity => entity.attendees)
   readonly event: Promise<EventEntity>
@@ -30,7 +30,7 @@ export class AttendeeEntity {
   @Column()
   role!: AttendeeRole
 
-  static createFromExistingUser(param: { eventId: string; userId: string; role: AttendeeRole }): AttendeeEntity {
+  static createFromExistingUser(param: { eventId: EventId; userId: UserId; role: AttendeeRole }): AttendeeEntity {
     const entity = new AttendeeEntity()
     entity.eventId = param.eventId
     entity.userId = param.userId
@@ -38,7 +38,7 @@ export class AttendeeEntity {
     return entity
   }
 
-  static createFromNonExistingUser(param: { eventId: string; email: string; role: AttendeeRole }): AttendeeEntity {
+  static createFromNonExistingUser(param: { eventId: EventId; email: string; role: AttendeeRole }): AttendeeEntity {
     const entity = new AttendeeEntity()
     entity.eventId = param.eventId
     entity.email = param.email

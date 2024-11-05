@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { BaseRepository } from '@wishlist/common-database'
+import { EventId, UserId } from '@wishlist/common-types'
 import { In } from 'typeorm'
 
 import { EventEntity } from './event.entity'
@@ -23,7 +24,7 @@ export class EventRepository extends BaseRepository(EventEntity) {
   }
 
   findAllForUserid(params: {
-    userId: string
+    userId: UserId
     take: number
     skip: number
     onlyFuture: boolean
@@ -51,7 +52,7 @@ export class EventRepository extends BaseRepository(EventEntity) {
     return Promise.all([fetchQueryBuilder.getMany(), countQueryBuilder.getCount()])
   }
 
-  findByIdAndUserId(params: { eventId: string; userId: string }): Promise<EventEntity | null> {
+  findByIdAndUserId(params: { eventId: EventId; userId: UserId }): Promise<EventEntity | null> {
     return this.createQueryBuilder('e')
       .leftJoinAndSelect('e.wishlists', 'w')
       .leftJoin('e.attendees', 'a')
@@ -60,7 +61,7 @@ export class EventRepository extends BaseRepository(EventEntity) {
       .getOne()
   }
 
-  findByIdsAndUserId(params: { eventIds: string[]; userId: string }): Promise<EventEntity[]> {
+  findByIdsAndUserId(params: { eventIds: EventId[]; userId: UserId }): Promise<EventEntity[]> {
     return this.createQueryBuilder('e')
       .leftJoin('e.attendees', 'a')
       .where({ id: In(params.eventIds) })

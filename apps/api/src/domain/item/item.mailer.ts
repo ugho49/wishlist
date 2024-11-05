@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common'
+import { WishlistId } from '@wishlist/common-types'
 
 import { MailService } from '../../core/mail/mail.service'
 
@@ -8,7 +9,7 @@ export class ItemMailer {
 
   async sendNotifyEmail(param: {
     emails: string[]
-    wishlist: { id: string; title: string }
+    wishlist: { id: WishlistId; title: string }
     ownerName: string
     nbNewItems: number
   }) {

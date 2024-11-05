@@ -5,11 +5,13 @@ import {
   CreateEventInputDto,
   createPagedResponse,
   DetailedEventDto,
+  EventId,
   EventWithCountsDto,
   ICurrentUser,
   MiniEventDto,
   PagedResponse,
   UpdateEventInputDto,
+  UserId,
 } from '@wishlist/common-types'
 import { uniq } from 'lodash'
 import { EntityManager } from 'typeorm'
@@ -53,7 +55,7 @@ export class EventService {
     limit?: number
     onlyFuture: boolean
     pageNumber: number
-    currentUserId: string
+    currentUserId: UserId
   }): Promise<PagedResponse<EventWithCountsDto>> {
     const { pageNumber, currentUserId, limit, onlyFuture } = param
     const pageSize = limit !== undefined ? limit : DEFAULT_RESULT_NUMBER
@@ -75,7 +77,7 @@ export class EventService {
     })
   }
 
-  async findById(param: { eventId: string; currentUserId: string }): Promise<DetailedEventDto> {
+  async findById(param: { eventId: EventId; currentUserId: UserId }): Promise<DetailedEventDto> {
     const entity = await this.eventRepository.findByIdAndUserId({
       eventId: param.eventId,
       userId: param.currentUserId,
@@ -88,7 +90,7 @@ export class EventService {
     return toDetailedEventDto(entity)
   }
 
-  async findByIdForAdmin(eventId: string): Promise<DetailedEventDto> {
+  async findByIdForAdmin(eventId: EventId): Promise<DetailedEventDto> {
     const entity = await this.eventRepository.findOneBy({ id: eventId })
 
     if (!entity) {
@@ -159,7 +161,7 @@ export class EventService {
     return toMiniEventDto(eventEntity)
   }
 
-  async updateEvent(param: { eventId: string; currentUser: ICurrentUser; dto: UpdateEventInputDto }): Promise<void> {
+  async updateEvent(param: { eventId: EventId; currentUser: ICurrentUser; dto: UpdateEventInputDto }): Promise<void> {
     const { currentUser, eventId, dto } = param
 
     const eventEntity = await this.eventRepository.findOneBy({ id: eventId })
@@ -184,7 +186,7 @@ export class EventService {
     )
   }
 
-  async deleteEvent(param: { eventId: string; currentUser: ICurrentUser }): Promise<void> {
+  async deleteEvent(param: { eventId: EventId; currentUser: ICurrentUser }): Promise<void> {
     const { currentUser, eventId } = param
     const eventEntity = await this.eventRepository.findOneBy({ id: eventId })
 

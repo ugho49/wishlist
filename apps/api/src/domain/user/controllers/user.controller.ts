@@ -20,6 +20,8 @@ import {
   UpdateUserPictureOutputDto,
   UpdateUserProfileInputDto,
   UserDto,
+  UserId,
+  UserSocialId,
 } from '@wishlist/common-types'
 import { Express } from 'express'
 import { RealIP } from 'nestjs-real-ip'
@@ -37,7 +39,7 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
-  getInfos(@CurrentUser('id') currentUserId: string): Promise<UserDto> {
+  getInfos(@CurrentUser('id') currentUserId: UserId): Promise<UserDto> {
     return this.userService.findById(currentUserId)
   }
 
@@ -55,18 +57,18 @@ export class UserController {
   }
 
   @Put()
-  update(@CurrentUser('id') currentUserId: string, @Body() dto: UpdateUserProfileInputDto): Promise<void> {
+  update(@CurrentUser('id') currentUserId: UserId, @Body() dto: UpdateUserProfileInputDto): Promise<void> {
     return this.userService.update({ currentUserId, dto })
   }
 
   @Put('/change-password')
-  changePassword(@CurrentUser('id') currentUserId: string, @Body() dto: ChangeUserPasswordInputDto): Promise<void> {
+  changePassword(@CurrentUser('id') currentUserId: UserId, @Body() dto: ChangeUserPasswordInputDto): Promise<void> {
     return this.userService.changeUserPassword({ currentUserId, dto })
   }
 
   @Get('/search')
   searchByKeyword(
-    @CurrentUser('id') currentUserId: string,
+    @CurrentUser('id') currentUserId: UserId,
     @Query('keyword') criteria: string,
   ): Promise<MiniUserDto[]> {
     return this.userService.searchByKeyword({ currentUserId, criteria })
@@ -76,7 +78,7 @@ export class UserController {
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('file'))
   async uploadPicture(
-    @CurrentUser('id') currentUserId: string,
+    @CurrentUser('id') currentUserId: UserId,
     @UploadedFile(userPictureFileValidators, userPictureResizePipe)
     file: Express.Multer.File,
   ): Promise<UpdateUserPictureOutputDto> {
@@ -87,12 +89,12 @@ export class UserController {
   }
 
   @Put('/picture')
-  async updatePictureFromSocial(@CurrentUser('id') currentUserId: string, @Query('social_id') socialId: string) {
+  async updatePictureFromSocial(@CurrentUser('id') currentUserId: UserId, @Query('social_id') socialId: UserSocialId) {
     await this.userService.updatePictureFromSocial({ currentUserId, socialId })
   }
 
   @Delete('/picture')
-  async removePicture(@CurrentUser('id') currentUserId: string) {
+  async removePicture(@CurrentUser('id') currentUserId: UserId) {
     await this.userService.removePicture({ userId: currentUserId })
   }
 }

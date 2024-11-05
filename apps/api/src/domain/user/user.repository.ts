@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common'
 import { BaseRepository, PartialEntity } from '@wishlist/common-database'
+import { UserId } from '@wishlist/common-types'
 import { Brackets, In, Not } from 'typeorm'
 
 import { UserEntity } from './user.entity'
 
 @Injectable()
 export class UserRepository extends BaseRepository(UserEntity) {
-  findById(id: string): Promise<UserEntity | null> {
+  findById(id: UserId): Promise<UserEntity | null> {
     return this.findOneBy({ id })
   }
 
@@ -18,11 +19,11 @@ export class UserRepository extends BaseRepository(UserEntity) {
     return this.findBy({ email: In(emails) })
   }
 
-  updateById(id: string, partialEntity: PartialEntity<UserEntity>) {
+  updateById(id: UserId, partialEntity: PartialEntity<UserEntity>) {
     return this.update({ id }, partialEntity)
   }
 
-  searchByKeyword(param: { userId: string; keyword: string }): Promise<UserEntity[]> {
+  searchByKeyword(param: { userId: UserId; keyword: string }): Promise<UserEntity[]> {
     const searchKey = param.keyword.trim().toLowerCase().normalize('NFC')
 
     return this.createQueryBuilder('u')

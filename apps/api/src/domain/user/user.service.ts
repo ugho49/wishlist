@@ -19,6 +19,8 @@ import {
   UpdateUserPictureOutputDto,
   UpdateUserProfileInputDto,
   UserDto,
+  UserId,
+  UserSocialId,
   UserSocialType,
 } from '@wishlist/common-types'
 import { isEmpty } from 'lodash'
@@ -45,14 +47,14 @@ export class UserService {
     private readonly bucketService: BucketService,
   ) {}
 
-  findById(id: string): Promise<UserDto> {
+  findById(id: UserId): Promise<UserDto> {
     return this.userRepository.findOneByOrFail({ id }).then(entity => toUserDto(entity))
   }
 
   async create(param: {
     dto: Omit<RegisterUserInputDto, 'password'> & { password?: string }
     ip: string
-    social?: (userId: string) => UserSocialEntity
+    social?: (userId: UserId) => UserSocialEntity
   }): Promise<MiniUserDto> {
     const { dto, ip, social } = param
 
@@ -127,7 +129,7 @@ export class UserService {
     })
   }
 
-  async update(param: { currentUserId: string; dto: UpdateUserProfileInputDto }): Promise<void> {
+  async update(param: { currentUserId: UserId; dto: UpdateUserProfileInputDto }): Promise<void> {
     const { dto, currentUserId } = param
 
     await this.userRepository.updateById(currentUserId, {
@@ -137,7 +139,7 @@ export class UserService {
     })
   }
 
-  async changeUserPassword(param: { currentUserId: string; dto: ChangeUserPasswordInputDto }) {
+  async changeUserPassword(param: { currentUserId: UserId; dto: ChangeUserPasswordInputDto }) {
     const { dto, currentUserId } = param
 
     const entity = await this.userRepository.findOneByOrFail({ id: currentUserId })
@@ -158,7 +160,7 @@ export class UserService {
     })
   }
 
-  async searchByKeyword(param: { currentUserId: string; criteria: string }): Promise<MiniUserDto[]> {
+  async searchByKeyword(param: { currentUserId: UserId; criteria: string }): Promise<MiniUserDto[]> {
     const { criteria, currentUserId } = param
 
     if (isEmpty(criteria) || criteria.trim().length < 2) {
@@ -192,7 +194,7 @@ export class UserService {
   }
 
   async updateProfileAsAdmin(param: {
-    userId: string
+    userId: UserId
     currentUser: ICurrentUser
     dto: UpdateFullUserProfileInputDto
   }): Promise<void> {
@@ -226,7 +228,7 @@ export class UserService {
     await this.userRepository.updateById(userId, userToUpdate)
   }
 
-  async delete(param: { userId: string; currentUser: ICurrentUser }): Promise<void> {
+  async delete(param: { userId: UserId; currentUser: ICurrentUser }): Promise<void> {
     const { currentUser, userId } = param
 
     if (userId === currentUser.id) {
@@ -244,7 +246,7 @@ export class UserService {
     await this.userRepository.delete({ id: userId })
   }
 
-  async uploadPicture(param: { userId: string; file: Express.Multer.File }): Promise<UpdateUserPictureOutputDto> {
+  async uploadPicture(param: { userId: UserId; file: Express.Multer.File }): Promise<UpdateUserPictureOutputDto> {
     const { userId, file } = param
     try {
       await this.bucketService.removeIfExist({ destination: `pictures/${userId}/` }) // TODO: to be removed
@@ -268,14 +270,14 @@ export class UserService {
     }
   }
 
-  async removePicture(param: { userId: string }): Promise<void> {
+  async removePicture(param: { userId: UserId }): Promise<void> {
     const { userId } = param
     await this.bucketService.removeIfExist({ destination: `pictures/${userId}/` }) // TODO: to be removed
     await this.bucketService.removeIfExist({ destination: `pictures/users${userId}/` })
     await this.userRepository.update({ id: userId }, { pictureUrl: null })
   }
 
-  async updatePictureFromSocial(param: { currentUserId: string; socialId: string }) {
+  async updatePictureFromSocial(param: { currentUserId: UserId; socialId: UserSocialId }) {
     const { currentUserId, socialId } = param
     const user = await this.userRepository.findOneByOrFail({ id: currentUserId })
     const socials = await user.socials

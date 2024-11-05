@@ -3,12 +3,14 @@ import { ApiTags } from '@nestjs/swagger'
 import {
   CreateEventInputDto,
   DetailedEventDto,
+  EventId,
   EventWithCountsDto,
   GetEventsQueryDto,
   ICurrentUser,
   MiniEventDto,
   PagedResponse,
   UpdateEventInputDto,
+  UserId,
 } from '@wishlist/common-types'
 
 import { CurrentUser } from '../../auth'
@@ -22,7 +24,7 @@ export class EventController {
   @Get()
   getMyEvents(
     @Query() queryParams: GetEventsQueryDto,
-    @CurrentUser('id') currentUserId: string,
+    @CurrentUser('id') currentUserId: UserId,
   ): Promise<PagedResponse<EventWithCountsDto>> {
     return this.eventService.getUserEventsPaginated({
       pageNumber: queryParams.p || 1,
@@ -33,7 +35,7 @@ export class EventController {
   }
 
   @Get('/:id')
-  getEventById(@Param('id') eventId: string, @CurrentUser('id') currentUserId: string): Promise<DetailedEventDto> {
+  getEventById(@Param('id') eventId: EventId, @CurrentUser('id') currentUserId: UserId): Promise<DetailedEventDto> {
     return this.eventService.findById({ eventId, currentUserId })
   }
 
@@ -44,7 +46,7 @@ export class EventController {
 
   @Put('/:id')
   updateEvent(
-    @Param('id') eventId: string,
+    @Param('id') eventId: EventId,
     @CurrentUser() currentUser: ICurrentUser,
     @Body() dto: UpdateEventInputDto,
   ): Promise<void> {
@@ -52,7 +54,7 @@ export class EventController {
   }
 
   @Delete('/:id')
-  deleteEvent(@Param('id') eventId: string, @CurrentUser() currentUser: ICurrentUser): Promise<void> {
+  deleteEvent(@Param('id') eventId: EventId, @CurrentUser() currentUser: ICurrentUser): Promise<void> {
     return this.eventService.deleteEvent({ eventId, currentUser })
   }
 }

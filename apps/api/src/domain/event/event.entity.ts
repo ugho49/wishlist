@@ -1,6 +1,6 @@
 import { uuid } from '@wishlist/common'
 import { TimestampEntity } from '@wishlist/common-database'
-import { AttendeeRole } from '@wishlist/common-types'
+import { AttendeeRole, EventId } from '@wishlist/common-types'
 import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryColumn } from 'typeorm'
 
 import { AttendeeEntity } from '../attendee/attendee.entity'
@@ -9,7 +9,7 @@ import { WishlistEntity } from '../wishlist/wishlist.entity'
 @Entity('event')
 export class EventEntity extends TimestampEntity {
   @PrimaryColumn()
-  id: string = uuid()
+  id: EventId = uuid() as EventId
 
   @Column()
   title: string

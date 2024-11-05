@@ -8,6 +8,7 @@ import {
   UpdateFullUserProfileInputDto,
   UpdateUserPictureOutputDto,
   UserDto,
+  UserId,
 } from '@wishlist/common-types'
 
 import { CurrentUser, IsAdmin } from '../../auth'
@@ -25,7 +26,7 @@ export class UserAdminController {
   constructor(private readonly userService: UserService) {}
 
   @Get('/:id')
-  getUserById(@Param('id') id: string): Promise<UserDto> {
+  getUserById(@Param('id') id: UserId): Promise<UserDto> {
     return this.userService.findById(id)
   }
 
@@ -36,7 +37,7 @@ export class UserAdminController {
 
   @Patch('/:id')
   updateFullUserProfile(
-    @Param('id') userId: string,
+    @Param('id') userId: UserId,
     @Body() dto: UpdateFullUserProfileInputDto,
     @CurrentUser() currentUser: ICurrentUser,
   ): Promise<void> {
@@ -44,7 +45,7 @@ export class UserAdminController {
   }
 
   @Delete('/:id')
-  deleteUserById(@Param('id') userId: string, @CurrentUser() currentUser: ICurrentUser): Promise<void> {
+  deleteUserById(@Param('id') userId: UserId, @CurrentUser() currentUser: ICurrentUser): Promise<void> {
     return this.userService.delete({ userId, currentUser })
   }
 
@@ -52,7 +53,7 @@ export class UserAdminController {
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('file'))
   async uploadPicture(
-    @Param('id') userId: string,
+    @Param('id') userId: UserId,
     @UploadedFile(userPictureFileValidators, userPictureResizePipe)
     file: Express.Multer.File,
   ): Promise<UpdateUserPictureOutputDto> {
@@ -63,7 +64,7 @@ export class UserAdminController {
   }
 
   @Delete('/:id/picture')
-  async removePicture(@Param('id') userId: string) {
+  async removePicture(@Param('id') userId: UserId) {
     await this.userService.removePicture({ userId })
   }
 }
