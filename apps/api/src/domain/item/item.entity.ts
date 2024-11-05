@@ -1,5 +1,6 @@
 import { uuid } from '@wishlist/common'
 import { TimestampEntity } from '@wishlist/common-database'
+import { ItemId, UserId, WishlistId } from '@wishlist/common-types'
 import { Column, Entity, ManyToOne, PrimaryColumn, RelationId } from 'typeorm'
 
 import { UserEntity } from '../user'
@@ -8,7 +9,7 @@ import { WishlistEntity } from '../wishlist/wishlist.entity'
 @Entity('item')
 export class ItemEntity extends TimestampEntity {
   @PrimaryColumn()
-  id: string = uuid()
+  id: ItemId = uuid() as ItemId
 
   @Column()
   name: string
@@ -36,18 +37,18 @@ export class ItemEntity extends TimestampEntity {
 
   @Column()
   @RelationId((entity: ItemEntity) => entity.wishlist)
-  wishlistId: string
+  wishlistId: WishlistId
 
   @ManyToOne(() => UserEntity, { lazy: true })
   readonly taker?: Promise<UserEntity> | null
 
   @Column({ nullable: true })
   @RelationId((entity: ItemEntity) => entity.taker)
-  takerId?: string | null
+  takerId?: UserId | null
 
   static create(param: {
     name: string
-    wishlistId: string
+    wishlistId: WishlistId
     description?: string
     url?: string
     pictureUrl?: string

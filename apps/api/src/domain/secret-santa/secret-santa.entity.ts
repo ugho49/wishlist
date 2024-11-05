@@ -1,6 +1,6 @@
 import { uuid } from '@wishlist/common'
 import { ColumnNumericTransformer, TimestampEntity } from '@wishlist/common-database'
-import { SecretSantaStatus } from '@wishlist/common-types'
+import { AttendeeId, EventId, SecretSantaId, SecretSantaStatus, SecretSantaUserId } from '@wishlist/common-types'
 import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn, RelationId } from 'typeorm'
 
 import { AttendeeEntity } from '../attendee/attendee.entity'
@@ -9,7 +9,7 @@ import { EventEntity } from '../event/event.entity'
 @Entity('secret_santa')
 export class SecretSantaEntity extends TimestampEntity {
   @PrimaryColumn()
-  id: string = uuid()
+  id: SecretSantaId = uuid() as SecretSantaId
 
   @Column({ type: 'varchar', nullable: true })
   description?: string | null
@@ -25,14 +25,14 @@ export class SecretSantaEntity extends TimestampEntity {
 
   @Column()
   @RelationId((entity: SecretSantaEntity) => entity.event)
-  eventId: string
+  eventId: EventId
 
   @OneToMany(() => SecretSantaUserEntity, entity => entity.secretSanta, {
     cascade: true,
   })
   users: Promise<SecretSantaUserEntity[]>
 
-  public static create(props: { description?: string; budget?: number; eventId: string }): SecretSantaEntity {
+  public static create(props: { description?: string; budget?: number; eventId: EventId }): SecretSantaEntity {
     const entity = new SecretSantaEntity()
     entity.description = props.description
     entity.budget = props.budget
@@ -44,33 +44,33 @@ export class SecretSantaEntity extends TimestampEntity {
 @Entity('secret_santa_user')
 export class SecretSantaUserEntity extends TimestampEntity {
   @PrimaryColumn()
-  id: string = uuid()
+  id: SecretSantaUserId = uuid() as SecretSantaUserId
 
   @ManyToOne(() => AttendeeEntity)
   readonly attendee: Promise<AttendeeEntity>
 
   @Column()
   @RelationId((entity: SecretSantaUserEntity) => entity.attendee)
-  attendeeId: string
+  attendeeId: AttendeeId
 
   @ManyToOne(() => SecretSantaUserEntity)
   readonly drawUser: Promise<SecretSantaUserEntity | null>
 
   @Column({ type: 'uuid', nullable: true })
   @RelationId((entity: SecretSantaUserEntity) => entity.drawUser)
-  drawUserId?: string | null
+  drawUserId?: SecretSantaUserId | null
 
   @ManyToOne(() => SecretSantaEntity)
   readonly secretSanta: Promise<SecretSantaEntity>
 
   @Column()
   @RelationId((entity: SecretSantaUserEntity) => entity.secretSanta)
-  secretSantaId: string
+  secretSantaId: SecretSantaId
 
   @Column('uuid', { array: true })
-  exclusions: string[] = []
+  exclusions: SecretSantaUserId[] = []
 
-  public static create(props: { attendeeId: string; secretSantaId: string }): SecretSantaUserEntity {
+  public static create(props: { attendeeId: AttendeeId; secretSantaId: SecretSantaId }): SecretSantaUserEntity {
     const entity = new SecretSantaUserEntity()
     entity.attendeeId = props.attendeeId
     entity.secretSantaId = props.secretSantaId

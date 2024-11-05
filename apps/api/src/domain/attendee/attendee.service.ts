@@ -6,7 +6,13 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common'
-import { AddEventAttendeeForEventInputDto, AttendeeDto, AttendeeRole, ICurrentUser } from '@wishlist/common-types'
+import {
+  AddEventAttendeeForEventInputDto,
+  AttendeeDto,
+  AttendeeId,
+  AttendeeRole,
+  ICurrentUser,
+} from '@wishlist/common-types'
 
 import { EventMailer } from '../event/event.mailer'
 import { EventRepository } from '../event/event.repository'
@@ -79,7 +85,7 @@ export class AttendeeService {
     return toAttendeeDto(attendeeEntity)
   }
 
-  async deleteAttendee(param: { currentUser: ICurrentUser; attendeeId: string }): Promise<void> {
+  async deleteAttendee(param: { currentUser: ICurrentUser; attendeeId: AttendeeId }): Promise<void> {
     const { attendeeId, currentUser } = param
     const attendeeEntity = await this.attendeeRepository.findOneBy({ id: attendeeId })
 

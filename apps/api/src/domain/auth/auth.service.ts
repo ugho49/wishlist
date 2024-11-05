@@ -9,6 +9,7 @@ import {
   RefreshTokenInputDto,
   RefreshTokenJwtPayload,
   RefreshTokenOutputDto,
+  UserId,
   UserSocialType,
 } from '@wishlist/common-types'
 
@@ -128,7 +129,7 @@ export class AuthService {
     return token
   }
 
-  private createRefreshToken(userId: string): string {
+  private createRefreshToken(userId: UserId): string {
     const payload: RefreshTokenJwtPayload = { sub: userId }
 
     return this.jwtService.sign(payload, {
@@ -148,6 +149,7 @@ export class AuthService {
     }
   }
 
+  // TODO: refacto
   private async validateUser(id: string, type: 'email' | 'id', password?: string): Promise<UserEntity> {
     const user = await (type === 'email' ? this.userRepository.findByEmail(id) : this.userRepository.findById(id))
 

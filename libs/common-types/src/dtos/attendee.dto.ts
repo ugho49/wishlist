@@ -1,7 +1,8 @@
 import { Transform } from 'class-transformer'
-import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator'
+import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator'
 
 import { AttendeeRole } from '../enums'
+import { EventId } from '../ids'
 import { MiniUserDto } from './user.dto'
 
 export class AttendeeDto {
@@ -25,8 +26,7 @@ export class AddEventAttendeeInputDto {
 }
 
 export class AddEventAttendeeForEventInputDto extends AddEventAttendeeInputDto {
-  @IsUUID()
   @IsString()
   @IsNotEmpty()
-  event_id: string
+  event_id: EventId
 }

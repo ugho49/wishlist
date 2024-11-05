@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Param, Post } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
-import { AddEventAttendeeForEventInputDto, AttendeeDto, ICurrentUser } from '@wishlist/common-types'
+import { AddEventAttendeeForEventInputDto, AttendeeDto, AttendeeId, ICurrentUser } from '@wishlist/common-types'
 
 import { CurrentUser } from '../auth'
 import { AttendeeService } from './attendee.service'
@@ -19,7 +19,7 @@ export class AttendeeController {
   }
 
   @Delete('/:id')
-  deleteAttendee(@Param('id') attendeeId: string, @CurrentUser() currentUser: ICurrentUser): Promise<void> {
+  deleteAttendee(@Param('id') attendeeId: AttendeeId, @CurrentUser() currentUser: ICurrentUser): Promise<void> {
     return this.attendeeService.deleteAttendee({ attendeeId, currentUser })
   }
 }

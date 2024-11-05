@@ -8,7 +8,6 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
-  IsUUID,
   MaxLength,
   ValidateNested,
 } from 'class-validator'
@@ -57,7 +56,7 @@ export class WishlistWithOwnerDto extends MiniWishlistDto {
 }
 
 export class LinkUnlinkWishlistInputDto {
-  @IsUUID()
+  @IsString()
   @IsNotEmpty()
   event_id: string
 }
