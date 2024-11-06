@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query } from '@nestjs/common'
+import { Body, Controller, Delete, Get, Inject, Param, Patch, Post, Put, Query } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 import {
   AttendeeDto,
@@ -14,13 +14,17 @@ import {
   UserId,
 } from '@wishlist/common-types'
 
+import { QUERY_BUS, QueryBus } from '../../core/bus/bus.module'
 import { CurrentUser } from '../auth'
 import { SecretSantaService } from './secret-santa.service'
 
 @ApiTags('Secret Santa')
 @Controller('/secret-santa')
 export class SecretSantaController {
-  constructor(private readonly secretSantaService: SecretSantaService) {}
+  constructor(
+    private readonly secretSantaService: SecretSantaService,
+    @Inject(QUERY_BUS) private readonly queryBus: QueryBus,
+  ) {}
 
   @Get('/user/draw')
   getMySecretSantaDrawForEvent(
@@ -34,8 +38,9 @@ export class SecretSantaController {
   getSecretSantaForEvent(
     @CurrentUser('id') currentUserId: UserId,
     @Query('eventId') eventId: EventId,
-  ): Promise<SecretSantaDto | null> {
-    return this.secretSantaService.getForEvent({ currentUserId, eventId })
+  ): Promise<SecretSantaDto | undefined> {
+    const query = this.queryBus.createQuery('getSecretSanta', { userId: currentUserId, eventId })
+    return this.queryBus.dispatch(query).then(res => res.result)
   }
 
   @Post('/')

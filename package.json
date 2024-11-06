@@ -60,6 +60,7 @@
     "jwt-decode": "4.0.0",
     "lodash": "4.17.21",
     "luxon": "3.5.0",
+    "missive.js": "^0.3.1",
     "mjml": "4.15.3",
     "nestjs-real-ip": "3.0.1",
     "node-gyp": "10.2.0",
