@@ -30,8 +30,9 @@ export class SecretSantaController {
   getMySecretSantaDrawForEvent(
     @CurrentUser('id') currentUserId: UserId,
     @Query('eventId') eventId: EventId,
-  ): Promise<AttendeeDto | null> {
-    return this.secretSantaService.getMyDrawForEvent({ currentUserId, eventId })
+  ): Promise<AttendeeDto | undefined> {
+    const query = this.queryBus.createQuery('getSecretSantaDraw', { userId: currentUserId, eventId })
+    return this.queryBus.dispatch(query).then(res => res.result)
   }
 
   @Get('/')
