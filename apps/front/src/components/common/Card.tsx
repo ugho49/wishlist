@@ -1,5 +1,4 @@
-import type { Theme } from '@mui/material/styles'
-import type { SxProps } from '@mui/system'
+import type { SxProps, Theme } from '@mui/material/styles'
 import type { PropsWithChildren } from 'react'
 
 import { Box } from '@mui/material'

@@ -1,6 +1,8 @@
+import type { AttendeeId, EventId, SecretSantaId, SecretSantaUserId } from '@wishlist/common-types'
+
 import { uuid } from '@wishlist/common'
 import { ColumnNumericTransformer, TimestampEntity } from '@wishlist/common-database'
-import { AttendeeId, EventId, SecretSantaId, SecretSantaStatus, SecretSantaUserId } from '@wishlist/common-types'
+import { SecretSantaStatus } from '@wishlist/common-types'
 import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn, RelationId } from 'typeorm'
 
 import { AttendeeEntity } from '../attendee/attendee.entity'
