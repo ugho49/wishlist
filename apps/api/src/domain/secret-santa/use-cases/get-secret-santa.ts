@@ -1,17 +1,16 @@
 import type { EventId, SecretSantaDto, UserId } from '@wishlist/common-types'
 import type { Envelope, QueryHandlerDefinition } from 'missive.js'
 
-import { Inject, Injectable } from '@nestjs/common'
-import { z } from 'zod'
+import { Injectable } from '@nestjs/common'
 
-import { QUERY_BUS, QueryBus } from '../../../core/bus/bus.module'
-import { SecretSantaService } from '../secret-santa.service'
+import { BusService } from '../../../core/bus/bus.service'
+import { toSecretSantaDto } from '../secret-santa.mapper'
+import { SecretSantaRepository } from '../secret-santa.repository'
 
-const getSecretSantaQuerySchema = z.object({
-  userId: z.string(),
-  eventId: z.string(),
-})
-type Query = z.infer<typeof getSecretSantaQuerySchema>
+type Query = {
+  userId: UserId
+  eventId: EventId
+}
 type Result = SecretSantaDto | undefined
 
 export type GetSecretSantaHandlerDefinition = QueryHandlerDefinition<'getSecretSanta', Query, Result>
@@ -19,17 +18,19 @@ export type GetSecretSantaHandlerDefinition = QueryHandlerDefinition<'getSecretS
 @Injectable()
 export class GetSecretSantaUseCase {
   constructor(
-    @Inject(QUERY_BUS) queryBus: QueryBus,
-    private readonly secretSantaService: SecretSantaService,
+    busService: BusService,
+    private readonly secretSantaRepository: SecretSantaRepository,
   ) {
-    queryBus.register('getSecretSanta', getSecretSantaQuerySchema, this.handle.bind(this))
+    busService.registerQueryHandler('getSecretSanta', envelope => this.handle(envelope))
   }
 
-  async handle(envelope: Envelope<Query>): Promise<Result> {
-    const secretSanta = await this.secretSantaService.getForEvent({
-      currentUserId: envelope.message.userId as UserId,
-      eventId: envelope.message.eventId as EventId,
-    })
+  async handle({ message }: Envelope<Query>): Promise<Result> {
+    const secretSanta = await this.secretSantaRepository
+      .getSecretSantaForEventAndUser({
+        eventId: message.eventId,
+        userId: message.userId,
+      })
+      .then(entity => (entity ? toSecretSantaDto(entity) : null))
 
     return secretSanta ?? undefined
   }

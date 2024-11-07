@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Inject, Param, Patch, Post, Put, Query } from '@nestjs/common'
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 import {
   AttendeeDto,
@@ -14,7 +14,7 @@ import {
   UserId,
 } from '@wishlist/common-types'
 
-import { QUERY_BUS, QueryBus } from '../../core/bus/bus.module'
+import { BusService } from '../../core/bus/bus.service'
 import { CurrentUser } from '../auth'
 import { SecretSantaService } from './secret-santa.service'
 
@@ -23,7 +23,7 @@ import { SecretSantaService } from './secret-santa.service'
 export class SecretSantaController {
   constructor(
     private readonly secretSantaService: SecretSantaService,
-    @Inject(QUERY_BUS) private readonly queryBus: QueryBus,
+    private readonly busService: BusService,
   ) {}
 
   @Get('/user/draw')
@@ -31,8 +31,7 @@ export class SecretSantaController {
     @CurrentUser('id') currentUserId: UserId,
     @Query('eventId') eventId: EventId,
   ): Promise<AttendeeDto | undefined> {
-    const query = this.queryBus.createQuery('getSecretSantaDraw', { userId: currentUserId, eventId })
-    return this.queryBus.dispatch(query).then(res => res.result)
+    return this.busService.dispatchQuery('getSecretSantaDraw', { userId: currentUserId, eventId })
   }
 
   @Get('/')
@@ -40,16 +39,24 @@ export class SecretSantaController {
     @CurrentUser('id') currentUserId: UserId,
     @Query('eventId') eventId: EventId,
   ): Promise<SecretSantaDto | undefined> {
-    const query = this.queryBus.createQuery('getSecretSanta', { userId: currentUserId, eventId })
-    return this.queryBus.dispatch(query).then(res => res.result)
+    return this.busService.dispatchQuery('getSecretSanta', { userId: currentUserId, eventId })
   }
 
   @Post('/')
-  createSecretSantaForEvent(
+  async createSecretSantaForEvent(
     @CurrentUser('id') currentUserId: UserId,
     @Body() dto: CreateSecretSantaInputDto,
   ): Promise<SecretSantaDto> {
-    return this.secretSantaService.createForEvent({ currentUserId, dto })
+    const result = await this.busService.dispatchCommand('createSecretSanta', {
+      userId: currentUserId,
+      eventId: dto.event_id,
+      budget: dto.budget,
+      description: dto.description,
+    })
+
+    if (!result) throw new Error('Failed to create secret santa')
+
+    return result
   }
 
   @Patch('/:id')
