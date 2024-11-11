@@ -15,6 +15,7 @@ import {
   WishlistId,
   WishlistWithEventsDto,
 } from '@wishlist/common-types'
+import { uniq } from 'lodash'
 
 import { BucketService } from '../../core/bucket/bucket.service'
 import { EventRepository } from '../event/event.repository'
@@ -74,12 +75,13 @@ export class WishlistService {
     imageFile?: Express.Multer.File
   }): Promise<MiniWishlistDto> {
     const { currentUserId, dto, imageFile } = params
+    const eventIds = uniq(dto.event_ids)
     const eventEntities = await this.eventRepository.findByIdsAndUserId({
-      eventIds: dto.event_ids,
+      eventIds: eventIds,
       userId: currentUserId,
     })
 
-    if (eventEntities.length !== dto.event_ids.length) {
+    if (eventEntities.length !== eventIds.length) {
       throw new UnauthorizedException('You cannot add the wishlist to one or more events')
     }
 

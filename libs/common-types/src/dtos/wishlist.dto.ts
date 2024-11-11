@@ -4,7 +4,6 @@ import { Type } from 'class-transformer'
 import {
   ArrayMaxSize,
   ArrayNotEmpty,
-  ArrayUnique,
   IsArray,
   IsBoolean,
   IsNotEmpty,
@@ -80,7 +79,6 @@ export class CreateWishlistInputDto extends UpdateWishlistInputDto {
   @IsOptional()
   hide_items?: boolean
 
-  @ArrayUnique()
   @ArrayNotEmpty()
   @ArrayMaxSize(MAX_EVENTS_BY_LIST)
   @IsString({ each: true })
