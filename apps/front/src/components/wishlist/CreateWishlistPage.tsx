@@ -34,6 +34,7 @@ import Collapse from '@mui/material/Collapse'
 import Link from '@mui/material/Link'
 import { useMutation } from '@tanstack/react-query'
 import { MAX_EVENTS_BY_LIST } from '@wishlist/common-types'
+import uniq from 'lodash/uniq'
 import { DateTime } from 'luxon'
 import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
@@ -88,7 +89,10 @@ export const CreateWishlistPage = () => {
 
   useEffect(() => {
     if (eventFromUrl !== undefined) {
-      setEvents(prev => [...prev, eventFromUrl])
+      setEvents(prev => {
+        if (prev.some(e => e.id === eventFromUrl.id)) return prev
+        return [...prev, eventFromUrl]
+      })
     }
   }, [eventFromUrl])
 
@@ -100,7 +104,7 @@ export const CreateWishlistPage = () => {
           title,
           description: description === '' ? undefined : description,
           hide_items: hideItems,
-          event_ids: events.map(e => e.id),
+          event_ids: uniq(events.map(e => e.id)),
           items: [],
         },
         logo,
