@@ -16,15 +16,11 @@ import {
 
 import { BusService } from '../../core/bus/bus.service'
 import { CurrentUser } from '../auth'
-import { SecretSantaService } from './secret-santa.service'
 
 @ApiTags('Secret Santa')
 @Controller('/secret-santa')
 export class SecretSantaController {
-  constructor(
-    private readonly secretSantaService: SecretSantaService,
-    private readonly busService: BusService,
-  ) {}
+  constructor(private readonly busService: BusService) {}
 
   @Get('/user/draw')
   getMySecretSantaDrawForEvent(
@@ -60,65 +56,94 @@ export class SecretSantaController {
   }
 
   @Patch('/:id')
-  updateSecretSanta(
+  async updateSecretSanta(
     @Param('id') secretSantaId: SecretSantaId,
     @CurrentUser('id') currentUserId: UserId,
     @Body() dto: UpdateSecretSantaInputDto,
   ): Promise<void> {
-    return this.secretSantaService.updateSecretSanta({ secretSantaId, currentUserId, dto })
+    await this.busService.dispatchCommand('updateSecretSanta', {
+      secretSantaId,
+      userId: currentUserId,
+      description: dto.description,
+      budget: dto.budget,
+    })
   }
 
   @Delete('/:id')
-  deleteSecretSanta(
+  async deleteSecretSanta(
     @Param('id') secretSantaId: SecretSantaId,
     @CurrentUser('id') currentUserId: UserId,
   ): Promise<void> {
-    return this.secretSantaService.deleteSecretSanta({ secretSantaId, currentUserId })
+    await this.busService.dispatchCommand('deleteSecretSanta', {
+      secretSantaId,
+      userId: currentUserId,
+    })
   }
 
   @Post('/:id/start')
-  startSecretSanta(@Param('id') secretSantaId: SecretSantaId, @CurrentUser('id') currentUserId: UserId): Promise<void> {
-    return this.secretSantaService.startSecretSanta({ secretSantaId, currentUserId })
-  }
-
-  @Post('/:id/cancel')
-  cancelSecretSanta(
+  async startSecretSanta(
     @Param('id') secretSantaId: SecretSantaId,
     @CurrentUser('id') currentUserId: UserId,
   ): Promise<void> {
-    return this.secretSantaService.cancelSecretSanta({ secretSantaId, currentUserId })
+    await this.busService.dispatchCommand('startSecretSanta', {
+      secretSantaId,
+      userId: currentUserId,
+    })
+  }
+
+  @Post('/:id/cancel')
+  async cancelSecretSanta(
+    @Param('id') secretSantaId: SecretSantaId,
+    @CurrentUser('id') currentUserId: UserId,
+  ): Promise<void> {
+    await this.busService.dispatchCommand('cancelSecretSanta', {
+      secretSantaId,
+      userId: currentUserId,
+    })
   }
 
   @Post('/:id/users')
-  addSecretSantaUsers(
+  async addSecretSantaUsers(
     @Param('id') secretSantaId: SecretSantaId,
     @CurrentUser('id') currentUserId: UserId,
     @Body() dto: CreateSecretSantaUsersInputDto,
   ): Promise<CreateSecretSantaUsersOutputDto> {
-    return this.secretSantaService.addSecretSantaUsers({ secretSantaId, currentUserId, dto })
+    const result = await this.busService.dispatchCommand('addSecretSantaUser', {
+      secretSantaId,
+      userId: currentUserId,
+      attendeeIds: dto.attendee_ids,
+    })
+
+    if (!result) throw new Error('Failed to add secret santa users')
+
+    return result
   }
 
   @Put('/:id/user/:secretSantaUserId')
-  updateSecretSantaUser(
+  async updateSecretSantaUser(
     @Param('id') secretSantaId: SecretSantaId,
     @Param('secretSantaUserId') secretSantaUserId: SecretSantaUserId,
     @CurrentUser('id') currentUserId: UserId,
     @Body() dto: UpdateSecretSantaUserInputDto,
   ): Promise<void> {
-    return this.secretSantaService.updateSecretSantaUser({
+    await this.busService.dispatchCommand('updateSecretSantaUser', {
       secretSantaId,
       secretSantaUserId,
-      currentUserId,
-      dto,
+      userId: currentUserId,
+      exclusions: dto.exclusions,
     })
   }
 
   @Delete('/:id/user/:secretSantaUserId')
-  deleteSecretSantaUser(
+  async deleteSecretSantaUser(
     @Param('id') secretSantaId: SecretSantaId,
     @Param('secretSantaUserId') secretSantaUserId: SecretSantaUserId,
     @CurrentUser('id') currentUserId: UserId,
   ): Promise<void> {
-    return this.secretSantaService.deleteSecretSantaUser({ secretSantaId, secretSantaUserId, currentUserId })
+    await this.busService.dispatchCommand('deleteSecretSantaUser', {
+      secretSantaId,
+      secretSantaUserId,
+      userId: currentUserId,
+    })
   }
 }
