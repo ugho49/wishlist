@@ -1,12 +1,13 @@
 import type { GridColDef } from '@mui/x-data-grid'
-import type { EventWithCountsDto } from '@wishlist/common-types'
+import type { EventWithCountsDto, UserId } from '@wishlist/common-types'
 
 import { DataGrid } from '@mui/x-data-grid'
 import { useQuery } from '@tanstack/react-query'
+import { AttendeeRole } from '@wishlist/common-types'
 import { DateTime } from 'luxon'
 import React, { useEffect, useState } from 'react'
 
-import { useApi } from '../../../hooks/useApi'
+import { useApi } from '../../../hooks'
 import { RouterLink } from '../../common/RouterLink'
 
 const columns: GridColDef<EventWithCountsDto>[] = [
@@ -18,6 +19,25 @@ const columns: GridColDef<EventWithCountsDto>[] = [
     width: 100,
     valueGetter: (_, row) => new Date(row.event_date),
     renderCell: ({ value }) => DateTime.fromJSDate(value).toLocaleString(DateTime.DATE_SHORT),
+  },
+  {
+    field: '',
+    headerName: 'Maintainer',
+    width: 170,
+    valueGetter: (_, row) => {
+      const maintainer = row.attendees.find(attendee => attendee.role === AttendeeRole.MAINTAINER)?.user
+      if (!maintainer) return 'Unknown'
+      return `${maintainer.firstname} ${maintainer.lastname}`
+    },
+    renderCell: ({ row }) => {
+      const maintainer = row.attendees.find(attendee => attendee.role === AttendeeRole.MAINTAINER)?.user
+      if (!maintainer) return 'Unknown'
+      return (
+        <RouterLink to={`/admin/users/${maintainer.id}`}>
+          {maintainer.firstname} {maintainer.lastname}
+        </RouterLink>
+      )
+    },
   },
   {
     field: 'nb_wishlists',
@@ -52,15 +72,19 @@ const columns: GridColDef<EventWithCountsDto>[] = [
   },
 ]
 
-export const AdminListEvents = () => {
+type AdminListEventsProps = {
+  userId?: UserId
+}
+
+export const AdminListEvents = ({ userId }: AdminListEventsProps) => {
   const { admin: api } = useApi()
   const [totalElements, setTotalElements] = useState(0)
   const [pageSize, setPageSize] = useState(0)
   const [currentPage, setCurrentPage] = useState(1)
 
   const { data: value, isLoading: loading } = useQuery({
-    queryKey: ['admin', 'events', { page: currentPage }],
-    queryFn: ({ signal }) => api.event.getAll({ p: currentPage }, { signal }),
+    queryKey: ['admin', 'events', { page: currentPage, userId }],
+    queryFn: ({ signal }) => api.event.getAll({ p: currentPage, user_id: userId }, { signal }),
   })
 
   useEffect(() => {
@@ -72,9 +96,8 @@ export const AdminListEvents = () => {
   }, [value])
 
   return (
-    <div style={{ width: '100%' }}>
+    <div style={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
       <DataGrid
-        autoHeight
         isRowSelectable={() => false}
         density="standard"
         rows={value?.resources || []}

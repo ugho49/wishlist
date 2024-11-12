@@ -10,7 +10,7 @@ export class AttendeeDto {
   id: AttendeeId
   user?: MiniUserDto
   pending_email?: string
-  role: string
+  role: AttendeeRole
 }
 
 export class AddEventAttendeeInputDto {

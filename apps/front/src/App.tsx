@@ -10,12 +10,13 @@ import { LoginPage } from './components/auth/LoginPage'
 import { RegisterPage } from './components/auth/RegisterPage'
 import { RenewForgotPasswordPage } from './components/auth/RenewForgotPasswordPage'
 import { MaintenancePage } from './components/common/MaintenancePage'
+import { AdminEventPage } from './components/event/admin/AdminEventPage'
 import { CreateEventPage } from './components/event/CreateEventPage'
 import { EditEventPage } from './components/event/EditEventPage'
 import { EventListPage } from './components/event/EventListPage'
 import { EventPage } from './components/event/EventPage'
 import { SecretSantaPage } from './components/secret-santa/SecretSantaPage'
-import { AdminEditUserPage } from './components/user/admin/AdminEditUserPage'
+import { AdminUserPage } from './components/user/admin/AdminUserPage'
 import { UserProfilePage } from './components/user/UserProfilePage'
 import { CreateWishlistPage } from './components/wishlist/CreateWishlistPage'
 import { EditWishlistPage } from './components/wishlist/EditWishlistPage'
@@ -81,8 +82,8 @@ export const App = () => {
 
             <Route path="admin" element={<AdminRouteOutlet />}>
               <Route index element={<AdminPage />} />
-              <Route path="users/:userId" element={<AdminEditUserPage />} />
-              {/*<Route path="events/:eventId" element={<AdminEditEvent />} />*/}
+              <Route path="users/:userId" element={<AdminUserPage />} />
+              <Route path="events/:eventId" element={<AdminEventPage />} />
             </Route>
           </Route>
         </>
