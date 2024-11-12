@@ -1,4 +1,9 @@
-import type { DetailedEventDto, EventWithCountsDto, GetEventsQueryDto, PagedResponse } from '@wishlist/common-types'
+import type {
+  DetailedEventDto,
+  EventWithCountsDto,
+  GetAllEventsPaginationQueryDto,
+  PagedResponse,
+} from '@wishlist/common-types'
 import type { AxiosInstance } from 'axios'
 
 import type { CommonRequestOptions } from './common'
@@ -10,7 +15,10 @@ export class AdminEventService {
     return this.client.get(`/admin/event/${eventId}`, { signal: options?.signal }).then(res => res.data)
   }
 
-  getAll(params: GetEventsQueryDto, options?: CommonRequestOptions): Promise<PagedResponse<EventWithCountsDto>> {
+  getAll(
+    params: GetAllEventsPaginationQueryDto,
+    options?: CommonRequestOptions,
+  ): Promise<PagedResponse<EventWithCountsDto>> {
     return this.client.get(`/admin/event`, { params, signal: options?.signal }).then(res => res.data)
   }
 }

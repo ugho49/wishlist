@@ -4,7 +4,7 @@ import {
   DetailedEventDto,
   EventId,
   EventWithCountsDto,
-  GetPaginationQueryDto,
+  GetAllEventsPaginationQueryDto,
   PagedResponse,
 } from '@wishlist/common-types'
 
@@ -23,7 +23,7 @@ export class EventAdminController {
   }
 
   @Get()
-  getAllPaginated(@Query() queryParams: GetPaginationQueryDto): Promise<PagedResponse<EventWithCountsDto>> {
-    return this.eventService.getAllPaginated(queryParams.p || 1)
+  getAllPaginated(@Query() queryParams: GetAllEventsPaginationQueryDto): Promise<PagedResponse<EventWithCountsDto>> {
+    return this.eventService.getAllPaginated({ pageNumber: queryParams.p ?? 1, userId: queryParams.user_id })
   }
 }

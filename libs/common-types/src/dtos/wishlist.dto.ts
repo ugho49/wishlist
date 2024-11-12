@@ -1,5 +1,3 @@
-import type { EventId, WishlistId } from '../ids'
-
 import { Type } from 'class-transformer'
 import {
   ArrayMaxSize,
@@ -14,6 +12,8 @@ import {
 } from 'class-validator'
 
 import { MAX_EVENTS_BY_LIST } from '../constants'
+import { EventId, UserId, WishlistId } from '../ids'
+import { GetPaginationQueryDto } from './common.dto'
 import { MiniEventDto } from './event.dto'
 import { AddItemInputDto, ItemDto } from './item.dto'
 import { MiniUserDto } from './user.dto'
@@ -54,6 +54,12 @@ export class WishlistWithOwnerDto extends MiniWishlistDto {
   config: WishlistConfigDto
   created_at: string
   updated_at: string
+}
+
+export class GetAllWishlistsPaginationQueryDto extends GetPaginationQueryDto {
+  @IsString()
+  @IsNotEmpty()
+  user_id: UserId
 }
 
 export class LinkUnlinkWishlistInputDto {

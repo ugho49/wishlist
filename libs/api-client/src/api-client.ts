@@ -5,6 +5,7 @@ import axios from 'axios'
 import {
   AdminEventService,
   AdminUserService,
+  AdminWishlistService,
   AttendeeService,
   AuthService,
   EventService,
@@ -32,6 +33,7 @@ export class ApiClient {
     public readonly admin: {
       user: AdminUserService
       event: AdminEventService
+      wishlist: AdminWishlistService
     },
   ) {}
 
@@ -58,6 +60,7 @@ export class ApiClient {
       {
         user: new AdminUserService(client),
         event: new AdminEventService(client),
+        wishlist: new AdminWishlistService(client),
       },
     )
   }

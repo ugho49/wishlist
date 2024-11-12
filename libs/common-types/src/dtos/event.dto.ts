@@ -13,7 +13,7 @@ import {
   ValidateNested,
 } from 'class-validator'
 
-import { EventId } from '../ids'
+import { EventId, UserId } from '../ids'
 import { AddEventAttendeeInputDto, AttendeeDto } from './attendee.dto'
 import { GetPaginationQueryDto } from './common.dto'
 import { WishlistWithOwnerDto } from './wishlist.dto'
@@ -37,6 +37,12 @@ export class DetailedEventDto extends MiniEventDto {
   attendees: AttendeeDto[]
   created_at: string
   updated_at: string
+}
+
+export class GetAllEventsPaginationQueryDto extends GetPaginationQueryDto {
+  @IsString()
+  @IsOptional()
+  user_id?: UserId
 }
 
 export class UpdateEventInputDto {

@@ -34,11 +34,13 @@ export class EventService {
     private readonly eventMailer: EventMailer,
   ) {}
 
-  async getAllPaginated(pageNumber: number): Promise<PagedResponse<EventWithCountsDto>> {
+  async getAllPaginated(params: { pageNumber: number; userId?: UserId }): Promise<PagedResponse<EventWithCountsDto>> {
+    const { pageNumber, userId } = params
     const pageSize = DEFAULT_RESULT_NUMBER
     const skip = pageSize * (pageNumber - 1)
 
     const [entities, totalElements] = await this.eventRepository.findAll({
+      userId,
       take: pageSize,
       skip,
     })

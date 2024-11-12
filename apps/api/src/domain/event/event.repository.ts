@@ -7,18 +7,28 @@ import { EventEntity } from './event.entity'
 
 @Injectable()
 export class EventRepository extends BaseRepository(EventEntity) {
-  findAll(params: { take: number; skip: number }): Promise<[EventEntity[], number]> {
+  findAll(params: { take: number; skip: number; userId?: UserId }): Promise<[EventEntity[], number]> {
     const { take, skip } = params
 
-    const fetchQuery = this.createQueryBuilder('e')
+    let fetchQueryBuilder = this.createQueryBuilder('e')
       .leftJoinAndSelect('e.wishlists', 'w')
       .leftJoinAndSelect('e.attendees', 'a')
-      .orderBy('e.createdAt', 'DESC')
-      .take(take)
-      .skip(skip)
-      .getMany()
 
-    const countQuery = this.createQueryBuilder('e').getCount()
+    if (params.userId) {
+      fetchQueryBuilder = fetchQueryBuilder.where('a.userId = :userId', { userId: params.userId })
+    }
+
+    const fetchQuery = fetchQueryBuilder.orderBy('e.createdAt', 'DESC').take(take).skip(skip).getMany()
+
+    let countQueryBuilder = this.createQueryBuilder('e')
+
+    if (params.userId) {
+      countQueryBuilder = countQueryBuilder
+        .leftJoin('e.attendees', 'a')
+        .where('a.userId = :userId', { userId: params.userId })
+    }
+
+    const countQuery = countQueryBuilder.getCount()
 
     return Promise.all([fetchQuery, countQuery])
   }

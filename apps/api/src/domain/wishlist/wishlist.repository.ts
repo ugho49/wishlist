@@ -17,7 +17,11 @@ export class WishlistRepository extends BaseRepository(WishlistEntity) {
       .getOne()
   }
 
-  getMyWishlistPaginated(params: { ownerId: UserId; take: number; skip: number }): Promise<[WishlistEntity[], number]> {
+  getAllWishlistForUserPaginated(params: {
+    ownerId: UserId
+    take: number
+    skip: number
+  }): Promise<[WishlistEntity[], number]> {
     const { ownerId, take, skip } = params
 
     const fetchQuery = this.createQueryBuilder('w')

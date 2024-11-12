@@ -16,10 +16,10 @@ import {
 } from '@wishlist/common-types'
 import { Express } from 'express'
 
-import { ValidJsonBody } from '../../common/common.decorator'
-import { CurrentUser } from '../auth'
-import { WishlistService } from './wishlist.service'
-import { wishlistLogoFileValidators, wishlistLogoResizePipe } from './wishlist.validator'
+import { ValidJsonBody } from '../../../common/common.decorator'
+import { CurrentUser } from '../../auth'
+import { WishlistService } from '../wishlist.service'
+import { wishlistLogoFileValidators, wishlistLogoResizePipe } from '../wishlist.validator'
 
 @ApiTags('Wishlist')
 @Controller('/wishlist')
@@ -31,7 +31,10 @@ export class WishlistController {
     @Query() queryParams: GetPaginationQueryDto,
     @CurrentUser('id') currentUserId: UserId,
   ): Promise<PagedResponse<WishlistWithEventsDto>> {
-    return this.wishlistService.getMyWishlistPaginated({ pageNumber: queryParams.p || 1, currentUserId })
+    return this.wishlistService.getAllWishlistForUserPaginated({
+      pageNumber: queryParams.p || 1,
+      userId: currentUserId,
+    })
   }
 
   @Get('/:id')

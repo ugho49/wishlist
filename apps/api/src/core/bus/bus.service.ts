@@ -3,7 +3,6 @@ import type { QueryHandlerRegistry } from './registry/query.registry'
 import { Injectable, Logger } from '@nestjs/common'
 import {
   createCommandBus,
-  createLoggerMiddleware,
   createQueryBus,
   Envelope,
   CommandBus as MissiveCommandBus,
@@ -36,10 +35,14 @@ export class BusService {
 
   constructor() {
     this.queryBus = createQueryBus<QueryHandlerRegistry>({
-      middlewares: [createLoggerMiddleware({ logger: new Logger('QueryBus') })],
+      middlewares: [
+        // createLoggerMiddleware({ logger: new Logger('QueryBus') })
+      ],
     })
     this.commandBus = createCommandBus<CommandHandlerRegistry>({
-      middlewares: [createLoggerMiddleware({ logger: new Logger('CommandBus') })],
+      middlewares: [
+        // createLoggerMiddleware({ logger: new Logger('CommandBus') })
+      ],
     })
   }
 
