@@ -16222,6 +16222,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"missive.js@npm:0.4.4":
+  version: 0.4.4
+  resolution: "missive.js@npm:0.4.4"
+  checksum: 10c0/54dc7a12a7d87a5c7a1009389bc6b527cf4c7f599859f320d4c989ee24a6255f031a1e3823a902f2bff51363a4b6c70bcc5bd614025cd437ce6d890a657245b5
+  languageName: node
+  linkType: hard
+
 "mjml-accordion@npm:4.15.3":
   version: 4.15.3
   resolution: "mjml-accordion@npm:4.15.3"
@@ -23183,6 +23190,7 @@ __metadata:
     lint-staged: "npm:15.2.10"
     lodash: "npm:4.17.21"
     luxon: "npm:3.5.0"
+    missive.js: "npm:0.4.4"
     mjml: "npm:4.15.3"
     nestjs-real-ip: "npm:3.0.1"
     node-gyp: "npm:10.2.0"

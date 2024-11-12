@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config'
 import { ScheduleModule } from '@nestjs/schedule'
 
 import { BucketModule } from './bucket/bucket.module'
+import { BusModule } from './bus/bus.module'
 import { DatabaseModule } from './database/database.module'
 import { HealthModule } from './health/health.module'
 import { MailModule } from './mail/mail.module'
@@ -38,6 +39,6 @@ const mailModule = MailModule.registerAsync({
 
 @Global()
 @Module({
-  imports: [ScheduleModule.forRoot(), HealthModule, DatabaseModule, mailModule, bucketModule],
+  imports: [ScheduleModule.forRoot(), HealthModule, BusModule, DatabaseModule, mailModule, bucketModule],
 })
 export class CoreModule {}

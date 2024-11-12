@@ -14,36 +14,49 @@ import {
   UserId,
 } from '@wishlist/common-types'
 
+import { BusService } from '../../core/bus/bus.service'
 import { CurrentUser } from '../auth'
 import { SecretSantaService } from './secret-santa.service'
 
 @ApiTags('Secret Santa')
 @Controller('/secret-santa')
 export class SecretSantaController {
-  constructor(private readonly secretSantaService: SecretSantaService) {}
+  constructor(
+    private readonly secretSantaService: SecretSantaService,
+    private readonly busService: BusService,
+  ) {}
 
   @Get('/user/draw')
   getMySecretSantaDrawForEvent(
     @CurrentUser('id') currentUserId: UserId,
     @Query('eventId') eventId: EventId,
-  ): Promise<AttendeeDto | null> {
-    return this.secretSantaService.getMyDrawForEvent({ currentUserId, eventId })
+  ): Promise<AttendeeDto | undefined> {
+    return this.busService.dispatchQuery('getSecretSantaDraw', { userId: currentUserId, eventId })
   }
 
   @Get('/')
   getSecretSantaForEvent(
     @CurrentUser('id') currentUserId: UserId,
     @Query('eventId') eventId: EventId,
-  ): Promise<SecretSantaDto | null> {
-    return this.secretSantaService.getForEvent({ currentUserId, eventId })
+  ): Promise<SecretSantaDto | undefined> {
+    return this.busService.dispatchQuery('getSecretSanta', { userId: currentUserId, eventId })
   }
 
   @Post('/')
-  createSecretSantaForEvent(
+  async createSecretSantaForEvent(
     @CurrentUser('id') currentUserId: UserId,
     @Body() dto: CreateSecretSantaInputDto,
   ): Promise<SecretSantaDto> {
-    return this.secretSantaService.createForEvent({ currentUserId, dto })
+    const result = await this.busService.dispatchCommand('createSecretSanta', {
+      userId: currentUserId,
+      eventId: dto.event_id,
+      budget: dto.budget,
+      description: dto.description,
+    })
+
+    if (!result) throw new Error('Failed to create secret santa')
+
+    return result
   }
 
   @Patch('/:id')

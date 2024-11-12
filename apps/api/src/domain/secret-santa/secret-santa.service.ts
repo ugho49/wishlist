@@ -1,18 +1,8 @@
-import {
-  BadRequestException,
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-  UnprocessableEntityException,
-} from '@nestjs/common'
+import { BadRequestException, ForbiddenException, Injectable, UnprocessableEntityException } from '@nestjs/common'
 import { SecretSantaDrawService } from '@wishlist/common'
 import {
-  AttendeeDto,
-  CreateSecretSantaInputDto,
   CreateSecretSantaUsersInputDto,
   CreateSecretSantaUsersOutputDto,
-  EventId,
-  SecretSantaDto,
   SecretSantaId,
   SecretSantaStatus,
   SecretSantaUserId,
@@ -23,66 +13,18 @@ import {
 import { ArrayContains, In } from 'typeorm'
 
 import { toAttendeeDto } from '../attendee/attendee.mapper'
-import { EventRepository } from '../event/event.repository'
 import { SecretSantaEntity, SecretSantaUserEntity } from './secret-santa.entity'
 import { SecretSantaMailer } from './secret-santa.mailer'
-import { toSecretSantaDto, toSecretSantaUserDto, toSecretSantaUserWithDrawDto } from './secret-santa.mapper'
+import { toSecretSantaUserDto, toSecretSantaUserWithDrawDto } from './secret-santa.mapper'
 import { SecretSantaRepository, SecretSantaUserRepository } from './secret-santa.repository'
 
 @Injectable()
 export class SecretSantaService {
   constructor(
-    private readonly eventRepository: EventRepository,
     private readonly secretSantaRepository: SecretSantaRepository,
     private readonly secretSantaUserRepository: SecretSantaUserRepository,
     private readonly mailer: SecretSantaMailer,
   ) {}
-
-  async getForEvent(param: { eventId: EventId; currentUserId: UserId }): Promise<SecretSantaDto | null> {
-    return this.secretSantaRepository
-      .getSecretSantaForEventAndUser({
-        eventId: param.eventId,
-        userId: param.currentUserId,
-      })
-      .then(entity => (entity ? toSecretSantaDto(entity) : null))
-  }
-
-  async getMyDrawForEvent(param: { eventId: EventId; currentUserId: UserId }): Promise<AttendeeDto | null> {
-    return this.secretSantaUserRepository
-      .getDrawSecretSantaUserForEvent({
-        eventId: param.eventId,
-        userId: param.currentUserId,
-      })
-      .then(entity => (entity ? entity.attendee : null))
-      .then(entity => (entity ? toAttendeeDto(entity) : null))
-  }
-
-  async createForEvent(param: { currentUserId: UserId; dto: CreateSecretSantaInputDto }): Promise<SecretSantaDto> {
-    const alreadyExists = await this.secretSantaRepository.exists({ where: { eventId: param.dto.event_id } })
-
-    if (alreadyExists) {
-      throw new BadRequestException('Secret santa already exists for event')
-    }
-
-    const event = await this.eventRepository.findByIdAndUserId({
-      eventId: param.dto.event_id,
-      userId: param.currentUserId,
-    })
-
-    if (!event) {
-      throw new NotFoundException('Event not found')
-    }
-
-    const entity = SecretSantaEntity.create({
-      eventId: event.id,
-      budget: param.dto.budget,
-      description: param.dto.description,
-    })
-
-    await this.secretSantaRepository.save(entity)
-
-    return toSecretSantaDto(entity)
-  }
 
   async updateSecretSanta(param: {
     currentUserId: UserId
