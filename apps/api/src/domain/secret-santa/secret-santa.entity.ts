@@ -41,6 +41,14 @@ export class SecretSantaEntity extends TimestampEntity {
     entity.eventId = props.eventId
     return entity
   }
+
+  isStarted(): boolean {
+    return this.status === SecretSantaStatus.STARTED
+  }
+
+  isCreated(): boolean {
+    return this.status === SecretSantaStatus.CREATED
+  }
 }
 
 @Entity('secret_santa_user')

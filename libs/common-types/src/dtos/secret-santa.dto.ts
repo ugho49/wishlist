@@ -53,7 +53,7 @@ export class CreateSecretSantaUsersInputDto {
 export class UpdateSecretSantaUserInputDto {
   @IsString({ each: true })
   @Transform(({ value }) => uniq(value))
-  exclusions: string[]
+  exclusions: SecretSantaUserId[]
 }
 
 export class CreateSecretSantaUsersOutputDto {

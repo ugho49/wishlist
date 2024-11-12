@@ -31,6 +31,9 @@ export class BusService {
   private readonly queryBus: MissiveQueryBus<QueryHandlerRegistry>
   private readonly commandBus: MissiveCommandBus<CommandHandlerRegistry>
 
+  private readonly registeredQueryHandlers: Set<keyof QueryHandlerRegistry> = new Set()
+  private readonly registeredCommandHandlers: Set<keyof CommandHandlerRegistry> = new Set()
+
   constructor() {
     this.queryBus = createQueryBus<QueryHandlerRegistry>({
       middlewares: [createLoggerMiddleware({ logger: new Logger('QueryBus') })],
@@ -44,6 +47,10 @@ export class BusService {
     type: MessageName,
     handler: QueryHandler<MessageName>,
   ) {
+    if (this.registeredQueryHandlers.has(type)) {
+      throw new Error(`Query handler for ${type} is already registered`)
+    }
+    this.registeredQueryHandlers.add(type)
     this.logger.log(`Registering query handler for ${type}`)
     this.queryBus.register(type, handler)
   }
@@ -52,6 +59,10 @@ export class BusService {
     type: MessageName,
     handler: CommandHandler<MessageName>,
   ) {
+    if (this.registeredCommandHandlers.has(type)) {
+      throw new Error(`Command handler for ${type} is already registered`)
+    }
+    this.registeredCommandHandlers.add(type)
     this.logger.log(`Registering command handler for ${type}`)
     this.commandBus.register(type, handler)
   }
