@@ -13,7 +13,7 @@ import React, { useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useNavigate, useParams } from 'react-router-dom'
 
-import { useEventById } from '../../hooks/domain/useEventById'
+import { useEventById } from '../../hooks'
 import { Description } from '../common/Description'
 import { Loader } from '../common/Loader'
 import { Title } from '../common/Title'

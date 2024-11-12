@@ -1,3 +1,4 @@
+import type { UserId } from '@wishlist/common-types'
 import type { FormEvent } from 'react'
 
 import type { RootState } from '../../../core'
@@ -25,16 +26,18 @@ import { InputLabel } from '../../common/InputLabel'
 import { Loader } from '../../common/Loader'
 import { Subtitle } from '../../common/Subtitle'
 import { Title } from '../../common/Title'
+import { AdminListEvents } from '../../event/admin/AdminListEvents'
+import { AdminListWishlistsForUser } from '../../wishlist/admin/AdminListWishlistsForUser'
 import { AvatarUpdateButton } from '../AvatarUpdateButton'
 import { UpdatePasswordModal } from './UpdatePasswordModal'
 
 const mapState = (state: RootState) => state.auth
 
-export const AdminEditUserPage = () => {
+export const AdminUserPage = () => {
   const { addToast } = useToast()
   const { user: currentUser } = useSelector(mapState)
   const params = useParams<'userId'>()
-  const userId = params.userId || ''
+  const userId = (params.userId || '') as UserId
   const { admin: api } = useApi()
   const theme = useTheme()
   const smallScreen = useMediaQuery(theme.breakpoints.down('md'))
@@ -294,6 +297,16 @@ export const AdminEditUserPage = () => {
               </Stack>
             )}
           </Stack>
+        </Card>
+        <br />
+        <Card>
+          <Subtitle>Evènements</Subtitle>
+          <AdminListEvents userId={userId} />
+        </Card>
+        <br />
+        <Card>
+          <Subtitle>Wishlists</Subtitle>
+          <AdminListWishlistsForUser userId={userId} />
         </Card>
       </Box>
     </Loader>

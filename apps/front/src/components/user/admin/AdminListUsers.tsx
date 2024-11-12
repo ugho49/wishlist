@@ -8,7 +8,7 @@ import { useQuery } from '@tanstack/react-query'
 import { DateTime } from 'luxon'
 import React, { useEffect, useState } from 'react'
 
-import { useApi } from '../../../hooks/useApi'
+import { useApi } from '../../../hooks'
 import { InputLabel } from '../../common/InputLabel'
 import { RouterLink } from '../../common/RouterLink'
 import { Status } from '../../common/Status'
@@ -92,7 +92,7 @@ export const AdminListUsers = () => {
   }
 
   return (
-    <div style={{ width: '100%' }}>
+    <div style={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
       <Box component="form" noValidate onSubmit={applySearch}>
         <InputLabel>Rechercher un utilisateur</InputLabel>
         <Stack direction="row" justifyContent="space-between" alignItems="center" gap={2} mb={2}>
@@ -111,7 +111,6 @@ export const AdminListUsers = () => {
         </Stack>
       </Box>
       <DataGrid
-        autoHeight
         isRowSelectable={() => false}
         density="standard"
         rows={value?.resources || []}
