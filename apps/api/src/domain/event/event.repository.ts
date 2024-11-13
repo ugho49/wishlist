@@ -12,7 +12,7 @@ export class EventRepository extends BaseRepository(EventEntity) {
 
     let fetchQueryBuilder = this.createQueryBuilder('e')
       .leftJoinAndSelect('e.wishlists', 'w')
-      .leftJoinAndSelect('e.attendees', 'a')
+      .leftJoin('e.attendees', 'a')
 
     if (params.userId) {
       fetchQueryBuilder = fetchQueryBuilder.where('a.userId = :userId', { userId: params.userId })

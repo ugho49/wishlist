@@ -48,7 +48,7 @@ export const WishlistCardWithOwner = ({ wishlist }: WishlistCardWithOwnerProps) 
         <div>
           {wishlist.config.hide_items ? (
             <Avatar
-              src={wishlist.owner.picture_url}
+              src={wishlist.logo_url ?? wishlist.owner.picture_url}
               sx={{ width: logoSize, height: logoSize, bgcolor: grey[200], color: grey[400] }}
             >
               <PersonIcon fontSize="medium" />

@@ -119,16 +119,14 @@ export const EditWishlistInformations = ({ wishlist }: EditWishlistInformationsP
     <Stack gap={3}>
       <Card>
         <Stack>
-          {!wishlist.config.hide_items && (
-            <Box marginBottom={3}>
-              <WishlistLogoActions
-                loading={loadingLogoUpdate}
-                logoUrl={logoUrl}
-                onLogoChange={file => uploadLogo(file)}
-                onLogoRemove={() => removeLogo()}
-              />
-            </Box>
-          )}
+          <Box marginBottom={3}>
+            <WishlistLogoActions
+              loading={loadingLogoUpdate}
+              logoUrl={logoUrl}
+              onLogoChange={file => uploadLogo(file)}
+              onLogoRemove={() => removeLogo()}
+            />
+          </Box>
           <Stack component="form" onSubmit={handleSubmit(onSubmit)} gap={3}>
             <Box>
               <InputLabel required>Titre</InputLabel>
