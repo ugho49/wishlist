@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { EventId } from '@wishlist/common-types'
-
-import { MailService } from '../../core/mail/mail.service'
+import { MailService } from '@wishlist/nestjs/modules/mail'
 
 @Injectable()
 export class EventMailer {

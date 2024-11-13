@@ -1,7 +1,6 @@
 import { ParseFilePipe } from '@nestjs/common'
 import { ACCEPTED_IMG_FORMATS } from '@wishlist/common-types'
-
-import { FileTypeValidator, MaxFileSizeValidator, ResizeImagePipe } from '../../core/bucket'
+import { FileTypeValidator, MaxFileSizeValidator, ResizeImagePipe } from '@wishlist/nestjs/modules/bucket'
 
 export const userPictureFileValidators = new ParseFilePipe({
   validators: [

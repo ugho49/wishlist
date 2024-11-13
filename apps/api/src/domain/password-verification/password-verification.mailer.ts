@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common'
-
-import { MailService } from '../../core/mail/mail.service'
+import { MailService } from '@wishlist/nestjs/modules/mail'
 
 @Injectable()
 export class PasswordVerificationMailer {

@@ -2,9 +2,9 @@ import type { CommandHandlerDefinition, Envelope } from 'missive.js'
 
 import { BadRequestException, Injectable } from '@nestjs/common'
 import { EventId, SecretSantaId, SecretSantaStatus, UserId } from '@wishlist/common-types'
+import { MailService } from '@wishlist/nestjs/modules/mail'
 
 import { BusService } from '../../../core/bus/bus.service'
-import { MailService } from '../../../core/mail/mail.service'
 import { toAttendeeDto } from '../../attendee/attendee.mapper'
 import { SecretSantaEntity, SecretSantaUserEntity } from '../secret-santa.entity'
 import { SecretSantaRepository } from '../secret-santa.repository'

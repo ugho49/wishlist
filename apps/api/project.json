@@ -21,7 +21,7 @@
     "db:generate-migration": {
       "executor": "nx:run-commands",
       "options": {
-        "cwd": "apps/api/src/core/database/migrations",
+        "cwd": "apps/api/src/infrastructure/database/migrations",
         "command": "typeorm migration:create",
         "color": true
       }

@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config'
 
 import { CoreModule } from './core/core.module'
 import { DomainModule } from './domain/domain.module'
+import { InfrastructureModule } from './infrastructure/infrastructure.module'
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { DomainModule } from './domain/domain.module'
       expandVariables: true,
     }),
     CoreModule,
+    InfrastructureModule,
     DomainModule,
   ],
 })
