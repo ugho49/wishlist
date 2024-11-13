@@ -1,4 +1,4 @@
-import type { SecretSantaUserDto } from '@wishlist/common-types'
+import type { SecretSantaUserDto, SecretSantaUserId } from '@wishlist/common-types'
 
 import CloseIcon from '@mui/icons-material/Close'
 import { LoadingButton } from '@mui/lab'
@@ -43,10 +43,10 @@ export const ManageUserExclusionsDialog = ({
   const queryClient = useQueryClient()
   const api = useApi()
   const { addToast } = useToast()
-  const [selected, setSelected] = useState<string[]>([])
+  const [selected, setSelected] = useState<SecretSantaUserId[]>([])
 
   const toggleSelect = useCallback(
-    (id: string) => {
+    (id: SecretSantaUserId) => {
       const checked = selected.includes(id)
 
       if (!checked) {

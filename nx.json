@@ -1,22 +1,11 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "nxCloudId": "67346a726d0c84465f4622bb",
   "defaultBase": "main",
   "defaultProject": "api",
   "workspaceLayout": {
     "appsDir": "apps",
     "libsDir": "libs"
-  },
-  "targetDefaults": {
-    "build": {
-      "dependsOn": [
-        "^build"
-      ],
-      "inputs": [
-        "production",
-        "^production"
-      ],
-      "cache": true
-    }
   },
   "plugins": [
     {
@@ -52,18 +41,8 @@
     }
   ],
   "namedInputs": {
-    "default": [
-      "{projectRoot}/**/*",
-      "sharedGlobals"
-    ],
-    "sharedGlobals": [
-      "{workspaceRoot}/yarn.lock",
-      "{workspaceRoot}/.circleci/*"
-    ],
-    "production": [
-      "default"
-    ]
-  },
-  "useLegacyCache": true,
-  "nxCloudId": "67346a726d0c84465f4622bb"
+    "default": ["{projectRoot}/**/*", "sharedGlobals"],
+    "sharedGlobals": ["{workspaceRoot}/.circleci/**/*"],
+    "production": ["default"]
+  }
 }
