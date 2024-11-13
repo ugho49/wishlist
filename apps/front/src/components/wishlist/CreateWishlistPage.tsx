@@ -175,6 +175,7 @@ export const CreateWishlistPage = () => {
                       setOwnerName(userFirstName ?? '')
                       setHideItems(true)
                       setIsListForSomeoneElse(false)
+                      setLogo(undefined)
                     }}
                   >
                     <Paper sx={{ width: '100%' }}>
