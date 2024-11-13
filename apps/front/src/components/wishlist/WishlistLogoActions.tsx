@@ -1,5 +1,5 @@
 import PersonIcon from '@mui/icons-material/Person'
-import { Avatar, Box, Button, Stack } from '@mui/material'
+import { Avatar, Box, Button, Stack, Typography } from '@mui/material'
 import { grey } from '@mui/material/colors'
 import React, { useState } from 'react'
 
@@ -42,7 +42,7 @@ export const WishlistLogoActions = (props: WishlistLogoActionsProps) => {
         />
       )}
       <Box>
-        <InputLabel>Logo</InputLabel>
+        <InputLabel>Logo de la liste</InputLabel>
         <Stack direction="row" gap={2}>
           <Avatar src={logoUrl} sx={{ width: 70, height: 70, bgcolor: grey[200], color: grey[400] }}>
             <PersonIcon fontSize="large" />
@@ -51,7 +51,7 @@ export const WishlistLogoActions = (props: WishlistLogoActionsProps) => {
           <Stack direction="column" justifyContent="center" gap={1} marginLeft={5}>
             <Box>
               <Button variant="outlined" component="label" disabled={loading} size="small">
-                Choisir un logo
+                Choisir une image
                 <input type="file" hidden accept={ACCEPT_IMG} onChange={onLogoInputChange} />
               </Button>
             </Box>
@@ -65,11 +65,15 @@ export const WishlistLogoActions = (props: WishlistLogoActionsProps) => {
                 color="error"
                 onClick={() => onLogoRemove()}
               >
-                Supprimer le logo
+                Supprimer l'image
               </Button>
             </Box>
           </Stack>
         </Stack>
+        <br />
+        <Typography variant="caption">
+          En l'absence d'image, le logo utilisé sera la photo de profile du créateur de la liste
+        </Typography>
       </Box>
     </>
   )

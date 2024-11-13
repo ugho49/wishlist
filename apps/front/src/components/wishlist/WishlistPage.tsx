@@ -2,14 +2,16 @@ import type { RootState } from '../../core'
 
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import EditIcon from '@mui/icons-material/Edit'
+import PersonIcon from '@mui/icons-material/Person'
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined'
 import PublicIcon from '@mui/icons-material/Public'
 import { Avatar, Box, Chip, Stack, Tooltip } from '@mui/material'
+import { grey } from '@mui/material/colors'
 import React, { useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useNavigate, useParams } from 'react-router-dom'
 
-import { useWishlistById } from '../../hooks/domain/useWishlistById'
+import { useWishlistById } from '../../hooks'
 import { Description } from '../common/Description'
 import { Loader } from '../common/Loader'
 import { Title } from '../common/Title'
@@ -18,6 +20,8 @@ import { WishlistItems } from './WishlistItems'
 import { WishlistNotFound } from './WishlistNotFound'
 
 const mapState = (state: RootState) => state.auth.user?.id
+
+const logoSize = 60
 
 export const WishlistPage = () => {
   const currentUserId = useSelector(mapState)
@@ -37,7 +41,24 @@ export const WishlistPage = () => {
 
         {wishlist && (
           <>
-            <Title smallMarginBottom>{wishlist.title}</Title>
+            <Title smallMarginBottom>
+              <Stack
+                direction="row"
+                gap={2}
+                alignItems="center"
+                flexWrap="wrap"
+                justifyContent="center"
+                textAlign="center"
+              >
+                <Avatar
+                  src={wishlist.logo_url ?? wishlist.owner.picture_url}
+                  sx={{ width: logoSize, height: logoSize, bgcolor: grey[200], color: grey[400] }}
+                >
+                  <PersonIcon fontSize="medium" />
+                </Avatar>
+                <span>{wishlist.title}</span>
+              </Stack>
+            </Title>
 
             <Stack
               direction="column"
@@ -48,11 +69,6 @@ export const WishlistPage = () => {
               gap={1}
             >
               <Stack direction="row" gap={1}>
-                {!wishlist.config.hide_items && (
-                  <Tooltip title="Tout le monde peut ajouter, cocher ou voir les souhaits cochés, même le créateur de la liste">
-                    <Chip label="Publique" color="primary" variant="outlined" size="small" icon={<PublicIcon />} />
-                  </Tooltip>
-                )}
                 <Chip
                   variant="outlined"
                   size="small"
@@ -75,6 +91,11 @@ export const WishlistPage = () => {
               </Stack>
               {currentUserCanEdit && (
                 <Stack direction="row" gap={1}>
+                  {!wishlist.config.hide_items && (
+                    <Tooltip title="Tout le monde peut ajouter, cocher ou voir les souhaits cochés, même le créateur de la liste">
+                      <Chip label="Publique" color="primary" variant="outlined" size="small" icon={<PublicIcon />} />
+                    </Tooltip>
+                  )}
                   <Chip
                     color="info"
                     variant="outlined"

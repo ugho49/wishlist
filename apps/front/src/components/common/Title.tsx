@@ -2,7 +2,7 @@ import type { Theme } from '@mui/material'
 import type { PropsWithChildren } from 'react'
 
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft'
-import { linkClasses, Stack } from '@mui/material'
+import { Box, linkClasses, Stack } from '@mui/material'
 import { makeStyles } from '@mui/styles'
 import clsx from 'clsx'
 import React from 'react'
@@ -45,7 +45,7 @@ export const Title = ({ children, smallMarginBottom = false, goBackLink }: Props
 
   return (
     <Stack gap={1} alignItems="center" className={clsx(classes.title, smallMarginBottom && 'smallMarginBottom')}>
-      <h1 className={classes.h1}>{children}</h1>
+      <Box className={classes.h1}>{children}</Box>
       {goBackLink && (
         <RouterLink to={goBackLink.to} className={classes.link}>
           <KeyboardArrowLeftIcon fontSize="small" />

@@ -2,27 +2,32 @@ import type { MiniEventDto } from '@wishlist/common-types'
 
 import type { RootState } from '../../core'
 
+import AccountCircleTwoToneIcon from '@mui/icons-material/AccountCircleTwoTone'
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import DeleteIcon from '@mui/icons-material/Delete'
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
+import Diversity1TwoToneIcon from '@mui/icons-material/Diversity1TwoTone'
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft'
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'
-import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp'
 import SaveIcon from '@mui/icons-material/Save'
 import { LoadingButton } from '@mui/lab'
 import {
   Avatar,
   Box,
   Button,
+  Checkbox,
   Container,
   Divider,
+  FormControl,
   FormControlLabel,
   IconButton,
+  InputAdornment,
   List,
   ListItem,
   ListItemAvatar,
   ListItemButton,
   ListItemText,
+  OutlinedInput,
+  Paper,
   Stack,
   Step,
   StepLabel,
@@ -30,8 +35,6 @@ import {
   TextField,
   useTheme,
 } from '@mui/material'
-import Collapse from '@mui/material/Collapse'
-import Link from '@mui/material/Link'
 import { useMutation } from '@tanstack/react-query'
 import { MAX_EVENTS_BY_LIST } from '@wishlist/common-types'
 import uniq from 'lodash/uniq'
@@ -39,25 +42,56 @@ import { DateTime } from 'luxon'
 import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
+import { useInterval } from 'usehooks-ts'
 
-import { useAvailableEvents } from '../../hooks/domain/useAvailableEvents'
-import { useEventById } from '../../hooks/domain/useEventById'
-import { useApi } from '../../hooks/useApi'
-import { useCustomSearchParams } from '../../hooks/useCustomSearchParams'
-import { useToast } from '../../hooks/useToast'
+import { useApi, useAvailableEvents, useCustomSearchParams, useEventById, useToast } from '../../hooks'
 import { Card } from '../common/Card'
 import { CharsRemaining } from '../common/CharsRemaining'
-import { ConfirmCheckbox } from '../common/ConfirmCheckbox'
 import { InputLabel } from '../common/InputLabel'
+import { Loader } from '../common/Loader'
 import { Title } from '../common/Title'
 import { SearchEventSelect } from '../event/SearchEventSelect'
 import { WishlistLogoActions } from './WishlistLogoActions'
 
 type QueryParamType = { 'from-event'?: string }
 
-const steps = ['Informations', 'Evènements']
+const steps = ['Type de liste', 'Informations', 'Evènements']
 
 const mapState = (state: RootState) => state.userProfile.firstName
+
+const PLACEHOLDER_NAMES = [
+  'John',
+  'Léo',
+  'Lucas',
+  'Marc',
+  'Julie',
+  'Claire',
+  'Maxime',
+  'Jeanne',
+  'Matthieu',
+  'Jean',
+  'Lou',
+  'Quentin',
+  'Nico',
+  'Pakura',
+  'Camille',
+  'Manu',
+  'Tom',
+  'Elise',
+  'Louane',
+  'Nina',
+  'Arthur',
+  'Sarah',
+  'Fleur',
+  'Killian',
+  'Bastien',
+  'Clément',
+]
+const getRandomPlaceholderName = () => {
+  const randomIndex = Math.floor(Math.random() * PLACEHOLDER_NAMES.length)
+  // eslint-disable-next-line security/detect-object-injection
+  return PLACEHOLDER_NAMES[randomIndex]
+}
 
 export const CreateWishlistPage = () => {
   const theme = useTheme()
@@ -66,26 +100,24 @@ export const CreateWishlistPage = () => {
   const userFirstName = useSelector(mapState)
   const [queryParams] = useCustomSearchParams<QueryParamType>()
   const [step, setStep] = useState(1)
-  const [title, setTitle] = useState('')
+  const [ownerName, setOwnerName] = useState('')
   const [description, setDescription] = useState('')
-  const [showAdvancedParams, setShowAdvancedParams] = useState(false)
+  const [isListForSomeoneElse, setIsListForSomeoneElse] = useState(false)
   const [hideItems, setHideItems] = useState(true)
   const [events, setEvents] = useState<MiniEventDto[]>([])
+  const [namePlaceholder, setNamePlaceholder] = useState<string>(getRandomPlaceholderName())
   const [logo, setLogo] = useState<File | undefined>()
   const api = useApi()
+
+  useInterval(() => {
+    setNamePlaceholder(getRandomPlaceholderName())
+  }, 2000)
 
   const { events: availableEvents, loading: availableEventsLoading } = useAvailableEvents()
   const { event: eventFromUrl } = useEventById(queryParams['from-event'])
 
-  const nextStepEnabled = title?.trim() !== ''
+  const nextStepEnabled = ownerName?.trim() !== ''
   const createEnabled = events.length > 0
-
-  useEffect(() => {
-    setTitle(prev => {
-      if (prev !== '' || !userFirstName) return prev
-      return `Liste de ${userFirstName}`
-    })
-  }, [userFirstName])
 
   useEffect(() => {
     if (eventFromUrl !== undefined) {
@@ -101,7 +133,7 @@ export const CreateWishlistPage = () => {
     mutationFn: () =>
       api.wishlist.create(
         {
-          title,
+          title: `Liste de ${ownerName}`,
           description: description === '' ? undefined : description,
           hide_items: hideItems,
           event_ids: uniq(events.map(e => e.id)),
@@ -118,199 +150,226 @@ export const CreateWishlistPage = () => {
 
   return (
     <Box>
-      <Title>Créer une liste</Title>
-      <Box sx={{ width: '100%' }}>
-        <Stepper activeStep={step - 1} alternativeLabel>
-          {steps.map((label, i) => (
-            <Step key={label} completed={step > i + 1 || loading}>
-              <StepLabel>{label}</StepLabel>
-            </Step>
-          ))}
-        </Stepper>
-      </Box>
-      <Container maxWidth="sm" sx={{ marginTop: '40px' }}>
-        <Card>
-          {step === 1 && (
-            <Stack component="form" noValidate gap={3}>
-              <Box>
-                <InputLabel required>Titre</InputLabel>
-                <TextField
-                  autoComplete="off"
-                  disabled={loading}
-                  fullWidth
-                  value={title}
-                  inputProps={{ maxLength: 100 }}
-                  placeholder="Nom de ma liste"
-                  helperText={<CharsRemaining max={100} value={title} />}
-                  onChange={e => setTitle(e.target.value)}
-                />
-              </Box>
+      <Loader loading={userFirstName === undefined}>
+        <Title>Créer une liste</Title>
+        <Box sx={{ width: '100%' }}>
+          <Stepper activeStep={step - 1} alternativeLabel>
+            {steps.map((label, i) => (
+              <Step key={label} completed={step > i + 1 || loading}>
+                <StepLabel>{label}</StepLabel>
+              </Step>
+            ))}
+          </Stepper>
+        </Box>
+        <Container maxWidth="sm" sx={{ marginTop: '40px' }}>
+          <Card>
+            {step === 1 && (
+              <Stack gap={2}>
+                <InputLabel required>Pour qui créer la liste ?</InputLabel>
 
-              <Box>
-                <InputLabel>Description</InputLabel>
-                <TextField
-                  autoComplete="off"
-                  disabled={loading}
-                  fullWidth
-                  multiline
-                  minRows={4}
-                  value={description}
-                  inputProps={{ maxLength: 2000 }}
-                  placeholder="Une petite description ..."
-                  helperText={<CharsRemaining max={2000} value={description} />}
-                  onChange={e => setDescription(e.target.value)}
-                />
-              </Box>
-
-              <Stack alignItems="center">
-                <Link
-                  variant="body2"
-                  component="button"
-                  onClick={e => {
-                    e.preventDefault()
-                    setShowAdvancedParams(!showAdvancedParams)
-                  }}
-                  sx={{ display: 'flex', alignItems: 'center' }}
-                >
-                  {showAdvancedParams ? 'Masquer les paramètres avancés' : 'Afficher les paramètres avancés'}
-                  {showAdvancedParams ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-                </Link>
-              </Stack>
-
-              <Collapse in={showAdvancedParams}>
-                <Stack gap={3}>
-                  <Box>
-                    <InputLabel>Révéler les Sélections</InputLabel>
-                    <FormControlLabel
-                      control={
-                        <ConfirmCheckbox
-                          checked={!hideItems}
-                          onChange={checked => setHideItems(!checked)}
-                          disabled={loading}
-                          confirmTitle="⚠️Préférez-vous garder la surprise ? ⚠️"
-                          confirmText={
-                            <>
-                              <p>
-                                Cette action a pour conséquence de vous montrer les souhaits de votre liste qui ont été
-                                réservés par les autres. Cela enlève toute la surprise de la liste.
-                              </p>
-                              <p>Dans la majorité des cas ce paramètre ne vous est pas utile.</p>
-                              <p>
-                                <b>Exemple de cas d'utilisation:</b> Gérer la liste d'un enfant qui n'a pas de compte
-                              </p>
-                              <p>
-                                <b>Attention</b> ce paramètre ne pourra pas être changé après la création.
-                              </p>
-                            </>
-                          }
+                <List sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <ListItem
+                    disablePadding
+                    onClick={() => {
+                      setStep(2)
+                      setOwnerName(userFirstName ?? '')
+                      setHideItems(true)
+                      setIsListForSomeoneElse(false)
+                    }}
+                  >
+                    <Paper sx={{ width: '100%' }}>
+                      <ListItemButton>
+                        <ListItemAvatar>
+                          <AccountCircleTwoToneIcon />
+                        </ListItemAvatar>
+                        <ListItemText
+                          primary={<b>Pour moi</b>}
+                          secondary="Je garde le secret et je fais ma liste pour moi-même"
                         />
-                      }
-                      label="Cochez cette case pour découvrir qui a sélectionné des souhaits sur votre liste"
+                      </ListItemButton>
+                    </Paper>
+                  </ListItem>
+                  <ListItem
+                    disablePadding
+                    onClick={() => {
+                      setStep(2)
+                      setOwnerName('')
+                      setHideItems(false)
+                      setIsListForSomeoneElse(true)
+                    }}
+                  >
+                    <Paper sx={{ width: '100%' }}>
+                      <ListItemButton>
+                        <ListItemAvatar>
+                          <Stack>
+                            <Diversity1TwoToneIcon />
+                          </Stack>
+                        </ListItemAvatar>
+                        <ListItemText
+                          primary={<b>Pour une autre personne (enfant, proche, ...)</b>}
+                          secondary="Je créer la liste pour quelqu'un d'autre. Je peut choisir si je souhaite voir ou non les sélections faites par les autres participants"
+                        />
+                      </ListItemButton>
+                    </Paper>
+                  </ListItem>
+                </List>
+              </Stack>
+            )}
+
+            {step === 2 && (
+              <Stack component="form" noValidate gap={3}>
+                <Box>
+                  <InputLabel required>Intitulé</InputLabel>
+                  <FormControl fullWidth>
+                    <OutlinedInput
+                      autoComplete="off"
+                      disabled={loading}
+                      readOnly={!isListForSomeoneElse}
+                      fullWidth
+                      value={ownerName}
+                      slotProps={{ input: { maxLength: 90 } }}
+                      placeholder={namePlaceholder}
+                      onChange={e => setOwnerName(e.target.value)}
+                      startAdornment={<InputAdornment position="start">Liste de </InputAdornment>}
                     />
-                  </Box>
-                  {!hideItems && (
+                  </FormControl>
+                </Box>
+
+                <Box>
+                  <InputLabel>Description</InputLabel>
+                  <TextField
+                    autoComplete="off"
+                    disabled={loading}
+                    fullWidth
+                    multiline
+                    minRows={4}
+                    value={description}
+                    inputProps={{ maxLength: 2000 }}
+                    placeholder="Une petite description ..."
+                    helperText={<CharsRemaining max={2000} value={description} />}
+                    onChange={e => setDescription(e.target.value)}
+                  />
+                </Box>
+
+                {isListForSomeoneElse && (
+                  <>
+                    <Box>
+                      <InputLabel>Révéler les Sélections</InputLabel>
+                      <FormControlLabel
+                        label="Je veux voir ce que les gens cochent sur cette liste"
+                        control={
+                          <Checkbox
+                            checked={!hideItems}
+                            onChange={() => setHideItems(prev => !prev)}
+                            disabled={loading}
+                          />
+                        }
+                      />
+                    </Box>
                     <WishlistLogoActions
                       logoUrl={logo ? URL.createObjectURL(logo) : undefined}
                       loading={loading}
                       onLogoChange={file => setLogo(file)}
                       onLogoRemove={() => setLogo(undefined)}
                     />
-                  )}
-                </Stack>
-              </Collapse>
-            </Stack>
-          )}
+                  </>
+                )}
+              </Stack>
+            )}
 
-          {step === 2 && (
-            <Stack>
-              <Box>
-                <InputLabel required>Gérer les évènements</InputLabel>
+            {step === 3 && (
+              <Stack>
+                <Box>
+                  <InputLabel required>Gérer les évènements</InputLabel>
 
-                <SearchEventSelect
-                  loading={availableEventsLoading}
-                  disabled={loading || events.length === MAX_EVENTS_BY_LIST}
-                  options={availableEvents}
-                  excludedEventIds={events.map(e => e.id)}
-                  onChange={val => setEvents(prevState => [...prevState, val])}
-                />
-              </Box>
-              {events.length > 0 && (
-                <>
-                  <Divider sx={{ marginTop: '20px', marginBottom: '10px' }} />
+                  <SearchEventSelect
+                    loading={availableEventsLoading}
+                    disabled={loading || events.length === MAX_EVENTS_BY_LIST}
+                    options={availableEvents}
+                    excludedEventIds={events.map(e => e.id)}
+                    onChange={val => setEvents(prevState => [...prevState, val])}
+                  />
+                </Box>
+                {events.length > 0 && (
+                  <>
+                    <Divider sx={{ marginTop: '20px', marginBottom: '10px' }} />
 
-                  <List>
-                    {events.map(event => (
-                      <ListItem
-                        key={event.id}
-                        disablePadding
-                        className="animated zoomIn fast"
-                        secondaryAction={
-                          <IconButton
-                            edge="end"
-                            aria-label="delete"
-                            onClick={() => setEvents(prev => prev.filter(value => value.id !== event.id))}
-                          >
-                            <DeleteIcon />
-                          </IconButton>
-                        }
-                      >
-                        <ListItemButton>
-                          <ListItemAvatar>
-                            <Avatar
-                              sx={{ bgcolor: theme.palette.primary.light, color: theme.palette.background.paper }}
+                    <List>
+                      {events.map(event => (
+                        <ListItem
+                          key={event.id}
+                          disablePadding
+                          className="animated zoomIn fast"
+                          secondaryAction={
+                            <IconButton
+                              edge="end"
+                              aria-label="delete"
+                              onClick={() => setEvents(prev => prev.filter(value => value.id !== event.id))}
                             >
-                              <CalendarMonthIcon />
-                            </Avatar>
-                          </ListItemAvatar>
-                          <ListItemText
-                            primary={<b>{event.title}</b>}
-                            secondary={DateTime.fromISO(event.event_date).toLocaleString(DateTime.DATE_MED)}
-                          />
-                        </ListItemButton>
-                      </ListItem>
-                    ))}
-                  </List>
-                </>
-              )}
-            </Stack>
-          )}
+                              <DeleteIcon />
+                            </IconButton>
+                          }
+                        >
+                          <ListItemButton>
+                            <ListItemAvatar>
+                              <Avatar
+                                sx={{ bgcolor: theme.palette.primary.light, color: theme.palette.background.paper }}
+                              >
+                                <CalendarMonthIcon />
+                              </Avatar>
+                            </ListItemAvatar>
+                            <ListItemText
+                              primary={<b>{event.title}</b>}
+                              secondary={DateTime.fromISO(event.event_date).toLocaleString(DateTime.DATE_MED)}
+                            />
+                          </ListItemButton>
+                        </ListItem>
+                      ))}
+                    </List>
+                  </>
+                )}
+              </Stack>
+            )}
 
-          <Stack direction="row" justifyContent="space-between" alignItems="center" marginTop={3}>
-            <Box>
-              {step > 1 && (
-                <Button
-                  onClick={() => setStep(prev => prev - 1)}
-                  disabled={step === 1}
-                  startIcon={<KeyboardArrowLeftIcon />}
-                >
-                  Précédent
-                </Button>
-              )}
-            </Box>
-            {step !== 2 && (
-              <Button
-                onClick={() => setStep(prev => prev + 1)}
-                disabled={!nextStepEnabled}
-                endIcon={<KeyboardArrowRightIcon />}
-              >
-                Suivant
-              </Button>
+            {step > 1 && (
+              <Stack direction="row" justifyContent="space-between" alignItems="center" marginTop={3}>
+                <Box>
+                  {step > 1 && (
+                    <Button
+                      onClick={() => setStep(prev => prev - 1)}
+                      disabled={step === 1}
+                      startIcon={<KeyboardArrowLeftIcon />}
+                    >
+                      Précédent
+                    </Button>
+                  )}
+                </Box>
+                {step < 3 && (
+                  <Button
+                    onClick={() => setStep(prev => prev + 1)}
+                    disabled={!nextStepEnabled}
+                    endIcon={<KeyboardArrowRightIcon />}
+                  >
+                    Suivant
+                  </Button>
+                )}
+                {step === 3 && (
+                  <LoadingButton
+                    variant="contained"
+                    loading={loading}
+                    loadingPosition="end"
+                    disabled={!createEnabled || loading}
+                    endIcon={<SaveIcon />}
+                    onClick={() => createWishlist()}
+                  >
+                    Créer
+                  </LoadingButton>
+                )}
+              </Stack>
             )}
-            {step === 2 && (
-              <LoadingButton
-                variant="contained"
-                loading={loading}
-                loadingPosition="end"
-                disabled={!createEnabled || loading}
-                endIcon={<SaveIcon />}
-                onClick={() => createWishlist()}
-              >
-                Créer
-              </LoadingButton>
-            )}
-          </Stack>
-        </Card>
-      </Container>
+          </Card>
+        </Container>
+      </Loader>
     </Box>
   )
 }
