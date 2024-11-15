@@ -50,7 +50,7 @@ const columns: GridColDef<EventWithCountsDto>[] = [
     headerName: '# Attendees',
     type: 'number',
     width: 100,
-    valueGetter: (_, row) => row.attendees.length + 1,
+    valueGetter: (_, row) => row.attendees.length,
   },
   {
     field: 'created_at',
