@@ -1,8 +1,8 @@
 import type { AttendeeId, EventId, SecretSantaId, SecretSantaUserId } from '@wishlist/common-types'
 
-import { uuid } from '@wishlist/common'
-import { ColumnNumericTransformer, TimestampEntity } from '@wishlist/common-database'
 import { SecretSantaStatus } from '@wishlist/common-types'
+import { ColumnNumericTransformer, TimestampEntity } from '@wishlist/nestjs/modules/database'
+import { uuid } from '@wishlist/utils'
 import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn, RelationId } from 'typeorm'
 
 import { AttendeeEntity } from '../attendee/attendee.entity'

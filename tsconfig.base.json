@@ -18,10 +18,9 @@
     "baseUrl": ".",
     "paths": {
       "@wishlist/api-client": ["libs/api-client/src/index.ts"],
-      "@wishlist/nestjs/common": ["libs/nestjs/src/common/index.ts"],
-      "@wishlist/nestjs/modules/*": ["libs/nestjs/src/modules/*/index.ts"],
-      "@wishlist/common": ["libs/common/src/index.ts"],
-      "@wishlist/common-database": ["libs/common-database/src/index.ts"],
+      "@wishlist/nestjs/*": ["libs/nestjs/src/*"],
+      "@wishlist/domain": ["libs/domain/src/index.ts"],
+      "@wishlist/utils": ["libs/utils/src/index.ts"],
       "@wishlist/common-types": ["libs/common-types/src/index.ts"]
     }
   },

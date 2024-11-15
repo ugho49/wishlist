@@ -1,7 +1,7 @@
 import { Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common'
 import { ConfigType } from '@nestjs/config'
-import { randomString } from '@wishlist/common'
 import { ResetPasswordInputDto, ResetPasswordValidationInputDto } from '@wishlist/common-types'
+import { randomString } from '@wishlist/utils'
 import { DateTime } from 'luxon'
 import { MoreThan } from 'typeorm'
 

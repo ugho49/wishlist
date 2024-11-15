@@ -1,6 +1,6 @@
-import { uuid } from '@wishlist/common'
-import { TimestampEntity } from '@wishlist/common-database'
 import { AttendeeRole, EventId } from '@wishlist/common-types'
+import { TimestampEntity } from '@wishlist/nestjs/modules/database'
+import { uuid } from '@wishlist/utils'
 import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryColumn } from 'typeorm'
 
 import { AttendeeEntity } from '../attendee/attendee.entity'

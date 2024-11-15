@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
-import { BaseRepository } from '@wishlist/common-database'
 import { EventId, UserId } from '@wishlist/common-types'
+import { BaseRepository } from '@wishlist/nestjs/modules/database'
 import { In } from 'typeorm'
 
 import { EventEntity } from './event.entity'

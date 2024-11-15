@@ -1,6 +1,6 @@
 import type { RequestApp } from './utils'
 
-import { uuid } from '@wishlist/common'
+import { uuid } from '@wishlist/utils'
 import { DateTime } from 'luxon'
 
 import { Fixtures, useTestApp } from './utils'

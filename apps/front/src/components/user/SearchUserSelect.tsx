@@ -3,11 +3,11 @@ import type { MiniUserDto } from '@wishlist/common-types'
 import PersonIcon from '@mui/icons-material/Person'
 import { Autocomplete, Avatar, createFilterOptions, Stack, TextField } from '@mui/material'
 import { blue, orange } from '@mui/material/colors'
-import { isValidEmail } from '@wishlist/common'
+import { isValidEmail } from '@wishlist/utils'
 import { debounce, uniqBy } from 'lodash'
 import React, { useState } from 'react'
 
-import { useApi } from '../../hooks/useApi'
+import { useApi } from '../../hooks'
 
 type UserOptionType = MiniUserDto | string
 const filter = createFilterOptions<UserOptionType>()

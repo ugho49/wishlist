@@ -1,8 +1,8 @@
 import type { CommandHandlerDefinition, Envelope } from 'missive.js'
 
 import { BadRequestException, ForbiddenException, Injectable, UnprocessableEntityException } from '@nestjs/common'
-import { SecretSantaDrawService } from '@wishlist/common'
 import { EventId, SecretSantaId, SecretSantaStatus, UserId } from '@wishlist/common-types'
+import { SecretSantaDrawService } from '@wishlist/domain'
 import { MailService } from '@wishlist/nestjs/modules/mail'
 import { chunk as createChunks } from 'lodash'
 

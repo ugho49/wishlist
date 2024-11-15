@@ -1,5 +1,4 @@
 import { Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common'
-import { DEFAULT_RESULT_NUMBER, uuid } from '@wishlist/common'
 import {
   createPagedResponse,
   CreateWishlistInputDto,
@@ -16,8 +15,10 @@ import {
   WishlistWithEventsDto,
 } from '@wishlist/common-types'
 import { BucketService } from '@wishlist/nestjs/modules/bucket'
+import { uuid } from '@wishlist/utils'
 import { uniq } from 'lodash'
 
+import { DEFAULT_RESULT_NUMBER } from '../../common/pagination'
 import { EventRepository } from '../event/event.repository'
 import { ItemEntity } from '../item/item.entity'
 import { WishlistEntity } from './wishlist.entity'

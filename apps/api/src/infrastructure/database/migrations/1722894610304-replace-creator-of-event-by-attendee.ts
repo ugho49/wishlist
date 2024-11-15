@@ -1,7 +1,7 @@
 import type { MigrationInterface, QueryRunner } from 'typeorm'
 
-import { uuid } from '@wishlist/common'
 import { AttendeeRole } from '@wishlist/common-types'
+import { uuid } from '@wishlist/utils'
 
 export class ReplaceCreatorOfEventByAttendee1722894610304 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
