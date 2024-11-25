@@ -14,6 +14,7 @@ import {
   Box,
   Chip,
   chipClasses,
+  ClickAwayListener,
   IconButton,
   Link,
   ListItemIcon,
@@ -22,9 +23,11 @@ import {
   MenuItem,
   Stack,
   Tooltip,
+  Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
+import Zoom from '@mui/material/Zoom'
 import { makeStyles } from '@mui/styles'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import clsx from 'clsx'
@@ -98,6 +101,63 @@ const useStyles = makeStyles((theme: Theme) => ({
     boxShadow: '0 0 1px 0 rgba(87, 113, 149, 0.3), 0 2px 4px -2px rgba(87, 113, 149, 0.5)',
   },
 }))
+
+const TakenBy = (props: { user: MiniUserDto }) => {
+  const classes = useStyles()
+  const [tooltipOpen, setTooltipOpen] = React.useState(false)
+  const { user } = props
+
+  return (
+    <Stack alignItems="center" justifyContent="center" gap={2} direction="row" className={classes.takenBy}>
+      <Box>Pris par</Box>
+      <ClickAwayListener onClickAway={() => setTooltipOpen(false)}>
+        <Tooltip
+          arrow
+          open={tooltipOpen}
+          disableFocusListener
+          disableHoverListener
+          disableTouchListener
+          slots={{
+            transition: Zoom,
+          }}
+          slotProps={{
+            transition: { timeout: 300 },
+          }}
+          title={
+            <Stack alignItems="center" gap={1} padding={1}>
+              <Typography color="inherit">{`${user.firstname} ${user.lastname}`}</Typography>
+              <Avatar
+                src={user.picture_url}
+                sx={{
+                  height: '100px',
+                  width: '100px',
+                  bgcolor: user?.picture_url ? 'white' : undefined,
+                  color: 'black',
+                }}
+              >
+                {user.firstname?.toUpperCase()?.charAt(0)}
+              </Avatar>
+            </Stack>
+          }
+        >
+          <Avatar
+            onClick={() => setTooltipOpen(prev => !prev)}
+            src={user.picture_url}
+            sx={{
+              cursor: 'pointer',
+              height: '32px',
+              width: '32px',
+              bgcolor: user?.picture_url ? 'white' : undefined,
+              color: 'black',
+            }}
+          >
+            {user.firstname?.toUpperCase()?.charAt(0)}
+          </Avatar>
+        </Tooltip>
+      </ClickAwayListener>
+    </Stack>
+  )
+}
 
 const mapState = (state: RootState) => state.auth.user?.id
 
@@ -176,24 +236,7 @@ export const ItemCard = ({ item, wishlist }: ItemCardProps) => {
           !displayActions && 'hideActions',
         )}
       >
-        {isTaken && (
-          <Stack alignItems="center" justifyContent="center" gap={2} direction="row" className={classes.takenBy}>
-            <Box>Pris par</Box>
-            <Tooltip title={`${takenBy?.firstname} ${takenBy?.lastname}`}>
-              <Avatar
-                src={takenBy?.picture_url}
-                sx={{
-                  height: '32px',
-                  width: '32px',
-                  bgcolor: takenBy?.picture_url ? 'white' : undefined,
-                  color: 'black',
-                }}
-              >
-                {takenBy?.firstname?.toUpperCase()?.charAt(0)}
-              </Avatar>
-            </Tooltip>
-          </Stack>
-        )}
+        {isTaken && <TakenBy user={takenBy!} />}
         <Stack className={classes.container}>
           <Box className={classes.actions}>
             {displayActions && (
@@ -233,6 +276,7 @@ export const ItemCard = ({ item, wishlist }: ItemCardProps) => {
             )}
           </Box>
           <Stack alignItems="center">
+            {/* TODO: on click show image fullscreen */}
             <Avatar
               src={item.picture_url}
               variant="square"
