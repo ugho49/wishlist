@@ -51,3 +51,5 @@ Thumbs.db
 !.yarn/versions
 
 vite.config.*.timestamp*
+
+*.env.development.local
