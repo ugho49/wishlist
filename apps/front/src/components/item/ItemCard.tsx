@@ -216,16 +216,16 @@ const ItemImage = (props: { imageUrl: string | undefined; itemUrl: string | unde
                   aria-label="close"
                   size="large"
                   onClick={() => setModalOpen(false)}
-                  sx={{
+                  sx={theme => ({
                     bgcolor: 'background.paper',
                     boxShadow: 24,
                     ':hover': {
-                      bgcolor: 'background.paper',
+                      bgcolor: theme.palette.grey[200],
                     },
                     ':focus': {
-                      bgcolor: 'background.paper',
+                      bgcolor: theme.palette.grey[200],
                     },
-                  }}
+                  })}
                 >
                   <CloseIcon />
                 </IconButton>
@@ -236,16 +236,16 @@ const ItemImage = (props: { imageUrl: string | undefined; itemUrl: string | unde
                     target="_blank"
                     rel="noopener noreferrer"
                     size="large"
-                    sx={{
+                    sx={theme => ({
                       bgcolor: 'background.paper',
                       boxShadow: 24,
                       ':hover': {
-                        bgcolor: 'background.paper',
+                        bgcolor: theme.palette.grey[200],
                       },
                       ':focus': {
-                        bgcolor: 'background.paper',
+                        bgcolor: theme.palette.grey[200],
                       },
-                    }}
+                    })}
                   >
                     <OpenInNewIcon />
                   </IconButton>
