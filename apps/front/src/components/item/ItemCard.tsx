@@ -3,9 +3,11 @@ import type { DetailedWishlistDto, ItemDto, MiniUserDto, WishlistId } from '@wis
 
 import type { RootState } from '../../core'
 
+import CloseIcon from '@mui/icons-material/Close'
 import DeleteForeverTwoToneIcon from '@mui/icons-material/DeleteForeverTwoTone'
 import EditTwoToneIcon from '@mui/icons-material/EditTwoTone'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
+import OpenInNewIcon from '@mui/icons-material/OpenInNew'
 import RedeemIcon from '@mui/icons-material/Redeem'
 import TipsAndUpdatesTwoToneIcon from '@mui/icons-material/TipsAndUpdatesTwoTone'
 import { LoadingButton } from '@mui/lab'
@@ -15,12 +17,14 @@ import {
   Chip,
   chipClasses,
   ClickAwayListener,
+  Fade,
   IconButton,
   Link,
   ListItemIcon,
   ListItemText,
   Menu,
   MenuItem,
+  Modal,
   Stack,
   Tooltip,
   Typography,
@@ -104,7 +108,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 
 const TakenBy = (props: { user: MiniUserDto }) => {
   const classes = useStyles()
-  const [tooltipOpen, setTooltipOpen] = React.useState(false)
+  const [tooltipOpen, setTooltipOpen] = useState(false)
   const { user } = props
 
   return (
@@ -159,11 +163,105 @@ const TakenBy = (props: { user: MiniUserDto }) => {
   )
 }
 
+const ItemImage = (props: { imageUrl: string | undefined; itemUrl: string | undefined }) => {
+  const theme = useTheme()
+  const smallScreen = useMediaQuery(theme.breakpoints.only('xs'))
+  const [modalOpen, setModalOpen] = useState(false)
+  const { imageUrl, itemUrl } = props
+
+  return (
+    <>
+      <Avatar
+        onClick={() => setModalOpen(true)}
+        src={imageUrl}
+        variant="square"
+        sx={theme => ({
+          cursor: imageUrl ? 'pointer' : 'default',
+          height: smallScreen ? '80px' : '120px',
+          width: smallScreen ? '80px' : '120px',
+          bgcolor: theme.palette.grey[200],
+          color: theme.palette.grey[500],
+          boxShadow: '0 0 1px 0 rgba(87, 113, 149, 0.3), 0 2px 4px -2px rgba(87, 113, 149, 0.5)',
+        })}
+      >
+        <RedeemIcon fontSize="large" />
+      </Avatar>
+      {imageUrl && (
+        <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
+          <Fade in={modalOpen}>
+            <Stack
+              alignItems="center"
+              gap={2}
+              sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}
+            >
+              <Box
+                sx={{
+                  bgcolor: 'background.paper',
+                  boxShadow: 24,
+                }}
+              >
+                <img
+                  onClick={() => setModalOpen(false)}
+                  src={imageUrl}
+                  alt="item"
+                  style={{
+                    maxWidth: smallScreen ? '80vw' : '60vw',
+                    maxHeight: smallScreen ? '80vh' : '60vh',
+                  }}
+                />
+              </Box>
+
+              <Stack direction="row" gap={2}>
+                <IconButton
+                  aria-label="close"
+                  size="large"
+                  onClick={() => setModalOpen(false)}
+                  sx={{
+                    bgcolor: 'background.paper',
+                    boxShadow: 24,
+                    ':hover': {
+                      bgcolor: 'background.paper',
+                    },
+                    ':focus': {
+                      bgcolor: 'background.paper',
+                    },
+                  }}
+                >
+                  <CloseIcon />
+                </IconButton>
+                {itemUrl && (
+                  <IconButton
+                    aria-label="close"
+                    href={itemUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    size="large"
+                    sx={{
+                      bgcolor: 'background.paper',
+                      boxShadow: 24,
+                      ':hover': {
+                        bgcolor: 'background.paper',
+                      },
+                      ':focus': {
+                        bgcolor: 'background.paper',
+                      },
+                    }}
+                  >
+                    <OpenInNewIcon />
+                  </IconButton>
+                )}
+              </Stack>
+            </Stack>
+          </Fade>
+        </Modal>
+      )}
+    </>
+  )
+}
+
 const mapState = (state: RootState) => state.auth.user?.id
 
 export const ItemCard = ({ item, wishlist }: ItemCardProps) => {
-  const theme = useTheme()
-  const smallScreen = useMediaQuery(theme.breakpoints.only('xs'))
   const classes = useStyles()
   const currentUserId = useSelector(mapState)
   const api = useApi()
@@ -276,20 +374,7 @@ export const ItemCard = ({ item, wishlist }: ItemCardProps) => {
             )}
           </Box>
           <Stack alignItems="center">
-            {/* TODO: on click show image fullscreen */}
-            <Avatar
-              src={item.picture_url}
-              variant="square"
-              sx={theme => ({
-                height: smallScreen ? '80px' : '120px',
-                width: smallScreen ? '80px' : '120px',
-                bgcolor: theme.palette.grey[200],
-                color: theme.palette.grey[500],
-                boxShadow: '0 0 1px 0 rgba(87, 113, 149, 0.3), 0 2px 4px -2px rgba(87, 113, 149, 0.5)',
-              })}
-            >
-              <RedeemIcon fontSize="large" />
-            </Avatar>
+            <ItemImage imageUrl={item.picture_url} itemUrl={item.url} />
           </Stack>
           <Stack alignItems="center" marginTop={2} marginBottom={1}>
             <Rating value={item.score} size="small" readOnly />
