@@ -1,3 +1,4 @@
+import type { UserId } from '@wishlist/common-types'
 import type { FormEvent } from 'react'
 
 import {
@@ -12,13 +13,12 @@ import {
 } from '@mui/material'
 import React, { useState } from 'react'
 
-import { useApi } from '../../../hooks/useApi'
-import { useToast } from '../../../hooks/useToast'
+import { useApi, useToast } from '../../../hooks'
 
 export type UpdatePasswordModalProps = {
   open: boolean
   onClose: () => void
-  userId: string
+  userId: UserId
 }
 
 export const UpdatePasswordModal = ({ onClose, open, userId }: UpdatePasswordModalProps) => {

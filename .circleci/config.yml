@@ -2,42 +2,32 @@ version: 2.1
 
 orbs:
   nx: nrwl/nx@1.6.2
-  continuation: circleci/continuation@1.0.0
-
-setup: true
-
-parameters:
-  continue-config:
-    description: Path to the internally-used config for continuation
-    type: string
-    default: .circleci/continuation.yml
-  continue-config-parameters:
-    description: Path to the internally-used parameters for continuation
-    type: string
-    default: .circleci/continue-config-parameters.json
+  docker: circleci/docker@2.8.0
 
 references:
   setup_env_node: &setup_env_node
     docker:
       - image: cimg/node:22.11
-  attach_workspace: &attach_workspace
-    at: ~/project
   nx/set-shas: &nx_set_shas_option
     error-on-no-successful-workflow: false
     main-branch-name: main
-    workflow-name: setup-workflow
+    workflow-name: ci
+  attach_workspace: &attach_workspace
+    at: ~/project
   save_node_cache: &save_node_cache
-    key: node-module-cache-{{ checksum "./yarn.lock" }}
+    key: node-yarn-module-cache-{{ checksum "./yarn.lock" }}
     paths:
       - node_modules
       - .yarn
   restore_node_cache: &restore_node_cache
     keys:
-      - node-module-cache-{{ checksum "./yarn.lock" }}
+      - node-yarn-module-cache-{{ checksum "./yarn.lock" }}
 
 jobs:
-  install-dependencies:
+  main:
     <<: *setup_env_node
+    environment:
+      TESTCONTAINERS_HOST_OVERRIDE: "localhost"
     steps:
       - checkout
       - restore_cache: *restore_node_cache
@@ -47,30 +37,9 @@ jobs:
           root: .
           paths:
             - node_modules
-
-  test-unit:
-    <<: *setup_env_node
-    steps:
-      - checkout
-      - attach_workspace: *attach_workspace
+      - run: npx nx-cloud start-ci-run --distribute-on="5 linux-medium-js" --stop-agents-after="build"
       - nx/set-shas: *nx_set_shas_option
-      - run:
-          command: yarn nx affected --target=test --base=$NX_BASE --head=$NX_HEAD --parallel --max-parallel=3  --output-style=stream
-          environment:
-            JEST_JUNIT_OUTPUT_DIR: ./reports/unit
-            JEST_JUNIT_UNIQUE_OUTPUT_NAME: 'true'
-            JEST_JUNIT_ADD_FILE_ATTRIBUTE: 'true'
-      - store_test_results:
-          path: ./reports/unit
-
-  test-int:
-    <<: *setup_env_node
-    environment:
-      TESTCONTAINERS_HOST_OVERRIDE: "localhost"
-    steps:
-      - checkout
-      - attach_workspace: *attach_workspace
-      - nx/set-shas: *nx_set_shas_option
+      - run: yarn nx affected --base=$NX_BASE --head=$NX_HEAD -t typecheck,lint,test,build --parallel 4
       - setup_remote_docker:
           docker_layer_caching: true
       - run:
@@ -78,73 +47,63 @@ jobs:
           background: true
           command: .circleci/autoforward.py
       - run:
-          command: yarn nx affected --target=test:int --base=$NX_BASE --head=$NX_HEAD --parallel --max-parallel=3  --output-style=stream
+          command: npx nx-cloud record -- yarn nx affected --target=test:int --base=$NX_BASE --head=$NX_HEAD --parallel --max-parallel=3  --output-style=stream --no-agents
           environment:
             JEST_JUNIT_OUTPUT_DIR: ./reports/integration
             JEST_JUNIT_UNIQUE_OUTPUT_NAME: 'true'
             JEST_JUNIT_ADD_FILE_ATTRIBUTE: 'true'
-      - store_test_results:
-          path: ./reports/integration
+      - persist_to_workspace:
+          root: .
+          paths:
+            - dist
 
-
-  lint:
+  deploy-front:
     <<: *setup_env_node
     steps:
       - checkout
       - attach_workspace: *attach_workspace
-      - nx/set-shas: *nx_set_shas_option
-      - run: yarn nx affected --target=lint --base=$NX_BASE --head=$NX_HEAD --parallel --max-parallel=3  --output-style=stream
-
-  continuation:
-    <<: *setup_env_node
-    parameters:
-      continue-config:
-        type: string
-        default: << pipeline.parameters.continue-config >>
-      continue-config-parameters:
-        type: string
-        default: << pipeline.parameters.continue-config-parameters >>
-    steps:
-      - checkout
-      - attach_workspace: *attach_workspace
-      - nx/set-shas: *nx_set_shas_option
       - run:
-          name: Generate the parameters based on affected apps
+          name: Install firebase-tools
+          command: curl -sL https://firebase.tools | bash
+      - run:
+          name: Deploy application
           command: |
-            DATA="{}"
-
-            AFFECTED_RAW=$(npx nx show projects --type=app --affected --base=$NX_BASE --head=$NX_HEAD --json | jq -r '. | join(" ")')
-            IFS=' ' read -ra APPS \<<< "$AFFECTED_RAW"
-
-            # Store list in file to be passed to following jobs
-            for app in "${APPS[@]}"; do
-              DATA=$(echo "${DATA}" | jq '. + {"workflow-'${app}'": true}')
-            done
-
-            # Add Json to parameter file
-            echo $DATA >> << parameters.continue-config-parameters >>
-
-            # Print parameters
-            cat << parameters.continue-config-parameters >>
-      - continuation/continue:
-          configuration_path: << parameters.continue-config >>
-          parameters: << parameters.continue-config-parameters >>
+            echo $FIREBASE_JSON > firebase_auth.json
+            export GOOGLE_APPLICATION_CREDENTIALS="$(pwd)/firebase_auth.json"
+            firebase deploy -P production -m "Workflow $CIRCLE_WORKFLOW_ID, build $CIRCLE_WORKFLOW_JOB_ID" --non-interactive
 
 workflows:
-  setup-workflow:
+  ci:
     jobs:
-      - install-dependencies
-      - lint:
+      - main
+      - docker/publish:
+          name: build-and-publish
+          image: ughoste/wishlist-api
+          attach-at: ~/project
+          dockerfile: 'apps/api/Dockerfile'
+          context:
+            - DOCKER_CREDENDIALS
+          tag: '${CIRCLE_SHA1},latest'
           requires:
-            - install-dependencies
-      - test-unit:
+            - main
+          filters:
+            branches:
+              only:
+                - main
+      - deploy-front-trigger:
+          name: deploy-front-trigger
+          type: approval
           requires:
-            - install-dependencies
-      - test-int:
+            - main
+          filters:
+            branches:
+              only:
+                - main
+      - deploy-front:
+          name: deploy
           requires:
-            - install-dependencies
-      - continuation:
-          requires:
-            - lint
-            - test-unit
-            - test-int
+            - deploy-front-trigger
+          filters:
+            branches:
+              only:
+                - main
