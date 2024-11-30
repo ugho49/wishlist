@@ -5,8 +5,8 @@ import { ColumnNumericTransformer, TimestampEntity } from '@wishlist/common-data
 import { SecretSantaStatus } from '@wishlist/common-types'
 import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn, RelationId } from 'typeorm'
 
-import { AttendeeEntity } from '../attendee/attendee.entity'
-import { EventEntity } from '../event/event.entity'
+import { AttendeeEntity } from '../../attendee/attendee.entity'
+import { EventEntity } from '../../event/event.entity'
 
 @Entity('secret_santa')
 export class SecretSantaEntity extends TimestampEntity {

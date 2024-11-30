@@ -3991,6 +3991,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@nestjs-architects/typed-cqrs@npm:2.1.0":
+  version: 2.1.0
+  resolution: "@nestjs-architects/typed-cqrs@npm:2.1.0"
+  checksum: 10c0/fee6d57c7e17352899c085efa715431ac50fff8d106c2d9ee115414ba8622f3f79e9e87480f2cfcbe06396fc4b789d02d8ef5c2a6f99b8fe43cc8bde96894c33
+  languageName: node
+  linkType: hard
+
 "@nestjs/common@npm:10.4.7":
   version: 10.4.7
   resolution: "@nestjs/common@npm:10.4.7"
@@ -4051,6 +4058,20 @@ __metadata:
     "@nestjs/websockets":
       optional: true
   checksum: 10c0/34c1601bd09ef7ca56ec57a9e7a729480ffc5ea102bf60427e34ae3642e8a8baa475b3f425b9258c076d110c29aa5b0027acdfb8dca290ad49566cd97be20d60
+  languageName: node
+  linkType: hard
+
+"@nestjs/cqrs@npm:10.2.8":
+  version: 10.2.8
+  resolution: "@nestjs/cqrs@npm:10.2.8"
+  dependencies:
+    uuid: "npm:11.0.2"
+  peerDependencies:
+    "@nestjs/common": ^9.0.0 || ^10.0.0
+    "@nestjs/core": ^9.0.0 || ^10.0.0
+    reflect-metadata: ^0.1.13 || ^0.2.0
+    rxjs: ^7.2.0
+  checksum: 10c0/fb56a282d07d5eb8c1619e1dac777f094496f37d7b9aee94c942dde27d6e1516559aaa762d737c3a60dee7a7bae6a7adffa2ba6cf6296bcf60f762517d52d0cb
   languageName: node
   linkType: hard
 
@@ -16313,13 +16334,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"missive.js@npm:0.4.4":
-  version: 0.4.4
-  resolution: "missive.js@npm:0.4.4"
-  checksum: 10c0/54dc7a12a7d87a5c7a1009389bc6b527cf4c7f599859f320d4c989ee24a6255f031a1e3823a902f2bff51363a4b6c70bcc5bd614025cd437ce6d890a657245b5
-  languageName: node
-  linkType: hard
-
 "mjml-accordion@npm:4.15.3":
   version: 4.15.3
   resolution: "mjml-accordion@npm:4.15.3"
@@ -22468,6 +22482,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"uuid@npm:11.0.2":
+  version: 11.0.2
+  resolution: "uuid@npm:11.0.2"
+  bin:
+    uuid: dist/esm/bin/uuid
+  checksum: 10c0/bd0670a0d6f77f1932da7544c51c32ceb467f3835382df2265f3275c4981d32c136a08a4369fb027ecfffd0b2ae48f19a28266ef636c7347264d5720e85d5ba0
+  languageName: node
+  linkType: hard
+
 "uuid@npm:11.0.3, uuid@npm:^11.0.2":
   version: 11.0.3
   resolution: "uuid@npm:11.0.3"
@@ -23255,9 +23278,11 @@ __metadata:
     "@mui/styles": "npm:6.1.6"
     "@mui/x-data-grid": "npm:7.22.2"
     "@mui/x-date-pickers": "npm:7.22.2"
+    "@nestjs-architects/typed-cqrs": "npm:2.1.0"
     "@nestjs/common": "npm:10.4.7"
     "@nestjs/config": "npm:3.3.0"
     "@nestjs/core": "npm:10.4.7"
+    "@nestjs/cqrs": "npm:10.2.8"
     "@nestjs/jwt": "npm:10.2.0"
     "@nestjs/passport": "npm:10.0.3"
     "@nestjs/platform-express": "npm:10.4.7"
@@ -23341,7 +23366,6 @@ __metadata:
     lint-staged: "npm:15.2.10"
     lodash: "npm:4.17.21"
     luxon: "npm:3.5.0"
-    missive.js: "npm:0.4.4"
     mjml: "npm:4.15.3"
     nestjs-real-ip: "npm:3.0.1"
     node-gyp: "npm:10.2.0"
