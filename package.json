@@ -42,7 +42,7 @@
     "@nestjs/passport": "10.0.3",
     "@nestjs/platform-express": "10.4.7",
     "@nestjs/schedule": "4.1.1",
-    "@nestjs/swagger": "7.4.2",
+    "@nestjs/swagger": "8.1.1",
     "@nestjs/terminus": "10.2.3",
     "@nestjs/typeorm": "10.0.2",
     "@react-oauth/google": "0.12.1",
