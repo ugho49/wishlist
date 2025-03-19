@@ -1,14 +1,12 @@
+import { useAuth0 } from '@auth0/auth0-react'
 import { useQueryClient } from '@tanstack/react-query'
-import { useCallback } from 'react'
 import { useDispatch } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
 
 import { resetStore } from '../core/store/features'
 
 export function useLogout() {
+  const { logout } = useAuth0()
   const dispatch = useDispatch()
-  const navigate = useNavigate()
-  const redirectToLogin = useCallback(() => navigate('/login'), [navigate])
   const queryClient = useQueryClient()
 
   return async () => {
@@ -20,7 +18,11 @@ export function useLogout() {
     queryClient.getQueryCache().clear()
     // Clear redux store
     resetStore(dispatch)
-    // Redirect to login page
-    redirectToLogin()
+    // Logout from auth0
+    await logout({
+      logoutParams: {
+        returnTo: `${window.location.origin}/login`,
+      },
+    })
   }
 }

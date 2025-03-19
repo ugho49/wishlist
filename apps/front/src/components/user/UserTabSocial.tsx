@@ -1,7 +1,22 @@
-import { Stack } from '@mui/material'
-import React from 'react'
+import { useAuth0 } from '@auth0/auth0-react'
+import { Button, Stack } from '@mui/material'
 
 export const UserTabSocial = () => {
-  // TODO add page, Ex: https://grafikart.fr/profil/edit
-  return <Stack>Coming soon 🔄</Stack>
+  const { loginWithPopup } = useAuth0()
+
+  return (
+    <Stack>
+      <Button
+        onClick={() =>
+          loginWithPopup({
+            authorizationParams: {
+              connection: 'google-oauth20',
+            },
+          })
+        }
+      >
+        Google
+      </Button>
+    </Stack>
+  )
 }

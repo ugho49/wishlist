@@ -1,14 +1,10 @@
-import type { RootState } from './core'
-
 import { useFeatureFlagEnabled } from 'posthog-js/react'
-import { useSelector } from 'react-redux'
 import { Navigate, Route, Routes } from 'react-router-dom'
 
 import { AdminPage } from './components/admin/AdminPage'
-import { ForgotPasswordPage } from './components/auth/ForgotPasswordPage'
 import { LoginPage } from './components/auth/LoginPage'
+import { LogoutPage } from './components/auth/LogoutPage'
 import { RegisterPage } from './components/auth/RegisterPage'
-import { RenewForgotPasswordPage } from './components/auth/RenewForgotPasswordPage'
 import { MaintenancePage } from './components/common/MaintenancePage'
 import { AdminEventPage } from './components/event/admin/AdminEventPage'
 import { CreateEventPage } from './components/event/CreateEventPage'
@@ -22,17 +18,10 @@ import { CreateWishlistPage } from './components/wishlist/CreateWishlistPage'
 import { EditWishlistPage } from './components/wishlist/EditWishlistPage'
 import { WishlistListPage } from './components/wishlist/WishlistListPage'
 import { WishlistPage } from './components/wishlist/WishlistPage'
-import { NavigateToAuthenticatedWithContext } from './core/router/NavigateToAuthenticatedWithContext'
-import { NavigateToLoginWithContext } from './core/router/NavigateToLoginWithContext'
 import { AdminRouteOutlet } from './core/router/outlet/AdminRouteOutlet'
-import { AnonymousRouteContainerOutlet } from './core/router/outlet/AnonymousRouteContainerOutlet'
 import { PrivateRouteContainerOutlet } from './core/router/outlet/PrivateRouteContainerOutlet'
 
-const mapAuthState = (state: RootState) => state.auth
-
 export const App = () => {
-  const { accessToken } = useSelector(mapAuthState)
-  const isLoggedIn = accessToken !== undefined
   const flagEnabled = useFeatureFlagEnabled('frontend-maintenance-page-enabled')
 
   if (flagEnabled) {
@@ -41,53 +30,41 @@ export const App = () => {
 
   return (
     <Routes>
-      {!isLoggedIn && (
-        <>
-          <Route path="*" element={<NavigateToLoginWithContext />} />
+      <Route path="logout" element={<LogoutPage />} />
 
-          <Route element={<AnonymousRouteContainerOutlet />}>
-            <Route path="login" element={<LoginPage />} />
-            <Route path="register" element={<RegisterPage />} />
-            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-            <Route path="/forgot-password/renew" element={<RenewForgotPasswordPage />} />
-          </Route>
-        </>
-      )}
+      <Route path="login" element={<LoginPage />} />
+      <Route path="register" element={<RegisterPage />} />
 
-      {isLoggedIn && (
-        <>
-          <Route path="*" element={<NavigateToAuthenticatedWithContext />} />
+      <Route path="*" element={<Navigate replace to="/not-found" />} />
 
-          <Route element={<PrivateRouteContainerOutlet />}>
-            <Route path="/" element={<Navigate replace to="/events" />} />
+      <Route element={<PrivateRouteContainerOutlet />}>
+        <Route path="/" element={<Navigate replace to="/events" />} />
 
-            <Route path="user">
-              <Route path="profile" element={<UserProfilePage />} />
-            </Route>
+        <Route path="user">
+          <Route path="profile" element={<UserProfilePage />} />
+        </Route>
 
-            <Route path="events">
-              <Route index element={<EventListPage />} />
-              <Route path="new" element={<CreateEventPage />} />
-              <Route path=":eventId" element={<EventPage />} />
-              <Route path=":eventId/edit" element={<EditEventPage />} />
-              <Route path=":eventId/secret-santa" element={<SecretSantaPage />} />
-            </Route>
+        <Route path="events">
+          <Route index element={<EventListPage />} />
+          <Route path="new" element={<CreateEventPage />} />
+          <Route path=":eventId" element={<EventPage />} />
+          <Route path=":eventId/edit" element={<EditEventPage />} />
+          <Route path=":eventId/secret-santa" element={<SecretSantaPage />} />
+        </Route>
 
-            <Route path="wishlists">
-              <Route index element={<WishlistListPage />} />
-              <Route path="new" element={<CreateWishlistPage />} />
-              <Route path=":wishlistId" element={<WishlistPage />} />
-              <Route path=":wishlistId/edit" element={<EditWishlistPage />} />
-            </Route>
+        <Route path="wishlists">
+          <Route index element={<WishlistListPage />} />
+          <Route path="new" element={<CreateWishlistPage />} />
+          <Route path=":wishlistId" element={<WishlistPage />} />
+          <Route path=":wishlistId/edit" element={<EditWishlistPage />} />
+        </Route>
 
-            <Route path="admin" element={<AdminRouteOutlet />}>
-              <Route index element={<AdminPage />} />
-              <Route path="users/:userId" element={<AdminUserPage />} />
-              <Route path="events/:eventId" element={<AdminEventPage />} />
-            </Route>
-          </Route>
-        </>
-      )}
+        <Route path="admin" element={<AdminRouteOutlet />}>
+          <Route index element={<AdminPage />} />
+          <Route path="users/:userId" element={<AdminUserPage />} />
+          <Route path="events/:eventId" element={<AdminEventPage />} />
+        </Route>
+      </Route>
     </Routes>
   )
 }

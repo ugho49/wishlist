@@ -1,7 +1,6 @@
 import type { PropsWithChildren } from 'react'
 
-import { CircularProgress, Stack } from '@mui/material'
-import React from 'react'
+import { LoadingPage } from './LoadingPage'
 
 type LoaderProps = {
   loading: boolean
@@ -9,11 +8,7 @@ type LoaderProps = {
 
 export const Loader = ({ children, loading }: PropsWithChildren<LoaderProps>) => {
   if (loading) {
-    return (
-      <Stack sx={{ alignItems: 'center', justifyContent: 'center', marginTop: '100px', marginBottom: '100px' }}>
-        <CircularProgress />
-      </Stack>
-    )
+    return <LoadingPage />
   }
 
   return <>{children}</>

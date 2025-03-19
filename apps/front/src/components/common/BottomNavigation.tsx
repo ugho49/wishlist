@@ -1,7 +1,6 @@
 import type { Theme } from '@mui/material'
 
-import type { RootState } from '../../core'
-
+import { useAuth0 } from '@auth0/auth0-react'
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings'
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted'
@@ -15,11 +14,7 @@ import {
 } from '@mui/material'
 import { makeStyles } from '@mui/styles'
 import React, { useEffect, useState } from 'react'
-import { useSelector } from 'react-redux'
 import { useLocation, useNavigate } from 'react-router-dom'
-
-const mapAuthState = (state: RootState) => state.auth
-const mapUserProfileState = (state: RootState) => state.userProfile
 
 const useStyles = makeStyles((theme: Theme) => ({
   bottomNavigationAction: {
@@ -45,8 +40,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 
 export const BottomNavigation = () => {
   const classes = useStyles()
-  const { user } = useSelector(mapAuthState)
-  const { pictureUrl } = useSelector(mapUserProfileState)
+  const { user } = useAuth0()
   const [currentNavigation, setCurrentNavigation] = useState('')
   const navigate = useNavigate()
   const location = useLocation()
@@ -88,7 +82,7 @@ export const BottomNavigation = () => {
           className={classes.bottomNavigationAction}
           label="Mon profil"
           value="/user/profile"
-          icon={pictureUrl ? <Avatar src={pictureUrl} sx={{ height: '24px', width: '24px' }} /> : <PersonIcon />}
+          icon={user?.picture ? <Avatar src={user.picture} sx={{ height: '24px', width: '24px' }} /> : <PersonIcon />}
         />
       </MuiBottomNavigation>
     </Paper>

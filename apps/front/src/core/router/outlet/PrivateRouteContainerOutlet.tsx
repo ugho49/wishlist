@@ -1,13 +1,11 @@
+import { useAuth0 } from '@auth0/auth0-react'
 import { Box, Container, containerClasses } from '@mui/material'
 import { makeStyles } from '@mui/styles'
-import { useEffect } from 'react'
-import { useDispatch } from 'react-redux'
-import { Outlet } from 'react-router-dom'
+import { Navigate, Outlet, useLocation } from 'react-router-dom'
 
 import { BottomNavigation } from '../../../components/common/BottomNavigation'
+import { LoadingPage } from '../../../components/common/LoadingPage'
 import { Navbar } from '../../../components/common/Navbar'
-import { useFetchUserInfo } from '../../../hooks/domain/useFetchUserInfo'
-import { setUser } from '../../store/features'
 
 const useStyles = makeStyles(() => ({
   container: {
@@ -18,16 +16,27 @@ const useStyles = makeStyles(() => ({
   },
 }))
 
+function getSearchParams({ pathname, search }: { pathname: string; search: string }): string {
+  if (pathname !== '/') {
+    const urlSearchParams = new URLSearchParams()
+    urlSearchParams.append('redirectUrl', `${pathname}${search}`)
+    return urlSearchParams.toString()
+  }
+  return ''
+}
+
 export const PrivateRouteContainerOutlet = () => {
   const classes = useStyles()
-  const { user } = useFetchUserInfo()
-  const dispatch = useDispatch()
+  const location = useLocation()
+  const { isAuthenticated, isLoading } = useAuth0()
 
-  useEffect(() => {
-    if (user) {
-      dispatch(setUser({ firstName: user.firstname, lastName: user.lastname, pictureUrl: user.picture_url }))
-    }
-  }, [user, dispatch])
+  if (isLoading) {
+    return <LoadingPage />
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate replace to={{ pathname: '/login', search: getSearchParams(location) }} />
+  }
 
   return (
     <>

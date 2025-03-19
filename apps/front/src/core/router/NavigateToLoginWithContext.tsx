@@ -1,4 +1,3 @@
-import React from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 
 function getSearchParams({ pathname, search }: { pathname: string; search: string }): string {
