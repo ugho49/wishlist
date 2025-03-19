@@ -24,6 +24,7 @@
     "yarn": "4.5.1"
   },
   "dependencies": {
+    "@auth0/auth0-react": "2.3.0",
     "@emotion/react": "11.13.3",
     "@emotion/styled": "11.13.0",
     "@hookform/resolvers": "3.9.1",
@@ -164,8 +165,8 @@
     "testcontainers": "10.14.0",
     "ts-jest": "29.2.5",
     "ts-node": "10.9.2",
-    "typescript": "5.6.3",
-    "typescript-eslint": "8.14.0",
+    "typescript": "5.8.2",
+    "typescript-eslint": "8.26.1",
     "url-loader": "4.1.1",
     "vite": "5.4.11",
     "vite-plugin-eslint": "1.8.1",
