@@ -5,6 +5,9 @@ import { Column, Entity, ManyToOne, PrimaryColumn, RelationId } from 'typeorm'
 
 import { UserEntity } from '../user'
 
+/**
+ * @deprecated
+ */
 @Entity('user_password_verification')
 export class PasswordVerificationEntity extends TimestampEntity {
   @PrimaryColumn()

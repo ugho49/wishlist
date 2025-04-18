@@ -8,6 +8,9 @@ import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn, RelationId } from 
 import { AttendeeEntity } from '../../attendee/attendee.entity'
 import { EventEntity } from '../../event/event.entity'
 
+/**
+ * @deprecated
+ */
 @Entity('secret_santa')
 export class SecretSantaEntity extends TimestampEntity {
   @PrimaryColumn()

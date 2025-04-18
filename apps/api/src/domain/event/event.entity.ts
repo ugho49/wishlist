@@ -6,6 +6,9 @@ import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryColumn } from 
 import { AttendeeEntity } from '../attendee/attendee.entity'
 import { WishlistEntity } from '../wishlist/wishlist.entity'
 
+/**
+ * @deprecated
+ */
 @Entity('event')
 export class EventEntity extends TimestampEntity {
   @PrimaryColumn()

@@ -7,6 +7,9 @@ import { EventEntity } from '../event/event.entity'
 import { ItemEntity } from '../item/item.entity'
 import { UserEntity } from '../user'
 
+/**
+ * @deprecated
+ */
 @Entity('wishlist')
 export class WishlistEntity extends TimestampEntity {
   @PrimaryColumn()

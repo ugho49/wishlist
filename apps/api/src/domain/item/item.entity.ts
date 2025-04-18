@@ -6,6 +6,9 @@ import { Column, Entity, ManyToOne, PrimaryColumn, RelationId } from 'typeorm'
 import { UserEntity } from '../user'
 import { WishlistEntity } from '../wishlist/wishlist.entity'
 
+/**
+ * @deprecated
+ */
 @Entity('item')
 export class ItemEntity extends TimestampEntity {
   @PrimaryColumn()

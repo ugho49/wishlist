@@ -1,10 +1,15 @@
-import { Module } from '@nestjs/common'
+import { Global, Module } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies'
 
+import { ConfigurableDatabaseModule } from './database.module-definitions'
+import { DatabaseService } from './database.service'
 import migrations from './migrations'
 
+/**
+ * @deprecated Use Kysely instead
+ */
 const typeOrmModule = TypeOrmModule.forRootAsync({
   inject: [ConfigService],
   useFactory: (config: ConfigService) => ({
@@ -25,7 +30,10 @@ const typeOrmModule = TypeOrmModule.forRootAsync({
   }),
 })
 
+@Global()
 @Module({
   imports: [typeOrmModule],
+  providers: [DatabaseService],
+  exports: [DatabaseService],
 })
-export class DatabaseModule {}
+export class DatabaseModule extends ConfigurableDatabaseModule {}

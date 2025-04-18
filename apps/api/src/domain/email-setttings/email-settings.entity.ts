@@ -3,6 +3,9 @@ import { TimestampEntity } from '@wishlist/common-database'
 import { UserEmailSettingId, UserId } from '@wishlist/common-types'
 import { Column, Entity, PrimaryColumn } from 'typeorm'
 
+/**
+ * @deprecated
+ */
 @Entity('user_email_setting')
 export class UserEmailSettingEntity extends TimestampEntity {
   @PrimaryColumn()

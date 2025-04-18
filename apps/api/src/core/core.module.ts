@@ -36,8 +36,20 @@ const mailModule = MailModule.registerAsync({
   }),
 })
 
+const databaseModule = DatabaseModule.registerAsync({
+  inject: [ConfigService],
+  useFactory: (config: ConfigService) => ({
+    host: config.getOrThrow('DB_HOST'),
+    port: parseInt(config.getOrThrow('DB_PORT'), 10),
+    username: config.getOrThrow('DB_USERNAME'),
+    password: config.getOrThrow('DB_PASSWORD'),
+    database: config.getOrThrow('DB_NAME'),
+    verbose: config.get<string>('DB_VERBOSE', 'false') === 'true',
+  }),
+})
+
 @Global()
 @Module({
-  imports: [ScheduleModule.forRoot(), HealthModule, DatabaseModule, mailModule, bucketModule],
+  imports: [ScheduleModule.forRoot(), HealthModule, mailModule, bucketModule, databaseModule],
 })
 export class CoreModule {}

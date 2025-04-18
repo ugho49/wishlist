@@ -7,6 +7,9 @@ import { Column, Entity, ManyToOne, PrimaryColumn, RelationId } from 'typeorm'
 import { EventEntity } from '../event/event.entity'
 import { UserEntity } from '../user'
 
+/**
+ * @deprecated
+ */
 @Entity('event_attendee')
 export class AttendeeEntity {
   @PrimaryColumn()

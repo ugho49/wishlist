@@ -7,6 +7,9 @@ import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm'
 
 import { UserSocialEntity } from './user-social.entity'
 
+/**
+ * @deprecated
+ */
 @Entity('user')
 export class UserEntity extends TimestampEntity {
   @PrimaryColumn()
