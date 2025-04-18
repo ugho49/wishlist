@@ -17,7 +17,7 @@ import {
 } from '@wishlist/common-types'
 import { uniq } from 'lodash'
 
-import { BucketService } from '../../core/bucket/bucket.service'
+import { BucketService } from '../core/bucket/bucket.service'
 import { EventRepository } from '../event/event.repository'
 import { ItemEntity } from '../item/item.entity'
 import { WishlistEntity } from './wishlist.entity'

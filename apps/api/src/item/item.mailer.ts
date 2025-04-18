@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { WishlistId } from '@wishlist/common-types'
 
-import { MailService } from '../../core/mail/mail.service'
+import { MailService } from '../core/mail/mail.service'
 
 @Injectable()
 export class ItemMailer {

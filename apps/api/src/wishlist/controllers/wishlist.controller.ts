@@ -14,10 +14,9 @@ import {
   WishlistId,
   WishlistWithEventsDto,
 } from '@wishlist/common-types'
-import { Express } from 'express'
 
-import { ValidJsonBody } from '../../../common/common.decorator'
 import { CurrentUser } from '../../auth'
+import { ValidJsonBody } from '../../common/common.decorator'
 import { WishlistService } from '../wishlist.service'
 import { wishlistLogoFileValidators, wishlistLogoResizePipe } from '../wishlist.validator'
 

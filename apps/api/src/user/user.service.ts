@@ -25,10 +25,10 @@ import {
 } from '@wishlist/common-types'
 import { isEmpty } from 'lodash'
 
-import { BucketService } from '../../core/bucket/bucket.service'
 import { AttendeeEntity } from '../attendee/attendee.entity'
 import { PasswordManager } from '../auth'
 import { GoogleAuthService } from '../auth-social'
+import { BucketService } from '../core/bucket/bucket.service'
 import { UserEmailSettingEntity } from '../email-setttings/email-settings.entity'
 import { UserSocialEntity } from './user-social.entity'
 import { UserEntity } from './user.entity'

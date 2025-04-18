@@ -1,7 +1,7 @@
 import { EventsHandler, IEventHandler } from '@nestjs/cqrs'
 import { chunk as createChunks } from 'lodash'
 
-import { MailService } from '../../../../core/mail/mail.service'
+import { MailService } from '../../../core/mail/mail.service'
 import { SecretSantaStartedEvent } from '../event/secret-santa-started.event'
 
 @EventsHandler(SecretSantaStartedEvent)

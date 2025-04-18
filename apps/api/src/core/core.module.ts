@@ -6,7 +6,6 @@ import { ScheduleModule } from '@nestjs/schedule'
 
 import { BucketModule } from './bucket/bucket.module'
 import { DatabaseModule } from './database/database.module'
-import { HealthModule } from './health/health.module'
 import { MailModule } from './mail/mail.module'
 
 const bucketModule = BucketModule.registerAsync({
@@ -50,6 +49,6 @@ const databaseModule = DatabaseModule.registerAsync({
 
 @Global()
 @Module({
-  imports: [ScheduleModule.forRoot(), HealthModule, mailModule, bucketModule, databaseModule],
+  imports: [ScheduleModule.forRoot(), mailModule, bucketModule, databaseModule],
 })
 export class CoreModule {}

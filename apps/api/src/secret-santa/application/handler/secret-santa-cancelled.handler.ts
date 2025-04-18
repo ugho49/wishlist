@@ -1,6 +1,6 @@
 import { EventsHandler, IEventHandler } from '@nestjs/cqrs'
 
-import { MailService } from '../../../../core/mail/mail.service'
+import { MailService } from '../../../core/mail/mail.service'
 import { SecretSantaCancelledEvent } from '../event/secret-santa-cancelled.event'
 
 @EventsHandler(SecretSantaCancelledEvent)
