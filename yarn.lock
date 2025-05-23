@@ -18709,15 +18709,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"posthog-js@npm:1.184.1":
-  version: 1.184.1
-  resolution: "posthog-js@npm:1.184.1"
+"posthog-js@npm:1.246.0":
+  version: 1.246.0
+  resolution: "posthog-js@npm:1.246.0"
   dependencies:
     core-js: "npm:^3.38.1"
     fflate: "npm:^0.4.8"
     preact: "npm:^10.19.3"
-    web-vitals: "npm:^4.2.0"
-  checksum: 10c0/c20e4d8df45c6276c296b43cf0df90d2c38fdeaf7881eafd8d1ab6be0f0d935d519b80ec39fdb85115f9db25391fb1e6a17739ea340627ef7675a5a1cd6686d7
+    web-vitals: "npm:^4.2.4"
+  peerDependencies:
+    "@rrweb/types": 2.0.0-alpha.17
+    rrweb-snapshot: 2.0.0-alpha.17
+  peerDependenciesMeta:
+    "@rrweb/types":
+      optional: true
+    rrweb-snapshot:
+      optional: true
+  checksum: 10c0/239ef01bc0b95b05ccf0da04422b28502dc45278634269f7d23553122a351cf34cca73df7c8592fa5610971929f992ddb9a8217e44b1700c82e38b5ec20bbda6
   languageName: node
   linkType: hard
 
@@ -22867,7 +22875,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"web-vitals@npm:^4.2.0":
+"web-vitals@npm:^4.2.4":
   version: 4.2.4
   resolution: "web-vitals@npm:4.2.4"
   checksum: 10c0/383c9281d5b556bcd190fde3c823aeb005bb8cf82e62c75b47beb411014a4ed13fa5c5e0489ed0f1b8d501cd66b0bebcb8624c1a75750bd5df13e2a3b1b2d194
@@ -23400,7 +23408,7 @@ __metadata:
     passport: "npm:0.7.0"
     passport-jwt: "npm:4.0.1"
     pg: "npm:8.13.1"
-    posthog-js: "npm:1.184.1"
+    posthog-js: "npm:1.246.0"
     prettier: "npm:3.3.3"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
