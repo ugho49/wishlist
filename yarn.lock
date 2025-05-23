@@ -7672,7 +7672,7 @@ __metadata:
     sass: "npm:1.89.0"
     sharp: "npm:0.34.2"
     supertest: "npm:7.1.1"
-    testcontainers: "npm:10.27.0"
+    testcontainers: "npm:10.28.0"
     tidy-url: "npm:1.18.3"
     ts-node: "npm:10.9.2"
     tslib: "npm:2.8.1"
@@ -22540,9 +22540,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"testcontainers@npm:10.27.0":
-  version: 10.27.0
-  resolution: "testcontainers@npm:10.27.0"
+"testcontainers@npm:10.28.0":
+  version: 10.28.0
+  resolution: "testcontainers@npm:10.28.0"
   dependencies:
     "@balena/dockerignore": "npm:^1.0.2"
     "@types/dockerode": "npm:^3.3.35"
@@ -22559,7 +22559,7 @@ __metadata:
     tar-fs: "npm:^3.0.7"
     tmp: "npm:^0.2.3"
     undici: "npm:^5.29.0"
-  checksum: 10c0/d82742602a4b5e6e5752d8d9c44953739a372c42ec95375bc1d1adbe054065ccf07666846f10bf4c362fe89b33c21c160387d9da08ee53af992b3968bc2113f5
+  checksum: 10c0/0bdefbcac5b774df4ed373f7e6f6a4df91f2c7fd2be135571471df6bdfa62919843824d11329a36a53c7446210db1eb17d8fb6658b7616d4b0158c089ed9563b
   languageName: node
   linkType: hard
 
