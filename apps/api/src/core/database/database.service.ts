@@ -1,16 +1,17 @@
+import type { Database } from './database.types'
+
 import { Inject, Injectable } from '@nestjs/common'
 import { Kysely, PostgresDialect } from 'kysely'
 import { Pool } from 'pg'
 
 import { DatabaseConfig } from './database.config'
 import { DATABASE_CONFIG_TOKEN } from './database.module-definitions'
-import { Database } from './database.types'
 
 @Injectable()
 export class DatabaseService {
   public readonly db: Kysely<Database>
 
-  constructor(@Inject(DATABASE_CONFIG_TOKEN) private readonly config: DatabaseConfig) {
+  constructor(@Inject(DATABASE_CONFIG_TOKEN) config: DatabaseConfig) {
     const dialect = new PostgresDialect({
       pool: new Pool({
         database: config.database,

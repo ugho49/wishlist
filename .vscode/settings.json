@@ -1,0 +1,6 @@
+{
+    "prettier.enable": false,
+    "eslint.format.enable": true,
+    "eslint.useFlatConfig": true,
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+}
