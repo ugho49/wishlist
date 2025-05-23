@@ -11,7 +11,13 @@ const typescriptPlugin = tslint.plugin
 /** @type {import('@typescript-eslint/utils').TSESLint.FlatConfig.ConfigFile} */
 module.exports = [
   {
-    ignores: ['**/dist/**', '**/coverage/**', '**/*.cjs'],
+    ignores: [
+      '**/dist/**',
+      '**/coverage/**',
+      '**/*.cjs',
+      '**/vite.config.*.timestamp*',
+      '**/vitest.config.*.timestamp*',
+    ],
   },
   eslint.configs.recommended,
   ...tslint.configs.recommended,
