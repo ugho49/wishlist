@@ -4,7 +4,7 @@ import type { RootState } from '../../core'
 
 import AddIcon from '@mui/icons-material/Add'
 import { Box, Button, Grid, Stack } from '@mui/material'
-import React, { useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
 
 import { FabAutoGrow } from '../common/FabAutoGrow'

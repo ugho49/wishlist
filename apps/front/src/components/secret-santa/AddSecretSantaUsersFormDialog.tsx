@@ -147,20 +147,21 @@ export const AddSecretSantaUsersFormDialog = ({
           </LoadingButton>
         </Stack>
 
-        <DataGrid
-          sx={{ marginBlock: '20px' }}
-          localeText={{
-            noRowsLabel: 'Aucun participant à ajouter',
-          }}
-          checkboxSelection
-          isRowSelectable={() => !loading}
-          onRowSelectionModelChange={newRowSelectionModel => setSelectedIds(newRowSelectionModel as AttendeeId[])}
-          rows={rows}
-          columns={columns}
-          autoHeight
-          disableColumnMenu
-          hideFooter
-        />
+        <Stack direction="column">
+          <DataGrid
+            sx={{ marginBlock: '20px' }}
+            localeText={{
+              noRowsLabel: 'Aucun participant à ajouter',
+            }}
+            checkboxSelection
+            isRowSelectable={() => !loading}
+            onRowSelectionModelChange={newRowSelectionModel => setSelectedIds(newRowSelectionModel as AttendeeId[])}
+            rows={rows}
+            columns={columns}
+            disableColumnMenu
+            hideFooter
+          />
+        </Stack>
       </Container>
     </Dialog>
   )

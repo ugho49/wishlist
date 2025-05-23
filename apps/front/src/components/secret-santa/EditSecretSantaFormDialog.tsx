@@ -36,9 +36,7 @@ const Transition = forwardRef(function Transition(
 })
 
 const schema = z.object({
-  budget: z
-    .union([z.coerce.number().gt(0, 'Le budget doit être supérieur à 0'), z.literal('').transform(() => undefined)])
-    .optional(),
+  budget: z.coerce.number().gt(0, 'Le budget doit être supérieur à 0').optional(),
   description: z
     .string()
     .max(2000, 'Nombre de caractères maximum 2000')
