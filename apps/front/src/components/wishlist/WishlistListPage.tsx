@@ -1,7 +1,7 @@
 import AddIcon from '@mui/icons-material/Add'
 import { Box, Button, Grid, Stack } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { useApi } from '../../hooks/useApi'
 import { useCustomSearchParams } from '../../hooks/useCustomSearchParams'
