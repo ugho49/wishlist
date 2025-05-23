@@ -19,60 +19,60 @@ import { AddItemInputDto, ItemDto } from './item.dto'
 import { MiniUserDto } from './user.dto'
 
 export class WishlistConfigDto {
-  hide_items: boolean
+  hide_items!: boolean
 }
 
 export class UpdateWishlistLogoOutputDto {
-  logo_url: string
+  logo_url!: string
 }
 
 export class MiniWishlistDto {
-  id: WishlistId
-  title: string
+  id!: WishlistId
+  title!: string
   description?: string
   logo_url?: string
 }
 
 export class DetailedWishlistDto extends MiniWishlistDto {
-  owner: MiniUserDto
-  items: ItemDto[]
-  events: MiniEventDto[]
-  config: WishlistConfigDto
-  created_at: string
-  updated_at: string
+  owner!: MiniUserDto
+  items!: ItemDto[]
+  events!: MiniEventDto[]
+  config!: WishlistConfigDto
+  created_at!: string
+  updated_at!: string
 }
 
 export class WishlistWithEventsDto extends MiniWishlistDto {
-  events: MiniEventDto[]
-  config: WishlistConfigDto
-  created_at: string
-  updated_at: string
+  events!: MiniEventDto[]
+  config!: WishlistConfigDto
+  created_at!: string
+  updated_at!: string
 }
 
 export class WishlistWithOwnerDto extends MiniWishlistDto {
-  owner: MiniUserDto
-  config: WishlistConfigDto
-  created_at: string
-  updated_at: string
+  owner!: MiniUserDto
+  config!: WishlistConfigDto
+  created_at!: string
+  updated_at!: string
 }
 
 export class GetAllWishlistsPaginationQueryDto extends GetPaginationQueryDto {
   @IsString()
   @IsNotEmpty()
-  user_id: UserId
+  user_id!: UserId
 }
 
 export class LinkUnlinkWishlistInputDto {
   @IsString()
   @IsNotEmpty()
-  event_id: EventId
+  event_id!: EventId
 }
 
 export class UpdateWishlistInputDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(100)
-  title: string
+  title!: string
 
   @IsString()
   @IsOptional()
@@ -88,7 +88,7 @@ export class CreateWishlistInputDto extends UpdateWishlistInputDto {
   @ArrayNotEmpty()
   @ArrayMaxSize(MAX_EVENTS_BY_LIST)
   @IsString({ each: true })
-  event_ids: EventId[]
+  event_ids!: EventId[]
 
   @IsArray()
   @ValidateNested({ each: true })

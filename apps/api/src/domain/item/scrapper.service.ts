@@ -1,5 +1,7 @@
+import type { Element } from 'domhandler'
+
 import { Injectable, Logger } from '@nestjs/common'
-import { Cheerio, Element, load as loadHtml } from 'cheerio'
+import { Cheerio, load as loadHtml } from 'cheerio'
 
 @Injectable()
 export class ScrapperService {
@@ -91,7 +93,7 @@ export class ScrapperService {
     ]
 
     const randomIndex = Math.floor(Math.random() * UAs.length)
-    return UAs[randomIndex]
+    return UAs[randomIndex]!
   }
 
   // Fonction pour extraire la partie de droite de l'URL
@@ -159,12 +161,12 @@ export class ScrapperService {
       .toArray()
       .map(element => {
         const url = element.attribs['data-src'] || element.attribs['src']
-        const path = this.isValidUrl(url) ? new URL(url).pathname : url
+        const path = this.isValidUrl(url!) ? new URL(url!).pathname : url
         return { url, path }
       })
-      .sort((a, b) => a.path.localeCompare(b.path))
+      .sort((a, b) => a.path!.localeCompare(b.path!))
 
-    return imgUrls[0].url
+    return imgUrls[0]!.url
   }
 
   async scanUrl(url: string) {

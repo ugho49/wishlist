@@ -2,11 +2,11 @@ import { IsBoolean, IsString } from 'class-validator'
 
 export class BucketConfig {
   @IsString()
-  firebaseServiceAccountKeyPath: string
+  firebaseServiceAccountKeyPath!: string
 
   @IsString()
-  bucketName: string
+  bucketName!: string
 
   @IsBoolean()
-  isMock: boolean
+  isMock!: boolean
 }

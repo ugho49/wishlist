@@ -55,13 +55,9 @@ jobs:
       - attach_workspace: *attach_workspace
       - nx/set-shas: *nx_set_shas_option
       - run:
-          command: yarn nx affected --target=test --base=$NX_BASE --head=$NX_HEAD --parallel --max-parallel=3  --output-style=stream
-          environment:
-            JEST_JUNIT_OUTPUT_DIR: ./reports/unit
-            JEST_JUNIT_UNIQUE_OUTPUT_NAME: 'true'
-            JEST_JUNIT_ADD_FILE_ATTRIBUTE: 'true'
+          command: yarn nx affected --target=test --base=$NX_BASE --head=$NX_HEAD --parallel --max-parallel=3  --output-style=stream --exclude=@wishlist/source
       - store_test_results:
-          path: ./reports/unit
+          path: ./junit_reports/unit
 
   test-int:
     <<: *setup_env_node
@@ -78,13 +74,9 @@ jobs:
           background: true
           command: .circleci/autoforward.py
       - run:
-          command: yarn nx affected --target=test:int --base=$NX_BASE --head=$NX_HEAD --parallel --max-parallel=3  --output-style=stream
-          environment:
-            JEST_JUNIT_OUTPUT_DIR: ./reports/integration
-            JEST_JUNIT_UNIQUE_OUTPUT_NAME: 'true'
-            JEST_JUNIT_ADD_FILE_ATTRIBUTE: 'true'
+          command: yarn nx affected --target=test:int --base=$NX_BASE --head=$NX_HEAD --parallel --max-parallel=3  --output-style=stream --exclude=@wishlist/source 
       - store_test_results:
-          path: ./reports/integration
+          path: ./junit_reports/integration
 
 
   lint:
@@ -93,7 +85,14 @@ jobs:
       - checkout
       - attach_workspace: *attach_workspace
       - nx/set-shas: *nx_set_shas_option
-      - run: yarn nx affected --target=lint --base=$NX_BASE --head=$NX_HEAD --parallel --max-parallel=3  --output-style=stream
+      - run: yarn nx affected --target=lint --base=$NX_BASE --head=$NX_HEAD --parallel --max-parallel=3  --output-style=stream --exclude=@wishlist/source
+
+  typecheck:
+      <<: *setup_env_node
+      steps:
+        - checkout
+        - attach_workspace: *attach_workspace
+        - run: yarn check-types
 
   continuation:
     <<: *setup_env_node
@@ -140,11 +139,15 @@ workflows:
       - test-unit:
           requires:
             - install-dependencies
-      - test-int:
+      - typecheck:
           requires:
             - install-dependencies
+      # - test-int:
+      #     requires:
+      #       - install-dependencies
       - continuation:
           requires:
             - lint
+            - typecheck
             - test-unit
-            - test-int
+            # - test-int

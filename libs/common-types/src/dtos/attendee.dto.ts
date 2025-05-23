@@ -7,10 +7,10 @@ import { AttendeeRole } from '../enums'
 import { MiniUserDto } from './user.dto'
 
 export class AttendeeDto {
-  id: AttendeeId
+  id!: AttendeeId
   user?: MiniUserDto
   pending_email?: string
-  role: AttendeeRole
+  role!: AttendeeRole
 }
 
 export class AddEventAttendeeInputDto {
@@ -19,7 +19,7 @@ export class AddEventAttendeeInputDto {
   @IsNotEmpty()
   @MaxLength(200)
   @Transform(({ value }) => value.toLowerCase())
-  email: string
+  email!: string
 
   @IsEnum(AttendeeRole)
   @IsOptional()
@@ -29,5 +29,5 @@ export class AddEventAttendeeInputDto {
 export class AddEventAttendeeForEventInputDto extends AddEventAttendeeInputDto {
   @IsString()
   @IsNotEmpty()
-  event_id: EventId
+  event_id!: EventId
 }

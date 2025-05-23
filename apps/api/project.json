@@ -11,11 +11,10 @@
       }
     },
     "test:int": {
-      "executor": "nx:run-commands",
+      "executor": "@nx/vite:test",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "cwd": "apps/api",
-        "command": "jest --config=jest.int.config.ts",
-        "color": true
+        "config": "apps/api/vitest.config.int.ts"
       }
     },
     "db:generate-migration": {

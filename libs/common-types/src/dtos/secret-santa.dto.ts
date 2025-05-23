@@ -1,4 +1,4 @@
-import type { AttendeeId, EventId, SecretSantaUserId } from '../ids'
+import type { AttendeeId, EventId, SecretSantaId, SecretSantaUserId } from '../ids'
 
 import { Transform } from 'class-transformer'
 import { IsNumber, IsOptional, IsPositive, IsString } from 'class-validator'
@@ -8,9 +8,9 @@ import { AttendeeDto, MiniEventDto } from '../dtos'
 import { SecretSantaStatus } from '../enums'
 
 export class SecretSantaUserDto {
-  id: SecretSantaUserId
-  attendee: AttendeeDto
-  exclusions: SecretSantaUserId[]
+  id!: SecretSantaUserId
+  attendee!: AttendeeDto
+  exclusions!: SecretSantaUserId[]
 }
 
 export class SecretSantaUserWithDrawDto extends SecretSantaUserDto {
@@ -18,14 +18,14 @@ export class SecretSantaUserWithDrawDto extends SecretSantaUserDto {
 }
 
 export class SecretSantaDto {
-  id: string
-  event: MiniEventDto
+  id!: SecretSantaId
+  event!: MiniEventDto
   description?: string
   budget?: number
-  status: SecretSantaStatus
-  users: SecretSantaUserDto[]
-  created_at: string
-  updated_at: string
+  status!: SecretSantaStatus
+  users!: SecretSantaUserDto[]
+  created_at!: string
+  updated_at!: string
 }
 
 export class UpdateSecretSantaInputDto {
@@ -41,21 +41,21 @@ export class UpdateSecretSantaInputDto {
 
 export class CreateSecretSantaInputDto extends UpdateSecretSantaInputDto {
   @IsString()
-  event_id: EventId
+  event_id!: EventId
 }
 
 export class CreateSecretSantaUsersInputDto {
   @IsString({ each: true })
   @Transform(({ value }) => uniq(value))
-  attendee_ids: AttendeeId[]
+  attendee_ids!: AttendeeId[]
 }
 
 export class UpdateSecretSantaUserInputDto {
   @IsString({ each: true })
   @Transform(({ value }) => uniq(value))
-  exclusions: SecretSantaUserId[]
+  exclusions!: SecretSantaUserId[]
 }
 
 export class CreateSecretSantaUsersOutputDto {
-  users: SecretSantaUserDto[]
+  users!: SecretSantaUserDto[]
 }

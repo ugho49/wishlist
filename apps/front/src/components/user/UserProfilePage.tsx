@@ -5,7 +5,6 @@ import PortraitIcon from '@mui/icons-material/Portrait'
 import { Box, Tab, Tabs } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
-import React from 'react'
 
 import { useCustomSearchParams } from '../../hooks/useCustomSearchParams'
 import { Card } from '../common/Card'
@@ -49,7 +48,7 @@ type SearchParamType = { tab: TabValues }
 
 export const UserProfilePage = () => {
   const theme = useTheme()
-  const [queryParams, setQueryParams] = useCustomSearchParams<SearchParamType>({ tab: tabs[0].value })
+  const [queryParams, setQueryParams] = useCustomSearchParams<SearchParamType>({ tab: tabs[0]!.value })
   const smallScreen = useMediaQuery(theme.breakpoints.down('sm'))
 
   return (

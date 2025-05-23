@@ -1,6 +1,3 @@
-import 'jest'
-import 'jest-expect-message'
-
 import type { DataSource } from 'typeorm'
 
 type DbAssertion = () => Promise<unknown>
@@ -29,11 +26,7 @@ export class TableAssert {
         .query(`SELECT COUNT(*) FROM ${this.tableName}`)
         .then(result => parseInt(result[0].count, 10))
 
-      expect(count, `Wrong number of rows for table ${this.tableName}`, {
-        showMatcherMessage: false,
-        showPrefix: false,
-        showStack: false,
-      }).toEqual(expected)
+      expect(count, `Wrong number of rows for table ${this.tableName}`).toEqual(expected)
     })
 
     return this
@@ -88,10 +81,7 @@ class TableRowAssert {
   toEqual(expected: Record<string, unknown>): TableAssert {
     this.addAssertion(async () => {
       const { value, index, tableName } = await this.fetchValue()
-      expect(value, `Wrong value for row[${index}] of table ${tableName}`, {
-        showPrefix: false,
-        showStack: false,
-      }).toEqual(expected)
+      expect(value, `Wrong value for row[${index}] of table ${tableName}`).toEqual(expected)
     })
 
     return this.parent
@@ -100,10 +90,7 @@ class TableRowAssert {
   toMatchObject(expected: Record<string, unknown>): this {
     this.addAssertion(async () => {
       const { value, index, tableName } = await this.fetchValue()
-      expect(value, `Wrong value for row[${index}] of table ${tableName}`, {
-        showPrefix: false,
-        showStack: false,
-      }).toMatchObject(expected)
+      expect(value, `Wrong value for row[${index}] of table ${tableName}`).toMatchObject(expected)
     })
 
     return this

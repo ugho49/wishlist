@@ -1,7 +1,6 @@
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import GroupsIcon from '@mui/icons-material/Groups'
 import { Box, Tab, Tabs } from '@mui/material'
-import React from 'react'
 
 import { useCustomSearchParams } from '../../hooks/useCustomSearchParams'
 import { Card } from '../common/Card'
@@ -30,7 +29,7 @@ const tabs = [
 type SearchParamType = { tab: TabValues }
 
 export const AdminPage = () => {
-  const [queryParams, setQueryParams] = useCustomSearchParams<SearchParamType>({ tab: tabs[0].value })
+  const [queryParams, setQueryParams] = useCustomSearchParams<SearchParamType>({ tab: tabs[0]!.value })
 
   return (
     <Box>

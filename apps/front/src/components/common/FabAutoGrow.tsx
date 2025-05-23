@@ -1,4 +1,4 @@
-import type { FabTypeMap } from '@mui/material/Fab/Fab'
+import type { FabProps } from '@mui/material/Fab'
 
 import { Box, Fab, fabClasses } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
@@ -21,7 +21,7 @@ const useStyles = makeStyles(() => ({
 export type FabAutoGrowProps = {
   to?: string
   onClick?: () => void
-  color?: FabTypeMap['props']['color']
+  color?: FabProps['color']
   label: string
   icon: React.ReactNode
 }

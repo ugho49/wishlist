@@ -1,15 +1,14 @@
-/* eslint-disable */
-const eslint = require('@eslint/js')
-const tslint = require('typescript-eslint')
-const jestPlugin = require('eslint-plugin-jest')
-const prettierPlugin = require('eslint-plugin-prettier/recommended')
-const nxPlugin = require('@nx/eslint-plugin')
-const pluginSecurity = require('eslint-plugin-security')
+import eslint from '@eslint/js'
+import nxPlugin from '@nx/eslint-plugin'
+import vitestPlugin from '@vitest/eslint-plugin'
+import prettierPlugin from 'eslint-plugin-prettier/recommended'
+import pluginSecurity from 'eslint-plugin-security'
+import tslint from 'typescript-eslint'
 
 const typescriptPlugin = tslint.plugin
 
 /** @type {import('@typescript-eslint/utils').TSESLint.FlatConfig.ConfigFile} */
-module.exports = [
+const config = [
   {
     ignores: [
       '**/dist/**',
@@ -32,7 +31,7 @@ module.exports = [
     },
     languageOptions: {
       parserOptions: {
-        tsconfigRootDir: __dirname,
+        tsconfigRootDir: import.meta.dirname,
         project: './tsconfig.base.json',
       },
     },
@@ -66,7 +65,14 @@ module.exports = [
   {
     files: ['**/*.spec.ts', '**/*.int-spec.ts'],
     plugins: {
-      jest: jestPlugin,
+      vitest: vitestPlugin,
+    },
+    rules: {
+      ...vitestPlugin.configs.recommended.rules,
+      'vitest/expect-expect': 'off',
+      'vitest/no-commented-out-tests': 'off',
     },
   },
 ]
+
+export default config

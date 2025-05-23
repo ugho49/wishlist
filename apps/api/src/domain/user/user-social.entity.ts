@@ -13,17 +13,17 @@ export class UserSocialEntity extends TimestampEntity {
   id: UserSocialId = uuid() as UserSocialId
 
   @ManyToOne(() => UserEntity, { lazy: true })
-  readonly user: Promise<UserEntity>
+  readonly user!: Promise<UserEntity>
 
   @Column()
   @RelationId((entity: UserSocialEntity) => entity.user)
-  userId: UserId
+  userId!: UserId
 
   @Column()
-  socialId: string
+  socialId!: string
 
   @Column()
-  socialType: UserSocialType
+  socialType!: UserSocialType
 
   @Column({ type: 'varchar', nullable: true })
   pictureUrl?: string | null

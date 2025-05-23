@@ -74,6 +74,9 @@ export class SecretSantaDrawService {
         return this.draw(possibleDraws, retryCount + 1)
       }
       const drawUserId = possibleDrawIds[Math.floor(Math.random() * possibleDrawIds.length)]
+      if (!drawUserId) {
+        throw new SecretSantaDrawError('Impossible de tirer au sort un utilisateur en raison des exclusions.')
+      }
       drawnIds.push(drawUserId)
       finalDraws.push({ userId: possibleDraw.userId, drawUserId })
     }

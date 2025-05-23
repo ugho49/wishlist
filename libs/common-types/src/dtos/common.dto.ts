@@ -10,13 +10,13 @@ export class GetPaginationQueryDto {
 }
 
 export class PaginationDto {
-  total_pages: number
-  total_elements: number
-  page_number: number
-  pages_size: number
+  total_pages!: number
+  total_elements!: number
+  page_number!: number
+  pages_size!: number
 }
 
 export class PagedResponse<T> {
-  resources: T[]
-  pagination: PaginationDto
+  resources!: T[]
+  pagination!: PaginationDto
 }

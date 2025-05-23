@@ -19,24 +19,24 @@ import { GetPaginationQueryDto } from './common.dto'
 import { WishlistWithOwnerDto } from './wishlist.dto'
 
 export class MiniEventDto {
-  id: EventId
-  title: string
+  id!: EventId
+  title!: string
   description?: string
-  event_date: string
+  event_date!: string
 }
 
 export class EventWithCountsDto extends MiniEventDto {
-  nb_wishlists: number
-  attendees: AttendeeDto[]
-  created_at: string
-  updated_at: string
+  nb_wishlists!: number
+  attendees!: AttendeeDto[]
+  created_at!: string
+  updated_at!: string
 }
 
 export class DetailedEventDto extends MiniEventDto {
-  wishlists: WishlistWithOwnerDto[]
-  attendees: AttendeeDto[]
-  created_at: string
-  updated_at: string
+  wishlists!: WishlistWithOwnerDto[]
+  attendees!: AttendeeDto[]
+  created_at!: string
+  updated_at!: string
 }
 
 export class GetAllEventsPaginationQueryDto extends GetPaginationQueryDto {
@@ -49,7 +49,7 @@ export class UpdateEventInputDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(100)
-  title: string
+  title!: string
 
   @IsString()
   @IsOptional()
@@ -60,7 +60,7 @@ export class UpdateEventInputDto {
   @IsDate()
   @IsNotEmpty()
   @Transform(({ value }) => new Date(value))
-  event_date: Date
+  event_date!: Date
 }
 
 export class CreateEventInputDto extends UpdateEventInputDto {

@@ -64,6 +64,8 @@ export const AvatarUpdateButton = ({
     if (!e.target.files) return
 
     const file = e.target.files[0]
+    if (!file) return
+
     const imageDataUrl = await sanitizeImgToUrl(file)
 
     setImageSrc(imageDataUrl)

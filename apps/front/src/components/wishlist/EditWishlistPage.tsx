@@ -1,7 +1,6 @@
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import { Box, Tab, Tabs } from '@mui/material'
-import React from 'react'
 import { useParams } from 'react-router-dom'
 
 import { useWishlistById } from '../../hooks/domain/useWishlistById'
@@ -35,7 +34,7 @@ type SearchParamType = { tab: TabValues }
 export const EditWishlistPage = () => {
   const params = useParams<'wishlistId'>()
   const wishlistId = params.wishlistId || ''
-  const [queryParams, setQueryParams] = useCustomSearchParams<SearchParamType>({ tab: tabs[0].value })
+  const [queryParams, setQueryParams] = useCustomSearchParams<SearchParamType>({ tab: tabs[0]!.value })
   const { wishlist, loading, currentUserCanEdit } = useWishlistById(wishlistId)
 
   return (

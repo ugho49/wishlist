@@ -13,13 +13,13 @@ export class UserEntity extends TimestampEntity {
   id: UserId = uuid() as UserId
 
   @Column()
-  email: string
+  email!: string
 
   @Column()
-  firstName: string
+  firstName!: string
 
   @Column()
-  lastName: string
+  lastName!: string
 
   @Column({ type: 'timestamp', nullable: true })
   birthday?: Date | null
@@ -46,7 +46,7 @@ export class UserEntity extends TimestampEntity {
     cascade: true,
     lazy: true,
   })
-  socials: Promise<UserSocialEntity[]>
+  socials!: Promise<UserSocialEntity[]>
 
   public static create(props: {
     email: string

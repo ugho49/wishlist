@@ -1,7 +1,7 @@
 import reactPlugin from 'eslint-plugin-react'
 import globals from 'globals'
 
-import baseConfig from '../../eslint.config.js'
+import baseConfig from '../../eslint.config.mjs'
 
 export default [
   ...baseConfig,
