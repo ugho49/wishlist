@@ -4,8 +4,7 @@ import type { AttendeeDto, AttendeeId, SecretSantaUserDto } from '@wishlist/comm
 
 import CloseIcon from '@mui/icons-material/Close'
 import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt'
-import { LoadingButton } from '@mui/lab'
-import { AppBar, Avatar, Container, Dialog, IconButton, Slide, Stack, Toolbar, Typography } from '@mui/material'
+import { AppBar, Avatar, Button, Container, Dialog, IconButton, Slide, Stack, Toolbar, Typography } from '@mui/material'
 import { DataGrid } from '@mui/x-data-grid'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React, { forwardRef, useEffect, useMemo, useState } from 'react'
@@ -135,7 +134,7 @@ export const AddSecretSantaUsersFormDialog = ({
       </AppBar>
       <Container sx={{ marginTop: '40px' }}>
         <Stack alignItems="center">
-          <LoadingButton
+          <Button
             disabled={loading || selectedIds.length === 0}
             loading={loading}
             variant="contained"
@@ -144,23 +143,26 @@ export const AddSecretSantaUsersFormDialog = ({
             startIcon={<PersonAddAltIcon />}
           >
             Ajouter {selectedIds.length} participant{selectedIds.length > 1 ? 's' : ''}
-          </LoadingButton>
+          </Button>
         </Stack>
 
-        <DataGrid
-          sx={{ marginBlock: '20px' }}
-          localeText={{
-            noRowsLabel: 'Aucun participant à ajouter',
-          }}
-          checkboxSelection
-          isRowSelectable={() => !loading}
-          onRowSelectionModelChange={newRowSelectionModel => setSelectedIds(newRowSelectionModel as AttendeeId[])}
-          rows={rows}
-          columns={columns}
-          autoHeight
-          disableColumnMenu
-          hideFooter
-        />
+        <Stack direction="column">
+          <DataGrid
+            sx={{ marginBlock: '20px' }}
+            localeText={{
+              noRowsLabel: 'Aucun participant à ajouter',
+            }}
+            checkboxSelection
+            isRowSelectable={() => !loading}
+            onRowSelectionModelChange={newRowSelectionModel =>
+              setSelectedIds(Array.from(newRowSelectionModel.ids) as AttendeeId[])
+            }
+            rows={rows}
+            columns={columns}
+            disableColumnMenu
+            hideFooter
+          />
+        </Stack>
       </Container>
     </Dialog>
   )

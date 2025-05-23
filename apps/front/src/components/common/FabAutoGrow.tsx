@@ -1,22 +1,19 @@
 import type { FabProps } from '@mui/material/Fab'
 
-import { Box, Fab, fabClasses } from '@mui/material'
+import { Box, Fab, fabClasses, styled } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
-import { makeStyles } from '@mui/styles'
 import React from 'react'
 
 import { RouterLink } from './RouterLink'
 
-const useStyles = makeStyles(() => ({
-  fab: {
-    [`&.${fabClasses.root}`]: {
-      position: 'fixed',
-      bottom: 72,
-      right: 16,
-    },
+const FabStyled = styled(Fab)({
+  [`&.${fabClasses.root}`]: {
+    position: 'fixed',
+    bottom: 72,
+    right: 16,
   },
-}))
+})
 
 export type FabAutoGrowProps = {
   to?: string
@@ -29,14 +26,13 @@ export type FabAutoGrowProps = {
 export const FabAutoGrow = ({ to, onClick, label, color, icon }: FabAutoGrowProps) => {
   const theme = useTheme()
   const smallScreen = useMediaQuery(theme.breakpoints.down('md'))
-  const classes = useStyles()
-  const BaseProps = { onClick, color, className: classes.fab }
+  const BaseProps = { onClick, color }
   const Props = to ? { ...BaseProps, component: RouterLink, to } : BaseProps
 
   return (
-    <Fab variant="extended" {...Props} size={smallScreen ? 'medium' : 'large'}>
+    <FabStyled variant="extended" {...Props} size={smallScreen ? 'medium' : 'large'}>
       {icon}
       <Box sx={{ ml: 1 }}>{label}</Box>
-    </Fab>
+    </FabStyled>
   )
 }

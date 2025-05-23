@@ -4,14 +4,12 @@ import type { RootState } from '../../core'
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import SaveIcon from '@mui/icons-material/Save'
-import { LoadingButton } from '@mui/lab'
-import { Box, Stack, TextField } from '@mui/material'
+import { Box, Button, Stack, TextField } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import { MobileDatePicker } from '@mui/x-date-pickers'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { DateTime } from 'luxon'
-import React from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
 import { z } from 'zod'
@@ -158,7 +156,7 @@ export const UserTabInformations = () => {
         </Stack>
 
         <Stack direction="row" justifyContent="center">
-          <LoadingButton
+          <Button
             sx={{ marginTop: '20px' }}
             type="submit"
             variant="contained"
@@ -170,7 +168,7 @@ export const UserTabInformations = () => {
             startIcon={<SaveIcon />}
           >
             Mettre à jour
-          </LoadingButton>
+          </Button>
         </Stack>
       </Stack>
     </Loader>

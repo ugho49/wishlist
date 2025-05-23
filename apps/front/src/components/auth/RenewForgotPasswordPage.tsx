@@ -2,8 +2,7 @@ import type { ResetPasswordValidationInputDto } from '@wishlist/common-types'
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import SaveAsIcon from '@mui/icons-material/SaveAs'
-import { LoadingButton } from '@mui/lab'
-import { Box, Stack, TextField } from '@mui/material'
+import { Box, Button, Stack, TextField } from '@mui/material'
 import { useMutation } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
@@ -88,7 +87,7 @@ export const RenewForgotPasswordPage = () => {
               helperText={formErrors.password?.message}
             />
           </Box>
-          <LoadingButton
+          <Button
             type="submit"
             fullWidth
             variant="contained"
@@ -100,7 +99,7 @@ export const RenewForgotPasswordPage = () => {
             disabled={isSubmitting}
           >
             Changer mon mot de passe
-          </LoadingButton>
+          </Button>
         </Stack>
       </Card>
       <Stack sx={{ marginTop: '20px' }} gap={1} alignItems="center">

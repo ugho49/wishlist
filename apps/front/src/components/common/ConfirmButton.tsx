@@ -1,9 +1,8 @@
-import type { LoadingButtonProps } from '@mui/lab/LoadingButton'
+import type { ButtonProps } from '@mui/material'
 import type { Theme } from '@mui/material/styles'
 import type { SxProps } from '@mui/system'
 import type { PropsWithChildren } from 'react'
 
-import LoadingButton from '@mui/lab/LoadingButton'
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material'
 import React, { useCallback, useMemo, useState } from 'react'
 
@@ -15,11 +14,11 @@ export type ConfirmButtonProps = {
   onClick: () => void
   disabled?: boolean
   loading?: boolean
-  startIcon?: LoadingButtonProps['startIcon']
-  endIcon?: LoadingButtonProps['endIcon']
-  color?: LoadingButtonProps['color']
-  size?: LoadingButtonProps['size']
-  variant?: LoadingButtonProps['variant']
+  startIcon?: ButtonProps['startIcon']
+  endIcon?: ButtonProps['endIcon']
+  color?: ButtonProps['color']
+  size?: ButtonProps['size']
+  variant?: ButtonProps['variant']
   sx?: SxProps<Theme>
 }
 
@@ -51,7 +50,7 @@ export const ConfirmButton = ({
 
   return (
     <>
-      <LoadingButton
+      <Button
         sx={sx}
         variant={variant}
         color={color}
@@ -64,7 +63,7 @@ export const ConfirmButton = ({
         onClick={() => setOpenDialog(true)}
       >
         {children}
-      </LoadingButton>
+      </Button>
       <Dialog open={openDialog} onClose={() => closeDialog()} disableScrollLock keepMounted>
         <DialogTitle>{confirmTitle}</DialogTitle>
         <DialogContent>

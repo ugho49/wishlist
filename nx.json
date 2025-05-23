@@ -51,6 +51,5 @@
     "sharedGlobals": ["{workspaceRoot}/yarn.lock", "{workspaceRoot}/.circleci/*"],
     "production": ["default"]
   },
-  "nxCloudId": "68302b27343ab56de51b5e2d",
   "useDaemonProcess": true
 }

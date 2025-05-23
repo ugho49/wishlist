@@ -1,9 +1,7 @@
-import type { Theme } from '@mui/material'
 import type { Area } from 'react-easy-crop'
 
-import { Box, Button, Modal, Slider, Typography } from '@mui/material'
-import { makeStyles } from '@mui/styles'
-import React, { useCallback, useState } from 'react'
+import { Box, Button, Modal, Slider as SliderBase, styled, Typography } from '@mui/material'
+import { useCallback, useState } from 'react'
 import Cropper from 'react-easy-crop'
 
 import { useToast } from '../../hooks/useToast'
@@ -15,66 +13,69 @@ export type AvatarCropperModalProps = {
   handleClose: () => void
 }
 
-const useStyles = makeStyles((theme: Theme) => ({
-  modal: {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    display: 'flex',
-    flexDirection: 'column',
-    backgroundColor: theme.palette.background.paper,
-    padding: 4,
-    borderRadius: 5,
-    height: '90vh',
-    width: '90vw',
-    [theme.breakpoints.up('sm')]: {
-      height: 600,
-      width: 600,
-    },
-  },
-  cropContainer: {
-    position: 'relative',
-    background: '#333',
-    width: '100%',
-    height: '100%',
-  },
-  controls: {
-    display: 'flex',
-    flexDirection: 'column',
-    padding: 16,
-    alignItems: 'stretch',
-    [theme.breakpoints.up('sm')]: {
-      flexDirection: 'row',
-      alignItems: 'center',
-    },
-  },
-  sliderContainer: {
-    display: 'flex',
-    flex: '1',
-    alignItems: 'center',
-  },
-  sliderLabel: {
-    [theme.breakpoints.down('xs')]: {
-      minWidth: 65,
-    },
-  },
-  slider: {
-    padding: '22px 0px',
-    marginLeft: 16,
-    [theme.breakpoints.up('sm')]: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      margin: '0 16px',
-    },
-  },
-  cropButton: {
-    flexShrink: 0,
+const ModalContainer = styled(Box)(({ theme }) => ({
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  display: 'flex',
+  flexDirection: 'column',
+  backgroundColor: theme.palette.background.paper,
+  padding: 4,
+  borderRadius: 5,
+  height: '90vh',
+  width: '90vw',
+  [theme.breakpoints.up('sm')]: {
+    height: 600,
+    width: 600,
   },
 }))
 
+const CropContainer = styled('div')({
+  position: 'relative',
+  background: '#333',
+  width: '100%',
+  height: '100%',
+})
+
+const Controls = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  padding: 16,
+  alignItems: 'stretch',
+  [theme.breakpoints.up('sm')]: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+}))
+
+const SliderContainer = styled(Box)({
+  display: 'flex',
+  flex: '1',
+  alignItems: 'center',
+})
+
+const SliderLabel = styled(Typography)(({ theme }) => ({
+  [theme.breakpoints.down('xs')]: {
+    minWidth: 65,
+  },
+}))
+
+const Slider = styled(SliderBase)(({ theme }) => ({
+  padding: '22px 0px',
+  marginLeft: 16,
+  [theme.breakpoints.up('sm')]: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    margin: '0 16px',
+  },
+}))
+
+const CropButton = styled(Button)({
+  flexShrink: 0,
+})
+
 export const AvatarCropperModal = ({ handleClose, imageSrc, handleSave }: AvatarCropperModalProps) => {
-  const classes = useStyles()
   const { addToast } = useToast()
   const [crop, setCrop] = useState({ x: 0, y: 0 })
   const [rotation, setRotation] = useState(0)
@@ -101,8 +102,8 @@ export const AvatarCropperModal = ({ handleClose, imageSrc, handleSave }: Avatar
 
   return (
     <Modal open onClose={handleClose}>
-      <Box className={classes.modal}>
-        <div className={classes.cropContainer}>
+      <ModalContainer>
+        <CropContainer>
           <Cropper
             image={imageSrc}
             crop={crop}
@@ -115,53 +116,41 @@ export const AvatarCropperModal = ({ handleClose, imageSrc, handleSave }: Avatar
             onCropComplete={onCropComplete}
             onZoomChange={setZoom}
           />
-        </div>
-        <div className={classes.controls}>
-          <div className={classes.sliderContainer}>
-            <Typography variant="overline" classes={{ root: classes.sliderLabel }}>
-              Zoom
-            </Typography>
+        </CropContainer>
+        <Controls>
+          <SliderContainer>
+            <SliderLabel variant="overline">Zoom</SliderLabel>
             <Slider
               value={zoom}
               min={1}
               max={3}
               step={0.1}
               aria-labelledby="Zoom"
-              classes={{ root: classes.slider }}
               onChange={(e, zoom) => {
                 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                 // @ts-ignore
                 setZoom(zoom)
               }}
             />
-          </div>
-          <div className={classes.sliderContainer}>
-            <Typography variant="overline" classes={{ root: classes.sliderLabel }}>
-              Rotation
-            </Typography>
+          </SliderContainer>
+          <SliderContainer>
+            <SliderLabel variant="overline">Rotation</SliderLabel>
             <Slider
               value={rotation}
               min={0}
               max={360}
               step={1}
               aria-labelledby="Rotation"
-              classes={{ root: classes.slider }}
               onChange={(e, rotation) => {
                 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                 // @ts-ignore
                 setRotation(rotation)
               }}
             />
-          </div>
-          <Button
-            variant="contained"
-            color="primary"
-            classes={{ root: classes.cropButton }}
-            onClick={() => getCroppedImage()}
-            disabled={loading}
-          >
+          </SliderContainer>
+          <CropButton variant="contained" color="primary" onClick={() => getCroppedImage()} disabled={loading}>
             Sauvegarder
-          </Button>
+          </CropButton>
           <Button
             variant="contained"
             color="inherit"
@@ -171,8 +160,8 @@ export const AvatarCropperModal = ({ handleClose, imageSrc, handleSave }: Avatar
           >
             Annuler
           </Button>
-        </div>
-      </Box>
+        </Controls>
+      </ModalContainer>
     </Modal>
   )
 }

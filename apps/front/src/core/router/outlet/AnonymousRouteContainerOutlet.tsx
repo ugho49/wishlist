@@ -1,36 +1,29 @@
 /// <reference types="vite-plugin-svgr/client" />
-import type { Theme } from '@mui/material'
-
-import { Container, Stack } from '@mui/material'
-import { makeStyles } from '@mui/styles'
-import React from 'react'
+import { Container, Stack, styled } from '@mui/material'
 import { Outlet } from 'react-router-dom'
 
 import IconSvg from '../../../assets/icons/icon.svg?react'
 import TextSvg from '../../../assets/icons/logo_text.svg?react'
 
-const useStyles = makeStyles((theme: Theme) => ({
-  root: {
-    marginTop: '64px',
-  },
-  logo: {
-    marginBottom: '25px',
-    color: theme.palette.primary.main,
-  },
+const Root = styled(Stack)({
+  marginTop: '64px',
+})
+
+const Logo = styled(Stack)(({ theme }) => ({
+  marginBottom: '25px',
+  color: theme.palette.primary.main,
 }))
 
 export const AnonymousRouteContainerOutlet = () => {
-  const classes = useStyles()
-
   return (
     <Container component="main" maxWidth="sm">
-      <Stack direction="column" alignItems="center" className={classes.root}>
-        <Stack alignItems="center" className={classes.logo}>
+      <Root direction="column" alignItems="center">
+        <Logo alignItems="center">
           <IconSvg style={{ marginRight: '10px', height: '55px' }} />
           <TextSvg style={{ height: '60px' }} />
-        </Stack>
+        </Logo>
         <Outlet />
-      </Stack>
+      </Root>
     </Container>
   )
 }

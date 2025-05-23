@@ -1,9 +1,9 @@
 import type { EventId, SecretSantaId, SecretSantaUserDto, SecretSantaUserId } from '@wishlist/common-types'
 
 import CloseIcon from '@mui/icons-material/Close'
-import { LoadingButton } from '@mui/lab'
 import {
   Avatar,
+  Button,
   Checkbox,
   Dialog,
   DialogActions,
@@ -121,9 +121,9 @@ export const ManageUserExclusionsDialog = ({
         </List>
       </DialogContent>
       <DialogActions>
-        <LoadingButton variant="contained" onClick={() => updateUser()}>
+        <Button variant="contained" onClick={() => updateUser()}>
           Enregistrer les modifications
-        </LoadingButton>
+        </Button>
       </DialogActions>
     </Dialog>
   )

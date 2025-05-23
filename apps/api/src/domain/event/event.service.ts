@@ -135,7 +135,10 @@ export class EventService {
 
     eventEntity.attendees = Promise.resolve(attendeeEntities)
 
-    await this.eventRepository.save(eventEntity)
+    await this.eventRepository.transaction(async em => {
+      await em.save(eventEntity)
+      await em.save(attendeeEntities)
+    })
 
     const creator = await this.userRepository.findOneByOrFail({ id: currentUser.id })
 
@@ -202,7 +205,7 @@ export class EventService {
       throw new UnauthorizedException('Only maintainers of the event can delete it')
     }
 
-    await this.eventRepository.getDataSource().transaction(async em => {
+    await this.eventRepository.transaction(async em => {
       const wishlists = await eventEntity.wishlists
       for (const wishlistEntity of wishlists) {
         await this.removeEventOfWishlist(em, { wishlistEntity, eventEntity })

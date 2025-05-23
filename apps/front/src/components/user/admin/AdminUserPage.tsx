@@ -7,14 +7,13 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import HistoryIcon from '@mui/icons-material/History'
 import LanguageIcon from '@mui/icons-material/Language'
 import SaveIcon from '@mui/icons-material/Save'
-import { LoadingButton } from '@mui/lab'
 import { Box, Button, List, ListItem, ListItemIcon, ListItemText, Stack, TextField } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import { MobileDatePicker } from '@mui/x-date-pickers'
 import { useQuery } from '@tanstack/react-query'
 import { DateTime } from 'luxon'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom'
 
@@ -281,7 +280,7 @@ export const AdminUserPage = () => {
 
             {!isCurrentUser && (
               <Stack direction="row" justifyContent="center">
-                <LoadingButton
+                <Button
                   sx={{ marginTop: '20px' }}
                   type="submit"
                   variant="contained"
@@ -293,7 +292,7 @@ export const AdminUserPage = () => {
                   startIcon={<SaveIcon />}
                 >
                   Mettre à jour
-                </LoadingButton>
+                </Button>
               </Stack>
             )}
           </Stack>

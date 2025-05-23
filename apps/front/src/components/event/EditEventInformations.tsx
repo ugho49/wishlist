@@ -3,12 +3,11 @@ import type { FormEvent } from 'react'
 
 import DeleteIcon from '@mui/icons-material/Delete'
 import SaveIcon from '@mui/icons-material/Save'
-import { LoadingButton } from '@mui/lab'
-import { Box, Stack, TextField } from '@mui/material'
+import { Box, Button, Stack, TextField } from '@mui/material'
 import { MobileDatePicker } from '@mui/x-date-pickers'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { DateTime } from 'luxon'
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { useApi } from '../../hooks/useApi'
@@ -123,7 +122,7 @@ export const EditEventInformations = ({ event }: EditEventInformationsProps) => 
             />
           </Stack>
 
-          <LoadingButton
+          <Button
             type="submit"
             fullWidth
             variant="contained"
@@ -135,7 +134,7 @@ export const EditEventInformations = ({ event }: EditEventInformationsProps) => 
             startIcon={<SaveIcon />}
           >
             Mettre à jour
-          </LoadingButton>
+          </Button>
         </Stack>
       </Card>
       <Stack alignItems="center">

@@ -10,7 +10,6 @@ import InfoIcon from '@mui/icons-material/Info'
 import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt'
 import PersonOffIcon from '@mui/icons-material/PersonOff'
 import TuneIcon from '@mui/icons-material/Tune'
-import { LoadingButton } from '@mui/lab'
 import { Alert, AlertTitle, Avatar, Button, Chip, IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
@@ -19,7 +18,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { SecretSantaDrawService } from '@wishlist/common'
 import { SecretSantaStatus } from '@wishlist/common-types'
 import { DateTime } from 'luxon'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { useApi, useToast } from '../../hooks'
 import { ConfirmButton } from '../common/ConfirmButton'
@@ -233,7 +232,7 @@ export const SecretSanta = ({ secretSanta, event }: SecretSantaProps) => {
                   Supprimer
                 </ConfirmButton>
 
-                <LoadingButton
+                <Button
                   variant="contained"
                   color="primary"
                   size="small"
@@ -243,7 +242,7 @@ export const SecretSanta = ({ secretSanta, event }: SecretSantaProps) => {
                   onClick={() => setOpenEditModal(true)}
                 >
                   Modifier
-                </LoadingButton>
+                </Button>
               </Stack>
 
               <ConfirmButton
@@ -291,73 +290,74 @@ export const SecretSanta = ({ secretSanta, event }: SecretSantaProps) => {
           Ajouter un participant
         </Button>
 
-        <DataGrid
-          localeText={{
-            noRowsLabel: 'Aucun participant',
-          }}
-          rows={secretSantaUsers.map(u => ({
-            id: u.id,
-            firstname: u.attendee.user?.firstname,
-            lastname: u.attendee.user?.lastname,
-            email: u.attendee.user?.email ?? u.attendee.pending_email,
-            pictureUrl: u.attendee.user?.picture_url,
-            exclusions: u.exclusions.length,
-          }))}
-          columns={[
-            {
-              field: 'pictureUrl',
-              headerName: '',
-              sortable: false,
-              filterable: false,
-              width: 60,
-              display: 'flex',
-              align: 'center',
-              renderCell: ({ row }) => <Avatar src={row.pictureUrl} sx={{ width: '30px', height: '30px' }} />,
-            },
-            { field: 'firstname', headerName: 'Prénom', width: 170, valueGetter: value => value ?? '-' },
-            { field: 'lastname', headerName: 'Nom', width: 170, valueGetter: value => value ?? '-' },
-            { field: 'email', headerName: 'Email', width: 250 },
-            { field: 'exclusions', headerName: 'Exclusions', headerAlign: 'center', align: 'center', width: 100 },
-            {
-              field: 'id',
-              sortable: false,
-              filterable: false,
-              headerName: 'Actions',
-              display: 'flex',
-              headerAlign: 'center',
-              align: 'center',
-              width: 150,
-              renderCell: ({ row }) => (
-                <>
-                  {status === SecretSantaStatus.CREATED && (
-                    <Stack flexDirection="row" gap={1}>
-                      {secretSantaUsers.length > 1 && (
-                        <IconButton color="info" size="small" onClick={() => setCurrentUserIdModalExclusion(row.id)}>
-                          <Tooltip title="Gérer les exclusions">
-                            <PersonOffIcon />
-                          </Tooltip>
-                        </IconButton>
-                      )}
-                      <ConfirmIconButton
-                        confirmTitle="Supprimer le participant"
-                        confirmText={`Êtes-vous sûr de vouloir supprimer ce participant ?`}
-                        onClick={() => removeSecretSantaUser(row.id)}
-                        disabled={loading}
-                        size="small"
-                        color="error"
-                      >
-                        <DeleteIcon />
-                      </ConfirmIconButton>
-                    </Stack>
-                  )}
-                </>
-              ),
-            },
-          ]}
-          hideFooter
-          autoHeight
-          disableColumnMenu
-        />
+        <Stack direction="column">
+          <DataGrid
+            localeText={{
+              noRowsLabel: 'Aucun participant',
+            }}
+            rows={secretSantaUsers.map(u => ({
+              id: u.id,
+              firstname: u.attendee.user?.firstname,
+              lastname: u.attendee.user?.lastname,
+              email: u.attendee.user?.email ?? u.attendee.pending_email,
+              pictureUrl: u.attendee.user?.picture_url,
+              exclusions: u.exclusions.length,
+            }))}
+            columns={[
+              {
+                field: 'pictureUrl',
+                headerName: '',
+                sortable: false,
+                filterable: false,
+                width: 60,
+                display: 'flex',
+                align: 'center',
+                renderCell: ({ row }) => <Avatar src={row.pictureUrl} sx={{ width: '30px', height: '30px' }} />,
+              },
+              { field: 'firstname', headerName: 'Prénom', width: 170, valueGetter: value => value ?? '-' },
+              { field: 'lastname', headerName: 'Nom', width: 170, valueGetter: value => value ?? '-' },
+              { field: 'email', headerName: 'Email', width: 250 },
+              { field: 'exclusions', headerName: 'Exclusions', headerAlign: 'center', align: 'center', width: 100 },
+              {
+                field: 'id',
+                sortable: false,
+                filterable: false,
+                headerName: 'Actions',
+                display: 'flex',
+                headerAlign: 'center',
+                align: 'center',
+                width: 150,
+                renderCell: ({ row }) => (
+                  <>
+                    {status === SecretSantaStatus.CREATED && (
+                      <Stack flexDirection="row" gap={1}>
+                        {secretSantaUsers.length > 1 && (
+                          <IconButton color="info" size="small" onClick={() => setCurrentUserIdModalExclusion(row.id)}>
+                            <Tooltip title="Gérer les exclusions">
+                              <PersonOffIcon />
+                            </Tooltip>
+                          </IconButton>
+                        )}
+                        <ConfirmIconButton
+                          confirmTitle="Supprimer le participant"
+                          confirmText={`Êtes-vous sûr de vouloir supprimer ce participant ?`}
+                          onClick={() => removeSecretSantaUser(row.id)}
+                          disabled={loading}
+                          size="small"
+                          color="error"
+                        >
+                          <DeleteIcon />
+                        </ConfirmIconButton>
+                      </Stack>
+                    )}
+                  </>
+                ),
+              },
+            ]}
+            hideFooter
+            disableColumnMenu
+          />
+        </Stack>
       </Stack>
     </Stack>
   )
