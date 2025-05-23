@@ -22,6 +22,8 @@ export const WishlistLogoActions = (props: WishlistLogoActionsProps) => {
     if (!e.target.files) return
 
     const file = e.target.files[0]
+    if (!file) return
+
     const imageDataUrl = await sanitizeImgToUrl(file)
 
     setTmpLogoSrc(imageDataUrl)

@@ -1,11 +1,13 @@
-import { dirname, join } from 'node:path'
+import { join } from 'node:path'
 import type { AbstractStartedContainer } from 'testcontainers'
 
 import * as dotenv from 'dotenv'
 import { DockerComposeEnvironment } from 'testcontainers'
 
-const setup = async () => {
-  const rootFolder = dirname(dirname(process.cwd()))
+let teardown = false
+
+export default async function () {
+  const rootFolder = process.cwd()
   const dockerFolder = join(rootFolder, 'docker')
 
   console.log('Setting up integration tests with Docker')
@@ -20,7 +22,7 @@ const setup = async () => {
   const containers = environment.startedGenericContainers as Record<string, AbstractStartedContainer>
 
   for (const container of Object.values(containers)) {
-    const containerName = container.getName().split('-')[0].toUpperCase()
+    const containerName = container.getName().split('-')[0]?.toUpperCase()
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
@@ -39,12 +41,19 @@ const setup = async () => {
         process.env[key] = process.env[variable]
       }
     }
+  }
 
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    // Add environment to global in order to use it in teardown
-    global.environment = environment
+  return async () => {
+    if (teardown) {
+      throw new Error('teardown called twice')
+    }
+    teardown = true
+
+    console.log('Stopping Docker...')
+
+    await environment.down()
+    await environment.stop()
+
+    console.log('Docker stopped')
   }
 }
-
-export default setup

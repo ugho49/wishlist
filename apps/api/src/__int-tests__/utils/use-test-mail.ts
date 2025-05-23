@@ -1,7 +1,7 @@
 import type { AxiosInstance } from 'axios'
 
-import { beforeEach } from '@jest/globals'
 import axios from 'axios'
+import { beforeEach } from 'vitest'
 
 import { MailsAssert } from './mail-assert'
 

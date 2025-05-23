@@ -2,19 +2,9 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "../../dist/out-tsc",
-    "module": "Node16",
-    "types": ["jest", "jest-extended", "node"]
+    "types": ["vitest/globals", "node"],
+    "declaration": true
   },
-  "include": [
-    "jest.config.ts",
-    "**/*.test.ts",
-    "**/*.spec.ts",
-    "**/*.test.tsx",
-    "**/*.spec.tsx",
-    "**/*.test.js",
-    "**/*.spec.js",
-    "**/*.test.jsx",
-    "**/*.spec.jsx",
-    "**/*.d.ts"
-  ]
+  "files": ["../../global.d.ts"],
+  "include": ["src/**/*.d.ts", "src/**/*.spec.ts"]
 }

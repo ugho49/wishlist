@@ -9,7 +9,7 @@ export class UserEmailSettingEntity extends TimestampEntity {
   id: UserEmailSettingId = uuid() as UserEmailSettingId
 
   @Column()
-  userId: UserId
+  userId!: UserId
 
   @Column()
   dailyNewItemNotification: boolean = true

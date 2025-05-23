@@ -11,17 +11,17 @@ export class PasswordVerificationEntity extends TimestampEntity {
   id: UserPasswordVerificationId = uuid() as UserPasswordVerificationId
 
   @ManyToOne(() => UserEntity)
-  readonly user: Promise<UserEntity>
+  readonly user!: Promise<UserEntity>
 
   @Column()
   @RelationId((entity: PasswordVerificationEntity) => entity.user)
-  userId: UserId
+  userId!: UserId
 
   @Column()
-  token: string
+  token!: string
 
   @Column()
-  expiredAt: Date
+  expiredAt!: Date
 
   public static create(props: { user: UserId; token: string; expiredAt: Date }): PasswordVerificationEntity {
     const entity = new PasswordVerificationEntity()

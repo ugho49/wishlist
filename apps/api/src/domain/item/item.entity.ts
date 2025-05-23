@@ -12,7 +12,7 @@ export class ItemEntity extends TimestampEntity {
   id: ItemId = uuid() as ItemId
 
   @Column()
-  name: string
+  name!: string
 
   @Column({ type: 'varchar', nullable: true })
   description?: string | null
@@ -24,7 +24,7 @@ export class ItemEntity extends TimestampEntity {
   pictureUrl?: string | null
 
   @Column()
-  isSuggested: boolean
+  isSuggested!: boolean
 
   @Column({ type: 'integer', nullable: true })
   score?: number | null
@@ -33,11 +33,11 @@ export class ItemEntity extends TimestampEntity {
   takenAt?: Date | null
 
   @ManyToOne(() => WishlistEntity, { lazy: true })
-  readonly wishlist: Promise<WishlistEntity>
+  readonly wishlist!: Promise<WishlistEntity>
 
   @Column()
   @RelationId((entity: ItemEntity) => entity.wishlist)
-  wishlistId: WishlistId
+  wishlistId!: WishlistId
 
   @ManyToOne(() => UserEntity, { lazy: true })
   readonly taker?: Promise<UserEntity> | null

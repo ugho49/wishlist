@@ -5,14 +5,12 @@ import type * as SMTPTransport from 'nodemailer/lib/smtp-transport'
 
 import { Inject, Injectable } from '@nestjs/common'
 import * as Handlebars from 'handlebars'
+import mjml2html from 'mjml'
 import { createTransport } from 'nodemailer'
 
 import { MailConfig } from './mail.config'
 import { MAIL_CONFIG_TOKEN } from './mail.module-definitions'
 import { helpers } from './mail.utils'
-
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-import mjml2html = require('mjml')
 
 @Injectable()
 export class MailService {

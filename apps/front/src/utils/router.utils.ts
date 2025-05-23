@@ -12,6 +12,6 @@ export const getUrlParameter = (name: string): string | undefined => {
   if (!match) {
     return undefined
   }
-  const param = decodeURIComponent(match[1].replace(/\+/g, ' '))
+  const param = decodeURIComponent(match[1]!.replace(/\+/g, ' '))
   return param ? param : undefined
 }

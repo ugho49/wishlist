@@ -1,4 +1,4 @@
-import type { LinkProps } from '@mui/material/Link/Link'
+import type { LinkProps } from '@mui/material/Link'
 import type { LinkProps as ReactRouterLinkProps } from 'react-router-dom'
 
 import { Link } from '@mui/material'

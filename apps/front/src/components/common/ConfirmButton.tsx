@@ -1,9 +1,9 @@
-import type { LoadingButtonTypeMap } from '@mui/lab/LoadingButton/LoadingButton'
+import type { LoadingButtonProps } from '@mui/lab/LoadingButton'
 import type { Theme } from '@mui/material/styles'
 import type { SxProps } from '@mui/system'
 import type { PropsWithChildren } from 'react'
 
-import { LoadingButton } from '@mui/lab'
+import LoadingButton from '@mui/lab/LoadingButton'
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material'
 import React, { useCallback, useMemo, useState } from 'react'
 
@@ -15,11 +15,11 @@ export type ConfirmButtonProps = {
   onClick: () => void
   disabled?: boolean
   loading?: boolean
-  startIcon?: LoadingButtonTypeMap['props']['startIcon']
-  endIcon?: LoadingButtonTypeMap['props']['endIcon']
-  color?: LoadingButtonTypeMap['props']['color']
-  size?: LoadingButtonTypeMap['props']['size']
-  variant?: LoadingButtonTypeMap['props']['variant']
+  startIcon?: LoadingButtonProps['startIcon']
+  endIcon?: LoadingButtonProps['endIcon']
+  color?: LoadingButtonProps['color']
+  size?: LoadingButtonProps['size']
+  variant?: LoadingButtonProps['variant']
   sx?: SxProps<Theme>
 }
 

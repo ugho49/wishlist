@@ -2,17 +2,17 @@ import { IsString } from 'class-validator'
 
 export class DatabaseConfig {
   @IsString()
-  host: string
+  host!: string
 
   @IsString()
-  port: string
+  port!: string
 
   @IsString()
-  username: string
+  username!: string
 
   @IsString()
-  password: string
+  password!: string
 
   @IsString()
-  database: string
+  database!: string
 }

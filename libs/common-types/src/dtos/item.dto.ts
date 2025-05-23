@@ -7,8 +7,8 @@ import { TidyURL } from 'tidy-url'
 import { MiniUserDto } from './user.dto'
 
 export class ItemDto {
-  id: ItemId
-  name: string
+  id!: ItemId
+  name!: string
   description?: string
   url?: string
   score?: number
@@ -16,7 +16,7 @@ export class ItemDto {
   picture_url?: string
   taken_by?: MiniUserDto
   taken_at?: string
-  created_at: string
+  created_at!: string
 }
 
 export class ToggleItemOutputDto {
@@ -25,14 +25,14 @@ export class ToggleItemOutputDto {
 }
 
 export class ScanItemOutputDto {
-  picture_url: string | null
+  picture_url!: string | null
 }
 
 export class AddItemInputDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(40)
-  name: string
+  name!: string
 
   @IsString()
   @IsOptional()
@@ -60,11 +60,11 @@ export class AddItemInputDto {
 export class AddItemForListInputDto extends AddItemInputDto {
   @IsString()
   @IsNotEmpty()
-  wishlist_id: WishlistId
+  wishlist_id!: WishlistId
 }
 
 export class ScanItemInputDto {
   @IsString()
   @IsNotEmpty()
-  url: string
+  url!: string
 }

@@ -2,8 +2,9 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "../../dist/out-tsc",
-    "module": "Node16",
-    "types": ["jest", "node"]
+    "types": ["vitest/globals", "node"],
+    "declaration": true
   },
-  "include": ["jest.config.ts", "**/*.test.ts", "**/*.spec.ts", "**/*.d.ts"]
+  "files": ["../../global.d.ts"],
+  "include": ["src/**/*.d.ts", "src/**/*.spec.ts"]
 }

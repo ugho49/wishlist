@@ -39,7 +39,7 @@ import { useMutation } from '@tanstack/react-query'
 import { MAX_EVENTS_BY_LIST } from '@wishlist/common-types'
 import uniq from 'lodash/uniq'
 import { DateTime } from 'luxon'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { useInterval } from 'usehooks-ts'
@@ -87,10 +87,10 @@ const PLACEHOLDER_NAMES = [
   'Bastien',
   'Clément',
 ]
-const getRandomPlaceholderName = () => {
+const getRandomPlaceholderName = (): string => {
   const randomIndex = Math.floor(Math.random() * PLACEHOLDER_NAMES.length)
   // eslint-disable-next-line security/detect-object-injection
-  return PLACEHOLDER_NAMES[randomIndex]
+  return PLACEHOLDER_NAMES[randomIndex]!
 }
 
 export const CreateWishlistPage = () => {

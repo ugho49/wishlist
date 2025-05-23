@@ -2,23 +2,8 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "../../dist/out-tsc",
-    "module": "Node16",
-    "types": ["node"],
-    "emitDecoratorMetadata": true,
-    "target": "es2021",
-    "strict": true,
-    "noImplicitOverride": true,
-    "noPropertyAccessFromIndexSignature": false,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "allowSyntheticDefaultImports": true
+    "types": ["node"]
   },
-  "exclude": [
-    "jest.config.ts",
-    "jest.int.config.ts",
-    "src/**/*.spec.ts",
-    "src/**/*.int-spec.ts",
-    "src/__int-tests__/**/*.ts"
-  ],
+  "exclude": ["src/**/*.int-spec.ts", "src/**/*.spec.ts", "src/__int-tests__/**/*.ts"],
   "include": ["**/*.ts"]
 }

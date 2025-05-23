@@ -14,17 +14,17 @@ export class AttendeeEntity {
 
   @Column()
   @RelationId((entity: AttendeeEntity) => entity.event)
-  eventId: EventId
+  eventId!: EventId
 
   @Column({ type: 'uuid', nullable: true })
   @RelationId((entity: AttendeeEntity) => entity.user)
   userId?: UserId | null
 
   @ManyToOne(() => EventEntity, entity => entity.attendees)
-  readonly event: Promise<EventEntity>
+  readonly event!: Promise<EventEntity>
 
   @ManyToOne(() => UserEntity)
-  readonly user: Promise<UserEntity | null>
+  readonly user!: Promise<UserEntity | null>
 
   @Column({ name: 'temp_user_email', type: 'varchar', nullable: true })
   email?: string | null

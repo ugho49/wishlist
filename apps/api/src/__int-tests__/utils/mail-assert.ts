@@ -1,6 +1,3 @@
-import 'jest'
-import 'jest-expect-message'
-
 import type { AxiosInstance } from 'axios'
 
 type MailAssertion = () => Promise<unknown>
@@ -35,11 +32,7 @@ export class MailsAssert {
     this.assertions.add(async () => {
       const mails = await this.getMails()
 
-      expect(mails.length, `Wrong number of length for mails`, {
-        showMatcherMessage: false,
-        showPrefix: false,
-        showStack: false,
-      }).toEqual(expected)
+      expect(mails.length, `Wrong number of length for mails`).toEqual(expected)
     })
 
     return this
@@ -86,10 +79,7 @@ class MailAssert {
   hasSubject(subject: string): this {
     this.addAssertion(async () => {
       const { mail, index } = await this.getMail()
-      expect(mail?.subject, `Wrong value for subject of mail[${index}]`, {
-        showPrefix: false,
-        showStack: false,
-      }).toEqual(subject)
+      expect(mail?.subject, `Wrong value for subject of mail[${index}]`).toEqual(subject)
     })
 
     return this
@@ -103,10 +93,6 @@ class MailAssert {
       expect(
         mail?.to?.map(value => value.address),
         `Wrong value for receiver of mail[${index}]`,
-        {
-          showPrefix: false,
-          showStack: false,
-        },
       ).toEqual(receiverEmails)
     })
 
@@ -121,10 +107,6 @@ class MailAssert {
       expect(
         mail?.from?.map(value => value.address),
         `Wrong value for sender of mail[${index}]`,
-        {
-          showPrefix: false,
-          showStack: false,
-        },
       ).toEqual(senderEmails)
     })
 

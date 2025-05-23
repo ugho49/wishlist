@@ -13,7 +13,7 @@ export class WishlistEntity extends TimestampEntity {
   id: WishlistId = uuid() as WishlistId
 
   @Column()
-  title: string
+  title!: string
 
   @Column({ type: 'varchar', nullable: true })
   description?: string | null
@@ -22,24 +22,24 @@ export class WishlistEntity extends TimestampEntity {
   logoUrl?: string | null
 
   @Column()
-  hideItems: boolean
+  hideItems!: boolean
 
   @ManyToOne(() => UserEntity)
-  readonly owner: Promise<UserEntity>
+  readonly owner!: Promise<UserEntity>
 
   @Column()
   @RelationId((entity: WishlistEntity) => entity.owner)
-  ownerId: UserId
+  ownerId!: UserId
 
   @OneToMany(() => ItemEntity, item => item.wishlist, {
     cascade: true,
   })
-  items: Promise<ItemEntity[]>
+  items!: Promise<ItemEntity[]>
 
   @ManyToMany(() => EventEntity, event => event.wishlists, {
     cascade: true,
   })
-  events: Promise<EventEntity[]>
+  events!: Promise<EventEntity[]>
 
   public static create(props: {
     title: string
