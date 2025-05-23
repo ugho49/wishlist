@@ -151,7 +151,7 @@
     "react-test-renderer": "19.1.0",
     "sass": "1.89.0",
     "supertest": "7.1.1",
-    "testcontainers": "10.27.0",
+    "testcontainers": "10.28.0",
     "ts-node": "10.9.2",
     "typescript": "5.8.3",
     "typescript-eslint": "8.32.1",
