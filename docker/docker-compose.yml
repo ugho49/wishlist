@@ -12,7 +12,7 @@ services:
       retries: 10
 
   mail:
-    image: maildev/maildev:2.1.0
+    image: maildev/maildev:2.2.1
     healthcheck:
       test: wget --spider http://localhost:1080 || exit 1
       interval: 2s
