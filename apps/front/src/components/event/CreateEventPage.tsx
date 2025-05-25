@@ -6,7 +6,6 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft'
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'
 import SaveIcon from '@mui/icons-material/Save'
-import { LoadingButton } from '@mui/lab'
 import {
   Box,
   Button,
@@ -26,7 +25,7 @@ import { MobileDatePicker } from '@mui/x-date-pickers'
 import { useMutation } from '@tanstack/react-query'
 import { AttendeeRole } from '@wishlist/common-types'
 import { DateTime } from 'luxon'
-import React, { useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 
@@ -239,7 +238,7 @@ export const CreateEventPage = () => {
               </Button>
             )}
             {step === 2 && (
-              <LoadingButton
+              <Button
                 variant="contained"
                 loading={loading}
                 loadingPosition="end"
@@ -248,7 +247,7 @@ export const CreateEventPage = () => {
                 onClick={() => createEvent()}
               >
                 Créer
-              </LoadingButton>
+              </Button>
             )}
           </Stack>
         </Card>

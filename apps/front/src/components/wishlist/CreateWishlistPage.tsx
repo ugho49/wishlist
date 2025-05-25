@@ -9,7 +9,6 @@ import Diversity1TwoToneIcon from '@mui/icons-material/Diversity1TwoTone'
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft'
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'
 import SaveIcon from '@mui/icons-material/Save'
-import { LoadingButton } from '@mui/lab'
 import {
   Avatar,
   Box,
@@ -355,7 +354,7 @@ export const CreateWishlistPage = () => {
                   </Button>
                 )}
                 {step === 3 && (
-                  <LoadingButton
+                  <Button
                     variant="contained"
                     loading={loading}
                     loadingPosition="end"
@@ -364,7 +363,7 @@ export const CreateWishlistPage = () => {
                     onClick={() => createWishlist()}
                   >
                     Créer
-                  </LoadingButton>
+                  </Button>
                 )}
               </Stack>
             )}

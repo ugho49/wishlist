@@ -11,8 +11,7 @@ import SortByAlphaIcon from '@mui/icons-material/SortByAlpha'
 import StarIcon from '@mui/icons-material/Star'
 import StarBorderIcon from '@mui/icons-material/StarBorder'
 import WatchLaterIcon from '@mui/icons-material/WatchLater'
-import { Box, Grid, inputBaseClasses, MenuItem, menuItemClasses, Select } from '@mui/material'
-import { makeStyles } from '@mui/styles'
+import { Box, GridLegacy as Grid, inputBaseClasses, MenuItem, menuItemClasses, Select, styled } from '@mui/material'
 import React, { useEffect } from 'react'
 
 import { InputLabel } from '../common/InputLabel'
@@ -153,21 +152,26 @@ export type WishFilterSortSelectProps = {
   displaySortSelect?: boolean
 }
 
-const useStyles = makeStyles(() => ({
-  select: {
-    [`&.${inputBaseClasses.root}`]: {
-      width: '100%',
-      height: '28px',
-    },
+const SelectStyled = styled(Select)({
+  [`&.${inputBaseClasses.root}`]: {
+    width: '100%',
+    height: '28px',
   },
-  menuItem: {
-    [`&, &.${menuItemClasses.root}`]: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '8px',
-    },
+})
+
+const MenuItemStyled = styled(MenuItem)({
+  [`&, &.${menuItemClasses.root}`]: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
   },
-}))
+})
+
+const BoxStyled = styled(Box)({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+})
 
 export const WishlistFilterAndSortItems = ({
   items,
@@ -179,8 +183,6 @@ export const WishlistFilterAndSortItems = ({
   displayFilterSelect = true,
   displaySortSelect = true,
 }: WishFilterSortSelectProps) => {
-  const classes = useStyles()
-
   useEffect(() => {
     const newItems = items.filter(item => applyFilter(item, filter)).sort((a, b) => applySort(a, b, sort))
     onChange(newItems)
@@ -195,28 +197,27 @@ export const WishlistFilterAndSortItems = ({
             <span>Trier par</span>
           </InputLabel>
 
-          <Select
-            className={classes.select}
+          <SelectStyled
             displayEmpty
             value={sort}
             onChange={e => onSortChange(e.target.value as SortType)}
             renderValue={value => {
               const option = sortOptions.find(opt => opt.value === value)
               return (
-                <Box className={classes.menuItem}>
+                <BoxStyled>
                   {option?.icon}
                   {option?.label}
-                </Box>
+                </BoxStyled>
               )
             }}
           >
             {sortOptions.map(opt => (
-              <MenuItem key={opt.value} value={opt.value} className={classes.menuItem}>
+              <MenuItemStyled key={opt.value} value={opt.value}>
                 {opt.icon}
                 {opt.label}
-              </MenuItem>
+              </MenuItemStyled>
             ))}
-          </Select>
+          </SelectStyled>
         </Grid>
       )}
       {displayFilterSelect && (
@@ -225,28 +226,27 @@ export const WishlistFilterAndSortItems = ({
             <FilterListIcon fontSize="small" />
             <span>Filtrer par</span>
           </InputLabel>
-          <Select
-            className={classes.select}
+          <SelectStyled
             displayEmpty
             value={filter}
             onChange={e => onFilterChange(e.target.value as FilterType)}
             renderValue={value => {
               const option = filterOptions.find(opt => opt.value === value)
               return (
-                <Box className={classes.menuItem}>
+                <BoxStyled>
                   {option?.icon}
                   {option?.label}
-                </Box>
+                </BoxStyled>
               )
             }}
           >
             {filterOptions.map(opt => (
-              <MenuItem key={opt.value} value={opt.value} className={classes.menuItem}>
+              <MenuItemStyled key={opt.value} value={opt.value}>
                 {opt.icon}
                 {opt.label}
-              </MenuItem>
+              </MenuItemStyled>
             ))}
-          </Select>
+          </SelectStyled>
         </Grid>
       )}
     </Grid>

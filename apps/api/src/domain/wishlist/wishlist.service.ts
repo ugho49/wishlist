@@ -103,16 +103,20 @@ export class WishlistService {
       }),
     )
 
-    wishlistEntity.events = Promise.resolve(eventEntities)
-    wishlistEntity.items = Promise.resolve(itemEntities)
-
     const fileDestination = this.getLogoDestination(wishlistEntity.id)
     if (imageFile) {
       wishlistEntity.logoUrl = await this.uploadToBucket(fileDestination, imageFile)
     }
 
     try {
-      await this.wishlistRepository.save(wishlistEntity)
+      wishlistEntity.events = Promise.resolve(eventEntities)
+      wishlistEntity.items = Promise.resolve(itemEntities)
+
+      await this.wishlistRepository.transaction(async em => {
+        await em.save(wishlistEntity)
+        await em.save(itemEntities)
+        await em.save(eventEntities)
+      })
     } catch (e) {
       if (imageFile) {
         await this.bucketService.removeIfExist({ destination: fileDestination })

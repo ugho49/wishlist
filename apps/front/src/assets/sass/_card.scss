@@ -16,6 +16,10 @@
     cursor: pointer;
     box-shadow: 0 4px 12px 0 rgba(4, 28, 44, 0.1), 0 0 9px 0 rgba(4, 28, 44, 0.08);
   }
+
+  &.no-padding {
+    padding: 0;
+  }
 }
 
 .card-outlined {

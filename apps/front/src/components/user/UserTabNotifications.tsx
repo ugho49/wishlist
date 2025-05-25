@@ -2,10 +2,9 @@ import type { UpdateUserEmailSettingsInputDto } from '@wishlist/common-types'
 import type { FormEvent } from 'react'
 
 import SaveIcon from '@mui/icons-material/Save'
-import { LoadingButton } from '@mui/lab'
-import { Box, Checkbox, FormControlLabel, Stack, Typography } from '@mui/material'
+import { Box, Button, Checkbox, FormControlLabel, Stack, Typography } from '@mui/material'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { useApi } from '../../hooks/useApi'
 import { useToast } from '../../hooks/useToast'
@@ -72,7 +71,7 @@ export const UserTabNotifications = () => {
         </Box>
 
         <Stack direction="row" justifyContent="center">
-          <LoadingButton
+          <Button
             type="submit"
             variant="contained"
             size="large"
@@ -83,7 +82,7 @@ export const UserTabNotifications = () => {
             startIcon={<SaveIcon />}
           >
             Mettre à jour
-          </LoadingButton>
+          </Button>
         </Stack>
       </Stack>
     </Loader>

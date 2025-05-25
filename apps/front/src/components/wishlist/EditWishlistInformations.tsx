@@ -3,10 +3,9 @@ import type { DetailedWishlistDto, UpdateWishlistInputDto } from '@wishlist/comm
 import { zodResolver } from '@hookform/resolvers/zod'
 import DeleteIcon from '@mui/icons-material/Delete'
 import SaveIcon from '@mui/icons-material/Save'
-import { LoadingButton } from '@mui/lab'
-import { Box, Stack, TextField } from '@mui/material'
+import { Box, Button, Stack, TextField } from '@mui/material'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import React, { useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 import { z } from 'zod'
@@ -154,7 +153,7 @@ export const EditWishlistInformations = ({ wishlist }: EditWishlistInformationsP
               />
             </Box>
 
-            <LoadingButton
+            <Button
               type="submit"
               fullWidth
               variant="contained"
@@ -166,7 +165,7 @@ export const EditWishlistInformations = ({ wishlist }: EditWishlistInformationsP
               startIcon={<SaveIcon />}
             >
               Mettre à jour
-            </LoadingButton>
+            </Button>
           </Stack>
         </Stack>
       </Card>

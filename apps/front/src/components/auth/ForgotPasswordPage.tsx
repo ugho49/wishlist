@@ -2,10 +2,9 @@ import type { ResetPasswordInputDto } from '@wishlist/common-types'
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import AttachEmailIcon from '@mui/icons-material/AttachEmail'
-import { LoadingButton } from '@mui/lab'
-import { Box, Stack, TextField } from '@mui/material'
+import { Box, Button, Stack, TextField } from '@mui/material'
 import { useMutation } from '@tanstack/react-query'
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
@@ -74,7 +73,7 @@ export const ForgotPasswordPage = () => {
                   helperText={formErrors.email?.message}
                 />
               </Box>
-              <LoadingButton
+              <Button
                 type="submit"
                 fullWidth
                 variant="contained"
@@ -86,7 +85,7 @@ export const ForgotPasswordPage = () => {
                 disabled={isSubmitting}
               >
                 Réinitialisez mon mot de passe
-              </LoadingButton>
+              </Button>
             </Stack>
           </>
         )}

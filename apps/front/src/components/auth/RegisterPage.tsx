@@ -3,12 +3,11 @@ import type { LoginOutputDto } from '@wishlist/common-types'
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import PersonAddIcon from '@mui/icons-material/PersonAdd'
-import { LoadingButton } from '@mui/lab'
-import { Alert, Box, Stack, TextField } from '@mui/material'
+import { Alert, Box, Button, Stack, TextField } from '@mui/material'
 import { GoogleLogin } from '@react-oauth/google'
 import { useMutation } from '@tanstack/react-query'
 import { AxiosError } from 'axios'
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useDispatch } from 'react-redux'
 import { z } from 'zod'
@@ -148,7 +147,7 @@ export const RegisterPage = () => {
             />
           </Box>
           <Stack alignItems="center" gap={2}>
-            <LoadingButton
+            <Button
               type="submit"
               variant="contained"
               size="large"
@@ -159,7 +158,7 @@ export const RegisterPage = () => {
               disabled={isSubmitting || socialLoading}
             >
               M'inscrire
-            </LoadingButton>
+            </Button>
             <GoogleLogin
               onSuccess={onGoogleRegisterSuccess}
               onError={onGoogleRegisterFailure}

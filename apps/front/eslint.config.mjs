@@ -6,7 +6,7 @@ import baseConfig from '../../eslint.config.mjs'
 export default [
   ...baseConfig,
   {
-    files: ['**/*.{jsx,tsx}'],
+    files: ['**/*.tsx'],
     ...reactPlugin.configs.flat.recommended,
     languageOptions: {
       ...reactPlugin.configs.flat.recommended.languageOptions,
@@ -21,6 +21,12 @@ export default [
       'react/jsx-uses-react': 0,
       'react/no-unescaped-entities': 0,
       'react/no-children-prop': 0,
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: ['@mui/*/*/*', '!@mui/material/test-utils/*'],
+        },
+      ],
     },
   },
 ]

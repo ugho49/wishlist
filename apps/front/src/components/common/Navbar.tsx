@@ -1,10 +1,7 @@
 /// <reference types="vite-plugin-svgr/client" />
-import type { Theme } from '@mui/material'
-
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import LogoutIcon from '@mui/icons-material/Logout'
-import { AppBar, Box, Button, Container, IconButton, Stack, Toolbar, Typography } from '@mui/material'
-import { makeStyles } from '@mui/styles'
+import { AppBar, Box, Button, Container, IconButton, Stack, styled, Toolbar, Typography } from '@mui/material'
 import { useCallback } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
@@ -14,25 +11,25 @@ import { useHistoryStack } from '../../hooks/useHistoryStack'
 import { useLogout } from '../../hooks/useLogout'
 import { useToast } from '../../hooks/useToast'
 
-const useStyles = makeStyles((theme: Theme) => ({
-  logo: {
-    flexGrow: 1,
-    [theme.breakpoints.down('sm')]: {
-      justifyContent: 'center',
-    },
+const Logo = styled(Stack)(({ theme }) => ({
+  flexGrow: 1,
+  [theme.breakpoints.down('sm')]: {
+    justifyContent: 'center',
   },
-  logoLink: {
-    display: 'flex',
-    alignItems: 'center',
-    color: theme.palette.secondary.main,
-  },
-  leftNavbar: {
-    display: 'flex',
-    flexBasis: '20%',
-    marginLeft: '-15px',
-    [theme.breakpoints.up('sm')]: {
-      display: 'none',
-    },
+}))
+
+const LogoLink = styled(Link)(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  color: theme.palette.secondary.main,
+}))
+
+const LeftNavbar = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  flexBasis: '20%',
+  marginLeft: '-15px',
+  [theme.breakpoints.up('sm')]: {
+    display: 'none',
   },
 }))
 
@@ -52,7 +49,6 @@ const GoBack = () => {
 }
 
 export const Navbar = () => {
-  const classes = useStyles()
   const { addToast } = useToast()
   const logout = useLogout()
 
@@ -65,16 +61,16 @@ export const Navbar = () => {
     <AppBar position="sticky">
       <Container maxWidth="xl">
         <Toolbar>
-          <Box className={classes.leftNavbar}>
+          <LeftNavbar>
             <GoBack />
-          </Box>
+          </LeftNavbar>
 
-          <Stack alignItems="center" direction="row" className={classes.logo}>
-            <Link to="/" className={classes.logoLink}>
+          <Logo alignItems="center" direction="row">
+            <LogoLink to="/">
               <IconSvg style={{ marginRight: '10px', height: '24px' }} />
               <TextSvg style={{ height: '44px' }} />
-            </Link>
-          </Stack>
+            </LogoLink>
+          </Logo>
 
           <Box sx={{ display: { xs: 'none', sm: 'flex' } }}>
             <Button color="inherit" startIcon={<LogoutIcon />} onClick={handleLogout}>

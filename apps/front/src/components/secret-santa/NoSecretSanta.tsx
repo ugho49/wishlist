@@ -1,9 +1,8 @@
 import type { EventId, UpdateSecretSantaInputDto } from '@wishlist/common-types'
 
-import { LoadingButton } from '@mui/lab'
-import { Box, Stack, Typography } from '@mui/material'
+import { Box, Button, Stack, Typography } from '@mui/material'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import React, { useState } from 'react'
+import { useState } from 'react'
 
 import SecretSanta from '../../assets/illustrations/secret_santa.png'
 import { useApi, useToast } from '../../hooks'
@@ -45,9 +44,9 @@ export const NoSecretSanta = ({ eventId }: NoSecretSantaProps) => {
           </Box>
           <Box>Vous pouvez en créer un en cliquant sur le bouton ci-dessous.</Box>
           <Box>
-            <LoadingButton loading={loading} disabled={loading} onClick={() => setOpenModal(true)} variant="contained">
+            <Button loading={loading} disabled={loading} onClick={() => setOpenModal(true)} variant="contained">
               Créer un secret santa
-            </LoadingButton>
+            </Button>
           </Box>
         </Stack>
         <Stack>

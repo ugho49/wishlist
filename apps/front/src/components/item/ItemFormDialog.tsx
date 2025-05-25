@@ -11,11 +11,11 @@ import type { FormEvent } from 'react'
 import CameraAltIcon from '@mui/icons-material/CameraAlt'
 import CloseIcon from '@mui/icons-material/Close'
 import SaveIcon from '@mui/icons-material/Save'
-import { LoadingButton } from '@mui/lab'
 import {
   AppBar,
   Avatar,
   Box,
+  Button,
   Container,
   Dialog,
   IconButton,
@@ -312,7 +312,7 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
             <Rating value={score} disabled={loading} onChange={(_, value) => setScore(value)} size="large" />
           </Box>
 
-          <LoadingButton
+          <Button
             type="submit"
             fullWidth
             variant="contained"
@@ -324,7 +324,7 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
             startIcon={<SaveIcon />}
           >
             {mode === 'create' ? 'Ajouter' : 'Modifier'}
-          </LoadingButton>
+          </Button>
         </Stack>
       </Container>
     </Dialog>

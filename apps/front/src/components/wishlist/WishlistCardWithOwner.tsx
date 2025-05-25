@@ -1,14 +1,10 @@
-import type { Theme } from '@mui/material'
 import type { WishlistWithOwnerDto } from '@wishlist/common-types'
 
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'
 import PersonIcon from '@mui/icons-material/Person'
 import PublicIcon from '@mui/icons-material/Public'
-import { Avatar, Badge, Stack } from '@mui/material'
+import { Avatar, Badge, Stack, styled } from '@mui/material'
 import { grey } from '@mui/material/colors'
-import { makeStyles } from '@mui/styles'
-import clsx from 'clsx'
-import React from 'react'
 
 import { Card } from '../common/Card'
 
@@ -16,34 +12,33 @@ export type WishlistCardWithOwnerProps = {
   wishlist: WishlistWithOwnerDto
 }
 
-const useStyles = makeStyles((theme: Theme) => ({
-  card: {
-    height: '100%',
-    padding: '6px',
-    borderRadius: '30px',
-  },
-  title: {
-    color: theme.palette.primary.main,
-    fontWeight: 400,
-    overflow: 'hidden',
-    maxWidth: '100%',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-    textTransform: 'uppercase',
-    marginInline: '16px',
-  },
-  arrow: {
-    color: theme.palette.primary.light,
-  },
-}))
-
 const logoSize = 60
 
-export const WishlistCardWithOwner = ({ wishlist }: WishlistCardWithOwnerProps) => {
-  const classes = useStyles()
+const CardStyled = styled(Card)({
+  height: '100%',
+  padding: '6px !important',
+  borderRadius: '30px',
+})
 
+const Title = styled('div')(({ theme }) => ({
+  color: theme.palette.primary.main,
+  fontWeight: 400,
+  overflow: 'hidden',
+  maxWidth: '100%',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+  textTransform: 'uppercase',
+  marginInline: '16px',
+}))
+
+const Arrow = styled('div')(({ theme }) => ({
+  display: 'flex',
+  color: theme.palette.primary.light,
+}))
+
+export const WishlistCardWithOwner = ({ wishlist }: WishlistCardWithOwnerProps) => {
   return (
-    <Card to={`/wishlists/${wishlist.id}`} className={clsx(classes.card, 'animated fadeIn fast')}>
+    <CardStyled to={`/wishlists/${wishlist.id}`} className="animated fadeIn fast">
       <Stack direction="row" justifyContent="space-between" height="100%" alignItems="center">
         <div>
           {wishlist.config.hide_items ? (
@@ -70,11 +65,11 @@ export const WishlistCardWithOwner = ({ wishlist }: WishlistCardWithOwnerProps) 
             </Badge>
           )}
         </div>
-        <span className={classes.title}>{wishlist.title}</span>
-        <div className={classes.arrow}>
+        <Title>{wishlist.title}</Title>
+        <Arrow>
           <KeyboardArrowRightIcon />
-        </div>
+        </Arrow>
       </Stack>
-    </Card>
+    </CardStyled>
   )
 }

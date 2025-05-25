@@ -1,4 +1,3 @@
-import type { Theme } from '@mui/material'
 import type { DetailedWishlistDto, ItemDto, MiniUserDto, WishlistId } from '@wishlist/common-types'
 
 import type { RootState } from '../../core'
@@ -10,10 +9,10 @@ import MoreVertIcon from '@mui/icons-material/MoreVert'
 import OpenInNewIcon from '@mui/icons-material/OpenInNew'
 import RedeemIcon from '@mui/icons-material/Redeem'
 import TipsAndUpdatesTwoToneIcon from '@mui/icons-material/TipsAndUpdatesTwoTone'
-import { LoadingButton } from '@mui/lab'
 import {
   Avatar,
   Box,
+  Button,
   Chip,
   chipClasses,
   ClickAwayListener,
@@ -26,15 +25,14 @@ import {
   MenuItem,
   Modal,
   Stack,
+  styled,
   Tooltip,
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import Zoom from '@mui/material/Zoom'
-import { makeStyles } from '@mui/styles'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import clsx from 'clsx'
 import { DateTime } from 'luxon'
 import React, { useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
@@ -54,65 +52,72 @@ export type ItemCardProps = {
   item: ItemDto
 }
 
-const useStyles = makeStyles((theme: Theme) => ({
-  card: {
-    display: 'flex',
-    height: '100%',
-    flexDirection: 'column',
-    padding: '0',
-    color: theme.palette.primary.main,
-  },
-  container: {
-    display: 'flex',
-    height: '100%',
-    flexDirection: 'column',
-    margin: '15px 20px',
-  },
-  actions: {
-    position: 'absolute',
-    top: '6px',
-    right: '6px',
-  },
-  name: {
-    maxWidth: '100%',
-    fontWeight: '500 !important',
-    wordWrap: 'break-word',
-    textAlign: 'center',
-  },
-  description: {
-    maxWidth: '100%',
-    fontWeight: 300,
-    wordWrap: 'break-word',
-    textAlign: 'center',
-  },
-  suggested: {
-    [`&.${chipClasses.root}`]: {
-      fontSize: '0.6rem',
-      height: '15px',
-    },
-  },
-  date: {
-    fontWeight: 300,
+const CardStyled = styled(Card)(({ theme }) => ({
+  display: 'flex',
+  height: '100%',
+  flexDirection: 'column',
+  color: theme.palette.primary.main,
+}))
+
+const ItemContainer = styled('div')({
+  display: 'flex',
+  height: '100%',
+  flexDirection: 'column',
+  margin: '15px 20px',
+})
+
+const ItemActions = styled('div')({
+  position: 'absolute',
+  top: '6px',
+  right: '6px',
+})
+
+const ItemName = styled('div')({
+  maxWidth: '100%',
+  fontWeight: '500',
+  wordWrap: 'break-word',
+  textAlign: 'center',
+})
+
+const ItemDescription = styled('div')({
+  maxWidth: '100%',
+  fontWeight: 300,
+  wordWrap: 'break-word',
+  textAlign: 'center',
+  marginTop: '4px',
+})
+
+const ItemDate = styled('div')(({ theme }) => ({
+  fontWeight: 300,
+  fontSize: '0.6rem',
+  color: theme.palette.grey[600],
+  textAlign: 'center',
+  width: '100%',
+  marginTop: '16px',
+}))
+
+const SuggestedChip = styled(Chip)({
+  [`&.${chipClasses.root}`]: {
     fontSize: '0.6rem',
-    color: theme.palette.grey[600],
+    height: '15px',
   },
-  takenBy: {
-    background: theme.palette.secondary.main,
-    color: theme.palette.secondary.contrastText,
-    borderTopLeftRadius: '3px',
-    borderTopRightRadius: '3px',
-    height: '45px',
-    boxShadow: '0 0 1px 0 rgba(87, 113, 149, 0.3), 0 2px 4px -2px rgba(87, 113, 149, 0.5)',
-  },
+})
+
+const TakenByContainer = styled(Stack)(({ theme }) => ({
+  background: theme.palette.secondary.main,
+  color: theme.palette.secondary.contrastText,
+  borderTopLeftRadius: '3px',
+  borderTopRightRadius: '3px',
+  height: '45px',
+  boxShadow: '0 0 1px 0 rgba(87, 113, 149, 0.3), 0 2px 4px -2px rgba(87, 113, 149, 0.5)',
 }))
 
 const TakenBy = (props: { user: MiniUserDto }) => {
-  const classes = useStyles()
   const [tooltipOpen, setTooltipOpen] = useState(false)
   const { user } = props
 
   return (
-    <Stack alignItems="center" justifyContent="center" gap={2} direction="row" className={classes.takenBy}>
+    <TakenByContainer alignItems="center" justifyContent="center" gap={2} direction="row">
       <Box>Pris par</Box>
       <ClickAwayListener onClickAway={() => setTooltipOpen(false)}>
         <Tooltip
@@ -159,7 +164,7 @@ const TakenBy = (props: { user: MiniUserDto }) => {
           </Avatar>
         </Tooltip>
       </ClickAwayListener>
-    </Stack>
+    </TakenByContainer>
   )
 }
 
@@ -262,7 +267,6 @@ const ItemImage = (props: { imageUrl: string | undefined; itemUrl: string | unde
 const mapState = (state: RootState) => state.auth.user?.id
 
 export const ItemCard = ({ item, wishlist }: ItemCardProps) => {
-  const classes = useStyles()
   const currentUserId = useSelector(mapState)
   const api = useApi()
   const { addToast } = useToast()
@@ -326,17 +330,10 @@ export const ItemCard = ({ item, wishlist }: ItemCardProps) => {
 
   return (
     <>
-      <Card
-        className={clsx(
-          classes.card,
-          'animated zoomIn faster',
-          isTaken && 'selected',
-          !displayActions && 'hideActions',
-        )}
-      >
+      <CardStyled className="animated zoomIn faster" noPadding>
         {isTaken && <TakenBy user={takenBy!} />}
-        <Stack className={classes.container}>
-          <Box className={classes.actions}>
+        <ItemContainer>
+          <ItemActions>
             {displayActions && (
               <>
                 <IconButton onClick={openMenu}>
@@ -372,7 +369,7 @@ export const ItemCard = ({ item, wishlist }: ItemCardProps) => {
                 </Menu>
               </>
             )}
-          </Box>
+          </ItemActions>
           <Stack alignItems="center">
             <ItemImage imageUrl={item.picture_url} itemUrl={item.url} />
           </Stack>
@@ -380,20 +377,13 @@ export const ItemCard = ({ item, wishlist }: ItemCardProps) => {
             <Rating value={item.score} size="small" readOnly />
           </Stack>
           <Stack alignItems="center" justifyContent="center" flexGrow={1}>
-            <Box className={classes.name} {...NameProps}>
-              {item.name}
-            </Box>
-            {item.description && (
-              <Box marginTop={0.5} className={classes.description}>
-                {item.description}
-              </Box>
-            )}
+            <ItemName {...NameProps}>{item.name}</ItemName>
+            {item.description && <ItemDescription>{item.description}</ItemDescription>}
           </Stack>
           {item.is_suggested && (
             <Stack alignItems="center" marginTop={1.5}>
               <Tooltip title="Ce souhait n'est pas visible du créateur de la liste car il a été suggéré par un utilisateur">
-                <Chip
-                  className={classes.suggested}
+                <SuggestedChip
                   icon={<TipsAndUpdatesTwoToneIcon sx={{ fontSize: '0.7rem' }} />}
                   label="Souhait suggéré"
                   color="success"
@@ -404,7 +394,7 @@ export const ItemCard = ({ item, wishlist }: ItemCardProps) => {
           )}
           {displayCheckButton && (
             <Stack alignItems="center" marginTop={1.5}>
-              <LoadingButton
+              <Button
                 size="small"
                 sx={{ fontSize: '0.75rem', opacity: 0.8 }}
                 variant="contained"
@@ -414,14 +404,12 @@ export const ItemCard = ({ item, wishlist }: ItemCardProps) => {
               >
                 {takenBy?.id === currentUserId && takenBy?.id !== undefined && <>Ne plus prendre</>}
                 {(takenBy?.id === undefined || takenBy?.id !== currentUserId) && <>Réserver ce cadeau</>}
-              </LoadingButton>
+              </Button>
             </Stack>
           )}
-          <Stack marginTop={1} alignItems="center" className={classes.date}>
-            Ajouté {DateTime.fromISO(item.created_at).toRelative()}
-          </Stack>
-        </Stack>
-      </Card>
+          <ItemDate>Ajouté {DateTime.fromISO(item.created_at).toRelative()}</ItemDate>
+        </ItemContainer>
+      </CardStyled>
       <ItemFormDialog
         mode="edit"
         title="Modifier le souhait"

@@ -2,8 +2,8 @@ import type { DetailedEventDto } from '@wishlist/common-types'
 
 import AddIcon from '@mui/icons-material/Add'
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted'
-import { Box, Button, Grid, Stack } from '@mui/material'
-import React, { useMemo } from 'react'
+import { Box, Button, GridLegacy as Grid, Stack } from '@mui/material'
+import { useMemo } from 'react'
 
 import { FabAutoGrow } from '../common/FabAutoGrow'
 import { InputLabel } from '../common/InputLabel'

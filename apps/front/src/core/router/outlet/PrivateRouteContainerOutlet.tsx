@@ -1,5 +1,4 @@
-import { Box, Container, containerClasses } from '@mui/material'
-import { makeStyles } from '@mui/styles'
+import { Box, Container, containerClasses, styled } from '@mui/material'
 import { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import { Outlet } from 'react-router-dom'
@@ -9,17 +8,14 @@ import { Navbar } from '../../../components/common/Navbar'
 import { useFetchUserInfo } from '../../../hooks/domain/useFetchUserInfo'
 import { setUser } from '../../store/features'
 
-const useStyles = makeStyles(() => ({
-  container: {
-    [`&.${containerClasses.root}`]: {
-      marginTop: 2,
-      marginBottom: '130px',
-    },
+const ContainerStyled = styled(Container)({
+  [`&.${containerClasses.root}`]: {
+    marginTop: 2,
+    marginBottom: '130px',
   },
-}))
+})
 
 export const PrivateRouteContainerOutlet = () => {
-  const classes = useStyles()
   const { user } = useFetchUserInfo()
   const dispatch = useDispatch()
 
@@ -33,9 +29,9 @@ export const PrivateRouteContainerOutlet = () => {
     <>
       <Navbar />
       <Box component="main">
-        <Container fixed component="section" maxWidth="lg" className={classes.container}>
+        <ContainerStyled fixed maxWidth="lg">
           <Outlet />
-        </Container>
+        </ContainerStyled>
       </Box>
       <BottomNavigation />
     </>

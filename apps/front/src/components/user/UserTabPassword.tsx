@@ -2,10 +2,8 @@ import type { ChangeUserPasswordInputDto } from '@wishlist/common-types'
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import SaveIcon from '@mui/icons-material/Save'
-import { LoadingButton } from '@mui/lab'
-import { Alert, Box, Stack, TextField } from '@mui/material'
+import { Alert, Box, Button, Stack, TextField } from '@mui/material'
 import { useMutation } from '@tanstack/react-query'
-import React from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
@@ -83,7 +81,7 @@ export const UserTabPassword = () => {
         />
       </Box>
       <Stack direction="row" justifyContent="center">
-        <LoadingButton
+        <Button
           type="submit"
           variant="contained"
           size="large"
@@ -94,7 +92,7 @@ export const UserTabPassword = () => {
           startIcon={<SaveIcon />}
         >
           Mettre à jour
-        </LoadingButton>
+        </Button>
       </Stack>
     </Stack>
   )
