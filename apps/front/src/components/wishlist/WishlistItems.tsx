@@ -3,7 +3,7 @@ import type { DetailedWishlistDto, ItemDto } from '@wishlist/common-types'
 import type { RootState } from '../../core'
 
 import AddIcon from '@mui/icons-material/Add'
-import { Box, Button, GridLegacy as Grid, Stack } from '@mui/material'
+import { Box, Button, Grid, Stack } from '@mui/material'
 import { useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
 
@@ -47,7 +47,7 @@ export const WishlistItems = ({ wishlist }: WishlistTabItemsProps) => {
 
           <Grid container spacing={3}>
             {itemsFilteredAndSorted.map(item => (
-              <Grid item xs={6} md={4} lg={3} key={item.id}>
+              <Grid key={item.id} size={{ xs: 6, md: 4, lg: 3 }}>
                 <ItemCard
                   wishlist={{ id: wishlist.id, ownerId: wishlist.owner.id, hideItems: wishlist.config.hide_items }}
                   item={item}

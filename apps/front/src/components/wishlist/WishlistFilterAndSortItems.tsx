@@ -11,7 +11,7 @@ import SortByAlphaIcon from '@mui/icons-material/SortByAlpha'
 import StarIcon from '@mui/icons-material/Star'
 import StarBorderIcon from '@mui/icons-material/StarBorder'
 import WatchLaterIcon from '@mui/icons-material/WatchLater'
-import { Box, GridLegacy as Grid, inputBaseClasses, MenuItem, menuItemClasses, Select, styled } from '@mui/material'
+import { Box, Grid, inputBaseClasses, MenuItem, menuItemClasses, Select, styled } from '@mui/material'
 import React, { useEffect } from 'react'
 
 import { InputLabel } from '../common/InputLabel'
@@ -191,7 +191,7 @@ export const WishlistFilterAndSortItems = ({
   return (
     <Grid container spacing={2} sx={{ marginBottom: '30px' }}>
       {displaySortSelect && (
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <InputLabel sx={{ gap: '6px' }}>
             <SortIcon fontSize="small" />
             <span>Trier par</span>
@@ -221,7 +221,7 @@ export const WishlistFilterAndSortItems = ({
         </Grid>
       )}
       {displayFilterSelect && (
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <InputLabel sx={{ gap: '6px' }}>
             <FilterListIcon fontSize="small" />
             <span>Filtrer par</span>

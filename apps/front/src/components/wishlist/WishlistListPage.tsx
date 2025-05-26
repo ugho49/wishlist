@@ -1,5 +1,5 @@
 import AddIcon from '@mui/icons-material/Add'
-import { Box, Button, GridLegacy as Grid, Stack } from '@mui/material'
+import { Box, Button, Grid, Stack } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
@@ -47,7 +47,7 @@ export const WishlistListPage = () => {
       <Loader loading={loading}>
         <Grid container spacing={3}>
           {(value?.resources || []).map(wishlist => (
-            <Grid item xs={12} md={6} key={wishlist.id}>
+            <Grid key={wishlist.id} size={{ xs: 12, md: 6 }}>
               <WishlistCardWithEvents wishlist={wishlist} />
             </Grid>
           ))}

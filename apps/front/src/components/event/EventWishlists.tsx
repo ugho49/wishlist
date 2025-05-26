@@ -2,7 +2,7 @@ import type { DetailedEventDto } from '@wishlist/common-types'
 
 import AddIcon from '@mui/icons-material/Add'
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted'
-import { Box, Button, GridLegacy as Grid, Stack } from '@mui/material'
+import { Box, Button, Grid, Stack } from '@mui/material'
 import { useMemo } from 'react'
 
 import { FabAutoGrow } from '../common/FabAutoGrow'
@@ -31,7 +31,7 @@ export const EventWishlists = ({ event }: EventWishlistsProps) => {
             {event.wishlists
               .sort((a, b) => a.title.localeCompare(b.title))
               .map(wishlist => (
-                <Grid item xs={12} md={6} key={wishlist.id}>
+                <Grid key={wishlist.id} size={{ xs: 12, md: 6 }}>
                   <WishlistCardWithOwner wishlist={wishlist} />
                 </Grid>
               ))}

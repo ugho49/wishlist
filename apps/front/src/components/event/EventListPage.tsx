@@ -1,5 +1,5 @@
 import AddIcon from '@mui/icons-material/Add'
-import { Box, Button, GridLegacy as Grid, Stack } from '@mui/material'
+import { Box, Button, Grid, Stack } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
@@ -47,7 +47,7 @@ export const EventListPage = () => {
       <Loader loading={loading}>
         <Grid container spacing={3}>
           {(value?.resources || []).map(event => (
-            <Grid item xs={12} md={6} key={event.id}>
+            <Grid key={event.id} size={{ xs: 12, md: 6 }}>
               <EventCard event={event} />
             </Grid>
           ))}
