@@ -72,7 +72,7 @@ const ItemActions = styled('div')({
   right: '6px',
 })
 
-const ItemName = styled('div')({
+const ItemName = styled(Box)({
   maxWidth: '100%',
   fontWeight: '500',
   wordWrap: 'break-word',
