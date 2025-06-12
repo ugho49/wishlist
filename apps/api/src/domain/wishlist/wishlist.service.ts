@@ -115,7 +115,14 @@ export class WishlistService {
       await this.wishlistRepository.transaction(async em => {
         await em.save(wishlistEntity)
         await em.save(itemEntities)
-        await em.save(eventEntities)
+
+        for (const eventEntity of eventEntities) {
+          await this.wishlistRepository.linkEvent({
+            wishlistId: wishlistEntity.id,
+            eventId: eventEntity.id,
+            em,
+          })
+        }
       })
     } catch (e) {
       if (imageFile) {

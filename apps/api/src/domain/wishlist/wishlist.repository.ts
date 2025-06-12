@@ -68,8 +68,9 @@ export class WishlistRepository extends BaseRepository(WishlistEntity) {
     ).then((list: Array<{ email: string }>) => list.reduce<string[]>((acc, val) => [...acc, val.email], []))
   }
 
-  async linkEvent(params: { wishlistId: WishlistId; eventId: EventId }): Promise<void> {
-    await this.query('INSERT INTO event_wishlist ("event_id","wishlist_id") VALUES ($1, $2)', [
+  async linkEvent(params: { wishlistId: WishlistId; eventId: EventId; em?: EntityManager }): Promise<void> {
+    const manager = params.em || this.manager
+    await manager.query('INSERT INTO event_wishlist ("event_id","wishlist_id") VALUES ($1, $2)', [
       params.eventId,
       params.wishlistId,
     ])
