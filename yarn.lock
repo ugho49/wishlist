@@ -6671,12 +6671,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*, @types/node@npm:22.15.21, @types/node@npm:>=13.7.0, @types/node@npm:^22.8.7":
+"@types/node@npm:*, @types/node@npm:>=13.7.0, @types/node@npm:^22.8.7":
   version: 22.15.21
   resolution: "@types/node@npm:22.15.21"
   dependencies:
     undici-types: "npm:~6.21.0"
   checksum: 10c0/f092bbccda2131c2b2c8f720338080aa0ef1d928f5f1062c03954a4f7dafa7ee3ed29bc3e51bd4e2584473b3d943c637a2b39ad7174898970818270187cf10c1
+  languageName: node
+  linkType: hard
+
+"@types/node@npm:22.15.34":
+  version: 22.15.34
+  resolution: "@types/node@npm:22.15.34"
+  dependencies:
+    undici-types: "npm:~6.21.0"
+  checksum: 10c0/fb6a6b36daaa1b484aaba3d33b4d1e7b37ea993e29f20b7a676affa76ed6ff6acd2ded4d5003469bc8dbc815b3d224533b4560896037ef6d5b5d552721ab7d57
   languageName: node
   linkType: hard
 
@@ -7506,7 +7515,7 @@ __metadata:
     "@types/luxon": "npm:3.6.2"
     "@types/mjml": "npm:4.7.4"
     "@types/multer": "npm:1.4.12"
-    "@types/node": "npm:22.15.21"
+    "@types/node": "npm:22.15.34"
     "@types/nodemailer": "npm:6.4.17"
     "@types/passport-jwt": "npm:4.0.1"
     "@types/react": "npm:19.1.5"
