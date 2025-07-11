@@ -4,7 +4,7 @@ import type { SignedAs } from './use-test-app'
 
 import { AttendeeRole, Authorities, uuid } from '@wishlist/common'
 
-import { PasswordManager } from '../../domain/auth'
+import { PasswordManager } from '../domain/auth'
 
 export class Fixtures {
   static readonly USER_TABLE = '"user"'

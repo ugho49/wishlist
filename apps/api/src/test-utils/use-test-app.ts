@@ -6,7 +6,7 @@ import * as request from 'supertest'
 import { DataSource } from 'typeorm'
 import { afterAll, beforeAll, beforeEach } from 'vitest'
 
-import { createApp } from '../../bootstrap'
+import { createApp } from '../bootstrap'
 import { Fixtures } from './fixtures'
 import { TableAssert } from './table-assert'
 

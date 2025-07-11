@@ -1,5 +1,7 @@
 import type { AxiosInstance } from 'axios'
 
+import { expect } from 'vitest'
+
 type MailAssertion = () => Promise<unknown>
 
 type MailContact = { address: string }

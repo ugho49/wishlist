@@ -1,5 +1,7 @@
 import type { DataSource } from 'typeorm'
 
+import { expect } from 'vitest'
+
 type DbAssertion = () => Promise<unknown>
 
 type FetchValueResult = {
