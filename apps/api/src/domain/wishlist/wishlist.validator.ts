@@ -1,5 +1,5 @@
 import { ParseFilePipe } from '@nestjs/common'
-import { ACCEPTED_IMG_FORMATS } from '@wishlist/common-types'
+import { ACCEPTED_IMG_FORMATS } from '@wishlist/common'
 
 import { FileTypeValidator, MaxFileSizeValidator, ResizeImagePipe } from '../../core/bucket'
 

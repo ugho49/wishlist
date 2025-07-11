@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { WishlistId } from '@wishlist/common-types'
+import { WishlistId } from '@wishlist/common'
 
 import { MailService } from '../../core/mail/mail.service'
 

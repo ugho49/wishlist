@@ -1,4 +1,4 @@
-import type { DetailedEventDto } from '@wishlist/common-types'
+import type { DetailedEventDto } from '@wishlist/common'
 
 import AddIcon from '@mui/icons-material/Add'
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted'

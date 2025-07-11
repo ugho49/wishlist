@@ -1,4 +1,4 @@
-import type { UserId } from '@wishlist/common-types'
+import type { UserId } from '@wishlist/common'
 import type { FormEvent } from 'react'
 
 import type { RootState } from '../../../core'

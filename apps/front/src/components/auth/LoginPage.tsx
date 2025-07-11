@@ -1,5 +1,5 @@
 import type { CredentialResponse } from '@react-oauth/google'
-import type { LoginInputDto, LoginOutputDto } from '@wishlist/common-types'
+import type { LoginInputDto, LoginOutputDto } from '@wishlist/common'
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import LoginIcon from '@mui/icons-material/Login'

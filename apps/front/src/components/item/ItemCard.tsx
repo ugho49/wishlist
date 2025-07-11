@@ -1,4 +1,4 @@
-import type { DetailedWishlistDto, ItemDto, MiniUserDto, WishlistId } from '@wishlist/common-types'
+import type { DetailedWishlistDto, ItemDto, MiniUserDto, WishlistId } from '@wishlist/common'
 
 import type { RootState } from '../../core'
 

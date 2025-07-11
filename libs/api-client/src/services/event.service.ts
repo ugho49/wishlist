@@ -6,7 +6,7 @@ import type {
   MiniEventDto,
   PagedResponse,
   UpdateEventInputDto,
-} from '@wishlist/common-types'
+} from '@wishlist/common'
 import type { AxiosInstance } from 'axios'
 
 import type { CommonRequestOptions } from './common'

@@ -1,11 +1,11 @@
 import type { GridColDef } from '@mui/x-data-grid'
-import type { EventWithCountsDto, UserId } from '@wishlist/common-types'
+import type { EventWithCountsDto, UserId } from '@wishlist/common'
 
 import { DataGrid } from '@mui/x-data-grid'
 import { useQuery } from '@tanstack/react-query'
-import { AttendeeRole } from '@wishlist/common-types'
+import { AttendeeRole } from '@wishlist/common'
 import { DateTime } from 'luxon'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { useApi } from '../../../hooks'
 import { RouterLink } from '../../common/RouterLink'

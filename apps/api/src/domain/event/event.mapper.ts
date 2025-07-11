@@ -1,4 +1,4 @@
-import type { DetailedEventDto, EventWithCountsDto, MiniEventDto } from '@wishlist/common-types'
+import type { DetailedEventDto, EventWithCountsDto, MiniEventDto } from '@wishlist/common'
 
 import type { EventEntity } from './event.entity'
 

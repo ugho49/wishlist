@@ -1,7 +1,7 @@
 import type { RootState } from '../../core'
 
 import { useQuery } from '@tanstack/react-query'
-import { canEditEvent } from '@wishlist/common-types'
+import { canEditEvent } from '@wishlist/common'
 import { useState } from 'react'
 import { useSelector } from 'react-redux'
 

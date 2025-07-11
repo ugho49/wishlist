@@ -1,12 +1,5 @@
 import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common'
-import {
-  AddItemForListInputDto,
-  AddItemInputDto,
-  ItemDto,
-  ItemId,
-  ToggleItemOutputDto,
-  UserId,
-} from '@wishlist/common-types'
+import { AddItemForListInputDto, AddItemInputDto, ItemDto, ItemId, ToggleItemOutputDto, UserId } from '@wishlist/common'
 
 import { toMiniUserDto } from '../user/user.mapper'
 import { UserRepository } from '../user/user.repository'

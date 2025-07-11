@@ -1,4 +1,4 @@
-import type { MiniUserDto, UserDto } from '@wishlist/common-types'
+import type { MiniUserDto, UserDto } from '@wishlist/common'
 
 import type { UserEntity } from './user.entity'
 

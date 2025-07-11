@@ -1,4 +1,4 @@
-import type { GetAllWishlistsPaginationQueryDto, PagedResponse, WishlistWithEventsDto } from '@wishlist/common-types'
+import type { GetAllWishlistsPaginationQueryDto, PagedResponse, WishlistWithEventsDto } from '@wishlist/common'
 import type { AxiosInstance } from 'axios'
 
 import type { CommonRequestOptions } from './common'

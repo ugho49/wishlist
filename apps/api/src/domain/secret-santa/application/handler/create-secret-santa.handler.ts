@@ -1,4 +1,4 @@
-import type { SecretSantaDto } from '@wishlist/common-types'
+import type { SecretSantaDto } from '@wishlist/common'
 
 import { BadRequestException, NotFoundException } from '@nestjs/common'
 import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'

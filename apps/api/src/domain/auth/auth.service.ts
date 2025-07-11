@@ -11,7 +11,7 @@ import {
   RefreshTokenOutputDto,
   UserId,
   UserSocialType,
-} from '@wishlist/common-types'
+} from '@wishlist/common'
 
 import { GoogleAuthService } from '../auth-social'
 import { UserEntity } from '../user'

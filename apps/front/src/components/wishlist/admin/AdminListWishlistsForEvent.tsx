@@ -1,11 +1,10 @@
 import type { GridColDef } from '@mui/x-data-grid'
-import type { WishlistWithOwnerDto } from '@wishlist/common-types'
+import type { WishlistWithOwnerDto } from '@wishlist/common'
 
 import ListIcon from '@mui/icons-material/List'
 import { Avatar } from '@mui/material'
 import { DataGrid } from '@mui/x-data-grid'
 import { DateTime } from 'luxon'
-import React from 'react'
 
 import { RouterLink } from '../../common/RouterLink'
 

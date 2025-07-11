@@ -1,4 +1,4 @@
-import { ACCEPTED_IMG_FORMATS } from '@wishlist/common-types'
+import { ACCEPTED_IMG_FORMATS } from '@wishlist/common'
 import { getOrientation } from 'get-orientation/browser'
 
 import { getRotatedImage } from './canvas.utils'

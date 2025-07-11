@@ -1,10 +1,9 @@
 import type { GridColDef } from '@mui/x-data-grid'
-import type { AttendeeDto } from '@wishlist/common-types'
+import type { AttendeeDto } from '@wishlist/common'
 
 import PersonIcon from '@mui/icons-material/Person'
 import { Avatar } from '@mui/material'
 import { DataGrid } from '@mui/x-data-grid'
-import React from 'react'
 
 import { RouterLink } from '../../common/RouterLink'
 

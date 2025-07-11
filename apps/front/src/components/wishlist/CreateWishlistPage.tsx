@@ -1,4 +1,4 @@
-import type { MiniEventDto } from '@wishlist/common-types'
+import type { MiniEventDto } from '@wishlist/common'
 
 import type { RootState } from '../../core'
 
@@ -35,7 +35,7 @@ import {
   useTheme,
 } from '@mui/material'
 import { useMutation } from '@tanstack/react-query'
-import { MAX_EVENTS_BY_LIST } from '@wishlist/common-types'
+import { MAX_EVENTS_BY_LIST } from '@wishlist/common'
 import uniq from 'lodash/uniq'
 import { DateTime } from 'luxon'
 import { useEffect, useState } from 'react'

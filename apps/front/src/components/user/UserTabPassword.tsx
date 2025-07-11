@@ -1,4 +1,4 @@
-import type { ChangeUserPasswordInputDto } from '@wishlist/common-types'
+import type { ChangeUserPasswordInputDto } from '@wishlist/common'
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import SaveIcon from '@mui/icons-material/Save'

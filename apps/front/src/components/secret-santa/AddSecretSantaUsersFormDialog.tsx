@@ -1,6 +1,6 @@
 import type { TransitionProps } from '@mui/material/transitions'
 import type { GridColDef } from '@mui/x-data-grid'
-import type { AttendeeDto, AttendeeId, SecretSantaUserDto } from '@wishlist/common-types'
+import type { AttendeeDto, AttendeeId, SecretSantaUserDto } from '@wishlist/common'
 
 import CloseIcon from '@mui/icons-material/Close'
 import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt'

@@ -1,4 +1,4 @@
-import type { EventId, SecretSantaId, SecretSantaUserDto, SecretSantaUserId } from '@wishlist/common-types'
+import type { EventId, SecretSantaId, SecretSantaUserDto, SecretSantaUserId } from '@wishlist/common'
 
 import CloseIcon from '@mui/icons-material/Close'
 import {

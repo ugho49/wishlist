@@ -1,4 +1,4 @@
-import type { SecretSantaDto, SecretSantaUserDto, SecretSantaUserWithDrawDto } from '@wishlist/common-types'
+import type { SecretSantaDto, SecretSantaUserDto, SecretSantaUserWithDrawDto } from '@wishlist/common'
 
 import type { SecretSantaEntity, SecretSantaUserEntity } from './secret-santa.entity'
 

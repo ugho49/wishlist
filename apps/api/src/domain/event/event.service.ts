@@ -1,5 +1,4 @@
 import { Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common'
-import { DEFAULT_RESULT_NUMBER } from '@wishlist/common'
 import {
   AttendeeRole,
   CreateEventInputDto,
@@ -12,10 +11,11 @@ import {
   PagedResponse,
   UpdateEventInputDto,
   UserId,
-} from '@wishlist/common-types'
+} from '@wishlist/common'
 import { uniq } from 'lodash'
 import { EntityManager } from 'typeorm'
 
+import { DEFAULT_RESULT_NUMBER } from '../../common'
 import { AttendeeEntity } from '../attendee/attendee.entity'
 import { UserRepository } from '../user/user.repository'
 import { WishlistEntity } from '../wishlist/wishlist.entity'

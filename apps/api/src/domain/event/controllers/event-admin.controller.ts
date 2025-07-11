@@ -6,7 +6,7 @@ import {
   EventWithCountsDto,
   GetAllEventsPaginationQueryDto,
   PagedResponse,
-} from '@wishlist/common-types'
+} from '@wishlist/common'
 
 import { IsAdmin } from '../../auth'
 import { EventService } from '../event.service'

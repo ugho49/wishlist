@@ -1,9 +1,8 @@
-import type { MiniEventDto } from '@wishlist/common-types'
+import type { MiniEventDto } from '@wishlist/common'
 
 import { Autocomplete, TextField } from '@mui/material'
-import { MAX_EVENTS_BY_LIST } from '@wishlist/common-types'
+import { MAX_EVENTS_BY_LIST } from '@wishlist/common'
 import { DateTime } from 'luxon'
-import React from 'react'
 
 export type SearchEventSelectProps = {
   options: MiniEventDto[]

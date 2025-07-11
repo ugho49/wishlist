@@ -1,4 +1,4 @@
-import type { DetailedEventDto, UpdateEventInputDto } from '@wishlist/common-types'
+import type { DetailedEventDto, UpdateEventInputDto } from '@wishlist/common'
 import type { FormEvent } from 'react'
 
 import DeleteIcon from '@mui/icons-material/Delete'

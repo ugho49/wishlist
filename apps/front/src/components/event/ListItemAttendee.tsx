@@ -2,8 +2,7 @@ import LocalPoliceOutlinedIcon from '@mui/icons-material/LocalPoliceOutlined'
 import PersonIcon from '@mui/icons-material/Person'
 import { Avatar, ListItemAvatar, ListItemText, Stack, Tooltip } from '@mui/material'
 import { blue, orange } from '@mui/material/colors'
-import { AttendeeRole } from '@wishlist/common-types'
-import React from 'react'
+import { AttendeeRole } from '@wishlist/common'
 
 type ListItemAttendee = {
   userName: string

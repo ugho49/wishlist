@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
-import { EventId, UserId, WishlistId } from '@wishlist/common-types'
+import { EventId, UserId, WishlistId } from '@wishlist/common'
 import { EntityManager } from 'typeorm'
 
 import { BaseRepository } from '../../common'

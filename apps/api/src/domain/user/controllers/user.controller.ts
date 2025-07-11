@@ -22,8 +22,7 @@ import {
   UserDto,
   UserId,
   UserSocialId,
-} from '@wishlist/common-types'
-import { Express } from 'express'
+} from '@wishlist/common'
 import { RealIP } from 'nestjs-real-ip'
 
 import { CurrentUser, Public } from '../../auth'

@@ -1,4 +1,4 @@
-import type { ResetPasswordValidationInputDto } from '@wishlist/common-types'
+import type { ResetPasswordValidationInputDto } from '@wishlist/common'
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import SaveAsIcon from '@mui/icons-material/SaveAs'

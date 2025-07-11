@@ -1,7 +1,6 @@
-import type { AttendeeId, EventId, UserId } from '@wishlist/common-types'
+import type { AttendeeId, EventId, UserId } from '@wishlist/common'
 
-import { uuid } from '@wishlist/common'
-import { AttendeeRole } from '@wishlist/common-types'
+import { AttendeeRole, uuid } from '@wishlist/common'
 import { Column, Entity, ManyToOne, PrimaryColumn, RelationId } from 'typeorm'
 
 import { EventEntity } from '../event/event.entity'

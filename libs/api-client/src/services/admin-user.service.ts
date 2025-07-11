@@ -5,7 +5,7 @@ import type {
   UpdateUserPictureOutputDto,
   UserDto,
   UserId,
-} from '@wishlist/common-types'
+} from '@wishlist/common'
 import type { AxiosInstance } from 'axios'
 
 import type { CommonRequestOptions } from './common'

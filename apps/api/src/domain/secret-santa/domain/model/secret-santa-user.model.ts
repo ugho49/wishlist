@@ -1,4 +1,4 @@
-import type { AttendeeId, SecretSantaUserId } from '@wishlist/common-types'
+import type { AttendeeId, SecretSantaUserId } from '@wishlist/common'
 
 export type SecretSantaUserModelProps = {
   id: SecretSantaUserId

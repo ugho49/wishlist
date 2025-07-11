@@ -4,7 +4,7 @@ import type {
   LoginWithGoogleInputDto,
   RefreshTokenInputDto,
   RefreshTokenOutputDto,
-} from '@wishlist/common-types'
+} from '@wishlist/common'
 import type { AxiosInstance } from 'axios'
 
 export class AuthService {

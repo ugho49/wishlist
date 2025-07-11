@@ -1,4 +1,4 @@
-import type { AttendeeDto } from '@wishlist/common-types'
+import type { AttendeeDto } from '@wishlist/common'
 
 import type { AttendeeEntity } from './attendee.entity'
 

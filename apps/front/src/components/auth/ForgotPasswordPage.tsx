@@ -1,4 +1,4 @@
-import type { ResetPasswordInputDto } from '@wishlist/common-types'
+import type { ResetPasswordInputDto } from '@wishlist/common'
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import AttachEmailIcon from '@mui/icons-material/AttachEmail'

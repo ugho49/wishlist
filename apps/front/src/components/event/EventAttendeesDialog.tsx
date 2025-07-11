@@ -1,4 +1,4 @@
-import type { AttendeeDto, AttendeeRole } from '@wishlist/common-types'
+import type { AttendeeDto, AttendeeRole } from '@wishlist/common'
 
 import CloseIcon from '@mui/icons-material/Close'
 import {
@@ -12,7 +12,6 @@ import {
   ListItem,
   Stack,
 } from '@mui/material'
-import React from 'react'
 
 import { RouterLink } from '../common/RouterLink'
 import { ListItemAttendee } from './ListItemAttendee'

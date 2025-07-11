@@ -1,4 +1,4 @@
-import type { EventId, SecretSantaId, SecretSantaStatus } from '@wishlist/common-types'
+import type { EventId, SecretSantaId, SecretSantaStatus } from '@wishlist/common'
 
 import type { SecretSantaUserModel } from './secret-santa-user.model'
 

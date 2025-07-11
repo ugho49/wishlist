@@ -9,7 +9,7 @@ import {
   ScanItemOutputDto,
   ToggleItemOutputDto,
   UserId,
-} from '@wishlist/common-types'
+} from '@wishlist/common'
 
 import { CurrentUser } from '../auth'
 import { ItemService } from './item.service'

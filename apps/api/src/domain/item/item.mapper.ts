@@ -1,4 +1,4 @@
-import type { ItemDto } from '@wishlist/common-types'
+import type { ItemDto } from '@wishlist/common'
 
 import type { ItemEntity } from './item.entity'
 

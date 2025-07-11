@@ -1,8 +1,8 @@
 import type { PayloadAction } from '@reduxjs/toolkit'
-import type { ICurrentUser } from '@wishlist/common-types'
+import type { ICurrentUser } from '@wishlist/common'
 
 import { createSlice } from '@reduxjs/toolkit'
-import { createCurrentUserFromPayload } from '@wishlist/common-types'
+import { createCurrentUserFromPayload } from '@wishlist/common'
 
 import { AuthService } from '../../services/auth.service'
 

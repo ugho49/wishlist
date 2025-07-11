@@ -5,7 +5,7 @@ import type {
   ScanItemInputDto,
   ScanItemOutputDto,
   ToggleItemOutputDto,
-} from '@wishlist/common-types'
+} from '@wishlist/common'
 import type { AxiosInstance } from 'axios'
 
 export class ItemService {

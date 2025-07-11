@@ -1,4 +1,4 @@
-import type { MiniUserDto } from '@wishlist/common-types'
+import type { MiniUserDto } from '@wishlist/common'
 
 import type { RootState } from '../../core'
 
@@ -23,7 +23,7 @@ import {
 } from '@mui/material'
 import { MobileDatePicker } from '@mui/x-date-pickers'
 import { useMutation } from '@tanstack/react-query'
-import { AttendeeRole } from '@wishlist/common-types'
+import { AttendeeRole } from '@wishlist/common'
 import { DateTime } from 'luxon'
 import { useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'

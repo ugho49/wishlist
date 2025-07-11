@@ -1,5 +1,4 @@
-import { uuid } from '@wishlist/common'
-import { ItemId, UserId, WishlistId } from '@wishlist/common-types'
+import { ItemId, UserId, uuid, WishlistId } from '@wishlist/common'
 import { Column, Entity, ManyToOne, PrimaryColumn, RelationId } from 'typeorm'
 
 import { TimestampEntity } from '../../common'
