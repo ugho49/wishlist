@@ -1,6 +1,6 @@
 import { uuid } from '@wishlist/common'
-import { TimestampEntity } from '@wishlist/common-database'
 import { UserId, UserPasswordVerificationId } from '@wishlist/common-types'
+import { TimestampEntity } from 'apps/api/src/common/database'
 import { Column, Entity, ManyToOne, PrimaryColumn, RelationId } from 'typeorm'
 
 import { UserEntity } from '../user'

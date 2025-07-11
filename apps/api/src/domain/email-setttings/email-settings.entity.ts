@@ -1,6 +1,6 @@
 import { uuid } from '@wishlist/common'
-import { TimestampEntity } from '@wishlist/common-database'
 import { UserEmailSettingId, UserId } from '@wishlist/common-types'
+import { TimestampEntity } from 'apps/api/src/common/database'
 import { Column, Entity, PrimaryColumn } from 'typeorm'
 
 @Entity('user_email_setting')

@@ -1,8 +1,8 @@
 import type { UserId } from '@wishlist/common-types'
 
 import { uuid } from '@wishlist/common'
-import { TimestampEntity } from '@wishlist/common-database'
 import { Authorities } from '@wishlist/common-types'
+import { TimestampEntity } from 'apps/api/src/common/database'
 import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm'
 
 import { UserSocialEntity } from './user-social.entity'
