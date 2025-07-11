@@ -51,7 +51,10 @@ describe('AuthController', () => {
         .send({ email: Fixtures.BASE_USER_EMAIL, password: Fixtures.DEFAULT_USER_PASSWORD })
         .expect(200)
         .expect(({ body }) =>
-          expect(body).toMatchObject({ access_token: expect.toBeString(), refresh_token: expect.toBeString() }),
+          expect(body).toMatchObject({
+            access_token: expect.toBeString(),
+            refresh_token: expect.toBeString(),
+          }),
         )
     })
   })

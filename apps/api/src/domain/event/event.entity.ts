@@ -7,7 +7,7 @@ import { WishlistEntity } from '../wishlist/wishlist.entity'
 
 @Entity('event')
 export class EventEntity extends TimestampEntity {
-  @PrimaryColumn()
+  @PrimaryColumn('uuid')
   id: EventId = uuid() as EventId
 
   @Column()

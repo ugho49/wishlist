@@ -46,8 +46,8 @@ describe('PasswordVerificationController', () => {
           token: expect.toBeString(),
           user_id: userId,
           expired_at: expect.toBeAfter(new Date()),
-          created_at: expect.toBeDateString(),
-          updated_at: expect.toBeDateString(),
+          created_at: expect.toBeDate(),
+          updated_at: expect.toBeDate(),
         })
         .check()
 

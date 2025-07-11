@@ -8,7 +8,7 @@ import { UserSocialEntity } from './user-social.entity'
 
 @Entity('user')
 export class UserEntity extends TimestampEntity {
-  @PrimaryColumn()
+  @PrimaryColumn('uuid')
   id: UserId = uuid() as UserId
 
   @Column()

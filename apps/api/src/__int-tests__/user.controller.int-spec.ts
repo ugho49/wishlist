@@ -153,9 +153,9 @@ describe('UserController', () => {
             authorities: ['ROLE_USER'],
             is_enabled: true,
             picture_url: null,
-            last_connected_at: expect.toBeDateString(),
-            created_at: expect.toBeDateString(),
-            updated_at: expect.toBeDateString(),
+            last_connected_at: expect.toBeDate(),
+            created_at: expect.toBeDate(),
+            updated_at: expect.toBeDate(),
           })
           .expectColumn<string>('password_enc', async value => {
             const res = await PasswordManager.verify({ hash: value, plainPassword: input.password })
@@ -170,8 +170,8 @@ describe('UserController', () => {
             id: expect.toBeString(),
             user_id: userId,
             daily_new_item_notification: true,
-            created_at: expect.toBeDateString(),
-            updated_at: expect.toBeDateString(),
+            created_at: expect.toBeDate(),
+            updated_at: expect.toBeDate(),
           })
           .check()
 

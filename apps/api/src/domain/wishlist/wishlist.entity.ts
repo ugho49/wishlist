@@ -8,7 +8,7 @@ import { UserEntity } from '../user'
 
 @Entity('wishlist')
 export class WishlistEntity extends TimestampEntity {
-  @PrimaryColumn()
+  @PrimaryColumn('uuid')
   id: WishlistId = uuid() as WishlistId
 
   @Column()
@@ -26,7 +26,7 @@ export class WishlistEntity extends TimestampEntity {
   @ManyToOne(() => UserEntity)
   readonly owner!: Promise<UserEntity>
 
-  @Column()
+  @Column('uuid')
   @RelationId((entity: WishlistEntity) => entity.owner)
   ownerId!: UserId
 
