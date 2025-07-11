@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common'
-import { BaseRepository } from '@wishlist/common-database'
 import { AttendeeId, EventId, SecretSantaId, UserId } from '@wishlist/common-types'
 import { In } from 'typeorm'
 
+import { BaseRepository } from '../../../common'
 import { SecretSantaEntity, SecretSantaUserEntity } from './secret-santa.entity'
 
 @Injectable()

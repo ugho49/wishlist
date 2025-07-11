@@ -1,4 +1,6 @@
 {
   "eslint.format.enable": true,
+  "prettier.enable": false,
+  "editor.defaultFormatter": "dbaeumer.vscode-eslint",
   "nxConsole.generateAiAgentRules": true
 }

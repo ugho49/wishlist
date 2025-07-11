@@ -1,8 +1,8 @@
 import { uuid } from '@wishlist/common'
-import { TimestampEntity } from '@wishlist/common-database'
 import { AttendeeRole, EventId } from '@wishlist/common-types'
 import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryColumn } from 'typeorm'
 
+import { TimestampEntity } from '../../common'
 import { AttendeeEntity } from '../attendee/attendee.entity'
 import { WishlistEntity } from '../wishlist/wishlist.entity'
 

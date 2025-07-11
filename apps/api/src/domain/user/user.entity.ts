@@ -1,10 +1,10 @@
 import type { UserId } from '@wishlist/common-types'
 
 import { uuid } from '@wishlist/common'
-import { TimestampEntity } from '@wishlist/common-database'
 import { Authorities } from '@wishlist/common-types'
 import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm'
 
+import { TimestampEntity } from '../../common'
 import { UserSocialEntity } from './user-social.entity'
 
 @Entity('user')
