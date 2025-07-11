@@ -2,9 +2,9 @@ import type { UserId, UserSocialId } from '@wishlist/common-types'
 
 import { uuid } from '@wishlist/common'
 import { UserSocialType } from '@wishlist/common-types'
-import { TimestampEntity } from 'apps/api/src/common/database'
 import { Column, Entity, ManyToOne, PrimaryColumn, RelationId } from 'typeorm'
 
+import { TimestampEntity } from '../../common'
 import { UserEntity } from './user.entity'
 
 @Entity('user_social')

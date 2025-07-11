@@ -1,0 +1,14 @@
+{
+  "recommendations": [
+    "nicoespeon.abracadabra",
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "nrwl.angular-console",
+    "christian-kohler.npm-intellisense",
+    "vitest.explorer",
+    "eamodio.gitlens",
+    "ms-azuretools.vscode-docker",
+    "akamud.vscode-theme-onedark",
+    "mjmlio.vscode-mjml"
+  ]
+}

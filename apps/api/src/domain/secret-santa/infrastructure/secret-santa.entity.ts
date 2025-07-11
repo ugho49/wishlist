@@ -2,9 +2,9 @@ import type { AttendeeId, EventId, SecretSantaId, SecretSantaUserId } from '@wis
 
 import { uuid } from '@wishlist/common'
 import { SecretSantaStatus } from '@wishlist/common-types'
-import { ColumnNumericTransformer, TimestampEntity } from 'apps/api/src/common/database'
 import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn, RelationId } from 'typeorm'
 
+import { ColumnNumericTransformer, TimestampEntity } from '../../../common'
 import { AttendeeEntity } from '../../attendee/attendee.entity'
 import { EventEntity } from '../../event/event.entity'
 

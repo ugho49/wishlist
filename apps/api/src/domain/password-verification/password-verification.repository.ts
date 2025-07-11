@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
-import { BaseRepository } from 'apps/api/src/common/database'
 
+import { BaseRepository } from '../../common'
 import { PasswordVerificationEntity } from './password-verification.entity'
 
 @Injectable()

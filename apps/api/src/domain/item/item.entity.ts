@@ -1,8 +1,8 @@
 import { uuid } from '@wishlist/common'
 import { ItemId, UserId, WishlistId } from '@wishlist/common-types'
-import { TimestampEntity } from 'apps/api/src/common/database'
 import { Column, Entity, ManyToOne, PrimaryColumn, RelationId } from 'typeorm'
 
+import { TimestampEntity } from '../../common'
 import { UserEntity } from '../user'
 import { WishlistEntity } from '../wishlist/wishlist.entity'
 

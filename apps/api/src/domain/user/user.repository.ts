@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common'
 import { UserId } from '@wishlist/common-types'
-import { BaseRepository, PartialEntity } from 'apps/api/src/common/database'
 import { Brackets, In, Not } from 'typeorm'
 
+import { BaseRepository, PartialEntity } from '../../common'
 import { UserEntity } from './user.entity'
 
 @Injectable()
