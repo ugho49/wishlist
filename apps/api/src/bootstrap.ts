@@ -11,7 +11,7 @@ function bootstrapSwagger(app: INestApplication) {
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Wishlist')
     .setDescription('The Wishlist API')
-    .setVersion('1.0')
+    .setVersion('1.0.0')
     .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }, 'JWT-Auth')
     .addSecurityRequirements('JWT-Auth')
     .build()
