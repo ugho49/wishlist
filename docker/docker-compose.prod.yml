@@ -12,9 +12,9 @@ services:
       # Crée le point d'entrée pour le trafic HTTPS sur le port 443
       - '--entrypoints.websecure.address=:443'
       # Configure le résolveur de certificats Let's Encrypt
-      - '--certificatesresolvers.letsencrypt.wishlistapi.tlschallenge=true'
-      - '--certificatesresolvers.letsencrypt.wishlistapi.email=contact@wishlistapp.fr'
-      - '--certificatesresolvers.letsencrypt.wishlistapi.storage=/letsencrypt/wishlistapi.json'
+      - '--certificatesresolvers.letsencrypt.acme.tlschallenge=true'
+      - '--certificatesresolvers.letsencrypt.acme.email=contact@wishlistapp.fr'
+      - '--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/wishlistapi.json'
       # Redirige tout le trafic HTTP vers HTTPS
       - '--entrypoints.web.http.redirections.entrypoint.to=websecure'
       - '--entrypoints.web.http.redirections.entrypoint.scheme=https'
@@ -68,7 +68,7 @@ services:
   api:
     image: ughoste/wishlist-api:${API_VERSION}
     restart: always
-    ports:
+    expose:
       - 3000 # On expose juste le port interne, pas de mapping sur l'hôte !
     volumes:
       - ./firebase:/usr/src/app/dist/apps/api/firebase
@@ -104,15 +104,12 @@ services:
     labels:
       # Active Traefik pour ce service
       - 'traefik.enable=true'
-      # Règle de routage : écoute le trafic pour votre domaine
-      - 'traefik.http.routers.api.rule=Host(`api.wishlistapp.fr`)'
-      # Utilise l'entrypoint HTTPS
-      - 'traefik.http.routers.api.entrypoints=websecure'
-      # Active le SSL avec Let's Encrypt
+      # Règle de routage HTTPS
+      - 'traefik.http.routers.wishlistapi.rule=Host(`api.wishlistapp.fr`)'
+      - 'traefik.http.routers.wishlistapi.entrypoints=websecure'
       - 'traefik.http.routers.wishlistapi.tls.certresolver=letsencrypt'
-      # Indique à Traefik que l'app tourne sur le port 3000
+      # Configuration du service
       - 'traefik.http.services.wishlistapi.loadbalancer.server.port=3000'
-      # Active la stratégie de déploiement Blue/Green pour les mises à jour
       - 'traefik.http.services.wishlistapi.loadbalancer.healthcheck.path=/health'
 
 volumes:
