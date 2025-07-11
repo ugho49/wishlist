@@ -17,11 +17,29 @@
         "config": "apps/api/vitest.config.int.ts"
       }
     },
-    "db:generate-migration": {
+    "drizzle:studio": {
       "executor": "nx:run-commands",
       "options": {
-        "cwd": "apps/api/src/core/database/migrations",
-        "command": "typeorm migration:create",
+        "cwd": "apps/api",
+        "command": "npx drizzle-kit studio",
+        "color": true
+      }
+    },
+    "drizzle:generate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/api",
+        "command": "npx drizzle-kit generate",
+        "color": true,
+        "args": ["--name"],
+        "forwardAllArgs": true
+      }
+    },
+    "drizzle:migrate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/api",
+        "command": "npx drizzle-kit migrate",
         "color": true
       }
     }
