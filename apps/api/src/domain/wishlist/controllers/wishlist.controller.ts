@@ -13,8 +13,7 @@ import {
   UserId,
   WishlistId,
   WishlistWithEventsDto,
-} from '@wishlist/common-types'
-import { Express } from 'express'
+} from '@wishlist/common'
 
 import { ValidJsonBody } from '../../../common/common.decorator'
 import { CurrentUser } from '../../auth'

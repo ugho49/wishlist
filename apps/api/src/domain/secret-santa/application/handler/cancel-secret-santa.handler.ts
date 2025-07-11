@@ -1,6 +1,6 @@
 import { BadRequestException } from '@nestjs/common'
 import { CommandHandler, EventBus, IInferredCommandHandler } from '@nestjs/cqrs'
-import { SecretSantaStatus } from '@wishlist/common-types'
+import { SecretSantaStatus } from '@wishlist/common'
 
 import { toAttendeeDto } from '../../../attendee/attendee.mapper'
 import { SecretSantaEntity, SecretSantaUserEntity } from '../../infrastructure/secret-santa.entity'

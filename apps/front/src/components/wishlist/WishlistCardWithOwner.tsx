@@ -1,4 +1,4 @@
-import type { WishlistWithOwnerDto } from '@wishlist/common-types'
+import type { WishlistWithOwnerDto } from '@wishlist/common'
 
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'
 import PersonIcon from '@mui/icons-material/Person'

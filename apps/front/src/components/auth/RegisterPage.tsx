@@ -1,5 +1,5 @@
 import type { CredentialResponse } from '@react-oauth/google'
-import type { LoginOutputDto } from '@wishlist/common-types'
+import type { LoginOutputDto } from '@wishlist/common'
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import PersonAddIcon from '@mui/icons-material/PersonAdd'

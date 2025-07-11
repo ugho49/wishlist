@@ -5,7 +5,7 @@ import type {
   DetailedWishlistDto,
   ItemDto,
   WishlistId,
-} from '@wishlist/common-types'
+} from '@wishlist/common'
 import type { FormEvent } from 'react'
 
 import CameraAltIcon from '@mui/icons-material/CameraAlt'

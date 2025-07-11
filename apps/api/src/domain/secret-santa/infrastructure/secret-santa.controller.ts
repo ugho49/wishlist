@@ -13,7 +13,7 @@ import {
   UpdateSecretSantaInputDto,
   UpdateSecretSantaUserInputDto,
   UserId,
-} from '@wishlist/common-types'
+} from '@wishlist/common'
 
 import { CurrentUser } from '../../auth'
 import { AddSecretSantaUserCommand } from '../application/command/add-secret-santa-user.command'

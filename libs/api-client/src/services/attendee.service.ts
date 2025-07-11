@@ -1,4 +1,4 @@
-import type { AddEventAttendeeForEventInputDto, AttendeeDto } from '@wishlist/common-types'
+import type { AddEventAttendeeForEventInputDto, AttendeeDto } from '@wishlist/common'
 import type { AxiosInstance } from 'axios'
 
 export class AttendeeService {

@@ -1,11 +1,11 @@
-import type { MiniUserDto } from '@wishlist/common-types'
+import type { MiniUserDto } from '@wishlist/common'
 
 import PersonIcon from '@mui/icons-material/Person'
 import { Autocomplete, Avatar, createFilterOptions, Stack, TextField } from '@mui/material'
 import { blue, orange } from '@mui/material/colors'
 import { isValidEmail } from '@wishlist/common'
 import { debounce, uniqBy } from 'lodash'
-import React, { useState } from 'react'
+import { useState } from 'react'
 
 import { useApi } from '../../hooks/useApi'
 

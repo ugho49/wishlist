@@ -1,12 +1,12 @@
-import type { AddEventAttendeeInputDto, AttendeeDto, DetailedEventDto, EventId } from '@wishlist/common-types'
+import type { AddEventAttendeeInputDto, AttendeeDto, DetailedEventDto, EventId } from '@wishlist/common'
 
 import type { RootState } from '../../core'
 
 import DeleteIcon from '@mui/icons-material/Delete'
 import { Box, Divider, List, ListItem, ListItemButton, Stack } from '@mui/material'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { AttendeeRole } from '@wishlist/common-types'
-import React, { useMemo } from 'react'
+import { AttendeeRole } from '@wishlist/common'
+import { useMemo } from 'react'
 import { useSelector } from 'react-redux'
 
 import { useApi, useToast } from '../../hooks'

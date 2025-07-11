@@ -4,7 +4,7 @@ import type {
   WishlistConfigDto,
   WishlistWithEventsDto,
   WishlistWithOwnerDto,
-} from '@wishlist/common-types'
+} from '@wishlist/common'
 
 import type { WishlistEntity } from './wishlist.entity'
 

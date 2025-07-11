@@ -1,4 +1,4 @@
-import type { AccessTokenJwtPayload, RefreshTokenJwtPayload } from '@wishlist/common-types'
+import type { AccessTokenJwtPayload, RefreshTokenJwtPayload } from '@wishlist/common'
 
 import { jwtDecode } from 'jwt-decode'
 

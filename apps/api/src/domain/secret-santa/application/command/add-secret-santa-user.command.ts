@@ -1,4 +1,4 @@
-import type { AttendeeId, SecretSantaId, SecretSantaUserDto, UserId } from '@wishlist/common-types'
+import type { AttendeeId, SecretSantaId, SecretSantaUserDto, UserId } from '@wishlist/common'
 
 import { Command } from '@nestjs-architects/typed-cqrs'
 

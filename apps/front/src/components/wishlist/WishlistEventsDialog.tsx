@@ -1,4 +1,4 @@
-import type { MiniEventDto } from '@wishlist/common-types'
+import type { MiniEventDto } from '@wishlist/common'
 
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import CloseIcon from '@mui/icons-material/Close'
@@ -18,7 +18,6 @@ import {
   useTheme,
 } from '@mui/material'
 import { DateTime } from 'luxon'
-import React from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { RouterLink } from '../common/RouterLink'

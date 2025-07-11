@@ -1,4 +1,4 @@
-import type { UserEmailSettingsDto } from '@wishlist/common-types'
+import type { UserEmailSettingsDto } from '@wishlist/common'
 
 import type { UserEmailSettingEntity } from './email-settings.entity'
 

@@ -1,4 +1,4 @@
-import type { EventId } from '@wishlist/common-types'
+import type { EventId } from '@wishlist/common'
 
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import NumbersIcon from '@mui/icons-material/Numbers'
@@ -9,7 +9,6 @@ import { useTheme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import { useQuery } from '@tanstack/react-query'
 import { DateTime } from 'luxon'
-import React from 'react'
 import { useParams } from 'react-router-dom'
 
 import { useApi } from '../../../hooks'

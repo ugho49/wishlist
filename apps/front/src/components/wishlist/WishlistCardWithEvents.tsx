@@ -1,4 +1,4 @@
-import type { WishlistWithEventsDto } from '@wishlist/common-types'
+import type { WishlistWithEventsDto } from '@wishlist/common'
 
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'

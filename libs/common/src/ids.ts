@@ -1,4 +1,4 @@
-import type { Brand } from './types'
+type Brand<T, U> = T & { __brand: U }
 
 export type EventId = Brand<string, 'EventId'>
 export type AttendeeId = Brand<string, 'AttendeeId'>

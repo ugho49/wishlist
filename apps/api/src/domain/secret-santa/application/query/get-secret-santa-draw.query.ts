@@ -1,4 +1,4 @@
-import type { AttendeeDto, EventId, UserId } from '@wishlist/common-types'
+import type { AttendeeDto, EventId, UserId } from '@wishlist/common'
 
 import { Query } from '@nestjs-architects/typed-cqrs'
 

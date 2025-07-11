@@ -1,12 +1,12 @@
 import type { GridColDef } from '@mui/x-data-grid'
-import type { UserDto } from '@wishlist/common-types'
+import type { UserDto } from '@wishlist/common'
 import type { FormEvent } from 'react'
 
 import { Avatar, Box, Button, Stack, TextField } from '@mui/material'
 import { DataGrid } from '@mui/x-data-grid'
 import { useQuery } from '@tanstack/react-query'
 import { DateTime } from 'luxon'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { useApi } from '../../../hooks'
 import { InputLabel } from '../../common/InputLabel'

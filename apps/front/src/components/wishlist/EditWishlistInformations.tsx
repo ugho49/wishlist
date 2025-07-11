@@ -1,4 +1,4 @@
-import type { DetailedWishlistDto, UpdateWishlistInputDto } from '@wishlist/common-types'
+import type { DetailedWishlistDto, UpdateWishlistInputDto } from '@wishlist/common'
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import DeleteIcon from '@mui/icons-material/Delete'

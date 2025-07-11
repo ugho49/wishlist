@@ -1,4 +1,4 @@
-import type { UpdateUserPictureOutputDto, UserSocialDto } from '@wishlist/common-types'
+import type { UpdateUserPictureOutputDto, UserSocialDto } from '@wishlist/common'
 
 import GoogleIcon from '@mui/icons-material/Google'
 import NoPhotographyIcon from '@mui/icons-material/NoPhotography'

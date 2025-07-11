@@ -1,4 +1,4 @@
-import type { EventWithCountsDto } from '@wishlist/common-types'
+import type { EventWithCountsDto } from '@wishlist/common'
 
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'
 import { styled } from '@mui/material'

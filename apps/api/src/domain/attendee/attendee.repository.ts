@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { EventId } from '@wishlist/common-types'
+import { EventId } from '@wishlist/common'
 
 import { BaseRepository } from '../../common'
 import { AttendeeEntity } from './attendee.entity'

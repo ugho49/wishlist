@@ -1,5 +1,5 @@
 import type { TransitionProps } from '@mui/material/transitions'
-import type { UpdateSecretSantaInputDto } from '@wishlist/common-types'
+import type { UpdateSecretSantaInputDto } from '@wishlist/common'
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import CloseIcon from '@mui/icons-material/Close'

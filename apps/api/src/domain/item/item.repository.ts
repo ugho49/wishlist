@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
-import { camelCaseKeys } from '@wishlist/common'
-import { ItemId, UserId } from '@wishlist/common-types'
+import { camelCaseKeys, ItemId, UserId } from '@wishlist/common'
 
 import { BaseRepository, PartialEntity } from '../../common'
 import { ItemEntity } from './item.entity'

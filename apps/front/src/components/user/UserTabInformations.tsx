@@ -1,4 +1,4 @@
-import type { UpdateUserProfileInputDto, UserDto } from '@wishlist/common-types'
+import type { UpdateUserProfileInputDto, UserDto } from '@wishlist/common'
 
 import type { RootState } from '../../core'
 

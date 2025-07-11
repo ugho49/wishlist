@@ -6,7 +6,6 @@ import {
   UnauthorizedException,
   UnprocessableEntityException,
 } from '@nestjs/common'
-import { DEFAULT_RESULT_NUMBER, uuid } from '@wishlist/common'
 import {
   ChangeUserPasswordInputDto,
   createPagedResponse,
@@ -22,9 +21,11 @@ import {
   UserId,
   UserSocialId,
   UserSocialType,
-} from '@wishlist/common-types'
+  uuid,
+} from '@wishlist/common'
 import { isEmpty } from 'lodash'
 
+import { DEFAULT_RESULT_NUMBER } from '../../common'
 import { BucketService } from '../../core/bucket/bucket.service'
 import { AttendeeEntity } from '../attendee/attendee.entity'
 import { PasswordManager } from '../auth'

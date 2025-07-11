@@ -4,7 +4,7 @@ import { Transform } from 'class-transformer'
 import { IsNumber, IsOptional, IsPositive, IsString } from 'class-validator'
 import { uniq } from 'lodash'
 
-import { AttendeeDto, MiniEventDto } from '../dtos'
+import { AttendeeDto, MiniEventDto } from '.'
 import { SecretSantaStatus } from '../enums'
 
 export class SecretSantaUserDto {

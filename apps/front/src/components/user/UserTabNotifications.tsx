@@ -1,4 +1,4 @@
-import type { UpdateUserEmailSettingsInputDto } from '@wishlist/common-types'
+import type { UpdateUserEmailSettingsInputDto } from '@wishlist/common'
 import type { FormEvent } from 'react'
 
 import SaveIcon from '@mui/icons-material/Save'

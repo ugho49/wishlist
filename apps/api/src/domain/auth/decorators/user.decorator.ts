@@ -1,5 +1,5 @@
 import type { ExecutionContext } from '@nestjs/common'
-import type { ICurrentUser } from '@wishlist/common-types'
+import type { ICurrentUser } from '@wishlist/common'
 
 import { createParamDecorator } from '@nestjs/common'
 

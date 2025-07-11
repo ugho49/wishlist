@@ -11,7 +11,7 @@ import {
   PagedResponse,
   UpdateEventInputDto,
   UserId,
-} from '@wishlist/common-types'
+} from '@wishlist/common'
 
 import { CurrentUser } from '../../auth'
 import { EventService } from '../event.service'

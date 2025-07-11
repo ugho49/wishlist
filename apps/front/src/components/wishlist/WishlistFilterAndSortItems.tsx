@@ -1,4 +1,4 @@
-import type { ItemDto } from '@wishlist/common-types'
+import type { ItemDto } from '@wishlist/common'
 
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import CheckBoxIcon from '@mui/icons-material/CheckBox'

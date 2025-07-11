@@ -6,7 +6,7 @@ import {
   LoginWithGoogleInputDto,
   RefreshTokenInputDto,
   RefreshTokenOutputDto,
-} from '@wishlist/common-types'
+} from '@wishlist/common'
 import { RealIP } from 'nestjs-real-ip'
 
 import { AuthService } from './auth.service'

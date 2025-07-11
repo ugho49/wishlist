@@ -2,8 +2,7 @@ import type { DataSource } from 'typeorm'
 
 import type { SignedAs } from './use-test-app'
 
-import { uuid } from '@wishlist/common'
-import { AttendeeRole, Authorities } from '@wishlist/common-types'
+import { AttendeeRole, Authorities, uuid } from '@wishlist/common'
 
 import { PasswordManager } from '../../domain/auth'
 

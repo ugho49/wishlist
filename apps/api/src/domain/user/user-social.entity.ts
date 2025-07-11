@@ -1,7 +1,6 @@
-import type { UserId, UserSocialId } from '@wishlist/common-types'
+import type { UserId, UserSocialId } from '@wishlist/common'
 
-import { uuid } from '@wishlist/common'
-import { UserSocialType } from '@wishlist/common-types'
+import { UserSocialType, uuid } from '@wishlist/common'
 import { Column, Entity, ManyToOne, PrimaryColumn, RelationId } from 'typeorm'
 
 import { TimestampEntity } from '../../common'

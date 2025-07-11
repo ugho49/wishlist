@@ -1,4 +1,4 @@
-import type { EventId, UpdateSecretSantaInputDto } from '@wishlist/common-types'
+import type { EventId, UpdateSecretSantaInputDto } from '@wishlist/common'
 
 import { Box, Button, Stack, Typography } from '@mui/material'
 import { useMutation, useQueryClient } from '@tanstack/react-query'

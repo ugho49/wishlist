@@ -1,7 +1,6 @@
 import { BadRequestException, ForbiddenException, UnprocessableEntityException } from '@nestjs/common'
 import { CommandHandler, EventBus, IInferredCommandHandler } from '@nestjs/cqrs'
-import { SecretSantaDrawService } from '@wishlist/common'
-import { SecretSantaStatus } from '@wishlist/common-types'
+import { SecretSantaDrawService, SecretSantaStatus } from '@wishlist/common'
 
 import { SecretSantaEntity, SecretSantaUserEntity } from '../../infrastructure/secret-santa.entity'
 import { toSecretSantaUserWithDrawDto } from '../../infrastructure/secret-santa.mapper'

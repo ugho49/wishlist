@@ -1,4 +1,4 @@
-import type { Authorities } from '@wishlist/common-types'
+import type { Authorities } from '@wishlist/common'
 
 import { applyDecorators, SetMetadata, UseGuards } from '@nestjs/common'
 

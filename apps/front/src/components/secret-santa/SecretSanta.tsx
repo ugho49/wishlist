@@ -1,4 +1,4 @@
-import type { DetailedEventDto, SecretSantaDto, UpdateSecretSantaInputDto } from '@wishlist/common-types'
+import type { DetailedEventDto, SecretSantaDto, UpdateSecretSantaInputDto } from '@wishlist/common'
 
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance'
 import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt'
@@ -15,8 +15,7 @@ import { useTheme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import { DataGrid } from '@mui/x-data-grid'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { SecretSantaDrawService } from '@wishlist/common'
-import { SecretSantaStatus } from '@wishlist/common-types'
+import { SecretSantaDrawService, SecretSantaStatus } from '@wishlist/common'
 import { DateTime } from 'luxon'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 

@@ -9,15 +9,13 @@ import {
   UpdateUserPictureOutputDto,
   UserDto,
   UserId,
-} from '@wishlist/common-types'
+} from '@wishlist/common'
 
 import { CurrentUser, IsAdmin } from '../../auth'
 import { UserService } from '../user.service'
 import { userPictureFileValidators, userPictureResizePipe } from '../user.validator'
 
 import 'multer'
-
-import { Express } from 'express'
 
 @IsAdmin()
 @ApiTags('ADMIN - User')

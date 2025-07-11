@@ -1,4 +1,4 @@
-import type { DetailedWishlistDto, MiniEventDto } from '@wishlist/common-types'
+import type { DetailedWishlistDto, MiniEventDto } from '@wishlist/common'
 
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import DeleteIcon from '@mui/icons-material/Delete'
@@ -15,9 +15,9 @@ import {
   useTheme,
 } from '@mui/material'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { MAX_EVENTS_BY_LIST } from '@wishlist/common-types'
+import { MAX_EVENTS_BY_LIST } from '@wishlist/common'
 import { DateTime } from 'luxon'
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 
 import { useAvailableEvents } from '../../hooks/domain/useAvailableEvents'
 import { useApi } from '../../hooks/useApi'

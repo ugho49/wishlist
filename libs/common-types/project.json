@@ -1,8 +1,0 @@
-{
-  "name": "common-types",
-  "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "libs/common-types/src",
-  "projectType": "library",
-  "tags": [],
-  "targets": {}
-}

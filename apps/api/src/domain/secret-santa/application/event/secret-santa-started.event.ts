@@ -1,4 +1,4 @@
-import type { EventId } from '@wishlist/common-types'
+import type { EventId } from '@wishlist/common'
 
 type Drawn = {
   email: string

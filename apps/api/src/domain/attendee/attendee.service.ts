@@ -6,13 +6,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common'
-import {
-  AddEventAttendeeForEventInputDto,
-  AttendeeDto,
-  AttendeeId,
-  AttendeeRole,
-  ICurrentUser,
-} from '@wishlist/common-types'
+import { AddEventAttendeeForEventInputDto, AttendeeDto, AttendeeId, AttendeeRole, ICurrentUser } from '@wishlist/common'
 
 import { EventMailer } from '../event/event.mailer'
 import { EventRepository } from '../event/event.repository'
