@@ -6,13 +6,13 @@ import { UserEntity } from '../user'
 
 @Entity('user_password_verification')
 export class PasswordVerificationEntity extends TimestampEntity {
-  @PrimaryColumn()
+  @PrimaryColumn('uuid')
   id: UserPasswordVerificationId = uuid() as UserPasswordVerificationId
 
   @ManyToOne(() => UserEntity)
   readonly user!: Promise<UserEntity>
 
-  @Column()
+  @Column('uuid')
   @RelationId((entity: PasswordVerificationEntity) => entity.user)
   userId!: UserId
 

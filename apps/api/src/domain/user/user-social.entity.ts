@@ -8,20 +8,20 @@ import { UserEntity } from './user.entity'
 
 @Entity('user_social')
 export class UserSocialEntity extends TimestampEntity {
-  @PrimaryColumn()
+  @PrimaryColumn('uuid')
   id: UserSocialId = uuid() as UserSocialId
 
   @ManyToOne(() => UserEntity, { lazy: true })
   readonly user!: Promise<UserEntity>
 
-  @Column()
+  @Column('uuid')
   @RelationId((entity: UserSocialEntity) => entity.user)
   userId!: UserId
 
   @Column()
   socialId!: string
 
-  @Column()
+  @Column('varchar')
   socialType!: UserSocialType
 
   @Column({ type: 'varchar', nullable: true })

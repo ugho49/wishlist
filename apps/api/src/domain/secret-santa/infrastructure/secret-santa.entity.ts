@@ -9,7 +9,7 @@ import { EventEntity } from '../../event/event.entity'
 
 @Entity('secret_santa')
 export class SecretSantaEntity extends TimestampEntity {
-  @PrimaryColumn()
+  @PrimaryColumn('uuid')
   id: SecretSantaId = uuid() as SecretSantaId
 
   @Column({ type: 'varchar', nullable: true })
@@ -24,7 +24,7 @@ export class SecretSantaEntity extends TimestampEntity {
   @ManyToOne(() => EventEntity)
   readonly event!: Promise<EventEntity>
 
-  @Column()
+  @Column('uuid')
   @RelationId((entity: SecretSantaEntity) => entity.event)
   eventId!: EventId
 
@@ -52,13 +52,13 @@ export class SecretSantaEntity extends TimestampEntity {
 
 @Entity('secret_santa_user')
 export class SecretSantaUserEntity extends TimestampEntity {
-  @PrimaryColumn()
+  @PrimaryColumn('uuid')
   id: SecretSantaUserId = uuid() as SecretSantaUserId
 
   @ManyToOne(() => AttendeeEntity)
   readonly attendee!: Promise<AttendeeEntity>
 
-  @Column()
+  @Column('uuid')
   @RelationId((entity: SecretSantaUserEntity) => entity.attendee)
   attendeeId!: AttendeeId
 
@@ -72,7 +72,7 @@ export class SecretSantaUserEntity extends TimestampEntity {
   @ManyToOne(() => SecretSantaEntity)
   readonly secretSanta!: Promise<SecretSantaEntity>
 
-  @Column()
+  @Column('uuid')
   @RelationId((entity: SecretSantaUserEntity) => entity.secretSanta)
   secretSantaId!: SecretSantaId
 

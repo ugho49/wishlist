@@ -20,6 +20,7 @@ export default async function () {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-expect-error
   const containers = environment.startedGenericContainers as Record<string, AbstractStartedContainer>
+  const configOutput = dotenv.config({ path: join(__dirname, '.env.test:int') })
 
   for (const container of Object.values(containers)) {
     const containerName = container.getName().split('-')[0]?.toUpperCase()
@@ -32,8 +33,6 @@ export default async function () {
       process.env[variable] = external.toString()
       console.log(`export ${variable}=${external}`)
     }
-
-    const configOutput = dotenv.config({ path: './.env.test:int' })
 
     for (const [key, value] of Object.entries(configOutput.parsed ?? {})) {
       if (value.startsWith('$')) {

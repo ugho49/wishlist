@@ -142,12 +142,12 @@ workflows:
       - typecheck:
           requires:
             - install-dependencies
-      # - test-int:
-      #     requires:
-      #       - install-dependencies
+      - test-int:
+          requires:
+            - install-dependencies
       - continuation:
           requires:
             - lint
             - typecheck
             - test-unit
-            # - test-int
+            - test-int

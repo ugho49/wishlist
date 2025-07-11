@@ -5,10 +5,10 @@ import { TimestampEntity } from '../../common'
 
 @Entity('user_email_setting')
 export class UserEmailSettingEntity extends TimestampEntity {
-  @PrimaryColumn()
+  @PrimaryColumn('uuid')
   id: UserEmailSettingId = uuid() as UserEmailSettingId
 
-  @Column()
+  @Column('uuid')
   userId!: UserId
 
   @Column()

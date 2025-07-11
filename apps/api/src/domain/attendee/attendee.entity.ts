@@ -8,10 +8,10 @@ import { UserEntity } from '../user'
 
 @Entity('event_attendee')
 export class AttendeeEntity {
-  @PrimaryColumn()
+  @PrimaryColumn('uuid')
   id: AttendeeId = uuid() as AttendeeId
 
-  @Column()
+  @Column('uuid')
   @RelationId((entity: AttendeeEntity) => entity.event)
   eventId!: EventId
 
@@ -28,7 +28,7 @@ export class AttendeeEntity {
   @Column({ name: 'temp_user_email', type: 'varchar', nullable: true })
   email?: string | null
 
-  @Column()
+  @Column('varchar')
   role!: AttendeeRole
 
   static createFromExistingUser(param: { eventId: EventId; userId: UserId; role: AttendeeRole }): AttendeeEntity {
