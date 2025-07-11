@@ -59,32 +59,18 @@ jobs:
 
   deploy-api:
     docker:
-      - image: cimg/base:2024.08
+      - image: cimg/base:2025.07
     steps:
       - add_ssh_keys:
           fingerprints:
-            - "dc:fe:f2:aa:b8:c3:82:22:25:d5:75:ce:5e:55:ba:6a"
+            - "SHA256:PlzcXSV+kI9bcTmhnwLFXnmdE0WU0c6PiHwYLxapNvc"
       - run:
-          name: Deploy on Server
+          name: Deploy on Server via SSH
           command: |
-            ssh -o "StrictHostKeyChecking no" -i ~/.ssh/id_rsa_dcfef2aab8c3822225d575ce5e55ba6a $OVH_SERVER_USER@$OVH_SERVER_URL -p $OVH_SERVER_PORT "cd /home/circleci/wishlist-api && ./deploy.sh $CIRCLE_SHA1"
-      - run:
-          name: Check Health
-          command: |
-            HEALTH_URL="https://api.wishlistapp.fr/health"
-            counter=0
-            max_tries=20
-            while [[ $(curl -s -f $HEALTH_URL | grep "UP") == "" ]] && [[ $counter -lt $max_tries ]]; do
-              echo 'API not ready, retrying in 5s...'
-              sleep 5
-              ((counter=counter+1))
-            done
-            if [[ $counter -eq $max_tries ]]; then
-              echo 'Too many attempts'
-              exit 1
-            fi
-            echo 'API is up, exiting'
-            exit 0
+            ssh -o StrictHostKeyChecking=no $OVH_SERVER_USER@$OVH_SERVER_URL -p $OVH_SERVER_PORT \<< 'EOF'
+              cd /home/circleci/wishlist-api
+              ./deploy.sh $CIRCLE_SHA1
+            EOF
 
 workflows:
   build-and-release-api:
@@ -109,14 +95,24 @@ workflows:
             branches:
               only:
                 - main
-#      - deploy-api:
-#          name: deploy
-#          filters:
-#            branches:
-#              only:
-#                - main
-#          requires:
-#            - build-and-publish
+
+      - deploy-api-trigger:
+          name: deploy-trigger
+          type: approval
+          filters:
+            branches:
+              only:
+                - main
+
+      - deploy-api:
+          name: deploy-api
+          filters:
+            branches:
+              only:
+                - main
+          requires:
+            - build-and-publish
+            - deploy-trigger
 
   build-and-release-front:
     when: << pipeline.parameters.workflow-front >>
