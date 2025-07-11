@@ -2,6 +2,15 @@
   "mcpServers": {
     "nx-mcp": {
       "url": "http://localhost:9812/sse"
+    },
+    "mui-mcp": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@mui/mcp@latest"]
+    },
+    "circleci-mcp": {
+      "command": "npx",
+      "args": ["-y", "@circleci/mcp-server-circleci@latest"]
     }
   }
 }
