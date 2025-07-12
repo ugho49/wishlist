@@ -1,4 +1,4 @@
-import { useTestApp } from '../../test-utils'
+import { useTestApp } from '@wishlist/api-test-utils'
 
 describe('HealthController', () => {
   const { getRequest } = useTestApp()

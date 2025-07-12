@@ -1,3 +1,16 @@
+import type {
+  AttendeeId,
+  EventId,
+  ItemId,
+  SecretSantaId,
+  SecretSantaUserId,
+  UserEmailSettingId,
+  UserId,
+  UserPasswordVerificationId,
+  UserSocialId,
+  WishlistId,
+} from '@wishlist/common'
+
 import { sql } from 'drizzle-orm'
 import {
   boolean,
@@ -9,28 +22,40 @@ import {
   pgTable,
   primaryKey,
   text,
-  timestamp,
   unique,
   uniqueIndex,
-  uuid,
   varchar,
 } from 'drizzle-orm/pg-core'
 
+import { brandedUuid, timestampWithTimezone } from './helpers'
+
+// Custom branded UUID types
+const eventId = brandedUuid<EventId>()
+const attendeeId = brandedUuid<AttendeeId>()
+const userId = brandedUuid<UserId>()
+const userPasswordVerificationId = brandedUuid<UserPasswordVerificationId>()
+const userEmailSettingId = brandedUuid<UserEmailSettingId>()
+const userSocialId = brandedUuid<UserSocialId>()
+const secretSantaId = brandedUuid<SecretSantaId>()
+const secretSantaUserId = brandedUuid<SecretSantaUserId>()
+const wishlistId = brandedUuid<WishlistId>()
+const itemId = brandedUuid<ItemId>()
+
 export const event = pgTable('event', {
-  id: uuid().primaryKey().notNull(),
+  id: eventId().primaryKey().notNull(),
   title: varchar({ length: 100 }).notNull(),
   description: text(),
   eventDate: date('event_date').notNull(),
-  createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-  updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+  createdAt: timestampWithTimezone('created_at').defaultNow().notNull(),
+  updatedAt: timestampWithTimezone('updated_at').defaultNow().notNull(),
 })
 
 export const eventAttendee = pgTable(
   'event_attendee',
   {
-    id: uuid().primaryKey().notNull(),
-    eventId: uuid('event_id').notNull(),
-    userId: uuid('user_id'),
+    id: attendeeId().primaryKey().notNull(),
+    eventId: eventId('event_id').notNull(),
+    userId: userId('user_id'),
     tempUserEmail: varchar('temp_user_email', { length: 200 }),
     role: varchar({ length: 50 }).default('user').notNull(),
   },
@@ -54,12 +79,12 @@ export const eventAttendee = pgTable(
 export const userPasswordVerification = pgTable(
   'user_password_verification',
   {
-    id: uuid().primaryKey().notNull(),
-    userId: uuid('user_id').notNull(),
+    id: userPasswordVerificationId().primaryKey().notNull(),
+    userId: userId('user_id').notNull(),
     token: varchar({ length: 200 }).notNull(),
-    expiredAt: timestamp('expired_at', { withTimezone: true, mode: 'string' }).notNull(),
-    createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-    updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+    expiredAt: timestampWithTimezone('expired_at').notNull(),
+    createdAt: timestampWithTimezone('created_at').defaultNow().notNull(),
+    updatedAt: timestampWithTimezone('updated_at').defaultNow().notNull(),
   },
   table => [
     foreignKey({
@@ -73,11 +98,11 @@ export const userPasswordVerification = pgTable(
 export const userEmailSetting = pgTable(
   'user_email_setting',
   {
-    id: uuid().primaryKey().notNull(),
-    userId: uuid('user_id').notNull(),
+    id: userEmailSettingId().primaryKey().notNull(),
+    userId: userId('user_id').notNull(),
     dailyNewItemNotification: boolean('daily_new_item_notification').default(true).notNull(),
-    createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-    updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+    createdAt: timestampWithTimezone('created_at').defaultNow().notNull(),
+    updatedAt: timestampWithTimezone('updated_at').defaultNow().notNull(),
   },
   table => [
     foreignKey({
@@ -92,13 +117,13 @@ export const userEmailSetting = pgTable(
 export const userSocial = pgTable(
   'user_social',
   {
-    id: uuid().primaryKey().notNull(),
-    userId: uuid('user_id').notNull(),
+    id: userSocialId().primaryKey().notNull(),
+    userId: userId('user_id').notNull(),
     socialId: varchar('social_id', { length: 1000 }).notNull(),
     socialType: varchar('social_type', { length: 50 }).notNull(),
     pictureUrl: varchar('picture_url', { length: 1000 }),
-    createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-    updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+    createdAt: timestampWithTimezone('created_at').defaultNow().notNull(),
+    updatedAt: timestampWithTimezone('updated_at').defaultNow().notNull(),
   },
   table => [
     foreignKey({
@@ -114,7 +139,7 @@ export const userSocial = pgTable(
 export const user = pgTable(
   'user',
   {
-    id: uuid().primaryKey().notNull(),
+    id: userId().primaryKey().notNull(),
     email: varchar({ length: 200 }).notNull(),
     firstName: varchar('first_name', { length: 50 }).notNull(),
     lastName: varchar('last_name', { length: 50 }).notNull(),
@@ -123,9 +148,9 @@ export const user = pgTable(
     isEnabled: boolean('is_enabled').default(true).notNull(),
     authorities: varchar({ length: 100 }).array().default(['ROLE_USER']).notNull(),
     lastIp: varchar('last_ip', { length: 50 }),
-    lastConnectedAt: timestamp('last_connected_at', { withTimezone: true, mode: 'string' }),
-    createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-    updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+    lastConnectedAt: timestampWithTimezone('last_connected_at'),
+    createdAt: timestampWithTimezone('created_at').defaultNow().notNull(),
+    updatedAt: timestampWithTimezone('updated_at').defaultNow().notNull(),
     pictureUrl: varchar('picture_url', { length: 1000 }),
   },
   _ => [uniqueIndex('user_email_unique_idx').using('btree', sql`lower((email)::text)`)],
@@ -134,13 +159,13 @@ export const user = pgTable(
 export const wishlist = pgTable(
   'wishlist',
   {
-    id: uuid().primaryKey().notNull(),
+    id: wishlistId().primaryKey().notNull(),
     title: varchar({ length: 100 }).notNull(),
     description: text(),
-    ownerId: uuid('owner_id').notNull(),
+    ownerId: userId('owner_id').notNull(),
     hideItems: boolean('hide_items').default(true).notNull(),
-    createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-    updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+    createdAt: timestampWithTimezone('created_at').defaultNow().notNull(),
+    updatedAt: timestampWithTimezone('updated_at').defaultNow().notNull(),
     logoUrl: varchar('logo_url', { length: 1000 }),
   },
   table => [
@@ -154,17 +179,17 @@ export const wishlist = pgTable(
 export const item = pgTable(
   'item',
   {
-    id: uuid().primaryKey().notNull(),
+    id: itemId().primaryKey().notNull(),
     name: varchar({ length: 100 }).notNull(),
     description: text(),
     url: varchar({ length: 1000 }),
     isSuggested: boolean('is_suggested').default(false).notNull(),
     score: integer(),
-    wishlistId: uuid('wishlist_id').notNull(),
-    takerId: uuid('taker_id'),
-    takenAt: timestamp('taken_at', { withTimezone: true, mode: 'string' }),
-    createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-    updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+    wishlistId: wishlistId('wishlist_id').notNull(),
+    takerId: userId('taker_id'),
+    takenAt: timestampWithTimezone('taken_at'),
+    createdAt: timestampWithTimezone('created_at').defaultNow().notNull(),
+    updatedAt: timestampWithTimezone('updated_at').defaultNow().notNull(),
     pictureUrl: varchar('picture_url', { length: 1000 }),
   },
   table => [
@@ -182,13 +207,13 @@ export const item = pgTable(
 export const secretSanta = pgTable(
   'secret_santa',
   {
-    id: uuid().primaryKey().notNull(),
-    eventId: uuid('event_id').notNull(),
+    id: secretSantaId().primaryKey().notNull(),
+    eventId: eventId('event_id').notNull(),
     description: text(),
     budget: numeric(),
     status: varchar({ length: 20 }).notNull(),
-    createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-    updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+    createdAt: timestampWithTimezone('created_at').defaultNow().notNull(),
+    updatedAt: timestampWithTimezone('updated_at').defaultNow().notNull(),
   },
   table => [
     foreignKey({
@@ -202,13 +227,13 @@ export const secretSanta = pgTable(
 export const secretSantaUser = pgTable(
   'secret_santa_user',
   {
-    id: uuid().primaryKey().notNull(),
-    secretSantaId: uuid('secret_santa_id').notNull(),
-    attendeeId: uuid('attendee_id').notNull(),
-    drawUserId: uuid('draw_user_id'),
-    exclusions: uuid().array().default([]).notNull(),
-    createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-    updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+    id: secretSantaUserId().primaryKey().notNull(),
+    secretSantaId: secretSantaId('secret_santa_id').notNull(),
+    attendeeId: attendeeId('attendee_id').notNull(),
+    drawUserId: secretSantaUserId('draw_user_id'),
+    exclusions: secretSantaUserId().array().default([]).notNull(),
+    createdAt: timestampWithTimezone('created_at').defaultNow().notNull(),
+    updatedAt: timestampWithTimezone('updated_at').defaultNow().notNull(),
   },
   table => [
     foreignKey({
@@ -230,8 +255,8 @@ export const secretSantaUser = pgTable(
 export const eventWishlist = pgTable(
   'event_wishlist',
   {
-    eventId: uuid('event_id').notNull(),
-    wishlistId: uuid('wishlist_id').notNull(),
+    eventId: eventId('event_id').notNull(),
+    wishlistId: wishlistId('wishlist_id').notNull(),
   },
   table => [
     primaryKey({ columns: [table.eventId, table.wishlistId] }),

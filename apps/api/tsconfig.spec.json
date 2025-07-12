@@ -5,5 +5,5 @@
     "types": ["vitest/globals", "node"]
   },
   "files": ["../../global.d.ts"],
-  "include": ["src/**/*.d.ts", "src/**/*.int-spec.ts", "src/**/*.spec.ts"]
+  "include": ["src/**/*.d.ts", "src/**/*.int-spec.ts", "src/**/*.spec.ts", "test-utils/**/*.ts"]
 }

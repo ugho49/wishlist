@@ -1,0 +1,25 @@
+import { Body, Controller, Delete, Param, Post } from '@nestjs/common'
+import { ApiTags } from '@nestjs/swagger'
+import { CurrentUser } from '@wishlist/api/auth'
+import { AddEventAttendeeForEventInputDto, AttendeeDto, AttendeeId, ICurrentUser } from '@wishlist/common'
+
+import { LegacyAttendeeService } from './legacy-attendee.service'
+
+@ApiTags('Attendee')
+@Controller('/attendee')
+export class AttendeeController {
+  constructor(private readonly attendeeService: LegacyAttendeeService) {}
+
+  @Post()
+  addAttendee(
+    @CurrentUser() currentUser: ICurrentUser,
+    @Body() dto: AddEventAttendeeForEventInputDto,
+  ): Promise<AttendeeDto> {
+    return this.attendeeService.addAttendee({ currentUser, dto })
+  }
+
+  @Delete('/:id')
+  deleteAttendee(@Param('id') attendeeId: AttendeeId, @CurrentUser() currentUser: ICurrentUser): Promise<void> {
+    return this.attendeeService.deleteAttendee({ attendeeId, currentUser })
+  }
+}

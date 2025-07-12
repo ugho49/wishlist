@@ -12,6 +12,7 @@ export class BucketRealService extends BucketService {
 
   constructor(@Inject(BUCKET_CONFIG_TOKEN) config: BucketConfig) {
     super('real')
+    this.logger.log('Initializing firebase app ...', { certPath: config.firebaseServiceAccountKeyPath })
 
     const app = initializeApp({
       credential: cert(config.firebaseServiceAccountKeyPath),

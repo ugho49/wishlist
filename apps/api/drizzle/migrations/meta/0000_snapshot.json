@@ -97,12 +97,8 @@
           "name": "event_attendee_event_id_event_id_fk",
           "tableFrom": "event_attendee",
           "tableTo": "event",
-          "columnsFrom": [
-            "event_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["event_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -110,12 +106,8 @@
           "name": "event_attendee_user_id_user_id_fk",
           "tableFrom": "event_attendee",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -125,11 +117,7 @@
         "event_attendee_event_id_user_id_temp_user_email_key": {
           "name": "event_attendee_event_id_user_id_temp_user_email_key",
           "nullsNotDistinct": false,
-          "columns": [
-            "event_id",
-            "user_id",
-            "temp_user_email"
-          ]
+          "columns": ["event_id", "user_id", "temp_user_email"]
         }
       },
       "policies": {},
@@ -164,12 +152,8 @@
           "name": "event_wishlist_wishlist_id_wishlist_id_fk",
           "tableFrom": "event_wishlist",
           "tableTo": "wishlist",
-          "columnsFrom": [
-            "wishlist_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["wishlist_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -177,12 +161,8 @@
           "name": "event_wishlist_event_id_event_id_fk",
           "tableFrom": "event_wishlist",
           "tableTo": "event",
-          "columnsFrom": [
-            "event_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["event_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -190,10 +170,7 @@
       "compositePrimaryKeys": {
         "event_wishlist_event_id_wishlist_id_pk": {
           "name": "event_wishlist_event_id_wishlist_id_pk",
-          "columns": [
-            "event_id",
-            "wishlist_id"
-          ]
+          "columns": ["event_id", "wishlist_id"]
         }
       },
       "uniqueConstraints": {},
@@ -287,12 +264,8 @@
           "name": "item_wishlist_id_wishlist_id_fk",
           "tableFrom": "item",
           "tableTo": "wishlist",
-          "columnsFrom": [
-            "wishlist_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["wishlist_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -300,12 +273,8 @@
           "name": "item_taker_id_user_id_fk",
           "tableFrom": "item",
           "tableTo": "user",
-          "columnsFrom": [
-            "taker_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["taker_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -371,12 +340,8 @@
           "name": "secret_santa_event_id_event_id_fk",
           "tableFrom": "secret_santa",
           "tableTo": "event",
-          "columnsFrom": [
-            "event_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["event_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -386,9 +351,7 @@
         "secret_santa_event_id_unique": {
           "name": "secret_santa_event_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "event_id"
-          ]
+          "columns": ["event_id"]
         }
       },
       "policies": {},
@@ -473,12 +436,8 @@
           "name": "secret_santa_user_secret_santa_id_secret_santa_id_fk",
           "tableFrom": "secret_santa_user",
           "tableTo": "secret_santa",
-          "columnsFrom": [
-            "secret_santa_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["secret_santa_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -486,12 +445,8 @@
           "name": "secret_santa_user_draw_user_id_secret_santa_user_id_fk",
           "tableFrom": "secret_santa_user",
           "tableTo": "secret_santa_user",
-          "columnsFrom": [
-            "draw_user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["draw_user_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -499,12 +454,8 @@
           "name": "secret_santa_user_attendee_id_event_attendee_id_fk",
           "tableFrom": "secret_santa_user",
           "tableTo": "event_attendee",
-          "columnsFrom": [
-            "attendee_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["attendee_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -670,12 +621,8 @@
           "name": "user_email_setting_user_id_fkey",
           "tableFrom": "user_email_setting",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -685,9 +632,7 @@
         "user_email_setting_user_id_key": {
           "name": "user_email_setting_user_id_key",
           "nullsNotDistinct": false,
-          "columns": [
-            "user_id"
-          ]
+          "columns": ["user_id"]
         }
       },
       "policies": {},
@@ -743,12 +688,8 @@
           "name": "user_password_verification_user_id_fkey",
           "tableFrom": "user_password_verification",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -814,12 +755,8 @@
           "name": "user_social_user_id_fkey",
           "tableFrom": "user_social",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -829,18 +766,12 @@
         "user_social_user_id_social_type_key": {
           "name": "user_social_user_id_social_type_key",
           "nullsNotDistinct": false,
-          "columns": [
-            "user_id",
-            "social_type"
-          ]
+          "columns": ["user_id", "social_type"]
         },
         "user_social_social_id_social_type_key": {
           "name": "user_social_social_id_social_type_key",
           "nullsNotDistinct": false,
-          "columns": [
-            "social_id",
-            "social_type"
-          ]
+          "columns": ["social_id", "social_type"]
         }
       },
       "policies": {},
@@ -909,12 +840,8 @@
           "name": "wishlist_owner_id_user_id_fk",
           "tableFrom": "wishlist",
           "tableTo": "user",
-          "columnsFrom": [
-            "owner_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["owner_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }

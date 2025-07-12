@@ -1,11 +1,11 @@
-import { IsString } from 'class-validator'
+import { IsBoolean, IsNumber, IsString } from 'class-validator'
 
 export class DatabaseConfig {
   @IsString()
   host!: string
 
-  @IsString()
-  port!: string
+  @IsNumber()
+  port!: number
 
   @IsString()
   username!: string
@@ -15,4 +15,13 @@ export class DatabaseConfig {
 
   @IsString()
   database!: string
+
+  @IsBoolean()
+  runMigrations!: boolean
+
+  @IsString()
+  migrationsFolder!: string
+
+  @IsBoolean()
+  verbose!: boolean
 }

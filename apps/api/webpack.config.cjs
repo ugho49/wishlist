@@ -33,6 +33,11 @@ module.exports = {
           glob: '**/*',
           output: 'firebase',
         },
+        {
+          input: 'apps/api/drizzle',
+          glob: '**/*',
+          output: 'drizzle',
+        },
       ],
     }),
   ],

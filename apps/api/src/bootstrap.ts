@@ -4,6 +4,7 @@ import { ValidationPipe } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import helmet from 'helmet'
+import { Logger } from 'pino-nestjs'
 
 import { AppModule } from './app.module'
 
@@ -17,11 +18,15 @@ function bootstrapSwagger(app: INestApplication) {
     .build()
 
   const document = SwaggerModule.createDocument(app, swaggerConfig)
-  SwaggerModule.setup('api', app, document)
+  SwaggerModule.setup('swagger', app, document)
 }
 
 export async function createApp(): Promise<INestApplication> {
-  const app = await NestFactory.create(AppModule)
+  const app = await NestFactory.create(AppModule, {
+    bufferLogs: true,
+  })
+
+  app.useLogger(app.get(Logger))
 
   app.useGlobalPipes(new ValidationPipe({ transform: true, stopAtFirstError: true }))
   app.enableCors()
