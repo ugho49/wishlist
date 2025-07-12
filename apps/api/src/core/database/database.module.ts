@@ -7,6 +7,7 @@ import { SnakeNamingStrategy } from 'typeorm-naming-strategies'
 import * as drizzleSchema from '../../../drizzle/schema'
 import { DRIZZLE_DB } from './database.constant'
 import { DatabaseService } from './database.service'
+import { TransactionManager } from './transaction-manager'
 
 /**
  * @deprecated Use DrizzlePGModule instead
@@ -52,7 +53,7 @@ const typeOrmModule = TypeOrmModule.forRootAsync({
       }),
     }),
   ],
-  providers: [DatabaseService],
-  exports: [DatabaseService],
+  providers: [DatabaseService, TransactionManager],
+  exports: [DatabaseService, TransactionManager],
 })
 export class DatabaseModule {}
