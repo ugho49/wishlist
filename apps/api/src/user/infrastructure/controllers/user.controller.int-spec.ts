@@ -287,13 +287,14 @@ describe('UserController', () => {
     it('should update user when valid input', async () => {
       const request = await getRequest({ signedAs: 'BASE_USER' })
 
-      // const birthday = DateTime.fromObject({ year: 1993, month: 11, day: 15 }).toISODate()
+      const birthday = DateTime.fromObject({ year: 1993, month: 11, day: 15 }).toISODate()
+
       await request
         .put(path)
         .send({
           firstname: 'Updated',
           lastname: 'UPDATED',
-          // birthday,
+          birthday,
         })
         .expect(200)
 
@@ -303,7 +304,7 @@ describe('UserController', () => {
         .toMatchObject({
           first_name: 'Updated',
           last_name: 'UPDATED',
-          // birthday,
+          birthday: new Date('1993-11-15'),
         })
         .check()
     })

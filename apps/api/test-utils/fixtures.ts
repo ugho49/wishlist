@@ -5,6 +5,7 @@ import type {
   SecretSantaId,
   SecretSantaStatus,
   SecretSantaUserId,
+  UserEmailSettingId,
   UserId,
   UserPasswordVerificationId,
   WishlistId,
@@ -106,6 +107,23 @@ export class Fixtures {
       lastname: 'Doe',
       authorities: [Authorities.ROLE_USER],
     })
+  }
+
+  async insertUserEmailSettings(parameters: {
+    userId: string
+    emailSettings: { daily_new_item_notification: boolean }
+  }): Promise<string> {
+    const { schema, db: client } = this.databaseService
+    const { userId, emailSettings } = parameters
+    const id = uuid() as UserEmailSettingId
+
+    await client.insert(schema.userEmailSetting).values({
+      id,
+      userId: userId as UserId,
+      dailyNewItemNotification: emailSettings.daily_new_item_notification,
+    })
+
+    return id
   }
 
   async insertEvent(parameters: { title: string; description: string; eventDate: Date }): Promise<string> {

@@ -5,9 +5,10 @@ import { DateTime } from 'luxon'
 import { MoreThan } from 'typeorm'
 
 import { PasswordManager } from '../../auth'
-import { LegacyUserRepository, UserEntity } from '../index'
+import { UserEntity } from '../infrastructure/legacy-user.entity'
 import { LegacyPasswordVerificationRepository } from './legacy-password-verification-repository.service'
 import { PasswordVerificationEntity } from './legacy-password-verification.entity'
+import { LegacyUserRepository } from './legacy-user.repository'
 import { PasswordVerificationMailer } from './password-verification.mailer'
 import userConfig from './user.config'
 
@@ -74,7 +75,7 @@ export class LegacyPasswordVerificationService {
     }
 
     if (DateTime.now() > DateTime.fromJSDate(entity.expiredAt)) {
-      throw new UnauthorizedException('This reset code is not valid anymore')
+      throw new UnauthorizedException('This reset code is expired')
     }
 
     await this.verificationEntityRepository.transaction(async em => {

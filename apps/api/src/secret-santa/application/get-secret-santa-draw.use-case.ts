@@ -1,16 +1,16 @@
-import type { GetSecretSantaDrawResult } from '../query/get-secret-santa-draw.query'
+import type { GetSecretSantaDrawResult } from '../domain/query/get-secret-santa-draw.query'
 
 import { Inject } from '@nestjs/common'
 import { IInferredQueryHandler, QueryHandler } from '@nestjs/cqrs'
 
-import { AttendeeRepository } from '../../../attendee/domain/attendee.repository'
-import { attendeeMapper } from '../../../attendee/infrastructure/attendee.mapper'
-import { ATTENDEE_REPOSITORY, SECRET_SANTA_USER_REPOSITORY } from '../../../repositories'
-import { SecretSantaUserRepository } from '../../domain/repository/secret-santa-user.repository'
-import { GetSecretSantaDrawQuery } from '../query/get-secret-santa-draw.query'
+import { AttendeeRepository } from '../../attendee/domain/attendee.repository'
+import { attendeeMapper } from '../../attendee/infrastructure/attendee.mapper'
+import { ATTENDEE_REPOSITORY, SECRET_SANTA_USER_REPOSITORY } from '../../repositories'
+import { GetSecretSantaDrawQuery } from '../domain/query/get-secret-santa-draw.query'
+import { SecretSantaUserRepository } from '../domain/repository/secret-santa-user.repository'
 
 @QueryHandler(GetSecretSantaDrawQuery)
-export class GetSecretSantaDrawHandler implements IInferredQueryHandler<GetSecretSantaDrawQuery> {
+export class GetSecretSantaDrawUseCase implements IInferredQueryHandler<GetSecretSantaDrawQuery> {
   constructor(
     @Inject(SECRET_SANTA_USER_REPOSITORY) private readonly secretSantaUserRepository: SecretSantaUserRepository,
     @Inject(ATTENDEE_REPOSITORY) private readonly attendeeRepository: AttendeeRepository,

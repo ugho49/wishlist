@@ -4,14 +4,14 @@ import { AttendeeRepository } from '@wishlist/api/attendee'
 import { Event } from '@wishlist/api/event'
 import { ATTENDEE_REPOSITORY, SECRET_SANTA_REPOSITORY, SECRET_SANTA_USER_REPOSITORY } from '@wishlist/api/repositories'
 
-import { AddSecretSantaUserCommand, AddSecretSantaUserResult } from '../../domain/command/add-secret-santa-user.command'
-import { SecretSantaUser } from '../../domain/model/secret-santa-user.model'
-import { SecretSantaUserRepository } from '../../domain/repository/secret-santa-user.repository'
-import { SecretSantaRepository } from '../../domain/repository/secret-santa.repository'
-import { secretSantaMapper } from '../../infrastructure/secret-santa.mapper'
+import { AddSecretSantaUserCommand, AddSecretSantaUserResult } from '../domain/command/add-secret-santa-user.command'
+import { SecretSantaUser } from '../domain/model/secret-santa-user.model'
+import { SecretSantaUserRepository } from '../domain/repository/secret-santa-user.repository'
+import { SecretSantaRepository } from '../domain/repository/secret-santa.repository'
+import { secretSantaMapper } from '../infrastructure/secret-santa.mapper'
 
 @CommandHandler(AddSecretSantaUserCommand)
-export class AddSecretSantaUserHandler implements IInferredCommandHandler<AddSecretSantaUserCommand> {
+export class AddSecretSantaUserUseCase implements IInferredCommandHandler<AddSecretSantaUserCommand> {
   constructor(
     @Inject(SECRET_SANTA_REPOSITORY) private readonly secretSantaRepository: SecretSantaRepository,
     @Inject(SECRET_SANTA_USER_REPOSITORY) private readonly secretSantaUserRepository: SecretSantaUserRepository,

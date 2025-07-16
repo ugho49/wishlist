@@ -1,11 +1,10 @@
 import { Injectable } from '@nestjs/common'
+import { schema } from '@wishlist/api-drizzle'
+import { Attendee, AttendeeRepository } from '@wishlist/api/attendee'
+import { DatabaseService } from '@wishlist/api/core'
 import { AttendeeId, AttendeeRole, EventId } from '@wishlist/common'
 import { and, eq, inArray, or } from 'drizzle-orm'
 
-import * as schema from '../../drizzle/schema'
-import { Attendee } from '../attendee/domain/attendee.model'
-import { AttendeeRepository } from '../attendee/domain/attendee.repository'
-import { DatabaseService } from '../core/database'
 import { PostgresUserRepository } from './user.repository'
 
 @Injectable()
@@ -30,18 +29,6 @@ export class PostgresAttendeeRepository implements AttendeeRepository {
 
     if (ids.length === 0) return []
 
-    // const result = await client
-    //   .select()
-    //   .from(schema.eventAttendee)
-    //   .leftJoin(schema.user, eq(schema.eventAttendee.userId, schema.user.id))
-    //   .where(inArray(schema.eventAttendee.id, ids))
-
-    // return result.map(row =>
-    //   PostgresAttendeeRepository.toModel({
-    //     eventAttendee: row.event_attendee,
-    //     user: row.user,
-    //   }),
-    // )
     const attendees = await db.query.eventAttendee.findMany({
       where: inArray(schema.eventAttendee.id, ids),
       with: { user: true },

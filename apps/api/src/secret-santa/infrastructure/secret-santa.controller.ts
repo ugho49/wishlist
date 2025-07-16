@@ -16,13 +16,14 @@ import {
   UpdateSecretSantaUserInputDto,
 } from '@wishlist/common'
 
-import { GetSecretSantaDrawQuery, GetSecretSantaQuery } from '../application'
 import {
   AddSecretSantaUserCommand,
   CancelSecretSantaCommand,
   CreateSecretSantaCommand,
   DeleteSecretSantaCommand,
   DeleteSecretSantaUserCommand,
+  GetSecretSantaDrawQuery,
+  GetSecretSantaQuery,
   StartSecretSantaCommand,
   UpdateSecretSantaCommand,
   UpdateSecretSantaUserCommand,

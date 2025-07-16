@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common'
 import { EventId, UserId, WishlistId } from '@wishlist/common'
 import { EntityManager } from 'typeorm'
 
-import { BaseRepository } from '../core/database'
+import { BaseRepository } from '../../core/database'
 import { WishlistEntity } from './wishlist.entity'
 
 @Injectable()

@@ -1,7 +1,7 @@
 import { ParseFilePipe } from '@nestjs/common'
 import { ACCEPTED_IMG_FORMATS } from '@wishlist/common'
 
-import { FileTypeValidator, MaxFileSizeValidator, ResizeImagePipe } from '../core/bucket'
+import { FileTypeValidator, MaxFileSizeValidator, ResizeImagePipe } from '../../core/bucket'
 
 export const wishlistLogoFileValidators = (fileIsRequired: boolean) =>
   new ParseFilePipe({

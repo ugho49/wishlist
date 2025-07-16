@@ -151,6 +151,27 @@ describe('PasswordVerificationController', () => {
         )
     })
 
+    it('should fail with expired token', async () => {
+      const userId = await fixtures.insertBaseUser()
+      await fixtures.insertUserPasswordVerification({
+        userId,
+        token: 'reset-token',
+        expiredAt: DateTime.now().minus({ hour: 1 }).toJSDate(),
+      })
+
+      const request = await getRequest()
+
+      return request
+        .post(path)
+        .send({ email: Fixtures.BASE_USER_EMAIL, token: 'reset-token', new_password: 'NewPassword123' })
+        .expect(401)
+        .expect(({ body }) =>
+          expect(body).toMatchObject({
+            message: 'This reset code is expired',
+          }),
+        )
+    })
+
     it('should reset the password with valid input', async () => {
       const userId = await fixtures.insertBaseUser()
       await fixtures.insertUserPasswordVerification({

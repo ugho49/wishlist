@@ -1,23 +1,23 @@
 import { ForbiddenException, Inject } from '@nestjs/common'
 import { CommandHandler, EventBus, IInferredCommandHandler } from '@nestjs/cqrs'
 
-import { AttendeeRepository } from '../../../attendee/domain/attendee.repository'
-import { TransactionManager } from '../../../core/database'
-import { Event } from '../../../event/domain/event.model'
-import { EventRepository } from '../../../event/domain/event.repository'
+import { AttendeeRepository } from '../../attendee/domain/attendee.repository'
+import { TransactionManager } from '../../core/database'
+import { Event } from '../../event/domain/event.model'
+import { EventRepository } from '../../event/domain/event.repository'
 import {
   ATTENDEE_REPOSITORY,
   EVENT_REPOSITORY,
   SECRET_SANTA_REPOSITORY,
   SECRET_SANTA_USER_REPOSITORY,
-} from '../../../repositories'
-import { CancelSecretSantaCommand } from '../../domain/command/cancel-secret-santa.command'
-import { SecretSantaCancelledEvent } from '../../domain/event/secret-santa-cancelled.event'
-import { SecretSantaUserRepository } from '../../domain/repository/secret-santa-user.repository'
-import { SecretSantaRepository } from '../../domain/repository/secret-santa.repository'
+} from '../../repositories'
+import { CancelSecretSantaCommand } from '../domain/command/cancel-secret-santa.command'
+import { SecretSantaCancelledEvent } from '../domain/event/secret-santa-cancelled.event'
+import { SecretSantaUserRepository } from '../domain/repository/secret-santa-user.repository'
+import { SecretSantaRepository } from '../domain/repository/secret-santa.repository'
 
 @CommandHandler(CancelSecretSantaCommand)
-export class CancelSecretSantaHandler implements IInferredCommandHandler<CancelSecretSantaCommand> {
+export class CancelSecretSantaUseCase implements IInferredCommandHandler<CancelSecretSantaCommand> {
   constructor(
     @Inject(SECRET_SANTA_REPOSITORY) private readonly secretSantaRepository: SecretSantaRepository,
     @Inject(SECRET_SANTA_USER_REPOSITORY) private readonly secretSantaUserRepository: SecretSantaUserRepository,

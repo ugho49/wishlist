@@ -1,10 +1,10 @@
 import { EventsHandler, IEventHandler } from '@nestjs/cqrs'
 
-import { MailService } from '../../../core/mail/mail.service'
-import { SecretSantaCancelledEvent } from '../../domain/event/secret-santa-cancelled.event'
+import { MailService } from '../../core/mail/mail.service'
+import { SecretSantaCancelledEvent } from '../domain/event/secret-santa-cancelled.event'
 
 @EventsHandler(SecretSantaCancelledEvent)
-export class SecretSantaCancelledHandler implements IEventHandler<SecretSantaCancelledEvent> {
+export class SecretSantaCancelledUseCase implements IEventHandler<SecretSantaCancelledEvent> {
   constructor(private readonly mailService: MailService) {}
 
   async handle(params: SecretSantaCancelledEvent) {

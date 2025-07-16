@@ -1,4 +1,5 @@
 export * from './command'
 export * from './event'
 export * from './model'
+export * from './query'
 export * from './repository'

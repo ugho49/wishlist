@@ -15,8 +15,8 @@ import {
   WishlistWithEventsDto,
 } from '@wishlist/common'
 
-import { CurrentUser } from '../../auth'
-import { ValidJsonBody } from '../../core/common/common.decorator'
+import { CurrentUser } from '../../../auth'
+import { ValidJsonBody } from '../../../core/common/common.decorator'
 import { WishlistService } from '../wishlist.service'
 import { wishlistLogoFileValidators, wishlistLogoResizePipe } from '../wishlist.validator'
 

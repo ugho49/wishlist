@@ -2,7 +2,7 @@ import { Controller, Get, Query } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 import { GetAllWishlistsPaginationQueryDto, PagedResponse, WishlistWithEventsDto } from '@wishlist/common'
 
-import { IsAdmin } from '../../auth'
+import { IsAdmin } from '../../../auth'
 import { WishlistService } from '../wishlist.service'
 
 @IsAdmin()

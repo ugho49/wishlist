@@ -5,7 +5,7 @@ import { uuid } from '@wishlist/common'
 import { DateTime } from 'luxon'
 
 describe('EventController', () => {
-  const { getRequest, getFixtures } = useTestApp()
+  const { getRequest, getFixtures, expectTable } = useTestApp()
   let fixtures: Fixtures
 
   beforeEach(() => {
@@ -398,18 +398,531 @@ describe('EventController', () => {
     })
   })
 
-  // TODO:
-  // describe('POST /event', () => {
-  //   const path = '/event'
-  // })
-  //
-  // TODO:
-  // describe('PUT /event/:id', () => {
-  //   const path = (id: string) => `/event/${id}`
-  // })
-  //
-  // TODO:
-  // describe('DELETE /event/:id', () => {
-  //   const path = (id: string) => `/event/${id}`
-  // })
+  describe('POST /event', () => {
+    const path = '/event'
+
+    it('should return unauthorized if not authenticated', async () => {
+      const request = await getRequest()
+
+      await request
+        .post(path)
+        .send({
+          title: 'Test Event',
+          description: 'Test Description',
+          event_date: DateTime.now().plus({ days: 1 }).toISODate(),
+        })
+        .expect(401)
+    })
+
+    describe('when user is authenticated', () => {
+      let request: RequestApp
+      let currentUserId: string
+
+      beforeEach(async () => {
+        request = await getRequest({ signedAs: 'BASE_USER' })
+        currentUserId = await fixtures.getSignedUserId('BASE_USER')
+      })
+
+      it.each([
+        {
+          body: {},
+          case: 'empty body',
+          message: ['title must be shorter than or equal to 100 characters', 'event_date should not be empty'],
+        },
+        {
+          body: { title: '' },
+          case: 'empty title',
+          message: ['title should not be empty'],
+        },
+        {
+          body: { title: 'a'.repeat(101) },
+          case: 'title too long',
+          message: ['title must be shorter than or equal to 100 characters'],
+        },
+        {
+          body: {
+            title: 'Valid Title',
+            description: 'a'.repeat(2001),
+            event_date: DateTime.now().plus({ days: 1 }).toISODate(),
+          },
+          case: 'description too long',
+          message: ['description must be shorter than or equal to 2000 characters'],
+        },
+        {
+          body: {
+            title: 'Valid Title',
+            event_date: DateTime.now().minus({ days: 1 }).toISODate(),
+          },
+          case: 'event_date in the past',
+          message: ['event_date must not be earlier than today'],
+        },
+        {
+          body: {
+            title: 'Valid Title',
+            event_date: 'not-a-date',
+          },
+          case: 'event_date not a date',
+          message: ['event_date must be a Date instance'],
+        },
+        {
+          body: {
+            title: 'Valid Title',
+            event_date: DateTime.now().plus({ days: 1 }).toISODate(),
+            attendees: [{ email: 'invalid-email' }],
+          },
+          case: 'invalid attendee email',
+          message: ['attendees.0.email must be an email'],
+        },
+        {
+          body: {
+            title: 'Valid Title',
+            event_date: DateTime.now().plus({ days: 1 }).toISODate(),
+            attendees: [{ email: 'test@test.com', role: 'invalid-role' }],
+          },
+          case: 'invalid attendee role',
+          message: ['attendees.0.role must be one of the following values: maintainer, user'],
+        },
+      ])('should return 400 when invalid input: $case', async ({ body, message }) => {
+        await request
+          .post(path)
+          .send(body)
+          .expect(400)
+          .expect(({ body }) =>
+            expect(body).toMatchObject({ error: 'Bad Request', message: expect.arrayContaining(message) }),
+          )
+      })
+
+      it('should create event successfully', async () => {
+        const eventDate = DateTime.now().plus({ days: 1 }).toISODate()
+
+        const response = await request
+          .post(path)
+          .send({
+            title: 'Test Event',
+            description: 'Test Description',
+            event_date: eventDate,
+          })
+          .expect(201)
+          .expect(({ body }) => {
+            expect(body).toEqual({
+              id: expect.toBeString(),
+              title: 'Test Event',
+              description: 'Test Description',
+              event_date: eventDate,
+            })
+          })
+
+        const createdEventId = response.body.id
+
+        await expectTable(Fixtures.EVENT_TABLE)
+          .hasNumberOfRows(1)
+          .row(0)
+          .toMatchObject({
+            id: createdEventId,
+            title: 'Test Event',
+            description: 'Test Description',
+            event_date: new Date(eventDate),
+            created_at: expect.toBeDate(),
+            updated_at: expect.toBeDate(),
+          })
+          .check()
+
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE)
+          .hasNumberOfRows(1)
+          .row(0)
+          .toMatchObject({
+            event_id: createdEventId,
+            user_id: currentUserId,
+            role: 'maintainer',
+          })
+          .check()
+      })
+
+      it('should create event with attendees', async () => {
+        const user1Id = await fixtures.insertUser({
+          email: 'user1@test.com',
+          firstname: 'User1',
+          lastname: 'USER1',
+        })
+
+        const user2Id = await fixtures.insertUser({
+          email: 'user2@test.com',
+          firstname: 'User2',
+          lastname: 'USER2',
+        })
+
+        const user3Email = 'user3@test.com'
+        const user4Email = 'user4@test.com'
+
+        const eventDate = DateTime.now().plus({ days: 1 }).toISODate()
+
+        const eventData = {
+          title: 'Test Event',
+          description: 'Test Description',
+          event_date: eventDate,
+          attendees: [
+            {
+              email: 'user1@test.com',
+              role: 'maintainer',
+            },
+            {
+              email: 'user2@test.com',
+              role: 'user',
+            },
+            {
+              email: user3Email,
+              role: 'user',
+            },
+            {
+              email: user4Email,
+              role: 'user',
+            },
+          ],
+        }
+
+        const response = await request
+          .post(path)
+          .send(eventData)
+          .expect(201)
+          .expect(({ body }) => {
+            expect(body).toEqual({
+              id: expect.toBeString(),
+              title: 'Test Event',
+              description: 'Test Description',
+              event_date: eventDate,
+            })
+          })
+
+        const createdEventId = response.body.id
+
+        await expectTable(Fixtures.EVENT_TABLE)
+          .hasNumberOfRows(1)
+          .row(0)
+          .toMatchObject({
+            id: createdEventId,
+            title: 'Test Event',
+            description: 'Test Description',
+            event_date: new Date(eventDate),
+          })
+          .check()
+
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE)
+          .hasNumberOfRows(5)
+          .row(0)
+          .toMatchObject({
+            event_id: createdEventId,
+            user_id: currentUserId,
+            role: 'maintainer',
+          })
+          .row(1)
+          .toMatchObject({
+            event_id: createdEventId,
+            user_id: user1Id,
+            role: 'maintainer',
+          })
+          .row(2)
+          .toMatchObject({
+            event_id: createdEventId,
+            user_id: user2Id,
+            role: 'user',
+          })
+          .row(3)
+          .toMatchObject({
+            event_id: createdEventId,
+            temp_user_email: user3Email,
+            role: 'user',
+          })
+          .row(4)
+          .toMatchObject({
+            event_id: createdEventId,
+            temp_user_email: user4Email,
+            role: 'user',
+          })
+          .check()
+
+        // TODO: assert mails
+      })
+    })
+  })
+
+  describe('PUT /event/:id', () => {
+    const path = (id: string) => `/event/${id}`
+
+    it('should return unauthorized if not authenticated', async () => {
+      const request = await getRequest()
+
+      await request
+        .put(path(uuid()))
+        .send({
+          title: 'Updated Event',
+          description: 'Updated Description',
+          event_date: DateTime.now().plus({ days: 1 }).toISODate(),
+        })
+        .expect(401)
+    })
+
+    describe('when user is authenticated', () => {
+      let request: RequestApp
+      let currentUserId: string
+
+      beforeEach(async () => {
+        request = await getRequest({ signedAs: 'BASE_USER' })
+        currentUserId = await fixtures.getSignedUserId('BASE_USER')
+      })
+
+      it('should return 404 when event not exists', async () => {
+        await request
+          .put(path(uuid()))
+          .send({
+            title: 'Updated Event',
+            description: 'Updated Description',
+            event_date: DateTime.now().plus({ days: 1 }).toISODate(),
+          })
+          .expect(404)
+      })
+
+      it('should return 404 when user is not maintainer of the event', async () => {
+        const otherUserId = await fixtures.insertUser({
+          email: 'other@test.com',
+          firstname: 'Other',
+          lastname: 'User',
+        })
+
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Event',
+          description: 'Description',
+          maintainerId: otherUserId,
+        })
+
+        await request
+          .put(path(eventId))
+          .send({
+            title: 'Updated Event',
+            description: 'Updated Description',
+            event_date: DateTime.now().plus({ days: 1 }).toISODate(),
+          })
+          .expect(401)
+      })
+
+      it.each([
+        {
+          body: {},
+          case: 'empty body',
+          message: ['title must be shorter than or equal to 100 characters', 'event_date should not be empty'],
+        },
+        {
+          body: { title: '' },
+          case: 'empty title',
+          message: ['title should not be empty'],
+        },
+        {
+          body: { title: 'a'.repeat(101) },
+          case: 'title too long',
+          message: ['title must be shorter than or equal to 100 characters'],
+        },
+        {
+          body: {
+            title: 'Valid Title',
+            description: 'a'.repeat(2001),
+            event_date: DateTime.now().plus({ days: 1 }).toISODate(),
+          },
+          case: 'description too long',
+          message: ['description must be shorter than or equal to 2000 characters'],
+        },
+        {
+          body: {
+            title: 'Valid Title',
+            event_date: DateTime.now().minus({ days: 1 }).toISODate(),
+          },
+          case: 'event_date in the past',
+          message: ['event_date must not be earlier than today'],
+        },
+        {
+          body: {
+            title: 'Valid Title',
+            event_date: 'not-a-date',
+          },
+          case: 'event_date not a date',
+          message: ['event_date must be a Date instance'],
+        },
+      ])('should return 400 when invalid input: $case', async ({ body, message }) => {
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Event',
+          description: 'Description',
+          maintainerId: currentUserId,
+        })
+
+        await request
+          .put(path(eventId))
+          .send(body)
+          .expect(400)
+          .expect(({ body }) =>
+            expect(body).toMatchObject({ error: 'Bad Request', message: expect.arrayContaining(message) }),
+          )
+      })
+
+      it('should update event successfully when user is maintainer', async () => {
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Original Event',
+          description: 'Original Description',
+          maintainerId: currentUserId,
+        })
+
+        const updateData = {
+          title: 'Updated Event',
+          description: 'Updated Description',
+          event_date: DateTime.now().plus({ days: 2 }).toISODate(),
+        }
+
+        await request.put(path(eventId)).send(updateData).expect(200)
+
+        await expectTable(Fixtures.EVENT_TABLE)
+          .hasNumberOfRows(1)
+          .row(0)
+          .toMatchObject({
+            id: eventId,
+            title: 'Updated Event',
+            description: 'Updated Description',
+            event_date: new Date(updateData.event_date),
+            updated_at: expect.toBeDate(),
+          })
+          .check()
+      })
+
+      it('should update event without description', async () => {
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Original Event',
+          description: 'Original Description',
+          eventDate: DateTime.now().plus({ days: 1 }).toJSDate(),
+          maintainerId: currentUserId,
+        })
+
+        const updateData = {
+          title: 'Updated Event',
+          event_date: DateTime.now().plus({ days: 2 }).toISODate(),
+        }
+
+        await request.put(path(eventId)).send(updateData).expect(200)
+
+        await expectTable(Fixtures.EVENT_TABLE)
+          .hasNumberOfRows(1)
+          .row(0)
+          .toMatchObject({
+            id: eventId,
+            title: 'Updated Event',
+            description: null,
+            event_date: new Date(updateData.event_date),
+            updated_at: expect.toBeDate(),
+          })
+          .check()
+      })
+    })
+  })
+
+  describe('DELETE /event/:id', () => {
+    const path = (id: string) => `/event/${id}`
+
+    it('should return unauthorized if not authenticated', async () => {
+      const request = await getRequest()
+
+      await request.delete(path(uuid())).expect(401)
+    })
+
+    describe('when user is authenticated', () => {
+      let request: RequestApp
+      let currentUserId: string
+
+      beforeEach(async () => {
+        request = await getRequest({ signedAs: 'BASE_USER' })
+        currentUserId = await fixtures.getSignedUserId('BASE_USER')
+      })
+
+      it('should return 404 when event not exists', async () => {
+        await request.delete(path(uuid())).expect(404)
+      })
+
+      it('should return 404 when user is not maintainer of the event', async () => {
+        const otherUserId = await fixtures.insertUser({
+          email: 'other@test.com',
+          firstname: 'Other',
+          lastname: 'User',
+        })
+
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Event',
+          description: 'Description',
+          eventDate: DateTime.now().plus({ days: 1 }).toJSDate(),
+          maintainerId: otherUserId,
+        })
+
+        await request.delete(path(eventId)).expect(401)
+
+        await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(1).check()
+      })
+
+      it('should delete event successfully when user is maintainer', async () => {
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Event to Delete',
+          description: 'Description',
+          eventDate: DateTime.now().plus({ days: 1 }).toJSDate(),
+          maintainerId: currentUserId,
+        })
+
+        await fixtures.insertWishlist({
+          eventId,
+          userId: currentUserId,
+          title: 'Test Wishlist',
+        })
+
+        await request.delete(path(eventId)).expect(200)
+
+        await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(0).check()
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(0).check()
+        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(0).check()
+      })
+
+      it('should delete event with attendees and related data', async () => {
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Event to Delete',
+          description: 'Description',
+          eventDate: DateTime.now().plus({ days: 1 }).toJSDate(),
+          maintainerId: currentUserId,
+        })
+
+        const otherUserId = await fixtures.insertUser({
+          email: 'other@test.com',
+          firstname: 'Other',
+          lastname: 'User',
+        })
+
+        await fixtures.insertActiveAttendee({
+          eventId,
+          userId: otherUserId,
+        })
+
+        await fixtures.insertPendingAttendee({
+          eventId,
+          tempUserEmail: 'pending@test.com',
+        })
+
+        await fixtures.insertWishlist({
+          eventId,
+          userId: currentUserId,
+          title: 'Maintainer Wishlist',
+        })
+
+        await fixtures.insertWishlist({
+          eventId,
+          userId: otherUserId,
+          title: 'Other User Wishlist',
+        })
+
+        await request.delete(path(eventId)).expect(200)
+
+        await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(0).check()
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(0).check()
+        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(0).check()
+      })
+    })
+  })
 })

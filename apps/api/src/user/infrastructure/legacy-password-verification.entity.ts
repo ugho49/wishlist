@@ -1,8 +1,8 @@
 import { UserId, UserPasswordVerificationId, uuid } from '@wishlist/common'
 import { Column, Entity, ManyToOne, PrimaryColumn, RelationId } from 'typeorm'
 
-import { TimestampEntity } from '../../core/database'
-import { UserEntity } from '../index'
+import { TimestampEntity } from '../../core'
+import { UserEntity } from './legacy-user.entity'
 
 @Entity('user_password_verification')
 export class PasswordVerificationEntity extends TimestampEntity {

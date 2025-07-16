@@ -1,14 +1,14 @@
 import { ForbiddenException, Inject } from '@nestjs/common'
 import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
 
-import { AttendeeRepository } from '../../../attendee/domain/attendee.repository'
-import { Event } from '../../../event/domain/event.model'
-import { ATTENDEE_REPOSITORY, SECRET_SANTA_REPOSITORY } from '../../../repositories/repositories.tokens'
-import { DeleteSecretSantaCommand } from '../../domain/command/delete-secret-santa.command'
-import { SecretSantaRepository } from '../../domain/repository/secret-santa.repository'
+import { AttendeeRepository } from '../../attendee/domain/attendee.repository'
+import { Event } from '../../event/domain/event.model'
+import { ATTENDEE_REPOSITORY, SECRET_SANTA_REPOSITORY } from '../../repositories/repositories.tokens'
+import { DeleteSecretSantaCommand } from '../domain/command/delete-secret-santa.command'
+import { SecretSantaRepository } from '../domain/repository/secret-santa.repository'
 
 @CommandHandler(DeleteSecretSantaCommand)
-export class DeleteSecretSantaHandler implements IInferredCommandHandler<DeleteSecretSantaCommand> {
+export class DeleteSecretSantaUseCase implements IInferredCommandHandler<DeleteSecretSantaCommand> {
   constructor(
     @Inject(SECRET_SANTA_REPOSITORY) private readonly secretSantaRepository: SecretSantaRepository,
     @Inject(ATTENDEE_REPOSITORY) private readonly attendeeRepository: AttendeeRepository,

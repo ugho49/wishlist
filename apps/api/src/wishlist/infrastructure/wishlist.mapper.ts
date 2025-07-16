@@ -8,10 +8,10 @@ import type {
 
 import type { WishlistEntity } from './wishlist.entity'
 
-import { toMiniEventDto } from '../event/infrastructure/legacy-event.mapper'
-import { toItemDto } from '../item/item.mapper'
-import { displayItemSensitiveInformations, showItem } from '../item/item.utils'
-import { toMiniUserDto } from '../user'
+import { toMiniEventDto } from '../../event/infrastructure/legacy-event.mapper'
+import { toItemDto } from '../../item/infrastructure/item.mapper'
+import { displayItemSensitiveInformations, showItem } from '../../item/infrastructure/item.utils'
+import { toMiniUserDto } from '../../user'
 
 function getConfig(entity: WishlistEntity): WishlistConfigDto {
   return { hide_items: entity.hideItems }

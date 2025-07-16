@@ -1,10 +1,10 @@
 import { UserId, uuid, WishlistId } from '@wishlist/common'
 import { Column, Entity, ManyToMany, ManyToOne, OneToMany, PrimaryColumn, RelationId } from 'typeorm'
 
-import { TimestampEntity } from '../core/database'
-import { EventEntity } from '../event/infrastructure/legacy-event.entity'
-import { ItemEntity } from '../item/item.entity'
-import { UserEntity } from '../user'
+import { TimestampEntity } from '../../core/database'
+import { EventEntity } from '../../event/infrastructure/legacy-event.entity'
+import { ItemEntity } from '../../item/infrastructure/item.entity'
+import { UserEntity } from '../../user'
 
 @Entity('wishlist')
 export class WishlistEntity extends TimestampEntity {

@@ -82,3 +82,188 @@ This is an Nx monorepo containing a wishlist application with React 19 frontend 
 - **Code Quality**: ESLint with security rules, Prettier with import sorting
 - **Git Hooks**: Husky for pre-commit formatting and conventional commit validation
 - **Package Manager**: Yarn 4.9.2 with workspaces
+
+## Integration Testing Guidelines
+
+### Core Testing Principles
+When writing integration tests for controllers, follow these mandatory rules:
+
+#### 1. Test Structure and Organization
+- **File naming**: Use `.int-spec.ts` suffix for integration tests
+- **Test organization**: Group tests by HTTP method (GET, POST, PUT, DELETE)
+- **Nested describe blocks**: Use authentication state as primary grouping within each method
+- **Authentication tests**: Always test unauthenticated requests first (expect 401)
+- **Test isolation**: Use `beforeEach` to reset fixtures and request instances
+
+#### 2. Required Test Utilities
+```typescript
+// Always import these from useTestApp
+const { getRequest, getFixtures, expectTable } = useTestApp()
+```
+
+#### 3. Authentication Testing Pattern
+```typescript
+describe('POST /resource', () => {
+  it('should return unauthorized if not authenticated', async () => {
+    const request = await getRequest()
+    await request.post(path).send(validData).expect(401)
+  })
+
+  describe('when user is authenticated', () => {
+    let request: RequestApp
+    let currentUserId: string
+
+    beforeEach(async () => {
+      request = await getRequest({ signedAs: 'BASE_USER' })
+      currentUserId = await fixtures.getSignedUserId('BASE_USER')
+    })
+    // ... authenticated tests
+  })
+})
+```
+
+#### 4. Dynamic Validation Testing
+Use `it.each` for testing multiple validation scenarios:
+```typescript
+it.each([
+  {
+    body: {},
+    case: 'empty body',
+    message: ['field must not be empty', 'field must be a string'],
+  },
+  {
+    body: { field: 'invalid' },
+    case: 'invalid field',
+    message: ['field must be a valid enum value'],
+  },
+])('should return 400 when invalid input: $case', async ({ body, message }) => {
+  await request
+    .post(path)
+    .send(body)
+    .expect(400)
+    .expect(({ body }) =>
+      expect(body).toMatchObject({ 
+        error: 'Bad Request', 
+        message: expect.arrayContaining(message) 
+      })
+    )
+})
+```
+
+#### 5. Database Verification (MANDATORY)
+Every test that creates, updates, or deletes data MUST verify the database state:
+```typescript
+// For creation tests
+const response = await request.post(path).send(data).expect(201)
+const createdId = response.body.id
+
+await expectTable(Fixtures.TABLE_NAME)
+  .hasNumberOfRows(1)
+  .row(0)
+  .toMatchObject({
+    id: createdId,
+    field: 'expected_value',
+    created_at: expect.toBeDate(),
+    updated_at: expect.toBeDate(),
+  })
+  .check()
+
+// For update tests
+await request.put(path(id)).send(updateData).expect(200)
+
+await expectTable(Fixtures.TABLE_NAME)
+  .hasNumberOfRows(1)
+  .row(0)
+  .toMatchObject({
+    id: id,
+    field: 'updated_value',
+    updated_at: expect.toBeDate(),
+  })
+  .check()
+
+// For deletion tests
+await request.delete(path(id)).expect(200)
+await expectTable(Fixtures.TABLE_NAME).hasNumberOfRows(0).check()
+```
+
+#### 6. Permission Testing
+Always test authorization scenarios:
+```typescript
+it('should return 404 when user is not maintainer/owner', async () => {
+  const otherUserId = await fixtures.insertUser({
+    email: 'other@test.com',
+    firstname: 'Other',
+    lastname: 'User',
+  })
+
+  const { resourceId } = await fixtures.insertResourceWithOwner({
+    ownerId: otherUserId,
+    // ... other fields
+  })
+
+  await request.method(path(resourceId)).send(data).expect(404)
+  
+  // Verify no changes were made
+  await expectTable(Fixtures.TABLE_NAME).hasNumberOfRows(1).check()
+})
+```
+
+#### 7. Response Validation
+Always validate response structure:
+```typescript
+.expect(({ body }) => {
+  expect(body).toEqual({
+    id: expect.toBeString(),
+    field: 'expected_value',
+    created_at: expect.toBeDateString(),
+    updated_at: expect.toBeDateString(),
+  })
+})
+```
+
+#### 8. Edge Cases and Error Handling
+- **Non-existent resources**: Test 404 responses
+- **Invalid UUIDs**: Test with malformed IDs
+- **Cascade deletions**: Verify related data is properly handled
+- **Complex relationships**: Test scenarios with multiple related entities
+
+#### 9. Test Data Management
+- Use `fixtures.insertX()` methods for test data creation
+- Always use branded types (EventId, UserId, etc.) consistently
+- Create realistic test scenarios with proper relationships
+- Use `DateTime.now().plus({ days: 1 })` for future dates
+- Use `DateTime.now().minus({ days: 1 })` for past dates
+
+#### 10. Common Test Patterns
+```typescript
+// Test creation with relationships
+it('should create resource with related data', async () => {
+  const relatedId = await fixtures.insertRelatedResource({...})
+  
+  const response = await request.post(path).send({
+    field: 'value',
+    related_ids: [relatedId]
+  }).expect(201)
+  
+  // Verify main table
+  await expectTable(Fixtures.MAIN_TABLE).hasNumberOfRows(1).check()
+  
+  // Verify junction table
+  await expectTable(Fixtures.JUNCTION_TABLE).hasNumberOfRows(1).check()
+})
+```
+
+### Mandatory Checklist for Integration Tests
+- [ ] Authentication test (401 for unauthenticated requests)
+- [ ] Dynamic validation tests using `it.each`
+- [ ] Database verification with `expectTable` for all mutations
+- [ ] Permission/authorization tests
+- [ ] Response structure validation
+- [ ] Error handling for non-existent resources
+- [ ] Cascade operations testing (where applicable)
+- [ ] Proper fixtures usage and cleanup
+
+### Examples to Follow
+- `apps/api/src/user/infrastructure/controllers/user.controller.int-spec.ts`
+- `apps/api/src/secret-santa/infrastructure/secret-santa.controller.int-spec.ts`
+- `apps/api/src/event/infrastructure/event.controller.int-spec.ts`

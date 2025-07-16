@@ -1,15 +1,15 @@
 import { BadRequestException, ForbiddenException, Inject } from '@nestjs/common'
 import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
 
-import { AttendeeRepository } from '../../../attendee/domain/attendee.repository'
-import { Event } from '../../../event/domain/event.model'
-import { ATTENDEE_REPOSITORY, SECRET_SANTA_REPOSITORY, SECRET_SANTA_USER_REPOSITORY } from '../../../repositories'
-import { UpdateSecretSantaUserCommand } from '../../domain/command/update-secret-santa-user.command'
-import { SecretSantaUserRepository } from '../../domain/repository/secret-santa-user.repository'
-import { SecretSantaRepository } from '../../domain/repository/secret-santa.repository'
+import { AttendeeRepository } from '../../attendee/domain/attendee.repository'
+import { Event } from '../../event/domain/event.model'
+import { ATTENDEE_REPOSITORY, SECRET_SANTA_REPOSITORY, SECRET_SANTA_USER_REPOSITORY } from '../../repositories'
+import { UpdateSecretSantaUserCommand } from '../domain/command/update-secret-santa-user.command'
+import { SecretSantaUserRepository } from '../domain/repository/secret-santa-user.repository'
+import { SecretSantaRepository } from '../domain/repository/secret-santa.repository'
 
 @CommandHandler(UpdateSecretSantaUserCommand)
-export class UpdateSecretSantaUserHandler implements IInferredCommandHandler<UpdateSecretSantaUserCommand> {
+export class UpdateSecretSantaUserUseCase implements IInferredCommandHandler<UpdateSecretSantaUserCommand> {
   constructor(
     @Inject(SECRET_SANTA_REPOSITORY) private readonly secretSantaRepository: SecretSantaRepository,
     @Inject(SECRET_SANTA_USER_REPOSITORY) private readonly secretSantaUserRepository: SecretSantaUserRepository,

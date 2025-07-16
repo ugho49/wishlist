@@ -5,14 +5,14 @@ import { LoggerModule } from 'pino-nestjs'
 
 import { AttendeeModule } from './attendee/attendee.module'
 import { AuthModule } from './auth/auth.module'
-import { CoreModule } from './core/core.module'
+import { CoreModule } from './core'
 import { EventModule } from './event/event.module'
 import { pinoLoggerConfig } from './helpers'
-import { ItemModule } from './item/item.module'
-import { RepositoriesModule } from './repositories/repositories.module'
-import { SecretSantaModule } from './secret-santa/secret-santa.module'
-import { UserModule } from './user/user.module'
-import { WishlistModule } from './wishlist/wishlist.module'
+import { ItemModule } from './item'
+import { RepositoriesModule } from './repositories'
+import { SecretSantaModule } from './secret-santa'
+import { UserModule } from './user'
+import { WishlistModule } from './wishlist'
 
 @Module({
   imports: [
