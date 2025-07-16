@@ -23,7 +23,7 @@ export class AttendeeEntity {
   readonly event!: Promise<EventEntity>
 
   @ManyToOne(() => UserEntity)
-  readonly user!: Promise<UserEntity | null>
+  user!: Promise<UserEntity | null>
 
   @Column({ name: 'temp_user_email', type: 'varchar', nullable: true })
   email?: string | null

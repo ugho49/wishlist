@@ -97,7 +97,7 @@ When writing integration tests for controllers, follow these mandatory rules:
 
 #### 2. Required Test Utilities
 ```typescript
-// Always import these from useTestApp
+// Always import these from useTestApp (import { useTestApp } from '@wishlist/api-test-utils')
 const { getRequest, getFixtures, expectTable } = useTestApp()
 ```
 

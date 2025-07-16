@@ -59,6 +59,8 @@ export class LegacyAttendeeService {
 
     try {
       if (user) {
+        attendeeEntity.user = Promise.resolve(user)
+
         await this.eventMailer.sendEmailForExistingAttendee({
           emails: dto.email,
           event: eventEntity,

@@ -37,9 +37,9 @@ export class UpdateItemInputDto {
   @IsOptional()
   description?: string
 
+  @IsUrl()
   @MaxLength(1000)
   @IsOptional()
-  @IsUrl()
   url?: string
 
   @Min(0)
@@ -48,8 +48,8 @@ export class UpdateItemInputDto {
   @IsOptional()
   score?: number
 
-  @MaxLength(1000)
   @IsUrl()
+  @MaxLength(1000)
   @IsOptional()
   picture_url?: string
 }
