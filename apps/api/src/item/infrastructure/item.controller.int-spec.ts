@@ -678,99 +678,588 @@ describe('ItemController', () => {
   })
 
   describe('DELETE /item/:id', () => {
+    const path = (id: string) => `/item/${id}`
+
     it('should return unauthorized if not authenticated', async () => {
       const request = await getRequest()
-      // TODO: Implement test
+      const itemId = uuid()
+      await request.delete(path(itemId)).expect(401)
     })
 
     describe('when user is authenticated', () => {
-      let request: any
-      let fixtures: any
+      let request: RequestApp
       let currentUserId: string
 
       beforeEach(async () => {
-        fixtures = await getFixtures()
         request = await getRequest({ signedAs: 'BASE_USER' })
         currentUserId = await fixtures.getSignedUserId('BASE_USER')
       })
 
       it('should delete item successfully', async () => {
-        // TODO: Implement test
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Test Event',
+          description: 'Description',
+          maintainerId: currentUserId,
+        })
+
+        const wishlistId = await fixtures.insertWishlist({
+          eventIds: [eventId],
+          userId: currentUserId,
+          title: 'My Wishlist',
+        })
+
+        const itemId = await fixtures.insertItem({
+          wishlistId,
+          name: 'Test Item',
+          description: 'Test description',
+        })
+
+        await request.delete(path(itemId)).expect(200)
+
+        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(0).check()
       })
 
       it('should return 404 when item not found', async () => {
-        // TODO: Implement test
+        const nonExistentItemId = uuid()
+
+        await request.delete(path(nonExistentItemId)).expect(404)
       })
 
       it('should return 404 when user does not have access to item', async () => {
-        // TODO: Implement test
+        const otherUserId = await fixtures.insertUser({
+          email: 'other@test.com',
+          firstname: 'Other',
+          lastname: 'User',
+        })
+
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Test Event',
+          description: 'Description',
+          maintainerId: otherUserId,
+        })
+
+        const wishlistId = await fixtures.insertWishlist({
+          eventIds: [eventId],
+          userId: otherUserId,
+          title: 'Other Wishlist',
+        })
+
+        const itemId = await fixtures.insertItem({
+          wishlistId,
+          name: 'Test Item',
+        })
+
+        await request.delete(path(itemId)).expect(404)
+
+        // Verify item still exists
+        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1).check()
       })
 
       it('should return 404 when trying to delete suggested item as list owner', async () => {
-        // TODO: Implement test
+        const otherUserId = await fixtures.insertUser({
+          email: 'other@test.com',
+          firstname: 'Other',
+          lastname: 'User',
+        })
+
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Test Event',
+          description: 'Description',
+          maintainerId: currentUserId,
+        })
+
+        await fixtures.insertActiveAttendee({
+          eventId,
+          userId: otherUserId,
+          role: AttendeeRole.USER,
+        })
+
+        const wishlistId = await fixtures.insertWishlist({
+          eventIds: [eventId],
+          userId: currentUserId,
+          title: 'My Wishlist',
+        })
+
+        const itemId = await fixtures.insertItem({
+          wishlistId,
+          name: 'Suggested Item',
+          isSuggested: true,
+        })
+
+        await request.delete(path(itemId)).expect(404)
+
+        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1).check()
       })
 
       it('should return 401 when trying to delete suggested item taken by someone else', async () => {
-        // TODO: Implement test
+        const otherUserId = await fixtures.insertUser({
+          email: 'other@test.com',
+          firstname: 'Other',
+          lastname: 'User',
+        })
+
+        const thirdUserId = await fixtures.insertUser({
+          email: 'third@test.com',
+          firstname: 'Third',
+          lastname: 'User',
+        })
+
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Test Event',
+          description: 'Description',
+          maintainerId: otherUserId,
+        })
+
+        await fixtures.insertActiveAttendee({
+          eventId,
+          userId: currentUserId,
+          role: AttendeeRole.USER,
+        })
+
+        await fixtures.insertActiveAttendee({
+          eventId,
+          userId: thirdUserId,
+          role: AttendeeRole.USER,
+        })
+
+        const wishlistId = await fixtures.insertWishlist({
+          eventIds: [eventId],
+          userId: otherUserId,
+          title: 'Other Wishlist',
+        })
+
+        const itemId = await fixtures.insertItem({
+          wishlistId,
+          name: 'Suggested Item',
+          isSuggested: true,
+          takerId: thirdUserId,
+          takenAt: new Date(),
+        })
+
+        await request
+          .delete(path(itemId))
+          .expect(401)
+          .expect(({ body }) => {
+            expect(body).toMatchObject({
+              error: 'Unauthorized',
+              message: 'You cannot delete this item, is already taken',
+            })
+          })
+
+        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1).check()
       })
 
       it('should return 401 when trying to delete non-suggested item as non-owner', async () => {
-        // TODO: Implement test
+        const otherUserId = await fixtures.insertUser({
+          email: 'other@test.com',
+          firstname: 'Other',
+          lastname: 'User',
+        })
+
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Test Event',
+          description: 'Description',
+          maintainerId: otherUserId,
+        })
+
+        await fixtures.insertActiveAttendee({
+          eventId,
+          userId: currentUserId,
+          role: AttendeeRole.USER,
+        })
+
+        const wishlistId = await fixtures.insertWishlist({
+          eventIds: [eventId],
+          userId: otherUserId,
+          title: 'Other Wishlist',
+        })
+
+        const itemId = await fixtures.insertItem({
+          wishlistId,
+          name: 'Regular Item',
+          isSuggested: false,
+        })
+
+        await request
+          .delete(path(itemId))
+          .expect(401)
+          .expect(({ body }) => {
+            expect(body).toMatchObject({
+              error: 'Unauthorized',
+              message: 'You cannot delete this item, only the creator of the list can',
+            })
+          })
+
+        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1).check()
       })
 
       it('should convert to suggested item when deleting taken non-suggested item', async () => {
-        // TODO: Implement test
+        const otherUserId = await fixtures.insertUser({
+          email: 'other@test.com',
+          firstname: 'Other',
+          lastname: 'User',
+        })
+
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Test Event',
+          description: 'Description',
+          maintainerId: currentUserId,
+        })
+
+        await fixtures.insertActiveAttendee({
+          eventId,
+          userId: otherUserId,
+          role: AttendeeRole.USER,
+        })
+
+        const wishlistId = await fixtures.insertWishlist({
+          eventIds: [eventId],
+          userId: currentUserId,
+          title: 'My Wishlist',
+        })
+
+        const takenAt = new Date()
+
+        const itemId = await fixtures.insertItem({
+          wishlistId,
+          name: 'Taken Item',
+          isSuggested: false,
+          takerId: otherUserId,
+          takenAt,
+        })
+
+        await request.delete(path(itemId)).expect(200)
+
+        // Verify item is converted to suggested instead of deleted
+        await expectTable(Fixtures.ITEM_TABLE)
+          .hasNumberOfRows(1)
+          .row(0)
+          .toMatchObject({
+            id: itemId,
+            name: 'Taken Item',
+            is_suggested: true,
+            taker_id: otherUserId,
+            taken_at: takenAt,
+          })
+          .check()
       })
     })
   })
 
   describe('POST /item/:id/toggle', () => {
+    const path = (id: string) => `/item/${id}/toggle`
+
     it('should return unauthorized if not authenticated', async () => {
       const request = await getRequest()
-      // TODO: Implement test
+      const itemId = uuid()
+      await request.post(path(itemId)).expect(401)
     })
 
     describe('when user is authenticated', () => {
-      let request: any
-      let fixtures: any
+      let request: RequestApp
       let currentUserId: string
 
       beforeEach(async () => {
-        fixtures = await getFixtures()
         request = await getRequest({ signedAs: 'BASE_USER' })
         currentUserId = await fixtures.getSignedUserId('BASE_USER')
       })
 
       it('should toggle item (check) successfully', async () => {
-        // TODO: Implement test
+        const otherUserId = await fixtures.insertUser({
+          email: 'other@test.com',
+          firstname: 'Other',
+          lastname: 'User',
+        })
+
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Test Event',
+          description: 'Description',
+          maintainerId: otherUserId,
+        })
+
+        await fixtures.insertActiveAttendee({
+          eventId,
+          userId: currentUserId,
+          role: AttendeeRole.USER,
+        })
+
+        const wishlistId = await fixtures.insertWishlist({
+          eventIds: [eventId],
+          userId: otherUserId,
+          title: 'Other Wishlist',
+        })
+
+        const itemId = await fixtures.insertItem({
+          wishlistId,
+          name: 'Test Item',
+          isSuggested: false,
+        })
+
+        await request
+          .post(path(itemId))
+          .expect(201)
+          .expect(({ body }) => {
+            expect(body).toEqual({
+              taken_by: {
+                id: currentUserId,
+                email: 'test@test.fr',
+                firstname: 'John',
+                lastname: 'Doe',
+              },
+              taken_at: expect.toBeDateString(),
+            })
+          })
+
+        await expectTable(Fixtures.ITEM_TABLE)
+          .hasNumberOfRows(1)
+          .row(0)
+          .toMatchObject({
+            id: itemId,
+            name: 'Test Item',
+            taker_id: currentUserId,
+            taken_at: expect.toBeDate(),
+          })
+          .check()
       })
 
       it('should toggle item (uncheck) successfully', async () => {
-        // TODO: Implement test
+        const otherUserId = await fixtures.insertUser({
+          email: 'other@test.com',
+          firstname: 'Other',
+          lastname: 'User',
+        })
+
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Test Event',
+          description: 'Description',
+          maintainerId: otherUserId,
+        })
+
+        await fixtures.insertActiveAttendee({
+          eventId,
+          userId: currentUserId,
+          role: AttendeeRole.USER,
+        })
+
+        const wishlistId = await fixtures.insertWishlist({
+          eventIds: [eventId],
+          userId: otherUserId,
+          title: 'Other Wishlist',
+        })
+
+        const itemId = await fixtures.insertItem({
+          wishlistId,
+          name: 'Test Item',
+          isSuggested: false,
+          takerId: currentUserId,
+          takenAt: new Date(),
+        })
+
+        await request
+          .post(path(itemId))
+          .expect(201)
+          .expect(({ body }) => {
+            expect(body).toEqual({})
+          })
+
+        await expectTable(Fixtures.ITEM_TABLE)
+          .hasNumberOfRows(1)
+          .row(0)
+          .toMatchObject({
+            id: itemId,
+            name: 'Test Item',
+            taker_id: null,
+            taken_at: null,
+          })
+          .check()
       })
 
       it('should return 404 when item not found', async () => {
-        // TODO: Implement test
+        const nonExistentItemId = uuid()
+
+        await request.post(path(nonExistentItemId)).expect(404)
       })
 
       it('should return 404 when user does not have access to item', async () => {
-        // TODO: Implement test
+        const otherUserId = await fixtures.insertUser({
+          email: 'other@test.com',
+          firstname: 'Other',
+          lastname: 'User',
+        })
+
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Test Event',
+          description: 'Description',
+          maintainerId: otherUserId,
+        })
+
+        const wishlistId = await fixtures.insertWishlist({
+          eventIds: [eventId],
+          userId: otherUserId,
+          title: 'Other Wishlist',
+        })
+
+        const itemId = await fixtures.insertItem({
+          wishlistId,
+          name: 'Test Item',
+        })
+
+        await request.post(path(itemId)).expect(404)
       })
 
       it('should return 404 when trying to check suggested item as list owner with hideItems', async () => {
-        // TODO: Implement test
+        const otherUserId = await fixtures.insertUser({
+          email: 'other@test.com',
+          firstname: 'Other',
+          lastname: 'User',
+        })
+
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Test Event',
+          description: 'Description',
+          maintainerId: currentUserId,
+        })
+
+        await fixtures.insertActiveAttendee({
+          eventId,
+          userId: otherUserId,
+          role: AttendeeRole.USER,
+        })
+
+        const wishlistId = await fixtures.insertWishlist({
+          eventIds: [eventId],
+          userId: currentUserId,
+          title: 'My Wishlist',
+          hideItems: true,
+        })
+
+        const itemId = await fixtures.insertItem({
+          wishlistId,
+          name: 'Suggested Item',
+          isSuggested: true,
+        })
+
+        await request.post(path(itemId)).expect(404)
       })
 
       it('should return 401 when trying to check own items as list owner with hideItems', async () => {
-        // TODO: Implement test
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Test Event',
+          description: 'Description',
+          maintainerId: currentUserId,
+        })
+
+        const wishlistId = await fixtures.insertWishlist({
+          eventIds: [eventId],
+          userId: currentUserId,
+          title: 'My Wishlist',
+          hideItems: true,
+        })
+
+        const itemId = await fixtures.insertItem({
+          wishlistId,
+          name: 'My Item',
+          isSuggested: false,
+        })
+
+        await request
+          .post(path(itemId))
+          .expect(401)
+          .expect(({ body }) => {
+            expect(body).toMatchObject({
+              error: 'Unauthorized',
+              message: 'You cannot check your own items',
+            })
+          })
       })
 
       it('should return 401 when trying to uncheck item taken by someone else', async () => {
-        // TODO: Implement test
+        const otherUserId = await fixtures.insertUser({
+          email: 'other@test.com',
+          firstname: 'Other',
+          lastname: 'User',
+        })
+
+        const thirdUserId = await fixtures.insertUser({
+          email: 'third@test.com',
+          firstname: 'Third',
+          lastname: 'User',
+        })
+
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Test Event',
+          description: 'Description',
+          maintainerId: otherUserId,
+        })
+
+        await fixtures.insertActiveAttendee({
+          eventId,
+          userId: currentUserId,
+          role: AttendeeRole.USER,
+        })
+
+        await fixtures.insertActiveAttendee({
+          eventId,
+          userId: thirdUserId,
+          role: AttendeeRole.USER,
+        })
+
+        const wishlistId = await fixtures.insertWishlist({
+          eventIds: [eventId],
+          userId: otherUserId,
+          title: 'Other Wishlist',
+        })
+
+        const itemId = await fixtures.insertItem({
+          wishlistId,
+          name: 'Test Item',
+          isSuggested: false,
+          takerId: thirdUserId,
+          takenAt: new Date(),
+        })
+
+        await request
+          .post(path(itemId))
+          .expect(401)
+          .expect(({ body }) => {
+            expect(body).toMatchObject({
+              error: 'Unauthorized',
+              message: 'You cannot uncheck this item, you are not the one who as check it',
+            })
+          })
       })
 
       it('should return 401 when trying to uncheck own items as list owner with hideItems', async () => {
-        // TODO: Implement test
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Test Event',
+          description: 'Description',
+          maintainerId: currentUserId,
+        })
+
+        const wishlistId = await fixtures.insertWishlist({
+          eventIds: [eventId],
+          userId: currentUserId,
+          title: 'My Wishlist',
+          hideItems: true,
+        })
+
+        const itemId = await fixtures.insertItem({
+          wishlistId,
+          name: 'My Item',
+          isSuggested: false,
+          takerId: currentUserId,
+          takenAt: new Date(),
+        })
+
+        await request
+          .post(path(itemId))
+          .expect(401)
+          .expect(({ body }) => {
+            expect(body).toMatchObject({
+              error: 'Unauthorized',
+              message: 'You cannot uncheck your own items',
+            })
+          })
       })
     })
   })
