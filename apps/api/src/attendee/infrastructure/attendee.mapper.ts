@@ -8,7 +8,7 @@ function toAttendeeDto(model: Attendee): AttendeeDto {
   return {
     id: model.id,
     user: model.user ? userMapper.toMiniUserDto(model.user) : undefined,
-    pending_email: model.email || undefined,
+    pending_email: model.pendingEmail || undefined,
     role: model.role,
   }
 }

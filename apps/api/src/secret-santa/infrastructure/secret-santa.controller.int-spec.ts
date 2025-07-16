@@ -618,13 +618,12 @@ describe('SecretSantaController', () => {
         })
         .check()
 
-      // TODO: fix this -->
-      // await expectMail()
-      //   .waitFor(500)
-      //   .hasNumberOfEmails(2)
-      //   .hasSubject("[Wishlist] Le secret santa viens d'être annulé")
-      //   .hasReceivers([Fixtures.BASE_USER_EMAIL, 'user2@test.fr'])
-      //   .check()
+      await expectMail()
+        .waitFor(500)
+        .hasNumberOfEmails(1)
+        .hasSubject("[Wishlist] Le secret santa viens d'être annulé")
+        .hasReceivers([Fixtures.BASE_USER_EMAIL, 'user2@test.fr'])
+        .check()
     })
 
     it('should return an error when user is not the maintainer', async () => {

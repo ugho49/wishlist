@@ -71,14 +71,14 @@ export class PostgresAttendeeRepository implements AttendeeRepository {
         id: attendee.id,
         eventId: attendee.eventId,
         userId: attendee.user?.id ?? null,
-        tempUserEmail: attendee.email ?? null,
+        tempUserEmail: attendee.pendingEmail ?? null,
         role: attendee.role,
       })
       .onConflictDoUpdate({
         target: schema.eventAttendee.id,
         set: {
           userId: attendee.user?.id ?? null,
-          tempUserEmail: attendee.email ?? null,
+          tempUserEmail: attendee.pendingEmail ?? null,
           role: attendee.role,
         },
       })
@@ -97,7 +97,7 @@ export class PostgresAttendeeRepository implements AttendeeRepository {
       id: attendee.id,
       eventId: attendee.eventId,
       user: attendee.user ? PostgresUserRepository.toModel(attendee.user) : undefined,
-      email: attendee.tempUserEmail ?? undefined,
+      pendingEmail: attendee.tempUserEmail ?? undefined,
       role: attendee.role as AttendeeRole,
     })
   }

@@ -7,7 +7,7 @@ export type AttendeeProps = {
   id: AttendeeId
   eventId: EventId
   user?: User
-  email?: string
+  pendingEmail?: string
   role: AttendeeRole
 }
 
@@ -15,23 +15,27 @@ export class Attendee {
   public readonly id: AttendeeId
   public readonly eventId: EventId
   public readonly user?: User
-  public readonly email?: string
+  public readonly pendingEmail?: string
   public readonly role: AttendeeRole
 
   constructor(props: AttendeeProps) {
     this.id = props.id
     this.eventId = props.eventId
     this.user = props.user
-    this.email = props.email
+    this.pendingEmail = props.pendingEmail
     this.role = props.role
   }
 
-  static create(param: { eventId: EventId; user?: User; email?: string; role?: AttendeeRole }): Attendee {
+  static create(param: { eventId: EventId; user?: User; pendingEmail?: string; role?: AttendeeRole }): Attendee {
+    if (param.user && param.pendingEmail) {
+      throw new Error('Params "user" and "pendingEmail" cannot be provided together')
+    }
+
     return new Attendee({
       id: uuid() as AttendeeId,
       eventId: param.eventId,
       user: param.user,
-      email: param.email,
+      pendingEmail: param.pendingEmail,
       role: param.role ?? AttendeeRole.USER,
     })
   }
@@ -41,29 +45,29 @@ export class Attendee {
       id: uuid() as AttendeeId,
       eventId: param.eventId,
       user: param.user,
-      email: undefined,
+      pendingEmail: undefined,
       role: param.role,
     })
   }
 
-  static fromNonExistingUser(param: { eventId: EventId; email: string; role: AttendeeRole }): Attendee {
+  static fromNonExistingUser(param: { eventId: EventId; pendingEmail: string; role: AttendeeRole }): Attendee {
     return new Attendee({
       id: uuid() as AttendeeId,
       eventId: param.eventId,
       user: undefined,
-      email: param.email,
+      pendingEmail: param.pendingEmail,
       role: param.role,
     })
   }
 
   getUserEmailOrPendingEmail(): string {
-    return this.user?.email ?? this.email ?? ''
+    return this.user?.email ?? this.pendingEmail ?? ''
   }
 
   getUserFullNameOrPendingEmail(): string {
     return this.user?.firstName && this.user?.lastName
       ? `${this.user.firstName} ${this.user.lastName}`
-      : (this.email ?? '')
+      : (this.pendingEmail ?? '')
   }
 
   isLinkedToUser(): boolean {
@@ -71,6 +75,6 @@ export class Attendee {
   }
 
   isTemporaryAttendee(): boolean {
-    return this.user === undefined && this.email !== undefined
+    return this.pendingEmail !== undefined
   }
 }

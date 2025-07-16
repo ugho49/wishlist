@@ -45,7 +45,7 @@ export class CancelSecretSantaUseCase implements IInferredCommandHandler<CancelS
 
     const attendeeIds = cancelledSecretSanta.users.map(user => user.attendeeId)
     const attendees = await this.attendeeRepository.findByIds(attendeeIds)
-    const attendeeEmails = attendees.map(attendee => attendee.email || '').filter(email => email !== '')
+    const attendeeEmails = attendees.map(attendee => attendee.getUserEmailOrPendingEmail())
 
     await this.eventBus.publish(
       new SecretSantaCancelledEvent({
