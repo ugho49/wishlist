@@ -14,11 +14,11 @@ export class AttendeeDto {
 }
 
 export class AddEventAttendeeInputDto {
+  @Transform(({ value }) => value.toLowerCase())
+  @MaxLength(200)
   @IsEmail()
   @IsString()
   @IsNotEmpty()
-  @MaxLength(200)
-  @Transform(({ value }) => value.toLowerCase())
   email!: string
 
   @IsEnum(AttendeeRole)

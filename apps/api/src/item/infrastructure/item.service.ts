@@ -1,7 +1,15 @@
 import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common'
 import { LegacyUserRepository, toMiniUserDto } from '@wishlist/api/user'
 import { LegacyWishlistRepository } from '@wishlist/api/wishlist'
-import { AddItemForListInputDto, AddItemInputDto, ItemDto, ItemId, ToggleItemOutputDto, UserId } from '@wishlist/common'
+import {
+  AddItemForListInputDto,
+  ItemDto,
+  ItemId,
+  ToggleItemOutputDto,
+  UpdateItemInputDto,
+  UserId,
+} from '@wishlist/common'
+import { TidyURL } from 'tidy-url'
 
 import { ItemEntity } from './item.entity'
 import { toItemDto } from './item.mapper'
@@ -32,7 +40,7 @@ export class ItemService {
       name: dto.name,
       description: dto.description,
       score: dto.score,
-      url: dto.url,
+      url: dto.url ? TidyURL.clean(dto.url).url : undefined,
       pictureUrl: dto.picture_url,
       isSuggested,
       wishlistId: wishlistEntity.id,
@@ -43,7 +51,7 @@ export class ItemService {
     return toItemDto({ entity: itemEntity, displayUserAndSuggested: true })
   }
 
-  async update(param: { itemId: ItemId; currentUserId: UserId; dto: AddItemInputDto }): Promise<void> {
+  async update(param: { itemId: ItemId; currentUserId: UserId; dto: UpdateItemInputDto }): Promise<void> {
     const { itemId, dto, currentUserId } = param
     const itemEntity = await this.itemRepository.findByIdAndUserIdOrFail({ itemId, userId: currentUserId })
     const wishlistEntity = await itemEntity.wishlist
@@ -64,7 +72,7 @@ export class ItemService {
     await this.itemRepository.updateById(itemId, {
       name: dto.name,
       description: dto.description || null,
-      url: dto.url || null,
+      url: dto.url ? TidyURL.clean(dto.url).url : null,
       pictureUrl: dto.picture_url || null,
       score: dto.score || null,
     })

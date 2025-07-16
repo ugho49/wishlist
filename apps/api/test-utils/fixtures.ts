@@ -2,6 +2,7 @@ import type { DatabaseService } from '@wishlist/api/core'
 import type {
   AttendeeId,
   EventId,
+  ItemId,
   SecretSantaId,
   SecretSantaStatus,
   SecretSantaUserId,
@@ -26,6 +27,7 @@ export class Fixtures {
   static readonly EVENT_ATTENDEE_TABLE = 'event_attendee'
   static readonly EVENT_WISHLIST_TABLE = 'event_wishlist'
   static readonly WISHLIST_TABLE = 'wishlist'
+  static readonly ITEM_TABLE = 'item'
   static readonly SECRET_SANTA_TABLE = 'secret_santa'
   static readonly SECRET_SANTA_USER_TABLE = 'secret_santa_user'
   static readonly DEFAULT_USER_PASSWORD = 'Password123'
@@ -91,6 +93,14 @@ export class Fixtures {
     return id
   }
 
+  async insertUserAndAddItToEventAsAttendee(
+    parameters: Parameters<typeof this.insertUser>[0] & { eventId: string },
+  ): Promise<{ userId: string; attendeeId: string }> {
+    const userId = await this.insertUser(parameters)
+    const attendeeId = await this.insertActiveAttendee({ eventId: parameters.eventId, userId })
+    return { userId, attendeeId }
+  }
+
   async insertAdminUser(): Promise<string> {
     return this.insertUser({
       email: Fixtures.ADMIN_USER_EMAIL,
@@ -152,7 +162,7 @@ export class Fixtures {
   }
 
   async insertWishlist(parameters: {
-    eventId: string
+    eventIds: string[]
     userId: string
     title: string
     description?: string
@@ -160,7 +170,7 @@ export class Fixtures {
   }): Promise<string> {
     const { schema, db: client } = this.databaseService
     const id = uuid() as WishlistId
-    const { eventId, title, description, userId, hideItems } = parameters
+    const { eventIds, title, description, userId, hideItems } = parameters
 
     await client.insert(schema.wishlist).values({
       id,
@@ -170,10 +180,12 @@ export class Fixtures {
       hideItems: hideItems ?? true,
     })
 
-    await client.insert(schema.eventWishlist).values({
-      eventId: eventId as EventId,
-      wishlistId: id,
-    })
+    await client.insert(schema.eventWishlist).values(
+      eventIds.map(eventId => ({
+        eventId: eventId as EventId,
+        wishlistId: id,
+      })),
+    )
 
     return id
   }
@@ -283,4 +295,45 @@ export class Fixtures {
 
     return id
   }
+
+  async insertItem(parameters: {
+    wishlistId: string
+    name: string
+    description?: string
+    url?: string
+    isSuggested?: boolean
+    score?: number
+    takerId?: string
+    takenAt?: Date
+    pictureUrl?: string
+  }): Promise<string> {
+    const { schema, db: client } = this.databaseService
+    const id = uuid() as ItemId
+    const { wishlistId, name, description, url, isSuggested, score, takerId, takenAt, pictureUrl } = parameters
+
+    await client.insert(schema.item).values({
+      id,
+      wishlistId: wishlistId as WishlistId,
+      name,
+      description,
+      url,
+      isSuggested: isSuggested ?? false,
+      score,
+      takerId: takerId ? (takerId as UserId) : null,
+      takenAt: takenAt ? takenAt.toISOString() : null,
+      pictureUrl,
+    })
+
+    return id
+  }
+
+  // async linkWishlistToEvent(parameters: { wishlistId: string; eventId: string }): Promise<void> {
+  //   const { schema, db: client } = this.databaseService
+  //   const { wishlistId, eventId } = parameters
+
+  //   await client.insert(schema.eventWishlist).values({
+  //     eventId: eventId as EventId,
+  //     wishlistId: wishlistId as WishlistId,
+  //   })
+  // }
 }

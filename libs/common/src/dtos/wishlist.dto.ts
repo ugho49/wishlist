@@ -1,21 +1,10 @@
-import { Type } from 'class-transformer'
-import {
-  ArrayMaxSize,
-  ArrayNotEmpty,
-  IsArray,
-  IsBoolean,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  MaxLength,
-  ValidateNested,
-} from 'class-validator'
+import { ArrayMaxSize, ArrayNotEmpty, IsBoolean, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator'
 
 import { MAX_EVENTS_BY_LIST } from '../constants'
 import { EventId, UserId, WishlistId } from '../ids'
 import { GetPaginationQueryDto } from './common.dto'
 import { MiniEventDto } from './event.dto'
-import { AddItemInputDto, ItemDto } from './item.dto'
+import { ItemDto } from './item.dto'
 import { MiniUserDto } from './user.dto'
 
 export class WishlistConfigDto {
@@ -69,14 +58,14 @@ export class LinkUnlinkWishlistInputDto {
 }
 
 export class UpdateWishlistInputDto {
+  @MaxLength(100)
   @IsString()
   @IsNotEmpty()
-  @MaxLength(100)
   title!: string
 
+  @MaxLength(2000)
   @IsString()
   @IsOptional()
-  @MaxLength(2000)
   description?: string
 }
 
@@ -85,13 +74,8 @@ export class CreateWishlistInputDto extends UpdateWishlistInputDto {
   @IsOptional()
   hide_items?: boolean
 
-  @ArrayNotEmpty()
   @ArrayMaxSize(MAX_EVENTS_BY_LIST)
   @IsString({ each: true })
+  @ArrayNotEmpty()
   event_ids!: EventId[]
-
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => AddItemInputDto)
-  items: AddItemInputDto[] = []
 }

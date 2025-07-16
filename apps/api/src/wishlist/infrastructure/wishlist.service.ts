@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common'
+import { BadRequestException, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common'
 import {
   createPagedResponse,
   CreateWishlistInputDto,
@@ -20,7 +20,6 @@ import { uniq } from 'lodash'
 import { BucketService } from '../../core/bucket/bucket.service'
 import { DEFAULT_RESULT_NUMBER } from '../../core/common'
 import { LegacyEventRepository } from '../../event/infrastructure/legacy-event.repository'
-import { ItemEntity } from '../../item/infrastructure/item.entity'
 import { LegacyWishlistRepository } from './legacy-wishlist-repository.service'
 import { WishlistEntity } from './wishlist.entity'
 import { toDetailedWishlistDto, toMiniWishlistDto, toWishlistWithEventsDto } from './wishlist.mapper'
@@ -93,17 +92,6 @@ export class WishlistService {
       hideItems: dto.hide_items === undefined ? true : dto.hide_items,
     })
 
-    const itemEntities = dto.items.map(item =>
-      ItemEntity.create({
-        name: item.name,
-        description: item.description,
-        url: item.url,
-        score: item.score,
-        isSuggested: false,
-        wishlistId: wishlistEntity.id,
-      }),
-    )
-
     const fileDestination = this.getLogoDestination(wishlistEntity.id)
     if (imageFile) {
       wishlistEntity.logoUrl = await this.uploadToBucket(fileDestination, imageFile)
@@ -111,11 +99,9 @@ export class WishlistService {
 
     try {
       wishlistEntity.events = Promise.resolve(eventEntities)
-      wishlistEntity.items = Promise.resolve(itemEntities)
 
       await this.wishlistRepository.transaction(async em => {
         await em.save(wishlistEntity)
-        await em.save(itemEntities)
 
         for (const eventEntity of eventEntities) {
           await this.wishlistRepository.linkEvent({
@@ -197,11 +183,11 @@ export class WishlistService {
     const eventEntity = await this.eventRepository.findByIdAndUserId({ eventId, userId: currentUserId })
 
     if (!eventEntity) {
-      throw new NotFoundException('Event not found')
+      throw new UnauthorizedException('You cannot add the wishlist to this event')
     }
 
     if (eventIds.includes(eventId)) {
-      throw new UnauthorizedException('This wishlist is already attached to this event')
+      throw new BadRequestException('Wishlist is already linked to this event')
     }
 
     await this.wishlistRepository.linkEvent({ wishlistId, eventId })
@@ -225,13 +211,11 @@ export class WishlistService {
     const eventIds = events.map(e => e.id)
 
     if (!eventIds.includes(eventId)) {
-      throw new UnauthorizedException('This wishlist is not attach to this event')
+      throw new BadRequestException('Wishlist is not linked to this event')
     }
 
     if (eventIds.length === 1) {
-      throw new UnauthorizedException(
-        'You cannot unlink this wishlist for this event, because she have only one event. However you can delete it if you want.',
-      )
+      throw new BadRequestException('A wishlist must be linked to at least one event. Delete the wishlist instead.')
     }
 
     await this.wishlistRepository.unlinkEvent({ wishlistId, eventId })

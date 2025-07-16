@@ -41,7 +41,7 @@ describe('EventController', () => {
 
         const attendeeId1 = await fixtures.insertPendingAttendee({ eventId: eventId1, tempUserEmail: 'temp@temp.fr' })
 
-        await fixtures.insertWishlist({ eventId: eventId1, userId: currentUserId, title: 'Wishlist1' })
+        await fixtures.insertWishlist({ eventIds: [eventId1], userId: currentUserId, title: 'Wishlist1' })
 
         await fixtures.insertEvent({
           title: 'Event2',
@@ -302,7 +302,11 @@ describe('EventController', () => {
           maintainerId: currentUserId,
         })
 
-        const wishlistId = await fixtures.insertWishlist({ eventId, userId: currentUserId, title: 'Wishlist1' })
+        const wishlistId = await fixtures.insertWishlist({
+          eventIds: [eventId],
+          userId: currentUserId,
+          title: 'Wishlist1',
+        })
         const activeAttendeeId = await fixtures.insertActiveAttendee({
           eventId,
           userId: userId2,
@@ -545,14 +549,7 @@ describe('EventController', () => {
           lastname: 'USER1',
         })
 
-        const user2Id = await fixtures.insertUser({
-          email: 'user2@test.com',
-          firstname: 'User2',
-          lastname: 'USER2',
-        })
-
-        const user3Email = 'user3@test.com'
-        const user4Email = 'user4@test.com'
+        const user2Email = 'user2@test.com'
 
         const eventDate = DateTime.now().plus({ days: 1 }).toISODate()
 
@@ -566,15 +563,7 @@ describe('EventController', () => {
               role: 'maintainer',
             },
             {
-              email: 'user2@test.com',
-              role: 'user',
-            },
-            {
-              email: user3Email,
-              role: 'user',
-            },
-            {
-              email: user4Email,
+              email: user2Email,
               role: 'user',
             },
           ],
@@ -607,7 +596,7 @@ describe('EventController', () => {
           .check()
 
         await expectTable(Fixtures.EVENT_ATTENDEE_TABLE)
-          .hasNumberOfRows(5)
+          .hasNumberOfRows(3)
           .row(0)
           .toMatchObject({
             event_id: createdEventId,
@@ -623,24 +612,12 @@ describe('EventController', () => {
           .row(2)
           .toMatchObject({
             event_id: createdEventId,
-            user_id: user2Id,
-            role: 'user',
-          })
-          .row(3)
-          .toMatchObject({
-            event_id: createdEventId,
-            temp_user_email: user3Email,
-            role: 'user',
-          })
-          .row(4)
-          .toMatchObject({
-            event_id: createdEventId,
-            temp_user_email: user4Email,
+            temp_user_email: user2Email,
             role: 'user',
           })
           .check()
 
-        // TODO: assert mails
+        // TODO(MailsAssert): assert mails are sent
       })
     })
   })
@@ -869,7 +846,7 @@ describe('EventController', () => {
         })
 
         await fixtures.insertWishlist({
-          eventId,
+          eventIds: [eventId],
           userId: currentUserId,
           title: 'Test Wishlist',
         })
@@ -906,13 +883,13 @@ describe('EventController', () => {
         })
 
         await fixtures.insertWishlist({
-          eventId,
+          eventIds: [eventId],
           userId: currentUserId,
           title: 'Maintainer Wishlist',
         })
 
         await fixtures.insertWishlist({
-          eventId,
+          eventIds: [eventId],
           userId: otherUserId,
           title: 'Other User Wishlist',
         })

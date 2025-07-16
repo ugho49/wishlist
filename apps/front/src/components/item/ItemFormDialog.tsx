@@ -1,9 +1,9 @@
 import type { TransitionProps } from '@mui/material/transitions'
 import type {
   AddItemForListInputDto,
-  AddItemInputDto,
   DetailedWishlistDto,
   ItemDto,
+  UpdateItemInputDto,
   WishlistId,
 } from '@wishlist/common'
 import type { FormEvent } from 'react'
@@ -101,7 +101,7 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
 
   const { mutateAsync: updateItem, isPending: updateItemPending } = useMutation({
     mutationKey: ['item.update', { id: item?.id }],
-    mutationFn: (props: { itemId: string; data: AddItemInputDto }) => api.item.update(props.itemId, props.data),
+    mutationFn: (props: { itemId: string; data: UpdateItemInputDto }) => api.item.update(props.itemId, props.data),
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
     onSuccess: (_output, props) => {
       const { itemId, data } = props
@@ -118,7 +118,7 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault()
 
-    const base: AddItemInputDto = {
+    const base: UpdateItemInputDto = {
       name,
       description: description === '' ? undefined : description,
       url: url === '' ? undefined : TidyURL.clean(url).url,

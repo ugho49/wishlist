@@ -1,10 +1,10 @@
 import type {
   AddItemForListInputDto,
-  AddItemInputDto,
   ItemDto,
   ScanItemInputDto,
   ScanItemOutputDto,
   ToggleItemOutputDto,
+  UpdateItemInputDto,
 } from '@wishlist/common'
 import type { AxiosInstance } from 'axios'
 
@@ -15,7 +15,7 @@ export class ItemService {
     return this.client.post('/item', data).then(res => res.data)
   }
 
-  async update(itemId: string, data: AddItemInputDto): Promise<void> {
+  async update(itemId: string, data: UpdateItemInputDto): Promise<void> {
     await this.client.put(`/item/${itemId}`, data)
   }
 

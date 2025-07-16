@@ -3,12 +3,12 @@ import { ApiTags } from '@nestjs/swagger'
 import { CurrentUser } from '@wishlist/api/auth'
 import {
   AddItemForListInputDto,
-  AddItemInputDto,
   ItemDto,
   ItemId,
   ScanItemInputDto,
   ScanItemOutputDto,
   ToggleItemOutputDto,
+  UpdateItemInputDto,
   UserId,
 } from '@wishlist/common'
 
@@ -39,7 +39,7 @@ export class ItemController {
   updateItem(
     @Param('id') itemId: ItemId,
     @CurrentUser('id') currentUserId: UserId,
-    @Body() dto: AddItemInputDto,
+    @Body() dto: UpdateItemInputDto,
   ): Promise<void> {
     return this.itemService.update({ itemId, dto, currentUserId })
   }

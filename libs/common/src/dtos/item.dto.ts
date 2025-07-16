@@ -1,8 +1,6 @@
 import type { ItemId, WishlistId } from '../ids'
 
-import { Transform } from 'class-transformer'
 import { IsInt, IsNotEmpty, IsOptional, IsString, IsUrl, Max, MaxLength, Min } from 'class-validator'
-import { TidyURL } from 'tidy-url'
 
 import { MiniUserDto } from './user.dto'
 
@@ -28,36 +26,35 @@ export class ScanItemOutputDto {
   picture_url!: string | null
 }
 
-export class AddItemInputDto {
+export class UpdateItemInputDto {
+  @MaxLength(40)
   @IsString()
   @IsNotEmpty()
-  @MaxLength(40)
   name!: string
 
+  @MaxLength(60)
   @IsString()
   @IsOptional()
-  @MaxLength(60)
   description?: string
 
-  @IsUrl()
-  @IsOptional()
   @MaxLength(1000)
-  @Transform(({ value }) => TidyURL.clean(value).url)
+  @IsOptional()
+  @IsUrl()
   url?: string
 
-  @IsInt()
   @Min(0)
   @Max(5)
+  @IsInt()
   @IsOptional()
   score?: number
 
+  @MaxLength(1000)
   @IsUrl()
   @IsOptional()
-  @MaxLength(1000)
   picture_url?: string
 }
 
-export class AddItemForListInputDto extends AddItemInputDto {
+export class AddItemForListInputDto extends UpdateItemInputDto {
   @IsString()
   @IsNotEmpty()
   wishlist_id!: WishlistId

@@ -501,6 +501,8 @@ describe('SecretSantaController', () => {
           status: SecretSantaStatus.STARTED,
         })
         .check()
+
+      // TODO(MailsAssert): assert mail is sent
     })
 
     it('should return an error when user is not the maintainer', async () => {
@@ -600,6 +602,8 @@ describe('SecretSantaController', () => {
           status: SecretSantaStatus.CREATED,
         })
         .check()
+
+      // TODO(MailsAssert): assert mail is sent
     })
 
     it('should return an error when user is not the maintainer', async () => {
