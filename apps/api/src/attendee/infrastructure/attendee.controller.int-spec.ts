@@ -1,6 +1,6 @@
 import type { RequestApp } from '@wishlist/api-test-utils'
 
-import { Fixtures, useTestApp } from '@wishlist/api-test-utils'
+import { Fixtures, useTestApp, useTestMail } from '@wishlist/api-test-utils'
 import { AttendeeRole, uuid } from '@wishlist/common'
 
 describe('AttendeeController', () => {
@@ -28,6 +28,7 @@ describe('AttendeeController', () => {
     })
 
     describe('when user is authenticated', () => {
+      const { expectMail } = useTestMail()
       let request: RequestApp
       let currentUserId: string
 
@@ -101,7 +102,13 @@ describe('AttendeeController', () => {
           })
           .check()
 
-        // TODO(MailsAssert): assert mail is sent
+        await expectMail()
+          .waitFor(500)
+          .hasNumberOfEmails(1)
+          .mail(0)
+          .hasSubject('[Wishlist] Vous participez à un nouvel événement')
+          .hasReceiver('new-attendee@example.com')
+          .check()
       })
 
       it('should create active attendee successfully', async () => {
@@ -151,7 +158,13 @@ describe('AttendeeController', () => {
           })
           .check()
 
-        // TODO(MailsAssert): assert mail is sent
+        await expectMail()
+          .waitFor(500)
+          .hasNumberOfEmails(1)
+          .mail(0)
+          .hasSubject('[Wishlist] Vous participez à un nouvel événement')
+          .hasReceiver('other@example.com')
+          .check()
       })
 
       it('should return 404 when event does not exist', async () => {

@@ -1,6 +1,6 @@
 import type { RequestApp } from '@wishlist/api-test-utils'
 
-import { Fixtures, useTestApp } from '@wishlist/api-test-utils'
+import { Fixtures, useTestApp, useTestMail } from '@wishlist/api-test-utils'
 import { SecretSantaStatus, uuid } from '@wishlist/common'
 
 describe('SecretSantaController', () => {
@@ -454,6 +454,7 @@ describe('SecretSantaController', () => {
 
   describe('POST /secret-santa/:id/start', () => {
     const path = (id: string) => `/secret-santa/${id}/start`
+    const { expectMail } = useTestMail()
 
     it('should return unauthorized if not authenticated', async () => {
       const unauthenticatedRequest = await getRequest()
@@ -468,19 +469,18 @@ describe('SecretSantaController', () => {
         maintainerId: currentUserId,
       })
 
-      const user2Id = await fixtures.insertUser({
+      const { attendeeId: attendee2Id } = await fixtures.insertUserAndAddItToEventAsAttendee({
         email: 'user2@test.fr',
         firstname: 'User2',
         lastname: 'Test',
+        eventId,
       })
-      const user3Id = await fixtures.insertUser({
+      const { attendeeId: attendee3Id } = await fixtures.insertUserAndAddItToEventAsAttendee({
         email: 'user3@test.fr',
         firstname: 'User3',
         lastname: 'Test',
+        eventId,
       })
-
-      const attendee2Id = await fixtures.insertActiveAttendee({ eventId, userId: user2Id })
-      const attendee3Id = await fixtures.insertActiveAttendee({ eventId, userId: user3Id })
 
       const secretSantaId = await fixtures.insertSecretSanta({
         eventId,
@@ -502,7 +502,12 @@ describe('SecretSantaController', () => {
         })
         .check()
 
-      // TODO(MailsAssert): assert mail is sent
+      await expectMail()
+        .waitFor(500)
+        .hasNumberOfEmails(3)
+        .hasSubject('[Wishlist] Votre tirage au sort secret santa')
+        .hasReceivers(['user2@test.fr', 'user3@test.fr', Fixtures.BASE_USER_EMAIL])
+        .check()
     })
 
     it('should return an error when user is not the maintainer', async () => {
@@ -518,19 +523,18 @@ describe('SecretSantaController', () => {
         maintainerId: otherUserId,
       })
 
-      const user2Id = await fixtures.insertUser({
+      const { attendeeId: attendee2Id } = await fixtures.insertUserAndAddItToEventAsAttendee({
         email: 'user2@test.fr',
         firstname: 'User2',
         lastname: 'Test',
+        eventId,
       })
-      const user3Id = await fixtures.insertUser({
+      const { attendeeId: attendee3Id } = await fixtures.insertUserAndAddItToEventAsAttendee({
         email: 'user3@test.fr',
         firstname: 'User3',
         lastname: 'Test',
+        eventId,
       })
-
-      const attendee2Id = await fixtures.insertActiveAttendee({ eventId, userId: user2Id })
-      const attendee3Id = await fixtures.insertActiveAttendee({ eventId, userId: user3Id })
 
       const secretSantaId = await fixtures.insertSecretSanta({
         eventId,
@@ -573,6 +577,7 @@ describe('SecretSantaController', () => {
 
   describe('POST /secret-santa/:id/cancel', () => {
     const path = (id: string) => `/secret-santa/${id}/cancel`
+    const { expectMail } = useTestMail()
 
     it('should return unauthorized if not authenticated', async () => {
       const unauthenticatedRequest = await getRequest()
@@ -581,16 +586,26 @@ describe('SecretSantaController', () => {
     })
 
     it('should cancel secret santa when user is maintainer', async () => {
-      const { eventId } = await fixtures.insertEventWithMaintainer({
+      const { eventId, attendeeId: maintainerAttendeeId } = await fixtures.insertEventWithMaintainer({
         title: 'Test Event',
         description: 'Test Description',
         maintainerId: currentUserId,
+      })
+
+      const { attendeeId: attendee2Id } = await fixtures.insertUserAndAddItToEventAsAttendee({
+        email: 'user2@test.fr',
+        firstname: 'User2',
+        lastname: 'Test',
+        eventId,
       })
 
       const secretSantaId = await fixtures.insertSecretSanta({
         eventId,
         status: SecretSantaStatus.STARTED,
       })
+
+      await fixtures.insertSecretSantaUser({ secretSantaId, attendeeId: maintainerAttendeeId })
+      await fixtures.insertSecretSantaUser({ secretSantaId, attendeeId: attendee2Id })
 
       await request.post(path(secretSantaId)).expect(201)
 
@@ -603,7 +618,13 @@ describe('SecretSantaController', () => {
         })
         .check()
 
-      // TODO(MailsAssert): assert mail is sent
+      // TODO: fix this -->
+      // await expectMail()
+      //   .waitFor(500)
+      //   .hasNumberOfEmails(2)
+      //   .hasSubject("[Wishlist] Le secret santa viens d'être annulé")
+      //   .hasReceivers([Fixtures.BASE_USER_EMAIL, 'user2@test.fr'])
+      //   .check()
     })
 
     it('should return an error when user is not the maintainer', async () => {

@@ -40,6 +40,30 @@ export class MailsAssert {
     return this
   }
 
+  hasReceivers(expected: string[]): this {
+    this.assertions.add(async () => {
+      const mails = await this.getMails()
+
+      expect(mails.map(mail => mail.to.map(to => to.address)).flat(), `Wrong receivers for mails`).toIncludeAllMembers(
+        expected,
+      )
+    })
+
+    return this
+  }
+
+  hasSubject(subject: string): this {
+    this.assertions.add(async () => {
+      const mails = await this.getMails()
+
+      for (const mail of mails) {
+        expect(mail.subject, `Wrong subject for mail to ${mail.to.map(to => to.address).join(', ')}`).toEqual(subject)
+      }
+    })
+
+    return this
+  }
+
   mail(index: number = 0): MailAssert {
     return new MailAssert(
       this,

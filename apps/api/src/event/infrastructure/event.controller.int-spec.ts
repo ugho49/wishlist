@@ -1,6 +1,6 @@
 import type { RequestApp } from '@wishlist/api-test-utils'
 
-import { Fixtures, useTestApp } from '@wishlist/api-test-utils'
+import { Fixtures, useTestApp, useTestMail } from '@wishlist/api-test-utils'
 import { uuid } from '@wishlist/common'
 import { DateTime } from 'luxon'
 
@@ -419,6 +419,7 @@ describe('EventController', () => {
     })
 
     describe('when user is authenticated', () => {
+      const { expectMail } = useTestMail()
       let request: RequestApp
       let currentUserId: string
 
@@ -543,13 +544,14 @@ describe('EventController', () => {
       })
 
       it('should create event with attendees', async () => {
+        const user1Email = 'user1@test.com'
+        const user2Email = 'user2@test.com'
+
         const user1Id = await fixtures.insertUser({
-          email: 'user1@test.com',
+          email: user1Email,
           firstname: 'User1',
           lastname: 'USER1',
         })
-
-        const user2Email = 'user2@test.com'
 
         const eventDate = DateTime.now().plus({ days: 1 }).toISODate()
 
@@ -559,7 +561,7 @@ describe('EventController', () => {
           event_date: eventDate,
           attendees: [
             {
-              email: 'user1@test.com',
+              email: user1Email,
               role: 'maintainer',
             },
             {
@@ -617,7 +619,12 @@ describe('EventController', () => {
           })
           .check()
 
-        // TODO(MailsAssert): assert mails are sent
+        await expectMail()
+          .waitFor(500)
+          .hasNumberOfEmails(2)
+          .hasSubject('[Wishlist] Vous participez à un nouvel événement')
+          .hasReceivers([user1Email, user2Email])
+          .check()
       })
     })
   })
