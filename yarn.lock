@@ -5824,7 +5824,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rollup/pluginutils@npm:^5.1.3, @rollup/pluginutils@npm:^5.1.4":
+"@rollup/pluginutils@npm:^5.1.3, @rollup/pluginutils@npm:^5.2.0":
   version: 5.2.0
   resolution: "@rollup/pluginutils@npm:5.2.0"
   dependencies:
@@ -8138,7 +8138,7 @@ __metadata:
     typeorm-naming-strategies: "npm:4.1.0"
     typescript: "npm:5.8.3"
     typescript-eslint: "npm:8.32.1"
-    unplugin-swc: "npm:1.5.3"
+    unplugin-swc: "npm:1.5.5"
     url-loader: "npm:4.1.1"
     usehooks-ts: "npm:3.1.1"
     uuid: "npm:11.1.0"
@@ -22790,20 +22790,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"unplugin-swc@npm:1.5.3":
-  version: 1.5.3
-  resolution: "unplugin-swc@npm:1.5.3"
+"unplugin-swc@npm:1.5.5":
+  version: 1.5.5
+  resolution: "unplugin-swc@npm:1.5.5"
   dependencies:
-    "@rollup/pluginutils": "npm:^5.1.4"
+    "@rollup/pluginutils": "npm:^5.2.0"
     load-tsconfig: "npm:^0.2.5"
-    unplugin: "npm:^2.3.4"
+    unplugin: "npm:^2.3.5"
   peerDependencies:
     "@swc/core": ^1.2.108
-  checksum: 10c0/8b1a8e68069e8322d02f3895ec6e6bf1aaaa786259aab4bae028a8968c2a40af792fe446e79ea1884fcdacf979a70dbb919987a5f1c9f29801e41e82a4c17de5
+  checksum: 10c0/dc8cfe2f761038e37089ca0767e805adc4ebb78121f6c927bdd5e88a86c528193ab15842fe52f2ccfb2791b4a986cf23b043ad81c9f2f643fea9304390137eb5
   languageName: node
   linkType: hard
 
-"unplugin@npm:^2.3.4":
+"unplugin@npm:^2.3.5":
   version: 2.3.5
   resolution: "unplugin@npm:2.3.5"
   dependencies:
