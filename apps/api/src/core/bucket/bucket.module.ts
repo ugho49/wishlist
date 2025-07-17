@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common'
+import { Global, Module } from '@nestjs/common'
 
 import { BucketConfig } from './bucket.config'
 import { BucketMockService } from './bucket.mock.service'
@@ -6,6 +6,7 @@ import { BUCKET_CONFIG_TOKEN, ConfigurableBucketModule } from './bucket.module-d
 import { BucketRealService } from './bucket.real.service'
 import { BucketService } from './bucket.service'
 
+@Global()
 @Module({
   providers: [
     {
