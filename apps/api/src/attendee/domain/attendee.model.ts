@@ -60,11 +60,11 @@ export class Attendee {
     })
   }
 
-  getUserEmailOrPendingEmail(): string {
+  getEmail(): string {
     return this.user?.email ?? this.pendingEmail ?? ''
   }
 
-  getUserFullNameOrPendingEmail(): string {
+  getFullNameOrPendingEmail(): string {
     return this.user?.firstName && this.user?.lastName
       ? `${this.user.firstName} ${this.user.lastName}`
       : (this.pendingEmail ?? '')

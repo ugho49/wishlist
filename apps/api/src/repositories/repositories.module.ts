@@ -22,6 +22,8 @@ import { PostgresEventRepository } from './event.repository'
 import * as tokens from './repositories.tokens'
 import { PostgresSecretSantaUserRepository } from './secret-santa-user.repository'
 import { PostgresSecretSantaRepository } from './secret-santa.repository'
+import { PostgresUserRepository } from './user.repository'
+import { PostgresWishlistRepository } from './wishlist.repository'
 
 const legacyRepositories = [
   LegacyEventRepository,
@@ -66,6 +68,14 @@ const legacyEntities = TypeOrmModule.forFeature([
       provide: tokens.SECRET_SANTA_USER_REPOSITORY,
       useClass: PostgresSecretSantaUserRepository,
     },
+    {
+      provide: tokens.USER_REPOSITORY,
+      useClass: PostgresUserRepository,
+    },
+    {
+      provide: tokens.WISHLIST_REPOSITORY,
+      useClass: PostgresWishlistRepository,
+    },
   ],
   exports: [
     ...legacyRepositories,
@@ -73,6 +83,8 @@ const legacyEntities = TypeOrmModule.forFeature([
     tokens.EVENT_REPOSITORY,
     tokens.SECRET_SANTA_REPOSITORY,
     tokens.SECRET_SANTA_USER_REPOSITORY,
+    tokens.USER_REPOSITORY,
+    tokens.WISHLIST_REPOSITORY,
   ],
 })
 export class RepositoriesModule {}

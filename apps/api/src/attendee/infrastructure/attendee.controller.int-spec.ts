@@ -212,7 +212,7 @@ describe('AttendeeController', () => {
           .expect(({ body }) =>
             expect(body).toMatchObject({
               error: 'Unauthorized',
-              message: 'Only maintainers of the event can update an attendee',
+              message: 'Only maintainers of the event can add an attendee',
             }),
           )
 
