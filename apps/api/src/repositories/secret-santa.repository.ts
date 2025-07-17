@@ -22,7 +22,7 @@ export class PostgresSecretSantaRepository implements SecretSantaRepository {
         id: secretSanta.id,
         eventId: secretSanta.eventId,
         description: secretSanta.description,
-        budget: secretSanta.budget?.toString(),
+        budget: secretSanta.budget,
         status: secretSanta.status,
         createdAt: secretSanta.createdAt.toISOString(),
         updatedAt: secretSanta.updatedAt.toISOString(),
@@ -31,7 +31,7 @@ export class PostgresSecretSantaRepository implements SecretSantaRepository {
         target: schema.secretSanta.id,
         set: {
           description: secretSanta.description,
-          budget: secretSanta.budget?.toString(),
+          budget: secretSanta.budget,
           status: secretSanta.status,
           updatedAt: secretSanta.updatedAt.toISOString(),
         },

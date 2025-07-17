@@ -9,3 +9,10 @@ export const brandedUuid = <T extends string>() =>
   })
 
 export const timestampWithTimezone = (name: string) => timestamp(name, { withTimezone: true, mode: 'string' })
+
+export const numericAsOptionalNumber = (name: string) =>
+  customType<{ data: number | undefined; driverData: string | null }>({
+    dataType: () => 'numeric',
+    toDriver: (value: number | undefined): string | null => value?.toString() ?? null,
+    fromDriver: (value: string | null): number | undefined => (value ? parseFloat(value) : undefined),
+  })(name)
