@@ -71,7 +71,7 @@ services:
     expose:
       - 3000 # On expose juste le port interne, pas de mapping sur l'hôte !
     volumes:
-      - ./firebase:/usr/src/app/dist/apps/api/firebase
+      - ./firebase:/usr/src/app/firebase
     environment:
       PORT: 3000
       DB_HOST: 'db'
@@ -92,8 +92,10 @@ services:
       MAIL_PORT: ${MAIL_PORT}
       MAIL_PASSWORD: ${MAIL_PASSWORD}
       MAIL_USERNAME: ${MAIL_USERNAME}
-      FIREBASE_SERVICE_ACCOUNT_KEY_PATH: ${FIREBASE_SERVICE_ACCOUNT_KEY_PATH}
       FIREBASE_BUCKET_NAME: ${FIREBASE_BUCKET_NAME}
+      FIREBASE_SERVICE_ACCOUNT_KEY_PATH: '/usr/src/app/firebase/firebase-config.json'
+      DB_MIGRATIONS_FOLDER: '/usr/src/app/dist/apps/api/drizzle/migrations'
+      MAIL_TEMPLATE_DIR: '/usr/src/app/dist/apps/api/templates'
     depends_on:
       - 'db'
     healthcheck:
