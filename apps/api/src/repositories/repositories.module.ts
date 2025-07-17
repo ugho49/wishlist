@@ -4,18 +4,16 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 import { AttendeeEntity } from '../attendee/infrastructure/legacy-attendee.entity'
 import { EventEntity } from '../event/infrastructure/legacy-event.entity'
 import { LegacyEventRepository } from '../event/infrastructure/legacy-event.repository'
-import { ItemEntity } from '../item'
-import {
-  LegacyEmailSettingsRepository,
-  LegacyPasswordVerificationRepository,
-  LegacyUserRepository,
-  LegacyUserSocialRepository,
-  PasswordVerificationEntity,
-  UserEmailSettingEntity,
-  UserEntity,
-  UserSocialEntity,
-} from '../user'
-import { LegacyWishlistRepository, WishlistEntity } from '../wishlist'
+import { ItemEntity } from '../item/infrastructure/item.entity'
+import { UserEmailSettingEntity } from '../user/infrastructure/legacy-email-settings.entity'
+import { LegacyEmailSettingsRepository } from '../user/infrastructure/legacy-email-settings.repository'
+import { LegacyPasswordVerificationRepository } from '../user/infrastructure/legacy-password-verification-repository.service'
+import { PasswordVerificationEntity } from '../user/infrastructure/legacy-password-verification.entity'
+import { UserSocialEntity } from '../user/infrastructure/legacy-user-social.entity'
+import { UserEntity } from '../user/infrastructure/legacy-user.entity'
+import { LegacyUserRepository } from '../user/infrastructure/legacy-user.repository'
+import { WishlistEntity } from '../wishlist/infrastructure/legacy-wishlist.entity'
+import { LegacyWishlistRepository } from '../wishlist/infrastructure/legacy-wishlist.repository'
 import { PostgresAttendeeRepository } from './attendee.repository'
 import { PostgresEventRepository } from './event.repository'
 import * as tokens from './repositories.tokens'
@@ -29,7 +27,6 @@ import { PostgresWishlistRepository } from './wishlist.repository'
 const legacyRepositories = [
   LegacyEventRepository,
   LegacyUserRepository,
-  LegacyUserSocialRepository,
   LegacyPasswordVerificationRepository,
   LegacyEmailSettingsRepository,
   LegacyWishlistRepository,

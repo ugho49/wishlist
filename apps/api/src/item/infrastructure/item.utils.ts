@@ -1,5 +1,4 @@
-import type { WishlistEntity } from '@wishlist/api/wishlist'
-
+import type { WishlistEntity } from '../../wishlist/infrastructure/legacy-wishlist.entity'
 import type { ItemEntity } from './item.entity'
 
 export function showItem(param: { item: ItemEntity; currentUserId: string; wishlist: WishlistEntity }): boolean {

@@ -326,14 +326,4 @@ export class Fixtures {
 
     return id
   }
-
-  // async linkWishlistToEvent(parameters: { wishlistId: string; eventId: string }): Promise<void> {
-  //   const { schema, db: client } = this.databaseService
-  //   const { wishlistId, eventId } = parameters
-
-  //   await client.insert(schema.eventWishlist).values({
-  //     eventId: eventId as EventId,
-  //     wishlistId: wishlistId as WishlistId,
-  //   })
-  // }
 }
