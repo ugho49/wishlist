@@ -36,8 +36,8 @@ export class PostgresSecretSantaUserRepository implements SecretSantaUserReposit
           attendeeId: user.attendeeId,
           drawUserId: user.drawUserId,
           exclusions: user.exclusions,
-          createdAt: user.createdAt.toISOString(),
-          updatedAt: user.updatedAt.toISOString(),
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt,
         })),
       )
       .onConflictDoUpdate({
@@ -104,8 +104,8 @@ export class PostgresSecretSantaUserRepository implements SecretSantaUserReposit
       secretSantaId: row.secretSantaId,
       drawUserId: row.drawUserId || undefined,
       exclusions: row.exclusions,
-      createdAt: new Date(row.createdAt),
-      updatedAt: new Date(row.updatedAt),
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
     })
   }
 }

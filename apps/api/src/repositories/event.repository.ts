@@ -39,8 +39,8 @@ export class PostgresEventRepository implements EventRepository {
         title: event.title,
         description: event.description ?? null,
         eventDate: event.eventDate.toISOString().split('T')[0] as string, // Convert to YYYY-MM-DD format
-        createdAt: event.createdAt.toISOString(),
-        updatedAt: event.updatedAt.toISOString(),
+        createdAt: event.createdAt,
+        updatedAt: event.updatedAt,
       })
       .onConflictDoUpdate({
         target: schema.event.id,
@@ -48,6 +48,7 @@ export class PostgresEventRepository implements EventRepository {
           title: event.title,
           description: event.description ?? null,
           eventDate: event.eventDate.toISOString().split('T')[0] as string, // Convert to YYYY-MM-DD format
+          updatedAt: event.updatedAt,
         },
       })
   }
@@ -64,8 +65,8 @@ export class PostgresEventRepository implements EventRepository {
       title: row.title,
       description: row.description ?? undefined,
       eventDate: new Date(row.eventDate),
-      createdAt: new Date(row.createdAt),
-      updatedAt: new Date(row.updatedAt),
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
     })
   }
 }

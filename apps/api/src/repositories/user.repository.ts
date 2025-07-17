@@ -38,7 +38,7 @@ export class PostgresUserRepository implements UserRepository {
       isEnabled: row.isEnabled,
       authorities: row.authorities as Authorities[],
       lastIp: row.lastIp ?? undefined,
-      lastConnectedAt: row.lastConnectedAt ? new Date(row.lastConnectedAt) : undefined,
+      lastConnectedAt: row.lastConnectedAt ?? undefined,
       pictureUrl: row.pictureUrl ?? undefined,
       createdAt: new Date(row.createdAt),
       updatedAt: new Date(row.updatedAt),

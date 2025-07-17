@@ -26,7 +26,7 @@ import {
   varchar,
 } from 'drizzle-orm/pg-core'
 
-import { brandedUuid, numericAsOptionalNumber, timestampWithTimezone } from './helpers'
+import { brandedUuid, numericNullable, timestampWithTimezone } from './helpers'
 
 // Custom branded UUID types
 const eventId = brandedUuid<EventId>()
@@ -209,7 +209,7 @@ export const secretSanta = pgTable(
     id: secretSantaId().primaryKey().notNull(),
     eventId: eventId('event_id').notNull(),
     description: text(),
-    budget: numericAsOptionalNumber('budget'),
+    budget: numericNullable('budget'),
     status: varchar({ length: 20 }).notNull(),
     createdAt: timestampWithTimezone('created_at').defaultNow().notNull(),
     updatedAt: timestampWithTimezone('updated_at').defaultNow().notNull(),
