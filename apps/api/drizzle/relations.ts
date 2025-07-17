@@ -75,7 +75,7 @@ export const itemRelations = relations(item, ({ one }) => ({
     fields: [item.wishlistId],
     references: [wishlist.id],
   }),
-  user: one(user, {
+  taker: one(user, {
     fields: [item.takerId],
     references: [user.id],
   }),

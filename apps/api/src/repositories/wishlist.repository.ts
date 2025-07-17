@@ -6,6 +6,7 @@ import { EventId, UserId, WishlistId } from '@wishlist/common'
 import { and, eq } from 'drizzle-orm'
 
 import { PostgresUserRepository } from './user.repository'
+import { PostgresWishlistItemRepository } from './wishlist-item.repository'
 
 @Injectable()
 export class PostgresWishlistRepository implements WishlistRepository {
@@ -14,7 +15,11 @@ export class PostgresWishlistRepository implements WishlistRepository {
   async findById(wishlistId: WishlistId): Promise<Wishlist | undefined> {
     const result = await this.databaseService.db.query.wishlist.findFirst({
       where: eq(schema.wishlist.id, wishlistId),
-      with: { owner: true },
+      with: {
+        owner: true,
+        eventWishlists: true,
+        items: { with: { taker: true } },
+      },
     })
 
     return result ? PostgresWishlistRepository.toModel(result) : undefined
@@ -29,7 +34,11 @@ export class PostgresWishlistRepository implements WishlistRepository {
             .from(schema.eventWishlist)
             .where(and(eq(schema.eventWishlist.eventId, eventId), eq(schema.eventWishlist.wishlistId, wishlist.id))),
         ),
-      with: { owner: true },
+      with: {
+        owner: true,
+        eventWishlists: true,
+        items: { with: { taker: true } },
+      },
     })
 
     return result.map(PostgresWishlistRepository.toModel)
@@ -38,7 +47,11 @@ export class PostgresWishlistRepository implements WishlistRepository {
   async findByOwner(userId: UserId): Promise<Wishlist[]> {
     const result = await this.databaseService.db.query.wishlist.findMany({
       where: eq(schema.wishlist.ownerId, userId),
-      with: { owner: true },
+      with: {
+        owner: true,
+        eventWishlists: true,
+        items: { with: { taker: true } },
+      },
     })
 
     return result.map(PostgresWishlistRepository.toModel)
@@ -47,29 +60,42 @@ export class PostgresWishlistRepository implements WishlistRepository {
   async save(wishlist: Wishlist, tx?: DrizzleTransaction): Promise<void> {
     const client = tx || this.databaseService.db
 
-    await client
-      .insert(schema.wishlist)
-      .values({
-        id: wishlist.id,
-        title: wishlist.title,
-        description: wishlist.description,
-        ownerId: wishlist.owner.id,
-        hideItems: wishlist.hideItems,
-        logoUrl: wishlist.logoUrl,
-        createdAt: wishlist.createdAt,
-        updatedAt: wishlist.updatedAt,
-      })
-      .onConflictDoUpdate({
-        target: schema.wishlist.id,
-        set: {
+    await client.transaction(async (subTx: DrizzleTransaction) => {
+      await subTx
+        .insert(schema.wishlist)
+        .values({
+          id: wishlist.id,
           title: wishlist.title,
           description: wishlist.description,
           ownerId: wishlist.owner.id,
           hideItems: wishlist.hideItems,
           logoUrl: wishlist.logoUrl,
+          createdAt: wishlist.createdAt,
           updatedAt: wishlist.updatedAt,
-        },
-      })
+        })
+        .onConflictDoUpdate({
+          target: schema.wishlist.id,
+          set: {
+            title: wishlist.title,
+            description: wishlist.description,
+            ownerId: wishlist.owner.id,
+            hideItems: wishlist.hideItems,
+            logoUrl: wishlist.logoUrl,
+            updatedAt: wishlist.updatedAt,
+          },
+        })
+
+      // Remove all eventWishlists
+      await subTx.delete(schema.eventWishlist).where(eq(schema.eventWishlist.wishlistId, wishlist.id))
+
+      // Add new eventWishlists
+      await subTx.insert(schema.eventWishlist).values(
+        wishlist.eventIds.map(eventId => ({
+          eventId,
+          wishlistId: wishlist.id,
+        })),
+      )
+    })
   }
 
   async delete(wishlistId: WishlistId, tx?: DrizzleTransaction): Promise<void> {
@@ -78,7 +104,13 @@ export class PostgresWishlistRepository implements WishlistRepository {
     await client.delete(schema.wishlist).where(eq(schema.wishlist.id, wishlistId))
   }
 
-  static toModel(row: typeof schema.wishlist.$inferSelect & { owner: typeof schema.user.$inferSelect }): Wishlist {
+  static toModel(
+    row: typeof schema.wishlist.$inferSelect & {
+      owner: typeof schema.user.$inferSelect
+      eventWishlists: (typeof schema.eventWishlist.$inferSelect)[]
+      items: (typeof schema.item.$inferSelect & { taker: typeof schema.user.$inferSelect | null })[]
+    },
+  ): Wishlist {
     return new Wishlist({
       id: row.id,
       title: row.title,
@@ -86,6 +118,8 @@ export class PostgresWishlistRepository implements WishlistRepository {
       owner: PostgresUserRepository.toModel(row.owner),
       hideItems: row.hideItems,
       logoUrl: row.logoUrl ?? undefined,
+      eventIds: row.eventWishlists.map(eventWishlist => eventWishlist.eventId),
+      items: row.items.map(item => PostgresWishlistItemRepository.toModel(item)),
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     })

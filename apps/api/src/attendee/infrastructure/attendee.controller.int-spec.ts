@@ -373,7 +373,7 @@ describe('AttendeeController', () => {
             expect(body).toMatchObject({
               error: 'Conflict',
               message:
-                'You remove this attendee from the event because he have a list in this event and the list have only this event attached',
+                'You cannot remove this attendee from the event because he have a list in this event and the list have only this event attached',
             }),
           )
 
