@@ -136,7 +136,6 @@ export const CreateWishlistPage = () => {
           description: description === '' ? undefined : description,
           hide_items: hideItems,
           event_ids: uniq(events.map(e => e.id)),
-          items: [],
         },
         logo,
       ),

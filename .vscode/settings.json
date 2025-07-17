@@ -2,5 +2,13 @@
   "eslint.format.enable": true,
   "prettier.enable": false,
   "editor.defaultFormatter": "dbaeumer.vscode-eslint",
-  "nxConsole.generateAiAgentRules": true
+  "nxConsole.generateAiAgentRules": true,
+  "editor.formatOnSave": true,
+  "editor.foldingImportsByDefault": true,
+  "editor.multiCursorModifier": "alt",
+  "files.autoSave": "onWindowChange",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.organizeImports": "explicit"
+  }
 }

@@ -17,6 +17,7 @@ export default mergeConfig(
       globalSetup: ['./int-tests.global-setup.ts'],
       setupFiles: ['../../vitest.matchers.ts'],
       fileParallelism: false,
+      maxConcurrency: 1,
       coverage: {
         enabled: false,
       },

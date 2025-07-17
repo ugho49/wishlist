@@ -56,7 +56,7 @@ export class UpdateEventInputDto {
   @MaxLength(2000)
   description?: string
 
-  @MinDate(new Date(new Date().toDateString()))
+  @MinDate(new Date(new Date().toDateString()), { message: 'event_date must not be earlier than today' })
   @IsDate()
   @IsNotEmpty()
   @Transform(({ value }) => new Date(value))
