@@ -25,6 +25,42 @@ export class PostgresUserRepository implements UserRepository {
     return user ? PostgresUserRepository.toModel(user) : undefined
   }
 
+  async save(user: User): Promise<void> {
+    await this.databaseService.db
+      .insert(schema.user)
+      .values({
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        birthday: user.birthday?.toISOString(),
+        passwordEnc: user.passwordEnc,
+        isEnabled: user.isEnabled,
+        authorities: user.authorities as Authorities[],
+        lastIp: user.lastIp,
+        lastConnectedAt: user.lastConnectedAt,
+        pictureUrl: user.pictureUrl,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+      })
+      .onConflictDoUpdate({
+        target: [schema.user.id],
+        set: {
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          birthday: user.birthday?.toISOString(),
+          passwordEnc: user.passwordEnc,
+          isEnabled: user.isEnabled,
+          authorities: user.authorities as Authorities[],
+          lastIp: user.lastIp,
+          lastConnectedAt: user.lastConnectedAt,
+          pictureUrl: user.pictureUrl,
+          updatedAt: user.updatedAt,
+        },
+      })
+  }
+
   static toModel(row: typeof schema.user.$inferSelect): User {
     return new User({
       id: row.id,

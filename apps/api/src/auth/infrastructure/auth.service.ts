@@ -2,14 +2,7 @@ import { Inject, Injectable, UnauthorizedException } from '@nestjs/common'
 import { ConfigType } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
 import { USER_REPOSITORY, USER_SOCIAL_REPOSITORY } from '@wishlist/api/repositories'
-import {
-  LegacyUserRepository,
-  LegacyUserSocialRepository,
-  UserEntity,
-  UserRepository,
-  UserSocialEntity,
-  UserSocialRepository,
-} from '@wishlist/api/user'
+import { User, UserRepository, UserSocial, UserSocialRepository } from '@wishlist/api/user'
 import {
   AccessTokenJwtPayload,
   LoginInputDto,
@@ -33,19 +26,17 @@ export class AuthService {
     private readonly userRepository: UserRepository,
     @Inject(USER_SOCIAL_REPOSITORY)
     private readonly userSocialRepository: UserSocialRepository,
-    private readonly legacyUserRepository: LegacyUserRepository,
-    private readonly legacyUserSocialRepository: LegacyUserSocialRepository,
     private readonly googleAuthService: GoogleAuthService,
     private readonly jwtService: JwtService,
     @Inject(authConfig.KEY) private readonly config: ConfigType<typeof authConfig>,
   ) {}
 
-  async login(user: LoginInputDto, ip: string): Promise<LoginOutputDto> {
-    const userEntity = await this.validateUserByEmailPassword(user.email, user.password)
+  async login(dto: LoginInputDto, ip: string): Promise<LoginOutputDto> {
+    const user = await this.validateUserByEmailPassword(dto.email, dto.password)
 
     return {
-      refresh_token: this.createRefreshToken(userEntity.id),
-      access_token: await this.createAccessTokenAndUpdateUser(userEntity, { ip }),
+      access_token: await this.createAccessTokenAndUpdateUser({ user, ip }),
+      refresh_token: this.createRefreshToken(user.id),
     }
   }
 
@@ -56,84 +47,70 @@ export class AuthService {
       throw new UnauthorizedException('Your token is not valid')
     }
 
-    let userSocial = await this.legacyUserSocialRepository.findOneBy({
-      socialId: payload.sub,
-      socialType: UserSocialType.GOOGLE,
-    })
-    let userEntity
-    let needUpdateProfilePicture = false
+    let userSocial = await this.userSocialRepository.findBySocialId(payload.sub, UserSocialType.GOOGLE)
+    let user = userSocial?.user ?? (await this.validateUserByEmail(payload.email || ''))
 
     if (!userSocial) {
       if (!payload.email_verified) {
         throw new UnauthorizedException('Email must be verified')
       }
-      userEntity = await this.validateUserByEmail(payload.email || '')
-      userSocial = UserSocialEntity.create({
-        userId: userEntity.id,
+
+      userSocial = UserSocial.create({
+        user,
         socialId: payload.sub,
         socialType: UserSocialType.GOOGLE,
         pictureUrl: payload.picture,
       })
-      await this.legacyUserSocialRepository.insert(userSocial)
-      if (!userEntity.pictureUrl) needUpdateProfilePicture = true
+
+      if (!user.pictureUrl) {
+        user = user.updatePicture(payload.picture)
+      }
     } else {
-      userEntity = await this.validateUserById(userSocial.userId)
-      if (userEntity.pictureUrl === userSocial.pictureUrl && payload.picture !== userSocial.pictureUrl)
-        needUpdateProfilePicture = true
-      await this.legacyUserSocialRepository.update(
-        { id: userSocial.id },
-        {
-          pictureUrl: payload.picture,
-        },
-      )
+      if (user.pictureUrl === userSocial.pictureUrl && payload.picture !== userSocial.pictureUrl) {
+        user = user.updatePicture(payload.picture)
+      }
+
+      userSocial = userSocial.updatePictureUrl(payload.picture)
     }
 
+    await this.userSocialRepository.save(userSocial)
+
     return {
-      refresh_token: this.createRefreshToken(userEntity.id),
-      access_token: await this.createAccessTokenAndUpdateUser(userEntity, {
-        ip,
-        pictureUrl: needUpdateProfilePicture ? payload.picture : undefined,
-      }),
+      access_token: await this.createAccessTokenAndUpdateUser({ user, ip }),
+      refresh_token: this.createRefreshToken(user.id),
     }
   }
 
   async refresh(dto: RefreshTokenInputDto, ip: string): Promise<RefreshTokenOutputDto> {
     const refreshPayload = this.validateRefreshToken(dto.token)
-    const userEntity = await this.legacyUserRepository.findById(refreshPayload.sub)
+    const user = await this.userRepository.findById(refreshPayload.sub)
 
-    if (!userEntity) {
+    if (!user) {
       throw new UnauthorizedException('User not found')
     }
 
-    if (!userEntity.isEnabled) {
+    if (!user.isEnabled) {
       throw new UnauthorizedException('User is disabled')
     }
 
     return {
-      access_token: await this.createAccessTokenAndUpdateUser(userEntity, { ip }),
+      access_token: await this.createAccessTokenAndUpdateUser({ user, ip }),
     }
   }
 
-  private async createAccessTokenAndUpdateUser(
-    userEntity: UserEntity,
-    newValues: {
-      ip: string
-      pictureUrl?: string
-    },
-  ): Promise<string> {
+  private async createAccessTokenAndUpdateUser(params: { user: User; ip: string }): Promise<string> {
+    const { user, ip } = params
     const payload: AccessTokenJwtPayload = {
-      sub: userEntity.id,
-      email: userEntity.email,
-      authorities: userEntity.authorities,
+      sub: user.id,
+      email: user.email,
+      authorities: user.authorities,
     }
 
     const token = this.jwtService.sign(payload)
 
-    await this.legacyUserRepository.updateById(userEntity.id, {
-      pictureUrl: newValues.pictureUrl,
-      lastIp: newValues.ip,
-      lastConnectedAt: new Date(),
-    })
+    const updatedUser = user.updateLastConnection(ip)
+
+    await this.userRepository.save(updatedUser)
 
     return token
   }
@@ -158,8 +135,8 @@ export class AuthService {
     }
   }
 
-  private async validateUserByEmailPassword(email: string, password: string): Promise<UserEntity> {
-    const user = await this.legacyUserRepository.findByEmail(email).then(this.checkUserExistAndEnabled)
+  private async validateUserByEmailPassword(email: string, password: string): Promise<User> {
+    const user = await this.userRepository.findByEmail(email).then(this.checkUserExistAndEnabled)
 
     const passwordVerified = await PasswordManager.verify({
       hash: user.passwordEnc || undefined,
@@ -173,15 +150,15 @@ export class AuthService {
     return user
   }
 
-  private validateUserByEmail(email: string): Promise<UserEntity> {
-    return this.legacyUserRepository.findByEmail(email).then(this.checkUserExistAndEnabled)
+  private validateUserByEmail(email: string): Promise<User> {
+    return this.userRepository.findByEmail(email).then(this.checkUserExistAndEnabled)
   }
 
-  private validateUserById(id: UserId): Promise<UserEntity> {
-    return this.legacyUserRepository.findById(id).then(this.checkUserExistAndEnabled)
+  private validateUserById(id: UserId): Promise<User> {
+    return this.userRepository.findById(id).then(this.checkUserExistAndEnabled)
   }
 
-  private checkUserExistAndEnabled(user: UserEntity | null): UserEntity {
+  private checkUserExistAndEnabled(user?: User): User {
     if (!user) {
       throw new UnauthorizedException('Incorrect login')
     }

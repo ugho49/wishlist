@@ -45,4 +45,12 @@ export class UserSocial {
       updatedAt: now,
     })
   }
+
+  updatePictureUrl(pictureUrl?: string): UserSocial {
+    return new UserSocial({
+      ...this,
+      pictureUrl,
+      updatedAt: new Date(),
+    })
+  }
 }

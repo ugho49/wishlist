@@ -109,7 +109,7 @@ export class User {
     })
   }
 
-  updatePicture(pictureUrl: string): User {
+  updatePicture(pictureUrl?: string): User {
     return new User({
       ...this,
       pictureUrl,
