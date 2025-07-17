@@ -4,7 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 import { AttendeeEntity } from '../attendee/infrastructure/legacy-attendee.entity'
 import { EventEntity } from '../event/infrastructure/legacy-event.entity'
 import { LegacyEventRepository } from '../event/infrastructure/legacy-event.repository'
-import { ItemEntity, LegacyItemRepository } from '../item'
+import { ItemEntity } from '../item'
 import {
   LegacyEmailSettingsRepository,
   LegacyPasswordVerificationRepository,
@@ -21,13 +21,13 @@ import { PostgresEventRepository } from './event.repository'
 import * as tokens from './repositories.tokens'
 import { PostgresSecretSantaUserRepository } from './secret-santa-user.repository'
 import { PostgresSecretSantaRepository } from './secret-santa.repository'
+import { PostgresUserSocialRepository } from './user-social.repository'
 import { PostgresUserRepository } from './user.repository'
 import { PostgresWishlistItemRepository } from './wishlist-item.repository'
 import { PostgresWishlistRepository } from './wishlist.repository'
 
 const legacyRepositories = [
   LegacyEventRepository,
-  LegacyItemRepository,
   LegacyUserRepository,
   LegacyUserSocialRepository,
   LegacyPasswordVerificationRepository,
@@ -72,6 +72,10 @@ const legacyEntities = TypeOrmModule.forFeature([
       useClass: PostgresUserRepository,
     },
     {
+      provide: tokens.USER_SOCIAL_REPOSITORY,
+      useClass: PostgresUserSocialRepository,
+    },
+    {
       provide: tokens.WISHLIST_REPOSITORY,
       useClass: PostgresWishlistRepository,
     },
@@ -87,6 +91,7 @@ const legacyEntities = TypeOrmModule.forFeature([
     tokens.SECRET_SANTA_REPOSITORY,
     tokens.SECRET_SANTA_USER_REPOSITORY,
     tokens.USER_REPOSITORY,
+    tokens.USER_SOCIAL_REPOSITORY,
     tokens.WISHLIST_REPOSITORY,
     tokens.WISHLIST_ITEM_REPOSITORY,
   ],

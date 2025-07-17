@@ -1,23 +1,31 @@
 import type { ItemDto } from '@wishlist/common'
 
-import type { ItemEntity } from './item.entity'
+import type { WishlistItem } from '../domain'
 
-import { toMiniUserDto } from '@wishlist/api/user'
+import { userMapper } from '@wishlist/api/user'
 
-export async function toItemDto(param: { entity: ItemEntity; displayUserAndSuggested: boolean }): Promise<ItemDto> {
-  const { displayUserAndSuggested, entity } = param
-  const user = entity.taker ? await entity.taker : null
+function toDto(param: { item: WishlistItem; displayUserAndSuggested: boolean }): ItemDto {
+  const { displayUserAndSuggested, item } = param
 
-  return {
-    id: entity.id,
-    name: entity.name,
-    description: entity.description || undefined,
-    score: entity.score || undefined,
-    url: entity.url || undefined,
-    picture_url: entity.pictureUrl || undefined,
-    is_suggested: displayUserAndSuggested ? entity.isSuggested : undefined,
-    taken_by: displayUserAndSuggested && user ? toMiniUserDto(user) : undefined,
-    taken_at: displayUserAndSuggested ? entity.takenAt?.toISOString() : undefined,
-    created_at: entity.createdAt.toISOString(),
+  const dto: ItemDto = {
+    id: item.id,
+    name: item.name,
+    description: item.description,
+    score: item.score,
+    url: item.url,
+    picture_url: item.imageUrl,
+    created_at: item.createdAt.toISOString(),
   }
+
+  if (displayUserAndSuggested) {
+    dto.is_suggested = item.isSuggested
+    dto.taken_by = item.takenBy ? userMapper.toMiniUserDto(item.takenBy) : undefined
+    dto.taken_at = item.takenAt?.toISOString()
+  }
+
+  return dto
+}
+
+export const itemMapper = {
+  toDto,
 }

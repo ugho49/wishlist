@@ -1,6 +1,6 @@
 import type { WishlistItem } from '@wishlist/api/item'
 import type { User } from '@wishlist/api/user'
-import type { EventId, WishlistId } from '@wishlist/common'
+import type { EventId, UserId, WishlistId } from '@wishlist/common'
 
 import { uuid } from '@wishlist/common'
 
@@ -79,5 +79,9 @@ export class Wishlist {
       ...this,
       eventIds: this.eventIds.filter(id => id !== eventId),
     })
+  }
+
+  isOwner(userId: UserId) {
+    return this.owner.id === userId
   }
 }

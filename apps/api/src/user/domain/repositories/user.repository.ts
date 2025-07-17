@@ -1,6 +1,6 @@
 import type { UserId } from '@wishlist/common'
 
-import type { User } from './user.model'
+import type { User } from '../models'
 
 export interface UserRepository {
   findById(id: UserId): Promise<User | undefined>

@@ -6,11 +6,11 @@ import type {
   WishlistWithOwnerDto,
 } from '@wishlist/common'
 
-import type { WishlistEntity } from './wishlist.entity'
+import type { WishlistEntity } from './legacy-wishlist.entity'
 
 import { toMiniEventDto } from '../../event/infrastructure/legacy-event.mapper'
-import { toItemDto } from '../../item/infrastructure/item.mapper'
 import { displayItemSensitiveInformations, showItem } from '../../item/infrastructure/item.utils'
+import { toItemDto } from '../../item/infrastructure/legacy-item.mapper'
 import { toMiniUserDto } from '../../user'
 
 function getConfig(entity: WishlistEntity): WishlistConfigDto {

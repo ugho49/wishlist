@@ -1,11 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
+import { schema } from '@wishlist/api-drizzle'
+import { DatabaseService } from '@wishlist/api/core'
+import { User, UserRepository } from '@wishlist/api/user'
 import { Authorities, UserId } from '@wishlist/common'
 import { eq } from 'drizzle-orm'
-
-import * as schema from '../../drizzle/schema'
-import { DatabaseService } from '../core/database'
-import { User } from '../user/domain/user.model'
-import { UserRepository } from '../user/domain/user.repository'
 
 @Injectable()
 export class PostgresUserRepository implements UserRepository {
@@ -40,8 +38,8 @@ export class PostgresUserRepository implements UserRepository {
       lastIp: row.lastIp ?? undefined,
       lastConnectedAt: row.lastConnectedAt ?? undefined,
       pictureUrl: row.pictureUrl ?? undefined,
-      createdAt: new Date(row.createdAt),
-      updatedAt: new Date(row.updatedAt),
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
     })
   }
 }

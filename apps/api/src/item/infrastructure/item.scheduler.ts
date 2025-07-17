@@ -1,17 +1,18 @@
-import { Injectable, Logger } from '@nestjs/common'
+import { Inject, Injectable, Logger } from '@nestjs/common'
 import { Cron } from '@nestjs/schedule'
+import { WISHLIST_ITEM_REPOSITORY } from '@wishlist/api/repositories'
 import { LegacyWishlistRepository } from '@wishlist/api/wishlist'
+import { DateTime } from 'luxon'
 
-import { NewItemsForWishlist } from './item.interface'
+import { NewItemsForWishlist, WishlistItemRepository } from '../domain'
 import { ItemMailer } from './item.mailer'
-import { LegacyItemRepository } from './legacy-item-repository.service'
 
 @Injectable()
 export class ItemScheduler {
   private readonly logger = new Logger(ItemScheduler.name)
 
   constructor(
-    private readonly itemRepository: LegacyItemRepository,
+    @Inject(WISHLIST_ITEM_REPOSITORY) private readonly itemRepository: WishlistItemRepository,
     private readonly wishlistRepository: LegacyWishlistRepository,
     private readonly itemMailer: ItemMailer,
   ) {}
@@ -20,9 +21,11 @@ export class ItemScheduler {
   @Cron('0 15 10 * * *')
   async sendNewItemNotification() {
     try {
-      this.logger.log('Fetch new items to send daily notification')
+      const oneDayAgo = DateTime.now().minus({ days: 1 }).toJSDate()
 
-      const newItemsForWishlists = await this.itemRepository.findAllNewItems()
+      this.logger.log('Fetch new items to send daily notification since ' + oneDayAgo.toISOString())
+
+      const newItemsForWishlists = await this.itemRepository.findAllNewItems(oneDayAgo)
 
       for (const newItemsForWishlist of newItemsForWishlists) {
         await this.notify(newItemsForWishlist)

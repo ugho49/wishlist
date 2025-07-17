@@ -1,7 +1,15 @@
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common'
 import { ConfigType } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
-import { LegacyUserRepository, LegacyUserSocialRepository, UserEntity, UserSocialEntity } from '@wishlist/api/user'
+import { USER_REPOSITORY, USER_SOCIAL_REPOSITORY } from '@wishlist/api/repositories'
+import {
+  LegacyUserRepository,
+  LegacyUserSocialRepository,
+  UserEntity,
+  UserRepository,
+  UserSocialEntity,
+  UserSocialRepository,
+} from '@wishlist/api/user'
 import {
   AccessTokenJwtPayload,
   LoginInputDto,
@@ -21,10 +29,14 @@ import { PasswordManager } from './util/password-manager'
 @Injectable()
 export class AuthService {
   constructor(
-    private userRepository: LegacyUserRepository,
-    private userSocialRepository: LegacyUserSocialRepository,
-    private googleAuthService: GoogleAuthService,
-    private jwtService: JwtService,
+    @Inject(USER_REPOSITORY)
+    private readonly userRepository: UserRepository,
+    @Inject(USER_SOCIAL_REPOSITORY)
+    private readonly userSocialRepository: UserSocialRepository,
+    private readonly legacyUserRepository: LegacyUserRepository,
+    private readonly legacyUserSocialRepository: LegacyUserSocialRepository,
+    private readonly googleAuthService: GoogleAuthService,
+    private readonly jwtService: JwtService,
     @Inject(authConfig.KEY) private readonly config: ConfigType<typeof authConfig>,
   ) {}
 
@@ -44,7 +56,7 @@ export class AuthService {
       throw new UnauthorizedException('Your token is not valid')
     }
 
-    let userSocial = await this.userSocialRepository.findOneBy({
+    let userSocial = await this.legacyUserSocialRepository.findOneBy({
       socialId: payload.sub,
       socialType: UserSocialType.GOOGLE,
     })
@@ -62,13 +74,13 @@ export class AuthService {
         socialType: UserSocialType.GOOGLE,
         pictureUrl: payload.picture,
       })
-      await this.userSocialRepository.insert(userSocial)
+      await this.legacyUserSocialRepository.insert(userSocial)
       if (!userEntity.pictureUrl) needUpdateProfilePicture = true
     } else {
       userEntity = await this.validateUserById(userSocial.userId)
       if (userEntity.pictureUrl === userSocial.pictureUrl && payload.picture !== userSocial.pictureUrl)
         needUpdateProfilePicture = true
-      await this.userSocialRepository.update(
+      await this.legacyUserSocialRepository.update(
         { id: userSocial.id },
         {
           pictureUrl: payload.picture,
@@ -87,7 +99,7 @@ export class AuthService {
 
   async refresh(dto: RefreshTokenInputDto, ip: string): Promise<RefreshTokenOutputDto> {
     const refreshPayload = this.validateRefreshToken(dto.token)
-    const userEntity = await this.userRepository.findById(refreshPayload.sub)
+    const userEntity = await this.legacyUserRepository.findById(refreshPayload.sub)
 
     if (!userEntity) {
       throw new UnauthorizedException('User not found')
@@ -117,7 +129,7 @@ export class AuthService {
 
     const token = this.jwtService.sign(payload)
 
-    await this.userRepository.updateById(userEntity.id, {
+    await this.legacyUserRepository.updateById(userEntity.id, {
       pictureUrl: newValues.pictureUrl,
       lastIp: newValues.ip,
       lastConnectedAt: new Date(),
@@ -147,7 +159,7 @@ export class AuthService {
   }
 
   private async validateUserByEmailPassword(email: string, password: string): Promise<UserEntity> {
-    const user = await this.userRepository.findByEmail(email).then(this.checkUserExistAndEnabled)
+    const user = await this.legacyUserRepository.findByEmail(email).then(this.checkUserExistAndEnabled)
 
     const passwordVerified = await PasswordManager.verify({
       hash: user.passwordEnc || undefined,
@@ -162,11 +174,11 @@ export class AuthService {
   }
 
   private validateUserByEmail(email: string): Promise<UserEntity> {
-    return this.userRepository.findByEmail(email).then(this.checkUserExistAndEnabled)
+    return this.legacyUserRepository.findByEmail(email).then(this.checkUserExistAndEnabled)
   }
 
   private validateUserById(id: UserId): Promise<UserEntity> {
-    return this.userRepository.findById(id).then(this.checkUserExistAndEnabled)
+    return this.legacyUserRepository.findById(id).then(this.checkUserExistAndEnabled)
   }
 
   private checkUserExistAndEnabled(user: UserEntity | null): UserEntity {

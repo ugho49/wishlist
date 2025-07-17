@@ -1,5 +1,5 @@
 import type { User } from '@wishlist/api/user'
-import type { ItemId, WishlistId } from '@wishlist/common'
+import type { ItemId, UserId, WishlistId } from '@wishlist/common'
 
 import { uuid } from '@wishlist/common'
 
@@ -73,6 +73,49 @@ export class WishlistItem {
       takenAt: params.takenAt,
       createdAt: now,
       updatedAt: now,
+    })
+  }
+
+  convertToSuggested(): WishlistItem {
+    return new WishlistItem({
+      ...this,
+      isSuggested: true,
+    })
+  }
+
+  update(params: {
+    name?: string
+    description?: string
+    url?: string
+    imageUrl?: string
+    score?: number
+  }): WishlistItem {
+    return new WishlistItem({ ...this, ...params, updatedAt: new Date() })
+  }
+
+  isTakenBySomeone() {
+    return this.takenBy !== undefined
+  }
+
+  isTakenBy(userId: UserId) {
+    return this.takenBy?.id === userId
+  }
+
+  check(user: User): WishlistItem {
+    return new WishlistItem({
+      ...this,
+      takenBy: user,
+      takenAt: new Date(),
+      updatedAt: new Date(),
+    })
+  }
+
+  uncheck(): WishlistItem {
+    return new WishlistItem({
+      ...this,
+      takenBy: undefined,
+      takenAt: undefined,
+      updatedAt: new Date(),
     })
   }
 }

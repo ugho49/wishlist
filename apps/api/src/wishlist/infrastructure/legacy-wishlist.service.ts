@@ -20,13 +20,13 @@ import { uniq } from 'lodash'
 import { BucketService } from '../../core/bucket/bucket.service'
 import { DEFAULT_RESULT_NUMBER } from '../../core/common'
 import { LegacyEventRepository } from '../../event/infrastructure/legacy-event.repository'
-import { LegacyWishlistRepository } from './legacy-wishlist-repository.service'
-import { WishlistEntity } from './wishlist.entity'
-import { toDetailedWishlistDto, toMiniWishlistDto, toWishlistWithEventsDto } from './wishlist.mapper'
+import { WishlistEntity } from './legacy-wishlist.entity'
+import { LegacyWishlistRepository } from './legacy-wishlist.repository'
+import { toDetailedWishlistDto, toMiniWishlistDto, toWishlistWithEventsDto } from './legay-wishlist.mapper'
 
 @Injectable()
-export class WishlistService {
-  private readonly logger = new Logger(WishlistService.name)
+export class LegacyWishlistService {
+  private readonly logger = new Logger(LegacyWishlistService.name)
 
   constructor(
     private readonly wishlistRepository: LegacyWishlistRepository,
@@ -92,7 +92,7 @@ export class WishlistService {
       hideItems: dto.hide_items === undefined ? true : dto.hide_items,
     })
 
-    const fileDestination = this.getLogoDestination(wishlistEntity.id)
+    const fileDestination = this.bucketService.getLogoDestination(wishlistEntity.id)
     if (imageFile) {
       wishlistEntity.logoUrl = await this.uploadToBucket(fileDestination, imageFile)
     }
@@ -155,7 +155,7 @@ export class WishlistService {
 
     await this.wishlistRepository.delete({ id: wishlistId })
 
-    const logoDest = this.getLogoDestination(wishlistId)
+    const logoDest = this.bucketService.getLogoDestination(wishlistId)
     await this.bucketService.removeIfExist({ destination: logoDest })
   }
 
@@ -229,7 +229,7 @@ export class WishlistService {
     const { currentUserId, wishlistId, file } = param
     const wishlistEntity = await this.wishlistRepository.findByIdOrThrow(wishlistId)
     const isOwner = wishlistEntity.ownerId === currentUserId
-    const destination = this.getLogoDestination(wishlistId)
+    const destination = this.bucketService.getLogoDestination(wishlistId)
 
     if (!isOwner) {
       throw new UnauthorizedException('Only the owner of the list can upload a logo')
@@ -254,7 +254,7 @@ export class WishlistService {
     const { currentUserId, wishlistId } = param
     const wishlistEntity = await this.wishlistRepository.findByIdOrThrow(wishlistId)
     const isOwner = wishlistEntity.ownerId === currentUserId
-    const destination = `pictures/wishlists/${wishlistId}/logo`
+    const destination = this.bucketService.getLogoDestination(wishlistId)
 
     if (!isOwner) {
       throw new UnauthorizedException('Only the owner of the list can remove a logo')
@@ -263,10 +263,6 @@ export class WishlistService {
     await this.bucketService.removeIfExist({ destination })
 
     await this.wishlistRepository.update({ id: wishlistId }, { logoUrl: null })
-  }
-
-  private getLogoDestination(wishlistId: WishlistId) {
-    return `pictures/wishlists/${wishlistId}/logo`
   }
 
   private async uploadToBucket(destination: string, file: Express.Multer.File) {

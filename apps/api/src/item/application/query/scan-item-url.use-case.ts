@@ -1,11 +1,69 @@
 import type { Element } from 'domhandler'
 
-import { Injectable, Logger } from '@nestjs/common'
+import { Logger } from '@nestjs/common'
+import { IInferredQueryHandler, QueryHandler } from '@nestjs/cqrs'
 import { Cheerio, load as loadHtml } from 'cheerio'
 
-@Injectable()
-export class ScrapperService {
-  private readonly logger = new Logger(ScrapperService.name)
+import { ScanItemUrlQuery, ScanItemUrlResult } from '../../domain'
+
+@QueryHandler(ScanItemUrlQuery)
+export class ScanItemUrlUseCase implements IInferredQueryHandler<ScanItemUrlQuery> {
+  private readonly logger = new Logger(ScanItemUrlUseCase.name)
+
+  async execute(query: ScanItemUrlQuery): Promise<ScanItemUrlResult> {
+    const picture_url = await this.scanUrl(query.url)
+    return { picture_url }
+  }
+
+  private async scanUrl(url: string) {
+    try {
+      this.logger.log('Scrap img for => ', { url })
+
+      const response = await this.fetch(url, { timeout: 3_000, method: 'GET' })
+      const html = await response.text()
+
+      if (!html) {
+        this.logger.warn('No html found')
+        return null
+      }
+
+      if (this.hasBotDetection(html)) {
+        this.logger.log('Bot detection detected.')
+        return null
+      }
+
+      // Charger le contenu HTML dans Cheerio
+      const $ = loadHtml(html)
+
+      const title = $('title').text().trim()
+      const mainImageElement = $('[property="og:image"], [name="og:image"]')
+
+      const ogImageUrl = mainImageElement.attr('content') || mainImageElement.attr('src')
+
+      if (ogImageUrl) {
+        return await this.sanitizeAndCheckUrl({ imageUrl: ogImageUrl, websiteUrl: url })
+      }
+
+      let titleImageElements: Cheerio<Element> = $(`img[alt*="${title}"]`)
+      if (titleImageElements.length === 0) {
+        titleImageElements = $(`img[alt*="${title.split(' : Amazon')[0]}"]`)
+      }
+      if (titleImageElements.length === 0) {
+        titleImageElements = $(`img[alt*="${title.substring(0, 20)}"]`)
+      }
+      const titleImageUrl = this.getBiggestImage(titleImageElements)
+
+      if (titleImageUrl) {
+        return await this.sanitizeAndCheckUrl({ imageUrl: titleImageUrl, websiteUrl: url })
+      }
+
+      this.logger.log('Aucune image principale trouvée.', response)
+      return null
+    } catch (error) {
+      this.logger.error("Une erreur s'est produite lors de la récupération de l'image:", error)
+      return null
+    }
+  }
 
   private async fetch(url: string, { timeout, method } = { timeout: 1_500, method: 'GET' }) {
     const controller = new AbortController()
@@ -167,55 +225,5 @@ export class ScrapperService {
       .sort((a, b) => a.path!.localeCompare(b.path!))
 
     return imgUrls[0]!.url
-  }
-
-  async scanUrl(url: string) {
-    try {
-      this.logger.log('Scrap img for => ', { url })
-
-      const response = await this.fetch(url, { timeout: 3_000, method: 'GET' })
-      const html = await response.text()
-
-      if (!html) {
-        this.logger.warn('No html found')
-        return null
-      }
-
-      if (this.hasBotDetection(html)) {
-        this.logger.log('Bot detection detected.')
-        return null
-      }
-
-      // Charger le contenu HTML dans Cheerio
-      const $ = loadHtml(html)
-
-      const title = $('title').text().trim()
-      const mainImageElement = $('[property="og:image"], [name="og:image"]')
-
-      const ogImageUrl = mainImageElement.attr('content') || mainImageElement.attr('src')
-
-      if (ogImageUrl) {
-        return await this.sanitizeAndCheckUrl({ imageUrl: ogImageUrl, websiteUrl: url })
-      }
-
-      let titleImageElements: Cheerio<Element> = $(`img[alt*="${title}"]`)
-      if (titleImageElements.length === 0) {
-        titleImageElements = $(`img[alt*="${title.split(' : Amazon')[0]}"]`)
-      }
-      if (titleImageElements.length === 0) {
-        titleImageElements = $(`img[alt*="${title.substring(0, 20)}"]`)
-      }
-      const titleImageUrl = this.getBiggestImage(titleImageElements)
-
-      if (titleImageUrl) {
-        return await this.sanitizeAndCheckUrl({ imageUrl: titleImageUrl, websiteUrl: url })
-      }
-
-      this.logger.log('Aucune image principale trouvée.', response)
-      return null
-    } catch (error) {
-      this.logger.error("Une erreur s'est produite lors de la récupération de l'image:", error)
-      return null
-    }
   }
 }

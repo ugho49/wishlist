@@ -1,9 +1,9 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, NotFoundException } from '@nestjs/common'
 import { schema } from '@wishlist/api-drizzle'
 import { DatabaseService, DrizzleTransaction } from '@wishlist/api/core'
 import { Wishlist, WishlistRepository } from '@wishlist/api/wishlist'
 import { EventId, UserId, WishlistId } from '@wishlist/common'
-import { and, eq } from 'drizzle-orm'
+import { and, eq, exists, or } from 'drizzle-orm'
 
 import { PostgresUserRepository } from './user.repository'
 import { PostgresWishlistItemRepository } from './wishlist-item.repository'
@@ -23,6 +23,12 @@ export class PostgresWishlistRepository implements WishlistRepository {
     })
 
     return result ? PostgresWishlistRepository.toModel(result) : undefined
+  }
+
+  async findByIdOrFail(wishlistId: WishlistId): Promise<Wishlist> {
+    const wishlist = await this.findById(wishlistId)
+    if (!wishlist) throw new NotFoundException('Wishlist not found')
+    return wishlist
   }
 
   async findByEvent(eventId: EventId): Promise<Wishlist[]> {
@@ -102,6 +108,36 @@ export class PostgresWishlistRepository implements WishlistRepository {
     const client = tx || this.databaseService.db
 
     await client.delete(schema.wishlist).where(eq(schema.wishlist.id, wishlistId))
+  }
+
+  async hasAccess(params: { wishlistId: WishlistId; userId: UserId }): Promise<boolean> {
+    const result = await this.databaseService.db
+      .select({ id: schema.wishlist.id })
+      .from(schema.wishlist)
+      .where(
+        and(
+          eq(schema.wishlist.id, params.wishlistId),
+          // User is owner OR user is participant in any event that contains this wishlist
+          or(
+            eq(schema.wishlist.ownerId, params.userId),
+            exists(
+              this.databaseService.db
+                .select()
+                .from(schema.eventWishlist)
+                .innerJoin(schema.eventAttendee, eq(schema.eventAttendee.eventId, schema.eventWishlist.eventId))
+                .where(
+                  and(
+                    eq(schema.eventWishlist.wishlistId, params.wishlistId),
+                    eq(schema.eventAttendee.userId, params.userId),
+                  ),
+                ),
+            ),
+          ),
+        ),
+      )
+      .limit(1)
+
+    return result.length > 0
   }
 
   static toModel(

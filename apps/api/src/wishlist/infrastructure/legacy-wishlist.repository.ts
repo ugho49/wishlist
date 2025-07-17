@@ -3,7 +3,7 @@ import { EventId, UserId, WishlistId } from '@wishlist/common'
 import { EntityManager } from 'typeorm'
 
 import { BaseRepository } from '../../core/database'
-import { WishlistEntity } from './wishlist.entity'
+import { WishlistEntity } from './legacy-wishlist.entity'
 
 @Injectable()
 export class LegacyWishlistRepository extends BaseRepository(WishlistEntity) {

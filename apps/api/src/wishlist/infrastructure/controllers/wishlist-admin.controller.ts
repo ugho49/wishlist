@@ -3,13 +3,13 @@ import { ApiTags } from '@nestjs/swagger'
 import { GetAllWishlistsPaginationQueryDto, PagedResponse, WishlistWithEventsDto } from '@wishlist/common'
 
 import { IsAdmin } from '../../../auth'
-import { WishlistService } from '../wishlist.service'
+import { LegacyWishlistService } from '../legacy-wishlist.service'
 
 @IsAdmin()
 @ApiTags('ADMIN - Wishlist')
 @Controller('/admin/wishlist')
 export class WishlistAdminController {
-  constructor(private readonly wishlistService: WishlistService) {}
+  constructor(private readonly wishlistService: LegacyWishlistService) {}
 
   @Get()
   getAllPaginated(

@@ -17,13 +17,13 @@ import {
 
 import { CurrentUser } from '../../../auth'
 import { ValidJsonBody } from '../../../core/common/common.decorator'
-import { WishlistService } from '../wishlist.service'
+import { LegacyWishlistService } from '../legacy-wishlist.service'
 import { wishlistLogoFileValidators, wishlistLogoResizePipe } from '../wishlist.validator'
 
 @ApiTags('Wishlist')
 @Controller('/wishlist')
 export class WishlistController {
-  constructor(private readonly wishlistService: WishlistService) {}
+  constructor(private readonly wishlistService: LegacyWishlistService) {}
 
   @Get()
   getMyWishlists(
