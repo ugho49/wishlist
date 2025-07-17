@@ -117,7 +117,6 @@ services:
       - 'traefik.http.services.wishlistapi.loadbalancer.healthcheck.path=/health'
       - 'traefik.http.services.wishlistapi.loadbalancer.healthcheck.interval=10s'
       - 'traefik.http.services.wishlistapi.loadbalancer.healthcheck.timeout=5s'
-      - 'traefik.http.services.wishlistapi.loadbalancer.healthcheck.retries=3'
       # Configuration pour les drains gracieux
       - 'traefik.http.services.wishlistapi.loadbalancer.healthcheck.followredirects=true'
       # Configuration pour améliorer la détection des changements
