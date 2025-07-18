@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common'
+import { uuid } from '@wishlist/common'
 import { cert, initializeApp } from 'firebase-admin/app'
 import { getStorage, Storage } from 'firebase-admin/storage'
 
@@ -36,5 +37,13 @@ export class BucketRealService extends BucketService {
       this.logger.error('Fail to upload file', { destination: param.destination })
       throw e
     }
+  }
+
+  uploadFile(param: { destination: string; file: Express.Multer.File }): Promise<string> {
+    return this.upload({
+      destination: `${param.destination}/${uuid()}`,
+      data: param.file.buffer,
+      contentType: param.file.mimetype,
+    })
   }
 }

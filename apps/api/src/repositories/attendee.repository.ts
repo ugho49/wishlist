@@ -1,7 +1,7 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, NotFoundException } from '@nestjs/common'
 import { schema } from '@wishlist/api-drizzle'
 import { Attendee, AttendeeRepository } from '@wishlist/api/attendee'
-import { DatabaseService } from '@wishlist/api/core'
+import { DatabaseService, DrizzleTransaction } from '@wishlist/api/core'
 import { AttendeeId, AttendeeRole, EventId } from '@wishlist/common'
 import { and, eq, inArray, or } from 'drizzle-orm'
 
@@ -12,9 +12,7 @@ export class PostgresAttendeeRepository implements AttendeeRepository {
   constructor(private readonly databaseService: DatabaseService) {}
 
   async findById(id: AttendeeId): Promise<Attendee | undefined> {
-    const { schema, db } = this.databaseService
-
-    const attendee = await db.query.eventAttendee.findFirst({
+    const attendee = await this.databaseService.db.query.eventAttendee.findFirst({
       where: eq(schema.eventAttendee.id, id),
       with: { user: true },
     })
@@ -24,12 +22,16 @@ export class PostgresAttendeeRepository implements AttendeeRepository {
     return PostgresAttendeeRepository.toModel(attendee)
   }
 
-  async findByIds(ids: AttendeeId[]): Promise<Attendee[]> {
-    const { schema, db } = this.databaseService
+  async findByIdOrFail(id: AttendeeId): Promise<Attendee> {
+    const attendee = await this.findById(id)
+    if (!attendee) throw new NotFoundException('Attendee not found')
+    return attendee
+  }
 
+  async findByIds(ids: AttendeeId[]): Promise<Attendee[]> {
     if (ids.length === 0) return []
 
-    const attendees = await db.query.eventAttendee.findMany({
+    const attendees = await this.databaseService.db.query.eventAttendee.findMany({
       where: inArray(schema.eventAttendee.id, ids),
       with: { user: true },
     })
@@ -38,9 +40,7 @@ export class PostgresAttendeeRepository implements AttendeeRepository {
   }
 
   async findByEventId(eventId: EventId): Promise<Attendee[]> {
-    const { schema, db } = this.databaseService
-
-    const attendees = await db.query.eventAttendee.findMany({
+    const attendees = await this.databaseService.db.query.eventAttendee.findMany({
       where: eq(schema.eventAttendee.eventId, eventId),
       with: { user: true },
     })
@@ -49,9 +49,7 @@ export class PostgresAttendeeRepository implements AttendeeRepository {
   }
 
   async existByEventAndEmail(param: { eventId: EventId; email: string }): Promise<boolean> {
-    const { schema, db } = this.databaseService
-
-    const attendee = await db.query.eventAttendee.findFirst({
+    const attendee = await this.databaseService.db.query.eventAttendee.findFirst({
       columns: { id: true },
       where: and(
         eq(schema.eventAttendee.eventId, param.eventId),
@@ -63,9 +61,7 @@ export class PostgresAttendeeRepository implements AttendeeRepository {
   }
 
   async save(attendee: Attendee): Promise<void> {
-    const { schema, db } = this.databaseService
-
-    await db
+    await this.databaseService.db
       .insert(schema.eventAttendee)
       .values({
         id: attendee.id,
@@ -84,10 +80,10 @@ export class PostgresAttendeeRepository implements AttendeeRepository {
       })
   }
 
-  async delete(id: AttendeeId): Promise<void> {
-    const { schema, db } = this.databaseService
+  async delete(id: AttendeeId, tx?: DrizzleTransaction): Promise<void> {
+    const client = tx || this.databaseService.db
 
-    await db.delete(schema.eventAttendee).where(eq(schema.eventAttendee.id, id))
+    await client.delete(schema.eventAttendee).where(eq(schema.eventAttendee.id, id))
   }
 
   static toModel(

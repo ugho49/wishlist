@@ -1,5 +1,3 @@
-export * from './legacy-item-repository.service'
 export * from './item.entity'
-export * from './item.mapper'
-export * from './item.service'
+export { itemMapper } from './item.mapper'
 export * from './item.module'

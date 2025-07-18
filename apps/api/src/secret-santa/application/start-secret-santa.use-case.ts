@@ -65,8 +65,8 @@ export class StartSecretSantaUseCase implements IInferredCommandHandler<StartSec
       const drawAttendee = attendees.find(a => a.id === drawSecretSantaUser?.attendeeId)!
 
       drawns.push({
-        email: attendee.getUserEmailOrPendingEmail(),
-        secretSantaName: drawAttendee.getUserFullNameOrPendingEmail(),
+        email: attendee.getEmail(),
+        secretSantaName: drawAttendee.getFullNameOrPendingEmail(),
       })
     }
 

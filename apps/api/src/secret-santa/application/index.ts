@@ -11,8 +11,6 @@ import { StartSecretSantaUseCase } from './start-secret-santa.use-case'
 import { UpdateSecretSantaUserUseCase } from './update-secret-santa-user.use-case'
 import { UpdateSecretSantaUseCase } from './update-secret-santa.use-case'
 
-export * from '../domain/query'
-
 export const handlers = [
   GetSecretSantaUseCase,
   GetSecretSantaDrawUseCase,

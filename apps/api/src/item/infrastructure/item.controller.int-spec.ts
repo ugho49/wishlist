@@ -249,7 +249,7 @@ describe('ItemController', () => {
         await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(0).check()
       })
 
-      it('should return 404 when user does not have access to wishlist', async () => {
+      it('should return 401 when user does not have access to wishlist', async () => {
         const otherUserId = await fixtures.insertUser({
           email: 'other@test.com',
           firstname: 'Other',
@@ -274,11 +274,11 @@ describe('ItemController', () => {
             wishlist_id: wishlistId,
             name: 'Test Item',
           })
-          .expect(404)
+          .expect(401)
           .expect(({ body }) => {
             expect(body).toMatchObject({
-              error: 'Not Found',
-              message: 'Wishlist not found',
+              error: 'Unauthorized',
+              message: 'You cannot add items to this wishlist',
             })
           })
 
@@ -495,7 +495,7 @@ describe('ItemController', () => {
         await request.put(path(nonExistentItemId)).send({ name: 'Updated Item' }).expect(404)
       })
 
-      it('should return 404 when user does not have access to item', async () => {
+      it('should return 401 when user does not have access to item', async () => {
         const otherUserId = await fixtures.insertUser({
           email: 'other@test.com',
           firstname: 'Other',
@@ -519,7 +519,7 @@ describe('ItemController', () => {
           name: 'Test Item',
         })
 
-        await request.put(path(itemId)).send({ name: 'Updated Item' }).expect(404)
+        await request.put(path(itemId)).send({ name: 'Updated Item' }).expect(401)
 
         // Verify no changes were made
         await expectTable(Fixtures.ITEM_TABLE)
@@ -725,7 +725,7 @@ describe('ItemController', () => {
         await request.delete(path(nonExistentItemId)).expect(404)
       })
 
-      it('should return 404 when user does not have access to item', async () => {
+      it('should return 401 when user does not have access to item', async () => {
         const otherUserId = await fixtures.insertUser({
           email: 'other@test.com',
           firstname: 'Other',
@@ -749,13 +749,13 @@ describe('ItemController', () => {
           name: 'Test Item',
         })
 
-        await request.delete(path(itemId)).expect(404)
+        await request.delete(path(itemId)).expect(401)
 
         // Verify item still exists
         await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1).check()
       })
 
-      it('should return 404 when trying to delete suggested item as list owner', async () => {
+      it('should return 401 when trying to delete suggested item as list owner', async () => {
         const otherUserId = await fixtures.insertUser({
           email: 'other@test.com',
           firstname: 'Other',
@@ -786,7 +786,7 @@ describe('ItemController', () => {
           isSuggested: true,
         })
 
-        await request.delete(path(itemId)).expect(404)
+        await request.delete(path(itemId)).expect(401)
 
         await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1).check()
       })
@@ -1080,7 +1080,7 @@ describe('ItemController', () => {
         await request.post(path(nonExistentItemId)).expect(404)
       })
 
-      it('should return 404 when user does not have access to item', async () => {
+      it('should return 401 when user does not have access to item', async () => {
         const otherUserId = await fixtures.insertUser({
           email: 'other@test.com',
           firstname: 'Other',
@@ -1104,7 +1104,7 @@ describe('ItemController', () => {
           name: 'Test Item',
         })
 
-        await request.post(path(itemId)).expect(404)
+        await request.post(path(itemId)).expect(401)
       })
 
       it('should return 404 when trying to check suggested item as list owner with hideItems', async () => {

@@ -17,4 +17,9 @@ export class BucketMockService extends BucketService {
     this.logger.log({ destination: param.destination }, 'Upload file')
     return Promise.resolve(param.destination)
   }
+
+  uploadFile(param: { destination: string; file: Express.Multer.File }): Promise<string> {
+    this.logger.log({ destination: param.destination }, 'Upload file')
+    return Promise.resolve(param.destination)
+  }
 }

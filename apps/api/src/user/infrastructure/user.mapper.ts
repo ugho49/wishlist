@@ -1,6 +1,6 @@
 import type { MiniUserDto } from '@wishlist/common'
 
-import type { User } from '../domain/user.model'
+import type { User } from '../domain'
 
 function toMiniUserDto(model: User): MiniUserDto {
   return {

@@ -267,3 +267,553 @@ it('should create resource with related data', async () => {
 - `apps/api/src/user/infrastructure/controllers/user.controller.int-spec.ts`
 - `apps/api/src/secret-santa/infrastructure/secret-santa.controller.int-spec.ts`
 - `apps/api/src/event/infrastructure/event.controller.int-spec.ts`
+
+## CQRS Use-Case Implementation Guidelines
+
+This section provides comprehensive guidelines for implementing CQRS patterns in new domains, following the established patterns from the secret-santa domain.
+
+### Domain Structure Organization
+
+When creating a new domain, follow this strict folder structure:
+
+```
+apps/api/src/{domain-name}/
+├── domain/
+│   ├── command/           # Command definitions
+│   ├── event/            # Domain events
+│   ├── model/            # Domain models/aggregates
+│   ├── query/            # Query definitions
+│   └── repository/       # Repository interfaces
+├── application/          # Use cases (handlers)
+│   ├── command/          # Command handlers
+│   ├── event/            # Event handlers
+│   └── query/            # Query handlers
+└── infrastructure/       # Controllers, modules, implementations
+    ├── controllers/      # REST controllers
+    ├── repository/       # Repository implementations
+    └── {domain}.module.ts # NestJS module
+```
+
+### Naming Conventions
+
+#### Commands
+- **Class Name**: `{Action}{EntityName}Command` (e.g., `CreateWishlistCommand`)
+- **File Name**: `{kebab-case-action}-{kebab-case-entity}.command.ts`
+- **Result Type**: `{Action}{EntityName}Result` (e.g., `CreateWishlistResult`)
+
+#### Queries
+- **Class Name**: `{Action}{EntityName}Query` (e.g., `GetWishlistQuery`)
+- **File Name**: `{kebab-case-action}-{kebab-case-entity}.query.ts`
+- **Result Type**: `{Action}{EntityName}Result` (e.g., `GetWishlistResult`)
+
+#### Events
+- **Class Name**: `{EntityName}{PastTenseAction}Event` (e.g., `WishlistCreatedEvent`)
+- **File Name**: `{kebab-case-entity}-{kebab-case-past-tense-action}.event.ts`
+
+#### Use Cases (Handlers)
+- **Class Name**: `{Action}{EntityName}UseCase` (e.g., `CreateWishlistUseCase`)
+- **File Name**: `{kebab-case-action}-{kebab-case-entity}.use-case.ts`
+
+### Command Implementation Template
+
+```typescript
+// domain/command/create-wishlist.command.ts
+import { Command } from '@nestjs-architects/typed-cqrs'
+import { ICurrentUser, EventId, WishlistDto } from '@wishlist/common'
+
+export class CreateWishlistCommand extends Command<CreateWishlistResult> {
+  public readonly currentUser: ICurrentUser
+  public readonly eventId: EventId
+  public readonly title: string
+  public readonly description?: string
+
+  constructor(props: {
+    currentUser: ICurrentUser
+    eventId: EventId
+    title: string
+    description?: string
+  }) {
+    super()
+    this.currentUser = props.currentUser
+    this.eventId = props.eventId
+    this.title = props.title
+    this.description = props.description
+  }
+}
+
+export type CreateWishlistResult = WishlistDto
+```
+
+### Query Implementation Template
+
+```typescript
+// domain/query/get-wishlist.query.ts
+import { Query } from '@nestjs-architects/typed-cqrs'
+import { ICurrentUser, WishlistId, WishlistDto } from '@wishlist/common'
+
+export class GetWishlistQuery extends Query<GetWishlistResult> {
+  public readonly currentUser: ICurrentUser
+  public readonly wishlistId: WishlistId
+
+  constructor(props: {
+    currentUser: ICurrentUser
+    wishlistId: WishlistId
+  }) {
+    super()
+    this.currentUser = props.currentUser
+    this.wishlistId = props.wishlistId
+  }
+}
+
+export type GetWishlistResult = WishlistDto | undefined
+```
+
+### Event Implementation Template
+
+```typescript
+// domain/event/wishlist-created.event.ts
+import { WishlistId, EventId } from '@wishlist/common'
+
+export class WishlistCreatedEvent {
+  public readonly wishlistId: WishlistId
+  public readonly eventId: EventId
+  public readonly title: string
+  public readonly ownerId: string
+  public readonly description?: string
+
+  constructor(props: {
+    wishlistId: WishlistId
+    eventId: EventId
+    title: string
+    ownerId: string
+    description?: string
+  }) {
+    this.wishlistId = props.wishlistId
+    this.eventId = props.eventId
+    this.title = props.title
+    this.ownerId = props.ownerId
+    this.description = props.description
+  }
+}
+```
+
+### Command Handler Template
+
+```typescript
+// application/command/create-wishlist.use-case.ts
+import { Inject } from '@nestjs/common'
+import { CommandHandler, EventBus, IInferredCommandHandler } from '@nestjs/cqrs'
+import { TransactionManager } from '@wishlist/api/database'
+import { CreateWishlistCommand, CreateWishlistResult } from '../../domain/command/create-wishlist.command'
+import { WishlistCreatedEvent } from '../../domain/event/wishlist-created.event'
+import { Wishlist } from '../../domain/model/wishlist.model'
+import { WishlistRepository, WISHLIST_REPOSITORY } from '../../domain/repository/wishlist.repository'
+
+@CommandHandler(CreateWishlistCommand)
+export class CreateWishlistUseCase implements IInferredCommandHandler<CreateWishlistCommand> {
+  constructor(
+    @Inject(WISHLIST_REPOSITORY)
+    private readonly wishlistRepository: WishlistRepository,
+    private readonly transactionManager: TransactionManager,
+    private readonly eventBus: EventBus,
+  ) {}
+
+  async execute(command: CreateWishlistCommand): Promise<CreateWishlistResult> {
+    // 1. Create domain model
+    const wishlist = Wishlist.create({
+      title: command.title,
+      description: command.description,
+      eventId: command.eventId,
+      ownerId: command.currentUser.id,
+    })
+
+    // 2. Save with transaction
+    await this.transactionManager.runInTransaction(async (tx) => {
+      await this.wishlistRepository.save(wishlist, tx)
+    })
+
+    // 3. Publish domain event
+    await this.eventBus.publish(
+      new WishlistCreatedEvent({
+        wishlistId: wishlist.id,
+        eventId: wishlist.eventId,
+        title: wishlist.title,
+        ownerId: wishlist.ownerId,
+        description: wishlist.description,
+      }),
+    )
+
+    // 4. Return DTO
+    return wishlist.toDto()
+  }
+}
+```
+
+### Query Handler Template
+
+```typescript
+// application/query/get-wishlist.use-case.ts
+import { Inject } from '@nestjs/common'
+import { QueryHandler, IInferredQueryHandler } from '@nestjs/cqrs'
+import { GetWishlistQuery, GetWishlistResult } from '../../domain/query/get-wishlist.query'
+import { WishlistRepository, WISHLIST_REPOSITORY } from '../../domain/repository/wishlist.repository'
+
+@QueryHandler(GetWishlistQuery)
+export class GetWishlistUseCase implements IInferredQueryHandler<GetWishlistQuery> {
+  constructor(
+    @Inject(WISHLIST_REPOSITORY)
+    private readonly wishlistRepository: WishlistRepository,
+  ) {}
+
+  async execute(query: GetWishlistQuery): Promise<GetWishlistResult> {
+    const wishlist = await this.wishlistRepository.findById(query.wishlistId)
+    
+    if (!wishlist) {
+      return undefined
+    }
+
+    // Add security checks
+    if (!wishlist.canBeViewedBy(query.currentUser)) {
+      return undefined
+    }
+
+    return wishlist.toDto()
+  }
+}
+```
+
+### Event Handler Template
+
+```typescript
+// application/event/wishlist-created.use-case.ts
+import { EventsHandler, IEventHandler } from '@nestjs/cqrs'
+import { MailService } from '@wishlist/api/mail'
+import { WishlistCreatedEvent } from '../../domain/event/wishlist-created.event'
+
+@EventsHandler(WishlistCreatedEvent)
+export class WishlistCreatedUseCase implements IEventHandler<WishlistCreatedEvent> {
+  constructor(private readonly mailService: MailService) {}
+
+  async handle(event: WishlistCreatedEvent): Promise<void> {
+    // Handle side effects like sending emails, logging, etc.
+    await this.mailService.send({
+      to: event.ownerId,
+      subject: 'Wishlist Created',
+      template: 'wishlist-created',
+      data: {
+        title: event.title,
+        eventId: event.eventId,
+      },
+    })
+  }
+}
+```
+
+### Domain Model Template
+
+```typescript
+// domain/model/wishlist.model.ts
+import { WishlistId, EventId, WishlistDto, ICurrentUser } from '@wishlist/common'
+import { randomUUID } from 'crypto'
+
+export interface WishlistProps {
+  id: WishlistId
+  title: string
+  description?: string
+  eventId: EventId
+  ownerId: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+export class Wishlist {
+  public readonly id: WishlistId
+  public readonly title: string
+  public readonly description?: string
+  public readonly eventId: EventId
+  public readonly ownerId: string
+  public readonly createdAt: Date
+  public readonly updatedAt: Date
+
+  constructor(props: WishlistProps) {
+    this.id = props.id
+    this.title = props.title
+    this.description = props.description
+    this.eventId = props.eventId
+    this.ownerId = props.ownerId
+    this.createdAt = props.createdAt
+    this.updatedAt = props.updatedAt
+  }
+
+  static create(props: {
+    title: string
+    description?: string
+    eventId: EventId
+    ownerId: string
+  }): Wishlist {
+    const now = new Date()
+    return new Wishlist({
+      id: randomUUID() as WishlistId,
+      title: props.title,
+      description: props.description,
+      eventId: props.eventId,
+      ownerId: props.ownerId,
+      createdAt: now,
+      updatedAt: now,
+    })
+  }
+
+  // Business logic methods
+  canBeViewedBy(user: ICurrentUser): boolean {
+    return this.ownerId === user.id
+  }
+
+  canBeModifiedBy(user: ICurrentUser): boolean {
+    return this.ownerId === user.id
+  }
+
+  updateTitle(title: string): Wishlist {
+    return new Wishlist({
+      ...this,
+      title,
+      updatedAt: new Date(),
+    })
+  }
+
+  toDto(): WishlistDto {
+    return {
+      id: this.id,
+      title: this.title,
+      description: this.description,
+      event_id: this.eventId,
+      owner_id: this.ownerId,
+      created_at: this.createdAt.toISOString(),
+      updated_at: this.updatedAt.toISOString(),
+    }
+  }
+}
+```
+
+### Repository Interface Template
+
+```typescript
+// domain/repository/wishlist.repository.ts
+import { DrizzleTransaction } from '@wishlist/api/database'
+import { WishlistId, EventId } from '@wishlist/common'
+import { Wishlist } from '../model/wishlist.model'
+
+export const WISHLIST_REPOSITORY = Symbol('WishlistRepository')
+
+export interface WishlistRepository {
+  findById(id: WishlistId): Promise<Wishlist | undefined>
+  findByIdOrFail(id: WishlistId): Promise<Wishlist>
+  findByEventId(eventId: EventId): Promise<Wishlist[]>
+  findByOwnerId(ownerId: string): Promise<Wishlist[]>
+  save(wishlist: Wishlist, tx?: DrizzleTransaction): Promise<void>
+  delete(id: WishlistId, tx?: DrizzleTransaction): Promise<void>
+  existsById(id: WishlistId): Promise<boolean>
+}
+```
+
+### Controller Template
+
+```typescript
+// infrastructure/controllers/wishlist.controller.ts
+import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common'
+import { CommandBus, QueryBus } from '@nestjs/cqrs'
+import { ApiTags } from '@nestjs/swagger'
+import { CurrentUser } from '@wishlist/api/auth'
+import {
+  CreateWishlistInputDto,
+  WishlistDto,
+  WishlistId,
+  EventId,
+  ICurrentUser,
+  UpdateWishlistInputDto,
+} from '@wishlist/common'
+import {
+  CreateWishlistCommand,
+  DeleteWishlistCommand,
+  GetWishlistQuery,
+  GetWishlistsByEventQuery,
+  UpdateWishlistCommand,
+} from '../domain'
+
+@ApiTags('Wishlists')
+@Controller('/wishlists')
+export class WishlistController {
+  constructor(
+    private readonly queryBus: QueryBus,
+    private readonly commandBus: CommandBus,
+  ) {}
+
+  @Get('/')
+  getWishlistsByEvent(
+    @CurrentUser() currentUser: ICurrentUser,
+    @Query('eventId') eventId: EventId,
+  ): Promise<WishlistDto[]> {
+    return this.queryBus.execute(
+      new GetWishlistsByEventQuery({ currentUser, eventId }),
+    )
+  }
+
+  @Get('/:id')
+  getWishlist(
+    @CurrentUser() currentUser: ICurrentUser,
+    @Param('id') wishlistId: WishlistId,
+  ): Promise<WishlistDto | undefined> {
+    return this.queryBus.execute(
+      new GetWishlistQuery({ currentUser, wishlistId }),
+    )
+  }
+
+  @Post('/')
+  createWishlist(
+    @CurrentUser() currentUser: ICurrentUser,
+    @Body() dto: CreateWishlistInputDto,
+  ): Promise<WishlistDto> {
+    return this.commandBus.execute(
+      new CreateWishlistCommand({
+        currentUser,
+        eventId: dto.event_id,
+        title: dto.title,
+        description: dto.description,
+      }),
+    )
+  }
+
+  @Put('/:id')
+  async updateWishlist(
+    @CurrentUser() currentUser: ICurrentUser,
+    @Param('id') wishlistId: WishlistId,
+    @Body() dto: UpdateWishlistInputDto,
+  ): Promise<void> {
+    await this.commandBus.execute(
+      new UpdateWishlistCommand({
+        currentUser,
+        wishlistId,
+        title: dto.title,
+        description: dto.description,
+      }),
+    )
+  }
+
+  @Delete('/:id')
+  async deleteWishlist(
+    @CurrentUser() currentUser: ICurrentUser,
+    @Param('id') wishlistId: WishlistId,
+  ): Promise<void> {
+    await this.commandBus.execute(
+      new DeleteWishlistCommand({ currentUser, wishlistId }),
+    )
+  }
+}
+```
+
+### Module Template
+
+```typescript
+// infrastructure/wishlist.module.ts
+import { Module } from '@nestjs/common'
+import { EventModule } from '@wishlist/api/event'
+import { WishlistController } from './controllers/wishlist.controller'
+import {
+  CreateWishlistUseCase,
+  UpdateWishlistUseCase,
+  DeleteWishlistUseCase,
+  GetWishlistUseCase,
+  GetWishlistsByEventUseCase,
+  WishlistCreatedUseCase,
+} from '../application'
+
+const handlers = [
+  // Command handlers
+  CreateWishlistUseCase,
+  UpdateWishlistUseCase,
+  DeleteWishlistUseCase,
+  // Query handlers
+  GetWishlistUseCase,
+  GetWishlistsByEventUseCase,
+  // Event handlers
+  WishlistCreatedUseCase,
+]
+
+@Module({
+  imports: [EventModule],
+  controllers: [WishlistController],
+  providers: [...handlers],
+})
+export class WishlistModule {}
+```
+
+### Key Implementation Rules
+
+#### 1. Security First
+- **Always include `currentUser: ICurrentUser`** in all commands and queries
+- **Implement authorization checks** in domain models (`canBeViewedBy`, `canBeModifiedBy`)
+- **Return 404 instead of 403** for unauthorized access to maintain privacy
+
+#### 2. Type Safety
+- **Use branded types** for all IDs (`WishlistId`, `EventId`, etc.)
+- **Define result types** for all commands and queries
+- **Use readonly properties** in domain models and commands/queries
+
+#### 3. Transaction Management
+- **Use `TransactionManager.runInTransaction`** only for operations involving multiple SQL queries
+- **Skip transaction management** for single SQL operations (repository methods handle this internally)
+- **Pass transaction context** to repository methods when needed for multi-operation transactions
+- **Group related operations** in a single transaction
+
+#### 4. Event Publishing
+- **Publish domain events** after successful command execution
+- **Use events for side effects** like sending emails, logging, etc.
+- **Keep events focused** on domain-specific information
+
+#### 5. Error Handling
+- **Use domain exceptions** for business rule violations
+- **Validate input** in command/query handlers
+- **Handle not found cases** gracefully in queries
+
+#### 6. Testing
+- **Follow integration testing guidelines** from CLAUDE.md
+- **Test all security scenarios** (authentication, authorization)
+- **Verify database state** after mutations
+- **Use dynamic validation testing** with `it.each`
+
+### Domain Index Files
+
+Create index files to export all domain objects:
+
+```typescript
+// domain/index.ts
+export * from './command'
+export * from './query'
+export * from './event'
+export * from './model'
+export * from './repository'
+
+// domain/command/index.ts
+export * from './create-wishlist.command'
+export * from './update-wishlist.command'
+export * from './delete-wishlist.command'
+
+// application/index.ts
+export * from './command'
+export * from './query'
+export * from './event'
+```
+
+### Migration Checklist
+
+When migrating existing domains to this pattern:
+
+- [ ] Create proper folder structure
+- [ ] Convert services to command/query handlers
+- [ ] Extract domain models with business logic
+- [ ] Define repository interfaces
+- [ ] Implement domain events
+- [ ] Add security checks to all handlers
+- [ ] Update controllers to use CommandBus/QueryBus
+- [ ] Write comprehensive integration tests
+- [ ] Add transaction support
+- [ ] Create proper index files for exports

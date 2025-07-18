@@ -248,7 +248,7 @@ export class Fixtures {
       id,
       userId: userId as UserId,
       token,
-      expiredAt: expiredAt.toISOString(),
+      expiredAt,
     })
 
     return id
@@ -268,7 +268,7 @@ export class Fixtures {
       id,
       eventId: eventId as EventId,
       description: description ?? null,
-      budget: budget ? budget.toString() : null,
+      budget,
       status,
     })
 
@@ -320,20 +320,10 @@ export class Fixtures {
       isSuggested: isSuggested ?? false,
       score,
       takerId: takerId ? (takerId as UserId) : null,
-      takenAt: takenAt ? takenAt.toISOString() : null,
+      takenAt,
       pictureUrl,
     })
 
     return id
   }
-
-  // async linkWishlistToEvent(parameters: { wishlistId: string; eventId: string }): Promise<void> {
-  //   const { schema, db: client } = this.databaseService
-  //   const { wishlistId, eventId } = parameters
-
-  //   await client.insert(schema.eventWishlist).values({
-  //     eventId: eventId as EventId,
-  //     wishlistId: wishlistId as WishlistId,
-  //   })
-  // }
 }

@@ -8,4 +8,11 @@ export const brandedUuid = <T extends string>() =>
     fromDriver: (value: string): T => value as T,
   })
 
-export const timestampWithTimezone = (name: string) => timestamp(name, { withTimezone: true, mode: 'string' })
+export const timestampWithTimezone = (name: string) => timestamp(name, { withTimezone: true, mode: 'date' })
+
+export const numericNullable = (name: string) =>
+  customType<{ data: number | undefined; driverData: string | null }>({
+    dataType: () => 'numeric',
+    toDriver: (value: number | undefined): string | null => value?.toString() ?? null,
+    fromDriver: (value: string | null): number | undefined => (value ? parseFloat(value) : undefined),
+  })(name)

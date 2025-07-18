@@ -1,5 +1,3 @@
 export { attendeeMapper } from './attendee.mapper'
 // export * from './legacy-attendee.entity'
 export * from './legacy-attendee.mapper'
-export { LegacyAttendeeRepository } from './legacy-attendee.repository'
-export { LegacyAttendeeService } from './legacy-attendee.service'

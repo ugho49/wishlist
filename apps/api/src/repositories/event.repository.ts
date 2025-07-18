@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { EventId } from '@wishlist/common'
-import { eq } from 'drizzle-orm'
+import { eq, inArray } from 'drizzle-orm'
 
 import * as schema from '../../drizzle/schema'
 import { DatabaseService } from '../core/database'
@@ -21,6 +21,12 @@ export class PostgresEventRepository implements EventRepository {
     return PostgresEventRepository.toModel(result[0]!)
   }
 
+  async findByIds(ids: EventId[]): Promise<Event[]> {
+    const { schema, db } = this.databaseService
+    const result = await db.select().from(schema.event).where(inArray(schema.event.id, ids))
+    return result.map(PostgresEventRepository.toModel)
+  }
+
   async findByIdOrFail(id: EventId): Promise<Event> {
     const event = await this.findById(id)
     if (!event) {
@@ -39,8 +45,8 @@ export class PostgresEventRepository implements EventRepository {
         title: event.title,
         description: event.description ?? null,
         eventDate: event.eventDate.toISOString().split('T')[0] as string, // Convert to YYYY-MM-DD format
-        createdAt: event.createdAt.toISOString(),
-        updatedAt: event.updatedAt.toISOString(),
+        createdAt: event.createdAt,
+        updatedAt: event.updatedAt,
       })
       .onConflictDoUpdate({
         target: schema.event.id,
@@ -48,6 +54,7 @@ export class PostgresEventRepository implements EventRepository {
           title: event.title,
           description: event.description ?? null,
           eventDate: event.eventDate.toISOString().split('T')[0] as string, // Convert to YYYY-MM-DD format
+          updatedAt: event.updatedAt,
         },
       })
   }
@@ -64,8 +71,8 @@ export class PostgresEventRepository implements EventRepository {
       title: row.title,
       description: row.description ?? undefined,
       eventDate: new Date(row.eventDate),
-      createdAt: new Date(row.createdAt),
-      updatedAt: new Date(row.updatedAt),
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
     })
   }
 }

@@ -212,7 +212,7 @@ describe('AttendeeController', () => {
           .expect(({ body }) =>
             expect(body).toMatchObject({
               error: 'Unauthorized',
-              message: 'Only maintainers of the event can update an attendee',
+              message: 'Only maintainers of the event can add an attendee',
             }),
           )
 
@@ -373,7 +373,7 @@ describe('AttendeeController', () => {
             expect(body).toMatchObject({
               error: 'Conflict',
               message:
-                'You remove this attendee from the event because he have a list in this event and the list have only this event attached',
+                'You cannot remove this attendee from the event because he have a list in this event and the list have only this event attached',
             }),
           )
 

@@ -1,2 +1,2 @@
-export * from './user.model'
-export * from './user.repository'
+export * from './models'
+export * from './repositories'

@@ -1,82 +1,53 @@
-import type {
-  DetailedWishlistDto,
-  MiniWishlistDto,
-  WishlistConfigDto,
-  WishlistWithEventsDto,
-  WishlistWithOwnerDto,
-} from '@wishlist/common'
+import type { Event } from '@wishlist/api/event'
+import type { DetailedWishlistDto, UserId, WishlistWithEventsDto } from '@wishlist/common'
 
-import type { WishlistEntity } from './wishlist.entity'
+import type { Wishlist } from '../domain'
 
-import { toMiniEventDto } from '../../event/infrastructure/legacy-event.mapper'
-import { toItemDto } from '../../item/infrastructure/item.mapper'
-import { displayItemSensitiveInformations, showItem } from '../../item/infrastructure/item.utils'
-import { toMiniUserDto } from '../../user'
+import { eventMapper } from '@wishlist/api/event'
+import { itemMapper } from '@wishlist/api/item'
+import { userMapper } from '@wishlist/api/user'
 
-function getConfig(entity: WishlistEntity): WishlistConfigDto {
-  return { hide_items: entity.hideItems }
-}
+function toDetailedWishlistDto(params: {
+  wishlist: Wishlist
+  currentUserId: UserId
+  events: Event[]
+}): DetailedWishlistDto {
+  const { wishlist, currentUserId, events } = params
 
-export function toMiniWishlistDto(entity: WishlistEntity): MiniWishlistDto {
+  const displayUserAndSuggested = wishlist.canDisplayItemSensitiveInformations(currentUserId)
+
   return {
-    id: entity.id,
-    title: entity.title,
-    description: entity.description || undefined,
-    logo_url: entity.logoUrl || undefined,
+    id: wishlist.id,
+    title: wishlist.title,
+    description: wishlist.description,
+    logo_url: wishlist.logoUrl,
+    owner: userMapper.toMiniUserDto(wishlist.owner),
+    items: wishlist.getItemsToDisplay(currentUserId).map(item => itemMapper.toDto({ item, displayUserAndSuggested })),
+    events: events.map(eventMapper.toMiniEventDto),
+    config: {
+      hide_items: wishlist.hideItems,
+    },
+    created_at: wishlist.createdAt.toISOString(),
+    updated_at: wishlist.updatedAt.toISOString(),
   }
 }
 
-export async function toWishlistWithEventsDto(entity: WishlistEntity): Promise<WishlistWithEventsDto> {
-  const events = await entity.events
+function toWishlistWithEventsDto(params: { wishlist: Wishlist; events: Event[] }): WishlistWithEventsDto {
+  const { wishlist, events } = params
 
   return {
-    ...toMiniWishlistDto(entity),
-    config: getConfig(entity),
-    events: events.map(event => toMiniEventDto(event)),
-    created_at: entity.createdAt.toISOString(),
-    updated_at: entity.updatedAt.toISOString(),
+    id: wishlist.id,
+    title: wishlist.title,
+    description: wishlist.description,
+    logo_url: wishlist.logoUrl,
+    events: events.map(eventMapper.toMiniEventDto),
+    config: { hide_items: wishlist.hideItems },
+    created_at: wishlist.createdAt.toISOString(),
+    updated_at: wishlist.updatedAt.toISOString(),
   }
 }
 
-export async function toWishlistWithOwnerDto(entity: WishlistEntity): Promise<WishlistWithOwnerDto> {
-  const owner = await entity.owner
-
-  return {
-    ...toMiniWishlistDto(entity),
-    config: getConfig(entity),
-    owner: toMiniUserDto(owner),
-    created_at: entity.createdAt.toISOString(),
-    updated_at: entity.updatedAt.toISOString(),
-  }
-}
-
-export async function toDetailedWishlistDto(param: {
-  entity: WishlistEntity
-  currentUserId: string
-}): Promise<DetailedWishlistDto> {
-  const { currentUserId, entity } = param
-  const [owner, events, itemEntities] = await Promise.all([entity.owner, entity.events, entity.items])
-
-  const displayUserAndSuggested = displayItemSensitiveInformations({ wishlist: entity, currentUserId })
-
-  const items = await Promise.all(
-    itemEntities
-      .filter(item => showItem({ item, wishlist: entity, currentUserId }))
-      .map(item =>
-        toItemDto({
-          entity: item,
-          displayUserAndSuggested,
-        }),
-      ),
-  )
-
-  return {
-    ...toMiniWishlistDto(entity),
-    owner: toMiniUserDto(owner),
-    items,
-    events: events.map(event => toMiniEventDto(event)),
-    config: getConfig(entity),
-    created_at: entity.createdAt.toISOString(),
-    updated_at: entity.updatedAt.toISOString(),
-  }
+export const wishlistMapper = {
+  toDetailedWishlistDto,
+  toWishlistWithEventsDto,
 }

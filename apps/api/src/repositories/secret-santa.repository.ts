@@ -22,18 +22,18 @@ export class PostgresSecretSantaRepository implements SecretSantaRepository {
         id: secretSanta.id,
         eventId: secretSanta.eventId,
         description: secretSanta.description,
-        budget: secretSanta.budget?.toString(),
+        budget: secretSanta.budget,
         status: secretSanta.status,
-        createdAt: secretSanta.createdAt.toISOString(),
-        updatedAt: secretSanta.updatedAt.toISOString(),
+        createdAt: secretSanta.createdAt,
+        updatedAt: secretSanta.updatedAt,
       })
       .onConflictDoUpdate({
         target: schema.secretSanta.id,
         set: {
           description: secretSanta.description,
-          budget: secretSanta.budget?.toString(),
+          budget: secretSanta.budget,
           status: secretSanta.status,
-          updatedAt: secretSanta.updatedAt.toISOString(),
+          updatedAt: secretSanta.updatedAt,
         },
       })
   }
@@ -101,11 +101,11 @@ export class PostgresSecretSantaRepository implements SecretSantaRepository {
       id: secretSanta.id,
       eventId: secretSanta.eventId,
       description: secretSanta.description || undefined,
-      budget: secretSanta.budget ? parseFloat(secretSanta.budget) : undefined,
+      budget: secretSanta.budget || undefined,
       status: secretSanta.status as SecretSantaStatus,
       users: secretSanta.secretSantaUsers.map(user => PostgresSecretSantaUserRepository.toModel(user)),
-      createdAt: new Date(secretSanta.createdAt),
-      updatedAt: new Date(secretSanta.updatedAt),
+      createdAt: secretSanta.createdAt,
+      updatedAt: secretSanta.updatedAt,
     })
   }
 }

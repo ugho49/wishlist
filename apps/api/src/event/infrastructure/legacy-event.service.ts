@@ -1,7 +1,6 @@
 import { Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common'
 import { DEFAULT_RESULT_NUMBER } from '@wishlist/api/core'
 import { LegacyUserRepository } from '@wishlist/api/user'
-import { WishlistEntity } from '@wishlist/api/wishlist'
 import {
   AttendeeRole,
   CreateEventInputDto,
@@ -19,6 +18,7 @@ import { uniq } from 'lodash'
 import { EntityManager } from 'typeorm'
 
 import { AttendeeEntity } from '../../attendee/infrastructure/legacy-attendee.entity'
+import { WishlistEntity } from '../../wishlist/infrastructure/legacy-wishlist.entity'
 import { EventMailer } from './event.mailer'
 import { EventEntity } from './legacy-event.entity'
 import { toDetailedEventDto, toEventWithCountsDto, toMiniEventDto } from './legacy-event.mapper'

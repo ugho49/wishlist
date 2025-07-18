@@ -292,13 +292,13 @@ describe('WishlistController', () => {
         currentUserId = await fixtures.getSignedUserId('BASE_USER')
       })
 
-      it('should return 404 if wishlist does not exist', async () => {
+      it('should return 401 if wishlist does not exist', async () => {
         const nonExistentId = uuid()
 
-        await request.get(path(nonExistentId)).expect(404)
+        await request.get(path(nonExistentId)).expect(401)
       })
 
-      it('should return 404 if user is not authorized to access wishlist', async () => {
+      it('should return 401 if user is not authorized to access wishlist', async () => {
         const otherUserId = await fixtures.insertUser({
           email: 'other@test.com',
           firstname: 'Other',
@@ -317,7 +317,7 @@ describe('WishlistController', () => {
           title: 'Other Wishlist',
         })
 
-        await request.get(path(wishlistId)).expect(404)
+        await request.get(path(wishlistId)).expect(401)
       })
 
       it('should return user own wishlist with all items visible when hideItems = false', async () => {
@@ -709,7 +709,7 @@ describe('WishlistController', () => {
           .expect(({ body }) =>
             expect(body).toMatchObject({
               error: 'Unauthorized',
-              message: 'You cannot add the wishlist to one or more events',
+              message: `You cannot add the wishlist to the event ${eventId}`,
             }),
           )
 
@@ -717,7 +717,7 @@ describe('WishlistController', () => {
       })
 
       it('should create wishlist successfully with one event', async () => {
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const { eventId, eventDate } = await fixtures.insertEventWithMaintainer({
           title: 'Test Event',
           description: 'Test Description',
           maintainerId: currentUserId,
@@ -739,6 +739,24 @@ describe('WishlistController', () => {
             expect(body).toEqual({
               id: expect.toBeString(),
               title: 'Test Wishlist',
+              config: { hide_items: true },
+              items: [],
+              owner: {
+                id: currentUserId,
+                email: Fixtures.BASE_USER_EMAIL,
+                firstname: 'John',
+                lastname: 'Doe',
+              },
+              events: expect.toIncludeSameMembers([
+                {
+                  id: eventId,
+                  title: 'Test Event',
+                  description: 'Test Description',
+                  event_date: eventDate.toISODate(),
+                },
+              ]),
+              created_at: expect.toBeDateString(),
+              updated_at: expect.toBeDateString(),
             })
           })
 
@@ -770,7 +788,7 @@ describe('WishlistController', () => {
       })
 
       it('should create wishlist successfully with one event and full data', async () => {
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const { eventId, eventDate } = await fixtures.insertEventWithMaintainer({
           title: 'Test Event',
           description: 'Test Description',
           maintainerId: currentUserId,
@@ -795,6 +813,24 @@ describe('WishlistController', () => {
               id: expect.toBeString(),
               title: 'Test Wishlist',
               description: 'Test Description',
+              config: { hide_items: false },
+              items: [],
+              owner: {
+                id: currentUserId,
+                email: Fixtures.BASE_USER_EMAIL,
+                firstname: 'John',
+                lastname: 'Doe',
+              },
+              events: expect.toIncludeSameMembers([
+                {
+                  id: eventId,
+                  title: 'Test Event',
+                  description: 'Test Description',
+                  event_date: eventDate.toISODate(),
+                },
+              ]),
+              created_at: expect.toBeDateString(),
+              updated_at: expect.toBeDateString(),
             })
           })
 
@@ -984,7 +1020,7 @@ describe('WishlistController', () => {
           })
           .expect(401)
           .expect(({ body }) =>
-            expect(body).toMatchObject({ error: 'Unauthorized', message: 'Only the owner of the list can update it' }),
+            expect(body).toMatchObject({ error: 'Unauthorized', message: 'You cannot modify this wishlist' }),
           )
 
         // Verify no changes were made

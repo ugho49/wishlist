@@ -1,8 +1,9 @@
 import { TimestampEntity } from '@wishlist/api/core'
 import { UserEntity } from '@wishlist/api/user'
-import { WishlistEntity } from '@wishlist/api/wishlist'
 import { ItemId, UserId, uuid, WishlistId } from '@wishlist/common'
 import { Column, Entity, ManyToOne, PrimaryColumn, RelationId } from 'typeorm'
+
+import { WishlistEntity } from '../../wishlist/infrastructure/legacy-wishlist.entity'
 
 @Entity('item')
 export class ItemEntity extends TimestampEntity {
