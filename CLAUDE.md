@@ -759,8 +759,9 @@ export class WishlistModule {}
 - **Use readonly properties** in domain models and commands/queries
 
 #### 3. Transaction Management
-- **Use `TransactionManager.runInTransaction`** for all write operations
-- **Pass transaction context** to repository methods when needed
+- **Use `TransactionManager.runInTransaction`** only for operations involving multiple SQL queries
+- **Skip transaction management** for single SQL operations (repository methods handle this internally)
+- **Pass transaction context** to repository methods when needed for multi-operation transactions
 - **Group related operations** in a single transaction
 
 #### 4. Event Publishing
