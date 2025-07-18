@@ -120,7 +120,7 @@
     "@types/lodash": "4.17.17",
     "@types/luxon": "3.6.2",
     "@types/mjml": "4.7.4",
-    "@types/multer": "1.4.12",
+    "@types/multer": "1.4.13",
     "@types/node": "22.15.21",
     "@types/nodemailer": "6.4.17",
     "@types/passport-jwt": "4.0.1",
