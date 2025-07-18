@@ -67,10 +67,7 @@ jobs:
       - run:
           name: Deploy on Server via SSH
           command: |
-            ssh -o StrictHostKeyChecking=no $OVH_SERVER_USER@$OVH_SERVER_URL -p $OVH_SERVER_PORT \<< 'EOF'
-              cd /home/circleci/wishlist-api
-              ./deploy.sh $CIRCLE_SHA1
-            EOF
+            ssh -o StrictHostKeyChecking=no $OVH_SERVER_USER@$OVH_SERVER_URL -p $OVH_SERVER_PORT "cd /home/circleci/wishlist-api && ./deploy.sh $CIRCLE_SHA1"
 
 workflows:
   build-and-release-api:
