@@ -4,6 +4,7 @@ import type { AttendeeId, EventId } from '@wishlist/common'
 import type { Attendee } from './attendee.model'
 
 export interface AttendeeRepository {
+  newId(): AttendeeId
   findById(id: AttendeeId): Promise<Attendee | undefined>
   findByIdOrFail(id: AttendeeId): Promise<Attendee>
   findByIds(ids: AttendeeId[]): Promise<Attendee[]>

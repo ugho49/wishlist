@@ -1,6 +1,2 @@
 export * from './event.mailer'
 export { eventMapper } from './event.mapper'
-// export * from './legacy-event.entity'
-export * from './legacy-event.mapper'
-export * from './legacy-event.repository'
-export * from './legacy-event.service'

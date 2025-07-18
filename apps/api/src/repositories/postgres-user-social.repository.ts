@@ -2,14 +2,18 @@ import { Injectable } from '@nestjs/common'
 import { schema } from '@wishlist/api-drizzle'
 import { DatabaseService } from '@wishlist/api/core'
 import { UserSocial, UserSocialRepository } from '@wishlist/api/user'
-import { UserSocialType } from '@wishlist/common'
+import { UserSocialId, UserSocialType, uuid } from '@wishlist/common'
 import { and, eq } from 'drizzle-orm'
 
-import { PostgresUserRepository } from './user.repository'
+import { PostgresUserRepository } from './postgres-user.repository'
 
 @Injectable()
 export class PostgresUserSocialRepository implements UserSocialRepository {
   constructor(private readonly databaseService: DatabaseService) {}
+
+  newId(): UserSocialId {
+    return uuid() as UserSocialId
+  }
 
   async findBySocialId(socialId: string, socialType: UserSocialType): Promise<UserSocial | undefined> {
     const userSocial = await this.databaseService.db.query.userSocial.findFirst({

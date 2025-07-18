@@ -1,9 +1,9 @@
 import { Inject } from '@nestjs/common'
 import { CommandHandler, EventBus, IInferredCommandHandler } from '@nestjs/cqrs'
-import { Attendee, AttendeeAddedEvent } from '@wishlist/api/attendee'
-import { EVENT_REPOSITORY, USER_REPOSITORY } from '@wishlist/api/repositories'
+import { Attendee, AttendeeAddedEvent, AttendeeRepository } from '@wishlist/api/attendee'
+import { ATTENDEE_REPOSITORY, EVENT_REPOSITORY, USER_REPOSITORY } from '@wishlist/api/repositories'
 import { UserRepository } from '@wishlist/api/user'
-import { AttendeeId, AttendeeRole, EventId, uuid } from '@wishlist/common'
+import { AttendeeRole } from '@wishlist/common'
 import { uniq } from 'lodash'
 
 import { CreateEventCommand, CreateEventResult, Event, EventRepository } from '../../domain'
@@ -13,6 +13,7 @@ import { eventMapper } from '../../infrastructure'
 export class CreateEventUseCase implements IInferredCommandHandler<CreateEventCommand> {
   constructor(
     @Inject(EVENT_REPOSITORY) private readonly eventRepository: EventRepository,
+    @Inject(ATTENDEE_REPOSITORY) private readonly attendeeRepository: AttendeeRepository,
     @Inject(USER_REPOSITORY) private readonly userRepository: UserRepository,
     private readonly eventBus: EventBus,
   ) {}
@@ -22,7 +23,7 @@ export class CreateEventUseCase implements IInferredCommandHandler<CreateEventCo
       // Remove the current user from the list of attendees
       .filter(email => email !== command.currentUser.email)
     const existingUsers = await this.userRepository.findByEmails(attendeeEmails)
-    const eventId = uuid() as EventId
+    const eventId = this.eventRepository.newId()
     const attendees: Attendee[] = []
 
     // Add the current user as maintainer attendee
@@ -30,7 +31,7 @@ export class CreateEventUseCase implements IInferredCommandHandler<CreateEventCo
 
     attendees.push(
       Attendee.createFromExistingUser({
-        id: uuid() as AttendeeId,
+        id: this.attendeeRepository.newId(),
         eventId,
         user: currentUser,
         role: AttendeeRole.MAINTAINER,
@@ -39,7 +40,7 @@ export class CreateEventUseCase implements IInferredCommandHandler<CreateEventCo
 
     for (const attendee of command.newEvent.attendees ?? []) {
       const user = existingUsers.find(u => u.email === attendee.email)
-      const id = uuid() as AttendeeId
+      const id = this.attendeeRepository.newId()
       const role = attendee.role ?? AttendeeRole.USER
       const newAttendee = user
         ? Attendee.createFromExistingUser({ id, eventId, user, role })

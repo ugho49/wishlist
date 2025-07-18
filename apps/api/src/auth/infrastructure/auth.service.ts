@@ -56,6 +56,7 @@ export class AuthService {
       }
 
       userSocial = UserSocial.create({
+        id: this.userSocialRepository.newId(),
         user,
         socialId: payload.sub,
         socialType: UserSocialType.GOOGLE,

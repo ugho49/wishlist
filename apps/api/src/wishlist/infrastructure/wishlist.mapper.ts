@@ -1,5 +1,5 @@
 import type { Event } from '@wishlist/api/event'
-import type { DetailedWishlistDto, UserId, WishlistWithEventsDto } from '@wishlist/common'
+import type { DetailedWishlistDto, UserId, WishlistWithEventsDto, WishlistWithOwnerDto } from '@wishlist/common'
 
 import type { Wishlist } from '../domain'
 
@@ -47,7 +47,21 @@ function toWishlistWithEventsDto(params: { wishlist: Wishlist; events: Event[] }
   }
 }
 
+function toWishlistWithOwnerDto(wishlist: Wishlist): WishlistWithOwnerDto {
+  return {
+    id: wishlist.id,
+    title: wishlist.title,
+    description: wishlist.description,
+    logo_url: wishlist.logoUrl,
+    config: { hide_items: wishlist.hideItems },
+    owner: userMapper.toMiniUserDto(wishlist.owner),
+    created_at: wishlist.createdAt.toISOString(),
+    updated_at: wishlist.updatedAt.toISOString(),
+  }
+}
+
 export const wishlistMapper = {
   toDetailedWishlistDto,
   toWishlistWithEventsDto,
+  toWishlistWithOwnerDto,
 }

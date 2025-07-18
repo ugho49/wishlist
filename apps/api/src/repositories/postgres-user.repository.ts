@@ -2,12 +2,16 @@ import { Injectable, NotFoundException } from '@nestjs/common'
 import { schema } from '@wishlist/api-drizzle'
 import { DatabaseService } from '@wishlist/api/core'
 import { User, UserRepository } from '@wishlist/api/user'
-import { Authorities, UserId } from '@wishlist/common'
+import { Authorities, UserId, uuid } from '@wishlist/common'
 import { eq, inArray } from 'drizzle-orm'
 
 @Injectable()
 export class PostgresUserRepository implements UserRepository {
   constructor(private readonly databaseService: DatabaseService) {}
+
+  newId(): UserId {
+    return uuid() as UserId
+  }
 
   async findById(id: UserId): Promise<User | undefined> {
     const user = await this.databaseService.db.query.user.findFirst({ where: eq(schema.user.id, id) })

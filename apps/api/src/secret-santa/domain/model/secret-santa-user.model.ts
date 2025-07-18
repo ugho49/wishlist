@@ -1,7 +1,5 @@
 import type { AttendeeId, SecretSantaId, SecretSantaUserId } from '@wishlist/common'
 
-import { uuid } from '@wishlist/common'
-
 export type SecretSantaUserProps = {
   id: SecretSantaUserId
   attendeeId: AttendeeId
@@ -31,10 +29,14 @@ export class SecretSantaUser {
     this.updatedAt = props.updatedAt
   }
 
-  static create(props: { attendeeId: AttendeeId; secretSantaId: SecretSantaId }): SecretSantaUser {
+  static create(props: {
+    id: SecretSantaUserId
+    attendeeId: AttendeeId
+    secretSantaId: SecretSantaId
+  }): SecretSantaUser {
     const now = new Date()
     return new SecretSantaUser({
-      id: uuid() as SecretSantaUserId,
+      id: props.id,
       attendeeId: props.attendeeId,
       secretSantaId: props.secretSantaId,
       exclusions: [],

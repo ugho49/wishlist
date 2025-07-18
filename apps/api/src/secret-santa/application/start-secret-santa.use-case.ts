@@ -3,7 +3,6 @@ import { CommandHandler, EventBus, IInferredCommandHandler } from '@nestjs/cqrs'
 
 import { AttendeeRepository } from '../../attendee/domain/attendee.repository'
 import { TransactionManager } from '../../core/database'
-import { Event } from '../../event/domain/event.model'
 import { EventRepository } from '../../event/domain/event.repository'
 import {
   ATTENDEE_REPOSITORY,
@@ -30,17 +29,15 @@ export class StartSecretSantaUseCase implements IInferredCommandHandler<StartSec
   async execute(command: StartSecretSantaCommand): Promise<void> {
     let secretSanta = await this.secretSantaRepository.findByIdOrFail(command.secretSantaId)
 
-    const attendees = await this.attendeeRepository.findByEventId(secretSanta.eventId)
+    const event = await this.eventRepository.findByIdOrFail(secretSanta.eventId)
 
-    if (!Event.canEdit({ currentUser: command.currentUser, attendees })) {
+    if (!event.canEdit(command.currentUser)) {
       throw new ForbiddenException('Event cannot be edited by this user')
     }
 
     if (secretSanta.isStarted()) {
       throw new ForbiddenException('Secret santa already started')
     }
-
-    const event = await this.eventRepository.findByIdOrFail(secretSanta.eventId)
 
     if (event.isFinished()) {
       throw new BadRequestException('Event is already finished')
@@ -60,9 +57,9 @@ export class StartSecretSantaUseCase implements IInferredCommandHandler<StartSec
     const drawns: { email: string; secretSantaName: string }[] = []
 
     for (const user of secretSanta.users) {
-      const attendee = attendees.find(a => a.id === user.attendeeId)!
+      const attendee = event.attendees.find(a => a.id === user.attendeeId)!
       const drawSecretSantaUser = secretSanta.users.find(s => s.id === user.drawUserId)!
-      const drawAttendee = attendees.find(a => a.id === drawSecretSantaUser?.attendeeId)!
+      const drawAttendee = event.attendees.find(a => a.id === drawSecretSantaUser?.attendeeId)!
 
       drawns.push({
         email: attendee.getEmail(),

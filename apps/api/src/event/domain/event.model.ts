@@ -1,5 +1,5 @@
 import type { Attendee } from '@wishlist/api/attendee'
-import type { EventId, ICurrentUser, UserId } from '@wishlist/common'
+import type { EventId, ICurrentUser, UserId, WishlistId } from '@wishlist/common'
 
 import { AttendeeRole } from '@wishlist/common'
 
@@ -9,6 +9,7 @@ export type EventProps = {
   description?: string
   eventDate: Date
   attendees: Attendee[]
+  wishlistIds: WishlistId[]
   createdAt: Date
   updatedAt: Date
 }
@@ -19,6 +20,7 @@ export class Event {
   public readonly description?: string
   public readonly eventDate: Date
   public readonly attendees: Attendee[]
+  public readonly wishlistIds: WishlistId[]
   public readonly createdAt: Date
   public readonly updatedAt: Date
 
@@ -28,6 +30,7 @@ export class Event {
     this.description = props.description
     this.eventDate = props.eventDate
     this.attendees = props.attendees
+    this.wishlistIds = props.wishlistIds
     this.createdAt = props.createdAt
     this.updatedAt = props.updatedAt
   }
@@ -51,43 +54,13 @@ export class Event {
       description: param.description,
       eventDate: param.eventDate,
       attendees: param.attendees,
+      wishlistIds: [],
       createdAt: now,
       updatedAt: now,
     })
   }
 
-  static canAccessByRole(params: {
-    currentUser: ICurrentUser
-    attendees: Attendee[]
-    acceptedRoles: AttendeeRole[]
-  }): boolean {
-    const { currentUser, attendees } = params
-    if (currentUser.isAdmin) return true
-    const attendee = attendees.find(a => a.user?.id === currentUser.id)
-    if (!attendee) return false
-    return params.acceptedRoles.includes(attendee.role)
-  }
-
-  static canEdit(params: { currentUser: ICurrentUser; attendees: Attendee[] }): boolean {
-    return this.canAccessByRole({
-      ...params,
-      acceptedRoles: [AttendeeRole.MAINTAINER],
-    })
-  }
-
-  static canView(params: { currentUser: ICurrentUser; attendees: Attendee[] }): boolean {
-    return this.canAccessByRole({
-      ...params,
-      acceptedRoles: [AttendeeRole.MAINTAINER, AttendeeRole.USER],
-    })
-  }
-
-  static canAddWishlist(params: { currentUserId: UserId; attendees: Attendee[] }): boolean {
-    const { currentUserId, attendees } = params
-    return attendees.some(a => a.user?.id === currentUserId)
-  }
-
-  update(updates: { title?: string; description?: string; eventDate?: Date }): Event {
+  update(updates: { title: string; description?: string; eventDate: Date }): Event {
     return new Event({
       ...this,
       ...updates,
@@ -97,5 +70,31 @@ export class Event {
 
   isFinished(): boolean {
     return this.eventDate < new Date()
+  }
+
+  canEdit(currentUser: ICurrentUser): boolean {
+    return this.canAccessByRole({
+      currentUser,
+      acceptedRoles: [AttendeeRole.MAINTAINER],
+    })
+  }
+
+  canView(currentUser: ICurrentUser): boolean {
+    return this.canAccessByRole({
+      currentUser,
+      acceptedRoles: [AttendeeRole.MAINTAINER, AttendeeRole.USER],
+    })
+  }
+
+  canAddWishlist(currentUserId: UserId): boolean {
+    return this.attendees.some(a => a.user?.id === currentUserId)
+  }
+
+  private canAccessByRole(params: { currentUser: ICurrentUser; acceptedRoles: AttendeeRole[] }): boolean {
+    const { currentUser, acceptedRoles } = params
+    if (currentUser.isAdmin) return true
+    const attendee = this.attendees.find(a => a.user?.id === currentUser.id)
+    if (!attendee) return false
+    return acceptedRoles.includes(attendee.role)
   }
 }

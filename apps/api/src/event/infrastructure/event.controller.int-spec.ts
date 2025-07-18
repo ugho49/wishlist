@@ -42,6 +42,7 @@ describe('EventController', () => {
         const attendeeId1 = await fixtures.insertPendingAttendee({ eventId: eventId1, tempUserEmail: 'temp@temp.fr' })
 
         await fixtures.insertWishlist({ eventIds: [eventId1], userId: currentUserId, title: 'Wishlist1' })
+        await fixtures.insertWishlist({ eventIds: [eventId1], userId: currentUserId, title: 'Wishlist2' })
 
         await fixtures.insertEvent({
           title: 'Event2',
@@ -60,7 +61,7 @@ describe('EventController', () => {
                   title: 'Event1',
                   description: 'Description1',
                   event_date: event1Date.toISODate(),
-                  nb_wishlists: 1,
+                  nb_wishlists: 2,
                   attendees: [
                     {
                       id: maintainerAttendeeId,
@@ -252,6 +253,55 @@ describe('EventController', () => {
               })
             })
         })
+
+        it('should return future events first and then past events (ordered by event date and creation date)', async () => {
+          const tomorrow = DateTime.now().plus({ days: 1 }).toJSDate()
+          const yesterday = DateTime.now().minus({ days: 1 }).toJSDate()
+
+          for (let i = 0; i < 2; i++) {
+            await fixtures.insertEventWithMaintainer({
+              title: `Event in past batch1 ${i}`,
+              eventDate: yesterday,
+              maintainerId: currentUserId,
+            })
+          }
+          for (let i = 0; i < 2; i++) {
+            await fixtures.insertEventWithMaintainer({
+              title: `Event in future batch1 ${i}`,
+              eventDate: tomorrow,
+              maintainerId: currentUserId,
+            })
+          }
+          for (let i = 0; i < 2; i++) {
+            await fixtures.insertEventWithMaintainer({
+              title: `Event in past batch2 ${i}`,
+              eventDate: yesterday,
+              maintainerId: currentUserId,
+            })
+          }
+          for (let i = 0; i < 2; i++) {
+            await fixtures.insertEventWithMaintainer({
+              title: `Event in future batch2 ${i}`,
+              eventDate: tomorrow,
+              maintainerId: currentUserId,
+            })
+          }
+
+          await request
+            .get(path)
+            .expect(200)
+            .expect(({ body }) => {
+              expect(body.resources).toHaveLength(8)
+              expect(body.resources[0].title).toBe('Event in future batch2 1')
+              expect(body.resources[1].title).toBe('Event in future batch2 0')
+              expect(body.resources[2].title).toBe('Event in future batch1 1')
+              expect(body.resources[3].title).toBe('Event in future batch1 0')
+              expect(body.resources[4].title).toBe('Event in past batch2 1')
+              expect(body.resources[5].title).toBe('Event in past batch2 0')
+              expect(body.resources[6].title).toBe('Event in past batch1 1')
+              expect(body.resources[7].title).toBe('Event in past batch1 0')
+            })
+        })
       })
     })
   })
@@ -278,14 +328,20 @@ describe('EventController', () => {
         await request.get(path(uuid())).expect(404)
       })
 
-      it('should return error when current user not part of event', async () => {
-        const eventId = await fixtures.insertEvent({
-          title: 'Event1',
-          description: 'Description1',
-          eventDate: new Date(),
+      it('should return 401 when current user not part of event', async () => {
+        const userId2 = await fixtures.insertUser({
+          email: 'user2@user2.fr',
+          firstname: 'User2',
+          lastname: 'USER2',
         })
 
-        await request.get(path(eventId)).expect(404)
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Event1',
+          description: 'Description1',
+          maintainerId: userId2,
+        })
+
+        await request.get(path(eventId)).expect(401)
       })
 
       it('should return event when current user is attendee MAINTAINER', async () => {
@@ -665,7 +721,7 @@ describe('EventController', () => {
           .expect(404)
       })
 
-      it('should return 404 when user is not maintainer of the event', async () => {
+      it('should return 401 when user is not maintainer of the event', async () => {
         const otherUserId = await fixtures.insertUser({
           email: 'other@test.com',
           firstname: 'Other',
@@ -835,7 +891,6 @@ describe('EventController', () => {
         const { eventId } = await fixtures.insertEventWithMaintainer({
           title: 'Event',
           description: 'Description',
-          eventDate: DateTime.now().plus({ days: 1 }).toJSDate(),
           maintainerId: otherUserId,
         })
 
@@ -844,11 +899,10 @@ describe('EventController', () => {
         await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(1).check()
       })
 
-      it('should delete event successfully when user is maintainer', async () => {
+      it('should return 400 when event has wishlists', async () => {
         const { eventId } = await fixtures.insertEventWithMaintainer({
           title: 'Event to Delete',
           description: 'Description',
-          eventDate: DateTime.now().plus({ days: 1 }).toJSDate(),
           maintainerId: currentUserId,
         })
 
@@ -858,18 +912,42 @@ describe('EventController', () => {
           title: 'Test Wishlist',
         })
 
+        await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(1).check()
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(1).check()
+        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1).check()
+
+        await request
+          .delete(path(eventId))
+          .expect(400)
+          .expect(({ body }) => {
+            expect(body).toMatchObject({
+              error: 'Bad Request',
+              message: 'Event has wishlists, cannot delete it',
+            })
+          })
+
+        await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(1).check()
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(1).check()
+        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1).check()
+      })
+
+      it('should delete event without wishlists', async () => {
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Event to Delete',
+          description: 'Description',
+          maintainerId: currentUserId,
+        })
+
         await request.delete(path(eventId)).expect(200)
 
         await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(0).check()
         await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(0).check()
-        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(0).check()
       })
 
-      it('should delete event with attendees and related data', async () => {
+      it('should delete event with attendees without wishlists', async () => {
         const { eventId } = await fixtures.insertEventWithMaintainer({
           title: 'Event to Delete',
           description: 'Description',
-          eventDate: DateTime.now().plus({ days: 1 }).toJSDate(),
           maintainerId: currentUserId,
         })
 
@@ -889,23 +967,10 @@ describe('EventController', () => {
           tempUserEmail: 'pending@test.com',
         })
 
-        await fixtures.insertWishlist({
-          eventIds: [eventId],
-          userId: currentUserId,
-          title: 'Maintainer Wishlist',
-        })
-
-        await fixtures.insertWishlist({
-          eventIds: [eventId],
-          userId: otherUserId,
-          title: 'Other User Wishlist',
-        })
-
         await request.delete(path(eventId)).expect(200)
 
         await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(0).check()
         await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(0).check()
-        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(0).check()
       })
     })
   })

@@ -404,16 +404,16 @@ export class WishlistCreatedEvent {
 import { Inject } from '@nestjs/common'
 import { CommandHandler, EventBus, IInferredCommandHandler } from '@nestjs/cqrs'
 import { TransactionManager } from '@wishlist/api/database'
-import { CreateWishlistCommand, CreateWishlistResult } from '../../domain/command/create-wishlist.command'
-import { WishlistCreatedEvent } from '../../domain/event/wishlist-created.event'
-import { Wishlist } from '../../domain/model/wishlist.model'
-import { WishlistRepository, WISHLIST_REPOSITORY } from '../../domain/repository/wishlist.repository'
+import { uuid, WishlistId } from '@wishlist/common'
+import { WishlistRepository, WISHLIST_REPOSITORY, Wishlist, WishlistCreatedEvent, CreateWishlistCommand, CreateWishlistResult } from '../../domain'
+import { wishlistMapper } from '../../infrastructure'
 
 @CommandHandler(CreateWishlistCommand)
 export class CreateWishlistUseCase implements IInferredCommandHandler<CreateWishlistCommand> {
   constructor(
     @Inject(WISHLIST_REPOSITORY)
     private readonly wishlistRepository: WishlistRepository,
+    // Only if transaction is needed
     private readonly transactionManager: TransactionManager,
     private readonly eventBus: EventBus,
   ) {}
@@ -421,16 +421,15 @@ export class CreateWishlistUseCase implements IInferredCommandHandler<CreateWish
   async execute(command: CreateWishlistCommand): Promise<CreateWishlistResult> {
     // 1. Create domain model
     const wishlist = Wishlist.create({
+      id: this.wishlistRepository.newId(),
       title: command.title,
       description: command.description,
       eventId: command.eventId,
       ownerId: command.currentUser.id,
     })
 
-    // 2. Save with transaction
-    await this.transactionManager.runInTransaction(async (tx) => {
-      await this.wishlistRepository.save(wishlist, tx)
-    })
+    // 2. Save 
+    await this.wishlistRepository.save(wishlist)
 
     // 3. Publish domain event if needed
     await this.eventBus.publish(
@@ -443,8 +442,8 @@ export class CreateWishlistUseCase implements IInferredCommandHandler<CreateWish
       }),
     )
 
-    // 4. Return DTO
-    return wishlist.toDto()
+    // 4. Return using mapper
+    return wishlistMapper.toDto(wishlist)
   }
 }
 ```
@@ -455,8 +454,8 @@ export class CreateWishlistUseCase implements IInferredCommandHandler<CreateWish
 // application/query/get-wishlist.use-case.ts
 import { Inject } from '@nestjs/common'
 import { QueryHandler, IInferredQueryHandler } from '@nestjs/cqrs'
-import { GetWishlistQuery, GetWishlistResult } from '../../domain/query/get-wishlist.query'
-import { WishlistRepository, WISHLIST_REPOSITORY } from '../../domain/repository/wishlist.repository'
+import { GetWishlistQuery, GetWishlistResult, WishlistRepository, WISHLIST_REPOSITORY } from '../../domain'
+import { wishlistMapper } from '../../infrastructure'
 
 @QueryHandler(GetWishlistQuery)
 export class GetWishlistUseCase implements IInferredQueryHandler<GetWishlistQuery> {
@@ -477,7 +476,8 @@ export class GetWishlistUseCase implements IInferredQueryHandler<GetWishlistQuer
       return undefined
     }
 
-    return wishlist.toDto()
+    // 4. Return using mapper
+    return wishlistMapper.toDto(wishlist)
   }
 }
 ```
@@ -546,6 +546,7 @@ export class Wishlist {
   }
 
   static create(props: {
+    id: WishlistId
     title: string
     description?: string
     eventId: EventId
@@ -553,7 +554,7 @@ export class Wishlist {
   }): Wishlist {
     const now = new Date()
     return new Wishlist({
-      id: randomUUID() as WishlistId,
+      id: props.id,
       title: props.title,
       description: props.description,
       eventId: props.eventId,
@@ -593,6 +594,7 @@ import { Wishlist } from '../model/wishlist.model'
 export const WISHLIST_REPOSITORY = Symbol('WishlistRepository')
 
 export interface WishlistRepository {
+  newId(): WishlistId
   findById(id: WishlistId): Promise<Wishlist | undefined>
   findByIdOrFail(id: WishlistId): Promise<Wishlist>
   findByEventId(eventId: EventId): Promise<Wishlist[]>

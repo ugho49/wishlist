@@ -2,15 +2,19 @@ import { Injectable, NotFoundException } from '@nestjs/common'
 import { schema } from '@wishlist/api-drizzle'
 import { DatabaseService, DrizzleTransaction } from '@wishlist/api/core'
 import { Wishlist, WishlistRepository } from '@wishlist/api/wishlist'
-import { EventId, UserId, WishlistId } from '@wishlist/common'
+import { EventId, UserId, uuid, WishlistId } from '@wishlist/common'
 import { and, count, desc, eq, exists, inArray, or, sql } from 'drizzle-orm'
 
-import { PostgresUserRepository } from './user.repository'
-import { PostgresWishlistItemRepository } from './wishlist-item.repository'
+import { PostgresUserRepository } from './postgres-user.repository'
+import { PostgresWishlistItemRepository } from './postgres-wishlist-item.repository'
 
 @Injectable()
 export class PostgresWishlistRepository implements WishlistRepository {
   constructor(private readonly databaseService: DatabaseService) {}
+
+  newId(): WishlistId {
+    return uuid() as WishlistId
+  }
 
   async findById(wishlistId: WishlistId): Promise<Wishlist | undefined> {
     const result = await this.databaseService.db.query.wishlist.findFirst({
@@ -65,8 +69,7 @@ export class PostgresWishlistRepository implements WishlistRepository {
 
   async findByOwnerPaginated(params: {
     userId: UserId
-    take: number
-    skip: number
+    pagination: { take: number; skip: number }
   }): Promise<{ wishlists: Wishlist[]; totalCount: number }> {
     // Get total count
     const totalCountResult = await this.databaseService.db
@@ -74,7 +77,7 @@ export class PostgresWishlistRepository implements WishlistRepository {
       .from(schema.wishlist)
       .where(eq(schema.wishlist.ownerId, params.userId))
 
-    const totalCount = totalCountResult[0]?.count || 0
+    const totalCount = totalCountResult[0]?.count ?? 0
 
     if (totalCount === 0) return { wishlists: [], totalCount }
 
@@ -87,12 +90,8 @@ export class PostgresWishlistRepository implements WishlistRepository {
       .where(eq(schema.wishlist.ownerId, params.userId))
       .groupBy(schema.wishlist.id)
       .orderBy(desc(sql<string>`MAX(${schema.event.eventDate})`), desc(schema.wishlist.createdAt))
-      .limit(params.take)
-      .offset(params.skip)
-
-    if (orderedWishlistIds.length === 0) {
-      return { wishlists: [], totalCount }
-    }
+      .limit(params.pagination.take)
+      .offset(params.pagination.skip)
 
     // Deuxième requête : récupérer toutes les données nécessaires pour toModel
     const validWishlists = await this.databaseService.db.query.wishlist.findMany({
@@ -109,14 +108,12 @@ export class PostgresWishlistRepository implements WishlistRepository {
 
     // Réordonner selon l'ordre de la première requête
     const wishlistsMap = new Map(validWishlists.map(w => [w.id, w]))
-    const orderedWishlists = orderedWishlistIds
+    const wishlists = orderedWishlistIds
       .map(row => wishlistsMap.get(row.id))
       .filter((wishlist): wishlist is NonNullable<typeof wishlist> => wishlist !== undefined)
+      .map(PostgresWishlistRepository.toModel)
 
-    return {
-      wishlists: orderedWishlists.map(PostgresWishlistRepository.toModel),
-      totalCount,
-    }
+    return { wishlists, totalCount }
   }
 
   async save(wishlist: Wishlist, tx?: DrizzleTransaction): Promise<void> {

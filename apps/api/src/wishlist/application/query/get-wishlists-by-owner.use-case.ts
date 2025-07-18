@@ -1,5 +1,6 @@
 import { Inject } from '@nestjs/common'
 import { IInferredQueryHandler, QueryHandler } from '@nestjs/cqrs'
+import { DEFAULT_RESULT_NUMBER } from '@wishlist/api/core'
 import { EventRepository } from '@wishlist/api/event'
 import { EVENT_REPOSITORY, WISHLIST_REPOSITORY } from '@wishlist/api/repositories'
 import { createPagedResponse } from '@wishlist/common'
@@ -15,13 +16,12 @@ export class GetMyWishlistsUseCase implements IInferredQueryHandler<GetWishlists
   ) {}
 
   async execute(query: GetWishlistsByOwnerQuery): Promise<GetWishlistsByOwnerResult> {
-    const pageSize = query.pageSize || 10
+    const pageSize = query.pageSize ?? DEFAULT_RESULT_NUMBER
     const skip = (query.pageNumber - 1) * pageSize
 
     const { wishlists, totalCount } = await this.wishlistRepository.findByOwnerPaginated({
       userId: query.ownerId,
-      take: pageSize,
-      skip: skip,
+      pagination: { take: pageSize, skip },
     })
 
     const events =
