@@ -1,4 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, UploadedFile, UseInterceptors } from '@nestjs/common'
+import { CommandBus } from '@nestjs/cqrs'
 import { FileInterceptor } from '@nestjs/platform-express'
 import { ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger'
 import {
@@ -17,13 +18,17 @@ import {
 
 import { CurrentUser } from '../../../auth'
 import { ValidJsonBody } from '../../../core/common/common.decorator'
+import { DeleteWishlistCommand, LinkWishlistToEventCommand, UnlinkWishlistFromEventCommand } from '../../domain'
 import { LegacyWishlistService } from '../legacy-wishlist.service'
 import { wishlistLogoFileValidators, wishlistLogoResizePipe } from '../wishlist.validator'
 
 @ApiTags('Wishlist')
 @Controller('/wishlist')
 export class WishlistController {
-  constructor(private readonly wishlistService: LegacyWishlistService) {}
+  constructor(
+    private readonly wishlistService: LegacyWishlistService,
+    private readonly commandBus: CommandBus,
+  ) {}
 
   @Get()
   getMyWishlists(
@@ -66,28 +71,30 @@ export class WishlistController {
   }
 
   @Delete('/:id')
-  deleteWishlist(@Param('id') wishlistId: WishlistId, @CurrentUser() currentUser: ICurrentUser): Promise<void> {
-    return this.wishlistService.deleteWishlist({ wishlistId, currentUser })
+  async deleteWishlist(@Param('id') wishlistId: WishlistId, @CurrentUser() currentUser: ICurrentUser): Promise<void> {
+    await this.commandBus.execute(new DeleteWishlistCommand({ wishlistId, currentUser }))
   }
 
   @Post('/:id/link-event')
   @ApiOperation({ summary: 'This endpoint has for purpose to link a wishlist for a given event' })
-  linkWishlistToAnEvent(
+  async linkWishlistToAnEvent(
     @Param('id') wishlistId: WishlistId,
     @Body() dto: LinkUnlinkWishlistInputDto,
-    @CurrentUser('id') currentUserId: UserId,
+    @CurrentUser() currentUser: ICurrentUser,
   ): Promise<void> {
-    return this.wishlistService.linkWishlistToAnEvent({ wishlistId, currentUserId, eventId: dto.event_id })
+    await this.commandBus.execute(new LinkWishlistToEventCommand({ wishlistId, currentUser, eventId: dto.event_id }))
   }
 
   @Post('/:id/unlink-event')
   @ApiOperation({ summary: 'This endpoint has for purpose to unlink a wishlist for a given event' })
-  unlinkWishlistToAnEvent(
+  async unlinkWishlistToAnEvent(
     @Param('id') wishlistId: WishlistId,
     @Body() dto: LinkUnlinkWishlistInputDto,
-    @CurrentUser('id') currentUserId: UserId,
+    @CurrentUser() currentUser: ICurrentUser,
   ): Promise<void> {
-    return this.wishlistService.unlinkWishlistToAnEvent({ wishlistId, currentUserId, eventId: dto.event_id })
+    await this.commandBus.execute(
+      new UnlinkWishlistFromEventCommand({ wishlistId, currentUser, eventId: dto.event_id }),
+    )
   }
 
   @Post('/:id/upload-logo')
