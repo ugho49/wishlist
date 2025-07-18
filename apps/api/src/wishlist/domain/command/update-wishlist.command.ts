@@ -3,7 +3,7 @@ import type { ICurrentUser, WishlistId } from '@wishlist/common'
 import { Command } from '@nestjs-architects/typed-cqrs'
 
 type UpdateWishlist = {
-  title?: string
+  title: string
   description?: string
 }
 

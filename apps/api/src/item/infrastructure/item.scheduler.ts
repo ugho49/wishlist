@@ -1,9 +1,9 @@
 import { Inject, Injectable, Logger } from '@nestjs/common'
 import { Cron } from '@nestjs/schedule'
-import { WISHLIST_ITEM_REPOSITORY } from '@wishlist/api/repositories'
+import { WISHLIST_ITEM_REPOSITORY, WISHLIST_REPOSITORY } from '@wishlist/api/repositories'
+import { WishlistRepository } from '@wishlist/api/wishlist'
 import { DateTime } from 'luxon'
 
-import { LegacyWishlistRepository } from '../../wishlist/infrastructure/legacy-wishlist.repository'
 import { NewItemsForWishlist, WishlistItemRepository } from '../domain'
 import { ItemMailer } from './item.mailer'
 
@@ -13,7 +13,7 @@ export class ItemScheduler {
 
   constructor(
     @Inject(WISHLIST_ITEM_REPOSITORY) private readonly itemRepository: WishlistItemRepository,
-    private readonly wishlistRepository: LegacyWishlistRepository,
+    @Inject(WISHLIST_REPOSITORY) private readonly wishlistRepository: WishlistRepository,
     private readonly itemMailer: ItemMailer,
   ) {}
 

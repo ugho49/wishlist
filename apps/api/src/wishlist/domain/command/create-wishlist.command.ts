@@ -6,7 +6,7 @@ type NewWishlist = {
   title: string
   description?: string
   eventIds: EventId[]
-  hideItems: boolean
+  hideItems?: boolean
   imageFile?: Express.Multer.File
 }
 

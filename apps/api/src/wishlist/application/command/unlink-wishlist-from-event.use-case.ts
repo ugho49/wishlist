@@ -22,7 +22,7 @@ export class UnlinkWishlistFromEventUseCase implements IInferredCommandHandler<U
     }
 
     // 2. Check if wishlist is linked to this event
-    if (!wishlist.eventIds.includes(eventId)) {
+    if (!wishlist.isLinkedToEvent(eventId)) {
       throw new BadRequestException('Wishlist is not linked to this event')
     }
 

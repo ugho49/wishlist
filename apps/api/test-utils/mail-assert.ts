@@ -44,9 +44,10 @@ export class MailsAssert {
     this.assertions.add(async () => {
       const mails = await this.getMails()
 
-      expect(mails.map(mail => mail.to.map(to => to.address)).flat(), `Wrong receivers for mails`).toIncludeAllMembers(
-        expected,
-      )
+      expect(
+        mails.flatMap(mail => mail.to.map(to => to.address)),
+        `Wrong receivers for mails`,
+      ).toIncludeAllMembers(expected)
     })
 
     return this

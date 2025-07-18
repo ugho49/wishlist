@@ -3,7 +3,7 @@ import { schema } from '@wishlist/api-drizzle'
 import { DatabaseService, DrizzleTransaction } from '@wishlist/api/core'
 import { Wishlist, WishlistRepository } from '@wishlist/api/wishlist'
 import { EventId, UserId, WishlistId } from '@wishlist/common'
-import { and, eq, exists, or } from 'drizzle-orm'
+import { and, count, desc, eq, exists, inArray, or, sql } from 'drizzle-orm'
 
 import { PostgresUserRepository } from './user.repository'
 import { PostgresWishlistItemRepository } from './wishlist-item.repository'
@@ -63,6 +63,62 @@ export class PostgresWishlistRepository implements WishlistRepository {
     return result.map(PostgresWishlistRepository.toModel)
   }
 
+  async findByOwnerPaginated(params: {
+    userId: UserId
+    take: number
+    skip: number
+  }): Promise<{ wishlists: Wishlist[]; totalCount: number }> {
+    // Get total count
+    const totalCountResult = await this.databaseService.db
+      .select({ count: count() })
+      .from(schema.wishlist)
+      .where(eq(schema.wishlist.ownerId, params.userId))
+
+    const totalCount = totalCountResult[0]?.count || 0
+
+    if (totalCount === 0) return { wishlists: [], totalCount }
+
+    // Première requête : récupérer les IDs des wishlists dans le bon ordre
+    const orderedWishlistIds = await this.databaseService.db
+      .select({ id: schema.wishlist.id })
+      .from(schema.wishlist)
+      .leftJoin(schema.eventWishlist, eq(schema.wishlist.id, schema.eventWishlist.wishlistId))
+      .leftJoin(schema.event, eq(schema.eventWishlist.eventId, schema.event.id))
+      .where(eq(schema.wishlist.ownerId, params.userId))
+      .groupBy(schema.wishlist.id)
+      .orderBy(desc(sql<string>`MAX(${schema.event.eventDate})`), desc(schema.wishlist.createdAt))
+      .limit(params.take)
+      .offset(params.skip)
+
+    if (orderedWishlistIds.length === 0) {
+      return { wishlists: [], totalCount }
+    }
+
+    // Deuxième requête : récupérer toutes les données nécessaires pour toModel
+    const validWishlists = await this.databaseService.db.query.wishlist.findMany({
+      where: inArray(
+        schema.wishlist.id,
+        orderedWishlistIds.map(row => row.id),
+      ),
+      with: {
+        owner: true,
+        eventWishlists: true,
+        items: { with: { taker: true } },
+      },
+    })
+
+    // Réordonner selon l'ordre de la première requête
+    const wishlistsMap = new Map(validWishlists.map(w => [w.id, w]))
+    const orderedWishlists = orderedWishlistIds
+      .map(row => wishlistsMap.get(row.id))
+      .filter((wishlist): wishlist is NonNullable<typeof wishlist> => wishlist !== undefined)
+
+    return {
+      wishlists: orderedWishlists.map(PostgresWishlistRepository.toModel),
+      totalCount,
+    }
+  }
+
   async save(wishlist: Wishlist, tx?: DrizzleTransaction): Promise<void> {
     const client = tx || this.databaseService.db
 
@@ -83,10 +139,10 @@ export class PostgresWishlistRepository implements WishlistRepository {
           target: schema.wishlist.id,
           set: {
             title: wishlist.title,
-            description: wishlist.description,
+            description: wishlist.description ?? null,
             ownerId: wishlist.owner.id,
             hideItems: wishlist.hideItems,
-            logoUrl: wishlist.logoUrl,
+            logoUrl: wishlist.logoUrl ?? null,
             updatedAt: wishlist.updatedAt,
           },
         })
@@ -138,6 +194,28 @@ export class PostgresWishlistRepository implements WishlistRepository {
       .limit(1)
 
     return result.length > 0
+  }
+
+  async findEmailsToNotify(params: { ownerId: UserId; wishlistId: WishlistId }): Promise<string[]> {
+    const result = await this.databaseService.db
+      .select({ email: schema.user.email })
+      .from(schema.wishlist)
+      .leftJoin(schema.eventWishlist, eq(schema.wishlist.id, schema.eventWishlist.wishlistId))
+      .leftJoin(schema.event, eq(schema.eventWishlist.eventId, schema.event.id))
+      .leftJoin(schema.eventAttendee, eq(schema.event.id, schema.eventAttendee.eventId))
+      .leftJoin(schema.user, eq(schema.eventAttendee.userId, schema.user.id))
+      .leftJoin(schema.userEmailSetting, eq(schema.user.id, schema.userEmailSetting.userId))
+      .where(
+        and(
+          eq(schema.wishlist.id, params.wishlistId),
+          // Exclude the wishlist owner
+          sql`${schema.user.id} != ${params.ownerId}`,
+          // Include users who either have no email settings (default to notify) or have notifications enabled
+          or(sql`${schema.userEmailSetting.id} IS NULL`, eq(schema.userEmailSetting.dailyNewItemNotification, true)),
+        ),
+      )
+
+    return result.map(row => row.email).filter((email): email is string => email !== null)
   }
 
   static toModel(

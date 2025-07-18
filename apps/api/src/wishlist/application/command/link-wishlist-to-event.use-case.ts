@@ -32,7 +32,7 @@ export class LinkWishlistToEventUseCase implements IInferredCommandHandler<LinkW
     }
 
     // 3. Check if already linked
-    if (wishlist.eventIds.includes(eventId)) {
+    if (wishlist.isLinkedToEvent(eventId)) {
       throw new BadRequestException('Wishlist is already linked to this event')
     }
 

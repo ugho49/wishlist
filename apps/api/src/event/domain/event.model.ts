@@ -1,5 +1,5 @@
 import type { Attendee } from '@wishlist/api/attendee'
-import type { EventId, ICurrentUser } from '@wishlist/common'
+import type { EventId, ICurrentUser, UserId } from '@wishlist/common'
 
 import { AttendeeRole, uuid } from '@wishlist/common'
 
@@ -65,6 +65,11 @@ export class Event {
       ...params,
       acceptedRoles: [AttendeeRole.MAINTAINER, AttendeeRole.USER],
     })
+  }
+
+  static canAddWishlist(params: { currentUserId: UserId; attendees: Attendee[] }): boolean {
+    const { currentUserId, attendees } = params
+    return attendees.some(a => a.user?.id === currentUserId)
   }
 
   update(updates: { title?: string; description?: string; eventDate?: Date }): Event {

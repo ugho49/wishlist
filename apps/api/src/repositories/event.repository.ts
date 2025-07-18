@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { EventId } from '@wishlist/common'
-import { eq } from 'drizzle-orm'
+import { eq, inArray } from 'drizzle-orm'
 
 import * as schema from '../../drizzle/schema'
 import { DatabaseService } from '../core/database'
@@ -19,6 +19,12 @@ export class PostgresEventRepository implements EventRepository {
     if (result.length === 0) return undefined
 
     return PostgresEventRepository.toModel(result[0]!)
+  }
+
+  async findByIds(ids: EventId[]): Promise<Event[]> {
+    const { schema, db } = this.databaseService
+    const result = await db.select().from(schema.event).where(inArray(schema.event.id, ids))
+    return result.map(PostgresEventRepository.toModel)
   }
 
   async findByIdOrFail(id: EventId): Promise<Event> {
