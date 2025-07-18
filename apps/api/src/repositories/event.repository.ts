@@ -1,29 +1,38 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
+import { Inject, Injectable, NotFoundException } from '@nestjs/common'
+import { schema } from '@wishlist/api-drizzle'
+import { DatabaseService, DrizzleTransaction } from '@wishlist/api/core'
+import { Event, EventRepository } from '@wishlist/api/event'
 import { EventId } from '@wishlist/common'
 import { eq, inArray } from 'drizzle-orm'
 
-import * as schema from '../../drizzle/schema'
-import { DatabaseService } from '../core/database'
-import { Event } from '../event/domain/event.model'
-import { EventRepository } from '../event/domain/event.repository'
+import { AttendeeRepository } from '../attendee'
+import { PostgresAttendeeRepository } from './attendee.repository'
+import { ATTENDEE_REPOSITORY } from './repositories.tokens'
 
 @Injectable()
 export class PostgresEventRepository implements EventRepository {
-  constructor(private readonly databaseService: DatabaseService) {}
+  constructor(
+    private readonly databaseService: DatabaseService,
+    @Inject(ATTENDEE_REPOSITORY) private readonly attendeeRepository: AttendeeRepository,
+  ) {}
 
   async findById(id: EventId): Promise<Event | undefined> {
-    const { schema, db } = this.databaseService
+    const result = await this.databaseService.db.query.event.findFirst({
+      where: eq(schema.event.id, id),
+      with: { attendees: { with: { user: true } } },
+    })
 
-    const result = await db.select().from(schema.event).where(eq(schema.event.id, id)).limit(1)
+    if (!result) return undefined
 
-    if (result.length === 0) return undefined
-
-    return PostgresEventRepository.toModel(result[0]!)
+    return PostgresEventRepository.toModel(result)
   }
 
   async findByIds(ids: EventId[]): Promise<Event[]> {
-    const { schema, db } = this.databaseService
-    const result = await db.select().from(schema.event).where(inArray(schema.event.id, ids))
+    const result = await this.databaseService.db.query.event.findMany({
+      where: inArray(schema.event.id, ids),
+      with: { attendees: { with: { user: true } } },
+    })
+
     return result.map(PostgresEventRepository.toModel)
   }
 
@@ -35,42 +44,53 @@ export class PostgresEventRepository implements EventRepository {
     return event
   }
 
-  async save(event: Event): Promise<void> {
-    const { schema, db } = this.databaseService
+  async save(event: Event, tx?: DrizzleTransaction): Promise<void> {
+    const client = tx ?? this.databaseService.db
 
-    await db
-      .insert(schema.event)
-      .values({
-        id: event.id,
-        title: event.title,
-        description: event.description ?? null,
-        eventDate: event.eventDate.toISOString().split('T')[0] as string, // Convert to YYYY-MM-DD format
-        createdAt: event.createdAt,
-        updatedAt: event.updatedAt,
-      })
-      .onConflictDoUpdate({
-        target: schema.event.id,
-        set: {
+    await client.transaction(async subTx => {
+      await subTx
+        .insert(schema.event)
+        .values({
+          id: event.id,
           title: event.title,
           description: event.description ?? null,
           eventDate: event.eventDate.toISOString().split('T')[0] as string, // Convert to YYYY-MM-DD format
+          createdAt: event.createdAt,
           updatedAt: event.updatedAt,
-        },
-      })
+        })
+        .onConflictDoUpdate({
+          target: schema.event.id,
+          set: {
+            title: event.title,
+            description: event.description ?? null,
+            eventDate: event.eventDate.toISOString().split('T')[0] as string, // Convert to YYYY-MM-DD format
+            updatedAt: event.updatedAt,
+          },
+        })
+
+      for (const attendee of event.attendees) {
+        await this.attendeeRepository.save(attendee, subTx)
+      }
+    })
   }
 
-  async delete(id: EventId): Promise<void> {
-    const { schema, db } = this.databaseService
+  async delete(id: EventId, tx?: DrizzleTransaction): Promise<void> {
+    const client = tx ?? this.databaseService.db
 
-    await db.delete(schema.event).where(eq(schema.event.id, id))
+    await client.delete(schema.event).where(eq(schema.event.id, id))
   }
 
-  static toModel(row: typeof schema.event.$inferSelect): Event {
+  static toModel(
+    row: typeof schema.event.$inferSelect & {
+      attendees: (typeof schema.eventAttendee.$inferSelect & { user: typeof schema.user.$inferSelect | null })[]
+    },
+  ): Event {
     return new Event({
       id: row.id,
       title: row.title,
       description: row.description ?? undefined,
       eventDate: new Date(row.eventDate),
+      attendees: row.attendees.map(attendee => PostgresAttendeeRepository.toModel(attendee)),
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     })

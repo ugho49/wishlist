@@ -60,8 +60,10 @@ export class PostgresAttendeeRepository implements AttendeeRepository {
     return !!attendee
   }
 
-  async save(attendee: Attendee): Promise<void> {
-    await this.databaseService.db
+  async save(attendee: Attendee, tx?: DrizzleTransaction): Promise<void> {
+    const client = tx ?? this.databaseService.db
+
+    await client
       .insert(schema.eventAttendee)
       .values({
         id: attendee.id,
@@ -81,7 +83,7 @@ export class PostgresAttendeeRepository implements AttendeeRepository {
   }
 
   async delete(id: AttendeeId, tx?: DrizzleTransaction): Promise<void> {
-    const client = tx || this.databaseService.db
+    const client = tx ?? this.databaseService.db
 
     await client.delete(schema.eventAttendee).where(eq(schema.eventAttendee.id, id))
   }

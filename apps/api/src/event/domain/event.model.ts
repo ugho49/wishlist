@@ -1,13 +1,14 @@
 import type { Attendee } from '@wishlist/api/attendee'
 import type { EventId, ICurrentUser, UserId } from '@wishlist/common'
 
-import { AttendeeRole, uuid } from '@wishlist/common'
+import { AttendeeRole } from '@wishlist/common'
 
 export type EventProps = {
   id: EventId
   title: string
   description?: string
   eventDate: Date
+  attendees: Attendee[]
   createdAt: Date
   updatedAt: Date
 }
@@ -17,6 +18,7 @@ export class Event {
   public readonly title: string
   public readonly description?: string
   public readonly eventDate: Date
+  public readonly attendees: Attendee[]
   public readonly createdAt: Date
   public readonly updatedAt: Date
 
@@ -25,17 +27,30 @@ export class Event {
     this.title = props.title
     this.description = props.description
     this.eventDate = props.eventDate
+    this.attendees = props.attendees
     this.createdAt = props.createdAt
     this.updatedAt = props.updatedAt
   }
 
-  static create(param: { title: string; description?: string; eventDate: Date }): Event {
+  static create(param: {
+    id: EventId
+    title: string
+    description?: string
+    eventDate: Date
+    attendees: Attendee[]
+  }): Event {
+    if (param.attendees.length === 0) {
+      throw new Error('Event must have at least one attendee')
+    }
+
     const now = new Date()
+
     return new Event({
-      id: uuid() as EventId,
+      id: param.id,
       title: param.title,
       description: param.description,
       eventDate: param.eventDate,
+      attendees: param.attendees,
       createdAt: now,
       updatedAt: now,
     })

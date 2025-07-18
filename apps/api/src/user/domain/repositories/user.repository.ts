@@ -6,5 +6,6 @@ export interface UserRepository {
   findById(id: UserId): Promise<User | undefined>
   findByIdOrFail(id: UserId): Promise<User>
   findByEmail(email: string): Promise<User | undefined>
+  findByEmails(emails: string[]): Promise<User[]>
   save(user: User): Promise<void>
 }

@@ -1,7 +1,5 @@
 import type { User } from '@wishlist/api/user'
-import type { AttendeeId, EventId } from '@wishlist/common'
-
-import { AttendeeRole, uuid } from '@wishlist/common'
+import type { AttendeeId, AttendeeRole, EventId } from '@wishlist/common'
 
 export type AttendeeProps = {
   id: AttendeeId
@@ -19,6 +17,10 @@ export class Attendee {
   public readonly role: AttendeeRole
 
   constructor(props: AttendeeProps) {
+    if (props.user && props.pendingEmail) {
+      throw new Error('Params "user" and "pendingEmail" cannot be provided together')
+    }
+
     this.id = props.id
     this.eventId = props.eventId
     this.user = props.user
@@ -26,23 +28,9 @@ export class Attendee {
     this.role = props.role
   }
 
-  static create(param: { eventId: EventId; user?: User; pendingEmail?: string; role?: AttendeeRole }): Attendee {
-    if (param.user && param.pendingEmail) {
-      throw new Error('Params "user" and "pendingEmail" cannot be provided together')
-    }
-
+  static createFromExistingUser(param: { id: AttendeeId; eventId: EventId; user: User; role: AttendeeRole }): Attendee {
     return new Attendee({
-      id: uuid() as AttendeeId,
-      eventId: param.eventId,
-      user: param.user,
-      pendingEmail: param.pendingEmail,
-      role: param.role ?? AttendeeRole.USER,
-    })
-  }
-
-  static fromExistingUser(param: { eventId: EventId; user: User; role: AttendeeRole }): Attendee {
-    return new Attendee({
-      id: uuid() as AttendeeId,
+      id: param.id,
       eventId: param.eventId,
       user: param.user,
       pendingEmail: undefined,
@@ -50,9 +38,14 @@ export class Attendee {
     })
   }
 
-  static fromNonExistingUser(param: { eventId: EventId; pendingEmail: string; role: AttendeeRole }): Attendee {
+  static createFromNonExistingUser(param: {
+    id: AttendeeId
+    eventId: EventId
+    pendingEmail: string
+    role: AttendeeRole
+  }): Attendee {
     return new Attendee({
-      id: uuid() as AttendeeId,
+      id: param.id,
       eventId: param.eventId,
       user: undefined,
       pendingEmail: param.pendingEmail,

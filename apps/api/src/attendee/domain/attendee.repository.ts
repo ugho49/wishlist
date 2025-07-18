@@ -9,6 +9,6 @@ export interface AttendeeRepository {
   findByIds(ids: AttendeeId[]): Promise<Attendee[]>
   findByEventId(eventId: EventId): Promise<Attendee[]>
   existByEventAndEmail(param: { eventId: EventId; email: string }): Promise<boolean>
-  save(attendee: Attendee): Promise<void>
+  save(attendee: Attendee, tx?: DrizzleTransaction): Promise<void>
   delete(id: AttendeeId, tx?: DrizzleTransaction): Promise<void>
 }

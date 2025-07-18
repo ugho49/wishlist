@@ -3,7 +3,7 @@ import { CommandHandler, EventBus, IInferredCommandHandler } from '@nestjs/cqrs'
 import { Event, EventRepository } from '@wishlist/api/event'
 import { ATTENDEE_REPOSITORY, EVENT_REPOSITORY, USER_REPOSITORY } from '@wishlist/api/repositories'
 import { UserRepository } from '@wishlist/api/user'
-import { AttendeeRole } from '@wishlist/common'
+import { AttendeeId, AttendeeRole, uuid } from '@wishlist/common'
 
 import { AddAttendeeCommand, AddAttendeeResult, Attendee, AttendeeAddedEvent, AttendeeRepository } from '../../domain'
 import { attendeeMapper } from '../../infrastructure'
@@ -38,14 +38,17 @@ export class AddAttendeeUseCase implements IInferredCommandHandler<AddAttendeeCo
 
     const user = await this.userRepository.findByEmail(command.newAttendee.email)
     const role = command.newAttendee.role ?? AttendeeRole.USER
+    const attendeeId = uuid() as AttendeeId
 
     const newAttendee = user
-      ? Attendee.fromExistingUser({
+      ? Attendee.createFromExistingUser({
+          id: attendeeId,
           eventId,
           user,
           role,
         })
-      : Attendee.fromNonExistingUser({
+      : Attendee.createFromNonExistingUser({
+          id: attendeeId,
           eventId,
           pendingEmail: command.newAttendee.email,
           role,

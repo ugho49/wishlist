@@ -432,7 +432,7 @@ export class CreateWishlistUseCase implements IInferredCommandHandler<CreateWish
       await this.wishlistRepository.save(wishlist, tx)
     })
 
-    // 3. Publish domain event
+    // 3. Publish domain event if needed
     await this.eventBus.publish(
       new WishlistCreatedEvent({
         wishlistId: wishlist.id,
@@ -578,18 +578,6 @@ export class Wishlist {
       title,
       updatedAt: new Date(),
     })
-  }
-
-  toDto(): WishlistDto {
-    return {
-      id: this.id,
-      title: this.title,
-      description: this.description,
-      event_id: this.eventId,
-      owner_id: this.ownerId,
-      created_at: this.createdAt.toISOString(),
-      updated_at: this.updatedAt.toISOString(),
-    }
   }
 }
 ```

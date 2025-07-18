@@ -1,4 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common'
+import { CommandBus } from '@nestjs/cqrs'
 import { ApiTags } from '@nestjs/swagger'
 import { CurrentUser } from '@wishlist/api/auth'
 import {
@@ -14,12 +15,16 @@ import {
   UserId,
 } from '@wishlist/common'
 
+import { CreateEventCommand } from '../domain'
 import { LegacyEventService } from './legacy-event.service'
 
 @ApiTags('Event')
 @Controller('/event')
 export class EventController {
-  constructor(private readonly eventService: LegacyEventService) {}
+  constructor(
+    private readonly eventService: LegacyEventService,
+    private readonly commandBus: CommandBus,
+  ) {}
 
   @Get()
   getMyEvents(
@@ -41,7 +46,20 @@ export class EventController {
 
   @Post()
   createEvent(@CurrentUser() currentUser: ICurrentUser, @Body() dto: CreateEventInputDto): Promise<MiniEventDto> {
-    return this.eventService.create({ dto, currentUser })
+    return this.commandBus.execute(
+      new CreateEventCommand({
+        currentUser,
+        newEvent: {
+          title: dto.title,
+          description: dto.description,
+          eventDate: dto.event_date,
+          attendees: dto.attendees?.map(attendee => ({
+            email: attendee.email,
+            role: attendee.role,
+          })),
+        },
+      }),
+    )
   }
 
   @Put('/:id')

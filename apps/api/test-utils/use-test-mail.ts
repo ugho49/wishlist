@@ -11,9 +11,14 @@ export function useTestMail() {
   })
 
   beforeEach(async () => {
-    // clear all mails
-    await http.delete('/email/all')
+    await new Promise(resolve => setTimeout(resolve, 100))
+    await clearMails()
   })
+
+  const clearMails = async () => {
+    await new Promise(resolve => setTimeout(resolve, 100))
+    await http.delete('/email/all')
+  }
 
   return {
     expectMail: () => new MailsAssert(http),
