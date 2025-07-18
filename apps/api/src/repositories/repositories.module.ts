@@ -13,7 +13,6 @@ import { UserSocialEntity } from '../user/infrastructure/legacy-user-social.enti
 import { UserEntity } from '../user/infrastructure/legacy-user.entity'
 import { LegacyUserRepository } from '../user/infrastructure/legacy-user.repository'
 import { WishlistEntity } from '../wishlist/infrastructure/legacy-wishlist.entity'
-import { LegacyWishlistRepository } from '../wishlist/infrastructure/legacy-wishlist.repository'
 import { PostgresAttendeeRepository } from './attendee.repository'
 import { PostgresEventRepository } from './event.repository'
 import * as tokens from './repositories.tokens'
@@ -29,7 +28,6 @@ const legacyRepositories = [
   LegacyUserRepository,
   LegacyPasswordVerificationRepository,
   LegacyEmailSettingsRepository,
-  LegacyWishlistRepository,
 ]
 
 const legacyEntities = TypeOrmModule.forFeature([

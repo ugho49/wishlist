@@ -1,6 +1,4 @@
 // export * from './legacy-wishlist.entity'
-// export * from './legacy-wishlist.repository'
-export * from './legacy-wishlist.service'
 export * from './legay-wishlist.mapper'
 export { wishlistMapper } from './wishlist.mapper'
 export * from './wishlist.module'
