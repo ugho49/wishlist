@@ -1,6 +1,8 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common'
+import { CommandBus, QueryBus } from '@nestjs/cqrs'
 import { ApiTags } from '@nestjs/swagger'
 import { CurrentUser } from '@wishlist/api/auth'
+import { DEFAULT_RESULT_NUMBER } from '@wishlist/api/core'
 import {
   CreateEventInputDto,
   DetailedEventDto,
@@ -14,47 +16,81 @@ import {
   UserId,
 } from '@wishlist/common'
 
-import { LegacyEventService } from './legacy-event.service'
+import {
+  CreateEventCommand,
+  DeleteEventCommand,
+  GetEventByIdQuery,
+  GetEventsForUserQuery,
+  UpdateEventCommand,
+} from '../domain'
 
 @ApiTags('Event')
 @Controller('/event')
 export class EventController {
-  constructor(private readonly eventService: LegacyEventService) {}
+  constructor(
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
+  ) {}
 
   @Get()
   getMyEvents(
     @Query() queryParams: GetEventsQueryDto,
     @CurrentUser('id') currentUserId: UserId,
   ): Promise<PagedResponse<EventWithCountsDto>> {
-    return this.eventService.getUserEventsPaginated({
-      pageNumber: queryParams.p || 1,
-      currentUserId,
-      limit: queryParams.limit,
-      onlyFuture: queryParams.only_future === undefined ? false : queryParams.only_future,
-    })
+    return this.queryBus.execute(
+      new GetEventsForUserQuery({
+        userId: currentUserId,
+        pageNumber: queryParams.p ?? 1,
+        pageSize: queryParams.limit ?? DEFAULT_RESULT_NUMBER,
+        ignorePastEvents: queryParams.only_future === undefined ? false : queryParams.only_future,
+      }),
+    )
   }
 
   @Get('/:id')
-  getEventById(@Param('id') eventId: EventId, @CurrentUser('id') currentUserId: UserId): Promise<DetailedEventDto> {
-    return this.eventService.findById({ eventId, currentUserId })
+  getEventById(@Param('id') eventId: EventId, @CurrentUser() currentUser: ICurrentUser): Promise<DetailedEventDto> {
+    return this.queryBus.execute(new GetEventByIdQuery({ currentUser, eventId }))
   }
 
   @Post()
   createEvent(@CurrentUser() currentUser: ICurrentUser, @Body() dto: CreateEventInputDto): Promise<MiniEventDto> {
-    return this.eventService.create({ dto, currentUser })
+    return this.commandBus.execute(
+      new CreateEventCommand({
+        currentUser,
+        newEvent: {
+          title: dto.title,
+          description: dto.description,
+          eventDate: dto.event_date,
+          attendees: dto.attendees?.map(attendee => ({
+            email: attendee.email,
+            role: attendee.role,
+          })),
+        },
+      }),
+    )
   }
 
   @Put('/:id')
-  updateEvent(
+  async updateEvent(
     @Param('id') eventId: EventId,
     @CurrentUser() currentUser: ICurrentUser,
     @Body() dto: UpdateEventInputDto,
   ): Promise<void> {
-    return this.eventService.updateEvent({ eventId, currentUser, dto })
+    await this.commandBus.execute(
+      new UpdateEventCommand({
+        currentUser,
+        eventId,
+        updateEvent: {
+          title: dto.title,
+          description: dto.description,
+          eventDate: dto.event_date,
+        },
+      }),
+    )
   }
 
   @Delete('/:id')
-  deleteEvent(@Param('id') eventId: EventId, @CurrentUser() currentUser: ICurrentUser): Promise<void> {
-    return this.eventService.deleteEvent({ eventId, currentUser })
+  async deleteEvent(@Param('id') eventId: EventId, @CurrentUser() currentUser: ICurrentUser): Promise<void> {
+    await this.commandBus.execute(new DeleteEventCommand({ currentUser, eventId }))
   }
 }

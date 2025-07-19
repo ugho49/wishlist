@@ -27,7 +27,7 @@ export const eventAttendeeRelations = relations(eventAttendee, ({ one, many }) =
 }))
 
 export const eventRelations = relations(event, ({ many }) => ({
-  eventAttendees: many(eventAttendee),
+  attendees: many(eventAttendee),
   secretSantas: many(secretSanta),
   eventWishlists: many(eventWishlist),
 }))

@@ -32,6 +32,7 @@ export class CreateItemUseCase implements IInferredCommandHandler<CreateItemComm
     const url = command.newItem.url ? TidyURL.clean(command.newItem.url).url : undefined
 
     const item = WishlistItem.create({
+      id: this.itemRepository.newId(),
       wishlistId: wishlist.id,
       name: command.newItem.name,
       description: command.newItem.description,

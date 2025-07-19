@@ -1,8 +1,6 @@
 import type { User } from '@wishlist/api/user'
 import type { ItemId, UserId, WishlistId } from '@wishlist/common'
 
-import { uuid } from '@wishlist/common'
-
 export type WishlistItemProps = {
   id: ItemId
   wishlistId: WishlistId
@@ -48,6 +46,7 @@ export class WishlistItem {
   }
 
   static create(params: {
+    id: ItemId
     name: string
     description?: string
     url?: string
@@ -61,7 +60,7 @@ export class WishlistItem {
     const now = new Date()
 
     return new WishlistItem({
-      id: uuid() as ItemId,
+      id: params.id,
       wishlistId: params.wishlistId,
       name: params.name,
       description: params.description,

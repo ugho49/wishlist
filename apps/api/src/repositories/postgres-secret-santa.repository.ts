@@ -1,16 +1,20 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
-import { EventId, SecretSantaId, SecretSantaStatus } from '@wishlist/common'
+import { EventId, SecretSantaId, SecretSantaStatus, uuid } from '@wishlist/common'
 import { eq } from 'drizzle-orm'
 
 import * as schema from '../../drizzle/schema'
 import { DatabaseService, DrizzleTransaction } from '../core/database'
 import { SecretSanta } from '../secret-santa/domain/model/secret-santa.model'
 import { SecretSantaRepository } from '../secret-santa/domain/repository/secret-santa.repository'
-import { PostgresSecretSantaUserRepository } from './secret-santa-user.repository'
+import { PostgresSecretSantaUserRepository } from './postgres-secret-santa-user.repository'
 
 @Injectable()
 export class PostgresSecretSantaRepository implements SecretSantaRepository {
   constructor(private readonly databaseService: DatabaseService) {}
+
+  newId(): SecretSantaId {
+    return uuid() as SecretSantaId
+  }
 
   async save(secretSanta: SecretSanta, tx?: DrizzleTransaction): Promise<void> {
     const { schema, db } = this.databaseService

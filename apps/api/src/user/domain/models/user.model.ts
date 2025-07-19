@@ -1,6 +1,6 @@
 import type { Authorities, UserId } from '@wishlist/common'
 
-import { Authorities as Auth, uuid } from '@wishlist/common'
+import { Authorities as Auth } from '@wishlist/common'
 
 export type UserProps = {
   id: UserId
@@ -50,6 +50,7 @@ export class User {
   }
 
   static create(params: {
+    id: UserId
     email: string
     firstName: string
     lastName: string
@@ -60,7 +61,7 @@ export class User {
   }): User {
     const now = new Date()
     return new User({
-      id: uuid() as UserId,
+      id: params.id,
       email: params.email,
       firstName: params.firstName,
       lastName: params.lastName,

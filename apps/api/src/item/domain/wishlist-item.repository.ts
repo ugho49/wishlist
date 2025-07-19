@@ -12,6 +12,7 @@ export interface NewItemsForWishlist {
 }
 
 export interface WishlistItemRepository {
+  newId(): ItemId
   findById(id: ItemId): Promise<WishlistItem | undefined>
   findByIdOrFail(id: ItemId): Promise<WishlistItem>
   findByWishlist(wishlistId: WishlistId): Promise<WishlistItem[]>

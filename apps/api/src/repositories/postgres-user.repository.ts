@@ -2,12 +2,16 @@ import { Injectable, NotFoundException } from '@nestjs/common'
 import { schema } from '@wishlist/api-drizzle'
 import { DatabaseService } from '@wishlist/api/core'
 import { User, UserRepository } from '@wishlist/api/user'
-import { Authorities, UserId } from '@wishlist/common'
-import { eq } from 'drizzle-orm'
+import { Authorities, UserId, uuid } from '@wishlist/common'
+import { eq, inArray } from 'drizzle-orm'
 
 @Injectable()
 export class PostgresUserRepository implements UserRepository {
   constructor(private readonly databaseService: DatabaseService) {}
+
+  newId(): UserId {
+    return uuid() as UserId
+  }
 
   async findById(id: UserId): Promise<User | undefined> {
     const user = await this.databaseService.db.query.user.findFirst({ where: eq(schema.user.id, id) })
@@ -23,6 +27,11 @@ export class PostgresUserRepository implements UserRepository {
   async findByEmail(email: string): Promise<User | undefined> {
     const user = await this.databaseService.db.query.user.findFirst({ where: eq(schema.user.email, email) })
     return user ? PostgresUserRepository.toModel(user) : undefined
+  }
+
+  async findByEmails(emails: string[]): Promise<User[]> {
+    const users = await this.databaseService.db.query.user.findMany({ where: inArray(schema.user.email, emails) })
+    return users.map(user => PostgresUserRepository.toModel(user))
   }
 
   async save(user: User): Promise<void> {

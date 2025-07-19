@@ -136,7 +136,7 @@ export class Fixtures {
     return id
   }
 
-  async insertEvent(parameters: { title: string; description: string; eventDate: Date }): Promise<string> {
+  async insertEvent(parameters: { title: string; description?: string; eventDate: Date }): Promise<string> {
     const { schema, db: client } = this.databaseService
     const id = uuid() as EventId
     const { title, description, eventDate } = parameters
@@ -151,7 +151,7 @@ export class Fixtures {
 
   async insertEventWithMaintainer(parameters: {
     title: string
-    description: string
+    description?: string
     eventDate?: Date
     maintainerId: string
   }): Promise<{ eventId: string; attendeeId: string; eventDate: DateTime }> {

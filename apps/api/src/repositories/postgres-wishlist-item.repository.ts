@@ -2,14 +2,18 @@ import { Injectable, NotFoundException } from '@nestjs/common'
 import { schema } from '@wishlist/api-drizzle'
 import { DatabaseService, DrizzleTransaction } from '@wishlist/api/core'
 import { NewItemsForWishlist, WishlistItem, WishlistItemRepository } from '@wishlist/api/item'
-import { ItemId, WishlistId } from '@wishlist/common'
+import { ItemId, uuid, WishlistId } from '@wishlist/common'
 import { and, eq, gt, sql } from 'drizzle-orm'
 
-import { PostgresUserRepository } from './user.repository'
+import { PostgresUserRepository } from './postgres-user.repository'
 
 @Injectable()
 export class PostgresWishlistItemRepository implements WishlistItemRepository {
   constructor(private readonly databaseService: DatabaseService) {}
+
+  newId(): ItemId {
+    return uuid() as ItemId
+  }
 
   async findById(id: ItemId): Promise<WishlistItem | undefined> {
     const result = await this.databaseService.db.query.item.findFirst({

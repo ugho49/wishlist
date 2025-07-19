@@ -3,7 +3,6 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 
 import { AttendeeEntity } from '../attendee/infrastructure/legacy-attendee.entity'
 import { EventEntity } from '../event/infrastructure/legacy-event.entity'
-import { LegacyEventRepository } from '../event/infrastructure/legacy-event.repository'
 import { ItemEntity } from '../item/infrastructure/item.entity'
 import { UserEmailSettingEntity } from '../user/infrastructure/legacy-email-settings.entity'
 import { LegacyEmailSettingsRepository } from '../user/infrastructure/legacy-email-settings.repository'
@@ -13,22 +12,17 @@ import { UserSocialEntity } from '../user/infrastructure/legacy-user-social.enti
 import { UserEntity } from '../user/infrastructure/legacy-user.entity'
 import { LegacyUserRepository } from '../user/infrastructure/legacy-user.repository'
 import { WishlistEntity } from '../wishlist/infrastructure/legacy-wishlist.entity'
-import { PostgresAttendeeRepository } from './attendee.repository'
-import { PostgresEventRepository } from './event.repository'
+import { PostgresAttendeeRepository } from './postgres-attendee.repository'
+import { PostgresEventRepository } from './postgres-event.repository'
+import { PostgresSecretSantaUserRepository } from './postgres-secret-santa-user.repository'
+import { PostgresSecretSantaRepository } from './postgres-secret-santa.repository'
+import { PostgresUserSocialRepository } from './postgres-user-social.repository'
+import { PostgresUserRepository } from './postgres-user.repository'
+import { PostgresWishlistItemRepository } from './postgres-wishlist-item.repository'
+import { PostgresWishlistRepository } from './postgres-wishlist.repository'
 import * as tokens from './repositories.tokens'
-import { PostgresSecretSantaUserRepository } from './secret-santa-user.repository'
-import { PostgresSecretSantaRepository } from './secret-santa.repository'
-import { PostgresUserSocialRepository } from './user-social.repository'
-import { PostgresUserRepository } from './user.repository'
-import { PostgresWishlistItemRepository } from './wishlist-item.repository'
-import { PostgresWishlistRepository } from './wishlist.repository'
 
-const legacyRepositories = [
-  LegacyEventRepository,
-  LegacyUserRepository,
-  LegacyPasswordVerificationRepository,
-  LegacyEmailSettingsRepository,
-]
+const legacyRepositories = [LegacyUserRepository, LegacyPasswordVerificationRepository, LegacyEmailSettingsRepository]
 
 const legacyEntities = TypeOrmModule.forFeature([
   EventEntity,

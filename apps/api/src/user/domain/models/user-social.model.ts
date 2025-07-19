@@ -2,8 +2,6 @@ import type { UserSocialId, UserSocialType } from '@wishlist/common'
 
 import type { User } from './user.model'
 
-import { uuid } from '@wishlist/common'
-
 export type UserSocialProps = {
   id: UserSocialId
   user: User
@@ -33,10 +31,16 @@ export class UserSocial {
     this.updatedAt = props.updatedAt
   }
 
-  static create(params: { user: User; socialId: string; socialType: UserSocialType; pictureUrl?: string }): UserSocial {
+  static create(params: {
+    id: UserSocialId
+    user: User
+    socialId: string
+    socialType: UserSocialType
+    pictureUrl?: string
+  }): UserSocial {
     const now = new Date()
     return new UserSocial({
-      id: uuid() as UserSocialId,
+      id: params.id,
       user: params.user,
       socialId: params.socialId,
       socialType: params.socialType,

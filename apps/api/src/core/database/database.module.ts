@@ -23,7 +23,7 @@ const typeOrmModule = TypeOrmModule.forRootAsync({
     autoLoadEntities: true,
     synchronize: false, // Setting synchronize: true shouldn't be used in production - otherwise you can lose production data.
     migrationsRun: false,
-    logging: config.get<string>('DB_VERBOSE', 'false') === 'true',
+    logging: false,
     // dropSchema: true, // ⚠️⚠️ DEV MODE ONLY ⚠️⚠️ Uncomment this if you want to drop all database
   }),
 })

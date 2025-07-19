@@ -2,7 +2,7 @@ import type { AttendeeId, EventId, SecretSantaId, SecretSantaStatus, SecretSanta
 
 import type { SecretSantaUser } from './secret-santa-user.model'
 
-import { SecretSantaDrawService, SecretSantaStatus as Status, uuid } from '@wishlist/common'
+import { SecretSantaDrawService, SecretSantaStatus as Status } from '@wishlist/common'
 
 export type SecretSantaProps = {
   id: SecretSantaId
@@ -36,10 +36,10 @@ export class SecretSanta {
     this.updatedAt = props.updatedAt
   }
 
-  static create(props: { description?: string; budget?: number; eventId: EventId }): SecretSanta {
+  static create(props: { id: SecretSantaId; description?: string; budget?: number; eventId: EventId }): SecretSanta {
     const now = new Date()
     return new SecretSanta({
-      id: uuid() as SecretSantaId,
+      id: props.id,
       description: props.description,
       budget: props.budget,
       status: Status.CREATED,

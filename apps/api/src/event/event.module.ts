@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common'
 
-import { EventMailer, LegacyEventService } from './infrastructure'
+import { handlers } from './application'
+import { EventMailer } from './infrastructure'
 import { EventAdminController } from './infrastructure/event-admin.controller'
 import { EventController } from './infrastructure/event.controller'
 
 @Module({
   controllers: [EventController, EventAdminController],
-  providers: [LegacyEventService, EventMailer],
+  providers: [EventMailer, ...handlers],
   exports: [EventMailer],
 })
 export class EventModule {}

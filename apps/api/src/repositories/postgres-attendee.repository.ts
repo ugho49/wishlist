@@ -2,14 +2,18 @@ import { Injectable, NotFoundException } from '@nestjs/common'
 import { schema } from '@wishlist/api-drizzle'
 import { Attendee, AttendeeRepository } from '@wishlist/api/attendee'
 import { DatabaseService, DrizzleTransaction } from '@wishlist/api/core'
-import { AttendeeId, AttendeeRole, EventId } from '@wishlist/common'
+import { AttendeeId, AttendeeRole, EventId, uuid } from '@wishlist/common'
 import { and, eq, inArray, or } from 'drizzle-orm'
 
-import { PostgresUserRepository } from './user.repository'
+import { PostgresUserRepository } from './postgres-user.repository'
 
 @Injectable()
 export class PostgresAttendeeRepository implements AttendeeRepository {
   constructor(private readonly databaseService: DatabaseService) {}
+
+  newId(): AttendeeId {
+    return uuid() as AttendeeId
+  }
 
   async findById(id: AttendeeId): Promise<Attendee | undefined> {
     const attendee = await this.databaseService.db.query.eventAttendee.findFirst({
@@ -60,8 +64,10 @@ export class PostgresAttendeeRepository implements AttendeeRepository {
     return !!attendee
   }
 
-  async save(attendee: Attendee): Promise<void> {
-    await this.databaseService.db
+  async save(attendee: Attendee, tx?: DrizzleTransaction): Promise<void> {
+    const client = tx ?? this.databaseService.db
+
+    await client
       .insert(schema.eventAttendee)
       .values({
         id: attendee.id,
@@ -81,7 +87,7 @@ export class PostgresAttendeeRepository implements AttendeeRepository {
   }
 
   async delete(id: AttendeeId, tx?: DrizzleTransaction): Promise<void> {
-    const client = tx || this.databaseService.db
+    const client = tx ?? this.databaseService.db
 
     await client.delete(schema.eventAttendee).where(eq(schema.eventAttendee.id, id))
   }

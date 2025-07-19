@@ -1,8 +1,8 @@
 import { ConflictException, Inject, UnauthorizedException } from '@nestjs/common'
 import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
 import { TransactionManager } from '@wishlist/api/core'
-import { Event } from '@wishlist/api/event'
-import { ATTENDEE_REPOSITORY, WISHLIST_REPOSITORY } from '@wishlist/api/repositories'
+import { EventRepository } from '@wishlist/api/event'
+import { ATTENDEE_REPOSITORY, EVENT_REPOSITORY, WISHLIST_REPOSITORY } from '@wishlist/api/repositories'
 import { WishlistRepository } from '@wishlist/api/wishlist'
 
 import { AttendeeRepository, DeleteAttendeeCommand } from '../../domain'
@@ -12,6 +12,8 @@ export class DeleteAttendeeUseCase implements IInferredCommandHandler<DeleteAtte
   constructor(
     @Inject(ATTENDEE_REPOSITORY)
     private readonly attendeeRepository: AttendeeRepository,
+    @Inject(EVENT_REPOSITORY)
+    private readonly eventRepository: EventRepository,
     @Inject(WISHLIST_REPOSITORY)
     private readonly wishlistRepository: WishlistRepository,
     private readonly transactionManager: TransactionManager,
@@ -26,9 +28,9 @@ export class DeleteAttendeeUseCase implements IInferredCommandHandler<DeleteAtte
       throw new ConflictException('You cannot delete yourself from the event')
     }
 
-    const eventAttendees = await this.attendeeRepository.findByEventId(attendee.eventId)
+    const event = await this.eventRepository.findByIdOrFail(attendee.eventId)
 
-    if (!Event.canEdit({ currentUser, attendees: eventAttendees })) {
+    if (!event.canEdit(currentUser)) {
       throw new UnauthorizedException('Only maintainers of the event can delete an attendee')
     }
 

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { EventId, SecretSantaId, SecretSantaUserId, UserId } from '@wishlist/common'
+import { EventId, SecretSantaId, SecretSantaUserId, UserId, uuid } from '@wishlist/common'
 import { and, eq, sql } from 'drizzle-orm'
 
 import * as schema from '../../drizzle/schema'
@@ -10,6 +10,10 @@ import { SecretSantaUserRepository } from '../secret-santa/domain/repository/sec
 @Injectable()
 export class PostgresSecretSantaUserRepository implements SecretSantaUserRepository {
   constructor(private readonly databaseService: DatabaseService) {}
+
+  newId(): SecretSantaUserId {
+    return uuid() as SecretSantaUserId
+  }
 
   async findBySecretSantaId(secretSantaId: SecretSantaId): Promise<SecretSantaUser[]> {
     const { schema, db } = this.databaseService
