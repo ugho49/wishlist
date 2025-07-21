@@ -1,4 +1,4 @@
-import type { DatabaseService } from '@wishlist/api/core'
+import type { Client } from 'pg'
 
 import { expect } from 'vitest'
 
@@ -17,14 +17,14 @@ export class TableAssert {
   private cachedRows = new Map<number, FetchValueResult['value']>()
 
   constructor(
-    private readonly databaseService: DatabaseService,
+    private readonly client: Client,
     private readonly tableName: string,
     private readonly sortOptions?: TableAssertSortOptions,
   ) {}
 
   hasNumberOfRows(expected: number): this {
     this.assertions.add(async () => {
-      const raw = await this.databaseService.db.execute(`SELECT COUNT(*) FROM ${this.tableName}`)
+      const raw = await this.client.query(`SELECT COUNT(*) FROM ${this.tableName}`)
 
       const count = parseInt(raw.rows[0]?.count as string, 10)
 
@@ -65,9 +65,7 @@ export class TableAssert {
           .join(', ')}`
       : ''
 
-    const result = await this.databaseService.client.query(
-      `SELECT * FROM ${this.tableName} ${orderBy} OFFSET ${index} LIMIT 1`,
-    )
+    const result = await this.client.query(`SELECT * FROM ${this.tableName} ${orderBy} OFFSET ${index} LIMIT 1`)
 
     const value = result.rows.length === 1 ? result.rows[0] : undefined
     this.cachedRows.set(index, value)

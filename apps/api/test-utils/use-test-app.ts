@@ -2,7 +2,9 @@ import type { INestApplication } from '@nestjs/common'
 
 import type { TableAssertSortOptions } from './table-assert'
 
+import { Logger } from '@nestjs/common'
 import { DatabaseService } from '@wishlist/api/core'
+import pg, { Client } from 'pg'
 import * as request from 'supertest'
 import { afterAll, beforeAll, beforeEach } from 'vitest'
 
@@ -14,29 +16,76 @@ export type RequestApp = InstanceType<(typeof request)['agent']>
 
 export type SignedAs = 'BASE_USER' | 'ADMIN_USER'
 
+const pgTypes = pg.types
+
+pgTypes.setTypeParser(pgTypes.builtins.NUMERIC, value => parseFloat(value))
+pgTypes.setTypeParser(pgTypes.builtins.DATE, value => new Date(value))
+
 export function useTestApp() {
   let app: INestApplication
   let databaseService: DatabaseService
+  let client: Client
+  let logger: Logger
 
   beforeAll(async () => {
     app = await createApp()
     databaseService = app.get<DatabaseService>(DatabaseService)
     await app.init()
-    await databaseService.dropDatabase()
+    logger = new Logger('UseTestApp')
+
+    client = new Client({
+      host: databaseService.config.host,
+      port: databaseService.config.port,
+      user: databaseService.config.username,
+      password: databaseService.config.password,
+      database: databaseService.config.database,
+      ssl: false,
+    })
+
+    await client.connect()
+    await dropDatabase()
     await databaseService.runMigrations()
   })
 
   beforeEach(async () => {
-    await databaseService.truncateDatabase()
+    await truncateDatabase()
   })
 
   afterAll(async () => {
+    await client.end()
     await app.close()
   })
 
+  async function dropDatabase(): Promise<void> {
+    const allTables = await client.query(
+      `SELECT schemaname, tablename FROM pg_catalog.pg_tables WHERE schemaname IN ('drizzle', 'public')`,
+    )
+    const tables = allTables.rows.map(row => `${row.schemaname}.${row.tablename}`)
+
+    for (const table of tables) {
+      await client.query(`DROP TABLE IF EXISTS ${table} CASCADE`)
+    }
+
+    logger.log(`Database dropped (${tables.length} tables) ✅`)
+  }
+
+  async function truncateDatabase(): Promise<void> {
+    logger.log('Truncating database ...')
+
+    const allTables = await client.query(
+      `SELECT schemaname, tablename FROM pg_catalog.pg_tables WHERE schemaname = 'public'`,
+    )
+    const tables = allTables.rows.map(row => `${row.schemaname}.${row.tablename}`)
+
+    for (const table of tables) {
+      await client.query(`TRUNCATE TABLE ${table} CASCADE`)
+    }
+
+    logger.log(`Database truncated (${tables.length} tables) ✅`)
+  }
+
   return {
-    expectTable: (table: string, sortOptions?: TableAssertSortOptions) =>
-      new TableAssert(databaseService, table, sortOptions),
+    expectTable: (table: string, sortOptions?: TableAssertSortOptions) => new TableAssert(client, table, sortOptions),
     getFixtures: () => Fixtures.create(databaseService),
     getRequest: async (options?: { signedAs?: SignedAs }): Promise<RequestApp> => {
       const requestAppServer = request.agent(app.getHttpServer())
