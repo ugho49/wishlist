@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common'
 
-import { EventModule } from '../event/event.module'
-import { handlers } from './application'
-import { AttendeeController } from './infrastructure/attendee.controller'
+import { EventModule } from '../../event/event.module'
+import { handlers } from '../application'
+import { AttendeeController } from './attendee.controller'
 
 @Module({
   imports: [EventModule],
