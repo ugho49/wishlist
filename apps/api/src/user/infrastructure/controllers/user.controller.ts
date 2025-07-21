@@ -32,7 +32,7 @@ import 'multer'
 
 import { CommandBus } from '@nestjs/cqrs'
 
-import { CreateUserCommand } from '../../domain'
+import { CreateUserCommand, CreateUserFromGoogleCommand } from '../../domain'
 import { userPictureFileValidators, userPictureResizePipe } from '../user.validator'
 
 @ApiTags('User')
@@ -66,9 +66,10 @@ export class UserController {
   }
 
   @Public()
+  @HttpCode(201)
   @Post('/register/google')
   registerWithGoogle(@Body() dto: RegisterUserWithGoogleInputDto, @RealIP() ip: string): Promise<MiniUserDto> {
-    return this.userService.createFromGoogle({ dto, ip })
+    return this.commandBus.execute(new CreateUserFromGoogleCommand({ credential: dto.credential, ip }))
   }
 
   @Put()

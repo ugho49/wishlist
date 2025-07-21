@@ -9,11 +9,10 @@ import { UserController } from './controllers/user.controller'
 import { LegacyEmailSettingsService } from './legacy-email-settings.service'
 import { LegacyUserService } from './legacy-user.service'
 import userConfig from './user.config'
-import { UserMailer } from './user.mailer'
 
 @Module({
   imports: [ConfigModule.forFeature(userConfig)],
   controllers: [UserController, UserAdminController, UserEmailSettingsController, UserPasswordVerificationController],
-  providers: [LegacyUserService, UserMailer, LegacyEmailSettingsService, ...handlers],
+  providers: [LegacyUserService, LegacyEmailSettingsService, ...handlers],
 })
 export class UserModule {}

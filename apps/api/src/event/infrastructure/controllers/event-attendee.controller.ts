@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Param, Post } from '@nestjs/common'
 import { CommandBus } from '@nestjs/cqrs'
-import { ApiTags } from '@nestjs/swagger'
+import { ApiOperation, ApiTags } from '@nestjs/swagger'
 import { CurrentUser } from '@wishlist/api/auth'
 import {
   AddEventAttendeeForEventInputDto,
@@ -21,6 +21,7 @@ export class EventAttendeeController {
   /**
    * @deprecated
    */
+  @ApiOperation({ deprecated: true })
   @Post('/attendee')
   oldAddAttendeeRoute(
     @CurrentUser() currentUser: ICurrentUser,
@@ -56,6 +57,7 @@ export class EventAttendeeController {
   /**
    * @deprecated
    */
+  @ApiOperation({ deprecated: true })
   @Delete('/attendee/:id')
   async oldDeleteAttendeeRoute(
     @Param('id') attendeeId: AttendeeId,

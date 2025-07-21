@@ -8,74 +8,74 @@ import { ItemDto } from './item.dto'
 import { MiniUserDto } from './user.dto'
 
 export class WishlistConfigDto {
-  hide_items!: boolean
+  declare hide_items: boolean
 }
 
 export class UpdateWishlistLogoOutputDto {
-  logo_url!: string
+  declare logo_url: string
 }
 
 export class MiniWishlistDto {
-  id!: WishlistId
-  title!: string
-  description?: string
-  logo_url?: string
+  declare id: WishlistId
+  declare title: string
+  declare description?: string
+  declare logo_url?: string
 }
 
 export class DetailedWishlistDto extends MiniWishlistDto {
-  owner!: MiniUserDto
-  items!: ItemDto[]
-  events!: MiniEventDto[]
-  config!: WishlistConfigDto
-  created_at!: string
-  updated_at!: string
+  declare owner: MiniUserDto
+  declare items: ItemDto[]
+  declare events: MiniEventDto[]
+  declare config: WishlistConfigDto
+  declare created_at: string
+  declare updated_at: string
 }
 
 export class WishlistWithEventsDto extends MiniWishlistDto {
-  events!: MiniEventDto[]
-  config!: WishlistConfigDto
-  created_at!: string
-  updated_at!: string
+  declare events: MiniEventDto[]
+  declare config: WishlistConfigDto
+  declare created_at: string
+  declare updated_at: string
 }
 
 export class WishlistWithOwnerDto extends MiniWishlistDto {
-  owner!: MiniUserDto
-  config!: WishlistConfigDto
-  created_at!: string
-  updated_at!: string
+  declare owner: MiniUserDto
+  declare config: WishlistConfigDto
+  declare created_at: string
+  declare updated_at: string
 }
 
 export class GetAllWishlistsPaginationQueryDto extends GetPaginationQueryDto {
   @IsString()
   @IsNotEmpty()
-  user_id!: UserId
+  declare user_id: UserId
 }
 
 export class LinkUnlinkWishlistInputDto {
   @IsString()
   @IsNotEmpty()
-  event_id!: EventId
+  declare event_id: EventId
 }
 
 export class UpdateWishlistInputDto {
   @MaxLength(100)
   @IsString()
   @IsNotEmpty()
-  title!: string
+  declare title: string
 
   @MaxLength(2000)
   @IsString()
   @IsOptional()
-  description?: string
+  declare description?: string
 }
 
 export class CreateWishlistInputDto extends UpdateWishlistInputDto {
   @IsBoolean()
   @IsOptional()
-  hide_items?: boolean
+  declare hide_items?: boolean
 
   @ArrayMaxSize(MAX_EVENTS_BY_LIST)
   @IsString({ each: true })
   @ArrayNotEmpty()
-  event_ids!: EventId[]
+  declare event_ids: EventId[]
 }
