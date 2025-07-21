@@ -16,6 +16,8 @@ import { PostgresAttendeeRepository } from './postgres-attendee.repository'
 import { PostgresEventRepository } from './postgres-event.repository'
 import { PostgresSecretSantaUserRepository } from './postgres-secret-santa-user.repository'
 import { PostgresSecretSantaRepository } from './postgres-secret-santa.repository'
+import { PostgresUserEmailSettingRepository } from './postgres-user-email-setting'
+import { PostgresUserPasswordVerificationRepository } from './postgres-user-password-verification'
 import { PostgresUserSocialRepository } from './postgres-user-social.repository'
 import { PostgresUserRepository } from './postgres-user.repository'
 import { PostgresWishlistItemRepository } from './postgres-wishlist-item.repository'
@@ -65,6 +67,14 @@ const legacyEntities = TypeOrmModule.forFeature([
       useClass: PostgresUserSocialRepository,
     },
     {
+      provide: tokens.USER_EMAIL_SETTING_REPOSITORY,
+      useClass: PostgresUserEmailSettingRepository,
+    },
+    {
+      provide: tokens.USER_PASSWORD_VERIFICATION_REPOSITORY,
+      useClass: PostgresUserPasswordVerificationRepository,
+    },
+    {
       provide: tokens.WISHLIST_REPOSITORY,
       useClass: PostgresWishlistRepository,
     },
@@ -81,6 +91,8 @@ const legacyEntities = TypeOrmModule.forFeature([
     tokens.SECRET_SANTA_USER_REPOSITORY,
     tokens.USER_REPOSITORY,
     tokens.USER_SOCIAL_REPOSITORY,
+    tokens.USER_EMAIL_SETTING_REPOSITORY,
+    tokens.USER_PASSWORD_VERIFICATION_REPOSITORY,
     tokens.WISHLIST_REPOSITORY,
     tokens.WISHLIST_ITEM_REPOSITORY,
   ],
