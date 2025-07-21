@@ -1,142 +1,34 @@
-import {
-  BadRequestException,
-  Injectable,
-  Logger,
-  NotFoundException,
-  UnauthorizedException,
-  UnprocessableEntityException,
-} from '@nestjs/common'
+import { BadRequestException, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common'
 import {
   ChangeUserPasswordInputDto,
   createPagedResponse,
   ICurrentUser,
   MiniUserDto,
   PagedResponse,
-  RegisterUserInputDto,
-  RegisterUserWithGoogleInputDto,
-  UpdateFullUserProfileInputDto,
   UpdateUserPictureOutputDto,
-  UpdateUserProfileInputDto,
   UserDto,
   UserId,
   UserSocialId,
-  UserSocialType,
   uuid,
 } from '@wishlist/common'
 import { isEmpty } from 'lodash'
 
-import { AttendeeEntity } from '../../attendee/infrastructure/legacy-attendee.entity'
-import { GoogleAuthService, PasswordManager } from '../../auth'
+import { PasswordManager } from '../../auth'
 import { BucketService, DEFAULT_RESULT_NUMBER } from '../../core'
-import { UserEmailSettingEntity } from './legacy-email-settings.entity'
-import { UserSocialEntity } from './legacy-user-social.entity'
-import { UserEntity } from './legacy-user.entity'
 import { toMiniUserDto, toUserDto } from './legacy-user.mapper'
 import { LegacyUserRepository } from './legacy-user.repository'
-import { UserMailer } from './user.mailer'
 
+/**
+ * @deprecated
+ */
 @Injectable()
 export class LegacyUserService {
   private readonly logger = new Logger(LegacyUserService.name)
 
   constructor(
     private readonly userRepository: LegacyUserRepository,
-    private readonly userMailer: UserMailer,
-    private readonly googleAuthService: GoogleAuthService,
     private readonly bucketService: BucketService,
   ) {}
-
-  findById(id: UserId): Promise<UserDto> {
-    return this.userRepository.findOneByOrFail({ id }).then(entity => toUserDto(entity))
-  }
-
-  async create(param: {
-    dto: Omit<RegisterUserInputDto, 'password'> & { password?: string }
-    ip: string
-    social?: (userId: UserId) => UserSocialEntity
-  }): Promise<MiniUserDto> {
-    const { dto, ip, social } = param
-
-    try {
-      const entity = UserEntity.create({
-        email: dto.email,
-        firstName: dto.firstname,
-        lastName: dto.lastname,
-        passwordEnc: dto.password ? await PasswordManager.hash(dto.password) : undefined,
-        ip,
-      })
-
-      const settings = UserEmailSettingEntity.create({ userId: entity.id })
-
-      const socialEntity = social ? social(entity.id) : undefined
-
-      if (socialEntity) entity.pictureUrl = socialEntity.pictureUrl
-
-      await this.userRepository.transaction(async em => {
-        await em.save(UserEntity, entity)
-        await em.save(UserEmailSettingEntity, settings)
-        if (socialEntity) {
-          await em.save(UserSocialEntity, socialEntity)
-        }
-        await em.update(
-          AttendeeEntity,
-          { email: entity.email },
-          {
-            email: null,
-            userId: entity.id,
-          },
-        )
-      })
-
-      try {
-        await this.userMailer.sendWelcomeMail({ email: entity.email })
-      } catch (e) {
-        this.logger.error('Fail to send welcome mail to user', e)
-      }
-
-      return toMiniUserDto(entity)
-    } catch {
-      throw new UnprocessableEntityException()
-    }
-  }
-
-  async createFromGoogle(param: { ip: string; dto: RegisterUserWithGoogleInputDto }): Promise<MiniUserDto> {
-    const payload = await this.googleAuthService.verify(param.dto.credential)
-
-    if (!payload) {
-      throw new UnauthorizedException('Your token is not valid')
-    }
-
-    if (!payload.email_verified) {
-      throw new UnauthorizedException('Email must be verified')
-    }
-
-    return this.create({
-      ip: param.ip,
-      dto: {
-        email: payload.email || '',
-        firstname: payload.given_name || '',
-        lastname: payload.family_name || '',
-      },
-      social: userId =>
-        UserSocialEntity.create({
-          userId,
-          socialId: payload.sub,
-          socialType: UserSocialType.GOOGLE,
-          pictureUrl: payload.picture,
-        }),
-    })
-  }
-
-  async update(param: { currentUserId: UserId; dto: UpdateUserProfileInputDto }): Promise<void> {
-    const { dto, currentUserId } = param
-
-    await this.userRepository.updateById(currentUserId, {
-      firstName: dto.firstname,
-      lastName: dto.lastname,
-      birthday: dto.birthday || null,
-    })
-  }
 
   async changeUserPassword(param: { currentUserId: UserId; dto: ChangeUserPasswordInputDto }) {
     const { dto, currentUserId } = param
@@ -190,41 +82,6 @@ export class LegacyUserService {
       resources: await Promise.all(entities.map(entity => toUserDto(entity))),
       options: { pageSize, totalElements, pageNumber },
     })
-  }
-
-  async updateProfileAsAdmin(param: {
-    userId: UserId
-    currentUser: ICurrentUser
-    dto: UpdateFullUserProfileInputDto
-  }): Promise<void> {
-    const { currentUser, userId, dto } = param
-    if (userId === currentUser.id) {
-      throw new UnauthorizedException('You cannot update yourself')
-    }
-
-    const userToUpdate = await this.userRepository.findOneByOrFail({ id: userId })
-
-    const canUpdateUser = (currentUser.isSuperAdmin && !userToUpdate.isSuperAdmin()) || !userToUpdate.isAdmin()
-
-    if (!canUpdateUser) {
-      throw new UnauthorizedException('You cannot update this user')
-    }
-
-    if (dto.email && userToUpdate.email !== dto.email) {
-      if (await this.userRepository.exist({ where: { email: dto.email } })) {
-        throw new BadRequestException('A user already exist with this email')
-      }
-
-      userToUpdate.email = dto.email
-    }
-
-    if (dto.new_password) userToUpdate.passwordEnc = await PasswordManager.hash(dto.new_password)
-    if (dto.firstname) userToUpdate.firstName = dto.firstname
-    if (dto.lastname) userToUpdate.lastName = dto.lastname
-    if (dto.birthday) userToUpdate.birthday = dto.birthday
-    if (dto.is_enabled !== undefined) userToUpdate.isEnabled = dto.is_enabled
-
-    await this.userRepository.updateById(userId, userToUpdate)
   }
 
   async delete(param: { userId: UserId; currentUser: ICurrentUser }): Promise<void> {

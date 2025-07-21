@@ -38,8 +38,7 @@ export const EditEventAttendees = ({ eventId, attendees }: EditEventAttendeesPro
   const { mutateAsync: addAttendee, isPending: addAttendeePending } = useMutation({
     mutationKey: ['event.addAttendee', { id: eventId }],
     mutationFn: (attendee: AddEventAttendeeInputDto) =>
-      api.attendee.addAttendee({
-        event_id: eventId,
+      api.attendee.addAttendee(eventId, {
         email: attendee.email,
         role: attendee.role,
       }),
@@ -56,7 +55,7 @@ export const EditEventAttendees = ({ eventId, attendees }: EditEventAttendeesPro
 
   const { mutateAsync: deleteAttendee, isPending: deleteAttendeePending } = useMutation({
     mutationKey: ['event.deleteAttendee', { id: eventId }],
-    mutationFn: (attendeeId: string) => api.attendee.deleteAttendee(attendeeId),
+    mutationFn: (attendeeId: string) => api.attendee.deleteAttendee({ eventId, attendeeId }),
     onSuccess: (_, attendeeId) => {
       addToast({ message: "Participant supprimé de l'évènement !", variant: 'info' })
 

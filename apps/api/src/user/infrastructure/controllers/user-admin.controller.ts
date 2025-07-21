@@ -17,15 +17,23 @@ import { userPictureFileValidators, userPictureResizePipe } from '../user.valida
 
 import 'multer'
 
+import { CommandBus, QueryBus } from '@nestjs/cqrs'
+
+import { GetUserByIdQuery, UpdateUserFullCommand } from '../../domain'
+
 @IsAdmin()
 @ApiTags('ADMIN - User')
 @Controller('/admin/user')
 export class UserAdminController {
-  constructor(private readonly userService: LegacyUserService) {}
+  constructor(
+    private readonly userService: LegacyUserService,
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
+  ) {}
 
   @Get('/:id')
   getUserById(@Param('id') id: UserId): Promise<UserDto> {
-    return this.userService.findById(id)
+    return this.queryBus.execute(new GetUserByIdQuery({ userId: id }))
   }
 
   @Get()
@@ -34,12 +42,25 @@ export class UserAdminController {
   }
 
   @Patch('/:id')
-  updateFullUserProfile(
+  async updateFullUserProfile(
     @Param('id') userId: UserId,
     @Body() dto: UpdateFullUserProfileInputDto,
     @CurrentUser() currentUser: ICurrentUser,
   ): Promise<void> {
-    return this.userService.updateProfileAsAdmin({ userId, currentUser, dto })
+    await this.commandBus.execute(
+      new UpdateUserFullCommand({
+        userId,
+        currentUser,
+        updateUser: {
+          email: dto.email,
+          newPassword: dto.new_password,
+          firstname: dto.firstname,
+          lastname: dto.lastname,
+          birthday: dto.birthday,
+          isEnabled: dto.is_enabled,
+        },
+      }),
+    )
   }
 
   @Delete('/:id')

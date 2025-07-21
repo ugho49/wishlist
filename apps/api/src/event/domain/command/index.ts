@@ -1,3 +1,6 @@
+export * from './add-attendee.command'
 export * from './create-event.command'
+export * from './delete-attendee.command'
 export * from './delete-event.command'
+export * from './old-delete-attendee.command'
 export * from './update-event.command'

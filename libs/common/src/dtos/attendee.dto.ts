@@ -7,10 +7,10 @@ import { AttendeeRole } from '../enums'
 import { MiniUserDto } from './user.dto'
 
 export class AttendeeDto {
-  id!: AttendeeId
-  user?: MiniUserDto
-  pending_email?: string
-  role!: AttendeeRole
+  declare id: AttendeeId
+  declare user?: MiniUserDto
+  declare pending_email?: string
+  declare role: AttendeeRole
 }
 
 export class AddEventAttendeeInputDto {
@@ -19,15 +19,19 @@ export class AddEventAttendeeInputDto {
   @IsEmail()
   @IsString()
   @IsNotEmpty()
-  email!: string
+  declare email: string
 
   @IsEnum(AttendeeRole)
   @IsOptional()
-  role?: AttendeeRole
+  declare role?: AttendeeRole
 }
 
+/**
+ * @deprecated
+ */
+// TODO: remove this once old route have been removed
 export class AddEventAttendeeForEventInputDto extends AddEventAttendeeInputDto {
   @IsString()
   @IsNotEmpty()
-  event_id!: EventId
+  declare event_id: EventId
 }

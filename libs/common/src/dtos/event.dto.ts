@@ -19,66 +19,66 @@ import { GetPaginationQueryDto } from './common.dto'
 import { WishlistWithOwnerDto } from './wishlist.dto'
 
 export class MiniEventDto {
-  id!: EventId
-  title!: string
-  description?: string
-  event_date!: string
+  declare id: EventId
+  declare title: string
+  declare description?: string
+  declare event_date: string
 }
 
 export class EventWithCountsDto extends MiniEventDto {
-  nb_wishlists!: number
-  attendees!: AttendeeDto[]
-  created_at!: string
-  updated_at!: string
+  declare nb_wishlists: number
+  declare attendees: AttendeeDto[]
+  declare created_at: string
+  declare updated_at: string
 }
 
 export class DetailedEventDto extends MiniEventDto {
-  wishlists!: WishlistWithOwnerDto[]
-  attendees!: AttendeeDto[]
-  created_at!: string
-  updated_at!: string
+  declare wishlists: WishlistWithOwnerDto[]
+  declare attendees: AttendeeDto[]
+  declare created_at: string
+  declare updated_at: string
 }
 
 export class GetAllEventsPaginationQueryDto extends GetPaginationQueryDto {
   @IsString()
   @IsOptional()
-  user_id?: UserId
+  declare user_id?: UserId
 }
 
 export class UpdateEventInputDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(100)
-  title!: string
+  declare title: string
 
   @IsString()
   @IsOptional()
   @MaxLength(2000)
-  description?: string
+  declare description?: string
 
   @MinDate(new Date(new Date().toDateString()), { message: 'event_date must not be earlier than today' })
   @IsDate()
   @IsNotEmpty()
   @Transform(({ value }) => new Date(value))
-  event_date!: Date
+  declare event_date: Date
 }
 
 export class CreateEventInputDto extends UpdateEventInputDto {
   @ValidateNested({ each: true })
   @Type(() => AddEventAttendeeInputDto)
-  attendees?: AddEventAttendeeInputDto[]
+  declare attendees?: AddEventAttendeeInputDto[]
 }
 
 export class GetEventsQueryDto extends GetPaginationQueryDto {
   @IsBoolean()
   @IsOptional()
   @Transform(({ value }) => value === 'true')
-  only_future?: boolean
+  declare only_future?: boolean
 
   @IsInt()
   @IsPositive()
   @Max(200)
   @IsOptional()
   @Transform(({ value }) => parseInt(value, 10))
-  limit?: number
+  declare limit?: number
 }

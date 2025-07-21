@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common'
 import { schema } from '@wishlist/api-drizzle'
-import { DatabaseService } from '@wishlist/api/core'
+import { DatabaseService, DrizzleTransaction } from '@wishlist/api/core'
 import { UserSocial, UserSocialRepository } from '@wishlist/api/user'
-import { UserSocialId, UserSocialType, uuid } from '@wishlist/common'
+import { UserId, UserSocialId, UserSocialType, uuid } from '@wishlist/common'
 import { and, eq } from 'drizzle-orm'
 
 import { PostgresUserRepository } from './postgres-user.repository'
@@ -24,8 +24,19 @@ export class PostgresUserSocialRepository implements UserSocialRepository {
     return userSocial ? PostgresUserSocialRepository.toModel(userSocial) : undefined
   }
 
-  async save(userSocial: UserSocial): Promise<void> {
-    await this.databaseService.db
+  async findByUserId(userId: UserId): Promise<UserSocial[]> {
+    const userSocials = await this.databaseService.db.query.userSocial.findMany({
+      where: eq(schema.userSocial.userId, userId),
+      with: { user: true },
+    })
+
+    return userSocials.map(userSocial => PostgresUserSocialRepository.toModel(userSocial))
+  }
+
+  async save(userSocial: UserSocial, tx?: DrizzleTransaction): Promise<void> {
+    const client = tx ?? this.databaseService.db
+
+    await client
       .insert(schema.userSocial)
       .values({
         id: userSocial.id,

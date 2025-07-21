@@ -1,19 +1,15 @@
 import { BadRequestException, ForbiddenException, Inject } from '@nestjs/common'
 import { CommandHandler, EventBus, IInferredCommandHandler } from '@nestjs/cqrs'
+import { TransactionManager } from '@wishlist/api/core'
+import { EventRepository } from '@wishlist/api/event'
+import { EVENT_REPOSITORY, SECRET_SANTA_REPOSITORY, SECRET_SANTA_USER_REPOSITORY } from '@wishlist/api/repositories'
 
-import { AttendeeRepository } from '../../attendee/domain/attendee.repository'
-import { TransactionManager } from '../../core/database'
-import { EventRepository } from '../../event/domain/event.repository'
 import {
-  ATTENDEE_REPOSITORY,
-  EVENT_REPOSITORY,
-  SECRET_SANTA_REPOSITORY,
-  SECRET_SANTA_USER_REPOSITORY,
-} from '../../repositories/repositories.tokens'
-import { StartSecretSantaCommand } from '../domain/command/start-secret-santa.command'
-import { SecretSantaStartedEvent } from '../domain/event/secret-santa-started.event'
-import { SecretSantaUserRepository } from '../domain/repository/secret-santa-user.repository'
-import { SecretSantaRepository } from '../domain/repository/secret-santa.repository'
+  SecretSantaRepository,
+  SecretSantaStartedEvent,
+  SecretSantaUserRepository,
+  StartSecretSantaCommand,
+} from '../domain'
 
 @CommandHandler(StartSecretSantaCommand)
 export class StartSecretSantaUseCase implements IInferredCommandHandler<StartSecretSantaCommand> {
@@ -21,7 +17,6 @@ export class StartSecretSantaUseCase implements IInferredCommandHandler<StartSec
     @Inject(SECRET_SANTA_REPOSITORY) private readonly secretSantaRepository: SecretSantaRepository,
     @Inject(SECRET_SANTA_USER_REPOSITORY) private readonly secretSantaUserRepository: SecretSantaUserRepository,
     @Inject(EVENT_REPOSITORY) private readonly eventRepository: EventRepository,
-    @Inject(ATTENDEE_REPOSITORY) private readonly attendeeRepository: AttendeeRepository,
     private readonly eventBus: EventBus,
     private readonly transactionManager: TransactionManager,
   ) {}

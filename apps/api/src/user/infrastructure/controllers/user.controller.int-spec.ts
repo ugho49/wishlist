@@ -2,6 +2,7 @@ import type { RequestApp } from '@wishlist/api-test-utils'
 
 import { Fixtures, useTestApp, useTestMail } from '@wishlist/api-test-utils'
 import { PasswordManager } from '@wishlist/api/auth'
+import { sleep } from '@wishlist/common'
 import { DateTime } from 'luxon'
 
 describe('UserController', () => {
@@ -117,8 +118,8 @@ describe('UserController', () => {
         await request
           .post(path)
           .send(input)
-          .expect(422)
-          .expect(({ body }) => expect(body).toMatchObject({ message: 'Unprocessable Entity' }))
+          .expect(401)
+          .expect(({ body }) => expect(body).toMatchObject({ message: 'User email already taken' }))
 
         await expectTable(Fixtures.USER_TABLE).hasNumberOfRows(1).check()
       })
@@ -211,6 +212,8 @@ describe('UserController', () => {
           .check()
 
         const res = await request.post(path).send(input).expect(201)
+
+        await sleep(500)
 
         await expectTable(Fixtures.EVENT_ATTENDEE_TABLE)
           .hasNumberOfRows(2)

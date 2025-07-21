@@ -11,7 +11,7 @@ import { AuthService } from './infrastructure/auth.service'
 import { AuthGuard } from './infrastructure/guards/auth.guard'
 import { JwtStrategy } from './infrastructure/strategies/jwt.strategy'
 
-@Global() // TODO: remove this when this is migrated to DDD
+@Global()
 @Module({
   imports: [
     ConfigModule.forFeature(authConfig),
@@ -31,6 +31,6 @@ import { JwtStrategy } from './infrastructure/strategies/jwt.strategy'
   ],
   providers: [AuthService, GoogleAuthService, JwtStrategy, { provide: APP_GUARD, useClass: AuthGuard }],
   controllers: [AuthController],
-  exports: [AuthService, GoogleAuthService],
+  exports: [GoogleAuthService],
 })
 export class AuthModule {}

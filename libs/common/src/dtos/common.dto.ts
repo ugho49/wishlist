@@ -6,17 +6,17 @@ export class GetPaginationQueryDto {
   @Min(1)
   @IsOptional()
   @Transform(({ value }) => parseInt(value, 10))
-  p?: number
+  declare p?: number
 }
 
 export class PaginationDto {
-  total_pages!: number
-  total_elements!: number
-  page_number!: number
-  pages_size!: number
+  declare total_pages: number
+  declare total_elements: number
+  declare page_number: number
+  declare pages_size: number
 }
 
 export class PagedResponse<T> {
-  resources!: T[]
-  pagination!: PaginationDto
+  declare resources: T[]
+  declare pagination: PaginationDto
 }

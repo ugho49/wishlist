@@ -6,8 +6,8 @@ import {
   AdminEventService,
   AdminUserService,
   AdminWishlistService,
-  AttendeeService,
   AuthService,
+  EventAttendeeService,
   EventService,
   ItemService,
   SecretSantaService,
@@ -28,7 +28,7 @@ export class ApiClient {
     public readonly wishlist: WishlistService,
     public readonly event: EventService,
     public readonly item: ItemService,
-    public readonly attendee: AttendeeService,
+    public readonly attendee: EventAttendeeService,
     public readonly secretSanta: SecretSantaService,
     public readonly admin: {
       user: AdminUserService
@@ -55,7 +55,7 @@ export class ApiClient {
       new WishlistService(client),
       new EventService(client),
       new ItemService(client),
-      new AttendeeService(client),
+      new EventAttendeeService(client),
       new SecretSantaService(client),
       {
         user: new AdminUserService(client),

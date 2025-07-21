@@ -1,4 +1,12 @@
-import { CreateEventUseCase, DeleteEventUseCase, UpdateEventUseCase } from './command'
+import {
+  AddAttendeeUseCase,
+  CreateEventUseCase,
+  DeleteAttendeeUseCase,
+  DeleteEventUseCase,
+  OldDeleteAttendeeUseCase,
+  UpdateEventUseCase,
+} from './command'
+import { AttendeeAddedUseCase } from './event'
 import { GetEventByIdUseCase, GetEventsForUserUseCase, GetEventsUseCase } from './query'
 
 export const handlers = [
@@ -6,8 +14,13 @@ export const handlers = [
   CreateEventUseCase,
   DeleteEventUseCase,
   UpdateEventUseCase,
+  AddAttendeeUseCase,
+  DeleteAttendeeUseCase,
+  OldDeleteAttendeeUseCase,
   // Query handlers
   GetEventByIdUseCase,
   GetEventsForUserUseCase,
   GetEventsUseCase,
+  // Event handlers
+  AttendeeAddedUseCase,
 ]

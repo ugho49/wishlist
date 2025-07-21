@@ -2,12 +2,11 @@ import type { GetSecretSantaResult } from '../domain/query/get-secret-santa.quer
 
 import { ForbiddenException, Inject } from '@nestjs/common'
 import { IInferredQueryHandler, QueryHandler } from '@nestjs/cqrs'
+import { EventRepository } from '@wishlist/api/event'
+import { EVENT_REPOSITORY, SECRET_SANTA_REPOSITORY } from '@wishlist/api/repositories'
 
-import { EventRepository } from '../../event/domain/event.repository'
-import { EVENT_REPOSITORY, SECRET_SANTA_REPOSITORY } from '../../repositories'
-import { GetSecretSantaQuery } from '../domain/query/get-secret-santa.query'
-import { SecretSantaRepository } from '../domain/repository/secret-santa.repository'
-import { secretSantaMapper } from '../infrastructure/secret-santa.mapper'
+import { GetSecretSantaQuery, SecretSantaRepository } from '../domain'
+import { secretSantaMapper } from '../infrastructure'
 
 @QueryHandler(GetSecretSantaQuery)
 export class GetSecretSantaUseCase implements IInferredQueryHandler<GetSecretSantaQuery> {

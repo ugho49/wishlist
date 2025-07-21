@@ -30,34 +30,61 @@ import { LegacyUserService } from '../legacy-user.service'
 
 import 'multer'
 
+import { CommandBus, QueryBus } from '@nestjs/cqrs'
+
+import { CreateUserCommand, CreateUserFromGoogleCommand, GetUserByIdQuery, UpdateUserCommand } from '../../domain'
 import { userPictureFileValidators, userPictureResizePipe } from '../user.validator'
 
 @ApiTags('User')
 @Controller('/user')
 export class UserController {
-  constructor(private readonly userService: LegacyUserService) {}
+  constructor(
+    private readonly userService: LegacyUserService,
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
+  ) {}
 
   @Get()
   getInfos(@CurrentUser('id') currentUserId: UserId): Promise<UserDto> {
-    return this.userService.findById(currentUserId)
+    return this.queryBus.execute(new GetUserByIdQuery({ userId: currentUserId }))
   }
 
   @Public()
   @HttpCode(201)
   @Post('/register')
   register(@Body() dto: RegisterUserInputDto, @RealIP() ip: string): Promise<MiniUserDto> {
-    return this.userService.create({ dto, ip })
+    return this.commandBus.execute(
+      new CreateUserCommand({
+        ip,
+        newUser: {
+          email: dto.email,
+          password: dto.password,
+          firstname: dto.firstname,
+          lastname: dto.lastname,
+        },
+      }),
+    )
   }
 
   @Public()
+  @HttpCode(201)
   @Post('/register/google')
   registerWithGoogle(@Body() dto: RegisterUserWithGoogleInputDto, @RealIP() ip: string): Promise<MiniUserDto> {
-    return this.userService.createFromGoogle({ dto, ip })
+    return this.commandBus.execute(new CreateUserFromGoogleCommand({ credential: dto.credential, ip }))
   }
 
   @Put()
-  update(@CurrentUser('id') currentUserId: UserId, @Body() dto: UpdateUserProfileInputDto): Promise<void> {
-    return this.userService.update({ currentUserId, dto })
+  async update(@CurrentUser('id') currentUserId: UserId, @Body() dto: UpdateUserProfileInputDto): Promise<void> {
+    await this.commandBus.execute(
+      new UpdateUserCommand({
+        userId: currentUserId,
+        updateUser: {
+          firstname: dto.firstname,
+          lastname: dto.lastname,
+          birthday: dto.birthday,
+        },
+      }),
+    )
   }
 
   @Put('/change-password')

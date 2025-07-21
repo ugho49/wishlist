@@ -1,8 +1,15 @@
 # TODO
 
+## Refacto
+
+- [ ] Move to GitHub action
+- [ ] Check if possible to run int-test in parallel
+- [ ] Repository export single const tokens for injection
+- [ ] Move repositories to database folder
+- [ ] Move Item to Wishlist folder
+
 ## General
 
-- [x] Backend: refacto mailer templating. Try react-mail or MJML
 - [ ] Try Nx Cloud
 - [ ] Add versioning github with tags using `nx release`
 

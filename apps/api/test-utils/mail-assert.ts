@@ -1,5 +1,6 @@
 import type { AxiosInstance } from 'axios'
 
+import { sleep } from '@wishlist/common'
 import { expect } from 'vitest'
 
 type MailAssertion = () => Promise<unknown>
@@ -25,7 +26,7 @@ export class MailsAssert {
   constructor(private readonly http: AxiosInstance) {}
 
   waitFor(ms: number): this {
-    this.assertions.add(() => new Promise(resolve => setTimeout(resolve, ms)))
+    this.assertions.add(() => sleep(ms))
 
     return this
   }
