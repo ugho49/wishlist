@@ -1,25 +1,31 @@
 import { Body, Controller, Get, Put } from '@nestjs/common'
+import { CommandBus, QueryBus } from '@nestjs/cqrs'
 import { ApiTags } from '@nestjs/swagger'
-import { UpdateUserEmailSettingsInputDto, UserEmailSettingsDto, UserId } from '@wishlist/common'
+import { ICurrentUser, UpdateUserEmailSettingsInputDto, UserEmailSettingsDto } from '@wishlist/common'
 
 import { CurrentUser } from '../../../auth'
-import { LegacyEmailSettingsService } from '../legacy-email-settings.service'
+import { GetUserEmailSettingQuery, UpdateUserEmailSettingCommand } from '../../domain'
 
 @ApiTags('User Email settings')
 @Controller('/user/email-settings')
 export class UserEmailSettingsController {
-  constructor(private readonly userEmailSettingsService: LegacyEmailSettingsService) {}
+  constructor(
+    private readonly queryBus: QueryBus,
+    private readonly commandBus: CommandBus,
+  ) {}
 
   @Get()
-  getEmailSettings(@CurrentUser('id') id: UserId): Promise<UserEmailSettingsDto> {
-    return this.userEmailSettingsService.findByUserId(id)
+  getEmailSettings(@CurrentUser() currentUser: ICurrentUser): Promise<UserEmailSettingsDto> {
+    return this.queryBus.execute(new GetUserEmailSettingQuery({ currentUser }))
   }
 
   @Put()
   updateEmailSettings(
-    @CurrentUser('id') id: UserId,
+    @CurrentUser() currentUser: ICurrentUser,
     @Body() dto: UpdateUserEmailSettingsInputDto,
   ): Promise<UserEmailSettingsDto> {
-    return this.userEmailSettingsService.update(id, dto)
+    return this.commandBus.execute(
+      new UpdateUserEmailSettingCommand({ currentUser, dailyNewItemNotification: dto.daily_new_item_notification }),
+    )
   }
 }

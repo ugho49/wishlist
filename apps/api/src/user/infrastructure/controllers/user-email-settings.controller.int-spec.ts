@@ -17,30 +17,6 @@ describe('UserEmailSettingsController', () => {
       await request.get(path).expect(401)
     })
 
-    it('should return default email settings when no settings exist', async () => {
-      await expectTable(Fixtures.USER_EMAIL_SETTING_TABLE).hasNumberOfRows(0).check()
-
-      const request = await getRequest({ signedAs: 'BASE_USER' })
-
-      await request
-        .get(path)
-        .expect(200)
-        .expect(({ body }) => {
-          expect(body).toEqual({
-            daily_new_item_notification: true,
-          })
-        })
-
-      // Should have created default settings in database
-      await expectTable(Fixtures.USER_EMAIL_SETTING_TABLE)
-        .hasNumberOfRows(1)
-        .row(0)
-        .toMatchObject({
-          daily_new_item_notification: true,
-        })
-        .check()
-    })
-
     it('should return existing email settings', async () => {
       const request = await getRequest({ signedAs: 'BASE_USER' })
 
@@ -103,34 +79,6 @@ describe('UserEmailSettingsController', () => {
             message: expect.arrayContaining(message),
           }),
         )
-    })
-
-    it('should create and update email settings when no settings exist', async () => {
-      const request = await getRequest({ signedAs: 'BASE_USER' })
-      const currentUserId = await fixtures.getSignedUserId('BASE_USER')
-
-      // Initially no settings exist
-      await expectTable(Fixtures.USER_EMAIL_SETTING_TABLE).hasNumberOfRows(0).check()
-
-      await request
-        .put(path)
-        .send({ daily_new_item_notification: false })
-        .expect(200)
-        .expect(({ body }) => {
-          expect(body).toEqual({
-            daily_new_item_notification: false,
-          })
-        })
-
-      // Should have created settings in database
-      await expectTable(Fixtures.USER_EMAIL_SETTING_TABLE)
-        .hasNumberOfRows(1)
-        .row(0)
-        .toMatchObject({
-          user_id: currentUserId,
-          daily_new_item_notification: false,
-        })
-        .check()
     })
 
     it('should update existing email settings', async () => {

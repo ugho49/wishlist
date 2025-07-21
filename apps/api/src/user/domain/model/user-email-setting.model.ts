@@ -35,4 +35,12 @@ export class UserEmailSetting {
       updatedAt: now,
     })
   }
+
+  updatePreferences(params: { dailyNewItemNotification: boolean }): UserEmailSetting {
+    return new UserEmailSetting({
+      ...this,
+      dailyNewItemNotification: params.dailyNewItemNotification,
+      updatedAt: new Date(),
+    })
+  }
 }

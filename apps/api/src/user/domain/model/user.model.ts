@@ -85,10 +85,34 @@ export class User {
     return this.isSuperAdmin() || this.authorities.includes(Auth.ROLE_ADMIN)
   }
 
-  updateProfile(updates: { firstName?: string; lastName?: string; birthday?: Date; email?: string }): User {
+  updateFirstName(firstName: string): User {
     return new User({
       ...this,
-      ...updates,
+      firstName,
+      updatedAt: new Date(),
+    })
+  }
+
+  updateLastName(lastName: string): User {
+    return new User({
+      ...this,
+      lastName,
+      updatedAt: new Date(),
+    })
+  }
+
+  updateBirthday(birthday?: Date): User {
+    return new User({
+      ...this,
+      birthday,
+      updatedAt: new Date(),
+    })
+  }
+
+  updateEmail(email: string): User {
+    return new User({
+      ...this,
+      email,
       updatedAt: new Date(),
     })
   }
@@ -97,6 +121,14 @@ export class User {
     return new User({
       ...this,
       passwordEnc: newPasswordEnc,
+      updatedAt: new Date(),
+    })
+  }
+
+  updateIsEnabled(isEnabled: boolean): User {
+    return new User({
+      ...this,
+      isEnabled,
       updatedAt: new Date(),
     })
   }
@@ -114,47 +146,6 @@ export class User {
     return new User({
       ...this,
       pictureUrl,
-      updatedAt: new Date(),
-    })
-  }
-
-  enable(): User {
-    if (this.isEnabled) return this
-    return new User({
-      ...this,
-      isEnabled: true,
-      updatedAt: new Date(),
-    })
-  }
-
-  disable(): User {
-    if (!this.isEnabled) return this
-    return new User({
-      ...this,
-      isEnabled: false,
-      updatedAt: new Date(),
-    })
-  }
-
-  grantAuthority(authority: Authorities): User {
-    if (this.authorities.includes(authority)) return this
-    return new User({
-      ...this,
-      authorities: [...this.authorities, authority],
-      updatedAt: new Date(),
-    })
-  }
-
-  revokeAuthority(authority: Authorities): User {
-    const filteredAuthorities = this.authorities.filter(auth => auth !== authority)
-    if (filteredAuthorities.length === this.authorities.length) return this
-
-    // Ensure user always has at least ROLE_USER
-    const finalAuthorities = filteredAuthorities.length === 0 ? [Auth.ROLE_USER] : filteredAuthorities
-
-    return new User({
-      ...this,
-      authorities: finalAuthorities,
       updatedAt: new Date(),
     })
   }

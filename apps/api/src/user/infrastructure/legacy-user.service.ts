@@ -5,9 +5,7 @@ import {
   ICurrentUser,
   MiniUserDto,
   PagedResponse,
-  UpdateFullUserProfileInputDto,
   UpdateUserPictureOutputDto,
-  UpdateUserProfileInputDto,
   UserDto,
   UserId,
   UserSocialId,
@@ -31,20 +29,6 @@ export class LegacyUserService {
     private readonly userRepository: LegacyUserRepository,
     private readonly bucketService: BucketService,
   ) {}
-
-  findById(id: UserId): Promise<UserDto> {
-    return this.userRepository.findOneByOrFail({ id }).then(entity => toUserDto(entity))
-  }
-
-  async update(param: { currentUserId: UserId; dto: UpdateUserProfileInputDto }): Promise<void> {
-    const { dto, currentUserId } = param
-
-    await this.userRepository.updateById(currentUserId, {
-      firstName: dto.firstname,
-      lastName: dto.lastname,
-      birthday: dto.birthday || null,
-    })
-  }
 
   async changeUserPassword(param: { currentUserId: UserId; dto: ChangeUserPasswordInputDto }) {
     const { dto, currentUserId } = param
@@ -98,41 +82,6 @@ export class LegacyUserService {
       resources: await Promise.all(entities.map(entity => toUserDto(entity))),
       options: { pageSize, totalElements, pageNumber },
     })
-  }
-
-  async updateProfileAsAdmin(param: {
-    userId: UserId
-    currentUser: ICurrentUser
-    dto: UpdateFullUserProfileInputDto
-  }): Promise<void> {
-    const { currentUser, userId, dto } = param
-    if (userId === currentUser.id) {
-      throw new UnauthorizedException('You cannot update yourself')
-    }
-
-    const userToUpdate = await this.userRepository.findOneByOrFail({ id: userId })
-
-    const canUpdateUser = (currentUser.isSuperAdmin && !userToUpdate.isSuperAdmin()) || !userToUpdate.isAdmin()
-
-    if (!canUpdateUser) {
-      throw new UnauthorizedException('You cannot update this user')
-    }
-
-    if (dto.email && userToUpdate.email !== dto.email) {
-      if (await this.userRepository.exist({ where: { email: dto.email } })) {
-        throw new BadRequestException('A user already exist with this email')
-      }
-
-      userToUpdate.email = dto.email
-    }
-
-    if (dto.new_password) userToUpdate.passwordEnc = await PasswordManager.hash(dto.new_password)
-    if (dto.firstname) userToUpdate.firstName = dto.firstname
-    if (dto.lastname) userToUpdate.lastName = dto.lastname
-    if (dto.birthday) userToUpdate.birthday = dto.birthday
-    if (dto.is_enabled !== undefined) userToUpdate.isEnabled = dto.is_enabled
-
-    await this.userRepository.updateById(userId, userToUpdate)
   }
 
   async delete(param: { userId: UserId; currentUser: ICurrentUser }): Promise<void> {

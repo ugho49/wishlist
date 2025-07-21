@@ -1,6 +1,4 @@
-export * from './legacy-email-settings.entity'
-export * from './legacy-email-settings.repository'
-export * from './legacy-email-settings.service'
+export { userEmailSettingMapper } from './email-settings.mapper'
 export * from './legacy-user-social.entity'
 export * from './legacy-user.entity'
 export * from './legacy-user.mapper'
