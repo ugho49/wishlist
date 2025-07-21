@@ -1,7 +1,7 @@
 import { Inject } from '@nestjs/common'
 import { CommandHandler, EventBus, IInferredCommandHandler } from '@nestjs/cqrs'
-import { Attendee, AttendeeAddedEvent, AttendeeRepository } from '@wishlist/api/attendee'
-import { ATTENDEE_REPOSITORY, EVENT_REPOSITORY, USER_REPOSITORY } from '@wishlist/api/repositories'
+import { AttendeeAddedEvent, EventAttendee, EventAttendeeRepository } from '@wishlist/api/attendee'
+import { EVENT_ATTENDEE_REPOSITORY, EVENT_REPOSITORY, USER_REPOSITORY } from '@wishlist/api/repositories'
 import { UserRepository } from '@wishlist/api/user'
 import { AttendeeRole } from '@wishlist/common'
 import { uniq } from 'lodash'
@@ -13,7 +13,7 @@ import { eventMapper } from '../../infrastructure'
 export class CreateEventUseCase implements IInferredCommandHandler<CreateEventCommand> {
   constructor(
     @Inject(EVENT_REPOSITORY) private readonly eventRepository: EventRepository,
-    @Inject(ATTENDEE_REPOSITORY) private readonly attendeeRepository: AttendeeRepository,
+    @Inject(EVENT_ATTENDEE_REPOSITORY) private readonly attendeeRepository: EventAttendeeRepository,
     @Inject(USER_REPOSITORY) private readonly userRepository: UserRepository,
     private readonly eventBus: EventBus,
   ) {}
@@ -24,13 +24,13 @@ export class CreateEventUseCase implements IInferredCommandHandler<CreateEventCo
       .filter(email => email !== command.currentUser.email)
     const existingUsers = await this.userRepository.findByEmails(attendeeEmails)
     const eventId = this.eventRepository.newId()
-    const attendees: Attendee[] = []
+    const attendees: EventAttendee[] = []
 
     // Add the current user as maintainer attendee
     const currentUser = await this.userRepository.findByIdOrFail(command.currentUser.id)
 
     attendees.push(
-      Attendee.createFromExistingUser({
+      EventAttendee.createFromExistingUser({
         id: this.attendeeRepository.newId(),
         eventId,
         user: currentUser,
@@ -43,8 +43,8 @@ export class CreateEventUseCase implements IInferredCommandHandler<CreateEventCo
       const id = this.attendeeRepository.newId()
       const role = attendee.role ?? AttendeeRole.USER
       const newAttendee = user
-        ? Attendee.createFromExistingUser({ id, eventId, user, role })
-        : Attendee.createFromNonExistingUser({
+        ? EventAttendee.createFromExistingUser({ id, eventId, user, role })
+        : EventAttendee.createFromNonExistingUser({
             id,
             eventId,
             role,

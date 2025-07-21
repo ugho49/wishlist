@@ -12,7 +12,7 @@ import { UserSocialEntity } from '../user/infrastructure/legacy-user-social.enti
 import { UserEntity } from '../user/infrastructure/legacy-user.entity'
 import { LegacyUserRepository } from '../user/infrastructure/legacy-user.repository'
 import { WishlistEntity } from '../wishlist/infrastructure/legacy-wishlist.entity'
-import { PostgresAttendeeRepository } from './postgres-attendee.repository'
+import { PostgresEventAttendeeRepository } from './postgres-event-attendee.repository'
 import { PostgresEventRepository } from './postgres-event.repository'
 import { PostgresSecretSantaUserRepository } from './postgres-secret-santa-user.repository'
 import { PostgresSecretSantaRepository } from './postgres-secret-santa.repository'
@@ -43,8 +43,8 @@ const legacyEntities = TypeOrmModule.forFeature([
   providers: [
     ...legacyRepositories,
     {
-      provide: tokens.ATTENDEE_REPOSITORY,
-      useClass: PostgresAttendeeRepository,
+      provide: tokens.EVENT_ATTENDEE_REPOSITORY,
+      useClass: PostgresEventAttendeeRepository,
     },
     {
       provide: tokens.EVENT_REPOSITORY,
@@ -85,8 +85,8 @@ const legacyEntities = TypeOrmModule.forFeature([
   ],
   exports: [
     ...legacyRepositories,
-    tokens.ATTENDEE_REPOSITORY,
     tokens.EVENT_REPOSITORY,
+    tokens.EVENT_ATTENDEE_REPOSITORY,
     tokens.SECRET_SANTA_REPOSITORY,
     tokens.SECRET_SANTA_USER_REPOSITORY,
     tokens.USER_REPOSITORY,

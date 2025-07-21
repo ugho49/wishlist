@@ -1,4 +1,4 @@
 export * from './command'
-export * from './event.model'
-export * from './event.repository'
+export * from './model'
 export * from './query'
+export * from './repository'

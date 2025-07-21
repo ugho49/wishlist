@@ -2,13 +2,11 @@ import type { SecretSantaDto } from '@wishlist/common'
 
 import { ConflictException, ForbiddenException, Inject } from '@nestjs/common'
 import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
+import { EventRepository } from '@wishlist/api/event'
+import { EVENT_REPOSITORY, SECRET_SANTA_REPOSITORY } from '@wishlist/api/repositories'
 
-import { EventRepository } from '../../event/domain/event.repository'
-import { EVENT_REPOSITORY, SECRET_SANTA_REPOSITORY } from '../../repositories'
-import { CreateSecretSantaCommand } from '../domain/command/create-secret-santa.command'
-import { SecretSanta } from '../domain/model/secret-santa.model'
-import { SecretSantaRepository } from '../domain/repository/secret-santa.repository'
-import { secretSantaMapper } from '../infrastructure/secret-santa.mapper'
+import { CreateSecretSantaCommand, SecretSanta, SecretSantaRepository } from '../domain'
+import { secretSantaMapper } from '../infrastructure'
 
 @CommandHandler(CreateSecretSantaCommand)
 export class CreateSecretSantaUseCase implements IInferredCommandHandler<CreateSecretSantaCommand> {

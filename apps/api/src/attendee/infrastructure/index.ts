@@ -1,2 +1,2 @@
-export { attendeeMapper } from './attendee.mapper'
-export * from './attendee.module'
+export { attendeeMapper } from './event-attendee.mapper'
+export * from './event-attendee.module'

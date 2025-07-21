@@ -1,7 +1,7 @@
 import type { DrizzleTransaction } from '@wishlist/api/core'
 import type { EventId, UserId } from '@wishlist/common'
 
-import type { Event } from './event.model'
+import type { Event } from '../model'
 
 export interface EventRepository {
   newId(): EventId

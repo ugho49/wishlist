@@ -1,11 +1,17 @@
 import { BadRequestException, Inject, UnauthorizedException } from '@nestjs/common'
 import { CommandHandler, EventBus, IInferredCommandHandler } from '@nestjs/cqrs'
 import { EventRepository } from '@wishlist/api/event'
-import { ATTENDEE_REPOSITORY, EVENT_REPOSITORY, USER_REPOSITORY } from '@wishlist/api/repositories'
+import { EVENT_ATTENDEE_REPOSITORY, EVENT_REPOSITORY, USER_REPOSITORY } from '@wishlist/api/repositories'
 import { UserRepository } from '@wishlist/api/user'
 import { AttendeeRole } from '@wishlist/common'
 
-import { AddAttendeeCommand, AddAttendeeResult, Attendee, AttendeeAddedEvent, AttendeeRepository } from '../../domain'
+import {
+  AddAttendeeCommand,
+  AddAttendeeResult,
+  AttendeeAddedEvent,
+  EventAttendee,
+  EventAttendeeRepository,
+} from '../../domain'
 import { attendeeMapper } from '../../infrastructure'
 
 @CommandHandler(AddAttendeeCommand)
@@ -13,8 +19,8 @@ export class AddAttendeeUseCase implements IInferredCommandHandler<AddAttendeeCo
   constructor(
     @Inject(EVENT_REPOSITORY)
     private readonly eventRepository: EventRepository,
-    @Inject(ATTENDEE_REPOSITORY)
-    private readonly attendeeRepository: AttendeeRepository,
+    @Inject(EVENT_ATTENDEE_REPOSITORY)
+    private readonly attendeeRepository: EventAttendeeRepository,
     @Inject(USER_REPOSITORY)
     private readonly userRepository: UserRepository,
     private readonly eventBus: EventBus,
@@ -40,13 +46,13 @@ export class AddAttendeeUseCase implements IInferredCommandHandler<AddAttendeeCo
     const attendeeId = this.attendeeRepository.newId()
 
     const newAttendee = user
-      ? Attendee.createFromExistingUser({
+      ? EventAttendee.createFromExistingUser({
           id: attendeeId,
           eventId,
           user,
           role,
         })
-      : Attendee.createFromNonExistingUser({
+      : EventAttendee.createFromNonExistingUser({
           id: attendeeId,
           eventId,
           pendingEmail: command.newAttendee.email,

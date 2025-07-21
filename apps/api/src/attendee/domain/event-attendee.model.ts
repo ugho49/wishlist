@@ -1,7 +1,7 @@
 import type { User } from '@wishlist/api/user'
 import type { AttendeeId, AttendeeRole, EventId } from '@wishlist/common'
 
-export type AttendeeProps = {
+export type EventAttendeeProps = {
   id: AttendeeId
   eventId: EventId
   user?: User
@@ -9,14 +9,14 @@ export type AttendeeProps = {
   role: AttendeeRole
 }
 
-export class Attendee {
+export class EventAttendee {
   public readonly id: AttendeeId
   public readonly eventId: EventId
   public readonly user?: User
   public readonly pendingEmail?: string
   public readonly role: AttendeeRole
 
-  constructor(props: AttendeeProps) {
+  constructor(props: EventAttendeeProps) {
     if (props.user && props.pendingEmail) {
       throw new Error('Params "user" and "pendingEmail" cannot be provided together')
     }
@@ -28,8 +28,13 @@ export class Attendee {
     this.role = props.role
   }
 
-  static createFromExistingUser(param: { id: AttendeeId; eventId: EventId; user: User; role: AttendeeRole }): Attendee {
-    return new Attendee({
+  static createFromExistingUser(param: {
+    id: AttendeeId
+    eventId: EventId
+    user: User
+    role: AttendeeRole
+  }): EventAttendee {
+    return new EventAttendee({
       id: param.id,
       eventId: param.eventId,
       user: param.user,
@@ -43,8 +48,8 @@ export class Attendee {
     eventId: EventId
     pendingEmail: string
     role: AttendeeRole
-  }): Attendee {
-    return new Attendee({
+  }): EventAttendee {
+    return new EventAttendee({
       id: param.id,
       eventId: param.eventId,
       user: undefined,

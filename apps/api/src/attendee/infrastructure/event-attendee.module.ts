@@ -2,11 +2,11 @@ import { Module } from '@nestjs/common'
 import { EventModule } from '@wishlist/api/event'
 
 import { handlers } from '../application'
-import { SecretSantaController } from './secret-santa.controller'
+import { EventAttendeeController } from './event-attendee.controller'
 
 @Module({
   imports: [EventModule],
-  controllers: [SecretSantaController],
+  controllers: [EventAttendeeController],
   providers: [...handlers],
 })
-export class SecretSantaModule {}
+export class EventAttendeeModule {}

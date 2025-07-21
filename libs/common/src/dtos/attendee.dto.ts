@@ -26,6 +26,10 @@ export class AddEventAttendeeInputDto {
   role?: AttendeeRole
 }
 
+/**
+ * @deprecated
+ */
+// TODO: remove this once old route have been removed
 export class AddEventAttendeeForEventInputDto extends AddEventAttendeeInputDto {
   @IsString()
   @IsNotEmpty()

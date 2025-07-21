@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { schema } from '@wishlist/api-drizzle'
-import { Attendee, AttendeeRepository } from '@wishlist/api/attendee'
+import { EventAttendee, EventAttendeeRepository } from '@wishlist/api/attendee'
 import { DatabaseService, DrizzleTransaction } from '@wishlist/api/core'
 import { AttendeeId, AttendeeRole, EventId, uuid } from '@wishlist/common'
 import { and, eq, inArray, or } from 'drizzle-orm'
@@ -8,14 +8,14 @@ import { and, eq, inArray, or } from 'drizzle-orm'
 import { PostgresUserRepository } from './postgres-user.repository'
 
 @Injectable()
-export class PostgresAttendeeRepository implements AttendeeRepository {
+export class PostgresEventAttendeeRepository implements EventAttendeeRepository {
   constructor(private readonly databaseService: DatabaseService) {}
 
   newId(): AttendeeId {
     return uuid() as AttendeeId
   }
 
-  async findById(id: AttendeeId): Promise<Attendee | undefined> {
+  async findById(id: AttendeeId): Promise<EventAttendee | undefined> {
     const attendee = await this.databaseService.db.query.eventAttendee.findFirst({
       where: eq(schema.eventAttendee.id, id),
       with: { user: true },
@@ -23,16 +23,16 @@ export class PostgresAttendeeRepository implements AttendeeRepository {
 
     if (!attendee) return undefined
 
-    return PostgresAttendeeRepository.toModel(attendee)
+    return PostgresEventAttendeeRepository.toModel(attendee)
   }
 
-  async findByIdOrFail(id: AttendeeId): Promise<Attendee> {
+  async findByIdOrFail(id: AttendeeId): Promise<EventAttendee> {
     const attendee = await this.findById(id)
     if (!attendee) throw new NotFoundException('Attendee not found')
     return attendee
   }
 
-  async findByIds(ids: AttendeeId[]): Promise<Attendee[]> {
+  async findByIds(ids: AttendeeId[]): Promise<EventAttendee[]> {
     if (ids.length === 0) return []
 
     const attendees = await this.databaseService.db.query.eventAttendee.findMany({
@@ -40,16 +40,16 @@ export class PostgresAttendeeRepository implements AttendeeRepository {
       with: { user: true },
     })
 
-    return attendees.map(attendee => PostgresAttendeeRepository.toModel(attendee))
+    return attendees.map(attendee => PostgresEventAttendeeRepository.toModel(attendee))
   }
 
-  async findByEventId(eventId: EventId): Promise<Attendee[]> {
+  async findByEventId(eventId: EventId): Promise<EventAttendee[]> {
     const attendees = await this.databaseService.db.query.eventAttendee.findMany({
       where: eq(schema.eventAttendee.eventId, eventId),
       with: { user: true },
     })
 
-    return attendees.map(PostgresAttendeeRepository.toModel)
+    return attendees.map(PostgresEventAttendeeRepository.toModel)
   }
 
   async existByEventAndEmail(param: { eventId: EventId; email: string }): Promise<boolean> {
@@ -64,7 +64,7 @@ export class PostgresAttendeeRepository implements AttendeeRepository {
     return !!attendee
   }
 
-  async save(attendee: Attendee, tx?: DrizzleTransaction): Promise<void> {
+  async save(attendee: EventAttendee, tx?: DrizzleTransaction): Promise<void> {
     const client = tx ?? this.databaseService.db
 
     await client
@@ -94,8 +94,8 @@ export class PostgresAttendeeRepository implements AttendeeRepository {
 
   static toModel(
     attendee: typeof schema.eventAttendee.$inferSelect & { user: typeof schema.user.$inferSelect | null },
-  ): Attendee {
-    return new Attendee({
+  ): EventAttendee {
+    return new EventAttendee({
       id: attendee.id,
       eventId: attendee.eventId,
       user: attendee.user ? PostgresUserRepository.toModel(attendee.user) : undefined,

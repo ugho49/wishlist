@@ -1,13 +1,15 @@
 import { ForbiddenException, Inject } from '@nestjs/common'
 import { CommandHandler, EventBus, IInferredCommandHandler } from '@nestjs/cqrs'
+import { TransactionManager } from '@wishlist/api/core'
+import { EventRepository } from '@wishlist/api/event'
+import { EVENT_REPOSITORY, SECRET_SANTA_REPOSITORY, SECRET_SANTA_USER_REPOSITORY } from '@wishlist/api/repositories'
 
-import { TransactionManager } from '../../core/database'
-import { EventRepository } from '../../event/domain/event.repository'
-import { EVENT_REPOSITORY, SECRET_SANTA_REPOSITORY, SECRET_SANTA_USER_REPOSITORY } from '../../repositories'
-import { CancelSecretSantaCommand } from '../domain/command/cancel-secret-santa.command'
-import { SecretSantaCancelledEvent } from '../domain/event/secret-santa-cancelled.event'
-import { SecretSantaUserRepository } from '../domain/repository/secret-santa-user.repository'
-import { SecretSantaRepository } from '../domain/repository/secret-santa.repository'
+import {
+  CancelSecretSantaCommand,
+  SecretSantaCancelledEvent,
+  SecretSantaRepository,
+  SecretSantaUserRepository,
+} from '../domain'
 
 @CommandHandler(CancelSecretSantaCommand)
 export class CancelSecretSantaUseCase implements IInferredCommandHandler<CancelSecretSantaCommand> {

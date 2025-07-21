@@ -6,15 +6,15 @@ import { EventId, UserId, uuid } from '@wishlist/common'
 import { and, count, desc, eq, gte, inArray, SelectedFields } from 'drizzle-orm'
 import { DateTime } from 'luxon'
 
-import { AttendeeRepository } from '../attendee'
-import { PostgresAttendeeRepository } from './postgres-attendee.repository'
-import { ATTENDEE_REPOSITORY } from './repositories.tokens'
+import { EventAttendeeRepository } from '../attendee'
+import { PostgresEventAttendeeRepository } from './postgres-event-attendee.repository'
+import { EVENT_ATTENDEE_REPOSITORY } from './repositories.tokens'
 
 @Injectable()
 export class PostgresEventRepository implements EventRepository {
   constructor(
     private readonly databaseService: DatabaseService,
-    @Inject(ATTENDEE_REPOSITORY) private readonly attendeeRepository: AttendeeRepository,
+    @Inject(EVENT_ATTENDEE_REPOSITORY) private readonly attendeeRepository: EventAttendeeRepository,
   ) {}
 
   newId(): EventId {
@@ -168,7 +168,7 @@ export class PostgresEventRepository implements EventRepository {
       title: row.title,
       description: row.description ?? undefined,
       eventDate: new Date(row.eventDate),
-      attendees: row.attendees.map(attendee => PostgresAttendeeRepository.toModel(attendee)),
+      attendees: row.attendees.map(attendee => PostgresEventAttendeeRepository.toModel(attendee)),
       wishlistIds: row.eventWishlists.map(eventWishlist => eventWishlist.wishlistId),
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,

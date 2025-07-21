@@ -1,4 +1,4 @@
-import type { Attendee } from '@wishlist/api/attendee'
+import type { EventAttendee } from '@wishlist/api/attendee'
 import type { EventId, ICurrentUser, UserId, WishlistId } from '@wishlist/common'
 
 import { AttendeeRole } from '@wishlist/common'
@@ -8,7 +8,7 @@ export type EventProps = {
   title: string
   description?: string
   eventDate: Date
-  attendees: Attendee[]
+  attendees: EventAttendee[]
   wishlistIds: WishlistId[]
   createdAt: Date
   updatedAt: Date
@@ -19,7 +19,7 @@ export class Event {
   public readonly title: string
   public readonly description?: string
   public readonly eventDate: Date
-  public readonly attendees: Attendee[]
+  public readonly attendees: EventAttendee[]
   public readonly wishlistIds: WishlistId[]
   public readonly createdAt: Date
   public readonly updatedAt: Date
@@ -40,7 +40,7 @@ export class Event {
     title: string
     description?: string
     eventDate: Date
-    attendees: Attendee[]
+    attendees: EventAttendee[]
   }): Event {
     if (param.attendees.length === 0) {
       throw new Error('Event must have at least one attendee')

@@ -1,14 +1,17 @@
-import { ConflictException, Inject, NotFoundException, UnauthorizedException } from '@nestjs/common'
+import { ConflictException, Inject, UnauthorizedException } from '@nestjs/common'
 import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
 import { TransactionManager } from '@wishlist/api/core'
 import { EventRepository } from '@wishlist/api/event'
 import { EVENT_ATTENDEE_REPOSITORY, EVENT_REPOSITORY, WISHLIST_REPOSITORY } from '@wishlist/api/repositories'
 import { WishlistRepository } from '@wishlist/api/wishlist'
 
-import { DeleteAttendeeCommand, EventAttendeeRepository } from '../../domain'
+import { EventAttendeeRepository, OldDeleteAttendeeCommand } from '../../domain'
 
-@CommandHandler(DeleteAttendeeCommand)
-export class DeleteAttendeeUseCase implements IInferredCommandHandler<DeleteAttendeeCommand> {
+/**
+ * @deprecated
+ */
+@CommandHandler(OldDeleteAttendeeCommand)
+export class OldDeleteAttendeeUseCase implements IInferredCommandHandler<OldDeleteAttendeeCommand> {
   constructor(
     @Inject(EVENT_ATTENDEE_REPOSITORY)
     private readonly attendeeRepository: EventAttendeeRepository,
@@ -19,24 +22,21 @@ export class DeleteAttendeeUseCase implements IInferredCommandHandler<DeleteAtte
     private readonly transactionManager: TransactionManager,
   ) {}
 
-  async execute(command: DeleteAttendeeCommand) {
-    const { attendeeId, currentUser, eventId } = command
+  async execute(command: OldDeleteAttendeeCommand) {
+    const { attendeeId, currentUser } = command
 
-    const event = await this.eventRepository.findByIdOrFail(eventId)
+    const attendee = await this.attendeeRepository.findByIdOrFail(attendeeId)
+
+    if (attendee.user?.id === currentUser.id) {
+      throw new ConflictException('You cannot delete yourself from the event')
+    }
+
+    const event = await this.eventRepository.findByIdOrFail(attendee.eventId)
 
     if (!event.canEdit(currentUser)) {
       throw new UnauthorizedException('Only maintainers of the event can delete an attendee')
     }
 
-    const attendee = event.attendees.find(a => a.id === attendeeId)
-
-    if (!attendee) {
-      throw new NotFoundException('Attendee not found')
-    }
-
-    if (attendee.user?.id === currentUser.id) {
-      throw new ConflictException('You cannot delete yourself from the event')
-    }
     const wishlists = await this.wishlistRepository.findByEvent(attendee.eventId)
 
     await this.transactionManager.runInTransaction(async tx => {
