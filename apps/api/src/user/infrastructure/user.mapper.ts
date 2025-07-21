@@ -1,4 +1,4 @@
-import type { MiniUserDto, UserDto } from '@wishlist/common'
+import type { MiniUserDto, UserDto, UserWithoutSocialsDto } from '@wishlist/common'
 
 import type { User, UserSocial } from '../domain'
 
@@ -14,9 +14,7 @@ function toMiniUserDto(model: User): MiniUserDto {
   }
 }
 
-function toUserDto(params: { user: User; socials: UserSocial[] }): UserDto {
-  const { user, socials } = params
-
+function toUserWithoutSocialsDto(user: User): UserWithoutSocialsDto {
   return {
     ...toMiniUserDto(user),
     admin: user.isAdmin(),
@@ -24,6 +22,16 @@ function toUserDto(params: { user: User; socials: UserSocial[] }): UserDto {
     is_enabled: user.isEnabled,
     last_connected_at: user.lastConnectedAt?.toISOString(),
     last_ip: user.lastIp,
+    created_at: user.createdAt.toISOString(),
+    updated_at: user.updatedAt.toISOString(),
+  }
+}
+
+function toUserDto(params: { user: User; socials: UserSocial[] }): UserDto {
+  const { user, socials } = params
+
+  return {
+    ...toUserWithoutSocialsDto(user),
     social: socials.map(social => ({
       id: social.id,
       social_id: social.socialId,
@@ -32,12 +40,11 @@ function toUserDto(params: { user: User; socials: UserSocial[] }): UserDto {
       created_at: social.createdAt.toISOString(),
       updated_at: social.updatedAt.toISOString(),
     })),
-    created_at: user.createdAt.toISOString(),
-    updated_at: user.updatedAt.toISOString(),
   }
 }
 
 export const userMapper = {
   toMiniUserDto,
+  toUserWithoutSocialsDto,
   toUserDto,
 }

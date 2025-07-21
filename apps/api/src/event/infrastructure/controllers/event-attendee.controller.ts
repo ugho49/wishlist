@@ -1,45 +1,17 @@
 import { Body, Controller, Delete, Param, Post } from '@nestjs/common'
 import { CommandBus } from '@nestjs/cqrs'
-import { ApiOperation, ApiTags } from '@nestjs/swagger'
+import { ApiTags } from '@nestjs/swagger'
 import { CurrentUser } from '@wishlist/api/auth'
-import {
-  AddEventAttendeeForEventInputDto,
-  AddEventAttendeeInputDto,
-  AttendeeDto,
-  AttendeeId,
-  EventId,
-  ICurrentUser,
-} from '@wishlist/common'
+import { AddEventAttendeeInputDto, AttendeeDto, AttendeeId, EventId, ICurrentUser } from '@wishlist/common'
 
-import { AddAttendeeCommand, DeleteAttendeeCommand, OldDeleteAttendeeCommand } from '../../domain'
+import { AddAttendeeCommand, DeleteAttendeeCommand } from '../../domain'
 
 @ApiTags('Event Attendee')
-@Controller() // TODO: put base path in the module once old route have been removed
+@Controller('/event/:eventId/attendee')
 export class EventAttendeeController {
   constructor(private readonly commandBus: CommandBus) {}
 
-  /**
-   * @deprecated
-   */
-  @ApiOperation({ deprecated: true })
-  @Post('/attendee')
-  oldAddAttendeeRoute(
-    @CurrentUser() currentUser: ICurrentUser,
-    @Body() dto: AddEventAttendeeForEventInputDto,
-  ): Promise<AttendeeDto> {
-    return this.commandBus.execute(
-      new AddAttendeeCommand({
-        currentUser,
-        eventId: dto.event_id,
-        newAttendee: {
-          email: dto.email,
-          role: dto.role,
-        },
-      }),
-    )
-  }
-
-  @Post('/event/:eventId/attendee')
+  @Post()
   addAttendee(
     @CurrentUser() currentUser: ICurrentUser,
     @Param('eventId') eventId: EventId,
@@ -54,24 +26,7 @@ export class EventAttendeeController {
     )
   }
 
-  /**
-   * @deprecated
-   */
-  @ApiOperation({ deprecated: true })
-  @Delete('/attendee/:id')
-  async oldDeleteAttendeeRoute(
-    @Param('id') attendeeId: AttendeeId,
-    @CurrentUser() currentUser: ICurrentUser,
-  ): Promise<void> {
-    await this.commandBus.execute(
-      new OldDeleteAttendeeCommand({
-        currentUser,
-        attendeeId,
-      }),
-    )
-  }
-
-  @Delete('/event/:eventId/attendee/:attendeeId')
+  @Delete('/:attendeeId')
   async deleteAttendee(
     @CurrentUser() currentUser: ICurrentUser,
     @Param('eventId') eventId: EventId,

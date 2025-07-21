@@ -3,7 +3,6 @@ import {
   CreateEventUseCase,
   DeleteAttendeeUseCase,
   DeleteEventUseCase,
-  OldDeleteAttendeeUseCase,
   UpdateEventUseCase,
 } from './command'
 import { AttendeeAddedUseCase } from './event'
@@ -16,7 +15,6 @@ export const handlers = [
   UpdateEventUseCase,
   AddAttendeeUseCase,
   DeleteAttendeeUseCase,
-  OldDeleteAttendeeUseCase,
   // Query handlers
   GetEventByIdUseCase,
   GetEventsForUserUseCase,

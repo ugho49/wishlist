@@ -5,6 +5,7 @@ import type {
   UpdateUserPictureOutputDto,
   UserDto,
   UserId,
+  UserWithoutSocialsDto,
 } from '@wishlist/common'
 import type { AxiosInstance } from 'axios'
 
@@ -17,7 +18,7 @@ export class AdminUserService {
     return this.client.get(`/admin/user/${userId}`, { signal: options?.signal }).then(res => res.data)
   }
 
-  getAll(params: GetAllUsersQueryDto, options?: CommonRequestOptions): Promise<PagedResponse<UserDto>> {
+  getAll(params: GetAllUsersQueryDto, options?: CommonRequestOptions): Promise<PagedResponse<UserWithoutSocialsDto>> {
     return this.client.get(`/admin/user`, { params, signal: options?.signal }).then(res => res.data)
   }
 

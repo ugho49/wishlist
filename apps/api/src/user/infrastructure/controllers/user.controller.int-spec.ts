@@ -398,4 +398,8 @@ describe('UserController', () => {
         .check()
     })
   })
+
+  // TODO: GET /user/search
+  // TODO: DELETE /user/picture
+  // TODO: PUT /user/picture
 })

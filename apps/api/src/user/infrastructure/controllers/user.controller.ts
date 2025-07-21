@@ -14,6 +14,7 @@ import { FileInterceptor } from '@nestjs/platform-express'
 import { ApiConsumes, ApiTags } from '@nestjs/swagger'
 import {
   ChangeUserPasswordInputDto,
+  ICurrentUser,
   MiniUserDto,
   RegisterUserInputDto,
   RegisterUserWithGoogleInputDto,
@@ -26,20 +27,28 @@ import {
 import { RealIP } from 'nestjs-real-ip'
 
 import { CurrentUser, Public } from '../../../auth'
-import { LegacyUserService } from '../legacy-user.service'
 
 import 'multer'
 
 import { CommandBus, QueryBus } from '@nestjs/cqrs'
 
-import { CreateUserCommand, CreateUserFromGoogleCommand, GetUserByIdQuery, UpdateUserCommand } from '../../domain'
+import {
+  CreateUserCommand,
+  CreateUserFromGoogleCommand,
+  GetUserByIdQuery,
+  GetUsersByCriteriaQuery,
+  RemoveUserPictureCommand,
+  UpdateUserCommand,
+  UpdateUserPasswordCommand,
+  UpdateUserPictureCommand,
+  UpdateUserPictureFromSocialCommand,
+} from '../../domain'
 import { userPictureFileValidators, userPictureResizePipe } from '../user.validator'
 
 @ApiTags('User')
 @Controller('/user')
 export class UserController {
   constructor(
-    private readonly userService: LegacyUserService,
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
   ) {}
@@ -88,16 +97,30 @@ export class UserController {
   }
 
   @Put('/change-password')
-  changePassword(@CurrentUser('id') currentUserId: UserId, @Body() dto: ChangeUserPasswordInputDto): Promise<void> {
-    return this.userService.changeUserPassword({ currentUserId, dto })
+  async changePassword(
+    @CurrentUser('id') currentUserId: UserId,
+    @Body() dto: ChangeUserPasswordInputDto,
+  ): Promise<void> {
+    await this.commandBus.execute(
+      new UpdateUserPasswordCommand({
+        userId: currentUserId,
+        oldPassword: dto.old_password,
+        newPassword: dto.new_password,
+      }),
+    )
   }
 
   @Get('/search')
   searchByKeyword(
-    @CurrentUser('id') currentUserId: UserId,
+    @CurrentUser() currentUser: ICurrentUser,
     @Query('keyword') criteria: string,
   ): Promise<MiniUserDto[]> {
-    return this.userService.searchByKeyword({ currentUserId, criteria })
+    return this.queryBus.execute(
+      new GetUsersByCriteriaQuery({
+        currentUser,
+        criteria,
+      }),
+    )
   }
 
   @Post('/upload-picture')
@@ -108,19 +131,17 @@ export class UserController {
     @UploadedFile(userPictureFileValidators, userPictureResizePipe)
     file: Express.Multer.File,
   ): Promise<UpdateUserPictureOutputDto> {
-    return this.userService.uploadPicture({
-      userId: currentUserId,
-      file,
-    })
+    const result = await this.commandBus.execute(new UpdateUserPictureCommand({ userId: currentUserId, file }))
+    return { picture_url: result.pictureUrl }
   }
 
   @Put('/picture')
   async updatePictureFromSocial(@CurrentUser('id') currentUserId: UserId, @Query('social_id') socialId: UserSocialId) {
-    await this.userService.updatePictureFromSocial({ currentUserId, socialId })
+    await this.commandBus.execute(new UpdateUserPictureFromSocialCommand({ userId: currentUserId, socialId }))
   }
 
   @Delete('/picture')
   async removePicture(@CurrentUser('id') currentUserId: UserId) {
-    await this.userService.removePicture({ userId: currentUserId })
+    await this.commandBus.execute(new RemoveUserPictureCommand({ userId: currentUserId }))
   }
 }
