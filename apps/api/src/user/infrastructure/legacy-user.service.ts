@@ -25,9 +25,9 @@ import {
 } from '@wishlist/common'
 import { isEmpty } from 'lodash'
 
-import { AttendeeEntity } from '../../attendee/infrastructure/legacy-attendee.entity'
 import { GoogleAuthService, PasswordManager } from '../../auth'
 import { BucketService, DEFAULT_RESULT_NUMBER } from '../../core'
+import { AttendeeEntity } from '../../event/infrastructure/legacy-attendee.entity'
 import { UserEmailSettingEntity } from './legacy-email-settings.entity'
 import { UserSocialEntity } from './legacy-user-social.entity'
 import { UserEntity } from './legacy-user.entity'

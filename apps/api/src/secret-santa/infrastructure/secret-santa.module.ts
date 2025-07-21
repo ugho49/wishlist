@@ -1,11 +1,9 @@
 import { Module } from '@nestjs/common'
-import { EventModule } from '@wishlist/api/event'
 
 import { handlers } from '../application'
 import { SecretSantaController } from './secret-santa.controller'
 
 @Module({
-  imports: [EventModule],
   controllers: [SecretSantaController],
   providers: [...handlers],
 })

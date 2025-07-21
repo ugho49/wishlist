@@ -1,6 +1,6 @@
 import type { UserSocialId, UserSocialType } from '@wishlist/common'
 
-import type { UserSocial } from '../models'
+import type { UserSocial } from '../model'
 
 export interface UserSocialRepository {
   newId(): UserSocialId

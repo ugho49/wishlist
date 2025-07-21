@@ -1,7 +1,7 @@
 import { Global, Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 
-import { AttendeeEntity } from '../attendee/infrastructure/legacy-attendee.entity'
+import { AttendeeEntity } from '../event/infrastructure/legacy-attendee.entity'
 import { EventEntity } from '../event/infrastructure/legacy-event.entity'
 import { ItemEntity } from '../item/infrastructure/item.entity'
 import { UserEmailSettingEntity } from '../user/infrastructure/legacy-email-settings.entity'

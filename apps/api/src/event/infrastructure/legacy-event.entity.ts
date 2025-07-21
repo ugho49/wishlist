@@ -2,8 +2,8 @@ import { TimestampEntity } from '@wishlist/api/core'
 import { AttendeeRole, EventId, uuid } from '@wishlist/common'
 import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryColumn } from 'typeorm'
 
-import { AttendeeEntity } from '../../attendee/infrastructure/legacy-attendee.entity'
 import { WishlistEntity } from '../../wishlist/infrastructure/legacy-wishlist.entity'
+import { AttendeeEntity } from './legacy-attendee.entity'
 
 @Entity('event')
 export class EventEntity extends TimestampEntity {

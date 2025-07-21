@@ -1,11 +1,9 @@
-import type { EventAttendee } from '@wishlist/api/attendee'
-import type { Event } from '@wishlist/api/event'
+import type { Event, EventAttendee } from '@wishlist/api/event'
 import type { SecretSantaDto, SecretSantaUserDto } from '@wishlist/common'
 
 import type { SecretSanta, SecretSantaUser } from '../domain'
 
-import { attendeeMapper } from '../../attendee/infrastructure/event-attendee.mapper'
-import { eventMapper } from '../../event/infrastructure/event.mapper'
+import { eventAttendeeMapper, eventMapper } from '@wishlist/api/event'
 
 function toSecretSantaDto(model: SecretSanta, event: Event): SecretSantaDto {
   return {
@@ -23,7 +21,7 @@ function toSecretSantaDto(model: SecretSanta, event: Event): SecretSantaDto {
 function toSecretSantaUserDto(model: SecretSantaUser, attendee: EventAttendee): SecretSantaUserDto {
   return {
     id: model.id,
-    attendee: attendeeMapper.toAttendeeDto(attendee),
+    attendee: eventAttendeeMapper.toAttendeeDto(attendee),
     exclusions: model.exclusions,
   }
 }

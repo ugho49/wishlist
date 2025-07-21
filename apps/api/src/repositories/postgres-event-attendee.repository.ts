@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { schema } from '@wishlist/api-drizzle'
-import { EventAttendee, EventAttendeeRepository } from '@wishlist/api/attendee'
 import { DatabaseService, DrizzleTransaction } from '@wishlist/api/core'
+import { EventAttendee, EventAttendeeRepository } from '@wishlist/api/event'
 import { AttendeeId, AttendeeRole, EventId, uuid } from '@wishlist/common'
 import { and, eq, inArray, or } from 'drizzle-orm'
 

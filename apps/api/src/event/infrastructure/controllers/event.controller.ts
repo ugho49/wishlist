@@ -22,7 +22,7 @@ import {
   GetEventByIdQuery,
   GetEventsForUserQuery,
   UpdateEventCommand,
-} from '../domain'
+} from '../../domain'
 
 @ApiTags('Event')
 @Controller('/event')

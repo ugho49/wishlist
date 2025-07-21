@@ -12,7 +12,7 @@ import {
   PagedResponse,
 } from '@wishlist/common'
 
-import { GetEventByIdQuery, GetEventsForUserQuery, GetEventsQuery } from '../domain'
+import { GetEventByIdQuery, GetEventsForUserQuery, GetEventsQuery } from '../../domain'
 
 @IsAdmin()
 @ApiTags('ADMIN - Event')

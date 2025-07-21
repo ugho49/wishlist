@@ -1,8 +1,8 @@
 import { Logger } from '@nestjs/common'
 import { EventsHandler, IEventHandler } from '@nestjs/cqrs'
-import { EventMailer } from '@wishlist/api/event'
 
 import { AttendeeAddedEvent } from '../../domain'
+import { EventMailer } from '../../infrastructure'
 
 @EventsHandler(AttendeeAddedEvent)
 export class AttendeeAddedUseCase implements IEventHandler<AttendeeAddedEvent> {

@@ -11,7 +11,7 @@ import {
   ICurrentUser,
 } from '@wishlist/common'
 
-import { AddAttendeeCommand, DeleteAttendeeCommand, OldDeleteAttendeeCommand } from '../domain'
+import { AddAttendeeCommand, DeleteAttendeeCommand, OldDeleteAttendeeCommand } from '../../domain'
 
 @ApiTags('Event Attendee')
 @Controller() // TODO: put base path in the module once old route have been removed

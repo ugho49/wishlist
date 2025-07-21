@@ -1,7 +1,6 @@
-import type { Event } from '@wishlist/api/event'
 import type { User } from '@wishlist/api/user'
 
-import type { EventAttendee } from '../event-attendee.model'
+import type { Event, EventAttendee } from '../model'
 
 export class AttendeeAddedEvent {
   public readonly event: Event

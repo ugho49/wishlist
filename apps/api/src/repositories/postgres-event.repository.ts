@@ -1,12 +1,11 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { schema } from '@wishlist/api-drizzle'
 import { DatabaseService, DrizzleTransaction } from '@wishlist/api/core'
-import { Event, EventRepository } from '@wishlist/api/event'
+import { Event, EventAttendeeRepository, EventRepository } from '@wishlist/api/event'
 import { EventId, UserId, uuid } from '@wishlist/common'
 import { and, count, desc, eq, gte, inArray, SelectedFields } from 'drizzle-orm'
 import { DateTime } from 'luxon'
 
-import { EventAttendeeRepository } from '../attendee'
 import { PostgresEventAttendeeRepository } from './postgres-event-attendee.repository'
 import { EVENT_ATTENDEE_REPOSITORY } from './repositories.tokens'
 

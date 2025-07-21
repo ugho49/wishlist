@@ -1,11 +1,10 @@
 import { ConflictException, Inject, UnauthorizedException } from '@nestjs/common'
 import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
 import { TransactionManager } from '@wishlist/api/core'
-import { EventRepository } from '@wishlist/api/event'
 import { EVENT_ATTENDEE_REPOSITORY, EVENT_REPOSITORY, WISHLIST_REPOSITORY } from '@wishlist/api/repositories'
 import { WishlistRepository } from '@wishlist/api/wishlist'
 
-import { EventAttendeeRepository, OldDeleteAttendeeCommand } from '../../domain'
+import { EventAttendeeRepository, EventRepository, OldDeleteAttendeeCommand } from '../../domain'
 
 /**
  * @deprecated

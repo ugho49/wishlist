@@ -1,6 +1,5 @@
 import { BadRequestException, Inject, UnauthorizedException } from '@nestjs/common'
 import { CommandHandler, EventBus, IInferredCommandHandler } from '@nestjs/cqrs'
-import { EventRepository } from '@wishlist/api/event'
 import { EVENT_ATTENDEE_REPOSITORY, EVENT_REPOSITORY, USER_REPOSITORY } from '@wishlist/api/repositories'
 import { UserRepository } from '@wishlist/api/user'
 import { AttendeeRole } from '@wishlist/common'
@@ -11,8 +10,9 @@ import {
   AttendeeAddedEvent,
   EventAttendee,
   EventAttendeeRepository,
+  EventRepository,
 } from '../../domain'
-import { attendeeMapper } from '../../infrastructure'
+import { eventAttendeeMapper } from '../../infrastructure'
 
 @CommandHandler(AddAttendeeCommand)
 export class AddAttendeeUseCase implements IInferredCommandHandler<AddAttendeeCommand> {
@@ -71,6 +71,6 @@ export class AddAttendeeUseCase implements IInferredCommandHandler<AddAttendeeCo
       }),
     )
 
-    return attendeeMapper.toAttendeeDto(newAttendee)
+    return eventAttendeeMapper.toAttendeeDto(newAttendee)
   }
 }

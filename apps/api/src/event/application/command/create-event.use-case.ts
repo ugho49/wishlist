@@ -1,12 +1,19 @@
 import { Inject } from '@nestjs/common'
 import { CommandHandler, EventBus, IInferredCommandHandler } from '@nestjs/cqrs'
-import { AttendeeAddedEvent, EventAttendee, EventAttendeeRepository } from '@wishlist/api/attendee'
 import { EVENT_ATTENDEE_REPOSITORY, EVENT_REPOSITORY, USER_REPOSITORY } from '@wishlist/api/repositories'
 import { UserRepository } from '@wishlist/api/user'
 import { AttendeeRole } from '@wishlist/common'
 import { uniq } from 'lodash'
 
-import { CreateEventCommand, CreateEventResult, Event, EventRepository } from '../../domain'
+import {
+  AttendeeAddedEvent,
+  CreateEventCommand,
+  CreateEventResult,
+  Event,
+  EventAttendee,
+  EventAttendeeRepository,
+  EventRepository,
+} from '../../domain'
 import { eventMapper } from '../../infrastructure'
 
 @CommandHandler(CreateEventCommand)

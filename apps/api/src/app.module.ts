@@ -3,7 +3,6 @@ import { ConfigModule } from '@nestjs/config'
 import { CqrsModule } from '@nestjs/cqrs'
 import { LoggerModule } from 'pino-nestjs'
 
-import { EventAttendeeModule } from './attendee'
 import { AuthModule } from './auth/auth.module'
 import { CoreModule } from './core'
 import { EventModule } from './event'
@@ -30,7 +29,6 @@ import { WishlistModule } from './wishlist'
     WishlistModule,
     ItemModule,
     EventModule,
-    EventAttendeeModule,
     SecretSantaModule,
   ],
 })

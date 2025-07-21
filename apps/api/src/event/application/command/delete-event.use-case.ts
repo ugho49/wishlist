@@ -1,11 +1,10 @@
 import { BadRequestException, Inject, UnauthorizedException } from '@nestjs/common'
 import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
-import { EventAttendeeRepository } from '@wishlist/api/attendee'
 import { TransactionManager } from '@wishlist/api/core'
 import { EVENT_ATTENDEE_REPOSITORY, EVENT_REPOSITORY, WISHLIST_REPOSITORY } from '@wishlist/api/repositories'
 import { WishlistRepository } from '@wishlist/api/wishlist'
 
-import { DeleteEventCommand, EventRepository } from '../../domain'
+import { DeleteEventCommand, EventAttendeeRepository, EventRepository } from '../../domain'
 
 @CommandHandler(DeleteEventCommand)
 export class DeleteEventUseCase implements IInferredCommandHandler<DeleteEventCommand> {

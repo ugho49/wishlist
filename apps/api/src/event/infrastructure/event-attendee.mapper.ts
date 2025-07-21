@@ -13,6 +13,6 @@ function toAttendeeDto(model: EventAttendee): AttendeeDto {
   }
 }
 
-export const attendeeMapper = {
+export const eventAttendeeMapper = {
   toAttendeeDto,
 }

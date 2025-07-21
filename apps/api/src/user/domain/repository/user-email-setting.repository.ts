@@ -1,7 +1,7 @@
 import type { DrizzleTransaction } from '@wishlist/api/core'
 import type { UserEmailSettingId, UserId } from '@wishlist/common'
 
-import type { UserEmailSetting } from '../models/user-email-setting.model'
+import type { UserEmailSetting } from '../model/user-email-setting.model'
 
 export interface UserEmailSettingRepository {
   newId(): UserEmailSettingId
