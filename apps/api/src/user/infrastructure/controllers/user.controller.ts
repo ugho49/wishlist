@@ -30,12 +30,18 @@ import { LegacyUserService } from '../legacy-user.service'
 
 import 'multer'
 
+import { CommandBus } from '@nestjs/cqrs'
+
+import { CreateUserCommand } from '../../domain'
 import { userPictureFileValidators, userPictureResizePipe } from '../user.validator'
 
 @ApiTags('User')
 @Controller('/user')
 export class UserController {
-  constructor(private readonly userService: LegacyUserService) {}
+  constructor(
+    private readonly userService: LegacyUserService,
+    private readonly commandBus: CommandBus,
+  ) {}
 
   @Get()
   getInfos(@CurrentUser('id') currentUserId: UserId): Promise<UserDto> {
@@ -46,7 +52,17 @@ export class UserController {
   @HttpCode(201)
   @Post('/register')
   register(@Body() dto: RegisterUserInputDto, @RealIP() ip: string): Promise<MiniUserDto> {
-    return this.userService.create({ dto, ip })
+    return this.commandBus.execute(
+      new CreateUserCommand({
+        ip,
+        newUser: {
+          email: dto.email,
+          password: dto.password,
+          firstname: dto.firstname,
+          lastname: dto.lastname,
+        },
+      }),
+    )
   }
 
   @Public()

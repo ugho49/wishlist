@@ -25,12 +25,12 @@ export class UserEmailSetting {
     this.updatedAt = props.updatedAt
   }
 
-  static create(params: { id: UserEmailSettingId; user: User; dailyNewItemNotification: boolean }): UserEmailSetting {
+  static create(params: { id: UserEmailSettingId; user: User; dailyNewItemNotification?: boolean }): UserEmailSetting {
     const now = new Date()
     return new UserEmailSetting({
       id: params.id,
       user: params.user,
-      dailyNewItemNotification: params.dailyNewItemNotification,
+      dailyNewItemNotification: params.dailyNewItemNotification === undefined ? true : params.dailyNewItemNotification,
       createdAt: now,
       updatedAt: now,
     })

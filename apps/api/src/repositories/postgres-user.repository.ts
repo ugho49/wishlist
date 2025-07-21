@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { schema } from '@wishlist/api-drizzle'
-import { DatabaseService } from '@wishlist/api/core'
+import { DatabaseService, DrizzleTransaction } from '@wishlist/api/core'
 import { User, UserRepository } from '@wishlist/api/user'
 import { Authorities, UserId, uuid } from '@wishlist/common'
 import { eq, inArray } from 'drizzle-orm'
@@ -34,8 +34,10 @@ export class PostgresUserRepository implements UserRepository {
     return users.map(user => PostgresUserRepository.toModel(user))
   }
 
-  async save(user: User): Promise<void> {
-    await this.databaseService.db
+  async save(user: User, tx?: DrizzleTransaction): Promise<void> {
+    const client = tx ?? this.databaseService.db
+
+    await client
       .insert(schema.user)
       .values({
         id: user.id,
@@ -58,13 +60,13 @@ export class PostgresUserRepository implements UserRepository {
           email: user.email,
           firstName: user.firstName,
           lastName: user.lastName,
-          birthday: user.birthday?.toISOString(),
+          birthday: user.birthday?.toISOString() ?? null,
           passwordEnc: user.passwordEnc,
           isEnabled: user.isEnabled,
           authorities: user.authorities as Authorities[],
           lastIp: user.lastIp,
           lastConnectedAt: user.lastConnectedAt,
-          pictureUrl: user.pictureUrl,
+          pictureUrl: user.pictureUrl ?? null,
           updatedAt: user.updatedAt,
         },
       })

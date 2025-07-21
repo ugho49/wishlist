@@ -16,106 +16,106 @@ import {
 import { GetPaginationQueryDto } from './common.dto'
 
 export class UpdateUserPictureOutputDto {
-  picture_url!: string
+  declare picture_url: string
 }
 
 export class UserSocialDto {
-  id!: UserSocialId
-  social_id!: string
-  social_type!: string
-  picture_url?: string
-  created_at!: string
-  updated_at!: string
+  declare id: UserSocialId
+  declare social_id: string
+  declare social_type: string
+  declare picture_url?: string
+  declare created_at: string
+  declare updated_at: string
 }
 
 export class MiniUserDto {
-  id!: UserId
-  firstname!: string
-  lastname!: string
-  email!: string
-  picture_url?: string
+  declare id: UserId
+  declare firstname: string
+  declare lastname: string
+  declare email: string
+  declare picture_url?: string
 }
 
 export class UserDto extends MiniUserDto {
-  birthday?: string
-  admin!: boolean
-  is_enabled!: boolean
-  last_connected_at?: string
-  last_ip?: string
-  social!: UserSocialDto[]
-  created_at!: string
-  updated_at!: string
+  declare birthday?: string
+  declare admin: boolean
+  declare is_enabled: boolean
+  declare last_connected_at?: string
+  declare last_ip?: string
+  declare social: UserSocialDto[]
+  declare created_at: string
+  declare updated_at: string
 }
 
 export class UserEmailSettingsDto {
-  daily_new_item_notification!: boolean
+  declare daily_new_item_notification: boolean
 }
 
 export class UpdateUserEmailSettingsInputDto {
   @IsBoolean()
   @IsNotEmpty()
-  daily_new_item_notification!: boolean
+  declare daily_new_item_notification: boolean
 }
 
 export class RegisterUserInputDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(50)
-  firstname!: string
+  declare firstname: string
 
   @IsString()
   @IsNotEmpty()
   @MaxLength(50)
-  lastname!: string
+  declare lastname: string
 
   @IsEmail()
   @IsString()
   @IsNotEmpty()
   @MaxLength(200)
   @Transform(({ value }) => value.toLowerCase())
-  email!: string
+  declare email: string
 
   @IsString()
   @IsNotEmpty()
   @MinLength(8)
   @MaxLength(50)
-  password!: string
+  declare password: string
 }
 
 export class RegisterUserWithGoogleInputDto {
   @IsString()
   @IsNotEmpty()
-  credential!: string
+  declare credential: string
 }
 
 export class UpdateUserProfileInputDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(50)
-  firstname!: string
+  declare firstname: string
 
   @IsString()
   @IsNotEmpty()
   @MaxLength(50)
-  lastname!: string
+  declare lastname: string
 
   @MaxDate(new Date())
   @IsDate()
   @IsOptional()
   @Transform(({ value }) => new Date(value))
-  birthday?: Date
+  declare birthday?: Date
 }
 
 export class ChangeUserPasswordInputDto {
   @IsString()
   @IsNotEmpty()
-  old_password!: string
+  declare old_password: string
 
   @IsString()
   @IsNotEmpty()
   @MinLength(8)
   @MaxLength(50)
-  new_password!: string
+  declare new_password: string
 }
 
 export class ResetPasswordInputDto {
@@ -123,7 +123,7 @@ export class ResetPasswordInputDto {
   @IsString()
   @IsNotEmpty()
   @Transform(({ value }) => value.toLowerCase())
-  email!: string
+  declare email: string
 }
 
 export class ResetPasswordValidationInputDto {
@@ -131,17 +131,17 @@ export class ResetPasswordValidationInputDto {
   @IsString()
   @IsNotEmpty()
   @Transform(({ value }) => value.toLowerCase())
-  email!: string
+  declare email: string
 
   @IsString()
   @IsNotEmpty()
-  token!: string
+  declare token: string
 
   @IsString()
   @IsNotEmpty()
   @MinLength(8)
   @MaxLength(50)
-  new_password!: string
+  declare new_password: string
 }
 
 export class UpdateFullUserProfileInputDto {
@@ -150,37 +150,37 @@ export class UpdateFullUserProfileInputDto {
   @MaxLength(200)
   @IsOptional()
   @Transform(({ value }) => value.toLowerCase())
-  email?: string
+  declare email?: string
 
   @IsString()
   @MinLength(8)
   @MaxLength(50)
   @IsOptional()
-  new_password?: string
+  declare new_password?: string
 
   @IsString()
   @MaxLength(50)
   @IsOptional()
-  firstname?: string
+  declare firstname?: string
 
   @IsString()
   @MaxLength(50)
   @IsOptional()
-  lastname?: string
+  declare lastname?: string
 
   @MaxDate(new Date())
   @IsDate()
   @IsOptional()
   @Transform(({ value }) => new Date(value))
-  birthday?: Date
+  declare birthday?: Date
 
   @IsBoolean()
   @IsOptional()
-  is_enabled?: boolean
+  declare is_enabled?: boolean
 }
 
 export class GetAllUsersQueryDto extends GetPaginationQueryDto {
   @IsString()
   @IsOptional()
-  q?: string = ''
+  declare q?: string
 }

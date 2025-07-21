@@ -7,7 +7,7 @@ import { LegacyEmailSettingsService } from '../legacy-email-settings.service'
 
 @ApiTags('User Email settings')
 @Controller('/user/email-settings')
-export class EmailSettingsController {
+export class UserEmailSettingsController {
   constructor(private readonly userEmailSettingsService: LegacyEmailSettingsService) {}
 
   @Get()

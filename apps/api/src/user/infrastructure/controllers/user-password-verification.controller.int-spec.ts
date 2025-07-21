@@ -2,7 +2,7 @@ import { Fixtures, useTestApp, useTestMail } from '@wishlist/api-test-utils'
 import { PasswordManager } from '@wishlist/api/auth'
 import { DateTime } from 'luxon'
 
-describe('PasswordVerificationController', () => {
+describe('UserPasswordVerificationController', () => {
   const { getRequest, expectTable, getFixtures } = useTestApp()
   let fixtures: Fixtures
 
@@ -127,7 +127,12 @@ describe('PasswordVerificationController', () => {
       return request
         .post(path)
         .send({ email: Fixtures.BASE_USER_EMAIL, token: 'reset-token', new_password: 'NewPassword123' })
-        .expect(404)
+        .expect(401)
+        .expect(({ body }) =>
+          expect(body).toMatchObject({
+            message: 'This reset code is not valid',
+          }),
+        )
     })
 
     it('should fail with invalid token', async () => {

@@ -5,6 +5,9 @@ import { UserEmailSettingEntity } from './legacy-email-settings.entity'
 import { toDto } from './legacy-email-settings.mapper'
 import { LegacyEmailSettingsRepository } from './legacy-email-settings.repository'
 
+/**
+ * @deprecated
+ */
 @Injectable()
 export class LegacyEmailSettingsService {
   constructor(private readonly emailSettingEntityRepository: LegacyEmailSettingsRepository) {}

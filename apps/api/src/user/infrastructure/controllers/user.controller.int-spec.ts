@@ -117,8 +117,8 @@ describe('UserController', () => {
         await request
           .post(path)
           .send(input)
-          .expect(422)
-          .expect(({ body }) => expect(body).toMatchObject({ message: 'Unprocessable Entity' }))
+          .expect(401)
+          .expect(({ body }) => expect(body).toMatchObject({ message: 'User email already taken' }))
 
         await expectTable(Fixtures.USER_TABLE).hasNumberOfRows(1).check()
       })

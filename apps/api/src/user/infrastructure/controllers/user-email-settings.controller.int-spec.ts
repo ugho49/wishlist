@@ -1,6 +1,6 @@
 import { Fixtures, useTestApp } from '@wishlist/api-test-utils'
 
-describe('EmailSettingsController', () => {
+describe('UserEmailSettingsController', () => {
   const { getRequest, expectTable, getFixtures } = useTestApp()
   let fixtures: Fixtures
 

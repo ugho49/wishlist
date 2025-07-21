@@ -52,6 +52,15 @@ export class PostgresEventAttendeeRepository implements EventAttendeeRepository 
     return attendees.map(PostgresEventAttendeeRepository.toModel)
   }
 
+  async findByTempEmail(email: string): Promise<EventAttendee[]> {
+    const attendees = await this.databaseService.db.query.eventAttendee.findMany({
+      where: eq(schema.eventAttendee.tempUserEmail, email),
+      with: { user: true },
+    })
+
+    return attendees.map(PostgresEventAttendeeRepository.toModel)
+  }
+
   async existByEventAndEmail(param: { eventId: EventId; email: string }): Promise<boolean> {
     const attendee = await this.databaseService.db.query.eventAttendee.findFirst({
       columns: { id: true },

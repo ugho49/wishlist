@@ -35,6 +35,9 @@ import { toMiniUserDto, toUserDto } from './legacy-user.mapper'
 import { LegacyUserRepository } from './legacy-user.repository'
 import { UserMailer } from './user.mailer'
 
+/**
+ * @deprecated
+ */
 @Injectable()
 export class LegacyUserService {
   private readonly logger = new Logger(LegacyUserService.name)

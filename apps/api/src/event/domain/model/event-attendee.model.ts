@@ -75,4 +75,16 @@ export class EventAttendee {
   isTemporaryAttendee(): boolean {
     return this.pendingEmail !== undefined
   }
+
+  convertTemporaryAttendeeToUser(user: User) {
+    if (!this.isTemporaryAttendee()) {
+      throw new Error('Attendee is not a temporary attendee')
+    }
+
+    return new EventAttendee({
+      ...this,
+      user,
+      pendingEmail: undefined,
+    })
+  }
 }
