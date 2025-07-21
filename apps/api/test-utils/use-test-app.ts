@@ -26,6 +26,7 @@ export function useTestApp() {
   let databaseService: DatabaseService
   let client: Client
   let logger: Logger
+  let fixtures: Fixtures
 
   beforeAll(async () => {
     app = await createApp()
@@ -45,6 +46,8 @@ export function useTestApp() {
     await client.connect()
     await dropDatabase()
     await databaseService.runMigrations()
+
+    fixtures = new Fixtures(client)
   })
 
   beforeEach(async () => {
@@ -86,10 +89,9 @@ export function useTestApp() {
 
   return {
     expectTable: (table: string, sortOptions?: TableAssertSortOptions) => new TableAssert(client, table, sortOptions),
-    getFixtures: () => Fixtures.create(databaseService),
+    getFixtures: () => fixtures,
     getRequest: async (options?: { signedAs?: SignedAs }): Promise<RequestApp> => {
       const requestAppServer = request.agent(app.getHttpServer())
-      const fixtures = Fixtures.create(databaseService)
       const authPath = '/auth/login'
       let token = ''
 

@@ -1,22 +1,10 @@
-import type { DatabaseService } from '@wishlist/api/core'
-import type {
-  AttendeeId,
-  EventId,
-  ItemId,
-  SecretSantaId,
-  SecretSantaStatus,
-  SecretSantaUserId,
-  UserEmailSettingId,
-  UserId,
-  UserPasswordVerificationId,
-  WishlistId,
-} from '@wishlist/common'
+import type { SecretSantaStatus } from '@wishlist/common'
+import type { Client } from 'pg'
 
 import type { SignedAs } from './use-test-app'
 
 import { PasswordManager } from '@wishlist/api/auth'
 import { AttendeeRole, Authorities, uuid } from '@wishlist/common'
-import { eq } from 'drizzle-orm'
 import { DateTime } from 'luxon'
 
 export class Fixtures {
@@ -34,11 +22,7 @@ export class Fixtures {
   static readonly BASE_USER_EMAIL = 'test@test.fr'
   static readonly ADMIN_USER_EMAIL = 'admin@admin.fr'
 
-  private constructor(private readonly databaseService: DatabaseService) {}
-
-  static create(databaseService: DatabaseService): Fixtures {
-    return new Fixtures(databaseService)
-  }
+  constructor(private readonly client: Client) {}
 
   async getSignedUserId(signedAs: SignedAs): Promise<string> {
     let email = ''
@@ -54,19 +38,17 @@ export class Fixtures {
         throw new Error(`Unknown signedAs value: ${signedAs}`)
     }
 
-    const { schema, db: client } = this.databaseService
+    const result = await this.client.query(`SELECT id FROM ${Fixtures.USER_TABLE} WHERE email = $1`, [email])
 
-    const result = await client.select().from(schema.user).where(eq(schema.user.email, email))
-
-    if (result.length > 1) {
+    if (result.rows.length > 1) {
       throw new Error(`Multiple users found for email: ${email}`)
     }
 
-    if (result.length === 0) {
+    if (result.rows.length === 0) {
       throw new Error(`No user found for email: ${email}`)
     }
 
-    return result[0]!.id
+    return result.rows[0]!.id
   }
 
   async insertUser(parameters: {
@@ -76,19 +58,14 @@ export class Fixtures {
     password?: string
     authorities?: Authorities[]
   }): Promise<string> {
-    const { schema, db: client } = this.databaseService
-    const id = uuid() as UserId
+    const id = uuid()
     const { email, firstname, lastname, password, authorities } = parameters
     const passwordEnc = await PasswordManager.hash(password ?? Fixtures.DEFAULT_USER_PASSWORD)
 
-    await client.insert(schema.user).values({
-      id,
-      email,
-      firstName: firstname,
-      lastName: lastname,
-      passwordEnc,
-      authorities: authorities ?? [Authorities.ROLE_USER],
-    })
+    await this.client.query(
+      `INSERT INTO ${Fixtures.USER_TABLE} (id, email, first_name, last_name, password_enc, authorities) VALUES ($1, $2, $3, $4, $5, $6)`,
+      [id, email, firstname, lastname, passwordEnc, authorities ?? [Authorities.ROLE_USER]],
+    )
 
     return id
   }
@@ -123,29 +100,26 @@ export class Fixtures {
     userId: string
     emailSettings: { daily_new_item_notification: boolean }
   }): Promise<string> {
-    const { schema, db: client } = this.databaseService
     const { userId, emailSettings } = parameters
-    const id = uuid() as UserEmailSettingId
+    const id = uuid()
 
-    await client.insert(schema.userEmailSetting).values({
-      id,
-      userId: userId as UserId,
-      dailyNewItemNotification: emailSettings.daily_new_item_notification,
-    })
+    await this.client.query(
+      `INSERT INTO ${Fixtures.USER_EMAIL_SETTING_TABLE} (id, user_id, daily_new_item_notification) VALUES ($1, $2, $3)`,
+      [id, userId, emailSettings.daily_new_item_notification],
+    )
 
     return id
   }
 
   async insertEvent(parameters: { title: string; description?: string; eventDate: Date }): Promise<string> {
-    const { schema, db: client } = this.databaseService
-    const id = uuid() as EventId
+    const id = uuid()
     const { title, description, eventDate } = parameters
-    await client.insert(schema.event).values({
-      id,
-      title,
-      description,
-      eventDate: eventDate.toISOString().split('T')[0] as string,
-    })
+
+    await this.client.query(
+      `INSERT INTO ${Fixtures.EVENT_TABLE} (id, title, description, event_date) VALUES ($1, $2, $3, $4)`,
+      [id, title, description, eventDate.toISOString().split('T')[0] as string],
+    )
+
     return id
   }
 
@@ -168,24 +142,21 @@ export class Fixtures {
     description?: string
     hideItems?: boolean
   }): Promise<string> {
-    const { schema, db: client } = this.databaseService
-    const id = uuid() as WishlistId
+    const id = uuid()
     const { eventIds, title, description, userId, hideItems } = parameters
 
-    await client.insert(schema.wishlist).values({
-      id,
-      title,
-      description: description ?? null,
-      ownerId: userId as UserId,
-      hideItems: hideItems ?? true,
-    })
-
-    await client.insert(schema.eventWishlist).values(
-      eventIds.map(eventId => ({
-        eventId: eventId as EventId,
-        wishlistId: id,
-      })),
+    await this.client.query(
+      `INSERT INTO ${Fixtures.WISHLIST_TABLE} (id, title, description, owner_id, hide_items) VALUES ($1, $2, $3, $4, $5)`,
+      [id, title, description, userId, hideItems ?? true],
     )
+
+    // TODO: optimize ?? One INSERT with multiple values ?
+    for (const eventId of eventIds) {
+      await this.client.query(`INSERT INTO ${Fixtures.EVENT_WISHLIST_TABLE} (event_id, wishlist_id) VALUES ($1, $2)`, [
+        eventId,
+        id,
+      ])
+    }
 
     return id
   }
@@ -195,33 +166,25 @@ export class Fixtures {
     tempUserEmail: string
     role?: AttendeeRole
   }): Promise<string> {
-    const { schema, db: client } = this.databaseService
-
-    const id = uuid() as AttendeeId
+    const id = uuid()
     const { eventId, tempUserEmail, role } = parameters
 
-    await client.insert(schema.eventAttendee).values({
-      id,
-      eventId: eventId as EventId,
-      tempUserEmail,
-      role: role ?? AttendeeRole.USER,
-    })
+    await this.client.query(
+      `INSERT INTO ${Fixtures.EVENT_ATTENDEE_TABLE} (id, event_id, temp_user_email, role) VALUES ($1, $2, $3, $4)`,
+      [id, eventId, tempUserEmail, role ?? AttendeeRole.USER],
+    )
 
     return id
   }
 
   async insertActiveAttendee(parameters: { eventId: string; userId: string; role?: AttendeeRole }): Promise<string> {
-    const { schema, db: client } = this.databaseService
-
-    const id = uuid() as AttendeeId
+    const id = uuid()
     const { eventId, userId, role } = parameters
 
-    await client.insert(schema.eventAttendee).values({
-      id,
-      eventId: eventId as EventId,
-      userId: userId as UserId,
-      role: role ?? AttendeeRole.USER,
-    })
+    await this.client.query(
+      `INSERT INTO ${Fixtures.EVENT_ATTENDEE_TABLE} (id, event_id, user_id, role) VALUES ($1, $2, $3, $4)`,
+      [id, eventId, userId, role ?? AttendeeRole.USER],
+    )
 
     return id
   }
@@ -239,17 +202,13 @@ export class Fixtures {
     token: string
     expiredAt: Date
   }): Promise<string> {
-    const { schema, db: client } = this.databaseService
-
     const { userId, token, expiredAt } = parameters
-    const id = uuid() as UserPasswordVerificationId
+    const id = uuid()
 
-    await client.insert(schema.userPasswordVerification).values({
-      id,
-      userId: userId as UserId,
-      token,
-      expiredAt,
-    })
+    await this.client.query(
+      `INSERT INTO ${Fixtures.USER_PASSWORD_VERIFICATION_TABLE} (id, user_id, token, expired_at) VALUES ($1, $2, $3, $4)`,
+      [id, userId, token, expiredAt],
+    )
 
     return id
   }
@@ -260,17 +219,13 @@ export class Fixtures {
     budget?: number
     status: SecretSantaStatus
   }): Promise<string> {
-    const { schema, db: client } = this.databaseService
-    const id = uuid() as SecretSantaId
+    const id = uuid()
     const { eventId, description, budget, status } = parameters
 
-    await client.insert(schema.secretSanta).values({
-      id,
-      eventId: eventId as EventId,
-      description: description ?? null,
-      budget,
-      status,
-    })
+    await this.client.query(
+      `INSERT INTO ${Fixtures.SECRET_SANTA_TABLE} (id, event_id, description, budget, status) VALUES ($1, $2, $3, $4, $5)`,
+      [id, eventId, description ?? null, budget, status],
+    )
 
     return id
   }
@@ -281,17 +236,13 @@ export class Fixtures {
     drawUserId?: string
     exclusions?: string[]
   }): Promise<string> {
-    const { schema, db: client } = this.databaseService
-    const id = uuid() as SecretSantaUserId
+    const id = uuid()
     const { secretSantaId, attendeeId, drawUserId, exclusions } = parameters
 
-    await client.insert(schema.secretSantaUser).values({
-      id,
-      secretSantaId: secretSantaId as SecretSantaId,
-      attendeeId: attendeeId as AttendeeId,
-      drawUserId: drawUserId ? (drawUserId as SecretSantaUserId) : null,
-      exclusions: (exclusions ?? []) as SecretSantaUserId[],
-    })
+    await this.client.query(
+      `INSERT INTO ${Fixtures.SECRET_SANTA_USER_TABLE} (id, secret_santa_id, attendee_id, draw_user_id, exclusions) VALUES ($1, $2, $3, $4, $5)`,
+      [id, secretSantaId, attendeeId, drawUserId, exclusions ?? []],
+    )
 
     return id
   }
@@ -307,22 +258,13 @@ export class Fixtures {
     takenAt?: Date
     pictureUrl?: string
   }): Promise<string> {
-    const { schema, db: client } = this.databaseService
-    const id = uuid() as ItemId
+    const id = uuid()
     const { wishlistId, name, description, url, isSuggested, score, takerId, takenAt, pictureUrl } = parameters
 
-    await client.insert(schema.item).values({
-      id,
-      wishlistId: wishlistId as WishlistId,
-      name,
-      description,
-      url,
-      isSuggested: isSuggested ?? false,
-      score,
-      takerId: takerId ? (takerId as UserId) : null,
-      takenAt,
-      pictureUrl,
-    })
+    await this.client.query(
+      `INSERT INTO ${Fixtures.ITEM_TABLE} (id, wishlist_id, name, description, url, is_suggested, score, taker_id, taken_at, picture_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+      [id, wishlistId, name, description, url, isSuggested ?? false, score, takerId, takenAt, pictureUrl],
+    )
 
     return id
   }
