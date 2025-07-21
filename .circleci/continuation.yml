@@ -14,7 +14,7 @@ parameters:
 references:
   setup_env_node: &setup_env_node
     docker:
-      - image: cimg/node:22.17
+      - image: cimg/node:24.4
   attach_workspace: &attach_workspace
     at: ~/project
   restore_node_cache: &restore_node_cache
