@@ -1,6 +1,15 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:base", ":skipStatusChecks", ":maintainLockFilesWeekly", ":docker"],
+  "extends": [
+    "config:base",
+    ":skipStatusChecks",
+    ":maintainLockFilesWeekly",
+    ":docker",
+    ":semanticCommits",
+    "schedule:weekly",
+    "group:all"
+  ],
+  "branchPrefix": "renovate-",
   "lockFileMaintenance": { "enabled": true },
   "updateLockFiles": true,
   "labels": ["dependencies"],
