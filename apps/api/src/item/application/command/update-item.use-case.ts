@@ -1,6 +1,6 @@
 import { Inject, NotFoundException, UnauthorizedException } from '@nestjs/common'
 import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
-import { WISHLIST_ITEM_REPOSITORY, WISHLIST_REPOSITORY } from '@wishlist/api/repositories'
+import { REPOSITORIES } from '@wishlist/api/repositories'
 import { WishlistRepository } from '@wishlist/api/wishlist'
 import { TidyURL } from 'tidy-url'
 
@@ -9,8 +9,8 @@ import { UpdateItemCommand, WishlistItemRepository } from '../../domain'
 @CommandHandler(UpdateItemCommand)
 export class UpdateItemUseCase implements IInferredCommandHandler<UpdateItemCommand> {
   constructor(
-    @Inject(WISHLIST_ITEM_REPOSITORY) private readonly itemRepository: WishlistItemRepository,
-    @Inject(WISHLIST_REPOSITORY) private readonly wishlistRepository: WishlistRepository,
+    @Inject(REPOSITORIES.WISHLIST_ITEM) private readonly itemRepository: WishlistItemRepository,
+    @Inject(REPOSITORIES.WISHLIST) private readonly wishlistRepository: WishlistRepository,
   ) {}
 
   async execute(command: UpdateItemCommand) {

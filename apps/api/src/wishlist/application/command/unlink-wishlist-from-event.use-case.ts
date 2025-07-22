@@ -1,13 +1,13 @@
 import { BadRequestException, Inject, UnauthorizedException } from '@nestjs/common'
 import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
-import { WISHLIST_REPOSITORY } from '@wishlist/api/repositories'
+import { REPOSITORIES } from '@wishlist/api/repositories'
 
 import { UnlinkWishlistFromEventCommand, WishlistRepository } from '../../domain'
 
 @CommandHandler(UnlinkWishlistFromEventCommand)
 export class UnlinkWishlistFromEventUseCase implements IInferredCommandHandler<UnlinkWishlistFromEventCommand> {
   constructor(
-    @Inject(WISHLIST_REPOSITORY)
+    @Inject(REPOSITORIES.WISHLIST)
     private readonly wishlistRepository: WishlistRepository,
   ) {}
 

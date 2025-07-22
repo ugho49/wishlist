@@ -1,7 +1,7 @@
 import { Inject, Logger, UnauthorizedException } from '@nestjs/common'
 import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
 import { BucketService } from '@wishlist/api/core'
-import { WISHLIST_REPOSITORY } from '@wishlist/api/repositories'
+import { REPOSITORIES } from '@wishlist/api/repositories'
 
 import { UploadWishlistLogoCommand, UploadWishlistLogoResult, WishlistRepository } from '../../domain'
 
@@ -10,7 +10,7 @@ export class UploadWishlistLogoUseCase implements IInferredCommandHandler<Upload
   private readonly logger = new Logger(UploadWishlistLogoUseCase.name)
 
   constructor(
-    @Inject(WISHLIST_REPOSITORY) private readonly wishlistRepository: WishlistRepository,
+    @Inject(REPOSITORIES.WISHLIST) private readonly wishlistRepository: WishlistRepository,
     private readonly bucketService: BucketService,
   ) {}
 

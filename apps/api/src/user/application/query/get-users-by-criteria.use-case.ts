@@ -1,6 +1,6 @@
 import { BadRequestException, Inject } from '@nestjs/common'
 import { IInferredQueryHandler, QueryHandler } from '@nestjs/cqrs'
-import { USER_REPOSITORY } from '@wishlist/api/repositories'
+import { REPOSITORIES } from '@wishlist/api/repositories'
 import { isEmpty } from 'lodash'
 
 import { GetUsersByCriteriaQuery, GetUsersByCriteriaResult, UserRepository } from '../../domain'
@@ -9,7 +9,7 @@ import { userMapper } from '../../infrastructure'
 @QueryHandler(GetUsersByCriteriaQuery)
 export class GetUsersByCriteriaUseCase implements IInferredQueryHandler<GetUsersByCriteriaQuery> {
   constructor(
-    @Inject(USER_REPOSITORY)
+    @Inject(REPOSITORIES.USER)
     private readonly userRepository: UserRepository,
   ) {}
 

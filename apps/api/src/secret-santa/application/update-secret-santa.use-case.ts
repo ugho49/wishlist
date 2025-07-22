@@ -2,15 +2,15 @@ import { ConflictException, ForbiddenException, Inject } from '@nestjs/common'
 import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
 import { EventRepository } from '@wishlist/api/event'
 
-import { EVENT_REPOSITORY, SECRET_SANTA_REPOSITORY } from '../../repositories'
+import { REPOSITORIES } from '../../repositories'
 import { UpdateSecretSantaCommand } from '../domain/command/update-secret-santa.command'
 import { SecretSantaRepository } from '../domain/repository/secret-santa.repository'
 
 @CommandHandler(UpdateSecretSantaCommand)
 export class UpdateSecretSantaUseCase implements IInferredCommandHandler<UpdateSecretSantaCommand> {
   constructor(
-    @Inject(SECRET_SANTA_REPOSITORY) private readonly secretSantaRepository: SecretSantaRepository,
-    @Inject(EVENT_REPOSITORY) private readonly eventRepository: EventRepository,
+    @Inject(REPOSITORIES.SECRET_SANTA) private readonly secretSantaRepository: SecretSantaRepository,
+    @Inject(REPOSITORIES.EVENT) private readonly eventRepository: EventRepository,
   ) {}
 
   async execute(command: UpdateSecretSantaCommand): Promise<void> {

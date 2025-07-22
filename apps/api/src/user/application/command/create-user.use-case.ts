@@ -1,7 +1,7 @@
 import { Inject, UnauthorizedException } from '@nestjs/common'
 import { CommandHandler, EventBus, IInferredCommandHandler } from '@nestjs/cqrs'
 import { PasswordManager } from '@wishlist/api/auth'
-import { USER_REPOSITORY } from '@wishlist/api/repositories'
+import { REPOSITORIES } from '@wishlist/api/repositories'
 
 import { CreateUserCommand, CreateUserResult, User, UserCreatedEvent, UserRepository } from '../../domain'
 import { userMapper } from '../../infrastructure'
@@ -9,7 +9,7 @@ import { userMapper } from '../../infrastructure'
 @CommandHandler(CreateUserCommand)
 export class CreateUserUseCase implements IInferredCommandHandler<CreateUserCommand> {
   constructor(
-    @Inject(USER_REPOSITORY)
+    @Inject(REPOSITORIES.USER)
     private readonly userRepository: UserRepository,
     private readonly eventBus: EventBus,
   ) {}

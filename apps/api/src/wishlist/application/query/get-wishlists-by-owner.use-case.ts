@@ -2,7 +2,7 @@ import { Inject } from '@nestjs/common'
 import { IInferredQueryHandler, QueryHandler } from '@nestjs/cqrs'
 import { DEFAULT_RESULT_NUMBER } from '@wishlist/api/core'
 import { EventRepository } from '@wishlist/api/event'
-import { EVENT_REPOSITORY, WISHLIST_REPOSITORY } from '@wishlist/api/repositories'
+import { REPOSITORIES } from '@wishlist/api/repositories'
 import { createPagedResponse } from '@wishlist/common'
 
 import { GetWishlistsByOwnerQuery, GetWishlistsByOwnerResult, WishlistRepository } from '../../domain'
@@ -11,8 +11,8 @@ import { wishlistMapper } from '../../infrastructure'
 @QueryHandler(GetWishlistsByOwnerQuery)
 export class GetMyWishlistsUseCase implements IInferredQueryHandler<GetWishlistsByOwnerQuery> {
   constructor(
-    @Inject(WISHLIST_REPOSITORY) private readonly wishlistRepository: WishlistRepository,
-    @Inject(EVENT_REPOSITORY) private readonly eventRepository: EventRepository,
+    @Inject(REPOSITORIES.WISHLIST) private readonly wishlistRepository: WishlistRepository,
+    @Inject(REPOSITORIES.EVENT) private readonly eventRepository: EventRepository,
   ) {}
 
   async execute(query: GetWishlistsByOwnerQuery): Promise<GetWishlistsByOwnerResult> {

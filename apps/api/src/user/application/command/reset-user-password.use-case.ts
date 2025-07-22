@@ -2,16 +2,16 @@ import { Inject, NotFoundException, UnauthorizedException } from '@nestjs/common
 import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
 import { PasswordManager } from '@wishlist/api/auth'
 import { TransactionManager } from '@wishlist/api/core'
-import { USER_PASSWORD_VERIFICATION_REPOSITORY, USER_REPOSITORY } from '@wishlist/api/repositories'
+import { REPOSITORIES } from '@wishlist/api/repositories'
 
 import { ResetUserPasswordCommand, UserPasswordVerificationRepository, UserRepository } from '../../domain'
 
 @CommandHandler(ResetUserPasswordCommand)
 export class ResetUserPasswordUseCase implements IInferredCommandHandler<ResetUserPasswordCommand> {
   constructor(
-    @Inject(USER_REPOSITORY)
+    @Inject(REPOSITORIES.USER)
     private readonly userRepository: UserRepository,
-    @Inject(USER_PASSWORD_VERIFICATION_REPOSITORY)
+    @Inject(REPOSITORIES.USER_PASSWORD_VERIFICATION)
     private readonly passwordVerificationRepository: UserPasswordVerificationRepository,
     private readonly transactionManager: TransactionManager,
   ) {}

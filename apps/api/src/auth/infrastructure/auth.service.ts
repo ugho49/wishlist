@@ -1,7 +1,7 @@
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common'
 import { ConfigType } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
-import { USER_REPOSITORY, USER_SOCIAL_REPOSITORY } from '@wishlist/api/repositories'
+import { REPOSITORIES } from '@wishlist/api/repositories'
 import { User, UserRepository, UserSocial, UserSocialRepository } from '@wishlist/api/user'
 import {
   AccessTokenJwtPayload,
@@ -22,9 +22,9 @@ import { PasswordManager } from './util/password-manager'
 @Injectable()
 export class AuthService {
   constructor(
-    @Inject(USER_REPOSITORY)
+    @Inject(REPOSITORIES.USER)
     private readonly userRepository: UserRepository,
-    @Inject(USER_SOCIAL_REPOSITORY)
+    @Inject(REPOSITORIES.USER_SOCIAL)
     private readonly userSocialRepository: UserSocialRepository,
     private readonly googleAuthService: GoogleAuthService,
     private readonly jwtService: JwtService,

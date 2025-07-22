@@ -3,7 +3,7 @@ import type { SecretSantaDto } from '@wishlist/common'
 import { ConflictException, ForbiddenException, Inject } from '@nestjs/common'
 import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
 import { EventRepository } from '@wishlist/api/event'
-import { EVENT_REPOSITORY, SECRET_SANTA_REPOSITORY } from '@wishlist/api/repositories'
+import { REPOSITORIES } from '@wishlist/api/repositories'
 
 import { CreateSecretSantaCommand, SecretSanta, SecretSantaRepository } from '../domain'
 import { secretSantaMapper } from '../infrastructure'
@@ -11,8 +11,8 @@ import { secretSantaMapper } from '../infrastructure'
 @CommandHandler(CreateSecretSantaCommand)
 export class CreateSecretSantaUseCase implements IInferredCommandHandler<CreateSecretSantaCommand> {
   constructor(
-    @Inject(EVENT_REPOSITORY) private readonly eventRepository: EventRepository,
-    @Inject(SECRET_SANTA_REPOSITORY) private readonly secretSantaRepository: SecretSantaRepository,
+    @Inject(REPOSITORIES.EVENT) private readonly eventRepository: EventRepository,
+    @Inject(REPOSITORIES.SECRET_SANTA) private readonly secretSantaRepository: SecretSantaRepository,
   ) {}
 
   async execute(command: CreateSecretSantaCommand): Promise<SecretSantaDto> {

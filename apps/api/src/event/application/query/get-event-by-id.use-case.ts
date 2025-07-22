@@ -1,7 +1,7 @@
 import { Inject, UnauthorizedException } from '@nestjs/common'
 import { IInferredQueryHandler, QueryHandler } from '@nestjs/cqrs'
 import { eventMapper, EventRepository } from '@wishlist/api/event'
-import { EVENT_REPOSITORY, WISHLIST_REPOSITORY } from '@wishlist/api/repositories'
+import { REPOSITORIES } from '@wishlist/api/repositories'
 import { WishlistRepository } from '@wishlist/api/wishlist'
 
 import { GetEventByIdQuery, GetEventByIdResult } from '../../domain'
@@ -9,8 +9,8 @@ import { GetEventByIdQuery, GetEventByIdResult } from '../../domain'
 @QueryHandler(GetEventByIdQuery)
 export class GetEventByIdUseCase implements IInferredQueryHandler<GetEventByIdQuery> {
   constructor(
-    @Inject(EVENT_REPOSITORY) private readonly eventRepository: EventRepository,
-    @Inject(WISHLIST_REPOSITORY) private readonly wishlistRepository: WishlistRepository,
+    @Inject(REPOSITORIES.EVENT) private readonly eventRepository: EventRepository,
+    @Inject(REPOSITORIES.WISHLIST) private readonly wishlistRepository: WishlistRepository,
   ) {}
 
   async execute(query: GetEventByIdQuery): Promise<GetEventByIdResult> {

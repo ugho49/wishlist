@@ -3,15 +3,15 @@ import type { GetSecretSantaDrawResult } from '../domain'
 import { Inject } from '@nestjs/common'
 import { IInferredQueryHandler, QueryHandler } from '@nestjs/cqrs'
 import { eventAttendeeMapper, EventAttendeeRepository } from '@wishlist/api/event'
-import { EVENT_ATTENDEE_REPOSITORY, SECRET_SANTA_USER_REPOSITORY } from '@wishlist/api/repositories'
+import { REPOSITORIES } from '@wishlist/api/repositories'
 
 import { GetSecretSantaDrawQuery, SecretSantaUserRepository } from '../domain'
 
 @QueryHandler(GetSecretSantaDrawQuery)
 export class GetSecretSantaDrawUseCase implements IInferredQueryHandler<GetSecretSantaDrawQuery> {
   constructor(
-    @Inject(SECRET_SANTA_USER_REPOSITORY) private readonly secretSantaUserRepository: SecretSantaUserRepository,
-    @Inject(EVENT_ATTENDEE_REPOSITORY) private readonly attendeeRepository: EventAttendeeRepository,
+    @Inject(REPOSITORIES.SECRET_SANTA_USER) private readonly secretSantaUserRepository: SecretSantaUserRepository,
+    @Inject(REPOSITORIES.EVENT_ATTENDEE) private readonly attendeeRepository: EventAttendeeRepository,
   ) {}
 
   async execute(query: GetSecretSantaDrawQuery): Promise<GetSecretSantaDrawResult> {

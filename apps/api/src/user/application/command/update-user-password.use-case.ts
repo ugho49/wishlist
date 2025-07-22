@@ -1,14 +1,14 @@
 import { BadRequestException, Inject } from '@nestjs/common'
 import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
 import { PasswordManager } from '@wishlist/api/auth'
-import { USER_REPOSITORY } from '@wishlist/api/repositories'
+import { REPOSITORIES } from '@wishlist/api/repositories'
 
 import { UpdateUserPasswordCommand, UserRepository } from '../../domain'
 
 @CommandHandler(UpdateUserPasswordCommand)
 export class UpdateUserPasswordUseCase implements IInferredCommandHandler<UpdateUserPasswordCommand> {
   constructor(
-    @Inject(USER_REPOSITORY)
+    @Inject(REPOSITORIES.USER)
     private readonly userRepository: UserRepository,
   ) {}
 

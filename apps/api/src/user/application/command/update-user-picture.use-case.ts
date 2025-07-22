@@ -1,7 +1,7 @@
 import { Inject, Logger } from '@nestjs/common'
 import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
 import { BucketService } from '@wishlist/api/core'
-import { USER_REPOSITORY } from '@wishlist/api/repositories'
+import { REPOSITORIES } from '@wishlist/api/repositories'
 import { uuid } from '@wishlist/common'
 
 import { UpdateUserPictureCommand, UpdateUserPictureResult, UserRepository } from '../../domain'
@@ -11,7 +11,7 @@ export class UpdateUserPictureUseCase implements IInferredCommandHandler<UpdateU
   private readonly logger = new Logger(UpdateUserPictureUseCase.name)
 
   constructor(
-    @Inject(USER_REPOSITORY)
+    @Inject(REPOSITORIES.USER)
     private readonly userRepository: UserRepository,
     private readonly bucketService: BucketService,
   ) {}

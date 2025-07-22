@@ -1,13 +1,13 @@
 import { Inject, UnauthorizedException } from '@nestjs/common'
 import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
-import { USER_REPOSITORY } from '@wishlist/api/repositories'
+import { REPOSITORIES } from '@wishlist/api/repositories'
 
 import { DeleteUserCommand, UserRepository } from '../../domain'
 
 @CommandHandler(DeleteUserCommand)
 export class DeleteUserUseCase implements IInferredCommandHandler<DeleteUserCommand> {
   constructor(
-    @Inject(USER_REPOSITORY)
+    @Inject(REPOSITORIES.USER)
     private readonly userRepository: UserRepository,
   ) {}
 

@@ -1,16 +1,16 @@
 import { Inject, NotFoundException } from '@nestjs/common'
 import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
 import { BucketService } from '@wishlist/api/core'
-import { USER_REPOSITORY, USER_SOCIAL_REPOSITORY } from '@wishlist/api/repositories'
+import { REPOSITORIES } from '@wishlist/api/repositories'
 
 import { UpdateUserPictureFromSocialCommand, UserRepository, UserSocialRepository } from '../../domain'
 
 @CommandHandler(UpdateUserPictureFromSocialCommand)
 export class UpdateUserPictureFromSocialUseCase implements IInferredCommandHandler<UpdateUserPictureFromSocialCommand> {
   constructor(
-    @Inject(USER_REPOSITORY)
+    @Inject(REPOSITORIES.USER)
     private readonly userRepository: UserRepository,
-    @Inject(USER_SOCIAL_REPOSITORY)
+    @Inject(REPOSITORIES.USER_SOCIAL)
     private readonly userSocialRepository: UserSocialRepository,
     private readonly bucketService: BucketService,
   ) {}

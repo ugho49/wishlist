@@ -10,63 +10,63 @@ import { PostgresUserSocialRepository } from './postgres-user-social.repository'
 import { PostgresUserRepository } from './postgres-user.repository'
 import { PostgresWishlistItemRepository } from './postgres-wishlist-item.repository'
 import { PostgresWishlistRepository } from './postgres-wishlist.repository'
-import * as tokens from './repositories.tokens'
+import { REPOSITORIES } from './repositories.constants'
 
 @Global()
 @Module({
   providers: [
     {
-      provide: tokens.EVENT_ATTENDEE_REPOSITORY,
+      provide: REPOSITORIES.EVENT_ATTENDEE,
       useClass: PostgresEventAttendeeRepository,
     },
     {
-      provide: tokens.EVENT_REPOSITORY,
+      provide: REPOSITORIES.EVENT,
       useClass: PostgresEventRepository,
     },
     {
-      provide: tokens.SECRET_SANTA_REPOSITORY,
+      provide: REPOSITORIES.SECRET_SANTA,
       useClass: PostgresSecretSantaRepository,
     },
     {
-      provide: tokens.SECRET_SANTA_USER_REPOSITORY,
+      provide: REPOSITORIES.SECRET_SANTA_USER,
       useClass: PostgresSecretSantaUserRepository,
     },
     {
-      provide: tokens.USER_REPOSITORY,
+      provide: REPOSITORIES.USER,
       useClass: PostgresUserRepository,
     },
     {
-      provide: tokens.USER_SOCIAL_REPOSITORY,
+      provide: REPOSITORIES.USER_SOCIAL,
       useClass: PostgresUserSocialRepository,
     },
     {
-      provide: tokens.USER_EMAIL_SETTING_REPOSITORY,
+      provide: REPOSITORIES.USER_EMAIL_SETTING,
       useClass: PostgresUserEmailSettingRepository,
     },
     {
-      provide: tokens.USER_PASSWORD_VERIFICATION_REPOSITORY,
+      provide: REPOSITORIES.USER_PASSWORD_VERIFICATION,
       useClass: PostgresUserPasswordVerificationRepository,
     },
     {
-      provide: tokens.WISHLIST_REPOSITORY,
+      provide: REPOSITORIES.WISHLIST,
       useClass: PostgresWishlistRepository,
     },
     {
-      provide: tokens.WISHLIST_ITEM_REPOSITORY,
+      provide: REPOSITORIES.WISHLIST_ITEM,
       useClass: PostgresWishlistItemRepository,
     },
   ],
   exports: [
-    tokens.EVENT_REPOSITORY,
-    tokens.EVENT_ATTENDEE_REPOSITORY,
-    tokens.SECRET_SANTA_REPOSITORY,
-    tokens.SECRET_SANTA_USER_REPOSITORY,
-    tokens.USER_REPOSITORY,
-    tokens.USER_SOCIAL_REPOSITORY,
-    tokens.USER_EMAIL_SETTING_REPOSITORY,
-    tokens.USER_PASSWORD_VERIFICATION_REPOSITORY,
-    tokens.WISHLIST_REPOSITORY,
-    tokens.WISHLIST_ITEM_REPOSITORY,
+    REPOSITORIES.EVENT,
+    REPOSITORIES.EVENT_ATTENDEE,
+    REPOSITORIES.SECRET_SANTA,
+    REPOSITORIES.SECRET_SANTA_USER,
+    REPOSITORIES.USER,
+    REPOSITORIES.USER_SOCIAL,
+    REPOSITORIES.USER_EMAIL_SETTING,
+    REPOSITORIES.USER_PASSWORD_VERIFICATION,
+    REPOSITORIES.WISHLIST,
+    REPOSITORIES.WISHLIST_ITEM,
   ],
 })
 export class RepositoriesModule {}

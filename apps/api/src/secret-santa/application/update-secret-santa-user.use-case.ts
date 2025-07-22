@@ -2,7 +2,7 @@ import { BadRequestException, ForbiddenException, Inject } from '@nestjs/common'
 import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
 import { EventRepository } from '@wishlist/api/event'
 
-import { EVENT_REPOSITORY, SECRET_SANTA_REPOSITORY, SECRET_SANTA_USER_REPOSITORY } from '../../repositories'
+import { REPOSITORIES } from '../../repositories'
 import { UpdateSecretSantaUserCommand } from '../domain/command/update-secret-santa-user.command'
 import { SecretSantaUserRepository } from '../domain/repository/secret-santa-user.repository'
 import { SecretSantaRepository } from '../domain/repository/secret-santa.repository'
@@ -10,9 +10,9 @@ import { SecretSantaRepository } from '../domain/repository/secret-santa.reposit
 @CommandHandler(UpdateSecretSantaUserCommand)
 export class UpdateSecretSantaUserUseCase implements IInferredCommandHandler<UpdateSecretSantaUserCommand> {
   constructor(
-    @Inject(SECRET_SANTA_REPOSITORY) private readonly secretSantaRepository: SecretSantaRepository,
-    @Inject(SECRET_SANTA_USER_REPOSITORY) private readonly secretSantaUserRepository: SecretSantaUserRepository,
-    @Inject(EVENT_REPOSITORY) private readonly eventRepository: EventRepository,
+    @Inject(REPOSITORIES.SECRET_SANTA) private readonly secretSantaRepository: SecretSantaRepository,
+    @Inject(REPOSITORIES.SECRET_SANTA_USER) private readonly secretSantaUserRepository: SecretSantaUserRepository,
+    @Inject(REPOSITORIES.EVENT) private readonly eventRepository: EventRepository,
   ) {}
 
   async execute(command: UpdateSecretSantaUserCommand): Promise<void> {

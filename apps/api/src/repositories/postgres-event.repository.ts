@@ -7,13 +7,13 @@ import { and, count, desc, eq, gte, inArray, SelectedFields } from 'drizzle-orm'
 import { DateTime } from 'luxon'
 
 import { PostgresEventAttendeeRepository } from './postgres-event-attendee.repository'
-import { EVENT_ATTENDEE_REPOSITORY } from './repositories.tokens'
+import { REPOSITORIES } from './repositories.constants'
 
 @Injectable()
 export class PostgresEventRepository implements EventRepository {
   constructor(
     private readonly databaseService: DatabaseService,
-    @Inject(EVENT_ATTENDEE_REPOSITORY) private readonly attendeeRepository: EventAttendeeRepository,
+    @Inject(REPOSITORIES.EVENT_ATTENDEE) private readonly attendeeRepository: EventAttendeeRepository,
   ) {}
 
   newId(): EventId {
