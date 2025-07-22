@@ -9,7 +9,7 @@ services:
       - '1025:1025'
 
   adminer:
-    image: adminer:4.8.1
+    image: adminer:5.3.0
     restart: always
     ports:
       - '3333:3333'
