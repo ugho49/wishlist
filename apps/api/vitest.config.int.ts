@@ -15,9 +15,9 @@ export default mergeConfig(
       outputFile: '../../junit_reports/integration/api.xml',
       include: ['src/**/*.int-spec.ts'],
       globalSetup: ['./int-tests.global-setup.ts'],
-      setupFiles: ['../../vitest.matchers.ts'],
+      setupFiles: ['./int-tests.worker-setup.ts', '../../vitest.matchers.ts'],
       fileParallelism: false,
-      maxConcurrency: 1,
+      maxConcurrency: 2,
       coverage: {
         enabled: false,
       },
