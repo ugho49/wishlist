@@ -13,6 +13,10 @@
 - [ ] Try Nx Cloud
 - [ ] Add versioning github with tags using `nx release`
 
+## User
+
+- [ ] Frontend: propose to upload a picture on signup
+
 ## Event
 
 - [ ] Frontend: allow to have multiple maintainers in order to manager the lists
