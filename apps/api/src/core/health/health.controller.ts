@@ -1,20 +1,18 @@
 import { Controller, Get } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
-import { HealthCheck, HealthCheckService, TypeOrmHealthIndicator } from '@nestjs/terminus'
+import { HealthCheck, HealthCheckService } from '@nestjs/terminus'
 import { Public } from '@wishlist/api/auth'
 
 @ApiTags('Health')
 @Controller('/health')
 export class HealthController {
-  constructor(
-    private readonly health: HealthCheckService,
-    private readonly dbHealthIndicator: TypeOrmHealthIndicator,
-  ) {}
+  constructor(private readonly health: HealthCheckService) {}
 
   @Get()
   @Public()
   @HealthCheck()
   check() {
-    return this.health.check([async () => this.dbHealthIndicator.pingCheck('database', { timeout: 300 })])
+    // TODO: add db health check
+    return this.health.check([])
   }
 }

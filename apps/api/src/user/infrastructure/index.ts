@@ -1,8 +1,3 @@
 export { userEmailSettingMapper } from './email-settings.mapper'
-export * from './legacy-user-social.entity'
-export * from './legacy-user.entity'
-export * from './legacy-user.mapper'
-export * from './legacy-user.repository'
-export * from './legacy-user.service'
 export { userMapper } from './user.mapper'
 export * from './user.module'
