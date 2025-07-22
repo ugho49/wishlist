@@ -1,6 +1,6 @@
 import { Inject, NotFoundException, UnauthorizedException } from '@nestjs/common'
 import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
-import { USER_REPOSITORY, WISHLIST_ITEM_REPOSITORY, WISHLIST_REPOSITORY } from '@wishlist/api/repositories'
+import { REPOSITORIES } from '@wishlist/api/repositories'
 import { userMapper, UserRepository } from '@wishlist/api/user'
 import { Wishlist, WishlistRepository } from '@wishlist/api/wishlist'
 import { ICurrentUser } from '@wishlist/common'
@@ -11,9 +11,9 @@ import { ToggleItemCommand, ToggleItemResult } from '../../domain/command/toggle
 @CommandHandler(ToggleItemCommand)
 export class ToggleItemUseCase implements IInferredCommandHandler<ToggleItemCommand> {
   constructor(
-    @Inject(WISHLIST_ITEM_REPOSITORY) private readonly itemRepository: WishlistItemRepository,
-    @Inject(WISHLIST_REPOSITORY) private readonly wishlistRepository: WishlistRepository,
-    @Inject(USER_REPOSITORY) private readonly userRepository: UserRepository,
+    @Inject(REPOSITORIES.WISHLIST_ITEM) private readonly itemRepository: WishlistItemRepository,
+    @Inject(REPOSITORIES.WISHLIST) private readonly wishlistRepository: WishlistRepository,
+    @Inject(REPOSITORIES.USER) private readonly userRepository: UserRepository,
   ) {}
 
   async execute(command: ToggleItemCommand): Promise<ToggleItemResult> {

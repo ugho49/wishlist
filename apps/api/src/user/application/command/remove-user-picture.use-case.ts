@@ -1,14 +1,14 @@
 import { Inject } from '@nestjs/common'
 import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
 import { BucketService } from '@wishlist/api/core'
-import { USER_REPOSITORY } from '@wishlist/api/repositories'
+import { REPOSITORIES } from '@wishlist/api/repositories'
 
 import { RemoveUserPictureCommand, UserRepository } from '../../domain'
 
 @CommandHandler(RemoveUserPictureCommand)
 export class RemoveUserPictureUseCase implements IInferredCommandHandler<RemoveUserPictureCommand> {
   constructor(
-    @Inject(USER_REPOSITORY)
+    @Inject(REPOSITORIES.USER)
     private readonly userRepository: UserRepository,
     private readonly bucketService: BucketService,
   ) {}

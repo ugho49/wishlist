@@ -1,14 +1,14 @@
 import { Inject, UnauthorizedException } from '@nestjs/common'
 import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
 import { BucketService } from '@wishlist/api/core'
-import { WISHLIST_REPOSITORY } from '@wishlist/api/repositories'
+import { REPOSITORIES } from '@wishlist/api/repositories'
 
 import { RemoveWishlistLogoCommand, WishlistRepository } from '../../domain'
 
 @CommandHandler(RemoveWishlistLogoCommand)
 export class RemoveWishlistLogoUseCase implements IInferredCommandHandler<RemoveWishlistLogoCommand> {
   constructor(
-    @Inject(WISHLIST_REPOSITORY) private readonly wishlistRepository: WishlistRepository,
+    @Inject(REPOSITORIES.WISHLIST) private readonly wishlistRepository: WishlistRepository,
     private readonly bucketService: BucketService,
   ) {}
 

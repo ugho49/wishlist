@@ -1,7 +1,7 @@
 import { Inject, UnauthorizedException } from '@nestjs/common'
 import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
 import { WishlistItem, WishlistItemRepository } from '@wishlist/api/item'
-import { WISHLIST_ITEM_REPOSITORY, WISHLIST_REPOSITORY } from '@wishlist/api/repositories'
+import { REPOSITORIES } from '@wishlist/api/repositories'
 import { WishlistRepository } from '@wishlist/api/wishlist'
 import { TidyURL } from 'tidy-url'
 
@@ -11,9 +11,9 @@ import { itemMapper } from '../../infrastructure'
 @CommandHandler(CreateItemCommand)
 export class CreateItemUseCase implements IInferredCommandHandler<CreateItemCommand> {
   constructor(
-    @Inject(WISHLIST_REPOSITORY)
+    @Inject(REPOSITORIES.WISHLIST)
     private readonly wishlistRepository: WishlistRepository,
-    @Inject(WISHLIST_ITEM_REPOSITORY)
+    @Inject(REPOSITORIES.WISHLIST_ITEM)
     private readonly itemRepository: WishlistItemRepository,
   ) {}
 

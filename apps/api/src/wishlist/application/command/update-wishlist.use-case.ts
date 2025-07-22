@@ -1,12 +1,12 @@
 import { Inject, UnauthorizedException } from '@nestjs/common'
 import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
-import { WISHLIST_REPOSITORY } from '@wishlist/api/repositories'
+import { REPOSITORIES } from '@wishlist/api/repositories'
 
 import { UpdateWishlistCommand, WishlistRepository } from '../../domain'
 
 @CommandHandler(UpdateWishlistCommand)
 export class UpdateWishlistUseCase implements IInferredCommandHandler<UpdateWishlistCommand> {
-  constructor(@Inject(WISHLIST_REPOSITORY) private readonly wishlistRepository: WishlistRepository) {}
+  constructor(@Inject(REPOSITORIES.WISHLIST) private readonly wishlistRepository: WishlistRepository) {}
 
   async execute(command: UpdateWishlistCommand): Promise<void> {
     const wishlist = await this.wishlistRepository.findByIdOrFail(command.wishlistId)

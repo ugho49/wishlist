@@ -1,7 +1,7 @@
 import { Inject, NotFoundException, UnauthorizedException } from '@nestjs/common'
 import { ConfigType } from '@nestjs/config'
 import { CommandHandler, EventBus, IInferredCommandHandler } from '@nestjs/cqrs'
-import { USER_PASSWORD_VERIFICATION_REPOSITORY, USER_REPOSITORY } from '@wishlist/api/repositories'
+import { REPOSITORIES } from '@wishlist/api/repositories'
 import { DateTime } from 'luxon'
 
 import {
@@ -16,9 +16,9 @@ import userConfig from '../../infrastructure/user.config'
 @CommandHandler(CreatePasswordVerificationCommand)
 export class CreatePasswordVerificationUseCase implements IInferredCommandHandler<CreatePasswordVerificationCommand> {
   constructor(
-    @Inject(USER_REPOSITORY)
+    @Inject(REPOSITORIES.USER)
     private readonly userRepository: UserRepository,
-    @Inject(USER_PASSWORD_VERIFICATION_REPOSITORY)
+    @Inject(REPOSITORIES.USER_PASSWORD_VERIFICATION)
     private readonly verificationEntityRepository: UserPasswordVerificationRepository,
     @Inject(userConfig.KEY)
     private readonly config: ConfigType<typeof userConfig>,

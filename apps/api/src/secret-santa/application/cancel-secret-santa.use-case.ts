@@ -2,7 +2,7 @@ import { ForbiddenException, Inject } from '@nestjs/common'
 import { CommandHandler, EventBus, IInferredCommandHandler } from '@nestjs/cqrs'
 import { TransactionManager } from '@wishlist/api/core'
 import { EventRepository } from '@wishlist/api/event'
-import { EVENT_REPOSITORY, SECRET_SANTA_REPOSITORY, SECRET_SANTA_USER_REPOSITORY } from '@wishlist/api/repositories'
+import { REPOSITORIES } from '@wishlist/api/repositories'
 
 import {
   CancelSecretSantaCommand,
@@ -14,9 +14,9 @@ import {
 @CommandHandler(CancelSecretSantaCommand)
 export class CancelSecretSantaUseCase implements IInferredCommandHandler<CancelSecretSantaCommand> {
   constructor(
-    @Inject(SECRET_SANTA_REPOSITORY) private readonly secretSantaRepository: SecretSantaRepository,
-    @Inject(SECRET_SANTA_USER_REPOSITORY) private readonly secretSantaUserRepository: SecretSantaUserRepository,
-    @Inject(EVENT_REPOSITORY) private readonly eventRepository: EventRepository,
+    @Inject(REPOSITORIES.SECRET_SANTA) private readonly secretSantaRepository: SecretSantaRepository,
+    @Inject(REPOSITORIES.SECRET_SANTA_USER) private readonly secretSantaUserRepository: SecretSantaUserRepository,
+    @Inject(REPOSITORIES.EVENT) private readonly eventRepository: EventRepository,
     private readonly transactionManager: TransactionManager,
     private readonly eventBus: EventBus,
   ) {}

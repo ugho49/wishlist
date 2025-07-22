@@ -2,7 +2,7 @@ import { Inject, NotFoundException, UnauthorizedException } from '@nestjs/common
 import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
 import { BucketService } from '@wishlist/api/core'
 import { EventRepository } from '@wishlist/api/event'
-import { EVENT_REPOSITORY, USER_REPOSITORY, WISHLIST_REPOSITORY } from '@wishlist/api/repositories'
+import { REPOSITORIES } from '@wishlist/api/repositories'
 import { UserRepository } from '@wishlist/api/user'
 import { uniq } from 'lodash'
 
@@ -12,9 +12,9 @@ import { wishlistMapper } from '../../infrastructure'
 @CommandHandler(CreateWishlistCommand)
 export class CreateWishlistUseCase implements IInferredCommandHandler<CreateWishlistCommand> {
   constructor(
-    @Inject(WISHLIST_REPOSITORY) private readonly wishlistRepository: WishlistRepository,
-    @Inject(EVENT_REPOSITORY) private readonly eventRepository: EventRepository,
-    @Inject(USER_REPOSITORY) private readonly userRepository: UserRepository,
+    @Inject(REPOSITORIES.WISHLIST) private readonly wishlistRepository: WishlistRepository,
+    @Inject(REPOSITORIES.EVENT) private readonly eventRepository: EventRepository,
+    @Inject(REPOSITORIES.USER) private readonly userRepository: UserRepository,
     private readonly bucketService: BucketService,
   ) {}
 

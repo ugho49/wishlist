@@ -2,7 +2,7 @@ import { BadRequestException, Inject, UnauthorizedException } from '@nestjs/comm
 import { CommandHandler, EventBus, IInferredCommandHandler } from '@nestjs/cqrs'
 import { GoogleAuthService } from '@wishlist/api/auth'
 import { TransactionManager } from '@wishlist/api/core'
-import { USER_REPOSITORY, USER_SOCIAL_REPOSITORY } from '@wishlist/api/repositories'
+import { REPOSITORIES } from '@wishlist/api/repositories'
 import { UserSocialType } from '@wishlist/common'
 
 import {
@@ -19,9 +19,9 @@ import { userMapper } from '../../infrastructure'
 @CommandHandler(CreateUserFromGoogleCommand)
 export class CreateUserFromGoogleUseCase implements IInferredCommandHandler<CreateUserFromGoogleCommand> {
   constructor(
-    @Inject(USER_REPOSITORY)
+    @Inject(REPOSITORIES.USER)
     private readonly userRepository: UserRepository,
-    @Inject(USER_SOCIAL_REPOSITORY)
+    @Inject(REPOSITORIES.USER_SOCIAL)
     private readonly userSocialRepository: UserSocialRepository,
     private readonly transactionManager: TransactionManager,
     private readonly googleAuthService: GoogleAuthService,

@@ -1,7 +1,7 @@
 import { BadRequestException, Inject } from '@nestjs/common'
 import { IInferredQueryHandler, QueryHandler } from '@nestjs/cqrs'
 import { DEFAULT_RESULT_NUMBER } from '@wishlist/api/core'
-import { USER_REPOSITORY } from '@wishlist/api/repositories'
+import { REPOSITORIES } from '@wishlist/api/repositories'
 import { createPagedResponse } from '@wishlist/common'
 
 import { GetUsersPaginatedQuery, GetUsersPaginatedResult, UserRepository } from '../../domain'
@@ -10,7 +10,7 @@ import { userMapper } from '../../infrastructure'
 @QueryHandler(GetUsersPaginatedQuery)
 export class GetUsersPaginatedUseCase implements IInferredQueryHandler<GetUsersPaginatedQuery> {
   constructor(
-    @Inject(USER_REPOSITORY)
+    @Inject(REPOSITORIES.USER)
     private readonly userRepository: UserRepository,
   ) {}
 

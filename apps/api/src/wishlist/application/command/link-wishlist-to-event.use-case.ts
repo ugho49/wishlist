@@ -1,7 +1,7 @@
 import { BadRequestException, Inject, UnauthorizedException } from '@nestjs/common'
 import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
 import { EventRepository } from '@wishlist/api/event'
-import { EVENT_REPOSITORY, WISHLIST_REPOSITORY } from '@wishlist/api/repositories'
+import { REPOSITORIES } from '@wishlist/api/repositories'
 import { MAX_EVENTS_BY_LIST } from '@wishlist/common'
 
 import { LinkWishlistToEventCommand, WishlistRepository } from '../../domain'
@@ -9,9 +9,9 @@ import { LinkWishlistToEventCommand, WishlistRepository } from '../../domain'
 @CommandHandler(LinkWishlistToEventCommand)
 export class LinkWishlistToEventUseCase implements IInferredCommandHandler<LinkWishlistToEventCommand> {
   constructor(
-    @Inject(WISHLIST_REPOSITORY)
+    @Inject(REPOSITORIES.WISHLIST)
     private readonly wishlistRepository: WishlistRepository,
-    @Inject(EVENT_REPOSITORY)
+    @Inject(REPOSITORIES.EVENT)
     private readonly eventRepository: EventRepository,
   ) {}
 

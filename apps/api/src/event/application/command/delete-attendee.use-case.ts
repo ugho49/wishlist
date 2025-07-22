@@ -1,7 +1,7 @@
 import { ConflictException, Inject, NotFoundException, UnauthorizedException } from '@nestjs/common'
 import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
 import { TransactionManager } from '@wishlist/api/core'
-import { EVENT_ATTENDEE_REPOSITORY, EVENT_REPOSITORY, WISHLIST_REPOSITORY } from '@wishlist/api/repositories'
+import { REPOSITORIES } from '@wishlist/api/repositories'
 import { WishlistRepository } from '@wishlist/api/wishlist'
 
 import { DeleteAttendeeCommand, EventAttendeeRepository, EventRepository } from '../../domain'
@@ -9,11 +9,11 @@ import { DeleteAttendeeCommand, EventAttendeeRepository, EventRepository } from 
 @CommandHandler(DeleteAttendeeCommand)
 export class DeleteAttendeeUseCase implements IInferredCommandHandler<DeleteAttendeeCommand> {
   constructor(
-    @Inject(EVENT_ATTENDEE_REPOSITORY)
+    @Inject(REPOSITORIES.EVENT_ATTENDEE)
     private readonly attendeeRepository: EventAttendeeRepository,
-    @Inject(EVENT_REPOSITORY)
+    @Inject(REPOSITORIES.EVENT)
     private readonly eventRepository: EventRepository,
-    @Inject(WISHLIST_REPOSITORY)
+    @Inject(REPOSITORIES.WISHLIST)
     private readonly wishlistRepository: WishlistRepository,
     private readonly transactionManager: TransactionManager,
   ) {}

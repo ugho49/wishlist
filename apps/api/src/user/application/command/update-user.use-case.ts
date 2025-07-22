@@ -1,13 +1,13 @@
 import { Inject } from '@nestjs/common'
 import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
-import { USER_REPOSITORY } from '@wishlist/api/repositories'
+import { REPOSITORIES } from '@wishlist/api/repositories'
 
 import { UpdateUserCommand, UserRepository } from '../../domain'
 
 @CommandHandler(UpdateUserCommand)
 export class UpdateUserUseCase implements IInferredCommandHandler<UpdateUserCommand> {
   constructor(
-    @Inject(USER_REPOSITORY)
+    @Inject(REPOSITORIES.USER)
     private readonly userRepository: UserRepository,
   ) {}
 

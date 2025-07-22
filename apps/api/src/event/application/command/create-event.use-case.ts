@@ -1,6 +1,6 @@
 import { Inject } from '@nestjs/common'
 import { CommandHandler, EventBus, IInferredCommandHandler } from '@nestjs/cqrs'
-import { EVENT_ATTENDEE_REPOSITORY, EVENT_REPOSITORY, USER_REPOSITORY } from '@wishlist/api/repositories'
+import { REPOSITORIES } from '@wishlist/api/repositories'
 import { UserRepository } from '@wishlist/api/user'
 import { AttendeeRole } from '@wishlist/common'
 import { uniq } from 'lodash'
@@ -19,9 +19,9 @@ import { eventMapper } from '../../infrastructure'
 @CommandHandler(CreateEventCommand)
 export class CreateEventUseCase implements IInferredCommandHandler<CreateEventCommand> {
   constructor(
-    @Inject(EVENT_REPOSITORY) private readonly eventRepository: EventRepository,
-    @Inject(EVENT_ATTENDEE_REPOSITORY) private readonly attendeeRepository: EventAttendeeRepository,
-    @Inject(USER_REPOSITORY) private readonly userRepository: UserRepository,
+    @Inject(REPOSITORIES.EVENT) private readonly eventRepository: EventRepository,
+    @Inject(REPOSITORIES.EVENT_ATTENDEE) private readonly attendeeRepository: EventAttendeeRepository,
+    @Inject(REPOSITORIES.USER) private readonly userRepository: UserRepository,
     private readonly eventBus: EventBus,
   ) {}
 

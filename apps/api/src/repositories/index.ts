@@ -1,2 +1,2 @@
-export * from './repositories.tokens'
-export * from './repositories.module'
+export { REPOSITORIES } from './repositories.constants'
+export { RepositoriesModule } from './repositories.module'

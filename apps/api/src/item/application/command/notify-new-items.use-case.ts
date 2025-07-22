@@ -1,7 +1,7 @@
 import { Inject, Logger } from '@nestjs/common'
 import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
 import { MailService } from '@wishlist/api/core'
-import { WISHLIST_ITEM_REPOSITORY, WISHLIST_REPOSITORY } from '@wishlist/api/repositories'
+import { REPOSITORIES } from '@wishlist/api/repositories'
 import { WishlistRepository } from '@wishlist/api/wishlist'
 import { WishlistId } from '@wishlist/common'
 import { DateTime } from 'luxon'
@@ -13,8 +13,8 @@ export class NotifyNewItemsUseCase implements IInferredCommandHandler<NotifyNewI
   private readonly logger = new Logger(NotifyNewItemsUseCase.name)
 
   constructor(
-    @Inject(WISHLIST_ITEM_REPOSITORY) private readonly itemRepository: WishlistItemRepository,
-    @Inject(WISHLIST_REPOSITORY) private readonly wishlistRepository: WishlistRepository,
+    @Inject(REPOSITORIES.WISHLIST_ITEM) private readonly itemRepository: WishlistItemRepository,
+    @Inject(REPOSITORIES.WISHLIST) private readonly wishlistRepository: WishlistRepository,
     private readonly mailService: MailService,
   ) {}
 
