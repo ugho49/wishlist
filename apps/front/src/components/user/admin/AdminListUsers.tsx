@@ -1,5 +1,5 @@
 import type { GridColDef } from '@mui/x-data-grid'
-import type { UserDto } from '@wishlist/common'
+import type { UserWithoutSocialsDto } from '@wishlist/common'
 import type { FormEvent } from 'react'
 
 import { Avatar, Box, Button, Stack, TextField } from '@mui/material'
@@ -13,7 +13,7 @@ import { InputLabel } from '../../common/InputLabel'
 import { RouterLink } from '../../common/RouterLink'
 import { Status } from '../../common/Status'
 
-const columns: GridColDef<UserDto>[] = [
+const columns: GridColDef<UserWithoutSocialsDto>[] = [
   {
     field: 'is_enabled',
     headerName: '',
