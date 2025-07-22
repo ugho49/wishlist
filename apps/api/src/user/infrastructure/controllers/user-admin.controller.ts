@@ -9,24 +9,30 @@ import {
   UpdateUserPictureOutputDto,
   UserDto,
   UserId,
+  UserWithoutSocialsDto,
 } from '@wishlist/common'
 
 import { CurrentUser, IsAdmin } from '../../../auth'
-import { LegacyUserService } from '../legacy-user.service'
 import { userPictureFileValidators, userPictureResizePipe } from '../user.validator'
 
 import 'multer'
 
 import { CommandBus, QueryBus } from '@nestjs/cqrs'
 
-import { GetUserByIdQuery, UpdateUserFullCommand } from '../../domain'
+import {
+  DeleteUserCommand,
+  GetUserByIdQuery,
+  GetUsersPaginatedQuery,
+  RemoveUserPictureCommand,
+  UpdateUserFullCommand,
+  UpdateUserPictureCommand,
+} from '../../domain'
 
 @IsAdmin()
 @ApiTags('ADMIN - User')
 @Controller('/admin/user')
 export class UserAdminController {
   constructor(
-    private readonly userService: LegacyUserService,
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
   ) {}
@@ -37,8 +43,13 @@ export class UserAdminController {
   }
 
   @Get()
-  getAllPaginated(@Query() queryParams: GetAllUsersQueryDto): Promise<PagedResponse<UserDto>> {
-    return this.userService.findAllByCriteriaPaginated({ pageNumber: queryParams.p || 1, criteria: queryParams.q })
+  getAllPaginated(@Query() queryParams: GetAllUsersQueryDto): Promise<PagedResponse<UserWithoutSocialsDto>> {
+    return this.queryBus.execute(
+      new GetUsersPaginatedQuery({
+        pageNumber: queryParams.p ?? 1,
+        criteria: queryParams.q,
+      }),
+    )
   }
 
   @Patch('/:id')
@@ -64,8 +75,8 @@ export class UserAdminController {
   }
 
   @Delete('/:id')
-  deleteUserById(@Param('id') userId: UserId, @CurrentUser() currentUser: ICurrentUser): Promise<void> {
-    return this.userService.delete({ userId, currentUser })
+  async deleteUserById(@Param('id') userId: UserId, @CurrentUser() currentUser: ICurrentUser): Promise<void> {
+    await this.commandBus.execute(new DeleteUserCommand({ userId, currentUser }))
   }
 
   @Post('/:id/upload-picture')
@@ -76,14 +87,12 @@ export class UserAdminController {
     @UploadedFile(userPictureFileValidators, userPictureResizePipe)
     file: Express.Multer.File,
   ): Promise<UpdateUserPictureOutputDto> {
-    return this.userService.uploadPicture({
-      userId,
-      file,
-    })
+    const result = await this.commandBus.execute(new UpdateUserPictureCommand({ userId, file }))
+    return { picture_url: result.pictureUrl }
   }
 
   @Delete('/:id/picture')
   async removePicture(@Param('id') userId: UserId) {
-    await this.userService.removePicture({ userId })
+    await this.commandBus.execute(new RemoveUserPictureCommand({ userId }))
   }
 }

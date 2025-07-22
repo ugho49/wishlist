@@ -9,5 +9,11 @@ export interface UserRepository {
   findByIdOrFail(id: UserId): Promise<User>
   findByEmail(email: string): Promise<User | undefined>
   findByEmails(emails: string[]): Promise<User[]>
+  findAllByCriteria(params: { criteria: string; ignoreUserId?: UserId; limit?: number }): Promise<User[]>
+  findAllPaginated(params: {
+    criteria?: string
+    pagination: { take: number; skip: number }
+  }): Promise<{ users: User[]; totalCount: number }>
   save(user: User, tx?: DrizzleTransaction): Promise<void>
+  delete(userId: UserId): Promise<void>
 }

@@ -1,13 +1,5 @@
 import { Global, Module } from '@nestjs/common'
-import { TypeOrmModule } from '@nestjs/typeorm'
 
-import { AttendeeEntity } from '../event/infrastructure/legacy-attendee.entity'
-import { EventEntity } from '../event/infrastructure/legacy-event.entity'
-import { ItemEntity } from '../item/infrastructure/item.entity'
-import { UserSocialEntity } from '../user/infrastructure/legacy-user-social.entity'
-import { UserEntity } from '../user/infrastructure/legacy-user.entity'
-import { LegacyUserRepository } from '../user/infrastructure/legacy-user.repository'
-import { WishlistEntity } from '../wishlist/infrastructure/legacy-wishlist.entity'
 import { PostgresEventAttendeeRepository } from './postgres-event-attendee.repository'
 import { PostgresEventRepository } from './postgres-event.repository'
 import { PostgresSecretSantaUserRepository } from './postgres-secret-santa-user.repository'
@@ -20,22 +12,9 @@ import { PostgresWishlistItemRepository } from './postgres-wishlist-item.reposit
 import { PostgresWishlistRepository } from './postgres-wishlist.repository'
 import * as tokens from './repositories.tokens'
 
-const legacyRepositories = [LegacyUserRepository]
-
-const legacyEntities = TypeOrmModule.forFeature([
-  EventEntity,
-  WishlistEntity,
-  UserEntity,
-  UserSocialEntity,
-  ItemEntity,
-  AttendeeEntity,
-])
-
 @Global()
 @Module({
-  imports: [legacyEntities],
   providers: [
-    ...legacyRepositories,
     {
       provide: tokens.EVENT_ATTENDEE_REPOSITORY,
       useClass: PostgresEventAttendeeRepository,
@@ -78,7 +57,6 @@ const legacyEntities = TypeOrmModule.forFeature([
     },
   ],
   exports: [
-    ...legacyRepositories,
     tokens.EVENT_REPOSITORY,
     tokens.EVENT_ATTENDEE_REPOSITORY,
     tokens.SECRET_SANTA_REPOSITORY,

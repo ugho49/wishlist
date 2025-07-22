@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { schema } from '@wishlist/api-drizzle'
-import { DatabaseService, DrizzleTransaction } from '@wishlist/api/core'
+import { DatabaseService, DEFAULT_RESULT_NUMBER, DrizzleTransaction } from '@wishlist/api/core'
 import { User, UserRepository } from '@wishlist/api/user'
 import { Authorities, UserId, uuid } from '@wishlist/common'
-import { eq, inArray } from 'drizzle-orm'
+import { and, asc, count, desc, eq, inArray, like, ne, or, sql } from 'drizzle-orm'
 
 @Injectable()
 export class PostgresUserRepository implements UserRepository {
@@ -32,6 +32,63 @@ export class PostgresUserRepository implements UserRepository {
   async findByEmails(emails: string[]): Promise<User[]> {
     const users = await this.databaseService.db.query.user.findMany({ where: inArray(schema.user.email, emails) })
     return users.map(user => PostgresUserRepository.toModel(user))
+  }
+
+  async findAllByCriteria(params: { criteria: string; ignoreUserId?: UserId; limit?: number }): Promise<User[]> {
+    const { criteria, ignoreUserId, limit } = params
+
+    const searchKey = criteria.trim().toLowerCase().normalize('NFC')
+
+    const users = await this.databaseService.db.query.user.findMany({
+      where: and(
+        ignoreUserId ? ne(schema.user.id, ignoreUserId) : undefined,
+        or(
+          like(sql`lower(${schema.user.firstName})`, `%${searchKey}%`),
+          like(sql`lower(${schema.user.lastName})`, `%${searchKey}%`),
+          like(sql`lower(${schema.user.email})`, `%${searchKey}%`),
+        ),
+      ),
+      limit: limit ?? DEFAULT_RESULT_NUMBER,
+      orderBy: [asc(schema.user.firstName)],
+    })
+
+    return users.map(user => PostgresUserRepository.toModel(user))
+  }
+
+  async findAllPaginated(params: {
+    criteria?: string
+    pagination: { take: number; skip: number }
+  }): Promise<{ users: User[]; totalCount: number }> {
+    let whereCondition = undefined
+
+    if (params.criteria) {
+      const searchKey = params.criteria.trim().toLowerCase().normalize('NFC')
+
+      whereCondition = or(
+        like(sql`lower(${schema.user.firstName})`, `%${searchKey}%`),
+        like(sql`lower(${schema.user.lastName})`, `%${searchKey}%`),
+        like(sql`lower(${schema.user.email})`, `%${searchKey}%`),
+      )
+    }
+
+    // Get total count
+    const totalCountResult = await this.databaseService.db
+      .select({ count: count() })
+      .from(schema.user)
+      .where(whereCondition)
+
+    const totalCount = totalCountResult[0]?.count ?? 0
+
+    if (totalCount === 0) return { users: [], totalCount }
+
+    const users = await this.databaseService.db.query.user.findMany({
+      where: whereCondition,
+      limit: params.pagination.take,
+      offset: params.pagination.skip,
+      orderBy: [desc(schema.user.createdAt)],
+    })
+
+    return { users: users.map(user => PostgresUserRepository.toModel(user)), totalCount }
   }
 
   async save(user: User, tx?: DrizzleTransaction): Promise<void> {
@@ -70,6 +127,10 @@ export class PostgresUserRepository implements UserRepository {
           updatedAt: user.updatedAt,
         },
       })
+  }
+
+  async delete(userId: UserId): Promise<void> {
+    await this.databaseService.db.delete(schema.user).where(eq(schema.user.id, userId))
   }
 
   static toModel(row: typeof schema.user.$inferSelect): User {

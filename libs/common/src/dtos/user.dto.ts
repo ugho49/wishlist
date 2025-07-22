@@ -36,15 +36,18 @@ export class MiniUserDto {
   declare picture_url?: string
 }
 
-export class UserDto extends MiniUserDto {
+export class UserWithoutSocialsDto extends MiniUserDto {
   declare birthday?: string
   declare admin: boolean
   declare is_enabled: boolean
   declare last_connected_at?: string
   declare last_ip?: string
-  declare social: UserSocialDto[]
   declare created_at: string
   declare updated_at: string
+}
+
+export class UserDto extends UserWithoutSocialsDto {
+  declare social: UserSocialDto[]
 }
 
 export class UserEmailSettingsDto {
