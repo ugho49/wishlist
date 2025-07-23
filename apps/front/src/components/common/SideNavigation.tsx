@@ -69,13 +69,13 @@ const LogoSectionStyled = styled(Box)(({ theme }) => ({
 }))
 
 const LogoIconStyled = styled(LogoSvg)(() => ({
-  height: 35,
-  width: 35,
+  height: 38,
+  width: 38,
   color: 'white',
 }))
 
 const LogoTextStyled = styled(LogoTextSvg)(() => ({
-  height: 45,
+  height: 60,
   color: 'white',
 }))
 

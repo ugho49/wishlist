@@ -10,14 +10,16 @@ import { useFetchUserInfo } from '../../../hooks/domain/useFetchUserInfo'
 import { setUser } from '../../store/features'
 
 const MainWrapper = styled(Box)(({ theme }) => ({
-  backgroundColor: theme.palette.grey[50],
   height: '100vh',
   [theme.breakpoints.up('md')]: {
     marginLeft: 280, // Make room for side navigation
   },
+}))
+
+const ContainerStyled = styled(Container)(({ theme }) => ({
   [theme.breakpoints.down('md')]: {
-    paddingTop: '64px', // Space for fixed mobile top bar
-    paddingBottom: '100px', // Space for fixed mobile bottom bar
+    marginTop: '64px', // Space for fixed mobile top bar
+    marginBottom: '56px', // Space for fixed mobile bottom bar
   },
 }))
 
@@ -33,20 +35,20 @@ export const PrivateRouteContainerOutlet = () => {
 
   return (
     <>
-      {/* Mobile Top Bar - only visible on mobile */}
-      <MobileTopBar />
-
       {/* Side Navigation - responsive drawer */}
       <SideNavigation />
 
-      {/* Mobile Bottom Navigation - only visible on mobile */}
-      <MobileBottomNavigation />
+      {/* Mobile Top Bar - only visible on mobile */}
+      <MobileTopBar />
 
       <MainWrapper>
-        <Container fixed maxWidth="lg">
+        <ContainerStyled fixed maxWidth="lg">
           <Outlet />
-        </Container>
+        </ContainerStyled>
       </MainWrapper>
+
+      {/* Mobile Bottom Navigation - only visible on mobile */}
+      <MobileBottomNavigation />
     </>
   )
 }

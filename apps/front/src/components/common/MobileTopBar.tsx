@@ -6,7 +6,6 @@ import LogoTextSvg from '../../assets/logo/logo_text.svg?react'
 import { useHistoryStack } from '../../hooks'
 
 const AppBarStyled = styled(AppBar)(({ theme }) => ({
-  display: 'block',
   backgroundColor: theme.palette.primary.main,
   borderBottom: `1px solid ${theme.palette.primary.dark}`,
   boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
@@ -20,22 +19,26 @@ const AppBarStyled = styled(AppBar)(({ theme }) => ({
 const ToolbarStyled = styled(Toolbar)(() => ({
   height: 56,
   minHeight: '56px !important',
-  paddingLeft: 16,
-  paddingRight: 16,
+  position: 'relative',
+  padding: 0,
 }))
 
-const BackButtonStyled = styled(IconButton)(() => ({
-  marginRight: 16,
+const BackButtonStyled = styled(IconButton)<{ canGoBack: boolean }>(({ canGoBack }) => ({
+  position: 'absolute',
+  left: 24,
+  top: '50%',
+  transform: canGoBack ? 'translateY(-50%)' : 'translateY(-50%) translateX(-100px)',
+  opacity: canGoBack ? 1 : 0,
+  pointerEvents: canGoBack ? 'auto' : 'none',
   color: 'white',
-  '&:hover': {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-  },
+  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+  zIndex: 1,
 }))
 
-const LogoContainerStyled = styled(Box)<{ canGoBack: boolean }>(({ canGoBack }) => ({
+const LogoContainerStyled = styled(Box)(() => ({
   flexGrow: 1,
   display: 'flex',
-  justifyContent: canGoBack ? 'flex-start' : 'center',
+  justifyContent: 'center',
 }))
 
 const LogoSvgStyled = styled(LogoTextSvg)(() => ({
@@ -59,13 +62,17 @@ export const MobileTopBar = () => {
   return (
     <AppBarStyled position="fixed">
       <ToolbarStyled>
-        {canGoBack && (
-          <BackButtonStyled color="inherit" aria-label="go back" edge="start" onClick={handleGoBack}>
-            <ArrowBackIcon />
-          </BackButtonStyled>
-        )}
+        <BackButtonStyled
+          canGoBack={canGoBack}
+          color="inherit"
+          aria-label="go back"
+          edge="start"
+          onClick={handleGoBack}
+        >
+          <ArrowBackIcon />
+        </BackButtonStyled>
 
-        <LogoContainerStyled canGoBack={canGoBack}>
+        <LogoContainerStyled>
           <LogoSvgStyled />
         </LogoContainerStyled>
       </ToolbarStyled>

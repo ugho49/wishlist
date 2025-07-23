@@ -6,7 +6,6 @@ import { Logo } from '../../../components/common/Logo'
 
 const Root = styled(Box)({
   minHeight: '100vh',
-  background: 'linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%)',
   display: 'flex',
   alignItems: 'center',
   py: 4,
