@@ -15,7 +15,6 @@ import { CreateEventPage } from './components/event/CreateEventPage'
 import { EditEventPage } from './components/event/EditEventPage'
 import { EventListPage } from './components/event/EventListPage'
 import { EventPage } from './components/event/EventPage'
-import { LandingPage } from './components/landing/LandingPage'
 import { SecretSantaPage } from './components/secret-santa/SecretSantaPage'
 import { AdminUserPage } from './components/user/admin/AdminUserPage'
 import { UserProfilePage } from './components/user/UserProfilePage'
@@ -43,7 +42,7 @@ export const App = () => {
     <Routes>
       {!isLoggedIn && (
         <>
-          <Route path="/" element={<LandingPage />} />
+          {/* <Route path="/" element={<LandingPage />} /> */}
 
           <Route element={<AnonymousRouteContainerOutlet />}>
             <Route path="login" element={<LoginPage />} />
@@ -52,7 +51,8 @@ export const App = () => {
             <Route path="/forgot-password/renew" element={<RenewForgotPasswordPage />} />
           </Route>
 
-          <Route path="*" element={<Navigate replace to="/" />} />
+          {/* <Route path="*" element={<Navigate replace to="/" />} /> */}
+          <Route path="*" element={<Navigate replace to="/login" />} />
         </>
       )}
 

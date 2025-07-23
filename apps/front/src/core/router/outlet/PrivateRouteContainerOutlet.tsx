@@ -16,10 +16,11 @@ const MainWrapper = styled(Box)(({ theme }) => ({
 }))
 
 const ContainerStyled = styled(Container)(({ theme }) => ({
-  [theme.breakpoints.down('md')]: {
-    [`&.${containerClasses.root}`]: {
+  [`&.${containerClasses.root}`]: {
+    marginBottom: '130px',
+
+    [theme.breakpoints.down('md')]: {
       marginTop: '56px',
-      marginBottom: '130px',
     },
   },
 }))
