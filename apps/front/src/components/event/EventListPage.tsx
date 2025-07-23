@@ -47,7 +47,7 @@ export const EventListPage = () => {
       <Loader loading={loading}>
         <Grid container spacing={3}>
           {(value?.resources || []).map(event => (
-            <Grid key={event.id} size={{ xs: 12, md: 6 }}>
+            <Grid key={event.id} size={{ xs: 12, lg: 6 }}>
               <EventCard event={event} />
             </Grid>
           ))}

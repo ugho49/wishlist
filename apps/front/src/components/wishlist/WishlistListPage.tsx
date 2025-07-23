@@ -47,7 +47,7 @@ export const WishlistListPage = () => {
       <Loader loading={loading}>
         <Grid container spacing={3}>
           {(value?.resources || []).map(wishlist => (
-            <Grid key={wishlist.id} size={{ xs: 12, md: 6 }}>
+            <Grid key={wishlist.id} size={{ xs: 12, lg: 6 }}>
               <WishlistCardWithEvents wishlist={wishlist} />
             </Grid>
           ))}
