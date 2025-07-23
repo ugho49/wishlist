@@ -2,7 +2,7 @@ import type { ResetPasswordValidationInputDto } from '@wishlist/common'
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import SaveAsIcon from '@mui/icons-material/SaveAs'
-import { Box, Button, Stack, TextField } from '@mui/material'
+import { Box, Button, Stack, styled, TextField, Typography } from '@mui/material'
 import { useMutation } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
@@ -11,21 +11,70 @@ import { z } from 'zod'
 import { useApi } from '../../hooks/useApi'
 import { useCustomSearchParams } from '../../hooks/useCustomSearchParams'
 import { useToast } from '../../hooks/useToast'
-import { Card } from '../common/Card'
 import { InputLabel } from '../common/InputLabel'
 import { RouterLink } from '../common/RouterLink'
-import { Subtitle } from '../common/Subtitle'
 
 type SearchParamsType = {
   email?: string
   token?: string
 }
 
-const schema = z.object({
-  password: z.string().min(8, '8 caractères minimum').max(50, '50 caractères maximum'),
-})
+const schema = z
+  .object({
+    password: z.string().min(8, '8 caractères minimum').max(50, '50 caractères maximum'),
+    confirmPassword: z.string().min(1, 'Veuillez confirmer votre mot de passe'),
+  })
+  .refine(data => data.password === data.confirmPassword, {
+    message: 'Les mots de passe ne correspondent pas',
+    path: ['confirmPassword'],
+  })
 
 type FormFields = z.infer<typeof schema>
+
+const TitleStyled = styled(Typography)(({ theme }) => ({
+  fontSize: '1.75rem',
+  fontWeight: 600,
+  color: theme.palette.text.primary,
+  textAlign: 'center',
+  marginBottom: 24,
+}))
+
+const TextFieldStyled = styled(TextField)(({ theme }) => ({
+  '& .MuiOutlinedInput-root': {
+    '&:hover fieldset': {
+      borderColor: theme.palette.primary.main,
+    },
+  },
+}))
+
+const ButtonStyled = styled(Button)(() => ({
+  paddingTop: 12,
+  paddingBottom: 12,
+  fontSize: '1rem',
+  fontWeight: 600,
+}))
+
+const FooterStackStyled = styled(Stack)(({ theme }) => ({
+  marginTop: theme.spacing(2.5),
+  gap: theme.spacing(1),
+  alignItems: 'center',
+}))
+
+const ErrorMessageStyled = styled(Typography)(({ theme }) => ({
+  textAlign: 'center',
+  color: theme.palette.error.main,
+  fontSize: '1.1rem',
+  fontWeight: 500,
+}))
+
+const InfoMessageStyled = styled(Typography)(({ theme }) => ({
+  textAlign: 'center',
+  color: theme.palette.text.secondary,
+  backgroundColor: theme.palette.grey[50],
+  padding: theme.spacing(2),
+  borderRadius: theme.shape.borderRadius,
+  border: `1px solid ${theme.palette.grey[200]}`,
+}))
 
 export const RenewForgotPasswordPage = () => {
   const api = useApi()
@@ -63,51 +112,73 @@ export const RenewForgotPasswordPage = () => {
     })
 
   if (!email || !token) {
-    return <div>Cette url n'est pas valide</div>
+    return (
+      <Stack spacing={4} alignItems="center">
+        <ErrorMessageStyled variant="h6">Cette URL n'est pas valide</ErrorMessageStyled>
+        <RouterLink to="/forgot-password">Demander un nouveau lien</RouterLink>
+      </Stack>
+    )
   }
 
   return (
-    <>
-      <Card sx={{ width: '100%' }}>
-        <Subtitle>Mot de passe oublié</Subtitle>
-        <Stack component="form" onSubmit={handleSubmit(onSubmit)} gap={3}>
-          <Box>
-            <InputLabel>Email</InputLabel>
-            <TextField autoComplete="off" fullWidth value={email} inputProps={{ readOnly: true }} disabled />
-          </Box>
-          <Box>
-            <InputLabel required>Nouveau mot de passe</InputLabel>
-            <TextField
-              {...register('password')}
-              fullWidth
-              placeholder="Un super mot de passe"
-              type="password"
-              autoComplete="new-password"
-              error={!!formErrors.password}
-              helperText={formErrors.password?.message}
-            />
-          </Box>
-          <Button
-            type="submit"
+    <Stack spacing={4} alignItems="center">
+      <TitleStyled variant="h4">Mot de passe oublié</TitleStyled>
+
+      <InfoMessageStyled variant="body1">
+        Vous êtes en train de définir un nouveau mot de passe pour <strong>{email}</strong>
+      </InfoMessageStyled>
+
+      <Stack component="form" onSubmit={handleSubmit(onSubmit)} spacing={3} width="100%">
+        <Box>
+          <InputLabel required>Nouveau mot de passe</InputLabel>
+          <TextFieldStyled
+            {...register('password')}
             fullWidth
-            variant="contained"
-            size="large"
-            color="secondary"
-            loading={isSubmitting}
-            loadingPosition="start"
-            startIcon={<SaveAsIcon />}
-            disabled={isSubmitting}
-          >
-            Changer mon mot de passe
-          </Button>
-        </Stack>
-      </Card>
-      <Stack sx={{ marginTop: '20px' }} gap={1} alignItems="center">
-        <Stack direction="row" alignItems="center" gap={1}>
-          <Box>Déjà inscrit ?</Box>
+            placeholder="Un super mot de passe"
+            type="password"
+            autoComplete="new-password"
+            autoFocus
+            error={!!formErrors.password}
+            helperText={formErrors.password?.message}
+          />
+        </Box>
+
+        <Box>
+          <InputLabel required>Confirmer le mot de passe</InputLabel>
+          <TextFieldStyled
+            {...register('confirmPassword')}
+            fullWidth
+            placeholder="Confirmez votre mot de passe"
+            type="password"
+            autoComplete="new-password"
+            error={!!formErrors.confirmPassword}
+            helperText={formErrors.confirmPassword?.message}
+          />
+        </Box>
+
+        <ButtonStyled
+          type="submit"
+          fullWidth
+          variant="contained"
+          size="large"
+          color="primary"
+          loading={isSubmitting}
+          loadingPosition="start"
+          startIcon={<SaveAsIcon />}
+          disabled={isSubmitting}
+        >
+          Changer mon mot de passe
+        </ButtonStyled>
+      </Stack>
+
+      <FooterStackStyled>
+        <Stack direction="row" alignItems="center" spacing={1}>
+          <Typography variant="body2" color="text.secondary">
+            Déjà inscrit ?
+          </Typography>
           <RouterLink to="/login">Me connecter</RouterLink>
         </Stack>
-      </Stack>
-    </>
+      </FooterStackStyled>
+    </Stack>
   )
 }

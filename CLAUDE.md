@@ -54,9 +54,17 @@ This is an Nx monorepo containing a wishlist application with React 19 frontend 
 ### Frontend Architecture (React)
 - **State Management**: Redux Toolkit for client state, React Query for server state
 - **UI Framework**: Material-UI (MUI) v6 with custom theming system
+- **Styling**: Prefer `styled()` components over `sx` prop for reusable styles and better performance
 - **Routing**: React Router DOM v7 with modern data loading patterns
 - **Form Handling**: React Hook Form with Zod schema validation
 - **Build Tool**: Vite with SWC for fast compilation and SVGR for SVG imports
+
+#### Frontend Styling Guidelines
+- **Use `styled()` components** whenever possible instead of `sx` prop for better performance and reusability
+- **Reserve `sx` prop** only for one-off styles or rapid prototyping
+- **Theme integration**: Always use theme values in `styled()` components via the `theme` parameter
+- **Responsive design**: Use theme breakpoints in styled components: `theme.breakpoints.up('md')`
+- **Component naming**: Use descriptive names with `Styled` suffix (e.g., `HeaderStyled`, `ContainerWrapper`)
 
 ### Key Domain Concepts
 - **Events**: Central organizing concept for wishlist sharing with mandatory event dates

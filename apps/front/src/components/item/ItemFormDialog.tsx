@@ -29,10 +29,10 @@ import {
 import { useTheme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useApi, useToast } from '@wishlist/front-hooks'
 import React, { forwardRef, useCallback, useEffect, useMemo, useState } from 'react'
 import { TidyURL } from 'tidy-url'
 
-import { useApi, useToast } from '../../hooks'
 import { isValidUrl } from '../../utils/router.utils'
 import { CharsRemaining } from '../common/CharsRemaining'
 import { InputLabel } from '../common/InputLabel'
@@ -317,7 +317,7 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
             fullWidth
             variant="contained"
             size="large"
-            color="secondary"
+            color="primary"
             loading={loading}
             loadingPosition="start"
             disabled={loading || !formIsValid}

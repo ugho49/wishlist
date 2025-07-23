@@ -3,7 +3,7 @@ import type { LoginOutputDto } from '@wishlist/common'
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import PersonAddIcon from '@mui/icons-material/PersonAdd'
-import { Alert, Box, Button, Stack, TextField } from '@mui/material'
+import { Alert, Button, Divider, Stack, styled, TextField, Typography } from '@mui/material'
 import { GoogleLogin } from '@react-oauth/google'
 import { useMutation } from '@tanstack/react-query'
 import { AxiosError } from 'axios'
@@ -16,10 +16,7 @@ import { setTokens } from '../../core/store/features'
 import { useApi } from '../../hooks/useApi'
 import { useToast } from '../../hooks/useToast'
 import { zodRequiredString } from '../../utils/validation'
-import { Card } from '../common/Card'
-import { InputLabel } from '../common/InputLabel'
 import { RouterLink } from '../common/RouterLink'
-import { Subtitle } from '../common/Subtitle'
 
 const schema = z.object({
   email: z.string().email({ message: 'Email invalide' }).max(200, '200 caractères maximum'),
@@ -29,6 +26,33 @@ const schema = z.object({
 })
 
 type FormFields = z.infer<typeof schema>
+
+const TitleStyled = styled(Typography)(({ theme }) => ({
+  fontSize: '1.75rem',
+  fontWeight: 600,
+  color: theme.palette.text.primary,
+  textAlign: 'center',
+}))
+
+const TextFieldStyled = styled(TextField)(({ theme }) => ({
+  '& .MuiOutlinedInput-root': {
+    '&:hover fieldset': {
+      borderColor: theme.palette.primary.main,
+    },
+  },
+}))
+
+const ButtonStyled = styled(Button)(() => ({
+  paddingTop: 12,
+  paddingBottom: 12,
+  fontSize: '1rem',
+  fontWeight: 600,
+}))
+
+const DividerStyled = styled(Divider)(() => ({
+  marginTop: 16,
+  marginBottom: 16,
+}))
 
 export const RegisterPage = () => {
   const api = useApi()
@@ -89,92 +113,95 @@ export const RegisterPage = () => {
   }
 
   return (
-    <>
-      <Card sx={{ width: '100%' }}>
-        <Subtitle>Inscription</Subtitle>
-        <Stack component="form" onSubmit={handleSubmit(onSubmit)} gap={3}>
-          {formErrors.root && <Alert severity="error">{formErrors.root.message}</Alert>}
+    <Stack spacing={4} alignItems="center">
+      <TitleStyled variant="h4">Créer un compte</TitleStyled>
 
-          <Stack direction="row" flexWrap="wrap" gap={3}>
-            <Box sx={{ flexGrow: 1 }}>
-              <InputLabel required>Prénom</InputLabel>
-              <TextField
-                {...register('firstname')}
-                fullWidth
-                autoFocus
-                placeholder="Mon Prénom"
-                autoComplete="given-name"
-                error={!!formErrors.firstname}
-                helperText={formErrors.firstname?.message}
-              />
-            </Box>
+      <Stack component="form" onSubmit={handleSubmit(onSubmit)} spacing={3} width="100%">
+        {formErrors.root && <Alert severity="error">{formErrors.root.message}</Alert>}
 
-            <Box sx={{ flexGrow: 1 }}>
-              <InputLabel required>Nom</InputLabel>
-              <TextField
-                {...register('lastname')}
-                fullWidth
-                placeholder="Mon Nom"
-                autoComplete="family-name"
-                error={!!formErrors.lastname}
-                helperText={formErrors.lastname?.message}
-              />
-            </Box>
-          </Stack>
+        <Stack direction="row" spacing={2}>
+          <TextFieldStyled
+            {...register('firstname')}
+            label="Prénom"
+            fullWidth
+            autoFocus
+            placeholder="Votre prénom"
+            autoComplete="given-name"
+            error={!!formErrors.firstname}
+            helperText={formErrors.firstname?.message}
+          />
 
-          <Box>
-            <InputLabel required>Email</InputLabel>
-            <TextField
-              {...register('email')}
-              type="email"
-              fullWidth
-              placeholder="Mon adresse email"
-              autoComplete="email"
-              error={!!formErrors.email}
-              helperText={formErrors.email?.message}
-            />
-          </Box>
-          <Box>
-            <InputLabel required>Mot de passe</InputLabel>
-            <TextField
-              {...register('password')}
-              fullWidth
-              placeholder="Un super mot de passe"
-              type="password"
-              autoComplete="new-password"
-              error={!!formErrors.password}
-              helperText={formErrors.password?.message}
-            />
-          </Box>
-          <Stack alignItems="center" gap={2}>
-            <Button
-              type="submit"
-              variant="contained"
-              size="large"
-              color="secondary"
-              loading={isSubmitting}
-              loadingPosition="start"
-              startIcon={<PersonAddIcon />}
-              disabled={isSubmitting || socialLoading}
-            >
-              M'inscrire
-            </Button>
-            <GoogleLogin
-              onSuccess={onGoogleRegisterSuccess}
-              onError={onGoogleRegisterFailure}
-              text="signup_with"
-              locale="fr"
-            />
-          </Stack>
+          <TextFieldStyled
+            {...register('lastname')}
+            label="Nom"
+            fullWidth
+            placeholder="Votre nom"
+            autoComplete="family-name"
+            error={!!formErrors.lastname}
+            helperText={formErrors.lastname?.message}
+          />
         </Stack>
-      </Card>
-      <Stack sx={{ marginTop: '20px' }} gap={1} alignItems="center">
-        <Stack direction="row" alignItems="center" gap={1}>
-          <Box>Déjà inscrit ?</Box>
-          <RouterLink to="/login">Me connecter</RouterLink>
+
+        <TextFieldStyled
+          {...register('email')}
+          type="email"
+          label="Email"
+          fullWidth
+          placeholder="votre@email.com"
+          autoComplete="email"
+          error={!!formErrors.email}
+          helperText={formErrors.email?.message}
+        />
+
+        <TextFieldStyled
+          {...register('password')}
+          type="password"
+          label="Mot de passe"
+          fullWidth
+          placeholder="Choisissez un mot de passe sécurisé"
+          autoComplete="new-password"
+          error={!!formErrors.password}
+          helperText={formErrors.password?.message}
+        />
+
+        <ButtonStyled
+          type="submit"
+          variant="contained"
+          size="large"
+          fullWidth
+          loading={isSubmitting}
+          loadingPosition="start"
+          startIcon={<PersonAddIcon />}
+          disabled={isSubmitting || socialLoading}
+        >
+          Créer mon compte
+        </ButtonStyled>
+
+        <DividerStyled>
+          <Typography variant="body2" color="text.secondary">
+            ou
+          </Typography>
+        </DividerStyled>
+
+        <Stack alignItems="center">
+          <GoogleLogin
+            onSuccess={onGoogleRegisterSuccess}
+            onError={onGoogleRegisterFailure}
+            text="signup_with"
+            locale="fr"
+          />
+        </Stack>
+      </Stack>
+
+      <Stack spacing={2} alignItems="center">
+        <Stack direction="row" alignItems="center" spacing={1}>
+          <Typography variant="body2" color="text.secondary">
+            Déjà inscrit ?
+          </Typography>
+          <RouterLink to="/login">Se connecter</RouterLink>
         </Stack>
         <RouterLink to="/forgot-password">Mot de passe oublié ?</RouterLink>
       </Stack>
-    </>
+    </Stack>
   )
 }

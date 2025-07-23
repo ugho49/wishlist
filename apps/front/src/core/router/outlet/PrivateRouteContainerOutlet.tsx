@@ -1,19 +1,25 @@
-import { Box, Container, containerClasses, styled } from '@mui/material'
+import { Box, Container, styled } from '@mui/material'
 import { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import { Outlet } from 'react-router-dom'
 
-import { BottomNavigation } from '../../../components/common/BottomNavigation'
-import { Navbar } from '../../../components/common/Navbar'
+import { MobileBottomNavigation } from '../../../components/common/MobileBottomNavigation'
+import { MobileTopBar } from '../../../components/common/MobileTopBar'
+import { SideNavigation } from '../../../components/common/SideNavigation'
 import { useFetchUserInfo } from '../../../hooks/domain/useFetchUserInfo'
 import { setUser } from '../../store/features'
 
-const ContainerStyled = styled(Container)({
-  [`&.${containerClasses.root}`]: {
-    marginTop: 2,
-    marginBottom: '130px',
+const MainWrapper = styled(Box)(({ theme }) => ({
+  backgroundColor: theme.palette.grey[50],
+  height: '100vh',
+  [theme.breakpoints.up('md')]: {
+    marginLeft: 280, // Make room for side navigation
   },
-})
+  [theme.breakpoints.down('md')]: {
+    paddingTop: '64px', // Space for fixed mobile top bar
+    paddingBottom: '100px', // Space for fixed mobile bottom bar
+  },
+}))
 
 export const PrivateRouteContainerOutlet = () => {
   const { user } = useFetchUserInfo()
@@ -27,13 +33,20 @@ export const PrivateRouteContainerOutlet = () => {
 
   return (
     <>
-      <Navbar />
-      <Box component="main">
-        <ContainerStyled fixed maxWidth="lg">
+      {/* Mobile Top Bar - only visible on mobile */}
+      <MobileTopBar />
+
+      {/* Side Navigation - responsive drawer */}
+      <SideNavigation />
+
+      {/* Mobile Bottom Navigation - only visible on mobile */}
+      <MobileBottomNavigation />
+
+      <MainWrapper>
+        <Container fixed maxWidth="lg">
           <Outlet />
-        </ContainerStyled>
-      </Box>
-      <BottomNavigation />
+        </Container>
+      </MainWrapper>
     </>
   )
 }

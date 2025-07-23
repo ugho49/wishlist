@@ -15,6 +15,7 @@ import { CreateEventPage } from './components/event/CreateEventPage'
 import { EditEventPage } from './components/event/EditEventPage'
 import { EventListPage } from './components/event/EventListPage'
 import { EventPage } from './components/event/EventPage'
+import { LandingPage } from './components/landing/LandingPage'
 import { SecretSantaPage } from './components/secret-santa/SecretSantaPage'
 import { AdminUserPage } from './components/user/admin/AdminUserPage'
 import { UserProfilePage } from './components/user/UserProfilePage'
@@ -23,7 +24,6 @@ import { EditWishlistPage } from './components/wishlist/EditWishlistPage'
 import { WishlistListPage } from './components/wishlist/WishlistListPage'
 import { WishlistPage } from './components/wishlist/WishlistPage'
 import { NavigateToAuthenticatedWithContext } from './core/router/NavigateToAuthenticatedWithContext'
-import { NavigateToLoginWithContext } from './core/router/NavigateToLoginWithContext'
 import { AdminRouteOutlet } from './core/router/outlet/AdminRouteOutlet'
 import { AnonymousRouteContainerOutlet } from './core/router/outlet/AnonymousRouteContainerOutlet'
 import { PrivateRouteContainerOutlet } from './core/router/outlet/PrivateRouteContainerOutlet'
@@ -43,7 +43,7 @@ export const App = () => {
     <Routes>
       {!isLoggedIn && (
         <>
-          <Route path="*" element={<NavigateToLoginWithContext />} />
+          <Route path="/" element={<LandingPage />} />
 
           <Route element={<AnonymousRouteContainerOutlet />}>
             <Route path="login" element={<LoginPage />} />
@@ -51,6 +51,8 @@ export const App = () => {
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/forgot-password/renew" element={<RenewForgotPasswordPage />} />
           </Route>
+
+          <Route path="*" element={<Navigate replace to="/" />} />
         </>
       )}
 

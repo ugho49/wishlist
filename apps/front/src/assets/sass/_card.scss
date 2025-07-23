@@ -1,20 +1,21 @@
 @mixin base-card {
-  border-radius: 3px;
+  border-radius: 8px;
   text-decoration: none;
   color: inherit;
   display: block;
   background-color: #ffffff;
+  transition: all 0.2s ease-in-out;
 }
 
 .card {
   @include base-card;
 
-  box-shadow: 0 0 1px 0 rgba(87, 113, 149, 0.3), 0 2px 4px -2px rgba(87, 113, 149, 0.5);
-  transition: 0.3s box-shadow;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
 
   &.clickable:hover {
     cursor: pointer;
-    box-shadow: 0 4px 12px 0 rgba(4, 28, 44, 0.1), 0 0 9px 0 rgba(4, 28, 44, 0.08);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+    transform: translateY(-1px);
   }
 
   &.no-padding {
@@ -25,10 +26,13 @@
 .card-outlined {
   @include base-card;
 
-  border: 1px solid #cecece;
+  border: 1px solid #e5e7eb;
+  box-shadow: none;
 
   &.clickable:hover {
     cursor: pointer;
-    background-color: rgb(206 206 206 / 10%);
+    border-color: #d1d5db;
+    background-color: #f9fafb;
+    transform: translateY(-1px);
   }
 }
