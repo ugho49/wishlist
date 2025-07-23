@@ -16,6 +16,5 @@
   "prConcurrentLimit": 10,
   "circleci": {
     "fileMatch": [".circleci/config.yml", ".circleci/continuation.yml"]
-  },
-  "matchSourceUrls": ["https://github.com/nrwl/nx**"]
+  }
 }
