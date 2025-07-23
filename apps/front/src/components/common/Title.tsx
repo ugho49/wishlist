@@ -7,7 +7,7 @@ import clsx from 'clsx'
 import { RouterLink } from './RouterLink'
 
 const TitleRoot = styled(Stack)(({ theme }) => ({
-  marginBlock: '20px',
+  paddingBlock: '20px',
   '&:not(.smallMarginBottom)': {
     [theme.breakpoints.up('sm')]: {
       marginBottom: '60px',

@@ -59,7 +59,7 @@ export const WishlistItems = ({ wishlist }: WishlistTabItemsProps) => {
           <FabAutoGrow
             label={ownerOfTheList ? 'Ajouter un souhait' : 'Suggérer un souhait'}
             icon={<AddIcon />}
-            color="secondary"
+            color="primary"
             onClick={() => addItem()}
           />
         </>
@@ -67,7 +67,7 @@ export const WishlistItems = ({ wishlist }: WishlistTabItemsProps) => {
 
       {nbOfItems === 0 && (
         <Stack alignItems="center" gap={2} sx={{ marginTop: '50px' }}>
-          <Button variant="contained" color="secondary" onClick={() => addItem()}>
+          <Button variant="contained" color="primary" onClick={() => addItem()}>
             Ajouter un souhait
           </Button>
           <span>Cette liste ne contient aucun souhait.</span>

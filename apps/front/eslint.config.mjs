@@ -1,3 +1,4 @@
+import nxPlugin from '@nx/eslint-plugin'
 import reactPlugin from 'eslint-plugin-react'
 import globals from 'globals'
 
@@ -15,6 +16,10 @@ export default [
         ...globals.browser,
       },
     },
+    plugins: {
+      ...reactPlugin.configs.flat.recommended.plugins,
+      '@nx': nxPlugin,
+    },
     rules: {
       ...reactPlugin.configs.flat.recommended.rules,
       'react/react-in-jsx-scope': 0,
@@ -25,6 +30,19 @@ export default [
         'error',
         {
           patterns: ['@mui/*/*/*', '!@mui/material/test-utils/*'],
+        },
+      ],
+      '@nx/enforce-module-boundaries': [
+        'error',
+        {
+          enforceBuildableLibDependency: true,
+          allow: ['@wishlist/front-components/*', '@wishlist/front-hooks'],
+          depConstraints: [
+            {
+              sourceTag: '*',
+              onlyDependOnLibsWithTags: ['*'],
+            },
+          ],
         },
       ],
     },

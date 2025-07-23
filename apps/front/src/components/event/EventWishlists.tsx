@@ -37,13 +37,13 @@ export const EventWishlists = ({ event }: EventWishlistsProps) => {
               ))}
           </Grid>
 
-          <FabAutoGrow label="Ajouter une liste" color="secondary" icon={<AddIcon />} to={addListRoute} />
+          <FabAutoGrow label="Ajouter une liste" color="primary" icon={<AddIcon />} to={addListRoute} />
         </>
       )}
 
       {nbOfItems === 0 && (
         <Stack alignItems="center" gap={2} sx={{ marginTop: '50px' }}>
-          <Button component={RouterLink} variant="contained" color="secondary" to={addListRoute}>
+          <Button component={RouterLink} variant="contained" color="primary" to={addListRoute}>
             Ajouter une liste
           </Button>
           <span>Cet évènement ne contient aucune liste.</span>
