@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "nx-mcp": {
+      "command": "npx",
+      "args": ["nx-mcp@latest"]
+    },
+    "mui-mcp": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@mui/mcp@latest"]
+    },
+    "circleci-mcp": {
+      "command": "npx",
+      "args": ["-y", "@circleci/mcp-server-circleci@latest"]
+    }
+  }
+}
