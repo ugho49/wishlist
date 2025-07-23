@@ -1,4 +1,4 @@
-import { Box, Container, styled } from '@mui/material'
+import { Box, Container, containerClasses, styled } from '@mui/material'
 import { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import { Outlet } from 'react-router-dom'
@@ -10,7 +10,6 @@ import { useFetchUserInfo } from '../../../hooks/domain/useFetchUserInfo'
 import { setUser } from '../../store/features'
 
 const MainWrapper = styled(Box)(({ theme }) => ({
-  height: '100vh',
   [theme.breakpoints.up('md')]: {
     marginLeft: 280, // Make room for side navigation
   },
@@ -18,8 +17,10 @@ const MainWrapper = styled(Box)(({ theme }) => ({
 
 const ContainerStyled = styled(Container)(({ theme }) => ({
   [theme.breakpoints.down('md')]: {
-    marginTop: '64px', // Space for fixed mobile top bar
-    marginBottom: '56px', // Space for fixed mobile bottom bar
+    [`&.${containerClasses.root}`]: {
+      marginTop: '56px',
+      marginBottom: '130px',
+    },
   },
 }))
 
@@ -41,7 +42,7 @@ export const PrivateRouteContainerOutlet = () => {
       {/* Mobile Top Bar - only visible on mobile */}
       <MobileTopBar />
 
-      <MainWrapper>
+      <MainWrapper as="main">
         <ContainerStyled fixed maxWidth="lg">
           <Outlet />
         </ContainerStyled>

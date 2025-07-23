@@ -10,7 +10,8 @@ const TitleRoot = styled(Stack)(({ theme }) => ({
   paddingBlock: '20px',
   '&:not(.smallMarginBottom)': {
     [theme.breakpoints.up('sm')]: {
-      marginBottom: '60px',
+      marginTop: '10px',
+      marginBottom: '20px',
     },
   },
 }))
