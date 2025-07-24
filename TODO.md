@@ -25,3 +25,18 @@
 ## Wishlist
 
 - [ ] Frontend: change description card design
+
+
+- [ ] Breadcrumbs for desktop
+- [ ] Dans wishlist page:
+    - [ ] Retravailler “Trier par” et “Filtrer par” 
+    - [ ] Retravailler Items
+    - [ ] Quand on click sur l’image d’un item, défiler a droite ou a gauche avec les flèches et afficher en plus de “fermer” et “open link”, “prendre” / “ne plus prendre”
+
+- [ ] Dans la user page, indiquer plus clairement que la photo peut être ajouter
+- [ ] Lors de la première connexion après création user account, inciter l’user a ajouter une photo
+
+- [ ] Retravailler la landing page
+  - [ ] Mode mobile ?
+  - [ ] Pages à implementer Confidentialité | Conditions | Cookies ???
+  - [ ] Navbar

@@ -1,600 +1,393 @@
-import { Box, Button, Container, Stack, Typography } from '@mui/material'
-import { useNavigate } from 'react-router-dom'
+import { Box, Container, Stack, Typography } from '@mui/material'
+import { styled } from '@mui/material/styles'
+import { useEffect, useRef } from 'react'
 
-import { Logo } from '../common/Logo'
+import { CTASection } from './CTASection'
+import { FeaturesGridSection } from './FeaturesGrid'
+import { HeroSection } from './HeroSection'
 
-export const LandingPage = () => {
-  const navigate = useNavigate()
+const FooterContainer = styled(Box)(({ theme }) => ({
+  backgroundColor: theme.palette.primary.dark,
+  color: 'white',
+  padding: theme.spacing(4, 0),
+}))
+
+const FooterContent = styled(Container)(() => ({
+  display: 'flex',
+  flexDirection: 'column',
+}))
+
+const FooterColumn = styled(Stack)(() => ({
+  gap: '16px',
+}))
+
+const FooterLinkItem = styled(Typography)(() => ({
+  color: '#d1d5db',
+  textDecoration: 'none',
+  cursor: 'pointer',
+  transition: 'color 0.3s ease',
+  '&:hover': {
+    color: 'white',
+  },
+}))
+
+const FAQSection = styled(Box)(({ theme }) => ({
+  padding: theme.spacing(8, 0, 12),
+  backgroundColor: 'white',
+  borderTop: '1px solid #e5e7eb',
+  borderBottom: '1px solid #e5e7eb',
+}))
+
+const FAQTitle = styled(Typography)(({ theme }) => ({
+  textAlign: 'center',
+  marginBottom: theme.spacing(6),
+  fontSize: '2.25rem',
+  fontWeight: 600,
+  color: theme.palette.text.primary,
+  [theme.breakpoints.down('md')]: {
+    fontSize: '1.75rem',
+    marginBottom: theme.spacing(5),
+  },
+}))
+
+const FAQContainerWrapper = styled(Box)(() => ({
+  position: 'relative',
+  // Masques de fondu sur les côtés
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: `${FAQ_ANIMATION_CONFIG.FADE_WIDTH}px`,
+    height: '100%',
+    background: 'linear-gradient(to right, white 0%, rgba(255, 255, 255, 0) 100%)',
+    zIndex: 10,
+    pointerEvents: 'none',
+  },
+  '&::after': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    width: `${FAQ_ANIMATION_CONFIG.FADE_WIDTH}px`,
+    height: '100%',
+    background: 'linear-gradient(to left, white 0%, rgba(255, 255, 255, 0) 100%)',
+    zIndex: 10,
+    pointerEvents: 'none',
+  },
+}))
+
+const FAQContainer = styled(Box)(() => ({
+  overflowX: 'auto',
+  overflowY: 'hidden',
+  position: 'relative',
+  paddingBottom: '16px',
+  scrollbarWidth: 'none',
+  msOverflowStyle: 'none',
+  WebkitOverflowScrolling: 'touch',
+  '&::-webkit-scrollbar': {
+    display: 'none',
+  },
+  '&:hover': {
+    cursor: 'grab',
+  },
+  '&:active': {
+    cursor: 'grabbing',
+  },
+}))
+
+const FAQScrollWrapper = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  gap: `${FAQ_ANIMATION_CONFIG.CARD_GAP}px`,
+  [theme.breakpoints.down('md')]: {
+    gap: theme.spacing(3),
+  },
+  [theme.breakpoints.down('sm')]: {
+    gap: theme.spacing(2),
+  },
+}))
+
+const FAQCard = styled(Box)(({ theme }) => ({
+  backgroundColor: '#fafafa',
+  borderRadius: theme.spacing(2),
+  padding: theme.spacing(4),
+  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+  border: '1px solid #e5e7eb',
+  transition: 'all 0.3s ease',
+  minWidth: `${FAQ_ANIMATION_CONFIG.CARD_WIDTH}px`,
+  maxWidth: `${FAQ_ANIMATION_CONFIG.CARD_WIDTH}px`,
+  scrollSnapAlign: 'start',
+  flexShrink: 0,
+  [theme.breakpoints.down('md')]: {
+    minWidth: '320px',
+    maxWidth: '320px',
+  },
+  [theme.breakpoints.down('sm')]: {
+    minWidth: '300px',
+    maxWidth: '300px',
+    padding: theme.spacing(3),
+  },
+}))
+
+const FAQQuestion = styled(Typography)(({ theme }) => ({
+  fontWeight: 600,
+  marginBottom: theme.spacing(2),
+  color: theme.palette.text.primary,
+  fontSize: '1.1rem',
+}))
+
+const FAQAnswer = styled(Typography)(({ theme }) => ({
+  color: theme.palette.text.secondary,
+  lineHeight: 1.6,
+}))
+
+// Configuration de l'animation FAQ
+const FAQ_ANIMATION_CONFIG = {
+  SCROLL_SPEED: 0.3, // pixels par frame
+  CARD_WIDTH: 380, // largeur des cartes FAQ
+  CARD_GAP: 32, // espacement entre les cartes
+  PAUSE_AFTER_INTERACTION: 500, // délai avant reprise de l'animation (ms)
+  USER_SCROLL_DETECTION_DELAY: 100, // délai pour détecter la fin du scroll utilisateur (ms)
+  DRAG_SENSITIVITY: 1, // multiplicateur de sensibilité pour le drag
+  INITIAL_DELAY: 3000, // délai initial avant démarrage de l'animation (ms)
+  FADE_WIDTH: 80, // largeur du fondu sur les côtés (px)
+} as const
+
+const InfiniteScrollFAQ = ({ faqs }: { faqs: Array<{ question: string; answer: string }> }) => {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const wrapperRef = useRef<HTMLDivElement>(null)
+  const animationRef = useRef<number>(0)
+  const isUserScrollingRef = useRef(false)
+  const isHoveringRef = useRef(false)
+  const lastUserScrollTime = useRef(Date.now() - FAQ_ANIMATION_CONFIG.INITIAL_DELAY)
+  const isDraggingRef = useRef(false)
+  const startXRef = useRef(0)
+  const scrollLeftRef = useRef(0)
+  const scrollAccumulator = useRef(0)
+
+  useEffect(() => {
+    const container = containerRef.current
+    const wrapper = wrapperRef.current
+    if (!container || !wrapper) return
+
+    const scrollSpeed = FAQ_ANIMATION_CONFIG.SCROLL_SPEED
+    const cardWidth = FAQ_ANIMATION_CONFIG.CARD_WIDTH + FAQ_ANIMATION_CONFIG.CARD_GAP
+    const totalWidth = cardWidth * faqs.length
+
+    const animate = () => {
+      const currentTime = Date.now()
+
+      // Si l'utilisateur a scrollé récemment ou hover, attendre avant de reprendre l'animation
+      if (
+        currentTime - lastUserScrollTime.current < FAQ_ANIMATION_CONFIG.PAUSE_AFTER_INTERACTION ||
+        isDraggingRef.current ||
+        isHoveringRef.current
+      ) {
+        animationRef.current = requestAnimationFrame(animate)
+        return
+      }
+
+      if (!isUserScrollingRef.current && !isDraggingRef.current && !isHoveringRef.current) {
+        // Accumuler les petites valeurs de scroll pour gérer les vitesses très lentes
+        scrollAccumulator.current += scrollSpeed
+
+        // N'appliquer le scroll que quand on a au moins 1 pixel à déplacer
+        if (scrollAccumulator.current >= 1) {
+          const scrollAmount = Math.floor(scrollAccumulator.current)
+          container.scrollLeft += scrollAmount
+          scrollAccumulator.current -= scrollAmount
+        }
+      }
+
+      animationRef.current = requestAnimationFrame(animate)
+    }
+
+    // Détecter le scroll utilisateur (wheel, touch)
+    const handleWheel = () => {
+      isUserScrollingRef.current = true
+      lastUserScrollTime.current = Date.now()
+      setTimeout(() => {
+        isUserScrollingRef.current = false
+      }, FAQ_ANIMATION_CONFIG.USER_SCROLL_DETECTION_DELAY)
+    }
+
+    // Gérer le scroll infini sans interférer avec l'animation
+    const handleScroll = () => {
+      const { scrollLeft, scrollWidth, clientWidth } = container
+
+      if (scrollLeft <= 0) {
+        container.scrollLeft = totalWidth - 1
+      } else if (scrollLeft >= scrollWidth - clientWidth - 1) {
+        container.scrollLeft = totalWidth + 1
+      }
+    }
+
+    // Gestionnaires pour le drag scroll
+    const handleMouseDown = (e: MouseEvent) => {
+      isDraggingRef.current = true
+      startXRef.current = e.pageX - container.offsetLeft
+      scrollLeftRef.current = container.scrollLeft
+      lastUserScrollTime.current = Date.now()
+      container.style.cursor = 'grabbing'
+      container.style.userSelect = 'none'
+    }
+
+    const handleMouseUp = () => {
+      isDraggingRef.current = false
+      container.style.cursor = 'grab'
+      container.style.userSelect = 'auto'
+    }
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDraggingRef.current) return
+      e.preventDefault()
+      const x = e.pageX - container.offsetLeft
+      const walk = (x - startXRef.current) * FAQ_ANIMATION_CONFIG.DRAG_SENSITIVITY
+      container.scrollLeft = scrollLeftRef.current - walk
+      lastUserScrollTime.current = Date.now()
+    }
+
+    // Gestionnaires pour le hover
+    const handleMouseEnter = () => {
+      isHoveringRef.current = true
+      lastUserScrollTime.current = Date.now()
+    }
+
+    const handleMouseLeaveContainer = () => {
+      isHoveringRef.current = false
+      // Arrêter le drag si on sort du container
+      if (isDraggingRef.current) {
+        isDraggingRef.current = false
+        container.style.cursor = 'grab'
+        container.style.userSelect = 'auto'
+      }
+    }
+
+    container.addEventListener('scroll', handleScroll, { passive: true })
+    container.addEventListener('wheel', handleWheel, { passive: true })
+    container.addEventListener('touchstart', handleWheel, { passive: true })
+    container.addEventListener('mouseenter', handleMouseEnter, { passive: true })
+    container.addEventListener('mouseleave', handleMouseLeaveContainer, { passive: true })
+    container.addEventListener('mousedown', handleMouseDown)
+    container.addEventListener('mouseup', handleMouseUp)
+    container.addEventListener('mousemove', handleMouseMove)
+
+    // Positionner au milieu au démarrage
+    container.scrollLeft = totalWidth
+
+    // Démarrer l'animation immédiatement
+    animationRef.current = requestAnimationFrame(animate)
+
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current)
+      }
+      container.removeEventListener('scroll', handleScroll)
+      container.removeEventListener('wheel', handleWheel)
+      container.removeEventListener('touchstart', handleWheel)
+      container.removeEventListener('mouseenter', handleMouseEnter)
+      container.removeEventListener('mouseleave', handleMouseLeaveContainer)
+      container.removeEventListener('mousedown', handleMouseDown)
+      container.removeEventListener('mouseup', handleMouseUp)
+      container.removeEventListener('mousemove', handleMouseMove)
+    }
+  }, [faqs.length])
 
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        background: 'linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%)',
-      }}
-    >
-      <Container maxWidth="lg" sx={{ py: { xs: 4, sm: 6, md: 8 } }}>
-        {/* Hero Section */}
-        <Box sx={{ display: 'flex', alignItems: 'center', minHeight: { xs: 'auto', md: '80vh' } }}>
-          <Stack
-            direction={{ xs: 'column', md: 'row' }}
-            spacing={{ xs: 6, md: 8 }}
-            alignItems="center"
-            justifyContent="center"
-            sx={{ width: '100%' }}
-          >
-            {/* Hero Content */}
-            <Box sx={{ flex: 1, textAlign: { xs: 'center', md: 'left' }, px: { xs: 2, sm: 0 } }}>
-              <Logo height={48} variant="full" sx={{ mb: 4, justifyContent: { xs: 'center', md: 'flex-start' } }} />
+    <FAQContainerWrapper>
+      <FAQContainer ref={containerRef}>
+        <FAQScrollWrapper ref={wrapperRef}>
+          {/* Première série */}
+          {faqs.map((faq, index) => (
+            <FAQCard key={`first-${index}`}>
+              <FAQQuestion>{faq.question}</FAQQuestion>
+              <FAQAnswer>{faq.answer}</FAQAnswer>
+            </FAQCard>
+          ))}
+          {/* Série dupliquée pour l'effet infini */}
+          {faqs.map((faq, index) => (
+            <FAQCard key={`second-${index}`}>
+              <FAQQuestion>{faq.question}</FAQQuestion>
+              <FAQAnswer>{faq.answer}</FAQAnswer>
+            </FAQCard>
+          ))}
+          {/* Troisième série pour un scroll plus fluide */}
+          {faqs.map((faq, index) => (
+            <FAQCard key={`third-${index}`}>
+              <FAQQuestion>{faq.question}</FAQQuestion>
+              <FAQAnswer>{faq.answer}</FAQAnswer>
+            </FAQCard>
+          ))}
+        </FAQScrollWrapper>
+      </FAQContainer>
+    </FAQContainerWrapper>
+  )
+}
 
-              <Typography
-                variant="h1"
-                sx={{
-                  fontSize: { xs: '2rem', sm: '2.5rem', md: '3.5rem' },
-                  fontWeight: 700,
-                  mb: 3,
-                  color: 'text.primary',
-                  lineHeight: 1.2,
-                }}
-              >
-                Créez vos listes de souhaits
-                <br />
-                <Typography
-                  component="span"
-                  variant="h1"
-                  sx={{
-                    fontSize: { xs: '2rem', sm: '2.5rem', md: '3.5rem' },
-                    fontWeight: 700,
-                    color: 'primary.main',
-                  }}
-                >
-                  en toute simplicité
-                </Typography>
-              </Typography>
+export const LandingPage = () => {
+  const faqs = [
+    {
+      question: 'Est-ce que Wishlist est gratuit ?',
+      answer: 'Oui, Wishlist est entièrement gratuit à utiliser pour tous vos événements et listes de souhaits.',
+    },
+    {
+      question: 'Comment inviter mes proches ?',
+      answer: 'Vous pouvez facilement inviter vos proches par email ou en partageant un lien vers votre événement.',
+    },
+    {
+      question: 'Puis-je créer plusieurs listes ?',
+      answer: 'Absolument ! Vous pouvez créer autant de listes que vous voulez pour différents événements.',
+    },
+    {
+      question: 'Comment fonctionne le Secret Santa ?',
+      answer: 'Notre système effectue automatiquement le tirage au sort en respectant vos contraintes et exclusions.',
+    },
+    {
+      question: 'Mes données sont-elles sécurisées ?',
+      answer:
+        'Absolument ! Nous utilisons un chiffrement de niveau bancaire pour protéger toutes vos informations personnelles.',
+    },
+    {
+      question: 'Puis-je modifier mes listes après création ?',
+      answer: 'Oui, vous pouvez modifier, ajouter ou supprimer des articles de vos listes à tout moment.',
+    },
+    {
+      question: 'Comment réserver un cadeau ?',
+      answer: 'Cliquez simplement sur un article dans une liste pour le réserver et éviter les doublons.',
+    },
+  ]
 
-              <Typography
-                variant="h2"
-                sx={{
-                  fontSize: { xs: '1rem', sm: '1.1rem', md: '1.25rem' },
-                  fontWeight: 400,
-                  mb: 4,
-                  color: 'text.secondary',
-                  maxWidth: '500px',
-                  mx: { xs: 'auto', md: 0 },
-                  lineHeight: 1.6,
-                }}
-              >
-                Organisez vos événements, partagez vos souhaits avec vos proches et découvrez leurs envies. Parfait pour
-                les anniversaires, Noël, mariages et plus encore.
-              </Typography>
+  return (
+    <Box>
+      <HeroSection />
 
-              <Stack
-                direction={{ xs: 'column', sm: 'row' }}
-                spacing={2}
-                sx={{ justifyContent: { xs: 'center', md: 'flex-start' } }}
-              >
-                <Button
-                  variant="contained"
-                  size="large"
-                  onClick={() => navigate('/register')}
-                  sx={{
-                    py: 1.5,
-                    px: 4,
-                    fontSize: '1.1rem',
-                    fontWeight: 600,
-                  }}
-                >
-                  Commencer gratuitement
-                </Button>
+      <FeaturesGridSection />
 
-                <Button
-                  variant="outlined"
-                  size="large"
-                  onClick={() => navigate('/login')}
-                  sx={{
-                    py: 1.5,
-                    px: 4,
-                    fontSize: '1.1rem',
-                    fontWeight: 500,
-                    borderColor: 'primary.main',
-                    color: 'primary.main',
-                    '&:hover': {
-                      borderColor: 'primary.dark',
-                      backgroundColor: 'primary.50',
-                    },
-                  }}
-                >
-                  Se connecter
-                </Button>
+      <CTASection />
+
+      <FAQSection id="faq">
+        <Container maxWidth="xl" sx={{ px: { xs: 2, sm: 3, md: 4 } }}>
+          <FAQTitle>Questions fréquentes</FAQTitle>
+          <InfiniteScrollFAQ faqs={faqs} />
+        </Container>
+      </FAQSection>
+
+      <FooterContainer>
+        <FooterContent maxWidth="lg">
+          <Box display="flex" justifyContent="center">
+            <FooterColumn>
+              <Stack direction="row" spacing={3} justifyContent="center" alignItems="center">
+                <FooterLinkItem variant="body2">Confidentialité</FooterLinkItem>
+                <FooterLinkItem variant="body2">Conditions</FooterLinkItem>
+                <FooterLinkItem variant="body2">Cookies</FooterLinkItem>
               </Stack>
-            </Box>
-
-            {/* Hero Visual */}
-            <Box
-              sx={{
-                flex: 1,
-                display: 'flex',
-                justifyContent: 'center',
-                maxWidth: { xs: '100%', md: '500px' },
-              }}
-            >
-              <Box
-                sx={{
-                  width: '100%',
-                  maxWidth: 400,
-                  aspectRatio: '1/1',
-                  background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-                  borderRadius: 4,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  position: 'relative',
-                  overflow: 'hidden',
-                  boxShadow: '0 20px 25px -5px rgba(37, 99, 235, 0.1), 0 10px 10px -5px rgba(37, 99, 235, 0.04)',
-                }}
-              >
-                {/* Decorative gift boxes */}
-                <Stack spacing={3} alignItems="center">
-                  {[1, 2, 3].map(index => (
-                    <Box
-                      key={index}
-                      sx={{
-                        width: 60 + index * 10,
-                        height: 60 + index * 10,
-                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                        borderRadius: 2,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        position: 'relative',
-                        transform: `rotate(${index * 5 - 10}deg)`,
-                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                        '&::before': {
-                          content: '""',
-                          position: 'absolute',
-                          top: '50%',
-                          left: 0,
-                          right: 0,
-                          height: 4,
-                          backgroundColor: '#10b981',
-                          transform: 'translateY(-50%)',
-                        },
-                        '&::after': {
-                          content: '""',
-                          position: 'absolute',
-                          left: '50%',
-                          top: 0,
-                          bottom: 0,
-                          width: 4,
-                          backgroundColor: '#10b981',
-                          transform: 'translateX(-50%)',
-                        },
-                      }}
-                    >
-                      {/* Bow */}
-                      <Box
-                        sx={{
-                          width: 16,
-                          height: 8,
-                          backgroundColor: '#10b981',
-                          borderRadius: '50%',
-                          position: 'absolute',
-                          top: -4,
-                          left: '50%',
-                          transform: 'translateX(-50%)',
-                        }}
-                      />
-                    </Box>
-                  ))}
-                </Stack>
-              </Box>
-            </Box>
-          </Stack>
-        </Box>
-
-        {/* Features Section */}
-        <Box sx={{ py: { xs: 8, md: 12 } }}>
-          <Typography
-            variant="h3"
-            sx={{
-              textAlign: 'center',
-              mb: 6,
-              fontSize: { xs: '1.75rem', md: '2.25rem' },
-              fontWeight: 600,
-              color: 'text.primary',
-            }}
-          >
-            Pourquoi choisir Wishlist ?
-          </Typography>
-
-          <Stack
-            direction={{ xs: 'column', md: 'row' }}
-            spacing={4}
-            sx={{ maxWidth: '900px', mx: 'auto', px: { xs: 2, sm: 0 } }}
-          >
-            {[
-              {
-                title: 'Simple à utiliser',
-                description: 'Interface intuitive pour créer et gérer vos listes en quelques clics',
-                icon: '✨',
-              },
-              {
-                title: 'Partage facile',
-                description: 'Invitez vos proches à voir vos souhaits et découvrir les leurs',
-                icon: '🎁',
-              },
-              {
-                title: 'Secret Santa',
-                description: 'Organisez facilement vos tirages au sort pour les fêtes',
-                icon: '🎅',
-              },
-            ].map((feature, index) => (
-              <Box
-                key={index}
-                sx={{
-                  textAlign: 'center',
-                  p: { xs: 3, sm: 4 },
-                  backgroundColor: 'white',
-                  borderRadius: 3,
-                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-                  flex: 1,
-                  transition: 'transform 0.2s ease-in-out',
-                  '&:hover': {
-                    transform: 'translateY(-2px)',
-                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-                  },
-                }}
-              >
-                <Typography sx={{ fontSize: '3rem', mb: 2 }}>{feature.icon}</Typography>
-                <Typography
-                  variant="h4"
-                  sx={{
-                    fontSize: '1.25rem',
-                    fontWeight: 600,
-                    mb: 2,
-                    color: 'text.primary',
-                  }}
-                >
-                  {feature.title}
-                </Typography>
-                <Typography
-                  sx={{
-                    color: 'text.secondary',
-                    lineHeight: 1.6,
-                  }}
-                >
-                  {feature.description}
-                </Typography>
-              </Box>
-            ))}
-          </Stack>
-        </Box>
-
-        {/* Screenshots Section */}
-        <Box sx={{ py: { xs: 8, md: 12 }, px: { xs: 2, sm: 0 } }}>
-          <Typography
-            variant="h3"
-            sx={{
-              textAlign: 'center',
-              mb: 2,
-              fontSize: { xs: '1.75rem', md: '2.25rem' },
-              fontWeight: 600,
-              color: 'text.primary',
-            }}
-          >
-            Découvrez l'application
-          </Typography>
-          <Typography
-            sx={{
-              textAlign: 'center',
-              mb: 8,
-              fontSize: { xs: '1rem', md: '1.1rem' },
-              color: 'text.secondary',
-              maxWidth: '600px',
-              mx: 'auto',
-            }}
-          >
-            Une interface moderne et intuitive pour gérer vos listes de souhaits en toute simplicité.
-          </Typography>
-
-          <Stack direction={{ xs: 'column', md: 'row' }} spacing={4} alignItems="center">
-            {/* Placeholder for screenshots */}
-            {[1, 2, 3].map(index => (
-              <Box
-                key={index}
-                sx={{
-                  flex: 1,
-                  aspectRatio: '3/4',
-                  backgroundColor: 'white',
-                  borderRadius: 3,
-                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  border: '2px dashed #e5e7eb',
-                  maxWidth: { xs: '280px', md: '200px' },
-                }}
-              >
-                <Stack alignItems="center" spacing={2}>
-                  <Typography sx={{ fontSize: '3rem', opacity: 0.5 }}>📱</Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Screenshot {index}
-                  </Typography>
-                </Stack>
-              </Box>
-            ))}
-          </Stack>
-        </Box>
-
-        {/* FAQ Section */}
-        <Box sx={{ py: { xs: 8, md: 12 }, px: { xs: 2, sm: 0 } }}>
-          <Typography
-            variant="h3"
-            sx={{
-              textAlign: 'center',
-              mb: 8,
-              fontSize: { xs: '1.75rem', md: '2.25rem' },
-              fontWeight: 600,
-              color: 'text.primary',
-            }}
-          >
-            Questions fréquentes
-          </Typography>
-
-          <Stack spacing={3} sx={{ maxWidth: '700px', mx: 'auto' }}>
-            {[
-              {
-                question: 'Est-ce que Wishlist est gratuit ?',
-                answer:
-                  'Oui, Wishlist est entièrement gratuit à utiliser pour tous vos événements et listes de souhaits.',
-              },
-              {
-                question: 'Comment inviter mes proches ?',
-                answer:
-                  'Vous pouvez facilement inviter vos proches par email ou en partageant un lien vers votre événement.',
-              },
-              {
-                question: 'Puis-je créer plusieurs listes ?',
-                answer: 'Absolument ! Vous pouvez créer autant de listes que vous voulez pour différents événements.',
-              },
-              {
-                question: 'Comment fonctionne le Secret Santa ?',
-                answer:
-                  'Notre système effectue automatiquement le tirage au sort en respectant vos contraintes et exclusions.',
-              },
-            ].map((faq, index) => (
-              <Box
-                key={index}
-                sx={{
-                  backgroundColor: 'white',
-                  borderRadius: 2,
-                  p: { xs: 3, sm: 4 },
-                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-                }}
-              >
-                <Typography
-                  variant="h6"
-                  sx={{
-                    fontWeight: 600,
-                    mb: 2,
-                    color: 'text.primary',
-                  }}
-                >
-                  {faq.question}
-                </Typography>
-                <Typography
-                  sx={{
-                    color: 'text.secondary',
-                    lineHeight: 1.6,
-                  }}
-                >
-                  {faq.answer}
-                </Typography>
-              </Box>
-            ))}
-          </Stack>
-        </Box>
-
-        {/* CTA Section */}
-        <Box sx={{ py: { xs: 8, md: 12 }, px: { xs: 2, sm: 0 }, textAlign: 'center' }}>
-          <Typography
-            variant="h3"
-            sx={{
-              mb: 3,
-              fontSize: { xs: '1.75rem', md: '2.25rem' },
-              fontWeight: 600,
-              color: 'text.primary',
-            }}
-          >
-            Prêt à commencer ?
-          </Typography>
-          <Typography
-            sx={{
-              mb: 4,
-              fontSize: { xs: '1rem', md: '1.1rem' },
-              color: 'text.secondary',
-              maxWidth: '500px',
-              mx: 'auto',
-            }}
-          >
-            Rejoignez des milliers d'utilisateurs qui utilisent déjà Wishlist pour leurs événements.
-          </Typography>
-          <Button
-            variant="contained"
-            size="large"
-            onClick={() => navigate('/register')}
-            sx={{
-              py: 2,
-              px: 6,
-              fontSize: '1.1rem',
-              fontWeight: 600,
-            }}
-          >
-            Créer mon compte gratuitement
-          </Button>
-        </Box>
-      </Container>
-
-      {/* Footer */}
-      <Box
-        sx={{
-          backgroundColor: '#1f2937',
-          color: 'white',
-          py: { xs: 6, md: 8 },
-          px: { xs: 2, sm: 0 },
-        }}
-      >
-        <Container maxWidth="lg">
-          <Stack
-            direction={{ xs: 'column', md: 'row' }}
-            spacing={{ xs: 4, md: 8 }}
-            justifyContent="space-between"
-            alignItems={{ xs: 'center', md: 'flex-start' }}
-          >
-            <Box sx={{ textAlign: { xs: 'center', md: 'left' } }}>
-              <Logo height={40} variant="full" sx={{ mb: 2, justifyContent: { xs: 'center', md: 'flex-start' } }} />
-              <Typography variant="body2" sx={{ mb: 2, maxWidth: '300px' }}>
-                L'application de listes de souhaits qui facilite l'organisation de vos événements.
-              </Typography>
-              <Typography variant="body2" color="grey.400">
+              <Typography variant="body2" color="grey.400" textAlign="center" sx={{ mt: 2 }}>
                 © 2025 Wishlist. Tous droits réservés.
               </Typography>
-            </Box>
-
-            <Stack
-              direction={{ xs: 'column', sm: 'row' }}
-              spacing={{ xs: 3, sm: 6 }}
-              sx={{ textAlign: { xs: 'center', md: 'left' } }}
-            >
-              <Stack spacing={2}>
-                <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-                  Produit
-                </Typography>
-                <Typography
-                  variant="body2"
-                  component="a"
-                  href="#"
-                  sx={{
-                    color: 'grey.300',
-                    textDecoration: 'none',
-                    '&:hover': { color: 'white' },
-                  }}
-                >
-                  Fonctionnalités
-                </Typography>
-                <Typography
-                  variant="body2"
-                  component="a"
-                  href="#"
-                  sx={{
-                    color: 'grey.300',
-                    textDecoration: 'none',
-                    '&:hover': { color: 'white' },
-                  }}
-                >
-                  Tarifs
-                </Typography>
-                <Typography
-                  variant="body2"
-                  component="a"
-                  href="#"
-                  sx={{
-                    color: 'grey.300',
-                    textDecoration: 'none',
-                    '&:hover': { color: 'white' },
-                  }}
-                >
-                  FAQ
-                </Typography>
-              </Stack>
-
-              <Stack spacing={2}>
-                <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-                  Support
-                </Typography>
-                <Typography
-                  variant="body2"
-                  component="a"
-                  href="#"
-                  sx={{
-                    color: 'grey.300',
-                    textDecoration: 'none',
-                    '&:hover': { color: 'white' },
-                  }}
-                >
-                  Aide
-                </Typography>
-                <Typography
-                  variant="body2"
-                  component="a"
-                  href="#"
-                  sx={{
-                    color: 'grey.300',
-                    textDecoration: 'none',
-                    '&:hover': { color: 'white' },
-                  }}
-                >
-                  Contact
-                </Typography>
-                <Typography
-                  variant="body2"
-                  component="a"
-                  href="#"
-                  sx={{
-                    color: 'grey.300',
-                    textDecoration: 'none',
-                    '&:hover': { color: 'white' },
-                  }}
-                >
-                  Statut
-                </Typography>
-              </Stack>
-
-              <Stack spacing={2}>
-                <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-                  Légal
-                </Typography>
-                <Typography
-                  variant="body2"
-                  component="a"
-                  href="#"
-                  sx={{
-                    color: 'grey.300',
-                    textDecoration: 'none',
-                    '&:hover': { color: 'white' },
-                  }}
-                >
-                  Confidentialité
-                </Typography>
-                <Typography
-                  variant="body2"
-                  component="a"
-                  href="#"
-                  sx={{
-                    color: 'grey.300',
-                    textDecoration: 'none',
-                    '&:hover': { color: 'white' },
-                  }}
-                >
-                  Conditions
-                </Typography>
-                <Typography
-                  variant="body2"
-                  component="a"
-                  href="#"
-                  sx={{
-                    color: 'grey.300',
-                    textDecoration: 'none',
-                    '&:hover': { color: 'white' },
-                  }}
-                >
-                  Cookies
-                </Typography>
-              </Stack>
-            </Stack>
-          </Stack>
-        </Container>
-      </Box>
+            </FooterColumn>
+          </Box>
+        </FooterContent>
+      </FooterContainer>
     </Box>
   )
 }
