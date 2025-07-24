@@ -42,6 +42,15 @@
         "command": "npx drizzle-kit migrate",
         "color": true
       }
+    },
+    "drizzle:seed": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/api",
+        "command": "yarn tsx drizzle/seed.ts",
+        "color": true,
+        "parallel": false
+      }
     }
   },
   "tags": []
