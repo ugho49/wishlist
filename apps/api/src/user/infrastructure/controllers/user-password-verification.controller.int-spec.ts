@@ -33,8 +33,7 @@ describe('UserPasswordVerificationController', () => {
 
       const request = await getRequest()
 
-      await expectTable(Fixtures.USER_PASSWORD_VERIFICATION_TABLE).hasNumberOfRows(0).check()
-
+      await expectTable(Fixtures.USER_PASSWORD_VERIFICATION_TABLE).hasNumberOfRows(0)
       await request.post(path).send({ email: Fixtures.BASE_USER_EMAIL }).expect(201)
 
       await expectTable(Fixtures.USER_PASSWORD_VERIFICATION_TABLE)
@@ -48,7 +47,6 @@ describe('UserPasswordVerificationController', () => {
           created_at: expect.toBeDate(),
           updated_at: expect.toBeDate(),
         })
-        .check()
 
       await expectMail()
         .waitFor(500)
@@ -57,7 +55,6 @@ describe('UserPasswordVerificationController', () => {
         .hasSubject('[Wishlist] Reinitialiser le mot de passe')
         .hasSender('contact@wishlistapp.fr')
         .hasReceiver(Fixtures.BASE_USER_EMAIL)
-        .check()
     })
 
     it('should fail when there is still a valid reset attempt', async () => {
@@ -70,13 +67,11 @@ describe('UserPasswordVerificationController', () => {
 
       const request = await getRequest()
 
-      await expectTable(Fixtures.USER_PASSWORD_VERIFICATION_TABLE).hasNumberOfRows(1).check()
-
+      await expectTable(Fixtures.USER_PASSWORD_VERIFICATION_TABLE).hasNumberOfRows(1)
       await request.post(path).send({ email: Fixtures.BASE_USER_EMAIL }).expect(401)
 
-      await expectTable(Fixtures.USER_PASSWORD_VERIFICATION_TABLE).hasNumberOfRows(1).check()
-
-      await expectMail().waitFor(500).hasNumberOfEmails(0).check()
+      await expectTable(Fixtures.USER_PASSWORD_VERIFICATION_TABLE).hasNumberOfRows(1)
+      await expectMail().waitFor(500).hasNumberOfEmails(0)
     })
   })
 
@@ -200,9 +195,8 @@ describe('UserPasswordVerificationController', () => {
           const res = await PasswordManager.verify({ hash: value, plainPassword: newPassword })
           expect(res, 'Password should match').toBe(true)
         })
-        .check()
 
-      await expectTable(Fixtures.USER_PASSWORD_VERIFICATION_TABLE).hasNumberOfRows(0).check()
+      await expectTable(Fixtures.USER_PASSWORD_VERIFICATION_TABLE).hasNumberOfRows(0)
     })
   })
 })

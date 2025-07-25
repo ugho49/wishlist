@@ -73,22 +73,18 @@ describe('ItemController', () => {
             })
           })
 
-        await expectTable(Fixtures.ITEM_TABLE)
-          .hasNumberOfRows(1)
-          .row(0)
-          .toMatchObject({
-            id: response.body.id,
-            name: 'Test Item',
-            description: 'Test description',
-            url: 'https://example.com',
-            score: 5,
-            picture_url: 'https://example.com/pic.jpg',
-            is_suggested: false,
-            wishlist_id: wishlistId,
-            created_at: expect.toBeDate(),
-            updated_at: expect.toBeDate(),
-          })
-          .check()
+        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+          id: response.body.id,
+          name: 'Test Item',
+          description: 'Test description',
+          url: 'https://example.com',
+          score: 5,
+          picture_url: 'https://example.com/pic.jpg',
+          is_suggested: false,
+          wishlist_id: wishlistId,
+          created_at: expect.toBeDate(),
+          updated_at: expect.toBeDate(),
+        })
       })
 
       it('should create item successfully for other user wishlist and mark it as suggested', async () => {
@@ -142,22 +138,18 @@ describe('ItemController', () => {
             })
           })
 
-        await expectTable(Fixtures.ITEM_TABLE)
-          .hasNumberOfRows(1)
-          .row(0)
-          .toMatchObject({
-            id: response.body.id,
-            name: 'Test Item',
-            description: 'Test description',
-            url: 'https://example.com',
-            score: 5,
-            picture_url: 'https://example.com/pic.jpg',
-            is_suggested: true,
-            wishlist_id: wishlistId,
-            created_at: expect.toBeDate(),
-            updated_at: expect.toBeDate(),
-          })
-          .check()
+        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+          id: response.body.id,
+          name: 'Test Item',
+          description: 'Test description',
+          url: 'https://example.com',
+          score: 5,
+          picture_url: 'https://example.com/pic.jpg',
+          is_suggested: true,
+          wishlist_id: wishlistId,
+          created_at: expect.toBeDate(),
+          updated_at: expect.toBeDate(),
+        })
       })
 
       it.each([
@@ -246,7 +238,7 @@ describe('ItemController', () => {
             })
           })
 
-        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(0).check()
+        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(0)
       })
 
       it('should return 401 when user does not have access to wishlist', async () => {
@@ -282,7 +274,7 @@ describe('ItemController', () => {
             })
           })
 
-        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(0).check()
+        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(0)
       })
 
       it('should create suggested item when user is not wishlist owner', async () => {
@@ -328,18 +320,14 @@ describe('ItemController', () => {
             })
           })
 
-        await expectTable(Fixtures.ITEM_TABLE)
-          .hasNumberOfRows(1)
-          .row(0)
-          .toMatchObject({
-            id: response.body.id,
-            name: 'Suggested Item',
-            is_suggested: true,
-            wishlist_id: wishlistId,
-            created_at: expect.toBeDate(),
-            updated_at: expect.toBeDate(),
-          })
-          .check()
+        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+          id: response.body.id,
+          name: 'Suggested Item',
+          is_suggested: true,
+          wishlist_id: wishlistId,
+          created_at: expect.toBeDate(),
+          updated_at: expect.toBeDate(),
+        })
       })
     })
   })
@@ -393,19 +381,15 @@ describe('ItemController', () => {
 
         await request.put(path(itemId)).send(updateData).expect(200)
 
-        await expectTable(Fixtures.ITEM_TABLE)
-          .hasNumberOfRows(1)
-          .row(0)
-          .toMatchObject({
-            id: itemId,
-            name: 'Updated Item',
-            description: 'Updated description',
-            url: 'https://updated.com',
-            score: 5,
-            picture_url: 'https://updated.com/pic.jpg',
-            updated_at: expect.toBeDate(),
-          })
-          .check()
+        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+          id: itemId,
+          name: 'Updated Item',
+          description: 'Updated description',
+          url: 'https://updated.com',
+          score: 5,
+          picture_url: 'https://updated.com/pic.jpg',
+          updated_at: expect.toBeDate(),
+        })
       })
 
       it.each([
@@ -522,14 +506,10 @@ describe('ItemController', () => {
         await request.put(path(itemId)).send({ name: 'Updated Item' }).expect(401)
 
         // Verify no changes were made
-        await expectTable(Fixtures.ITEM_TABLE)
-          .hasNumberOfRows(1)
-          .row(0)
-          .toMatchObject({
-            id: itemId,
-            name: 'Test Item',
-          })
-          .check()
+        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+          id: itemId,
+          name: 'Test Item',
+        })
       })
 
       it('should return 404 when trying to update suggested item as list owner', async () => {
@@ -565,14 +545,10 @@ describe('ItemController', () => {
 
         await request.put(path(itemId)).send({ name: 'Updated Item' }).expect(404)
 
-        await expectTable(Fixtures.ITEM_TABLE)
-          .hasNumberOfRows(1)
-          .row(0)
-          .toMatchObject({
-            id: itemId,
-            name: 'Suggested Item',
-          })
-          .check()
+        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+          id: itemId,
+          name: 'Suggested Item',
+        })
       })
 
       it('should return 401 when trying to update suggested item taken by someone else', async () => {
@@ -716,7 +692,7 @@ describe('ItemController', () => {
 
         await request.delete(path(itemId)).expect(200)
 
-        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(0).check()
+        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(0)
       })
 
       it('should return 404 when item not found', async () => {
@@ -752,7 +728,7 @@ describe('ItemController', () => {
         await request.delete(path(itemId)).expect(401)
 
         // Verify item still exists
-        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1).check()
+        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1)
       })
 
       it('should return 401 when trying to delete suggested item as list owner', async () => {
@@ -788,7 +764,7 @@ describe('ItemController', () => {
 
         await request.delete(path(itemId)).expect(401)
 
-        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1).check()
+        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1)
       })
 
       it('should return 401 when trying to delete suggested item taken by someone else', async () => {
@@ -846,7 +822,7 @@ describe('ItemController', () => {
             })
           })
 
-        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1).check()
+        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1)
       })
 
       it('should return 401 when trying to delete non-suggested item as non-owner', async () => {
@@ -890,7 +866,7 @@ describe('ItemController', () => {
             })
           })
 
-        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1).check()
+        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1)
       })
 
       it('should convert to suggested item when deleting taken non-suggested item', async () => {
@@ -931,17 +907,13 @@ describe('ItemController', () => {
         await request.delete(path(itemId)).expect(200)
 
         // Verify item is converted to suggested instead of deleted
-        await expectTable(Fixtures.ITEM_TABLE)
-          .hasNumberOfRows(1)
-          .row(0)
-          .toMatchObject({
-            id: itemId,
-            name: 'Taken Item',
-            is_suggested: true,
-            taker_id: otherUserId,
-            taken_at: takenAt,
-          })
-          .check()
+        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+          id: itemId,
+          name: 'Taken Item',
+          is_suggested: true,
+          taker_id: otherUserId,
+          taken_at: takenAt,
+        })
       })
     })
   })
@@ -1010,16 +982,12 @@ describe('ItemController', () => {
             })
           })
 
-        await expectTable(Fixtures.ITEM_TABLE)
-          .hasNumberOfRows(1)
-          .row(0)
-          .toMatchObject({
-            id: itemId,
-            name: 'Test Item',
-            taker_id: currentUserId,
-            taken_at: expect.toBeDate(),
-          })
-          .check()
+        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+          id: itemId,
+          name: 'Test Item',
+          taker_id: currentUserId,
+          taken_at: expect.toBeDate(),
+        })
       })
 
       it('should toggle item (uncheck) successfully', async () => {
@@ -1062,16 +1030,12 @@ describe('ItemController', () => {
             expect(body).toEqual({})
           })
 
-        await expectTable(Fixtures.ITEM_TABLE)
-          .hasNumberOfRows(1)
-          .row(0)
-          .toMatchObject({
-            id: itemId,
-            name: 'Test Item',
-            taker_id: null,
-            taken_at: null,
-          })
-          .check()
+        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+          id: itemId,
+          name: 'Test Item',
+          taker_id: null,
+          taken_at: null,
+        })
       })
 
       it('should return 404 when item not found', async () => {

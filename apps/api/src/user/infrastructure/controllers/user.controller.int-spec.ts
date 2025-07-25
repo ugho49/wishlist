@@ -98,7 +98,7 @@ describe('UserController', () => {
           expect(body).toMatchObject({ error: 'Bad Request', message: expect.arrayContaining(message) }),
         )
 
-      await expectTable(Fixtures.USER_TABLE).hasNumberOfRows(0).check()
+      await expectTable(Fixtures.USER_TABLE).hasNumberOfRows(0)
     })
 
     describe('when valid input', () => {
@@ -113,20 +113,18 @@ describe('UserController', () => {
       it('should fail when email already exists', async () => {
         await fixtures.insertBaseUser()
 
-        await expectTable(Fixtures.USER_TABLE).hasNumberOfRows(1).check()
-
+        await expectTable(Fixtures.USER_TABLE).hasNumberOfRows(1)
         await request
           .post(path)
           .send(input)
           .expect(401)
           .expect(({ body }) => expect(body).toMatchObject({ message: 'User email already taken' }))
 
-        await expectTable(Fixtures.USER_TABLE).hasNumberOfRows(1).check()
+        await expectTable(Fixtures.USER_TABLE).hasNumberOfRows(1)
       })
 
       it('should create user', async () => {
-        await expectTable(Fixtures.USER_TABLE).hasNumberOfRows(0).check()
-
+        await expectTable(Fixtures.USER_TABLE).hasNumberOfRows(0)
         const res = await request
           .post(path)
           .send(input)
@@ -161,19 +159,14 @@ describe('UserController', () => {
             const res = await PasswordManager.verify({ hash: value, plainPassword: input.password })
             expect(res, 'Password should match').toBe(true)
           })
-          .check()
 
-        await expectTable(Fixtures.USER_EMAIL_SETTING_TABLE)
-          .hasNumberOfRows(1)
-          .row(0)
-          .toEqual({
-            id: expect.toBeString(),
-            user_id: userId,
-            daily_new_item_notification: true,
-            created_at: expect.toBeDate(),
-            updated_at: expect.toBeDate(),
-          })
-          .check()
+        await expectTable(Fixtures.USER_EMAIL_SETTING_TABLE).hasNumberOfRows(1).row(0).toEqual({
+          id: expect.toBeString(),
+          user_id: userId,
+          daily_new_item_notification: true,
+          created_at: expect.toBeDate(),
+          updated_at: expect.toBeDate(),
+        })
 
         await expectMail()
           .waitFor(500)
@@ -182,7 +175,6 @@ describe('UserController', () => {
           .hasSubject('[Wishlist] Bienvenue !!!')
           .hasSender('contact@wishlistapp.fr')
           .hasReceiver(Fixtures.BASE_USER_EMAIL)
-          .check()
       })
 
       it('should create user and join event if invited as pending', async () => {
@@ -200,31 +192,23 @@ describe('UserController', () => {
           tempUserEmail: Fixtures.BASE_USER_EMAIL,
         })
 
-        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE)
-          .hasNumberOfRows(2)
-          .row(1)
-          .toMatchObject({
-            id: attendeeId,
-            event_id: eventId,
-            user_id: null,
-            temp_user_email: Fixtures.BASE_USER_EMAIL,
-          })
-          .check()
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(2).row(1).toMatchObject({
+          id: attendeeId,
+          event_id: eventId,
+          user_id: null,
+          temp_user_email: Fixtures.BASE_USER_EMAIL,
+        })
 
         const res = await request.post(path).send(input).expect(201)
 
         await sleep(500)
 
-        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE)
-          .hasNumberOfRows(2)
-          .row(1)
-          .toMatchObject({
-            id: attendeeId,
-            event_id: eventId,
-            user_id: res.body.id,
-            temp_user_email: null,
-          })
-          .check()
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(2).row(1).toMatchObject({
+          id: attendeeId,
+          event_id: eventId,
+          user_id: res.body.id,
+          temp_user_email: null,
+        })
       })
     })
   })
@@ -309,7 +293,6 @@ describe('UserController', () => {
           last_name: 'UPDATED',
           birthday: new Date('1993-11-15'),
         })
-        .check()
     })
   })
 
@@ -375,7 +358,6 @@ describe('UserController', () => {
           const res = await PasswordManager.verify({ hash: value, plainPassword: Fixtures.DEFAULT_USER_PASSWORD })
           expect(res, 'Password should match').toBe(true)
         })
-        .check()
     })
 
     it('should update user password when valid input', async () => {
@@ -395,7 +377,6 @@ describe('UserController', () => {
           const res = await PasswordManager.verify({ hash: value, plainPassword: newPassword })
           expect(res, 'Password should match').toBe(true)
         })
-        .check()
     })
   })
 

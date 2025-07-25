@@ -227,19 +227,15 @@ describe('SecretSantaController', () => {
           })
         })
 
-      await expectTable(Fixtures.SECRET_SANTA_TABLE)
-        .hasNumberOfRows(1)
-        .row(0)
-        .toEqual({
-          id: expect.toBeString(),
-          event_id: eventId,
-          description: 'Test Secret Santa',
-          budget: 50,
-          status: SecretSantaStatus.CREATED,
-          created_at: expect.toBeDate(),
-          updated_at: expect.toBeDate(),
-        })
-        .check()
+      await expectTable(Fixtures.SECRET_SANTA_TABLE).hasNumberOfRows(1).row(0).toEqual({
+        id: expect.toBeString(),
+        event_id: eventId,
+        description: 'Test Secret Santa',
+        budget: 50,
+        status: SecretSantaStatus.CREATED,
+        created_at: expect.toBeDate(),
+        updated_at: expect.toBeDate(),
+      })
     })
 
     it('should return error when user is not in event', async () => {
@@ -264,7 +260,7 @@ describe('SecretSantaController', () => {
         })
         .expect(403)
 
-      await expectTable(Fixtures.SECRET_SANTA_TABLE).hasNumberOfRows(0).check()
+      await expectTable(Fixtures.SECRET_SANTA_TABLE).hasNumberOfRows(0)
     })
 
     it('should return error when secret santa already exists for event', async () => {
@@ -327,15 +323,11 @@ describe('SecretSantaController', () => {
         })
         .expect(200)
 
-      await expectTable(Fixtures.SECRET_SANTA_TABLE)
-        .hasNumberOfRows(1)
-        .row(0)
-        .toMatchObject({
-          id: secretSantaId,
-          description: 'Updated Description',
-          budget: 100,
-        })
-        .check()
+      await expectTable(Fixtures.SECRET_SANTA_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+        id: secretSantaId,
+        description: 'Updated Description',
+        budget: 100,
+      })
     })
 
     it('should return error when user is not maintainer', async () => {
@@ -408,7 +400,7 @@ describe('SecretSantaController', () => {
 
       await request.delete(path(secretSantaId)).expect(200)
 
-      await expectTable(Fixtures.SECRET_SANTA_TABLE).hasNumberOfRows(0).check()
+      await expectTable(Fixtures.SECRET_SANTA_TABLE).hasNumberOfRows(0)
     })
 
     it('should return an error when secret santa is started', async () => {
@@ -425,7 +417,7 @@ describe('SecretSantaController', () => {
 
       await request.delete(path(secretSantaId)).expect(403)
 
-      await expectTable(Fixtures.SECRET_SANTA_TABLE).hasNumberOfRows(1).check()
+      await expectTable(Fixtures.SECRET_SANTA_TABLE).hasNumberOfRows(1)
     })
 
     it('should return error when user is not maintainer', async () => {
@@ -448,7 +440,7 @@ describe('SecretSantaController', () => {
 
       await request.delete(path(secretSantaId)).expect(403)
 
-      await expectTable(Fixtures.SECRET_SANTA_TABLE).hasNumberOfRows(1).check()
+      await expectTable(Fixtures.SECRET_SANTA_TABLE).hasNumberOfRows(1)
     })
   })
 
@@ -493,21 +485,16 @@ describe('SecretSantaController', () => {
 
       await request.post(path(secretSantaId)).expect(201)
 
-      await expectTable(Fixtures.SECRET_SANTA_TABLE)
-        .hasNumberOfRows(1)
-        .row(0)
-        .toMatchObject({
-          id: secretSantaId,
-          status: SecretSantaStatus.STARTED,
-        })
-        .check()
+      await expectTable(Fixtures.SECRET_SANTA_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+        id: secretSantaId,
+        status: SecretSantaStatus.STARTED,
+      })
 
       await expectMail()
         .waitFor(500)
         .hasNumberOfEmails(3)
         .hasSubject('[Wishlist] Votre tirage au sort secret santa')
         .hasReceivers(['user2@test.fr', 'user3@test.fr', Fixtures.BASE_USER_EMAIL])
-        .check()
     })
 
     it('should return an error when user is not the maintainer', async () => {
@@ -547,14 +534,10 @@ describe('SecretSantaController', () => {
 
       await request.post(path(secretSantaId)).expect(403)
 
-      await expectTable(Fixtures.SECRET_SANTA_TABLE)
-        .hasNumberOfRows(1)
-        .row(0)
-        .toMatchObject({
-          id: secretSantaId,
-          status: SecretSantaStatus.CREATED,
-        })
-        .check()
+      await expectTable(Fixtures.SECRET_SANTA_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+        id: secretSantaId,
+        status: SecretSantaStatus.CREATED,
+      })
     })
 
     it('should return error when not enough users to start', async () => {
@@ -609,21 +592,16 @@ describe('SecretSantaController', () => {
 
       await request.post(path(secretSantaId)).expect(201)
 
-      await expectTable(Fixtures.SECRET_SANTA_TABLE)
-        .hasNumberOfRows(1)
-        .row(0)
-        .toMatchObject({
-          id: secretSantaId,
-          status: SecretSantaStatus.CREATED,
-        })
-        .check()
+      await expectTable(Fixtures.SECRET_SANTA_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+        id: secretSantaId,
+        status: SecretSantaStatus.CREATED,
+      })
 
       await expectMail()
         .waitFor(500)
         .hasNumberOfEmails(1)
         .hasSubject("[Wishlist] Le secret santa viens d'être annulé")
         .hasReceivers([Fixtures.BASE_USER_EMAIL, 'user2@test.fr'])
-        .check()
     })
 
     it('should return an error when user is not the maintainer', async () => {
@@ -646,14 +624,10 @@ describe('SecretSantaController', () => {
 
       await request.post(path(secretSantaId)).expect(403)
 
-      await expectTable(Fixtures.SECRET_SANTA_TABLE)
-        .hasNumberOfRows(1)
-        .row(0)
-        .toMatchObject({
-          id: secretSantaId,
-          status: SecretSantaStatus.STARTED,
-        })
-        .check()
+      await expectTable(Fixtures.SECRET_SANTA_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+        id: secretSantaId,
+        status: SecretSantaStatus.STARTED,
+      })
     })
   })
 
@@ -718,19 +692,15 @@ describe('SecretSantaController', () => {
           })
         })
 
-      await expectTable(Fixtures.SECRET_SANTA_USER_TABLE)
-        .hasNumberOfRows(1)
-        .row(0)
-        .toEqual({
-          id: expect.toBeString(),
-          secret_santa_id: secretSantaId,
-          attendee_id: attendee2Id,
-          draw_user_id: null,
-          exclusions: [],
-          created_at: expect.toBeDate(),
-          updated_at: expect.toBeDate(),
-        })
-        .check()
+      await expectTable(Fixtures.SECRET_SANTA_USER_TABLE).hasNumberOfRows(1).row(0).toEqual({
+        id: expect.toBeString(),
+        secret_santa_id: secretSantaId,
+        attendee_id: attendee2Id,
+        draw_user_id: null,
+        exclusions: [],
+        created_at: expect.toBeDate(),
+        updated_at: expect.toBeDate(),
+      })
     })
 
     it('should return an error when user is the maintainer but secret santa is started', async () => {
@@ -760,7 +730,7 @@ describe('SecretSantaController', () => {
         })
         .expect(403)
 
-      await expectTable(Fixtures.SECRET_SANTA_USER_TABLE).hasNumberOfRows(0).check()
+      await expectTable(Fixtures.SECRET_SANTA_USER_TABLE).hasNumberOfRows(0)
     })
 
     it('should return an error when user is not the maintainer', async () => {
@@ -796,7 +766,7 @@ describe('SecretSantaController', () => {
         })
         .expect(403)
 
-      await expectTable(Fixtures.SECRET_SANTA_USER_TABLE).hasNumberOfRows(0).check()
+      await expectTable(Fixtures.SECRET_SANTA_USER_TABLE).hasNumberOfRows(0)
     })
   })
 
@@ -862,7 +832,6 @@ describe('SecretSantaController', () => {
           id: secretSantaUser2Id,
           exclusions: [secretSantaUser3Id],
         })
-        .check()
     })
 
     it('should return an error when user is the maintainer but secret santa is started', async () => {
@@ -907,13 +876,10 @@ describe('SecretSantaController', () => {
         })
         .expect(403)
 
-      await expectTable(Fixtures.SECRET_SANTA_USER_TABLE)
-        .row(0)
-        .toMatchObject({
-          id: secretSantaUser2Id,
-          exclusions: [],
-        })
-        .check()
+      await expectTable(Fixtures.SECRET_SANTA_USER_TABLE).row(0).toMatchObject({
+        id: secretSantaUser2Id,
+        exclusions: [],
+      })
     })
 
     it('should return an error when user is not the maintainer', async () => {
@@ -964,13 +930,10 @@ describe('SecretSantaController', () => {
         })
         .expect(403)
 
-      await expectTable(Fixtures.SECRET_SANTA_USER_TABLE)
-        .row(0)
-        .toMatchObject({
-          id: secretSantaUser2Id,
-          exclusions: [],
-        })
-        .check()
+      await expectTable(Fixtures.SECRET_SANTA_USER_TABLE).row(0).toMatchObject({
+        id: secretSantaUser2Id,
+        exclusions: [],
+      })
     })
   })
 
@@ -1010,7 +973,7 @@ describe('SecretSantaController', () => {
 
       await request.delete(path(secretSantaId, secretSantaUserId)).expect(200)
 
-      await expectTable(Fixtures.SECRET_SANTA_USER_TABLE).hasNumberOfRows(0).check()
+      await expectTable(Fixtures.SECRET_SANTA_USER_TABLE).hasNumberOfRows(0)
     })
 
     it('should return error when secret santa is started and user is maintainer', async () => {

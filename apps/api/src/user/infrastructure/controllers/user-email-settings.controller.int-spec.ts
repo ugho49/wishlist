@@ -101,14 +101,10 @@ describe('UserEmailSettingsController', () => {
         })
 
       // Verify database was updated
-      await expectTable(Fixtures.USER_EMAIL_SETTING_TABLE)
-        .hasNumberOfRows(1)
-        .row(0)
-        .toMatchObject({
-          user_id: currentUserId,
-          daily_new_item_notification: false,
-        })
-        .check()
+      await expectTable(Fixtures.USER_EMAIL_SETTING_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+        user_id: currentUserId,
+        daily_new_item_notification: false,
+      })
     })
   })
 })

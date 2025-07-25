@@ -24,7 +24,7 @@ describe('AuthController', () => {
     })
 
     it('should return 401 with not existing user', async () => {
-      await expectTable(Fixtures.USER_TABLE).hasNumberOfRows(0).check()
+      await expectTable(Fixtures.USER_TABLE).hasNumberOfRows(0)
 
       await request
         .post(path)

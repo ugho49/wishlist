@@ -586,17 +586,12 @@ describe('EventController', () => {
             created_at: expect.toBeDate(),
             updated_at: expect.toBeDate(),
           })
-          .check()
 
-        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE)
-          .hasNumberOfRows(1)
-          .row(0)
-          .toMatchObject({
-            event_id: createdEventId,
-            user_id: currentUserId,
-            role: 'maintainer',
-          })
-          .check()
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+          event_id: createdEventId,
+          user_id: currentUserId,
+          role: 'maintainer',
+        })
       })
 
       it('should create event with attendees', async () => {
@@ -651,7 +646,6 @@ describe('EventController', () => {
             description: 'Test Description',
             event_date: new Date(eventDate),
           })
-          .check()
 
         await expectTable(Fixtures.EVENT_ATTENDEE_TABLE)
           .hasNumberOfRows(3)
@@ -673,14 +667,12 @@ describe('EventController', () => {
             temp_user_email: user2Email,
             role: 'user',
           })
-          .check()
 
         await expectMail()
           .waitFor(500)
           .hasNumberOfEmails(2)
           .hasSubject('[Wishlist] Vous participez à un nouvel événement')
           .hasReceivers([user1Email, user2Email])
-          .check()
       })
     })
   })
@@ -826,7 +818,6 @@ describe('EventController', () => {
             event_date: new Date(updateData.event_date),
             updated_at: expect.toBeDate(),
           })
-          .check()
       })
 
       it('should update event without description', async () => {
@@ -854,7 +845,6 @@ describe('EventController', () => {
             event_date: new Date(updateData.event_date),
             updated_at: expect.toBeDate(),
           })
-          .check()
       })
     })
   })
@@ -896,7 +886,7 @@ describe('EventController', () => {
 
         await request.delete(path(eventId)).expect(401)
 
-        await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(1).check()
+        await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(1)
       })
 
       it('should return 400 when event has wishlists', async () => {
@@ -912,10 +902,9 @@ describe('EventController', () => {
           title: 'Test Wishlist',
         })
 
-        await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(1).check()
-        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(1).check()
-        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1).check()
-
+        await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(1)
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(1)
+        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1)
         await request
           .delete(path(eventId))
           .expect(400)
@@ -926,9 +915,9 @@ describe('EventController', () => {
             })
           })
 
-        await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(1).check()
-        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(1).check()
-        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1).check()
+        await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(1)
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(1)
+        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1)
       })
 
       it('should delete event without wishlists', async () => {
@@ -940,8 +929,8 @@ describe('EventController', () => {
 
         await request.delete(path(eventId)).expect(200)
 
-        await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(0).check()
-        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(0).check()
+        await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(0)
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(0)
       })
 
       it('should delete event with attendees without wishlists', async () => {
@@ -969,8 +958,8 @@ describe('EventController', () => {
 
         await request.delete(path(eventId)).expect(200)
 
-        await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(0).check()
-        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(0).check()
+        await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(0)
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(0)
       })
     })
   })

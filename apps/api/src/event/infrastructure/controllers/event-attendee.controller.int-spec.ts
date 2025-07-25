@@ -99,7 +99,6 @@ describe('EventAttendeeController', () => {
             temp_user_email: 'new-attendee@example.com',
             role: AttendeeRole.USER,
           })
-          .check()
 
         await expectMail()
           .waitFor(500)
@@ -107,7 +106,6 @@ describe('EventAttendeeController', () => {
           .mail(0)
           .hasSubject('[Wishlist] Vous participez à un nouvel événement')
           .hasReceiver('new-attendee@example.com')
-          .check()
       })
 
       it('should create active attendee successfully', async () => {
@@ -154,7 +152,6 @@ describe('EventAttendeeController', () => {
             user_id: otherUserId,
             role: AttendeeRole.USER,
           })
-          .check()
 
         await expectMail()
           .waitFor(500)
@@ -162,7 +159,6 @@ describe('EventAttendeeController', () => {
           .mail(0)
           .hasSubject('[Wishlist] Vous participez à un nouvel événement')
           .hasReceiver('other@example.com')
-          .check()
       })
 
       it('should return 404 when event does not exist', async () => {
@@ -182,7 +178,7 @@ describe('EventAttendeeController', () => {
             }),
           )
 
-        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(0).check()
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(0)
       })
 
       it('should return 401 when user is not maintainer of event', async () => {
@@ -212,7 +208,7 @@ describe('EventAttendeeController', () => {
             }),
           )
 
-        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(1).check() // only maintainer
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(1) // only maintainer
       })
 
       it('should return 400 when attendee already exists for this event', async () => {
@@ -242,7 +238,7 @@ describe('EventAttendeeController', () => {
             }),
           )
 
-        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(2).check() // maintainer + existing attendee
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(2) // maintainer + existing attendee
       })
     })
   })
@@ -316,7 +312,7 @@ describe('EventAttendeeController', () => {
             }),
           )
 
-        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(2).check() // maintainer + attendee
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(2) // maintainer + attendee
       })
 
       it('should return 409 when trying to delete yourself', async () => {
@@ -336,7 +332,7 @@ describe('EventAttendeeController', () => {
             }),
           )
 
-        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(1).check() // maintainer still exists
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(1) // maintainer still exists
       })
 
       it('should return 409 when attendee has wishlist with items', async () => {
@@ -380,9 +376,9 @@ describe('EventAttendeeController', () => {
             }),
           )
 
-        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(2).check() // maintainer + attendee
-        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1).check()
-        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1).check()
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(2) // maintainer + attendee
+        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1)
+        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1)
       })
 
       it('should delete pending attendee successfully', async () => {
@@ -399,7 +395,7 @@ describe('EventAttendeeController', () => {
 
         await request.delete(path({ eventId, attendeeId })).expect(200)
 
-        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(1).check() // only maintainer remains
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(1) // only maintainer remains
       })
 
       it('should delete active attendee successfully', async () => {
@@ -422,7 +418,7 @@ describe('EventAttendeeController', () => {
 
         await request.delete(path({ eventId, attendeeId })).expect(200)
 
-        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(1).check() // only maintainer remains
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(1) // only maintainer remains
       })
 
       it('should unlink wishlist from event when attendee has wishlist linked to multiple events', async () => {
@@ -455,14 +451,14 @@ describe('EventAttendeeController', () => {
           title: 'Test Wishlist',
         })
 
-        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(3).check() // 2 attendees for eventId1 and 1 for eventId2
-        await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(2).check() // linked to eventId1 and eventId2
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(3) // 2 attendees for eventId1 and 1 for eventId2
+        await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(2) // linked to eventId1 and eventId2
 
         await request.delete(path({ eventId: eventId1, attendeeId })).expect(200)
 
-        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(2).check() // 1 attendee for eventId1 and 1 for eventId2
-        await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(1).check() // linked to eventId2
-        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1).check() // wishlist still exists
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(2) // 1 attendee for eventId1 and 1 for eventId2
+        await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(1) // linked to eventId2
+        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1) // wishlist still exists
       })
     })
   })

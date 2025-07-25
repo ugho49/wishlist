@@ -31,8 +31,7 @@ describe('WishlistController', () => {
       })
 
       it('should return empty list when user has no wishlists', async () => {
-        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(0).check()
-
+        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(0)
         await request
           .get(path)
           .expect(200)
@@ -679,7 +678,7 @@ describe('WishlistController', () => {
             expect(body).toMatchObject({ error: 'Bad Request', message: expect.arrayContaining(message) }),
           )
 
-        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(0).check()
+        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(0)
       })
 
       it('should return 401 when user is not attendee of event', async () => {
@@ -713,7 +712,7 @@ describe('WishlistController', () => {
             }),
           )
 
-        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(0).check()
+        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(0)
       })
 
       it('should create wishlist successfully with one event', async () => {
@@ -723,8 +722,7 @@ describe('WishlistController', () => {
           maintainerId: currentUserId,
         })
 
-        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(0).check()
-
+        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(0)
         const response = await request
           .post(path)
           .field(
@@ -762,29 +760,21 @@ describe('WishlistController', () => {
 
         const createdWishlistId = response.body.id
 
-        await expectTable(Fixtures.WISHLIST_TABLE)
-          .hasNumberOfRows(1)
-          .row(0)
-          .toMatchObject({
-            id: createdWishlistId,
-            title: 'Test Wishlist',
-            description: null,
-            logo_url: null,
-            hide_items: true,
-            owner_id: currentUserId,
-            created_at: expect.toBeDate(),
-            updated_at: expect.toBeDate(),
-          })
-          .check()
+        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+          id: createdWishlistId,
+          title: 'Test Wishlist',
+          description: null,
+          logo_url: null,
+          hide_items: true,
+          owner_id: currentUserId,
+          created_at: expect.toBeDate(),
+          updated_at: expect.toBeDate(),
+        })
 
-        await expectTable(Fixtures.EVENT_WISHLIST_TABLE)
-          .hasNumberOfRows(1)
-          .row(0)
-          .toEqual({
-            event_id: eventId,
-            wishlist_id: createdWishlistId,
-          })
-          .check()
+        await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(1).row(0).toEqual({
+          event_id: eventId,
+          wishlist_id: createdWishlistId,
+        })
       })
 
       it('should create wishlist successfully with one event and full data', async () => {
@@ -794,8 +784,7 @@ describe('WishlistController', () => {
           maintainerId: currentUserId,
         })
 
-        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(0).check()
-
+        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(0)
         const response = await request
           .post(path)
           .field(
@@ -836,29 +825,21 @@ describe('WishlistController', () => {
 
         const createdWishlistId = response.body.id
 
-        await expectTable(Fixtures.WISHLIST_TABLE)
-          .hasNumberOfRows(1)
-          .row(0)
-          .toMatchObject({
-            id: createdWishlistId,
-            title: 'Test Wishlist',
-            description: 'Test Description',
-            logo_url: null,
-            hide_items: false,
-            owner_id: currentUserId,
-            created_at: expect.toBeDate(),
-            updated_at: expect.toBeDate(),
-          })
-          .check()
+        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+          id: createdWishlistId,
+          title: 'Test Wishlist',
+          description: 'Test Description',
+          logo_url: null,
+          hide_items: false,
+          owner_id: currentUserId,
+          created_at: expect.toBeDate(),
+          updated_at: expect.toBeDate(),
+        })
 
-        await expectTable(Fixtures.EVENT_WISHLIST_TABLE)
-          .hasNumberOfRows(1)
-          .row(0)
-          .toEqual({
-            event_id: eventId,
-            wishlist_id: createdWishlistId,
-          })
-          .check()
+        await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(1).row(0).toEqual({
+          event_id: eventId,
+          wishlist_id: createdWishlistId,
+        })
       })
 
       it('should create wishlist with multiple events', async () => {
@@ -899,7 +880,6 @@ describe('WishlistController', () => {
             event_id: eventId2,
             wishlist_id: createdWishlistId,
           })
-          .check()
       })
     })
   })
@@ -984,14 +964,10 @@ describe('WishlistController', () => {
           )
 
         // Verify no changes were made
-        await expectTable(Fixtures.WISHLIST_TABLE)
-          .hasNumberOfRows(1)
-          .row(0)
-          .toMatchObject({
-            id: wishlistId,
-            title: 'Original Title',
-          })
-          .check()
+        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+          id: wishlistId,
+          title: 'Original Title',
+        })
       })
 
       it('should return 401 when user is not owner', async () => {
@@ -1024,14 +1000,10 @@ describe('WishlistController', () => {
           )
 
         // Verify no changes were made
-        await expectTable(Fixtures.WISHLIST_TABLE)
-          .hasNumberOfRows(1)
-          .row(0)
-          .toMatchObject({
-            id: wishlistId,
-            title: 'Original Title',
-          })
-          .check()
+        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+          id: wishlistId,
+          title: 'Original Title',
+        })
       })
 
       it('should update wishlist successfully with title', async () => {
@@ -1055,16 +1027,12 @@ describe('WishlistController', () => {
           })
           .expect(200)
 
-        await expectTable(Fixtures.WISHLIST_TABLE)
-          .hasNumberOfRows(1)
-          .row(0)
-          .toMatchObject({
-            id: wishlistId,
-            title: 'Updated Title',
-            description: null,
-            updated_at: expect.toBeDate(),
-          })
-          .check()
+        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+          id: wishlistId,
+          title: 'Updated Title',
+          description: null,
+          updated_at: expect.toBeDate(),
+        })
       })
 
       it('should update wishlist successfully with title and description', async () => {
@@ -1089,16 +1057,12 @@ describe('WishlistController', () => {
           })
           .expect(200)
 
-        await expectTable(Fixtures.WISHLIST_TABLE)
-          .hasNumberOfRows(1)
-          .row(0)
-          .toMatchObject({
-            id: wishlistId,
-            title: 'Updated wishlist title',
-            description: 'Updated wishlist description',
-            updated_at: expect.toBeDate(),
-          })
-          .check()
+        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+          id: wishlistId,
+          title: 'Updated wishlist title',
+          description: 'Updated wishlist description',
+          updated_at: expect.toBeDate(),
+        })
       })
     })
   })
@@ -1154,8 +1118,8 @@ describe('WishlistController', () => {
           )
 
         // Verify wishlist still exists
-        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1).check()
-        await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(1).check()
+        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1)
+        await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(1)
       })
 
       it('should delete wishlist successfully', async () => {
@@ -1171,14 +1135,13 @@ describe('WishlistController', () => {
           title: 'Test Wishlist',
         })
 
-        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1).check()
-        await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(1).check()
-
+        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1)
+        await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(1)
         await request.delete(path(wishlistId)).expect(200)
 
         // Verify wishlist and its relations are deleted
-        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(0).check()
-        await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(0).check()
+        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(0)
+        await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(0)
       })
 
       it('should delete wishlist with multiple events successfully', async () => {
@@ -1200,16 +1163,15 @@ describe('WishlistController', () => {
           title: 'Test Wishlist',
         })
 
-        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1).check()
-        await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(2).check()
-        await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(2).check()
-
+        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1)
+        await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(2)
+        await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(2)
         await request.delete(path(wishlistId)).expect(200)
 
         // Verify wishlist and its relations are deleted
-        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(0).check()
-        await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(0).check()
-        await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(2).check()
+        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(0)
+        await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(0)
+        await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(2)
       })
 
       it('should delete wishlist with items successfully', async () => {
@@ -1232,14 +1194,13 @@ describe('WishlistController', () => {
           isSuggested: false,
         })
 
-        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1).check()
-        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1).check()
-
+        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1)
+        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1)
         await request.delete(path(wishlistId)).expect(200)
 
         // Verify wishlist and its items are deleted
-        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(0).check()
-        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(0).check()
+        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(0)
+        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(0)
       })
     })
   })
@@ -1316,7 +1277,7 @@ describe('WishlistController', () => {
           )
 
         // Verify no new event-wishlist relations were created
-        await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(1).check()
+        await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(1)
       })
 
       it('should return 401 when user is not owner of wishlist', async () => {
@@ -1358,7 +1319,7 @@ describe('WishlistController', () => {
           )
 
         // Verify no new event-wishlist relations were created
-        await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(1).check()
+        await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(1)
       })
 
       it('should return 401 when user is not attendee of event', async () => {
@@ -1395,7 +1356,7 @@ describe('WishlistController', () => {
           )
 
         // Verify no new event-wishlist relations were created
-        await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(1).check()
+        await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(1)
       })
 
       it('should link wishlist to event successfully', async () => {
@@ -1417,8 +1378,7 @@ describe('WishlistController', () => {
           title: 'My Wishlist',
         })
 
-        await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(1).check()
-
+        await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(1)
         await request.post(path(wishlistId)).send({ event_id: eventId2 }).expect(201)
 
         // Verify new event-wishlist relation was created
@@ -1434,7 +1394,6 @@ describe('WishlistController', () => {
             event_id: eventId2,
             wishlist_id: wishlistId,
           })
-          .check()
       })
 
       it('should link wishlist to event when user is attendee', async () => {
@@ -1476,7 +1435,7 @@ describe('WishlistController', () => {
           .expect(201)
 
         // Verify new event-wishlist relation was created
-        await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(2).check()
+        await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(2)
       })
 
       it('should return 400 when wishlist is already linked to event', async () => {
@@ -1506,7 +1465,7 @@ describe('WishlistController', () => {
           )
 
         // Verify no new event-wishlist relations were created
-        await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(1).check()
+        await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(1)
       })
     })
   })
@@ -1583,7 +1542,7 @@ describe('WishlistController', () => {
           )
 
         // Verify event-wishlist relation still exists
-        await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(1).check()
+        await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(1)
       })
 
       it('should return 401 when user is not owner of wishlist', async () => {
@@ -1616,7 +1575,7 @@ describe('WishlistController', () => {
           )
 
         // Verify event-wishlist relation still exists
-        await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(1).check()
+        await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(1)
       })
 
       it('should unlink wishlist from event successfully', async () => {
@@ -1638,19 +1597,14 @@ describe('WishlistController', () => {
           title: 'My Wishlist',
         })
 
-        await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(2).check()
-
+        await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(2)
         await request.post(path(wishlistId)).send({ event_id: eventId2 }).expect(201)
 
         // Verify event-wishlist relation was removed
-        await expectTable(Fixtures.EVENT_WISHLIST_TABLE)
-          .hasNumberOfRows(1)
-          .row(0)
-          .toEqual({
-            event_id: eventId1,
-            wishlist_id: wishlistId,
-          })
-          .check()
+        await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(1).row(0).toEqual({
+          event_id: eventId1,
+          wishlist_id: wishlistId,
+        })
       })
 
       it('should return 400 when wishlist is not linked to event', async () => {
@@ -1686,7 +1640,7 @@ describe('WishlistController', () => {
           )
 
         // Verify original event-wishlist relation still exists
-        await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(2).check()
+        await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(2)
       })
 
       it('should return 400 when trying to unlink the last event', async () => {
@@ -1716,7 +1670,7 @@ describe('WishlistController', () => {
           )
 
         // Verify event-wishlist relation still exists
-        await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(1).check()
+        await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(1)
       })
     })
   })
