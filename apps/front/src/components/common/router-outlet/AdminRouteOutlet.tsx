@@ -1,6 +1,5 @@
-import type { RootState } from '../../store'
+import type { RootState } from '../../../core'
 
-import React from 'react'
 import { useSelector } from 'react-redux'
 import { Navigate, Outlet } from 'react-router-dom'
 

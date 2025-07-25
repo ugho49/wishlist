@@ -83,6 +83,11 @@ export class MailsAssert {
     }
   }
 
+  // Thenable pattern: allow to chain assertions with await without a check() call
+  then(onFulfilled: () => unknown, onRejected?: (error: unknown) => unknown): Promise<unknown> {
+    return this.check().then(onFulfilled, onRejected)
+  }
+
   private async getMails(): Promise<Mail[]> {
     if (this.dataFetched) {
       return this.mailsCached
@@ -147,5 +152,10 @@ class MailAssert {
 
   check() {
     return this.parent.check()
+  }
+
+  // Thenable pattern: allow to chain assertions with await without a check() call
+  then(onFulfilled: () => unknown, onRejected?: (error: unknown) => unknown): Promise<unknown> {
+    return this.check().then(onFulfilled, onRejected)
   }
 }

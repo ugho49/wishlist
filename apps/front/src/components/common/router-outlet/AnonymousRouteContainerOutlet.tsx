@@ -2,14 +2,14 @@
 import { Box, Container, Stack, styled } from '@mui/material'
 import { Outlet, useNavigate } from 'react-router-dom'
 
-import { Logo } from '../../../components/common/Logo'
+import { Logo } from '../Logo'
 
-const Root = styled(Box)({
+const Root = styled(Box)(({ theme }) => ({
   minHeight: '100vh',
   display: 'flex',
   alignItems: 'center',
-  py: 4,
-})
+  paddingBlock: theme.spacing(4),
+}))
 
 const LogoContainer = styled(Box)({
   cursor: 'pointer',

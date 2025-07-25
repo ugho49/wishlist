@@ -128,7 +128,7 @@ const CardText = styled(Typography)(() => ({
   fontWeight: 500,
 }))
 
-export const CTASection = () => {
+export const GetStartedSection = () => {
   return (
     <CTAContainer>
       <FloatingCard1>

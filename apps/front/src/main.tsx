@@ -13,6 +13,7 @@ import { Provider as ReduxProvider } from 'react-redux'
 import { BrowserRouter } from 'react-router-dom'
 
 import { App } from './App'
+import { ScrollToTop } from './components/common/ScrollToTop'
 import { ApiProvider } from './context/ApiContext'
 import { store } from './core'
 import { AxiosInterceptor } from './core/router/AxiosInterceptor'
@@ -50,6 +51,7 @@ function main() {
               <CssBaseline />
               <LocalizationProvider dateAdapter={AdapterLuxon} adapterLocale="fr">
                 <BrowserRouter>
+                  <ScrollToTop />
                   <SnackbarProvider
                     maxSnack={3}
                     autoHideDuration={1_500}

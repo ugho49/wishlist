@@ -66,6 +66,13 @@ This is an Nx monorepo containing a wishlist application with React 19 frontend 
 - **Responsive design**: Use theme breakpoints in styled components: `theme.breakpoints.up('md')`
 - **Component naming**: Use descriptive names with `Styled` suffix (e.g., `HeaderStyled`, `ContainerWrapper`)
 
+#### MUI Component Usage (IMPORTANT)
+- **Be careful with `component` prop** on MUI components in TypeScript - it can cause type errors
+- **For Button navigation**: When using `component={Link}`, you may need proper type assertions. **Alternative approach**: Use `onClick={() => navigate('/')}` with `useNavigate()` hook
+- **For Typography as lists**: `<Typography component="ul">` may cause type issues, prefer `<Box component="ul">` for semantic HTML
+- **Type safety**: Always check TypeScript errors when using `component` prop and consider alternatives if types conflict
+- **Navigation best practice**: For simple navigation, `useNavigate()` hook is often more reliable than `component` prop
+
 ### Key Domain Concepts
 - **Events**: Central organizing concept for wishlist sharing with mandatory event dates
 - **Attendees**: Users participating in events with role-based permissions (MAINTAINER/PARTICIPANT)

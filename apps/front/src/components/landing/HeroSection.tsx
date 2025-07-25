@@ -61,6 +61,17 @@ const HeroContainer = styled(Box)(() => ({
   animation: `${colorShift} 10s ease-in-out infinite`,
 }))
 
+// Container for all stars
+const StarsContainer = styled(Box)(() => ({
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  pointerEvents: 'none',
+  zIndex: 0,
+}))
+
 // Animated Star Points
 const StarPoint = styled(Box)(() => ({
   position: 'absolute',
@@ -91,10 +102,12 @@ const ContentWrapper = styled(Container)(({ theme }) => ({
   gridTemplateColumns: '1fr 400px',
   gap: theme.spacing(8),
   alignItems: 'center',
+  paddingTop: theme.spacing(12),
   [theme.breakpoints.down('md')]: {
     gridTemplateColumns: '1fr',
     gap: theme.spacing(4),
     textAlign: 'center',
+    paddingTop: theme.spacing(14),
   },
 }))
 
@@ -135,6 +148,9 @@ const ButtonGroup = styled(Box)(({ theme }) => ({
   display: 'flex',
   gap: theme.spacing(2),
   marginBottom: theme.spacing(6),
+  [theme.breakpoints.down('md')]: {
+    justifyContent: 'center',
+  },
   [theme.breakpoints.down('sm')]: {
     flexDirection: 'column',
   },
@@ -180,6 +196,7 @@ const FeaturesSidebar = styled(Box)(({ theme }) => ({
   [theme.breakpoints.down('md')]: {
     margin: '0 auto',
     maxWidth: '400px',
+    marginBottom: theme.spacing(6),
   },
 }))
 
@@ -226,14 +243,23 @@ const NavBar = styled(Box)(({ theme }) => ({
   top: 0,
   left: 0,
   right: 0,
-  zIndex: 2,
+  zIndex: 10,
   padding: theme.spacing(2, 0),
+  backdropFilter: 'blur(10px)',
+  borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+  transition: 'padding 0.3s ease',
 }))
 
 const NavContent = styled(Container)(() => ({
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'center',
+}))
+
+const NavRightGroup = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing(4),
 }))
 
 const NavLinks = styled(Box)(({ theme }) => ({
@@ -269,6 +295,7 @@ const LoginButton = styled(Button)<ButtonProps & LinkProps>(() => ({
   color: 'white',
   borderColor: 'rgba(255, 255, 255, 0.3)',
   fontWeight: 500,
+  transition: 'all 0.3s ease',
   '&:hover': {
     borderColor: 'white',
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
@@ -296,6 +323,11 @@ const features = [
   },
 ]
 
+const navItems = [
+  { label: 'Fonctionnalités', targetId: 'features' },
+  { label: 'FAQ', targetId: 'faq' },
+]
+
 export const HeroSection = () => {
   // Generate star positions
   const smallStars = Array.from({ length: 70 }, (_, i) => ({
@@ -314,40 +346,47 @@ export const HeroSection = () => {
 
   return (
     <HeroContainer>
-      {/* Small twinkling stars */}
-      {smallStars.map(star => (
-        <StarPoint
-          key={`small-${star.id}`}
-          sx={{
-            top: `${star.top}%`,
-            left: `${star.left}%`,
-            animationDelay: `${star.delay}s`,
-          }}
-        />
-      ))}
+      <StarsContainer id="stars">
+        {/* Small twinkling stars */}
+        {smallStars.map(star => (
+          <StarPoint
+            key={`small-${star.id}`}
+            sx={{
+              top: `${star.top}%`,
+              left: `${star.left}%`,
+              animationDelay: `${star.delay}s`,
+            }}
+          />
+        ))}
 
-      {/* Bigger shimmering stars */}
-      {bigStars.map(star => (
-        <BiggerStar
-          key={`big-${star.id}`}
-          sx={{
-            top: `${star.top}%`,
-            left: `${star.left}%`,
-            animationDelay: `${star.delay}s`,
-          }}
-        />
-      ))}
+        {/* Bigger shimmering stars */}
+        {bigStars.map(star => (
+          <BiggerStar
+            key={`big-${star.id}`}
+            sx={{
+              top: `${star.top}%`,
+              left: `${star.left}%`,
+              animationDelay: `${star.delay}s`,
+            }}
+          />
+        ))}
+      </StarsContainer>
 
       <NavBar>
         <NavContent maxWidth="lg">
           <Logo variant="full" color="white" />
-          <NavLinks>
-            <NavLink onClick={() => handleSmoothScroll('features')}>Fonctionnalités</NavLink>
-            <NavLink onClick={() => handleSmoothScroll('faq')}>FAQ</NavLink>
-          </NavLinks>
-          <LoginButton variant="outlined" component={Link} to="/login">
-            Connexion
-          </LoginButton>
+          <NavRightGroup>
+            <NavLinks>
+              {navItems.map(item => (
+                <NavLink key={item.label} onClick={() => handleSmoothScroll(item.targetId)}>
+                  {item.label}
+                </NavLink>
+              ))}
+            </NavLinks>
+            <LoginButton variant="outlined" component={Link} to="/login">
+              Connexion
+            </LoginButton>
+          </NavRightGroup>
         </NavContent>
       </NavBar>
 
