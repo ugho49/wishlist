@@ -50,9 +50,7 @@ export const EditEventPage = () => {
         {(!event || !currentUserCanEdit) && <EventNotFound />}
         {event && currentUserCanEdit && (
           <>
-            <Title smallMarginBottom goBackLink={{ to: `/events/${eventId}`, title: "Revenir à l'évènement" }}>
-              Modifier l'évènement
-            </Title>
+            <Title smallMarginBottom>Modifier l'évènement</Title>
             <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: '20px' }}>
               <Tabs
                 value={queryParams.tab}

@@ -117,9 +117,7 @@ export const AdminUserPage = () => {
   return (
     <Loader loading={loadingUser}>
       <Box>
-        <Title smallMarginBottom goBackLink={{ title: 'Retour', to: '/admin?tab=users' }}>
-          Editer l'utilisateur
-        </Title>
+        <Title smallMarginBottom>Editer l'utilisateur</Title>
 
         <UpdatePasswordModal
           userId={userId}

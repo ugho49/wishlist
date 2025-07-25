@@ -142,8 +142,19 @@ export class PostgresEventRepository implements EventRepository {
           },
         })
 
-      await subTx.delete(schema.eventAttendee).where(eq(schema.eventAttendee.eventId, event.id))
+      // Get existing attendees
+      const existingAttendees = await subTx.query.eventAttendee.findMany({
+        where: eq(schema.eventAttendee.eventId, event.id),
+      })
 
+      // Delete attendees that are not in the new list
+      const attendeeIdsToDelete = existingAttendees
+        .filter(attendee => !event.attendees.some(a => a.id === attendee.id))
+        .map(a => a.id)
+
+      await subTx.delete(schema.eventAttendee).where(inArray(schema.eventAttendee.id, attendeeIdsToDelete))
+
+      // Save others
       for (const attendee of event.attendees) {
         await this.attendeeRepository.save(attendee, subTx)
       }

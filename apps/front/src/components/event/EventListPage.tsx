@@ -47,7 +47,7 @@ export const EventListPage = () => {
       <Loader loading={loading}>
         <Grid container spacing={3}>
           {(value?.resources || []).map(event => (
-            <Grid key={event.id} size={{ xs: 12, md: 6 }}>
+            <Grid key={event.id} size={{ xs: 12, lg: 6 }}>
               <EventCard event={event} />
             </Grid>
           ))}
@@ -64,14 +64,14 @@ export const EventListPage = () => {
             onChange={value => setCurrentPage(value)}
           />
 
-          <FabAutoGrow label="Créer un évènement" icon={<AddIcon />} color="secondary" to={CREATE_EVENT_ROUTE} />
+          <FabAutoGrow label="Créer un évènement" icon={<AddIcon />} color="primary" to={CREATE_EVENT_ROUTE} />
         </>
       )}
 
       {totalElements === 0 && !loading && (
         <Stack alignItems="center" gap={2} sx={{ marginTop: '50px' }}>
           <span>Vous n'avez pas d'évènements pour le moment.</span>
-          <Button component={RouterLink} variant="contained" color="secondary" to={CREATE_EVENT_ROUTE}>
+          <Button component={RouterLink} variant="contained" color="primary" to={CREATE_EVENT_ROUTE}>
             Ajouter un évènement
           </Button>
         </Stack>

@@ -149,7 +149,7 @@ async function main() {
       id: faker.string.uuid(),
       eventId: event.id,
       userId: maintainer.id,
-      role: 'MAINTAINER',
+      role: 'maintainer',
     })
 
     const numberOfAttendees = faker.number.int({ min: 0, max: 10 })
@@ -162,6 +162,7 @@ async function main() {
           id: faker.string.uuid(),
           eventId: event.id,
           tempUserEmail: faker.internet.email(),
+          role: 'user',
         })
       } else {
         const attendee = getRandomUserWithExclusion(maintainer.id)
@@ -170,7 +171,7 @@ async function main() {
           id: faker.string.uuid(),
           eventId: event.id,
           userId: attendee.id,
-          role: 'USER',
+          role: 'user',
         })
       }
     }

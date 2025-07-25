@@ -48,6 +48,11 @@ export class TableAssert {
     }
   }
 
+  // Thenable pattern: allow to chain assertions with await without a check() call
+  then(onFulfilled: () => unknown, onRejected?: (error: unknown) => unknown): Promise<unknown> {
+    return this.check().then(onFulfilled, onRejected)
+  }
+
   private async fetchValue(index: number): Promise<FetchValueResult> {
     const returnValue: FetchValueResult = {
       value: undefined,
@@ -116,5 +121,10 @@ class TableRowAssert {
 
   check() {
     return this.parent.check()
+  }
+
+  // Thenable pattern: allow to chain assertions with await without a check() call
+  then(onFulfilled: () => unknown, onRejected?: (error: unknown) => unknown): Promise<unknown> {
+    return this.check().then(onFulfilled, onRejected)
   }
 }

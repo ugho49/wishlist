@@ -43,9 +43,7 @@ export const EditWishlistPage = () => {
         {(!wishlist || !currentUserCanEdit) && <WishlistNotFound />}
         {wishlist && currentUserCanEdit && (
           <>
-            <Title smallMarginBottom goBackLink={{ to: `/wishlists/${wishlistId}`, title: 'Revenir à la liste' }}>
-              Modifier la liste
-            </Title>
+            <Title smallMarginBottom>Modifier la liste</Title>
             <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: '20px' }}>
               <Tabs
                 value={queryParams.tab}

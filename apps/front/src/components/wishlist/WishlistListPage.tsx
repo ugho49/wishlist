@@ -47,7 +47,7 @@ export const WishlistListPage = () => {
       <Loader loading={loading}>
         <Grid container spacing={3}>
           {(value?.resources || []).map(wishlist => (
-            <Grid key={wishlist.id} size={{ xs: 12, md: 6 }}>
+            <Grid key={wishlist.id} size={{ xs: 12, lg: 6 }}>
               <WishlistCardWithEvents wishlist={wishlist} />
             </Grid>
           ))}
@@ -64,14 +64,14 @@ export const WishlistListPage = () => {
             onChange={value => setCurrentPage(value)}
           />
 
-          <FabAutoGrow label="Créer une liste" icon={<AddIcon />} color="secondary" to={CREATE_LIST_ROUTE} />
+          <FabAutoGrow label="Créer une liste" icon={<AddIcon />} color="primary" to={CREATE_LIST_ROUTE} />
         </>
       )}
 
       {totalElements === 0 && !loading && (
         <Stack alignItems="center" gap={2} sx={{ marginTop: '50px' }}>
           <span>Vous n'avez aucune liste pour le moment.</span>
-          <Button component={RouterLink} variant="contained" color="secondary" to={CREATE_LIST_ROUTE}>
+          <Button component={RouterLink} variant="contained" color="primary" to={CREATE_LIST_ROUTE}>
             Ajouter une liste
           </Button>
         </Stack>
