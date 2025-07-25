@@ -1,4 +1,4 @@
-import { Box, Container, containerClasses, styled } from '@mui/material'
+import { Box, Container, containerClasses, styled, useMediaQuery, useTheme } from '@mui/material'
 import { useFetchUserInfo } from '@wishlist/front-hooks'
 import { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
@@ -27,7 +27,9 @@ const ContainerStyled = styled(Container)(({ theme }) => ({
 
 export const PrivateRouteContainerOutlet = () => {
   const { user } = useFetchUserInfo()
+  const theme = useTheme()
   const dispatch = useDispatch()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
   useEffect(() => {
     if (user) {
@@ -37,11 +39,9 @@ export const PrivateRouteContainerOutlet = () => {
 
   return (
     <>
-      {/* Side Navigation - responsive drawer */}
       <SideNavigation />
 
-      {/* Mobile Top Bar - only visible on mobile */}
-      <MobileTopBar />
+      {isMobile && <MobileTopBar />}
 
       <MainWrapper as="main">
         <ContainerStyled fixed maxWidth="lg">
@@ -49,8 +49,7 @@ export const PrivateRouteContainerOutlet = () => {
         </ContainerStyled>
       </MainWrapper>
 
-      {/* Mobile Bottom Navigation - only visible on mobile */}
-      <MobileBottomNavigation />
+      {isMobile && <MobileBottomNavigation />}
     </>
   )
 }

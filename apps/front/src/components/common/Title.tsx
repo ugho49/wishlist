@@ -3,9 +3,8 @@ import type { PropsWithChildren } from 'react'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { Box, IconButton, Stack, styled, useMediaQuery, useTheme } from '@mui/material'
 import clsx from 'clsx'
-import { useLocation, useNavigate } from 'react-router-dom'
 
-import { useHistoryStack } from '../../hooks'
+import { useBackNavigation } from '../../hooks'
 
 const TitleRoot = styled(Stack)(({ theme }) => ({
   alignItems: 'center',
@@ -47,23 +46,13 @@ export type TitleProps = {
 }
 
 export const Title = ({ children, smallMarginBottom = false }: PropsWithChildren<TitleProps>) => {
-  const navigate = useNavigate()
-  const location = useLocation()
-  const { history } = useHistoryStack()
   const theme = useTheme()
   const isDesktop = useMediaQuery(theme.breakpoints.up('md'))
-
-  // Same logic as MobileTopBar: show back button if we're not on main routes
-  const isMainRoute = ['/', '/events', '/wishlists', '/admin', '/user/profile'].includes(location.pathname)
-  const canGoBack = history.length > 0 && !isMainRoute && isDesktop
-
-  const handleGoBack = () => {
-    navigate(-1)
-  }
+  const { canGoBack, handleGoBack } = useBackNavigation()
 
   return (
     <TitleRoot direction="row" gap={1} className={clsx(smallMarginBottom && 'smallMarginBottom')}>
-      {canGoBack && (
+      {canGoBack && isDesktop && (
         <BackButton onClick={handleGoBack} aria-label="go back" size="small">
           <ArrowBackIcon fontSize="small" />
         </BackButton>

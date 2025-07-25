@@ -18,9 +18,6 @@ const PaperStyled = styled(Paper)<{ isDrawerOpen: boolean }>(({ theme, isDrawerO
   backdropFilter: 'blur(16px)',
   boxShadow: isDrawerOpen ? 'none' : '0 -1px 4px rgba(0, 0, 0, 0.04), 0 -2px 8px rgba(0, 0, 0, 0.02)',
   borderRadius: 0,
-  [theme.breakpoints.up('md')]: {
-    display: 'none',
-  },
 }))
 
 const BottomNavigationStyled = styled(BottomNavigation)(({ theme }) => ({

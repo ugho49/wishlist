@@ -1,9 +1,9 @@
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { AppBar, Box, IconButton, styled, Toolbar } from '@mui/material'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
 import LogoTextSvg from '../../assets/logo/logo_text.svg?react'
-import { useHistoryStack } from '../../hooks'
+import { useBackNavigation } from '../../hooks'
 
 const AppBarStyled = styled(AppBar)(({ theme }) => ({
   backgroundColor: theme.palette.primary.main,
@@ -11,9 +11,6 @@ const AppBarStyled = styled(AppBar)(({ theme }) => ({
   boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
   color: 'white',
   zIndex: theme.zIndex.drawer - 2,
-  [theme.breakpoints.up('md')]: {
-    display: 'none',
-  },
 }))
 
 const ToolbarStyled = styled(Toolbar)(() => ({
@@ -49,16 +46,7 @@ const LogoSvgStyled = styled(LogoTextSvg)(() => ({
 
 export const MobileTopBar = () => {
   const navigate = useNavigate()
-  const location = useLocation()
-  const { history } = useHistoryStack()
-
-  // Simple logic: show back button if we're not on main routes
-  const isMainRoute = ['/', '/events', '/wishlists', '/admin', '/user/profile'].includes(location.pathname)
-  const canGoBack = history.length > 0 && !isMainRoute
-
-  const handleGoBack = () => {
-    navigate(-1)
-  }
+  const { canGoBack, handleGoBack } = useBackNavigation()
 
   return (
     <AppBarStyled position="fixed">
