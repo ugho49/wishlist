@@ -35,8 +35,3 @@
 
 - [ ] Dans la user page, indiquer plus clairement que la photo peut être ajouter
 - [ ] Lors de la première connexion après création user account, inciter l’user a ajouter une photo
-
-- [ ] Retravailler la landing page
-  - [ ] Mode mobile ?
-  - [ ] Pages à implementer Confidentialité | Conditions | Cookies ???
-  - [ ] Navbar

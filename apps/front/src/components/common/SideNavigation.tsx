@@ -65,6 +65,7 @@ const LogoSectionStyled = styled(Box)(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
+  cursor: 'pointer',
   gap: 20,
 }))
 
@@ -207,7 +208,7 @@ export const SideNavigation = () => {
 
   const drawerContent = (
     <DrawerContentStyled>
-      <LogoSectionStyled>
+      <LogoSectionStyled onClick={() => navigate('/')}>
         <LogoIconStyled />
         <LogoTextStyled />
       </LogoSectionStyled>

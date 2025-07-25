@@ -26,9 +26,7 @@ export const SecretSantaPage = () => {
 
   return (
     <Box>
-      <Title smallMarginBottom goBackLink={{ to: `/events/${eventId}`, title: "Revenir à l'évènement" }}>
-        Secret Santa
-      </Title>
+      <Title smallMarginBottom>Secret Santa</Title>
       <Loader loading={loading}>
         {event && (
           <>

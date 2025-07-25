@@ -35,9 +35,7 @@ export const AdminEventPage = () => {
   return (
     <Loader loading={loadingEvent}>
       <Box>
-        <Title smallMarginBottom goBackLink={{ title: 'Retour', to: '/admin?tab=events' }}>
-          Editer l'évènement
-        </Title>
+        <Title smallMarginBottom>Editer l'évènement</Title>
 
         <Card>
           <Subtitle>Détails</Subtitle>

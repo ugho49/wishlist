@@ -7,13 +7,17 @@ import React from 'react'
 
 import { RouterLink } from './RouterLink'
 
-const FabStyled = styled(Fab)({
+const FabStyled = styled(Fab)(({ theme }) => ({
   [`&.${fabClasses.root}`]: {
     position: 'fixed',
-    bottom: 72,
+    bottom: 35,
     right: 16,
+
+    [theme.breakpoints.down('md')]: {
+      bottom: 72,
+    },
   },
-})
+}))
 
 export type FabAutoGrowProps = {
   to?: string

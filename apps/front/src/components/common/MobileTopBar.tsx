@@ -39,6 +39,7 @@ const LogoContainerStyled = styled(Box)(() => ({
   flexGrow: 1,
   display: 'flex',
   justifyContent: 'center',
+  cursor: 'pointer',
 }))
 
 const LogoSvgStyled = styled(LogoTextSvg)(() => ({
@@ -72,7 +73,7 @@ export const MobileTopBar = () => {
           <ArrowBackIcon />
         </BackButtonStyled>
 
-        <LogoContainerStyled>
+        <LogoContainerStyled onClick={() => navigate('/')}>
           <LogoSvgStyled />
         </LogoContainerStyled>
       </ToolbarStyled>

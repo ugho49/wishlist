@@ -1,6 +1,5 @@
 import type { RootState } from '../../core'
 
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import MenuIcon from '@mui/icons-material/Menu'
 import { BottomNavigation, BottomNavigationAction, bottomNavigationActionClasses, Paper, styled } from '@mui/material'
 import { useDispatch, useSelector } from 'react-redux'
@@ -72,7 +71,7 @@ export const MobileBottomNavigation = () => {
     <PaperStyled elevation={0} isDrawerOpen={isDrawerOpen}>
       <BottomNavigationStyled value={getSelectedValue()} onChange={handleChange} showLabels>
         <BottomNavigationAction label="Menu" value="menu" icon={<MenuIcon />} />
-        <BottomNavigationAction label="Événements" value="events" icon={<CalendarMonthIcon />} />
+        {/* <BottomNavigationAction label="Événements" value="events" icon={<CalendarMonthIcon />} /> */}
       </BottomNavigationStyled>
     </PaperStyled>
   )
