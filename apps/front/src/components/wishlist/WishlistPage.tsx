@@ -5,9 +5,9 @@ import EditIcon from '@mui/icons-material/Edit'
 import PersonIcon from '@mui/icons-material/Person'
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined'
 import PublicIcon from '@mui/icons-material/Public'
-import { Avatar, Box, Chip, Stack, Tooltip } from '@mui/material'
+import { Avatar, Box, Chip, Container, Stack, Tooltip } from '@mui/material'
 import { grey } from '@mui/material/colors'
-import React, { useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useNavigate, useParams } from 'react-router-dom'
 
@@ -108,9 +108,13 @@ export const WishlistPage = () => {
               )}
             </Stack>
 
-            {wishlist.description && <Description text={wishlist.description} />}
+            <Container maxWidth="lg">
+              <Stack gap={'20px'}>
+                {wishlist.description && <Description text={wishlist.description} />}
 
-            <WishlistItems wishlist={wishlist} />
+                <WishlistItems wishlist={wishlist} />
+              </Stack>
+            </Container>
 
             <WishlistEventsDialog
               open={openEventDialog}

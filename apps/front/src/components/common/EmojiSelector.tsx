@@ -61,7 +61,7 @@ export const EmojiSelector = ({ value, onChange, disabled }: EmojiSelectorProps)
     setAnchorEl(null)
   }
 
-  const handleEmojiSelect = (emoji: any) => {
+  const handleEmojiSelect = (emoji: { native: string }) => {
     onChange(emoji.native)
     handleClose()
   }

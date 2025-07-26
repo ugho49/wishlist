@@ -6,16 +6,10 @@ import clsx from 'clsx'
 
 import { useBackNavigation } from '../../hooks'
 
-const TitleRoot = styled(Stack)(({ theme }) => ({
+const TitleRoot = styled(Stack)(() => ({
   alignItems: 'center',
   justifyContent: 'center',
-  paddingBlock: '20px',
-  '&:not(.smallMarginBottom)': {
-    [theme.breakpoints.up('sm')]: {
-      marginTop: '10px',
-      marginBottom: '20px',
-    },
-  },
+  paddingBottom: '20px',
 }))
 
 const Content = styled(Box)(({ theme }) => ({
