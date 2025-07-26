@@ -19,7 +19,7 @@ import { getUrlParameter } from '../../utils/router.utils'
 import { RouterLink } from '../common/RouterLink'
 
 const schema = z.object({
-  email: z.string().email('Email invalide'),
+  email: z.email('Email invalide'),
   password: z.string().min(1, 'Ce champ ne peut pas être vide'),
 })
 

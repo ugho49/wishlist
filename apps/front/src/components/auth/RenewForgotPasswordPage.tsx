@@ -2,7 +2,7 @@ import type { ResetPasswordValidationInputDto } from '@wishlist/common'
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import SaveAsIcon from '@mui/icons-material/SaveAs'
-import { Box, Button, Stack, styled, TextField, Typography } from '@mui/material'
+import { Button, Stack, styled, TextField, Typography } from '@mui/material'
 import { useMutation } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
@@ -11,7 +11,6 @@ import { z } from 'zod'
 import { useApi } from '../../hooks/useApi'
 import { useCustomSearchParams } from '../../hooks/useCustomSearchParams'
 import { useToast } from '../../hooks/useToast'
-import { InputLabel } from '../common/InputLabel'
 import { RouterLink } from '../common/RouterLink'
 
 type SearchParamsType = {
@@ -122,39 +121,35 @@ export const RenewForgotPasswordPage = () => {
 
   return (
     <Stack spacing={4} alignItems="center">
-      <TitleStyled variant="h4">Mot de passe oublié</TitleStyled>
+      <TitleStyled variant="h4">Changer de mot de passe</TitleStyled>
 
       <InfoMessageStyled variant="body1">
         Vous êtes en train de définir un nouveau mot de passe pour <strong>{email}</strong>
       </InfoMessageStyled>
 
       <Stack component="form" onSubmit={handleSubmit(onSubmit)} spacing={3} width="100%">
-        <Box>
-          <InputLabel required>Nouveau mot de passe</InputLabel>
-          <TextFieldStyled
-            {...register('password')}
-            fullWidth
-            placeholder="Un super mot de passe"
-            type="password"
-            autoComplete="new-password"
-            autoFocus
-            error={!!formErrors.password}
-            helperText={formErrors.password?.message}
-          />
-        </Box>
+        <TextFieldStyled
+          {...register('password')}
+          label="Nouveau mot de passe"
+          fullWidth
+          placeholder="Un super mot de passe"
+          type="password"
+          autoComplete="new-password"
+          autoFocus
+          error={!!formErrors.password}
+          helperText={formErrors.password?.message}
+        />
 
-        <Box>
-          <InputLabel required>Confirmer le mot de passe</InputLabel>
-          <TextFieldStyled
-            {...register('confirmPassword')}
-            fullWidth
-            placeholder="Confirmez votre mot de passe"
-            type="password"
-            autoComplete="new-password"
-            error={!!formErrors.confirmPassword}
-            helperText={formErrors.confirmPassword?.message}
-          />
-        </Box>
+        <TextFieldStyled
+          {...register('confirmPassword')}
+          label="Confirmer le mot de passe"
+          fullWidth
+          placeholder="Confirmez votre mot de passe"
+          type="password"
+          autoComplete="new-password"
+          error={!!formErrors.confirmPassword}
+          helperText={formErrors.confirmPassword?.message}
+        />
 
         <ButtonStyled
           type="submit"

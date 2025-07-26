@@ -19,7 +19,7 @@ import { zodRequiredString } from '../../utils/validation'
 import { RouterLink } from '../common/RouterLink'
 
 const schema = z.object({
-  email: z.string().email({ message: 'Email invalide' }).max(200, '200 caractères maximum'),
+  email: z.email({ message: 'Email invalide' }).max(200, '200 caractères maximum'),
   password: z.string().min(8, '8 caractères minimum').max(50, '50 caractères maximum'),
   firstname: zodRequiredString().max(50, '50 caractères maximum'),
   lastname: zodRequiredString().max(50, '50 caractères maximum'),

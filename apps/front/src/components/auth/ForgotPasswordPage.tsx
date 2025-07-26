@@ -10,11 +10,10 @@ import { z } from 'zod'
 
 import { useApi } from '../../hooks/useApi'
 import { useToast } from '../../hooks/useToast'
-import { InputLabel } from '../common/InputLabel'
 import { RouterLink } from '../common/RouterLink'
 
 const schema = z.object({
-  email: z.string().email('Email invalide').max(200, '200 caractères maximum'),
+  email: z.email('Email invalide').max(200, '200 caractères maximum'),
 })
 
 type FormFields = z.infer<typeof schema>
@@ -96,19 +95,17 @@ export const ForgotPasswordPage = () => {
           <TitleStyled variant="h4">Mot de passe oublié</TitleStyled>
 
           <Stack component="form" onSubmit={handleSubmit(onSubmit)} spacing={3} width="100%">
-            <Box>
-              <InputLabel required>Email</InputLabel>
-              <TextFieldStyled
-                {...register('email')}
-                type="email"
-                fullWidth
-                placeholder="Entrer l'email que vous avez utilisé lors de l'inscription"
-                autoComplete="email"
-                autoFocus
-                error={!!formErrors.email}
-                helperText={formErrors.email?.message}
-              />
-            </Box>
+            <TextFieldStyled
+              {...register('email')}
+              type="email"
+              label="Email"
+              fullWidth
+              placeholder="Entrer l'email que vous avez utilisé lors de l'inscription"
+              autoComplete="email"
+              autoFocus
+              error={!!formErrors.email}
+              helperText={formErrors.email?.message}
+            />
 
             <ButtonStyled
               type="submit"
