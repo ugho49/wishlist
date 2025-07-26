@@ -130,7 +130,7 @@ async function main() {
 
     const event: typeof schema.event.$inferInsert = {
       id: faker.string.uuid(),
-      title: faker.lorem.sentence(),
+      title: faker.book.title(),
       eventDate: isPastEvent
         ? faker.date.past().toISOString()
         : faker.date
@@ -228,7 +228,7 @@ async function main() {
       const hasDescription = faker.datatype.boolean({ probability: 0.3 })
       const wishlist: typeof schema.wishlist.$inferInsert = {
         id: faker.string.uuid(),
-        title: faker.lorem.sentence(),
+        title: `Liste de ${user.firstName} ${user.lastName}`,
         ownerId: user.id,
         description: hasDescription ? faker.lorem.paragraph() : undefined,
         hideItems: faker.datatype.boolean({ probability: 0.99 }),
