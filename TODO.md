@@ -27,3 +27,4 @@
 - [ ] Dans la user page, indiquer plus clairement que la photo peut être ajouté / modifié
 - [ ] Lors de la première connexion après création user account, inciter l’user a ajouter une photo
 - [ ] Modifier la page ‘aucun event », « aucune liste », « aucun item » 
+- [ ] Change Input fields for forms --> like auth pages
