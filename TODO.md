@@ -15,23 +15,15 @@
 
 ## User
 
-- [ ] Frontend: propose to upload a picture on signup
-
-## Event
-
-- [ ] Frontend: allow to have multiple maintainers in order to manager the lists
-- [ ] Frontend: change description & secret-santa card design
-
-## Wishlist
-
-- [ ] Frontend: change description card design
-
-
-- [ ] Breadcrumbs for desktop
+- [ ] Frontend: user : propose to upload a picture on signup
+- [ ] Frontend: allow to have multiple event maintainers in order to manage the lists
+- [x] Frontend: change description & secret-santa card design
+- [x] Frontend: change description card design
+- [x] Breadcrumbs for desktop
 - [ ] Dans wishlist page:
     - [ ] Retravailler “Trier par” et “Filtrer par” 
     - [ ] Retravailler Items
     - [ ] Quand on click sur l’image d’un item, défiler a droite ou a gauche avec les flèches et afficher en plus de “fermer” et “open link”, “prendre” / “ne plus prendre”
-
-- [ ] Dans la user page, indiquer plus clairement que la photo peut être ajouter
+- [ ] Dans la user page, indiquer plus clairement que la photo peut être ajouté / modifié
 - [ ] Lors de la première connexion après création user account, inciter l’user a ajouter une photo
+- [ ] Modifier la page ‘aucun event », « aucune liste », « aucun item » 
