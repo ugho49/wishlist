@@ -227,7 +227,7 @@ export const AdminUserPage = () => {
                   disabled={loading || isCurrentUser}
                   fullWidth
                   value={firstname}
-                  inputProps={{ maxLength: 50 }}
+                  slotProps={{ htmlInput: { maxLength: 50 } }}
                   placeholder="John"
                   required
                   helperText={<CharsRemaining max={50} value={firstname} />}
@@ -242,7 +242,7 @@ export const AdminUserPage = () => {
                   disabled={loading || isCurrentUser}
                   fullWidth
                   value={lastname}
-                  inputProps={{ maxLength: 50 }}
+                  slotProps={{ htmlInput: { maxLength: 50 } }}
                   placeholder="Doe"
                   required
                   helperText={<CharsRemaining max={50} value={lastname} />}

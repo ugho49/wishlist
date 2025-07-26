@@ -104,7 +104,7 @@ export const UserTabInformations = () => {
               disabled={true}
               fullWidth
               value={user?.email || ''}
-              inputProps={{ readOnly: true }}
+              slotProps={{ htmlInput: { readOnly: true } }}
               helperText="Ce champ n'est pas modifiable pour le moment"
             />
           </Box>

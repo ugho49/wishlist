@@ -196,7 +196,7 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
               disabled={loading}
               fullWidth
               value={name}
-              inputProps={{ maxLength: 40 }}
+              slotProps={{ htmlInput: { maxLength: 40 } }}
               placeholder="Nom du souhait"
               helperText={<CharsRemaining max={40} value={name} />}
               onChange={e => setName(e.target.value)}
@@ -212,7 +212,7 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
               disabled={loading}
               fullWidth
               value={description}
-              inputProps={{ maxLength: 60 }}
+              slotProps={{ htmlInput: { maxLength: 60 } }}
               placeholder="Ajouter du détail à votre souhait"
               helperText={<CharsRemaining max={60} value={description} />}
               onChange={e => setDescription(e.target.value)}
@@ -229,7 +229,7 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
               disabled={loading || scanUrlLoading}
               fullWidth
               value={url}
-              inputProps={{ maxLength: 1000 }}
+              slotProps={{ htmlInput: { maxLength: 1000 } }}
               placeholder="Ex: https://www.google.com"
               error={invalidUrl}
               helperText={
@@ -270,7 +270,7 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
                 disabled={loading || scanUrlLoading}
                 fullWidth
                 value={pictureUrl}
-                inputProps={{ maxLength: 1000 }}
+                slotProps={{ htmlInput: { maxLength: 1000 } }}
                 placeholder="Ex: https://www.google.com"
                 error={validPictureUrl === false}
                 helperText={

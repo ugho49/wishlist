@@ -94,7 +94,7 @@ export const EditEventInformations = ({ event }: EditEventInformationsProps) => 
                   fullWidth
                   required
                   value={title}
-                  inputProps={{ maxLength: 100 }}
+                  slotProps={{ htmlInput: { maxLength: 100 } }}
                   placeholder="Le titre de votre évènement"
                   helperText={<CharsRemaining max={100} value={title} />}
                   onChange={e => setTitle(e.target.value)}
@@ -112,7 +112,7 @@ export const EditEventInformations = ({ event }: EditEventInformationsProps) => 
               multiline
               minRows={4}
               value={description}
-              inputProps={{ maxLength: 2000 }}
+              slotProps={{ htmlInput: { maxLength: 2000 } }}
               placeholder="Une petite description ..."
               helperText={<CharsRemaining max={2000} value={description} />}
               onChange={e => setDescription(e.target.value)}

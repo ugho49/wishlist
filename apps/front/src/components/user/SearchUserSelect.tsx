@@ -110,7 +110,7 @@ export const SearchUserSelect = ({ disabled, onChange, excludedEmails }: SearchU
       renderInput={params => (
         <TextField
           {...params}
-          inputProps={{ ...params.inputProps }}
+          slotProps={{ htmlInput: { ...params.inputProps } }}
           onChange={e => {
             const value = e.target.value
             if (value.length > 1) setLoading(true)

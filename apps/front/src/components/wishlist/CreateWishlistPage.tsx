@@ -30,7 +30,6 @@ import {
   StepLabel,
   Stepper,
   TextField,
-  useTheme,
 } from '@mui/material'
 import { useMutation } from '@tanstack/react-query'
 import { MAX_EVENTS_BY_LIST } from '@wishlist/common'
@@ -59,7 +58,6 @@ const steps = ['Type de liste', 'Informations', 'Evènements']
 const mapState = (state: RootState) => state.userProfile.firstName
 
 export const CreateWishlistPage = () => {
-  const theme = useTheme()
   const { addToast } = useToast()
   const navigate = useNavigate()
   const userFirstName = useSelector(mapState)
@@ -209,7 +207,7 @@ export const CreateWishlistPage = () => {
                     multiline
                     minRows={4}
                     value={description}
-                    inputProps={{ maxLength: 2000 }}
+                    slotProps={{ htmlInput: { maxLength: 2000 } }}
                     placeholder="Une petite description ..."
                     helperText={<CharsRemaining max={2000} value={description} />}
                     onChange={e => setDescription(e.target.value)}

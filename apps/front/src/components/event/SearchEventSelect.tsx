@@ -1,8 +1,10 @@
 import type { MiniEventDto } from '@wishlist/common'
 
-import { Autocomplete, TextField } from '@mui/material'
+import { Autocomplete, ListItemAvatar, ListItemText, Stack, TextField } from '@mui/material'
 import { MAX_EVENTS_BY_LIST } from '@wishlist/common'
 import { DateTime } from 'luxon'
+
+import { EventIcon } from './EventIcon'
 
 export type SearchEventSelectProps = {
   options: MiniEventDto[]
@@ -35,13 +37,24 @@ export const SearchEventSelect = ({
         if (value) onChange(value)
       }}
       getOptionDisabled={option => excludedEventIds.includes(option.id)}
-      getOptionLabel={option =>
-        `${option.title} - ${DateTime.fromISO(option.event_date).toLocaleString(DateTime.DATE_MED)}`
-      }
+      getOptionLabel={option => option.title}
+      renderOption={(props, option) => (
+        <li {...props}>
+          <Stack direction="row" gap={2} alignItems="center" sx={{ width: '100%' }}>
+            <ListItemAvatar sx={{ minWidth: 'auto' }}>
+              <EventIcon icon={option.icon} />
+            </ListItemAvatar>
+            <ListItemText
+              primary={<b>{option.title}</b>}
+              secondary={DateTime.fromISO(option.event_date).toLocaleString(DateTime.DATE_MED)}
+            />
+          </Stack>
+        </li>
+      )}
       renderInput={params => (
         <TextField
           {...params}
-          inputProps={{ ...params.inputProps }}
+          slotProps={{ htmlInput: { ...params.inputProps } }}
           placeholder="Sélectionner un évènement"
           error={error}
           helperText={`Vous ne pouvez pas séléctionner plus de ${MAX_EVENTS_BY_LIST} évènements auxquels vous souhaitez que cette liste apparaisse`}
