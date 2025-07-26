@@ -33,7 +33,7 @@ import { useApi } from '../../hooks/useApi'
 import { useToast } from '../../hooks/useToast'
 import { Card } from '../common/Card'
 import { CharsRemaining } from '../common/CharsRemaining'
-import { EmojiSelector } from '../common/EmojiSelector'
+import { EmojiSelectorWithBadge } from '../common/EmojiSelectorWithBadge'
 import { InputLabel } from '../common/InputLabel'
 import { Title } from '../common/Title'
 import { SearchUserSelect } from '../user/SearchUserSelect'
@@ -113,7 +113,7 @@ export const CreateEventPage = () => {
               <Box>
                 <InputLabel required>Titre et icône</InputLabel>
                 <Stack direction="row" gap={2} alignItems="flex-start">
-                  <EmojiSelector value={icon} onChange={setIcon} disabled={loading} />
+                  <EmojiSelectorWithBadge value={icon} onChange={setIcon} disabled={loading} />
                   <Box sx={{ flex: 1 }}>
                     <TextField
                       autoComplete="off"
