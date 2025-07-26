@@ -3,14 +3,12 @@ import type { MiniEventDto } from '@wishlist/common'
 import type { RootState } from '../../core'
 
 import AccountCircleTwoToneIcon from '@mui/icons-material/AccountCircleTwoTone'
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import DeleteIcon from '@mui/icons-material/Delete'
 import Diversity1TwoToneIcon from '@mui/icons-material/Diversity1TwoTone'
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft'
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'
 import SaveIcon from '@mui/icons-material/Save'
 import {
-  Avatar,
   Box,
   Button,
   Checkbox,
@@ -32,7 +30,6 @@ import {
   StepLabel,
   Stepper,
   TextField,
-  useTheme,
 } from '@mui/material'
 import { useMutation } from '@tanstack/react-query'
 import { MAX_EVENTS_BY_LIST } from '@wishlist/common'
@@ -44,11 +41,13 @@ import { useNavigate } from 'react-router-dom'
 import { useInterval } from 'usehooks-ts'
 
 import { useApi, useAvailableEvents, useCustomSearchParams, useEventById, useToast } from '../../hooks'
+import { getRandomPlaceholderName } from '../../utils/wishlist.utils'
 import { Card } from '../common/Card'
 import { CharsRemaining } from '../common/CharsRemaining'
 import { InputLabel } from '../common/InputLabel'
 import { Loader } from '../common/Loader'
 import { Title } from '../common/Title'
+import { EventIcon } from '../event/EventIcon'
 import { SearchEventSelect } from '../event/SearchEventSelect'
 import { WishlistLogoActions } from './WishlistLogoActions'
 
@@ -58,42 +57,7 @@ const steps = ['Type de liste', 'Informations', 'Evènements']
 
 const mapState = (state: RootState) => state.userProfile.firstName
 
-const PLACEHOLDER_NAMES = [
-  'John',
-  'Léo',
-  'Lucas',
-  'Marc',
-  'Julie',
-  'Claire',
-  'Maxime',
-  'Jeanne',
-  'Matthieu',
-  'Jean',
-  'Lou',
-  'Quentin',
-  'Nico',
-  'Pakura',
-  'Camille',
-  'Manu',
-  'Tom',
-  'Elise',
-  'Louane',
-  'Nina',
-  'Arthur',
-  'Sarah',
-  'Fleur',
-  'Killian',
-  'Bastien',
-  'Clément',
-]
-const getRandomPlaceholderName = (): string => {
-  const randomIndex = Math.floor(Math.random() * PLACEHOLDER_NAMES.length)
-  // eslint-disable-next-line security/detect-object-injection
-  return PLACEHOLDER_NAMES[randomIndex]!
-}
-
 export const CreateWishlistPage = () => {
-  const theme = useTheme()
   const { addToast } = useToast()
   const navigate = useNavigate()
   const userFirstName = useSelector(mapState)
@@ -243,7 +207,7 @@ export const CreateWishlistPage = () => {
                     multiline
                     minRows={4}
                     value={description}
-                    inputProps={{ maxLength: 2000 }}
+                    slotProps={{ htmlInput: { maxLength: 2000 } }}
                     placeholder="Une petite description ..."
                     helperText={<CharsRemaining max={2000} value={description} />}
                     onChange={e => setDescription(e.target.value)}
@@ -311,11 +275,7 @@ export const CreateWishlistPage = () => {
                         >
                           <ListItemButton>
                             <ListItemAvatar>
-                              <Avatar
-                                sx={{ bgcolor: theme.palette.primary.light, color: theme.palette.background.paper }}
-                              >
-                                <CalendarMonthIcon />
-                              </Avatar>
+                              <EventIcon icon={event.icon} />
                             </ListItemAvatar>
                             <ListItemText
                               primary={<b>{event.title}</b>}

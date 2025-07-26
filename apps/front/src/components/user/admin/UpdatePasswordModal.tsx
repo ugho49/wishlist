@@ -58,7 +58,7 @@ export const UpdatePasswordModal = ({ onClose, open, userId }: UpdatePasswordMod
             variant="standard"
             disabled={loading}
             required
-            inputProps={{ maxLength: 50, minLength: 8 }}
+            slotProps={{ htmlInput: { maxLength: 50, minLength: 8 } }}
             placeholder="********"
             error={newPassword.length > 0 && newPassword.length < 8}
             helperText="8 caractères minimum"

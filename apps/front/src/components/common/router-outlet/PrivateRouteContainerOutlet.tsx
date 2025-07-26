@@ -18,9 +18,10 @@ const MainWrapper = styled(Box)(({ theme }) => ({
 const ContainerStyled = styled(Container)(({ theme }) => ({
   [`&.${containerClasses.root}`]: {
     marginBottom: '130px',
+    marginTop: '20px',
 
     [theme.breakpoints.down('md')]: {
-      marginTop: '56px',
+      marginTop: '76px',
     },
   },
 }))

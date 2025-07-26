@@ -33,6 +33,7 @@ import { useApi } from '../../hooks/useApi'
 import { useToast } from '../../hooks/useToast'
 import { Card } from '../common/Card'
 import { CharsRemaining } from '../common/CharsRemaining'
+import { EmojiSelector } from '../common/EmojiSelector'
 import { InputLabel } from '../common/InputLabel'
 import { Title } from '../common/Title'
 import { SearchUserSelect } from '../user/SearchUserSelect'
@@ -55,6 +56,7 @@ export const CreateEventPage = () => {
   const [step, setStep] = useState(1)
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
+  const [icon, setIcon] = useState<string | undefined>(undefined)
   const [eventDate, setEventDate] = useState<DateTime | null>(DateTime.now())
   const [attendees, setAttendees] = useState<Attendee[]>([])
 
@@ -76,6 +78,7 @@ export const CreateEventPage = () => {
       return api.event.create({
         title,
         description: description === '' ? undefined : description,
+        icon,
         event_date: new Date(isoDate),
         attendees: attendees.map(attendee => ({
           email: typeof attendee.user === 'string' ? attendee.user : attendee.user.email,
@@ -108,17 +111,22 @@ export const CreateEventPage = () => {
           {step === 1 && (
             <Stack component="form" noValidate gap={3}>
               <Box>
-                <InputLabel required>Titre</InputLabel>
-                <TextField
-                  autoComplete="off"
-                  disabled={loading}
-                  fullWidth
-                  value={title}
-                  inputProps={{ maxLength: 100 }}
-                  placeholder="La titre de votre évènement"
-                  helperText={<CharsRemaining max={100} value={title} />}
-                  onChange={e => setTitle(e.target.value)}
-                />
+                <InputLabel required>Titre et icône</InputLabel>
+                <Stack direction="row" gap={2} alignItems="flex-start">
+                  <EmojiSelector value={icon} onChange={setIcon} disabled={loading} />
+                  <Box sx={{ flex: 1 }}>
+                    <TextField
+                      autoComplete="off"
+                      disabled={loading}
+                      fullWidth
+                      value={title}
+                      slotProps={{ htmlInput: { maxLength: 100 } }}
+                      placeholder="Le titre de votre évènement"
+                      helperText={<CharsRemaining max={100} value={title} />}
+                      onChange={e => setTitle(e.target.value)}
+                    />
+                  </Box>
+                </Stack>
               </Box>
 
               <Stack>
@@ -141,7 +149,7 @@ export const CreateEventPage = () => {
                   multiline
                   minRows={4}
                   value={description}
-                  inputProps={{ maxLength: 2000 }}
+                  slotProps={{ htmlInput: { maxLength: 2000 } }}
                   placeholder="Une petite description ..."
                   helperText={<CharsRemaining max={2000} value={description} />}
                   onChange={e => setDescription(e.target.value)}

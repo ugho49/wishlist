@@ -1,9 +1,7 @@
 import type { MiniEventDto } from '@wishlist/common'
 
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import CloseIcon from '@mui/icons-material/Close'
 import {
-  Avatar,
   Button,
   Dialog,
   DialogActions,
@@ -15,12 +13,12 @@ import {
   ListItemButton,
   ListItemText,
   Stack,
-  useTheme,
 } from '@mui/material'
 import { DateTime } from 'luxon'
 import { useNavigate } from 'react-router-dom'
 
 import { RouterLink } from '../common/RouterLink'
+import { EventIcon } from '../event/EventIcon'
 
 export interface EventDialogProps {
   open: boolean
@@ -37,7 +35,6 @@ export const WishlistEventsDialog = ({
   wishlistId,
   currentUserCanEdit,
 }: EventDialogProps) => {
-  const theme = useTheme()
   const navigate = useNavigate()
 
   const handleEventClick = (eventId: string) => {
@@ -59,9 +56,7 @@ export const WishlistEventsDialog = ({
           {events.map(event => (
             <ListItemButton onClick={() => handleEventClick(event.id)} key={event.id}>
               <ListItemAvatar>
-                <Avatar sx={{ bgcolor: theme.palette.primary.light, color: theme.palette.background.paper }}>
-                  <CalendarMonthIcon />
-                </Avatar>
+                <EventIcon icon={event.icon} />
               </ListItemAvatar>
               <ListItemText
                 primary={<b>{event.title}</b>}

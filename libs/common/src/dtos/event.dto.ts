@@ -7,6 +7,7 @@ import {
   IsOptional,
   IsPositive,
   IsString,
+  Matches,
   Max,
   MaxLength,
   MinDate,
@@ -22,6 +23,7 @@ export class MiniEventDto {
   declare id: EventId
   declare title: string
   declare description?: string
+  declare icon?: string
   declare event_date: string
 }
 
@@ -55,6 +57,14 @@ export class UpdateEventInputDto {
   @IsOptional()
   @MaxLength(2000)
   declare description?: string
+
+  @IsString()
+  @IsOptional()
+  @MaxLength(10)
+  @Matches(/^[\p{Emoji}\p{Emoji_Modifier}\p{Emoji_Component}\p{Emoji_Modifier_Base}\p{Emoji_Presentation}]+$/u, {
+    message: 'icon must be a valid emoji',
+  })
+  declare icon?: string
 
   @MinDate(new Date(new Date().toDateString()), { message: 'event_date must not be earlier than today' })
   @IsDate()

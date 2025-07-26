@@ -8,6 +8,7 @@ export type EventProps = {
   id: EventId
   title: string
   description?: string
+  icon?: string
   eventDate: Date
   attendees: EventAttendee[]
   wishlistIds: WishlistId[]
@@ -19,6 +20,7 @@ export class Event {
   public readonly id: EventId
   public readonly title: string
   public readonly description?: string
+  public readonly icon?: string
   public readonly eventDate: Date
   public readonly attendees: EventAttendee[]
   public readonly wishlistIds: WishlistId[]
@@ -29,6 +31,7 @@ export class Event {
     this.id = props.id
     this.title = props.title
     this.description = props.description
+    this.icon = props.icon
     this.eventDate = props.eventDate
     this.attendees = props.attendees
     this.wishlistIds = props.wishlistIds
@@ -40,6 +43,7 @@ export class Event {
     id: EventId
     title: string
     description?: string
+    icon?: string
     eventDate: Date
     attendees: EventAttendee[]
   }): Event {
@@ -53,6 +57,7 @@ export class Event {
       id: param.id,
       title: param.title,
       description: param.description,
+      icon: param.icon,
       eventDate: param.eventDate,
       attendees: param.attendees,
       wishlistIds: [],
@@ -61,7 +66,7 @@ export class Event {
     })
   }
 
-  update(updates: { title: string; description?: string; eventDate: Date }): Event {
+  update(updates: { title: string; description?: string; icon?: string; eventDate: Date }): Event {
     return new Event({
       ...this,
       ...updates,

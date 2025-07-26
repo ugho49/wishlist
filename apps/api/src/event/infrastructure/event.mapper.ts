@@ -12,7 +12,8 @@ function toMiniEventDto(event: Event): MiniEventDto {
   return {
     id: event.id,
     title: event.title,
-    description: event.description || undefined,
+    description: event.description,
+    icon: event.icon,
     event_date: DateTime.fromJSDate(event.eventDate).toISODate() || '',
   }
 }

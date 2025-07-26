@@ -10,6 +10,7 @@ type NewEventAttendee = {
 type NewEvent = {
   title: string
   description?: string
+  icon?: string
   eventDate: Date
   attendees?: NewEventAttendee[]
 }

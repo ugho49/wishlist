@@ -44,6 +44,7 @@ export const event = pgTable('event', {
   id: eventId().primaryKey().notNull(),
   title: varchar({ length: 100 }).notNull(),
   description: text(),
+  icon: varchar({ length: 10 }),
   eventDate: date('event_date').notNull(),
   createdAt: timestampWithTimezone('created_at').defaultNow().notNull(),
   updatedAt: timestampWithTimezone('updated_at').defaultNow().notNull(),

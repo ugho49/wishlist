@@ -111,13 +111,18 @@ export class Fixtures {
     return id
   }
 
-  async insertEvent(parameters: { title: string; description?: string; eventDate: Date }): Promise<string> {
+  async insertEvent(parameters: {
+    title: string
+    description?: string
+    icon?: string
+    eventDate: Date
+  }): Promise<string> {
     const id = uuid()
-    const { title, description, eventDate } = parameters
+    const { title, description, icon, eventDate } = parameters
 
     await this.client.query(
-      `INSERT INTO ${Fixtures.EVENT_TABLE} (id, title, description, event_date) VALUES ($1, $2, $3, $4)`,
-      [id, title, description, eventDate.toISOString().split('T')[0] as string],
+      `INSERT INTO ${Fixtures.EVENT_TABLE} (id, title, description, icon, event_date) VALUES ($1, $2, $3, $4, $5)`,
+      [id, title, description, icon, eventDate.toISOString().split('T')[0] as string],
     )
 
     return id
@@ -126,6 +131,7 @@ export class Fixtures {
   async insertEventWithMaintainer(parameters: {
     title: string
     description?: string
+    icon?: string
     eventDate?: Date
     maintainerId: string
   }): Promise<{ eventId: string; attendeeId: string; eventDate: DateTime }> {

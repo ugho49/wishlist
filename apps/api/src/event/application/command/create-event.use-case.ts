@@ -65,6 +65,7 @@ export class CreateEventUseCase implements IInferredCommandHandler<CreateEventCo
       id: eventId,
       title: command.newEvent.title,
       description: command.newEvent.description,
+      icon: command.newEvent.icon,
       eventDate: command.newEvent.eventDate,
       attendees,
     })

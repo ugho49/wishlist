@@ -1,19 +1,7 @@
 import type { DetailedWishlistDto, MiniEventDto } from '@wishlist/common'
 
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import DeleteIcon from '@mui/icons-material/Delete'
-import {
-  Avatar,
-  Box,
-  Divider,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemButton,
-  ListItemText,
-  Stack,
-  useTheme,
-} from '@mui/material'
+import { Box, Divider, List, ListItem, ListItemAvatar, ListItemButton, ListItemText, Stack } from '@mui/material'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { MAX_EVENTS_BY_LIST } from '@wishlist/common'
 import { DateTime } from 'luxon'
@@ -25,6 +13,7 @@ import { useToast } from '../../hooks/useToast'
 import { Card } from '../common/Card'
 import { ConfirmIconButton } from '../common/ConfirmIconButton'
 import { InputLabel } from '../common/InputLabel'
+import { EventIcon } from '../event/EventIcon'
 import { SearchEventSelect } from '../event/SearchEventSelect'
 
 export type EditWishlistEventsProps = {
@@ -34,7 +23,6 @@ export type EditWishlistEventsProps = {
 
 export const EditWishlistEvent = ({ wishlistId, events }: EditWishlistEventsProps) => {
   const api = useApi()
-  const theme = useTheme()
   const { addToast } = useToast()
   const queryClient = useQueryClient()
   const { events: availableEvents, loading: availableEventsLoading } = useAvailableEvents()
@@ -115,9 +103,7 @@ export const EditWishlistEvent = ({ wishlistId, events }: EditWishlistEventsProp
             >
               <ListItemButton>
                 <ListItemAvatar>
-                  <Avatar sx={{ bgcolor: theme.palette.secondary.dark, color: theme.palette.background.paper }}>
-                    <CalendarMonthIcon />
-                  </Avatar>
+                  <EventIcon icon={event.icon} />
                 </ListItemAvatar>
                 <ListItemText
                   primary={<b>{event.title}</b>}

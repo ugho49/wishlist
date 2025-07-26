@@ -18,6 +18,7 @@ export class UpdateEventUseCase implements IInferredCommandHandler<UpdateEventCo
     const updatedEvent = event.update({
       title: command.updateEvent.title,
       description: command.updateEvent.description,
+      icon: command.updateEvent.icon,
       eventDate: command.updateEvent.eventDate,
     })
 

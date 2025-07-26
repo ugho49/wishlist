@@ -60,6 +60,7 @@ export class EventController {
         newEvent: {
           title: dto.title,
           description: dto.description,
+          icon: dto.icon,
           eventDate: dto.event_date,
           attendees: dto.attendees?.map(attendee => ({
             email: attendee.email,
@@ -83,6 +84,7 @@ export class EventController {
         updateEvent: {
           title: dto.title,
           description: dto.description,
+          icon: dto.icon,
           eventDate: dto.event_date,
         },
       }),
