@@ -127,7 +127,8 @@ export class PostgresEventRepository implements EventRepository {
         .values({
           id: event.id,
           title: event.title,
-          description: event.description ?? null,
+          description: event.description,
+          icon: event.icon,
           eventDate: event.eventDate.toISOString().split('T')[0] as string, // Convert to YYYY-MM-DD format
           createdAt: event.createdAt,
           updatedAt: event.updatedAt,
@@ -137,6 +138,7 @@ export class PostgresEventRepository implements EventRepository {
           set: {
             title: event.title,
             description: event.description ?? null,
+            icon: event.icon ?? null,
             eventDate: event.eventDate.toISOString().split('T')[0] as string, // Convert to YYYY-MM-DD format
             updatedAt: event.updatedAt,
           },
@@ -177,6 +179,7 @@ export class PostgresEventRepository implements EventRepository {
       id: row.id,
       title: row.title,
       description: row.description ?? undefined,
+      icon: row.icon ?? undefined,
       eventDate: new Date(row.eventDate),
       attendees: row.attendees.map(attendee => PostgresEventAttendeeRepository.toModel(attendee)),
       wishlistIds: row.eventWishlists.map(eventWishlist => eventWishlist.wishlistId),

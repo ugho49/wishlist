@@ -12,12 +12,15 @@ export type CardProps = {
   sx?: SxProps<Theme>
   variant?: 'outlined' | 'contained'
   noPadding?: boolean
+  biggerPaddingInDesktop?: boolean
 }
 
 const CardStyled = styled(Box)(({ theme }) => ({
   padding: '16px',
-  [theme.breakpoints.up('sm')]: {
-    padding: '24px',
+  ['&.bigger-padding-in-desktop']: {
+    [theme.breakpoints.up('sm')]: {
+      padding: '24px',
+    },
   },
 }))
 
@@ -27,6 +30,7 @@ export const Card = ({
   children,
   className,
   sx,
+  biggerPaddingInDesktop = true,
   variant = 'contained',
   noPadding = false,
 }: PropsWithChildren<CardProps>) => {
@@ -38,6 +42,7 @@ export const Card = ({
         variant === 'contained' && 'card',
         variant === 'outlined' && 'card-outlined',
         (to || onClick) && 'clickable',
+        biggerPaddingInDesktop && 'bigger-padding-in-desktop',
         noPadding && 'no-padding',
         className,
       )}

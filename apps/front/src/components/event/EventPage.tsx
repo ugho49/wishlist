@@ -99,7 +99,10 @@ export const EventPage = () => {
         {!event && <EventNotFound />}
         {event && (
           <>
-            <Title smallMarginBottom>{event.title}</Title>
+            <Title smallMarginBottom>
+              {event.icon ? `${event.icon} ` : ''}
+              {event.title}
+            </Title>
 
             <Header
               eventId={event.id}

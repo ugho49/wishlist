@@ -543,6 +543,15 @@ describe('EventController', () => {
           case: 'invalid attendee role',
           message: ['attendees.0.role must be one of the following values: maintainer, user'],
         },
+        {
+          body: {
+            title: 'Valid Title',
+            icon: 'not-an-emoji',
+            event_date: DateTime.now().plus({ days: 1 }).toISODate(),
+          },
+          case: 'invalid icon',
+          message: ['icon must be a valid emoji'],
+        },
       ])('should return 400 when invalid input: $case', async ({ body, message }) => {
         await request
           .post(path)
@@ -561,6 +570,7 @@ describe('EventController', () => {
           .send({
             title: 'Test Event',
             description: 'Test Description',
+            icon: '🎉',
             event_date: eventDate,
           })
           .expect(201)
@@ -569,6 +579,7 @@ describe('EventController', () => {
               id: expect.toBeString(),
               title: 'Test Event',
               description: 'Test Description',
+              icon: '🎉',
               event_date: eventDate,
             })
           })
@@ -582,6 +593,7 @@ describe('EventController', () => {
             id: createdEventId,
             title: 'Test Event',
             description: 'Test Description',
+            icon: '🎉',
             event_date: new Date(eventDate),
             created_at: expect.toBeDate(),
             updated_at: expect.toBeDate(),
@@ -777,6 +789,15 @@ describe('EventController', () => {
           case: 'event_date not a date',
           message: ['event_date must be a Date instance'],
         },
+        {
+          body: {
+            title: 'Valid Title',
+            icon: 'not-an-emoji',
+            event_date: DateTime.now().plus({ days: 1 }).toISODate(),
+          },
+          case: 'invalid icon',
+          message: ['icon must be a valid emoji'],
+        },
       ])('should return 400 when invalid input: $case', async ({ body, message }) => {
         const { eventId } = await fixtures.insertEventWithMaintainer({
           title: 'Event',
@@ -803,6 +824,7 @@ describe('EventController', () => {
         const updateData = {
           title: 'Updated Event',
           description: 'Updated Description',
+          icon: '🚀',
           event_date: DateTime.now().plus({ days: 2 }).toISODate(),
         }
 
@@ -815,6 +837,7 @@ describe('EventController', () => {
             id: eventId,
             title: 'Updated Event',
             description: 'Updated Description',
+            icon: '🚀',
             event_date: new Date(updateData.event_date),
             updated_at: expect.toBeDate(),
           })

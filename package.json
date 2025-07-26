@@ -21,6 +21,8 @@
     "node": ">=24"
   },
   "dependencies": {
+    "@emoji-mart/data": "1.2.1",
+    "@emoji-mart/react": "1.1.1",
     "@emotion/react": "11.14.0",
     "@emotion/styled": "11.14.1",
     "@hookform/resolvers": "5.1.1",
@@ -52,6 +54,7 @@
     "clsx": "2.1.1",
     "core-js": "3.44.0",
     "drizzle-orm": "0.44.3",
+    "emoji-mart": "5.6.0",
     "firebase-admin": "13.4.0",
     "get-orientation": "1.1.2",
     "google-auth-library": "10.1.0",

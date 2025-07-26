@@ -15,6 +15,7 @@ import { useToast } from '../../hooks/useToast'
 import { Card } from '../common/Card'
 import { CharsRemaining } from '../common/CharsRemaining'
 import { ConfirmButton } from '../common/ConfirmButton'
+import { EmojiSelector } from '../common/EmojiSelector'
 import { InputLabel } from '../common/InputLabel'
 
 export type EditEventInformationsProps = {
@@ -26,6 +27,7 @@ export const EditEventInformations = ({ event }: EditEventInformationsProps) => 
   const { addToast } = useToast()
   const [title, setTitle] = useState(event.title)
   const [description, setDescription] = useState(event.description)
+  const [icon, setIcon] = useState<string | undefined>(event.icon)
   const [eventDate, setEventDate] = useState<DateTime | null>(DateTime.fromISO(event.event_date))
   const queryClient = useQueryClient()
   const navigate = useNavigate()
@@ -61,6 +63,7 @@ export const EditEventInformations = ({ event }: EditEventInformationsProps) => 
     const body: UpdateEventInputDto = {
       title,
       description: description === '' ? undefined : description,
+      icon,
       event_date: new Date(isoDate),
     }
     await updateEvent(body)
@@ -81,18 +84,23 @@ export const EditEventInformations = ({ event }: EditEventInformationsProps) => 
       <Card>
         <Stack component="form" onSubmit={onSubmit} gap={3}>
           <Box>
-            <InputLabel required>Titre</InputLabel>
-            <TextField
-              autoComplete="off"
-              disabled={loading}
-              fullWidth
-              required
-              value={title}
-              inputProps={{ maxLength: 100 }}
-              placeholder="La titre de votre évènement"
-              helperText={<CharsRemaining max={100} value={title} />}
-              onChange={e => setTitle(e.target.value)}
-            />
+            <InputLabel required>Titre et icône</InputLabel>
+            <Stack direction="row" gap={2} alignItems="flex-start">
+              <EmojiSelector value={icon} onChange={setIcon} disabled={loading} />
+              <Box sx={{ flex: 1 }}>
+                <TextField
+                  autoComplete="off"
+                  disabled={loading}
+                  fullWidth
+                  required
+                  value={title}
+                  inputProps={{ maxLength: 100 }}
+                  placeholder="Le titre de votre évènement"
+                  helperText={<CharsRemaining max={100} value={title} />}
+                  onChange={e => setTitle(e.target.value)}
+                />
+              </Box>
+            </Stack>
           </Box>
 
           <Box>

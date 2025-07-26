@@ -5,6 +5,7 @@ import { Command } from '@nestjs-architects/typed-cqrs'
 type UpdateEvent = {
   title: string
   description?: string
+  icon?: string
   eventDate: Date
 }
 
