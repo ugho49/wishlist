@@ -136,6 +136,7 @@ export const EditSecretSantaFormDialog = ({
               {...register('budget', { valueAsNumber: true })}
               fullWidth
               type="number"
+              inputMode="numeric"
               placeholder="Budget Max"
               error={!!formErrors.budget}
               helperText={formErrors.budget?.message}

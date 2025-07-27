@@ -124,7 +124,6 @@ export const RegisterPage = () => {
             {...register('firstname')}
             label="Prénom"
             fullWidth
-            autoFocus
             placeholder="Votre prénom"
             autoComplete="given-name"
             error={!!formErrors.firstname}
