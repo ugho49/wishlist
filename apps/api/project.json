@@ -20,7 +20,7 @@
     "drizzle:studio": {
       "executor": "nx:run-commands",
       "options": {
-        "cwd": "apps/api",
+        "cwd": "{projectRoot}",
         "command": "npx drizzle-kit studio",
         "color": true
       }
@@ -28,7 +28,7 @@
     "drizzle:generate": {
       "executor": "nx:run-commands",
       "options": {
-        "cwd": "apps/api",
+        "cwd": "{projectRoot}",
         "command": "npx drizzle-kit generate",
         "color": true,
         "args": ["--name"],
@@ -38,7 +38,7 @@
     "drizzle:migrate": {
       "executor": "nx:run-commands",
       "options": {
-        "cwd": "apps/api",
+        "cwd": "{projectRoot}",
         "command": "npx drizzle-kit migrate",
         "color": true
       }
@@ -46,10 +46,8 @@
     "drizzle:seed": {
       "executor": "nx:run-commands",
       "options": {
-        "cwd": "apps/api",
-        "command": "yarn tsx drizzle/seed.ts",
-        "color": true,
-        "parallel": false
+        "cwd": "{projectRoot}",
+        "command": "yarn tsx drizzle/seed.ts"
       }
     }
   },
