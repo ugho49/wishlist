@@ -1,6 +1,6 @@
 services:
   traefik:
-    image: traefik:v3.4
+    image: traefik:v3.5
     container_name: traefik
     command:
       # Active le fournisseur Docker pour que Traefik détecte les conteneurs
