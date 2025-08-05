@@ -2,7 +2,7 @@ version: 2.1
 
 orbs:
   nx: nrwl/nx@1.7.0
-  continuation: circleci/continuation@2.0.0
+  continuation: circleci/continuation@2.0.1
 
 setup: true
 
