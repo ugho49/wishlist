@@ -156,7 +156,6 @@ export class Fixtures {
       [id, title, description, userId, hideItems ?? true],
     )
 
-    // TODO: optimize ?? One INSERT with multiple values ?
     for (const eventId of eventIds) {
       await this.client.query(`INSERT INTO ${Fixtures.EVENT_WISHLIST_TABLE} (event_id, wishlist_id) VALUES ($1, $2)`, [
         eventId,

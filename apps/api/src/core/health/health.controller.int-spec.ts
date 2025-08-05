@@ -6,11 +6,22 @@ describe('HealthController', () => {
   it('GET /health', async () => {
     const request = await getRequest()
 
-    await request.get('/health').expect(200).expect({
-      status: 'ok',
-      info: {},
-      error: {},
-      details: {},
-    })
+    await request
+      .get('/health')
+      .expect(200)
+      .expect({
+        status: 'ok',
+        info: {
+          database: {
+            status: 'up',
+          },
+        },
+        error: {},
+        details: {
+          database: {
+            status: 'up',
+          },
+        },
+      })
   })
 })
