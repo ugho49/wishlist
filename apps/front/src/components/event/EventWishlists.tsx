@@ -24,7 +24,7 @@ export const EventWishlists = ({ event }: EventWishlistsProps) => {
             {event.wishlists
               .sort((a, b) => a.title.localeCompare(b.title))
               .map(wishlist => (
-                <Grid key={wishlist.id} size={{ xs: 12, lg: 6 }}>
+                <Grid key={wishlist.id} size={{ xs: 12, md: 6, xl: 4 }}>
                   <WishlistCardWithOwner wishlist={wishlist} />
                 </Grid>
               ))}

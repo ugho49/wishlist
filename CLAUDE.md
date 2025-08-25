@@ -73,6 +73,27 @@ This is an Nx monorepo containing a wishlist application with React 19 frontend 
 - **Type safety**: Always check TypeScript errors when using `component` prop and consider alternatives if types conflict
 - **Navigation best practice**: For simple navigation, `useNavigate()` hook is often more reliable than `component` prop
 
+#### DOM Structure and Component Organization
+- **Avoid unnecessary nested containers**: Before creating wrapper divs, ask "Does this container add unique structural, semantic, or styling value?"
+- **Problematic pattern to avoid**:
+  ```jsx
+  <OuterContainer>
+    <InnerList>
+      {items.map(item => <Item key={item.id} />)}
+    </InnerList>
+  </OuterContainer>
+  ```
+  If `OuterContainer` only contains `InnerList`, merge their styles into one component.
+
+- **When nested containers ARE acceptable**:
+  - Different semantic purposes (e.g., `<section><ul>` for accessibility)
+  - Different animation or positioning requirements
+  - Logical separation for component reusability
+  - Different state management between parent and child
+  - Different responsive behaviors
+
+- **Refactoring approach**: Merge styles into the functional container and eliminate the wrapper-only div.
+
 ### Key Domain Concepts
 - **Events**: Central organizing concept for wishlist sharing with mandatory event dates
 - **Attendees**: Users participating in events with role-based permissions (MAINTAINER/PARTICIPANT)
