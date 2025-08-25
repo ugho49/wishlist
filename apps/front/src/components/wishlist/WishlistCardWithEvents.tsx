@@ -1,83 +1,200 @@
 import type { WishlistWithEventsDto } from '@wishlist/common'
 
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
-import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'
+import type { RootState } from '../../core'
+
 import PublicIcon from '@mui/icons-material/Public'
-import { Chip, Stack, styled } from '@mui/material'
+import { Avatar, styled, Typography } from '@mui/material'
 import clsx from 'clsx'
 import { DateTime } from 'luxon'
+import { useSelector } from 'react-redux'
 
 import { Card } from '../common/Card'
+import { EventIcon } from '../event/EventIcon'
 
 export type WishlistCardWithEventsProps = {
   wishlist: WishlistWithEventsDto
 }
 
-const CardStyled = styled(Card)({
-  height: '100%',
+const WishlistCardContent = styled(Card)(({ theme }) => ({
+  position: 'relative',
+  display: 'flex',
+  flexDirection: 'column',
+  height: '140px',
+  background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.grey[50]} 100%)`,
+  border: `1px solid ${theme.palette.divider}`,
+  borderRadius: '12px',
+  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+  cursor: 'pointer',
+  '&:hover': {
+    transform: 'translateY(-2px)',
+    boxShadow: theme.shadows[8],
+    borderColor: theme.palette.primary.main,
+  },
   ['&.disabled']: {
-    backgroundColor: '#f7f7f7',
-    '& > *': {
-      opacity: '.6',
+    backgroundColor: theme.palette.grey[50],
+    border: `1px solid ${theme.palette.grey[200]}`,
+    color: theme.palette.text.disabled,
+    filter: 'grayscale(100%)',
+    '&:hover': {
+      transform: 'none',
+      boxShadow: theme.shadows[1],
+      borderColor: theme.palette.grey[300],
+    },
+    '& .wishlist-title': {
+      color: theme.palette.text.disabled,
+      textDecoration: 'line-through',
+    },
+    '& .wishlist-icon': {
+      opacity: 0.4,
+      filter: 'grayscale(100%)',
+    },
+    '& .wishlist-events': {
+      color: theme.palette.text.disabled,
+      borderTopColor: theme.palette.grey[200],
+      '& .MuiChip-root': {
+        backgroundColor: theme.palette.grey[100],
+        color: theme.palette.text.disabled,
+        '& .MuiSvgIcon-root': {
+          color: theme.palette.text.disabled,
+        },
+      },
     },
   },
-})
-
-const Wishlist = styled('div')(({ theme }) => ({
-  color: theme.palette.text.secondary,
-  flexGrow: 1,
-  width: '95%',
-  paddingRight: '10px',
-  letterSpacing: '0.05em',
 }))
 
-const WishlistTitle = styled('span')(({ theme }) => ({
+const WishlistHeader = styled('div')({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: '12px',
+  marginBottom: '16px',
+})
+
+const WishlistLogo = styled(Avatar)(({ theme }) => ({
+  width: '32px',
+  height: '32px',
+  backgroundColor: theme.palette.primary.light,
+  fontSize: '1rem',
+}))
+
+const WishlistTitleContainer = styled('div')({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  flex: 1,
+  minWidth: 0,
+})
+
+const WishlistTitle = styled('div')(({ theme }) => ({
   color: theme.palette.primary.main,
-  fontWeight: 400,
+  fontWeight: 600,
+  fontSize: '1rem',
   overflow: 'hidden',
-  maxWidth: '100%',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
   textTransform: 'uppercase',
+  letterSpacing: '0.05em',
+  textAlign: 'center',
+  maxWidth: '100%',
 }))
 
-const Arrow = styled('div')(({ theme }) => ({
+const PublicIndicator = styled(PublicIcon)(({ theme }) => ({
+  fontSize: '14px',
+  color: theme.palette.text.secondary,
+  marginLeft: '6px',
+  opacity: 0.7,
+}))
+
+const WishlistEvents = styled('div')(({ theme }) => ({
+  marginTop: 'auto',
+  paddingTop: '12px',
+  borderTop: `1px solid ${theme.palette.divider}`,
   display: 'flex',
-  color: theme.palette.primary.light,
+  flexDirection: 'column',
   alignItems: 'center',
-  flexBasis: '5%',
+  justifyContent: 'center',
+  gap: '6px',
+}))
+
+const EventItem = styled('div')(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '6px',
+  fontSize: '0.8rem',
+  color: theme.palette.text.secondary,
+  flexShrink: 0,
+}))
+
+const EventName = styled(Typography)(({ theme }) => ({
+  fontSize: '0.8rem',
+  color: theme.palette.text.secondary,
+  fontWeight: 500,
+  whiteSpace: 'nowrap',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  maxWidth: '380px',
+  [theme.breakpoints.down('lg')]: {
+    maxWidth: '500px',
+  },
+  [theme.breakpoints.down('sm')]: {
+    maxWidth: '260px',
+  },
+}))
+
+const MoreEventsIndicator = styled('span')(({ theme }) => ({
+  fontSize: '0.75rem',
+  color: theme.palette.text.disabled,
+  fontStyle: 'italic',
+  whiteSpace: 'nowrap',
+  textAlign: 'center',
 }))
 
 export const WishlistCardWithEvents = ({ wishlist }: WishlistCardWithEventsProps) => {
+  const userProfile = useSelector((state: RootState) => state.userProfile)
+
   const past =
     wishlist.events.filter(e => DateTime.fromISO(e.event_date) < DateTime.now().minus({ days: 1 })).length ===
     wishlist.events.length
 
+  const isPublic = !wishlist.config.hide_items
+  const maxEventsToShow = 1
+  const eventsToShow = wishlist.events
+    .toSorted((a, b) => DateTime.fromISO(a.event_date).toMillis() - DateTime.fromISO(b.event_date).toMillis())
+    .slice(0, maxEventsToShow)
+  const remainingEventsCount = wishlist.events.length - maxEventsToShow
+
   return (
-    <CardStyled to={`/wishlists/${wishlist.id}`} className={clsx(past && 'disabled', 'animated fadeIn fast')}>
-      <Stack direction="row" justifyContent="space-between" height="100%">
-        <Wishlist>
-          <Stack direction="row" alignItems="center" justifyContent="center" marginBottom="10px" gap={1}>
-            {!wishlist.config.hide_items && <PublicIcon fontSize="small" color="primary" />}
-            <WishlistTitle>{wishlist.title}</WishlistTitle>
-          </Stack>
-          <Stack direction="row" justifyContent="center" alignItems="center" flexWrap="wrap" gap={1} marginTop="14px">
-            {wishlist.events.map(event => (
-              <Chip
-                key={event.id}
-                color="default"
-                size="small"
-                icon={<CalendarMonthIcon />}
-                sx={{ cursor: 'pointer' }}
-                label={event.title}
-              />
-            ))}
-          </Stack>
-        </Wishlist>
-        <Arrow>
-          <KeyboardArrowRightIcon />
-        </Arrow>
-      </Stack>
-    </CardStyled>
+    <WishlistCardContent
+      to={`/wishlists/${wishlist.id}`}
+      className={clsx(past && 'disabled', 'animated fadeIn fast')}
+      biggerPaddingInDesktop={false}
+    >
+      <WishlistHeader>
+        <WishlistLogo src={wishlist.logo_url ?? userProfile.pictureUrl} className="wishlist-icon">
+          {wishlist.title.charAt(0).toUpperCase()}
+        </WishlistLogo>
+        <WishlistTitleContainer>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <WishlistTitle className="wishlist-title">{wishlist.title}</WishlistTitle>
+            {isPublic && <PublicIndicator className="wishlist-icon" />}
+          </div>
+        </WishlistTitleContainer>
+      </WishlistHeader>
+
+      <WishlistEvents>
+        {eventsToShow.map(event => (
+          <EventItem key={event.id}>
+            <EventIcon icon={event.icon} size="small" />
+            <EventName>{event.title}</EventName>
+          </EventItem>
+        ))}
+        {remainingEventsCount > 0 && (
+          <MoreEventsIndicator>
+            et {remainingEventsCount} autre{remainingEventsCount > 1 ? 's' : ''} événement
+            {remainingEventsCount > 1 ? 's' : ''}
+          </MoreEventsIndicator>
+        )}
+      </WishlistEvents>
+    </WishlistCardContent>
   )
 }
