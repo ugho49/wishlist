@@ -42,7 +42,7 @@ export const Card = ({
         variant === 'contained' && 'card',
         variant === 'outlined' && 'card-outlined',
         (to || onClick) && 'clickable',
-        biggerPaddingInDesktop && 'bigger-padding-in-desktop',
+        biggerPaddingInDesktop && !noPadding && 'bigger-padding-in-desktop',
         noPadding && 'no-padding',
         className,
       )}
