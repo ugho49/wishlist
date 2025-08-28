@@ -1,6 +1,6 @@
 services:
   traefik:
-    image: traefik:v3.4
+    image: traefik:v3.5
     container_name: traefik
     command:
       # Active le fournisseur Docker pour que Traefik détecte les conteneurs
@@ -30,7 +30,7 @@ services:
     restart: unless-stopped
 
   db:
-    image: postgres:17.5-alpine
+    image: postgres:17.6-alpine
     restart: always
     environment:
       POSTGRES_USER: ${DB_USER}
