@@ -112,7 +112,7 @@ jobs:
           command: |
             DATA="{}"
 
-            AFFECTED_RAW=$(npx nx show projects --type=app --affected --base=$NX_BASE --head=$NX_HEAD --json | jq -r '. | join(" ")')
+            AFFECTED_RAW=$(npx nx show projects --type=app --exclude=@wishlist/source --affected --base=$NX_BASE --head=$NX_HEAD --json | jq -r '. | join(" ")')
             IFS=' ' read -ra APPS \<<< "$AFFECTED_RAW"
 
             # Store list in file to be passed to following jobs
