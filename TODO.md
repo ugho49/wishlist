@@ -28,3 +28,5 @@
 - [ ] Lors de la première connexion après création user account, inciter l’user a ajouter une photo
 - [ ] Modifier la page ‘aucun event », « aucune liste », « aucun item » 
 - [ ] Change Input fields for forms --> like auth pages
+- [ ] proposer d'ajouter les users recurrent lors d'un nouvel event
+- [ ] proposer d'importer les souhaits non pris des anciennes listes
