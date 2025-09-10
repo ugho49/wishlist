@@ -1,10 +1,11 @@
 import {
   CreatePasswordVerificationUseCase,
-  CreateUserFromGoogleUseCase,
   CreateUserUseCase,
   DeleteUserUseCase,
+  LinkUserToGoogleUseCase,
   RemoveUserPictureUseCase,
   ResetUserPasswordUseCase,
+  UnlinkUserSocialUseCase,
   UpdateUserEmailSettingUseCase,
   UpdateUserFullUseCase,
   UpdateUserPasswordUseCase,
@@ -24,8 +25,9 @@ import {
 export const handlers = [
   // Commands
   CreateUserUseCase,
-  CreateUserFromGoogleUseCase,
   CreatePasswordVerificationUseCase,
+  LinkUserToGoogleUseCase,
+  UnlinkUserSocialUseCase,
   ResetUserPasswordUseCase,
   UpdateUserEmailSettingUseCase,
   UpdateUserUseCase,

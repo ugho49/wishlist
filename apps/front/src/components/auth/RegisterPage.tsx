@@ -1,15 +1,14 @@
-import type { CredentialResponse } from '@react-oauth/google'
 import type { LoginOutputDto } from '@wishlist/common'
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import PersonAddIcon from '@mui/icons-material/PersonAdd'
 import { Alert, Button, Divider, Stack, styled, TextField, Typography } from '@mui/material'
-import { GoogleLogin } from '@react-oauth/google'
 import { useMutation } from '@tanstack/react-query'
 import { AxiosError } from 'axios'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useDispatch } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 import { z } from 'zod'
 
 import { setTokens } from '../../core/store/features'
@@ -17,6 +16,7 @@ import { useApi } from '../../hooks/useApi'
 import { useToast } from '../../hooks/useToast'
 import { zodRequiredString } from '../../utils/validation'
 import { RouterLink } from '../common/RouterLink'
+import { GoogleButton } from './GoogleButton'
 
 const schema = z.object({
   email: z.email({ message: 'Email invalide' }).max(200, '200 caractères maximum'),
@@ -42,6 +42,11 @@ const TextFieldStyled = styled(TextField)(({ theme }) => ({
   },
 }))
 
+const SocialButtonsStack = styled(Stack)(() => ({
+  width: '100%',
+  gap: 12,
+}))
+
 const ButtonStyled = styled(Button)(() => ({
   paddingTop: 12,
   paddingBottom: 12,
@@ -57,8 +62,10 @@ const DividerStyled = styled(Divider)(() => ({
 export const RegisterPage = () => {
   const api = useApi()
   const dispatch = useDispatch()
+  const navigate = useNavigate()
   const { addToast } = useToast()
   const [socialLoading, setSocialLoading] = useState(false)
+
   const {
     register,
     setError,
@@ -66,15 +73,17 @@ export const RegisterPage = () => {
     formState: { isSubmitting, errors: formErrors },
   } = useForm<FormFields>({ resolver: zodResolver(schema) })
 
-  const handleRegisterSuccess = (param: LoginOutputDto) => {
+  const handleRegisterSuccess = (param: LoginOutputDto, from: 'social' | 'email') => {
     addToast({ message: 'Bienvenue sur wishlist 👋', variant: 'default' })
 
     dispatch(
       setTokens({
         accessToken: param.access_token,
-        refreshToken: param.refresh_token,
       }),
     )
+
+    // Redirect to welcome page for new users
+    navigate(`/welcome?from=${from}`) // TODO: fix this redirect that is not working
   }
 
   const { mutateAsync: registerUser } = useMutation({
@@ -83,7 +92,7 @@ export const RegisterPage = () => {
       await api.user.register(data)
       return api.auth.login({ email: data.email, password: data.password })
     },
-    onSuccess: data => handleRegisterSuccess(data),
+    onSuccess: data => handleRegisterSuccess(data, 'email'),
     onError: e => {
       if (e instanceof AxiosError && e.response?.status === 422) {
         setError('root', { message: 'Cet email est déjà utilisé' })
@@ -93,21 +102,16 @@ export const RegisterPage = () => {
     },
   })
 
+  const { mutateAsync: registerWithGoogle } = useMutation({
+    mutationKey: ['registerWithGoogle'],
+    mutationFn: (code: string) => api.auth.loginWithGoogle({ code, createUserIfNotExists: true }),
+    onSuccess: data => handleRegisterSuccess(data, 'social'),
+    onError: () => onSocialError(),
+  })
+
   const onSubmit = (data: FormFields) => registerUser(data)
 
-  const onGoogleRegisterSuccess = async (credentialResponse: CredentialResponse) => {
-    setSocialLoading(true)
-    try {
-      await api.user.registerWithGoogle({ credential: credentialResponse.credential || '' })
-      const data = await api.auth.loginWithGoogle({ credential: credentialResponse.credential || '' })
-      handleRegisterSuccess(data)
-    } catch {
-      addToast({ message: "Une erreur s'est produite", variant: 'error' })
-      setSocialLoading(false)
-    }
-  }
-
-  const onGoogleRegisterFailure = () => {
+  const onSocialError = () => {
     setSocialLoading(false)
     addToast({ message: "Une erreur s'est produite", variant: 'error' })
   }
@@ -182,14 +186,18 @@ export const RegisterPage = () => {
           </Typography>
         </DividerStyled>
 
-        <Stack alignItems="center">
-          <GoogleLogin
-            onSuccess={onGoogleRegisterSuccess}
-            onError={onGoogleRegisterFailure}
-            text="signup_with"
-            locale="fr"
-          />
-        </Stack>
+        <SocialButtonsStack alignItems="center">
+          <GoogleButton
+            loading={socialLoading}
+            disabled={socialLoading}
+            onSuccess={code => registerWithGoogle(code)}
+            onError={() => onSocialError()}
+            onStart={() => setSocialLoading(true)}
+            iconSize={23}
+          >
+            S'inscrire avec Google
+          </GoogleButton>
+        </SocialButtonsStack>
       </Stack>
 
       <Stack spacing={2} alignItems="center">

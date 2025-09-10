@@ -30,3 +30,6 @@
 - [ ] Change Input fields for forms --> like auth pages
 - [ ] proposer d'ajouter les users recurrent lors d'un nouvel event
 - [ ] proposer d'importer les souhaits non pris des anciennes listes
+- [ ] Improve create liste form
+- [ ] Social google on user profile page -> link google and unlink google
+- [ ] After register with social network, require to set a password

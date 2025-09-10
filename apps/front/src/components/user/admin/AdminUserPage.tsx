@@ -133,8 +133,6 @@ export const AdminUserPage = () => {
                 <ListItemIcon>
                   <AvatarUpdateButton
                     size="30px"
-                    firstname={firstname}
-                    lastname={lastname}
                     pictureUrl={pictureUrl}
                     socials={[]}
                     onPictureUpdated={url => setPictureUrl(url || '')}

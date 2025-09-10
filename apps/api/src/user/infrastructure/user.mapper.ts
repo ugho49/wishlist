@@ -1,4 +1,4 @@
-import type { MiniUserDto, UserDto, UserWithoutSocialsDto } from '@wishlist/common'
+import type { MiniUserDto, UserDto, UserSocialDto, UserWithoutSocialsDto } from '@wishlist/common'
 
 import type { User, UserSocial } from '../domain'
 
@@ -27,19 +27,25 @@ function toUserWithoutSocialsDto(user: User): UserWithoutSocialsDto {
   }
 }
 
+function toUserSocialDto(social: UserSocial): UserSocialDto {
+  return {
+    id: social.id,
+    email: social.email,
+    name: social.name,
+    social_id: social.socialId,
+    social_type: social.socialType,
+    picture_url: social.pictureUrl,
+    created_at: social.createdAt.toISOString(),
+    updated_at: social.updatedAt.toISOString(),
+  }
+}
+
 function toUserDto(params: { user: User; socials: UserSocial[] }): UserDto {
   const { user, socials } = params
 
   return {
     ...toUserWithoutSocialsDto(user),
-    social: socials.map(social => ({
-      id: social.id,
-      social_id: social.socialId,
-      social_type: social.socialType,
-      picture_url: social.pictureUrl,
-      created_at: social.createdAt.toISOString(),
-      updated_at: social.updatedAt.toISOString(),
-    })),
+    social: socials.map(social => toUserSocialDto(social)),
   }
 }
 
@@ -47,4 +53,5 @@ export const userMapper = {
   toMiniUserDto,
   toUserWithoutSocialsDto,
   toUserDto,
+  toUserSocialDto,
 }

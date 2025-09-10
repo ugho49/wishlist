@@ -9,6 +9,7 @@ import useMediaQuery from '@mui/material/useMediaQuery'
 import { useCustomSearchParams } from '../../hooks/useCustomSearchParams'
 import { Card } from '../common/Card'
 import { Title } from '../common/Title'
+import { ProfilePictureSection } from './ProfilePictureSection'
 import { UserTabInformations } from './UserTabInformations'
 import { UserTabNotifications } from './UserTabNotifications'
 import { UserTabPassword } from './UserTabPassword'
@@ -54,6 +55,11 @@ export const UserProfilePage = () => {
   return (
     <Box>
       <Title smallMarginBottom>Mon Profil</Title>
+
+      <Box sx={{ mb: 3 }}>
+        <ProfilePictureSection />
+      </Box>
+
       <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: '20px' }}>
         <Tabs
           value={queryParams.tab}

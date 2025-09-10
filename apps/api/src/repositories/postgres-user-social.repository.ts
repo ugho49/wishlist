@@ -40,6 +40,8 @@ export class PostgresUserSocialRepository implements UserSocialRepository {
       .insert(schema.userSocial)
       .values({
         id: userSocial.id,
+        email: userSocial.email,
+        name: userSocial.name,
         userId: userSocial.user.id,
         socialId: userSocial.socialId,
         socialType: userSocial.socialType,
@@ -51,15 +53,25 @@ export class PostgresUserSocialRepository implements UserSocialRepository {
         target: [schema.userSocial.socialId, schema.userSocial.socialType],
         set: {
           pictureUrl: userSocial.pictureUrl,
+          email: userSocial.email,
+          name: userSocial.name,
           updatedAt: userSocial.updatedAt,
         },
       })
+  }
+
+  async delete(id: UserSocialId, tx?: DrizzleTransaction): Promise<void> {
+    const client = tx ?? this.databaseService.db
+
+    await client.delete(schema.userSocial).where(eq(schema.userSocial.id, id))
   }
 
   static toModel(row: typeof schema.userSocial.$inferSelect & { user: typeof schema.user.$inferSelect }): UserSocial {
     return new UserSocial({
       id: row.id,
       user: PostgresUserRepository.toModel(row.user),
+      email: row.email ?? '', // TODO: in future remove ?? '' because it will be not nullable
+      name: row.name ?? undefined,
       socialId: row.socialId,
       socialType: row.socialType as UserSocialType,
       pictureUrl: row.pictureUrl ?? undefined,

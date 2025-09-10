@@ -3,7 +3,7 @@ import { ConfigModule } from '@nestjs/config'
 import { CqrsModule } from '@nestjs/cqrs'
 import { LoggerModule } from 'pino-nestjs'
 
-import { AuthModule } from './auth/auth.module'
+import { AuthModule } from './auth/infrastructure/auth.module'
 import { CoreModule } from './core'
 import { EventModule } from './event'
 import { pinoLoggerConfig } from './helpers'

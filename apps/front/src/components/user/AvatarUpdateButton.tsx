@@ -1,18 +1,69 @@
 import type { UpdateUserPictureOutputDto, UserSocialDto } from '@wishlist/common'
 
+import AddAPhotoIcon from '@mui/icons-material/AddAPhoto'
+import EditIcon from '@mui/icons-material/Edit'
 import GoogleIcon from '@mui/icons-material/Google'
 import NoPhotographyIcon from '@mui/icons-material/NoPhotography'
 import PortraitIcon from '@mui/icons-material/Portrait'
-import { Avatar, CircularProgress, ListItemIcon, ListItemText, Menu, MenuItem } from '@mui/material'
+import {
+  Avatar,
+  Box,
+  CircularProgress,
+  IconButton,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
+  Stack,
+  styled,
+  Typography,
+} from '@mui/material'
+import clsx from 'clsx'
 import React, { useRef, useState } from 'react'
 
 import { useToast } from '../../hooks/useToast'
 import { ACCEPT_IMG, sanitizeImgToUrl } from '../../utils/images.utils'
 import { AvatarCropperModal } from '../common/AvatarCropperModal'
 
+const AvatarSection = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: theme.spacing(2),
+}))
+
+const AvatarContainer = styled(Box)(() => ({
+  position: 'relative',
+}))
+
+const StyledAvatar = styled(Avatar)(({ theme }) => ({
+  backgroundColor: theme.palette.primary.main,
+  '&.clickable:hover': {
+    opacity: 0.9,
+    cursor: 'pointer',
+  },
+  '&.with-picture': {
+    border: `4px solid ${theme.palette.primary.main}`,
+  },
+}))
+
+const MenuButton = styled(IconButton)(({ theme }) => ({
+  position: 'absolute',
+  bottom: -8,
+  right: -8,
+  backgroundColor: theme.palette.primary.main,
+  color: theme.palette.primary.contrastText,
+  width: 36,
+  height: 36,
+  '&:hover': {
+    backgroundColor: theme.palette.primary.dark,
+    transform: 'scale(1.1)',
+  },
+  boxShadow: theme.shadows[3],
+}))
+
 export type AvatarUpdateButtonProps = {
-  firstname: string
-  lastname: string
   uploadPictureHandler: (file: File) => Promise<UpdateUserPictureOutputDto>
   updatePictureFromSocialHandler: (socialId: string) => Promise<void>
   deletePictureHandler: () => Promise<void>
@@ -24,8 +75,6 @@ export type AvatarUpdateButtonProps = {
 
 export const AvatarUpdateButton = ({
   pictureUrl,
-  firstname,
-  lastname,
   socials,
   uploadPictureHandler,
   updatePictureFromSocialHandler,
@@ -117,21 +166,43 @@ export const AvatarUpdateButton = ({
           }}
         />
       )}
-      {!loading && (
-        <Avatar
-          src={pictureUrl}
-          onClick={openMenu}
-          sx={{ width: size, height: size, ':hover': { opacity: 0.7, cursor: 'pointer' } }}
-        >
-          {`${firstname.substring(0, 1).toUpperCase()}${lastname.substring(0, 1).toUpperCase()}`}
-        </Avatar>
-      )}
-      {loading && (
-        <Avatar sx={{ width: size, height: size }}>
-          <CircularProgress color="inherit" size="18px" thickness={5} />
-        </Avatar>
-      )}
+
+      <AvatarSection>
+        <AvatarContainer>
+          <StyledAvatar
+            src={!loading ? pictureUrl : undefined}
+            className={clsx(!pictureUrl && 'clickable', pictureUrl && 'with-picture')}
+            onClick={!pictureUrl ? () => selectAPicture() : undefined}
+            sx={{ width: size, height: size }}
+          >
+            {loading && (
+              <CircularProgress
+                thickness={4}
+                sx={{ color: 'white', width: `calc(${size} / 3)`, height: `calc(${size} / 3)` }}
+              />
+            )}
+            {!loading && (
+              <AddAPhotoIcon sx={{ color: 'white', width: `calc(${size} / 3)`, height: `calc(${size} / 3)` }} />
+            )}
+          </StyledAvatar>
+          {pictureUrl && (
+            <MenuButton onClick={openMenu}>
+              <EditIcon fontSize="small" />
+            </MenuButton>
+          )}
+        </AvatarContainer>
+
+        {!pictureUrl && (
+          <Stack alignItems="center">
+            <Typography variant="body2" color="text.secondary">
+              Cliquez sur l'icône ci-dessus pour ajouter une photo
+            </Typography>
+          </Stack>
+        )}
+      </AvatarSection>
+
       <input ref={inputFileRef} type="file" hidden accept={ACCEPT_IMG} onChange={onFileInputChange} />
+
       <Menu anchorEl={anchorElMenu} open={Boolean(anchorElMenu)} onClose={closeMenu}>
         <MenuItem onClick={() => selectAPicture()}>
           <ListItemIcon>
