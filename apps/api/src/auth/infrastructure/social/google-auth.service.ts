@@ -9,10 +9,18 @@ export class GoogleAuthService {
   private logger = new Logger(GoogleAuthService.name)
   private client: OAuth2Client
 
-  constructor(@Inject(authConfig.KEY) config: ConfigType<typeof authConfig>) {
+  constructor(@Inject(authConfig.KEY) private readonly config: ConfigType<typeof authConfig>) {
     const googleConfig = config.social.google
 
-    this.client = new OAuth2Client(googleConfig.clientId, googleConfig.clientSecret, '')
+    this.client = new OAuth2Client({
+      clientId: googleConfig.clientId,
+      clientSecret: googleConfig.clientSecret,
+      redirectUri: 'postmessage',
+    })
+
+    this.logger.log(`Created Google OAuth2Client`, {
+      clientId: googleConfig.clientId,
+    })
   }
 
   async getGoogleAccountFromCode(code: string): Promise<TokenPayload> {
@@ -40,9 +48,14 @@ export class GoogleAuthService {
 
   private async exchangeCodeToIdToken(code: string) {
     try {
-      const response = await this.client.getToken({ code, redirect_uri: 'postmessage' })
+      const response = await this.client.getToken({ code })
       return response.tokens.id_token
     } catch (error) {
+      // TODO: remove after debug
+      this.logger.log('creds', {
+        clientId: this.config.social.google.clientId,
+        clientSecret: this.config.social.google.clientSecret,
+      })
       this.logger.error('Error getting token from code', { error })
       throw new InternalServerErrorException('Error getting token from code')
     }
