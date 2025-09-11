@@ -83,7 +83,7 @@ workflows:
       - docker/publish:
           name: build-and-publish
           image: ughoste/wishlist-api
-          attach-at: ~/project
+          attach_at: ~/project
           dockerfile: 'apps/api/Dockerfile'
           context:
             - DOCKER_CREDENDIALS
