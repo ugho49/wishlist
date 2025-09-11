@@ -4,10 +4,12 @@ import { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import { Outlet } from 'react-router-dom'
 
-import { setUser } from '../../../core/store/features'
-import { MobileBottomNavigation } from '../MobileBottomNavigation'
-import { MobileTopBar } from '../MobileTopBar'
-import { SideNavigation } from '../SideNavigation'
+import { setUser } from '../../../../core/store/features'
+import { useProfilePicturePrompt } from '../../../../hooks/useProfilePicturePrompt'
+import { ProfilePicturePromptModal } from '../../../user/ProfilePicturePromptModal'
+import { MobileBottomNavigation } from '../../MobileBottomNavigation'
+import { MobileTopBar } from '../../MobileTopBar'
+import { SideNavigation } from '../../SideNavigation'
 
 const MainWrapper = styled(Box)(({ theme }) => ({
   [theme.breakpoints.up('md')]: {
@@ -26,15 +28,26 @@ const ContainerStyled = styled(Container)(({ theme }) => ({
   },
 }))
 
-export const PrivateRouteContainerOutlet = () => {
+export const AuthenticatedContainerOutlet = () => {
   const { user } = useFetchUserInfo()
   const theme = useTheme()
   const dispatch = useDispatch()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+  const { shouldShowPrompt, handlePromptClosed } = useProfilePicturePrompt()
 
   useEffect(() => {
     if (user) {
-      dispatch(setUser({ firstName: user.firstname, lastName: user.lastname, pictureUrl: user.picture_url }))
+      dispatch(
+        setUser({
+          id: user.id,
+          email: user.email,
+          firstName: user.firstname,
+          lastName: user.lastname,
+          birthday: user.birthday,
+          pictureUrl: user.picture_url,
+          social: user.social,
+        }),
+      )
     }
   }, [user, dispatch])
 
@@ -51,6 +64,9 @@ export const PrivateRouteContainerOutlet = () => {
       </MainWrapper>
 
       {isMobile && <MobileBottomNavigation />}
+
+      {/* Profile Picture Suggestion Modal */}
+      <ProfilePicturePromptModal open={shouldShowPrompt} onClose={() => handlePromptClosed()} />
     </>
   )
 }

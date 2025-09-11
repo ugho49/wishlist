@@ -1,8 +1,8 @@
 import type {
   ChangeUserPasswordInputDto,
+  LinkUserToGoogleInputDto,
   MiniUserDto,
   RegisterUserInputDto,
-  RegisterUserWithGoogleInputDto,
   ResetPasswordInputDto,
   ResetPasswordValidationInputDto,
   UpdateUserEmailSettingsInputDto,
@@ -10,6 +10,7 @@ import type {
   UpdateUserProfileInputDto,
   UserDto,
   UserEmailSettingsDto,
+  UserSocialDto,
 } from '@wishlist/common'
 import type { AxiosInstance } from 'axios'
 
@@ -26,8 +27,12 @@ export class UserService {
     return this.client.post(`/user/register`, data).then(res => res.data)
   }
 
-  registerWithGoogle(data: RegisterUserWithGoogleInputDto): Promise<MiniUserDto> {
-    return this.client.post(`/user/register/google`, data).then(res => res.data)
+  linkSocialWithGoogle(data: LinkUserToGoogleInputDto): Promise<UserSocialDto> {
+    return this.client.post(`/user/link-social/google`, data).then(res => res.data)
+  }
+
+  async unlinkSocialAccount(socialId: string): Promise<void> {
+    await this.client.delete(`/user/unlink-social/${socialId}`)
   }
 
   async update(data: UpdateUserProfileInputDto): Promise<void> {

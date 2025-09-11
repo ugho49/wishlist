@@ -1,10 +1,9 @@
-import type { AccessTokenJwtPayload, RefreshTokenJwtPayload } from '@wishlist/common'
+import type { AccessTokenJwtPayload } from '@wishlist/common'
 
 import { jwtDecode } from 'jwt-decode'
 
 export enum LS_KEYS {
   ACCESS_TOKEN = 'wl_v2_access_token',
-  REFRESH_TOKEN = 'wl_v2_refresh_token',
 }
 
 export type TokenContent<T> = {
@@ -14,7 +13,6 @@ export type TokenContent<T> = {
 
 export class AuthService {
   public readonly accessTokenService = new TokenService<AccessTokenJwtPayload>(LS_KEYS.ACCESS_TOKEN)
-  public readonly refreshTokenService = new TokenService<RefreshTokenJwtPayload>(LS_KEYS.REFRESH_TOKEN)
 }
 
 class TokenService<T> {

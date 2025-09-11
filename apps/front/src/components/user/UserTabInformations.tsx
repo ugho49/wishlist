@@ -14,16 +14,14 @@ import { Controller, useForm } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
 import { z } from 'zod'
 
-import { updatePicture as updatePictureAction, updateUser as updateUserAction } from '../../core/store/features'
-import { useFetchUserInfo } from '../../hooks/domain/useFetchUserInfo'
+import { updateUser as updateUserAction } from '../../core/store/features'
 import { useApi } from '../../hooks/useApi'
 import { useToast } from '../../hooks/useToast'
 import { zodRequiredString } from '../../utils/validation'
 import { InputLabel } from '../common/InputLabel'
 import { Loader } from '../common/Loader'
-import { AvatarUpdateButton } from './AvatarUpdateButton'
 
-const mapState = (state: RootState) => state.userProfile.pictureUrl
+const mapState = (state: RootState) => state.userProfile
 
 const schema = z.object({
   firstname: zodRequiredString().max(50, '50 caractères maximum'),
@@ -34,13 +32,12 @@ const schema = z.object({
 type FormFields = z.infer<typeof schema>
 
 export const UserTabInformations = () => {
-  const pictureUrl = useSelector(mapState)
+  const userState = useSelector(mapState)
   const theme = useTheme()
   const dispatch = useDispatch()
   const smallScreen = useMediaQuery(theme.breakpoints.down('md'))
   const api = useApi()
   const { addToast } = useToast()
-  const { user, loading: loadingUser } = useFetchUserInfo()
   const queryClient = useQueryClient()
 
   const {
@@ -51,9 +48,9 @@ export const UserTabInformations = () => {
   } = useForm<FormFields>({
     resolver: zodResolver(schema),
     values: {
-      firstname: user?.firstname || '',
-      lastname: user?.lastname || '',
-      birthday: user?.birthday ? DateTime.fromISO(user.birthday) : null,
+      firstname: userState.firstName || '',
+      lastname: userState.lastName || '',
+      birthday: userState.birthday ? DateTime.fromISO(userState.birthday) : null,
     },
   })
 
@@ -70,7 +67,13 @@ export const UserTabInformations = () => {
         birthday: data.birthday ? DateTime.fromJSDate(data.birthday) : null,
       }))
 
-      dispatch(updateUserAction({ firstName: data.firstname, lastName: data.lastname }))
+      dispatch(
+        updateUserAction({
+          firstName: data.firstname,
+          lastName: data.lastname,
+          birthday: data.birthday ? data.birthday.toISOString() : undefined,
+        }),
+      )
     },
   })
 
@@ -82,33 +85,19 @@ export const UserTabInformations = () => {
     })
 
   return (
-    <Loader loading={loadingUser}>
+    <Loader loading={!userState.isUserLoaded}>
       <Stack component="form" onSubmit={handleSubmit(onSubmit)} noValidate gap={smallScreen ? 2 : 3}>
-        <Stack direction="row" flexWrap="wrap" gap={smallScreen ? 2 : 3}>
-          <Stack justifyContent="center" alignItems="center" sx={smallScreen ? { width: '100%' } : undefined}>
-            <AvatarUpdateButton
-              firstname={user?.firstname || ''}
-              lastname={user?.lastname || ''}
-              pictureUrl={pictureUrl}
-              socials={user?.social || []}
-              onPictureUpdated={pictureUrl => dispatch(updatePictureAction(pictureUrl))}
-              uploadPictureHandler={file => api.user.uploadPicture(file)}
-              updatePictureFromSocialHandler={socialId => api.user.updatePictureFromSocial(socialId)}
-              deletePictureHandler={() => api.user.deletePicture()}
-            />
-          </Stack>
-          <Box sx={{ flexGrow: 1 }}>
-            <InputLabel>Email</InputLabel>
-            <TextField
-              autoComplete="off"
-              disabled={true}
-              fullWidth
-              value={user?.email || ''}
-              slotProps={{ htmlInput: { readOnly: true } }}
-              helperText="Ce champ n'est pas modifiable pour le moment"
-            />
-          </Box>
-        </Stack>
+        <Box>
+          <InputLabel>Email</InputLabel>
+          <TextField
+            autoComplete="off"
+            disabled={true}
+            fullWidth
+            value={userState.email || ''}
+            slotProps={{ htmlInput: { readOnly: true } }}
+            helperText="Ce champ n'est pas modifiable pour le moment"
+          />
+        </Box>
 
         <Stack direction="row" flexWrap="wrap" gap={smallScreen ? 2 : 3}>
           <Box sx={{ flexGrow: 1 }}>

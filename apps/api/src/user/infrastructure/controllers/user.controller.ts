@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   HttpCode,
+  Param,
   Post,
   Put,
   Query,
@@ -15,13 +16,14 @@ import { ApiConsumes, ApiTags } from '@nestjs/swagger'
 import {
   ChangeUserPasswordInputDto,
   ICurrentUser,
+  LinkUserToGoogleInputDto,
   MiniUserDto,
   RegisterUserInputDto,
-  RegisterUserWithGoogleInputDto,
   UpdateUserPictureOutputDto,
   UpdateUserProfileInputDto,
   UserDto,
   UserId,
+  UserSocialDto,
   UserSocialId,
 } from '@wishlist/common'
 import { RealIP } from 'nestjs-real-ip'
@@ -34,10 +36,11 @@ import { CommandBus, QueryBus } from '@nestjs/cqrs'
 
 import {
   CreateUserCommand,
-  CreateUserFromGoogleCommand,
   GetUserByIdQuery,
   GetUsersByCriteriaQuery,
+  LinkUserToGoogleCommand,
   RemoveUserPictureCommand,
+  UnlinkUserSocialCommand,
   UpdateUserCommand,
   UpdateUserPasswordCommand,
   UpdateUserPictureCommand,
@@ -75,11 +78,20 @@ export class UserController {
     )
   }
 
-  @Public()
-  @HttpCode(201)
-  @Post('/register/google')
-  registerWithGoogle(@Body() dto: RegisterUserWithGoogleInputDto, @RealIP() ip: string): Promise<MiniUserDto> {
-    return this.commandBus.execute(new CreateUserFromGoogleCommand({ credential: dto.credential, ip }))
+  @Post('/link-social/google')
+  linkSocialWithGoogle(
+    @CurrentUser('id') currentUserId: UserId,
+    @Body() dto: LinkUserToGoogleInputDto,
+  ): Promise<UserSocialDto> {
+    return this.commandBus.execute(new LinkUserToGoogleCommand({ code: dto.code, userId: currentUserId }))
+  }
+
+  @Delete('/unlink-social/:socialId')
+  unlinkSocialAccount(
+    @CurrentUser('id') currentUserId: UserId,
+    @Param('socialId') socialId: UserSocialId,
+  ): Promise<void> {
+    return this.commandBus.execute(new UnlinkUserSocialCommand({ userId: currentUserId, socialId }))
   }
 
   @Put()

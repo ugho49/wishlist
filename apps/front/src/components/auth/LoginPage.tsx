@@ -1,15 +1,14 @@
-import type { CredentialResponse } from '@react-oauth/google'
 import type { LoginInputDto, LoginOutputDto } from '@wishlist/common'
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import LoginIcon from '@mui/icons-material/Login'
 import { Alert, Button, Divider, Stack, styled, TextField, Typography } from '@mui/material'
-import { GoogleLogin } from '@react-oauth/google'
 import { useMutation } from '@tanstack/react-query'
 import { AxiosError } from 'axios'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useDispatch } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 import { z } from 'zod'
 
 import { setTokens } from '../../core/store/features'
@@ -17,6 +16,7 @@ import { useApi } from '../../hooks/useApi'
 import { useToast } from '../../hooks/useToast'
 import { getUrlParameter } from '../../utils/router.utils'
 import { RouterLink } from '../common/RouterLink'
+import { GoogleButton } from './GoogleButton'
 
 const schema = z.object({
   email: z.email('Email invalide'),
@@ -47,6 +47,11 @@ const ButtonStyled = styled(Button)(() => ({
   fontWeight: 600,
 }))
 
+const SocialButtonsStack = styled(Stack)(() => ({
+  width: '100%',
+  gap: 12,
+}))
+
 const DividerStyled = styled(Divider)(() => ({
   marginTop: 16,
   marginBottom: 16,
@@ -57,6 +62,8 @@ export const LoginPage = () => {
   const dispatch = useDispatch()
   const { addToast } = useToast()
   const [socialLoading, setSocialLoading] = useState(false)
+  const navigate = useNavigate()
+  const redirectUrl = getUrlParameter('redirectUrl') || '/'
   const {
     register,
     setError,
@@ -73,9 +80,15 @@ export const LoginPage = () => {
     dispatch(
       setTokens({
         accessToken: param.access_token,
-        refreshToken: param.refresh_token,
       }),
     )
+
+    navigate(redirectUrl)
+  }
+
+  const onSocialError = () => {
+    setSocialLoading(false)
+    addToast({ message: "Une erreur s'est produite", variant: 'error' })
   }
 
   const { mutateAsync: login } = useMutation({
@@ -91,23 +104,14 @@ export const LoginPage = () => {
     },
   })
 
+  const { mutateAsync: loginWithGoogle } = useMutation({
+    mutationKey: ['loginWithGoogle'],
+    mutationFn: (code: string) => api.auth.loginWithGoogle({ code, createUserIfNotExists: false }),
+    onSuccess: data => handleLoginSuccess(data),
+    onError: () => onSocialError(),
+  })
+
   const onSubmit = (data: FormFields) => login(data)
-
-  const onGoogleLoginSuccess = async (credentialResponse: CredentialResponse) => {
-    try {
-      setSocialLoading(true)
-      const data = await api.auth.loginWithGoogle({ credential: credentialResponse.credential || '' })
-      handleLoginSuccess(data)
-    } catch {
-      setSocialLoading(false)
-      addToast({ message: "Une erreur s'est produite", variant: 'error' })
-    }
-  }
-
-  const onGoogleLoginFailure = () => {
-    setSocialLoading(false)
-    addToast({ message: "Une erreur s'est produite", variant: 'error' })
-  }
 
   return (
     <Stack spacing={4} alignItems="center">
@@ -158,9 +162,26 @@ export const LoginPage = () => {
           </Typography>
         </DividerStyled>
 
-        <Stack alignItems="center">
-          <GoogleLogin onSuccess={onGoogleLoginSuccess} onError={onGoogleLoginFailure} text="signin_with" locale="fr" />
-        </Stack>
+        <SocialButtonsStack alignItems="center">
+          <GoogleButton
+            loading={socialLoading}
+            disabled={socialLoading}
+            onSuccess={code => loginWithGoogle(code)}
+            onError={() => onSocialError()}
+            onStart={() => setSocialLoading(true)}
+            iconSize={23}
+          >
+            Se connecter avec Google
+          </GoogleButton>
+          {/* <SocialButton
+            variant="contained"
+            loading={socialLoading}
+            disabled={socialLoading}
+            startIcon={<CustomIcon name="facebook" style={{ width: 24.5, height: 24.5 }} />}
+          >
+            Se connecter avec facebook
+          </SocialButton> */}
+        </SocialButtonsStack>
       </Stack>
 
       <Stack spacing={2} alignItems="center">

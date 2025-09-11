@@ -53,11 +53,8 @@ describe('AuthController', () => {
         .expect(({ body }) =>
           expect(body).toMatchObject({
             access_token: expect.toBeString(),
-            refresh_token: expect.toBeString(),
           }),
         )
     })
   })
-
-  // TODO POST /auth/refresh
 })

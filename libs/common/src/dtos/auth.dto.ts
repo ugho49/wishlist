@@ -1,13 +1,10 @@
 import { Transform } from 'class-transformer'
-import { IsEmail, IsNotEmpty, IsString, MaxLength } from 'class-validator'
+import { IsBoolean, IsEmail, IsNotEmpty, IsString, MaxLength } from 'class-validator'
 
 export class LoginOutputDto {
   declare access_token: string
-  declare refresh_token: string
-}
-
-export class RefreshTokenOutputDto {
-  declare access_token: string
+  declare new_user_created?: boolean
+  declare linked_to_existing_user?: boolean
 }
 
 export class LoginInputDto {
@@ -24,7 +21,11 @@ export class LoginInputDto {
 export class LoginWithGoogleInputDto {
   @IsString()
   @IsNotEmpty()
-  declare credential: string
+  declare code: string
+
+  @IsBoolean()
+  @IsNotEmpty()
+  declare createUserIfNotExists: boolean
 }
 
 export class RefreshTokenInputDto {
