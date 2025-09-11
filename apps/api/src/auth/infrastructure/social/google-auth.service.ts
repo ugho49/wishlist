@@ -51,11 +51,6 @@ export class GoogleAuthService {
       const response = await this.client.getToken({ code })
       return response.tokens.id_token
     } catch (error) {
-      // TODO: remove after debug
-      this.logger.log('creds', {
-        clientId: this.config.social.google.clientId,
-        clientSecret: this.config.social.google.clientSecret,
-      })
       this.logger.error('Error getting token from code', { error })
       throw new InternalServerErrorException('Error getting token from code')
     }
