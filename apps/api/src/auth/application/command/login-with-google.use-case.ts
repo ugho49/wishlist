@@ -42,39 +42,36 @@ export class LoginWithGoogleUseCase
     }
 
     const userSocial = await this.userSocialRepository.findBySocialId(payload.sub, UserSocialType.GOOGLE)
-    const user = await this.userRepository.findByEmail(payload.email)
 
-    if (userSocial && user) {
-      return this.loginWithGoogleAndUpdate({ payload, ip, user, userSocial })
+    if (userSocial) {
+      return this.loginWithGoogleAndUpdate({ payload, ip, userSocial })
     }
 
-    if (!userSocial && user) {
+    const user = await this.userRepository.findByEmail(payload.email)
+
+    if (user) {
       return this.linkUserToGoogleAndLogin({ payload, ip, user })
     }
 
-    if (!userSocial && !user) {
-      if (!createUserIfNotExists) {
-        throw new UnauthorizedException('User not found')
-      }
-
-      return this.createUserWithGoogleAndLogin({ payload, ip })
+    if (!createUserIfNotExists) {
+      throw new UnauthorizedException('User not found')
     }
 
-    throw new Error('Invalid state')
+    return this.createUserWithGoogleAndLogin({ payload, ip })
   }
 
   private async loginWithGoogleAndUpdate(params: {
-    user: User
     userSocial: UserSocial
     payload: TokenPayload
     ip: string
   }): Promise<LoginWithGoogleResult> {
-    const { user, userSocial, payload, ip } = params
+    const { userSocial, payload, ip } = params
+    const { user } = userSocial
 
     this.checkUserIsEnabled(user)
 
     let updatedUserSocial = userSocial.updateEmail(payload.email!).updateName(payload.name)
-    let updatedUser = user.updateLastConnection(ip)
+    let updatedUser = userSocial.user.updateLastConnection(ip)
 
     if (user.pictureUrl === userSocial.pictureUrl && payload.picture !== userSocial.pictureUrl) {
       updatedUser = updatedUser.updatePicture(payload.picture)

@@ -70,7 +70,7 @@ export class PostgresUserSocialRepository implements UserSocialRepository {
     return new UserSocial({
       id: row.id,
       user: PostgresUserRepository.toModel(row.user),
-      email: row.email ?? '', // TODO: in future remove ?? '' because it will be not nullable
+      email: row.email,
       name: row.name ?? undefined,
       socialId: row.socialId,
       socialType: row.socialType as UserSocialType,

@@ -43,7 +43,7 @@ export class GoogleAuthService {
       const response = await this.client.getToken({ code, redirect_uri: 'postmessage' })
       return response.tokens.id_token
     } catch (error) {
-      this.logger.error('Error getting token from code', error)
+      this.logger.error('Error getting token from code', { error })
       throw new InternalServerErrorException('Error getting token from code')
     }
   }

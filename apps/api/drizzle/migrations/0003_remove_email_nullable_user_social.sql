@@ -1,0 +1,1 @@
+ALTER TABLE "user_social" ALTER COLUMN "email" SET NOT NULL;

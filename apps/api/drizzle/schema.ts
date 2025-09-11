@@ -119,7 +119,7 @@ export const userSocial = pgTable(
   {
     id: userSocialId().primaryKey().notNull(),
     userId: userId('user_id').notNull(),
-    email: varchar({ length: 200 }), // TODO in future .notNull(),
+    email: varchar({ length: 200 }).notNull(),
     name: varchar({ length: 200 }),
     socialId: varchar('social_id', { length: 1000 }).notNull(),
     socialType: varchar('social_type', { length: 50 }).notNull(),
