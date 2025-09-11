@@ -29,7 +29,8 @@ export default async function () {
     // @ts-expect-error
     const boundedPorts = container.boundPorts as { ports: Map<number, number> }
     for (const [internal, external] of boundedPorts.ports) {
-      const variable = `DOCKER_${containerName}_PORT_${internal}`
+      const internalPort = internal.toString().split('/')[0]
+      const variable = `DOCKER_${containerName}_PORT_${internalPort}`
       process.env[variable] = external.toString()
       console.log(`export ${variable}=${external}`)
     }
