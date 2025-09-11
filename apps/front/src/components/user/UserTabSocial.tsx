@@ -17,11 +17,6 @@ import { ConfirmButton } from '../common/ConfirmButton'
 import { CustomIcon } from '../common/CustomIcon'
 import { Loader } from '../common/Loader'
 
-const IconWrapper = styled('div')(() => ({
-  display: 'flex',
-  alignItems: 'center',
-}))
-
 const SocialsContainer = styled(Stack)(() => ({
   gap: '20px',
 }))
@@ -50,11 +45,11 @@ const TextContainer = styled('div')(() => ({
 }))
 
 const SocialTitle = styled('div')(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
   fontWeight: 600,
   fontSize: '1.1rem',
   color: theme.palette.primary.main,
-  display: 'flex',
-  alignItems: 'center',
   gap: theme.spacing(1),
 }))
 
@@ -147,12 +142,10 @@ export const UserTabSocial = () => {
     <Loader loading={!userState.isUserLoaded}>
       <SocialsContainer>
         <SectionContainer>
-          <IconWrapper>
-            <CustomIcon name="google" style={{ width: 24.5, height: 24.5 }} />
-          </IconWrapper>
           <TextContainer>
             <SocialTitle>
-              Authentification via Google {googleSocial && <CheckIcon fontSize="small" color="success" />}
+              <CustomIcon name="google" style={{ width: 24.5, height: 24.5 }} />
+              <span>Authentification via Google</span> {googleSocial && <CheckIcon fontSize="small" color="success" />}
             </SocialTitle>
             {googleSocial ? (
               <ConnectedUserInfo>

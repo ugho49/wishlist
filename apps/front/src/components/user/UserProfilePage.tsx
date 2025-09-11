@@ -1,7 +1,7 @@
-import ConnectWithoutContactIcon from '@mui/icons-material/ConnectWithoutContact'
 import LockIcon from '@mui/icons-material/Lock'
 import NotificationsIcon from '@mui/icons-material/Notifications'
 import PortraitIcon from '@mui/icons-material/Portrait'
+import ShareIcon from '@mui/icons-material/Share'
 import { Box, Tab, Tabs } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
@@ -31,7 +31,7 @@ const tabs = [
   {
     value: TabValues.social,
     label: 'Connexion social',
-    icon: <ConnectWithoutContactIcon />,
+    icon: <ShareIcon />,
   },
   {
     value: TabValues.notifications,
