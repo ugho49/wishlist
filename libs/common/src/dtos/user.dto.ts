@@ -13,6 +13,7 @@ import {
   MinLength,
 } from 'class-validator'
 
+import { UserSocialType } from '../enums'
 import { GetPaginationQueryDto } from './common.dto'
 
 export class UpdateUserPictureOutputDto {
@@ -21,8 +22,10 @@ export class UpdateUserPictureOutputDto {
 
 export class UserSocialDto {
   declare id: UserSocialId
+  declare email: string
+  declare name?: string
   declare social_id: string
-  declare social_type: string
+  declare social_type: UserSocialType
   declare picture_url?: string
   declare created_at: string
   declare updated_at: string
@@ -85,10 +88,10 @@ export class RegisterUserInputDto {
   declare password: string
 }
 
-export class RegisterUserWithGoogleInputDto {
+export class LinkUserToGoogleInputDto {
   @IsString()
   @IsNotEmpty()
-  declare credential: string
+  declare code: string
 }
 
 export class UpdateUserProfileInputDto {

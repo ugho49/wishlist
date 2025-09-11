@@ -15,6 +15,13 @@
       "when": 1753529327715,
       "tag": "0001_add_event_icon",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1757580982866,
+      "tag": "0002_add_user_social_email_and_name",
+      "breakpoints": true
     }
   ]
 }

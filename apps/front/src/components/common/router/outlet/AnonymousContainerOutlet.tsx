@@ -1,8 +1,7 @@
-/// <reference types="vite-plugin-svgr/client" />
 import { Box, Container, Stack, styled } from '@mui/material'
 import { Outlet, useNavigate } from 'react-router-dom'
 
-import { Logo } from '../Logo'
+import { Logo } from '../../Logo'
 
 const Root = styled(Box)(({ theme }) => ({
   minHeight: '100vh',
@@ -27,7 +26,7 @@ const OutletContainer = styled(Box)(({ theme }) => ({
   padding: theme.spacing(4),
 }))
 
-export const AnonymousRouteContainerOutlet = () => {
+export const AnonymousContainerOutlet = () => {
   const navigate = useNavigate()
 
   return (
@@ -35,7 +34,6 @@ export const AnonymousRouteContainerOutlet = () => {
       <Container component="main" maxWidth="sm">
         <Stack direction="column" alignItems="center" spacing={4}>
           <LogoContainer onClick={() => navigate('/')}>
-            {/* TODO: use svg */}
             <Logo height={48} variant="full" />
           </LogoContainer>
 

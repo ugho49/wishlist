@@ -1,3 +1,4 @@
+/// <reference types="vite-plugin-svgr/client" />
 import type { SxProps, Theme } from '@mui/material'
 
 import { Box, Stack, styled } from '@mui/material'
