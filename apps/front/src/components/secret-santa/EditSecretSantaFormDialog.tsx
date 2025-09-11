@@ -103,7 +103,7 @@ export const EditSecretSantaFormDialog = ({
   }, [input])
 
   return (
-    <Dialog fullScreen open={open} onClose={onClose} TransitionComponent={Transition}>
+    <Dialog fullScreen open={open} onClose={onClose} slots={{ transition: Transition }}>
       <AppBar sx={{ position: 'relative' }}>
         <Toolbar sx={{ justifyContent: 'space-between' }}>
           <Typography sx={{ ml: 2, flex: 1, textTransform: 'uppercase' }} variant="h6" component="div">

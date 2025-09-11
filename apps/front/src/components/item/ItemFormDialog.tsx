@@ -176,7 +176,7 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
   )
 
   return (
-    <Dialog fullScreen open={open} onClose={handleClose} TransitionComponent={Transition}>
+    <Dialog fullScreen open={open} onClose={handleClose} slots={{ transition: Transition }}>
       <AppBar sx={{ position: 'relative' }}>
         <Toolbar sx={{ justifyContent: 'space-between' }}>
           <Typography sx={{ ml: 2, flex: 1, textTransform: 'uppercase' }} variant="h6" component="div">

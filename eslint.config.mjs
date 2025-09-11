@@ -38,6 +38,7 @@ const config = [
     rules: {
       'security/detect-non-literal-fs-filename': 'off',
       'require-await': 'off',
+      '@typescript-eslint/no-deprecated': 'warn',
       '@typescript-eslint/require-await': 'error',
       // Conflict with prettier
       '@typescript-eslint/arrow-parens': 'off',

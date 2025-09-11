@@ -120,7 +120,7 @@ export const AddSecretSantaUsersFormDialog = ({
       open={open}
       onClose={handleClose}
       disableEscapeKeyDown={loading}
-      TransitionComponent={Transition}
+      slots={{ transition: Transition }}
     >
       <AppBar sx={{ position: 'relative' }}>
         <Toolbar sx={{ justifyContent: 'space-between' }}>

@@ -543,18 +543,7 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
       </ItemCardStyled>
 
       {/* Actions menu */}
-      <Menu
-        id="item-menu"
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={closeMenu}
-        PaperProps={{
-          sx: {
-            borderRadius: '12px',
-            boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
-          },
-        }}
-      >
+      <Menu id="item-menu" anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={closeMenu}>
         <MenuItem
           onClick={() => {
             closeMenu()
