@@ -38,10 +38,12 @@ const AvatarContainer = styled(Box)(() => ({
 }))
 
 const StyledAvatar = styled(Avatar)(({ theme }) => ({
-  backgroundColor: theme.palette.primary.main,
-  '&.clickable:hover': {
-    opacity: 0.9,
-    cursor: 'pointer',
+  '&.clickable': {
+    backgroundColor: theme.palette.primary.main,
+    '&:hover': {
+      opacity: 0.9,
+      cursor: 'pointer',
+    },
   },
   '&.with-picture': {
     border: `4px solid ${theme.palette.primary.main}`,
@@ -50,9 +52,9 @@ const StyledAvatar = styled(Avatar)(({ theme }) => ({
 
 const MenuButton = styled(IconButton)(({ theme }) => ({
   position: 'absolute',
-  bottom: -8,
-  right: -8,
-  backgroundColor: theme.palette.primary.main,
+  bottom: -4,
+  right: -4,
+  backgroundColor: theme.palette.primary.light,
   color: theme.palette.primary.contrastText,
   width: 36,
   height: 36,

@@ -4,6 +4,7 @@ import type { FormEvent } from 'react'
 import type { RootState } from '../../../core'
 
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
+import AssignmentIndIcon from '@mui/icons-material/AssignmentInd'
 import HistoryIcon from '@mui/icons-material/History'
 import LanguageIcon from '@mui/icons-material/Language'
 import SaveIcon from '@mui/icons-material/Save'
@@ -125,27 +126,25 @@ export const AdminUserPage = () => {
           onClose={() => setUpdatePasswordModalOpen(false)}
         />
 
+        <Stack direction="row" justifyContent="center" flexWrap="wrap" mb={5}>
+          <AvatarUpdateButton
+            size="120px"
+            pictureUrl={pictureUrl}
+            socials={[]}
+            onPictureUpdated={url => setPictureUrl(url || '')}
+            uploadPictureHandler={file => api.user.uploadPicture(userId, file)}
+            updatePictureFromSocialHandler={() => Promise.resolve()}
+            deletePictureHandler={() => api.user.deletePicture(userId)}
+          />
+        </Stack>
+
         <Card>
           <Subtitle>Détails</Subtitle>
           <Stack direction="row" flexWrap="wrap" gap={smallScreen ? 0 : 3}>
             <List dense sx={{ flexGrow: 1 }}>
               <ListItem>
                 <ListItemIcon>
-                  <AvatarUpdateButton
-                    size="30px"
-                    pictureUrl={pictureUrl}
-                    socials={[]}
-                    onPictureUpdated={url => setPictureUrl(url || '')}
-                    uploadPictureHandler={file =>
-                      // TODO: useMutation
-                      api.user.uploadPicture(userId, file)
-                    }
-                    updatePictureFromSocialHandler={() => Promise.resolve()}
-                    deletePictureHandler={() =>
-                      // TODO: useMutation
-                      api.user.deletePicture(userId)
-                    }
-                  />
+                  <AssignmentIndIcon />
                 </ListItemIcon>
                 <ListItemText primary={`${firstname} ${lastname}`} secondary={email} />
               </ListItem>
