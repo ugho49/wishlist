@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  docker: circleci/docker@2.8.2
+  docker: circleci/docker@3.0.1
 
 parameters:
   workflow-api:
@@ -59,7 +59,7 @@ jobs:
 
   deploy-api:
     docker:
-      - image: cimg/base:2025.07
+      - image: cimg/base:2025.09
     steps:
       - add_ssh_keys:
           fingerprints:
@@ -83,7 +83,7 @@ workflows:
       - docker/publish:
           name: build-and-publish
           image: ughoste/wishlist-api
-          attach-at: ~/project
+          attach_at: ~/project
           dockerfile: 'apps/api/Dockerfile'
           context:
             - DOCKER_CREDENDIALS
