@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  docker: circleci/docker@2.8.2
+  docker: circleci/docker@3.0.1
 
 parameters:
   workflow-api:
@@ -59,7 +59,7 @@ jobs:
 
   deploy-api:
     docker:
-      - image: cimg/base:2025.07
+      - image: cimg/base:2025.09
     steps:
       - add_ssh_keys:
           fingerprints:
