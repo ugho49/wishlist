@@ -6,9 +6,9 @@ import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon'
 import { GoogleOAuthProvider } from '@react-oauth/google'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
-import { SnackbarProvider } from 'notistack'
 import { PostHogProvider } from 'posthog-js/react'
 import * as ReactDOM from 'react-dom/client'
+import { Toaster } from 'react-hot-toast'
 import { Provider as ReduxProvider } from 'react-redux'
 import { BrowserRouter } from 'react-router-dom'
 
@@ -44,6 +44,7 @@ function main() {
 
   root.render(
     <PostHogProvider apiKey={environment.posthogKey} options={{ api_host: environment.posthogHost }}>
+      <Toaster position="top-right" toastOptions={{ duration: 3_000 }} />
       <QueryClientProvider client={queryClient}>
         <ApiProvider>
           <ReduxProvider store={store}>
@@ -52,17 +53,10 @@ function main() {
               <LocalizationProvider dateAdapter={AdapterLuxon} adapterLocale="fr">
                 <BrowserRouter>
                   <ScrollToTop />
-                  <SnackbarProvider
-                    maxSnack={3}
-                    autoHideDuration={1_500}
-                    anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                    preventDuplicate
-                  >
-                    <AxiosInterceptor />
-                    <GoogleOAuthProvider clientId={environment.googleClientId}>
-                      <App />
-                    </GoogleOAuthProvider>
-                  </SnackbarProvider>
+                  <AxiosInterceptor />
+                  <GoogleOAuthProvider clientId={environment.googleClientId}>
+                    <App />
+                  </GoogleOAuthProvider>
                 </BrowserRouter>
               </LocalizationProvider>
             </ThemeProvider>

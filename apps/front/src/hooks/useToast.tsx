@@ -1,13 +1,12 @@
-import type { SnackbarMessage, VariantType } from 'notistack'
-
-import CloseIcon from '@mui/icons-material/Close'
-import { IconButton } from '@mui/material'
-import { useSnackbar } from 'notistack'
+import { uuid } from '@wishlist/common'
 import { useCallback } from 'react'
+import toast from 'react-hot-toast'
+
+type VariantType = 'default' | 'error' | 'success' | 'warning' | 'info'
 
 type AddToastInput = {
-  message: SnackbarMessage
-  variant: VariantType
+  message: string | React.ReactNode
+  variant?: VariantType
 }
 
 type AddToastOutput = {
@@ -15,27 +14,28 @@ type AddToastOutput = {
 }
 
 export function useToast() {
-  const { enqueueSnackbar, closeSnackbar } = useSnackbar()
+  const addToast = useCallback((params: AddToastInput): AddToastOutput => {
+    const toastId = uuid()
+    const message = () => <>{params.message}</>
 
-  const addToast = useCallback(
-    (params: AddToastInput): AddToastOutput => {
-      const snackbarKey = enqueueSnackbar(params.message, {
-        variant: params.variant,
-        action: key => (
-          <IconButton onClick={() => closeSnackbar(key)} color="inherit">
-            <CloseIcon />
-          </IconButton>
-        ),
-      })
+    if (params.variant === 'error') {
+      toast.error(message, { id: toastId })
+    } else if (params.variant === 'success') {
+      toast.success(message, { id: toastId })
+    } else if (params.variant === 'warning') {
+      toast(message, { id: toastId, icon: '⚠️' })
+    } else if (params.variant === 'info') {
+      toast(message, { id: toastId, icon: 'ℹ️' })
+    } else {
+      toast(message, { id: toastId })
+    }
 
-      return {
-        closeToast: () => {
-          closeSnackbar(snackbarKey)
-        },
-      }
-    },
-    [enqueueSnackbar, closeSnackbar],
-  )
+    return {
+      closeToast: () => {
+        toast.dismiss(toastId)
+      },
+    }
+  }, [])
 
   return { addToast }
 }
