@@ -38,14 +38,6 @@ const TitleStyled = styled(Typography)(({ theme }) => ({
   marginBottom: 24,
 }))
 
-const TextFieldStyled = styled(TextField)(({ theme }) => ({
-  '& .MuiOutlinedInput-root': {
-    '&:hover fieldset': {
-      borderColor: theme.palette.primary.main,
-    },
-  },
-}))
-
 const ButtonStyled = styled(Button)(() => ({
   paddingTop: 12,
   paddingBottom: 12,
@@ -128,7 +120,7 @@ export const RenewForgotPasswordPage = () => {
       </InfoMessageStyled>
 
       <Stack component="form" onSubmit={handleSubmit(onSubmit)} spacing={3} width="100%">
-        <TextFieldStyled
+        <TextField
           {...register('password')}
           label="Nouveau mot de passe"
           fullWidth
@@ -140,7 +132,7 @@ export const RenewForgotPasswordPage = () => {
           helperText={formErrors.password?.message}
         />
 
-        <TextFieldStyled
+        <TextField
           {...register('confirmPassword')}
           label="Confirmer le mot de passe"
           fullWidth

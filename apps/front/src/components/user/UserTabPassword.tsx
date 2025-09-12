@@ -9,7 +9,7 @@ import { z } from 'zod'
 
 import { useApi } from '../../hooks/useApi'
 import { useToast } from '../../hooks/useToast'
-import { InputLabel } from '../common/InputLabel'
+import { Subtitle } from '../common/Subtitle'
 
 const schema = z.object({
   oldPassword: z.string().min(1, 'Ce champ ne peut pas être vide'),
@@ -53,47 +53,53 @@ export const UserTabPassword = () => {
   }
 
   return (
-    <Stack component="form" onSubmit={handleSubmit(onSubmit)} noValidate gap={3}>
+    <Box>
+      <Subtitle>Modifier le mot de passe</Subtitle>
+
       {formErrors.root && <Alert severity="error">{formErrors.root.message}</Alert>}
 
-      <Box>
-        <InputLabel required>Ancien mot de passe</InputLabel>
-        <TextField
-          {...register('oldPassword')}
-          type="password"
-          autoComplete="off"
-          fullWidth
-          placeholder="********"
-          error={!!formErrors.oldPassword}
-          helperText={formErrors.oldPassword?.message}
-        />
-      </Box>
-      <Box>
-        <InputLabel required>Nouveau mot de passe</InputLabel>
-        <TextField
-          {...register('newPassword')}
-          type="password"
-          autoComplete="off"
-          fullWidth
-          placeholder="********"
-          error={!!formErrors.newPassword}
-          helperText={formErrors.newPassword?.message}
-        />
-      </Box>
-      <Stack direction="row" justifyContent="center">
-        <Button
-          type="submit"
-          variant="contained"
-          size="large"
-          color="secondary"
-          loading={isSubmitting}
-          loadingPosition="start"
-          disabled={isSubmitting}
-          startIcon={<SaveIcon />}
-        >
-          Mettre à jour
-        </Button>
+      <Stack component="form" onSubmit={handleSubmit(onSubmit)} noValidate gap={3}>
+        <Stack direction="row" flexWrap="wrap" gap={3}>
+          <Box sx={{ flex: '1 1 300px', minWidth: '200px' }}>
+            <TextField
+              {...register('oldPassword')}
+              label="Ancien mot de passe"
+              type="password"
+              autoComplete="off"
+              fullWidth
+              placeholder="********"
+              error={!!formErrors.oldPassword}
+              helperText={formErrors.oldPassword?.message}
+            />
+          </Box>
+          <Box sx={{ flex: '1 1 300px', minWidth: '200px' }}>
+            <TextField
+              {...register('newPassword')}
+              label="Nouveau mot de passe"
+              type="password"
+              autoComplete="off"
+              fullWidth
+              placeholder="********"
+              error={!!formErrors.newPassword}
+              helperText={formErrors.newPassword?.message}
+            />
+          </Box>
+        </Stack>
+        <Stack direction="row" justifyContent="center">
+          <Button
+            sx={{ marginTop: '8px' }}
+            type="submit"
+            variant="contained"
+            size="medium"
+            loading={isSubmitting}
+            loadingPosition="start"
+            disabled={isSubmitting}
+            startIcon={<SaveIcon />}
+          >
+            Mettre à jour
+          </Button>
+        </Stack>
       </Stack>
-    </Stack>
+    </Box>
   )
 }

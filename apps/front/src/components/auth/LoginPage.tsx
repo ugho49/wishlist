@@ -32,14 +32,6 @@ const TitleStyled = styled(Typography)(({ theme }) => ({
   textAlign: 'center',
 }))
 
-const TextFieldStyled = styled(TextField)(({ theme }) => ({
-  '& .MuiOutlinedInput-root': {
-    '&:hover fieldset': {
-      borderColor: theme.palette.primary.main,
-    },
-  },
-}))
-
 const ButtonStyled = styled(Button)(() => ({
   paddingTop: 12,
   paddingBottom: 12,
@@ -120,7 +112,7 @@ export const LoginPage = () => {
       <Stack component="form" onSubmit={handleSubmit(onSubmit)} spacing={3} width="100%">
         {formErrors.root && <Alert severity="error">{formErrors.root.message}</Alert>}
 
-        <TextFieldStyled
+        <TextField
           {...register('email')}
           type="email"
           label="Email"
@@ -131,7 +123,7 @@ export const LoginPage = () => {
           helperText={formErrors.email?.message}
         />
 
-        <TextFieldStyled
+        <TextField
           {...register('password')}
           type="password"
           label="Mot de passe"

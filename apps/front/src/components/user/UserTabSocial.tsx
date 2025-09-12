@@ -16,6 +16,7 @@ import { addUserSocial, removeUserSocial } from '../../core/store/features'
 import { ConfirmButton } from '../common/ConfirmButton'
 import { CustomIcon } from '../common/CustomIcon'
 import { Loader } from '../common/Loader'
+import { Subtitle } from '../common/Subtitle'
 
 const SocialsContainer = styled(Stack)(() => ({
   gap: '20px',
@@ -140,6 +141,8 @@ export const UserTabSocial = () => {
 
   return (
     <Loader loading={!userState.isUserLoaded}>
+      <Subtitle>Gérer les connexions sociales</Subtitle>
+
       <SocialsContainer>
         <SectionContainer>
           <TextContainer>

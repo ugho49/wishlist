@@ -1,19 +1,19 @@
-import type { SxProps, Theme } from '@mui/material/styles'
 import type { PropsWithChildren } from 'react'
 
-import { Typography, useTheme } from '@mui/material'
-import React from 'react'
+import { styled, Typography } from '@mui/material'
 
 export type SubtitleProps = {
-  sx?: SxProps<Theme>
+  className?: string
 }
 
-export const Subtitle = ({ children, sx = {} }: PropsWithChildren<SubtitleProps>) => {
-  const theme = useTheme()
+const TypographyStyled = styled(Typography)(({ theme }) => ({
+  marginBottom: 28,
+  color: theme.palette.primary.dark,
+  fontWeight: 400,
+  fontSize: '1.5rem',
+  lineHeight: '1.334',
+}))
 
-  return (
-    <Typography component="h1" variant="h5" sx={{ marginBottom: '20px', color: theme.palette.primary.dark, ...sx }}>
-      {children}
-    </Typography>
-  )
+export const Subtitle = ({ children, className }: PropsWithChildren<SubtitleProps>) => {
+  return <TypographyStyled className={className}>{children}</TypographyStyled>
 }

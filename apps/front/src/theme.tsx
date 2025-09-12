@@ -75,5 +75,16 @@ export const theme = createTheme({
         },
       },
     },
+    MuiTextField: {
+      styleOverrides: {
+        root: {
+          '& .MuiOutlinedInput-root': {
+            '&:hover fieldset': {
+              borderColor: '#255376',
+            },
+          },
+        },
+      },
+    },
   },
 })

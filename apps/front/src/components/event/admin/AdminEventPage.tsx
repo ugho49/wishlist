@@ -7,7 +7,7 @@ import NumbersIcon from '@mui/icons-material/Numbers'
 import ShortTextIcon from '@mui/icons-material/ShortText'
 import TitleIcon from '@mui/icons-material/Title'
 import { Box, List, ListItem, ListItemIcon, ListItemText, Stack } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
+import { styled, useTheme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { AttendeeRole } from '@wishlist/common'
@@ -17,13 +17,17 @@ import { useParams } from 'react-router-dom'
 
 import { useApi, useToast } from '../../../hooks'
 import { BreaklineText } from '../../common/BreaklineText'
-import { Card } from '../../common/Card'
+import { CardV2 } from '../../common/CardV2'
 import { Loader } from '../../common/Loader'
 import { Subtitle } from '../../common/Subtitle'
 import { Title } from '../../common/Title'
 import { AdminSecretSanta } from '../../secret-santa/admin/AdminSecretSanta'
 import { AdminListWishlistsForEvent } from '../../wishlist/admin/AdminListWishlistsForEvent'
 import { AdminListAttendees } from './AdminListAttendees'
+
+const CardStack = styled(Stack)(() => ({
+  gap: 32,
+}))
 
 export const AdminEventPage = () => {
   const params = useParams<'eventId'>()
@@ -129,106 +133,103 @@ export const AdminEventPage = () => {
     <Box>
       <Title smallMarginBottom>Editer l'évènement</Title>
 
-      <Card>
-        <Loader loading={loadingEvent}>
-          <Subtitle>Détails</Subtitle>
-          <Stack direction="row" flexWrap="wrap" gap={smallScreen ? 0 : 3}>
-            <List dense sx={{ flexGrow: 1 }}>
-              <ListItem>
-                <ListItemIcon>
-                  <TitleIcon />
-                </ListItemIcon>
-                <ListItemText primary="Titre" secondary={event?.title} />
-              </ListItem>
-              <ListItem>
-                <ListItemIcon>
-                  <NumbersIcon />
-                </ListItemIcon>
-                <ListItemText primary="Nombre de participants" secondary={event?.attendees.length} />
-              </ListItem>
-              <ListItem>
-                <ListItemIcon>
-                  <LocalPoliceOutlinedIcon />
-                </ListItemIcon>
-                <ListItemText primary="Maintenu par" secondary={maintainerName} />
-              </ListItem>
-            </List>
-
-            <List dense sx={{ flexGrow: 1 }}>
-              <ListItem>
-                <ListItemIcon>
-                  <AccessTimeIcon />
-                </ListItemIcon>
-                <ListItemText
-                  primary="Créé le"
-                  secondary={DateTime.fromISO(event?.created_at || '').toLocaleString(
-                    DateTime.DATETIME_MED_WITH_SECONDS,
-                  )}
-                />
-              </ListItem>
-              <ListItem>
-                <ListItemIcon>
-                  <NumbersIcon />
-                </ListItemIcon>
-                <ListItemText primary="Nombre de listes" secondary={event?.wishlists.length} />
-              </ListItem>
-            </List>
-          </Stack>
-          {event?.description && (
+      <CardStack>
+        <CardV2>
+          <Loader loading={loadingEvent}>
+            <Subtitle>Détails</Subtitle>
             <Stack direction="row" flexWrap="wrap" gap={smallScreen ? 0 : 3}>
               <List dense sx={{ flexGrow: 1 }}>
                 <ListItem>
                   <ListItemIcon>
-                    <ShortTextIcon />
+                    <TitleIcon />
                   </ListItemIcon>
-                  <ListItemText primary="Description" secondary={<BreaklineText text={event?.description ?? ''} />} />
+                  <ListItemText primary="Titre" secondary={event?.title} />
+                </ListItem>
+                <ListItem>
+                  <ListItemIcon>
+                    <NumbersIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Nombre de participants" secondary={event?.attendees.length} />
+                </ListItem>
+                <ListItem>
+                  <ListItemIcon>
+                    <LocalPoliceOutlinedIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Maintenu par" secondary={maintainerName} />
+                </ListItem>
+              </List>
+
+              <List dense sx={{ flexGrow: 1 }}>
+                <ListItem>
+                  <ListItemIcon>
+                    <AccessTimeIcon />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary="Créé le"
+                    secondary={DateTime.fromISO(event?.created_at || '').toLocaleString(
+                      DateTime.DATETIME_MED_WITH_SECONDS,
+                    )}
+                  />
+                </ListItem>
+                <ListItem>
+                  <ListItemIcon>
+                    <NumbersIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Nombre de listes" secondary={event?.wishlists.length} />
                 </ListItem>
               </List>
             </Stack>
-          )}
-        </Loader>
-      </Card>
-      <br />
+            {event?.description && (
+              <Stack direction="row" flexWrap="wrap" gap={smallScreen ? 0 : 3}>
+                <List dense sx={{ flexGrow: 1 }}>
+                  <ListItem>
+                    <ListItemIcon>
+                      <ShortTextIcon />
+                    </ListItemIcon>
+                    <ListItemText primary="Description" secondary={<BreaklineText text={event?.description ?? ''} />} />
+                  </ListItem>
+                </List>
+              </Stack>
+            )}
+          </Loader>
+        </CardV2>
 
-      <Card>
-        <Loader loading={loadingSecretSanta}>
-          <Subtitle>Secret Santa</Subtitle>
-          {secretSanta && (
-            <AdminSecretSanta
-              secretSanta={secretSanta}
+        <CardV2>
+          <Loader loading={loadingSecretSanta}>
+            <Subtitle>Secret Santa</Subtitle>
+            {secretSanta && (
+              <AdminSecretSanta
+                secretSanta={secretSanta}
+                loading={loadingEdit}
+                startSecretSanta={() => startSecretSanta()}
+                updateSecretSanta={input => updateSecretSanta(input)}
+                cancelSecretSanta={() => cancelSecretSanta()}
+                deleteSecretSanta={() => deleteSecretSanta()}
+                removeSecretSantaUser={secretSantaUserId => removeSecretSantaUser(secretSantaUserId)}
+              />
+            )}
+            {!secretSanta && <div>Il n'y a pas de secret santa pour cet évènement</div>}
+          </Loader>
+        </CardV2>
+
+        <CardV2>
+          <Loader loading={loadingEvent}>
+            <Subtitle>Participants ({event?.attendees.length})</Subtitle>
+            <AdminListAttendees
+              attendees={event?.attendees ?? []}
               loading={loadingEdit}
-              startSecretSanta={() => startSecretSanta()}
-              updateSecretSanta={input => updateSecretSanta(input)}
-              cancelSecretSanta={() => cancelSecretSanta()}
-              deleteSecretSanta={() => deleteSecretSanta()}
-              removeSecretSantaUser={secretSantaUserId => removeSecretSantaUser(secretSantaUserId)}
+              deleteAttendee={attendeeId => deleteAttendee(attendeeId)}
             />
-          )}
-          {!secretSanta && <div>Il n'y a pas de secret santa pour cet évènement</div>}
-        </Loader>
-      </Card>
+          </Loader>
+        </CardV2>
 
-      <br />
-
-      <Card>
-        <Loader loading={loadingEvent}>
-          <Subtitle>Participants ({event?.attendees.length})</Subtitle>
-          <AdminListAttendees
-            attendees={event?.attendees ?? []}
-            loading={loadingEdit}
-            deleteAttendee={attendeeId => deleteAttendee(attendeeId)}
-          />
-        </Loader>
-      </Card>
-
-      <br />
-
-      <Card>
-        <Loader loading={loadingEvent}>
-          <Subtitle>Wishlists ({event?.wishlists.length})</Subtitle>
-          <AdminListWishlistsForEvent wishlists={event?.wishlists ?? []} />
-        </Loader>
-      </Card>
+        <CardV2>
+          <Loader loading={loadingEvent}>
+            <Subtitle>Wishlists ({event?.wishlists.length})</Subtitle>
+            <AdminListWishlistsForEvent wishlists={event?.wishlists ?? []} />
+          </Loader>
+        </CardV2>
+      </CardStack>
     </Box>
   )
 }

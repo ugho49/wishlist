@@ -24,6 +24,9 @@ const CardStyled = styled(Box)(({ theme }) => ({
   },
 }))
 
+/**
+ * @deprecated use {@link CardV2} instead
+ */
 export const Card = ({
   onClick,
   to,

@@ -4,12 +4,11 @@ import type { FormEvent } from 'react'
 import type { RootState } from '../../../core'
 
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
-import AssignmentIndIcon from '@mui/icons-material/AssignmentInd'
 import HistoryIcon from '@mui/icons-material/History'
 import LanguageIcon from '@mui/icons-material/Language'
 import SaveIcon from '@mui/icons-material/Save'
 import { Box, Button, List, ListItem, ListItemIcon, ListItemText, Stack, TextField } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
+import { styled, useTheme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import { MobileDatePicker } from '@mui/x-date-pickers'
 import { useQuery } from '@tanstack/react-query'
@@ -19,10 +18,9 @@ import { useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom'
 
 import { useApi, useToast } from '../../../hooks'
-import { Card } from '../../common/Card'
+import { CardV2 } from '../../common/CardV2'
 import { CharsRemaining } from '../../common/CharsRemaining'
 import { ConfirmButton } from '../../common/ConfirmButton'
-import { InputLabel } from '../../common/InputLabel'
 import { Loader } from '../../common/Loader'
 import { Subtitle } from '../../common/Subtitle'
 import { Title } from '../../common/Title'
@@ -32,6 +30,29 @@ import { AvatarUpdateButton } from '../AvatarUpdateButton'
 import { UpdatePasswordModal } from './UpdatePasswordModal'
 
 const mapState = (state: RootState) => state.auth
+
+const UserNameAndEmail = styled('div')(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  gap: 2,
+  marginBottom: theme.spacing(5),
+}))
+
+const Name = styled('div')(({ theme }) => ({
+  fontWeight: 500,
+  fontSize: '1.3rem',
+  color: theme.palette.text.primary,
+}))
+
+const Email = styled('div')(({ theme }) => ({
+  fontSize: '0.9rem',
+  color: theme.palette.text.secondary,
+}))
+
+const CardStack = styled(Stack)(() => ({
+  gap: 32,
+}))
 
 export const AdminUserPage = () => {
   const { addToast } = useToast()
@@ -49,6 +70,7 @@ export const AdminUserPage = () => {
   const [enabled, setEnabled] = useState(true)
   const [birthday, setBirthday] = useState<DateTime | null>(null)
   const [updatePasswordModalOpen, setUpdatePasswordModalOpen] = useState(false)
+
   const { data: value, isLoading: loadingUser } = useQuery({
     queryKey: ['admin', 'user', { id: userId }],
     queryFn: ({ signal }) => api.user.getById(userId, { signal }),
@@ -117,37 +139,37 @@ export const AdminUserPage = () => {
 
   return (
     <Loader loading={loadingUser}>
-      <Box>
-        <Title smallMarginBottom>Editer l'utilisateur</Title>
+      <Title smallMarginBottom>Editer l'utilisateur</Title>
 
-        <UpdatePasswordModal
-          userId={userId}
-          open={updatePasswordModalOpen}
-          onClose={() => setUpdatePasswordModalOpen(false)}
+      <UpdatePasswordModal
+        userId={userId}
+        open={updatePasswordModalOpen}
+        onClose={() => setUpdatePasswordModalOpen(false)}
+      />
+
+      <Stack direction="row" justifyContent="center" flexWrap="wrap" mb={2}>
+        <AvatarUpdateButton
+          size="120px"
+          pictureUrl={pictureUrl}
+          socials={[]}
+          onPictureUpdated={url => setPictureUrl(url || '')}
+          uploadPictureHandler={file => api.user.uploadPicture(userId, file)}
+          updatePictureFromSocialHandler={() => Promise.resolve()}
+          deletePictureHandler={() => api.user.deletePicture(userId)}
         />
+      </Stack>
 
-        <Stack direction="row" justifyContent="center" flexWrap="wrap" mb={5}>
-          <AvatarUpdateButton
-            size="120px"
-            pictureUrl={pictureUrl}
-            socials={[]}
-            onPictureUpdated={url => setPictureUrl(url || '')}
-            uploadPictureHandler={file => api.user.uploadPicture(userId, file)}
-            updatePictureFromSocialHandler={() => Promise.resolve()}
-            deletePictureHandler={() => api.user.deletePicture(userId)}
-          />
-        </Stack>
+      <UserNameAndEmail>
+        <Name>
+          {firstname} {lastname}
+        </Name>
+        <Email>{email}</Email>
+      </UserNameAndEmail>
 
-        <Card>
-          <Subtitle>Détails</Subtitle>
+      <CardStack>
+        <CardV2>
           <Stack direction="row" flexWrap="wrap" gap={smallScreen ? 0 : 3}>
             <List dense sx={{ flexGrow: 1 }}>
-              <ListItem>
-                <ListItemIcon>
-                  <AssignmentIndIcon />
-                </ListItemIcon>
-                <ListItemText primary={`${firstname} ${lastname}`} secondary={email} />
-              </ListItem>
               <ListItem>
                 <ListItemIcon>
                   <AccessTimeIcon />
@@ -160,7 +182,6 @@ export const AdminUserPage = () => {
                 />
               </ListItem>
             </List>
-
             <List dense sx={{ flexGrow: 1 }}>
               <ListItem>
                 <ListItemIcon>
@@ -168,16 +189,20 @@ export const AdminUserPage = () => {
                 </ListItemIcon>
                 <ListItemText
                   primary="Dernière connexion le"
-                  secondary={DateTime.fromISO(value?.last_connected_at || '').toLocaleString(
-                    DateTime.DATETIME_MED_WITH_SECONDS,
-                  )}
+                  secondary={
+                    value?.last_connected_at
+                      ? DateTime.fromISO(value.last_connected_at).toLocaleString(DateTime.DATETIME_MED_WITH_SECONDS)
+                      : ' - '
+                  }
                 />
               </ListItem>
+            </List>
+            <List dense sx={{ flexGrow: 1 }}>
               <ListItem>
                 <ListItemIcon>
                   <LanguageIcon />
                 </ListItemIcon>
-                <ListItemText primary="Dernière IP connue" secondary={value?.last_ip} />
+                <ListItemText primary="Dernière IP connue" secondary={value?.last_ip || ' - '} />
               </ListItem>
             </List>
           </Stack>
@@ -185,6 +210,7 @@ export const AdminUserPage = () => {
           {!isCurrentUser && (
             <Stack mt="16px" direction="row" justifyContent="center" gap={1} flexWrap="wrap">
               <ConfirmButton
+                sx={{ padding: '3px 10px' }}
                 confirmTitle={enabled ? "Désactiver l'utilisateur" : "Activer l'utilisateur"}
                 confirmText={
                   enabled
@@ -201,6 +227,7 @@ export const AdminUserPage = () => {
               </ConfirmButton>
 
               <Button
+                sx={{ padding: '3px 10px' }}
                 variant="outlined"
                 size="small"
                 disabled={loading}
@@ -210,17 +237,17 @@ export const AdminUserPage = () => {
               </Button>
             </Stack>
           )}
-        </Card>
-        <br />
-        <Card>
+        </CardV2>
+
+        <CardV2>
           <Subtitle>Modifier les informations</Subtitle>
 
           <Stack component="form" gap={3} onSubmit={updateProfile}>
             <Stack direction="row" flexWrap="wrap" gap={3}>
-              <Box sx={{ flexGrow: 1 }}>
-                <InputLabel required>Prénom</InputLabel>
+              <Box sx={{ flex: '1 1 300px', minWidth: '200px' }}>
                 <TextField
                   autoComplete="off"
+                  label="Prénom"
                   disabled={loading || isCurrentUser}
                   fullWidth
                   value={firstname}
@@ -232,10 +259,10 @@ export const AdminUserPage = () => {
                 />
               </Box>
 
-              <Box sx={{ flexGrow: 1 }}>
-                <InputLabel required>Nom</InputLabel>
+              <Box sx={{ flex: '1 1 300px', minWidth: '200px' }}>
                 <TextField
                   autoComplete="off"
+                  label="Nom"
                   disabled={loading || isCurrentUser}
                   fullWidth
                   value={lastname}
@@ -248,39 +275,44 @@ export const AdminUserPage = () => {
               </Box>
             </Stack>
 
-            <Box>
-              <InputLabel required>Email</InputLabel>
-              <TextField
-                type="email"
-                autoComplete="off"
-                disabled={loading || isCurrentUser}
-                fullWidth
-                value={email}
-                placeholder="john@doe.fr"
-                required
-                onChange={e => setEmail(e.target.value)}
-              />
-            </Box>
+            <Stack direction="row" flexWrap="wrap" gap={3}>
+              <Box sx={{ flex: '1 1 300px', minWidth: '200px' }}>
+                <TextField
+                  label="Email"
+                  type="email"
+                  autoComplete="off"
+                  disabled={loading || isCurrentUser}
+                  fullWidth
+                  value={email}
+                  placeholder="john@doe.fr"
+                  required
+                  onChange={e => setEmail(e.target.value)}
+                />
+              </Box>
 
-            <Stack>
-              <InputLabel>Date de naissance</InputLabel>
-              <MobileDatePicker
-                value={birthday}
-                disabled={loading || isCurrentUser}
-                // defaultCalendarMonth={DateTime.now().minus({ year: 30 })}
-                onChange={date => setBirthday(date)}
-                disableFuture={true}
-              />
+              <Box sx={{ flex: '1 1 300px', minWidth: '200px' }}>
+                <MobileDatePicker
+                  label="Date de naissance"
+                  value={birthday}
+                  disabled={loading || isCurrentUser}
+                  onChange={date => setBirthday(date)}
+                  disableFuture={true}
+                  slotProps={{
+                    textField: {
+                      fullWidth: true,
+                    },
+                  }}
+                />
+              </Box>
             </Stack>
 
             {!isCurrentUser && (
               <Stack direction="row" justifyContent="center">
                 <Button
-                  sx={{ marginTop: '20px' }}
+                  sx={{ marginTop: '8px' }}
                   type="submit"
                   variant="contained"
-                  size="large"
-                  color="secondary"
+                  size="small"
                   loading={loading}
                   loadingPosition="start"
                   disabled={loading || isCurrentUser}
@@ -291,18 +323,18 @@ export const AdminUserPage = () => {
               </Stack>
             )}
           </Stack>
-        </Card>
-        <br />
-        <Card>
+        </CardV2>
+
+        <CardV2>
           <Subtitle>Evènements</Subtitle>
           <AdminListEvents userId={userId} />
-        </Card>
-        <br />
-        <Card>
+        </CardV2>
+
+        <CardV2>
           <Subtitle>Wishlists</Subtitle>
           <AdminListWishlistsForUser userId={userId} />
-        </Card>
-      </Box>
+        </CardV2>
+      </CardStack>
     </Loader>
   )
 }
