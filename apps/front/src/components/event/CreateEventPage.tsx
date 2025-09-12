@@ -57,7 +57,7 @@ export const CreateEventPage = () => {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [icon, setIcon] = useState<string | undefined>(undefined)
-  const [eventDate, setEventDate] = useState<DateTime | null>(DateTime.now())
+  const [eventDate, setEventDate] = useState<DateTime | null>(null)
   const [attendees, setAttendees] = useState<Attendee[]>([])
 
   const attendeeEmails = useMemo(
