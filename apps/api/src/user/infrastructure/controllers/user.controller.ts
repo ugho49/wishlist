@@ -16,6 +16,7 @@ import { ApiConsumes, ApiTags } from '@nestjs/swagger'
 import {
   ChangeUserPasswordInputDto,
   ICurrentUser,
+  LimitQueryDto,
   LinkUserToGoogleInputDto,
   MiniUserDto,
   RegisterUserInputDto,
@@ -46,6 +47,7 @@ import {
   UpdateUserPictureCommand,
   UpdateUserPictureFromSocialCommand,
 } from '../../domain'
+import { GetClosestFriendsQuery } from '../../domain/query/get-closest-friends.query'
 import { userPictureFileValidators, userPictureResizePipe } from '../user.validator'
 
 @ApiTags('User')
@@ -133,6 +135,14 @@ export class UserController {
         criteria,
       }),
     )
+  }
+
+  @Get('/closest-friends')
+  getClosestFriends(
+    @CurrentUser('id') currentUserId: UserId,
+    @Query() queryParams: LimitQueryDto,
+  ): Promise<MiniUserDto[]> {
+    return this.queryBus.execute(new GetClosestFriendsQuery({ userId: currentUserId, limit: queryParams.limit ?? 20 }))
   }
 
   @Post('/upload-picture')

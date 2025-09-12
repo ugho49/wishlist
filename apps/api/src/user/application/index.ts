@@ -16,6 +16,7 @@ import {
 import { UserCreatedUseCase } from './event'
 import { PasswordVerificationCreatedUseCase } from './event/password-verification-created.use-case'
 import {
+  GetClosestFriendsUseCase,
   GetUserByIdUseCase,
   GetUserEmailSettingUseCase,
   GetUsersByCriteriaUseCase,
@@ -42,6 +43,7 @@ export const handlers = [
   GetUserByIdUseCase,
   GetUsersByCriteriaUseCase,
   GetUsersPaginatedUseCase,
+  GetClosestFriendsUseCase,
   // Events
   UserCreatedUseCase,
   PasswordVerificationCreatedUseCase,

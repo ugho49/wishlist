@@ -133,6 +133,27 @@ export class PostgresUserRepository implements UserRepository {
     await this.databaseService.db.delete(schema.user).where(eq(schema.user.id, userId))
   }
 
+  async findClosestFriends(userId: UserId, limit: number): Promise<User[]> {
+    const userEventsSubquery = this.databaseService.db
+      .select({ eventId: schema.eventAttendee.eventId })
+      .from(schema.eventAttendee)
+      .where(eq(schema.eventAttendee.userId, userId))
+
+    const result = await this.databaseService.db
+      .select({
+        user: schema.user,
+        commonEventsCount: count().as('common_events_count'),
+      })
+      .from(schema.user)
+      .innerJoin(schema.eventAttendee, eq(schema.user.id, schema.eventAttendee.userId))
+      .where(and(ne(schema.user.id, userId), inArray(schema.eventAttendee.eventId, userEventsSubquery)))
+      .groupBy(schema.user.id)
+      .orderBy(desc(count()))
+      .limit(limit)
+
+    return result.map(row => PostgresUserRepository.toModel(row.user))
+  }
+
   static toModel(row: typeof schema.user.$inferSelect): User {
     return new User({
       id: row.id,

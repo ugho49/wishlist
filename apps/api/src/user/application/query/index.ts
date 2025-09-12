@@ -1,3 +1,4 @@
+export { GetClosestFriendsUseCase } from './get-closest-friends.use-case'
 export { GetUserByIdUseCase } from './get-user-by-id.use-case'
 export { GetUserEmailSettingUseCase } from './get-user-email-setting.use-case'
 export { GetUsersByCriteriaUseCase } from './get-users-by-criteria.use-case'

@@ -14,6 +14,7 @@ export interface UserRepository {
     criteria?: string
     pagination: { take: number; skip: number }
   }): Promise<{ users: User[]; totalCount: number }>
+  findClosestFriends(userId: UserId, limit: number): Promise<User[]>
   save(user: User, tx?: DrizzleTransaction): Promise<void>
   delete(userId: UserId): Promise<void>
 }

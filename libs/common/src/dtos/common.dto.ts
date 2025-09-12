@@ -1,5 +1,5 @@
 import { Transform } from 'class-transformer'
-import { IsInt, IsOptional, Min } from 'class-validator'
+import { IsInt, IsOptional, IsPositive, Min } from 'class-validator'
 
 export class GetPaginationQueryDto {
   @IsInt()
@@ -7,6 +7,15 @@ export class GetPaginationQueryDto {
   @IsOptional()
   @Transform(({ value }) => parseInt(value, 10))
   declare p?: number
+}
+
+export class LimitQueryDto {
+  @IsInt()
+  @Min(1)
+  @IsPositive()
+  @IsOptional()
+  @Transform(({ value }) => parseInt(value, 10))
+  declare limit?: number
 }
 
 export class PaginationDto {
