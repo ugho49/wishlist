@@ -21,7 +21,6 @@ import {
   Stepper,
   TextField,
 } from '@mui/material'
-import { MobileDatePicker } from '@mui/x-date-pickers'
 import { useMutation } from '@tanstack/react-query'
 import { AttendeeRole } from '@wishlist/common'
 import { DateTime } from 'luxon'
@@ -33,6 +32,7 @@ import { useApi } from '../../hooks/useApi'
 import { useToast } from '../../hooks/useToast'
 import { CardV2 } from '../common/CardV2'
 import { CharsRemaining } from '../common/CharsRemaining'
+import { WishlistDatePicker } from '../common/DatePicker'
 import { EmojiSelectorWithBadge } from '../common/EmojiSelectorWithBadge'
 import { InputLabel } from '../common/InputLabel'
 import { Title } from '../common/Title'
@@ -131,12 +131,12 @@ export const CreateEventPage = () => {
 
               <Stack>
                 <InputLabel required>Date de l'évènement</InputLabel>
-                <MobileDatePicker
+                <WishlistDatePicker
                   format="DDDD"
                   value={eventDate}
                   disabled={loading}
                   onChange={date => setEventDate(date)}
-                  disablePast={true}
+                  disablePast
                 />
               </Stack>
 

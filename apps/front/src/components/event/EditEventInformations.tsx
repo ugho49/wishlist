@@ -4,7 +4,6 @@ import type { FormEvent } from 'react'
 import DeleteIcon from '@mui/icons-material/Delete'
 import SaveIcon from '@mui/icons-material/Save'
 import { Box, Button, Stack, TextField } from '@mui/material'
-import { MobileDatePicker } from '@mui/x-date-pickers'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { DateTime } from 'luxon'
 import { useState } from 'react'
@@ -15,6 +14,7 @@ import { useToast } from '../../hooks/useToast'
 import { CardV2 } from '../common/CardV2'
 import { CharsRemaining } from '../common/CharsRemaining'
 import { ConfirmButton } from '../common/ConfirmButton'
+import { WishlistDatePicker } from '../common/DatePicker'
 import { EmojiSelectorWithBadge } from '../common/EmojiSelectorWithBadge'
 import { Subtitle } from '../common/Subtitle'
 
@@ -120,13 +120,13 @@ export const EditEventInformations = ({ event }: EditEventInformationsProps) => 
           </Box>
 
           <Stack>
-            <MobileDatePicker
+            <WishlistDatePicker
               label="Date de l'évènement"
               format="DDDD"
               value={eventDate}
               disabled={loading}
               onChange={date => setEventDate(date)}
-              disablePast={true}
+              disablePast
             />
           </Stack>
 

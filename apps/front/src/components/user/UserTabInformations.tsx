@@ -5,7 +5,6 @@ import type { RootState } from '../../core'
 import { zodResolver } from '@hookform/resolvers/zod'
 import SaveIcon from '@mui/icons-material/Save'
 import { Box, Button, Stack, TextField } from '@mui/material'
-import { MobileDatePicker } from '@mui/x-date-pickers'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { DateTime } from 'luxon'
 import { Controller, useForm } from 'react-hook-form'
@@ -16,6 +15,7 @@ import { updateUser as updateUserAction } from '../../core/store/features'
 import { useApi } from '../../hooks/useApi'
 import { useToast } from '../../hooks/useToast'
 import { zodRequiredString } from '../../utils/validation'
+import { WishlistDatePicker } from '../common/DatePicker'
 import { Loader } from '../common/Loader'
 import { Subtitle } from '../common/Subtitle'
 
@@ -118,19 +118,15 @@ export const UserTabInformations = () => {
             control={control}
             name="birthday"
             render={({ field }) => (
-              <MobileDatePicker
+              <WishlistDatePicker
+                label="Date de naissance"
                 value={field.value}
                 inputRef={field.ref}
                 disabled={field.disabled}
                 referenceDate={DateTime.now().minus({ year: 30 })}
                 onChange={date => field.onChange(date)}
-                disableFuture={true}
-                label="Date de naissance"
-                slotProps={{
-                  textField: {
-                    fullWidth: true,
-                  },
-                }}
+                disableFuture
+                fullWidth
               />
             )}
           />

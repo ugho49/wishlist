@@ -10,7 +10,6 @@ import SaveIcon from '@mui/icons-material/Save'
 import { Box, Button, List, ListItem, ListItemIcon, ListItemText, Stack, TextField } from '@mui/material'
 import { styled, useTheme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
-import { MobileDatePicker } from '@mui/x-date-pickers'
 import { useQuery } from '@tanstack/react-query'
 import { DateTime } from 'luxon'
 import { useEffect, useState } from 'react'
@@ -21,6 +20,7 @@ import { useApi, useToast } from '../../../hooks'
 import { CardV2 } from '../../common/CardV2'
 import { CharsRemaining } from '../../common/CharsRemaining'
 import { ConfirmButton } from '../../common/ConfirmButton'
+import { WishlistDatePicker } from '../../common/DatePicker'
 import { Loader } from '../../common/Loader'
 import { Subtitle } from '../../common/Subtitle'
 import { Title } from '../../common/Title'
@@ -291,17 +291,13 @@ export const AdminUserPage = () => {
               </Box>
 
               <Box sx={{ flex: '1 1 300px', minWidth: '200px' }}>
-                <MobileDatePicker
+                <WishlistDatePicker
                   label="Date de naissance"
                   value={birthday}
                   disabled={loading || isCurrentUser}
                   onChange={date => setBirthday(date)}
-                  disableFuture={true}
-                  slotProps={{
-                    textField: {
-                      fullWidth: true,
-                    },
-                  }}
+                  disableFuture
+                  fullWidth
                 />
               </Box>
             </Stack>
