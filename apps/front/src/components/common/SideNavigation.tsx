@@ -123,8 +123,7 @@ const ListItemIconStyled = styled(ListItemIcon)(({ theme }) => ({
 }))
 
 const UserSectionStyled = styled(Box)(({ theme }) => ({
-  padding: theme.spacing(2),
-  paddingLeft: theme.spacing(2.5),
+  padding: theme.spacing(1),
   display: 'flex',
   alignItems: 'center',
   gap: theme.spacing(1.5),
@@ -160,6 +159,8 @@ const UserInfoStyled = styled(Box)(() => ({
   display: 'flex',
   flexDirection: 'column',
   flex: 1,
+  minWidth: 0,
+  gap: '4px',
 }))
 
 const UserNameStyled = styled(Box)(({ theme }) => ({
@@ -167,12 +168,18 @@ const UserNameStyled = styled(Box)(({ theme }) => ({
   fontWeight: 600,
   color: theme.palette.text.primary,
   lineHeight: 1.2,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
 }))
 
 const UserRoleStyled = styled(Box)(({ theme }) => ({
   fontSize: '0.85rem',
   color: theme.palette.text.secondary,
   lineHeight: 1.2,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
 }))
 
 const BottomSectionStyled = styled(Box)(({ theme }) => ({
@@ -186,7 +193,7 @@ const BottomSectionStyled = styled(Box)(({ theme }) => ({
 
 export const SideNavigation = () => {
   const { user } = useSelector(mapAuthState)
-  const { pictureUrl, firstName, lastName, email } = useSelector(mapUserProfileState)
+  const { pictureUrl, firstName, email } = useSelector(mapUserProfileState)
   const { isOpen: isDrawerOpen } = useSelector(mapDrawerState)
   const dispatch = useDispatch()
   const navigate = useNavigate()
@@ -302,9 +309,7 @@ export const SideNavigation = () => {
             {!pictureUrl && <PersonIcon />}
           </UserAvatarStyled>
           <UserInfoStyled>
-            <UserNameStyled>
-              {firstName} {lastName}
-            </UserNameStyled>
+            <UserNameStyled>{firstName}</UserNameStyled>
             <UserRoleStyled>{email}</UserRoleStyled>
           </UserInfoStyled>
         </UserSectionStyled>
