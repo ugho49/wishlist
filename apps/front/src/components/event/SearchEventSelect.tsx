@@ -7,6 +7,7 @@ import { DateTime } from 'luxon'
 import { EventIcon } from './EventIcon'
 
 export type SearchEventSelectProps = {
+  label?: string
   options: MiniEventDto[]
   disabled?: boolean
   loading?: boolean
@@ -16,6 +17,7 @@ export type SearchEventSelectProps = {
 }
 
 export const SearchEventSelect = ({
+  label,
   excludedEventIds,
   onChange,
   options,
@@ -54,6 +56,7 @@ export const SearchEventSelect = ({
       renderInput={params => (
         <TextField
           {...params}
+          label={label}
           slotProps={{ htmlInput: { ...params.inputProps } }}
           placeholder="Sélectionner un évènement"
           error={error}

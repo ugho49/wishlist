@@ -12,7 +12,6 @@ import { useSelector } from 'react-redux'
 import { useApi, useToast } from '../../hooks'
 import { CardV2 } from '../common/CardV2'
 import { ConfirmIconButton } from '../common/ConfirmIconButton'
-import { InputLabel } from '../common/InputLabel'
 import { Subtitle } from '../common/Subtitle'
 import { SearchUserSelect } from '../user/SearchUserSelect'
 import { ListItemAttendee } from './ListItemAttendee'
@@ -75,12 +74,11 @@ export const EditEventAttendees = ({ eventId, attendees }: EditEventAttendeesPro
 
   return (
     <CardV2>
-      <Subtitle>Modifier les participants</Subtitle>
+      <Subtitle>Gérer les participants</Subtitle>
 
       <Box>
-        <InputLabel>Ajouter un nouveau participant à l'évènement ?</InputLabel>
-
         <SearchUserSelect
+          label="Ajouter un nouveau participant à l'évènement ?"
           disabled={loading}
           excludedEmails={[...attendeeEmails, currentUserEmail || '']}
           onChange={value =>

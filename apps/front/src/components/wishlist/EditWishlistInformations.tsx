@@ -14,6 +14,7 @@ import { useApi } from '../../hooks/useApi'
 import { useToast } from '../../hooks/useToast'
 import { zodRequiredString } from '../../utils/validation'
 import { CardV2 } from '../common/CardV2'
+import { CharsRemaining } from '../common/CharsRemaining'
 import { ConfirmButton } from '../common/ConfirmButton'
 import { Subtitle } from '../common/Subtitle'
 import { WishlistLogoActions } from './WishlistLogoActions'
@@ -40,6 +41,7 @@ export const EditWishlistInformations = ({ wishlist }: EditWishlistInformationsP
     register,
     handleSubmit,
     formState: { isSubmitting, errors: formErrors },
+    watch,
   } = useForm<FormFields>({
     resolver: zodResolver(schema),
     values: {
@@ -47,6 +49,8 @@ export const EditWishlistInformations = ({ wishlist }: EditWishlistInformationsP
       description: wishlist.description,
     },
   })
+
+  const formValues = watch()
 
   const { mutateAsync: updateWishlist } = useMutation({
     mutationKey: ['wishlist.update', { id: wishlist.id }],
@@ -132,7 +136,6 @@ export const EditWishlistInformations = ({ wishlist }: EditWishlistInformationsP
               <TextField
                 {...register('title')}
                 label="Titre"
-                required
                 autoComplete="off"
                 fullWidth
                 placeholder="Ma super liste"
@@ -151,7 +154,9 @@ export const EditWishlistInformations = ({ wishlist }: EditWishlistInformationsP
                 minRows={4}
                 placeholder="Une petite description ..."
                 error={!!formErrors.description}
-                helperText={formErrors.description?.message}
+                helperText={
+                  formErrors.description?.message || <CharsRemaining max={2000} value={formValues.description || ''} />
+                }
               />
             </Box>
 

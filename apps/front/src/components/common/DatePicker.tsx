@@ -14,13 +14,17 @@ export type WishlistDatePickerProps = {
   label?: MobileDatePickerProps['label']
   referenceDate?: MobileDatePickerProps['referenceDate']
   disabled?: boolean
+  required?: boolean
   disablePast?: boolean
   disableFuture?: boolean
   fullWidth?: boolean
   placeholder?: string
+  error?: boolean
+  helperText?: string
 }
 
 export const WishlistDatePicker = ({
+  required,
   value,
   minDate,
   inputRef,
@@ -32,6 +36,8 @@ export const WishlistDatePicker = ({
   disableFuture,
   fullWidth,
   placeholder = 'Sélectionner une date',
+  error,
+  helperText,
 }: WishlistDatePickerProps) => {
   const [datePickerOpen, setDatePickerOpen] = useState(false)
 
@@ -40,8 +46,11 @@ export const WishlistDatePicker = ({
       <TextField
         ref={inputRef}
         label={label}
+        required={required}
         fullWidth={fullWidth}
         disabled={disabled}
+        error={error}
+        helperText={helperText}
         slotProps={{
           input: { readOnly: true },
         }}

@@ -9,28 +9,25 @@ import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft'
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'
 import SaveIcon from '@mui/icons-material/Save'
 import {
+  Alert,
   Box,
   Button,
   Checkbox,
   Container,
   Divider,
-  FormControl,
   FormControlLabel,
   IconButton,
-  InputAdornment,
   List,
   ListItem,
   ListItemAvatar,
   ListItemButton,
   ListItemText,
-  OutlinedInput,
   Stack,
   Step,
   StepLabel,
   Stepper,
   styled,
   TextField,
-  Typography,
 } from '@mui/material'
 import { useMutation } from '@tanstack/react-query'
 import { MAX_EVENTS_BY_LIST } from '@wishlist/common'
@@ -48,6 +45,7 @@ import { CardV2 } from '../common/CardV2'
 import { CharsRemaining } from '../common/CharsRemaining'
 import { InputLabel } from '../common/InputLabel'
 import { Loader } from '../common/Loader'
+import { Subtitle } from '../common/Subtitle'
 import { Title } from '../common/Title'
 import { EventIcon } from '../event/EventIcon'
 import { SearchEventSelect } from '../event/SearchEventSelect'
@@ -109,6 +107,12 @@ const IconWrapper = styled(Box)(({ theme }) => ({
   },
 }))
 
+const ListOfTitle = styled(Box)(({ theme }) => ({
+  fontSize: '1.1rem',
+  color: theme.palette.primary.main,
+  lineHeight: 1.4,
+}))
+
 const mapState = (state: RootState) => state.userProfile.firstName
 
 export const CreateWishlistPage = () => {
@@ -166,57 +170,39 @@ export const CreateWishlistPage = () => {
 
   return (
     <Box>
+      <Title>Créer une liste</Title>
+      <Box sx={{ width: '100%' }}>
+        <Stepper activeStep={step - 1} alternativeLabel>
+          {steps.map((label, i) => (
+            <Step key={label} completed={step > i + 1 || loading}>
+              <StepLabel>{label}</StepLabel>
+            </Step>
+          ))}
+        </Stepper>
+      </Box>
       <Loader loading={userFirstName === undefined}>
-        <Title>Créer une liste</Title>
-        <Box sx={{ width: '100%' }}>
-          <Stepper activeStep={step - 1} alternativeLabel>
-            {steps.map((label, i) => (
-              <Step key={label} completed={step > i + 1 || loading}>
-                <StepLabel>{label}</StepLabel>
-              </Step>
-            ))}
-          </Stepper>
-        </Box>
         <Container maxWidth="sm" sx={{ marginTop: '40px' }}>
           <CardV2>
             {step === 1 && (
-              <Stack gap={3}>
-                <Typography
-                  id="list-type-label"
-                  component="legend"
-                  sx={{
-                    color: theme => theme.palette.primary.main,
-                    fontWeight: 500,
-                    marginBottom: '8px',
-                    fontSize: '1rem',
-                  }}
-                >
-                  Pour qui créer la liste ?{' '}
-                  <Typography component="span" sx={{ color: theme => theme.palette.error.main }}>
-                    *
-                  </Typography>
-                </Typography>
+              <Box>
+                <Subtitle>Pour qui créer la liste ?</Subtitle>
 
-                <Stack gap={2} role="group" aria-labelledby="list-type-label">
+                <Stack gap={2}>
                   <OptionCard
                     onClick={() => {
                       setStep(2)
-                      setOwnerName(userFirstName ?? '')
+                      setOwnerName(userFirstName!)
                       setHideItems(true)
                       setIsListForSomeoneElse(false)
                       setLogo(undefined)
                     }}
-                    aria-label="Créer une liste pour moi-même"
-                    aria-describedby="option-for-me-description"
                   >
                     <IconWrapper>
-                      <AccountCircleTwoToneIcon aria-hidden="true" />
+                      <AccountCircleTwoToneIcon />
                     </IconWrapper>
                     <Box sx={{ flex: 1 }}>
                       <OptionTitle>Pour moi</OptionTitle>
-                      <OptionDescription id="option-for-me-description">
-                        Je garde le secret et je fais ma liste pour moi-même
-                      </OptionDescription>
+                      <OptionDescription>Je garde le secret et je fais ma liste pour moi-même</OptionDescription>
                     </Box>
                   </OptionCard>
 
@@ -227,91 +213,100 @@ export const CreateWishlistPage = () => {
                       setHideItems(false)
                       setIsListForSomeoneElse(true)
                     }}
-                    aria-label="Créer une liste pour une autre personne"
-                    aria-describedby="option-for-someone-description"
                   >
                     <IconWrapper>
-                      <Diversity1TwoToneIcon aria-hidden="true" />
+                      <Diversity1TwoToneIcon />
                     </IconWrapper>
                     <Box sx={{ flex: 1 }}>
                       <OptionTitle>Pour une autre personne</OptionTitle>
-                      <OptionDescription id="option-for-someone-description">
+                      <OptionDescription>
                         Je crée la liste pour quelqu'un d'autre. Je peux choisir si je souhaite voir ou non les
                         sélections faites par les autres participants
                       </OptionDescription>
                     </Box>
                   </OptionCard>
                 </Stack>
-              </Stack>
+              </Box>
             )}
 
             {step === 2 && (
-              <Stack component="form" noValidate gap={3}>
-                <Box>
-                  <InputLabel required>Intitulé</InputLabel>
-                  <FormControl fullWidth>
-                    <OutlinedInput
-                      autoComplete="off"
-                      disabled={loading}
-                      readOnly={!isListForSomeoneElse}
-                      fullWidth
-                      value={ownerName}
-                      slotProps={{ input: { maxLength: 90 } }}
-                      placeholder={namePlaceholder}
-                      onChange={e => setOwnerName(e.target.value)}
-                      startAdornment={<InputAdornment position="start">Liste de </InputAdornment>}
-                    />
-                  </FormControl>
-                </Box>
+              <Box component="form" noValidate>
+                <Subtitle>Ajouter les informations</Subtitle>
 
-                <Box>
-                  <InputLabel>Description</InputLabel>
-                  <TextField
-                    autoComplete="off"
-                    disabled={loading}
-                    fullWidth
-                    multiline
-                    minRows={4}
-                    value={description}
-                    slotProps={{ htmlInput: { maxLength: 2000 } }}
-                    placeholder="Une petite description ..."
-                    helperText={<CharsRemaining max={2000} value={description} />}
-                    onChange={e => setDescription(e.target.value)}
-                  />
-                </Box>
-
-                {isListForSomeoneElse && (
-                  <>
-                    <Box>
-                      <InputLabel>Révéler les Sélections</InputLabel>
-                      <FormControlLabel
-                        label="Je veux voir ce que les gens cochent sur cette liste"
-                        control={
-                          <Checkbox
-                            checked={!hideItems}
-                            onChange={() => setHideItems(prev => !prev)}
-                            disabled={loading}
-                          />
-                        }
+                <Stack gap={3}>
+                  <Stack direction="row" gap={3} alignItems="center">
+                    <ListOfTitle>Liste de</ListOfTitle>
+                    <Box sx={{ flex: 1 }}>
+                      <TextField
+                        label="Nom de la personne"
+                        required
+                        autoComplete="off"
+                        disabled={loading}
+                        fullWidth
+                        value={ownerName}
+                        slotProps={{ htmlInput: { maxLength: 90 } }}
+                        placeholder={namePlaceholder}
+                        onChange={e => setOwnerName(e.target.value)}
                       />
                     </Box>
-                    <WishlistLogoActions
-                      logoUrl={logo ? URL.createObjectURL(logo) : undefined}
-                      loading={loading}
-                      onLogoChange={file => setLogo(file)}
-                      onLogoRemove={() => setLogo(undefined)}
+                  </Stack>
+
+                  <Box>
+                    <TextField
+                      label="Description"
+                      autoComplete="off"
+                      disabled={loading}
+                      fullWidth
+                      multiline
+                      minRows={4}
+                      value={description}
+                      slotProps={{ htmlInput: { maxLength: 2000 } }}
+                      placeholder="Une petite description ..."
+                      helperText={<CharsRemaining max={2000} value={description} />}
+                      onChange={e => setDescription(e.target.value)}
                     />
-                  </>
-                )}
-              </Stack>
+                  </Box>
+
+                  {isListForSomeoneElse && (
+                    <>
+                      <Box>
+                        <InputLabel>Révéler les Sélections</InputLabel>
+                        {!hideItems && (
+                          <Alert severity="warning" icon={false} sx={{ marginBlock: '15px' }}>
+                            En activant cette option, vous et tous les participants pourrez voir qui a coché quoi sur
+                            cette liste.
+                          </Alert>
+                        )}
+                        <FormControlLabel
+                          label="Je veux voir ce que les gens cochent sur cette liste"
+                          control={
+                            <Checkbox
+                              checked={!hideItems}
+                              onChange={() => setHideItems(prev => !prev)}
+                              disabled={loading}
+                            />
+                          }
+                        />
+                      </Box>
+                      <WishlistLogoActions
+                        logoUrl={logo ? URL.createObjectURL(logo) : undefined}
+                        loading={loading}
+                        onLogoChange={file => setLogo(file)}
+                        onLogoRemove={() => setLogo(undefined)}
+                      />
+                    </>
+                  )}
+                </Stack>
+              </Box>
             )}
 
             {step === 3 && (
               <Stack>
-                <Box>
-                  <InputLabel required>Gérer les évènements</InputLabel>
+                <Subtitle>Gérer les évènements</Subtitle>
 
+                <Box>
                   <SearchEventSelect
+                    label="Ajouter un évènement"
                     loading={availableEventsLoading}
                     disabled={loading || events.length === MAX_EVENTS_BY_LIST}
                     options={availableEvents}
