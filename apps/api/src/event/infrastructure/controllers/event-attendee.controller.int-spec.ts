@@ -421,6 +421,42 @@ describe('EventAttendeeController', () => {
         await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(1) // only maintainer remains
       })
 
+      it('should delete active attendee successfully if a wishlist exists but from another attendee', async () => {
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Test Event',
+          description: 'Test Description',
+          maintainerId: currentUserId,
+        })
+
+        await fixtures.insertWishlist({
+          eventIds: [eventId],
+          userId: currentUserId,
+          title: 'Test Wishlist',
+        })
+
+        const { attendeeId: attendeeId1 } = await fixtures.insertUserAndAddItToEventAsAttendee({
+          email: 'attendee1@example.com',
+          firstname: 'User 1',
+          lastname: 'User 1',
+          eventId,
+        })
+
+        await fixtures.insertUserAndAddItToEventAsAttendee({
+          email: 'attendee2@example.com',
+          firstname: 'User 2',
+          lastname: 'User 2',
+          eventId,
+        })
+
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(3)
+        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1)
+
+        await request.delete(path({ eventId, attendeeId: attendeeId1 })).expect(200)
+
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(2) // 2 attendee remaining (attendee2 and maintainer)
+        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1) // wishlist still exists
+      })
+
       it('should unlink wishlist from event when attendee has wishlist linked to multiple events', async () => {
         const otherUserId = await fixtures.insertUser({
           email: 'attendee@example.com',

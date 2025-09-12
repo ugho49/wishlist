@@ -1,10 +1,11 @@
 import { Module } from '@nestjs/common'
 
 import { handlers } from '../application'
-import { SecretSantaController } from './secret-santa.controller'
+import { SecretSantaAdminController } from './controllers/secret-santa-admin.controller'
+import { SecretSantaController } from './controllers/secret-santa.controller'
 
 @Module({
-  controllers: [SecretSantaController],
+  controllers: [SecretSantaController, SecretSantaAdminController],
   providers: [...handlers],
 })
 export class SecretSantaModule {}

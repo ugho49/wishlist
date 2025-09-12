@@ -102,6 +102,7 @@ export const AdminListWishlistsForUser = ({ userId }: AdminListWishlistsForUserP
         }}
         pageSizeOptions={[pageSize]}
         onPaginationModelChange={({ page }) => setCurrentPage(page + 1)}
+        hideFooter={totalElements <= pageSize}
       />
     </div>
   )

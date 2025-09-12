@@ -68,6 +68,8 @@ export const AdminListWishlistsForEvent = ({ wishlists }: AdminListWishlistsForE
         rows={wishlists}
         columns={columns}
         paginationMode="client"
+        hideFooter
+        disableColumnMenu
       />
     </div>
   )

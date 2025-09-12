@@ -6,12 +6,22 @@ import { useQuery } from '@tanstack/react-query'
 import { AttendeeRole } from '@wishlist/common'
 import { DateTime } from 'luxon'
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 import { useApi } from '../../../hooks'
-import { RouterLink } from '../../common/RouterLink'
+import { EventIcon } from '../EventIcon'
 
 const columns: GridColDef<EventWithCountsDto>[] = [
-  { field: 'title', headerName: 'Title', width: 170 },
+  {
+    field: 'icon',
+    headerName: '',
+    width: 20,
+    sortable: false,
+    filterable: false,
+    display: 'flex',
+    renderCell: ({ row }) => <EventIcon icon={row.icon} size="small" />,
+  },
+  { field: 'title', headerName: 'Title', flex: 1 },
   {
     field: 'event_date',
     headerName: 'Event Date',
@@ -28,15 +38,6 @@ const columns: GridColDef<EventWithCountsDto>[] = [
       const maintainer = row.attendees.find(attendee => attendee.role === AttendeeRole.MAINTAINER)?.user
       if (!maintainer) return 'Unknown'
       return `${maintainer.firstname} ${maintainer.lastname}`
-    },
-    renderCell: ({ row }) => {
-      const maintainer = row.attendees.find(attendee => attendee.role === AttendeeRole.MAINTAINER)?.user
-      if (!maintainer) return 'Unknown'
-      return (
-        <RouterLink to={`/admin/users/${maintainer.id}`}>
-          {maintainer.firstname} {maintainer.lastname}
-        </RouterLink>
-      )
     },
   },
   {
@@ -56,19 +57,9 @@ const columns: GridColDef<EventWithCountsDto>[] = [
     field: 'created_at',
     headerName: 'Created At',
     type: 'dateTime',
-    width: 150,
+    width: 200,
     valueGetter: (_, row) => new Date(row.created_at),
     renderCell: ({ value }) => DateTime.fromJSDate(value).toLocaleString(DateTime.DATETIME_MED),
-  },
-  {
-    field: 'id',
-    sortable: false,
-    filterable: false,
-    headerName: 'Actions',
-    flex: 1,
-    headerAlign: 'center',
-    align: 'center',
-    renderCell: ({ row: event }) => <RouterLink to={`/admin/events/${event.id}`}>Voir</RouterLink>,
   },
 ]
 
@@ -81,6 +72,7 @@ export const AdminListEvents = ({ userId }: AdminListEventsProps) => {
   const [totalElements, setTotalElements] = useState(0)
   const [pageSize, setPageSize] = useState(0)
   const [currentPage, setCurrentPage] = useState(1)
+  const navigate = useNavigate()
 
   const { data: value, isLoading: loading } = useQuery({
     queryKey: ['admin', 'events', { page: currentPage, userId }],
@@ -98,7 +90,11 @@ export const AdminListEvents = ({ userId }: AdminListEventsProps) => {
   return (
     <div style={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
       <DataGrid
-        isRowSelectable={() => false}
+        isRowSelectable={() => true}
+        disableMultipleRowSelection={true}
+        disableColumnSelector={true}
+        isCellEditable={() => false}
+        onRowClick={data => navigate(`/admin/events/${data.row.id}`)}
         density="standard"
         rows={value?.resources || []}
         loading={loading}
@@ -111,6 +107,7 @@ export const AdminListEvents = ({ userId }: AdminListEventsProps) => {
         }}
         pageSizeOptions={[pageSize]}
         onPaginationModelChange={({ page }) => setCurrentPage(page + 1)}
+        hideFooter={totalElements <= pageSize}
       />
     </div>
   )

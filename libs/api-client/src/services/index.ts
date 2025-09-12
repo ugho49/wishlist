@@ -1,4 +1,6 @@
+export { AdminEventAttendeeService } from './admin-event-attendee.service'
 export { AdminEventService } from './admin-event.service'
+export { AdminSecretSantaService } from './admin-secret-santa.service'
 export { AdminUserService } from './admin-user.service'
 export { AdminWishlistService } from './admin-wishlist.service'
 export { AuthService } from './auth.service'

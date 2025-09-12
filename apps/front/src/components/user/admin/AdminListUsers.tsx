@@ -7,10 +7,10 @@ import { DataGrid } from '@mui/x-data-grid'
 import { useQuery } from '@tanstack/react-query'
 import { DateTime } from 'luxon'
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 import { useApi } from '../../../hooks'
 import { InputLabel } from '../../common/InputLabel'
-import { RouterLink } from '../../common/RouterLink'
 import { Status } from '../../common/Status'
 
 const columns: GridColDef<UserWithoutSocialsDto>[] = [
@@ -38,7 +38,7 @@ const columns: GridColDef<UserWithoutSocialsDto>[] = [
   },
   { field: 'firstname', headerName: 'First name', width: 170 },
   { field: 'lastname', headerName: 'Last name', width: 170 },
-  { field: 'email', headerName: 'Email', width: 250 },
+  { field: 'email', headerName: 'Email', flex: 1 },
   {
     field: 'admin',
     headerName: 'Is Admin',
@@ -49,19 +49,9 @@ const columns: GridColDef<UserWithoutSocialsDto>[] = [
     field: 'created_at',
     headerName: 'Created At',
     type: 'dateTime',
-    width: 150,
+    width: 200,
     valueGetter: (_, row) => new Date(row.created_at),
     renderCell: ({ value }) => DateTime.fromJSDate(value).toLocaleString(DateTime.DATETIME_MED),
-  },
-  {
-    field: 'id',
-    sortable: false,
-    filterable: false,
-    headerName: 'Actions',
-    flex: 1,
-    headerAlign: 'center',
-    align: 'center',
-    renderCell: ({ row: user }) => <RouterLink to={`/admin/users/${user.id}`}>Voir</RouterLink>,
   },
 ]
 
@@ -72,6 +62,7 @@ export const AdminListUsers = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const [inputSearch, setInputSearch] = useState('')
   const [search, setSearch] = useState('')
+  const navigate = useNavigate()
 
   const { data: value, isLoading: loading } = useQuery({
     queryKey: ['admin', 'users', { page: currentPage, search }],
@@ -111,7 +102,11 @@ export const AdminListUsers = () => {
         </Stack>
       </Box>
       <DataGrid
-        isRowSelectable={() => false}
+        isRowSelectable={() => true}
+        disableMultipleRowSelection={true}
+        disableColumnSelector={true}
+        isCellEditable={() => false}
+        onRowClick={data => navigate(`/admin/users/${data.row.id}`)}
         density="standard"
         rows={value?.resources || []}
         loading={loading}
@@ -124,6 +119,7 @@ export const AdminListUsers = () => {
         }}
         pageSizeOptions={[pageSize]}
         onPaginationModelChange={({ page }) => setCurrentPage(page + 1)}
+        hideFooter={totalElements <= pageSize}
       />
     </div>
   )
