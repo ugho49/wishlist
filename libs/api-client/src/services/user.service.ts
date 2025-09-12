@@ -23,6 +23,12 @@ export class UserService {
     return this.client.get(`/user`, { signal: options?.signal }).then(res => res.data)
   }
 
+  getClosestFriends(limit?: number, options?: CommonRequestOptions): Promise<MiniUserDto[]> {
+    return this.client
+      .get(`/user/closest-friends`, { params: { limit }, signal: options?.signal })
+      .then(res => res.data)
+  }
+
   register(data: RegisterUserInputDto): Promise<MiniUserDto> {
     return this.client.post(`/user/register`, data).then(res => res.data)
   }
