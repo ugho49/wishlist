@@ -1,7 +1,7 @@
 import type { DetailedWishlistDto, MiniEventDto } from '@wishlist/common'
 
 import DeleteIcon from '@mui/icons-material/Delete'
-import { Box, Divider, List, ListItem, ListItemAvatar, ListItemButton, ListItemText, Stack } from '@mui/material'
+import { Box, Divider, List, ListItem, ListItemAvatar, ListItemButton, ListItemText } from '@mui/material'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { MAX_EVENTS_BY_LIST } from '@wishlist/common'
 import { DateTime } from 'luxon'
@@ -13,6 +13,7 @@ import { useToast } from '../../hooks/useToast'
 import { CardV2 } from '../common/CardV2'
 import { ConfirmIconButton } from '../common/ConfirmIconButton'
 import { InputLabel } from '../common/InputLabel'
+import { Subtitle } from '../common/Subtitle'
 import { EventIcon } from '../event/EventIcon'
 import { SearchEventSelect } from '../event/SearchEventSelect'
 
@@ -64,56 +65,56 @@ export const EditWishlistEvent = ({ wishlistId, events }: EditWishlistEventsProp
 
   return (
     <CardV2>
-      <Stack>
-        <Box>
-          <InputLabel>Ajouter un nouvel évènement sur la liste ?</InputLabel>
+      <Subtitle>Modifier les évènements associés</Subtitle>
 
-          <SearchEventSelect
-            loading={availableEventsLoading}
-            error={events.length === MAX_EVENTS_BY_LIST}
-            options={availableEvents}
-            disabled={loading || events.length === MAX_EVENTS_BY_LIST}
-            onChange={value => attachEventToWishlist(value)}
-            excludedEventIds={events.map(e => e.id)}
-          />
-        </Box>
+      <Box>
+        <InputLabel>Ajouter un nouvel évènement sur la liste ?</InputLabel>
 
-        <Divider sx={{ marginBlock: '20px' }} />
+        <SearchEventSelect
+          loading={availableEventsLoading}
+          error={events.length === MAX_EVENTS_BY_LIST}
+          options={availableEvents}
+          disabled={loading || events.length === MAX_EVENTS_BY_LIST}
+          onChange={value => attachEventToWishlist(value)}
+          excludedEventIds={events.map(e => e.id)}
+        />
+      </Box>
 
-        <List>
-          {events.map(event => (
-            <ListItem
-              key={event.id}
-              className="animated zoomIn fast"
-              disablePadding
-              secondaryAction={
-                <ConfirmIconButton
-                  confirmTitle="Séparer cette liste et cet évènement ?"
-                  confirmText={
-                    <>
-                      Êtes-vous sur de supprimer la liaison entre cette liste et l'évènement <b>{event.title}</b> ?
-                    </>
-                  }
-                  onClick={() => detachEventFromWishlist(event)}
-                  disabled={loading || events.length === 1}
-                >
-                  <DeleteIcon />
-                </ConfirmIconButton>
-              }
-            >
-              <ListItemButton>
-                <ListItemAvatar>
-                  <EventIcon icon={event.icon} />
-                </ListItemAvatar>
-                <ListItemText
-                  primary={<b>{event.title}</b>}
-                  secondary={DateTime.fromISO(event.event_date).toLocaleString(DateTime.DATE_MED)}
-                />
-              </ListItemButton>
-            </ListItem>
-          ))}
-        </List>
-      </Stack>
+      <Divider sx={{ marginBlock: '20px' }} />
+
+      <List>
+        {events.map(event => (
+          <ListItem
+            key={event.id}
+            className="animated zoomIn fast"
+            disablePadding
+            secondaryAction={
+              <ConfirmIconButton
+                confirmTitle="Séparer cette liste et cet évènement ?"
+                confirmText={
+                  <>
+                    Êtes-vous sur de supprimer la liaison entre cette liste et l'évènement <b>{event.title}</b> ?
+                  </>
+                }
+                onClick={() => detachEventFromWishlist(event)}
+                disabled={loading || events.length === 1}
+              >
+                <DeleteIcon />
+              </ConfirmIconButton>
+            }
+          >
+            <ListItemButton>
+              <ListItemAvatar>
+                <EventIcon icon={event.icon} />
+              </ListItemAvatar>
+              <ListItemText
+                primary={<b>{event.title}</b>}
+                secondary={DateTime.fromISO(event.event_date).toLocaleString(DateTime.DATE_MED)}
+              />
+            </ListItemButton>
+          </ListItem>
+        ))}
+      </List>
     </CardV2>
   )
 }

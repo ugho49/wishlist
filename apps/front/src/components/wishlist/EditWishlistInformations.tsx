@@ -15,6 +15,7 @@ import { useToast } from '../../hooks/useToast'
 import { zodRequiredString } from '../../utils/validation'
 import { CardV2 } from '../common/CardV2'
 import { ConfirmButton } from '../common/ConfirmButton'
+import { Subtitle } from '../common/Subtitle'
 import { WishlistLogoActions } from './WishlistLogoActions'
 
 export type EditWishlistInformationsProps = {
@@ -116,6 +117,7 @@ export const EditWishlistInformations = ({ wishlist }: EditWishlistInformationsP
   return (
     <Stack gap={3}>
       <CardV2>
+        <Subtitle>Modifier les informations</Subtitle>
         <Stack>
           <Box marginBottom={3}>
             <WishlistLogoActions

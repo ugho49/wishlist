@@ -3,7 +3,7 @@ import type { AddEventAttendeeInputDto, AttendeeDto, DetailedEventDto, EventId }
 import type { RootState } from '../../core'
 
 import DeleteIcon from '@mui/icons-material/Delete'
-import { Box, Divider, List, ListItem, ListItemButton, Stack } from '@mui/material'
+import { Box, Divider, List, ListItem, ListItemButton } from '@mui/material'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { AttendeeRole } from '@wishlist/common'
 import { useMemo } from 'react'
@@ -13,6 +13,7 @@ import { useApi, useToast } from '../../hooks'
 import { CardV2 } from '../common/CardV2'
 import { ConfirmIconButton } from '../common/ConfirmIconButton'
 import { InputLabel } from '../common/InputLabel'
+import { Subtitle } from '../common/Subtitle'
 import { SearchUserSelect } from '../user/SearchUserSelect'
 import { ListItemAttendee } from './ListItemAttendee'
 
@@ -74,61 +75,61 @@ export const EditEventAttendees = ({ eventId, attendees }: EditEventAttendeesPro
 
   return (
     <CardV2>
-      <Stack>
-        <Box>
-          <InputLabel>Ajouter un nouveau participant à l'évènement ?</InputLabel>
+      <Subtitle>Modifier les participants</Subtitle>
 
-          <SearchUserSelect
-            disabled={loading}
-            excludedEmails={[...attendeeEmails, currentUserEmail || '']}
-            onChange={value =>
-              addAttendee({ email: typeof value === 'string' ? value : value.email, role: AttendeeRole.USER })
+      <Box>
+        <InputLabel>Ajouter un nouveau participant à l'évènement ?</InputLabel>
+
+        <SearchUserSelect
+          disabled={loading}
+          excludedEmails={[...attendeeEmails, currentUserEmail || '']}
+          onChange={value =>
+            addAttendee({ email: typeof value === 'string' ? value : value.email, role: AttendeeRole.USER })
+          }
+        />
+      </Box>
+
+      <Divider sx={{ marginBlock: '20px' }} />
+
+      <List>
+        {attendees.map(attendee => (
+          <ListItem
+            key={attendee.id}
+            className="animated zoomIn fast"
+            disablePadding
+            secondaryAction={
+              <ConfirmIconButton
+                disabled={attendee?.user?.id === currentUserId}
+                confirmTitle="Enlever ce participant ?"
+                confirmText={
+                  <>
+                    Êtes-vous sur de retirer le participant{' '}
+                    <b>
+                      {attendee.pending_email
+                        ? attendee.pending_email
+                        : `${attendee.user?.firstname} ${attendee.user?.lastname}`}
+                    </b>{' '}
+                    de l'évènement ?
+                  </>
+                }
+                onClick={() => deleteAttendee(attendee.id)}
+              >
+                <DeleteIcon />
+              </ConfirmIconButton>
             }
-          />
-        </Box>
-
-        <Divider sx={{ marginBlock: '20px' }} />
-
-        <List>
-          {attendees.map(attendee => (
-            <ListItem
-              key={attendee.id}
-              className="animated zoomIn fast"
-              disablePadding
-              secondaryAction={
-                <ConfirmIconButton
-                  disabled={attendee?.user?.id === currentUserId}
-                  confirmTitle="Enlever ce participant ?"
-                  confirmText={
-                    <>
-                      Êtes-vous sur de retirer le participant{' '}
-                      <b>
-                        {attendee.pending_email
-                          ? attendee.pending_email
-                          : `${attendee.user?.firstname} ${attendee.user?.lastname}`}
-                      </b>{' '}
-                      de l'évènement ?
-                    </>
-                  }
-                  onClick={() => deleteAttendee(attendee.id)}
-                >
-                  <DeleteIcon />
-                </ConfirmIconButton>
-              }
-            >
-              <ListItemButton>
-                <ListItemAttendee
-                  role={attendee.role as AttendeeRole}
-                  userName={`${attendee.user?.firstname} ${attendee.user?.lastname}`}
-                  isPending={!!attendee.pending_email}
-                  email={attendee.pending_email ?? attendee.user?.email ?? ''}
-                  pictureUrl={attendee.user?.picture_url}
-                />
-              </ListItemButton>
-            </ListItem>
-          ))}
-        </List>
-      </Stack>
+          >
+            <ListItemButton>
+              <ListItemAttendee
+                role={attendee.role as AttendeeRole}
+                userName={`${attendee.user?.firstname} ${attendee.user?.lastname}`}
+                isPending={!!attendee.pending_email}
+                email={attendee.pending_email ?? attendee.user?.email ?? ''}
+                pictureUrl={attendee.user?.picture_url}
+              />
+            </ListItemButton>
+          </ListItem>
+        ))}
+      </List>
     </CardV2>
   )
 }

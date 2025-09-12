@@ -16,6 +16,7 @@ import { CardV2 } from '../common/CardV2'
 import { CharsRemaining } from '../common/CharsRemaining'
 import { ConfirmButton } from '../common/ConfirmButton'
 import { EmojiSelectorWithBadge } from '../common/EmojiSelectorWithBadge'
+import { Subtitle } from '../common/Subtitle'
 
 export type EditEventInformationsProps = {
   event: DetailedEventDto
@@ -80,64 +81,68 @@ export const EditEventInformations = ({ event }: EditEventInformationsProps) => 
 
   return (
     <Stack gap={3}>
-      <CardV2 sx={{ display: 'flex', flexDirection: 'column', gap: 4 }} component="form" onSubmit={onSubmit}>
-        <Stack direction="row" gap={2} alignItems="flex-start">
-          <EmojiSelectorWithBadge value={icon} onChange={setIcon} disabled={loading} />
-          <Box sx={{ flex: 1 }}>
+      <CardV2 component="form" onSubmit={onSubmit}>
+        <Subtitle>Modifier les informations</Subtitle>
+
+        <Stack gap={4}>
+          <Stack direction="row" gap={2} alignItems="flex-start">
+            <EmojiSelectorWithBadge value={icon} onChange={setIcon} disabled={loading} />
+            <Box sx={{ flex: 1 }}>
+              <TextField
+                label="Titre"
+                autoComplete="off"
+                disabled={loading}
+                fullWidth
+                required
+                value={title}
+                slotProps={{ htmlInput: { maxLength: 100 } }}
+                placeholder="Le titre de votre évènement"
+                helperText={<CharsRemaining max={100} value={title} />}
+                onChange={e => setTitle(e.target.value)}
+              />
+            </Box>
+          </Stack>
+
+          <Box>
             <TextField
-              label="Titre"
+              label="Description"
               autoComplete="off"
               disabled={loading}
               fullWidth
-              required
-              value={title}
-              slotProps={{ htmlInput: { maxLength: 100 } }}
-              placeholder="Le titre de votre évènement"
-              helperText={<CharsRemaining max={100} value={title} />}
-              onChange={e => setTitle(e.target.value)}
+              multiline
+              minRows={4}
+              value={description}
+              slotProps={{ htmlInput: { maxLength: 2000 } }}
+              placeholder="Une petite description ..."
+              helperText={<CharsRemaining max={2000} value={description} />}
+              onChange={e => setDescription(e.target.value)}
             />
           </Box>
-        </Stack>
 
-        <Box>
-          <TextField
-            label="Description"
-            autoComplete="off"
-            disabled={loading}
-            fullWidth
-            multiline
-            minRows={4}
-            value={description}
-            slotProps={{ htmlInput: { maxLength: 2000 } }}
-            placeholder="Une petite description ..."
-            helperText={<CharsRemaining max={2000} value={description} />}
-            onChange={e => setDescription(e.target.value)}
-          />
-        </Box>
+          <Stack>
+            <MobileDatePicker
+              label="Date de l'évènement"
+              format="DDDD"
+              value={eventDate}
+              disabled={loading}
+              onChange={date => setEventDate(date)}
+              disablePast={true}
+            />
+          </Stack>
 
-        <Stack>
-          <MobileDatePicker
-            label="Date de l'évènement"
-            format="DDDD"
-            value={eventDate}
-            disabled={loading}
-            onChange={date => setEventDate(date)}
-            disablePast={true}
-          />
-        </Stack>
-
-        <Stack direction="row" justifyContent="center" marginTop={4}>
-          <Button
-            type="submit"
-            variant="contained"
-            size="medium"
-            loading={loading}
-            loadingPosition="start"
-            disabled={loading || !updateEnabled}
-            startIcon={<SaveIcon />}
-          >
-            Mettre à jour
-          </Button>
+          <Stack direction="row" justifyContent="center" marginTop={4}>
+            <Button
+              type="submit"
+              variant="contained"
+              size="medium"
+              loading={loading}
+              loadingPosition="start"
+              disabled={loading || !updateEnabled}
+              startIcon={<SaveIcon />}
+            >
+              Mettre à jour
+            </Button>
+          </Stack>
         </Stack>
       </CardV2>
 
