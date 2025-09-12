@@ -30,6 +30,7 @@ import {
   Stepper,
   styled,
   TextField,
+  Typography,
 } from '@mui/material'
 import { useMutation } from '@tanstack/react-query'
 import { MAX_EVENTS_BY_LIST } from '@wishlist/common'
@@ -54,7 +55,7 @@ import { WishlistLogoActions } from './WishlistLogoActions'
 
 const steps = ['Type de liste', 'Informations', 'Evènements']
 
-const OptionCard = styled(Box)(({ theme }) => ({
+const OptionCard = styled(Button)(({ theme }) => ({
   backgroundColor: theme.palette.grey[50],
   borderRadius: theme.spacing(1.5),
   border: `1px solid ${theme.palette.grey[200]}`,
@@ -63,8 +64,13 @@ const OptionCard = styled(Box)(({ theme }) => ({
   transition: 'all 0.3s ease',
   display: 'flex',
   alignItems: 'center',
+  justifyContent: 'flex-start',
   gap: 24,
-  '&:hover': {
+  textTransform: 'none',
+  minHeight: 'auto',
+  width: '100%',
+  textAlign: 'left',
+  '&:hover, &:focus': {
     borderColor: theme.palette.primary.main,
     backgroundColor: theme.palette.primary.main + '08',
     transform: 'translateY(-1px)',
@@ -175,9 +181,23 @@ export const CreateWishlistPage = () => {
           <CardV2>
             {step === 1 && (
               <Stack gap={3}>
-                <InputLabel required>Pour qui créer la liste ?</InputLabel>
+                <Typography
+                  id="list-type-label"
+                  component="legend"
+                  sx={{
+                    color: theme => theme.palette.primary.main,
+                    fontWeight: 500,
+                    marginBottom: '8px',
+                    fontSize: '1rem',
+                  }}
+                >
+                  Pour qui créer la liste ?{' '}
+                  <Typography component="span" sx={{ color: theme => theme.palette.error.main }}>
+                    *
+                  </Typography>
+                </Typography>
 
-                <Stack gap={2}>
+                <Stack gap={2} role="group" aria-labelledby="list-type-label">
                   <OptionCard
                     onClick={() => {
                       setStep(2)
@@ -186,13 +206,17 @@ export const CreateWishlistPage = () => {
                       setIsListForSomeoneElse(false)
                       setLogo(undefined)
                     }}
+                    aria-label="Créer une liste pour moi-même"
+                    aria-describedby="option-for-me-description"
                   >
                     <IconWrapper>
-                      <AccountCircleTwoToneIcon />
+                      <AccountCircleTwoToneIcon aria-hidden="true" />
                     </IconWrapper>
                     <Box sx={{ flex: 1 }}>
                       <OptionTitle>Pour moi</OptionTitle>
-                      <OptionDescription>Je garde le secret et je fais ma liste pour moi-même</OptionDescription>
+                      <OptionDescription id="option-for-me-description">
+                        Je garde le secret et je fais ma liste pour moi-même
+                      </OptionDescription>
                     </Box>
                   </OptionCard>
 
@@ -203,13 +227,15 @@ export const CreateWishlistPage = () => {
                       setHideItems(false)
                       setIsListForSomeoneElse(true)
                     }}
+                    aria-label="Créer une liste pour une autre personne"
+                    aria-describedby="option-for-someone-description"
                   >
                     <IconWrapper>
-                      <Diversity1TwoToneIcon />
+                      <Diversity1TwoToneIcon aria-hidden="true" />
                     </IconWrapper>
                     <Box sx={{ flex: 1 }}>
                       <OptionTitle>Pour une autre personne</OptionTitle>
-                      <OptionDescription>
+                      <OptionDescription id="option-for-someone-description">
                         Je crée la liste pour quelqu'un d'autre. Je peux choisir si je souhaite voir ou non les
                         sélections faites par les autres participants
                       </OptionDescription>
