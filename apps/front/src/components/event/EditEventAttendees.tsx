@@ -10,7 +10,7 @@ import { useMemo } from 'react'
 import { useSelector } from 'react-redux'
 
 import { useApi, useToast } from '../../hooks'
-import { Card } from '../common/Card'
+import { CardV2 } from '../common/CardV2'
 import { ConfirmIconButton } from '../common/ConfirmIconButton'
 import { InputLabel } from '../common/InputLabel'
 import { SearchUserSelect } from '../user/SearchUserSelect'
@@ -73,7 +73,7 @@ export const EditEventAttendees = ({ eventId, attendees }: EditEventAttendeesPro
   )
 
   return (
-    <Card>
+    <CardV2>
       <Stack>
         <Box>
           <InputLabel>Ajouter un nouveau participant à l'évènement ?</InputLabel>
@@ -129,6 +129,6 @@ export const EditEventAttendees = ({ eventId, attendees }: EditEventAttendeesPro
           ))}
         </List>
       </Stack>
-    </Card>
+    </CardV2>
   )
 }

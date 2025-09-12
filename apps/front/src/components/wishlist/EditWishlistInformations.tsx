@@ -13,9 +13,8 @@ import { z } from 'zod'
 import { useApi } from '../../hooks/useApi'
 import { useToast } from '../../hooks/useToast'
 import { zodRequiredString } from '../../utils/validation'
-import { Card } from '../common/Card'
+import { CardV2 } from '../common/CardV2'
 import { ConfirmButton } from '../common/ConfirmButton'
-import { InputLabel } from '../common/InputLabel'
 import { WishlistLogoActions } from './WishlistLogoActions'
 
 export type EditWishlistInformationsProps = {
@@ -116,7 +115,7 @@ export const EditWishlistInformations = ({ wishlist }: EditWishlistInformationsP
 
   return (
     <Stack gap={3}>
-      <Card>
+      <CardV2>
         <Stack>
           <Box marginBottom={3}>
             <WishlistLogoActions
@@ -128,9 +127,10 @@ export const EditWishlistInformations = ({ wishlist }: EditWishlistInformationsP
           </Box>
           <Stack component="form" onSubmit={handleSubmit(onSubmit)} gap={3}>
             <Box>
-              <InputLabel required>Titre</InputLabel>
               <TextField
                 {...register('title')}
+                label="Titre"
+                required
                 autoComplete="off"
                 fullWidth
                 placeholder="Ma super liste"
@@ -140,9 +140,9 @@ export const EditWishlistInformations = ({ wishlist }: EditWishlistInformationsP
             </Box>
 
             <Box>
-              <InputLabel>Description</InputLabel>
               <TextField
                 {...register('description')}
+                label="Description"
                 autoComplete="off"
                 fullWidth
                 multiline
@@ -153,22 +153,23 @@ export const EditWishlistInformations = ({ wishlist }: EditWishlistInformationsP
               />
             </Box>
 
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              size="large"
-              color="secondary"
-              loading={isSubmitting}
-              loadingPosition="start"
-              disabled={isSubmitting}
-              startIcon={<SaveIcon />}
-            >
-              Mettre à jour
-            </Button>
+            <Stack direction="row" justifyContent="center">
+              <Button
+                type="submit"
+                variant="contained"
+                size="medium"
+                loading={isSubmitting}
+                loadingPosition="start"
+                disabled={isSubmitting}
+                startIcon={<SaveIcon />}
+              >
+                Mettre à jour
+              </Button>
+            </Stack>
           </Stack>
         </Stack>
-      </Card>
+      </CardV2>
+
       <Stack alignItems="center">
         <Box>
           <ConfirmButton

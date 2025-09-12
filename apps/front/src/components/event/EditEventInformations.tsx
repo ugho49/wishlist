@@ -12,11 +12,10 @@ import { useNavigate } from 'react-router-dom'
 
 import { useApi } from '../../hooks/useApi'
 import { useToast } from '../../hooks/useToast'
-import { Card } from '../common/Card'
+import { CardV2 } from '../common/CardV2'
 import { CharsRemaining } from '../common/CharsRemaining'
 import { ConfirmButton } from '../common/ConfirmButton'
 import { EmojiSelectorWithBadge } from '../common/EmojiSelectorWithBadge'
-import { InputLabel } from '../common/InputLabel'
 
 export type EditEventInformationsProps = {
   event: DetailedEventDto
@@ -81,61 +80,57 @@ export const EditEventInformations = ({ event }: EditEventInformationsProps) => 
 
   return (
     <Stack gap={3}>
-      <Card>
-        <Stack component="form" onSubmit={onSubmit} gap={3}>
-          <Box>
-            <InputLabel required>Titre et icône</InputLabel>
-            <Stack direction="row" gap={2} alignItems="flex-start">
-              <EmojiSelectorWithBadge value={icon} onChange={setIcon} disabled={loading} />
-              <Box sx={{ flex: 1 }}>
-                <TextField
-                  autoComplete="off"
-                  disabled={loading}
-                  fullWidth
-                  required
-                  value={title}
-                  slotProps={{ htmlInput: { maxLength: 100 } }}
-                  placeholder="Le titre de votre évènement"
-                  helperText={<CharsRemaining max={100} value={title} />}
-                  onChange={e => setTitle(e.target.value)}
-                />
-              </Box>
-            </Stack>
-          </Box>
-
-          <Box>
-            <InputLabel>Description</InputLabel>
+      <CardV2 sx={{ display: 'flex', flexDirection: 'column', gap: 4 }} component="form" onSubmit={onSubmit}>
+        <Stack direction="row" gap={2} alignItems="flex-start">
+          <EmojiSelectorWithBadge value={icon} onChange={setIcon} disabled={loading} />
+          <Box sx={{ flex: 1 }}>
             <TextField
+              label="Titre"
               autoComplete="off"
               disabled={loading}
               fullWidth
-              multiline
-              minRows={4}
-              value={description}
-              slotProps={{ htmlInput: { maxLength: 2000 } }}
-              placeholder="Une petite description ..."
-              helperText={<CharsRemaining max={2000} value={description} />}
-              onChange={e => setDescription(e.target.value)}
+              required
+              value={title}
+              slotProps={{ htmlInput: { maxLength: 100 } }}
+              placeholder="Le titre de votre évènement"
+              helperText={<CharsRemaining max={100} value={title} />}
+              onChange={e => setTitle(e.target.value)}
             />
           </Box>
+        </Stack>
 
-          <Stack>
-            <InputLabel required>Date de l'évènement</InputLabel>
-            <MobileDatePicker
-              format="DDDD"
-              value={eventDate}
-              disabled={loading}
-              onChange={date => setEventDate(date)}
-              disablePast={true}
-            />
-          </Stack>
+        <Box>
+          <TextField
+            label="Description"
+            autoComplete="off"
+            disabled={loading}
+            fullWidth
+            multiline
+            minRows={4}
+            value={description}
+            slotProps={{ htmlInput: { maxLength: 2000 } }}
+            placeholder="Une petite description ..."
+            helperText={<CharsRemaining max={2000} value={description} />}
+            onChange={e => setDescription(e.target.value)}
+          />
+        </Box>
 
+        <Stack>
+          <MobileDatePicker
+            label="Date de l'évènement"
+            format="DDDD"
+            value={eventDate}
+            disabled={loading}
+            onChange={date => setEventDate(date)}
+            disablePast={true}
+          />
+        </Stack>
+
+        <Stack direction="row" justifyContent="center" marginTop={4}>
           <Button
             type="submit"
-            fullWidth
             variant="contained"
-            size="large"
-            color="secondary"
+            size="medium"
             loading={loading}
             loadingPosition="start"
             disabled={loading || !updateEnabled}
@@ -144,7 +139,8 @@ export const EditEventInformations = ({ event }: EditEventInformationsProps) => 
             Mettre à jour
           </Button>
         </Stack>
-      </Card>
+      </CardV2>
+
       <Stack alignItems="center">
         <Box>
           <ConfirmButton

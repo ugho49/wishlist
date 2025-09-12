@@ -22,4 +22,5 @@
 - [ ] Modifier la page ‘aucun event », « aucune liste », « aucun item » 
 - [ ] proposer d'ajouter les users recurrent lors d'un nouvel event
 - [ ] proposer d'importer les souhaits non pris des anciennes listes
-- [ ] Social google on user profile page -> link google and unlink google
+- [ ] Open Calendar popup on click on input (user page / create event page, etc...)
+- [ ] Update page style "Update Wishlist"
