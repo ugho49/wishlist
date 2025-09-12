@@ -6,6 +6,7 @@ import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon'
 import { GoogleOAuthProvider } from '@react-oauth/google'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import { NuqsAdapter } from 'nuqs/adapters/react-router/v7'
 import { PostHogProvider } from 'posthog-js/react'
 import * as ReactDOM from 'react-dom/client'
 import { Toaster } from 'react-hot-toast'
@@ -52,11 +53,13 @@ function main() {
               <CssBaseline />
               <LocalizationProvider dateAdapter={AdapterLuxon} adapterLocale="fr">
                 <BrowserRouter>
-                  <ScrollToTop />
-                  <AxiosInterceptor />
-                  <GoogleOAuthProvider clientId={environment.googleClientId}>
-                    <App />
-                  </GoogleOAuthProvider>
+                  <NuqsAdapter>
+                    <ScrollToTop />
+                    <AxiosInterceptor />
+                    <GoogleOAuthProvider clientId={environment.googleClientId}>
+                      <App />
+                    </GoogleOAuthProvider>
+                  </NuqsAdapter>
                 </BrowserRouter>
               </LocalizationProvider>
             </ThemeProvider>

@@ -7,9 +7,9 @@ import ShareIcon from '@mui/icons-material/Share'
 import { Box, Tab, Tabs } from '@mui/material'
 import { styled, useTheme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
+import { useQueryState } from 'nuqs'
 import { useSelector } from 'react-redux'
 
-import { useCustomSearchParams } from '../../hooks/useCustomSearchParams'
 import { CardV2 } from '../common/CardV2'
 import { ProfilePictureSection } from './ProfilePictureSection'
 import { UserTabInformations } from './UserTabInformations'
@@ -73,13 +73,11 @@ const tabs = [
   },
 ]
 
-type SearchParamType = { tab: TabValues }
-
 const mapState = (state: RootState) => state.userProfile
 
 export const UserProfilePage = () => {
   const theme = useTheme()
-  const [queryParams, setQueryParams] = useCustomSearchParams<SearchParamType>({ tab: tabs[0]!.value })
+  const [tab, setTab] = useQueryState('tab', { defaultValue: TabValues.informations })
   const smallScreen = useMediaQuery(theme.breakpoints.down('sm'))
   const userState = useSelector(mapState)
 
@@ -98,8 +96,8 @@ export const UserProfilePage = () => {
 
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }} mb={4}>
         <Tabs
-          value={queryParams.tab}
-          onChange={(_, newValue) => setQueryParams({ tab: newValue })}
+          value={tab}
+          onChange={(_, newValue) => setTab(newValue)}
           variant="fullWidth"
           scrollButtons="auto"
           allowScrollButtonsMobile
@@ -116,10 +114,10 @@ export const UserProfilePage = () => {
         </Tabs>
       </Box>
       <CardV2>
-        {queryParams.tab === TabValues.informations && <UserTabInformations />}
-        {queryParams.tab === TabValues.notifications && <UserTabNotifications />}
-        {queryParams.tab === TabValues.social && <UserTabSocial />}
-        {queryParams.tab === TabValues.password && <UserTabPassword />}
+        {tab === TabValues.informations && <UserTabInformations />}
+        {tab === TabValues.notifications && <UserTabNotifications />}
+        {tab === TabValues.social && <UserTabSocial />}
+        {tab === TabValues.password && <UserTabPassword />}
       </CardV2>
     </Box>
   )

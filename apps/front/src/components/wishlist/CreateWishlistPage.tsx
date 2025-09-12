@@ -35,12 +35,13 @@ import { useMutation } from '@tanstack/react-query'
 import { MAX_EVENTS_BY_LIST } from '@wishlist/common'
 import uniq from 'lodash/uniq'
 import { DateTime } from 'luxon'
+import { useQueryState } from 'nuqs'
 import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { useInterval } from 'usehooks-ts'
 
-import { useApi, useAvailableEvents, useCustomSearchParams, useEventById, useToast } from '../../hooks'
+import { useApi, useAvailableEvents, useEventById, useToast } from '../../hooks'
 import { getRandomPlaceholderName } from '../../utils/wishlist.utils'
 import { CardV2 } from '../common/CardV2'
 import { CharsRemaining } from '../common/CharsRemaining'
@@ -50,8 +51,6 @@ import { Title } from '../common/Title'
 import { EventIcon } from '../event/EventIcon'
 import { SearchEventSelect } from '../event/SearchEventSelect'
 import { WishlistLogoActions } from './WishlistLogoActions'
-
-type QueryParamType = { 'from-event'?: string }
 
 const steps = ['Type de liste', 'Informations', 'Evènements']
 
@@ -110,7 +109,6 @@ export const CreateWishlistPage = () => {
   const { addToast } = useToast()
   const navigate = useNavigate()
   const userFirstName = useSelector(mapState)
-  const [queryParams] = useCustomSearchParams<QueryParamType>()
   const [step, setStep] = useState(1)
   const [ownerName, setOwnerName] = useState('')
   const [description, setDescription] = useState('')
@@ -119,6 +117,7 @@ export const CreateWishlistPage = () => {
   const [events, setEvents] = useState<MiniEventDto[]>([])
   const [namePlaceholder, setNamePlaceholder] = useState<string>(getRandomPlaceholderName())
   const [logo, setLogo] = useState<File | undefined>()
+  const [fromEvent] = useQueryState('from-event')
   const api = useApi()
 
   useInterval(() => {
@@ -126,7 +125,7 @@ export const CreateWishlistPage = () => {
   }, 2000)
 
   const { events: availableEvents, loading: availableEventsLoading } = useAvailableEvents()
-  const { event: eventFromUrl } = useEventById(queryParams['from-event'])
+  const { event: eventFromUrl } = useEventById(fromEvent ?? undefined)
 
   const nextStepEnabled = ownerName?.trim() !== ''
   const createEnabled = events.length > 0
