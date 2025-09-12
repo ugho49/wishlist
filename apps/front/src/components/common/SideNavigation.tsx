@@ -122,6 +122,59 @@ const ListItemIconStyled = styled(ListItemIcon)(({ theme }) => ({
   color: theme.palette.text.secondary,
 }))
 
+const UserSectionStyled = styled(Box)(({ theme }) => ({
+  padding: theme.spacing(2),
+  paddingLeft: theme.spacing(2.5),
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing(1.5),
+  cursor: 'pointer',
+  transition: 'all 0.2s ease-in-out',
+  borderRadius: theme.spacing(2),
+  margin: theme.spacing(0, 2, 0.5, 2),
+  backgroundColor: theme.palette.grey[50],
+  '&:hover': {
+    backgroundColor: theme.palette.primary.main + '20',
+    color: theme.palette.primary.main,
+    transform: 'scale(1.02)',
+    '& .user-avatar': {
+      borderColor: theme.palette.primary.main,
+    },
+  },
+  '&:active': {
+    backgroundColor: theme.palette.primary.main + '15',
+    transform: 'scale(1.01)',
+  },
+  // Supprimer le highlight par défaut sur mobile
+  WebkitTapHighlightColor: 'transparent',
+}))
+
+const UserAvatarStyled = styled(Avatar)(({ theme }) => ({
+  width: 48,
+  height: 48,
+  border: `2px solid ${theme.palette.grey[300]}`,
+  transition: 'all 0.2s ease-in-out',
+}))
+
+const UserInfoStyled = styled(Box)(() => ({
+  display: 'flex',
+  flexDirection: 'column',
+  flex: 1,
+}))
+
+const UserNameStyled = styled(Box)(({ theme }) => ({
+  fontSize: '1rem',
+  fontWeight: 600,
+  color: theme.palette.text.primary,
+  lineHeight: 1.2,
+}))
+
+const UserRoleStyled = styled(Box)(({ theme }) => ({
+  fontSize: '0.85rem',
+  color: theme.palette.text.secondary,
+  lineHeight: 1.2,
+}))
+
 const BottomSectionStyled = styled(Box)(({ theme }) => ({
   borderTop: `1px solid ${theme.palette.grey[200]}`,
   paddingTop: theme.spacing(1),
@@ -133,7 +186,7 @@ const BottomSectionStyled = styled(Box)(({ theme }) => ({
 
 export const SideNavigation = () => {
   const { user } = useSelector(mapAuthState)
-  const { pictureUrl } = useSelector(mapUserProfileState)
+  const { pictureUrl, firstName, lastName, email } = useSelector(mapUserProfileState)
   const { isOpen: isDrawerOpen } = useSelector(mapDrawerState)
   const dispatch = useDispatch()
   const navigate = useNavigate()
@@ -243,7 +296,21 @@ export const SideNavigation = () => {
 
       {/* Bottom section - Profile and Logout */}
       <BottomSectionStyled>
-        {bottomMenuItems.map(item => (
+        {/* User section in bottom */}
+        <UserSectionStyled onClick={() => handleNavigation('/user/profile')}>
+          <UserAvatarStyled className="user-avatar" src={pictureUrl || undefined}>
+            {!pictureUrl && <PersonIcon />}
+          </UserAvatarStyled>
+          <UserInfoStyled>
+            <UserNameStyled>
+              {firstName} {lastName}
+            </UserNameStyled>
+            <UserRoleStyled>{email}</UserRoleStyled>
+          </UserInfoStyled>
+        </UserSectionStyled>
+
+        {/* Logout only */}
+        {bottomMenuItems.slice(1).map(item => (
           <ListItemStyled key={item.value} disablePadding>
             <ListItemButtonStyled selected={isRouteActive(item.value)} onClick={() => handleNavigation(item.value)}>
               <ListItemIconStyled
