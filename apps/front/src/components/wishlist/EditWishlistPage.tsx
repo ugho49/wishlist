@@ -1,10 +1,10 @@
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import { Box, Tab, Tabs } from '@mui/material'
+import { useQueryState } from 'nuqs'
 import { useParams } from 'react-router-dom'
 
 import { useWishlistById } from '../../hooks/domain/useWishlistById'
-import { useCustomSearchParams } from '../../hooks/useCustomSearchParams'
 import { Loader } from '../common/Loader'
 import { Title } from '../common/Title'
 import { EditWishlistEvent } from './EditWishlistEvents'
@@ -29,12 +29,10 @@ const tabs = [
   },
 ]
 
-type SearchParamType = { tab: TabValues }
-
 export const EditWishlistPage = () => {
   const params = useParams<'wishlistId'>()
   const wishlistId = params.wishlistId || ''
-  const [queryParams, setQueryParams] = useCustomSearchParams<SearchParamType>({ tab: tabs[0]!.value })
+  const [tab, setTab] = useQueryState('tab', { defaultValue: TabValues.informations })
   const { wishlist, loading, currentUserCanEdit } = useWishlistById(wishlistId)
 
   return (
@@ -46,8 +44,8 @@ export const EditWishlistPage = () => {
             <Title smallMarginBottom>Modifier la liste</Title>
             <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: '20px' }}>
               <Tabs
-                value={queryParams.tab}
-                onChange={(_, newValue) => setQueryParams({ tab: newValue })}
+                value={tab}
+                onChange={(_, newValue) => setTab(newValue)}
                 variant="fullWidth"
                 scrollButtons="auto"
                 allowScrollButtonsMobile
@@ -57,10 +55,8 @@ export const EditWishlistPage = () => {
                 ))}
               </Tabs>
             </Box>
-            {queryParams.tab === TabValues.informations && <EditWishlistInformations wishlist={wishlist} />}
-            {queryParams.tab === TabValues.events && (
-              <EditWishlistEvent wishlistId={wishlist.id} events={wishlist.events} />
-            )}
+            {tab === TabValues.informations && <EditWishlistInformations wishlist={wishlist} />}
+            {tab === TabValues.events && <EditWishlistEvent wishlistId={wishlist.id} events={wishlist.events} />}
           </>
         )}
       </Loader>

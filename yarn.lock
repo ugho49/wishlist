@@ -7221,7 +7221,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@standard-schema/spec@npm:^1.0.0":
+"@standard-schema/spec@npm:1.0.0, @standard-schema/spec@npm:^1.0.0":
   version: 1.0.0
   resolution: "@standard-schema/spec@npm:1.0.0"
   checksum: 10c0/a1ab9a8bdc09b5b47aa8365d0e0ec40cc2df6437be02853696a0e377321653b0d3ac6f079a8c67d5ddbe9821025584b1fb71d9cc041a6666a96f1fadf2ece15f
@@ -9333,6 +9333,7 @@ __metadata:
     nestjs-real-ip: "npm:3.0.1"
     node-gyp: "npm:11.4.2"
     nodemailer: "npm:7.0.6"
+    nuqs: "npm:2.6.0"
     nx: "npm:21.5.2"
     passport: "npm:0.7.0"
     passport-jwt: "npm:4.0.1"
@@ -19136,6 +19137,33 @@ __metadata:
   dependencies:
     boolbase: "npm:^1.0.0"
   checksum: 10c0/5fee7ff309727763689cfad844d979aedd2204a817fbaaf0e1603794a7c20db28548d7b024692f953557df6ce4a0ee4ae46cd8ebd9b36cfb300b9226b567c479
+  languageName: node
+  linkType: hard
+
+"nuqs@npm:2.6.0":
+  version: 2.6.0
+  resolution: "nuqs@npm:2.6.0"
+  dependencies:
+    "@standard-schema/spec": "npm:1.0.0"
+  peerDependencies:
+    "@remix-run/react": ">=2"
+    "@tanstack/react-router": ^1
+    next: ">=14.2.0"
+    react: ">=18.2.0 || ^19.0.0-0"
+    react-router: ^6 || ^7
+    react-router-dom: ^6 || ^7
+  peerDependenciesMeta:
+    "@remix-run/react":
+      optional: true
+    "@tanstack/react-router":
+      optional: true
+    next:
+      optional: true
+    react-router:
+      optional: true
+    react-router-dom:
+      optional: true
+  checksum: 10c0/b97647fc26cdcb34ae562befdea0bc663660be117715b31ffd7189ffcbed3b432818d48b98ccb503e1064cb9c4e674d8fdfeb0b78e88a27064cf2d978ee4f04a
   languageName: node
   linkType: hard
 

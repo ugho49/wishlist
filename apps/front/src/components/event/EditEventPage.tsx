@@ -2,9 +2,10 @@ import ForestIcon from '@mui/icons-material/Forest'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import PeopleIcon from '@mui/icons-material/People'
 import { Box, Tab, Tabs } from '@mui/material'
+import { useQueryState } from 'nuqs'
 import { useParams } from 'react-router-dom'
 
-import { useCustomSearchParams, useEventById } from '../../hooks'
+import { useEventById } from '../../hooks'
 import { Loader } from '../common/Loader'
 import { Title } from '../common/Title'
 import { EditEventAttendees } from './EditEventAttendees'
@@ -36,12 +37,10 @@ const tabs = [
   },
 ]
 
-type SearchParamType = { tab: TabValues }
-
 export const EditEventPage = () => {
   const params = useParams<'eventId'>()
   const eventId = params.eventId || ''
-  const [queryParams, setQueryParams] = useCustomSearchParams<SearchParamType>({ tab: tabs[0]!.value })
+  const [tab, setTab] = useQueryState('tab', { defaultValue: TabValues.informations })
   const { event, loading, currentUserCanEdit } = useEventById(eventId)
 
   return (
@@ -53,8 +52,8 @@ export const EditEventPage = () => {
             <Title smallMarginBottom>Modifier l'évènement</Title>
             <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: '20px' }}>
               <Tabs
-                value={queryParams.tab}
-                onChange={(_, newValue) => setQueryParams({ tab: newValue })}
+                value={tab}
+                onChange={(_, newValue) => setTab(newValue)}
                 variant="fullWidth"
                 scrollButtons="auto"
                 allowScrollButtonsMobile
@@ -65,11 +64,9 @@ export const EditEventPage = () => {
               </Tabs>
             </Box>
             <>
-              {queryParams.tab === TabValues.informations && <EditEventInformations event={event} />}
-              {queryParams.tab === TabValues.attendees && (
-                <EditEventAttendees eventId={event.id} attendees={event.attendees} />
-              )}
-              {queryParams.tab === TabValues.secretSanta && <EditSecretSanta eventId={event.id} />}
+              {tab === TabValues.informations && <EditEventInformations event={event} />}
+              {tab === TabValues.attendees && <EditEventAttendees eventId={event.id} attendees={event.attendees} />}
+              {tab === TabValues.secretSanta && <EditSecretSanta eventId={event.id} />}
             </>
           </>
         )}

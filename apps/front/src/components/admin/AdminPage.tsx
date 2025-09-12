@@ -1,8 +1,8 @@
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import GroupsIcon from '@mui/icons-material/Groups'
 import { Box, Tab, Tabs } from '@mui/material'
+import { useQueryState } from 'nuqs'
 
-import { useCustomSearchParams } from '../../hooks/useCustomSearchParams'
 import { CardV2 } from '../common/CardV2'
 import { Title } from '../common/Title'
 import { AdminListEvents } from '../event/admin/AdminListEvents'
@@ -26,18 +26,16 @@ const tabs = [
   },
 ]
 
-type SearchParamType = { tab: TabValues }
-
 export const AdminPage = () => {
-  const [queryParams, setQueryParams] = useCustomSearchParams<SearchParamType>({ tab: tabs[0]!.value })
+  const [tab, setTab] = useQueryState('tab', { defaultValue: TabValues.users })
 
   return (
     <Box>
       <Title smallMarginBottom>Administration</Title>
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }} mb={4}>
         <Tabs
-          value={queryParams.tab}
-          onChange={(_, newValue) => setQueryParams({ tab: newValue })}
+          value={tab}
+          onChange={(_, newValue) => setTab(newValue)}
           variant="fullWidth"
           scrollButtons="auto"
           allowScrollButtonsMobile
@@ -48,8 +46,8 @@ export const AdminPage = () => {
         </Tabs>
       </Box>
       <CardV2>
-        {queryParams.tab === TabValues.users && <AdminListUsers />}
-        {queryParams.tab === TabValues.events && <AdminListEvents />}
+        {tab === TabValues.users && <AdminListUsers />}
+        {tab === TabValues.events && <AdminListEvents />}
       </CardV2>
     </Box>
   )

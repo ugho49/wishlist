@@ -4,19 +4,14 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import SaveAsIcon from '@mui/icons-material/SaveAs'
 import { Button, Stack, styled, TextField, Typography } from '@mui/material'
 import { useMutation } from '@tanstack/react-query'
+import { useQueryState } from 'nuqs'
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 import { z } from 'zod'
 
 import { useApi } from '../../hooks/useApi'
-import { useCustomSearchParams } from '../../hooks/useCustomSearchParams'
 import { useToast } from '../../hooks/useToast'
 import { RouterLink } from '../common/RouterLink'
-
-type SearchParamsType = {
-  email?: string
-  token?: string
-}
 
 const schema = z
   .object({
@@ -71,8 +66,8 @@ export const RenewForgotPasswordPage = () => {
   const api = useApi()
   const { addToast } = useToast()
   const navigate = useNavigate()
-  const [queryParams] = useCustomSearchParams<SearchParamsType>()
-  const { email, token } = queryParams
+  const [email] = useQueryState('email')
+  const [token] = useQueryState('token')
 
   const {
     register,
