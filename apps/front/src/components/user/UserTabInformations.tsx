@@ -5,8 +5,6 @@ import type { RootState } from '../../core'
 import { zodResolver } from '@hookform/resolvers/zod'
 import SaveIcon from '@mui/icons-material/Save'
 import { Box, Button, Stack, TextField } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
-import useMediaQuery from '@mui/material/useMediaQuery'
 import { MobileDatePicker } from '@mui/x-date-pickers'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { DateTime } from 'luxon'
@@ -18,8 +16,8 @@ import { updateUser as updateUserAction } from '../../core/store/features'
 import { useApi } from '../../hooks/useApi'
 import { useToast } from '../../hooks/useToast'
 import { zodRequiredString } from '../../utils/validation'
-import { InputLabel } from '../common/InputLabel'
 import { Loader } from '../common/Loader'
+import { Subtitle } from '../common/Subtitle'
 
 const mapState = (state: RootState) => state.userProfile
 
@@ -33,9 +31,7 @@ type FormFields = z.infer<typeof schema>
 
 export const UserTabInformations = () => {
   const userState = useSelector(mapState)
-  const theme = useTheme()
   const dispatch = useDispatch()
-  const smallScreen = useMediaQuery(theme.breakpoints.down('md'))
   const api = useApi()
   const { addToast } = useToast()
   const queryClient = useQueryClient()
@@ -86,26 +82,17 @@ export const UserTabInformations = () => {
 
   return (
     <Loader loading={!userState.isUserLoaded}>
-      <Stack component="form" onSubmit={handleSubmit(onSubmit)} noValidate gap={smallScreen ? 2 : 3}>
-        <Box>
-          <InputLabel>Email</InputLabel>
-          <TextField
-            autoComplete="off"
-            disabled={true}
-            fullWidth
-            value={userState.email || ''}
-            slotProps={{ htmlInput: { readOnly: true } }}
-            helperText="Ce champ n'est pas modifiable pour le moment"
-          />
-        </Box>
+      <Subtitle>Modifier les informations</Subtitle>
 
-        <Stack direction="row" flexWrap="wrap" gap={smallScreen ? 2 : 3}>
+      <Stack component="form" onSubmit={handleSubmit(onSubmit)} noValidate gap={3}>
+        <Stack direction="row" flexWrap="wrap" gap={3}>
           <Box sx={{ flexGrow: 1 }}>
-            <InputLabel required>Prénom</InputLabel>
             <TextField
               {...register('firstname')}
               autoComplete="off"
+              label="Prénom"
               fullWidth
+              required
               placeholder="John"
               error={!!formErrors.firstname}
               helperText={formErrors.firstname?.message}
@@ -113,9 +100,10 @@ export const UserTabInformations = () => {
           </Box>
 
           <Box sx={{ flexGrow: 1 }}>
-            <InputLabel required>Nom</InputLabel>
             <TextField
               {...register('lastname')}
+              label="Nom"
+              required
               autoComplete="off"
               fullWidth
               placeholder="Doe"
@@ -125,9 +113,7 @@ export const UserTabInformations = () => {
           </Box>
         </Stack>
 
-        <Stack>
-          <InputLabel>Date de naissance</InputLabel>
-
+        <Box sx={{ flexGrow: 1 }}>
           <Controller
             control={control}
             name="birthday"
@@ -139,18 +125,23 @@ export const UserTabInformations = () => {
                 referenceDate={DateTime.now().minus({ year: 30 })}
                 onChange={date => field.onChange(date)}
                 disableFuture={true}
+                label="Date de naissance"
+                slotProps={{
+                  textField: {
+                    fullWidth: true,
+                  },
+                }}
               />
             )}
           />
-        </Stack>
+        </Box>
 
         <Stack direction="row" justifyContent="center">
           <Button
-            sx={{ marginTop: '20px' }}
+            sx={{ marginTop: '8px' }}
             type="submit"
             variant="contained"
-            size="large"
-            color="secondary"
+            size="medium"
             loading={isSubmitting}
             loadingPosition="start"
             disabled={isSubmitting}

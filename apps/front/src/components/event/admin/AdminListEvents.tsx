@@ -21,7 +21,7 @@ const columns: GridColDef<EventWithCountsDto>[] = [
     display: 'flex',
     renderCell: ({ row }) => <EventIcon icon={row.icon} size="small" />,
   },
-  { field: 'title', headerName: 'Title', flex: 1 },
+  { field: 'title', headerName: 'Title', minWidth: 250, flex: 1 },
   {
     field: 'event_date',
     headerName: 'Event Date',
@@ -88,27 +88,28 @@ export const AdminListEvents = ({ userId }: AdminListEventsProps) => {
   }, [value])
 
   return (
-    <div style={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
-      <DataGrid
-        isRowSelectable={() => true}
-        disableMultipleRowSelection={true}
-        disableColumnSelector={true}
-        isCellEditable={() => false}
-        onRowClick={data => navigate(`/admin/events/${data.row.id}`)}
-        density="standard"
-        rows={value?.resources || []}
-        loading={loading}
-        columns={columns}
-        paginationMode="server"
-        rowCount={totalElements}
-        paginationModel={{
-          page: currentPage - 1,
-          pageSize,
-        }}
-        pageSizeOptions={[pageSize]}
-        onPaginationModelChange={({ page }) => setCurrentPage(page + 1)}
-        hideFooter={totalElements <= pageSize}
-      />
-    </div>
+    <DataGrid
+      isRowSelectable={() => true}
+      disableMultipleRowSelection={true}
+      disableColumnSelector={true}
+      isCellEditable={() => false}
+      onRowClick={data => navigate(`/admin/events/${data.row.id}`)}
+      density="standard"
+      rows={value?.resources || []}
+      loading={loading}
+      columns={columns}
+      paginationMode="server"
+      localeText={{
+        noRowsLabel: 'Aucun évènement',
+      }}
+      rowCount={totalElements}
+      paginationModel={{
+        page: currentPage - 1,
+        pageSize,
+      }}
+      pageSizeOptions={[pageSize]}
+      onPaginationModelChange={({ page }) => setCurrentPage(page + 1)}
+      hideFooter={totalElements <= pageSize}
+    />
   )
 }

@@ -21,6 +21,9 @@ export const AdminListAttendees = ({ attendees, deleteAttendee, loading = false 
       <DataGrid
         isRowSelectable={() => false}
         density="standard"
+        localeText={{
+          noRowsLabel: 'Aucun participant',
+        }}
         rows={attendees}
         columns={[
           {
@@ -40,6 +43,7 @@ export const AdminListAttendees = ({ attendees, deleteAttendee, loading = false 
             field: 'name',
             headerName: 'Nom',
             flex: 1,
+            minWidth: 200,
             valueGetter: (_, row) => {
               if (!row.user) return '-'
               return `${row.user?.firstname} ${row.user?.lastname}`

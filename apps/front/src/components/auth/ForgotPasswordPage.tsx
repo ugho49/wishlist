@@ -26,14 +26,6 @@ const TitleStyled = styled(Typography)(({ theme }) => ({
   marginBottom: 24,
 }))
 
-const TextFieldStyled = styled(TextField)(({ theme }) => ({
-  '& .MuiOutlinedInput-root': {
-    '&:hover fieldset': {
-      borderColor: theme.palette.primary.main,
-    },
-  },
-}))
-
 const ButtonStyled = styled(Button)(() => ({
   paddingTop: 12,
   paddingBottom: 12,
@@ -95,7 +87,7 @@ export const ForgotPasswordPage = () => {
           <TitleStyled variant="h4">Mot de passe oublié</TitleStyled>
 
           <Stack component="form" onSubmit={handleSubmit(onSubmit)} spacing={3} width="100%">
-            <TextFieldStyled
+            <TextField
               {...register('email')}
               type="email"
               label="Email"

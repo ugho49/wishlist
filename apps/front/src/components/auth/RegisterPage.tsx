@@ -34,14 +34,6 @@ const TitleStyled = styled(Typography)(({ theme }) => ({
   textAlign: 'center',
 }))
 
-const TextFieldStyled = styled(TextField)(({ theme }) => ({
-  '& .MuiOutlinedInput-root': {
-    '&:hover fieldset': {
-      borderColor: theme.palette.primary.main,
-    },
-  },
-}))
-
 const SocialButtonsStack = styled(Stack)(() => ({
   width: '100%',
   gap: 12,
@@ -124,7 +116,7 @@ export const RegisterPage = () => {
         {formErrors.root && <Alert severity="error">{formErrors.root.message}</Alert>}
 
         <Stack direction="row" spacing={2}>
-          <TextFieldStyled
+          <TextField
             {...register('firstname')}
             label="Prénom"
             fullWidth
@@ -134,7 +126,7 @@ export const RegisterPage = () => {
             helperText={formErrors.firstname?.message}
           />
 
-          <TextFieldStyled
+          <TextField
             {...register('lastname')}
             label="Nom"
             fullWidth
@@ -145,7 +137,7 @@ export const RegisterPage = () => {
           />
         </Stack>
 
-        <TextFieldStyled
+        <TextField
           {...register('email')}
           type="email"
           label="Email"
@@ -156,7 +148,7 @@ export const RegisterPage = () => {
           helperText={formErrors.email?.message}
         />
 
-        <TextFieldStyled
+        <TextField
           {...register('password')}
           type="password"
           label="Mot de passe"

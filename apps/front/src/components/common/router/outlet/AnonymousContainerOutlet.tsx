@@ -1,6 +1,7 @@
 import { Box, Container, Stack, styled } from '@mui/material'
 import { Outlet, useNavigate } from 'react-router-dom'
 
+import { CardV2 } from '../../CardV2'
 import { Logo } from '../../Logo'
 
 const Root = styled(Box)(({ theme }) => ({
@@ -18,12 +19,10 @@ const LogoContainer = styled(Box)({
   },
 })
 
-const OutletContainer = styled(Box)(({ theme }) => ({
-  width: '100%',
-  backgroundColor: 'white',
-  borderRadius: theme.spacing(3),
-  boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-  padding: theme.spacing(4),
+const OutletContainer = styled(CardV2)(() => ({
+  borderRadius: 24,
+  padding: 32,
+  boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important',
 }))
 
 export const AnonymousContainerOutlet = () => {

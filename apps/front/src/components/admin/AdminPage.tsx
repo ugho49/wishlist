@@ -3,7 +3,7 @@ import GroupsIcon from '@mui/icons-material/Groups'
 import { Box, Tab, Tabs } from '@mui/material'
 
 import { useCustomSearchParams } from '../../hooks/useCustomSearchParams'
-import { Card } from '../common/Card'
+import { CardV2 } from '../common/CardV2'
 import { Title } from '../common/Title'
 import { AdminListEvents } from '../event/admin/AdminListEvents'
 import { AdminListUsers } from '../user/admin/AdminListUsers'
@@ -34,7 +34,7 @@ export const AdminPage = () => {
   return (
     <Box>
       <Title smallMarginBottom>Administration</Title>
-      <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: '20px' }}>
+      <Box sx={{ borderBottom: 1, borderColor: 'divider' }} mb={4}>
         <Tabs
           value={queryParams.tab}
           onChange={(_, newValue) => setQueryParams({ tab: newValue })}
@@ -47,10 +47,10 @@ export const AdminPage = () => {
           ))}
         </Tabs>
       </Box>
-      <Card>
+      <CardV2>
         {queryParams.tab === TabValues.users && <AdminListUsers />}
         {queryParams.tab === TabValues.events && <AdminListEvents />}
-      </Card>
+      </CardV2>
     </Box>
   )
 }

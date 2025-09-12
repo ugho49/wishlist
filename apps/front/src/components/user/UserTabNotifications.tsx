@@ -10,6 +10,7 @@ import { useApi } from '../../hooks/useApi'
 import { useToast } from '../../hooks/useToast'
 import { InputLabel } from '../common/InputLabel'
 import { Loader } from '../common/Loader'
+import { Subtitle } from '../common/Subtitle'
 
 export const UserTabNotifications = () => {
   const { addToast } = useToast()
@@ -48,6 +49,8 @@ export const UserTabNotifications = () => {
 
   return (
     <Loader loading={loadingNotificationSettings}>
+      <Subtitle>Gérer les notifications de mail</Subtitle>
+
       <Stack component="form" onSubmit={onSubmit} noValidate gap={3}>
         <Box>
           <InputLabel>Notifications de mail</InputLabel>
@@ -74,8 +77,7 @@ export const UserTabNotifications = () => {
           <Button
             type="submit"
             variant="contained"
-            size="large"
-            color="secondary"
+            size="medium"
             loading={loading}
             loadingPosition="start"
             disabled={loading}

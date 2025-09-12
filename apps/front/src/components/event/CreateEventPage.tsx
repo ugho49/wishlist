@@ -31,7 +31,7 @@ import { useNavigate } from 'react-router-dom'
 
 import { useApi } from '../../hooks/useApi'
 import { useToast } from '../../hooks/useToast'
-import { Card } from '../common/Card'
+import { CardV2 } from '../common/CardV2'
 import { CharsRemaining } from '../common/CharsRemaining'
 import { EmojiSelectorWithBadge } from '../common/EmojiSelectorWithBadge'
 import { InputLabel } from '../common/InputLabel'
@@ -107,7 +107,7 @@ export const CreateEventPage = () => {
         </Stepper>
       </Box>
       <Container maxWidth="sm" sx={{ marginTop: '40px' }}>
-        <Card>
+        <CardV2>
           {step === 1 && (
             <Stack component="form" noValidate gap={3}>
               <Box>
@@ -258,7 +258,7 @@ export const CreateEventPage = () => {
               </Button>
             )}
           </Stack>
-        </Card>
+        </CardV2>
       </Container>
     </Box>
   )

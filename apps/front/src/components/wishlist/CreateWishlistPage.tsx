@@ -24,11 +24,11 @@ import {
   ListItemButton,
   ListItemText,
   OutlinedInput,
-  Paper,
   Stack,
   Step,
   StepLabel,
   Stepper,
+  styled,
   TextField,
 } from '@mui/material'
 import { useMutation } from '@tanstack/react-query'
@@ -42,7 +42,7 @@ import { useInterval } from 'usehooks-ts'
 
 import { useApi, useAvailableEvents, useCustomSearchParams, useEventById, useToast } from '../../hooks'
 import { getRandomPlaceholderName } from '../../utils/wishlist.utils'
-import { Card } from '../common/Card'
+import { CardV2 } from '../common/CardV2'
 import { CharsRemaining } from '../common/CharsRemaining'
 import { InputLabel } from '../common/InputLabel'
 import { Loader } from '../common/Loader'
@@ -54,6 +54,55 @@ import { WishlistLogoActions } from './WishlistLogoActions'
 type QueryParamType = { 'from-event'?: string }
 
 const steps = ['Type de liste', 'Informations', 'Evènements']
+
+const OptionCard = styled(Box)(({ theme }) => ({
+  backgroundColor: theme.palette.grey[50],
+  borderRadius: theme.spacing(1.5),
+  border: `1px solid ${theme.palette.grey[200]}`,
+  padding: 16,
+  cursor: 'pointer',
+  transition: 'all 0.3s ease',
+  display: 'flex',
+  alignItems: 'center',
+  gap: 24,
+  '&:hover': {
+    borderColor: theme.palette.primary.main,
+    backgroundColor: theme.palette.primary.main + '08',
+    transform: 'translateY(-1px)',
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+  },
+}))
+
+const OptionTitle = styled('span')(({ theme }) => ({
+  fontSize: '1rem',
+  fontWeight: 600,
+  color: theme.palette.text.primary,
+  lineHeight: 1.4,
+  display: 'block',
+  marginBottom: '4px',
+}))
+
+const OptionDescription = styled('span')(({ theme }) => ({
+  fontSize: '0.875rem',
+  fontWeight: 400,
+  color: theme.palette.text.secondary,
+  lineHeight: 1.5,
+  display: 'block',
+}))
+
+const IconWrapper = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: 50,
+  height: 50,
+  borderRadius: '50%',
+  backgroundColor: theme.palette.primary.main + '15',
+  color: theme.palette.primary.main,
+  '& svg': {
+    fontSize: 24,
+  },
+}))
 
 const mapState = (state: RootState) => state.userProfile.firstName
 
@@ -124,14 +173,13 @@ export const CreateWishlistPage = () => {
           </Stepper>
         </Box>
         <Container maxWidth="sm" sx={{ marginTop: '40px' }}>
-          <Card>
+          <CardV2>
             {step === 1 && (
-              <Stack gap={2}>
+              <Stack gap={3}>
                 <InputLabel required>Pour qui créer la liste ?</InputLabel>
 
-                <List sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  <ListItem
-                    disablePadding
+                <Stack gap={2}>
+                  <OptionCard
                     onClick={() => {
                       setStep(2)
                       setOwnerName(userFirstName ?? '')
@@ -140,20 +188,16 @@ export const CreateWishlistPage = () => {
                       setLogo(undefined)
                     }}
                   >
-                    <Paper sx={{ width: '100%' }}>
-                      <ListItemButton>
-                        <ListItemAvatar>
-                          <AccountCircleTwoToneIcon />
-                        </ListItemAvatar>
-                        <ListItemText
-                          primary={<b>Pour moi</b>}
-                          secondary="Je garde le secret et je fais ma liste pour moi-même"
-                        />
-                      </ListItemButton>
-                    </Paper>
-                  </ListItem>
-                  <ListItem
-                    disablePadding
+                    <IconWrapper>
+                      <AccountCircleTwoToneIcon />
+                    </IconWrapper>
+                    <Box sx={{ flex: 1 }}>
+                      <OptionTitle>Pour moi</OptionTitle>
+                      <OptionDescription>Je garde le secret et je fais ma liste pour moi-même</OptionDescription>
+                    </Box>
+                  </OptionCard>
+
+                  <OptionCard
                     onClick={() => {
                       setStep(2)
                       setOwnerName('')
@@ -161,21 +205,18 @@ export const CreateWishlistPage = () => {
                       setIsListForSomeoneElse(true)
                     }}
                   >
-                    <Paper sx={{ width: '100%' }}>
-                      <ListItemButton>
-                        <ListItemAvatar>
-                          <Stack>
-                            <Diversity1TwoToneIcon />
-                          </Stack>
-                        </ListItemAvatar>
-                        <ListItemText
-                          primary={<b>Pour une autre personne (enfant, proche, ...)</b>}
-                          secondary="Je créer la liste pour quelqu'un d'autre. Je peut choisir si je souhaite voir ou non les sélections faites par les autres participants"
-                        />
-                      </ListItemButton>
-                    </Paper>
-                  </ListItem>
-                </List>
+                    <IconWrapper>
+                      <Diversity1TwoToneIcon />
+                    </IconWrapper>
+                    <Box sx={{ flex: 1 }}>
+                      <OptionTitle>Pour une autre personne</OptionTitle>
+                      <OptionDescription>
+                        Je crée la liste pour quelqu'un d'autre. Je peux choisir si je souhaite voir ou non les
+                        sélections faites par les autres participants
+                      </OptionDescription>
+                    </Box>
+                  </OptionCard>
+                </Stack>
               </Stack>
             )}
 
@@ -326,7 +367,7 @@ export const CreateWishlistPage = () => {
                 )}
               </Stack>
             )}
-          </Card>
+          </CardV2>
         </Container>
       </Loader>
     </Box>

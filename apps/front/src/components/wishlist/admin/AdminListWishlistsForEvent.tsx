@@ -22,7 +22,7 @@ const columns: GridColDef<WishlistWithOwnerDto>[] = [
       </Avatar>
     ),
   },
-  { field: 'title', headerName: 'Title', flex: 1 },
+  { field: 'title', headerName: 'Title', flex: 1, minWidth: 250 },
   {
     field: '',
     headerName: 'Owner',
@@ -68,6 +68,9 @@ export const AdminListWishlistsForEvent = ({ wishlists }: AdminListWishlistsForE
         rows={wishlists}
         columns={columns}
         paginationMode="client"
+        localeText={{
+          noRowsLabel: 'Aucune liste',
+        }}
         hideFooter
         disableColumnMenu
       />

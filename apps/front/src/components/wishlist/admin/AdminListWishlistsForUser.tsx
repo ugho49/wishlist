@@ -25,11 +25,12 @@ const columns: GridColDef<WishlistWithEventsDto>[] = [
       </Avatar>
     ),
   },
-  { field: 'title', headerName: 'Title', width: 170 },
+  { field: 'title', headerName: 'Title', width: 250 },
   {
     field: '',
     headerName: 'Events',
     flex: 1,
+    minWidth: 250,
     resizable: true,
     valueGetter: (_, row) => row.events.map(event => event.title).join(', '),
     renderCell: ({ row }) => {
@@ -95,6 +96,9 @@ export const AdminListWishlistsForUser = ({ userId }: AdminListWishlistsForUserP
         loading={loading}
         columns={columns}
         paginationMode="server"
+        localeText={{
+          noRowsLabel: 'Aucune liste',
+        }}
         rowCount={totalElements}
         paginationModel={{
           page: currentPage - 1,
