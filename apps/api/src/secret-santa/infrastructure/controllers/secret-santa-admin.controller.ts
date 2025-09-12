@@ -1,14 +1,23 @@
-import { Controller, Delete, Get, Param, Post, Query } from '@nestjs/common'
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common'
 import { CommandBus, QueryBus } from '@nestjs/cqrs'
 import { ApiTags } from '@nestjs/swagger'
 import { CurrentUser, IsAdmin } from '@wishlist/api/auth'
-import { EventId, ICurrentUser, SecretSantaDto, SecretSantaId } from '@wishlist/common'
+import {
+  EventId,
+  ICurrentUser,
+  SecretSantaDto,
+  SecretSantaId,
+  SecretSantaUserId,
+  UpdateSecretSantaInputDto,
+} from '@wishlist/common'
 
 import {
   CancelSecretSantaCommand,
   DeleteSecretSantaCommand,
+  DeleteSecretSantaUserCommand,
   GetSecretSantaQuery,
   StartSecretSantaCommand,
+  UpdateSecretSantaCommand,
 } from '../../domain'
 
 @IsAdmin()
@@ -26,6 +35,22 @@ export class SecretSantaAdminController {
     @Query('eventId') eventId: EventId,
   ): Promise<SecretSantaDto | undefined> {
     return this.queryBus.execute(new GetSecretSantaQuery({ currentUser, eventId }))
+  }
+
+  @Patch('/:id')
+  async updateSecretSanta(
+    @Param('id') secretSantaId: SecretSantaId,
+    @CurrentUser() currentUser: ICurrentUser,
+    @Body() dto: UpdateSecretSantaInputDto,
+  ): Promise<void> {
+    await this.commandBus.execute(
+      new UpdateSecretSantaCommand({
+        secretSantaId,
+        currentUser,
+        description: dto.description,
+        budget: dto.budget,
+      }),
+    )
   }
 
   @Delete('/:id')
@@ -57,6 +82,21 @@ export class SecretSantaAdminController {
     await this.commandBus.execute(
       new CancelSecretSantaCommand({
         secretSantaId,
+        currentUser,
+      }),
+    )
+  }
+
+  @Delete('/:id/user/:secretSantaUserId')
+  async deleteSecretSantaUser(
+    @Param('id') secretSantaId: SecretSantaId,
+    @Param('secretSantaUserId') secretSantaUserId: SecretSantaUserId,
+    @CurrentUser() currentUser: ICurrentUser,
+  ): Promise<void> {
+    await this.commandBus.execute(
+      new DeleteSecretSantaUserCommand({
+        secretSantaId,
+        secretSantaUserId,
         currentUser,
       }),
     )

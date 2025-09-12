@@ -3,7 +3,9 @@ import type { CreateAxiosDefaults } from 'axios'
 import axios from 'axios'
 
 import {
+  AdminEventAttendeeService,
   AdminEventService,
+  AdminSecretSantaService,
   AdminUserService,
   AdminWishlistService,
   AuthService,
@@ -33,6 +35,8 @@ export class ApiClient {
     public readonly admin: {
       user: AdminUserService
       event: AdminEventService
+      eventAttendee: AdminEventAttendeeService
+      secretSanta: AdminSecretSantaService
       wishlist: AdminWishlistService
     },
   ) {}
@@ -61,6 +65,8 @@ export class ApiClient {
         user: new AdminUserService(client),
         event: new AdminEventService(client),
         wishlist: new AdminWishlistService(client),
+        eventAttendee: new AdminEventAttendeeService(client),
+        secretSanta: new AdminSecretSantaService(client),
       },
     )
   }

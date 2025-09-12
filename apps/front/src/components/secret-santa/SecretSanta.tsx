@@ -20,8 +20,10 @@ import { DateTime } from 'luxon'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { useApi, useToast } from '../../hooks'
+import { eurosFormatter } from '../../utils/currency.utils'
 import { ConfirmButton } from '../common/ConfirmButton'
 import { ConfirmIconButton } from '../common/ConfirmIconButton'
+import { Description } from '../common/Description'
 import { AddSecretSantaUsersFormDialog } from './AddSecretSantaUsersFormDialog'
 import { EditSecretSantaFormDialog } from './EditSecretSantaFormDialog'
 import { ManageUserExclusionsDialog } from './ManageUserExclusionsDialog'
@@ -30,11 +32,6 @@ type SecretSantaProps = {
   secretSanta: SecretSantaDto
   event: DetailedEventDto
 }
-
-const eurosFormatter = Intl.NumberFormat('fr-FR', {
-  style: 'currency',
-  currency: 'EUR',
-})
 
 export const SecretSanta = ({ secretSanta, event }: SecretSantaProps) => {
   const queryClient = useQueryClient()
@@ -278,6 +275,12 @@ export const SecretSanta = ({ secretSanta, event }: SecretSantaProps) => {
         </Stack>
       </Stack>
 
+      {secretSanta.description && (
+        <Stack mb={4}>
+          <Description text={secretSanta.description} />
+        </Stack>
+      )}
+
       <Stack>
         <Button
           fullWidth
@@ -315,7 +318,7 @@ export const SecretSanta = ({ secretSanta, event }: SecretSantaProps) => {
               },
               { field: 'firstname', headerName: 'Prénom', width: 170, valueGetter: value => value ?? '-' },
               { field: 'lastname', headerName: 'Nom', width: 170, valueGetter: value => value ?? '-' },
-              { field: 'email', headerName: 'Email', width: 250 },
+              { field: 'email', headerName: 'Email', minWidth: 250, flex: 1 },
               { field: 'exclusions', headerName: 'Exclusions', headerAlign: 'center', align: 'center', width: 100 },
               {
                 field: 'id',

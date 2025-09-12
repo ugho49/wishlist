@@ -52,7 +52,7 @@ const columns: GridColDef<RowType>[] = [
   },
   { field: 'firstname', headerName: 'Prénom', width: 170, valueGetter: value => value ?? '-' },
   { field: 'lastname', headerName: 'Nom', width: 170, valueGetter: value => value ?? '-' },
-  { field: 'email', headerName: 'Email', width: 250 },
+  { field: 'email', headerName: 'Email', minWidth: 250, flex: 1 },
   {
     field: 'isPending',
     headerName: 'Status',

@@ -36,14 +36,22 @@ export class DeleteAttendeeUseCase implements IInferredCommandHandler<DeleteAtte
     if (attendee.user?.id === currentUser.id) {
       throw new ConflictException('You cannot delete yourself from the event')
     }
-    const wishlists = await this.wishlistRepository.findByEvent(attendee.eventId)
+
+    const attendeeUserId = attendee.user?.id
+
+    const attendeeWishlistsForEvent =
+      attendeeUserId === undefined
+        ? []
+        : (await this.wishlistRepository.findByEvent(attendee.eventId)).filter(wishlist =>
+            wishlist.isOwner(attendeeUserId),
+          )
 
     await this.transactionManager.runInTransaction(async tx => {
       // Remove the attendee from the event
       await this.attendeeRepository.delete(attendeeId, tx)
 
       // Check if this is ok for the wishlists
-      for (const wishlist of wishlists) {
+      for (const wishlist of attendeeWishlistsForEvent) {
         if (wishlist.eventIds.length > 1) {
           const updatedWishlist = wishlist.unlinkEvent(attendee.eventId)
           await this.wishlistRepository.save(updatedWishlist, tx)
