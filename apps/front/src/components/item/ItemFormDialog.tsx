@@ -26,8 +26,6 @@ import {
   Toolbar,
   Typography,
 } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
-import useMediaQuery from '@mui/material/useMediaQuery'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useApi, useToast } from '@wishlist/front-hooks'
 import React, { forwardRef, useCallback, useEffect, useMemo, useState } from 'react'
@@ -37,6 +35,7 @@ import { isValidUrl } from '../../utils/router.utils'
 import { CharsRemaining } from '../common/CharsRemaining'
 import { InputLabel } from '../common/InputLabel'
 import { Rating } from '../common/Rating'
+import { Subtitle } from '../common/Subtitle'
 
 const Transition = forwardRef(function Transition(
   props: TransitionProps & { children: React.ReactElement },
@@ -60,8 +59,6 @@ export type ItemFormDialogProps = (ModeProps<'create'> | ModeProps<'edit'>) & {
 }
 
 export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistId }: ItemFormDialogProps) => {
-  const theme = useTheme()
-  const smallScreen = useMediaQuery(theme.breakpoints.down('md'))
   const { addToast } = useToast()
   const api = useApi()
   const [name, setName] = useState('')
@@ -188,16 +185,19 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
         </Toolbar>
       </AppBar>
       <Container maxWidth="sm" sx={{ marginTop: '40px' }}>
-        <Stack component="form" onSubmit={onSubmit} noValidate gap={smallScreen ? 2 : 3}>
+        <Subtitle>Renseigner les informations sur le souhait</Subtitle>
+
+        <Stack component="form" onSubmit={onSubmit} noValidate gap={2}>
           <Box>
-            <InputLabel required>Nom</InputLabel>
             <TextField
+              label="Titre du souhait"
+              required
               autoComplete="off"
               disabled={loading}
               fullWidth
               value={name}
               slotProps={{ htmlInput: { maxLength: 40 } }}
-              placeholder="Nom du souhait"
+              placeholder="Titre du souhait"
               helperText={<CharsRemaining max={40} value={name} />}
               onChange={e => setName(e.target.value)}
             />
@@ -205,9 +205,8 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
           </Box>
 
           <Box>
-            <InputLabel>Détails</InputLabel>
-
             <TextField
+              label="Détails"
               autoComplete="off"
               disabled={loading}
               fullWidth
@@ -221,9 +220,8 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
           </Box>
 
           <Box>
-            <InputLabel>URL</InputLabel>
-
             <TextField
+              label="URL"
               type="url"
               autoComplete="off"
               disabled={loading || scanUrlLoading}
@@ -262,9 +260,8 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
 
           <Stack direction="row" flexWrap="wrap" gap={2}>
             <Box sx={{ flexGrow: 1 }}>
-              <InputLabel>URL de photo</InputLabel>
-
               <TextField
+                label="URL de photo"
                 type="url"
                 autoComplete="off"
                 disabled={loading || scanUrlLoading}
