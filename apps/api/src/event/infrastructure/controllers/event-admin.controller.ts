@@ -1,5 +1,5 @@
-import { Controller, Get, Param, Query } from '@nestjs/common'
-import { QueryBus } from '@nestjs/cqrs'
+import { Body, Controller, Delete, Get, Param, Put, Query } from '@nestjs/common'
+import { CommandBus, QueryBus } from '@nestjs/cqrs'
 import { ApiTags } from '@nestjs/swagger'
 import { CurrentUser, IsAdmin } from '@wishlist/api/auth'
 import { DEFAULT_RESULT_NUMBER } from '@wishlist/api/core'
@@ -10,15 +10,25 @@ import {
   GetAllEventsPaginationQueryDto,
   ICurrentUser,
   PagedResponse,
+  UpdateEventInputDto,
 } from '@wishlist/common'
 
-import { GetEventByIdQuery, GetEventsForUserQuery, GetEventsQuery } from '../../domain'
+import {
+  DeleteEventCommand,
+  GetEventByIdQuery,
+  GetEventsForUserQuery,
+  GetEventsQuery,
+  UpdateEventCommand,
+} from '../../domain'
 
 @IsAdmin()
 @ApiTags('ADMIN - Event')
 @Controller('/admin/event')
 export class EventAdminController {
-  constructor(private readonly queryBus: QueryBus) {}
+  constructor(
+    private readonly queryBus: QueryBus,
+    private readonly commandBus: CommandBus,
+  ) {}
 
   @Get('/:id')
   getById(@Param('id') id: EventId, @CurrentUser() currentUser: ICurrentUser): Promise<DetailedEventDto> {
@@ -42,5 +52,30 @@ export class EventAdminController {
     }
 
     return this.queryBus.execute(new GetEventsQuery({ pageNumber, pageSize }))
+  }
+
+  @Put('/:id')
+  async updateEvent(
+    @Param('id') eventId: EventId,
+    @CurrentUser() currentUser: ICurrentUser,
+    @Body() dto: UpdateEventInputDto,
+  ): Promise<void> {
+    await this.commandBus.execute(
+      new UpdateEventCommand({
+        currentUser,
+        eventId,
+        updateEvent: {
+          title: dto.title,
+          description: dto.description,
+          icon: dto.icon,
+          eventDate: dto.event_date,
+        },
+      }),
+    )
+  }
+
+  @Delete('/:id')
+  async deleteEvent(@Param('id') eventId: EventId, @CurrentUser() currentUser: ICurrentUser): Promise<void> {
+    await this.commandBus.execute(new DeleteEventCommand({ currentUser, eventId }))
   }
 }

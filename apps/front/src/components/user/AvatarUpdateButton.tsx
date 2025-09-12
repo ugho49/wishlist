@@ -1,10 +1,10 @@
 import type { UpdateUserPictureOutputDto, UserSocialDto } from '@wishlist/common'
 
 import AddAPhotoIcon from '@mui/icons-material/AddAPhoto'
+import CloudUploadIcon from '@mui/icons-material/CloudUpload'
 import EditIcon from '@mui/icons-material/Edit'
 import GoogleIcon from '@mui/icons-material/Google'
 import NoPhotographyIcon from '@mui/icons-material/NoPhotography'
-import PortraitIcon from '@mui/icons-material/Portrait'
 import {
   Avatar,
   Box,
@@ -208,7 +208,7 @@ export const AvatarUpdateButton = ({
       <Menu anchorEl={anchorElMenu} open={Boolean(anchorElMenu)} onClose={closeMenu}>
         <MenuItem onClick={() => selectAPicture()}>
           <ListItemIcon>
-            <PortraitIcon fontSize="small" />
+            <CloudUploadIcon fontSize="small" />
           </ListItemIcon>
           <ListItemText>Mettre à jour la photo de profil</ListItemText>
         </MenuItem>

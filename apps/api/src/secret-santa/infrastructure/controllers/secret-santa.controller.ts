@@ -27,7 +27,7 @@ import {
   StartSecretSantaCommand,
   UpdateSecretSantaCommand,
   UpdateSecretSantaUserCommand,
-} from '../domain'
+} from '../../domain'
 
 @ApiTags('Secret Santa')
 @Controller('/secret-santa')

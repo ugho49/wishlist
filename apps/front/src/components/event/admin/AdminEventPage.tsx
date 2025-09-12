@@ -1,6 +1,7 @@
 import type { EventId } from '@wishlist/common'
 
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
+import LocalPoliceOutlinedIcon from '@mui/icons-material/LocalPoliceOutlined'
 import NumbersIcon from '@mui/icons-material/Numbers'
 import ShortTextIcon from '@mui/icons-material/ShortText'
 import TitleIcon from '@mui/icons-material/Title'
@@ -8,7 +9,9 @@ import { Box, List, ListItem, ListItemIcon, ListItemText, Stack } from '@mui/mat
 import { useTheme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import { useQuery } from '@tanstack/react-query'
+import { AttendeeRole } from '@wishlist/common'
 import { DateTime } from 'luxon'
+import { useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 
 import { useApi } from '../../../hooks'
@@ -32,6 +35,13 @@ export const AdminEventPage = () => {
     queryFn: ({ signal }) => api.event.getById(eventId, { signal }),
   })
 
+  const maintainerName = useMemo(() => {
+    if (!value) return ''
+    const user = value.attendees.find(attendee => attendee.role === AttendeeRole.MAINTAINER)
+    if (!user) return ''
+    return `${user.user?.firstname} ${user.user?.lastname}`
+  }, [value])
+
   return (
     <Loader loading={loadingEvent}>
       <Box>
@@ -52,6 +62,12 @@ export const AdminEventPage = () => {
                   <NumbersIcon />
                 </ListItemIcon>
                 <ListItemText primary="Nombre de participants" secondary={value?.attendees.length} />
+              </ListItem>
+              <ListItem>
+                <ListItemIcon>
+                  <LocalPoliceOutlinedIcon />
+                </ListItemIcon>
+                <ListItemText primary="Maintenu par" secondary={maintainerName} />
               </ListItem>
             </List>
 
@@ -91,12 +107,12 @@ export const AdminEventPage = () => {
         {/* TODO: add secret santa card */}
         <br />
         <Card>
-          <Subtitle>Participants</Subtitle>
+          <Subtitle>Participants ({value?.attendees.length})</Subtitle>
           <AdminListAttendees attendees={value?.attendees ?? []} />
         </Card>
         <br />
         <Card>
-          <Subtitle>Wishlists</Subtitle>
+          <Subtitle>Wishlists ({value?.wishlists.length})</Subtitle>
           <AdminListWishlistsForEvent wishlists={value?.wishlists ?? []} />
         </Card>
       </Box>
