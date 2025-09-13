@@ -1,7 +1,9 @@
 import type { MiniUserDto } from '@wishlist/common'
+import type { DateTime } from 'luxon'
 
 import type { RootState } from '../../core'
 
+import { zodResolver } from '@hookform/resolvers/zod'
 import DeleteIcon from '@mui/icons-material/Delete'
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft'
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'
@@ -23,10 +25,11 @@ import {
 } from '@mui/material'
 import { useMutation } from '@tanstack/react-query'
 import { AttendeeRole } from '@wishlist/common'
-import { DateTime } from 'luxon'
 import { useMemo, useState } from 'react'
+import { Controller, useForm } from 'react-hook-form'
 import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
+import { z } from 'zod'
 
 import { useApi } from '../../hooks/useApi'
 import { useToast } from '../../hooks/useToast'
@@ -34,7 +37,7 @@ import { CardV2 } from '../common/CardV2'
 import { CharsRemaining } from '../common/CharsRemaining'
 import { WishlistDatePicker } from '../common/DatePicker'
 import { EmojiSelectorWithBadge } from '../common/EmojiSelectorWithBadge'
-import { InputLabel } from '../common/InputLabel'
+import { Subtitle } from '../common/Subtitle'
 import { Title } from '../common/Title'
 import { SearchUserSelect } from '../user/SearchUserSelect'
 import { ListItemAttendee } from './ListItemAttendee'
@@ -46,6 +49,18 @@ type Attendee = {
   role: AttendeeRole
 }
 
+const schema = z.object({
+  icon: z.string().optional(),
+  title: z.string().min(1, 'Le titre est requis').max(100, '100 caractères maximum'),
+  description: z.string().max(2000, '2000 caractères maximum').optional(),
+  eventDate: z
+    .custom<DateTime>()
+    .nullable()
+    .refine(date => date !== null, "La date de l'événement est requise"),
+})
+
+type FormFields = z.infer<typeof schema>
+
 const mapState = (state: RootState) => state.auth.user?.email
 
 export const CreateEventPage = () => {
@@ -54,11 +69,25 @@ export const CreateEventPage = () => {
   const { addToast } = useToast()
   const navigate = useNavigate()
   const [step, setStep] = useState(1)
-  const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
-  const [icon, setIcon] = useState<string | undefined>(undefined)
-  const [eventDate, setEventDate] = useState<DateTime | null>(null)
   const [attendees, setAttendees] = useState<Attendee[]>([])
+
+  const {
+    register,
+    control,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm<FormFields>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      title: '',
+      description: '',
+      eventDate: null,
+      icon: undefined,
+    },
+  })
+
+  const formValues = watch()
 
   const attendeeEmails = useMemo(
     () =>
@@ -69,16 +98,14 @@ export const CreateEventPage = () => {
     [attendees],
   )
 
-  const nextStepEnabled = title?.trim() !== '' && eventDate !== null
-
   const { mutateAsync: createEvent, isPending: loading } = useMutation({
     mutationKey: ['event.create'],
     mutationFn: () => {
-      const isoDate = eventDate?.toISODate() || DateTime.now().toISODate() || ''
+      const isoDate = formValues.eventDate!.toISODate()!
       return api.event.create({
-        title,
-        description: description === '' ? undefined : description,
-        icon,
+        title: formValues.title,
+        description: formValues.description === '' ? undefined : formValues.description,
+        icon: formValues.icon,
         event_date: new Date(isoDate),
         attendees: attendees.map(attendee => ({
           email: typeof attendee.user === 'string' ? attendee.user : attendee.user.email,
@@ -106,53 +133,70 @@ export const CreateEventPage = () => {
           ))}
         </Stepper>
       </Box>
-      <Container maxWidth="sm" sx={{ marginTop: '40px' }}>
+      <Container
+        maxWidth={step === 1 ? 'md' : 'sm'}
+        sx={{ marginTop: '40px', transition: 'max-width 0.3s ease-in-out' }}
+      >
         <CardV2>
           {step === 1 && (
             <Stack component="form" noValidate gap={3}>
-              <Box>
-                <InputLabel required>Titre et icône</InputLabel>
-                <Stack direction="row" gap={2} alignItems="flex-start">
-                  <EmojiSelectorWithBadge value={icon} onChange={setIcon} disabled={loading} />
-                  <Box sx={{ flex: 1 }}>
-                    <TextField
-                      autoComplete="off"
-                      disabled={loading}
-                      fullWidth
-                      value={title}
-                      slotProps={{ htmlInput: { maxLength: 100 } }}
-                      placeholder="Le titre de votre évènement"
-                      helperText={<CharsRemaining max={100} value={title} />}
-                      onChange={e => setTitle(e.target.value)}
-                    />
-                  </Box>
-                </Stack>
-              </Box>
+              <Subtitle sx={{ marginBottom: '16px' }}>Informations</Subtitle>
+
+              <Stack direction="row" gap={2} alignItems="flex-start">
+                <Controller
+                  control={control}
+                  name="icon"
+                  render={({ field }) => (
+                    <EmojiSelectorWithBadge value={field.value} onChange={value => field.onChange(value)} />
+                  )}
+                />
+
+                <Box sx={{ flex: 1 }}>
+                  <TextField
+                    {...register('title')}
+                    label="Titre"
+                    autoComplete="off"
+                    fullWidth
+                    placeholder="Le titre de votre évènement"
+                    error={!!errors.title}
+                    helperText={errors.title?.message || <CharsRemaining max={100} value={formValues.title || ''} />}
+                  />
+                </Box>
+              </Stack>
 
               <Stack>
-                <InputLabel required>Date de l'évènement</InputLabel>
-                <WishlistDatePicker
-                  format="DDDD"
-                  value={eventDate}
-                  disabled={loading}
-                  onChange={date => setEventDate(date)}
-                  disablePast
+                <Controller
+                  control={control}
+                  name="eventDate"
+                  render={({ field }) => (
+                    <WishlistDatePicker
+                      label="Date de l'évènement"
+                      format="DDDD"
+                      value={field.value}
+                      inputRef={field.ref}
+                      onChange={date => field.onChange(date)}
+                      disablePast
+                      fullWidth
+                      error={!!errors.eventDate}
+                      helperText={errors.eventDate?.message}
+                    />
+                  )}
                 />
               </Stack>
 
               <Box>
-                <InputLabel>Description</InputLabel>
                 <TextField
+                  {...register('description')}
+                  label="Description"
                   autoComplete="off"
-                  disabled={loading}
                   fullWidth
                   multiline
                   minRows={4}
-                  value={description}
-                  slotProps={{ htmlInput: { maxLength: 2000 } }}
                   placeholder="Une petite description ..."
-                  helperText={<CharsRemaining max={2000} value={description} />}
-                  onChange={e => setDescription(e.target.value)}
+                  error={!!errors.description}
+                  helperText={
+                    errors.description?.message || <CharsRemaining max={2000} value={formValues.description || ''} />
+                  }
                 />
               </Box>
             </Stack>
@@ -160,15 +204,16 @@ export const CreateEventPage = () => {
 
           {step === 2 && (
             <Stack>
-              <Box>
-                <InputLabel>Gérer les participants</InputLabel>
+              <Subtitle>Gérer les participants</Subtitle>
 
+              <Box>
                 {/*TODO: add a way to add all attendees from a specific event
                 - Open a dialog, select previous events
                 - Get all attendees (add possibility to delete attendees if we don't want them)
                 */}
 
                 <SearchUserSelect
+                  label="Rechercher un participant"
                   disabled={loading}
                   onChange={val => {
                     setAttendees(prevState => [
@@ -237,11 +282,7 @@ export const CreateEventPage = () => {
               )}
             </Box>
             {step === 1 && (
-              <Button
-                onClick={() => setStep(prev => prev + 1)}
-                disabled={!nextStepEnabled}
-                endIcon={<KeyboardArrowRightIcon />}
-              >
+              <Button onClick={handleSubmit(() => setStep(prev => prev + 1))} endIcon={<KeyboardArrowRightIcon />}>
                 Suivant
               </Button>
             )}

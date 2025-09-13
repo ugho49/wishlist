@@ -1,7 +1,7 @@
 import ForestIcon from '@mui/icons-material/Forest'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import PeopleIcon from '@mui/icons-material/People'
-import { Box, Tab, Tabs } from '@mui/material'
+import { Box, Container, Tab, Tabs } from '@mui/material'
 import { useQueryState } from 'nuqs'
 import { useParams } from 'react-router-dom'
 
@@ -45,11 +45,11 @@ export const EditEventPage = () => {
 
   return (
     <Box>
+      <Title smallMarginBottom>Modifier l'évènement</Title>
       <Loader loading={loading}>
         {(!event || !currentUserCanEdit) && <EventNotFound />}
         {event && currentUserCanEdit && (
-          <>
-            <Title smallMarginBottom>Modifier l'évènement</Title>
+          <Container maxWidth="md">
             <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: '20px' }}>
               <Tabs
                 value={tab}
@@ -63,12 +63,12 @@ export const EditEventPage = () => {
                 ))}
               </Tabs>
             </Box>
-            <>
+            <Box>
               {tab === TabValues.informations && <EditEventInformations event={event} />}
               {tab === TabValues.attendees && <EditEventAttendees eventId={event.id} attendees={event.attendees} />}
               {tab === TabValues.secretSanta && <EditSecretSanta eventId={event.id} />}
-            </>
-          </>
+            </Box>
+          </Container>
         )}
       </Loader>
     </Box>

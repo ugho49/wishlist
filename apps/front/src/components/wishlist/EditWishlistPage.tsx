@@ -1,6 +1,6 @@
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
-import { Box, Tab, Tabs } from '@mui/material'
+import { Box, Container, Tab, Tabs } from '@mui/material'
 import { useQueryState } from 'nuqs'
 import { useParams } from 'react-router-dom'
 
@@ -37,11 +37,11 @@ export const EditWishlistPage = () => {
 
   return (
     <Box>
+      <Title smallMarginBottom>Modifier la liste</Title>
       <Loader loading={loading}>
         {(!wishlist || !currentUserCanEdit) && <WishlistNotFound />}
         {wishlist && currentUserCanEdit && (
-          <>
-            <Title smallMarginBottom>Modifier la liste</Title>
+          <Container maxWidth="md">
             <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: '20px' }}>
               <Tabs
                 value={tab}
@@ -57,7 +57,7 @@ export const EditWishlistPage = () => {
             </Box>
             {tab === TabValues.informations && <EditWishlistInformations wishlist={wishlist} />}
             {tab === TabValues.events && <EditWishlistEvent wishlistId={wishlist.id} events={wishlist.events} />}
-          </>
+          </Container>
         )}
       </Loader>
     </Box>

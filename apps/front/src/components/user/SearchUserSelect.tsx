@@ -50,12 +50,13 @@ const GroupItems = styled('ul')({
 })
 
 export type SearchUserSelectProps = {
+  label?: string
   disabled?: boolean
   onChange: (value: OptionType) => void
   excludedEmails: string[]
 }
 
-export const SearchUserSelect = ({ disabled, onChange, excludedEmails }: SearchUserSelectProps) => {
+export const SearchUserSelect = ({ disabled, onChange, excludedEmails, label }: SearchUserSelectProps) => {
   const api = useApi()
   const [loading, setLoading] = useState(false)
   const [options, setOptions] = useState<OptionType[]>([])
@@ -227,6 +228,7 @@ export const SearchUserSelect = ({ disabled, onChange, excludedEmails }: SearchU
       renderInput={params => (
         <TextField
           {...params}
+          label={label}
           slotProps={{ htmlInput: { ...params.inputProps } }}
           onChange={e => {
             const value = e.target.value
