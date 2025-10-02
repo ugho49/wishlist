@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate, useRouter } from '@tanstack/react-router'
 
 import { useHistoryStack } from './useHistoryStack'
 
@@ -29,7 +29,7 @@ const DEFAULT_MAIN_ROUTES = ['/', '/events', '/wishlists', '/admin', '/user/prof
  * Provides a unified way to determine if back navigation is possible and handle it
  */
 export const useBackNavigation = (options: UseBackNavigationOptions = {}): UseBackNavigationReturn => {
-  const navigate = useNavigate()
+  const router = useRouter()
   const location = useLocation()
   const { history } = useHistoryStack()
 
@@ -40,7 +40,7 @@ export const useBackNavigation = (options: UseBackNavigationOptions = {}): UseBa
   const canGoBack = useMemo(() => history.length > 0 && !isMainRoute, [history.length, isMainRoute])
 
   const handleGoBack = () => {
-    navigate(-1)
+    router.history.back()
   }
 
   return {

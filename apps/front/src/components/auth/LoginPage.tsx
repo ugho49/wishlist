@@ -8,7 +8,7 @@ import { AxiosError } from 'axios'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useDispatch } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearch } from '@tanstack/react-router'
 import { z } from 'zod'
 
 import { setTokens } from '../../core/store/features'
@@ -55,7 +55,8 @@ export const LoginPage = () => {
   const { addToast } = useToast()
   const [socialLoading, setSocialLoading] = useState(false)
   const navigate = useNavigate()
-  const redirectUrl = getUrlParameter('redirectUrl') || '/'
+  const search = useSearch({ strict: false }) as { redirectUrl?: string; email?: string }
+  const redirectUrl = search.redirectUrl || '/'
   const {
     register,
     setError,
@@ -63,7 +64,7 @@ export const LoginPage = () => {
     formState: { isSubmitting, errors: formErrors },
   } = useForm<FormFields>({
     resolver: zodResolver(schema),
-    defaultValues: { email: getUrlParameter('email') || '' },
+    defaultValues: { email: search.email || '' },
   })
 
   const handleLoginSuccess = (param: LoginOutputDto) => {
@@ -75,7 +76,7 @@ export const LoginPage = () => {
       }),
     )
 
-    navigate(redirectUrl)
+    navigate({ to: redirectUrl as any })
   }
 
   const onSocialError = () => {

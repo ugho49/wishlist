@@ -8,7 +8,7 @@ import { AxiosError } from 'axios'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useDispatch } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from '@tanstack/react-router'
 import { z } from 'zod'
 
 import { setTokens } from '../../core/store/features'
@@ -75,7 +75,7 @@ export const RegisterPage = () => {
     )
 
     // Redirect to welcome page for new users
-    navigate(`/welcome?from=${from}`) // TODO: fix this redirect that is not working
+    navigate({ to: '/welcome', search: { from } })
   }
 
   const { mutateAsync: registerUser } = useMutation({

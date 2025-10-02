@@ -1,17 +1,21 @@
+import { useRouter } from '@tanstack/react-router'
 import { useEffect } from 'react'
-import { useLocation } from 'react-router-dom'
 
 /**
  * Component that scrolls to top when the route changes.
- * Should be placed inside the Router but outside of Routes.
+ * Should be placed inside the Router.
  */
 export const ScrollToTop = () => {
-  const { pathname } = useLocation()
+  const router = useRouter()
 
   useEffect(() => {
-    // Scroll to top when pathname changes
-    window.scrollTo(0, 0)
-  }, [pathname])
+    const unsubscribe = router.subscribe('onResolved', () => {
+      // Scroll to top when route changes
+      window.scrollTo(0, 0)
+    })
+
+    return () => unsubscribe()
+  }, [router])
 
   // This component doesn't render anything
   return null

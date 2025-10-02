@@ -6,7 +6,7 @@ import { Button, Stack, styled, TextField, Typography } from '@mui/material'
 import { useMutation } from '@tanstack/react-query'
 import { useQueryState } from 'nuqs'
 import { useForm } from 'react-hook-form'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from '@tanstack/react-router'
 import { z } from 'zod'
 
 import { useApi } from '../../hooks/useApi'
@@ -84,9 +84,7 @@ export const RenewForgotPasswordPage = () => {
         message: 'Le mot de passe à été réinitialisé avec succès. Vous pouvez maintenant vous connecter.',
         variant: 'success',
       })
-      const searchParam = new URLSearchParams()
-      searchParam.append('email', email || '')
-      navigate({ pathname: '/login', search: searchParam.toString() })
+      navigate({ to: '/login', search: { email: email || '' } })
     },
   })
 

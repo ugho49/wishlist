@@ -5,7 +5,7 @@ import { Box, Button, Container, Stack, Step, StepLabel, Stepper, styled, Typogr
 import { useApi } from '@wishlist/front-hooks'
 import { useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from '@tanstack/react-router'
 
 import { OnboardingService } from '../../core/services/onboarding.service'
 import { updatePicture } from '../../core/store/features'
@@ -196,7 +196,7 @@ export const WelcomePage = () => {
   }
 
   const handleFinishOnboarding = () => {
-    navigate('/events')
+    navigate({ to: '/events' })
   }
 
   return (

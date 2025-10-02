@@ -7,7 +7,7 @@ import { Box, Button, Stack, TextField } from '@mui/material'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { DateTime } from 'luxon'
 import { Controller, useForm } from 'react-hook-form'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from '@tanstack/react-router'
 import { z } from 'zod'
 
 import { useApi } from '../../hooks/useApi'
@@ -97,7 +97,7 @@ export const EditEventInformations = ({ event }: EditEventInformationsProps) => 
     try {
       await handleDelete()
       addToast({ message: "L'évènement à bien été supprimée", variant: 'success' })
-      navigate('/events')
+      navigate({ to: '/events' })
     } catch {
       addToast({ message: "Une erreur s'est produite", variant: 'error' })
     }

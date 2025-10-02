@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query'
 import { AttendeeRole } from '@wishlist/common'
 import { DateTime } from 'luxon'
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from '@tanstack/react-router'
 
 import { useApi } from '../../../hooks'
 import { EventIcon } from '../EventIcon'
@@ -93,7 +93,7 @@ export const AdminListEvents = ({ userId }: AdminListEventsProps) => {
       disableMultipleRowSelection={true}
       disableColumnSelector={true}
       isCellEditable={() => false}
-      onRowClick={data => navigate(`/admin/events/${data.row.id}`)}
+      onRowClick={data => navigate({ to: '/admin/events/$eventId', params: { eventId: data.row.id } })}
       density="standard"
       rows={value?.resources || []}
       loading={loading}

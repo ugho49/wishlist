@@ -2,9 +2,9 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import { Box, Container, Tab, Tabs } from '@mui/material'
 import { useQueryState } from 'nuqs'
-import { useParams } from 'react-router-dom'
 
 import { useWishlistById } from '../../hooks/domain/useWishlistById'
+import { Route } from '../../routes/_authenticated/wishlists.$wishlistId.edit'
 import { Loader } from '../common/Loader'
 import { Title } from '../common/Title'
 import { EditWishlistEvent } from './EditWishlistEvents'
@@ -30,8 +30,7 @@ const tabs = [
 ]
 
 export const EditWishlistPage = () => {
-  const params = useParams<'wishlistId'>()
-  const wishlistId = params.wishlistId || ''
+  const { wishlistId } = Route.useParams()
   const [tab, setTab] = useQueryState('tab', { defaultValue: TabValues.informations })
   const { wishlist, loading, currentUserCanEdit } = useWishlistById(wishlistId)
 

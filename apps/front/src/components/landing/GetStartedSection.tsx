@@ -3,7 +3,7 @@ import type { LinkProps } from 'react-router-dom'
 
 import { Box, Button, Container, Typography } from '@mui/material'
 import { styled } from '@mui/material/styles'
-import { Link } from 'react-router-dom'
+import { Link } from '@tanstack/react-router'
 
 const CTAContainer = styled(Box)(({ theme }) => ({
   background: `linear-gradient(10deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 30%, ${theme.palette.primary.light} 60%, ${theme.palette.primary.dark} 100%)`,

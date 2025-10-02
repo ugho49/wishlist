@@ -11,7 +11,9 @@ import { canEditEvent } from '@wishlist/common'
 import { DateTime } from 'luxon'
 import { useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate } from '@tanstack/react-router'
+
+import { Route } from '../../routes/_authenticated/events.$eventId'
 
 import { useEventById } from '../../hooks'
 import { Description } from '../common/Description'
@@ -231,8 +233,7 @@ const EventHeader = ({
 
 export const EventPage = () => {
   const currentUserId = useSelector(mapState)
-  const params = useParams<'eventId'>()
-  const eventId = params.eventId || ''
+  const { eventId } = Route.useParams()
   const [openAttendeesDialog, setOpenAttendeesDialog] = useState(false)
   const { event, loading } = useEventById(eventId)
 

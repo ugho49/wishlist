@@ -3,7 +3,7 @@ import type { PropsWithChildren } from 'react'
 
 import { Box, styled } from '@mui/material'
 import clsx from 'clsx'
-import { Link } from 'react-router-dom'
+import { Link } from '@tanstack/react-router'
 
 export type CardProps = {
   to?: string

@@ -13,9 +13,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { AttendeeRole } from '@wishlist/common'
 import { DateTime } from 'luxon'
 import { useMemo } from 'react'
-import { useParams } from 'react-router-dom'
 
 import { useApi, useToast } from '../../../hooks'
+import { Route } from '../../../routes/_authenticated/admin.events.$eventId'
 import { BreaklineText } from '../../common/BreaklineText'
 import { CardV2 } from '../../common/CardV2'
 import { Loader } from '../../common/Loader'
@@ -30,8 +30,7 @@ const CardStack = styled(Stack)(() => ({
 }))
 
 export const AdminEventPage = () => {
-  const params = useParams<'eventId'>()
-  const eventId = (params.eventId || '') as EventId
+  const { eventId } = Route.useParams()
   const queryClient = useQueryClient()
   const { admin: api } = useApi()
   const { addToast } = useToast()

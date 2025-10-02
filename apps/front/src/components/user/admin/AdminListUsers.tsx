@@ -7,7 +7,7 @@ import { DataGrid } from '@mui/x-data-grid'
 import { useQuery } from '@tanstack/react-query'
 import { DateTime } from 'luxon'
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from '@tanstack/react-router'
 
 import { useApi } from '../../../hooks'
 import { Status } from '../../common/Status'
@@ -118,7 +118,7 @@ export const AdminListUsers = () => {
         localeText={{
           noRowsLabel: 'Aucun utilisateur',
         }}
-        onRowClick={data => navigate(`/admin/users/${data.row.id}`)}
+        onRowClick={data => navigate({ to: '/admin/users/$userId', params: { userId: data.row.id } })}
         density="standard"
         rows={value?.resources || []}
         loading={loading}

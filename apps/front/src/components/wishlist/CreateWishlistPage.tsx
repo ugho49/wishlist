@@ -36,7 +36,7 @@ import { DateTime } from 'luxon'
 import { useQueryState } from 'nuqs'
 import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from '@tanstack/react-router'
 import { useInterval } from 'usehooks-ts'
 
 import { useApi, useAvailableEvents, useEventById, useToast } from '../../hooks'
@@ -164,7 +164,7 @@ export const CreateWishlistPage = () => {
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
     onSuccess: wishlist => {
       addToast({ message: 'Liste créé avec succès', variant: 'success' })
-      navigate(`/wishlists/${wishlist.id}`)
+      navigate({ to: '/wishlists/$wishlistId', params: { wishlistId: wishlist.id } })
     },
   })
 

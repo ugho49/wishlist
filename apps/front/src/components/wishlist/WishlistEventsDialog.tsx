@@ -15,7 +15,7 @@ import {
   Stack,
 } from '@mui/material'
 import { DateTime } from 'luxon'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from '@tanstack/react-router'
 
 import { RouterLink } from '../common/RouterLink'
 import { EventIcon } from '../event/EventIcon'
@@ -38,7 +38,7 @@ export const WishlistEventsDialog = ({
   const navigate = useNavigate()
 
   const handleEventClick = (eventId: string) => {
-    navigate(`/events/${eventId}`)
+    navigate({ to: '/events/$eventId', params: { eventId } })
   }
 
   return (

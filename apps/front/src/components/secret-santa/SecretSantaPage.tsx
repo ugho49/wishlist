@@ -2,17 +2,17 @@ import type { EventId } from '@wishlist/common'
 
 import { Box } from '@mui/material'
 import { useEffect } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate } from '@tanstack/react-router'
 
 import { useEventById, useSecretSanta } from '../../hooks'
+import { Route } from '../../routes/_authenticated/events.$eventId.secret-santa'
 import { Loader } from '../common/Loader'
 import { Title } from '../common/Title'
 import { NoSecretSanta } from './NoSecretSanta'
 import { SecretSanta } from './SecretSanta'
 
 export const SecretSantaPage = () => {
-  const params = useParams<'eventId'>()
-  const eventId = (params.eventId || '') as EventId
+  const { eventId } = Route.useParams()
   const { secretSanta, loading: loadingSecretSanta } = useSecretSanta(eventId)
   const { event, loading: loadingEvent } = useEventById(eventId)
   const navigate = useNavigate()
@@ -20,9 +20,9 @@ export const SecretSantaPage = () => {
 
   useEffect(() => {
     if (!loadingEvent && !event) {
-      navigate('/events')
+      navigate({ to: '/events' })
     }
-  }, [event, loadingEvent])
+  }, [event, loadingEvent, navigate])
 
   return (
     <Box>

@@ -3,9 +3,9 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import PeopleIcon from '@mui/icons-material/People'
 import { Box, Container, Tab, Tabs } from '@mui/material'
 import { useQueryState } from 'nuqs'
-import { useParams } from 'react-router-dom'
 
 import { useEventById } from '../../hooks'
+import { Route } from '../../routes/_authenticated/events.$eventId.edit'
 import { Loader } from '../common/Loader'
 import { Title } from '../common/Title'
 import { EditEventAttendees } from './EditEventAttendees'
@@ -38,8 +38,7 @@ const tabs = [
 ]
 
 export const EditEventPage = () => {
-  const params = useParams<'eventId'>()
-  const eventId = params.eventId || ''
+  const { eventId } = Route.useParams()
   const [tab, setTab] = useQueryState('tab', { defaultValue: TabValues.informations })
   const { event, loading, currentUserCanEdit } = useEventById(eventId)
 

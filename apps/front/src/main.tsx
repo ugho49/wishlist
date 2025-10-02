@@ -1,25 +1,13 @@
 import 'reflect-metadata'
 
-import { CssBaseline, ThemeProvider } from '@mui/material'
-import { LocalizationProvider } from '@mui/x-date-pickers'
-import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon'
-import { GoogleOAuthProvider } from '@react-oauth/google'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
-import { NuqsAdapter } from 'nuqs/adapters/react-router/v7'
-import { PostHogProvider } from 'posthog-js/react'
-import * as ReactDOM from 'react-dom/client'
-import { Toaster } from 'react-hot-toast'
-import { Provider as ReduxProvider } from 'react-redux'
-import { BrowserRouter } from 'react-router-dom'
+import type { RouterContext } from './routes/__root'
 
-import { App } from './App'
-import { ScrollToTop } from './components/common/ScrollToTop'
-import { ApiProvider } from './context/ApiContext'
+import { QueryClient } from '@tanstack/react-query'
+import { createRouter, RouterProvider } from '@tanstack/react-router'
+import * as ReactDOM from 'react-dom/client'
+
 import { store } from './core'
-import { AxiosInterceptor } from './core/router/AxiosInterceptor'
-import { environment } from './environment'
-import { theme } from './theme'
+import { routeTree } from './routeTree.gen'
 
 function main() {
   const needRedirect =
@@ -31,7 +19,6 @@ function main() {
     return
   }
 
-  const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -43,32 +30,29 @@ function main() {
     },
   })
 
-  root.render(
-    <PostHogProvider apiKey={environment.posthogKey} options={{ api_host: environment.posthogHost }}>
-      <Toaster position="top-right" toastOptions={{ duration: 3_000 }} />
-      <QueryClientProvider client={queryClient}>
-        <ApiProvider>
-          <ReduxProvider store={store}>
-            <ThemeProvider theme={theme}>
-              <CssBaseline />
-              <LocalizationProvider dateAdapter={AdapterLuxon} adapterLocale="fr">
-                <BrowserRouter>
-                  <NuqsAdapter>
-                    <ScrollToTop />
-                    <AxiosInterceptor />
-                    <GoogleOAuthProvider clientId={environment.googleClientId}>
-                      <App />
-                    </GoogleOAuthProvider>
-                  </NuqsAdapter>
-                </BrowserRouter>
-              </LocalizationProvider>
-            </ThemeProvider>
-          </ReduxProvider>
-        </ApiProvider>
-        <ReactQueryDevtools initialIsOpen={false} />
-      </QueryClientProvider>
-    </PostHogProvider>,
-  )
+  const router = createRouter({
+    routeTree,
+    context: {
+      queryClient,
+      isAuthenticated: false,
+      accessToken: undefined,
+    } satisfies RouterContext,
+  })
+
+  // Update router context when auth state changes
+  store.subscribe(() => {
+    const state = store.getState()
+    router.update({
+      context: {
+        queryClient,
+        isAuthenticated: state.auth.accessToken !== undefined,
+        accessToken: state.auth.accessToken,
+      },
+    })
+  })
+
+  const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
+  root.render(<RouterProvider router={router} />)
 }
 
 main()

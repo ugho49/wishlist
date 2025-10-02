@@ -63,3 +63,6 @@ junit_reports/
 junit.xml
 .cursor/rules/nx-rules.mdc
 .github/instructions/nx.instructions.md
+
+# TanStack Router generated files
+/apps/front/src/routeTree.gen.ts

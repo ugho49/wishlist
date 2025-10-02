@@ -1,6 +1,6 @@
 import { Box, Stack, Typography } from '@mui/material'
 import { styled } from '@mui/material/styles'
-import { Link } from 'react-router-dom'
+import { Link } from '@tanstack/react-router'
 
 const FooterContainer = styled(Box)(({ theme }) => ({
   backgroundColor: theme.palette.primary.dark,

@@ -20,7 +20,7 @@ import {
 } from '@mui/material'
 import { useCallback } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from '@tanstack/react-router'
 
 import LogoTextSvg from '../../assets/logo/logo_text.svg?react'
 import LogoSvg from '../../assets/logo/logo.svg?react'
@@ -213,7 +213,7 @@ export const SideNavigation = () => {
       handleLogout()
       return
     }
-    navigate(route)
+    navigate({ to: route as any })
     // Close mobile drawer after navigation
     if (isMobile) {
       dispatch(closeDrawer())

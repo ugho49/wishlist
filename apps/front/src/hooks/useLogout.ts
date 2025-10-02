@@ -1,14 +1,14 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback } from 'react'
 import { useDispatch } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from '@tanstack/react-router'
 
 import { resetStore } from '../core/store/features'
 
 export function useLogout() {
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  const redirectToLogin = useCallback(() => navigate('/login'), [navigate])
+  const redirectToLogin = useCallback(() => navigate({ to: '/login' }), [navigate])
   const queryClient = useQueryClient()
 
   return async () => {

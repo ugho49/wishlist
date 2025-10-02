@@ -1,5 +1,5 @@
 import { Box, Container, Stack, styled } from '@mui/material'
-import { Outlet, useNavigate } from 'react-router-dom'
+import { useNavigate } from '@tanstack/react-router'
 
 import { CardV2 } from '../../CardV2'
 import { Logo } from '../../Logo'
@@ -25,20 +25,22 @@ const OutletContainer = styled(CardV2)(() => ({
   boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important',
 }))
 
-export const AnonymousContainerOutlet = () => {
+interface AnonymousContainerOutletProps {
+  children: React.ReactNode
+}
+
+export const AnonymousContainerOutlet = ({ children }: AnonymousContainerOutletProps) => {
   const navigate = useNavigate()
 
   return (
     <Root>
       <Container component="main" maxWidth="sm">
         <Stack direction="column" alignItems="center" spacing={4}>
-          <LogoContainer onClick={() => navigate('/')}>
+          <LogoContainer onClick={() => navigate({ to: '/' })}>
             <Logo height={48} variant="full" />
           </LogoContainer>
 
-          <OutletContainer>
-            <Outlet />
-          </OutletContainer>
+          <OutletContainer>{children}</OutletContainer>
         </Stack>
       </Container>
     </Root>

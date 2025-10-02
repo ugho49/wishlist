@@ -2,7 +2,6 @@ import { Box, Container, containerClasses, styled, useMediaQuery, useTheme } fro
 import { useFetchUserInfo } from '@wishlist/front-hooks'
 import { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
-import { Outlet } from 'react-router-dom'
 
 import { setUser } from '../../../../core/store/features'
 import { useProfilePicturePrompt } from '../../../../hooks/useProfilePicturePrompt'
@@ -28,7 +27,11 @@ const ContainerStyled = styled(Container)(({ theme }) => ({
   },
 }))
 
-export const AuthenticatedContainerOutlet = () => {
+interface AuthenticatedContainerOutletProps {
+  children: React.ReactNode
+}
+
+export const AuthenticatedContainerOutlet = ({ children }: AuthenticatedContainerOutletProps) => {
   const { user } = useFetchUserInfo()
   const theme = useTheme()
   const dispatch = useDispatch()
@@ -59,7 +62,7 @@ export const AuthenticatedContainerOutlet = () => {
 
       <MainWrapper as="main">
         <ContainerStyled fixed maxWidth="lg">
-          <Outlet />
+          {children}
         </ContainerStyled>
       </MainWrapper>
 

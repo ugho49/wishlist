@@ -1,8 +1,8 @@
-import { Navigate, useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from '@tanstack/react-router'
+import { useEffect } from 'react'
 
-function getTo({ search }: { search: string }): string {
-  const urlSearchParams = new URLSearchParams(search)
-  const redirectUrl = urlSearchParams.get('redirectUrl')
+function getTo({ search }: { search: URLSearchParams }): string {
+  const redirectUrl = search.get('redirectUrl')
   if (redirectUrl) {
     return redirectUrl
   }
@@ -11,6 +11,11 @@ function getTo({ search }: { search: string }): string {
 
 export const NavigateToAuthenticatedWithContext = () => {
   const location = useLocation()
+  const navigate = useNavigate()
 
-  return <Navigate replace to={getTo(location)} />
+  useEffect(() => {
+    navigate({ to: getTo(location), replace: true })
+  }, [navigate, location])
+
+  return null
 }

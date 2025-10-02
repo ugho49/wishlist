@@ -14,9 +14,9 @@ import { useQuery } from '@tanstack/react-query'
 import { DateTime } from 'luxon'
 import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
-import { useParams } from 'react-router-dom'
 
 import { useApi, useToast } from '../../../hooks'
+import { Route } from '../../../routes/_authenticated/admin.users.$userId'
 import { CardV2 } from '../../common/CardV2'
 import { CharsRemaining } from '../../common/CharsRemaining'
 import { ConfirmButton } from '../../common/ConfirmButton'
@@ -57,8 +57,7 @@ const CardStack = styled(Stack)(() => ({
 export const AdminUserPage = () => {
   const { addToast } = useToast()
   const { user: currentUser } = useSelector(mapState)
-  const params = useParams<'userId'>()
-  const userId = (params.userId || '') as UserId
+  const { userId } = Route.useParams()
   const { admin: api } = useApi()
   const theme = useTheme()
   const smallScreen = useMediaQuery(theme.breakpoints.down('md'))

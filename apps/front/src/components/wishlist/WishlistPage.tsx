@@ -9,9 +9,10 @@ import { Avatar, Box, Chip, Container, Stack, Tooltip } from '@mui/material'
 import { grey } from '@mui/material/colors'
 import { useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate } from '@tanstack/react-router'
 
 import { useWishlistById } from '../../hooks'
+import { Route } from '../../routes/_authenticated/wishlists.$wishlistId'
 import { Description } from '../common/Description'
 import { Loader } from '../common/Loader'
 import { Title } from '../common/Title'
@@ -26,8 +27,7 @@ const logoSize = 60
 export const WishlistPage = () => {
   const currentUserId = useSelector(mapState)
   const [openEventDialog, setOpenEventDialog] = useState(false)
-  const params = useParams<'wishlistId'>()
-  const wishlistId = params.wishlistId || ''
+  const { wishlistId } = Route.useParams()
   const navigate = useNavigate()
 
   const { wishlist, loading } = useWishlistById(wishlistId)
@@ -101,7 +101,7 @@ export const WishlistPage = () => {
                     variant="outlined"
                     size="small"
                     icon={<EditIcon />}
-                    onClick={() => navigate(`/wishlists/${wishlistId}/edit`)}
+                    onClick={() => navigate({ to: '/wishlists/$wishlistId/edit', params: { wishlistId } })}
                     label="Modifier"
                   />
                 </Stack>

@@ -3,7 +3,7 @@ import type { LinkProps } from 'react-router-dom'
 
 import { Box, Button, Container, Typography } from '@mui/material'
 import { keyframes, styled } from '@mui/material/styles'
-import { Link } from 'react-router-dom'
+import { Link } from '@tanstack/react-router'
 
 import { Logo } from '../common/Logo'
 

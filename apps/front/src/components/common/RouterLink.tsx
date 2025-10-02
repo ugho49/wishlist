@@ -1,13 +1,13 @@
 import type { LinkProps } from '@mui/material/Link'
-import type { LinkProps as ReactRouterLinkProps } from 'react-router-dom'
+import type { LinkProps as TanStackLinkProps } from '@tanstack/react-router'
 
 import { Link } from '@mui/material'
+import { Link as TanStackLink } from '@tanstack/react-router'
 import { forwardRef } from 'react'
-import { Link as ReactRouterLink } from 'react-router-dom'
 
-type RouterLinkProps = Omit<ReactRouterLinkProps & LinkProps, 'href'>
+type RouterLinkProps = Omit<TanStackLinkProps & LinkProps, 'href'>
 
 export const RouterLink = forwardRef<HTMLAnchorElement, RouterLinkProps>(function RouterLink(props, ref) {
   const { to, ...other } = props
-  return <Link ref={ref} to={to} {...other} component={ReactRouterLink} />
+  return <Link ref={ref} to={to} {...other} component={TanStackLink} />
 })

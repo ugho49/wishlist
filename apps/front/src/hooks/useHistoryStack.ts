@@ -1,24 +1,24 @@
 import { useEffect, useState } from 'react'
-import { useLocation, useNavigationType } from 'react-router-dom'
+import { useLocation } from '@tanstack/react-router'
 
 export function useHistoryStack() {
   const [stack, setStack] = useState<string[]>([])
-  const { pathname } = useLocation()
-  const type = useNavigationType()
+  const location = useLocation()
+  const pathname = location.pathname
 
   useEffect(() => {
-    if (type === 'POP') {
-      setStack(prevState => prevState.slice(0, prevState.length - 1))
-    } else if (type === 'PUSH') {
-      setStack(prevState => [...prevState, pathname])
-    } else if (type === 'REPLACE') {
-      setStack(prevState => {
-        // We cannot replace if no previous stack
-        if (prevState.length === 0) return prevState
-        return [...prevState.slice(0, prevState.length - 1), pathname]
-      })
-    }
-  }, [pathname, type, setStack])
+    // TanStack Router doesn't expose navigation type like react-router-dom
+    // We'll use a simpler approach by tracking pathname changes
+    setStack(prevState => {
+      // If pathname is already in stack, it's likely a back navigation
+      const existingIndex = prevState.indexOf(pathname)
+      if (existingIndex !== -1) {
+        return prevState.slice(0, existingIndex + 1)
+      }
+      // Otherwise, it's a forward navigation
+      return [...prevState, pathname]
+    })
+  }, [pathname])
 
   useEffect(() => {
     if (stack.length > 40) {
