@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url'
 import type { Params as PinoParams } from 'pino-nestjs'
 
 import { RequestMethod } from '@nestjs/common'
+import { kinds, tags, types } from 'dd-trace/ext'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = resolve(__filename, '../..')
@@ -64,6 +65,27 @@ export function pinoLoggerConfig(serviceName: string): PinoParams {
         return `${contextString} - [${statusCode}] `
       },
       customErrorMessage: (_req, _res, error) => error?.message,
+      customProps: (req, res) => {
+        return {
+          // For Datadog's APM (https://docs.datadoghq.com/logs/log_configuration/attributes_naming_convention/)
+          [tags.RESOURCE_NAME]: req.url,
+          [tags.SPAN_TYPE]: types.WEB,
+          [tags.SPAN_KIND]: kinds.SERVER,
+          [tags.HTTP_STATUS_CODE]: res.writableEnded ? res.statusCode : undefined,
+          [tags.HTTP_URL]: req.url,
+          [tags.HTTP_METHOD]: req.method,
+          [tags.HTTP_USERAGENT]: req.headers['user-agent'],
+          'http.version': req.httpVersion,
+          context_name: 'express.request',
+        }
+      },
+      redact: {
+        paths: ['req.headers', 'res.headers'], // Hide headers on Datadog
+        remove: true,
+      },
+      base: {
+        service: serviceName,
+      },
     },
     renameContext: 'caller', // For pino-pretty
     exclude: excludePaths.map(path => ({

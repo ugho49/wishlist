@@ -53,6 +53,7 @@
     "class-validator": "0.14.2",
     "clsx": "2.1.1",
     "core-js": "3.45.1",
+    "dd-trace": "5.69.0",
     "drizzle-orm": "0.44.5",
     "emoji-mart": "5.6.0",
     "firebase-admin": "13.5.0",

@@ -4,29 +4,29 @@ services:
     container_name: traefik
     command:
       # Active le fournisseur Docker pour que Traefik détecte les conteneurs
-      - '--providers.docker=true'
+      - "--providers.docker=true"
       # Empêche Traefik d'exposer tous les conteneurs par défaut
-      - '--providers.docker.exposedbydefault=false'
+      - "--providers.docker.exposedbydefault=false"
       # Crée le point d'entrée pour le trafic HTTP sur le port 80
-      - '--entrypoints.web.address=:80'
+      - "--entrypoints.web.address=:80"
       # Crée le point d'entrée pour le trafic HTTPS sur le port 443
-      - '--entrypoints.websecure.address=:443'
+      - "--entrypoints.websecure.address=:443"
       # Configure le résolveur de certificats Let's Encrypt
-      - '--certificatesresolvers.letsencrypt.acme.tlschallenge=true'
-      - '--certificatesresolvers.letsencrypt.acme.email=contact@wishlistapp.fr'
-      - '--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/wishlistapi.json'
+      - "--certificatesresolvers.letsencrypt.acme.tlschallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.email=contact@wishlistapp.fr"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/wishlistapi.json"
       # Redirige tout le trafic HTTP vers HTTPS
-      - '--entrypoints.web.http.redirections.entrypoint.to=websecure'
-      - '--entrypoints.web.http.redirections.entrypoint.scheme=https'
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
     ports:
       # Expose les ports web sur le VPS
-      - '80:80'
-      - '443:443'
+      - "80:80"
+      - "443:443"
     volumes:
       # Permet à Traefik de communiquer avec l'API Docker
-      - '/var/run/docker.sock:/var/run/docker.sock:ro'
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
       # Stocke les certificats SSL
-      - 'letsencrypt-data:/letsencrypt'
+      - "letsencrypt-data:/letsencrypt"
     restart: unless-stopped
 
   db:
@@ -39,9 +39,9 @@ services:
     volumes:
       - db-data:/var/lib/postgresql/data
     ports:
-      - '5432:5432'
+      - "5432:5432"
     healthcheck:
-      test: 'pg_isready -d $DB_NAME -U $DB_USER'
+      test: "pg_isready -d $DB_NAME -U $DB_USER"
 
   pgbackups:
     image: prodrigestivill/postgres-backup-local:17-alpine
@@ -51,12 +51,12 @@ services:
     depends_on:
       - db
     environment:
-      POSTGRES_HOST: 'db'
+      POSTGRES_HOST: "db"
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
-      POSTGRES_EXTRA_OPTS: '-Z9 --schema=public --blobs'
-      SCHEDULE: '@daily'
+      POSTGRES_EXTRA_OPTS: "-Z9 --schema=public --blobs"
+      SCHEDULE: "@daily"
       BACKUP_KEEP_DAYS: 7
       BACKUP_KEEP_WEEKS: 4
       BACKUP_KEEP_MONTHS: 2
@@ -74,52 +74,80 @@ services:
       - ./firebase:/usr/src/app/firebase
     environment:
       PORT: 3000
-      DB_HOST: 'db'
+      NODE_ENV: "production"
+      DD_ENV: "prod"
+      DD_SERVICE: "wishlist-api"
+      DD_VERSION: ${API_VERSION}
+      DB_HOST: "db"
       DB_PORT: 5432
       DB_USERNAME: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
       DB_NAME: ${DB_NAME}
-      AUTH_ISSUER: 'Wishlist API'
+      AUTH_ISSUER: "Wishlist API"
       AUTH_ACCESS_TOKEN_SECRET: ${AUTH_ACCESS_TOKEN_SECRET}
       AUTH_ACCESS_TOKEN_DURATION: ${AUTH_ACCESS_TOKEN_DURATION}
       AUTH_ACCESS_TOKEN_ALGORITHM: ${AUTH_ACCESS_TOKEN_ALGORITHM}
       GOOGLE_OAUTH_CLIENT_ID: ${GOOGLE_OAUTH_CLIENT_ID}
       GOOGLE_OAUTH_CLIENT_SECRET: ${GOOGLE_OAUTH_CLIENT_SECRET}
       RESET_PASSWORD_TOKEN_DURATION_IN_MIN: 15
-      RESET_PASSWORD_RENEW_URL: 'https://wishlistapp.fr/forgot-password/renew'
+      RESET_PASSWORD_RENEW_URL: "https://wishlistapp.fr/forgot-password/renew"
       MAIL_HOST: ${MAIL_HOST}
       MAIL_PORT: ${MAIL_PORT}
       MAIL_PASSWORD: ${MAIL_PASSWORD}
       MAIL_USERNAME: ${MAIL_USERNAME}
-      FIREBASE_SERVICE_ACCOUNT_KEY_PATH: '/usr/src/app/firebase/firebase-config.json'
+      FIREBASE_SERVICE_ACCOUNT_KEY_PATH: "/usr/src/app/firebase/firebase-config.json"
       FIREBASE_BUCKET_NAME: ${FIREBASE_BUCKET_NAME}
-      DB_MIGRATIONS_FOLDER: '/usr/src/app/dist/apps/api/drizzle/migrations'
-      MAIL_TEMPLATE_DIR: '/usr/src/app/dist/apps/api/templates'
+      DB_MIGRATIONS_FOLDER: "/usr/src/app/dist/apps/api/drizzle/migrations"
+      MAIL_TEMPLATE_DIR: "/usr/src/app/dist/apps/api/templates"
     depends_on:
-      - 'db'
+      - "db"
     healthcheck:
-      test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost:3000/health']
+      test:
+        [
+          "CMD",
+          "wget",
+          "--quiet",
+          "--tries=1",
+          "--spider",
+          "http://localhost:3000/health",
+        ]
       interval: 5s
       timeout: 5s
       retries: 10
       start_period: 5s
     labels:
       # Active Traefik pour ce service
-      - 'traefik.enable=true'
+      - "traefik.enable=true"
       # Règle de routage HTTPS
-      - 'traefik.http.routers.wishlistapi.rule=Host(`api.wishlistapp.fr`)'
-      - 'traefik.http.routers.wishlistapi.entrypoints=websecure'
-      - 'traefik.http.routers.wishlistapi.tls.certresolver=letsencrypt'
+      - "traefik.http.routers.wishlistapi.rule=Host(`api.wishlistapp.fr`)"
+      - "traefik.http.routers.wishlistapi.entrypoints=websecure"
+      - "traefik.http.routers.wishlistapi.tls.certresolver=letsencrypt"
       # Configuration du service
-      - 'traefik.http.services.wishlistapi.loadbalancer.server.port=3000'
+      - "traefik.http.services.wishlistapi.loadbalancer.server.port=3000"
       # Configuration du health check
-      - 'traefik.http.services.wishlistapi.loadbalancer.healthcheck.path=/health'
-      - 'traefik.http.services.wishlistapi.loadbalancer.healthcheck.interval=10s'
-      - 'traefik.http.services.wishlistapi.loadbalancer.healthcheck.timeout=5s'
+      - "traefik.http.services.wishlistapi.loadbalancer.healthcheck.path=/health"
+      - "traefik.http.services.wishlistapi.loadbalancer.healthcheck.interval=10s"
+      - "traefik.http.services.wishlistapi.loadbalancer.healthcheck.timeout=5s"
       # Configuration pour les drains gracieux
-      - 'traefik.http.services.wishlistapi.loadbalancer.healthcheck.followredirects=true'
+      - "traefik.http.services.wishlistapi.loadbalancer.healthcheck.followredirects=true"
       # Configuration pour améliorer la détection des changements
-      - 'traefik.http.services.wishlistapi.loadbalancer.server.scheme=http'
+      - "traefik.http.services.wishlistapi.loadbalancer.server.scheme=http"
+
+  datadog:
+    image: gcr.io/datadoghq/agent:latest
+    container_name: dd-agent
+    restart: unless-stopped
+    environment:
+      DD_API_KEY: ${DD_API_KEY}
+      DD_SITE: "datadoghq.eu"
+      DD_LOGS_ENABLED: "true"
+      DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL: "true"
+      DD_CONTAINER_INCLUDE_LOGS: "name:api"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /proc/:/host/proc/:ro
+      - /opt/datadog-agent/run:/opt/datadog-agent/run:rw
+      - /sys/fs/cgroup/:/host/sys/fs/cgroup:ro
 
 volumes:
   db-data:
