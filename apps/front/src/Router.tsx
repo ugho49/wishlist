@@ -22,7 +22,6 @@ import { LandingPage } from './components/landing/LandingPage'
 import { PrivacyPolicyPage } from './components/legal/PrivacyPolicyPage'
 import { TermsOfServicePage } from './components/legal/TermsOfServicePage'
 import { WelcomePage } from './components/onboarding/WelcomePage'
-import { SecretSantaPage } from './components/secret-santa/SecretSantaPage'
 import { AdminUserPage } from './components/user/admin/AdminUserPage'
 import { UserProfilePage } from './components/user/UserProfilePage'
 import { CreateWishlistPage } from './components/wishlist/CreateWishlistPage'
@@ -69,7 +68,6 @@ export const AppRouter = () => {
             <Route path="new" element={<CreateEventPage />} />
             <Route path=":eventId" element={<EventPage />} />
             <Route path=":eventId/edit" element={<EditEventPage />} />
-            <Route path=":eventId/secret-santa" element={<SecretSantaPage />} />
           </Route>
 
           <Route path="wishlists">
