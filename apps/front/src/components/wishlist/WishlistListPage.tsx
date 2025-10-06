@@ -1,5 +1,5 @@
 import AddIcon from '@mui/icons-material/Add'
-import { Box, Button, Grid, Stack } from '@mui/material'
+import { Box, Grid } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
 import { parseAsInteger, useQueryState } from 'nuqs'
 import { useEffect, useState } from 'react'
@@ -8,8 +8,8 @@ import { useApi } from '../../hooks/useApi'
 import { FabAutoGrow } from '../common/FabAutoGrow'
 import { Loader } from '../common/Loader'
 import { Pagination } from '../common/Pagination'
-import { RouterLink } from '../common/RouterLink'
 import { Title } from '../common/Title'
+import { EmptyListsState } from './EmptyListsState'
 import { WishlistCardWithEvents } from './WishlistCardWithEvents'
 
 const CREATE_LIST_ROUTE = '/wishlists/new'
@@ -31,7 +31,7 @@ export const WishlistListPage = () => {
 
   return (
     <Box>
-      <Title>Mes listes</Title>
+      {totalElements > 0 && <Title>Mes listes</Title>}
 
       <Loader loading={loading}>
         <Grid container spacing={3}>
@@ -58,12 +58,11 @@ export const WishlistListPage = () => {
       )}
 
       {totalElements === 0 && !loading && (
-        <Stack alignItems="center" gap={2} sx={{ marginTop: '50px' }}>
-          <span>Vous n'avez aucune liste pour le moment.</span>
-          <Button component={RouterLink} variant="contained" color="primary" to={CREATE_LIST_ROUTE}>
-            Ajouter une liste
-          </Button>
-        </Stack>
+        <EmptyListsState
+          addListRoute={CREATE_LIST_ROUTE}
+          title="Aucune liste pour le moment"
+          subtitle="Créez votre première liste de souhaits et partagez vos envies !"
+        />
       )}
     </Box>
   )

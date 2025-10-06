@@ -1,11 +1,11 @@
 import type { DetailedEventDto } from '@wishlist/common'
 
 import AddIcon from '@mui/icons-material/Add'
-import { Box, Button, Grid, Stack } from '@mui/material'
+import { Box, Grid } from '@mui/material'
 import { useMemo } from 'react'
 
 import { FabAutoGrow } from '../common/FabAutoGrow'
-import { RouterLink } from '../common/RouterLink'
+import { EmptyListsState } from '../wishlist/EmptyListsState'
 import { WishlistCardWithOwner } from '../wishlist/WishlistCardWithOwner'
 
 export type EventWishlistsProps = {
@@ -35,12 +35,11 @@ export const EventWishlists = ({ event }: EventWishlistsProps) => {
       )}
 
       {nbOfItems === 0 && (
-        <Stack alignItems="center" gap={2} sx={{ marginTop: '50px' }}>
-          <Button component={RouterLink} variant="contained" color="primary" to={addListRoute}>
-            Ajouter une liste
-          </Button>
-          <span>Cet évènement ne contient aucune liste.</span>
-        </Stack>
+        <EmptyListsState
+          addListRoute={addListRoute}
+          title="Aucune liste pour le moment"
+          subtitle="Créez votre première liste de souhaits pour cet événement et partagez vos envies !"
+        />
       )}
     </Box>
   )
