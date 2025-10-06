@@ -1,32 +1,35 @@
 import type { AttendeeDto } from '@wishlist/common'
 
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
+import CardGiftcardIcon from '@mui/icons-material/CardGiftcard'
 import EditIcon from '@mui/icons-material/Edit'
-import ForestIcon from '@mui/icons-material/Forest'
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import PeopleIcon from '@mui/icons-material/People'
-import { Box, Button, Container, Stack, styled, Typography } from '@mui/material'
+import {
+  Box,
+  Button,
+  ButtonGroup,
+  Container,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
+  Stack,
+  styled,
+  Typography,
+} from '@mui/material'
 import { DateTime } from 'luxon'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { EventIcon } from './EventIcon'
 
-const CompactButton = styled(Button)(({ theme }) => ({
-  borderRadius: '20px',
-  fontSize: '0.75rem',
-  textTransform: 'none',
-  paddingTop: theme.spacing(0.5),
-  paddingBottom: theme.spacing(0.5),
-  paddingLeft: theme.spacing(2),
-  paddingRight: theme.spacing(2),
-  height: '28px',
-  '&:hover': {
-    color: 'white',
-  },
-}))
-
-const HeaderContainer = styled(Container)(({ theme }) => ({
+const HeaderContainer = styled(Box)(({ theme }) => ({
+  backgroundColor: theme.palette.grey[50],
+  borderBottom: `1px solid ${theme.palette.grey[200]}`,
+  paddingTop: theme.spacing(3),
+  paddingBottom: theme.spacing(3),
   marginBottom: theme.spacing(4),
-  marginTop: theme.spacing(4),
 }))
 
 const HeaderStack = styled(Stack)(({ theme }) => ({
@@ -108,17 +111,26 @@ const RightSection = styled(Box)({
   flexShrink: 0,
 })
 
-const ButtonsStack = styled(Stack)(({ theme }) => ({
-  gap: theme.spacing(1.5),
-  justifyContent: 'center',
-  alignItems: 'stretch',
+const StyledButtonGroup = styled(ButtonGroup)(({ theme }) => ({
+  boxShadow: 'none',
   [theme.breakpoints.down('md')]: {
-    flexDirection: 'row',
+    width: '100%',
   },
-  [theme.breakpoints.up('md')]: {
-    flexDirection: 'column',
-    minWidth: '180px',
+}))
+
+const MainActionButton = styled(Button)(({ theme }) => ({
+  textTransform: 'none',
+  fontWeight: 500,
+  fontSize: '0.875rem',
+  padding: theme.spacing(1, 2.5),
+  [theme.breakpoints.down('md')]: {
+    flex: 1,
   },
+}))
+
+const DropdownButton = styled(Button)(({ theme }) => ({
+  padding: theme.spacing(1, 1),
+  minWidth: 'auto',
 }))
 
 export type EventHeaderProps = {
@@ -141,76 +153,104 @@ export const EventHeader = ({
   openAttendeesDialog,
 }: EventHeaderProps) => {
   const navigate = useNavigate()
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const menuOpen = Boolean(anchorEl)
+
+  const handleOpenMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget)
+  }
+
+  const handleCloseMenu = () => {
+    setAnchorEl(null)
+  }
+
+  const handleSecretSanta = () => {
+    handleCloseMenu()
+    navigate(`/events/${eventId}/edit?tab=secret_santa`)
+  }
+
+  const handleAttendees = () => {
+    handleCloseMenu()
+    navigate(`/events/${eventId}/edit?tab=attendees`)
+  }
 
   return (
-    <HeaderContainer maxWidth="lg">
-      <HeaderStack>
-        {/* Left section - Icon and Title */}
-        <LeftSection>
-          <IconTitleContainer>
-            <IconWrapper>
-              <EventIcon icon={icon} size="large" />
-            </IconWrapper>
-            <TitleContainer>
-              <EventTitle variant="h4" as="h1">
-                {title}
-              </EventTitle>
+    <HeaderContainer>
+      <Container maxWidth="lg">
+        <HeaderStack>
+          {/* Left section - Icon and Title */}
+          <LeftSection>
+            <IconTitleContainer>
+              <IconWrapper>
+                <EventIcon icon={icon} size="large" />
+              </IconWrapper>
+              <TitleContainer>
+                <EventTitle variant="h4" as="h1">
+                  {title}
+                </EventTitle>
 
-              {/* Metadata */}
-              <MetadataStack>
-                <MetadataItem>
-                  <AccessTimeIcon fontSize="small" />
-                  <MetadataText variant="body2">
-                    {DateTime.fromISO(eventDate).toLocaleString(DateTime.DATE_HUGE)}
-                  </MetadataText>
-                </MetadataItem>
-                <ClickableMetadataItem onClick={() => openAttendeesDialog()}>
-                  <PeopleIcon fontSize="small" />
-                  <MetadataText variant="body2">
-                    {attendees.length} {attendees.length > 1 ? 'participants' : 'participant'}
-                  </MetadataText>
-                </ClickableMetadataItem>
-              </MetadataStack>
-            </TitleContainer>
-          </IconTitleContainer>
-        </LeftSection>
+                {/* Metadata */}
+                <MetadataStack>
+                  <MetadataItem>
+                    <AccessTimeIcon fontSize="small" />
+                    <MetadataText variant="body2">
+                      {DateTime.fromISO(eventDate).toLocaleString(DateTime.DATE_HUGE)}
+                    </MetadataText>
+                  </MetadataItem>
+                  <ClickableMetadataItem onClick={() => openAttendeesDialog()}>
+                    <PeopleIcon fontSize="small" />
+                    <MetadataText variant="body2">
+                      {attendees.length} {attendees.length > 1 ? 'participants' : 'participant'}
+                    </MetadataText>
+                  </ClickableMetadataItem>
+                </MetadataStack>
+              </TitleContainer>
+            </IconTitleContainer>
+          </LeftSection>
 
-        {/* Right section - Action Buttons */}
-        {currentUserCanEdit && (
-          <RightSection>
-            <ButtonsStack>
-              <CompactButton
-                color="success"
-                variant="outlined"
-                size="small"
-                startIcon={<ForestIcon fontSize="small" />}
-                onClick={() => navigate(`/events/${eventId}/edit?tab=secret_santa`)}
-                sx={{
-                  '&:hover': {
-                    backgroundColor: 'success.light',
-                  },
+          {/* Right section - Action Button with Dropdown */}
+          {currentUserCanEdit && (
+            <RightSection>
+              <StyledButtonGroup variant="outlined" color="primary" disableElevation>
+                <MainActionButton startIcon={<EditIcon />} onClick={() => navigate(`/events/${eventId}/edit`)}>
+                  Modifier
+                </MainActionButton>
+                <DropdownButton size="small" onClick={handleOpenMenu}>
+                  <KeyboardArrowDownIcon />
+                </DropdownButton>
+              </StyledButtonGroup>
+
+              <Menu
+                id="event-actions-menu"
+                anchorEl={anchorEl}
+                open={menuOpen}
+                onClose={handleCloseMenu}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'right',
+                }}
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
                 }}
               >
-                Secret Santa
-              </CompactButton>
-              <CompactButton
-                color="primary"
-                variant="outlined"
-                size="small"
-                startIcon={<EditIcon fontSize="small" />}
-                onClick={() => navigate(`/events/${eventId}/edit`)}
-                sx={{
-                  '&:hover': {
-                    backgroundColor: 'primary.light',
-                  },
-                }}
-              >
-                Modifier
-              </CompactButton>
-            </ButtonsStack>
-          </RightSection>
-        )}
-      </HeaderStack>
+                <MenuItem onClick={handleAttendees}>
+                  <ListItemIcon>
+                    <PeopleIcon fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText>Gérer les participants</ListItemText>
+                </MenuItem>
+                <MenuItem onClick={handleSecretSanta}>
+                  <ListItemIcon>
+                    <CardGiftcardIcon fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText>Gérer le Secret Santa</ListItemText>
+                </MenuItem>
+              </Menu>
+            </RightSection>
+          )}
+        </HeaderStack>
+      </Container>
     </HeaderContainer>
   )
 }
