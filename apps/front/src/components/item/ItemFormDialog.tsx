@@ -25,6 +25,7 @@ import {
   TextField,
   Toolbar,
   Typography,
+  useMediaQuery,
 } from '@mui/material'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useApi, useToast } from '@wishlist/front-hooks'
@@ -69,6 +70,8 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
   const [score, setScore] = useState<number | null>(null)
   const [scanUrlLoading, setScanUrlLoading] = useState(false)
   const queryClient = useQueryClient()
+
+  const isFullscreen = useMediaQuery(theme => theme.breakpoints.down('md'))
 
   const invalidUrl = url !== '' && !isValidUrl(url)
   const formIsValid =
@@ -173,7 +176,13 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
   )
 
   return (
-    <Dialog fullScreen open={open} onClose={handleClose} slots={{ transition: Transition }}>
+    <Dialog
+      fullScreen={isFullscreen}
+      fullWidth={!isFullscreen}
+      open={open}
+      onClose={handleClose}
+      slots={{ transition: Transition }}
+    >
       <AppBar sx={{ position: 'relative' }}>
         <Toolbar sx={{ justifyContent: 'space-between' }}>
           <Typography sx={{ ml: 2, flex: 1, textTransform: 'uppercase' }} variant="h6" component="div">
@@ -184,7 +193,10 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
           </IconButton>
         </Toolbar>
       </AppBar>
-      <Container maxWidth="sm" sx={{ marginTop: '40px' }}>
+      <Container
+        maxWidth="sm"
+        sx={isFullscreen ? { marginBlock: '40px' } : { marginTop: '20px', marginBottom: '40px' }}
+      >
         <Subtitle>Renseigner les informations sur le souhait</Subtitle>
 
         <Stack component="form" onSubmit={onSubmit} noValidate gap={2}>
@@ -259,47 +271,41 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
           </Box>
 
           <Stack direction="row" flexWrap="wrap" gap={2}>
-            <Box sx={{ flexGrow: 1 }}>
-              <TextField
-                label="URL de photo"
-                type="url"
-                autoComplete="off"
-                disabled={loading || scanUrlLoading}
-                fullWidth
-                value={pictureUrl}
-                slotProps={{ htmlInput: { maxLength: 1000 } }}
-                placeholder="Ex: https://www.google.com"
-                error={validPictureUrl === false}
-                helperText={
-                  <>
-                    {validPictureUrl === false && <span>L'url saisie ne contient pas une image</span>}
-                    {validPictureUrl === true && <CharsRemaining max={1000} value={pictureUrl} />}
-                  </>
-                }
-                onChange={e => {
-                  setValidPictureUrl(undefined)
-                  setPictureUrl(e.target.value)
-                }}
-              />
-            </Box>
+            <TextField
+              label="URL de photo"
+              type="url"
+              autoComplete="off"
+              disabled={loading || scanUrlLoading}
+              sx={{ flexGrow: 1 }}
+              value={pictureUrl}
+              slotProps={{ htmlInput: { maxLength: 1000 } }}
+              placeholder="Ex: https://www.google.com"
+              error={validPictureUrl === false}
+              helperText={
+                <>
+                  {validPictureUrl === false && <span>L'url saisie ne contient pas une image</span>}
+                  {validPictureUrl === true && <CharsRemaining max={1000} value={pictureUrl} />}
+                </>
+              }
+              onChange={e => {
+                setValidPictureUrl(undefined)
+                setPictureUrl(e.target.value)
+              }}
+            />
 
             {pictureUrl && validPictureUrl !== false && (
-              <Box>
-                <InputLabel sx={{ visibility: 'hidden' }}>Preview</InputLabel>
-
-                <Avatar
-                  src={pictureUrl}
-                  variant="square"
-                  sx={{
-                    height: '56px',
-                    width: '56px',
-                  }}
-                  onLoad={() => setValidPictureUrl(true)}
-                  onError={() => setValidPictureUrl(false)}
-                >
-                  <CameraAltIcon fontSize="small" />
-                </Avatar>
-              </Box>
+              <Avatar
+                src={pictureUrl}
+                variant="square"
+                sx={{
+                  height: '56px',
+                  width: '56px',
+                }}
+                onLoad={() => setValidPictureUrl(true)}
+                onError={() => setValidPictureUrl(false)}
+              >
+                <CameraAltIcon fontSize="small" />
+              </Avatar>
             )}
           </Stack>
 
