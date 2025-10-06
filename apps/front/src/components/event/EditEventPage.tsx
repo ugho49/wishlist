@@ -66,7 +66,7 @@ export const EditEventPage = () => {
             <Box>
               {tab === TabValues.informations && <EditEventInformations event={event} />}
               {tab === TabValues.attendees && <EditEventAttendees eventId={event.id} attendees={event.attendees} />}
-              {tab === TabValues.secretSanta && <EditSecretSanta eventId={event.id} />}
+              {tab === TabValues.secretSanta && <EditSecretSanta event={event} />}
             </Box>
           </Container>
         )}

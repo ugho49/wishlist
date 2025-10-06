@@ -1,20 +1,22 @@
-import { Box, Button, Stack } from '@mui/material'
-import React from 'react'
-import { useNavigate } from 'react-router-dom'
+import type { DetailedEventDto } from '@wishlist/common'
 
-type EditSecretSantaProps = { eventId: string }
+import { Stack } from '@mui/material'
 
-export const EditSecretSanta = ({ eventId }: EditSecretSantaProps) => {
-  const navigate = useNavigate()
+import { useSecretSanta } from '../../hooks/domain/useSecretSanta'
+import { Loader } from '../common/Loader'
+import { NoSecretSanta } from '../secret-santa/NoSecretSanta'
+import { SecretSanta } from '../secret-santa/SecretSanta'
+
+type EditSecretSantaProps = { event: DetailedEventDto }
+
+export const EditSecretSanta = ({ event }: EditSecretSantaProps) => {
+  const { secretSanta, loading } = useSecretSanta(event.id)
 
   return (
-    <Stack gap={3} alignItems="center" marginTop={5}>
-      <Box>Cliquer sur le bouton ci-dessous pour gérer le Secret Santa</Box>
-      <Box>
-        <Button variant="contained" onClick={() => navigate(`/events/${eventId}/secret-santa`)}>
-          Gérer le Secret Santa
-        </Button>
-      </Box>
+    <Stack marginTop={5}>
+      <Loader loading={loading}>
+        {secretSanta ? <SecretSanta event={event} secretSanta={secretSanta} /> : <NoSecretSanta eventId={event.id} />}
+      </Loader>
     </Stack>
   )
 }

@@ -19,13 +19,10 @@ import {
   Toolbar,
   Typography,
 } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import React, { forwardRef, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
-
-import { InputLabel } from '../common/InputLabel'
 
 const Transition = forwardRef(function Transition(
   props: TransitionProps & { children: React.ReactElement },
@@ -67,8 +64,7 @@ export const EditSecretSantaFormDialog = ({
   handleSubmit,
   handleClose,
 }: EditSecretSantaFormDialogProps) => {
-  const theme = useTheme()
-  const smallScreen = useMediaQuery(theme.breakpoints.down('md'))
+  const isFullscreen = useMediaQuery(theme => theme.breakpoints.down('md'))
   const {
     register,
     handleSubmit: handleFormSubmit,
@@ -103,7 +99,13 @@ export const EditSecretSantaFormDialog = ({
   }, [input])
 
   return (
-    <Dialog fullScreen open={open} onClose={onClose} slots={{ transition: Transition }}>
+    <Dialog
+      fullScreen={isFullscreen}
+      fullWidth={!isFullscreen}
+      open={open}
+      onClose={onClose}
+      slots={{ transition: Transition }}
+    >
       <AppBar sx={{ position: 'relative' }}>
         <Toolbar sx={{ justifyContent: 'space-between' }}>
           <Typography sx={{ ml: 2, flex: 1, textTransform: 'uppercase' }} variant="h6" component="div">
@@ -114,8 +116,11 @@ export const EditSecretSantaFormDialog = ({
           </IconButton>
         </Toolbar>
       </AppBar>
-      <Container maxWidth="sm" sx={{ marginTop: '40px' }}>
-        <Stack component="form" onSubmit={handleFormSubmit(onSubmit)} noValidate gap={smallScreen ? 2 : 3}>
+      <Container
+        maxWidth="sm"
+        sx={isFullscreen ? { marginBlock: '40px' } : { marginTop: '20px', marginBottom: '40px' }}
+      >
+        <Stack component="form" onSubmit={handleFormSubmit(onSubmit)} noValidate gap={2}>
           <Alert severity="info">
             <AlertTitle>Toutes les valeurs sont optionnelles</AlertTitle>
             <Typography variant="body2">
@@ -131,9 +136,9 @@ export const EditSecretSantaFormDialog = ({
             </Typography>
           </Alert>
           <Box>
-            <InputLabel>Budget Max (€)</InputLabel>
             <TextField
               {...register('budget', { valueAsNumber: true })}
+              label="Budget Max (€)"
               fullWidth
               type="number"
               inputMode="numeric"
@@ -144,9 +149,9 @@ export const EditSecretSantaFormDialog = ({
           </Box>
 
           <Box>
-            <InputLabel>Description</InputLabel>
             <TextField
               {...register('description')}
+              label="Description"
               autoComplete="off"
               fullWidth
               multiline
@@ -157,7 +162,7 @@ export const EditSecretSantaFormDialog = ({
             />
           </Box>
 
-          <Button type="submit" fullWidth variant="contained" size="large" color="secondary" startIcon={<SaveIcon />}>
+          <Button type="submit" fullWidth variant="contained" size="large" color="primary" startIcon={<SaveIcon />}>
             {saveButtonText}
           </Button>
         </Stack>

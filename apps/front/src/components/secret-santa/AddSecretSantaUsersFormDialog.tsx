@@ -4,7 +4,19 @@ import type { AttendeeDto, AttendeeId, SecretSantaUserDto } from '@wishlist/comm
 
 import CloseIcon from '@mui/icons-material/Close'
 import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt'
-import { AppBar, Avatar, Button, Container, Dialog, IconButton, Slide, Stack, Toolbar, Typography } from '@mui/material'
+import {
+  AppBar,
+  Avatar,
+  Button,
+  Container,
+  Dialog,
+  IconButton,
+  Slide,
+  Stack,
+  Toolbar,
+  Typography,
+  useMediaQuery,
+} from '@mui/material'
 import { DataGrid } from '@mui/x-data-grid'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React, { forwardRef, useEffect, useMemo, useState } from 'react'
@@ -59,7 +71,7 @@ const columns: GridColDef<RowType>[] = [
     display: 'flex',
     sortable: true,
     filterable: false,
-    width: 200,
+    width: 150,
     headerAlign: 'center',
     align: 'center',
     renderCell: ({ row }) => (
@@ -84,6 +96,7 @@ export const AddSecretSantaUsersFormDialog = ({
   const queryClient = useQueryClient()
   const { addToast } = useToast()
   const [selectedIds, setSelectedIds] = useState<AttendeeId[]>([])
+  const isFullscreen = useMediaQuery(theme => theme.breakpoints.down('md'))
 
   const { mutateAsync: addUsers, isPending: loading } = useMutation({
     mutationKey: ['secret-santa.add-users', { id: secretSantaId }],
@@ -116,7 +129,8 @@ export const AddSecretSantaUsersFormDialog = ({
 
   return (
     <Dialog
-      fullScreen
+      fullScreen={isFullscreen}
+      maxWidth="xl"
       open={open}
       onClose={handleClose}
       disableEscapeKeyDown={loading}

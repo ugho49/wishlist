@@ -184,7 +184,7 @@ export const EventHeader = ({
                 variant="outlined"
                 size="small"
                 startIcon={<ForestIcon fontSize="small" />}
-                onClick={() => navigate(`/events/${eventId}/secret-santa`)}
+                onClick={() => navigate(`/events/${eventId}/edit?tab=secret_santa`)}
                 sx={{
                   '&:hover': {
                     backgroundColor: 'success.light',
