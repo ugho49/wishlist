@@ -57,7 +57,9 @@ export const EventListPage = () => {
         </>
       )}
 
-      {totalElements === 0 && !loading && <EmptyEventsState addEventRoute={CREATE_EVENT_ROUTE} />}
+      {totalElements === 0 && !loading && (
+        <EmptyEventsState sx={{ marginTop: '100px' }} addEventRoute={CREATE_EVENT_ROUTE} />
+      )}
     </Box>
   )
 }

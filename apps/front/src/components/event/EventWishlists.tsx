@@ -36,6 +36,7 @@ export const EventWishlists = ({ event }: EventWishlistsProps) => {
 
       {nbOfItems === 0 && (
         <EmptyListsState
+          sx={{ marginTop: '50px' }}
           addListRoute={addListRoute}
           title="Aucune liste pour le moment"
           subtitle="Créez votre première liste de souhaits pour cet événement et partagez vos envies !"

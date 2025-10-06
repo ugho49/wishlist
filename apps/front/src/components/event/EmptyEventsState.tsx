@@ -1,22 +1,16 @@
+import type { SxProps, Theme } from '@mui/material'
+
 import AddIcon from '@mui/icons-material/Add'
 import { Box, Button, Stack, styled, Typography } from '@mui/material'
 
-import EmptyEventsIllustration from '../../assets/illustrations/empty-events.svg?react'
+import EmptyEventsIllustration from '../../assets/illustrations/empty-events.png'
 
 const EmptyStateContainer = styled(Stack)(({ theme }) => ({
   alignItems: 'center',
   gap: theme.spacing(2),
 }))
 
-const IllustrationWrapper = styled(Box)(({ theme }) => ({
-  '& svg': {
-    width: '200px',
-    height: '200px',
-    [theme.breakpoints.down('sm')]: {
-      width: '150px',
-      height: '150px',
-    },
-  },
+const IllustrationWrapper = styled(Box)(() => ({
   animation: 'fadeInUp 0.6s ease-out',
   '@keyframes fadeInUp': {
     from: {
@@ -27,6 +21,15 @@ const IllustrationWrapper = styled(Box)(({ theme }) => ({
       opacity: 1,
       transform: 'translateY(0)',
     },
+  },
+}))
+
+const Illustration = styled('img')(({ theme }) => ({
+  width: '150px',
+  height: '150px',
+  [theme.breakpoints.down('sm')]: {
+    width: '100px',
+    height: '100px',
   },
 }))
 
@@ -60,13 +63,14 @@ const AddEventButton = styled(Button)(({ theme }) => ({
 
 export type EmptyEventsStateProps = {
   addEventRoute: string
+  sx?: SxProps<Theme>
 }
 
-export const EmptyEventsState = ({ addEventRoute }: EmptyEventsStateProps) => {
+export const EmptyEventsState = ({ addEventRoute, sx }: EmptyEventsStateProps) => {
   return (
-    <EmptyStateContainer>
+    <EmptyStateContainer sx={sx}>
       <IllustrationWrapper>
-        <EmptyEventsIllustration />
+        <Illustration src={EmptyEventsIllustration} alt="Empty Events" />
       </IllustrationWrapper>
 
       <Box textAlign="center">

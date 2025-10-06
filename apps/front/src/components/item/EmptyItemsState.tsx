@@ -1,22 +1,16 @@
+import type { SxProps, Theme } from '@mui/material'
+
 import AddIcon from '@mui/icons-material/Add'
 import { Box, Button, Stack, styled, Typography } from '@mui/material'
 
-import EmptyItemsIllustration from '../../assets/illustrations/empty-items.svg?react'
+import EmptyItemsIllustration from '../../assets/illustrations/empty-items.png'
 
 const EmptyStateContainer = styled(Stack)(({ theme }) => ({
   alignItems: 'center',
   gap: theme.spacing(2),
 }))
 
-const IllustrationWrapper = styled(Box)(({ theme }) => ({
-  '& svg': {
-    width: '200px',
-    height: '200px',
-    [theme.breakpoints.down('sm')]: {
-      width: '150px',
-      height: '150px',
-    },
-  },
+const IllustrationWrapper = styled(Box)(() => ({
   animation: 'fadeInUp 0.6s ease-out',
   '@keyframes fadeInUp': {
     from: {
@@ -27,6 +21,15 @@ const IllustrationWrapper = styled(Box)(({ theme }) => ({
       opacity: 1,
       transform: 'translateY(0)',
     },
+  },
+}))
+
+const Illustration = styled('img')(({ theme }) => ({
+  width: '150px',
+  height: '150px',
+  [theme.breakpoints.down('sm')]: {
+    width: '100px',
+    height: '100px',
   },
 }))
 
@@ -61,13 +64,14 @@ const AddItemButton = styled(Button)(({ theme }) => ({
 export type EmptyItemsStateProps = {
   onAddItem: () => void
   isOwner: boolean
+  sx?: SxProps<Theme>
 }
 
-export const EmptyItemsState = ({ onAddItem, isOwner }: EmptyItemsStateProps) => {
+export const EmptyItemsState = ({ onAddItem, isOwner, sx }: EmptyItemsStateProps) => {
   return (
-    <EmptyStateContainer>
+    <EmptyStateContainer sx={sx}>
       <IllustrationWrapper>
-        <EmptyItemsIllustration />
+        <Illustration src={EmptyItemsIllustration} alt="Empty Items" />
       </IllustrationWrapper>
 
       <Box textAlign="center">

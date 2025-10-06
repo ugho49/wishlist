@@ -170,7 +170,7 @@ export const WishlistItems = ({ wishlist }: WishlistTabItemsProps) => {
         </>
       )}
 
-      {nbOfItems === 0 && <EmptyItemsState onAddItem={addItem} isOwner={ownerOfTheList} />}
+      {nbOfItems === 0 && <EmptyItemsState sx={{ marginTop: '50px' }} onAddItem={addItem} isOwner={ownerOfTheList} />}
 
       <ItemFormDialog
         mode="create"

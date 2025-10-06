@@ -59,6 +59,7 @@ export const WishlistListPage = () => {
 
       {totalElements === 0 && !loading && (
         <EmptyListsState
+          sx={{ marginTop: '100px' }}
           addListRoute={CREATE_LIST_ROUTE}
           title="Aucune liste pour le moment"
           subtitle="Créez votre première liste de souhaits et partagez vos envies !"

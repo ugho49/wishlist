@@ -1,22 +1,16 @@
+import type { SxProps, Theme } from '@mui/material'
+
 import AddIcon from '@mui/icons-material/Add'
 import { Box, Button, Stack, styled, Typography } from '@mui/material'
 
-import EmptyWishlistIllustration from '../../assets/illustrations/empty-wishlist.svg?react'
+import EmptyWishlistIllustration from '../../assets/illustrations/empty-wishlists.png'
 
 const EmptyStateContainer = styled(Stack)(({ theme }) => ({
   alignItems: 'center',
   gap: theme.spacing(2),
 }))
 
-const IllustrationWrapper = styled(Box)(({ theme }) => ({
-  '& svg': {
-    width: '200px',
-    height: '200px',
-    [theme.breakpoints.down('sm')]: {
-      width: '150px',
-      height: '150px',
-    },
-  },
+const IllustrationWrapper = styled(Box)(() => ({
   animation: 'fadeInUp 0.6s ease-out',
   '@keyframes fadeInUp': {
     from: {
@@ -27,6 +21,15 @@ const IllustrationWrapper = styled(Box)(({ theme }) => ({
       opacity: 1,
       transform: 'translateY(0)',
     },
+  },
+}))
+
+const Illustration = styled('img')(({ theme }) => ({
+  width: '150px',
+  height: '150px',
+  [theme.breakpoints.down('sm')]: {
+    width: '100px',
+    height: '100px',
   },
 }))
 
@@ -62,13 +65,14 @@ export type EmptyListsStateProps = {
   addListRoute: string
   title: string
   subtitle: string
+  sx?: SxProps<Theme>
 }
 
-export const EmptyListsState = ({ addListRoute }: EmptyListsStateProps) => {
+export const EmptyListsState = ({ addListRoute, sx }: EmptyListsStateProps) => {
   return (
-    <EmptyStateContainer>
+    <EmptyStateContainer sx={sx}>
       <IllustrationWrapper>
-        <EmptyWishlistIllustration />
+        <Illustration src={EmptyWishlistIllustration} alt="Empty Wishlist" />
       </IllustrationWrapper>
 
       <Box textAlign="center">
