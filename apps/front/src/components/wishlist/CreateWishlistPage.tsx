@@ -173,7 +173,7 @@ export const CreateWishlistPage = () => {
       <Title>Créer une liste</Title>
       <Box sx={{ width: '100%' }}>
         <Stepper activeStep={step - 1} alternativeLabel>
-          {steps.map((label, i) => (
+          {(fromEvent ? steps.slice(0, -1) : steps).map((label, i) => (
             <Step key={label} completed={step > i + 1 || loading}>
               <StepLabel>{label}</StepLabel>
             </Step>
@@ -364,7 +364,7 @@ export const CreateWishlistPage = () => {
                     </Button>
                   )}
                 </Box>
-                {step < 3 && (
+                {step < 3 && !fromEvent && (
                   <Button
                     onClick={() => setStep(prev => prev + 1)}
                     disabled={!nextStepEnabled}
@@ -373,7 +373,7 @@ export const CreateWishlistPage = () => {
                     Suivant
                   </Button>
                 )}
-                {step === 3 && (
+                {(step === 3 || (fromEvent && step === 2)) && (
                   <Button
                     variant="contained"
                     loading={loading}
