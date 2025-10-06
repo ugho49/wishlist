@@ -1,0 +1,68 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Calendar base -->
+  <g id="calendar">
+    <!-- Calendar body -->
+    <rect x="40" y="60" width="120" height="110" rx="8" fill="#E8F4F8" stroke="#1976D2" stroke-width="2"/>
+
+    <!-- Calendar header -->
+    <rect x="40" y="60" width="120" height="30" rx="8" fill="#1976D2"/>
+    <rect x="40" y="75" width="120" height="15" fill="#1976D2"/>
+
+    <!-- Binding rings -->
+    <circle cx="65" cy="60" r="6" fill="#E8F4F8" stroke="#1976D2" stroke-width="2"/>
+    <circle cx="100" cy="60" r="6" fill="#E8F4F8" stroke="#1976D2" stroke-width="2"/>
+    <circle cx="135" cy="60" r="6" fill="#E8F4F8" stroke="#1976D2" stroke-width="2"/>
+
+    <!-- Calendar grid lines -->
+    <line x1="50" y1="105" x2="150" y2="105" stroke="#BBDEFB" stroke-width="1"/>
+    <line x1="50" y1="125" x2="150" y2="125" stroke="#BBDEFB" stroke-width="1"/>
+    <line x1="50" y1="145" x2="150" y2="145" stroke="#BBDEFB" stroke-width="1"/>
+
+    <line x1="75" y1="95" x2="75" y2="165" stroke="#BBDEFB" stroke-width="1"/>
+    <line x1="100" y1="95" x2="100" y2="165" stroke="#BBDEFB" stroke-width="1"/>
+    <line x1="125" y1="95" x2="125" y2="165" stroke="#BBDEFB" stroke-width="1"/>
+
+    <!-- Empty indicator - question mark in center -->
+    <circle cx="100" cy="125" r="20" fill="#BBDEFB" opacity="0.5"/>
+    <text x="100" y="137" font-size="28" fill="#1976D2" font-weight="bold" text-anchor="middle">?</text>
+  </g>
+
+  <!-- Party elements -->
+  <g id="party-elements">
+    <!-- Balloon 1 -->
+    <ellipse cx="25" cy="95" rx="12" ry="15" fill="#FF6B9D" opacity="0.8"/>
+    <line x1="25" y1="110" x2="20" y2="135" stroke="#FF6B9D" stroke-width="1"/>
+
+    <!-- Balloon 2 -->
+    <ellipse cx="175" cy="105" rx="12" ry="15" fill="#FFC107" opacity="0.8"/>
+    <line x1="175" y1="120" x2="180" y2="145" stroke="#FFC107" stroke-width="1"/>
+
+    <!-- Confetti -->
+    <rect x="30" y="45" width="4" height="8" fill="#FFC107" opacity="0.7" transform="rotate(25 32 49)"/>
+    <rect x="170" y="50" width="4" height="8" fill="#FF6B9D" opacity="0.7" transform="rotate(-25 172 54)"/>
+    <circle cx="45" cy="175" r="3" fill="#64B5F6" opacity="0.7"/>
+    <circle cx="155" cy="170" r="3" fill="#FFC107" opacity="0.7"/>
+    <rect x="25" y="160" width="5" height="5" fill="#FF6B9D" opacity="0.7" transform="rotate(45 27.5 162.5)"/>
+    <rect x="170" y="165" width="5" height="5" fill="#64B5F6" opacity="0.7" transform="rotate(45 172.5 167.5)"/>
+  </g>
+
+  <!-- Stars -->
+  <g id="stars">
+    <!-- Star 1 -->
+    <path d="M20 35 L22 41 L28 41 L23 45 L25 51 L20 47 L15 51 L17 45 L12 41 L18 41 Z" fill="#FFC107" opacity="0.8"/>
+
+    <!-- Star 2 -->
+    <path d="M180 40 L182 46 L188 46 L183 50 L185 56 L180 52 L175 56 L177 50 L172 46 L178 46 Z" fill="#FFC107" opacity="0.8"/>
+
+    <!-- Star 3 -->
+    <path d="M165 25 L166.5 29 L170.5 29 L167.5 31.5 L169 35.5 L165 33 L161 35.5 L162.5 31.5 L159.5 29 L163.5 29 Z" fill="#FF6B9D" opacity="0.7"/>
+  </g>
+
+  <!-- Sparkles -->
+  <g id="sparkles">
+    <circle cx="55" cy="50" r="2" fill="#64B5F6"/>
+    <circle cx="145" cy="55" r="2" fill="#64B5F6"/>
+    <circle cx="35" cy="120" r="2" fill="#FFC107"/>
+    <circle cx="165" cy="135" r="2" fill="#FFC107"/>
+  </g>
+</svg>

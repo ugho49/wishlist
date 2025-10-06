@@ -1,5 +1,5 @@
 import AddIcon from '@mui/icons-material/Add'
-import { Box, Button, Grid, Stack } from '@mui/material'
+import { Box, Grid } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
 import { parseAsInteger, useQueryState } from 'nuqs'
 import { useEffect, useState } from 'react'
@@ -8,8 +8,8 @@ import { useApi } from '../../hooks/useApi'
 import { FabAutoGrow } from '../common/FabAutoGrow'
 import { Loader } from '../common/Loader'
 import { Pagination } from '../common/Pagination'
-import { RouterLink } from '../common/RouterLink'
 import { Title } from '../common/Title'
+import { EmptyEventsState } from './EmptyEventsState'
 import { EventCard } from './EventCard'
 
 const CREATE_EVENT_ROUTE = '/events/new'
@@ -31,7 +31,7 @@ export const EventListPage = () => {
 
   return (
     <Box>
-      <Title>Évènements</Title>
+      {totalElements > 0 && <Title>Évènements</Title>}
 
       <Loader loading={loading}>
         <Grid container spacing={3}>
@@ -57,14 +57,7 @@ export const EventListPage = () => {
         </>
       )}
 
-      {totalElements === 0 && !loading && (
-        <Stack alignItems="center" gap={2} sx={{ marginTop: '50px' }}>
-          <span>Vous n'avez pas d'évènements pour le moment.</span>
-          <Button component={RouterLink} variant="contained" color="primary" to={CREATE_EVENT_ROUTE}>
-            Ajouter un évènement
-          </Button>
-        </Stack>
-      )}
+      {totalElements === 0 && !loading && <EmptyEventsState addEventRoute={CREATE_EVENT_ROUTE} />}
     </Box>
   )
 }

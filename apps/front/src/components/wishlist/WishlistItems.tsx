@@ -5,11 +5,13 @@ import type { RootState } from '../../core'
 import AddIcon from '@mui/icons-material/Add'
 import CloseIcon from '@mui/icons-material/Close'
 import OpenInNewIcon from '@mui/icons-material/OpenInNew'
-import { Box, Button, Fade, Grid, IconButton, Modal, Stack, useMediaQuery, useTheme } from '@mui/material'
+import { Box, Fade, Grid, IconButton, Modal, Stack, useMediaQuery, useTheme } from '@mui/material'
+import { parseAsBoolean, parseAsStringEnum, useQueryState } from 'nuqs'
 import { useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
 
 import { FabAutoGrow } from '../common/FabAutoGrow'
+import { EmptyItemsState } from '../item/EmptyItemsState'
 import { ItemCard } from '../item/ItemCard'
 import { ItemFormDialog } from '../item/ItemFormDialog'
 import { FilterType, SortType, WishlistFilterAndSortItems } from './WishlistFilterAndSortItems'
@@ -112,9 +114,18 @@ const mapState = (state: RootState) => state.auth.user?.id
 
 export const WishlistItems = ({ wishlist }: WishlistTabItemsProps) => {
   const currentUserId = useSelector(mapState)
-  const [openItemFormDialog, setOpenItemFormDialog] = useState(false)
-  const [sort, setSort] = useState<SortType>(SortType.CREATED_AT_DESC)
-  const [filter, setFilter] = useState<FilterType>(FilterType.NONE)
+  const [openItemFormDialog, setOpenItemFormDialog] = useQueryState(
+    'showItemFormDialog',
+    parseAsBoolean.withDefault(false),
+  )
+  const [sort, setSort] = useQueryState(
+    'sort',
+    parseAsStringEnum<SortType>(Object.values(SortType)).withDefault(SortType.CREATED_AT_DESC),
+  )
+  const [filter, setFilter] = useQueryState(
+    'filter',
+    parseAsStringEnum<FilterType>(Object.values(FilterType)).withDefault(FilterType.NONE),
+  )
   const [itemsFilteredAndSorted, setItemsFilteredAndSorted] = useState<ItemDto[]>([])
   const nbOfItems = useMemo(() => wishlist.items.length, [wishlist.items])
   const ownerOfTheList = currentUserId === wishlist.owner.id
@@ -159,14 +170,7 @@ export const WishlistItems = ({ wishlist }: WishlistTabItemsProps) => {
         </>
       )}
 
-      {nbOfItems === 0 && (
-        <Stack alignItems="center" gap={2} sx={{ marginTop: '50px' }}>
-          <Button variant="contained" color="primary" onClick={() => addItem()}>
-            Ajouter un souhait
-          </Button>
-          <span>Cette liste ne contient aucun souhait.</span>
-        </Stack>
-      )}
+      {nbOfItems === 0 && <EmptyItemsState onAddItem={addItem} isOwner={ownerOfTheList} />}
 
       <ItemFormDialog
         mode="create"
