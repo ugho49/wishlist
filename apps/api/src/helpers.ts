@@ -66,7 +66,10 @@ export function pinoLoggerConfig(serviceName: string): PinoParams {
       },
       customErrorMessage: (_req, _res, error) => error?.message,
       customProps: (req, res) => {
+        const customProps = (res as any).locals ?? {}
+
         return {
+          ...customProps,
           // For Datadog's APM (https://docs.datadoghq.com/logs/log_configuration/attributes_naming_convention/)
           [tags.RESOURCE_NAME]: req.url,
           [tags.SPAN_TYPE]: types.WEB,

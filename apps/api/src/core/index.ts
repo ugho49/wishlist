@@ -1,5 +1,6 @@
 export * from './bucket'
 export * from './common'
+export * from './core.module'
 export * from './database'
 export * from './mail'
-export * from './core.module'
+export { Observability } from './observability'

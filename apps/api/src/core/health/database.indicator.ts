@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { HealthIndicatorResult, HealthIndicatorService } from '@nestjs/terminus'
-import { DatabaseService } from '@wishlist/api/core'
+
+import { DatabaseService } from '../database/database.service'
 
 @Injectable()
 export class DatabaseHealthIndicator {
