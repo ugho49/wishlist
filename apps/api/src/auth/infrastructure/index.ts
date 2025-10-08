@@ -1,5 +1,6 @@
 export { IsAdmin } from './decorators/admin.decorator'
 export { HasAuthorities } from './decorators/authority.decorator'
+export { CurrentGqlUser } from './decorators/gql-user.decorator'
 export { Public } from './decorators/public.metadata'
 export { CurrentUser } from './decorators/user.decorator'
 export { GoogleAuthService } from './social'

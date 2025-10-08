@@ -38,6 +38,11 @@ module.exports = {
           glob: '**/*',
           output: 'drizzle',
         },
+        {
+          input: 'apps/api/schema.gql',
+          glob: '**/*',
+          output: 'schema.gql',
+        },
       ],
     }),
   ],

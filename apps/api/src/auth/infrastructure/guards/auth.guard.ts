@@ -1,5 +1,6 @@
 import { ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
+import { GqlExecutionContext } from '@nestjs/graphql'
 import { AuthGuard as PassportAuthGuard } from '@nestjs/passport'
 import { Observability } from '@wishlist/api/core'
 
@@ -24,6 +25,16 @@ export class AuthGuard extends PassportAuthGuard('jwt') {
     return super.canActivate(context)
   }
 
+  override getRequest(context: ExecutionContext) {
+    // Handle GraphQL context
+    if (context.getType<string>() === 'graphql') {
+      const gqlContext = GqlExecutionContext.create(context)
+      return gqlContext.getContext().req
+    }
+    // Handle HTTP context
+    return context.switchToHttp().getRequest()
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   override handleRequest(err: any, user: any, info: any, context: ExecutionContext) {
     // You can throw an exception based on either "info" or "err" arguments
@@ -31,8 +42,11 @@ export class AuthGuard extends PassportAuthGuard('jwt') {
       throw err || new UnauthorizedException(info?.name || 'Invalid token')
     }
 
-    const observability = new Observability(context.switchToHttp().getResponse())
-    observability.setContext({ currentUser: user })
+    // Handle observability for HTTP only (GraphQL doesn't use HTTP response)
+    if (context.getType<string>() === 'http') {
+      const observability = new Observability(context.switchToHttp().getResponse())
+      observability.setContext({ currentUser: user })
+    }
 
     return user
   }
