@@ -4,13 +4,14 @@ import LockIcon from '@mui/icons-material/Lock'
 import NotificationsIcon from '@mui/icons-material/Notifications'
 import PortraitIcon from '@mui/icons-material/Portrait'
 import ShareIcon from '@mui/icons-material/Share'
-import { Box, Tab, Tabs } from '@mui/material'
+import { Box } from '@mui/material'
 import { styled, useTheme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import { useQueryState } from 'nuqs'
 import { useSelector } from 'react-redux'
 
 import { CardV2 } from '../common/CardV2'
+import { StyledTab, StyledTabs } from '../common/StyledTabs'
 import { ProfilePictureSection } from './ProfilePictureSection'
 import { UserTabInformations } from './UserTabInformations'
 import { UserTabNotifications } from './UserTabNotifications'
@@ -22,7 +23,7 @@ const ProfileSection = styled(Box)(() => ({
   flexDirection: 'column',
   alignItems: 'center',
   gap: 24,
-  marginBottom: 18,
+  marginBottom: 32,
 }))
 
 const UserNameAndEmail = styled(Box)(() => ({
@@ -95,7 +96,7 @@ export const UserProfilePage = () => {
       </ProfileSection>
 
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }} mb={4}>
-        <Tabs
+        <StyledTabs
           value={tab}
           onChange={(_, newValue) => setTab(newValue)}
           variant="fullWidth"
@@ -103,7 +104,7 @@ export const UserProfilePage = () => {
           allowScrollButtonsMobile
         >
           {tabs.map(tab => (
-            <Tab
+            <StyledTab
               key={tab.value}
               value={tab.value}
               label={smallScreen ? undefined : tab.label}
@@ -111,7 +112,7 @@ export const UserProfilePage = () => {
               icon={tab.icon}
             />
           ))}
-        </Tabs>
+        </StyledTabs>
       </Box>
       <CardV2>
         {tab === TabValues.informations && <UserTabInformations />}
