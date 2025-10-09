@@ -4,10 +4,35 @@
   "sourceRoot": "apps/api/src",
   "projectType": "application",
   "targets": {
-    "serve": {
-      "executor": "@nx/js:node",
+    "build": {
+      "executor": "nx:run-commands",
       "options": {
-        "buildTarget": "api:build"
+        "command": "webpack-cli build",
+        "args": ["--node-env=production"],
+        "cwd": "{projectRoot}"
+      },
+      "configurations": {
+        "development": {
+          "args": ["--node-env=development"]
+        }
+      }
+    },
+    "serve": {
+      "continuous": true,
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "dependsOn": ["build"],
+      "options": {
+        "buildTarget": "api:build",
+        "runBuildTargetDependencies": false
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "api:build:development"
+        },
+        "production": {
+          "buildTarget": "api:build:production"
+        }
       }
     },
     "test:int": {
