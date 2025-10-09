@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
-  "nxCloudId": "67346a726d0c84465f4622bb",
+  "nxCloudId": "68e81f9df262b31bc21efd6d",
   "defaultBase": "main",
   "defaultProject": "api",
   "workspaceLayout": {
@@ -41,8 +41,15 @@
     }
   ],
   "namedInputs": {
-    "default": ["{projectRoot}/**/*", "sharedGlobals"],
-    "sharedGlobals": ["{workspaceRoot}/.circleci/**/*"],
-    "production": ["default"]
+    "default": [
+      "{projectRoot}/**/*",
+      "sharedGlobals"
+    ],
+    "sharedGlobals": [
+      "{workspaceRoot}/.circleci/**/*"
+    ],
+    "production": [
+      "default"
+    ]
   }
 }
