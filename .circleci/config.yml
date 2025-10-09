@@ -34,12 +34,14 @@ references:
   restore_node_cache: &restore_node_cache
     keys:
       - node-module-cache-{{ checksum "./yarn.lock" }}
+  checkout: &checkout
+    method: blobless
 
 jobs:
   install-dependencies:
     <<: *setup_env_node
     steps:
-      - checkout
+      - checkout: *checkout
       - restore_cache: *restore_node_cache
       - run: yarn install --immutable
       - save_cache: *save_node_cache
@@ -48,23 +50,21 @@ jobs:
           paths:
             - node_modules
 
-  test-unit:
+  main:
     <<: *setup_env_node
     steps:
-      - checkout
+      - checkout: *checkout
       - attach_workspace: *attach_workspace
       - nx/set-shas: *nx_set_shas_option
-      - run:
-          command: yarn nx affected --target=test --base=$NX_BASE --head=$NX_HEAD --parallel --max-parallel=3  --output-style=stream --exclude=@wishlist/source
-      - store_test_results:
-          path: ./junit_reports/unit
+      - run: yarn nx-cloud start-ci-run --distribute-on="5 linux-medium-js" --stop-agents-after="build"
+      - run: yarn nx affected --base=$NX_BASE --head=$NX_HEAD -t lint,test,typecheck,build --parallel=2 --configuration=ci --exclude=@wishlist/source
 
   test-int:
     <<: *setup_env_node
     environment:
       TESTCONTAINERS_HOST_OVERRIDE: "localhost"
     steps:
-      - checkout
+      - checkout: *checkout
       - attach_workspace: *attach_workspace
       - nx/set-shas: *nx_set_shas_option
       - setup_remote_docker:
@@ -74,25 +74,9 @@ jobs:
           background: true
           command: .circleci/autoforward.py
       - run:
-          command: yarn nx affected --target=test:int --base=$NX_BASE --head=$NX_HEAD --parallel --max-parallel=3  --output-style=stream --exclude=@wishlist/source 
+          command: yarn nx-cloud record -- yarn nx affected --target=test:int --base=$NX_BASE --head=$NX_HEAD --parallel --max-parallel=3  --output-style=stream --exclude=@wishlist/source --no-agents
       - store_test_results:
           path: ./junit_reports/integration
-
-
-  lint:
-    <<: *setup_env_node
-    steps:
-      - checkout
-      - attach_workspace: *attach_workspace
-      - nx/set-shas: *nx_set_shas_option
-      - run: yarn nx affected --target=lint --base=$NX_BASE --head=$NX_HEAD --parallel --max-parallel=3  --output-style=stream --exclude=@wishlist/source
-
-  typecheck:
-      <<: *setup_env_node
-      steps:
-        - checkout
-        - attach_workspace: *attach_workspace
-        - run: yarn check-types
 
   continuation:
     <<: *setup_env_node
@@ -104,7 +88,7 @@ jobs:
         type: string
         default: << pipeline.parameters.continue-config-parameters >>
     steps:
-      - checkout
+      - checkout: *checkout
       - attach_workspace: *attach_workspace
       - nx/set-shas: *nx_set_shas_option
       - run:
@@ -133,13 +117,7 @@ workflows:
   setup-workflow:
     jobs:
       - install-dependencies
-      - lint:
-          requires:
-            - install-dependencies
-      - test-unit:
-          requires:
-            - install-dependencies
-      - typecheck:
+      - main:
           requires:
             - install-dependencies
       - test-int:
@@ -147,7 +125,5 @@ workflows:
             - install-dependencies
       - continuation:
           requires:
-            - lint
-            - typecheck
-            - test-unit
+            - main
             - test-int

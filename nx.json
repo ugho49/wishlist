@@ -11,8 +11,13 @@
   },
   "targetDefaults": {
     "build": {
-      "dependsOn": ["^build"],
-      "inputs": ["production", "^production"],
+      "dependsOn": [
+        "^build"
+      ],
+      "inputs": [
+        "production",
+        "^production"
+      ],
       "cache": true
     }
   },
@@ -44,8 +49,17 @@
     }
   ],
   "namedInputs": {
-    "default": ["{projectRoot}/**/*", "sharedGlobals"],
-    "sharedGlobals": ["{workspaceRoot}/yarn.lock", "{workspaceRoot}/.circleci/*"],
-    "production": ["default"]
-  }
+    "default": [
+      "{projectRoot}/**/*",
+      "sharedGlobals"
+    ],
+    "sharedGlobals": [
+      "{workspaceRoot}/yarn.lock",
+      "{workspaceRoot}/.circleci/*"
+    ],
+    "production": [
+      "default"
+    ]
+  },
+  "nxCloudId": "68e81f9df262b31bc21efd6d"
 }
