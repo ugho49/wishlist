@@ -1,4 +1,5 @@
 import type { UpdateUserPictureOutputDto, UserSocialDto } from '@wishlist/common'
+import type React from 'react'
 
 import AddAPhotoIcon from '@mui/icons-material/AddAPhoto'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
@@ -19,7 +20,7 @@ import {
   Typography,
 } from '@mui/material'
 import clsx from 'clsx'
-import React, { useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 
 import { useToast } from '../../hooks/useToast'
 import { ACCEPT_IMG, sanitizeImgToUrl } from '../../utils/images.utils'

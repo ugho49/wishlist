@@ -13,7 +13,6 @@ import type {
   UserSocialDto,
 } from '@wishlist/common'
 import type { AxiosInstance } from 'axios'
-
 import type { CommonRequestOptions } from './common'
 
 export class UserService {

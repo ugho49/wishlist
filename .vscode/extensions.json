@@ -1,8 +1,7 @@
 {
   "recommendations": [
     "nicoespeon.abracadabra",
-    "esbenp.prettier-vscode",
-    "dbaeumer.vscode-eslint",
+    "biomejs.biome",
     "nrwl.angular-console",
     "christian-kohler.npm-intellisense",
     "vitest.explorer",

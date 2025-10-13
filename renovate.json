@@ -17,9 +17,6 @@
   "labels": ["dependencies"],
   "prConcurrentLimit": 10,
   "circleci": {
-    "managerFilePatterns": [
-      "/.circleci/config.yml/",
-      "/.circleci/continuation.yml/"
-    ]
+    "managerFilePatterns": ["/.circleci/config.yml/", "/.circleci/continuation.yml/"]
   }
 }

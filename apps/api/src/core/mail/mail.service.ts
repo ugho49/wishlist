@@ -1,8 +1,8 @@
-import { readFile } from 'node:fs/promises'
-import { join } from 'node:path'
 import type { Transporter } from 'nodemailer'
 import type * as SMTPTransport from 'nodemailer/lib/smtp-transport'
 
+import { readFile } from 'node:fs/promises'
+import { join } from 'node:path'
 import { Inject, Injectable, Logger } from '@nestjs/common'
 import * as Handlebars from 'handlebars'
 import mjml2html from 'mjml'

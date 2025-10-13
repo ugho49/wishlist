@@ -1,8 +1,7 @@
 import type { ItemId, WishlistId } from '../ids'
+import type { MiniUserDto } from './user.dto'
 
 import { IsInt, IsNotEmpty, IsOptional, IsString, IsUrl, Max, MaxLength, Min } from 'class-validator'
-
-import { MiniUserDto } from './user.dto'
 
 export class ItemDto {
   declare id: ItemId

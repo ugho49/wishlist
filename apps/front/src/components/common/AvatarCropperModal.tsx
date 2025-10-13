@@ -128,7 +128,7 @@ export const AvatarCropperModal = ({ handleClose, imageSrc, handleSave }: Avatar
               aria-labelledby="Zoom"
               onChange={(e, zoom) => {
                 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore
+                // @ts-expect-error
                 setZoom(zoom)
               }}
             />
@@ -143,7 +143,7 @@ export const AvatarCropperModal = ({ handleClose, imageSrc, handleSave }: Avatar
               aria-labelledby="Rotation"
               onChange={(e, rotation) => {
                 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore
+                // @ts-expect-error
                 setRotation(rotation)
               }}
             />

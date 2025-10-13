@@ -1,15 +1,15 @@
 import { Global, Module } from '@nestjs/common'
 
-import { PostgresEventAttendeeRepository } from './postgres-event-attendee.repository'
 import { PostgresEventRepository } from './postgres-event.repository'
-import { PostgresSecretSantaUserRepository } from './postgres-secret-santa-user.repository'
+import { PostgresEventAttendeeRepository } from './postgres-event-attendee.repository'
 import { PostgresSecretSantaRepository } from './postgres-secret-santa.repository'
+import { PostgresSecretSantaUserRepository } from './postgres-secret-santa-user.repository'
+import { PostgresUserRepository } from './postgres-user.repository'
 import { PostgresUserEmailSettingRepository } from './postgres-user-email-setting'
 import { PostgresUserPasswordVerificationRepository } from './postgres-user-password-verification'
 import { PostgresUserSocialRepository } from './postgres-user-social.repository'
-import { PostgresUserRepository } from './postgres-user.repository'
-import { PostgresWishlistItemRepository } from './postgres-wishlist-item.repository'
 import { PostgresWishlistRepository } from './postgres-wishlist.repository'
+import { PostgresWishlistItemRepository } from './postgres-wishlist-item.repository'
 import { REPOSITORIES } from './repositories.constants'
 
 @Global()

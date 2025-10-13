@@ -2,7 +2,7 @@ import type { GetSecretSantaDrawResult } from '../domain'
 
 import { Inject } from '@nestjs/common'
 import { IInferredQueryHandler, QueryHandler } from '@nestjs/cqrs'
-import { eventAttendeeMapper, EventAttendeeRepository } from '@wishlist/api/event'
+import { EventAttendeeRepository, eventAttendeeMapper } from '@wishlist/api/event'
 import { REPOSITORIES } from '@wishlist/api/repositories'
 
 import { GetSecretSantaDrawQuery, SecretSantaUserRepository } from '../domain'

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
-import { schema } from '@wishlist/api-drizzle'
 import { DatabaseService, DrizzleTransaction } from '@wishlist/api/core'
 import { UserSocial, UserSocialRepository } from '@wishlist/api/user'
+import { schema } from '@wishlist/api-drizzle'
 import { UserId, UserSocialId, UserSocialType, uuid } from '@wishlist/common'
 import { and, eq } from 'drizzle-orm'
 

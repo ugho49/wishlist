@@ -1,5 +1,4 @@
 import type { ItemDto } from '@wishlist/common'
-
 import type { WishlistItem } from '../domain'
 
 import { userMapper } from '@wishlist/api/user'

@@ -1,5 +1,5 @@
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard'
-import { alpha, Avatar, Box, Stack, styled } from '@mui/material'
+import { Avatar, alpha, Box, Stack, styled } from '@mui/material'
 
 import { useMySecretSantaDraw } from '../../hooks/domain/useMySecretSantaDraw'
 

@@ -1,7 +1,7 @@
 import type { RequestApp } from '@wishlist/api-test-utils'
 
-import { Fixtures, useTestApp, useTestMail } from '@wishlist/api-test-utils'
 import { PasswordManager } from '@wishlist/api/auth'
+import { Fixtures, useTestApp, useTestMail } from '@wishlist/api-test-utils'
 import { sleep } from '@wishlist/common'
 import { DateTime } from 'luxon'
 

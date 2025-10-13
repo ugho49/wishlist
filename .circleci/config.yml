@@ -85,7 +85,9 @@ jobs:
       - checkout
       - attach_workspace: *attach_workspace
       - nx/set-shas: *nx_set_shas_option
-      - run: yarn nx affected --target=lint --base=$NX_BASE --head=$NX_HEAD --parallel --max-parallel=3  --output-style=stream --exclude=@wishlist/source
+      - run: yarn biome check --diagnostic-level=error
+      # TODO: check only affected apps / libs
+      #- run: yarn nx affected --target=lint --base=$NX_BASE --head=$NX_HEAD --parallel --max-parallel=3  --output-style=stream --exclude=@wishlist/source
 
   typecheck:
       <<: *setup_env_node

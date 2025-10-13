@@ -1,5 +1,4 @@
 import type { UserSocialId, UserSocialType } from '@wishlist/common'
-
 import type { User } from './user.model'
 
 export type UserSocialProps = {

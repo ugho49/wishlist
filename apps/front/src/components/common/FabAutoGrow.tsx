@@ -3,7 +3,6 @@ import type { FabProps } from '@mui/material/Fab'
 import { Box, Fab, fabClasses, styled } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
-import React from 'react'
 
 import { RouterLink } from './RouterLink'
 

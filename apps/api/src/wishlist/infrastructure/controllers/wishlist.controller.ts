@@ -133,7 +133,7 @@ export class WishlistController {
   @Post('/:id/upload-logo')
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('file'))
-  async uploadLogo(
+  uploadLogo(
     @Param('id') wishlistId: WishlistId,
     @CurrentUser() currentUser: ICurrentUser,
     @UploadedFile(wishlistLogoFileValidators(true), wishlistLogoResizePipe(true))

@@ -1,5 +1,4 @@
 import type { WishlistWithEventsDto } from '@wishlist/common'
-
 import type { RootState } from '../../core'
 
 import PublicIcon from '@mui/icons-material/Public'

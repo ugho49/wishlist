@@ -1,10 +1,10 @@
 import type { AttendeeId, EventId } from '../ids'
+import type { MiniUserDto } from './user.dto'
 
 import { Transform } from 'class-transformer'
 import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator'
 
 import { AttendeeRole } from '../enums'
-import { MiniUserDto } from './user.dto'
 
 export class AttendeeDto {
   declare id: AttendeeId

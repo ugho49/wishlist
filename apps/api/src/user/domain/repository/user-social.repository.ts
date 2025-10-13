@@ -1,6 +1,5 @@
 import type { DrizzleTransaction } from '@wishlist/api/core'
 import type { UserId, UserSocialId, UserSocialType } from '@wishlist/common'
-
 import type { UserSocial } from '../model'
 
 export interface UserSocialRepository {

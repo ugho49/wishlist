@@ -1,5 +1,4 @@
 import { Box, Button, Stack } from '@mui/material'
-import React from 'react'
 
 import { RouterLink } from '../common/RouterLink'
 import { Title } from '../common/Title'

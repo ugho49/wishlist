@@ -1,5 +1,4 @@
 import type { AttendeeDto } from '@wishlist/common'
-
 import type { EventAttendee } from '../domain'
 
 import { userMapper } from '@wishlist/api/user'

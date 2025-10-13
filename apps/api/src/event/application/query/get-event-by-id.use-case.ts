@@ -1,6 +1,6 @@
 import { Inject, UnauthorizedException } from '@nestjs/common'
 import { IInferredQueryHandler, QueryHandler } from '@nestjs/cqrs'
-import { eventMapper, EventRepository } from '@wishlist/api/event'
+import { EventRepository, eventMapper } from '@wishlist/api/event'
 import { REPOSITORIES } from '@wishlist/api/repositories'
 import { WishlistRepository } from '@wishlist/api/wishlist'
 

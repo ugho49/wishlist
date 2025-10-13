@@ -1,5 +1,4 @@
 import type { AttendeeId, EventId, SecretSantaId, SecretSantaStatus, SecretSantaUserId } from '@wishlist/common'
-
 import type { SecretSantaUser } from './secret-santa-user.model'
 
 import { SecretSantaDrawService, SecretSantaStatus as Status } from '@wishlist/common'

@@ -8,7 +8,6 @@ import type {
   UserWithoutSocialsDto,
 } from '@wishlist/common'
 import type { AxiosInstance } from 'axios'
-
 import type { CommonRequestOptions } from './common'
 
 export class AdminUserService {
@@ -30,7 +29,7 @@ export class AdminUserService {
     await this.client.delete(`/admin/user/${userId}`)
   }
 
-  async uploadPicture(userId: UserId, file: File): Promise<UpdateUserPictureOutputDto> {
+  uploadPicture(userId: UserId, file: File): Promise<UpdateUserPictureOutputDto> {
     const formData = new FormData()
     formData.append('file', file)
 

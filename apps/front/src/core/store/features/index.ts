@@ -4,8 +4,8 @@ import { resetAuthState } from './authSlice'
 import { resetUserState } from './userProfileSlice'
 
 export * from './authSlice'
-export * from './userProfileSlice'
 export * from './drawerSlice'
+export * from './userProfileSlice'
 
 export const resetStore = (dispatch: Dispatch) => {
   dispatch(resetAuthState())

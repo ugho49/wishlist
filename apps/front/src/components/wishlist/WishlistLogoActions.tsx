@@ -1,7 +1,9 @@
+import type React from 'react'
+
 import PersonIcon from '@mui/icons-material/Person'
 import { Avatar, Box, Button, Stack, Typography } from '@mui/material'
 import { grey } from '@mui/material/colors'
-import React, { useState } from 'react'
+import { useState } from 'react'
 
 import { ACCEPT_IMG, sanitizeImgToUrl } from '../../utils/images.utils'
 import { AvatarCropperModal } from '../common/AvatarCropperModal'

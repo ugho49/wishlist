@@ -1,5 +1,4 @@
 import type { UserEmailSettingId } from '@wishlist/common'
-
 import type { User } from './user.model'
 
 export type UserEmailSettingProps = {

@@ -5,7 +5,7 @@ import 'pg'
 
 import { createApp } from './bootstrap'
 
-;(async function () {
+;(async () => {
   const app = await createApp()
   const configService = app.get(ConfigService)
   const port = configService.get('PORT')

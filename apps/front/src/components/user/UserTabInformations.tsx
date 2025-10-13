@@ -1,5 +1,4 @@
 import type { UpdateUserProfileInputDto, UserDto } from '@wishlist/common'
-
 import type { RootState } from '../../core'
 
 import { zodResolver } from '@hookform/resolvers/zod'

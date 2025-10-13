@@ -1,5 +1,5 @@
-import { Fixtures, useTestApp, useTestMail } from '@wishlist/api-test-utils'
 import { PasswordManager } from '@wishlist/api/auth'
+import { Fixtures, useTestApp, useTestMail } from '@wishlist/api-test-utils'
 import { DateTime } from 'luxon'
 
 describe('UserPasswordVerificationController', () => {

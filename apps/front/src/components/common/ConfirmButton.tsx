@@ -1,10 +1,11 @@
 import type { ButtonProps } from '@mui/material'
 import type { Theme } from '@mui/material/styles'
 import type { SxProps } from '@mui/system'
+import type React from 'react'
 import type { PropsWithChildren } from 'react'
 
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material'
-import React, { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 
 export type ConfirmButtonProps = {
   confirmTitle: string | React.ReactNode

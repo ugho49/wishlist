@@ -4,8 +4,8 @@ import { EventRepository } from '@wishlist/api/event'
 
 import { REPOSITORIES } from '../../repositories/repositories.constants'
 import { DeleteSecretSantaUserCommand } from '../domain/command/delete-secret-santa-user.command'
-import { SecretSantaUserRepository } from '../domain/repository/secret-santa-user.repository'
 import { SecretSantaRepository } from '../domain/repository/secret-santa.repository'
+import { SecretSantaUserRepository } from '../domain/repository/secret-santa-user.repository'
 
 @CommandHandler(DeleteSecretSantaUserCommand)
 export class DeleteSecretSantaUserUseCase implements IInferredCommandHandler<DeleteSecretSantaUserCommand> {

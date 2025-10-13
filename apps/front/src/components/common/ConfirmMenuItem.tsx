@@ -1,8 +1,9 @@
 import type { SxProps, Theme } from '@mui/material/styles'
+import type React from 'react'
 import type { PropsWithChildren } from 'react'
 
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, MenuItem } from '@mui/material'
-import React, { useCallback, useState } from 'react'
+import { useCallback, useState } from 'react'
 
 export type ConfirmMenuItemProps = {
   confirmTitle: string | React.ReactNode

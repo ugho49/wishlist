@@ -1,6 +1,5 @@
 import type { Event } from '@wishlist/api/event'
 import type { DetailedWishlistDto, UserId, WishlistWithEventsDto, WishlistWithOwnerDto } from '@wishlist/common'
-
 import type { Wishlist } from '../domain'
 
 import { eventMapper } from '@wishlist/api/event'

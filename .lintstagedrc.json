@@ -1,6 +1,3 @@
 {
-  "**/*.d.ts": ["prettier --write"],
-  "**/!(*.d).{ts,tsx}": ["prettier --write"],
-  "**/eslint.config.{cjs,js,ts,mjs}": ["prettier --write"],
-  "**/*.{json,css,mdx}": ["prettier --write"]
+  "**/*.{ts,tsx,json,css,mdx,md,cjs,js,mjs,html,yml}": ["biome check --write"]
 }

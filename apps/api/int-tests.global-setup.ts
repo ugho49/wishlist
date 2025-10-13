@@ -1,6 +1,6 @@
-import { join } from 'node:path'
 import type { AbstractStartedContainer } from 'testcontainers'
 
+import { join } from 'node:path'
 import * as dotenv from 'dotenv'
 import { DockerComposeEnvironment } from 'testcontainers'
 

@@ -49,6 +49,7 @@ export class TableAssert {
   }
 
   // Thenable pattern: allow to chain assertions with await without a check() call
+  // biome-ignore lint/suspicious/noThenProperty: Thenable pattern expected here
   then(onFulfilled: () => unknown, onRejected?: (error: unknown) => unknown): Promise<unknown> {
     return this.check().then(onFulfilled, onRejected)
   }
@@ -124,6 +125,7 @@ class TableRowAssert {
   }
 
   // Thenable pattern: allow to chain assertions with await without a check() call
+  // biome-ignore lint/suspicious/noThenProperty: Thenable pattern expected here
   then(onFulfilled: () => unknown, onRejected?: (error: unknown) => unknown): Promise<unknown> {
     return this.check().then(onFulfilled, onRejected)
   }

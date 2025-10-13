@@ -1,5 +1,4 @@
 import type { DetailedWishlistDto, ItemDto } from '@wishlist/common'
-
 import type { RootState } from '../../core'
 
 import AddIcon from '@mui/icons-material/Add'

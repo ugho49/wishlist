@@ -3,8 +3,8 @@ import type { SxProps, Theme } from '@mui/material'
 
 import { Box, Stack, styled } from '@mui/material'
 
-import LogoTextSvg from '../../assets/logo/logo_text.svg?react'
 import LogoIconSvg from '../../assets/logo/logo.svg?react'
+import LogoTextSvg from '../../assets/logo/logo_text.svg?react'
 
 interface LogoProps {
   height?: number

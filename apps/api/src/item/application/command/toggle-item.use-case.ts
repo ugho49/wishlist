@@ -1,7 +1,7 @@
 import { Inject, NotFoundException, UnauthorizedException } from '@nestjs/common'
 import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
 import { REPOSITORIES } from '@wishlist/api/repositories'
-import { userMapper, UserRepository } from '@wishlist/api/user'
+import { UserRepository, userMapper } from '@wishlist/api/user'
 import { Wishlist, WishlistRepository } from '@wishlist/api/wishlist'
 import { ICurrentUser } from '@wishlist/common'
 

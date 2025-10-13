@@ -1,4 +1,5 @@
 import type { IconButtonTypeMap } from '@mui/material'
+import type React from 'react'
 import type { PropsWithChildren } from 'react'
 
 import {
@@ -11,7 +12,7 @@ import {
   IconButton,
   Tooltip,
 } from '@mui/material'
-import React, { useCallback, useState } from 'react'
+import { useCallback, useState } from 'react'
 
 export type ConfirmIconButtonProps = {
   confirmTitle: string | React.ReactNode
@@ -42,7 +43,7 @@ export const ConfirmIconButton = ({
   return (
     <>
       <IconButton color={color} size={size} disabled={disabled} onClick={() => setOpenDialog(true)}>
-        <Tooltip title={confirmTitle} children={children as React.ReactElement} />
+        <Tooltip title={confirmTitle}>{children as React.ReactElement}</Tooltip>
       </IconButton>
       <Dialog open={openDialog} onClose={() => closeDialog()}>
         <DialogTitle component="div">{confirmTitle}</DialogTitle>

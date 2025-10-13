@@ -119,7 +119,7 @@ export class SecretSantaController {
   }
 
   @Post('/:id/users')
-  async addSecretSantaUsers(
+  addSecretSantaUsers(
     @Param('id') secretSantaId: SecretSantaId,
     @CurrentUser() currentUser: ICurrentUser,
     @Body() dto: CreateSecretSantaUsersInputDto,
