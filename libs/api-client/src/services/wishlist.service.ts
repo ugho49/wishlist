@@ -10,7 +10,6 @@ import type {
   WishlistWithEventsDto,
 } from '@wishlist/common'
 import type { AxiosInstance } from 'axios'
-
 import type { CommonRequestOptions } from './common'
 
 export class WishlistService {
@@ -54,7 +53,7 @@ export class WishlistService {
     await this.client.post(`/wishlist/${wishlistId}/unlink-event`, data)
   }
 
-  async uploadLogo(wishlistId: string, file: File): Promise<UpdateWishlistLogoOutputDto> {
+  uploadLogo(wishlistId: string, file: File): Promise<UpdateWishlistLogoOutputDto> {
     const formData = new FormData()
     formData.append('file', file)
 

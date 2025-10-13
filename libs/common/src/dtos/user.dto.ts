@@ -1,3 +1,4 @@
+import type { UserSocialType } from '../enums'
 import type { UserId, UserSocialId } from '../ids'
 
 import { Transform } from 'class-transformer'
@@ -13,7 +14,6 @@ import {
   MinLength,
 } from 'class-validator'
 
-import { UserSocialType } from '../enums'
 import { GetPaginationQueryDto } from './common.dto'
 
 export class UpdateUserPictureOutputDto {

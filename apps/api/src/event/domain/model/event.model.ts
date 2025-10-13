@@ -1,5 +1,4 @@
 import type { EventId, ICurrentUser, UserId, WishlistId } from '@wishlist/common'
-
 import type { EventAttendee } from './event-attendee.model'
 
 import { AttendeeRole } from '@wishlist/common'

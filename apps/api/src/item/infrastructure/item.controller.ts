@@ -25,7 +25,7 @@ export class ItemController {
 
   // Scan an item url to get the picture url
   @Post('/scan-url')
-  async scanItemUrl(@Body() dto: ScanItemInputDto): Promise<ScanItemOutputDto> {
+  scanItemUrl(@Body() dto: ScanItemInputDto): Promise<ScanItemOutputDto> {
     return this.queryBus.execute(new ScanItemUrlQuery({ url: dto.url }))
   }
 

@@ -1,6 +1,5 @@
 import type { SecretSantaDto, UpdateSecretSantaInputDto } from '@wishlist/common'
 import type { AxiosInstance } from 'axios'
-
 import type { CommonRequestOptions } from './common'
 
 export class AdminSecretSantaService {

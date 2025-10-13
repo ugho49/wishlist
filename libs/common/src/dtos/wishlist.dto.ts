@@ -1,11 +1,12 @@
+import type { EventId, UserId, WishlistId } from '../ids'
+import type { MiniEventDto } from './event.dto'
+import type { ItemDto } from './item.dto'
+import type { MiniUserDto } from './user.dto'
+
 import { ArrayMaxSize, ArrayNotEmpty, IsBoolean, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator'
 
 import { MAX_EVENTS_BY_LIST } from '../constants'
-import { EventId, UserId, WishlistId } from '../ids'
 import { GetPaginationQueryDto } from './common.dto'
-import { MiniEventDto } from './event.dto'
-import { ItemDto } from './item.dto'
-import { MiniUserDto } from './user.dto'
 
 export class WishlistConfigDto {
   declare hide_items: boolean

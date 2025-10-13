@@ -1,5 +1,3 @@
-import React from 'react'
-
 export type CharsRemainingProps = {
   max: number
   value?: string

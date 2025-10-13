@@ -8,7 +8,6 @@ import type {
   UpdateSecretSantaUserInputDto,
 } from '@wishlist/common'
 import type { AxiosInstance } from 'axios'
-
 import type { CommonRequestOptions } from './common'
 
 export class SecretSantaService {

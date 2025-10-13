@@ -1,3 +1,6 @@
+import type { EventId, UserId } from '../ids'
+import type { WishlistWithOwnerDto } from './wishlist.dto'
+
 import { Transform, Type } from 'class-transformer'
 import {
   IsBoolean,
@@ -14,10 +17,8 @@ import {
   ValidateNested,
 } from 'class-validator'
 
-import { EventId, UserId } from '../ids'
-import { AddEventAttendeeInputDto, AttendeeDto } from './attendee.dto'
+import { AddEventAttendeeInputDto, type AttendeeDto } from './attendee.dto'
 import { GetPaginationQueryDto } from './common.dto'
-import { WishlistWithOwnerDto } from './wishlist.dto'
 
 export class MiniEventDto {
   declare id: EventId

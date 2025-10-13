@@ -6,6 +6,7 @@ import type {
   UpdateItemInputDto,
   WishlistId,
 } from '@wishlist/common'
+import type React from 'react'
 import type { FormEvent } from 'react'
 
 import CameraAltIcon from '@mui/icons-material/CameraAlt'
@@ -29,7 +30,7 @@ import {
 } from '@mui/material'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useApi, useToast } from '@wishlist/front-hooks'
-import React, { forwardRef, useCallback, useEffect, useMemo, useState } from 'react'
+import { forwardRef, useCallback, useEffect, useMemo, useState } from 'react'
 import { TidyURL } from 'tidy-url'
 
 import { isValidUrl } from '../../utils/router.utils'
@@ -43,7 +44,11 @@ const Transition = forwardRef(function Transition(
   ref: React.Ref<unknown>,
 ) {
   const { children, ...other } = props
-  return <Slide direction="up" ref={ref} {...other} children={children} />
+  return (
+    <Slide direction="up" ref={ref} {...other}>
+      {children}
+    </Slide>
+  )
 })
 
 type ModeProps<T> = T extends 'create'

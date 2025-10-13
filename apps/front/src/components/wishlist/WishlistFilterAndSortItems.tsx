@@ -1,4 +1,5 @@
 import type { ItemDto } from '@wishlist/common'
+import type React from 'react'
 
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import CheckBoxIcon from '@mui/icons-material/CheckBox'
@@ -12,7 +13,7 @@ import StarIcon from '@mui/icons-material/Star'
 import StarBorderIcon from '@mui/icons-material/StarBorder'
 import WatchLaterIcon from '@mui/icons-material/WatchLater'
 import { Box, Grid, inputBaseClasses, MenuItem, menuItemClasses, Select, styled } from '@mui/material'
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 
 import { InputLabel } from '../common/InputLabel'
 

@@ -1,6 +1,7 @@
 import type { TransitionProps } from '@mui/material/transitions'
 import type { GridColDef } from '@mui/x-data-grid'
 import type { AttendeeDto, AttendeeId, SecretSantaUserDto } from '@wishlist/common'
+import type React from 'react'
 
 import CloseIcon from '@mui/icons-material/Close'
 import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt'
@@ -19,7 +20,7 @@ import {
 } from '@mui/material'
 import { DataGrid } from '@mui/x-data-grid'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import React, { forwardRef, useEffect, useMemo, useState } from 'react'
+import { forwardRef, useEffect, useMemo, useState } from 'react'
 
 import { useApi, useToast } from '../../hooks'
 import { Status } from '../common/Status'
@@ -29,7 +30,11 @@ const Transition = forwardRef(function Transition(
   ref: React.Ref<unknown>,
 ) {
   const { children, ...other } = props
-  return <Slide direction="up" ref={ref} {...other} children={children} />
+  return (
+    <Slide direction="up" ref={ref} {...other}>
+      {children}
+    </Slide>
+  )
 })
 
 export type AddSecretSantaUsersFormDialogProps = {

@@ -1,6 +1,5 @@
 import type { SecretSantaStatus } from '@wishlist/common'
 import type { Client } from 'pg'
-
 import type { SignedAs } from './use-test-app'
 
 import { PasswordManager } from '@wishlist/api/auth'
@@ -78,7 +77,7 @@ export class Fixtures {
     return { userId, attendeeId }
   }
 
-  async insertAdminUser(): Promise<string> {
+  insertAdminUser(): Promise<string> {
     return this.insertUser({
       email: Fixtures.ADMIN_USER_EMAIL,
       firstname: 'Admin',
@@ -87,7 +86,7 @@ export class Fixtures {
     })
   }
 
-  async insertBaseUser(): Promise<string> {
+  insertBaseUser(): Promise<string> {
     return this.insertUser({
       email: Fixtures.BASE_USER_EMAIL,
       firstname: 'John',
@@ -194,7 +193,7 @@ export class Fixtures {
     return id
   }
 
-  async insertMaintainerAttendee(parameters: { eventId: string; userId: string }): Promise<string> {
+  insertMaintainerAttendee(parameters: { eventId: string; userId: string }): Promise<string> {
     return this.insertActiveAttendee({
       eventId: parameters.eventId,
       userId: parameters.userId,

@@ -1,6 +1,5 @@
 import type { DrizzleTransaction } from '@wishlist/api/core'
 import type { AttendeeId, EventId } from '@wishlist/common'
-
 import type { EventAttendee } from '../model'
 
 export interface EventAttendeeRepository {

@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
+import { DatabaseService, DEFAULT_RESULT_NUMBER, type DrizzleTransaction } from '@wishlist/api/core'
+import { User, type UserRepository } from '@wishlist/api/user'
 import { schema } from '@wishlist/api-drizzle'
-import { DatabaseService, DEFAULT_RESULT_NUMBER, DrizzleTransaction } from '@wishlist/api/core'
-import { User, UserRepository } from '@wishlist/api/user'
-import { Authorities, UserId, uuid } from '@wishlist/common'
-import { and, asc, count, desc, eq, inArray, like, ne, or, sql } from 'drizzle-orm'
+import { type Authorities, type UserId, uuid } from '@wishlist/common'
+import { and, asc, count, desc, eq, inArray, like, ne, or, type SQL, sql } from 'drizzle-orm'
 
 @Injectable()
 export class PostgresUserRepository implements UserRepository {
@@ -59,7 +59,7 @@ export class PostgresUserRepository implements UserRepository {
     criteria?: string
     pagination: { take: number; skip: number }
   }): Promise<{ users: User[]; totalCount: number }> {
-    let whereCondition = undefined
+    let whereCondition: SQL | undefined
 
     if (params.criteria) {
       const searchKey = params.criteria.trim().toLowerCase().normalize('NFC')

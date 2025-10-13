@@ -1,5 +1,4 @@
 import type { INestApplication } from '@nestjs/common'
-
 import type { TableAssertSortOptions } from './table-assert'
 
 import { Logger } from '@nestjs/common'

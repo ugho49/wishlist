@@ -4,8 +4,8 @@ import { EventRepository } from '@wishlist/api/event'
 
 import { REPOSITORIES } from '../../repositories'
 import { UpdateSecretSantaUserCommand } from '../domain/command/update-secret-santa-user.command'
-import { SecretSantaUserRepository } from '../domain/repository/secret-santa-user.repository'
 import { SecretSantaRepository } from '../domain/repository/secret-santa.repository'
+import { SecretSantaUserRepository } from '../domain/repository/secret-santa-user.repository'
 
 @CommandHandler(UpdateSecretSantaUserCommand)
 export class UpdateSecretSantaUserUseCase implements IInferredCommandHandler<UpdateSecretSantaUserCommand> {

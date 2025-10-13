@@ -46,7 +46,9 @@ export class SecretSantaDrawService {
         throw new SecretSantaDrawError('Impossible de tirer au sort un utilisateur en raison des exclusions.')
       }
 
-      possibleDrawIds.forEach(id => drawUserIds.add(id))
+      possibleDrawIds.forEach(id => {
+        drawUserIds.add(id)
+      })
       possibleDraws.push({ userId: user.id, possibleDrawIds })
     }
 

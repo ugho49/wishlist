@@ -1,14 +1,19 @@
 {
-  "eslint.format.enable": true,
+  "biome.enabled": true,
+  "eslint.enable": false,
   "prettier.enable": false,
-  "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+  "cSpell.enabled": false,
+  "editor.defaultFormatter": "biomejs.biome",
   "nxConsole.generateAiAgentRules": true,
   "editor.formatOnSave": true,
   "editor.foldingImportsByDefault": true,
   "editor.multiCursorModifier": "alt",
   "files.autoSave": "onWindowChange",
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "explicit",
-    "source.organizeImports": "explicit"
+    "source.fixAll.biome": "explicit",
+    "source.organizeImports.biome": "explicit"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "biomejs.biome"
   }
 }

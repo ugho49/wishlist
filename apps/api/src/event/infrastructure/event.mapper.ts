@@ -1,6 +1,5 @@
 import type { Wishlist } from '@wishlist/api/wishlist'
 import type { DetailedEventDto, EventWithCountsDto, MiniEventDto } from '@wishlist/common'
-
 import type { Event } from '../domain'
 
 import { wishlistMapper } from '@wishlist/api/wishlist'

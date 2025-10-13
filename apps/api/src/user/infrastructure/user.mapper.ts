@@ -1,5 +1,4 @@
 import type { MiniUserDto, UserDto, UserSocialDto, UserWithoutSocialsDto } from '@wishlist/common'
-
 import type { User, UserSocial } from '../domain'
 
 import { DateTime } from 'luxon'

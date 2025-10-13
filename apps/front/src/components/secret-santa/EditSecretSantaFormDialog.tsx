@@ -1,5 +1,6 @@
 import type { TransitionProps } from '@mui/material/transitions'
 import type { UpdateSecretSantaInputDto } from '@wishlist/common'
+import type React from 'react'
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import CloseIcon from '@mui/icons-material/Close'
@@ -20,7 +21,7 @@ import {
   Typography,
 } from '@mui/material'
 import useMediaQuery from '@mui/material/useMediaQuery'
-import React, { forwardRef, useEffect } from 'react'
+import { forwardRef, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
@@ -29,7 +30,11 @@ const Transition = forwardRef(function Transition(
   ref: React.Ref<unknown>,
 ) {
   const { children, ...other } = props
-  return <Slide direction="up" ref={ref} {...other} children={children} />
+  return (
+    <Slide direction="up" ref={ref} {...other}>
+      {children}
+    </Slide>
+  )
 })
 
 const schema = z.object({

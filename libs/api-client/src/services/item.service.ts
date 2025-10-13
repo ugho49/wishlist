@@ -23,11 +23,11 @@ export class ItemService {
     await this.client.delete(`/item/${itemId}`)
   }
 
-  async toggle(itemId: string): Promise<ToggleItemOutputDto> {
+  toggle(itemId: string): Promise<ToggleItemOutputDto> {
     return this.client.post(`/item/${itemId}/toggle`).then(res => res.data)
   }
 
-  async scanUrl(data: ScanItemInputDto): Promise<ScanItemOutputDto> {
+  scanUrl(data: ScanItemInputDto): Promise<ScanItemOutputDto> {
     return this.client.post('/item/scan-url', data).then(res => res.data)
   }
 }

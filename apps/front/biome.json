@@ -1,0 +1,14 @@
+{
+  "extends": "//",
+  "linter": {
+    "rules": {
+      "correctness": {
+        "useExhaustiveDependencies": "warn",
+        "useUniqueElementIds": "off"
+      },
+      "a11y": {
+        "useKeyWithClickEvents": "off"
+      }
+    }
+  }
+}

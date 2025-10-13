@@ -1,5 +1,4 @@
 import type { MiniEventDto } from '@wishlist/common'
-
 import type { RootState } from '../../core'
 
 import AccountCircleTwoToneIcon from '@mui/icons-material/AccountCircleTwoTone'

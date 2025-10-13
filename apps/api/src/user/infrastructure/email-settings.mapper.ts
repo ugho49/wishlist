@@ -1,5 +1,4 @@
 import type { UserEmailSettingsDto } from '@wishlist/common'
-
 import type { UserEmailSetting } from '../domain'
 
 function toDto(model: UserEmailSetting): UserEmailSettingsDto {

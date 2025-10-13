@@ -1,5 +1,4 @@
 import type { UserSocialId } from '@wishlist/common'
-
 import type { RootState } from '../../core'
 
 import CheckIcon from '@mui/icons-material/Check'

@@ -1,6 +1,5 @@
 import type { Event, EventAttendee } from '@wishlist/api/event'
 import type { SecretSantaDto, SecretSantaUserDto } from '@wishlist/common'
-
 import type { SecretSanta, SecretSantaUser } from '../domain'
 
 import { eventAttendeeMapper, eventMapper } from '@wishlist/api/event'

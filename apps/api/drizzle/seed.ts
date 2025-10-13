@@ -27,7 +27,7 @@ const getAttendeesForUser = (userId: string) => eventAttendeesValues.filter(atte
 
 function getRandomUserWithExclusion(exclude: string) {
   let attempts = 0
-  let user: typeof schema.user.$inferInsert | undefined = undefined
+  let user: typeof schema.user.$inferInsert | undefined
   const users = usersValues.filter(user => user.id !== exclude)
   while (user === undefined && attempts < 10) {
     const fetchedUser = sample(users)!
@@ -202,7 +202,7 @@ async function main() {
 
     const getRandomUserAttendeeEventIdWithExclusion = (exclude: string[]) => {
       let attempts = 0
-      let eventId: string | undefined = undefined
+      let eventId: string | undefined
       const eventIds = userAttendeeEventIds.filter(eventId => !exclude.includes(eventId))
 
       while (eventId === undefined && attempts < 10) {

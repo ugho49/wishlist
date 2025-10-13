@@ -1,5 +1,4 @@
 import type { DetailedWishlistDto, ItemDto, MiniUserDto, WishlistId } from '@wishlist/common'
-
 import type { RootState } from '../../core'
 
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard'
@@ -10,8 +9,8 @@ import RedeemIcon from '@mui/icons-material/Redeem'
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline'
 import TipsAndUpdatesTwoToneIcon from '@mui/icons-material/TipsAndUpdatesTwoTone'
 import {
-  alpha,
   Avatar,
+  alpha,
   Box,
   Button,
   Chip,

@@ -1,7 +1,8 @@
 import type { SxProps, Theme } from '@mui/material/styles'
+import type React from 'react'
 
 import { Button, Checkbox, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material'
-import React, { useCallback, useState } from 'react'
+import { useCallback, useState } from 'react'
 
 export type ConfirmCheckboxProps = {
   confirmTitle: string | React.ReactNode

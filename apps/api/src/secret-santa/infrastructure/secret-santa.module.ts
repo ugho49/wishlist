@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common'
 
 import { handlers } from '../application'
-import { SecretSantaAdminController } from './controllers/secret-santa-admin.controller'
 import { SecretSantaController } from './controllers/secret-santa.controller'
+import { SecretSantaAdminController } from './controllers/secret-santa-admin.controller'
 
 @Module({
   controllers: [SecretSantaController, SecretSantaAdminController],

@@ -1,5 +1,4 @@
 import type { AddEventAttendeeInputDto, AttendeeDto, DetailedEventDto, EventId } from '@wishlist/common'
-
 import type { RootState } from '../../core'
 
 import DeleteIcon from '@mui/icons-material/Delete'

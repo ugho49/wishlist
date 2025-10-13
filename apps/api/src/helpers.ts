@@ -1,7 +1,7 @@
-import { join, resolve } from 'node:path'
-import { fileURLToPath } from 'node:url'
 import type { Params as PinoParams } from 'pino-nestjs'
 
+import { join, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { RequestMethod } from '@nestjs/common'
 import { kinds, tags, types } from 'dd-trace/ext'
 
