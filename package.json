@@ -11,7 +11,7 @@
     "build": "nx run-many --target=build",
     "test": "nx run-many --target=test --exclude=@wishlist/source",
     "test:int": "nx run-many --target=test:int",
-    "lint": "nx run-many --target=lint",
+    "lint": "biome check --diagnostic-level=error",
     "prepack": "husky",
     "docker:up": "docker compose -f ./docker/docker-compose.yml -f ./docker/docker-compose.local.yml up -d",
     "docker:down": "docker compose -f ./docker/docker-compose.yml -f ./docker/docker-compose.local.yml down --remove-orphans",
