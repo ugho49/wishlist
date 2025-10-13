@@ -34,14 +34,6 @@ const config: UserConfig = {
     },
   },
 
-  css: {
-    preprocessorOptions: {
-      scss: {
-        api: 'modern-compiler',
-      },
-    },
-  },
-
   plugins: [react(), svgr(), nxViteTsPaths()],
 
   // Uncomment this if you are using workers.

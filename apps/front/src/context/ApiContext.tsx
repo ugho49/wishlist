@@ -1,7 +1,7 @@
 import type { PropsWithChildren } from 'react'
 
 import { ApiClient } from '@wishlist/api-client'
-import React, { createContext, useMemo, useState } from 'react'
+import { createContext, useMemo, useState } from 'react'
 
 import { environment } from '../environment'
 

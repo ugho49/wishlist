@@ -23,10 +23,11 @@
     "strict": true,
     "paths": {
       "@wishlist/api-client": ["libs/api-client/src/index.ts"],
-      "@wishlist/common": ["libs/common/src/index.ts"],
-      "@wishlist/api-test-utils": ["apps/api/test-utils/index.ts"],
       "@wishlist/api-drizzle": ["apps/api/drizzle/index.ts"],
+      "@wishlist/api-test-utils": ["apps/api/test-utils/index.ts"],
       "@wishlist/api/*": ["apps/api/src/*/index.ts"],
+      "@wishlist/biome-plugin": ["plugin/biome-plugin/src/index.ts"],
+      "@wishlist/common": ["libs/common/src/index.ts"],
       "@wishlist/front-components/*": ["apps/front/src/components/*"],
       "@wishlist/front-hooks": ["apps/front/src/hooks"]
     }
