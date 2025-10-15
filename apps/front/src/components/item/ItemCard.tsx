@@ -461,7 +461,7 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
         )}
 
         {/* Item image */}
-        <ItemImageContainer className={'item-image-container'}>
+        <ItemImageContainer className="item-image-container">
           {item.picture_url ? (
             <ItemImage onClick={() => onImageClick?.()} src={item.picture_url} alt={item.name} />
           ) : (
@@ -481,7 +481,7 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
 
         {/* Item content */}
         <ItemContent
-          className={'item-content'}
+          className="item-content"
           sx={{ cursor: item.url ? 'pointer' : 'default' }}
           onClick={() => item.url && window.open(item.url, '_blank', 'noopener,noreferrer')}
         >
@@ -519,7 +519,7 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
 
         {/* Card footer - at the very bottom */}
         <ItemFooter
-          className={'item-footer'}
+          className="item-footer"
           style={{ justifyContent: shouldShowReserveButton && isReservedByCurrentUser ? 'space-between' : 'center' }}
         >
           <DateContainer>

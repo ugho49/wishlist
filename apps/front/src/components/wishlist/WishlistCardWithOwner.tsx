@@ -19,7 +19,7 @@ const WishlistCardContent = styled(Card)(({ theme }) => ({
   height: '5.5rem',
   padding: '12px',
   background: theme.palette.background.paper,
-  border: `2px solid transparent`,
+  border: '2px solid transparent',
   borderRadius: '20px',
   transition: 'all 0.4s cubic-bezier(0.23, 1, 0.320, 1)',
   cursor: 'pointer',

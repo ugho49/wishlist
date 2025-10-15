@@ -44,7 +44,7 @@ export const EventPage = () => {
             />
 
             <Container maxWidth="lg">
-              <Stack gap={'20px'}>
+              <Stack gap="20px">
                 <MySecretSantaDraw eventId={event.id} />
 
                 {event.description && <Description text={event.description} />}

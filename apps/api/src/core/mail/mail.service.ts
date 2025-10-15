@@ -39,7 +39,12 @@ export class MailService {
     })
   }
 
-  async sendMail(param: { to: string | string[]; subject: string; template: string; context?: Record<string, any> }) {
+  async sendMail(param: {
+    to: string | string[]
+    subject: string
+    template: string
+    context?: Record<string, unknown>
+  }) {
     const templatePath = join(this.config.templateDir, `${param.template}.mjml`)
 
     if (!this.templateCache.has(templatePath)) {

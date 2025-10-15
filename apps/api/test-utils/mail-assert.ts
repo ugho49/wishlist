@@ -21,7 +21,7 @@ type GetMailResult = {
 export class MailsAssert {
   private assertions = new Set<MailAssertion>()
   private mailsCached: Mail[] = []
-  private dataFetched: boolean = false
+  private dataFetched = false
 
   constructor(private readonly http: AxiosInstance) {}
 
@@ -35,7 +35,7 @@ export class MailsAssert {
     this.assertions.add(async () => {
       const mails = await this.getMails()
 
-      expect(mails.length, `Wrong number of length for mails`).toEqual(expected)
+      expect(mails.length, 'Wrong number of length for mails').toEqual(expected)
     })
 
     return this
@@ -47,7 +47,7 @@ export class MailsAssert {
 
       expect(
         mails.flatMap(mail => mail.to.map(to => to.address)),
-        `Wrong receivers for mails`,
+        'Wrong receivers for mails',
       ).toIncludeAllMembers(expected)
     })
 
@@ -66,7 +66,7 @@ export class MailsAssert {
     return this
   }
 
-  mail(index: number = 0): MailAssert {
+  mail(index = 0): MailAssert {
     return new MailAssert(
       this,
       () =>
@@ -147,7 +147,7 @@ class MailAssert {
     return this
   }
 
-  mail(index: number = 0): MailAssert {
+  mail(index = 0): MailAssert {
     return this.parent.mail(index)
   }
 

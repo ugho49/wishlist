@@ -208,10 +208,10 @@ async function main() {
       while (eventId === undefined && attempts < 10) {
         const fetchedEventId = sample(eventIds)!
 
-        if (!exclude.includes(fetchedEventId)) {
-          eventId = fetchedEventId
-        } else {
+        if (exclude.includes(fetchedEventId)) {
           attempts++
+        } else {
+          eventId = fetchedEventId
         }
       }
 

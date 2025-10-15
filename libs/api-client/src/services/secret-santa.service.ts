@@ -15,16 +15,16 @@ export class SecretSantaService {
 
   getMyDraw(eventId: string, options?: CommonRequestOptions): Promise<AttendeeDto | null> {
     return this.client
-      .get(`/secret-santa/user/draw`, { params: { eventId }, signal: options?.signal })
+      .get('/secret-santa/user/draw', { params: { eventId }, signal: options?.signal })
       .then(res => res.data)
   }
 
   get(eventId: string, options?: CommonRequestOptions): Promise<SecretSantaDto | null> {
-    return this.client.get(`/secret-santa`, { params: { eventId }, signal: options?.signal }).then(res => res.data)
+    return this.client.get('/secret-santa', { params: { eventId }, signal: options?.signal }).then(res => res.data)
   }
 
   create(data: CreateSecretSantaInputDto): Promise<SecretSantaDto> {
-    return this.client.post(`/secret-santa`, data).then(res => res.data)
+    return this.client.post('/secret-santa', data).then(res => res.data)
   }
 
   async update(secretSantaId: string, data: UpdateSecretSantaInputDto): Promise<void> {

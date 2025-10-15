@@ -40,7 +40,7 @@ export class AttendeeAddedUseCase implements IEventHandler<AttendeeAddedEvent> {
       context: {
         eventTitle: params.event.title,
         eventUrl: `https://wishlistapp.fr/events/${params.event.id}`,
-        invitedBy: params.invitedBy.firstName + ' ' + params.invitedBy.lastName,
+        invitedBy: `${params.invitedBy.firstName} ${params.invitedBy.lastName}`,
       },
     })
   }
@@ -57,7 +57,7 @@ export class AttendeeAddedUseCase implements IEventHandler<AttendeeAddedEvent> {
       context: {
         eventTitle: params.event.title,
         registerUrl: 'https://wishlistapp.fr/register',
-        invitedBy: params.invitedBy.firstName + ' ' + params.invitedBy.lastName,
+        invitedBy: `${params.invitedBy.firstName} ${params.invitedBy.lastName}`,
       },
     })
   }

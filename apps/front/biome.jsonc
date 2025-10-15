@@ -5,6 +5,13 @@
       "react": "all"
     },
     "rules": {
+      "style": {
+        "useConsistentCurlyBraces": "error",
+        "useSelfClosingElements": "error"
+      },
+      "complexity": {
+        "noUselessFragments": "error"
+      },
       "correctness": {
         "useExhaustiveDependencies": "warn",
         "useUniqueElementIds": "off"

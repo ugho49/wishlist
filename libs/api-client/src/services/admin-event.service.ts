@@ -19,7 +19,7 @@ export class AdminEventService {
     params: GetAllEventsPaginationQueryDto,
     options?: CommonRequestOptions,
   ): Promise<PagedResponse<EventWithCountsDto>> {
-    return this.client.get(`/admin/event`, { params, signal: options?.signal }).then(res => res.data)
+    return this.client.get('/admin/event', { params, signal: options?.signal }).then(res => res.data)
   }
 
   async update(eventId: string, data: UpdateEventInputDto): Promise<void> {

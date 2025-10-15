@@ -52,9 +52,9 @@ export class ToggleItemUseCase implements IInferredCommandHandler<ToggleItemComm
     if (wishlist.isOwner(currentUser.id) && wishlist.hideItems) {
       if (item.isSuggested) {
         throw new NotFoundException('Item not found')
-      } else {
-        throw new UnauthorizedException('You cannot check your own items')
       }
+
+      throw new UnauthorizedException('You cannot check your own items')
     }
 
     const user = await this.userRepository.findByIdOrFail(currentUser.id)
@@ -75,9 +75,9 @@ export class ToggleItemUseCase implements IInferredCommandHandler<ToggleItemComm
     if (wishlist.isOwner(currentUser.id) && wishlist.hideItems) {
       if (item.isSuggested) {
         throw new NotFoundException('Item not found')
-      } else {
-        throw new UnauthorizedException('You cannot uncheck your own items')
       }
+
+      throw new UnauthorizedException('You cannot uncheck your own items')
     }
 
     const updatedItem = item.uncheck()

@@ -9,6 +9,11 @@ import { DateTime } from 'luxon'
 import { PostgresEventAttendeeRepository } from './postgres-event-attendee.repository'
 import { REPOSITORIES } from './repositories.constants'
 
+type RowType = typeof schema.event.$inferSelect & {
+  attendees: (typeof schema.eventAttendee.$inferSelect & { user: typeof schema.user.$inferSelect | null })[]
+  eventWishlists: (typeof schema.eventWishlist.$inferSelect)[]
+}
+
 @Injectable()
 export class PostgresEventRepository implements EventRepository {
   constructor(
@@ -76,6 +81,7 @@ export class PostgresEventRepository implements EventRepository {
     pagination: { take: number; skip: number }
     onlyFuture: boolean
   }): Promise<{ events: Event[]; totalCount: number }> {
+    // biome-ignore lint/suspicious/noExplicitAny: type is too complex
     const baseQuery = (selectFields: SelectedFields<any, typeof schema.event>) =>
       this.databaseService.db
         .select(selectFields)
@@ -112,7 +118,7 @@ export class PostgresEventRepository implements EventRepository {
     const eventsMap = new Map(validEvents.map(e => [e.id, e]))
     const events = orderedEventIds
       .map(row => eventsMap.get(row.id))
-      .filter((event): event is NonNullable<typeof event> => event !== undefined)
+      .filter((event): event is NonNullable<RowType> => event !== undefined)
       .map(PostgresEventRepository.toModel)
 
     return { events, totalCount }
@@ -169,12 +175,7 @@ export class PostgresEventRepository implements EventRepository {
     await client.delete(schema.event).where(eq(schema.event.id, id))
   }
 
-  static toModel(
-    row: typeof schema.event.$inferSelect & {
-      attendees: (typeof schema.eventAttendee.$inferSelect & { user: typeof schema.user.$inferSelect | null })[]
-      eventWishlists: (typeof schema.eventWishlist.$inferSelect)[]
-    },
-  ): Event {
+  static toModel(row: RowType): Event {
     return new Event({
       id: row.id,
       title: row.title,

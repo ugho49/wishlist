@@ -18,7 +18,7 @@ export class GoogleAuthService {
       redirectUri: 'postmessage',
     })
 
-    this.logger.log(`Created Google OAuth2Client`, {
+    this.logger.log('Created Google OAuth2Client', {
       clientId: googleConfig.clientId,
     })
   }

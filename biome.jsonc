@@ -22,23 +22,40 @@
       "test": "all"
     },
     "rules": {
-      "recommended": true,
       "complexity": {
-        "noStaticOnlyClass": "off"
+        "noStaticOnlyClass": "off",
+        "noEmptyTypeParameters": "error"
       },
       "correctness": {
         "noUnusedVariables": "error",
         "noUnusedImports": "error"
       },
       "style": {
-        "useImportType": "error"
+        "useImportType": "error",
+        "noInferrableTypes": "error",
+        "useTemplate": "warn",
+        "noUnusedTemplateLiteral": "error",
+        "noMagicNumbers": "warn",
+        "noNegationElse": "error",
+        "noNestedTernary": "error",
+        "noParameterAssign": "error",
+        "noRestrictedGlobals": "error",
+        "noUselessElse": "error",
+        "useArrayLiterals": "error",
+        "useConsistentArrayType": "error",
+        "useConst": "error",
+        "useThrowOnlyError": "error"
       },
       "performance": {
         "noAccumulatingSpread": "off"
       },
       "suspicious": {
         "noArrayIndexKey": "warn",
-        "useAwait": "error"
+        "useAwait": "error",
+        "noImplicitAnyLet": "warn",
+        "noExplicitAny": "error",
+        "noUnassignedVariables": "error",
+        "noVar": "error"
       }
     }
   },

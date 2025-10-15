@@ -13,7 +13,7 @@ const Container = styled(Stack)(({ theme }) => ({
   lineHeight: 1.6,
   fontWeight: 400,
   textAlign: 'left',
-  borderLeft: `8px solid #2f7d31`,
+  borderLeft: '8px solid #2f7d31',
   gap: '16px', // Utilise gap au lieu de spacing pour éviter les marges automatiques
 }))
 

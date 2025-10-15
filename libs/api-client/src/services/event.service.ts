@@ -18,7 +18,7 @@ export class EventService {
   }
 
   getAll(params: GetEventsQueryDto, options?: CommonRequestOptions): Promise<PagedResponse<EventWithCountsDto>> {
-    return this.client.get(`/event`, { params, signal: options?.signal }).then(res => res.data)
+    return this.client.get('/event', { params, signal: options?.signal }).then(res => res.data)
   }
 
   create(data: CreateEventInputDto): Promise<MiniEventDto> {
