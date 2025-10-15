@@ -1,6 +1,9 @@
 {
   "extends": "//",
   "linter": {
+    "domains": {
+      "react": "all"
+    },
     "rules": {
       "correctness": {
         "useExhaustiveDependencies": "warn",

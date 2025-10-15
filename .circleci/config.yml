@@ -79,15 +79,13 @@ jobs:
           path: ./junit_reports/integration
 
 
-  lint:
+  check:
     <<: *setup_env_node
     steps:
       - checkout
       - attach_workspace: *attach_workspace
       - nx/set-shas: *nx_set_shas_option
-      - run: yarn biome check --diagnostic-level=error
-      # TODO: check only affected apps / libs
-      #- run: yarn nx affected --target=lint --base=$NX_BASE --head=$NX_HEAD --parallel --max-parallel=3  --output-style=stream --exclude=@wishlist/source
+      - run: yarn check
 
   typecheck:
       <<: *setup_env_node
@@ -135,7 +133,7 @@ workflows:
   setup-workflow:
     jobs:
       - install-dependencies
-      - lint:
+      - check:
           requires:
             - install-dependencies
       - test-unit:
@@ -149,7 +147,7 @@ workflows:
             - install-dependencies
       - continuation:
           requires:
-            - lint
+            - check
             - typecheck
             - test-unit
             - test-int

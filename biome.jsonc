@@ -6,7 +6,6 @@
     "includes": ["**/*", "!node_modules", "!dist", "!junit_reports", "!.nx", "!.yarn"]
   },
   "formatter": {
-    "enabled": true,
     "formatWithErrors": false,
     "indentStyle": "space",
     "indentWidth": 2,
@@ -19,7 +18,9 @@
     "useEditorconfig": true
   },
   "linter": {
-    "enabled": true,
+    "domains": {
+      "test": "all"
+    },
     "rules": {
       "recommended": true,
       "complexity": {
@@ -49,9 +50,6 @@
       "semicolons": "asNeeded",
       "arrowParentheses": "asNeeded",
       "quoteStyle": "single"
-    },
-    "parser": {
-      "unsafeParameterDecoratorsEnabled": true
     }
   },
   "html": { "formatter": { "selfCloseVoidElements": "always" } },
