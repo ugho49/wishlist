@@ -52,7 +52,7 @@ const colorShift = keyframes`
 `
 
 const HeroContainer = styled(Box)(() => ({
-  background: `linear-gradient(135deg, #1a3a52 0%, #255376 50%, #1a3a52 100%)`,
+  background: 'linear-gradient(135deg, #1a3a52 0%, #255376 50%, #1a3a52 100%)',
   minHeight: '100vh',
   position: 'relative',
   overflow: 'hidden',

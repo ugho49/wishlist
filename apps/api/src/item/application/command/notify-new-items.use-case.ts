@@ -22,7 +22,7 @@ export class NotifyNewItemsUseCase implements IInferredCommandHandler<NotifyNewI
     try {
       const oneDayAgo = DateTime.now().minus({ days: 1 }).toJSDate()
 
-      this.logger.log('Fetch new items to send daily notification since ' + oneDayAgo.toISOString())
+      this.logger.log(`Fetch new items to send daily notification since ${oneDayAgo.toISOString()}`)
 
       const newItemsForWishlists = await this.itemRepository.findAllNewItems(oneDayAgo)
 

@@ -132,7 +132,7 @@ export const AvatarUpdateButton = ({
       const res = await uploadPictureHandler(file)
       onPictureUpdated(res.picture_url)
     } catch (e) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // biome-ignore lint/suspicious/noExplicitAny: wtf
       const error = (e as any)?.response?.data?.message as string
       addToast({ message: error || "Une erreur s'est produite", variant: 'error' })
     } finally {
@@ -173,9 +173,9 @@ export const AvatarUpdateButton = ({
       <AvatarSection>
         <AvatarContainer>
           <StyledAvatar
-            src={!loading ? pictureUrl : undefined}
+            src={loading ? undefined : pictureUrl}
             className={clsx(!pictureUrl && 'clickable', pictureUrl && 'with-picture')}
-            onClick={!pictureUrl ? () => selectAPicture() : undefined}
+            onClick={pictureUrl ? undefined : () => selectAPicture()}
             sx={{ width: size, height: size }}
           >
             {loading && (

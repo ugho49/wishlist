@@ -7,7 +7,7 @@ export class AdminSecretSantaService {
 
   get(eventId: string, options?: CommonRequestOptions): Promise<SecretSantaDto | null> {
     return this.client
-      .get(`/admin/secret-santa`, { params: { eventId }, signal: options?.signal })
+      .get('/admin/secret-santa', { params: { eventId }, signal: options?.signal })
       .then(res => res.data)
   }
 

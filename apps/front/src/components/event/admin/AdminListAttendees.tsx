@@ -90,7 +90,7 @@ export const AdminListAttendees = ({ attendees, deleteAttendee, loading = false 
               <>
                 <ConfirmIconButton
                   confirmTitle="Supprimer le participant"
-                  confirmText={`Êtes-vous sûr de vouloir supprimer ce participant ?`}
+                  confirmText="Êtes-vous sûr de vouloir supprimer ce participant ?"
                   onClick={() => deleteAttendee(row.id)}
                   disabled={row.role === AttendeeRole.MAINTAINER || loading}
                   size="small"

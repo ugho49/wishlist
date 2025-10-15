@@ -66,6 +66,7 @@ export function pinoLoggerConfig(serviceName: string): PinoParams {
       },
       customErrorMessage: (_req, _res, error) => error?.message,
       customProps: (req, res) => {
+        // biome-ignore lint/suspicious/noExplicitAny: res is too complex
         const customProps = (res as any).locals ?? {}
 
         return {

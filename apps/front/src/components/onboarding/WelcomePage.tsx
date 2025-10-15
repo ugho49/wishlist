@@ -200,43 +200,41 @@ export const WelcomePage = () => {
   }
 
   return (
-    <>
-      <WelcomeContainer>
-        <HeroSection>
-          <WelcomeTitle variant="h1">Bienvenue{user?.firstname ? `, ${user.firstname}` : ''} ! 🎉</WelcomeTitle>
-          <WelcomeSubtitle variant="h6">Nous sommes ravis de vous accueillir sur Wishlist.</WelcomeSubtitle>
-        </HeroSection>
+    <WelcomeContainer>
+      <HeroSection>
+        <WelcomeTitle variant="h1">Bienvenue{user?.firstname ? `, ${user.firstname}` : ''} ! 🎉</WelcomeTitle>
+        <WelcomeSubtitle variant="h6">Nous sommes ravis de vous accueillir sur Wishlist.</WelcomeSubtitle>
+      </HeroSection>
 
-        <StepsContainer>
-          <Stepper activeStep={activeStep} alternativeLabel>
-            {steps.map(step => (
-              <Step key={step.id}>
-                <StepLabel>{step.title}</StepLabel>
-              </Step>
-            ))}
-          </Stepper>
-        </StepsContainer>
+      <StepsContainer>
+        <Stepper activeStep={activeStep} alternativeLabel>
+          {steps.map(step => (
+            <Step key={step.id}>
+              <StepLabel>{step.title}</StepLabel>
+            </Step>
+          ))}
+        </Stepper>
+      </StepsContainer>
 
-        {currentStep && currentStep.component}
+      {currentStep?.component}
 
-        <ActionButtons sx={{ mt: 4 }}>
-          {activeStep > 0 && (
-            <Button variant="text" onClick={handleBack} size="large">
-              Précédent
-            </Button>
-          )}
+      <ActionButtons sx={{ mt: 4 }}>
+        {activeStep > 0 && (
+          <Button variant="text" onClick={handleBack} size="large">
+            Précédent
+          </Button>
+        )}
 
-          {activeStep < steps.length - 1 ? (
-            <Button variant="contained" onClick={handleNext} size="large">
-              Suivant
-            </Button>
-          ) : (
-            <Button variant="contained" onClick={handleFinishOnboarding} size="large">
-              Commencer à utiliser Wishlist
-            </Button>
-          )}
-        </ActionButtons>
-      </WelcomeContainer>
-    </>
+        {activeStep < steps.length - 1 ? (
+          <Button variant="contained" onClick={handleNext} size="large">
+            Suivant
+          </Button>
+        ) : (
+          <Button variant="contained" onClick={handleFinishOnboarding} size="large">
+            Commencer à utiliser Wishlist
+          </Button>
+        )}
+      </ActionButtons>
+    </WelcomeContainer>
   )
 }

@@ -9,6 +9,6 @@ export class AdminWishlistService {
     params: GetAllWishlistsPaginationQueryDto,
     options?: CommonRequestOptions,
   ): Promise<PagedResponse<WishlistWithEventsDto>> {
-    return this.client.get(`/admin/wishlist`, { params, signal: options?.signal }).then(res => res.data)
+    return this.client.get('/admin/wishlist', { params, signal: options?.signal }).then(res => res.data)
   }
 }

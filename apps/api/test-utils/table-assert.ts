@@ -34,7 +34,7 @@ export class TableAssert {
     return this
   }
 
-  row(index: number = 0): TableRowAssert {
+  row(index = 0): TableRowAssert {
     return new TableRowAssert(
       this,
       () => this.fetchValue(index),
@@ -116,7 +116,7 @@ class TableRowAssert {
     return this
   }
 
-  row(index: number = 0): TableRowAssert {
+  row(index = 0): TableRowAssert {
     return this.parent.row(index)
   }
 

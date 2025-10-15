@@ -49,10 +49,10 @@ export const ManageUserExclusionsDialog = ({
     (id: SecretSantaUserId) => {
       const checked = selected.includes(id)
 
-      if (!checked) {
-        setSelected(prev => [...prev, id])
-      } else {
+      if (checked) {
         setSelected(prev => prev.filter(i => i !== id))
+      } else {
+        setSelected(prev => [...prev, id])
       }
     },
     [selected],

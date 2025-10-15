@@ -8,7 +8,7 @@ export const isValidUrl = (url: string): boolean => {
 }
 
 export const getUrlParameter = (name: string): string | undefined => {
-  const match = new RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search)
+  const match = new RegExp(`[?&]${name}=([^&]*)`).exec(window.location.search)
   if (!match) {
     return undefined
   }

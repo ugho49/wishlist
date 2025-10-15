@@ -233,7 +233,7 @@ export const AdminSecretSanta = ({
               <>
                 <ConfirmIconButton
                   confirmTitle="Supprimer le participant"
-                  confirmText={`Êtes-vous sûr de vouloir supprimer ce participant ?`}
+                  confirmText="Êtes-vous sûr de vouloir supprimer ce participant ?"
                   onClick={() => removeSecretSantaUser(row.id)}
                   disabled={secretSanta.status !== SecretSantaStatus.CREATED || loading}
                   size="small"
