@@ -20,12 +20,14 @@ references:
   restore_node_cache: &restore_node_cache
     keys:
       - node-module-cache-{{ checksum "./yarn.lock" }}
+  checkout: &checkout
+    method: blobless
 
 jobs:
   build-front:
     <<: *setup_env_node
     steps:
-      - checkout
+      - checkout: *checkout
       - attach_workspace: *attach_workspace
       - restore_cache: *restore_node_cache
       - run: yarn nx build front
@@ -37,7 +39,7 @@ jobs:
   deploy-front:
     <<: *setup_env_node
     steps:
-      - checkout
+      - checkout: *checkout
       - attach_workspace: *attach_workspace
       - run:
           name: Install firebase-tools
@@ -52,7 +54,7 @@ jobs:
   build-api:
     <<: *setup_env_node
     steps:
-      - checkout
+      - checkout: *checkout
       - attach_workspace: *attach_workspace
       - restore_cache: *restore_node_cache
       - run: yarn nx build api

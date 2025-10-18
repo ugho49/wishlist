@@ -1,3 +1,5 @@
 {
-  "**/*.{ts,tsx,json,jsonc,css,mdx,md,cjs,js,mjs,html,yml}": ["biome check --write --no-errors-on-unmatched"]
+  "**/*.{ts,tsx,json,jsonc,css,mdx,md,cjs,js,mjs,html,yml}": [
+    "biome check --write --no-errors-on-unmatched --diagnostic-level=error"
+  ]
 }

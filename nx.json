@@ -1,7 +1,6 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "defaultBase": "main",
-  "defaultProject": "api",
   "tui": {
     "enabled": false
   },
@@ -10,11 +9,6 @@
     "libsDir": "libs"
   },
   "targetDefaults": {
-    "build": {
-      "dependsOn": ["^build"],
-      "inputs": ["production", "^production"],
-      "cache": true
-    },
     "@nx/js:tsc": {
       "cache": true,
       "dependsOn": ["^build"],
@@ -34,7 +28,7 @@
       "plugin": "@nx/webpack/plugin",
       "options": {
         "buildTargetName": "build",
-        "serveTargetName": "webpack:serve",
+        "serveTargetName": "serve",
         "serveStaticTargetName": "webpack:serve-static",
         "previewTargetName": "webpack:preview"
       }

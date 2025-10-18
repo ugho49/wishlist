@@ -1,22 +1,35 @@
 const { NxAppWebpackPlugin } = require('@nx/webpack/app-plugin')
 const { join } = require('path')
+const { RunScriptWebpackPlugin } = require('run-script-webpack-plugin')
+
+const isDevelopment = process.env.NODE_ENV !== 'production'
+const outputFileName = 'main.js'
 
 module.exports = {
   output: {
     path: join(__dirname, '../../dist/apps/api'),
-    ...(process.env.NODE_ENV !== 'production' && {
+    ...(isDevelopment && {
       devtoolModuleFilenameTemplate: '[absolute-resource-path]',
     }),
+  },
+  // Write files to disk in development mode for RunScriptWebpackPlugin
+  devServer: {
+    port: 9000, // Use different port than the NestJS app (8080)
+    hot: true,
+    devMiddleware: {
+      writeToDisk: true,
+    },
   },
   plugins: [
     new NxAppWebpackPlugin({
       target: 'node',
       compiler: 'tsc',
       main: './src/main.ts',
+      outputFileName,
       tsConfig: './tsconfig.app.json',
       optimization: false,
       outputHashing: 'none',
-      generatePackageJson: true,
+      generatePackageJson: !isDevelopment,
       sourceMaps: true,
       transformers: [
         {
@@ -44,5 +57,13 @@ module.exports = {
         },
       ],
     }),
+    ...(isDevelopment
+      ? [
+          new RunScriptWebpackPlugin({
+            name: outputFileName,
+            autoRestart: true,
+          }),
+        ]
+      : []),
   ],
 }
