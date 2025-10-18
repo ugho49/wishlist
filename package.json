@@ -95,7 +95,7 @@
     "zod": "4.1.8"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.2.5",
+    "@biomejs/biome": "2.2.6",
     "@commitlint/cli": "19.8.1",
     "@commitlint/config-conventional": "19.8.1",
     "@faker-js/faker": "10.0.0",
@@ -130,6 +130,7 @@
     "@types/react-router-dom": "5.3.3",
     "@types/supertest": "6.0.3",
     "@types/uuid": "10.0.0",
+    "@types/webpack-node-externals": "3.0.4",
     "@vitejs/plugin-react": "5.0.2",
     "@vitest/coverage-v8": "3.2.4",
     "@vitest/ui": "3.2.4",
@@ -146,6 +147,7 @@
     "nx": "21.6.4",
     "react-refresh": "0.17.0",
     "react-test-renderer": "19.1.1",
+    "run-script-webpack-plugin": "0.2.3",
     "sass-embedded": "1.93.2",
     "supertest": "7.1.4",
     "testcontainers": "11.5.1",

@@ -34,12 +34,14 @@ references:
   restore_node_cache: &restore_node_cache
     keys:
       - node-module-cache-{{ checksum "./yarn.lock" }}
+  checkout: &checkout
+    method: blobless
 
 jobs:
   install-dependencies:
     <<: *setup_env_node
     steps:
-      - checkout
+      - checkout: *checkout
       - restore_cache: *restore_node_cache
       - run: yarn install --immutable
       - save_cache: *save_node_cache
@@ -51,7 +53,7 @@ jobs:
   test-unit:
     <<: *setup_env_node
     steps:
-      - checkout
+      - checkout: *checkout
       - attach_workspace: *attach_workspace
       - nx/set-shas: *nx_set_shas_option
       - run:
@@ -64,7 +66,7 @@ jobs:
     environment:
       TESTCONTAINERS_HOST_OVERRIDE: "localhost"
     steps:
-      - checkout
+      - checkout: *checkout
       - attach_workspace: *attach_workspace
       - nx/set-shas: *nx_set_shas_option
       - setup_remote_docker:
@@ -82,15 +84,15 @@ jobs:
   check:
     <<: *setup_env_node
     steps:
-      - checkout
+      - checkout: *checkout
       - attach_workspace: *attach_workspace
       - nx/set-shas: *nx_set_shas_option
-      - run: yarn check
+      - run: yarn check --reporter=summary
 
   typecheck:
       <<: *setup_env_node
       steps:
-        - checkout
+        - checkout: *checkout
         - attach_workspace: *attach_workspace
         - run: yarn check-types
 
@@ -104,7 +106,7 @@ jobs:
         type: string
         default: << pipeline.parameters.continue-config-parameters >>
     steps:
-      - checkout
+      - checkout: *checkout
       - attach_workspace: *attach_workspace
       - nx/set-shas: *nx_set_shas_option
       - run:
