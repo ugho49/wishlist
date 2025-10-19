@@ -35,7 +35,7 @@ const ImageModal = ({
   const smallScreen = useMediaQuery(theme.breakpoints.only('xs'))
 
   return (
-    <Modal open={open} onClose={onClose}>
+    <Modal open={open} onClose={onClose} autoFocus={false} disableAutoFocus>
       <Fade in={open}>
         <Stack
           alignItems="center"
