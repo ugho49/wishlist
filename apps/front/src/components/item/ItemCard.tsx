@@ -126,6 +126,7 @@ const ItemImage = styled('img')({
 const ItemImagePlaceholder = styled(Box)(({ theme }) => ({
   width: '100%',
   height: '100%',
+  cursor: 'pointer',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -344,7 +345,7 @@ export type ItemCardProps = {
     hideItems: boolean
   }
   item: ItemDto
-  onImageClick?: () => void
+  onImageClick: () => void
 }
 
 const mapState = (state: RootState) => state.auth.user?.id
@@ -463,9 +464,9 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
         {/* Item image */}
         <ItemImageContainer className="item-image-container">
           {item.picture_url ? (
-            <ItemImage onClick={() => onImageClick?.()} src={item.picture_url} alt={item.name} />
+            <ItemImage onClick={() => onImageClick()} src={item.picture_url} alt={item.name} />
           ) : (
-            <ItemImagePlaceholder>
+            <ItemImagePlaceholder onClick={() => onImageClick()}>
               <CardGiftcardIcon />
             </ItemImagePlaceholder>
           )}

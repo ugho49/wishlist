@@ -35,7 +35,7 @@ const ImageModal = ({
   const smallScreen = useMediaQuery(theme.breakpoints.only('xs'))
 
   return (
-    <Modal open={open} onClose={onClose}>
+    <Modal open={open} onClose={onClose} autoFocus={false} disableAutoFocus>
       <Fade in={open}>
         <Stack
           alignItems="center"
@@ -125,10 +125,14 @@ export const WishlistItems = ({ wishlist }: WishlistTabItemsProps) => {
     'filter',
     parseAsStringEnum<FilterType>(Object.values(FilterType)).withDefault(FilterType.NONE),
   )
+  const [currentItemId, setCurrentItemId] = useQueryState('currentItemId')
   const [itemsFilteredAndSorted, setItemsFilteredAndSorted] = useState<ItemDto[]>([])
   const nbOfItems = useMemo(() => wishlist.items.length, [wishlist.items])
   const ownerOfTheList = currentUserId === wishlist.owner.id
-  const [currentItem, setCurrentItem] = useState<ItemDto | null>(null)
+  const currentItem = useMemo(
+    () => wishlist.items.find(item => item.id === currentItemId),
+    [wishlist.items, currentItemId],
+  )
 
   const addItem = () => {
     setOpenItemFormDialog(true)
@@ -154,7 +158,7 @@ export const WishlistItems = ({ wishlist }: WishlistTabItemsProps) => {
                 <ItemCard
                   wishlist={{ id: wishlist.id, ownerId: wishlist.owner.id, hideItems: wishlist.config.hide_items }}
                   item={item}
-                  onImageClick={() => setCurrentItem(item)}
+                  onImageClick={() => setCurrentItemId(item.id)}
                 />
               </Grid>
             ))}
@@ -181,10 +185,10 @@ export const WishlistItems = ({ wishlist }: WishlistTabItemsProps) => {
 
       {/* Image modal */}
       <ImageModal
+        open={!!currentItem}
+        onClose={() => setCurrentItemId(null)}
         imageUrl={currentItem?.picture_url}
         itemUrl={currentItem?.url}
-        open={!!currentItem}
-        onClose={() => setCurrentItem(null)}
       />
     </Box>
   )
