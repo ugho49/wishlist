@@ -30,7 +30,7 @@ services:
     restart: unless-stopped
 
   db:
-    image: postgres:18.0-alpine
+    image: postgres:17.6-alpine
     restart: always
     environment:
       POSTGRES_USER: ${DB_USER}
@@ -44,7 +44,7 @@ services:
       test: "pg_isready -d $DB_NAME -U $DB_USER"
 
   pgbackups:
-    image: prodrigestivill/postgres-backup-local:18-alpine
+    image: prodrigestivill/postgres-backup-local:17-alpine
     restart: always
     volumes:
       - /pgbackups:/backups
