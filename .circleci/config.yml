@@ -57,7 +57,7 @@ jobs:
       - attach_workspace: *attach_workspace
       - nx/set-shas: *nx_set_shas_option
       - run:
-          command: yarn nx affected --target=test --base=$NX_BASE --head=$NX_HEAD --parallel --max-parallel=3  --output-style=stream --exclude=@wishlist/source
+          command: yarn nx affected --target=test --base=$NX_BASE --head=$NX_HEAD --parallel=3  --output-style=stream --exclude=@wishlist/source
       - store_test_results:
           path: ./junit_reports/unit
 
@@ -76,7 +76,7 @@ jobs:
           background: true
           command: .circleci/autoforward.py
       - run:
-          command: yarn nx affected --target=test:int --base=$NX_BASE --head=$NX_HEAD --parallel --max-parallel=3  --output-style=stream --exclude=@wishlist/source 
+          command: yarn nx affected --target=test:int --base=$NX_BASE --head=$NX_HEAD --parallel=3  --output-style=stream --exclude=@wishlist/source 
       - store_test_results:
           path: ./junit_reports/integration
 
@@ -86,7 +86,6 @@ jobs:
     steps:
       - checkout: *checkout
       - attach_workspace: *attach_workspace
-      - nx/set-shas: *nx_set_shas_option
       - run: yarn check --reporter=summary
 
   typecheck:
@@ -94,7 +93,8 @@ jobs:
       steps:
         - checkout: *checkout
         - attach_workspace: *attach_workspace
-        - run: yarn check-types
+        - nx/set-shas: *nx_set_shas_option
+        - run: yarn nx affected --target=typecheck --base=$NX_BASE --head=$NX_HEAD --parallel=3  --output-style=stream --exclude=@wishlist/source 
 
   continuation:
     <<: *setup_env_node
