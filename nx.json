@@ -17,11 +17,26 @@
   },
   "plugins": [
     {
-      "plugin": "@wishlist/biome-plugin",
+      "plugin": "@wishlist/plugin/biome",
       "options": {
         "lintTargetName": "lint",
         "formatTargetName": "format",
         "checkTargetName": "check"
+      }
+    },
+    {
+      "plugin": "@wishlist/plugin/integration-test",
+      "options": {
+        "intTestTargetName": "test:int"
+      }
+    },
+    {
+      "plugin": "@wishlist/plugin/drizzle",
+      "options": {
+        "studioTargetName": "drizzle:studio",
+        "generateTargetName": "drizzle:generate",
+        "migrateTargetName": "drizzle:migrate",
+        "seedTargetName": "drizzle:seed"
       }
     },
     {
