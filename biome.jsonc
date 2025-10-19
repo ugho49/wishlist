@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.2.5/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.2.6/schema.json",
   "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
   "files": {
     "ignoreUnknown": false,
@@ -33,7 +33,8 @@
         "noMisusedPromises": "error"
       },
       "complexity": {
-        "noStaticOnlyClass": "off"
+        "noStaticOnlyClass": "off",
+        "noEmptyTypeParameters": "error"
       },
       "correctness": {
         "noUnusedVariables": "error",
@@ -41,14 +42,29 @@
       },
       "style": {
         "useImportType": "error",
-        "useTemplate": "warn"
+        "noInferrableTypes": "error",
+        "useTemplate": "warn",
+        "noUnusedTemplateLiteral": "error",
+        "noMagicNumbers": "warn",
+        "noNegationElse": "error",
+        "noNestedTernary": "error",
+        "noParameterAssign": "error",
+        "noRestrictedGlobals": "error",
+        "noUselessElse": "error",
+        "useArrayLiterals": "error",
+        "useConsistentArrayType": "error",
+        "useConst": "error",
+        "useThrowOnlyError": "error"
       },
       "performance": {
         "noAccumulatingSpread": "off"
       },
       "suspicious": {
-        "noArrayIndexKey": "warn",
-        "useAwait": "error"
+        "useAwait": "error",
+        "noImplicitAnyLet": "error",
+        "noExplicitAny": "error",
+        "noUnassignedVariables": "error",
+        "noVar": "error"
       }
     }
   },

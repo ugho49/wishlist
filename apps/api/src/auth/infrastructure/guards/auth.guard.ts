@@ -24,7 +24,7 @@ export class AuthGuard extends PassportAuthGuard('jwt') {
     return super.canActivate(context)
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // biome-ignore lint/suspicious/noExplicitAny: it's an override
   override handleRequest(err: any, user: any, info: any, context: ExecutionContext) {
     // You can throw an exception based on either "info" or "err" arguments
     if (err || !user) {

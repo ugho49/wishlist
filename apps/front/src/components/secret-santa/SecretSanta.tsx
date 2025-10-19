@@ -132,41 +132,40 @@ export const SecretSanta = ({ secretSanta, event }: SecretSantaProps) => {
 
   return (
     <Stack>
-      <>
-        <EditSecretSantaFormDialog
-          title="Modifier le secret santa"
-          open={openEditModal}
-          saveButtonText="Modifier"
-          handleSubmit={input => {
-            setOpenEditModal(false)
-            void updateSecretSanta(input)
-          }}
-          handleClose={() => setOpenEditModal(false)}
-          input={{ budget, description }}
-        />
+      <EditSecretSantaFormDialog
+        title="Modifier le secret santa"
+        open={openEditModal}
+        saveButtonText="Modifier"
+        handleSubmit={input => {
+          setOpenEditModal(false)
+          void updateSecretSanta(input)
+        }}
+        handleClose={() => setOpenEditModal(false)}
+        input={{ budget, description }}
+      />
 
-        <AddSecretSantaUsersFormDialog
-          open={openSecretSantaUsersModal}
-          handleSubmit={newSecretSantaUsers => {
-            setSecretSantaUsers(prev => [...prev, ...newSecretSantaUsers])
-            setOpenSecretSantaUsersModal(false)
-          }}
-          handleClose={() => setOpenSecretSantaUsersModal(false)}
-          secretSantaId={secretSanta.id}
-          eventId={eventId}
-          eventAttendees={eventAttendees}
-          secretSantaAttendees={secretSantaUsers.map(u => u.attendee)}
-        />
+      <AddSecretSantaUsersFormDialog
+        open={openSecretSantaUsersModal}
+        handleSubmit={newSecretSantaUsers => {
+          setSecretSantaUsers(prev => [...prev, ...newSecretSantaUsers])
+          setOpenSecretSantaUsersModal(false)
+        }}
+        handleClose={() => setOpenSecretSantaUsersModal(false)}
+        secretSantaId={secretSanta.id}
+        eventId={eventId}
+        eventAttendees={eventAttendees}
+        secretSantaAttendees={secretSantaUsers.map(u => u.attendee)}
+      />
 
-        <ManageUserExclusionsDialog
-          open={currentUserIdModalExclusion !== undefined}
-          eventId={eventId}
-          secretSantaId={secretSanta.id}
-          secretSantaUser={secretSantaUsers.find(u => u.id === currentUserIdModalExclusion)}
-          handleClose={() => setCurrentUserIdModalExclusion(undefined)}
-          otherSecretSantaUser={secretSantaUsers.filter(u => u.id !== currentUserIdModalExclusion)}
-        />
-      </>
+      <ManageUserExclusionsDialog
+        open={currentUserIdModalExclusion !== undefined}
+        eventId={eventId}
+        secretSantaId={secretSanta.id}
+        secretSantaUser={secretSantaUsers.find(u => u.id === currentUserIdModalExclusion)}
+        handleClose={() => setCurrentUserIdModalExclusion(undefined)}
+        otherSecretSantaUser={secretSantaUsers.filter(u => u.id !== currentUserIdModalExclusion)}
+      />
+
       {drawFinishedPopup && (
         <Stack mb={4}>
           <Alert severity="success" className="animated zoomIn faster">
@@ -342,7 +341,7 @@ export const SecretSanta = ({ secretSanta, event }: SecretSantaProps) => {
                         )}
                         <ConfirmIconButton
                           confirmTitle="Supprimer le participant"
-                          confirmText={`Êtes-vous sûr de vouloir supprimer ce participant ?`}
+                          confirmText="Êtes-vous sûr de vouloir supprimer ce participant ?"
                           onClick={() => removeSecretSantaUser(row.id)}
                           disabled={loading}
                           size="small"

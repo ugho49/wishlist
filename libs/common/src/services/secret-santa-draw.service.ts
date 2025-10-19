@@ -59,10 +59,7 @@ export class SecretSantaDrawService {
     return possibleDraws
   }
 
-  private draw(
-    possibleDraws: { userId: string; possibleDrawIds: string[] }[],
-    retryCount: number = 0,
-  ): SecretSantaAssign[] {
+  private draw(possibleDraws: { userId: string; possibleDrawIds: string[] }[], retryCount = 0): SecretSantaAssign[] {
     const finalDraws: SecretSantaAssign[] = []
     const drawnIds: string[] = []
 

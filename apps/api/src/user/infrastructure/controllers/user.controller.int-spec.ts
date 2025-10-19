@@ -685,6 +685,7 @@ describe('UserController', () => {
             })
 
             // Frank should not appear (0 common events)
+            // biome-ignore lint/suspicious/noExplicitAny: for the test
             expect(body.map((u: any) => u.id)).not.toContain(frankId)
           })
       })
@@ -744,6 +745,7 @@ describe('UserController', () => {
               email: 'user1@test.com',
             })
             // user2 should not appear as they don't share events with current user
+            // biome-ignore lint/suspicious/noExplicitAny: for the test
             expect(body.map((u: any) => u.id)).not.toContain(user2Id)
           })
       })

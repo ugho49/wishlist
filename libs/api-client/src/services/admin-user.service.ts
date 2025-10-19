@@ -18,7 +18,7 @@ export class AdminUserService {
   }
 
   getAll(params: GetAllUsersQueryDto, options?: CommonRequestOptions): Promise<PagedResponse<UserWithoutSocialsDto>> {
-    return this.client.get(`/admin/user`, { params, signal: options?.signal }).then(res => res.data)
+    return this.client.get('/admin/user', { params, signal: options?.signal }).then(res => res.data)
   }
 
   async update(userId: UserId, data: UpdateFullUserProfileInputDto): Promise<void> {

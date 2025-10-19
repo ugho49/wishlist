@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/suspicious/noExplicitAny: vitest*/
 import 'vitest'
 
 import type CustomMatchers from 'jest-extended'

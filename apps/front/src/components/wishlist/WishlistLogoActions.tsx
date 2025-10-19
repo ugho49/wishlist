@@ -12,8 +12,8 @@ import { InputLabel } from '../common/InputLabel'
 type WishlistLogoActionsProps = {
   logoUrl?: string
   loading: boolean
-  onLogoChange: (file: File) => void
-  onLogoRemove: () => void
+  onLogoChange: (file: File) => void | Promise<void>
+  onLogoRemove: () => void | Promise<void>
 }
 
 export const WishlistLogoActions = (props: WishlistLogoActionsProps) => {
@@ -39,9 +39,9 @@ export const WishlistLogoActions = (props: WishlistLogoActionsProps) => {
         <AvatarCropperModal
           imageSrc={tmpLogoSrc}
           handleClose={() => setTmpLogoSrc(undefined)}
-          handleSave={file => {
+          handleSave={async file => {
             setTmpLogoSrc(undefined)
-            onLogoChange(file)
+            await onLogoChange(file)
           }}
         />
       )}
