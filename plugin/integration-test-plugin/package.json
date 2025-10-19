@@ -1,5 +1,5 @@
 {
-  "name": "@wishlist/plugin/biome",
+  "name": "@wishlist/plugin/integration-test",
   "version": "0.0.1",
   "private": true,
   "type": "commonjs",

@@ -3,47 +3,6 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/api/src",
   "projectType": "application",
-  "targets": {
-    "test:int": {
-      "executor": "@nx/vite:test",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
-      "options": {
-        "config": "apps/api/vitest.config.int.ts"
-      }
-    },
-    "drizzle:studio": {
-      "executor": "nx:run-commands",
-      "options": {
-        "cwd": "{projectRoot}",
-        "command": "npx drizzle-kit studio",
-        "color": true
-      }
-    },
-    "drizzle:generate": {
-      "executor": "nx:run-commands",
-      "options": {
-        "cwd": "{projectRoot}",
-        "command": "npx drizzle-kit generate",
-        "color": true,
-        "args": ["--name"],
-        "forwardAllArgs": true
-      }
-    },
-    "drizzle:migrate": {
-      "executor": "nx:run-commands",
-      "options": {
-        "cwd": "{projectRoot}",
-        "command": "npx drizzle-kit migrate",
-        "color": true
-      }
-    },
-    "drizzle:seed": {
-      "executor": "nx:run-commands",
-      "options": {
-        "cwd": "{projectRoot}",
-        "command": "yarn tsx drizzle/seed.ts"
-      }
-    }
-  },
+  "targets": {},
   "tags": []
 }

@@ -1,0 +1,41 @@
+{
+  "name": "integration-test-plugin",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "plugin/integration-test-plugin/src",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/plugin/integration-test-plugin",
+        "main": "plugin/integration-test-plugin/src/index.ts",
+        "tsConfig": "plugin/integration-test-plugin/tsconfig.lib.json",
+        "assets": [
+          "plugin/integration-test-plugin/*.md",
+          {
+            "input": "./plugin/integration-test-plugin/src",
+            "glob": "**/!(*.ts)",
+            "output": "./src"
+          },
+          {
+            "input": "./plugin/integration-test-plugin/src",
+            "glob": "**/*.d.ts",
+            "output": "./src"
+          },
+          {
+            "input": "./plugin/integration-test-plugin",
+            "glob": "generators.json",
+            "output": "."
+          },
+          {
+            "input": "./plugin/integration-test-plugin",
+            "glob": "executors.json",
+            "output": "."
+          }
+        ]
+      }
+    }
+  }
+}
