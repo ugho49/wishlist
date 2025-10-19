@@ -9,7 +9,7 @@ import { getCroppedImg } from '../../utils/canvas.utils'
 
 export type AvatarCropperModalProps = {
   imageSrc: string
-  handleSave: (file: File) => Promise<void>
+  handleSave: (file: File) => void | Promise<void>
   handleClose: () => void
 }
 

@@ -127,8 +127,12 @@ export const EditWishlistInformations = ({ wishlist }: EditWishlistInformationsP
             <WishlistLogoActions
               loading={loadingLogoUpdate}
               logoUrl={logoUrl}
-              onLogoChange={file => uploadLogo(file)}
-              onLogoRemove={() => removeLogo()}
+              onLogoChange={async file => {
+                await uploadLogo(file)
+              }}
+              onLogoRemove={async () => {
+                await removeLogo()
+              }}
             />
           </Box>
           <Stack component="form" onSubmit={handleSubmit(onSubmit)} gap={3}>
