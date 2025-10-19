@@ -6,6 +6,7 @@ import { Avatar, Box, Button, Stack, styled, TextField } from '@mui/material'
 import { DataGrid } from '@mui/x-data-grid'
 import { useQuery } from '@tanstack/react-query'
 import { DateTime } from 'luxon'
+import { parseAsInteger, useQueryState } from 'nuqs'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
@@ -62,7 +63,7 @@ export const AdminListUsers = () => {
   const { admin: api } = useApi()
   const [totalElements, setTotalElements] = useState(0)
   const [pageSize, setPageSize] = useState(0)
-  const [currentPage, setCurrentPage] = useState(1)
+  const [currentPage, setCurrentPage] = useQueryState('page', parseAsInteger.withDefault(1))
   const [inputSearch, setInputSearch] = useState('')
   const [search, setSearch] = useState('')
   const navigate = useNavigate()
@@ -78,7 +79,7 @@ export const AdminListUsers = () => {
       setCurrentPage(value.pagination.page_number)
       setPageSize(value.pagination.pages_size)
     }
-  }, [value])
+  }, [value, setCurrentPage])
 
   const applySearch = (e: FormEvent) => {
     e.preventDefault()

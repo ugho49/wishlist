@@ -5,6 +5,7 @@ import { DataGrid } from '@mui/x-data-grid'
 import { useQuery } from '@tanstack/react-query'
 import { AttendeeRole } from '@wishlist/common'
 import { DateTime } from 'luxon'
+import { parseAsInteger, useQueryState } from 'nuqs'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
@@ -71,7 +72,7 @@ export const AdminListEvents = ({ userId }: AdminListEventsProps) => {
   const { admin: api } = useApi()
   const [totalElements, setTotalElements] = useState(0)
   const [pageSize, setPageSize] = useState(0)
-  const [currentPage, setCurrentPage] = useState(1)
+  const [currentPage, setCurrentPage] = useQueryState('page', parseAsInteger.withDefault(1))
   const navigate = useNavigate()
 
   const { data: value, isLoading: loading } = useQuery({
@@ -85,7 +86,7 @@ export const AdminListEvents = ({ userId }: AdminListEventsProps) => {
       setCurrentPage(value.pagination.page_number)
       setPageSize(value.pagination.pages_size)
     }
-  }, [value])
+  }, [value, setCurrentPage])
 
   return (
     <DataGrid
