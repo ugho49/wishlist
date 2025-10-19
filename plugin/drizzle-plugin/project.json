@@ -1,0 +1,41 @@
+{
+  "name": "drizzle-plugin",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "plugin/drizzle-plugin/src",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/plugin/drizzle-plugin",
+        "main": "plugin/drizzle-plugin/src/index.ts",
+        "tsConfig": "plugin/drizzle-plugin/tsconfig.lib.json",
+        "assets": [
+          "plugin/drizzle-plugin/*.md",
+          {
+            "input": "./plugin/drizzle-plugin/src",
+            "glob": "**/!(*.ts)",
+            "output": "./src"
+          },
+          {
+            "input": "./plugin/drizzle-plugin/src",
+            "glob": "**/*.d.ts",
+            "output": "./src"
+          },
+          {
+            "input": "./plugin/drizzle-plugin",
+            "glob": "generators.json",
+            "output": "."
+          },
+          {
+            "input": "./plugin/drizzle-plugin",
+            "glob": "executors.json",
+            "output": "."
+          }
+        ]
+      }
+    }
+  }
+}

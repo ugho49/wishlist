@@ -26,10 +26,12 @@
       "@wishlist/api-drizzle": ["apps/api/drizzle/index.ts"],
       "@wishlist/api-test-utils": ["apps/api/test-utils/index.ts"],
       "@wishlist/api/*": ["apps/api/src/*/index.ts"],
-      "@wishlist/biome-plugin": ["plugin/biome-plugin/src/index.ts"],
       "@wishlist/common": ["libs/common/src/index.ts"],
       "@wishlist/front-components/*": ["apps/front/src/components/*"],
-      "@wishlist/front-hooks": ["apps/front/src/hooks"]
+      "@wishlist/front-hooks": ["apps/front/src/hooks"],
+      "@wishlist/plugin/biome": ["plugin/biome-plugin/src/index.ts"],
+      "@wishlist/plugin/integration-test": ["plugin/integration-test-plugin/src/index.ts"],
+      "@wishlist/plugin/drizzle": ["plugin/drizzle-plugin/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
