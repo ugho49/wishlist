@@ -9,7 +9,7 @@ import { getCroppedImg } from '../../utils/canvas.utils'
 
 export type AvatarCropperModalProps = {
   imageSrc: string
-  handleSave: (file: File) => void
+  handleSave: (file: File) => Promise<void>
   handleClose: () => void
 }
 
@@ -83,7 +83,7 @@ export const AvatarCropperModal = ({ handleClose, imageSrc, handleSave }: Avatar
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area>({ width: 0, height: 0, x: 0, y: 0 })
   const [loading, setLoading] = useState(false)
 
-  const onCropComplete = useCallback((croppedArea: Area, croppedAreaPixels: Area) => {
+  const onCropComplete = useCallback((_croppedArea: Area, croppedAreaPixels: Area) => {
     setCroppedAreaPixels(croppedAreaPixels)
   }, [])
 
@@ -91,7 +91,7 @@ export const AvatarCropperModal = ({ handleClose, imageSrc, handleSave }: Avatar
     setLoading(true)
     try {
       const croppedImage = await getCroppedImg(imageSrc, croppedAreaPixels, rotation)
-      handleSave(croppedImage)
+      await handleSave(croppedImage)
     } catch {
       addToast({ message: "Une erreur s'est produite lors du redimensionnement de l'image", variant: 'error' })
       handleClose()
@@ -126,7 +126,7 @@ export const AvatarCropperModal = ({ handleClose, imageSrc, handleSave }: Avatar
               max={3}
               step={0.1}
               aria-labelledby="Zoom"
-              onChange={(e, zoom) => {
+              onChange={(_e, zoom) => {
                 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                 // @ts-expect-error
                 setZoom(zoom)
@@ -141,7 +141,7 @@ export const AvatarCropperModal = ({ handleClose, imageSrc, handleSave }: Avatar
               max={360}
               step={1}
               aria-labelledby="Rotation"
-              onChange={(e, rotation) => {
+              onChange={(_e, rotation) => {
                 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                 // @ts-expect-error
                 setRotation(rotation)

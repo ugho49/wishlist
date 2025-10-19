@@ -257,6 +257,7 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
                       disabled={loading || scanUrlLoading}
                       onClick={e => {
                         e.preventDefault()
+                        // biome-ignore lint/nursery/noFloatingPromises: it's okay to not await here
                         scanUrl(url)
                       }}
                     >
@@ -268,6 +269,7 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
               onChange={e => {
                 const newVal = e.target.value
                 if (pictureUrl === '' && url === '') {
+                  // biome-ignore lint/nursery/noFloatingPromises: it's okay to not await here
                   scanUrl(newVal)
                 }
                 setUrl(newVal)

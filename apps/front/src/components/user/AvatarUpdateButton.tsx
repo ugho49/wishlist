@@ -163,9 +163,9 @@ export const AvatarUpdateButton = ({
         <AvatarCropperModal
           imageSrc={imageSrc}
           handleClose={() => setImageSrc(undefined)}
-          handleSave={file => {
+          handleSave={async file => {
             setImageSrc(undefined)
-            uploadProfilePicture(file)
+            await uploadProfilePicture(file)
           }}
         />
       )}

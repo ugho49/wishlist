@@ -208,9 +208,9 @@ export const SideNavigation = () => {
     await logout()
   }, [addToast, logout])
 
-  const handleNavigation = (route: string) => {
+  const handleNavigation = async (route: string) => {
     if (route === 'logout') {
-      handleLogout()
+      await handleLogout()
       return
     }
     navigate(route)
@@ -228,7 +228,7 @@ export const SideNavigation = () => {
     const pathname = location.pathname
     if (route === pathname) return true
     // Handle nested routes (e.g., /events/123 should activate /events)
-    if (route !== '/' && pathname.startsWith(route + '/')) return true
+    if (route !== '/' && pathname.startsWith(`${route}/`)) return true
     return false
   }
 

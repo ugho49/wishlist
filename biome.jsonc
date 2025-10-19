@@ -19,10 +19,19 @@
   },
   "linter": {
     "domains": {
-      "test": "all"
+      "test": "all",
+      "project": "recommended"
     },
     "rules": {
       "recommended": true,
+      "nursery": {
+        // Combinaison of @typescript-eslint/explicit-module-boundary-types and @typescript-eslint/explicit-function-return-type
+        // it is used to enforce the use of explicit types for modules and functions return types
+        // previously eslint was enforcing only return types, so a lot of code is not compliant
+        // "useExplicitType": "error",
+        "noFloatingPromises": "error",
+        "noMisusedPromises": "error"
+      },
       "complexity": {
         "noStaticOnlyClass": "off"
       },
@@ -31,7 +40,8 @@
         "noUnusedImports": "error"
       },
       "style": {
-        "useImportType": "error"
+        "useImportType": "error",
+        "useTemplate": "warn"
       },
       "performance": {
         "noAccumulatingSpread": "off"

@@ -294,7 +294,12 @@ async function main() {
   process.exit(0)
 }
 
-main().then(() => {
-  consola.box('Seeding complete')
-  process.exit(0)
-})
+main()
+  .then(() => {
+    consola.box('Seeding complete')
+    process.exit(0)
+  })
+  .catch(error => {
+    consola.error('Failed to seed the database', error)
+    process.exit(1)
+  })
