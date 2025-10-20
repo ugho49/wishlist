@@ -34,6 +34,8 @@ export class DatabaseService implements OnModuleInit {
   }
 
   async onModuleInit() {
+    await this.ping()
+
     if (this.config.runMigrations) {
       await this.runMigrations()
     }
@@ -48,5 +50,13 @@ export class DatabaseService implements OnModuleInit {
     })
 
     this.logger.log('Migrations completed ✅')
+  }
+
+  async ping(): Promise<void> {
+    try {
+      await this.db.execute('SELECT 1')
+    } catch {
+      throw new Error(`Database is not reachable on ${this.config.host}:${this.config.port} (${this.config.database})`)
+    }
   }
 }

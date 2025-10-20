@@ -14,7 +14,7 @@ export class DatabaseHealthIndicator {
     const indicator = this.healthIndicatorService.check(key)
 
     try {
-      await this.databaseService.db.execute('SELECT 1')
+      await this.databaseService.ping()
       return indicator.up()
     } catch {
       return indicator.down()
