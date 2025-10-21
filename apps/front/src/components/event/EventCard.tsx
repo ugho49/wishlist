@@ -3,33 +3,26 @@ import type { EventWithCountsDto } from '@wishlist/common'
 import { styled } from '@mui/material'
 import clsx from 'clsx'
 import { DateTime } from 'luxon'
+import { useNavigate } from 'react-router-dom'
 
 import { Card } from '../common/Card'
 import { EventIcon } from './EventIcon'
 
 const EventCardContent = styled(Card)(({ theme }) => ({
-  position: 'relative',
   display: 'flex',
   flexDirection: 'column',
   minHeight: '100px',
-  background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.grey[50]} 100%)`,
   border: `1px solid ${theme.palette.divider}`,
-  borderRadius: '12px',
-  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-  cursor: 'pointer',
+  padding: 16,
   '&:hover': {
-    transform: 'translateY(-2px)',
-    boxShadow: theme.shadows[8],
     borderColor: theme.palette.primary.main,
   },
-  ['&.disabled']: {
+  '&.disabled': {
     backgroundColor: theme.palette.grey[50],
-    border: `1px solid ${theme.palette.grey[200]}`,
+    borderColor: theme.palette.grey[200],
     color: theme.palette.text.disabled,
     filter: 'grayscale(100%)',
     '&:hover': {
-      transform: 'none',
-      boxShadow: theme.shadows[1],
       borderColor: theme.palette.grey[300],
     },
     '& .event-title': {
@@ -105,12 +98,13 @@ export type EventCardProps = {
 export const EventCard = ({ event }: EventCardProps) => {
   const numberOfAttendees = event.attendees.length
   const past = DateTime.fromISO(event.event_date) < DateTime.now().minus({ days: 1 })
+  const navigate = useNavigate()
 
   return (
     <EventCardContent
-      to={`/events/${event.id}`}
+      onClick={() => navigate(`/events/${event.id}`)}
       className={clsx(past && 'disabled', 'animated fadeIn fast')}
-      biggerPaddingInDesktop={false}
+      hoverable
     >
       <EventHeader>
         <EventIcon icon={event.icon} className="event-icon" />

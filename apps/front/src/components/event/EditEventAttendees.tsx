@@ -9,7 +9,7 @@ import { useMemo } from 'react'
 import { useSelector } from 'react-redux'
 
 import { useApi, useToast } from '../../hooks'
-import { CardV2 } from '../common/CardV2'
+import { Card } from '../common/Card'
 import { ConfirmIconButton } from '../common/ConfirmIconButton'
 import { Subtitle } from '../common/Subtitle'
 import { SearchUserSelect } from '../user/SearchUserSelect'
@@ -72,7 +72,7 @@ export const EditEventAttendees = ({ eventId, attendees }: EditEventAttendeesPro
   )
 
   return (
-    <CardV2>
+    <Card>
       <Subtitle>Gérer les participants</Subtitle>
 
       <Box>
@@ -127,6 +127,6 @@ export const EditEventAttendees = ({ eventId, attendees }: EditEventAttendeesPro
           </ListItem>
         ))}
       </List>
-    </CardV2>
+    </Card>
   )
 }

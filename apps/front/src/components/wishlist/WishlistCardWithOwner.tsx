@@ -4,6 +4,7 @@ import PersonIcon from '@mui/icons-material/Person'
 import PublicIcon from '@mui/icons-material/Public'
 import { Avatar, styled, Typography } from '@mui/material'
 import clsx from 'clsx'
+import { useNavigate } from 'react-router-dom'
 
 import { Card } from '../common/Card'
 
@@ -13,23 +14,17 @@ export type WishlistCardWithOwnerProps = {
 
 const WishlistCardContent = styled(Card)(({ theme }) => ({
   display: 'flex',
-  gap: '16px',
   flexDirection: 'row',
   alignItems: 'center',
   height: '5.5rem',
-  padding: '12px',
-  background: theme.palette.background.paper,
-  border: '2px solid transparent',
-  borderRadius: '20px',
-  transition: 'all 0.4s cubic-bezier(0.23, 1, 0.320, 1)',
-  cursor: 'pointer',
+  padding: 12,
+  gap: '16px',
+  border: `1px solid ${theme.palette.divider}`,
   overflow: 'hidden',
   '&:hover': {
-    transform: 'translateY(-4px) scale(1.02)',
-    boxShadow: `0 20px 40px ${theme.palette.primary.main}20`,
     borderColor: theme.palette.primary.main,
     '& .wishlist-avatar': {
-      transform: 'scale(1.05) rotate(3deg)',
+      transform: 'scale(1.05)',
       boxShadow: `0 8px 25px ${theme.palette.primary.main}30`,
     },
   },
@@ -107,15 +102,16 @@ const PublicIconStyled = styled(PublicIcon)(() => ({
 }))
 
 export const WishlistCardWithOwner = ({ wishlist }: WishlistCardWithOwnerProps) => {
+  const navigate = useNavigate()
   const isPublic = !wishlist.config.hide_items
   const initials =
     `${wishlist.owner.firstname?.charAt(0) || ''}${wishlist.owner.lastname?.charAt(0) || ''}`.toUpperCase()
 
   return (
     <WishlistCardContent
-      to={`/wishlists/${wishlist.id}`}
+      onClick={() => navigate(`/wishlists/${wishlist.id}`)}
       className={clsx('animated fadeIn fast')}
-      biggerPaddingInDesktop={false}
+      hoverable
     >
       <AvatarContainer>
         <WishlistAvatar src={wishlist.logo_url ?? wishlist.owner.picture_url} className="wishlist-avatar">

@@ -16,7 +16,7 @@ import { useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom'
 
 import { useApi, useToast } from '../../../hooks'
-import { CardV2 } from '../../common/CardV2'
+import { Card } from '../../common/Card'
 import { CharsRemaining } from '../../common/CharsRemaining'
 import { ConfirmButton } from '../../common/ConfirmButton'
 import { WishlistDatePicker } from '../../common/DatePicker'
@@ -166,7 +166,7 @@ export const AdminUserPage = () => {
       </UserNameAndEmail>
 
       <CardStack>
-        <CardV2>
+        <Card>
           <Stack direction="row" flexWrap="wrap" gap={smallScreen ? 0 : 3}>
             <List dense sx={{ flexGrow: 1 }}>
               <ListItem>
@@ -236,9 +236,9 @@ export const AdminUserPage = () => {
               </Button>
             </Stack>
           )}
-        </CardV2>
+        </Card>
 
-        <CardV2>
+        <Card>
           <Subtitle>Modifier les informations</Subtitle>
 
           <Stack component="form" gap={3} onSubmit={updateProfile}>
@@ -318,17 +318,17 @@ export const AdminUserPage = () => {
               </Stack>
             )}
           </Stack>
-        </CardV2>
+        </Card>
 
-        <CardV2>
+        <Card>
           <Subtitle>Evènements</Subtitle>
           <AdminListEvents userId={userId} />
-        </CardV2>
+        </Card>
 
-        <CardV2>
+        <Card>
           <Subtitle>Wishlists</Subtitle>
           <AdminListWishlistsForUser userId={userId} />
-        </CardV2>
+        </Card>
       </CardStack>
     </Loader>
   )

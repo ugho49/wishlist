@@ -10,7 +10,7 @@ import { useMemo } from 'react'
 import { useAvailableEvents } from '../../hooks/domain/useAvailableEvents'
 import { useApi } from '../../hooks/useApi'
 import { useToast } from '../../hooks/useToast'
-import { CardV2 } from '../common/CardV2'
+import { Card } from '../common/Card'
 import { ConfirmIconButton } from '../common/ConfirmIconButton'
 import { InputLabel } from '../common/InputLabel'
 import { Subtitle } from '../common/Subtitle'
@@ -64,7 +64,7 @@ export const EditWishlistEvent = ({ wishlistId, events }: EditWishlistEventsProp
   )
 
   return (
-    <CardV2>
+    <Card>
       <Subtitle>Modifier les évènements associés</Subtitle>
 
       <Box>
@@ -115,6 +115,6 @@ export const EditWishlistEvent = ({ wishlistId, events }: EditWishlistEventsProp
           </ListItem>
         ))}
       </List>
-    </CardV2>
+    </Card>
   )
 }

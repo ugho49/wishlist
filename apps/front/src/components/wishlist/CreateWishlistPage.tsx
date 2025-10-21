@@ -40,7 +40,7 @@ import { useInterval } from 'usehooks-ts'
 
 import { useApi, useAvailableEvents, useEventById, useToast } from '../../hooks'
 import { getRandomPlaceholderName } from '../../utils/wishlist.utils'
-import { CardV2 } from '../common/CardV2'
+import { Card } from '../common/Card'
 import { CharsRemaining } from '../common/CharsRemaining'
 import { InputLabel } from '../common/InputLabel'
 import { Loader } from '../common/Loader'
@@ -181,7 +181,7 @@ export const CreateWishlistPage = () => {
       </Box>
       <Loader loading={userFirstName === undefined}>
         <Container maxWidth="sm" sx={{ marginTop: '40px' }}>
-          <CardV2>
+          <Card>
             {step === 1 && (
               <Box>
                 <Subtitle>Pour qui créer la liste ?</Subtitle>
@@ -386,7 +386,7 @@ export const CreateWishlistPage = () => {
                 )}
               </Stack>
             )}
-          </CardV2>
+          </Card>
         </Container>
       </Loader>
     </Box>

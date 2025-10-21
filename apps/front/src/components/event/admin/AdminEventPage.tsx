@@ -27,7 +27,7 @@ import { useParams } from 'react-router-dom'
 import z from 'zod'
 
 import { useApi, useToast } from '../../../hooks'
-import { CardV2 } from '../../common/CardV2'
+import { Card } from '../../common/Card'
 import { Loader } from '../../common/Loader'
 import { Subtitle } from '../../common/Subtitle'
 import { Title } from '../../common/Title'
@@ -214,7 +214,7 @@ export const AdminEventPage = () => {
       <Title smallMarginBottom>Editer l'évènement</Title>
 
       <CardStack>
-        <CardV2>
+        <Card>
           <Loader loading={loadingEvent}>
             <Stack direction="row" flexWrap="wrap" gap={smallScreen ? 0 : 3}>
               <List dense sx={{ flexGrow: 1 }}>
@@ -255,9 +255,9 @@ export const AdminEventPage = () => {
               </Stack>
             </Stack>
           </Loader>
-        </CardV2>
+        </Card>
 
-        <CardV2>
+        <Card>
           <Subtitle>Modifier les informations</Subtitle>
 
           <Stack component="form" onSubmit={handleSubmit(onSubmit)} gap={3}>
@@ -334,9 +334,9 @@ export const AdminEventPage = () => {
               </Button>
             </Stack>
           </Stack>
-        </CardV2>
+        </Card>
 
-        <CardV2>
+        <Card>
           <Loader loading={loadingSecretSanta}>
             <Subtitle>Secret Santa</Subtitle>
             {secretSanta && (
@@ -352,9 +352,9 @@ export const AdminEventPage = () => {
             )}
             {!secretSanta && <div>Il n'y a pas de secret santa pour cet évènement</div>}
           </Loader>
-        </CardV2>
+        </Card>
 
-        <CardV2>
+        <Card>
           <Loader loading={loadingEvent}>
             <Subtitle>Participants ({event?.attendees.length})</Subtitle>
             <AdminListAttendees
@@ -363,14 +363,14 @@ export const AdminEventPage = () => {
               deleteAttendee={attendeeId => deleteAttendee(attendeeId)}
             />
           </Loader>
-        </CardV2>
+        </Card>
 
-        <CardV2>
+        <Card>
           <Loader loading={loadingEvent}>
             <Subtitle>Wishlists ({event?.wishlists.length})</Subtitle>
             <AdminListWishlistsForEvent wishlists={event?.wishlists ?? []} />
           </Loader>
-        </CardV2>
+        </Card>
       </CardStack>
     </Box>
   )

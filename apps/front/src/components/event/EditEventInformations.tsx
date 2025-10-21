@@ -12,7 +12,7 @@ import { z } from 'zod'
 
 import { useApi } from '../../hooks/useApi'
 import { useToast } from '../../hooks/useToast'
-import { CardV2 } from '../common/CardV2'
+import { Card } from '../common/Card'
 import { CharsRemaining } from '../common/CharsRemaining'
 import { ConfirmButton } from '../common/ConfirmButton'
 import { WishlistDatePicker } from '../common/DatePicker'
@@ -105,7 +105,7 @@ export const EditEventInformations = ({ event }: EditEventInformationsProps) => 
 
   return (
     <Stack gap={3}>
-      <CardV2 component="form" onSubmit={handleSubmit(onSubmit)}>
+      <Card component="form" onSubmit={handleSubmit(onSubmit)}>
         <Subtitle>Modifier les informations</Subtitle>
 
         <Stack gap={4}>
@@ -183,7 +183,7 @@ export const EditEventInformations = ({ event }: EditEventInformationsProps) => 
             </Button>
           </Stack>
         </Stack>
-      </CardV2>
+      </Card>
 
       <Stack alignItems="center">
         <Box>

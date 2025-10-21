@@ -132,7 +132,8 @@ const UserSectionStyled = styled(Box)(({ theme }) => ({
   borderRadius: theme.spacing(2),
   margin: theme.spacing(0, 2, 0.5, 2),
   backgroundColor: theme.palette.grey[50],
-  '&:hover': {
+  '&:hover, &:focus': {
+    outline: 'none',
     backgroundColor: theme.palette.primary.main + '20',
     color: theme.palette.primary.main,
     transform: 'scale(1.02)',
@@ -304,7 +305,18 @@ export const SideNavigation = () => {
       {/* Bottom section - Profile and Logout */}
       <BottomSectionStyled>
         {/* User section in bottom */}
-        <UserSectionStyled onClick={() => handleNavigation('/user/profile')}>
+        <UserSectionStyled
+          onClick={() => handleNavigation('/user/profile')}
+          onKeyDown={async event => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault()
+              await handleNavigation('/user/profile')
+            }
+          }}
+          tabIndex={0}
+          role="button"
+          aria-pressed="false"
+        >
           <UserAvatarStyled className="user-avatar" src={pictureUrl || undefined}>
             {!pictureUrl && <PersonIcon />}
           </UserAvatarStyled>
