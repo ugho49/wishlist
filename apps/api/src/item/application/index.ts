@@ -5,10 +5,11 @@ import {
   ToggleItemUseCase,
   UpdateItemUseCase,
 } from './command'
-import { ScanItemUrlUseCase } from './query'
+import { GetImportableItemsUseCase, ScanItemUrlUseCase } from './query'
 
 export const handlers = [
   ScanItemUrlUseCase,
+  GetImportableItemsUseCase,
   CreateItemUseCase,
   DeleteItemUseCase,
   ToggleItemUseCase,

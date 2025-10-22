@@ -30,4 +30,8 @@ export class ItemService {
   scanUrl(data: ScanItemInputDto): Promise<ScanItemOutputDto> {
     return this.client.post('/item/scan-url', data).then(res => res.data)
   }
+
+  getImportableItems(): Promise<ItemDto[]> {
+    return this.client.get('/item/importable').then(res => res.data)
+  }
 }

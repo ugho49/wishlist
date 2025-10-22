@@ -2,8 +2,9 @@ import { Injectable, NotFoundException } from '@nestjs/common'
 import { DatabaseService, DrizzleTransaction } from '@wishlist/api/core'
 import { NewItemsForWishlist, WishlistItem, WishlistItemRepository } from '@wishlist/api/item'
 import { schema } from '@wishlist/api-drizzle'
-import { ItemId, uuid, WishlistId } from '@wishlist/common'
-import { and, eq, gt, sql } from 'drizzle-orm'
+import { ItemId, UserId, uuid, WishlistId } from '@wishlist/common'
+import { and, eq, gt, inArray, isNull, lt, sql } from 'drizzle-orm'
+import { DateTime } from 'luxon'
 
 import { PostgresUserRepository } from './postgres-user.repository'
 
@@ -67,6 +68,35 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
       ownerName: row.ownerName,
       nbNewItems: row.nbNewItems,
     }))
+  }
+
+  async findImportableItems(userId: UserId): Promise<WishlistItem[]> {
+    const twoMonthsAgo = DateTime.now().minus({ months: 2 }).toJSDate()
+
+    // Find all wishlists of the user where all linked events are finished more than 2 months ago
+    const eligibleWishlistsSubquery = this.databaseService.db
+      .select({
+        wishlistId: schema.eventWishlist.wishlistId,
+      })
+      .from(schema.eventWishlist)
+      .innerJoin(schema.wishlist, eq(schema.wishlist.id, schema.eventWishlist.wishlistId))
+      .innerJoin(schema.event, eq(schema.event.id, schema.eventWishlist.eventId))
+      .where(eq(schema.wishlist.ownerId, userId))
+      .groupBy(schema.eventWishlist.wishlistId)
+      .having(sql`MAX(${schema.event.eventDate}) < ${twoMonthsAgo}`)
+      .as('eligible_wishlists')
+
+    // Get all items from these wishlists that are not taken and not suggested
+    const result = await this.databaseService.db
+      .select({
+        item: schema.item,
+      })
+      .from(schema.item)
+      .innerJoin(eligibleWishlistsSubquery, eq(schema.item.wishlistId, eligibleWishlistsSubquery.wishlistId))
+      .where(and(eq(schema.item.isSuggested, false), isNull(schema.item.takerId)))
+      .orderBy(schema.item.createdAt)
+
+    return result.map(row => PostgresWishlistItemRepository.toModel({ ...row.item, taker: null }))
   }
 
   async save(item: WishlistItem, tx?: DrizzleTransaction): Promise<void> {

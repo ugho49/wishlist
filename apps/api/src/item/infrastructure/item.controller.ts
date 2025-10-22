@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Param, Post, Put } from '@nestjs/common'
+import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common'
 import { CommandBus, QueryBus } from '@nestjs/cqrs'
 import { ApiTags } from '@nestjs/swagger'
 import { CurrentUser } from '@wishlist/api/auth'
@@ -11,9 +11,17 @@ import {
   ScanItemOutputDto,
   ToggleItemOutputDto,
   UpdateItemInputDto,
+  UserId,
 } from '@wishlist/common'
 
-import { CreateItemCommand, DeleteItemCommand, ScanItemUrlQuery, ToggleItemCommand, UpdateItemCommand } from '../domain'
+import {
+  CreateItemCommand,
+  DeleteItemCommand,
+  GetImportableItemsQuery,
+  ScanItemUrlQuery,
+  ToggleItemCommand,
+  UpdateItemCommand,
+} from '../domain'
 
 @ApiTags('Item')
 @Controller('/item')
@@ -22,6 +30,12 @@ export class ItemController {
     private readonly queryBus: QueryBus,
     private readonly commandBus: CommandBus,
   ) {}
+
+  // Get importable items from old wishlists
+  @Get('/importable')
+  getImportableItems(@CurrentUser('id') userId: UserId): Promise<ItemDto[]> {
+    return this.queryBus.execute(new GetImportableItemsQuery({ userId }))
+  }
 
   // Scan an item url to get the picture url
   @Post('/scan-url')

@@ -48,6 +48,7 @@ import { Subtitle } from '../common/Subtitle'
 import { Title } from '../common/Title'
 import { EventIcon } from '../event/EventIcon'
 import { SearchEventSelect } from '../event/SearchEventSelect'
+import { ImportItemsDialog } from '../item/ImportItemsDialog'
 import { WishlistLogoActions } from './WishlistLogoActions'
 
 const steps = ['Type de liste', 'Informations', 'Evènements']
@@ -127,6 +128,8 @@ export const CreateWishlistPage = () => {
   const [namePlaceholder, setNamePlaceholder] = useState<string>(getRandomPlaceholderName())
   const [logo, setLogo] = useState<File | undefined>()
   const [fromEvent] = useQueryState('from-event')
+  const [showImportDialog, setShowImportDialog] = useState(false)
+  const [createdWishlistId, setCreatedWishlistId] = useState<string | null>(null)
   const api = useApi()
 
   useInterval(() => {
@@ -163,9 +166,23 @@ export const CreateWishlistPage = () => {
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
     onSuccess: wishlist => {
       addToast({ message: 'Liste créé avec succès', variant: 'success' })
-      navigate(`/wishlists/${wishlist.id}`)
+      setCreatedWishlistId(wishlist.id)
+
+      // Show import dialog only for lists created for myself
+      if (!isListForSomeoneElse) {
+        setShowImportDialog(true)
+      } else {
+        navigate(`/wishlists/${wishlist.id}`)
+      }
     },
   })
+
+  const handleImportComplete = () => {
+    setShowImportDialog(false)
+    if (createdWishlistId) {
+      navigate(`/wishlists/${createdWishlistId}`)
+    }
+  }
 
   return (
     <Box>
@@ -179,6 +196,16 @@ export const CreateWishlistPage = () => {
           ))}
         </Stepper>
       </Box>
+
+      {createdWishlistId && (
+        <ImportItemsDialog
+          open={showImportDialog}
+          wishlistId={createdWishlistId}
+          onClose={() => setShowImportDialog(false)}
+          onComplete={handleImportComplete}
+        />
+      )}
+
       <Loader loading={userFirstName === undefined}>
         <Container maxWidth="sm" sx={{ marginTop: '40px' }}>
           <Card>
