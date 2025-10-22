@@ -262,20 +262,20 @@ export const ImportItemsDialog = ({ open, wishlistId, onClose, onComplete }: Imp
             </List>
 
             <Stack direction="row" justifyContent="space-between" alignItems="center" gap={2} paddingTop={2}>
-              <Button variant="outlined" onClick={handleSkip}>
+              <Button variant="outlined" onClick={handleSkip} disabled={isImporting}>
                 Ignorer
               </Button>
               <Button
                 variant="contained"
                 onClick={handleImport}
                 disabled={isImporting}
-                loading={isImporting}
-                loadingPosition="start"
-                startIcon={<AddIcon />}
+                startIcon={!isImporting ? <AddIcon /> : undefined}
               >
-                {selectedItemIds.size > 0
-                  ? `Importer ${selectedItemIds.size} souhait${selectedItemIds.size > 1 ? 's' : ''}`
-                  : 'Continuer'}
+                {isImporting
+                  ? 'Import en cours...'
+                  : selectedItemIds.size > 0
+                    ? `Importer ${selectedItemIds.size} souhait${selectedItemIds.size > 1 ? 's' : ''}`
+                    : 'Continuer'}
               </Button>
             </Stack>
           </Stack>
