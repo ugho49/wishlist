@@ -6,6 +6,7 @@ import { Avatar, styled, Typography } from '@mui/material'
 import clsx from 'clsx'
 import { DateTime } from 'luxon'
 import { useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 
 import { Card } from '../common/Card'
 import { EventIcon } from '../event/EventIcon'
@@ -15,28 +16,21 @@ export type WishlistCardWithEventsProps = {
 }
 
 const WishlistCardContent = styled(Card)(({ theme }) => ({
-  position: 'relative',
   display: 'flex',
   flexDirection: 'column',
-  height: '140px',
-  background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.grey[50]} 100%)`,
+  minHeight: '100px',
+  height: '100%',
   border: `1px solid ${theme.palette.divider}`,
-  borderRadius: '12px',
-  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-  cursor: 'pointer',
+  padding: 16,
   '&:hover': {
-    transform: 'translateY(-2px)',
-    boxShadow: theme.shadows[8],
     borderColor: theme.palette.primary.main,
   },
-  ['&.disabled']: {
+  '&.disabled': {
     backgroundColor: theme.palette.grey[50],
-    border: `1px solid ${theme.palette.grey[200]}`,
+    borderColor: theme.palette.grey[200],
     color: theme.palette.text.disabled,
     filter: 'grayscale(100%)',
     '&:hover': {
-      transform: 'none',
-      boxShadow: theme.shadows[1],
       borderColor: theme.palette.grey[300],
     },
     '& .wishlist-title': {
@@ -150,7 +144,7 @@ const MoreEventsIndicator = styled('span')(({ theme }) => ({
 
 export const WishlistCardWithEvents = ({ wishlist }: WishlistCardWithEventsProps) => {
   const userProfile = useSelector((state: RootState) => state.userProfile)
-
+  const navigate = useNavigate()
   const past =
     wishlist.events.filter(e => DateTime.fromISO(e.event_date) < DateTime.now().minus({ days: 1 })).length ===
     wishlist.events.length
@@ -164,9 +158,9 @@ export const WishlistCardWithEvents = ({ wishlist }: WishlistCardWithEventsProps
 
   return (
     <WishlistCardContent
-      to={`/wishlists/${wishlist.id}`}
+      onClick={() => navigate(`/wishlists/${wishlist.id}`)}
       className={clsx(past && 'disabled', 'animated fadeIn fast')}
-      biggerPaddingInDesktop={false}
+      hoverable
     >
       <WishlistHeader>
         <WishlistLogo src={wishlist.logo_url ?? userProfile.pictureUrl} className="wishlist-icon">

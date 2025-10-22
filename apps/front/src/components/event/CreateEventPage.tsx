@@ -32,7 +32,7 @@ import { z } from 'zod'
 
 import { useApi } from '../../hooks/useApi'
 import { useToast } from '../../hooks/useToast'
-import { CardV2 } from '../common/CardV2'
+import { Card } from '../common/Card'
 import { CharsRemaining } from '../common/CharsRemaining'
 import { WishlistDatePicker } from '../common/DatePicker'
 import { EmojiSelectorWithBadge } from '../common/EmojiSelectorWithBadge'
@@ -136,7 +136,7 @@ export const CreateEventPage = () => {
         maxWidth={step === 1 ? 'md' : 'sm'}
         sx={{ marginTop: '40px', transition: 'max-width 0.3s ease-in-out' }}
       >
-        <CardV2>
+        <Card>
           {step === 1 && (
             <Stack component="form" noValidate gap={3}>
               <Subtitle sx={{ marginBottom: '16px' }}>Informations</Subtitle>
@@ -298,7 +298,7 @@ export const CreateEventPage = () => {
               </Button>
             )}
           </Stack>
-        </CardV2>
+        </Card>
       </Container>
     </Box>
   )

@@ -3,7 +3,7 @@ import GroupsIcon from '@mui/icons-material/Groups'
 import { Box, Tab, Tabs } from '@mui/material'
 import { useQueryState } from 'nuqs'
 
-import { CardV2 } from '../common/CardV2'
+import { Card } from '../common/Card'
 import { Title } from '../common/Title'
 import { AdminListEvents } from '../event/admin/AdminListEvents'
 import { AdminListUsers } from '../user/admin/AdminListUsers'
@@ -45,10 +45,10 @@ export const AdminPage = () => {
           ))}
         </Tabs>
       </Box>
-      <CardV2>
+      <Card>
         {tab === TabValues.users && <AdminListUsers />}
         {tab === TabValues.events && <AdminListEvents />}
-      </CardV2>
+      </Card>
     </Box>
   )
 }

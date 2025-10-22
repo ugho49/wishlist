@@ -10,7 +10,7 @@ import useMediaQuery from '@mui/material/useMediaQuery'
 import { useQueryState } from 'nuqs'
 import { useSelector } from 'react-redux'
 
-import { CardV2 } from '../common/CardV2'
+import { Card } from '../common/Card'
 import { ProfilePictureSection } from './ProfilePictureSection'
 import { UserTabInformations } from './UserTabInformations'
 import { UserTabNotifications } from './UserTabNotifications'
@@ -113,12 +113,12 @@ export const UserProfilePage = () => {
           ))}
         </Tabs>
       </Box>
-      <CardV2>
+      <Card>
         {tab === TabValues.informations && <UserTabInformations />}
         {tab === TabValues.notifications && <UserTabNotifications />}
         {tab === TabValues.social && <UserTabSocial />}
         {tab === TabValues.password && <UserTabPassword />}
-      </CardV2>
+      </Card>
     </Box>
   )
 }

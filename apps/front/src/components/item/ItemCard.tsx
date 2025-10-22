@@ -42,11 +42,9 @@ const ItemCardStyled = styled(Card)(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   height: '100%',
-  background: 'white',
-  borderRadius: '16px',
-  transition: 'all 0.3s ease',
   overflow: 'hidden',
-  boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+  border: `1px solid ${theme.palette.divider}`,
+  padding: 0,
   '&:hover': {
     transform: 'scale(1.008)',
   },
@@ -422,7 +420,7 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
 
   return (
     <>
-      <ItemCardStyled className={clsx(isTaken && 'reserved', isReservedByCurrentUser && 'reserved-by-me')} noPadding>
+      <ItemCardStyled className={clsx(isTaken && 'reserved', isReservedByCurrentUser && 'reserved-by-me')}>
         {/* Suggested badge - hide when item is reserved */}
         {item.is_suggested && !isTaken && (
           <SuggestedBadge icon={<TipsAndUpdatesTwoToneIcon />} label="Suggéré par un utilisateur" size="small" />
