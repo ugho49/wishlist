@@ -55,7 +55,7 @@ export const WishlistPage = () => {
   useEffect(() => {
     if (wishlist && currentUserCanEdit && !hasCheckedImport && importableItems.length > 0) {
       const hasNoItems = wishlist.items.length === 0
-      const storageKey = getImportDialogKey(wishlistId)
+      const storageKey = getImportDialogKey(wishlist.id)
       const hasSeenAutoDialog = localStorage.getItem(storageKey) === 'true'
 
       if (hasNoItems && !hasSeenAutoDialog) {
@@ -65,7 +65,7 @@ export const WishlistPage = () => {
       }
       setHasCheckedImport(true)
     }
-  }, [wishlist, currentUserCanEdit, importableItems, hasCheckedImport, wishlistId])
+  }, [wishlist, currentUserCanEdit, importableItems, hasCheckedImport])
 
   return (
     <Box>
