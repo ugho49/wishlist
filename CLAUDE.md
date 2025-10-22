@@ -13,18 +13,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Testing
 - `yarn test` - Run unit tests for all projects using Vitest
 - `yarn test:int` - Run integration tests with Testcontainers and Docker orchestration
-- `yarn check-types` - Run TypeScript type checking across all projects
+- `yarn typecheck` - Run TypeScript type checking across all projects
 - Single test execution: Use Nx to run specific tests: `nx test <project-name>`
 
 ### Quality Assurance
-- `yarn lint` - Run ESLint on all projects
-- Pre-commit hooks automatically format staged files with Prettier
+- `yarn check` - Run Biome check (replaces ESLint)
+- `yarn check:fix` - Fix Biome violations automatically
+- Pre-commit hooks automatically check and fix code with Biome via lint-staged
 - Conventional commits enforced via commitlint
 
 ### Database Operations
 - **Drizzle Studio**: `nx run api:drizzle:studio` - Open database management UI
 - **Generate Migration**: `nx run api:drizzle:generate --name <migration-name>`
 - **Run Migrations**: `nx run api:drizzle:migrate`
+- **Seed Database**: `nx run api:drizzle:seed` - Populate database with sample data
 - **Schema**: Located in `apps/api/drizzle/schema.ts`
 - **Migrations**: Stored in `apps/api/drizzle/migrations/`
 
@@ -35,7 +37,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Architecture Overview
 
-This is an Nx monorepo containing a wishlist application with React 19 frontend and NestJS backend, requiring Node.js 22+.
+This is an Nx monorepo containing a wishlist application with React 19 frontend and NestJS backend, requiring Node.js 24+.
 
 ### Project Structure
 - **apps/api/** - NestJS backend with Domain-Driven Design and CQRS
@@ -53,7 +55,7 @@ This is an Nx monorepo containing a wishlist application with React 19 frontend 
 
 ### Frontend Architecture (React)
 - **State Management**: Redux Toolkit for client state, React Query for server state
-- **UI Framework**: Material-UI (MUI) v6 with custom theming system
+- **UI Framework**: Material-UI (MUI) v7 with custom theming system
 - **Styling**: Prefer `styled()` components over `sx` prop for reusable styles and better performance
 - **Routing**: React Router DOM v7 with modern data loading patterns
 - **Form Handling**: React Hook Form with Zod schema validation
@@ -114,10 +116,10 @@ This is an Nx monorepo containing a wishlist application with React 19 frontend 
 - **Audit Fields**: createdAt/updatedAt with automatic timezone handling
 
 ### Development Workflow
-- **Monorepo**: Nx 21.1.2 with proper build dependencies and caching
-- **Code Quality**: ESLint with security rules, Prettier with import sorting
+- **Monorepo**: Nx 21.6.5 with proper build dependencies and caching
+- **Code Quality**: Biome (replaces ESLint and Prettier) with security rules and import sorting
 - **Git Hooks**: Husky for pre-commit formatting and conventional commit validation
-- **Package Manager**: Yarn 4.9.2 with workspaces
+- **Package Manager**: Yarn 4.10.3 with workspaces
 
 ## Integration Testing Guidelines
 

@@ -4,8 +4,6 @@
 
 - [ ] Move to GitHub action
 - [ ] Check if possible to run int-test in parallel
-- [x] Repository export single const tokens for injection
-- [ ] Move repositories to database folder
 - [ ] Move Item to Wishlist folder
 
 ## General
@@ -19,7 +17,4 @@
 - [ ] Dans wishlist page:
     - [ ] Retravailler “Trier par” et “Filtrer par” 
     - [ ] Quand on click sur l’image d’un item, défiler a droite ou a gauche avec les flèches et afficher en plus de “fermer” et “open link”, “prendre” / “ne plus prendre”
-- [ ] Modifier la page ‘aucun event », « aucune liste », « aucun item » 
-- [ ] proposer d'ajouter les users recurrent lors d'un nouvel event
-- [ ] proposer d'importer les souhaits non pris des anciennes listes
 - [ ] Update page style "Update Wishlist"
