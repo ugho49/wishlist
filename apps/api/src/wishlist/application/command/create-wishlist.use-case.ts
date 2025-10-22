@@ -1,4 +1,4 @@
-import { Inject, NotFoundException, UnauthorizedException } from '@nestjs/common'
+import { Inject, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common'
 import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
 import { BucketService } from '@wishlist/api/core'
 import { EventRepository } from '@wishlist/api/event'
@@ -11,6 +11,8 @@ import { wishlistMapper } from '../../infrastructure'
 
 @CommandHandler(CreateWishlistCommand)
 export class CreateWishlistUseCase implements IInferredCommandHandler<CreateWishlistCommand> {
+  private readonly logger = new Logger(CreateWishlistUseCase.name)
+
   constructor(
     @Inject(REPOSITORIES.WISHLIST) private readonly wishlistRepository: WishlistRepository,
     @Inject(REPOSITORIES.EVENT) private readonly eventRepository: EventRepository,
@@ -19,6 +21,8 @@ export class CreateWishlistUseCase implements IInferredCommandHandler<CreateWish
   ) {}
 
   async execute(command: CreateWishlistCommand): Promise<CreateWishlistResult> {
+    this.logger.log('Starting to create wishlist', { newWishlist: command.newWishlist })
+
     const eventIds = uniq(command.newWishlist.eventIds)
     const events = await this.eventRepository.findByIds(eventIds)
 

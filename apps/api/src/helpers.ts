@@ -3,6 +3,7 @@ import type { Params as PinoParams } from 'pino-nestjs'
 import { join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { RequestMethod } from '@nestjs/common'
+import { uuid } from '@wishlist/common'
 import { kinds, tags, types } from 'dd-trace/ext'
 
 const __filename = fileURLToPath(import.meta.url)
@@ -23,6 +24,13 @@ export function pinoLoggerConfig(serviceName: string): PinoParams {
       messageKey: 'message', // For Datadog
       errorKey: 'error', // For Datadog
       timestamp: () => `,"timestamp":"${new Date(Date.now()).toISOString()}"`,
+      genReqId: (req, res) => {
+        const existingId = req.id ?? req.headers['x-request-id']
+        if (existingId) return existingId as string
+        const id = uuid()
+        res.setHeader('X-Request-Id', id)
+        return id
+      },
       autoLogging: {
         ignore: req => excludePaths.includes(req.url || ''),
       },
@@ -71,6 +79,7 @@ export function pinoLoggerConfig(serviceName: string): PinoParams {
 
         return {
           ...customProps,
+          requestId: req.id,
           // For Datadog's APM (https://docs.datadoghq.com/logs/log_configuration/attributes_naming_convention/)
           [tags.RESOURCE_NAME]: req.url,
           [tags.SPAN_TYPE]: types.WEB,
