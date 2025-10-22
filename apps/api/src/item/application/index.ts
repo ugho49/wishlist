@@ -1,6 +1,7 @@
 import {
   CreateItemUseCase,
   DeleteItemUseCase,
+  ImportItemsUseCase,
   NotifyNewItemsUseCase,
   ToggleItemUseCase,
   UpdateItemUseCase,
@@ -15,4 +16,5 @@ export const handlers = [
   ToggleItemUseCase,
   UpdateItemUseCase,
   NotifyNewItemsUseCase,
+  ImportItemsUseCase,
 ]

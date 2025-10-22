@@ -236,6 +236,7 @@ describe('ItemController', () => {
         const response = await request.get(path).expect(200)
 
         expect(response.body).toHaveLength(3)
+        // biome-ignore lint/suspicious/noExplicitAny: normal for test
         expect(response.body.map((item: any) => item.id)).toEqual([item1Id, item2Id, item3Id])
       })
     })

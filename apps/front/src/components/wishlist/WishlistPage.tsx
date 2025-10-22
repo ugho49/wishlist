@@ -1,3 +1,4 @@
+import type { WishlistId } from '@wishlist/common'
 import type { RootState } from '../../core'
 
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
@@ -32,8 +33,8 @@ export const WishlistPage = () => {
   const [openEventDialog, setOpenEventDialog] = useState(false)
   const [showImportDialog, setShowImportDialog] = useState(false)
   const [hasCheckedImport, setHasCheckedImport] = useState(false)
-  const params = useParams<'wishlistId'>()
-  const wishlistId = params.wishlistId || ''
+  const params = useParams<'wishlistId'>() as { wishlistId: WishlistId }
+  const wishlistId = params.wishlistId
   const navigate = useNavigate()
   const api = useApi()
 
@@ -41,10 +42,11 @@ export const WishlistPage = () => {
 
   const currentUserCanEdit = useMemo(() => wishlist?.owner.id === currentUserId, [currentUserId, wishlist])
 
+  // TODO: create a custom hook to get importable items
   // Check for importable items only if it's the user's own wishlist
   const { data: importableItems = [] } = useQuery({
     queryKey: ['item.importable'],
-    queryFn: () => api.item.getImportableItems(),
+    queryFn: () => api.item.getImportableItems({ wishlist_id: wishlistId }),
     enabled: currentUserCanEdit,
   })
 

@@ -1,5 +1,6 @@
 export * from './create-item.command'
 export * from './delete-item.command'
+export * from './import-items.command'
 export * from './notify-new-items.command'
 export * from './toggle-item.command'
 export * from './update-item.command'

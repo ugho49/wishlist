@@ -13,10 +13,11 @@ export interface NewItemsForWishlist {
 export interface WishlistItemRepository {
   newId(): ItemId
   findById(id: ItemId): Promise<WishlistItem | undefined>
+  findByIds(ids: ItemId[]): Promise<WishlistItem[]>
   findByIdOrFail(id: ItemId): Promise<WishlistItem>
   findByWishlist(wishlistId: WishlistId): Promise<WishlistItem[]>
   findAllNewItems(since: Date): Promise<NewItemsForWishlist[]>
-  findImportableItems(userId: UserId): Promise<WishlistItem[]>
+  findImportableItems(params: { userId: UserId; wishlistId: WishlistId }): Promise<WishlistItem[]>
   save(item: WishlistItem, tx?: DrizzleTransaction): Promise<void>
   delete(id: ItemId, tx?: DrizzleTransaction): Promise<void>
 }

@@ -1,5 +1,6 @@
+/** biome-ignore-all lint/style/noNestedTernary: <explanation> */
 import type { TransitionProps } from '@mui/material/transitions'
-import type { ItemDto, WishlistId } from '@wishlist/common'
+import type { ItemId, WishlistId } from '@wishlist/common'
 import type React from 'react'
 
 import AddIcon from '@mui/icons-material/Add'
@@ -81,43 +82,33 @@ export const ImportItemsDialog = ({ open, wishlistId, onClose, onComplete }: Imp
   const { addToast } = useToast()
   const api = useApi()
   const queryClient = useQueryClient()
-  const [selectedItemIds, setSelectedItemIds] = useState<Set<string>>(new Set())
+  const [selectedItemIds, setSelectedItemIds] = useState<Set<ItemId>>(new Set())
 
   const isFullscreen = useMediaQuery(theme => theme.breakpoints.down('md'))
 
+  // TODO: create a custom hook to get importable items
   // Fetch importable items
   const { data: importableItems = [], isLoading } = useQuery({
-    queryKey: ['item.importable'],
-    queryFn: () => api.item.getImportableItems(),
+    queryKey: ['item.importable', { wishlistId }],
+    queryFn: () => api.item.getImportableItems({ wishlist_id: wishlistId }),
     enabled: open,
   })
 
   // Import selected items mutation
   const { mutateAsync: importItems, isPending: isImporting } = useMutation({
     mutationKey: ['item.import', wishlistId],
-    mutationFn: async () => {
-      const selectedItems = importableItems.filter(item => selectedItemIds.has(item.id))
-
-      // Create each selected item in the new wishlist
-      await Promise.all(
-        selectedItems.map(item =>
-          api.item.create({
-            wishlist_id: wishlistId,
-            name: item.name,
-            description: item.description,
-            url: item.url,
-            score: item.score,
-            picture_url: item.picture_url,
-          }),
-        ),
-      )
-    },
+    mutationFn: () =>
+      api.item.importItems({
+        wishlist_id: wishlistId,
+        source_item_ids: Array.from(selectedItemIds),
+      }),
     onSuccess: () => {
       addToast({
         message: `${selectedItemIds.size} souhait${selectedItemIds.size > 1 ? 's' : ''} importé${selectedItemIds.size > 1 ? 's' : ''} avec succès`,
         variant: 'success',
       })
-      queryClient.invalidateQueries({ queryKey: ['wishlist.getById', wishlistId] })
+      queryClient.invalidateQueries({ queryKey: ['wishlist', { id: wishlistId }] })
+      queryClient.invalidateQueries({ queryKey: ['item.importable', { wishlistId }] })
       onComplete()
     },
     onError: () => {
@@ -125,7 +116,7 @@ export const ImportItemsDialog = ({ open, wishlistId, onClose, onComplete }: Imp
     },
   })
 
-  const toggleItemSelection = (itemId: string) => {
+  const toggleItemSelection = (itemId: ItemId) => {
     setSelectedItemIds(prev => {
       const newSet = new Set(prev)
       if (newSet.has(itemId)) {
@@ -160,7 +151,14 @@ export const ImportItemsDialog = ({ open, wishlistId, onClose, onComplete }: Imp
   }
 
   return (
-    <Dialog fullScreen={isFullscreen} open={open} onClose={handleSkip} TransitionComponent={Transition} maxWidth="md" fullWidth>
+    <Dialog
+      fullScreen={isFullscreen}
+      open={open}
+      onClose={handleSkip}
+      slots={{ transition: Transition }}
+      maxWidth="md"
+      fullWidth
+    >
       <AppBar sx={{ position: 'relative' }}>
         <Toolbar>
           <IconButton edge="start" color="inherit" onClick={handleSkip} aria-label="close">
@@ -199,7 +197,8 @@ export const ImportItemsDialog = ({ open, wishlistId, onClose, onComplete }: Imp
 
             <Stack direction="row" justifyContent="space-between" alignItems="center">
               <Typography variant="body2" color="text.secondary">
-                {selectedItemIds.size} souhait{selectedItemIds.size > 1 ? 's' : ''} sélectionné{selectedItemIds.size > 1 ? 's' : ''}
+                {selectedItemIds.size} souhait{selectedItemIds.size > 1 ? 's' : ''} sélectionné
+                {selectedItemIds.size > 1 ? 's' : ''}
               </Typography>
               <Stack direction="row" gap={1}>
                 <Button size="small" onClick={selectAll} disabled={selectedItemIds.size === importableItems.length}>
@@ -217,16 +216,15 @@ export const ImportItemsDialog = ({ open, wishlistId, onClose, onComplete }: Imp
                 return (
                   <ItemCard key={item.id} disablePadding>
                     <ListItemButton onClick={() => toggleItemSelection(item.id)} sx={{ padding: 2 }}>
-                      <Checkbox
-                        edge="start"
-                        checked={isSelected}
-                        tabIndex={-1}
-                        disableRipple
-                        sx={{ marginRight: 2 }}
-                      />
+                      <Checkbox edge="start" checked={isSelected} tabIndex={-1} disableRipple sx={{ marginRight: 2 }} />
                       {item.picture_url && (
                         <ListItemAvatar>
-                          <Avatar src={item.picture_url} alt={item.name} variant="rounded" sx={{ width: 56, height: 56 }} />
+                          <Avatar
+                            src={item.picture_url}
+                            alt={item.name}
+                            variant="rounded"
+                            sx={{ width: 56, height: 56 }}
+                          />
                         </ListItemAvatar>
                       )}
                       <ListItemText
@@ -262,20 +260,20 @@ export const ImportItemsDialog = ({ open, wishlistId, onClose, onComplete }: Imp
             </List>
 
             <Stack direction="row" justifyContent="space-between" alignItems="center" gap={2} paddingTop={2}>
-              <Button variant="outlined" onClick={handleSkip} disabled={isImporting}>
+              <Button variant="outlined" onClick={handleSkip}>
                 Ignorer
               </Button>
               <Button
                 variant="contained"
                 onClick={handleImport}
                 disabled={isImporting}
-                startIcon={!isImporting ? <AddIcon /> : undefined}
+                loading={isImporting}
+                loadingPosition="start"
+                startIcon={<AddIcon />}
               >
-                {isImporting
-                  ? 'Import en cours...'
-                  : selectedItemIds.size > 0
-                    ? `Importer ${selectedItemIds.size} souhait${selectedItemIds.size > 1 ? 's' : ''}`
-                    : 'Continuer'}
+                {selectedItemIds.size > 0
+                  ? `Importer ${selectedItemIds.size} souhait${selectedItemIds.size > 1 ? 's' : ''}`
+                  : 'Continuer'}
               </Button>
             </Stack>
           </Stack>
