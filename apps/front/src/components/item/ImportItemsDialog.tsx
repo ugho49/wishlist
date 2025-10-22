@@ -1,4 +1,3 @@
-/** biome-ignore-all lint/style/noNestedTernary: <explanation> */
 import type { TransitionProps } from '@mui/material/transitions'
 import type { ItemId, WishlistId } from '@wishlist/common'
 import type React from 'react'
@@ -103,10 +102,11 @@ export const ImportItemsDialog = ({ open, wishlistId, onClose, onComplete }: Imp
         source_item_ids: Array.from(selectedItemIds),
       }),
     onSuccess: () => {
-      addToast({
-        message: `${selectedItemIds.size} souhait${selectedItemIds.size > 1 ? 's' : ''} importé${selectedItemIds.size > 1 ? 's' : ''} avec succès`,
-        variant: 'success',
-      })
+      const count = selectedItemIds.size
+      const plural = count > 1
+      const message = `${count} souhait${plural ? 's' : ''} importé${plural ? 's' : ''} avec succès`
+
+      addToast({ message, variant: 'success' })
       queryClient.invalidateQueries({ queryKey: ['wishlist', { id: wishlistId }] })
       queryClient.invalidateQueries({ queryKey: ['item.importable', { wishlistId }] })
       onComplete()
@@ -148,6 +148,15 @@ export const ImportItemsDialog = ({ open, wishlistId, onClose, onComplete }: Imp
   const handleSkip = () => {
     onClose()
     onComplete()
+  }
+
+  const getImportButtonLabel = () => {
+    if (selectedItemIds.size === 0) {
+      return 'Continuer'
+    }
+    const count = selectedItemIds.size
+    const plural = count > 1
+    return `Importer ${count} souhait${plural ? 's' : ''}`
   }
 
   return (
@@ -271,9 +280,7 @@ export const ImportItemsDialog = ({ open, wishlistId, onClose, onComplete }: Imp
                 loadingPosition="start"
                 startIcon={<AddIcon />}
               >
-                {selectedItemIds.size > 0
-                  ? `Importer ${selectedItemIds.size} souhait${selectedItemIds.size > 1 ? 's' : ''}`
-                  : 'Continuer'}
+                {getImportButtonLabel()}
               </Button>
             </Stack>
           </Stack>

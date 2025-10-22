@@ -36,7 +36,7 @@ describe('ItemController', () => {
 
       it('should return empty array when old wishlists have no items', async () => {
         // Create event finished more than 2 months ago
-        const oldEventDate = DateTime.now().minus({ months: 3 }).toISODate()!
+        const oldEventDate = DateTime.now().minus({ months: 3 }).toJSDate()
         const { eventId } = await fixtures.insertEventWithMaintainer({
           title: 'Old Event',
           description: 'Description',
@@ -57,7 +57,7 @@ describe('ItemController', () => {
 
       it('should return importable items from old wishlists', async () => {
         // Create event finished more than 2 months ago
-        const oldEventDate = DateTime.now().minus({ months: 3 }).toISODate()!
+        const oldEventDate = DateTime.now().minus({ months: 3 }).toJSDate()
         const { eventId: oldEventId } = await fixtures.insertEventWithMaintainer({
           title: 'Old Event',
           description: 'Description',
@@ -106,7 +106,7 @@ describe('ItemController', () => {
 
       it('should not return items from wishlists with events finished less than 2 months ago', async () => {
         // Create event finished 1 month ago (less than 2 months)
-        const recentEventDate = DateTime.now().minus({ months: 1 }).toISODate()!
+        const recentEventDate = DateTime.now().minus({ months: 1 }).toJSDate()
         const { eventId: recentEventId } = await fixtures.insertEventWithMaintainer({
           title: 'Recent Event',
           description: 'Description',
@@ -133,7 +133,7 @@ describe('ItemController', () => {
 
       it('should not return items from wishlists with at least one event not finished more than 2 months ago', async () => {
         // Create one old event and one recent event
-        const oldEventDate = DateTime.now().minus({ months: 3 }).toISODate()!
+        const oldEventDate = DateTime.now().minus({ months: 3 }).toJSDate()
         const { eventId: oldEventId } = await fixtures.insertEventWithMaintainer({
           title: 'Old Event',
           description: 'Description',
@@ -141,7 +141,7 @@ describe('ItemController', () => {
           eventDate: oldEventDate,
         })
 
-        const recentEventDate = DateTime.now().minus({ months: 1 }).toISODate()!
+        const recentEventDate = DateTime.now().minus({ months: 1 }).toJSDate()
         const { eventId: recentEventId } = await fixtures.insertEventWithMaintainer({
           title: 'Recent Event',
           description: 'Description',
@@ -175,7 +175,7 @@ describe('ItemController', () => {
         })
 
         // Create old event for other user
-        const oldEventDate = DateTime.now().minus({ months: 3 }).toISODate()!
+        const oldEventDate = DateTime.now().minus({ months: 3 }).toJSDate()
         const { eventId: otherEventId } = await fixtures.insertEventWithMaintainer({
           title: 'Other Event',
           description: 'Description',
@@ -202,7 +202,7 @@ describe('ItemController', () => {
 
       it('should return multiple importable items ordered by creation date', async () => {
         // Create event finished more than 2 months ago
-        const oldEventDate = DateTime.now().minus({ months: 3 }).toISODate()!
+        const oldEventDate = DateTime.now().minus({ months: 3 }).toJSDate()
         const { eventId: oldEventId } = await fixtures.insertEventWithMaintainer({
           title: 'Old Event',
           description: 'Description',
