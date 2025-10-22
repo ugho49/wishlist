@@ -25,6 +25,7 @@ import { WishlistNotFound } from './WishlistNotFound'
 const mapState = (state: RootState) => state.auth.user?.id
 
 const logoSize = 60
+const IMPORT_DIALOG_AUTO_SHOWN_KEY = 'wishlist-import-dialog-auto-shown'
 
 export const WishlistPage = () => {
   const currentUserId = useSelector(mapState)
@@ -47,12 +48,19 @@ export const WishlistPage = () => {
     enabled: currentUserCanEdit,
   })
 
-  // Show import dialog automatically if the wishlist is empty and there are items to import
+  // Show import dialog automatically only if:
+  // - The wishlist is empty
+  // - There are items to import
+  // - The user has never seen the auto-dialog before (checked via localStorage)
   useEffect(() => {
     if (wishlist && currentUserCanEdit && !hasCheckedImport && importableItems.length > 0) {
       const hasNoItems = wishlist.items.length === 0
-      if (hasNoItems) {
+      const hasSeenAutoDialog = localStorage.getItem(IMPORT_DIALOG_AUTO_SHOWN_KEY) === 'true'
+
+      if (hasNoItems && !hasSeenAutoDialog) {
         setShowImportDialog(true)
+        // Mark that the user has seen the auto-dialog
+        localStorage.setItem(IMPORT_DIALOG_AUTO_SHOWN_KEY, 'true')
       }
       setHasCheckedImport(true)
     }
