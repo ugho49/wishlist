@@ -114,7 +114,7 @@ const mapState = (state: RootState) => state.auth.user?.id
 export const WishlistItems = ({ wishlist }: WishlistTabItemsProps) => {
   const currentUserId = useSelector(mapState)
   const [openItemFormDialog, setOpenItemFormDialog] = useQueryState(
-    'showItemFormDialog',
+    'displayAddItemFormDialog',
     parseAsBoolean.withDefault(false),
   )
   const [sort, setSort] = useQueryState(

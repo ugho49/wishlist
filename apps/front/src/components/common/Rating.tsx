@@ -2,7 +2,7 @@ import type { RatingProps as MuiRatingProps } from '@mui/material'
 
 import FavoriteIcon from '@mui/icons-material/Favorite'
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder'
-import { Rating as MuiRating, ratingClasses, styled } from '@mui/material'
+import { alpha, Rating as MuiRating, ratingClasses, Stack, styled } from '@mui/material'
 
 export type RatingProps = {
   value: MuiRatingProps['value']
@@ -19,6 +19,20 @@ const MuiRatingStyled = styled(MuiRating)(({ theme }) => ({
   [`& .${ratingClasses.iconHover}`]: {
     color: theme.palette.primary.main,
   },
+}))
+
+export const RatingBubble = styled(Stack)(({ theme }) => ({
+  width: 'fit-content',
+  justifyContent: 'center',
+  alignItems: 'center',
+  background: alpha(theme.palette.background.paper, 0.9),
+  borderRadius: '12px',
+  padding: '4px 8px',
+  fontSize: '0.75rem',
+  fontWeight: 500,
+  color: theme.palette.text.secondary,
+  backdropFilter: 'blur(8px)',
+  boxShadow: `0 2px 8px ${alpha(theme.palette.common.black, 0.1)}`,
 }))
 
 export const Rating = ({ value, disabled, onChange, size, readOnly }: RatingProps) => {

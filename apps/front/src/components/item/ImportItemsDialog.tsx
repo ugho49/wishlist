@@ -1,27 +1,20 @@
 import type { TransitionProps } from '@mui/material/transitions'
-import type { ItemId, WishlistId } from '@wishlist/common'
+import type { ItemDto, ItemId, WishlistId } from '@wishlist/common'
 import type React from 'react'
 
 import AddIcon from '@mui/icons-material/Add'
+import CardGiftcardIcon from '@mui/icons-material/CardGiftcard'
 import CloseIcon from '@mui/icons-material/Close'
-import HistoryIcon from '@mui/icons-material/History'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import {
   Alert,
   AppBar,
-  Avatar,
+  alpha,
   Box,
   Button,
-  Checkbox,
-  Chip,
-  Container,
   Dialog,
   IconButton,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemButton,
-  ListItemText,
+  Link,
   Slide,
   Stack,
   styled,
@@ -29,9 +22,13 @@ import {
   Typography,
   useMediaQuery,
 } from '@mui/material'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useApi, useToast } from '@wishlist/front-hooks'
+import clsx from 'clsx'
 import { forwardRef, useState } from 'react'
+
+import { Card } from '../common/Card'
+import { Rating, RatingBubble } from '../common/Rating'
 
 const Transition = forwardRef(function Transition(
   props: TransitionProps & { children: React.ReactElement },
@@ -45,39 +42,120 @@ const Transition = forwardRef(function Transition(
   )
 })
 
-const EmptyStateContainer = styled(Box)(({ theme }) => ({
+const ItemCard = styled(Card)(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  padding: '10px',
+  boxShadow: 'none',
+  transition: 'none',
+  border: `1px solid ${theme.palette.divider}`,
+  '&:hover': {
+    transform: 'none !important',
+    boxShadow: 'none !important',
+    border: `1px solid ${theme.palette.primary.light}`,
+  },
+  '&.selected': {
+    border: `2px solid ${theme.palette.primary.main}`,
+  },
+}))
+
+const ItemsListContainer = styled(Box)({
   display: 'flex',
   flexDirection: 'column',
+  gap: '16px',
+  flexGrow: 1,
+  overflow: 'auto',
+})
+
+const ItemImageContainer = styled(Box)(({ theme }) => ({
+  position: 'relative',
+  width: '100px',
+  height: '100px',
+  borderRadius: '8px',
+  overflow: 'hidden',
+  background: `linear-gradient(135deg, ${alpha(theme.palette.primary.light, 0.1)} 0%, ${alpha(theme.palette.primary.main, 0.15)} 100%)`,
+  flexShrink: 0,
+  marginRight: theme.spacing(2),
+}))
+
+const ItemImage = styled('img')({
+  width: '100%',
+  height: '100%',
+  objectFit: 'cover',
+  opacity: 1,
+})
+
+const ItemImagePlaceholder = styled(Box)(({ theme }) => ({
+  width: '100%',
+  height: '100%',
+  display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  padding: theme.spacing(6),
-  textAlign: 'center',
-}))
-
-const EmptyStateIcon = styled(HistoryIcon)(({ theme }) => ({
-  fontSize: 80,
-  color: theme.palette.grey[300],
-  marginBottom: theme.spacing(2),
-}))
-
-const ItemCard = styled(ListItem)(({ theme }) => ({
-  borderRadius: theme.spacing(1),
-  marginBottom: theme.spacing(1),
-  border: `1px solid ${theme.palette.divider}`,
-  backgroundColor: theme.palette.background.paper,
-  '&:hover': {
-    backgroundColor: theme.palette.action.hover,
+  '& .MuiSvgIcon-root': {
+    fontSize: '3rem',
+    color: theme.palette.primary.main,
+    opacity: 0.6,
   },
+}))
+
+const ItemTitleContainer = styled(Box)(({ theme }) => ({
+  fontWeight: 600,
+  fontSize: '1rem',
+  color: theme.palette.text.primary,
+  lineHeight: 1.4,
+}))
+
+const ItemDescription = styled(Typography)(({ theme }) => ({
+  color: theme.palette.text.secondary,
+  fontSize: '0.875rem',
+  fontStyle: 'italic',
+  lineHeight: 1.4,
+}))
+
+const ItemUrl = styled(Link)(({ theme }) => ({
+  color: theme.palette.primary.main,
+  '&:hover': {
+    textDecoration: 'underline',
+    color: theme.palette.primary.dark,
+  },
+}))
+
+const ItemContentWrapper = styled(Box)({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'flex-start',
+  justifyContent: 'space-between',
+  flexGrow: 1,
+  minHeight: '100px',
+})
+
+const BottomActionStack = styled(Stack)(({ theme }) => ({
+  position: 'sticky',
+  flexDirection: 'row',
+  bottom: 0,
+  padding: '12px 24px',
+  gap: theme.spacing(2),
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  borderTop: `1px solid ${theme.palette.divider}`,
+  backgroundColor: '#f9fafb',
 }))
 
 export interface ImportItemsDialogProps {
   open: boolean
   wishlistId: WishlistId
+  importableItems: ItemDto[]
   onClose: () => void
   onComplete: () => void
 }
 
-export const ImportItemsDialog = ({ open, wishlistId, onClose, onComplete }: ImportItemsDialogProps) => {
+export const ImportItemsDialog = ({
+  open,
+  wishlistId,
+  onClose,
+  onComplete,
+  importableItems,
+}: ImportItemsDialogProps) => {
   const { addToast } = useToast()
   const api = useApi()
   const queryClient = useQueryClient()
@@ -85,16 +163,8 @@ export const ImportItemsDialog = ({ open, wishlistId, onClose, onComplete }: Imp
 
   const isFullscreen = useMediaQuery(theme => theme.breakpoints.down('md'))
 
-  // TODO: create a custom hook to get importable items
-  // Fetch importable items
-  const { data: importableItems = [], isLoading } = useQuery({
-    queryKey: ['item.importable', { wishlistId }],
-    queryFn: () => api.item.getImportableItems({ wishlist_id: wishlistId }),
-    enabled: open,
-  })
-
   // Import selected items mutation
-  const { mutateAsync: importItems, isPending: isImporting } = useMutation({
+  const { mutateAsync: importItems, isPending: isLoading } = useMutation({
     mutationKey: ['item.import', wishlistId],
     mutationFn: () =>
       api.item.importItems({
@@ -150,15 +220,6 @@ export const ImportItemsDialog = ({ open, wishlistId, onClose, onComplete }: Imp
     onComplete()
   }
 
-  const getImportButtonLabel = () => {
-    if (selectedItemIds.size === 0) {
-      return 'Continuer'
-    }
-    const count = selectedItemIds.size
-    const plural = count > 1
-    return `Importer ${count} souhait${plural ? 's' : ''}`
-  }
-
   return (
     <Dialog
       fullScreen={isFullscreen}
@@ -168,124 +229,114 @@ export const ImportItemsDialog = ({ open, wishlistId, onClose, onComplete }: Imp
       maxWidth="md"
       fullWidth
     >
-      <AppBar sx={{ position: 'relative' }}>
+      <AppBar sx={{ position: 'sticky' }}>
         <Toolbar>
           <IconButton edge="start" color="inherit" onClick={handleSkip} aria-label="close">
             <CloseIcon />
           </IconButton>
           <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
-            Importer d'anciennes souhaits
+            Importer d'anciens souhaits
           </Typography>
         </Toolbar>
       </AppBar>
 
-      <Container maxWidth="md" sx={{ paddingY: 3 }}>
-        {isLoading ? (
-          <Box display="flex" justifyContent="center" padding={4}>
-            <Typography>Chargement...</Typography>
-          </Box>
-        ) : importableItems.length === 0 ? (
-          <EmptyStateContainer>
-            <EmptyStateIcon />
-            <Typography variant="h6" color="text.secondary" gutterBottom>
-              Aucun souhait à importer
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 400 }}>
-              Vous n'avez pas de souhaits non pris dans vos anciennes listes (événements terminés depuis plus de 2 mois)
-            </Typography>
-            <Button variant="contained" onClick={handleSkip} sx={{ marginTop: 3 }}>
-              Continuer
+      <Stack padding={3} gap={2} direction="column" sx={{ backgroundColor: 'rgb(249, 250, 251)' }}>
+        <Alert severity="info" icon={<InfoOutlinedIcon />}>
+          Vous avez <strong>{importableItems.length}</strong> souhait{importableItems.length > 1 ? 's' : ''} non pris
+          dans vos anciennes listes. Sélectionnez ceux que vous souhaitez importer dans votre nouvelle liste.
+        </Alert>
+
+        <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={1}>
+          <Typography variant="body2" color="text.secondary">
+            {selectedItemIds.size} souhait{selectedItemIds.size > 1 ? 's' : ''} sélectionné
+            {selectedItemIds.size > 1 ? 's' : ''}
+          </Typography>
+          <Stack direction="row" gap={1}>
+            <Button
+              size="small"
+              variant={selectedItemIds.size === 0 ? 'text' : 'outlined'}
+              onClick={deselectAll}
+              disabled={selectedItemIds.size === 0}
+            >
+              Tout désélectionner
             </Button>
-          </EmptyStateContainer>
-        ) : (
-          <Stack gap={2}>
-            <Alert severity="info" icon={<InfoOutlinedIcon />}>
-              Vous avez <strong>{importableItems.length}</strong> souhait{importableItems.length > 1 ? 's' : ''} non
-              pris dans vos anciennes listes. Sélectionnez ceux que vous souhaitez importer dans votre nouvelle liste.
-            </Alert>
-
-            <Stack direction="row" justifyContent="space-between" alignItems="center">
-              <Typography variant="body2" color="text.secondary">
-                {selectedItemIds.size} souhait{selectedItemIds.size > 1 ? 's' : ''} sélectionné
-                {selectedItemIds.size > 1 ? 's' : ''}
-              </Typography>
-              <Stack direction="row" gap={1}>
-                <Button size="small" onClick={selectAll} disabled={selectedItemIds.size === importableItems.length}>
-                  Tout sélectionner
-                </Button>
-                <Button size="small" onClick={deselectAll} disabled={selectedItemIds.size === 0}>
-                  Tout désélectionner
-                </Button>
-              </Stack>
-            </Stack>
-
-            <List sx={{ maxHeight: 500, overflow: 'auto' }}>
-              {importableItems.map(item => {
-                const isSelected = selectedItemIds.has(item.id)
-                return (
-                  <ItemCard key={item.id} disablePadding>
-                    <ListItemButton onClick={() => toggleItemSelection(item.id)} sx={{ padding: 2 }}>
-                      <Checkbox edge="start" checked={isSelected} tabIndex={-1} disableRipple sx={{ marginRight: 2 }} />
-                      {item.picture_url && (
-                        <ListItemAvatar>
-                          <Avatar
-                            src={item.picture_url}
-                            alt={item.name}
-                            variant="rounded"
-                            sx={{ width: 56, height: 56 }}
-                          />
-                        </ListItemAvatar>
-                      )}
-                      <ListItemText
-                        primary={
-                          <Stack direction="row" alignItems="center" gap={1}>
-                            <Typography variant="subtitle1" fontWeight={600}>
-                              {item.name}
-                            </Typography>
-                            {item.score && (
-                              <Chip label={`${item.score}/5`} size="small" color="primary" variant="outlined" />
-                            )}
-                          </Stack>
-                        }
-                        secondary={
-                          <Stack gap={0.5}>
-                            {item.description && (
-                              <Typography variant="body2" color="text.secondary" noWrap>
-                                {item.description}
-                              </Typography>
-                            )}
-                            {item.url && (
-                              <Typography variant="caption" color="primary" noWrap>
-                                {item.url}
-                              </Typography>
-                            )}
-                          </Stack>
-                        }
-                      />
-                    </ListItemButton>
-                  </ItemCard>
-                )
-              })}
-            </List>
-
-            <Stack direction="row" justifyContent="space-between" alignItems="center" gap={2} paddingTop={2}>
-              <Button variant="outlined" onClick={handleSkip}>
-                Ignorer
-              </Button>
-              <Button
-                variant="contained"
-                onClick={handleImport}
-                disabled={isImporting}
-                loading={isImporting}
-                loadingPosition="start"
-                startIcon={<AddIcon />}
-              >
-                {getImportButtonLabel()}
-              </Button>
-            </Stack>
+            <Button
+              size="small"
+              onClick={selectAll}
+              variant={selectedItemIds.size === importableItems.length ? 'text' : 'outlined'}
+              disabled={selectedItemIds.size === importableItems.length}
+            >
+              Tout sélectionner
+            </Button>
           </Stack>
-        )}
-      </Container>
+        </Stack>
+
+        <ItemsListContainer>
+          {importableItems.map(item => (
+            <ItemCard
+              key={item.id}
+              hoverable
+              onClick={() => toggleItemSelection(item.id)}
+              className={clsx({ selected: selectedItemIds.has(item.id) })}
+            >
+              <ItemImageContainer>
+                {item.picture_url ? (
+                  <ItemImage src={item.picture_url} alt={item.name} />
+                ) : (
+                  <ItemImagePlaceholder>
+                    <CardGiftcardIcon />
+                  </ItemImagePlaceholder>
+                )}
+              </ItemImageContainer>
+
+              <ItemContentWrapper>
+                <Stack direction="column" gap={1}>
+                  <ItemTitleContainer>
+                    {item.url ? (
+                      <ItemUrl
+                        href={item.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={e => e.stopPropagation()}
+                      >
+                        {item.name}
+                      </ItemUrl>
+                    ) : (
+                      <span>{item.name}</span>
+                    )}
+                  </ItemTitleContainer>
+
+                  {item.description && <ItemDescription>{item.description}</ItemDescription>}
+                </Stack>
+
+                {item.score && (
+                  <RatingBubble>
+                    <Rating value={item.score} size="small" readOnly />
+                  </RatingBubble>
+                )}
+              </ItemContentWrapper>
+            </ItemCard>
+          ))}
+        </ItemsListContainer>
+      </Stack>
+
+      <BottomActionStack>
+        <Button variant="outlined" color="secondary" onClick={handleSkip}>
+          Ignorer
+        </Button>
+        <Button
+          variant="contained"
+          onClick={handleImport}
+          disabled={isLoading}
+          loading={isLoading}
+          loadingPosition="start"
+          startIcon={<AddIcon />}
+        >
+          {selectedItemIds.size > 0
+            ? `Importer ${selectedItemIds.size} souhait${selectedItemIds.size > 1 ? 's' : ''}`
+            : 'Continuer'}
+        </Button>
+      </BottomActionStack>
     </Dialog>
   )
 }

@@ -29,9 +29,20 @@ export class ImportItemsUseCase implements IInferredCommandHandler<ImportItemsCo
       throw new UnauthorizedException('You cannot import items to this wishlist')
     }
 
-    const items = await this.itemRepository.findByIds(command.sourceItemIds)
+    const sourceItems = await this.itemRepository.findByIds(command.sourceItemIds)
+    const sourceWishlistIds = [...new Set(sourceItems.map(item => item.wishlistId))]
+    const sourceWishlists = await this.wishlistRepository.findByIds(sourceWishlistIds)
 
-    const itemsToImport = items.map(item => item.exportTo({ id: this.itemRepository.newId(), wishlistId: wishlist.id }))
+    // Verify that all source items belong to the current user
+    for (const wishlist of sourceWishlists) {
+      if (!wishlist.isOwner(command.currentUser.id)) {
+        throw new UnauthorizedException('You cannot import items from another user wishlist')
+      }
+    }
+
+    const itemsToImport = sourceItems.map(item =>
+      item.exportTo({ id: this.itemRepository.newId(), wishlistId: wishlist.id }),
+    )
 
     await this.transactionManager.runInTransaction(async tx => {
       for (const item of itemsToImport) {
