@@ -2,6 +2,7 @@ import type { RequestApp } from '@wishlist/api-test-utils'
 
 import { Fixtures, useTestApp } from '@wishlist/api-test-utils'
 import { AttendeeRole, uuid } from '@wishlist/common'
+import { DateTime } from 'luxon'
 
 describe('ItemController', () => {
   const { getRequest, getFixtures, expectTable } = useTestApp()
@@ -9,6 +10,748 @@ describe('ItemController', () => {
 
   beforeEach(() => {
     fixtures = getFixtures()
+  })
+
+  describe('GET /item/importable', () => {
+    const path = (wishlistId: string) => `/item/importable?wishlist_id=${wishlistId}`
+
+    it('should return unauthorized if not authenticated', async () => {
+      const request = await getRequest()
+      const wishlistId = uuid()
+      await request.get(path(wishlistId)).expect(401)
+    })
+
+    describe('when user is authenticated', () => {
+      let request: RequestApp
+      let currentUserId: string
+
+      beforeEach(async () => {
+        request = await getRequest({ signedAs: 'BASE_USER' })
+        currentUserId = await fixtures.getSignedUserId('BASE_USER')
+      })
+
+      it('should return empty array when user has no old wishlists', async () => {
+        // Create a target wishlist for the query parameter
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Target Event',
+          description: 'Description',
+          maintainerId: currentUserId,
+        })
+
+        const targetWishlistId = await fixtures.insertWishlist({
+          eventIds: [eventId],
+          userId: currentUserId,
+          title: 'Target Wishlist',
+        })
+
+        const response = await request.get(path(targetWishlistId)).expect(200)
+        expect(response.body).toEqual([])
+      })
+
+      it('should return empty array when old wishlists have no items', async () => {
+        // Create target wishlist
+        const { eventId: targetEventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Target Event',
+          description: 'Description',
+          maintainerId: currentUserId,
+        })
+
+        const targetWishlistId = await fixtures.insertWishlist({
+          eventIds: [targetEventId],
+          userId: currentUserId,
+          title: 'Target Wishlist',
+        })
+
+        // Create event finished more than 2 months ago
+        const oldEventDate = DateTime.now().minus({ months: 3 }).toJSDate()
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Old Event',
+          description: 'Description',
+          maintainerId: currentUserId,
+          eventDate: oldEventDate,
+        })
+
+        // Create wishlist linked to old event
+        await fixtures.insertWishlist({
+          eventIds: [eventId],
+          userId: currentUserId,
+          title: 'Old Wishlist',
+        })
+
+        const response = await request.get(path(targetWishlistId)).expect(200)
+        expect(response.body).toEqual([])
+      })
+
+      it('should return importable items from old wishlists', async () => {
+        // Create target wishlist
+        const { eventId: targetEventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Target Event',
+          description: 'Description',
+          maintainerId: currentUserId,
+        })
+
+        const targetWishlistId = await fixtures.insertWishlist({
+          eventIds: [targetEventId],
+          userId: currentUserId,
+          title: 'Target Wishlist',
+        })
+
+        // Create event finished more than 2 months ago
+        const oldEventDate = DateTime.now().minus({ months: 3 }).toJSDate()
+        const { eventId: oldEventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Old Event',
+          description: 'Description',
+          maintainerId: currentUserId,
+          eventDate: oldEventDate,
+        })
+
+        // Create wishlist linked to old event
+        const oldWishlistId = await fixtures.insertWishlist({
+          eventIds: [oldEventId],
+          userId: currentUserId,
+          title: 'Old Wishlist',
+        })
+
+        // Create items - one not taken, one taken, one suggested
+        const notTakenItemId = await fixtures.insertItem({
+          wishlistId: oldWishlistId,
+          name: 'Not Taken Item',
+          description: 'Should be importable',
+        })
+
+        await fixtures.insertItem({
+          wishlistId: oldWishlistId,
+          name: 'Taken Item',
+          description: 'Should not be importable',
+          takerId: currentUserId,
+          takenAt: new Date(),
+        })
+
+        await fixtures.insertItem({
+          wishlistId: oldWishlistId,
+          name: 'Suggested Item',
+          description: 'Should not be importable',
+          isSuggested: true,
+        })
+
+        const response = await request.get(path(targetWishlistId)).expect(200)
+
+        expect(response.body).toHaveLength(1)
+        expect(response.body[0]).toMatchObject({
+          id: notTakenItemId,
+          name: 'Not Taken Item',
+          description: 'Should be importable',
+        })
+      })
+
+      it('should not return items from wishlists with events finished less than 2 months ago', async () => {
+        // Create target wishlist
+        const { eventId: targetEventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Target Event',
+          description: 'Description',
+          maintainerId: currentUserId,
+        })
+
+        const targetWishlistId = await fixtures.insertWishlist({
+          eventIds: [targetEventId],
+          userId: currentUserId,
+          title: 'Target Wishlist',
+        })
+
+        // Create event finished 1 month ago (less than 2 months)
+        const recentEventDate = DateTime.now().minus({ months: 1 }).toJSDate()
+        const { eventId: recentEventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Recent Event',
+          description: 'Description',
+          maintainerId: currentUserId,
+          eventDate: recentEventDate,
+        })
+
+        // Create wishlist linked to recent event
+        const recentWishlistId = await fixtures.insertWishlist({
+          eventIds: [recentEventId],
+          userId: currentUserId,
+          title: 'Recent Wishlist',
+        })
+
+        await fixtures.insertItem({
+          wishlistId: recentWishlistId,
+          name: 'Recent Item',
+          description: 'Should not be importable',
+        })
+
+        const response = await request.get(path(targetWishlistId)).expect(200)
+        expect(response.body).toEqual([])
+      })
+
+      it('should not return items from wishlists with at least one event not finished more than 2 months ago', async () => {
+        // Create target wishlist
+        const { eventId: targetEventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Target Event',
+          description: 'Description',
+          maintainerId: currentUserId,
+        })
+
+        const targetWishlistId = await fixtures.insertWishlist({
+          eventIds: [targetEventId],
+          userId: currentUserId,
+          title: 'Target Wishlist',
+        })
+
+        // Create one old event and one recent event
+        const oldEventDate = DateTime.now().minus({ months: 3 }).toJSDate()
+        const { eventId: oldEventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Old Event',
+          description: 'Description',
+          maintainerId: currentUserId,
+          eventDate: oldEventDate,
+        })
+
+        const recentEventDate = DateTime.now().minus({ months: 1 }).toJSDate()
+        const { eventId: recentEventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Recent Event',
+          description: 'Description',
+          maintainerId: currentUserId,
+          eventDate: recentEventDate,
+        })
+
+        // Create wishlist linked to both events (one old, one recent)
+        const mixedWishlistId = await fixtures.insertWishlist({
+          eventIds: [oldEventId, recentEventId],
+          userId: currentUserId,
+          title: 'Mixed Wishlist',
+        })
+
+        await fixtures.insertItem({
+          wishlistId: mixedWishlistId,
+          name: 'Mixed Event Item',
+          description: 'Should not be importable because one event is recent',
+        })
+
+        const response = await request.get(path(targetWishlistId)).expect(200)
+        expect(response.body).toEqual([])
+      })
+
+      it('should only return items from current user wishlists', async () => {
+        // Create target wishlist
+        const { eventId: targetEventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Target Event',
+          description: 'Description',
+          maintainerId: currentUserId,
+        })
+
+        const targetWishlistId = await fixtures.insertWishlist({
+          eventIds: [targetEventId],
+          userId: currentUserId,
+          title: 'Target Wishlist',
+        })
+
+        // Create another user
+        const otherUserId = await fixtures.insertUser({
+          email: 'other@test.com',
+          firstname: 'Other',
+          lastname: 'User',
+        })
+
+        // Create old event for other user
+        const oldEventDate = DateTime.now().minus({ months: 3 }).toJSDate()
+        const { eventId: otherEventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Other Event',
+          description: 'Description',
+          maintainerId: otherUserId,
+          eventDate: oldEventDate,
+        })
+
+        // Create wishlist for other user
+        const otherWishlistId = await fixtures.insertWishlist({
+          eventIds: [otherEventId],
+          userId: otherUserId,
+          title: 'Other Wishlist',
+        })
+
+        await fixtures.insertItem({
+          wishlistId: otherWishlistId,
+          name: 'Other User Item',
+          description: 'Should not be importable',
+        })
+
+        const response = await request.get(path(targetWishlistId)).expect(200)
+        expect(response.body).toEqual([])
+      })
+
+      it('should return multiple importable items ordered by creation date', async () => {
+        // Create target wishlist
+        const { eventId: targetEventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Target Event',
+          description: 'Description',
+          maintainerId: currentUserId,
+        })
+
+        const targetWishlistId = await fixtures.insertWishlist({
+          eventIds: [targetEventId],
+          userId: currentUserId,
+          title: 'Target Wishlist',
+        })
+
+        // Create event finished more than 2 months ago
+        const oldEventDate = DateTime.now().minus({ months: 3 }).toJSDate()
+        const { eventId: oldEventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Old Event',
+          description: 'Description',
+          maintainerId: currentUserId,
+          eventDate: oldEventDate,
+        })
+
+        // Create wishlist linked to old event
+        const oldWishlistId = await fixtures.insertWishlist({
+          eventIds: [oldEventId],
+          userId: currentUserId,
+          title: 'Old Wishlist',
+        })
+
+        // Create multiple items
+        const item1Id = await fixtures.insertItem({
+          wishlistId: oldWishlistId,
+          name: 'Item 1',
+        })
+
+        const item2Id = await fixtures.insertItem({
+          wishlistId: oldWishlistId,
+          name: 'Item 2',
+        })
+
+        const item3Id = await fixtures.insertItem({
+          wishlistId: oldWishlistId,
+          name: 'Item 3',
+        })
+
+        const response = await request.get(path(targetWishlistId)).expect(200)
+
+        expect(response.body).toHaveLength(3)
+        // biome-ignore lint/suspicious/noExplicitAny: normal for test
+        expect(response.body.map((item: any) => item.id)).toEqual([item1Id, item2Id, item3Id])
+      })
+    })
+  })
+
+  describe('POST /item/import', () => {
+    const path = '/item/import'
+
+    it('should return unauthorized if not authenticated', async () => {
+      const request = await getRequest()
+      await request
+        .post(path)
+        .send({
+          wishlist_id: uuid(),
+          source_item_ids: [uuid()],
+        })
+        .expect(401)
+    })
+
+    describe('when user is authenticated', () => {
+      let request: RequestApp
+      let currentUserId: string
+
+      beforeEach(async () => {
+        request = await getRequest({ signedAs: 'BASE_USER' })
+        currentUserId = await fixtures.getSignedUserId('BASE_USER')
+      })
+
+      it.each([
+        {
+          body: {},
+          case: 'empty body',
+          message: ['wishlist_id should not be empty', 'source_item_ids must be an array'],
+        },
+        {
+          body: { wishlist_id: uuid() },
+          case: 'missing source_item_ids',
+          message: ['source_item_ids must be an array'],
+        },
+        {
+          body: { wishlist_id: uuid(), source_item_ids: [] },
+          case: 'empty source_item_ids array',
+          message: ['source_item_ids should not be empty'],
+        },
+        {
+          body: { wishlist_id: uuid(), source_item_ids: [true, 1] },
+          case: 'source_item_ids not an array of strings',
+          message: ['each value in source_item_ids must be a string'],
+        },
+        {
+          body: { source_item_ids: [uuid()] },
+          case: 'missing wishlist_id',
+          message: ['wishlist_id should not be empty'],
+        },
+        {
+          body: { wishlist_id: uuid(), source_item_ids: 'not-an-array' },
+          case: 'source_item_ids not an array',
+          message: ['source_item_ids must be an array'],
+        },
+      ])('should return 400 when invalid input: $case', async ({ body, message }) => {
+        await request
+          .post(path)
+          .send(body)
+          .expect(400)
+          .expect(({ body }) =>
+            expect(body).toMatchObject({
+              error: 'Bad Request',
+              message: expect.arrayContaining(message),
+            }),
+          )
+      })
+
+      it('should return 404 when target wishlist not found', async () => {
+        const nonExistentWishlistId = uuid()
+
+        await request
+          .post(path)
+          .send({
+            wishlist_id: nonExistentWishlistId,
+            source_item_ids: [uuid()],
+          })
+          .expect(404)
+          .expect(({ body }) => {
+            expect(body).toMatchObject({
+              error: 'Not Found',
+              message: 'Wishlist not found',
+            })
+          })
+
+        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(0).check()
+      })
+
+      it('should successfully import multiple items from old wishlists', async () => {
+        // Create old event (more than 2 months ago)
+        const oldEventDate = DateTime.now().minus({ months: 3 }).toJSDate()
+        const { eventId: oldEventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Old Event',
+          description: 'Description',
+          maintainerId: currentUserId,
+          eventDate: oldEventDate,
+        })
+
+        // Create old wishlist
+        const oldWishlistId = await fixtures.insertWishlist({
+          eventIds: [oldEventId],
+          userId: currentUserId,
+          title: 'Old Wishlist',
+        })
+
+        // Create importable items
+        const item1Id = await fixtures.insertItem({
+          wishlistId: oldWishlistId,
+          name: 'Item 1',
+          description: 'Description 1',
+          url: 'https://example1.com',
+          score: 3,
+          pictureUrl: 'https://example1.com/pic.jpg',
+        })
+
+        const item2Id = await fixtures.insertItem({
+          wishlistId: oldWishlistId,
+          name: 'Item 2',
+          description: 'Description 2',
+          url: 'https://example2.com',
+          score: 5,
+        })
+
+        // Create new event
+        const newEventDate = DateTime.now().plus({ days: 30 }).toJSDate()
+        const { eventId: newEventId } = await fixtures.insertEventWithMaintainer({
+          title: 'New Event',
+          description: 'Description',
+          maintainerId: currentUserId,
+          eventDate: newEventDate,
+        })
+
+        // Create target wishlist
+        const targetWishlistId = await fixtures.insertWishlist({
+          eventIds: [newEventId],
+          userId: currentUserId,
+          title: 'Target Wishlist',
+        })
+
+        const response = await request
+          .post(path)
+          .send({
+            wishlist_id: targetWishlistId,
+            source_item_ids: [item1Id, item2Id],
+          })
+          .expect(201)
+
+        expect(response.body).toHaveLength(2)
+        expect(response.body[0]).toMatchObject({
+          id: expect.toBeString(),
+          name: 'Item 1',
+          description: 'Description 1',
+          url: 'https://example1.com',
+          score: 3,
+          picture_url: 'https://example1.com/pic.jpg',
+          created_at: expect.toBeDateString(),
+        })
+        expect(response.body[1]).toMatchObject({
+          id: expect.toBeString(),
+          name: 'Item 2',
+          description: 'Description 2',
+          url: 'https://example2.com',
+          score: 5,
+          created_at: expect.toBeDateString(),
+        })
+
+        // Verify database - should have 4 items total (2 old + 2 imported)
+        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(4).check()
+      })
+
+      it('should return 401 when user does not have access to target wishlist', async () => {
+        const otherUserId = await fixtures.insertUser({
+          email: 'other@test.com',
+          firstname: 'Other',
+          lastname: 'User',
+        })
+
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Test Event',
+          description: 'Description',
+          maintainerId: otherUserId,
+        })
+
+        const otherWishlistId = await fixtures.insertWishlist({
+          eventIds: [eventId],
+          userId: otherUserId,
+          title: 'Other Wishlist',
+        })
+
+        await request
+          .post(path)
+          .send({
+            wishlist_id: otherWishlistId,
+            source_item_ids: [uuid()],
+          })
+          .expect(401)
+          .expect(({ body }) => {
+            expect(body).toMatchObject({
+              error: 'Unauthorized',
+              message: 'You cannot import items to this wishlist',
+            })
+          })
+
+        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(0).check()
+      })
+
+      it('should return empty array when source items not found', async () => {
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Test Event',
+          description: 'Description',
+          maintainerId: currentUserId,
+        })
+
+        const wishlistId = await fixtures.insertWishlist({
+          eventIds: [eventId],
+          userId: currentUserId,
+          title: 'My Wishlist',
+        })
+
+        const nonExistentItemId = uuid()
+
+        const response = await request
+          .post(path)
+          .send({
+            wishlist_id: wishlistId,
+            source_item_ids: [nonExistentItemId],
+          })
+          .expect(201)
+
+        expect(response.body).toEqual([])
+        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(0).check()
+      })
+
+      it('should return 401 when trying to import items from another user wishlist', async () => {
+        const otherUserId = await fixtures.insertUser({
+          email: 'other@test.com',
+          firstname: 'Other',
+          lastname: 'User',
+        })
+
+        // Create old event for other user
+        const oldEventDate = DateTime.now().minus({ months: 3 }).toJSDate()
+        const { eventId: oldEventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Old Event',
+          description: 'Description',
+          maintainerId: otherUserId,
+          eventDate: oldEventDate,
+        })
+
+        // Create old wishlist for other user
+        const oldWishlistId = await fixtures.insertWishlist({
+          eventIds: [oldEventId],
+          userId: otherUserId,
+          title: 'Other User Wishlist',
+        })
+
+        // Create item in other user's wishlist
+        const itemId = await fixtures.insertItem({
+          wishlistId: oldWishlistId,
+          name: 'Other User Item',
+          description: 'Should not be importable',
+        })
+
+        // Create target wishlist for current user
+        const { eventId: newEventId } = await fixtures.insertEventWithMaintainer({
+          title: 'New Event',
+          description: 'Description',
+          maintainerId: currentUserId,
+        })
+
+        const targetWishlistId = await fixtures.insertWishlist({
+          eventIds: [newEventId],
+          userId: currentUserId,
+          title: 'My Wishlist',
+        })
+
+        await request
+          .post(path)
+          .send({
+            wishlist_id: targetWishlistId,
+            source_item_ids: [itemId],
+          })
+          .expect(401)
+          .expect(({ body }) => {
+            expect(body).toMatchObject({
+              error: 'Unauthorized',
+              message: 'You cannot import items from another user wishlist',
+            })
+          })
+
+        // Only the original item should exist
+        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1).check()
+      })
+
+      it('should return 500 when trying to import suggested items', async () => {
+        // Create old event
+        const oldEventDate = DateTime.now().minus({ months: 3 }).toJSDate()
+        const { eventId: oldEventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Old Event',
+          description: 'Description',
+          maintainerId: currentUserId,
+          eventDate: oldEventDate,
+        })
+
+        // Create old wishlist
+        const oldWishlistId = await fixtures.insertWishlist({
+          eventIds: [oldEventId],
+          userId: currentUserId,
+          title: 'Old Wishlist',
+        })
+
+        // Create a suggested item
+        const suggestedItemId = await fixtures.insertItem({
+          wishlistId: oldWishlistId,
+          name: 'Suggested Item',
+          isSuggested: true,
+        })
+
+        // Create target wishlist
+        const { eventId: newEventId } = await fixtures.insertEventWithMaintainer({
+          title: 'New Event',
+          description: 'Description',
+          maintainerId: currentUserId,
+        })
+
+        const targetWishlistId = await fixtures.insertWishlist({
+          eventIds: [newEventId],
+          userId: currentUserId,
+          title: 'Target Wishlist',
+        })
+
+        await request
+          .post(path)
+          .send({
+            wishlist_id: targetWishlistId,
+            source_item_ids: [suggestedItemId],
+          })
+          .expect(500)
+
+        // Only the original item should exist
+        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1).check()
+      })
+
+      it('should import taken items without their taken status', async () => {
+        const otherUserId = await fixtures.insertUser({
+          email: 'other@test.com',
+          firstname: 'Other',
+          lastname: 'User',
+        })
+
+        // Create old event
+        const oldEventDate = DateTime.now().minus({ months: 3 }).toJSDate()
+        const { eventId: oldEventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Old Event',
+          description: 'Description',
+          maintainerId: currentUserId,
+          eventDate: oldEventDate,
+        })
+
+        await fixtures.insertActiveAttendee({
+          eventId: oldEventId,
+          userId: otherUserId,
+          role: AttendeeRole.USER,
+        })
+
+        // Create old wishlist
+        const oldWishlistId = await fixtures.insertWishlist({
+          eventIds: [oldEventId],
+          userId: currentUserId,
+          title: 'Old Wishlist',
+        })
+
+        // Create one regular item and one taken item
+        const regularItemId = await fixtures.insertItem({
+          wishlistId: oldWishlistId,
+          name: 'Regular Item',
+        })
+
+        const takenItemId = await fixtures.insertItem({
+          wishlistId: oldWishlistId,
+          name: 'Taken Item',
+          takerId: otherUserId,
+          takenAt: new Date(),
+        })
+
+        // Create target wishlist
+        const { eventId: newEventId } = await fixtures.insertEventWithMaintainer({
+          title: 'New Event',
+          description: 'Description',
+          maintainerId: currentUserId,
+        })
+
+        const targetWishlistId = await fixtures.insertWishlist({
+          eventIds: [newEventId],
+          userId: currentUserId,
+          title: 'Target Wishlist',
+        })
+
+        const response = await request
+          .post(path)
+          .send({
+            wishlist_id: targetWishlistId,
+            source_item_ids: [regularItemId, takenItemId],
+          })
+          .expect(201)
+
+        // Should import both items
+        expect(response.body).toHaveLength(2)
+        expect(response.body[0]).toMatchObject({
+          name: 'Regular Item',
+        })
+        expect(response.body[1]).toMatchObject({
+          name: 'Taken Item',
+        })
+
+        // Verify database - should have 4 items (2 old + 2 imported)
+        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(4).check()
+      })
+    })
   })
 
   describe('POST /item', () => {

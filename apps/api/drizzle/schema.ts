@@ -182,17 +182,18 @@ export const item = pgTable(
   'item',
   {
     id: itemId().primaryKey().notNull(),
+    wishlistId: wishlistId('wishlist_id').notNull(),
     name: varchar({ length: 100 }).notNull(),
     description: text(),
     url: varchar({ length: 1000 }),
+    pictureUrl: varchar('picture_url', { length: 1000 }),
     isSuggested: boolean('is_suggested').default(false).notNull(),
     score: integer(),
-    wishlistId: wishlistId('wishlist_id').notNull(),
+    importSourceId: itemId('import_source_id'),
     takerId: userId('taker_id'),
     takenAt: timestampWithTimezone('taken_at'),
     createdAt: timestampWithTimezone('created_at').defaultNow().notNull(),
     updatedAt: timestampWithTimezone('updated_at').defaultNow().notNull(),
-    pictureUrl: varchar('picture_url', { length: 1000 }),
   },
   table => [
     foreignKey({
@@ -203,6 +204,11 @@ export const item = pgTable(
       columns: [table.takerId],
       foreignColumns: [user.id],
     }).onDelete('set null'),
+    foreignKey({
+      columns: [table.importSourceId],
+      foreignColumns: [table.id],
+    }).onDelete('set null'),
+    check('chk_import_source_id', sql`import_source_id IS DISTINCT FROM id`),
   ],
 )
 

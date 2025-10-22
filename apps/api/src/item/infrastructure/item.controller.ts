@@ -1,19 +1,30 @@
-import { Body, Controller, Delete, Param, Post, Put } from '@nestjs/common'
+import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common'
 import { CommandBus, QueryBus } from '@nestjs/cqrs'
 import { ApiTags } from '@nestjs/swagger'
 import { CurrentUser } from '@wishlist/api/auth'
 import {
   AddItemForListInputDto,
+  GetImportableItemsInputDto,
   ICurrentUser,
+  ImportItemsInputDto,
   ItemDto,
   ItemId,
   ScanItemInputDto,
   ScanItemOutputDto,
   ToggleItemOutputDto,
   UpdateItemInputDto,
+  UserId,
 } from '@wishlist/common'
 
-import { CreateItemCommand, DeleteItemCommand, ScanItemUrlQuery, ToggleItemCommand, UpdateItemCommand } from '../domain'
+import {
+  CreateItemCommand,
+  DeleteItemCommand,
+  GetImportableItemsQuery,
+  ImportItemsCommand,
+  ScanItemUrlQuery,
+  ToggleItemCommand,
+  UpdateItemCommand,
+} from '../domain'
 
 @ApiTags('Item')
 @Controller('/item')
@@ -22,6 +33,19 @@ export class ItemController {
     private readonly queryBus: QueryBus,
     private readonly commandBus: CommandBus,
   ) {}
+
+  // Get importable items from old wishlists
+  @Get('/importable')
+  getImportableItems(@CurrentUser('id') userId: UserId, @Query() dto: GetImportableItemsInputDto): Promise<ItemDto[]> {
+    return this.queryBus.execute(new GetImportableItemsQuery({ userId, wishlistId: dto.wishlist_id }))
+  }
+
+  @Post('/import')
+  importItems(@CurrentUser() currentUser: ICurrentUser, @Body() dto: ImportItemsInputDto): Promise<ItemDto[]> {
+    return this.commandBus.execute(
+      new ImportItemsCommand({ currentUser, wishlistId: dto.wishlist_id, sourceItemIds: dto.source_item_ids }),
+    )
+  }
 
   // Scan an item url to get the picture url
   @Post('/scan-url')

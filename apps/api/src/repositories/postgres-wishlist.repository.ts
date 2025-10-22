@@ -29,6 +29,19 @@ export class PostgresWishlistRepository implements WishlistRepository {
     return result ? PostgresWishlistRepository.toModel(result) : undefined
   }
 
+  async findByIds(wishlistIds: WishlistId[]): Promise<Wishlist[]> {
+    const result = await this.databaseService.db.query.wishlist.findMany({
+      where: inArray(schema.wishlist.id, wishlistIds),
+      with: {
+        owner: true,
+        eventWishlists: true,
+        items: { with: { taker: true } },
+      },
+    })
+
+    return result.map(PostgresWishlistRepository.toModel)
+  }
+
   async findByIdOrFail(wishlistId: WishlistId): Promise<Wishlist> {
     const wishlist = await this.findById(wishlistId)
     if (!wishlist) throw new NotFoundException('Wishlist not found')

@@ -1,5 +1,7 @@
 import type {
   AddItemForListInputDto,
+  GetImportableItemsInputDto,
+  ImportItemsInputDto,
   ItemDto,
   ScanItemInputDto,
   ScanItemOutputDto,
@@ -29,5 +31,13 @@ export class ItemService {
 
   scanUrl(data: ScanItemInputDto): Promise<ScanItemOutputDto> {
     return this.client.post('/item/scan-url', data).then(res => res.data)
+  }
+
+  getImportableItems(params: GetImportableItemsInputDto): Promise<ItemDto[]> {
+    return this.client.get('/item/importable', { params }).then(res => res.data)
+  }
+
+  importItems(data: ImportItemsInputDto): Promise<ItemDto[]> {
+    return this.client.post('/item/import', data).then(res => res.data)
   }
 }

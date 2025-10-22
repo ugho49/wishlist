@@ -6,6 +6,7 @@ export interface WishlistRepository {
   newId(): WishlistId
   findById(wishlistId: WishlistId): Promise<Wishlist | undefined>
   findByIdOrFail(wishlistId: WishlistId): Promise<Wishlist>
+  findByIds(wishlistIds: WishlistId[]): Promise<Wishlist[]>
   findByEvent(eventId: EventId): Promise<Wishlist[]>
   findByOwner(userId: UserId): Promise<Wishlist[]>
   findEmailsToNotify(params: { ownerId: UserId; wishlistId: WishlistId }): Promise<string[]>

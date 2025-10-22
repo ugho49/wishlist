@@ -1,7 +1,18 @@
 import type { ItemId, WishlistId } from '../ids'
 import type { MiniUserDto } from './user.dto'
 
-import { IsInt, IsNotEmpty, IsOptional, IsString, IsUrl, Max, MaxLength, Min } from 'class-validator'
+import {
+  ArrayNotEmpty,
+  IsArray,
+  IsInt,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsUrl,
+  Max,
+  MaxLength,
+  Min,
+} from 'class-validator'
 
 export class ItemDto {
   declare id: ItemId
@@ -57,6 +68,23 @@ export class AddItemForListInputDto extends UpdateItemInputDto {
   @IsString()
   @IsNotEmpty()
   declare wishlist_id: WishlistId
+}
+
+export class GetImportableItemsInputDto {
+  @IsString()
+  @IsNotEmpty()
+  declare wishlist_id: WishlistId
+}
+
+export class ImportItemsInputDto {
+  @IsString()
+  @IsNotEmpty()
+  declare wishlist_id: WishlistId
+
+  @IsString({ each: true })
+  @ArrayNotEmpty()
+  @IsArray()
+  declare source_item_ids: ItemId[]
 }
 
 export class ScanItemInputDto {

@@ -27,13 +27,14 @@ import {
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import clsx from 'clsx'
 import { DateTime } from 'luxon'
-import React, { useMemo, useState } from 'react'
+import { useQueryState } from 'nuqs'
+import React, { useCallback, useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
 
 import { useApi, useToast } from '../../hooks'
 import { Card } from '../common/Card'
 import { ConfirmMenuItem } from '../common/ConfirmMenuItem'
-import { Rating } from '../common/Rating'
+import { Rating, RatingBubble } from '../common/Rating'
 import { ItemFormDialog } from './ItemFormDialog'
 
 // Modern card styling with vertical layout
@@ -119,6 +120,13 @@ const ItemImage = styled('img')({
     opacity: 1,
   },
 })
+
+const RatingBubbleStyled = styled(RatingBubble)(() => ({
+  position: 'absolute',
+  bottom: '8px',
+  right: '8px',
+  zIndex: 3,
+}))
 
 // Item image placeholder when no image - beautiful gift icon with gradient background
 const ItemImagePlaceholder = styled(Box)(({ theme }) => ({
@@ -304,23 +312,6 @@ const ItemFooter = styled(Box)(({ theme }) => ({
   marginTop: 'auto',
 }))
 
-// Rating bubble - discrete bottom-right of image
-const RatingBubble = styled(Box)(({ theme }) => ({
-  position: 'absolute',
-  bottom: '8px',
-  right: '8px',
-  zIndex: 3,
-  background: alpha(theme.palette.background.paper, 0.9),
-  borderRadius: '12px',
-  display: 'flex',
-  padding: '4px 8px',
-  fontSize: '0.75rem',
-  fontWeight: 500,
-  color: theme.palette.text.secondary,
-  backdropFilter: 'blur(8px)',
-  boxShadow: `0 2px 8px ${alpha(theme.palette.common.black, 0.1)}`,
-}))
-
 // Date container in metadata
 const DateContainer = styled(Box)({
   display: 'flex',
@@ -352,8 +343,13 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
   const api = useApi()
   const { addToast } = useToast()
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
-  const [openDialog, setOpenDialog] = useState(false)
+  const [currentItemId, setCurrentItemId] = useQueryState('currentItemId')
   const [takenBy, setTakenBy] = useState<MiniUserDto | undefined>(item.taken_by)
+  const isDialogOpen = useMemo(() => currentItemId === item.id, [currentItemId, item.id])
+  const setDialogOpen = useCallback(
+    (open: boolean) => setCurrentItemId(open ? item.id : null),
+    [item.id, setCurrentItemId],
+  )
 
   const isTaken = useMemo(() => takenBy !== undefined, [takenBy])
   const isOwner = currentUserId === wishlist.ownerId
@@ -471,9 +467,9 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
 
           {/* Rating bubble - bottom-right of image */}
           {item.score && item.score > 0 && (
-            <RatingBubble>
+            <RatingBubbleStyled>
               <Rating value={item.score} size="small" readOnly />
-            </RatingBubble>
+            </RatingBubbleStyled>
           )}
         </ItemImageContainer>
 
@@ -544,7 +540,7 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
         <MenuItem
           onClick={() => {
             closeMenu()
-            setOpenDialog(true)
+            setDialogOpen(true)
           }}
         >
           <ListItemIcon>
@@ -575,8 +571,8 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
         title="Modifier le souhait"
         item={item}
         wishlistId={wishlist.id}
-        open={openDialog}
-        handleClose={() => setOpenDialog(false)}
+        open={isDialogOpen}
+        handleClose={() => setDialogOpen(false)}
       />
     </>
   )

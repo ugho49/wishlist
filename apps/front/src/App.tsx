@@ -1,12 +1,13 @@
-import { useFeatureFlagEnabled } from 'posthog-js/react'
+import { FeatureFlags } from '@wishlist/common'
 
 import { MaintenancePage } from './components/common/MaintenancePage'
+import { useFeatureFlag } from './hooks/useFeatureFlag'
 import { AppRouter } from './Router'
 
 export const App = () => {
-  const flagEnabled = useFeatureFlagEnabled('frontend-maintenance-page-enabled')
+  const maintenancePageEnabled = useFeatureFlag(FeatureFlags.FRONTEND_MAINTENANCE_PAGE_ENABLED)
 
-  if (flagEnabled) {
+  if (maintenancePageEnabled) {
     return <MaintenancePage />
   }
 

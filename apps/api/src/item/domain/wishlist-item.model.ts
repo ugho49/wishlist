@@ -3,6 +3,7 @@ import type { ItemId, UserId, WishlistId } from '@wishlist/common'
 
 export type WishlistItemProps = {
   id: ItemId
+  importSourceId?: ItemId
   wishlistId: WishlistId
   name: string
   description?: string
@@ -18,6 +19,7 @@ export type WishlistItemProps = {
 
 export class WishlistItem {
   public readonly id: ItemId
+  public readonly importSourceId?: ItemId
   public readonly wishlistId: WishlistId
   public readonly name: string
   public readonly description?: string
@@ -32,6 +34,7 @@ export class WishlistItem {
 
   constructor(props: WishlistItemProps) {
     this.id = props.id
+    this.importSourceId = props.importSourceId
     this.wishlistId = props.wishlistId
     this.name = props.name
     this.description = props.description
@@ -54,6 +57,7 @@ export class WishlistItem {
     isSuggested: boolean
     imageUrl?: string
     wishlistId: WishlistId
+    importSourceId?: ItemId
     takenBy?: User
     takenAt?: Date
   }): WishlistItem {
@@ -68,6 +72,7 @@ export class WishlistItem {
       score: params.score,
       isSuggested: params.isSuggested,
       imageUrl: params.imageUrl,
+      importSourceId: params.importSourceId,
       takenBy: params.takenBy,
       takenAt: params.takenAt,
       createdAt: now,
@@ -79,6 +84,28 @@ export class WishlistItem {
     return new WishlistItem({
       ...this,
       isSuggested: true,
+    })
+  }
+
+  exportTo(params: { id: ItemId; wishlistId: WishlistId }): WishlistItem {
+    if (this.isSuggested) {
+      throw new Error('You cannot export a suggested item')
+    }
+
+    const now = new Date()
+
+    return new WishlistItem({
+      id: params.id,
+      wishlistId: params.wishlistId,
+      name: this.name,
+      description: this.description,
+      url: this.url,
+      score: this.score,
+      isSuggested: false,
+      imageUrl: this.imageUrl,
+      importSourceId: this.id,
+      createdAt: now,
+      updatedAt: now,
     })
   }
 

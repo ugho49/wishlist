@@ -2,8 +2,9 @@ import { Injectable, NotFoundException } from '@nestjs/common'
 import { DatabaseService, DrizzleTransaction } from '@wishlist/api/core'
 import { NewItemsForWishlist, WishlistItem, WishlistItemRepository } from '@wishlist/api/item'
 import { schema } from '@wishlist/api-drizzle'
-import { ItemId, uuid, WishlistId } from '@wishlist/common'
-import { and, eq, gt, sql } from 'drizzle-orm'
+import { ItemId, UserId, uuid, WishlistId } from '@wishlist/common'
+import { and, eq, gt, inArray, isNull, ne, sql } from 'drizzle-orm'
+import { DateTime } from 'luxon'
 
 import { PostgresUserRepository } from './postgres-user.repository'
 
@@ -22,6 +23,17 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
     })
 
     return result ? PostgresWishlistItemRepository.toModel(result) : undefined
+  }
+
+  async findByIds(ids: ItemId[]): Promise<WishlistItem[]> {
+    if (ids.length === 0) return []
+
+    const result = await this.databaseService.db.query.item.findMany({
+      where: inArray(schema.item.id, ids),
+      with: { taker: true },
+    })
+
+    return result.map(PostgresWishlistItemRepository.toModel)
   }
 
   async findByIdOrFail(id: ItemId): Promise<WishlistItem> {
@@ -69,6 +81,58 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
     }))
   }
 
+  async findImportableItems(params: { userId: UserId; wishlistId: WishlistId }): Promise<WishlistItem[]> {
+    const { userId, wishlistId } = params
+    const twoMonthsAgo = DateTime.now().minus({ months: 2 }).toJSDate()
+
+    // Find all wishlists of the user where all linked events are finished more than 2 months ago
+    const eligibleWishlistsSubquery = this.databaseService.db
+      .select({
+        wishlistId: schema.eventWishlist.wishlistId,
+      })
+      .from(schema.eventWishlist)
+      .innerJoin(schema.wishlist, eq(schema.wishlist.id, schema.eventWishlist.wishlistId))
+      .innerJoin(schema.event, eq(schema.event.id, schema.eventWishlist.eventId))
+      .where(
+        and(
+          ne(schema.wishlist.id, wishlistId),
+          eq(schema.wishlist.ownerId, userId),
+          eq(schema.wishlist.hideItems, true),
+        ),
+      )
+      .groupBy(schema.eventWishlist.wishlistId)
+      .having(sql`MAX(${schema.event.eventDate}) < ${twoMonthsAgo}`)
+      .as('eligible_wishlists')
+
+    // Find items that already exist in the target wishlist (with importSourceId)
+    const alreadyImportedItemsSubquery = this.databaseService.db
+      .select({
+        importSourceId: schema.item.importSourceId,
+      })
+      .from(schema.item)
+      .where(and(eq(schema.item.wishlistId, wishlistId), sql`${schema.item.importSourceId} IS NOT NULL`))
+      .as('already_imported_items')
+
+    // Get all items from these wishlists that are not taken, not suggested, and not already imported
+    const result = await this.databaseService.db
+      .select({
+        item: schema.item,
+      })
+      .from(schema.item)
+      .innerJoin(eligibleWishlistsSubquery, eq(schema.item.wishlistId, eligibleWishlistsSubquery.wishlistId))
+      .leftJoin(alreadyImportedItemsSubquery, eq(schema.item.id, alreadyImportedItemsSubquery.importSourceId))
+      .where(
+        and(
+          eq(schema.item.isSuggested, false),
+          isNull(schema.item.takerId),
+          isNull(alreadyImportedItemsSubquery.importSourceId),
+        ),
+      )
+      .orderBy(schema.item.createdAt)
+
+    return result.map(row => PostgresWishlistItemRepository.toModel({ ...row.item, taker: null }))
+  }
+
   async save(item: WishlistItem, tx?: DrizzleTransaction): Promise<void> {
     const client = tx ?? this.databaseService.db
 
@@ -85,6 +149,7 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
         takerId: item.takenBy?.id,
         takenAt: item.takenAt,
         pictureUrl: item.imageUrl,
+        importSourceId: item.importSourceId,
         createdAt: item.createdAt,
         updatedAt: item.updatedAt,
       })
@@ -93,12 +158,13 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
         set: {
           name: item.name,
           description: item.description ?? null,
+          importSourceId: item.importSourceId ?? null,
           url: item.url ?? null,
+          pictureUrl: item.imageUrl ?? null,
           score: item.score ?? null,
           isSuggested: item.isSuggested,
           takerId: item.takenBy?.id ?? null,
           takenAt: item.takenAt ?? null,
-          pictureUrl: item.imageUrl ?? null,
           updatedAt: item.updatedAt,
         },
       })
@@ -116,6 +182,7 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
   ): WishlistItem {
     return new WishlistItem({
       id: row.id,
+      importSourceId: row.importSourceId ?? undefined,
       wishlistId: row.wishlistId,
       name: row.name,
       description: row.description ?? undefined,
