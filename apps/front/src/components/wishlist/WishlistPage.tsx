@@ -2,19 +2,22 @@ import type { RootState } from '../../core'
 
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import EditIcon from '@mui/icons-material/Edit'
+import HistoryIcon from '@mui/icons-material/History'
 import PersonIcon from '@mui/icons-material/Person'
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined'
 import PublicIcon from '@mui/icons-material/Public'
 import { Avatar, Box, Chip, Container, Stack, Tooltip } from '@mui/material'
 import { grey } from '@mui/material/colors'
-import { useMemo, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { useEffect, useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useNavigate, useParams } from 'react-router-dom'
 
-import { useWishlistById } from '../../hooks'
+import { useApi, useWishlistById } from '../../hooks'
 import { Description } from '../common/Description'
 import { Loader } from '../common/Loader'
 import { Title } from '../common/Title'
+import { ImportItemsDialog } from '../item/ImportItemsDialog'
 import { WishlistEventsDialog } from './WishlistEventsDialog'
 import { WishlistItems } from './WishlistItems'
 import { WishlistNotFound } from './WishlistNotFound'
@@ -26,13 +29,34 @@ const logoSize = 60
 export const WishlistPage = () => {
   const currentUserId = useSelector(mapState)
   const [openEventDialog, setOpenEventDialog] = useState(false)
+  const [showImportDialog, setShowImportDialog] = useState(false)
+  const [hasCheckedImport, setHasCheckedImport] = useState(false)
   const params = useParams<'wishlistId'>()
   const wishlistId = params.wishlistId || ''
   const navigate = useNavigate()
+  const api = useApi()
 
   const { wishlist, loading } = useWishlistById(wishlistId)
 
   const currentUserCanEdit = useMemo(() => wishlist?.owner.id === currentUserId, [currentUserId, wishlist])
+
+  // Check for importable items only if it's the user's own wishlist
+  const { data: importableItems = [] } = useQuery({
+    queryKey: ['item.importable'],
+    queryFn: () => api.item.getImportableItems(),
+    enabled: currentUserCanEdit,
+  })
+
+  // Show import dialog automatically if the wishlist is empty and there are items to import
+  useEffect(() => {
+    if (wishlist && currentUserCanEdit && !hasCheckedImport && importableItems.length > 0) {
+      const hasNoItems = wishlist.items.length === 0
+      if (hasNoItems) {
+        setShowImportDialog(true)
+      }
+      setHasCheckedImport(true)
+    }
+  }, [wishlist, currentUserCanEdit, importableItems, hasCheckedImport])
 
   return (
     <Box>
@@ -96,6 +120,16 @@ export const WishlistPage = () => {
                       <Chip label="Publique" color="primary" variant="outlined" size="small" icon={<PublicIcon />} />
                     </Tooltip>
                   )}
+                  {importableItems.length > 0 && (
+                    <Chip
+                      color="secondary"
+                      variant="outlined"
+                      size="small"
+                      icon={<HistoryIcon />}
+                      onClick={() => setShowImportDialog(true)}
+                      label={`Importer (${importableItems.length})`}
+                    />
+                  )}
                   <Chip
                     color="info"
                     variant="outlined"
@@ -123,6 +157,15 @@ export const WishlistPage = () => {
               events={wishlist.events}
               currentUserCanEdit={currentUserCanEdit}
             />
+
+            {currentUserCanEdit && (
+              <ImportItemsDialog
+                open={showImportDialog}
+                wishlistId={wishlist.id}
+                onClose={() => setShowImportDialog(false)}
+                onComplete={() => setShowImportDialog(false)}
+              />
+            )}
           </>
         )}
       </Loader>
