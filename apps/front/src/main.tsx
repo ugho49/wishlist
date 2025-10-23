@@ -27,7 +27,14 @@ function main() {
     window.location.hostname === 'wishlist-stephan.firebaseapp.com'
 
   if (needRedirect) {
-    window.location.href = 'https://wishlistapp.fr'
+    // Set referrer policy to no-referrer
+    const meta = document.createElement('meta')
+    meta.name = 'referrer'
+    meta.content = 'no-referrer'
+    document.head.appendChild(meta)
+
+    // Use replace() to redirect without adding to browser history and without referrer
+    window.location.replace('https://wishlistapp.fr')
     return
   }
 
