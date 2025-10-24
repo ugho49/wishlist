@@ -272,51 +272,53 @@ export const ImportItemsDialog = ({
         </Stack>
 
         <ItemsListContainer>
-          {importableItems.map(item => (
-            <ItemCard
-              key={item.id}
-              hoverable
-              onClick={() => toggleItemSelection(item.id)}
-              className={clsx({ selected: selectedItemIds.has(item.id) })}
-            >
-              <ItemImageContainer>
-                {item.picture_url ? (
-                  <ItemImage src={item.picture_url} alt={item.name} />
-                ) : (
-                  <ItemImagePlaceholder>
-                    <CardGiftcardIcon />
-                  </ItemImagePlaceholder>
-                )}
-              </ItemImageContainer>
+          {importableItems
+            .toSorted((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+            .map(item => (
+              <ItemCard
+                key={item.id}
+                hoverable
+                onClick={() => toggleItemSelection(item.id)}
+                className={clsx({ selected: selectedItemIds.has(item.id) })}
+              >
+                <ItemImageContainer>
+                  {item.picture_url ? (
+                    <ItemImage src={item.picture_url} alt={item.name} />
+                  ) : (
+                    <ItemImagePlaceholder>
+                      <CardGiftcardIcon />
+                    </ItemImagePlaceholder>
+                  )}
+                </ItemImageContainer>
 
-              <ItemContentWrapper>
-                <Stack direction="column" gap={1}>
-                  <ItemTitleContainer>
-                    {item.url ? (
-                      <ItemUrl
-                        href={item.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={e => e.stopPropagation()}
-                      >
-                        {item.name}
-                      </ItemUrl>
-                    ) : (
-                      <span>{item.name}</span>
-                    )}
-                  </ItemTitleContainer>
+                <ItemContentWrapper>
+                  <Stack direction="column" gap={1}>
+                    <ItemTitleContainer>
+                      {item.url ? (
+                        <ItemUrl
+                          href={item.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={e => e.stopPropagation()}
+                        >
+                          {item.name}
+                        </ItemUrl>
+                      ) : (
+                        <span>{item.name}</span>
+                      )}
+                    </ItemTitleContainer>
 
-                  {item.description && <ItemDescription>{item.description}</ItemDescription>}
-                </Stack>
+                    {item.description && <ItemDescription>{item.description}</ItemDescription>}
+                  </Stack>
 
-                {item.score && (
-                  <RatingBubble>
-                    <Rating value={item.score} size="small" readOnly />
-                  </RatingBubble>
-                )}
-              </ItemContentWrapper>
-            </ItemCard>
-          ))}
+                  {item.score && (
+                    <RatingBubble>
+                      <Rating value={item.score} size="small" readOnly />
+                    </RatingBubble>
+                  )}
+                </ItemContentWrapper>
+              </ItemCard>
+            ))}
         </ItemsListContainer>
       </Stack>
 
