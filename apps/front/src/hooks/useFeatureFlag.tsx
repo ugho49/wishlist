@@ -1,9 +1,9 @@
 import type { FeatureFlags } from '@wishlist/common'
 
-import { useFeatureFlagEnabled } from 'posthog-js/react'
+import { useFlags } from 'launchdarkly-react-client-sdk'
 
 export function useFeatureFlag(flag: FeatureFlags, defaultValue = false): boolean {
-  const flagEnabled = useFeatureFlagEnabled(flag)
+  const flags = useFlags()
 
-  return flagEnabled ?? defaultValue
+  return flags[flag] ?? defaultValue
 }

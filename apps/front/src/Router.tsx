@@ -1,5 +1,7 @@
 import type { RootState } from './core'
 
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { useEffect } from 'react'
 import { useSelector } from 'react-redux'
 import { Navigate, Route, Routes } from 'react-router-dom'
 
@@ -30,10 +32,28 @@ import { WishlistListPage } from './components/wishlist/WishlistListPage'
 import { WishlistPage } from './components/wishlist/WishlistPage'
 
 const mapAuthState = (state: RootState) => state.auth
+const mapUserProfileState = (state: RootState) => state.userProfile
 
 export const AppRouter = () => {
   const { accessToken } = useSelector(mapAuthState)
   const isLoggedIn = accessToken !== undefined
+  const ldClient = useLDClient()
+  const userProfile = useSelector(mapUserProfileState)
+
+  // Add user context to LaunchDarkly
+  useEffect(() => {
+    if (userProfile.isUserLoaded) {
+      ldClient?.identify({
+        kind: 'user',
+        key: userProfile.id,
+        email: userProfile.email,
+        firstName: userProfile.firstName,
+        lastName: userProfile.lastName,
+      })
+    } else {
+      ldClient?.identify({ anonymous: true })
+    }
+  }, [userProfile, ldClient])
 
   return (
     <Routes>

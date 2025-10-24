@@ -6,8 +6,8 @@ import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon'
 import { GoogleOAuthProvider } from '@react-oauth/google'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import { LDProvider } from 'launchdarkly-react-client-sdk'
 import { NuqsAdapter } from 'nuqs/adapters/react-router/v7'
-import { PostHogProvider } from 'posthog-js/react'
 import * as ReactDOM from 'react-dom/client'
 import { Toaster } from 'react-hot-toast'
 import { Provider as ReduxProvider } from 'react-redux'
@@ -51,7 +51,7 @@ function main() {
   })
 
   root.render(
-    <PostHogProvider apiKey={environment.posthogKey} options={{ api_host: environment.posthogHost }}>
+    <LDProvider clientSideID={environment.launchdarklyClientSideiD} reactOptions={{ useCamelCaseFlagKeys: false }}>
       <Toaster position="top-right" toastOptions={{ duration: 3_000 }} />
       <QueryClientProvider client={queryClient}>
         <ApiProvider>
@@ -74,7 +74,7 @@ function main() {
         </ApiProvider>
         <ReactQueryDevtools initialIsOpen={false} />
       </QueryClientProvider>
-    </PostHogProvider>,
+    </LDProvider>,
   )
 }
 
