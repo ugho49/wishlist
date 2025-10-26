@@ -8,6 +8,10 @@ services:
       - "1080:1080"
       - "1025:1025"
 
+  valkey:
+    ports:
+      - "6379:6379"
+
   adminer:
     image: adminer:5.4.1
     restart: always

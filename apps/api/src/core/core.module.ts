@@ -7,6 +7,7 @@ import { BucketModule } from './bucket/bucket.module'
 import { DatabaseModule } from './database/database.module'
 import { HealthModule } from './health/health.module'
 import { MailModule } from './mail/mail.module'
+import { QueueModule } from './queue/queue.module'
 
 const bucketModule = BucketModule.registerAsync({
   inject: [ConfigService],
@@ -58,8 +59,21 @@ const databaseModule = DatabaseModule.registerAsync({
   },
 })
 
+const queueModule = QueueModule.registerAsync({
+  inject: [ConfigService],
+  useFactory: (config: ConfigService) => {
+    return {
+      host: config.get<string>('VALKEY_HOST', 'localhost'),
+      port: parseInt(config.get<string>('VALKEY_PORT', '6379'), 10),
+      password: config.get<string>('VALKEY_PASSWORD', ''),
+      db: parseInt(config.get<string>('VALKEY_DB', '0'), 10),
+      keyPrefix: config.get<string>('VALKEY_KEY_PREFIX', 'wishlist:'),
+    }
+  },
+})
+
 @Global()
 @Module({
-  imports: [ScheduleModule.forRoot(), HealthModule, databaseModule, mailModule, bucketModule],
+  imports: [ScheduleModule.forRoot(), HealthModule, databaseModule, mailModule, bucketModule, queueModule],
 })
 export class CoreModule {}

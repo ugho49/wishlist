@@ -1,0 +1,5 @@
+export * from './event-handler-registry.service'
+export * from './event-publisher.service'
+export * from './events.processor'
+export * from './queue-module.config'
+export * from './queue.module'

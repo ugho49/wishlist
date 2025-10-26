@@ -18,3 +18,11 @@ services:
       interval: 2s
       timeout: 5s
       retries: 10
+
+  valkey:
+    image: valkey/valkey:8.0-alpine
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 2s
+      timeout: 5s
+      retries: 10
