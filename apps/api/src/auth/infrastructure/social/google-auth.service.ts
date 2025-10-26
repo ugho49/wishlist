@@ -9,7 +9,7 @@ export class GoogleAuthService {
   private logger = new Logger(GoogleAuthService.name)
   private client: OAuth2Client
 
-  constructor(@Inject(authConfig.KEY) private readonly config: ConfigType<typeof authConfig>) {
+  constructor(@Inject(authConfig.KEY) config: ConfigType<typeof authConfig>) {
     const googleConfig = config.social.google
 
     this.client = new OAuth2Client({
