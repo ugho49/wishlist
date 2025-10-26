@@ -5,5 +5,9 @@ services:
 
   mail:
     ports:
-      - '1025'
-      - '1080'
+      - "1025"
+      - "1080"
+
+  valkey:
+    ports:
+      - "6379"

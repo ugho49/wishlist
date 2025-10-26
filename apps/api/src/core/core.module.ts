@@ -59,21 +59,8 @@ const databaseModule = DatabaseModule.registerAsync({
   },
 })
 
-const queueModule = QueueModule.registerAsync({
-  inject: [ConfigService],
-  useFactory: (config: ConfigService) => {
-    return {
-      host: config.get<string>('VALKEY_HOST', 'localhost'),
-      port: parseInt(config.get<string>('VALKEY_PORT', '6379'), 10),
-      password: config.get<string>('VALKEY_PASSWORD', ''),
-      db: parseInt(config.get<string>('VALKEY_DB', '0'), 10),
-      keyPrefix: config.get<string>('VALKEY_KEY_PREFIX', 'wishlist:'),
-    }
-  },
-})
-
 @Global()
 @Module({
-  imports: [ScheduleModule.forRoot(), HealthModule, databaseModule, mailModule, bucketModule, queueModule],
+  imports: [ScheduleModule.forRoot(), HealthModule, databaseModule, mailModule, bucketModule, QueueModule],
 })
 export class CoreModule {}

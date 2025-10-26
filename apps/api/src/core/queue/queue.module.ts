@@ -1,44 +1,45 @@
+import { BullMQAdapter } from '@bull-board/api/bullMQAdapter'
+import { ExpressAdapter } from '@bull-board/express'
+import { BullBoardModule } from '@bull-board/nestjs'
 import { BullModule } from '@nestjs/bullmq'
-import { DynamicModule, Module } from '@nestjs/common'
-import { DiscoveryModule } from '@nestjs/core'
+import { Global, MiddlewareConsumer, Module, NestModule } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 
-import type { QueueModuleConfig } from './queue-module.config'
-import { EventPublisherService } from './event-publisher.service'
-import { EventsProcessor } from './events.processor'
-import { EventHandlerRegistryService } from './event-handler-registry.service'
+import { BullBoardAuthMiddleware } from './middleware/bull-board-auth.middleware'
+import { QueueName } from './queues.type'
 
-@Module({})
-export class QueueModule {
-  static registerAsync(options: {
-    inject?: any[]
-    useFactory: (...args: any[]) => QueueModuleConfig | Promise<QueueModuleConfig>
-  }): DynamicModule {
-    return {
-      module: QueueModule,
-      imports: [
-        DiscoveryModule,
-        BullModule.forRootAsync({
-          inject: options.inject,
-          useFactory: async (...args: any[]) => {
-            const config = await options.useFactory(...args)
-            return {
-              connection: {
-                host: config.host,
-                port: config.port,
-                password: config.password,
-                username: config.username,
-                db: config.db,
-                keyPrefix: config.keyPrefix,
-              },
-            }
-          },
-        }),
-        BullModule.registerQueue({
-          name: 'events',
-        }),
-      ],
-      providers: [EventPublisherService, EventsProcessor, EventHandlerRegistryService],
-      exports: [BullModule, EventPublisherService, EventsProcessor],
-    }
+@Global()
+@Module({
+  imports: [
+    BullModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        prefix: config.get<string>('VALKEY_KEY_PREFIX', 'wishlist:'),
+        connection: {
+          host: config.get<string>('VALKEY_HOST', 'localhost'),
+          port: parseInt(config.get<string>('VALKEY_PORT', '6379'), 10),
+          password: config.get<string>('VALKEY_PASSWORD', ''),
+          db: parseInt(config.get<string>('VALKEY_DB', '0'), 10),
+        },
+      }),
+    }),
+    BullBoardModule.forRoot({
+      route: '/queues',
+      boardOptions: {
+        uiConfig: { boardTitle: 'Wishlist App' },
+      },
+      adapter: ExpressAdapter,
+    }),
+    BullBoardModule.forFeature(
+      ...Object.values(QueueName).map(name => ({
+        name,
+        adapter: BullMQAdapter,
+      })),
+    ),
+  ],
+})
+export class QueueModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(BullBoardAuthMiddleware).forRoutes('/queues')
   }
 }

@@ -10,7 +10,7 @@ services:
 
   valkey:
     ports:
-      - "6379:6379"
+      - "6381:6379"
 
   adminer:
     image: adminer:5.4.1
