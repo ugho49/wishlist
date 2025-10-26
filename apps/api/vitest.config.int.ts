@@ -21,6 +21,11 @@ export default mergeConfig(
       coverage: {
         enabled: false,
       },
+      server: {
+        deps: {
+          inline: [/@nestjs/],
+        },
+      },
     },
   }),
 )
