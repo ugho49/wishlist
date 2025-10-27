@@ -73,7 +73,7 @@ export const WishlistPage = () => {
 
         {wishlist && (
           <>
-            <Title smallMarginBottom>
+            <Title>
               <Stack
                 direction="row"
                 gap={2}

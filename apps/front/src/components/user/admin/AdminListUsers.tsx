@@ -5,6 +5,8 @@ import type { FormEvent } from 'react'
 import { Avatar, Box, Button, Stack, styled, TextField } from '@mui/material'
 import { DataGrid } from '@mui/x-data-grid'
 import { useQuery } from '@tanstack/react-query'
+import { Card } from '@wishlist/front-components/common/Card'
+import { Title } from '@wishlist/front-components/common/Title'
 import { DateTime } from 'luxon'
 import { parseAsInteger, useQueryState } from 'nuqs'
 import { useEffect, useState } from 'react'
@@ -88,52 +90,56 @@ export const AdminListUsers = () => {
 
   return (
     <Box>
-      <Stack
-        direction="row"
-        justifyContent="space-between"
-        alignItems="center"
-        gap={2}
-        component="form"
-        noValidate
-        onSubmit={applySearch}
-        mb={5}
-      >
-        <TextField
-          size="small"
-          label="Rechercher un utilisateur"
-          fullWidth
-          placeholder="John Doe, john@doe.fr, john, etc..."
-          value={inputSearch}
-          onChange={e => setInputSearch(e.target.value)}
-        />
-        <SearchButton variant="outlined" type="submit" size="small">
-          Rechercher
-        </SearchButton>
-      </Stack>
+      <Title>Liste des utilisateurs</Title>
 
-      <DataGrid
-        isRowSelectable={() => true}
-        disableMultipleRowSelection={true}
-        disableColumnSelector={true}
-        isCellEditable={() => false}
-        localeText={{
-          noRowsLabel: 'Aucun utilisateur',
-        }}
-        onRowClick={data => navigate(`/admin/users/${data.row.id}`)}
-        density="standard"
-        rows={value?.resources || []}
-        loading={loading}
-        columns={columns}
-        paginationMode="server"
-        rowCount={totalElements}
-        paginationModel={{
-          page: currentPage - 1,
-          pageSize,
-        }}
-        pageSizeOptions={[pageSize]}
-        onPaginationModelChange={({ page }) => setCurrentPage(page + 1)}
-        hideFooter={totalElements <= pageSize}
-      />
+      <Card>
+        <Stack
+          direction="row"
+          justifyContent="space-between"
+          alignItems="center"
+          gap={2}
+          component="form"
+          noValidate
+          onSubmit={applySearch}
+          mb={5}
+        >
+          <TextField
+            size="small"
+            label="Rechercher un utilisateur"
+            fullWidth
+            placeholder="John Doe, john@doe.fr, john, etc..."
+            value={inputSearch}
+            onChange={e => setInputSearch(e.target.value)}
+          />
+          <SearchButton variant="outlined" type="submit" size="small">
+            Rechercher
+          </SearchButton>
+        </Stack>
+
+        <DataGrid
+          isRowSelectable={() => true}
+          disableMultipleRowSelection={true}
+          disableColumnSelector={true}
+          isCellEditable={() => false}
+          localeText={{
+            noRowsLabel: 'Aucun utilisateur',
+          }}
+          onRowClick={data => navigate(`/admin/users/${data.row.id}`)}
+          density="standard"
+          rows={value?.resources || []}
+          loading={loading}
+          columns={columns}
+          paginationMode="server"
+          rowCount={totalElements}
+          paginationModel={{
+            page: currentPage - 1,
+            pageSize,
+          }}
+          pageSizeOptions={[pageSize]}
+          onPaginationModelChange={({ page }) => setCurrentPage(page + 1)}
+          hideFooter={totalElements <= pageSize}
+        />
+      </Card>
     </Box>
   )
 }

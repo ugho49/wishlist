@@ -45,7 +45,7 @@ export const EditEventPage = () => {
 
   return (
     <Box>
-      <Title smallMarginBottom>Modifier l'évènement</Title>
+      <Title>Modifier l'évènement</Title>
       <Loader loading={loading}>
         {(!event || !currentUserCanEdit) && <EventNotFound />}
         {event && currentUserCanEdit && (

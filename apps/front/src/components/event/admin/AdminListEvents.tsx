@@ -1,9 +1,12 @@
 import type { GridColDef } from '@mui/x-data-grid'
 import type { EventWithCountsDto, UserId } from '@wishlist/common'
 
+import { Box } from '@mui/material'
 import { DataGrid } from '@mui/x-data-grid'
 import { useQuery } from '@tanstack/react-query'
 import { AttendeeRole } from '@wishlist/common'
+import { Card } from '@wishlist/front-components/common/Card'
+import { Title } from '@wishlist/front-components/common/Title'
 import { DateTime } from 'luxon'
 import { parseAsInteger, useQueryState } from 'nuqs'
 import { useEffect, useState } from 'react'
@@ -89,28 +92,34 @@ export const AdminListEvents = ({ userId }: AdminListEventsProps) => {
   }, [value, setCurrentPage])
 
   return (
-    <DataGrid
-      isRowSelectable={() => true}
-      disableMultipleRowSelection={true}
-      disableColumnSelector={true}
-      isCellEditable={() => false}
-      onRowClick={data => navigate(`/admin/events/${data.row.id}`)}
-      density="standard"
-      rows={value?.resources || []}
-      loading={loading}
-      columns={columns}
-      paginationMode="server"
-      localeText={{
-        noRowsLabel: 'Aucun évènement',
-      }}
-      rowCount={totalElements}
-      paginationModel={{
-        page: currentPage - 1,
-        pageSize,
-      }}
-      pageSizeOptions={[pageSize]}
-      onPaginationModelChange={({ page }) => setCurrentPage(page + 1)}
-      hideFooter={totalElements <= pageSize}
-    />
+    <Box>
+      <Title>Liste des évènements</Title>
+
+      <Card>
+        <DataGrid
+          isRowSelectable={() => true}
+          disableMultipleRowSelection={true}
+          disableColumnSelector={true}
+          isCellEditable={() => false}
+          onRowClick={data => navigate(`/admin/events/${data.row.id}`)}
+          density="standard"
+          rows={value?.resources || []}
+          loading={loading}
+          columns={columns}
+          paginationMode="server"
+          localeText={{
+            noRowsLabel: 'Aucun évènement',
+          }}
+          rowCount={totalElements}
+          paginationModel={{
+            page: currentPage - 1,
+            pageSize,
+          }}
+          pageSizeOptions={[pageSize]}
+          onPaginationModelChange={({ page }) => setCurrentPage(page + 1)}
+          hideFooter={totalElements <= pageSize}
+        />
+      </Card>
+    </Box>
   )
 }
