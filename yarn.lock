@@ -8256,15 +8256,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/ioredis@npm:5.0.0":
-  version: 5.0.0
-  resolution: "@types/ioredis@npm:5.0.0"
-  dependencies:
-    ioredis: "npm:*"
-  checksum: 10c0/e52ce4239f0334701fc95fb5aaf1753d75f7582099fdf152743192f49d9ee4a88478b339d015e50cb5e111e38925846cf20668355f4046af7855021d2be181f0
-  languageName: node
-  linkType: hard
-
 "@types/istanbul-lib-coverage@npm:*, @types/istanbul-lib-coverage@npm:^2.0.0, @types/istanbul-lib-coverage@npm:^2.0.1, @types/istanbul-lib-coverage@npm:^2.0.6":
   version: 2.0.6
   resolution: "@types/istanbul-lib-coverage@npm:2.0.6"
@@ -9263,7 +9254,6 @@ __metadata:
     "@tanstack/react-query-devtools": "npm:5.90.2"
     "@testing-library/react": "npm:16.3.0"
     "@types/bcrypt": "npm:6.0.0"
-    "@types/ioredis": "npm:5.0.0"
     "@types/lodash": "npm:4.17.20"
     "@types/luxon": "npm:3.7.1"
     "@types/mjml": "npm:4.7.4"
@@ -15217,7 +15207,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ioredis@npm:*, ioredis@npm:5.8.2, ioredis@npm:^5.4.1":
+"ioredis@npm:5.8.2, ioredis@npm:^5.4.1":
   version: 5.8.2
   resolution: "ioredis@npm:5.8.2"
   dependencies:
