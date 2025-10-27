@@ -1,4 +1,4 @@
-import { dirname } from 'path'
+import { dirname } from 'node:path'
 import { type CreateNodesV2, createNodesFromFiles } from '@nx/devkit'
 
 export type IntegrationTestsPluginOptions = {

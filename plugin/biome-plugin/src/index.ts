@@ -1,5 +1,5 @@
-import { existsSync } from 'fs'
-import { basename, dirname, join } from 'path'
+import { existsSync } from 'node:fs'
+import { basename, dirname, join } from 'node:path'
 import { type CreateNodesV2, createNodesFromFiles } from '@nx/devkit'
 
 export type BiomePluginOptions = {

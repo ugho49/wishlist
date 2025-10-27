@@ -7,6 +7,7 @@ import { BucketModule } from './bucket/bucket.module'
 import { DatabaseModule } from './database/database.module'
 import { HealthModule } from './health/health.module'
 import { MailModule } from './mail/mail.module'
+import { QueueModule } from './queue/queue.module'
 
 const bucketModule = BucketModule.registerAsync({
   inject: [ConfigService],
@@ -60,6 +61,6 @@ const databaseModule = DatabaseModule.registerAsync({
 
 @Global()
 @Module({
-  imports: [ScheduleModule.forRoot(), HealthModule, databaseModule, mailModule, bucketModule],
+  imports: [ScheduleModule.forRoot(), HealthModule, databaseModule, mailModule, bucketModule, QueueModule],
 })
 export class CoreModule {}

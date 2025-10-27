@@ -83,6 +83,11 @@ services:
       DB_USERNAME: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
       DB_NAME: ${DB_NAME}
+      VALKEY_HOST: "valkey"
+      VALKEY_PORT: 6379
+      VALKEY_PASSWORD: ""
+      VALKEY_DB: 0
+      VALKEY_KEY_PREFIX: "wishlist:"
       AUTH_ISSUER: "Wishlist API"
       AUTH_ACCESS_TOKEN_SECRET: ${AUTH_ACCESS_TOKEN_SECRET}
       AUTH_ACCESS_TOKEN_DURATION: ${AUTH_ACCESS_TOKEN_DURATION}
@@ -101,6 +106,7 @@ services:
       MAIL_TEMPLATE_DIR: "/usr/src/app/dist/apps/api/templates"
     depends_on:
       - "db"
+      - "valkey"
     healthcheck:
       test:
         [
@@ -149,6 +155,20 @@ services:
       - /opt/datadog-agent/run:/opt/datadog-agent/run:rw
       - /sys/fs/cgroup/:/host/sys/fs/cgroup:ro
 
+  valkey:
+    image: valkey/valkey:9.0-alpine
+    restart: always
+    expose:
+      - "6379:6379"
+    volumes:
+      - valkey-data:/data
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 2s
+      timeout: 5s
+      retries: 10
+
 volumes:
   db-data:
+  valkey-data:
   letsencrypt-data:
