@@ -19,5 +19,6 @@
   "prConcurrentLimit": 10,
   "circleci": {
     "managerFilePatterns": ["/.circleci/config.yml/", "/.circleci/continuation.yml/"]
-  }
+  },
+  "ignoreDeps": ["postgres", "prodrigestivill/postgres-backup-local", "valkey/valkey", "traefik"]
 }
