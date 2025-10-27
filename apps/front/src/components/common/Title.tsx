@@ -1,8 +1,7 @@
 import type { PropsWithChildren } from 'react'
 
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
-import { Box, IconButton, Stack, styled, useMediaQuery, useTheme } from '@mui/material'
-import clsx from 'clsx'
+import { Box, IconButton, Stack, type StackProps, styled, useMediaQuery, useTheme } from '@mui/material'
 
 import { useBackNavigation } from '../../hooks'
 
@@ -35,17 +34,15 @@ const BackButton = styled(IconButton)(({ theme }) => ({
   },
 }))
 
-export type TitleProps = {
-  smallMarginBottom?: boolean
-}
+export type TitleProps = StackProps & {}
 
-export const Title = ({ children, smallMarginBottom = false }: PropsWithChildren<TitleProps>) => {
+export const Title = ({ children, ...props }: PropsWithChildren<TitleProps>) => {
   const theme = useTheme()
   const isDesktop = useMediaQuery(theme.breakpoints.up('md'))
   const { canGoBack, handleGoBack } = useBackNavigation()
 
   return (
-    <TitleRoot direction="row" gap={1} className={clsx(smallMarginBottom && 'smallMarginBottom')}>
+    <TitleRoot direction="row" gap={1} {...props}>
       {canGoBack && isDesktop && (
         <BackButton onClick={handleGoBack} aria-label="go back" size="small">
           <ArrowBackIcon fontSize="small" />

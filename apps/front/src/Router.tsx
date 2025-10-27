@@ -16,6 +16,7 @@ import { AuthenticatedRouteGuard } from './components/common/router/guard/Authen
 import { AnonymousContainerOutlet } from './components/common/router/outlet/AnonymousContainerOutlet'
 import { AuthenticatedContainerOutlet } from './components/common/router/outlet/AuthenticatedContainerOutlet'
 import { AdminEventPage } from './components/event/admin/AdminEventPage'
+import { AdminListEvents } from './components/event/admin/AdminListEvents'
 import { CreateEventPage } from './components/event/CreateEventPage'
 import { EditEventPage } from './components/event/EditEventPage'
 import { EventListPage } from './components/event/EventListPage'
@@ -24,6 +25,7 @@ import { LandingPage } from './components/landing/LandingPage'
 import { PrivacyPolicyPage } from './components/legal/PrivacyPolicyPage'
 import { TermsOfServicePage } from './components/legal/TermsOfServicePage'
 import { WelcomePage } from './components/onboarding/WelcomePage'
+import { AdminListUsers } from './components/user/admin/AdminListUsers'
 import { AdminUserPage } from './components/user/admin/AdminUserPage'
 import { UserProfilePage } from './components/user/UserProfilePage'
 import { CreateWishlistPage } from './components/wishlist/CreateWishlistPage'
@@ -99,7 +101,9 @@ export const AppRouter = () => {
 
           <Route path="admin" element={<AdminRouteGuard />}>
             <Route index element={<AdminPage />} />
+            <Route path="users" element={<AdminListUsers />} />
             <Route path="users/:userId" element={<AdminUserPage />} />
+            <Route path="events" element={<AdminListEvents />} />
             <Route path="events/:eventId" element={<AdminEventPage />} />
           </Route>
         </Route>

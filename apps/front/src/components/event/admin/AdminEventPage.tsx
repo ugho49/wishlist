@@ -211,7 +211,7 @@ export const AdminEventPage = () => {
 
   return (
     <Box>
-      <Title smallMarginBottom>Editer l'évènement</Title>
+      <Title>Editer l'évènement</Title>
 
       <CardStack>
         <Card>

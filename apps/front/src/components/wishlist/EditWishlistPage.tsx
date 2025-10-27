@@ -37,7 +37,7 @@ export const EditWishlistPage = () => {
 
   return (
     <Box>
-      <Title smallMarginBottom>Modifier la liste</Title>
+      <Title>Modifier la liste</Title>
       <Loader loading={loading}>
         {(!wishlist || !currentUserCanEdit) && <WishlistNotFound />}
         {wishlist && currentUserCanEdit && (

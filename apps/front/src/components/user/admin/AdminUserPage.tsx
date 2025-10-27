@@ -138,7 +138,7 @@ export const AdminUserPage = () => {
 
   return (
     <Loader loading={loadingUser}>
-      <Title smallMarginBottom>Editer l'utilisateur</Title>
+      <Title>Editer l'utilisateur</Title>
 
       <UpdatePasswordModal
         userId={userId}
