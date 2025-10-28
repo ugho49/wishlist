@@ -10,6 +10,11 @@ export const brandedUuid = <T extends string>() =>
 
 export const timestampWithTimezone = (name: string) => timestamp(name, { withTimezone: true, mode: 'date' })
 
+export const timestamps = {
+  createdAt: timestampWithTimezone('created_at').defaultNow().notNull(),
+  updatedAt: timestampWithTimezone('updated_at').defaultNow().notNull(),
+}
+
 export const numericNullable = (name: string) =>
   customType<{ data: number | undefined; driverData: string | null }>({
     dataType: () => 'numeric',

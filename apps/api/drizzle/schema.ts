@@ -26,7 +26,7 @@ import {
   varchar,
 } from 'drizzle-orm/pg-core'
 
-import { brandedUuid, numericNullable, timestampWithTimezone } from './helpers'
+import { brandedUuid, numericNullable, timestamps, timestampWithTimezone } from './helpers'
 
 // Custom branded UUID types
 const eventId = brandedUuid<EventId>()
@@ -46,8 +46,7 @@ export const event = pgTable('event', {
   description: text(),
   icon: varchar({ length: 10 }),
   eventDate: date('event_date').notNull(),
-  createdAt: timestampWithTimezone('created_at').defaultNow().notNull(),
-  updatedAt: timestampWithTimezone('updated_at').defaultNow().notNull(),
+  ...timestamps,
 })
 
 export const eventAttendee = pgTable(
@@ -60,14 +59,8 @@ export const eventAttendee = pgTable(
     role: varchar({ length: 50 }).default('user').notNull(),
   },
   table => [
-    foreignKey({
-      columns: [table.eventId],
-      foreignColumns: [event.id],
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [table.userId],
-      foreignColumns: [user.id],
-    }).onDelete('cascade'),
+    foreignKey({ columns: [table.eventId], foreignColumns: [event.id] }).onDelete('cascade'),
+    foreignKey({ columns: [table.userId], foreignColumns: [user.id] }).onDelete('cascade'),
     unique('event_attendee_event_id_user_id_temp_user_email_key').on(table.eventId, table.userId, table.tempUserEmail),
     check(
       'chk_user',
@@ -83,8 +76,7 @@ export const userPasswordVerification = pgTable(
     userId: userId('user_id').notNull(),
     token: varchar({ length: 200 }).notNull(),
     expiredAt: timestampWithTimezone('expired_at').notNull(),
-    createdAt: timestampWithTimezone('created_at').defaultNow().notNull(),
-    updatedAt: timestampWithTimezone('updated_at').defaultNow().notNull(),
+    ...timestamps,
   },
   table => [
     foreignKey({
@@ -101,8 +93,7 @@ export const userEmailSetting = pgTable(
     id: userEmailSettingId().primaryKey().notNull(),
     userId: userId('user_id').notNull(),
     dailyNewItemNotification: boolean('daily_new_item_notification').default(true).notNull(),
-    createdAt: timestampWithTimezone('created_at').defaultNow().notNull(),
-    updatedAt: timestampWithTimezone('updated_at').defaultNow().notNull(),
+    ...timestamps,
   },
   table => [
     foreignKey({
@@ -124,15 +115,12 @@ export const userSocial = pgTable(
     socialId: varchar('social_id', { length: 1000 }).notNull(),
     socialType: varchar('social_type', { length: 50 }).notNull(),
     pictureUrl: varchar('picture_url', { length: 1000 }),
-    createdAt: timestampWithTimezone('created_at').defaultNow().notNull(),
-    updatedAt: timestampWithTimezone('updated_at').defaultNow().notNull(),
+    ...timestamps,
   },
   table => [
-    foreignKey({
-      columns: [table.userId],
-      foreignColumns: [user.id],
-      name: 'user_social_user_id_fkey',
-    }).onDelete('cascade'),
+    foreignKey({ columns: [table.userId], foreignColumns: [user.id], name: 'user_social_user_id_fkey' }).onDelete(
+      'cascade',
+    ),
     unique('user_social_user_id_social_type_key').on(table.userId, table.socialType),
     unique('user_social_social_id_social_type_key').on(table.socialId, table.socialType),
   ],
@@ -151,9 +139,8 @@ export const user = pgTable(
     authorities: varchar({ length: 100 }).array().default(['ROLE_USER']).notNull(),
     lastIp: varchar('last_ip', { length: 50 }),
     lastConnectedAt: timestampWithTimezone('last_connected_at'),
-    createdAt: timestampWithTimezone('created_at').defaultNow().notNull(),
-    updatedAt: timestampWithTimezone('updated_at').defaultNow().notNull(),
     pictureUrl: varchar('picture_url', { length: 1000 }),
+    ...timestamps,
   },
   _ => [uniqueIndex('user_email_unique_idx').using('btree', sql`lower((email)::text)`)],
 )
@@ -166,16 +153,10 @@ export const wishlist = pgTable(
     description: text(),
     ownerId: userId('owner_id').notNull(),
     hideItems: boolean('hide_items').default(true).notNull(),
-    createdAt: timestampWithTimezone('created_at').defaultNow().notNull(),
-    updatedAt: timestampWithTimezone('updated_at').defaultNow().notNull(),
     logoUrl: varchar('logo_url', { length: 1000 }),
+    ...timestamps,
   },
-  table => [
-    foreignKey({
-      columns: [table.ownerId],
-      foreignColumns: [user.id],
-    }).onDelete('cascade'),
-  ],
+  table => [foreignKey({ columns: [table.ownerId], foreignColumns: [user.id] }).onDelete('cascade')],
 )
 
 export const item = pgTable(
@@ -192,22 +173,12 @@ export const item = pgTable(
     importSourceId: itemId('import_source_id'),
     takerId: userId('taker_id'),
     takenAt: timestampWithTimezone('taken_at'),
-    createdAt: timestampWithTimezone('created_at').defaultNow().notNull(),
-    updatedAt: timestampWithTimezone('updated_at').defaultNow().notNull(),
+    ...timestamps,
   },
   table => [
-    foreignKey({
-      columns: [table.wishlistId],
-      foreignColumns: [wishlist.id],
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [table.takerId],
-      foreignColumns: [user.id],
-    }).onDelete('set null'),
-    foreignKey({
-      columns: [table.importSourceId],
-      foreignColumns: [table.id],
-    }).onDelete('set null'),
+    foreignKey({ columns: [table.wishlistId], foreignColumns: [wishlist.id] }).onDelete('cascade'),
+    foreignKey({ columns: [table.takerId], foreignColumns: [user.id] }).onDelete('set null'),
+    foreignKey({ columns: [table.importSourceId], foreignColumns: [table.id] }).onDelete('set null'),
     check('chk_import_source_id', sql`import_source_id IS DISTINCT FROM id`),
   ],
 )
@@ -220,14 +191,10 @@ export const secretSanta = pgTable(
     description: text(),
     budget: numericNullable('budget'),
     status: varchar({ length: 20 }).notNull(),
-    createdAt: timestampWithTimezone('created_at').defaultNow().notNull(),
-    updatedAt: timestampWithTimezone('updated_at').defaultNow().notNull(),
+    ...timestamps,
   },
   table => [
-    foreignKey({
-      columns: [table.eventId],
-      foreignColumns: [event.id],
-    }).onDelete('cascade'),
+    foreignKey({ columns: [table.eventId], foreignColumns: [event.id] }).onDelete('cascade'),
     unique().on(table.eventId),
   ],
 )
@@ -240,22 +207,12 @@ export const secretSantaUser = pgTable(
     attendeeId: attendeeId('attendee_id').notNull(),
     drawUserId: secretSantaUserId('draw_user_id'),
     exclusions: secretSantaUserId().array().default([]).notNull(),
-    createdAt: timestampWithTimezone('created_at').defaultNow().notNull(),
-    updatedAt: timestampWithTimezone('updated_at').defaultNow().notNull(),
+    ...timestamps,
   },
   table => [
-    foreignKey({
-      columns: [table.secretSantaId],
-      foreignColumns: [secretSanta.id],
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [table.drawUserId],
-      foreignColumns: [table.id],
-    }).onDelete('set null'),
-    foreignKey({
-      columns: [table.attendeeId],
-      foreignColumns: [eventAttendee.id],
-    }),
+    foreignKey({ columns: [table.secretSantaId], foreignColumns: [secretSanta.id] }).onDelete('cascade'),
+    foreignKey({ columns: [table.drawUserId], foreignColumns: [table.id] }).onDelete('set null'),
+    foreignKey({ columns: [table.attendeeId], foreignColumns: [eventAttendee.id] }),
     uniqueIndex('secret_santa_user_secret_santa_id_attendee_id_key').on(table.secretSantaId, table.attendeeId),
   ],
 )
@@ -268,13 +225,7 @@ export const eventWishlist = pgTable(
   },
   table => [
     primaryKey({ columns: [table.eventId, table.wishlistId] }),
-    foreignKey({
-      columns: [table.wishlistId],
-      foreignColumns: [wishlist.id],
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [table.eventId],
-      foreignColumns: [event.id],
-    }).onDelete('cascade'),
+    foreignKey({ columns: [table.wishlistId], foreignColumns: [wishlist.id] }).onDelete('cascade'),
+    foreignKey({ columns: [table.eventId], foreignColumns: [event.id] }).onDelete('cascade'),
   ],
 )
