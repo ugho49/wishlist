@@ -39,8 +39,8 @@ function isEventInChristmasPeriod(eventDate: DateTime): boolean {
     return true
   }
 
-  // January 1
-  if (month === 1 && day === 1) {
+  // January 1 - 15
+  if (month === 1 && day <= 15) {
     return true
   }
 
@@ -48,14 +48,104 @@ function isEventInChristmasPeriod(eventDate: DateTime): boolean {
 }
 
 /**
- * Check if title contains Christmas-related keywords (case-insensitive)
+ * Compute a simple similarity score between two strings (0–1)
+ * using normalized Levenshtein distance
  */
-function containsChristmasKeyword(title: string): boolean {
-  const christmasKeywords = ['noel', 'noël', 'christmas', 'xmas']
+function stringSimilarity(a: string, b: string): number {
+  if (a === b) return 1
+  const m = a.length,
+    n = b.length
+  if (m === 0 || n === 0) return 0
 
-  const normalizedTitle = title.toLowerCase()
+  const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0))
 
-  return christmasKeywords.some(keyword => normalizedTitle.includes(keyword))
+  for (let i = 0; i <= m; i++) dp[i]![0] = i
+  for (let j = 0; j <= n; j++) dp[0]![j]! = j
+
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1
+      dp[i]![j]! = Math.min(
+        dp[i - 1]![j]! + 1, // deletion
+        dp[i]![j - 1]! + 1, // insertion
+        dp[i - 1]![j - 1]! + cost, // substitution
+      )
+    }
+  }
+
+  const distance = dp[m]![n]!
+  return 1 - distance / Math.max(m, n)
+}
+
+/**
+ * Check if a title contains Christmas-related keywords
+ * using accent-insensitive, case-insensitive and fuzzy matching.
+ */
+export function containsChristmasKeyword(title: string): boolean {
+  if (!title) return false
+
+  // Keywords: avoid overly generic ones like 'holiday' that cause false positives.
+  const christmasKeywords = [
+    'noel',
+    'noël',
+    'christmas',
+    'xmas',
+    'x-mas',
+    'navidad',
+    'natale',
+    'weihnachten',
+    'santa',
+    'santa claus',
+    'santaclaus',
+    'pere noel',
+    'père noël',
+    'sapin',
+    'advent',
+    'avent',
+    'réveillon',
+    'calendrier de l avent',
+    'calendrier',
+  ]
+
+  // 1) Normalize: lowercase + decompose accents + remove diacritics
+  const normalized = title
+    .replace(/([a-z])([A-Z])/g, '$1 $2') // split camelCase like "SantaClaus" -> "Santa Claus"
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+
+  // 2) Create a "collapsed" version without non-alphanumerics to catch spaced/ dashed variants
+  const collapsed = normalized.replace(/[^a-z0-9]/g, '') // e.g. "x mas" -> "xmas", "santaclaus" -> "santaclaus"
+
+  // 3) Tokenize into words using Unicode letters/numbers
+  const words = normalized.match(/\p{L}[\p{L}\p{N}-]*/gu) ?? []
+
+  for (const rawKeyword of christmasKeywords) {
+    const kw = rawKeyword
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/\p{Diacritic}/gu, '')
+
+    const kwCollapsed = kw.replace(/[^a-z0-9]/g, '')
+
+    // Collapsed inclusion: catches "x mas", "x-mas", "SantaClaus", etc.
+    if (kwCollapsed && collapsed.includes(kwCollapsed)) return true
+
+    // Word-level heuristics: startsWith / include (to accept "noellish")
+    for (const w of words) {
+      if (w === kw) return true
+      if (w.startsWith(kw) || kw.startsWith(w)) return true
+    }
+
+    // Fuzzy match (only if nothing above matched) with dynamic threshold:
+    // shorter keywords allow slightly lower threshold
+    const threshold = kw.length <= 4 ? 0.7 : 0.8
+    for (const w of words) {
+      if (stringSimilarity(w, kw) >= threshold) return true
+    }
+  }
+
+  return false
 }
 
 interface UseSecretSantaSuggestionProps {
