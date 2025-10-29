@@ -45,7 +45,7 @@
         "noInferrableTypes": "error",
         "useTemplate": "warn",
         "noUnusedTemplateLiteral": "error",
-        "noMagicNumbers": "warn",
+        "noMagicNumbers": "off",
         "noNegationElse": "error",
         "noNestedTernary": "error",
         "noParameterAssign": "error",

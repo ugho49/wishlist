@@ -13,13 +13,13 @@ import type { CommonRequestOptions } from './common'
 export class SecretSantaService {
   constructor(private readonly client: AxiosInstance) {}
 
-  getMyDraw(eventId: string, options?: CommonRequestOptions): Promise<AttendeeDto | null> {
+  getMyDraw(eventId: string, options?: CommonRequestOptions): Promise<AttendeeDto | undefined> {
     return this.client
       .get('/secret-santa/user/draw', { params: { eventId }, signal: options?.signal })
       .then(res => res.data)
   }
 
-  get(eventId: string, options?: CommonRequestOptions): Promise<SecretSantaDto | null> {
+  get(eventId: string, options?: CommonRequestOptions): Promise<SecretSantaDto | undefined> {
     return this.client.get('/secret-santa', { params: { eventId }, signal: options?.signal }).then(res => res.data)
   }
 
