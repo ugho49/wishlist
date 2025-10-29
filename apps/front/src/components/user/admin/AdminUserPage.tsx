@@ -10,10 +10,11 @@ import { Box, Button, List, ListItem, ListItemIcon, ListItemText, Stack, TextFie
 import { styled, useTheme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import { useQuery } from '@tanstack/react-query'
+import { useNavigate, useSearch } from '@tanstack/react-router'
+import { AdminListEvents } from '@wishlist/front-components/event/admin/AdminListEvents'
 import { DateTime } from 'luxon'
 import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
-import { useParams } from 'react-router-dom'
 
 import { useApi, useToast } from '../../../hooks'
 import { Card } from '../../common/Card'
@@ -23,7 +24,6 @@ import { WishlistDatePicker } from '../../common/DatePicker'
 import { Loader } from '../../common/Loader'
 import { Subtitle } from '../../common/Subtitle'
 import { Title } from '../../common/Title'
-import { AdminListEvents } from '../../event/admin/AdminListEvents'
 import { AdminListWishlistsForUser } from '../../wishlist/admin/AdminListWishlistsForUser'
 import { AvatarUpdateButton } from '../AvatarUpdateButton'
 import { UpdatePasswordModal } from './UpdatePasswordModal'
@@ -53,11 +53,13 @@ const CardStack = styled(Stack)(() => ({
   gap: 32,
 }))
 
-export const AdminUserPage = () => {
+interface AdminUserPageProps {
+  userId: UserId
+}
+
+export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
   const { addToast } = useToast()
   const { user: currentUser } = useSelector(mapState)
-  const params = useParams<'userId'>()
-  const userId = (params.userId || '') as UserId
   const { admin: api } = useApi()
   const theme = useTheme()
   const smallScreen = useMediaQuery(theme.breakpoints.down('md'))
@@ -69,6 +71,12 @@ export const AdminUserPage = () => {
   const [enabled, setEnabled] = useState(true)
   const [birthday, setBirthday] = useState<DateTime | null>(null)
   const [updatePasswordModalOpen, setUpdatePasswordModalOpen] = useState(false)
+  const { eventPage } = useSearch({ from: '/_authenticated/_with-layout/admin/users/$userId' })
+  const navigate = useNavigate()
+
+  const changeEventPage = (page: number) => {
+    void navigate({ to: '/admin/users/$userId', params: { userId }, search: prev => ({ ...prev, eventPage: page }) })
+  }
 
   const { data: value, isLoading: loadingUser } = useQuery({
     queryKey: ['admin', 'user', { id: userId }],
@@ -322,7 +330,7 @@ export const AdminUserPage = () => {
 
         <Card>
           <Subtitle>Evènements</Subtitle>
-          <AdminListEvents userId={userId} />
+          <AdminListEvents userId={userId} currentPage={eventPage} changeCurrentPage={changeEventPage} />
         </Card>
 
         <Card>

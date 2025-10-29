@@ -62,13 +62,13 @@ const AddListButton = styled(Button)(({ theme }) => ({
 }))
 
 export type EmptyListsStateProps = {
-  addListRoute: string
   title: string
   subtitle: string
   sx?: SxProps<Theme>
+  onAddListClick: () => void
 }
 
-export const EmptyListsState = ({ addListRoute, sx }: EmptyListsStateProps) => {
+export const EmptyListsState = ({ onAddListClick, sx }: EmptyListsStateProps) => {
   return (
     <EmptyStateContainer sx={sx}>
       <IllustrationWrapper>
@@ -82,7 +82,7 @@ export const EmptyListsState = ({ addListRoute, sx }: EmptyListsStateProps) => {
         </EmptyStateSubtitle>
       </Box>
 
-      <AddListButton variant="contained" color="primary" href={addListRoute} startIcon={<AddIcon />}>
+      <AddListButton variant="contained" color="primary" onClick={() => onAddListClick()} startIcon={<AddIcon />}>
         Ajouter ma liste
       </AddListButton>
     </EmptyStateContainer>

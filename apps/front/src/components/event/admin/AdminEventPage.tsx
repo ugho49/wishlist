@@ -23,7 +23,6 @@ import { EmojiSelectorWithBadge } from '@wishlist/front-components/common/EmojiS
 import { DateTime } from 'luxon'
 import { useEffect, useMemo } from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import { useParams } from 'react-router-dom'
 import z from 'zod'
 
 import { useApi, useToast } from '../../../hooks'
@@ -51,9 +50,11 @@ const schema = z.object({
 
 type FormFields = z.infer<typeof schema>
 
-export const AdminEventPage = () => {
-  const params = useParams<'eventId'>()
-  const eventId = (params.eventId || '') as EventId
+interface AdminEventPageProps {
+  eventId: EventId
+}
+
+export const AdminEventPage = ({ eventId }: AdminEventPageProps) => {
   const queryClient = useQueryClient()
   const { admin: api } = useApi()
   const { addToast } = useToast()

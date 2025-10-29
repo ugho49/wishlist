@@ -7,7 +7,7 @@ import ShareIcon from '@mui/icons-material/Share'
 import { Box, Tab, Tabs } from '@mui/material'
 import { styled, useTheme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
-import { useQueryState } from 'nuqs'
+import { useNavigate, useSearch } from '@tanstack/react-router'
 import { useSelector } from 'react-redux'
 
 import { Card } from '../common/Card'
@@ -43,7 +43,7 @@ const Email = styled(Box)(({ theme }) => ({
   color: theme.palette.text.secondary,
 }))
 
-enum TabValues {
+export enum TabValues {
   informations = 'informations',
   notifications = 'notifications',
   social = 'social',
@@ -77,7 +77,8 @@ const mapState = (state: RootState) => state.userProfile
 
 export const UserProfilePage = () => {
   const theme = useTheme()
-  const [tab, setTab] = useQueryState('tab', { defaultValue: TabValues.informations })
+  const { tab } = useSearch({ from: '/_authenticated/_with-layout/user/profile' })
+  const navigate = useNavigate({ from: '/user/profile' })
   const smallScreen = useMediaQuery(theme.breakpoints.down('sm'))
   const userState = useSelector(mapState)
 
@@ -97,7 +98,7 @@ export const UserProfilePage = () => {
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }} mb={4}>
         <Tabs
           value={tab}
-          onChange={(_, newValue) => setTab(newValue)}
+          onChange={(_, newValue) => navigate({ search: { tab: newValue as TabValues } })}
           variant="fullWidth"
           scrollButtons="auto"
           allowScrollButtonsMobile

@@ -23,11 +23,11 @@ import {
   TextField,
 } from '@mui/material'
 import { useMutation } from '@tanstack/react-query'
+import { useNavigate } from '@tanstack/react-router'
 import { AttendeeRole } from '@wishlist/common'
 import { useMemo, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { useSelector } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
 import { z } from 'zod'
 
 import { useApi } from '../../hooks/useApi'
@@ -116,7 +116,7 @@ export const CreateEventPage = () => {
     onSuccess: output => {
       addToast({ message: 'Evènement créé avec succès', variant: 'success' })
 
-      navigate(`/events/${output.id}`)
+      void navigate({ to: '/events/$eventId', params: { eventId: output.id } })
     },
   })
 

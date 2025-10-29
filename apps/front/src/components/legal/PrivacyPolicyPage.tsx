@@ -1,7 +1,7 @@
 import { ArrowBack } from '@mui/icons-material'
 import { Box, Button, Container, Divider, Typography } from '@mui/material'
 import { styled } from '@mui/material/styles'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from '@tanstack/react-router'
 
 const PageContainer = styled(Box)(({ theme }) => ({
   minHeight: '100vh',
@@ -77,7 +77,7 @@ export const PrivacyPolicyPage = () => {
   return (
     <PageContainer>
       <ContentWrapper maxWidth="md">
-        <BackButton startIcon={<ArrowBack />} onClick={() => navigate('/')} variant="text">
+        <BackButton startIcon={<ArrowBack />} onClick={() => navigate({ to: '/' })} variant="text">
           Retour à l'accueil
         </BackButton>
 

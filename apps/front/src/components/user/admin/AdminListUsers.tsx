@@ -5,12 +5,11 @@ import type { FormEvent } from 'react'
 import { Avatar, Box, Button, Stack, styled, TextField } from '@mui/material'
 import { DataGrid } from '@mui/x-data-grid'
 import { useQuery } from '@tanstack/react-query'
+import { useNavigate, useSearch } from '@tanstack/react-router'
 import { Card } from '@wishlist/front-components/common/Card'
 import { Title } from '@wishlist/front-components/common/Title'
 import { DateTime } from 'luxon'
-import { parseAsInteger, useQueryState } from 'nuqs'
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 
 import { useApi } from '../../../hooks'
 import { Status } from '../../common/Status'
@@ -65,9 +64,8 @@ export const AdminListUsers = () => {
   const { admin: api } = useApi()
   const [totalElements, setTotalElements] = useState(0)
   const [pageSize, setPageSize] = useState(0)
-  const [currentPage, setCurrentPage] = useQueryState('page', parseAsInteger.withDefault(1))
-  const [inputSearch, setInputSearch] = useState('')
-  const [search, setSearch] = useState('')
+  const { page: currentPage, search } = useSearch({ from: '/_authenticated/_with-layout/admin/users/' })
+  const [inputSearch, setInputSearch] = useState(search)
   const navigate = useNavigate()
 
   const { data: value, isLoading: loading } = useQuery({
@@ -78,14 +76,16 @@ export const AdminListUsers = () => {
   useEffect(() => {
     if (value) {
       setTotalElements(value.pagination.total_elements)
-      setCurrentPage(value.pagination.page_number)
       setPageSize(value.pagination.pages_size)
     }
-  }, [value, setCurrentPage])
+  }, [value])
 
   const applySearch = (e: FormEvent) => {
     e.preventDefault()
-    setSearch(inputSearch)
+    void navigate({
+      to: '/admin/users',
+      search: prev => ({ ...prev, page: 1, search: inputSearch }),
+    })
   }
 
   return (
@@ -124,7 +124,7 @@ export const AdminListUsers = () => {
           localeText={{
             noRowsLabel: 'Aucun utilisateur',
           }}
-          onRowClick={data => navigate(`/admin/users/${data.row.id}`)}
+          onRowClick={data => navigate({ to: '/admin/users/$userId', params: { userId: data.row.id } })}
           density="standard"
           rows={value?.resources || []}
           loading={loading}
@@ -136,7 +136,12 @@ export const AdminListUsers = () => {
             pageSize,
           }}
           pageSizeOptions={[pageSize]}
-          onPaginationModelChange={({ page }) => setCurrentPage(page + 1)}
+          onPaginationModelChange={({ page }) =>
+            navigate({
+              to: '/admin/users',
+              search: prev => ({ ...prev, page: page + 1, search }),
+            })
+          }
           hideFooter={totalElements <= pageSize}
         />
       </Card>

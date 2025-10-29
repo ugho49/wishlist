@@ -62,11 +62,11 @@ const AddEventButton = styled(Button)(({ theme }) => ({
 }))
 
 export type EmptyEventsStateProps = {
-  addEventRoute: string
+  onAddEventClick: () => void
   sx?: SxProps<Theme>
 }
 
-export const EmptyEventsState = ({ addEventRoute, sx }: EmptyEventsStateProps) => {
+export const EmptyEventsState = ({ onAddEventClick, sx }: EmptyEventsStateProps) => {
   return (
     <EmptyStateContainer sx={sx}>
       <IllustrationWrapper>
@@ -80,7 +80,7 @@ export const EmptyEventsState = ({ addEventRoute, sx }: EmptyEventsStateProps) =
         </EmptyStateSubtitle>
       </Box>
 
-      <AddEventButton variant="contained" color="primary" href={addEventRoute} startIcon={<AddIcon />}>
+      <AddEventButton variant="contained" color="primary" onClick={() => onAddEventClick()} startIcon={<AddIcon />}>
         Créer un événement
       </AddEventButton>
     </EmptyStateContainer>

@@ -1,8 +1,8 @@
 import { Box, Container, containerClasses, styled, useMediaQuery, useTheme } from '@mui/material'
+import { Outlet } from '@tanstack/react-router'
 import { useFetchUserInfo } from '@wishlist/front-hooks'
 import { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
-import { Outlet } from 'react-router-dom'
 
 import { setUser } from '../../../../core/store/features'
 import { useProfilePicturePrompt } from '../../../../hooks/useProfilePicturePrompt'

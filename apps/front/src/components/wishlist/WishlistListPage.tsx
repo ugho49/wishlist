@@ -1,7 +1,7 @@
 import AddIcon from '@mui/icons-material/Add'
 import { Box, Grid } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
-import { parseAsInteger, useQueryState } from 'nuqs'
+import { useNavigate, useSearch } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 
 import { useApi } from '../../hooks/useApi'
@@ -12,22 +12,23 @@ import { Title } from '../common/Title'
 import { EmptyListsState } from './EmptyListsState'
 import { WishlistCardWithEvents } from './WishlistCardWithEvents'
 
-const CREATE_LIST_ROUTE = '/wishlists/new'
-
 export const WishlistListPage = () => {
   const api = useApi()
   const [totalElements, setTotalElements] = useState(0)
-  const [currentPage, setCurrentPage] = useQueryState('page', parseAsInteger.withDefault(1))
+  const { page: currentPage } = useSearch({ from: '/_authenticated/_with-layout/wishlists/' })
   const { data: value, isLoading: loading } = useQuery({
     queryKey: ['wishlists', { page: currentPage }],
     queryFn: ({ signal }) => api.wishlist.getAll({ p: currentPage }, { signal }),
   })
+  const navigate = useNavigate()
 
   useEffect(() => {
     if (value) {
       setTotalElements(value.pagination.total_elements)
     }
   }, [value])
+
+  const handleAddList = () => navigate({ to: '/wishlists/new' })
 
   return (
     <Box>
@@ -50,17 +51,17 @@ export const WishlistListPage = () => {
             currentPage={currentPage}
             disabled={loading}
             hide={value?.pagination.total_pages === 1}
-            onChange={value => setCurrentPage(value)}
+            onChange={value => navigate({ from: '/wishlists', search: prev => ({ ...prev, page: value }) })}
           />
 
-          <FabAutoGrow label="Créer une liste" icon={<AddIcon />} color="primary" to={CREATE_LIST_ROUTE} />
+          <FabAutoGrow label="Créer une liste" icon={<AddIcon />} color="primary" onClick={() => handleAddList()} />
         </>
       )}
 
       {totalElements === 0 && !loading && (
         <EmptyListsState
           sx={{ marginTop: '100px' }}
-          addListRoute={CREATE_LIST_ROUTE}
+          onAddListClick={() => handleAddList()}
           title="Aucune liste pour le moment"
           subtitle="Créez votre première liste de souhaits et partagez vos envies !"
         />

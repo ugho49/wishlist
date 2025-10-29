@@ -37,7 +37,7 @@ const columns: GridColDef<WishlistWithEventsDto>[] = [
       return (
         <Stack gap={1} direction="row">
           {row.events.map(event => (
-            <RouterLink key={event.id} to={`/admin/events/${event.id}`}>
+            <RouterLink key={event.id} to="/admin/events/$eventId" params={{ eventId: event.id }}>
               {event.title}
             </RouterLink>
           ))}

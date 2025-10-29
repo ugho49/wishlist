@@ -3,10 +3,10 @@ import type { RootState } from '../../core'
 
 import PublicIcon from '@mui/icons-material/Public'
 import { Avatar, styled, Typography } from '@mui/material'
+import { useNavigate } from '@tanstack/react-router'
 import clsx from 'clsx'
 import { DateTime } from 'luxon'
 import { useSelector } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
 
 import { Card } from '../common/Card'
 import { EventIcon } from '../event/EventIcon'
@@ -158,7 +158,7 @@ export const WishlistCardWithEvents = ({ wishlist }: WishlistCardWithEventsProps
 
   return (
     <WishlistCardContent
-      onClick={() => navigate(`/wishlists/${wishlist.id}`)}
+      onClick={() => navigate({ to: '/wishlists/$wishlistId', params: { wishlistId: wishlist.id } })}
       className={clsx(past && 'disabled', 'animated fadeIn fast')}
       hoverable
     >

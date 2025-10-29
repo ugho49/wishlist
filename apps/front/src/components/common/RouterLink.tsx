@@ -1,13 +1,26 @@
-import type { LinkProps } from '@mui/material/Link'
-import type { LinkProps as ReactRouterLinkProps } from 'react-router-dom'
+import type { LinkComponent } from '@tanstack/react-router'
 
 import { Link } from '@mui/material'
-import { forwardRef } from 'react'
-import { Link as ReactRouterLink } from 'react-router-dom'
+import { Link as TanStackLink } from '@tanstack/react-router'
 
-type RouterLinkProps = Omit<ReactRouterLinkProps & LinkProps, 'href'>
-
-export const RouterLink = forwardRef<HTMLAnchorElement, RouterLinkProps>(function RouterLink(props, ref) {
-  const { to, ...other } = props
-  return <Link ref={ref} to={to} {...other} component={ReactRouterLink} />
-})
+/**
+ * RouterLink component that combines MUI Link styling with TanStack Router navigation.
+ * Provides full TypeScript autocompletion for routes, params, and search parameters.
+ * The `search` and `params` props are typed based on the `to` route.
+ *
+ * @example
+ * // Simple navigation
+ * <RouterLink to="/events">Events</RouterLink>
+ *
+ * @example
+ * // With route parameters - params are typed based on the route
+ * <RouterLink to="/events/$eventId" params={{ eventId: '123' }}>View Event</RouterLink>
+ *
+ * @example
+ * // With search parameters - search is typed based on the route definition
+ * <RouterLink to="/login" search={{ redirectUrl: '/events' }}>Login</RouterLink>
+ */
+export const RouterLink: LinkComponent<typeof Link> = props => {
+  // biome-ignore lint/suspicious/noExplicitAny: MUI component prop type incompatibility with TanStack Router Link
+  return <Link {...(props as any)} component={TanStackLink} />
+}

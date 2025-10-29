@@ -2,7 +2,7 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import GroupsIcon from '@mui/icons-material/Groups'
 import ManageHistoryIcon from '@mui/icons-material/ManageHistory'
 import { Box, Grid, styled, Typography } from '@mui/material'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from '@tanstack/react-router'
 
 import { environment } from '../../environment'
 import { Card } from '../common/Card'
@@ -40,14 +40,14 @@ export const AdminPage = () => {
       title: 'Utilisateurs',
       description: 'Gérer les utilisateurs de la plateforme',
       icon: <GroupsIcon />,
-      onClick: () => navigate('/admin/users'),
+      onClick: () => navigate({ to: '/admin/users' }),
     },
     {
       id: 'events',
       title: 'Évènements',
       description: 'Gérer les évènements créés',
       icon: <CalendarMonthIcon />,
-      onClick: () => navigate('/admin/events'),
+      onClick: () => navigate({ to: '/admin/events' }),
     },
     {
       id: 'queues',

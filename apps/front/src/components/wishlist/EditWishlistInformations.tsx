@@ -5,9 +5,9 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import SaveIcon from '@mui/icons-material/Save'
 import { Box, Button, Stack, TextField } from '@mui/material'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useNavigate } from '@tanstack/react-router'
 import { useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { useNavigate } from 'react-router-dom'
 import { z } from 'zod'
 
 import { useApi } from '../../hooks/useApi'
@@ -104,7 +104,7 @@ export const EditWishlistInformations = ({ wishlist }: EditWishlistInformationsP
     try {
       await handleDelete()
       addToast({ message: 'La liste à bien été supprimée', variant: 'success' })
-      navigate('/wishlists')
+      void navigate({ to: '/wishlists' })
     } catch {
       addToast({ message: "Une erreur s'est produite", variant: 'error' })
     }

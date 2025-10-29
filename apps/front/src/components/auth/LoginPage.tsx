@@ -4,17 +4,16 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import LoginIcon from '@mui/icons-material/Login'
 import { Alert, Button, Divider, Stack, styled, TextField, Typography } from '@mui/material'
 import { useMutation } from '@tanstack/react-query'
+import { useNavigate, useSearch } from '@tanstack/react-router'
 import { AxiosError } from 'axios'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useDispatch } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
 import { z } from 'zod'
 
 import { setTokens } from '../../core/store/features'
 import { useApi } from '../../hooks/useApi'
 import { useToast } from '../../hooks/useToast'
-import { getUrlParameter } from '../../utils/router.utils'
 import { RouterLink } from '../common/RouterLink'
 import { GoogleButton } from './GoogleButton'
 
@@ -55,7 +54,7 @@ export const LoginPage = () => {
   const { addToast } = useToast()
   const [socialLoading, setSocialLoading] = useState(false)
   const navigate = useNavigate()
-  const redirectUrl = getUrlParameter('redirectUrl') || '/'
+  const { redirectUrl, email: emailFromSearch } = useSearch({ from: '/_anonymous-with-layout/login' })
   const {
     register,
     setError,
@@ -63,7 +62,7 @@ export const LoginPage = () => {
     formState: { isSubmitting, errors: formErrors },
   } = useForm<FormFields>({
     resolver: zodResolver(schema),
-    defaultValues: { email: getUrlParameter('email') || '' },
+    defaultValues: { email: emailFromSearch || '' },
   })
 
   const handleLoginSuccess = (param: LoginOutputDto) => {
@@ -75,7 +74,7 @@ export const LoginPage = () => {
       }),
     )
 
-    navigate(redirectUrl)
+    void navigate({ to: redirectUrl })
   }
 
   const onSocialError = () => {

@@ -2,8 +2,8 @@ import type { RootState } from '../../core'
 
 import MenuIcon from '@mui/icons-material/Menu'
 import { BottomNavigation, BottomNavigationAction, bottomNavigationActionClasses, Paper, styled } from '@mui/material'
+import { useLocation, useNavigate } from '@tanstack/react-router'
 import { useDispatch, useSelector } from 'react-redux'
-import { useLocation, useNavigate } from 'react-router-dom'
 
 import { closeDrawer, toggleDrawer } from '../../core/store/features'
 
@@ -60,7 +60,7 @@ export const MobileBottomNavigation = () => {
       if (isDrawerOpen) {
         dispatch(closeDrawer())
       }
-      navigate('/events')
+      void navigate({ to: '/events' })
     }
   }
 

@@ -1,3 +1,4 @@
+import type { WishlistId } from '@wishlist/common'
 import type { RootState } from '../../core'
 
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
@@ -9,11 +10,10 @@ import PublicIcon from '@mui/icons-material/Public'
 import { Avatar, Box, Chip, Container, Stack, Tooltip } from '@mui/material'
 import { grey } from '@mui/material/colors'
 import { useQuery } from '@tanstack/react-query'
-import { FeatureFlags, type WishlistId } from '@wishlist/common'
-import { parseAsBoolean, useQueryState } from 'nuqs'
-import { useEffect, useMemo } from 'react'
+import { useNavigate, useSearch } from '@tanstack/react-router'
+import { FeatureFlags } from '@wishlist/common'
+import { useCallback, useEffect, useMemo } from 'react'
 import { useSelector } from 'react-redux'
-import { useNavigate, useParams } from 'react-router-dom'
 
 import { useApi, useWishlistById } from '../../hooks'
 import { useFeatureFlag } from '../../hooks/useFeatureFlag'
@@ -30,18 +30,19 @@ const mapState = (state: RootState) => state.auth.user?.id
 const logoSize = 60
 const getImportDialogKey = (wishlistId: string) => `wishlist-import-dialog-auto-shown-${wishlistId}`
 
-export const WishlistPage = () => {
+interface WishlistPageProps {
+  wishlistId: WishlistId
+}
+
+export const WishlistPage = ({ wishlistId }: WishlistPageProps) => {
   const importItemsEnabled = useFeatureFlag(FeatureFlags.FRONTEND_WISHLIST_IMPORT_ITEMS_ENABLED)
   const currentUserId = useSelector(mapState)
-  const [showEventDialog, setShowEventDialog] = useQueryState('showEventDialog', parseAsBoolean.withDefault(false))
-  const [showImportDialog, setShowImportDialog] = useQueryState('showImportDialog', parseAsBoolean.withDefault(false))
-  const params = useParams<'wishlistId'>() as { wishlistId: WishlistId }
-  const wishlistId = params.wishlistId
+  const { showEventDialog, showImportDialog } = useSearch({
+    from: '/_authenticated/_with-layout/wishlists/$wishlistId/',
+  })
   const navigate = useNavigate()
   const api = useApi()
-
   const { wishlist, loading } = useWishlistById(wishlistId)
-
   const currentUserCanEdit = useMemo(() => wishlist?.owner.id === currentUserId, [currentUserId, wishlist])
 
   const { data: importableItems = [] } = useQuery({
@@ -49,6 +50,20 @@ export const WishlistPage = () => {
     queryFn: () => api.item.getImportableItems({ wishlist_id: wishlistId }),
     enabled: currentUserCanEdit && importItemsEnabled,
   })
+
+  const setShowEventDialog = useCallback(
+    (show: boolean) => {
+      void navigate({ from: '/wishlists/$wishlistId', search: prev => ({ ...prev, showEventDialog: show }) })
+    },
+    [navigate],
+  )
+
+  const setShowImportDialog = useCallback(
+    (show: boolean) => {
+      void navigate({ from: '/wishlists/$wishlistId', search: prev => ({ ...prev, showImportDialog: show }) })
+    },
+    [navigate],
+  )
 
   useEffect(() => {
     if (!importItemsEnabled) return
@@ -64,7 +79,7 @@ export const WishlistPage = () => {
         localStorage.setItem(storageKey, 'true')
       }
     }
-  }, [wishlist, currentUserCanEdit, importableItems, setShowImportDialog, importItemsEnabled])
+  }, [wishlist, currentUserCanEdit, importableItems, importItemsEnabled, setShowImportDialog])
 
   return (
     <Box>
@@ -143,7 +158,7 @@ export const WishlistPage = () => {
                     variant="outlined"
                     size="small"
                     icon={<EditIcon />}
-                    onClick={() => navigate(`/wishlists/${wishlistId}/edit`)}
+                    onClick={() => navigate({ to: '/wishlists/$wishlistId/edit', params: { wishlistId } })}
                     label="Modifier"
                   />
                 </Stack>

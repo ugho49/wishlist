@@ -5,7 +5,7 @@ import AddIcon from '@mui/icons-material/Add'
 import CloseIcon from '@mui/icons-material/Close'
 import OpenInNewIcon from '@mui/icons-material/OpenInNew'
 import { Box, Fade, Grid, IconButton, Modal, Stack, useMediaQuery, useTheme } from '@mui/material'
-import { parseAsBoolean, parseAsStringEnum, useQueryState } from 'nuqs'
+import { useNavigate, useSearch } from '@tanstack/react-router'
 import { useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
 
@@ -13,7 +13,7 @@ import { FabAutoGrow } from '../common/FabAutoGrow'
 import { EmptyItemsState } from '../item/EmptyItemsState'
 import { ItemCard } from '../item/ItemCard'
 import { ItemFormDialog } from '../item/ItemFormDialog'
-import { FilterType, SortType, WishlistFilterAndSortItems } from './WishlistFilterAndSortItems'
+import { type FilterType, type SortType, WishlistFilterAndSortItems } from './WishlistFilterAndSortItems'
 
 export type WishlistTabItemsProps = {
   wishlist: DetailedWishlistDto
@@ -113,25 +113,26 @@ const mapState = (state: RootState) => state.auth.user?.id
 
 export const WishlistItems = ({ wishlist }: WishlistTabItemsProps) => {
   const currentUserId = useSelector(mapState)
-  const [openItemFormDialog, setOpenItemFormDialog] = useQueryState(
-    'displayAddItemFormDialog',
-    parseAsBoolean.withDefault(false),
-  )
-  const [sort, setSort] = useQueryState(
-    'sort',
-    parseAsStringEnum<SortType>(Object.values(SortType)).withDefault(SortType.CREATED_AT_DESC),
-  )
-  const [filter, setFilter] = useQueryState(
-    'filter',
-    parseAsStringEnum<FilterType>(Object.values(FilterType)).withDefault(FilterType.NONE),
-  )
+  const {
+    displayAddItemFormDialog: openItemFormDialog,
+    sort,
+    filter,
+  } = useSearch({ from: '/_authenticated/_with-layout/wishlists/$wishlistId/' })
   const [itemsFilteredAndSorted, setItemsFilteredAndSorted] = useState<ItemDto[]>([])
   const nbOfItems = useMemo(() => wishlist.items.length, [wishlist.items])
   const ownerOfTheList = currentUserId === wishlist.owner.id
   const [currentItem, setCurrentItem] = useState<ItemDto | null>(null)
+  const navigate = useNavigate({ from: '/wishlists/$wishlistId' })
 
-  const addItem = () => {
-    setOpenItemFormDialog(true)
+  const setOpenItemFormDialog = (open: boolean) => {
+    void navigate({ search: prev => ({ ...prev, displayAddItemFormDialog: open }) })
+  }
+
+  const setSort = (newSort: SortType) => {
+    void navigate({ search: prev => ({ ...prev, sort: newSort }) })
+  }
+  const setFilter = (newFilter: FilterType) => {
+    void navigate({ search: prev => ({ ...prev, filter: newFilter }) })
   }
 
   return (
@@ -164,12 +165,18 @@ export const WishlistItems = ({ wishlist }: WishlistTabItemsProps) => {
             label={ownerOfTheList ? 'Ajouter un souhait' : 'Suggérer un souhait'}
             icon={<AddIcon />}
             color="primary"
-            onClick={() => addItem()}
+            onClick={() => setOpenItemFormDialog(true)}
           />
         </>
       )}
 
-      {nbOfItems === 0 && <EmptyItemsState sx={{ marginTop: '50px' }} onAddItem={addItem} isOwner={ownerOfTheList} />}
+      {nbOfItems === 0 && (
+        <EmptyItemsState
+          sx={{ marginTop: '50px' }}
+          onAddItem={() => setOpenItemFormDialog(true)}
+          isOwner={ownerOfTheList}
+        />
+      )}
 
       <ItemFormDialog
         mode="create"

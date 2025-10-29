@@ -2,6 +2,7 @@ import type { DetailedEventDto } from '@wishlist/common'
 
 import AddIcon from '@mui/icons-material/Add'
 import { Box, Grid } from '@mui/material'
+import { useNavigate } from '@tanstack/react-router'
 import { useMemo } from 'react'
 
 import { FabAutoGrow } from '../common/FabAutoGrow'
@@ -14,7 +15,9 @@ export type EventWishlistsProps = {
 
 export const EventWishlists = ({ event }: EventWishlistsProps) => {
   const nbOfItems = useMemo(() => event.wishlists.length, [event])
-  const addListRoute = useMemo(() => `/wishlists/new?from-event=${event.id}`, [event])
+  const navigate = useNavigate()
+
+  const handleAddList = () => navigate({ to: '/wishlists/new', search: { fromEvent: event.id } })
 
   return (
     <Box className="wishlists">
@@ -30,14 +33,14 @@ export const EventWishlists = ({ event }: EventWishlistsProps) => {
               ))}
           </Grid>
 
-          <FabAutoGrow label="Ajouter une liste" color="primary" icon={<AddIcon />} to={addListRoute} />
+          <FabAutoGrow label="Ajouter une liste" color="primary" icon={<AddIcon />} onClick={() => handleAddList()} />
         </>
       )}
 
       {nbOfItems === 0 && (
         <EmptyListsState
           sx={{ marginTop: '50px' }}
-          addListRoute={addListRoute}
+          onAddListClick={() => handleAddList()}
           title="Aucune liste pour le moment"
           subtitle="Créez votre première liste de souhaits pour cet événement et partagez vos envies !"
         />

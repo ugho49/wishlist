@@ -1,18 +1,12 @@
 import type { GridColDef } from '@mui/x-data-grid'
 import type { EventWithCountsDto, UserId } from '@wishlist/common'
 
-import { Box } from '@mui/material'
 import { DataGrid } from '@mui/x-data-grid'
-import { useQuery } from '@tanstack/react-query'
+import { useNavigate } from '@tanstack/react-router'
 import { AttendeeRole } from '@wishlist/common'
-import { Card } from '@wishlist/front-components/common/Card'
-import { Title } from '@wishlist/front-components/common/Title'
+import { useAdminEvents } from '@wishlist/front-hooks'
 import { DateTime } from 'luxon'
-import { parseAsInteger, useQueryState } from 'nuqs'
-import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 
-import { useApi } from '../../../hooks'
 import { EventIcon } from '../EventIcon'
 
 const columns: GridColDef<EventWithCountsDto>[] = [
@@ -69,57 +63,37 @@ const columns: GridColDef<EventWithCountsDto>[] = [
 
 type AdminListEventsProps = {
   userId?: UserId
+  currentPage: number
+  changeCurrentPage: (page: number) => void
 }
 
-export const AdminListEvents = ({ userId }: AdminListEventsProps) => {
-  const { admin: api } = useApi()
-  const [totalElements, setTotalElements] = useState(0)
-  const [pageSize, setPageSize] = useState(0)
-  const [currentPage, setCurrentPage] = useQueryState('page', parseAsInteger.withDefault(1))
+export const AdminListEvents = ({ userId, currentPage, changeCurrentPage }: AdminListEventsProps) => {
   const navigate = useNavigate()
-
-  const { data: value, isLoading: loading } = useQuery({
-    queryKey: ['admin', 'events', { page: currentPage, userId }],
-    queryFn: ({ signal }) => api.event.getAll({ p: currentPage, user_id: userId }, { signal }),
-  })
-
-  useEffect(() => {
-    if (value) {
-      setTotalElements(value.pagination.total_elements)
-      setCurrentPage(value.pagination.page_number)
-      setPageSize(value.pagination.pages_size)
-    }
-  }, [value, setCurrentPage])
+  const { events, totalElements, pageSize, loading } = useAdminEvents({ userId, page: currentPage })
 
   return (
-    <Box>
-      <Title>Liste des évènements</Title>
-
-      <Card>
-        <DataGrid
-          isRowSelectable={() => true}
-          disableMultipleRowSelection={true}
-          disableColumnSelector={true}
-          isCellEditable={() => false}
-          onRowClick={data => navigate(`/admin/events/${data.row.id}`)}
-          density="standard"
-          rows={value?.resources || []}
-          loading={loading}
-          columns={columns}
-          paginationMode="server"
-          localeText={{
-            noRowsLabel: 'Aucun évènement',
-          }}
-          rowCount={totalElements}
-          paginationModel={{
-            page: currentPage - 1,
-            pageSize,
-          }}
-          pageSizeOptions={[pageSize]}
-          onPaginationModelChange={({ page }) => setCurrentPage(page + 1)}
-          hideFooter={totalElements <= pageSize}
-        />
-      </Card>
-    </Box>
+    <DataGrid
+      isRowSelectable={() => true}
+      disableMultipleRowSelection={true}
+      disableColumnSelector={true}
+      isCellEditable={() => false}
+      onRowClick={data => navigate({ to: `/admin/events/${data.row.id}` })}
+      density="standard"
+      rows={events}
+      loading={loading}
+      columns={columns}
+      paginationMode="server"
+      localeText={{
+        noRowsLabel: 'Aucun évènement',
+      }}
+      rowCount={totalElements}
+      paginationModel={{
+        page: currentPage - 1,
+        pageSize,
+      }}
+      pageSizeOptions={[pageSize]}
+      onPaginationModelChange={({ page }) => void changeCurrentPage(page + 1)}
+      hideFooter={totalElements <= pageSize}
+    />
   )
 }

@@ -1,9 +1,9 @@
 import type { ButtonProps } from '@mui/material'
-import type { LinkProps } from 'react-router-dom'
+import type { LinkProps } from '@tanstack/react-router'
 
 import { Box, Button, Container, Typography } from '@mui/material'
 import { keyframes, styled } from '@mui/material/styles'
-import { Link } from 'react-router-dom'
+import { Link } from '@tanstack/react-router'
 
 import { Logo } from '../common/Logo'
 

@@ -3,8 +3,8 @@ import type { WishlistWithOwnerDto } from '@wishlist/common'
 import PersonIcon from '@mui/icons-material/Person'
 import PublicIcon from '@mui/icons-material/Public'
 import { Avatar, styled, Typography } from '@mui/material'
+import { useNavigate } from '@tanstack/react-router'
 import clsx from 'clsx'
-import { useNavigate } from 'react-router-dom'
 
 import { Card } from '../common/Card'
 
@@ -109,7 +109,7 @@ export const WishlistCardWithOwner = ({ wishlist }: WishlistCardWithOwnerProps) 
 
   return (
     <WishlistCardContent
-      onClick={() => navigate(`/wishlists/${wishlist.id}`)}
+      onClick={() => navigate({ to: '/wishlists/$wishlistId', params: { wishlistId: wishlist.id } })}
       className={clsx('animated fadeIn fast')}
       hoverable
     >

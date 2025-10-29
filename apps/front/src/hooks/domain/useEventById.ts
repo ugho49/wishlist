@@ -1,7 +1,7 @@
 import type { RootState } from '../../core'
 
 import { useQuery } from '@tanstack/react-query'
-import { canEditEvent } from '@wishlist/common'
+import { canEditEvent, type EventId } from '@wishlist/common'
 import { useState } from 'react'
 import { useSelector } from 'react-redux'
 
@@ -9,7 +9,7 @@ import { useApi } from '../useApi'
 
 const mapState = (state: RootState) => state.auth.user?.id
 
-export const useEventById = (eventId?: string) => {
+export const useEventById = (eventId?: EventId) => {
   const api = useApi()
   const [currentUserCanEdit, setCurrentUserCanEdit] = useState(true)
   const currentUserId = useSelector(mapState)
