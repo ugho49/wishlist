@@ -29,13 +29,12 @@ import {
   TextField,
 } from '@mui/material'
 import { useMutation } from '@tanstack/react-query'
+import { useNavigate, useSearch } from '@tanstack/react-router'
 import { MAX_EVENTS_BY_LIST } from '@wishlist/common'
 import uniq from 'lodash/uniq'
 import { DateTime } from 'luxon'
-import { useQueryState } from 'nuqs'
 import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
 import { useInterval } from 'usehooks-ts'
 
 import { useApi, useAvailableEvents, useEventById, useToast } from '../../hooks'
@@ -126,7 +125,6 @@ export const CreateWishlistPage = () => {
   const [events, setEvents] = useState<MiniEventDto[]>([])
   const [namePlaceholder, setNamePlaceholder] = useState<string>(getRandomPlaceholderName())
   const [logo, setLogo] = useState<File | undefined>()
-  const [fromEvent] = useQueryState('from-event')
   const api = useApi()
 
   useInterval(() => {
@@ -134,7 +132,8 @@ export const CreateWishlistPage = () => {
   }, 2000)
 
   const { events: availableEvents, loading: availableEventsLoading } = useAvailableEvents()
-  const { event: eventFromUrl } = useEventById(fromEvent ?? undefined)
+  const { fromEvent } = useSearch({ from: '/_authenticated/_with-layout/wishlists/new' })
+  const { event: eventFromUrl } = useEventById(fromEvent)
 
   const nextStepEnabled = ownerName?.trim() !== ''
   const createEnabled = events.length > 0
@@ -163,7 +162,7 @@ export const CreateWishlistPage = () => {
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
     onSuccess: wishlist => {
       addToast({ message: 'Liste créé avec succès', variant: 'success' })
-      navigate(`/wishlists/${wishlist.id}`)
+      void navigate({ to: '/wishlists/$wishlistId', params: { wishlistId: wishlist.id } })
     },
   })
 

@@ -3,22 +3,19 @@ import 'reflect-metadata'
 import { CssBaseline, ThemeProvider } from '@mui/material'
 import { LocalizationProvider } from '@mui/x-date-pickers'
 import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon'
-import { GoogleOAuthProvider } from '@react-oauth/google'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import { RouterProvider } from '@tanstack/react-router'
+import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 import { LDProvider } from 'launchdarkly-react-client-sdk'
-import { NuqsAdapter } from 'nuqs/adapters/react-router/v7'
 import * as ReactDOM from 'react-dom/client'
 import { Toaster } from 'react-hot-toast'
 import { Provider as ReduxProvider } from 'react-redux'
-import { BrowserRouter } from 'react-router-dom'
 
-import { App } from './App'
-import { ScrollToTop } from './components/common/ScrollToTop'
 import { ApiProvider } from './context/ApiContext'
 import { store } from './core'
-import { AxiosInterceptor } from './core/router/AxiosInterceptor'
 import { environment } from './environment'
+import { router } from './router'
 import { theme } from './theme'
 
 function main() {
@@ -59,15 +56,8 @@ function main() {
             <ThemeProvider theme={theme}>
               <CssBaseline />
               <LocalizationProvider dateAdapter={AdapterLuxon} adapterLocale="fr">
-                <BrowserRouter>
-                  <NuqsAdapter>
-                    <ScrollToTop />
-                    <AxiosInterceptor />
-                    <GoogleOAuthProvider clientId={environment.googleClientId}>
-                      <App />
-                    </GoogleOAuthProvider>
-                  </NuqsAdapter>
-                </BrowserRouter>
+                <RouterProvider router={router} context={{ queryClient }} />
+                <TanStackRouterDevtools router={router} />
               </LocalizationProvider>
             </ThemeProvider>
           </ReduxProvider>

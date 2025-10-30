@@ -18,9 +18,9 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material'
+import { useLocation, useNavigate } from '@tanstack/react-router'
 import { useCallback } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { useLocation, useNavigate } from 'react-router-dom'
 
 import LogoSvg from '../../assets/logo/logo.svg?react'
 import LogoTextSvg from '../../assets/logo/logo_text.svg?react'
@@ -214,7 +214,7 @@ export const SideNavigation = () => {
       await handleLogout()
       return
     }
-    navigate(route)
+    void navigate({ to: route })
     // Close mobile drawer after navigation
     if (isMobile) {
       dispatch(closeDrawer())
@@ -269,7 +269,7 @@ export const SideNavigation = () => {
 
   const drawerContent = (
     <DrawerContentStyled>
-      <LogoSectionStyled onClick={() => navigate('/')}>
+      <LogoSectionStyled onClick={() => navigate({ to: '/' })}>
         <LogoIconStyled />
         <LogoTextStyled />
       </LogoSectionStyled>

@@ -1,4 +1,4 @@
-import type { MiniEventDto } from '@wishlist/common'
+import type { EventId, MiniEventDto } from '@wishlist/common'
 
 import CloseIcon from '@mui/icons-material/Close'
 import {
@@ -14,8 +14,8 @@ import {
   ListItemText,
   Stack,
 } from '@mui/material'
+import { useNavigate } from '@tanstack/react-router'
 import { DateTime } from 'luxon'
-import { useNavigate } from 'react-router-dom'
 
 import { RouterLink } from '../common/RouterLink'
 import { EventIcon } from '../event/EventIcon'
@@ -37,8 +37,8 @@ export const WishlistEventsDialog = ({
 }: EventDialogProps) => {
   const navigate = useNavigate()
 
-  const handleEventClick = (eventId: string) => {
-    navigate(`/events/${eventId}`)
+  const handleEventClick = (eventId: EventId) => {
+    void navigate({ to: '/events/$eventId', params: { eventId } })
   }
 
   return (

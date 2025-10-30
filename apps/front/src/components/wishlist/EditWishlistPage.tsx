@@ -1,8 +1,9 @@
+import type { WishlistId } from '@wishlist/common'
+
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import { Box, Container, Tab, Tabs } from '@mui/material'
-import { useQueryState } from 'nuqs'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useSearch } from '@tanstack/react-router'
 
 import { useWishlistById } from '../../hooks/domain/useWishlistById'
 import { Loader } from '../common/Loader'
@@ -11,7 +12,7 @@ import { EditWishlistEvent } from './EditWishlistEvents'
 import { EditWishlistInformations } from './EditWishlistInformations'
 import { WishlistNotFound } from './WishlistNotFound'
 
-enum TabValues {
+export enum TabValues {
   informations = 'informations',
   events = 'events',
 }
@@ -29,11 +30,14 @@ const tabs = [
   },
 ]
 
-export const EditWishlistPage = () => {
-  const params = useParams<'wishlistId'>()
-  const wishlistId = params.wishlistId || ''
-  const [tab, setTab] = useQueryState('tab', { defaultValue: TabValues.informations })
+interface EditWishlistPageProps {
+  wishlistId: WishlistId
+}
+
+export const EditWishlistPage = ({ wishlistId }: EditWishlistPageProps) => {
+  const { tab } = useSearch({ from: '/_authenticated/_with-layout/wishlists/$wishlistId/edit' })
   const { wishlist, loading, currentUserCanEdit } = useWishlistById(wishlistId)
+  const navigate = useNavigate({ from: '/wishlists/$wishlistId/edit' })
 
   return (
     <Box>
@@ -45,7 +49,7 @@ export const EditWishlistPage = () => {
             <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: '20px' }}>
               <Tabs
                 value={tab}
-                onChange={(_, newValue) => setTab(newValue)}
+                onChange={(_, newValue) => navigate({ search: { tab: newValue as TabValues } })}
                 variant="fullWidth"
                 scrollButtons="auto"
                 allowScrollButtonsMobile

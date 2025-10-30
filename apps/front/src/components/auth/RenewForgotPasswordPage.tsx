@@ -4,9 +4,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import SaveAsIcon from '@mui/icons-material/SaveAs'
 import { Button, Stack, styled, TextField, Typography } from '@mui/material'
 import { useMutation } from '@tanstack/react-query'
-import { useQueryState } from 'nuqs'
+import { useNavigate, useSearch } from '@tanstack/react-router'
 import { useForm } from 'react-hook-form'
-import { useNavigate } from 'react-router-dom'
 import { z } from 'zod'
 
 import { useApi } from '../../hooks/useApi'
@@ -63,11 +62,10 @@ const InfoMessageStyled = styled(Typography)(({ theme }) => ({
 }))
 
 export const RenewForgotPasswordPage = () => {
+  const { email, token } = useSearch({ from: '/_anonymous-with-layout/forgot-password/renew' })
   const api = useApi()
   const { addToast } = useToast()
   const navigate = useNavigate()
-  const [email] = useQueryState('email')
-  const [token] = useQueryState('token')
 
   const {
     register,
@@ -84,16 +82,14 @@ export const RenewForgotPasswordPage = () => {
         message: 'Le mot de passe à été réinitialisé avec succès. Vous pouvez maintenant vous connecter.',
         variant: 'success',
       })
-      const searchParam = new URLSearchParams()
-      searchParam.append('email', email || '')
-      navigate({ pathname: '/login', search: searchParam.toString() })
+      void navigate({ to: '/login', search: { email } })
     },
   })
 
   const onSubmit = (data: FormFields) =>
     validateResetPassword({
-      email: email || '',
-      token: token || '',
+      email,
+      token,
       new_password: data.password,
     })
 

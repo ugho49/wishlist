@@ -1,5 +1,5 @@
 import { Box, Container, Stack, styled } from '@mui/material'
-import { Outlet, useNavigate } from 'react-router-dom'
+import { Outlet, useNavigate } from '@tanstack/react-router'
 
 import { Card } from '../../Card'
 import { Logo } from '../../Logo'
@@ -32,7 +32,7 @@ export const AnonymousContainerOutlet = () => {
     <Root>
       <Container component="main" maxWidth="sm">
         <Stack direction="column" alignItems="center" spacing={4}>
-          <LogoContainer onClick={() => navigate('/')}>
+          <LogoContainer onClick={() => navigate({ to: '/' })}>
             <Logo height={48} variant="full" />
           </LogoContainer>
 

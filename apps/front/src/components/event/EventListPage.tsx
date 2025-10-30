@@ -1,7 +1,7 @@
 import AddIcon from '@mui/icons-material/Add'
 import { Box, Grid } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
-import { parseAsInteger, useQueryState } from 'nuqs'
+import { useNavigate, useSearch } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 
 import { useApi } from '../../hooks/useApi'
@@ -12,12 +12,11 @@ import { Title } from '../common/Title'
 import { EmptyEventsState } from './EmptyEventsState'
 import { EventCard } from './EventCard'
 
-const CREATE_EVENT_ROUTE = '/events/new'
-
 export const EventListPage = () => {
   const api = useApi()
   const [totalElements, setTotalElements] = useState(0)
-  const [currentPage, setCurrentPage] = useQueryState('page', parseAsInteger.withDefault(1))
+  const { page: currentPage } = useSearch({ from: '/_authenticated/_with-layout/events/' })
+  const navigate = useNavigate()
   const { data: value, isLoading: loading } = useQuery({
     queryKey: ['events', { page: currentPage }],
     queryFn: ({ signal }) => api.event.getAll({ p: currentPage }, { signal }),
@@ -28,6 +27,8 @@ export const EventListPage = () => {
       setTotalElements(value.pagination.total_elements)
     }
   }, [value])
+
+  const handleAddEventClick = () => navigate({ to: '/events/new' })
 
   return (
     <Box>
@@ -50,15 +51,20 @@ export const EventListPage = () => {
             currentPage={currentPage}
             disabled={loading}
             hide={value?.pagination.total_pages === 1}
-            onChange={value => setCurrentPage(value)}
+            onChange={value => navigate({ from: '/events', search: prev => ({ ...prev, page: value }) })}
           />
 
-          <FabAutoGrow label="Créer un évènement" icon={<AddIcon />} color="primary" to={CREATE_EVENT_ROUTE} />
+          <FabAutoGrow
+            label="Créer un évènement"
+            icon={<AddIcon />}
+            color="primary"
+            onClick={() => handleAddEventClick()}
+          />
         </>
       )}
 
       {totalElements === 0 && !loading && (
-        <EmptyEventsState sx={{ marginTop: '100px' }} addEventRoute={CREATE_EVENT_ROUTE} />
+        <EmptyEventsState sx={{ marginTop: '100px' }} onAddEventClick={() => handleAddEventClick()} />
       )}
     </Box>
   )

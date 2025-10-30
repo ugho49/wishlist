@@ -1,7 +1,5 @@
+import { useCanGoBack, useLocation, useRouter } from '@tanstack/react-router'
 import { useMemo } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
-
-import { useHistoryStack } from './useHistoryStack'
 
 interface UseBackNavigationOptions {
   /**
@@ -29,18 +27,20 @@ const DEFAULT_MAIN_ROUTES = ['/', '/events', '/wishlists', '/admin', '/user/prof
  * Provides a unified way to determine if back navigation is possible and handle it
  */
 export const useBackNavigation = (options: UseBackNavigationOptions = {}): UseBackNavigationReturn => {
-  const navigate = useNavigate()
   const location = useLocation()
-  const { history } = useHistoryStack()
+  const router = useRouter()
+  const canGoBackTanstack = useCanGoBack()
 
   const { mainRoutes = DEFAULT_MAIN_ROUTES } = options
 
   // Show back button if we're not on main routes and have history
   const isMainRoute = useMemo(() => mainRoutes.includes(location.pathname), [location.pathname, mainRoutes])
-  const canGoBack = useMemo(() => history.length > 0 && !isMainRoute, [history.length, isMainRoute])
+  const canGoBack = useMemo(() => canGoBackTanstack && !isMainRoute, [canGoBackTanstack, isMainRoute])
 
   const handleGoBack = () => {
-    navigate(-1)
+    if (canGoBackTanstack) {
+      router.history.back()
+    }
   }
 
   return {

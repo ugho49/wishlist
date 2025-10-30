@@ -3,7 +3,9 @@ import type { EventId } from '@wishlist/common'
 import CloseIcon from '@mui/icons-material/Close'
 import ForestIcon from '@mui/icons-material/Forest'
 import { alpha, Button, IconButton, keyframes, Stack, styled, Typography } from '@mui/material'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from '@tanstack/react-router'
+
+import { TabValues } from '../../routes/_authenticated/_with-layout/events/$eventId/edit'
 
 interface SecretSantaSuggestionCardProps {
   eventId: EventId
@@ -142,7 +144,7 @@ export function SecretSantaSuggestionCard({ eventId, onDismiss }: SecretSantaSug
   const navigate = useNavigate()
 
   const handleCreateSecretSanta = () => {
-    navigate(`/events/${eventId}/edit?tab=secret_santa`)
+    void navigate({ to: '/events/$eventId/edit', params: { eventId }, search: { tab: TabValues.secretSanta } })
   }
 
   return (

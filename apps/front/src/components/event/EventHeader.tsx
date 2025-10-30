@@ -1,4 +1,4 @@
-import type { AttendeeDto } from '@wishlist/common'
+import type { AttendeeDto, EventId } from '@wishlist/common'
 
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard'
@@ -18,10 +18,11 @@ import {
   styled,
   Typography,
 } from '@mui/material'
+import { useNavigate } from '@tanstack/react-router'
 import { DateTime } from 'luxon'
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 
+import { TabValues } from '../../routes/_authenticated/_with-layout/events/$eventId/edit'
 import { EventIcon } from './EventIcon'
 
 const HeaderContainer = styled(Box)(({ theme }) => ({
@@ -137,7 +138,7 @@ export type EventHeaderProps = {
   icon?: string
   title: string
   eventDate: string
-  eventId: string
+  eventId: EventId
   attendees: AttendeeDto[]
   currentUserCanEdit: boolean
   openAttendeesDialog: () => void
@@ -166,12 +167,12 @@ export const EventHeader = ({
 
   const handleSecretSanta = () => {
     handleCloseMenu()
-    navigate(`/events/${eventId}/edit?tab=secret_santa`)
+    void navigate({ to: '/events/$eventId/edit', params: { eventId }, search: { tab: TabValues.secretSanta } })
   }
 
   const handleAttendees = () => {
     handleCloseMenu()
-    navigate(`/events/${eventId}/edit?tab=attendees`)
+    void navigate({ to: '/events/$eventId/edit', params: { eventId }, search: { tab: TabValues.attendees } })
   }
 
   return (
@@ -212,7 +213,10 @@ export const EventHeader = ({
           {currentUserCanEdit && (
             <RightSection>
               <StyledButtonGroup variant="outlined" color="primary" disableElevation>
-                <MainActionButton startIcon={<EditIcon />} onClick={() => navigate(`/events/${eventId}/edit`)}>
+                <MainActionButton
+                  startIcon={<EditIcon />}
+                  onClick={() => navigate({ to: '/events/$eventId/edit', params: { eventId } })}
+                >
                   Modifier
                 </MainActionButton>
                 <DropdownButton size="small" onClick={handleOpenMenu}>

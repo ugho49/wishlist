@@ -2,10 +2,10 @@ import type { RootState } from '../../core'
 
 import ExploreIcon from '@mui/icons-material/Explore'
 import { Box, Button, Container, Stack, Step, StepLabel, Stepper, styled, Typography } from '@mui/material'
+import { useNavigate } from '@tanstack/react-router'
 import { useApi } from '@wishlist/front-hooks'
 import { useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
 
 import { OnboardingService } from '../../core/services/onboarding.service'
 import { updatePicture } from '../../core/store/features'
@@ -196,7 +196,7 @@ export const WelcomePage = () => {
   }
 
   const handleFinishOnboarding = () => {
-    navigate('/events')
+    void navigate({ to: '/events' })
   }
 
   return (

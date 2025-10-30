@@ -25,9 +25,9 @@ import {
   Typography,
 } from '@mui/material'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useNavigate, useSearch } from '@tanstack/react-router'
 import clsx from 'clsx'
 import { DateTime } from 'luxon'
-import { useQueryState } from 'nuqs'
 import React, { useCallback, useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
 
@@ -343,12 +343,15 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
   const api = useApi()
   const { addToast } = useToast()
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
-  const [currentItemId, setCurrentItemId] = useQueryState('currentItemId')
+  const { currentItemId } = useSearch({ from: '/_authenticated/_with-layout/wishlists/$wishlistId/' })
   const [takenBy, setTakenBy] = useState<MiniUserDto | undefined>(item.taken_by)
   const isDialogOpen = useMemo(() => currentItemId === item.id, [currentItemId, item.id])
+  const navigate = useNavigate({ from: '/wishlists/$wishlistId' })
   const setDialogOpen = useCallback(
-    (open: boolean) => setCurrentItemId(open ? item.id : null),
-    [item.id, setCurrentItemId],
+    (open: boolean) => {
+      void navigate({ search: prev => ({ ...prev, currentItemId: open ? item.id : undefined }) })
+    },
+    [item.id, navigate],
   )
 
   const isTaken = useMemo(() => takenBy !== undefined, [takenBy])

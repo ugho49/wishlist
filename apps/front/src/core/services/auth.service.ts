@@ -45,6 +45,11 @@ class TokenService<T> {
     }
   }
 
+  isLocalStorageTokenValid = (): boolean => {
+    const token = this.getTokenFromLocalStorage()
+    return token !== undefined && !this.isExpired(token.rawToken)
+  }
+
   storeTokenInLocalStorage = (token: string) => {
     localStorage.setItem(this.STORAGE_KEY, token)
   }

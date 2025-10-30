@@ -30,7 +30,7 @@ const columns: GridColDef<WishlistWithOwnerDto>[] = [
     valueGetter: (_, row) => `${row.owner.firstname} ${row.owner.lastname}`,
     renderCell: ({ row }) => {
       return (
-        <RouterLink key={row.owner.id} to={`/admin/users/${row.owner.id}`}>
+        <RouterLink key={row.owner.id} to="/admin/users/$userId" params={{ userId: row.owner.id }}>
           {row.owner.firstname} {row.owner.lastname}
         </RouterLink>
       )

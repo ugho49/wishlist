@@ -51,7 +51,7 @@ export const AdminListAttendees = ({ attendees, deleteAttendee, loading = false 
             renderCell: ({ row }) => {
               if (!row.user) return '-'
               return (
-                <RouterLink key={row.user.id} to={`/admin/users/${row.user.id}`}>
+                <RouterLink key={row.user.id} to="/admin/users/$userId" params={{ userId: row.user.id }}>
                   {row.user.firstname} {row.user.lastname}
                 </RouterLink>
               )

@@ -1,6 +1,6 @@
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { AppBar, Box, IconButton, styled, Toolbar } from '@mui/material'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from '@tanstack/react-router'
 
 import LogoTextSvg from '../../assets/logo/logo_text.svg?react'
 import { useBackNavigation } from '../../hooks'
@@ -61,7 +61,7 @@ export const MobileTopBar = () => {
           <ArrowBackIcon />
         </BackButtonStyled>
 
-        <LogoContainerStyled onClick={() => navigate('/')}>
+        <LogoContainerStyled onClick={() => navigate({ to: '/' })}>
           <LogoSvgStyled />
         </LogoContainerStyled>
       </ToolbarStyled>

@@ -1,9 +1,9 @@
 import type { EventWithCountsDto } from '@wishlist/common'
 
 import { styled } from '@mui/material'
+import { useNavigate } from '@tanstack/react-router'
 import clsx from 'clsx'
 import { DateTime } from 'luxon'
-import { useNavigate } from 'react-router-dom'
 
 import { Card } from '../common/Card'
 import { EventIcon } from './EventIcon'
@@ -102,7 +102,7 @@ export const EventCard = ({ event }: EventCardProps) => {
 
   return (
     <EventCardContent
-      onClick={() => navigate(`/events/${event.id}`)}
+      onClick={() => navigate({ to: '/events/$eventId', params: { eventId: event.id } })}
       className={clsx(past && 'disabled', 'animated fadeIn fast')}
       hoverable
     >
