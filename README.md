@@ -22,7 +22,7 @@ Wishlist App is a collaborative platform designed to make gift-giving easier and
 ### Prerequisites
 
 - **Node.js**: 24+ ([.nvmrc](.nvmrc))
-- **Yarn**: 4.10.3+
+- **Yarn**: For package management
 - **Docker**: For local database
 
 ### Installation
@@ -96,16 +96,16 @@ yarn docker:down       # Stop services
 
 ### Backend (NestJS)
 - **Architecture**: Domain-Driven Design with CQRS pattern
-- **Database**: PostgreSQL 17 + Drizzle ORM
+- **Database**: PostgreSQL + Drizzle ORM
 - **Authentication**: JWT + Google OAuth
 - **Email**: MJML templates + Nodemailer
 - **Storage**: Firebase for uploads
 - **Testing**: Vitest + Testcontainers
 
-### Frontend (React 19)
-- **UI Framework**: Material-UI v7
-- **State Management**: Redux Toolkit (client) + React Query (server)
-- **Routing**: React Router DOM v7
+### Frontend (React)
+- **UI Framework**: Material-UI (MUI)
+- **State Management**: Redux Toolkit (client) + TanStack Query (server)
+- **Routing**: TanStack Router with file-based routing
 - **Forms**: React Hook Form + Zod validation
 - **Build Tool**: Vite + SWC
 
@@ -131,15 +131,16 @@ yarn docker:down       # Stop services
 ## 🛠️ Technology Stack
 
 ### Core Technologies
-- **Backend**: NestJS 11 + PostgreSQL 17 + Drizzle ORM
-- **Frontend**: React 19 + Vite + Material-UI v7
-- **Monorepo**: Nx 21.6.5
-- **Package Manager**: Yarn 4.10.3
+- **Backend**: NestJS + PostgreSQL + Drizzle ORM
+- **Frontend**: React + Vite + Material-UI (MUI)
+- **Monorepo**: Nx
+- **Package Manager**: Yarn
 - **Code Quality**: Biome (replaces ESLint + Prettier)
 - **Testing**: Vitest + Testcontainers
 
 ### Key Libraries
-- **State**: Redux Toolkit, React Query
+- **State**: Redux Toolkit, TanStack Query (React Query)
+- **Routing**: TanStack Router
 - **Authentication**: Passport, JWT, Google OAuth
 - **Validation**: Zod, class-validator
 - **Email**: MJML, Nodemailer

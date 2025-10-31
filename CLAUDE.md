@@ -37,7 +37,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Architecture Overview
 
-This is an Nx monorepo containing a wishlist application with React 19 frontend and NestJS backend, requiring Node.js 24+.
+This is an Nx monorepo containing a wishlist application with React frontend and NestJS backend, requiring Node.js 24+.
 
 ### Project Structure
 - **apps/api/** - NestJS backend with Domain-Driven Design and CQRS
@@ -55,9 +55,9 @@ This is an Nx monorepo containing a wishlist application with React 19 frontend 
 
 ### Frontend Architecture (React)
 - **State Management**: Redux Toolkit for client state, React Query for server state
-- **UI Framework**: Material-UI (MUI) v7 with custom theming system
+- **UI Framework**: Material-UI (MUI) with custom theming system
 - **Styling**: Prefer `styled()` components over `sx` prop for reusable styles and better performance
-- **Routing**: React Router DOM v7 with modern data loading patterns
+- **Routing**: TanStack Router with file-based routing and type-safe navigation
 - **Form Handling**: React Hook Form with Zod schema validation
 - **Build Tool**: Vite with SWC for fast compilation and SVGR for SVG imports
 
@@ -116,10 +116,11 @@ This is an Nx monorepo containing a wishlist application with React 19 frontend 
 - **Audit Fields**: createdAt/updatedAt with automatic timezone handling
 
 ### Development Workflow
-- **Monorepo**: Nx 21.6.5 with proper build dependencies and caching
+
+- **Monorepo**: Nx with proper build dependencies and caching
 - **Code Quality**: Biome (replaces ESLint and Prettier) with security rules and import sorting
 - **Git Hooks**: Husky for pre-commit formatting and conventional commit validation
-- **Package Manager**: Yarn 4.10.3 with workspaces
+- **Package Manager**: Yarn
 
 ## Integration Testing Guidelines
 
@@ -204,7 +205,6 @@ await expectTable(Fixtures.TABLE_NAME)
     created_at: expect.toBeDate(),
     updated_at: expect.toBeDate(),
   })
-  .check()
 
 // For update tests
 await request.put(path(id)).send(updateData).expect(200)
@@ -217,11 +217,10 @@ await expectTable(Fixtures.TABLE_NAME)
     field: 'updated_value',
     updated_at: expect.toBeDate(),
   })
-  .check()
 
 // For deletion tests
 await request.delete(path(id)).expect(200)
-await expectTable(Fixtures.TABLE_NAME).hasNumberOfRows(0).check()
+await expectTable(Fixtures.TABLE_NAME).hasNumberOfRows(0)
 ```
 
 #### 6. Permission Testing
@@ -242,7 +241,7 @@ it('should return 404 when user is not maintainer/owner', async () => {
   await request.method(path(resourceId)).send(data).expect(404)
   
   // Verify no changes were made
-  await expectTable(Fixtures.TABLE_NAME).hasNumberOfRows(1).check()
+  await expectTable(Fixtures.TABLE_NAME).hasNumberOfRows(1)
 })
 ```
 
@@ -284,10 +283,10 @@ it('should create resource with related data', async () => {
   }).expect(201)
   
   // Verify main table
-  await expectTable(Fixtures.MAIN_TABLE).hasNumberOfRows(1).check()
+  await expectTable(Fixtures.MAIN_TABLE).hasNumberOfRows(1)
   
   // Verify junction table
-  await expectTable(Fixtures.JUNCTION_TABLE).hasNumberOfRows(1).check()
+  await expectTable(Fixtures.JUNCTION_TABLE).hasNumberOfRows(1)
 })
 ```
 

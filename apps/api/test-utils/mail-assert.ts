@@ -77,6 +77,18 @@ export class MailsAssert {
     )
   }
 
+  /**
+   * If you await your assertions, you don't need to call this method.
+   *
+   * @example
+   *
+   * ```ts
+   * await expectMails().hasSubject('Test').check()
+   *
+   * // Same as:
+   * await expectMails().hasSubject('Test')
+   * ```
+   */
   async check() {
     for (const assertion of this.assertions) {
       await assertion()
@@ -151,6 +163,17 @@ class MailAssert {
     return this.parent.mail(index)
   }
 
+  /**
+   * If you await your assertions, you don't need to call this method.
+   *
+   * @example
+   * ```ts
+   * await expectMails().hasNumberOfEmails(1).mail(0).hasSubject('Test').check()
+   *
+   * // Same as:
+   * await expectMails().hasNumberOfEmails(1).mail(0).hasSubject('Test')
+   * ```
+   */
   check() {
     return this.parent.check()
   }

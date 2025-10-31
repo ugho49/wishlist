@@ -418,7 +418,7 @@ describe('ItemController', () => {
             })
           })
 
-        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(0).check()
+        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(0)
       })
 
       it('should successfully import multiple items from old wishlists', async () => {
@@ -500,7 +500,7 @@ describe('ItemController', () => {
         })
 
         // Verify database - should have 4 items total (2 old + 2 imported)
-        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(4).check()
+        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(4)
       })
 
       it('should return 401 when user does not have access to target wishlist', async () => {
@@ -536,7 +536,7 @@ describe('ItemController', () => {
             })
           })
 
-        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(0).check()
+        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(0)
       })
 
       it('should return empty array when source items not found', async () => {
@@ -563,7 +563,7 @@ describe('ItemController', () => {
           .expect(201)
 
         expect(response.body).toEqual([])
-        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(0).check()
+        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(0)
       })
 
       it('should return 401 when trying to import items from another user wishlist', async () => {
@@ -624,7 +624,7 @@ describe('ItemController', () => {
           })
 
         // Only the original item should exist
-        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1).check()
+        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1)
       })
 
       it('should return 500 when trying to import suggested items', async () => {
@@ -673,7 +673,7 @@ describe('ItemController', () => {
           .expect(500)
 
         // Only the original item should exist
-        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1).check()
+        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1)
       })
 
       it('should import taken items without their taken status', async () => {
@@ -749,7 +749,7 @@ describe('ItemController', () => {
         })
 
         // Verify database - should have 4 items (2 old + 2 imported)
-        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(4).check()
+        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(4)
       })
     })
   })

@@ -42,6 +42,18 @@ export class TableAssert {
     )
   }
 
+  /**
+   * If you await your assertions, you don't need to call this method.
+   *
+   * @example
+   *
+   * ```ts
+   * await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1).check()
+   *
+   * // Same as:
+   * await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1)
+   * ```
+   */
   async check() {
     for (const assertion of this.assertions) {
       await assertion()
@@ -120,6 +132,18 @@ class TableRowAssert {
     return this.parent.row(index)
   }
 
+  /**
+   * If you await your assertions, you don't need to call this method.
+   *
+   * @example
+   *
+   * ```ts
+   * await expectTable(Fixtures.ITEM_TABLE).row(0).toEqual({ id: '1', name: 'Item 1' }).check()
+   *
+   * // Same as:
+   * await expectTable(Fixtures.ITEM_TABLE).row(0).toEqual({ id: '1', name: 'Item 1' })
+   * ```
+   */
   check() {
     return this.parent.check()
   }
