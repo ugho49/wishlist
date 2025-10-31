@@ -175,7 +175,9 @@ export function useSecretSantaSuggestion({
   dismissSuggestion: () => void
 } {
   const [isDismissedState, setIsDismissedState] = useState(isDismissed(eventId))
-  const { secretSanta } = useSecretSanta(eventId, { enabled: currentUserCanEdit && !isDismissedState })
+  const { secretSanta, loading: secretSantaLoading } = useSecretSanta(eventId, {
+    enabled: currentUserCanEdit && !isDismissedState,
+  })
 
   const dismissSuggestion = useCallback(() => {
     setIsDismissedState(true)
@@ -189,6 +191,9 @@ export function useSecretSantaSuggestion({
     // Check if user has dismissed the suggestion
     if (isDismissedState) return false
 
+    // Wait for secret santa to load
+    if (secretSantaLoading) return false
+
     // Secret Santa must not exist
     if (secretSanta) return false
 
@@ -197,13 +202,15 @@ export function useSecretSantaSuggestion({
 
     // Check date range: December 15 to January 1
     const eventDateFormatted = DateTime.fromISO(eventDate)
+
+    // Check if event date is in Christmas period
     const isInChristmasPeriod = isEventInChristmasPeriod(eventDateFormatted)
 
     // Check title for Christmas keywords
     const hasChristmasKeyword = containsChristmasKeyword(eventTitle)
 
     return isInChristmasPeriod && hasChristmasKeyword
-  }, [eventDate, eventTitle, secretSanta, currentUserCanEdit, isDismissedState])
+  }, [eventDate, eventTitle, secretSanta, currentUserCanEdit, isDismissedState, secretSantaLoading])
 
   return { shouldShowSuggestion, dismissSuggestion }
 }
