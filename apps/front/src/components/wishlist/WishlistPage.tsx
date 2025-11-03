@@ -44,11 +44,12 @@ export const WishlistPage = ({ wishlistId }: WishlistPageProps) => {
   const api = useApi()
   const { wishlist, loading } = useWishlistById(wishlistId)
   const currentUserCanEdit = useMemo(() => wishlist?.owner.id === currentUserId, [currentUserId, wishlist])
+  const isPublic = useMemo(() => wishlist?.config.hide_items === false, [wishlist])
 
   const { data: importableItems = [] } = useQuery({
     queryKey: ['item.importable', { wishlistId }],
     queryFn: () => api.item.getImportableItems({ wishlist_id: wishlistId }),
-    enabled: currentUserCanEdit && importItemsEnabled,
+    enabled: currentUserCanEdit && !isPublic && importItemsEnabled,
   })
 
   const setShowEventDialog = useCallback(
