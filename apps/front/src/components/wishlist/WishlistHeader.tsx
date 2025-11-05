@@ -24,18 +24,20 @@ import {
 import { useState } from 'react'
 
 import { getAvatarUrl } from '../../utils/wishlist.utils'
-import { Card } from '../common/Card'
 import { WishlistAvatar } from './WishlistAvatar'
 import { filterOptions, sortOptions } from './WishlistFilterAndSortItems'
 
-const HeaderCard = styled(Card)(({ theme }) => ({
+const HeaderContent = styled(Box)(({ theme }) => ({
   display: 'flex',
-  padding: theme.spacing(2, 2.5),
+  paddingBottom: theme.spacing(2),
+  borderBottom: `1px solid ${theme.palette.divider}`,
+
   [theme.breakpoints.down('md')]: {
     flexDirection: 'column',
     alignItems: 'center',
     gap: theme.spacing(2),
   },
+
   [theme.breakpoints.up('md')]: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -118,6 +120,7 @@ const MainActionButton = styled(Button)(({ theme }) => ({
   fontWeight: 500,
   fontSize: '0.875rem',
   padding: theme.spacing(1, 2),
+  border: `1px solid ${theme.palette.divider}`,
 }))
 
 const CompactIconButton = styled(IconButton)(({ theme }) => ({
@@ -207,7 +210,7 @@ export const WishlistHeader = ({
 
   return (
     <Container maxWidth="lg">
-      <HeaderCard>
+      <HeaderContent>
         {/* Left section - Avatar, Title and Metadata */}
         <LeftSection>
           <WishlistAvatar
@@ -293,7 +296,7 @@ export const WishlistHeader = ({
             </MainActionButton>
           )}
         </RightSection>
-      </HeaderCard>
+      </HeaderContent>
 
       {/* Sort Menu */}
       <Menu

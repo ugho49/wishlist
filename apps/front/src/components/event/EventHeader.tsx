@@ -24,21 +24,19 @@ import { DateTime } from 'luxon'
 import { useState } from 'react'
 
 import { TabValues } from '../../routes/_authenticated/_with-layout/events/$eventId/edit'
-import { Card } from '../common/Card'
-import { EventAvatar } from './EventAvatar'
+import { EventIcon } from './EventIcon'
 
-const HeaderCard = styled(Card)(({ theme }) => ({
+const HeaderContent = styled(Box)(({ theme }) => ({
   display: 'flex',
-  padding: theme.spacing(2, 2.5),
-  [theme.breakpoints.down('md')]: {
+  paddingBottom: theme.spacing(2),
+  borderBottom: `1px solid ${theme.palette.divider}`,
+  flexDirection: 'row',
+  alignItems: 'center',
+  gap: theme.spacing(3),
+
+  [theme.breakpoints.down('sm')]: {
     flexDirection: 'column',
-    alignItems: 'center',
     gap: theme.spacing(2),
-  },
-  [theme.breakpoints.up('md')]: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: theme.spacing(3),
   },
 }))
 
@@ -99,14 +97,9 @@ const ClickableMetadataBox = styled(MetadataBox)(({ theme }) => ({
 }))
 
 const RightSection = styled(Box)(({ theme }) => ({
-  flexShrink: 0,
   display: 'flex',
   gap: theme.spacing(1),
   alignItems: 'center',
-  [theme.breakpoints.down('md')]: {
-    width: '100%',
-    justifyContent: 'center',
-  },
 }))
 
 const MainActionButton = styled(Button)(({ theme }) => ({
@@ -115,6 +108,7 @@ const MainActionButton = styled(Button)(({ theme }) => ({
   fontSize: '0.875rem',
   padding: theme.spacing(1, 2),
   height: '40px',
+  border: `1px solid ${theme.palette.divider}`,
 }))
 
 const CompactIconButton = styled(IconButton)(({ theme }) => ({
@@ -168,10 +162,10 @@ export const EventHeader = ({
 
   return (
     <Container maxWidth="lg">
-      <HeaderCard>
+      <HeaderContent>
         {/* Left section - Avatar, Title and Metadata */}
         <LeftSection>
-          <EventAvatar icon={icon} sx={{ width: 75, height: 75 }} iconSize="large" />
+          <EventIcon icon={icon} size="large" />
 
           <TitleContainer>
             <EventTitle>{title}</EventTitle>
@@ -216,7 +210,7 @@ export const EventHeader = ({
             </Tooltip>
           </RightSection>
         )}
-      </HeaderCard>
+      </HeaderContent>
 
       {/* Actions Menu */}
       <Menu
