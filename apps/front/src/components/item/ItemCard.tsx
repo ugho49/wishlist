@@ -100,7 +100,7 @@ const ItemImageContainer = styled(Box)(({ theme }) => ({
   alignItems: 'center',
   justifyContent: 'center',
   padding: '0',
-  height: '180px',
+  height: '240px',
   width: '100%',
   overflow: 'hidden',
   background: `linear-gradient(135deg, ${alpha(theme.palette.primary.light, 0.1)} 0%, ${alpha(theme.palette.primary.main, 0.15)} 100%)`,
