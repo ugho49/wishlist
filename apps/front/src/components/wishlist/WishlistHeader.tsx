@@ -1,11 +1,10 @@
 import type { DetailedWishlistDto } from '@wishlist/common'
 import type { FilterType, SortType } from './WishlistFilterAndSortItems'
 
+import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh'
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import EditIcon from '@mui/icons-material/Edit'
 import FilterListIcon from '@mui/icons-material/FilterList'
-import HistoryIcon from '@mui/icons-material/History'
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import PersonIcon from '@mui/icons-material/Person'
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined'
@@ -15,8 +14,6 @@ import {
   Avatar,
   Box,
   Button,
-  ButtonGroup,
-  Chip,
   Container,
   IconButton,
   ListItemIcon,
@@ -103,13 +100,6 @@ const RightSection = styled(Box)(({ theme }) => ({
   },
 }))
 
-const StyledButtonGroup = styled(ButtonGroup)(({ theme }) => ({
-  boxShadow: 'none',
-  [theme.breakpoints.down('md')]: {
-    flex: 1,
-  },
-}))
-
 const MainActionButton = styled(Button)(({ theme }) => ({
   textTransform: 'none',
   fontWeight: 500,
@@ -120,15 +110,44 @@ const MainActionButton = styled(Button)(({ theme }) => ({
   },
 }))
 
-const DropdownButton = styled(Button)({
-  padding: '8px 8px',
-  minWidth: 'auto',
-})
-
 const CompactIconButton = styled(IconButton)(({ theme }) => ({
   border: `1px solid ${theme.palette.divider}`,
   borderRadius: theme.shape.borderRadius,
   padding: theme.spacing(1),
+  height: '40px',
+  width: '40px',
+}))
+
+const ImportButton = styled(Button)(({ theme }) => ({
+  textTransform: 'none',
+  fontWeight: 600,
+  fontSize: '0.875rem',
+  padding: theme.spacing(1, 2),
+  borderRadius: theme.shape.borderRadius,
+  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+  color: 'white',
+  boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)',
+  border: 'none',
+  height: '40px',
+  '&:hover': {
+    background: 'linear-gradient(135deg, #5568d3 0%, #6a3f8f 100%)',
+    boxShadow: '0 6px 20px rgba(102, 126, 234, 0.6)',
+    transform: 'translateY(-1px)',
+  },
+  '& .MuiButton-startIcon': {
+    animation: 'sparkle 2s ease-in-out infinite',
+  },
+  '@keyframes sparkle': {
+    '0%, 100%': {
+      transform: 'scale(1) rotate(0deg)',
+      opacity: 1,
+    },
+    '50%': {
+      transform: 'scale(1.2) rotate(180deg)',
+      opacity: 0.8,
+    },
+  },
+  transition: 'all 0.3s ease',
 }))
 
 export type WishlistHeaderProps = {
@@ -207,11 +226,6 @@ export const WishlistHeader = ({
     onNavigateToEdit()
   }
 
-  const handleImport = () => {
-    handleCloseActionsMenu()
-    onOpenImportDialog()
-  }
-
   const hasActiveFilter = filter !== ''
 
   return (
@@ -238,19 +252,23 @@ export const WishlistHeader = ({
                 <MetadataStack>
                   {/* Show owner info only for public lists */}
                   {isPublic && (
-                    <Chip
-                      variant="outlined"
-                      size="small"
-                      avatar={
-                        wishlist.owner.picture_url ? (
-                          <Avatar src={wishlist.owner.picture_url} sx={{ width: 24, height: 24 }} />
-                        ) : (
-                          <PersonOutlineOutlinedIcon fontSize="small" />
-                        )
-                      }
-                      label={`${wishlist.owner.firstname} ${wishlist.owner.lastname}`}
-                      sx={{ height: '24px' }}
-                    />
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1,
+                      }}
+                    >
+                      <Avatar
+                        src={wishlist.owner.picture_url}
+                        sx={{ width: 20, height: 20, bgcolor: grey[200], color: grey[400] }}
+                      >
+                        <PersonOutlineOutlinedIcon fontSize="small" />
+                      </Avatar>
+                      <Typography variant="body2" color="text.secondary">
+                        Créé par {wishlist.owner.firstname} {wishlist.owner.lastname}
+                      </Typography>
+                    </Box>
                   )}
 
                   {/* Event info as clickable text with icon */}
@@ -277,14 +295,19 @@ export const WishlistHeader = ({
                   {/* Public indicator */}
                   {isPublic && (
                     <Tooltip title="Tout le monde peut ajouter, cocher ou voir les souhaits cochés, même le créateur de la liste">
-                      <Chip
-                        label="Publique"
-                        color="primary"
-                        variant="outlined"
-                        size="small"
-                        icon={<PublicIcon fontSize="small" />}
-                        sx={{ height: '24px' }}
-                      />
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 0.5,
+                          color: 'primary.main',
+                        }}
+                      >
+                        <PublicIcon fontSize="small" />
+                        <Typography variant="body2" fontWeight={500}>
+                          Liste publique
+                        </Typography>
+                      </Box>
                     </Tooltip>
                   )}
                 </MetadataStack>
@@ -294,6 +317,15 @@ export const WishlistHeader = ({
 
           {/* Right section - Filter, Sort and Actions */}
           <RightSection>
+            {/* Import Button (only for owner with importable items) */}
+            {currentUserCanEdit && hasImportableItems && (
+              <Tooltip title="Importer des souhaits d'anciennes listes">
+                <ImportButton startIcon={<AutoFixHighIcon />} onClick={onOpenImportDialog} size="small">
+                  Importer
+                </ImportButton>
+              </Tooltip>
+            )}
+
             {/* Sort Button */}
             <Tooltip title="Trier">
               <CompactIconButton
@@ -326,23 +358,22 @@ export const WishlistHeader = ({
                   <MoreVertIcon fontSize="small" />
                 </CompactIconButton>
               ) : (
-                // Desktop: Button group
-                <StyledButtonGroup variant="outlined" color="primary" disableElevation>
-                  <MainActionButton startIcon={<EditIcon />} onClick={onNavigateToEdit}>
-                    Modifier
-                  </MainActionButton>
-                  {hasImportableItems && (
-                    <DropdownButton size="small" onClick={handleOpenActionsMenu}>
-                      <KeyboardArrowDownIcon />
-                    </DropdownButton>
-                  )}
-                </StyledButtonGroup>
+                // Desktop: Edit button
+                <MainActionButton
+                  variant="outlined"
+                  color="primary"
+                  startIcon={<EditIcon />}
+                  onClick={onNavigateToEdit}
+                  sx={{ height: '40px' }}
+                >
+                  Modifier
+                </MainActionButton>
               ))}
           </RightSection>
         </HeaderStack>
       </Card>
 
-      {/* Actions Menu */}
+      {/* Actions Menu (Mobile only) */}
       <Menu
         id="wishlist-actions-menu"
         anchorEl={actionsAnchorEl}
@@ -357,22 +388,12 @@ export const WishlistHeader = ({
           horizontal: 'right',
         }}
       >
-        {isMobile && (
-          <MenuItem onClick={handleEdit}>
-            <ListItemIcon>
-              <EditIcon fontSize="small" />
-            </ListItemIcon>
-            <ListItemText>Modifier</ListItemText>
-          </MenuItem>
-        )}
-        {hasImportableItems && (
-          <MenuItem onClick={handleImport}>
-            <ListItemIcon>
-              <HistoryIcon fontSize="small" />
-            </ListItemIcon>
-            <ListItemText>Importer des souhaits</ListItemText>
-          </MenuItem>
-        )}
+        <MenuItem onClick={handleEdit}>
+          <ListItemIcon>
+            <EditIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>Modifier</ListItemText>
+        </MenuItem>
       </Menu>
 
       {/* Sort Menu */}

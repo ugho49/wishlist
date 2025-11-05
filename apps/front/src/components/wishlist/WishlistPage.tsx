@@ -117,7 +117,11 @@ export const WishlistPage = ({ wishlistId }: WishlistPageProps) => {
               <Stack gap="20px" sx={{ paddingTop: 3 }}>
                 {wishlist.description && <Description text={wishlist.description} />}
 
-                <WishlistItems wishlist={wishlist} />
+                <WishlistItems
+                  wishlist={wishlist}
+                  hasImportableItems={importableItems.length > 0}
+                  onImportItems={() => setShowImportDialog(true)}
+                />
               </Stack>
             </Container>
 

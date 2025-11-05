@@ -17,6 +17,8 @@ import { applyFilter, applySort } from './WishlistFilterAndSortItems'
 
 export type WishlistTabItemsProps = {
   wishlist: DetailedWishlistDto
+  hasImportableItems?: boolean
+  onImportItems?: () => void
 }
 
 // Image modal component
@@ -111,7 +113,7 @@ const ImageModal = ({
 
 const mapState = (state: RootState) => state.auth.user?.id
 
-export const WishlistItems = ({ wishlist }: WishlistTabItemsProps) => {
+export const WishlistItems = ({ wishlist, hasImportableItems = false, onImportItems }: WishlistTabItemsProps) => {
   const currentUserId = useSelector(mapState)
   const {
     displayAddItemFormDialog: openItemFormDialog,
@@ -164,6 +166,8 @@ export const WishlistItems = ({ wishlist }: WishlistTabItemsProps) => {
           sx={{ marginTop: '50px' }}
           onAddItem={() => setOpenItemFormDialog(true)}
           isOwner={ownerOfTheList}
+          hasImportableItems={hasImportableItems}
+          onImportItems={onImportItems}
         />
       )}
 
