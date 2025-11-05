@@ -15,8 +15,8 @@ import { useTheme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import { DataGrid } from '@mui/x-data-grid'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { SecretSantaDrawService, SecretSantaStatus } from '@wishlist/common'
-import { DateTime } from 'luxon'
+import { SecretSantaDrawService, SecretSantaStatus, parseISO } from '@wishlist/common'
+import { isBefore } from 'date-fns'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { useApi, useToast } from '../../hooks'
@@ -49,7 +49,7 @@ export const SecretSanta = ({ secretSanta, event }: SecretSantaProps) => {
   const [secretSantaUsers, setSecretSantaUsers] = useState(secretSanta.users || [])
   const eventAttendees = useMemo(() => event.attendees || [], [event])
   const eventId = event.id
-  const eventInPast = DateTime.fromISO(event.event_date) < DateTime.now()
+  const eventInPast = isBefore(parseISO(event.event_date), new Date())
 
   useEffect(() => {
     setStatus(secretSanta.status)

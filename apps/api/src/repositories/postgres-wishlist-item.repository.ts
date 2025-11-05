@@ -2,9 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common'
 import { DatabaseService, DrizzleTransaction } from '@wishlist/api/core'
 import { NewItemsForWishlist, WishlistItem, WishlistItemRepository } from '@wishlist/api/item'
 import { schema } from '@wishlist/api-drizzle'
-import { ItemId, UserId, uuid, WishlistId } from '@wishlist/common'
+import { ItemId, UserId, uuid, WishlistId, subtractMonths } from '@wishlist/common'
 import { and, eq, gt, inArray, isNull, ne, sql } from 'drizzle-orm'
-import { DateTime } from 'luxon'
 
 import { PostgresUserRepository } from './postgres-user.repository'
 
@@ -83,7 +82,7 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
 
   async findImportableItems(params: { userId: UserId; wishlistId: WishlistId }): Promise<WishlistItem[]> {
     const { userId, wishlistId } = params
-    const twoMonthsAgo = DateTime.now().minus({ months: 2 }).toJSDate()
+    const twoMonthsAgo = subtractMonths(new Date(), 2)
 
     // Find all wishlists of the user where all linked events are finished more than 2 months ago
     const eligibleWishlistsSubquery = this.databaseService.db

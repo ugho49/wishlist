@@ -20,7 +20,9 @@ import { AttendeeRole } from '@wishlist/common'
 import { ConfirmButton } from '@wishlist/front-components/common/ConfirmButton'
 import { WishlistDatePicker } from '@wishlist/front-components/common/DatePicker'
 import { EmojiSelectorWithBadge } from '@wishlist/front-components/common/EmojiSelectorWithBadge'
-import { DateTime } from 'luxon'
+import { parseISO } from '@wishlist/common'
+import { format } from 'date-fns'
+import { fr } from 'date-fns/locale/fr'
 import { useEffect, useMemo } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import z from 'zod'
@@ -43,7 +45,7 @@ const schema = z.object({
   title: z.string().min(1, 'Le titre est requis').max(100, '100 caractères maximum'),
   description: z.string().max(2000, '2000 caractères maximum').optional(),
   eventDate: z
-    .custom<DateTime>()
+    .custom<Date>()
     .nullable()
     .refine(date => date !== null, "La date de l'événement est requise"),
 })
@@ -184,18 +186,17 @@ export const AdminEventPage = ({ eventId }: AdminEventPageProps) => {
     if (event) {
       setValue('title', event.title)
       setValue('description', event.description)
-      setValue('eventDate', DateTime.fromISO(event.event_date))
+      setValue('eventDate', parseISO(event.event_date))
       setValue('icon', event.icon)
     }
   }, [event, setValue])
 
   const onSubmit = async (data: FormFields) => {
-    const isoDate = data.eventDate!.toISODate()!
     const body: UpdateEventInputDto = {
       title: data.title,
       description: data.description === '' ? undefined : data.description,
       icon: data.icon,
-      event_date: new Date(isoDate),
+      event_date: data.eventDate!,
     }
     await updateEvent(body)
   }
@@ -234,9 +235,7 @@ export const AdminEventPage = ({ eventId }: AdminEventPageProps) => {
                   </ListItemIcon>
                   <ListItemText
                     primary="Créé le"
-                    secondary={DateTime.fromISO(event?.created_at || '').toLocaleString(
-                      DateTime.DATETIME_MED_WITH_SECONDS,
-                    )}
+                    secondary={format(parseISO(event?.created_at || ''), 'PPpp', { locale: fr })}
                   />
                 </ListItem>
               </List>

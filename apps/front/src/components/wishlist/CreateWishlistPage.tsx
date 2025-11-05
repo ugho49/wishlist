@@ -30,9 +30,10 @@ import {
 } from '@mui/material'
 import { useMutation } from '@tanstack/react-query'
 import { useNavigate, useSearch } from '@tanstack/react-router'
-import { MAX_EVENTS_BY_LIST } from '@wishlist/common'
+import { MAX_EVENTS_BY_LIST, parseISO } from '@wishlist/common'
 import uniq from 'lodash/uniq'
-import { DateTime } from 'luxon'
+import { format } from 'date-fns'
+import { fr } from 'date-fns/locale/fr'
 import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useInterval } from 'usehooks-ts'
@@ -338,7 +339,7 @@ export const CreateWishlistPage = () => {
                             </ListItemAvatar>
                             <ListItemText
                               primary={<b>{event.title}</b>}
-                              secondary={DateTime.fromISO(event.event_date).toLocaleString(DateTime.DATE_MED)}
+                              secondary={format(parseISO(event.event_date), 'PPP', { locale: fr })}
                             />
                           </ListItemButton>
                         </ListItem>

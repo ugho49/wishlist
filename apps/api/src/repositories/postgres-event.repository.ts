@@ -2,9 +2,8 @@ import { Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { DatabaseService, DrizzleTransaction } from '@wishlist/api/core'
 import { Event, EventAttendeeRepository, EventRepository } from '@wishlist/api/event'
 import { schema } from '@wishlist/api-drizzle'
-import { EventId, UserId, uuid } from '@wishlist/common'
+import { EventId, UserId, uuid, formatISODate } from '@wishlist/common'
 import { and, count, desc, eq, gte, inArray, SelectedFields } from 'drizzle-orm'
-import { DateTime } from 'luxon'
 
 import { PostgresEventAttendeeRepository } from './postgres-event-attendee.repository'
 import { REPOSITORIES } from './repositories.constants'
@@ -90,7 +89,7 @@ export class PostgresEventRepository implements EventRepository {
         .where(
           and(
             eq(schema.eventAttendee.userId, params.userId),
-            ...(params.onlyFuture ? [gte(schema.event.eventDate, DateTime.now().toISODate())] : []),
+            ...(params.onlyFuture ? [gte(schema.event.eventDate, formatISODate(new Date()))] : []),
           ),
         )
 

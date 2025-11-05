@@ -6,7 +6,7 @@ import SaveIcon from '@mui/icons-material/Save'
 import { Box, Button, Stack, TextField } from '@mui/material'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
-import { DateTime } from 'luxon'
+import { formatISO, parseISO } from '@wishlist/common'
 import { Controller, useForm } from 'react-hook-form'
 import { z } from 'zod'
 
@@ -24,7 +24,7 @@ const schema = z.object({
   title: z.string().min(1, 'Le titre est requis').max(100, '100 caractères maximum'),
   description: z.string().max(2000, '2000 caractères maximum').optional(),
   eventDate: z
-    .custom<DateTime>()
+    .custom<Date>()
     .nullable()
     .refine(date => date !== null, "La date de l'événement est requise"),
 })
@@ -52,7 +52,7 @@ export const EditEventInformations = ({ event }: EditEventInformationsProps) => 
     defaultValues: {
       title: event.title,
       description: event.description || '',
-      eventDate: DateTime.fromISO(event.event_date),
+      eventDate: parseISO(event.event_date),
       icon: event.icon,
     },
   })
@@ -83,12 +83,11 @@ export const EditEventInformations = ({ event }: EditEventInformationsProps) => 
   })
 
   const onSubmit = async (data: FormFields) => {
-    const isoDate = data.eventDate!.toISODate()!
     const body: UpdateEventInputDto = {
       title: data.title,
       description: data.description === '' ? undefined : data.description,
       icon: data.icon,
-      event_date: new Date(isoDate),
+      event_date: data.eventDate!,
     }
     await updateEvent(body)
   }

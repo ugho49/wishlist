@@ -2,7 +2,8 @@ import 'reflect-metadata'
 
 import { CssBaseline, ThemeProvider } from '@mui/material'
 import { LocalizationProvider } from '@mui/x-date-pickers'
-import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon'
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
+import { fr } from 'date-fns/locale/fr'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { RouterProvider } from '@tanstack/react-router'
@@ -55,7 +56,7 @@ function main() {
           <ReduxProvider store={store}>
             <ThemeProvider theme={theme}>
               <CssBaseline />
-              <LocalizationProvider dateAdapter={AdapterLuxon} adapterLocale="fr">
+              <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={fr}>
                 <RouterProvider router={router} context={{ queryClient }} />
                 <TanStackRouterDevtools router={router} />
               </LocalizationProvider>

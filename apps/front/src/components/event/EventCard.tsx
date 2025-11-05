@@ -2,8 +2,10 @@ import type { EventWithCountsDto } from '@wishlist/common'
 
 import { styled } from '@mui/material'
 import { useNavigate } from '@tanstack/react-router'
+import { parseISO } from '@wishlist/common'
 import clsx from 'clsx'
-import { DateTime } from 'luxon'
+import { format, isBefore, subDays } from 'date-fns'
+import { fr } from 'date-fns/locale/fr'
 
 import { Card } from '../common/Card'
 import { EventIcon } from './EventIcon'
@@ -97,7 +99,7 @@ export type EventCardProps = {
 
 export const EventCard = ({ event }: EventCardProps) => {
   const numberOfAttendees = event.attendees.length
-  const past = DateTime.fromISO(event.event_date) < DateTime.now().minus({ days: 1 })
+  const past = isBefore(parseISO(event.event_date), subDays(new Date(), 1))
   const navigate = useNavigate()
 
   return (
@@ -111,7 +113,7 @@ export const EventCard = ({ event }: EventCardProps) => {
         <EventTextContent>
           <EventTitle className="event-title">{event.title}</EventTitle>
           <EventDate className="event-date">
-            {DateTime.fromISO(event.event_date).toLocaleString(DateTime.DATE_MED)}
+            {format(parseISO(event.event_date), 'PPP', { locale: fr })}
           </EventDate>
         </EventTextContent>
       </EventHeader>

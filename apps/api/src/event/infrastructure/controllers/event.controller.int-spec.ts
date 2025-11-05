@@ -1,8 +1,7 @@
 import type { RequestApp } from '@wishlist/api-test-utils'
 
 import { Fixtures, useTestApp, useTestMail } from '@wishlist/api-test-utils'
-import { uuid } from '@wishlist/common'
-import { DateTime } from 'luxon'
+import { addDays, addYears, formatISODate, subtractDays, uuid } from '@wishlist/common'
 
 describe('EventController', () => {
   const { getRequest, getFixtures, expectTable } = useTestApp()
@@ -31,11 +30,11 @@ describe('EventController', () => {
       })
 
       it('should return events when user is maintainer attendee', async () => {
-        const event1Date = DateTime.now().plus({ days: 1 })
+        const event1Date = addDays(new Date(), 1)
         const { eventId: eventId1, attendeeId: maintainerAttendeeId } = await fixtures.insertEventWithMaintainer({
           title: 'Event1',
           description: 'Description1',
-          eventDate: event1Date.toJSDate(),
+          eventDate: event1Date,
           maintainerId: currentUserId,
         })
 
@@ -60,7 +59,7 @@ describe('EventController', () => {
                   id: eventId1,
                   title: 'Event1',
                   description: 'Description1',
-                  event_date: event1Date.toISODate(),
+                  event_date: formatISODate(event1Date),
                   nb_wishlists: 2,
                   attendees: [
                     {
@@ -89,11 +88,11 @@ describe('EventController', () => {
       })
 
       it('should return events when user is attendee of 2 different events', async () => {
-        const event1Date = DateTime.now().plus({ days: 1 })
+        const event1Date = addDays(new Date(), 1)
         const { eventId: eventId1 } = await fixtures.insertEventWithMaintainer({
           title: 'Event1',
           description: 'Description1',
-          eventDate: event1Date.toJSDate(),
+          eventDate: event1Date,
           maintainerId: currentUserId,
         })
 
@@ -102,7 +101,7 @@ describe('EventController', () => {
           firstname: 'User2',
           lastname: 'USER2',
         })
-        const event2Date = DateTime.now().plus({ year: 1 }).toJSDate()
+        const event2Date = addYears(new Date(), 1)
         const { eventId: eventId2 } = await fixtures.insertEventWithMaintainer({
           title: 'Event2',
           description: 'Description2',
@@ -231,8 +230,8 @@ describe('EventController', () => {
                 description: `Description${i}`,
                 eventDate:
                   i % 2 === 0
-                    ? DateTime.now().plus({ days: 1 }).toJSDate()
-                    : DateTime.now().minus({ days: 1 }).toJSDate(),
+                    ? addDays(new Date(), 1)
+                    : subtractDays(new Date(), 1),
                 maintainerId: currentUserId,
               }),
             )
@@ -255,8 +254,8 @@ describe('EventController', () => {
         })
 
         it('should return future events first and then past events (ordered by event date and creation date)', async () => {
-          const tomorrow = DateTime.now().plus({ days: 1 }).toJSDate()
-          const yesterday = DateTime.now().minus({ days: 1 }).toJSDate()
+          const tomorrow = addDays(new Date(), 1)
+          const yesterday = subtractDays(new Date(), 1)
 
           for (let i = 0; i < 2; i++) {
             await fixtures.insertEventWithMaintainer({
@@ -350,11 +349,11 @@ describe('EventController', () => {
           firstname: 'User2',
           lastname: 'USER2',
         })
-        const eventDate = DateTime.now().plus({ days: 1 })
+        const eventDate = addDays(new Date(), 1)
         const { eventId, attendeeId: maintainerAttendeeId } = await fixtures.insertEventWithMaintainer({
           title: 'Event1',
           description: 'Description1',
-          eventDate: eventDate.toJSDate(),
+          eventDate: eventDate,
           maintainerId: currentUserId,
         })
 
@@ -380,7 +379,7 @@ describe('EventController', () => {
               id: eventId,
               title: 'Event1',
               description: 'Description1',
-              event_date: eventDate.toISODate(),
+              event_date: formatISODate(eventDate),
               wishlists: [
                 {
                   id: wishlistId,
@@ -469,7 +468,7 @@ describe('EventController', () => {
         .send({
           title: 'Test Event',
           description: 'Test Description',
-          event_date: DateTime.now().plus({ days: 1 }).toISODate(),
+          event_date: formatISODate(addDays(new Date(), 1)),
         })
         .expect(401)
     })
@@ -504,7 +503,7 @@ describe('EventController', () => {
           body: {
             title: 'Valid Title',
             description: 'a'.repeat(2001),
-            event_date: DateTime.now().plus({ days: 1 }).toISODate(),
+            event_date: formatISODate(addDays(new Date(), 1)),
           },
           case: 'description too long',
           message: ['description must be shorter than or equal to 2000 characters'],
@@ -512,7 +511,7 @@ describe('EventController', () => {
         {
           body: {
             title: 'Valid Title',
-            event_date: DateTime.now().minus({ days: 1 }).toISODate(),
+            event_date: formatISODate(subtractDays(new Date(), 1)),
           },
           case: 'event_date in the past',
           message: ['event_date must not be earlier than today'],
@@ -528,7 +527,7 @@ describe('EventController', () => {
         {
           body: {
             title: 'Valid Title',
-            event_date: DateTime.now().plus({ days: 1 }).toISODate(),
+            event_date: formatISODate(addDays(new Date(), 1)),
             attendees: [{ email: 'invalid-email' }],
           },
           case: 'invalid attendee email',
@@ -537,7 +536,7 @@ describe('EventController', () => {
         {
           body: {
             title: 'Valid Title',
-            event_date: DateTime.now().plus({ days: 1 }).toISODate(),
+            event_date: formatISODate(addDays(new Date(), 1)),
             attendees: [{ email: 'test@test.com', role: 'invalid-role' }],
           },
           case: 'invalid attendee role',
@@ -547,7 +546,7 @@ describe('EventController', () => {
           body: {
             title: 'Valid Title',
             icon: 'not-an-emoji',
-            event_date: DateTime.now().plus({ days: 1 }).toISODate(),
+            event_date: formatISODate(addDays(new Date(), 1)),
           },
           case: 'invalid icon',
           message: ['icon must be a valid emoji'],
@@ -563,7 +562,7 @@ describe('EventController', () => {
       })
 
       it('should create event successfully', async () => {
-        const eventDate = DateTime.now().plus({ days: 1 }).toISODate()
+        const eventDate = formatISODate(addDays(new Date(), 1))
 
         const response = await request
           .post(path)
@@ -616,7 +615,7 @@ describe('EventController', () => {
           lastname: 'USER1',
         })
 
-        const eventDate = DateTime.now().plus({ days: 1 }).toISODate()
+        const eventDate = formatISODate(addDays(new Date(), 1))
 
         const eventData = {
           title: 'Test Event',
@@ -700,7 +699,7 @@ describe('EventController', () => {
         .send({
           title: 'Updated Event',
           description: 'Updated Description',
-          event_date: DateTime.now().plus({ days: 1 }).toISODate(),
+          event_date: formatISODate(addDays(new Date(), 1)),
         })
         .expect(401)
     })
@@ -720,7 +719,7 @@ describe('EventController', () => {
           .send({
             title: 'Updated Event',
             description: 'Updated Description',
-            event_date: DateTime.now().plus({ days: 1 }).toISODate(),
+            event_date: formatISODate(addDays(new Date(), 1)),
           })
           .expect(404)
       })
@@ -743,7 +742,7 @@ describe('EventController', () => {
           .send({
             title: 'Updated Event',
             description: 'Updated Description',
-            event_date: DateTime.now().plus({ days: 1 }).toISODate(),
+            event_date: formatISODate(addDays(new Date(), 1)),
           })
           .expect(401)
       })
@@ -768,7 +767,7 @@ describe('EventController', () => {
           body: {
             title: 'Valid Title',
             description: 'a'.repeat(2001),
-            event_date: DateTime.now().plus({ days: 1 }).toISODate(),
+            event_date: formatISODate(addDays(new Date(), 1)),
           },
           case: 'description too long',
           message: ['description must be shorter than or equal to 2000 characters'],
@@ -776,7 +775,7 @@ describe('EventController', () => {
         {
           body: {
             title: 'Valid Title',
-            event_date: DateTime.now().minus({ days: 1 }).toISODate(),
+            event_date: formatISODate(subtractDays(new Date(), 1)),
           },
           case: 'event_date in the past',
           message: ['event_date must not be earlier than today'],
@@ -793,7 +792,7 @@ describe('EventController', () => {
           body: {
             title: 'Valid Title',
             icon: 'not-an-emoji',
-            event_date: DateTime.now().plus({ days: 1 }).toISODate(),
+            event_date: formatISODate(addDays(new Date(), 1)),
           },
           case: 'invalid icon',
           message: ['icon must be a valid emoji'],
@@ -825,7 +824,7 @@ describe('EventController', () => {
           title: 'Updated Event',
           description: 'Updated Description',
           icon: '🚀',
-          event_date: DateTime.now().plus({ days: 2 }).toISODate(),
+          event_date: formatISODate(addDays(new Date(), 2)),
         }
 
         await request.put(path(eventId)).send(updateData).expect(200)
@@ -847,13 +846,13 @@ describe('EventController', () => {
         const { eventId } = await fixtures.insertEventWithMaintainer({
           title: 'Original Event',
           description: 'Original Description',
-          eventDate: DateTime.now().plus({ days: 1 }).toJSDate(),
+          eventDate: addDays(new Date(), 1),
           maintainerId: currentUserId,
         })
 
         const updateData = {
           title: 'Updated Event',
-          event_date: DateTime.now().plus({ days: 2 }).toISODate(),
+          event_date: formatISODate(addDays(new Date(), 2)),
         }
 
         await request.put(path(eventId)).send(updateData).expect(200)

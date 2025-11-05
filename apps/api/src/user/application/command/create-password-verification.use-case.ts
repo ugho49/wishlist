@@ -2,7 +2,7 @@ import { Inject, NotFoundException, UnauthorizedException } from '@nestjs/common
 import { ConfigType } from '@nestjs/config'
 import { CommandHandler, EventBus, IInferredCommandHandler } from '@nestjs/cqrs'
 import { REPOSITORIES } from '@wishlist/api/repositories'
-import { DateTime } from 'luxon'
+import { addMinutes } from '@wishlist/common'
 
 import {
   CreatePasswordVerificationCommand,
@@ -42,7 +42,7 @@ export class CreatePasswordVerificationUseCase implements IInferredCommandHandle
     const passwordVerification = UserPasswordVerification.create({
       id: this.verificationEntityRepository.newId(),
       user,
-      expiredAt: DateTime.now().plus({ minute: this.config.resetPasswordTokenDurationInMinutes }).toJSDate(),
+      expiredAt: addMinutes(new Date(), this.config.resetPasswordTokenDurationInMinutes),
     })
 
     await this.verificationEntityRepository.save(passwordVerification)

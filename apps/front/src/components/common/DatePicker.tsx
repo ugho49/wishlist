@@ -1,14 +1,14 @@
 import type { MobileDatePickerProps } from '@mui/x-date-pickers'
-import type { DateTime } from 'luxon'
 
 import { TextField } from '@mui/material'
 import { MobileDatePicker } from '@mui/x-date-pickers'
+import { format } from 'date-fns'
 import { useState } from 'react'
 
 export type WishlistDatePickerProps = {
-  value: DateTime | null
-  minDate?: DateTime
-  onChange: (date: DateTime | null) => void
+  value: Date | null
+  minDate?: Date
+  onChange: (date: Date | null) => void
   inputRef?: MobileDatePickerProps['inputRef']
   format?: MobileDatePickerProps['format']
   label?: MobileDatePickerProps['label']
@@ -28,7 +28,7 @@ export const WishlistDatePicker = ({
   value,
   minDate,
   inputRef,
-  format,
+  format: dateFormat,
   label,
   disabled,
   onChange,
@@ -55,13 +55,13 @@ export const WishlistDatePicker = ({
           input: { readOnly: true },
         }}
         placeholder={placeholder}
-        value={value ? value.toFormat(format || 'dd/MM/yyyy') : ''}
+        value={value ? format(value, dateFormat || 'dd/MM/yyyy') : ''}
         onClick={() => !disabled && setDatePickerOpen(true)}
         sx={{ cursor: disabled ? 'default' : 'pointer' }}
       />
 
       <MobileDatePicker
-        format={format}
+        format={dateFormat}
         value={value}
         disabled={disabled}
         open={datePickerOpen}

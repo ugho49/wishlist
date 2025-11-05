@@ -4,8 +4,9 @@ import dotenv from 'dotenv'
 import { drizzle } from 'drizzle-orm/node-postgres'
 import { reset } from 'drizzle-seed'
 import { sample } from 'lodash'
-import { DateTime } from 'luxon'
 import { Client } from 'pg'
+
+import { addDays, addYears } from '../../../libs/common/src/utils/date.utils'
 
 import { PasswordManager } from '../src/auth/infrastructure/util/password-manager'
 import * as schema from './schema'
@@ -135,8 +136,8 @@ async function main() {
         ? faker.date.past().toISOString()
         : faker.date
             .between({
-              from: DateTime.now().plus({ days: 1 }).toJSDate(),
-              to: DateTime.now().plus({ years: 1 }).toJSDate(),
+              from: addDays(new Date(), 1),
+              to: addYears(new Date(), 1),
             })
             .toISOString(),
       description: hasDescription ? faker.lorem.paragraph() : undefined,

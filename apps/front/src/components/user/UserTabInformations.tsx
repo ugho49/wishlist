@@ -5,7 +5,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import SaveIcon from '@mui/icons-material/Save'
 import { Box, Button, Stack, TextField } from '@mui/material'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { DateTime } from 'luxon'
+import { parseISO } from '@wishlist/common'
+import { subYears } from 'date-fns'
 import { Controller, useForm } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
 import { z } from 'zod'
@@ -23,7 +24,7 @@ const mapState = (state: RootState) => state.userProfile
 const schema = z.object({
   firstname: zodRequiredString().max(50, '50 caractères maximum'),
   lastname: zodRequiredString().max(50, '50 caractères maximum'),
-  birthday: z.custom<DateTime>().nullable(),
+  birthday: z.custom<Date>().nullable(),
 })
 
 type FormFields = z.infer<typeof schema>
@@ -45,7 +46,7 @@ export const UserTabInformations = () => {
     values: {
       firstname: userState.firstName || '',
       lastname: userState.lastName || '',
-      birthday: userState.birthday ? DateTime.fromISO(userState.birthday) : null,
+      birthday: userState.birthday ? parseISO(userState.birthday) : null,
     },
   })
 
@@ -59,7 +60,7 @@ export const UserTabInformations = () => {
       queryClient.setQueryData(['user'], (old: UserDto) => ({
         ...old,
         ...data,
-        birthday: data.birthday ? DateTime.fromJSDate(data.birthday) : null,
+        birthday: data.birthday ? data.birthday : null,
       }))
 
       dispatch(
@@ -76,7 +77,7 @@ export const UserTabInformations = () => {
     update({
       firstname: data.firstname,
       lastname: data.lastname,
-      birthday: data.birthday !== null ? new Date(data.birthday.toISODate() || '') : undefined,
+      birthday: data.birthday ?? undefined,
     })
 
   return (
@@ -122,7 +123,7 @@ export const UserTabInformations = () => {
                 value={field.value}
                 inputRef={field.ref}
                 disabled={field.disabled}
-                referenceDate={DateTime.now().minus({ year: 30 })}
+                referenceDate={subYears(new Date(), 30)}
                 onChange={date => field.onChange(date)}
                 disableFuture
                 fullWidth

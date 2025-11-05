@@ -2558,6 +2558,27 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@date-io/core@npm:^3.2.0":
+  version: 3.2.0
+  resolution: "@date-io/core@npm:3.2.0"
+  checksum: 10c0/e320e5eb1dc5cdafbebdb5b3a4c80fcf18cef1ccf39bd57e63de7826c966b89814c984b59f7fb1fc3f7650859fb0ba890e39b0e77bfb671f4b01991432ccc06e
+  languageName: node
+  linkType: hard
+
+"@date-io/date-fns@npm:^3.2.1":
+  version: 3.2.1
+  resolution: "@date-io/date-fns@npm:3.2.1"
+  dependencies:
+    "@date-io/core": "npm:^3.2.0"
+  peerDependencies:
+    date-fns: ^3.2.0 || ^4.1.0
+  peerDependenciesMeta:
+    date-fns:
+      optional: true
+  checksum: 10c0/fe489ce51599264ec6d0e64d0a1675220cea4123568320fe58c2c6e8f2b6cea0124e4ee7fccfbc905173bd98b841948cde1030023517da8ed2d54a133513e19d
+  languageName: node
+  linkType: hard
+
 "@discoveryjs/json-ext@npm:^0.6.1":
   version: 0.6.3
   resolution: "@discoveryjs/json-ext@npm:0.6.3"
@@ -8494,7 +8515,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/luxon@npm:3.7.1, @types/luxon@npm:~3.7.0":
+"@types/luxon@npm:~3.7.0":
   version: 3.7.1
   resolution: "@types/luxon@npm:3.7.1"
   checksum: 10c0/2db30c13b58adcd86daa447faa3ba59515fe907ead8ee3e6bb716d662812af0619d712f6c1eb190cdd7f9d2c00444c3ecd80af0f36e8143eb0c5e7339d6b2aca
@@ -9363,6 +9384,7 @@ __metadata:
     "@bull-board/nestjs": "npm:6.14.0"
     "@commitlint/cli": "npm:20.1.0"
     "@commitlint/config-conventional": "npm:20.0.0"
+    "@date-io/date-fns": "npm:^3.2.1"
     "@emoji-mart/data": "npm:1.2.1"
     "@emoji-mart/react": "npm:1.1.1"
     "@emotion/react": "npm:11.14.0"
@@ -9410,7 +9432,6 @@ __metadata:
     "@testing-library/react": "npm:16.3.0"
     "@types/bcrypt": "npm:6.0.0"
     "@types/lodash": "npm:4.17.20"
-    "@types/luxon": "npm:3.7.1"
     "@types/mjml": "npm:4.7.4"
     "@types/multer": "npm:2.0.0"
     "@types/node": "npm:24.9.1"
@@ -9435,6 +9456,7 @@ __metadata:
     clsx: "npm:2.1.1"
     consola: "npm:3.4.2"
     core-js: "npm:3.46.0"
+    date-fns: "npm:^4.1.0"
     dd-trace: "npm:5.74.0"
     drizzle-kit: "npm:0.31.5"
     drizzle-orm: "npm:0.44.7"
@@ -9455,7 +9477,6 @@ __metadata:
     launchdarkly-react-client-sdk: "npm:3.9.0"
     lint-staged: "npm:16.2.6"
     lodash: "npm:4.17.21"
-    luxon: "npm:3.7.2"
     mjml: "npm:4.16.1"
     nestjs-real-ip: "npm:3.0.1"
     node-gyp: "npm:11.5.0"
@@ -12148,6 +12169,13 @@ __metadata:
     whatwg-mimetype: "npm:^4.0.0"
     whatwg-url: "npm:^15.0.0"
   checksum: 10c0/952102a8e6282fea112f7120d79fac482a2f99e20c67f9cb069d661c00627305b042e1f7e3cef8e4bbc795b42c5d481bbc9c6effeff5bb1427f9acaf1722bd35
+  languageName: node
+  linkType: hard
+
+"date-fns@npm:^4.1.0":
+  version: 4.1.0
+  resolution: "date-fns@npm:4.1.0"
+  checksum: 10c0/b79ff32830e6b7faa009590af6ae0fb8c3fd9ffad46d930548fbb5acf473773b4712ae887e156ba91a7b3dc30591ce0f517d69fd83bd9c38650fdc03b4e0bac8
   languageName: node
   linkType: hard
 
@@ -17240,7 +17268,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"luxon@npm:3.7.2, luxon@npm:^3.2.1, luxon@npm:~3.7.0":
+"luxon@npm:^3.2.1, luxon@npm:~3.7.0":
   version: 3.7.2
   resolution: "luxon@npm:3.7.2"
   checksum: 10c0/ed8f0f637826c08c343a29dd478b00628be93bba6f068417b1d8896b61cb61c6deacbe1df1e057dbd9298334044afa150f9aaabbeb3181418ac8520acfdc2ae2

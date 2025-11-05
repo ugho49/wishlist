@@ -3,8 +3,7 @@ import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
 import { MailService } from '@wishlist/api/core'
 import { REPOSITORIES } from '@wishlist/api/repositories'
 import { WishlistRepository } from '@wishlist/api/wishlist'
-import { WishlistId } from '@wishlist/common'
-import { DateTime } from 'luxon'
+import { WishlistId, subtractDays } from '@wishlist/common'
 
 import { NewItemsForWishlist, NotifyNewItemsCommand, WishlistItemRepository } from '../../domain'
 
@@ -20,7 +19,7 @@ export class NotifyNewItemsUseCase implements IInferredCommandHandler<NotifyNewI
 
   async execute() {
     try {
-      const oneDayAgo = DateTime.now().minus({ days: 1 }).toJSDate()
+      const oneDayAgo = subtractDays(new Date(), 1)
 
       this.logger.log(`Fetch new items to send daily notification since ${oneDayAgo.toISOString()}`)
 

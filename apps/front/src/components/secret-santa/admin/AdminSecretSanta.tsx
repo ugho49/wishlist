@@ -21,8 +21,9 @@ import {
   useTheme,
 } from '@mui/material'
 import { DataGrid } from '@mui/x-data-grid'
-import { SecretSantaStatus } from '@wishlist/common'
-import { DateTime } from 'luxon'
+import { SecretSantaStatus, parseISO } from '@wishlist/common'
+import { format } from 'date-fns'
+import { fr } from 'date-fns/locale/fr'
 import { useState } from 'react'
 
 import { eurosFormatter } from '../../../utils/currency.utils'
@@ -90,9 +91,7 @@ export const AdminSecretSanta = ({
             </ListItemIcon>
             <ListItemText
               primary="Créé le"
-              secondary={DateTime.fromISO(secretSanta.created_at || '').toLocaleString(
-                DateTime.DATETIME_MED_WITH_SECONDS,
-              )}
+              secondary={format(parseISO(secretSanta.created_at || ''), 'PPpp', { locale: fr })}
             />
           </ListItem>
           <ListItem>

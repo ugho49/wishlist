@@ -3,7 +3,7 @@ import type { DetailedEventDto, EventWithCountsDto, MiniEventDto } from '@wishli
 import type { Event } from '../domain'
 
 import { wishlistMapper } from '@wishlist/api/wishlist'
-import { DateTime } from 'luxon'
+import { formatISODate } from '@wishlist/common'
 
 import { eventAttendeeMapper } from './event-attendee.mapper'
 
@@ -13,7 +13,7 @@ function toMiniEventDto(event: Event): MiniEventDto {
     title: event.title,
     description: event.description,
     icon: event.icon,
-    event_date: DateTime.fromJSDate(event.eventDate).toISODate() || '',
+    event_date: formatISODate(event.eventDate),
   }
 }
 

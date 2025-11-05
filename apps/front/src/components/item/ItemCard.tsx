@@ -26,8 +26,10 @@ import {
 } from '@mui/material'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate, useSearch } from '@tanstack/react-router'
+import { parseISO } from '@wishlist/common'
 import clsx from 'clsx'
-import { DateTime } from 'luxon'
+import { formatDistanceToNow } from 'date-fns'
+import { fr } from 'date-fns/locale/fr'
 import React, { useCallback, useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
 
@@ -520,7 +522,7 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
           style={{ justifyContent: shouldShowReserveButton && isReservedByCurrentUser ? 'space-between' : 'center' }}
         >
           <DateContainer>
-            <Typography variant="caption">Ajouté {DateTime.fromISO(item.created_at).toRelative()}</Typography>
+            <Typography variant="caption">Ajouté {formatDistanceToNow(parseISO(item.created_at), { addSuffix: true, locale: fr })}</Typography>
           </DateContainer>
 
           {/* Release button in footer when item is reserved by current user */}

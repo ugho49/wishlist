@@ -8,7 +8,8 @@ import { useQuery } from '@tanstack/react-query'
 import { useNavigate, useSearch } from '@tanstack/react-router'
 import { Card } from '@wishlist/front-components/common/Card'
 import { Title } from '@wishlist/front-components/common/Title'
-import { DateTime } from 'luxon'
+import { format } from 'date-fns'
+import { fr } from 'date-fns/locale/fr'
 import { useEffect, useState } from 'react'
 
 import { useApi } from '../../../hooks'
@@ -56,7 +57,7 @@ const columns: GridColDef<UserWithoutSocialsDto>[] = [
     type: 'dateTime',
     width: 200,
     valueGetter: (_, row) => new Date(row.created_at),
-    renderCell: ({ value }) => DateTime.fromJSDate(value).toLocaleString(DateTime.DATETIME_MED),
+    renderCell: ({ value }) => format(value, 'PPp', { locale: fr }),
   },
 ]
 

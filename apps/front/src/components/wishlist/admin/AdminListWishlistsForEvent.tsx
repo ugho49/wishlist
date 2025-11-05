@@ -4,7 +4,8 @@ import type { WishlistWithOwnerDto } from '@wishlist/common'
 import ListIcon from '@mui/icons-material/List'
 import { Avatar } from '@mui/material'
 import { DataGrid } from '@mui/x-data-grid'
-import { DateTime } from 'luxon'
+import { format } from 'date-fns'
+import { fr } from 'date-fns/locale/fr'
 
 import { RouterLink } from '../../common/RouterLink'
 
@@ -51,7 +52,7 @@ const columns: GridColDef<WishlistWithOwnerDto>[] = [
     type: 'dateTime',
     width: 200,
     valueGetter: (_, row) => new Date(row.created_at),
-    renderCell: ({ value }) => DateTime.fromJSDate(value).toLocaleString(DateTime.DATETIME_MED),
+    renderCell: ({ value }) => format(value, 'PPp', { locale: fr }),
   },
 ]
 

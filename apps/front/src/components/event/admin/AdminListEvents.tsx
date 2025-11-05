@@ -5,7 +5,8 @@ import { DataGrid } from '@mui/x-data-grid'
 import { useNavigate } from '@tanstack/react-router'
 import { AttendeeRole } from '@wishlist/common'
 import { useAdminEvents } from '@wishlist/front-hooks'
-import { DateTime } from 'luxon'
+import { format } from 'date-fns'
+import { fr } from 'date-fns/locale/fr'
 
 import { EventIcon } from '../EventIcon'
 
@@ -26,7 +27,7 @@ const columns: GridColDef<EventWithCountsDto>[] = [
     type: 'dateTime',
     width: 100,
     valueGetter: (_, row) => new Date(row.event_date),
-    renderCell: ({ value }) => DateTime.fromJSDate(value).toLocaleString(DateTime.DATE_SHORT),
+    renderCell: ({ value }) => format(value, 'P', { locale: fr }),
   },
   {
     field: '',
@@ -57,7 +58,7 @@ const columns: GridColDef<EventWithCountsDto>[] = [
     type: 'dateTime',
     width: 200,
     valueGetter: (_, row) => new Date(row.created_at),
-    renderCell: ({ value }) => DateTime.fromJSDate(value).toLocaleString(DateTime.DATETIME_MED),
+    renderCell: ({ value }) => format(value, 'PPp', { locale: fr }),
   },
 ]
 

@@ -1,8 +1,9 @@
 import type { MiniEventDto } from '@wishlist/common'
 
 import { Autocomplete, ListItemAvatar, ListItemText, Stack, TextField } from '@mui/material'
-import { MAX_EVENTS_BY_LIST } from '@wishlist/common'
-import { DateTime } from 'luxon'
+import { MAX_EVENTS_BY_LIST, parseISO } from '@wishlist/common'
+import { format } from 'date-fns'
+import { fr } from 'date-fns/locale/fr'
 
 import { EventIcon } from './EventIcon'
 
@@ -48,7 +49,7 @@ export const SearchEventSelect = ({
             </ListItemAvatar>
             <ListItemText
               primary={<b>{option.title}</b>}
-              secondary={DateTime.fromISO(option.event_date).toLocaleString(DateTime.DATE_MED)}
+              secondary={format(parseISO(option.event_date), 'PPP', { locale: fr })}
             />
           </Stack>
         </li>

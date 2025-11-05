@@ -1,5 +1,4 @@
 import type { MiniUserDto } from '@wishlist/common'
-import type { DateTime } from 'luxon'
 import type { RootState } from '../../core'
 
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -53,7 +52,7 @@ const schema = z.object({
   title: z.string().min(1, 'Le titre est requis').max(100, '100 caractères maximum'),
   description: z.string().max(2000, '2000 caractères maximum').optional(),
   eventDate: z
-    .custom<DateTime>()
+    .custom<Date>()
     .nullable()
     .refine(date => date !== null, "La date de l'événement est requise"),
 })
@@ -100,12 +99,11 @@ export const CreateEventPage = () => {
   const { mutateAsync: createEvent, isPending: loading } = useMutation({
     mutationKey: ['event.create'],
     mutationFn: () => {
-      const isoDate = formValues.eventDate!.toISODate()!
       return api.event.create({
         title: formValues.title,
         description: formValues.description === '' ? undefined : formValues.description,
         icon: formValues.icon,
-        event_date: new Date(isoDate),
+        event_date: formValues.eventDate!,
         attendees: attendees.map(attendee => ({
           email: typeof attendee.user === 'string' ? attendee.user : attendee.user.email,
           role: attendee.role,

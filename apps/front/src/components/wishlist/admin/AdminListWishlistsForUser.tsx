@@ -5,7 +5,8 @@ import ListIcon from '@mui/icons-material/List'
 import { Avatar, Stack } from '@mui/material'
 import { DataGrid } from '@mui/x-data-grid'
 import { useQuery } from '@tanstack/react-query'
-import { DateTime } from 'luxon'
+import { format } from 'date-fns'
+import { fr } from 'date-fns/locale/fr'
 import { useEffect, useState } from 'react'
 
 import { useApi } from '../../../hooks'
@@ -60,7 +61,7 @@ const columns: GridColDef<WishlistWithEventsDto>[] = [
     type: 'dateTime',
     width: 200,
     valueGetter: (_, row) => new Date(row.created_at),
-    renderCell: ({ value }) => DateTime.fromJSDate(value).toLocaleString(DateTime.DATETIME_MED),
+    renderCell: ({ value }) => format(value, 'PPp', { locale: fr }),
   },
 ]
 

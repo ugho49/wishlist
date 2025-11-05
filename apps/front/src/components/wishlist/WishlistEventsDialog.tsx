@@ -15,7 +15,9 @@ import {
   Stack,
 } from '@mui/material'
 import { useNavigate } from '@tanstack/react-router'
-import { DateTime } from 'luxon'
+import { parseISO } from '@wishlist/common'
+import { format } from 'date-fns'
+import { fr } from 'date-fns/locale/fr'
 
 import { RouterLink } from '../common/RouterLink'
 import { EventIcon } from '../event/EventIcon'
@@ -60,7 +62,7 @@ export const WishlistEventsDialog = ({
               </ListItemAvatar>
               <ListItemText
                 primary={<b>{event.title}</b>}
-                secondary={DateTime.fromISO(event.event_date).toLocaleString(DateTime.DATE_MED)}
+                secondary={format(parseISO(event.event_date), 'PPP', { locale: fr })}
               />
             </ListItemButton>
           ))}

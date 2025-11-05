@@ -3,8 +3,7 @@ import type { Client } from 'pg'
 import type { SignedAs } from './use-test-app'
 
 import { PasswordManager } from '@wishlist/api/auth'
-import { AttendeeRole, Authorities, uuid } from '@wishlist/common'
-import { DateTime } from 'luxon'
+import { AttendeeRole, Authorities, addDays, uuid } from '@wishlist/common'
 
 export class Fixtures {
   static readonly USER_TABLE = '"user"'
@@ -133,11 +132,11 @@ export class Fixtures {
     icon?: string
     eventDate?: Date
     maintainerId: string
-  }): Promise<{ eventId: string; attendeeId: string; eventDate: DateTime }> {
-    const eventDate = parameters.eventDate ?? DateTime.now().plus({ days: 30 }).toJSDate()
+  }): Promise<{ eventId: string; attendeeId: string; eventDate: Date }> {
+    const eventDate = parameters.eventDate ?? addDays(new Date(), 30)
     const eventId = await this.insertEvent({ ...parameters, eventDate })
     const attendeeId = await this.insertMaintainerAttendee({ eventId, userId: parameters.maintainerId })
-    return { eventId, attendeeId, eventDate: DateTime.fromJSDate(eventDate) }
+    return { eventId, attendeeId, eventDate }
   }
 
   async insertWishlist(parameters: {

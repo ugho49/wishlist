@@ -1,8 +1,7 @@
 import type { RequestApp } from '@wishlist/api-test-utils'
 
 import { Fixtures, useTestApp } from '@wishlist/api-test-utils'
-import { uuid } from '@wishlist/common'
-import { DateTime } from 'luxon'
+import { addDays, formatISODate, uuid } from '@wishlist/common'
 
 describe('WishlistController', () => {
   const { getRequest, getFixtures, expectTable } = useTestApp()
@@ -49,20 +48,20 @@ describe('WishlistController', () => {
       })
 
       it('should return user wishlists with events ordered by event creation date DESC', async () => {
-        const eventDate1 = DateTime.now().plus({ days: 1 })
+        const eventDate1 = addDays(new Date(), 1)
         const { eventId: eventId1 } = await fixtures.insertEventWithMaintainer({
           title: 'Event 1',
           description: 'Description 1',
           maintainerId: currentUserId,
-          eventDate: eventDate1.toJSDate(),
+          eventDate: eventDate1,
         })
 
-        const eventDate2 = DateTime.now().plus({ days: 2 })
+        const eventDate2 = addDays(new Date(), 2)
         const { eventId: eventId2 } = await fixtures.insertEventWithMaintainer({
           title: 'Event 2',
           description: 'Description 2',
           maintainerId: currentUserId,
-          eventDate: eventDate2.toJSDate(),
+          eventDate: eventDate2,
         })
 
         const wishlistId1 = await fixtures.insertWishlist({
@@ -95,7 +94,7 @@ describe('WishlistController', () => {
                       id: eventId2,
                       title: 'Event 2',
                       description: 'Description 2',
-                      event_date: eventDate2.toISODate(),
+                      event_date: formatISODate(eventDate2),
                     },
                   ],
                   created_at: expect.toBeDateString(),
@@ -113,7 +112,7 @@ describe('WishlistController', () => {
                       id: eventId1,
                       title: 'Event 1',
                       description: 'Description 1',
-                      event_date: eventDate1.toISODate(),
+                      event_date: formatISODate(eventDate1),
                     },
                   ],
                   created_at: expect.toBeDateString(),
@@ -415,7 +414,7 @@ describe('WishlistController', () => {
                   id: eventId,
                   title: 'Test Event',
                   description: 'Test Description',
-                  event_date: eventDate.toISODate(),
+                  event_date: formatISODate(eventDate),
                 },
               ],
               config: {
@@ -750,7 +749,7 @@ describe('WishlistController', () => {
                   id: eventId,
                   title: 'Test Event',
                   description: 'Test Description',
-                  event_date: eventDate.toISODate(),
+                  event_date: formatISODate(eventDate),
                 },
               ]),
               created_at: expect.toBeDateString(),
@@ -815,7 +814,7 @@ describe('WishlistController', () => {
                   id: eventId,
                   title: 'Test Event',
                   description: 'Test Description',
-                  event_date: eventDate.toISODate(),
+                  event_date: formatISODate(eventDate),
                 },
               ]),
               created_at: expect.toBeDateString(),

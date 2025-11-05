@@ -1,6 +1,6 @@
 import { PasswordManager } from '@wishlist/api/auth'
 import { Fixtures, useTestApp, useTestMail } from '@wishlist/api-test-utils'
-import { DateTime } from 'luxon'
+import { addHours, subtractHours } from '@wishlist/common'
 
 describe('UserPasswordVerificationController', () => {
   const { getRequest, expectTable, getFixtures } = useTestApp()
@@ -62,7 +62,7 @@ describe('UserPasswordVerificationController', () => {
       await fixtures.insertUserPasswordVerification({
         userId,
         token: 'token',
-        expiredAt: DateTime.now().plus({ hour: 1 }).toJSDate(),
+        expiredAt: addHours(new Date(), 1),
       })
 
       const request = await getRequest()
@@ -135,7 +135,7 @@ describe('UserPasswordVerificationController', () => {
       await fixtures.insertUserPasswordVerification({
         userId,
         token: 'reset-token',
-        expiredAt: DateTime.now().plus({ hour: 1 }).toJSDate(),
+        expiredAt: addHours(new Date(), 1),
       })
 
       const request = await getRequest()
@@ -156,7 +156,7 @@ describe('UserPasswordVerificationController', () => {
       await fixtures.insertUserPasswordVerification({
         userId,
         token: 'reset-token',
-        expiredAt: DateTime.now().minus({ hour: 1 }).toJSDate(),
+        expiredAt: subtractHours(new Date(), 1),
       })
 
       const request = await getRequest()
@@ -177,7 +177,7 @@ describe('UserPasswordVerificationController', () => {
       await fixtures.insertUserPasswordVerification({
         userId,
         token: 'reset-token',
-        expiredAt: DateTime.now().plus({ hour: 1 }).toJSDate(),
+        expiredAt: addHours(new Date(), 1),
       })
 
       const request = await getRequest()

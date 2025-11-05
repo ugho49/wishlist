@@ -1,6 +1,6 @@
 import type { EventId } from '@wishlist/common'
 
-import { DateTime } from 'luxon'
+import { parseISO } from '@wishlist/common'
 import { useCallback, useMemo, useState } from 'react'
 
 import { useSecretSanta } from './useSecretSanta'
@@ -30,9 +30,9 @@ function setDismissed(eventId: EventId): void {
 /**
  * Check if event date falls between December 15 and January 1
  */
-function isEventInChristmasPeriod(eventDate: DateTime): boolean {
-  const month = eventDate.month
-  const day = eventDate.day
+function isEventInChristmasPeriod(eventDate: Date): boolean {
+  const month = eventDate.getMonth() + 1 // getMonth() is 0-indexed
+  const day = eventDate.getDate()
 
   // December 15-31
   if (month === 12 && day >= 15) {
@@ -201,7 +201,7 @@ export function useSecretSantaSuggestion({
     if (!eventDate || !eventTitle) return false
 
     // Check date range: December 15 to January 1
-    const eventDateFormatted = DateTime.fromISO(eventDate)
+    const eventDateFormatted = parseISO(eventDate)
 
     // Check if event date is in Christmas period
     const isInChristmasPeriod = isEventInChristmasPeriod(eventDateFormatted)

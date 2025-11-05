@@ -2,8 +2,7 @@ import type { RequestApp } from '@wishlist/api-test-utils'
 
 import { PasswordManager } from '@wishlist/api/auth'
 import { Fixtures, useTestApp, useTestMail } from '@wishlist/api-test-utils'
-import { sleep } from '@wishlist/common'
-import { DateTime } from 'luxon'
+import { addDays, formatISODate, sleep } from '@wishlist/common'
 
 describe('UserController', () => {
   const { getRequest, expectTable, getFixtures } = useTestApp()
@@ -254,7 +253,7 @@ describe('UserController', () => {
       },
       {
         body: {
-          birthday: DateTime.now().plus({ days: 1 }).toISODate(),
+          birthday: formatISODate(addDays(new Date(), 1)),
         },
         case: 'birthday in future',
         message: [expect.stringMatching('maximal allowed date for birthday is')],
@@ -274,7 +273,7 @@ describe('UserController', () => {
     it('should update user when valid input', async () => {
       const request = await getRequest({ signedAs: 'BASE_USER' })
 
-      const birthday = DateTime.fromObject({ year: 1993, month: 11, day: 15 }).toISODate()
+      const birthday = formatISODate(new Date(1993, 10, 15))
 
       await request
         .put(path)
@@ -444,21 +443,21 @@ describe('UserController', () => {
         const { eventId: event1Id } = await fixtures.insertEventWithMaintainer({
           title: 'Event 1',
           description: 'First event',
-          eventDate: DateTime.now().plus({ days: 1 }).toJSDate(),
+          eventDate: addDays(new Date(), 1),
           maintainerId: currentUserId,
         })
 
         const { eventId: event2Id } = await fixtures.insertEventWithMaintainer({
           title: 'Event 2',
           description: 'Second event',
-          eventDate: DateTime.now().plus({ days: 2 }).toJSDate(),
+          eventDate: addDays(new Date(), 2),
           maintainerId: currentUserId,
         })
 
         const { eventId: event3Id } = await fixtures.insertEventWithMaintainer({
           title: 'Event 3',
           description: 'Third event',
-          eventDate: DateTime.now().plus({ days: 3 }).toJSDate(),
+          eventDate: addDays(new Date(), 3),
           maintainerId: currentUserId,
         })
 
@@ -520,7 +519,7 @@ describe('UserController', () => {
         const { eventId } = await fixtures.insertEventWithMaintainer({
           title: 'Event',
           description: 'Test event',
-          eventDate: DateTime.now().plus({ days: 1 }).toJSDate(),
+          eventDate: addDays(new Date(), 1),
           maintainerId: currentUserId,
         })
 
@@ -578,35 +577,35 @@ describe('UserController', () => {
         const { eventId: birthdayId } = await fixtures.insertEventWithMaintainer({
           title: 'Birthday Party',
           description: 'Annual birthday celebration',
-          eventDate: DateTime.now().plus({ days: 1 }).toJSDate(),
+          eventDate: addDays(new Date(), 1),
           maintainerId: currentUserId,
         })
 
         const { eventId: christmasId } = await fixtures.insertEventWithMaintainer({
           title: 'Christmas Party',
           description: 'Holiday celebration',
-          eventDate: DateTime.now().plus({ days: 30 }).toJSDate(),
+          eventDate: addDays(new Date(), 30),
           maintainerId: currentUserId,
         })
 
         const { eventId: weddingId } = await fixtures.insertEventWithMaintainer({
           title: 'Wedding',
           description: 'Wedding ceremony',
-          eventDate: DateTime.now().plus({ days: 60 }).toJSDate(),
+          eventDate: addDays(new Date(), 60),
           maintainerId: currentUserId,
         })
 
         const { eventId: babyShowerId } = await fixtures.insertEventWithMaintainer({
           title: 'Baby Shower',
           description: 'Baby shower party',
-          eventDate: DateTime.now().plus({ days: 90 }).toJSDate(),
+          eventDate: addDays(new Date(), 90),
           maintainerId: currentUserId,
         })
 
         const { eventId: graduationId } = await fixtures.insertEventWithMaintainer({
           title: 'Graduation',
           description: 'Graduation ceremony',
-          eventDate: DateTime.now().plus({ days: 120 }).toJSDate(),
+          eventDate: addDays(new Date(), 120),
           maintainerId: currentUserId,
         })
 
@@ -715,7 +714,7 @@ describe('UserController', () => {
         const { eventId: event1Id } = await fixtures.insertEventWithMaintainer({
           title: 'Event 1',
           description: 'Current user event',
-          eventDate: DateTime.now().plus({ days: 1 }).toJSDate(),
+          eventDate: addDays(new Date(), 1),
           maintainerId: currentUserId,
         })
 
@@ -723,7 +722,7 @@ describe('UserController', () => {
         const { eventId: event2Id } = await fixtures.insertEventWithMaintainer({
           title: 'Event 2',
           description: 'Other user event',
-          eventDate: DateTime.now().plus({ days: 2 }).toJSDate(),
+          eventDate: addDays(new Date(), 2),
           maintainerId: otherMaintainerId,
         })
 
@@ -755,7 +754,7 @@ describe('UserController', () => {
         await fixtures.insertEventWithMaintainer({
           title: 'Solo Event',
           description: 'Event with only current user',
-          eventDate: DateTime.now().plus({ days: 1 }).toJSDate(),
+          eventDate: addDays(new Date(), 1),
           maintainerId: currentUserId,
         })
 

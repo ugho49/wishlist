@@ -19,7 +19,9 @@ import {
   Typography,
 } from '@mui/material'
 import { useNavigate } from '@tanstack/react-router'
-import { DateTime } from 'luxon'
+import { parseISO } from '@wishlist/common'
+import { format } from 'date-fns'
+import { fr } from 'date-fns/locale/fr'
 import { useState } from 'react'
 
 import { TabValues } from '../../routes/_authenticated/_with-layout/events/$eventId/edit'
@@ -195,7 +197,7 @@ export const EventHeader = ({
                   <MetadataItem>
                     <AccessTimeIcon fontSize="small" />
                     <MetadataText variant="body2">
-                      {DateTime.fromISO(eventDate).toLocaleString(DateTime.DATE_HUGE)}
+                      {format(parseISO(eventDate), 'PPPP', { locale: fr })}
                     </MetadataText>
                   </MetadataItem>
                   <ClickableMetadataItem onClick={() => openAttendeesDialog()}>

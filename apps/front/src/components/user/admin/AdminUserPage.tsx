@@ -11,8 +11,10 @@ import { styled, useTheme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate, useSearch } from '@tanstack/react-router'
+import { formatISO, parseISO } from '@wishlist/common'
 import { AdminListEvents } from '@wishlist/front-components/event/admin/AdminListEvents'
-import { DateTime } from 'luxon'
+import { format } from 'date-fns'
+import { fr } from 'date-fns/locale/fr'
 import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 
@@ -69,7 +71,7 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
   const [lastname, setLastname] = useState('')
   const [pictureUrl, setPictureUrl] = useState('')
   const [enabled, setEnabled] = useState(true)
-  const [birthday, setBirthday] = useState<DateTime | null>(null)
+  const [birthday, setBirthday] = useState<Date | null>(null)
   const [updatePasswordModalOpen, setUpdatePasswordModalOpen] = useState(false)
   const { eventPage } = useSearch({ from: '/_authenticated/_with-layout/admin/users/$userId' })
   const navigate = useNavigate()
@@ -90,7 +92,7 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
       setEmail(value.email)
       setFirstname(value.firstname)
       setLastname(value.lastname)
-      setBirthday(value?.birthday ? DateTime.fromISO(value.birthday) : null)
+      setBirthday(value?.birthday ? parseISO(value.birthday) : null)
       setEnabled(value.is_enabled)
       setPictureUrl(value.picture_url || '')
     }
@@ -132,7 +134,7 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
       await api.user.update(userId, {
         firstname,
         lastname,
-        birthday: birthday !== null ? new Date(birthday.toISODate() || '') : undefined,
+        birthday: birthday !== null ? birthday : undefined,
         email,
       })
 
@@ -183,9 +185,7 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
                 </ListItemIcon>
                 <ListItemText
                   primary="Inscrit le"
-                  secondary={DateTime.fromISO(value?.created_at || '').toLocaleString(
-                    DateTime.DATETIME_MED_WITH_SECONDS,
-                  )}
+                  secondary={format(parseISO(value?.created_at || ''), 'PPpp', { locale: fr })}
                 />
               </ListItem>
             </List>
@@ -198,7 +198,7 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
                   primary="Dernière connexion le"
                   secondary={
                     value?.last_connected_at
-                      ? DateTime.fromISO(value.last_connected_at).toLocaleString(DateTime.DATETIME_MED_WITH_SECONDS)
+                      ? format(parseISO(value.last_connected_at), 'PPpp', { locale: fr })
                       : ' - '
                   }
                 />

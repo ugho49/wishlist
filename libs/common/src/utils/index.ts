@@ -1,4 +1,5 @@
 export * from './auth.utils'
+export * from './date.utils'
 export * from './event.utils'
 export * from './id.utils'
 export * from './pagination.utils'

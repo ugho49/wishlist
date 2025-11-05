@@ -3,8 +3,9 @@ import type { DetailedWishlistDto, MiniEventDto } from '@wishlist/common'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { Box, Divider, List, ListItem, ListItemAvatar, ListItemButton, ListItemText } from '@mui/material'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { MAX_EVENTS_BY_LIST } from '@wishlist/common'
-import { DateTime } from 'luxon'
+import { MAX_EVENTS_BY_LIST, parseISO } from '@wishlist/common'
+import { format } from 'date-fns'
+import { fr } from 'date-fns/locale/fr'
 import { useMemo } from 'react'
 
 import { useAvailableEvents } from '../../hooks/domain/useAvailableEvents'
@@ -109,7 +110,7 @@ export const EditWishlistEvent = ({ wishlistId, events }: EditWishlistEventsProp
               </ListItemAvatar>
               <ListItemText
                 primary={<b>{event.title}</b>}
-                secondary={DateTime.fromISO(event.event_date).toLocaleString(DateTime.DATE_MED)}
+                secondary={format(parseISO(event.event_date), 'PPP', { locale: fr })}
               />
             </ListItemButton>
           </ListItem>

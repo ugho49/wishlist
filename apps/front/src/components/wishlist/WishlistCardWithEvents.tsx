@@ -4,8 +4,9 @@ import type { RootState } from '../../core'
 import PublicIcon from '@mui/icons-material/Public'
 import { Avatar, styled, Typography } from '@mui/material'
 import { useNavigate } from '@tanstack/react-router'
+import { parseISO } from '@wishlist/common'
 import clsx from 'clsx'
-import { DateTime } from 'luxon'
+import { isAfter, subDays } from 'date-fns'
 import { useSelector } from 'react-redux'
 
 import { Card } from '../common/Card'
@@ -146,13 +147,13 @@ export const WishlistCardWithEvents = ({ wishlist }: WishlistCardWithEventsProps
   const userProfile = useSelector((state: RootState) => state.userProfile)
   const navigate = useNavigate()
   const past =
-    wishlist.events.filter(e => DateTime.fromISO(e.event_date) < DateTime.now().minus({ days: 1 })).length ===
+    wishlist.events.filter(e => !isAfter(parseISO(e.event_date), subDays(new Date(), 1))).length ===
     wishlist.events.length
 
   const isPublic = !wishlist.config.hide_items
   const maxEventsToShow = 1
   const eventsToShow = wishlist.events
-    .toSorted((a, b) => DateTime.fromISO(a.event_date).toMillis() - DateTime.fromISO(b.event_date).toMillis())
+    .toSorted((a, b) => parseISO(a.event_date).getTime() - parseISO(b.event_date).getTime())
     .slice(0, maxEventsToShow)
   const remainingEventsCount = wishlist.events.length - maxEventsToShow
 

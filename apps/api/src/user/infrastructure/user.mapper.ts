@@ -1,7 +1,7 @@
 import type { MiniUserDto, UserDto, UserSocialDto, UserWithoutSocialsDto } from '@wishlist/common'
 import type { User, UserSocial } from '../domain'
 
-import { DateTime } from 'luxon'
+import { formatISODate } from '@wishlist/common'
 
 function toMiniUserDto(model: User): MiniUserDto {
   return {
@@ -17,7 +17,7 @@ function toUserWithoutSocialsDto(user: User): UserWithoutSocialsDto {
   return {
     ...toMiniUserDto(user),
     admin: user.isAdmin(),
-    birthday: user.birthday ? DateTime.fromJSDate(user.birthday).toISODate() || '' : undefined,
+    birthday: user.birthday ? formatISODate(user.birthday) : undefined,
     is_enabled: user.isEnabled,
     last_connected_at: user.lastConnectedAt?.toISOString(),
     last_ip: user.lastIp,
