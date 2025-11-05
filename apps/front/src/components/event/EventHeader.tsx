@@ -18,10 +18,11 @@ import {
   styled,
   Tooltip,
   Typography,
+  useMediaQuery,
 } from '@mui/material'
 import { useNavigate } from '@tanstack/react-router'
 import { DateTime } from 'luxon'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 
 import { TabValues } from '../../routes/_authenticated/_with-layout/events/$eventId/edit'
 import { EventIcon } from './EventIcon'
@@ -102,12 +103,12 @@ const RightSection = styled(Box)(({ theme }) => ({
   alignItems: 'center',
 }))
 
-const MainActionButton = styled(Button)(({ theme }) => ({
+const UpdateButton = styled(Button)(({ theme }) => ({
   textTransform: 'none',
+  height: '40px',
   fontWeight: 500,
   fontSize: '0.875rem',
   padding: theme.spacing(1, 2),
-  height: '40px',
   border: `1px solid ${theme.palette.divider}`,
 }))
 
@@ -118,6 +119,33 @@ const CompactIconButton = styled(IconButton)(({ theme }) => ({
   height: '40px',
   width: '40px',
 }))
+
+const ReponsiveUpdateButton = (props: { eventId: EventId }) => {
+  const { eventId } = props
+  const isDownMd = useMediaQuery(theme => theme.breakpoints.down('md'))
+  const isUpSm = useMediaQuery(theme => theme.breakpoints.up('sm'))
+  const navigate = useNavigate()
+
+  const handleNavigateToEdit = useCallback(() => {
+    void navigate({ to: '/events/$eventId/edit', params: { eventId } })
+  }, [navigate, eventId])
+
+  if (isDownMd && isUpSm) {
+    return (
+      <Tooltip title="Modifier les informations de l'événement">
+        <CompactIconButton size="small" onClick={handleNavigateToEdit}>
+          <EditIcon fontSize="small" />
+        </CompactIconButton>
+      </Tooltip>
+    )
+  }
+
+  return (
+    <UpdateButton variant="outlined" color="primary" startIcon={<EditIcon />} onClick={handleNavigateToEdit}>
+      Modifier
+    </UpdateButton>
+  )
+}
 
 export type EventHeaderProps = {
   icon?: string
@@ -192,16 +220,7 @@ export const EventHeader = ({
         {/* Right section - Action Button with Dropdown */}
         {currentUserCanEdit && (
           <RightSection>
-            <Tooltip title="Modifier les informations de l'événement">
-              <MainActionButton
-                variant="outlined"
-                color="primary"
-                startIcon={<EditIcon />}
-                onClick={() => navigate({ to: '/events/$eventId/edit', params: { eventId } })}
-              >
-                Modifier
-              </MainActionButton>
-            </Tooltip>
+            <ReponsiveUpdateButton eventId={eventId} />
 
             <Tooltip title="Plus d'options">
               <CompactIconButton size="small" onClick={handleOpenMenu}>

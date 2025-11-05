@@ -1,7 +1,6 @@
 import type { DetailedWishlistDto } from '@wishlist/common'
 import type { FilterType, SortType } from './WishlistFilterAndSortItems'
 
-import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh'
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import EditIcon from '@mui/icons-material/Edit'
 import FilterListIcon from '@mui/icons-material/FilterList'
@@ -21,9 +20,11 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import { useState } from 'react'
+import { useNavigate } from '@tanstack/react-router'
+import { useCallback, useState } from 'react'
 
 import { getAvatarUrl } from '../../utils/wishlist.utils'
+import { ImportItemsButton } from './ImportItemsButton'
 import { WishlistAvatar } from './WishlistAvatar'
 import { filterOptions, sortOptions } from './WishlistFilterAndSortItems'
 
@@ -35,7 +36,7 @@ const HeaderContent = styled(Box)(({ theme }) => ({
   alignItems: 'center',
   gap: theme.spacing(3),
 
-  [theme.breakpoints.down('sm')]: {
+  [theme.breakpoints.down('md')]: {
     flexDirection: 'column',
     gap: theme.spacing(2),
   },
@@ -111,7 +112,7 @@ const RightSection = styled(Box)(({ theme }) => ({
   },
 }))
 
-const MainActionButton = styled(Button)(({ theme }) => ({
+const UpdateButton = styled(Button)(({ theme }) => ({
   textTransform: 'none',
   fontWeight: 500,
   fontSize: '0.875rem',
@@ -127,22 +128,6 @@ const CompactIconButton = styled(IconButton)(({ theme }) => ({
   width: '40px',
 }))
 
-const ImportButton = styled(Button)(({ theme }) => ({
-  textTransform: 'none',
-  fontWeight: 600,
-  fontSize: '0.875rem',
-  padding: theme.spacing(1, 2),
-  borderRadius: theme.shape.borderRadius,
-  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-  color: 'white',
-  border: 'none',
-  height: '40px',
-  '&:hover': {
-    boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)',
-  },
-  transition: 'all 0.3s ease',
-}))
-
 export type WishlistHeaderProps = {
   wishlist: DetailedWishlistDto
   currentUserCanEdit: boolean
@@ -154,7 +139,6 @@ export type WishlistHeaderProps = {
   onFilterChange: (filter: FilterType) => void
   onOpenEventDialog: () => void
   onOpenImportDialog: () => void
-  onNavigateToEdit: () => void
 }
 
 export const WishlistHeader = ({
@@ -168,10 +152,13 @@ export const WishlistHeader = ({
   onFilterChange,
   onOpenEventDialog,
   onOpenImportDialog,
-  onNavigateToEdit,
 }: WishlistHeaderProps) => {
   const [sortAnchorEl, setSortAnchorEl] = useState<null | HTMLElement>(null)
   const [filterAnchorEl, setFilterAnchorEl] = useState<null | HTMLElement>(null)
+  const navigate = useNavigate()
+  const handleNavigateToEdit = useCallback(() => {
+    void navigate({ to: '/wishlists/$wishlistId/edit', params: { wishlistId: wishlist.id } })
+  }, [navigate, wishlist])
 
   const sortMenuOpen = Boolean(sortAnchorEl)
   const filterMenuOpen = Boolean(filterAnchorEl)
@@ -248,9 +235,9 @@ export const WishlistHeader = ({
           {/* Import Button (only for owner with importable items) */}
           {currentUserCanEdit && hasImportableItems && (
             <Tooltip title="Importer des souhaits d'anciennes listes">
-              <ImportButton startIcon={<AutoFixHighIcon />} onClick={onOpenImportDialog} size="small">
+              <ImportItemsButton onClick={onOpenImportDialog} sx={theme => ({ padding: theme.spacing(1, 2) })}>
                 Importer
-              </ImportButton>
+              </ImportItemsButton>
             </Tooltip>
           )}
 
@@ -281,15 +268,15 @@ export const WishlistHeader = ({
           {/* Edit Actions (only for owner) */}
           {currentUserCanEdit && (
             // Desktop: Edit button
-            <MainActionButton
+            <UpdateButton
               variant="outlined"
               color="primary"
               startIcon={<EditIcon />}
-              onClick={onNavigateToEdit}
+              onClick={handleNavigateToEdit}
               sx={{ height: '40px' }}
             >
               Modifier
-            </MainActionButton>
+            </UpdateButton>
           )}
         </RightSection>
       </HeaderContent>

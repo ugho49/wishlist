@@ -1,10 +1,10 @@
 import type { SxProps, Theme } from '@mui/material'
 
 import AddIcon from '@mui/icons-material/Add'
-import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh'
 import { Box, Button, Stack, styled, Typography } from '@mui/material'
 
 import EmptyItemsIllustration from '../../assets/illustrations/empty-items.png'
+import { ImportItemsButton } from './ImportItemsButton'
 
 const EmptyStateContainer = styled(Stack)(({ theme }) => ({
   alignItems: 'center',
@@ -64,23 +64,6 @@ const AddItemButton = styled(Button)(({ theme }) => ({
   transition: 'all 0.3s ease',
 }))
 
-const ImportButton = styled(Button)(({ theme }) => ({
-  marginTop: theme.spacing(1),
-  borderRadius: '24px',
-  textTransform: 'none',
-  fontSize: '1rem',
-  fontWeight: 600,
-  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-  color: 'white',
-  boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)',
-  border: 'none',
-  '&:hover': {
-    boxShadow: '0 6px 20px rgba(102, 126, 234, 0.6)',
-    transform: 'translateY(-2px)',
-  },
-  transition: 'all 0.3s ease',
-}))
-
 export type EmptyItemsStateProps = {
   onAddItem: () => void
   isOwner: boolean
@@ -113,9 +96,9 @@ export const EmptyItemsState = ({
 
       <ButtonsContainer>
         {isOwner && hasImportableItems && (
-          <ImportButton variant="contained" onClick={onImportItems} startIcon={<AutoFixHighIcon />}>
+          <ImportItemsButton onClick={onImportItems} rounded sx={{ fontSize: '1rem' }}>
             Importer d'anciens souhaits
-          </ImportButton>
+          </ImportItemsButton>
         )}
 
         <AddItemButton variant="contained" color="primary" onClick={onAddItem} startIcon={<AddIcon />}>

@@ -10,9 +10,9 @@ import { useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
 
 import { FabAutoGrow } from '../common/FabAutoGrow'
-import { EmptyItemsState } from '../item/EmptyItemsState'
 import { ItemCard } from '../item/ItemCard'
 import { ItemFormDialog } from '../item/ItemFormDialog'
+import { EmptyItemsState } from './EmptyItemsState'
 import { applyFilter, applySort } from './WishlistFilterAndSortItems'
 
 export type WishlistTabItemsProps = {

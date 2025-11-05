@@ -29,6 +29,8 @@ import { forwardRef, useState } from 'react'
 
 import { Card } from '../common/Card'
 import { Rating, RatingBubble } from '../common/Rating'
+import { Subtitle } from '../common/Subtitle'
+import { ImportItemsButton } from '../wishlist/ImportItemsButton'
 
 const Transition = forwardRef(function Transition(
   props: TransitionProps & { children: React.ReactElement },
@@ -52,10 +54,12 @@ const ItemCard = styled(Card)(({ theme }) => ({
   '&:hover': {
     transform: 'none !important',
     boxShadow: 'none !important',
-    border: `1px solid ${theme.palette.primary.light}`,
+    border: '1px solid #764ba2',
+    background: `linear-gradient(135deg, ${alpha('#667eea', 0.03)} 0%, ${alpha('#764ba2', 0.06)} 100%)`,
   },
   '&.selected': {
-    border: `2px solid ${theme.palette.primary.main}`,
+    border: '2px solid #764ba2',
+    background: `linear-gradient(135deg, ${alpha('#667eea', 0.05)} 0%, ${alpha('#764ba2', 0.08)} 100%)`,
   },
 }))
 
@@ -229,28 +233,26 @@ export const ImportItemsDialog = ({
       maxWidth="md"
       fullWidth
     >
-      <AppBar sx={{ position: 'sticky' }}>
-        <Toolbar>
+      <AppBar sx={{ position: 'sticky', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%)' }}>
+        <Toolbar sx={{ justifyContent: 'space-between' }}>
+          <Typography sx={{ ml: 2, flex: 1, textTransform: 'uppercase' }} variant="h6" component="div">
+            Importer des souhaits
+          </Typography>
           <IconButton edge="start" color="inherit" onClick={handleSkip} aria-label="close">
             <CloseIcon />
           </IconButton>
-          <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
-            Importer d'anciens souhaits
-          </Typography>
         </Toolbar>
       </AppBar>
 
       <Stack padding={3} gap={2} direction="column" sx={{ backgroundColor: 'rgb(249, 250, 251)' }}>
+        <Subtitle sx={{ marginBottom: 0 }}>Importer d'anciens souhaits</Subtitle>
+
         <Alert severity="info" icon={<InfoOutlinedIcon />}>
           Vous avez <strong>{importableItems.length}</strong> souhait{importableItems.length > 1 ? 's' : ''} non pris
           dans vos anciennes listes. Sélectionnez ceux que vous souhaitez importer dans votre nouvelle liste.
         </Alert>
 
         <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={1}>
-          <Typography variant="body2" color="text.secondary">
-            {selectedItemIds.size} souhait{selectedItemIds.size > 1 ? 's' : ''} sélectionné
-            {selectedItemIds.size > 1 ? 's' : ''}
-          </Typography>
           <Stack direction="row" gap={1}>
             <Button
               size="small"
@@ -326,18 +328,18 @@ export const ImportItemsDialog = ({
         <Button variant="outlined" color="secondary" onClick={handleSkip}>
           Ignorer
         </Button>
-        <Button
+        <ImportItemsButton
           variant="contained"
           onClick={handleImport}
-          disabled={isLoading}
+          disabled={isLoading || selectedItemIds.size === 0}
           loading={isLoading}
           loadingPosition="start"
           startIcon={<AddIcon />}
         >
           {selectedItemIds.size > 0
             ? `Importer ${selectedItemIds.size} souhait${selectedItemIds.size > 1 ? 's' : ''}`
-            : 'Continuer'}
-        </Button>
+            : 'Importer'}
+        </ImportItemsButton>
       </BottomActionStack>
     </Dialog>
   )

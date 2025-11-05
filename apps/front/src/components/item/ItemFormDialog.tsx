@@ -188,7 +188,7 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
       onClose={handleClose}
       slots={{ transition: Transition }}
     >
-      <AppBar sx={{ position: 'relative' }}>
+      <AppBar sx={{ position: 'sticky' }}>
         <Toolbar sx={{ justifyContent: 'space-between' }}>
           <Typography sx={{ ml: 2, flex: 1, textTransform: 'uppercase' }} variant="h6" component="div">
             {title}
@@ -198,6 +198,7 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
           </IconButton>
         </Toolbar>
       </AppBar>
+
       <Container
         maxWidth="sm"
         sx={isFullscreen ? { marginBlock: '40px' } : { marginTop: '20px', marginBottom: '40px' }}
