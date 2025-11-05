@@ -31,17 +31,13 @@ const HeaderContent = styled(Box)(({ theme }) => ({
   display: 'flex',
   paddingBottom: theme.spacing(2),
   borderBottom: `1px solid ${theme.palette.divider}`,
+  flexDirection: 'row',
+  alignItems: 'center',
+  gap: theme.spacing(3),
 
-  [theme.breakpoints.down('md')]: {
+  [theme.breakpoints.down('sm')]: {
     flexDirection: 'column',
-    alignItems: 'center',
     gap: theme.spacing(2),
-  },
-
-  [theme.breakpoints.up('md')]: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: theme.spacing(3),
   },
 }))
 
