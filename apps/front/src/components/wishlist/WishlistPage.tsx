@@ -70,10 +70,6 @@ export const WishlistPage = ({ wishlistId }: WishlistPageProps) => {
     [navigate],
   )
 
-  const handleNavigateToEdit = useCallback(() => {
-    void navigate({ to: '/wishlists/$wishlistId/edit', params: { wishlistId } })
-  }, [navigate, wishlistId])
-
   return (
     <Box>
       <Loader loading={loading}>
@@ -92,7 +88,6 @@ export const WishlistPage = ({ wishlistId }: WishlistPageProps) => {
               onFilterChange={setFilter}
               onOpenEventDialog={() => setShowEventDialog(true)}
               onOpenImportDialog={() => setShowImportDialog(true)}
-              onNavigateToEdit={handleNavigateToEdit}
             />
 
             <Container maxWidth="lg">

@@ -141,7 +141,7 @@ export const AddSecretSantaUsersFormDialog = ({
       disableEscapeKeyDown={loading}
       slots={{ transition: Transition }}
     >
-      <AppBar sx={{ position: 'relative' }}>
+      <AppBar sx={{ position: 'sticky' }}>
         <Toolbar sx={{ justifyContent: 'space-between' }}>
           <Typography sx={{ ml: 2, flex: 1, textTransform: 'uppercase' }} variant="h6" component="div">
             Ajouter des participants
