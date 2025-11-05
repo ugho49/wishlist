@@ -2,14 +2,16 @@ import type { WishlistWithEventsDto } from '@wishlist/common'
 import type { RootState } from '../../core'
 
 import PublicIcon from '@mui/icons-material/Public'
-import { Avatar, styled, Typography } from '@mui/material'
+import { styled, Typography } from '@mui/material'
 import { useNavigate } from '@tanstack/react-router'
 import clsx from 'clsx'
 import { DateTime } from 'luxon'
 import { useSelector } from 'react-redux'
 
+import { getAvatarUrl } from '../../utils/wishlist.utils'
 import { Card } from '../common/Card'
 import { EventIcon } from '../event/EventIcon'
+import { WishlistAvatar } from './WishlistAvatar'
 
 export type WishlistCardWithEventsProps = {
   wishlist: WishlistWithEventsDto
@@ -62,13 +64,6 @@ const WishlistHeader = styled('div')({
   gap: '12px',
   marginBottom: '16px',
 })
-
-const WishlistLogo = styled(Avatar)(({ theme }) => ({
-  width: '32px',
-  height: '32px',
-  backgroundColor: theme.palette.primary.light,
-  fontSize: '1rem',
-}))
 
 const WishlistTitleContainer = styled('div')({
   display: 'flex',
@@ -163,9 +158,12 @@ export const WishlistCardWithEvents = ({ wishlist }: WishlistCardWithEventsProps
       hoverable
     >
       <WishlistHeader>
-        <WishlistLogo src={wishlist.logo_url ?? userProfile.pictureUrl} className="wishlist-icon">
-          {wishlist.title.charAt(0).toUpperCase()}
-        </WishlistLogo>
+        <WishlistAvatar
+          className="wishlist-icon"
+          sx={{ width: '32px', height: '32px', border: 'none' }}
+          iconSize="small"
+          src={getAvatarUrl({ wishlist, ownerPictureUrl: userProfile.pictureUrl })}
+        />
         <WishlistTitleContainer>
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <WishlistTitle className="wishlist-title">{wishlist.title}</WishlistTitle>

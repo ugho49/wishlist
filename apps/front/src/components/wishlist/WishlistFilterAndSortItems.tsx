@@ -40,7 +40,7 @@ export enum SortType {
   SCORE_ASC = 'score_asc',
 }
 
-const filterOptions: SelectOption<FilterType>[] = [
+export const filterOptions: SelectOption<FilterType>[] = [
   {
     value: FilterType.NONE,
     label: <em>Aucun filtre</em>,
@@ -67,7 +67,7 @@ const filterOptions: SelectOption<FilterType>[] = [
   },
 ]
 
-const sortOptions: SelectOption<SortType>[] = [
+export const sortOptions: SelectOption<SortType>[] = [
   {
     value: SortType.NAME_ASC,
     label: 'Ordre alphabétique',

@@ -13,10 +13,12 @@ import { FabAutoGrow } from '../common/FabAutoGrow'
 import { EmptyItemsState } from '../item/EmptyItemsState'
 import { ItemCard } from '../item/ItemCard'
 import { ItemFormDialog } from '../item/ItemFormDialog'
-import { type FilterType, type SortType, WishlistFilterAndSortItems } from './WishlistFilterAndSortItems'
+import { applyFilter, applySort } from './WishlistFilterAndSortItems'
 
 export type WishlistTabItemsProps = {
   wishlist: DetailedWishlistDto
+  hasImportableItems: boolean
+  onImportItems: () => void
 }
 
 // Image modal component
@@ -111,14 +113,15 @@ const ImageModal = ({
 
 const mapState = (state: RootState) => state.auth.user?.id
 
-export const WishlistItems = ({ wishlist }: WishlistTabItemsProps) => {
+export const WishlistItems = ({ wishlist, hasImportableItems, onImportItems }: WishlistTabItemsProps) => {
   const currentUserId = useSelector(mapState)
   const {
     displayAddItemFormDialog: openItemFormDialog,
     sort,
     filter,
-  } = useSearch({ from: '/_authenticated/_with-layout/wishlists/$wishlistId/' })
-  const [itemsFilteredAndSorted, setItemsFilteredAndSorted] = useState<ItemDto[]>([])
+  } = useSearch({
+    from: '/_authenticated/_with-layout/wishlists/$wishlistId/',
+  })
   const nbOfItems = useMemo(() => wishlist.items.length, [wishlist.items])
   const ownerOfTheList = currentUserId === wishlist.owner.id
   const [currentItem, setCurrentItem] = useState<ItemDto | null>(null)
@@ -128,27 +131,15 @@ export const WishlistItems = ({ wishlist }: WishlistTabItemsProps) => {
     void navigate({ search: prev => ({ ...prev, displayAddItemFormDialog: open }) })
   }
 
-  const setSort = (newSort: SortType) => {
-    void navigate({ search: prev => ({ ...prev, sort: newSort }) })
-  }
-  const setFilter = (newFilter: FilterType) => {
-    void navigate({ search: prev => ({ ...prev, filter: newFilter }) })
-  }
+  // Apply filter and sort to items
+  const itemsFilteredAndSorted = useMemo(() => {
+    return wishlist.items.filter(item => applyFilter(item, filter)).sort((a, b) => applySort(a, b, sort))
+  }, [wishlist.items, filter, sort])
 
   return (
     <Box className="items">
       {nbOfItems > 0 && (
         <>
-          <WishlistFilterAndSortItems
-            displayFilterSelect={!ownerOfTheList}
-            items={wishlist.items}
-            sort={sort}
-            filter={filter}
-            onChange={newItems => setItemsFilteredAndSorted(newItems)}
-            onSortChange={newSort => setSort(newSort)}
-            onFilterChange={newFilter => setFilter(newFilter)}
-          />
-
           <Grid container spacing={3}>
             {itemsFilteredAndSorted.map(item => (
               <Grid key={item.id} size={{ xs: 12, sm: 6, lg: 4, xl: 3 }}>
@@ -172,9 +163,10 @@ export const WishlistItems = ({ wishlist }: WishlistTabItemsProps) => {
 
       {nbOfItems === 0 && (
         <EmptyItemsState
-          sx={{ marginTop: '50px' }}
           onAddItem={() => setOpenItemFormDialog(true)}
           isOwner={ownerOfTheList}
+          hasImportableItems={hasImportableItems}
+          onImportItems={onImportItems}
         />
       )}
 

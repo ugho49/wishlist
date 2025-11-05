@@ -53,7 +53,7 @@ export const EventPage = ({ eventId }: EventPageProps) => {
             />
 
             <Container maxWidth="lg">
-              <Stack gap="20px">
+              <Stack gap="20px" sx={{ paddingTop: 3 }}>
                 {shouldShowSuggestion && <SecretSantaSuggestionCard eventId={event.id} onDismiss={dismissSuggestion} />}
 
                 <MySecretSantaDraw eventId={event.id} />

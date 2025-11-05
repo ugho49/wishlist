@@ -1,12 +1,13 @@
 import type { WishlistWithOwnerDto } from '@wishlist/common'
 
-import PersonIcon from '@mui/icons-material/Person'
 import PublicIcon from '@mui/icons-material/Public'
-import { Avatar, styled, Typography } from '@mui/material'
+import { styled, Typography } from '@mui/material'
 import { useNavigate } from '@tanstack/react-router'
 import clsx from 'clsx'
 
+import { getAvatarUrl } from '../../utils/wishlist.utils'
 import { Card } from '../common/Card'
+import { WishlistAvatar } from './WishlistAvatar'
 
 export type WishlistCardWithOwnerProps = {
   wishlist: WishlistWithOwnerDto
@@ -34,18 +35,6 @@ const AvatarContainer = styled('div')({
   position: 'relative',
   zIndex: 1,
 })
-
-const WishlistAvatar = styled(Avatar)(({ theme }) => ({
-  width: '65px',
-  height: '65px',
-  background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-  color: 'white',
-  fontSize: '1.4rem',
-  fontWeight: 'bold',
-  border: `3px solid ${theme.palette.background.paper}`,
-  transition: 'all 0.3s cubic-bezier(0.23, 1, 0.320, 1)',
-  boxShadow: `0 4px 15px ${theme.palette.primary.main}25`,
-}))
 
 const ContentContainer = styled('div')({
   flex: 1,
@@ -104,8 +93,6 @@ const PublicIconStyled = styled(PublicIcon)(() => ({
 export const WishlistCardWithOwner = ({ wishlist }: WishlistCardWithOwnerProps) => {
   const navigate = useNavigate()
   const isPublic = !wishlist.config.hide_items
-  const initials =
-    `${wishlist.owner.firstname?.charAt(0) || ''}${wishlist.owner.lastname?.charAt(0) || ''}`.toUpperCase()
 
   return (
     <WishlistCardContent
@@ -114,9 +101,10 @@ export const WishlistCardWithOwner = ({ wishlist }: WishlistCardWithOwnerProps) 
       hoverable
     >
       <AvatarContainer>
-        <WishlistAvatar src={wishlist.logo_url ?? wishlist.owner.picture_url} className="wishlist-avatar">
-          {!wishlist.logo_url && !wishlist.owner.picture_url ? initials : <PersonIcon fontSize="medium" />}
-        </WishlistAvatar>
+        <WishlistAvatar
+          src={getAvatarUrl({ wishlist, ownerPictureUrl: wishlist.owner.picture_url })}
+          className="wishlist-avatar"
+        />
         {isPublic && (
           <PublicBadge>
             <PublicIconStyled />
