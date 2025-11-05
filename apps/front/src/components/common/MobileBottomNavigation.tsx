@@ -13,6 +13,7 @@ const PaperStyled = styled(Paper)<{ isDrawerOpen: boolean }>(({ theme, isDrawerO
   left: 0,
   right: 0,
   display: 'block',
+  '-webkit-backface-visibility': 'hidden',
   zIndex: theme.zIndex.drawer + 1,
   borderTop: `1px solid ${theme.palette.grey[200]}`,
   backdropFilter: 'blur(16px)',
