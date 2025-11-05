@@ -5,7 +5,7 @@ import { Box, Container, Stack } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate, useSearch } from '@tanstack/react-router'
 import { FeatureFlags } from '@wishlist/common'
-import { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 import { useSelector } from 'react-redux'
 
 import { useApi, useWishlistById } from '../../hooks'
@@ -19,8 +19,6 @@ import { WishlistItems } from './WishlistItems'
 import { WishlistNotFound } from './WishlistNotFound'
 
 const mapState = (state: RootState) => state.auth.user?.id
-
-const getImportDialogKey = (wishlistId: string) => `wishlist-import-dialog-auto-shown-${wishlistId}`
 
 interface WishlistPageProps {
   wishlistId: WishlistId
@@ -75,22 +73,6 @@ export const WishlistPage = ({ wishlistId }: WishlistPageProps) => {
   const handleNavigateToEdit = useCallback(() => {
     void navigate({ to: '/wishlists/$wishlistId/edit', params: { wishlistId } })
   }, [navigate, wishlistId])
-
-  useEffect(() => {
-    if (!importItemsEnabled) return
-
-    if (wishlist && currentUserCanEdit && importableItems.length > 0) {
-      const hasNoItems = wishlist.items.length === 0
-      const storageKey = getImportDialogKey(wishlist.id)
-      const hasSeenAutoDialog = localStorage.getItem(storageKey) === 'true'
-
-      if (hasNoItems && !hasSeenAutoDialog) {
-        setShowImportDialog(true)
-        // Mark that the user has seen the auto-dialog for this wishlist
-        localStorage.setItem(storageKey, 'true')
-      }
-    }
-  }, [wishlist, currentUserCanEdit, importableItems, importItemsEnabled, setShowImportDialog])
 
   return (
     <Box>

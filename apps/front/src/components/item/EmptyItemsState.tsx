@@ -9,19 +9,10 @@ import EmptyItemsIllustration from '../../assets/illustrations/empty-items.png'
 const EmptyStateContainer = styled(Stack)(({ theme }) => ({
   alignItems: 'center',
   gap: theme.spacing(2),
-}))
+  marginTop: theme.spacing(5),
 
-const IllustrationWrapper = styled(Box)(() => ({
-  animation: 'fadeInUp 0.6s ease-out',
-  '@keyframes fadeInUp': {
-    from: {
-      opacity: 0,
-      transform: 'translateY(20px)',
-    },
-    to: {
-      opacity: 1,
-      transform: 'translateY(0)',
-    },
+  [theme.breakpoints.down('md')]: {
+    marginTop: theme.spacing(0),
   },
 }))
 
@@ -46,6 +37,17 @@ const EmptyStateSubtitle = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
   textAlign: 'center',
   maxWidth: '400px',
+}))
+
+const ButtonsContainer = styled(Stack)(({ theme }) => ({
+  flexDirection: 'row',
+  gap: theme.spacing(1),
+  justifyContent: 'center',
+  flexWrap: 'wrap',
+
+  [theme.breakpoints.down('lg')]: {
+    flexDirection: 'column',
+  },
 }))
 
 const AddItemButton = styled(Button)(({ theme }) => ({
@@ -73,22 +75,8 @@ const ImportButton = styled(Button)(({ theme }) => ({
   boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)',
   border: 'none',
   '&:hover': {
-    background: 'linear-gradient(135deg, #5568d3 0%, #6a3f8f 100%)',
     boxShadow: '0 6px 20px rgba(102, 126, 234, 0.6)',
     transform: 'translateY(-2px)',
-  },
-  '& .MuiButton-startIcon': {
-    animation: 'sparkle 2s ease-in-out infinite',
-  },
-  '@keyframes sparkle': {
-    '0%, 100%': {
-      transform: 'scale(1) rotate(0deg)',
-      opacity: 1,
-    },
-    '50%': {
-      transform: 'scale(1.2) rotate(180deg)',
-      opacity: 0.8,
-    },
   },
   transition: 'all 0.3s ease',
 }))
@@ -96,23 +84,23 @@ const ImportButton = styled(Button)(({ theme }) => ({
 export type EmptyItemsStateProps = {
   onAddItem: () => void
   isOwner: boolean
-  hasImportableItems?: boolean
-  onImportItems?: () => void
+  hasImportableItems: boolean
+  onImportItems: () => void
   sx?: SxProps<Theme>
 }
 
 export const EmptyItemsState = ({
   onAddItem,
   isOwner,
-  hasImportableItems = false,
+  hasImportableItems,
   onImportItems,
   sx,
 }: EmptyItemsStateProps) => {
   return (
     <EmptyStateContainer sx={sx}>
-      <IllustrationWrapper>
+      <Box>
         <Illustration src={EmptyItemsIllustration} alt="Empty Items" />
-      </IllustrationWrapper>
+      </Box>
 
       <Box textAlign="center">
         <EmptyStateTitle>Aucun souhait pour le moment</EmptyStateTitle>
@@ -123,8 +111,8 @@ export const EmptyItemsState = ({
         </EmptyStateSubtitle>
       </Box>
 
-      <Stack direction="row" gap={2} flexWrap="wrap" justifyContent="center">
-        {isOwner && hasImportableItems && onImportItems && (
+      <ButtonsContainer>
+        {isOwner && hasImportableItems && (
           <ImportButton variant="contained" onClick={onImportItems} startIcon={<AutoFixHighIcon />}>
             Importer d'anciens souhaits
           </ImportButton>
@@ -133,7 +121,7 @@ export const EmptyItemsState = ({
         <AddItemButton variant="contained" color="primary" onClick={onAddItem} startIcon={<AddIcon />}>
           {isOwner ? 'Ajouter un souhait' : 'Suggérer un souhait'}
         </AddItemButton>
-      </Stack>
+      </ButtonsContainer>
     </EmptyStateContainer>
   )
 }
