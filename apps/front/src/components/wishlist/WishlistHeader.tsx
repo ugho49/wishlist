@@ -1,4 +1,5 @@
 import type { DetailedWishlistDto } from '@wishlist/common'
+import type { FilterType, SortType } from './WishlistFilterAndSortItems'
 
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import EditIcon from '@mui/icons-material/Edit'
@@ -32,21 +33,8 @@ import {
 import { grey } from '@mui/material/colors'
 import { useState } from 'react'
 
-import type { FilterType, SortType } from './WishlistFilterAndSortItems'
+import { Card } from '../common/Card'
 import { filterOptions, sortOptions } from './WishlistFilterAndSortItems'
-
-const HeaderContainer = styled(Box)(({ theme }) => ({
-  backgroundColor: theme.palette.background.paper,
-  borderBottom: `1px solid ${theme.palette.grey[200]}`,
-  position: 'sticky',
-  top: 56, // Height of navbar on mobile
-  zIndex: theme.zIndex.appBar - 1,
-  paddingTop: theme.spacing(2),
-  paddingBottom: theme.spacing(2),
-  [theme.breakpoints.up('md')]: {
-    top: 64, // Height of navbar on desktop
-  },
-}))
 
 const HeaderStack = styled(Stack)(({ theme }) => ({
   [theme.breakpoints.down('md')]: {
@@ -224,13 +212,11 @@ export const WishlistHeader = ({
     onOpenImportDialog()
   }
 
-  const currentSortOption = sortOptions.find(opt => opt.value === sort)
-  const currentFilterOption = filterOptions.find(opt => opt.value === filter)
   const hasActiveFilter = filter !== ''
 
   return (
-    <HeaderContainer>
-      <Container maxWidth="lg">
+    <Container maxWidth="lg" sx={{ paddingTop: 3 }}>
+      <Card>
         <HeaderStack>
           {/* Left section - Avatar, Title and Metadata */}
           <LeftSection>
@@ -250,27 +236,45 @@ export const WishlistHeader = ({
 
                 {/* Metadata */}
                 <MetadataStack>
-                  <Chip
-                    variant="outlined"
-                    size="small"
-                    avatar={
-                      wishlist.owner.picture_url ? (
-                        <Avatar src={wishlist.owner.picture_url} sx={{ width: 24, height: 24 }} />
-                      ) : (
-                        <PersonOutlineOutlinedIcon fontSize="small" />
-                      )
-                    }
-                    label={`${wishlist.owner.firstname} ${wishlist.owner.lastname}`}
-                    sx={{ height: '24px' }}
-                  />
-                  <Chip
-                    variant="outlined"
-                    size="small"
-                    icon={<CalendarMonthIcon fontSize="small" />}
+                  {/* Show owner info only for public lists */}
+                  {isPublic && (
+                    <Chip
+                      variant="outlined"
+                      size="small"
+                      avatar={
+                        wishlist.owner.picture_url ? (
+                          <Avatar src={wishlist.owner.picture_url} sx={{ width: 24, height: 24 }} />
+                        ) : (
+                          <PersonOutlineOutlinedIcon fontSize="small" />
+                        )
+                      }
+                      label={`${wishlist.owner.firstname} ${wishlist.owner.lastname}`}
+                      sx={{ height: '24px' }}
+                    />
+                  )}
+
+                  {/* Event info as clickable text with icon */}
+                  <Box
                     onClick={onOpenEventDialog}
-                    label={`${wishlist.events.length} ${wishlist.events.length > 1 ? 'évènements' : 'évènement'}`}
-                    sx={{ height: '24px', cursor: 'pointer' }}
-                  />
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 0.5,
+                      cursor: 'pointer',
+                      color: 'text.secondary',
+                      '&:hover': {
+                        color: 'primary.main',
+                      },
+                      transition: 'color 0.2s',
+                    }}
+                  >
+                    <CalendarMonthIcon fontSize="small" />
+                    <Typography variant="body2">
+                      {wishlist.events.length} {wishlist.events.length > 1 ? 'évènements' : 'évènement'}
+                    </Typography>
+                  </Box>
+
+                  {/* Public indicator */}
                   {isPublic && (
                     <Tooltip title="Tout le monde peut ajouter, cocher ou voir les souhaits cochés, même le créateur de la liste">
                       <Chip
@@ -315,33 +319,28 @@ export const WishlistHeader = ({
             )}
 
             {/* Edit Actions (only for owner) */}
-            {currentUserCanEdit && (
-              <>
-                {isMobile ? (
-                  // Mobile: Single button with dropdown
-                  <>
-                    <CompactIconButton size="small" onClick={handleOpenActionsMenu}>
-                      <MoreVertIcon fontSize="small" />
-                    </CompactIconButton>
-                  </>
-                ) : (
-                  // Desktop: Button group
-                  <StyledButtonGroup variant="outlined" color="primary" disableElevation>
-                    <MainActionButton startIcon={<EditIcon />} onClick={onNavigateToEdit}>
-                      Modifier
-                    </MainActionButton>
-                    {hasImportableItems && (
-                      <DropdownButton size="small" onClick={handleOpenActionsMenu}>
-                        <KeyboardArrowDownIcon />
-                      </DropdownButton>
-                    )}
-                  </StyledButtonGroup>
-                )}
-              </>
-            )}
+            {currentUserCanEdit &&
+              (isMobile ? (
+                // Mobile: Single button with dropdown
+                <CompactIconButton size="small" onClick={handleOpenActionsMenu}>
+                  <MoreVertIcon fontSize="small" />
+                </CompactIconButton>
+              ) : (
+                // Desktop: Button group
+                <StyledButtonGroup variant="outlined" color="primary" disableElevation>
+                  <MainActionButton startIcon={<EditIcon />} onClick={onNavigateToEdit}>
+                    Modifier
+                  </MainActionButton>
+                  {hasImportableItems && (
+                    <DropdownButton size="small" onClick={handleOpenActionsMenu}>
+                      <KeyboardArrowDownIcon />
+                    </DropdownButton>
+                  )}
+                </StyledButtonGroup>
+              ))}
           </RightSection>
         </HeaderStack>
-      </Container>
+      </Card>
 
       {/* Actions Menu */}
       <Menu
@@ -421,6 +420,6 @@ export const WishlistHeader = ({
           </MenuItem>
         ))}
       </Menu>
-    </HeaderContainer>
+    </Container>
   )
 }

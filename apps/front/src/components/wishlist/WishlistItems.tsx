@@ -13,7 +13,7 @@ import { FabAutoGrow } from '../common/FabAutoGrow'
 import { EmptyItemsState } from '../item/EmptyItemsState'
 import { ItemCard } from '../item/ItemCard'
 import { ItemFormDialog } from '../item/ItemFormDialog'
-import { applyFilter, applySort, type FilterType, type SortType } from './WishlistFilterAndSortItems'
+import { applyFilter, applySort } from './WishlistFilterAndSortItems'
 
 export type WishlistTabItemsProps = {
   wishlist: DetailedWishlistDto
@@ -113,7 +113,11 @@ const mapState = (state: RootState) => state.auth.user?.id
 
 export const WishlistItems = ({ wishlist }: WishlistTabItemsProps) => {
   const currentUserId = useSelector(mapState)
-  const { displayAddItemFormDialog: openItemFormDialog, sort, filter } = useSearch({
+  const {
+    displayAddItemFormDialog: openItemFormDialog,
+    sort,
+    filter,
+  } = useSearch({
     from: '/_authenticated/_with-layout/wishlists/$wishlistId/',
   })
   const nbOfItems = useMemo(() => wishlist.items.length, [wishlist.items])
