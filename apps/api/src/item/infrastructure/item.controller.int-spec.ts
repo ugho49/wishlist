@@ -912,9 +912,9 @@ describe('ItemController', () => {
           message: ['name must be shorter than or equal to 40 characters'],
         },
         {
-          body: { wishlist_id: 'valid-uuid', name: 'Item Name', description: 'a'.repeat(61) },
+          body: { wishlist_id: 'valid-uuid', name: 'Item Name', description: 'a'.repeat(121) },
           case: 'description too long',
-          message: ['description must be shorter than or equal to 60 characters'],
+          message: ['description must be shorter than or equal to 120 characters'],
         },
         {
           body: { wishlist_id: 'valid-uuid', name: 'Item Name', url: 'invalid-url' },
@@ -1147,9 +1147,9 @@ describe('ItemController', () => {
           message: ['name must be shorter than or equal to 40 characters'],
         },
         {
-          body: { name: 'Item Name', description: 'a'.repeat(61) },
+          body: { name: 'Item Name', description: 'a'.repeat(121) },
           case: 'description too long',
-          message: ['description must be shorter than or equal to 60 characters'],
+          message: ['description must be shorter than or equal to 120 characters'],
         },
         {
           body: { name: 'Item Name', url: 'invalid-url' },

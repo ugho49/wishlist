@@ -229,9 +229,9 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
               disabled={loading}
               fullWidth
               value={description}
-              slotProps={{ htmlInput: { maxLength: 60 } }}
+              slotProps={{ htmlInput: { maxLength: 120 } }}
               placeholder="Ajouter du détail à votre souhait"
-              helperText={<CharsRemaining max={60} value={description} />}
+              helperText={<CharsRemaining max={120} value={description} />}
               onChange={e => setDescription(e.target.value)}
             />
             {/* TODO: suggest to "add size" if it's clothe */}

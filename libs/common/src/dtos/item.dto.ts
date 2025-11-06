@@ -42,7 +42,7 @@ export class UpdateItemInputDto {
   @IsNotEmpty()
   declare name: string
 
-  @MaxLength(60)
+  @MaxLength(120)
   @IsString()
   @IsOptional()
   declare description?: string
