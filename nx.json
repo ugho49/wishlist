@@ -40,12 +40,12 @@
       }
     },
     {
-      "plugin": "@nx/webpack/plugin",
+      "plugin": "@nx/rspack/plugin",
       "options": {
         "buildTargetName": "build",
+        "previewTargetName": "preview",
         "serveTargetName": "serve",
-        "serveStaticTargetName": "webpack:serve-static",
-        "previewTargetName": "webpack:preview"
+        "serveStaticTargetName": "serve-static"
       }
     },
     {
