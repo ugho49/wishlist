@@ -16,7 +16,8 @@
     "prepack": "husky",
     "docker:up": "docker compose -f ./docker/docker-compose.yml -f ./docker/docker-compose.local.yml up -d",
     "docker:down": "docker compose -f ./docker/docker-compose.yml -f ./docker/docker-compose.local.yml down --remove-orphans",
-    "typecheck": "nx run-many --target=typecheck --exclude=@wishlist/source"
+    "typecheck": "nx run-many --target=typecheck --exclude=@wishlist/source",
+    "bump-deps": "npx npm-check-updates -u -i --format group"
   },
   "engines": {
     "node": ">=24"
