@@ -14,7 +14,7 @@ parameters:
 references:
   setup_env_node: &setup_env_node
     docker:
-      - image: cimg/node:24.4
+      - image: cimg/node:24.11
   attach_workspace: &attach_workspace
     at: ~/project
   restore_node_cache: &restore_node_cache
@@ -53,7 +53,7 @@ jobs:
 
   deploy-api:
     docker:
-      - image: cimg/base:2025.10
+      - image: cimg/base:2025.11
     steps:
       - add_ssh_keys:
           fingerprints:
