@@ -1,6 +1,7 @@
 import type { UserConfig } from 'vite'
 
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin'
+import { devtools } from '@tanstack/devtools-vite'
 import { tanstackRouter } from '@tanstack/router-plugin/vite'
 import react from '@vitejs/plugin-react'
 import browserslistToEsbuild from 'browserslist-to-esbuild'
@@ -36,11 +37,10 @@ const config: UserConfig = {
   },
 
   plugins: [
+    devtools(),
     tanstackRouter({
       target: 'react',
       autoCodeSplitting: true,
-      routesDirectory: './src/routes',
-      generatedRouteTree: './src/routeTree.gen.ts',
     }),
     react(),
     svgr(),

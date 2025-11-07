@@ -3,10 +3,11 @@ import 'reflect-metadata'
 import { CssBaseline, ThemeProvider } from '@mui/material'
 import { LocalizationProvider } from '@mui/x-date-pickers'
 import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon'
+import { TanStackDevtools } from '@tanstack/react-devtools'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import { ReactQueryDevtoolsPanel } from '@tanstack/react-query-devtools'
 import { RouterProvider } from '@tanstack/react-router'
-import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
+import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { LDProvider } from 'launchdarkly-react-client-sdk'
 import * as ReactDOM from 'react-dom/client'
 import { Toaster } from 'react-hot-toast'
@@ -57,12 +58,24 @@ function main() {
               <CssBaseline />
               <LocalizationProvider dateAdapter={AdapterLuxon} adapterLocale="fr">
                 <RouterProvider router={router} context={{ queryClient }} />
-                <TanStackRouterDevtools router={router} />
+                <TanStackDevtools
+                  plugins={[
+                    {
+                      name: 'TanStack Query',
+                      render: <ReactQueryDevtoolsPanel client={queryClient} />,
+                      defaultOpen: true,
+                    },
+                    {
+                      name: 'TanStack Router',
+                      render: <TanStackRouterDevtoolsPanel router={router} />,
+                      defaultOpen: false,
+                    },
+                  ]}
+                />
               </LocalizationProvider>
             </ThemeProvider>
           </ReduxProvider>
         </ApiProvider>
-        <ReactQueryDevtools initialIsOpen={false} />
       </QueryClientProvider>
     </LDProvider>,
   )
