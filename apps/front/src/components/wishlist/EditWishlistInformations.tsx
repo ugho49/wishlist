@@ -14,9 +14,9 @@ import { useApi } from '../../hooks/useApi'
 import { useToast } from '../../hooks/useToast'
 import { zodRequiredString } from '../../utils/validation'
 import { Card } from '../common/Card'
-import { CharsRemaining } from '../common/CharsRemaining'
 import { ConfirmButton } from '../common/ConfirmButton'
 import { Subtitle } from '../common/Subtitle'
+import { TextareaMarkdown } from '../common/TextareaMarkdown'
 import { WishlistLogoActions } from './WishlistLogoActions'
 
 export type EditWishlistInformationsProps = {
@@ -149,18 +149,15 @@ export const EditWishlistInformations = ({ wishlist }: EditWishlistInformationsP
             </Box>
 
             <Box>
-              <TextField
+              <TextareaMarkdown
                 {...register('description')}
                 label="Description"
                 autoComplete="off"
                 fullWidth
-                multiline
-                minRows={4}
-                placeholder="Une petite description ..."
+                maxLength={2000}
+                placeholder="Une petite description (supporte le markdown) ..."
                 error={!!formErrors.description}
-                helperText={
-                  formErrors.description?.message || <CharsRemaining max={2000} value={formValues.description || ''} />
-                }
+                helperText={formErrors.description?.message}
               />
             </Box>
 

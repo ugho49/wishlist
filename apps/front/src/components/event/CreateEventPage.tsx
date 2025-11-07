@@ -37,6 +37,7 @@ import { CharsRemaining } from '../common/CharsRemaining'
 import { WishlistDatePicker } from '../common/DatePicker'
 import { EmojiSelectorWithBadge } from '../common/EmojiSelectorWithBadge'
 import { Subtitle } from '../common/Subtitle'
+import { TextareaMarkdown } from '../common/TextareaMarkdown'
 import { Title } from '../common/Title'
 import { SearchUserSelect } from '../user/SearchUserSelect'
 import { ListItemAttendee } from './ListItemAttendee'
@@ -184,18 +185,15 @@ export const CreateEventPage = () => {
               </Stack>
 
               <Box>
-                <TextField
+                <TextareaMarkdown
                   {...register('description')}
                   label="Description"
                   autoComplete="off"
                   fullWidth
-                  multiline
-                  minRows={4}
-                  placeholder="Une petite description ..."
+                  maxLength={2000}
+                  placeholder="Une petite description (supporte le markdown) ..."
                   error={!!errors.description}
-                  helperText={
-                    errors.description?.message || <CharsRemaining max={2000} value={formValues.description || ''} />
-                  }
+                  helperText={errors.description?.message}
                 />
               </Box>
             </Stack>

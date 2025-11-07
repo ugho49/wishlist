@@ -18,6 +18,7 @@ import { ConfirmButton } from '../common/ConfirmButton'
 import { WishlistDatePicker } from '../common/DatePicker'
 import { EmojiSelectorWithBadge } from '../common/EmojiSelectorWithBadge'
 import { Subtitle } from '../common/Subtitle'
+import { TextareaMarkdown } from '../common/TextareaMarkdown'
 
 const schema = z.object({
   icon: z.string().optional(),
@@ -132,19 +133,16 @@ export const EditEventInformations = ({ event }: EditEventInformationsProps) => 
           </Stack>
 
           <Box>
-            <TextField
+            <TextareaMarkdown
               {...register('description')}
               label="Description"
               autoComplete="off"
               disabled={loading}
               fullWidth
-              multiline
-              minRows={4}
-              placeholder="Une petite description ..."
+              maxLength={2000}
+              placeholder="Une petite description (supporte le markdown) ..."
               error={!!errors.description}
-              helperText={
-                errors.description?.message || <CharsRemaining max={2000} value={formValues.description || ''} />
-              }
+              helperText={errors.description?.message}
             />
           </Box>
 

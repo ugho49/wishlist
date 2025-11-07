@@ -58,7 +58,7 @@ export const EventPage = ({ eventId }: EventPageProps) => {
 
                 <MySecretSantaDraw eventId={event.id} />
 
-                {event.description && <Description text={event.description} />}
+                {event.description && <Description text={event.description} allowMarkdown />}
 
                 <EventWishlists event={event} />
               </Stack>

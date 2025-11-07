@@ -40,10 +40,10 @@ import { useInterval } from 'usehooks-ts'
 import { useApi, useAvailableEvents, useEventById, useToast } from '../../hooks'
 import { getRandomPlaceholderName } from '../../utils/wishlist.utils'
 import { Card } from '../common/Card'
-import { CharsRemaining } from '../common/CharsRemaining'
 import { InputLabel } from '../common/InputLabel'
 import { Loader } from '../common/Loader'
 import { Subtitle } from '../common/Subtitle'
+import { TextareaMarkdown } from '../common/TextareaMarkdown'
 import { Title } from '../common/Title'
 import { EventIcon } from '../event/EventIcon'
 import { SearchEventSelect } from '../event/SearchEventSelect'
@@ -250,17 +250,14 @@ export const CreateWishlistPage = () => {
                   </Stack>
 
                   <Box>
-                    <TextField
+                    <TextareaMarkdown
                       label="Description"
                       autoComplete="off"
                       disabled={loading}
                       fullWidth
-                      multiline
-                      minRows={4}
                       value={description}
-                      slotProps={{ htmlInput: { maxLength: 2000 } }}
-                      placeholder="Une petite description ..."
-                      helperText={<CharsRemaining max={2000} value={description} />}
+                      maxLength={2000}
+                      placeholder="Une petite description (supporte le markdown) ..."
                       onChange={e => setDescription(e.target.value)}
                     />
                   </Box>

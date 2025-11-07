@@ -92,7 +92,7 @@ export const WishlistPage = ({ wishlistId }: WishlistPageProps) => {
 
             <Container maxWidth="lg">
               <Stack gap="20px" sx={{ paddingTop: 3 }}>
-                {wishlist.description && <Description text={wishlist.description} />}
+                {wishlist.description && <Description text={wishlist.description} allowMarkdown />}
 
                 <WishlistItems
                   wishlist={wishlist}
