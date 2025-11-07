@@ -1,16 +1,16 @@
-import type { DetailedEventDto, UpdateEventInputDto } from '@wishlist/common'
-
 import { zodResolver } from '@hookform/resolvers/zod'
 import DeleteIcon from '@mui/icons-material/Delete'
 import SaveIcon from '@mui/icons-material/Save'
 import { Box, Button, Stack, TextField } from '@mui/material'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
+import { type DetailedEventDto, FeatureFlags, type UpdateEventInputDto } from '@wishlist/common'
 import { DateTime } from 'luxon'
 import { Controller, useForm } from 'react-hook-form'
 import { z } from 'zod'
 
 import { useApi } from '../../hooks/useApi'
+import { useFeatureFlag } from '../../hooks/useFeatureFlag'
 import { useToast } from '../../hooks/useToast'
 import { Card } from '../common/Card'
 import { CharsRemaining } from '../common/CharsRemaining'
@@ -41,6 +41,7 @@ export const EditEventInformations = ({ event }: EditEventInformationsProps) => 
   const { addToast } = useToast()
   const queryClient = useQueryClient()
   const navigate = useNavigate()
+  const isFeatureFlagMarkdownEnabled = useFeatureFlag(FeatureFlags.FRONTEND_ACTIVATE_DESCRIPTION_MARKDOWN)
 
   const {
     register,
@@ -136,22 +137,39 @@ export const EditEventInformations = ({ event }: EditEventInformationsProps) => 
             <Controller
               control={control}
               name="description"
-              render={({ field }) => (
-                <TextareaMarkdown
-                  label="Description"
-                  autoComplete="off"
-                  disabled={loading}
-                  fullWidth
-                  maxLength={2000}
-                  placeholder="Une petite description (supporte le markdown) ..."
-                  error={!!errors.description}
-                  helperText={errors.description?.message}
-                  value={field.value}
-                  onChange={field.onChange}
-                  onBlur={field.onBlur}
-                  ref={field.ref}
-                />
-              )}
+              render={({ field }) =>
+                isFeatureFlagMarkdownEnabled ? (
+                  <TextareaMarkdown
+                    label="Description"
+                    autoComplete="off"
+                    disabled={loading}
+                    fullWidth
+                    maxLength={2000}
+                    placeholder="Une petite description (supporte le markdown) ..."
+                    error={!!errors.description}
+                    helperText={errors.description?.message}
+                    value={field.value}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    ref={field.ref}
+                  />
+                ) : (
+                  <TextField
+                    label="Description"
+                    error={!!errors.description}
+                    autoComplete="off"
+                    disabled={loading}
+                    fullWidth
+                    multiline
+                    minRows={4}
+                    value={field.value}
+                    slotProps={{ htmlInput: { maxLength: 2000 } }}
+                    placeholder="Une petite description ..."
+                    helperText={errors.description?.message || <CharsRemaining max={2000} value={field.value} />}
+                    onChange={field.onChange}
+                  />
+                )
+              }
             />
           </Box>
 

@@ -1,8 +1,10 @@
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import { alpha, Box, Collapse, Stack, styled } from '@mui/material'
+import { FeatureFlags } from '@wishlist/common'
 import { useLayoutEffect, useRef, useState } from 'react'
 
+import { useFeatureFlag } from '../../hooks/useFeatureFlag'
 import { BreaklineText } from './BreaklineText'
 import { Card } from './Card'
 import { MarkdownContent } from './MarkdownContent'
@@ -67,6 +69,8 @@ export const Description = ({ text, allowMarkdown = false }: { text: string; all
   const [isExpanded, setIsExpanded] = useState(false)
   const contentRef = useRef<HTMLDivElement>(null)
   const isInitialized = useRef(false)
+  const isFeatureFlagMarkdownEnabled = useFeatureFlag(FeatureFlags.FRONTEND_ACTIVATE_DESCRIPTION_MARKDOWN)
+  const isMarkdownEnabled = isFeatureFlagMarkdownEnabled && allowMarkdown
 
   useLayoutEffect(() => {
     if (contentRef.current && !isInitialized.current) {
@@ -92,7 +96,7 @@ export const Description = ({ text, allowMarkdown = false }: { text: string; all
           </IconWrapper>
           <ContentWrapper>
             <Box ref={contentRef} sx={{ opacity: 0 }}>
-              {allowMarkdown ? <MarkdownContent text={text} /> : <BreaklineText text={text} />}
+              {isMarkdownEnabled ? <MarkdownContent text={text} /> : <BreaklineText text={text} />}
             </Box>
           </ContentWrapper>
         </DescriptionContainer>
@@ -113,7 +117,7 @@ export const Description = ({ text, allowMarkdown = false }: { text: string; all
             timeout={300}
           >
             <Box ref={contentRef}>
-              {allowMarkdown ? <MarkdownContent text={text} /> : <BreaklineText text={text} />}
+              {isMarkdownEnabled ? <MarkdownContent text={text} /> : <BreaklineText text={text} />}
             </Box>
           </Collapse>
         </ContentWrapper>

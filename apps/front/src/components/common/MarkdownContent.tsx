@@ -8,7 +8,7 @@ const MarkdownContainer = styled(Box)(({ theme }) => ({
   fontSize: '1em',
   '& p': {
     margin: 0,
-    marginBottom: '2px',
+    marginBottom: '12px',
     '&:last-child': {
       marginBottom: 0,
     },

@@ -9665,13 +9665,13 @@ __metadata:
     react-easy-crop: "npm:5.5.3"
     react-hook-form: "npm:7.66.0"
     react-hot-toast: "npm:2.6.0"
-    react-markdown: "npm:^10.1.0"
+    react-markdown: "npm:10.1.0"
     react-redux: "npm:9.2.0"
     react-refresh: "npm:0.18.0"
     react-test-renderer: "npm:19.2.0"
     reflect-metadata: "npm:0.2.2"
     regenerator-runtime: "npm:0.14.1"
-    remark-gfm: "npm:^4.0.1"
+    remark-gfm: "npm:4.0.1"
     run-script-webpack-plugin: "npm:0.2.3"
     rxjs: "npm:7.8.2"
     sass-embedded: "npm:1.93.3"
@@ -20870,7 +20870,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-markdown@npm:^10.1.0":
+"react-markdown@npm:10.1.0":
   version: 10.1.0
   resolution: "react-markdown@npm:10.1.0"
   dependencies:
@@ -21155,7 +21155,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"remark-gfm@npm:^4.0.1":
+"remark-gfm@npm:4.0.1":
   version: 4.0.1
   resolution: "remark-gfm@npm:4.0.1"
   dependencies:

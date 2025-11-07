@@ -24,13 +24,14 @@ import {
 } from '@mui/material'
 import { useMutation } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
-import { AttendeeRole } from '@wishlist/common'
+import { AttendeeRole, FeatureFlags } from '@wishlist/common'
 import { useMemo, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { useSelector } from 'react-redux'
 import { z } from 'zod'
 
 import { useApi } from '../../hooks/useApi'
+import { useFeatureFlag } from '../../hooks/useFeatureFlag'
 import { useToast } from '../../hooks/useToast'
 import { Card } from '../common/Card'
 import { CharsRemaining } from '../common/CharsRemaining'
@@ -70,6 +71,7 @@ export const CreateEventPage = () => {
   const navigate = useNavigate()
   const [step, setStep] = useState(1)
   const [attendees, setAttendees] = useState<Attendee[]>([])
+  const isFeatureFlagMarkdownEnabled = useFeatureFlag(FeatureFlags.FRONTEND_ACTIVATE_DESCRIPTION_MARKDOWN)
 
   const {
     register,
@@ -188,21 +190,43 @@ export const CreateEventPage = () => {
                 <Controller
                   control={control}
                   name="description"
-                  render={({ field }) => (
-                    <TextareaMarkdown
-                      label="Description"
-                      autoComplete="off"
-                      fullWidth
-                      maxLength={2000}
-                      placeholder="Une petite description (supporte le markdown) ..."
-                      error={!!errors.description}
-                      helperText={errors.description?.message}
-                      value={field.value}
-                      onChange={field.onChange}
-                      onBlur={field.onBlur}
-                      ref={field.ref}
-                    />
-                  )}
+                  render={({ field }) =>
+                    isFeatureFlagMarkdownEnabled ? (
+                      <TextareaMarkdown
+                        label="Description"
+                        autoComplete="off"
+                        fullWidth
+                        maxLength={2000}
+                        placeholder="Une petite description (supporte le markdown) ..."
+                        error={!!errors.description}
+                        helperText={errors.description?.message}
+                        value={field.value}
+                        onChange={field.onChange}
+                        onBlur={field.onBlur}
+                        ref={field.ref}
+                        disabled={loading}
+                      />
+                    ) : (
+                      <TextField
+                        label="Description"
+                        autoComplete="off"
+                        value={field.value}
+                        onChange={field.onChange}
+                        onBlur={field.onBlur}
+                        ref={field.ref}
+                        fullWidth
+                        multiline
+                        minRows={4}
+                        placeholder="Une petite description ..."
+                        error={!!errors.description}
+                        helperText={
+                          errors.description?.message || (
+                            <CharsRemaining max={2000} value={formValues.description || ''} />
+                          )
+                        }
+                      />
+                    )
+                  }
                 />
               </Box>
             </Stack>
