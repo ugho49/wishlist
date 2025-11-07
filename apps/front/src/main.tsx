@@ -48,6 +48,12 @@ function main() {
     },
   })
 
+  if (environment.env === 'development') {
+    // Used for the TanStack Query Devtools extension in browser
+    // @ts-expect-error - This is a global variable for the TanStack Query client
+    window.__TANSTACK_QUERY_CLIENT__ = queryClient
+  }
+
   root.render(
     <LDProvider clientSideID={environment.launchdarklyClientSideiD} reactOptions={{ useCamelCaseFlagKeys: false }}>
       <Toaster position="top-right" toastOptions={{ duration: 3_000 }} />
