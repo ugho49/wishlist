@@ -7,7 +7,7 @@ import { Box, Button, Stack, TextField } from '@mui/material'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import { useMemo, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 import { z } from 'zod'
 
 import { useApi } from '../../hooks/useApi'
@@ -39,9 +39,9 @@ export const EditWishlistInformations = ({ wishlist }: EditWishlistInformationsP
 
   const {
     register,
+    control,
     handleSubmit,
     formState: { isSubmitting, errors: formErrors },
-    watch,
   } = useForm<FormFields>({
     resolver: zodResolver(schema),
     values: {
@@ -49,8 +49,6 @@ export const EditWishlistInformations = ({ wishlist }: EditWishlistInformationsP
       description: wishlist.description,
     },
   })
-
-  const formValues = watch()
 
   const { mutateAsync: updateWishlist } = useMutation({
     mutationKey: ['wishlist.update', { id: wishlist.id }],
@@ -149,15 +147,24 @@ export const EditWishlistInformations = ({ wishlist }: EditWishlistInformationsP
             </Box>
 
             <Box>
-              <TextareaMarkdown
-                {...register('description')}
-                label="Description"
-                autoComplete="off"
-                fullWidth
-                maxLength={2000}
-                placeholder="Une petite description (supporte le markdown) ..."
-                error={!!formErrors.description}
-                helperText={formErrors.description?.message}
+              <Controller
+                control={control}
+                name="description"
+                render={({ field }) => (
+                  <TextareaMarkdown
+                    label="Description"
+                    autoComplete="off"
+                    fullWidth
+                    maxLength={2000}
+                    placeholder="Une petite description (supporte le markdown) ..."
+                    error={!!formErrors.description}
+                    helperText={formErrors.description?.message}
+                    value={field.value}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    ref={field.ref}
+                  />
+                )}
               />
             </Box>
 

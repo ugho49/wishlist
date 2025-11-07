@@ -185,15 +185,24 @@ export const CreateEventPage = () => {
               </Stack>
 
               <Box>
-                <TextareaMarkdown
-                  {...register('description')}
-                  label="Description"
-                  autoComplete="off"
-                  fullWidth
-                  maxLength={2000}
-                  placeholder="Une petite description (supporte le markdown) ..."
-                  error={!!errors.description}
-                  helperText={errors.description?.message}
+                <Controller
+                  control={control}
+                  name="description"
+                  render={({ field }) => (
+                    <TextareaMarkdown
+                      label="Description"
+                      autoComplete="off"
+                      fullWidth
+                      maxLength={2000}
+                      placeholder="Une petite description (supporte le markdown) ..."
+                      error={!!errors.description}
+                      helperText={errors.description?.message}
+                      value={field.value}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      ref={field.ref}
+                    />
+                  )}
                 />
               </Box>
             </Stack>

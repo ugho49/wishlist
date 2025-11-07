@@ -9647,6 +9647,7 @@ __metadata:
     launchdarkly-react-client-sdk: "npm:3.9.0"
     lint-staged: "npm:16.2.6"
     lodash: "npm:4.17.21"
+    lucide-react: "npm:0.553.0"
     luxon: "npm:3.7.2"
     mjml: "npm:4.16.1"
     nestjs-real-ip: "npm:3.0.1"
@@ -17245,6 +17246,15 @@ __metadata:
     lodash.clonedeep: "npm:^4.5.0"
     lru-cache: "npm:6.0.0"
   checksum: 10c0/13cf6bc9ff74cdb167078dbb66d4cf43adc802495da8f56097e6f388b4d7ccb91668beb809bdbc55b62d016c138d7c19a18c5883a2fdbcc7f508ad8a23ec7c65
+  languageName: node
+  linkType: hard
+
+"lucide-react@npm:0.553.0":
+  version: 0.553.0
+  resolution: "lucide-react@npm:0.553.0"
+  peerDependencies:
+    react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
+  checksum: 10c0/b1283f1a2302a50d6a16bd67b9f7417ae08a74cba59ae5ca9953527cb9724247df12ba8c72ca2fc6a70b745f8315cc709ac7573643c4088728766da151999ef6
   languageName: node
   linkType: hard
 
