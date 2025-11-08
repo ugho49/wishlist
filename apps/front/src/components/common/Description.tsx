@@ -1,10 +1,13 @@
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import { alpha, Box, Collapse, Stack, styled } from '@mui/material'
+import { FeatureFlags } from '@wishlist/common'
 import { useLayoutEffect, useRef, useState } from 'react'
 
+import { useFeatureFlag } from '../../hooks/useFeatureFlag'
 import { BreaklineText } from './BreaklineText'
 import { Card } from './Card'
+import { MarkdownContent } from './MarkdownContent'
 
 const DescriptionCard = styled(Card)<{ collapsable: boolean }>(({ theme, collapsable }) => ({
   position: 'relative',
@@ -61,11 +64,13 @@ const EllipsisOverlay = styled(Box)(() => ({
 
 const MAX_HEIGHT = 110 // Maximum height in pixels before showing collapse button
 
-export const Description = ({ text }: { text: string }) => {
+export const Description = ({ text, allowMarkdown = false }: { text: string; allowMarkdown?: boolean }) => {
   const [isCollapsable, setIsCollapsable] = useState<boolean | null>(null)
   const [isExpanded, setIsExpanded] = useState(false)
   const contentRef = useRef<HTMLDivElement>(null)
   const isInitialized = useRef(false)
+  const isFeatureFlagMarkdownEnabled = useFeatureFlag(FeatureFlags.FRONTEND_ACTIVATE_DESCRIPTION_MARKDOWN)
+  const isMarkdownEnabled = isFeatureFlagMarkdownEnabled && allowMarkdown
 
   useLayoutEffect(() => {
     if (contentRef.current && !isInitialized.current) {
@@ -91,7 +96,7 @@ export const Description = ({ text }: { text: string }) => {
           </IconWrapper>
           <ContentWrapper>
             <Box ref={contentRef} sx={{ opacity: 0 }}>
-              <BreaklineText text={text} />
+              {isMarkdownEnabled ? <MarkdownContent text={text} /> : <BreaklineText text={text} />}
             </Box>
           </ContentWrapper>
         </DescriptionContainer>
@@ -112,7 +117,7 @@ export const Description = ({ text }: { text: string }) => {
             timeout={300}
           >
             <Box ref={contentRef}>
-              <BreaklineText text={text} />
+              {isMarkdownEnabled ? <MarkdownContent text={text} /> : <BreaklineText text={text} />}
             </Box>
           </Collapse>
         </ContentWrapper>
