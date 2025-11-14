@@ -24,6 +24,136 @@ references:
     method: blobless
 
 jobs:
+  compute-version-api:
+    <<: *setup_env_node
+    steps:
+      - checkout: *checkout
+      - attach_workspace: *attach_workspace
+      - restore_cache: *restore_node_cache
+      - run:
+          name: Configure Git
+          command: |
+            git config user.email "ci@wishlist.com"
+            git config user.name "CircleCI"
+      - run:
+          name: Compute next version for API (dry-run)
+          command: |
+            # Run nx release in dry-run mode and capture output
+            OUTPUT=$(yarn nx release version api --dry-run --verbose 2>&1)
+            echo "$OUTPUT"
+
+            # Try to extract version from the output
+            VERSION=$(echo "$OUTPUT" | grep -oP 'api-v\K\d+\.\d+\.\d+' | head -1)
+
+            # If no version found, try alternative patterns
+            if [ -z "$VERSION" ]; then
+              VERSION=$(echo "$OUTPUT" | grep -oP '(?<=version to )\d+\.\d+\.\d+' | head -1)
+            fi
+
+            # If still no version, start with 0.1.0
+            if [ -z "$VERSION" ]; then
+              echo "Could not determine version from nx release output, using 0.1.0 as initial version"
+              VERSION="0.1.0"
+            fi
+
+            echo "export API_VERSION=$VERSION" >> $BASH_ENV
+            echo "Computed API version: $VERSION"
+            mkdir -p /tmp/versions
+            echo "$VERSION" > /tmp/versions/api-version.txt
+      - persist_to_workspace:
+          root: /tmp/versions
+          paths:
+            - api-version.txt
+
+  compute-version-front:
+    <<: *setup_env_node
+    steps:
+      - checkout: *checkout
+      - attach_workspace: *attach_workspace
+      - restore_cache: *restore_node_cache
+      - run:
+          name: Configure Git
+          command: |
+            git config user.email "ci@wishlist.com"
+            git config user.name "CircleCI"
+      - run:
+          name: Compute next version for Front (dry-run)
+          command: |
+            # Run nx release in dry-run mode and capture output
+            OUTPUT=$(yarn nx release version front --dry-run --verbose 2>&1)
+            echo "$OUTPUT"
+
+            # Try to extract version from the output
+            VERSION=$(echo "$OUTPUT" | grep -oP 'front-v\K\d+\.\d+\.\d+' | head -1)
+
+            # If no version found, try alternative patterns
+            if [ -z "$VERSION" ]; then
+              VERSION=$(echo "$OUTPUT" | grep -oP '(?<=version to )\d+\.\d+\.\d+' | head -1)
+            fi
+
+            # If still no version, start with 0.1.0
+            if [ -z "$VERSION" ]; then
+              echo "Could not determine version from nx release output, using 0.1.0 as initial version"
+              VERSION="0.1.0"
+            fi
+
+            echo "export FRONT_VERSION=$VERSION" >> $BASH_ENV
+            echo "Computed Front version: $VERSION"
+            mkdir -p /tmp/versions
+            echo "$VERSION" > /tmp/versions/front-version.txt
+      - persist_to_workspace:
+          root: /tmp/versions
+          paths:
+            - front-version.txt
+
+  create-release-api:
+    <<: *setup_env_node
+    steps:
+      - checkout: *checkout
+      - attach_workspace: *attach_workspace
+      - restore_cache: *restore_node_cache
+      - run:
+          name: Configure Git
+          command: |
+            git config user.email "ci@wishlist.com"
+            git config user.name "CircleCI"
+      - run:
+          name: Create GitHub release for API
+          command: |
+            # Set GitHub token for creating releases
+            export GITHUB_TOKEN=$GITHUB_TOKEN
+
+            # Run nx release to create version, changelog, and GitHub release
+            yarn nx release --projects=api --skip-publish --yes
+      - run:
+          name: Push tags and commits
+          command: |
+            git push --follow-tags origin main
+
+  create-release-front:
+    <<: *setup_env_node
+    steps:
+      - checkout: *checkout
+      - attach_workspace: *attach_workspace
+      - restore_cache: *restore_node_cache
+      - run:
+          name: Configure Git
+          command: |
+            git config user.email "ci@wishlist.com"
+            git config user.name "CircleCI"
+      - run:
+          name: Create GitHub release for Front
+          command: |
+            # Set GitHub token for creating releases
+            export GITHUB_TOKEN=$GITHUB_TOKEN
+
+            # Run nx release to create version, changelog, and GitHub release
+            yarn nx release --projects=front --skip-publish --yes
+      - run:
+          name: Push tags and commits
+          command: |
+            git push --follow-tags origin main
+
   build-front:
     <<: *setup_env_node
     steps:
@@ -40,7 +170,15 @@ jobs:
     <<: *setup_env_node
     steps:
       - checkout: *checkout
+      - attach_workspace:
+          at: /tmp/versions
       - attach_workspace: *attach_workspace
+      - restore_cache: *restore_node_cache
+      - run:
+          name: Load version
+          command: |
+            FRONT_VERSION=$(cat /tmp/versions/front-version.txt)
+            echo "export FRONT_VERSION=$FRONT_VERSION" >> $BASH_ENV
       - run:
           name: Install firebase-tools
           command: curl -sL https://firebase.tools | bash
@@ -49,7 +187,36 @@ jobs:
           command: |
             echo $FIREBASE_JSON > firebase_auth.json
             export GOOGLE_APPLICATION_CREDENTIALS="$(pwd)/firebase_auth.json"
-            firebase deploy -P production -m "Workflow $CIRCLE_WORKFLOW_ID, build $CIRCLE_WORKFLOW_JOB_ID" --non-interactive
+            firebase deploy -P production -m "Release front-v${FRONT_VERSION} - Workflow $CIRCLE_WORKFLOW_ID, build $CIRCLE_WORKFLOW_JOB_ID" --non-interactive
+
+  build-and-publish-docker-api:
+    docker:
+      - image: cimg/base:2025.10
+    steps:
+      - checkout: *checkout
+      - attach_workspace:
+          at: /tmp/versions
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run:
+          name: Load version
+          command: |
+            API_VERSION=$(cat /tmp/versions/api-version.txt)
+            echo "export API_VERSION=$API_VERSION" >> $BASH_ENV
+            echo "API version to tag: $API_VERSION"
+      - run:
+          name: Build Docker image
+          command: |
+            docker build -f apps/api/Dockerfile -t ughoste/wishlist-api:${CIRCLE_SHA1} -t ughoste/wishlist-api:latest -t ughoste/wishlist-api:${API_VERSION} .
+      - run:
+          name: Login to Docker Hub
+          command: echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+      - run:
+          name: Push Docker image
+          command: |
+            docker push ughoste/wishlist-api:${CIRCLE_SHA1}
+            docker push ughoste/wishlist-api:latest
+            docker push ughoste/wishlist-api:${API_VERSION}
 
   deploy-api:
     docker:
@@ -80,19 +247,32 @@ workflows:
               ignore:
                 - main
 
-      - docker/publish:
-          name: build-and-publish
-          image: ughoste/wishlist-api
-          attach_at: ~/project
-          dockerfile: 'apps/api/Dockerfile'
-          use_buildkit: true
-          context:
-            - DOCKER_CREDENDIALS
-          tag: '${CIRCLE_SHA1},latest'
+      - compute-version-api:
+          name: compute-version
           filters:
             branches:
               only:
                 - main
+
+      - build-and-publish-docker-api:
+          name: build-and-publish
+          context:
+            - DOCKER_CREDENDIALS
+          filters:
+            branches:
+              only:
+                - main
+          requires:
+            - compute-version
+
+      - create-release-api:
+          name: create-release
+          filters:
+            branches:
+              only:
+                - main
+          requires:
+            - build-and-publish
 
       - deploy-api-trigger:
           name: deploy-trigger
@@ -118,6 +298,23 @@ workflows:
       - build-front:
           name: build
 
+      - compute-version-front:
+          name: compute-version
+          filters:
+            branches:
+              only:
+                - main
+
+      - create-release-front:
+          name: create-release
+          filters:
+            branches:
+              only:
+                - main
+          requires:
+            - build
+            - compute-version
+
       - deploy-front-trigger:
           name: deploy-trigger
           type: approval
@@ -130,6 +327,7 @@ workflows:
           name: deploy
           requires:
             - build
+            - compute-version
             - deploy-trigger
           filters:
             branches:
