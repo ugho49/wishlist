@@ -20,8 +20,8 @@ export class LinkWishlistToEventUseCase implements IInferredCommandHandler<LinkW
 
     const wishlist = await this.wishlistRepository.findByIdOrFail(wishlistId)
 
-    if (!wishlist.isOwner(currentUser.id)) {
-      throw new UnauthorizedException('Only the owner of the list can update it')
+    if (!wishlist.isOwnerOrCoOwner(currentUser.id)) {
+      throw new UnauthorizedException('Only the owner or co-owner of the list can update it')
     }
 
     const event = await this.eventRepository.findByIdOrFail(eventId)

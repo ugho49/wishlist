@@ -36,7 +36,8 @@ export const userRelations = relations(user, ({ many }) => ({
   passwordVerifications: many(userPasswordVerification),
   emailSettings: many(userEmailSetting),
   socials: many(userSocial),
-  wishlists: many(wishlist),
+  wishlists: many(wishlist, { relationName: 'ownedWishlists' }),
+  coOwnedWishlists: many(wishlist, { relationName: 'coOwnedWishlists' }),
   items: many(item),
 }))
 
@@ -65,6 +66,12 @@ export const wishlistRelations = relations(wishlist, ({ one, many }) => ({
   owner: one(user, {
     fields: [wishlist.ownerId],
     references: [user.id],
+    relationName: 'ownedWishlists',
+  }),
+  coOwner: one(user, {
+    fields: [wishlist.coOwnerId],
+    references: [user.id],
+    relationName: 'coOwnedWishlists',
   }),
   items: many(item),
   eventWishlists: many(eventWishlist),

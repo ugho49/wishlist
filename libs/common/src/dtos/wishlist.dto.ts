@@ -25,6 +25,7 @@ export class MiniWishlistDto {
 
 export class DetailedWishlistDto extends MiniWishlistDto {
   declare owner: MiniUserDto
+  declare co_owner?: MiniUserDto
   declare items: ItemDto[]
   declare events: MiniEventDto[]
   declare config: WishlistConfigDto
@@ -41,6 +42,7 @@ export class WishlistWithEventsDto extends MiniWishlistDto {
 
 export class WishlistWithOwnerDto extends MiniWishlistDto {
   declare owner: MiniUserDto
+  declare co_owner?: MiniUserDto
   declare config: WishlistConfigDto
   declare created_at: string
   declare updated_at: string
@@ -79,4 +81,10 @@ export class CreateWishlistInputDto extends UpdateWishlistInputDto {
   @IsString({ each: true })
   @ArrayNotEmpty()
   declare event_ids: EventId[]
+}
+
+export class AddCoOwnerInputDto {
+  @IsString()
+  @IsNotEmpty()
+  declare user_id: UserId
 }

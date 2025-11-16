@@ -21,6 +21,7 @@ function toDetailedWishlistDto(params: {
     description: wishlist.description,
     logo_url: wishlist.logoUrl,
     owner: userMapper.toMiniUserDto(wishlist.owner),
+    co_owner: wishlist.coOwner ? userMapper.toMiniUserDto(wishlist.coOwner) : undefined,
     items: wishlist.getItemsToDisplay(currentUserId).map(item => itemMapper.toDto({ item, displayUserAndSuggested })),
     events: events.map(eventMapper.toMiniEventDto),
     config: {
@@ -54,6 +55,7 @@ function toWishlistWithOwnerDto(wishlist: Wishlist): WishlistWithOwnerDto {
     logo_url: wishlist.logoUrl,
     config: { hide_items: wishlist.hideItems },
     owner: userMapper.toMiniUserDto(wishlist.owner),
+    co_owner: wishlist.coOwner ? userMapper.toMiniUserDto(wishlist.coOwner) : undefined,
     created_at: wishlist.createdAt.toISOString(),
     updated_at: wishlist.updatedAt.toISOString(),
   }

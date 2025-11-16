@@ -21,6 +21,7 @@ export class PostgresWishlistRepository implements WishlistRepository {
       where: eq(schema.wishlist.id, wishlistId),
       with: {
         owner: true,
+        coOwner: true,
         eventWishlists: true,
         items: { with: { taker: true } },
       },
@@ -34,6 +35,7 @@ export class PostgresWishlistRepository implements WishlistRepository {
       where: inArray(schema.wishlist.id, wishlistIds),
       with: {
         owner: true,
+        coOwner: true,
         eventWishlists: true,
         items: { with: { taker: true } },
       },
@@ -59,6 +61,7 @@ export class PostgresWishlistRepository implements WishlistRepository {
         ),
       with: {
         owner: true,
+        coOwner: true,
         eventWishlists: true,
         items: { with: { taker: true } },
       },
@@ -69,9 +72,10 @@ export class PostgresWishlistRepository implements WishlistRepository {
 
   async findByOwner(userId: UserId): Promise<Wishlist[]> {
     const result = await this.databaseService.db.query.wishlist.findMany({
-      where: eq(schema.wishlist.ownerId, userId),
+      where: or(eq(schema.wishlist.ownerId, userId), eq(schema.wishlist.coOwnerId, userId)),
       with: {
         owner: true,
+        coOwner: true,
         eventWishlists: true,
         items: { with: { taker: true } },
       },
@@ -88,7 +92,7 @@ export class PostgresWishlistRepository implements WishlistRepository {
     const totalCountResult = await this.databaseService.db
       .select({ count: count() })
       .from(schema.wishlist)
-      .where(eq(schema.wishlist.ownerId, params.userId))
+      .where(or(eq(schema.wishlist.ownerId, params.userId), eq(schema.wishlist.coOwnerId, params.userId)))
 
     const totalCount = totalCountResult[0]?.count ?? 0
 
@@ -100,7 +104,7 @@ export class PostgresWishlistRepository implements WishlistRepository {
       .from(schema.wishlist)
       .leftJoin(schema.eventWishlist, eq(schema.wishlist.id, schema.eventWishlist.wishlistId))
       .leftJoin(schema.event, eq(schema.eventWishlist.eventId, schema.event.id))
-      .where(eq(schema.wishlist.ownerId, params.userId))
+      .where(or(eq(schema.wishlist.ownerId, params.userId), eq(schema.wishlist.coOwnerId, params.userId)))
       .groupBy(schema.wishlist.id)
       .orderBy(desc(sql<string>`MAX(${schema.event.eventDate})`), desc(schema.wishlist.createdAt))
       .limit(params.pagination.take)
@@ -114,6 +118,7 @@ export class PostgresWishlistRepository implements WishlistRepository {
       ),
       with: {
         owner: true,
+        coOwner: true,
         eventWishlists: true,
         items: { with: { taker: true } },
       },
@@ -140,6 +145,7 @@ export class PostgresWishlistRepository implements WishlistRepository {
           title: wishlist.title,
           description: wishlist.description,
           ownerId: wishlist.owner.id,
+          coOwnerId: wishlist.coOwner?.id,
           hideItems: wishlist.hideItems,
           logoUrl: wishlist.logoUrl,
           createdAt: wishlist.createdAt,
@@ -151,6 +157,7 @@ export class PostgresWishlistRepository implements WishlistRepository {
             title: wishlist.title,
             description: wishlist.description ?? null,
             ownerId: wishlist.owner.id,
+            coOwnerId: wishlist.coOwner?.id ?? null,
             hideItems: wishlist.hideItems,
             logoUrl: wishlist.logoUrl ?? null,
             updatedAt: wishlist.updatedAt,
@@ -183,9 +190,10 @@ export class PostgresWishlistRepository implements WishlistRepository {
       .where(
         and(
           eq(schema.wishlist.id, params.wishlistId),
-          // User is owner OR user is participant in any event that contains this wishlist
+          // User is owner OR co-owner OR user is participant in any event that contains this wishlist
           or(
             eq(schema.wishlist.ownerId, params.userId),
+            eq(schema.wishlist.coOwnerId, params.userId),
             exists(
               this.databaseService.db
                 .select()
@@ -231,6 +239,7 @@ export class PostgresWishlistRepository implements WishlistRepository {
   static toModel(
     row: typeof schema.wishlist.$inferSelect & {
       owner: typeof schema.user.$inferSelect
+      coOwner: typeof schema.user.$inferSelect | null
       eventWishlists: (typeof schema.eventWishlist.$inferSelect)[]
       items: (typeof schema.item.$inferSelect & { taker: typeof schema.user.$inferSelect | null })[]
     },
@@ -240,6 +249,7 @@ export class PostgresWishlistRepository implements WishlistRepository {
       title: row.title,
       description: row.description ?? undefined,
       owner: PostgresUserRepository.toModel(row.owner),
+      coOwner: row.coOwner ? PostgresUserRepository.toModel(row.coOwner) : undefined,
       hideItems: row.hideItems,
       logoUrl: row.logoUrl ?? undefined,
       eventIds: row.eventWishlists.map(eventWishlist => eventWishlist.eventId),

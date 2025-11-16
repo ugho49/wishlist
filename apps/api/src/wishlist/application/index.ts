@@ -1,7 +1,9 @@
 import {
+  AddCoOwnerUseCase,
   CreateWishlistUseCase,
   DeleteWishlistUseCase,
   LinkWishlistToEventUseCase,
+  RemoveCoOwnerUseCase,
   RemoveWishlistLogoUseCase,
   UnlinkWishlistFromEventUseCase,
   UpdateWishlistUseCase,
@@ -11,13 +13,15 @@ import { GetMyWishlistsUseCase, GetWishlistByIdUseCase } from './query'
 
 export const handlers = [
   // Command handlers
+  AddCoOwnerUseCase,
+  CreateWishlistUseCase,
   DeleteWishlistUseCase,
   LinkWishlistToEventUseCase,
+  RemoveCoOwnerUseCase,
+  RemoveWishlistLogoUseCase,
   UnlinkWishlistFromEventUseCase,
-  CreateWishlistUseCase,
   UpdateWishlistUseCase,
   UploadWishlistLogoUseCase,
-  RemoveWishlistLogoUseCase,
   // Query handlers
   GetMyWishlistsUseCase,
   GetWishlistByIdUseCase,
