@@ -40,7 +40,7 @@
       }
     },
     {
-      "plugin": "@nx/rspack/plugin",
+      "plugin": "@nx/webpack/plugin",
       "options": {
         "buildTargetName": "build",
         "previewTargetName": "preview",
