@@ -1,24 +1,24 @@
-import type { Configuration } from '@rspack/cli'
+import type { WebpackPluginInstance } from 'webpack'
 
 import { join } from 'node:path'
-import { NxAppRspackPlugin } from '@nx/rspack/app-plugin'
+import { NxAppWebpackPlugin } from '@nx/webpack/app-plugin'
 import { RunScriptWebpackPlugin } from 'run-script-webpack-plugin'
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
 const isServer = process.env.WEBPACK_SERVE === 'true'
 const outputFileName = 'main.js'
 
-const plugins: Configuration['plugins'] = [
-  new NxAppRspackPlugin({
+const plugins: WebpackPluginInstance[] = [
+  new NxAppWebpackPlugin({
     target: 'node',
-    main: 'apps/api/src/main.ts',
+    compiler: 'tsc',
+    main: './src/main.ts',
     outputFileName,
-    tsConfig: 'apps/api/tsconfig.app.json',
+    tsConfig: './tsconfig.app.json',
     optimization: false,
     outputHashing: 'none',
     generatePackageJson: !isDevelopment,
     sourceMap: true,
-    mode: isDevelopment ? 'development' : 'production',
     transformers: [
       {
         name: '@nestjs/swagger/plugin',
@@ -30,7 +30,7 @@ const plugins: Configuration['plugins'] = [
     assets: [
       {
         input: 'apps/api/templates',
-        glob: '**/*',
+        glob: '**/*.(hbs|mjml)',
         output: 'templates',
       },
       {
@@ -59,19 +59,17 @@ if (isServer) {
 export default {
   output: {
     path: join(__dirname, '../../dist/apps/api'),
+    ...(isDevelopment && {
+      devtoolModuleFilenameTemplate: '[absolute-resource-path]',
+    }),
   },
+  // Write files to disk in development mode for RunScriptWebpackPlugin
   devServer: {
     port: 9000, // Use different port than the NestJS app (8080)
     hot: true,
+    devMiddleware: {
+      writeToDisk: true,
+    },
   },
   plugins,
-  ignoreWarnings: [
-    // Ignore warnings about TypeScript types/interfaces not being found at runtime
-    // These are expected since TypeScript types only exist at compile-time
-    // and are erased during transpilation. They're used in decorator metadata
-    // but the actual values are injected via Symbols at runtime.
-    (warning: { message?: string }) => {
-      return warning.message?.includes('ESModulesLinkingWarning') ?? false
-    },
-  ],
-} satisfies Configuration
+}

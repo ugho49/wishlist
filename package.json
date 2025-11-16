@@ -117,13 +117,10 @@
     "@nx/nest": "22.0.2",
     "@nx/node": "22.0.2",
     "@nx/react": "22.0.2",
-    "@nx/rspack": "22.0.2",
     "@nx/vite": "22.0.2",
     "@nx/web": "22.0.2",
+    "@nx/webpack": "22.0.3",
     "@nx/workspace": "22.0.2",
-    "@rspack/cli": "1.6.1",
-    "@rspack/core": "1.6.1",
-    "@rspack/dev-server": "1.1.4",
     "@swc-node/register": "1.11.1",
     "@swc/cli": "0.7.9",
     "@swc/core": "1.15.0",
@@ -143,6 +140,7 @@
     "@types/react": "19.2.2",
     "@types/react-dom": "19.2.2",
     "@types/supertest": "6.0.3",
+    "@types/webpack-node-externals": "3.0.4",
     "@vitejs/plugin-react": "5.1.0",
     "@vitest/coverage-v8": "4.0.7",
     "@vitest/ui": "4.0.7",
@@ -170,6 +168,7 @@
     "vite": "7.2.1",
     "vite-plugin-svgr": "4.5.0",
     "vite-tsconfig-paths": "5.1.4",
-    "vitest": "4.0.7"
+    "vitest": "4.0.7",
+    "webpack-cli": "6.0.1"
   }
 }
