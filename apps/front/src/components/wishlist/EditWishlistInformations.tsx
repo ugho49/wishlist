@@ -113,7 +113,7 @@ export const EditWishlistInformations = ({ wishlist }: EditWishlistInformationsP
 
   const { mutateAsync: addCoOwner } = useMutation({
     mutationKey: ['wishlist.addCoOwner', { id: wishlist.id }],
-    mutationFn: (userId: string) => api.wishlist.addCoOwner(wishlist.id, { user_id: userId }),
+    mutationFn: (userId: string) => api.wishlist.addCoOwner(wishlist.id, { user_id: userId as import('@wishlist/common').UserId }),
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
     onSuccess: () => {
       addToast({ message: 'Co-gestionnaire ajouté avec succès', variant: 'success' })

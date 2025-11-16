@@ -1,4 +1,5 @@
 import type {
+  AddCoOwnerInputDto,
   CreateWishlistInputDto,
   DetailedWishlistDto,
   GetPaginationQueryDto,
@@ -66,5 +67,13 @@ export class WishlistService {
 
   async removeLogo(wishlistId: string): Promise<void> {
     await this.client.delete(`/wishlist/${wishlistId}/logo`)
+  }
+
+  async addCoOwner(wishlistId: string, data: AddCoOwnerInputDto): Promise<void> {
+    await this.client.post(`/wishlist/${wishlistId}/co-owner`, data)
+  }
+
+  async removeCoOwner(wishlistId: string): Promise<void> {
+    await this.client.delete(`/wishlist/${wishlistId}/co-owner`)
   }
 }
