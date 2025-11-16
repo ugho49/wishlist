@@ -1,11 +1,11 @@
 import type { MiniUserDto } from '@wishlist/common'
+import type { RootState } from '../../core'
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import DeleteIcon from '@mui/icons-material/Delete'
-import PersonAddIcon from '@mui/icons-material/PersonAdd'
 import PersonRemoveIcon from '@mui/icons-material/PersonRemove'
 import SaveIcon from '@mui/icons-material/Save'
-import { Avatar, Box, Button, Chip, Stack, TextField, Typography } from '@mui/material'
+import { Avatar, Box, Button, Stack, TextField, Typography } from '@mui/material'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import { type DetailedWishlistDto, FeatureFlags, type UpdateWishlistInputDto } from '@wishlist/common'
@@ -14,7 +14,6 @@ import { Controller, useForm } from 'react-hook-form'
 import { useSelector } from 'react-redux'
 import { z } from 'zod'
 
-import { type RootState } from '../../core'
 import { useApi } from '../../hooks/useApi'
 import { useFeatureFlag } from '../../hooks/useFeatureFlag'
 import { useToast } from '../../hooks/useToast'
@@ -141,16 +140,16 @@ export const EditWishlistInformations = ({ wishlist }: EditWishlistInformationsP
 
     try {
       await addCoOwner(selected.id)
-    } catch (error) {
-      // Error already handled by mutation
+    } catch {
+      addToast({ message: "Une erreur s'est produite", variant: 'error' })
     }
   }
 
   const handleRemoveCoOwner = async () => {
     try {
       await removeCoOwner()
-    } catch (error) {
-      // Error already handled by mutation
+    } catch {
+      addToast({ message: "Une erreur s'est produite", variant: 'error' })
     }
   }
 

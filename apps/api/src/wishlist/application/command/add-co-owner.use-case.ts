@@ -1,7 +1,7 @@
 import { BadRequestException, Inject, UnauthorizedException } from '@nestjs/common'
 import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
-import { UserRepository } from '@wishlist/api/user'
 import { REPOSITORIES } from '@wishlist/api/repositories'
+import { UserRepository } from '@wishlist/api/user'
 
 import { AddCoOwnerCommand, WishlistRepository } from '../../domain'
 

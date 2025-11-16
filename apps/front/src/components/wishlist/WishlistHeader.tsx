@@ -223,7 +223,10 @@ export const WishlistHeader = ({
                     <Typography variant="body2" fontWeight={500}>
                       Liste publique créée par {wishlist.owner.firstname} {wishlist.owner.lastname}
                       {wishlist.co_owner && (
-                        <> et co-gérée par {wishlist.co_owner.firstname} {wishlist.co_owner.lastname}</>
+                        <>
+                          {' '}
+                          et co-gérée par {wishlist.co_owner.firstname} {wishlist.co_owner.lastname}
+                        </>
                       )}
                     </Typography>
                   </PublicIndicatorBox>
