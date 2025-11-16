@@ -33,7 +33,10 @@ export const WishlistPage = ({ wishlistId }: WishlistPageProps) => {
   const navigate = useNavigate()
   const api = useApi()
   const { wishlist, loading } = useWishlistById(wishlistId)
-  const currentUserCanEdit = useMemo(() => wishlist?.owner.id === currentUserId, [currentUserId, wishlist])
+  const currentUserCanEdit = useMemo(
+    () => wishlist?.owner.id === currentUserId || wishlist?.co_owner?.id === currentUserId,
+    [currentUserId, wishlist],
+  )
   const isPublic = useMemo(() => wishlist?.config.hide_items === false, [wishlist])
 
   const { data: importableItems = [] } = useQuery({
