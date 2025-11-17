@@ -24,9 +24,9 @@ export class DeleteItemUseCase implements IInferredCommandHandler<DeleteItemComm
     }
 
     const wishlist = await this.wishlistRepository.findByIdOrFail(item.wishlistId)
-    const isOwnerOfList = wishlist.isOwner(command.currentUser.id)
+    const isOwnerOrCoOwnerOfList = wishlist.isOwnerOrCoOwner(command.currentUser.id)
 
-    if (item.isSuggested && isOwnerOfList) {
+    if (item.isSuggested && isOwnerOrCoOwnerOfList && wishlist.hideItems) {
       throw new UnauthorizedException('You cannot delete this item')
     }
 
@@ -34,7 +34,7 @@ export class DeleteItemUseCase implements IInferredCommandHandler<DeleteItemComm
       throw new UnauthorizedException('You cannot delete this item, is already taken')
     }
 
-    if (!item.isSuggested && !isOwnerOfList) {
+    if (!item.isSuggested && !isOwnerOrCoOwnerOfList) {
       throw new UnauthorizedException('You cannot delete this item, only the creator of the list can')
     }
 

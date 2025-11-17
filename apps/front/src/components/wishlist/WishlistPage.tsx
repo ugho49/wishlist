@@ -1,12 +1,10 @@
 import type { WishlistId } from '@wishlist/common'
-import type { RootState } from '../../core'
 
 import { Box, Container, Stack } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate, useSearch } from '@tanstack/react-router'
 import { FeatureFlags } from '@wishlist/common'
 import { useCallback, useMemo } from 'react'
-import { useSelector } from 'react-redux'
 
 import { useApi, useWishlistById } from '../../hooks'
 import { useFeatureFlag } from '../../hooks/useFeatureFlag'
@@ -18,22 +16,18 @@ import { WishlistHeader } from './WishlistHeader'
 import { WishlistItems } from './WishlistItems'
 import { WishlistNotFound } from './WishlistNotFound'
 
-const mapState = (state: RootState) => state.auth.user?.id
-
 interface WishlistPageProps {
   wishlistId: WishlistId
 }
 
 export const WishlistPage = ({ wishlistId }: WishlistPageProps) => {
   const importItemsEnabled = useFeatureFlag(FeatureFlags.FRONTEND_WISHLIST_IMPORT_ITEMS_ENABLED)
-  const currentUserId = useSelector(mapState)
   const { showEventDialog, showImportDialog, sort, filter } = useSearch({
     from: '/_authenticated/_with-layout/wishlists/$wishlistId/',
   })
   const navigate = useNavigate()
   const api = useApi()
-  const { wishlist, loading } = useWishlistById(wishlistId)
-  const currentUserCanEdit = useMemo(() => wishlist?.owner.id === currentUserId, [currentUserId, wishlist])
+  const { wishlist, loading, currentUserCanEdit } = useWishlistById(wishlistId)
   const isPublic = useMemo(() => wishlist?.config.hide_items === false, [wishlist])
 
   const { data: importableItems = [] } = useQuery({

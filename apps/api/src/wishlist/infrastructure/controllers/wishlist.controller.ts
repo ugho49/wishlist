@@ -4,6 +4,7 @@ import { FileInterceptor } from '@nestjs/platform-express'
 import { ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger'
 import { DEFAULT_RESULT_NUMBER } from '@wishlist/api/core'
 import {
+  AddCoOwnerInputDto,
   CreateWishlistInputDto,
   DetailedWishlistDto,
   GetPaginationQueryDto,
@@ -20,11 +21,13 @@ import {
 import { CurrentUser } from '../../../auth'
 import { ValidJsonBody } from '../../../core/common/common.decorator'
 import {
+  AddCoOwnerCommand,
   CreateWishlistCommand,
   DeleteWishlistCommand,
   GetWishlistByIdQuery,
   GetWishlistsByOwnerQuery,
   LinkWishlistToEventCommand,
+  RemoveCoOwnerCommand,
   RemoveWishlistLogoCommand,
   UnlinkWishlistFromEventCommand,
   UpdateWishlistCommand,
@@ -145,5 +148,21 @@ export class WishlistController {
   @Delete('/:id/logo')
   async removeLogo(@Param('id') wishlistId: WishlistId, @CurrentUser() currentUser: ICurrentUser): Promise<void> {
     await this.commandBus.execute(new RemoveWishlistLogoCommand({ wishlistId, currentUser }))
+  }
+
+  @Post('/:id/co-owner')
+  @ApiOperation({ summary: 'Add a co-owner to a public wishlist' })
+  async addCoOwner(
+    @Param('id') wishlistId: WishlistId,
+    @Body() dto: AddCoOwnerInputDto,
+    @CurrentUser() currentUser: ICurrentUser,
+  ): Promise<void> {
+    await this.commandBus.execute(new AddCoOwnerCommand({ wishlistId, currentUser, coOwnerId: dto.user_id }))
+  }
+
+  @Delete('/:id/co-owner')
+  @ApiOperation({ summary: 'Remove the co-owner from a wishlist' })
+  async removeCoOwner(@Param('id') wishlistId: WishlistId, @CurrentUser() currentUser: ICurrentUser): Promise<void> {
+    await this.commandBus.execute(new RemoveCoOwnerCommand({ wishlistId, currentUser }))
   }
 }

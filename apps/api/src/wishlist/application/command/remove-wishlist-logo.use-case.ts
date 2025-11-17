@@ -15,7 +15,7 @@ export class RemoveWishlistLogoUseCase implements IInferredCommandHandler<Remove
   async execute(command: RemoveWishlistLogoCommand): Promise<void> {
     const wishlist = await this.wishlistRepository.findByIdOrFail(command.wishlistId)
 
-    if (!wishlist.isOwner(command.currentUser.id)) {
+    if (!wishlist.isOwnerOrCoOwner(command.currentUser.id)) {
       throw new UnauthorizedException('You cannot modify this wishlist')
     }
 

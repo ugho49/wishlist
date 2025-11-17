@@ -146,13 +146,14 @@ export class Fixtures {
     title: string
     description?: string
     hideItems?: boolean
+    coOwnerId?: string
   }): Promise<string> {
     const id = uuid()
-    const { eventIds, title, description, userId, hideItems } = parameters
+    const { eventIds, title, description, userId, hideItems, coOwnerId } = parameters
 
     await this.client.query(
-      `INSERT INTO ${Fixtures.WISHLIST_TABLE} (id, title, description, owner_id, hide_items) VALUES ($1, $2, $3, $4, $5)`,
-      [id, title, description, userId, hideItems ?? true],
+      `INSERT INTO ${Fixtures.WISHLIST_TABLE} (id, title, description, owner_id, hide_items, co_owner_id) VALUES ($1, $2, $3, $4, $5, $6)`,
+      [id, title, description, userId, hideItems ?? true, coOwnerId ?? null],
     )
 
     for (const eventId of eventIds) {

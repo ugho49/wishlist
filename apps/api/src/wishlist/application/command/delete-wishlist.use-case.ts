@@ -19,10 +19,10 @@ export class DeleteWishlistUseCase implements IInferredCommandHandler<DeleteWish
     // 1. Find wishlist and check permissions
     const wishlist = await this.wishlistRepository.findByIdOrFail(wishlistId)
 
-    const userCanDeleteList = wishlist.isOwner(currentUser.id) || currentUser.isAdmin
+    const userCanDeleteList = wishlist.isOwnerOrCoOwner(currentUser.id) || currentUser.isAdmin
 
     if (!userCanDeleteList) {
-      throw new UnauthorizedException('Only the owner of the list can delete it')
+      throw new UnauthorizedException('Only the owner or co-owner of the list can delete it')
     }
 
     // 2. Delete wishlist

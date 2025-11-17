@@ -330,6 +330,7 @@ export type ItemCardProps = {
   wishlist: {
     id: WishlistId
     ownerId: string
+    coOwnerId?: string
     hideItems: boolean
   }
   item: ItemDto
@@ -355,9 +356,9 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
   )
 
   const isTaken = useMemo(() => takenBy !== undefined, [takenBy])
-  const isOwner = currentUserId === wishlist.ownerId
-  const canReserve = !isOwner || !wishlist.hideItems
-  const canEdit = (isOwner || item.is_suggested) && !isTaken
+  const isOwnerOrCoOwner = currentUserId === wishlist.ownerId || wishlist.coOwnerId === currentUserId
+  const canReserve = !isOwnerOrCoOwner || !wishlist.hideItems
+  const canEdit = (isOwnerOrCoOwner || item.is_suggested) && !isTaken
   const isReservedByCurrentUser = takenBy?.id === currentUserId
 
   const openMenu = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget)

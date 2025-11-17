@@ -1,23 +1,29 @@
 import type { WishlistId } from '@wishlist/common'
+import type { RootState } from '../../core'
 
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
+import ManageAccountsIcon from '@mui/icons-material/ManageAccounts'
 import { Box, Container, Tab, Tabs } from '@mui/material'
 import { useNavigate, useSearch } from '@tanstack/react-router'
+import { useEffect, useState } from 'react'
+import { useSelector } from 'react-redux'
 
 import { useWishlistById } from '../../hooks/domain/useWishlistById'
 import { Loader } from '../common/Loader'
 import { Title } from '../common/Title'
 import { EditWishlistEvent } from './EditWishlistEvents'
 import { EditWishlistInformations } from './EditWishlistInformations'
+import { EditWishlistManagement } from './EditWishlistManagement'
 import { WishlistNotFound } from './WishlistNotFound'
 
 export enum TabValues {
   informations = 'informations',
   events = 'events',
+  management = 'management',
 }
 
-const tabs = [
+const BASE_TABS = [
   {
     value: TabValues.informations,
     label: 'Informations',
@@ -30,14 +36,32 @@ const tabs = [
   },
 ]
 
+const MANAGEMENT_TAB = {
+  value: TabValues.management,
+  label: 'Gestion',
+  icon: <ManageAccountsIcon />,
+}
+
+const mapState = (state: RootState) => state.auth.user?.id
+
 interface EditWishlistPageProps {
   wishlistId: WishlistId
 }
 
 export const EditWishlistPage = ({ wishlistId }: EditWishlistPageProps) => {
+  const [tabs, setTabs] = useState(BASE_TABS)
   const { tab } = useSearch({ from: '/_authenticated/_with-layout/wishlists/$wishlistId/edit' })
   const { wishlist, loading, currentUserCanEdit } = useWishlistById(wishlistId)
+  const currentUserId = useSelector(mapState)
   const navigate = useNavigate({ from: '/wishlists/$wishlistId/edit' })
+  const isOwner = wishlist?.owner.id === currentUserId
+  const isPublic = wishlist?.config.hide_items === false
+
+  useEffect(() => {
+    if (isPublic && isOwner) {
+      setTabs(prev => [...prev, MANAGEMENT_TAB])
+    }
+  }, [isPublic, isOwner])
 
   return (
     <Box>
@@ -61,6 +85,7 @@ export const EditWishlistPage = ({ wishlistId }: EditWishlistPageProps) => {
             </Box>
             {tab === TabValues.informations && <EditWishlistInformations wishlist={wishlist} />}
             {tab === TabValues.events && <EditWishlistEvent wishlistId={wishlist.id} events={wishlist.events} />}
+            {tab === TabValues.management && <EditWishlistManagement wishlist={wishlist} />}
           </Container>
         )}
       </Loader>

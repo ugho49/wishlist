@@ -28,7 +28,7 @@ export class CreateItemUseCase implements IInferredCommandHandler<CreateItemComm
       throw new UnauthorizedException('You cannot add items to this wishlist')
     }
 
-    const isSuggested = !wishlist.isOwner(command.currentUser.id)
+    const isSuggested = !wishlist.isOwnerOrCoOwner(command.currentUser.id)
     const url = command.newItem.url ? TidyURL.clean(command.newItem.url).url : undefined
 
     const item = WishlistItem.create({

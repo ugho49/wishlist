@@ -270,6 +270,53 @@ describe('WishlistController', () => {
             expect(body.resources[0].id).toEqual(currentUserWishlistId)
           })
       })
+
+      it('should return wishlists where user is co-owner', async () => {
+        const otherUserId = await fixtures.insertUser({
+          email: 'other@test.com',
+          firstname: 'Other',
+          lastname: 'User',
+        })
+
+        const { eventId: eventId1 } = await fixtures.insertEventWithMaintainer({
+          title: 'Event 1',
+          description: 'Description 1',
+          maintainerId: currentUserId,
+        })
+
+        const { eventId: eventId2 } = await fixtures.insertEventWithMaintainer({
+          title: 'Event 2',
+          description: 'Description 2',
+          maintainerId: otherUserId,
+        })
+
+        // Wishlist owned by current user
+        const ownedWishlistId = await fixtures.insertWishlist({
+          eventIds: [eventId1],
+          userId: currentUserId,
+          title: 'My Owned Wishlist',
+        })
+
+        // Wishlist co-owned by current user
+        const coOwnedWishlistId = await fixtures.insertWishlist({
+          eventIds: [eventId2],
+          userId: otherUserId,
+          title: 'Co-Owned Wishlist',
+          hideItems: false,
+          coOwnerId: currentUserId,
+        })
+
+        await request
+          .get(path)
+          .expect(200)
+          .expect(({ body }) => {
+            expect(body.resources).toHaveLength(2)
+            // biome-ignore lint/suspicious/noExplicitAny: ok for testing
+            expect(body.resources.map((r: any) => r.id)).toEqual(
+              expect.arrayContaining([ownedWishlistId, coOwnedWishlistId]),
+            )
+          })
+      })
     })
   })
 
@@ -604,6 +651,95 @@ describe('WishlistController', () => {
               ]),
             )
           })
+      })
+
+      describe('co-owner should have access', () => {
+        it('should allow co-owner to view wishlist', async () => {
+          const otherUserId = await fixtures.insertUser({
+            email: 'other@test.com',
+            firstname: 'Other',
+            lastname: 'User',
+          })
+
+          const { eventId } = await fixtures.insertEventWithMaintainer({
+            title: 'Event',
+            description: 'Description',
+            maintainerId: otherUserId,
+          })
+
+          const wishlistId = await fixtures.insertWishlist({
+            eventIds: [eventId],
+            userId: otherUserId,
+            title: 'Co-Owned Wishlist',
+            hideItems: false,
+            coOwnerId: currentUserId,
+          })
+
+          await request
+            .get(path(wishlistId))
+            .expect(200)
+            .expect(({ body }) => {
+              expect(body).toMatchObject({
+                id: wishlistId,
+                title: 'Co-Owned Wishlist',
+                owner: {
+                  id: otherUserId,
+                  email: 'other@test.com',
+                  firstname: 'Other',
+                  lastname: 'User',
+                },
+                co_owner: {
+                  id: currentUserId,
+                  email: Fixtures.BASE_USER_EMAIL,
+                  firstname: 'John',
+                  lastname: 'Doe',
+                },
+              })
+            })
+        })
+
+        it('should filter suggested items for co-owner when hideItems = true', async () => {
+          const otherUserId = await fixtures.insertUser({
+            email: 'other@test.com',
+            firstname: 'Other',
+            lastname: 'User',
+          })
+
+          const { eventId } = await fixtures.insertEventWithMaintainer({
+            title: 'Event',
+            description: 'Description',
+            maintainerId: otherUserId,
+          })
+
+          const wishlistId = await fixtures.insertWishlist({
+            eventIds: [eventId],
+            userId: otherUserId,
+            title: 'Co-Owned Private Wishlist',
+            hideItems: true,
+            coOwnerId: currentUserId,
+          })
+
+          const normalItemId = await fixtures.insertItem({
+            wishlistId,
+            name: 'Normal Item',
+            isSuggested: false,
+          })
+
+          // This should NOT be visible to co-owner when hideItems = true
+          await fixtures.insertItem({
+            wishlistId,
+            name: 'Suggested Item',
+            isSuggested: true,
+          })
+
+          await request
+            .get(path(wishlistId))
+            .expect(200)
+            .expect(({ body }) => {
+              expect(body.items).toHaveLength(1)
+              expect(body.items[0].id).toEqual(normalItemId)
+            })
+        })
       })
     })
   })
@@ -1064,6 +1200,42 @@ describe('WishlistController', () => {
           updated_at: expect.toBeDate(),
         })
       })
+
+      it('should allow co-owner to update wishlist', async () => {
+        const otherUserId = await fixtures.insertUser({
+          email: 'other@test.com',
+          firstname: 'Other',
+          lastname: 'User',
+        })
+
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Event',
+          description: 'Description',
+          maintainerId: otherUserId,
+        })
+
+        const wishlistId = await fixtures.insertWishlist({
+          eventIds: [eventId],
+          userId: otherUserId,
+          title: 'Original Title',
+          hideItems: false,
+          coOwnerId: currentUserId,
+        })
+
+        await request
+          .put(path(wishlistId))
+          .send({
+            title: 'Updated by Co-Owner',
+            description: 'Updated description',
+          })
+          .expect(200)
+
+        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+          id: wishlistId,
+          title: 'Updated by Co-Owner',
+          description: 'Updated description',
+        })
+      })
     })
   })
 
@@ -1091,7 +1263,7 @@ describe('WishlistController', () => {
         await request.delete(path(nonExistentId)).expect(404)
       })
 
-      it('should return 401 when user is not owner', async () => {
+      it('should return 401 when user is not owner or co-owner', async () => {
         const otherUserId = await fixtures.insertUser({
           email: 'other@test.com',
           firstname: 'Other',
@@ -1114,7 +1286,10 @@ describe('WishlistController', () => {
           .delete(path(wishlistId))
           .expect(401)
           .expect(({ body }) =>
-            expect(body).toMatchObject({ error: 'Unauthorized', message: 'Only the owner of the list can delete it' }),
+            expect(body).toMatchObject({
+              error: 'Unauthorized',
+              message: 'Only the owner or co-owner of the list can delete it',
+            }),
           )
 
         // Verify wishlist still exists
@@ -1202,6 +1377,34 @@ describe('WishlistController', () => {
         await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(0)
         await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(0)
       })
+
+      it('should allow co-owner to delete wishlist', async () => {
+        const otherUserId = await fixtures.insertUser({
+          email: 'other@test.com',
+          firstname: 'Other',
+          lastname: 'User',
+        })
+
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Event',
+          description: 'Description',
+          maintainerId: otherUserId,
+        })
+
+        const wishlistId = await fixtures.insertWishlist({
+          eventIds: [eventId],
+          userId: otherUserId,
+          title: 'Wishlist to Delete',
+          hideItems: false,
+          coOwnerId: currentUserId,
+        })
+
+        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1)
+        await request.delete(path(wishlistId)).expect(200)
+
+        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(0)
+        await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(0)
+      })
     })
   })
 
@@ -1280,7 +1483,7 @@ describe('WishlistController', () => {
         await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(1)
       })
 
-      it('should return 401 when user is not owner of wishlist', async () => {
+      it('should return 401 when user is not owner or co-owner of wishlist', async () => {
         const otherUserId = await fixtures.insertUser({
           email: 'other@test.com',
           firstname: 'Other',
@@ -1314,7 +1517,7 @@ describe('WishlistController', () => {
           .expect(({ body }) =>
             expect(body).toMatchObject({
               error: 'Unauthorized',
-              message: 'Only the owner of the list can update it',
+              message: 'Only the owner or co-owner of the list can update it',
             }),
           )
 
@@ -1467,6 +1670,39 @@ describe('WishlistController', () => {
         // Verify no new event-wishlist relations were created
         await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(1)
       })
+
+      it('should allow co-owner to link wishlist to event', async () => {
+        const otherUserId = await fixtures.insertUser({
+          email: 'other@test.com',
+          firstname: 'Other',
+          lastname: 'User',
+        })
+
+        const { eventId: eventId1 } = await fixtures.insertEventWithMaintainer({
+          title: 'Event 1',
+          description: 'Description 1',
+          maintainerId: otherUserId,
+        })
+
+        const { eventId: eventId2 } = await fixtures.insertEventWithMaintainer({
+          title: 'Event 2',
+          description: 'Description 2',
+          maintainerId: currentUserId,
+        })
+
+        const wishlistId = await fixtures.insertWishlist({
+          eventIds: [eventId1],
+          userId: otherUserId,
+          title: 'Co-Owned Wishlist',
+          hideItems: false,
+          coOwnerId: currentUserId,
+        })
+
+        await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(1)
+        await request.post(path(wishlistId)).send({ event_id: eventId2 }).expect(201)
+
+        await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(2)
+      })
     })
   })
 
@@ -1545,7 +1781,7 @@ describe('WishlistController', () => {
         await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(1)
       })
 
-      it('should return 401 when user is not owner of wishlist', async () => {
+      it('should return 401 when user is not owner or co-owner of wishlist', async () => {
         const otherUserId = await fixtures.insertUser({
           email: 'other@test.com',
           firstname: 'Other',
@@ -1571,7 +1807,10 @@ describe('WishlistController', () => {
           })
           .expect(401)
           .expect(({ body }) =>
-            expect(body).toMatchObject({ error: 'Unauthorized', message: 'Only the owner of the list can update it' }),
+            expect(body).toMatchObject({
+              error: 'Unauthorized',
+              message: 'Only the owner or co-owner of the list can update it',
+            }),
           )
 
         // Verify event-wishlist relation still exists
@@ -1672,9 +1911,431 @@ describe('WishlistController', () => {
         // Verify event-wishlist relation still exists
         await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(1)
       })
+
+      it('should allow co-owner to unlink wishlist from event', async () => {
+        const otherUserId = await fixtures.insertUser({
+          email: 'other@test.com',
+          firstname: 'Other',
+          lastname: 'User',
+        })
+
+        const { eventId: eventId1 } = await fixtures.insertEventWithMaintainer({
+          title: 'Event 1',
+          description: 'Description 1',
+          maintainerId: otherUserId,
+        })
+
+        const { eventId: eventId2 } = await fixtures.insertEventWithMaintainer({
+          title: 'Event 2',
+          description: 'Description 2',
+          maintainerId: otherUserId,
+        })
+
+        const wishlistId = await fixtures.insertWishlist({
+          eventIds: [eventId1, eventId2],
+          userId: otherUserId,
+          title: 'Co-Owned Wishlist',
+          hideItems: false,
+          coOwnerId: currentUserId,
+        })
+
+        await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(2)
+        await request.post(path(wishlistId)).send({ event_id: eventId2 }).expect(201)
+
+        await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(1)
+      })
     })
   })
 
+  describe('POST /wishlist/:id/co-owner', () => {
+    const path = (id: string) => `/wishlist/${id}/co-owner`
+
+    it('should return unauthorized if not authenticated', async () => {
+      const request = await getRequest()
+
+      await request
+        .post(path(uuid()))
+        .send({
+          user_id: uuid(),
+        })
+        .expect(401)
+    })
+
+    describe('when user is authenticated', () => {
+      let request: RequestApp
+      let currentUserId: string
+
+      beforeEach(async () => {
+        request = await getRequest({ signedAs: 'BASE_USER' })
+        currentUserId = await fixtures.getSignedUserId('BASE_USER')
+      })
+
+      it('should return 404 if wishlist does not exist', async () => {
+        const nonExistentId = uuid()
+        const coOwnerId = await fixtures.insertUser({
+          email: 'coowner@test.com',
+          firstname: 'CoOwner',
+          lastname: 'User',
+        })
+
+        await request
+          .post(path(nonExistentId))
+          .send({
+            user_id: coOwnerId,
+          })
+          .expect(404)
+      })
+
+      it.each([
+        {
+          body: {},
+          case: 'empty body',
+          message: ['user_id should not be empty'],
+        },
+        {
+          body: { user_id: '' },
+          case: 'empty user_id',
+          message: ['user_id should not be empty'],
+        },
+      ])('should return 400 when invalid input: $case', async ({ body, message }) => {
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Event',
+          description: 'Description',
+          maintainerId: currentUserId,
+        })
+
+        const wishlistId = await fixtures.insertWishlist({
+          eventIds: [eventId],
+          userId: currentUserId,
+          title: 'Public Wishlist',
+          hideItems: false,
+        })
+
+        await request
+          .post(path(wishlistId))
+          .send(body)
+          .expect(400)
+          .expect(({ body }) =>
+            expect(body).toMatchObject({ error: 'Bad Request', message: expect.arrayContaining(message) }),
+          )
+
+        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+          id: wishlistId,
+          co_owner_id: null,
+        })
+      })
+
+      it('should return 401 when user is not the owner', async () => {
+        const otherUserId = await fixtures.insertUser({
+          email: 'other@test.com',
+          firstname: 'Other',
+          lastname: 'User',
+        })
+
+        const coOwnerId = await fixtures.insertUser({
+          email: 'coowner@test.com',
+          firstname: 'CoOwner',
+          lastname: 'User',
+        })
+
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Event',
+          description: 'Description',
+          maintainerId: otherUserId,
+        })
+
+        const wishlistId = await fixtures.insertWishlist({
+          eventIds: [eventId],
+          userId: otherUserId,
+          title: 'Other Public Wishlist',
+          hideItems: false,
+        })
+
+        await request
+          .post(path(wishlistId))
+          .send({
+            user_id: coOwnerId,
+          })
+          .expect(401)
+          .expect(({ body }) =>
+            expect(body).toMatchObject({ error: 'Unauthorized', message: 'Only the owner can add a co-owner' }),
+          )
+
+        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+          id: wishlistId,
+          co_owner_id: null,
+        })
+      })
+
+      it('should return 400 when trying to add co-owner to private list', async () => {
+        const coOwnerId = await fixtures.insertUser({
+          email: 'coowner@test.com',
+          firstname: 'CoOwner',
+          lastname: 'User',
+        })
+
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Event',
+          description: 'Description',
+          maintainerId: currentUserId,
+        })
+
+        const wishlistId = await fixtures.insertWishlist({
+          eventIds: [eventId],
+          userId: currentUserId,
+          title: 'Private Wishlist',
+          hideItems: true,
+        })
+
+        await request
+          .post(path(wishlistId))
+          .send({
+            user_id: coOwnerId,
+          })
+          .expect(400)
+          .expect(({ body }) =>
+            expect(body).toMatchObject({ error: 'Bad Request', message: 'Cannot add co-owner to private lists' }),
+          )
+
+        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+          id: wishlistId,
+          co_owner_id: null,
+        })
+      })
+
+      it('should return 400 when trying to add owner as co-owner', async () => {
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Event',
+          description: 'Description',
+          maintainerId: currentUserId,
+        })
+
+        const wishlistId = await fixtures.insertWishlist({
+          eventIds: [eventId],
+          userId: currentUserId,
+          title: 'Public Wishlist',
+          hideItems: false,
+        })
+
+        await request
+          .post(path(wishlistId))
+          .send({
+            user_id: currentUserId,
+          })
+          .expect(400)
+          .expect(({ body }) =>
+            expect(body).toMatchObject({ error: 'Bad Request', message: 'Cannot add the owner as co-owner' }),
+          )
+
+        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+          id: wishlistId,
+          co_owner_id: null,
+        })
+      })
+
+      it('should add co-owner successfully to public wishlist', async () => {
+        const coOwnerId = await fixtures.insertUser({
+          email: 'coowner@test.com',
+          firstname: 'CoOwner',
+          lastname: 'User',
+        })
+
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Event',
+          description: 'Description',
+          maintainerId: currentUserId,
+        })
+
+        const wishlistId = await fixtures.insertWishlist({
+          eventIds: [eventId],
+          userId: currentUserId,
+          title: 'Public Wishlist',
+          hideItems: false,
+        })
+
+        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+          id: wishlistId,
+          co_owner_id: null,
+        })
+
+        await request
+          .post(path(wishlistId))
+          .send({
+            user_id: coOwnerId,
+          })
+          .expect(201)
+
+        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+          id: wishlistId,
+          co_owner_id: coOwnerId,
+          updated_at: expect.toBeDate(),
+        })
+      })
+
+      it('should replace existing co-owner when adding a new one', async () => {
+        const coOwnerId1 = await fixtures.insertUser({
+          email: 'coowner1@test.com',
+          firstname: 'CoOwner1',
+          lastname: 'User',
+        })
+
+        const coOwnerId2 = await fixtures.insertUser({
+          email: 'coowner2@test.com',
+          firstname: 'CoOwner2',
+          lastname: 'User',
+        })
+
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Event',
+          description: 'Description',
+          maintainerId: currentUserId,
+        })
+
+        const wishlistId = await fixtures.insertWishlist({
+          eventIds: [eventId],
+          userId: currentUserId,
+          title: 'Public Wishlist',
+          hideItems: false,
+          coOwnerId: coOwnerId1,
+        })
+
+        await request
+          .post(path(wishlistId))
+          .send({
+            user_id: coOwnerId2,
+          })
+          .expect(201)
+
+        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+          id: wishlistId,
+          co_owner_id: coOwnerId2,
+        })
+      })
+    })
+  })
+
+  describe('DELETE /wishlist/:id/co-owner', () => {
+    const path = (id: string) => `/wishlist/${id}/co-owner`
+
+    it('should return unauthorized if not authenticated', async () => {
+      const request = await getRequest()
+
+      await request.delete(path(uuid())).expect(401)
+    })
+
+    describe('when user is authenticated', () => {
+      let request: RequestApp
+      let currentUserId: string
+
+      beforeEach(async () => {
+        request = await getRequest({ signedAs: 'BASE_USER' })
+        currentUserId = await fixtures.getSignedUserId('BASE_USER')
+      })
+
+      it('should return 404 if wishlist does not exist', async () => {
+        const nonExistentId = uuid()
+
+        await request.delete(path(nonExistentId)).expect(404)
+      })
+
+      it('should return 401 when user is not the owner', async () => {
+        const otherUserId = await fixtures.insertUser({
+          email: 'other@test.com',
+          firstname: 'Other',
+          lastname: 'User',
+        })
+
+        const coOwnerId = await fixtures.insertUser({
+          email: 'coowner@test.com',
+          firstname: 'CoOwner',
+          lastname: 'User',
+        })
+
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Event',
+          description: 'Description',
+          maintainerId: otherUserId,
+        })
+
+        const wishlistId = await fixtures.insertWishlist({
+          eventIds: [eventId],
+          userId: otherUserId,
+          title: 'Other Public Wishlist',
+          hideItems: false,
+          coOwnerId,
+        })
+
+        await request
+          .delete(path(wishlistId))
+          .expect(401)
+          .expect(({ body }) =>
+            expect(body).toMatchObject({ error: 'Unauthorized', message: 'Only the owner can remove the co-owner' }),
+          )
+
+        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+          id: wishlistId,
+          co_owner_id: coOwnerId,
+        })
+      })
+
+      it('should remove co-owner successfully', async () => {
+        const coOwnerId = await fixtures.insertUser({
+          email: 'coowner@test.com',
+          firstname: 'CoOwner',
+          lastname: 'User',
+        })
+
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Event',
+          description: 'Description',
+          maintainerId: currentUserId,
+        })
+
+        const wishlistId = await fixtures.insertWishlist({
+          eventIds: [eventId],
+          userId: currentUserId,
+          title: 'Public Wishlist',
+          hideItems: false,
+          coOwnerId,
+        })
+
+        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+          id: wishlistId,
+          co_owner_id: coOwnerId,
+        })
+
+        await request.delete(path(wishlistId)).expect(200)
+
+        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+          id: wishlistId,
+          co_owner_id: null,
+          updated_at: expect.toBeDate(),
+        })
+      })
+
+      it('should succeed even when no co-owner exists', async () => {
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Event',
+          description: 'Description',
+          maintainerId: currentUserId,
+        })
+
+        const wishlistId = await fixtures.insertWishlist({
+          eventIds: [eventId],
+          userId: currentUserId,
+          title: 'Public Wishlist',
+          hideItems: false,
+        })
+
+        await request.delete(path(wishlistId)).expect(200)
+
+        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+          id: wishlistId,
+          co_owner_id: null,
+        })
+      })
+    })
+  })
   // TODO: create later when we are able to mock and assert file upload
   // POST /wishlist/:id/upload-logo
   // DELETE /wishlist/:id/logo

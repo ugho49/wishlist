@@ -7,6 +7,7 @@ export type WishlistProps = {
   title: string
   description?: string
   owner: User
+  coOwner?: User
   hideItems: boolean
   logoUrl?: string
   eventIds: EventId[]
@@ -20,6 +21,7 @@ export class Wishlist {
   public readonly title: string
   public readonly description?: string
   public readonly owner: User
+  public readonly coOwner?: User
   public readonly hideItems: boolean
   public readonly logoUrl?: string
   public readonly eventIds: EventId[]
@@ -32,6 +34,7 @@ export class Wishlist {
     this.title = props.title
     this.description = props.description
     this.owner = props.owner
+    this.coOwner = props.coOwner
     this.hideItems = props.hideItems
     this.items = props.items
     this.logoUrl = props.logoUrl
@@ -106,6 +109,30 @@ export class Wishlist {
     return this.owner.id === userId
   }
 
+  isCoOwner(userId: UserId) {
+    return this.coOwner?.id === userId
+  }
+
+  isOwnerOrCoOwner(userId: UserId) {
+    return this.isOwner(userId) || this.isCoOwner(userId)
+  }
+
+  addCoOwner(coOwner: User) {
+    return new Wishlist({
+      ...this,
+      coOwner,
+      updatedAt: new Date(),
+    })
+  }
+
+  removeCoOwner() {
+    return new Wishlist({
+      ...this,
+      coOwner: undefined,
+      updatedAt: new Date(),
+    })
+  }
+
   isListHiddingItems(): boolean {
     return this.hideItems
   }
@@ -114,8 +141,8 @@ export class Wishlist {
     // If hideItems is false, we want to display all items, including suggested and with the taker
     if (!this.isListHiddingItems()) return true
 
-    // If we are the owner of the list, we not want the information to be displayed
-    return !this.isOwner(currentUserId)
+    // If we are the owner or co-owner of the list, we not want the information to be displayed
+    return !this.isOwnerOrCoOwner(currentUserId)
   }
 
   getItemsToDisplay(currentUserId: UserId): WishlistItem[] {
@@ -128,10 +155,10 @@ export class Wishlist {
     // If hideItems is false, we force items to be shown, even if they are suggested
     if (!this.isListHiddingItems()) return true
 
-    // If we are not the owner of the list, display all items
-    if (!this.isOwner(currentUserId)) return true
+    // If we are not the owner or co-owner of the list, display all items
+    if (!this.isOwnerOrCoOwner(currentUserId)) return true
 
-    // In this case, current user is owner of the list
+    // In this case, current user is owner or co-owner of the list
     // we want to show him only the item that are not suggested
     return !item.isSuggested
   }

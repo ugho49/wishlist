@@ -56,13 +56,9 @@ export const EditWishlistInformations = ({ wishlist }: EditWishlistInformationsP
     mutationKey: ['wishlist.update', { id: wishlist.id }],
     mutationFn: (data: UpdateWishlistInputDto) => api.wishlist.update(wishlist.id, data),
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-    onSuccess: (_output, data) => {
+    onSuccess: () => {
       addToast({ message: 'Liste mis à jour', variant: 'info' })
-
-      queryClient.setQueryData(['wishlist', { id: wishlist.id }], (old: DetailedWishlistDto) => ({
-        ...old,
-        ...data,
-      }))
+      void queryClient.invalidateQueries({ queryKey: ['wishlist', { id: wishlist.id }] })
     },
   })
 
@@ -73,11 +69,7 @@ export const EditWishlistInformations = ({ wishlist }: EditWishlistInformationsP
     onSuccess: output => {
       setLogoUrl(output.logo_url)
       addToast({ message: 'Logo mis à jour', variant: 'info' })
-
-      queryClient.setQueryData(['wishlist', { id: wishlist.id }], (old: DetailedWishlistDto) => ({
-        ...old,
-        logo_url: output.logo_url,
-      }))
+      void queryClient.invalidateQueries({ queryKey: ['wishlist', { id: wishlist.id }] })
     },
   })
 
@@ -88,10 +80,7 @@ export const EditWishlistInformations = ({ wishlist }: EditWishlistInformationsP
     onSuccess: () => {
       setLogoUrl(undefined)
       addToast({ message: 'Logo supprimé', variant: 'info' })
-      queryClient.setQueryData(['wishlist', { id: wishlist.id }], (old: DetailedWishlistDto) => ({
-        ...old,
-        logo_url: undefined,
-      }))
+      void queryClient.invalidateQueries({ queryKey: ['wishlist', { id: wishlist.id }] })
     },
   })
 

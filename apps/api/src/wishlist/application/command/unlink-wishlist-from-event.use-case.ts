@@ -17,8 +17,8 @@ export class UnlinkWishlistFromEventUseCase implements IInferredCommandHandler<U
     // 1. Find wishlist and check ownership
     const wishlist = await this.wishlistRepository.findByIdOrFail(wishlistId)
 
-    if (!wishlist.isOwner(currentUser.id)) {
-      throw new UnauthorizedException('Only the owner of the list can update it')
+    if (!wishlist.isOwnerOrCoOwner(currentUser.id)) {
+      throw new UnauthorizedException('Only the owner or co-owner of the list can update it')
     }
 
     // 2. Check if wishlist is linked to this event

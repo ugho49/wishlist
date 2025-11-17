@@ -123,7 +123,7 @@ export const WishlistItems = ({ wishlist, hasImportableItems, onImportItems }: W
     from: '/_authenticated/_with-layout/wishlists/$wishlistId/',
   })
   const nbOfItems = useMemo(() => wishlist.items.length, [wishlist.items])
-  const ownerOfTheList = currentUserId === wishlist.owner.id
+  const ownerOrCoOwnerOfTheList = currentUserId === wishlist.owner.id || wishlist.co_owner?.id === currentUserId
   const [currentItem, setCurrentItem] = useState<ItemDto | null>(null)
   const navigate = useNavigate({ from: '/wishlists/$wishlistId' })
 
@@ -144,7 +144,12 @@ export const WishlistItems = ({ wishlist, hasImportableItems, onImportItems }: W
             {itemsFilteredAndSorted.map(item => (
               <Grid key={item.id} size={{ xs: 12, sm: 6, lg: 4, xl: 3 }}>
                 <ItemCard
-                  wishlist={{ id: wishlist.id, ownerId: wishlist.owner.id, hideItems: wishlist.config.hide_items }}
+                  wishlist={{
+                    id: wishlist.id,
+                    ownerId: wishlist.owner.id,
+                    coOwnerId: wishlist.co_owner?.id,
+                    hideItems: wishlist.config.hide_items,
+                  }}
                   item={item}
                   onImageClick={() => setCurrentItem(item)}
                 />
@@ -153,7 +158,7 @@ export const WishlistItems = ({ wishlist, hasImportableItems, onImportItems }: W
           </Grid>
 
           <FabAutoGrow
-            label={ownerOfTheList ? 'Ajouter un souhait' : 'Suggérer un souhait'}
+            label={ownerOrCoOwnerOfTheList ? 'Ajouter un souhait' : 'Suggérer un souhait'}
             icon={<AddIcon />}
             color="primary"
             onClick={() => setOpenItemFormDialog(true)}
@@ -164,7 +169,7 @@ export const WishlistItems = ({ wishlist, hasImportableItems, onImportItems }: W
       {nbOfItems === 0 && (
         <EmptyItemsState
           onAddItem={() => setOpenItemFormDialog(true)}
-          isOwner={ownerOfTheList}
+          isOwner={ownerOrCoOwnerOfTheList}
           hasImportableItems={hasImportableItems}
           onImportItems={onImportItems}
         />
@@ -172,7 +177,7 @@ export const WishlistItems = ({ wishlist, hasImportableItems, onImportItems }: W
 
       <ItemFormDialog
         mode="create"
-        title={ownerOfTheList ? 'Ajouter un souhait' : 'Suggérer un souhait'}
+        title={ownerOrCoOwnerOfTheList ? 'Ajouter un souhait' : 'Suggérer un souhait'}
         wishlistId={wishlist.id}
         open={openItemFormDialog}
         handleClose={() => setOpenItemFormDialog(false)}

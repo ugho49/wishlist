@@ -17,7 +17,7 @@ export const useWishlistById = (wishlistId: string) => {
     queryKey: ['wishlist', { id: wishlistId }],
     queryFn: async ({ signal }) => {
       const wishlist = await api.wishlist.getById(wishlistId, { signal })
-      setCurrentUserCanEdit(wishlist.owner.id === currentUserId)
+      setCurrentUserCanEdit(wishlist.owner.id === currentUserId || wishlist.co_owner?.id === currentUserId)
       return wishlist
     },
   })
