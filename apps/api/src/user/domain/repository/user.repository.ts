@@ -1,6 +1,6 @@
 import type { DrizzleTransaction } from '@wishlist/api/core'
 import type { UserId } from '@wishlist/common'
-import type { User } from '../model'
+import type { User } from '../model/user.model'
 
 export interface UserRepository {
   newId(): UserId

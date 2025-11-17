@@ -1,4 +1,4 @@
-import type { User } from '../model'
+import type { User } from '../model/user.model'
 
 export class UserCreatedEvent {
   public readonly user: User

@@ -1,8 +1,0 @@
-export { AddSecretSantaUserCommand } from './add-secret-santa-user.command'
-export { CancelSecretSantaCommand } from './cancel-secret-santa.command'
-export { CreateSecretSantaCommand } from './create-secret-santa.command'
-export { DeleteSecretSantaCommand } from './delete-secret-santa.command'
-export { DeleteSecretSantaUserCommand } from './delete-secret-santa-user.command'
-export { StartSecretSantaCommand } from './start-secret-santa.command'
-export { UpdateSecretSantaCommand } from './update-secret-santa.command'
-export { UpdateSecretSantaUserCommand } from './update-secret-santa-user.command'
