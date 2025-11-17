@@ -43,7 +43,7 @@ export class UserCreatedUseCase implements IEventHandler<UserCreatedEvent> {
         subject: '[Wishlist] Bienvenue !!!',
         template: 'welcome-user',
         context: {
-          mainUrl: `${this.config.frontendBaseUrl}/`,
+          mainUrl: this.config.frontendBaseUrl,
         },
       })
     } catch (error) {
