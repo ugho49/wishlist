@@ -13,8 +13,8 @@ type FetchValueResult = {
 export type TableAssertSortOptions = Record<string, 'ASC' | 'DESC'>
 
 export class TableAssert {
-  private assertions = new Set<DbAssertion>()
-  private cachedRows = new Map<number, FetchValueResult['value']>()
+  private readonly assertions = new Set<DbAssertion>()
+  private readonly cachedRows = new Map<number, FetchValueResult['value']>()
 
   constructor(
     private readonly client: Client,

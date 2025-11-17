@@ -9,8 +9,8 @@ type OnboardingKeys = {
 export class OnboardingService {
   private readonly lsKey: string
 
-  constructor(private readonly userId: UserId) {
-    this.lsKey = `${LS_ONBOARDING_PREFIX}${this.userId}`
+  constructor(userId: UserId) {
+    this.lsKey = `${LS_ONBOARDING_PREFIX}${userId}`
   }
 
   isSetProfilePictureAsBeenShown() {
