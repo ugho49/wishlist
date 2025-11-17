@@ -1,6 +1,7 @@
-import { Logger } from '@nestjs/common'
+import { Inject, Logger } from '@nestjs/common'
+import { ConfigType } from '@nestjs/config'
 import { EventsHandler, IEventHandler } from '@nestjs/cqrs'
-import { MailService, MailTemplate } from '@wishlist/api/core'
+import { appConfig, MailService, MailTemplate } from '@wishlist/api/core'
 
 import { AttendeeAddedEvent, Event } from '../../domain'
 
@@ -8,7 +9,11 @@ import { AttendeeAddedEvent, Event } from '../../domain'
 export class AttendeeAddedUseCase implements IEventHandler<AttendeeAddedEvent> {
   private readonly logger = new Logger(AttendeeAddedUseCase.name)
 
-  constructor(private readonly mailService: MailService) {}
+  constructor(
+    private readonly mailService: MailService,
+    @Inject(appConfig.KEY)
+    private readonly config: ConfigType<typeof appConfig>,
+  ) {}
 
   async handle(event: AttendeeAddedEvent): Promise<void> {
     const params = {
@@ -39,7 +44,7 @@ export class AttendeeAddedUseCase implements IEventHandler<AttendeeAddedEvent> {
       template: MailTemplate.ADDED_TO_EVENT,
       context: {
         eventTitle: params.event.title,
-        eventUrl: `https://wishlistapp.fr/events/${params.event.id}`,
+        eventUrl: `${this.config.frontendBaseUrl}/events/${params.event.id}`,
         invitedBy: `${params.invitedBy.firstName} ${params.invitedBy.lastName}`,
       },
     })
@@ -56,7 +61,7 @@ export class AttendeeAddedUseCase implements IEventHandler<AttendeeAddedEvent> {
       template: MailTemplate.ADDED_TO_EVENT_NEW_USER,
       context: {
         eventTitle: params.event.title,
-        registerUrl: 'https://wishlistapp.fr/register',
+        registerUrl: `${this.config.frontendBaseUrl}/register`,
         invitedBy: `${params.invitedBy.firstName} ${params.invitedBy.lastName}`,
       },
     })

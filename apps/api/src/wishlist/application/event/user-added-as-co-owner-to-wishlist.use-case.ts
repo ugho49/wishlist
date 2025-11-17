@@ -1,6 +1,7 @@
-import { Logger } from '@nestjs/common'
+import { Inject, Logger } from '@nestjs/common'
+import { ConfigType } from '@nestjs/config'
 import { EventsHandler, IEventHandler } from '@nestjs/cqrs'
-import { MailService, MailTemplate } from '@wishlist/api/core'
+import { appConfig, MailService, MailTemplate } from '@wishlist/api/core'
 
 import { UserAddedAsCoOwnerToWishlistEvent } from '../../domain'
 
@@ -8,7 +9,11 @@ import { UserAddedAsCoOwnerToWishlistEvent } from '../../domain'
 export class UserAddedAsCoOwnerToWishlistUseCase implements IEventHandler<UserAddedAsCoOwnerToWishlistEvent> {
   private readonly logger = new Logger(UserAddedAsCoOwnerToWishlistUseCase.name)
 
-  constructor(private readonly mailService: MailService) {}
+  constructor(
+    private readonly mailService: MailService,
+    @Inject(appConfig.KEY)
+    private readonly config: ConfigType<typeof appConfig>,
+  ) {}
 
   async handle(params: UserAddedAsCoOwnerToWishlistEvent) {
     if (!params.wishlist.coOwner) {
@@ -23,7 +28,7 @@ export class UserAddedAsCoOwnerToWishlistUseCase implements IEventHandler<UserAd
         template: MailTemplate.ADDED_TO_WISHLIST_AS_CO_OWNER,
         context: {
           wishlistTitle: params.wishlist.title,
-          wishlistUrl: `https://wishlistapp.fr/wishlists/${params.wishlist.id}`,
+          wishlistUrl: `${this.config.frontendBaseUrl}/wishlists/${params.wishlist.id}`,
           invitedBy: `${params.wishlist.owner.firstName} ${params.wishlist.owner.lastName}`,
         },
       })

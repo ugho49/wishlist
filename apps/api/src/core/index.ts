@@ -1,3 +1,4 @@
+export { default as appConfig } from './app.config'
 export * from './bucket'
 export * from './common'
 export * from './core.module'
