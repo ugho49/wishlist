@@ -4,7 +4,7 @@ import { CqrsModule } from '@nestjs/cqrs'
 import { LoggerModule } from 'pino-nestjs'
 
 import { AuthModule } from './auth/infrastructure/auth.module'
-import { appConfig, CoreModule } from './core'
+import { CoreModule } from './core'
 import { EventModule } from './event'
 import { pinoLoggerConfig } from './helpers'
 import { ItemModule } from './item'
@@ -20,7 +20,6 @@ import { WishlistModule } from './wishlist'
       isGlobal: true,
       envFilePath: ['.env'],
       expandVariables: true,
-      load: [appConfig],
     }),
     CqrsModule.forRoot(),
     CoreModule,

@@ -1,8 +1,6 @@
-import { Inject } from '@nestjs/common'
-import { ConfigType } from '@nestjs/config'
 import { EventsHandler, IEventHandler } from '@nestjs/cqrs'
 
-import { appConfig } from '../../core'
+import { FrontendRoutesService } from '../../core'
 import { MailService, MailTemplate } from '../../core/mail'
 import { SecretSantaCancelledEvent } from '../domain/event/secret-santa-cancelled.event'
 
@@ -10,13 +8,11 @@ import { SecretSantaCancelledEvent } from '../domain/event/secret-santa-cancelle
 export class SecretSantaCancelledUseCase implements IEventHandler<SecretSantaCancelledEvent> {
   constructor(
     private readonly mailService: MailService,
-    @Inject(appConfig.KEY)
-    private readonly config: ConfigType<typeof appConfig>,
+    private readonly frontendRoutes: FrontendRoutesService,
   ) {}
 
   async handle(params: SecretSantaCancelledEvent) {
     const { eventTitle, eventId, attendeeEmails } = params
-    const eventUrl = `${this.config.frontendBaseUrl}/events/${eventId}`
 
     await this.mailService.sendMail({
       to: attendeeEmails,
@@ -24,7 +20,7 @@ export class SecretSantaCancelledUseCase implements IEventHandler<SecretSantaCan
       template: MailTemplate.SECRET_SANTA_CANCEL,
       context: {
         eventTitle,
-        eventUrl,
+        eventUrl: this.frontendRoutes.routes.event.byId(eventId),
       },
     })
   }
