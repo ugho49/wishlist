@@ -1,6 +1,7 @@
 import { Inject, Logger } from '@nestjs/common'
+import { ConfigType } from '@nestjs/config'
 import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
-import { MailService } from '@wishlist/api/core'
+import { appConfig, MailService } from '@wishlist/api/core'
 import { REPOSITORIES } from '@wishlist/api/repositories'
 import { WishlistRepository } from '@wishlist/api/wishlist'
 import { WishlistId } from '@wishlist/common'
@@ -16,6 +17,8 @@ export class NotifyNewItemsUseCase implements IInferredCommandHandler<NotifyNewI
     @Inject(REPOSITORIES.WISHLIST_ITEM) private readonly itemRepository: WishlistItemRepository,
     @Inject(REPOSITORIES.WISHLIST) private readonly wishlistRepository: WishlistRepository,
     private readonly mailService: MailService,
+    @Inject(appConfig.KEY)
+    private readonly config: ConfigType<typeof appConfig>,
   ) {}
 
   async execute() {
@@ -70,7 +73,7 @@ export class NotifyNewItemsUseCase implements IInferredCommandHandler<NotifyNewI
       template: 'new-items-reminder',
       context: {
         wishlistTitle: param.wishlist.title,
-        wishlistUrl: `https://wishlistapp.fr/wishlists/${param.wishlist.id}`,
+        wishlistUrl: `${this.config.frontendBaseUrl}/wishlists/${param.wishlist.id}`,
         nbItems: param.nbNewItems,
         userName: param.ownerName,
       },

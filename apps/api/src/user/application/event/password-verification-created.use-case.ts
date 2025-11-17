@@ -1,17 +1,16 @@
 import { Inject } from '@nestjs/common'
 import { ConfigType } from '@nestjs/config'
 import { EventsHandler, IEventHandler } from '@nestjs/cqrs'
-import { MailService } from '@wishlist/api/core'
+import { appConfig, MailService } from '@wishlist/api/core'
 
 import { PasswordVerificationCreatedEvent } from '../../domain'
-import userConfig from '../../infrastructure/user.config'
 
 @EventsHandler(PasswordVerificationCreatedEvent)
 export class PasswordVerificationCreatedUseCase implements IEventHandler<PasswordVerificationCreatedEvent> {
   constructor(
     private readonly mailService: MailService,
-    @Inject(userConfig.KEY)
-    private readonly config: ConfigType<typeof userConfig>,
+    @Inject(appConfig.KEY)
+    private readonly config: ConfigType<typeof appConfig>,
   ) {}
 
   async handle(params: PasswordVerificationCreatedEvent) {
@@ -26,7 +25,7 @@ export class PasswordVerificationCreatedUseCase implements IEventHandler<Passwor
   }
 
   private generateResetPasswordUrl(param: { email: string; token: string }) {
-    const url = new URL(this.config.renewUrl)
+    const url = new URL(`${this.config.frontendBaseUrl}/reset-password`)
     url.searchParams.append('email', param.email)
     url.searchParams.append('token', param.token)
     return url.toString()

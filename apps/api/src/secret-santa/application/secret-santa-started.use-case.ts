@@ -1,16 +1,23 @@
+import { Inject } from '@nestjs/common'
+import { ConfigType } from '@nestjs/config'
 import { EventsHandler, IEventHandler } from '@nestjs/cqrs'
 import { chunk as createChunks } from 'lodash'
 
+import { appConfig } from '../../core'
 import { MailService } from '../../core/mail/mail.service'
 import { SecretSantaStartedEvent } from '../domain/event/secret-santa-started.event'
 
 @EventsHandler(SecretSantaStartedEvent)
 export class SecretSantaStartedUseCase implements IEventHandler<SecretSantaStartedEvent> {
-  constructor(private readonly mailService: MailService) {}
+  constructor(
+    private readonly mailService: MailService,
+    @Inject(appConfig.KEY)
+    private readonly config: ConfigType<typeof appConfig>,
+  ) {}
 
   async handle(params: SecretSantaStartedEvent) {
     const { eventTitle, eventId, drawns, budget, description } = params
-    const eventUrl = `https://wishlistapp.fr/events/${eventId}`
+    const eventUrl = `${this.config.frontendBaseUrl}/events/${eventId}`
     const eurosFormatter = Intl.NumberFormat('fr-FR', {
       style: 'currency',
       currency: 'EUR',
