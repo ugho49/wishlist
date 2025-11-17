@@ -1,6 +1,7 @@
 import { Body, Controller, HttpCode, Post } from '@nestjs/common'
 import { CommandBus } from '@nestjs/cqrs'
 import { ApiTags } from '@nestjs/swagger'
+import { AuthThrottle } from '@wishlist/api/core'
 import { LoginInputDto, LoginOutputDto, LoginWithGoogleInputDto } from '@wishlist/common'
 import { RealIP } from 'nestjs-real-ip'
 
@@ -13,12 +14,14 @@ import { Public } from './decorators/public.metadata'
 export class AuthController {
   constructor(private readonly commandBus: CommandBus) {}
 
+  @AuthThrottle()
   @HttpCode(200)
   @Post('/login')
   login(@Body() dto: LoginInputDto, @RealIP() ip: string): Promise<LoginOutputDto> {
     return this.commandBus.execute(new LoginCommand({ email: dto.email, password: dto.password, ip }))
   }
 
+  @AuthThrottle()
   @HttpCode(200)
   @Post('/login/google')
   loginWithGoogle(@Body() dto: LoginWithGoogleInputDto, @RealIP() ip: string): Promise<LoginOutputDto> {

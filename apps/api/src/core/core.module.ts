@@ -8,6 +8,7 @@ import { DatabaseModule } from './database/database.module'
 import { HealthModule } from './health/health.module'
 import { MailModule } from './mail/mail.module'
 import { QueueModule } from './queue/queue.module'
+import { ThrottlerModule } from './throttler/throttler.module'
 
 const bucketModule = BucketModule.registerAsync({
   inject: [ConfigService],
@@ -61,6 +62,14 @@ const databaseModule = DatabaseModule.registerAsync({
 
 @Global()
 @Module({
-  imports: [ScheduleModule.forRoot(), HealthModule, databaseModule, mailModule, bucketModule, QueueModule],
+  imports: [
+    ScheduleModule.forRoot(),
+    HealthModule,
+    databaseModule,
+    mailModule,
+    bucketModule,
+    QueueModule,
+    ThrottlerModule,
+  ],
 })
 export class CoreModule {}
