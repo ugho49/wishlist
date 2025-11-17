@@ -14,31 +14,17 @@ export class MailService {
     private readonly queue: Queue,
   ) {}
 
-  async sendMail(param: {
-    to: string | string[]
-    subject: string
-    template: string
-    context?: Record<string, unknown>
-  }) {
+  async sendMail(param: MailPayload) {
     this.logger.log(`Publishing to queue ${QueueName.MAILS} in order to be processed`, { param })
 
-    await this.queue.add(
-      'send-mail',
-      {
-        to: param.to,
-        subject: param.subject,
-        template: param.template,
-        context: param.context,
-      } satisfies MailPayload,
-      {
-        removeOnComplete: 100,
-        removeOnFail: 100,
-        attempts: 3,
-        backoff: {
-          type: 'exponential',
-          delay: 2000,
-        },
+    await this.queue.add('send-mail', param satisfies MailPayload, {
+      removeOnComplete: 100,
+      removeOnFail: 100,
+      attempts: 3,
+      backoff: {
+        type: 'exponential',
+        delay: 2000,
       },
-    )
+    })
   }
 }
