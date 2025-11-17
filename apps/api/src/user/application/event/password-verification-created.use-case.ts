@@ -25,7 +25,7 @@ export class PasswordVerificationCreatedUseCase implements IEventHandler<Passwor
   }
 
   private generateResetPasswordUrl(param: { email: string; token: string }) {
-    const url = new URL(`${this.config.frontendBaseUrl}/reset-password`)
+    const url = new URL(`${this.config.frontendBaseUrl}/forgot-password/renew`)
     url.searchParams.append('email', param.email)
     url.searchParams.append('token', param.token)
     return url.toString()
