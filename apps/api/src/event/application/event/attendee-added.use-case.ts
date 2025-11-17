@@ -1,6 +1,6 @@
 import { Logger } from '@nestjs/common'
 import { EventsHandler, IEventHandler } from '@nestjs/cqrs'
-import { MailService } from '@wishlist/api/core'
+import { MailService, MailTemplate } from '@wishlist/api/core'
 
 import { AttendeeAddedEvent, Event } from '../../domain'
 
@@ -36,7 +36,7 @@ export class AttendeeAddedUseCase implements IEventHandler<AttendeeAddedEvent> {
     await this.mailService.sendMail({
       to: params.email,
       subject: '[Wishlist] Vous participez à un nouvel événement',
-      template: 'added-to-event',
+      template: MailTemplate.ADDED_TO_EVENT,
       context: {
         eventTitle: params.event.title,
         eventUrl: `https://wishlistapp.fr/events/${params.event.id}`,
@@ -53,7 +53,7 @@ export class AttendeeAddedUseCase implements IEventHandler<AttendeeAddedEvent> {
     await this.mailService.sendMail({
       to: params.email,
       subject: '[Wishlist] Vous participez à un nouvel événement',
-      template: 'added-to-event-new-user',
+      template: MailTemplate.ADDED_TO_EVENT_NEW_USER,
       context: {
         eventTitle: params.event.title,
         registerUrl: 'https://wishlistapp.fr/register',

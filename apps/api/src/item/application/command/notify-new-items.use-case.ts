@@ -1,6 +1,6 @@
 import { Inject, Logger } from '@nestjs/common'
 import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
-import { MailService } from '@wishlist/api/core'
+import { MailService, MailTemplate } from '@wishlist/api/core'
 import { REPOSITORIES } from '@wishlist/api/repositories'
 import { WishlistRepository } from '@wishlist/api/wishlist'
 import { WishlistId } from '@wishlist/common'
@@ -67,7 +67,7 @@ export class NotifyNewItemsUseCase implements IInferredCommandHandler<NotifyNewI
     await this.mailService.sendMail({
       to: param.emails,
       subject: '[Wishlist] Des souhaits ont été ajoutés !!',
-      template: 'new-items-reminder',
+      template: MailTemplate.NEW_ITEMS_REMINDER,
       context: {
         wishlistTitle: param.wishlist.title,
         wishlistUrl: `https://wishlistapp.fr/wishlists/${param.wishlist.id}`,
