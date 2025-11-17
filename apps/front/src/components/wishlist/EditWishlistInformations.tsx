@@ -1,4 +1,4 @@
-import type { MiniUserDto } from '@wishlist/common'
+import type { MiniUserDto, UserId } from '@wishlist/common'
 import type { RootState } from '../../core'
 
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -69,11 +69,7 @@ export const EditWishlistInformations = ({ wishlist }: EditWishlistInformationsP
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
     onSuccess: (_output, data) => {
       addToast({ message: 'Liste mis à jour', variant: 'info' })
-
-      queryClient.setQueryData(['wishlist', { id: wishlist.id }], (old: DetailedWishlistDto) => ({
-        ...old,
-        ...data,
-      }))
+      void queryClient.invalidateQueries({ queryKey: ['wishlist', { id: wishlist.id }] })
     },
   })
 
@@ -84,11 +80,7 @@ export const EditWishlistInformations = ({ wishlist }: EditWishlistInformationsP
     onSuccess: output => {
       setLogoUrl(output.logo_url)
       addToast({ message: 'Logo mis à jour', variant: 'info' })
-
-      queryClient.setQueryData(['wishlist', { id: wishlist.id }], (old: DetailedWishlistDto) => ({
-        ...old,
-        logo_url: output.logo_url,
-      }))
+      void queryClient.invalidateQueries({ queryKey: ['wishlist', { id: wishlist.id }] })
     },
   })
 
@@ -99,10 +91,7 @@ export const EditWishlistInformations = ({ wishlist }: EditWishlistInformationsP
     onSuccess: () => {
       setLogoUrl(undefined)
       addToast({ message: 'Logo supprimé', variant: 'info' })
-      queryClient.setQueryData(['wishlist', { id: wishlist.id }], (old: DetailedWishlistDto) => ({
-        ...old,
-        logo_url: undefined,
-      }))
+      void queryClient.invalidateQueries({ queryKey: ['wishlist', { id: wishlist.id }] })
     },
   })
 
@@ -113,7 +102,7 @@ export const EditWishlistInformations = ({ wishlist }: EditWishlistInformationsP
 
   const { mutateAsync: addCoOwner } = useMutation({
     mutationKey: ['wishlist.addCoOwner', { id: wishlist.id }],
-    mutationFn: (userId: string) => api.wishlist.addCoOwner(wishlist.id, { user_id: userId as import('@wishlist/common').UserId }),
+    mutationFn: (userId: UserId) => api.wishlist.addCoOwner(wishlist.id, { user_id: userId }),
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
     onSuccess: () => {
       addToast({ message: 'Co-gestionnaire ajouté avec succès', variant: 'success' })
