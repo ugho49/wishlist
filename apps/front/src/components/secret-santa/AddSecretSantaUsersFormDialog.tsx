@@ -1,6 +1,6 @@
 import type { TransitionProps } from '@mui/material/transitions'
 import type { GridColDef } from '@mui/x-data-grid'
-import type { AttendeeDto, AttendeeId, SecretSantaUserDto } from '@wishlist/common'
+import type { AttendeeDto, AttendeeId, EventId, SecretSantaId, SecretSantaUserDto } from '@wishlist/common'
 import type React from 'react'
 
 import CloseIcon from '@mui/icons-material/Close'
@@ -39,8 +39,8 @@ const Transition = forwardRef(function Transition(
 
 export type AddSecretSantaUsersFormDialogProps = {
   open: boolean
-  eventId: string
-  secretSantaId: string
+  eventId: EventId
+  secretSantaId: SecretSantaId
   eventAttendees: AttendeeDto[]
   secretSantaAttendees: AttendeeDto[]
   handleSubmit: (newSecretSantaUsers: SecretSantaUserDto[]) => void

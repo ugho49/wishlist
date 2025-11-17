@@ -11,6 +11,7 @@ import type {
   UserDto,
   UserEmailSettingsDto,
   UserSocialDto,
+  UserSocialId,
 } from '@wishlist/common'
 import type { AxiosInstance } from 'axios'
 import type { CommonRequestOptions } from './common'
@@ -36,7 +37,7 @@ export class UserService {
     return this.client.post('/user/link-social/google', data).then(res => res.data)
   }
 
-  async unlinkSocialAccount(socialId: string): Promise<void> {
+  async unlinkSocialAccount(socialId: UserSocialId): Promise<void> {
     await this.client.delete(`/user/unlink-social/${socialId}`)
   }
 
@@ -79,7 +80,7 @@ export class UserService {
       .then(res => res.data)
   }
 
-  async updatePictureFromSocial(socialId: string): Promise<void> {
+  async updatePictureFromSocial(socialId: UserSocialId): Promise<void> {
     await this.client.put('/user/picture', {}, { params: { social_id: socialId } })
   }
 

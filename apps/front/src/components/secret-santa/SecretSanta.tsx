@@ -1,4 +1,4 @@
-import type { DetailedEventDto, SecretSantaDto, UpdateSecretSantaInputDto } from '@wishlist/common'
+import type { DetailedEventDto, SecretSantaDto, SecretSantaUserId, UpdateSecretSantaInputDto } from '@wishlist/common'
 
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance'
 import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt'
@@ -105,7 +105,7 @@ export const SecretSanta = ({ secretSanta, event }: SecretSantaProps) => {
 
   const { mutateAsync: removeSecretSantaUser, isPending: loadingRemoveUser } = useMutation({
     mutationKey: ['secret-santa.user.remove', { secretSantaId: secretSanta.id }],
-    mutationFn: (secretSantaUserId: string) => api.secretSanta.deleteUser(secretSanta.id, secretSantaUserId),
+    mutationFn: (secretSantaUserId: SecretSantaUserId) => api.secretSanta.deleteUser(secretSanta.id, secretSantaUserId),
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
     onSuccess: async (_, secretSantaUserId) => {
       setSecretSantaUsers(prev => prev.filter(u => u.id !== secretSantaUserId))
@@ -161,7 +161,7 @@ export const SecretSanta = ({ secretSanta, event }: SecretSantaProps) => {
         open={currentUserIdModalExclusion !== undefined}
         eventId={eventId}
         secretSantaId={secretSanta.id}
-        secretSantaUser={secretSantaUsers.find(u => u.id === currentUserIdModalExclusion)}
+        secretSantaUser={secretSantaUsers.find(u => u.id === currentUserIdModalExclusion)!}
         handleClose={() => setCurrentUserIdModalExclusion(undefined)}
         otherSecretSantaUser={secretSantaUsers.filter(u => u.id !== currentUserIdModalExclusion)}
       />

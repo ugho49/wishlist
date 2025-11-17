@@ -1,4 +1,4 @@
-import type { UpdateUserPictureOutputDto, UserSocialDto } from '@wishlist/common'
+import type { UpdateUserPictureOutputDto, UserSocialDto, UserSocialId } from '@wishlist/common'
 import type React from 'react'
 
 import AddAPhotoIcon from '@mui/icons-material/AddAPhoto'
@@ -68,7 +68,7 @@ const MenuButton = styled(IconButton)(({ theme }) => ({
 
 export type AvatarUpdateButtonProps = {
   uploadPictureHandler: (file: File) => Promise<UpdateUserPictureOutputDto>
-  updatePictureFromSocialHandler: (socialId: string) => Promise<void>
+  updatePictureFromSocialHandler: (socialId: UserSocialId) => Promise<void>
   deletePictureHandler: () => Promise<void>
   onPictureUpdated: (pictureUrl: string | undefined) => void
   pictureUrl?: string

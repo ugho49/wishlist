@@ -1,3 +1,4 @@
+import type { WishlistId } from '@wishlist/common'
 import type { RootState } from '../../core'
 
 import { useQuery } from '@tanstack/react-query'
@@ -8,7 +9,7 @@ import { useApi } from '../useApi'
 
 const mapState = (state: RootState) => state.auth.user?.id
 
-export const useWishlistById = (wishlistId: string) => {
+export const useWishlistById = (wishlistId: WishlistId) => {
   const api = useApi()
   const [currentUserCanEdit, setCurrentUserCanEdit] = useState(false)
   const currentUserId = useSelector(mapState)

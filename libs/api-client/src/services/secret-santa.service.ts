@@ -3,7 +3,10 @@ import type {
   CreateSecretSantaInputDto,
   CreateSecretSantaUsersInputDto,
   CreateSecretSantaUsersOutputDto,
+  EventId,
   SecretSantaDto,
+  SecretSantaId,
+  SecretSantaUserId,
   UpdateSecretSantaInputDto,
   UpdateSecretSantaUserInputDto,
 } from '@wishlist/common'
@@ -13,13 +16,13 @@ import type { CommonRequestOptions } from './common'
 export class SecretSantaService {
   constructor(private readonly client: AxiosInstance) {}
 
-  getMyDraw(eventId: string, options?: CommonRequestOptions): Promise<AttendeeDto | undefined> {
+  getMyDraw(eventId: EventId, options?: CommonRequestOptions): Promise<AttendeeDto | undefined> {
     return this.client
       .get('/secret-santa/user/draw', { params: { eventId }, signal: options?.signal })
       .then(res => res.data)
   }
 
-  get(eventId: string, options?: CommonRequestOptions): Promise<SecretSantaDto | undefined> {
+  get(eventId: EventId, options?: CommonRequestOptions): Promise<SecretSantaDto | undefined> {
     return this.client.get('/secret-santa', { params: { eventId }, signal: options?.signal }).then(res => res.data)
   }
 
@@ -27,35 +30,38 @@ export class SecretSantaService {
     return this.client.post('/secret-santa', data).then(res => res.data)
   }
 
-  async update(secretSantaId: string, data: UpdateSecretSantaInputDto): Promise<void> {
+  async update(secretSantaId: SecretSantaId, data: UpdateSecretSantaInputDto): Promise<void> {
     await this.client.patch(`/secret-santa/${secretSantaId}`, data)
   }
 
-  async start(secretSantaId: string): Promise<void> {
+  async start(secretSantaId: SecretSantaId): Promise<void> {
     await this.client.post(`/secret-santa/${secretSantaId}/start`, {})
   }
 
-  async cancel(secretSantaId: string): Promise<void> {
+  async cancel(secretSantaId: SecretSantaId): Promise<void> {
     await this.client.post(`/secret-santa/${secretSantaId}/cancel`, {})
   }
 
-  async delete(secretSantaId: string): Promise<void> {
+  async delete(secretSantaId: SecretSantaId): Promise<void> {
     await this.client.delete(`/secret-santa/${secretSantaId}`)
   }
 
-  addUsers(secretSantaId: string, data: CreateSecretSantaUsersInputDto): Promise<CreateSecretSantaUsersOutputDto> {
+  addUsers(
+    secretSantaId: SecretSantaId,
+    data: CreateSecretSantaUsersInputDto,
+  ): Promise<CreateSecretSantaUsersOutputDto> {
     return this.client.post(`/secret-santa/${secretSantaId}/users`, data).then(res => res.data)
   }
 
   async updateUser(
-    secretSantaId: string,
-    secretSantaUserId: string,
+    secretSantaId: SecretSantaId,
+    secretSantaUserId: SecretSantaUserId,
     data: UpdateSecretSantaUserInputDto,
   ): Promise<void> {
     await this.client.put(`/secret-santa/${secretSantaId}/user/${secretSantaUserId}`, data)
   }
 
-  async deleteUser(secretSantaId: string, secretSantaUserId: string): Promise<void> {
+  async deleteUser(secretSantaId: SecretSantaId, secretSantaUserId: SecretSantaUserId): Promise<void> {
     await this.client.delete(`/secret-santa/${secretSantaId}/user/${secretSantaUserId}`)
   }
 }
