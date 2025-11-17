@@ -6,8 +6,8 @@ import { EventId, UserId, uuid } from '@wishlist/common'
 import { and, count, desc, eq, gte, inArray, SelectedFields } from 'drizzle-orm'
 import { DateTime } from 'luxon'
 
+import { REPOSITORIES } from '../repositories.constants'
 import { PostgresEventAttendeeRepository } from './postgres-event-attendee.repository'
-import { REPOSITORIES } from './repositories.constants'
 
 type RowType = typeof schema.event.$inferSelect & {
   attendees: (typeof schema.eventAttendee.$inferSelect & { user: typeof schema.user.$inferSelect | null })[]

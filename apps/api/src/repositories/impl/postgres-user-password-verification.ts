@@ -5,7 +5,7 @@ import { schema } from '@wishlist/api-drizzle'
 import { UserId, UserPasswordVerificationId, uuid } from '@wishlist/common'
 import { eq } from 'drizzle-orm'
 
-import { UserPasswordVerification } from '../user'
+import { UserPasswordVerification } from '../../user'
 import { PostgresUserRepository } from './postgres-user.repository'
 
 @Injectable()
