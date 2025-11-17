@@ -43,6 +43,13 @@
       "when": 1763332067005,
       "tag": "0005_add-wishlist-co-owner",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1763407656035,
+      "tag": "0006_add-co-owner-constraint",
+      "breakpoints": true
     }
   ]
 }

@@ -33,19 +33,16 @@ export class DetailedWishlistDto extends MiniWishlistDto {
   declare updated_at: string
 }
 
-export class WishlistWithEventsDto extends MiniWishlistDto {
-  declare events: MiniEventDto[]
-  declare config: WishlistConfigDto
-  declare created_at: string
-  declare updated_at: string
-}
-
 export class WishlistWithOwnerDto extends MiniWishlistDto {
   declare owner: MiniUserDto
   declare co_owner?: MiniUserDto
   declare config: WishlistConfigDto
   declare created_at: string
   declare updated_at: string
+}
+
+export class WishlistWithEventsDto extends WishlistWithOwnerDto {
+  declare events: MiniEventDto[]
 }
 
 export class GetAllWishlistsPaginationQueryDto extends GetPaginationQueryDto {

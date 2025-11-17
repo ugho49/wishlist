@@ -24,7 +24,7 @@ const columns: GridColDef<WishlistWithOwnerDto>[] = [
   },
   { field: 'title', headerName: 'Title', flex: 1, minWidth: 250 },
   {
-    field: '',
+    field: 'owner',
     headerName: 'Owner',
     width: 300,
     valueGetter: (_, row) => `${row.owner.firstname} ${row.owner.lastname}`,
@@ -32,6 +32,20 @@ const columns: GridColDef<WishlistWithOwnerDto>[] = [
       return (
         <RouterLink key={row.owner.id} to="/admin/users/$userId" params={{ userId: row.owner.id }}>
           {row.owner.firstname} {row.owner.lastname}
+        </RouterLink>
+      )
+    },
+  },
+  {
+    field: 'co_owner',
+    headerName: 'Co-owner',
+    width: 300,
+    valueGetter: (_, row) => `${row.co_owner?.firstname} ${row.co_owner?.lastname}`,
+    renderCell: ({ row }) => {
+      if (!row.co_owner) return '-'
+      return (
+        <RouterLink key={row.co_owner.id} to="/admin/users/$userId" params={{ userId: row.co_owner.id }}>
+          {row.co_owner.firstname} {row.co_owner.lastname}
         </RouterLink>
       )
     },

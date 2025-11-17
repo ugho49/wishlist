@@ -42,6 +42,8 @@ function toWishlistWithEventsDto(params: { wishlist: Wishlist; events: Event[] }
     logo_url: wishlist.logoUrl,
     events: events.map(eventMapper.toMiniEventDto),
     config: { hide_items: wishlist.hideItems },
+    owner: userMapper.toMiniUserDto(wishlist.owner),
+    co_owner: wishlist.coOwner ? userMapper.toMiniUserDto(wishlist.coOwner) : undefined,
     created_at: wishlist.createdAt.toISOString(),
     updated_at: wishlist.updatedAt.toISOString(),
   }

@@ -160,6 +160,7 @@ export const wishlist = pgTable(
   table => [
     foreignKey({ columns: [table.ownerId], foreignColumns: [user.id] }).onDelete('cascade'),
     foreignKey({ columns: [table.coOwnerId], foreignColumns: [user.id] }).onDelete('set null'),
+    check('chk_co_owner', sql`co_owner_id IS DISTINCT FROM owner_id`),
   ],
 )
 
