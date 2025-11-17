@@ -10,7 +10,7 @@ const mapState = (state: RootState) => state.auth.user?.id
 
 export const useWishlistById = (wishlistId: string) => {
   const api = useApi()
-  const [currentUserCanEdit, setCurrentUserCanEdit] = useState(true)
+  const [currentUserCanEdit, setCurrentUserCanEdit] = useState(false)
   const currentUserId = useSelector(mapState)
 
   const { data, isLoading } = useQuery({
