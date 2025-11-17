@@ -1091,7 +1091,7 @@ describe('WishlistController', () => {
         await request.delete(path(nonExistentId)).expect(404)
       })
 
-      it('should return 401 when user is not owner', async () => {
+      it('should return 401 when user is not owner or co-owner', async () => {
         const otherUserId = await fixtures.insertUser({
           email: 'other@test.com',
           firstname: 'Other',
@@ -1114,7 +1114,10 @@ describe('WishlistController', () => {
           .delete(path(wishlistId))
           .expect(401)
           .expect(({ body }) =>
-            expect(body).toMatchObject({ error: 'Unauthorized', message: 'Only the owner of the list can delete it' }),
+            expect(body).toMatchObject({
+              error: 'Unauthorized',
+              message: 'Only the owner or co-owner of the list can delete it',
+            }),
           )
 
         // Verify wishlist still exists
@@ -1280,7 +1283,7 @@ describe('WishlistController', () => {
         await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(1)
       })
 
-      it('should return 401 when user is not owner of wishlist', async () => {
+      it('should return 401 when user is not owner or co-owner of wishlist', async () => {
         const otherUserId = await fixtures.insertUser({
           email: 'other@test.com',
           firstname: 'Other',
@@ -1314,7 +1317,7 @@ describe('WishlistController', () => {
           .expect(({ body }) =>
             expect(body).toMatchObject({
               error: 'Unauthorized',
-              message: 'Only the owner of the list can update it',
+              message: 'Only the owner or co-owner of the list can update it',
             }),
           )
 
@@ -1545,7 +1548,7 @@ describe('WishlistController', () => {
         await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(1)
       })
 
-      it('should return 401 when user is not owner of wishlist', async () => {
+      it('should return 401 when user is not owner or co-owner of wishlist', async () => {
         const otherUserId = await fixtures.insertUser({
           email: 'other@test.com',
           firstname: 'Other',
@@ -1571,7 +1574,10 @@ describe('WishlistController', () => {
           })
           .expect(401)
           .expect(({ body }) =>
-            expect(body).toMatchObject({ error: 'Unauthorized', message: 'Only the owner of the list can update it' }),
+            expect(body).toMatchObject({
+              error: 'Unauthorized',
+              message: 'Only the owner or co-owner of the list can update it',
+            }),
           )
 
         // Verify event-wishlist relation still exists
