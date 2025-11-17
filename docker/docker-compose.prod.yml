@@ -75,6 +75,7 @@ services:
     environment:
       PORT: 3000
       NODE_ENV: "production"
+      FRONTEND_BASE_URL: "https://wishlistapp.fr"
       DD_ENV: "prod"
       DD_SERVICE: "wishlist-api"
       DD_VERSION: ${API_VERSION}
@@ -95,7 +96,6 @@ services:
       GOOGLE_OAUTH_CLIENT_ID: ${GOOGLE_OAUTH_CLIENT_ID}
       GOOGLE_OAUTH_CLIENT_SECRET: ${GOOGLE_OAUTH_CLIENT_SECRET}
       RESET_PASSWORD_TOKEN_DURATION_IN_MIN: 15
-      RESET_PASSWORD_RENEW_URL: "https://wishlistapp.fr/forgot-password/renew"
       MAIL_HOST: ${MAIL_HOST}
       MAIL_PORT: ${MAIL_PORT}
       MAIL_PASSWORD: ${MAIL_PASSWORD}

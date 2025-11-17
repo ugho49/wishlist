@@ -9,6 +9,7 @@ import {
   UpdateWishlistUseCase,
   UploadWishlistLogoUseCase,
 } from './command'
+import { UserAddedAsCoOwnerToWishlistUseCase } from './event'
 import { GetMyWishlistsUseCase, GetWishlistByIdUseCase } from './query'
 
 export const handlers = [
@@ -25,4 +26,6 @@ export const handlers = [
   // Query handlers
   GetMyWishlistsUseCase,
   GetWishlistByIdUseCase,
+  // Event handlers
+  UserAddedAsCoOwnerToWishlistUseCase,
 ]

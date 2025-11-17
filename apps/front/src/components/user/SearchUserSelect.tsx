@@ -54,9 +54,16 @@ export type SearchUserSelectProps = {
   disabled?: boolean
   onChange: (value: OptionType) => void
   excludedEmails: string[]
+  acceptNewUsers?: boolean
 }
 
-export const SearchUserSelect = ({ disabled, onChange, excludedEmails, label }: SearchUserSelectProps) => {
+export const SearchUserSelect = ({
+  disabled,
+  onChange,
+  excludedEmails,
+  label,
+  acceptNewUsers = true,
+}: SearchUserSelectProps) => {
   const api = useApi()
   const [loading, setLoading] = useState(false)
   const [options, setOptions] = useState<OptionType[]>([])
@@ -169,7 +176,7 @@ export const SearchUserSelect = ({ disabled, onChange, excludedEmails, label }: 
           return option.email === inputValue
         })
 
-        if (!containValue && inputValue && isValidEmail(inputValue)) {
+        if (!containValue && inputValue && isValidEmail(inputValue) && acceptNewUsers) {
           filtered.push(inputValue.toLowerCase())
         }
 
@@ -188,11 +195,15 @@ export const SearchUserSelect = ({ disabled, onChange, excludedEmails, label }: 
         </li>
       )}
       getOptionDisabled={option => {
-        if (typeof option === 'string') return excludedEmails.includes(option)
-        return excludedEmails.includes(option.email)
+        const email = typeof option === 'string' ? option : option.email
+        return excludedEmails.includes(email)
       }}
       getOptionLabel={option => {
-        if (typeof option === 'string') return `Inviter le participant par son email: ${option}`
+        if (typeof option === 'string') {
+          if (acceptNewUsers) return `Inviter le participant par son email: ${option}`
+          return `Utilisateur inconnu: ${option}`
+        }
+
         return `${option.firstname} ${option.lastname} (${option.email})`
       }}
       renderOption={(props, option) => (
@@ -237,7 +248,11 @@ export const SearchUserSelect = ({ disabled, onChange, excludedEmails, label }: 
             searchUserDebounced(value)
           }}
           placeholder="Rechercher un participant ..."
-          helperText="Si vous ne trouvez pas le participant, vous pouvez l'inviter sur wishlist en entrant son email dans la barre de recherche"
+          helperText={
+            acceptNewUsers
+              ? "Si vous ne trouvez pas le participant, vous pouvez l'inviter sur wishlist en entrant son email dans la barre de recherche"
+              : undefined
+          }
         />
       )}
     />

@@ -1,15 +1,16 @@
 import { BadRequestException, Inject, UnauthorizedException } from '@nestjs/common'
-import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
+import { CommandHandler, EventBus, IInferredCommandHandler } from '@nestjs/cqrs'
 import { REPOSITORIES } from '@wishlist/api/repositories'
 import { UserRepository } from '@wishlist/api/user'
 
-import { AddCoOwnerCommand, WishlistRepository } from '../../domain'
+import { AddCoOwnerCommand, UserAddedAsCoOwnerToWishlistEvent, WishlistRepository } from '../../domain'
 
 @CommandHandler(AddCoOwnerCommand)
 export class AddCoOwnerUseCase implements IInferredCommandHandler<AddCoOwnerCommand> {
   constructor(
     @Inject(REPOSITORIES.WISHLIST) private readonly wishlistRepository: WishlistRepository,
     @Inject(REPOSITORIES.USER) private readonly userRepository: UserRepository,
+    private readonly eventBus: EventBus,
   ) {}
 
   async execute(command: AddCoOwnerCommand): Promise<void> {
@@ -36,5 +37,7 @@ export class AddCoOwnerUseCase implements IInferredCommandHandler<AddCoOwnerComm
     const updatedWishlist = wishlist.addCoOwner(coOwner)
 
     await this.wishlistRepository.save(updatedWishlist)
+
+    await this.eventBus.publish(new UserAddedAsCoOwnerToWishlistEvent({ wishlist: updatedWishlist }))
   }
 }

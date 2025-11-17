@@ -25,9 +25,9 @@ export class UpdateItemUseCase implements IInferredCommandHandler<UpdateItemComm
     }
 
     const wishlist = await this.wishlistRepository.findByIdOrFail(item.wishlistId)
-    const isOwnerOfList = wishlist.isOwner(command.currentUser.id)
+    const isOwnerOrCoOwnerOfList = wishlist.isOwnerOrCoOwner(command.currentUser.id)
 
-    if (item.isSuggested && isOwnerOfList) {
+    if (item.isSuggested && isOwnerOrCoOwnerOfList && wishlist.hideItems) {
       throw new NotFoundException('Item not found')
     }
 
@@ -35,7 +35,7 @@ export class UpdateItemUseCase implements IInferredCommandHandler<UpdateItemComm
       throw new UnauthorizedException('You cannot update this item, is already take by someone else')
     }
 
-    if (!item.isSuggested && !isOwnerOfList) {
+    if (!item.isSuggested && !isOwnerOrCoOwnerOfList) {
       throw new UnauthorizedException('You cannot update this item, only the creator of the list can')
     }
 
