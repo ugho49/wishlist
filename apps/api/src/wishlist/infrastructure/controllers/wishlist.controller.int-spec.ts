@@ -2112,6 +2112,7 @@ describe('WishlistController', () => {
           .expect(200)
           .expect(({ body }) => {
             expect(body.resources).toHaveLength(2)
+            // biome-ignore lint/suspicious/noExplicitAny: ok for testing
             expect(body.resources.map((r: any) => r.id)).toEqual(
               expect.arrayContaining([ownedWishlistId, coOwnedWishlistId]),
             )
