@@ -895,6 +895,66 @@ describe('ItemController', () => {
         })
       })
 
+      it('should create item successfully as co-owner without marking it as suggested', async () => {
+        const otherUserId = await fixtures.insertUser({
+          email: 'other@test.com',
+          firstname: 'Other',
+          lastname: 'User',
+        })
+
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Test Event',
+          description: 'Description',
+          maintainerId: otherUserId,
+        })
+
+        const wishlistId = await fixtures.insertWishlist({
+          eventIds: [eventId],
+          userId: otherUserId,
+          title: 'Other Wishlist',
+          coOwnerId: currentUserId,
+        })
+
+        const itemData = {
+          wishlist_id: wishlistId,
+          name: 'Co-owner Item',
+          description: 'Created by co-owner',
+          url: 'https://example.com',
+          score: 4,
+          picture_url: 'https://example.com/pic.jpg',
+        }
+
+        const response = await request
+          .post(path)
+          .send(itemData)
+          .expect(201)
+          .expect(({ body }) => {
+            expect(body).toEqual({
+              id: expect.toBeString(),
+              name: 'Co-owner Item',
+              description: 'Created by co-owner',
+              url: 'https://example.com',
+              score: 4,
+              picture_url: 'https://example.com/pic.jpg',
+              is_suggested: false,
+              created_at: expect.toBeDateString(),
+            })
+          })
+
+        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+          id: response.body.id,
+          name: 'Co-owner Item',
+          description: 'Created by co-owner',
+          url: 'https://example.com',
+          score: 4,
+          picture_url: 'https://example.com/pic.jpg',
+          is_suggested: false,
+          wishlist_id: wishlistId,
+          created_at: expect.toBeDate(),
+          updated_at: expect.toBeDate(),
+        })
+      })
+
       it.each([
         {
           body: {},
@@ -1128,6 +1188,55 @@ describe('ItemController', () => {
           id: itemId,
           name: 'Updated Item',
           description: 'Updated description',
+          url: 'https://updated.com',
+          score: 5,
+          picture_url: 'https://updated.com/pic.jpg',
+          updated_at: expect.toBeDate(),
+        })
+      })
+
+      it('should update item successfully as co-owner', async () => {
+        const otherUserId = await fixtures.insertUser({
+          email: 'other@test.com',
+          firstname: 'Other',
+          lastname: 'User',
+        })
+
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Test Event',
+          description: 'Description',
+          maintainerId: otherUserId,
+        })
+
+        const wishlistId = await fixtures.insertWishlist({
+          eventIds: [eventId],
+          userId: otherUserId,
+          title: 'Other Wishlist',
+          coOwnerId: currentUserId,
+        })
+
+        const itemId = await fixtures.insertItem({
+          wishlistId,
+          name: 'Original Item',
+          description: 'Original description',
+          url: 'https://original.com',
+          score: 3,
+        })
+
+        const updateData = {
+          name: 'Updated by Co-owner',
+          description: 'Updated by co-owner',
+          url: 'https://updated.com',
+          score: 5,
+          picture_url: 'https://updated.com/pic.jpg',
+        }
+
+        await request.put(path(itemId)).send(updateData).expect(200)
+
+        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+          id: itemId,
+          name: 'Updated by Co-owner',
+          description: 'Updated by co-owner',
           url: 'https://updated.com',
           score: 5,
           picture_url: 'https://updated.com/pic.jpg',
@@ -1425,6 +1534,37 @@ describe('ItemController', () => {
           eventIds: [eventId],
           userId: currentUserId,
           title: 'My Wishlist',
+        })
+
+        const itemId = await fixtures.insertItem({
+          wishlistId,
+          name: 'Test Item',
+          description: 'Test description',
+        })
+
+        await request.delete(path(itemId)).expect(200)
+
+        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(0)
+      })
+
+      it('should delete item successfully as co-owner', async () => {
+        const otherUserId = await fixtures.insertUser({
+          email: 'other@test.com',
+          firstname: 'Other',
+          lastname: 'User',
+        })
+
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Test Event',
+          description: 'Description',
+          maintainerId: otherUserId,
+        })
+
+        const wishlistId = await fixtures.insertWishlist({
+          eventIds: [eventId],
+          userId: otherUserId,
+          title: 'Other Wishlist',
+          coOwnerId: currentUserId,
         })
 
         const itemId = await fixtures.insertItem({
