@@ -529,97 +529,97 @@ describe('WishlistController', () => {
           })
       })
 
-      it.each([true, false])(
-        'should return other user wishlist with all items and sensitive info when hideItems = %s',
-        async hideItems => {
-          const otherUserId = await fixtures.insertUser({
-            email: 'other@test.com',
-            firstname: 'Other',
-            lastname: 'User',
-          })
+      it.each([
+        true,
+        false,
+      ])('should return other user wishlist with all items and sensitive info when hideItems = %s', async hideItems => {
+        const otherUserId = await fixtures.insertUser({
+          email: 'other@test.com',
+          firstname: 'Other',
+          lastname: 'User',
+        })
 
-          const { eventId } = await fixtures.insertEventWithMaintainer({
-            title: 'Shared Event',
-            description: 'Shared Description',
-            maintainerId: otherUserId,
-          })
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Shared Event',
+          description: 'Shared Description',
+          maintainerId: otherUserId,
+        })
 
-          // Make current user an attendee of the event
-          await fixtures.insertActiveAttendee({
-            eventId,
-            userId: currentUserId,
-          })
+        // Make current user an attendee of the event
+        await fixtures.insertActiveAttendee({
+          eventId,
+          userId: currentUserId,
+        })
 
-          const wishlistId = await fixtures.insertWishlist({
-            eventIds: [eventId],
-            userId: otherUserId,
-            title: 'Other Wishlist',
-            hideItems,
-          })
+        const wishlistId = await fixtures.insertWishlist({
+          eventIds: [eventId],
+          userId: otherUserId,
+          title: 'Other Wishlist',
+          hideItems,
+        })
 
-          const normalItemId = await fixtures.insertItem({
-            wishlistId,
-            name: 'Normal Item',
-            isSuggested: false,
-          })
+        const normalItemId = await fixtures.insertItem({
+          wishlistId,
+          name: 'Normal Item',
+          isSuggested: false,
+        })
 
-          const suggestedItemId = await fixtures.insertItem({
-            wishlistId,
-            name: 'Suggested Item',
-            isSuggested: true,
-          })
+        const suggestedItemId = await fixtures.insertItem({
+          wishlistId,
+          name: 'Suggested Item',
+          isSuggested: true,
+        })
 
-          const takenItemId = await fixtures.insertItem({
-            wishlistId,
-            name: 'Taken Item',
-            takerId: currentUserId,
-            takenAt: new Date('2024-01-01T10:00:00Z'),
-            isSuggested: false,
-          })
+        const takenItemId = await fixtures.insertItem({
+          wishlistId,
+          name: 'Taken Item',
+          takerId: currentUserId,
+          takenAt: new Date('2024-01-01T10:00:00Z'),
+          isSuggested: false,
+        })
 
-          await request
-            .get(path(wishlistId))
-            .expect(200)
-            .expect(({ body }) => {
-              expect(body.owner).toEqual({
-                id: otherUserId,
-                firstname: 'Other',
-                lastname: 'User',
-                email: 'other@test.com',
-              })
-              expect(body.items).toHaveLength(3)
-              expect(body.items).toEqual(
-                expect.arrayContaining([
-                  {
-                    id: normalItemId,
-                    name: 'Normal Item',
-                    is_suggested: false,
-                    created_at: expect.toBeDateString(),
-                  },
-                  {
-                    id: suggestedItemId,
-                    name: 'Suggested Item',
-                    is_suggested: true,
-                    created_at: expect.toBeDateString(),
-                  },
-                  {
-                    id: takenItemId,
-                    name: 'Taken Item',
-                    is_suggested: false,
-                    taken_by: {
-                      id: currentUserId,
-                      firstname: 'John',
-                      lastname: 'Doe',
-                      email: Fixtures.BASE_USER_EMAIL,
-                    },
-                    taken_at: '2024-01-01T10:00:00.000Z',
-                    created_at: expect.toBeDateString(),
-                  },
-                ]),
-              )
+        await request
+          .get(path(wishlistId))
+          .expect(200)
+          .expect(({ body }) => {
+            expect(body.owner).toEqual({
+              id: otherUserId,
+              firstname: 'Other',
+              lastname: 'User',
+              email: 'other@test.com',
             })
-        },
-      )
+            expect(body.items).toHaveLength(3)
+            expect(body.items).toEqual(
+              expect.arrayContaining([
+                {
+                  id: normalItemId,
+                  name: 'Normal Item',
+                  is_suggested: false,
+                  created_at: expect.toBeDateString(),
+                },
+                {
+                  id: suggestedItemId,
+                  name: 'Suggested Item',
+                  is_suggested: true,
+                  created_at: expect.toBeDateString(),
+                },
+                {
+                  id: takenItemId,
+                  name: 'Taken Item',
+                  is_suggested: false,
+                  taken_by: {
+                    id: currentUserId,
+                    firstname: 'John',
+                    lastname: 'Doe',
+                    email: Fixtures.BASE_USER_EMAIL,
+                  },
+                  taken_at: '2024-01-01T10:00:00.000Z',
+                  created_at: expect.toBeDateString(),
+                },
+              ]),
+            )
+          })
+      })
 
       it('should return wishlist with multiple events', async () => {
         const { eventId: eventId1 } = await fixtures.insertEventWithMaintainer({

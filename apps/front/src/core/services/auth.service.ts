@@ -11,10 +11,6 @@ export type TokenContent<T> = {
   payload: T
 }
 
-export class AuthService {
-  public readonly accessTokenService = new TokenService<AccessTokenJwtPayload>(LS_KEYS.ACCESS_TOKEN)
-}
-
 class TokenService<T> {
   constructor(private readonly STORAGE_KEY: string) {}
 
@@ -57,4 +53,8 @@ class TokenService<T> {
   removeTokenFromStorage = () => {
     localStorage.removeItem(this.STORAGE_KEY)
   }
+}
+
+export class AuthService {
+  public readonly accessTokenService = new TokenService<AccessTokenJwtPayload>(LS_KEYS.ACCESS_TOKEN)
 }
