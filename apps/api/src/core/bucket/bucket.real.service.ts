@@ -9,7 +9,7 @@ import { BucketService } from './bucket.service'
 
 @Injectable()
 export class BucketRealService extends BucketService {
-  private storage: Storage
+  private readonly storage: Storage
 
   constructor(@Inject(BUCKET_CONFIG_TOKEN) config: BucketConfig) {
     super('real')

@@ -6,8 +6,8 @@ import authConfig from '../auth.config'
 
 @Injectable()
 export class GoogleAuthService {
-  private logger = new Logger(GoogleAuthService.name)
-  private client: OAuth2Client
+  private readonly logger = new Logger(GoogleAuthService.name)
+  private readonly client: OAuth2Client
 
   constructor(@Inject(authConfig.KEY) config: ConfigType<typeof authConfig>) {
     const googleConfig = config.social.google

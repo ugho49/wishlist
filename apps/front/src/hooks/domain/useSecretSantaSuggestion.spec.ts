@@ -2,19 +2,22 @@ import { containsChristmasKeyword } from './useSecretSantaSuggestion'
 
 describe('useSecretSantaSuggestion', () => {
   describe('containsChristmasKeyword', () => {
-    it.each(['Joyeux Noël à tous', 'Merry Christmas everyone', 'Xmas Party tonight', 'X-mas vibes'])(
-      'should detect classic Christmas keywords: "%s"',
-      title => {
-        expect(containsChristmasKeyword(title)).toBe(true)
-      },
-    )
+    it.each([
+      'Joyeux Noël à tous',
+      'Merry Christmas everyone',
+      'Xmas Party tonight',
+      'X-mas vibes',
+    ])('should detect classic Christmas keywords: "%s"', title => {
+      expect(containsChristmasKeyword(title)).toBe(true)
+    })
 
-    it.each(['Feliz Navidad!', 'Buon Natale a tutti', 'Frohe Weihnachten!'])(
-      'should detect multilingual Christmas keywords: "%s"',
-      title => {
-        expect(containsChristmasKeyword(title)).toBe(true)
-      },
-    )
+    it.each([
+      'Feliz Navidad!',
+      'Buon Natale a tutti',
+      'Frohe Weihnachten!',
+    ])('should detect multilingual Christmas keywords: "%s"', title => {
+      expect(containsChristmasKeyword(title)).toBe(true)
+    })
 
     it.each([
       'Le Père Noël arrive bientôt',

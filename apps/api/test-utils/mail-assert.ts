@@ -19,7 +19,8 @@ type GetMailResult = {
 }
 
 export class MailsAssert {
-  private assertions = new Set<MailAssertion>()
+  private readonly assertions = new Set<MailAssertion>()
+
   private mailsCached: Mail[] = []
   private dataFetched = false
 
@@ -106,7 +107,7 @@ export class MailsAssert {
       return this.mailsCached
     }
 
-    const { data } = await this.http.get('/email')
+    const { data } = await this.http.get<Mail[]>('/email')
 
     this.mailsCached = data
     this.dataFetched = true

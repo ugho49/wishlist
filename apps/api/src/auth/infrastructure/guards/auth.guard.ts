@@ -7,7 +7,7 @@ import { IS_PUBLIC_KEY } from '../decorators/public.metadata'
 
 @Injectable()
 export class AuthGuard extends PassportAuthGuard('jwt') {
-  constructor(private reflector: Reflector) {
+  constructor(private readonly reflector: Reflector) {
     super()
   }
 
