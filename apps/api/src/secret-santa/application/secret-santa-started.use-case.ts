@@ -1,9 +1,7 @@
-import { Inject } from '@nestjs/common'
-import { ConfigType } from '@nestjs/config'
 import { EventsHandler, IEventHandler } from '@nestjs/cqrs'
 import { chunk as createChunks } from 'lodash'
 
-import { appConfig } from '../../core'
+import { FrontendRoutesService } from '../../core'
 import { MailService, MailTemplate } from '../../core/mail'
 import { SecretSantaStartedEvent } from '../domain/event/secret-santa-started.event'
 
@@ -11,13 +9,12 @@ import { SecretSantaStartedEvent } from '../domain/event/secret-santa-started.ev
 export class SecretSantaStartedUseCase implements IEventHandler<SecretSantaStartedEvent> {
   constructor(
     private readonly mailService: MailService,
-    @Inject(appConfig.KEY)
-    private readonly config: ConfigType<typeof appConfig>,
+    private readonly frontendRoutes: FrontendRoutesService,
   ) {}
 
   async handle(params: SecretSantaStartedEvent) {
     const { eventTitle, eventId, drawns, budget, description } = params
-    const eventUrl = `${this.config.frontendBaseUrl}/events/${eventId}`
+    const eventUrl = this.frontendRoutes.routes.event.byId(eventId)
     const eurosFormatter = Intl.NumberFormat('fr-FR', {
       style: 'currency',
       currency: 'EUR',

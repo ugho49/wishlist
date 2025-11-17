@@ -1,7 +1,5 @@
-import { Inject } from '@nestjs/common'
-import { ConfigType } from '@nestjs/config'
 import { EventsHandler, IEventHandler } from '@nestjs/cqrs'
-import { appConfig, MailService, MailTemplate } from '@wishlist/api/core'
+import { FrontendRoutesService, MailService, MailTemplate } from '@wishlist/api/core'
 
 import { PasswordVerificationCreatedEvent } from '../../domain'
 
@@ -9,8 +7,7 @@ import { PasswordVerificationCreatedEvent } from '../../domain'
 export class PasswordVerificationCreatedUseCase implements IEventHandler<PasswordVerificationCreatedEvent> {
   constructor(
     private readonly mailService: MailService,
-    @Inject(appConfig.KEY)
-    private readonly config: ConfigType<typeof appConfig>,
+    private readonly frontendRoutes: FrontendRoutesService,
   ) {}
 
   async handle(params: PasswordVerificationCreatedEvent) {
@@ -19,15 +16,8 @@ export class PasswordVerificationCreatedUseCase implements IEventHandler<Passwor
       subject: '[Wishlist] Reinitialiser le mot de passe',
       template: MailTemplate.RESET_PASSWORD,
       context: {
-        url: this.generateResetPasswordUrl({ email: params.email, token: params.token }),
+        url: this.frontendRoutes.routes.user.resetPassword({ email: params.email, token: params.token }),
       },
     })
-  }
-
-  private generateResetPasswordUrl(param: { email: string; token: string }) {
-    const url = new URL(`${this.config.frontendBaseUrl}/forgot-password/renew`)
-    url.searchParams.append('email', param.email)
-    url.searchParams.append('token', param.token)
-    return url.toString()
   }
 }

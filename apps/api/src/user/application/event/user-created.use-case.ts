@@ -1,7 +1,6 @@
 import { Inject, Logger } from '@nestjs/common'
-import { ConfigType } from '@nestjs/config'
 import { EventsHandler, IEventHandler } from '@nestjs/cqrs'
-import { appConfig, MailService, MailTemplate, TransactionManager } from '@wishlist/api/core'
+import { FrontendRoutesService, MailService, MailTemplate, TransactionManager } from '@wishlist/api/core'
 import { EventAttendeeRepository } from '@wishlist/api/event'
 import { REPOSITORIES } from '@wishlist/api/repositories'
 
@@ -18,8 +17,7 @@ export class UserCreatedUseCase implements IEventHandler<UserCreatedEvent> {
     @Inject(REPOSITORIES.EVENT_ATTENDEE)
     private readonly eventAttendeeRepository: EventAttendeeRepository,
     private readonly transactionManager: TransactionManager,
-    @Inject(appConfig.KEY)
-    private readonly config: ConfigType<typeof appConfig>,
+    private readonly frontendRoutes: FrontendRoutesService,
   ) {}
 
   async handle(params: UserCreatedEvent) {
@@ -43,7 +41,7 @@ export class UserCreatedUseCase implements IEventHandler<UserCreatedEvent> {
         subject: '[Wishlist] Bienvenue !!!',
         template: MailTemplate.WELCOME_USER,
         context: {
-          mainUrl: this.config.frontendBaseUrl,
+          mainUrl: this.frontendRoutes.routes.home(),
         },
       })
     } catch (error) {

@@ -1,7 +1,6 @@
-import { Inject, Logger } from '@nestjs/common'
-import { ConfigType } from '@nestjs/config'
+import { Logger } from '@nestjs/common'
 import { EventsHandler, IEventHandler } from '@nestjs/cqrs'
-import { appConfig, MailService, MailTemplate } from '@wishlist/api/core'
+import { FrontendRoutesService, MailService, MailTemplate } from '@wishlist/api/core'
 
 import { AttendeeAddedEvent, Event } from '../../domain'
 
@@ -11,8 +10,7 @@ export class AttendeeAddedUseCase implements IEventHandler<AttendeeAddedEvent> {
 
   constructor(
     private readonly mailService: MailService,
-    @Inject(appConfig.KEY)
-    private readonly config: ConfigType<typeof appConfig>,
+    private readonly frontendRoutes: FrontendRoutesService,
   ) {}
 
   async handle(event: AttendeeAddedEvent): Promise<void> {
@@ -44,7 +42,7 @@ export class AttendeeAddedUseCase implements IEventHandler<AttendeeAddedEvent> {
       template: MailTemplate.ADDED_TO_EVENT,
       context: {
         eventTitle: params.event.title,
-        eventUrl: `${this.config.frontendBaseUrl}/events/${params.event.id}`,
+        eventUrl: this.frontendRoutes.routes.event.byId(params.event.id),
         invitedBy: `${params.invitedBy.firstName} ${params.invitedBy.lastName}`,
       },
     })
@@ -61,7 +59,7 @@ export class AttendeeAddedUseCase implements IEventHandler<AttendeeAddedEvent> {
       template: MailTemplate.ADDED_TO_EVENT_NEW_USER,
       context: {
         eventTitle: params.event.title,
-        registerUrl: `${this.config.frontendBaseUrl}/register`,
+        registerUrl: this.frontendRoutes.routes.user.register(),
         invitedBy: `${params.invitedBy.firstName} ${params.invitedBy.lastName}`,
       },
     })

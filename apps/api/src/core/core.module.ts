@@ -5,6 +5,7 @@ import { ScheduleModule } from '@nestjs/schedule'
 import { path } from '../helpers'
 import { BucketModule } from './bucket/bucket.module'
 import { DatabaseModule } from './database/database.module'
+import { FrontendRoutesModule } from './frontend-routes/frontend-routes.module'
 import { HealthModule } from './health/health.module'
 import { MailModule } from './mail/mail.module'
 import { QueueModule } from './queue/queue.module'
@@ -59,8 +60,25 @@ const databaseModule = DatabaseModule.registerAsync({
   },
 })
 
+const frontendRoutesModule = FrontendRoutesModule.registerAsync({
+  inject: [ConfigService],
+  useFactory: (config: ConfigService) => {
+    return {
+      baseUrl: config.getOrThrow<string>('FRONTEND_BASE_URL'),
+    }
+  },
+})
+
 @Global()
 @Module({
-  imports: [ScheduleModule.forRoot(), HealthModule, databaseModule, mailModule, bucketModule, QueueModule],
+  imports: [
+    ScheduleModule.forRoot(),
+    HealthModule,
+    databaseModule,
+    mailModule,
+    bucketModule,
+    QueueModule,
+    frontendRoutesModule,
+  ],
 })
 export class CoreModule {}
