@@ -3,7 +3,7 @@ import { ConfigType } from '@nestjs/config'
 import { EventsHandler, IEventHandler } from '@nestjs/cqrs'
 
 import { appConfig } from '../../core'
-import { MailService } from '../../core/mail/mail.service'
+import { MailService, MailTemplate } from '../../core/mail'
 import { SecretSantaCancelledEvent } from '../domain/event/secret-santa-cancelled.event'
 
 @EventsHandler(SecretSantaCancelledEvent)
@@ -21,7 +21,7 @@ export class SecretSantaCancelledUseCase implements IEventHandler<SecretSantaCan
     await this.mailService.sendMail({
       to: attendeeEmails,
       subject: "[Wishlist] Le secret santa viens d'être annulé",
-      template: 'secret-santa-cancel',
+      template: MailTemplate.SECRET_SANTA_CANCEL,
       context: {
         eventTitle,
         eventUrl,

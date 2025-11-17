@@ -1,7 +1,7 @@
 import { Inject, Logger } from '@nestjs/common'
 import { ConfigType } from '@nestjs/config'
 import { EventsHandler, IEventHandler } from '@nestjs/cqrs'
-import { appConfig, MailService, TransactionManager } from '@wishlist/api/core'
+import { appConfig, MailService, MailTemplate, TransactionManager } from '@wishlist/api/core'
 import { EventAttendeeRepository } from '@wishlist/api/event'
 import { REPOSITORIES } from '@wishlist/api/repositories'
 
@@ -41,7 +41,7 @@ export class UserCreatedUseCase implements IEventHandler<UserCreatedEvent> {
       await this.mailService.sendMail({
         to: params.user.email,
         subject: '[Wishlist] Bienvenue !!!',
-        template: 'welcome-user',
+        template: MailTemplate.WELCOME_USER,
         context: {
           mainUrl: this.config.frontendBaseUrl,
         },

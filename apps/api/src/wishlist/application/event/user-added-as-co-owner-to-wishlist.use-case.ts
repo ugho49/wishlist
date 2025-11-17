@@ -1,7 +1,7 @@
 import { Inject, Logger } from '@nestjs/common'
 import { ConfigType } from '@nestjs/config'
 import { EventsHandler, IEventHandler } from '@nestjs/cqrs'
-import { appConfig, MailService } from '@wishlist/api/core'
+import { appConfig, MailService, MailTemplate } from '@wishlist/api/core'
 
 import { UserAddedAsCoOwnerToWishlistEvent } from '../../domain'
 
@@ -25,7 +25,7 @@ export class UserAddedAsCoOwnerToWishlistUseCase implements IEventHandler<UserAd
       await this.mailService.sendMail({
         to: params.wishlist.coOwner.email,
         subject: "[Wishlist] Vous avez été ajouté comme co-gestionnaire d'une liste",
-        template: 'added-to-wishlist-as-co-owner',
+        template: MailTemplate.ADDED_TO_WISHLIST_AS_CO_OWNER,
         context: {
           wishlistTitle: params.wishlist.title,
           wishlistUrl: `${this.config.frontendBaseUrl}/wishlists/${params.wishlist.id}`,

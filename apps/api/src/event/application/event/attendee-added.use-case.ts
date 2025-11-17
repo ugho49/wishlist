@@ -1,7 +1,7 @@
 import { Inject, Logger } from '@nestjs/common'
 import { ConfigType } from '@nestjs/config'
 import { EventsHandler, IEventHandler } from '@nestjs/cqrs'
-import { appConfig, MailService } from '@wishlist/api/core'
+import { appConfig, MailService, MailTemplate } from '@wishlist/api/core'
 
 import { AttendeeAddedEvent, Event } from '../../domain'
 
@@ -41,7 +41,7 @@ export class AttendeeAddedUseCase implements IEventHandler<AttendeeAddedEvent> {
     await this.mailService.sendMail({
       to: params.email,
       subject: '[Wishlist] Vous participez à un nouvel événement',
-      template: 'added-to-event',
+      template: MailTemplate.ADDED_TO_EVENT,
       context: {
         eventTitle: params.event.title,
         eventUrl: `${this.config.frontendBaseUrl}/events/${params.event.id}`,
@@ -58,7 +58,7 @@ export class AttendeeAddedUseCase implements IEventHandler<AttendeeAddedEvent> {
     await this.mailService.sendMail({
       to: params.email,
       subject: '[Wishlist] Vous participez à un nouvel événement',
-      template: 'added-to-event-new-user',
+      template: MailTemplate.ADDED_TO_EVENT_NEW_USER,
       context: {
         eventTitle: params.event.title,
         registerUrl: `${this.config.frontendBaseUrl}/register`,

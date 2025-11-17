@@ -1,7 +1,7 @@
 import { Inject } from '@nestjs/common'
 import { ConfigType } from '@nestjs/config'
 import { EventsHandler, IEventHandler } from '@nestjs/cqrs'
-import { appConfig, MailService } from '@wishlist/api/core'
+import { appConfig, MailService, MailTemplate } from '@wishlist/api/core'
 
 import { PasswordVerificationCreatedEvent } from '../../domain'
 
@@ -17,7 +17,7 @@ export class PasswordVerificationCreatedUseCase implements IEventHandler<Passwor
     await this.mailService.sendMail({
       to: params.email,
       subject: '[Wishlist] Reinitialiser le mot de passe',
-      template: 'reset-password',
+      template: MailTemplate.RESET_PASSWORD,
       context: {
         url: this.generateResetPasswordUrl({ email: params.email, token: params.token }),
       },
