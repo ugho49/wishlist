@@ -1,4 +1,4 @@
-import type { DetailedWishlistDto, MiniEventDto } from '@wishlist/common'
+import type { DetailedWishlistDto, MiniEventDto, WishlistId } from '@wishlist/common'
 
 import DeleteIcon from '@mui/icons-material/Delete'
 import { Box, Divider, List, ListItem, ListItemAvatar, ListItemButton, ListItemText } from '@mui/material'
@@ -18,7 +18,7 @@ import { EventIcon } from '../event/EventIcon'
 import { SearchEventSelect } from '../event/SearchEventSelect'
 
 export type EditWishlistEventsProps = {
-  wishlistId: string
+  wishlistId: WishlistId
   events: MiniEventDto[]
 }
 

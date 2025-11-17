@@ -3,6 +3,7 @@ import type {
   AddItemForListInputDto,
   DetailedWishlistDto,
   ItemDto,
+  ItemId,
   UpdateItemInputDto,
   WishlistId,
 } from '@wishlist/common'
@@ -106,7 +107,7 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
 
   const { mutateAsync: updateItem, isPending: updateItemPending } = useMutation({
     mutationKey: ['item.update', { id: item?.id }],
-    mutationFn: (props: { itemId: string; data: UpdateItemInputDto }) => api.item.update(props.itemId, props.data),
+    mutationFn: (props: { itemId: ItemId; data: UpdateItemInputDto }) => api.item.update(props.itemId, props.data),
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
     onSuccess: (_output, props) => {
       const { itemId, data } = props

@@ -1,6 +1,7 @@
 import type {
   CreateEventInputDto,
   DetailedEventDto,
+  EventId,
   EventWithCountsDto,
   GetEventsQueryDto,
   MiniEventDto,
@@ -13,7 +14,7 @@ import type { CommonRequestOptions } from './common'
 export class EventService {
   constructor(private readonly client: AxiosInstance) {}
 
-  getById(eventId: string, options?: CommonRequestOptions): Promise<DetailedEventDto> {
+  getById(eventId: EventId, options?: CommonRequestOptions): Promise<DetailedEventDto> {
     return this.client.get(`/event/${eventId}`, { signal: options?.signal }).then(res => res.data)
   }
 
@@ -25,11 +26,11 @@ export class EventService {
     return this.client.post('/event', data).then(res => res.data)
   }
 
-  async update(eventId: string, data: UpdateEventInputDto): Promise<void> {
+  async update(eventId: EventId, data: UpdateEventInputDto): Promise<void> {
     await this.client.put(`/event/${eventId}`, data)
   }
 
-  async delete(eventId: string): Promise<void> {
+  async delete(eventId: EventId): Promise<void> {
     await this.client.delete(`/event/${eventId}`)
   }
 }

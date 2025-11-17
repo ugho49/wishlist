@@ -1,9 +1,8 @@
-import type { GridColDef } from '@mui/x-data-grid'
 import type { UserId, WishlistWithEventsDto } from '@wishlist/common'
 
 import ListIcon from '@mui/icons-material/List'
 import { Avatar, Stack } from '@mui/material'
-import { DataGrid } from '@mui/x-data-grid'
+import { DataGrid, type GridColDef } from '@mui/x-data-grid'
 import { useQuery } from '@tanstack/react-query'
 import { DateTime } from 'luxon'
 import { useEffect, useState } from 'react'
@@ -11,7 +10,7 @@ import { useEffect, useState } from 'react'
 import { useApi } from '../../../hooks'
 import { RouterLink } from '../../common/RouterLink'
 
-const columns: GridColDef<WishlistWithEventsDto>[] = [
+const getColumns = (userId: UserId): GridColDef<WishlistWithEventsDto>[] => [
   {
     field: 'picture_url',
     headerName: '',
@@ -27,7 +26,7 @@ const columns: GridColDef<WishlistWithEventsDto>[] = [
   },
   { field: 'title', headerName: 'Title', width: 250 },
   {
-    field: '',
+    field: 'events',
     headerName: 'Events',
     flex: 1,
     minWidth: 250,
@@ -44,6 +43,12 @@ const columns: GridColDef<WishlistWithEventsDto>[] = [
         </Stack>
       )
     },
+  },
+  {
+    field: 'role',
+    headerName: 'Role',
+    width: 100,
+    valueGetter: (_, row) => (userId === row.co_owner?.id ? 'Co-owner' : 'Owner'),
   },
   {
     field: 'config.hide_items',
@@ -94,7 +99,7 @@ export const AdminListWishlistsForUser = ({ userId }: AdminListWishlistsForUserP
         density="standard"
         rows={value?.resources || []}
         loading={loading}
-        columns={columns}
+        columns={getColumns(userId)}
         paginationMode="server"
         localeText={{
           noRowsLabel: 'Aucune liste',

@@ -1,0 +1,1 @@
+ALTER TABLE "wishlist" ADD CONSTRAINT "chk_co_owner" CHECK (co_owner_id IS DISTINCT FROM owner_id);

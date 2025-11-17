@@ -29,7 +29,7 @@ const columns: GridColDef<EventWithCountsDto>[] = [
     renderCell: ({ value }) => DateTime.fromJSDate(value).toLocaleString(DateTime.DATE_SHORT),
   },
   {
-    field: '',
+    field: 'maintainer',
     headerName: 'Maintainer',
     width: 170,
     valueGetter: (_, row) => {

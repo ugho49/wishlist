@@ -27,7 +27,7 @@ export interface ManageUserExclusionsDialogProps {
   open: boolean
   eventId: EventId
   secretSantaId: SecretSantaId
-  secretSantaUser?: SecretSantaUserDto
+  secretSantaUser: SecretSantaUserDto
   otherSecretSantaUser: SecretSantaUserDto[]
   handleClose: () => void
 }
@@ -61,7 +61,7 @@ export const ManageUserExclusionsDialog = ({
   const { mutateAsync: updateUser, isPending: loadingUpdateUser } = useMutation({
     mutationKey: ['secret-santa.user.update', { secretSantaId, secretSantaUserId: secretSantaUser?.id }],
     mutationFn: () =>
-      api.secretSanta.updateUser(secretSantaId, secretSantaUser?.id || '', {
+      api.secretSanta.updateUser(secretSantaId, secretSantaUser.id, {
         exclusions: selected,
       }),
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),

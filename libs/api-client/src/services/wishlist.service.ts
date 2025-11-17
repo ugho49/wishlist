@@ -21,7 +21,7 @@ export class WishlistService {
     return this.client.get('/wishlist', { params, signal: options?.signal }).then(res => res.data)
   }
 
-  getById(wishlistId: string, options?: CommonRequestOptions): Promise<DetailedWishlistDto> {
+  getById(wishlistId: WishlistId, options?: CommonRequestOptions): Promise<DetailedWishlistDto> {
     return this.client.get(`/wishlist/${wishlistId}`, { signal: options?.signal }).then(res => res.data)
   }
 
@@ -39,23 +39,23 @@ export class WishlistService {
       .then(res => res.data)
   }
 
-  async update(wishlistId: string, data: UpdateWishlistInputDto): Promise<void> {
+  async update(wishlistId: WishlistId, data: UpdateWishlistInputDto): Promise<void> {
     await this.client.put(`/wishlist/${wishlistId}`, data)
   }
 
-  async delete(wishlistId: string): Promise<void> {
+  async delete(wishlistId: WishlistId): Promise<void> {
     await this.client.delete(`/wishlist/${wishlistId}`)
   }
 
-  async linkWishlistToAnEvent(wishlistId: string, data: LinkUnlinkWishlistInputDto): Promise<void> {
+  async linkWishlistToAnEvent(wishlistId: WishlistId, data: LinkUnlinkWishlistInputDto): Promise<void> {
     await this.client.post(`/wishlist/${wishlistId}/link-event`, data)
   }
 
-  async unlinkWishlistToAnEvent(wishlistId: string, data: LinkUnlinkWishlistInputDto): Promise<void> {
+  async unlinkWishlistToAnEvent(wishlistId: WishlistId, data: LinkUnlinkWishlistInputDto): Promise<void> {
     await this.client.post(`/wishlist/${wishlistId}/unlink-event`, data)
   }
 
-  uploadLogo(wishlistId: string, file: File): Promise<UpdateWishlistLogoOutputDto> {
+  uploadLogo(wishlistId: WishlistId, file: File): Promise<UpdateWishlistLogoOutputDto> {
     const formData = new FormData()
     formData.append('file', file)
 
@@ -66,7 +66,7 @@ export class WishlistService {
       .then(res => res.data)
   }
 
-  async removeLogo(wishlistId: string): Promise<void> {
+  async removeLogo(wishlistId: WishlistId): Promise<void> {
     await this.client.delete(`/wishlist/${wishlistId}/logo`)
   }
 

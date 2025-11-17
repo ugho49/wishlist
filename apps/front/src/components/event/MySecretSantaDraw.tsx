@@ -1,3 +1,5 @@
+import type { EventId } from '@wishlist/common'
+
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard'
 import { Avatar, alpha, Box, Stack, styled } from '@mui/material'
 
@@ -58,7 +60,7 @@ const DescriptionText = styled(Box)(({ theme }) => ({
 }))
 
 type MySecretSantaDrawProps = {
-  eventId: string
+  eventId: EventId
 }
 
 export const MySecretSantaDraw = ({ eventId }: MySecretSantaDrawProps) => {

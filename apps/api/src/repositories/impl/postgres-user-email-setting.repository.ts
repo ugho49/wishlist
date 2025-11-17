@@ -4,7 +4,7 @@ import { schema } from '@wishlist/api-drizzle'
 import { UserEmailSettingId, UserId, uuid } from '@wishlist/common'
 import { eq } from 'drizzle-orm'
 
-import { UserEmailSetting, UserEmailSettingRepository } from '../user'
+import { UserEmailSetting, UserEmailSettingRepository } from '../../user'
 import { PostgresUserRepository } from './postgres-user.repository'
 
 @Injectable()

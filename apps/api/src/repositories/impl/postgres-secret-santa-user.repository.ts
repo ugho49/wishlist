@@ -2,10 +2,10 @@ import { Injectable } from '@nestjs/common'
 import { EventId, SecretSantaId, SecretSantaUserId, UserId, uuid } from '@wishlist/common'
 import { and, eq, sql } from 'drizzle-orm'
 
-import * as schema from '../../drizzle/schema'
-import { DatabaseService, DrizzleTransaction } from '../core/database'
-import { SecretSantaUser } from '../secret-santa/domain/model/secret-santa-user.model'
-import { SecretSantaUserRepository } from '../secret-santa/domain/repository/secret-santa-user.repository'
+import * as schema from '../../../drizzle/schema'
+import { DatabaseService, DrizzleTransaction } from '../../core/database'
+import { SecretSantaUser } from '../../secret-santa/domain/model/secret-santa-user.model'
+import { SecretSantaUserRepository } from '../../secret-santa/domain/repository/secret-santa-user.repository'
 
 @Injectable()
 export class PostgresSecretSantaUserRepository implements SecretSantaUserRepository {

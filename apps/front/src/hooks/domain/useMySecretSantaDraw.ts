@@ -1,8 +1,10 @@
+import type { EventId } from '@wishlist/common'
+
 import { useQuery } from '@tanstack/react-query'
 
 import { useApi } from '../useApi'
 
-export const useMySecretSantaDraw = (eventId: string) => {
+export const useMySecretSantaDraw = (eventId: EventId) => {
   const api = useApi()
 
   const { data, isLoading } = useQuery({

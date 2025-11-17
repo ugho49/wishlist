@@ -1,6 +1,6 @@
 import type { DrizzleTransaction } from '@wishlist/api/core'
 import type { EventId, SecretSantaId, SecretSantaUserId, UserId } from '@wishlist/common'
-import type { SecretSantaUser } from '../model'
+import type { SecretSantaUser } from '../model/secret-santa-user.model'
 
 export interface SecretSantaUserRepository {
   newId(): SecretSantaUserId

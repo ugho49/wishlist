@@ -1,4 +1,4 @@
-import type { AddEventAttendeeInputDto, AttendeeDto, DetailedEventDto, EventId } from '@wishlist/common'
+import type { AddEventAttendeeInputDto, AttendeeDto, AttendeeId, DetailedEventDto, EventId } from '@wishlist/common'
 import type { RootState } from '../../core'
 
 import DeleteIcon from '@mui/icons-material/Delete'
@@ -54,7 +54,7 @@ export const EditEventAttendees = ({ eventId, attendees }: EditEventAttendeesPro
 
   const { mutateAsync: deleteAttendee, isPending: deleteAttendeePending } = useMutation({
     mutationKey: ['event.deleteAttendee', { id: eventId }],
-    mutationFn: (attendeeId: string) => api.attendee.deleteAttendee({ eventId, attendeeId }),
+    mutationFn: (attendeeId: AttendeeId) => api.attendee.deleteAttendee({ eventId, attendeeId }),
     onSuccess: (_, attendeeId) => {
       addToast({ message: "Participant supprimé de l'évènement !", variant: 'info' })
 
