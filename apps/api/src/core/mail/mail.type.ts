@@ -55,52 +55,43 @@ export type AddedToEventNewUserContext = {
   invitedBy: string
 }
 
-export type MailPayload =
-  | {
-      to: string | string[]
-      subject: string
-      template: MailTemplate.WELCOME_USER
-      context: WelcomeUserContext
-    }
-  | {
-      to: string | string[]
-      subject: string
-      template: MailTemplate.SECRET_SANTA_DRAW
-      context: SecretSantaDrawContext
-    }
-  | {
-      to: string | string[]
-      subject: string
-      template: MailTemplate.SECRET_SANTA_CANCEL
-      context: SecretSantaCancelContext
-    }
-  | {
-      to: string | string[]
-      subject: string
-      template: MailTemplate.RESET_PASSWORD
-      context: ResetPasswordContext
-    }
-  | {
-      to: string | string[]
-      subject: string
-      template: MailTemplate.NEW_ITEMS_REMINDER
-      context: NewItemsReminderContext
-    }
-  | {
-      to: string | string[]
-      subject: string
-      template: MailTemplate.ADDED_TO_EVENT
-      context: AddedToEventContext
-    }
-  | {
-      to: string | string[]
-      subject: string
-      template: MailTemplate.ADDED_TO_WISHLIST_AS_CO_OWNER
-      context: AddedToWishlistAsCoOwnerContext
-    }
-  | {
-      to: string | string[]
-      subject: string
-      template: MailTemplate.ADDED_TO_EVENT_NEW_USER
-      context: AddedToEventNewUserContext
-    }
+type BaseMailPayload = {
+  to: string | string[]
+  subject: string
+}
+
+export type MailPayload = BaseMailPayload &
+  (
+    | {
+        template: MailTemplate.WELCOME_USER
+        context: WelcomeUserContext
+      }
+    | {
+        template: MailTemplate.SECRET_SANTA_DRAW
+        context: SecretSantaDrawContext
+      }
+    | {
+        template: MailTemplate.SECRET_SANTA_CANCEL
+        context: SecretSantaCancelContext
+      }
+    | {
+        template: MailTemplate.RESET_PASSWORD
+        context: ResetPasswordContext
+      }
+    | {
+        template: MailTemplate.NEW_ITEMS_REMINDER
+        context: NewItemsReminderContext
+      }
+    | {
+        template: MailTemplate.ADDED_TO_EVENT
+        context: AddedToEventContext
+      }
+    | {
+        template: MailTemplate.ADDED_TO_WISHLIST_AS_CO_OWNER
+        context: AddedToWishlistAsCoOwnerContext
+      }
+    | {
+        template: MailTemplate.ADDED_TO_EVENT_NEW_USER
+        context: AddedToEventNewUserContext
+      }
+  )
