@@ -13,6 +13,7 @@ import {
 } from '@nestjs/common'
 import { FileInterceptor } from '@nestjs/platform-express'
 import { ApiConsumes, ApiTags } from '@nestjs/swagger'
+import { AuthThrottle } from '@wishlist/api/core'
 import {
   ChangeUserPasswordInputDto,
   ICurrentUser,
@@ -63,6 +64,7 @@ export class UserController {
     return this.queryBus.execute(new GetUserByIdQuery({ userId: currentUserId }))
   }
 
+  @AuthThrottle()
   @Public()
   @HttpCode(201)
   @Post('/register')

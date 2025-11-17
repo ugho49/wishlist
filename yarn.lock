@@ -5286,6 +5286,32 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@nest-lab/throttler-storage-redis@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "@nest-lab/throttler-storage-redis@npm:1.1.0"
+  dependencies:
+    tslib: "npm:^2.3.0"
+  peerDependencies:
+    "@nestjs/common": ^7.0.0 || ^8.0.0 || ^9.0.0 || ^10.0.0 || ^11.0.0
+    "@nestjs/core": ^7.0.0 || ^8.0.0 || ^9.0.0 || ^10.0.0 || ^11.0.0
+    "@nestjs/throttler": ">=6.0.0"
+    ioredis: ">=5.0.0"
+    reflect-metadata: ^0.2.1
+  peerDependenciesMeta:
+    "@nestjs/common":
+      optional: false
+    "@nestjs/core":
+      optional: false
+    "@nestjs/throttler":
+      optional: false
+    ioredis:
+      optional: false
+    reflect-metadata:
+      optional: false
+  checksum: 10c0/91ed1e6b9dbf55a3cba0459c8637f8524cbfddadccd147e42700c0482d15b81b9d791e1e1b1dfadeb9bb2d2aeb30ee0838297107d9f4072151eed72014824bf0
+  languageName: node
+  linkType: hard
+
 "@nestjs-architects/typed-cqrs@npm:2.1.0":
   version: 2.1.0
   resolution: "@nestjs-architects/typed-cqrs@npm:2.1.0"
@@ -5558,6 +5584,17 @@ __metadata:
     typeorm:
       optional: true
   checksum: 10c0/6c2d019b7a0f91bc68e654b44e45d93998d3a30919aaee8792e337d33183452817cd462706101f39157813d2aabb5d2ac81bc392c2ba943bfeaeb65920da15db
+  languageName: node
+  linkType: hard
+
+"@nestjs/throttler@npm:^6.4.0":
+  version: 6.4.0
+  resolution: "@nestjs/throttler@npm:6.4.0"
+  peerDependencies:
+    "@nestjs/common": ^7.0.0 || ^8.0.0 || ^9.0.0 || ^10.0.0 || ^11.0.0
+    "@nestjs/core": ^7.0.0 || ^8.0.0 || ^9.0.0 || ^10.0.0 || ^11.0.0
+    reflect-metadata: ^0.1.13 || ^0.2.0
+  checksum: 10c0/796134644e341aad4a403b7431524db97adc31ae8771fc1160a4694a24c295b7a3dd15abcb72b9ea3a0702247b929f501fc5dc74a3f30d915f2667a39ba5c5d7
   languageName: node
   linkType: hard
 
@@ -9742,6 +9779,7 @@ __metadata:
     "@mui/material": "npm:7.3.5"
     "@mui/x-data-grid": "npm:8.17.0"
     "@mui/x-date-pickers": "npm:8.17.0"
+    "@nest-lab/throttler-storage-redis": "npm:^1.1.0"
     "@nestjs-architects/typed-cqrs": "npm:2.1.0"
     "@nestjs/bullmq": "npm:11.0.4"
     "@nestjs/common": "npm:11.1.8"
@@ -9755,6 +9793,7 @@ __metadata:
     "@nestjs/schematics": "npm:11.0.9"
     "@nestjs/swagger": "npm:11.2.1"
     "@nestjs/terminus": "npm:11.0.0"
+    "@nestjs/throttler": "npm:^6.4.0"
     "@nx/devkit": "npm:22.0.2"
     "@nx/js": "npm:22.0.2"
     "@nx/nest": "npm:22.0.2"
