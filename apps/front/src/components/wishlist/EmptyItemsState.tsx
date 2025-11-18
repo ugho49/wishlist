@@ -51,7 +51,6 @@ const ButtonsContainer = styled(Stack)(({ theme }) => ({
 }))
 
 const AddItemButton = styled(Button)(({ theme }) => ({
-  marginTop: theme.spacing(1),
   borderRadius: '24px',
   textTransform: 'none',
   fontSize: '1rem',
