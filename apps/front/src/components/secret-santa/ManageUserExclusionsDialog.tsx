@@ -112,7 +112,7 @@ export const ManageUserExclusionsDialog = ({
                   primary={
                     santaUser.attendee.pending_email
                       ? santaUser.attendee.pending_email
-                      : `${santaUser.attendee.user?.firstname} ${santaUser.attendee.user?.firstname}`
+                      : `${santaUser.attendee.user?.firstname} ${santaUser.attendee.user?.lastname}`
                   }
                 />
               </ListItemButton>
