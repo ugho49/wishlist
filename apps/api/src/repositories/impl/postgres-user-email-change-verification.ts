@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { DatabaseService, DrizzleTransaction } from '@wishlist/api/core'
 import { UserEmailChangeVerificationRepository } from '@wishlist/api/user'
 import { schema } from '@wishlist/api-drizzle'
-import { UserId, UserEmailChangeVerificationId, uuid } from '@wishlist/common'
+import { UserEmailChangeVerificationId, UserId, uuid } from '@wishlist/common'
 import { and, eq } from 'drizzle-orm'
 
 import { UserEmailChangeVerification } from '../../user'

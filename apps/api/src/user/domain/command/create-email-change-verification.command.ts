@@ -1,5 +1,6 @@
-import { Command } from '@nestjs-architects/typed-cqrs'
 import type { ICurrentUser } from '@wishlist/common'
+
+import { Command } from '@nestjs-architects/typed-cqrs'
 
 export class CreateEmailChangeVerificationCommand extends Command<void> {
   public readonly currentUser: ICurrentUser

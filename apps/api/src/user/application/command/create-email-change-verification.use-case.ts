@@ -28,18 +28,13 @@ export class CreateEmailChangeVerificationUseCase
   ) {}
 
   async execute(command: CreateEmailChangeVerificationCommand): Promise<void> {
-    // Get the current user
-    const user = await this.userRepository.findById(command.currentUser.id)
-
-    if (!user) {
-      throw new UnauthorizedException('User not found')
-    }
+    const currentUser = await this.userRepository.findByIdOrFail(command.currentUser.id)
 
     // Normalize email to lowercase
     const newEmail = command.newEmail.toLowerCase()
 
     // Check if the new email is the same as the current email
-    if (user.email.toLowerCase() === newEmail) {
+    if (currentUser.email.toLowerCase() === newEmail) {
       throw new BadRequestException('New email cannot be the same as current email')
     }
 
@@ -50,7 +45,7 @@ export class CreateEmailChangeVerificationUseCase
     }
 
     // Check if there's already a pending verification for this user
-    const previousVerifications = await this.emailChangeVerificationRepository.findByUserId(user.id)
+    const previousVerifications = await this.emailChangeVerificationRepository.findByUserId(currentUser.id)
     const hasActiveVerification = previousVerifications.some(verification => !verification.isExpired())
 
     if (hasActiveVerification) {
@@ -60,9 +55,9 @@ export class CreateEmailChangeVerificationUseCase
     // Create the email change verification
     const emailChangeVerification = UserEmailChangeVerification.create({
       id: this.emailChangeVerificationRepository.newId(),
-      user,
+      user: currentUser,
       newEmail,
-      expiredAt: DateTime.now().plus({ minute: this.config.resetPasswordTokenDurationInMinutes }).toJSDate(),
+      expiredAt: DateTime.now().plus({ minute: this.config.emailChangeVerificationTokenDurationInMinutes }).toJSDate(),
     })
 
     await this.emailChangeVerificationRepository.save(emailChangeVerification)
@@ -70,7 +65,7 @@ export class CreateEmailChangeVerificationUseCase
     // Publish event to send notification emails
     this.eventBus.publish(
       new EmailChangeVerificationCreatedEvent({
-        oldEmail: user.email,
+        oldEmail: currentUser.email,
         newEmail,
         token: emailChangeVerification.token,
       }),

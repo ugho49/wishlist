@@ -1,5 +1,5 @@
 import type { DrizzleTransaction } from '@wishlist/api/core'
-import type { UserId, UserEmailChangeVerificationId } from '@wishlist/common'
+import type { UserEmailChangeVerificationId, UserId } from '@wishlist/common'
 import type { UserEmailChangeVerification } from '../model/user-email-change-verification.model'
 
 export interface UserEmailChangeVerificationRepository {
