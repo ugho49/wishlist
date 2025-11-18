@@ -4,13 +4,20 @@ import { ConfigModule } from '@nestjs/config'
 import { handlers } from '../application'
 import { UserController } from './controllers/user.controller'
 import { UserAdminController } from './controllers/user-admin.controller'
+import { UserEmailChangeController } from './controllers/user-email-change.controller'
 import { UserEmailSettingsController } from './controllers/user-email-settings.controller'
 import { UserPasswordVerificationController } from './controllers/user-password-verification.controller'
 import userConfig from './user.config'
 
 @Module({
   imports: [ConfigModule.forFeature(userConfig)],
-  controllers: [UserController, UserAdminController, UserEmailSettingsController, UserPasswordVerificationController],
+  controllers: [
+    UserController,
+    UserAdminController,
+    UserEmailChangeController,
+    UserEmailSettingsController,
+    UserPasswordVerificationController,
+  ],
   providers: [...handlers],
 })
 export class UserModule {}

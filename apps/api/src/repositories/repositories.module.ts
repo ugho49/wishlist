@@ -5,6 +5,7 @@ import { PostgresEventAttendeeRepository } from './impl/postgres-event-attendee.
 import { PostgresSecretSantaRepository } from './impl/postgres-secret-santa.repository'
 import { PostgresSecretSantaUserRepository } from './impl/postgres-secret-santa-user.repository'
 import { PostgresUserRepository } from './impl/postgres-user.repository'
+import { PostgresUserEmailChangeVerificationRepository } from './impl/postgres-user-email-change-verification'
 import { PostgresUserEmailSettingRepository } from './impl/postgres-user-email-setting.repository'
 import { PostgresUserPasswordVerificationRepository } from './impl/postgres-user-password-verification'
 import { PostgresUserSocialRepository } from './impl/postgres-user-social.repository'
@@ -18,9 +19,10 @@ const repositoryProviders: Record<keyof typeof REPOSITORIES, Type<unknown>> = {
   SECRET_SANTA: PostgresSecretSantaRepository,
   SECRET_SANTA_USER: PostgresSecretSantaUserRepository,
   USER: PostgresUserRepository,
-  USER_SOCIAL: PostgresUserSocialRepository,
+  USER_EMAIL_CHANGE_VERIFICATION: PostgresUserEmailChangeVerificationRepository,
   USER_EMAIL_SETTING: PostgresUserEmailSettingRepository,
   USER_PASSWORD_VERIFICATION: PostgresUserPasswordVerificationRepository,
+  USER_SOCIAL: PostgresUserSocialRepository,
   WISHLIST: PostgresWishlistRepository,
   WISHLIST_ITEM: PostgresWishlistItemRepository,
 }

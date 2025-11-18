@@ -7,6 +7,10 @@ export enum MailTemplate {
   ADDED_TO_EVENT = 'added-to-event',
   ADDED_TO_WISHLIST_AS_CO_OWNER = 'added-to-wishlist-as-co-owner',
   ADDED_TO_EVENT_NEW_USER = 'added-to-event-new-user',
+  CONFIRM_EMAIL_CHANGE = 'confirm-email-change',
+  EMAIL_CHANGE_NOTIFICATION = 'email-change-notification',
+  EMAIL_CHANGED_CONFIRMATION = 'email-changed-confirmation',
+  EMAIL_CHANGED_SUCCESS = 'email-changed-success',
 }
 
 export type WelcomeUserContext = {
@@ -55,6 +59,23 @@ export type AddedToEventNewUserContext = {
   invitedBy: string
 }
 
+export type ConfirmEmailChangeContext = {
+  url: string
+  newEmail: string
+}
+
+export type EmailChangeNotificationContext = {
+  newEmail: string
+}
+
+export type EmailChangedConfirmationContext = {
+  newEmail: string
+}
+
+export type EmailChangedSuccessContext = {
+  email: string
+}
+
 type BaseMailPayload = {
   to: string | string[]
   subject: string
@@ -93,5 +114,21 @@ export type MailPayload = BaseMailPayload &
     | {
         template: MailTemplate.ADDED_TO_EVENT_NEW_USER
         context: AddedToEventNewUserContext
+      }
+    | {
+        template: MailTemplate.CONFIRM_EMAIL_CHANGE
+        context: ConfirmEmailChangeContext
+      }
+    | {
+        template: MailTemplate.EMAIL_CHANGE_NOTIFICATION
+        context: EmailChangeNotificationContext
+      }
+    | {
+        template: MailTemplate.EMAIL_CHANGED_CONFIRMATION
+        context: EmailChangedConfirmationContext
+      }
+    | {
+        template: MailTemplate.EMAIL_CHANGED_SUCCESS
+        context: EmailChangedSuccessContext
       }
   )

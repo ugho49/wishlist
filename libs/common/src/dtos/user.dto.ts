@@ -150,6 +150,27 @@ export class ResetPasswordValidationInputDto {
   declare new_password: string
 }
 
+export class RequestEmailChangeInputDto {
+  @IsEmail()
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(200)
+  @Transform(({ value }) => value.toLowerCase())
+  declare new_email: string
+}
+
+export class ConfirmEmailChangeInputDto {
+  @IsEmail()
+  @IsString()
+  @IsNotEmpty()
+  @Transform(({ value }) => value.toLowerCase())
+  declare new_email: string
+
+  @IsString()
+  @IsNotEmpty()
+  declare token: string
+}
+
 export class UpdateFullUserProfileInputDto {
   @IsEmail()
   @IsString()

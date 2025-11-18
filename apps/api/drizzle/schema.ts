@@ -4,6 +4,7 @@ import type {
   ItemId,
   SecretSantaId,
   SecretSantaUserId,
+  UserEmailChangeVerificationId,
   UserEmailSettingId,
   UserId,
   UserPasswordVerificationId,
@@ -33,6 +34,7 @@ const eventId = brandedUuid<EventId>()
 const attendeeId = brandedUuid<AttendeeId>()
 const userId = brandedUuid<UserId>()
 const userPasswordVerificationId = brandedUuid<UserPasswordVerificationId>()
+const userEmailChangeVerificationId = brandedUuid<UserEmailChangeVerificationId>()
 const userEmailSettingId = brandedUuid<UserEmailSettingId>()
 const userSocialId = brandedUuid<UserSocialId>()
 const secretSantaId = brandedUuid<SecretSantaId>()
@@ -83,6 +85,25 @@ export const userPasswordVerification = pgTable(
       columns: [table.userId],
       foreignColumns: [user.id],
       name: 'user_password_verification_user_id_fkey',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const userEmailChangeVerification = pgTable(
+  'user_email_change_verification',
+  {
+    id: userEmailChangeVerificationId().primaryKey().notNull(),
+    userId: userId('user_id').notNull(),
+    newEmail: varchar('new_email', { length: 200 }).notNull(),
+    token: varchar({ length: 200 }).notNull(),
+    expiredAt: timestampWithTimezone('expired_at').notNull(),
+    ...timestamps,
+  },
+  table => [
+    foreignKey({
+      columns: [table.userId],
+      foreignColumns: [user.id],
+      name: 'user_email_change_verification_user_id_fkey',
     }).onDelete('cascade'),
   ],
 )

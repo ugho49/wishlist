@@ -1,0 +1,80 @@
+<mjml>
+  <mj-body background-color="#F4F4F4">
+    <!-- Header with logo -->
+    <mj-section padding="20px 0" text-align="center">
+      <mj-column>
+        <mj-image align="center" src="https://wishlistapp.fr/icon.png" width="80px"/>
+        <mj-image align="center" src="https://wishlistapp.fr/logo_text.png" width="160px"/>
+      </mj-column>
+    </mj-section>
+
+    <!-- Main content -->
+    <mj-section background-color="#ffffff" padding="40px 30px 30px 30px">
+      <mj-column>
+        <mj-text align="center" color="#224158" font-family="Arial, sans-serif" font-size="26px" line-height="32px" font-weight="bold" padding-bottom="20px">
+          Confirmation de changement d'email 📧
+        </mj-text>
+        <mj-text align="left" color="#55575d" font-family="Arial, sans-serif" font-size="16px" line-height="24px" padding-bottom="20px">
+          Vous avez demandé à changer l'adresse email de votre compte Wishlist pour <strong>{{newEmail}}</strong>.
+        </mj-text>
+        <mj-text align="left" color="#55575d" font-family="Arial, sans-serif" font-size="16px" line-height="24px" padding-bottom="20px">
+          Pour confirmer ce changement, cliquez sur le bouton ci-dessous :
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- CTA Button -->
+    <mj-section background-color="#ffffff" padding="10px 30px 30px 30px">
+      <mj-column>
+        <mj-button href="{{url}}" background-color="#224158" color="#ffffff" font-size="16px" font-weight="bold" border-radius="6px" padding="15px 40px">
+          Confirmer le changement d'email
+        </mj-button>
+        <mj-text align="center" color="#888888" font-family="Arial, sans-serif" font-size="13px" line-height="20px" padding-top="15px">
+          Si le bouton ne fonctionne pas, copiez-collez ce lien dans votre navigateur :
+        </mj-text>
+        <mj-text align="center" color="#224158" font-family="Arial, sans-serif" font-size="12px" line-height="20px" padding-top="5px" css-class="link">
+          <a href="{{url}}" rel="noopener" style="color: #224158; word-break: break-all;" target="_blank">{{url}}</a>
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- Warning section -->
+    <mj-section background-color="#fff3cd" padding="20px 30px">
+      <mj-column>
+        <mj-text align="center" color="#856404" font-family="Arial, sans-serif" font-size="14px" line-height="20px" font-weight="bold" padding-bottom="8px">
+          ⏱️ Attention : Ce lien expire dans 15 minutes
+        </mj-text>
+        <mj-text align="center" color="#856404" font-family="Arial, sans-serif" font-size="13px" line-height="19px">
+          Pour des raisons de sécurité, ce lien de confirmation n'est valide que pendant 15 minutes. Passé ce délai, vous devrez faire une nouvelle demande.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- Security notice -->
+    <mj-section background-color="#ffffff" padding="25px 30px 35px 30px">
+      <mj-column>
+        <mj-text align="left" color="#224158" font-family="Arial, sans-serif" font-size="16px" line-height="22px" font-weight="bold" padding-bottom="12px">
+          🔒 Vous n'avez pas demandé ce changement ?
+        </mj-text>
+        <mj-text align="left" color="#55575d" font-family="Arial, sans-serif" font-size="14px" line-height="21px">
+          Si vous n'êtes pas à l'origine de cette demande, vous pouvez ignorer cet e-mail en toute sécurité. Votre adresse email actuelle restera inchangée et votre compte est protégé.
+        </mj-text>
+        <mj-text align="left" color="#55575d" font-family="Arial, sans-serif" font-size="14px" line-height="21px" padding-top="10px">
+          Nous vous recommandons toutefois de vérifier l'activité récente de votre compte si vous recevez régulièrement ce type de message.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- Footer -->
+    <mj-section padding="5px 0 10px 0" text-align="center">
+      <mj-column>
+        <mj-text align="center" color="#9d9d9d" font-family="Arial, sans-serif" font-size="11px" line-height="18px" padding="15px 25px">
+          Ce mail a été envoyé automatiquement, merci de ne pas y répondre.
+        </mj-text>
+        <mj-text align="center" color="#9d9d9d" font-family="Arial, sans-serif" font-size="11px" line-height="18px" padding="5px 25px 15px 25px">
+          © Wishlist App - Partagez vos souhaits avec simplicité
+        </mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>

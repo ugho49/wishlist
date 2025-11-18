@@ -16,5 +16,11 @@ export const frontendRoutesBuilder = (baseUrl: string) => ({
       url.searchParams.append('token', params.token)
       return url.toString()
     },
+    confirmEmailChange: (params: { email: string; token: string }) => {
+      const url = new URL(`${baseUrl}/confirm-email-change`)
+      url.searchParams.append('email', params.email)
+      url.searchParams.append('token', params.token)
+      return url.toString()
+    },
   },
 })
