@@ -1,22 +1,109 @@
 <mjml>
   <mj-body background-color="#F4F4F4">
+    <!-- Header with logo -->
     <mj-section padding="20px 0" text-align="center">
       <mj-column>
         <mj-image align="center" src="https://wishlistapp.fr/icon.png" width="80px"/>
         <mj-image align="center" src="https://wishlistapp.fr/logo_text.png" width="160px"/>
       </mj-column>
     </mj-section>
-    <mj-section background-color="#ffffff" background-repeat="repeat" padding="30px 20px" text-align="center">
+
+    <!-- Main content -->
+    <mj-section background-color="#ffffff" padding="40px 30px 25px 30px">
       <mj-column>
-        <mj-text align="left" color="#224158" font-family="Arial, sans-serif" font-size="24px" line-height="28px" padding-bottom="40px" text-transform="uppercase">Hello</mj-text>
-        <mj-text align="left" color="#55575d" font-family="Arial, sans-serif" font-size="16px" line-height="24px">Tu as été ajouté en tant que co-gestionnaire de la liste <b>{{wishlistTitle}}</b> par l'utilisateur <u>{{invitedBy}}</u>.</mj-text>
-        <mj-text align="left" color="#55575d" font-family="Arial, sans-serif" font-size="16px" line-height="24px">Tu peux maintenant te rendre à l'adresse ci-dessous afin de gérer la liste.</mj-text>
-        <mj-button href="{{wishlistUrl}}" background-color="#224158" font-size="16px" padding-top="25px">Accèder à la liste</mj-button>
+        <mj-text align="center" color="#224158" font-family="Arial, sans-serif" font-size="26px" line-height="32px" font-weight="bold" padding-bottom="20px">
+          Vous êtes co-gestionnaire ! 🤝
+        </mj-text>
+        <mj-text align="left" color="#55575d" font-family="Arial, sans-serif" font-size="16px" line-height="24px" padding-bottom="15px">
+          <b>{{invitedBy}}</b> vous a ajouté(e) en tant que co-gestionnaire de la liste de souhaits :
+        </mj-text>
       </mj-column>
     </mj-section>
+
+    <!-- Wishlist info highlight -->
+    <mj-section background-color="#e7f3ff" padding="20px 30px">
+      <mj-column>
+        <mj-text align="center" color="#004085" font-family="Arial, sans-serif" font-size="22px" line-height="28px" font-weight="bold">
+          📝 {{wishlistTitle}}
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- What is a co-owner section -->
+    <mj-section background-color="#ffffff" padding="25px 30px 20px 30px">
+      <mj-column>
+        <mj-text align="left" color="#224158" font-family="Arial, sans-serif" font-size="18px" line-height="24px" font-weight="bold" padding-bottom="15px">
+          Qu'est-ce qu'un co-gestionnaire ?
+        </mj-text>
+        <mj-text align="left" color="#55575d" font-family="Arial, sans-serif" font-size="15px" line-height="22px" padding-bottom="15px">
+          En tant que co-gestionnaire, vous partagez les mêmes droits que le propriétaire de la liste. Vous pouvez gérer cette liste de souhaits ensemble.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- Permissions section -->
+    <mj-section background-color="#f8f9fa" padding="20px 30px">
+      <mj-column>
+        <mj-text align="left" color="#224158" font-family="Arial, sans-serif" font-size="16px" line-height="22px" font-weight="bold" padding-bottom="12px">
+          🔑 Vos droits en tant que co-gestionnaire :
+        </mj-text>
+        <mj-text align="left" color="#55575d" font-family="Arial, sans-serif" font-size="14px" line-height="21px" padding-bottom="8px">
+          <span style="color: #224158; font-weight: bold;">✓</span> <b>Ajouter des articles</b> à la liste de souhaits
+        </mj-text>
+        <mj-text align="left" color="#55575d" font-family="Arial, sans-serif" font-size="14px" line-height="21px" padding-bottom="8px">
+          <span style="color: #224158; font-weight: bold;">✓</span> <b>Modifier ou supprimer</b> les articles existants
+        </mj-text>
+        <mj-text align="left" color="#55575d" font-family="Arial, sans-serif" font-size="14px" line-height="21px" padding-bottom="8px">
+          <span style="color: #224158; font-weight: bold;">✓</span> <b>Gérer les paramètres</b> de la liste
+        </mj-text>
+        <mj-text align="left" color="#55575d" font-family="Arial, sans-serif" font-size="14px" line-height="21px">
+          <span style="color: #224158; font-weight: bold;">✓</span> <b>Ajouter d'autres co-gestionnaires</b>
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- Use case section -->
+    <mj-section background-color="#ffffff" padding="25px 30px 20px 30px">
+      <mj-column>
+        <mj-text align="left" color="#224158" font-family="Arial, sans-serif" font-size="16px" line-height="22px" font-weight="bold" padding-bottom="10px">
+          💡 Cas d'usage typiques :
+        </mj-text>
+        <mj-text align="left" color="#55575d" font-family="Arial, sans-serif" font-size="14px" line-height="21px" padding-bottom="8px">
+          • Liste partagée pour un couple
+        </mj-text>
+        <mj-text align="left" color="#55575d" font-family="Arial, sans-serif" font-size="14px" line-height="21px" padding-bottom="8px">
+          • Liste commune pour des enfants gérée par les parents
+        </mj-text>
+        <mj-text align="left" color="#55575d" font-family="Arial, sans-serif" font-size="14px" line-height="21px">
+          • Liste collaborative pour un projet commun
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- CTA Button -->
+    <mj-section background-color="#ffffff" padding="30px 30px 40px 30px">
+      <mj-column>
+        <mj-text align="center" color="#55575d" font-family="Arial, sans-serif" font-size="15px" line-height="22px" padding-bottom="20px">
+          Commencez dès maintenant à gérer cette liste :
+        </mj-text>
+        <mj-button href="{{wishlistUrl}}" background-color="#224158" color="#ffffff" font-size="16px" font-weight="bold" border-radius="6px" padding="15px 40px">
+          Gérer la liste
+        </mj-button>
+        <mj-text align="center" color="#888888" font-family="Arial, sans-serif" font-size="13px" line-height="20px" padding-top="15px">
+          Si le bouton ne fonctionne pas, copiez ce lien : <a href="{{wishlistUrl}}" style="color: #224158; text-decoration: none;">{{wishlistUrl}}</a>
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- Footer -->
     <mj-section padding="5px 0 10px 0" text-align="center">
       <mj-column>
-        <mj-text align="center" color="#9d9d9d" font-family="Arial, sans-serif" font-size="10px" line-height="24px" padding="15px 25px 15px 25px">Cet mail à été envoyé automatiquement, merci de ne pas y répondre.</mj-text>
+        <mj-text align="center" color="#9d9d9d" font-family="Arial, sans-serif" font-size="11px" line-height="18px" padding="15px 25px">
+          Ce mail a été envoyé automatiquement, merci de ne pas y répondre.
+        </mj-text>
+        <mj-text align="center" color="#9d9d9d" font-family="Arial, sans-serif" font-size="11px" line-height="18px" padding="5px 25px 15px 25px">
+          © Wishlist App - Partagez vos souhaits avec simplicité
+        </mj-text>
       </mj-column>
     </mj-section>
   </mj-body>

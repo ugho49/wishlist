@@ -1,27 +1,96 @@
 <mjml>
   <mj-body background-color="#F4F4F4">
+    <!-- Header with logo -->
     <mj-section padding="20px 0" text-align="center">
       <mj-column>
         <mj-image align="center" src="https://wishlistapp.fr/icon.png" width="80px"/>
         <mj-image align="center" src="https://wishlistapp.fr/logo_text.png" width="160px"/>
       </mj-column>
     </mj-section>
-    <mj-section background-color="#ffffff" background-repeat="repeat" padding="30px 20px" text-align="center">
+
+    <!-- Main content -->
+    <mj-section background-color="#ffffff" padding="40px 30px 25px 30px">
       <mj-column>
-        <mj-text align="left" color="#224158" font-family="Arial, sans-serif" font-size="24px" line-height="28px" padding-bottom="40px" text-transform="uppercase">Hello</mj-text>
-        <mj-text align="left" color="#55575d" font-family="Arial, sans-serif" font-size="16px" line-height="24px">Breaking news, l'utilisateur <b>{{userName}}</b> a ajouté <b>{{nbItems}}</b>
-          {{#if (eqNum nbItems 1)}}
-          <span>nouveau souhait</span>
-          {{else}}
-          <span>nouveaux souhaits</span>
-          {{/if}}
-          sur sa liste <b>{{wishlistTitle}}</b> depuis hier.</mj-text>
-        <mj-button href="{{wishlistUrl}}" background-color="#224158" font-size="16px" padding-top="25px">Voir sa liste</mj-button>
+        <mj-text align="center" color="#224158" font-family="Arial, sans-serif" font-size="26px" line-height="32px" font-weight="bold" padding-bottom="20px">
+          Nouveautés sur une liste ! 🎁
+        </mj-text>
+        <mj-text align="left" color="#55575d" font-family="Arial, sans-serif" font-size="16px" line-height="24px" padding-bottom="15px">
+          <b>{{userName}}</b> a ajouté de nouveaux articles à sa liste de souhaits depuis hier.
+        </mj-text>
       </mj-column>
     </mj-section>
+
+    <!-- Highlight section -->
+    <mj-section background-color="#fff9e6" padding="25px 30px">
+      <mj-column>
+        <mj-text align="center" color="#856404" font-family="Arial, sans-serif" font-size="20px" line-height="26px" font-weight="bold" padding-bottom="10px">
+          📝 {{wishlistTitle}}
+        </mj-text>
+        <mj-text align="center" color="#856404" font-family="Arial, sans-serif" font-size="32px" line-height="38px" font-weight="bold">
+          {{nbItems}}
+          {{#if (eqNum nbItems 1)}}
+          <span style="font-size: 18px; display: block; margin-top: 5px;">nouveau souhait ajouté</span>
+          {{else}}
+          <span style="font-size: 18px; display: block; margin-top: 5px;">nouveaux souhaits ajoutés</span>
+          {{/if}}
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- Why this matters section -->
+    <mj-section background-color="#ffffff" padding="25px 30px 20px 30px">
+      <mj-column>
+        <mj-text align="left" color="#224158" font-family="Arial, sans-serif" font-size="18px" line-height="24px" font-weight="bold" padding-bottom="15px">
+          Pourquoi est-ce important ?
+        </mj-text>
+        <mj-text align="left" color="#55575d" font-family="Arial, sans-serif" font-size="15px" line-height="22px" padding-bottom="10px">
+          <span style="color: #224158; font-weight: bold;">•</span> Découvrez les nouvelles idées de cadeaux de <b>{{userName}}</b>
+        </mj-text>
+        <mj-text align="left" color="#55575d" font-family="Arial, sans-serif" font-size="15px" line-height="22px" padding-bottom="10px">
+          <span style="color: #224158; font-weight: bold;">•</span> Réservez rapidement avant que d'autres ne le fassent
+        </mj-text>
+        <mj-text align="left" color="#55575d" font-family="Arial, sans-serif" font-size="15px" line-height="22px">
+          <span style="color: #224158; font-weight: bold;">•</span> Soyez sûr(e) de faire plaisir avec le bon cadeau
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- Tips section -->
+    <mj-section background-color="#f8f9fa" padding="20px 30px">
+      <mj-column>
+        <mj-text align="left" color="#224158" font-family="Arial, sans-serif" font-size="16px" line-height="22px" font-weight="bold" padding-bottom="10px">
+          💡 Astuce :
+        </mj-text>
+        <mj-text align="left" color="#55575d" font-family="Arial, sans-serif" font-size="14px" line-height="21px">
+          Les articles les plus populaires peuvent être réservés rapidement ! Consultez la liste dès maintenant pour avoir le plus grand choix de cadeaux disponibles.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- CTA Button -->
+    <mj-section background-color="#ffffff" padding="30px 30px 40px 30px">
+      <mj-column>
+        <mj-text align="center" color="#55575d" font-family="Arial, sans-serif" font-size="15px" line-height="22px" padding-bottom="20px">
+          Cliquez ci-dessous pour découvrir les nouveaux articles ajoutés :
+        </mj-text>
+        <mj-button href="{{wishlistUrl}}" background-color="#224158" color="#ffffff" font-size="16px" font-weight="bold" border-radius="6px" padding="15px 40px">
+          Découvrir les nouveautés
+        </mj-button>
+        <mj-text align="center" color="#888888" font-family="Arial, sans-serif" font-size="13px" line-height="20px" padding-top="15px">
+          Si le bouton ne fonctionne pas, copiez ce lien : <a href="{{wishlistUrl}}" style="color: #224158; text-decoration: none;">{{wishlistUrl}}</a>
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- Footer -->
     <mj-section padding="5px 0 10px 0" text-align="center">
       <mj-column>
-        <mj-text align="center" color="#9d9d9d" font-family="Arial, sans-serif" font-size="10px" line-height="24px" padding="15px 25px 15px 25px">Cet mail à été envoyé automatiquement, merci de ne pas y répondre.</mj-text>
+        <mj-text align="center" color="#9d9d9d" font-family="Arial, sans-serif" font-size="11px" line-height="18px" padding="15px 25px">
+          Ce mail a été envoyé automatiquement, merci de ne pas y répondre.
+        </mj-text>
+        <mj-text align="center" color="#9d9d9d" font-family="Arial, sans-serif" font-size="11px" line-height="18px" padding="5px 25px 15px 25px">
+          © Wishlist App - Partagez vos souhaits avec simplicité
+        </mj-text>
       </mj-column>
     </mj-section>
   </mj-body>
