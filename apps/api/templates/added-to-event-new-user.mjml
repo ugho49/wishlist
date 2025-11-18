@@ -1,22 +1,100 @@
 <mjml>
   <mj-body background-color="#F4F4F4">
+    <!-- Header with logo -->
     <mj-section padding="20px 0" text-align="center">
       <mj-column>
         <mj-image align="center" src="https://wishlistapp.fr/icon.png" width="80px"/>
         <mj-image align="center" src="https://wishlistapp.fr/logo_text.png" width="160px"/>
       </mj-column>
     </mj-section>
-    <mj-section background-color="#ffffff" background-repeat="repeat" padding="30px 20px" text-align="center">
+
+    <!-- Main content -->
+    <mj-section background-color="#ffffff" padding="40px 30px 25px 30px">
       <mj-column>
-        <mj-text align="left" color="#224158" font-family="Arial, sans-serif" font-size="24px" line-height="28px" padding-bottom="40px" text-transform="uppercase">Hello</mj-text>
-        <mj-text align="left" color="#55575d" font-family="Arial, sans-serif" font-size="16px" line-height="24px">Tu as été ajouté en tant que membre de l'événement <b>{{eventTitle}}</b> par l'utilisateur <u>{{invitedBy}}</u>.</mj-text>
-        <mj-text align="left" color="#55575d" font-family="Arial, sans-serif" font-size="16px" line-height="24px">Tu peux te rendre à l'adresse ci-dessous afin de créer ton compte et voir l'évènement auquel tu as été ajouté.</mj-text>
-        <mj-button href="{{registerUrl}}" background-color="#224158" font-size="16px" padding-top="25px">M'inscrire</mj-button>
+        <mj-text align="center" color="#224158" font-family="Arial, sans-serif" font-size="26px" line-height="32px" font-weight="bold" padding-bottom="20px">
+          Vous êtes invité(e) ! 🎉
+        </mj-text>
+        <mj-text align="left" color="#55575d" font-family="Arial, sans-serif" font-size="16px" line-height="24px" padding-bottom="15px">
+          <b>{{invitedBy}}</b> vous a ajouté(e) en tant que participant(e) à un événement sur Wishlist :
+        </mj-text>
       </mj-column>
     </mj-section>
+
+    <!-- Event info highlight -->
+    <mj-section background-color="#f0f4f8" padding="20px 30px">
+      <mj-column>
+        <mj-text align="center" color="#224158" font-family="Arial, sans-serif" font-size="22px" line-height="28px" font-weight="bold">
+          📅 {{eventTitle}}
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- What is Wishlist section -->
+    <mj-section background-color="#ffffff" padding="25px 30px 20px 30px">
+      <mj-column>
+        <mj-text align="left" color="#224158" font-family="Arial, sans-serif" font-size="18px" line-height="24px" font-weight="bold" padding-bottom="15px">
+          Qu'est-ce que Wishlist ?
+        </mj-text>
+        <mj-text align="left" color="#55575d" font-family="Arial, sans-serif" font-size="15px" line-height="22px" padding-bottom="15px">
+          Wishlist est une plateforme gratuite qui vous permet de partager vos souhaits avec vos proches et de découvrir les leurs. Plus besoin de se demander quoi offrir !
+        </mj-text>
+        <mj-text align="left" color="#55575d" font-family="Arial, sans-serif" font-size="15px" line-height="22px" padding-bottom="10px">
+          <span style="color: #224158; font-weight: bold;">✓</span> <b>Créez vos listes de souhaits</b> pour chaque événement
+        </mj-text>
+        <mj-text align="left" color="#55575d" font-family="Arial, sans-serif" font-size="15px" line-height="22px" padding-bottom="10px">
+          <span style="color: #224158; font-weight: bold;">✓</span> <b>Consultez les listes</b> de vos amis et famille
+        </mj-text>
+        <mj-text align="left" color="#55575d" font-family="Arial, sans-serif" font-size="15px" line-height="22px" padding-bottom="10px">
+          <span style="color: #224158; font-weight: bold;">✓</span> <b>Réservez des cadeaux</b> en toute discrétion
+        </mj-text>
+        <mj-text align="left" color="#55575d" font-family="Arial, sans-serif" font-size="15px" line-height="22px">
+          <span style="color: #224158; font-weight: bold;">✓</span> <b>Organisez des Secret Santa</b> facilement
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- Benefits section -->
+    <mj-section background-color="#f8f9fa" padding="20px 30px">
+      <mj-column>
+        <mj-text align="left" color="#224158" font-family="Arial, sans-serif" font-size="16px" line-height="22px" font-weight="bold" padding-bottom="10px">
+          🎁 Pourquoi rejoindre ?
+        </mj-text>
+        <mj-text align="left" color="#55575d" font-family="Arial, sans-serif" font-size="14px" line-height="21px" padding-bottom="8px">
+          • <b>Gratuit et sans publicité</b>
+        </mj-text>
+        <mj-text align="left" color="#55575d" font-family="Arial, sans-serif" font-size="14px" line-height="21px" padding-bottom="8px">
+          • <b>Simple et rapide</b> à utiliser
+        </mj-text>
+        <mj-text align="left" color="#55575d" font-family="Arial, sans-serif" font-size="14px" line-height="21px">
+          • <b>Vos proches sauront</b> exactement quoi vous offrir
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- CTA Button -->
+    <mj-section background-color="#ffffff" padding="30px 30px 40px 30px">
+      <mj-column>
+        <mj-text align="center" color="#55575d" font-family="Arial, sans-serif" font-size="15px" line-height="22px" padding-bottom="20px">
+          Créez votre compte gratuitement pour participer à cet événement :
+        </mj-text>
+        <mj-button href="{{registerUrl}}" background-color="#224158" color="#ffffff" font-size="16px" font-weight="bold" border-radius="6px" padding="15px 40px">
+          Créer mon compte gratuitement
+        </mj-button>
+        <mj-text align="center" color="#888888" font-family="Arial, sans-serif" font-size="13px" line-height="20px" padding-top="15px">
+          Si le bouton ne fonctionne pas, copiez ce lien : <a href="{{registerUrl}}" style="color: #224158; text-decoration: none;">{{registerUrl}}</a>
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- Footer -->
     <mj-section padding="5px 0 10px 0" text-align="center">
       <mj-column>
-        <mj-text align="center" color="#9d9d9d" font-family="Arial, sans-serif" font-size="10px" line-height="24px" padding="15px 25px 15px 25px">Cet mail à été envoyé automatiquement, merci de ne pas y répondre.</mj-text>
+        <mj-text align="center" color="#9d9d9d" font-family="Arial, sans-serif" font-size="11px" line-height="18px" padding="15px 25px">
+          Ce mail a été envoyé automatiquement, merci de ne pas y répondre.
+        </mj-text>
+        <mj-text align="center" color="#9d9d9d" font-family="Arial, sans-serif" font-size="11px" line-height="18px" padding="5px 25px 15px 25px">
+          © Wishlist App - Partagez vos souhaits avec simplicité
+        </mj-text>
       </mj-column>
     </mj-section>
   </mj-body>
