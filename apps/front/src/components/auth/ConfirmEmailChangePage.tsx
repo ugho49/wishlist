@@ -91,8 +91,8 @@ export const ConfirmEmailChangePage = () => {
       <Stack spacing={4} alignItems="center">
         <ErrorMessageStyled variant="h6">Cette URL n'est pas valide</ErrorMessageStyled>
         <InfoMessageStyled variant="body1">
-          Le lien de confirmation d'email n'est pas valide. Veuillez vérifier votre email ou demander un nouveau changement
-          d'adresse.
+          Le lien de confirmation d'email n'est pas valide. Veuillez vérifier votre email ou demander un nouveau
+          changement d'adresse.
         </InfoMessageStyled>
         <RouterLink to="/user/profile">Retour au profil</RouterLink>
       </Stack>

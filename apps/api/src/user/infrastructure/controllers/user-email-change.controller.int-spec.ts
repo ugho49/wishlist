@@ -105,7 +105,11 @@ describe('UserEmailChangeController', () => {
         {
           body: { new_email: 123 },
           case: 'non-string email',
-          message: ['new_email must be shorter than or equal to 200 characters', 'new_email must be an email', 'new_email must be a string'],
+          message: [
+            'new_email must be shorter than or equal to 200 characters',
+            'new_email must be an email',
+            'new_email must be a string',
+          ],
         },
       ])('should return 400 when invalid input: $case', async ({ body, message }) => {
         const request = await getRequest({ signedAs: 'BASE_USER' })
@@ -223,13 +227,13 @@ describe('UserEmailChangeController', () => {
           .waitFor(500)
           .hasNumberOfEmails(2)
           .mail(0)
-          .hasSubject('[Wishlist] Confirmez votre changement d\'adresse email')
+          .hasSubject("[Wishlist] Confirmez votre changement d'adresse email")
           .hasSender('contact@wishlistapp.fr')
           .hasReceiver(newEmail)
 
         await expectMail()
           .mail(1)
-          .hasSubject('[Wishlist] Demande de changement d\'adresse email')
+          .hasSubject("[Wishlist] Demande de changement d'adresse email")
           .hasSender('contact@wishlistapp.fr')
           .hasReceiver(Fixtures.BASE_USER_EMAIL)
       })
@@ -315,16 +319,14 @@ describe('UserEmailChangeController', () => {
       // Verification should not be deleted
       await expectTable(Fixtures.USER_EMAIL_CHANGE_VERIFICATION_TABLE).hasNumberOfRows(1)
       // User email should not be changed
-      await expectTable(Fixtures.USER_TABLE)
-        .row(0)
-        .toMatchObject({
-          email: Fixtures.BASE_USER_EMAIL,
-        })
+      await expectTable(Fixtures.USER_TABLE).row(0).toMatchObject({
+        email: Fixtures.BASE_USER_EMAIL,
+      })
     })
 
     it('should fail when new email is already taken by another user', async () => {
       const userId = await fixtures.insertBaseUser()
-      const otherUserId = await fixtures.insertUser({
+      await fixtures.insertUser({
         email: 'other@test.fr',
         firstname: 'Other',
         lastname: 'User',
@@ -354,11 +356,9 @@ describe('UserEmailChangeController', () => {
       // Verification should not be deleted
       await expectTable(Fixtures.USER_EMAIL_CHANGE_VERIFICATION_TABLE).hasNumberOfRows(1)
       // User email should not be changed
-      await expectTable(Fixtures.USER_TABLE)
-        .row(0)
-        .toMatchObject({
-          email: Fixtures.BASE_USER_EMAIL,
-        })
+      await expectTable(Fixtures.USER_TABLE).row(0).toMatchObject({
+        email: Fixtures.BASE_USER_EMAIL,
+      })
     })
 
     it('should change email with valid input', async () => {
@@ -383,12 +383,10 @@ describe('UserEmailChangeController', () => {
       await expectTable(Fixtures.USER_EMAIL_CHANGE_VERIFICATION_TABLE).hasNumberOfRows(0)
 
       // User email should be updated
-      await expectTable(Fixtures.USER_TABLE)
-        .row(0)
-        .toMatchObject({
-          id: userId,
-          email: newEmail,
-        })
+      await expectTable(Fixtures.USER_TABLE).row(0).toMatchObject({
+        id: userId,
+        email: newEmail,
+      })
 
       // Should send 2 emails: one to old email, one to new email
       await expectMail()

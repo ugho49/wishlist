@@ -1,5 +1,6 @@
-import { Query } from '@nestjs-architects/typed-cqrs'
 import type { ICurrentUser } from '@wishlist/common'
+
+import { Query } from '@nestjs-architects/typed-cqrs'
 
 export class GetPendingEmailChangeQuery extends Query<GetPendingEmailChangeResult> {
   public readonly currentUser: ICurrentUser

@@ -1,10 +1,10 @@
 import type { RequestEmailChangeInputDto } from '@wishlist/common'
 
+import { zodResolver } from '@hookform/resolvers/zod'
 import EmailIcon from '@mui/icons-material/Email'
 import InfoIcon from '@mui/icons-material/Info'
 import { Alert, Box, Button, Stack, TextField, Typography } from '@mui/material'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
@@ -13,7 +13,7 @@ import { useToast } from '../../hooks/useToast'
 import { Subtitle } from '../common/Subtitle'
 
 const schema = z.object({
-  new_email: z.string().email('Email invalide').min(1, 'Email requis').max(200, '200 caractères maximum'),
+  new_email: z.email('Email invalide').min(1, 'Email requis').max(200, '200 caractères maximum'),
 })
 
 type FormFields = z.infer<typeof schema>
@@ -44,14 +44,11 @@ export const EmailChangeSection = () => {
   const { mutateAsync: requestEmailChange } = useMutation({
     mutationKey: ['user.requestEmailChange'],
     mutationFn: (data: RequestEmailChangeInputDto) => api.user.requestEmailChange(data),
-    onError: (error: any) => {
-      const message = error?.response?.data?.message || "Une erreur s'est produite"
-      addToast({ message, variant: 'error' })
-    },
+    onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
     onSuccess: () => {
       addToast({
         message:
-          "Un email de confirmation a été envoyé à votre nouvelle adresse. Vérifiez votre boîte de réception pour confirmer le changement.",
+          'Un email de confirmation a été envoyé à votre nouvelle adresse. Vérifiez votre boîte de réception pour confirmer le changement.',
         variant: 'success',
       })
       reset()
@@ -71,7 +68,7 @@ export const EmailChangeSection = () => {
 
         <Alert severity={isExpired ? 'warning' : 'info'} icon={<InfoIcon />} sx={{ marginTop: 2 }}>
           <Typography variant="body1" fontWeight={500} gutterBottom>
-            {isExpired ? 'Demande de changement expirée' : 'Changement d\'email en attente'}
+            {isExpired ? 'Demande de changement expirée' : "Changement d'email en attente"}
           </Typography>
           <Typography variant="body2" color="text.secondary">
             {isExpired ? (

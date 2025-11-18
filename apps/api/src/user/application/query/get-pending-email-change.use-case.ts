@@ -1,5 +1,5 @@
 import { Inject } from '@nestjs/common'
-import { QueryHandler, IInferredQueryHandler } from '@nestjs/cqrs'
+import { IInferredQueryHandler, QueryHandler } from '@nestjs/cqrs'
 import { REPOSITORIES } from '@wishlist/api/repositories'
 
 import {
