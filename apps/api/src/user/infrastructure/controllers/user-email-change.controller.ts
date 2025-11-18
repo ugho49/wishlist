@@ -1,15 +1,41 @@
-import { Body, Controller, Post } from '@nestjs/common'
-import { CommandBus } from '@nestjs/cqrs'
+import { Body, Controller, Get, Post } from '@nestjs/common'
+import { CommandBus, QueryBus } from '@nestjs/cqrs'
 import { ApiTags } from '@nestjs/swagger'
 import { CurrentUser, Public } from '@wishlist/api/auth'
-import { ConfirmEmailChangeInputDto, type ICurrentUser, RequestEmailChangeInputDto } from '@wishlist/common'
+import {
+  ConfirmEmailChangeInputDto,
+  type ICurrentUser,
+  type PendingEmailChangeDto,
+  RequestEmailChangeInputDto,
+} from '@wishlist/common'
 
-import { ConfirmEmailChangeCommand, CreateEmailChangeVerificationCommand } from '../../domain'
+import {
+  ConfirmEmailChangeCommand,
+  CreateEmailChangeVerificationCommand,
+  GetPendingEmailChangeQuery,
+} from '../../domain'
 
 @ApiTags('User Email Change')
 @Controller('/user/email-change')
 export class UserEmailChangeController {
-  constructor(private readonly commandBus: CommandBus) {}
+  constructor(
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
+  ) {}
+
+  @Get('/pending')
+  async getPendingEmailChange(@CurrentUser() currentUser: ICurrentUser): Promise<PendingEmailChangeDto | undefined> {
+    const result = await this.queryBus.execute(new GetPendingEmailChangeQuery({ currentUser }))
+
+    if (!result) {
+      return undefined
+    }
+
+    return {
+      new_email: result.newEmail,
+      expired_at: result.expiredAt,
+    }
+  }
 
   @Post('/request')
   async requestEmailChange(

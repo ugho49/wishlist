@@ -10,6 +10,7 @@ export class Fixtures {
   static readonly USER_TABLE = '"user"'
   static readonly USER_EMAIL_SETTING_TABLE = 'user_email_setting'
   static readonly USER_PASSWORD_VERIFICATION_TABLE = 'user_password_verification'
+  static readonly USER_EMAIL_CHANGE_VERIFICATION_TABLE = 'user_email_change_verification'
   static readonly EVENT_TABLE = 'event'
   static readonly EVENT_ATTENDEE_TABLE = 'event_attendee'
   static readonly EVENT_WISHLIST_TABLE = 'event_wishlist'
@@ -213,6 +214,23 @@ export class Fixtures {
     await this.client.query(
       `INSERT INTO ${Fixtures.USER_PASSWORD_VERIFICATION_TABLE} (id, user_id, token, expired_at) VALUES ($1, $2, $3, $4)`,
       [id, userId, token, expiredAt],
+    )
+
+    return id
+  }
+
+  async insertUserEmailChangeVerification(parameters: {
+    userId: string
+    newEmail: string
+    token: string
+    expiredAt: Date
+  }): Promise<string> {
+    const { userId, newEmail, token, expiredAt } = parameters
+    const id = uuid()
+
+    await this.client.query(
+      `INSERT INTO ${Fixtures.USER_EMAIL_CHANGE_VERIFICATION_TABLE} (id, user_id, new_email, token, expired_at) VALUES ($1, $2, $3, $4, $5)`,
+      [id, userId, newEmail, token, expiredAt],
     )
 
     return id

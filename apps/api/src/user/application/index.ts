@@ -18,6 +18,7 @@ import { EmailChangedUseCase } from './event/email-changed.use-case'
 import { PasswordVerificationCreatedUseCase } from './event/password-verification-created.use-case'
 import { UserCreatedUseCase } from './event/user-created.use-case'
 import { GetClosestFriendsUseCase } from './query/get-closest-friends.use-case'
+import { GetPendingEmailChangeUseCase } from './query/get-pending-email-change.use-case'
 import { GetUserByIdUseCase } from './query/get-user-by-id.use-case'
 import { GetUserEmailSettingUseCase } from './query/get-user-email-setting.use-case'
 import { GetUsersByCriteriaUseCase } from './query/get-users-by-criteria.use-case'
@@ -42,6 +43,7 @@ export const handlers = [
   RemoveUserPictureUseCase,
   // Queries
   GetUserEmailSettingUseCase,
+  GetPendingEmailChangeUseCase,
   GetUserByIdUseCase,
   GetUsersByCriteriaUseCase,
   GetUsersPaginatedUseCase,

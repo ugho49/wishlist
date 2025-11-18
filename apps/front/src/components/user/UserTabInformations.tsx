@@ -17,6 +17,7 @@ import { zodRequiredString } from '../../utils/validation'
 import { WishlistDatePicker } from '../common/DatePicker'
 import { Loader } from '../common/Loader'
 import { Subtitle } from '../common/Subtitle'
+import { EmailChangeSection } from './EmailChangeSection'
 
 const mapState = (state: RootState) => state.userProfile
 
@@ -146,6 +147,10 @@ export const UserTabInformations = () => {
           </Button>
         </Stack>
       </Stack>
+
+      <Box sx={{ marginTop: 4, paddingTop: 3, borderTop: '1px solid', borderColor: 'divider' }}>
+        <EmailChangeSection />
+      </Box>
     </Loader>
   )
 }

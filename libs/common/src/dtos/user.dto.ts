@@ -63,6 +63,11 @@ export class UpdateUserEmailSettingsInputDto {
   declare daily_new_item_notification: boolean
 }
 
+export class PendingEmailChangeDto {
+  declare new_email: string
+  declare expired_at: string
+}
+
 export class RegisterUserInputDto {
   @IsString()
   @IsNotEmpty()
