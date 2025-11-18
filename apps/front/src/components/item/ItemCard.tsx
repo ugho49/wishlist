@@ -486,7 +486,12 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
           {/* Title */}
           <ItemTitle>
             {item.url ? (
-              <ClickableTitle href={item.url} target="_blank" rel="noopener noreferrer">
+              <ClickableTitle
+                href={item.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={e => e.stopPropagation()}
+              >
                 {item.name}
               </ClickableTitle>
             ) : (
