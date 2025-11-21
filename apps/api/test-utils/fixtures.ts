@@ -55,12 +55,13 @@ export class Fixtures {
     email: string
     firstname: string
     lastname: string
-    password?: string
+    password?: string | null
     authorities?: Authorities[]
   }): Promise<string> {
     const id = uuid()
     const { email, firstname, lastname, password, authorities } = parameters
-    const passwordEnc = await PasswordManager.hash(password ?? Fixtures.DEFAULT_USER_PASSWORD)
+    const passwordEnc =
+      password === null ? null : await PasswordManager.hash(password ?? Fixtures.DEFAULT_USER_PASSWORD)
 
     await this.client.query(
       `INSERT INTO ${Fixtures.USER_TABLE} (id, email, first_name, last_name, password_enc, authorities) VALUES ($1, $2, $3, $4, $5, $6)`,

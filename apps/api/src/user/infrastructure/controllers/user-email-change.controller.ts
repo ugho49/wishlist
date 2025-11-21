@@ -46,6 +46,7 @@ export class UserEmailChangeController {
       new CreateEmailChangeVerificationCommand({
         currentUser,
         newEmail: dto.new_email,
+        password: dto.password,
       }),
     )
   }

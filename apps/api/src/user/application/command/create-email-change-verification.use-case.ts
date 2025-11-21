@@ -1,6 +1,7 @@
 import { BadRequestException, Inject, UnauthorizedException } from '@nestjs/common'
 import { ConfigType } from '@nestjs/config'
 import { CommandHandler, EventBus, IInferredCommandHandler } from '@nestjs/cqrs'
+import { PasswordManager } from '@wishlist/api/auth'
 import { REPOSITORIES } from '@wishlist/api/repositories'
 import { DateTime } from 'luxon'
 
@@ -29,6 +30,24 @@ export class CreateEmailChangeVerificationUseCase
 
   async execute(command: CreateEmailChangeVerificationCommand): Promise<void> {
     const currentUser = await this.userRepository.findByIdOrFail(command.currentUser.id)
+
+    // Verify password if user has one (email/password authentication)
+    if (currentUser.passwordEnc) {
+      // User has a password, so password verification is required
+      if (!command.password) {
+        throw new UnauthorizedException('Password is required for users with email/password authentication')
+      }
+
+      const passwordVerified = await PasswordManager.verify({
+        hash: currentUser.passwordEnc,
+        plainPassword: command.password,
+      })
+
+      if (!passwordVerified) {
+        throw new UnauthorizedException('Incorrect password')
+      }
+    }
+    // If user has no password (Google-only authentication), skip password verification
 
     // Normalize email to lowercase
     const newEmail = command.newEmail.toLowerCase()

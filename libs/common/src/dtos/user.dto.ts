@@ -43,6 +43,7 @@ export class UserWithoutSocialsDto extends MiniUserDto {
   declare birthday?: string
   declare admin: boolean
   declare is_enabled: boolean
+  declare has_password: boolean
   declare last_connected_at?: string
   declare last_ip?: string
   declare created_at: string
@@ -161,6 +162,10 @@ export class RequestEmailChangeInputDto {
   @IsString()
   @IsNotEmpty()
   declare new_email: string
+
+  @IsString()
+  @IsOptional()
+  declare password?: string
 }
 
 export class ConfirmEmailChangeInputDto {
