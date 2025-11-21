@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react'
 
 import { useApi } from '../../hooks/useApi'
 import { useToast } from '../../hooks/useToast'
+import { Card } from '../common/Card'
 import { InputLabel } from '../common/InputLabel'
 import { Loader } from '../common/Loader'
 import { Subtitle } from '../common/Subtitle'
@@ -48,45 +49,47 @@ export const UserTabNotifications = () => {
   }
 
   return (
-    <Loader loading={loadingNotificationSettings}>
-      <Subtitle>Gérer les notifications de mail</Subtitle>
+    <Card>
+      <Loader loading={loadingNotificationSettings}>
+        <Subtitle>Gérer les notifications de mail</Subtitle>
 
-      <Stack component="form" onSubmit={onSubmit} noValidate gap={3}>
-        <Box>
-          <InputLabel>Notifications de mail</InputLabel>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={dailyNewItemNotification}
-                onChange={e => setDailyNewItemNotification(e.target.checked)}
-                disabled={loading}
-              />
-            }
-            label={
-              <Stack>
-                <Typography variant="body1">Recevoir les mails quotidien d'ajout de nouveaux souhaits</Typography>
-                <Typography variant="caption">
-                  Utile pour ne pas avoir à se connecter tous les jours si rien ne change
-                </Typography>
-              </Stack>
-            }
-          />
-        </Box>
+        <Stack component="form" onSubmit={onSubmit} noValidate gap={3}>
+          <Box>
+            <InputLabel>Notifications de mail</InputLabel>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={dailyNewItemNotification}
+                  onChange={e => setDailyNewItemNotification(e.target.checked)}
+                  disabled={loading}
+                />
+              }
+              label={
+                <Stack>
+                  <Typography variant="body1">Recevoir les mails quotidien d'ajout de nouveaux souhaits</Typography>
+                  <Typography variant="caption">
+                    Utile pour ne pas avoir à se connecter tous les jours si rien ne change
+                  </Typography>
+                </Stack>
+              }
+            />
+          </Box>
 
-        <Stack direction="row" justifyContent="center">
-          <Button
-            type="submit"
-            variant="contained"
-            size="medium"
-            loading={loading}
-            loadingPosition="start"
-            disabled={loading}
-            startIcon={<SaveIcon />}
-          >
-            Mettre à jour
-          </Button>
+          <Stack direction="row" justifyContent="center">
+            <Button
+              type="submit"
+              variant="contained"
+              size="medium"
+              loading={loading}
+              loadingPosition="start"
+              disabled={loading}
+              startIcon={<SaveIcon />}
+            >
+              Mettre à jour
+            </Button>
+          </Stack>
         </Stack>
-      </Stack>
-    </Loader>
+      </Loader>
+    </Card>
   )
 }

@@ -8,6 +8,7 @@ import {
   secretSanta,
   secretSantaUser,
   user,
+  userEmailChangeVerification,
   userEmailSetting,
   userPasswordVerification,
   userSocial,
@@ -34,6 +35,7 @@ export const eventRelations = relations(event, ({ many }) => ({
 
 export const userRelations = relations(user, ({ many }) => ({
   passwordVerifications: many(userPasswordVerification),
+  emailChangeVerifications: many(userEmailChangeVerification),
   emailSettings: many(userEmailSetting),
   socials: many(userSocial),
   wishlists: many(wishlist, { relationName: 'ownedWishlists' }),
@@ -44,6 +46,13 @@ export const userRelations = relations(user, ({ many }) => ({
 export const userPasswordVerificationRelations = relations(userPasswordVerification, ({ one }) => ({
   user: one(user, {
     fields: [userPasswordVerification.userId],
+    references: [user.id],
+  }),
+}))
+
+export const userEmailChangeVerificationRelations = relations(userEmailChangeVerification, ({ one }) => ({
+  user: one(user, {
+    fields: [userEmailChangeVerification.userId],
     references: [user.id],
   }),
 }))

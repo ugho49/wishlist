@@ -9,6 +9,7 @@ import { z } from 'zod'
 
 import { useApi } from '../../hooks/useApi'
 import { useToast } from '../../hooks/useToast'
+import { Card } from '../common/Card'
 import { Subtitle } from '../common/Subtitle'
 
 const schema = z.object({
@@ -53,7 +54,7 @@ export const UserTabPassword = () => {
   }
 
   return (
-    <Box>
+    <Card>
       <Subtitle>Modifier le mot de passe</Subtitle>
 
       {formErrors.root && <Alert severity="error">{formErrors.root.message}</Alert>}
@@ -100,6 +101,6 @@ export const UserTabPassword = () => {
           </Button>
         </Stack>
       </Stack>
-    </Box>
+    </Card>
   )
 }
