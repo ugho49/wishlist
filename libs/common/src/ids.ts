@@ -5,6 +5,7 @@ export type AttendeeId = Brand<string, 'AttendeeId'>
 export type SecretSantaUserId = Brand<string, 'SecretSantaUserId'>
 export type SecretSantaId = Brand<string, 'SecretSantaId'>
 export type UserPasswordVerificationId = Brand<string, 'UserPasswordVerificationId'>
+export type UserEmailChangeVerificationId = Brand<string, 'UserEmailChangeVerificationId'>
 export type UserId = Brand<string, 'UserId'>
 export type UserSocialId = Brand<string, 'UserSocialId'>
 export type UserEmailSettingId = Brand<string, 'UserEmailSettingId'>

@@ -7,27 +7,58 @@ type MailAssertion = () => Promise<unknown>
 
 type MailContact = { address: string }
 
-type Mail = {
+type MaildevEmailDto = {
   subject: string
   from: MailContact[]
   to: MailContact[]
 }
 
 type GetMailResult = {
-  mail: Mail | undefined
+  mail: MaildevEmailDto | undefined
   index: number
+}
+
+type AssertMail = {
+  subject: string
+  from: string | string[]
+  to: string | string[]
 }
 
 export class MailsAssert {
   private readonly assertions = new Set<MailAssertion>()
 
-  private mailsCached: Mail[] = []
+  private mailsCached: MaildevEmailDto[] = []
   private dataFetched = false
 
   constructor(private readonly http: AxiosInstance) {}
 
   waitFor(ms: number): this {
     this.assertions.add(() => sleep(ms))
+
+    return this
+  }
+
+  hasReceiveInAnyOrder(expected: AssertMail[]): this {
+    this.assertions.add(async () => {
+      const mails = await this.getMails()
+
+      for (const expectedMail of expected) {
+        const expectedTo = Array.isArray(expectedMail.to) ? expectedMail.to : [expectedMail.to]
+        const expectedFrom = Array.isArray(expectedMail.from) ? expectedMail.from : [expectedMail.from]
+
+        const mail = mails.find(
+          mail =>
+            expectedTo.every(to => mail.to.some(t => t.address === to)) &&
+            expectedFrom.every(from => mail.from.some(f => f.address === from)) &&
+            mail.subject === expectedMail.subject,
+        )
+
+        expect(
+          mail,
+          `Mail with receiver(s) "${expectedTo.join(', ')}" and sender "${expectedFrom.join(', ')}" and subject "${expectedMail.subject}" not found`,
+        ).toBeDefined()
+      }
+    })
 
     return this
   }
@@ -102,12 +133,12 @@ export class MailsAssert {
     return this.check().then(onFulfilled, onRejected)
   }
 
-  private async getMails(): Promise<Mail[]> {
+  private async getMails(): Promise<MaildevEmailDto[]> {
     if (this.dataFetched) {
       return this.mailsCached
     }
 
-    const { data } = await this.http.get<Mail[]>('/email')
+    const { data } = await this.http.get<MaildevEmailDto[]>('/email')
 
     this.mailsCached = data
     this.dataFetched = true

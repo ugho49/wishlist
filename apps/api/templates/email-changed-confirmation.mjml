@@ -1,0 +1,68 @@
+<mjml>
+  <mj-body background-color="#F4F4F4">
+    <!-- Header with logo -->
+    <mj-section padding="20px 0" text-align="center">
+      <mj-column>
+        <mj-image align="center" src="https://wishlistapp.fr/icon.png" width="80px"/>
+        <mj-image align="center" src="https://wishlistapp.fr/logo_text.png" width="160px"/>
+      </mj-column>
+    </mj-section>
+
+    <!-- Main content -->
+    <mj-section background-color="#ffffff" padding="40px 30px 30px 30px">
+      <mj-column>
+        <mj-text align="center" color="#224158" font-family="Arial, sans-serif" font-size="26px" line-height="32px" font-weight="bold" padding-bottom="20px">
+          Votre email a été modifié ✅
+        </mj-text>
+        <mj-text align="left" color="#55575d" font-family="Arial, sans-serif" font-size="16px" line-height="24px" padding-bottom="20px">
+          Nous vous confirmons que l'adresse email de votre compte Wishlist a été modifiée avec succès.
+        </mj-text>
+        <mj-text align="left" color="#55575d" font-family="Arial, sans-serif" font-size="16px" line-height="24px" padding-bottom="20px">
+          Nouvelle adresse email : <strong>{{newEmail}}</strong>
+        </mj-text>
+        <mj-text align="left" color="#55575d" font-family="Arial, sans-serif" font-size="16px" line-height="24px" padding-bottom="20px">
+          À partir de maintenant, utilisez cette nouvelle adresse pour vous connecter à votre compte.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- Success section -->
+    <mj-section background-color="#d4edda" padding="20px 30px">
+      <mj-column>
+        <mj-text align="center" color="#155724" font-family="Arial, sans-serif" font-size="14px" line-height="20px" font-weight="bold" padding-bottom="8px">
+          ✅ Changement effectué
+        </mj-text>
+        <mj-text align="center" color="#155724" font-family="Arial, sans-serif" font-size="13px" line-height="19px">
+          Cette adresse email n'est plus associée à votre compte Wishlist. Un email de confirmation a été envoyé à votre nouvelle adresse.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- Security notice -->
+    <mj-section background-color="#ffffff" padding="25px 30px 35px 30px">
+      <mj-column>
+        <mj-text align="left" color="#224158" font-family="Arial, sans-serif" font-size="16px" line-height="22px" font-weight="bold" padding-bottom="12px">
+          🔒 Vous n'avez pas effectué ce changement ?
+        </mj-text>
+        <mj-text align="left" color="#55575d" font-family="Arial, sans-serif" font-size="14px" line-height="21px">
+          Si vous n'êtes pas à l'origine de ce changement, votre compte a été compromis. Contactez-nous immédiatement pour récupérer l'accès à votre compte.
+        </mj-text>
+        <mj-text align="left" color="#55575d" font-family="Arial, sans-serif" font-size="14px" line-height="21px" padding-top="10px">
+          Note : Cette ancienne adresse email ne recevra plus les notifications de votre compte Wishlist.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- Footer -->
+    <mj-section padding="5px 0 10px 0" text-align="center">
+      <mj-column>
+        <mj-text align="center" color="#9d9d9d" font-family="Arial, sans-serif" font-size="11px" line-height="18px" padding="15px 25px">
+          Ce mail a été envoyé automatiquement, merci de ne pas y répondre.
+        </mj-text>
+        <mj-text align="center" color="#9d9d9d" font-family="Arial, sans-serif" font-size="11px" line-height="18px" padding="5px 25px 15px 25px">
+          © Wishlist App - Partagez vos souhaits avec simplicité
+        </mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>

@@ -63,6 +63,11 @@ export class UpdateUserEmailSettingsInputDto {
   declare daily_new_item_notification: boolean
 }
 
+export class PendingEmailChangeDto {
+  declare new_email: string
+  declare expired_at: string
+}
+
 export class RegisterUserInputDto {
   @IsString()
   @IsNotEmpty()
@@ -148,6 +153,25 @@ export class ResetPasswordValidationInputDto {
   @MinLength(8)
   @MaxLength(50)
   declare new_password: string
+}
+
+export class RequestEmailChangeInputDto {
+  @IsEmail()
+  @MaxLength(200)
+  @IsString()
+  @IsNotEmpty()
+  declare new_email: string
+}
+
+export class ConfirmEmailChangeInputDto {
+  @IsEmail()
+  @IsString()
+  @IsNotEmpty()
+  declare new_email: string
+
+  @IsString()
+  @IsNotEmpty()
+  declare token: string
 }
 
 export class UpdateFullUserProfileInputDto {

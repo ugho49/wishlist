@@ -1,3 +1,5 @@
+import { ConfirmEmailChangeUseCase } from './command/confirm-email-change.use-case'
+import { CreateEmailChangeVerificationUseCase } from './command/create-email-change-verification.use-case'
 import { CreatePasswordVerificationUseCase } from './command/create-password-verification.use-case'
 import { CreateUserUseCase } from './command/create-user.use-case'
 import { DeleteUserUseCase } from './command/delete-user.use-case'
@@ -11,9 +13,12 @@ import { UpdateUserFullUseCase } from './command/update-user-full.use-case'
 import { UpdateUserPasswordUseCase } from './command/update-user-password.use-case'
 import { UpdateUserPictureUseCase } from './command/update-user-picture.use-case'
 import { UpdateUserPictureFromSocialUseCase } from './command/update-user-picture-from-social.use-case'
+import { EmailChangeVerificationCreatedUseCase } from './event/email-change-verification-created.use-case'
+import { EmailChangedUseCase } from './event/email-changed.use-case'
 import { PasswordVerificationCreatedUseCase } from './event/password-verification-created.use-case'
 import { UserCreatedUseCase } from './event/user-created.use-case'
 import { GetClosestFriendsUseCase } from './query/get-closest-friends.use-case'
+import { GetPendingEmailChangeUseCase } from './query/get-pending-email-change.use-case'
 import { GetUserByIdUseCase } from './query/get-user-by-id.use-case'
 import { GetUserEmailSettingUseCase } from './query/get-user-email-setting.use-case'
 import { GetUsersByCriteriaUseCase } from './query/get-users-by-criteria.use-case'
@@ -22,6 +27,8 @@ import { GetUsersPaginatedUseCase } from './query/get-users-paginated.use-case'
 export const handlers = [
   // Commands
   CreateUserUseCase,
+  CreateEmailChangeVerificationUseCase,
+  ConfirmEmailChangeUseCase,
   CreatePasswordVerificationUseCase,
   LinkUserToGoogleUseCase,
   UnlinkUserSocialUseCase,
@@ -36,6 +43,7 @@ export const handlers = [
   RemoveUserPictureUseCase,
   // Queries
   GetUserEmailSettingUseCase,
+  GetPendingEmailChangeUseCase,
   GetUserByIdUseCase,
   GetUsersByCriteriaUseCase,
   GetUsersPaginatedUseCase,
@@ -43,4 +51,6 @@ export const handlers = [
   // Events
   UserCreatedUseCase,
   PasswordVerificationCreatedUseCase,
+  EmailChangeVerificationCreatedUseCase,
+  EmailChangedUseCase,
 ]

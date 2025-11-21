@@ -14,9 +14,11 @@ import { updateUser as updateUserAction } from '../../core/store/features'
 import { useApi } from '../../hooks/useApi'
 import { useToast } from '../../hooks/useToast'
 import { zodRequiredString } from '../../utils/validation'
+import { Card } from '../common/Card'
 import { WishlistDatePicker } from '../common/DatePicker'
 import { Loader } from '../common/Loader'
 import { Subtitle } from '../common/Subtitle'
+import { EmailChangeSection } from './EmailChangeSection'
 
 const mapState = (state: RootState) => state.userProfile
 
@@ -80,72 +82,80 @@ export const UserTabInformations = () => {
     })
 
   return (
-    <Loader loading={!userState.isUserLoaded}>
-      <Subtitle>Modifier les informations</Subtitle>
+    <Stack gap={3}>
+      <Card>
+        <Loader loading={!userState.isUserLoaded}>
+          <Subtitle>Modifier les informations</Subtitle>
 
-      <Stack component="form" onSubmit={handleSubmit(onSubmit)} noValidate gap={3}>
-        <Stack direction="row" flexWrap="wrap" gap={3}>
-          <Box sx={{ flexGrow: 1 }}>
-            <TextField
-              {...register('firstname')}
-              autoComplete="off"
-              label="Prénom"
-              fullWidth
-              required
-              placeholder="John"
-              error={!!formErrors.firstname}
-              helperText={formErrors.firstname?.message}
-            />
-          </Box>
+          <Stack component="form" onSubmit={handleSubmit(onSubmit)} noValidate gap={3}>
+            <Stack direction="row" flexWrap="wrap" gap={3}>
+              <Box sx={{ flexGrow: 1 }}>
+                <TextField
+                  {...register('firstname')}
+                  autoComplete="off"
+                  label="Prénom"
+                  fullWidth
+                  required
+                  placeholder="John"
+                  error={!!formErrors.firstname}
+                  helperText={formErrors.firstname?.message}
+                />
+              </Box>
 
-          <Box sx={{ flexGrow: 1 }}>
-            <TextField
-              {...register('lastname')}
-              label="Nom"
-              required
-              autoComplete="off"
-              fullWidth
-              placeholder="Doe"
-              error={!!formErrors.lastname}
-              helperText={formErrors.lastname?.message}
-            />
-          </Box>
-        </Stack>
+              <Box sx={{ flexGrow: 1 }}>
+                <TextField
+                  {...register('lastname')}
+                  label="Nom"
+                  required
+                  autoComplete="off"
+                  fullWidth
+                  placeholder="Doe"
+                  error={!!formErrors.lastname}
+                  helperText={formErrors.lastname?.message}
+                />
+              </Box>
+            </Stack>
 
-        <Box sx={{ flexGrow: 1 }}>
-          <Controller
-            control={control}
-            name="birthday"
-            render={({ field }) => (
-              <WishlistDatePicker
-                label="Date de naissance"
-                value={field.value}
-                inputRef={field.ref}
-                disabled={field.disabled}
-                referenceDate={DateTime.now().minus({ year: 30 })}
-                onChange={date => field.onChange(date)}
-                disableFuture
-                fullWidth
+            <Box sx={{ flexGrow: 1 }}>
+              <Controller
+                control={control}
+                name="birthday"
+                render={({ field }) => (
+                  <WishlistDatePicker
+                    label="Date de naissance"
+                    value={field.value}
+                    inputRef={field.ref}
+                    disabled={field.disabled}
+                    referenceDate={DateTime.now().minus({ year: 30 })}
+                    onChange={date => field.onChange(date)}
+                    disableFuture
+                    fullWidth
+                  />
+                )}
               />
-            )}
-          />
-        </Box>
+            </Box>
 
-        <Stack direction="row" justifyContent="center">
-          <Button
-            sx={{ marginTop: '8px' }}
-            type="submit"
-            variant="contained"
-            size="medium"
-            loading={isSubmitting}
-            loadingPosition="start"
-            disabled={isSubmitting}
-            startIcon={<SaveIcon />}
-          >
-            Mettre à jour
-          </Button>
-        </Stack>
-      </Stack>
-    </Loader>
+            <Stack direction="row" justifyContent="center">
+              <Button
+                sx={{ marginTop: '8px' }}
+                type="submit"
+                variant="contained"
+                size="medium"
+                loading={isSubmitting}
+                loadingPosition="start"
+                disabled={isSubmitting}
+                startIcon={<SaveIcon />}
+              >
+                Mettre à jour
+              </Button>
+            </Stack>
+          </Stack>
+        </Loader>
+      </Card>
+
+      <Card>
+        <EmailChangeSection />
+      </Card>
+    </Stack>
   )
 }

@@ -12,6 +12,7 @@ import { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { addUserSocial, removeUserSocial } from '../../core/store/features'
+import { Card } from '../common/Card'
 import { ConfirmButton } from '../common/ConfirmButton'
 import { CustomIcon } from '../common/CustomIcon'
 import { Loader } from '../common/Loader'
@@ -139,58 +140,61 @@ export const UserTabSocial = () => {
   })
 
   return (
-    <Loader loading={!userState.isUserLoaded}>
-      <Subtitle>Gérer les connexions sociales</Subtitle>
+    <Card>
+      <Loader loading={!userState.isUserLoaded}>
+        <Subtitle>Gérer les connexions sociales</Subtitle>
 
-      <SocialsContainer>
-        <SectionContainer>
-          <TextContainer>
-            <SocialTitle>
-              <CustomIcon name="google" style={{ width: 24.5, height: 24.5 }} />
-              <span>Authentification via Google</span> {googleSocial && <CheckIcon fontSize="small" color="success" />}
-            </SocialTitle>
-            {googleSocial ? (
-              <ConnectedUserInfo>
-                <UserAvatar src={googleSocial.picture_url} alt="Avatar Google" />
-                <UserDetails>
-                  <UserName>{googleSocial.name}</UserName>
-                  <UserEmail>{googleSocial.email}</UserEmail>
-                </UserDetails>
-              </ConnectedUserInfo>
-            ) : (
-              <SocialDescription>Vous pouvez vous connecter avec votre compte Google.</SocialDescription>
-            )}
-          </TextContainer>
-          <ButtonWrapper>
-            {googleSocial ? (
-              <ConfirmButton
-                confirmTitle="Dissocier votre compte Google"
-                confirmText="Voulez-vous vraiment dissocier votre compte Google ?"
-                loading={loadingSocial}
-                disabled={loadingSocial}
-                startIcon={<DeleteForeverIcon />}
-                color="error"
-                variant="text"
-                onClick={() => unlinkSocial(googleSocial.id)}
-              >
-                Dissocier
-              </ConfirmButton>
-            ) : (
-              <Button
-                loading={loadingSocial}
-                disabled={loadingSocial}
-                variant="contained"
-                onClick={() => {
-                  setLoadingSocial(true)
-                  linkGoogle()
-                }}
-              >
-                Lier votre compte Google
-              </Button>
-            )}
-          </ButtonWrapper>
-        </SectionContainer>
-      </SocialsContainer>
-    </Loader>
+        <SocialsContainer>
+          <SectionContainer>
+            <TextContainer>
+              <SocialTitle>
+                <CustomIcon name="google" style={{ width: 24.5, height: 24.5 }} />
+                <span>Authentification via Google</span>{' '}
+                {googleSocial && <CheckIcon fontSize="small" color="success" />}
+              </SocialTitle>
+              {googleSocial ? (
+                <ConnectedUserInfo>
+                  <UserAvatar src={googleSocial.picture_url} alt="Avatar Google" />
+                  <UserDetails>
+                    <UserName>{googleSocial.name}</UserName>
+                    <UserEmail>{googleSocial.email}</UserEmail>
+                  </UserDetails>
+                </ConnectedUserInfo>
+              ) : (
+                <SocialDescription>Vous pouvez vous connecter avec votre compte Google.</SocialDescription>
+              )}
+            </TextContainer>
+            <ButtonWrapper>
+              {googleSocial ? (
+                <ConfirmButton
+                  confirmTitle="Dissocier votre compte Google"
+                  confirmText="Voulez-vous vraiment dissocier votre compte Google ?"
+                  loading={loadingSocial}
+                  disabled={loadingSocial}
+                  startIcon={<DeleteForeverIcon />}
+                  color="error"
+                  variant="text"
+                  onClick={() => unlinkSocial(googleSocial.id)}
+                >
+                  Dissocier
+                </ConfirmButton>
+              ) : (
+                <Button
+                  loading={loadingSocial}
+                  disabled={loadingSocial}
+                  variant="contained"
+                  onClick={() => {
+                    setLoadingSocial(true)
+                    linkGoogle()
+                  }}
+                >
+                  Lier votre compte Google
+                </Button>
+              )}
+            </ButtonWrapper>
+          </SectionContainer>
+        </SocialsContainer>
+      </Loader>
+    </Card>
   )
 }

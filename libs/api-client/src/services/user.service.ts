@@ -1,8 +1,11 @@
 import type {
   ChangeUserPasswordInputDto,
+  ConfirmEmailChangeInputDto,
   LinkUserToGoogleInputDto,
   MiniUserDto,
+  PendingEmailChangeDto,
   RegisterUserInputDto,
+  RequestEmailChangeInputDto,
   ResetPasswordInputDto,
   ResetPasswordValidationInputDto,
   UpdateUserEmailSettingsInputDto,
@@ -59,6 +62,20 @@ export class UserService {
 
   async validateResetPassword(data: ResetPasswordValidationInputDto): Promise<void> {
     await this.client.post('/user/forgot-password/reset', data)
+  }
+
+  getPendingEmailChange(options?: CommonRequestOptions): Promise<PendingEmailChangeDto | undefined> {
+    return this.client
+      .get('/user/email-change/pending', { signal: options?.signal })
+      .then(res => (Object.keys(res.data).length === 0 ? undefined : res.data))
+  }
+
+  async requestEmailChange(data: RequestEmailChangeInputDto): Promise<void> {
+    await this.client.post('/user/email-change/request', data)
+  }
+
+  async confirmEmailChange(data: ConfirmEmailChangeInputDto): Promise<void> {
+    await this.client.post('/user/email-change/confirm', data)
   }
 
   getEmailSettings(options?: CommonRequestOptions): Promise<UserEmailSettingsDto> {

@@ -4,13 +4,12 @@ import LockIcon from '@mui/icons-material/Lock'
 import NotificationsIcon from '@mui/icons-material/Notifications'
 import PortraitIcon from '@mui/icons-material/Portrait'
 import ShareIcon from '@mui/icons-material/Share'
-import { Box, Tab, Tabs } from '@mui/material'
+import { Box, Stack, Tab, Tabs } from '@mui/material'
 import { styled, useTheme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import { useNavigate, useSearch } from '@tanstack/react-router'
 import { useSelector } from 'react-redux'
 
-import { Card } from '../common/Card'
 import { ProfilePictureSection } from './ProfilePictureSection'
 import { UserTabInformations } from './UserTabInformations'
 import { UserTabNotifications } from './UserTabNotifications'
@@ -114,12 +113,12 @@ export const UserProfilePage = () => {
           ))}
         </Tabs>
       </Box>
-      <Card>
+      <Stack>
         {tab === TabValues.informations && <UserTabInformations />}
         {tab === TabValues.notifications && <UserTabNotifications />}
         {tab === TabValues.social && <UserTabSocial />}
         {tab === TabValues.password && <UserTabPassword />}
-      </Card>
+      </Stack>
     </Box>
   )
 }

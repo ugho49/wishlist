@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as ConfirmEmailChangeRouteImport } from './routes/confirm-email-change'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as AnonymousWithLayoutRouteImport } from './routes/_anonymous-with-layout'
 import { Route as IndexRouteImport } from './routes/index'
@@ -44,6 +45,11 @@ const TermsRoute = TermsRouteImport.update({
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConfirmEmailChangeRoute = ConfirmEmailChangeRouteImport.update({
+  id: '/confirm-email-change',
+  path: '/confirm-email-change',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
@@ -185,6 +191,7 @@ const AuthenticatedWithLayoutAdminEventsEventIdRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/confirm-email-change': typeof ConfirmEmailChangeRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/login': typeof AnonymousWithLayoutLoginRoute
@@ -210,6 +217,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/confirm-email-change': typeof ConfirmEmailChangeRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/login': typeof AnonymousWithLayoutLoginRoute
@@ -237,6 +245,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_anonymous-with-layout': typeof AnonymousWithLayoutRouteWithChildren
   '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/confirm-email-change': typeof ConfirmEmailChangeRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/_anonymous-with-layout/login': typeof AnonymousWithLayoutLoginRoute
@@ -265,6 +274,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/confirm-email-change'
     | '/privacy'
     | '/terms'
     | '/login'
@@ -290,6 +300,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/confirm-email-change'
     | '/privacy'
     | '/terms'
     | '/login'
@@ -316,6 +327,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_anonymous-with-layout'
     | '/_authenticated'
+    | '/confirm-email-change'
     | '/privacy'
     | '/terms'
     | '/_anonymous-with-layout/login'
@@ -345,6 +357,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AnonymousWithLayoutRoute: typeof AnonymousWithLayoutRouteWithChildren
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  ConfirmEmailChangeRoute: typeof ConfirmEmailChangeRoute
   PrivacyRoute: typeof PrivacyRoute
   TermsRoute: typeof TermsRoute
 }
@@ -363,6 +376,13 @@ declare module '@tanstack/react-router' {
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/confirm-email-change': {
+      id: '/confirm-email-change'
+      path: '/confirm-email-change'
+      fullPath: '/confirm-email-change'
+      preLoaderRoute: typeof ConfirmEmailChangeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -642,6 +662,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AnonymousWithLayoutRoute: AnonymousWithLayoutRouteWithChildren,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  ConfirmEmailChangeRoute: ConfirmEmailChangeRoute,
   PrivacyRoute: PrivacyRoute,
   TermsRoute: TermsRoute,
 }

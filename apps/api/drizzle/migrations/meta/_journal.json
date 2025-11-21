@@ -50,6 +50,13 @@
       "when": 1763407656035,
       "tag": "0006_add-co-owner-constraint",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1763474192991,
+      "tag": "0007_add-user-email-change-verification",
+      "breakpoints": true
     }
   ]
 }
