@@ -1,10 +1,13 @@
 import type { INestApplication } from '@nestjs/common'
+import type { AbstractStartedContainer, StartedDockerComposeEnvironment } from 'testcontainers'
 import type { TableAssertSortOptions } from './table-assert'
 
+import { join } from 'node:path'
 import { Logger } from '@nestjs/common'
 import { DatabaseService } from '@wishlist/api/core'
 import pg, { Client } from 'pg'
 import * as request from 'supertest'
+import { DockerComposeEnvironment } from 'testcontainers'
 import { afterAll, beforeAll, beforeEach } from 'vitest'
 
 import { createApp } from '../src/bootstrap'
@@ -26,49 +29,62 @@ export function useTestApp() {
   let client: Client
   let logger: Logger
   let fixtures: Fixtures
+  let dockerEnvironment: StartedDockerComposeEnvironment
 
   beforeAll(async () => {
-    // Get unique database name for this worker to enable parallel test execution
     const workerId = process.env.VITEST_POOL_ID || '1'
-    const baseDatabaseName = process.env.DB_NAME || 'wishlist-api'
-    const databaseName = `${baseDatabaseName}-worker-${workerId}`
-
-    // Override the database name for this worker
-    process.env.DB_NAME = databaseName
-
     logger = new Logger(`UseTestApp [Worker ${workerId}]`)
-    logger.log(`Using database: ${databaseName}`)
 
-    // Create a client connected to the default postgres database to create our test database
-    const adminClient = new Client({
-      host: process.env.DB_HOST || 'localhost',
-      port: Number.parseInt(process.env.DB_PORT || '5432'),
-      user: process.env.DB_USERNAME || 'service',
-      password: process.env.DB_PASSWORD || 'service',
-      database: 'postgres',
-      ssl: false,
-    })
+    // Start a complete Docker Compose environment for this worker
+    logger.log('Starting Docker Compose environment...')
+    const rootFolder = process.cwd()
+    const dockerFolder = join(rootFolder, 'docker')
 
-    await adminClient.connect()
+    dockerEnvironment = await new DockerComposeEnvironment(rootFolder, [
+      join(dockerFolder, 'docker-compose.yml'),
+      join(dockerFolder, 'docker-compose.test.yml'),
+    ]).up()
 
-    // Drop and recreate the worker-specific database
-    await adminClient.query(`DROP DATABASE IF EXISTS "${databaseName}"`)
-    await adminClient.query(`CREATE DATABASE "${databaseName}"`)
-    await adminClient.end()
+    // Extract mapped ports from containers
+    const containers = dockerEnvironment.startedGenericContainers as Record<string, AbstractStartedContainer>
 
-    logger.log(`Database ${databaseName} created ✅`)
+    const dbContainer = Object.values(containers).find(c => c.getName().includes('db'))
+    const mailContainer = Object.values(containers).find(c => c.getName().includes('mail'))
+    const valkeyContainer = Object.values(containers).find(c => c.getName().includes('valkey'))
 
-    // Now connect to our newly created database
+    if (!dbContainer || !mailContainer || !valkeyContainer) {
+      throw new Error('Required containers not found in Docker Compose environment')
+    }
+
+    const dbPort = dbContainer.getMappedPort(5432)
+    const mailPort = mailContainer.getMappedPort(1025)
+    const valkeyPort = valkeyContainer.getMappedPort(6379)
+
+    logger.log(`Docker Compose started - DB: ${dbPort}, Mail: ${mailPort}, Valkey: ${valkeyPort}`)
+
+    // Configure environment variables for this worker
+    process.env.DB_HOST = 'localhost'
+    process.env.DB_PORT = dbPort.toString()
+    process.env.DB_USERNAME = 'service'
+    process.env.DB_PASSWORD = 'service'
+    process.env.DB_NAME = 'wishlist-api'
+    process.env.MAIL_HOST = 'localhost'
+    process.env.MAIL_PORT = mailPort.toString()
+    process.env.VALKEY_HOST = 'localhost'
+    process.env.VALKEY_PORT = valkeyPort.toString()
+
+    // Create and initialize the application
     app = await createApp()
     databaseService = app.get<DatabaseService>(DatabaseService)
     await app.init()
 
+    // Connect to the database
     client = new Client({
-      host: databaseService.config.host,
-      port: databaseService.config.port,
-      user: databaseService.config.username,
-      password: databaseService.config.password,
-      database: databaseName,
+      host: 'localhost',
+      port: dbPort,
+      user: 'service',
+      password: 'service',
+      database: 'wishlist-api',
       ssl: false,
     })
 
@@ -76,33 +92,25 @@ export function useTestApp() {
     await databaseService.runMigrations()
 
     fixtures = new Fixtures(client)
-  })
+    logger.log('Test environment ready ✅')
+  }, 120000) // Increase timeout for Docker Compose startup
 
   beforeEach(async () => {
     await truncateDatabase()
   })
 
   afterAll(async () => {
-    const databaseName = client.database
+    logger.log('Cleaning up test environment...')
+
     await client.end()
     await app.close()
 
-    // Clean up the worker-specific database
-    const adminClient = new Client({
-      host: process.env.DB_HOST || 'localhost',
-      port: Number.parseInt(process.env.DB_PORT || '5432'),
-      user: process.env.DB_USERNAME || 'service',
-      password: process.env.DB_PASSWORD || 'service',
-      database: 'postgres',
-      ssl: false,
-    })
+    // Stop and clean up the Docker Compose environment
+    await dockerEnvironment.down()
+    await dockerEnvironment.stop()
 
-    await adminClient.connect()
-    await adminClient.query(`DROP DATABASE IF EXISTS "${databaseName}"`)
-    await adminClient.end()
-
-    logger.log(`Database ${databaseName} dropped ✅`)
-  })
+    logger.log('Test environment cleaned up ✅')
+  }, 60000) // Increase timeout for Docker Compose cleanup
 
   async function truncateDatabase(): Promise<void> {
     logger.log('Truncating database ...')
