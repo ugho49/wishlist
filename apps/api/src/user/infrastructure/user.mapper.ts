@@ -19,6 +19,7 @@ function toUserWithoutSocialsDto(user: User): UserWithoutSocialsDto {
     admin: user.isAdmin(),
     birthday: user.birthday ? DateTime.fromJSDate(user.birthday).toISODate() || '' : undefined,
     is_enabled: user.isEnabled,
+    has_password: !!user.passwordEnc,
     last_connected_at: user.lastConnectedAt?.toISOString(),
     last_ip: user.lastIp,
     created_at: user.createdAt.toISOString(),

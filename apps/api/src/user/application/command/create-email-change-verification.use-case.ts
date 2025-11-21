@@ -31,15 +31,23 @@ export class CreateEmailChangeVerificationUseCase
   async execute(command: CreateEmailChangeVerificationCommand): Promise<void> {
     const currentUser = await this.userRepository.findByIdOrFail(command.currentUser.id)
 
-    // Verify password
-    const passwordVerified = await PasswordManager.verify({
-      hash: currentUser.passwordEnc || undefined,
-      plainPassword: command.password,
-    })
+    // Verify password if user has one (email/password authentication)
+    if (currentUser.passwordEnc) {
+      // User has a password, so password verification is required
+      if (!command.password) {
+        throw new UnauthorizedException('Password is required for users with email/password authentication')
+      }
 
-    if (!passwordVerified) {
-      throw new UnauthorizedException('Incorrect password')
+      const passwordVerified = await PasswordManager.verify({
+        hash: currentUser.passwordEnc,
+        plainPassword: command.password,
+      })
+
+      if (!passwordVerified) {
+        throw new UnauthorizedException('Incorrect password')
+      }
     }
+    // If user has no password (Google-only authentication), skip password verification
 
     // Normalize email to lowercase
     const newEmail = command.newEmail.toLowerCase()

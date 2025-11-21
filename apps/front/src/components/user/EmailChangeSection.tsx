@@ -9,6 +9,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
+import { useFetchUserInfo } from '../../hooks/domain/useFetchUserInfo'
 import { useApi } from '../../hooks/useApi'
 import { useToast } from '../../hooks/useToast'
 import { Loader } from '../common/Loader'
@@ -25,6 +26,7 @@ export const EmailChangeSection = () => {
   const api = useApi()
   const { addToast } = useToast()
   const queryClient = useQueryClient()
+  const { user } = useFetchUserInfo()
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false)
   const [pendingEmail, setPendingEmail] = useState<string>('')
 
@@ -73,7 +75,14 @@ export const EmailChangeSection = () => {
 
   const onSubmit = (data: FormFields) => {
     setPendingEmail(data.new_email)
-    setIsPasswordModalOpen(true)
+
+    // If user has a password, show password verification modal
+    if (user?.has_password) {
+      setIsPasswordModalOpen(true)
+    } else {
+      // User authenticated with Google only, no password verification needed
+      void requestEmailChange({ new_email: data.new_email })
+    }
   }
 
   const handlePasswordConfirm = async (password: string) => {
