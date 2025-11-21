@@ -16,8 +16,13 @@ export default mergeConfig(
       include: ['src/**/*.int-spec.ts'],
       globalSetup: ['./int-tests.global-setup.ts'],
       setupFiles: ['../../vitest.matchers.ts'],
-      fileParallelism: false,
-      maxConcurrency: 1,
+      // Enable parallel test execution for faster test runs
+      // Each worker gets its own isolated database
+      fileParallelism: true,
+      // Allow up to 4 test files to run concurrently
+      // Adjust based on available CPU cores and resources
+      maxWorkers: 4,
+      minWorkers: 1,
       coverage: {
         enabled: false,
       },

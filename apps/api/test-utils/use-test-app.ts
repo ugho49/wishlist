@@ -28,22 +28,51 @@ export function useTestApp() {
   let fixtures: Fixtures
 
   beforeAll(async () => {
+    // Get unique database name for this worker to enable parallel test execution
+    const workerId = process.env.VITEST_POOL_ID || '1'
+    const baseDatabaseName = process.env.DB_NAME || 'wishlist-api'
+    const databaseName = `${baseDatabaseName}-worker-${workerId}`
+
+    // Override the database name for this worker
+    process.env.DB_NAME = databaseName
+
+    logger = new Logger(`UseTestApp [Worker ${workerId}]`)
+    logger.log(`Using database: ${databaseName}`)
+
+    // Create a client connected to the default postgres database to create our test database
+    const adminClient = new Client({
+      host: process.env.DB_HOST || 'localhost',
+      port: Number.parseInt(process.env.DB_PORT || '5432'),
+      user: process.env.DB_USERNAME || 'service',
+      password: process.env.DB_PASSWORD || 'service',
+      database: 'postgres',
+      ssl: false,
+    })
+
+    await adminClient.connect()
+
+    // Drop and recreate the worker-specific database
+    await adminClient.query(`DROP DATABASE IF EXISTS "${databaseName}"`)
+    await adminClient.query(`CREATE DATABASE "${databaseName}"`)
+    await adminClient.end()
+
+    logger.log(`Database ${databaseName} created ✅`)
+
+    // Now connect to our newly created database
     app = await createApp()
     databaseService = app.get<DatabaseService>(DatabaseService)
     await app.init()
-    logger = new Logger('UseTestApp')
 
     client = new Client({
       host: databaseService.config.host,
       port: databaseService.config.port,
       user: databaseService.config.username,
       password: databaseService.config.password,
-      database: databaseService.config.database,
+      database: databaseName,
       ssl: false,
     })
 
     await client.connect()
-    await dropDatabase()
     await databaseService.runMigrations()
 
     fixtures = new Fixtures(client)
@@ -54,22 +83,26 @@ export function useTestApp() {
   })
 
   afterAll(async () => {
+    const databaseName = client.database
     await client.end()
     await app.close()
+
+    // Clean up the worker-specific database
+    const adminClient = new Client({
+      host: process.env.DB_HOST || 'localhost',
+      port: Number.parseInt(process.env.DB_PORT || '5432'),
+      user: process.env.DB_USERNAME || 'service',
+      password: process.env.DB_PASSWORD || 'service',
+      database: 'postgres',
+      ssl: false,
+    })
+
+    await adminClient.connect()
+    await adminClient.query(`DROP DATABASE IF EXISTS "${databaseName}"`)
+    await adminClient.end()
+
+    logger.log(`Database ${databaseName} dropped ✅`)
   })
-
-  async function dropDatabase(): Promise<void> {
-    const allTables = await client.query(
-      `SELECT schemaname, tablename FROM pg_catalog.pg_tables WHERE schemaname IN ('drizzle', 'public')`,
-    )
-    const tables = allTables.rows.map(row => `${row.schemaname}.${row.tablename}`)
-
-    for (const table of tables) {
-      await client.query(`DROP TABLE IF EXISTS ${table} CASCADE`)
-    }
-
-    logger.log(`Database dropped (${tables.length} tables) ✅`)
-  }
 
   async function truncateDatabase(): Promise<void> {
     logger.log('Truncating database ...')
