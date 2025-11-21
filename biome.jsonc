@@ -37,7 +37,7 @@
         "noEmptyTypeParameters": "error"
       },
       "correctness": {
-        // "noUnusedPrivateClassMembers": "error", // TODO: re-enable this rule when biome has fixed it
+        "noUnusedPrivateClassMembers": "error",
         "noUnusedVariables": "error",
         "noUnusedImports": { "level": "error", "fix": "safe" }
       },
