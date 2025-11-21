@@ -1,4 +1,4 @@
-import { Fixtures, useTestApp, useTestMail } from '@wishlist/api-test-utils'
+import { Fixtures, RequestApp, useTestApp, useTestMail } from '@wishlist/api-test-utils'
 import { DateTime } from 'luxon'
 
 describe('UserEmailChangeController', () => {
@@ -18,9 +18,15 @@ describe('UserEmailChangeController', () => {
     })
 
     describe('when user is authenticated', () => {
-      it('should return undefined when no pending email change', async () => {
-        const request = await getRequest({ signedAs: 'BASE_USER' })
+      let request: RequestApp
+      let currentUserId: string
 
+      beforeEach(async () => {
+        request = await getRequest({ signedAs: 'BASE_USER' })
+        currentUserId = await fixtures.getSignedUserId('BASE_USER')
+      })
+
+      it('should return undefined when no pending email change', async () => {
         await request
           .get(path)
           .expect(200)
@@ -30,18 +36,15 @@ describe('UserEmailChangeController', () => {
       })
 
       it('should return pending email change when exists and not expired', async () => {
-        const userId = await fixtures.insertBaseUser()
         const newEmail = 'newemail@test.fr'
         const expiredAt = DateTime.now().plus({ hour: 1 }).toJSDate()
 
         await fixtures.insertUserEmailChangeVerification({
-          userId,
+          userId: currentUserId,
           newEmail,
           token: 'test-token',
           expiredAt,
         })
-
-        const request = await getRequest({ signedAs: 'BASE_USER' })
 
         await request
           .get(path)
@@ -55,16 +58,12 @@ describe('UserEmailChangeController', () => {
       })
 
       it('should return undefined when pending email change is expired', async () => {
-        const userId = await fixtures.insertBaseUser()
-
         await fixtures.insertUserEmailChangeVerification({
-          userId,
+          userId: currentUserId,
           newEmail: 'newemail@test.fr',
           token: 'test-token',
           expiredAt: DateTime.now().minus({ hour: 1 }).toJSDate(),
         })
-
-        const request = await getRequest({ signedAs: 'BASE_USER' })
 
         await request
           .get(path)
@@ -86,16 +85,19 @@ describe('UserEmailChangeController', () => {
     })
 
     describe('when user is authenticated', () => {
+      let request: RequestApp
+      let currentUserId: string
+
+      beforeEach(async () => {
+        request = await getRequest({ signedAs: 'BASE_USER' })
+        currentUserId = await fixtures.getSignedUserId('BASE_USER')
+      })
+
       it.each([
         {
           body: {},
           case: 'empty body',
-          message: [
-            'new_email should not be empty',
-            'new_email must be a string',
-            'new_email must be an email',
-            'new_email must be shorter than or equal to 200 characters',
-          ],
+          message: ['new_email should not be empty'],
         },
         {
           body: { new_email: 'invalid-email' },
@@ -103,17 +105,16 @@ describe('UserEmailChangeController', () => {
           message: ['new_email must be an email'],
         },
         {
+          body: { new_email: `${'a'.repeat(200)}@test.com` },
+          case: 'email too long',
+          message: ['new_email must be shorter than or equal to 200 characters'],
+        },
+        {
           body: { new_email: 123 },
           case: 'non-string email',
-          message: [
-            'new_email must be shorter than or equal to 200 characters',
-            'new_email must be an email',
-            'new_email must be a string',
-          ],
+          message: ['new_email must be a string'],
         },
       ])('should return 400 when invalid input: $case', async ({ body, message }) => {
-        const request = await getRequest({ signedAs: 'BASE_USER' })
-
         await request
           .post(path)
           .send(body)
@@ -127,9 +128,6 @@ describe('UserEmailChangeController', () => {
       })
 
       it('should fail when new email is the same as current email', async () => {
-        await fixtures.insertBaseUser()
-        const request = await getRequest({ signedAs: 'BASE_USER' })
-
         await expectTable(Fixtures.USER_EMAIL_CHANGE_VERIFICATION_TABLE).hasNumberOfRows(0)
 
         await request
@@ -147,14 +145,11 @@ describe('UserEmailChangeController', () => {
       })
 
       it('should fail when new email is already taken by another user', async () => {
-        await fixtures.insertBaseUser()
         await fixtures.insertUser({
           email: 'existing@test.fr',
           firstname: 'Existing',
           lastname: 'User',
         })
-
-        const request = await getRequest({ signedAs: 'BASE_USER' })
 
         await expectTable(Fixtures.USER_EMAIL_CHANGE_VERIFICATION_TABLE).hasNumberOfRows(0)
 
@@ -173,15 +168,12 @@ describe('UserEmailChangeController', () => {
       })
 
       it('should fail when there is already a pending email change request', async () => {
-        const userId = await fixtures.insertBaseUser()
         await fixtures.insertUserEmailChangeVerification({
-          userId,
+          userId: currentUserId,
           newEmail: 'pending@test.fr',
           token: 'token',
           expiredAt: DateTime.now().plus({ hour: 1 }).toJSDate(),
         })
-
-        const request = await getRequest({ signedAs: 'BASE_USER' })
 
         await expectTable(Fixtures.USER_EMAIL_CHANGE_VERIFICATION_TABLE).hasNumberOfRows(1)
 
@@ -200,10 +192,7 @@ describe('UserEmailChangeController', () => {
       })
 
       it('should create email change verification when valid input', async () => {
-        const userId = await fixtures.insertBaseUser()
         const newEmail = 'newemail@test.fr'
-
-        const request = await getRequest({ signedAs: 'BASE_USER' })
 
         await expectTable(Fixtures.USER_EMAIL_CHANGE_VERIFICATION_TABLE).hasNumberOfRows(0)
 
@@ -214,7 +203,7 @@ describe('UserEmailChangeController', () => {
           .row(0)
           .toEqual({
             id: expect.toBeString(),
-            user_id: userId,
+            user_id: currentUserId,
             new_email: newEmail,
             token: expect.toBeString(),
             expired_at: expect.toBeAfter(new Date()),
@@ -226,16 +215,49 @@ describe('UserEmailChangeController', () => {
         await expectMail()
           .waitFor(500)
           .hasNumberOfEmails(2)
-          .mail(0)
-          .hasSubject("[Wishlist] Confirmez votre changement d'adresse email")
-          .hasSender('contact@wishlistapp.fr')
-          .hasReceiver(newEmail)
+          .hasReceiveInAnyOrder([
+            {
+              subject: "[Wishlist] Confirmez votre changement d'adresse email",
+              from: 'contact@wishlistapp.fr',
+              to: newEmail,
+            },
+            {
+              subject: "[Wishlist] Demande de changement d'adresse email",
+              from: 'contact@wishlistapp.fr',
+              to: Fixtures.BASE_USER_EMAIL,
+            },
+          ])
+      })
 
-        await expectMail()
-          .mail(1)
-          .hasSubject("[Wishlist] Demande de changement d'adresse email")
-          .hasSender('contact@wishlistapp.fr')
-          .hasReceiver(Fixtures.BASE_USER_EMAIL)
+      it('should create email change verification when valid input and pending email change request exists but expired', async () => {
+        const newEmail = 'newemail@test.fr'
+
+        await fixtures.insertUserEmailChangeVerification({
+          userId: currentUserId,
+          newEmail: 'pending@test.fr',
+          token: 'token',
+          expiredAt: DateTime.now().minus({ hour: 1 }).toJSDate(),
+        })
+
+        await expectTable(Fixtures.USER_EMAIL_CHANGE_VERIFICATION_TABLE).hasNumberOfRows(1)
+
+        await request.post(path).send({ new_email: newEmail }).expect(201)
+
+        await expectTable(Fixtures.USER_EMAIL_CHANGE_VERIFICATION_TABLE)
+          .hasNumberOfRows(2)
+          .row(1)
+          .toEqual({
+            id: expect.toBeString(),
+            user_id: currentUserId,
+            new_email: newEmail,
+            token: expect.toBeString(),
+            expired_at: expect.toBeAfter(new Date()),
+            created_at: expect.toBeDate(),
+            updated_at: expect.toBeDate(),
+          })
+
+        // Should send 2 emails: one to new email, one to old email
+        await expectMail().waitFor(500).hasNumberOfEmails(2)
       })
     })
   })
@@ -244,17 +266,17 @@ describe('UserEmailChangeController', () => {
     const { expectMail } = useTestMail()
     const path = '/user/email-change/confirm'
 
+    let request: RequestApp
+
+    beforeEach(async () => {
+      request = await getRequest()
+    })
+
     it.each([
       {
         body: {},
         case: 'empty body',
-        message: [
-          'new_email should not be empty',
-          'new_email must be a string',
-          'new_email must be an email',
-          'token should not be empty',
-          'token must be a string',
-        ],
+        message: ['new_email should not be empty', 'token should not be empty'],
       },
       {
         body: { new_email: 'invalid-email', token: 123 },
@@ -262,8 +284,6 @@ describe('UserEmailChangeController', () => {
         message: ['new_email must be an email', 'token must be a string'],
       },
     ])('should return 400 when invalid input: $case', async ({ body, message }) => {
-      const request = await getRequest()
-
       await request
         .post(path)
         .send(body)
@@ -278,8 +298,6 @@ describe('UserEmailChangeController', () => {
 
     it('should fail when no verification found for email and token', async () => {
       await fixtures.insertBaseUser()
-
-      const request = await getRequest()
 
       await request
         .post(path)
@@ -303,8 +321,6 @@ describe('UserEmailChangeController', () => {
         token,
         expiredAt: DateTime.now().minus({ hour: 1 }).toJSDate(),
       })
-
-      const request = await getRequest()
 
       await request
         .post(path)
@@ -341,8 +357,6 @@ describe('UserEmailChangeController', () => {
         expiredAt: DateTime.now().plus({ hour: 1 }).toJSDate(),
       })
 
-      const request = await getRequest()
-
       await request
         .post(path)
         .send({ new_email: newEmail, token })
@@ -373,14 +387,9 @@ describe('UserEmailChangeController', () => {
         expiredAt: DateTime.now().plus({ hour: 1 }).toJSDate(),
       })
 
-      const request = await getRequest()
-
       await expectTable(Fixtures.USER_EMAIL_CHANGE_VERIFICATION_TABLE).hasNumberOfRows(1)
 
       await request.post(path).send({ new_email: newEmail, token }).expect(201)
-
-      // Verification should be deleted
-      await expectTable(Fixtures.USER_EMAIL_CHANGE_VERIFICATION_TABLE).hasNumberOfRows(0)
 
       // User email should be updated
       await expectTable(Fixtures.USER_TABLE).row(0).toMatchObject({
@@ -388,20 +397,29 @@ describe('UserEmailChangeController', () => {
         email: newEmail,
       })
 
+      // Verification should be invalidated
+      await expectTable(Fixtures.USER_EMAIL_CHANGE_VERIFICATION_TABLE)
+        .row(0)
+        .toMatchObject({
+          expired_at: expect.toBeBefore(DateTime.now().toJSDate()),
+        })
+
       // Should send 2 emails: one to old email, one to new email
       await expectMail()
         .waitFor(500)
         .hasNumberOfEmails(2)
-        .mail(0)
-        .hasSubject('[Wishlist] Votre adresse email a été modifiée')
-        .hasSender('contact@wishlistapp.fr')
-        .hasReceiver(Fixtures.BASE_USER_EMAIL)
-
-      await expectMail()
-        .mail(1)
-        .hasSubject('[Wishlist] Votre adresse email a été mise à jour')
-        .hasSender('contact@wishlistapp.fr')
-        .hasReceiver(newEmail)
+        .hasReceiveInAnyOrder([
+          {
+            subject: '[Wishlist] Votre adresse email a été modifiée',
+            from: 'contact@wishlistapp.fr',
+            to: Fixtures.BASE_USER_EMAIL,
+          },
+          {
+            subject: '[Wishlist] Votre adresse email a été mise à jour',
+            from: 'contact@wishlistapp.fr',
+            to: newEmail,
+          },
+        ])
     })
   })
 })

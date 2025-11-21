@@ -7,5 +7,4 @@ export interface UserEmailChangeVerificationRepository {
   findByUserId(userId: UserId): Promise<UserEmailChangeVerification[]>
   findByTokenAndEmail(token: string, email: string): Promise<UserEmailChangeVerification | undefined>
   save(userEmailChangeVerification: UserEmailChangeVerification, tx?: DrizzleTransaction): Promise<void>
-  delete(id: UserEmailChangeVerificationId, tx?: DrizzleTransaction): Promise<void>
 }

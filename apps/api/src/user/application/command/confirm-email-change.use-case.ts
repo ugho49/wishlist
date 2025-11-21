@@ -44,11 +44,12 @@ export class ConfirmEmailChangeUseCase implements IInferredCommandHandler<Confir
 
     const oldEmail = verification.user.email
     const updatedUser = verification.user.updateEmail(newEmail)
+    const invalidatedVerification = verification.invalidate()
 
-    // Update user email and delete verification in a transaction
+    // Update user email and invalidate verification in a transaction
     await this.transactionManager.runInTransaction(async tx => {
       await this.userRepository.save(updatedUser, tx)
-      await this.emailChangeVerificationRepository.delete(verification.id, tx)
+      await this.emailChangeVerificationRepository.save(invalidatedVerification, tx)
     })
 
     // Publish event to notify of email change

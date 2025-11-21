@@ -62,12 +62,6 @@ export class PostgresUserEmailChangeVerificationRepository implements UserEmailC
       })
   }
 
-  async delete(id: UserEmailChangeVerificationId, tx?: DrizzleTransaction): Promise<void> {
-    const client = tx || this.databaseService.db
-
-    await client.delete(schema.userEmailChangeVerification).where(eq(schema.userEmailChangeVerification.id, id))
-  }
-
   static toModel(
     row: typeof schema.userEmailChangeVerification.$inferSelect & { user: typeof schema.user.$inferSelect },
   ): UserEmailChangeVerification {

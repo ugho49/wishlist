@@ -56,4 +56,12 @@ export class UserEmailChangeVerification {
   isExpired(): boolean {
     return new Date() > this.expiredAt
   }
+
+  invalidate(): UserEmailChangeVerification {
+    return new UserEmailChangeVerification({
+      ...this,
+      expiredAt: new Date(),
+      updatedAt: new Date(),
+    })
+  }
 }
