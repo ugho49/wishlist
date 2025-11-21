@@ -5,6 +5,7 @@ import EmailIcon from '@mui/icons-material/Email'
 import InfoIcon from '@mui/icons-material/Info'
 import { Alert, Button, Stack, TextField, Typography } from '@mui/material'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
@@ -12,6 +13,7 @@ import { useApi } from '../../hooks/useApi'
 import { useToast } from '../../hooks/useToast'
 import { Loader } from '../common/Loader'
 import { Subtitle } from '../common/Subtitle'
+import { CheckPasswordModal } from './CheckPasswordModal'
 
 const schema = z.object({
   new_email: z.email('Email invalide').min(1, 'Email requis').max(200, '200 caractères maximum'),
@@ -23,6 +25,8 @@ export const EmailChangeSection = () => {
   const api = useApi()
   const { addToast } = useToast()
   const queryClient = useQueryClient()
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false)
+  const [pendingEmail, setPendingEmail] = useState<string>('')
 
   const {
     register,
@@ -41,11 +45,20 @@ export const EmailChangeSection = () => {
     queryFn: ({ signal }) => api.user.getPendingEmailChange({ signal }),
   })
 
-  const { mutateAsync: requestEmailChange } = useMutation({
+  const { mutateAsync: requestEmailChange, isPending: isRequestingEmailChange } = useMutation({
     mutationKey: ['user.requestEmailChange'],
     mutationFn: (data: RequestEmailChangeInputDto) => api.user.requestEmailChange(data),
-    onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
+    onError: error => {
+      setIsPasswordModalOpen(false)
+      // Check if it's an unauthorized error (wrong password)
+      if (error && typeof error === 'object' && 'status' in error && error.status === 401) {
+        addToast({ message: 'Mot de passe incorrect', variant: 'error' })
+      } else {
+        addToast({ message: "Une erreur s'est produite", variant: 'error' })
+      }
+    },
     onSuccess: () => {
+      setIsPasswordModalOpen(false)
       addToast({
         message:
           'Un email de confirmation a été envoyé à votre nouvelle adresse. Vérifiez votre boîte de réception pour confirmer le changement.',
@@ -57,7 +70,15 @@ export const EmailChangeSection = () => {
   })
 
   const expiresAt = pendingChange ? new Date(pendingChange.expired_at).toLocaleString('fr-FR') : undefined
-  const onSubmit = (data: FormFields) => requestEmailChange({ new_email: data.new_email })
+
+  const onSubmit = (data: FormFields) => {
+    setPendingEmail(data.new_email)
+    setIsPasswordModalOpen(true)
+  }
+
+  const handlePasswordConfirm = async (password: string) => {
+    await requestEmailChange({ new_email: pendingEmail, password })
+  }
 
   return (
     <Loader loading={loadingPendingChange}>
@@ -110,6 +131,13 @@ export const EmailChangeSection = () => {
           </Typography>
         </Alert>
       )}
+
+      <CheckPasswordModal
+        open={isPasswordModalOpen}
+        onClose={() => setIsPasswordModalOpen(false)}
+        onConfirm={handlePasswordConfirm}
+        loading={isRequestingEmailChange}
+      />
     </Loader>
   )
 }

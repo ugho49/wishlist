@@ -161,6 +161,10 @@ export class RequestEmailChangeInputDto {
   @IsString()
   @IsNotEmpty()
   declare new_email: string
+
+  @IsString()
+  @IsNotEmpty()
+  declare password: string
 }
 
 export class ConfirmEmailChangeInputDto {

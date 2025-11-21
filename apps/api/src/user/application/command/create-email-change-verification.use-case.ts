@@ -1,6 +1,7 @@
 import { BadRequestException, Inject, UnauthorizedException } from '@nestjs/common'
 import { ConfigType } from '@nestjs/config'
 import { CommandHandler, EventBus, IInferredCommandHandler } from '@nestjs/cqrs'
+import { PasswordManager } from '@wishlist/api/auth'
 import { REPOSITORIES } from '@wishlist/api/repositories'
 import { DateTime } from 'luxon'
 
@@ -29,6 +30,16 @@ export class CreateEmailChangeVerificationUseCase
 
   async execute(command: CreateEmailChangeVerificationCommand): Promise<void> {
     const currentUser = await this.userRepository.findByIdOrFail(command.currentUser.id)
+
+    // Verify password
+    const passwordVerified = await PasswordManager.verify({
+      hash: currentUser.passwordEnc || undefined,
+      plainPassword: command.password,
+    })
+
+    if (!passwordVerified) {
+      throw new UnauthorizedException('Incorrect password')
+    }
 
     // Normalize email to lowercase
     const newEmail = command.newEmail.toLowerCase()

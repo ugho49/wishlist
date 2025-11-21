@@ -97,22 +97,32 @@ describe('UserEmailChangeController', () => {
         {
           body: {},
           case: 'empty body',
-          message: ['new_email should not be empty'],
+          message: ['new_email should not be empty', 'password should not be empty'],
         },
         {
-          body: { new_email: 'invalid-email' },
+          body: { new_email: 'invalid-email', password: 'Password123' },
           case: 'invalid email',
           message: ['new_email must be an email'],
         },
         {
-          body: { new_email: `${'a'.repeat(200)}@test.com` },
+          body: { new_email: `${'a'.repeat(200)}@test.com`, password: 'Password123' },
           case: 'email too long',
           message: ['new_email must be shorter than or equal to 200 characters'],
         },
         {
-          body: { new_email: 123 },
+          body: { new_email: 123, password: 'Password123' },
           case: 'non-string email',
           message: ['new_email must be a string'],
+        },
+        {
+          body: { new_email: 'newemail@test.fr' },
+          case: 'missing password',
+          message: ['password should not be empty'],
+        },
+        {
+          body: { new_email: 'newemail@test.fr', password: 123 },
+          case: 'non-string password',
+          message: ['password must be a string'],
         },
       ])('should return 400 when invalid input: $case', async ({ body, message }) => {
         await request
@@ -127,12 +137,29 @@ describe('UserEmailChangeController', () => {
           )
       })
 
+      it('should fail when password is incorrect', async () => {
+        await expectTable(Fixtures.USER_EMAIL_CHANGE_VERIFICATION_TABLE).hasNumberOfRows(0)
+
+        await request
+          .post(path)
+          .send({ new_email: 'newemail@test.fr', password: 'WrongPassword' })
+          .expect(401)
+          .expect(({ body }) =>
+            expect(body).toMatchObject({
+              message: 'Incorrect password',
+            }),
+          )
+
+        await expectTable(Fixtures.USER_EMAIL_CHANGE_VERIFICATION_TABLE).hasNumberOfRows(0)
+        await expectMail().waitFor(500).hasNumberOfEmails(0)
+      })
+
       it('should fail when new email is the same as current email', async () => {
         await expectTable(Fixtures.USER_EMAIL_CHANGE_VERIFICATION_TABLE).hasNumberOfRows(0)
 
         await request
           .post(path)
-          .send({ new_email: Fixtures.BASE_USER_EMAIL })
+          .send({ new_email: Fixtures.BASE_USER_EMAIL, password: Fixtures.DEFAULT_USER_PASSWORD })
           .expect(400)
           .expect(({ body }) =>
             expect(body).toMatchObject({
@@ -155,7 +182,7 @@ describe('UserEmailChangeController', () => {
 
         await request
           .post(path)
-          .send({ new_email: 'existing@test.fr' })
+          .send({ new_email: 'existing@test.fr', password: Fixtures.DEFAULT_USER_PASSWORD })
           .expect(400)
           .expect(({ body }) =>
             expect(body).toMatchObject({
@@ -179,7 +206,7 @@ describe('UserEmailChangeController', () => {
 
         await request
           .post(path)
-          .send({ new_email: 'newemail@test.fr' })
+          .send({ new_email: 'newemail@test.fr', password: Fixtures.DEFAULT_USER_PASSWORD })
           .expect(401)
           .expect(({ body }) =>
             expect(body).toMatchObject({
@@ -196,7 +223,7 @@ describe('UserEmailChangeController', () => {
 
         await expectTable(Fixtures.USER_EMAIL_CHANGE_VERIFICATION_TABLE).hasNumberOfRows(0)
 
-        await request.post(path).send({ new_email: newEmail }).expect(201)
+        await request.post(path).send({ new_email: newEmail, password: Fixtures.DEFAULT_USER_PASSWORD }).expect(201)
 
         await expectTable(Fixtures.USER_EMAIL_CHANGE_VERIFICATION_TABLE)
           .hasNumberOfRows(1)
@@ -241,7 +268,7 @@ describe('UserEmailChangeController', () => {
 
         await expectTable(Fixtures.USER_EMAIL_CHANGE_VERIFICATION_TABLE).hasNumberOfRows(1)
 
-        await request.post(path).send({ new_email: newEmail }).expect(201)
+        await request.post(path).send({ new_email: newEmail, password: Fixtures.DEFAULT_USER_PASSWORD }).expect(201)
 
         await expectTable(Fixtures.USER_EMAIL_CHANGE_VERIFICATION_TABLE)
           .hasNumberOfRows(2)
