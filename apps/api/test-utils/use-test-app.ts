@@ -1,13 +1,10 @@
 import type { INestApplication } from '@nestjs/common'
-import type { AbstractStartedContainer, StartedDockerComposeEnvironment } from 'testcontainers'
 import type { TableAssertSortOptions } from './table-assert'
 
-import { join } from 'node:path'
 import { Logger } from '@nestjs/common'
 import { DatabaseService } from '@wishlist/api/core'
 import pg, { Client } from 'pg'
 import * as request from 'supertest'
-import { DockerComposeEnvironment } from 'testcontainers'
 import { afterAll, beforeAll, beforeEach } from 'vitest'
 
 import { createApp } from '../src/bootstrap'
@@ -29,49 +26,36 @@ export function useTestApp() {
   let client: Client
   let logger: Logger
   let fixtures: Fixtures
-  let dockerEnvironment: StartedDockerComposeEnvironment
 
   beforeAll(async () => {
+    // Get worker ID from Vitest pool
     const workerId = process.env.VITEST_POOL_ID || '1'
     logger = new Logger(`UseTestApp [Worker ${workerId}]`)
 
-    // Start a complete Docker Compose environment for this worker
-    logger.log('Starting Docker Compose environment...')
-    const rootFolder = process.cwd()
-    const dockerFolder = join(rootFolder, 'docker')
+    // Read ports from environment variables set by global setup
+    const dbPort = process.env[`DOCKER_WORKER_${workerId}_DB_PORT_5432`]
+    const mailPort = process.env[`DOCKER_WORKER_${workerId}_MAIL_PORT_1025`]
+    const valkeyPort = process.env[`DOCKER_WORKER_${workerId}_VALKEY_PORT_6379`]
 
-    dockerEnvironment = await new DockerComposeEnvironment(rootFolder, [
-      join(dockerFolder, 'docker-compose.yml'),
-      join(dockerFolder, 'docker-compose.test.yml'),
-    ]).up()
-
-    // Extract mapped ports from containers
-    const containers = dockerEnvironment.startedGenericContainers as Record<string, AbstractStartedContainer>
-
-    const dbContainer = Object.values(containers).find(c => c.getName().includes('db'))
-    const mailContainer = Object.values(containers).find(c => c.getName().includes('mail'))
-    const valkeyContainer = Object.values(containers).find(c => c.getName().includes('valkey'))
-
-    if (!dbContainer || !mailContainer || !valkeyContainer) {
-      throw new Error('Required containers not found in Docker Compose environment')
+    if (!dbPort || !mailPort || !valkeyPort) {
+      throw new Error(
+        `Docker environment variables not found for worker ${workerId}. ` +
+          `Expected: DOCKER_WORKER_${workerId}_DB_PORT_5432, DOCKER_WORKER_${workerId}_MAIL_PORT_1025, DOCKER_WORKER_${workerId}_VALKEY_PORT_6379`,
+      )
     }
 
-    const dbPort = dbContainer.getMappedPort(5432)
-    const mailPort = mailContainer.getMappedPort(1025)
-    const valkeyPort = valkeyContainer.getMappedPort(6379)
-
-    logger.log(`Docker Compose started - DB: ${dbPort}, Mail: ${mailPort}, Valkey: ${valkeyPort}`)
+    logger.log(`Using Docker Compose environment - DB: ${dbPort}, Mail: ${mailPort}, Valkey: ${valkeyPort}`)
 
     // Configure environment variables for this worker
     process.env.DB_HOST = 'localhost'
-    process.env.DB_PORT = dbPort.toString()
+    process.env.DB_PORT = dbPort
     process.env.DB_USERNAME = 'service'
     process.env.DB_PASSWORD = 'service'
     process.env.DB_NAME = 'wishlist-api'
     process.env.MAIL_HOST = 'localhost'
-    process.env.MAIL_PORT = mailPort.toString()
+    process.env.MAIL_PORT = mailPort
     process.env.VALKEY_HOST = 'localhost'
-    process.env.VALKEY_PORT = valkeyPort.toString()
+    process.env.VALKEY_PORT = valkeyPort
 
     // Create and initialize the application
     app = await createApp()
@@ -81,7 +65,7 @@ export function useTestApp() {
     // Connect to the database
     client = new Client({
       host: 'localhost',
-      port: dbPort,
+      port: Number.parseInt(dbPort),
       user: 'service',
       password: 'service',
       database: 'wishlist-api',
@@ -93,24 +77,17 @@ export function useTestApp() {
 
     fixtures = new Fixtures(client)
     logger.log('Test environment ready ✅')
-  }, 120000) // Increase timeout for Docker Compose startup
+  })
 
   beforeEach(async () => {
     await truncateDatabase()
   })
 
   afterAll(async () => {
-    logger.log('Cleaning up test environment...')
-
     await client.end()
     await app.close()
-
-    // Stop and clean up the Docker Compose environment
-    await dockerEnvironment.down()
-    await dockerEnvironment.stop()
-
     logger.log('Test environment cleaned up ✅')
-  }, 60000) // Increase timeout for Docker Compose cleanup
+  })
 
   async function truncateDatabase(): Promise<void> {
     logger.log('Truncating database ...')

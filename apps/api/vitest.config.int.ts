@@ -14,14 +14,15 @@ export default mergeConfig(
       reporters: ['default', 'junit'],
       outputFile: '../../junit_reports/integration/api.xml',
       include: ['src/**/*.int-spec.ts'],
-      // No global setup needed - each worker manages its own Docker Compose environment
+      // Global setup starts multiple Docker Compose environments (one per worker)
+      globalSetup: ['./int-tests.global-setup.ts'],
       setupFiles: ['../../vitest.matchers.ts'],
       // Enable parallel test execution for faster test runs
       // Each worker gets its own isolated Docker Compose environment (db, mail, valkey)
+      // Environment variables are exposed as: DOCKER_WORKER_${workerId}_${service}_PORT_${port}
       fileParallelism: true,
       // Allow up to 4 test files to run concurrently
-      // Adjust based on available CPU cores and resources
-      // Note: Each worker starts its own Docker containers
+      // IMPORTANT: This must match MAX_WORKERS in int-tests.global-setup.ts
       maxWorkers: 4,
       minWorkers: 1,
       coverage: {
