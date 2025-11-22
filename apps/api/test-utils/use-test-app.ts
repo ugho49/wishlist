@@ -28,25 +28,55 @@ export function useTestApp() {
   let fixtures: Fixtures
 
   beforeAll(async () => {
+    // Get worker ID from Vitest pool
+    const workerId = process.env.VITEST_POOL_ID || '1'
+    logger = new Logger(`UseTestApp [Worker ${workerId}]`)
+
+    // Read ports from environment variables set by global setup
+    const dbPort = process.env[`DOCKER_WORKER_${workerId}_DB_PORT_5432`]
+    const mailPort = process.env[`DOCKER_WORKER_${workerId}_MAIL_PORT_1025`]
+    const valkeyPort = process.env[`DOCKER_WORKER_${workerId}_VALKEY_PORT_6379`]
+
+    if (!dbPort || !mailPort || !valkeyPort) {
+      throw new Error(
+        `Docker environment variables not found for worker ${workerId}. ` +
+          `Expected: DOCKER_WORKER_${workerId}_DB_PORT_5432, DOCKER_WORKER_${workerId}_MAIL_PORT_1025, DOCKER_WORKER_${workerId}_VALKEY_PORT_6379`,
+      )
+    }
+
+    logger.log(`Using Docker Compose environment - DB: ${dbPort}, Mail: ${mailPort}, Valkey: ${valkeyPort}`)
+
+    // Configure environment variables for this worker
+    process.env.DB_HOST = 'localhost'
+    process.env.DB_PORT = dbPort
+    process.env.DB_USERNAME = 'service'
+    process.env.DB_PASSWORD = 'service'
+    process.env.DB_NAME = 'wishlist-api'
+    process.env.MAIL_HOST = 'localhost'
+    process.env.MAIL_PORT = mailPort
+    process.env.VALKEY_HOST = 'localhost'
+    process.env.VALKEY_PORT = valkeyPort
+
+    // Create and initialize the application
     app = await createApp()
     databaseService = app.get<DatabaseService>(DatabaseService)
     await app.init()
-    logger = new Logger('UseTestApp')
 
+    // Connect to the database
     client = new Client({
-      host: databaseService.config.host,
-      port: databaseService.config.port,
-      user: databaseService.config.username,
-      password: databaseService.config.password,
-      database: databaseService.config.database,
+      host: 'localhost',
+      port: Number.parseInt(dbPort),
+      user: 'service',
+      password: 'service',
+      database: 'wishlist-api',
       ssl: false,
     })
 
     await client.connect()
-    await dropDatabase()
     await databaseService.runMigrations()
 
     fixtures = new Fixtures(client)
+    logger.log('Test environment ready ✅')
   })
 
   beforeEach(async () => {
@@ -56,20 +86,8 @@ export function useTestApp() {
   afterAll(async () => {
     await client.end()
     await app.close()
+    logger.log('Test environment cleaned up ✅')
   })
-
-  async function dropDatabase(): Promise<void> {
-    const allTables = await client.query(
-      `SELECT schemaname, tablename FROM pg_catalog.pg_tables WHERE schemaname IN ('drizzle', 'public')`,
-    )
-    const tables = allTables.rows.map(row => `${row.schemaname}.${row.tablename}`)
-
-    for (const table of tables) {
-      await client.query(`DROP TABLE IF EXISTS ${table} CASCADE`)
-    }
-
-    logger.log(`Database dropped (${tables.length} tables) ✅`)
-  }
 
   async function truncateDatabase(): Promise<void> {
     logger.log('Truncating database ...')
