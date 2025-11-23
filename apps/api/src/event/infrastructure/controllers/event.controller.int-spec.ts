@@ -1,11 +1,11 @@
 import type { RequestApp } from '@wishlist/api-test-utils'
 
-import { Fixtures, useTestApp, useTestMail } from '@wishlist/api-test-utils'
+import { Fixtures, useTestApp } from '@wishlist/api-test-utils'
 import { uuid } from '@wishlist/common'
 import { DateTime } from 'luxon'
 
 describe('EventController', () => {
-  const { getRequest, getFixtures, expectTable } = useTestApp()
+  const { getRequest, getFixtures, expectTable, expectMail } = useTestApp()
   let fixtures: Fixtures
 
   beforeEach(() => {
@@ -475,7 +475,6 @@ describe('EventController', () => {
     })
 
     describe('when user is authenticated', () => {
-      const { expectMail } = useTestMail()
       let request: RequestApp
       let currentUserId: string
 

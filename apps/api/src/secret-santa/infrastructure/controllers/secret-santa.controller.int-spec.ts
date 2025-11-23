@@ -1,10 +1,10 @@
 import type { RequestApp } from '@wishlist/api-test-utils'
 
-import { Fixtures, useTestApp, useTestMail } from '@wishlist/api-test-utils'
+import { Fixtures, useTestApp } from '@wishlist/api-test-utils'
 import { SecretSantaStatus, uuid } from '@wishlist/common'
 
 describe('SecretSantaController', () => {
-  const { getRequest, getFixtures, expectTable } = useTestApp()
+  const { getRequest, getFixtures, expectTable, expectMail } = useTestApp()
   let fixtures: Fixtures
   let request: RequestApp
   let currentUserId: string
@@ -446,7 +446,6 @@ describe('SecretSantaController', () => {
 
   describe('POST /secret-santa/:id/start', () => {
     const path = (id: string) => `/secret-santa/${id}/start`
-    const { expectMail } = useTestMail()
 
     it('should return unauthorized if not authenticated', async () => {
       const unauthenticatedRequest = await getRequest()
@@ -560,7 +559,6 @@ describe('SecretSantaController', () => {
 
   describe('POST /secret-santa/:id/cancel', () => {
     const path = (id: string) => `/secret-santa/${id}/cancel`
-    const { expectMail } = useTestMail()
 
     it('should return unauthorized if not authenticated', async () => {
       const unauthenticatedRequest = await getRequest()

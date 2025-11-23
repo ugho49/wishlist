@@ -1,12 +1,12 @@
 import type { RequestApp } from '@wishlist/api-test-utils'
 
 import { PasswordManager } from '@wishlist/api/auth'
-import { Fixtures, useTestApp, useTestMail } from '@wishlist/api-test-utils'
+import { Fixtures, useTestApp } from '@wishlist/api-test-utils'
 import { sleep } from '@wishlist/common'
 import { DateTime } from 'luxon'
 
 describe('UserController', () => {
-  const { getRequest, expectTable, getFixtures } = useTestApp()
+  const { getRequest, expectTable, getFixtures, expectMail } = useTestApp()
   let fixtures: Fixtures
 
   beforeEach(() => {
@@ -102,7 +102,6 @@ describe('UserController', () => {
     })
 
     describe('when valid input', () => {
-      const { expectMail } = useTestMail()
       const input = {
         email: Fixtures.BASE_USER_EMAIL,
         password: Fixtures.DEFAULT_USER_PASSWORD,

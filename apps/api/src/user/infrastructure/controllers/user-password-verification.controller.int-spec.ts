@@ -1,9 +1,9 @@
 import { PasswordManager } from '@wishlist/api/auth'
-import { Fixtures, useTestApp, useTestMail } from '@wishlist/api-test-utils'
+import { Fixtures, useTestApp } from '@wishlist/api-test-utils'
 import { DateTime } from 'luxon'
 
 describe('UserPasswordVerificationController', () => {
-  const { getRequest, expectTable, getFixtures } = useTestApp()
+  const { getRequest, expectTable, getFixtures, expectMail } = useTestApp()
   let fixtures: Fixtures
 
   beforeEach(() => {
@@ -11,7 +11,6 @@ describe('UserPasswordVerificationController', () => {
   })
 
   describe('POST /user/forgot-password/send-reset-email', () => {
-    const { expectMail } = useTestMail()
     const path = '/user/forgot-password/send-reset-email'
 
     it('should fail with invalid email', async () => {

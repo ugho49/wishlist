@@ -1,8 +1,8 @@
-import { Fixtures, RequestApp, useTestApp, useTestMail } from '@wishlist/api-test-utils'
+import { Fixtures, RequestApp, useTestApp } from '@wishlist/api-test-utils'
 import { DateTime } from 'luxon'
 
 describe('UserEmailChangeController', () => {
-  const { getRequest, expectTable, getFixtures } = useTestApp()
+  const { getRequest, expectTable, getFixtures, expectMail } = useTestApp()
   let fixtures: Fixtures
 
   beforeEach(() => {
@@ -76,7 +76,6 @@ describe('UserEmailChangeController', () => {
   })
 
   describe('POST /user/email-change/request', () => {
-    const { expectMail } = useTestMail()
     const path = '/user/email-change/request'
 
     it('should return unauthorized if not authenticated', async () => {
@@ -263,7 +262,6 @@ describe('UserEmailChangeController', () => {
   })
 
   describe('POST /user/email-change/confirm', () => {
-    const { expectMail } = useTestMail()
     const path = '/user/email-change/confirm'
 
     let request: RequestApp

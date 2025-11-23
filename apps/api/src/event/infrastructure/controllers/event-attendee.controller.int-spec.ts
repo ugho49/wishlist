@@ -1,10 +1,10 @@
 import type { RequestApp } from '@wishlist/api-test-utils'
 
-import { Fixtures, useTestApp, useTestMail } from '@wishlist/api-test-utils'
+import { Fixtures, useTestApp } from '@wishlist/api-test-utils'
 import { AttendeeRole, uuid } from '@wishlist/common'
 
 describe('EventAttendeeController', () => {
-  const { getRequest, getFixtures, expectTable } = useTestApp()
+  const { getRequest, getFixtures, expectTable, expectMail } = useTestApp()
   let fixtures: Fixtures
 
   beforeEach(() => {
@@ -27,7 +27,6 @@ describe('EventAttendeeController', () => {
     })
 
     describe('when user is authenticated', () => {
-      const { expectMail } = useTestMail()
       let request: RequestApp
       let currentUserId: string
 
