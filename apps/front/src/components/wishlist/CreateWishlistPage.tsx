@@ -30,7 +30,7 @@ import {
 } from '@mui/material'
 import { useMutation } from '@tanstack/react-query'
 import { useNavigate, useSearch } from '@tanstack/react-router'
-import { FeatureFlags, MAX_EVENTS_BY_LIST } from '@wishlist/common'
+import { MAX_EVENTS_BY_LIST } from '@wishlist/common'
 import uniq from 'lodash/uniq'
 import { DateTime } from 'luxon'
 import { useEffect, useState } from 'react'
@@ -38,10 +38,8 @@ import { useSelector } from 'react-redux'
 import { useInterval } from 'usehooks-ts'
 
 import { useApi, useAvailableEvents, useEventById, useToast } from '../../hooks'
-import { useFeatureFlag } from '../../hooks/useFeatureFlag'
 import { getRandomPlaceholderName } from '../../utils/wishlist.utils'
 import { Card } from '../common/Card'
-import { CharsRemaining } from '../common/CharsRemaining'
 import { InputLabel } from '../common/InputLabel'
 import { Loader } from '../common/Loader'
 import { Subtitle } from '../common/Subtitle'
@@ -128,7 +126,6 @@ export const CreateWishlistPage = () => {
   const [namePlaceholder, setNamePlaceholder] = useState<string>(getRandomPlaceholderName())
   const [logo, setLogo] = useState<File | undefined>()
   const api = useApi()
-  const isFeatureFlagMarkdownEnabled = useFeatureFlag(FeatureFlags.FRONTEND_ACTIVATE_DESCRIPTION_MARKDOWN)
 
   useInterval(() => {
     setNamePlaceholder(getRandomPlaceholderName())
@@ -253,32 +250,16 @@ export const CreateWishlistPage = () => {
                   </Stack>
 
                   <Box>
-                    {isFeatureFlagMarkdownEnabled ? (
-                      <TextareaMarkdown
-                        label="Description"
-                        autoComplete="off"
-                        disabled={loading}
-                        fullWidth
-                        value={description}
-                        maxLength={2000}
-                        placeholder="Une petite description (supporte le markdown) ..."
-                        onChange={e => setDescription(e.target.value)}
-                      />
-                    ) : (
-                      <TextField
-                        label="Description"
-                        autoComplete="off"
-                        disabled={loading}
-                        fullWidth
-                        multiline
-                        minRows={4}
-                        value={description}
-                        slotProps={{ htmlInput: { maxLength: 2000 } }}
-                        placeholder="Une petite description ..."
-                        helperText={<CharsRemaining max={2000} value={description} />}
-                        onChange={e => setDescription(e.target.value)}
-                      />
-                    )}
+                    <TextareaMarkdown
+                      label="Description"
+                      autoComplete="off"
+                      disabled={loading}
+                      fullWidth
+                      value={description}
+                      maxLength={2000}
+                      placeholder="Une petite description (supporte le markdown) ..."
+                      onChange={e => setDescription(e.target.value)}
+                    />
                   </Box>
 
                   {isListForSomeoneElse && (

@@ -20,6 +20,7 @@ import { AttendeeRole } from '@wishlist/common'
 import { ConfirmButton } from '@wishlist/front-components/common/ConfirmButton'
 import { WishlistDatePicker } from '@wishlist/front-components/common/DatePicker'
 import { EmojiSelectorWithBadge } from '@wishlist/front-components/common/EmojiSelectorWithBadge'
+import { TextareaMarkdown } from '@wishlist/front-components/common/TextareaMarkdown'
 import { DateTime } from 'luxon'
 import { useEffect, useMemo } from 'react'
 import { Controller, useForm } from 'react-hook-form'
@@ -285,17 +286,25 @@ export const AdminEventPage = ({ eventId }: AdminEventPageProps) => {
             </Stack>
 
             <Box>
-              <TextField
-                {...register('description')}
-                label="Description"
-                autoComplete="off"
-                disabled={loadingEdit}
-                fullWidth
-                multiline
-                minRows={4}
-                placeholder="Une petite description ..."
-                error={!!errors.description}
-                helperText={errors.description?.message}
+              <Controller
+                control={control}
+                name="description"
+                render={({ field }) => (
+                  <TextareaMarkdown
+                    label="Description"
+                    autoComplete="off"
+                    fullWidth
+                    maxLength={2000}
+                    placeholder="Une petite description  ..."
+                    error={!!errors.description}
+                    helperText={errors.description?.message}
+                    value={field.value}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    ref={field.ref}
+                    disabled={loadingEdit}
+                  />
+                )}
               />
             </Box>
 
