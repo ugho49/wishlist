@@ -17,7 +17,6 @@ export default async function () {
     join(dockerFolder, 'docker-compose.test.yml'),
   ]).up()
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-expect-error
   const containers = environment.startedGenericContainers as Record<string, AbstractStartedContainer>
   const configOutput = dotenv.config({ path: join(__dirname, '.env.test:int') })
@@ -25,7 +24,6 @@ export default async function () {
   for (const container of Object.values(containers)) {
     const containerName = container.getName().split('-')[0]?.toUpperCase()
 
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
     const boundedPorts = container.boundPorts as { ports: Map<number, number> }
     for (const [internal, external] of boundedPorts.ports) {
@@ -34,12 +32,12 @@ export default async function () {
       process.env[variable] = external.toString()
       console.log(`export ${variable}=${external}`)
     }
+  }
 
-    for (const [key, value] of Object.entries(configOutput.parsed ?? {})) {
-      if (value.startsWith('$')) {
-        const variable = value.replace('$', '')
-        process.env[key] = process.env[variable]
-      }
+  for (const [key, value] of Object.entries(configOutput.parsed ?? {})) {
+    if (value.startsWith('$')) {
+      const variable = value.replace('$', '')
+      process.env[key] = process.env[variable]
     }
   }
 
