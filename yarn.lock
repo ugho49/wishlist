@@ -9463,8 +9463,6 @@ __metadata:
     react-hot-toast: "npm:2.6.0"
     react-markdown: "npm:10.1.0"
     react-redux: "npm:9.2.0"
-    react-refresh: "npm:0.18.0"
-    react-test-renderer: "npm:19.2.0"
     reflect-metadata: "npm:0.2.2"
     regenerator-runtime: "npm:0.14.1"
     remark-gfm: "npm:4.0.1"
@@ -21453,22 +21451,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-refresh@npm:0.18.0, react-refresh@npm:^0.18.0":
+"react-refresh@npm:^0.18.0":
   version: 0.18.0
   resolution: "react-refresh@npm:0.18.0"
   checksum: 10c0/34a262f7fd803433a534f50deb27a148112a81adcae440c7d1cbae7ef14d21ea8f2b3d783e858cb7698968183b77755a38b4d4b5b1d79b4f4689c2f6d358fff2
-  languageName: node
-  linkType: hard
-
-"react-test-renderer@npm:19.2.0":
-  version: 19.2.0
-  resolution: "react-test-renderer@npm:19.2.0"
-  dependencies:
-    react-is: "npm:^19.2.0"
-    scheduler: "npm:^0.27.0"
-  peerDependencies:
-    react: ^19.2.0
-  checksum: 10c0/cc116b908489316f06881bf7392c5fad4b5f66be42d2f04788f4179a19e86674d54f1006b33fe9eba28bde6edb4cb38764ab75b416f28d02e0182c5552c97551
   languageName: node
   linkType: hard
 
