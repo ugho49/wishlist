@@ -1,6 +1,7 @@
 import type { RootState } from '../core'
 
 import { createFileRoute, Navigate } from '@tanstack/react-router'
+import { SEO } from '@wishlist/front-components/SEO'
 import { useSelector } from 'react-redux'
 
 import { LandingPage } from '../components/landing/LandingPage'
@@ -16,6 +17,11 @@ export const Route = createFileRoute('/')({
       return <Navigate to="/events" replace />
     }
 
-    return <LandingPage />
+    return (
+      <>
+        <SEO indexByRobots />
+        <LandingPage />
+      </>
+    )
   },
 })

@@ -50,6 +50,7 @@ const ItemCardStyled = styled(Card)(({ theme }) => ({
     transform: 'scale(1.008)',
   },
   '&.reserved': {
+    border: `3px solid ${theme.palette.success.main}`,
     '& .item-image-container': {
       '&::before': {
         content: '""',
@@ -113,12 +114,8 @@ const ItemImage = styled('img')({
   objectFit: 'cover',
   objectPosition: 'center',
   cursor: 'pointer',
-  opacity: 0.8,
+  opacity: 1,
   transition: 'all 0.2s ease',
-  '&:hover': {
-    transform: 'scale(1.02)',
-    opacity: 1,
-  },
 })
 
 const RatingBubbleStyled = styled(RatingBubble)(() => ({
