@@ -7,7 +7,7 @@ export interface SEOProps {
   ogImage?: string
   ogType?: 'website' | 'article'
   canonical?: string
-  noindex?: boolean
+  indexByRobots?: boolean
 }
 
 const DEFAULT_TITLE = 'Wishlist - Créez et partagez vos listes de souhaits'
@@ -28,9 +28,9 @@ export function SEO({
   ogImage = DEFAULT_OG_IMAGE,
   ogType = 'website',
   canonical,
-  noindex = false,
+  indexByRobots = false,
 }: SEOProps) {
-  const fullTitle = title ? `${title} | Wishlist` : DEFAULT_TITLE
+  const fullTitle = title ? `Wishlist | ${title}` : DEFAULT_TITLE
   const canonicalUrl = canonical ? `${SITE_URL}${canonical}` : SITE_URL
 
   return (
@@ -42,7 +42,7 @@ export function SEO({
       <meta name="keywords" content={keywords} />
 
       {/* Robots */}
-      {noindex && <meta name="robots" content="noindex, nofollow" />}
+      <meta name="robots" content={indexByRobots ? 'index, follow' : 'noindex, nofollow'} />
 
       {/* Canonical URL */}
       <link rel="canonical" href={canonicalUrl} />

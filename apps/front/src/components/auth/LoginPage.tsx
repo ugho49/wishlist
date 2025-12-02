@@ -15,7 +15,6 @@ import { setTokens } from '../../core/store/features'
 import { useApi } from '../../hooks/useApi'
 import { useToast } from '../../hooks/useToast'
 import { RouterLink } from '../common/RouterLink'
-import { SEO } from '../SEO'
 import { GoogleButton } from './GoogleButton'
 
 const schema = z.object({
@@ -106,72 +105,66 @@ export const LoginPage = () => {
   const onSubmit = (data: FormFields) => login(data)
 
   return (
-    <>
-      <SEO
-        title="Connexion"
-        description="Connectez-vous à votre compte Wishlist pour gérer vos listes de souhaits et partager vos envies avec vos proches."
-        canonical="/login"
-      />
-      <Stack spacing={4} alignItems="center">
-        <TitleStyled variant="h4">Connexion</TitleStyled>
+    <Stack spacing={4} alignItems="center">
+      <TitleStyled variant="h4">Connexion</TitleStyled>
 
-        <Stack component="form" onSubmit={handleSubmit(onSubmit)} spacing={3} width="100%">
-          {formErrors.root && <Alert severity="error">{formErrors.root.message}</Alert>}
+      <Stack component="form" onSubmit={handleSubmit(onSubmit)} spacing={3} width="100%">
+        {formErrors.root && <Alert severity="error">{formErrors.root.message}</Alert>}
 
-          <TextField
-            {...register('email')}
-            type="email"
-            label="Email"
-            fullWidth
-            placeholder="votre@email.com"
-            autoComplete="email"
-            error={!!formErrors.email}
-            helperText={formErrors.email?.message}
-          />
+        <TextField
+          {...register('email')}
+          type="email"
+          label="Email"
+          fullWidth
+          placeholder="votre@email.com"
+          autoComplete="email"
+          error={!!formErrors.email}
+          helperText={formErrors.email?.message}
+        />
 
-          <TextField
-            {...register('password')}
-            type="password"
-            label="Mot de passe"
-            fullWidth
-            placeholder="Votre mot de passe"
-            autoComplete="current-password"
-            error={!!formErrors.password}
-            helperText={formErrors.password?.message}
-          />
+        <TextField
+          {...register('password')}
+          type="password"
+          label="Mot de passe"
+          fullWidth
+          placeholder="Votre mot de passe"
+          autoComplete="current-password"
+          error={!!formErrors.password}
+          helperText={formErrors.password?.message}
+        />
 
-          <ButtonStyled
-            type="submit"
-            variant="contained"
-            size="large"
-            color="primary"
-            fullWidth
-            loading={isSubmitting}
-            loadingPosition="start"
-            startIcon={<LoginIcon />}
-            disabled={isSubmitting || socialLoading}
+        <ButtonStyled
+          type="submit"
+          variant="contained"
+          size="large"
+          color="primary"
+          fullWidth
+          loading={isSubmitting}
+          loadingPosition="start"
+          startIcon={<LoginIcon />}
+          disabled={isSubmitting || socialLoading}
+        >
+          Se connecter
+        </ButtonStyled>
+
+        <DividerStyled>
+          <Typography variant="body2" color="text.secondary">
+            ou
+          </Typography>
+        </DividerStyled>
+
+        <SocialButtonsStack alignItems="center">
+          <GoogleButton
+            loading={socialLoading}
+            disabled={socialLoading}
+            onSuccess={code => loginWithGoogle(code)}
+            onError={() => onSocialError()}
+            onStart={() => setSocialLoading(true)}
+            iconSize={23}
           >
-            Se connecter
-          </ButtonStyled>
-
-          <DividerStyled>
-            <Typography variant="body2" color="text.secondary">
-              ou
-            </Typography>
-          </DividerStyled>
-
-          <SocialButtonsStack alignItems="center">
-            <GoogleButton
-              loading={socialLoading}
-              disabled={socialLoading}
-              onSuccess={code => loginWithGoogle(code)}
-              onError={() => onSocialError()}
-              onStart={() => setSocialLoading(true)}
-              iconSize={23}
-            >
-              Se connecter avec Google
-            </GoogleButton>
-            {/* <SocialButton
+            Se connecter avec Google
+          </GoogleButton>
+          {/* <SocialButton
             variant="contained"
             loading={socialLoading}
             disabled={socialLoading}
@@ -179,19 +172,18 @@ export const LoginPage = () => {
           >
             Se connecter avec facebook
           </SocialButton> */}
-          </SocialButtonsStack>
-        </Stack>
-
-        <Stack spacing={2} alignItems="center">
-          <Stack direction="row" alignItems="center" spacing={1}>
-            <Typography variant="body2" color="text.secondary">
-              Pas encore inscrit ?
-            </Typography>
-            <RouterLink to="/register">Créer un compte</RouterLink>
-          </Stack>
-          <RouterLink to="/forgot-password">Mot de passe oublié ?</RouterLink>
-        </Stack>
+        </SocialButtonsStack>
       </Stack>
-    </>
+
+      <Stack spacing={2} alignItems="center">
+        <Stack direction="row" alignItems="center" spacing={1}>
+          <Typography variant="body2" color="text.secondary">
+            Pas encore inscrit ?
+          </Typography>
+          <RouterLink to="/register">Créer un compte</RouterLink>
+        </Stack>
+        <RouterLink to="/forgot-password">Mot de passe oublié ?</RouterLink>
+      </Stack>
+    </Stack>
   )
 }

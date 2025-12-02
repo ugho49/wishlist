@@ -43,7 +43,6 @@ export const EventPage = ({ eventId }: EventPageProps) => {
         title={event?.title || 'Événement'}
         description={`Consultez les listes de souhaits pour l'événement ${event?.title || ''}.`}
         canonical={`/events/${eventId}`}
-        noindex
       />
       <Box>
         <Loader loading={loading}>

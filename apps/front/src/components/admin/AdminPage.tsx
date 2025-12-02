@@ -7,7 +7,6 @@ import { useNavigate } from '@tanstack/react-router'
 import { environment } from '../../environment'
 import { Card } from '../common/Card'
 import { Title } from '../common/Title'
-import { SEO } from '../SEO'
 
 const AdminCard = styled(Card)(({ theme }) => ({
   display: 'flex',
@@ -60,27 +59,24 @@ export const AdminPage = () => {
   ]
 
   return (
-    <>
-      <SEO title="Administration" description="Panneau d'administration de Wishlist." canonical="/admin" noindex />
-      <Box>
-        <Title>Administration</Title>
+    <Box>
+      <Title>Administration</Title>
 
-        <Grid container spacing={3}>
-          {adminSections.map(section => (
-            <Grid key={section.id} size={{ xs: 12, sm: 6, lg: 4 }}>
-              <AdminCard hoverable onClick={() => section.onClick()}>
-                <IconWrapper>{section.icon}</IconWrapper>
-                <Typography variant="h6" align="center" fontWeight={600}>
-                  {section.title}
-                </Typography>
-                <Typography variant="body2" align="center" color="text.secondary">
-                  {section.description}
-                </Typography>
-              </AdminCard>
-            </Grid>
-          ))}
-        </Grid>
-      </Box>
-    </>
+      <Grid container spacing={3}>
+        {adminSections.map(section => (
+          <Grid key={section.id} size={{ xs: 12, sm: 6, lg: 4 }}>
+            <AdminCard hoverable onClick={() => section.onClick()}>
+              <IconWrapper>{section.icon}</IconWrapper>
+              <Typography variant="h6" align="center" fontWeight={600}>
+                {section.title}
+              </Typography>
+              <Typography variant="body2" align="center" color="text.secondary">
+                {section.description}
+              </Typography>
+            </AdminCard>
+          </Grid>
+        ))}
+      </Grid>
+    </Box>
   )
 }

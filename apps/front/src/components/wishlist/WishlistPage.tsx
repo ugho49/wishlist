@@ -71,7 +71,6 @@ export const WishlistPage = ({ wishlistId }: WishlistPageProps) => {
         title={wishlist?.title || 'Liste de souhaits'}
         description={`Découvrez la liste de souhaits ${wishlist?.title || ''}.`}
         canonical={`/wishlists/${wishlistId}`}
-        noindex
       />
       <Box>
         <Loader loading={loading}>

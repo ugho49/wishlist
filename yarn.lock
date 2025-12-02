@@ -9459,7 +9459,7 @@ __metadata:
     react: "npm:19.2.0"
     react-dom: "npm:19.2.0"
     react-easy-crop: "npm:5.5.5"
-    react-helmet-async: "npm:^2.0.5"
+    react-helmet-async: "npm:2.0.5"
     react-hook-form: "npm:7.66.1"
     react-hot-toast: "npm:2.6.0"
     react-markdown: "npm:10.1.0"
@@ -21384,7 +21384,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-helmet-async@npm:^2.0.5":
+"react-helmet-async@npm:2.0.5":
   version: 2.0.5
   resolution: "react-helmet-async@npm:2.0.5"
   dependencies:

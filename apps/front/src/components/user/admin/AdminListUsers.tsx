@@ -13,7 +13,6 @@ import { useEffect, useState } from 'react'
 
 import { useApi } from '../../../hooks'
 import { Status } from '../../common/Status'
-import { SEO } from '../../SEO'
 
 const SearchButton = styled(Button)(() => ({
   padding: '8px 10px',
@@ -90,70 +89,62 @@ export const AdminListUsers = () => {
   }
 
   return (
-    <>
-      <SEO
-        title="Admin - Utilisateurs"
-        description="Administration - Liste des utilisateurs."
-        canonical="/admin/users"
-        noindex
-      />
-      <Box>
-        <Title>Liste des utilisateurs</Title>
+    <Box>
+      <Title>Liste des utilisateurs</Title>
 
-        <Card>
-          <Stack
-            direction="row"
-            justifyContent="space-between"
-            alignItems="center"
-            gap={2}
-            component="form"
-            noValidate
-            onSubmit={applySearch}
-            mb={5}
-          >
-            <TextField
-              size="small"
-              label="Rechercher un utilisateur"
-              fullWidth
-              placeholder="John Doe, john@doe.fr, john, etc..."
-              value={inputSearch}
-              onChange={e => setInputSearch(e.target.value)}
-            />
-            <SearchButton variant="outlined" type="submit" size="small">
-              Rechercher
-            </SearchButton>
-          </Stack>
-
-          <DataGrid
-            isRowSelectable={() => true}
-            disableMultipleRowSelection={true}
-            disableColumnSelector={true}
-            isCellEditable={() => false}
-            localeText={{
-              noRowsLabel: 'Aucun utilisateur',
-            }}
-            onRowClick={data => navigate({ to: '/admin/users/$userId', params: { userId: data.row.id } })}
-            density="standard"
-            rows={value?.resources || []}
-            loading={loading}
-            columns={columns}
-            paginationMode="server"
-            rowCount={totalElements}
-            paginationModel={{
-              page: currentPage - 1,
-              pageSize,
-            }}
-            pageSizeOptions={[pageSize]}
-            onPaginationModelChange={({ page }) =>
-              navigate({
-                to: '/admin/users',
-                search: prev => ({ ...prev, page: page + 1, search }),
-              })
-            }
-            hideFooter={totalElements <= pageSize}
+      <Card>
+        <Stack
+          direction="row"
+          justifyContent="space-between"
+          alignItems="center"
+          gap={2}
+          component="form"
+          noValidate
+          onSubmit={applySearch}
+          mb={5}
+        >
+          <TextField
+            size="small"
+            label="Rechercher un utilisateur"
+            fullWidth
+            placeholder="John Doe, john@doe.fr, john, etc..."
+            value={inputSearch}
+            onChange={e => setInputSearch(e.target.value)}
           />
-        </Card>
-      </Box>
-    </>
+          <SearchButton variant="outlined" type="submit" size="small">
+            Rechercher
+          </SearchButton>
+        </Stack>
+
+        <DataGrid
+          isRowSelectable={() => true}
+          disableMultipleRowSelection={true}
+          disableColumnSelector={true}
+          isCellEditable={() => false}
+          localeText={{
+            noRowsLabel: 'Aucun utilisateur',
+          }}
+          onRowClick={data => navigate({ to: '/admin/users/$userId', params: { userId: data.row.id } })}
+          density="standard"
+          rows={value?.resources || []}
+          loading={loading}
+          columns={columns}
+          paginationMode="server"
+          rowCount={totalElements}
+          paginationModel={{
+            page: currentPage - 1,
+            pageSize,
+          }}
+          pageSizeOptions={[pageSize]}
+          onPaginationModelChange={({ page }) =>
+            navigate({
+              to: '/admin/users',
+              search: prev => ({ ...prev, page: page + 1, search }),
+            })
+          }
+          hideFooter={totalElements <= pageSize}
+        />
+      </Card>
+    </Box>
   )
 }

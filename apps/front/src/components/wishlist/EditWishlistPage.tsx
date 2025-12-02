@@ -12,6 +12,7 @@ import { useSelector } from 'react-redux'
 import { useWishlistById } from '../../hooks/domain/useWishlistById'
 import { Loader } from '../common/Loader'
 import { Title } from '../common/Title'
+import { SEO } from '../SEO'
 import { EditWishlistEvent } from './EditWishlistEvents'
 import { EditWishlistInformations } from './EditWishlistInformations'
 import { EditWishlistManagement } from './EditWishlistManagement'
@@ -64,31 +65,38 @@ export const EditWishlistPage = ({ wishlistId }: EditWishlistPageProps) => {
   }, [isPublic, isOwner])
 
   return (
-    <Box>
-      <Title>Modifier la liste</Title>
-      <Loader loading={loading}>
-        {(!wishlist || !currentUserCanEdit) && <WishlistNotFound />}
-        {wishlist && currentUserCanEdit && (
-          <Container maxWidth="md">
-            <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: '20px' }}>
-              <Tabs
-                value={tab}
-                onChange={(_, newValue) => navigate({ search: { tab: newValue as TabValues } })}
-                variant="fullWidth"
-                scrollButtons="auto"
-                allowScrollButtonsMobile
-              >
-                {tabs.map(tab => (
-                  <Tab key={tab.value} value={tab.value} label={tab.label} iconPosition="start" icon={tab.icon} />
-                ))}
-              </Tabs>
-            </Box>
-            {tab === TabValues.informations && <EditWishlistInformations wishlist={wishlist} />}
-            {tab === TabValues.events && <EditWishlistEvent wishlistId={wishlist.id} events={wishlist.events} />}
-            {tab === TabValues.management && <EditWishlistManagement wishlist={wishlist} />}
-          </Container>
-        )}
-      </Loader>
-    </Box>
+    <>
+      <SEO
+        title={`Modifier la liste de souhaits ${wishlist?.title || ''}`}
+        description={`Modifier la liste de souhaits ${wishlist?.title || ''}.`}
+        canonical={`/wishlists/${wishlistId}/edit`}
+      />
+      <Box>
+        <Title>Modifier la liste</Title>
+        <Loader loading={loading}>
+          {(!wishlist || !currentUserCanEdit) && <WishlistNotFound />}
+          {wishlist && currentUserCanEdit && (
+            <Container maxWidth="md">
+              <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: '20px' }}>
+                <Tabs
+                  value={tab}
+                  onChange={(_, newValue) => navigate({ search: { tab: newValue as TabValues } })}
+                  variant="fullWidth"
+                  scrollButtons="auto"
+                  allowScrollButtonsMobile
+                >
+                  {tabs.map(tab => (
+                    <Tab key={tab.value} value={tab.value} label={tab.label} iconPosition="start" icon={tab.icon} />
+                  ))}
+                </Tabs>
+              </Box>
+              {tab === TabValues.informations && <EditWishlistInformations wishlist={wishlist} />}
+              {tab === TabValues.events && <EditWishlistEvent wishlistId={wishlist.id} events={wishlist.events} />}
+              {tab === TabValues.management && <EditWishlistManagement wishlist={wishlist} />}
+            </Container>
+          )}
+        </Loader>
+      </Box>
+    </>
   )
 }
