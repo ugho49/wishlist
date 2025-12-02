@@ -9,6 +9,7 @@ import { FabAutoGrow } from '../common/FabAutoGrow'
 import { Loader } from '../common/Loader'
 import { Pagination } from '../common/Pagination'
 import { Title } from '../common/Title'
+import { SEO } from '../SEO'
 import { EmptyEventsState } from './EmptyEventsState'
 import { EventCard } from './EventCard'
 
@@ -31,41 +32,49 @@ export const EventListPage = () => {
   const handleAddEventClick = () => navigate({ to: '/events/new' })
 
   return (
-    <Box>
-      {totalElements > 0 && <Title>Évènements</Title>}
+    <>
+      <SEO
+        title="Mes événements"
+        description="Gérez tous vos événements et leurs listes de souhaits associées."
+        canonical="/events"
+        noindex
+      />
+      <Box>
+        {totalElements > 0 && <Title>Évènements</Title>}
 
-      <Loader loading={loading}>
-        <Grid container spacing={3}>
-          {(value?.resources || []).map(event => (
-            <Grid key={event.id} size={{ xs: 12, lg: 6 }}>
-              <EventCard event={event} />
-            </Grid>
-          ))}
-        </Grid>
-      </Loader>
+        <Loader loading={loading}>
+          <Grid container spacing={3}>
+            {(value?.resources || []).map(event => (
+              <Grid key={event.id} size={{ xs: 12, lg: 6 }}>
+                <EventCard event={event} />
+              </Grid>
+            ))}
+          </Grid>
+        </Loader>
 
-      {totalElements > 0 && (
-        <>
-          <Pagination
-            totalPage={value?.pagination.total_pages}
-            currentPage={currentPage}
-            disabled={loading}
-            hide={value?.pagination.total_pages === 1}
-            onChange={value => navigate({ from: '/events', search: prev => ({ ...prev, page: value }) })}
-          />
+        {totalElements > 0 && (
+          <>
+            <Pagination
+              totalPage={value?.pagination.total_pages}
+              currentPage={currentPage}
+              disabled={loading}
+              hide={value?.pagination.total_pages === 1}
+              onChange={value => navigate({ from: '/events', search: prev => ({ ...prev, page: value }) })}
+            />
 
-          <FabAutoGrow
-            label="Créer un évènement"
-            icon={<AddIcon />}
-            color="primary"
-            onClick={() => handleAddEventClick()}
-          />
-        </>
-      )}
+            <FabAutoGrow
+              label="Créer un évènement"
+              icon={<AddIcon />}
+              color="primary"
+              onClick={() => handleAddEventClick()}
+            />
+          </>
+        )}
 
-      {totalElements === 0 && !loading && (
-        <EmptyEventsState sx={{ marginTop: '100px' }} onAddEventClick={() => handleAddEventClick()} />
-      )}
-    </Box>
+        {totalElements === 0 && !loading && (
+          <EmptyEventsState sx={{ marginTop: '100px' }} onAddEventClick={() => handleAddEventClick()} />
+        )}
+      </Box>
+    </>
   )
 }

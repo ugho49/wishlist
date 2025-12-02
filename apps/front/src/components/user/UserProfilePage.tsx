@@ -10,6 +10,7 @@ import useMediaQuery from '@mui/material/useMediaQuery'
 import { useNavigate, useSearch } from '@tanstack/react-router'
 import { useSelector } from 'react-redux'
 
+import { SEO } from '../SEO'
 import { ProfilePictureSection } from './ProfilePictureSection'
 import { UserTabInformations } from './UserTabInformations'
 import { UserTabNotifications } from './UserTabNotifications'
@@ -82,43 +83,51 @@ export const UserProfilePage = () => {
   const userState = useSelector(mapState)
 
   return (
-    <Box>
-      <ProfileSection>
-        <ProfilePictureSection />
+    <>
+      <SEO
+        title="Mon profil"
+        description="Gérez vos informations personnelles, vos paramètres de notifications et votre vie privée."
+        canonical="/user/profile"
+        noindex
+      />
+      <Box>
+        <ProfileSection>
+          <ProfilePictureSection />
 
-        <UserNameAndEmail>
-          <Name>
-            {userState.firstName} {userState.lastName}
-          </Name>
-          <Email>{userState.email}</Email>
-        </UserNameAndEmail>
-      </ProfileSection>
+          <UserNameAndEmail>
+            <Name>
+              {userState.firstName} {userState.lastName}
+            </Name>
+            <Email>{userState.email}</Email>
+          </UserNameAndEmail>
+        </ProfileSection>
 
-      <Box sx={{ borderBottom: 1, borderColor: 'divider' }} mb={4}>
-        <Tabs
-          value={tab}
-          onChange={(_, newValue) => navigate({ search: { tab: newValue as TabValues } })}
-          variant="fullWidth"
-          scrollButtons="auto"
-          allowScrollButtonsMobile
-        >
-          {tabs.map(tab => (
-            <Tab
-              key={tab.value}
-              value={tab.value}
-              label={smallScreen ? undefined : tab.label}
-              iconPosition="start"
-              icon={tab.icon}
-            />
-          ))}
-        </Tabs>
+        <Box sx={{ borderBottom: 1, borderColor: 'divider' }} mb={4}>
+          <Tabs
+            value={tab}
+            onChange={(_, newValue) => navigate({ search: { tab: newValue as TabValues } })}
+            variant="fullWidth"
+            scrollButtons="auto"
+            allowScrollButtonsMobile
+          >
+            {tabs.map(tab => (
+              <Tab
+                key={tab.value}
+                value={tab.value}
+                label={smallScreen ? undefined : tab.label}
+                iconPosition="start"
+                icon={tab.icon}
+              />
+            ))}
+          </Tabs>
+        </Box>
+        <Stack>
+          {tab === TabValues.informations && <UserTabInformations />}
+          {tab === TabValues.notifications && <UserTabNotifications />}
+          {tab === TabValues.social && <UserTabSocial />}
+          {tab === TabValues.password && <UserTabPassword />}
+        </Stack>
       </Box>
-      <Stack>
-        {tab === TabValues.informations && <UserTabInformations />}
-        {tab === TabValues.notifications && <UserTabNotifications />}
-        {tab === TabValues.social && <UserTabSocial />}
-        {tab === TabValues.password && <UserTabPassword />}
-      </Stack>
-    </Box>
+    </>
   )
 }

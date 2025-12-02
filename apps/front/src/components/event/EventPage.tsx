@@ -9,6 +9,7 @@ import { useSelector } from 'react-redux'
 import { useEventById, useSecretSantaSuggestion } from '../../hooks'
 import { Description } from '../common/Description'
 import { Loader } from '../common/Loader'
+import { SEO } from '../SEO'
 import { EventAttendeesDialog } from './EventAttendeesDialog'
 import { EventHeader } from './EventHeader'
 import { EventNotFound } from './EventNotFound'
@@ -37,43 +38,53 @@ export const EventPage = ({ eventId }: EventPageProps) => {
   })
 
   return (
-    <Box>
-      <Loader loading={loading}>
-        {!event && <EventNotFound />}
-        {event && (
-          <>
-            <EventHeader
-              icon={event.icon}
-              title={event.title}
-              eventId={event.id}
-              eventDate={event.event_date}
-              attendees={attendees}
-              currentUserCanEdit={currentUserCanEdit}
-              openAttendeesDialog={() => setOpenAttendeesDialog(true)}
-            />
+    <>
+      <SEO
+        title={event?.title || 'Événement'}
+        description={`Consultez les listes de souhaits pour l'événement ${event?.title || ''}.`}
+        canonical={`/events/${eventId}`}
+        noindex
+      />
+      <Box>
+        <Loader loading={loading}>
+          {!event && <EventNotFound />}
+          {event && (
+            <>
+              <EventHeader
+                icon={event.icon}
+                title={event.title}
+                eventId={event.id}
+                eventDate={event.event_date}
+                attendees={attendees}
+                currentUserCanEdit={currentUserCanEdit}
+                openAttendeesDialog={() => setOpenAttendeesDialog(true)}
+              />
 
-            <Container maxWidth="lg">
-              <Stack gap="20px" sx={{ paddingTop: 3 }}>
-                {shouldShowSuggestion && <SecretSantaSuggestionCard eventId={event.id} onDismiss={dismissSuggestion} />}
+              <Container maxWidth="lg">
+                <Stack gap="20px" sx={{ paddingTop: 3 }}>
+                  {shouldShowSuggestion && (
+                    <SecretSantaSuggestionCard eventId={event.id} onDismiss={dismissSuggestion} />
+                  )}
 
-                <MySecretSantaDraw eventId={event.id} />
+                  <MySecretSantaDraw eventId={event.id} />
 
-                {event.description && <Description text={event.description} allowMarkdown />}
+                  {event.description && <Description text={event.description} allowMarkdown />}
 
-                <EventWishlists event={event} />
-              </Stack>
-            </Container>
+                  <EventWishlists event={event} />
+                </Stack>
+              </Container>
 
-            <EventAttendeesDialog
-              open={openAttendeesDialog}
-              handleClose={() => setOpenAttendeesDialog(false)}
-              currentUserCanEdit={currentUserCanEdit}
-              eventId={event.id}
-              attendees={attendees}
-            />
-          </>
-        )}
-      </Loader>
-    </Box>
+              <EventAttendeesDialog
+                open={openAttendeesDialog}
+                handleClose={() => setOpenAttendeesDialog(false)}
+                currentUserCanEdit={currentUserCanEdit}
+                eventId={event.id}
+                attendees={attendees}
+              />
+            </>
+          )}
+        </Loader>
+      </Box>
+    </>
   )
 }

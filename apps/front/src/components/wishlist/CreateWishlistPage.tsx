@@ -47,6 +47,7 @@ import { TextareaMarkdown } from '../common/TextareaMarkdown'
 import { Title } from '../common/Title'
 import { EventIcon } from '../event/EventIcon'
 import { SearchEventSelect } from '../event/SearchEventSelect'
+import { SEO } from '../SEO'
 import { WishlistLogoActions } from './WishlistLogoActions'
 
 const steps = ['Type de liste', 'Informations', 'Evènements']
@@ -167,224 +168,232 @@ export const CreateWishlistPage = () => {
   })
 
   return (
-    <Box>
-      <Title>Créer une liste</Title>
-      <Box sx={{ width: '100%' }}>
-        <Stepper activeStep={step - 1} alternativeLabel>
-          {(fromEvent ? steps.slice(0, -1) : steps).map((label, i) => (
-            <Step key={label} completed={step > i + 1 || loading}>
-              <StepLabel>{label}</StepLabel>
-            </Step>
-          ))}
-        </Stepper>
-      </Box>
-      <Loader loading={userFirstName === undefined}>
-        <Container maxWidth="sm" sx={{ marginTop: '40px' }}>
-          <Card>
-            {step === 1 && (
-              <Box>
-                <Subtitle>Pour qui créer la liste ?</Subtitle>
+    <>
+      <SEO
+        title="Créer une liste de souhaits"
+        description="Créez une nouvelle liste de souhaits et partagez vos envies avec vos proches."
+        canonical="/wishlists/new"
+        noindex
+      />
+      <Box>
+        <Title>Créer une liste</Title>
+        <Box sx={{ width: '100%' }}>
+          <Stepper activeStep={step - 1} alternativeLabel>
+            {(fromEvent ? steps.slice(0, -1) : steps).map((label, i) => (
+              <Step key={label} completed={step > i + 1 || loading}>
+                <StepLabel>{label}</StepLabel>
+              </Step>
+            ))}
+          </Stepper>
+        </Box>
+        <Loader loading={userFirstName === undefined}>
+          <Container maxWidth="sm" sx={{ marginTop: '40px' }}>
+            <Card>
+              {step === 1 && (
+                <Box>
+                  <Subtitle>Pour qui créer la liste ?</Subtitle>
 
-                <Stack gap={2}>
-                  <OptionCard
-                    onClick={() => {
-                      setStep(2)
-                      setOwnerName(userFirstName!)
-                      setHideItems(true)
-                      setIsListForSomeoneElse(false)
-                      setLogo(undefined)
-                    }}
-                  >
-                    <IconWrapper>
-                      <AccountCircleTwoToneIcon />
-                    </IconWrapper>
-                    <Box sx={{ flex: 1 }}>
-                      <OptionTitle>Pour moi</OptionTitle>
-                      <OptionDescription>Je garde le secret et je fais ma liste pour moi-même</OptionDescription>
-                    </Box>
-                  </OptionCard>
+                  <Stack gap={2}>
+                    <OptionCard
+                      onClick={() => {
+                        setStep(2)
+                        setOwnerName(userFirstName!)
+                        setHideItems(true)
+                        setIsListForSomeoneElse(false)
+                        setLogo(undefined)
+                      }}
+                    >
+                      <IconWrapper>
+                        <AccountCircleTwoToneIcon />
+                      </IconWrapper>
+                      <Box sx={{ flex: 1 }}>
+                        <OptionTitle>Pour moi</OptionTitle>
+                        <OptionDescription>Je garde le secret et je fais ma liste pour moi-même</OptionDescription>
+                      </Box>
+                    </OptionCard>
 
-                  <OptionCard
-                    onClick={() => {
-                      setStep(2)
-                      setOwnerName('')
-                      setHideItems(false)
-                      setIsListForSomeoneElse(true)
-                    }}
-                  >
-                    <IconWrapper>
-                      <Diversity1TwoToneIcon />
-                    </IconWrapper>
-                    <Box sx={{ flex: 1 }}>
-                      <OptionTitle>Pour une autre personne</OptionTitle>
-                      <OptionDescription>
-                        Je crée la liste pour quelqu'un d'autre. Je peux choisir si je souhaite voir ou non les
-                        sélections faites par les autres participants
-                      </OptionDescription>
-                    </Box>
-                  </OptionCard>
-                </Stack>
-              </Box>
-            )}
+                    <OptionCard
+                      onClick={() => {
+                        setStep(2)
+                        setOwnerName('')
+                        setHideItems(false)
+                        setIsListForSomeoneElse(true)
+                      }}
+                    >
+                      <IconWrapper>
+                        <Diversity1TwoToneIcon />
+                      </IconWrapper>
+                      <Box sx={{ flex: 1 }}>
+                        <OptionTitle>Pour une autre personne</OptionTitle>
+                        <OptionDescription>
+                          Je crée la liste pour quelqu'un d'autre. Je peux choisir si je souhaite voir ou non les
+                          sélections faites par les autres participants
+                        </OptionDescription>
+                      </Box>
+                    </OptionCard>
+                  </Stack>
+                </Box>
+              )}
 
-            {step === 2 && (
-              <Box component="form" noValidate>
-                <Subtitle>Ajouter les informations</Subtitle>
+              {step === 2 && (
+                <Box component="form" noValidate>
+                  <Subtitle>Ajouter les informations</Subtitle>
 
-                <Stack gap={3}>
-                  <Stack direction="row" gap={3} alignItems="center">
-                    <ListOfTitle>Liste de</ListOfTitle>
-                    <Box sx={{ flex: 1 }}>
-                      <TextField
-                        label="Nom de la personne"
-                        required
+                  <Stack gap={3}>
+                    <Stack direction="row" gap={3} alignItems="center">
+                      <ListOfTitle>Liste de</ListOfTitle>
+                      <Box sx={{ flex: 1 }}>
+                        <TextField
+                          label="Nom de la personne"
+                          required
+                          autoComplete="off"
+                          disabled={loading}
+                          fullWidth
+                          value={ownerName}
+                          slotProps={{ htmlInput: { maxLength: 90 } }}
+                          placeholder={namePlaceholder}
+                          onChange={e => setOwnerName(e.target.value)}
+                        />
+                      </Box>
+                    </Stack>
+
+                    <Box>
+                      <TextareaMarkdown
+                        label="Description"
                         autoComplete="off"
                         disabled={loading}
                         fullWidth
-                        value={ownerName}
-                        slotProps={{ htmlInput: { maxLength: 90 } }}
-                        placeholder={namePlaceholder}
-                        onChange={e => setOwnerName(e.target.value)}
+                        value={description}
+                        maxLength={2000}
+                        placeholder="Une petite description (supporte le markdown) ..."
+                        onChange={e => setDescription(e.target.value)}
                       />
                     </Box>
+
+                    {isListForSomeoneElse && (
+                      <>
+                        <Box>
+                          <InputLabel>Révéler les Sélections</InputLabel>
+                          {!hideItems && (
+                            <Alert severity="warning" icon={false} sx={{ marginBlock: '15px' }}>
+                              En activant cette option, vous et tous les participants pourrez voir qui a coché quoi sur
+                              cette liste.
+                            </Alert>
+                          )}
+                          <FormControlLabel
+                            label="Je veux voir ce que les gens cochent sur cette liste"
+                            control={
+                              <Checkbox
+                                checked={!hideItems}
+                                onChange={() => setHideItems(prev => !prev)}
+                                disabled={loading}
+                              />
+                            }
+                          />
+                        </Box>
+                        <WishlistLogoActions
+                          logoUrl={logo ? URL.createObjectURL(logo) : undefined}
+                          loading={loading}
+                          onLogoChange={file => setLogo(file)}
+                          onLogoRemove={() => setLogo(undefined)}
+                        />
+                      </>
+                    )}
                   </Stack>
+                </Box>
+              )}
+
+              {step === 3 && (
+                <Stack>
+                  <Subtitle>Gérer les évènements</Subtitle>
 
                   <Box>
-                    <TextareaMarkdown
-                      label="Description"
-                      autoComplete="off"
-                      disabled={loading}
-                      fullWidth
-                      value={description}
-                      maxLength={2000}
-                      placeholder="Une petite description (supporte le markdown) ..."
-                      onChange={e => setDescription(e.target.value)}
+                    <SearchEventSelect
+                      label="Ajouter un évènement"
+                      loading={availableEventsLoading}
+                      disabled={loading || events.length === MAX_EVENTS_BY_LIST}
+                      options={availableEvents}
+                      excludedEventIds={events.map(e => e.id)}
+                      onChange={val => setEvents(prevState => [...prevState, val])}
                     />
                   </Box>
-
-                  {isListForSomeoneElse && (
+                  {events.length > 0 && (
                     <>
-                      <Box>
-                        <InputLabel>Révéler les Sélections</InputLabel>
-                        {!hideItems && (
-                          <Alert severity="warning" icon={false} sx={{ marginBlock: '15px' }}>
-                            En activant cette option, vous et tous les participants pourrez voir qui a coché quoi sur
-                            cette liste.
-                          </Alert>
-                        )}
-                        <FormControlLabel
-                          label="Je veux voir ce que les gens cochent sur cette liste"
-                          control={
-                            <Checkbox
-                              checked={!hideItems}
-                              onChange={() => setHideItems(prev => !prev)}
-                              disabled={loading}
-                            />
-                          }
-                        />
-                      </Box>
-                      <WishlistLogoActions
-                        logoUrl={logo ? URL.createObjectURL(logo) : undefined}
-                        loading={loading}
-                        onLogoChange={file => setLogo(file)}
-                        onLogoRemove={() => setLogo(undefined)}
-                      />
+                      <Divider sx={{ marginTop: '20px', marginBottom: '10px' }} />
+
+                      <List>
+                        {events.map(event => (
+                          <ListItem
+                            key={event.id}
+                            disablePadding
+                            className="animated zoomIn fast"
+                            secondaryAction={
+                              <IconButton
+                                edge="end"
+                                aria-label="delete"
+                                onClick={() => setEvents(prev => prev.filter(value => value.id !== event.id))}
+                              >
+                                <DeleteIcon />
+                              </IconButton>
+                            }
+                          >
+                            <ListItemButton>
+                              <ListItemAvatar>
+                                <EventIcon icon={event.icon} />
+                              </ListItemAvatar>
+                              <ListItemText
+                                primary={<b>{event.title}</b>}
+                                secondary={DateTime.fromISO(event.event_date).toLocaleString(DateTime.DATE_MED)}
+                              />
+                            </ListItemButton>
+                          </ListItem>
+                        ))}
+                      </List>
                     </>
                   )}
                 </Stack>
-              </Box>
-            )}
+              )}
 
-            {step === 3 && (
-              <Stack>
-                <Subtitle>Gérer les évènements</Subtitle>
-
-                <Box>
-                  <SearchEventSelect
-                    label="Ajouter un évènement"
-                    loading={availableEventsLoading}
-                    disabled={loading || events.length === MAX_EVENTS_BY_LIST}
-                    options={availableEvents}
-                    excludedEventIds={events.map(e => e.id)}
-                    onChange={val => setEvents(prevState => [...prevState, val])}
-                  />
-                </Box>
-                {events.length > 0 && (
-                  <>
-                    <Divider sx={{ marginTop: '20px', marginBottom: '10px' }} />
-
-                    <List>
-                      {events.map(event => (
-                        <ListItem
-                          key={event.id}
-                          disablePadding
-                          className="animated zoomIn fast"
-                          secondaryAction={
-                            <IconButton
-                              edge="end"
-                              aria-label="delete"
-                              onClick={() => setEvents(prev => prev.filter(value => value.id !== event.id))}
-                            >
-                              <DeleteIcon />
-                            </IconButton>
-                          }
-                        >
-                          <ListItemButton>
-                            <ListItemAvatar>
-                              <EventIcon icon={event.icon} />
-                            </ListItemAvatar>
-                            <ListItemText
-                              primary={<b>{event.title}</b>}
-                              secondary={DateTime.fromISO(event.event_date).toLocaleString(DateTime.DATE_MED)}
-                            />
-                          </ListItemButton>
-                        </ListItem>
-                      ))}
-                    </List>
-                  </>
-                )}
-              </Stack>
-            )}
-
-            {step > 1 && (
-              <Stack direction="row" justifyContent="space-between" alignItems="center" marginTop={3}>
-                <Box>
-                  {step > 1 && (
+              {step > 1 && (
+                <Stack direction="row" justifyContent="space-between" alignItems="center" marginTop={3}>
+                  <Box>
+                    {step > 1 && (
+                      <Button
+                        onClick={() => setStep(prev => prev - 1)}
+                        disabled={step === 1}
+                        startIcon={<KeyboardArrowLeftIcon />}
+                      >
+                        Précédent
+                      </Button>
+                    )}
+                  </Box>
+                  {step < 3 && !fromEvent && (
                     <Button
-                      onClick={() => setStep(prev => prev - 1)}
-                      disabled={step === 1}
-                      startIcon={<KeyboardArrowLeftIcon />}
+                      onClick={() => setStep(prev => prev + 1)}
+                      disabled={!nextStepEnabled}
+                      endIcon={<KeyboardArrowRightIcon />}
                     >
-                      Précédent
+                      Suivant
                     </Button>
                   )}
-                </Box>
-                {step < 3 && !fromEvent && (
-                  <Button
-                    onClick={() => setStep(prev => prev + 1)}
-                    disabled={!nextStepEnabled}
-                    endIcon={<KeyboardArrowRightIcon />}
-                  >
-                    Suivant
-                  </Button>
-                )}
-                {(step === 3 || (fromEvent && step === 2)) && (
-                  <Button
-                    variant="contained"
-                    loading={loading}
-                    loadingPosition="end"
-                    disabled={!createEnabled || loading}
-                    endIcon={<SaveIcon />}
-                    onClick={() => createWishlist()}
-                  >
-                    Créer
-                  </Button>
-                )}
-              </Stack>
-            )}
-          </Card>
-        </Container>
-      </Loader>
-    </Box>
+                  {(step === 3 || (fromEvent && step === 2)) && (
+                    <Button
+                      variant="contained"
+                      loading={loading}
+                      loadingPosition="end"
+                      disabled={!createEnabled || loading}
+                      endIcon={<SaveIcon />}
+                      onClick={() => createWishlist()}
+                    >
+                      Créer
+                    </Button>
+                  )}
+                </Stack>
+              )}
+            </Card>
+          </Container>
+        </Loader>
+      </Box>
+    </>
   )
 }

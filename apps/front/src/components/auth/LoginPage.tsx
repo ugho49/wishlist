@@ -111,7 +111,6 @@ export const LoginPage = () => {
         title="Connexion"
         description="Connectez-vous à votre compte Wishlist pour gérer vos listes de souhaits et partager vos envies avec vos proches."
         canonical="/login"
-        noindex
       />
       <Stack spacing={4} alignItems="center">
         <TitleStyled variant="h4">Connexion</TitleStyled>

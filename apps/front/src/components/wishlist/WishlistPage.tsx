@@ -11,6 +11,7 @@ import { useFeatureFlag } from '../../hooks/useFeatureFlag'
 import { Description } from '../common/Description'
 import { Loader } from '../common/Loader'
 import { ImportItemsDialog } from '../item/ImportItemsDialog'
+import { SEO } from '../SEO'
 import { WishlistEventsDialog } from './WishlistEventsDialog'
 import { WishlistHeader } from './WishlistHeader'
 import { WishlistItems } from './WishlistItems'
@@ -65,57 +66,65 @@ export const WishlistPage = ({ wishlistId }: WishlistPageProps) => {
   )
 
   return (
-    <Box>
-      <Loader loading={loading}>
-        {!wishlist && <WishlistNotFound />}
+    <>
+      <SEO
+        title={wishlist?.title || 'Liste de souhaits'}
+        description={`Découvrez la liste de souhaits ${wishlist?.title || ''}.`}
+        canonical={`/wishlists/${wishlistId}`}
+        noindex
+      />
+      <Box>
+        <Loader loading={loading}>
+          {!wishlist && <WishlistNotFound />}
 
-        {wishlist && (
-          <>
-            <WishlistHeader
-              wishlist={wishlist}
-              currentUserCanEdit={currentUserCanEdit}
-              isPublic={isPublic}
-              hasImportableItems={importableItems.length > 0}
-              sort={sort}
-              filter={filter}
-              onSortChange={setSort}
-              onFilterChange={setFilter}
-              onOpenEventDialog={() => setShowEventDialog(true)}
-              onOpenImportDialog={() => setShowImportDialog(true)}
-            />
-
-            <Container maxWidth="lg">
-              <Stack gap="20px" sx={{ paddingTop: 3 }}>
-                {wishlist.description && <Description text={wishlist.description} allowMarkdown />}
-
-                <WishlistItems
-                  wishlist={wishlist}
-                  hasImportableItems={importableItems.length > 0}
-                  onImportItems={() => setShowImportDialog(true)}
-                />
-              </Stack>
-            </Container>
-
-            <WishlistEventsDialog
-              open={showEventDialog}
-              handleClose={() => setShowEventDialog(false)}
-              wishlistId={wishlist.id}
-              events={wishlist.events}
-              currentUserCanEdit={currentUserCanEdit}
-            />
-
-            {currentUserCanEdit && importableItems.length > 0 && (
-              <ImportItemsDialog
-                open={showImportDialog && importItemsEnabled}
-                wishlistId={wishlist.id}
-                importableItems={importableItems}
-                onClose={() => setShowImportDialog(false)}
-                onComplete={() => setShowImportDialog(false)}
+          {wishlist && (
+            <>
+              <WishlistHeader
+                wishlist={wishlist}
+                currentUserCanEdit={currentUserCanEdit}
+                isPublic={isPublic}
+                hasImportableItems={importableItems.length > 0}
+                sort={sort}
+                filter={filter}
+                onSortChange={setSort}
+                onFilterChange={setFilter}
+                onOpenEventDialog={() => setShowEventDialog(true)}
+                onOpenImportDialog={() => setShowImportDialog(true)}
               />
-            )}
-          </>
-        )}
-      </Loader>
-    </Box>
+
+              <Container maxWidth="lg">
+                <Stack gap="20px" sx={{ paddingTop: 3 }}>
+                  {wishlist.description && <Description text={wishlist.description} allowMarkdown />}
+
+                  <WishlistItems
+                    wishlist={wishlist}
+                    hasImportableItems={importableItems.length > 0}
+                    onImportItems={() => setShowImportDialog(true)}
+                  />
+                </Stack>
+              </Container>
+
+              <WishlistEventsDialog
+                open={showEventDialog}
+                handleClose={() => setShowEventDialog(false)}
+                wishlistId={wishlist.id}
+                events={wishlist.events}
+                currentUserCanEdit={currentUserCanEdit}
+              />
+
+              {currentUserCanEdit && importableItems.length > 0 && (
+                <ImportItemsDialog
+                  open={showImportDialog && importItemsEnabled}
+                  wishlistId={wishlist.id}
+                  importableItems={importableItems}
+                  onClose={() => setShowImportDialog(false)}
+                  onComplete={() => setShowImportDialog(false)}
+                />
+              )}
+            </>
+          )}
+        </Loader>
+      </Box>
+    </>
   )
 }
