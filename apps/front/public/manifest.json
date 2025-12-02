@@ -1,0 +1,66 @@
+{
+  "name": "Wishlist - Créez et partagez vos listes de souhaits",
+  "short_name": "Wishlist",
+  "description": "Créez, gérez et partagez facilement vos listes de souhaits pour tous vos événements : anniversaires, mariages, Noël.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f9fafb",
+  "theme_color": "#255376",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "fr-FR",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "/icon_50x50.png",
+      "sizes": "50x50",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon_100x100.png",
+      "sizes": "100x100",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon_200x200.png",
+      "sizes": "200x200",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["lifestyle", "utilities", "social"],
+  "shortcuts": [
+    {
+      "name": "Mes événements",
+      "short_name": "Événements",
+      "description": "Accéder à mes événements",
+      "url": "/events",
+      "icons": [
+        {
+          "src": "/icon_100x100.png",
+          "sizes": "100x100"
+        }
+      ]
+    },
+    {
+      "name": "Mes listes",
+      "short_name": "Listes",
+      "description": "Accéder à mes listes de souhaits",
+      "url": "/wishlists",
+      "icons": [
+        {
+          "src": "/icon_100x100.png",
+          "sizes": "100x100"
+        }
+      ]
+    }
+  ]
+}

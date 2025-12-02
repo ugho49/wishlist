@@ -2,12 +2,44 @@
 <html lang="fr">
   <head>
     <meta charset="utf-8" />
-    <title>Wishlist</title>
+    <title>Wishlist - Créez et partagez vos listes de souhaits</title>
     <base href="/" />
 
+    <!-- Primary Meta Tags -->
+    <meta name="title" content="Wishlist - Créez et partagez vos listes de souhaits" />
+    <meta name="description" content="Créez, gérez et partagez facilement vos listes de souhaits pour tous vos événements : anniversaires, mariages, Noël. Organisez vos cadeaux et faites plaisir à vos proches." />
+    <meta name="keywords" content="liste de souhaits, wishlist, cadeaux, anniversaire, mariage, noël, partage, événements" />
+    <meta name="author" content="Wishlist App" />
     <meta name="theme-color" content="#255376" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://wishlistapp.fr/" />
+    <meta property="og:title" content="Wishlist - Créez et partagez vos listes de souhaits" />
+    <meta property="og:description" content="Créez, gérez et partagez facilement vos listes de souhaits pour tous vos événements : anniversaires, mariages, Noël. Organisez vos cadeaux et faites plaisir à vos proches." />
+    <meta property="og:image" content="https://wishlistapp.fr/logo_text_350x150.png" />
+    <meta property="og:locale" content="fr_FR" />
+    <meta property="og:site_name" content="Wishlist" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://wishlistapp.fr/" />
+    <meta name="twitter:title" content="Wishlist - Créez et partagez vos listes de souhaits" />
+    <meta name="twitter:description" content="Créez, gérez et partagez facilement vos listes de souhaits pour tous vos événements : anniversaires, mariages, Noël. Organisez vos cadeaux et faites plaisir à vos proches." />
+    <meta name="twitter:image" content="https://wishlistapp.fr/logo_text_350x150.png" />
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://wishlistapp.fr/" />
+
+    <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="200x200" href="/icon_200x200.png" />
+    <link rel="icon" type="image/png" sizes="100x100" href="/icon_100x100.png" />
+    <link rel="icon" type="image/png" sizes="50x50" href="/icon_50x50.png" />
+
+    <!-- Manifest for PWA -->
+    <link rel="manifest" href="/manifest.json" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
     <link rel="stylesheet" href="/src/styles.scss" />
@@ -20,6 +52,26 @@
       gtag('js', new Date());
 
       gtag('config', 'G-F80Q6QS9RW');
+    </script>
+
+    <!-- Structured Data / Schema.org -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Wishlist",
+      "applicationCategory": "LifestyleApplication",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "EUR"
+      },
+      "description": "Créez, gérez et partagez facilement vos listes de souhaits pour tous vos événements : anniversaires, mariages, Noël. Organisez vos cadeaux et faites plaisir à vos proches.",
+      "url": "https://wishlistapp.fr",
+      "operatingSystem": "Web",
+      "browserRequirements": "Requires JavaScript. Requires HTML5.",
+      "inLanguage": "fr-FR"
+    }
     </script>
   </head>
   <body style="background-color: #f9fafb">

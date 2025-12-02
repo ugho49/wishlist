@@ -1,2 +1,13 @@
 # https://www.robotstxt.org/robotstxt.html
+# Robots.txt pour Wishlist App
+
 User-agent: *
+Allow: /
+Disallow: /events/
+Disallow: /wishlists/
+Disallow: /user/
+Disallow: /admin/
+Disallow: /welcome
+
+# Sitemap
+Sitemap: https://wishlistapp.fr/sitemap.xml

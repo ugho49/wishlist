@@ -16,6 +16,7 @@ import { useApi } from '../../hooks/useApi'
 import { useToast } from '../../hooks/useToast'
 import { zodRequiredString } from '../../utils/validation'
 import { RouterLink } from '../common/RouterLink'
+import { SEO } from '../SEO'
 import { GoogleButton } from './GoogleButton'
 
 const schema = z.object({
@@ -109,98 +110,105 @@ export const RegisterPage = () => {
   }
 
   return (
-    <Stack spacing={4} alignItems="center">
-      <TitleStyled variant="h4">Créer un compte</TitleStyled>
+    <>
+      <SEO
+        title="Créer un compte"
+        description="Inscrivez-vous gratuitement sur Wishlist pour créer et partager vos listes de souhaits avec vos proches en toute simplicité."
+        canonical="/register"
+      />
+      <Stack spacing={4} alignItems="center">
+        <TitleStyled variant="h4">Créer un compte</TitleStyled>
 
-      <Stack component="form" onSubmit={handleSubmit(onSubmit)} spacing={3} width="100%">
-        {formErrors.root && <Alert severity="error">{formErrors.root.message}</Alert>}
+        <Stack component="form" onSubmit={handleSubmit(onSubmit)} spacing={3} width="100%">
+          {formErrors.root && <Alert severity="error">{formErrors.root.message}</Alert>}
 
-        <Stack direction="row" spacing={2}>
+          <Stack direction="row" spacing={2}>
+            <TextField
+              {...register('firstname')}
+              label="Prénom"
+              fullWidth
+              placeholder="Votre prénom"
+              autoComplete="given-name"
+              error={!!formErrors.firstname}
+              helperText={formErrors.firstname?.message}
+            />
+
+            <TextField
+              {...register('lastname')}
+              label="Nom"
+              fullWidth
+              placeholder="Votre nom"
+              autoComplete="family-name"
+              error={!!formErrors.lastname}
+              helperText={formErrors.lastname?.message}
+            />
+          </Stack>
+
           <TextField
-            {...register('firstname')}
-            label="Prénom"
+            {...register('email')}
+            type="email"
+            label="Email"
             fullWidth
-            placeholder="Votre prénom"
-            autoComplete="given-name"
-            error={!!formErrors.firstname}
-            helperText={formErrors.firstname?.message}
+            placeholder="votre@email.com"
+            autoComplete="email"
+            error={!!formErrors.email}
+            helperText={formErrors.email?.message}
           />
 
           <TextField
-            {...register('lastname')}
-            label="Nom"
+            {...register('password')}
+            type="password"
+            label="Mot de passe"
             fullWidth
-            placeholder="Votre nom"
-            autoComplete="family-name"
-            error={!!formErrors.lastname}
-            helperText={formErrors.lastname?.message}
+            placeholder="Choisissez un mot de passe sécurisé"
+            autoComplete="new-password"
+            error={!!formErrors.password}
+            helperText={formErrors.password?.message}
           />
-        </Stack>
 
-        <TextField
-          {...register('email')}
-          type="email"
-          label="Email"
-          fullWidth
-          placeholder="votre@email.com"
-          autoComplete="email"
-          error={!!formErrors.email}
-          helperText={formErrors.email?.message}
-        />
-
-        <TextField
-          {...register('password')}
-          type="password"
-          label="Mot de passe"
-          fullWidth
-          placeholder="Choisissez un mot de passe sécurisé"
-          autoComplete="new-password"
-          error={!!formErrors.password}
-          helperText={formErrors.password?.message}
-        />
-
-        <ButtonStyled
-          type="submit"
-          variant="contained"
-          size="large"
-          fullWidth
-          loading={isSubmitting}
-          loadingPosition="start"
-          startIcon={<PersonAddIcon />}
-          disabled={isSubmitting || socialLoading}
-        >
-          Créer mon compte
-        </ButtonStyled>
-
-        <DividerStyled>
-          <Typography variant="body2" color="text.secondary">
-            ou
-          </Typography>
-        </DividerStyled>
-
-        <SocialButtonsStack alignItems="center">
-          <GoogleButton
-            loading={socialLoading}
-            disabled={socialLoading}
-            onSuccess={code => registerWithGoogle(code)}
-            onError={() => onSocialError()}
-            onStart={() => setSocialLoading(true)}
-            iconSize={23}
+          <ButtonStyled
+            type="submit"
+            variant="contained"
+            size="large"
+            fullWidth
+            loading={isSubmitting}
+            loadingPosition="start"
+            startIcon={<PersonAddIcon />}
+            disabled={isSubmitting || socialLoading}
           >
-            S'inscrire avec Google
-          </GoogleButton>
-        </SocialButtonsStack>
-      </Stack>
+            Créer mon compte
+          </ButtonStyled>
 
-      <Stack spacing={2} alignItems="center">
-        <Stack direction="row" alignItems="center" spacing={1}>
-          <Typography variant="body2" color="text.secondary">
-            Déjà inscrit ?
-          </Typography>
-          <RouterLink to="/login">Se connecter</RouterLink>
+          <DividerStyled>
+            <Typography variant="body2" color="text.secondary">
+              ou
+            </Typography>
+          </DividerStyled>
+
+          <SocialButtonsStack alignItems="center">
+            <GoogleButton
+              loading={socialLoading}
+              disabled={socialLoading}
+              onSuccess={code => registerWithGoogle(code)}
+              onError={() => onSocialError()}
+              onStart={() => setSocialLoading(true)}
+              iconSize={23}
+            >
+              S'inscrire avec Google
+            </GoogleButton>
+          </SocialButtonsStack>
         </Stack>
-        <RouterLink to="/forgot-password">Mot de passe oublié ?</RouterLink>
+
+        <Stack spacing={2} alignItems="center">
+          <Stack direction="row" alignItems="center" spacing={1}>
+            <Typography variant="body2" color="text.secondary">
+              Déjà inscrit ?
+            </Typography>
+            <RouterLink to="/login">Se connecter</RouterLink>
+          </Stack>
+          <RouterLink to="/forgot-password">Mot de passe oublié ?</RouterLink>
+        </Stack>
       </Stack>
-    </Stack>
+    </>
   )
 }
