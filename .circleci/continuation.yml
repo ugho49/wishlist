@@ -14,12 +14,12 @@ parameters:
 references:
   setup_env_node: &setup_env_node
     docker:
-      - image: cimg/node:24.11
+      - image: oven/bun:1.3.3-alpine
   attach_workspace: &attach_workspace
     at: ~/project
   restore_node_cache: &restore_node_cache
     keys:
-      - node-module-cache-{{ checksum "./yarn.lock" }}
+      - node-module-cache-{{ checksum "./bun.lock" }}
   checkout: &checkout
     method: blobless
 
@@ -30,7 +30,7 @@ jobs:
       - checkout: *checkout
       - attach_workspace: *attach_workspace
       - restore_cache: *restore_node_cache
-      - run: yarn nx build front
+      - run: bun nx build front
       - persist_to_workspace:
           root: .
           paths:

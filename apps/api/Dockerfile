@@ -1,4 +1,4 @@
-FROM oven/bun:1.1.44-alpine as base
+FROM oven/bun:1.3-alpine as base
 
 FROM base AS builder
 

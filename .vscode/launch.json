@@ -17,7 +17,7 @@
       "type": "node",
       "request": "launch",
       "name": "Start api server",
-      "runtimeExecutable": "yarn",
+      "runtimeExecutable": "bun",
       "runtimeArgs": ["nx", "serve", "api"],
       "env": {
         "NODE_OPTIONS": "--inspect=9229"

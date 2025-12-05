@@ -19,7 +19,7 @@ parameters:
 references:
   setup_env_node: &setup_env_node
     docker:
-      - image: cimg/node:24.11
+      - image: oven/bun:1.3.3-alpine
   attach_workspace: &attach_workspace
     at: ~/project
   nx/set-shas: &nx_set_shas_option
@@ -27,13 +27,12 @@ references:
     main-branch-name: main
     workflow-name: setup-workflow
   save_node_cache: &save_node_cache
-    key: node-module-cache-{{ checksum "./yarn.lock" }}
+    key: node-module-cache-{{ checksum "./bun.lock" }}
     paths:
       - node_modules
-      - .yarn
   restore_node_cache: &restore_node_cache
     keys:
-      - node-module-cache-{{ checksum "./yarn.lock" }}
+      - node-module-cache-{{ checksum "./bun.lock" }}
   checkout: &checkout
     method: blobless
 
@@ -43,7 +42,7 @@ jobs:
     steps:
       - checkout: *checkout
       - restore_cache: *restore_node_cache
-      - run: yarn install --immutable
+      - run: bun install --frozen-lockfile
       - save_cache: *save_node_cache
       - persist_to_workspace:
           root: .
@@ -57,7 +56,7 @@ jobs:
       - attach_workspace: *attach_workspace
       - nx/set-shas: *nx_set_shas_option
       - run:
-          command: yarn nx affected --target=test --base=$NX_BASE --head=$NX_HEAD --parallel=3  --output-style=stream --exclude=@wishlist/source
+          command: bun nx affected --target=test --base=$NX_BASE --head=$NX_HEAD --parallel=3  --output-style=stream --exclude=@wishlist/source
       - store_test_results:
           path: ./junit_reports/unit
 
@@ -76,7 +75,7 @@ jobs:
           background: true
           command: .circleci/autoforward.py
       - run:
-          command: yarn nx affected --target=test:int --base=$NX_BASE --head=$NX_HEAD --parallel=3  --output-style=stream --exclude=@wishlist/source 
+          command: bun nx affected --target=test:int --base=$NX_BASE --head=$NX_HEAD --parallel=3  --output-style=stream --exclude=@wishlist/source 
       - store_test_results:
           path: ./junit_reports/integration
 
@@ -86,7 +85,7 @@ jobs:
     steps:
       - checkout: *checkout
       - attach_workspace: *attach_workspace
-      - run: yarn check --reporter=summary
+      - run: bun check --reporter=summary
 
   typecheck:
       <<: *setup_env_node
@@ -94,7 +93,7 @@ jobs:
         - checkout: *checkout
         - attach_workspace: *attach_workspace
         - nx/set-shas: *nx_set_shas_option
-        - run: yarn nx affected --target=typecheck --base=$NX_BASE --head=$NX_HEAD --parallel=3  --output-style=stream --exclude=@wishlist/source 
+        - run: bun nx affected --target=typecheck --base=$NX_BASE --head=$NX_HEAD --parallel=3  --output-style=stream --exclude=@wishlist/source 
 
   continuation:
     <<: *setup_env_node

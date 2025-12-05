@@ -61,7 +61,7 @@
   ],
   "namedInputs": {
     "default": ["{projectRoot}/**/*", "sharedGlobals"],
-    "sharedGlobals": ["{workspaceRoot}/yarn.lock", "{workspaceRoot}/.circleci/*"],
+    "sharedGlobals": ["{workspaceRoot}/bun.lock", "{workspaceRoot}/.circleci/*"],
     "production": [
       "default",
       "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",

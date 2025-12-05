@@ -34,7 +34,7 @@ function createNodesInternal(params: { configFilePath: string; options?: Drizzle
 
   const seedTarget = {
     [options?.seedTargetName ?? 'drizzle:seed']: {
-      command: 'yarn tsx drizzle/seed.ts',
+      command: 'bun tsx drizzle/seed.ts',
       options: {
         cwd: '{projectRoot}',
         color: true,
