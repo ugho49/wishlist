@@ -1,0 +1,239 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+# Ensure only one workflow runs at a time per branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '24.11'
+  NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
+
+jobs:
+  install-dependencies:
+    name: Install Dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Full history for Nx affected
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Cache node_modules
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            node_modules
+            .yarn
+          key: node-modules-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+
+  check:
+    name: Biome Check
+    runs-on: ubuntu-latest
+    needs: install-dependencies
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Restore node_modules cache
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            node_modules
+            .yarn
+          key: node-modules-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+
+      - name: Run Biome check
+        run: yarn check --reporter=summary
+
+  typecheck:
+    name: TypeScript Check
+    runs-on: ubuntu-latest
+    needs: install-dependencies
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Restore node_modules cache
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            node_modules
+            .yarn
+          key: node-modules-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+
+      - name: Set NX SHAs for affected detection
+        uses: nrwl/nx-set-shas@v4
+        with:
+          main-branch-name: main
+          error-on-no-successful-workflow: false
+          workflow-id: ci.yml
+
+      - name: Run TypeScript type checking
+        run: yarn nx affected --target=typecheck --base=$NX_BASE --head=$NX_HEAD --parallel=3 --output-style=stream --exclude=@wishlist/source
+
+  test-unit:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    needs: install-dependencies
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Restore node_modules cache
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            node_modules
+            .yarn
+          key: node-modules-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+
+      - name: Set NX SHAs for affected detection
+        uses: nrwl/nx-set-shas@v4
+        with:
+          main-branch-name: main
+          error-on-no-successful-workflow: false
+          workflow-id: ci.yml
+
+      - name: Run unit tests
+        run: yarn nx affected --target=test --base=$NX_BASE --head=$NX_HEAD --parallel=3 --output-style=stream --exclude=@wishlist/source
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-results
+          path: ./junit_reports/unit
+          if-no-files-found: ignore
+
+  test-int:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: install-dependencies
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Restore node_modules cache
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            node_modules
+            .yarn
+          key: node-modules-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+
+      - name: Set NX SHAs for affected detection
+        uses: nrwl/nx-set-shas@v4
+        with:
+          main-branch-name: main
+          error-on-no-successful-workflow: false
+          workflow-id: ci.yml
+
+      - name: Run integration tests
+        run: yarn nx affected --target=test:int --base=$NX_BASE --head=$NX_HEAD --parallel=3 --output-style=stream --exclude=@wishlist/source
+        env:
+          # Testcontainers will work natively in GitHub Actions with Docker
+          TESTCONTAINERS_HOST_OVERRIDE: localhost
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-test-results
+          path: ./junit_reports/integration
+          if-no-files-found: ignore
+
+  # Detect which apps are affected to trigger build/deploy workflows
+  detect-affected:
+    name: Detect Affected Apps
+    runs-on: ubuntu-latest
+    needs: [check, typecheck, test-unit, test-int]
+    outputs:
+      api-affected: ${{ steps.detect.outputs.api-affected }}
+      front-affected: ${{ steps.detect.outputs.front-affected }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Restore node_modules cache
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            node_modules
+            .yarn
+          key: node-modules-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+
+      - name: Set NX SHAs for affected detection
+        uses: nrwl/nx-set-shas@v4
+        with:
+          main-branch-name: main
+          error-on-no-successful-workflow: false
+          workflow-id: ci.yml
+
+      - name: Detect affected apps
+        id: detect
+        run: |
+          AFFECTED_APPS=$(npx nx show projects --type=app --exclude=@wishlist/source --affected --base=$NX_BASE --head=$NX_HEAD --json | jq -r '. | join(" ")')
+          echo "Affected apps: $AFFECTED_APPS"
+
+          if echo "$AFFECTED_APPS" | grep -q "api"; then
+            echo "api-affected=true" >> $GITHUB_OUTPUT
+          else
+            echo "api-affected=false" >> $GITHUB_OUTPUT
+          fi
+
+          if echo "$AFFECTED_APPS" | grep -q "front"; then
+            echo "front-affected=true" >> $GITHUB_OUTPUT
+          else
+            echo "front-affected=false" >> $GITHUB_OUTPUT
+          fi

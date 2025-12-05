@@ -1,0 +1,220 @@
+name: Build and Deploy
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [main]
+
+env:
+  NODE_VERSION: '24.11'
+
+jobs:
+  # This job determines if we should proceed based on CI success and affected apps
+  check-prerequisites:
+    name: Check Prerequisites
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    outputs:
+      api-affected: ${{ steps.affected.outputs.api-affected }}
+      front-affected: ${{ steps.affected.outputs.front-affected }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Set NX SHAs for affected detection
+        uses: nrwl/nx-set-shas@v4
+        with:
+          main-branch-name: main
+          error-on-no-successful-workflow: false
+          workflow-id: ci.yml
+
+      - name: Detect affected apps
+        id: affected
+        run: |
+          AFFECTED_APPS=$(npx nx show projects --type=app --exclude=@wishlist/source --affected --base=$NX_BASE --head=$NX_HEAD --json | jq -r '. | join(" ")')
+          echo "Affected apps: $AFFECTED_APPS"
+
+          if echo "$AFFECTED_APPS" | grep -q "api"; then
+            echo "api-affected=true" >> $GITHUB_OUTPUT
+          else
+            echo "api-affected=false" >> $GITHUB_OUTPUT
+          fi
+
+          if echo "$AFFECTED_APPS" | grep -q "front"; then
+            echo "front-affected=true" >> $GITHUB_OUTPUT
+          else
+            echo "front-affected=false" >> $GITHUB_OUTPUT
+          fi
+
+  # Build Docker image for API (without publishing for non-main branches)
+  build-api-docker:
+    name: Build API Docker Image
+    runs-on: ubuntu-latest
+    needs: check-prerequisites
+    if: needs.check-prerequisites.outputs.api-affected == 'true'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/api/Dockerfile
+          push: false
+          tags: ughoste/wishlist-api:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # Build and publish Docker image for API (only on main branch)
+  build-and-publish-api-docker:
+    name: Build and Publish API Docker Image
+    runs-on: ubuntu-latest
+    needs: check-prerequisites
+    if: |
+      needs.check-prerequisites.outputs.api-affected == 'true' &&
+      github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/api/Dockerfile
+          push: true
+          tags: |
+            ughoste/wishlist-api:${{ github.sha }}
+            ughoste/wishlist-api:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # Manual approval for API deployment
+  deploy-api-approval:
+    name: Approve API Deployment
+    runs-on: ubuntu-latest
+    needs: build-and-publish-api-docker
+    if: |
+      needs.check-prerequisites.outputs.api-affected == 'true' &&
+      github.ref == 'refs/heads/main'
+    environment:
+      name: production-api
+    steps:
+      - name: Approval checkpoint
+        run: echo "API deployment approved"
+
+  # Deploy API to OVH server
+  deploy-api:
+    name: Deploy API
+    runs-on: ubuntu-latest
+    needs: deploy-api-approval
+    steps:
+      - name: Deploy to OVH server via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.OVH_SERVER_URL }}
+          username: ${{ secrets.OVH_SERVER_USER }}
+          key: ${{ secrets.OVH_SERVER_SSH_KEY }}
+          port: ${{ secrets.OVH_SERVER_PORT }}
+          script: |
+            cd /home/circleci/wishlist-api
+            ./deploy.sh ${{ github.sha }}
+
+  # Build frontend
+  build-front:
+    name: Build Frontend
+    runs-on: ubuntu-latest
+    needs: check-prerequisites
+    if: needs.check-prerequisites.outputs.front-affected == 'true'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Build frontend
+        run: yarn nx build front
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: dist
+          retention-days: 1
+
+  # Manual approval for frontend deployment
+  deploy-front-approval:
+    name: Approve Frontend Deployment
+    runs-on: ubuntu-latest
+    needs: build-front
+    if: |
+      needs.check-prerequisites.outputs.front-affected == 'true' &&
+      github.ref == 'refs/heads/main'
+    environment:
+      name: production-frontend
+    steps:
+      - name: Approval checkpoint
+        run: echo "Frontend deployment approved"
+
+  # Deploy frontend to Firebase
+  deploy-front:
+    name: Deploy Frontend
+    runs-on: ubuntu-latest
+    needs: deploy-front-approval
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-dist
+          path: dist
+
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: Deploy to Firebase
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        run: |
+          echo '${{ secrets.FIREBASE_JSON }}' > firebase_auth.json
+          export GOOGLE_APPLICATION_CREDENTIALS="$(pwd)/firebase_auth.json"
+          firebase deploy -P production -m "Workflow ${{ github.run_id }}, SHA ${{ github.sha }}" --non-interactive
