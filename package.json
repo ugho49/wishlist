@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "license": "MIT",
   "private": true,
-  "packageManager": "yarn@4.12.0",
+  "packageManager": "bun@1.1.44",
   "scripts": {
     "serve:all": "nx run-many --target=serve",
     "serve:front": "nx serve front",
@@ -12,7 +12,7 @@
     "test": "nx run-many --target=test --exclude=@wishlist/source",
     "test:int": "nx run-many --target=test:int",
     "check": "biome check --diagnostic-level=error",
-    "check:fix": "yarn check --write",
+    "check:fix": "bun check --write",
     "prepack": "husky",
     "docker:up": "docker compose -f ./docker/docker-compose.yml -f ./docker/docker-compose.local.yml up -d",
     "docker:down": "docker compose -f ./docker/docker-compose.yml -f ./docker/docker-compose.local.yml down --remove-orphans",

@@ -22,7 +22,7 @@ Wishlist App is a collaborative platform designed to make gift-giving easier and
 ### Prerequisites
 
 - **Node.js**: 24+ ([.nvmrc](.nvmrc))
-- **Yarn**: For package management
+- **Bun**: For package management
 - **Docker**: For local database
 
 ### Installation
@@ -31,12 +31,12 @@ Wishlist App is a collaborative platform designed to make gift-giving easier and
 ```bash
 git clone <repository-url>
 cd wishlist
-yarn install
+bun install
 ```
 
 2. **Start local services**
 ```bash
-yarn docker:up  # Starts PostgreSQL, MailDev, and Adminer
+bun docker:up  # Starts PostgreSQL, MailDev, and Adminer
 ```
 
 3. **Setup environment**
@@ -49,7 +49,7 @@ cp apps/front/.env.example apps/front/.env.local
 4. **Run migrations and start**
 ```bash
 nx run api:drizzle:migrate
-yarn serve:all  # Frontend on :4200, API on :3000
+bun serve:all  # Frontend on :4200, API on :3000
 ```
 
 ### Local Services
@@ -66,18 +66,18 @@ yarn serve:all  # Frontend on :4200, API on :3000
 
 ```bash
 # Development
-yarn serve:all          # Start all apps
-yarn serve:front        # Start React frontend only
-yarn serve:api          # Start NestJS API only
+bun serve:all          # Start all apps
+bun serve:front        # Start React frontend only
+bun serve:api          # Start NestJS API only
 
 # Testing
-yarn test              # Unit tests (Vitest)
-yarn test:int          # Integration tests (Testcontainers)
-yarn typecheck         # TypeScript type checking
+bun test              # Unit tests (Vitest)
+bun test:int          # Integration tests (Testcontainers)
+bun typecheck         # TypeScript type checking
 
 # Code Quality
-yarn check             # Run Biome linting
-yarn check:fix         # Fix Biome violations
+bun check             # Run Biome linting
+bun check:fix         # Fix Biome violations
 
 # Database
 nx run api:drizzle:studio                      # Open database UI
@@ -86,8 +86,8 @@ nx run api:drizzle:migrate                     # Run migrations
 nx run api:drizzle:seed                        # Seed database
 
 # Docker
-yarn docker:up         # Start services
-yarn docker:down       # Stop services
+bun docker:up         # Start services
+bun docker:down       # Stop services
 ```
 
 ## 🏗️ Architecture
@@ -134,7 +134,7 @@ yarn docker:down       # Stop services
 - **Backend**: NestJS + PostgreSQL + Drizzle ORM
 - **Frontend**: React + Vite + Material-UI (MUI)
 - **Monorepo**: Nx
-- **Package Manager**: Yarn
+- **Package Manager**: Bun
 - **Code Quality**: Biome (replaces ESLint + Prettier)
 - **Testing**: Vitest + Testcontainers
 
@@ -153,8 +153,8 @@ yarn docker:down       # Stop services
 2. Create a feature branch: `git checkout -b feature/amazing-feature`
 3. Follow coding standards:
    - Use conventional commits
-   - Run `yarn test` and `yarn typecheck`
-   - Run `yarn check` before committing
+   - Run `bun test` and `bun typecheck`
+   - Run `bun check` before committing
 4. Commit: `git commit -m 'feat: add amazing feature'`
 5. Push and open a Pull Request
 

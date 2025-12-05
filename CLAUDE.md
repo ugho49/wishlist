@@ -5,20 +5,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Development Commands
 
 ### Building and Running
-- `yarn build` - Build all projects in the monorepo
-- `yarn serve:front` - Start the React frontend development server (port 4200)
-- `yarn serve:api` - Start the NestJS API development server
-- `yarn serve:all` - Start all applications concurrently
+- `bun build` - Build all projects in the monorepo
+- `bun serve:front` - Start the React frontend development server (port 4200)
+- `bun serve:api` - Start the NestJS API development server
+- `bun serve:all` - Start all applications concurrently
 
 ### Testing
-- `yarn test` - Run unit tests for all projects using Vitest
-- `yarn test:int` - Run integration tests with Testcontainers and Docker orchestration
-- `yarn typecheck` - Run TypeScript type checking across all projects
+- `bun test` - Run unit tests for all projects using Vitest
+- `bun test:int` - Run integration tests with Testcontainers and Docker orchestration
+- `bun typecheck` - Run TypeScript type checking across all projects
 - Single test execution: Use Nx to run specific tests: `nx test <project-name>`
 
 ### Quality Assurance
-- `yarn check` - Run Biome check (replaces ESLint)
-- `yarn check:fix` - Fix Biome violations automatically
+- `bun check` - Run Biome check (replaces ESLint)
+- `bun check:fix` - Fix Biome violations automatically
 - Pre-commit hooks automatically check and fix code with Biome via lint-staged
 - Conventional commits enforced via commitlint
 
@@ -31,8 +31,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Migrations**: Stored in `apps/api/drizzle/migrations/`
 
 ### Docker Environment
-- `yarn docker:up` - Start PostgreSQL, MailDev, and Adminer for development
-- `yarn docker:down` - Stop and clean up Docker containers
+- `bun docker:up` - Start PostgreSQL, MailDev, and Adminer for development
+- `bun docker:down` - Stop and clean up Docker containers
 - Adminer available for database management in local environment
 
 ## Architecture Overview

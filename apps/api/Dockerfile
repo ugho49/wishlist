@@ -1,4 +1,4 @@
-FROM node:24.11-alpine as base
+FROM oven/bun:1.1.44-alpine as base
 
 FROM base AS builder
 
@@ -8,11 +8,11 @@ WORKDIR /usr/src/app
 
 COPY . .
 
-RUN yarn --immutable
+RUN bun install --frozen-lockfile
 
-RUN yarn nx run api:build:production
+RUN bun nx run api:build:production
 
-RUN yarn workspaces focus --production
+RUN bun install --production --no-save
 
 FROM base as production
 
@@ -22,4 +22,4 @@ COPY --from=builder /usr/src/app/package.json ./package.json
 COPY --from=builder /usr/src/app/node_modules node_modules
 COPY --from=builder /usr/src/app/dist ./dist
 
-CMD ["node", "dist/apps/api/main"]
+CMD ["bun", "run", "dist/apps/api/main"]
