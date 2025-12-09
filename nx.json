@@ -8,6 +8,25 @@
     "appsDir": "apps",
     "libsDir": "libs"
   },
+  "release": {
+    "projects": ["api", "front"],
+    "projectsRelationship": "independent",
+    "releaseTagPattern": "{projectName}@{version}",
+    "version": {
+      "generatorOptions": {
+        "specifierSource": "conventional-commits"
+      }
+    },
+    "changelog": {
+      "projectChangelogs": {
+        "createRelease": "github"
+      }
+    },
+    "git": {
+      "commit": true,
+      "tag": true
+    }
+  },
   "targetDefaults": {
     "@nx/js:tsc": {
       "cache": true,

@@ -1,4 +1,7 @@
 {
   "name": "front",
-  "type": "module"
+  "type": "module",
+  "nx": {
+    "release": {}
+  }
 }

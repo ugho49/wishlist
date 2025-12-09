@@ -9,7 +9,7 @@
 ## General
 
 - [ ] Try Nx Cloud
-- [ ] Add versioning github with tags using `nx release`
+- [x] Add versioning github with tags using `nx release`
 
 ## User
 

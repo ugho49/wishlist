@@ -1,0 +1,11 @@
+{
+  "name": "api",
+  "type": "module",
+  "nx": {
+    "release": {
+      "docker": {
+        "repositoryName": "ughoste/wishlist-api"
+      }
+    }
+  }
+}

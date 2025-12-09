@@ -22,8 +22,153 @@ references:
       - node-module-cache-{{ checksum "./yarn.lock" }}
   checkout: &checkout
     method: blobless
+  compute_version: &compute_version
+    name: Compute calendar version
+    command: |
+      # Calendar version format: YYMM.DD.SHA (e.g., 2512.09.a1b2c3d)
+      VERSION="$(date -u +'%y%m.%d').${CIRCLE_SHA1:0:7}"
+      echo "Computed version: $VERSION"
+      echo "export VERSION=$VERSION" >> "$BASH_ENV"
+      mkdir -p ~/project/version
+      echo "$VERSION" > ~/project/version/version.txt
 
 jobs:
+  # ===================
+  # API Jobs
+  # ===================
+  compute-version-api:
+    <<: *setup_env_node
+    steps:
+      - run: *compute_version
+      - persist_to_workspace:
+          root: ~/project
+          paths:
+            - version
+
+  build-api:
+    docker:
+      - image: cimg/base:2025.12
+    steps:
+      - checkout: *checkout
+      - attach_workspace: *attach_workspace
+      - run:
+          name: Load version
+          command: |
+            VERSION=$(cat ~/project/version/version.txt)
+            echo "export VERSION=$VERSION" >> "$BASH_ENV"
+            echo "Using version: $VERSION"
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run:
+          name: Build Docker image
+          command: |
+            docker build \
+              -f apps/api/Dockerfile \
+              -t ughoste/wishlist-api:$VERSION \
+              -t ughoste/wishlist-api:latest \
+              .
+
+  build-and-publish-api:
+    docker:
+      - image: cimg/base:2025.12
+    steps:
+      - checkout: *checkout
+      - attach_workspace: *attach_workspace
+      - run:
+          name: Load version
+          command: |
+            VERSION=$(cat ~/project/version/version.txt)
+            echo "export VERSION=$VERSION" >> "$BASH_ENV"
+            echo "Using version: $VERSION"
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run:
+          name: Build Docker image
+          command: |
+            docker build \
+              -f apps/api/Dockerfile \
+              -t ughoste/wishlist-api:$VERSION \
+              -t ughoste/wishlist-api:latest \
+              .
+      - run:
+          name: Push Docker image
+          command: |
+            echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_LOGIN" --password-stdin
+            docker push ughoste/wishlist-api:$VERSION
+            docker push ughoste/wishlist-api:latest
+
+  release-api:
+    <<: *setup_env_node
+    steps:
+      - checkout: *checkout
+      - attach_workspace: *attach_workspace
+      - restore_cache: *restore_node_cache
+      - run:
+          name: Load version
+          command: |
+            VERSION=$(cat ~/project/version/version.txt)
+            echo "export VERSION=$VERSION" >> "$BASH_ENV"
+            echo "Using version: $VERSION"
+      - run:
+          name: Configure git
+          command: |
+            git config user.email "ci@wishlistapp.fr"
+            git config user.name "CircleCI"
+      - run:
+          name: Create GitHub release for API
+          command: |
+            yarn nx release version $VERSION --projects=api --git-commit=false --git-tag=false --stage-changes=false
+            yarn nx release changelog $VERSION --projects=api --create-release=github --git-commit=false --git-tag=false
+            git tag "api@$VERSION"
+            git push origin "api@$VERSION"
+
+  deploy-api:
+    docker:
+      - image: cimg/base:2025.12
+    steps:
+      - attach_workspace: *attach_workspace
+      - run:
+          name: Load version
+          command: |
+            VERSION=$(cat ~/project/version/version.txt)
+            echo "export VERSION=$VERSION" >> "$BASH_ENV"
+            echo "Using version: $VERSION"
+      - run:
+          name: Update application version
+          command: |
+            curl -X 'POST' "$VPS_API_URL/api/application.update" \
+              -H 'accept: application/json' \
+              -H 'Content-Type: application/json' \
+              -H "x-api-key: $VPS_API_KEY" \
+              -d "{
+                \"applicationId\": \"$DOKPLOY_API_APPLICATION_ID\",
+                \"dockerImage\": \"ughoste/wishlist-api:$VERSION\"
+              }"
+      - run:
+          name: Deploy application
+          command: |
+            curl -X 'POST' "$VPS_API_URL/api/application.deploy" \
+              -H 'accept: application/json' \
+              -H 'Content-Type: application/json' \
+              -H "x-api-key: $VPS_API_KEY" \
+              -d "{
+                \"applicationId\": \"$DOKPLOY_API_APPLICATION_ID\",
+                \"title\": \"Deploy v$VERSION\",
+                \"description\": \"Version: $VERSION | Commit: $CIRCLE_SHA1\"
+              }"
+
+  # ===================
+  # Front Jobs
+  # ===================
+  compute-version-front:
+    <<: *setup_env_node
+    steps:
+      - run: *compute_version
+      - persist_to_workspace:
+          root: ~/project
+          paths:
+            - version
+
   build-front:
     <<: *setup_env_node
     steps:
@@ -35,12 +180,44 @@ jobs:
           root: .
           paths:
             - dist
+            - version
+
+  release-front:
+    <<: *setup_env_node
+    steps:
+      - checkout: *checkout
+      - attach_workspace: *attach_workspace
+      - restore_cache: *restore_node_cache
+      - run:
+          name: Load version
+          command: |
+            VERSION=$(cat ~/project/version/version.txt)
+            echo "export VERSION=$VERSION" >> "$BASH_ENV"
+            echo "Using version: $VERSION"
+      - run:
+          name: Configure git
+          command: |
+            git config user.email "ci@wishlistapp.fr"
+            git config user.name "CircleCI"
+      - run:
+          name: Create GitHub release for Front
+          command: |
+            yarn nx release version $VERSION --projects=front --git-commit=false --git-tag=false --stage-changes=false
+            yarn nx release changelog $VERSION --projects=front --create-release=github --git-commit=false --git-tag=false
+            git tag "front@$VERSION"
+            git push origin "front@$VERSION"
 
   deploy-front:
     <<: *setup_env_node
     steps:
       - checkout: *checkout
       - attach_workspace: *attach_workspace
+      - run:
+          name: Load version
+          command: |
+            VERSION=$(cat ~/project/version/version.txt)
+            echo "export VERSION=$VERSION" >> "$BASH_ENV"
+            echo "Using version: $VERSION"
       - run:
           name: Install firebase-tools
           command: curl -sL https://firebase.tools | bash
@@ -49,62 +226,54 @@ jobs:
           command: |
             echo $FIREBASE_JSON > firebase_auth.json
             export GOOGLE_APPLICATION_CREDENTIALS="$(pwd)/firebase_auth.json"
-            firebase deploy -P production -m "Workflow $CIRCLE_WORKFLOW_ID, build $CIRCLE_WORKFLOW_JOB_ID" --non-interactive
-
-  deploy-api:
-    docker:
-      - image: cimg/base:2025.12
-    steps:
-      - run:
-          name: Update application version
-          command: |
-            curl -X 'POST' "$VPS_API_URL/api/application.update" \
-              -H 'accept: application/json' \
-              -H 'Content-Type: application/json' \
-              -H "x-api-key: $VPS_API_KEY" \
-              -d "{
-                \"applicationId\": \"$DOKPLOY_API_APPLICATION_ID\",
-                \"dockerImage\": \"ughoste/wishlist-api:$CIRCLE_SHA1\"
-              }"
-      - run:
-          name: Deploy application
-          command: |
-            curl -X 'POST' "$VPS_API_URL/api/application.deploy" \
-              -H 'accept: application/json' \
-              -H 'Content-Type: application/json' \
-              -H "x-api-key: $VPS_API_KEY" \
-              -d "{
-                \"applicationId\": \"$DOKPLOY_API_APPLICATION_ID\",
-                \"title\": \"Deploy from CircleCI\",
-                \"description\": \"Commit $CIRCLE_SHA1\"
-              }"
+            firebase deploy -P production -m "Version: $VERSION | Commit: $CIRCLE_SHA1" --non-interactive
 
 workflows:
   build-and-release-api:
     when: << pipeline.parameters.workflow-api >>
     jobs:
-      - docker/publish:
-          name: build-without-publish
-          image: ughoste/wishlist-api
-          attach_at: ~/project
-          dockerfile: 'apps/api/Dockerfile'
-          use_buildkit: true
-          tag: '${CIRCLE_SHA1}'
-          deploy: false
+      # Build only for non-main branches
+      - compute-version-api:
+          name: compute-version
           filters:
             branches:
               ignore:
                 - main
 
-      - docker/publish:
+      - build-api:
+          name: build
+          requires:
+            - compute-version
+          filters:
+            branches:
+              ignore:
+                - main
+
+      # Build, publish, release for main branch
+      - compute-version-api:
+          name: compute-version-main
+          filters:
+            branches:
+              only:
+                - main
+
+      - build-and-publish-api:
           name: build-and-publish
-          image: ughoste/wishlist-api
-          attach_at: ~/project
-          dockerfile: 'apps/api/Dockerfile'
-          use_buildkit: true
           context:
             - DOCKER_CREDENDIALS
-          tag: '${CIRCLE_SHA1},latest'
+          requires:
+            - compute-version-main
+          filters:
+            branches:
+              only:
+                - main
+
+      - release-api:
+          name: release
+          context:
+            - GITHUB_CREDENTIALS
+          requires:
+            - build-and-publish
           filters:
             branches:
               only:
@@ -113,32 +282,77 @@ workflows:
       - deploy-api-trigger:
           name: deploy-trigger
           type: approval
+          requires:
+            - release
           filters:
             branches:
               only:
                 - main
 
       - deploy-api:
-          name: deploy-api
+          name: deploy
           context:
             - DOKPLOY_CREDENTIALS
+          requires:
+            - deploy-trigger
           filters:
             branches:
               only:
                 - main
-          requires:
-            - build-and-publish
-            - deploy-trigger
 
   build-and-release-front:
     when: << pipeline.parameters.workflow-front >>
     jobs:
+      # Build only for non-main branches
+      - compute-version-front:
+          name: compute-version
+          filters:
+            branches:
+              ignore:
+                - main
+
       - build-front:
           name: build
+          requires:
+            - compute-version
+          filters:
+            branches:
+              ignore:
+                - main
+
+      # Build, release for main branch
+      - compute-version-front:
+          name: compute-version-main
+          filters:
+            branches:
+              only:
+                - main
+
+      - build-front:
+          name: build-main
+          requires:
+            - compute-version-main
+          filters:
+            branches:
+              only:
+                - main
+
+      - release-front:
+          name: release
+          context:
+            - GITHUB_CREDENTIALS
+          requires:
+            - build-main
+          filters:
+            branches:
+              only:
+                - main
 
       - deploy-front-trigger:
           name: deploy-trigger
           type: approval
+          requires:
+            - release
           filters:
             branches:
               only:
@@ -147,7 +361,6 @@ workflows:
       - deploy-front:
           name: deploy
           requires:
-            - build
             - deploy-trigger
           filters:
             branches:
