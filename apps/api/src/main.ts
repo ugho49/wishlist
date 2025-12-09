@@ -1,6 +1,9 @@
+// Needs to be at the top level for the tracer to work correctly
+// (see: https://docs.datadoghq.com/tracing/setup_overview/setup/nodejs?tabs=containers#installation-and-getting-started)
+import './tracer'
+
 import { Logger } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
-
 import 'pg'
 
 import { createApp } from './bootstrap'
