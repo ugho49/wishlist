@@ -1,9 +1,5 @@
 {
   "mcpServers": {
-    "nx-mcp": {
-      "command": "npx",
-      "args": ["-y", "nx-mcp@latest", "."]
-    },
     "mui-mcp": {
       "type": "stdio",
       "command": "npx",

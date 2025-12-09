@@ -55,18 +55,6 @@ jobs:
     docker:
       - image: cimg/base:2025.12
     steps:
-      - add_ssh_keys:
-          fingerprints:
-            - "SHA256:PlzcXSV+kI9bcTmhnwLFXnmdE0WU0c6PiHwYLxapNvc"
-      - run:
-          name: Deploy on Server via SSH
-          command: |
-            ssh -o StrictHostKeyChecking=no $OVH_SERVER_USER@$OVH_SERVER_URL -p $OVH_SERVER_PORT "cd /home/circleci/wishlist-api && ./deploy.sh $CIRCLE_SHA1"
-  
-  deploy-api-on-new-vps:
-    docker:
-      - image: cimg/base:2025.12
-    steps:
       - run:
           name: Update application version
           command: |
@@ -129,27 +117,9 @@ workflows:
             branches:
               only:
                 - main
-      
-      - deploy-api-trigger-new-vps:
-          name: deploy-trigger-new-vps
-          type: approval
-          filters:
-            branches:
-              only:
-                - main
 
       - deploy-api:
           name: deploy-api
-          filters:
-            branches:
-              only:
-                - main
-          requires:
-            - build-and-publish
-            - deploy-trigger
-      
-      - deploy-api-on-new-vps:
-          name: deploy-api-on-new-vps
           context:
             - DOKPLOY_CREDENTIALS
           filters:
@@ -158,7 +128,7 @@ workflows:
                 - main
           requires:
             - build-and-publish
-            - deploy-trigger-new-vps
+            - deploy-trigger
 
   build-and-release-front:
     when: << pipeline.parameters.workflow-front >>
