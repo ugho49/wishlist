@@ -237,7 +237,6 @@ export const secretSantaUser = pgTable(
   },
   table => [
     foreignKey({ columns: [table.secretSantaId], foreignColumns: [secretSanta.id] }).onDelete('cascade'),
-    foreignKey({ columns: [table.drawUserId], foreignColumns: [table.id] }).onDelete('set null'),
     foreignKey({ columns: [table.attendeeId], foreignColumns: [eventAttendee.id] }),
     uniqueIndex('secret_santa_user_secret_santa_id_attendee_id_key').on(table.secretSantaId, table.attendeeId),
   ],
