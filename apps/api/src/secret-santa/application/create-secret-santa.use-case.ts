@@ -1,6 +1,6 @@
 import type { SecretSantaDto } from '@wishlist/common'
 
-import { ConflictException, ForbiddenException, Inject } from '@nestjs/common'
+import { ConflictException, ForbiddenException, Inject, Logger } from '@nestjs/common'
 import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
 import { EventRepository } from '@wishlist/api/event'
 import { REPOSITORIES } from '@wishlist/api/repositories'
@@ -10,12 +10,15 @@ import { secretSantaMapper } from '../infrastructure'
 
 @CommandHandler(CreateSecretSantaCommand)
 export class CreateSecretSantaUseCase implements IInferredCommandHandler<CreateSecretSantaCommand> {
+  private readonly logger = new Logger(CreateSecretSantaUseCase.name)
+
   constructor(
     @Inject(REPOSITORIES.EVENT) private readonly eventRepository: EventRepository,
     @Inject(REPOSITORIES.SECRET_SANTA) private readonly secretSantaRepository: SecretSantaRepository,
   ) {}
 
   async execute(command: CreateSecretSantaCommand): Promise<SecretSantaDto> {
+    this.logger.log('Create secret santa request received', { command })
     const alreadyExists = await this.secretSantaRepository.existsForEvent(command.eventId)
 
     if (alreadyExists) {
@@ -35,6 +38,7 @@ export class CreateSecretSantaUseCase implements IInferredCommandHandler<CreateS
       description: command.description,
     })
 
+    this.logger.log('Saving secret santa...', { secretSantaId: secretSanta.id, secretSanta })
     await this.secretSantaRepository.save(secretSanta)
 
     return secretSantaMapper.toSecretSantaDto(secretSanta, event)

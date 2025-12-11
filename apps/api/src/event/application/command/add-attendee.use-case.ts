@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, UnauthorizedException } from '@nestjs/common'
+import { BadRequestException, Inject, Logger, UnauthorizedException } from '@nestjs/common'
 import { CommandHandler, EventBus, IInferredCommandHandler } from '@nestjs/cqrs'
 import { REPOSITORIES } from '@wishlist/api/repositories'
 import { UserRepository } from '@wishlist/api/user'
@@ -16,6 +16,8 @@ import { eventAttendeeMapper } from '../../infrastructure'
 
 @CommandHandler(AddAttendeeCommand)
 export class AddAttendeeUseCase implements IInferredCommandHandler<AddAttendeeCommand> {
+  private readonly logger = new Logger(AddAttendeeUseCase.name)
+
   constructor(
     @Inject(REPOSITORIES.EVENT)
     private readonly eventRepository: EventRepository,
@@ -28,6 +30,7 @@ export class AddAttendeeUseCase implements IInferredCommandHandler<AddAttendeeCo
 
   async execute(command: AddAttendeeCommand): Promise<AddAttendeeResult> {
     const { eventId, currentUser } = command
+    this.logger.log('Add attendee request received', { eventId, currentUser })
 
     const event = await this.eventRepository.findByIdOrFail(eventId)
 
@@ -59,6 +62,7 @@ export class AddAttendeeUseCase implements IInferredCommandHandler<AddAttendeeCo
           role,
         })
 
+    this.logger.log('Saving attendee...', { newAttendee })
     await this.attendeeRepository.save(newAttendee)
 
     const invitedBy = await this.userRepository.findByIdOrFail(currentUser.id)

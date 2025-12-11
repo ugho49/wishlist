@@ -1,4 +1,4 @@
-import { Inject, UnauthorizedException } from '@nestjs/common'
+import { Inject, Logger, UnauthorizedException } from '@nestjs/common'
 import { CommandHandler, EventBus, IInferredCommandHandler } from '@nestjs/cqrs'
 import { TransactionManager } from '@wishlist/api/core'
 import { REPOSITORIES } from '@wishlist/api/repositories'
@@ -12,6 +12,8 @@ import {
 
 @CommandHandler(ConfirmEmailChangeCommand)
 export class ConfirmEmailChangeUseCase implements IInferredCommandHandler<ConfirmEmailChangeCommand> {
+  private readonly logger = new Logger(ConfirmEmailChangeUseCase.name)
+
   constructor(
     @Inject(REPOSITORIES.USER)
     private readonly userRepository: UserRepository,
@@ -22,6 +24,7 @@ export class ConfirmEmailChangeUseCase implements IInferredCommandHandler<Confir
   ) {}
 
   async execute(command: ConfirmEmailChangeCommand): Promise<void> {
+    this.logger.log('Confirm email change request received', { command })
     // Normalize email to lowercase
     const newEmail = command.newEmail.toLowerCase()
 
@@ -46,6 +49,11 @@ export class ConfirmEmailChangeUseCase implements IInferredCommandHandler<Confir
     const updatedUser = verification.user.updateEmail(newEmail)
     const invalidatedVerification = verification.invalidate()
 
+    this.logger.log('Updating user email and invalidating verification...', {
+      userId: updatedUser.id,
+      oldEmail,
+      newEmail,
+    })
     // Update user email and invalidate verification in a transaction
     await this.transactionManager.runInTransaction(async tx => {
       await this.userRepository.save(updatedUser, tx)

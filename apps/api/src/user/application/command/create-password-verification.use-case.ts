@@ -1,4 +1,4 @@
-import { Inject, NotFoundException, UnauthorizedException } from '@nestjs/common'
+import { Inject, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common'
 import { ConfigType } from '@nestjs/config'
 import { CommandHandler, EventBus, IInferredCommandHandler } from '@nestjs/cqrs'
 import { REPOSITORIES } from '@wishlist/api/repositories'
@@ -15,6 +15,8 @@ import userConfig from '../../infrastructure/user.config'
 
 @CommandHandler(CreatePasswordVerificationCommand)
 export class CreatePasswordVerificationUseCase implements IInferredCommandHandler<CreatePasswordVerificationCommand> {
+  private readonly logger = new Logger(CreatePasswordVerificationUseCase.name)
+
   constructor(
     @Inject(REPOSITORIES.USER)
     private readonly userRepository: UserRepository,
@@ -26,6 +28,8 @@ export class CreatePasswordVerificationUseCase implements IInferredCommandHandle
   ) {}
 
   async execute(command: CreatePasswordVerificationCommand): Promise<void> {
+    this.logger.log('Create password verification request received', { command })
+
     const user = await this.userRepository.findByEmail(command.email)
 
     if (!user) {
@@ -45,6 +49,7 @@ export class CreatePasswordVerificationUseCase implements IInferredCommandHandle
       expiredAt: DateTime.now().plus({ minute: this.config.resetPasswordTokenDurationInMinutes }).toJSDate(),
     })
 
+    this.logger.log('Saving password verification...', { userId: user.id, passwordVerification })
     await this.verificationEntityRepository.save(passwordVerification)
 
     this.eventBus.publish(

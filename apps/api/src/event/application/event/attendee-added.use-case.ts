@@ -14,6 +14,8 @@ export class AttendeeAddedUseCase implements IEventHandler<AttendeeAddedEvent> {
   ) {}
 
   async handle(event: AttendeeAddedEvent): Promise<void> {
+    this.logger.log('Attendee added event received', { event })
+
     const params = {
       email: event.newAttendee.getEmail(),
       event: event.event,

@@ -45,12 +45,16 @@ export class MailProcessor extends WorkerHost {
   }
 
   async process(job: Job<MailPayload>): Promise<void> {
+    const jobId = job.id
+    this.logger.log('Processing mail job ...', { jobId })
+
     const { data } = job
     const templatePath = join(this.config.templateDir, `${data.template}.mjml`)
 
     if (!this.templateCache.has(templatePath)) {
       const fileContent = await readFile(templatePath, 'utf8')
       const templatedContent = mjml2html(fileContent).html
+      this.logger.log('Compiling template ...', { jobId, templatePath })
       this.templateCache.set(templatePath, templatedContent)
     }
 
@@ -58,7 +62,7 @@ export class MailProcessor extends WorkerHost {
     const template = Handlebars.compile(templateSource, { strict: true })
     const html = template(data.context, { helpers })
 
-    this.logger.log('Sending mail ...', { to: data.to, subject: data.subject, template: data.template })
+    this.logger.log('Sending mail ...', { jobId, to: data.to, subject: data.subject, template: data.template })
 
     await this.transporter.sendMail({
       from: this.config.from,

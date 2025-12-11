@@ -21,8 +21,12 @@ export class UserCreatedUseCase implements IEventHandler<UserCreatedEvent> {
   ) {}
 
   async handle(params: UserCreatedEvent) {
+    this.logger.log('User created event received', { userId: params.user.id })
     const settings = UserEmailSetting.create({ id: this.userEmailSettingRepository.newId(), user: params.user })
 
+    this.logger.log('Creating event attendees from temporary attendees for this user email...', {
+      userId: params.user.id,
+    })
     const eventAttendeeByUserEmail = await this.eventAttendeeRepository
       .findByTempEmail(params.user.email)
       .then(attendees => attendees.map(attendee => attendee.convertTemporaryAttendeeToUser(params.user)))
@@ -36,6 +40,7 @@ export class UserCreatedUseCase implements IEventHandler<UserCreatedEvent> {
     })
 
     try {
+      this.logger.log('Sending welcome email to user...', { userId: params.user.id })
       await this.mailService.sendMail({
         to: params.user.email,
         subject: '[Wishlist] Bienvenue !!!',

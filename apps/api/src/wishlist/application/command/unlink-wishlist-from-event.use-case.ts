@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, UnauthorizedException } from '@nestjs/common'
+import { BadRequestException, Inject, Logger, UnauthorizedException } from '@nestjs/common'
 import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
 import { REPOSITORIES } from '@wishlist/api/repositories'
 
@@ -6,12 +6,15 @@ import { UnlinkWishlistFromEventCommand, WishlistRepository } from '../../domain
 
 @CommandHandler(UnlinkWishlistFromEventCommand)
 export class UnlinkWishlistFromEventUseCase implements IInferredCommandHandler<UnlinkWishlistFromEventCommand> {
+  private readonly logger = new Logger(UnlinkWishlistFromEventUseCase.name)
+
   constructor(
     @Inject(REPOSITORIES.WISHLIST)
     private readonly wishlistRepository: WishlistRepository,
   ) {}
 
   async execute(command: UnlinkWishlistFromEventCommand): Promise<void> {
+    this.logger.log('Unlink wishlist from event request received', { command })
     const { currentUser, wishlistId, eventId } = command
 
     // 1. Find wishlist and check ownership
@@ -33,6 +36,7 @@ export class UnlinkWishlistFromEventUseCase implements IInferredCommandHandler<U
 
     // 4. Unlink wishlist from event
     const updatedWishlist = wishlist.unlinkEvent(eventId)
+    this.logger.log('Saving wishlist...', { wishlistId: updatedWishlist.id, updatedFields: ['eventIds'] })
     await this.wishlistRepository.save(updatedWishlist)
   }
 }

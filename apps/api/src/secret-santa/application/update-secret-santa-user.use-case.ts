@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, Inject } from '@nestjs/common'
+import { BadRequestException, ForbiddenException, Inject, Logger } from '@nestjs/common'
 import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
 import { EventRepository } from '@wishlist/api/event'
 
@@ -9,6 +9,8 @@ import { SecretSantaUserRepository } from '../domain/repository/secret-santa-use
 
 @CommandHandler(UpdateSecretSantaUserCommand)
 export class UpdateSecretSantaUserUseCase implements IInferredCommandHandler<UpdateSecretSantaUserCommand> {
+  private readonly logger = new Logger(UpdateSecretSantaUserUseCase.name)
+
   constructor(
     @Inject(REPOSITORIES.SECRET_SANTA) private readonly secretSantaRepository: SecretSantaRepository,
     @Inject(REPOSITORIES.SECRET_SANTA_USER) private readonly secretSantaUserRepository: SecretSantaUserRepository,
@@ -16,6 +18,7 @@ export class UpdateSecretSantaUserUseCase implements IInferredCommandHandler<Upd
   ) {}
 
   async execute(command: UpdateSecretSantaUserCommand): Promise<void> {
+    this.logger.log('Update secret santa user request received', { command })
     const secretSanta = await this.secretSantaRepository.findByIdOrFail(command.secretSantaId)
     const event = await this.eventRepository.findByIdOrFail(secretSanta.eventId)
 
@@ -32,6 +35,7 @@ export class UpdateSecretSantaUserUseCase implements IInferredCommandHandler<Upd
     }
 
     const updatedSecretSanta = secretSanta.updateUserExclusions(command.secretSantaUserId, command.exclusions)
+    this.logger.log('Saving secret santa users...', { secretSantaId: secretSanta.id, updatedSecretSanta })
     await this.secretSantaUserRepository.saveAll(updatedSecretSanta)
   }
 }

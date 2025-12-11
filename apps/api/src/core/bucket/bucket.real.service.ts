@@ -23,6 +23,7 @@ export class BucketRealService extends BucketService {
   }
 
   async removeIfExist(param: { destination: string }): Promise<void> {
+    this.logger.log('Removing file...', { destination: param.destination })
     await this.storage.bucket().deleteFiles({
       prefix: param.destination,
     })
@@ -30,6 +31,7 @@ export class BucketRealService extends BucketService {
 
   async upload(param: { destination: string; data: Buffer; contentType: string }): Promise<string> {
     try {
+      this.logger.log('Uploading file...', { destination: param.destination })
       const file = this.storage.bucket().file(param.destination)
       await file.save(param.data, { contentType: param.contentType, public: true })
       return file.publicUrl()

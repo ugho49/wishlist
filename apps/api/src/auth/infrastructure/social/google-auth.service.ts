@@ -24,6 +24,7 @@ export class GoogleAuthService {
   }
 
   async getGoogleAccountFromCode(code: string): Promise<TokenPayload> {
+    this.logger.log('Exchange code to ID token...')
     const idToken = await this.exchangeCodeToIdToken(code)
 
     if (!idToken) {
@@ -34,6 +35,7 @@ export class GoogleAuthService {
   }
 
   private async verify(token: string) {
+    this.logger.log('Verifying ID token...')
     const ticket = await this.client.verifyIdToken({
       idToken: token,
     })
@@ -51,8 +53,7 @@ export class GoogleAuthService {
       const response = await this.client.getToken({ code })
       return response.tokens.id_token
     } catch (error) {
-      this.logger.error('Error getting token from code', { error })
-      throw new InternalServerErrorException('Error getting token from code')
+      throw new InternalServerErrorException(error, 'Error getting token from code')
     }
   }
 }

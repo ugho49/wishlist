@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, Inject } from '@nestjs/common'
+import { BadRequestException, ForbiddenException, Inject, Logger } from '@nestjs/common'
 import { CommandHandler, EventBus, IInferredCommandHandler } from '@nestjs/cqrs'
 import { TransactionManager } from '@wishlist/api/core'
 import { EventRepository } from '@wishlist/api/event'
@@ -13,6 +13,8 @@ import {
 
 @CommandHandler(StartSecretSantaCommand)
 export class StartSecretSantaUseCase implements IInferredCommandHandler<StartSecretSantaCommand> {
+  private readonly logger = new Logger(StartSecretSantaUseCase.name)
+
   constructor(
     @Inject(REPOSITORIES.SECRET_SANTA) private readonly secretSantaRepository: SecretSantaRepository,
     @Inject(REPOSITORIES.SECRET_SANTA_USER) private readonly secretSantaUserRepository: SecretSantaUserRepository,
@@ -22,6 +24,7 @@ export class StartSecretSantaUseCase implements IInferredCommandHandler<StartSec
   ) {}
 
   async execute(command: StartSecretSantaCommand): Promise<void> {
+    this.logger.log('Start secret santa request received', { command })
     let secretSanta = await this.secretSantaRepository.findByIdOrFail(command.secretSantaId)
 
     const event = await this.eventRepository.findByIdOrFail(secretSanta.eventId)
@@ -39,11 +42,13 @@ export class StartSecretSantaUseCase implements IInferredCommandHandler<StartSec
     }
 
     try {
+      this.logger.log('Starting secret santa and assigning draw...', { secretSantaId: secretSanta.id })
       secretSanta = secretSanta.startAndAssignDraw()
     } catch (error) {
       throw new BadRequestException(error)
     }
 
+    this.logger.log('Saving secret santa...', { secretSantaId: secretSanta.id, secretSanta })
     await this.transactionManager.runInTransaction(async tx => {
       await this.secretSantaUserRepository.saveAll(secretSanta.users, tx)
       await this.secretSantaRepository.save(secretSanta, tx)

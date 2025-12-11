@@ -1,4 +1,4 @@
-import { Inject, UnauthorizedException } from '@nestjs/common'
+import { Inject, Logger, UnauthorizedException } from '@nestjs/common'
 import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
 import { TransactionManager } from '@wishlist/api/core'
 import { WishlistItemRepository } from '@wishlist/api/item'
@@ -10,6 +10,8 @@ import { itemMapper } from '../../infrastructure'
 
 @CommandHandler(ImportItemsCommand)
 export class ImportItemsUseCase implements IInferredCommandHandler<ImportItemsCommand> {
+  private readonly logger = new Logger(ImportItemsUseCase.name)
+
   constructor(
     @Inject(REPOSITORIES.WISHLIST)
     private readonly wishlistRepository: WishlistRepository,
@@ -19,6 +21,7 @@ export class ImportItemsUseCase implements IInferredCommandHandler<ImportItemsCo
   ) {}
 
   async execute(command: ImportItemsCommand): Promise<ImportItemsResult> {
+    this.logger.log('Import items request received', { command })
     const wishlist = await this.wishlistRepository.findByIdOrFail(command.wishlistId)
     const hasAccess = await this.wishlistRepository.hasAccess({
       wishlistId: wishlist.id,
@@ -43,6 +46,11 @@ export class ImportItemsUseCase implements IInferredCommandHandler<ImportItemsCo
     const itemsToImport = sourceItems.map(item =>
       item.exportTo({ id: this.itemRepository.newId(), wishlistId: wishlist.id }),
     )
+
+    this.logger.log('Creating items to import...', {
+      wishlistId: wishlist.id,
+      itemsToImport: itemsToImport.map(item => item.id),
+    })
 
     await this.transactionManager.runInTransaction(async tx => {
       for (const item of itemsToImport) {

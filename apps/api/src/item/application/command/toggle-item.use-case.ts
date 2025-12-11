@@ -1,4 +1,4 @@
-import { Inject, NotFoundException, UnauthorizedException } from '@nestjs/common'
+import { Inject, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common'
 import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
 import { REPOSITORIES } from '@wishlist/api/repositories'
 import { UserRepository, userMapper } from '@wishlist/api/user'
@@ -10,6 +10,8 @@ import { ToggleItemCommand, ToggleItemResult } from '../../domain/command/toggle
 
 @CommandHandler(ToggleItemCommand)
 export class ToggleItemUseCase implements IInferredCommandHandler<ToggleItemCommand> {
+  private readonly logger = new Logger(ToggleItemUseCase.name)
+
   constructor(
     @Inject(REPOSITORIES.WISHLIST_ITEM) private readonly itemRepository: WishlistItemRepository,
     @Inject(REPOSITORIES.WISHLIST) private readonly wishlistRepository: WishlistRepository,
@@ -17,6 +19,7 @@ export class ToggleItemUseCase implements IInferredCommandHandler<ToggleItemComm
   ) {}
 
   async execute(command: ToggleItemCommand): Promise<ToggleItemResult> {
+    this.logger.log('Toggle item request received', { command })
     const item = await this.itemRepository.findByIdOrFail(command.itemId)
     const hasAccess = await this.wishlistRepository.hasAccess({
       wishlistId: item.wishlistId,
@@ -47,6 +50,7 @@ export class ToggleItemUseCase implements IInferredCommandHandler<ToggleItemComm
     wishlist: Wishlist
     currentUser: ICurrentUser
   }): Promise<WishlistItem> {
+    this.logger.log('Checking item...', { itemId: params.item.id })
     const { item, currentUser, wishlist } = params
 
     if (wishlist.isOwner(currentUser.id) && wishlist.hideItems) {
@@ -66,6 +70,7 @@ export class ToggleItemUseCase implements IInferredCommandHandler<ToggleItemComm
   }
 
   private async uncheck(params: { item: WishlistItem; wishlist: Wishlist; currentUser: ICurrentUser }): Promise<void> {
+    this.logger.log('Unchecking item...', { itemId: params.item.id })
     const { item, wishlist, currentUser } = params
 
     if (!item.isTakenBy(currentUser.id)) {

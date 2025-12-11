@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common'
 import { EventsHandler, IEventHandler } from '@nestjs/cqrs'
 import { chunk as createChunks } from 'lodash'
 
@@ -7,12 +8,15 @@ import { SecretSantaStartedEvent } from '../domain/event/secret-santa-started.ev
 
 @EventsHandler(SecretSantaStartedEvent)
 export class SecretSantaStartedUseCase implements IEventHandler<SecretSantaStartedEvent> {
+  private readonly logger = new Logger(SecretSantaStartedUseCase.name)
+
   constructor(
     private readonly mailService: MailService,
     private readonly frontendRoutes: FrontendRoutesService,
   ) {}
 
   async handle(params: SecretSantaStartedEvent) {
+    this.logger.log('Secret santa started event received', { params })
     const { eventTitle, eventId, drawns, budget, description } = params
     const eventUrl = this.frontendRoutes.routes.event.byId(eventId)
     const eurosFormatter = Intl.NumberFormat('fr-FR', {
@@ -24,6 +28,7 @@ export class SecretSantaStartedUseCase implements IEventHandler<SecretSantaStart
 
     const chunks = createChunks(drawns, 10)
 
+    this.logger.log('Sending emails to attendees...', { eventTitle, eventId, drawns })
     for (const chunk of chunks) {
       await Promise.all(
         chunk.map(({ email, secretSantaName }) =>
@@ -42,5 +47,6 @@ export class SecretSantaStartedUseCase implements IEventHandler<SecretSantaStart
         ),
       )
     }
+    this.logger.log('Emails sent to attendees', { eventTitle, eventId, drawns })
   }
 }

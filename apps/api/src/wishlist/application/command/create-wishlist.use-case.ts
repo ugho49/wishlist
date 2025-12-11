@@ -21,7 +21,7 @@ export class CreateWishlistUseCase implements IInferredCommandHandler<CreateWish
   ) {}
 
   async execute(command: CreateWishlistCommand): Promise<CreateWishlistResult> {
-    this.logger.log('Starting to create wishlist', { newWishlist: command.newWishlist })
+    this.logger.log('Create wishlist request received', { command })
 
     const eventIds = uniq(command.newWishlist.eventIds)
     const events = await this.eventRepository.findByIds(eventIds)
@@ -57,6 +57,7 @@ export class CreateWishlistUseCase implements IInferredCommandHandler<CreateWish
       wishlist = wishlist.updateLogoUrl(logoUrl)
     }
 
+    this.logger.log('Saving wishlist...', { wishlistId: wishlist.id })
     await this.wishlistRepository.save(wishlist)
 
     return wishlistMapper.toDetailedWishlistDto({

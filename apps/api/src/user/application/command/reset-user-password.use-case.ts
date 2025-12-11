@@ -1,4 +1,4 @@
-import { Inject, NotFoundException, UnauthorizedException } from '@nestjs/common'
+import { Inject, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common'
 import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
 import { PasswordManager } from '@wishlist/api/auth'
 import { TransactionManager } from '@wishlist/api/core'
@@ -8,6 +8,8 @@ import { ResetUserPasswordCommand, UserPasswordVerificationRepository, UserRepos
 
 @CommandHandler(ResetUserPasswordCommand)
 export class ResetUserPasswordUseCase implements IInferredCommandHandler<ResetUserPasswordCommand> {
+  private readonly logger = new Logger(ResetUserPasswordUseCase.name)
+
   constructor(
     @Inject(REPOSITORIES.USER)
     private readonly userRepository: UserRepository,
@@ -17,6 +19,7 @@ export class ResetUserPasswordUseCase implements IInferredCommandHandler<ResetUs
   ) {}
 
   async execute(command: ResetUserPasswordCommand): Promise<void> {
+    this.logger.log('Reset user password request received', { email: command.email, token: command.token })
     const user = await this.userRepository.findByEmail(command.email)
 
     if (!user) {
@@ -38,6 +41,7 @@ export class ResetUserPasswordUseCase implements IInferredCommandHandler<ResetUs
     const newPasswordEncoded = await PasswordManager.hash(command.newPassword)
     const updatedUser = user.updatePassword(newPasswordEncoded)
 
+    this.logger.log('Saving user and deleting password verification...', { userId: user.id })
     await this.transactionManager.runInTransaction(async tx => {
       await this.userRepository.save(updatedUser, tx)
       await this.passwordVerificationRepository.delete(passwordVerification.id, tx)

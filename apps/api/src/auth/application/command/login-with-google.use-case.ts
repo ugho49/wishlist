@@ -26,11 +26,12 @@ export class LoginWithGoogleUseCase
     private readonly eventBus: EventBus,
     jwtService: JwtService,
   ) {
-    super(jwtService)
+    super({ jwtService, loggerName: LoginWithGoogleUseCase.name })
   }
 
   async execute(command: LoginWithGoogleCommand): Promise<LoginWithGoogleResult> {
     const { code, ip, createUserIfNotExists } = command
+    this.logger.log('Login with Google request received', { code })
     const payload = await this.googleAuthService.getGoogleAccountFromCode(code)
 
     if (!payload.email) {
@@ -65,6 +66,7 @@ export class LoginWithGoogleUseCase
     payload: TokenPayload
     ip: string
   }): Promise<LoginWithGoogleResult> {
+    this.logger.log('Login with Google and update...')
     const { userSocial, payload, ip } = params
     const { user } = userSocial
 
@@ -91,6 +93,7 @@ export class LoginWithGoogleUseCase
     ip: string
   }): Promise<LoginWithGoogleResult> {
     const { payload, ip } = params
+    this.logger.log('Creating user with Google and login...', { payload, ip })
 
     if (!payload.given_name) {
       throw new BadRequestException('Given name is not given by Google')
@@ -135,6 +138,7 @@ export class LoginWithGoogleUseCase
     ip: string
   }): Promise<LoginWithGoogleResult> {
     const { user, payload, ip } = params
+    this.logger.log('Linking user to Google and login...', { user, payload, ip })
 
     this.checkUserIsEnabled(user)
 

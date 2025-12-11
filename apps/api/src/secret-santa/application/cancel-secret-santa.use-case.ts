@@ -1,4 +1,4 @@
-import { ForbiddenException, Inject } from '@nestjs/common'
+import { ForbiddenException, Inject, Logger } from '@nestjs/common'
 import { CommandHandler, EventBus, IInferredCommandHandler } from '@nestjs/cqrs'
 import { TransactionManager } from '@wishlist/api/core'
 import { EventRepository } from '@wishlist/api/event'
@@ -13,6 +13,8 @@ import {
 
 @CommandHandler(CancelSecretSantaCommand)
 export class CancelSecretSantaUseCase implements IInferredCommandHandler<CancelSecretSantaCommand> {
+  private readonly logger = new Logger(CancelSecretSantaUseCase.name)
+
   constructor(
     @Inject(REPOSITORIES.SECRET_SANTA) private readonly secretSantaRepository: SecretSantaRepository,
     @Inject(REPOSITORIES.SECRET_SANTA_USER) private readonly secretSantaUserRepository: SecretSantaUserRepository,
@@ -22,6 +24,7 @@ export class CancelSecretSantaUseCase implements IInferredCommandHandler<CancelS
   ) {}
 
   async execute(command: CancelSecretSantaCommand): Promise<void> {
+    this.logger.log('Cancel secret santa request received', { command })
     const secretSanta = await this.secretSantaRepository.findByIdOrFail(command.secretSantaId)
     const event = await this.eventRepository.findByIdOrFail(secretSanta.eventId)
 
@@ -31,6 +34,7 @@ export class CancelSecretSantaUseCase implements IInferredCommandHandler<CancelS
 
     const cancelledSecretSanta = secretSanta.cancel()
 
+    this.logger.log('Saving secret santa...', { secretSantaId: secretSanta.id, cancelledSecretSanta })
     await this.transactionManager.runInTransaction(async tx => {
       await this.secretSantaRepository.save(cancelledSecretSanta, tx)
       await this.secretSantaUserRepository.saveAll(cancelledSecretSanta.users, tx)

@@ -1,4 +1,4 @@
-import { ForbiddenException, Inject } from '@nestjs/common'
+import { ForbiddenException, Inject, Logger } from '@nestjs/common'
 import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
 import { EventRepository } from '@wishlist/api/event'
 
@@ -9,6 +9,8 @@ import { SecretSantaUserRepository } from '../domain/repository/secret-santa-use
 
 @CommandHandler(DeleteSecretSantaUserCommand)
 export class DeleteSecretSantaUserUseCase implements IInferredCommandHandler<DeleteSecretSantaUserCommand> {
+  private readonly logger = new Logger(DeleteSecretSantaUserUseCase.name)
+
   constructor(
     @Inject(REPOSITORIES.SECRET_SANTA) private readonly secretSantaRepository: SecretSantaRepository,
     @Inject(REPOSITORIES.SECRET_SANTA_USER) private readonly secretSantaUserRepository: SecretSantaUserRepository,
@@ -16,6 +18,7 @@ export class DeleteSecretSantaUserUseCase implements IInferredCommandHandler<Del
   ) {}
 
   async execute(command: DeleteSecretSantaUserCommand): Promise<void> {
+    this.logger.log('Delete secret santa user request received', { command })
     const secretSanta = await this.secretSantaRepository.findByIdOrFail(command.secretSantaId)
     const event = await this.eventRepository.findByIdOrFail(secretSanta.eventId)
 
@@ -27,6 +30,10 @@ export class DeleteSecretSantaUserUseCase implements IInferredCommandHandler<Del
       throw new ForbiddenException('Secret santa already started')
     }
 
+    this.logger.log('Deleting secret santa user...', {
+      secretSantaId: secretSanta.id,
+      secretSantaUserId: command.secretSantaUserId,
+    })
     await this.secretSantaUserRepository.delete(command.secretSantaUserId)
   }
 }

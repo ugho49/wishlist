@@ -1,4 +1,4 @@
-import { Inject, UnauthorizedException } from '@nestjs/common'
+import { Inject, Logger, UnauthorizedException } from '@nestjs/common'
 import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
 import { WishlistItem, WishlistItemRepository } from '@wishlist/api/item'
 import { REPOSITORIES } from '@wishlist/api/repositories'
@@ -10,6 +10,8 @@ import { itemMapper } from '../../infrastructure'
 
 @CommandHandler(CreateItemCommand)
 export class CreateItemUseCase implements IInferredCommandHandler<CreateItemCommand> {
+  private readonly logger = new Logger(CreateItemUseCase.name)
+
   constructor(
     @Inject(REPOSITORIES.WISHLIST)
     private readonly wishlistRepository: WishlistRepository,
@@ -18,6 +20,7 @@ export class CreateItemUseCase implements IInferredCommandHandler<CreateItemComm
   ) {}
 
   async execute(command: CreateItemCommand): Promise<CreateItemResult> {
+    this.logger.log('Create item request received', { command })
     const wishlist = await this.wishlistRepository.findByIdOrFail(command.wishlistId)
     const hasAccess = await this.wishlistRepository.hasAccess({
       wishlistId: wishlist.id,
@@ -42,6 +45,7 @@ export class CreateItemUseCase implements IInferredCommandHandler<CreateItemComm
       isSuggested,
     })
 
+    this.logger.log('Saving item...', { item })
     await this.itemRepository.save(item)
 
     return itemMapper.toDto({ item, displayUserAndSuggested: true })

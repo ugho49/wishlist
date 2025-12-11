@@ -1,4 +1,4 @@
-export { AddSecretSantaUserCommand } from './command/add-secret-santa-user.command'
+export { AddSecretSantaUsersCommand as AddSecretSantaUserCommand } from './command/add-secret-santa-user.command'
 export { CancelSecretSantaCommand } from './command/cancel-secret-santa.command'
 export { CreateSecretSantaCommand } from './command/create-secret-santa.command'
 export { DeleteSecretSantaCommand } from './command/delete-secret-santa.command'

@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, UnauthorizedException } from '@nestjs/common'
+import { BadRequestException, Inject, Logger, UnauthorizedException } from '@nestjs/common'
 import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
 import { GoogleAuthService } from '@wishlist/api/auth'
 import { TransactionManager } from '@wishlist/api/core'
@@ -16,6 +16,8 @@ import { userMapper } from '../../infrastructure'
 
 @CommandHandler(LinkUserToGoogleCommand)
 export class LinkUserToGoogleUseCase implements IInferredCommandHandler<LinkUserToGoogleCommand> {
+  private readonly logger = new Logger(LinkUserToGoogleUseCase.name)
+
   constructor(
     @Inject(REPOSITORIES.USER)
     private readonly userRepository: UserRepository,
@@ -26,6 +28,7 @@ export class LinkUserToGoogleUseCase implements IInferredCommandHandler<LinkUser
   ) {}
 
   async execute(command: LinkUserToGoogleCommand): Promise<LinkUserToGoogleResult> {
+    this.logger.log('Link user to Google request received', { command })
     const { code, userId } = command
 
     let user = await this.userRepository.findByIdOrFail(userId)
@@ -63,9 +66,11 @@ export class LinkUserToGoogleUseCase implements IInferredCommandHandler<LinkUser
     })
 
     if (user.pictureUrl === undefined && payload.picture !== undefined) {
+      this.logger.log('Updating user picture from Google', { userId, picture: payload.picture })
       user = user.updatePicture(payload.picture)
     }
 
+    this.logger.log('Saving user and social...', { userId })
     await this.transactionManager.runInTransaction(async tx => {
       await this.userRepository.save(user, tx)
       await this.userSocialRepository.save(social, tx)

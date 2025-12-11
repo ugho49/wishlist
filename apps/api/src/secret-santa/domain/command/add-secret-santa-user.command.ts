@@ -2,7 +2,7 @@ import type { AttendeeId, ICurrentUser, SecretSantaId, SecretSantaUserDto } from
 
 import { Command } from '@nestjs-architects/typed-cqrs'
 
-export class AddSecretSantaUserCommand extends Command<AddSecretSantaUserResult> {
+export class AddSecretSantaUsersCommand extends Command<AddSecretSantaUsersResult> {
   public readonly currentUser: ICurrentUser
   public readonly secretSantaId: SecretSantaId
   public readonly attendeeIds: AttendeeId[]
@@ -15,6 +15,6 @@ export class AddSecretSantaUserCommand extends Command<AddSecretSantaUserResult>
   }
 }
 
-export type AddSecretSantaUserResult = {
+export type AddSecretSantaUsersResult = {
   users: SecretSantaUserDto[]
 }

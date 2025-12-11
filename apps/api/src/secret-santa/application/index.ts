@@ -1,4 +1,4 @@
-import { AddSecretSantaUserUseCase } from './add-secret-santa-user.use-case'
+import { AddSecretSantaUsersUseCase } from './add-secret-santa-users.use-case'
 import { CancelSecretSantaUseCase } from './cancel-secret-santa.use-case'
 import { CreateSecretSantaUseCase } from './create-secret-santa.use-case'
 import { DeleteSecretSantaUseCase } from './delete-secret-santa.use-case'
@@ -19,7 +19,7 @@ export const handlers = [
   DeleteSecretSantaUseCase,
   StartSecretSantaUseCase,
   CancelSecretSantaUseCase,
-  AddSecretSantaUserUseCase,
+  AddSecretSantaUsersUseCase,
   UpdateSecretSantaUserUseCase,
   DeleteSecretSantaUserUseCase,
   SecretSantaCancelledUseCase,
