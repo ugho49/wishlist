@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, UnauthorizedException } from '@nestjs/common'
+import { BadRequestException, Inject, Logger, UnauthorizedException } from '@nestjs/common'
 import { CommandHandler, EventBus, IInferredCommandHandler } from '@nestjs/cqrs'
 import { REPOSITORIES } from '@wishlist/api/repositories'
 import { UserRepository } from '@wishlist/api/user'
@@ -7,6 +7,8 @@ import { AddCoOwnerCommand, UserAddedAsCoOwnerToWishlistEvent, WishlistRepositor
 
 @CommandHandler(AddCoOwnerCommand)
 export class AddCoOwnerUseCase implements IInferredCommandHandler<AddCoOwnerCommand> {
+  private readonly logger = new Logger(AddCoOwnerUseCase.name)
+
   constructor(
     @Inject(REPOSITORIES.WISHLIST) private readonly wishlistRepository: WishlistRepository,
     @Inject(REPOSITORIES.USER) private readonly userRepository: UserRepository,
@@ -14,6 +16,7 @@ export class AddCoOwnerUseCase implements IInferredCommandHandler<AddCoOwnerComm
   ) {}
 
   async execute(command: AddCoOwnerCommand): Promise<void> {
+    this.logger.log('Add co-owner request received', { command })
     const wishlist = await this.wishlistRepository.findByIdOrFail(command.wishlistId)
 
     // Only the owner can add a co-owner
@@ -36,6 +39,7 @@ export class AddCoOwnerUseCase implements IInferredCommandHandler<AddCoOwnerComm
 
     const updatedWishlist = wishlist.addCoOwner(coOwner)
 
+    this.logger.log('Saving wishlist...', { wishlistId: updatedWishlist.id, updatedFields: ['coOwner'] })
     await this.wishlistRepository.save(updatedWishlist)
 
     await this.eventBus.publish(new UserAddedAsCoOwnerToWishlistEvent({ wishlist: updatedWishlist }))

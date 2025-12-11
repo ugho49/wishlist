@@ -43,6 +43,7 @@ export class NotifyNewItemsUseCase implements IInferredCommandHandler<NotifyNewI
       })
 
       if (allEmailToNotify.length === 0) {
+        this.logger.log(`No emails to notify for wishlist ${dto.wishlistId}`)
         return
       }
 

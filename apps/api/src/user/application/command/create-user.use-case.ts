@@ -1,4 +1,4 @@
-import { Inject, UnauthorizedException } from '@nestjs/common'
+import { Inject, Logger, UnauthorizedException } from '@nestjs/common'
 import { CommandHandler, EventBus, IInferredCommandHandler } from '@nestjs/cqrs'
 import { PasswordManager } from '@wishlist/api/auth'
 import { REPOSITORIES } from '@wishlist/api/repositories'
@@ -8,6 +8,8 @@ import { userMapper } from '../../infrastructure'
 
 @CommandHandler(CreateUserCommand)
 export class CreateUserUseCase implements IInferredCommandHandler<CreateUserCommand> {
+  private readonly logger = new Logger(CreateUserUseCase.name)
+
   constructor(
     @Inject(REPOSITORIES.USER)
     private readonly userRepository: UserRepository,
@@ -15,6 +17,14 @@ export class CreateUserUseCase implements IInferredCommandHandler<CreateUserComm
   ) {}
 
   async execute(command: CreateUserCommand): Promise<CreateUserResult> {
+    this.logger.log('Create user request received', {
+      payload: {
+        email: command.newUser.email,
+        firstname: command.newUser.firstname,
+        lastname: command.newUser.lastname,
+      },
+    })
+
     const { newUser, ip } = command
 
     if (await this.userRepository.findByEmail(newUser.email)) {
@@ -30,6 +40,7 @@ export class CreateUserUseCase implements IInferredCommandHandler<CreateUserComm
       ip,
     })
 
+    this.logger.log('Creating user...', { userId: user.id })
     await this.userRepository.save(user)
 
     await this.eventBus.publish(new UserCreatedEvent({ user }))

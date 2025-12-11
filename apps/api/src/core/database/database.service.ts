@@ -34,16 +34,20 @@ export class DatabaseService implements OnModuleInit {
   }
 
   async onModuleInit() {
+    this.logger.log('🔍 Checking database connection...')
     await this.ping()
+    this.logger.log('🔍 Database connection is ok ✅')
 
     if (this.config.runMigrations) {
       await this.runMigrations()
+    } else {
+      this.logger.log('❌ Migrations are not enabled, skipping ...')
     }
   }
 
   async runMigrations(): Promise<void> {
     const migrationsFolder = this.config.migrationsFolder
-    this.logger.log('Running migrations ...', { migrationsFolder })
+    this.logger.log('🔍 Running migrations...', { migrationsFolder })
 
     await migrate(this.db, {
       migrationsFolder,

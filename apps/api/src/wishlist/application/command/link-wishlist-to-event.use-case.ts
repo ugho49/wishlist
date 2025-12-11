@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, UnauthorizedException } from '@nestjs/common'
+import { BadRequestException, Inject, Logger, UnauthorizedException } from '@nestjs/common'
 import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
 import { EventRepository } from '@wishlist/api/event'
 import { REPOSITORIES } from '@wishlist/api/repositories'
@@ -8,6 +8,8 @@ import { LinkWishlistToEventCommand, WishlistRepository } from '../../domain'
 
 @CommandHandler(LinkWishlistToEventCommand)
 export class LinkWishlistToEventUseCase implements IInferredCommandHandler<LinkWishlistToEventCommand> {
+  private readonly logger = new Logger(LinkWishlistToEventUseCase.name)
+
   constructor(
     @Inject(REPOSITORIES.WISHLIST)
     private readonly wishlistRepository: WishlistRepository,
@@ -16,6 +18,7 @@ export class LinkWishlistToEventUseCase implements IInferredCommandHandler<LinkW
   ) {}
 
   async execute(command: LinkWishlistToEventCommand): Promise<void> {
+    this.logger.log('Link wishlist to event request received', { command })
     const { currentUser, wishlistId, eventId } = command
 
     const wishlist = await this.wishlistRepository.findByIdOrFail(wishlistId)
@@ -39,6 +42,8 @@ export class LinkWishlistToEventUseCase implements IInferredCommandHandler<LinkW
     }
 
     const updatedWishlist = wishlist.linkEvent(eventId)
+
+    this.logger.log('Saving wishlist...', { wishlistId: updatedWishlist.id, updatedFields: ['eventIds'] })
     await this.wishlistRepository.save(updatedWishlist)
   }
 }

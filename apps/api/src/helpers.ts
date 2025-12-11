@@ -3,6 +3,7 @@ import type { Params as PinoParams } from 'pino-nestjs'
 import { join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { RequestMethod } from '@nestjs/common'
+import { getClientIp } from '@supercharge/request-ip'
 import { uuid } from '@wishlist/common'
 import { kinds, tags, types } from 'dd-trace/ext'
 
@@ -77,9 +78,13 @@ export function pinoLoggerConfig(serviceName: string): PinoParams {
         // biome-ignore lint/suspicious/noExplicitAny: res is too complex
         const customProps = (res as any).locals ?? {}
 
+        // Extract IP address (handles proxied requests)
+        const ip = getClientIp(req)
+
         return {
           ...customProps,
           requestId: req.id,
+          ip: ip ?? 'unknown',
           // For Datadog's APM (https://docs.datadoghq.com/logs/log_configuration/attributes_naming_convention/)
           [tags.RESOURCE_NAME]: req.url,
           [tags.SPAN_TYPE]: types.WEB,

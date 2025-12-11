@@ -1,4 +1,4 @@
-import { ConflictException, Inject, NotFoundException, UnauthorizedException } from '@nestjs/common'
+import { ConflictException, Inject, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common'
 import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
 import { TransactionManager } from '@wishlist/api/core'
 import { REPOSITORIES } from '@wishlist/api/repositories'
@@ -8,6 +8,8 @@ import { DeleteAttendeeCommand, EventAttendeeRepository, EventRepository } from 
 
 @CommandHandler(DeleteAttendeeCommand)
 export class DeleteAttendeeUseCase implements IInferredCommandHandler<DeleteAttendeeCommand> {
+  private readonly logger = new Logger(DeleteAttendeeUseCase.name)
+
   constructor(
     @Inject(REPOSITORIES.EVENT_ATTENDEE)
     private readonly attendeeRepository: EventAttendeeRepository,
@@ -19,6 +21,7 @@ export class DeleteAttendeeUseCase implements IInferredCommandHandler<DeleteAtte
   ) {}
 
   async execute(command: DeleteAttendeeCommand) {
+    this.logger.log('Delete attendee request received', { command })
     const { attendeeId, currentUser, eventId } = command
 
     const event = await this.eventRepository.findByIdOrFail(eventId)
@@ -47,12 +50,15 @@ export class DeleteAttendeeUseCase implements IInferredCommandHandler<DeleteAtte
           )
 
     await this.transactionManager.runInTransaction(async tx => {
+      this.logger.log('Removing attendee from event...', { attendeeId, eventId })
       // Remove the attendee from the event
       await this.attendeeRepository.delete(attendeeId, tx)
 
+      this.logger.log('Checking wishlists where the attendee is the owner...', { eventId, attendeeId })
       // Check if this is ok for the wishlists
       for (const wishlist of attendeeWishlistsForEvent) {
         if (wishlist.eventIds.length > 1) {
+          this.logger.log('Unlinking event from wishlist...', { wishlistId: wishlist.id, eventId: attendee.eventId })
           const updatedWishlist = wishlist.unlinkEvent(attendee.eventId)
           await this.wishlistRepository.save(updatedWishlist, tx)
           continue
@@ -64,6 +70,7 @@ export class DeleteAttendeeUseCase implements IInferredCommandHandler<DeleteAtte
           )
         }
 
+        this.logger.log('Deleting wishlist...', { wishlistId: wishlist.id })
         await this.wishlistRepository.delete(wishlist.id, tx)
       }
     })

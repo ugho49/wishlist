@@ -15,11 +15,12 @@ export class LoginUseCase extends CommonLoginUseCase implements IInferredCommand
     private readonly userRepository: UserRepository,
     jwtService: JwtService,
   ) {
-    super(jwtService)
+    super({ jwtService, loggerName: LoginUseCase.name })
   }
 
   async execute(command: LoginCommand): Promise<LoginResult> {
     const { email, password, ip } = command
+    this.logger.log('Login request received', { email })
 
     const user = await this.validateUserByEmailPassword(email, password)
 
@@ -27,6 +28,8 @@ export class LoginUseCase extends CommonLoginUseCase implements IInferredCommand
     const updatedUser = user.updateLastConnection(ip)
 
     await this.userRepository.save(updatedUser)
+
+    this.logger.log('Login successful', { email })
 
     return { access_token: accessToken }
   }

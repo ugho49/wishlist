@@ -14,12 +14,14 @@ export class UserAddedAsCoOwnerToWishlistUseCase implements IEventHandler<UserAd
   ) {}
 
   async handle(params: UserAddedAsCoOwnerToWishlistEvent) {
+    this.logger.log('User added as co-owner to wishlist event received', { wishlistId: params.wishlist.id })
     if (!params.wishlist.coOwner) {
       this.logger.error('Co-owner is not set')
       return
     }
 
     try {
+      this.logger.log('Sending mail to co-owner...', { wishlistId: params.wishlist.id })
       await this.mailService.sendMail({
         to: params.wishlist.coOwner.email,
         subject: "[Wishlist] Vous avez été ajouté comme co-gestionnaire d'une liste",

@@ -7,6 +7,7 @@ import helmet from 'helmet'
 import { Logger } from 'pino-nestjs'
 
 import { AppModule } from './app.module'
+import { DatadogErrorTrackingExceptionFilter } from './core/filters/exception.filter'
 
 function bootstrapSwagger(app: INestApplication) {
   const swaggerConfig = new DocumentBuilder()
@@ -29,6 +30,7 @@ export async function createApp(): Promise<INestApplication> {
   app.useLogger(app.get(Logger))
 
   app.useGlobalPipes(new ValidationPipe({ transform: true, stopAtFirstError: true }))
+  app.useGlobalFilters(new DatadogErrorTrackingExceptionFilter())
   app.enableCors()
   app.enableShutdownHooks()
 

@@ -1,4 +1,4 @@
-import { Inject, UnauthorizedException } from '@nestjs/common'
+import { Inject, Logger, UnauthorizedException } from '@nestjs/common'
 import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
 import { REPOSITORIES } from '@wishlist/api/repositories'
 import { WishlistRepository } from '@wishlist/api/wishlist'
@@ -7,12 +7,15 @@ import { DeleteItemCommand, DeleteItemResult, WishlistItemRepository } from '../
 
 @CommandHandler(DeleteItemCommand)
 export class DeleteItemUseCase implements IInferredCommandHandler<DeleteItemCommand> {
+  private readonly logger = new Logger(DeleteItemUseCase.name)
+
   constructor(
     @Inject(REPOSITORIES.WISHLIST_ITEM) private readonly itemRepository: WishlistItemRepository,
     @Inject(REPOSITORIES.WISHLIST) private readonly wishlistRepository: WishlistRepository,
   ) {}
 
   async execute(command: DeleteItemCommand): Promise<DeleteItemResult> {
+    this.logger.log('Delete item request received', { command })
     const item = await this.itemRepository.findByIdOrFail(command.itemId)
     const hasAccess = await this.wishlistRepository.hasAccess({
       wishlistId: item.wishlistId,
@@ -44,6 +47,7 @@ export class DeleteItemUseCase implements IInferredCommandHandler<DeleteItemComm
       return
     }
 
+    this.logger.log('Deleting item...', { itemId: item.id })
     await this.itemRepository.delete(item.id)
   }
 }

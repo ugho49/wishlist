@@ -65,6 +65,7 @@ export class CreateEmailChangeVerificationUseCase
     // Publish event to send notification emails
     this.eventBus.publish(
       new EmailChangeVerificationCreatedEvent({
+        userId: currentUser.id,
         oldEmail: currentUser.email,
         newEmail,
         token: emailChangeVerification.token,

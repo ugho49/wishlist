@@ -1,4 +1,4 @@
-import { Inject, NotFoundException, UnauthorizedException } from '@nestjs/common'
+import { Inject, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common'
 import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
 import { REPOSITORIES } from '@wishlist/api/repositories'
 import { WishlistRepository } from '@wishlist/api/wishlist'
@@ -8,12 +8,15 @@ import { UpdateItemCommand, WishlistItemRepository } from '../../domain'
 
 @CommandHandler(UpdateItemCommand)
 export class UpdateItemUseCase implements IInferredCommandHandler<UpdateItemCommand> {
+  private readonly logger = new Logger(UpdateItemUseCase.name)
+
   constructor(
     @Inject(REPOSITORIES.WISHLIST_ITEM) private readonly itemRepository: WishlistItemRepository,
     @Inject(REPOSITORIES.WISHLIST) private readonly wishlistRepository: WishlistRepository,
   ) {}
 
   async execute(command: UpdateItemCommand) {
+    this.logger.log('Update item request received', { command })
     const item = await this.itemRepository.findByIdOrFail(command.itemId)
     const hasAccess = await this.wishlistRepository.hasAccess({
       wishlistId: item.wishlistId,
@@ -47,6 +50,7 @@ export class UpdateItemUseCase implements IInferredCommandHandler<UpdateItemComm
       score: command.updateItem.score,
     })
 
+    this.logger.log('Saving item...', { itemId: item.id, updatedItem })
     await this.itemRepository.save(updatedItem)
   }
 }

@@ -17,11 +17,13 @@ export class UpdateUserPictureUseCase implements IInferredCommandHandler<UpdateU
   ) {}
 
   async execute(command: UpdateUserPictureCommand): Promise<UpdateUserPictureResult> {
+    this.logger.log('Update user picture request received', { command })
     const { userId, file } = command
 
     const user = await this.userRepository.findByIdOrFail(userId)
 
     try {
+      this.logger.log('Removing user picture in bucket...', { userId })
       await this.bucketService.removeIfExist({ destination: `pictures/${userId}/` }) // TODO: to be removed
       await this.bucketService.removeIfExist({ destination: `pictures/users/${userId}/` })
     } catch (e) {
@@ -35,6 +37,7 @@ export class UpdateUserPictureUseCase implements IInferredCommandHandler<UpdateU
     })
 
     const updatedUser = user.updatePicture(publicUrl)
+    this.logger.log('Saving user...', { userId, updatedFields: ['pictureUrl'] })
     await this.userRepository.save(updatedUser)
 
     return { pictureUrl: publicUrl }
