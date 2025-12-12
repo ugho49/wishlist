@@ -6,6 +6,7 @@ import { LoggerModule } from 'pino-nestjs'
 import { AuthModule } from './auth/infrastructure/auth.module'
 import { CoreModule } from './core'
 import { EventModule } from './event'
+import { GraphqlModule } from './graphql'
 import { pinoLoggerConfig } from './helpers'
 import { ItemModule } from './item'
 import { RepositoriesModule } from './repositories'
@@ -30,6 +31,7 @@ import { WishlistModule } from './wishlist'
     ItemModule,
     EventModule,
     SecretSantaModule,
+    GraphqlModule,
   ],
 })
 export class AppModule {}
