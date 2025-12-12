@@ -11,6 +11,7 @@ tracer.use('express', { middleware: false })
 
 // remove healthcheck traces
 tracer.use('http', { blocklist: ['/health'] })
+tracer.use('graphql')
 
 // Remove middleware spans to avoid trace pollution
 tracer.use('dns', { enabled: false })

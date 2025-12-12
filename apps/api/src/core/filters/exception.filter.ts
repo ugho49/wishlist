@@ -1,17 +1,34 @@
-import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus } from '@nestjs/common'
+import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Logger } from '@nestjs/common'
 import tracer from 'dd-trace'
 import { USER_KEEP } from 'dd-trace/ext/priority'
 import { Response } from 'express'
 
 @Catch()
 export class DatadogErrorTrackingExceptionFilter implements ExceptionFilter {
+  private readonly logger = new Logger(DatadogErrorTrackingExceptionFilter.name)
+
   catch(exception: Error, host: ArgumentsHost) {
+    // Track error with Datadog
+    this._trackErrorWithDatadog(exception)
+
+    // Log the error for debugging
+    this.logger.debug(`Exception caught: ${exception.message}`, { exception })
+
+    // Handle based on context type
+    const contextType = host.getType<'graphql' | 'http'>()
+
+    if (contextType === 'graphql') {
+      // For GraphQL, we just rethrow the exception
+      // GraphQL will handle formatting the error response
+      throw exception
+    }
+
+    // For HTTP/REST requests
     const ctx = host.switchToHttp()
     const response = ctx.getResponse<Response>()
 
     // Datadog Error Tracking
     response.err = exception // Will be renamed as `error` by pino
-    this._trackErrorWithDatadog(exception)
 
     let status: number
     let body: string | object

@@ -23,6 +23,7 @@ function bootstrapSwagger(app: INestApplication) {
 }
 
 export async function createApp(): Promise<INestApplication> {
+  const isProduction = process.env.NODE_ENV === 'production'
   const app = await NestFactory.create(AppModule, {
     bufferLogs: true,
   })
@@ -34,18 +35,21 @@ export async function createApp(): Promise<INestApplication> {
   app.enableCors()
   app.enableShutdownHooks()
 
-  app.use(
-    helmet({
-      contentSecurityPolicy: {
-        directives: {
-          defaultSrc: [`'self'`],
-          styleSrc: [`'self'`, `'unsafe-inline'`],
-          imgSrc: [`'self'`, 'data:', 'validator.swagger.io'],
-          scriptSrc: [`'self'`, `https: 'unsafe-inline'`],
+  // Disable CSP in development for GraphiQL
+  if (isProduction) {
+    app.use(
+      helmet({
+        contentSecurityPolicy: {
+          directives: {
+            defaultSrc: [`'self'`],
+            styleSrc: [`'self'`, `'unsafe-inline'`],
+            imgSrc: [`'self'`, 'data:', 'validator.swagger.io'],
+            scriptSrc: [`'self'`, `https: 'unsafe-inline'`],
+          },
         },
-      },
-    }),
-  )
+      }),
+    )
+  }
 
   bootstrapSwagger(app)
 
