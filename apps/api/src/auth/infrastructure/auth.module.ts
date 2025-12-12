@@ -8,6 +8,7 @@ import { handlers } from '../application'
 import { GoogleAuthService } from '.'
 import authConfig from './auth.config'
 import { AuthController } from './auth.controller'
+import { AuthResolver } from './auth.resolver'
 import { AuthGuard } from './guards/auth.guard'
 import { JwtStrategy } from './strategies/jwt.strategy'
 
@@ -29,7 +30,7 @@ import { JwtStrategy } from './strategies/jwt.strategy'
       }),
     }),
   ],
-  providers: [...handlers, GoogleAuthService, JwtStrategy, { provide: APP_GUARD, useClass: AuthGuard }],
+  providers: [...handlers, AuthResolver, GoogleAuthService, JwtStrategy, { provide: APP_GUARD, useClass: AuthGuard }],
   controllers: [AuthController],
   exports: [GoogleAuthService],
 })

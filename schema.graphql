@@ -1,0 +1,18 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type HealthDto {
+  status: HealthStatus!
+}
+
+enum HealthStatus {
+  ERROR
+  OK
+  SHUTTING_DOWN
+}
+
+type Query {
+  """Health check query"""
+  health: HealthDto!
+}

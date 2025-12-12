@@ -5,6 +5,7 @@ import type { User } from '../model/user.model'
 export interface UserRepository {
   newId(): UserId
   findById(id: UserId): Promise<User | undefined>
+  findByIds(userIds: UserId[]): Promise<User[]>
   findByIdOrFail(id: UserId): Promise<User>
   findByEmail(email: string): Promise<User | undefined>
   findByEmails(emails: string[]): Promise<User[]>
