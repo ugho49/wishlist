@@ -9,7 +9,9 @@ import { UpdateWishlistUseCase } from './command/update-wishlist.use-case'
 import { UploadWishlistLogoUseCase } from './command/upload-wishlist-logo.use-case'
 import { UserAddedAsCoOwnerToWishlistUseCase } from './event/user-added-as-co-owner-to-wishlist.use-case'
 import { GetWishlistByIdUseCase } from './query/get-wishlist-by-id.use-case'
-import { GetMyWishlistsUseCase } from './query/get-wishlists-by-owner.use-case'
+import { GetWishlistsByIdsUseCase } from './query/get-wishlists-by-ids.use-case'
+import { GetWishlistsByOwnerUseCase } from './query/get-wishlists-by-owner.use-case'
+import { GetWishlistsByUserUseCase } from './query/get-wishlists-by-user.use-case'
 
 export const handlers = [
   // Command handlers
@@ -23,8 +25,10 @@ export const handlers = [
   UpdateWishlistUseCase,
   UploadWishlistLogoUseCase,
   // Query handlers
-  GetMyWishlistsUseCase,
+  GetWishlistsByOwnerUseCase,
+  GetWishlistsByUserUseCase,
   GetWishlistByIdUseCase,
+  GetWishlistsByIdsUseCase,
   // Event handlers
   UserAddedAsCoOwnerToWishlistUseCase,
 ]

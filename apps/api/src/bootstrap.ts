@@ -7,7 +7,7 @@ import helmet from 'helmet'
 import { Logger } from 'pino-nestjs'
 
 import { AppModule } from './app.module'
-import { DatadogErrorTrackingExceptionFilter } from './core/filters/exception.filter'
+import { GlobalExceptionFilter } from './core/filters/exception.filter'
 
 function bootstrapSwagger(app: INestApplication) {
   const swaggerConfig = new DocumentBuilder()
@@ -23,6 +23,7 @@ function bootstrapSwagger(app: INestApplication) {
 }
 
 export async function createApp(): Promise<INestApplication> {
+  const isProduction = process.env.NODE_ENV === 'production'
   const app = await NestFactory.create(AppModule, {
     bufferLogs: true,
   })
@@ -30,22 +31,26 @@ export async function createApp(): Promise<INestApplication> {
   app.useLogger(app.get(Logger))
 
   app.useGlobalPipes(new ValidationPipe({ transform: true, stopAtFirstError: true }))
-  app.useGlobalFilters(new DatadogErrorTrackingExceptionFilter())
+  // Order of filters is important
+  app.useGlobalFilters(new GlobalExceptionFilter())
   app.enableCors()
   app.enableShutdownHooks()
 
-  app.use(
-    helmet({
-      contentSecurityPolicy: {
-        directives: {
-          defaultSrc: [`'self'`],
-          styleSrc: [`'self'`, `'unsafe-inline'`],
-          imgSrc: [`'self'`, 'data:', 'validator.swagger.io'],
-          scriptSrc: [`'self'`, `https: 'unsafe-inline'`],
+  // Disable CSP in development for GraphiQL
+  if (isProduction) {
+    app.use(
+      helmet({
+        contentSecurityPolicy: {
+          directives: {
+            defaultSrc: [`'self'`],
+            styleSrc: [`'self'`, `'unsafe-inline'`],
+            imgSrc: [`'self'`, 'data:', 'validator.swagger.io'],
+            scriptSrc: [`'self'`, `https: 'unsafe-inline'`],
+          },
         },
-      },
-    }),
-  )
+      }),
+    )
+  }
 
   bootstrapSwagger(app)
 

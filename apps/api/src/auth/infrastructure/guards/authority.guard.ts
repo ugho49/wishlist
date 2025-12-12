@@ -1,5 +1,6 @@
 import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
+import { GqlExecutionContext } from '@nestjs/graphql'
 import { ICurrentUser } from '@wishlist/common'
 
 import { HasAuthoritiesMetadataKey, HasAuthoritiesMetadataParamType } from '../decorators/authority.decorator'
@@ -13,8 +14,18 @@ export class AuthorityGuard implements CanActivate {
       HasAuthoritiesMetadataKey,
       [context.getHandler(), context.getClass()],
     )
-    const request = context.switchToHttp().getRequest()
-    const user = request.user as ICurrentUser
+
+    // Support both REST and GraphQL contexts
+    const contextType = context.getType<'http' | 'graphql'>()
+    let user: ICurrentUser
+
+    if (contextType === 'graphql') {
+      const ctx = GqlExecutionContext.create(context)
+      user = ctx.getContext().req.user as ICurrentUser
+    } else {
+      const request = context.switchToHttp().getRequest()
+      user = request.user as ICurrentUser
+    }
 
     if (condition === 'AND') {
       for (const authority of authorities) {

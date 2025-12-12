@@ -21,7 +21,9 @@ import { GetClosestFriendsUseCase } from './query/get-closest-friends.use-case'
 import { GetPendingEmailChangeUseCase } from './query/get-pending-email-change.use-case'
 import { GetUserByIdUseCase } from './query/get-user-by-id.use-case'
 import { GetUserEmailSettingUseCase } from './query/get-user-email-setting.use-case'
+import { GetUserSocialsByUserIdsUseCase } from './query/get-user-socials-by-user-ids.use-case'
 import { GetUsersByCriteriaUseCase } from './query/get-users-by-criteria.use-case'
+import { GetUsersByIdsUseCase } from './query/get-users-by-ids.use-case'
 import { GetUsersPaginatedUseCase } from './query/get-users-paginated.use-case'
 
 export const handlers = [
@@ -45,9 +47,11 @@ export const handlers = [
   GetUserEmailSettingUseCase,
   GetPendingEmailChangeUseCase,
   GetUserByIdUseCase,
+  GetUsersByIdsUseCase,
   GetUsersByCriteriaUseCase,
   GetUsersPaginatedUseCase,
   GetClosestFriendsUseCase,
+  GetUserSocialsByUserIdsUseCase,
   // Events
   UserCreatedUseCase,
   PasswordVerificationCreatedUseCase,

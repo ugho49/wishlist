@@ -8,6 +8,8 @@ import { UserEmailChangeController } from './controllers/user-email-change.contr
 import { UserEmailSettingsController } from './controllers/user-email-settings.controller'
 import { UserPasswordVerificationController } from './controllers/user-password-verification.controller'
 import userConfig from './user.config'
+import { UserDataLoaderFactory } from './user.dataloader'
+import { UserResolver } from './user.resolver'
 
 @Module({
   imports: [ConfigModule.forFeature(userConfig)],
@@ -18,6 +20,7 @@ import userConfig from './user.config'
     UserEmailSettingsController,
     UserPasswordVerificationController,
   ],
-  providers: [...handlers],
+  providers: [...handlers, UserResolver, UserDataLoaderFactory],
+  exports: [UserDataLoaderFactory],
 })
 export class UserModule {}

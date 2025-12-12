@@ -1,3 +1,5 @@
+name: wishlist-test
+
 services:
   db:
     ports:
