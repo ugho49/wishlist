@@ -1,10 +1,11 @@
 import type { Wishlist } from '@wishlist/api/wishlist'
 import type { DetailedEventDto, EventWithCountsDto, MiniEventDto } from '@wishlist/common'
-import type { Event } from '../domain'
+import type { Event, EventAttendee } from '../domain'
 
 import { wishlistMapper } from '@wishlist/api/wishlist'
 import { DateTime } from 'luxon'
 
+import { EventAttendeeOutput, EventOutput } from './event.dto'
 import { eventAttendeeMapper } from './event-attendee.mapper'
 
 function toMiniEventDto(event: Event): MiniEventDto {
@@ -39,8 +40,33 @@ function toEventWithCountsDto(event: Event): EventWithCountsDto {
   }
 }
 
+function toEventOutput(event: Event): EventOutput {
+  return {
+    id: event.id,
+    title: event.title,
+    description: event.description,
+    icon: event.icon,
+    eventDate: DateTime.fromJSDate(event.eventDate).toISODate() || '',
+    createdAt: event.createdAt.toISOString(),
+    updatedAt: event.updatedAt.toISOString(),
+    wishlistIds: event.wishlistIds,
+    attendeeIds: event.attendees.map(attendee => attendee.id),
+  }
+}
+
+function toEventAttendeeOutput(eventAttendee: EventAttendee): EventAttendeeOutput {
+  return {
+    id: eventAttendee.id,
+    userId: eventAttendee.user?.id,
+    pendingEmail: eventAttendee.pendingEmail,
+    role: eventAttendee.role,
+  }
+}
+
 export const eventMapper = {
   toMiniEventDto,
   toDetailedEventDto,
   toEventWithCountsDto,
+  toEventOutput,
+  toEventAttendeeOutput,
 }

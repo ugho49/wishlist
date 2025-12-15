@@ -18,6 +18,11 @@ export class PostgresUserRepository implements UserRepository {
     return user ? PostgresUserRepository.toModel(user) : undefined
   }
 
+  async findByIds(userIds: UserId[]): Promise<User[]> {
+    const users = await this.databaseService.db.query.user.findMany({ where: inArray(schema.user.id, userIds) })
+    return users.map(user => PostgresUserRepository.toModel(user))
+  }
+
   async findByIdOrFail(id: UserId): Promise<User> {
     const user = await this.findById(id)
     if (!user) throw new NotFoundException('User not found')

@@ -3,6 +3,8 @@ import type { User, UserSocial } from '../domain'
 
 import { DateTime } from 'luxon'
 
+import { UserOutput } from './user.dto'
+
 function toMiniUserDto(model: User): MiniUserDto {
   return {
     id: model.id,
@@ -48,9 +50,24 @@ function toUserDto(params: { user: User; socials: UserSocial[] }): UserDto {
   }
 }
 
+function toUserOutput(user: User): UserOutput {
+  return {
+    id: user.id,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    email: user.email,
+    pictureUrl: user.pictureUrl,
+    birthday: user.birthday ? DateTime.fromJSDate(user.birthday).toISODate() || '' : undefined,
+    isEnabled: user.isEnabled,
+    createdAt: user.createdAt.toISOString(),
+    updatedAt: user.updatedAt.toISOString(),
+  }
+}
+
 export const userMapper = {
   toMiniUserDto,
   toUserWithoutSocialsDto,
   toUserDto,
   toUserSocialDto,
+  toUserOutput,
 }

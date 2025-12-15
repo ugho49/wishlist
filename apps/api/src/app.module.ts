@@ -5,6 +5,7 @@ import { LoggerModule } from 'pino-nestjs'
 
 import { AuthModule } from './auth/infrastructure/auth.module'
 import { CoreModule } from './core'
+import { GraphQLModule } from './core/graphql/graphql.module'
 import { EventModule } from './event'
 import { pinoLoggerConfig } from './helpers'
 import { ItemModule } from './item'
@@ -30,6 +31,8 @@ import { WishlistModule } from './wishlist'
     ItemModule,
     EventModule,
     SecretSantaModule,
+    // GraphQLModule must be AFTER all domain modules it depends on
+    GraphQLModule,
   ],
 })
 export class AppModule {}

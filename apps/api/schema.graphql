@@ -1,0 +1,149 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+enum AttendeeRole {
+  MAINTAINER
+  USER
+}
+
+type EventAttendeeOutput {
+  id: String!
+  pendingEmail: String
+  role: AttendeeRole!
+  user: UserOutput
+  userId: String
+}
+
+type EventOutput {
+  attendeeIds: [String!]!
+  attendees: [EventAttendeeOutput!]!
+  createdAt: String!
+  description: String
+  eventDate: String!
+  icon: String
+  id: String!
+  title: String!
+  updatedAt: String!
+  wishlistIds: [String!]!
+  wishlists: [WishlistOutput!]!
+}
+
+type EventOutputPagedResponse {
+  pagination: PaginationOutput!
+  resources: [EventOutput!]!
+}
+
+input EventPaginationInput {
+  limit: Int = 10
+  onlyFuture: Boolean
+  page: Int = 1
+}
+
+type HealthOutput {
+  status: HealthStatus!
+}
+
+enum HealthStatus {
+  ERROR
+  OK
+  SHUTTING_DOWN
+}
+
+type ItemOutput {
+  createdAt: String!
+  description: String
+  id: String!
+  isSuggested: Boolean
+  name: String!
+  pictureUrl: String
+  score: Float
+  takenAt: String
+  takenById: String
+  takerUser: UserOutput
+  url: String
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+type LoginOutput {
+  accessToken: String!
+}
+
+input LoginWithGoogleInput {
+  code: String!
+  createUserIfNotExists: Boolean!
+}
+
+type LoginWithGoogleOutput {
+  accessToken: String!
+  linkedToExistingUser: Boolean
+  newUserCreated: Boolean
+}
+
+type Mutation {
+  login(input: LoginInput!): LoginOutput!
+  loginWithGoogle(input: LoginWithGoogleInput!): LoginWithGoogleOutput!
+}
+
+input PaginationInput {
+  limit: Int = 10
+  page: Int = 1
+}
+
+type PaginationOutput {
+  pageNumber: Int!
+  pageSize: Int!
+  totalElements: Int!
+  totalPages: Int!
+}
+
+type Query {
+  getCurrentUser: UserOutput!
+  getEventById(id: String!): EventOutput
+  getMyEvents(pagination: EventPaginationInput!): EventOutputPagedResponse!
+  getMyWishlists(pagination: PaginationInput!): WishlistOutputPagedResponse!
+  getWishlistById(id: String!): WishlistOutput
+  health: HealthOutput!
+}
+
+type UserOutput {
+  birthday: String
+  createdAt: String!
+  email: String!
+  firstName: String!
+  id: String!
+  isEnabled: Boolean!
+  lastName: String!
+  pictureUrl: String
+  updatedAt: String!
+}
+
+type WishlistConfigOutput {
+  hideItems: Boolean!
+}
+
+type WishlistOutput {
+  coOwner: UserOutput
+  coOwnerId: String
+  config: WishlistConfigOutput!
+  createdAt: String!
+  description: String
+  eventIds: [String!]!
+  events: [EventOutput!]!
+  id: String!
+  items: [ItemOutput!]!
+  logoUrl: String
+  owner: UserOutput!
+  ownerId: String!
+  title: String!
+  updatedAt: String!
+}
+
+type WishlistOutputPagedResponse {
+  pagination: PaginationOutput!
+  resources: [WishlistOutput!]!
+}

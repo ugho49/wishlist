@@ -10,7 +10,7 @@ export interface WishlistRepository {
   findByEvent(eventId: EventId): Promise<Wishlist[]>
   findByOwner(userId: UserId): Promise<Wishlist[]>
   findEmailsToNotify(params: { ownerId: UserId; wishlistId: WishlistId }): Promise<string[]>
-  findByOwnerPaginated(params: {
+  findByUserPaginated(params: {
     userId: UserId
     pagination: { take: number; skip: number }
   }): Promise<{ wishlists: Wishlist[]; totalCount: number }>
