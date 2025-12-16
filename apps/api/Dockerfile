@@ -9,17 +9,14 @@ WORKDIR /usr/src/app
 COPY . .
 
 RUN yarn --immutable
-
 RUN yarn nx run api:build:production
-
 RUN yarn workspaces focus --production
+RUN cd dist/apps/api && yarn install --immutable
 
 FROM base as production
 
 WORKDIR /usr/src/app
 
-COPY --from=builder /usr/src/app/package.json ./package.json
-COPY --from=builder /usr/src/app/node_modules node_modules
 COPY --from=builder /usr/src/app/dist ./dist
 
 CMD ["node", "dist/apps/api/main"]
