@@ -23,9 +23,16 @@ export class NotifyNewItemsUseCase implements IInferredCommandHandler<NotifyNewI
     try {
       const oneDayAgo = DateTime.now().minus({ days: 1 }).toJSDate()
 
-      this.logger.log(`Fetch new items to send daily notification since ${oneDayAgo.toISOString()}`)
+      this.logger.log(`Fetching new items to send daily notification since "${oneDayAgo.toISOString()}" ...`)
 
       const newItemsForWishlists = await this.itemRepository.findAllNewItems(oneDayAgo)
+
+      if (newItemsForWishlists.length === 0) {
+        this.logger.log('No new items to send daily notification')
+        return
+      }
+
+      this.logger.log(`Found ${newItemsForWishlists.length} new items to send daily notification`)
 
       for (const newItemsForWishlist of newItemsForWishlists) {
         await this.notify(newItemsForWishlist)
@@ -37,6 +44,11 @@ export class NotifyNewItemsUseCase implements IInferredCommandHandler<NotifyNewI
 
   private async notify(dto: NewItemsForWishlist) {
     try {
+      this.logger.log(`Notifying wishlist "${dto.wishlistId}" ...`, {
+        wishlistId: dto.wishlistId,
+        nbNewItems: dto.nbNewItems,
+      })
+
       const allEmailToNotify = await this.wishlistRepository.findEmailsToNotify({
         wishlistId: dto.wishlistId,
         ownerId: dto.ownerId,
@@ -47,7 +59,10 @@ export class NotifyNewItemsUseCase implements IInferredCommandHandler<NotifyNewI
         return
       }
 
-      this.logger.log(`Notify ${allEmailToNotify.length} peoples for new items in wishlist ${dto.wishlistId}`)
+      this.logger.log(
+        `Notifying ${allEmailToNotify.length} peoples for new items in wishlist "${dto.wishlistId}" ...`,
+        { wishlistId: dto.wishlistId },
+      )
 
       await this.sendNotifyEmail({
         emails: allEmailToNotify,
@@ -55,6 +70,8 @@ export class NotifyNewItemsUseCase implements IInferredCommandHandler<NotifyNewI
         wishlist: { id: dto.wishlistId, title: dto.wishlistTitle },
         ownerName: dto.ownerName,
       })
+
+      this.logger.log(`✅ New items notification sent successfully for wishlist "${dto.wishlistId}"`)
     } catch (e) {
       this.logger.error(`Fail to notify new items for wishlist ${dto.wishlistId}`, e)
     }
