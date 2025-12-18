@@ -1,25 +1,30 @@
 import { BullMQAdapter } from '@bull-board/api/bullMQAdapter'
 import { ExpressAdapter } from '@bull-board/express'
 import { BullBoardModule } from '@bull-board/nestjs'
-import { BullModule } from '@nestjs/bullmq'
+import { BullModule, getQueueToken } from '@nestjs/bullmq'
 import { Global, MiddlewareConsumer, Module, NestModule } from '@nestjs/common'
-import { ConfigService } from '@nestjs/config'
+import { ConfigModule, ConfigType } from '@nestjs/config'
+import { Queue } from 'bullmq'
 
 import { BullBoardAuthMiddleware } from './middleware/bull-board-auth.middleware'
-import { QueueName } from './queues.type'
+import queueConfig from './queue.config'
+import { QueueService } from './queue.service'
+import { QUEUES, QueueName } from './queues.type'
 
 @Global()
 @Module({
   imports: [
+    ConfigModule.forFeature(queueConfig),
     BullModule.forRootAsync({
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        prefix: config.get<string>('VALKEY_KEY_PREFIX', 'wishlist:'),
+      imports: [ConfigModule.forFeature(queueConfig)],
+      inject: [queueConfig.KEY],
+      useFactory: (config: ConfigType<typeof queueConfig>) => ({
+        prefix: config.valkey.keyPrefix,
         connection: {
-          host: config.get<string>('VALKEY_HOST', 'localhost'),
-          port: parseInt(config.get<string>('VALKEY_PORT', '6379'), 10),
-          password: config.get<string>('VALKEY_PASSWORD', ''),
-          db: parseInt(config.get<string>('VALKEY_DB', '0'), 10),
+          host: config.valkey.host,
+          port: config.valkey.port,
+          password: config.valkey.password,
+          db: config.valkey.db,
         },
       }),
     }),
@@ -30,6 +35,7 @@ import { QueueName } from './queues.type'
       },
       adapter: ExpressAdapter,
     }),
+    ...Object.values(QueueName).map(name => BullModule.registerQueue({ name })),
     BullBoardModule.forFeature(
       ...Object.values(QueueName).map(name => ({
         name,
@@ -37,6 +43,15 @@ import { QueueName } from './queues.type'
       })),
     ),
   ],
+  providers: [
+    QueueService,
+    {
+      provide: QUEUES,
+      inject: Object.values(QueueName).map(name => getQueueToken(name)),
+      useFactory: (...queues: Queue[]) => queues,
+    },
+  ],
+  exports: [QueueService, BullModule],
 })
 export class QueueModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
