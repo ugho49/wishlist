@@ -1,9 +1,10 @@
 import { Global, Module } from '@nestjs/common'
-import { ConfigService } from '@nestjs/config'
+import { ConfigModule, ConfigService } from '@nestjs/config'
 import { ScheduleModule } from '@nestjs/schedule'
 
 import { path } from '../helpers'
 import { BucketModule } from './bucket/bucket.module'
+import coreConfig from './core.config'
 import { DatabaseModule } from './database/database.module'
 import { FrontendRoutesModule } from './frontend-routes/frontend-routes.module'
 import { HealthModule } from './health/health.module'
@@ -72,6 +73,7 @@ const frontendRoutesModule = FrontendRoutesModule.registerAsync({
 @Global()
 @Module({
   imports: [
+    ConfigModule.forFeature(coreConfig),
     ScheduleModule.forRoot(),
     HealthModule,
     databaseModule,

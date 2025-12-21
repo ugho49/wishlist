@@ -1,4 +1,5 @@
 import { registerAs } from '@nestjs/config'
+import { mapConfigOrThrow } from '@wishlist/common'
 import { z } from 'zod'
 
 const schema = z.object({
@@ -10,23 +11,15 @@ const schema = z.object({
   SCHEDULED_JOBS_ENABLED: z.boolean('Missing SCHEDULED_JOBS_ENABLED environment variable').optional().default(true),
 })
 
-export default registerAs('queue', () => {
-  const result = schema.safeParse(process.env)
-
-  if (!result.success) {
-    throw new Error(z.prettifyError(result.error))
-  }
-
-  const validatedConfig = result.data
-
-  return {
+export default registerAs('queue', () =>
+  mapConfigOrThrow(schema, process.env, data => ({
     valkey: {
-      keyPrefix: validatedConfig.VALKEY_KEY_PREFIX,
-      host: validatedConfig.VALKEY_HOST,
-      port: validatedConfig.VALKEY_PORT,
-      password: validatedConfig.VALKEY_PASSWORD,
-      db: validatedConfig.VALKEY_DB,
+      keyPrefix: data.VALKEY_KEY_PREFIX,
+      host: data.VALKEY_HOST,
+      port: data.VALKEY_PORT,
+      password: data.VALKEY_PASSWORD,
+      db: data.VALKEY_DB,
     },
-    scheduledJobsEnabled: validatedConfig.SCHEDULED_JOBS_ENABLED,
-  }
-})
+    scheduledJobsEnabled: data.SCHEDULED_JOBS_ENABLED,
+  })),
+)

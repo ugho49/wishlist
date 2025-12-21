@@ -4,6 +4,7 @@ tracer.init({
   logInjection: true,
   runtimeMetrics: true,
   sampleRate: 1,
+  version: process.env.API_VERSION,
 })
 
 tracer.use('pino')

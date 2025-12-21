@@ -1,4 +1,5 @@
 import { registerAs } from '@nestjs/config'
+import { mapConfigOrThrow } from '@wishlist/common'
 import { z } from 'zod'
 
 const schema = z.object({
@@ -10,17 +11,9 @@ const schema = z.object({
   ),
 })
 
-export default registerAs('user', () => {
-  const result = schema.safeParse(process.env)
-
-  if (!result.success) {
-    throw new Error(z.prettifyError(result.error))
-  }
-
-  const validatedConfig = result.data
-
-  return {
-    resetPasswordTokenDurationInMinutes: validatedConfig.RESET_PASSWORD_TOKEN_DURATION_IN_MIN,
-    emailChangeVerificationTokenDurationInMinutes: validatedConfig.EMAIL_CHANGE_VERIFICATION_TOKEN_DURATION_IN_MIN,
-  }
-})
+export default registerAs('user', () =>
+  mapConfigOrThrow(schema, process.env, data => ({
+    resetPasswordTokenDurationInMinutes: data.RESET_PASSWORD_TOKEN_DURATION_IN_MIN,
+    emailChangeVerificationTokenDurationInMinutes: data.EMAIL_CHANGE_VERIFICATION_TOKEN_DURATION_IN_MIN,
+  })),
+)
