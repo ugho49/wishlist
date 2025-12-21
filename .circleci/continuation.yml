@@ -30,7 +30,11 @@ jobs:
       - checkout: *checkout
       - attach_workspace: *attach_workspace
       - restore_cache: *restore_node_cache
-      - run: yarn nx build front
+      - run:
+          name: Build front
+          command: |
+            export VITE_APP_VERSION=${CIRCLE_SHA1}
+            yarn nx build front
       - persist_to_workspace:
           root: .
           paths:

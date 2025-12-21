@@ -55,6 +55,9 @@ function main() {
     window.__TANSTACK_QUERY_CLIENT__ = queryClient
   }
 
+  // @ts-expect-error - This is a global variable for the Wishlist environment
+  window.__WISHLIST_ENVIRONMENT__ = environment
+
   root.render(
     <HelmetProvider>
       <LDProvider clientSideID={environment.launchdarklyClientSideiD} reactOptions={{ useCamelCaseFlagKeys: false }}>
