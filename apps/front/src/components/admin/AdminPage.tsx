@@ -54,7 +54,7 @@ export const AdminPage = () => {
       title: 'Gestion des queues',
       description: 'Accéder au dashboard de gestion des queues bullMQ',
       icon: <ManageHistoryIcon />,
-      onClick: () => window.open(`${environment.baseUrl}/queues`, '_blank'),
+      onClick: () => window.open(`${environment.apiBaseUrl}/queues`, '_blank'),
     },
   ]
 

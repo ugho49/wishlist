@@ -15,7 +15,7 @@ export const ApiProvider = ({ children }: PropsWithChildren) => {
   const api = useMemo(
     () =>
       ApiClient.create({
-        baseURL: environment.baseUrl,
+        baseURL: environment.apiBaseUrl,
         timeoutInMs: 10_000, // 10 seconds
         accessToken,
       }),
