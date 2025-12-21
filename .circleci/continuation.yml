@@ -90,6 +90,7 @@ workflows:
           dockerfile: 'apps/api/Dockerfile'
           use_buildkit: true
           tag: '${CIRCLE_SHA1}'
+          extra_build_args: '--build-arg=API_VERSION=${CIRCLE_SHA1}' # TODO: use real version when available
           deploy: false
           filters:
             branches:
@@ -105,6 +106,7 @@ workflows:
           context:
             - DOCKER_CREDENDIALS
           tag: '${CIRCLE_SHA1},latest'
+          extra_build_args: '--build-arg=API_VERSION=${CIRCLE_SHA1}' # TODO: use real version when available
           filters:
             branches:
               only:

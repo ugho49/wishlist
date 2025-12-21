@@ -2,6 +2,7 @@ import type { Algorithm } from 'jsonwebtoken'
 import type { StringValue } from 'ms'
 
 import { registerAs } from '@nestjs/config'
+import { mapConfigOrThrow } from '@wishlist/common'
 import { z } from 'zod'
 
 const schema = z.object({
@@ -13,27 +14,19 @@ const schema = z.object({
   GOOGLE_OAUTH_CLIENT_SECRET: z.string('Missing GOOGLE_OAUTH_CLIENT_SECRET environment variable'),
 })
 
-export default registerAs('auth', () => {
-  const result = schema.safeParse(process.env)
-
-  if (!result.success) {
-    throw new Error(z.prettifyError(result.error))
-  }
-
-  const validatedConfig = result.data
-
-  return {
-    issuer: validatedConfig.AUTH_ISSUER,
+export default registerAs('auth', () =>
+  mapConfigOrThrow(schema, process.env, data => ({
+    issuer: data.AUTH_ISSUER,
     accessToken: {
-      secret: validatedConfig.AUTH_ACCESS_TOKEN_SECRET,
-      duration: validatedConfig.AUTH_ACCESS_TOKEN_DURATION as StringValue,
-      algorithm: validatedConfig.AUTH_ACCESS_TOKEN_ALGORITHM as Algorithm,
+      secret: data.AUTH_ACCESS_TOKEN_SECRET,
+      duration: data.AUTH_ACCESS_TOKEN_DURATION as StringValue,
+      algorithm: data.AUTH_ACCESS_TOKEN_ALGORITHM as Algorithm,
     },
     social: {
       google: {
-        clientId: validatedConfig.GOOGLE_OAUTH_CLIENT_ID,
-        clientSecret: validatedConfig.GOOGLE_OAUTH_CLIENT_SECRET,
+        clientId: data.GOOGLE_OAUTH_CLIENT_ID,
+        clientSecret: data.GOOGLE_OAUTH_CLIENT_SECRET,
       },
     },
-  }
-})
+  })),
+)
