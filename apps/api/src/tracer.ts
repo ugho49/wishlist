@@ -1,17 +1,14 @@
 import tracer from 'dd-trace'
 
-tracer.init({
-  logInjection: true,
-  runtimeMetrics: true,
-  sampleRate: 1,
-  version: process.env.API_VERSION,
-})
+tracer.init()
 
 tracer.use('pino')
+tracer.use('pg', { service: 'wishlist-api-database' })
+tracer.use('redis', { service: 'wishlist-api-redis' })
 tracer.use('express', { middleware: false })
 
-// remove healthcheck traces
-tracer.use('http', { blocklist: ['/health'] })
+// remove traces for non-essential routes
+tracer.use('http', { blocklist: ['/health', '/api/queues', '/js/async', 'css/async'] })
 
 // Remove middleware spans to avoid trace pollution
 tracer.use('dns', { enabled: false })
