@@ -2,6 +2,7 @@ version: 2.1
 
 orbs:
   docker: circleci/docker@3.0.1
+  gh: circleci/github-cli@2.7.2
 
 parameters:
   workflow-api:
@@ -24,6 +25,78 @@ references:
     method: blobless
 
 jobs:
+  compute-version:
+    <<: *setup_env_node
+    parameters:
+      output-file:
+        type: string
+        default: .release/version.txt
+    steps:
+      - checkout: *checkout
+      - attach_workspace: *attach_workspace
+      - restore_cache: *restore_node_cache
+      - run:
+          name: Compute calendar version for API
+          command: |
+            # Calendar version format: YYMM.DD.short_sha
+            VERSION=$(date +"%y%m.%d").${CIRCLE_SHA1:0:7}
+            echo "Computed version: $VERSION"
+            echo "export APP_VERSION=$VERSION" >> $BASH_ENV
+            mkdir -p .release
+            echo "$VERSION" > << parameters.output-file >>
+      - persist_to_workspace:
+          root: .
+          paths:
+            - << parameters.output-file >>
+
+  release-app:
+      <<: *setup_env_node
+      parameters:
+        version-file:
+          type: string
+          default: .release/version.txt
+        tag-prefix:
+          type: string
+          default: api@
+        app-name:
+          type: string
+          default: API
+      steps:
+        - checkout: *checkout
+        - attach_workspace: *attach_workspace
+        - restore_cache: *restore_node_cache
+        - run:
+            name: Generate GitHub token
+            command: |
+              yarn tsx scripts/generate_github_token.mts
+              export GITHUB_TOKEN=$(cat github_token)
+        - gh/install
+        - run:
+            name: Read version
+            command: |
+              VERSION=$(cat << parameters.version-file >>)
+              echo "export APP_VERSION=$VERSION" >> $BASH_ENV
+              echo "Releasing version: $VERSION"
+        - run:
+            name: Create GitHub release for << parameters.app-name >>
+            command: |
+              source $BASH_ENV
+              TAG="<< parameters.tag-prefix >>$APP_VERSION"
+
+              # Configure git
+              git config user.email "ci@wishlistapp.fr"
+              git config user.name "CircleCI"
+
+              # Create and push tag
+              git tag -a "$TAG" -m "Release $TAG"
+              git push origin "$TAG"
+
+              # Create GitHub release
+              gh release create "$TAG" \
+                --title "<< parameters.app-name >> $APP_VERSION" \
+                --notes "Release << parameters.app-name >> version $APP_VERSION (commit: ${CIRCLE_SHA1})" \
+                --target "$CIRCLE_SHA1"
+                
   build-front:
     <<: *setup_env_node
     steps:
@@ -46,55 +119,77 @@ jobs:
       - checkout: *checkout
       - attach_workspace: *attach_workspace
       - run:
+          name: Read version
+          command: |
+            VERSION=$(cat .release/front-version.txt)
+            echo "export APP_VERSION=$VERSION" >> $BASH_ENV
+      - run:
           name: Install firebase-tools
           command: curl -sL https://firebase.tools | bash
       - run:
           name: Deploy application
           command: |
+            source $BASH_ENV
             echo $FIREBASE_JSON > firebase_auth.json
             export GOOGLE_APPLICATION_CREDENTIALS="$(pwd)/firebase_auth.json"
-            firebase deploy -P production -m "Workflow $CIRCLE_WORKFLOW_ID, build $CIRCLE_WORKFLOW_JOB_ID" --non-interactive
+            firebase deploy -P production -m "Version $APP_VERSION (commit: ${CIRCLE_SHA1:0:7})" --non-interactive
 
   deploy-api:
     docker:
       - image: cimg/base:2025.12
     steps:
+      - attach_workspace: *attach_workspace
+      - run:
+          name: Read version
+          command: |
+            VERSION=$(cat .release/api-version.txt)
+            echo "export API_VERSION=$VERSION" >> $BASH_ENV
       - run:
           name: Update application version
           command: |
+            source $BASH_ENV
             curl -X 'POST' "$VPS_API_URL/api/application.update" \
               -H 'accept: application/json' \
               -H 'Content-Type: application/json' \
               -H "x-api-key: $VPS_API_KEY" \
               -d "{
                 \"applicationId\": \"$DOKPLOY_API_APPLICATION_ID\",
-                \"dockerImage\": \"ughoste/wishlist-api:$CIRCLE_SHA1\"
+                \"dockerImage\": \"ughoste/wishlist-api:$API_VERSION\"
               }"
       - run:
           name: Deploy application
           command: |
+            source $BASH_ENV
             curl -X 'POST' "$VPS_API_URL/api/application.deploy" \
               -H 'accept: application/json' \
               -H 'Content-Type: application/json' \
               -H "x-api-key: $VPS_API_KEY" \
               -d "{
                 \"applicationId\": \"$DOKPLOY_API_APPLICATION_ID\",
-                \"title\": \"Deploy from CircleCI\",
-                \"description\": \"Commit $CIRCLE_SHA1\"
+                \"title\": \"Deploy $APP_VERSION from CircleCI\",
+                \"description\": \"Version $APP_VERSION (commit: ${CIRCLE_SHA1:0:7})\"
               }"
 
 workflows:
   build-and-release-api:
     when: << pipeline.parameters.workflow-api >>
     jobs:
+      - compute-version:
+          name: compute-version
+          output-file: .release/api-version.txt
+          filters:
+            branches:
+              only:
+                - main
+
       - docker/publish:
           name: build-without-publish
           image: ughoste/wishlist-api
           attach_at: ~/project
           dockerfile: 'apps/api/Dockerfile'
           use_buildkit: true
-          tag: '${CIRCLE_SHA1}'
-          extra_build_args: '--build-arg=API_VERSION=${CIRCLE_SHA1}' # TODO: use real version when available
+          tag: 'feature-${CIRCLE_SHA1}'
+          extra_build_args: '--build-arg=API_VERSION=feature-${CIRCLE_SHA1}' # TODO: use real version when available
           deploy: false
           filters:
             branches:
@@ -109,8 +204,10 @@ workflows:
           use_buildkit: true
           context:
             - DOCKER_CREDENDIALS
-          tag: '${CIRCLE_SHA1},latest'
-          extra_build_args: '--build-arg=API_VERSION=${CIRCLE_SHA1}' # TODO: use real version when available
+          tag: '${cat .release/api-version.txt},latest'
+          extra_build_args: '--build-arg=API_VERSION=${cat .release/api-version.txt}' # TODO: use real version when available
+          requires:
+            - compute-version
           filters:
             branches:
               only:
@@ -135,12 +232,35 @@ workflows:
           requires:
             - build-and-publish
             - deploy-trigger
+            - compute-version
+      
+      - release-app:
+          name: release-app
+          version-file: .release/api-version.txt
+          tag-prefix: api@
+          app-name: Api
+          context:
+            - GITHUB_CREDENTIALS
+          filters:
+            branches:
+              only:
+                - main
+          requires:
+            - deploy-api
 
   build-and-release-front:
     when: << pipeline.parameters.workflow-front >>
     jobs:
       - build-front:
           name: build
+      
+      - compute-version:
+          name: compute-version
+          output-file: .release/front-version.txt
+          filters:
+            branches:
+              only:
+                - main
 
       - deploy-front-trigger:
           name: deploy-trigger
@@ -151,11 +271,26 @@ workflows:
                 - main
 
       - deploy-front:
-          name: deploy
+          name: deploy-front
           requires:
             - build
             - deploy-trigger
+            - compute-version
           filters:
             branches:
               only:
                 - main
+      
+      - release-app:
+          name: release-app
+          version-file: .release/front-version.txt
+          tag-prefix: front@
+          app-name: Front
+          context:
+            - GITHUB_CREDENTIALS
+          filters:
+            branches:
+              only:
+                - main
+          requires:
+            - deploy-front

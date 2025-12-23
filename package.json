@@ -157,6 +157,7 @@
     "jsdom": "27.3.0",
     "lint-staged": "16.2.7",
     "nx": "22.3.3",
+    "octokit": "5.0.5",
     "run-script-webpack-plugin": "0.2.3",
     "sass-embedded": "1.97.1",
     "supertest": "7.1.4",
