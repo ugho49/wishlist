@@ -1,5 +1,6 @@
 {
   "name": "api",
+  "version": "0.0.0",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/api/src",
   "projectType": "application",

@@ -8,6 +8,48 @@
     "appsDir": "apps",
     "libsDir": "libs"
   },
+  "release": {
+    "projectsRelationship": "independent",
+    "releaseTagPattern": "{projectName}@{version}",
+    "version": {
+      "generatorOptions": {
+        "currentVersionResolver": "git-tag",
+        "specifierSource": "conventional-commits",
+        "fallbackCurrentVersionResolver": "disk"
+      }
+    },
+    "versionPlans": false,
+    "changelog": {
+      "projectChangelogs": {
+        "createRelease": "github"
+      },
+      "workspaceChangelog": false
+    },
+    "git": {
+      "commit": true,
+      "tag": true
+    },
+    "groups": {
+      "api": {
+        "projects": ["api"],
+        "version": {
+          "generatorOptions": {
+            "currentVersionResolver": "git-tag",
+            "specifierSource": "conventional-commits"
+          }
+        }
+      },
+      "front": {
+        "projects": ["front"],
+        "version": {
+          "generatorOptions": {
+            "currentVersionResolver": "git-tag",
+            "specifierSource": "conventional-commits"
+          }
+        }
+      }
+    }
+  },
   "targetDefaults": {
     "@nx/js:tsc": {
       "cache": true,
