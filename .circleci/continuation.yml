@@ -38,8 +38,8 @@ jobs:
       - run:
           name: Compute calendar version for API
           command: |
-            # Calendar version format: YYMM.DD.short_sha
-            VERSION=$(date +"%y%m.%d").${CIRCLE_SHA1:0:7}
+            # Calendar version format: YYYY.MM.DD.short_sha
+            VERSION=$(date +"%Y.%m.%d").${CIRCLE_SHA1:0:7}
             echo "Computed version: $VERSION"
             echo "export APP_VERSION=$VERSION" >> $BASH_ENV
             mkdir -p .release
@@ -69,7 +69,7 @@ jobs:
             name: Generate GitHub token
             command: |
               yarn tsx scripts/generate_github_token.mts
-              export GITHUB_TOKEN=$(cat github_token)
+              echo "export GITHUB_TOKEN=$(cat github_token)" >> $BASH_ENV
         - gh/install
         - run:
             name: Read version
@@ -86,6 +86,9 @@ jobs:
               # Configure git
               git config user.email "ci@wishlistapp.fr"
               git config user.name "CircleCI"
+
+              # Configure git to use HTTPS with token instead of SSH
+              git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}.git"
 
               # Create and push tag
               git tag -a "$TAG" -m "Release $TAG"
@@ -204,8 +207,8 @@ workflows:
           use_buildkit: true
           context:
             - DOCKER_CREDENDIALS
-          tag: '${cat .release/api-version.txt},latest'
-          extra_build_args: '--build-arg=API_VERSION=${cat .release/api-version.txt}' # TODO: use real version when available
+          tag: '$(cat .release/api-version.txt),latest'
+          extra_build_args: '--build-arg=API_VERSION=$(cat .release/api-version.txt)' # TODO: use real version when available
           requires:
             - compute-version
           filters:
