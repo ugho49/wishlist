@@ -109,7 +109,7 @@ jobs:
       - run:
           name: Build front
           command: |
-            export VITE_APP_VERSION=${CIRCLE_SHA1}
+            export VITE_APP_VERSION=$(cat .release/front-version.txt)
             yarn nx build front
       - persist_to_workspace:
           root: .
@@ -180,10 +180,6 @@ workflows:
       - compute-version:
           name: compute-version
           output-file: .release/api-version.txt
-          filters:
-            branches:
-              only:
-                - main
 
       - docker/publish:
           name: build-without-publish
@@ -191,9 +187,11 @@ workflows:
           attach_at: ~/project
           dockerfile: 'apps/api/Dockerfile'
           use_buildkit: true
-          tag: 'feature-${CIRCLE_SHA1}'
-          extra_build_args: '--build-arg=API_VERSION=feature-${CIRCLE_SHA1}' # TODO: use real version when available
+          tag: 'feature-$(cat .release/api-version.txt)'
+          extra_build_args: '--build-arg=API_VERSION=feature-$(cat .release/api-version.txt)'
           deploy: false
+          requires:
+            - compute-version
           filters:
             branches:
               ignore:
@@ -208,7 +206,7 @@ workflows:
           context:
             - DOCKER_CREDENDIALS
           tag: '$(cat .release/api-version.txt),latest'
-          extra_build_args: '--build-arg=API_VERSION=$(cat .release/api-version.txt)' # TODO: use real version when available
+          extra_build_args: '--build-arg=API_VERSION=$(cat .release/api-version.txt)' 
           requires:
             - compute-version
           filters:
@@ -254,16 +252,14 @@ workflows:
   build-and-release-front:
     when: << pipeline.parameters.workflow-front >>
     jobs:
-      - build-front:
-          name: build
-      
       - compute-version:
           name: compute-version
           output-file: .release/front-version.txt
-          filters:
-            branches:
-              only:
-                - main
+
+      - build-front:
+          name: build
+          requires:
+            - compute-version
 
       - deploy-front-trigger:
           name: deploy-trigger
