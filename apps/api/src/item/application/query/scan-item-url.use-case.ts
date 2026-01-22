@@ -1,16 +1,18 @@
 import type { Element } from 'domhandler'
 
-import { Logger } from '@nestjs/common'
-import { IInferredQueryHandler, QueryHandler } from '@nestjs/cqrs'
+import { Injectable, Logger } from '@nestjs/common'
+import { ScanItemOutputDto } from '@wishlist/common'
 import { Cheerio, load as loadHtml } from 'cheerio'
 
-import { ScanItemUrlQuery, ScanItemUrlResult } from '../../domain'
+export type ScanItemUrlInput = {
+  url: string
+}
 
-@QueryHandler(ScanItemUrlQuery)
-export class ScanItemUrlUseCase implements IInferredQueryHandler<ScanItemUrlQuery> {
+@Injectable()
+export class ScanItemUrlUseCase {
   private readonly logger = new Logger(ScanItemUrlUseCase.name)
 
-  async execute(query: ScanItemUrlQuery): Promise<ScanItemUrlResult> {
+  async execute(query: ScanItemUrlInput): Promise<ScanItemOutputDto> {
     const picture_url = await this.scanUrl(query.url)
     return { picture_url }
   }
@@ -134,8 +136,7 @@ export class ScanItemUrlUseCase implements IInferredQueryHandler<ScanItemUrlQuer
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36 OPR/76.0.4017.107',
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36 OPR/76.0.4017.123',
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36 OPR/77.0.4054.64',
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36 OPR/76.0.4017.107',
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36 OPR/76.0.4017.123',
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36 OPR/77.0.4054.64',
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36 OPR/76.0.4017.107',
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36 OPR/76.0.4017.123',
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36 OPR/77.0.4054.64',

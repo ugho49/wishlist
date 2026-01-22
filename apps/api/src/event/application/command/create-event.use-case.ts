@@ -1,23 +1,33 @@
-import { Inject, Logger } from '@nestjs/common'
-import { CommandHandler, EventBus, IInferredCommandHandler } from '@nestjs/cqrs'
+import { Inject, Injectable, Logger } from '@nestjs/common'
+import { EventBus } from '@nestjs/cqrs'
 import { REPOSITORIES } from '@wishlist/api/repositories'
 import { UserRepository } from '@wishlist/api/user'
-import { AttendeeRole } from '@wishlist/common'
+import { AttendeeRole, ICurrentUser, MiniEventDto } from '@wishlist/common'
 import { uniq } from 'lodash'
 
-import {
-  AttendeeAddedEvent,
-  CreateEventCommand,
-  CreateEventResult,
-  Event,
-  EventAttendee,
-  EventAttendeeRepository,
-  EventRepository,
-} from '../../domain'
+import { AttendeeAddedEvent, Event, EventAttendee, EventAttendeeRepository, EventRepository } from '../../domain'
 import { eventMapper } from '../../infrastructure'
 
-@CommandHandler(CreateEventCommand)
-export class CreateEventUseCase implements IInferredCommandHandler<CreateEventCommand> {
+type NewEventAttendee = {
+  email: string
+  role?: AttendeeRole
+}
+
+type NewEvent = {
+  title: string
+  description?: string
+  icon?: string
+  eventDate: Date
+  attendees?: NewEventAttendee[]
+}
+
+export type CreateEventInput = {
+  currentUser: ICurrentUser
+  newEvent: NewEvent
+}
+
+@Injectable()
+export class CreateEventUseCase {
   private readonly logger = new Logger(CreateEventUseCase.name)
 
   constructor(
@@ -27,17 +37,17 @@ export class CreateEventUseCase implements IInferredCommandHandler<CreateEventCo
     private readonly eventBus: EventBus,
   ) {}
 
-  async execute(command: CreateEventCommand): Promise<CreateEventResult> {
-    this.logger.log('Create event request received', { command })
-    const attendeeEmails = uniq(command.newEvent.attendees?.map(a => a.email) ?? [])
+  async execute(input: CreateEventInput): Promise<MiniEventDto> {
+    this.logger.log('Create event request received', { input })
+    const attendeeEmails = uniq(input.newEvent.attendees?.map(a => a.email) ?? [])
       // Remove the current user from the list of attendees
-      .filter(email => email !== command.currentUser.email)
+      .filter(email => email !== input.currentUser.email)
     const existingUsers = await this.userRepository.findByEmails(attendeeEmails)
     const eventId = this.eventRepository.newId()
     const attendees: EventAttendee[] = []
 
     // Add the current user as maintainer attendee
-    const currentUser = await this.userRepository.findByIdOrFail(command.currentUser.id)
+    const currentUser = await this.userRepository.findByIdOrFail(input.currentUser.id)
 
     attendees.push(
       EventAttendee.createFromExistingUser({
@@ -48,7 +58,7 @@ export class CreateEventUseCase implements IInferredCommandHandler<CreateEventCo
       }),
     )
 
-    for (const attendee of command.newEvent.attendees ?? []) {
+    for (const attendee of input.newEvent.attendees ?? []) {
       const user = existingUsers.find(u => u.email === attendee.email)
       const id = this.attendeeRepository.newId()
       const role = attendee.role ?? AttendeeRole.USER
@@ -66,10 +76,10 @@ export class CreateEventUseCase implements IInferredCommandHandler<CreateEventCo
 
     const event = Event.create({
       id: eventId,
-      title: command.newEvent.title,
-      description: command.newEvent.description,
-      icon: command.newEvent.icon,
-      eventDate: command.newEvent.eventDate,
+      title: input.newEvent.title,
+      description: input.newEvent.description,
+      icon: input.newEvent.icon,
+      eventDate: input.newEvent.eventDate,
       attendees,
     })
 

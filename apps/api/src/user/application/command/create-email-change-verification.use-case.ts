@@ -1,11 +1,11 @@
-import { BadRequestException, Inject, UnauthorizedException } from '@nestjs/common'
+import { BadRequestException, Inject, Injectable, UnauthorizedException } from '@nestjs/common'
 import { ConfigType } from '@nestjs/config'
-import { CommandHandler, EventBus, IInferredCommandHandler } from '@nestjs/cqrs'
+import { EventBus } from '@nestjs/cqrs'
 import { REPOSITORIES } from '@wishlist/api/repositories'
+import { ICurrentUser } from '@wishlist/common'
 import { DateTime } from 'luxon'
 
 import {
-  CreateEmailChangeVerificationCommand,
   EmailChangeVerificationCreatedEvent,
   UserEmailChangeVerification,
   UserEmailChangeVerificationRepository,
@@ -13,10 +13,13 @@ import {
 } from '../../domain'
 import userConfig from '../../infrastructure/user.config'
 
-@CommandHandler(CreateEmailChangeVerificationCommand)
-export class CreateEmailChangeVerificationUseCase
-  implements IInferredCommandHandler<CreateEmailChangeVerificationCommand>
-{
+export type CreateEmailChangeVerificationInput = {
+  currentUser: ICurrentUser
+  newEmail: string
+}
+
+@Injectable()
+export class CreateEmailChangeVerificationUseCase {
   constructor(
     @Inject(REPOSITORIES.USER)
     private readonly userRepository: UserRepository,
@@ -27,11 +30,11 @@ export class CreateEmailChangeVerificationUseCase
     private readonly eventBus: EventBus,
   ) {}
 
-  async execute(command: CreateEmailChangeVerificationCommand): Promise<void> {
-    const currentUser = await this.userRepository.findByIdOrFail(command.currentUser.id)
+  async execute(input: CreateEmailChangeVerificationInput): Promise<void> {
+    const currentUser = await this.userRepository.findByIdOrFail(input.currentUser.id)
 
     // Normalize email to lowercase
-    const newEmail = command.newEmail.toLowerCase()
+    const newEmail = input.newEmail.toLowerCase()
 
     // Check if the new email is the same as the current email
     if (currentUser.email.toLowerCase() === newEmail) {

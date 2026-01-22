@@ -1,18 +1,22 @@
-import { Inject, NotFoundException } from '@nestjs/common'
-import { IInferredQueryHandler, QueryHandler } from '@nestjs/cqrs'
+import { Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { REPOSITORIES } from '@wishlist/api/repositories'
+import { ICurrentUser, UserEmailSettingsDto } from '@wishlist/common'
 
-import { GetUserEmailSettingQuery, GetUserEmailSettingResult, UserEmailSettingRepository } from '../../domain'
+import { UserEmailSettingRepository } from '../../domain'
 import { userEmailSettingMapper } from '../../infrastructure'
 
-@QueryHandler(GetUserEmailSettingQuery)
-export class GetUserEmailSettingUseCase implements IInferredQueryHandler<GetUserEmailSettingQuery> {
+export type GetUserEmailSettingInput = {
+  currentUser: ICurrentUser
+}
+
+@Injectable()
+export class GetUserEmailSettingUseCase {
   constructor(
     @Inject(REPOSITORIES.USER_EMAIL_SETTING)
     private readonly userEmailSettingRepository: UserEmailSettingRepository,
   ) {}
 
-  async execute(query: GetUserEmailSettingQuery): Promise<GetUserEmailSettingResult> {
+  async execute(query: GetUserEmailSettingInput): Promise<UserEmailSettingsDto> {
     const userEmailSetting = await this.userEmailSettingRepository.findByUserId(query.currentUser.id)
 
     if (!userEmailSetting) {

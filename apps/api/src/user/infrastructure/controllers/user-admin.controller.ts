@@ -17,39 +17,37 @@ import { userPictureFileValidators, userPictureResizePipe } from '../user.valida
 
 import 'multer'
 
-import { CommandBus, QueryBus } from '@nestjs/cqrs'
-
-import {
-  DeleteUserCommand,
-  GetUserByIdQuery,
-  GetUsersPaginatedQuery,
-  RemoveUserPictureCommand,
-  UpdateUserFullCommand,
-  UpdateUserPictureCommand,
-} from '../../domain'
+import { DeleteUserUseCase } from '../../application/command/delete-user.use-case'
+import { RemoveUserPictureUseCase } from '../../application/command/remove-user-picture.use-case'
+import { UpdateUserFullUseCase } from '../../application/command/update-user-full.use-case'
+import { UpdateUserPictureUseCase } from '../../application/command/update-user-picture.use-case'
+import { GetUserByIdUseCase } from '../../application/query/get-user-by-id.use-case'
+import { GetUsersPaginatedUseCase } from '../../application/query/get-users-paginated.use-case'
 
 @IsAdmin()
 @ApiTags('ADMIN - User')
 @Controller('/admin/user')
 export class UserAdminController {
   constructor(
-    private readonly commandBus: CommandBus,
-    private readonly queryBus: QueryBus,
+    private readonly getUserByIdUseCase: GetUserByIdUseCase,
+    private readonly getUsersPaginatedUseCase: GetUsersPaginatedUseCase,
+    private readonly updateUserFullUseCase: UpdateUserFullUseCase,
+    private readonly updateUserPictureUseCase: UpdateUserPictureUseCase,
+    private readonly deleteUserUseCase: DeleteUserUseCase,
+    private readonly removeUserPictureUseCase: RemoveUserPictureUseCase,
   ) {}
 
   @Get('/:id')
   getUserById(@Param('id') id: UserId): Promise<UserDto> {
-    return this.queryBus.execute(new GetUserByIdQuery({ userId: id }))
+    return this.getUserByIdUseCase.execute({ userId: id })
   }
 
   @Get()
   getAllPaginated(@Query() queryParams: GetAllUsersQueryDto): Promise<PagedResponse<UserWithoutSocialsDto>> {
-    return this.queryBus.execute(
-      new GetUsersPaginatedQuery({
-        pageNumber: queryParams.p ?? 1,
-        criteria: queryParams.q,
-      }),
-    )
+    return this.getUsersPaginatedUseCase.execute({
+      pageNumber: queryParams.p ?? 1,
+      criteria: queryParams.q,
+    })
   }
 
   @Patch('/:id')
@@ -58,25 +56,23 @@ export class UserAdminController {
     @Body() dto: UpdateFullUserProfileInputDto,
     @CurrentUser() currentUser: ICurrentUser,
   ): Promise<void> {
-    await this.commandBus.execute(
-      new UpdateUserFullCommand({
-        userId,
-        currentUser,
-        updateUser: {
-          email: dto.email,
-          newPassword: dto.new_password,
-          firstname: dto.firstname,
-          lastname: dto.lastname,
-          birthday: dto.birthday,
-          isEnabled: dto.is_enabled,
-        },
-      }),
-    )
+    await this.updateUserFullUseCase.execute({
+      userId,
+      currentUser,
+      updateUser: {
+        email: dto.email,
+        newPassword: dto.new_password,
+        firstname: dto.firstname,
+        lastname: dto.lastname,
+        birthday: dto.birthday,
+        isEnabled: dto.is_enabled,
+      },
+    })
   }
 
   @Delete('/:id')
   async deleteUserById(@Param('id') userId: UserId, @CurrentUser() currentUser: ICurrentUser): Promise<void> {
-    await this.commandBus.execute(new DeleteUserCommand({ userId, currentUser }))
+    await this.deleteUserUseCase.execute({ userId, currentUser })
   }
 
   @Post('/:id/upload-picture')
@@ -87,12 +83,12 @@ export class UserAdminController {
     @UploadedFile(userPictureFileValidators, userPictureResizePipe)
     file: Express.Multer.File,
   ): Promise<UpdateUserPictureOutputDto> {
-    const result = await this.commandBus.execute(new UpdateUserPictureCommand({ userId, file }))
+    const result = await this.updateUserPictureUseCase.execute({ userId, file })
     return { picture_url: result.pictureUrl }
   }
 
   @Delete('/:id/picture')
   async removePicture(@Param('id') userId: UserId) {
-    await this.commandBus.execute(new RemoveUserPictureCommand({ userId }))
+    await this.removeUserPictureUseCase.execute({ userId })
   }
 }

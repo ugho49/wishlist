@@ -1,15 +1,18 @@
 import { Body, Controller, Delete, Param, Post } from '@nestjs/common'
-import { CommandBus } from '@nestjs/cqrs'
 import { ApiTags } from '@nestjs/swagger'
 import { CurrentUser } from '@wishlist/api/auth'
 import { AddEventAttendeeInputDto, AttendeeDto, AttendeeId, EventId, ICurrentUser } from '@wishlist/common'
 
-import { AddAttendeeCommand, DeleteAttendeeCommand } from '../../domain'
+import { AddAttendeeUseCase } from '../../application/command/add-attendee.use-case'
+import { DeleteAttendeeUseCase } from '../../application/command/delete-attendee.use-case'
 
 @ApiTags('Event Attendee')
 @Controller('/event/:eventId/attendee')
 export class EventAttendeeController {
-  constructor(private readonly commandBus: CommandBus) {}
+  constructor(
+    private readonly addAttendeeUseCase: AddAttendeeUseCase,
+    private readonly deleteAttendeeUseCase: DeleteAttendeeUseCase,
+  ) {}
 
   @Post()
   addAttendee(
@@ -17,13 +20,14 @@ export class EventAttendeeController {
     @Param('eventId') eventId: EventId,
     @Body() dto: AddEventAttendeeInputDto,
   ): Promise<AttendeeDto> {
-    return this.commandBus.execute(
-      new AddAttendeeCommand({
-        currentUser,
-        eventId,
-        newAttendee: dto,
-      }),
-    )
+    return this.addAttendeeUseCase.execute({
+      currentUser,
+      eventId,
+      newAttendee: {
+        email: dto.email,
+        role: dto.role,
+      },
+    })
   }
 
   @Delete('/:attendeeId')
@@ -32,12 +36,10 @@ export class EventAttendeeController {
     @Param('eventId') eventId: EventId,
     @Param('attendeeId') attendeeId: AttendeeId,
   ): Promise<void> {
-    await this.commandBus.execute(
-      new DeleteAttendeeCommand({
-        currentUser,
-        attendeeId,
-        eventId,
-      }),
-    )
+    await this.deleteAttendeeUseCase.execute({
+      currentUser,
+      attendeeId,
+      eventId,
+    })
   }
 }

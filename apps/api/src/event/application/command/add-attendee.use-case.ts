@@ -1,21 +1,23 @@
-import { BadRequestException, Inject, Logger, UnauthorizedException } from '@nestjs/common'
-import { CommandHandler, EventBus, IInferredCommandHandler } from '@nestjs/cqrs'
+import { BadRequestException, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common'
+import { EventBus } from '@nestjs/cqrs'
 import { REPOSITORIES } from '@wishlist/api/repositories'
 import { UserRepository } from '@wishlist/api/user'
-import { AttendeeRole } from '@wishlist/common'
+import { AttendeeDto, AttendeeRole, EventId, ICurrentUser } from '@wishlist/common'
 
-import {
-  AddAttendeeCommand,
-  AddAttendeeResult,
-  AttendeeAddedEvent,
-  EventAttendee,
-  EventAttendeeRepository,
-  EventRepository,
-} from '../../domain'
+import { AttendeeAddedEvent, EventAttendee, EventAttendeeRepository, EventRepository } from '../../domain'
 import { eventAttendeeMapper } from '../../infrastructure'
 
-@CommandHandler(AddAttendeeCommand)
-export class AddAttendeeUseCase implements IInferredCommandHandler<AddAttendeeCommand> {
+export type AddAttendeeInput = {
+  currentUser: ICurrentUser
+  eventId: EventId
+  newAttendee: {
+    email: string
+    role?: AttendeeRole
+  }
+}
+
+@Injectable()
+export class AddAttendeeUseCase {
   private readonly logger = new Logger(AddAttendeeUseCase.name)
 
   constructor(
@@ -28,8 +30,8 @@ export class AddAttendeeUseCase implements IInferredCommandHandler<AddAttendeeCo
     private readonly eventBus: EventBus,
   ) {}
 
-  async execute(command: AddAttendeeCommand): Promise<AddAttendeeResult> {
-    const { eventId, currentUser } = command
+  async execute(input: AddAttendeeInput): Promise<AttendeeDto> {
+    const { eventId, currentUser } = input
     this.logger.log('Add attendee request received', { eventId, currentUser })
 
     const event = await this.eventRepository.findByIdOrFail(eventId)
@@ -38,14 +40,14 @@ export class AddAttendeeUseCase implements IInferredCommandHandler<AddAttendeeCo
       throw new UnauthorizedException('Only maintainers of the event can add an attendee')
     }
 
-    const attendeeAlreadyExists = event.attendees.some(attendee => attendee.getEmail() === command.newAttendee.email)
+    const attendeeAlreadyExists = event.attendees.some(attendee => attendee.getEmail() === input.newAttendee.email)
 
     if (attendeeAlreadyExists) {
       throw new BadRequestException('This attendee already exist for this event')
     }
 
-    const user = await this.userRepository.findByEmail(command.newAttendee.email)
-    const role = command.newAttendee.role ?? AttendeeRole.USER
+    const user = await this.userRepository.findByEmail(input.newAttendee.email)
+    const role = input.newAttendee.role ?? AttendeeRole.USER
     const attendeeId = this.attendeeRepository.newId()
 
     const newAttendee = user
@@ -58,7 +60,7 @@ export class AddAttendeeUseCase implements IInferredCommandHandler<AddAttendeeCo
       : EventAttendee.createFromNonExistingUser({
           id: attendeeId,
           eventId,
-          pendingEmail: command.newAttendee.email,
+          pendingEmail: input.newAttendee.email,
           role,
         })
 

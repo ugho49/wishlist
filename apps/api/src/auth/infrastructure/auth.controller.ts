@@ -3,8 +3,8 @@ import { ApiTags } from '@nestjs/swagger'
 import { LoginInputDto, LoginOutputDto, LoginWithGoogleInputDto } from '@wishlist/common'
 import { RealIP } from 'nestjs-real-ip'
 
-import { LoginUseCase } from '../application/use-case/login.use-case'
-import { LoginWithGoogleUseCase } from '../application/use-case/login-with-google.use-case'
+import { LoginUseCase } from '../application/commands/login.use-case'
+import { LoginWithGoogleUseCase } from '../application/commands/login-with-google.use-case'
 import { Public } from './decorators/public.metadata'
 
 @Public()

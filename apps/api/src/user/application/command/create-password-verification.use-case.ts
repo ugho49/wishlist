@@ -1,11 +1,10 @@
-import { Inject, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common'
+import { Inject, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common'
 import { ConfigType } from '@nestjs/config'
-import { CommandHandler, EventBus, IInferredCommandHandler } from '@nestjs/cqrs'
+import { EventBus } from '@nestjs/cqrs'
 import { REPOSITORIES } from '@wishlist/api/repositories'
 import { DateTime } from 'luxon'
 
 import {
-  CreatePasswordVerificationCommand,
   PasswordVerificationCreatedEvent,
   UserPasswordVerification,
   UserPasswordVerificationRepository,
@@ -13,8 +12,12 @@ import {
 } from '../../domain'
 import userConfig from '../../infrastructure/user.config'
 
-@CommandHandler(CreatePasswordVerificationCommand)
-export class CreatePasswordVerificationUseCase implements IInferredCommandHandler<CreatePasswordVerificationCommand> {
+export type CreatePasswordVerificationInput = {
+  email: string
+}
+
+@Injectable()
+export class CreatePasswordVerificationUseCase {
   private readonly logger = new Logger(CreatePasswordVerificationUseCase.name)
 
   constructor(
@@ -27,10 +30,10 @@ export class CreatePasswordVerificationUseCase implements IInferredCommandHandle
     private readonly eventBus: EventBus,
   ) {}
 
-  async execute(command: CreatePasswordVerificationCommand): Promise<void> {
-    this.logger.log('Create password verification request received', { command })
+  async execute(input: CreatePasswordVerificationInput): Promise<void> {
+    this.logger.log('Create password verification request received', { input })
 
-    const user = await this.userRepository.findByEmail(command.email)
+    const user = await this.userRepository.findByEmail(input.email)
 
     if (!user) {
       throw new NotFoundException('User not found')

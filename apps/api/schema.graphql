@@ -109,7 +109,7 @@ type Wishlist {
   events: [Event!]!
 }
 
-type GqlWishlistPagedResponse {
+type WishlistPagedResponse {
   resources: [Wishlist!]!
   pagination: Pagination!
 }
@@ -128,17 +128,17 @@ type Query {
   health: HealthOutput!
   getCurrentUser: User!
   getWishlistById(id: String!): Wishlist
-  getMyWishlists(pagination: PaginationInput!): GqlWishlistPagedResponse!
+  getMyWishlists(filters: PaginationFilters!): WishlistPagedResponse!
   getEventById(id: String!): Event
-  getMyEvents(pagination: EventPaginationInput!): EventOutputPagedResponse!
+  getMyEvents(filters: EventPaginationFilters!): EventOutputPagedResponse!
 }
 
-input PaginationInput {
+input PaginationFilters {
   page: Int = 1
   limit: Int = 10
 }
 
-input EventPaginationInput {
+input EventPaginationFilters {
   page: Int = 1
   limit: Int = 10
   onlyFuture: Boolean

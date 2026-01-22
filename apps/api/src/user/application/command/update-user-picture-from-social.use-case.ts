@@ -1,12 +1,17 @@
-import { Inject, Logger, NotFoundException } from '@nestjs/common'
-import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
+import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { BucketService } from '@wishlist/api/core'
 import { REPOSITORIES } from '@wishlist/api/repositories'
+import { UserId, UserSocialId } from '@wishlist/common'
 
-import { UpdateUserPictureFromSocialCommand, UserRepository, UserSocialRepository } from '../../domain'
+import { UserRepository, UserSocialRepository } from '../../domain'
 
-@CommandHandler(UpdateUserPictureFromSocialCommand)
-export class UpdateUserPictureFromSocialUseCase implements IInferredCommandHandler<UpdateUserPictureFromSocialCommand> {
+export type UpdateUserPictureFromSocialInput = {
+  userId: UserId
+  socialId: UserSocialId
+}
+
+@Injectable()
+export class UpdateUserPictureFromSocialUseCase {
   private readonly logger = new Logger(UpdateUserPictureFromSocialUseCase.name)
 
   constructor(
@@ -17,9 +22,9 @@ export class UpdateUserPictureFromSocialUseCase implements IInferredCommandHandl
     private readonly bucketService: BucketService,
   ) {}
 
-  async execute(command: UpdateUserPictureFromSocialCommand): Promise<void> {
-    this.logger.log('Update user picture from social request received', { command })
-    const { userId, socialId } = command
+  async execute(input: UpdateUserPictureFromSocialInput): Promise<void> {
+    this.logger.log('Update user picture from social request received', { input })
+    const { userId, socialId } = input
 
     const user = await this.userRepository.findByIdOrFail(userId)
     const socials = await this.userSocialRepository.findByUserId(userId)

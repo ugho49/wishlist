@@ -1,27 +1,32 @@
-import { Inject } from '@nestjs/common'
-import { IInferredQueryHandler, QueryHandler } from '@nestjs/cqrs'
+import { Inject, Injectable } from '@nestjs/common'
 import { DEFAULT_RESULT_NUMBER } from '@wishlist/api/core'
 import { REPOSITORIES } from '@wishlist/api/repositories'
-import { createPagedResponse } from '@wishlist/common'
+import { createPagedResponse, PagedResponse, UserId } from '@wishlist/common'
 
-import { GetWishlistsByUserQuery, GetWishlistsByUserResult, WishlistRepository } from '../../domain'
+import { Wishlist, WishlistRepository } from '../../domain'
 
-@QueryHandler(GetWishlistsByUserQuery)
-export class GetWishlistsByUserUseCase implements IInferredQueryHandler<GetWishlistsByUserQuery> {
+export type GetWishlistsByUserInput = {
+  userId: UserId
+  pageNumber: number
+  pageSize?: number
+}
+
+@Injectable()
+export class GetWishlistsByUserUseCase {
   constructor(@Inject(REPOSITORIES.WISHLIST) private readonly wishlistRepository: WishlistRepository) {}
 
-  async execute(query: GetWishlistsByUserQuery): Promise<GetWishlistsByUserResult> {
-    const pageSize = query.pageSize ?? DEFAULT_RESULT_NUMBER
-    const skip = (query.pageNumber - 1) * pageSize
+  async execute(input: GetWishlistsByUserInput): Promise<PagedResponse<Wishlist>> {
+    const pageSize = input.pageSize ?? DEFAULT_RESULT_NUMBER
+    const skip = (input.pageNumber - 1) * pageSize
 
     const { wishlists, totalCount } = await this.wishlistRepository.findByUserPaginated({
-      userId: query.userId,
+      userId: input.userId,
       pagination: { take: pageSize, skip },
     })
 
     return createPagedResponse({
       resources: wishlists,
-      options: { pageSize, totalElements: totalCount, pageNumber: query.pageNumber },
+      options: { pageSize, totalElements: totalCount, pageNumber: input.pageNumber },
     })
   }
 }

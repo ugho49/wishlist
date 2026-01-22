@@ -1,16 +1,25 @@
-import { Inject, Logger, UnauthorizedException } from '@nestjs/common'
-import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
+import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common'
 import { REPOSITORIES } from '@wishlist/api/repositories'
+import { ICurrentUser, WishlistId } from '@wishlist/common'
 
-import { UpdateWishlistCommand, WishlistRepository } from '../../domain'
+import { WishlistRepository } from '../../domain'
 
-@CommandHandler(UpdateWishlistCommand)
-export class UpdateWishlistUseCase implements IInferredCommandHandler<UpdateWishlistCommand> {
+export type UpdateWishlistInput = {
+  currentUser: ICurrentUser
+  wishlistId: WishlistId
+  updateWishlist: {
+    title: string
+    description?: string
+  }
+}
+
+@Injectable()
+export class UpdateWishlistUseCase {
   private readonly logger = new Logger(UpdateWishlistUseCase.name)
 
   constructor(@Inject(REPOSITORIES.WISHLIST) private readonly wishlistRepository: WishlistRepository) {}
 
-  async execute(command: UpdateWishlistCommand): Promise<void> {
+  async execute(command: UpdateWishlistInput): Promise<void> {
     this.logger.log('Update wishlist request received', { command })
     const wishlist = await this.wishlistRepository.findByIdOrFail(command.wishlistId)
 

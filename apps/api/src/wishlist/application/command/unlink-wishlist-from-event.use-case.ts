@@ -1,11 +1,17 @@
-import { BadRequestException, Inject, Logger, UnauthorizedException } from '@nestjs/common'
-import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
+import { BadRequestException, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common'
 import { REPOSITORIES } from '@wishlist/api/repositories'
+import { EventId, ICurrentUser, WishlistId } from '@wishlist/common'
 
-import { UnlinkWishlistFromEventCommand, WishlistRepository } from '../../domain'
+import { WishlistRepository } from '../../domain'
 
-@CommandHandler(UnlinkWishlistFromEventCommand)
-export class UnlinkWishlistFromEventUseCase implements IInferredCommandHandler<UnlinkWishlistFromEventCommand> {
+export type UnlinkWishlistFromEventInput = {
+  currentUser: ICurrentUser
+  wishlistId: WishlistId
+  eventId: EventId
+}
+
+@Injectable()
+export class UnlinkWishlistFromEventUseCase {
   private readonly logger = new Logger(UnlinkWishlistFromEventUseCase.name)
 
   constructor(
@@ -13,7 +19,7 @@ export class UnlinkWishlistFromEventUseCase implements IInferredCommandHandler<U
     private readonly wishlistRepository: WishlistRepository,
   ) {}
 
-  async execute(command: UnlinkWishlistFromEventCommand): Promise<void> {
+  async execute(command: UnlinkWishlistFromEventInput): Promise<void> {
     this.logger.log('Unlink wishlist from event request received', { command })
     const { currentUser, wishlistId, eventId } = command
 

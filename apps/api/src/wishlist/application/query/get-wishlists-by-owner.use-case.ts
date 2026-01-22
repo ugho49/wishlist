@@ -1,26 +1,31 @@
-import { Inject } from '@nestjs/common'
-import { IInferredQueryHandler, QueryHandler } from '@nestjs/cqrs'
+import { Inject, Injectable } from '@nestjs/common'
 import { DEFAULT_RESULT_NUMBER } from '@wishlist/api/core'
 import { EventRepository } from '@wishlist/api/event'
 import { REPOSITORIES } from '@wishlist/api/repositories'
-import { createPagedResponse } from '@wishlist/common'
+import { createPagedResponse, PagedResponse, UserId, WishlistWithEventsDto } from '@wishlist/common'
 
-import { GetWishlistsByOwnerQuery, GetWishlistsByOwnerResult, WishlistRepository } from '../../domain'
+import { WishlistRepository } from '../../domain'
 import { wishlistMapper } from '../../infrastructure'
 
-@QueryHandler(GetWishlistsByOwnerQuery)
-export class GetWishlistsByOwnerUseCase implements IInferredQueryHandler<GetWishlistsByOwnerQuery> {
+export type GetWishlistsByOwnerInput = {
+  ownerId: UserId
+  pageNumber: number
+  pageSize?: number
+}
+
+@Injectable()
+export class GetWishlistsByOwnerUseCase {
   constructor(
     @Inject(REPOSITORIES.WISHLIST) private readonly wishlistRepository: WishlistRepository,
     @Inject(REPOSITORIES.EVENT) private readonly eventRepository: EventRepository,
   ) {}
 
-  async execute(query: GetWishlistsByOwnerQuery): Promise<GetWishlistsByOwnerResult> {
-    const pageSize = query.pageSize ?? DEFAULT_RESULT_NUMBER
-    const skip = (query.pageNumber - 1) * pageSize
+  async execute(input: GetWishlistsByOwnerInput): Promise<PagedResponse<WishlistWithEventsDto>> {
+    const pageSize = input.pageSize ?? DEFAULT_RESULT_NUMBER
+    const skip = (input.pageNumber - 1) * pageSize
 
     const { wishlists, totalCount } = await this.wishlistRepository.findByUserPaginated({
-      userId: query.ownerId,
+      userId: input.ownerId,
       pagination: { take: pageSize, skip },
     })
 
@@ -34,7 +39,7 @@ export class GetWishlistsByOwnerUseCase implements IInferredQueryHandler<GetWish
           events: events.filter(event => wishlist.isLinkedToEvent(event.id)),
         }),
       ),
-      options: { pageSize, totalElements: totalCount, pageNumber: query.pageNumber },
+      options: { pageSize, totalElements: totalCount, pageNumber: input.pageNumber },
     })
   }
 }

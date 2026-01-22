@@ -1,15 +1,14 @@
 import { Injectable } from '@nestjs/common'
-import { QueryBus } from '@nestjs/cqrs'
 import { ICurrentUser, WishlistId } from '@wishlist/common'
 import DataLoader from 'dataloader'
 
-import { GetWishlistsByIdsQuery } from '../domain'
+import { GetWishlistsByIdsUseCase } from '../application/query/get-wishlists-by-ids.use-case'
 import { GqlWishlist } from './wishlist.dto'
 import { wishlistMapper } from './wishlist.mapper'
 
 @Injectable()
 export class WishlistDataLoaderFactory {
-  constructor(private readonly queryBus: QueryBus) {}
+  constructor(private readonly getWishlistsByIdsUseCase: GetWishlistsByIdsUseCase) {}
 
   createLoader(getCurrentUser: () => ICurrentUser | undefined) {
     return new DataLoader<WishlistId, GqlWishlist | null>(async (wishlistIds: readonly WishlistId[]) => {
@@ -18,9 +17,10 @@ export class WishlistDataLoaderFactory {
       // If no user, return null for all wishlists (DataLoader requires same length array)
       if (!currentUser) return wishlistIds.map(() => null)
 
-      const wishlists = await this.queryBus.execute(
-        new GetWishlistsByIdsQuery({ wishlistIds: [...wishlistIds], currentUser }),
-      )
+      const wishlists = await this.getWishlistsByIdsUseCase.execute({
+        currentUser,
+        wishlistIds: [...wishlistIds],
+      })
 
       // Map wishlists to maintain order and length matching input IDs
       const wishlistMap = new Map(

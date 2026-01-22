@@ -1,21 +1,19 @@
-import { BadRequestException, Inject, Logger, UnauthorizedException } from '@nestjs/common'
-import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
+import { BadRequestException, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common'
 import { GoogleAuthService } from '@wishlist/api/auth'
 import { TransactionManager } from '@wishlist/api/core'
 import { REPOSITORIES } from '@wishlist/api/repositories'
-import { UserSocialType } from '@wishlist/common'
+import { UserId, UserSocialDto, UserSocialType } from '@wishlist/common'
 
-import {
-  LinkUserToGoogleCommand,
-  LinkUserToGoogleResult,
-  UserRepository,
-  UserSocial,
-  UserSocialRepository,
-} from '../../domain'
+import { UserRepository, UserSocial, UserSocialRepository } from '../../domain'
 import { userMapper } from '../../infrastructure'
 
-@CommandHandler(LinkUserToGoogleCommand)
-export class LinkUserToGoogleUseCase implements IInferredCommandHandler<LinkUserToGoogleCommand> {
+export type LinkUserToGoogleInput = {
+  code: string
+  userId: UserId
+}
+
+@Injectable()
+export class LinkUserToGoogleUseCase {
   private readonly logger = new Logger(LinkUserToGoogleUseCase.name)
 
   constructor(
@@ -27,9 +25,9 @@ export class LinkUserToGoogleUseCase implements IInferredCommandHandler<LinkUser
     private readonly transactionManager: TransactionManager,
   ) {}
 
-  async execute(command: LinkUserToGoogleCommand): Promise<LinkUserToGoogleResult> {
-    this.logger.log('Link user to Google request received', { command })
-    const { code, userId } = command
+  async execute(input: LinkUserToGoogleInput): Promise<UserSocialDto> {
+    this.logger.log('Link user to Google request received', { input })
+    const { code, userId } = input
 
     let user = await this.userRepository.findByIdOrFail(userId)
     const socials = await this.userSocialRepository.findByUserId(userId)

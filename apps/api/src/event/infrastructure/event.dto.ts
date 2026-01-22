@@ -1,5 +1,5 @@
 import { Field, InputType, ObjectType, registerEnumType } from '@nestjs/graphql'
-import { PagedResponse, PaginationInput } from '@wishlist/api/core'
+import { PagedResponse, PaginationFilters } from '@wishlist/api/core'
 import { AttendeeId, AttendeeRole, EventId, UserId, WishlistId } from '@wishlist/common'
 
 registerEnumType(AttendeeRole, { name: 'AttendeeRole' })
@@ -49,8 +49,8 @@ export class GqlEventAttendee {
   declare role: AttendeeRole
 }
 
-@InputType('EventPaginationInput')
-export class GqlEventPaginationInput extends PaginationInput {
+@InputType('EventPaginationFilters')
+export class GqlEventPaginationFilters extends PaginationFilters {
   @Field(() => Boolean, { nullable: true })
   declare onlyFuture?: boolean
 }

@@ -1,8 +1,8 @@
 import { Args, Mutation, Resolver } from '@nestjs/graphql'
 import { RealIP } from 'nestjs-real-ip'
 
-import { LoginUseCase } from '../application/use-case/login.use-case'
-import { LoginWithGoogleUseCase } from '../application/use-case/login-with-google.use-case'
+import { LoginUseCase } from '../application/commands/login.use-case'
+import { LoginWithGoogleUseCase } from '../application/commands/login-with-google.use-case'
 import { LoginInput, LoginOutput, LoginWithGoogleInput, LoginWithGoogleOutput } from './auth.dto'
 import { Public } from './decorators/public.metadata'
 

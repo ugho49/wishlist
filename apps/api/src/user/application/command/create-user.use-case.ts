@@ -1,13 +1,24 @@
-import { Inject, Logger, UnauthorizedException } from '@nestjs/common'
-import { CommandHandler, EventBus, IInferredCommandHandler } from '@nestjs/cqrs'
+import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common'
+import { EventBus } from '@nestjs/cqrs'
 import { PasswordManager } from '@wishlist/api/auth'
 import { REPOSITORIES } from '@wishlist/api/repositories'
+import { MiniUserDto } from '@wishlist/common'
 
-import { CreateUserCommand, CreateUserResult, User, UserCreatedEvent, UserRepository } from '../../domain'
+import { User, UserCreatedEvent, UserRepository } from '../../domain'
 import { userMapper } from '../../infrastructure'
 
-@CommandHandler(CreateUserCommand)
-export class CreateUserUseCase implements IInferredCommandHandler<CreateUserCommand> {
+export type CreateUserInput = {
+  newUser: {
+    firstname: string
+    lastname: string
+    email: string
+    password: string
+  }
+  ip: string
+}
+
+@Injectable()
+export class CreateUserUseCase {
   private readonly logger = new Logger(CreateUserUseCase.name)
 
   constructor(
@@ -16,16 +27,16 @@ export class CreateUserUseCase implements IInferredCommandHandler<CreateUserComm
     private readonly eventBus: EventBus,
   ) {}
 
-  async execute(command: CreateUserCommand): Promise<CreateUserResult> {
+  async execute(input: CreateUserInput): Promise<MiniUserDto> {
     this.logger.log('Create user request received', {
       payload: {
-        email: command.newUser.email,
-        firstname: command.newUser.firstname,
-        lastname: command.newUser.lastname,
+        email: input.newUser.email,
+        firstname: input.newUser.firstname,
+        lastname: input.newUser.lastname,
       },
     })
 
-    const { newUser, ip } = command
+    const { newUser, ip } = input
 
     if (await this.userRepository.findByEmail(newUser.email)) {
       throw new UnauthorizedException('User email already taken')

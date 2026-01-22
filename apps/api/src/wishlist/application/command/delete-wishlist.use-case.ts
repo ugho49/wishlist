@@ -1,12 +1,17 @@
-import { Inject, Logger, UnauthorizedException } from '@nestjs/common'
-import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
+import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common'
 import { BucketService } from '@wishlist/api/core'
 import { REPOSITORIES } from '@wishlist/api/repositories'
+import { ICurrentUser, WishlistId } from '@wishlist/common'
 
-import { DeleteWishlistCommand, WishlistRepository } from '../../domain'
+import { WishlistRepository } from '../../domain'
 
-@CommandHandler(DeleteWishlistCommand)
-export class DeleteWishlistUseCase implements IInferredCommandHandler<DeleteWishlistCommand> {
+export type DeleteWishlistInput = {
+  currentUser: ICurrentUser
+  wishlistId: WishlistId
+}
+
+@Injectable()
+export class DeleteWishlistUseCase {
   private readonly logger = new Logger(DeleteWishlistUseCase.name)
 
   constructor(
@@ -15,7 +20,7 @@ export class DeleteWishlistUseCase implements IInferredCommandHandler<DeleteWish
     private readonly bucketService: BucketService,
   ) {}
 
-  async execute(command: DeleteWishlistCommand): Promise<void> {
+  async execute(command: DeleteWishlistInput): Promise<void> {
     this.logger.log('Delete wishlist request received', { command })
     const { currentUser, wishlistId } = command
 

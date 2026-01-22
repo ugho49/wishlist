@@ -13,10 +13,10 @@ import { UpdateUserFullUseCase } from './command/update-user-full.use-case'
 import { UpdateUserPasswordUseCase } from './command/update-user-password.use-case'
 import { UpdateUserPictureUseCase } from './command/update-user-picture.use-case'
 import { UpdateUserPictureFromSocialUseCase } from './command/update-user-picture-from-social.use-case'
-import { EmailChangeVerificationCreatedUseCase } from './event/email-change-verification-created.use-case'
-import { EmailChangedUseCase } from './event/email-changed.use-case'
-import { PasswordVerificationCreatedUseCase } from './event/password-verification-created.use-case'
-import { UserCreatedUseCase } from './event/user-created.use-case'
+import { EmailChangeVerificationCreatedHandler } from './event/email-change-verification-created.handler'
+import { EmailChangedhandler } from './event/email-changed.handler'
+import { PasswordVerificationCreatedHandler } from './event/password-verification-created.handler'
+import { UserCreatedHandler } from './event/user-created.handler'
 import { GetClosestFriendsUseCase } from './query/get-closest-friends.use-case'
 import { GetPendingEmailChangeUseCase } from './query/get-pending-email-change.use-case'
 import { GetUserByIdUseCase } from './query/get-user-by-id.use-case'
@@ -52,9 +52,9 @@ export const handlers = [
   GetUsersPaginatedUseCase,
   GetClosestFriendsUseCase,
   GetUserSocialsByUserIdsUseCase,
-  // Events
-  UserCreatedUseCase,
-  PasswordVerificationCreatedUseCase,
-  EmailChangeVerificationCreatedUseCase,
-  EmailChangedUseCase,
+  // Events handlers
+  UserCreatedHandler,
+  PasswordVerificationCreatedHandler,
+  EmailChangeVerificationCreatedHandler,
+  EmailChangedhandler,
 ]

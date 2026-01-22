@@ -1,15 +1,26 @@
-import { Inject, Logger, UnauthorizedException } from '@nestjs/common'
-import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
+import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common'
 import { WishlistItem, WishlistItemRepository } from '@wishlist/api/item'
 import { REPOSITORIES } from '@wishlist/api/repositories'
 import { WishlistRepository } from '@wishlist/api/wishlist'
+import { ICurrentUser, ItemDto, WishlistId } from '@wishlist/common'
 import { TidyURL } from 'tidy-url'
 
-import { CreateItemCommand, CreateItemResult } from '../../domain'
 import { itemMapper } from '../../infrastructure'
 
-@CommandHandler(CreateItemCommand)
-export class CreateItemUseCase implements IInferredCommandHandler<CreateItemCommand> {
+export type CreateItemInput = {
+  currentUser: ICurrentUser
+  wishlistId: WishlistId
+  newItem: {
+    name: string
+    description?: string
+    score?: number
+    url?: string
+    pictureUrl?: string
+  }
+}
+
+@Injectable()
+export class CreateItemUseCase {
   private readonly logger = new Logger(CreateItemUseCase.name)
 
   constructor(
@@ -19,7 +30,7 @@ export class CreateItemUseCase implements IInferredCommandHandler<CreateItemComm
     private readonly itemRepository: WishlistItemRepository,
   ) {}
 
-  async execute(command: CreateItemCommand): Promise<CreateItemResult> {
+  async execute(command: CreateItemInput): Promise<ItemDto> {
     this.logger.log('Create item request received', { command })
     const wishlist = await this.wishlistRepository.findByIdOrFail(command.wishlistId)
     const hasAccess = await this.wishlistRepository.hasAccess({

@@ -1,16 +1,20 @@
-import { Inject } from '@nestjs/common'
-import { IInferredQueryHandler, QueryHandler } from '@nestjs/cqrs'
+import { Inject, Injectable } from '@nestjs/common'
 import { EventRepository, eventMapper } from '@wishlist/api/event'
 import { REPOSITORIES } from '@wishlist/api/repositories'
-import { createPagedResponse } from '@wishlist/common'
+import { createPagedResponse, EventWithCountsDto, PagedResponse, UserId } from '@wishlist/common'
 
-import { GetEventsForUserQuery, GetEventsForUserResult } from '../../domain'
+type GetEventsForUserInput = {
+  userId: UserId
+  pageNumber: number
+  pageSize: number
+  ignorePastEvents: boolean
+}
 
-@QueryHandler(GetEventsForUserQuery)
-export class GetEventsForUserUseCase implements IInferredQueryHandler<GetEventsForUserQuery> {
+@Injectable()
+export class GetEventsForUserUseCase {
   constructor(@Inject(REPOSITORIES.EVENT) private readonly eventRepository: EventRepository) {}
 
-  async execute(query: GetEventsForUserQuery): Promise<GetEventsForUserResult> {
+  async execute(query: GetEventsForUserInput): Promise<PagedResponse<EventWithCountsDto>> {
     const { userId, pageNumber, pageSize, ignorePastEvents } = query
 
     const skip = (pageNumber - 1) * pageSize

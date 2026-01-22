@@ -1,13 +1,19 @@
-import { ConflictException, Inject, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common'
-import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
+import { ConflictException, Inject, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common'
 import { TransactionManager } from '@wishlist/api/core'
 import { REPOSITORIES } from '@wishlist/api/repositories'
 import { WishlistRepository } from '@wishlist/api/wishlist'
+import { AttendeeId, EventId, ICurrentUser } from '@wishlist/common'
 
-import { DeleteAttendeeCommand, EventAttendeeRepository, EventRepository } from '../../domain'
+import { EventAttendeeRepository, EventRepository } from '../../domain'
 
-@CommandHandler(DeleteAttendeeCommand)
-export class DeleteAttendeeUseCase implements IInferredCommandHandler<DeleteAttendeeCommand> {
+export type DeleteAttendeeInput = {
+  currentUser: ICurrentUser
+  attendeeId: AttendeeId
+  eventId: EventId
+}
+
+@Injectable()
+export class DeleteAttendeeUseCase {
   private readonly logger = new Logger(DeleteAttendeeUseCase.name)
 
   constructor(
@@ -20,9 +26,9 @@ export class DeleteAttendeeUseCase implements IInferredCommandHandler<DeleteAtte
     private readonly transactionManager: TransactionManager,
   ) {}
 
-  async execute(command: DeleteAttendeeCommand) {
-    this.logger.log('Delete attendee request received', { command })
-    const { attendeeId, currentUser, eventId } = command
+  async execute(input: DeleteAttendeeInput): Promise<void> {
+    this.logger.log('Delete attendee request received', { input })
+    const { attendeeId, currentUser, eventId } = input
 
     const event = await this.eventRepository.findByIdOrFail(eventId)
 

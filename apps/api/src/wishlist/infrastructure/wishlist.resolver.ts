@@ -1,18 +1,17 @@
-import { QueryBus } from '@nestjs/cqrs'
 import { Args, Context, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 import { GqlCurrentUser } from '@wishlist/api/auth'
-import { GraphQLContext, PaginationInput } from '@wishlist/api/core'
+import { GraphQLContext, PaginationFilters } from '@wishlist/api/core'
 import { UserId, WishlistId } from '@wishlist/common'
 
 import { GqlEvent } from '../../event/infrastructure/event.dto'
 import { GqlUser } from '../../user/infrastructure/user.dto'
-import { GetWishlistsByUserQuery } from '../domain'
+import { GetWishlistsByUserUseCase } from '../application/query/get-wishlists-by-user.use-case'
 import { GqlWishlist, GqlWishlistPagedResponse } from './wishlist.dto'
 import { wishlistMapper } from './wishlist.mapper'
 
 @Resolver(() => GqlWishlist)
 export class WishlistResolver {
-  constructor(private readonly queryBus: QueryBus) {}
+  constructor(private readonly getWishlistsByUserUseCase: GetWishlistsByUserUseCase) {}
 
   @Query(() => GqlWishlist, { nullable: true })
   getWishlistById(@Args('id') id: WishlistId, @Context() ctx: GraphQLContext): Promise<GqlWishlist | null> {
@@ -21,16 +20,14 @@ export class WishlistResolver {
 
   @Query(() => GqlWishlistPagedResponse)
   async getMyWishlists(
-    @Args('pagination') pagination: PaginationInput,
+    @Args('filters') filters: PaginationFilters,
     @GqlCurrentUser('id') currentUserId: UserId,
   ): Promise<GqlWishlistPagedResponse> {
-    const result = await this.queryBus.execute(
-      new GetWishlistsByUserQuery({
-        userId: currentUserId,
-        pageNumber: pagination.page,
-        pageSize: pagination.limit,
-      }),
-    )
+    const result = await this.getWishlistsByUserUseCase.execute({
+      userId: currentUserId,
+      pageNumber: filters.page,
+      pageSize: filters.limit,
+    })
 
     return {
       resources: result.resources.map(wishlist => wishlistMapper.toGqlWishlist({ wishlist, currentUserId })),

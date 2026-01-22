@@ -1,20 +1,25 @@
-import { BadRequestException, Inject } from '@nestjs/common'
-import { IInferredQueryHandler, QueryHandler } from '@nestjs/cqrs'
+import { BadRequestException, Inject, Injectable } from '@nestjs/common'
 import { REPOSITORIES } from '@wishlist/api/repositories'
+import { MiniUserDto, UserId } from '@wishlist/common'
 
-import { GetClosestFriendsQuery, GetClosestFriendsResult, UserRepository } from '../../domain'
+import { UserRepository } from '../../domain'
 import { userMapper } from '../../infrastructure'
 
 const MAX_LIMIT = 50
 
-@QueryHandler(GetClosestFriendsQuery)
-export class GetClosestFriendsUseCase implements IInferredQueryHandler<GetClosestFriendsQuery> {
+export type GetClosestFriendsInput = {
+  userId: UserId
+  limit: number
+}
+
+@Injectable()
+export class GetClosestFriendsUseCase {
   constructor(
     @Inject(REPOSITORIES.USER)
     private readonly userRepository: UserRepository,
   ) {}
 
-  async execute(query: GetClosestFriendsQuery): Promise<GetClosestFriendsResult> {
+  async execute(query: GetClosestFriendsInput): Promise<MiniUserDto[]> {
     const { userId, limit } = query
 
     if (limit > MAX_LIMIT) {

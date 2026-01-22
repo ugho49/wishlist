@@ -1,22 +1,25 @@
-import { Inject, UnauthorizedException } from '@nestjs/common'
-import { IInferredQueryHandler, QueryHandler } from '@nestjs/cqrs'
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common'
 import { EventRepository, eventMapper } from '@wishlist/api/event'
 import { REPOSITORIES } from '@wishlist/api/repositories'
 import { WishlistRepository } from '@wishlist/api/wishlist'
+import { DetailedEventDto, EventId, ICurrentUser } from '@wishlist/common'
 
-import { GetEventByIdQuery, GetEventByIdResult } from '../../domain'
+export type GetEventByIdInput = {
+  currentUser: ICurrentUser
+  eventId: EventId
+}
 
-@QueryHandler(GetEventByIdQuery)
-export class GetEventByIdUseCase implements IInferredQueryHandler<GetEventByIdQuery> {
+@Injectable()
+export class GetEventByIdUseCase {
   constructor(
     @Inject(REPOSITORIES.EVENT) private readonly eventRepository: EventRepository,
     @Inject(REPOSITORIES.WISHLIST) private readonly wishlistRepository: WishlistRepository,
   ) {}
 
-  async execute(query: GetEventByIdQuery): Promise<GetEventByIdResult> {
-    const event = await this.eventRepository.findByIdOrFail(query.eventId)
+  async execute(input: GetEventByIdInput): Promise<DetailedEventDto> {
+    const event = await this.eventRepository.findByIdOrFail(input.eventId)
 
-    if (!event.canView(query.currentUser)) {
+    if (!event.canView(input.currentUser)) {
       throw new UnauthorizedException('You cannot access this event')
     }
 

@@ -8,8 +8,10 @@ import { GetImportableItemsUseCase } from './query/get-importable-items.use-case
 import { ScanItemUrlUseCase } from './query/scan-item-url.use-case'
 
 export const handlers = [
-  ScanItemUrlUseCase,
+  // Queries
   GetImportableItemsUseCase,
+  ScanItemUrlUseCase,
+  // Commands
   CreateItemUseCase,
   DeleteItemUseCase,
   ToggleItemUseCase,

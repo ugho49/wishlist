@@ -1,5 +1,4 @@
 import { Body, Controller, Get, Post } from '@nestjs/common'
-import { CommandBus, QueryBus } from '@nestjs/cqrs'
 import { ApiTags } from '@nestjs/swagger'
 import { CurrentUser, Public } from '@wishlist/api/auth'
 import {
@@ -9,23 +8,22 @@ import {
   RequestEmailChangeInputDto,
 } from '@wishlist/common'
 
-import {
-  ConfirmEmailChangeCommand,
-  CreateEmailChangeVerificationCommand,
-  GetPendingEmailChangeQuery,
-} from '../../domain'
+import { ConfirmEmailChangeUseCase } from '../../application/command/confirm-email-change.use-case'
+import { CreateEmailChangeVerificationUseCase } from '../../application/command/create-email-change-verification.use-case'
+import { GetPendingEmailChangeUseCase } from '../../application/query/get-pending-email-change.use-case'
 
 @ApiTags('User Email Change')
 @Controller('/user/email-change')
 export class UserEmailChangeController {
   constructor(
-    private readonly commandBus: CommandBus,
-    private readonly queryBus: QueryBus,
+    private readonly createEmailChangeVerificationUseCase: CreateEmailChangeVerificationUseCase,
+    private readonly confirmEmailChangeUseCase: ConfirmEmailChangeUseCase,
+    private readonly getPendingEmailChangeUseCase: GetPendingEmailChangeUseCase,
   ) {}
 
   @Get('/pending')
   async getPendingEmailChange(@CurrentUser() currentUser: ICurrentUser): Promise<PendingEmailChangeDto | undefined> {
-    const result = await this.queryBus.execute(new GetPendingEmailChangeQuery({ currentUser }))
+    const result = await this.getPendingEmailChangeUseCase.execute({ currentUser })
 
     if (!result) {
       return undefined
@@ -42,22 +40,18 @@ export class UserEmailChangeController {
     @CurrentUser() currentUser: ICurrentUser,
     @Body() dto: RequestEmailChangeInputDto,
   ): Promise<void> {
-    await this.commandBus.execute(
-      new CreateEmailChangeVerificationCommand({
-        currentUser,
-        newEmail: dto.new_email,
-      }),
-    )
+    await this.createEmailChangeVerificationUseCase.execute({
+      currentUser,
+      newEmail: dto.new_email,
+    })
   }
 
   @Public()
   @Post('/confirm')
   async confirmEmailChange(@Body() dto: ConfirmEmailChangeInputDto): Promise<void> {
-    await this.commandBus.execute(
-      new ConfirmEmailChangeCommand({
-        newEmail: dto.new_email,
-        token: dto.token,
-      }),
-    )
+    await this.confirmEmailChangeUseCase.execute({
+      newEmail: dto.new_email,
+      token: dto.token,
+    })
   }
 }

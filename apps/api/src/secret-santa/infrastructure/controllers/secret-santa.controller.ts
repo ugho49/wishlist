@@ -1,5 +1,4 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query } from '@nestjs/common'
-import { CommandBus, QueryBus } from '@nestjs/cqrs'
 import { ApiTags } from '@nestjs/swagger'
 import { CurrentUser } from '@wishlist/api/auth'
 import {
@@ -16,25 +15,31 @@ import {
   UpdateSecretSantaUserInputDto,
 } from '@wishlist/common'
 
-import {
-  AddSecretSantaUserCommand,
-  CancelSecretSantaCommand,
-  CreateSecretSantaCommand,
-  DeleteSecretSantaCommand,
-  DeleteSecretSantaUserCommand,
-  GetSecretSantaDrawQuery,
-  GetSecretSantaQuery,
-  StartSecretSantaCommand,
-  UpdateSecretSantaCommand,
-  UpdateSecretSantaUserCommand,
-} from '../../domain'
+import { AddSecretSantaUsersUseCase } from '../../application/command/add-secret-santa-users.use-case'
+import { CancelSecretSantaUseCase } from '../../application/command/cancel-secret-santa.use-case'
+import { CreateSecretSantaUseCase } from '../../application/command/create-secret-santa.use-case'
+import { DeleteSecretSantaUseCase } from '../../application/command/delete-secret-santa.use-case'
+import { DeleteSecretSantaUserUseCase } from '../../application/command/delete-secret-santa-user.use-case'
+import { StartSecretSantaUseCase } from '../../application/command/start-secret-santa.use-case'
+import { UpdateSecretSantaUseCase } from '../../application/command/update-secret-santa.use-case'
+import { UpdateSecretSantaUserUseCase } from '../../application/command/update-secret-santa-user.use-case'
+import { GetSecretSantaUseCase } from '../../application/query/get-secret-santa.use-case'
+import { GetSecretSantaDrawUseCase } from '../../application/query/get-secret-santa-draw.use-case'
 
 @ApiTags('Secret Santa')
 @Controller('/secret-santa')
 export class SecretSantaController {
   constructor(
-    private readonly queryBus: QueryBus,
-    private readonly commandBus: CommandBus,
+    private readonly getSecretSantaDrawUseCase: GetSecretSantaDrawUseCase,
+    private readonly getSecretSantaUseCase: GetSecretSantaUseCase,
+    private readonly createSecretSantaUseCase: CreateSecretSantaUseCase,
+    private readonly updateSecretSantaUseCase: UpdateSecretSantaUseCase,
+    private readonly deleteSecretSantaUseCase: DeleteSecretSantaUseCase,
+    private readonly startSecretSantaUseCase: StartSecretSantaUseCase,
+    private readonly cancelSecretSantaUseCase: CancelSecretSantaUseCase,
+    private readonly addSecretSantaUsersUseCase: AddSecretSantaUsersUseCase,
+    private readonly updateSecretSantaUserUseCase: UpdateSecretSantaUserUseCase,
+    private readonly deleteSecretSantaUserUseCase: DeleteSecretSantaUserUseCase,
   ) {}
 
   @Get('/user/draw')
@@ -42,7 +47,7 @@ export class SecretSantaController {
     @CurrentUser() currentUser: ICurrentUser,
     @Query('eventId') eventId: EventId,
   ): Promise<AttendeeDto | undefined> {
-    return this.queryBus.execute(new GetSecretSantaDrawQuery({ currentUser, eventId }))
+    return this.getSecretSantaDrawUseCase.execute({ currentUser, eventId })
   }
 
   @Get('/')
@@ -50,7 +55,7 @@ export class SecretSantaController {
     @CurrentUser() currentUser: ICurrentUser,
     @Query('eventId') eventId: EventId,
   ): Promise<SecretSantaDto | undefined> {
-    return this.queryBus.execute(new GetSecretSantaQuery({ currentUser, eventId }))
+    return this.getSecretSantaUseCase.execute({ currentUser, eventId })
   }
 
   @Post('/')
@@ -58,14 +63,12 @@ export class SecretSantaController {
     @CurrentUser() currentUser: ICurrentUser,
     @Body() dto: CreateSecretSantaInputDto,
   ): Promise<SecretSantaDto> {
-    return this.commandBus.execute(
-      new CreateSecretSantaCommand({
-        currentUser,
-        eventId: dto.event_id,
-        budget: dto.budget,
-        description: dto.description,
-      }),
-    )
+    return this.createSecretSantaUseCase.execute({
+      currentUser,
+      eventId: dto.event_id,
+      budget: dto.budget,
+      description: dto.description,
+    })
   }
 
   @Patch('/:id')
@@ -74,14 +77,12 @@ export class SecretSantaController {
     @CurrentUser() currentUser: ICurrentUser,
     @Body() dto: UpdateSecretSantaInputDto,
   ): Promise<void> {
-    await this.commandBus.execute(
-      new UpdateSecretSantaCommand({
-        secretSantaId,
-        currentUser,
-        description: dto.description,
-        budget: dto.budget,
-      }),
-    )
+    await this.updateSecretSantaUseCase.execute({
+      secretSantaId,
+      currentUser,
+      description: dto.description,
+      budget: dto.budget,
+    })
   }
 
   @Delete('/:id')
@@ -89,7 +90,7 @@ export class SecretSantaController {
     @Param('id') secretSantaId: SecretSantaId,
     @CurrentUser() currentUser: ICurrentUser,
   ): Promise<void> {
-    await this.commandBus.execute(new DeleteSecretSantaCommand({ currentUser, secretSantaId }))
+    await this.deleteSecretSantaUseCase.execute({ currentUser, secretSantaId })
   }
 
   @Post('/:id/start')
@@ -97,12 +98,10 @@ export class SecretSantaController {
     @Param('id') secretSantaId: SecretSantaId,
     @CurrentUser() currentUser: ICurrentUser,
   ): Promise<void> {
-    await this.commandBus.execute(
-      new StartSecretSantaCommand({
-        secretSantaId,
-        currentUser,
-      }),
-    )
+    await this.startSecretSantaUseCase.execute({
+      secretSantaId,
+      currentUser,
+    })
   }
 
   @Post('/:id/cancel')
@@ -110,12 +109,10 @@ export class SecretSantaController {
     @Param('id') secretSantaId: SecretSantaId,
     @CurrentUser() currentUser: ICurrentUser,
   ): Promise<void> {
-    await this.commandBus.execute(
-      new CancelSecretSantaCommand({
-        secretSantaId,
-        currentUser,
-      }),
-    )
+    await this.cancelSecretSantaUseCase.execute({
+      secretSantaId,
+      currentUser,
+    })
   }
 
   @Post('/:id/users')
@@ -124,13 +121,11 @@ export class SecretSantaController {
     @CurrentUser() currentUser: ICurrentUser,
     @Body() dto: CreateSecretSantaUsersInputDto,
   ): Promise<CreateSecretSantaUsersOutputDto> {
-    return this.commandBus.execute(
-      new AddSecretSantaUserCommand({
-        secretSantaId,
-        currentUser,
-        attendeeIds: dto.attendee_ids,
-      }),
-    )
+    return this.addSecretSantaUsersUseCase.execute({
+      secretSantaId,
+      currentUser,
+      attendeeIds: dto.attendee_ids,
+    })
   }
 
   @Put('/:id/user/:secretSantaUserId')
@@ -140,14 +135,12 @@ export class SecretSantaController {
     @CurrentUser() currentUser: ICurrentUser,
     @Body() dto: UpdateSecretSantaUserInputDto,
   ): Promise<void> {
-    await this.commandBus.execute(
-      new UpdateSecretSantaUserCommand({
-        secretSantaId,
-        secretSantaUserId,
-        currentUser,
-        exclusions: dto.exclusions,
-      }),
-    )
+    await this.updateSecretSantaUserUseCase.execute({
+      secretSantaId,
+      secretSantaUserId,
+      currentUser,
+      exclusions: dto.exclusions,
+    })
   }
 
   @Delete('/:id/user/:secretSantaUserId')
@@ -156,12 +149,10 @@ export class SecretSantaController {
     @Param('secretSantaUserId') secretSantaUserId: SecretSantaUserId,
     @CurrentUser() currentUser: ICurrentUser,
   ): Promise<void> {
-    await this.commandBus.execute(
-      new DeleteSecretSantaUserCommand({
-        secretSantaId,
-        secretSantaUserId,
-        currentUser,
-      }),
-    )
+    await this.deleteSecretSantaUserUseCase.execute({
+      secretSantaId,
+      secretSantaUserId,
+      currentUser,
+    })
   }
 }

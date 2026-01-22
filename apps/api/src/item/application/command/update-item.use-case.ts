@@ -1,13 +1,25 @@
-import { Inject, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common'
-import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
+import { Inject, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common'
 import { REPOSITORIES } from '@wishlist/api/repositories'
 import { WishlistRepository } from '@wishlist/api/wishlist'
+import { ICurrentUser, ItemId } from '@wishlist/common'
 import { TidyURL } from 'tidy-url'
 
-import { UpdateItemCommand, WishlistItemRepository } from '../../domain'
+import { WishlistItemRepository } from '../../domain'
 
-@CommandHandler(UpdateItemCommand)
-export class UpdateItemUseCase implements IInferredCommandHandler<UpdateItemCommand> {
+export type UpdateItemInput = {
+  currentUser: ICurrentUser
+  itemId: ItemId
+  updateItem: {
+    name?: string
+    description?: string
+    score?: number
+    url?: string
+    pictureUrl?: string
+  }
+}
+
+@Injectable()
+export class UpdateItemUseCase {
   private readonly logger = new Logger(UpdateItemUseCase.name)
 
   constructor(
@@ -15,7 +27,7 @@ export class UpdateItemUseCase implements IInferredCommandHandler<UpdateItemComm
     @Inject(REPOSITORIES.WISHLIST) private readonly wishlistRepository: WishlistRepository,
   ) {}
 
-  async execute(command: UpdateItemCommand) {
+  async execute(command: UpdateItemInput): Promise<void> {
     this.logger.log('Update item request received', { command })
     const item = await this.itemRepository.findByIdOrFail(command.itemId)
     const hasAccess = await this.wishlistRepository.hasAccess({
