@@ -1,21 +1,23 @@
-import { BadRequestException, Inject, UnauthorizedException } from '@nestjs/common'
-import { CommandHandler, EventBus, IInferredCommandHandler } from '@nestjs/cqrs'
+import { BadRequestException, Inject, Injectable, UnauthorizedException } from '@nestjs/common'
+import { EventBus } from '@nestjs/cqrs'
 import { JwtService } from '@nestjs/jwt'
 import { TransactionManager } from '@wishlist/api/core'
 import { REPOSITORIES } from '@wishlist/api/repositories'
 import { User, UserCreatedEvent, UserRepository, UserSocial, UserSocialRepository } from '@wishlist/api/user'
-import { UserSocialType } from '@wishlist/common'
+import { LoginOutputDto, UserSocialType } from '@wishlist/common'
 import { TokenPayload } from 'google-auth-library'
 
-import { LoginWithGoogleCommand, LoginWithGoogleResult } from '../../domain'
 import { GoogleAuthService } from '../../infrastructure'
 import { CommonLoginUseCase } from './common-login.use-case'
 
-@CommandHandler(LoginWithGoogleCommand)
-export class LoginWithGoogleUseCase
-  extends CommonLoginUseCase
-  implements IInferredCommandHandler<LoginWithGoogleCommand>
-{
+export type LoginWithGoogleInput = {
+  code: string
+  ip: string
+  createUserIfNotExists: boolean
+}
+
+@Injectable()
+export class LoginWithGoogleUseCase extends CommonLoginUseCase {
   constructor(
     @Inject(REPOSITORIES.USER)
     private readonly userRepository: UserRepository,
@@ -29,7 +31,7 @@ export class LoginWithGoogleUseCase
     super({ jwtService, loggerName: LoginWithGoogleUseCase.name })
   }
 
-  async execute(command: LoginWithGoogleCommand): Promise<LoginWithGoogleResult> {
+  async execute(command: LoginWithGoogleInput): Promise<LoginOutputDto> {
     const { code, ip, createUserIfNotExists } = command
     this.logger.log('Login with Google request received', { code })
     const payload = await this.googleAuthService.getGoogleAccountFromCode(code)
@@ -65,7 +67,7 @@ export class LoginWithGoogleUseCase
     userSocial: UserSocial
     payload: TokenPayload
     ip: string
-  }): Promise<LoginWithGoogleResult> {
+  }): Promise<LoginOutputDto> {
     this.logger.log('Login with Google and update...')
     const { userSocial, payload, ip } = params
     const { user } = userSocial
@@ -88,10 +90,7 @@ export class LoginWithGoogleUseCase
     return { access_token: this.createAccessToken(updatedUser) }
   }
 
-  private async createUserWithGoogleAndLogin(params: {
-    payload: TokenPayload
-    ip: string
-  }): Promise<LoginWithGoogleResult> {
+  private async createUserWithGoogleAndLogin(params: { payload: TokenPayload; ip: string }): Promise<LoginOutputDto> {
     const { payload, ip } = params
     this.logger.log('Creating user with Google and login...', { payload, ip })
 
@@ -136,7 +135,7 @@ export class LoginWithGoogleUseCase
     user: User
     payload: TokenPayload
     ip: string
-  }): Promise<LoginWithGoogleResult> {
+  }): Promise<LoginOutputDto> {
     const { user, payload, ip } = params
     this.logger.log('Linking user to Google and login...', { user, payload, ip })
 

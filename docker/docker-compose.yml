@@ -1,7 +1,7 @@
 services:
   db:
     container_name: db
-    image: postgres:17.6-alpine
+    image: postgres:18.1-alpine
     environment:
       POSTGRES_USER: "service"
       POSTGRES_PASSWORD: "service"

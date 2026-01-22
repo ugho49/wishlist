@@ -1,15 +1,20 @@
-import { Inject, UnauthorizedException } from '@nestjs/common'
-import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { REPOSITORIES } from '@wishlist/api/repositories'
 import { User, UserRepository } from '@wishlist/api/user'
+import { LoginOutputDto } from '@wishlist/common'
 
-import { LoginCommand, LoginResult } from '../../domain'
 import { PasswordManager } from '../../infrastructure'
 import { CommonLoginUseCase } from './common-login.use-case'
 
-@CommandHandler(LoginCommand)
-export class LoginUseCase extends CommonLoginUseCase implements IInferredCommandHandler<LoginCommand> {
+export type LoginInput = {
+  email: string
+  password: string
+  ip: string
+}
+
+@Injectable()
+export class LoginUseCase extends CommonLoginUseCase {
   constructor(
     @Inject(REPOSITORIES.USER)
     private readonly userRepository: UserRepository,
@@ -18,7 +23,7 @@ export class LoginUseCase extends CommonLoginUseCase implements IInferredCommand
     super({ jwtService, loggerName: LoginUseCase.name })
   }
 
-  async execute(command: LoginCommand): Promise<LoginResult> {
+  async execute(command: LoginInput): Promise<LoginOutputDto> {
     const { email, password, ip } = command
     this.logger.log('Login request received', { email })
 

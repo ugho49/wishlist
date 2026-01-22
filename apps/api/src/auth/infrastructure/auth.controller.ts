@@ -1,29 +1,30 @@
 import { Body, Controller, HttpCode, Post } from '@nestjs/common'
-import { CommandBus } from '@nestjs/cqrs'
 import { ApiTags } from '@nestjs/swagger'
 import { LoginInputDto, LoginOutputDto, LoginWithGoogleInputDto } from '@wishlist/common'
 import { RealIP } from 'nestjs-real-ip'
 
-import { LoginCommand, LoginWithGoogleCommand } from '../domain'
+import { LoginUseCase } from '../application/use-case/login.use-case'
+import { LoginWithGoogleUseCase } from '../application/use-case/login-with-google.use-case'
 import { Public } from './decorators/public.metadata'
 
 @Public()
 @ApiTags('Auth')
 @Controller('/auth')
 export class AuthController {
-  constructor(private readonly commandBus: CommandBus) {}
+  constructor(
+    private readonly loginUseCase: LoginUseCase,
+    private readonly loginWithGoogleUseCase: LoginWithGoogleUseCase,
+  ) {}
 
   @HttpCode(200)
   @Post('/login')
   login(@Body() dto: LoginInputDto, @RealIP() ip: string): Promise<LoginOutputDto> {
-    return this.commandBus.execute(new LoginCommand({ email: dto.email, password: dto.password, ip }))
+    return this.loginUseCase.execute({ email: dto.email, password: dto.password, ip })
   }
 
   @HttpCode(200)
   @Post('/login/google')
   loginWithGoogle(@Body() dto: LoginWithGoogleInputDto, @RealIP() ip: string): Promise<LoginOutputDto> {
-    return this.commandBus.execute(
-      new LoginWithGoogleCommand({ code: dto.code, ip, createUserIfNotExists: dto.createUserIfNotExists }),
-    )
+    return this.loginWithGoogleUseCase.execute({ code: dto.code, ip, createUserIfNotExists: dto.createUserIfNotExists })
   }
 }
