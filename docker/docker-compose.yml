@@ -1,5 +1,6 @@
 services:
   db:
+    container_name: db
     image: postgres:17.6-alpine
     environment:
       POSTGRES_USER: "service"
@@ -12,6 +13,7 @@ services:
       retries: 10
 
   mail:
+    container_name: mail
     image: maildev/maildev:2.2.1
     healthcheck:
       test: wget --spider http://localhost:1080 || exit 1
@@ -20,6 +22,7 @@ services:
       retries: 10
 
   valkey:
+    container_name: valkey
     image: valkey/valkey:9.0-alpine
     healthcheck:
       test: ["CMD", "valkey-cli", "ping"]

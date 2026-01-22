@@ -1,3 +1,5 @@
+name: wishlist-local
+
 services:
   db:
     ports:
@@ -11,9 +13,3 @@ services:
   valkey:
     ports:
       - "6381:6379"
-
-  adminer:
-    image: adminer:5.4.1
-    restart: always
-    ports:
-      - "3333:3333"

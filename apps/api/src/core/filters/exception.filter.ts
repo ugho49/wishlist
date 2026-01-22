@@ -3,15 +3,35 @@ import tracer from 'dd-trace'
 import { USER_KEEP } from 'dd-trace/ext/priority'
 import { Response } from 'express'
 
-@Catch()
-export class DatadogErrorTrackingExceptionFilter implements ExceptionFilter {
+@Catch(Error)
+export class GlobalExceptionFilter implements ExceptionFilter {
   catch(exception: Error, host: ArgumentsHost) {
+    // Track error with Datadog
+    this._trackErrorWithDatadog(exception)
+
+    // Handle based on context type
+    const contextType = host.getType<'graphql' | 'http'>()
+
+    if (contextType === 'graphql') {
+      // For GraphQL, we just rethrow the exception
+      // GraphQL will handle formatting the error response
+      // this.logger.error('Unknown error occurred', { exception })
+      // if (exception instanceof HttpException) {
+      //   throw exception
+      // }
+      // throw new InternalServerErrorException('An unknown error occurred')
+      return {
+        __typename: 'InternalErrorRejection',
+        message: 'An unexpected error occured',
+      }
+    }
+
+    // For HTTP/REST requests
     const ctx = host.switchToHttp()
     const response = ctx.getResponse<Response>()
 
     // Datadog Error Tracking
     response.err = exception // Will be renamed as `error` by pino
-    this._trackErrorWithDatadog(exception)
 
     let status: number
     let body: string | object

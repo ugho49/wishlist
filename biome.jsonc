@@ -3,7 +3,7 @@
   "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
   "files": {
     "ignoreUnknown": false,
-    "includes": ["**/*", "!node_modules", "!dist", "!junit_reports", "!.nx", "!.yarn"]
+    "includes": ["**", "!node_modules", "!dist", "!junit_reports", "!.nx", "!.yarn", "!**/schema.graphql"]
   },
   "formatter": {
     "formatWithErrors": false,

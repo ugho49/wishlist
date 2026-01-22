@@ -3,6 +3,8 @@ import type { User, UserSocial } from '../domain'
 
 import { DateTime } from 'luxon'
 
+import { GqlUser, GqlUserSocial, GqlUserWithAdmin } from './user.dto'
+
 function toMiniUserDto(model: User): MiniUserDto {
   return {
     id: model.id,
@@ -48,9 +50,47 @@ function toUserDto(params: { user: User; socials: UserSocial[] }): UserDto {
   }
 }
 
+function toGqlUser(user: User): GqlUser {
+  return {
+    id: user.id,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    email: user.email,
+    pictureUrl: user.pictureUrl,
+    birthday: user.birthday ? DateTime.fromJSDate(user.birthday).toISODate() || '' : undefined,
+    isEnabled: user.isEnabled,
+    createdAt: user.createdAt.toISOString(),
+    updatedAt: user.updatedAt.toISOString(),
+  }
+}
+
+function toGqlUserWithAdmin(user: User): GqlUserWithAdmin {
+  return {
+    ...toGqlUser(user),
+    isAdmin: user.isAdmin(),
+    lastConnectedAt: user.lastConnectedAt?.toISOString(),
+    lastIp: user.lastIp,
+  }
+}
+
+function toGqlUserSocial(social: UserSocial): GqlUserSocial {
+  return {
+    id: social.id,
+    email: social.email,
+    name: social.name,
+    socialType: social.socialType,
+    pictureUrl: social.pictureUrl,
+    createdAt: social.createdAt.toISOString(),
+    updatedAt: social.updatedAt.toISOString(),
+  }
+}
+
 export const userMapper = {
   toMiniUserDto,
   toUserWithoutSocialsDto,
   toUserDto,
   toUserSocialDto,
+  toGqlUser,
+  toGqlUserWithAdmin,
+  toGqlUserSocial,
 }

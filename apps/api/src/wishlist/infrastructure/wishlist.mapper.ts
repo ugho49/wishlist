@@ -6,6 +6,8 @@ import { eventMapper } from '@wishlist/api/event'
 import { itemMapper } from '@wishlist/api/item'
 import { userMapper } from '@wishlist/api/user'
 
+import { GqlWishlist } from './wishlist.dto'
+
 function toDetailedWishlistDto(params: {
   wishlist: Wishlist
   currentUserId: UserId
@@ -63,8 +65,31 @@ function toWishlistWithOwnerDto(wishlist: Wishlist): WishlistWithOwnerDto {
   }
 }
 
+function toGqlWishlist(params: { wishlist: Wishlist; currentUserId: UserId }): GqlWishlist {
+  const { wishlist, currentUserId } = params
+
+  const displayUserAndSuggested = wishlist.canDisplayItemSensitiveInformations(currentUserId)
+
+  return {
+    id: wishlist.id,
+    title: wishlist.title,
+    description: wishlist.description,
+    logoUrl: wishlist.logoUrl,
+    ownerId: wishlist.owner.id,
+    coOwnerId: wishlist.coOwner?.id,
+    eventIds: wishlist.eventIds,
+    items: wishlist
+      .getItemsToDisplay(currentUserId)
+      .map(item => itemMapper.toGqlItem({ item, displayUserAndSuggested })),
+    config: { hideItems: wishlist.hideItems },
+    createdAt: wishlist.createdAt.toISOString(),
+    updatedAt: wishlist.updatedAt.toISOString(),
+  }
+}
+
 export const wishlistMapper = {
   toDetailedWishlistDto,
   toWishlistWithEventsDto,
   toWishlistWithOwnerDto,
+  toGqlWishlist,
 }

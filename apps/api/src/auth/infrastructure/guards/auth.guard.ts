@@ -1,5 +1,6 @@
 import { ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
+import { GqlExecutionContext } from '@nestjs/graphql'
 import { AuthGuard as PassportAuthGuard } from '@nestjs/passport'
 import { Observability } from '@wishlist/api/core'
 
@@ -9,6 +10,18 @@ import { IS_PUBLIC_KEY } from '../decorators/public.metadata'
 export class AuthGuard extends PassportAuthGuard('jwt') {
   constructor(private readonly reflector: Reflector) {
     super()
+  }
+
+  override getRequest(context: ExecutionContext) {
+    // Support both REST and GraphQL contexts
+    const contextType = context.getType<'http' | 'graphql'>()
+
+    if (contextType === 'graphql') {
+      const ctx = GqlExecutionContext.create(context)
+      return ctx.getContext().req
+    }
+
+    return context.switchToHttp().getRequest()
   }
 
   override canActivate(context: ExecutionContext) {
@@ -31,8 +44,13 @@ export class AuthGuard extends PassportAuthGuard('jwt') {
       throw err || new UnauthorizedException(info?.name || 'Invalid token')
     }
 
-    const observability = new Observability(context.switchToHttp().getResponse())
-    observability.setContext({ currentUser: user })
+    const contextType = context.getType<'http' | 'graphql'>()
+
+    // Only set observability for HTTP requests (not GraphQL)
+    if (contextType === 'http') {
+      const observability = new Observability(context.switchToHttp().getResponse())
+      observability.setContext({ currentUser: user })
+    }
 
     return user
   }

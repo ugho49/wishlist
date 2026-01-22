@@ -3,7 +3,7 @@ import { DatabaseService, DrizzleTransaction } from '@wishlist/api/core'
 import { UserSocial, UserSocialRepository } from '@wishlist/api/user'
 import { schema } from '@wishlist/api-drizzle'
 import { UserId, UserSocialId, UserSocialType, uuid } from '@wishlist/common'
-import { and, eq } from 'drizzle-orm'
+import { and, eq, inArray } from 'drizzle-orm'
 
 import { PostgresUserRepository } from './postgres-user.repository'
 
@@ -27,6 +27,15 @@ export class PostgresUserSocialRepository implements UserSocialRepository {
   async findByUserId(userId: UserId): Promise<UserSocial[]> {
     const userSocials = await this.databaseService.db.query.userSocial.findMany({
       where: eq(schema.userSocial.userId, userId),
+      with: { user: true },
+    })
+
+    return userSocials.map(userSocial => PostgresUserSocialRepository.toModel(userSocial))
+  }
+
+  async findByUserIds(userIds: UserId[]): Promise<UserSocial[]> {
+    const userSocials = await this.databaseService.db.query.userSocial.findMany({
+      where: inArray(schema.userSocial.userId, userIds),
       with: { user: true },
     })
 

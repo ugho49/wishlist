@@ -7,8 +7,9 @@ tracer.use('pg', { service: 'wishlist-api-database' })
 tracer.use('redis', { service: 'wishlist-api-redis' })
 tracer.use('express', { middleware: false })
 
-// remove traces for non-essential routes
-tracer.use('http', { blocklist: ['/health', '/api/queues', '/js/async', 'css/async'] })
+// remove healthcheck traces
+tracer.use('http', { blocklist: ['/health'] })
+tracer.use('graphql')
 
 // Remove middleware spans to avoid trace pollution
 tracer.use('dns', { enabled: false })

@@ -9,7 +9,7 @@ import { GetWishlistsByOwnerQuery, GetWishlistsByOwnerResult, WishlistRepository
 import { wishlistMapper } from '../../infrastructure'
 
 @QueryHandler(GetWishlistsByOwnerQuery)
-export class GetMyWishlistsUseCase implements IInferredQueryHandler<GetWishlistsByOwnerQuery> {
+export class GetWishlistsByOwnerUseCase implements IInferredQueryHandler<GetWishlistsByOwnerQuery> {
   constructor(
     @Inject(REPOSITORIES.WISHLIST) private readonly wishlistRepository: WishlistRepository,
     @Inject(REPOSITORIES.EVENT) private readonly eventRepository: EventRepository,
@@ -19,7 +19,7 @@ export class GetMyWishlistsUseCase implements IInferredQueryHandler<GetWishlists
     const pageSize = query.pageSize ?? DEFAULT_RESULT_NUMBER
     const skip = (query.pageNumber - 1) * pageSize
 
-    const { wishlists, totalCount } = await this.wishlistRepository.findByOwnerPaginated({
+    const { wishlists, totalCount } = await this.wishlistRepository.findByUserPaginated({
       userId: query.ownerId,
       pagination: { take: pageSize, skip },
     })

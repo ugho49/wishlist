@@ -84,7 +84,7 @@ export class PostgresWishlistRepository implements WishlistRepository {
     return result.map(PostgresWishlistRepository.toModel)
   }
 
-  async findByOwnerPaginated(params: {
+  async findByUserPaginated(params: {
     userId: UserId
     pagination: { take: number; skip: number }
   }): Promise<{ wishlists: Wishlist[]; totalCount: number }> {
