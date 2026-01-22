@@ -13,7 +13,10 @@ export class EventResolver {
   constructor(private readonly getEventsByUserUseCase: GetEventsByUserUseCase) {}
 
   @Query(() => GqlEvent, { nullable: true })
-  getEventById(@Args('id') id: EventId, @Context() ctx: GraphQLContext): Promise<GqlEvent | null> {
+  getEventById(
+    @Args('id', { type: () => String }) id: EventId,
+    @Context() ctx: GraphQLContext,
+  ): Promise<GqlEvent | null> {
     return ctx.loaders.event.load(id)
   }
 

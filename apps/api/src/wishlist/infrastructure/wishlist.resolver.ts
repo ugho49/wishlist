@@ -14,7 +14,10 @@ export class WishlistResolver {
   constructor(private readonly getWishlistsByUserUseCase: GetWishlistsByUserUseCase) {}
 
   @Query(() => GqlWishlist, { nullable: true })
-  getWishlistById(@Args('id') id: WishlistId, @Context() ctx: GraphQLContext): Promise<GqlWishlist | null> {
+  getWishlistById(
+    @Args('id', { type: () => String }) id: WishlistId,
+    @Context() ctx: GraphQLContext,
+  ): Promise<GqlWishlist | null> {
     return ctx.loaders.wishlist.load(id)
   }
 
