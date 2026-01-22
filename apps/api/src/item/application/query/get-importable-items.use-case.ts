@@ -1,19 +1,24 @@
-import { Inject, UnauthorizedException } from '@nestjs/common'
-import { IInferredQueryHandler, QueryHandler } from '@nestjs/cqrs'
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common'
 import { REPOSITORIES } from '@wishlist/api/repositories'
 import { WishlistRepository } from '@wishlist/api/wishlist'
+import { ItemDto, UserId, WishlistId } from '@wishlist/common'
 
-import { GetImportableItemsQuery, GetImportableItemsResult, WishlistItemRepository } from '../../domain'
+import { WishlistItemRepository } from '../../domain'
 import { itemMapper } from '../../infrastructure'
 
-@QueryHandler(GetImportableItemsQuery)
-export class GetImportableItemsUseCase implements IInferredQueryHandler<GetImportableItemsQuery> {
+export type GetImportableItemsInput = {
+  userId: UserId
+  wishlistId: WishlistId
+}
+
+@Injectable()
+export class GetImportableItemsUseCase {
   constructor(
     @Inject(REPOSITORIES.WISHLIST_ITEM) private readonly itemRepository: WishlistItemRepository,
     @Inject(REPOSITORIES.WISHLIST) private readonly wishlistRepository: WishlistRepository,
   ) {}
 
-  async execute(query: GetImportableItemsQuery): Promise<GetImportableItemsResult> {
+  async execute(query: GetImportableItemsInput): Promise<ItemDto[]> {
     const { userId, wishlistId } = query
     const wishlist = await this.wishlistRepository.findByIdOrFail(wishlistId)
 

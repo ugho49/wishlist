@@ -1,17 +1,21 @@
-import { Inject } from '@nestjs/common'
-import { IInferredQueryHandler, QueryHandler } from '@nestjs/cqrs'
+import { Inject, Injectable } from '@nestjs/common'
 import { REPOSITORIES } from '@wishlist/api/repositories'
+import { UserId } from '@wishlist/common'
 
-import { GetUsersByIdsQuery, User, UserRepository } from '../../domain'
+import { User, UserRepository } from '../../domain'
 
-@QueryHandler(GetUsersByIdsQuery)
-export class GetUsersByIdsUseCase implements IInferredQueryHandler<GetUsersByIdsQuery> {
+export type GetUsersByIdsInput = {
+  userIds: UserId[]
+}
+
+@Injectable()
+export class GetUsersByIdsUseCase {
   constructor(
     @Inject(REPOSITORIES.USER)
     private readonly userRepository: UserRepository,
   ) {}
 
-  execute(query: GetUsersByIdsQuery): Promise<User[]> {
+  execute(query: GetUsersByIdsInput): Promise<User[]> {
     return this.userRepository.findByIds(query.userIds)
   }
 }

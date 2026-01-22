@@ -7,14 +7,14 @@ import { RemoveWishlistLogoUseCase } from './command/remove-wishlist-logo.use-ca
 import { UnlinkWishlistFromEventUseCase } from './command/unlink-wishlist-from-event.use-case'
 import { UpdateWishlistUseCase } from './command/update-wishlist.use-case'
 import { UploadWishlistLogoUseCase } from './command/upload-wishlist-logo.use-case'
-import { UserAddedAsCoOwnerToWishlistUseCase } from './event/user-added-as-co-owner-to-wishlist.use-case'
+import { UserAddedAsCoOwnerToWishlistHandler } from './event/user-added-as-co-owner-to-wishlist.handler'
 import { GetWishlistByIdUseCase } from './query/get-wishlist-by-id.use-case'
 import { GetWishlistsByIdsUseCase } from './query/get-wishlists-by-ids.use-case'
 import { GetWishlistsByOwnerUseCase } from './query/get-wishlists-by-owner.use-case'
 import { GetWishlistsByUserUseCase } from './query/get-wishlists-by-user.use-case'
 
 export const handlers = [
-  // Command handlers
+  // Commands
   AddCoOwnerUseCase,
   CreateWishlistUseCase,
   DeleteWishlistUseCase,
@@ -24,11 +24,11 @@ export const handlers = [
   UnlinkWishlistFromEventUseCase,
   UpdateWishlistUseCase,
   UploadWishlistLogoUseCase,
-  // Query handlers
+  // Queries
   GetWishlistsByOwnerUseCase,
   GetWishlistsByUserUseCase,
   GetWishlistByIdUseCase,
   GetWishlistsByIdsUseCase,
   // Event handlers
-  UserAddedAsCoOwnerToWishlistUseCase,
+  UserAddedAsCoOwnerToWishlistHandler,
 ]

@@ -1,36 +1,36 @@
-import { QueryBus } from '@nestjs/cqrs'
 import { Args, Context, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 import { GqlCurrentUser } from '@wishlist/api/auth'
 import { GraphQLContext } from '@wishlist/api/core'
 import { EventId, UserId } from '@wishlist/common'
 
 import { GqlWishlist } from '../../wishlist/infrastructure/wishlist.dto'
-import { GetEventsByUserQuery } from '../domain'
-import { EventOutputPagedResponse, GqlEvent, GqlEventAttendee, GqlEventPaginationInput } from './event.dto'
+import { GetEventsByUserUseCase } from '../application/query/get-events-by-user.use-case'
+import { EventOutputPagedResponse, GqlEvent, GqlEventAttendee, GqlEventPaginationFilters } from './event.dto'
 import { eventMapper } from './event.mapper'
 
 @Resolver(() => GqlEvent)
 export class EventResolver {
-  constructor(private readonly queryBus: QueryBus) {}
+  constructor(private readonly getEventsByUserUseCase: GetEventsByUserUseCase) {}
 
   @Query(() => GqlEvent, { nullable: true })
-  getEventById(@Args('id') id: EventId, @Context() ctx: GraphQLContext): Promise<GqlEvent | null> {
+  getEventById(
+    @Args('id', { type: () => String }) id: EventId,
+    @Context() ctx: GraphQLContext,
+  ): Promise<GqlEvent | null> {
     return ctx.loaders.event.load(id)
   }
 
   @Query(() => EventOutputPagedResponse)
   async getMyEvents(
-    @Args('pagination') pagination: GqlEventPaginationInput,
+    @Args('filters') filters: GqlEventPaginationFilters,
     @GqlCurrentUser('id') currentUserId: UserId,
   ): Promise<EventOutputPagedResponse> {
-    const result = await this.queryBus.execute(
-      new GetEventsByUserQuery({
-        userId: currentUserId,
-        pageNumber: pagination.page,
-        pageSize: pagination.limit,
-        ignorePastEvents: false,
-      }),
-    )
+    const result = await this.getEventsByUserUseCase.execute({
+      userId: currentUserId,
+      pageNumber: filters.page,
+      pageSize: filters.limit,
+      ignorePastEvents: false,
+    })
 
     return {
       resources: result.resources.map(eventMapper.toGqlEvent),

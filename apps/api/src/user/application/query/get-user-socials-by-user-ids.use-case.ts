@@ -1,23 +1,21 @@
-import { Inject } from '@nestjs/common'
-import { IInferredQueryHandler, QueryHandler } from '@nestjs/cqrs'
+import { Inject, Injectable } from '@nestjs/common'
 import { REPOSITORIES } from '@wishlist/api/repositories'
 import { UserId } from '@wishlist/common'
 
-import {
-  GetUserSocialsByUserIdsQuery,
-  GetUserSocialsByUserIdsResult,
-  UserSocial,
-  UserSocialRepository,
-} from '../../domain'
+import { UserSocial, UserSocialRepository } from '../../domain'
 
-@QueryHandler(GetUserSocialsByUserIdsQuery)
-export class GetUserSocialsByUserIdsUseCase implements IInferredQueryHandler<GetUserSocialsByUserIdsQuery> {
+export type GetUserSocialsByUserIdsInput = {
+  userIds: UserId[]
+}
+
+@Injectable()
+export class GetUserSocialsByUserIdsUseCase {
   constructor(
     @Inject(REPOSITORIES.USER_SOCIAL)
     private readonly userSocialRepository: UserSocialRepository,
   ) {}
 
-  async execute(query: GetUserSocialsByUserIdsQuery): Promise<GetUserSocialsByUserIdsResult> {
+  async execute(query: GetUserSocialsByUserIdsInput): Promise<Map<UserId, UserSocial[]>> {
     const userSocials = await this.userSocialRepository.findByUserIds(query.userIds)
 
     return userSocials.reduce((acc, userSocial) => {

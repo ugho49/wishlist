@@ -1,19 +1,24 @@
-import { BadRequestException, Inject } from '@nestjs/common'
-import { IInferredQueryHandler, QueryHandler } from '@nestjs/cqrs'
+import { BadRequestException, Inject, Injectable } from '@nestjs/common'
 import { REPOSITORIES } from '@wishlist/api/repositories'
+import { ICurrentUser, MiniUserDto } from '@wishlist/common'
 import { isEmpty } from 'lodash'
 
-import { GetUsersByCriteriaQuery, GetUsersByCriteriaResult, UserRepository } from '../../domain'
+import { UserRepository } from '../../domain'
 import { userMapper } from '../../infrastructure'
 
-@QueryHandler(GetUsersByCriteriaQuery)
-export class GetUsersByCriteriaUseCase implements IInferredQueryHandler<GetUsersByCriteriaQuery> {
+export type GetUsersByCriteriaInput = {
+  currentUser: ICurrentUser
+  criteria: string
+}
+
+@Injectable()
+export class GetUsersByCriteriaUseCase {
   constructor(
     @Inject(REPOSITORIES.USER)
     private readonly userRepository: UserRepository,
   ) {}
 
-  async execute(query: GetUsersByCriteriaQuery): Promise<GetUsersByCriteriaResult> {
+  async execute(query: GetUsersByCriteriaInput): Promise<MiniUserDto[]> {
     const { criteria } = query
 
     if (isEmpty(criteria) || criteria.trim().length < 2) {

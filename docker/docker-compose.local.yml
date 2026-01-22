@@ -4,6 +4,8 @@ services:
   db:
     ports:
       - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/18/docker
 
   mail:
     ports:
@@ -13,3 +15,6 @@ services:
   valkey:
     ports:
       - "6381:6379"
+
+volumes:
+  postgres_data:

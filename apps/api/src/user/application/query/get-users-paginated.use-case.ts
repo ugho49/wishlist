@@ -1,20 +1,24 @@
-import { BadRequestException, Inject } from '@nestjs/common'
-import { IInferredQueryHandler, QueryHandler } from '@nestjs/cqrs'
+import { BadRequestException, Inject, Injectable } from '@nestjs/common'
 import { DEFAULT_RESULT_NUMBER } from '@wishlist/api/core'
 import { REPOSITORIES } from '@wishlist/api/repositories'
-import { createPagedResponse } from '@wishlist/common'
+import { createPagedResponse, PagedResponse, UserWithoutSocialsDto } from '@wishlist/common'
 
-import { GetUsersPaginatedQuery, GetUsersPaginatedResult, UserRepository } from '../../domain'
+import { UserRepository } from '../../domain'
 import { userMapper } from '../../infrastructure'
 
-@QueryHandler(GetUsersPaginatedQuery)
-export class GetUsersPaginatedUseCase implements IInferredQueryHandler<GetUsersPaginatedQuery> {
+export type GetUsersPaginatedInput = {
+  criteria?: string
+  pageNumber: number
+}
+
+@Injectable()
+export class GetUsersPaginatedUseCase {
   constructor(
     @Inject(REPOSITORIES.USER)
     private readonly userRepository: UserRepository,
   ) {}
 
-  async execute(query: GetUsersPaginatedQuery): Promise<GetUsersPaginatedResult> {
+  async execute(query: GetUsersPaginatedInput): Promise<PagedResponse<UserWithoutSocialsDto>> {
     const { criteria, pageNumber } = query
     const pageSize = DEFAULT_RESULT_NUMBER
     const skip = pageSize * (pageNumber - 1)

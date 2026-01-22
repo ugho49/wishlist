@@ -1,15 +1,18 @@
-import { Inject, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common'
-import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
+import { Inject, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common'
 import { REPOSITORIES } from '@wishlist/api/repositories'
 import { UserRepository, userMapper } from '@wishlist/api/user'
 import { Wishlist, WishlistRepository } from '@wishlist/api/wishlist'
-import { ICurrentUser } from '@wishlist/common'
+import { ICurrentUser, ItemId, ToggleItemOutputDto } from '@wishlist/common'
 
 import { WishlistItem, WishlistItemRepository } from '../../domain'
-import { ToggleItemCommand, ToggleItemResult } from '../../domain/command/toggle-item.command'
 
-@CommandHandler(ToggleItemCommand)
-export class ToggleItemUseCase implements IInferredCommandHandler<ToggleItemCommand> {
+export type ToggleItemInput = {
+  currentUser: ICurrentUser
+  itemId: ItemId
+}
+
+@Injectable()
+export class ToggleItemUseCase {
   private readonly logger = new Logger(ToggleItemUseCase.name)
 
   constructor(
@@ -18,7 +21,7 @@ export class ToggleItemUseCase implements IInferredCommandHandler<ToggleItemComm
     @Inject(REPOSITORIES.USER) private readonly userRepository: UserRepository,
   ) {}
 
-  async execute(command: ToggleItemCommand): Promise<ToggleItemResult> {
+  async execute(command: ToggleItemInput): Promise<ToggleItemOutputDto> {
     this.logger.log('Toggle item request received', { command })
     const item = await this.itemRepository.findByIdOrFail(command.itemId)
     const hasAccess = await this.wishlistRepository.hasAccess({

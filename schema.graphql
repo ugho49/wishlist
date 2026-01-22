@@ -2,7 +2,7 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type HealthDto {
+type HealthOutput {
   status: HealthStatus!
 }
 
@@ -12,7 +12,149 @@ enum HealthStatus {
   SHUTTING_DOWN
 }
 
+type Pagination {
+  totalPages: Int!
+  totalElements: Int!
+  pageNumber: Int!
+  pageSize: Int!
+}
+
+type User {
+  id: String!
+  firstName: String!
+  lastName: String!
+  email: String!
+  pictureUrl: String
+  birthday: String
+  isEnabled: Boolean!
+  createdAt: String!
+  updatedAt: String!
+  socials: [UserSocial!]!
+}
+
+type UserSocial {
+  id: String!
+  email: String!
+  name: String
+  socialType: String!
+  pictureUrl: String
+  createdAt: String!
+  updatedAt: String!
+}
+
+type Item {
+  id: String!
+  name: String!
+  description: String
+  url: String
+  score: Float
+  isSuggested: Boolean
+  pictureUrl: String
+  takenById: String
+  takenAt: String
+  createdAt: String!
+  takerUser: User
+}
+
+type Event {
+  id: String!
+  title: String!
+  description: String
+  icon: String
+  eventDate: String!
+  wishlistIds: [String!]!
+  attendeeIds: [String!]!
+  createdAt: String!
+  updatedAt: String!
+  wishlists: [Wishlist!]!
+  attendees: [EventAttendee!]!
+}
+
+type EventAttendee {
+  id: String!
+  userId: String
+  pendingEmail: String
+  role: AttendeeRole!
+  user: User
+}
+
+enum AttendeeRole {
+  MAINTAINER
+  USER
+}
+
+type EventOutputPagedResponse {
+  resources: [Event!]!
+  pagination: Pagination!
+}
+
+type WishlistConfig {
+  hideItems: Boolean!
+}
+
+type Wishlist {
+  id: String!
+  title: String!
+  description: String
+  logoUrl: String
+  ownerId: String!
+  coOwnerId: String
+  eventIds: [String!]!
+  items: [Item!]!
+  config: WishlistConfig!
+  createdAt: String!
+  updatedAt: String!
+  owner: User!
+  coOwner: User
+  events: [Event!]!
+}
+
+type WishlistPagedResponse {
+  resources: [Wishlist!]!
+  pagination: Pagination!
+}
+
+type LoginOutput {
+  accessToken: String!
+}
+
+type LoginWithGoogleOutput {
+  accessToken: String!
+  newUserCreated: Boolean
+  linkedToExistingUser: Boolean
+}
+
 type Query {
-  """Health check query"""
-  health: HealthDto!
+  health: HealthOutput!
+  getCurrentUser: User!
+  getWishlistById(id: String!): Wishlist
+  getMyWishlists(filters: PaginationFilters!): WishlistPagedResponse!
+  getEventById(id: String!): Event
+  getMyEvents(filters: EventPaginationFilters!): EventOutputPagedResponse!
+}
+
+input PaginationFilters {
+  page: Int = 1
+  limit: Int = 10
+}
+
+input EventPaginationFilters {
+  page: Int = 1
+  limit: Int = 10
+  onlyFuture: Boolean
+}
+
+type Mutation {
+  login(input: LoginInput!): LoginOutput!
+  loginWithGoogle(input: LoginWithGoogleInput!): LoginWithGoogleOutput!
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+input LoginWithGoogleInput {
+  code: String!
+  createUserIfNotExists: Boolean!
 }

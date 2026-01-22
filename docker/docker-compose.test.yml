@@ -4,6 +4,8 @@ services:
   db:
     ports:
       - "5432"
+    tmpfs:
+      - /var/lib/postgresql
 
   mail:
     ports:

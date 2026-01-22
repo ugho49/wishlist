@@ -1,12 +1,18 @@
-import { Inject, Logger, UnauthorizedException } from '@nestjs/common'
-import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
+import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common'
 import { BucketService } from '@wishlist/api/core'
 import { REPOSITORIES } from '@wishlist/api/repositories'
+import { ICurrentUser, UpdateWishlistLogoOutputDto, WishlistId } from '@wishlist/common'
 
-import { UploadWishlistLogoCommand, UploadWishlistLogoResult, WishlistRepository } from '../../domain'
+import { WishlistRepository } from '../../domain'
 
-@CommandHandler(UploadWishlistLogoCommand)
-export class UploadWishlistLogoUseCase implements IInferredCommandHandler<UploadWishlistLogoCommand> {
+export type UploadWishlistLogoInput = {
+  currentUser: ICurrentUser
+  wishlistId: WishlistId
+  file: Express.Multer.File
+}
+
+@Injectable()
+export class UploadWishlistLogoUseCase {
   private readonly logger = new Logger(UploadWishlistLogoUseCase.name)
 
   constructor(
@@ -14,7 +20,7 @@ export class UploadWishlistLogoUseCase implements IInferredCommandHandler<Upload
     private readonly bucketService: BucketService,
   ) {}
 
-  async execute(command: UploadWishlistLogoCommand): Promise<UploadWishlistLogoResult> {
+  async execute(command: UploadWishlistLogoInput): Promise<UpdateWishlistLogoOutputDto> {
     this.logger.log('Upload wishlist logo request received', { command })
     const wishlist = await this.wishlistRepository.findByIdOrFail(command.wishlistId)
 

@@ -1,25 +1,26 @@
-import { CommandBus } from '@nestjs/cqrs'
 import { Args, Mutation, Resolver } from '@nestjs/graphql'
 import { RealIP } from 'nestjs-real-ip'
 
-import { LoginCommand, LoginWithGoogleCommand } from '../domain'
+import { LoginUseCase } from '../application/commands/login.use-case'
+import { LoginWithGoogleUseCase } from '../application/commands/login-with-google.use-case'
 import { LoginInput, LoginOutput, LoginWithGoogleInput, LoginWithGoogleOutput } from './auth.dto'
 import { Public } from './decorators/public.metadata'
 
 @Public()
 @Resolver()
 export class AuthResolver {
-  constructor(private readonly commandBus: CommandBus) {}
+  constructor(
+    private readonly loginUseCase: LoginUseCase,
+    private readonly loginWithGoogleUseCase: LoginWithGoogleUseCase,
+  ) {}
 
   @Mutation(() => LoginOutput)
   async login(@Args('input') input: LoginInput, @RealIP() ip: string): Promise<LoginOutput> {
-    const result = await this.commandBus.execute(
-      new LoginCommand({
-        email: input.email,
-        password: input.password,
-        ip,
-      }),
-    )
+    const result = await this.loginUseCase.execute({
+      email: input.email,
+      password: input.password,
+      ip,
+    })
 
     return {
       accessToken: result.access_token,
@@ -31,13 +32,11 @@ export class AuthResolver {
     @Args('input') input: LoginWithGoogleInput,
     @RealIP() ip: string,
   ): Promise<LoginWithGoogleOutput> {
-    const result = await this.commandBus.execute(
-      new LoginWithGoogleCommand({
-        code: input.code,
-        createUserIfNotExists: input.createUserIfNotExists,
-        ip,
-      }),
-    )
+    const result = await this.loginWithGoogleUseCase.execute({
+      code: input.code,
+      createUserIfNotExists: input.createUserIfNotExists,
+      ip,
+    })
 
     return {
       accessToken: result.access_token,

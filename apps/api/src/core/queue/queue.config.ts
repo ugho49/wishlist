@@ -8,7 +8,11 @@ const schema = z.object({
   VALKEY_PORT: z.coerce.number('Missing VALKEY_PORT environment variable'),
   VALKEY_PASSWORD: z.string('Missing VALKEY_PASSWORD environment variable'),
   VALKEY_DB: z.coerce.number('Missing VALKEY_DB environment variable'),
-  SCHEDULED_JOBS_ENABLED: z.boolean('Missing SCHEDULED_JOBS_ENABLED environment variable').optional().default(true),
+  SCHEDULED_JOBS_ENABLED: z
+    .enum(['true', 'false'], { message: 'Missing SCHEDULED_JOBS_ENABLED environment variable' })
+    .transform(val => val === 'true')
+    .optional()
+    .default(true),
 })
 
 export default registerAs('queue', () =>

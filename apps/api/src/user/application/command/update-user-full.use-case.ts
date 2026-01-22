@@ -1,12 +1,25 @@
-import { BadRequestException, Inject, Logger, UnauthorizedException } from '@nestjs/common'
-import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
+import { BadRequestException, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common'
 import { PasswordManager } from '@wishlist/api/auth'
 import { REPOSITORIES } from '@wishlist/api/repositories'
+import { ICurrentUser, UserId } from '@wishlist/common'
 
-import { UpdateUserFullCommand, UserRepository } from '../../domain'
+import { UserRepository } from '../../domain'
 
-@CommandHandler(UpdateUserFullCommand)
-export class UpdateUserFullUseCase implements IInferredCommandHandler<UpdateUserFullCommand> {
+export type UpdateUserFullInput = {
+  userId: UserId
+  currentUser: ICurrentUser
+  updateUser: {
+    email?: string
+    newPassword?: string
+    firstname?: string
+    lastname?: string
+    birthday?: Date
+    isEnabled?: boolean
+  }
+}
+
+@Injectable()
+export class UpdateUserFullUseCase {
   private readonly logger = new Logger(UpdateUserFullUseCase.name)
 
   constructor(
@@ -14,9 +27,9 @@ export class UpdateUserFullUseCase implements IInferredCommandHandler<UpdateUser
     private readonly userRepository: UserRepository,
   ) {}
 
-  async execute(command: UpdateUserFullCommand): Promise<void> {
-    this.logger.log('Update user full request received', { userId: command.userId })
-    const { userId, currentUser, updateUser } = command
+  async execute(input: UpdateUserFullInput): Promise<void> {
+    this.logger.log('Update user full request received', { userId: input.userId })
+    const { userId, currentUser, updateUser } = input
 
     if (userId === currentUser.id) {
       throw new UnauthorizedException('You cannot update yourself')

@@ -1,15 +1,14 @@
-import { Inject, Logger } from '@nestjs/common'
-import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
+import { Inject, Injectable, Logger } from '@nestjs/common'
 import { FrontendRoutesService, MailService, MailTemplate } from '@wishlist/api/core'
 import { REPOSITORIES } from '@wishlist/api/repositories'
 import { WishlistRepository } from '@wishlist/api/wishlist'
 import { WishlistId } from '@wishlist/common'
 import { DateTime } from 'luxon'
 
-import { NewItemsForWishlist, NotifyNewItemsCommand, WishlistItemRepository } from '../../domain'
+import { NewItemsForWishlist, WishlistItemRepository } from '../../domain'
 
-@CommandHandler(NotifyNewItemsCommand)
-export class NotifyNewItemsUseCase implements IInferredCommandHandler<NotifyNewItemsCommand> {
+@Injectable()
+export class NotifyNewItemsUseCase {
   private readonly logger = new Logger(NotifyNewItemsUseCase.name)
 
   constructor(
@@ -19,7 +18,7 @@ export class NotifyNewItemsUseCase implements IInferredCommandHandler<NotifyNewI
     private readonly frontendRoutes: FrontendRoutesService,
   ) {}
 
-  async execute() {
+  async execute(): Promise<void> {
     try {
       const oneDayAgo = DateTime.now().minus({ days: 1 }).toJSDate()
 

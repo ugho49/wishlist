@@ -1,11 +1,16 @@
-import { Inject, Logger, UnauthorizedException } from '@nestjs/common'
-import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
+import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common'
 import { REPOSITORIES } from '@wishlist/api/repositories'
+import { ICurrentUser, UserId } from '@wishlist/common'
 
-import { DeleteUserCommand, UserRepository } from '../../domain'
+import { UserRepository } from '../../domain'
 
-@CommandHandler(DeleteUserCommand)
-export class DeleteUserUseCase implements IInferredCommandHandler<DeleteUserCommand> {
+export type DeleteUserInput = {
+  currentUser: ICurrentUser
+  userId: UserId
+}
+
+@Injectable()
+export class DeleteUserUseCase {
   private readonly logger = new Logger(DeleteUserUseCase.name)
 
   constructor(
@@ -13,9 +18,9 @@ export class DeleteUserUseCase implements IInferredCommandHandler<DeleteUserComm
     private readonly userRepository: UserRepository,
   ) {}
 
-  async execute(command: DeleteUserCommand): Promise<void> {
-    this.logger.log('Delete user request received', { command })
-    const { userId, currentUser } = command
+  async execute(input: DeleteUserInput): Promise<void> {
+    this.logger.log('Delete user request received', { input })
+    const { userId, currentUser } = input
 
     if (userId === currentUser.id) {
       throw new UnauthorizedException('You cannot delete yourself')

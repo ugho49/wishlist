@@ -1,35 +1,40 @@
-import { Inject, UnauthorizedException } from '@nestjs/common'
-import { IInferredQueryHandler, QueryHandler } from '@nestjs/cqrs'
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common'
 import { EventRepository } from '@wishlist/api/event'
 import { REPOSITORIES } from '@wishlist/api/repositories'
+import { DetailedWishlistDto, ICurrentUser, WishlistId } from '@wishlist/common'
 
-import { GetWishlistByIdQuery, GetWishlistByIdResult, WishlistRepository } from '../../domain'
+import { WishlistRepository } from '../../domain'
 import { wishlistMapper } from '../../infrastructure'
 
-@QueryHandler(GetWishlistByIdQuery)
-export class GetWishlistByIdUseCase implements IInferredQueryHandler<GetWishlistByIdQuery> {
+export type GetWishlistByIdInput = {
+  currentUser: ICurrentUser
+  wishlistId: WishlistId
+}
+
+@Injectable()
+export class GetWishlistByIdUseCase {
   constructor(
     @Inject(REPOSITORIES.WISHLIST) private readonly wishlistRepository: WishlistRepository,
     @Inject(REPOSITORIES.EVENT) private readonly eventRepository: EventRepository,
   ) {}
 
-  async execute(query: GetWishlistByIdQuery): Promise<GetWishlistByIdResult> {
+  async execute(input: GetWishlistByIdInput): Promise<DetailedWishlistDto> {
     const hasAccess = await this.wishlistRepository.hasAccess({
-      wishlistId: query.wishlistId,
-      userId: query.currentUser.id,
+      wishlistId: input.wishlistId,
+      userId: input.currentUser.id,
     })
 
     if (!hasAccess) {
       throw new UnauthorizedException('You cannot access this wishlist')
     }
 
-    const wishlist = await this.wishlistRepository.findByIdOrFail(query.wishlistId)
+    const wishlist = await this.wishlistRepository.findByIdOrFail(input.wishlistId)
     const events = await this.eventRepository.findByIds(wishlist.eventIds)
 
     return wishlistMapper.toDetailedWishlistDto({
       wishlist,
       events,
-      currentUserId: query.currentUser.id,
+      currentUserId: input.currentUser.id,
     })
   }
 }

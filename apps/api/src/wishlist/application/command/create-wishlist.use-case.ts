@@ -1,16 +1,27 @@
-import { Inject, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common'
-import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
+import { Inject, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common'
 import { BucketService } from '@wishlist/api/core'
 import { EventRepository } from '@wishlist/api/event'
 import { REPOSITORIES } from '@wishlist/api/repositories'
 import { UserRepository } from '@wishlist/api/user'
+import { DetailedWishlistDto, EventId, ICurrentUser } from '@wishlist/common'
 import { uniq } from 'lodash'
 
-import { CreateWishlistCommand, CreateWishlistResult, Wishlist, WishlistRepository } from '../../domain'
+import { Wishlist, WishlistRepository } from '../../domain'
 import { wishlistMapper } from '../../infrastructure'
 
-@CommandHandler(CreateWishlistCommand)
-export class CreateWishlistUseCase implements IInferredCommandHandler<CreateWishlistCommand> {
+export type CreateWishlistInput = {
+  currentUser: ICurrentUser
+  newWishlist: {
+    title: string
+    description?: string
+    eventIds: EventId[]
+    hideItems?: boolean
+    imageFile?: Express.Multer.File
+  }
+}
+
+@Injectable()
+export class CreateWishlistUseCase {
   private readonly logger = new Logger(CreateWishlistUseCase.name)
 
   constructor(
@@ -20,7 +31,7 @@ export class CreateWishlistUseCase implements IInferredCommandHandler<CreateWish
     private readonly bucketService: BucketService,
   ) {}
 
-  async execute(command: CreateWishlistCommand): Promise<CreateWishlistResult> {
+  async execute(command: CreateWishlistInput): Promise<DetailedWishlistDto> {
     this.logger.log('Create wishlist request received', { command })
 
     const eventIds = uniq(command.newWishlist.eventIds)

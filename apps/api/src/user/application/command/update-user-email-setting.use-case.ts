@@ -1,12 +1,17 @@
-import { Inject, Logger, NotFoundException } from '@nestjs/common'
-import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
+import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { REPOSITORIES } from '@wishlist/api/repositories'
+import { ICurrentUser, UserEmailSettingsDto } from '@wishlist/common'
 
-import { UpdateUserEmailSettingCommand, UpdateUserEmailSettingResult, UserEmailSettingRepository } from '../../domain'
+import { UserEmailSettingRepository } from '../../domain'
 import { userEmailSettingMapper } from '../../infrastructure'
 
-@CommandHandler(UpdateUserEmailSettingCommand)
-export class UpdateUserEmailSettingUseCase implements IInferredCommandHandler<UpdateUserEmailSettingCommand> {
+export type UpdateUserEmailSettingInput = {
+  currentUser: ICurrentUser
+  dailyNewItemNotification: boolean
+}
+
+@Injectable()
+export class UpdateUserEmailSettingUseCase {
   private readonly logger = new Logger(UpdateUserEmailSettingUseCase.name)
 
   constructor(
@@ -14,9 +19,9 @@ export class UpdateUserEmailSettingUseCase implements IInferredCommandHandler<Up
     private readonly userEmailSettingRepository: UserEmailSettingRepository,
   ) {}
 
-  async execute(command: UpdateUserEmailSettingCommand): Promise<UpdateUserEmailSettingResult> {
-    this.logger.log('Update user email setting request received', { command })
-    const { currentUser, dailyNewItemNotification } = command
+  async execute(input: UpdateUserEmailSettingInput): Promise<UserEmailSettingsDto> {
+    this.logger.log('Update user email setting request received', { input })
+    const { currentUser, dailyNewItemNotification } = input
 
     const userEmailSetting = await this.userEmailSettingRepository.findByUserId(currentUser.id)
 

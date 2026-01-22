@@ -1,11 +1,20 @@
-import { Inject, Logger } from '@nestjs/common'
-import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
+import { Inject, Injectable, Logger } from '@nestjs/common'
 import { REPOSITORIES } from '@wishlist/api/repositories'
+import { UserId } from '@wishlist/common'
 
-import { UpdateUserCommand, UserRepository } from '../../domain'
+import { UserRepository } from '../../domain'
 
-@CommandHandler(UpdateUserCommand)
-export class UpdateUserUseCase implements IInferredCommandHandler<UpdateUserCommand> {
+export type UpdateUserInput = {
+  userId: UserId
+  updateUser: {
+    firstname: string
+    lastname: string
+    birthday?: Date
+  }
+}
+
+@Injectable()
+export class UpdateUserUseCase {
   private readonly logger = new Logger(UpdateUserUseCase.name)
 
   constructor(
@@ -13,9 +22,9 @@ export class UpdateUserUseCase implements IInferredCommandHandler<UpdateUserComm
     private readonly userRepository: UserRepository,
   ) {}
 
-  async execute(command: UpdateUserCommand): Promise<void> {
-    this.logger.log('Update user request received', { command })
-    const { userId, updateUser } = command
+  async execute(input: UpdateUserInput): Promise<void> {
+    this.logger.log('Update user request received', { input })
+    const { userId, updateUser } = input
 
     const user = await this.userRepository.findByIdOrFail(userId)
 

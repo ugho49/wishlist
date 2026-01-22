@@ -33,51 +33,54 @@ import { CurrentUser, Public } from '../../../auth'
 
 import 'multer'
 
-import { CommandBus, QueryBus } from '@nestjs/cqrs'
-
-import {
-  CreateUserCommand,
-  GetUserByIdQuery,
-  GetUsersByCriteriaQuery,
-  LinkUserToGoogleCommand,
-  RemoveUserPictureCommand,
-  UnlinkUserSocialCommand,
-  UpdateUserCommand,
-  UpdateUserPasswordCommand,
-  UpdateUserPictureCommand,
-  UpdateUserPictureFromSocialCommand,
-} from '../../domain'
-import { GetClosestFriendsQuery } from '../../domain/query/get-closest-friends.query'
+import { CreateUserUseCase } from '../../application/command/create-user.use-case'
+import { LinkUserToGoogleUseCase } from '../../application/command/link-user-to-google.use-case'
+import { RemoveUserPictureUseCase } from '../../application/command/remove-user-picture.use-case'
+import { UnlinkUserSocialUseCase } from '../../application/command/unlink-user-social.use-case'
+import { UpdateUserUseCase } from '../../application/command/update-user.use-case'
+import { UpdateUserPasswordUseCase } from '../../application/command/update-user-password.use-case'
+import { UpdateUserPictureUseCase } from '../../application/command/update-user-picture.use-case'
+import { UpdateUserPictureFromSocialUseCase } from '../../application/command/update-user-picture-from-social.use-case'
+import { GetClosestFriendsUseCase } from '../../application/query/get-closest-friends.use-case'
+import { GetUserByIdUseCase } from '../../application/query/get-user-by-id.use-case'
+import { GetUsersByCriteriaUseCase } from '../../application/query/get-users-by-criteria.use-case'
 import { userPictureFileValidators, userPictureResizePipe } from '../user.validator'
 
 @ApiTags('User')
 @Controller('/user')
 export class UserController {
   constructor(
-    private readonly commandBus: CommandBus,
-    private readonly queryBus: QueryBus,
+    private readonly getUserByIdUseCase: GetUserByIdUseCase,
+    private readonly getUsersByCriteriaUseCase: GetUsersByCriteriaUseCase,
+    private readonly getClosestFriendsUseCase: GetClosestFriendsUseCase,
+    private readonly createUserUseCase: CreateUserUseCase,
+    private readonly linkUserToGoogleUseCase: LinkUserToGoogleUseCase,
+    private readonly removeUserPictureUseCase: RemoveUserPictureUseCase,
+    private readonly unlinkUserSocialUseCase: UnlinkUserSocialUseCase,
+    private readonly updateUserUseCase: UpdateUserUseCase,
+    private readonly updateUserPasswordUseCase: UpdateUserPasswordUseCase,
+    private readonly updateUserPictureUseCase: UpdateUserPictureUseCase,
+    private readonly updateUserPictureFromSocialUseCase: UpdateUserPictureFromSocialUseCase,
   ) {}
 
   @Get()
   getInfos(@CurrentUser('id') currentUserId: UserId): Promise<UserDto> {
-    return this.queryBus.execute(new GetUserByIdQuery({ userId: currentUserId }))
+    return this.getUserByIdUseCase.execute({ userId: currentUserId })
   }
 
   @Public()
   @HttpCode(201)
   @Post('/register')
   register(@Body() dto: RegisterUserInputDto, @RealIP() ip: string): Promise<MiniUserDto> {
-    return this.commandBus.execute(
-      new CreateUserCommand({
-        ip,
-        newUser: {
-          email: dto.email,
-          password: dto.password,
-          firstname: dto.firstname,
-          lastname: dto.lastname,
-        },
-      }),
-    )
+    return this.createUserUseCase.execute({
+      ip,
+      newUser: {
+        email: dto.email,
+        password: dto.password,
+        firstname: dto.firstname,
+        lastname: dto.lastname,
+      },
+    })
   }
 
   @Post('/link-social/google')
@@ -85,7 +88,7 @@ export class UserController {
     @CurrentUser('id') currentUserId: UserId,
     @Body() dto: LinkUserToGoogleInputDto,
   ): Promise<UserSocialDto> {
-    return this.commandBus.execute(new LinkUserToGoogleCommand({ code: dto.code, userId: currentUserId }))
+    return this.linkUserToGoogleUseCase.execute({ code: dto.code, userId: currentUserId })
   }
 
   @Delete('/unlink-social/:socialId')
@@ -93,21 +96,19 @@ export class UserController {
     @CurrentUser('id') currentUserId: UserId,
     @Param('socialId') socialId: UserSocialId,
   ): Promise<void> {
-    return this.commandBus.execute(new UnlinkUserSocialCommand({ userId: currentUserId, socialId }))
+    return this.unlinkUserSocialUseCase.execute({ userId: currentUserId, socialId })
   }
 
   @Put()
   async update(@CurrentUser('id') currentUserId: UserId, @Body() dto: UpdateUserProfileInputDto): Promise<void> {
-    await this.commandBus.execute(
-      new UpdateUserCommand({
-        userId: currentUserId,
-        updateUser: {
-          firstname: dto.firstname,
-          lastname: dto.lastname,
-          birthday: dto.birthday,
-        },
-      }),
-    )
+    await this.updateUserUseCase.execute({
+      userId: currentUserId,
+      updateUser: {
+        firstname: dto.firstname,
+        lastname: dto.lastname,
+        birthday: dto.birthday,
+      },
+    })
   }
 
   @Put('/change-password')
@@ -115,13 +116,11 @@ export class UserController {
     @CurrentUser('id') currentUserId: UserId,
     @Body() dto: ChangeUserPasswordInputDto,
   ): Promise<void> {
-    await this.commandBus.execute(
-      new UpdateUserPasswordCommand({
-        userId: currentUserId,
-        oldPassword: dto.old_password,
-        newPassword: dto.new_password,
-      }),
-    )
+    await this.updateUserPasswordUseCase.execute({
+      userId: currentUserId,
+      oldPassword: dto.old_password,
+      newPassword: dto.new_password,
+    })
   }
 
   @Get('/search')
@@ -129,12 +128,10 @@ export class UserController {
     @CurrentUser() currentUser: ICurrentUser,
     @Query('keyword') criteria: string,
   ): Promise<MiniUserDto[]> {
-    return this.queryBus.execute(
-      new GetUsersByCriteriaQuery({
-        currentUser,
-        criteria,
-      }),
-    )
+    return this.getUsersByCriteriaUseCase.execute({
+      currentUser,
+      criteria,
+    })
   }
 
   @Get('/closest-friends')
@@ -142,7 +139,7 @@ export class UserController {
     @CurrentUser('id') currentUserId: UserId,
     @Query() queryParams: LimitQueryDto,
   ): Promise<MiniUserDto[]> {
-    return this.queryBus.execute(new GetClosestFriendsQuery({ userId: currentUserId, limit: queryParams.limit ?? 20 }))
+    return this.getClosestFriendsUseCase.execute({ userId: currentUserId, limit: queryParams.limit ?? 20 })
   }
 
   @Post('/upload-picture')
@@ -153,17 +150,17 @@ export class UserController {
     @UploadedFile(userPictureFileValidators, userPictureResizePipe)
     file: Express.Multer.File,
   ): Promise<UpdateUserPictureOutputDto> {
-    const result = await this.commandBus.execute(new UpdateUserPictureCommand({ userId: currentUserId, file }))
+    const result = await this.updateUserPictureUseCase.execute({ userId: currentUserId, file })
     return { picture_url: result.pictureUrl }
   }
 
   @Put('/picture')
   async updatePictureFromSocial(@CurrentUser('id') currentUserId: UserId, @Query('social_id') socialId: UserSocialId) {
-    await this.commandBus.execute(new UpdateUserPictureFromSocialCommand({ userId: currentUserId, socialId }))
+    await this.updateUserPictureFromSocialUseCase.execute({ userId: currentUserId, socialId })
   }
 
   @Delete('/picture')
   async removePicture(@CurrentUser('id') currentUserId: UserId) {
-    await this.commandBus.execute(new RemoveUserPictureCommand({ userId: currentUserId }))
+    await this.removeUserPictureUseCase.execute({ userId: currentUserId })
   }
 }

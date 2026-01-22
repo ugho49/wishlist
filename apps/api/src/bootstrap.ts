@@ -36,21 +36,22 @@ export async function createApp(): Promise<INestApplication> {
   app.enableCors()
   app.enableShutdownHooks()
 
-  // Disable CSP in development for GraphiQL
-  if (isProduction) {
-    app.use(
-      helmet({
-        contentSecurityPolicy: {
-          directives: {
-            defaultSrc: [`'self'`],
-            styleSrc: [`'self'`, `'unsafe-inline'`],
-            imgSrc: [`'self'`, 'data:', 'validator.swagger.io'],
-            scriptSrc: [`'self'`, `https: 'unsafe-inline'`],
-          },
-        },
-      }),
-    )
-  }
+  // Helmet with CSP configuration for GraphiQL and Swagger
+  app.use(
+    helmet({
+      contentSecurityPolicy: isProduction
+        ? {
+            directives: {
+              defaultSrc: [`'self'`],
+              styleSrc: [`'self'`, `'unsafe-inline'`, 'unpkg.com'],
+              imgSrc: [`'self'`, 'data:', 'validator.swagger.io'],
+              scriptSrc: [`'self'`, `'unsafe-inline'`, 'unpkg.com'],
+              fontSrc: [`'self'`, 'unpkg.com'],
+            },
+          }
+        : false,
+    }),
+  )
 
   bootstrapSwagger(app)
 

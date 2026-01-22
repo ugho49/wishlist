@@ -1,13 +1,21 @@
-import { Inject, Logger } from '@nestjs/common'
-import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
+import { Inject, Injectable, Logger } from '@nestjs/common'
 import { BucketService } from '@wishlist/api/core'
 import { REPOSITORIES } from '@wishlist/api/repositories'
-import { uuid } from '@wishlist/common'
+import { UserId, uuid } from '@wishlist/common'
 
-import { UpdateUserPictureCommand, UpdateUserPictureResult, UserRepository } from '../../domain'
+import { UserRepository } from '../../domain'
 
-@CommandHandler(UpdateUserPictureCommand)
-export class UpdateUserPictureUseCase implements IInferredCommandHandler<UpdateUserPictureCommand> {
+export type UpdateUserPictureResult = {
+  pictureUrl: string
+}
+
+export type UpdateUserPictureInput = {
+  userId: UserId
+  file: Express.Multer.File
+}
+
+@Injectable()
+export class UpdateUserPictureUseCase {
   private readonly logger = new Logger(UpdateUserPictureUseCase.name)
 
   constructor(
@@ -16,7 +24,7 @@ export class UpdateUserPictureUseCase implements IInferredCommandHandler<UpdateU
     private readonly bucketService: BucketService,
   ) {}
 
-  async execute(command: UpdateUserPictureCommand): Promise<UpdateUserPictureResult> {
+  async execute(command: UpdateUserPictureInput): Promise<UpdateUserPictureResult> {
     this.logger.log('Update user picture request received', { command })
     const { userId, file } = command
 

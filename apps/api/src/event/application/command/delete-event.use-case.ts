@@ -1,13 +1,18 @@
-import { BadRequestException, Inject, Logger, UnauthorizedException } from '@nestjs/common'
-import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
+import { BadRequestException, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common'
 import { TransactionManager } from '@wishlist/api/core'
 import { REPOSITORIES } from '@wishlist/api/repositories'
 import { WishlistRepository } from '@wishlist/api/wishlist'
+import { EventId, ICurrentUser } from '@wishlist/common'
 
-import { DeleteEventCommand, EventAttendeeRepository, EventRepository } from '../../domain'
+import { EventAttendeeRepository, EventRepository } from '../../domain'
 
-@CommandHandler(DeleteEventCommand)
-export class DeleteEventUseCase implements IInferredCommandHandler<DeleteEventCommand> {
+export type DeleteEventInput = {
+  currentUser: ICurrentUser
+  eventId: EventId
+}
+
+@Injectable()
+export class DeleteEventUseCase {
   private readonly logger = new Logger(DeleteEventUseCase.name)
 
   constructor(
@@ -17,9 +22,9 @@ export class DeleteEventUseCase implements IInferredCommandHandler<DeleteEventCo
     private readonly transactionManager: TransactionManager,
   ) {}
 
-  async execute(command: DeleteEventCommand): Promise<void> {
-    this.logger.log('Delete event request received', { command })
-    const { currentUser, eventId } = command
+  async execute(input: DeleteEventInput): Promise<void> {
+    this.logger.log('Delete event request received', { input })
+    const { currentUser, eventId } = input
 
     const event = await this.eventRepository.findByIdOrFail(eventId)
 

@@ -1,17 +1,17 @@
-import { Inject, Logger, UnauthorizedException } from '@nestjs/common'
-import { CommandHandler, EventBus, IInferredCommandHandler } from '@nestjs/cqrs'
+import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common'
+import { EventBus } from '@nestjs/cqrs'
 import { TransactionManager } from '@wishlist/api/core'
 import { REPOSITORIES } from '@wishlist/api/repositories'
 
-import {
-  ConfirmEmailChangeCommand,
-  EmailChangedEvent,
-  UserEmailChangeVerificationRepository,
-  UserRepository,
-} from '../../domain'
+import { EmailChangedEvent, UserEmailChangeVerificationRepository, UserRepository } from '../../domain'
 
-@CommandHandler(ConfirmEmailChangeCommand)
-export class ConfirmEmailChangeUseCase implements IInferredCommandHandler<ConfirmEmailChangeCommand> {
+export type ConfirmEmailChangeInput = {
+  newEmail: string
+  token: string
+}
+
+@Injectable()
+export class ConfirmEmailChangeUseCase {
   private readonly logger = new Logger(ConfirmEmailChangeUseCase.name)
 
   constructor(
@@ -23,13 +23,13 @@ export class ConfirmEmailChangeUseCase implements IInferredCommandHandler<Confir
     private readonly eventBus: EventBus,
   ) {}
 
-  async execute(command: ConfirmEmailChangeCommand): Promise<void> {
-    this.logger.log('Confirm email change request received', { command })
+  async execute(input: ConfirmEmailChangeInput): Promise<void> {
+    this.logger.log('Confirm email change request received', { input })
     // Normalize email to lowercase
-    const newEmail = command.newEmail.toLowerCase()
+    const newEmail = input.newEmail.toLowerCase()
 
     // Find the verification by token and email
-    const verification = await this.emailChangeVerificationRepository.findByTokenAndEmail(command.token, newEmail)
+    const verification = await this.emailChangeVerificationRepository.findByTokenAndEmail(input.token, newEmail)
 
     if (!verification) {
       throw new UnauthorizedException('This email change verification is not valid')

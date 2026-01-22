@@ -47,5 +47,5 @@ export class GqlWishlist {
   declare updatedAt: string
 }
 
-@ObjectType()
+@ObjectType('WishlistPagedResponse')
 export class GqlWishlistPagedResponse extends PagedResponse(GqlWishlist) {}

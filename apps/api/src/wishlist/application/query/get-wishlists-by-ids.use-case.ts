@@ -1,27 +1,31 @@
-import { Inject } from '@nestjs/common'
-import { IInferredQueryHandler, QueryHandler } from '@nestjs/cqrs'
+import { Inject, Injectable } from '@nestjs/common'
 import { REPOSITORIES } from '@wishlist/api/repositories'
-import { WishlistId } from '@wishlist/common'
+import { ICurrentUser, WishlistId } from '@wishlist/common'
 
-import { GetWishlistsByIdsQuery, Wishlist, WishlistRepository } from '../../domain'
+import { Wishlist, WishlistRepository } from '../../domain'
 
-@QueryHandler(GetWishlistsByIdsQuery)
-export class GetWishlistsByIdsUseCase implements IInferredQueryHandler<GetWishlistsByIdsQuery> {
+export type GetWishlistsByIdsInput = {
+  currentUser: ICurrentUser
+  wishlistIds: WishlistId[]
+}
+
+@Injectable()
+export class GetWishlistsByIdsUseCase {
   constructor(@Inject(REPOSITORIES.WISHLIST) private readonly wishlistRepository: WishlistRepository) {}
 
-  async execute(query: GetWishlistsByIdsQuery): Promise<Wishlist[]> {
+  async execute(input: GetWishlistsByIdsInput): Promise<Wishlist[]> {
     const wishlistIds = (
       await Promise.all(
-        query.wishlistIds.map(wishlistId =>
+        input.wishlistIds.map(wishlistId =>
           this.wishlistRepository.hasAccess({
             wishlistId,
-            userId: query.currentUser.id,
+            userId: input.currentUser.id,
           }),
         ),
       )
     )
       .filter(Boolean)
-      .map((hasAccess, index) => (hasAccess ? query.wishlistIds[index] : undefined))
+      .map((hasAccess, index) => (hasAccess ? input.wishlistIds[index] : undefined))
       .filter((wishlistId): wishlistId is WishlistId => wishlistId !== undefined)
 
     return this.wishlistRepository.findByIds(wishlistIds)

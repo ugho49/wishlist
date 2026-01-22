@@ -1,12 +1,18 @@
-import { BadRequestException, Inject, Logger } from '@nestjs/common'
-import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
+import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common'
 import { PasswordManager } from '@wishlist/api/auth'
 import { REPOSITORIES } from '@wishlist/api/repositories'
+import { UserId } from '@wishlist/common'
 
-import { UpdateUserPasswordCommand, UserRepository } from '../../domain'
+import { UserRepository } from '../../domain'
 
-@CommandHandler(UpdateUserPasswordCommand)
-export class UpdateUserPasswordUseCase implements IInferredCommandHandler<UpdateUserPasswordCommand> {
+export type UpdateUserPasswordInput = {
+  userId: UserId
+  oldPassword: string
+  newPassword: string
+}
+
+@Injectable()
+export class UpdateUserPasswordUseCase {
   private readonly logger = new Logger(UpdateUserPasswordUseCase.name)
 
   constructor(
@@ -14,9 +20,9 @@ export class UpdateUserPasswordUseCase implements IInferredCommandHandler<Update
     private readonly userRepository: UserRepository,
   ) {}
 
-  async execute(command: UpdateUserPasswordCommand): Promise<void> {
-    this.logger.log('Update user password request received', { userId: command.userId })
-    const { userId, oldPassword, newPassword } = command
+  async execute(input: UpdateUserPasswordInput): Promise<void> {
+    this.logger.log('Update user password request received', { userId: input.userId })
+    const { userId, oldPassword, newPassword } = input
 
     const user = await this.userRepository.findByIdOrFail(userId)
     const oldPasswordMatch = await PasswordManager.verify({

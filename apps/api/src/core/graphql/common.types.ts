@@ -4,8 +4,8 @@ import { IsPositive, Max, Min } from 'class-validator'
 
 import { DEFAULT_RESULT_NUMBER } from '../common'
 
-@InputType('PaginationInput')
-export class PaginationInput {
+@InputType('PaginationFilters')
+export class PaginationFilters {
   @Field(() => Int, { nullable: true, defaultValue: 1 })
   @Min(1)
   declare page: number

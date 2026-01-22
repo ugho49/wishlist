@@ -1,11 +1,16 @@
-import { Inject, Logger, NotFoundException } from '@nestjs/common'
-import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
+import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { REPOSITORIES } from '@wishlist/api/repositories'
+import { UserId, UserSocialId } from '@wishlist/common'
 
-import { UnlinkUserSocialCommand, UpdateUserPictureFromSocialCommand, UserSocialRepository } from '../../domain'
+import { UserSocialRepository } from '../../domain'
 
-@CommandHandler(UnlinkUserSocialCommand)
-export class UnlinkUserSocialUseCase implements IInferredCommandHandler<UnlinkUserSocialCommand> {
+export type UnlinkUserSocialInput = {
+  userId: UserId
+  socialId: UserSocialId
+}
+
+@Injectable()
+export class UnlinkUserSocialUseCase {
   private readonly logger = new Logger(UnlinkUserSocialUseCase.name)
 
   constructor(
@@ -13,9 +18,9 @@ export class UnlinkUserSocialUseCase implements IInferredCommandHandler<UnlinkUs
     private readonly userSocialRepository: UserSocialRepository,
   ) {}
 
-  async execute(command: UpdateUserPictureFromSocialCommand): Promise<void> {
-    this.logger.log('Unlink user social request received', { command })
-    const { userId, socialId } = command
+  async execute(input: UnlinkUserSocialInput): Promise<void> {
+    this.logger.log('Unlink user social request received', { input })
+    const { userId, socialId } = input
 
     const socials = await this.userSocialRepository.findByUserId(userId)
     const social = socials.find(s => s.id === socialId)

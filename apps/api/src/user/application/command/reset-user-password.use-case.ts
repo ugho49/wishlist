@@ -1,13 +1,18 @@
-import { Inject, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common'
-import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
+import { Inject, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common'
 import { PasswordManager } from '@wishlist/api/auth'
 import { TransactionManager } from '@wishlist/api/core'
 import { REPOSITORIES } from '@wishlist/api/repositories'
 
-import { ResetUserPasswordCommand, UserPasswordVerificationRepository, UserRepository } from '../../domain'
+import { UserPasswordVerificationRepository, UserRepository } from '../../domain'
 
-@CommandHandler(ResetUserPasswordCommand)
-export class ResetUserPasswordUseCase implements IInferredCommandHandler<ResetUserPasswordCommand> {
+export type ResetUserPasswordInput = {
+  email: string
+  token: string
+  newPassword: string
+}
+
+@Injectable()
+export class ResetUserPasswordUseCase {
   private readonly logger = new Logger(ResetUserPasswordUseCase.name)
 
   constructor(
@@ -18,9 +23,9 @@ export class ResetUserPasswordUseCase implements IInferredCommandHandler<ResetUs
     private readonly transactionManager: TransactionManager,
   ) {}
 
-  async execute(command: ResetUserPasswordCommand): Promise<void> {
-    this.logger.log('Reset user password request received', { email: command.email, token: command.token })
-    const user = await this.userRepository.findByEmail(command.email)
+  async execute(input: ResetUserPasswordInput): Promise<void> {
+    this.logger.log('Reset user password request received', { email: input.email, token: input.token })
+    const user = await this.userRepository.findByEmail(input.email)
 
     if (!user) {
       throw new NotFoundException('User not found')
@@ -28,7 +33,7 @@ export class ResetUserPasswordUseCase implements IInferredCommandHandler<ResetUs
 
     const passwordVerifications = await this.passwordVerificationRepository.findByUserId(user.id)
 
-    const passwordVerification = passwordVerifications.find(verification => verification.token === command.token)
+    const passwordVerification = passwordVerifications.find(verification => verification.token === input.token)
 
     if (!passwordVerification) {
       throw new UnauthorizedException('This reset code is not valid')
@@ -38,7 +43,7 @@ export class ResetUserPasswordUseCase implements IInferredCommandHandler<ResetUs
       throw new UnauthorizedException('This reset code is expired')
     }
 
-    const newPasswordEncoded = await PasswordManager.hash(command.newPassword)
+    const newPasswordEncoded = await PasswordManager.hash(input.newPassword)
     const updatedUser = user.updatePassword(newPasswordEncoded)
 
     this.logger.log('Saving user and deleting password verification...', { userId: user.id })

@@ -1,12 +1,16 @@
-import { Inject, Logger } from '@nestjs/common'
-import { CommandHandler, IInferredCommandHandler } from '@nestjs/cqrs'
+import { Inject, Injectable, Logger } from '@nestjs/common'
 import { BucketService } from '@wishlist/api/core'
 import { REPOSITORIES } from '@wishlist/api/repositories'
+import { UserId } from '@wishlist/common'
 
-import { RemoveUserPictureCommand, UserRepository } from '../../domain'
+import { UserRepository } from '../../domain'
 
-@CommandHandler(RemoveUserPictureCommand)
-export class RemoveUserPictureUseCase implements IInferredCommandHandler<RemoveUserPictureCommand> {
+export type RemoveUserPictureInput = {
+  userId: UserId
+}
+
+@Injectable()
+export class RemoveUserPictureUseCase {
   private readonly logger = new Logger(RemoveUserPictureUseCase.name)
 
   constructor(
@@ -15,10 +19,10 @@ export class RemoveUserPictureUseCase implements IInferredCommandHandler<RemoveU
     private readonly bucketService: BucketService,
   ) {}
 
-  async execute(command: RemoveUserPictureCommand): Promise<void> {
-    this.logger.log('Remove user picture request received', { command })
+  async execute(input: RemoveUserPictureInput): Promise<void> {
+    this.logger.log('Remove user picture request received', { input })
 
-    const { userId } = command
+    const { userId } = input
     const user = await this.userRepository.findByIdOrFail(userId)
 
     this.logger.log('Removing user picture in bucket...', { userId })

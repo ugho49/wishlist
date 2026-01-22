@@ -1,12 +1,16 @@
-import { Inject } from '@nestjs/common'
-import { IInferredQueryHandler, QueryHandler } from '@nestjs/cqrs'
+import { Inject, Injectable } from '@nestjs/common'
 import { REPOSITORIES } from '@wishlist/api/repositories'
+import { UserDto, UserId } from '@wishlist/common'
 
-import { GetUserByIdQuery, GetUserByIdResult, UserRepository, UserSocialRepository } from '../../domain'
+import { UserRepository, UserSocialRepository } from '../../domain'
 import { userMapper } from '../../infrastructure'
 
-@QueryHandler(GetUserByIdQuery)
-export class GetUserByIdUseCase implements IInferredQueryHandler<GetUserByIdQuery> {
+export type GetUserByIdInput = {
+  userId: UserId
+}
+
+@Injectable()
+export class GetUserByIdUseCase {
   constructor(
     @Inject(REPOSITORIES.USER)
     private readonly userRepository: UserRepository,
@@ -14,7 +18,7 @@ export class GetUserByIdUseCase implements IInferredQueryHandler<GetUserByIdQuer
     private readonly userSocialRepository: UserSocialRepository,
   ) {}
 
-  async execute(query: GetUserByIdQuery): Promise<GetUserByIdResult> {
+  async execute(query: GetUserByIdInput): Promise<UserDto> {
     const user = await this.userRepository.findByIdOrFail(query.userId)
     const socials = await this.userSocialRepository.findByUserId(query.userId)
 

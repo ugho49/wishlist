@@ -1,17 +1,22 @@
-import { Inject } from '@nestjs/common'
-import { IInferredQueryHandler, QueryHandler } from '@nestjs/cqrs'
+import { Inject, Injectable } from '@nestjs/common'
 import { EventRepository } from '@wishlist/api/event'
 import { REPOSITORIES } from '@wishlist/api/repositories'
+import { EventId, ICurrentUser } from '@wishlist/common'
 
-import { Event, GetEventsByIdsQuery } from '../../domain'
+import { Event } from '../../domain'
 
-@QueryHandler(GetEventsByIdsQuery)
-export class GetEventsByIdsUseCase implements IInferredQueryHandler<GetEventsByIdsQuery> {
+export type GetEventsByIdsInput = {
+  currentUser: ICurrentUser
+  eventIds: EventId[]
+}
+
+@Injectable()
+export class GetEventsByIdsUseCase {
   constructor(@Inject(REPOSITORIES.EVENT) private readonly eventRepository: EventRepository) {}
 
-  async execute(query: GetEventsByIdsQuery): Promise<Event[]> {
-    const events = await this.eventRepository.findByIds(query.eventIds)
+  async execute(input: GetEventsByIdsInput): Promise<Event[]> {
+    const events = await this.eventRepository.findByIds(input.eventIds)
 
-    return events.filter(event => event.canView(query.currentUser))
+    return events.filter(event => event.canView(input.currentUser))
   }
 }
