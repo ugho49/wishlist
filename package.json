@@ -77,7 +77,6 @@
     "graphql": "16.12.0",
     "graphql-yoga": "5.18.0",
     "handlebars": "4.7.8",
-    "helmet": "8.1.0",
     "ioredis": "5.8.2",
     "jwt-decode": "4.0.0",
     "launchdarkly-react-client-sdk": "3.9.0",

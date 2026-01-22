@@ -3,7 +3,6 @@ import type { INestApplication } from '@nestjs/common'
 import { ValidationPipe } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
-import helmet from 'helmet'
 import { Logger } from 'pino-nestjs'
 
 import { AppModule } from './app.module'
@@ -23,7 +22,6 @@ function bootstrapSwagger(app: INestApplication) {
 }
 
 export async function createApp(): Promise<INestApplication> {
-  const isProduction = process.env.NODE_ENV === 'production'
   const app = await NestFactory.create(AppModule, {
     bufferLogs: true,
   })
@@ -35,23 +33,6 @@ export async function createApp(): Promise<INestApplication> {
   app.useGlobalFilters(new GlobalExceptionFilter())
   app.enableCors()
   app.enableShutdownHooks()
-
-  // Helmet with CSP configuration for GraphiQL and Swagger
-  app.use(
-    helmet({
-      contentSecurityPolicy: isProduction
-        ? {
-            directives: {
-              defaultSrc: [`'self'`],
-              styleSrc: [`'self'`, `'unsafe-inline'`, 'unpkg.com'],
-              imgSrc: [`'self'`, 'data:', 'validator.swagger.io'],
-              scriptSrc: [`'self'`, `'unsafe-inline'`, 'unpkg.com'],
-              fontSrc: [`'self'`, 'unpkg.com'],
-            },
-          }
-        : false,
-    }),
-  )
 
   bootstrapSwagger(app)
 
