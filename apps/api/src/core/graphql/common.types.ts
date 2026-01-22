@@ -3,6 +3,7 @@ import { Field, InputType, Int, ObjectType } from '@nestjs/graphql'
 import { IsPositive, Max, Min } from 'class-validator'
 
 import { DEFAULT_RESULT_NUMBER } from '../common'
+import { createMutationResult } from './rejection.types'
 
 @InputType('PaginationFilters')
 export class PaginationFilters {
@@ -42,3 +43,11 @@ export function PagedResponse<T>(classRef: Type<T>): Type<{ resources: T[]; pagi
   }
   return PagedResponseClass as Type<{ resources: T[]; pagination: GqlPagination }>
 }
+
+@ObjectType('VoidOutput')
+export class GqlVoidOutput {
+  @Field(() => Boolean)
+  declare success: boolean
+}
+
+export const VoidResult = createMutationResult('VoidResult', GqlVoidOutput)

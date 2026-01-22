@@ -1,5 +1,5 @@
 import { Field, InputType, ObjectType, registerEnumType } from '@nestjs/graphql'
-import { PagedResponse, PaginationFilters } from '@wishlist/api/core'
+import { createQueryResult, PagedResponse, PaginationFilters } from '@wishlist/api/core'
 import { AttendeeId, AttendeeRole, EventId, UserId, WishlistId } from '@wishlist/common'
 
 registerEnumType(AttendeeRole, { name: 'AttendeeRole' })
@@ -57,3 +57,7 @@ export class GqlEventPaginationFilters extends PaginationFilters {
 
 @ObjectType()
 export class EventOutputPagedResponse extends PagedResponse(GqlEvent) {}
+
+// Union types for queries (includes success type + auth rejection types)
+export const GetEventByIdResult = createQueryResult('GetEventByIdResult', GqlEvent)
+export const GetMyEventsResult = createQueryResult('GetMyEventsResult', EventOutputPagedResponse)

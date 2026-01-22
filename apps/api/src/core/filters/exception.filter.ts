@@ -13,20 +13,14 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     const contextType = host.getType<'graphql' | 'http'>()
 
     if (contextType === 'graphql') {
-      // For GraphQL, we just rethrow the exception
-      // GraphQL will handle formatting the error response
-      // this.logger.error('Unknown error occurred', { exception })
-      // if (exception instanceof HttpException) {
-      //   throw exception
-      // }
-      // throw new InternalServerErrorException('An unknown error occurred')
-      return {
-        __typename: 'InternalErrorRejection',
-        message: 'An unexpected error occured',
-      }
+      // Re-throw the exception so GraphQL Yoga plugin can handle it
+      throw exception
     }
 
-    // For HTTP/REST requests
+    return this._handleHttpException(exception, host)
+  }
+
+  private _handleHttpException(exception: Error, host: ArgumentsHost): void {
     const ctx = host.switchToHttp()
     const response = ctx.getResponse<Response>()
 

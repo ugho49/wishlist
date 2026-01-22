@@ -5,14 +5,21 @@ import { EventId, UserId } from '@wishlist/common'
 
 import { GqlWishlist } from '../../wishlist/infrastructure/wishlist.dto'
 import { GetEventsByUserUseCase } from '../application/query/get-events-by-user.use-case'
-import { EventOutputPagedResponse, GqlEvent, GqlEventAttendee, GqlEventPaginationFilters } from './event.dto'
+import {
+  EventOutputPagedResponse,
+  GetEventByIdResult,
+  GetMyEventsResult,
+  GqlEvent,
+  GqlEventAttendee,
+  GqlEventPaginationFilters,
+} from './event.dto'
 import { eventMapper } from './event.mapper'
 
 @Resolver(() => GqlEvent)
 export class EventResolver {
   constructor(private readonly getEventsByUserUseCase: GetEventsByUserUseCase) {}
 
-  @Query(() => GqlEvent, { nullable: true })
+  @Query(() => GetEventByIdResult, { nullable: true })
   getEventById(
     @Args('id', { type: () => String }) id: EventId,
     @Context() ctx: GraphQLContext,
@@ -20,7 +27,7 @@ export class EventResolver {
     return ctx.loaders.event.load(id)
   }
 
-  @Query(() => EventOutputPagedResponse)
+  @Query(() => GetMyEventsResult)
   async getMyEvents(
     @Args('filters') filters: GqlEventPaginationFilters,
     @GqlCurrentUser('id') currentUserId: UserId,

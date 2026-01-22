@@ -3,7 +3,7 @@ import type { GqlUser, GqlUserSocial } from '../user/infrastructure/user.dto'
 import type { GqlWishlist } from '../wishlist/infrastructure/wishlist.dto'
 
 import { Injectable } from '@nestjs/common'
-import { AttendeeId, EventId, ICurrentUser, UserId, WishlistId } from '@wishlist/common'
+import { AttendeeId, EventId, ICurrentUser, UserId, UserSocialId, WishlistId } from '@wishlist/common'
 import DataLoader from 'dataloader'
 
 import { EventDataLoaderFactory } from '../event/infrastructure/event.dataloader'
@@ -13,7 +13,8 @@ import { WishlistDataLoaderFactory } from '../wishlist/infrastructure/wishlist.d
 
 export type DataLoaders = {
   user: DataLoader<UserId, GqlUser | null>
-  userSocial: DataLoader<UserId, GqlUserSocial[]>
+  userSocialsByUser: DataLoader<UserId, GqlUserSocial[]>
+  userSocial: DataLoader<UserSocialId, GqlUserSocial | null>
   wishlist: DataLoader<WishlistId, GqlWishlist | null>
   event: DataLoader<EventId, GqlEvent | null>
   eventAttendee: DataLoader<AttendeeId, GqlEventAttendee | null>
@@ -31,6 +32,7 @@ export class DataLoaderService {
   createLoaders(getCurrentUser: () => ICurrentUser | undefined): DataLoaders {
     return {
       user: this.userDataLoaderFactory.createUserLoader(),
+      userSocialsByUser: this.userDataLoaderFactory.createUserSocialsByUserLoader(),
       userSocial: this.userDataLoaderFactory.createUserSocialLoader(),
       wishlist: this.wishlistDataLoaderFactory.createLoader(getCurrentUser),
       event: this.eventDataLoaderFactory.createLoader(getCurrentUser),

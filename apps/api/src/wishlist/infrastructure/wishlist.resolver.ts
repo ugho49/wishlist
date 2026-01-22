@@ -6,14 +6,14 @@ import { UserId, WishlistId } from '@wishlist/common'
 import { GqlEvent } from '../../event/infrastructure/event.dto'
 import { GqlUser } from '../../user/infrastructure/user.dto'
 import { GetWishlistsByUserUseCase } from '../application/query/get-wishlists-by-user.use-case'
-import { GqlWishlist, GqlWishlistPagedResponse } from './wishlist.dto'
+import { GetMyWishlistsResult, GetWishlistByIdResult, GqlWishlist, GqlWishlistPagedResponse } from './wishlist.dto'
 import { wishlistMapper } from './wishlist.mapper'
 
 @Resolver(() => GqlWishlist)
 export class WishlistResolver {
   constructor(private readonly getWishlistsByUserUseCase: GetWishlistsByUserUseCase) {}
 
-  @Query(() => GqlWishlist, { nullable: true })
+  @Query(() => GetWishlistByIdResult, { nullable: true })
   getWishlistById(
     @Args('id', { type: () => String }) id: WishlistId,
     @Context() ctx: GraphQLContext,
@@ -21,7 +21,7 @@ export class WishlistResolver {
     return ctx.loaders.wishlist.load(id)
   }
 
-  @Query(() => GqlWishlistPagedResponse)
+  @Query(() => GetMyWishlistsResult)
   async getMyWishlists(
     @Args('filters') filters: PaginationFilters,
     @GqlCurrentUser('id') currentUserId: UserId,

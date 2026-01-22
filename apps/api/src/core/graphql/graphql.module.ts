@@ -6,6 +6,7 @@ import { DataLoaderModule } from '../../dataloader/dataloader.module'
 import { DataLoaderService } from '../../dataloader/dataloader.service'
 import { GraphQLContext } from './graphql.context'
 import { useLoggingPlugin } from './graphql.plugin'
+import { useErrorTransformPlugin } from './graphql-error.plugin'
 
 @Module({
   imports: [
@@ -15,7 +16,7 @@ import { useLoggingPlugin } from './graphql.plugin'
       inject: [DataLoaderService],
       useFactory: (dataLoaderService: DataLoaderService) => ({
         autoSchemaFile: 'schema.graphql',
-        plugins: [useLoggingPlugin()],
+        plugins: [useLoggingPlugin(), useErrorTransformPlugin()],
         graphiql: true,
         context: ({ req }: Omit<GraphQLContext, 'loaders'>): GraphQLContext => ({
           req,

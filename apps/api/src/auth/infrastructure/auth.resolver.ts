@@ -1,9 +1,18 @@
 import { Args, Mutation, Resolver } from '@nestjs/graphql'
+import { ZodPipe } from '@wishlist/api/core'
 import { RealIP } from 'nestjs-real-ip'
 
 import { LoginUseCase } from '../application/commands/login.use-case'
 import { LoginWithGoogleUseCase } from '../application/commands/login-with-google.use-case'
-import { LoginInput, LoginOutput, LoginWithGoogleInput, LoginWithGoogleOutput } from './auth.dto'
+import {
+  LoginInput,
+  LoginOutput,
+  LoginResult,
+  LoginWithGoogleInput,
+  LoginWithGoogleOutput,
+  LoginWithGoogleResult,
+} from './auth.dto'
+import { LoginInputSchema, LoginWithGoogleInputSchema } from './auth.schema'
 import { Public } from './decorators/public.metadata'
 
 @Public()
@@ -14,8 +23,11 @@ export class AuthResolver {
     private readonly loginWithGoogleUseCase: LoginWithGoogleUseCase,
   ) {}
 
-  @Mutation(() => LoginOutput)
-  async login(@Args('input') input: LoginInput, @RealIP() ip: string): Promise<LoginOutput> {
+  @Mutation(() => LoginResult)
+  async login(
+    @Args('input', new ZodPipe(LoginInputSchema)) input: LoginInput,
+    @RealIP() ip: string,
+  ): Promise<LoginOutput> {
     const result = await this.loginUseCase.execute({
       email: input.email,
       password: input.password,
@@ -27,9 +39,9 @@ export class AuthResolver {
     }
   }
 
-  @Mutation(() => LoginWithGoogleOutput)
+  @Mutation(() => LoginWithGoogleResult)
   async loginWithGoogle(
-    @Args('input') input: LoginWithGoogleInput,
+    @Args('input', new ZodPipe(LoginWithGoogleInputSchema)) input: LoginWithGoogleInput,
     @RealIP() ip: string,
   ): Promise<LoginWithGoogleOutput> {
     const result = await this.loginWithGoogleUseCase.execute({

@@ -1,0 +1,13 @@
+enum HealthStatus {
+  ERROR
+  OK
+  SHUTTING_DOWN
+}
+
+type HealthResult {
+  status: HealthStatus!
+}
+
+extend type Query {
+  health: HealthResult!
+}

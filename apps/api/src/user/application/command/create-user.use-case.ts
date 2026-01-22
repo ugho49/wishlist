@@ -13,6 +13,7 @@ export type CreateUserInput = {
     lastname: string
     email: string
     password: string
+    birthday?: Date
   }
   ip: string
 }
@@ -29,11 +30,7 @@ export class CreateUserUseCase {
 
   async execute(input: CreateUserInput): Promise<MiniUserDto> {
     this.logger.log('Create user request received', {
-      payload: {
-        email: input.newUser.email,
-        firstname: input.newUser.firstname,
-        lastname: input.newUser.lastname,
-      },
+      payload: input.newUser,
     })
 
     const { newUser, ip } = input
@@ -47,6 +44,7 @@ export class CreateUserUseCase {
       email: newUser.email,
       firstName: newUser.firstname,
       lastName: newUser.lastname,
+      birthday: newUser.birthday,
       passwordEnc: newUser.password ? await PasswordManager.hash(newUser.password) : undefined,
       ip,
     })

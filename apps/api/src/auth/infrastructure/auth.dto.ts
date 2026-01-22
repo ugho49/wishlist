@@ -1,23 +1,13 @@
 import { Field, InputType, ObjectType } from '@nestjs/graphql'
-import { Transform } from 'class-transformer'
-import { IsEmail, MaxLength } from 'class-validator'
+import { createMutationResult } from '@wishlist/api/core'
 
 @InputType()
 export class LoginInput {
   @Field(() => String)
-  @IsEmail()
-  @MaxLength(200)
-  @Transform(({ value }) => value.toLowerCase())
   declare email: string
 
   @Field(() => String)
   declare password: string
-}
-
-@ObjectType()
-export class LoginOutput {
-  @Field(() => String)
-  declare accessToken: string
 }
 
 @InputType()
@@ -30,6 +20,12 @@ export class LoginWithGoogleInput {
 }
 
 @ObjectType()
+export class LoginOutput {
+  @Field(() => String)
+  declare accessToken: string
+}
+
+@ObjectType()
 export class LoginWithGoogleOutput extends LoginOutput {
   @Field(() => Boolean, { nullable: true })
   declare newUserCreated?: boolean
@@ -37,3 +33,7 @@ export class LoginWithGoogleOutput extends LoginOutput {
   @Field(() => Boolean, { nullable: true })
   declare linkedToExistingUser?: boolean
 }
+
+// Union types for mutations (includes success type + rejection types)
+export const LoginResult = createMutationResult('LoginResult', LoginOutput)
+export const LoginWithGoogleResult = createMutationResult('LoginWithGoogleResult', LoginWithGoogleOutput)

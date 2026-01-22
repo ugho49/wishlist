@@ -12,6 +12,11 @@ enum HealthStatus {
   SHUTTING_DOWN
 }
 
+type FieldValidationError {
+  field: String!
+  message: String!
+}
+
 type Pagination {
   totalPages: Int!
   totalElements: Int!
@@ -29,7 +34,7 @@ type User {
   isEnabled: Boolean!
   createdAt: String!
   updatedAt: String!
-  socials: [UserSocial!]!
+  socials: [UserSocial!]
 }
 
 type UserSocial {
@@ -83,11 +88,6 @@ enum AttendeeRole {
   USER
 }
 
-type EventOutputPagedResponse {
-  resources: [Event!]!
-  pagination: Pagination!
-}
-
 type WishlistConfig {
   hideItems: Boolean!
 }
@@ -109,33 +109,55 @@ type Wishlist {
   events: [Event!]!
 }
 
+type Query {
+  health: HealthOutput!
+  getCurrentUser: GetCurrentUserResult!
+  getWishlistById(id: String!): GetWishlistByIdResult
+  getMyWishlists(filters: PaginationFilters!): GetMyWishlistsResult!
+  getEventById(id: String!): GetEventByIdResult
+  getMyEvents(filters: EventPaginationFilters!): GetMyEventsResult!
+}
+
+union GetCurrentUserResult = User | UnauthorizedRejection | ForbiddenRejection | InternalErrorRejection
+
+type UnauthorizedRejection implements Rejection {
+  message: String!
+}
+
+"""Base interface for all rejection types"""
+interface Rejection {
+  message: String!
+}
+
+type ForbiddenRejection implements Rejection {
+  message: String!
+}
+
+type InternalErrorRejection implements Rejection {
+  message: String!
+}
+
+union GetWishlistByIdResult = Wishlist | UnauthorizedRejection | ForbiddenRejection | InternalErrorRejection
+
+union GetMyWishlistsResult = WishlistPagedResponse | UnauthorizedRejection | ForbiddenRejection | InternalErrorRejection
+
 type WishlistPagedResponse {
   resources: [Wishlist!]!
   pagination: Pagination!
 }
 
-type LoginOutput {
-  accessToken: String!
-}
-
-type LoginWithGoogleOutput {
-  accessToken: String!
-  newUserCreated: Boolean
-  linkedToExistingUser: Boolean
-}
-
-type Query {
-  health: HealthOutput!
-  getCurrentUser: User!
-  getWishlistById(id: String!): Wishlist
-  getMyWishlists(filters: PaginationFilters!): WishlistPagedResponse!
-  getEventById(id: String!): Event
-  getMyEvents(filters: EventPaginationFilters!): EventOutputPagedResponse!
-}
-
 input PaginationFilters {
   page: Int = 1
   limit: Int = 10
+}
+
+union GetEventByIdResult = Event | UnauthorizedRejection | ForbiddenRejection | InternalErrorRejection
+
+union GetMyEventsResult = EventOutputPagedResponse | UnauthorizedRejection | ForbiddenRejection | InternalErrorRejection
+
+type EventOutputPagedResponse {
+  resources: [Event!]!
+  pagination: Pagination!
 }
 
 input EventPaginationFilters {
@@ -145,8 +167,23 @@ input EventPaginationFilters {
 }
 
 type Mutation {
-  login(input: LoginInput!): LoginOutput!
-  loginWithGoogle(input: LoginWithGoogleInput!): LoginWithGoogleOutput!
+  login(input: LoginInput!): LoginResult!
+  loginWithGoogle(input: LoginWithGoogleInput!): LoginWithGoogleResult!
+  registerUser(input: RegisterUserInput!): RegisterUserResult!
+  linkCurrentUserlWithGoogle(input: LinkUserToGoogleInput!): LinkUserToGoogleResult!
+  unlinkCurrentUserSocial(socialId: String!): VoidResult!
+  updateUserProfile(input: UpdateUserInput!): UpdateUserResult!
+}
+
+union LoginResult = LoginOutput | ValidationRejection | UnauthorizedRejection | ForbiddenRejection | InternalErrorRejection
+
+type LoginOutput {
+  accessToken: String!
+}
+
+type ValidationRejection implements Rejection {
+  message: String!
+  errors: [FieldValidationError!]!
 }
 
 input LoginInput {
@@ -154,7 +191,45 @@ input LoginInput {
   password: String!
 }
 
+union LoginWithGoogleResult = LoginWithGoogleOutput | ValidationRejection | UnauthorizedRejection | ForbiddenRejection | InternalErrorRejection
+
+type LoginWithGoogleOutput {
+  accessToken: String!
+  newUserCreated: Boolean
+  linkedToExistingUser: Boolean
+}
+
 input LoginWithGoogleInput {
   code: String!
   createUserIfNotExists: Boolean!
+}
+
+union RegisterUserResult = User | ValidationRejection | UnauthorizedRejection | ForbiddenRejection | InternalErrorRejection
+
+input RegisterUserInput {
+  firstname: String!
+  lastname: String!
+  email: String!
+  password: String!
+  birthday: String
+}
+
+union LinkUserToGoogleResult = UserSocial | ValidationRejection | UnauthorizedRejection | ForbiddenRejection | InternalErrorRejection
+
+input LinkUserToGoogleInput {
+  code: String!
+}
+
+union VoidResult = VoidOutput | ValidationRejection | UnauthorizedRejection | ForbiddenRejection | InternalErrorRejection
+
+type VoidOutput {
+  success: Boolean!
+}
+
+union UpdateUserResult = User | ValidationRejection | UnauthorizedRejection | ForbiddenRejection | InternalErrorRejection
+
+input UpdateUserInput {
+  firstname: String!
+  lastname: String!
+  birthday: String
 }

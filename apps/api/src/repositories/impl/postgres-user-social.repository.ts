@@ -42,6 +42,15 @@ export class PostgresUserSocialRepository implements UserSocialRepository {
     return userSocials.map(userSocial => PostgresUserSocialRepository.toModel(userSocial))
   }
 
+  async findByIds(userSocialIds: UserSocialId[]): Promise<UserSocial[]> {
+    const userSocials = await this.databaseService.db.query.userSocial.findMany({
+      where: inArray(schema.userSocial.id, userSocialIds),
+      with: { user: true },
+    })
+
+    return userSocials.map(userSocial => PostgresUserSocialRepository.toModel(userSocial))
+  }
+
   async save(userSocial: UserSocial, tx?: DrizzleTransaction): Promise<void> {
     const client = tx ?? this.databaseService.db
 

@@ -1,7 +1,7 @@
 import type { EventId, UserId, WishlistId } from '@wishlist/common'
 
 import { Field, ObjectType } from '@nestjs/graphql'
-import { PagedResponse } from '@wishlist/api/core'
+import { createQueryResult, PagedResponse } from '@wishlist/api/core'
 
 import { GqlItem } from '../../item/infrastructure/item.dto'
 
@@ -49,3 +49,7 @@ export class GqlWishlist {
 
 @ObjectType('WishlistPagedResponse')
 export class GqlWishlistPagedResponse extends PagedResponse(GqlWishlist) {}
+
+// Union types for queries (includes success type + auth rejection types)
+export const GetWishlistByIdResult = createQueryResult('GetWishlistByIdResult', GqlWishlist)
+export const GetMyWishlistsResult = createQueryResult('GetMyWishlistsResult', GqlWishlistPagedResponse)

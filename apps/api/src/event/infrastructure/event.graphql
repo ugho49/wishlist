@@ -1,0 +1,46 @@
+enum AttendeeRole {
+  MAINTAINER
+  USER
+}
+
+type EventAttendee {
+  id: String!
+  userId: String
+  pendingEmail: String
+  role: AttendeeRole!
+  user: User
+}
+
+type Event {
+  id: String!
+  title: String!
+  description: String
+  icon: String
+  eventDate: String!
+  wishlistIds: [String!]!
+  attendeeIds: [String!]!
+  createdAt: String!
+  updatedAt: String!
+  wishlists: [Wishlist!]!
+  attendees: [EventAttendee!]!
+}
+
+type GetEventsPagedResponse {
+  data: [Event!]!
+  pagination: Pagination!
+}
+
+input EventPaginationFilters {
+  page: Int = 1
+  limit: Int = 10
+  onlyFuture: Boolean
+}
+
+union GetEventByIdResult = Event | UnauthorizedRejection | ForbiddenRejection | InternalErrorRejection
+
+union GetMyEventsResult = GetEventsPagedResponse | UnauthorizedRejection | ForbiddenRejection | InternalErrorRejection
+
+extend type Query {
+  getEventById(id: String!): GetEventByIdResult
+  getMyEvents(filters: EventPaginationFilters!): GetMyEventsResult!
+}

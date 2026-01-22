@@ -1,0 +1,13 @@
+type Item {
+  id: String!
+  name: String!
+  description: String
+  url: String
+  score: Int
+  isSuggested: Boolean
+  pictureUrl: String
+  takenById: String
+  takenAt: String
+  createdAt: String!
+  takerUser: User
+}

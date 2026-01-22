@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common'
-import { UserId } from '@wishlist/common'
+import { UserId, UserSocialId } from '@wishlist/common'
 import DataLoader from 'dataloader'
 
+import { GetUserSocialsByIdsUseCase } from '../application/query/get-user-socials-by-ids.use-case'
 import { GetUserSocialsByUserIdsUseCase } from '../application/query/get-user-socials-by-user-ids.use-case'
 import { GetUsersByIdsUseCase } from '../application/query/get-users-by-ids.use-case'
 import { GqlUser, GqlUserSocial } from './user.dto'
@@ -12,6 +13,7 @@ export class UserDataLoaderFactory {
   constructor(
     private readonly getUsersByIdsUseCase: GetUsersByIdsUseCase,
     private readonly getUserSocialsByUserIdsUseCase: GetUserSocialsByUserIdsUseCase,
+    private readonly getUserSocialsByIdsUseCase: GetUserSocialsByIdsUseCase,
   ) {}
 
   createUserLoader() {
@@ -22,10 +24,20 @@ export class UserDataLoaderFactory {
     })
   }
 
-  createUserSocialLoader() {
+  createUserSocialsByUserLoader() {
     return new DataLoader<UserId, GqlUserSocial[]>(async (userIds: readonly UserId[]) => {
       const userSocialMap = await this.getUserSocialsByUserIdsUseCase.execute({ userIds: [...userIds] })
       return userIds.map(id => (userSocialMap.get(id) ?? []).map(userSocial => userMapper.toGqlUserSocial(userSocial)))
+    })
+  }
+
+  createUserSocialLoader() {
+    return new DataLoader<UserSocialId, GqlUserSocial | null>(async (userSocialIds: readonly UserSocialId[]) => {
+      const userSocials = await this.getUserSocialsByIdsUseCase.execute({ userSocialIds: [...userSocialIds] })
+      const userSocialMap = new Map(
+        userSocials.map(userSocial => [userSocial.id, userMapper.toGqlUserSocial(userSocial)]),
+      )
+      return userSocialIds.map(id => userSocialMap.get(id) ?? null)
     })
   }
 }

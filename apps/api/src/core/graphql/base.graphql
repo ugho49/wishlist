@@ -1,0 +1,46 @@
+########################################################
+###############        Types        ###################
+########################################################
+type Query
+type Mutation
+
+type FieldError {
+  field: String!
+  message: String!
+}
+
+type ValidationRejection {
+  message: String!
+  errors: [FieldError!]!
+}
+
+type UnauthorizedRejection {
+  message: String!
+}
+
+type ForbiddenRejection {
+  message: String!
+}
+
+type InternalErrorRejection {
+  message: String!
+}
+
+type Pagination {
+  totalPages: Int!
+  totalElements: Int!
+  pageNumber: Int!
+  pageSize: Int!
+}
+
+type VoidOutput {
+  success: Boolean!
+}
+
+########################################################
+###############        Inputs        ###################
+########################################################
+input PaginationFilters {
+  page: Int = 1
+  limit: Int = 10
+}
