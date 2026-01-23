@@ -31,6 +31,13 @@ export enum AttendeeRole {
   User = 'USER'
 }
 
+export type ChangeUserPasswordInput = {
+  newPassword: Scalars['String']['input'];
+  oldPassword: Scalars['String']['input'];
+};
+
+export type ChangeUserPasswordResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+
 export type Event = {
   __typename: 'Event';
   attendeeIds: Array<Scalars['AttendeeId']['output']>;
@@ -157,12 +164,20 @@ export type LoginWithGoogleResult = InternalErrorRejection | LoginWithGoogleOutp
 
 export type Mutation = {
   __typename: 'Mutation';
+  changeUserPassword: ChangeUserPasswordResult;
   linkCurrentUserlWithGoogle: LinkUserToGoogleResult;
   login: LoginResult;
   loginWithGoogle: LoginWithGoogleResult;
   registerUser: RegisterUserResult;
+  removeUserPicture: RemoveUserPictureResult;
   unlinkCurrentUserSocial: UnlinkCurrentUserSocialResult;
+  updateUserPictureFromSocial: UpdateUserPictureFromSocialResult;
   updateUserProfile: UpdateUserProfileResult;
+};
+
+
+export type MutationChangeUserPasswordArgs = {
+  input: ChangeUserPasswordInput;
 };
 
 
@@ -188,6 +203,11 @@ export type MutationRegisterUserArgs = {
 
 export type MutationUnlinkCurrentUserSocialArgs = {
   socialId: Scalars['UserSocialId']['input'];
+};
+
+
+export type MutationUpdateUserPictureFromSocialArgs = {
+  input: UpdateUserPictureFromSocialInput;
 };
 
 
@@ -253,12 +273,20 @@ export type RegisterUserInput = {
 
 export type RegisterUserResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | User | ValidationRejection;
 
+export type RemoveUserPictureResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+
 export type UnauthorizedRejection = {
   __typename: 'UnauthorizedRejection';
   message: Scalars['String']['output'];
 };
 
 export type UnlinkCurrentUserSocialResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+
+export type UpdateUserPictureFromSocialInput = {
+  socialId: Scalars['UserSocialId']['input'];
+};
+
+export type UpdateUserPictureFromSocialResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
 export type UpdateUserProfileInput = {
   birthday?: InputMaybe<Scalars['String']['input']>;
