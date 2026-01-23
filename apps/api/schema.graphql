@@ -2,7 +2,81 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type HealthOutput {
+
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+directive @resolved on FIELD_DEFINITION
+
+scalar AttendeeId
+
+enum AttendeeRole {
+  MAINTAINER
+  USER
+}
+
+type Event {
+  attendeeIds: [AttendeeId!]!
+  attendees: [EventAttendee!]! @resolved
+  createdAt: String!
+  description: String
+  eventDate: String!
+  icon: String
+  id: EventId!
+  title: String!
+  updatedAt: String!
+  wishlistIds: [WishlistId!]!
+  wishlists: [Wishlist!]! @resolved
+}
+
+type EventAttendee {
+  id: AttendeeId!
+  pendingEmail: String
+  role: AttendeeRole!
+  user: User
+  userId: UserId
+}
+
+scalar EventId
+
+input EventPaginationFilters {
+  limit: Int = 10
+  onlyFuture: Boolean
+  page: Int = 1
+}
+
+type FieldError {
+  field: String!
+  message: String!
+}
+
+type ForbiddenRejection {
+  message: String!
+}
+
+union GetCurrentUserResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | User
+
+union GetEventByIdResult = Event | ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection
+
+type GetEventsPagedResponse {
+  data: [Event!]!
+  pagination: Pagination!
+}
+
+union GetMyEventsResult = ForbiddenRejection | GetEventsPagedResponse | InternalErrorRejection | UnauthorizedRejection
+
+union GetMyWishlistsResult = ForbiddenRejection | GetWishlistsPagedResponse | InternalErrorRejection | UnauthorizedRejection
+
+union GetWishlistByIdResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | Wishlist
+
+type GetWishlistsPagedResponse {
+  data: [Wishlist!]!
+  pagination: Pagination!
+}
+
+type HealthResult {
   status: HealthStatus!
 }
 
@@ -12,149 +86,168 @@ enum HealthStatus {
   SHUTTING_DOWN
 }
 
-type Pagination {
-  totalPages: Int!
-  totalElements: Int!
-  pageNumber: Int!
-  pageSize: Int!
-}
-
-type User {
-  id: String!
-  firstName: String!
-  lastName: String!
-  email: String!
-  pictureUrl: String
-  birthday: String
-  isEnabled: Boolean!
-  createdAt: String!
-  updatedAt: String!
-  socials: [UserSocial!]!
-}
-
-type UserSocial {
-  id: String!
-  email: String!
-  name: String
-  socialType: String!
-  pictureUrl: String
-  createdAt: String!
-  updatedAt: String!
+type InternalErrorRejection {
+  message: String!
 }
 
 type Item {
-  id: String!
-  name: String!
+  createdAt: String!
   description: String
-  url: String
-  score: Float
+  id: ItemId!
   isSuggested: Boolean
+  name: String!
   pictureUrl: String
-  takenById: String
+  score: Int
   takenAt: String
-  createdAt: String!
+  takenById: UserId
   takerUser: User
+  url: String
 }
 
-type Event {
-  id: String!
-  title: String!
-  description: String
-  icon: String
-  eventDate: String!
-  wishlistIds: [String!]!
-  attendeeIds: [String!]!
-  createdAt: String!
-  updatedAt: String!
-  wishlists: [Wishlist!]!
-  attendees: [EventAttendee!]!
+scalar ItemId
+
+input LinkUserToGoogleInput {
+  code: String!
 }
 
-type EventAttendee {
-  id: String!
-  userId: String
-  pendingEmail: String
-  role: AttendeeRole!
-  user: User
-}
-
-enum AttendeeRole {
-  MAINTAINER
-  USER
-}
-
-type EventOutputPagedResponse {
-  resources: [Event!]!
-  pagination: Pagination!
-}
-
-type WishlistConfig {
-  hideItems: Boolean!
-}
-
-type Wishlist {
-  id: String!
-  title: String!
-  description: String
-  logoUrl: String
-  ownerId: String!
-  coOwnerId: String
-  eventIds: [String!]!
-  items: [Item!]!
-  config: WishlistConfig!
-  createdAt: String!
-  updatedAt: String!
-  owner: User!
-  coOwner: User
-  events: [Event!]!
-}
-
-type WishlistPagedResponse {
-  resources: [Wishlist!]!
-  pagination: Pagination!
-}
-
-type LoginOutput {
-  accessToken: String!
-}
-
-type LoginWithGoogleOutput {
-  accessToken: String!
-  newUserCreated: Boolean
-  linkedToExistingUser: Boolean
-}
-
-type Query {
-  health: HealthOutput!
-  getCurrentUser: User!
-  getWishlistById(id: String!): Wishlist
-  getMyWishlists(filters: PaginationFilters!): WishlistPagedResponse!
-  getEventById(id: String!): Event
-  getMyEvents(filters: EventPaginationFilters!): EventOutputPagedResponse!
-}
-
-input PaginationFilters {
-  page: Int = 1
-  limit: Int = 10
-}
-
-input EventPaginationFilters {
-  page: Int = 1
-  limit: Int = 10
-  onlyFuture: Boolean
-}
-
-type Mutation {
-  login(input: LoginInput!): LoginOutput!
-  loginWithGoogle(input: LoginWithGoogleInput!): LoginWithGoogleOutput!
-}
+union LinkUserToGoogleResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | UserSocial | ValidationRejection
 
 input LoginInput {
   email: String!
   password: String!
 }
 
+type LoginOutput {
+  accessToken: String!
+}
+
+union LoginResult = InternalErrorRejection | LoginOutput | UnauthorizedRejection | ValidationRejection
+
 input LoginWithGoogleInput {
   code: String!
   createUserIfNotExists: Boolean!
 }
+
+type LoginWithGoogleOutput {
+  accessToken: String!
+  linkedToExistingUser: Boolean
+  newUserCreated: Boolean
+}
+
+union LoginWithGoogleResult = InternalErrorRejection | LoginWithGoogleOutput | UnauthorizedRejection | ValidationRejection
+
+type Mutation {
+  linkCurrentUserlWithGoogle(input: LinkUserToGoogleInput!): LinkUserToGoogleResult!
+  login(input: LoginInput!): LoginResult!
+  loginWithGoogle(input: LoginWithGoogleInput!): LoginWithGoogleResult!
+  registerUser(input: RegisterUserInput!): RegisterUserResult!
+  unlinkCurrentUserSocial(socialId: UserSocialId!): UnlinkCurrentUserSocialResult!
+  updateUserProfile(input: UpdateUserProfileInput!): UpdateUserProfileResult!
+}
+
+type NotFoundRejection {
+  message: String!
+}
+
+type Pagination {
+  pageNumber: Int!
+  pageSize: Int!
+  totalElements: Int!
+  totalPages: Int!
+}
+
+input PaginationFilters {
+  limit: Int
+  page: Int
+}
+
+type Query {
+  getCurrentUser: GetCurrentUserResult!
+  getEventById(id: EventId!): GetEventByIdResult
+  getMyEvents(filters: EventPaginationFilters!): GetMyEventsResult!
+  getMyWishlists(filters: PaginationFilters!): GetMyWishlistsResult!
+  getWishlistById(id: WishlistId!): GetWishlistByIdResult
+  health: HealthResult!
+}
+
+input RegisterUserInput {
+  birthday: String
+  email: String!
+  firstname: String!
+  lastname: String!
+  password: String!
+}
+
+union RegisterUserResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | User | ValidationRejection
+
+type UnauthorizedRejection {
+  message: String!
+}
+
+union UnlinkCurrentUserSocialResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
+input UpdateUserProfileInput {
+  birthday: String
+  firstname: String!
+  lastname: String!
+}
+
+union UpdateUserProfileResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | User | ValidationRejection
+
+type User {
+  birthday: String
+  createdAt: String!
+  email: String!
+  firstName: String!
+  id: UserId!
+  isEnabled: Boolean!
+  lastName: String!
+  pictureUrl: String
+  socials: [UserSocial!]
+  updatedAt: String!
+}
+
+scalar UserId
+
+type UserSocial {
+  createdAt: String!
+  email: String!
+  id: UserSocialId!
+  name: String
+  pictureUrl: String
+  socialType: String!
+  updatedAt: String!
+}
+
+scalar UserSocialId
+
+type ValidationRejection {
+  errors: [FieldError!]!
+}
+
+type VoidOutput {
+  success: Boolean!
+}
+
+type Wishlist {
+  coOwner: User @resolved
+  coOwnerId: UserId
+  config: WishlistConfig!
+  createdAt: String!
+  description: String
+  eventIds: [EventId!]!
+  events: [Event!]! @resolved
+  id: WishlistId!
+  items: [Item!]!
+  logoUrl: String
+  owner: User! @resolved
+  ownerId: UserId!
+  title: String!
+  updatedAt: String!
+}
+
+type WishlistConfig {
+  hideItems: Boolean!
+}
+
+scalar WishlistId

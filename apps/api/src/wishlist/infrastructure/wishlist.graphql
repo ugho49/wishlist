@@ -1,0 +1,45 @@
+scalar WishlistId
+
+type WishlistConfig {
+  hideItems: Boolean!
+}
+
+type Wishlist {
+  id: WishlistId!
+  title: String!
+  description: String
+  logoUrl: String
+  ownerId: UserId!
+  owner: User! @resolved
+  coOwnerId: UserId
+  coOwner: User @resolved
+  eventIds: [EventId!]!
+  events: [Event!]! @resolved
+  items: [Item!]!
+  config: WishlistConfig!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type GetWishlistsPagedResponse {
+  data: [Wishlist!]!
+  pagination: Pagination!
+}
+
+union GetWishlistByIdResult =
+  | Wishlist
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+  | NotFoundRejection
+
+union GetMyWishlistsResult =
+  | GetWishlistsPagedResponse
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+
+extend type Query {
+  getWishlistById(id: WishlistId!): GetWishlistByIdResult
+  getMyWishlists(filters: PaginationFilters!): GetMyWishlistsResult!
+}

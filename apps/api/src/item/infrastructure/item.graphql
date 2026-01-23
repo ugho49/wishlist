@@ -1,0 +1,15 @@
+scalar ItemId
+
+type Item {
+  id: ItemId!
+  name: String!
+  description: String
+  url: String
+  score: Int
+  isSuggested: Boolean
+  pictureUrl: String
+  takenById: UserId
+  takerUser: User
+  takenAt: String
+  createdAt: String!
+}

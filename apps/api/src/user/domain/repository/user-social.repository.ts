@@ -4,6 +4,7 @@ import type { UserSocial } from '../model/user-social.model'
 
 export interface UserSocialRepository {
   newId(): UserSocialId
+  findByIds(userSocialIds: UserSocialId[]): Promise<UserSocial[]>
   findByUserId(userId: UserId): Promise<UserSocial[]>
   findByUserIds(userIds: UserId[]): Promise<UserSocial[]>
   findBySocialId(socialId: string, socialType: UserSocialType): Promise<UserSocial | undefined>

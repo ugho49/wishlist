@@ -1,0 +1,51 @@
+directive @resolved on FIELD_DEFINITION
+
+########################################################
+###############        Types        ###################
+########################################################
+type Query
+type Mutation
+
+type FieldError {
+  field: String!
+  message: String!
+}
+
+type ValidationRejection {
+  errors: [FieldError!]!
+}
+
+type UnauthorizedRejection {
+  message: String!
+}
+
+type ForbiddenRejection {
+  message: String!
+}
+
+type NotFoundRejection {
+  message: String!
+}
+
+type InternalErrorRejection {
+  message: String!
+}
+
+type Pagination {
+  totalPages: Int!
+  totalElements: Int!
+  pageNumber: Int!
+  pageSize: Int!
+}
+
+type VoidOutput {
+  success: Boolean!
+}
+
+########################################################
+###############        Inputs        ###################
+########################################################
+input PaginationFilters {
+  page: Int
+  limit: Int
+}

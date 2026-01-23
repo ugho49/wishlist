@@ -1,0 +1,54 @@
+scalar EventId
+scalar AttendeeId
+
+enum AttendeeRole {
+  MAINTAINER
+  USER
+}
+
+type EventAttendee {
+  id: AttendeeId!
+  userId: UserId
+  user: User
+  pendingEmail: String
+  role: AttendeeRole!
+}
+
+type Event {
+  id: EventId!
+  title: String!
+  description: String
+  icon: String
+  eventDate: String!
+  wishlistIds: [WishlistId!]!
+  wishlists: [Wishlist!]! @resolved
+  attendeeIds: [AttendeeId!]!
+  attendees: [EventAttendee!]! @resolved
+  createdAt: String!
+  updatedAt: String!
+}
+
+type GetEventsPagedResponse {
+  data: [Event!]!
+  pagination: Pagination!
+}
+
+input EventPaginationFilters {
+  page: Int = 1
+  limit: Int = 10
+  onlyFuture: Boolean
+}
+
+union GetEventByIdResult =
+  | Event
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+  | NotFoundRejection
+
+union GetMyEventsResult = GetEventsPagedResponse | UnauthorizedRejection | ForbiddenRejection | InternalErrorRejection
+
+extend type Query {
+  getEventById(id: EventId!): GetEventByIdResult
+  getMyEvents(filters: EventPaginationFilters!): GetMyEventsResult!
+}

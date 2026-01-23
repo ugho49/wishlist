@@ -4,8 +4,10 @@ import { GraphQLModule as NestGraphQLModule } from '@nestjs/graphql'
 
 import { DataLoaderModule } from '../../dataloader/dataloader.module'
 import { DataLoaderService } from '../../dataloader/dataloader.service'
+import { path } from '../../helpers'
 import { GraphQLContext } from './graphql.context'
 import { useLoggingPlugin } from './graphql.plugin'
+import { useErrorTransformPlugin } from './graphql-error.plugin'
 
 @Module({
   imports: [
@@ -14,8 +16,8 @@ import { useLoggingPlugin } from './graphql.plugin'
       imports: [DataLoaderModule],
       inject: [DataLoaderService],
       useFactory: (dataLoaderService: DataLoaderService) => ({
-        autoSchemaFile: 'schema.graphql',
-        plugins: [useLoggingPlugin()],
+        typePaths: [path('**/*.graphql')],
+        plugins: [useLoggingPlugin(), useErrorTransformPlugin()],
         graphiql: true,
         context: ({ req }: Omit<GraphQLContext, 'loaders'>): GraphQLContext => ({
           req,

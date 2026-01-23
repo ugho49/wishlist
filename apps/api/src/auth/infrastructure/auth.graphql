@@ -1,0 +1,32 @@
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+input LoginWithGoogleInput {
+  code: String!
+  createUserIfNotExists: Boolean!
+}
+
+type LoginOutput {
+  accessToken: String!
+}
+
+type LoginWithGoogleOutput {
+  accessToken: String!
+  newUserCreated: Boolean
+  linkedToExistingUser: Boolean
+}
+
+union LoginWithGoogleResult =
+  | LoginWithGoogleOutput
+  | ValidationRejection
+  | UnauthorizedRejection
+  | InternalErrorRejection
+
+union LoginResult = LoginOutput | ValidationRejection | UnauthorizedRejection | InternalErrorRejection
+
+extend type Mutation {
+  login(input: LoginInput!): LoginResult!
+  loginWithGoogle(input: LoginWithGoogleInput!): LoginWithGoogleResult!
+}

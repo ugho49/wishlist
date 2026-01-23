@@ -1,0 +1,84 @@
+scalar UserSocialId
+scalar UserId
+
+type UserSocial {
+  id: UserSocialId!
+  email: String!
+  name: String
+  socialType: String!
+  pictureUrl: String
+  createdAt: String!
+  updatedAt: String!
+}
+
+type User {
+  id: UserId!
+  firstName: String!
+  lastName: String!
+  email: String!
+  pictureUrl: String
+  birthday: String
+  isEnabled: Boolean!
+  createdAt: String!
+  updatedAt: String!
+  socials: [UserSocial!]
+}
+
+union GetCurrentUserResult = User | UnauthorizedRejection | ForbiddenRejection | InternalErrorRejection
+
+extend type Query {
+  getCurrentUser: GetCurrentUserResult!
+}
+
+input RegisterUserInput {
+  firstname: String!
+  lastname: String!
+  email: String!
+  password: String!
+  birthday: String
+}
+
+input LinkUserToGoogleInput {
+  code: String!
+}
+
+input UpdateUserProfileInput {
+  firstname: String!
+  lastname: String!
+  birthday: String
+}
+
+union RegisterUserResult =
+  | User
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+
+union LinkUserToGoogleResult =
+  | UserSocial
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+
+union UpdateUserProfileResult =
+  | User
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+
+union UnlinkCurrentUserSocialResult =
+  | VoidOutput
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+
+extend type Mutation {
+  registerUser(input: RegisterUserInput!): RegisterUserResult!
+  linkCurrentUserlWithGoogle(input: LinkUserToGoogleInput!): LinkUserToGoogleResult!
+  unlinkCurrentUserSocial(socialId: UserSocialId!): UnlinkCurrentUserSocialResult!
+  updateUserProfile(input: UpdateUserProfileInput!): UpdateUserProfileResult!
+}

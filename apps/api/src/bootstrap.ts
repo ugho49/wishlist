@@ -29,7 +29,6 @@ export async function createApp(): Promise<INestApplication> {
   app.useLogger(app.get(Logger))
 
   app.useGlobalPipes(new ValidationPipe({ transform: true, stopAtFirstError: true }))
-  // Order of filters is important
   app.useGlobalFilters(new GlobalExceptionFilter())
   app.enableCors()
   app.enableShutdownHooks()

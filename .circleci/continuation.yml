@@ -25,6 +25,26 @@ references:
     method: blobless
 
 jobs:
+  check-codegen:
+    <<: *setup_env_node
+    steps:
+      - checkout: *checkout
+      - attach_workspace: *attach_workspace
+      - restore_cache: *restore_node_cache
+      - run:
+          name: Run codegen
+          command: yarn nx run api:codegen
+      - run:
+          name: Check schema.graphql is up to date
+          command: |
+            if git diff --exit-code apps/api/schema.graphql; then
+              echo "schema.graphql is up to date"
+            else
+              echo "Error: schema.graphql is not up to date some graphql files have been modified without running codegen."
+              echo "Please run 'yarn nx run api:codegen' locally and commit the changes."
+              exit 1
+            fi
+
   compute-version:
     <<: *setup_env_node
     parameters:
@@ -177,6 +197,9 @@ workflows:
   build-and-release-api:
     when: << pipeline.parameters.workflow-api >>
     jobs:
+      - check-codegen:
+          name: check-codegen
+
       - compute-version:
           name: compute-version
           output-file: .release/api-version.txt
@@ -192,6 +215,7 @@ workflows:
           deploy: false
           requires:
             - compute-version
+            - check-codegen
           filters:
             branches:
               ignore:
