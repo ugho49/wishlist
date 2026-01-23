@@ -1,7 +1,8 @@
 import { Query, Resolver } from '@nestjs/graphql'
+import { match } from 'ts-pattern'
 
 import { Public } from '../../auth/infrastructure/decorators/public.metadata'
-import { HealthOutput, HealthStatus } from './health.dto'
+import { HealthResult, HealthStatus } from '../../gql/generated-types'
 import { HealthService } from './health.service'
 
 @Resolver()
@@ -9,12 +10,15 @@ export class HealthResolver {
   constructor(private readonly healthService: HealthService) {}
 
   @Public()
-  @Query(() => HealthOutput)
-  async health(): Promise<HealthOutput> {
+  @Query()
+  async health(): Promise<HealthResult> {
     const health = await this.healthService.check()
+    const status = match(health.status)
+      .with('error', () => HealthStatus.Error)
+      .with('ok', () => HealthStatus.Ok)
+      .with('shutting_down', () => HealthStatus.ShuttingDown)
+      .exhaustive()
 
-    return {
-      status: health.status as HealthStatus,
-    }
+    return { __typename: 'HealthResult', status }
   }
 }

@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common'
 import { ICurrentUser, WishlistId } from '@wishlist/common'
 import DataLoader from 'dataloader'
 
+import { Wishlist } from '../../gql/generated-types'
 import { GetWishlistsByIdsUseCase } from '../application/query/get-wishlists-by-ids.use-case'
-import { GqlWishlist } from './wishlist.dto'
 import { wishlistMapper } from './wishlist.mapper'
 
 @Injectable()
@@ -11,7 +11,7 @@ export class WishlistDataLoaderFactory {
   constructor(private readonly getWishlistsByIdsUseCase: GetWishlistsByIdsUseCase) {}
 
   createLoader(getCurrentUser: () => ICurrentUser | undefined) {
-    return new DataLoader<WishlistId, GqlWishlist | null>(async (wishlistIds: readonly WishlistId[]) => {
+    return new DataLoader<WishlistId, Wishlist | null>(async (wishlistIds: readonly WishlistId[]) => {
       const currentUser = getCurrentUser()
 
       // If no user, return null for all wishlists (DataLoader requires same length array)

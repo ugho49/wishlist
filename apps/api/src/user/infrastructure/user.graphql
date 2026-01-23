@@ -1,5 +1,8 @@
+scalar UserSocialId
+scalar UserId
+
 type UserSocial {
-  id: String!
+  id: UserSocialId!
   email: String!
   name: String
   socialType: String!
@@ -9,7 +12,7 @@ type UserSocial {
 }
 
 type User {
-  id: String!
+  id: UserId!
   firstName: String!
   lastName: String!
   email: String!
@@ -76,6 +79,6 @@ union UnlinkCurrentUserSocialResult =
 extend type Mutation {
   registerUser(input: RegisterUserInput!): RegisterUserResult!
   linkCurrentUserlWithGoogle(input: LinkUserToGoogleInput!): LinkUserToGoogleResult!
-  unlinkCurrentUserSocial(socialId: String!): UnlinkCurrentUserSocialResult!
+  unlinkCurrentUserSocial(socialId: UserSocialId!): UnlinkCurrentUserSocialResult!
   updateUserProfile(input: UpdateUserProfileInput!): UpdateUserProfileResult!
 }

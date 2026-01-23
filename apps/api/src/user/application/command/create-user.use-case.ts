@@ -30,7 +30,13 @@ export class CreateUserUseCase {
 
   async execute(input: CreateUserInput): Promise<MiniUserDto> {
     this.logger.log('Create user request received', {
-      payload: input.newUser,
+      payload: {
+        newUser: {
+          ...input.newUser,
+          password: '********',
+        },
+        ip: input.ip,
+      },
     })
 
     const { newUser, ip } = input

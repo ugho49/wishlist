@@ -11,3 +11,17 @@ export type UserSocialId = Brand<string, 'UserSocialId'>
 export type UserEmailSettingId = Brand<string, 'UserEmailSettingId'>
 export type ItemId = Brand<string, 'ItemId'>
 export type WishlistId = Brand<string, 'WishlistId'>
+
+export type Ids = {
+  EventId: EventId
+  AttendeeId: AttendeeId
+  SecretSantaUserId: SecretSantaUserId
+  SecretSantaId: SecretSantaId
+  UserPasswordVerificationId: UserPasswordVerificationId
+  UserEmailChangeVerificationId: UserEmailChangeVerificationId
+  UserId: UserId
+  UserSocialId: UserSocialId
+  UserEmailSettingId: UserEmailSettingId
+  ItemId: ItemId
+  WishlistId: WishlistId
+}

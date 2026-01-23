@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common'
 import { EventId, ICurrentUser } from '@wishlist/common'
 import DataLoader from 'dataloader'
 
+import { Event } from '../../gql/generated-types'
 import { GetEventsByIdsUseCase } from '../application/query/get-events-by-ids.use-case'
-import { GqlEvent } from './event.dto'
 import { eventMapper } from './event.mapper'
 
 @Injectable()
@@ -11,7 +11,7 @@ export class EventDataLoaderFactory {
   constructor(private readonly getEventsByIdsUseCase: GetEventsByIdsUseCase) {}
 
   createLoader(getCurrentUser: () => ICurrentUser | undefined) {
-    return new DataLoader<EventId, GqlEvent | null>(async (eventIds: readonly EventId[]) => {
+    return new DataLoader<EventId, Event | null>(async (eventIds: readonly EventId[]) => {
       const currentUser = getCurrentUser()
 
       // If no user, return null for all events (DataLoader requires same length array)

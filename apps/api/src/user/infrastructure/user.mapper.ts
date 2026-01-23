@@ -3,7 +3,7 @@ import type { User, UserSocial } from '../domain'
 
 import { DateTime } from 'luxon'
 
-import { GqlUser, GqlUserSocial, GqlUserWithAdmin } from './user.dto'
+import { User as GqlUser, UserSocial as GqlUserSocial } from '../../gql/generated-types'
 
 function toMiniUserDto(model: User): MiniUserDto {
   return {
@@ -52,6 +52,7 @@ function toUserDto(params: { user: User; socials: UserSocial[] }): UserDto {
 
 function toGqlUser(user: User): GqlUser {
   return {
+    __typename: 'User',
     id: user.id,
     firstName: user.firstName,
     lastName: user.lastName,
@@ -64,6 +65,7 @@ function toGqlUser(user: User): GqlUser {
   }
 }
 
+/*
 function toGqlUserWithAdmin(user: User): GqlUserWithAdmin {
   return {
     ...toGqlUser(user),
@@ -72,9 +74,11 @@ function toGqlUserWithAdmin(user: User): GqlUserWithAdmin {
     lastIp: user.lastIp,
   }
 }
+*/
 
 function toGqlUserSocial(social: UserSocial): GqlUserSocial {
   return {
+    __typename: 'UserSocial',
     id: social.id,
     email: social.email,
     name: social.name,
@@ -91,6 +95,6 @@ export const userMapper = {
   toUserDto,
   toUserSocialDto,
   toGqlUser,
-  toGqlUserWithAdmin,
+  //toGqlUserWithAdmin,
   toGqlUserSocial,
 }

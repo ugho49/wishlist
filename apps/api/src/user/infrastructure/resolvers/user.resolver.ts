@@ -1,27 +1,26 @@
-import { Args, Context, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql'
 import { GqlCurrentUser, Public } from '@wishlist/api/auth'
-import { GqlVoidOutput, GraphQLContext, VoidResult, ZodPipe } from '@wishlist/api/core'
+import { GraphQLContext, ZodPipe } from '@wishlist/api/core'
 import { UserId, UserSocialId } from '@wishlist/common'
 import { RealIP } from 'nestjs-real-ip'
 
-import { CreateUserUseCase } from '../application/command/create-user.use-case'
-import { LinkUserToGoogleUseCase } from '../application/command/link-user-to-google.use-case'
-import { UnlinkUserSocialUseCase } from '../application/command/unlink-user-social.use-case'
-import { UpdateUserUseCase } from '../application/command/update-user.use-case'
 import {
-  GetCurrentUserResult,
-  GqlUser,
-  GqlUserSocial,
   LinkUserToGoogleInput,
   LinkUserToGoogleResult,
   RegisterUserInput,
   RegisterUserResult,
-  UpdateUserInput,
-  UpdateUserResult,
-} from './user.dto'
-import { LinkUserToGoogleInputSchema, RegisterUserInputSchema, UpdateUserInputSchema } from './user.schema'
+  UnlinkCurrentUserSocialResult,
+  UpdateUserProfileInput,
+  UpdateUserProfileResult,
+  User,
+} from '../../../gql/generated-types'
+import { CreateUserUseCase } from '../../application/command/create-user.use-case'
+import { LinkUserToGoogleUseCase } from '../../application/command/link-user-to-google.use-case'
+import { UnlinkUserSocialUseCase } from '../../application/command/unlink-user-social.use-case'
+import { UpdateUserUseCase } from '../../application/command/update-user.use-case'
+import { LinkUserToGoogleInputSchema, RegisterUserInputSchema, UpdateUserProfileInputSchema } from '../user.schema'
 
-@Resolver(() => GqlUser)
+@Resolver()
 export class UserResolver {
   constructor(
     private readonly createUserUseCase: CreateUserUseCase,
@@ -30,8 +29,8 @@ export class UserResolver {
     private readonly updateUserUseCase: UpdateUserUseCase,
   ) {}
 
-  @Query(() => GetCurrentUserResult)
-  async getCurrentUser(@GqlCurrentUser('id') currentUserId: UserId, @Context() ctx: GraphQLContext): Promise<GqlUser> {
+  @Query()
+  async getCurrentUser(@GqlCurrentUser('id') currentUserId: UserId, @Context() ctx: GraphQLContext): Promise<User> {
     const user = await ctx.loaders.user.load(currentUserId)
     if (!user) {
       throw new Error('User not found')
@@ -39,23 +38,13 @@ export class UserResolver {
     return user
   }
 
-  @ResolveField(() => [GqlUserSocial], { nullable: true })
-  socials(
-    @Parent() user: GqlUser,
-    @Context() ctx: GraphQLContext,
-    @GqlCurrentUser('id') currentUserId: UserId,
-  ): Promise<GqlUserSocial[] | null> {
-    if (user.id !== currentUserId) return Promise.resolve(null)
-    return ctx.loaders.userSocialsByUser.load(user.id)
-  }
-
   @Public()
-  @Mutation(() => RegisterUserResult)
+  @Mutation()
   async registerUser(
     @Args('input', new ZodPipe(RegisterUserInputSchema)) input: RegisterUserInput,
     @RealIP() ip: string,
     @Context() ctx: GraphQLContext,
-  ): Promise<GqlUser> {
+  ): Promise<RegisterUserResult> {
     const user = await this.createUserUseCase.execute({
       ip,
       newUser: {
@@ -63,7 +52,7 @@ export class UserResolver {
         password: input.password,
         firstname: input.firstname,
         lastname: input.lastname,
-        birthday: input.birthday,
+        birthday: input.birthday ? new Date(input.birthday) : undefined,
       },
     })
 
@@ -76,12 +65,12 @@ export class UserResolver {
     return loadedUser
   }
 
-  @Mutation(() => LinkUserToGoogleResult)
+  @Mutation()
   async linkCurrentUserlWithGoogle(
     @Args('input', new ZodPipe(LinkUserToGoogleInputSchema)) input: LinkUserToGoogleInput,
     @GqlCurrentUser('id') currentUserId: UserId,
     @Context() ctx: GraphQLContext,
-  ): Promise<GqlUserSocial> {
+  ): Promise<LinkUserToGoogleResult> {
     const userSocial = await this.linkUserToGoogleUseCase.execute({
       code: input.code,
       userId: currentUserId,
@@ -94,27 +83,27 @@ export class UserResolver {
     return loadedUserSocial
   }
 
-  @Mutation(() => VoidResult)
+  @Mutation()
   async unlinkCurrentUserSocial(
     @Args('socialId', { type: () => String }) id: UserSocialId,
     @GqlCurrentUser('id') currentUserId: UserId,
-  ): Promise<GqlVoidOutput> {
+  ): Promise<UnlinkCurrentUserSocialResult> {
     await this.unlinkUserSocialUseCase.execute({ userId: currentUserId, socialId: id })
-    return { success: true }
+    return { __typename: 'VoidOutput', success: true }
   }
 
-  @Mutation(() => UpdateUserResult)
+  @Mutation()
   async updateUserProfile(
-    @Args('input', new ZodPipe(UpdateUserInputSchema)) input: UpdateUserInput,
+    @Args('input', new ZodPipe(UpdateUserProfileInputSchema)) input: UpdateUserProfileInput,
     @GqlCurrentUser('id') currentUserId: UserId,
     @Context() ctx: GraphQLContext,
-  ): Promise<GqlUser> {
+  ): Promise<UpdateUserProfileResult> {
     await this.updateUserUseCase.execute({
       userId: currentUserId,
       updateUser: {
         firstname: input.firstname,
         lastname: input.lastname,
-        birthday: input.birthday,
+        birthday: input.birthday ? new Date(input.birthday) : undefined,
       },
     })
 

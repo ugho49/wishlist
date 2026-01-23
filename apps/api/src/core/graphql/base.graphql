@@ -1,3 +1,5 @@
+directive @resolved on FIELD_DEFINITION
+
 ########################################################
 ###############        Types        ###################
 ########################################################
@@ -10,7 +12,6 @@ type FieldError {
 }
 
 type ValidationRejection {
-  message: String!
   errors: [FieldError!]!
 }
 
@@ -19,6 +20,10 @@ type UnauthorizedRejection {
 }
 
 type ForbiddenRejection {
+  message: String!
+}
+
+type NotFoundRejection {
   message: String!
 }
 
@@ -41,6 +46,6 @@ type VoidOutput {
 ###############        Inputs        ###################
 ########################################################
 input PaginationFilters {
-  page: Int = 1
-  limit: Int = 10
+  page: Int
+  limit: Int
 }

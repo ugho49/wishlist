@@ -1,11 +1,16 @@
 import type { Wishlist } from '@wishlist/api/wishlist'
-import type { DetailedEventDto, EventWithCountsDto, MiniEventDto } from '@wishlist/common'
 import type { Event, EventAttendee } from '../domain'
 
 import { wishlistMapper } from '@wishlist/api/wishlist'
+import { AttendeeRole, type DetailedEventDto, type EventWithCountsDto, type MiniEventDto } from '@wishlist/common'
 import { DateTime } from 'luxon'
+import { match } from 'ts-pattern'
 
-import { GqlEvent, GqlEventAttendee } from './event.dto'
+import {
+  AttendeeRole as GqlAttendeeRole,
+  Event as GqlEvent,
+  EventAttendee as GqlEventAttendee,
+} from '../../gql/generated-types'
 import { eventAttendeeMapper } from './event-attendee.mapper'
 
 function toMiniEventDto(event: Event): MiniEventDto {
@@ -42,6 +47,7 @@ function toEventWithCountsDto(event: Event): EventWithCountsDto {
 
 function toGqlEvent(event: Event): GqlEvent {
   return {
+    __typename: 'Event',
     id: event.id,
     title: event.title,
     description: event.description,
@@ -55,11 +61,17 @@ function toGqlEvent(event: Event): GqlEvent {
 }
 
 function toGqlEventAttendee(eventAttendee: EventAttendee): GqlEventAttendee {
+  const role = match(eventAttendee.role)
+    .with(AttendeeRole.MAINTAINER, () => GqlAttendeeRole.Maintainer)
+    .with(AttendeeRole.USER, () => GqlAttendeeRole.User)
+    .exhaustive()
+
   return {
+    __typename: 'EventAttendee',
     id: eventAttendee.id,
     userId: eventAttendee.user?.id,
     pendingEmail: eventAttendee.pendingEmail,
-    role: eventAttendee.role,
+    role,
   }
 }
 

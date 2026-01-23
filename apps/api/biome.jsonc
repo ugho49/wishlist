@@ -1,5 +1,8 @@
 {
   "extends": "//",
+  "files": {
+    "includes": ["!src/gql/generated-types.ts", "!schema.graphql"]
+  },
   "linter": {
     "rules": {
       "style": {

@@ -2,10 +2,10 @@ import { Injectable } from '@nestjs/common'
 import { UserId, UserSocialId } from '@wishlist/common'
 import DataLoader from 'dataloader'
 
+import { User, UserSocial } from '../../gql/generated-types'
 import { GetUserSocialsByIdsUseCase } from '../application/query/get-user-socials-by-ids.use-case'
 import { GetUserSocialsByUserIdsUseCase } from '../application/query/get-user-socials-by-user-ids.use-case'
 import { GetUsersByIdsUseCase } from '../application/query/get-users-by-ids.use-case'
-import { GqlUser, GqlUserSocial } from './user.dto'
 import { userMapper } from './user.mapper'
 
 @Injectable()
@@ -17,7 +17,7 @@ export class UserDataLoaderFactory {
   ) {}
 
   createUserLoader() {
-    return new DataLoader<UserId, GqlUser | null>(async (userIds: readonly UserId[]) => {
+    return new DataLoader<UserId, User | null>(async (userIds: readonly UserId[]) => {
       const users = await this.getUsersByIdsUseCase.execute({ userIds: [...userIds] })
       const userMap = new Map(users.map(user => [user.id, userMapper.toGqlUser(user)]))
       return userIds.map(id => userMap.get(id) ?? null)
@@ -25,14 +25,14 @@ export class UserDataLoaderFactory {
   }
 
   createUserSocialsByUserLoader() {
-    return new DataLoader<UserId, GqlUserSocial[]>(async (userIds: readonly UserId[]) => {
+    return new DataLoader<UserId, UserSocial[]>(async (userIds: readonly UserId[]) => {
       const userSocialMap = await this.getUserSocialsByUserIdsUseCase.execute({ userIds: [...userIds] })
       return userIds.map(id => (userSocialMap.get(id) ?? []).map(userSocial => userMapper.toGqlUserSocial(userSocial)))
     })
   }
 
   createUserSocialLoader() {
-    return new DataLoader<UserSocialId, GqlUserSocial | null>(async (userSocialIds: readonly UserSocialId[]) => {
+    return new DataLoader<UserSocialId, UserSocial | null>(async (userSocialIds: readonly UserSocialId[]) => {
       const userSocials = await this.getUserSocialsByIdsUseCase.execute({ userSocialIds: [...userSocialIds] })
       const userSocialMap = new Map(
         userSocials.map(userSocial => [userSocial.id, userMapper.toGqlUserSocial(userSocial)]),

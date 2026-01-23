@@ -1,6 +1,6 @@
 import z from 'zod'
 
-import { LoginInput, LoginWithGoogleInput } from './auth.dto'
+import { LoginInput, LoginWithGoogleInput } from '../../gql/generated-types'
 
 export const LoginInputSchema = z.object({
   email: z.email().transform(value => value.toLowerCase()),

@@ -1,4 +1,4 @@
-export * from './common.types'
+export * from './common-type.schema'
 export { GraphQLContext } from './graphql.context'
 export * from './rejection.types'
 export * from './zod-pipe'

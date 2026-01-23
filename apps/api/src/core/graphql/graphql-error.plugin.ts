@@ -1,48 +1,64 @@
-import { ForbiddenException, HttpException, UnauthorizedException } from '@nestjs/common'
+import { ForbiddenException, HttpException, NotFoundException, UnauthorizedException } from '@nestjs/common'
 import { Plugin } from 'graphql-yoga'
 
-import {
-  ForbiddenRejection,
-  InternalErrorRejection,
-  UnauthorizedRejection,
-  ValidationRejection,
-} from './rejection.types'
+import { Rejection } from './rejection.types'
 import { ZodValidationException } from './zod-validation.exception'
 
-type RejectionType = InternalErrorRejection | ValidationRejection | UnauthorizedRejection | ForbiddenRejection
-
-function transformException(exception: Error): RejectionType {
+function transformException(exception: Error): Rejection {
   if (exception instanceof ZodValidationException) {
     const errors = exception.zodError.issues.map(issue => ({
       field: issue.path.join('.'),
       message: issue.message,
     }))
 
-    return new ValidationRejection(errors)
+    return {
+      __typename: 'ValidationRejection',
+      errors,
+    }
   }
 
   // Handle UnauthorizedException
   if (exception instanceof UnauthorizedException) {
     const response = exception.getResponse()
     const message = typeof response === 'string' ? response : (response as { message?: string }).message
-    return new UnauthorizedRejection(message ?? 'Unauthorized')
+    return {
+      __typename: 'UnauthorizedRejection',
+      message: message ?? 'Unauthorized',
+    }
+  }
+
+  // Handle NotFoundException
+  if (exception instanceof NotFoundException) {
+    return {
+      __typename: 'NotFoundRejection',
+      message: exception.message ?? 'Not found',
+    }
   }
 
   // Handle ForbiddenException
   if (exception instanceof ForbiddenException) {
     const response = exception.getResponse()
     const message = typeof response === 'string' ? response : (response as { message?: string }).message
-    return new ForbiddenRejection(message ?? 'Forbidden')
+    return {
+      __typename: 'ForbiddenRejection',
+      message: message ?? 'Forbidden',
+    }
   }
 
   // Handle other HttpExceptions
   if (exception instanceof HttpException) {
     const response = exception.getResponse() as { message?: string | string[] }
     const message = Array.isArray(response.message) ? response.message.join(', ') : response.message
-    return new InternalErrorRejection(message ?? 'An unexpected error occurred')
+    return {
+      __typename: 'InternalErrorRejection',
+      message: message ?? 'An unexpected error occurred',
+    }
   }
 
-  return new InternalErrorRejection(exception.message ?? 'An unexpected error occurred')
+  return {
+    __typename: 'InternalErrorRejection',
+    message: exception.message ?? 'An unexpected error occurred',
+  }
 }
 
 export function useErrorTransformPlugin(): Plugin {
