@@ -26,6 +26,30 @@ export type Scalars = {
   WishlistId: { input: Ids["WishlistId"]; output: Ids["WishlistId"]; }
 };
 
+export type AdminDeleteUserResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+
+export type AdminGetAllUsersInput = {
+  criteria?: InputMaybe<Scalars['String']['input']>;
+  pageNumber?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type AdminGetAllUsersResult = ForbiddenRejection | InternalErrorRejection | PagedUsers | UnauthorizedRejection | ValidationRejection;
+
+export type AdminGetUserByIdResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | User | ValidationRejection;
+
+export type AdminRemoveUserPictureResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+
+export type AdminUpdateUserProfileInput = {
+  birthday?: InputMaybe<Scalars['String']['input']>;
+  email?: InputMaybe<Scalars['String']['input']>;
+  firstname?: InputMaybe<Scalars['String']['input']>;
+  isEnabled?: InputMaybe<Scalars['Boolean']['input']>;
+  lastname?: InputMaybe<Scalars['String']['input']>;
+  newPassword?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type AdminUpdateUserProfileResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+
 export enum AttendeeRole {
   Maintainer = 'MAINTAINER',
   User = 'USER'
@@ -175,6 +199,9 @@ export type LoginWithGoogleResult = InternalErrorRejection | LoginWithGoogleOutp
 
 export type Mutation = {
   __typename: 'Mutation';
+  adminDeleteUser: AdminDeleteUserResult;
+  adminRemoveUserPicture: AdminRemoveUserPictureResult;
+  adminUpdateUserProfile: AdminUpdateUserProfileResult;
   changeUserPassword: ChangeUserPasswordResult;
   confirmEmailChange: ConfirmEmailChangeResult;
   linkCurrentUserlWithGoogle: LinkUserToGoogleResult;
@@ -189,6 +216,22 @@ export type Mutation = {
   updateUserEmailSettings: UpdateUserEmailSettingsResult;
   updateUserPictureFromSocial: UpdateUserPictureFromSocialResult;
   updateUserProfile: UpdateUserProfileResult;
+};
+
+
+export type MutationAdminDeleteUserArgs = {
+  userId: Scalars['UserId']['input'];
+};
+
+
+export type MutationAdminRemoveUserPictureArgs = {
+  userId: Scalars['UserId']['input'];
+};
+
+
+export type MutationAdminUpdateUserProfileArgs = {
+  input: AdminUpdateUserProfileInput;
+  userId: Scalars['UserId']['input'];
 };
 
 
@@ -261,6 +304,12 @@ export type NotFoundRejection = {
   message: Scalars['String']['output'];
 };
 
+export type PagedUsers = {
+  __typename: 'PagedUsers';
+  pagination: Pagination;
+  resources: Array<UserWithoutSocials>;
+};
+
 export type Pagination = {
   __typename: 'Pagination';
   pageNumber: Scalars['Int']['output'];
@@ -282,6 +331,8 @@ export type PendingEmailChange = {
 
 export type Query = {
   __typename: 'Query';
+  adminGetAllUsers: AdminGetAllUsersResult;
+  adminGetUserById: AdminGetUserByIdResult;
   getCurrentUser: GetCurrentUserResult;
   getEventById?: Maybe<GetEventByIdResult>;
   getMyEvents: GetMyEventsResult;
@@ -290,6 +341,16 @@ export type Query = {
   getUserEmailSettings: GetUserEmailSettingsResult;
   getWishlistById?: Maybe<GetWishlistByIdResult>;
   health: HealthResult;
+};
+
+
+export type QueryAdminGetAllUsersArgs = {
+  input?: InputMaybe<AdminGetAllUsersInput>;
+};
+
+
+export type QueryAdminGetUserByIdArgs = {
+  userId: Scalars['UserId']['input'];
 };
 
 
@@ -398,6 +459,22 @@ export type UserSocial = {
   name?: Maybe<Scalars['String']['output']>;
   pictureUrl?: Maybe<Scalars['String']['output']>;
   socialType: Scalars['String']['output'];
+  updatedAt: Scalars['String']['output'];
+};
+
+export type UserWithoutSocials = {
+  __typename: 'UserWithoutSocials';
+  admin: Scalars['Boolean']['output'];
+  birthday?: Maybe<Scalars['String']['output']>;
+  createdAt: Scalars['String']['output'];
+  email: Scalars['String']['output'];
+  firstname: Scalars['String']['output'];
+  id: Scalars['UserId']['output'];
+  isEnabled: Scalars['Boolean']['output'];
+  lastConnectedAt?: Maybe<Scalars['String']['output']>;
+  lastIp?: Maybe<Scalars['String']['output']>;
+  lastname: Scalars['String']['output'];
+  pictureUrl?: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['String']['output'];
 };
 

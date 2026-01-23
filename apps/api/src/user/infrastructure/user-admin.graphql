@@ -1,0 +1,79 @@
+type PagedUsers {
+  resources: [UserWithoutSocials!]!
+  pagination: Pagination!
+}
+
+type UserWithoutSocials {
+  id: UserId!
+  firstname: String!
+  lastname: String!
+  email: String!
+  pictureUrl: String
+  birthday: String
+  admin: Boolean!
+  isEnabled: Boolean!
+  lastConnectedAt: String
+  lastIp: String
+  createdAt: String!
+  updatedAt: String!
+}
+
+input AdminGetAllUsersInput {
+  pageNumber: Int
+  criteria: String
+}
+
+input AdminUpdateUserProfileInput {
+  email: String
+  newPassword: String
+  firstname: String
+  lastname: String
+  birthday: String
+  isEnabled: Boolean
+}
+
+union AdminGetUserByIdResult =
+  | User
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+
+union AdminGetAllUsersResult =
+  | PagedUsers
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+
+union AdminUpdateUserProfileResult =
+  | VoidOutput
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+
+union AdminDeleteUserResult =
+  | VoidOutput
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+
+union AdminRemoveUserPictureResult =
+  | VoidOutput
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+
+extend type Query {
+  adminGetUserById(userId: UserId!): AdminGetUserByIdResult!
+  adminGetAllUsers(input: AdminGetAllUsersInput): AdminGetAllUsersResult!
+}
+
+extend type Mutation {
+  adminUpdateUserProfile(userId: UserId!, input: AdminUpdateUserProfileInput!): AdminUpdateUserProfileResult!
+  adminDeleteUser(userId: UserId!): AdminDeleteUserResult!
+  adminRemoveUserPicture(userId: UserId!): AdminRemoveUserPictureResult!
+}
