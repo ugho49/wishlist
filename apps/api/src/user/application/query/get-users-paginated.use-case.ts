@@ -1,14 +1,17 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common'
-import { DEFAULT_RESULT_NUMBER } from '@wishlist/api/core'
 import { REPOSITORIES } from '@wishlist/api/repositories'
-import { createPagedResponse, PagedResponse, UserWithoutSocialsDto } from '@wishlist/common'
 
-import { UserRepository } from '../../domain'
-import { userMapper } from '../../infrastructure'
+import { User, UserRepository } from '../../domain'
 
 export type GetUsersPaginatedInput = {
   criteria?: string
   pageNumber: number
+  pageSize: number
+}
+
+export type GetUsersPaginatedOutput = {
+  users: User[]
+  totalCount: number
 }
 
 @Injectable()
@@ -18,9 +21,8 @@ export class GetUsersPaginatedUseCase {
     private readonly userRepository: UserRepository,
   ) {}
 
-  async execute(query: GetUsersPaginatedInput): Promise<PagedResponse<UserWithoutSocialsDto>> {
-    const { criteria, pageNumber } = query
-    const pageSize = DEFAULT_RESULT_NUMBER
+  async execute(query: GetUsersPaginatedInput): Promise<GetUsersPaginatedOutput> {
+    const { criteria, pageNumber, pageSize } = query
     const skip = pageSize * (pageNumber - 1)
 
     if (criteria && criteria.trim().length < 2) {
@@ -32,9 +34,9 @@ export class GetUsersPaginatedUseCase {
       pagination: { take: pageSize, skip },
     })
 
-    return createPagedResponse({
-      resources: users.map(user => userMapper.toUserWithoutSocialsDto(user)),
-      options: { pageSize, totalElements: totalCount, pageNumber },
-    })
+    return {
+      users,
+      totalCount,
+    }
   }
 }

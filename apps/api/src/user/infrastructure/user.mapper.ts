@@ -1,9 +1,21 @@
-import type { MiniUserDto, UserDto, UserSocialDto, UserWithoutSocialsDto } from '@wishlist/common'
 import type { User, UserSocial } from '../domain'
 
+import {
+  Authorities,
+  type MiniUserDto,
+  type UserDto,
+  type UserSocialDto,
+  type UserWithoutSocialsDto,
+} from '@wishlist/common'
 import { DateTime } from 'luxon'
+import { match } from 'ts-pattern'
 
-import { User as GqlUser, UserSocial as GqlUserSocial } from '../../gql/generated-types'
+import {
+  User as GqlUser,
+  UserAuthorities as GqlUserAuthorities,
+  UserFull as GqlUserFull,
+  UserSocial as GqlUserSocial,
+} from '../../gql/generated-types'
 
 function toMiniUserDto(model: User): MiniUserDto {
   return {
@@ -65,16 +77,26 @@ function toGqlUser(user: User): GqlUser {
   }
 }
 
-/*
-function toGqlUserWithAdmin(user: User): GqlUserWithAdmin {
+function toGqlUserFull(user: User): GqlUserFull {
+  const authorities: GqlUserAuthorities[] = user.authorities.map(authority => {
+    const gqlAuthority = match(authority)
+      .with(Authorities.ROLE_USER, () => GqlUserAuthorities.RoleUser)
+      .with(Authorities.ROLE_ADMIN, () => GqlUserAuthorities.RoleAdmin)
+      .with(Authorities.ROLE_SUPERADMIN, () => GqlUserAuthorities.RoleSuperadmin)
+      .exhaustive()
+
+    return gqlAuthority
+  })
+
   return {
     ...toGqlUser(user),
-    isAdmin: user.isAdmin(),
+    __typename: 'UserFull',
+    authorities,
+    isEnabled: user.isEnabled,
     lastConnectedAt: user.lastConnectedAt?.toISOString(),
     lastIp: user.lastIp,
   }
 }
-*/
 
 function toGqlUserSocial(social: UserSocial): GqlUserSocial {
   return {
@@ -95,6 +117,6 @@ export const userMapper = {
   toUserDto,
   toUserSocialDto,
   toGqlUser,
-  //toGqlUserWithAdmin,
+  toGqlUserFull,
   toGqlUserSocial,
 }

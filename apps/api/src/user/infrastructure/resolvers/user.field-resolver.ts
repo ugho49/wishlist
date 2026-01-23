@@ -14,6 +14,6 @@ export class UserFieldResolver {
     @GqlCurrentUser('id') currentUserId: UserId,
   ): Promise<UserSocial[] | null> {
     if (user.id !== currentUserId) return Promise.resolve(null)
-    return ctx.loaders.userSocialsByUser.load(user.id as UserId)
+    return ctx.loaders.userSocialsByUser.load(user.id)
   }
 }

@@ -21,14 +21,31 @@ type User {
   isEnabled: Boolean!
   createdAt: String!
   updatedAt: String!
-  socials: [UserSocial!]
+  socials: [UserSocial!] @resolved
+}
+
+type PendingEmailChange {
+  newEmail: String!
+  expiredAt: String!
+}
+
+type UserEmailSettings {
+  dailyNewItemNotification: Boolean!
 }
 
 union GetCurrentUserResult = User | UnauthorizedRejection | ForbiddenRejection | InternalErrorRejection
 
-extend type Query {
-  getCurrentUser: GetCurrentUserResult!
-}
+union GetPendingEmailChangeResult =
+  | PendingEmailChange
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+
+union GetUserEmailSettingsResult =
+  | UserEmailSettings
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
 
 input RegisterUserInput {
   firstname: String!
@@ -55,6 +72,29 @@ input ChangeUserPasswordInput {
 
 input UpdateUserPictureFromSocialInput {
   socialId: UserSocialId!
+}
+
+input RequestEmailChangeInput {
+  newEmail: String!
+}
+
+input ConfirmEmailChangeInput {
+  newEmail: String!
+  token: String!
+}
+
+input UpdateUserEmailSettingsInput {
+  dailyNewItemNotification: Boolean!
+}
+
+input SendResetPasswordEmailInput {
+  email: String!
+}
+
+input ResetPasswordInput {
+  email: String!
+  token: String!
+  newPassword: String!
 }
 
 union RegisterUserResult =
@@ -106,6 +146,47 @@ union RemoveUserPictureResult =
   | ForbiddenRejection
   | InternalErrorRejection
 
+union RequestEmailChangeResult =
+  | VoidOutput
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+
+union ConfirmEmailChangeResult =
+  | VoidOutput
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+
+union UpdateUserEmailSettingsResult =
+  | UserEmailSettings
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+
+union SendResetPasswordEmailResult =
+  | VoidOutput
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+
+union ResetPasswordResult =
+  | VoidOutput
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+
+extend type Query {
+  getCurrentUser: GetCurrentUserResult!
+  getPendingEmailChange: GetPendingEmailChangeResult
+  getUserEmailSettings: GetUserEmailSettingsResult!
+}
+
 extend type Mutation {
   registerUser(input: RegisterUserInput!): RegisterUserResult!
   linkCurrentUserlWithGoogle(input: LinkUserToGoogleInput!): LinkUserToGoogleResult!
@@ -114,4 +195,9 @@ extend type Mutation {
   changeUserPassword(input: ChangeUserPasswordInput!): ChangeUserPasswordResult!
   updateUserPictureFromSocial(input: UpdateUserPictureFromSocialInput!): UpdateUserPictureFromSocialResult!
   removeUserPicture: RemoveUserPictureResult!
+  requestEmailChange(input: RequestEmailChangeInput!): RequestEmailChangeResult!
+  confirmEmailChange(input: ConfirmEmailChangeInput!): ConfirmEmailChangeResult!
+  updateUserEmailSettings(input: UpdateUserEmailSettingsInput!): UpdateUserEmailSettingsResult!
+  sendResetPasswordEmail(input: SendResetPasswordEmailInput!): SendResetPasswordEmailResult!
+  resetPassword(input: ResetPasswordInput!): ResetPasswordResult!
 }

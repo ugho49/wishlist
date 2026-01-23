@@ -1,0 +1,88 @@
+enum UserAuthorities {
+  ROLE_USER
+  ROLE_ADMIN
+  ROLE_SUPERADMIN
+}
+
+type UserFull {
+  id: UserId!
+  firstName: String!
+  lastName: String!
+  email: String!
+  pictureUrl: String
+  birthday: String
+  isEnabled: Boolean!
+  createdAt: String!
+  updatedAt: String!
+  socials: [UserSocial!]! @resolved
+  authorities: [UserAuthorities!]!
+  isEnabled: Boolean!
+  lastConnectedAt: String
+  lastIp: String
+}
+
+type AdminGetAllUsers {
+  data: [UserFull!]!
+  pagination: Pagination!
+}
+
+input AdminGetAllUsersPaginationFilters {
+  page: Int
+  limit: Int
+  criteria: String
+}
+
+input AdminUpdateUserProfileInput {
+  email: String
+  newPassword: String
+  firstname: String
+  lastname: String
+  birthday: String
+  isEnabled: Boolean
+}
+
+union AdminGetUserByIdResult =
+  | UserFull
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+
+union AdminGetAllUsersResult =
+  | AdminGetAllUsers
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+
+union AdminUpdateUserProfileResult =
+  | VoidOutput
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+
+union AdminDeleteUserResult =
+  | VoidOutput
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+
+union AdminRemoveUserPictureResult =
+  | VoidOutput
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+
+extend type Query {
+  adminGetUserById(userId: UserId!): AdminGetUserByIdResult!
+  adminGetAllUsers(input: AdminGetAllUsersPaginationFilters): AdminGetAllUsersResult!
+}
+
+extend type Mutation {
+  adminUpdateUserProfile(userId: UserId!, input: AdminUpdateUserProfileInput!): AdminUpdateUserProfileResult!
+  adminDeleteUser(userId: UserId!): AdminDeleteUserResult!
+  adminRemoveUserPicture(userId: UserId!): AdminRemoveUserPictureResult!
+}

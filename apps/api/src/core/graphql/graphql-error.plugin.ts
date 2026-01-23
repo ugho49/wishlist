@@ -1,10 +1,12 @@
-import { ForbiddenException, HttpException, NotFoundException, UnauthorizedException } from '@nestjs/common'
+import { ForbiddenException, HttpException, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common'
 import { Plugin } from 'graphql-yoga'
 
 import { Rejection } from './rejection.types'
 import { ZodValidationException } from './zod-validation.exception'
 
 function transformException(exception: Error): Rejection {
+  const logger = new Logger('GraphQLErrorPlugin')
+
   if (exception instanceof ZodValidationException) {
     const errors = exception.zodError.issues.map(issue => ({
       field: issue.path.join('.'),
@@ -55,9 +57,11 @@ function transformException(exception: Error): Rejection {
     }
   }
 
+  logger.error('An unexpected error occurred', { exception })
+
   return {
     __typename: 'InternalErrorRejection',
-    message: exception.message ?? 'An unexpected error occurred',
+    message: 'An unexpected error occurred',
   }
 }
 

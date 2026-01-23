@@ -1,8 +1,8 @@
 import { NotFoundException } from '@nestjs/common'
 import { Args, Context, Query, Resolver } from '@nestjs/graphql'
 import { GqlCurrentUser } from '@wishlist/api/auth'
-import { GraphQLContext, PaginationFiltersSchema, ZodPipe } from '@wishlist/api/core'
-import { UserId, WishlistId } from '@wishlist/common'
+import { DEFAULT_RESULT_NUMBER, GraphQLContext, PaginationFiltersSchema, ZodPipe } from '@wishlist/api/core'
+import { createPagedResponse, UserId, WishlistId } from '@wishlist/common'
 
 import { GetMyWishlistsResult, GetWishlistByIdResult, PaginationFilters, Wishlist } from '../../../gql/generated-types'
 import { GetWishlistsByUserUseCase } from '../../application/query/get-wishlists-by-user.use-case'
@@ -29,21 +29,29 @@ export class WishlistResolver {
     @Args('filters', new ZodPipe(PaginationFiltersSchema)) filters: PaginationFilters,
     @GqlCurrentUser('id') currentUserId: UserId,
   ): Promise<GetMyWishlistsResult> {
-    const result = await this.getWishlistsByUserUseCase.execute({
+    const pageSize = filters.limit ?? DEFAULT_RESULT_NUMBER
+    const pageNumber = filters.page ?? 1
+
+    const { wishlists, totalCount } = await this.getWishlistsByUserUseCase.execute({
       userId: currentUserId,
-      pageNumber: filters.page ?? 1,
-      pageSize: filters.limit ?? 10,
+      pageNumber,
+      pageSize,
+    })
+
+    const pagedResponse = createPagedResponse({
+      resources: wishlists.map(wishlist => wishlistMapper.toGqlWishlist({ wishlist, currentUserId })),
+      options: { pageSize, totalElements: totalCount, pageNumber },
     })
 
     return {
       __typename: 'GetWishlistsPagedResponse',
-      data: result.resources.map(wishlist => wishlistMapper.toGqlWishlist({ wishlist, currentUserId })) as Wishlist[],
+      data: pagedResponse.resources,
       pagination: {
         __typename: 'Pagination',
-        totalPages: result.pagination.total_pages,
-        totalElements: result.pagination.total_elements,
-        pageNumber: result.pagination.page_number,
-        pageSize: result.pagination.pages_size,
+        totalPages: pagedResponse.pagination.total_pages,
+        totalElements: pagedResponse.pagination.total_elements,
+        pageNumber: pagedResponse.pagination.page_number,
+        pageSize: pagedResponse.pagination.pages_size,
       },
     }
   }

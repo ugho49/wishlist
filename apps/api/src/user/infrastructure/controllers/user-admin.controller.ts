@@ -2,6 +2,7 @@ import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UploadedFile,
 import { FileInterceptor } from '@nestjs/platform-express'
 import { ApiConsumes, ApiTags } from '@nestjs/swagger'
 import {
+  createPagedResponse,
   GetAllUsersQueryDto,
   ICurrentUser,
   PagedResponse,
@@ -17,12 +18,15 @@ import { userPictureFileValidators, userPictureResizePipe } from '../user.valida
 
 import 'multer'
 
+import { DEFAULT_RESULT_NUMBER } from '@wishlist/api/core'
+
 import { DeleteUserUseCase } from '../../application/command/delete-user.use-case'
 import { RemoveUserPictureUseCase } from '../../application/command/remove-user-picture.use-case'
 import { UpdateUserFullUseCase } from '../../application/command/update-user-full.use-case'
 import { UpdateUserPictureUseCase } from '../../application/command/update-user-picture.use-case'
 import { GetUserByIdUseCase } from '../../application/query/get-user-by-id.use-case'
 import { GetUsersPaginatedUseCase } from '../../application/query/get-users-paginated.use-case'
+import { userMapper } from '../user.mapper'
 
 @IsAdmin()
 @ApiTags('ADMIN - User')
@@ -43,10 +47,19 @@ export class UserAdminController {
   }
 
   @Get()
-  getAllPaginated(@Query() queryParams: GetAllUsersQueryDto): Promise<PagedResponse<UserWithoutSocialsDto>> {
-    return this.getUsersPaginatedUseCase.execute({
-      pageNumber: queryParams.p ?? 1,
+  async getAllPaginated(@Query() queryParams: GetAllUsersQueryDto): Promise<PagedResponse<UserWithoutSocialsDto>> {
+    const pageSize = DEFAULT_RESULT_NUMBER
+    const pageNumber = queryParams.p ?? 1
+
+    const { users, totalCount } = await this.getUsersPaginatedUseCase.execute({
       criteria: queryParams.q,
+      pageNumber,
+      pageSize,
+    })
+
+    return createPagedResponse({
+      resources: users.map(user => userMapper.toUserWithoutSocialsDto(user)),
+      options: { pageSize, totalElements: totalCount, pageNumber },
     })
   }
 

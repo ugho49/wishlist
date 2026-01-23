@@ -26,6 +26,37 @@ export type Scalars = {
   WishlistId: { input: Ids["WishlistId"]; output: Ids["WishlistId"]; }
 };
 
+export type AdminDeleteUserResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+
+export type AdminGetAllUsers = {
+  __typename: 'AdminGetAllUsers';
+  data: Array<UserFull>;
+  pagination: Pagination;
+};
+
+export type AdminGetAllUsersPaginationFilters = {
+  criteria?: InputMaybe<Scalars['String']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  page?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type AdminGetAllUsersResult = AdminGetAllUsers | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection;
+
+export type AdminGetUserByIdResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | UserFull | ValidationRejection;
+
+export type AdminRemoveUserPictureResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+
+export type AdminUpdateUserProfileInput = {
+  birthday?: InputMaybe<Scalars['String']['input']>;
+  email?: InputMaybe<Scalars['String']['input']>;
+  firstname?: InputMaybe<Scalars['String']['input']>;
+  isEnabled?: InputMaybe<Scalars['Boolean']['input']>;
+  lastname?: InputMaybe<Scalars['String']['input']>;
+  newPassword?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type AdminUpdateUserProfileResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+
 export enum AttendeeRole {
   Maintainer = 'MAINTAINER',
   User = 'USER'
@@ -37,6 +68,13 @@ export type ChangeUserPasswordInput = {
 };
 
 export type ChangeUserPasswordResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+
+export type ConfirmEmailChangeInput = {
+  newEmail: Scalars['String']['input'];
+  token: Scalars['String']['input'];
+};
+
+export type ConfirmEmailChangeResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
 export type Event = {
   __typename: 'Event';
@@ -90,6 +128,10 @@ export type GetEventsPagedResponse = {
 export type GetMyEventsResult = ForbiddenRejection | GetEventsPagedResponse | InternalErrorRejection | UnauthorizedRejection;
 
 export type GetMyWishlistsResult = ForbiddenRejection | GetWishlistsPagedResponse | InternalErrorRejection | UnauthorizedRejection;
+
+export type GetPendingEmailChangeResult = ForbiddenRejection | InternalErrorRejection | PendingEmailChange | UnauthorizedRejection;
+
+export type GetUserEmailSettingsResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | UserEmailSettings;
 
 export type GetWishlistByIdResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | Wishlist;
 
@@ -164,20 +206,49 @@ export type LoginWithGoogleResult = InternalErrorRejection | LoginWithGoogleOutp
 
 export type Mutation = {
   __typename: 'Mutation';
+  adminDeleteUser: AdminDeleteUserResult;
+  adminRemoveUserPicture: AdminRemoveUserPictureResult;
+  adminUpdateUserProfile: AdminUpdateUserProfileResult;
   changeUserPassword: ChangeUserPasswordResult;
+  confirmEmailChange: ConfirmEmailChangeResult;
   linkCurrentUserlWithGoogle: LinkUserToGoogleResult;
   login: LoginResult;
   loginWithGoogle: LoginWithGoogleResult;
   registerUser: RegisterUserResult;
   removeUserPicture: RemoveUserPictureResult;
+  requestEmailChange: RequestEmailChangeResult;
+  resetPassword: ResetPasswordResult;
+  sendResetPasswordEmail: SendResetPasswordEmailResult;
   unlinkCurrentUserSocial: UnlinkCurrentUserSocialResult;
+  updateUserEmailSettings: UpdateUserEmailSettingsResult;
   updateUserPictureFromSocial: UpdateUserPictureFromSocialResult;
   updateUserProfile: UpdateUserProfileResult;
 };
 
 
+export type MutationAdminDeleteUserArgs = {
+  userId: Scalars['UserId']['input'];
+};
+
+
+export type MutationAdminRemoveUserPictureArgs = {
+  userId: Scalars['UserId']['input'];
+};
+
+
+export type MutationAdminUpdateUserProfileArgs = {
+  input: AdminUpdateUserProfileInput;
+  userId: Scalars['UserId']['input'];
+};
+
+
 export type MutationChangeUserPasswordArgs = {
   input: ChangeUserPasswordInput;
+};
+
+
+export type MutationConfirmEmailChangeArgs = {
+  input: ConfirmEmailChangeInput;
 };
 
 
@@ -201,8 +272,28 @@ export type MutationRegisterUserArgs = {
 };
 
 
+export type MutationRequestEmailChangeArgs = {
+  input: RequestEmailChangeInput;
+};
+
+
+export type MutationResetPasswordArgs = {
+  input: ResetPasswordInput;
+};
+
+
+export type MutationSendResetPasswordEmailArgs = {
+  input: SendResetPasswordEmailInput;
+};
+
+
 export type MutationUnlinkCurrentUserSocialArgs = {
   socialId: Scalars['UserSocialId']['input'];
+};
+
+
+export type MutationUpdateUserEmailSettingsArgs = {
+  input: UpdateUserEmailSettingsInput;
 };
 
 
@@ -233,14 +324,34 @@ export type PaginationFilters = {
   page?: InputMaybe<Scalars['Int']['input']>;
 };
 
+export type PendingEmailChange = {
+  __typename: 'PendingEmailChange';
+  expiredAt: Scalars['String']['output'];
+  newEmail: Scalars['String']['output'];
+};
+
 export type Query = {
   __typename: 'Query';
+  adminGetAllUsers: AdminGetAllUsersResult;
+  adminGetUserById: AdminGetUserByIdResult;
   getCurrentUser: GetCurrentUserResult;
   getEventById?: Maybe<GetEventByIdResult>;
   getMyEvents: GetMyEventsResult;
   getMyWishlists: GetMyWishlistsResult;
+  getPendingEmailChange?: Maybe<GetPendingEmailChangeResult>;
+  getUserEmailSettings: GetUserEmailSettingsResult;
   getWishlistById?: Maybe<GetWishlistByIdResult>;
   health: HealthResult;
+};
+
+
+export type QueryAdminGetAllUsersArgs = {
+  input?: InputMaybe<AdminGetAllUsersPaginationFilters>;
+};
+
+
+export type QueryAdminGetUserByIdArgs = {
+  userId: Scalars['UserId']['input'];
 };
 
 
@@ -275,12 +386,38 @@ export type RegisterUserResult = ForbiddenRejection | InternalErrorRejection | U
 
 export type RemoveUserPictureResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
+export type RequestEmailChangeInput = {
+  newEmail: Scalars['String']['input'];
+};
+
+export type RequestEmailChangeResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+
+export type ResetPasswordInput = {
+  email: Scalars['String']['input'];
+  newPassword: Scalars['String']['input'];
+  token: Scalars['String']['input'];
+};
+
+export type ResetPasswordResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+
+export type SendResetPasswordEmailInput = {
+  email: Scalars['String']['input'];
+};
+
+export type SendResetPasswordEmailResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+
 export type UnauthorizedRejection = {
   __typename: 'UnauthorizedRejection';
   message: Scalars['String']['output'];
 };
 
 export type UnlinkCurrentUserSocialResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+
+export type UpdateUserEmailSettingsInput = {
+  dailyNewItemNotification: Scalars['Boolean']['input'];
+};
+
+export type UpdateUserEmailSettingsResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | UserEmailSettings | ValidationRejection;
 
 export type UpdateUserPictureFromSocialInput = {
   socialId: Scalars['UserSocialId']['input'];
@@ -306,7 +443,33 @@ export type User = {
   isEnabled: Scalars['Boolean']['output'];
   lastName: Scalars['String']['output'];
   pictureUrl?: Maybe<Scalars['String']['output']>;
-  socials?: Maybe<Array<UserSocial>>;
+  updatedAt: Scalars['String']['output'];
+};
+
+export enum UserAuthorities {
+  RoleAdmin = 'ROLE_ADMIN',
+  RoleSuperadmin = 'ROLE_SUPERADMIN',
+  RoleUser = 'ROLE_USER'
+}
+
+export type UserEmailSettings = {
+  __typename: 'UserEmailSettings';
+  dailyNewItemNotification: Scalars['Boolean']['output'];
+};
+
+export type UserFull = {
+  __typename: 'UserFull';
+  authorities: Array<UserAuthorities>;
+  birthday?: Maybe<Scalars['String']['output']>;
+  createdAt: Scalars['String']['output'];
+  email: Scalars['String']['output'];
+  firstName: Scalars['String']['output'];
+  id: Scalars['UserId']['output'];
+  isEnabled: Scalars['Boolean']['output'];
+  lastConnectedAt?: Maybe<Scalars['String']['output']>;
+  lastIp?: Maybe<Scalars['String']['output']>;
+  lastName: Scalars['String']['output'];
+  pictureUrl?: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['String']['output'];
 };
 

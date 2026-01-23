@@ -10,6 +10,36 @@ schema {
 
 directive @resolved on FIELD_DEFINITION
 
+union AdminDeleteUserResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
+type AdminGetAllUsers {
+  data: [UserFull!]!
+  pagination: Pagination!
+}
+
+input AdminGetAllUsersPaginationFilters {
+  criteria: String
+  limit: Int
+  page: Int
+}
+
+union AdminGetAllUsersResult = AdminGetAllUsers | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection
+
+union AdminGetUserByIdResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | UserFull | ValidationRejection
+
+union AdminRemoveUserPictureResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
+input AdminUpdateUserProfileInput {
+  birthday: String
+  email: String
+  firstname: String
+  isEnabled: Boolean
+  lastname: String
+  newPassword: String
+}
+
+union AdminUpdateUserProfileResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
 scalar AttendeeId
 
 enum AttendeeRole {
@@ -23,6 +53,13 @@ input ChangeUserPasswordInput {
 }
 
 union ChangeUserPasswordResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
+input ConfirmEmailChangeInput {
+  newEmail: String!
+  token: String!
+}
+
+union ConfirmEmailChangeResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
 type Event {
   attendeeIds: [AttendeeId!]!
@@ -49,9 +86,9 @@ type EventAttendee {
 scalar EventId
 
 input EventPaginationFilters {
-  limit: Int = 10
+  limit: Int
   onlyFuture: Boolean
-  page: Int = 1
+  page: Int
 }
 
 type FieldError {
@@ -75,6 +112,10 @@ type GetEventsPagedResponse {
 union GetMyEventsResult = ForbiddenRejection | GetEventsPagedResponse | InternalErrorRejection | UnauthorizedRejection
 
 union GetMyWishlistsResult = ForbiddenRejection | GetWishlistsPagedResponse | InternalErrorRejection | UnauthorizedRejection
+
+union GetPendingEmailChangeResult = ForbiddenRejection | InternalErrorRejection | PendingEmailChange | UnauthorizedRejection
+
+union GetUserEmailSettingsResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | UserEmailSettings
 
 union GetWishlistByIdResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | Wishlist
 
@@ -144,13 +185,21 @@ type LoginWithGoogleOutput {
 union LoginWithGoogleResult = InternalErrorRejection | LoginWithGoogleOutput | UnauthorizedRejection | ValidationRejection
 
 type Mutation {
+  adminDeleteUser(userId: UserId!): AdminDeleteUserResult!
+  adminRemoveUserPicture(userId: UserId!): AdminRemoveUserPictureResult!
+  adminUpdateUserProfile(input: AdminUpdateUserProfileInput!, userId: UserId!): AdminUpdateUserProfileResult!
   changeUserPassword(input: ChangeUserPasswordInput!): ChangeUserPasswordResult!
+  confirmEmailChange(input: ConfirmEmailChangeInput!): ConfirmEmailChangeResult!
   linkCurrentUserlWithGoogle(input: LinkUserToGoogleInput!): LinkUserToGoogleResult!
   login(input: LoginInput!): LoginResult!
   loginWithGoogle(input: LoginWithGoogleInput!): LoginWithGoogleResult!
   registerUser(input: RegisterUserInput!): RegisterUserResult!
   removeUserPicture: RemoveUserPictureResult!
+  requestEmailChange(input: RequestEmailChangeInput!): RequestEmailChangeResult!
+  resetPassword(input: ResetPasswordInput!): ResetPasswordResult!
+  sendResetPasswordEmail(input: SendResetPasswordEmailInput!): SendResetPasswordEmailResult!
   unlinkCurrentUserSocial(socialId: UserSocialId!): UnlinkCurrentUserSocialResult!
+  updateUserEmailSettings(input: UpdateUserEmailSettingsInput!): UpdateUserEmailSettingsResult!
   updateUserPictureFromSocial(input: UpdateUserPictureFromSocialInput!): UpdateUserPictureFromSocialResult!
   updateUserProfile(input: UpdateUserProfileInput!): UpdateUserProfileResult!
 }
@@ -171,11 +220,20 @@ input PaginationFilters {
   page: Int
 }
 
+type PendingEmailChange {
+  expiredAt: String!
+  newEmail: String!
+}
+
 type Query {
+  adminGetAllUsers(input: AdminGetAllUsersPaginationFilters): AdminGetAllUsersResult!
+  adminGetUserById(userId: UserId!): AdminGetUserByIdResult!
   getCurrentUser: GetCurrentUserResult!
   getEventById(id: EventId!): GetEventByIdResult
   getMyEvents(filters: EventPaginationFilters!): GetMyEventsResult!
   getMyWishlists(filters: PaginationFilters!): GetMyWishlistsResult!
+  getPendingEmailChange: GetPendingEmailChangeResult
+  getUserEmailSettings: GetUserEmailSettingsResult!
   getWishlistById(id: WishlistId!): GetWishlistByIdResult
   health: HealthResult!
 }
@@ -192,11 +250,37 @@ union RegisterUserResult = ForbiddenRejection | InternalErrorRejection | Unautho
 
 union RemoveUserPictureResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
+input RequestEmailChangeInput {
+  newEmail: String!
+}
+
+union RequestEmailChangeResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
+input ResetPasswordInput {
+  email: String!
+  newPassword: String!
+  token: String!
+}
+
+union ResetPasswordResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
+input SendResetPasswordEmailInput {
+  email: String!
+}
+
+union SendResetPasswordEmailResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
 type UnauthorizedRejection {
   message: String!
 }
 
 union UnlinkCurrentUserSocialResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
+input UpdateUserEmailSettingsInput {
+  dailyNewItemNotification: Boolean!
+}
+
+union UpdateUserEmailSettingsResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | UserEmailSettings | ValidationRejection
 
 input UpdateUserPictureFromSocialInput {
   socialId: UserSocialId!
@@ -221,7 +305,33 @@ type User {
   isEnabled: Boolean!
   lastName: String!
   pictureUrl: String
-  socials: [UserSocial!]
+  socials: [UserSocial!] @resolved
+  updatedAt: String!
+}
+
+enum UserAuthorities {
+  ROLE_ADMIN
+  ROLE_SUPERADMIN
+  ROLE_USER
+}
+
+type UserEmailSettings {
+  dailyNewItemNotification: Boolean!
+}
+
+type UserFull {
+  authorities: [UserAuthorities!]!
+  birthday: String
+  createdAt: String!
+  email: String!
+  firstName: String!
+  id: UserId!
+  isEnabled: Boolean!
+  lastConnectedAt: String
+  lastIp: String
+  lastName: String!
+  pictureUrl: String
+  socials: [UserSocial!]! @resolved
   updatedAt: String!
 }
 

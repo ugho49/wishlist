@@ -1,8 +1,8 @@
 import { NotFoundException } from '@nestjs/common'
 import { Args, Context, Query, Resolver } from '@nestjs/graphql'
 import { GqlCurrentUser } from '@wishlist/api/auth'
-import { GraphQLContext, ZodPipe } from '@wishlist/api/core'
-import { EventId, UserId } from '@wishlist/common'
+import { DEFAULT_RESULT_NUMBER, GraphQLContext, ZodPipe } from '@wishlist/api/core'
+import { createPagedResponse, EventId, UserId } from '@wishlist/common'
 
 import { EventPaginationFilters, GetEventByIdResult, GetMyEventsResult } from '../../../gql/generated-types'
 import { GetEventsByUserUseCase } from '../../application/query/get-events-by-user.use-case'
@@ -30,22 +30,30 @@ export class EventResolver {
     @Args('filters', new ZodPipe(EventPaginationFiltersSchema)) filters: EventPaginationFilters,
     @GqlCurrentUser('id') currentUserId: UserId,
   ): Promise<GetMyEventsResult> {
-    const result = await this.getEventsByUserUseCase.execute({
+    const pageSize = filters.limit ?? DEFAULT_RESULT_NUMBER
+    const pageNumber = filters.page ?? 1
+
+    const { events, totalCount } = await this.getEventsByUserUseCase.execute({
       userId: currentUserId,
-      pageNumber: filters.page ?? 1,
-      pageSize: filters.limit ?? 10,
+      pageNumber,
+      pageSize,
       ignorePastEvents: false,
+    })
+
+    const pagedResponse = createPagedResponse({
+      resources: events.map(eventMapper.toGqlEvent),
+      options: { pageSize, totalElements: totalCount, pageNumber },
     })
 
     return {
       __typename: 'GetEventsPagedResponse',
-      data: result.resources.map(eventMapper.toGqlEvent),
+      data: pagedResponse.resources,
       pagination: {
         __typename: 'Pagination',
-        totalPages: result.pagination.total_pages,
-        totalElements: result.pagination.total_elements,
-        pageNumber: result.pagination.page_number,
-        pageSize: result.pagination.pages_size,
+        totalPages: pagedResponse.pagination.total_pages,
+        totalElements: pagedResponse.pagination.total_elements,
+        pageNumber: pagedResponse.pagination.page_number,
+        pageSize: pagedResponse.pagination.pages_size,
       },
     }
   }
