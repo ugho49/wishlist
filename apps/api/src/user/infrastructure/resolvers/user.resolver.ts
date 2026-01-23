@@ -23,9 +23,9 @@ import { CreateUserUseCase } from '../../application/command/create-user.use-cas
 import { LinkUserToGoogleUseCase } from '../../application/command/link-user-to-google.use-case'
 import { RemoveUserPictureUseCase } from '../../application/command/remove-user-picture.use-case'
 import { UnlinkUserSocialUseCase } from '../../application/command/unlink-user-social.use-case'
+import { UpdateUserUseCase } from '../../application/command/update-user.use-case'
 import { UpdateUserPasswordUseCase } from '../../application/command/update-user-password.use-case'
 import { UpdateUserPictureFromSocialUseCase } from '../../application/command/update-user-picture-from-social.use-case'
-import { UpdateUserUseCase } from '../../application/command/update-user.use-case'
 import {
   ChangeUserPasswordInputSchema,
   LinkUserToGoogleInputSchema,

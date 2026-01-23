@@ -86,7 +86,7 @@ jobs:
     steps:
       - checkout: *checkout
       - attach_workspace: *attach_workspace
-      - run: yarn check --reporter=summary
+      - run: yarn check
 
   typecheck:
       <<: *setup_env_node

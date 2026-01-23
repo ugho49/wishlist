@@ -33,5 +33,5 @@ export const ChangeUserPasswordInputSchema = z.object({
 }) satisfies z.ZodType<ChangeUserPasswordInput>
 
 export const UpdateUserPictureFromSocialInputSchema = z.object({
-  socialId: z.string().transform((val) => val as UserSocialId),
+  socialId: z.string().transform(val => val as UserSocialId),
 }) satisfies z.ZodType<UpdateUserPictureFromSocialInput>
