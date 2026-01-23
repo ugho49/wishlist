@@ -24,6 +24,13 @@ input ChangeUserPasswordInput {
 
 union ChangeUserPasswordResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
+input ConfirmEmailChangeInput {
+  newEmail: String!
+  token: String!
+}
+
+union ConfirmEmailChangeResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
 type Event {
   attendeeIds: [AttendeeId!]!
   attendees: [EventAttendee!]! @resolved
@@ -75,6 +82,10 @@ type GetEventsPagedResponse {
 union GetMyEventsResult = ForbiddenRejection | GetEventsPagedResponse | InternalErrorRejection | UnauthorizedRejection
 
 union GetMyWishlistsResult = ForbiddenRejection | GetWishlistsPagedResponse | InternalErrorRejection | UnauthorizedRejection
+
+union GetPendingEmailChangeResult = ForbiddenRejection | InternalErrorRejection | PendingEmailChange | UnauthorizedRejection
+
+union GetUserEmailSettingsResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | UserEmailSettings
 
 union GetWishlistByIdResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | Wishlist
 
@@ -145,12 +156,17 @@ union LoginWithGoogleResult = InternalErrorRejection | LoginWithGoogleOutput | U
 
 type Mutation {
   changeUserPassword(input: ChangeUserPasswordInput!): ChangeUserPasswordResult!
+  confirmEmailChange(input: ConfirmEmailChangeInput!): ConfirmEmailChangeResult!
   linkCurrentUserlWithGoogle(input: LinkUserToGoogleInput!): LinkUserToGoogleResult!
   login(input: LoginInput!): LoginResult!
   loginWithGoogle(input: LoginWithGoogleInput!): LoginWithGoogleResult!
   registerUser(input: RegisterUserInput!): RegisterUserResult!
   removeUserPicture: RemoveUserPictureResult!
+  requestEmailChange(input: RequestEmailChangeInput!): RequestEmailChangeResult!
+  resetPassword(input: ResetPasswordInput!): ResetPasswordResult!
+  sendResetPasswordEmail(input: SendResetPasswordEmailInput!): SendResetPasswordEmailResult!
   unlinkCurrentUserSocial(socialId: UserSocialId!): UnlinkCurrentUserSocialResult!
+  updateUserEmailSettings(input: UpdateUserEmailSettingsInput!): UpdateUserEmailSettingsResult!
   updateUserPictureFromSocial(input: UpdateUserPictureFromSocialInput!): UpdateUserPictureFromSocialResult!
   updateUserProfile(input: UpdateUserProfileInput!): UpdateUserProfileResult!
 }
@@ -171,11 +187,18 @@ input PaginationFilters {
   page: Int
 }
 
+type PendingEmailChange {
+  expiredAt: String!
+  newEmail: String!
+}
+
 type Query {
   getCurrentUser: GetCurrentUserResult!
   getEventById(id: EventId!): GetEventByIdResult
   getMyEvents(filters: EventPaginationFilters!): GetMyEventsResult!
   getMyWishlists(filters: PaginationFilters!): GetMyWishlistsResult!
+  getPendingEmailChange: GetPendingEmailChangeResult
+  getUserEmailSettings: GetUserEmailSettingsResult!
   getWishlistById(id: WishlistId!): GetWishlistByIdResult
   health: HealthResult!
 }
@@ -192,11 +215,37 @@ union RegisterUserResult = ForbiddenRejection | InternalErrorRejection | Unautho
 
 union RemoveUserPictureResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
+input RequestEmailChangeInput {
+  newEmail: String!
+}
+
+union RequestEmailChangeResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
+input ResetPasswordInput {
+  email: String!
+  newPassword: String!
+  token: String!
+}
+
+union ResetPasswordResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
+input SendResetPasswordEmailInput {
+  email: String!
+}
+
+union SendResetPasswordEmailResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
 type UnauthorizedRejection {
   message: String!
 }
 
 union UnlinkCurrentUserSocialResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
+input UpdateUserEmailSettingsInput {
+  dailyNewItemNotification: Boolean!
+}
+
+union UpdateUserEmailSettingsResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | UserEmailSettings | ValidationRejection
 
 input UpdateUserPictureFromSocialInput {
   socialId: UserSocialId!
@@ -223,6 +272,10 @@ type User {
   pictureUrl: String
   socials: [UserSocial!]
   updatedAt: String!
+}
+
+type UserEmailSettings {
+  dailyNewItemNotification: Boolean!
 }
 
 scalar UserId
