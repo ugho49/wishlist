@@ -11,7 +11,7 @@
     "build": "nx run-many --target=build",
     "test": "nx run-many --target=test --exclude=@wishlist/source",
     "test:int": "nx run-many --target=test:int",
-    "check": "biome check --diagnostic-level=error",
+    "check": "biome check --diagnostic-level=error --reporter=summary",
     "check:fix": "yarn check --write",
     "prepack": "husky",
     "docker:up": "docker compose -f ./docker/docker-compose.yml -f ./docker/docker-compose.local.yml up -d",

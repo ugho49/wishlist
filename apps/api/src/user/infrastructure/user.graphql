@@ -48,6 +48,15 @@ input UpdateUserProfileInput {
   birthday: String
 }
 
+input ChangeUserPasswordInput {
+  oldPassword: String!
+  newPassword: String!
+}
+
+input UpdateUserPictureFromSocialInput {
+  socialId: UserSocialId!
+}
+
 union RegisterUserResult =
   | User
   | ValidationRejection
@@ -76,9 +85,33 @@ union UnlinkCurrentUserSocialResult =
   | ForbiddenRejection
   | InternalErrorRejection
 
+union ChangeUserPasswordResult =
+  | VoidOutput
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+
+union UpdateUserPictureFromSocialResult =
+  | VoidOutput
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+
+union RemoveUserPictureResult =
+  | VoidOutput
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+
 extend type Mutation {
   registerUser(input: RegisterUserInput!): RegisterUserResult!
   linkCurrentUserlWithGoogle(input: LinkUserToGoogleInput!): LinkUserToGoogleResult!
   unlinkCurrentUserSocial(socialId: UserSocialId!): UnlinkCurrentUserSocialResult!
   updateUserProfile(input: UpdateUserProfileInput!): UpdateUserProfileResult!
+  changeUserPassword(input: ChangeUserPasswordInput!): ChangeUserPasswordResult!
+  updateUserPictureFromSocial(input: UpdateUserPictureFromSocialInput!): UpdateUserPictureFromSocialResult!
+  removeUserPicture: RemoveUserPictureResult!
 }

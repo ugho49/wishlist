@@ -5,20 +5,34 @@ import { UserId, UserSocialId } from '@wishlist/common'
 import { RealIP } from 'nestjs-real-ip'
 
 import {
+  ChangeUserPasswordInput,
+  ChangeUserPasswordResult,
   LinkUserToGoogleInput,
   LinkUserToGoogleResult,
   RegisterUserInput,
   RegisterUserResult,
+  RemoveUserPictureResult,
   UnlinkCurrentUserSocialResult,
+  UpdateUserPictureFromSocialInput,
+  UpdateUserPictureFromSocialResult,
   UpdateUserProfileInput,
   UpdateUserProfileResult,
   User,
 } from '../../../gql/generated-types'
 import { CreateUserUseCase } from '../../application/command/create-user.use-case'
 import { LinkUserToGoogleUseCase } from '../../application/command/link-user-to-google.use-case'
+import { RemoveUserPictureUseCase } from '../../application/command/remove-user-picture.use-case'
 import { UnlinkUserSocialUseCase } from '../../application/command/unlink-user-social.use-case'
 import { UpdateUserUseCase } from '../../application/command/update-user.use-case'
-import { LinkUserToGoogleInputSchema, RegisterUserInputSchema, UpdateUserProfileInputSchema } from '../user.schema'
+import { UpdateUserPasswordUseCase } from '../../application/command/update-user-password.use-case'
+import { UpdateUserPictureFromSocialUseCase } from '../../application/command/update-user-picture-from-social.use-case'
+import {
+  ChangeUserPasswordInputSchema,
+  LinkUserToGoogleInputSchema,
+  RegisterUserInputSchema,
+  UpdateUserPictureFromSocialInputSchema,
+  UpdateUserProfileInputSchema,
+} from '../user.schema'
 
 @Resolver()
 export class UserResolver {
@@ -27,6 +41,9 @@ export class UserResolver {
     private readonly linkUserToGoogleUseCase: LinkUserToGoogleUseCase,
     private readonly unlinkUserSocialUseCase: UnlinkUserSocialUseCase,
     private readonly updateUserUseCase: UpdateUserUseCase,
+    private readonly updateUserPasswordUseCase: UpdateUserPasswordUseCase,
+    private readonly updateUserPictureFromSocialUseCase: UpdateUserPictureFromSocialUseCase,
+    private readonly removeUserPictureUseCase: RemoveUserPictureUseCase,
   ) {}
 
   @Query()
@@ -112,5 +129,36 @@ export class UserResolver {
       throw new Error('Failed to load user')
     }
     return loadedUser
+  }
+
+  @Mutation()
+  async changeUserPassword(
+    @Args('input', new ZodPipe(ChangeUserPasswordInputSchema)) input: ChangeUserPasswordInput,
+    @GqlCurrentUser('id') currentUserId: UserId,
+  ): Promise<ChangeUserPasswordResult> {
+    await this.updateUserPasswordUseCase.execute({
+      userId: currentUserId,
+      oldPassword: input.oldPassword,
+      newPassword: input.newPassword,
+    })
+    return { __typename: 'VoidOutput', success: true }
+  }
+
+  @Mutation()
+  async updateUserPictureFromSocial(
+    @Args('input', new ZodPipe(UpdateUserPictureFromSocialInputSchema)) input: UpdateUserPictureFromSocialInput,
+    @GqlCurrentUser('id') currentUserId: UserId,
+  ): Promise<UpdateUserPictureFromSocialResult> {
+    await this.updateUserPictureFromSocialUseCase.execute({
+      userId: currentUserId,
+      socialId: input.socialId,
+    })
+    return { __typename: 'VoidOutput', success: true }
+  }
+
+  @Mutation()
+  async removeUserPicture(@GqlCurrentUser('id') currentUserId: UserId): Promise<RemoveUserPictureResult> {
+    await this.removeUserPictureUseCase.execute({ userId: currentUserId })
+    return { __typename: 'VoidOutput', success: true }
   }
 }

@@ -17,6 +17,13 @@ enum AttendeeRole {
   USER
 }
 
+input ChangeUserPasswordInput {
+  newPassword: String!
+  oldPassword: String!
+}
+
+union ChangeUserPasswordResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
 type Event {
   attendeeIds: [AttendeeId!]!
   attendees: [EventAttendee!]! @resolved
@@ -137,11 +144,14 @@ type LoginWithGoogleOutput {
 union LoginWithGoogleResult = InternalErrorRejection | LoginWithGoogleOutput | UnauthorizedRejection | ValidationRejection
 
 type Mutation {
+  changeUserPassword(input: ChangeUserPasswordInput!): ChangeUserPasswordResult!
   linkCurrentUserlWithGoogle(input: LinkUserToGoogleInput!): LinkUserToGoogleResult!
   login(input: LoginInput!): LoginResult!
   loginWithGoogle(input: LoginWithGoogleInput!): LoginWithGoogleResult!
   registerUser(input: RegisterUserInput!): RegisterUserResult!
+  removeUserPicture: RemoveUserPictureResult!
   unlinkCurrentUserSocial(socialId: UserSocialId!): UnlinkCurrentUserSocialResult!
+  updateUserPictureFromSocial(input: UpdateUserPictureFromSocialInput!): UpdateUserPictureFromSocialResult!
   updateUserProfile(input: UpdateUserProfileInput!): UpdateUserProfileResult!
 }
 
@@ -180,11 +190,19 @@ input RegisterUserInput {
 
 union RegisterUserResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | User | ValidationRejection
 
+union RemoveUserPictureResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
 type UnauthorizedRejection {
   message: String!
 }
 
 union UnlinkCurrentUserSocialResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
+input UpdateUserPictureFromSocialInput {
+  socialId: UserSocialId!
+}
+
+union UpdateUserPictureFromSocialResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
 input UpdateUserProfileInput {
   birthday: String
