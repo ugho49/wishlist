@@ -43,6 +43,11 @@ const plugins: WebpackPluginInstance[] = [
         glob: '**/*',
         output: 'drizzle',
       },
+      {
+        input: 'apps/api/src',
+        glob: '**/*.graphql',
+        output: 'graphql',
+      },
     ],
   }),
 ]
