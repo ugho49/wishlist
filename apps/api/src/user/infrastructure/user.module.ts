@@ -9,6 +9,7 @@ import { UserEmailSettingsController } from './controllers/user-email-settings.c
 import { UserPasswordVerificationController } from './controllers/user-password-verification.controller'
 import { UserFieldResolver } from './resolvers/user.field-resolver'
 import { UserResolver } from './resolvers/user.resolver'
+import { UserAdminFieldResolver } from './resolvers/user-admin.field-resolver'
 import { UserAdminResolver } from './resolvers/user-admin.resolver'
 import userConfig from './user.config'
 import { UserDataLoaderFactory } from './user.dataloader'
@@ -22,7 +23,14 @@ import { UserDataLoaderFactory } from './user.dataloader'
     UserEmailSettingsController,
     UserPasswordVerificationController,
   ],
-  providers: [...handlers, UserResolver, UserAdminResolver, UserFieldResolver, UserDataLoaderFactory],
+  providers: [
+    ...handlers,
+    UserResolver,
+    UserFieldResolver,
+    UserAdminResolver,
+    UserAdminFieldResolver,
+    UserDataLoaderFactory,
+  ],
   exports: [UserDataLoaderFactory],
 })
 export class UserModule {}

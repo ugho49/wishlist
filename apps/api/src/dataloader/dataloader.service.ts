@@ -4,12 +4,13 @@ import DataLoader from 'dataloader'
 
 import { EventDataLoaderFactory } from '../event/infrastructure/event.dataloader'
 import { EventAttendeeDataLoaderFactory } from '../event/infrastructure/event-attendee.dataloader'
-import { Event, EventAttendee, User, UserSocial, Wishlist } from '../gql/generated-types'
+import { Event, EventAttendee, User, UserFull, UserSocial, Wishlist } from '../gql/generated-types'
 import { UserDataLoaderFactory } from '../user/infrastructure/user.dataloader'
 import { WishlistDataLoaderFactory } from '../wishlist/infrastructure/wishlist.dataloader'
 
 export type DataLoaders = {
   user: DataLoader<UserId, User | null>
+  userFull: DataLoader<UserId, UserFull | null>
   userSocialsByUser: DataLoader<UserId, UserSocial[]>
   userSocial: DataLoader<UserSocialId, UserSocial | null>
   wishlist: DataLoader<WishlistId, Wishlist | null>
@@ -29,6 +30,7 @@ export class DataLoaderService {
   createLoaders(getCurrentUser: () => ICurrentUser | undefined): DataLoaders {
     return {
       user: this.userDataLoaderFactory.createUserLoader(),
+      userFull: this.userDataLoaderFactory.createUserFullLoader(),
       userSocialsByUser: this.userDataLoaderFactory.createUserSocialsByUserLoader(),
       userSocial: this.userDataLoaderFactory.createUserSocialLoader(),
       wishlist: this.wishlistDataLoaderFactory.createLoader(getCurrentUser),

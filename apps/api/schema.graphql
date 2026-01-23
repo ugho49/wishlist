@@ -12,14 +12,20 @@ directive @resolved on FIELD_DEFINITION
 
 union AdminDeleteUserResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
-input AdminGetAllUsersInput {
-  criteria: String
-  pageNumber: Int
+type AdminGetAllUsers {
+  data: [UserFull!]!
+  pagination: Pagination!
 }
 
-union AdminGetAllUsersResult = ForbiddenRejection | InternalErrorRejection | PagedUsers | UnauthorizedRejection | ValidationRejection
+input AdminGetAllUsersPaginationFilters {
+  criteria: String
+  limit: Int
+  page: Int
+}
 
-union AdminGetUserByIdResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | User | ValidationRejection
+union AdminGetAllUsersResult = AdminGetAllUsers | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection
+
+union AdminGetUserByIdResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | UserFull | ValidationRejection
 
 union AdminRemoveUserPictureResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
@@ -80,9 +86,9 @@ type EventAttendee {
 scalar EventId
 
 input EventPaginationFilters {
-  limit: Int = 10
+  limit: Int
   onlyFuture: Boolean
-  page: Int = 1
+  page: Int
 }
 
 type FieldError {
@@ -202,11 +208,6 @@ type NotFoundRejection {
   message: String!
 }
 
-type PagedUsers {
-  pagination: Pagination!
-  resources: [UserWithoutSocials!]!
-}
-
 type Pagination {
   pageNumber: Int!
   pageSize: Int!
@@ -225,7 +226,7 @@ type PendingEmailChange {
 }
 
 type Query {
-  adminGetAllUsers(input: AdminGetAllUsersInput): AdminGetAllUsersResult!
+  adminGetAllUsers(input: AdminGetAllUsersPaginationFilters): AdminGetAllUsersResult!
   adminGetUserById(userId: UserId!): AdminGetUserByIdResult!
   getCurrentUser: GetCurrentUserResult!
   getEventById(id: EventId!): GetEventByIdResult
@@ -304,12 +305,34 @@ type User {
   isEnabled: Boolean!
   lastName: String!
   pictureUrl: String
-  socials: [UserSocial!]
+  socials: [UserSocial!] @resolved
   updatedAt: String!
+}
+
+enum UserAuthorities {
+  ROLE_ADMIN
+  ROLE_SUPERADMIN
+  ROLE_USER
 }
 
 type UserEmailSettings {
   dailyNewItemNotification: Boolean!
+}
+
+type UserFull {
+  authorities: [UserAuthorities!]!
+  birthday: String
+  createdAt: String!
+  email: String!
+  firstName: String!
+  id: UserId!
+  isEnabled: Boolean!
+  lastConnectedAt: String
+  lastIp: String
+  lastName: String!
+  pictureUrl: String
+  socials: [UserSocial!]! @resolved
+  updatedAt: String!
 }
 
 scalar UserId
@@ -325,21 +348,6 @@ type UserSocial {
 }
 
 scalar UserSocialId
-
-type UserWithoutSocials {
-  admin: Boolean!
-  birthday: String
-  createdAt: String!
-  email: String!
-  firstname: String!
-  id: UserId!
-  isEnabled: Boolean!
-  lastConnectedAt: String
-  lastIp: String
-  lastname: String!
-  pictureUrl: String
-  updatedAt: String!
-}
 
 type ValidationRejection {
   errors: [FieldError!]!

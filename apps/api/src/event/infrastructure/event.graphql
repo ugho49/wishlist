@@ -34,8 +34,8 @@ type GetEventsPagedResponse {
 }
 
 input EventPaginationFilters {
-  page: Int = 1
-  limit: Int = 10
+  page: Int
+  limit: Int
   onlyFuture: Boolean
 }
 

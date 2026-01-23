@@ -1,35 +1,32 @@
 import type { ICurrentUser } from '@wishlist/common'
 
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql'
+import { NotFoundException } from '@nestjs/common'
+import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql'
 import { GqlCurrentUser, IsAdmin } from '@wishlist/api/auth'
-import { ZodPipe } from '@wishlist/api/core'
-import { UserId } from '@wishlist/common'
+import { DEFAULT_RESULT_NUMBER, GraphQLContext, ZodPipe } from '@wishlist/api/core'
+import { createPagedResponse, UserId } from '@wishlist/common'
 
 import {
   AdminDeleteUserResult,
-  AdminGetAllUsersInput,
+  AdminGetAllUsersPaginationFilters,
   AdminGetAllUsersResult,
   AdminGetUserByIdResult,
   AdminRemoveUserPictureResult,
   AdminUpdateUserProfileInput,
   AdminUpdateUserProfileResult,
-  PagedUsers,
-  Pagination,
-  User,
-  UserWithoutSocials,
 } from '../../../gql/generated-types'
 import { DeleteUserUseCase } from '../../application/command/delete-user.use-case'
 import { RemoveUserPictureUseCase } from '../../application/command/remove-user-picture.use-case'
 import { UpdateUserFullUseCase } from '../../application/command/update-user-full.use-case'
-import { GetUserByIdUseCase } from '../../application/query/get-user-by-id.use-case'
 import { GetUsersPaginatedUseCase } from '../../application/query/get-users-paginated.use-case'
-import { AdminGetAllUsersInputSchema, AdminUpdateUserProfileInputSchema, UserIdSchema } from '../user-admin.schema'
+import { userMapper } from '../user.mapper'
+import { UserIdSchema } from '../user.schema'
+import { AdminGetAllUsersPaginationFiltersSchema, AdminUpdateUserProfileInputSchema } from '../user-admin.schema'
 
 @IsAdmin()
 @Resolver()
 export class UserAdminResolver {
   constructor(
-    private readonly getUserByIdUseCase: GetUserByIdUseCase,
     private readonly getUsersPaginatedUseCase: GetUsersPaginatedUseCase,
     private readonly updateUserFullUseCase: UpdateUserFullUseCase,
     private readonly deleteUserUseCase: DeleteUserUseCase,
@@ -37,74 +34,48 @@ export class UserAdminResolver {
   ) {}
 
   @Query()
-  async adminGetUserById(@Args('userId', new ZodPipe(UserIdSchema)) userId: UserId): Promise<AdminGetUserByIdResult> {
-    const result = await this.getUserByIdUseCase.execute({ userId })
+  async adminGetUserById(
+    @Args('userId', new ZodPipe(UserIdSchema)) userId: UserId,
+    @Context() ctx: GraphQLContext,
+  ): Promise<AdminGetUserByIdResult> {
+    const result = await ctx.loaders.userFull.load(userId)
 
-    const user: User = {
-      __typename: 'User',
-      id: result.id,
-      firstName: result.firstname,
-      lastName: result.lastname,
-      email: result.email,
-      pictureUrl: result.picture_url ?? null,
-      birthday: result.birthday ?? null,
-      isEnabled: result.is_enabled,
-      createdAt: result.created_at,
-      updatedAt: result.updated_at,
-      socials: result.social.map(social => ({
-        __typename: 'UserSocial',
-        id: social.id,
-        email: social.email,
-        name: social.name ?? null,
-        socialType: social.social_type,
-        pictureUrl: social.picture_url ?? null,
-        createdAt: social.created_at,
-        updatedAt: social.updated_at,
-      })),
+    if (!result) {
+      throw new NotFoundException(`User with id ${userId} not found`)
     }
 
-    return user
+    return result
   }
 
   @Query()
   async adminGetAllUsers(
-    @Args('input', new ZodPipe(AdminGetAllUsersInputSchema)) input?: AdminGetAllUsersInput,
+    @Args('input', new ZodPipe(AdminGetAllUsersPaginationFiltersSchema)) input: AdminGetAllUsersPaginationFilters,
   ): Promise<AdminGetAllUsersResult> {
-    const result = await this.getUsersPaginatedUseCase.execute({
-      pageNumber: input?.pageNumber ?? 1,
-      criteria: input?.criteria ?? undefined,
+    const pageSize = input.limit ?? DEFAULT_RESULT_NUMBER
+    const pageNumber = input.page ?? 1
+
+    const { users, totalCount } = await this.getUsersPaginatedUseCase.execute({
+      criteria: input.criteria ?? undefined,
+      pageNumber,
+      pageSize,
     })
 
-    const pagedUsers: PagedUsers = {
-      __typename: 'PagedUsers',
-      resources: result.resources.map(user => {
-        const userWithoutSocials: UserWithoutSocials = {
-          __typename: 'UserWithoutSocials',
-          id: user.id,
-          firstname: user.firstname,
-          lastname: user.lastname,
-          email: user.email,
-          pictureUrl: user.picture_url ?? null,
-          birthday: user.birthday ?? null,
-          admin: user.admin,
-          isEnabled: user.is_enabled,
-          lastConnectedAt: user.last_connected_at ?? null,
-          lastIp: user.last_ip ?? null,
-          createdAt: user.created_at,
-          updatedAt: user.updated_at,
-        }
-        return userWithoutSocials
-      }),
+    const pagedResponse = createPagedResponse({
+      resources: users.map(user => userMapper.toGqlUserFull(user)),
+      options: { pageSize, totalElements: totalCount, pageNumber },
+    })
+
+    return {
+      __typename: 'AdminGetAllUsers',
+      data: pagedResponse.resources,
       pagination: {
         __typename: 'Pagination',
-        totalPages: result.pagination.total_pages,
-        totalElements: result.pagination.total_elements,
-        pageNumber: result.pagination.page_number,
-        pageSize: result.pagination.pages_size,
-      } satisfies Pagination,
+        totalPages: pagedResponse.pagination.total_pages,
+        totalElements: pagedResponse.pagination.total_elements,
+        pageNumber: pagedResponse.pagination.page_number,
+        pageSize: pagedResponse.pagination.pages_size,
+      },
     }
-
-    return pagedUsers
   }
 
   @Mutation()

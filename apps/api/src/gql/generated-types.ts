@@ -28,14 +28,21 @@ export type Scalars = {
 
 export type AdminDeleteUserResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
-export type AdminGetAllUsersInput = {
-  criteria?: InputMaybe<Scalars['String']['input']>;
-  pageNumber?: InputMaybe<Scalars['Int']['input']>;
+export type AdminGetAllUsers = {
+  __typename: 'AdminGetAllUsers';
+  data: Array<UserFull>;
+  pagination: Pagination;
 };
 
-export type AdminGetAllUsersResult = ForbiddenRejection | InternalErrorRejection | PagedUsers | UnauthorizedRejection | ValidationRejection;
+export type AdminGetAllUsersPaginationFilters = {
+  criteria?: InputMaybe<Scalars['String']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  page?: InputMaybe<Scalars['Int']['input']>;
+};
 
-export type AdminGetUserByIdResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | User | ValidationRejection;
+export type AdminGetAllUsersResult = AdminGetAllUsers | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection;
+
+export type AdminGetUserByIdResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | UserFull | ValidationRejection;
 
 export type AdminRemoveUserPictureResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
@@ -304,12 +311,6 @@ export type NotFoundRejection = {
   message: Scalars['String']['output'];
 };
 
-export type PagedUsers = {
-  __typename: 'PagedUsers';
-  pagination: Pagination;
-  resources: Array<UserWithoutSocials>;
-};
-
 export type Pagination = {
   __typename: 'Pagination';
   pageNumber: Scalars['Int']['output'];
@@ -345,7 +346,7 @@ export type Query = {
 
 
 export type QueryAdminGetAllUsersArgs = {
-  input?: InputMaybe<AdminGetAllUsersInput>;
+  input?: InputMaybe<AdminGetAllUsersPaginationFilters>;
 };
 
 
@@ -442,13 +443,34 @@ export type User = {
   isEnabled: Scalars['Boolean']['output'];
   lastName: Scalars['String']['output'];
   pictureUrl?: Maybe<Scalars['String']['output']>;
-  socials?: Maybe<Array<UserSocial>>;
   updatedAt: Scalars['String']['output'];
 };
+
+export enum UserAuthorities {
+  RoleAdmin = 'ROLE_ADMIN',
+  RoleSuperadmin = 'ROLE_SUPERADMIN',
+  RoleUser = 'ROLE_USER'
+}
 
 export type UserEmailSettings = {
   __typename: 'UserEmailSettings';
   dailyNewItemNotification: Scalars['Boolean']['output'];
+};
+
+export type UserFull = {
+  __typename: 'UserFull';
+  authorities: Array<UserAuthorities>;
+  birthday?: Maybe<Scalars['String']['output']>;
+  createdAt: Scalars['String']['output'];
+  email: Scalars['String']['output'];
+  firstName: Scalars['String']['output'];
+  id: Scalars['UserId']['output'];
+  isEnabled: Scalars['Boolean']['output'];
+  lastConnectedAt?: Maybe<Scalars['String']['output']>;
+  lastIp?: Maybe<Scalars['String']['output']>;
+  lastName: Scalars['String']['output'];
+  pictureUrl?: Maybe<Scalars['String']['output']>;
+  updatedAt: Scalars['String']['output'];
 };
 
 export type UserSocial = {
@@ -459,22 +481,6 @@ export type UserSocial = {
   name?: Maybe<Scalars['String']['output']>;
   pictureUrl?: Maybe<Scalars['String']['output']>;
   socialType: Scalars['String']['output'];
-  updatedAt: Scalars['String']['output'];
-};
-
-export type UserWithoutSocials = {
-  __typename: 'UserWithoutSocials';
-  admin: Scalars['Boolean']['output'];
-  birthday?: Maybe<Scalars['String']['output']>;
-  createdAt: Scalars['String']['output'];
-  email: Scalars['String']['output'];
-  firstname: Scalars['String']['output'];
-  id: Scalars['UserId']['output'];
-  isEnabled: Scalars['Boolean']['output'];
-  lastConnectedAt?: Maybe<Scalars['String']['output']>;
-  lastIp?: Maybe<Scalars['String']['output']>;
-  lastname: Scalars['String']['output'];
-  pictureUrl?: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['String']['output'];
 };
 

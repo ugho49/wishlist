@@ -21,7 +21,7 @@ type User {
   isEnabled: Boolean!
   createdAt: String!
   updatedAt: String!
-  socials: [UserSocial!]
+  socials: [UserSocial!] @resolved
 }
 
 type PendingEmailChange {
@@ -46,12 +46,6 @@ union GetUserEmailSettingsResult =
   | UnauthorizedRejection
   | ForbiddenRejection
   | InternalErrorRejection
-
-extend type Query {
-  getCurrentUser: GetCurrentUserResult!
-  getPendingEmailChange: GetPendingEmailChangeResult
-  getUserEmailSettings: GetUserEmailSettingsResult!
-}
 
 input RegisterUserInput {
   firstname: String!
@@ -186,6 +180,12 @@ union ResetPasswordResult =
   | UnauthorizedRejection
   | ForbiddenRejection
   | InternalErrorRejection
+
+extend type Query {
+  getCurrentUser: GetCurrentUserResult!
+  getPendingEmailChange: GetPendingEmailChangeResult
+  getUserEmailSettings: GetUserEmailSettingsResult!
+}
 
 extend type Mutation {
   registerUser(input: RegisterUserInput!): RegisterUserResult!
