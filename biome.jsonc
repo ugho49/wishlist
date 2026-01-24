@@ -62,7 +62,8 @@
         "useConsistentArrayType": "error",
         "useConst": "error",
         "useThrowOnlyError": "error",
-        "useGraphqlNamingConvention": "error"
+        "useGraphqlNamingConvention": "error",
+        "useDeprecatedReason": "error"
       },
       "performance": {
         "noAccumulatingSpread": "off"
