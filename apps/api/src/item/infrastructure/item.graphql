@@ -13,3 +13,92 @@ type Item {
   takenAt: String
   createdAt: String!
 }
+
+########################################################
+###############   Output Types   #######################
+########################################################
+
+type ToggleItemOutput {
+  takenById: UserId
+  takenAt: String
+}
+
+type ScanItemUrlOutput {
+  pictureUrl: String
+}
+
+########################################################
+###############   Input Types   ########################
+########################################################
+
+input CreateItemInput {
+  wishlistId: WishlistId!
+  name: String!
+  description: String
+  url: String
+  score: Int
+  pictureUrl: String
+}
+
+input UpdateItemInput {
+  name: String!
+  description: String
+  url: String
+  score: Int
+  pictureUrl: String
+}
+
+input ScanItemUrlInput {
+  url: String!
+}
+
+########################################################
+###############   Result Unions   ######################
+########################################################
+
+union CreateItemResult =
+  | Item
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+
+union UpdateItemResult =
+  | VoidOutput
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+
+union DeleteItemResult =
+  | VoidOutput
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+
+union ToggleItemResult =
+  | ToggleItemOutput
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+
+union ScanItemUrlResult =
+  | ScanItemUrlOutput
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+
+########################################################
+###############   Mutations   ##########################
+########################################################
+
+extend type Mutation {
+  createItem(input: CreateItemInput!): CreateItemResult!
+  updateItem(itemId: ItemId!, input: UpdateItemInput!): UpdateItemResult!
+  deleteItem(itemId: ItemId!): DeleteItemResult!
+  toggleItem(itemId: ItemId!): ToggleItemResult!
+  scanItemUrl(input: ScanItemUrlInput!): ScanItemUrlResult!
+}

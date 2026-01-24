@@ -50,7 +50,24 @@ function toGqlItem(param: { item: WishlistItem; displayUserAndSuggested: boolean
   return dto
 }
 
+function dtoToGqlItem(dto: ItemDto): GqlItem {
+  return {
+    __typename: 'Item',
+    id: dto.id,
+    name: dto.name,
+    description: dto.description,
+    score: dto.score,
+    url: dto.url,
+    pictureUrl: dto.picture_url,
+    createdAt: dto.created_at,
+    isSuggested: dto.is_suggested,
+    takenById: dto.taken_by?.id,
+    takenAt: dto.taken_at,
+  }
+}
+
 export const itemMapper = {
   toDto,
   toGqlItem,
+  dtoToGqlItem,
 }
