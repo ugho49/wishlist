@@ -16,7 +16,6 @@ type UserFull {
   updatedAt: String!
   socials: [UserSocial!]! @resolved
   authorities: [UserAuthorities!]!
-  isEnabled: Boolean!
   lastConnectedAt: String
   lastIp: String
 }

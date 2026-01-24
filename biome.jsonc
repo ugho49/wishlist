@@ -1,9 +1,9 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.3.10/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.3.12/schema.json",
   "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
   "files": {
     "ignoreUnknown": false,
-    "includes": ["**", "!node_modules", "!dist", "!junit_reports", "!.nx", "!.yarn", "!**/schema.graphql"]
+    "includes": ["**", "!node_modules", "!dist", "!junit_reports", "!.nx", "!.yarn"]
   },
   "formatter": {
     "formatWithErrors": false,
@@ -30,7 +30,12 @@
         // previously eslint was enforcing only return types, so a lot of code is not compliant
         // "useExplicitType": "error",
         "noFloatingPromises": "error",
-        "noMisusedPromises": "error"
+        "noMisusedPromises": "error",
+        "noDuplicateArgumentNames": "error",
+        "noDuplicateEnumValueNames": "error",
+        "noDuplicateFieldDefinitionNames": "error",
+        "noDuplicateInputFieldNames": "error",
+        "noDuplicateVariableNames": "error"
       },
       "complexity": {
         "noStaticOnlyClass": "off",
@@ -56,7 +61,8 @@
         "useArrayLiterals": "error",
         "useConsistentArrayType": "error",
         "useConst": "error",
-        "useThrowOnlyError": "error"
+        "useThrowOnlyError": "error",
+        "useGraphqlNamingConvention": "error"
       },
       "performance": {
         "noAccumulatingSpread": "off"
@@ -66,7 +72,8 @@
         "noImplicitAnyLet": "error",
         "noExplicitAny": "error",
         "noUnassignedVariables": "error",
-        "noVar": "error"
+        "noVar": "error",
+        "noDuplicateFields": "error"
       }
     }
   },
