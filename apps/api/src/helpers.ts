@@ -68,7 +68,8 @@ export function pinoLoggerConfig(serviceName: string): PinoParams {
       },
       customSuccessMessage: (req, res) => {
         const { method, url } = req
-        const contextString = `[${method}] [${url}]`
+        const originalUrl = (req as unknown as { originalUrl?: string }).originalUrl
+        const contextString = `[${method}] [${originalUrl || url}]`
         const { statusCode } = res
 
         return `${contextString} - [${statusCode}] `
