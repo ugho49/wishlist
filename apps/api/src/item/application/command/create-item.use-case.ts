@@ -2,10 +2,8 @@ import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/commo
 import { WishlistItem, WishlistItemRepository } from '@wishlist/api/item'
 import { REPOSITORIES } from '@wishlist/api/repositories'
 import { WishlistRepository } from '@wishlist/api/wishlist'
-import { ICurrentUser, ItemDto, WishlistId } from '@wishlist/common'
+import { ICurrentUser, WishlistId } from '@wishlist/common'
 import { TidyURL } from 'tidy-url'
-
-import { itemMapper } from '../../infrastructure'
 
 export type CreateItemInput = {
   currentUser: ICurrentUser
@@ -30,7 +28,7 @@ export class CreateItemUseCase {
     private readonly itemRepository: WishlistItemRepository,
   ) {}
 
-  async execute(command: CreateItemInput): Promise<ItemDto> {
+  async execute(command: CreateItemInput): Promise<WishlistItem> {
     this.logger.log('Create item request received', { command })
     const wishlist = await this.wishlistRepository.findByIdOrFail(command.wishlistId)
     const hasAccess = await this.wishlistRepository.hasAccess({
@@ -59,6 +57,6 @@ export class CreateItemUseCase {
     this.logger.log('Saving item...', { item })
     await this.itemRepository.save(item)
 
-    return itemMapper.toDto({ item, displayUserAndSuggested: true })
+    return item
   }
 }

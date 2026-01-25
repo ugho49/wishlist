@@ -76,6 +76,19 @@ export type ConfirmEmailChangeInput = {
 
 export type ConfirmEmailChangeResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
+export type CreateItemInput = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  pictureUrl?: InputMaybe<Scalars['String']['input']>;
+  score?: InputMaybe<Scalars['Int']['input']>;
+  url?: InputMaybe<Scalars['String']['input']>;
+  wishlistId: Scalars['WishlistId']['input'];
+};
+
+export type CreateItemResult = ForbiddenRejection | InternalErrorRejection | Item | UnauthorizedRejection | ValidationRejection;
+
+export type DeleteItemResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+
 export type Event = {
   __typename: 'Event';
   attendeeIds: Array<Scalars['AttendeeId']['output']>;
@@ -125,6 +138,13 @@ export type GetEventsPagedResponse = {
   pagination: Pagination;
 };
 
+export type GetImportableItemsOutput = {
+  __typename: 'GetImportableItemsOutput';
+  items: Array<Item>;
+};
+
+export type GetImportableItemsResult = ForbiddenRejection | GetImportableItemsOutput | InternalErrorRejection | UnauthorizedRejection;
+
 export type GetMyEventsResult = ForbiddenRejection | GetEventsPagedResponse | InternalErrorRejection | UnauthorizedRejection;
 
 export type GetMyWishlistsResult = ForbiddenRejection | GetWishlistsPagedResponse | InternalErrorRejection | UnauthorizedRejection;
@@ -151,6 +171,18 @@ export enum HealthStatus {
   Ok = 'OK',
   ShuttingDown = 'SHUTTING_DOWN'
 }
+
+export type ImportItemsInput = {
+  sourceItemIds: Array<Scalars['ItemId']['input']>;
+  wishlistId: Scalars['WishlistId']['input'];
+};
+
+export type ImportItemsOutput = {
+  __typename: 'ImportItemsOutput';
+  items: Array<Item>;
+};
+
+export type ImportItemsResult = ForbiddenRejection | ImportItemsOutput | InternalErrorRejection | UnauthorizedRejection | ValidationRejection;
 
 export type InternalErrorRejection = {
   __typename: 'InternalErrorRejection';
@@ -211,6 +243,9 @@ export type Mutation = {
   adminUpdateUserProfile: AdminUpdateUserProfileResult;
   changeUserPassword: ChangeUserPasswordResult;
   confirmEmailChange: ConfirmEmailChangeResult;
+  createItem: CreateItemResult;
+  deleteItem: DeleteItemResult;
+  importItems: ImportItemsResult;
   linkCurrentUserlWithGoogle: LinkUserToGoogleResult;
   login: LoginResult;
   loginWithGoogle: LoginWithGoogleResult;
@@ -218,8 +253,11 @@ export type Mutation = {
   removeUserPicture: RemoveUserPictureResult;
   requestEmailChange: RequestEmailChangeResult;
   resetPassword: ResetPasswordResult;
+  scanItemUrl: ScanItemUrlResult;
   sendResetPasswordEmail: SendResetPasswordEmailResult;
+  toggleItem: ToggleItemResult;
   unlinkCurrentUserSocial: UnlinkCurrentUserSocialResult;
+  updateItem: UpdateItemResult;
   updateUserEmailSettings: UpdateUserEmailSettingsResult;
   updateUserPictureFromSocial: UpdateUserPictureFromSocialResult;
   updateUserProfile: UpdateUserProfileResult;
@@ -249,6 +287,21 @@ export type MutationChangeUserPasswordArgs = {
 
 export type MutationConfirmEmailChangeArgs = {
   input: ConfirmEmailChangeInput;
+};
+
+
+export type MutationCreateItemArgs = {
+  input: CreateItemInput;
+};
+
+
+export type MutationDeleteItemArgs = {
+  itemId: Scalars['ItemId']['input'];
+};
+
+
+export type MutationImportItemsArgs = {
+  input: ImportItemsInput;
 };
 
 
@@ -282,13 +335,29 @@ export type MutationResetPasswordArgs = {
 };
 
 
+export type MutationScanItemUrlArgs = {
+  input: ScanItemUrlInput;
+};
+
+
 export type MutationSendResetPasswordEmailArgs = {
   input: SendResetPasswordEmailInput;
 };
 
 
+export type MutationToggleItemArgs = {
+  itemId: Scalars['ItemId']['input'];
+};
+
+
 export type MutationUnlinkCurrentUserSocialArgs = {
   socialId: Scalars['UserSocialId']['input'];
+};
+
+
+export type MutationUpdateItemArgs = {
+  input: UpdateItemInput;
+  itemId: Scalars['ItemId']['input'];
 };
 
 
@@ -336,6 +405,7 @@ export type Query = {
   adminGetUserById: AdminGetUserByIdResult;
   getCurrentUser: GetCurrentUserResult;
   getEventById?: Maybe<GetEventByIdResult>;
+  getImportableItems: GetImportableItemsResult;
   getMyEvents: GetMyEventsResult;
   getMyWishlists: GetMyWishlistsResult;
   getPendingEmailChange?: Maybe<GetPendingEmailChangeResult>;
@@ -357,6 +427,11 @@ export type QueryAdminGetUserByIdArgs = {
 
 export type QueryGetEventByIdArgs = {
   id: Scalars['EventId']['input'];
+};
+
+
+export type QueryGetImportableItemsArgs = {
+  wishlistId: Scalars['WishlistId']['input'];
 };
 
 
@@ -400,11 +475,30 @@ export type ResetPasswordInput = {
 
 export type ResetPasswordResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
+export type ScanItemUrlInput = {
+  url: Scalars['String']['input'];
+};
+
+export type ScanItemUrlOutput = {
+  __typename: 'ScanItemUrlOutput';
+  pictureUrl?: Maybe<Scalars['String']['output']>;
+};
+
+export type ScanItemUrlResult = ForbiddenRejection | InternalErrorRejection | ScanItemUrlOutput | UnauthorizedRejection | ValidationRejection;
+
 export type SendResetPasswordEmailInput = {
   email: Scalars['String']['input'];
 };
 
 export type SendResetPasswordEmailResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+
+export type ToggleItemOutput = {
+  __typename: 'ToggleItemOutput';
+  takenAt?: Maybe<Scalars['String']['output']>;
+  takenById?: Maybe<Scalars['UserId']['output']>;
+};
+
+export type ToggleItemResult = ForbiddenRejection | InternalErrorRejection | ToggleItemOutput | UnauthorizedRejection | ValidationRejection;
 
 export type UnauthorizedRejection = {
   __typename: 'UnauthorizedRejection';
@@ -412,6 +506,16 @@ export type UnauthorizedRejection = {
 };
 
 export type UnlinkCurrentUserSocialResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+
+export type UpdateItemInput = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  pictureUrl?: InputMaybe<Scalars['String']['input']>;
+  score?: InputMaybe<Scalars['Int']['input']>;
+  url?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type UpdateItemResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
 export type UpdateUserEmailSettingsInput = {
   dailyNewItemNotification: Scalars['Boolean']['input'];

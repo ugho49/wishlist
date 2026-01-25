@@ -13,3 +13,127 @@ type Item {
   takenAt: String
   createdAt: String!
 }
+
+########################################################
+###############   Input Types   ########################
+########################################################
+
+input CreateItemInput {
+  wishlistId: WishlistId!
+  name: String!
+  description: String
+  url: String
+  score: Int
+  pictureUrl: String
+}
+
+input UpdateItemInput {
+  name: String!
+  description: String
+  url: String
+  score: Int
+  pictureUrl: String
+}
+
+input ScanItemUrlInput {
+  url: String!
+}
+
+input ImportItemsInput {
+  wishlistId: WishlistId!
+  sourceItemIds: [ItemId!]!
+}
+
+########################################################
+###############   Output Types   #######################
+########################################################
+
+type ToggleItemOutput {
+  takenById: UserId
+  takenAt: String
+}
+
+type ScanItemUrlOutput {
+  pictureUrl: String
+}
+
+type GetImportableItemsOutput {
+  items: [Item!]!
+}
+
+type ImportItemsOutput {
+  items: [Item!]!
+}
+
+########################################################
+###############   Result Unions   ######################
+########################################################
+
+union CreateItemResult =
+  | Item
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+
+union UpdateItemResult =
+  | VoidOutput
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+
+union DeleteItemResult =
+  | VoidOutput
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+
+union ToggleItemResult =
+  | ToggleItemOutput
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+
+union ScanItemUrlResult =
+  | ScanItemUrlOutput
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+
+union GetImportableItemsResult =
+  | GetImportableItemsOutput
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+
+union ImportItemsResult =
+  | ImportItemsOutput
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+
+########################################################
+###############   Mutations   ##########################
+########################################################
+
+extend type Mutation {
+  createItem(input: CreateItemInput!): CreateItemResult!
+  updateItem(itemId: ItemId!, input: UpdateItemInput!): UpdateItemResult!
+  deleteItem(itemId: ItemId!): DeleteItemResult!
+  toggleItem(itemId: ItemId!): ToggleItemResult!
+  scanItemUrl(input: ScanItemUrlInput!): ScanItemUrlResult!
+  importItems(input: ImportItemsInput!): ImportItemsResult!
+}
+
+########################################################
+###############   Queries   ###########################
+########################################################
+
+extend type Query {
+  getImportableItems(wishlistId: WishlistId!): GetImportableItemsResult!
+}
