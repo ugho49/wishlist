@@ -1,11 +1,9 @@
 import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common'
 import { TransactionManager } from '@wishlist/api/core'
-import { WishlistItemRepository } from '@wishlist/api/item'
+import { WishlistItem, WishlistItemRepository } from '@wishlist/api/item'
 import { REPOSITORIES } from '@wishlist/api/repositories'
 import { WishlistRepository } from '@wishlist/api/wishlist'
-import { ICurrentUser, ItemDto, ItemId, WishlistId } from '@wishlist/common'
-
-import { itemMapper } from '../../infrastructure'
+import { ICurrentUser, ItemId, WishlistId } from '@wishlist/common'
 
 export type ImportItemsInput = {
   currentUser: ICurrentUser
@@ -25,7 +23,7 @@ export class ImportItemsUseCase {
     private readonly transactionManager: TransactionManager,
   ) {}
 
-  async execute(command: ImportItemsInput): Promise<ItemDto[]> {
+  async execute(command: ImportItemsInput): Promise<WishlistItem[]> {
     this.logger.log('Import items request received', { command })
     const wishlist = await this.wishlistRepository.findByIdOrFail(command.wishlistId)
     const hasAccess = await this.wishlistRepository.hasAccess({
@@ -63,6 +61,6 @@ export class ImportItemsUseCase {
       }
     })
 
-    return itemsToImport.map(item => itemMapper.toDto({ item, displayUserAndSuggested: false }))
+    return itemsToImport
   }
 }

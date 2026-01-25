@@ -138,6 +138,13 @@ export type GetEventsPagedResponse = {
   pagination: Pagination;
 };
 
+export type GetImportableItemsOutput = {
+  __typename: 'GetImportableItemsOutput';
+  items: Array<Item>;
+};
+
+export type GetImportableItemsResult = ForbiddenRejection | GetImportableItemsOutput | InternalErrorRejection | UnauthorizedRejection;
+
 export type GetMyEventsResult = ForbiddenRejection | GetEventsPagedResponse | InternalErrorRejection | UnauthorizedRejection;
 
 export type GetMyWishlistsResult = ForbiddenRejection | GetWishlistsPagedResponse | InternalErrorRejection | UnauthorizedRejection;
@@ -164,6 +171,18 @@ export enum HealthStatus {
   Ok = 'OK',
   ShuttingDown = 'SHUTTING_DOWN'
 }
+
+export type ImportItemsInput = {
+  sourceItemIds: Array<Scalars['ItemId']['input']>;
+  wishlistId: Scalars['WishlistId']['input'];
+};
+
+export type ImportItemsOutput = {
+  __typename: 'ImportItemsOutput';
+  items: Array<Item>;
+};
+
+export type ImportItemsResult = ForbiddenRejection | ImportItemsOutput | InternalErrorRejection | UnauthorizedRejection | ValidationRejection;
 
 export type InternalErrorRejection = {
   __typename: 'InternalErrorRejection';
@@ -226,6 +245,7 @@ export type Mutation = {
   confirmEmailChange: ConfirmEmailChangeResult;
   createItem: CreateItemResult;
   deleteItem: DeleteItemResult;
+  importItems: ImportItemsResult;
   linkCurrentUserlWithGoogle: LinkUserToGoogleResult;
   login: LoginResult;
   loginWithGoogle: LoginWithGoogleResult;
@@ -277,6 +297,11 @@ export type MutationCreateItemArgs = {
 
 export type MutationDeleteItemArgs = {
   itemId: Scalars['ItemId']['input'];
+};
+
+
+export type MutationImportItemsArgs = {
+  input: ImportItemsInput;
 };
 
 
@@ -380,6 +405,7 @@ export type Query = {
   adminGetUserById: AdminGetUserByIdResult;
   getCurrentUser: GetCurrentUserResult;
   getEventById?: Maybe<GetEventByIdResult>;
+  getImportableItems: GetImportableItemsResult;
   getMyEvents: GetMyEventsResult;
   getMyWishlists: GetMyWishlistsResult;
   getPendingEmailChange?: Maybe<GetPendingEmailChangeResult>;
@@ -401,6 +427,11 @@ export type QueryAdminGetUserByIdArgs = {
 
 export type QueryGetEventByIdArgs = {
   id: Scalars['EventId']['input'];
+};
+
+
+export type QueryGetImportableItemsArgs = {
+  wishlistId: Scalars['WishlistId']['input'];
 };
 
 

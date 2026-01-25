@@ -22,6 +22,7 @@ import { ToggleItemUseCase } from '../application/command/toggle-item.use-case'
 import { UpdateItemUseCase } from '../application/command/update-item.use-case'
 import { GetImportableItemsUseCase } from '../application/query/get-importable-items.use-case'
 import { ScanItemUrlUseCase } from '../application/query/scan-item-url.use-case'
+import { itemMapper } from './item.mapper'
 
 @ApiTags('Item')
 @Controller('/item')
@@ -38,17 +39,23 @@ export class ItemController {
 
   // Get importable items from old wishlists
   @Get('/importable')
-  getImportableItems(@CurrentUser('id') userId: UserId, @Query() dto: GetImportableItemsInputDto): Promise<ItemDto[]> {
-    return this.getImportableItemsUseCase.execute({ userId, wishlistId: dto.wishlist_id })
+  async getImportableItems(
+    @CurrentUser('id') userId: UserId,
+    @Query() dto: GetImportableItemsInputDto,
+  ): Promise<ItemDto[]> {
+    const items = await this.getImportableItemsUseCase.execute({ userId, wishlistId: dto.wishlist_id })
+    return items.map(item => itemMapper.toDto({ item, displayUserAndSuggested: false }))
   }
 
   @Post('/import')
-  importItems(@CurrentUser() currentUser: ICurrentUser, @Body() dto: ImportItemsInputDto): Promise<ItemDto[]> {
-    return this.importItemsUseCase.execute({
+  async importItems(@CurrentUser() currentUser: ICurrentUser, @Body() dto: ImportItemsInputDto): Promise<ItemDto[]> {
+    const items = await this.importItemsUseCase.execute({
       currentUser,
       wishlistId: dto.wishlist_id,
       sourceItemIds: dto.source_item_ids,
     })
+
+    return items.map(item => itemMapper.toDto({ item, displayUserAndSuggested: false }))
   }
 
   // Scan an item url to get the picture url
@@ -58,8 +65,8 @@ export class ItemController {
   }
 
   @Post()
-  createItem(@CurrentUser() currentUser: ICurrentUser, @Body() dto: AddItemForListInputDto): Promise<ItemDto> {
-    return this.createItemUseCase.execute({
+  async createItem(@CurrentUser() currentUser: ICurrentUser, @Body() dto: AddItemForListInputDto): Promise<ItemDto> {
+    const item = await this.createItemUseCase.execute({
       currentUser,
       wishlistId: dto.wishlist_id,
       newItem: {
@@ -70,6 +77,8 @@ export class ItemController {
         pictureUrl: dto.picture_url,
       },
     })
+
+    return itemMapper.toDto({ item, displayUserAndSuggested: true })
   }
 
   @Put('/:id')

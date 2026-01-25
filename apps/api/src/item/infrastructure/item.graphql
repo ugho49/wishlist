@@ -15,19 +15,6 @@ type Item {
 }
 
 ########################################################
-###############   Output Types   #######################
-########################################################
-
-type ToggleItemOutput {
-  takenById: UserId
-  takenAt: String
-}
-
-type ScanItemUrlOutput {
-  pictureUrl: String
-}
-
-########################################################
 ###############   Input Types   ########################
 ########################################################
 
@@ -50,6 +37,32 @@ input UpdateItemInput {
 
 input ScanItemUrlInput {
   url: String!
+}
+
+input ImportItemsInput {
+  wishlistId: WishlistId!
+  sourceItemIds: [ItemId!]!
+}
+
+########################################################
+###############   Output Types   #######################
+########################################################
+
+type ToggleItemOutput {
+  takenById: UserId
+  takenAt: String
+}
+
+type ScanItemUrlOutput {
+  pictureUrl: String
+}
+
+type GetImportableItemsOutput {
+  items: [Item!]!
+}
+
+type ImportItemsOutput {
+  items: [Item!]!
 }
 
 ########################################################
@@ -91,6 +104,19 @@ union ScanItemUrlResult =
   | ForbiddenRejection
   | InternalErrorRejection
 
+union GetImportableItemsResult =
+  | GetImportableItemsOutput
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+
+union ImportItemsResult =
+  | ImportItemsOutput
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+
 ########################################################
 ###############   Mutations   ##########################
 ########################################################
@@ -101,4 +127,13 @@ extend type Mutation {
   deleteItem(itemId: ItemId!): DeleteItemResult!
   toggleItem(itemId: ItemId!): ToggleItemResult!
   scanItemUrl(input: ScanItemUrlInput!): ScanItemUrlResult!
+  importItems(input: ImportItemsInput!): ImportItemsResult!
+}
+
+########################################################
+###############   Queries   ###########################
+########################################################
+
+extend type Query {
+  getImportableItems(wishlistId: WishlistId!): GetImportableItemsResult!
 }

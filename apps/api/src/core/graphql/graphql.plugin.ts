@@ -1,7 +1,72 @@
 import type { Plugin } from 'graphql-yoga'
 
 import { Logger } from '@nestjs/common'
-import { type GraphQLError, print as graphqlPrint } from 'graphql'
+import { type DocumentNode, type GraphQLError, print as graphqlPrint, Kind, visit } from 'graphql'
+
+const SENSITIVE_FIELDS = new Set([
+  'password',
+  'token',
+  'accesstoken',
+  'refreshtoken',
+  'secret',
+  'apikey',
+  'authorization',
+  'credential',
+  'credentials',
+  'currentpassword',
+  'newpassword',
+])
+
+const REDACTED = '[REDACTED]'
+
+export function obfuscateQuery(document: DocumentNode): string {
+  const sanitizedDoc = visit(document, {
+    Argument(node) {
+      if (SENSITIVE_FIELDS.has(node.name.value.toLowerCase())) {
+        return {
+          ...node,
+          value: { kind: Kind.STRING, value: REDACTED },
+        }
+      }
+      return undefined
+    },
+    ObjectField(node) {
+      if (SENSITIVE_FIELDS.has(node.name.value.toLowerCase())) {
+        return {
+          ...node,
+          value: { kind: Kind.STRING, value: REDACTED },
+        }
+      }
+      return undefined
+    },
+  })
+
+  return graphqlPrint(sanitizedDoc)
+}
+
+export function obfuscateSensitiveData(data: unknown): unknown {
+  if (data === null || data === undefined) {
+    return data
+  }
+
+  if (Array.isArray(data)) {
+    return data.map(obfuscateSensitiveData)
+  }
+
+  if (typeof data === 'object') {
+    const result: Record<string, unknown> = {}
+    for (const [key, value] of Object.entries(data)) {
+      if (SENSITIVE_FIELDS.has(key.toLowerCase())) {
+        result[key] = REDACTED
+      } else {
+        result[key] = obfuscateSensitiveData(value)
+      }
+    }
+    return result
+  }
+
+  return data
+}
 
 export function useLoggingPlugin(): Plugin {
   const logger = new Logger('GraphQLLoggerPlugin')
@@ -16,22 +81,23 @@ export function useLoggingPlugin(): Plugin {
       }
 
       const operationType = operation.operation
-      const query = graphqlPrint(args.document)
+      const query = obfuscateQuery(args.document)
+      const variables = obfuscateSensitiveData(args.variableValues)
 
-      logger.log(`Executing GraphQL ${operationType}`, {
+      const logArgs = {
         query,
         operationType,
         operationName,
-        variables: args.variableValues,
-      })
+        variables,
+      }
+
+      logger.log(`Executing GraphQL ${operationType}`, logArgs)
 
       return {
         onExecuteDone({ result }) {
           if ('errors' in result && result.errors) {
             logger.error(`GraphQL ${operationType} errors`, {
-              query,
-              operationType,
-              operationName,
+              ...logArgs,
               errors: result.errors.map((e: GraphQLError) => ({
                 code: e.extensions?.code,
                 message: e.message,

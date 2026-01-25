@@ -122,6 +122,12 @@ type GetEventsPagedResponse {
   pagination: Pagination!
 }
 
+type GetImportableItemsOutput {
+  items: [Item!]!
+}
+
+union GetImportableItemsResult = ForbiddenRejection | GetImportableItemsOutput | InternalErrorRejection | UnauthorizedRejection
+
 union GetMyEventsResult = ForbiddenRejection | GetEventsPagedResponse | InternalErrorRejection | UnauthorizedRejection
 
 union GetMyWishlistsResult = ForbiddenRejection | GetWishlistsPagedResponse | InternalErrorRejection | UnauthorizedRejection
@@ -146,6 +152,17 @@ enum HealthStatus {
   OK
   SHUTTING_DOWN
 }
+
+input ImportItemsInput {
+  sourceItemIds: [ItemId!]!
+  wishlistId: WishlistId!
+}
+
+type ImportItemsOutput {
+  items: [Item!]!
+}
+
+union ImportItemsResult = ForbiddenRejection | ImportItemsOutput | InternalErrorRejection | UnauthorizedRejection | ValidationRejection
 
 type InternalErrorRejection {
   message: String!
@@ -205,6 +222,7 @@ type Mutation {
   confirmEmailChange(input: ConfirmEmailChangeInput!): ConfirmEmailChangeResult!
   createItem(input: CreateItemInput!): CreateItemResult!
   deleteItem(itemId: ItemId!): DeleteItemResult!
+  importItems(input: ImportItemsInput!): ImportItemsResult!
   linkCurrentUserlWithGoogle(input: LinkUserToGoogleInput!): LinkUserToGoogleResult!
   login(input: LoginInput!): LoginResult!
   loginWithGoogle(input: LoginWithGoogleInput!): LoginWithGoogleResult!
@@ -248,6 +266,7 @@ type Query {
   adminGetUserById(userId: UserId!): AdminGetUserByIdResult!
   getCurrentUser: GetCurrentUserResult!
   getEventById(id: EventId!): GetEventByIdResult
+  getImportableItems(wishlistId: WishlistId!): GetImportableItemsResult!
   getMyEvents(filters: EventPaginationFilters!): GetMyEventsResult!
   getMyWishlists(filters: PaginationFilters!): GetMyWishlistsResult!
   getPendingEmailChange: GetPendingEmailChangeResult
