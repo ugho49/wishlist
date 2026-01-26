@@ -1,4 +1,4 @@
-import type { DetailedWishlistDto, WishlistId } from '@wishlist/common'
+import type { WishlistId } from '@wishlist/common'
 import type { RootState } from '../../core'
 import type { WishlistPageQuery } from '../../gql/__generated__/types'
 
@@ -22,64 +22,12 @@ import { WishlistHeader } from './WishlistHeader'
 import { WishlistItems } from './WishlistItems'
 import { WishlistNotFound } from './WishlistNotFound'
 
-type GqlWishlist = Extract<NonNullable<WishlistPageQuery['getWishlistById']>, { __typename?: 'Wishlist' }>
+export type GqlWishlist = Extract<NonNullable<WishlistPageQuery['getWishlistById']>, { __typename?: 'Wishlist' }>
+export type GqlWishlistItem = GqlWishlist['items'][number]
+export type GqlWishlistEvent = GqlWishlist['events'][number]
+export type GqlWishlistUser = GqlWishlist['owner']
 
 const mapState = (state: RootState) => state.auth.user?.id
-
-function mapGqlToDto(gql: GqlWishlist): DetailedWishlistDto {
-  return {
-    id: gql.id,
-    title: gql.title,
-    description: gql.description ?? undefined,
-    logo_url: gql.logoUrl ?? undefined,
-    owner: {
-      id: gql.owner.id,
-      firstname: gql.owner.firstName,
-      lastname: gql.owner.lastName,
-      email: '',
-      picture_url: gql.owner.pictureUrl ?? undefined,
-    },
-    co_owner: gql.coOwner
-      ? {
-          id: gql.coOwner.id,
-          firstname: gql.coOwner.firstName,
-          lastname: gql.coOwner.lastName,
-          email: '',
-          picture_url: gql.coOwner.pictureUrl ?? undefined,
-        }
-      : undefined,
-    events: gql.events.map(event => ({
-      id: event.id,
-      title: event.title,
-      event_date: event.eventDate,
-    })),
-    items: gql.items.map(item => ({
-      id: item.id,
-      name: item.name,
-      description: item.description ?? undefined,
-      url: item.url ?? undefined,
-      score: item.score ?? undefined,
-      is_suggested: item.isSuggested ?? undefined,
-      picture_url: item.pictureUrl ?? undefined,
-      taken_by: item.takerUser
-        ? {
-            id: item.takerUser.id,
-            firstname: item.takerUser.firstName,
-            lastname: item.takerUser.lastName,
-            email: '',
-            picture_url: item.takerUser.pictureUrl ?? undefined,
-          }
-        : undefined,
-      taken_at: item.takenAt ?? undefined,
-      created_at: item.createdAt,
-    })),
-    config: {
-      hide_items: gql.config.hideItems,
-    },
-    created_at: '',
-    updated_at: '',
-  }
-}
 
 interface WishlistPageProps {
   wishlistId: WishlistId
@@ -106,14 +54,13 @@ export const WishlistPage = ({ wishlistId }: WishlistPageProps) => {
       .with({ __typename: 'InternalErrorRejection' }, () => ({ wishlist: undefined, currentUserCanEdit: false }))
       .with(P.nullish, () => ({ wishlist: undefined, currentUserCanEdit: false }))
       .with({ id: P.string }, gqlWishlist => {
-        const mapped = mapGqlToDto(gqlWishlist)
-        const canEdit = mapped.owner.id === currentUserId || mapped.co_owner?.id === currentUserId
-        return { wishlist: mapped, currentUserCanEdit: canEdit }
+        const canEdit = gqlWishlist.ownerId === currentUserId || gqlWishlist.coOwnerId === currentUserId
+        return { wishlist: gqlWishlist, currentUserCanEdit: canEdit }
       })
       .exhaustive()
   }, [data, currentUserId])
 
-  const isPublic = useMemo(() => wishlist?.config.hide_items === false, [wishlist])
+  const isPublic = useMemo(() => wishlist?.config.hideItems === false, [wishlist])
 
   const { data: importableItems = [] } = useQuery({
     queryKey: ['item.importable', { wishlistId }],

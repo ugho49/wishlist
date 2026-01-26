@@ -1,5 +1,5 @@
-import type { ItemDto } from '@wishlist/common'
 import type React from 'react'
+import type { GqlWishlistItem } from './WishlistPage'
 
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import CheckBoxIcon from '@mui/icons-material/CheckBox'
@@ -95,8 +95,8 @@ export const sortOptions: SelectOption<SortType>[] = [
   },
 ]
 
-export const applyFilter = (item: ItemDto, filter: FilterType): boolean => {
-  const checked = item.taken_by?.id !== undefined
+export const applyFilter = (item: GqlWishlistItem, filter: FilterType): boolean => {
+  const checked = item.takenById !== undefined && item.takenById !== null
 
   if (filter === FilterType.CHECKED && checked) {
     return true
@@ -106,18 +106,18 @@ export const applyFilter = (item: ItemDto, filter: FilterType): boolean => {
     return true
   }
 
-  if (filter === FilterType.SUGGESTED && item.is_suggested) {
+  if (filter === FilterType.SUGGESTED && item.isSuggested) {
     return true
   }
 
-  if (filter === FilterType.NOT_SUGGESTED && !item.is_suggested) {
+  if (filter === FilterType.NOT_SUGGESTED && !item.isSuggested) {
     return true
   }
 
   return filter === FilterType.NONE
 }
 
-export const applySort = (a: ItemDto, b: ItemDto, sort: SortType): number => {
+export const applySort = (a: GqlWishlistItem, b: GqlWishlistItem, sort: SortType): number => {
   if (sort === SortType.NAME_DESC) {
     return b.name.localeCompare(a.name)
   }
@@ -131,11 +131,11 @@ export const applySort = (a: ItemDto, b: ItemDto, sort: SortType): number => {
   }
 
   if (sort === SortType.CREATED_AT_ASC) {
-    return new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+    return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
   }
 
   if (sort === SortType.CREATED_AT_DESC) {
-    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   }
 
   // Default sort by name ASC
@@ -147,8 +147,8 @@ export type WishFilterSortSelectProps = {
   onSortChange: (sort: SortType) => void
   filter: FilterType
   onFilterChange: (filter: FilterType) => void
-  items: ItemDto[]
-  onChange: (items: ItemDto[]) => void
+  items: GqlWishlistItem[]
+  onChange: (items: GqlWishlistItem[]) => void
   displayFilterSelect?: boolean
   displaySortSelect?: boolean
 }

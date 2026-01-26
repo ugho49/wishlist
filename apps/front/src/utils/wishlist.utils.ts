@@ -1,5 +1,3 @@
-import type { MiniWishlistDto, WishlistConfigDto } from '@wishlist/common'
-
 const PLACEHOLDER_NAMES = [
   'John',
   'Léo',
@@ -36,14 +34,15 @@ export const getRandomPlaceholderName = (): string => {
 }
 
 export const getAvatarUrl = (params: {
-  wishlist: MiniWishlistDto & { config: WishlistConfigDto }
-  ownerPictureUrl?: string
+  logoUrl?: string | null
+  hideItems: boolean
+  ownerPictureUrl?: string | null
 }): string | undefined => {
-  const { wishlist, ownerPictureUrl } = params
+  const { logoUrl, hideItems, ownerPictureUrl } = params
 
-  if (wishlist.config.hide_items) {
-    return wishlist.logo_url ?? ownerPictureUrl
+  if (hideItems) {
+    return logoUrl ?? ownerPictureUrl ?? undefined
   }
 
-  return wishlist.logo_url
+  return logoUrl ?? undefined
 }

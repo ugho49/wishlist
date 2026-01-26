@@ -102,7 +102,11 @@ export const WishlistCardWithOwner = ({ wishlist }: WishlistCardWithOwnerProps) 
     >
       <AvatarContainer>
         <WishlistAvatar
-          src={getAvatarUrl({ wishlist, ownerPictureUrl: wishlist.owner.picture_url })}
+          src={getAvatarUrl({
+            logoUrl: wishlist.logo_url,
+            hideItems: wishlist.config.hide_items,
+            ownerPictureUrl: wishlist.owner.picture_url,
+          })}
           className="wishlist-avatar"
         />
         {isPublic && (

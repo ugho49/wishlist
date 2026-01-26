@@ -1,4 +1,5 @@
-import type { EventId, MiniEventDto } from '@wishlist/common'
+import type { EventId } from '@wishlist/common'
+import type { GqlWishlistEvent } from './WishlistPage'
 
 import CloseIcon from '@mui/icons-material/Close'
 import {
@@ -23,7 +24,7 @@ import { EventIcon } from '../event/EventIcon'
 export interface EventDialogProps {
   open: boolean
   handleClose: () => void
-  events: MiniEventDto[]
+  events: GqlWishlistEvent[]
   wishlistId: string
   currentUserCanEdit: boolean
 }
@@ -56,11 +57,11 @@ export const WishlistEventsDialog = ({
           {events.map(event => (
             <ListItemButton onClick={() => handleEventClick(event.id)} key={event.id}>
               <ListItemAvatar>
-                <EventIcon icon={event.icon} />
+                <EventIcon icon={event.icon ?? undefined} />
               </ListItemAvatar>
               <ListItemText
                 primary={<b>{event.title}</b>}
-                secondary={DateTime.fromISO(event.event_date).toLocaleString(DateTime.DATE_MED)}
+                secondary={DateTime.fromISO(event.eventDate).toLocaleString(DateTime.DATE_MED)}
               />
             </ListItemButton>
           ))}

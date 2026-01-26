@@ -28,6 +28,7 @@ export const WishlistPageDocument = `
       events {
         id
         title
+        icon
         eventDate
       }
       items {

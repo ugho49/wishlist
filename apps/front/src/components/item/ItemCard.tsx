@@ -1,5 +1,6 @@
-import type { DetailedWishlistDto, ItemDto, MiniUserDto, WishlistId } from '@wishlist/common'
+import type { WishlistId } from '@wishlist/common'
 import type { RootState } from '../../core'
+import type { GqlWishlistItem, GqlWishlistUser } from '../wishlist/WishlistPage'
 
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard'
 import DeleteForeverTwoToneIcon from '@mui/icons-material/DeleteForeverTwoTone'
@@ -327,10 +328,10 @@ export type ItemCardProps = {
   wishlist: {
     id: WishlistId
     ownerId: string
-    coOwnerId?: string
+    coOwnerId?: string | null
     hideItems: boolean
   }
-  item: ItemDto
+  item: GqlWishlistItem
   onImageClick?: () => void
 }
 
@@ -342,7 +343,7 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
   const { addToast } = useToast()
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
   const { currentItemId } = useSearch({ from: '/_authenticated/_with-layout/wishlists/$wishlistId/' })
-  const [takenBy, setTakenBy] = useState<MiniUserDto | undefined>(item.taken_by)
+  const [takenBy, setTakenBy] = useState<GqlWishlistUser | undefined>(item.takerUser ?? undefined)
   const isDialogOpen = useMemo(() => currentItemId === item.id, [currentItemId, item.id])
   const navigate = useNavigate({ from: '/wishlists/$wishlistId' })
   const setDialogOpen = useCallback(
@@ -355,7 +356,7 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
   const isTaken = useMemo(() => takenBy !== undefined, [takenBy])
   const isOwnerOrCoOwner = currentUserId === wishlist.ownerId || wishlist.coOwnerId === currentUserId
   const canReserve = !isOwnerOrCoOwner || !wishlist.hideItems
-  const canEdit = (isOwnerOrCoOwner || item.is_suggested) && !isTaken
+  const canEdit = (isOwnerOrCoOwner || item.isSuggested) && !isTaken
   const isReservedByCurrentUser = takenBy?.id === currentUserId
 
   const openMenu = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget)
@@ -367,10 +368,7 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
     onSuccess: () => {
       addToast({ message: 'Le souhait à bien été supprimé', variant: 'success' })
-      queryClient.setQueryData(['wishlist', { id: wishlist.id }], (old: DetailedWishlistDto) => ({
-        ...old,
-        items: old.items.filter(i => i.id !== item.id),
-      }))
+      void queryClient.invalidateQueries({ queryKey: ['WishlistPage', { wishlistId: wishlist.id }] })
     },
   })
 
@@ -380,7 +378,16 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
     onSuccess: res => {
       const action = res.taken_by !== undefined ? 'check' : 'uncheck'
-      setTakenBy(res.taken_by)
+      // Map REST response to GraphQL format
+      const mappedTakenBy: GqlWishlistUser | undefined = res.taken_by
+        ? {
+            id: res.taken_by.id,
+            firstName: res.taken_by.firstname,
+            lastName: res.taken_by.lastname,
+            pictureUrl: res.taken_by.picture_url,
+          }
+        : undefined
+      setTakenBy(mappedTakenBy)
 
       if (action === 'check') {
         addToast({
@@ -419,7 +426,7 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
     <>
       <ItemCardStyled className={clsx(isTaken && 'reserved', isReservedByCurrentUser && 'reserved-by-me')}>
         {/* Suggested badge - hide when item is reserved */}
-        {item.is_suggested && !isTaken && (
+        {item.isSuggested && !isTaken && (
           <SuggestedBadge icon={<TipsAndUpdatesTwoToneIcon />} label="Suggéré par un utilisateur" size="small" />
         )}
 
@@ -447,9 +454,9 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
           <ReservedIndicator isReservedByMe={isReservedByCurrentUser}>
             <RedeemIcon sx={{ fontSize: '1rem' }} />
             <span>Réservé</span>
-            <Tooltip title={takenBy?.firstname}>
-              <ReservedIndicatorAvatar src={takenBy?.picture_url}>
-                {takenBy?.firstname?.toUpperCase()?.charAt(0)}
+            <Tooltip title={takenBy?.firstName}>
+              <ReservedIndicatorAvatar src={takenBy?.pictureUrl ?? undefined}>
+                {takenBy?.firstName?.toUpperCase()?.charAt(0)}
               </ReservedIndicatorAvatar>
             </Tooltip>
           </ReservedIndicator>
@@ -457,8 +464,8 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
 
         {/* Item image */}
         <ItemImageContainer className="item-image-container">
-          {item.picture_url ? (
-            <ItemImage onClick={() => onImageClick?.()} src={item.picture_url} alt={item.name} />
+          {item.pictureUrl ? (
+            <ItemImage onClick={() => onImageClick?.()} src={item.pictureUrl} alt={item.name} />
           ) : (
             <ItemImagePlaceholder>
               <CardGiftcardIcon />
@@ -523,7 +530,7 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
           style={{ justifyContent: shouldShowReserveButton && isReservedByCurrentUser ? 'space-between' : 'center' }}
         >
           <DateContainer>
-            <Typography variant="caption">Ajouté {DateTime.fromISO(item.created_at).toRelative()}</Typography>
+            <Typography variant="caption">Ajouté {DateTime.fromISO(item.createdAt).toRelative()}</Typography>
           </DateContainer>
 
           {/* Release button in footer when item is reserved by current user */}

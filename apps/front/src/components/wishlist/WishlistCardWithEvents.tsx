@@ -162,7 +162,11 @@ export const WishlistCardWithEvents = ({ wishlist }: WishlistCardWithEventsProps
           className="wishlist-icon"
           sx={{ width: '32px', height: '32px', border: 'none' }}
           iconSize="small"
-          src={getAvatarUrl({ wishlist, ownerPictureUrl: userProfile.pictureUrl })}
+          src={getAvatarUrl({
+            logoUrl: wishlist.logo_url,
+            hideItems: wishlist.config.hide_items,
+            ownerPictureUrl: userProfile.pictureUrl,
+          })}
         />
         <WishlistTitleContainer>
           <div style={{ display: 'flex', alignItems: 'center' }}>

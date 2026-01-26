@@ -22,6 +22,7 @@ query WishlistPage($wishlistId: WishlistId!) {
       events {
         id
         title
+        icon
         eventDate
       }
       items {
