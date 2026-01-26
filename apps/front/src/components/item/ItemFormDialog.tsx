@@ -1,14 +1,8 @@
 import type { TransitionProps } from '@mui/material/transitions'
-import type {
-  AddItemForListInputDto,
-  DetailedWishlistDto,
-  ItemDto,
-  ItemId,
-  UpdateItemInputDto,
-  WishlistId,
-} from '@wishlist/common'
+import type { AddItemForListInputDto, ItemId, UpdateItemInputDto, WishlistId } from '@wishlist/common'
 import type React from 'react'
 import type { FormEvent } from 'react'
+import type { GqlWishlistItem } from '../wishlist/WishlistPage'
 
 import CameraAltIcon from '@mui/icons-material/CameraAlt'
 import CloseIcon from '@mui/icons-material/Close'
@@ -55,7 +49,7 @@ const Transition = forwardRef(function Transition(
 type ModeProps<T> = T extends 'create'
   ? { mode: 'create'; item?: never }
   : T extends 'edit'
-    ? { mode: 'edit'; item: ItemDto }
+    ? { mode: 'edit'; item: GqlWishlistItem }
     : never
 
 export type ItemFormDialogProps = (ModeProps<'create'> | ModeProps<'edit'>) & {
@@ -95,12 +89,9 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
     mutationKey: ['item.create'],
     mutationFn: (data: AddItemForListInputDto) => api.item.create(data),
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-    onSuccess: newItem => {
+    onSuccess: () => {
       addToast({ message: 'Souhait créé avec succès', variant: 'success' })
-      queryClient.setQueryData(['wishlist', { id: wishlistId }], (old: DetailedWishlistDto) => ({
-        ...old,
-        items: [...old.items, newItem],
-      }))
+      void queryClient.invalidateQueries({ queryKey: ['WishlistPage', { wishlistId }] })
       resetForm()
     },
   })
@@ -109,13 +100,9 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
     mutationKey: ['item.update', { id: item?.id }],
     mutationFn: (props: { itemId: ItemId; data: UpdateItemInputDto }) => api.item.update(props.itemId, props.data),
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-    onSuccess: (_output, props) => {
-      const { itemId, data } = props
+    onSuccess: () => {
       addToast({ message: 'Le souhait à bien été modifié', variant: 'success' })
-      queryClient.setQueryData(['wishlist', { id: wishlistId }], (old: DetailedWishlistDto) => ({
-        ...old,
-        items: old.items.map(item => (item.id === itemId ? { ...item, ...data } : item)),
-      }))
+      void queryClient.invalidateQueries({ queryKey: ['WishlistPage', { wishlistId }] })
     },
   })
 
@@ -152,7 +139,7 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
     setName(item.name)
     setDescription(item.description || '')
     setUrl(item.url || '')
-    setPictureUrl(item.picture_url || '')
+    setPictureUrl(item.pictureUrl || '')
     setScore(item.score || null)
   }, [item])
 

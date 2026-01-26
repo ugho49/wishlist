@@ -626,9 +626,9 @@ export type WishlistPageQueryVariables = Exact<{
 
 
 export type WishlistPageQuery = { __typename?: 'Query', getWishlistById?:
-    | { __typename?: 'ForbiddenRejection' }
-    | { __typename?: 'InternalErrorRejection' }
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
     | { __typename: 'NotFoundRejection' }
-    | { __typename?: 'UnauthorizedRejection' }
-    | { __typename?: 'Wishlist', id: Ids["WishlistId"], title: string, description?: string | null, logoUrl?: string | null, owner: { __typename?: 'User', id: Ids["UserId"], firstName: string, lastName: string } }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename?: 'Wishlist', id: Ids["WishlistId"], title: string, description?: string | null, logoUrl?: string | null, ownerId: Ids["UserId"], coOwnerId?: Ids["UserId"] | null, owner: { __typename?: 'User', id: Ids["UserId"], firstName: string, lastName: string, pictureUrl?: string | null }, coOwner?: { __typename?: 'User', id: Ids["UserId"], firstName: string, lastName: string, pictureUrl?: string | null } | null, events: Array<{ __typename?: 'Event', id: Ids["EventId"], title: string, icon?: string | null, eventDate: string }>, items: Array<{ __typename?: 'Item', id: Ids["ItemId"], name: string, description?: string | null, url?: string | null, score?: number | null, isSuggested?: boolean | null, pictureUrl?: string | null, takenById?: Ids["UserId"] | null, takenAt?: string | null, createdAt: string, takerUser?: { __typename?: 'User', id: Ids["UserId"], firstName: string, lastName: string, pictureUrl?: string | null } | null }>, config: { __typename?: 'WishlistConfig', hideItems: boolean } }
    | null };

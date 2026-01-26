@@ -1,12 +1,17 @@
 import type { WishlistId } from '@wishlist/common'
+import type { RootState } from '../../core'
+import type { WishlistPageQuery } from '../../gql/__generated__/types'
 
 import { Box, Container, Stack } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate, useSearch } from '@tanstack/react-router'
 import { FeatureFlags } from '@wishlist/common'
 import { useCallback, useMemo } from 'react'
+import { useSelector } from 'react-redux'
+import { match, P } from 'ts-pattern'
 
-import { useApi, useWishlistById } from '../../hooks'
+import { useWishlistPageQuery } from '../../gql/__generated__/graphql'
+import { useApi } from '../../hooks'
 import { useFeatureFlag } from '../../hooks/useFeatureFlag'
 import { Description } from '../common/Description'
 import { Loader } from '../common/Loader'
@@ -16,6 +21,13 @@ import { WishlistEventsDialog } from './WishlistEventsDialog'
 import { WishlistHeader } from './WishlistHeader'
 import { WishlistItems } from './WishlistItems'
 import { WishlistNotFound } from './WishlistNotFound'
+
+export type GqlWishlist = Extract<NonNullable<WishlistPageQuery['getWishlistById']>, { __typename?: 'Wishlist' }>
+export type GqlWishlistItem = GqlWishlist['items'][number]
+export type GqlWishlistEvent = GqlWishlist['events'][number]
+export type GqlWishlistUser = GqlWishlist['owner']
+
+const mapState = (state: RootState) => state.auth.user?.id
 
 interface WishlistPageProps {
   wishlistId: WishlistId
@@ -28,8 +40,27 @@ export const WishlistPage = ({ wishlistId }: WishlistPageProps) => {
   })
   const navigate = useNavigate()
   const api = useApi()
-  const { wishlist, loading, currentUserCanEdit } = useWishlistById(wishlistId)
-  const isPublic = useMemo(() => wishlist?.config.hide_items === false, [wishlist])
+  const currentUserId = useSelector(mapState)
+
+  const { data, isLoading } = useWishlistPageQuery({ wishlistId })
+
+  const { wishlist, currentUserCanEdit } = useMemo(() => {
+    const result = data?.getWishlistById
+
+    return match(result)
+      .with({ __typename: 'NotFoundRejection' }, () => ({ wishlist: undefined, currentUserCanEdit: false }))
+      .with({ __typename: 'ForbiddenRejection' }, () => ({ wishlist: undefined, currentUserCanEdit: false }))
+      .with({ __typename: 'UnauthorizedRejection' }, () => ({ wishlist: undefined, currentUserCanEdit: false }))
+      .with({ __typename: 'InternalErrorRejection' }, () => ({ wishlist: undefined, currentUserCanEdit: false }))
+      .with(P.nullish, () => ({ wishlist: undefined, currentUserCanEdit: false }))
+      .with({ id: P.string }, gqlWishlist => {
+        const canEdit = gqlWishlist.ownerId === currentUserId || gqlWishlist.coOwnerId === currentUserId
+        return { wishlist: gqlWishlist, currentUserCanEdit: canEdit }
+      })
+      .exhaustive()
+  }, [data, currentUserId])
+
+  const isPublic = useMemo(() => wishlist?.config.hideItems === false, [wishlist])
 
   const { data: importableItems = [] } = useQuery({
     queryKey: ['item.importable', { wishlistId }],
@@ -73,7 +104,7 @@ export const WishlistPage = ({ wishlistId }: WishlistPageProps) => {
         canonical={`/wishlists/${wishlistId}`}
       />
       <Box>
-        <Loader loading={loading}>
+        <Loader loading={isLoading}>
           {!wishlist && <WishlistNotFound />}
 
           {wishlist && (
