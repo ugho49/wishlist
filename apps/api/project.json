@@ -9,6 +9,14 @@
       "executor": "nx:run-commands",
       "options": {
         "command": "graphql-codegen --config codegen.ts",
+        "cwd": "{projectRoot}",
+        "forwardAllArgs": true
+      }
+    },
+    "dev": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": ["nx run api:codegen --watch", "nx run api:serve"],
         "cwd": "{projectRoot}"
       }
     }

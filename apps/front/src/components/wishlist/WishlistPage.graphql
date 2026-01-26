@@ -1,0 +1,18 @@
+query WishlistPage($wishlistId: WishlistId!) {
+  getWishlistById(id: $wishlistId) {
+    ... on Wishlist {
+      id
+      title
+      description
+      logoUrl
+      owner {
+        id
+        firstName
+        lastName
+      }
+    }
+    ... on NotFoundRejection {
+      __typename
+    }
+  }
+}
