@@ -25,3 +25,19 @@ export type Ids = {
   ItemId: ItemId
   WishlistId: WishlistId
 }
+
+const getBrandedType = (type: keyof Ids): string => `Ids["${type}"]`
+
+export const gqlScalarIds: Record<keyof Ids, string> = {
+  EventId: getBrandedType('EventId'),
+  WishlistId: getBrandedType('WishlistId'),
+  AttendeeId: getBrandedType('AttendeeId'),
+  UserId: getBrandedType('UserId'),
+  UserSocialId: getBrandedType('UserSocialId'),
+  UserEmailSettingId: getBrandedType('UserEmailSettingId'),
+  UserEmailChangeVerificationId: getBrandedType('UserEmailChangeVerificationId'),
+  UserPasswordVerificationId: getBrandedType('UserPasswordVerificationId'),
+  SecretSantaId: getBrandedType('SecretSantaId'),
+  SecretSantaUserId: getBrandedType('SecretSantaUserId'),
+  ItemId: getBrandedType('ItemId'),
+}

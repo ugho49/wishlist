@@ -3,6 +3,22 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/front/src",
   "projectType": "application",
-  "targets": {},
+  "targets": {
+    "codegen": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "graphql-codegen --config codegen.ts",
+        "cwd": "{projectRoot}",
+        "forwardAllArgs": true
+      }
+    },
+    "dev": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": ["nx run front:codegen --watch", "nx run front:serve"],
+        "cwd": "{projectRoot}"
+      }
+    }
+  },
   "tags": []
 }

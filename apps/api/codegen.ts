@@ -1,23 +1,7 @@
 import type { CodegenConfig } from '@graphql-codegen/cli'
-import type { Ids } from '@wishlist/common'
 
+import { gqlScalarIds } from '../../libs/common/src/ids'
 import { loadSchemaWithoutResolvedFields } from './codegen-schema-transform'
-
-const getBrandedType = (type: keyof Ids): string => `Ids["${type}"]`
-
-const scalarIds: Record<keyof Ids, string> = {
-  EventId: getBrandedType('EventId'),
-  WishlistId: getBrandedType('WishlistId'),
-  AttendeeId: getBrandedType('AttendeeId'),
-  UserId: getBrandedType('UserId'),
-  UserSocialId: getBrandedType('UserSocialId'),
-  UserEmailSettingId: getBrandedType('UserEmailSettingId'),
-  UserEmailChangeVerificationId: getBrandedType('UserEmailChangeVerificationId'),
-  UserPasswordVerificationId: getBrandedType('UserPasswordVerificationId'),
-  SecretSantaId: getBrandedType('SecretSantaId'),
-  SecretSantaUserId: getBrandedType('SecretSantaUserId'),
-  ItemId: getBrandedType('ItemId'),
-}
 
 const config: CodegenConfig = {
   generates: {
@@ -49,7 +33,7 @@ const config: CodegenConfig = {
         skipTypeNameForRoot: true,
         defaultScalarType: 'unknown',
         scalars: {
-          ...scalarIds,
+          ...gqlScalarIds,
         },
       },
     },

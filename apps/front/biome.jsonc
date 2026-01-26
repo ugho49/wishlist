@@ -1,7 +1,7 @@
 {
   "extends": "//",
   "files": {
-    "includes": ["!src/routeTree.gen.ts"]
+    "includes": ["!src/routeTree.gen.ts", "!src/gql/__generated__/**/*"]
   },
   "linter": {
     "domains": {
