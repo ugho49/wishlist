@@ -1,17 +1,21 @@
-import type { EventId, ICurrentUser, SecretSantaDto } from '@wishlist/common'
+import type { EventId, ICurrentUser } from '@wishlist/common'
 
 import { ConflictException, ForbiddenException, Inject, Injectable, Logger } from '@nestjs/common'
-import { EventRepository } from '@wishlist/api/event'
+import { Event, EventRepository } from '@wishlist/api/event'
 import { REPOSITORIES } from '@wishlist/api/repositories'
 
 import { SecretSanta, SecretSantaRepository } from '../../domain'
-import { secretSantaMapper } from '../../infrastructure'
 
 export type CreateSecretSantaInput = {
   currentUser: ICurrentUser
   eventId: EventId
   description?: string
   budget?: number
+}
+
+export type CreateSecretSantaResult = {
+  secretSanta: SecretSanta
+  event: Event
 }
 
 @Injectable()
@@ -23,7 +27,7 @@ export class CreateSecretSantaUseCase {
     @Inject(REPOSITORIES.SECRET_SANTA) private readonly secretSantaRepository: SecretSantaRepository,
   ) {}
 
-  async execute(command: CreateSecretSantaInput): Promise<SecretSantaDto> {
+  async execute(command: CreateSecretSantaInput): Promise<CreateSecretSantaResult> {
     this.logger.log('Create secret santa request received', { command })
     const alreadyExists = await this.secretSantaRepository.existsForEvent(command.eventId)
 
@@ -47,6 +51,6 @@ export class CreateSecretSantaUseCase {
     this.logger.log('Saving secret santa...', { secretSantaId: secretSanta.id, secretSanta })
     await this.secretSantaRepository.save(secretSanta)
 
-    return secretSantaMapper.toSecretSantaDto(secretSanta, event)
+    return { secretSanta, event }
   }
 }

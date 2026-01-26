@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { EventId, SecretSantaId, SecretSantaUserId, UserId, uuid } from '@wishlist/common'
-import { and, eq, sql } from 'drizzle-orm'
+import { and, eq, inArray, sql } from 'drizzle-orm'
 
 import * as schema from '../../../drizzle/schema'
 import { DatabaseService, DrizzleTransaction } from '../../core/database'
@@ -20,6 +20,30 @@ export class PostgresSecretSantaUserRepository implements SecretSantaUserReposit
 
     const users = await db.query.secretSantaUser.findMany({
       where: eq(schema.secretSantaUser.secretSantaId, secretSantaId),
+    })
+
+    return users.map(PostgresSecretSantaUserRepository.toModel)
+  }
+
+  async findBySecretSantaIds(secretSantaIds: SecretSantaId[]): Promise<SecretSantaUser[]> {
+    const { schema, db } = this.databaseService
+
+    if (secretSantaIds.length === 0) return []
+
+    const users = await db.query.secretSantaUser.findMany({
+      where: inArray(schema.secretSantaUser.secretSantaId, secretSantaIds),
+    })
+
+    return users.map(PostgresSecretSantaUserRepository.toModel)
+  }
+
+  async findByIds(secretSantaUserIds: SecretSantaUserId[]): Promise<SecretSantaUser[]> {
+    const { schema, db } = this.databaseService
+
+    if (secretSantaUserIds.length === 0) return []
+
+    const users = await db.query.secretSantaUser.findMany({
+      where: inArray(schema.secretSantaUser.id, secretSantaUserIds),
     })
 
     return users.map(PostgresSecretSantaUserRepository.toModel)

@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { EventId, SecretSantaId, SecretSantaStatus, uuid } from '@wishlist/common'
-import { eq } from 'drizzle-orm'
+import { eq, inArray } from 'drizzle-orm'
 
 import * as schema from '../../../drizzle/schema'
 import { DatabaseService, DrizzleTransaction } from '../../core/database'
@@ -64,6 +64,19 @@ export class PostgresSecretSantaRepository implements SecretSantaRepository {
     if (!secretSanta) return undefined
 
     return PostgresSecretSantaRepository.toModel(secretSanta)
+  }
+
+  async findByIds(secretSantaIds: SecretSantaId[]): Promise<SecretSanta[]> {
+    const { schema, db } = this.databaseService
+
+    if (secretSantaIds.length === 0) return []
+
+    const secretSantas = await db.query.secretSanta.findMany({
+      where: inArray(schema.secretSanta.id, secretSantaIds),
+      with: { secretSantaUsers: true },
+    })
+
+    return secretSantas.map(PostgresSecretSantaRepository.toModel)
   }
 
   async findByIdOrFail(id: SecretSantaId): Promise<SecretSanta> {

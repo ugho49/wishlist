@@ -10,6 +10,16 @@ schema {
 
 directive @resolved on FIELD_DEFINITION
 
+input AddSecretSantaUsersInput {
+  attendeeIds: [AttendeeId!]!
+}
+
+type AddSecretSantaUsersOutput {
+  users: [SecretSantaUser!]!
+}
+
+union AddSecretSantaUsersResult = AddSecretSantaUsersOutput | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection
+
 union AdminDeleteUserResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
 type AdminGetAllUsers {
@@ -47,6 +57,8 @@ enum AttendeeRole {
   USER
 }
 
+union CancelSecretSantaResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | VoidOutput
+
 input ChangeUserPasswordInput {
   newPassword: String!
   oldPassword: String!
@@ -72,7 +84,19 @@ input CreateItemInput {
 
 union CreateItemResult = ForbiddenRejection | InternalErrorRejection | Item | UnauthorizedRejection | ValidationRejection
 
+input CreateSecretSantaInput {
+  budget: Float
+  description: String
+  eventId: EventId!
+}
+
+union CreateSecretSantaResult = ForbiddenRejection | InternalErrorRejection | SecretSanta | UnauthorizedRejection | ValidationRejection
+
 union DeleteItemResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
+union DeleteSecretSantaResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | VoidOutput
+
+union DeleteSecretSantaUserResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | VoidOutput
 
 type Event {
   attendeeIds: [AttendeeId!]!
@@ -133,6 +157,14 @@ union GetMyEventsResult = ForbiddenRejection | GetEventsPagedResponse | Internal
 union GetMyWishlistsResult = ForbiddenRejection | GetWishlistsPagedResponse | InternalErrorRejection | UnauthorizedRejection
 
 union GetPendingEmailChangeResult = ForbiddenRejection | InternalErrorRejection | PendingEmailChange | UnauthorizedRejection
+
+union GetSecretSantaByEventResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | SecretSanta | UnauthorizedRejection
+
+type GetSecretSantaDrawForEventOutput {
+  attendee: EventAttendee
+}
+
+union GetSecretSantaDrawForEventResult = ForbiddenRejection | GetSecretSantaDrawForEventOutput | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection
 
 union GetUserEmailSettingsResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | UserEmailSettings
 
@@ -215,13 +247,18 @@ type LoginWithGoogleOutput {
 union LoginWithGoogleResult = InternalErrorRejection | LoginWithGoogleOutput | UnauthorizedRejection | ValidationRejection
 
 type Mutation {
+  addSecretSantaUsers(id: SecretSantaId!, input: AddSecretSantaUsersInput!): AddSecretSantaUsersResult
   adminDeleteUser(userId: UserId!): AdminDeleteUserResult!
   adminRemoveUserPicture(userId: UserId!): AdminRemoveUserPictureResult!
   adminUpdateUserProfile(input: AdminUpdateUserProfileInput!, userId: UserId!): AdminUpdateUserProfileResult!
+  cancelSecretSanta(id: SecretSantaId!): CancelSecretSantaResult
   changeUserPassword(input: ChangeUserPasswordInput!): ChangeUserPasswordResult!
   confirmEmailChange(input: ConfirmEmailChangeInput!): ConfirmEmailChangeResult!
   createItem(input: CreateItemInput!): CreateItemResult!
+  createSecretSanta(input: CreateSecretSantaInput!): CreateSecretSantaResult
   deleteItem(itemId: ItemId!): DeleteItemResult!
+  deleteSecretSanta(id: SecretSantaId!): DeleteSecretSantaResult
+  deleteSecretSantaUser(secretSantaId: SecretSantaId!, secretSantaUserId: SecretSantaUserId!): DeleteSecretSantaUserResult
   importItems(input: ImportItemsInput!): ImportItemsResult!
   linkCurrentUserlWithGoogle(input: LinkUserToGoogleInput!): LinkUserToGoogleResult!
   login(input: LoginInput!): LoginResult!
@@ -232,9 +269,12 @@ type Mutation {
   resetPassword(input: ResetPasswordInput!): ResetPasswordResult!
   scanItemUrl(input: ScanItemUrlInput!): ScanItemUrlResult!
   sendResetPasswordEmail(input: SendResetPasswordEmailInput!): SendResetPasswordEmailResult!
+  startSecretSanta(id: SecretSantaId!): StartSecretSantaResult
   toggleItem(itemId: ItemId!): ToggleItemResult!
   unlinkCurrentUserSocial(socialId: UserSocialId!): UnlinkCurrentUserSocialResult!
   updateItem(input: UpdateItemInput!, itemId: ItemId!): UpdateItemResult!
+  updateSecretSanta(id: SecretSantaId!, input: UpdateSecretSantaInput!): UpdateSecretSantaResult
+  updateSecretSantaUser(input: UpdateSecretSantaUserInput!, secretSantaId: SecretSantaId!, secretSantaUserId: SecretSantaUserId!): UpdateSecretSantaUserResult
   updateUserEmailSettings(input: UpdateUserEmailSettingsInput!): UpdateUserEmailSettingsResult!
   updateUserPictureFromSocial(input: UpdateUserPictureFromSocialInput!): UpdateUserPictureFromSocialResult!
   updateUserProfile(input: UpdateUserProfileInput!): UpdateUserProfileResult!
@@ -270,6 +310,8 @@ type Query {
   getMyEvents(filters: EventPaginationFilters!): GetMyEventsResult!
   getMyWishlists(filters: PaginationFilters!): GetMyWishlistsResult!
   getPendingEmailChange: GetPendingEmailChangeResult
+  getSecretSantaDrawForEvent(eventId: EventId!): GetSecretSantaDrawForEventResult
+  getSecretSantaForEvent(eventId: EventId!): GetSecretSantaByEventResult
   getUserEmailSettings: GetUserEmailSettingsResult!
   getWishlistById(id: WishlistId!): GetWishlistByIdResult
   health: HealthResult!
@@ -311,11 +353,42 @@ type ScanItemUrlOutput {
 
 union ScanItemUrlResult = ForbiddenRejection | InternalErrorRejection | ScanItemUrlOutput | UnauthorizedRejection | ValidationRejection
 
+type SecretSanta {
+  budget: Float
+  createdAt: String!
+  description: String
+  event: Event! @resolved
+  eventId: EventId!
+  id: SecretSantaId!
+  status: SecretSantaStatus!
+  updatedAt: String!
+  users: [SecretSantaUser!]! @resolved
+}
+
+scalar SecretSantaId
+
+enum SecretSantaStatus {
+  CREATED
+  STARTED
+}
+
+type SecretSantaUser {
+  attendee: EventAttendee! @resolved
+  attendeeId: AttendeeId!
+  exclusionIds: [SecretSantaUserId!]!
+  exclusions: [SecretSantaUser!]! @resolved
+  id: SecretSantaUserId!
+}
+
+scalar SecretSantaUserId
+
 input SendResetPasswordEmailInput {
   email: String!
 }
 
 union SendResetPasswordEmailResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
+union StartSecretSantaResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | VoidOutput
 
 type ToggleItemOutput {
   takenAt: String
@@ -339,6 +412,19 @@ input UpdateItemInput {
 }
 
 union UpdateItemResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
+input UpdateSecretSantaInput {
+  budget: Float
+  description: String
+}
+
+union UpdateSecretSantaResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
+input UpdateSecretSantaUserInput {
+  exclusionIds: [SecretSantaUserId!]!
+}
+
+union UpdateSecretSantaUserResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
 input UpdateUserEmailSettingsInput {
   dailyNewItemNotification: Boolean!

@@ -1,7 +1,7 @@
-export type SecretSantaUser = { id: string; exclusions: string[] }
-export type SecretSantaAssign = { userId: string; drawUserId: string }
+type SecretSantaUser = { id: string; exclusions: string[] }
+type SecretSantaAssign = { userId: string; drawUserId: string }
 
-export class SecretSantaDrawError extends Error {
+class SecretSantaDrawError extends Error {
   constructor(message: string) {
     super(message)
     this.name = 'SecretSantaDrawError'

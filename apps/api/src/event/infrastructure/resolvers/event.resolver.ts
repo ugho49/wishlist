@@ -1,17 +1,38 @@
 import { NotFoundException } from '@nestjs/common'
-import { Args, Context, Query, Resolver } from '@nestjs/graphql'
+import { Args, Context, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 import { GqlCurrentUser } from '@wishlist/api/auth'
 import { DEFAULT_RESULT_NUMBER, GraphQLContext, ZodPipe } from '@wishlist/api/core'
 import { createPagedResponse, EventId, UserId } from '@wishlist/common'
 
-import { EventPaginationFilters, GetEventByIdResult, GetMyEventsResult } from '../../../gql/generated-types'
+import {
+  Event,
+  EventAttendee,
+  EventPaginationFilters,
+  GetEventByIdResult,
+  GetMyEventsResult,
+  Wishlist,
+} from '../../../gql/generated-types'
 import { GetEventsByUserUseCase } from '../../application/query/get-events-by-user.use-case'
 import { eventMapper } from '../event.mapper'
 import { EventPaginationFiltersSchema } from '../event.schema'
 
-@Resolver()
+@Resolver('Event')
 export class EventResolver {
   constructor(private readonly getEventsByUserUseCase: GetEventsByUserUseCase) {}
+
+  @ResolveField()
+  async wishlists(@Parent() event: Event, @Context() ctx: GraphQLContext): Promise<Wishlist[]> {
+    if (event.wishlistIds.length === 0) return []
+    const wishlists = await ctx.loaders.wishlist.loadMany(event.wishlistIds)
+    return wishlists.filter((wishlist): wishlist is Wishlist => wishlist !== null)
+  }
+
+  @ResolveField()
+  async attendees(@Parent() event: Event, @Context() ctx: GraphQLContext): Promise<EventAttendee[]> {
+    if (event.attendeeIds.length === 0) return []
+    const attendees = await ctx.loaders.eventAttendee.loadMany(event.attendeeIds)
+    return attendees.filter((attendee): attendee is EventAttendee => attendee !== null)
+  }
 
   @Query()
   async getEventById(

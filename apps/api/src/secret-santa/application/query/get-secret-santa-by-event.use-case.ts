@@ -4,7 +4,7 @@ import { ForbiddenException, Inject, Injectable } from '@nestjs/common'
 import { EventRepository } from '@wishlist/api/event'
 import { REPOSITORIES } from '@wishlist/api/repositories'
 
-import { SecretSantaRepository } from '../../domain'
+import { SecretSanta, SecretSantaRepository } from '../../domain'
 import { secretSantaMapper } from '../../infrastructure'
 
 export type GetSecretSantaInput = {
@@ -12,10 +12,18 @@ export type GetSecretSantaInput = {
   eventId: EventId
 }
 
-export type GetSecretSantaResult = SecretSantaDto | undefined
+export type GetSecretSantaResult =
+  | {
+      /**
+       * @deprecated Use secretSanta instead
+       */
+      secretSantaDto: SecretSantaDto
+      secretSanta: SecretSanta
+    }
+  | undefined
 
 @Injectable()
-export class GetSecretSantaUseCase {
+export class GetSecretSantaByEventUseCase {
   constructor(
     @Inject(REPOSITORIES.SECRET_SANTA) private readonly secretSantaRepository: SecretSantaRepository,
     @Inject(REPOSITORIES.EVENT) private readonly eventRepository: EventRepository,
@@ -34,6 +42,8 @@ export class GetSecretSantaUseCase {
       throw new ForbiddenException('Event cannot be viewed by this user')
     }
 
-    return secretSantaMapper.toSecretSantaDto(secretSanta, event)
+    const secretSantaDto = secretSantaMapper.toSecretSantaDto(secretSanta, event)
+
+    return { secretSanta, secretSantaDto }
   }
 }

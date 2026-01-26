@@ -14,7 +14,11 @@ export type AddSecretSantaUsersInput = {
 }
 
 export type AddSecretSantaUsersResult = {
-  users: SecretSantaUserDto[]
+  /**
+   * @deprecated Use users instead
+   */
+  userDtos: SecretSantaUserDto[]
+  users: SecretSantaUser[]
 }
 
 @Injectable()
@@ -65,6 +69,6 @@ export class AddSecretSantaUsersUseCase {
       secretSantaMapper.toSecretSantaUserDto(user, event.attendees.find(a => a.id === user.attendeeId)!),
     )
 
-    return { users: userDtos }
+    return { userDtos, users }
   }
 }

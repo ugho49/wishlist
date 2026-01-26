@@ -7,9 +7,8 @@ import { EventAttendeeController } from './controllers/event-attendee.controller
 import { EventAttendeeAdminController } from './controllers/event-attendee-admin.controller'
 import { EventDataLoaderFactory } from './event.dataloader'
 import { EventAttendeeDataLoaderFactory } from './event-attendee.dataloader'
-import { EventFieldResolver } from './resolvers/event.field-resolver'
 import { EventResolver } from './resolvers/event.resolver'
-import { EventAttendeeFieldResolver } from './resolvers/event-attendee.field-resolver'
+import { EventAttendeeResolver } from './resolvers/event-attendee.resolver'
 
 @Module({
   controllers: [EventController, EventAttendeeController, EventAdminController, EventAttendeeAdminController],
@@ -18,8 +17,7 @@ import { EventAttendeeFieldResolver } from './resolvers/event-attendee.field-res
     EventDataLoaderFactory,
     EventAttendeeDataLoaderFactory,
     EventResolver,
-    EventFieldResolver,
-    EventAttendeeFieldResolver,
+    EventAttendeeResolver,
   ],
   exports: [EventDataLoaderFactory, EventAttendeeDataLoaderFactory],
 })

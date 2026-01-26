@@ -1,10 +1,20 @@
 import { Injectable } from '@nestjs/common'
-import { AttendeeId, EventId, ICurrentUser, UserId, UserSocialId, WishlistId } from '@wishlist/common'
+import {
+  AttendeeId,
+  EventId,
+  ICurrentUser,
+  SecretSantaId,
+  SecretSantaUserId,
+  UserId,
+  UserSocialId,
+  WishlistId,
+} from '@wishlist/common'
 import DataLoader from 'dataloader'
 
 import { EventDataLoaderFactory } from '../event/infrastructure/event.dataloader'
 import { EventAttendeeDataLoaderFactory } from '../event/infrastructure/event-attendee.dataloader'
-import { Event, EventAttendee, User, UserFull, UserSocial, Wishlist } from '../gql/generated-types'
+import { Event, EventAttendee, SecretSantaUser, User, UserFull, UserSocial, Wishlist } from '../gql/generated-types'
+import { SecretSantaDataLoaderFactory } from '../secret-santa/infrastructure/secret-santa.dataloader'
 import { UserDataLoaderFactory } from '../user/infrastructure/user.dataloader'
 import { WishlistDataLoaderFactory } from '../wishlist/infrastructure/wishlist.dataloader'
 
@@ -16,6 +26,8 @@ export type DataLoaders = {
   wishlist: DataLoader<WishlistId, Wishlist | null>
   event: DataLoader<EventId, Event | null>
   eventAttendee: DataLoader<AttendeeId, EventAttendee | null>
+  secretSantaUser: DataLoader<SecretSantaUserId, SecretSantaUser | null>
+  secretSantaUsersBySecretSanta: DataLoader<SecretSantaId, SecretSantaUser[]>
 }
 
 @Injectable()
@@ -25,6 +37,7 @@ export class DataLoaderService {
     private readonly wishlistDataLoaderFactory: WishlistDataLoaderFactory,
     private readonly eventDataLoaderFactory: EventDataLoaderFactory,
     private readonly eventAttendeeDataLoaderFactory: EventAttendeeDataLoaderFactory,
+    private readonly secretSantaDataLoaderFactory: SecretSantaDataLoaderFactory,
   ) {}
 
   createLoaders(getCurrentUser: () => ICurrentUser | undefined): DataLoaders {
@@ -36,6 +49,8 @@ export class DataLoaderService {
       wishlist: this.wishlistDataLoaderFactory.createLoader(getCurrentUser),
       event: this.eventDataLoaderFactory.createLoader(getCurrentUser),
       eventAttendee: this.eventAttendeeDataLoaderFactory.createLoader(),
+      secretSantaUser: this.secretSantaDataLoaderFactory.createSecretSantaUserLoader(),
+      secretSantaUsersBySecretSanta: this.secretSantaDataLoaderFactory.createSecretSantaUsersBySecretSantaLoader(),
     }
   }
 }

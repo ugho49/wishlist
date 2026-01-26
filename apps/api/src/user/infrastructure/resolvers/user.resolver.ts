@@ -1,6 +1,6 @@
 import type { ICurrentUser } from '@wishlist/common'
 
-import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql'
+import { Args, Context, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 import { GqlCurrentUser, Public } from '@wishlist/api/auth'
 import { GraphQLContext, ZodPipe } from '@wishlist/api/core'
 import { UserId, UserSocialId } from '@wishlist/common'
@@ -34,6 +34,7 @@ import {
   UpdateUserProfileResult,
   User,
   UserEmailSettings,
+  UserSocial,
 } from '../../../gql/generated-types'
 import { ConfirmEmailChangeUseCase } from '../../application/command/confirm-email-change.use-case'
 import { CreateEmailChangeVerificationUseCase } from '../../application/command/create-email-change-verification.use-case'
@@ -62,7 +63,7 @@ import {
   UpdateUserProfileInputSchema,
 } from '../user.schema'
 
-@Resolver()
+@Resolver('User')
 export class UserResolver {
   constructor(
     private readonly createUserUseCase: CreateUserUseCase,
@@ -80,6 +81,16 @@ export class UserResolver {
     private readonly createPasswordVerificationUseCase: CreatePasswordVerificationUseCase,
     private readonly resetUserPasswordUseCase: ResetUserPasswordUseCase,
   ) {}
+
+  @ResolveField()
+  socials(
+    @Parent() user: User,
+    @Context() ctx: GraphQLContext,
+    @GqlCurrentUser('id') currentUserId: UserId,
+  ): Promise<UserSocial[] | null> {
+    if (user.id !== currentUserId) return Promise.resolve(null)
+    return ctx.loaders.userSocialsByUser.load(user.id)
+  }
 
   @Query()
   async getCurrentUser(@GqlCurrentUser('id') currentUserId: UserId, @Context() ctx: GraphQLContext): Promise<User> {

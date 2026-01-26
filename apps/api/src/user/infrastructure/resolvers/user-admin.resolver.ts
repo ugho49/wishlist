@@ -1,7 +1,7 @@
 import type { ICurrentUser } from '@wishlist/common'
 
 import { NotFoundException } from '@nestjs/common'
-import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql'
+import { Args, Context, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 import { GqlCurrentUser, IsAdmin } from '@wishlist/api/auth'
 import { DEFAULT_RESULT_NUMBER, GraphQLContext, ZodPipe } from '@wishlist/api/core'
 import { createPagedResponse, UserId } from '@wishlist/common'
@@ -14,6 +14,8 @@ import {
   AdminRemoveUserPictureResult,
   AdminUpdateUserProfileInput,
   AdminUpdateUserProfileResult,
+  UserFull,
+  UserSocial,
 } from '../../../gql/generated-types'
 import { DeleteUserUseCase } from '../../application/command/delete-user.use-case'
 import { RemoveUserPictureUseCase } from '../../application/command/remove-user-picture.use-case'
@@ -24,7 +26,7 @@ import { UserIdSchema } from '../user.schema'
 import { AdminGetAllUsersPaginationFiltersSchema, AdminUpdateUserProfileInputSchema } from '../user-admin.schema'
 
 @IsAdmin()
-@Resolver()
+@Resolver('UserFull')
 export class UserAdminResolver {
   constructor(
     private readonly getUsersPaginatedUseCase: GetUsersPaginatedUseCase,
@@ -32,6 +34,11 @@ export class UserAdminResolver {
     private readonly deleteUserUseCase: DeleteUserUseCase,
     private readonly removeUserPictureUseCase: RemoveUserPictureUseCase,
   ) {}
+
+  @ResolveField()
+  socials(@Parent() user: UserFull, @Context() ctx: GraphQLContext): Promise<UserSocial[]> {
+    return ctx.loaders.userSocialsByUser.load(user.id)
+  }
 
   @Query()
   async adminGetUserById(

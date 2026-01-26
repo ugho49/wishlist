@@ -4,7 +4,7 @@ import DataLoader from 'dataloader'
 
 import { EventAttendee } from '../../gql/generated-types'
 import { GetEventAttendeesByIdsUseCase } from '../application/query/get-event-attendees-by-ids.use-case'
-import { eventMapper } from './event.mapper'
+import { eventAttendeeMapper } from './event-attendee.mapper'
 
 @Injectable()
 export class EventAttendeeDataLoaderFactory {
@@ -15,7 +15,7 @@ export class EventAttendeeDataLoaderFactory {
       const attendees = await this.getEventAttendeesByIdsUseCase.execute({ attendeeIds: [...attendeeIds] })
 
       // Map attendees to maintain order and length matching input IDs
-      const attendeeMap = new Map(attendees.map(a => [a.id, eventMapper.toGqlEventAttendee(a)]))
+      const attendeeMap = new Map(attendees.map(a => [a.id, eventAttendeeMapper.toGqlEventAttendee(a)]))
 
       return attendeeIds.map(id => attendeeMap.get(id) ?? null)
     })

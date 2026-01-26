@@ -15,14 +15,14 @@ import { DeleteSecretSantaUseCase } from '../../application/command/delete-secre
 import { DeleteSecretSantaUserUseCase } from '../../application/command/delete-secret-santa-user.use-case'
 import { StartSecretSantaUseCase } from '../../application/command/start-secret-santa.use-case'
 import { UpdateSecretSantaUseCase } from '../../application/command/update-secret-santa.use-case'
-import { GetSecretSantaUseCase } from '../../application/query/get-secret-santa.use-case'
+import { GetSecretSantaByEventUseCase } from '../../application/query/get-secret-santa-by-event.use-case'
 
 @IsAdmin()
 @ApiTags('ADMIN - Secret Santa')
 @Controller('/admin/secret-santa')
 export class SecretSantaAdminController {
   constructor(
-    private readonly getSecretSantaUseCase: GetSecretSantaUseCase,
+    private readonly getSecretSantaUseCase: GetSecretSantaByEventUseCase,
     private readonly updateSecretSantaUseCase: UpdateSecretSantaUseCase,
     private readonly deleteSecretSantaUseCase: DeleteSecretSantaUseCase,
     private readonly startSecretSantaUseCase: StartSecretSantaUseCase,
@@ -31,11 +31,12 @@ export class SecretSantaAdminController {
   ) {}
 
   @Get('/')
-  getSecretSantaForEvent(
+  async getSecretSantaForEvent(
     @CurrentUser() currentUser: ICurrentUser,
     @Query('eventId') eventId: EventId,
   ): Promise<SecretSantaDto | undefined> {
-    return this.getSecretSantaUseCase.execute({ currentUser, eventId })
+    const res = await this.getSecretSantaUseCase.execute({ currentUser, eventId })
+    return res?.secretSantaDto
   }
 
   @Patch('/:id')

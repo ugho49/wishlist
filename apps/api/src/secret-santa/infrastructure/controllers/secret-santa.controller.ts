@@ -1,6 +1,7 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 import { CurrentUser } from '@wishlist/api/auth'
+import { eventAttendeeMapper } from '@wishlist/api/event'
 import {
   AttendeeDto,
   CreateSecretSantaInputDto,
@@ -23,15 +24,16 @@ import { DeleteSecretSantaUserUseCase } from '../../application/command/delete-s
 import { StartSecretSantaUseCase } from '../../application/command/start-secret-santa.use-case'
 import { UpdateSecretSantaUseCase } from '../../application/command/update-secret-santa.use-case'
 import { UpdateSecretSantaUserUseCase } from '../../application/command/update-secret-santa-user.use-case'
-import { GetSecretSantaUseCase } from '../../application/query/get-secret-santa.use-case'
+import { GetSecretSantaByEventUseCase } from '../../application/query/get-secret-santa-by-event.use-case'
 import { GetSecretSantaDrawUseCase } from '../../application/query/get-secret-santa-draw.use-case'
+import { secretSantaMapper } from '../secret-santa.mapper'
 
 @ApiTags('Secret Santa')
 @Controller('/secret-santa')
 export class SecretSantaController {
   constructor(
     private readonly getSecretSantaDrawUseCase: GetSecretSantaDrawUseCase,
-    private readonly getSecretSantaUseCase: GetSecretSantaUseCase,
+    private readonly getSecretSantaUseCase: GetSecretSantaByEventUseCase,
     private readonly createSecretSantaUseCase: CreateSecretSantaUseCase,
     private readonly updateSecretSantaUseCase: UpdateSecretSantaUseCase,
     private readonly deleteSecretSantaUseCase: DeleteSecretSantaUseCase,
@@ -43,32 +45,36 @@ export class SecretSantaController {
   ) {}
 
   @Get('/user/draw')
-  getMySecretSantaDrawForEvent(
+  async getMySecretSantaDrawForEvent(
     @CurrentUser() currentUser: ICurrentUser,
     @Query('eventId') eventId: EventId,
   ): Promise<AttendeeDto | undefined> {
-    return this.getSecretSantaDrawUseCase.execute({ currentUser, eventId })
+    const attendee = await this.getSecretSantaDrawUseCase.execute({ currentUser, eventId })
+    return attendee ? eventAttendeeMapper.toAttendeeDto(attendee) : undefined
   }
 
   @Get('/')
-  getSecretSantaForEvent(
+  async getSecretSantaForEvent(
     @CurrentUser() currentUser: ICurrentUser,
     @Query('eventId') eventId: EventId,
   ): Promise<SecretSantaDto | undefined> {
-    return this.getSecretSantaUseCase.execute({ currentUser, eventId })
+    const res = await this.getSecretSantaUseCase.execute({ currentUser, eventId })
+    return res?.secretSantaDto
   }
 
   @Post('/')
-  createSecretSantaForEvent(
+  async createSecretSantaForEvent(
     @CurrentUser() currentUser: ICurrentUser,
     @Body() dto: CreateSecretSantaInputDto,
   ): Promise<SecretSantaDto> {
-    return this.createSecretSantaUseCase.execute({
+    const { secretSanta, event } = await this.createSecretSantaUseCase.execute({
       currentUser,
       eventId: dto.event_id,
       budget: dto.budget,
       description: dto.description,
     })
+
+    return secretSantaMapper.toSecretSantaDto(secretSanta, event)
   }
 
   @Patch('/:id')
@@ -116,16 +122,18 @@ export class SecretSantaController {
   }
 
   @Post('/:id/users')
-  addSecretSantaUsers(
+  async addSecretSantaUsers(
     @Param('id') secretSantaId: SecretSantaId,
     @CurrentUser() currentUser: ICurrentUser,
     @Body() dto: CreateSecretSantaUsersInputDto,
   ): Promise<CreateSecretSantaUsersOutputDto> {
-    return this.addSecretSantaUsersUseCase.execute({
+    const result = await this.addSecretSantaUsersUseCase.execute({
       secretSantaId,
       currentUser,
       attendeeIds: dto.attendee_ids,
     })
+
+    return { users: result.userDtos }
   }
 
   @Put('/:id/user/:secretSantaUserId')
