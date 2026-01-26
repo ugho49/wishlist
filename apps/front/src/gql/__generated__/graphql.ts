@@ -11,13 +11,57 @@ export const WishlistPageDocument = `
       title
       description
       logoUrl
+      ownerId
       owner {
         id
         firstName
         lastName
+        pictureUrl
+      }
+      coOwnerId
+      coOwner {
+        id
+        firstName
+        lastName
+        pictureUrl
+      }
+      events {
+        id
+        title
+        eventDate
+      }
+      items {
+        id
+        name
+        description
+        url
+        score
+        isSuggested
+        pictureUrl
+        takenById
+        takerUser {
+          id
+          firstName
+          lastName
+          pictureUrl
+        }
+        takenAt
+        createdAt
+      }
+      config {
+        hideItems
       }
     }
     ... on NotFoundRejection {
+      __typename
+    }
+    ... on ForbiddenRejection {
+      __typename
+    }
+    ... on UnauthorizedRejection {
+      __typename
+    }
+    ... on InternalErrorRejection {
       __typename
     }
   }
