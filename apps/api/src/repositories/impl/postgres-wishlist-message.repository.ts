@@ -2,8 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common'
 import { DatabaseService, DrizzleTransaction } from '@wishlist/api/core'
 import { WishlistMessage, WishlistMessageRepository } from '@wishlist/api/wishlist-message'
 import { schema } from '@wishlist/api-drizzle'
-import { uuid, WishlistId, WishlistMessageId } from '@wishlist/common'
-import { desc, eq } from 'drizzle-orm'
+import { UserId, uuid, WishlistId, WishlistMessageId } from '@wishlist/common'
+import { and, count, desc, eq, gt, lt, or, sql } from 'drizzle-orm'
 
 import { PostgresUserRepository } from './postgres-user.repository'
 
@@ -30,14 +30,72 @@ export class PostgresWishlistMessageRepository implements WishlistMessageReposit
     return message
   }
 
-  async findByWishlistId(wishlistId: WishlistId): Promise<WishlistMessage[]> {
+  async findByWishlistIdPaginated(params: {
+    wishlistId: WishlistId
+    cursor?: { createdAt: Date; id: WishlistMessageId }
+    limit: number
+  }): Promise<WishlistMessage[]> {
+    const { wishlistId, cursor, limit } = params
+
+    const conditions = [eq(schema.wishlistMessage.wishlistId, wishlistId)]
+
+    if (cursor) {
+      conditions.push(
+        or(
+          lt(schema.wishlistMessage.createdAt, cursor.createdAt),
+          and(eq(schema.wishlistMessage.createdAt, cursor.createdAt), lt(schema.wishlistMessage.id, cursor.id)),
+        )!,
+      )
+    }
+
     const results = await this.databaseService.db.query.wishlistMessage.findMany({
-      where: eq(schema.wishlistMessage.wishlistId, wishlistId),
+      where: and(...conditions),
       with: { author: true },
-      orderBy: [desc(schema.wishlistMessage.createdAt)],
+      orderBy: [desc(schema.wishlistMessage.createdAt), desc(schema.wishlistMessage.id)],
+      limit,
     })
 
     return results.map(PostgresWishlistMessageRepository.toModel)
+  }
+
+  async countUnreadMessages(params: { wishlistId: WishlistId; lastReadAt?: Date }): Promise<number> {
+    const conditions = [eq(schema.wishlistMessage.wishlistId, params.wishlistId)]
+
+    if (params.lastReadAt) {
+      conditions.push(gt(schema.wishlistMessage.createdAt, params.lastReadAt))
+    }
+
+    const result = await this.databaseService.db
+      .select({ count: count() })
+      .from(schema.wishlistMessage)
+      .where(and(...conditions))
+
+    return result[0]?.count ?? 0
+  }
+
+  async getLastReadAt(params: { userId: UserId; wishlistId: WishlistId }): Promise<Date | undefined> {
+    const result = await this.databaseService.db.query.wishlistMessageRead.findFirst({
+      where: and(
+        eq(schema.wishlistMessageRead.userId, params.userId),
+        eq(schema.wishlistMessageRead.wishlistId, params.wishlistId),
+      ),
+    })
+
+    return result?.lastReadAt
+  }
+
+  async markAsRead(params: { userId: UserId; wishlistId: WishlistId }): Promise<void> {
+    await this.databaseService.db
+      .insert(schema.wishlistMessageRead)
+      .values({
+        userId: params.userId,
+        wishlistId: params.wishlistId,
+        lastReadAt: new Date(),
+      })
+      .onConflictDoUpdate({
+        target: [schema.wishlistMessageRead.userId, schema.wishlistMessageRead.wishlistId],
+        set: { lastReadAt: sql`now()` },
+      })
   }
 
   async save(message: WishlistMessage, tx?: DrizzleTransaction): Promise<void> {

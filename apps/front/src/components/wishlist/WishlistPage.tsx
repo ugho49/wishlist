@@ -106,7 +106,14 @@ export const WishlistPage = ({ wishlistId }: WishlistPageProps) => {
                 <Stack gap="20px" sx={{ paddingTop: 3 }}>
                   {wishlist.description && <Description text={wishlist.description} allowMarkdown />}
 
-                  {canSeeMessages && <WishlistMessages wishlistId={wishlist.id} />}
+                  {canSeeMessages && (
+                    <WishlistMessages
+                      wishlistId={wishlist.id}
+                      hideItems={wishlist.config.hide_items}
+                      ownerFirstname={wishlist.owner.firstname}
+                      coOwnerFirstname={wishlist.co_owner?.firstname}
+                    />
+                  )}
 
                   <WishlistItems
                     wishlist={wishlist}

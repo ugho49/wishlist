@@ -71,6 +71,13 @@
       "when": 1772446860434,
       "tag": "0009_add-wishlist-message",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1772533260000,
+      "tag": "0010_add-wishlist-message-read",
+      "breakpoints": true
     }
   ]
 }

@@ -14,6 +14,7 @@ import {
   userSocial,
   wishlist,
   wishlistMessage,
+  wishlistMessageRead,
 } from './schema'
 
 export const eventAttendeeRelations = relations(eventAttendee, ({ one, many }) => ({
@@ -145,5 +146,16 @@ export const wishlistMessageRelations = relations(wishlistMessage, ({ one }) => 
   author: one(user, {
     fields: [wishlistMessage.authorId],
     references: [user.id],
+  }),
+}))
+
+export const wishlistMessageReadRelations = relations(wishlistMessageRead, ({ one }) => ({
+  user: one(user, {
+    fields: [wishlistMessageRead.userId],
+    references: [user.id],
+  }),
+  wishlist: one(wishlist, {
+    fields: [wishlistMessageRead.wishlistId],
+    references: [wishlist.id],
   }),
 }))

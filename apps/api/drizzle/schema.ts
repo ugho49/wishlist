@@ -259,6 +259,20 @@ export const wishlistMessage = pgTable(
   ],
 )
 
+export const wishlistMessageRead = pgTable(
+  'wishlist_message_read',
+  {
+    userId: userId('user_id').notNull(),
+    wishlistId: wishlistId('wishlist_id').notNull(),
+    lastReadAt: timestampWithTimezone('last_read_at').defaultNow().notNull(),
+  },
+  table => [
+    primaryKey({ columns: [table.userId, table.wishlistId] }),
+    foreignKey({ columns: [table.userId], foreignColumns: [user.id] }).onDelete('cascade'),
+    foreignKey({ columns: [table.wishlistId], foreignColumns: [wishlist.id] }).onDelete('cascade'),
+  ],
+)
+
 export const eventWishlist = pgTable(
   'event_wishlist',
   {

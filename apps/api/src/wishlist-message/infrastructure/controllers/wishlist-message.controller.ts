@@ -1,9 +1,11 @@
-import { Body, Controller, Delete, Get, Param, Post, Query } from '@nestjs/common'
+import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 import {
   CreateWishlistMessageInputDto,
+  CursorPaginatedWishlistMessagesDto,
+  GetWishlistMessagesQueryDto,
   ICurrentUser,
-  WishlistId,
+  MarkWishlistMessagesAsReadInputDto,
   WishlistMessageDto,
   WishlistMessageId,
 } from '@wishlist/common'
@@ -11,6 +13,7 @@ import {
 import { CurrentUser } from '../../../auth'
 import { CreateWishlistMessageUseCase } from '../../application/command/create-wishlist-message.use-case'
 import { DeleteWishlistMessageUseCase } from '../../application/command/delete-wishlist-message.use-case'
+import { MarkWishlistMessagesAsReadUseCase } from '../../application/command/mark-wishlist-messages-as-read.use-case'
 import { GetWishlistMessagesUseCase } from '../../application/query/get-wishlist-messages.use-case'
 
 @ApiTags('Wishlist Message')
@@ -20,14 +23,20 @@ export class WishlistMessageController {
     private readonly createWishlistMessageUseCase: CreateWishlistMessageUseCase,
     private readonly deleteWishlistMessageUseCase: DeleteWishlistMessageUseCase,
     private readonly getWishlistMessagesUseCase: GetWishlistMessagesUseCase,
+    private readonly markWishlistMessagesAsReadUseCase: MarkWishlistMessagesAsReadUseCase,
   ) {}
 
   @Get()
   getMessages(
     @CurrentUser() currentUser: ICurrentUser,
-    @Query('wishlistId') wishlistId: WishlistId,
-  ): Promise<WishlistMessageDto[]> {
-    return this.getWishlistMessagesUseCase.execute({ currentUser, wishlistId })
+    @Query() query: GetWishlistMessagesQueryDto,
+  ): Promise<CursorPaginatedWishlistMessagesDto> {
+    return this.getWishlistMessagesUseCase.execute({
+      currentUser,
+      wishlistId: query.wishlistId,
+      cursor: query.cursor,
+      limit: query.limit,
+    })
   }
 
   @Post()
@@ -39,6 +48,17 @@ export class WishlistMessageController {
       currentUser,
       wishlistId: dto.wishlist_id,
       content: dto.content,
+    })
+  }
+
+  @Put('/read')
+  async markAsRead(
+    @CurrentUser() currentUser: ICurrentUser,
+    @Body() dto: MarkWishlistMessagesAsReadInputDto,
+  ): Promise<void> {
+    await this.markWishlistMessagesAsReadUseCase.execute({
+      currentUser,
+      wishlistId: dto.wishlist_id,
     })
   }
 
