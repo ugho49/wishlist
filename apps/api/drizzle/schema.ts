@@ -10,6 +10,7 @@ import type {
   UserPasswordVerificationId,
   UserSocialId,
   WishlistId,
+  WishlistMessageId,
 } from '@wishlist/common'
 
 import { sql } from 'drizzle-orm'
@@ -40,6 +41,7 @@ const userSocialId = brandedUuid<UserSocialId>()
 const secretSantaId = brandedUuid<SecretSantaId>()
 const secretSantaUserId = brandedUuid<SecretSantaUserId>()
 const wishlistId = brandedUuid<WishlistId>()
+const wishlistMessageId = brandedUuid<WishlistMessageId>()
 const itemId = brandedUuid<ItemId>()
 
 export const event = pgTable('event', {
@@ -239,6 +241,35 @@ export const secretSantaUser = pgTable(
     foreignKey({ columns: [table.secretSantaId], foreignColumns: [secretSanta.id] }).onDelete('cascade'),
     foreignKey({ columns: [table.attendeeId], foreignColumns: [eventAttendee.id] }),
     uniqueIndex('secret_santa_user_secret_santa_id_attendee_id_key').on(table.secretSantaId, table.attendeeId),
+  ],
+)
+
+export const wishlistMessage = pgTable(
+  'wishlist_message',
+  {
+    id: wishlistMessageId().primaryKey().notNull(),
+    wishlistId: wishlistId('wishlist_id').notNull(),
+    authorId: userId('author_id').notNull(),
+    content: text().notNull(),
+    ...timestamps,
+  },
+  table => [
+    foreignKey({ columns: [table.wishlistId], foreignColumns: [wishlist.id] }).onDelete('cascade'),
+    foreignKey({ columns: [table.authorId], foreignColumns: [user.id] }).onDelete('cascade'),
+  ],
+)
+
+export const wishlistMessageRead = pgTable(
+  'wishlist_message_read',
+  {
+    userId: userId('user_id').notNull(),
+    wishlistId: wishlistId('wishlist_id').notNull(),
+    lastReadAt: timestampWithTimezone('last_read_at').defaultNow().notNull(),
+  },
+  table => [
+    primaryKey({ columns: [table.userId, table.wishlistId] }),
+    foreignKey({ columns: [table.userId], foreignColumns: [user.id] }).onDelete('cascade'),
+    foreignKey({ columns: [table.wishlistId], foreignColumns: [wishlist.id] }).onDelete('cascade'),
   ],
 )
 

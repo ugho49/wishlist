@@ -10,4 +10,5 @@ export const REPOSITORIES = {
   USER_SOCIAL: Symbol('USER_SOCIAL_REPOSITORY'),
   WISHLIST: Symbol('WISHLIST_REPOSITORY'),
   WISHLIST_ITEM: Symbol('WISHLIST_ITEM_REPOSITORY'),
+  WISHLIST_MESSAGE: Symbol('WISHLIST_MESSAGE_REPOSITORY'),
 } as const satisfies Record<Uppercase<string>, symbol>

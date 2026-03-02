@@ -18,6 +18,8 @@ export class Fixtures {
   static readonly ITEM_TABLE = 'item'
   static readonly SECRET_SANTA_TABLE = 'secret_santa'
   static readonly SECRET_SANTA_USER_TABLE = 'secret_santa_user'
+  static readonly WISHLIST_MESSAGE_TABLE = 'wishlist_message'
+  static readonly WISHLIST_MESSAGE_READ_TABLE = 'wishlist_message_read'
   static readonly DEFAULT_USER_PASSWORD = 'Password123'
   static readonly BASE_USER_EMAIL = 'test@test.fr'
   static readonly ADMIN_USER_EMAIL = 'admin@admin.fr'
@@ -290,5 +292,49 @@ export class Fixtures {
     )
 
     return id
+  }
+
+  async insertWishlistMessage(parameters: {
+    wishlistId: string
+    authorId: string
+    content: string
+    createdAt?: Date
+  }): Promise<string> {
+    const id = uuid()
+    const { wishlistId, authorId, content, createdAt } = parameters
+
+    if (createdAt) {
+      await this.client.query(
+        `INSERT INTO ${Fixtures.WISHLIST_MESSAGE_TABLE} (id, wishlist_id, author_id, content, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $5)`,
+        [id, wishlistId, authorId, content, createdAt],
+      )
+    } else {
+      await this.client.query(
+        `INSERT INTO ${Fixtures.WISHLIST_MESSAGE_TABLE} (id, wishlist_id, author_id, content) VALUES ($1, $2, $3, $4)`,
+        [id, wishlistId, authorId, content],
+      )
+    }
+
+    return id
+  }
+
+  async insertWishlistMessageRead(parameters: {
+    userId: string
+    wishlistId: string
+    lastReadAt?: Date
+  }): Promise<void> {
+    const { userId, wishlistId, lastReadAt } = parameters
+
+    if (lastReadAt) {
+      await this.client.query(
+        `INSERT INTO ${Fixtures.WISHLIST_MESSAGE_READ_TABLE} (user_id, wishlist_id, last_read_at) VALUES ($1, $2, $3)`,
+        [userId, wishlistId, lastReadAt],
+      )
+    } else {
+      await this.client.query(
+        `INSERT INTO ${Fixtures.WISHLIST_MESSAGE_READ_TABLE} (user_id, wishlist_id) VALUES ($1, $2)`,
+        [userId, wishlistId],
+      )
+    }
   }
 }

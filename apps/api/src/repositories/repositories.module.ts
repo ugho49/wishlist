@@ -11,6 +11,7 @@ import { PostgresUserPasswordVerificationRepository } from './impl/postgres-user
 import { PostgresUserSocialRepository } from './impl/postgres-user-social.repository'
 import { PostgresWishlistRepository } from './impl/postgres-wishlist.repository'
 import { PostgresWishlistItemRepository } from './impl/postgres-wishlist-item.repository'
+import { PostgresWishlistMessageRepository } from './impl/postgres-wishlist-message.repository'
 import { REPOSITORIES } from './repositories.constants'
 
 const repositoryProviders: Record<keyof typeof REPOSITORIES, Type<unknown>> = {
@@ -25,6 +26,7 @@ const repositoryProviders: Record<keyof typeof REPOSITORIES, Type<unknown>> = {
   USER_SOCIAL: PostgresUserSocialRepository,
   WISHLIST: PostgresWishlistRepository,
   WISHLIST_ITEM: PostgresWishlistItemRepository,
+  WISHLIST_MESSAGE: PostgresWishlistMessageRepository,
 }
 
 @Global()
