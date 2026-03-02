@@ -29,11 +29,6 @@ const plugins: WebpackPluginInstance[] = [
     ],
     assets: [
       {
-        input: 'apps/api/templates',
-        glob: '**/*.(hbs|mjml)',
-        output: 'templates',
-      },
-      {
         input: 'apps/api/firebase',
         glob: '**/*',
         output: 'firebase',

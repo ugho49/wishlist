@@ -1,26 +1,36 @@
 import type * as SMTPTransport from 'nodemailer/lib/smtp-transport'
 
-import { readFile } from 'node:fs/promises'
-import { join } from 'node:path'
 import { Processor, WorkerHost } from '@nestjs/bullmq'
 import { Inject, Logger } from '@nestjs/common'
+import { render } from '@react-email/render'
 import { Job } from 'bullmq'
-import * as Handlebars from 'handlebars'
-import mjml2html from 'mjml'
 import { createTransport, type Transporter } from 'nodemailer'
 import { InjectPinoLogger, PinoLogger } from 'pino-nestjs'
+import { createElement } from 'react'
 
 import { QueueName, WithPinoContext } from '../queue'
 import { MailConfig } from './mail.config'
 import { MAIL_CONFIG_TOKEN } from './mail.module-definitions'
-import { MailPayload } from './mail.type'
-import { helpers } from './mail.utils'
+import { MailPayload, MailTemplate } from './mail.type'
+import {
+  AddedToEventEmail,
+  AddedToEventNewUserEmail,
+  AddedToWishlistAsCoOwnerEmail,
+  ConfirmEmailChangeEmail,
+  EmailChangedConfirmationEmail,
+  EmailChangedSuccessEmail,
+  EmailChangeNotificationEmail,
+  NewItemsReminderEmail,
+  ResetPasswordEmail,
+  SecretSantaCancelEmail,
+  SecretSantaDrawEmail,
+  WelcomeUserEmail,
+} from './templates'
 
 @Processor(QueueName.MAILS, { concurrency: 5 })
 export class MailProcessor extends WorkerHost {
   private readonly logger = new Logger(MailProcessor.name)
   private readonly transporter: Transporter<SMTPTransport.SentMessageInfo>
-  private readonly templateCache: Map<string, string> = new Map()
 
   constructor(
     @Inject(MAIL_CONFIG_TOKEN)
@@ -33,7 +43,6 @@ export class MailProcessor extends WorkerHost {
     this.logger.log('Initializing mail transporter ...', {
       host: config.host,
       port: config.port,
-      templateFolder: config.templateDir,
     })
 
     this.transporter = createTransport({
@@ -54,18 +63,7 @@ export class MailProcessor extends WorkerHost {
     this.logger.log('Processing mail job ...')
 
     const { data } = job
-    const templatePath = join(this.config.templateDir, `${data.template}.mjml`)
-
-    if (!this.templateCache.has(templatePath)) {
-      const fileContent = await readFile(templatePath, 'utf8')
-      const templatedContent = mjml2html(fileContent).html
-      this.logger.log('Compiling template ...', { templatePath })
-      this.templateCache.set(templatePath, templatedContent)
-    }
-
-    const templateSource = this.templateCache.get(templatePath)
-    const template = Handlebars.compile(templateSource, { strict: true })
-    const html = template(data.context, { helpers })
+    const html = await this.renderTemplate(data)
 
     this.logger.log('Sending mail ...', { to: data.to, subject: data.subject, template: data.template })
 
@@ -75,5 +73,34 @@ export class MailProcessor extends WorkerHost {
       subject: data.subject,
       html,
     })
+  }
+
+  private renderTemplate(payload: MailPayload): Promise<string> {
+    switch (payload.template) {
+      case MailTemplate.WELCOME_USER:
+        return render(createElement(WelcomeUserEmail, payload.context))
+      case MailTemplate.SECRET_SANTA_DRAW:
+        return render(createElement(SecretSantaDrawEmail, payload.context))
+      case MailTemplate.SECRET_SANTA_CANCEL:
+        return render(createElement(SecretSantaCancelEmail, payload.context))
+      case MailTemplate.RESET_PASSWORD:
+        return render(createElement(ResetPasswordEmail, payload.context))
+      case MailTemplate.NEW_ITEMS_REMINDER:
+        return render(createElement(NewItemsReminderEmail, payload.context))
+      case MailTemplate.ADDED_TO_EVENT:
+        return render(createElement(AddedToEventEmail, payload.context))
+      case MailTemplate.ADDED_TO_EVENT_NEW_USER:
+        return render(createElement(AddedToEventNewUserEmail, payload.context))
+      case MailTemplate.ADDED_TO_WISHLIST_AS_CO_OWNER:
+        return render(createElement(AddedToWishlistAsCoOwnerEmail, payload.context))
+      case MailTemplate.CONFIRM_EMAIL_CHANGE:
+        return render(createElement(ConfirmEmailChangeEmail, payload.context))
+      case MailTemplate.EMAIL_CHANGE_NOTIFICATION:
+        return render(createElement(EmailChangeNotificationEmail, payload.context))
+      case MailTemplate.EMAIL_CHANGED_CONFIRMATION:
+        return render(createElement(EmailChangedConfirmationEmail, payload.context))
+      case MailTemplate.EMAIL_CHANGED_SUCCESS:
+        return render(createElement(EmailChangedSuccessEmail, payload.context))
+    }
   }
 }
