@@ -13,6 +13,7 @@ import { RepositoriesModule } from './repositories'
 import { SecretSantaModule } from './secret-santa'
 import { UserModule } from './user'
 import { WishlistModule } from './wishlist'
+import { WishlistMessageModule } from './wishlist-message'
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { WishlistModule } from './wishlist'
     ItemModule,
     EventModule,
     SecretSantaModule,
+    WishlistMessageModule,
     // GraphQLModule must be AFTER all domain modules it depends on
     GraphQLModule,
   ],

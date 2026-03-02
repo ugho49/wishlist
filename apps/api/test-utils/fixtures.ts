@@ -18,6 +18,7 @@ export class Fixtures {
   static readonly ITEM_TABLE = 'item'
   static readonly SECRET_SANTA_TABLE = 'secret_santa'
   static readonly SECRET_SANTA_USER_TABLE = 'secret_santa_user'
+  static readonly WISHLIST_MESSAGE_TABLE = 'wishlist_message'
   static readonly DEFAULT_USER_PASSWORD = 'Password123'
   static readonly BASE_USER_EMAIL = 'test@test.fr'
   static readonly ADMIN_USER_EMAIL = 'admin@admin.fr'
@@ -287,6 +288,18 @@ export class Fixtures {
     await this.client.query(
       `INSERT INTO ${Fixtures.ITEM_TABLE} (id, wishlist_id, name, description, url, is_suggested, score, taker_id, taken_at, picture_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
       [id, wishlistId, name, description, url, isSuggested ?? false, score, takerId, takenAt, pictureUrl],
+    )
+
+    return id
+  }
+
+  async insertWishlistMessage(parameters: { wishlistId: string; authorId: string; content: string }): Promise<string> {
+    const id = uuid()
+    const { wishlistId, authorId, content } = parameters
+
+    await this.client.query(
+      `INSERT INTO ${Fixtures.WISHLIST_MESSAGE_TABLE} (id, wishlist_id, author_id, content) VALUES ($1, $2, $3, $4)`,
+      [id, wishlistId, authorId, content],
     )
 
     return id

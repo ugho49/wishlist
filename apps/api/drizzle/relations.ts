@@ -13,6 +13,7 @@ import {
   userPasswordVerification,
   userSocial,
   wishlist,
+  wishlistMessage,
 } from './schema'
 
 export const eventAttendeeRelations = relations(eventAttendee, ({ one, many }) => ({
@@ -84,6 +85,7 @@ export const wishlistRelations = relations(wishlist, ({ one, many }) => ({
   }),
   items: many(item),
   eventWishlists: many(eventWishlist),
+  messages: many(wishlistMessage),
 }))
 
 export const itemRelations = relations(item, ({ one }) => ({
@@ -132,5 +134,16 @@ export const eventWishlistRelations = relations(eventWishlist, ({ one }) => ({
   event: one(event, {
     fields: [eventWishlist.eventId],
     references: [event.id],
+  }),
+}))
+
+export const wishlistMessageRelations = relations(wishlistMessage, ({ one }) => ({
+  wishlist: one(wishlist, {
+    fields: [wishlistMessage.wishlistId],
+    references: [wishlist.id],
+  }),
+  author: one(user, {
+    fields: [wishlistMessage.authorId],
+    references: [user.id],
   }),
 }))

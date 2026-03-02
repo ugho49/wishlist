@@ -11,6 +11,7 @@ export type UserSocialId = Brand<string, 'UserSocialId'>
 export type UserEmailSettingId = Brand<string, 'UserEmailSettingId'>
 export type ItemId = Brand<string, 'ItemId'>
 export type WishlistId = Brand<string, 'WishlistId'>
+export type WishlistMessageId = Brand<string, 'WishlistMessageId'>
 
 export type Ids = {
   EventId: EventId
@@ -24,6 +25,7 @@ export type Ids = {
   UserEmailSettingId: UserEmailSettingId
   ItemId: ItemId
   WishlistId: WishlistId
+  WishlistMessageId: WishlistMessageId
 }
 
 const getBrandedType = (type: keyof Ids): string => `Ids["${type}"]`
@@ -40,4 +42,5 @@ export const gqlScalarIds: Record<keyof Ids, string> = {
   SecretSantaId: getBrandedType('SecretSantaId'),
   SecretSantaUserId: getBrandedType('SecretSantaUserId'),
   ItemId: getBrandedType('ItemId'),
+  WishlistMessageId: getBrandedType('WishlistMessageId'),
 }

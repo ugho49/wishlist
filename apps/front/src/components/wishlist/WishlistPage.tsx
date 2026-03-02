@@ -1,10 +1,12 @@
 import type { WishlistId } from '@wishlist/common'
+import type { RootState } from '../../core'
 
 import { Box, Container, Stack } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate, useSearch } from '@tanstack/react-router'
 import { FeatureFlags } from '@wishlist/common'
 import { useCallback, useMemo } from 'react'
+import { useSelector } from 'react-redux'
 
 import { useApi, useWishlistById } from '../../hooks'
 import { useFeatureFlag } from '../../hooks/useFeatureFlag'
@@ -15,13 +17,17 @@ import { SEO } from '../SEO'
 import { WishlistEventsDialog } from './WishlistEventsDialog'
 import { WishlistHeader } from './WishlistHeader'
 import { WishlistItems } from './WishlistItems'
+import { WishlistMessages } from './WishlistMessages'
 import { WishlistNotFound } from './WishlistNotFound'
 
 interface WishlistPageProps {
   wishlistId: WishlistId
 }
 
+const mapState = (state: RootState) => state.auth.user?.id
+
 export const WishlistPage = ({ wishlistId }: WishlistPageProps) => {
+  const currentUserId = useSelector(mapState)
   const importItemsEnabled = useFeatureFlag(FeatureFlags.FRONTEND_WISHLIST_IMPORT_ITEMS_ENABLED)
   const { showEventDialog, showImportDialog, sort, filter } = useSearch({
     from: '/_authenticated/_with-layout/wishlists/$wishlistId/',
@@ -30,6 +36,11 @@ export const WishlistPage = ({ wishlistId }: WishlistPageProps) => {
   const api = useApi()
   const { wishlist, loading, currentUserCanEdit } = useWishlistById(wishlistId)
   const isPublic = useMemo(() => wishlist?.config.hide_items === false, [wishlist])
+  const canSeeMessages = useMemo(() => {
+    if (!wishlist) return false
+    if (!wishlist.config.hide_items) return true
+    return wishlist.owner.id !== currentUserId && wishlist.co_owner?.id !== currentUserId
+  }, [wishlist, currentUserId])
 
   const { data: importableItems = [] } = useQuery({
     queryKey: ['item.importable', { wishlistId }],
@@ -94,6 +105,8 @@ export const WishlistPage = ({ wishlistId }: WishlistPageProps) => {
               <Container maxWidth="lg">
                 <Stack gap="20px" sx={{ paddingTop: 3 }}>
                   {wishlist.description && <Description text={wishlist.description} allowMarkdown />}
+
+                  {canSeeMessages && <WishlistMessages wishlistId={wishlist.id} />}
 
                   <WishlistItems
                     wishlist={wishlist}
