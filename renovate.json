@@ -17,8 +17,8 @@
   "updateLockFiles": true,
   "labels": ["dependencies"],
   "prConcurrentLimit": 10,
-  "circleci": {
-    "managerFilePatterns": ["/.circleci/config.yml/", "/.circleci/continuation.yml/"]
+  "github-actions": {
+    "managerFilePatterns": ["/^\\.github/workflows/[^/]+\\.ya?ml$/", "/^\\.github/actions/.+/action\\.ya?ml$/"]
   },
   "ignoreDeps": ["postgres", "prodrigestivill/postgres-backup-local", "valkey/valkey", "traefik"]
 }

@@ -3,9 +3,6 @@ name: Claude Code Review
 on:
   pull_request:
     types: [opened, synchronize, ready_for_review, reopened]
-    branches:
-      # ignore renovate branches
-      - '!renovate-*'
     # Optional: Only run on specific file changes
     # paths:
     #   - "src/**/*.ts"
@@ -15,12 +12,9 @@ on:
 
 jobs:
   claude-review:
-    # Optional: Filter by PR author
-    # if: |
-    #   github.event.pull_request.user.login == 'external-contributor' ||
-    #   github.event.pull_request.user.login == 'new-developer' ||
-    #   github.event.pull_request.author_association == 'FIRST_TIME_CONTRIBUTOR'
-
+    # Skip renovate branches (checks the PR head branch, unlike an `on.branches` filter
+    # which would match the base branch and also break triggering when only negated).
+    if: ${{ !startsWith(github.head_ref, 'renovate-') }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -30,7 +24,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 1
 
