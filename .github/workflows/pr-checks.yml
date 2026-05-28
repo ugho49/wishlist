@@ -92,7 +92,7 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: Run affected typecheck
-        run: yarn nx affected --target=typecheck --base=${{ needs.install.outputs.nx_base }} --head=${{ needs.install.outputs.nx_head }} --exclude=@wishlist/source --parallel=3 --output-style=stream
+        run: yarn nx affected --target=typecheck --base=${{ needs.install.outputs.nx_base }} --head=${{ needs.install.outputs.nx_head }} --exclude=@wishlist/source --parallel=3
 
   test-unit:
     name: Unit Tests
@@ -109,7 +109,7 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: Run affected unit tests
-        run: yarn nx affected --target=test --base=${{ needs.install.outputs.nx_base }} --head=${{ needs.install.outputs.nx_head }} --exclude=@wishlist/source --parallel=3 --output-style=stream
+        run: yarn nx affected --target=test --base=${{ needs.install.outputs.nx_base }} --head=${{ needs.install.outputs.nx_head }} --exclude=@wishlist/source --parallel=3
 
       - name: Upload test reports
         if: always()
@@ -136,7 +136,7 @@ jobs:
       # Testcontainers runs natively against the runner's Docker daemon,
       # so no SSH tunnel / autoforward is required (unlike CircleCI).
       - name: Run affected integration tests
-        run: yarn nx affected --target=test:int --base=${{ needs.install.outputs.nx_base }} --head=${{ needs.install.outputs.nx_head }} --exclude=@wishlist/source --parallel=3 --output-style=stream
+        run: yarn nx affected --target=test:int --base=${{ needs.install.outputs.nx_base }} --head=${{ needs.install.outputs.nx_head }} --exclude=@wishlist/source --parallel=3
 
       - name: Upload test reports
         if: always()
