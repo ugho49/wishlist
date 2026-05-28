@@ -25,7 +25,7 @@ import { useErrorTransformPlugin } from './graphql-error.plugin'
           useErrorTransformPlugin(),
           ...(process.env.NODE_ENV === 'production' ? [useDisableIntrospection()] : []),
         ],
-        graphiql: true,
+        graphiql: process.env.NODE_ENV !== 'production',
         context: ({ req }: Omit<GraphQLContext, 'loaders'>): GraphQLContext => ({
           req,
           loaders: dataLoaderService.createLoaders(() => req.user),
