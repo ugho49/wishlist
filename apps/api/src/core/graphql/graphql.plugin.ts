@@ -109,3 +109,16 @@ export function useLoggingPlugin(): Plugin {
     },
   }
 }
+
+export const useBlockGetRequests = (): Plugin => ({
+  onRequest({ endResponse, request }) {
+    if (request.method === 'GET') {
+      endResponse(
+        new Response('Only POST requests are allowed', {
+          headers: { 'Content-Type': 'text/plain' },
+          status: 405,
+        }),
+      )
+    }
+  },
+})
