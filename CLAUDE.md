@@ -48,7 +48,7 @@ This is an Nx monorepo containing a wishlist application with React frontend and
 ### Backend Architecture (NestJS)
 - **Domain-Driven Design** with application, domain, and infrastructure layers
 - **CQRS pattern** extensively used via `@nestjs/cqrs` (commands, queries, events)
-- **Core modules**: database (Drizzle), mail (MJML + Nodemailer), bucket (Firebase), health
+- **Core modules**: database (Drizzle), mail (react-email + Nodemailer), bucket (Firebase), health
 - **Domain modules**: auth (JWT + Google OAuth), user, event, attendee, wishlist, item, secret-santa
 - **Database**: PostgreSQL with Drizzle ORM using branded UUID types for type safety
 - **Transaction management**: Available via TransactionManager service

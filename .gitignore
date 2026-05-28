@@ -5,6 +5,10 @@
 /tmp
 /out-tsc
 
+# react-email preview / export output
+.react-email
+libs/mail/out
+
 # dependencies
 node_modules
 
