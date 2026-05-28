@@ -15,7 +15,4 @@ export class MailConfig {
 
   @IsString()
   password!: string
-
-  @IsString()
-  templateDir!: string
 }
