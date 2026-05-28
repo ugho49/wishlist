@@ -18,11 +18,11 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       # Reuse the bundle built by the Build Front job in the same run.
       - name: Download front build
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: front-dist
           path: dist/apps/front
@@ -47,7 +47,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Create release
         env:
