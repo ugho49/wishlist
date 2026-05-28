@@ -42,7 +42,7 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           use_sticky_comment: true
-          claude_args: '--allowedTools "Read,Glob,Grep,Bash(gh pr *),Bash(gh api *),Bash(git diff *),Bash(git log *),Bash(git show *)" --model claude-opus-4-7'
+          claude_args: '--allowedTools "Read,Glob,Grep,Bash(gh pr *),Bash(gh api *),Bash(git diff *),Bash(git log *),Bash(git show *)" --model claude-opus-4-8'
           prompt: |
             Please analyze the changes in this PR and focus on identifying critical issues related to:
             - Potential bugs or issues
