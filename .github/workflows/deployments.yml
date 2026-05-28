@@ -1,0 +1,47 @@
+name: Deployments
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '**/*.md'
+      - '.husky/**'
+      - '.vscode/**'
+      - '.idea/**'
+      - 'junit_reports/**'
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  # Run the full PR check suite first. It also builds & pushes the API image
+  # (push happens because this runs on main) and builds the front bundle.
+  pr-checks:
+    uses: ./.github/workflows/pr-checks.yml
+    secrets: inherit
+
+  deploy-api:
+    name: Deploy API
+    needs: pr-checks
+    if: contains(needs.pr-checks.outputs.affected_projects, '"api"')
+    uses: ./.github/workflows/deploy-api.yml
+    concurrency:
+      group: deploy-api
+      cancel-in-progress: false
+    with:
+      version: ${{ needs.pr-checks.outputs.version }}
+    secrets: inherit
+
+  deploy-front:
+    name: Deploy Front
+    needs: pr-checks
+    if: contains(needs.pr-checks.outputs.affected_projects, '"front"')
+    uses: ./.github/workflows/deploy-front.yml
+    concurrency:
+      group: deploy-front
+      cancel-in-progress: false
+    with:
+      version: ${{ needs.pr-checks.outputs.version }}
+    secrets: inherit

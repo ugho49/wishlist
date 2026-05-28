@@ -1,0 +1,50 @@
+name: Deploy to VPS
+description: Deploy an application to the VPS via the Dokploy API
+
+inputs:
+  application-id:
+    description: The Dokploy application ID
+    required: true
+  version:
+    description: The version tag to deploy
+    required: true
+  docker-image:
+    description: The Docker image name (without tag)
+    required: true
+  vps-api-url:
+    description: The VPS API base URL
+    required: true
+  vps-api-key:
+    description: The VPS API key
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Update application image
+      shell: bash
+      run: |
+        echo "Updating application image to ${{ inputs.docker-image }}:${{ inputs.version }}..."
+        curl -f -X 'POST' "${{ inputs.vps-api-url }}/api/application.update" \
+          -H 'accept: application/json' \
+          -H 'Content-Type: application/json' \
+          -H "x-api-key: ${{ inputs.vps-api-key }}" \
+          -d "{
+            \"applicationId\": \"${{ inputs.application-id }}\",
+            \"dockerImage\": \"${{ inputs.docker-image }}:${{ inputs.version }}\"
+          }"
+
+    - name: Deploy application
+      shell: bash
+      run: |
+        SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+        echo "Deploying version ${{ inputs.version }} (commit: ${SHORT_SHA})..."
+        curl -f -X 'POST' "${{ inputs.vps-api-url }}/api/application.deploy" \
+          -H 'accept: application/json' \
+          -H 'Content-Type: application/json' \
+          -H "x-api-key: ${{ inputs.vps-api-key }}" \
+          -d "{
+            \"applicationId\": \"${{ inputs.application-id }}\",
+            \"title\": \"Deploy ${{ inputs.version }} from GitHub Actions\",
+            \"description\": \"Version ${{ inputs.version }} (commit: ${SHORT_SHA})\"
+          }"

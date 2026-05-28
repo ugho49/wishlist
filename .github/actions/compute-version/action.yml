@@ -1,0 +1,21 @@
+name: Compute Version
+description: Compute a calendar-based version in the format YYYY.MM.DD.short_sha
+
+outputs:
+  version:
+    description: The computed version string
+    value: ${{ steps.version.outputs.version }}
+
+runs:
+  using: composite
+  steps:
+    - name: Compute version
+      id: version
+      shell: bash
+      run: |
+        # Calendar version format: YYYY.MM.DD.short_sha (matches the previous CircleCI scheme)
+        DATE=$(date -u '+%Y.%m.%d')
+        SHORT_SHA=$(git rev-parse HEAD | cut -c1-7)
+        VERSION="${DATE}.${SHORT_SHA}"
+        echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+        echo "Computed version: ${VERSION}"

@@ -1,0 +1,61 @@
+name: Deploy Front
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  deploy-firebase:
+    name: Deploy to Firebase Hosting
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Reuse the bundle built by the Build Front job in the same run.
+      - name: Download front build
+        uses: actions/download-artifact@v4
+        with:
+          name: front-dist
+          path: dist/apps/front
+
+      - name: Deploy to Firebase Hosting
+        env:
+          FIREBASE_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          echo "$FIREBASE_JSON" > firebase_auth.json
+          export GOOGLE_APPLICATION_CREDENTIALS="$(pwd)/firebase_auth.json"
+          SHORT_SHA=$(echo "${GITHUB_SHA}" | cut -c1-7)
+          npx -y firebase-tools deploy \
+            -P production \
+            --only hosting \
+            -m "Version ${{ inputs.version }} (commit: ${SHORT_SHA})" \
+            --non-interactive
+
+  release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: deploy-firebase
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="front@${{ inputs.version }}"
+          SHORT_SHA=$(echo "${GITHUB_SHA}" | cut -c1-7)
+          gh release create "$TAG" \
+            --title "Front ${{ inputs.version }}" \
+            --notes "Release Front version ${{ inputs.version }} (commit: ${SHORT_SHA})" \
+            --target "$GITHUB_SHA"

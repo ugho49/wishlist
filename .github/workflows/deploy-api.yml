@@ -1,0 +1,50 @@
+name: Deploy API
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  deploy-to-vps:
+    name: Deploy to VPS
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy to VPS
+        uses: ./.github/actions/deploy-to-vps
+        with:
+          application-id: ${{ secrets.DOKPLOY_API_APPLICATION_ID }}
+          version: ${{ inputs.version }}
+          docker-image: ughoste/wishlist-api
+          vps-api-url: ${{ secrets.VPS_API_URL }}
+          vps-api-key: ${{ secrets.VPS_API_KEY }}
+
+  release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: deploy-to-vps
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="api@${{ inputs.version }}"
+          SHORT_SHA=$(echo "${GITHUB_SHA}" | cut -c1-7)
+          gh release create "$TAG" \
+            --title "API ${{ inputs.version }}" \
+            --notes "Release API version ${{ inputs.version }} (commit: ${SHORT_SHA})" \
+            --target "$GITHUB_SHA"
