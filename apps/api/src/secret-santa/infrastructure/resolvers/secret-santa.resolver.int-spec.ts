@@ -329,6 +329,27 @@ describe('SecretSantaResolver (GraphQL)', () => {
       await expectTable(Fixtures.SECRET_SANTA_TABLE).hasNumberOfRows(0)
     })
 
+    it.each([
+      { budget: 0 },
+      { budget: -10 },
+    ])('should return ValidationRejection when budget is not positive ($budget) (parity with REST @IsPositive)', async ({
+      budget,
+    }) => {
+      const { eventId } = await fixtures.insertEventWithMaintainer({
+        title: 'Test Event',
+        description: 'Test Description',
+        maintainerId: currentUserId,
+      })
+
+      const res = await request
+        .post('/graphql')
+        .send({ query, variables: { input: { eventId, budget } } })
+        .expect(200)
+
+      expect(res.body.data.createSecretSanta.__typename).toBe('ValidationRejection')
+      await expectTable(Fixtures.SECRET_SANTA_TABLE).hasNumberOfRows(0)
+    })
+
     it('should return ForbiddenRejection and not change db when user is not in event', async () => {
       const otherUserId = await fixtures.insertUser({
         email: 'other@test.fr',
@@ -924,6 +945,36 @@ describe('SecretSantaResolver (GraphQL)', () => {
         created_at: expect.toBeDate(),
         updated_at: expect.toBeDate(),
       })
+    })
+
+    it('should deduplicate attendeeIds (parity with REST @Transform(uniq))', async () => {
+      const { eventId } = await fixtures.insertEventWithMaintainer({
+        title: 'Test Event',
+        description: 'Test Description',
+        maintainerId: currentUserId,
+      })
+
+      const user2Id = await fixtures.insertUser({
+        email: 'user2@test.fr',
+        firstname: 'User2',
+        lastname: 'Test',
+      })
+      const attendee2Id = await fixtures.insertActiveAttendee({ eventId, userId: user2Id })
+
+      const secretSantaId = await fixtures.insertSecretSanta({
+        eventId,
+        status: SecretSantaStatus.CREATED,
+      })
+
+      const res = await request
+        .post('/graphql')
+        .send({ query, variables: { id: secretSantaId, input: { attendeeIds: [attendee2Id, attendee2Id] } } })
+        .expect(200)
+
+      // Duplicate ids in a single request must collapse to one SecretSantaUser row (no draw corruption).
+      expect(res.body.data.addSecretSantaUsers.__typename).toBe('AddSecretSantaUsersOutput')
+      expect(res.body.data.addSecretSantaUsers.users).toHaveLength(1)
+      await expectTable(Fixtures.SECRET_SANTA_USER_TABLE).hasNumberOfRows(1)
     })
 
     it('should not succeed and not change db when secret santa is started', async () => {
