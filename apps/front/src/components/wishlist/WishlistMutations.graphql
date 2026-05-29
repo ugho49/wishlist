@@ -1,0 +1,23 @@
+mutation UpdateWishlist($id: WishlistId!, $input: UpdateWishlistInput!) {
+  updateWishlist(id: $id, input: $input) {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+    ... on ValidationRejection {
+      errors {
+        field
+        message
+      }
+    }
+  }
+}
+
+mutation DeleteWishlist($id: WishlistId!) {
+  deleteWishlist(id: $id) {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+  }
+}
