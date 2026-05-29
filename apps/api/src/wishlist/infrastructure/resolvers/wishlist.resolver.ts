@@ -13,7 +13,7 @@ export class WishlistResolver {
   constructor(private readonly getWishlistsByUserUseCase: GetWishlistsByUserUseCase) {}
 
   @Query()
-  async getWishlistById(
+  async wishlist(
     @Args('id', { type: () => String }) id: WishlistId,
     @Context() ctx: GraphQLContext,
   ): Promise<GetWishlistByIdResult> {
@@ -25,7 +25,7 @@ export class WishlistResolver {
   }
 
   @Query()
-  async getMyWishlists(
+  async wishlists(
     @Args('filters', new ZodPipe(PaginationFiltersSchema)) filters: PaginationFilters,
     @GqlCurrentUser('id') currentUserId: UserId,
   ): Promise<GetMyWishlistsResult> {

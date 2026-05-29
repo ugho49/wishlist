@@ -34,7 +34,7 @@ export class UserAdminResolver {
   ) {}
 
   @Query()
-  async adminGetUserById(
+  async user(
     @Args('userId', new ZodPipe(UserIdSchema)) userId: UserId,
     @Context() ctx: GraphQLContext,
   ): Promise<AdminGetUserByIdResult> {
@@ -48,7 +48,7 @@ export class UserAdminResolver {
   }
 
   @Query()
-  async adminGetAllUsers(
+  async users(
     @Args('input', new ZodPipe(AdminGetAllUsersPaginationFiltersSchema)) input: AdminGetAllUsersPaginationFilters,
   ): Promise<AdminGetAllUsersResult> {
     const pageSize = input.limit ?? DEFAULT_RESULT_NUMBER

@@ -58,7 +58,7 @@ export class SecretSantaResolver {
   ) {}
 
   @Query()
-  async getSecretSantaForEvent(
+  async secretSanta(
     @Args('eventId', new ZodPipe(EventIdSchema)) eventId: EventId,
     @GqlCurrentUser() currentUser: ICurrentUser,
   ): Promise<GetSecretSantaForEventResult | null> {
@@ -68,7 +68,7 @@ export class SecretSantaResolver {
   }
 
   @Query()
-  async getMySecretSantaDraw(
+  async mySecretSantaDraw(
     @Args('eventId', new ZodPipe(EventIdSchema)) eventId: EventId,
     @GqlCurrentUser() currentUser: ICurrentUser,
   ): Promise<GetMySecretSantaDrawResult | null> {

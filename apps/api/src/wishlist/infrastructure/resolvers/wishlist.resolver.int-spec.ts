@@ -36,10 +36,10 @@ describe('WishlistResolver (GraphQL)', () => {
     currentUserId = await fixtures.getSignedUserId('BASE_USER')
   })
 
-  describe('Query getWishlistById', () => {
+  describe('Query wishlist', () => {
     const query = /* GraphQL */ `
       query GetWishlistById($id: WishlistId!) {
-        getWishlistById(id: $id) {
+        wishlist(id: $id) {
           __typename
           ... on Wishlist {
             id
@@ -93,7 +93,7 @@ describe('WishlistResolver (GraphQL)', () => {
         .send({ query, variables: { id: wishlistId } })
         .expect(200)
 
-      expectNotSucceeded(res.body, 'getWishlistById')
+      expectNotSucceeded(res.body, 'wishlist')
     })
 
     it('should return the wishlist with nested owner, coOwner and events on happy path', async () => {
@@ -125,7 +125,7 @@ describe('WishlistResolver (GraphQL)', () => {
         .expect(200)
 
       expect(res.body.errors).toBeUndefined()
-      expect(res.body.data.getWishlistById).toMatchObject({
+      expect(res.body.data.wishlist).toMatchObject({
         __typename: 'Wishlist',
         id: wishlistId,
         title: 'My wishlist',
@@ -164,7 +164,7 @@ describe('WishlistResolver (GraphQL)', () => {
         .send({ query, variables: { id: wishlistId } })
         .expect(200)
 
-      expect(res.body.data.getWishlistById).toMatchObject({
+      expect(res.body.data.wishlist).toMatchObject({
         __typename: 'Wishlist',
         id: wishlistId,
         coOwnerId: null,
@@ -200,7 +200,7 @@ describe('WishlistResolver (GraphQL)', () => {
         .send({ query, variables: { id: wishlistId } })
         .expect(200)
 
-      const wishlist = res.body.data.getWishlistById
+      const wishlist = res.body.data.wishlist
       expect(wishlist.__typename).toBe('Wishlist')
       expect(wishlist.eventIds).toEqual(expect.arrayContaining([accessibleEventId, hiddenEventId]))
       // events field-resolver filters out events the user cannot access
@@ -213,7 +213,7 @@ describe('WishlistResolver (GraphQL)', () => {
         .send({ query, variables: { id: uuid() } })
         .expect(200)
 
-      expect(res.body.data.getWishlistById).toMatchObject({
+      expect(res.body.data.wishlist).toMatchObject({
         __typename: 'NotFoundRejection',
       })
     })
@@ -239,16 +239,16 @@ describe('WishlistResolver (GraphQL)', () => {
         .send({ query, variables: { id: wishlistId } })
         .expect(200)
 
-      expect(res.body.data.getWishlistById).toMatchObject({
+      expect(res.body.data.wishlist).toMatchObject({
         __typename: 'NotFoundRejection',
       })
     })
   })
 
-  describe('Query getMyWishlists', () => {
+  describe('Query wishlists', () => {
     const query = /* GraphQL */ `
       query GetMyWishlists($filters: PaginationFilters!) {
-        getMyWishlists(filters: $filters) {
+        wishlists(filters: $filters) {
           __typename
           ... on GetWishlistsPagedResponse {
             data {
@@ -286,7 +286,7 @@ describe('WishlistResolver (GraphQL)', () => {
         .send({ query, variables: { filters: {} } })
         .expect(200)
 
-      expectNotSucceeded(res.body, 'getMyWishlists')
+      expectNotSucceeded(res.body, 'wishlists')
     })
 
     it('should return only the wishlists owned by the current user with nested fields', async () => {
@@ -319,7 +319,7 @@ describe('WishlistResolver (GraphQL)', () => {
         .expect(200)
 
       expect(res.body.errors).toBeUndefined()
-      const result = res.body.data.getMyWishlists
+      const result = res.body.data.wishlists
       expect(result.__typename).toBe('GetWishlistsPagedResponse')
       expect(result.data).toHaveLength(1)
       expect(result.data[0]).toMatchObject({
@@ -356,7 +356,7 @@ describe('WishlistResolver (GraphQL)', () => {
         .send({ query, variables: { filters: {} } })
         .expect(200)
 
-      const result = res.body.data.getMyWishlists
+      const result = res.body.data.wishlists
       expect(result.__typename).toBe('GetWishlistsPagedResponse')
       expect(result.data).toHaveLength(10)
       expect(result.pagination).toMatchObject({
@@ -386,7 +386,7 @@ describe('WishlistResolver (GraphQL)', () => {
         .send({ query, variables: { filters: { page: 2, limit: 2 } } })
         .expect(200)
 
-      const result = res.body.data.getMyWishlists
+      const result = res.body.data.wishlists
       expect(result.__typename).toBe('GetWishlistsPagedResponse')
       expect(result.data).toHaveLength(2)
       expect(result.pagination).toMatchObject({
@@ -403,7 +403,7 @@ describe('WishlistResolver (GraphQL)', () => {
         .send({ query, variables: { filters: {} } })
         .expect(200)
 
-      const result = res.body.data.getMyWishlists
+      const result = res.body.data.wishlists
       expect(result.__typename).toBe('GetWishlistsPagedResponse')
       expect(result.data).toEqual([])
       expect(result.pagination).toMatchObject({
@@ -421,7 +421,7 @@ describe('WishlistResolver (GraphQL)', () => {
     ])('should not succeed with invalid pagination filters: $case', async ({ filters }) => {
       const res = await request.post('/graphql').send({ query, variables: { filters } }).expect(200)
 
-      expectNotSucceeded(res.body, 'getMyWishlists')
+      expectNotSucceeded(res.body, 'wishlists')
     })
 
     it('should not leak wishlists between users and keep DB state unchanged (read-only query)', async () => {
@@ -450,7 +450,7 @@ describe('WishlistResolver (GraphQL)', () => {
         .send({ query, variables: { filters: {} } })
         .expect(200)
 
-      expect(res.body.data.getMyWishlists.data).toHaveLength(1)
+      expect(res.body.data.wishlists.data).toHaveLength(1)
       // a read-only query must not mutate the table
       await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(2)
     })

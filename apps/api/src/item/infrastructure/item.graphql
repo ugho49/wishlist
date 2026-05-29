@@ -135,5 +135,5 @@ extend type Mutation {
 ########################################################
 
 extend type Query {
-  getImportableItems(wishlistId: WishlistId!): GetImportableItemsResult!
+  importableItems(wishlistId: WishlistId!): GetImportableItemsResult!
 }

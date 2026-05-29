@@ -17,12 +17,12 @@ describe('UserAdminResolver (GraphQL)', () => {
   })
 
   // ---------------------------------------------------------------------------
-  // adminGetUserById
+  // user
   // ---------------------------------------------------------------------------
-  describe('Query adminGetUserById', () => {
+  describe('Query user', () => {
     const query = /* GraphQL */ `
       query AdminGetUserById($userId: UserId!) {
-        adminGetUserById(userId: $userId) {
+        user(userId: $userId) {
           __typename
           ... on UserFull {
             id
@@ -64,7 +64,7 @@ describe('UserAdminResolver (GraphQL)', () => {
         .expect(200)
 
       // Unauthenticated requests must NOT resolve to a UserFull payload
-      expect(res.body.data?.adminGetUserById?.__typename).not.toBe('UserFull')
+      expect(res.body.data?.user?.__typename).not.toBe('UserFull')
     })
 
     describe('when user is authenticated as BASE_USER (non-admin)', () => {
@@ -86,7 +86,7 @@ describe('UserAdminResolver (GraphQL)', () => {
           .send({ query, variables: { userId: targetUserId } })
           .expect(200)
 
-        expect(res.body.data.adminGetUserById).toMatchObject({ __typename: 'ForbiddenRejection' })
+        expect(res.body.data.user).toMatchObject({ __typename: 'ForbiddenRejection' })
       })
     })
 
@@ -109,7 +109,7 @@ describe('UserAdminResolver (GraphQL)', () => {
           .expect(200)
 
         // insertUser never persists a birthday, so it is always null here.
-        expect(res.body.data.adminGetUserById).toMatchObject({
+        expect(res.body.data.user).toMatchObject({
           __typename: 'UserFull',
           id: targetUserId,
           firstName: 'Target',
@@ -128,7 +128,7 @@ describe('UserAdminResolver (GraphQL)', () => {
           .send({ query, variables: { userId: uuid() } })
           .expect(200)
 
-        expect(res.body.data.adminGetUserById).toMatchObject({ __typename: 'NotFoundRejection' })
+        expect(res.body.data.user).toMatchObject({ __typename: 'NotFoundRejection' })
       })
 
       it('should not return a user when userId is malformed', async () => {
@@ -139,18 +139,18 @@ describe('UserAdminResolver (GraphQL)', () => {
           .send({ query, variables: { userId: 'not-a-uuid' } })
           .expect(200)
 
-        expect(res.body.data.adminGetUserById.__typename).not.toBe('UserFull')
+        expect(res.body.data.user.__typename).not.toBe('UserFull')
       })
     })
   })
 
   // ---------------------------------------------------------------------------
-  // adminGetAllUsers (pagination)
+  // users (pagination)
   // ---------------------------------------------------------------------------
-  describe('Query adminGetAllUsers', () => {
+  describe('Query users', () => {
     const query = /* GraphQL */ `
       query AdminGetAllUsers($input: AdminGetAllUsersPaginationFilters) {
-        adminGetAllUsers(input: $input) {
+        users(input: $input) {
           __typename
           ... on AdminGetAllUsers {
             data {
@@ -187,7 +187,7 @@ describe('UserAdminResolver (GraphQL)', () => {
         .send({ query, variables: { input: {} } })
         .expect(200)
 
-      expect(res.body.data?.adminGetAllUsers?.__typename).not.toBe('AdminGetAllUsers')
+      expect(res.body.data?.users?.__typename).not.toBe('AdminGetAllUsers')
     })
 
     it('should reject a BASE_USER with ForbiddenRejection', async () => {
@@ -198,7 +198,7 @@ describe('UserAdminResolver (GraphQL)', () => {
         .send({ query, variables: { input: {} } })
         .expect(200)
 
-      expect(res.body.data.adminGetAllUsers).toMatchObject({ __typename: 'ForbiddenRejection' })
+      expect(res.body.data.users).toMatchObject({ __typename: 'ForbiddenRejection' })
     })
 
     describe('when user is authenticated as ADMIN_USER', () => {
@@ -216,13 +216,13 @@ describe('UserAdminResolver (GraphQL)', () => {
           .send({ query, variables: { input: { page: 1, limit: 50 } } })
           .expect(200)
 
-        expect(res.body.data.adminGetAllUsers.__typename).toBe('AdminGetAllUsers')
-        expect(res.body.data.adminGetAllUsers.pagination).toMatchObject({
+        expect(res.body.data.users.__typename).toBe('AdminGetAllUsers')
+        expect(res.body.data.users.pagination).toMatchObject({
           totalElements: 3,
           pageNumber: 1,
           pageSize: 50,
         })
-        expect(res.body.data.adminGetAllUsers.data).toHaveLength(3)
+        expect(res.body.data.users.data).toHaveLength(3)
       })
 
       it('should respect pagination (limit / page)', async () => {
@@ -234,8 +234,8 @@ describe('UserAdminResolver (GraphQL)', () => {
           .send({ query, variables: { input: { page: 1, limit: 2 } } })
           .expect(200)
 
-        expect(firstPage.body.data.adminGetAllUsers.data).toHaveLength(2)
-        expect(firstPage.body.data.adminGetAllUsers.pagination).toMatchObject({
+        expect(firstPage.body.data.users.data).toHaveLength(2)
+        expect(firstPage.body.data.users.pagination).toMatchObject({
           totalElements: 3,
           totalPages: 2,
           pageNumber: 1,
@@ -247,8 +247,8 @@ describe('UserAdminResolver (GraphQL)', () => {
           .send({ query, variables: { input: { page: 2, limit: 2 } } })
           .expect(200)
 
-        expect(secondPage.body.data.adminGetAllUsers.data).toHaveLength(1)
-        expect(secondPage.body.data.adminGetAllUsers.pagination).toMatchObject({
+        expect(secondPage.body.data.users.data).toHaveLength(1)
+        expect(secondPage.body.data.users.pagination).toMatchObject({
           totalElements: 3,
           pageNumber: 2,
           pageSize: 2,
@@ -264,9 +264,9 @@ describe('UserAdminResolver (GraphQL)', () => {
           .send({ query, variables: { input: { criteria: 'alice' } } })
           .expect(200)
 
-        expect(res.body.data.adminGetAllUsers.__typename).toBe('AdminGetAllUsers')
-        expect(res.body.data.adminGetAllUsers.data).toHaveLength(1)
-        expect(res.body.data.adminGetAllUsers.data[0]).toMatchObject({ email: 'alice@test.fr' })
+        expect(res.body.data.users.__typename).toBe('AdminGetAllUsers')
+        expect(res.body.data.users.data).toHaveLength(1)
+        expect(res.body.data.users.data[0]).toMatchObject({ email: 'alice@test.fr' })
       })
 
       it.each([
@@ -275,7 +275,7 @@ describe('UserAdminResolver (GraphQL)', () => {
       ])('should return ValidationRejection when $case', async ({ input }) => {
         const res = await request.post(GRAPHQL_PATH).send({ query, variables: { input } }).expect(200)
 
-        expect(res.body.data.adminGetAllUsers).toMatchObject({ __typename: 'ValidationRejection' })
+        expect(res.body.data.users).toMatchObject({ __typename: 'ValidationRejection' })
       })
     })
   })

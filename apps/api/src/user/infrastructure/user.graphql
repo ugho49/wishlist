@@ -22,6 +22,7 @@ type User {
   createdAt: String!
   updatedAt: String!
   socials: [UserSocial!] @resolved
+  emailSettings: UserEmailSettings @resolved
 }
 
 type PendingEmailChange {
@@ -37,12 +38,6 @@ union GetCurrentUserResult = User | UnauthorizedRejection | ForbiddenRejection |
 
 union GetPendingEmailChangeResult =
   | PendingEmailChange
-  | UnauthorizedRejection
-  | ForbiddenRejection
-  | InternalErrorRejection
-
-union GetUserEmailSettingsResult =
-  | UserEmailSettings
   | UnauthorizedRejection
   | ForbiddenRejection
   | InternalErrorRejection
@@ -182,14 +177,13 @@ union ResetPasswordResult =
   | InternalErrorRejection
 
 extend type Query {
-  getCurrentUser: GetCurrentUserResult!
-  getPendingEmailChange: GetPendingEmailChangeResult
-  getUserEmailSettings: GetUserEmailSettingsResult!
+  currentUser: GetCurrentUserResult!
+  pendingEmailChange: GetPendingEmailChangeResult
 }
 
 extend type Mutation {
   registerUser(input: RegisterUserInput!): RegisterUserResult!
-  linkCurrentUserlWithGoogle(input: LinkUserToGoogleInput!): LinkUserToGoogleResult!
+  linkCurrentUserWithGoogle(input: LinkUserToGoogleInput!): LinkUserToGoogleResult!
   unlinkCurrentUserSocial(socialId: UserSocialId!): UnlinkCurrentUserSocialResult!
   updateUserProfile(input: UpdateUserProfileInput!): UpdateUserProfileResult!
   changeUserPassword(input: ChangeUserPasswordInput!): ChangeUserPasswordResult!

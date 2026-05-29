@@ -14,7 +14,7 @@ export class EventResolver {
   constructor(private readonly getEventsByUserUseCase: GetEventsByUserUseCase) {}
 
   @Query()
-  async getEventById(
+  async event(
     @Args('id', { type: () => String }) id: EventId,
     @Context() ctx: GraphQLContext,
   ): Promise<GetEventByIdResult> {
@@ -26,7 +26,7 @@ export class EventResolver {
   }
 
   @Query()
-  async getMyEvents(
+  async events(
     @Args('filters', new ZodPipe(EventPaginationFiltersSchema)) filters: EventPaginationFilters,
     @GqlCurrentUser('id') currentUserId: UserId,
   ): Promise<GetMyEventsResult> {

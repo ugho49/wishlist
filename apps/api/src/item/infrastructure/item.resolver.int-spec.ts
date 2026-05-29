@@ -28,10 +28,10 @@ describe('ItemResolver (GraphQL)', () => {
     fixtures = getFixtures()
   })
 
-  describe('Query getImportableItems', () => {
+  describe('Query importableItems', () => {
     const query = /* GraphQL */ `
       query GetImportableItems($wishlistId: WishlistId!) {
-        getImportableItems(wishlistId: $wishlistId) {
+        importableItems(wishlistId: $wishlistId) {
           __typename
           ... on GetImportableItemsOutput {
             items {
@@ -54,7 +54,7 @@ describe('ItemResolver (GraphQL)', () => {
         .send({ query, variables: { wishlistId: uuid() } })
         .expect(200)
 
-      expect(res.body.data?.getImportableItems?.__typename).not.toBe('GetImportableItemsOutput')
+      expect(res.body.data?.importableItems?.__typename).not.toBe('GetImportableItemsOutput')
     })
 
     describe('when user is authenticated', () => {
@@ -110,7 +110,7 @@ describe('ItemResolver (GraphQL)', () => {
           .send({ query, variables: { wishlistId: targetWishlistId } })
           .expect(200)
 
-        expect(res.body.data.getImportableItems).toMatchObject({
+        expect(res.body.data.importableItems).toMatchObject({
           __typename: 'GetImportableItemsOutput',
           items: [
             {
@@ -136,7 +136,7 @@ describe('ItemResolver (GraphQL)', () => {
 
         const res = await request.post('/graphql').send({ query, variables: { wishlistId } }).expect(200)
 
-        expect(res.body.data.getImportableItems).toEqual({
+        expect(res.body.data.importableItems).toEqual({
           __typename: 'GetImportableItemsOutput',
           items: [],
         })
@@ -148,7 +148,7 @@ describe('ItemResolver (GraphQL)', () => {
           .send({ query, variables: { wishlistId: uuid() } })
           .expect(200)
 
-        expect(res.body.data.getImportableItems.__typename).not.toBe('GetImportableItemsOutput')
+        expect(res.body.data.importableItems.__typename).not.toBe('GetImportableItemsOutput')
       })
 
       it('should return UnauthorizedRejection when user is not the owner of the wishlist', async () => {
@@ -174,7 +174,7 @@ describe('ItemResolver (GraphQL)', () => {
           .send({ query, variables: { wishlistId: otherWishlistId } })
           .expect(200)
 
-        expect(res.body.data.getImportableItems.__typename).toBe('UnauthorizedRejection')
+        expect(res.body.data.importableItems.__typename).toBe('UnauthorizedRejection')
       })
     })
   })
@@ -1127,7 +1127,7 @@ describe('ItemResolver (GraphQL)', () => {
   describe('Field resolver Item.takerUser', () => {
     // The Item.takerUser field resolver returns undefined when the parent Item has no
     // takenById, otherwise it loads the user via the dataloader. Every Item-returning
-    // operation in this resolver (createItem / importItems / getImportableItems) produces
+    // operation in this resolver (createItem / importItems / importableItems) produces
     // an Item with no taker, so we assert the resolver returns null (no taker) for a fresh item.
     const createMutation = /* GraphQL */ `
       mutation CreateItem($input: CreateItemInput!) {

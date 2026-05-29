@@ -5,7 +5,7 @@ import { fetchGql } from '../fetcher';
 
 export const WishlistPageDocument = `
     query WishlistPage($wishlistId: WishlistId!) {
-  getWishlistById(id: $wishlistId) {
+  wishlist(id: $wishlistId) {
     ... on Wishlist {
       id
       title

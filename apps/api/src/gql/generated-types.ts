@@ -182,8 +182,6 @@ export type GetPendingEmailChangeResult = ForbiddenRejection | InternalErrorReje
 
 export type GetSecretSantaForEventResult = ForbiddenRejection | InternalErrorRejection | SecretSanta | UnauthorizedRejection;
 
-export type GetUserEmailSettingsResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | UserEmailSettings;
-
 export type GetWishlistByIdResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | Wishlist;
 
 export type GetWishlistsPagedResponse = {
@@ -282,7 +280,7 @@ export type Mutation = {
   deleteSecretSanta: DeleteSecretSantaResult;
   deleteSecretSantaUser: DeleteSecretSantaUserResult;
   importItems: ImportItemsResult;
-  linkCurrentUserlWithGoogle: LinkUserToGoogleResult;
+  linkCurrentUserWithGoogle: LinkUserToGoogleResult;
   login: LoginResult;
   loginWithGoogle: LoginWithGoogleResult;
   registerUser: RegisterUserResult;
@@ -371,7 +369,7 @@ export type MutationImportItemsArgs = {
 };
 
 
-export type MutationLinkCurrentUserlWithGoogleArgs = {
+export type MutationLinkCurrentUserWithGoogleArgs = {
   input: LinkUserToGoogleInput;
 };
 
@@ -485,64 +483,63 @@ export type PendingEmailChange = {
 
 export type Query = {
   __typename: 'Query';
-  adminGetAllUsers: AdminGetAllUsersResult;
-  adminGetUserById: AdminGetUserByIdResult;
-  getCurrentUser: GetCurrentUserResult;
-  getEventById?: Maybe<GetEventByIdResult>;
-  getImportableItems: GetImportableItemsResult;
-  getMyEvents: GetMyEventsResult;
-  getMySecretSantaDraw?: Maybe<GetMySecretSantaDrawResult>;
-  getMyWishlists: GetMyWishlistsResult;
-  getPendingEmailChange?: Maybe<GetPendingEmailChangeResult>;
-  getSecretSantaForEvent?: Maybe<GetSecretSantaForEventResult>;
-  getUserEmailSettings: GetUserEmailSettingsResult;
-  getWishlistById?: Maybe<GetWishlistByIdResult>;
+  currentUser: GetCurrentUserResult;
+  event?: Maybe<GetEventByIdResult>;
+  events: GetMyEventsResult;
   health: HealthResult;
+  importableItems: GetImportableItemsResult;
+  mySecretSantaDraw?: Maybe<GetMySecretSantaDrawResult>;
+  pendingEmailChange?: Maybe<GetPendingEmailChangeResult>;
+  secretSanta?: Maybe<GetSecretSantaForEventResult>;
+  user: AdminGetUserByIdResult;
+  users: AdminGetAllUsersResult;
+  wishlist?: Maybe<GetWishlistByIdResult>;
+  wishlists: GetMyWishlistsResult;
 };
 
 
-export type QueryAdminGetAllUsersArgs = {
-  input?: InputMaybe<AdminGetAllUsersPaginationFilters>;
-};
-
-
-export type QueryAdminGetUserByIdArgs = {
-  userId: Scalars['UserId']['input'];
-};
-
-
-export type QueryGetEventByIdArgs = {
+export type QueryEventArgs = {
   id: Scalars['EventId']['input'];
 };
 
 
-export type QueryGetImportableItemsArgs = {
-  wishlistId: Scalars['WishlistId']['input'];
-};
-
-
-export type QueryGetMyEventsArgs = {
+export type QueryEventsArgs = {
   filters: EventPaginationFilters;
 };
 
 
-export type QueryGetMySecretSantaDrawArgs = {
+export type QueryImportableItemsArgs = {
+  wishlistId: Scalars['WishlistId']['input'];
+};
+
+
+export type QueryMySecretSantaDrawArgs = {
   eventId: Scalars['EventId']['input'];
 };
 
 
-export type QueryGetMyWishlistsArgs = {
-  filters: PaginationFilters;
-};
-
-
-export type QueryGetSecretSantaForEventArgs = {
+export type QuerySecretSantaArgs = {
   eventId: Scalars['EventId']['input'];
 };
 
 
-export type QueryGetWishlistByIdArgs = {
+export type QueryUserArgs = {
+  userId: Scalars['UserId']['input'];
+};
+
+
+export type QueryUsersArgs = {
+  input?: InputMaybe<AdminGetAllUsersPaginationFilters>;
+};
+
+
+export type QueryWishlistArgs = {
   id: Scalars['WishlistId']['input'];
+};
+
+
+export type QueryWishlistsArgs = {
+  filters: PaginationFilters;
 };
 
 export type RegisterUserInput = {
