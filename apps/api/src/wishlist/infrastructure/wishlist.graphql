@@ -40,6 +40,6 @@ union GetMyWishlistsResult =
   | InternalErrorRejection
 
 extend type Query {
-  getWishlistById(id: WishlistId!): GetWishlistByIdResult
-  getMyWishlists(filters: PaginationFilters!): GetMyWishlistsResult!
+  wishlist(id: WishlistId!): GetWishlistByIdResult
+  wishlists(filters: PaginationFilters!): GetMyWishlistsResult!
 }

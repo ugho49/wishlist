@@ -64,7 +64,7 @@ export class ItemResolver {
   }
 
   @Query()
-  async getImportableItems(
+  async importableItems(
     @Args('wishlistId', new ZodPipe(WishlistIdSchema)) wishlistId: WishlistId,
     @GqlCurrentUser() currentUser: ICurrentUser,
   ): Promise<GetImportableItemsOutput> {

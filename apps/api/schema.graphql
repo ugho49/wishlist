@@ -162,8 +162,6 @@ union GetPendingEmailChangeResult = ForbiddenRejection | InternalErrorRejection 
 
 union GetSecretSantaForEventResult = ForbiddenRejection | InternalErrorRejection | SecretSanta | UnauthorizedRejection
 
-union GetUserEmailSettingsResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | UserEmailSettings
-
 union GetWishlistByIdResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | Wishlist
 
 type GetWishlistsPagedResponse {
@@ -256,7 +254,7 @@ type Mutation {
   deleteSecretSanta(id: SecretSantaId!): DeleteSecretSantaResult!
   deleteSecretSantaUser(id: SecretSantaId!, secretSantaUserId: SecretSantaUserId!): DeleteSecretSantaUserResult!
   importItems(input: ImportItemsInput!): ImportItemsResult!
-  linkCurrentUserlWithGoogle(input: LinkUserToGoogleInput!): LinkUserToGoogleResult!
+  linkCurrentUserWithGoogle(input: LinkUserToGoogleInput!): LinkUserToGoogleResult!
   login(input: LoginInput!): LoginResult!
   loginWithGoogle(input: LoginWithGoogleInput!): LoginWithGoogleResult!
   registerUser(input: RegisterUserInput!): RegisterUserResult!
@@ -298,19 +296,18 @@ type PendingEmailChange {
 }
 
 type Query {
-  adminGetAllUsers(input: AdminGetAllUsersPaginationFilters): AdminGetAllUsersResult!
-  adminGetUserById(userId: UserId!): AdminGetUserByIdResult!
-  getCurrentUser: GetCurrentUserResult!
-  getEventById(id: EventId!): GetEventByIdResult
-  getImportableItems(wishlistId: WishlistId!): GetImportableItemsResult!
-  getMyEvents(filters: EventPaginationFilters!): GetMyEventsResult!
-  getMySecretSantaDraw(eventId: EventId!): GetMySecretSantaDrawResult
-  getMyWishlists(filters: PaginationFilters!): GetMyWishlistsResult!
-  getPendingEmailChange: GetPendingEmailChangeResult
-  getSecretSantaForEvent(eventId: EventId!): GetSecretSantaForEventResult
-  getUserEmailSettings: GetUserEmailSettingsResult!
-  getWishlistById(id: WishlistId!): GetWishlistByIdResult
+  currentUser: GetCurrentUserResult!
+  event(id: EventId!): GetEventByIdResult
+  events(filters: EventPaginationFilters!): GetMyEventsResult!
   health: HealthResult!
+  importableItems(wishlistId: WishlistId!): GetImportableItemsResult!
+  mySecretSantaDraw(eventId: EventId!): GetMySecretSantaDrawResult
+  pendingEmailChange: GetPendingEmailChangeResult
+  secretSanta(eventId: EventId!): GetSecretSantaForEventResult
+  user(userId: UserId!): AdminGetUserByIdResult!
+  users(input: AdminGetAllUsersPaginationFilters): AdminGetAllUsersResult!
+  wishlist(id: WishlistId!): GetWishlistByIdResult
+  wishlists(filters: PaginationFilters!): GetMyWishlistsResult!
 }
 
 input RegisterUserInput {
@@ -445,6 +442,7 @@ type User {
   birthday: String
   createdAt: String!
   email: String!
+  emailSettings: UserEmailSettings @resolved
   firstName: String!
   id: UserId!
   isEnabled: Boolean!

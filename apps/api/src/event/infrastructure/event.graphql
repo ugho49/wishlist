@@ -49,6 +49,6 @@ union GetEventByIdResult =
 union GetMyEventsResult = GetEventsPagedResponse | UnauthorizedRejection | ForbiddenRejection | InternalErrorRejection
 
 extend type Query {
-  getEventById(id: EventId!): GetEventByIdResult
-  getMyEvents(filters: EventPaginationFilters!): GetMyEventsResult!
+  event(id: EventId!): GetEventByIdResult
+  events(filters: EventPaginationFilters!): GetMyEventsResult!
 }

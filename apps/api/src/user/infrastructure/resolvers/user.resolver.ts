@@ -12,7 +12,6 @@ import {
   ConfirmEmailChangeInput,
   ConfirmEmailChangeResult,
   GetPendingEmailChangeResult,
-  GetUserEmailSettingsResult,
   LinkUserToGoogleInput,
   LinkUserToGoogleResult,
   PendingEmailChange,
@@ -48,7 +47,6 @@ import { UpdateUserEmailSettingUseCase } from '../../application/command/update-
 import { UpdateUserPasswordUseCase } from '../../application/command/update-user-password.use-case'
 import { UpdateUserPictureFromSocialUseCase } from '../../application/command/update-user-picture-from-social.use-case'
 import { GetPendingEmailChangeUseCase } from '../../application/query/get-pending-email-change.use-case'
-import { GetUserEmailSettingUseCase } from '../../application/query/get-user-email-setting.use-case'
 import {
   ChangeUserPasswordInputSchema,
   ConfirmEmailChangeInputSchema,
@@ -76,13 +74,12 @@ export class UserResolver {
     private readonly confirmEmailChangeUseCase: ConfirmEmailChangeUseCase,
     private readonly getPendingEmailChangeUseCase: GetPendingEmailChangeUseCase,
     private readonly updateUserEmailSettingUseCase: UpdateUserEmailSettingUseCase,
-    private readonly getUserEmailSettingUseCase: GetUserEmailSettingUseCase,
     private readonly createPasswordVerificationUseCase: CreatePasswordVerificationUseCase,
     private readonly resetUserPasswordUseCase: ResetUserPasswordUseCase,
   ) {}
 
   @Query()
-  async getCurrentUser(@GqlCurrentUser('id') currentUserId: UserId, @Context() ctx: GraphQLContext): Promise<User> {
+  async currentUser(@GqlCurrentUser('id') currentUserId: UserId, @Context() ctx: GraphQLContext): Promise<User> {
     const user = await ctx.loaders.user.load(currentUserId)
     if (!user) {
       throw new Error('User not found')
@@ -118,7 +115,7 @@ export class UserResolver {
   }
 
   @Mutation()
-  async linkCurrentUserlWithGoogle(
+  async linkCurrentUserWithGoogle(
     @Args('input', new ZodPipe(LinkUserToGoogleInputSchema)) input: LinkUserToGoogleInput,
     @GqlCurrentUser('id') currentUserId: UserId,
     @Context() ctx: GraphQLContext,
@@ -198,9 +195,7 @@ export class UserResolver {
   }
 
   @Query()
-  async getPendingEmailChange(
-    @GqlCurrentUser() currentUser: ICurrentUser,
-  ): Promise<GetPendingEmailChangeResult | null> {
+  async pendingEmailChange(@GqlCurrentUser() currentUser: ICurrentUser): Promise<GetPendingEmailChangeResult | null> {
     const result = await this.getPendingEmailChangeUseCase.execute({ currentUser })
 
     if (!result) {
@@ -238,18 +233,6 @@ export class UserResolver {
       token: input.token,
     })
     return { __typename: 'VoidOutput', success: true }
-  }
-
-  @Query()
-  async getUserEmailSettings(@GqlCurrentUser() currentUser: ICurrentUser): Promise<GetUserEmailSettingsResult> {
-    const result = await this.getUserEmailSettingUseCase.execute({ currentUser })
-
-    const settings: UserEmailSettings = {
-      __typename: 'UserEmailSettings',
-      dailyNewItemNotification: result.daily_new_item_notification,
-    }
-
-    return settings
   }
 
   @Mutation()

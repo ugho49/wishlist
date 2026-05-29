@@ -19,21 +19,21 @@ import { DateTime } from 'luxon'
  * NotFoundRejection / InternalErrorRejection) thanks to the error-transform plugin.
  *
  * COVERED operations:
- *  - getCurrentUser (Query)            -> unauthenticated + happy path + socials field
+ *  - currentUser (Query)              -> unauthenticated + happy path + socials field
  *  - registerUser (Mutation)          -> happy path + DB verify, duplicate-email conflict, validation (it.each)
  *  - updateUserProfile (Mutation)     -> unauthenticated + happy path + DB verify + validation (it.each)
  *  - changeUserPassword (Mutation)    -> happy path + DB verify, wrong old password, validation (it.each)
- *  - getUserEmailSettings (Query)     -> unauthenticated + happy path (with seeded settings)
+ *  - User.emailSettings field resolver -> unauthenticated + happy path (with seeded settings), via currentUser
  *  - updateUserEmailSettings (Mutation)-> happy path + DB verify
  *  - User.socials field resolver      -> returns own socials shape; returns null for another user's record
  *
  * INTENTIONALLY SKIPPED (require external integrations / OAuth / mail-token round-trips
  * that are out of scope for this high-value subset):
- *  - linkCurrentUserlWithGoogle / unlinkCurrentUserSocial (Google OAuth dependency)
+ *  - linkCurrentUserWithGoogle / unlinkCurrentUserSocial (Google OAuth dependency)
  *  - updateUserPictureFromSocial / removeUserPicture (bucket + social dependency)
  *  - requestEmailChange / confirmEmailChange (mail token round-trip)
  *  - sendResetPasswordEmail / resetPassword (mail token round-trip)
- *  - getPendingEmailChange (depends on requestEmailChange flow)
+ *  - pendingEmailChange (depends on requestEmailChange flow)
  */
 describe('UserResolver (GraphQL)', () => {
   const { getRequest, getFixtures, expectTable } = useTestApp()
@@ -47,10 +47,10 @@ describe('UserResolver (GraphQL)', () => {
     currentUserId = await fixtures.getSignedUserId('BASE_USER')
   })
 
-  describe('Query getCurrentUser', () => {
+  describe('Query currentUser', () => {
     const query = /* GraphQL */ `
-      query GetCurrentUser {
-        getCurrentUser {
+      query CurrentUser {
+        currentUser {
           __typename
           ... on User {
             id
@@ -73,14 +73,14 @@ describe('UserResolver (GraphQL)', () => {
       const res = await anon.post('/graphql').send({ query }).expect(200)
 
       const hasTopLevelError = Array.isArray(res.body.errors) && res.body.errors.length > 0
-      const typename = res.body.data?.getCurrentUser?.__typename
+      const typename = res.body.data?.currentUser?.__typename
       expect(typename !== 'User' || hasTopLevelError).toBe(true)
     })
 
     it('should return the current user when authenticated', async () => {
       const res = await request.post('/graphql').send({ query }).expect(200)
 
-      expect(res.body.data.getCurrentUser).toMatchObject({
+      expect(res.body.data.currentUser).toMatchObject({
         __typename: 'User',
         id: currentUserId,
         firstName: 'John',
@@ -92,8 +92,8 @@ describe('UserResolver (GraphQL)', () => {
 
     it('should resolve the socials field for the current user as an array', async () => {
       const query = /* GraphQL */ `
-        query GetCurrentUserWithSocials {
-          getCurrentUser {
+        query CurrentUserWithSocials {
+          currentUser {
             __typename
             ... on User {
               id
@@ -109,7 +109,7 @@ describe('UserResolver (GraphQL)', () => {
 
       const res = await request.post('/graphql').send({ query }).expect(200)
 
-      const user = res.body.data.getCurrentUser
+      const user = res.body.data.currentUser
       expect(user.__typename).toBe('User')
       expect(user.id).toBe(currentUserId)
       // No socials seeded -> own record resolves to an (empty) array, never null.
@@ -432,13 +432,21 @@ describe('UserResolver (GraphQL)', () => {
     })
   })
 
-  describe('Query getUserEmailSettings', () => {
+  describe('User.emailSettings field resolver', () => {
+    // emailSettings is now a @ResolveField on the User type, reached through the
+    // currentUser query (the only schema entry point returning a User). The field
+    // resolver only resolves settings when the resolved User.id equals the current
+    // user's id (returns null otherwise); currentUser always resolves the signed-in
+    // user so the id-equality guard always passes here.
     const query = /* GraphQL */ `
-      query GetUserEmailSettings {
-        getUserEmailSettings {
+      query CurrentUserEmailSettings {
+        currentUser {
           __typename
-          ... on UserEmailSettings {
-            dailyNewItemNotification
+          ... on User {
+            id
+            emailSettings {
+              dailyNewItemNotification
+            }
           }
           ... on UnauthorizedRejection {
             message
@@ -452,8 +460,8 @@ describe('UserResolver (GraphQL)', () => {
       const res = await anon.post('/graphql').send({ query }).expect(200)
 
       const hasTopLevelError = Array.isArray(res.body.errors) && res.body.errors.length > 0
-      const typename = res.body.data?.getUserEmailSettings?.__typename
-      expect(typename !== 'UserEmailSettings' || hasTopLevelError).toBe(true)
+      const typename = res.body.data?.currentUser?.__typename
+      expect(typename !== 'User' || hasTopLevelError).toBe(true)
     })
 
     it('should return the email settings when they exist', async () => {
@@ -464,8 +472,10 @@ describe('UserResolver (GraphQL)', () => {
 
       const res = await request.post('/graphql').send({ query }).expect(200)
 
-      expect(res.body.data.getUserEmailSettings).toEqual({
-        __typename: 'UserEmailSettings',
+      const user = res.body.data.currentUser
+      expect(user.__typename).toBe('User')
+      expect(user.id).toBe(currentUserId)
+      expect(user.emailSettings).toEqual({
         dailyNewItemNotification: true,
       })
     })
@@ -521,7 +531,7 @@ describe('UserResolver (GraphQL)', () => {
   describe('User.socials field resolver', () => {
     // The field resolver only exposes socials when the resolved User.id equals the
     // current user's id (returns null otherwise). The only schema entry point that
-    // returns a User and supports the socials field is getCurrentUser, which always
+    // returns a User and supports the socials field is currentUser, which always
     // resolves the signed-in user -> the id-equality guard always passes here, so we
     // verify the own-record path returns a (non-null) array. The "another user" guard
     // (returning null) is not reachable via the current schema and is left for a unit
@@ -529,7 +539,7 @@ describe('UserResolver (GraphQL)', () => {
     it('should return a non-null socials array for the current user own record', async () => {
       const query = /* GraphQL */ `
         query OwnSocials {
-          getCurrentUser {
+          currentUser {
             ... on User {
               id
               socials {
@@ -541,7 +551,7 @@ describe('UserResolver (GraphQL)', () => {
       `
 
       const res = await request.post('/graphql').send({ query }).expect(200)
-      const user = res.body.data.getCurrentUser
+      const user = res.body.data.currentUser
 
       expect(user.id).toBe(currentUserId)
       expect(user.socials).not.toBeNull()

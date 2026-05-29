@@ -28,7 +28,7 @@ describe('SecretSantaResolver (GraphQL)', () => {
   describe('Query getSecretSantaForEvent', () => {
     const query = /* GraphQL */ `
       query GetSecretSantaForEvent($eventId: EventId!) {
-        getSecretSantaForEvent(eventId: $eventId) {
+        secretSanta(eventId: $eventId) {
           __typename
           ... on SecretSanta {
             id
@@ -60,7 +60,7 @@ describe('SecretSantaResolver (GraphQL)', () => {
         .send({ query, variables: { eventId: uuid() } })
         .expect(200)
 
-      expectNotSuccess(res, 'getSecretSantaForEvent')
+      expectNotSuccess(res, 'secretSanta')
     })
 
     it('should return null when no secret santa exists for event', async () => {
@@ -72,7 +72,7 @@ describe('SecretSantaResolver (GraphQL)', () => {
 
       const res = await request.post('/graphql').send({ query, variables: { eventId } }).expect(200)
 
-      expect(res.body.data.getSecretSantaForEvent).toBeNull()
+      expect(res.body.data.secretSanta).toBeNull()
     })
 
     it('should return secret santa with resolved event when current user is maintainer', async () => {
@@ -91,7 +91,7 @@ describe('SecretSantaResolver (GraphQL)', () => {
 
       const res = await request.post('/graphql').send({ query, variables: { eventId } }).expect(200)
 
-      expect(res.body.data.getSecretSantaForEvent).toMatchObject({
+      expect(res.body.data.secretSanta).toMatchObject({
         __typename: 'SecretSanta',
         id: secretSantaId,
         eventId,
@@ -129,14 +129,14 @@ describe('SecretSantaResolver (GraphQL)', () => {
 
       const res = await request.post('/graphql').send({ query, variables: { eventId } }).expect(200)
 
-      expect(res.body.data.getSecretSantaForEvent).toMatchObject({ __typename: 'ForbiddenRejection' })
+      expect(res.body.data.secretSanta).toMatchObject({ __typename: 'ForbiddenRejection' })
     })
   })
 
   describe('Query getMySecretSantaDraw', () => {
     const query = /* GraphQL */ `
       query GetMySecretSantaDraw($eventId: EventId!) {
-        getMySecretSantaDraw(eventId: $eventId) {
+        mySecretSantaDraw(eventId: $eventId) {
           __typename
           ... on EventAttendee {
             id
@@ -160,7 +160,7 @@ describe('SecretSantaResolver (GraphQL)', () => {
         .send({ query, variables: { eventId: uuid() } })
         .expect(200)
 
-      expectNotSuccess(res, 'getMySecretSantaDraw')
+      expectNotSuccess(res, 'mySecretSantaDraw')
     })
 
     it('should return null when secret santa is not started and user has no draw', async () => {
@@ -179,7 +179,7 @@ describe('SecretSantaResolver (GraphQL)', () => {
 
       const res = await request.post('/graphql').send({ query, variables: { eventId } }).expect(200)
 
-      expect(res.body.data.getMySecretSantaDraw).toBeNull()
+      expect(res.body.data.mySecretSantaDraw).toBeNull()
     })
 
     it('should return draw with resolved attendee/user when started and user has a draw', async () => {
@@ -214,7 +214,7 @@ describe('SecretSantaResolver (GraphQL)', () => {
 
       const res = await request.post('/graphql').send({ query, variables: { eventId } }).expect(200)
 
-      expect(res.body.data.getMySecretSantaDraw).toMatchObject({
+      expect(res.body.data.mySecretSantaDraw).toMatchObject({
         __typename: 'EventAttendee',
         id: targetAttendeeId,
         role: 'USER',
