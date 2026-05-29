@@ -16,6 +16,10 @@ import z from 'zod'
 
 export const UserIdSchema = z.string().transform(val => val as UserId)
 
+export const SearchUsersKeywordSchema = z.string().trim().min(2).max(100)
+
+export const ClosestFriendsLimitSchema = z.number().int().min(1).max(50).optional()
+
 export const UpdateUserProfileInputSchema = z.object({
   firstname: z.string().nonempty().max(50),
   lastname: z.string().nonempty().max(50),

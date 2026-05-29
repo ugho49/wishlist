@@ -10,6 +10,13 @@ schema {
 
 directive @resolved on FIELD_DEFINITION
 
+input AddEventAttendeeInput {
+  email: String!
+  role: AttendeeRole
+}
+
+union AddEventAttendeeResult = EventAttendee | ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection
+
 input AddSecretSantaUsersInput {
   attendeeIds: [AttendeeId!]!
 }
@@ -20,7 +27,23 @@ type AddSecretSantaUsersOutput {
 
 union AddSecretSantaUsersResult = AddSecretSantaUsersOutput | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection
 
+input AddWishlistCoOwnerInput {
+  userId: UserId!
+}
+
+union AddWishlistCoOwnerResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
+union AdminDeleteEventAttendeeResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
+union AdminDeleteEventResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
 union AdminDeleteUserResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
+input AdminEventPaginationFilters {
+  limit: Int
+  page: Int
+  userId: UserId
+}
 
 type AdminGetAllUsers {
   data: [UserFull!]!
@@ -35,9 +58,22 @@ input AdminGetAllUsersPaginationFilters {
 
 union AdminGetAllUsersResult = AdminGetAllUsers | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection
 
+union AdminGetEventByIdResult = Event | ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection
+
+union AdminGetEventsResult = ForbiddenRejection | GetEventsPagedResponse | InternalErrorRejection | UnauthorizedRejection | ValidationRejection
+
 union AdminGetUserByIdResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | UserFull | ValidationRejection
 
+type AdminGetWishlists {
+  data: [Wishlist!]!
+  pagination: Pagination!
+}
+
+union AdminGetWishlistsResult = AdminGetWishlists | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection
+
 union AdminRemoveUserPictureResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
+union AdminUpdateEventResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
 input AdminUpdateUserProfileInput {
   birthday: String
@@ -49,6 +85,12 @@ input AdminUpdateUserProfileInput {
 }
 
 union AdminUpdateUserProfileResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
+input AdminWishlistPaginationFilters {
+  limit: Int
+  page: Int
+  userId: UserId!
+}
 
 scalar AttendeeId
 
@@ -66,12 +108,33 @@ input ChangeUserPasswordInput {
 
 union ChangeUserPasswordResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
+type ClosestFriendsOutput {
+  users: [User!]!
+}
+
+union ClosestFriendsResult = ClosestFriendsOutput | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection
+
 input ConfirmEmailChangeInput {
   newEmail: String!
   token: String!
 }
 
 union ConfirmEmailChangeResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
+input CreateEventAttendeeInput {
+  email: String!
+  role: AttendeeRole
+}
+
+input CreateEventInput {
+  attendees: [CreateEventAttendeeInput!]
+  description: String
+  eventDate: String!
+  icon: String
+  title: String!
+}
+
+union CreateEventResult = Event | ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection
 
 input CreateItemInput {
   description: String
@@ -92,11 +155,15 @@ input CreateSecretSantaInput {
 
 union CreateSecretSantaResult = ForbiddenRejection | InternalErrorRejection | SecretSanta | UnauthorizedRejection | ValidationRejection
 
+union DeleteEventResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
 union DeleteItemResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
 union DeleteSecretSantaResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | VoidOutput
 
 union DeleteSecretSantaUserResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | VoidOutput
+
+union DeleteWishlistResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
 type Event {
   attendeeIds: [AttendeeId!]!
@@ -216,6 +283,8 @@ input LinkUserToGoogleInput {
 
 union LinkUserToGoogleResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | UserSocial | ValidationRejection
 
+union LinkWishlistToEventResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
 input LoginInput {
   email: String!
   password: String!
@@ -241,24 +310,36 @@ type LoginWithGoogleOutput {
 union LoginWithGoogleResult = InternalErrorRejection | LoginWithGoogleOutput | UnauthorizedRejection | ValidationRejection
 
 type Mutation {
+  addEventAttendee(eventId: EventId!, input: AddEventAttendeeInput!): AddEventAttendeeResult!
   addSecretSantaUsers(id: SecretSantaId!, input: AddSecretSantaUsersInput!): AddSecretSantaUsersResult!
+  addWishlistCoOwner(id: WishlistId!, input: AddWishlistCoOwnerInput!): AddWishlistCoOwnerResult!
+  adminDeleteEvent(id: EventId!): AdminDeleteEventResult!
+  adminDeleteEventAttendee(attendeeId: AttendeeId!, eventId: EventId!): AdminDeleteEventAttendeeResult!
   adminDeleteUser(userId: UserId!): AdminDeleteUserResult!
   adminRemoveUserPicture(userId: UserId!): AdminRemoveUserPictureResult!
+  adminUpdateEvent(id: EventId!, input: UpdateEventInput!): AdminUpdateEventResult!
   adminUpdateUserProfile(input: AdminUpdateUserProfileInput!, userId: UserId!): AdminUpdateUserProfileResult!
   cancelSecretSanta(id: SecretSantaId!): CancelSecretSantaResult!
   changeUserPassword(input: ChangeUserPasswordInput!): ChangeUserPasswordResult!
   confirmEmailChange(input: ConfirmEmailChangeInput!): ConfirmEmailChangeResult!
+  createEvent(input: CreateEventInput!): CreateEventResult!
   createItem(input: CreateItemInput!): CreateItemResult!
   createSecretSanta(input: CreateSecretSantaInput!): CreateSecretSantaResult!
+  deleteEvent(id: EventId!): DeleteEventResult!
   deleteItem(itemId: ItemId!): DeleteItemResult!
   deleteSecretSanta(id: SecretSantaId!): DeleteSecretSantaResult!
   deleteSecretSantaUser(id: SecretSantaId!, secretSantaUserId: SecretSantaUserId!): DeleteSecretSantaUserResult!
+  deleteWishlist(id: WishlistId!): DeleteWishlistResult!
   importItems(input: ImportItemsInput!): ImportItemsResult!
   linkCurrentUserWithGoogle(input: LinkUserToGoogleInput!): LinkUserToGoogleResult!
+  linkWishlistToEvent(eventId: EventId!, id: WishlistId!): LinkWishlistToEventResult!
   login(input: LoginInput!): LoginResult!
   loginWithGoogle(input: LoginWithGoogleInput!): LoginWithGoogleResult!
   registerUser(input: RegisterUserInput!): RegisterUserResult!
+  removeEventAttendee(attendeeId: AttendeeId!, eventId: EventId!): RemoveEventAttendeeResult!
   removeUserPicture: RemoveUserPictureResult!
+  removeWishlistCoOwner(id: WishlistId!): RemoveWishlistCoOwnerResult!
+  removeWishlistLogo(id: WishlistId!): RemoveWishlistLogoResult!
   requestEmailChange(input: RequestEmailChangeInput!): RequestEmailChangeResult!
   resetPassword(input: ResetPasswordInput!): ResetPasswordResult!
   scanItemUrl(input: ScanItemUrlInput!): ScanItemUrlResult!
@@ -266,12 +347,15 @@ type Mutation {
   startSecretSanta(id: SecretSantaId!): StartSecretSantaResult!
   toggleItem(itemId: ItemId!): ToggleItemResult!
   unlinkCurrentUserSocial(socialId: UserSocialId!): UnlinkCurrentUserSocialResult!
+  unlinkWishlistFromEvent(eventId: EventId!, id: WishlistId!): UnlinkWishlistFromEventResult!
+  updateEvent(id: EventId!, input: UpdateEventInput!): UpdateEventResult!
   updateItem(input: UpdateItemInput!, itemId: ItemId!): UpdateItemResult!
   updateSecretSanta(id: SecretSantaId!, input: UpdateSecretSantaInput!): UpdateSecretSantaResult!
   updateSecretSantaUser(id: SecretSantaId!, input: UpdateSecretSantaUserInput!, secretSantaUserId: SecretSantaUserId!): UpdateSecretSantaUserResult!
   updateUserEmailSettings(input: UpdateUserEmailSettingsInput!): UpdateUserEmailSettingsResult!
   updateUserPictureFromSocial(input: UpdateUserPictureFromSocialInput!): UpdateUserPictureFromSocialResult!
   updateUserProfile(input: UpdateUserProfileInput!): UpdateUserProfileResult!
+  updateWishlist(id: WishlistId!, input: UpdateWishlistInput!): UpdateWishlistResult!
 }
 
 type NotFoundRejection {
@@ -296,6 +380,12 @@ type PendingEmailChange {
 }
 
 type Query {
+  adminEvent(id: EventId!): AdminGetEventByIdResult!
+  adminEvents(filters: AdminEventPaginationFilters!): AdminGetEventsResult!
+  adminUser(userId: UserId!): AdminGetUserByIdResult!
+  adminUsers(input: AdminGetAllUsersPaginationFilters): AdminGetAllUsersResult!
+  adminWishlists(filters: AdminWishlistPaginationFilters!): AdminGetWishlistsResult!
+  closestFriends(limit: Int): ClosestFriendsResult!
   currentUser: GetCurrentUserResult!
   event(id: EventId!): GetEventByIdResult
   events(filters: EventPaginationFilters!): GetMyEventsResult!
@@ -303,9 +393,8 @@ type Query {
   importableItems(wishlistId: WishlistId!): GetImportableItemsResult!
   mySecretSantaDraw(eventId: EventId!): GetMySecretSantaDrawResult
   pendingEmailChange: GetPendingEmailChangeResult
+  searchUsers(keyword: String!): SearchUsersResult!
   secretSanta(eventId: EventId!): GetSecretSantaForEventResult
-  user(userId: UserId!): AdminGetUserByIdResult!
-  users(input: AdminGetAllUsersPaginationFilters): AdminGetAllUsersResult!
   wishlist(id: WishlistId!): GetWishlistByIdResult
   wishlists(filters: PaginationFilters!): GetMyWishlistsResult!
 }
@@ -320,7 +409,13 @@ input RegisterUserInput {
 
 union RegisterUserResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | User | ValidationRejection
 
+union RemoveEventAttendeeResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
 union RemoveUserPictureResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
+union RemoveWishlistCoOwnerResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
+union RemoveWishlistLogoResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
 input RequestEmailChangeInput {
   newEmail: String!
@@ -345,6 +440,12 @@ type ScanItemUrlOutput {
 }
 
 union ScanItemUrlResult = ForbiddenRejection | InternalErrorRejection | ScanItemUrlOutput | UnauthorizedRejection | ValidationRejection
+
+type SearchUsersOutput {
+  users: [User!]!
+}
+
+union SearchUsersResult = ForbiddenRejection | InternalErrorRejection | SearchUsersOutput | UnauthorizedRejection | ValidationRejection
 
 type SecretSanta {
   budget: Int
@@ -395,6 +496,17 @@ type UnauthorizedRejection {
 
 union UnlinkCurrentUserSocialResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
+union UnlinkWishlistFromEventResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
+input UpdateEventInput {
+  description: String
+  eventDate: String!
+  icon: String
+  title: String!
+}
+
+union UpdateEventResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
 input UpdateItemInput {
   description: String
   name: String!
@@ -437,6 +549,13 @@ input UpdateUserProfileInput {
 }
 
 union UpdateUserProfileResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | User | ValidationRejection
+
+input UpdateWishlistInput {
+  description: String
+  title: String!
+}
+
+union UpdateWishlistResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
 type User {
   birthday: String

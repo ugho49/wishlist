@@ -9,6 +9,7 @@ import { RealIP } from 'nestjs-real-ip'
 import {
   ChangeUserPasswordInput,
   ChangeUserPasswordResult,
+  ClosestFriendsResult,
   ConfirmEmailChangeInput,
   ConfirmEmailChangeResult,
   GetPendingEmailChangeResult,
@@ -22,6 +23,7 @@ import {
   RequestEmailChangeResult,
   ResetPasswordInput,
   ResetPasswordResult,
+  SearchUsersResult,
   SendResetPasswordEmailInput,
   SendResetPasswordEmailResult,
   UnlinkCurrentUserSocialResult,
@@ -46,14 +48,18 @@ import { UpdateUserUseCase } from '../../application/command/update-user.use-cas
 import { UpdateUserEmailSettingUseCase } from '../../application/command/update-user-email-setting.use-case'
 import { UpdateUserPasswordUseCase } from '../../application/command/update-user-password.use-case'
 import { UpdateUserPictureFromSocialUseCase } from '../../application/command/update-user-picture-from-social.use-case'
+import { GetClosestFriendsUseCase } from '../../application/query/get-closest-friends.use-case'
 import { GetPendingEmailChangeUseCase } from '../../application/query/get-pending-email-change.use-case'
+import { GetUsersByCriteriaUseCase } from '../../application/query/get-users-by-criteria.use-case'
 import {
   ChangeUserPasswordInputSchema,
+  ClosestFriendsLimitSchema,
   ConfirmEmailChangeInputSchema,
   LinkUserToGoogleInputSchema,
   RegisterUserInputSchema,
   RequestEmailChangeInputSchema,
   ResetPasswordInputSchema,
+  SearchUsersKeywordSchema,
   SendResetPasswordEmailInputSchema,
   UpdateUserEmailSettingsInputSchema,
   UpdateUserPictureFromSocialInputSchema,
@@ -76,6 +82,8 @@ export class UserResolver {
     private readonly updateUserEmailSettingUseCase: UpdateUserEmailSettingUseCase,
     private readonly createPasswordVerificationUseCase: CreatePasswordVerificationUseCase,
     private readonly resetUserPasswordUseCase: ResetUserPasswordUseCase,
+    private readonly getUsersByCriteriaUseCase: GetUsersByCriteriaUseCase,
+    private readonly getClosestFriendsUseCase: GetClosestFriendsUseCase,
   ) {}
 
   @Query()
@@ -85,6 +93,36 @@ export class UserResolver {
       throw new Error('User not found')
     }
     return user
+  }
+
+  @Query()
+  async searchUsers(
+    @Args('keyword', new ZodPipe(SearchUsersKeywordSchema)) keyword: string,
+    @GqlCurrentUser() currentUser: ICurrentUser,
+    @Context() ctx: GraphQLContext,
+  ): Promise<SearchUsersResult> {
+    const miniUsers = await this.getUsersByCriteriaUseCase.execute({ currentUser, criteria: keyword })
+    const users = await Promise.all(miniUsers.map(user => ctx.loaders.user.load(user.id)))
+
+    return {
+      __typename: 'SearchUsersOutput',
+      users: users.filter((user): user is User => !!user),
+    }
+  }
+
+  @Query()
+  async closestFriends(
+    @Args('limit', new ZodPipe(ClosestFriendsLimitSchema)) limit: number | undefined,
+    @GqlCurrentUser('id') currentUserId: UserId,
+    @Context() ctx: GraphQLContext,
+  ): Promise<ClosestFriendsResult> {
+    const miniUsers = await this.getClosestFriendsUseCase.execute({ userId: currentUserId, limit: limit ?? 20 })
+    const users = await Promise.all(miniUsers.map(user => ctx.loaders.user.load(user.id)))
+
+    return {
+      __typename: 'ClosestFriendsOutput',
+      users: users.filter((user): user is User => !!user),
+    }
   }
 
   @Public()

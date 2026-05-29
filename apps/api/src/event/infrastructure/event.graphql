@@ -48,7 +48,138 @@ union GetEventByIdResult =
 
 union GetMyEventsResult = GetEventsPagedResponse | UnauthorizedRejection | ForbiddenRejection | InternalErrorRejection
 
+########################################################
+###############   Input Types   ########################
+########################################################
+
+input CreateEventAttendeeInput {
+  email: String!
+  role: AttendeeRole
+}
+
+input CreateEventInput {
+  title: String!
+  description: String
+  icon: String
+  eventDate: String!
+  attendees: [CreateEventAttendeeInput!]
+}
+
+input UpdateEventInput {
+  title: String!
+  description: String
+  icon: String
+  eventDate: String!
+}
+
+input AddEventAttendeeInput {
+  email: String!
+  role: AttendeeRole
+}
+
+input AdminEventPaginationFilters {
+  page: Int
+  limit: Int
+  userId: UserId
+}
+
+########################################################
+###############   Result Unions   ######################
+########################################################
+
+union CreateEventResult =
+  | Event
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | NotFoundRejection
+  | InternalErrorRejection
+
+union UpdateEventResult =
+  | VoidOutput
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | NotFoundRejection
+  | InternalErrorRejection
+
+union DeleteEventResult =
+  | VoidOutput
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | NotFoundRejection
+  | InternalErrorRejection
+
+union AddEventAttendeeResult =
+  | EventAttendee
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | NotFoundRejection
+  | InternalErrorRejection
+
+union RemoveEventAttendeeResult =
+  | VoidOutput
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | NotFoundRejection
+  | InternalErrorRejection
+
+union AdminGetEventByIdResult =
+  | Event
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | NotFoundRejection
+  | InternalErrorRejection
+
+union AdminGetEventsResult =
+  | GetEventsPagedResponse
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+
+union AdminUpdateEventResult =
+  | VoidOutput
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | NotFoundRejection
+  | InternalErrorRejection
+
+union AdminDeleteEventResult =
+  | VoidOutput
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | NotFoundRejection
+  | InternalErrorRejection
+
+union AdminDeleteEventAttendeeResult =
+  | VoidOutput
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | NotFoundRejection
+  | InternalErrorRejection
+
 extend type Query {
   event(id: EventId!): GetEventByIdResult
   events(filters: EventPaginationFilters!): GetMyEventsResult!
+  adminEvent(id: EventId!): AdminGetEventByIdResult!
+  adminEvents(filters: AdminEventPaginationFilters!): AdminGetEventsResult!
+}
+
+extend type Mutation {
+  createEvent(input: CreateEventInput!): CreateEventResult!
+  updateEvent(id: EventId!, input: UpdateEventInput!): UpdateEventResult!
+  deleteEvent(id: EventId!): DeleteEventResult!
+  addEventAttendee(eventId: EventId!, input: AddEventAttendeeInput!): AddEventAttendeeResult!
+  removeEventAttendee(eventId: EventId!, attendeeId: AttendeeId!): RemoveEventAttendeeResult!
+  adminUpdateEvent(id: EventId!, input: UpdateEventInput!): AdminUpdateEventResult!
+  adminDeleteEvent(id: EventId!): AdminDeleteEventResult!
+  adminDeleteEventAttendee(eventId: EventId!, attendeeId: AttendeeId!): AdminDeleteEventAttendeeResult!
 }
