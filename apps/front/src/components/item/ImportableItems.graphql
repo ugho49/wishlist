@@ -1,0 +1,24 @@
+query ImportableItems($wishlistId: WishlistId!) {
+  importableItems(wishlistId: $wishlistId) {
+    __typename
+    ... on GetImportableItemsOutput {
+      items {
+        id
+        name
+        description
+        url
+        score
+        isSuggested
+        pictureUrl
+        takenById
+        takenAt
+        createdAt
+        takerUser {
+          id
+          firstName
+          pictureUrl
+        }
+      }
+    }
+  }
+}

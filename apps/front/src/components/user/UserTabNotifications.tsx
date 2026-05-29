@@ -1,12 +1,12 @@
-import type { UpdateUserEmailSettingsInputDto } from '@wishlist/common'
 import type { FormEvent } from 'react'
 
 import SaveIcon from '@mui/icons-material/Save'
 import { Box, Button, Checkbox, FormControlLabel, Stack, Typography } from '@mui/material'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 
-import { useApi } from '../../hooks/useApi'
+import { useUpdateUserEmailSettingsMutation, useUserProfileEmailSettingsQuery } from '../../gql'
+import { unwrapResult } from '../../gql/result'
 import { useToast } from '../../hooks/useToast'
 import { Card } from '../common/Card'
 import { InputLabel } from '../common/InputLabel'
@@ -15,37 +15,36 @@ import { Subtitle } from '../common/Subtitle'
 
 export const UserTabNotifications = () => {
   const { addToast } = useToast()
-  const api = useApi()
   const queryClient = useQueryClient()
   const [dailyNewItemNotification, setDailyNewItemNotification] = useState(true)
 
-  const { data: value, isLoading: loadingNotificationSettings } = useQuery({
-    queryKey: ['user.getEmailSettings'],
-    queryFn: ({ signal }) => api.user.getEmailSettings({ signal }),
+  const { data: emailSettings, isLoading: loadingNotificationSettings } = useUserProfileEmailSettingsQuery(undefined, {
+    select: d => unwrapResult(d.currentUser, 'User').emailSettings,
   })
 
-  const { mutateAsync: updateEmailSettings, isPending: loading } = useMutation({
-    mutationKey: ['user.updateEmailSettings'],
-    mutationFn: (data: UpdateUserEmailSettingsInputDto) => api.user.updateUserEmailSettings(data),
+  const { mutateAsync: updateEmailSettings, isPending: loading } = useUpdateUserEmailSettingsMutation({
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-    onSuccess: output => {
-      addToast({ message: 'Préférences de notification mis à jour', variant: 'info' })
-      queryClient.setQueryData(['user.getEmailSettings'], output)
-    },
   })
 
   useEffect(() => {
-    if (value) {
-      setDailyNewItemNotification(value.daily_new_item_notification)
+    if (emailSettings) {
+      setDailyNewItemNotification(emailSettings.dailyNewItemNotification)
     }
-  }, [value])
+  }, [emailSettings])
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault()
 
-    await updateEmailSettings({
-      daily_new_item_notification: dailyNewItemNotification,
+    const res = await updateEmailSettings({
+      input: {
+        dailyNewItemNotification,
+      },
     })
+
+    unwrapResult(res.updateUserEmailSettings, 'UserEmailSettings')
+
+    addToast({ message: 'Préférences de notification mis à jour', variant: 'info' })
+    void queryClient.invalidateQueries({ queryKey: ['UserProfileEmailSettings'] })
   }
 
   return (

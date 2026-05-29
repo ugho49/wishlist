@@ -12,11 +12,17 @@ import {
   Typography,
   Zoom,
 } from '@mui/material'
+import { useQueryClient } from '@tanstack/react-query'
 import { useDispatch, useSelector } from 'react-redux'
 
+import { uploadUserPicture } from '../../api/upload'
 import { updatePicture } from '../../core/store/features'
-import { useFetchUserInfo } from '../../hooks/domain/useFetchUserInfo'
-import { useApi } from '../../hooks/useApi'
+import {
+  useRemoveCurrentUserPictureMutation,
+  useUpdateUserPictureFromSocialMutation,
+  useUserProfileCurrentUserQuery,
+} from '../../gql'
+import { unwrapResult } from '../../gql/result'
 import { AvatarUpdateButton } from './AvatarUpdateButton'
 
 type ProfilePicturePromptModalProps = {
@@ -78,9 +84,14 @@ const SecondaryButton = styled(Button)(({ theme }) => ({
 
 export const ProfilePicturePromptModal = ({ open, onClose }: ProfilePicturePromptModalProps) => {
   const dispatch = useDispatch()
-  const { user } = useFetchUserInfo()
+  const queryClient = useQueryClient()
+  const { data: user } = useUserProfileCurrentUserQuery(undefined, {
+    select: d => unwrapResult(d.currentUser, 'User'),
+  })
   const pictureUrl = useSelector(mapState)
-  const api = useApi()
+
+  const { mutateAsync: updatePictureFromSocial } = useUpdateUserPictureFromSocialMutation()
+  const { mutateAsync: removePicture } = useRemoveCurrentUserPictureMutation()
 
   const handleClose = () => {
     onClose()
@@ -88,6 +99,7 @@ export const ProfilePicturePromptModal = ({ open, onClose }: ProfilePicturePromp
 
   const handlePictureUpdated = (newPictureUrl: string | undefined) => {
     dispatch(updatePicture(newPictureUrl))
+    void queryClient.invalidateQueries({ queryKey: ['UserProfileCurrentUser'] })
   }
 
   return (
@@ -103,11 +115,17 @@ export const ProfilePicturePromptModal = ({ open, onClose }: ProfilePicturePromp
 
         <AvatarUpdateButton
           pictureUrl={pictureUrl}
-          socials={user?.social || []}
+          socials={user?.socials || []}
           onPictureUpdated={handlePictureUpdated}
-          uploadPictureHandler={file => api.user.uploadPicture(file)}
-          updatePictureFromSocialHandler={socialId => api.user.updatePictureFromSocial(socialId)}
-          deletePictureHandler={() => api.user.deletePicture()}
+          uploadPictureHandler={file => uploadUserPicture(file)}
+          updatePictureFromSocialHandler={async socialId => {
+            const res = await updatePictureFromSocial({ input: { socialId } })
+            unwrapResult(res.updateUserPictureFromSocial, 'VoidOutput')
+          }}
+          deletePictureHandler={async () => {
+            const res = await removePicture({})
+            unwrapResult(res.removeUserPicture, 'VoidOutput')
+          }}
           size="120px"
         />
       </DialogContent>

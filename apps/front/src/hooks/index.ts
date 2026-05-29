@@ -1,5 +1,4 @@
 export * from './domain'
-export { useApi } from './useApi'
 export { useBackNavigation } from './useBackNavigation'
 export { useLogout } from './useLogout'
 export { useToast } from './useToast'

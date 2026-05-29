@@ -1,5 +1,7 @@
-import type { UpdateUserPictureOutputDto, UserSocialDto, UserSocialId } from '@wishlist/common'
+import type { UserSocialId } from '@wishlist/common'
 import type React from 'react'
+import type { UploadPictureResult } from '../../api/upload'
+import type { UserSocial } from '../../gql'
 
 import AddAPhotoIcon from '@mui/icons-material/AddAPhoto'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
@@ -67,12 +69,12 @@ const MenuButton = styled(IconButton)(({ theme }) => ({
 }))
 
 export type AvatarUpdateButtonProps = {
-  uploadPictureHandler: (file: File) => Promise<UpdateUserPictureOutputDto>
+  uploadPictureHandler: (file: File) => Promise<UploadPictureResult>
   updatePictureFromSocialHandler: (socialId: UserSocialId) => Promise<void>
   deletePictureHandler: () => Promise<void>
   onPictureUpdated: (pictureUrl: string | undefined) => void
   pictureUrl?: string
-  socials: UserSocialDto[]
+  socials: UserSocial[]
   size?: string
 }
 
@@ -140,7 +142,7 @@ export const AvatarUpdateButton = ({
     }
   }
 
-  const updateWithSocialPicture = async (social?: UserSocialDto) => {
+  const updateWithSocialPicture = async (social?: UserSocial) => {
     closeMenu()
 
     if (!social) return
@@ -149,7 +151,7 @@ export const AvatarUpdateButton = ({
 
     try {
       await updatePictureFromSocialHandler(social.id)
-      onPictureUpdated(social.picture_url!)
+      onPictureUpdated(social.pictureUrl!)
     } catch {
       addToast({ message: "Une erreur s'est produite", variant: 'error' })
     } finally {
@@ -221,15 +223,15 @@ export const AvatarUpdateButton = ({
             <ListItemText>Supprimer la photo</ListItemText>
           </MenuItem>
         )}
-        {socials.find(s => s.social_type === 'google') && (
-          <MenuItem onClick={() => updateWithSocialPicture(socials.find(s => s.social_type === 'google'))}>
+        {socials.find(s => s.socialType === 'google') && (
+          <MenuItem onClick={() => updateWithSocialPicture(socials.find(s => s.socialType === 'google'))}>
             <ListItemIcon>
               <GoogleIcon fontSize="small" />
             </ListItemIcon>
             <ListItemText>Utiliser ma photo google</ListItemText>
             <ListItemIcon sx={{ marginLeft: '50px', justifyContent: 'flex-end' }}>
               <Avatar
-                src={socials.find(s => s.social_type === 'google')?.picture_url}
+                src={socials.find(s => s.socialType === 'google')?.pictureUrl ?? undefined}
                 sx={{ width: '20px', height: '20px' }}
               />
             </ListItemIcon>

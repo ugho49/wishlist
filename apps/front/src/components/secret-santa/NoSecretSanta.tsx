@@ -1,12 +1,15 @@
-import type { EventId, UpdateSecretSantaInputDto } from '@wishlist/common'
+import type { EventId } from '@wishlist/common'
+import type { SecretSantaFormInput } from './EditSecretSantaFormDialog'
 
 import AddIcon from '@mui/icons-material/Add'
 import { Box, Button, Stack, styled, Typography } from '@mui/material'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 
 import EmptySecretSantaIllustration from '../../assets/illustrations/secret-santa.png'
-import { useApi, useToast } from '../../hooks'
+import { useCreateSecretSantaMutation } from '../../gql'
+import { GraphqlRejectionError, unwrapResult } from '../../gql/result'
+import { useToast } from '../../hooks'
 import { EditSecretSantaFormDialog } from './EditSecretSantaFormDialog'
 
 const EmptyStateContainer = styled(Stack)(({ theme }) => ({
@@ -71,24 +74,24 @@ type NoSecretSantaProps = {
 
 export const NoSecretSanta = ({ eventId }: NoSecretSantaProps) => {
   const queryClient = useQueryClient()
-  const api = useApi()
   const { addToast } = useToast()
   const [openModal, setOpenModal] = useState(false)
 
-  const { mutateAsync: createSecretSanta, isPending: loading } = useMutation({
-    mutationKey: ['secret-santa.create', { eventId }],
-    mutationFn: (input: UpdateSecretSantaInputDto) => {
-      return api.secretSanta.create({
-        event_id: eventId,
-        ...input,
+  const { mutateAsync: createSecretSantaMutation, isPending: loading } = useCreateSecretSantaMutation()
+
+  const createSecretSanta = async (input: SecretSantaFormInput) => {
+    try {
+      const res = await createSecretSantaMutation({
+        input: { eventId, budget: input.budget, description: input.description },
       })
-    },
-    onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-    onSuccess: output => {
+      unwrapResult(res.createSecretSanta, 'SecretSanta')
       addToast({ message: 'Secret santa créé avec succès', variant: 'success' })
-      queryClient.setQueryData(['secret-santa', { eventId }], output)
-    },
-  })
+      await queryClient.invalidateQueries({ queryKey: ['GetSecretSantaForEvent', { eventId }] })
+    } catch (error) {
+      const message = error instanceof GraphqlRejectionError ? error.message : "Une erreur s'est produite"
+      addToast({ message, variant: 'error' })
+    }
+  }
 
   return (
     <>

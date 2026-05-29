@@ -1,4 +1,4 @@
-import type { WishlistWithOwnerDto } from '@wishlist/common'
+import type { WishlistId } from '@wishlist/common'
 
 import PublicIcon from '@mui/icons-material/Public'
 import { styled, Typography } from '@mui/material'
@@ -9,8 +9,21 @@ import { getAvatarUrl } from '../../utils/wishlist.utils'
 import { Card } from '../common/Card'
 import { WishlistAvatar } from './WishlistAvatar'
 
+/**
+ * Card shown inside an event's wishlist grid. The wishlist data is supplied by
+ * the event feature's GraphQL query, so we describe only the fields this card
+ * reads (camelCase GraphQL shape).
+ */
+export type WishlistCardWithOwnerWishlist = {
+  id: WishlistId
+  title: string
+  logoUrl?: string | null
+  config: { hideItems: boolean }
+  owner: { firstName: string; lastName: string; pictureUrl?: string | null }
+}
+
 export type WishlistCardWithOwnerProps = {
-  wishlist: WishlistWithOwnerDto
+  wishlist: WishlistCardWithOwnerWishlist
 }
 
 const WishlistCardContent = styled(Card)(({ theme }) => ({
@@ -92,7 +105,7 @@ const PublicIconStyled = styled(PublicIcon)(() => ({
 
 export const WishlistCardWithOwner = ({ wishlist }: WishlistCardWithOwnerProps) => {
   const navigate = useNavigate()
-  const isPublic = !wishlist.config.hide_items
+  const isPublic = !wishlist.config.hideItems
 
   return (
     <WishlistCardContent
@@ -102,7 +115,7 @@ export const WishlistCardWithOwner = ({ wishlist }: WishlistCardWithOwnerProps) 
     >
       <AvatarContainer>
         <WishlistAvatar
-          src={getAvatarUrl({ wishlist, ownerPictureUrl: wishlist.owner.picture_url })}
+          src={getAvatarUrl({ wishlist, ownerPictureUrl: wishlist.owner.pictureUrl })}
           className="wishlist-avatar"
         />
         {isPublic && (
@@ -115,7 +128,7 @@ export const WishlistCardWithOwner = ({ wishlist }: WishlistCardWithOwnerProps) 
       <ContentContainer>
         <WishlistTitle className="wishlist-title">{wishlist.title}</WishlistTitle>
         <OwnerInfo className="owner-info">
-          {wishlist.owner.firstname} {wishlist.owner.lastname}
+          {wishlist.owner.firstName} {wishlist.owner.lastName}
         </OwnerInfo>
       </ContentContainer>
     </WishlistCardContent>

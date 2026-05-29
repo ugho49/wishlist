@@ -1,5 +1,5 @@
 import type { GridColDef } from '@mui/x-data-grid'
-import type { WishlistWithOwnerDto } from '@wishlist/common'
+import type { UserId, WishlistId } from '@wishlist/common'
 
 import ListIcon from '@mui/icons-material/List'
 import { Avatar } from '@mui/material'
@@ -8,16 +8,31 @@ import { DateTime } from 'luxon'
 
 import { RouterLink } from '../../common/RouterLink'
 
-const columns: GridColDef<WishlistWithOwnerDto>[] = [
+/**
+ * The admin event page supplies these wishlists from its own GraphQL query
+ * (the event feature's `Wishlist` type). We describe only the fields the grid
+ * reads here, in the camelCase GraphQL shape.
+ */
+export type AdminEventWishlist = {
+  id: WishlistId
+  title: string
+  logoUrl?: string | null
+  config: { hideItems: boolean }
+  createdAt: string
+  owner: { id: UserId; firstName: string; lastName: string }
+  coOwner?: { id: UserId; firstName: string; lastName: string } | null
+}
+
+const columns: GridColDef<AdminEventWishlist>[] = [
   {
-    field: 'picture_url',
+    field: 'logoUrl',
     headerName: '',
     width: 20,
     sortable: false,
     filterable: false,
     display: 'flex',
     renderCell: ({ row: wishlist }) => (
-      <Avatar src={wishlist.logo_url} sx={{ width: '30px', height: '30px' }}>
+      <Avatar src={wishlist.logoUrl ?? undefined} sx={{ width: '30px', height: '30px' }}>
         <ListIcon />
       </Avatar>
     ),
@@ -27,50 +42,50 @@ const columns: GridColDef<WishlistWithOwnerDto>[] = [
     field: 'owner',
     headerName: 'Owner',
     width: 300,
-    valueGetter: (_, row) => `${row.owner.firstname} ${row.owner.lastname}`,
+    valueGetter: (_, row) => `${row.owner.firstName} ${row.owner.lastName}`,
     renderCell: ({ row }) => {
       return (
         <RouterLink key={row.owner.id} to="/admin/users/$userId" params={{ userId: row.owner.id }}>
-          {row.owner.firstname} {row.owner.lastname}
+          {row.owner.firstName} {row.owner.lastName}
         </RouterLink>
       )
     },
   },
   {
-    field: 'co_owner',
+    field: 'coOwner',
     headerName: 'Co-owner',
     width: 300,
-    valueGetter: (_, row) => `${row.co_owner?.firstname} ${row.co_owner?.lastname}`,
+    valueGetter: (_, row) => `${row.coOwner?.firstName} ${row.coOwner?.lastName}`,
     renderCell: ({ row }) => {
-      if (!row.co_owner) return '-'
+      if (!row.coOwner) return '-'
       return (
-        <RouterLink key={row.co_owner.id} to="/admin/users/$userId" params={{ userId: row.co_owner.id }}>
-          {row.co_owner.firstname} {row.co_owner.lastname}
+        <RouterLink key={row.coOwner.id} to="/admin/users/$userId" params={{ userId: row.coOwner.id }}>
+          {row.coOwner.firstName} {row.coOwner.lastName}
         </RouterLink>
       )
     },
   },
   {
-    field: 'config.hide_items',
+    field: 'config.hideItems',
     headerName: 'Is Public',
     width: 100,
     sortable: false,
     filterable: false,
     type: 'boolean',
-    valueGetter: (_, row) => !row.config.hide_items,
+    valueGetter: (_, row) => !row.config.hideItems,
   },
   {
-    field: 'created_at',
+    field: 'createdAt',
     headerName: 'Created At',
     type: 'dateTime',
     width: 200,
-    valueGetter: (_, row) => new Date(row.created_at),
+    valueGetter: (_, row) => new Date(row.createdAt),
     renderCell: ({ value }) => DateTime.fromJSDate(value).toLocaleString(DateTime.DATETIME_MED),
   },
 ]
 
 type AdminListWishlistsForEventProps = {
-  wishlists: WishlistWithOwnerDto[]
+  wishlists: AdminEventWishlist[]
 }
 
 export const AdminListWishlistsForEvent = ({ wishlists }: AdminListWishlistsForEventProps) => {

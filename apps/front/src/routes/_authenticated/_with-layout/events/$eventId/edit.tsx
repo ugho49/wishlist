@@ -1,4 +1,5 @@
 import type { EventId } from '@wishlist/common'
+import type { RootState } from '../../../../../core'
 
 import ForestIcon from '@mui/icons-material/Forest'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
@@ -12,8 +13,11 @@ import { EditEventInformations } from '@wishlist/front-components/event/EditEven
 import { EditSecretSanta } from '@wishlist/front-components/event/EditSecretSanta'
 import { EventNotFound } from '@wishlist/front-components/event/EventNotFound'
 import { SEO } from '@wishlist/front-components/SEO'
-import { useEventById } from '@wishlist/front-hooks'
+import { useSelector } from 'react-redux'
 import z from 'zod'
+
+import { AttendeeRole, useEventPageGetEventQuery } from '../../../../../gql'
+import { unwrapResultOrNotFound } from '../../../../../gql/result'
 
 export enum TabValues {
   informations = 'informations',
@@ -49,10 +53,18 @@ const tabs = [
   },
 ]
 
+const mapCurrentUserId = (state: RootState) => state.auth.user?.id
+
 function RouteComponent() {
   const { eventId } = Route.useParams()
   const { tab } = Route.useSearch()
-  const { event, loading, currentUserCanEdit } = useEventById(eventId)
+  const currentUserId = useSelector(mapCurrentUserId)
+  const { data: event, isLoading: loading } = useEventPageGetEventQuery(
+    { eventId },
+    { select: d => unwrapResultOrNotFound(d.event, 'Event') },
+  )
+  const currentUserCanEdit =
+    event?.attendees.some(a => a.user?.id === currentUserId && a.role === AttendeeRole.Maintainer) ?? false
   const navigate = useNavigate({ from: '/events/$eventId/edit' })
 
   const handleTabChange = (newValue: TabValues) => {

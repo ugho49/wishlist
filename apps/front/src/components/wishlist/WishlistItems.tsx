@@ -1,5 +1,5 @@
-import type { DetailedWishlistDto, ItemDto } from '@wishlist/common'
 import type { RootState } from '../../core'
+import type { DetailedWishlist, WishlistItem } from './wishlist.types'
 
 import AddIcon from '@mui/icons-material/Add'
 import CloseIcon from '@mui/icons-material/Close'
@@ -16,7 +16,7 @@ import { EmptyItemsState } from './EmptyItemsState'
 import { applyFilter, applySort } from './WishlistFilterAndSortItems'
 
 export type WishlistTabItemsProps = {
-  wishlist: DetailedWishlistDto
+  wishlist: DetailedWishlist
   hasImportableItems: boolean
   onImportItems: () => void
 }
@@ -123,8 +123,8 @@ export const WishlistItems = ({ wishlist, hasImportableItems, onImportItems }: W
     from: '/_authenticated/_with-layout/wishlists/$wishlistId/',
   })
   const nbOfItems = useMemo(() => wishlist.items.length, [wishlist.items])
-  const ownerOrCoOwnerOfTheList = currentUserId === wishlist.owner.id || wishlist.co_owner?.id === currentUserId
-  const [currentItem, setCurrentItem] = useState<ItemDto | null>(null)
+  const ownerOrCoOwnerOfTheList = currentUserId === wishlist.owner.id || wishlist.coOwner?.id === currentUserId
+  const [currentItem, setCurrentItem] = useState<WishlistItem | null>(null)
   const navigate = useNavigate({ from: '/wishlists/$wishlistId' })
 
   const setOpenItemFormDialog = (open: boolean) => {
@@ -147,8 +147,8 @@ export const WishlistItems = ({ wishlist, hasImportableItems, onImportItems }: W
                   wishlist={{
                     id: wishlist.id,
                     ownerId: wishlist.owner.id,
-                    coOwnerId: wishlist.co_owner?.id,
-                    hideItems: wishlist.config.hide_items,
+                    coOwnerId: wishlist.coOwner?.id,
+                    hideItems: wishlist.config.hideItems,
                   }}
                   item={item}
                   onImageClick={() => setCurrentItem(item)}
@@ -185,8 +185,8 @@ export const WishlistItems = ({ wishlist, hasImportableItems, onImportItems }: W
 
       {/* Image modal */}
       <ImageModal
-        imageUrl={currentItem?.picture_url}
-        itemUrl={currentItem?.url}
+        imageUrl={currentItem?.pictureUrl ?? undefined}
+        itemUrl={currentItem?.url ?? undefined}
         open={!!currentItem}
         onClose={() => setCurrentItem(null)}
       />

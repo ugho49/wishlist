@@ -1,10 +1,11 @@
 import { Box, Container, containerClasses, styled, useMediaQuery, useTheme } from '@mui/material'
 import { Outlet } from '@tanstack/react-router'
-import { useFetchUserInfo } from '@wishlist/front-hooks'
 import { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 
 import { setUser } from '../../../../core/store/features'
+import { useUserProfileCurrentUserQuery } from '../../../../gql'
+import { unwrapResult } from '../../../../gql/result'
 import { useProfilePicturePrompt } from '../../../../hooks/useProfilePicturePrompt'
 import { ProfilePicturePromptModal } from '../../../user/ProfilePicturePromptModal'
 import { MobileBottomNavigation } from '../../MobileBottomNavigation'
@@ -29,7 +30,9 @@ const ContainerStyled = styled(Container)(({ theme }) => ({
 }))
 
 export const AuthenticatedContainerOutlet = () => {
-  const { user } = useFetchUserInfo()
+  const { data: user } = useUserProfileCurrentUserQuery(undefined, {
+    select: d => unwrapResult(d.currentUser, 'User'),
+  })
   const theme = useTheme()
   const dispatch = useDispatch()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
@@ -41,11 +44,11 @@ export const AuthenticatedContainerOutlet = () => {
         setUser({
           id: user.id,
           email: user.email,
-          firstName: user.firstname,
-          lastName: user.lastname,
-          birthday: user.birthday,
-          pictureUrl: user.picture_url,
-          social: user.social,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          birthday: user.birthday ?? undefined,
+          pictureUrl: user.pictureUrl ?? undefined,
+          social: user.socials ?? [],
         }),
       )
     }

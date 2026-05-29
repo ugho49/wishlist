@@ -9,14 +9,21 @@ import SaveIcon from '@mui/icons-material/Save'
 import { Box, Button, List, ListItem, ListItemIcon, ListItemText, Stack, TextField } from '@mui/material'
 import { styled, useTheme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
-import { useQuery } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate, useSearch } from '@tanstack/react-router'
 import { AdminListEvents } from '@wishlist/front-components/event/admin/AdminListEvents'
 import { DateTime } from 'luxon'
 import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 
-import { useApi, useToast } from '../../../hooks'
+import { uploadAdminUserPicture } from '../../../api/upload'
+import {
+  useAdminRemoveUserPictureMutation,
+  useAdminUpdateUserProfileMutation,
+  useAdminUserDetailQuery,
+} from '../../../gql'
+import { unwrapResult } from '../../../gql/result'
+import { useToast } from '../../../hooks'
 import { Card } from '../../common/Card'
 import { CharsRemaining } from '../../common/CharsRemaining'
 import { ConfirmButton } from '../../common/ConfirmButton'
@@ -60,7 +67,7 @@ interface AdminUserPageProps {
 export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
   const { addToast } = useToast()
   const { user: currentUser } = useSelector(mapState)
-  const { admin: api } = useApi()
+  const queryClient = useQueryClient()
   const theme = useTheme()
   const smallScreen = useMediaQuery(theme.breakpoints.down('md'))
   const [loading, setLoading] = useState(false)
@@ -78,31 +85,37 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
     void navigate({ to: '/admin/users/$userId', params: { userId }, search: prev => ({ ...prev, eventPage: page }) })
   }
 
-  const { data: value, isLoading: loadingUser } = useQuery({
-    queryKey: ['admin', 'user', { id: userId }],
-    queryFn: ({ signal }) => api.user.getById(userId, { signal }),
-  })
+  const { data: value, isLoading: loadingUser } = useAdminUserDetailQuery(
+    { userId },
+    { select: d => unwrapResult(d.adminUser, 'UserFull') },
+  )
+
+  const { mutateAsync: updateUser } = useAdminUpdateUserProfileMutation()
+  const { mutateAsync: removeUserPicture } = useAdminRemoveUserPictureMutation()
+
+  const invalidateUser = () => queryClient.invalidateQueries({ queryKey: ['AdminUserDetail', { userId }] })
 
   const isCurrentUser = currentUser?.id === userId
 
   useEffect(() => {
     if (value) {
       setEmail(value.email)
-      setFirstname(value.firstname)
-      setLastname(value.lastname)
+      setFirstname(value.firstName)
+      setLastname(value.lastName)
       setBirthday(value?.birthday ? DateTime.fromISO(value.birthday) : null)
-      setEnabled(value.is_enabled)
-      setPictureUrl(value.picture_url || '')
+      setEnabled(value.isEnabled)
+      setPictureUrl(value.pictureUrl || '')
     }
   }, [value])
 
-  const disableUser = async () => {
+  const setUserEnabled = async (isEnabled: boolean) => {
     setLoading(true)
-    setEnabled(false)
+    setEnabled(isEnabled)
     try {
-      // TODO: useMutation
-      await api.user.update(userId, { is_enabled: false })
-      addToast({ message: 'Utilisateur désactivé', variant: 'success' })
+      const res = await updateUser({ userId, input: { isEnabled } })
+      unwrapResult(res.adminUpdateUserProfile, 'VoidOutput')
+      void invalidateUser()
+      addToast({ message: isEnabled ? 'Utilisateur activé' : 'Utilisateur désactivé', variant: 'success' })
     } catch {
       addToast({ message: "Une erreur s'est produite", variant: 'error' })
     } finally {
@@ -110,32 +123,24 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
     }
   }
 
-  const enableUser = async () => {
-    setLoading(true)
-    setEnabled(true)
-    try {
-      // TODO: useMutation
-      await api.user.update(userId, { is_enabled: true })
-      addToast({ message: 'Utilisateur activé', variant: 'success' })
-    } catch {
-      addToast({ message: "Une erreur s'est produite", variant: 'error' })
-    } finally {
-      setLoading(false)
-    }
-  }
+  const disableUser = () => setUserEnabled(false)
+  const enableUser = () => setUserEnabled(true)
 
   const updateProfile = async (e: FormEvent) => {
     e.preventDefault()
     setLoading(true)
     try {
-      // TODO: useMutation
-      await api.user.update(userId, {
-        firstname,
-        lastname,
-        birthday: birthday !== null ? new Date(birthday.toISODate() || '') : undefined,
-        email,
+      const res = await updateUser({
+        userId,
+        input: {
+          firstname,
+          lastname,
+          birthday: birthday !== null ? birthday.toISODate() || undefined : undefined,
+          email,
+        },
       })
-
+      unwrapResult(res.adminUpdateUserProfile, 'VoidOutput')
+      void invalidateUser()
       addToast({ message: 'Profil mis à jour', variant: 'success' })
     } catch {
       addToast({ message: "Une erreur s'est produite", variant: 'error' })
@@ -159,10 +164,16 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
           size="120px"
           pictureUrl={pictureUrl}
           socials={[]}
-          onPictureUpdated={url => setPictureUrl(url || '')}
-          uploadPictureHandler={file => api.user.uploadPicture(userId, file)}
+          onPictureUpdated={url => {
+            setPictureUrl(url || '')
+            void invalidateUser()
+          }}
+          uploadPictureHandler={file => uploadAdminUserPicture(userId, file)}
           updatePictureFromSocialHandler={() => Promise.resolve()}
-          deletePictureHandler={() => api.user.deletePicture(userId)}
+          deletePictureHandler={async () => {
+            const res = await removeUserPicture({ userId })
+            unwrapResult(res.adminRemoveUserPicture, 'VoidOutput')
+          }}
         />
       </Stack>
 
@@ -183,7 +194,7 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
                 </ListItemIcon>
                 <ListItemText
                   primary="Inscrit le"
-                  secondary={DateTime.fromISO(value?.created_at || '').toLocaleString(
+                  secondary={DateTime.fromISO(value?.createdAt || '').toLocaleString(
                     DateTime.DATETIME_MED_WITH_SECONDS,
                   )}
                 />
@@ -197,8 +208,8 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
                 <ListItemText
                   primary="Dernière connexion le"
                   secondary={
-                    value?.last_connected_at
-                      ? DateTime.fromISO(value.last_connected_at).toLocaleString(DateTime.DATETIME_MED_WITH_SECONDS)
+                    value?.lastConnectedAt
+                      ? DateTime.fromISO(value.lastConnectedAt).toLocaleString(DateTime.DATETIME_MED_WITH_SECONDS)
                       : ' - '
                   }
                 />
@@ -209,7 +220,7 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
                 <ListItemIcon>
                   <LanguageIcon />
                 </ListItemIcon>
-                <ListItemText primary="Dernière IP connue" secondary={value?.last_ip || ' - '} />
+                <ListItemText primary="Dernière IP connue" secondary={value?.lastIp || ' - '} />
               </ListItem>
             </List>
           </Stack>

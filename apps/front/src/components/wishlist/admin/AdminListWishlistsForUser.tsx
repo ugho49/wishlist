@@ -1,25 +1,26 @@
-import type { UserId, WishlistWithEventsDto } from '@wishlist/common'
+import type { UserId } from '@wishlist/common'
+import type { AdminUserWishlistRow } from '../wishlist.types'
 
 import ListIcon from '@mui/icons-material/List'
 import { Avatar, Stack } from '@mui/material'
 import { DataGrid, type GridColDef } from '@mui/x-data-grid'
-import { useQuery } from '@tanstack/react-query'
 import { DateTime } from 'luxon'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
-import { useApi } from '../../../hooks'
+import { useAdminListWishlistsForUserQuery } from '../../../gql'
+import { unwrapResult } from '../../../gql/result'
 import { RouterLink } from '../../common/RouterLink'
 
-const getColumns = (userId: UserId): GridColDef<WishlistWithEventsDto>[] => [
+const getColumns = (userId: UserId): GridColDef<AdminUserWishlistRow>[] => [
   {
-    field: 'picture_url',
+    field: 'logoUrl',
     headerName: '',
     width: 20,
     sortable: false,
     filterable: false,
     display: 'flex',
     renderCell: ({ row: wishlist }) => (
-      <Avatar src={wishlist.logo_url} sx={{ width: '30px', height: '30px' }}>
+      <Avatar src={wishlist.logoUrl ?? undefined} sx={{ width: '30px', height: '30px' }}>
         <ListIcon />
       </Avatar>
     ),
@@ -48,23 +49,23 @@ const getColumns = (userId: UserId): GridColDef<WishlistWithEventsDto>[] => [
     field: 'role',
     headerName: 'Role',
     width: 100,
-    valueGetter: (_, row) => (userId === row.co_owner?.id ? 'Co-owner' : 'Owner'),
+    valueGetter: (_, row) => (userId === row.coOwnerId ? 'Co-owner' : 'Owner'),
   },
   {
-    field: 'config.hide_items',
+    field: 'config.hideItems',
     headerName: 'Is Public',
     width: 100,
     sortable: false,
     filterable: false,
     type: 'boolean',
-    valueGetter: (_, row) => !row.config.hide_items,
+    valueGetter: (_, row) => !row.config.hideItems,
   },
   {
-    field: 'created_at',
+    field: 'createdAt',
     headerName: 'Created At',
     type: 'dateTime',
     width: 200,
-    valueGetter: (_, row) => new Date(row.created_at),
+    valueGetter: (_, row) => new Date(row.createdAt),
     renderCell: ({ value }) => DateTime.fromJSDate(value).toLocaleString(DateTime.DATETIME_MED),
   },
 ]
@@ -74,30 +75,22 @@ type AdminListWishlistsForUserProps = {
 }
 
 export const AdminListWishlistsForUser = ({ userId }: AdminListWishlistsForUserProps) => {
-  const { admin: api } = useApi()
-  const [totalElements, setTotalElements] = useState(0)
-  const [pageSize, setPageSize] = useState(0)
   const [currentPage, setCurrentPage] = useState(1)
 
-  const { data: value, isLoading: loading } = useQuery({
-    queryKey: ['admin', 'wishlists', { page: currentPage, userId }],
-    queryFn: ({ signal }) => api.wishlist.getAll({ p: currentPage, user_id: userId }, { signal }),
-  })
+  const { data, isLoading: loading } = useAdminListWishlistsForUserQuery(
+    { filters: { page: currentPage, userId } },
+    { select: d => unwrapResult(d.adminWishlists, 'AdminGetWishlists') },
+  )
 
-  useEffect(() => {
-    if (value) {
-      setTotalElements(value.pagination.total_elements)
-      setCurrentPage(value.pagination.page_number)
-      setPageSize(value.pagination.pages_size)
-    }
-  }, [value])
+  const totalElements = data?.pagination.totalElements ?? 0
+  const pageSize = data?.pagination.pageSize ?? 0
 
   return (
     <div style={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
       <DataGrid
         isRowSelectable={() => false}
         density="standard"
-        rows={value?.resources || []}
+        rows={data?.data ?? []}
         loading={loading}
         columns={getColumns(userId)}
         paginationMode="server"

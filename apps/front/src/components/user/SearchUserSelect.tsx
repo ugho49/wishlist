@@ -1,4 +1,9 @@
-import type { MiniUserDto } from '@wishlist/common'
+import type {
+  SearchUsersSelectQuery,
+  SearchUsersSelectQueryVariables,
+  UserClosestFriendsQuery,
+  UserClosestFriendsQueryVariables,
+} from '../../gql'
 
 import PersonIcon from '@mui/icons-material/Person'
 import { Autocomplete, Avatar, createFilterOptions, Stack, TextField } from '@mui/material'
@@ -8,10 +13,13 @@ import { isValidEmail } from '@wishlist/common'
 import { debounce, uniqBy } from 'lodash'
 import { useEffect, useState } from 'react'
 
-import { useApi } from '../../hooks/useApi'
+import { fetchGql, SearchUsersSelectDocument, UserClosestFriendsDocument } from '../../gql'
+import { unwrapResult } from '../../gql/result'
 
-type UsualUserOptionType = MiniUserDto & { type: 'usual' }
-type FriendUserOptionType = MiniUserDto & { type: 'friend'; order: number }
+type MiniUser = Extract<SearchUsersSelectQuery['searchUsers'], { __typename: 'SearchUsersOutput' }>['users'][number]
+
+type UsualUserOptionType = MiniUser & { type: 'usual' }
+type FriendUserOptionType = MiniUser & { type: 'friend'; order: number }
 type UserOptionType = UsualUserOptionType | FriendUserOptionType
 
 type OptionType = UserOptionType | string
@@ -64,7 +72,6 @@ export const SearchUserSelect = ({
   label,
   acceptNewUsers = true,
 }: SearchUserSelectProps) => {
-  const api = useApi()
   const [loading, setLoading] = useState(false)
   const [options, setOptions] = useState<OptionType[]>([])
   const [inputValue, setInputValue] = useState('')
@@ -75,7 +82,10 @@ export const SearchUserSelect = ({
       if (inputValue.trim() === '' || inputValue.trim().length < 2) {
         return
       }
-      const users = await api.user.searchUserByKeyword(inputValue)
+      const res = await fetchGql<SearchUsersSelectQuery, SearchUsersSelectQueryVariables>(SearchUsersSelectDocument, {
+        keyword: inputValue,
+      })()
+      const users = unwrapResult(res.searchUsers, 'SearchUsersOutput').users
       const usualUsers = users.map<UsualUserOptionType>(user => ({ type: 'usual', ...user }))
       setOptions(prev => {
         const combined = uniqBy([...(prev as UserOptionType[]), ...usualUsers], v => v.id)
@@ -87,7 +97,10 @@ export const SearchUserSelect = ({
   }
 
   const getClosestFriends = async () => {
-    const data = await api.user.getClosestFriends(20)
+    const res = await fetchGql<UserClosestFriendsQuery, UserClosestFriendsQueryVariables>(UserClosestFriendsDocument, {
+      limit: 20,
+    })()
+    const data = unwrapResult(res.closestFriends, 'ClosestFriendsOutput').users
     const friends = data.map<FriendUserOptionType>((user, index) => ({ type: 'friend', order: index, ...user }))
     setOptions(prev => {
       const combined = uniqBy([...(prev as UserOptionType[]), ...friends], v => v.id)
@@ -113,15 +126,15 @@ export const SearchUserSelect = ({
         return a.order - b.order
       }
       // En cas d'égalité d'ordre, tri alphabétique
-      const nameA = `${a.firstname} ${a.lastname}`.toLowerCase()
-      const nameB = `${b.firstname} ${b.lastname}`.toLowerCase()
+      const nameA = `${a.firstName} ${a.lastName}`.toLowerCase()
+      const nameB = `${b.firstName} ${b.lastName}`.toLowerCase()
       return nameA.localeCompare(nameB)
     })
 
     // Tri des autres utilisateurs par ordre alphabétique
     others.sort((a, b) => {
-      const nameA = `${a.firstname} ${a.lastname}`.toLowerCase()
-      const nameB = `${b.firstname} ${b.lastname}`.toLowerCase()
+      const nameA = `${a.firstName} ${a.lastName}`.toLowerCase()
+      const nameB = `${b.firstName} ${b.lastName}`.toLowerCase()
       return nameA.localeCompare(nameB)
     })
 
@@ -204,7 +217,7 @@ export const SearchUserSelect = ({
           return `Utilisateur inconnu: ${option}`
         }
 
-        return `${option.firstname} ${option.lastname} (${option.email})`
+        return `${option.firstName} ${option.lastName} (${option.email})`
       }}
       renderOption={(props, option) => (
         <li {...props}>
@@ -216,7 +229,7 @@ export const SearchUserSelect = ({
                 bgcolor: typeof option === 'string' ? orange[100] : blue[100],
                 color: typeof option === 'string' ? orange[600] : blue[600],
               }}
-              src={typeof option !== 'string' ? option?.picture_url : undefined}
+              src={typeof option !== 'string' ? (option?.pictureUrl ?? undefined) : undefined}
             >
               <PersonIcon />
             </Avatar>
@@ -228,7 +241,7 @@ export const SearchUserSelect = ({
             ) : (
               <>
                 <b>
-                  {option.firstname} {option.lastname}
+                  {option.firstName} {option.lastName}
                 </b>
                 <span>({option.email})</span>
               </>

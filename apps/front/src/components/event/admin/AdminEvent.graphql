@@ -1,0 +1,110 @@
+query AdminEventListEvents($filters: AdminEventPaginationFilters!) {
+  adminEvents(filters: $filters) {
+    __typename
+    ... on GetEventsPagedResponse {
+      data {
+        id
+        title
+        icon
+        eventDate
+        wishlistIds
+        createdAt
+        attendees {
+          id
+          role
+          user {
+            id
+            firstName
+            lastName
+          }
+        }
+      }
+      pagination {
+        totalPages
+        totalElements
+        pageNumber
+        pageSize
+      }
+    }
+  }
+}
+
+query AdminEventGetEvent($id: EventId!) {
+  adminEvent(id: $id) {
+    __typename
+    ... on Event {
+      id
+      title
+      description
+      icon
+      eventDate
+      createdAt
+      attendees {
+        id
+        userId
+        pendingEmail
+        role
+        user {
+          id
+          firstName
+          lastName
+          email
+          pictureUrl
+        }
+      }
+      wishlists {
+        id
+        title
+        logoUrl
+        config {
+          hideItems
+        }
+        createdAt
+        owner {
+          id
+          firstName
+          lastName
+          pictureUrl
+        }
+        coOwner {
+          id
+          firstName
+          lastName
+        }
+      }
+    }
+  }
+}
+
+mutation AdminUpdateEvent($id: EventId!, $input: UpdateEventInput!) {
+  adminUpdateEvent(id: $id, input: $input) {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+    ... on ValidationRejection {
+      errors {
+        field
+        message
+      }
+    }
+  }
+}
+
+mutation AdminDeleteEvent($id: EventId!) {
+  adminDeleteEvent(id: $id) {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+  }
+}
+
+mutation AdminDeleteEventAttendee($eventId: EventId!, $attendeeId: AttendeeId!) {
+  adminDeleteEventAttendee(eventId: $eventId, attendeeId: $attendeeId) {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+  }
+}

@@ -1,4 +1,4 @@
-import type { MiniEventDto } from '@wishlist/common'
+import type { EventSelectAvailableEventsQuery } from '../../gql'
 
 import { Autocomplete, ListItemAvatar, ListItemText, Stack, TextField } from '@mui/material'
 import { MAX_EVENTS_BY_LIST } from '@wishlist/common'
@@ -6,13 +6,18 @@ import { DateTime } from 'luxon'
 
 import { EventIcon } from './EventIcon'
 
+export type SelectableEvent = Extract<
+  EventSelectAvailableEventsQuery['events'],
+  { __typename: 'GetEventsPagedResponse' }
+>['data'][number]
+
 export type SearchEventSelectProps = {
   label?: string
-  options: MiniEventDto[]
+  options: SelectableEvent[]
   disabled?: boolean
   loading?: boolean
   error?: boolean
-  onChange: (value: MiniEventDto) => void
+  onChange: (value: SelectableEvent) => void
   excludedEventIds: string[]
 }
 
@@ -44,11 +49,11 @@ export const SearchEventSelect = ({
         <li {...props}>
           <Stack direction="row" gap={2} alignItems="center" sx={{ width: '100%' }}>
             <ListItemAvatar sx={{ minWidth: 'auto' }}>
-              <EventIcon icon={option.icon} />
+              <EventIcon icon={option.icon ?? undefined} />
             </ListItemAvatar>
             <ListItemText
               primary={<b>{option.title}</b>}
-              secondary={DateTime.fromISO(option.event_date).toLocaleString(DateTime.DATE_MED)}
+              secondary={DateTime.fromISO(option.eventDate).toLocaleString(DateTime.DATE_MED)}
             />
           </Stack>
         </li>

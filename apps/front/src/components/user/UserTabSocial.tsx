@@ -5,13 +5,15 @@ import CheckIcon from '@mui/icons-material/Check'
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever'
 import { Button, Stack, styled } from '@mui/material'
 import { useGoogleLogin } from '@react-oauth/google'
-import { useMutation } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { UserSocialType } from '@wishlist/common'
-import { useApi, useToast } from '@wishlist/front-hooks'
+import { useToast } from '@wishlist/front-hooks'
 import { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { addUserSocial, removeUserSocial } from '../../core/store/features'
+import { useLinkCurrentUserWithGoogleMutation, useUnlinkCurrentUserSocialMutation } from '../../gql'
+import { unwrapResult } from '../../gql/result'
 import { Card } from '../common/Card'
 import { ConfirmButton } from '../common/ConfirmButton'
 import { CustomIcon } from '../common/CustomIcon'
@@ -101,12 +103,14 @@ const UserEmail = styled('div')(({ theme }) => ({
 const mapState = (state: RootState) => state.userProfile
 
 export const UserTabSocial = () => {
-  const api = useApi()
   const userState = useSelector(mapState)
   const [loadingSocial, setLoadingSocial] = useState(false)
   const dispatch = useDispatch()
+  const queryClient = useQueryClient()
   const { addToast } = useToast()
-  const googleSocial = (userState.social || []).find(s => s.social_type === UserSocialType.GOOGLE)
+  const googleSocial = (userState.social || []).find(s => s.socialType === UserSocialType.GOOGLE)
+
+  const invalidateCurrentUser = () => queryClient.invalidateQueries({ queryKey: ['UserProfileCurrentUser'] })
 
   const linkGoogle = useGoogleLogin({
     onSuccess: response => linkSocial(response.code),
@@ -117,27 +121,31 @@ export const UserTabSocial = () => {
     flow: 'auth-code',
   })
 
-  const { mutateAsync: unlinkSocial } = useMutation({
-    mutationKey: ['user.unlinkSocial'],
-    mutationFn: (socialId: UserSocialId) => api.user.unlinkSocialAccount(socialId),
+  const { mutateAsync: unlinkSocialMutation } = useUnlinkCurrentUserSocialMutation({
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
     onSettled: () => setLoadingSocial(false),
-    onSuccess: (_, socialId) => {
-      dispatch(removeUserSocial(socialId))
-      addToast({ message: 'Compte google dissocié avec succès', variant: 'success' })
-    },
   })
 
-  const { mutateAsync: linkSocial } = useMutation({
-    mutationKey: ['user.linkSocial'],
-    mutationFn: (code: string) => api.user.linkSocialWithGoogle({ code }),
+  const { mutateAsync: linkSocialMutation } = useLinkCurrentUserWithGoogleMutation({
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
     onSettled: () => setLoadingSocial(false),
-    onSuccess: data => {
-      dispatch(addUserSocial(data))
-      addToast({ message: 'Compte Google lié avec succès', variant: 'success' })
-    },
   })
+
+  const unlinkSocial = async (socialId: UserSocialId) => {
+    const res = await unlinkSocialMutation({ socialId })
+    unwrapResult(res.unlinkCurrentUserSocial, 'VoidOutput')
+    dispatch(removeUserSocial(socialId))
+    void invalidateCurrentUser()
+    addToast({ message: 'Compte google dissocié avec succès', variant: 'success' })
+  }
+
+  const linkSocial = async (code: string) => {
+    const res = await linkSocialMutation({ input: { code } })
+    const social = unwrapResult(res.linkCurrentUserWithGoogle, 'UserSocial')
+    dispatch(addUserSocial(social))
+    void invalidateCurrentUser()
+    addToast({ message: 'Compte Google lié avec succès', variant: 'success' })
+  }
 
   return (
     <Card>
@@ -154,7 +162,7 @@ export const UserTabSocial = () => {
               </SocialTitle>
               {googleSocial ? (
                 <ConnectedUserInfo>
-                  <UserAvatar src={googleSocial.picture_url} alt="Avatar Google" />
+                  <UserAvatar src={googleSocial.pictureUrl ?? undefined} alt="Avatar Google" />
                   <UserDetails>
                     <UserName>{googleSocial.name}</UserName>
                     <UserEmail>{googleSocial.email}</UserEmail>

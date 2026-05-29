@@ -1,13 +1,11 @@
-import type { ChangeUserPasswordInputDto } from '@wishlist/common'
-
 import { zodResolver } from '@hookform/resolvers/zod'
 import SaveIcon from '@mui/icons-material/Save'
 import { Alert, Box, Button, Stack, TextField } from '@mui/material'
-import { useMutation } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
-import { useApi } from '../../hooks/useApi'
+import { useChangeUserPasswordMutation } from '../../gql'
+import { unwrapResult } from '../../gql/result'
 import { useToast } from '../../hooks/useToast'
 import { Card } from '../common/Card'
 import { Subtitle } from '../common/Subtitle'
@@ -20,7 +18,6 @@ const schema = z.object({
 type FormFields = z.infer<typeof schema>
 
 export const UserTabPassword = () => {
-  const api = useApi()
   const { addToast } = useToast()
 
   const {
@@ -31,14 +28,8 @@ export const UserTabPassword = () => {
     formState: { isSubmitting, errors: formErrors },
   } = useForm<FormFields>({ resolver: zodResolver(schema) })
 
-  const { mutateAsync: changePassword } = useMutation({
-    mutationKey: ['user.changePassword'],
-    mutationFn: (data: ChangeUserPasswordInputDto) => api.user.changePassword(data),
+  const { mutateAsync: changePassword } = useChangeUserPasswordMutation({
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-    onSuccess: () => {
-      addToast({ message: 'Mot de passe mis à jour', variant: 'info' })
-      resetForm()
-    },
   })
 
   const onSubmit = async (data: FormFields) => {
@@ -47,10 +38,17 @@ export const UserTabPassword = () => {
       return
     }
 
-    await changePassword({
-      old_password: data.oldPassword,
-      new_password: data.newPassword,
+    const res = await changePassword({
+      input: {
+        oldPassword: data.oldPassword,
+        newPassword: data.newPassword,
+      },
     })
+
+    unwrapResult(res.changeUserPassword, 'VoidOutput')
+
+    addToast({ message: 'Mot de passe mis à jour', variant: 'info' })
+    resetForm()
   }
 
   return (

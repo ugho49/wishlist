@@ -1,24 +1,22 @@
 import type { EventId } from '@wishlist/common'
 
-import { useQuery } from '@tanstack/react-query'
-
-import { useApi } from '../useApi'
+import { useGetSecretSantaForEventQuery } from '../../gql'
+import { unwrapResult } from '../../gql/result'
 
 type Options = {
   enabled: boolean
 }
 
 export const useSecretSanta = (eventId: EventId | undefined, options: Options = { enabled: true }) => {
-  const api = useApi()
-
-  const { data, isLoading } = useQuery({
-    queryKey: ['secret-santa', { eventId }],
-    queryFn: ({ signal }) => {
-      if (!eventId) return undefined
-      return api.secretSanta.get(eventId, { signal })
+  const { data, isLoading } = useGetSecretSantaForEventQuery(
+    { eventId: eventId as EventId },
+    {
+      enabled: options.enabled && !!eventId,
+      // The `secretSanta` field is nullable: it resolves to null when no secret
+      // santa exists for the event, in which case we expose `undefined`.
+      select: d => (d.secretSanta ? unwrapResult(d.secretSanta, 'SecretSanta') : undefined),
     },
-    enabled: options.enabled,
-  })
+  )
 
   return { secretSanta: data, loading: isLoading }
 }

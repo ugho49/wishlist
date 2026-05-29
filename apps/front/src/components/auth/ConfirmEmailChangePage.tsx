@@ -1,12 +1,10 @@
-import type { ConfirmEmailChangeInputDto } from '@wishlist/common'
-
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import { CircularProgress, Stack, styled, Typography } from '@mui/material'
-import { useMutation } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import { useEffect, useRef, useState } from 'react'
 
-import { useApi } from '../../hooks/useApi'
+import { useAuthConfirmEmailChangeMutation } from '../../gql'
+import { unwrapResult } from '../../gql/result'
 import { RouterLink } from '../common/RouterLink'
 
 const ContainerStyled = styled(Stack)(({ theme }) => ({
@@ -63,17 +61,15 @@ type ConfirmEmailChangePageProps = {
 
 export const ConfirmEmailChangePage = (props: ConfirmEmailChangePageProps) => {
   const { email, token } = props
-  const api = useApi()
   const [error, setError] = useState<boolean>(false)
   const [redirectTimeoutInSeconds, setRedirectTimeoutInSeconds] = useState<number>(0)
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
   const navigate = useNavigate()
 
-  const { mutateAsync: confirmEmailChange, isPending } = useMutation({
-    mutationKey: ['user.confirmEmailChange'],
-    mutationFn: (data: ConfirmEmailChangeInputDto) => api.user.confirmEmailChange(data),
-    onError: () => setError(true),
-    onSuccess: () => {
+  const { mutateAsync: confirmEmailChange, isPending } = useAuthConfirmEmailChangeMutation()
+
+  useEffect(() => {
+    const onSuccess = () => {
       setRedirectTimeoutInSeconds(10)
 
       const interval = setInterval(() => {
@@ -91,21 +87,21 @@ export const ConfirmEmailChangePage = (props: ConfirmEmailChangePageProps) => {
         void navigate({ to: '/user/profile' })
       }, 10000)
       timeoutRef.current = timeout
-    },
-  })
+    }
 
-  useEffect(() => {
     if (email && token) {
-      void confirmEmailChange({
-        new_email: email,
-        token,
-      })
+      confirmEmailChange({ input: { newEmail: email, token } })
+        .then(res => {
+          unwrapResult(res.confirmEmailChange, 'VoidOutput')
+          onSuccess()
+        })
+        .catch(() => setError(true))
     }
 
     if (!email || !token) {
       setError(true)
     }
-  }, [email, token, confirmEmailChange])
+  }, [email, token, confirmEmailChange, navigate])
 
   useEffect(() => {
     return () => {

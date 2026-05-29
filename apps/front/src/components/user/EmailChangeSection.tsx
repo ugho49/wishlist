@@ -1,26 +1,24 @@
-import type { RequestEmailChangeInputDto } from '@wishlist/common'
-
 import { zodResolver } from '@hookform/resolvers/zod'
 import EmailIcon from '@mui/icons-material/Email'
 import InfoIcon from '@mui/icons-material/Info'
 import { Alert, Button, Stack, TextField, Typography } from '@mui/material'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
-import { useApi } from '../../hooks/useApi'
+import { useRequestUserEmailChangeMutation, useUserPendingEmailChangeQuery } from '../../gql'
+import { unwrapResult } from '../../gql/result'
 import { useToast } from '../../hooks/useToast'
 import { Loader } from '../common/Loader'
 import { Subtitle } from '../common/Subtitle'
 
 const schema = z.object({
-  new_email: z.email('Email invalide').min(1, 'Email requis').max(200, '200 caractères maximum'),
+  newEmail: z.email('Email invalide').min(1, 'Email requis').max(200, '200 caractères maximum'),
 })
 
 type FormFields = z.infer<typeof schema>
 
 export const EmailChangeSection = () => {
-  const api = useApi()
   const { addToast } = useToast()
   const queryClient = useQueryClient()
 
@@ -32,32 +30,32 @@ export const EmailChangeSection = () => {
   } = useForm<FormFields>({
     resolver: zodResolver(schema),
     defaultValues: {
-      new_email: '',
+      newEmail: '',
     },
   })
 
-  const { data: pendingChange, isLoading: loadingPendingChange } = useQuery({
-    queryKey: ['user.pendingEmailChange'],
-    queryFn: ({ signal }) => api.user.getPendingEmailChange({ signal }),
+  const { data: pendingChange, isLoading: loadingPendingChange } = useUserPendingEmailChangeQuery(undefined, {
+    select: d => (d.pendingEmailChange?.__typename === 'PendingEmailChange' ? d.pendingEmailChange : undefined),
   })
 
-  const { mutateAsync: requestEmailChange } = useMutation({
-    mutationKey: ['user.requestEmailChange'],
-    mutationFn: (data: RequestEmailChangeInputDto) => api.user.requestEmailChange(data),
+  const { mutateAsync: requestEmailChange } = useRequestUserEmailChangeMutation({
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-    onSuccess: () => {
-      addToast({
-        message:
-          'Un email de confirmation a été envoyé à votre nouvelle adresse. Vérifiez votre boîte de réception pour confirmer le changement.',
-        variant: 'success',
-      })
-      reset()
-      void queryClient.invalidateQueries({ queryKey: ['user.pendingEmailChange'] })
-    },
   })
 
-  const expiresAt = pendingChange ? new Date(pendingChange.expired_at).toLocaleString('fr-FR') : undefined
-  const onSubmit = (data: FormFields) => requestEmailChange({ new_email: data.new_email })
+  const expiresAt = pendingChange ? new Date(pendingChange.expiredAt).toLocaleString('fr-FR') : undefined
+
+  const onSubmit = async (data: FormFields) => {
+    const res = await requestEmailChange({ input: { newEmail: data.newEmail } })
+    unwrapResult(res.requestEmailChange, 'VoidOutput')
+
+    addToast({
+      message:
+        'Un email de confirmation a été envoyé à votre nouvelle adresse. Vérifiez votre boîte de réception pour confirmer le changement.',
+      variant: 'success',
+    })
+    reset()
+    void queryClient.invalidateQueries({ queryKey: ['UserPendingEmailChange'] })
+  }
 
   return (
     <Loader loading={loadingPendingChange}>
@@ -72,14 +70,14 @@ export const EmailChangeSection = () => {
 
           <Stack component="form" onSubmit={handleSubmit(onSubmit)} gap={3}>
             <TextField
-              {...register('new_email')}
+              {...register('newEmail')}
               label="Nouvelle adresse email"
               type="email"
               fullWidth
               placeholder="nouvel-email@exemple.com"
               autoComplete="email"
-              error={!!formErrors.new_email}
-              helperText={formErrors.new_email?.message}
+              error={!!formErrors.newEmail}
+              helperText={formErrors.newEmail?.message}
             />
 
             <Stack direction="row" justifyContent="center">
@@ -105,7 +103,7 @@ export const EmailChangeSection = () => {
             Changement d'email en attente
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Un email de confirmation a été envoyé à <strong>{pendingChange.new_email}</strong>. Vérifiez votre boîte de
+            Un email de confirmation a été envoyé à <strong>{pendingChange.newEmail}</strong>. Vérifiez votre boîte de
             réception et cliquez sur le lien de confirmation avant <strong>{expiresAt}</strong>.
           </Typography>
         </Alert>
