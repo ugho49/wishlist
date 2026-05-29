@@ -43,3 +43,112 @@ extend type Query {
   wishlist(id: WishlistId!): GetWishlistByIdResult
   wishlists(filters: PaginationFilters!): GetMyWishlistsResult!
 }
+
+########################################################
+###############   Mutation Inputs   ####################
+########################################################
+
+input UpdateWishlistInput {
+  title: String!
+  description: String
+}
+
+input AddWishlistCoOwnerInput {
+  userId: UserId!
+}
+
+########################################################
+###############   Mutation Result Unions   #############
+########################################################
+
+union UpdateWishlistResult =
+  | VoidOutput
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | NotFoundRejection
+  | InternalErrorRejection
+
+union DeleteWishlistResult =
+  | VoidOutput
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | NotFoundRejection
+  | InternalErrorRejection
+
+union LinkWishlistToEventResult =
+  | VoidOutput
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | NotFoundRejection
+  | InternalErrorRejection
+
+union UnlinkWishlistFromEventResult =
+  | VoidOutput
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | NotFoundRejection
+  | InternalErrorRejection
+
+union AddWishlistCoOwnerResult =
+  | VoidOutput
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | NotFoundRejection
+  | InternalErrorRejection
+
+union RemoveWishlistCoOwnerResult =
+  | VoidOutput
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | NotFoundRejection
+  | InternalErrorRejection
+
+union RemoveWishlistLogoResult =
+  | VoidOutput
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | NotFoundRejection
+  | InternalErrorRejection
+
+extend type Mutation {
+  updateWishlist(id: WishlistId!, input: UpdateWishlistInput!): UpdateWishlistResult!
+  deleteWishlist(id: WishlistId!): DeleteWishlistResult!
+  linkWishlistToEvent(id: WishlistId!, eventId: EventId!): LinkWishlistToEventResult!
+  unlinkWishlistFromEvent(id: WishlistId!, eventId: EventId!): UnlinkWishlistFromEventResult!
+  addWishlistCoOwner(id: WishlistId!, input: AddWishlistCoOwnerInput!): AddWishlistCoOwnerResult!
+  removeWishlistCoOwner(id: WishlistId!): RemoveWishlistCoOwnerResult!
+  removeWishlistLogo(id: WishlistId!): RemoveWishlistLogoResult!
+}
+
+########################################################
+###############   Admin   ##############################
+########################################################
+
+type AdminGetWishlists {
+  data: [Wishlist!]!
+  pagination: Pagination!
+}
+
+input AdminWishlistPaginationFilters {
+  page: Int
+  limit: Int
+  userId: UserId!
+}
+
+union AdminGetWishlistsResult =
+  | AdminGetWishlists
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+
+extend type Query {
+  adminWishlists(filters: AdminWishlistPaginationFilters!): AdminGetWishlistsResult!
+}

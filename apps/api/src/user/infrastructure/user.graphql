@@ -36,6 +36,28 @@ type UserEmailSettings {
 
 union GetCurrentUserResult = User | UnauthorizedRejection | ForbiddenRejection | InternalErrorRejection
 
+type SearchUsersOutput {
+  users: [User!]!
+}
+
+type ClosestFriendsOutput {
+  users: [User!]!
+}
+
+union SearchUsersResult =
+  | SearchUsersOutput
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+
+union ClosestFriendsResult =
+  | ClosestFriendsOutput
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+
 union GetPendingEmailChangeResult =
   | PendingEmailChange
   | UnauthorizedRejection
@@ -179,6 +201,8 @@ union ResetPasswordResult =
 extend type Query {
   currentUser: GetCurrentUserResult!
   pendingEmailChange: GetPendingEmailChangeResult
+  searchUsers(keyword: String!): SearchUsersResult!
+  closestFriends(limit: Int): ClosestFriendsResult!
 }
 
 extend type Mutation {

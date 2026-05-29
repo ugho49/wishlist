@@ -558,4 +558,117 @@ describe('UserResolver (GraphQL)', () => {
       expect(Array.isArray(user.socials)).toBe(true)
     })
   })
+
+  describe('Query searchUsers', () => {
+    const query = /* GraphQL */ `
+      query SearchUsers($keyword: String!) {
+        searchUsers(keyword: $keyword) {
+          __typename
+          ... on SearchUsersOutput {
+            users {
+              id
+              firstName
+              lastName
+              email
+            }
+          }
+          ... on ValidationRejection {
+            errors {
+              field
+              message
+            }
+          }
+          ... on UnauthorizedRejection {
+            message
+          }
+        }
+      }
+    `
+
+    it('should not succeed when not authenticated', async () => {
+      const anon = await getRequest()
+      const res = await anon
+        .post('/graphql')
+        .send({ query, variables: { keyword: 'someone' } })
+        .expect(200)
+
+      expect(res.body.data?.searchUsers?.__typename).not.toBe('SearchUsersOutput')
+    })
+
+    it('should return matching users excluding the current user', async () => {
+      const targetId = await fixtures.insertUser({
+        email: 'zorglub@test.fr',
+        firstname: 'Zorglub',
+        lastname: 'Searchable',
+      })
+
+      const res = await request
+        .post('/graphql')
+        .send({ query, variables: { keyword: 'Zorglub' } })
+        .expect(200)
+
+      expect(res.body.data.searchUsers.__typename).toBe('SearchUsersOutput')
+      const ids = res.body.data.searchUsers.users.map((u: { id: string }) => u.id)
+      expect(ids).toContain(targetId)
+      expect(ids).not.toContain(currentUserId)
+    })
+
+    it.each([
+      { keyword: '', case: 'empty keyword' },
+      { keyword: 'a', case: 'keyword too short' },
+    ])('should return ValidationRejection when invalid input: $case', async ({ keyword }) => {
+      const res = await request.post('/graphql').send({ query, variables: { keyword } }).expect(200)
+
+      expect(res.body.data.searchUsers.__typename).toBe('ValidationRejection')
+    })
+  })
+
+  describe('Query closestFriends', () => {
+    const query = /* GraphQL */ `
+      query ClosestFriends($limit: Int) {
+        closestFriends(limit: $limit) {
+          __typename
+          ... on ClosestFriendsOutput {
+            users {
+              id
+              firstName
+              lastName
+            }
+          }
+          ... on ValidationRejection {
+            errors {
+              field
+              message
+            }
+          }
+          ... on UnauthorizedRejection {
+            message
+          }
+        }
+      }
+    `
+
+    it('should not succeed when not authenticated', async () => {
+      const anon = await getRequest()
+      const res = await anon.post('/graphql').send({ query, variables: {} }).expect(200)
+
+      expect(res.body.data?.closestFriends?.__typename).not.toBe('ClosestFriendsOutput')
+    })
+
+    it('should return a ClosestFriendsOutput for an authenticated user', async () => {
+      const res = await request.post('/graphql').send({ query, variables: {} }).expect(200)
+
+      expect(res.body.data.closestFriends.__typename).toBe('ClosestFriendsOutput')
+      expect(Array.isArray(res.body.data.closestFriends.users)).toBe(true)
+    })
+
+    it('should return ValidationRejection when limit exceeds the maximum', async () => {
+      const res = await request
+        .post('/graphql')
+        .send({ query, variables: { limit: 51 } })
+        .expect(200)
+
+      expect(res.body.data.closestFriends.__typename).toBe('ValidationRejection')
+    })
+  })
 })

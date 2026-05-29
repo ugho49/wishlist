@@ -28,6 +28,13 @@ export type Scalars = {
   WishlistId: { input: Ids["WishlistId"]; output: Ids["WishlistId"]; }
 };
 
+export type AddEventAttendeeInput = {
+  email: Scalars['String']['input'];
+  role?: InputMaybe<AttendeeRole>;
+};
+
+export type AddEventAttendeeResult = EventAttendee | ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection;
+
 export type AddSecretSantaUsersInput = {
   attendeeIds: Array<Scalars['AttendeeId']['input']>;
 };
@@ -39,7 +46,23 @@ export type AddSecretSantaUsersOutput = {
 
 export type AddSecretSantaUsersResult = AddSecretSantaUsersOutput | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection;
 
+export type AddWishlistCoOwnerInput = {
+  userId: Scalars['UserId']['input'];
+};
+
+export type AddWishlistCoOwnerResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+
+export type AdminDeleteEventAttendeeResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+
+export type AdminDeleteEventResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+
 export type AdminDeleteUserResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+
+export type AdminEventPaginationFilters = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  page?: InputMaybe<Scalars['Int']['input']>;
+  userId?: InputMaybe<Scalars['UserId']['input']>;
+};
 
 export type AdminGetAllUsers = {
   __typename: 'AdminGetAllUsers';
@@ -55,9 +78,23 @@ export type AdminGetAllUsersPaginationFilters = {
 
 export type AdminGetAllUsersResult = AdminGetAllUsers | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection;
 
+export type AdminGetEventByIdResult = Event | ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection;
+
+export type AdminGetEventsResult = ForbiddenRejection | GetEventsPagedResponse | InternalErrorRejection | UnauthorizedRejection | ValidationRejection;
+
 export type AdminGetUserByIdResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | UserFull | ValidationRejection;
 
+export type AdminGetWishlists = {
+  __typename: 'AdminGetWishlists';
+  data: Array<Wishlist>;
+  pagination: Pagination;
+};
+
+export type AdminGetWishlistsResult = AdminGetWishlists | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection;
+
 export type AdminRemoveUserPictureResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+
+export type AdminUpdateEventResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
 export type AdminUpdateUserProfileInput = {
   birthday?: InputMaybe<Scalars['String']['input']>;
@@ -69,6 +106,12 @@ export type AdminUpdateUserProfileInput = {
 };
 
 export type AdminUpdateUserProfileResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+
+export type AdminWishlistPaginationFilters = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  page?: InputMaybe<Scalars['Int']['input']>;
+  userId: Scalars['UserId']['input'];
+};
 
 export enum AttendeeRole {
   Maintainer = 'MAINTAINER',
@@ -84,12 +127,34 @@ export type ChangeUserPasswordInput = {
 
 export type ChangeUserPasswordResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
+export type ClosestFriendsOutput = {
+  __typename: 'ClosestFriendsOutput';
+  users: Array<User>;
+};
+
+export type ClosestFriendsResult = ClosestFriendsOutput | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection;
+
 export type ConfirmEmailChangeInput = {
   newEmail: Scalars['String']['input'];
   token: Scalars['String']['input'];
 };
 
 export type ConfirmEmailChangeResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+
+export type CreateEventAttendeeInput = {
+  email: Scalars['String']['input'];
+  role?: InputMaybe<AttendeeRole>;
+};
+
+export type CreateEventInput = {
+  attendees?: InputMaybe<Array<CreateEventAttendeeInput>>;
+  description?: InputMaybe<Scalars['String']['input']>;
+  eventDate: Scalars['String']['input'];
+  icon?: InputMaybe<Scalars['String']['input']>;
+  title: Scalars['String']['input'];
+};
+
+export type CreateEventResult = Event | ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection;
 
 export type CreateItemInput = {
   description?: InputMaybe<Scalars['String']['input']>;
@@ -110,11 +175,15 @@ export type CreateSecretSantaInput = {
 
 export type CreateSecretSantaResult = ForbiddenRejection | InternalErrorRejection | SecretSanta | UnauthorizedRejection | ValidationRejection;
 
+export type DeleteEventResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+
 export type DeleteItemResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
 export type DeleteSecretSantaResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | VoidOutput;
 
 export type DeleteSecretSantaUserResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | VoidOutput;
+
+export type DeleteWishlistResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
 export type Event = {
   __typename: 'Event';
@@ -239,6 +308,8 @@ export type LinkUserToGoogleInput = {
 
 export type LinkUserToGoogleResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | UserSocial | ValidationRejection;
 
+export type LinkWishlistToEventResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+
 export type LoginInput = {
   email: Scalars['String']['input'];
   password: Scalars['String']['input'];
@@ -267,24 +338,36 @@ export type LoginWithGoogleResult = InternalErrorRejection | LoginWithGoogleOutp
 
 export type Mutation = {
   __typename: 'Mutation';
+  addEventAttendee: AddEventAttendeeResult;
   addSecretSantaUsers: AddSecretSantaUsersResult;
+  addWishlistCoOwner: AddWishlistCoOwnerResult;
+  adminDeleteEvent: AdminDeleteEventResult;
+  adminDeleteEventAttendee: AdminDeleteEventAttendeeResult;
   adminDeleteUser: AdminDeleteUserResult;
   adminRemoveUserPicture: AdminRemoveUserPictureResult;
+  adminUpdateEvent: AdminUpdateEventResult;
   adminUpdateUserProfile: AdminUpdateUserProfileResult;
   cancelSecretSanta: CancelSecretSantaResult;
   changeUserPassword: ChangeUserPasswordResult;
   confirmEmailChange: ConfirmEmailChangeResult;
+  createEvent: CreateEventResult;
   createItem: CreateItemResult;
   createSecretSanta: CreateSecretSantaResult;
+  deleteEvent: DeleteEventResult;
   deleteItem: DeleteItemResult;
   deleteSecretSanta: DeleteSecretSantaResult;
   deleteSecretSantaUser: DeleteSecretSantaUserResult;
+  deleteWishlist: DeleteWishlistResult;
   importItems: ImportItemsResult;
   linkCurrentUserWithGoogle: LinkUserToGoogleResult;
+  linkWishlistToEvent: LinkWishlistToEventResult;
   login: LoginResult;
   loginWithGoogle: LoginWithGoogleResult;
   registerUser: RegisterUserResult;
+  removeEventAttendee: RemoveEventAttendeeResult;
   removeUserPicture: RemoveUserPictureResult;
+  removeWishlistCoOwner: RemoveWishlistCoOwnerResult;
+  removeWishlistLogo: RemoveWishlistLogoResult;
   requestEmailChange: RequestEmailChangeResult;
   resetPassword: ResetPasswordResult;
   scanItemUrl: ScanItemUrlResult;
@@ -292,18 +375,44 @@ export type Mutation = {
   startSecretSanta: StartSecretSantaResult;
   toggleItem: ToggleItemResult;
   unlinkCurrentUserSocial: UnlinkCurrentUserSocialResult;
+  unlinkWishlistFromEvent: UnlinkWishlistFromEventResult;
+  updateEvent: UpdateEventResult;
   updateItem: UpdateItemResult;
   updateSecretSanta: UpdateSecretSantaResult;
   updateSecretSantaUser: UpdateSecretSantaUserResult;
   updateUserEmailSettings: UpdateUserEmailSettingsResult;
   updateUserPictureFromSocial: UpdateUserPictureFromSocialResult;
   updateUserProfile: UpdateUserProfileResult;
+  updateWishlist: UpdateWishlistResult;
+};
+
+
+export type MutationAddEventAttendeeArgs = {
+  eventId: Scalars['EventId']['input'];
+  input: AddEventAttendeeInput;
 };
 
 
 export type MutationAddSecretSantaUsersArgs = {
   id: Scalars['SecretSantaId']['input'];
   input: AddSecretSantaUsersInput;
+};
+
+
+export type MutationAddWishlistCoOwnerArgs = {
+  id: Scalars['WishlistId']['input'];
+  input: AddWishlistCoOwnerInput;
+};
+
+
+export type MutationAdminDeleteEventArgs = {
+  id: Scalars['EventId']['input'];
+};
+
+
+export type MutationAdminDeleteEventAttendeeArgs = {
+  attendeeId: Scalars['AttendeeId']['input'];
+  eventId: Scalars['EventId']['input'];
 };
 
 
@@ -314,6 +423,12 @@ export type MutationAdminDeleteUserArgs = {
 
 export type MutationAdminRemoveUserPictureArgs = {
   userId: Scalars['UserId']['input'];
+};
+
+
+export type MutationAdminUpdateEventArgs = {
+  id: Scalars['EventId']['input'];
+  input: UpdateEventInput;
 };
 
 
@@ -338,6 +453,11 @@ export type MutationConfirmEmailChangeArgs = {
 };
 
 
+export type MutationCreateEventArgs = {
+  input: CreateEventInput;
+};
+
+
 export type MutationCreateItemArgs = {
   input: CreateItemInput;
 };
@@ -345,6 +465,11 @@ export type MutationCreateItemArgs = {
 
 export type MutationCreateSecretSantaArgs = {
   input: CreateSecretSantaInput;
+};
+
+
+export type MutationDeleteEventArgs = {
+  id: Scalars['EventId']['input'];
 };
 
 
@@ -364,6 +489,11 @@ export type MutationDeleteSecretSantaUserArgs = {
 };
 
 
+export type MutationDeleteWishlistArgs = {
+  id: Scalars['WishlistId']['input'];
+};
+
+
 export type MutationImportItemsArgs = {
   input: ImportItemsInput;
 };
@@ -371,6 +501,12 @@ export type MutationImportItemsArgs = {
 
 export type MutationLinkCurrentUserWithGoogleArgs = {
   input: LinkUserToGoogleInput;
+};
+
+
+export type MutationLinkWishlistToEventArgs = {
+  eventId: Scalars['EventId']['input'];
+  id: Scalars['WishlistId']['input'];
 };
 
 
@@ -386,6 +522,22 @@ export type MutationLoginWithGoogleArgs = {
 
 export type MutationRegisterUserArgs = {
   input: RegisterUserInput;
+};
+
+
+export type MutationRemoveEventAttendeeArgs = {
+  attendeeId: Scalars['AttendeeId']['input'];
+  eventId: Scalars['EventId']['input'];
+};
+
+
+export type MutationRemoveWishlistCoOwnerArgs = {
+  id: Scalars['WishlistId']['input'];
+};
+
+
+export type MutationRemoveWishlistLogoArgs = {
+  id: Scalars['WishlistId']['input'];
 };
 
 
@@ -424,6 +576,18 @@ export type MutationUnlinkCurrentUserSocialArgs = {
 };
 
 
+export type MutationUnlinkWishlistFromEventArgs = {
+  eventId: Scalars['EventId']['input'];
+  id: Scalars['WishlistId']['input'];
+};
+
+
+export type MutationUpdateEventArgs = {
+  id: Scalars['EventId']['input'];
+  input: UpdateEventInput;
+};
+
+
 export type MutationUpdateItemArgs = {
   input: UpdateItemInput;
   itemId: Scalars['ItemId']['input'];
@@ -457,6 +621,12 @@ export type MutationUpdateUserProfileArgs = {
   input: UpdateUserProfileInput;
 };
 
+
+export type MutationUpdateWishlistArgs = {
+  id: Scalars['WishlistId']['input'];
+  input: UpdateWishlistInput;
+};
+
 export type NotFoundRejection = {
   __typename: 'NotFoundRejection';
   message: Scalars['String']['output'];
@@ -483,6 +653,12 @@ export type PendingEmailChange = {
 
 export type Query = {
   __typename: 'Query';
+  adminEvent: AdminGetEventByIdResult;
+  adminEvents: AdminGetEventsResult;
+  adminUser: AdminGetUserByIdResult;
+  adminUsers: AdminGetAllUsersResult;
+  adminWishlists: AdminGetWishlistsResult;
+  closestFriends: ClosestFriendsResult;
   currentUser: GetCurrentUserResult;
   event?: Maybe<GetEventByIdResult>;
   events: GetMyEventsResult;
@@ -490,11 +666,40 @@ export type Query = {
   importableItems: GetImportableItemsResult;
   mySecretSantaDraw?: Maybe<GetMySecretSantaDrawResult>;
   pendingEmailChange?: Maybe<GetPendingEmailChangeResult>;
+  searchUsers: SearchUsersResult;
   secretSanta?: Maybe<GetSecretSantaForEventResult>;
-  user: AdminGetUserByIdResult;
-  users: AdminGetAllUsersResult;
   wishlist?: Maybe<GetWishlistByIdResult>;
   wishlists: GetMyWishlistsResult;
+};
+
+
+export type QueryAdminEventArgs = {
+  id: Scalars['EventId']['input'];
+};
+
+
+export type QueryAdminEventsArgs = {
+  filters: AdminEventPaginationFilters;
+};
+
+
+export type QueryAdminUserArgs = {
+  userId: Scalars['UserId']['input'];
+};
+
+
+export type QueryAdminUsersArgs = {
+  input?: InputMaybe<AdminGetAllUsersPaginationFilters>;
+};
+
+
+export type QueryAdminWishlistsArgs = {
+  filters: AdminWishlistPaginationFilters;
+};
+
+
+export type QueryClosestFriendsArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -518,18 +723,13 @@ export type QueryMySecretSantaDrawArgs = {
 };
 
 
+export type QuerySearchUsersArgs = {
+  keyword: Scalars['String']['input'];
+};
+
+
 export type QuerySecretSantaArgs = {
   eventId: Scalars['EventId']['input'];
-};
-
-
-export type QueryUserArgs = {
-  userId: Scalars['UserId']['input'];
-};
-
-
-export type QueryUsersArgs = {
-  input?: InputMaybe<AdminGetAllUsersPaginationFilters>;
 };
 
 
@@ -552,7 +752,13 @@ export type RegisterUserInput = {
 
 export type RegisterUserResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | User | ValidationRejection;
 
+export type RemoveEventAttendeeResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+
 export type RemoveUserPictureResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+
+export type RemoveWishlistCoOwnerResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+
+export type RemoveWishlistLogoResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
 export type RequestEmailChangeInput = {
   newEmail: Scalars['String']['input'];
@@ -578,6 +784,13 @@ export type ScanItemUrlOutput = {
 };
 
 export type ScanItemUrlResult = ForbiddenRejection | InternalErrorRejection | ScanItemUrlOutput | UnauthorizedRejection | ValidationRejection;
+
+export type SearchUsersOutput = {
+  __typename: 'SearchUsersOutput';
+  users: Array<User>;
+};
+
+export type SearchUsersResult = ForbiddenRejection | InternalErrorRejection | SearchUsersOutput | UnauthorizedRejection | ValidationRejection;
 
 export type SecretSanta = {
   __typename: 'SecretSanta';
@@ -626,6 +839,17 @@ export type UnauthorizedRejection = {
 
 export type UnlinkCurrentUserSocialResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
+export type UnlinkWishlistFromEventResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+
+export type UpdateEventInput = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  eventDate: Scalars['String']['input'];
+  icon?: InputMaybe<Scalars['String']['input']>;
+  title: Scalars['String']['input'];
+};
+
+export type UpdateEventResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+
 export type UpdateItemInput = {
   description?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
@@ -668,6 +892,13 @@ export type UpdateUserProfileInput = {
 };
 
 export type UpdateUserProfileResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | User | ValidationRejection;
+
+export type UpdateWishlistInput = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  title: Scalars['String']['input'];
+};
+
+export type UpdateWishlistResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
 export type User = {
   __typename: 'User';
