@@ -21,3 +21,66 @@ mutation DeleteWishlist($id: WishlistId!) {
     }
   }
 }
+
+mutation LinkWishlistToEvent($id: WishlistId!, $eventId: EventId!) {
+  linkWishlistToEvent(id: $id, eventId: $eventId) {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+    ... on ValidationRejection {
+      errors {
+        field
+        message
+      }
+    }
+  }
+}
+
+mutation UnlinkWishlistFromEvent($id: WishlistId!, $eventId: EventId!) {
+  unlinkWishlistFromEvent(id: $id, eventId: $eventId) {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+    ... on ValidationRejection {
+      errors {
+        field
+        message
+      }
+    }
+  }
+}
+
+mutation AddWishlistCoOwner($id: WishlistId!, $input: AddWishlistCoOwnerInput!) {
+  addWishlistCoOwner(id: $id, input: $input) {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+    ... on ValidationRejection {
+      errors {
+        field
+        message
+      }
+    }
+  }
+}
+
+mutation RemoveWishlistCoOwner($id: WishlistId!) {
+  removeWishlistCoOwner(id: $id) {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+  }
+}
+
+mutation RemoveWishlistLogo($id: WishlistId!) {
+  removeWishlistLogo(id: $id) {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+  }
+}

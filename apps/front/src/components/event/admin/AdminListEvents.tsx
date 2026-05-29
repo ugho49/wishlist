@@ -1,15 +1,16 @@
 import type { GridColDef } from '@mui/x-data-grid'
-import type { EventWithCountsDto, UserId } from '@wishlist/common'
+import type { UserId } from '@wishlist/common'
+import type { AdminEventListItem } from './admin.types'
 
 import { DataGrid } from '@mui/x-data-grid'
 import { useNavigate } from '@tanstack/react-router'
-import { AttendeeRole } from '@wishlist/common'
-import { useAdminEvents } from '@wishlist/front-hooks'
 import { DateTime } from 'luxon'
 
+import { AttendeeRole, useAdminEventListEventsQuery } from '../../../gql'
+import { unwrapResult } from '../../../gql/result'
 import { EventIcon } from '../EventIcon'
 
-const columns: GridColDef<EventWithCountsDto>[] = [
+const columns: GridColDef<AdminEventListItem>[] = [
   {
     field: 'icon',
     headerName: '',
@@ -17,15 +18,15 @@ const columns: GridColDef<EventWithCountsDto>[] = [
     sortable: false,
     filterable: false,
     display: 'flex',
-    renderCell: ({ row }) => <EventIcon icon={row.icon} size="small" />,
+    renderCell: ({ row }) => <EventIcon icon={row.icon ?? undefined} size="small" />,
   },
   { field: 'title', headerName: 'Title', minWidth: 250, flex: 1 },
   {
-    field: 'event_date',
+    field: 'eventDate',
     headerName: 'Event Date',
     type: 'dateTime',
     width: 100,
-    valueGetter: (_, row) => new Date(row.event_date),
+    valueGetter: (_, row) => new Date(row.eventDate),
     renderCell: ({ value }) => DateTime.fromJSDate(value).toLocaleString(DateTime.DATE_SHORT),
   },
   {
@@ -33,16 +34,17 @@ const columns: GridColDef<EventWithCountsDto>[] = [
     headerName: 'Maintainer',
     width: 170,
     valueGetter: (_, row) => {
-      const maintainer = row.attendees.find(attendee => attendee.role === AttendeeRole.MAINTAINER)?.user
+      const maintainer = row.attendees.find(attendee => attendee.role === AttendeeRole.Maintainer)?.user
       if (!maintainer) return 'Unknown'
-      return `${maintainer.firstname} ${maintainer.lastname}`
+      return `${maintainer.firstName} ${maintainer.lastName}`
     },
   },
   {
-    field: 'nb_wishlists',
+    field: 'nbWishlists',
     headerName: '# Lists',
     type: 'number',
     width: 100,
+    valueGetter: (_, row) => row.wishlistIds.length,
   },
   {
     field: 'attendees',
@@ -52,11 +54,11 @@ const columns: GridColDef<EventWithCountsDto>[] = [
     valueGetter: (_, row) => row.attendees.length,
   },
   {
-    field: 'created_at',
+    field: 'createdAt',
     headerName: 'Created At',
     type: 'dateTime',
     width: 200,
-    valueGetter: (_, row) => new Date(row.created_at),
+    valueGetter: (_, row) => new Date(row.createdAt),
     renderCell: ({ value }) => DateTime.fromJSDate(value).toLocaleString(DateTime.DATETIME_MED),
   },
 ]
@@ -69,7 +71,14 @@ type AdminListEventsProps = {
 
 export const AdminListEvents = ({ userId, currentPage, changeCurrentPage }: AdminListEventsProps) => {
   const navigate = useNavigate()
-  const { events, totalElements, pageSize, loading } = useAdminEvents({ userId, page: currentPage })
+  const { data, isLoading: loading } = useAdminEventListEventsQuery(
+    { filters: { page: currentPage, userId } },
+    { select: d => unwrapResult(d.adminEvents, 'GetEventsPagedResponse') },
+  )
+
+  const events = data?.data ?? []
+  const totalElements = data?.pagination.totalElements ?? 0
+  const pageSize = data?.pagination.pageSize ?? 0
 
   return (
     <DataGrid

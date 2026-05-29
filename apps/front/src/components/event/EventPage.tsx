@@ -2,11 +2,12 @@ import type { EventId } from '@wishlist/common'
 import type { RootState } from '../../core'
 
 import { Box, Container, Stack } from '@mui/material'
-import { canEditEvent } from '@wishlist/common'
 import { useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
 
-import { useEventById, useSecretSantaSuggestion } from '../../hooks'
+import { AttendeeRole, useEventPageGetEventQuery } from '../../gql'
+import { unwrapResultOrNotFound } from '../../gql/result'
+import { useSecretSantaSuggestion } from '../../hooks'
 import { Description } from '../common/Description'
 import { Loader } from '../common/Loader'
 import { SEO } from '../SEO'
@@ -26,14 +27,20 @@ interface EventPageProps {
 export const EventPage = ({ eventId }: EventPageProps) => {
   const currentUserId = useSelector(mapState)
   const [openAttendeesDialog, setOpenAttendeesDialog] = useState(false)
-  const { event, loading } = useEventById(eventId)
+  const { data: event, isLoading: loading } = useEventPageGetEventQuery(
+    { eventId },
+    { select: d => unwrapResultOrNotFound(d.event, 'Event') },
+  )
 
-  const attendees = useMemo(() => event?.attendees || [], [event])
-  const currentUserCanEdit = useMemo(() => canEditEvent(attendees, currentUserId ?? ''), [attendees, currentUserId])
+  const attendees = useMemo(() => event?.attendees ?? [], [event])
+  const currentUserCanEdit = useMemo(
+    () => attendees.some(a => a.user?.id === currentUserId && a.role === AttendeeRole.Maintainer),
+    [attendees, currentUserId],
+  )
   const { shouldShowSuggestion, dismissSuggestion } = useSecretSantaSuggestion({
     eventId: eventId,
     eventTitle: event?.title,
-    eventDate: event?.event_date,
+    eventDate: event?.eventDate,
     currentUserCanEdit,
   })
 
@@ -50,10 +57,10 @@ export const EventPage = ({ eventId }: EventPageProps) => {
           {event && (
             <>
               <EventHeader
-                icon={event.icon}
+                icon={event.icon ?? undefined}
                 title={event.title}
                 eventId={event.id}
-                eventDate={event.event_date}
+                eventDate={event.eventDate}
                 attendees={attendees}
                 currentUserCanEdit={currentUserCanEdit}
                 openAttendeesDialog={() => setOpenAttendeesDialog(true)}
@@ -69,7 +76,7 @@ export const EventPage = ({ eventId }: EventPageProps) => {
 
                   {event.description && <Description text={event.description} allowMarkdown />}
 
-                  <EventWishlists event={event} />
+                  <EventWishlists eventId={event.id} wishlists={event.wishlists} />
                 </Stack>
               </Container>
 

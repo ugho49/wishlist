@@ -1,5 +1,6 @@
-import type { MiniEventDto } from '@wishlist/common'
+import type { WishlistId } from '@wishlist/common'
 import type { RootState } from '../../core'
+import type { SelectableEvent } from '../event/SearchEventSelect'
 
 import AccountCircleTwoToneIcon from '@mui/icons-material/AccountCircleTwoTone'
 import DeleteIcon from '@mui/icons-material/Delete'
@@ -37,7 +38,10 @@ import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useInterval } from 'usehooks-ts'
 
-import { useApi, useAvailableEvents, useEventById, useToast } from '../../hooks'
+import { createWishlistMultipart } from '../../api/upload'
+import { useEventSelectAvailableEventsQuery } from '../../gql'
+import { unwrapResult } from '../../gql/result'
+import { useToast } from '../../hooks'
 import { getRandomPlaceholderName } from '../../utils/wishlist.utils'
 import { Card } from '../common/Card'
 import { InputLabel } from '../common/InputLabel'
@@ -122,18 +126,20 @@ export const CreateWishlistPage = () => {
   const [description, setDescription] = useState('')
   const [isListForSomeoneElse, setIsListForSomeoneElse] = useState(false)
   const [hideItems, setHideItems] = useState(true)
-  const [events, setEvents] = useState<MiniEventDto[]>([])
+  const [events, setEvents] = useState<SelectableEvent[]>([])
   const [namePlaceholder, setNamePlaceholder] = useState<string>(getRandomPlaceholderName())
   const [logo, setLogo] = useState<File | undefined>()
-  const api = useApi()
 
   useInterval(() => {
     setNamePlaceholder(getRandomPlaceholderName())
   }, 2000)
 
-  const { events: availableEvents, loading: availableEventsLoading } = useAvailableEvents()
+  const { data: availableEvents = [], isLoading: availableEventsLoading } = useEventSelectAvailableEventsQuery(
+    { filters: { limit: 100, onlyFuture: true } },
+    { select: d => unwrapResult(d.events, 'GetEventsPagedResponse').data },
+  )
   const { fromEvent } = useSearch({ from: '/_authenticated/_with-layout/wishlists/new' })
-  const { event: eventFromUrl } = useEventById(fromEvent)
+  const eventFromUrl = fromEvent ? availableEvents.find(e => e.id === fromEvent) : undefined
 
   const nextStepEnabled = ownerName?.trim() !== ''
   const createEnabled = events.length > 0
@@ -148,9 +154,8 @@ export const CreateWishlistPage = () => {
   }, [eventFromUrl])
 
   const { mutateAsync: createWishlist, isPending: loading } = useMutation({
-    mutationKey: ['wishlist.create'],
     mutationFn: () =>
-      api.wishlist.create(
+      createWishlistMultipart<{ id: WishlistId }>(
         {
           title: `Liste de ${ownerName}`,
           description: description === '' ? undefined : description,
@@ -331,11 +336,11 @@ export const CreateWishlistPage = () => {
                         >
                           <ListItemButton>
                             <ListItemAvatar>
-                              <EventIcon icon={event.icon} />
+                              <EventIcon icon={event.icon ?? undefined} />
                             </ListItemAvatar>
                             <ListItemText
                               primary={<b>{event.title}</b>}
-                              secondary={DateTime.fromISO(event.event_date).toLocaleString(DateTime.DATE_MED)}
+                              secondary={DateTime.fromISO(event.eventDate).toLocaleString(DateTime.DATE_MED)}
                             />
                           </ListItemButton>
                         </ListItem>

@@ -10,7 +10,7 @@ import { useSelector } from 'react-redux'
 import { MaintenancePage } from '../components/common/MaintenancePage'
 import { ScrollToTop } from '../components/common/ScrollToTop'
 import { SEO } from '../components/SEO'
-import { AxiosInterceptor } from '../core/router/AxiosInterceptor'
+import { SessionWatcher } from '../core/router/SessionWatcher'
 import { environment } from '../environment'
 import { useFeatureFlag } from '../hooks/useFeatureFlag'
 
@@ -43,7 +43,7 @@ export const Route = createRootRoute({
       <>
         <SEO indexByRobots={false} />
         <ScrollToTop />
-        <AxiosInterceptor />
+        <SessionWatcher />
         <GoogleOAuthProvider clientId={environment.googleClientId}>
           <Outlet />
         </GoogleOAuthProvider>

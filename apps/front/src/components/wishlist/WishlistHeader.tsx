@@ -1,5 +1,5 @@
-import type { DetailedWishlistDto } from '@wishlist/common'
 import type { FilterType, SortType } from './WishlistFilterAndSortItems'
+import type { DetailedWishlist } from './wishlist.types'
 
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import EditIcon from '@mui/icons-material/Edit'
@@ -129,7 +129,7 @@ const CompactIconButton = styled(IconButton)(({ theme }) => ({
 }))
 
 export type WishlistHeaderProps = {
-  wishlist: DetailedWishlistDto
+  wishlist: DetailedWishlist
   currentUserCanEdit: boolean
   isPublic: boolean
   hasImportableItems: boolean
@@ -197,7 +197,7 @@ export const WishlistHeader = ({
         {/* Left section - Avatar, Title and Metadata */}
         <LeftSection>
           <WishlistAvatar
-            src={getAvatarUrl({ wishlist, ownerPictureUrl: wishlist.owner.picture_url })}
+            src={getAvatarUrl({ wishlist, ownerPictureUrl: wishlist.owner.pictureUrl })}
             sx={{ width: 75, height: 75 }}
             iconSize="medium"
           />
@@ -221,11 +221,11 @@ export const WishlistHeader = ({
                   <PublicIndicatorBox>
                     <PublicIcon fontSize="small" />
                     <Typography variant="body2" fontWeight={500}>
-                      Liste publique créée par {wishlist.owner.firstname} {wishlist.owner.lastname}
-                      {wishlist.co_owner && (
+                      Liste publique créée par {wishlist.owner.firstName} {wishlist.owner.lastName}
+                      {wishlist.coOwner && (
                         <>
                           {' '}
-                          et co-gérée par {wishlist.co_owner.firstname} {wishlist.co_owner.lastname}
+                          et co-gérée par {wishlist.coOwner.firstName} {wishlist.coOwner.lastName}
                         </>
                       )}
                     </Typography>

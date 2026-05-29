@@ -1,14 +1,9 @@
 import type { TransitionProps } from '@mui/material/transitions'
-import type {
-  AddItemForListInputDto,
-  DetailedWishlistDto,
-  ItemDto,
-  ItemId,
-  UpdateItemInputDto,
-  WishlistId,
-} from '@wishlist/common'
+import type { WishlistId } from '@wishlist/common'
 import type React from 'react'
 import type { FormEvent } from 'react'
+import type * as Types from '../../gql/__generated__/types'
+import type { WishlistItem } from '../wishlist/wishlist.types'
 
 import CameraAltIcon from '@mui/icons-material/CameraAlt'
 import CloseIcon from '@mui/icons-material/Close'
@@ -29,11 +24,13 @@ import {
   Typography,
   useMediaQuery,
 } from '@mui/material'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useApi, useToast } from '@wishlist/front-hooks'
+import { useQueryClient } from '@tanstack/react-query'
+import { useToast } from '@wishlist/front-hooks'
 import { forwardRef, useCallback, useEffect, useMemo, useState } from 'react'
 import { TidyURL } from 'tidy-url'
 
+import { useCreateItemMutation, useScanItemUrlMutation, useUpdateItemMutation } from '../../gql'
+import { unwrapResult } from '../../gql/result'
 import { isValidUrl } from '../../utils/router.utils'
 import { CharsRemaining } from '../common/CharsRemaining'
 import { InputLabel } from '../common/InputLabel'
@@ -55,7 +52,7 @@ const Transition = forwardRef(function Transition(
 type ModeProps<T> = T extends 'create'
   ? { mode: 'create'; item?: never }
   : T extends 'edit'
-    ? { mode: 'edit'; item: ItemDto }
+    ? { mode: 'edit'; item: WishlistItem }
     : never
 
 export type ItemFormDialogProps = (ModeProps<'create'> | ModeProps<'edit'>) & {
@@ -67,7 +64,6 @@ export type ItemFormDialogProps = (ModeProps<'create'> | ModeProps<'edit'>) & {
 
 export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistId }: ItemFormDialogProps) => {
   const { addToast } = useToast()
-  const api = useApi()
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [url, setUrl] = useState('')
@@ -91,31 +87,24 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
     setScore(null)
   }
 
-  const { mutateAsync: createItem, isPending: createItemPending } = useMutation({
-    mutationKey: ['item.create'],
-    mutationFn: (data: AddItemForListInputDto) => api.item.create(data),
+  const invalidateWishlist = () => queryClient.invalidateQueries({ queryKey: ['WishlistPage', { wishlistId }] })
+
+  const { mutateAsync: createItem, isPending: createItemPending } = useCreateItemMutation({
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-    onSuccess: newItem => {
+    onSuccess: res => {
+      unwrapResult(res.createItem, 'Item')
       addToast({ message: 'Souhait créé avec succès', variant: 'success' })
-      queryClient.setQueryData(['wishlist', { id: wishlistId }], (old: DetailedWishlistDto) => ({
-        ...old,
-        items: [...old.items, newItem],
-      }))
+      void invalidateWishlist()
       resetForm()
     },
   })
 
-  const { mutateAsync: updateItem, isPending: updateItemPending } = useMutation({
-    mutationKey: ['item.update', { id: item?.id }],
-    mutationFn: (props: { itemId: ItemId; data: UpdateItemInputDto }) => api.item.update(props.itemId, props.data),
+  const { mutateAsync: updateItem, isPending: updateItemPending } = useUpdateItemMutation({
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-    onSuccess: (_output, props) => {
-      const { itemId, data } = props
+    onSuccess: res => {
+      unwrapResult(res.updateItem, 'VoidOutput')
       addToast({ message: 'Le souhait à bien été modifié', variant: 'success' })
-      queryClient.setQueryData(['wishlist', { id: wishlistId }], (old: DetailedWishlistDto) => ({
-        ...old,
-        items: old.items.map(item => (item.id === itemId ? { ...item, ...data } : item)),
-      }))
+      void invalidateWishlist()
     },
   })
 
@@ -124,23 +113,20 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault()
 
-    const base: UpdateItemInputDto = {
+    const base: Types.UpdateItemInput = {
       name,
       description: description === '' ? undefined : description,
       url: url === '' ? undefined : TidyURL.clean(url).url,
-      picture_url: pictureUrl === '' ? undefined : pictureUrl,
+      pictureUrl: pictureUrl === '' ? undefined : pictureUrl,
       score: score === null ? undefined : score,
     }
 
     if (mode === 'create') {
-      await createItem({
-        wishlist_id: wishlistId,
-        ...base,
-      })
+      await createItem({ input: { wishlistId, ...base } })
     }
 
     if (mode === 'edit') {
-      await updateItem({ itemId: item.id, data: base })
+      await updateItem({ itemId: item.id, input: base })
     }
 
     handleClose()
@@ -152,9 +138,11 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
     setName(item.name)
     setDescription(item.description || '')
     setUrl(item.url || '')
-    setPictureUrl(item.picture_url || '')
+    setPictureUrl(item.pictureUrl || '')
     setScore(item.score || null)
   }, [item])
+
+  const { mutateAsync: scanItemUrl } = useScanItemUrlMutation()
 
   const scanUrl = useCallback(
     async (urlToScan: string) => {
@@ -165,10 +153,11 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
       setScanUrlLoading(true)
 
       try {
-        const { picture_url } = await api.item.scanUrl({ url: urlToScan })
+        const res = await scanItemUrl({ input: { url: urlToScan } })
+        const { pictureUrl } = unwrapResult(res.scanItemUrl, 'ScanItemUrlOutput')
 
-        if (picture_url) {
-          setPictureUrl(picture_url)
+        if (pictureUrl) {
+          setPictureUrl(pictureUrl)
         } else {
           setPictureUrl('')
         }
@@ -178,7 +167,7 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
         setScanUrlLoading(false)
       }
     },
-    [scanUrlLoading],
+    [scanUrlLoading, scanItemUrl, addToast],
   )
 
   return (

@@ -1,0 +1,27 @@
+query AdminListWishlistsForUser($filters: AdminWishlistPaginationFilters!) {
+  adminWishlists(filters: $filters) {
+    __typename
+    ... on AdminGetWishlists {
+      data {
+        id
+        title
+        logoUrl
+        coOwnerId
+        config {
+          hideItems
+        }
+        createdAt
+        events {
+          id
+          title
+        }
+      }
+      pagination {
+        totalPages
+        totalElements
+        pageNumber
+        pageSize
+      }
+    }
+  }
+}

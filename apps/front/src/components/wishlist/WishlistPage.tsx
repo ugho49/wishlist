@@ -1,12 +1,14 @@
 import type { WishlistId } from '@wishlist/common'
+import type { RootState } from '../../core'
 
 import { Box, Container, Stack } from '@mui/material'
-import { useQuery } from '@tanstack/react-query'
 import { useNavigate, useSearch } from '@tanstack/react-router'
 import { FeatureFlags } from '@wishlist/common'
 import { useCallback, useMemo } from 'react'
+import { useSelector } from 'react-redux'
 
-import { useApi, useWishlistById } from '../../hooks'
+import { useImportableItemsQuery, useWishlistPageQuery } from '../../gql'
+import { unwrapResultOrNotFound } from '../../gql/result'
 import { useFeatureFlag } from '../../hooks/useFeatureFlag'
 import { Description } from '../common/Description'
 import { Loader } from '../common/Loader'
@@ -21,21 +23,34 @@ interface WishlistPageProps {
   wishlistId: WishlistId
 }
 
+const mapState = (state: RootState) => state.auth.user?.id
+
 export const WishlistPage = ({ wishlistId }: WishlistPageProps) => {
   const importItemsEnabled = useFeatureFlag(FeatureFlags.FRONTEND_WISHLIST_IMPORT_ITEMS_ENABLED)
   const { showEventDialog, showImportDialog, sort, filter } = useSearch({
     from: '/_authenticated/_with-layout/wishlists/$wishlistId/',
   })
   const navigate = useNavigate()
-  const api = useApi()
-  const { wishlist, loading, currentUserCanEdit } = useWishlistById(wishlistId)
-  const isPublic = useMemo(() => wishlist?.config.hide_items === false, [wishlist])
+  const currentUserId = useSelector(mapState)
 
-  const { data: importableItems = [] } = useQuery({
-    queryKey: ['item.importable', { wishlistId }],
-    queryFn: () => api.item.getImportableItems({ wishlist_id: wishlistId }),
-    enabled: currentUserCanEdit && !isPublic && importItemsEnabled,
-  })
+  const { data: wishlist, isLoading: loading } = useWishlistPageQuery(
+    { wishlistId },
+    { select: d => unwrapResultOrNotFound(d.wishlist, 'Wishlist') },
+  )
+
+  const currentUserCanEdit = useMemo(
+    () => !!wishlist && (wishlist.owner.id === currentUserId || wishlist.coOwner?.id === currentUserId),
+    [wishlist, currentUserId],
+  )
+  const isPublic = useMemo(() => wishlist?.config.hideItems === false, [wishlist])
+
+  const { data: importableItems = [] } = useImportableItemsQuery(
+    { wishlistId },
+    {
+      enabled: currentUserCanEdit && !isPublic && importItemsEnabled,
+      select: d => unwrapResultOrNotFound(d.importableItems, 'GetImportableItemsOutput')?.items ?? [],
+    },
+  )
 
   const setShowEventDialog = useCallback(
     (show: boolean) => {

@@ -9,7 +9,8 @@ import { useNavigate, useSearch } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 
-import { useWishlistById } from '../../hooks/domain/useWishlistById'
+import { useWishlistPageQuery } from '../../gql'
+import { unwrapResultOrNotFound } from '../../gql/result'
 import { Loader } from '../common/Loader'
 import { Title } from '../common/Title'
 import { SEO } from '../SEO'
@@ -52,11 +53,16 @@ interface EditWishlistPageProps {
 export const EditWishlistPage = ({ wishlistId }: EditWishlistPageProps) => {
   const [tabs, setTabs] = useState(BASE_TABS)
   const { tab } = useSearch({ from: '/_authenticated/_with-layout/wishlists/$wishlistId/edit' })
-  const { wishlist, loading, currentUserCanEdit } = useWishlistById(wishlistId)
+  const { data: wishlist, isLoading: loading } = useWishlistPageQuery(
+    { wishlistId },
+    { select: d => unwrapResultOrNotFound(d.wishlist, 'Wishlist') },
+  )
   const currentUserId = useSelector(mapState)
   const navigate = useNavigate({ from: '/wishlists/$wishlistId/edit' })
+  const currentUserCanEdit =
+    !!wishlist && (wishlist.owner.id === currentUserId || wishlist.coOwner?.id === currentUserId)
   const isOwner = wishlist?.owner.id === currentUserId
-  const isPublic = wishlist?.config.hide_items === false
+  const isPublic = wishlist?.config.hideItems === false
 
   useEffect(() => {
     if (isPublic && isOwner) {

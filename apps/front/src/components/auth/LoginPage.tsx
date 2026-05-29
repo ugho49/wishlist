@@ -1,18 +1,15 @@
-import type { LoginInputDto, LoginOutputDto } from '@wishlist/common'
-
 import { zodResolver } from '@hookform/resolvers/zod'
 import LoginIcon from '@mui/icons-material/Login'
 import { Alert, Button, Divider, Stack, styled, TextField, Typography } from '@mui/material'
-import { useMutation } from '@tanstack/react-query'
 import { useNavigate, useSearch } from '@tanstack/react-router'
-import { AxiosError } from 'axios'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useDispatch } from 'react-redux'
 import { z } from 'zod'
 
 import { setTokens } from '../../core/store/features'
-import { useApi } from '../../hooks/useApi'
+import { useAuthLoginMutation, useAuthLoginWithGoogleMutation } from '../../gql'
+import { GraphqlRejectionError, unwrapResult } from '../../gql/result'
 import { useToast } from '../../hooks/useToast'
 import { RouterLink } from '../common/RouterLink'
 import { GoogleButton } from './GoogleButton'
@@ -49,7 +46,6 @@ const DividerStyled = styled(Divider)(() => ({
 }))
 
 export const LoginPage = () => {
-  const api = useApi()
   const dispatch = useDispatch()
   const { addToast } = useToast()
   const [socialLoading, setSocialLoading] = useState(false)
@@ -65,12 +61,12 @@ export const LoginPage = () => {
     defaultValues: { email: emailFromSearch || '' },
   })
 
-  const handleLoginSuccess = (param: LoginOutputDto) => {
+  const handleLoginSuccess = (accessToken: string) => {
     addToast({ message: 'Heureux de vous revoir 🤓', variant: 'default' })
 
     dispatch(
       setTokens({
-        accessToken: param.access_token,
+        accessToken,
       }),
     )
 
@@ -82,25 +78,35 @@ export const LoginPage = () => {
     addToast({ message: "Une erreur s'est produite", variant: 'error' })
   }
 
-  const { mutateAsync: login } = useMutation({
-    mutationKey: ['login'],
-    mutationFn: (data: LoginInputDto) => api.auth.login(data),
-    onSuccess: data => handleLoginSuccess(data),
-    onError: e => {
-      if (e instanceof AxiosError && (e.response?.status === 401 || e.response?.status === 403)) {
+  const { mutateAsync: loginMutation } = useAuthLoginMutation()
+  const { mutateAsync: loginWithGoogleMutation } = useAuthLoginWithGoogleMutation()
+
+  const login = async (data: FormFields) => {
+    try {
+      const res = await loginMutation({ input: data })
+      const output = unwrapResult(res.login, 'LoginOutput')
+      handleLoginSuccess(output.accessToken)
+    } catch (e) {
+      if (
+        e instanceof GraphqlRejectionError &&
+        (e.typename === 'UnauthorizedRejection' || e.typename === 'ValidationRejection')
+      ) {
         setError('root', { message: 'Email ou mot de passe incorrect' })
       } else {
         setError('root', { message: "Une erreur s'est produite." })
       }
-    },
-  })
+    }
+  }
 
-  const { mutateAsync: loginWithGoogle } = useMutation({
-    mutationKey: ['loginWithGoogle'],
-    mutationFn: (code: string) => api.auth.loginWithGoogle({ code, createUserIfNotExists: false }),
-    onSuccess: data => handleLoginSuccess(data),
-    onError: () => onSocialError(),
-  })
+  const loginWithGoogle = async (code: string) => {
+    try {
+      const res = await loginWithGoogleMutation({ input: { code, createUserIfNotExists: false } })
+      const output = unwrapResult(res.loginWithGoogle, 'LoginWithGoogleOutput')
+      handleLoginSuccess(output.accessToken)
+    } catch {
+      onSocialError()
+    }
+  }
 
   const onSubmit = (data: FormFields) => login(data)
 

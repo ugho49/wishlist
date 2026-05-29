@@ -2,7 +2,8 @@ import LocalPoliceOutlinedIcon from '@mui/icons-material/LocalPoliceOutlined'
 import PersonIcon from '@mui/icons-material/Person'
 import { Avatar, ListItemAvatar, ListItemText, Stack, Tooltip } from '@mui/material'
 import { blue, orange } from '@mui/material/colors'
-import { AttendeeRole } from '@wishlist/common'
+
+import { AttendeeRole } from '../../gql'
 
 type ListItemAttendee = {
   userName: string
@@ -30,7 +31,7 @@ export const ListItemAttendee = (params: ListItemAttendee) => {
       <ListItemText
         primary={
           <Stack flexDirection="row" gap={1} alignItems="center">
-            {role === AttendeeRole.MAINTAINER && (
+            {role === AttendeeRole.Maintainer && (
               <Tooltip title="Admin de la liste">
                 <LocalPoliceOutlinedIcon fontSize="small" />
               </Tooltip>

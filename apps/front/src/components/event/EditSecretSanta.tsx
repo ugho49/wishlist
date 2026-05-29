@@ -1,4 +1,4 @@
-import type { DetailedEventDto } from '@wishlist/common'
+import type { EventDetail } from './event.types'
 
 import { Stack } from '@mui/material'
 
@@ -7,7 +7,7 @@ import { Loader } from '../common/Loader'
 import { NoSecretSanta } from '../secret-santa/NoSecretSanta'
 import { SecretSanta } from '../secret-santa/SecretSanta'
 
-type EditSecretSantaProps = { event: DetailedEventDto }
+type EditSecretSantaProps = { event: EventDetail }
 
 export const EditSecretSanta = ({ event }: EditSecretSantaProps) => {
   const { secretSanta, loading } = useSecretSanta(event.id)

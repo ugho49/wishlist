@@ -1,14 +1,12 @@
-import type { ResetPasswordValidationInputDto } from '@wishlist/common'
-
 import { zodResolver } from '@hookform/resolvers/zod'
 import SaveAsIcon from '@mui/icons-material/SaveAs'
 import { Button, Stack, styled, TextField, Typography } from '@mui/material'
-import { useMutation } from '@tanstack/react-query'
 import { useNavigate, useSearch } from '@tanstack/react-router'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
-import { useApi } from '../../hooks/useApi'
+import { useAuthResetPasswordMutation } from '../../gql'
+import { unwrapResult } from '../../gql/result'
 import { useToast } from '../../hooks/useToast'
 import { RouterLink } from '../common/RouterLink'
 
@@ -63,7 +61,6 @@ const InfoMessageStyled = styled(Typography)(({ theme }) => ({
 
 export const RenewForgotPasswordPage = () => {
   const { email, token } = useSearch({ from: '/_anonymous-with-layout/forgot-password/renew' })
-  const api = useApi()
   const { addToast } = useToast()
   const navigate = useNavigate()
 
@@ -73,25 +70,27 @@ export const RenewForgotPasswordPage = () => {
     formState: { isSubmitting, errors: formErrors },
   } = useForm<FormFields>({ resolver: zodResolver(schema) })
 
-  const { mutateAsync: validateResetPassword } = useMutation({
-    mutationKey: ['user.validateResetPassword'],
-    mutationFn: (data: ResetPasswordValidationInputDto) => api.user.validateResetPassword(data),
-    onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-    onSuccess: () => {
+  const { mutateAsync: resetPassword } = useAuthResetPasswordMutation()
+
+  const onSubmit = async (data: FormFields) => {
+    try {
+      const res = await resetPassword({
+        input: {
+          email,
+          token,
+          newPassword: data.password,
+        },
+      })
+      unwrapResult(res.resetPassword, 'VoidOutput')
       addToast({
         message: 'Le mot de passe à été réinitialisé avec succès. Vous pouvez maintenant vous connecter.',
         variant: 'success',
       })
       void navigate({ to: '/login', search: { email } })
-    },
-  })
-
-  const onSubmit = (data: FormFields) =>
-    validateResetPassword({
-      email,
-      token,
-      new_password: data.password,
-    })
+    } catch {
+      addToast({ message: "Une erreur s'est produite", variant: 'error' })
+    }
+  }
 
   if (!email || !token) {
     return (

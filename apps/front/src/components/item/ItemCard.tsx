@@ -1,5 +1,6 @@
-import type { DetailedWishlistDto, ItemDto, MiniUserDto, WishlistId } from '@wishlist/common'
+import type { WishlistId } from '@wishlist/common'
 import type { RootState } from '../../core'
+import type { WishlistItem } from '../wishlist/wishlist.types'
 
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard'
 import DeleteForeverTwoToneIcon from '@mui/icons-material/DeleteForeverTwoTone'
@@ -24,14 +25,16 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate, useSearch } from '@tanstack/react-router'
 import clsx from 'clsx'
 import { DateTime } from 'luxon'
 import React, { useCallback, useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
 
-import { useApi, useToast } from '../../hooks'
+import { useDeleteItemMutation, useToggleItemMutation } from '../../gql'
+import { unwrapResult } from '../../gql/result'
+import { useToast } from '../../hooks'
 import { Card } from '../common/Card'
 import { ConfirmMenuItem } from '../common/ConfirmMenuItem'
 import { Rating, RatingBubble } from '../common/Rating'
@@ -330,19 +333,27 @@ export type ItemCardProps = {
     coOwnerId?: string
     hideItems: boolean
   }
-  item: ItemDto
+  item: WishlistItem
   onImageClick?: () => void
 }
 
+type Taker = {
+  id: string
+  firstName?: string | null
+  pictureUrl?: string | null
+}
+
 const mapState = (state: RootState) => state.auth.user?.id
+const mapProfile = (state: RootState) => state.userProfile
 
 export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
   const currentUserId = useSelector(mapState)
-  const api = useApi()
+  const currentUserProfile = useSelector(mapProfile)
   const { addToast } = useToast()
+  const queryClient = useQueryClient()
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
   const { currentItemId } = useSearch({ from: '/_authenticated/_with-layout/wishlists/$wishlistId/' })
-  const [takenBy, setTakenBy] = useState<MiniUserDto | undefined>(item.taken_by)
+  const [takenBy, setTakenBy] = useState<Taker | undefined>(item.takerUser ?? undefined)
   const isDialogOpen = useMemo(() => currentItemId === item.id, [currentItemId, item.id])
   const navigate = useNavigate({ from: '/wishlists/$wishlistId' })
   const setDialogOpen = useCallback(
@@ -355,32 +366,32 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
   const isTaken = useMemo(() => takenBy !== undefined, [takenBy])
   const isOwnerOrCoOwner = currentUserId === wishlist.ownerId || wishlist.coOwnerId === currentUserId
   const canReserve = !isOwnerOrCoOwner || !wishlist.hideItems
-  const canEdit = (isOwnerOrCoOwner || item.is_suggested) && !isTaken
+  const canEdit = (isOwnerOrCoOwner || item.isSuggested) && !isTaken
   const isReservedByCurrentUser = takenBy?.id === currentUserId
 
   const openMenu = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget)
   const closeMenu = () => setAnchorEl(null)
 
-  const { mutateAsync: deleteItem, isPending: deleteItemPending } = useMutation({
-    mutationKey: ['item.delete', { id: item.id }],
-    mutationFn: () => api.item.delete(item.id),
-    onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-    onSuccess: () => {
-      addToast({ message: 'Le souhait à bien été supprimé', variant: 'success' })
-      queryClient.setQueryData(['wishlist', { id: wishlist.id }], (old: DetailedWishlistDto) => ({
-        ...old,
-        items: old.items.filter(i => i.id !== item.id),
-      }))
-    },
-  })
-
-  const { mutateAsync: toggleItem, isPending: toggleItemPending } = useMutation({
-    mutationKey: ['item.toggle', { id: item.id }],
-    mutationFn: () => api.item.toggle(item.id),
+  const { mutateAsync: deleteItemMutation, isPending: deleteItemPending } = useDeleteItemMutation({
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
     onSuccess: res => {
-      const action = res.taken_by !== undefined ? 'check' : 'uncheck'
-      setTakenBy(res.taken_by)
+      unwrapResult(res.deleteItem, 'VoidOutput')
+      addToast({ message: 'Le souhait à bien été supprimé', variant: 'success' })
+      void queryClient.invalidateQueries({ queryKey: ['WishlistPage', { wishlistId: wishlist.id }] })
+    },
+  })
+  const deleteItem = () => deleteItemMutation({ itemId: item.id })
+
+  const { mutateAsync: toggleItemMutation, isPending: toggleItemPending } = useToggleItemMutation({
+    onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
+    onSuccess: res => {
+      const output = unwrapResult(res.toggleItem, 'ToggleItemOutput')
+      const action = output.takenById != null ? 'check' : 'uncheck'
+      setTakenBy(
+        output.takenById != null
+          ? { id: output.takenById, firstName: currentUserProfile.firstName, pictureUrl: currentUserProfile.pictureUrl }
+          : undefined,
+      )
 
       if (action === 'check') {
         addToast({
@@ -404,7 +415,6 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
     },
   })
 
-  const queryClient = useQueryClient()
   const loading = useMemo(() => deleteItemPending || toggleItemPending, [deleteItemPending, toggleItemPending])
 
   // Determine if we should show reserve button
@@ -419,7 +429,7 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
     <>
       <ItemCardStyled className={clsx(isTaken && 'reserved', isReservedByCurrentUser && 'reserved-by-me')}>
         {/* Suggested badge - hide when item is reserved */}
-        {item.is_suggested && !isTaken && (
+        {item.isSuggested && !isTaken && (
           <SuggestedBadge icon={<TipsAndUpdatesTwoToneIcon />} label="Suggéré par un utilisateur" size="small" />
         )}
 
@@ -447,9 +457,9 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
           <ReservedIndicator isReservedByMe={isReservedByCurrentUser}>
             <RedeemIcon sx={{ fontSize: '1rem' }} />
             <span>Réservé</span>
-            <Tooltip title={takenBy?.firstname}>
-              <ReservedIndicatorAvatar src={takenBy?.picture_url}>
-                {takenBy?.firstname?.toUpperCase()?.charAt(0)}
+            <Tooltip title={takenBy?.firstName ?? ''}>
+              <ReservedIndicatorAvatar src={takenBy?.pictureUrl ?? undefined}>
+                {takenBy?.firstName?.toUpperCase()?.charAt(0)}
               </ReservedIndicatorAvatar>
             </Tooltip>
           </ReservedIndicator>
@@ -457,8 +467,8 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
 
         {/* Item image */}
         <ItemImageContainer className="item-image-container">
-          {item.picture_url ? (
-            <ItemImage onClick={() => onImageClick?.()} src={item.picture_url} alt={item.name} />
+          {item.pictureUrl ? (
+            <ItemImage onClick={() => onImageClick?.()} src={item.pictureUrl} alt={item.name} />
           ) : (
             <ItemImagePlaceholder>
               <CardGiftcardIcon />
@@ -506,7 +516,7 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
               <ReservedButton
                 onClick={e => {
                   e.stopPropagation()
-                  toggleItem()
+                  void toggleItemMutation({ itemId: item.id })
                 }}
                 disabled={loading || isTaken}
                 startIcon={<RedeemIcon />}
@@ -523,7 +533,7 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
           style={{ justifyContent: shouldShowReserveButton && isReservedByCurrentUser ? 'space-between' : 'center' }}
         >
           <DateContainer>
-            <Typography variant="caption">Ajouté {DateTime.fromISO(item.created_at).toRelative()}</Typography>
+            <Typography variant="caption">Ajouté {DateTime.fromISO(item.createdAt).toRelative()}</Typography>
           </DateContainer>
 
           {/* Release button in footer when item is reserved by current user */}
@@ -531,7 +541,7 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
             <ReleaseButton
               variant="contained"
               size="small"
-              onClick={() => toggleItem()}
+              onClick={() => toggleItemMutation({ itemId: item.id })}
               disabled={loading}
               startIcon={<RemoveCircleOutlineIcon />}
             >

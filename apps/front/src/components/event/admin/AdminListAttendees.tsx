@@ -1,16 +1,17 @@
-import type { AttendeeDto, AttendeeId } from '@wishlist/common'
+import type { AttendeeId } from '@wishlist/common'
+import type { AdminEventAttendee } from './admin.types'
 
 import DeleteIcon from '@mui/icons-material/Delete'
 import PersonIcon from '@mui/icons-material/Person'
 import { Avatar } from '@mui/material'
 import { DataGrid } from '@mui/x-data-grid'
-import { AttendeeRole } from '@wishlist/common'
 
+import { AttendeeRole } from '../../../gql'
 import { ConfirmIconButton } from '../../common/ConfirmIconButton'
 import { RouterLink } from '../../common/RouterLink'
 
 type AdminListAttendeesProps = {
-  attendees: AttendeeDto[]
+  attendees: AdminEventAttendee[]
   deleteAttendee: (attendeeId: AttendeeId) => void
   loading?: boolean
 }
@@ -34,7 +35,7 @@ export const AdminListAttendees = ({ attendees, deleteAttendee, loading = false 
             filterable: false,
             display: 'flex',
             renderCell: ({ row: attendee }) => (
-              <Avatar src={attendee.user?.picture_url} sx={{ width: '30px', height: '30px' }}>
+              <Avatar src={attendee.user?.pictureUrl ?? undefined} sx={{ width: '30px', height: '30px' }}>
                 <PersonIcon />
               </Avatar>
             ),
@@ -46,13 +47,13 @@ export const AdminListAttendees = ({ attendees, deleteAttendee, loading = false 
             minWidth: 200,
             valueGetter: (_, row) => {
               if (!row.user) return '-'
-              return `${row.user?.firstname} ${row.user?.lastname}`
+              return `${row.user?.firstName} ${row.user?.lastName}`
             },
             renderCell: ({ row }) => {
               if (!row.user) return '-'
               return (
                 <RouterLink key={row.user.id} to="/admin/users/$userId" params={{ userId: row.user.id }}>
-                  {row.user.firstname} {row.user.lastname}
+                  {row.user.firstName} {row.user.lastName}
                 </RouterLink>
               )
             },
@@ -62,7 +63,7 @@ export const AdminListAttendees = ({ attendees, deleteAttendee, loading = false 
             headerName: 'Email',
             width: 350,
             valueGetter: (_, row) => {
-              if (!row.user) return row.pending_email
+              if (!row.user) return row.pendingEmail
               return row.user.email
             },
           },
@@ -75,7 +76,7 @@ export const AdminListAttendees = ({ attendees, deleteAttendee, loading = false 
             headerName: 'Invitation ?',
             width: 150,
             type: 'boolean',
-            valueGetter: (_, row) => !!row.pending_email,
+            valueGetter: (_, row) => !!row.pendingEmail,
           },
           {
             field: 'id',
@@ -92,7 +93,7 @@ export const AdminListAttendees = ({ attendees, deleteAttendee, loading = false 
                   confirmTitle="Supprimer le participant"
                   confirmText="Êtes-vous sûr de vouloir supprimer ce participant ?"
                   onClick={() => deleteAttendee(row.id)}
-                  disabled={row.role === AttendeeRole.MAINTAINER || loading}
+                  disabled={row.role === AttendeeRole.Maintainer || loading}
                   size="small"
                   color="error"
                 >

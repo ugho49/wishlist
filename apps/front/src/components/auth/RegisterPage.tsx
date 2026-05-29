@@ -1,18 +1,15 @@
-import type { LoginOutputDto } from '@wishlist/common'
-
 import { zodResolver } from '@hookform/resolvers/zod'
 import PersonAddIcon from '@mui/icons-material/PersonAdd'
 import { Alert, Button, Divider, Stack, styled, TextField, Typography } from '@mui/material'
-import { useMutation } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
-import { AxiosError } from 'axios'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useDispatch } from 'react-redux'
 import { z } from 'zod'
 
 import { setTokens } from '../../core/store/features'
-import { useApi } from '../../hooks/useApi'
+import { useAuthLoginMutation, useAuthLoginWithGoogleMutation, useAuthRegisterUserMutation } from '../../gql'
+import { GraphqlRejectionError, unwrapResult } from '../../gql/result'
 import { useToast } from '../../hooks/useToast'
 import { zodRequiredString } from '../../utils/validation'
 import { RouterLink } from '../common/RouterLink'
@@ -52,7 +49,6 @@ const DividerStyled = styled(Divider)(() => ({
 }))
 
 export const RegisterPage = () => {
-  const api = useApi()
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const { addToast } = useToast()
@@ -65,12 +61,12 @@ export const RegisterPage = () => {
     formState: { isSubmitting, errors: formErrors },
   } = useForm<FormFields>({ resolver: zodResolver(schema) })
 
-  const handleRegisterSuccess = (param: LoginOutputDto, from: 'social' | 'email') => {
+  const handleRegisterSuccess = (accessToken: string, from: 'social' | 'email') => {
     addToast({ message: 'Bienvenue sur wishlist 👋', variant: 'default' })
 
     dispatch(
       setTokens({
-        accessToken: param.access_token,
+        accessToken,
       }),
     )
 
@@ -78,28 +74,36 @@ export const RegisterPage = () => {
     void navigate({ to: '/welcome', search: { from } })
   }
 
-  const { mutateAsync: registerUser } = useMutation({
-    mutationKey: ['register'],
-    mutationFn: async (data: FormFields) => {
-      await api.user.register(data)
-      return api.auth.login({ email: data.email, password: data.password })
-    },
-    onSuccess: data => handleRegisterSuccess(data, 'email'),
-    onError: e => {
-      if (e instanceof AxiosError && e.response?.status === 422) {
+  const { mutateAsync: registerUserMutation } = useAuthRegisterUserMutation()
+  const { mutateAsync: loginMutation } = useAuthLoginMutation()
+  const { mutateAsync: loginWithGoogleMutation } = useAuthLoginWithGoogleMutation()
+
+  const registerUser = async (data: FormFields) => {
+    try {
+      const registerRes = await registerUserMutation({ input: data })
+      unwrapResult(registerRes.registerUser, 'User')
+
+      const loginRes = await loginMutation({ input: { email: data.email, password: data.password } })
+      const output = unwrapResult(loginRes.login, 'LoginOutput')
+      handleRegisterSuccess(output.accessToken, 'email')
+    } catch (e) {
+      if (e instanceof GraphqlRejectionError && e.typename === 'ValidationRejection') {
         setError('root', { message: 'Cet email est déjà utilisé' })
       } else {
         setError('root', { message: "Une erreur s'est produite." })
       }
-    },
-  })
+    }
+  }
 
-  const { mutateAsync: registerWithGoogle } = useMutation({
-    mutationKey: ['registerWithGoogle'],
-    mutationFn: (code: string) => api.auth.loginWithGoogle({ code, createUserIfNotExists: true }),
-    onSuccess: data => handleRegisterSuccess(data, 'social'),
-    onError: () => onSocialError(),
-  })
+  const registerWithGoogle = async (code: string) => {
+    try {
+      const res = await loginWithGoogleMutation({ input: { code, createUserIfNotExists: true } })
+      const output = unwrapResult(res.loginWithGoogle, 'LoginWithGoogleOutput')
+      handleRegisterSuccess(output.accessToken, 'social')
+    } catch {
+      onSocialError()
+    }
+  }
 
   const onSubmit = (data: FormFields) => registerUser(data)
 

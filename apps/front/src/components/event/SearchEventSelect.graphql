@@ -1,0 +1,13 @@
+query EventSelectAvailableEvents($filters: EventPaginationFilters!) {
+  events(filters: $filters) {
+    __typename
+    ... on GetEventsPagedResponse {
+      data {
+        id
+        title
+        icon
+        eventDate
+      }
+    }
+  }
+}

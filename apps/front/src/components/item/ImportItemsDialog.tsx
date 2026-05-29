@@ -1,6 +1,7 @@
 import type { TransitionProps } from '@mui/material/transitions'
-import type { ItemDto, ItemId, WishlistId } from '@wishlist/common'
+import type { ItemId, WishlistId } from '@wishlist/common'
 import type React from 'react'
+import type { WishlistItem } from '../wishlist/wishlist.types'
 
 import AddIcon from '@mui/icons-material/Add'
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard'
@@ -22,11 +23,13 @@ import {
   Typography,
   useMediaQuery,
 } from '@mui/material'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useApi, useToast } from '@wishlist/front-hooks'
+import { useQueryClient } from '@tanstack/react-query'
+import { useToast } from '@wishlist/front-hooks'
 import clsx from 'clsx'
 import { forwardRef, useState } from 'react'
 
+import { useImportItemsMutation } from '../../gql'
+import { unwrapResult } from '../../gql/result'
 import { Card } from '../common/Card'
 import { Rating, RatingBubble } from '../common/Rating'
 import { Subtitle } from '../common/Subtitle'
@@ -148,7 +151,7 @@ const BottomActionStack = styled(Stack)(({ theme }) => ({
 export interface ImportItemsDialogProps {
   open: boolean
   wishlistId: WishlistId
-  importableItems: ItemDto[]
+  importableItems: WishlistItem[]
   onClose: () => void
   onComplete: () => void
 }
@@ -161,34 +164,30 @@ export const ImportItemsDialog = ({
   importableItems,
 }: ImportItemsDialogProps) => {
   const { addToast } = useToast()
-  const api = useApi()
   const queryClient = useQueryClient()
   const [selectedItemIds, setSelectedItemIds] = useState<Set<ItemId>>(new Set())
 
   const isFullscreen = useMediaQuery(theme => theme.breakpoints.down('md'))
 
   // Import selected items mutation
-  const { mutateAsync: importItems, isPending: isLoading } = useMutation({
-    mutationKey: ['item.import', wishlistId],
-    mutationFn: () =>
-      api.item.importItems({
-        wishlist_id: wishlistId,
-        source_item_ids: Array.from(selectedItemIds),
-      }),
-    onSuccess: () => {
+  const { mutateAsync: importItemsMutation, isPending: isLoading } = useImportItemsMutation({
+    onSuccess: res => {
+      unwrapResult(res.importItems, 'ImportItemsOutput')
       const count = selectedItemIds.size
       const plural = count > 1
       const message = `${count} souhait${plural ? 's' : ''} importé${plural ? 's' : ''} avec succès`
 
       addToast({ message, variant: 'success' })
-      queryClient.invalidateQueries({ queryKey: ['wishlist', { id: wishlistId }] })
-      queryClient.invalidateQueries({ queryKey: ['item.importable', { wishlistId }] })
+      void queryClient.invalidateQueries({ queryKey: ['WishlistPage', { wishlistId }] })
+      void queryClient.invalidateQueries({ queryKey: ['ImportableItems', { wishlistId }] })
       onComplete()
     },
     onError: () => {
       addToast({ message: "Erreur lors de l'import des souhaits", variant: 'error' })
     },
   })
+
+  const importItems = () => importItemsMutation({ input: { wishlistId, sourceItemIds: Array.from(selectedItemIds) } })
 
   const toggleItemSelection = (itemId: ItemId) => {
     setSelectedItemIds(prev => {
@@ -275,7 +274,7 @@ export const ImportItemsDialog = ({
 
         <ItemsListContainer>
           {importableItems
-            .toSorted((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+            .toSorted((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
             .map(item => (
               <ItemCard
                 key={item.id}
@@ -284,8 +283,8 @@ export const ImportItemsDialog = ({
                 className={clsx({ selected: selectedItemIds.has(item.id) })}
               >
                 <ItemImageContainer>
-                  {item.picture_url ? (
-                    <ItemImage src={item.picture_url} alt={item.name} />
+                  {item.pictureUrl ? (
+                    <ItemImage src={item.pictureUrl} alt={item.name} />
                   ) : (
                     <ItemImagePlaceholder>
                       <CardGiftcardIcon />

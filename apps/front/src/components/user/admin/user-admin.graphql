@@ -1,0 +1,75 @@
+query AdminUsersList($input: AdminGetAllUsersPaginationFilters) {
+  adminUsers(input: $input) {
+    __typename
+    ... on AdminGetAllUsers {
+      data {
+        id
+        firstName
+        lastName
+        email
+        pictureUrl
+        isEnabled
+        authorities
+        createdAt
+      }
+      pagination {
+        totalPages
+        totalElements
+        pageNumber
+        pageSize
+      }
+    }
+  }
+}
+
+query AdminUserDetail($userId: UserId!) {
+  adminUser(userId: $userId) {
+    __typename
+    ... on UserFull {
+      id
+      firstName
+      lastName
+      email
+      birthday
+      pictureUrl
+      isEnabled
+      authorities
+      createdAt
+      lastConnectedAt
+      lastIp
+    }
+  }
+}
+
+mutation AdminUpdateUserProfile($userId: UserId!, $input: AdminUpdateUserProfileInput!) {
+  adminUpdateUserProfile(userId: $userId, input: $input) {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+    ... on ValidationRejection {
+      errors {
+        field
+        message
+      }
+    }
+  }
+}
+
+mutation AdminDeleteUser($userId: UserId!) {
+  adminDeleteUser(userId: $userId) {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+  }
+}
+
+mutation AdminRemoveUserPicture($userId: UserId!) {
+  adminRemoveUserPicture(userId: $userId) {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+  }
+}

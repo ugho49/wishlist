@@ -1,17 +1,17 @@
-import type { UpdateUserProfileInputDto, UserDto } from '@wishlist/common'
 import type { RootState } from '../../core'
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import SaveIcon from '@mui/icons-material/Save'
 import { Box, Button, Stack, TextField } from '@mui/material'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { DateTime } from 'luxon'
 import { Controller, useForm } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
 import { z } from 'zod'
 
 import { updateUser as updateUserAction } from '../../core/store/features'
-import { useApi } from '../../hooks/useApi'
+import { useUpdateUserProfileMutation } from '../../gql'
+import { unwrapResult } from '../../gql/result'
 import { useToast } from '../../hooks/useToast'
 import { zodRequiredString } from '../../utils/validation'
 import { Card } from '../common/Card'
@@ -33,7 +33,6 @@ type FormFields = z.infer<typeof schema>
 export const UserTabInformations = () => {
   const userState = useSelector(mapState)
   const dispatch = useDispatch()
-  const api = useApi()
   const { addToast } = useToast()
   const queryClient = useQueryClient()
 
@@ -51,35 +50,35 @@ export const UserTabInformations = () => {
     },
   })
 
-  const { mutateAsync: update } = useMutation({
-    mutationKey: ['user.update'],
-    mutationFn: (data: UpdateUserProfileInputDto) => api.user.update(data),
+  const { mutateAsync: update } = useUpdateUserProfileMutation({
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-    onSuccess: (_output, data) => {
-      addToast({ message: 'Profil mis à jour', variant: 'info' })
-
-      queryClient.setQueryData(['user'], (old: UserDto) => ({
-        ...old,
-        ...data,
-        birthday: data.birthday ? DateTime.fromJSDate(data.birthday) : null,
-      }))
-
-      dispatch(
-        updateUserAction({
-          firstName: data.firstname,
-          lastName: data.lastname,
-          birthday: data.birthday ? data.birthday.toISOString() : undefined,
-        }),
-      )
-    },
   })
 
-  const onSubmit = (data: FormFields) =>
-    update({
-      firstname: data.firstname,
-      lastname: data.lastname,
-      birthday: data.birthday !== null ? new Date(data.birthday.toISODate() || '') : undefined,
+  const onSubmit = async (data: FormFields) => {
+    const birthday = data.birthday !== null ? data.birthday.toISODate() || undefined : undefined
+
+    const res = await update({
+      input: {
+        firstname: data.firstname,
+        lastname: data.lastname,
+        birthday,
+      },
     })
+
+    unwrapResult(res.updateUserProfile, 'User')
+
+    addToast({ message: 'Profil mis à jour', variant: 'info' })
+
+    dispatch(
+      updateUserAction({
+        firstName: data.firstname,
+        lastName: data.lastname,
+        birthday,
+      }),
+    )
+
+    void queryClient.invalidateQueries({ queryKey: ['UserProfileCurrentUser'] })
+  }
 
   return (
     <Stack gap={3}>

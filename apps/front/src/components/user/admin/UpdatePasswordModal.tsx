@@ -13,7 +13,8 @@ import {
 } from '@mui/material'
 import { useState } from 'react'
 
-import { useApi } from '../../../hooks/useApi'
+import { useAdminUpdateUserProfileMutation } from '../../../gql'
+import { unwrapResult } from '../../../gql/result'
 import { useToast } from '../../../hooks/useToast'
 
 export type UpdatePasswordModalProps = {
@@ -23,16 +24,18 @@ export type UpdatePasswordModalProps = {
 }
 
 export const UpdatePasswordModal = ({ onClose, open, userId }: UpdatePasswordModalProps) => {
-  const { admin: api } = useApi()
   const [newPassword, setNewPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const { addToast } = useToast()
+
+  const { mutateAsync: updateUser } = useAdminUpdateUserProfileMutation()
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault()
     setLoading(true)
     try {
-      await api.user.update(userId, { new_password: newPassword })
+      const res = await updateUser({ userId, input: { newPassword } })
+      unwrapResult(res.adminUpdateUserProfile, 'VoidOutput')
       addToast({ message: 'Mot de passe mis à jour', variant: 'success' })
       setLoading(false)
       setNewPassword('')

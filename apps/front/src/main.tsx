@@ -14,7 +14,6 @@ import { HelmetProvider } from 'react-helmet-async'
 import { Toaster } from 'react-hot-toast'
 import { Provider as ReduxProvider } from 'react-redux'
 
-import { ApiProvider } from './context/ApiContext'
 import { store } from './core'
 import { environment } from './environment'
 import { router } from './router'
@@ -63,30 +62,28 @@ function main() {
       <LDProvider clientSideID={environment.launchdarklyClientSideiD} reactOptions={{ useCamelCaseFlagKeys: false }}>
         <Toaster position="top-right" toastOptions={{ duration: 3_000 }} />
         <QueryClientProvider client={queryClient}>
-          <ApiProvider>
-            <ReduxProvider store={store}>
-              <ThemeProvider theme={theme}>
-                <CssBaseline />
-                <LocalizationProvider dateAdapter={AdapterLuxon} adapterLocale="fr">
-                  <RouterProvider router={router} context={{ queryClient }} />
-                  <TanStackDevtools
-                    plugins={[
-                      {
-                        name: 'TanStack Query',
-                        render: <ReactQueryDevtoolsPanel client={queryClient} />,
-                        defaultOpen: true,
-                      },
-                      {
-                        name: 'TanStack Router',
-                        render: <TanStackRouterDevtoolsPanel router={router} />,
-                        defaultOpen: false,
-                      },
-                    ]}
-                  />
-                </LocalizationProvider>
-              </ThemeProvider>
-            </ReduxProvider>
-          </ApiProvider>
+          <ReduxProvider store={store}>
+            <ThemeProvider theme={theme}>
+              <CssBaseline />
+              <LocalizationProvider dateAdapter={AdapterLuxon} adapterLocale="fr">
+                <RouterProvider router={router} context={{ queryClient }} />
+                <TanStackDevtools
+                  plugins={[
+                    {
+                      name: 'TanStack Query',
+                      render: <ReactQueryDevtoolsPanel client={queryClient} />,
+                      defaultOpen: true,
+                    },
+                    {
+                      name: 'TanStack Router',
+                      render: <TanStackRouterDevtoolsPanel router={router} />,
+                      defaultOpen: false,
+                    },
+                  ]}
+                />
+              </LocalizationProvider>
+            </ThemeProvider>
+          </ReduxProvider>
         </QueryClientProvider>
       </LDProvider>
     </HelmetProvider>,
