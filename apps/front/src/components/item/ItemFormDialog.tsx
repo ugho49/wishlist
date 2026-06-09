@@ -28,10 +28,11 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@wishlist/front-hooks'
 import { forwardRef, useCallback, useEffect, useMemo, useState } from 'react'
 import { TidyURL } from 'tidy-url'
+import { match } from 'ts-pattern'
 
 import {
-  isRejection,
   rejectionMessage,
+  rejectionPattern,
   useCreateItemMutation,
   useScanItemUrlMutation,
   useUpdateItemMutation,
@@ -117,26 +118,28 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
 
     if (mode === 'create') {
       const res = await createItem({ input: { wishlistId, ...base } })
-      if (isRejection(res.createItem)) {
-        addToast({ message: rejectionMessage(res.createItem), variant: 'error' })
-        return
-      }
-      addToast({ message: 'Souhait créé avec succès', variant: 'success' })
-      void invalidateWishlist()
-      resetForm()
+      match(res.createItem)
+        .with({ __typename: 'Item' }, () => {
+          addToast({ message: 'Souhait créé avec succès', variant: 'success' })
+          void invalidateWishlist()
+          resetForm()
+          handleClose()
+        })
+        .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+        .exhaustive()
     }
 
     if (mode === 'edit') {
       const res = await updateItem({ itemId: item.id, input: base })
-      if (isRejection(res.updateItem)) {
-        addToast({ message: rejectionMessage(res.updateItem), variant: 'error' })
-        return
-      }
-      addToast({ message: 'Le souhait à bien été modifié', variant: 'success' })
-      void invalidateWishlist()
+      match(res.updateItem)
+        .with({ __typename: 'VoidOutput' }, () => {
+          addToast({ message: 'Le souhait à bien été modifié', variant: 'success' })
+          void invalidateWishlist()
+          handleClose()
+        })
+        .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+        .exhaustive()
     }
-
-    handleClose()
   }
 
   useEffect(() => {
@@ -149,7 +152,10 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
     setScore(item.score || null)
   }, [item])
 
-  const { mutateAsync: scanItemUrl } = useScanItemUrlMutation()
+  const { mutateAsync: scanItemUrl } = useScanItemUrlMutation({
+    onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
+    onSettled: () => setScanUrlLoading(false),
+  })
 
   const scanUrl = useCallback(
     async (urlToScan: string) => {
@@ -159,24 +165,11 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
 
       setScanUrlLoading(true)
 
-      try {
-        const res = await scanItemUrl({ input: { url: urlToScan } })
-        const result = res.scanItemUrl
-        if (isRejection(result)) {
-          addToast({ message: rejectionMessage(result), variant: 'error' })
-          return
-        }
-
-        if (result.pictureUrl) {
-          setPictureUrl(result.pictureUrl)
-        } else {
-          setPictureUrl('')
-        }
-      } catch {
-        addToast({ message: "Une erreur s'est produite", variant: 'error' })
-      } finally {
-        setScanUrlLoading(false)
-      }
+      const res = await scanItemUrl({ input: { url: urlToScan } })
+      match(res.scanItemUrl)
+        .with({ __typename: 'ScanItemUrlOutput' }, output => setPictureUrl(output.pictureUrl || ''))
+        .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+        .exhaustive()
     },
     [scanUrlLoading, scanItemUrl, addToast],
   )

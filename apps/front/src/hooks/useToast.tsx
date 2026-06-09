@@ -1,6 +1,7 @@
 import { uuid } from '@wishlist/common'
 import { useCallback } from 'react'
 import toast from 'react-hot-toast'
+import { match } from 'ts-pattern'
 
 type VariantType = 'default' | 'error' | 'success' | 'warning' | 'info'
 
@@ -18,17 +19,13 @@ export function useToast() {
     const toastId = uuid()
     const message = () => <>{params.message}</>
 
-    if (params.variant === 'error') {
-      toast.error(message, { id: toastId })
-    } else if (params.variant === 'success') {
-      toast.success(message, { id: toastId })
-    } else if (params.variant === 'warning') {
-      toast(message, { id: toastId, icon: '⚠️' })
-    } else if (params.variant === 'info') {
-      toast(message, { id: toastId, icon: 'ℹ️' })
-    } else {
-      toast(message, { id: toastId })
-    }
+    match(params.variant ?? 'default')
+      .with('error', () => toast.error(message, { id: toastId }))
+      .with('success', () => toast.success(message, { id: toastId }))
+      .with('warning', () => toast(message, { id: toastId, icon: '⚠️' }))
+      .with('info', () => toast(message, { id: toastId, icon: 'ℹ️' }))
+      .with('default', () => toast(message, { id: toastId }))
+      .exhaustive()
 
     return {
       closeToast: () => {

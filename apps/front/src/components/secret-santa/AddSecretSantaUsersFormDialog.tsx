@@ -22,8 +22,9 @@ import {
 import { DataGrid } from '@mui/x-data-grid'
 import { useQueryClient } from '@tanstack/react-query'
 import { forwardRef, useEffect, useMemo, useState } from 'react'
+import { match } from 'ts-pattern'
 
-import { isRejection, rejectionMessage, useAddSecretSantaUsersMutation } from '../../gql'
+import { rejectionMessage, rejectionPattern, useAddSecretSantaUsersMutation } from '../../gql'
 import { useToast } from '../../hooks'
 import { Status } from '../common/Status'
 
@@ -104,25 +105,28 @@ export const AddSecretSantaUsersFormDialog = ({
   const [selectedIds, setSelectedIds] = useState<AttendeeId[]>([])
   const isFullscreen = useMediaQuery(theme => theme.breakpoints.down('md'))
 
-  const { mutateAsync: addUsersMutation, isPending: loading } = useAddSecretSantaUsersMutation()
+  const { mutateAsync: addUsersMutation, isPending: loading } = useAddSecretSantaUsersMutation({
+    onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
+  })
 
   const addUsers = async () => {
-    try {
-      const res = await addUsersMutation({ id: secretSantaId, input: { attendeeIds: selectedIds } })
-      const result = res.addSecretSantaUsers
-      if (isRejection(result)) {
-        const message =
-          result.__typename === 'ValidationRejection' && result.errors.length > 0
-            ? result.errors.map(error => error.message).join(', ')
-            : rejectionMessage(result)
-        addToast({ message, variant: 'error' })
-        return
-      }
-      handleSubmit(result.users)
-      await queryClient.invalidateQueries({ queryKey: ['GetSecretSantaForEvent', { eventId }] })
-    } catch {
-      addToast({ message: "Une erreur s'est produite", variant: 'error' })
-    }
+    const res = await addUsersMutation({ id: secretSantaId, input: { attendeeIds: selectedIds } })
+    await match(res.addSecretSantaUsers)
+      .with({ __typename: 'AddSecretSantaUsersOutput' }, async output => {
+        handleSubmit(output.users)
+        await queryClient.invalidateQueries({ queryKey: ['GetSecretSantaForEvent', { eventId }] })
+      })
+      .with({ __typename: 'ValidationRejection' }, rejection =>
+        addToast({
+          message:
+            rejection.errors.length > 0
+              ? rejection.errors.map(error => error.message).join(', ')
+              : rejectionMessage(rejection),
+          variant: 'error',
+        }),
+      )
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
   }
 
   useEffect(() => {

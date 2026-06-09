@@ -21,8 +21,9 @@ import {
 } from '@mui/material'
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useState } from 'react'
+import { match } from 'ts-pattern'
 
-import { isRejection, rejectionMessage, useUpdateSecretSantaUserMutation } from '../../gql'
+import { rejectionMessage, rejectionPattern, useUpdateSecretSantaUserMutation } from '../../gql'
 import { useToast } from '../../hooks'
 
 export interface ManageUserExclusionsDialogProps {
@@ -59,30 +60,33 @@ export const ManageUserExclusionsDialog = ({
     [selected],
   )
 
-  const { mutateAsync: updateUserMutation, isPending: loadingUpdateUser } = useUpdateSecretSantaUserMutation()
+  const { mutateAsync: updateUserMutation, isPending: loadingUpdateUser } = useUpdateSecretSantaUserMutation({
+    onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
+  })
 
   const updateUser = async () => {
-    try {
-      const res = await updateUserMutation({
-        id: secretSantaId,
-        secretSantaUserId: secretSantaUser.id,
-        input: { exclusions: selected },
+    const res = await updateUserMutation({
+      id: secretSantaId,
+      secretSantaUserId: secretSantaUser.id,
+      input: { exclusions: selected },
+    })
+    await match(res.updateSecretSantaUser)
+      .with({ __typename: 'VoidOutput' }, async () => {
+        handleClose()
+        addToast({ message: 'Les exclusions ont été mises à jour', variant: 'success' })
+        await queryClient.invalidateQueries({ queryKey: ['GetSecretSantaForEvent', { eventId }] })
       })
-      const result = res.updateSecretSantaUser
-      if (isRejection(result)) {
-        const message =
-          result.__typename === 'ValidationRejection' && result.errors.length > 0
-            ? result.errors.map(error => error.message).join(', ')
-            : rejectionMessage(result)
-        addToast({ message, variant: 'error' })
-        return
-      }
-      handleClose()
-      addToast({ message: 'Les exclusions ont été mises à jour', variant: 'success' })
-      await queryClient.invalidateQueries({ queryKey: ['GetSecretSantaForEvent', { eventId }] })
-    } catch {
-      addToast({ message: "Une erreur s'est produite", variant: 'error' })
-    }
+      .with({ __typename: 'ValidationRejection' }, rejection =>
+        addToast({
+          message:
+            rejection.errors.length > 0
+              ? rejection.errors.map(error => error.message).join(', ')
+              : rejectionMessage(rejection),
+          variant: 'error',
+        }),
+      )
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
   }
 
   useEffect(() => {

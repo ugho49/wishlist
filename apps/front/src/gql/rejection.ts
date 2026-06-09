@@ -7,11 +7,22 @@
  * always responds with HTTP 200, so rejections arrive as data, not errors:
  * every call site must narrow the union and decide what UI each case gets.
  *
- * `isRejection` narrows a result to its rejection members (and, in the false
- * branch, to its success members). `rejectionMessage` gives the default
- * user-facing message for a rejection; call sites with more context should
- * handle specific `__typename` cases before falling back to it.
+ * Call sites match results with ts-pattern: success member(s) and noteworthy
+ * rejections get their own `.with()` case, `rejectionPattern` catches the
+ * remaining rejections with `rejectionMessage` as default user-facing message,
+ * and `.exhaustive()` guarantees no case is ever missed:
+ *
+ *   match(res.changeUserPassword)
+ *     .with({ __typename: 'VoidOutput' }, () => ...)
+ *     .with({ __typename: 'ValidationRejection' }, () => ...)
+ *     .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+ *     .exhaustive()
+ *
+ * `isRejection` narrows a result union outside of match expressions (e.g.
+ * deriving query data).
  */
+
+import { P } from 'ts-pattern'
 
 const REJECTION_TYPENAMES = [
   'ValidationRejection',
@@ -31,6 +42,12 @@ export type SuccessOf<R extends WithTypename> = Exclude<R, { __typename: Rejecti
 export function isRejection<R extends WithTypename>(result: R): result is RejectionOf<R> {
   return (REJECTION_TYPENAMES as readonly string[]).includes(result.__typename)
 }
+
+/**
+ * ts-pattern pattern matching every rejection member of a result union,
+ * whatever subset of rejection types the union declares.
+ */
+export const rejectionPattern = { __typename: P.string.endsWith('Rejection') } as const
 
 const DEFAULT_MESSAGES: Record<RejectionTypename, string> = {
   ValidationRejection: 'Certaines informations saisies sont invalides',

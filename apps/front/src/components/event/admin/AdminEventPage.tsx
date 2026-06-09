@@ -16,12 +16,14 @@ import { TextareaMarkdown } from '@wishlist/front-components/common/TextareaMark
 import { DateTime } from 'luxon'
 import { useEffect, useMemo } from 'react'
 import { Controller, useForm } from 'react-hook-form'
+import { match } from 'ts-pattern'
 import z from 'zod'
 
 import {
   AttendeeRole,
   isRejection,
   rejectionMessage,
+  rejectionPattern,
   useAdminDeleteEventAttendeeMutation,
   useAdminDeleteEventMutation,
   useAdminEventGetEventQuery,
@@ -88,123 +90,123 @@ export const AdminEventPage = ({ eventId }: AdminEventPageProps) => {
   const invalidateSecretSanta = () =>
     queryClient.invalidateQueries({ queryKey: ['GetSecretSantaForEvent', { eventId }] })
 
-  const { mutateAsync: deleteAttendeeMutation, isPending: loadingDeleteAttendee } =
-    useAdminDeleteEventAttendeeMutation()
+  const { mutateAsync: deleteAttendeeMutation, isPending: loadingDeleteAttendee } = useAdminDeleteEventAttendeeMutation(
+    {
+      onError: error => {
+        addToast({ message: 'Impossible de supprimer ce participant', variant: 'error' })
+        console.error(error)
+      },
+    },
+  )
 
   const deleteAttendee = async (attendeeId: AttendeeId) => {
-    try {
-      const res = await deleteAttendeeMutation({ eventId, attendeeId })
-      if (isRejection(res.adminDeleteEventAttendee)) {
-        addToast({ message: rejectionMessage(res.adminDeleteEventAttendee), variant: 'error' })
-        return
-      }
-      addToast({ message: 'Participant supprimé avec succès', variant: 'success' })
-      await invalidateEvent()
-      await invalidateSecretSanta()
-    } catch (error) {
-      addToast({ message: 'Impossible de supprimer ce participant', variant: 'error' })
-      console.error(error)
-    }
+    const res = await deleteAttendeeMutation({ eventId, attendeeId })
+    match(res.adminDeleteEventAttendee)
+      .with({ __typename: 'VoidOutput' }, () => {
+        addToast({ message: 'Participant supprimé avec succès', variant: 'success' })
+        void invalidateEvent()
+        void invalidateSecretSanta()
+      })
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
   }
 
-  const { mutateAsync: deleteSecretSantaMutation, isPending: loadingDeleteSecretSanta } = useDeleteSecretSantaMutation()
+  const { mutateAsync: deleteSecretSantaMutation, isPending: loadingDeleteSecretSanta } = useDeleteSecretSantaMutation({
+    onError: () => addToast({ message: 'Impossible de supprimer le secret santa', variant: 'error' }),
+  })
 
   const deleteSecretSanta = async () => {
-    try {
-      const res = await deleteSecretSantaMutation({ id: secretSanta!.id })
-      if (isRejection(res.deleteSecretSanta)) {
-        addToast({ message: rejectionMessage(res.deleteSecretSanta), variant: 'error' })
-        return
-      }
-      addToast({ message: 'Secret santa supprimé avec succès', variant: 'success' })
-      await invalidateSecretSanta()
-    } catch {
-      addToast({ message: 'Impossible de supprimer le secret santa', variant: 'error' })
-    }
+    const res = await deleteSecretSantaMutation({ id: secretSanta!.id })
+    match(res.deleteSecretSanta)
+      .with({ __typename: 'VoidOutput' }, () => {
+        addToast({ message: 'Secret santa supprimé avec succès', variant: 'success' })
+        void invalidateSecretSanta()
+      })
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
   }
 
-  const { mutateAsync: startSecretSantaMutation, isPending: loadingStartSecretSanta } = useStartSecretSantaMutation()
+  const { mutateAsync: startSecretSantaMutation, isPending: loadingStartSecretSanta } = useStartSecretSantaMutation({
+    onError: () => addToast({ message: 'Impossible de lancer le secret santa', variant: 'error' }),
+  })
 
   const startSecretSanta = async () => {
-    try {
-      const res = await startSecretSantaMutation({ id: secretSanta!.id })
-      if (isRejection(res.startSecretSanta)) {
-        addToast({ message: rejectionMessage(res.startSecretSanta), variant: 'error' })
-        return
-      }
-      addToast({ message: 'Secret santa lancé avec succès', variant: 'success' })
-      await invalidateSecretSanta()
-    } catch {
-      addToast({ message: 'Impossible de lancer le secret santa', variant: 'error' })
-    }
+    const res = await startSecretSantaMutation({ id: secretSanta!.id })
+    match(res.startSecretSanta)
+      .with({ __typename: 'VoidOutput' }, () => {
+        addToast({ message: 'Secret santa lancé avec succès', variant: 'success' })
+        void invalidateSecretSanta()
+      })
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
   }
 
-  const { mutateAsync: cancelSecretSantaMutation, isPending: loadingCancelSecretSanta } = useCancelSecretSantaMutation()
+  const { mutateAsync: cancelSecretSantaMutation, isPending: loadingCancelSecretSanta } = useCancelSecretSantaMutation({
+    onError: () => addToast({ message: "Impossible d'annuler le secret santa", variant: 'error' }),
+  })
 
   const cancelSecretSanta = async () => {
-    try {
-      const res = await cancelSecretSantaMutation({ id: secretSanta!.id })
-      if (isRejection(res.cancelSecretSanta)) {
-        addToast({ message: rejectionMessage(res.cancelSecretSanta), variant: 'error' })
-        return
-      }
-      addToast({ message: 'Secret santa annulé avec succès', variant: 'success' })
-      await invalidateSecretSanta()
-    } catch {
-      addToast({ message: "Impossible d'annuler le secret santa", variant: 'error' })
-    }
+    const res = await cancelSecretSantaMutation({ id: secretSanta!.id })
+    match(res.cancelSecretSanta)
+      .with({ __typename: 'VoidOutput' }, () => {
+        addToast({ message: 'Secret santa annulé avec succès', variant: 'success' })
+        void invalidateSecretSanta()
+      })
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
   }
 
   const { mutateAsync: removeSecretSantaUserMutation, isPending: loadingRemoveSecretSantaUser } =
-    useDeleteSecretSantaUserMutation()
+    useDeleteSecretSantaUserMutation({
+      onError: () => addToast({ message: "Impossible de supprimer l'utilisateur du secret santa", variant: 'error' }),
+    })
 
   const removeSecretSantaUser = async (secretSantaUserId: SecretSantaUserId) => {
-    try {
-      const res = await removeSecretSantaUserMutation({ id: secretSanta!.id, secretSantaUserId })
-      if (isRejection(res.deleteSecretSantaUser)) {
-        addToast({ message: rejectionMessage(res.deleteSecretSantaUser), variant: 'error' })
-        return
-      }
-      addToast({ message: 'Utilisateur supprimé du secret santa avec succès', variant: 'success' })
-      await invalidateSecretSanta()
-    } catch {
-      addToast({ message: "Impossible de supprimer l'utilisateur du secret santa", variant: 'error' })
-    }
+    const res = await removeSecretSantaUserMutation({ id: secretSanta!.id, secretSantaUserId })
+    match(res.deleteSecretSantaUser)
+      .with({ __typename: 'VoidOutput' }, () => {
+        addToast({ message: 'Utilisateur supprimé du secret santa avec succès', variant: 'success' })
+        void invalidateSecretSanta()
+      })
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
   }
 
-  const { mutateAsync: updateSecretSantaMutation, isPending: loadingUpdateSecretSanta } = useUpdateSecretSantaMutation()
+  const { mutateAsync: updateSecretSantaMutation, isPending: loadingUpdateSecretSanta } = useUpdateSecretSantaMutation({
+    onError: () => addToast({ message: 'Impossible de modifier le secret santa', variant: 'error' }),
+  })
 
   const updateSecretSanta = async (input: { budget?: number; description?: string }) => {
-    try {
-      const res = await updateSecretSantaMutation({ id: secretSanta!.id, input })
-      if (isRejection(res.updateSecretSanta)) {
-        addToast({ message: rejectionMessage(res.updateSecretSanta), variant: 'error' })
-        return
-      }
-      addToast({ message: 'Secret santa modifié avec succès', variant: 'success' })
-      await invalidateSecretSanta()
-    } catch {
-      addToast({ message: 'Impossible de modifier le secret santa', variant: 'error' })
-    }
+    const res = await updateSecretSantaMutation({ id: secretSanta!.id, input })
+    match(res.updateSecretSanta)
+      .with({ __typename: 'VoidOutput' }, () => {
+        addToast({ message: 'Secret santa modifié avec succès', variant: 'success' })
+        void invalidateSecretSanta()
+      })
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
   }
 
-  const { mutateAsync: updateEventMutation, isPending: loadingUpdateEvent } = useAdminUpdateEventMutation()
+  const { mutateAsync: updateEventMutation, isPending: loadingUpdateEvent } = useAdminUpdateEventMutation({
+    onError: () => addToast({ message: "Impossible de modifier l'évènement", variant: 'error' }),
+  })
 
-  const { mutateAsync: deleteEventMutation, isPending: loadingDeleteEvent } = useAdminDeleteEventMutation()
-
-  const deleteEvent = async () => {
-    try {
-      const res = await deleteEventMutation({ id: eventId })
-      if (isRejection(res.adminDeleteEvent)) {
-        addToast({ message: rejectionMessage(res.adminDeleteEvent), variant: 'error' })
-        return
-      }
-      addToast({ message: 'Évènement supprimé avec succès', variant: 'success' })
-      await invalidateEvent()
-    } catch (error) {
+  const { mutateAsync: deleteEventMutation, isPending: loadingDeleteEvent } = useAdminDeleteEventMutation({
+    onError: error => {
       addToast({ message: "Impossible de supprimer l'évènement", variant: 'error' })
       console.error(error)
-    }
+    },
+  })
+
+  const deleteEvent = async () => {
+    const res = await deleteEventMutation({ id: eventId })
+    match(res.adminDeleteEvent)
+      .with({ __typename: 'VoidOutput' }, () => {
+        addToast({ message: 'Évènement supprimé avec succès', variant: 'success' })
+        void invalidateEvent()
+      })
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
   }
 
   const maintainerName = useMemo(() => {
@@ -225,25 +227,22 @@ export const AdminEventPage = ({ eventId }: AdminEventPageProps) => {
 
   const onSubmit = async (data: FormFields) => {
     const isoDate = data.eventDate!.toISODate()!
-    try {
-      const res = await updateEventMutation({
-        id: eventId,
-        input: {
-          title: data.title,
-          description: data.description === '' ? undefined : data.description,
-          icon: data.icon,
-          eventDate: isoDate,
-        },
+    const res = await updateEventMutation({
+      id: eventId,
+      input: {
+        title: data.title,
+        description: data.description === '' ? undefined : data.description,
+        icon: data.icon,
+        eventDate: isoDate,
+      },
+    })
+    match(res.adminUpdateEvent)
+      .with({ __typename: 'VoidOutput' }, () => {
+        addToast({ message: 'Évènement modifié avec succès', variant: 'success' })
+        void invalidateEvent()
       })
-      if (isRejection(res.adminUpdateEvent)) {
-        addToast({ message: rejectionMessage(res.adminUpdateEvent), variant: 'error' })
-        return
-      }
-      addToast({ message: 'Évènement modifié avec succès', variant: 'success' })
-      await invalidateEvent()
-    } catch {
-      addToast({ message: "Impossible de modifier l'évènement", variant: 'error' })
-    }
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
   }
 
   const loadingEdit =

@@ -7,10 +7,11 @@ import { useQueryClient } from '@tanstack/react-query'
 import { DateTime } from 'luxon'
 import { Controller, useForm } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
+import { match } from 'ts-pattern'
 import { z } from 'zod'
 
 import { updateUser as updateUserAction } from '../../core/store/features'
-import { isRejection, rejectionMessage, useUpdateUserProfileMutation } from '../../gql'
+import { rejectionMessage, rejectionPattern, useUpdateUserProfileMutation } from '../../gql'
 import { useToast } from '../../hooks/useToast'
 import { zodRequiredString } from '../../utils/validation'
 import { Card } from '../common/Card'
@@ -64,22 +65,22 @@ export const UserTabInformations = () => {
       },
     })
 
-    if (isRejection(res.updateUserProfile)) {
-      addToast({ message: rejectionMessage(res.updateUserProfile), variant: 'error' })
-      return
-    }
+    match(res.updateUserProfile)
+      .with({ __typename: 'User' }, () => {
+        addToast({ message: 'Profil mis à jour', variant: 'info' })
 
-    addToast({ message: 'Profil mis à jour', variant: 'info' })
+        dispatch(
+          updateUserAction({
+            firstName: data.firstname,
+            lastName: data.lastname,
+            birthday,
+          }),
+        )
 
-    dispatch(
-      updateUserAction({
-        firstName: data.firstname,
-        lastName: data.lastname,
-        birthday,
-      }),
-    )
-
-    void queryClient.invalidateQueries({ queryKey: ['UserProfileCurrentUser'] })
+        void queryClient.invalidateQueries({ queryKey: ['UserProfileCurrentUser'] })
+      })
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
   }
 
   return (

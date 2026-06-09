@@ -5,9 +5,10 @@ import AddIcon from '@mui/icons-material/Add'
 import { Box, Button, Stack, styled, Typography } from '@mui/material'
 import { useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
+import { match } from 'ts-pattern'
 
 import EmptySecretSantaIllustration from '../../assets/illustrations/secret-santa.png'
-import { isRejection, rejectionMessage, useCreateSecretSantaMutation } from '../../gql'
+import { rejectionMessage, rejectionPattern, useCreateSecretSantaMutation } from '../../gql'
 import { useToast } from '../../hooks'
 import { EditSecretSantaFormDialog } from './EditSecretSantaFormDialog'
 
@@ -76,27 +77,30 @@ export const NoSecretSanta = ({ eventId }: NoSecretSantaProps) => {
   const { addToast } = useToast()
   const [openModal, setOpenModal] = useState(false)
 
-  const { mutateAsync: createSecretSantaMutation, isPending: loading } = useCreateSecretSantaMutation()
+  const { mutateAsync: createSecretSantaMutation, isPending: loading } = useCreateSecretSantaMutation({
+    onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
+  })
 
   const createSecretSanta = async (input: SecretSantaFormInput) => {
-    try {
-      const res = await createSecretSantaMutation({
-        input: { eventId, budget: input.budget, description: input.description },
+    const res = await createSecretSantaMutation({
+      input: { eventId, budget: input.budget, description: input.description },
+    })
+    await match(res.createSecretSanta)
+      .with({ __typename: 'SecretSanta' }, async () => {
+        addToast({ message: 'Secret santa créé avec succès', variant: 'success' })
+        await queryClient.invalidateQueries({ queryKey: ['GetSecretSantaForEvent', { eventId }] })
       })
-      const result = res.createSecretSanta
-      if (isRejection(result)) {
-        const message =
-          result.__typename === 'ValidationRejection' && result.errors.length > 0
-            ? result.errors.map(error => error.message).join(', ')
-            : rejectionMessage(result)
-        addToast({ message, variant: 'error' })
-        return
-      }
-      addToast({ message: 'Secret santa créé avec succès', variant: 'success' })
-      await queryClient.invalidateQueries({ queryKey: ['GetSecretSantaForEvent', { eventId }] })
-    } catch {
-      addToast({ message: "Une erreur s'est produite", variant: 'error' })
-    }
+      .with({ __typename: 'ValidationRejection' }, rejection =>
+        addToast({
+          message:
+            rejection.errors.length > 0
+              ? rejection.errors.map(error => error.message).join(', ')
+              : rejectionMessage(rejection),
+          variant: 'error',
+        }),
+      )
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
   }
 
   return (

@@ -7,10 +7,12 @@ import { useQueryClient } from '@tanstack/react-query'
 import { MAX_EVENTS_BY_LIST } from '@wishlist/common'
 import { DateTime } from 'luxon'
 import { useMemo } from 'react'
+import { match } from 'ts-pattern'
 
 import {
   isRejection,
   rejectionMessage,
+  rejectionPattern,
   useEventSelectAvailableEventsQuery,
   useLinkWishlistToEventMutation,
   useUnlinkWishlistFromEventMutation,
@@ -59,22 +61,24 @@ export const EditWishlistEvent = ({ wishlistId, events }: EditWishlistEventsProp
 
   const attachEventToWishlist = async (eventId: EventId) => {
     const res = await attachEventToWishlistMutation({ id: wishlistId, eventId })
-    if (isRejection(res.linkWishlistToEvent)) {
-      addToast({ message: rejectionMessage(res.linkWishlistToEvent), variant: 'error' })
-      return
-    }
-    addToast({ message: 'La liaison entre cette liste et cet évènement à été ajoutée !', variant: 'info' })
-    void invalidateWishlist()
+    match(res.linkWishlistToEvent)
+      .with({ __typename: 'VoidOutput' }, () => {
+        addToast({ message: 'La liaison entre cette liste et cet évènement à été ajoutée !', variant: 'info' })
+        void invalidateWishlist()
+      })
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
   }
 
   const detachEventFromWishlist = async (eventId: EventId) => {
     const res = await detachEventFromWishlistMutation({ id: wishlistId, eventId })
-    if (isRejection(res.unlinkWishlistFromEvent)) {
-      addToast({ message: rejectionMessage(res.unlinkWishlistFromEvent), variant: 'error' })
-      return
-    }
-    addToast({ message: 'La liaison entre cette liste et cet évènement à été supprimée !', variant: 'info' })
-    void invalidateWishlist()
+    match(res.unlinkWishlistFromEvent)
+      .with({ __typename: 'VoidOutput' }, () => {
+        addToast({ message: 'La liaison entre cette liste et cet évènement à été supprimée !', variant: 'info' })
+        void invalidateWishlist()
+      })
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
   }
 
   const loading = useMemo(

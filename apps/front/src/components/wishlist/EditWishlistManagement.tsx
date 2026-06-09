@@ -4,10 +4,11 @@ import type { DetailedWishlist } from './wishlist.types'
 import PersonRemoveIcon from '@mui/icons-material/PersonRemove'
 import { Avatar, Box, Stack, Typography } from '@mui/material'
 import { useQueryClient } from '@tanstack/react-query'
+import { match } from 'ts-pattern'
 
 import {
-  isRejection,
   rejectionMessage,
+  rejectionPattern,
   useAddWishlistCoOwnerMutation,
   useRemoveWishlistCoOwnerMutation,
 } from '../../gql'
@@ -32,12 +33,13 @@ export const EditWishlistManagement = ({ wishlist }: EditWishlistManagementProps
   })
   const addCoOwner = async (userId: UserId) => {
     const res = await addCoOwnerMutation({ id: wishlist.id, input: { userId } })
-    if (isRejection(res.addWishlistCoOwner)) {
-      addToast({ message: rejectionMessage(res.addWishlistCoOwner), variant: 'error' })
-      return
-    }
-    addToast({ message: 'Co-gestionnaire ajouté avec succès', variant: 'success' })
-    void invalidateWishlist()
+    match(res.addWishlistCoOwner)
+      .with({ __typename: 'VoidOutput' }, () => {
+        addToast({ message: 'Co-gestionnaire ajouté avec succès', variant: 'success' })
+        void invalidateWishlist()
+      })
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
   }
 
   const { mutateAsync: removeCoOwnerMutation } = useRemoveWishlistCoOwnerMutation({
@@ -45,12 +47,13 @@ export const EditWishlistManagement = ({ wishlist }: EditWishlistManagementProps
   })
   const removeCoOwner = async () => {
     const res = await removeCoOwnerMutation({ id: wishlist.id })
-    if (isRejection(res.removeWishlistCoOwner)) {
-      addToast({ message: rejectionMessage(res.removeWishlistCoOwner), variant: 'error' })
-      return
-    }
-    addToast({ message: 'Co-gestionnaire retiré avec succès', variant: 'success' })
-    void invalidateWishlist()
+    match(res.removeWishlistCoOwner)
+      .with({ __typename: 'VoidOutput' }, () => {
+        addToast({ message: 'Co-gestionnaire retiré avec succès', variant: 'success' })
+        void invalidateWishlist()
+      })
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
   }
 
   return (

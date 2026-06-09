@@ -3,9 +3,10 @@ import SaveAsIcon from '@mui/icons-material/SaveAs'
 import { Button, Stack, styled, TextField, Typography } from '@mui/material'
 import { useNavigate, useSearch } from '@tanstack/react-router'
 import { useForm } from 'react-hook-form'
+import { match } from 'ts-pattern'
 import { z } from 'zod'
 
-import { isRejection, rejectionMessage, useAuthResetPasswordMutation } from '../../gql'
+import { rejectionMessage, rejectionPattern, useAuthResetPasswordMutation } from '../../gql'
 import { useToast } from '../../hooks/useToast'
 import { RouterLink } from '../common/RouterLink'
 
@@ -69,30 +70,28 @@ export const RenewForgotPasswordPage = () => {
     formState: { isSubmitting, errors: formErrors },
   } = useForm<FormFields>({ resolver: zodResolver(schema) })
 
-  const { mutateAsync: resetPassword } = useAuthResetPasswordMutation()
+  const { mutateAsync: resetPassword } = useAuthResetPasswordMutation({
+    onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
+  })
 
   const onSubmit = async (data: FormFields) => {
-    try {
-      const res = await resetPassword({
-        input: {
-          email,
-          token,
-          newPassword: data.password,
-        },
+    const res = await resetPassword({
+      input: {
+        email,
+        token,
+        newPassword: data.password,
+      },
+    })
+    match(res.resetPassword)
+      .with({ __typename: 'VoidOutput' }, () => {
+        addToast({
+          message: 'Le mot de passe à été réinitialisé avec succès. Vous pouvez maintenant vous connecter.',
+          variant: 'success',
+        })
+        void navigate({ to: '/login', search: { email } })
       })
-      const result = res.resetPassword
-      if (isRejection(result)) {
-        addToast({ message: rejectionMessage(result), variant: 'error' })
-        return
-      }
-      addToast({
-        message: 'Le mot de passe à été réinitialisé avec succès. Vous pouvez maintenant vous connecter.',
-        variant: 'success',
-      })
-      void navigate({ to: '/login', search: { email } })
-    } catch {
-      addToast({ message: "Une erreur s'est produite", variant: 'error' })
-    }
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
   }
 
   if (!email || !token) {

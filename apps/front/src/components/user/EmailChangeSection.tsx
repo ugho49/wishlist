@@ -4,11 +4,12 @@ import InfoIcon from '@mui/icons-material/Info'
 import { Alert, Button, Stack, TextField, Typography } from '@mui/material'
 import { useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
+import { match } from 'ts-pattern'
 import { z } from 'zod'
 
 import {
-  isRejection,
   rejectionMessage,
+  rejectionPattern,
   useRequestUserEmailChangeMutation,
   useUserPendingEmailChangeQuery,
 } from '../../gql'
@@ -51,18 +52,18 @@ export const EmailChangeSection = () => {
   const onSubmit = async (data: FormFields) => {
     const res = await requestEmailChange({ input: { newEmail: data.newEmail } })
 
-    if (isRejection(res.requestEmailChange)) {
-      addToast({ message: rejectionMessage(res.requestEmailChange), variant: 'error' })
-      return
-    }
-
-    addToast({
-      message:
-        'Un email de confirmation a été envoyé à votre nouvelle adresse. Vérifiez votre boîte de réception pour confirmer le changement.',
-      variant: 'success',
-    })
-    reset()
-    void queryClient.invalidateQueries({ queryKey: ['UserPendingEmailChange'] })
+    match(res.requestEmailChange)
+      .with({ __typename: 'VoidOutput' }, () => {
+        addToast({
+          message:
+            'Un email de confirmation a été envoyé à votre nouvelle adresse. Vérifiez votre boîte de réception pour confirmer le changement.',
+          variant: 'success',
+        })
+        reset()
+        void queryClient.invalidateQueries({ queryKey: ['UserPendingEmailChange'] })
+      })
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
   }
 
   return (

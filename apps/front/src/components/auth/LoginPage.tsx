@@ -5,10 +5,11 @@ import { useNavigate, useSearch } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useDispatch } from 'react-redux'
+import { match, P } from 'ts-pattern'
 import { z } from 'zod'
 
 import { setTokens } from '../../core/store/features'
-import { isRejection, rejectionMessage, useAuthLoginMutation, useAuthLoginWithGoogleMutation } from '../../gql'
+import { rejectionMessage, rejectionPattern, useAuthLoginMutation, useAuthLoginWithGoogleMutation } from '../../gql'
 import { useToast } from '../../hooks/useToast'
 import { RouterLink } from '../common/RouterLink'
 import { GoogleButton } from './GoogleButton'
@@ -77,48 +78,37 @@ export const LoginPage = () => {
     addToast({ message: "Une erreur s'est produite", variant: 'error' })
   }
 
-  const { mutateAsync: loginMutation } = useAuthLoginMutation()
-  const { mutateAsync: loginWithGoogleMutation } = useAuthLoginWithGoogleMutation()
+  const { mutateAsync: loginMutation } = useAuthLoginMutation({
+    onError: () => setError('root', { message: "Une erreur s'est produite." }),
+  })
+  const { mutateAsync: loginWithGoogleMutation } = useAuthLoginWithGoogleMutation({
+    onError: () => onSocialError(),
+  })
 
   const login = async (data: FormFields) => {
-    try {
-      const res = await loginMutation({ input: data })
-      const result = res.login
-      switch (result.__typename) {
-        case 'LoginOutput':
-          handleLoginSuccess(result.accessToken)
-          break
-        case 'UnauthorizedRejection':
-        case 'ValidationRejection':
-          setError('root', { message: 'Email ou mot de passe incorrect' })
-          break
-        default:
-          setError('root', { message: rejectionMessage(result) })
-      }
-    } catch {
-      setError('root', { message: "Une erreur s'est produite." })
-    }
+    const res = await loginMutation({ input: data })
+    match(res.login)
+      .with({ __typename: 'LoginOutput' }, output => handleLoginSuccess(output.accessToken))
+      .with({ __typename: P.union('UnauthorizedRejection', 'ValidationRejection') }, () =>
+        setError('root', { message: 'Email ou mot de passe incorrect' }),
+      )
+      .with(rejectionPattern, rejection => setError('root', { message: rejectionMessage(rejection) }))
+      .exhaustive()
   }
 
   const loginWithGoogle = async (code: string) => {
-    try {
-      const res = await loginWithGoogleMutation({ input: { code, createUserIfNotExists: false } })
-      const result = res.loginWithGoogle
-      if (isRejection(result)) {
+    const res = await loginWithGoogleMutation({ input: { code, createUserIfNotExists: false } })
+    match(res.loginWithGoogle)
+      .with({ __typename: 'LoginWithGoogleOutput' }, output => handleLoginSuccess(output.accessToken))
+      .with({ __typename: 'UnauthorizedRejection' }, () => {
         setSocialLoading(false)
-        addToast({
-          message:
-            result.__typename === 'UnauthorizedRejection'
-              ? 'Impossible de vous connecter avec ce compte Google'
-              : rejectionMessage(result),
-          variant: 'error',
-        })
-        return
-      }
-      handleLoginSuccess(result.accessToken)
-    } catch {
-      onSocialError()
-    }
+        addToast({ message: 'Impossible de vous connecter avec ce compte Google', variant: 'error' })
+      })
+      .with(rejectionPattern, rejection => {
+        setSocialLoading(false)
+        addToast({ message: rejectionMessage(rejection), variant: 'error' })
+      })
+      .exhaustive()
   }
 
   const onSubmit = (data: FormFields) => login(data)

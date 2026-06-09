@@ -2,9 +2,10 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import SaveIcon from '@mui/icons-material/Save'
 import { Alert, Box, Button, Stack, TextField } from '@mui/material'
 import { useForm } from 'react-hook-form'
+import { match } from 'ts-pattern'
 import { z } from 'zod'
 
-import { isRejection, rejectionMessage, useChangeUserPasswordMutation } from '../../gql'
+import { rejectionMessage, rejectionPattern, useChangeUserPasswordMutation } from '../../gql'
 import { useToast } from '../../hooks/useToast'
 import { Card } from '../common/Card'
 import { Subtitle } from '../common/Subtitle'
@@ -44,18 +45,16 @@ export const UserTabPassword = () => {
       },
     })
 
-    const result = res.changeUserPassword
-    if (isRejection(result)) {
-      if (result.__typename === 'ValidationRejection') {
-        setError('oldPassword', { message: "L'ancien mot de passe est incorrect" })
-      } else {
-        addToast({ message: rejectionMessage(result), variant: 'error' })
-      }
-      return
-    }
-
-    addToast({ message: 'Mot de passe mis à jour', variant: 'info' })
-    resetForm()
+    match(res.changeUserPassword)
+      .with({ __typename: 'VoidOutput' }, () => {
+        addToast({ message: 'Mot de passe mis à jour', variant: 'info' })
+        resetForm()
+      })
+      .with({ __typename: 'ValidationRejection' }, () =>
+        setError('oldPassword', { message: "L'ancien mot de passe est incorrect" }),
+      )
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
   }
 
   return (

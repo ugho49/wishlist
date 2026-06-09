@@ -2,8 +2,9 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import { CircularProgress, Stack, styled, Typography } from '@mui/material'
 import { useNavigate } from '@tanstack/react-router'
 import { useEffect, useRef, useState } from 'react'
+import { match } from 'ts-pattern'
 
-import { isRejection, useAuthConfirmEmailChangeMutation } from '../../gql'
+import { rejectionPattern, useAuthConfirmEmailChangeMutation } from '../../gql'
 import { RouterLink } from '../common/RouterLink'
 
 const ContainerStyled = styled(Stack)(({ theme }) => ({
@@ -65,7 +66,9 @@ export const ConfirmEmailChangePage = (props: ConfirmEmailChangePageProps) => {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
   const navigate = useNavigate()
 
-  const { mutateAsync: confirmEmailChange, isPending } = useAuthConfirmEmailChangeMutation()
+  const { mutateAsync: confirmEmailChange, isPending } = useAuthConfirmEmailChangeMutation({
+    onError: () => setError(true),
+  })
 
   useEffect(() => {
     const onSuccess = () => {
@@ -88,19 +91,17 @@ export const ConfirmEmailChangePage = (props: ConfirmEmailChangePageProps) => {
       timeoutRef.current = timeout
     }
 
-    if (email && token) {
-      confirmEmailChange({ input: { newEmail: email, token } })
-        .then(res => {
-          if (isRejection(res.confirmEmailChange)) {
-            setError(true)
-            return
-          }
-          onSuccess()
-        })
-        .catch(() => setError(true))
+    const confirm = async () => {
+      const res = await confirmEmailChange({ input: { newEmail: email, token } })
+      match(res.confirmEmailChange)
+        .with({ __typename: 'VoidOutput' }, () => onSuccess())
+        .with(rejectionPattern, () => setError(true))
+        .exhaustive()
     }
 
-    if (!email || !token) {
+    if (email && token) {
+      void confirm()
+    } else {
       setError(true)
     }
   }, [email, token, confirmEmailChange, navigate])

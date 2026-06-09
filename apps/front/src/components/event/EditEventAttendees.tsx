@@ -7,11 +7,12 @@ import { Box, Divider, List, ListItem, ListItemButton } from '@mui/material'
 import { useQueryClient } from '@tanstack/react-query'
 import { useMemo } from 'react'
 import { useSelector } from 'react-redux'
+import { match } from 'ts-pattern'
 
 import {
   AttendeeRole,
-  isRejection,
   rejectionMessage,
+  rejectionPattern,
   useAddEventAttendeeMutation,
   useRemoveEventAttendeeMutation,
 } from '../../gql'
@@ -41,35 +42,33 @@ export const EditEventAttendees = ({ eventId, attendees }: EditEventAttendeesPro
 
   const invalidateEvent = () => queryClient.invalidateQueries({ queryKey: ['EventPageGetEvent', { eventId }] })
 
-  const { mutateAsync: addAttendeeMutation, isPending: addAttendeePending } = useAddEventAttendeeMutation()
-  const { mutateAsync: removeAttendeeMutation, isPending: deleteAttendeePending } = useRemoveEventAttendeeMutation()
+  const { mutateAsync: addAttendeeMutation, isPending: addAttendeePending } = useAddEventAttendeeMutation({
+    onError: () => addToast({ message: "Impossible d'ajouter ce participant", variant: 'error' }),
+  })
+  const { mutateAsync: removeAttendeeMutation, isPending: deleteAttendeePending } = useRemoveEventAttendeeMutation({
+    onError: () => addToast({ message: 'Impossible de supprimer ce participant', variant: 'error' }),
+  })
 
   const addAttendee = async (email: string) => {
-    try {
-      const res = await addAttendeeMutation({ eventId, input: { email, role: AttendeeRole.User } })
-      if (isRejection(res.addEventAttendee)) {
-        addToast({ message: rejectionMessage(res.addEventAttendee), variant: 'error' })
-        return
-      }
-      addToast({ message: "Participant ajouté à l'évènement !", variant: 'info' })
-      await invalidateEvent()
-    } catch {
-      addToast({ message: "Impossible d'ajouter ce participant", variant: 'error' })
-    }
+    const res = await addAttendeeMutation({ eventId, input: { email, role: AttendeeRole.User } })
+    match(res.addEventAttendee)
+      .with({ __typename: 'EventAttendee' }, () => {
+        addToast({ message: "Participant ajouté à l'évènement !", variant: 'info' })
+        void invalidateEvent()
+      })
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
   }
 
   const deleteAttendee = async (attendeeId: AttendeeId) => {
-    try {
-      const res = await removeAttendeeMutation({ eventId, attendeeId })
-      if (isRejection(res.removeEventAttendee)) {
-        addToast({ message: rejectionMessage(res.removeEventAttendee), variant: 'error' })
-        return
-      }
-      addToast({ message: "Participant supprimé de l'évènement !", variant: 'info' })
-      await invalidateEvent()
-    } catch {
-      addToast({ message: 'Impossible de supprimer ce participant', variant: 'error' })
-    }
+    const res = await removeAttendeeMutation({ eventId, attendeeId })
+    match(res.removeEventAttendee)
+      .with({ __typename: 'VoidOutput' }, () => {
+        addToast({ message: "Participant supprimé de l'évènement !", variant: 'info' })
+        void invalidateEvent()
+      })
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
   }
 
   const loading = useMemo(

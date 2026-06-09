@@ -15,11 +15,13 @@ import { AdminListEvents } from '@wishlist/front-components/event/admin/AdminLis
 import { DateTime } from 'luxon'
 import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
+import { match } from 'ts-pattern'
 
 import { uploadAdminUserPicture } from '../../../api/upload'
 import {
   isRejection,
   rejectionMessage,
+  rejectionPattern,
   useAdminRemoveUserPictureMutation,
   useAdminUpdateUserProfileMutation,
   useAdminUserDetailQuery,
@@ -90,7 +92,10 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
   const value = data?.__typename === 'UserFull' ? data : undefined
   const queryRejection = data && isRejection(data) ? data : undefined
 
-  const { mutateAsync: updateUser } = useAdminUpdateUserProfileMutation()
+  const { mutateAsync: updateUser } = useAdminUpdateUserProfileMutation({
+    onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
+    onSettled: () => setLoading(false),
+  })
   const { mutateAsync: removeUserPicture } = useAdminRemoveUserPictureMutation()
 
   const invalidateUser = () => queryClient.invalidateQueries({ queryKey: ['AdminUserDetail', { userId }] })
@@ -111,20 +116,14 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
   const setUserEnabled = async (isEnabled: boolean) => {
     setLoading(true)
     setEnabled(isEnabled)
-    try {
-      const res = await updateUser({ userId, input: { isEnabled } })
-      const result = res.adminUpdateUserProfile
-      if (isRejection(result)) {
-        addToast({ message: rejectionMessage(result), variant: 'error' })
-        return
-      }
-      void invalidateUser()
-      addToast({ message: isEnabled ? 'Utilisateur activé' : 'Utilisateur désactivé', variant: 'success' })
-    } catch {
-      addToast({ message: "Une erreur s'est produite", variant: 'error' })
-    } finally {
-      setLoading(false)
-    }
+    const res = await updateUser({ userId, input: { isEnabled } })
+    match(res.adminUpdateUserProfile)
+      .with({ __typename: 'VoidOutput' }, () => {
+        void invalidateUser()
+        addToast({ message: isEnabled ? 'Utilisateur activé' : 'Utilisateur désactivé', variant: 'success' })
+      })
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
   }
 
   const disableUser = () => setUserEnabled(false)
@@ -133,28 +132,22 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
   const updateProfile = async (e: FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    try {
-      const res = await updateUser({
-        userId,
-        input: {
-          firstname,
-          lastname,
-          birthday: birthday !== null ? birthday.toISODate() || undefined : undefined,
-          email,
-        },
+    const res = await updateUser({
+      userId,
+      input: {
+        firstname,
+        lastname,
+        birthday: birthday !== null ? birthday.toISODate() || undefined : undefined,
+        email,
+      },
+    })
+    match(res.adminUpdateUserProfile)
+      .with({ __typename: 'VoidOutput' }, () => {
+        void invalidateUser()
+        addToast({ message: 'Profil mis à jour', variant: 'success' })
       })
-      const result = res.adminUpdateUserProfile
-      if (isRejection(result)) {
-        addToast({ message: rejectionMessage(result), variant: 'error' })
-        return
-      }
-      void invalidateUser()
-      addToast({ message: 'Profil mis à jour', variant: 'success' })
-    } catch {
-      addToast({ message: "Une erreur s'est produite", variant: 'error' })
-    } finally {
-      setLoading(false)
-    }
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
   }
 
   return (
@@ -182,10 +175,14 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
           updatePictureFromSocialHandler={() => Promise.resolve()}
           deletePictureHandler={async () => {
             const res = await removeUserPicture({ userId })
-            const result = res.adminRemoveUserPicture
             // AvatarUpdateButton owns the error UI for this handler: throwing keeps
             // its catch path (error toast) and prevents it from clearing the picture.
-            if (isRejection(result)) throw new Error(rejectionMessage(result))
+            match(res.adminRemoveUserPicture)
+              .with({ __typename: 'VoidOutput' }, () => undefined)
+              .with(rejectionPattern, rejection => {
+                throw new Error(rejectionMessage(rejection))
+              })
+              .exhaustive()
           }}
         />
       </Stack>

@@ -31,8 +31,9 @@ import clsx from 'clsx'
 import { DateTime } from 'luxon'
 import React, { useCallback, useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
+import { match } from 'ts-pattern'
 
-import { isRejection, rejectionMessage, useDeleteItemMutation, useToggleItemMutation } from '../../gql'
+import { rejectionMessage, rejectionPattern, useDeleteItemMutation, useToggleItemMutation } from '../../gql'
 import { useToast } from '../../hooks'
 import { Card } from '../common/Card'
 import { ConfirmMenuItem } from '../common/ConfirmMenuItem'
@@ -376,12 +377,13 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
   })
   const deleteItem = async () => {
     const res = await deleteItemMutation({ itemId: item.id })
-    if (isRejection(res.deleteItem)) {
-      addToast({ message: rejectionMessage(res.deleteItem), variant: 'error' })
-      return
-    }
-    addToast({ message: 'Le souhait à bien été supprimé', variant: 'success' })
-    void queryClient.invalidateQueries({ queryKey: ['WishlistPage', { wishlistId: wishlist.id }] })
+    match(res.deleteItem)
+      .with({ __typename: 'VoidOutput' }, () => {
+        addToast({ message: 'Le souhait à bien été supprimé', variant: 'success' })
+        void queryClient.invalidateQueries({ queryKey: ['WishlistPage', { wishlistId: wishlist.id }] })
+      })
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
   }
 
   const { mutateAsync: toggleItemMutation, isPending: toggleItemPending } = useToggleItemMutation({
@@ -389,37 +391,41 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
   })
   const toggleItem = async () => {
     const res = await toggleItemMutation({ itemId: item.id })
-    const output = res.toggleItem
-    if (isRejection(output)) {
-      addToast({ message: rejectionMessage(output), variant: 'error' })
-      return
-    }
-    const action = output.takenById != null ? 'check' : 'uncheck'
-    setTakenBy(
-      output.takenById != null
-        ? { id: output.takenById, firstName: currentUserProfile.firstName, pictureUrl: currentUserProfile.pictureUrl }
-        : undefined,
-    )
+    match(res.toggleItem)
+      .with({ __typename: 'ToggleItemOutput' }, output => {
+        const action = output.takenById != null ? 'check' : 'uncheck'
+        setTakenBy(
+          output.takenById != null
+            ? {
+                id: output.takenById,
+                firstName: currentUserProfile.firstName,
+                pictureUrl: currentUserProfile.pictureUrl,
+              }
+            : undefined,
+        )
 
-    if (action === 'check') {
-      addToast({
-        message: (
-          <span>
-            Vous avez coché : <b>{item.name}</b>
-          </span>
-        ),
-        variant: 'success',
+        if (action === 'check') {
+          addToast({
+            message: (
+              <span>
+                Vous avez coché : <b>{item.name}</b>
+              </span>
+            ),
+            variant: 'success',
+          })
+        } else {
+          addToast({
+            message: (
+              <span>
+                Le souhait <b>{item.name}</b> est à nouveau disponible
+              </span>
+            ),
+            variant: 'info',
+          })
+        }
       })
-    } else {
-      addToast({
-        message: (
-          <span>
-            Le souhait <b>{item.name}</b> est à nouveau disponible
-          </span>
-        ),
-        variant: 'info',
-      })
-    }
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
   }
 
   const loading = useMemo(() => deleteItemPending || toggleItemPending, [deleteItemPending, toggleItemPending])

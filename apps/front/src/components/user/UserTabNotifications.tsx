@@ -4,10 +4,12 @@ import SaveIcon from '@mui/icons-material/Save'
 import { Alert, Box, Button, Checkbox, FormControlLabel, Stack, Typography } from '@mui/material'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
+import { match } from 'ts-pattern'
 
 import {
   isRejection,
   rejectionMessage,
+  rejectionPattern,
   useUpdateUserEmailSettingsMutation,
   useUserProfileEmailSettingsQuery,
 } from '../../gql'
@@ -47,13 +49,13 @@ export const UserTabNotifications = () => {
       },
     })
 
-    if (isRejection(res.updateUserEmailSettings)) {
-      addToast({ message: rejectionMessage(res.updateUserEmailSettings), variant: 'error' })
-      return
-    }
-
-    addToast({ message: 'Préférences de notification mis à jour', variant: 'info' })
-    void queryClient.invalidateQueries({ queryKey: ['UserProfileEmailSettings'] })
+    match(res.updateUserEmailSettings)
+      .with({ __typename: 'UserEmailSettings' }, () => {
+        addToast({ message: 'Préférences de notification mis à jour', variant: 'info' })
+        void queryClient.invalidateQueries({ queryKey: ['UserProfileEmailSettings'] })
+      })
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
   }
 
   return (

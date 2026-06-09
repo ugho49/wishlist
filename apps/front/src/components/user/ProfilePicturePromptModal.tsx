@@ -14,12 +14,13 @@ import {
 } from '@mui/material'
 import { useQueryClient } from '@tanstack/react-query'
 import { useDispatch, useSelector } from 'react-redux'
+import { match } from 'ts-pattern'
 
 import { uploadUserPicture } from '../../api/upload'
 import { updatePicture } from '../../core/store/features'
 import {
-  isRejection,
   rejectionMessage,
+  rejectionPattern,
   useRemoveCurrentUserPictureMutation,
   useUpdateUserPictureFromSocialMutation,
   useUserProfileCurrentUserQuery,
@@ -124,19 +125,25 @@ export const ProfilePicturePromptModal = ({ open, onClose }: ProfilePicturePromp
           uploadPictureHandler={file => uploadUserPicture(file)}
           updatePictureFromSocialHandler={async socialId => {
             const res = await updatePictureFromSocial({ input: { socialId } })
-            if (isRejection(res.updateUserPictureFromSocial)) {
-              addToast({ message: rejectionMessage(res.updateUserPictureFromSocial), variant: 'error' })
-              // AvatarUpdateButton applies the new picture unless the handler throws
-              throw new Error(rejectionMessage(res.updateUserPictureFromSocial))
-            }
+            match(res.updateUserPictureFromSocial)
+              .with({ __typename: 'VoidOutput' }, () => undefined)
+              .with(rejectionPattern, rejection => {
+                addToast({ message: rejectionMessage(rejection), variant: 'error' })
+                // AvatarUpdateButton applies the new picture unless the handler throws
+                throw new Error(rejectionMessage(rejection))
+              })
+              .exhaustive()
           }}
           deletePictureHandler={async () => {
             const res = await removePicture({})
-            if (isRejection(res.removeUserPicture)) {
-              addToast({ message: rejectionMessage(res.removeUserPicture), variant: 'error' })
-              // AvatarUpdateButton removes the picture unless the handler throws
-              throw new Error(rejectionMessage(res.removeUserPicture))
-            }
+            match(res.removeUserPicture)
+              .with({ __typename: 'VoidOutput' }, () => undefined)
+              .with(rejectionPattern, rejection => {
+                addToast({ message: rejectionMessage(rejection), variant: 'error' })
+                // AvatarUpdateButton removes the picture unless the handler throws
+                throw new Error(rejectionMessage(rejection))
+              })
+              .exhaustive()
           }}
           size="120px"
         />

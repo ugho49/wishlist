@@ -25,9 +25,10 @@ import { useNavigate } from '@tanstack/react-router'
 import { useMemo, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { useSelector } from 'react-redux'
+import { match } from 'ts-pattern'
 import { z } from 'zod'
 
-import { AttendeeRole, isRejection, rejectionMessage, useCreateEventMutation } from '../../gql'
+import { AttendeeRole, rejectionMessage, rejectionPattern, useCreateEventMutation } from '../../gql'
 import { useToast } from '../../hooks/useToast'
 import { Card } from '../common/Card'
 import { CharsRemaining } from '../common/CharsRemaining'
@@ -102,33 +103,31 @@ export const CreateEventPage = () => {
     [attendees],
   )
 
-  const { mutateAsync: createEventMutation, isPending: loading } = useCreateEventMutation()
+  const { mutateAsync: createEventMutation, isPending: loading } = useCreateEventMutation({
+    onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
+  })
 
   const createEvent = async () => {
     const isoDate = formValues.eventDate!.toISODate()!
-    try {
-      const res = await createEventMutation({
-        input: {
-          title: formValues.title,
-          description: formValues.description === '' ? undefined : formValues.description,
-          icon: formValues.icon,
-          eventDate: isoDate,
-          attendees: attendees.map(attendee => ({
-            email: typeof attendee.user === 'string' ? attendee.user : attendee.user.email,
-            role: attendee.role,
-          })),
-        },
+    const res = await createEventMutation({
+      input: {
+        title: formValues.title,
+        description: formValues.description === '' ? undefined : formValues.description,
+        icon: formValues.icon,
+        eventDate: isoDate,
+        attendees: attendees.map(attendee => ({
+          email: typeof attendee.user === 'string' ? attendee.user : attendee.user.email,
+          role: attendee.role,
+        })),
+      },
+    })
+    match(res.createEvent)
+      .with({ __typename: 'Event' }, created => {
+        addToast({ message: 'Evènement créé avec succès', variant: 'success' })
+        void navigate({ to: '/events/$eventId', params: { eventId: created.id } })
       })
-      const created = res.createEvent
-      if (isRejection(created)) {
-        addToast({ message: rejectionMessage(created), variant: 'error' })
-        return
-      }
-      addToast({ message: 'Evènement créé avec succès', variant: 'success' })
-      void navigate({ to: '/events/$eventId', params: { eventId: created.id } })
-    } catch {
-      addToast({ message: "Une erreur s'est produite", variant: 'error' })
-    }
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
   }
 
   return (

@@ -3,9 +3,10 @@ import AttachEmailIcon from '@mui/icons-material/AttachEmail'
 import { Box, Button, Stack, styled, TextField, Typography } from '@mui/material'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { match } from 'ts-pattern'
 import { z } from 'zod'
 
-import { isRejection, rejectionMessage, useAuthSendResetPasswordEmailMutation } from '../../gql'
+import { rejectionMessage, rejectionPattern, useAuthSendResetPasswordEmailMutation } from '../../gql'
 import { useToast } from '../../hooks/useToast'
 import { RouterLink } from '../common/RouterLink'
 
@@ -54,21 +55,19 @@ export const ForgotPasswordPage = () => {
     formState: { isSubmitting, errors: formErrors },
   } = useForm<FormFields>({ resolver: zodResolver(schema) })
 
-  const { mutateAsync: sendResetPasswordEmail } = useAuthSendResetPasswordEmailMutation()
+  const { mutateAsync: sendResetPasswordEmail } = useAuthSendResetPasswordEmailMutation({
+    onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
+  })
 
   const onSubmit = async (data: FormFields) => {
-    try {
-      const res = await sendResetPasswordEmail({ input: data })
-      const result = res.sendResetPasswordEmail
-      if (isRejection(result)) {
-        addToast({ message: rejectionMessage(result), variant: 'error' })
-        return
-      }
-      setResetCodeSent(true)
-      addToast({ message: 'Un email vient de vous être envoyé pour réinitialiser le mot de passe', variant: 'info' })
-    } catch {
-      addToast({ message: "Une erreur s'est produite", variant: 'error' })
-    }
+    const res = await sendResetPasswordEmail({ input: data })
+    match(res.sendResetPasswordEmail)
+      .with({ __typename: 'VoidOutput' }, () => {
+        setResetCodeSent(true)
+        addToast({ message: 'Un email vient de vous être envoyé pour réinitialiser le mot de passe', variant: 'info' })
+      })
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
   }
 
   return (

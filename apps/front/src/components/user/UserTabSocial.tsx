@@ -10,11 +10,12 @@ import { UserSocialType } from '@wishlist/common'
 import { useToast } from '@wishlist/front-hooks'
 import { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import { match } from 'ts-pattern'
 
 import { addUserSocial, removeUserSocial } from '../../core/store/features'
 import {
-  isRejection,
   rejectionMessage,
+  rejectionPattern,
   useLinkCurrentUserWithGoogleMutation,
   useUnlinkCurrentUserSocialMutation,
 } from '../../gql'
@@ -137,25 +138,26 @@ export const UserTabSocial = () => {
 
   const unlinkSocial = async (socialId: UserSocialId) => {
     const res = await unlinkSocialMutation({ socialId })
-    if (isRejection(res.unlinkCurrentUserSocial)) {
-      addToast({ message: rejectionMessage(res.unlinkCurrentUserSocial), variant: 'error' })
-      return
-    }
-    dispatch(removeUserSocial(socialId))
-    void invalidateCurrentUser()
-    addToast({ message: 'Compte google dissocié avec succès', variant: 'success' })
+    match(res.unlinkCurrentUserSocial)
+      .with({ __typename: 'VoidOutput' }, () => {
+        dispatch(removeUserSocial(socialId))
+        void invalidateCurrentUser()
+        addToast({ message: 'Compte google dissocié avec succès', variant: 'success' })
+      })
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
   }
 
   const linkSocial = async (code: string) => {
     const res = await linkSocialMutation({ input: { code } })
-    const social = res.linkCurrentUserWithGoogle
-    if (isRejection(social)) {
-      addToast({ message: rejectionMessage(social), variant: 'error' })
-      return
-    }
-    dispatch(addUserSocial(social))
-    void invalidateCurrentUser()
-    addToast({ message: 'Compte Google lié avec succès', variant: 'success' })
+    match(res.linkCurrentUserWithGoogle)
+      .with({ __typename: 'UserSocial' }, social => {
+        dispatch(addUserSocial(social))
+        void invalidateCurrentUser()
+        addToast({ message: 'Compte Google lié avec succès', variant: 'success' })
+      })
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
   }
 
   return (

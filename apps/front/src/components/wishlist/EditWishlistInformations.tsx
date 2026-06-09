@@ -8,12 +8,13 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import { useMemo, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
+import { match } from 'ts-pattern'
 import { z } from 'zod'
 
 import { uploadWishlistLogo } from '../../api/upload'
 import {
-  isRejection,
   rejectionMessage,
+  rejectionPattern,
   useDeleteWishlistMutation,
   useRemoveWishlistLogoMutation,
   useUpdateWishlistMutation,
@@ -78,29 +79,29 @@ export const EditWishlistInformations = ({ wishlist }: EditWishlistInformationsP
 
   const removeLogo = async () => {
     const res = await removeLogoMutation({ id: wishlist.id })
-    if (isRejection(res.removeWishlistLogo)) {
-      addToast({ message: rejectionMessage(res.removeWishlistLogo), variant: 'error' })
-      return
-    }
-    setLogoUrl(undefined)
-    addToast({ message: 'Logo supprimé', variant: 'info' })
-    void invalidateWishlist()
+    match(res.removeWishlistLogo)
+      .with({ __typename: 'VoidOutput' }, () => {
+        setLogoUrl(undefined)
+        addToast({ message: 'Logo supprimé', variant: 'info' })
+        void invalidateWishlist()
+      })
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
   }
 
-  const { mutateAsync: deleteWishlistMutation } = useDeleteWishlistMutation()
+  const { mutateAsync: deleteWishlistMutation } = useDeleteWishlistMutation({
+    onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
+  })
 
   const deleteWishlist = async () => {
-    try {
-      const res = await deleteWishlistMutation({ id: wishlist.id })
-      if (isRejection(res.deleteWishlist)) {
-        addToast({ message: rejectionMessage(res.deleteWishlist), variant: 'error' })
-        return
-      }
-      addToast({ message: 'La liste à bien été supprimée', variant: 'success' })
-      void navigate({ to: '/wishlists' })
-    } catch {
-      addToast({ message: "Une erreur s'est produite", variant: 'error' })
-    }
+    const res = await deleteWishlistMutation({ id: wishlist.id })
+    match(res.deleteWishlist)
+      .with({ __typename: 'VoidOutput' }, () => {
+        addToast({ message: 'La liste à bien été supprimée', variant: 'success' })
+        void navigate({ to: '/wishlists' })
+      })
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
   }
 
   const loadingLogoUpdate = useMemo(
@@ -113,12 +114,13 @@ export const EditWishlistInformations = ({ wishlist }: EditWishlistInformationsP
       id: wishlist.id,
       input: { title: data.title, description: data.description === '' ? undefined : data.description },
     })
-    if (isRejection(res.updateWishlist)) {
-      addToast({ message: rejectionMessage(res.updateWishlist), variant: 'error' })
-      return
-    }
-    addToast({ message: 'Liste mis à jour', variant: 'info' })
-    void invalidateWishlist()
+    match(res.updateWishlist)
+      .with({ __typename: 'VoidOutput' }, () => {
+        addToast({ message: 'Liste mis à jour', variant: 'info' })
+        void invalidateWishlist()
+      })
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
   }
 
   return (

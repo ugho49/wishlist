@@ -8,9 +8,10 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import { DateTime } from 'luxon'
 import { Controller, useForm } from 'react-hook-form'
+import { match } from 'ts-pattern'
 import { z } from 'zod'
 
-import { isRejection, rejectionMessage, useDeleteEventMutation, useUpdateEventMutation } from '../../gql'
+import { rejectionMessage, rejectionPattern, useDeleteEventMutation, useUpdateEventMutation } from '../../gql'
 import { useToast } from '../../hooks/useToast'
 import { Card } from '../common/Card'
 import { CharsRemaining } from '../common/CharsRemaining'
@@ -59,45 +60,43 @@ export const EditEventInformations = ({ event }: EditEventInformationsProps) => 
 
   const formValues = watch()
 
-  const { mutateAsync: updateEventMutation, isPending: loading } = useUpdateEventMutation()
-  const { mutateAsync: deleteEventMutation } = useDeleteEventMutation()
+  const { mutateAsync: updateEventMutation, isPending: loading } = useUpdateEventMutation({
+    onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
+  })
+  const { mutateAsync: deleteEventMutation } = useDeleteEventMutation({
+    onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
+  })
 
   const onSubmit = async (data: FormFields) => {
     const isoDate = data.eventDate!.toISODate()!
-    try {
-      const res = await updateEventMutation({
-        id: event.id,
-        input: {
-          title: data.title,
-          description: data.description === '' ? undefined : data.description,
-          icon: data.icon,
-          eventDate: isoDate,
-        },
+    const res = await updateEventMutation({
+      id: event.id,
+      input: {
+        title: data.title,
+        description: data.description === '' ? undefined : data.description,
+        icon: data.icon,
+        eventDate: isoDate,
+      },
+    })
+    match(res.updateEvent)
+      .with({ __typename: 'VoidOutput' }, () => {
+        addToast({ message: 'Évènement mis à jour', variant: 'info' })
+        void queryClient.invalidateQueries({ queryKey: ['EventPageGetEvent', { eventId: event.id }] })
       })
-      if (isRejection(res.updateEvent)) {
-        addToast({ message: rejectionMessage(res.updateEvent), variant: 'error' })
-        return
-      }
-      addToast({ message: 'Évènement mis à jour', variant: 'info' })
-      await queryClient.invalidateQueries({ queryKey: ['EventPageGetEvent', { eventId: event.id }] })
-    } catch {
-      addToast({ message: "Une erreur s'est produite", variant: 'error' })
-    }
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
   }
 
   const deleteEvent = async () => {
-    try {
-      const res = await deleteEventMutation({ id: event.id })
-      if (isRejection(res.deleteEvent)) {
-        addToast({ message: rejectionMessage(res.deleteEvent), variant: 'error' })
-        return
-      }
-      await queryClient.invalidateQueries({ queryKey: ['EventListPageGetEvents'] })
-      addToast({ message: "L'évènement à bien été supprimée", variant: 'success' })
-      void navigate({ to: '/events' })
-    } catch {
-      addToast({ message: "Une erreur s'est produite", variant: 'error' })
-    }
+    const res = await deleteEventMutation({ id: event.id })
+    match(res.deleteEvent)
+      .with({ __typename: 'VoidOutput' }, () => {
+        void queryClient.invalidateQueries({ queryKey: ['EventListPageGetEvents'] })
+        addToast({ message: "L'évènement à bien été supprimée", variant: 'success' })
+        void navigate({ to: '/events' })
+      })
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
   }
 
   return (
