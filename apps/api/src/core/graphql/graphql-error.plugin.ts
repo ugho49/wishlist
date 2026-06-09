@@ -1,6 +1,7 @@
 import { ForbiddenException, HttpException, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common'
 import { Plugin } from 'graphql-yoga'
 
+import { BusinessRuleException } from '../common/business-rule.exception'
 import { Rejection } from './rejection.types'
 import { ZodValidationException } from './zod-validation.exception'
 
@@ -16,6 +17,16 @@ function transformException(exception: Error): Rejection {
     return {
       __typename: 'ValidationRejection',
       errors,
+    }
+  }
+
+  // Handle BusinessRuleException (must come before the generic HttpException branch,
+  // BusinessRuleException extends BadRequestException)
+  if (exception instanceof BusinessRuleException) {
+    return {
+      __typename: 'BusinessRuleRejection',
+      code: exception.code,
+      message: exception.message,
     }
   }
 

@@ -15,6 +15,15 @@ type ValidationRejection {
   errors: [FieldError!]!
 }
 
+enum BusinessRuleCode {
+  WRONG_OLD_PASSWORD
+}
+
+type BusinessRuleRejection {
+  code: BusinessRuleCode!
+  message: String!
+}
+
 type UnauthorizedRejection {
   message: String!
 }

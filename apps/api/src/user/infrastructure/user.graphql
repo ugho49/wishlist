@@ -145,6 +145,7 @@ union UnlinkCurrentUserSocialResult =
 union ChangeUserPasswordResult =
   | VoidOutput
   | ValidationRejection
+  | BusinessRuleRejection
   | UnauthorizedRejection
   | ForbiddenRejection
   | InternalErrorRejection

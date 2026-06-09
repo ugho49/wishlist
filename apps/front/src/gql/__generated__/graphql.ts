@@ -1591,6 +1591,10 @@ export const ChangeUserPasswordDocument = `
         message
       }
     }
+    ... on BusinessRuleRejection {
+      code
+      message
+    }
   }
 }
     `;

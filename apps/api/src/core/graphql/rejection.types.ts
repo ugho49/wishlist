@@ -1,3 +1,5 @@
+import { BusinessRuleCode } from '../common/business-rule.exception'
+
 type FieldError = {
   field: string
   message: string
@@ -6,6 +8,12 @@ type FieldError = {
 export type ValidationRejection = {
   __typename: 'ValidationRejection'
   errors: FieldError[]
+}
+
+export type BusinessRuleRejection = {
+  __typename: 'BusinessRuleRejection'
+  code: BusinessRuleCode
+  message: string
 }
 
 export type UnauthorizedRejection = {
@@ -30,6 +38,7 @@ export type InternalErrorRejection = {
 
 export type Rejection =
   | ValidationRejection
+  | BusinessRuleRejection
   | UnauthorizedRejection
   | ForbiddenRejection
   | NotFoundRejection
