@@ -1,5 +1,4 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import SaveAsIcon from '@mui/icons-material/SaveAs'
 import { Button, Stack, styled, TextField, Typography } from '@mui/material'
 import { useNavigate, useSearch } from '@tanstack/react-router'
 import { useForm } from 'react-hook-form'
@@ -9,6 +8,7 @@ import { z } from 'zod'
 import { rejectionMessage, rejectionPattern, useAuthResetPasswordMutation } from '../../gql'
 import { useToast } from '../../hooks/useToast'
 import { RouterLink } from '../common/RouterLink'
+import { AuthFormHeader } from './AuthFormHeader'
 
 const schema = z
   .object({
@@ -21,14 +21,6 @@ const schema = z
   })
 
 type FormFields = z.infer<typeof schema>
-
-const TitleStyled = styled(Typography)(({ theme }) => ({
-  fontSize: '1.75rem',
-  fontWeight: 600,
-  color: theme.palette.text.primary,
-  textAlign: 'center',
-  marginBottom: 24,
-}))
 
 const ButtonStyled = styled(Button)(() => ({
   paddingTop: 12,
@@ -48,15 +40,6 @@ const ErrorMessageStyled = styled(Typography)(({ theme }) => ({
   color: theme.palette.error.main,
   fontSize: '1.1rem',
   fontWeight: 500,
-}))
-
-const InfoMessageStyled = styled(Typography)(({ theme }) => ({
-  textAlign: 'center',
-  color: theme.palette.text.secondary,
-  backgroundColor: theme.palette.grey[50],
-  padding: theme.spacing(2),
-  borderRadius: theme.shape.borderRadius,
-  border: `1px solid ${theme.palette.grey[200]}`,
 }))
 
 export const RenewForgotPasswordPage = () => {
@@ -104,12 +87,15 @@ export const RenewForgotPasswordPage = () => {
   }
 
   return (
-    <Stack spacing={4} alignItems="center">
-      <TitleStyled variant="h4">Changer de mot de passe</TitleStyled>
-
-      <InfoMessageStyled variant="body1">
-        Vous êtes en train de définir un nouveau mot de passe pour <strong>{email}</strong>
-      </InfoMessageStyled>
+    <Stack spacing={4}>
+      <AuthFormHeader
+        title="Nouveau mot de passe"
+        subtitle={
+          <>
+            Vous définissez un nouveau mot de passe pour <strong>{email}</strong>.
+          </>
+        }
+      />
 
       <Stack component="form" onSubmit={handleSubmit(onSubmit)} spacing={3} width="100%">
         <TextField
@@ -142,8 +128,6 @@ export const RenewForgotPasswordPage = () => {
           size="large"
           color="primary"
           loading={isSubmitting}
-          loadingPosition="start"
-          startIcon={<SaveAsIcon />}
           disabled={isSubmitting}
         >
           Changer mon mot de passe
