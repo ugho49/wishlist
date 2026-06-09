@@ -50,9 +50,9 @@ export const UserTabPassword = () => {
         addToast({ message: 'Mot de passe mis à jour', variant: 'info' })
         resetForm()
       })
-      .with({ __typename: 'ValidationRejection' }, () =>
-        setError('oldPassword', { message: "L'ancien mot de passe est incorrect" }),
-      )
+      // A wrong old password arrives as InternalErrorRejection (BadRequestException
+      // on the API side), not ValidationRejection, so it gets the default message
+      // like the other rejections until the API exposes a typed case for it.
       .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
       .exhaustive()
   }
