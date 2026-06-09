@@ -1,153 +1,115 @@
 import type { ButtonProps } from '@mui/material'
 import type { LinkProps } from '@tanstack/react-router'
 
+import { CalendarMonthRounded, RedeemRounded, ShuffleRounded } from '@mui/icons-material'
 import { Box, Button, Container, Typography } from '@mui/material'
 import { keyframes, styled } from '@mui/material/styles'
 import { Link } from '@tanstack/react-router'
 
-import { Logo } from '../common/Logo'
+import { landingTokens } from './landing.tokens'
 
-// Animations
-const twinkle = keyframes`
-  0%, 100% { 
-    opacity: 0.2;
-    transform: scale(0.8);
-    filter: brightness(0.8);
+const fadeUp = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(16px);
   }
-  50% { 
+  to {
     opacity: 1;
-    transform: scale(1.5);
-    filter: brightness(1.5);
-  }
-`
-
-const shimmer = keyframes`
-  0% { 
-    opacity: 0.4;
-    filter: brightness(1);
-  }
-  50% { 
-    opacity: 1;
-    filter: brightness(2);
-  }
-  100% { 
-    opacity: 0.4;
-    filter: brightness(1);
-  }
-`
-
-const colorShift = keyframes`
-  0%, 100% {
-    filter: hue-rotate(0deg) brightness(1) saturate(1);
-  }
-  25% {
-    filter: hue-rotate(-3deg) brightness(1.05) saturate(1.1);
-  }
-  50% {
-    filter: hue-rotate(3deg) brightness(0.95) saturate(0.95);
-  }
-  75% {
-    filter: hue-rotate(-2deg) brightness(1.02) saturate(1.05);
+    transform: translateY(0);
   }
 `
 
 const HeroContainer = styled(Box)(() => ({
-  background: 'linear-gradient(135deg, #1a3a52 0%, #255376 50%, #1a3a52 100%)',
-  minHeight: '100vh',
+  backgroundColor: landingTokens.paper,
+  backgroundImage: `radial-gradient(ellipse 60% 50% at 85% 10%, ${landingTokens.blueTint} 0%, transparent 70%)`,
   position: 'relative',
   overflow: 'hidden',
-  display: 'flex',
-  alignItems: 'center',
-  animation: `${colorShift} 10s ease-in-out infinite`,
-}))
-
-// Container for all stars
-const StarsContainer = styled(Box)(() => ({
-  position: 'absolute',
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
-  pointerEvents: 'none',
-  zIndex: 0,
-}))
-
-// Animated Star Points
-const StarPoint = styled(Box)(() => ({
-  position: 'absolute',
-  width: '2px',
-  height: '2px',
-  backgroundColor: '#ffffff',
-  borderRadius: '50%',
-  pointerEvents: 'none',
-  boxShadow: '0 0 10px rgba(255, 255, 255, 1), 0 0 20px rgba(147, 197, 253, 0.8)',
-  animation: `${twinkle} 1.5s ease-in-out infinite`,
-}))
-
-const BiggerStar = styled(Box)(() => ({
-  position: 'absolute',
-  width: '3px',
-  height: '3px',
-  backgroundColor: '#ffffff',
-  borderRadius: '50%',
-  pointerEvents: 'none',
-  boxShadow: '0 0 15px rgba(255, 255, 255, 1), 0 0 30px rgba(147, 197, 253, 1)',
-  animation: `${shimmer} 1s ease-in-out infinite`,
 }))
 
 const ContentWrapper = styled(Container)(({ theme }) => ({
-  position: 'relative',
-  zIndex: 1,
   display: 'grid',
-  gridTemplateColumns: '1fr 400px',
-  gap: theme.spacing(8),
+  gridTemplateColumns: '1.05fr 0.95fr',
+  gap: theme.spacing(10),
   alignItems: 'center',
   paddingTop: theme.spacing(12),
+  paddingBottom: theme.spacing(14),
   [theme.breakpoints.down('md')]: {
     gridTemplateColumns: '1fr',
-    gap: theme.spacing(4),
-    textAlign: 'center',
-    paddingTop: theme.spacing(14),
+    gap: theme.spacing(8),
+    paddingTop: theme.spacing(8),
+    paddingBottom: theme.spacing(10),
   },
 }))
 
-const MainContent = styled(Box)(() => ({
-  color: 'white',
+const MainContent = styled(Box)(({ theme }) => ({
+  '& > *': {
+    animation: `${fadeUp} 0.7s ease both`,
+  },
+  '& > *:nth-of-type(2)': { animationDelay: '0.1s' },
+  '& > *:nth-of-type(3)': { animationDelay: '0.2s' },
+  '& > *:nth-of-type(4)': { animationDelay: '0.3s' },
+  '& > *:nth-of-type(5)': { animationDelay: '0.4s' },
+  '@media (prefers-reduced-motion: reduce)': {
+    '& > *': { animation: 'none' },
+  },
+  [theme.breakpoints.down('md')]: {
+    textAlign: 'center',
+  },
 }))
 
-const GradientTitle = styled(Typography)(({ theme }) => ({
-  background: 'linear-gradient(135deg, #ffffff 0%, #e0f2fe 100%)',
-  backgroundClip: 'text',
-  WebkitBackgroundClip: 'text',
-  WebkitTextFillColor: 'transparent',
-  fontSize: '3.5rem',
-  fontWeight: 700,
-  lineHeight: 1.2,
+const Kicker = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing(1.5),
   marginBottom: theme.spacing(3),
   [theme.breakpoints.down('md')]: {
-    fontSize: '2.5rem',
+    justifyContent: 'center',
   },
-  [theme.breakpoints.down('sm')]: {
-    fontSize: '2rem',
+}))
+
+const KickerRule = styled(Box)(() => ({
+  width: 28,
+  height: 1,
+  backgroundColor: landingTokens.accent,
+}))
+
+const KickerText = styled(Typography)(() => ({
+  color: landingTokens.accent,
+  fontSize: '0.8rem',
+  fontWeight: 600,
+  letterSpacing: '0.18em',
+  textTransform: 'uppercase',
+}))
+
+const HeroTitle = styled(Typography)(({ theme }) => ({
+  fontFamily: landingTokens.displayFont,
+  fontWeight: 500,
+  fontSize: 'clamp(2.5rem, 5vw, 4rem)',
+  lineHeight: 1.12,
+  letterSpacing: '-0.02em',
+  color: landingTokens.ink,
+  marginBottom: theme.spacing(3),
+  '& em': {
+    fontStyle: 'italic',
+    color: theme.palette.primary.main,
   },
 }))
 
 const Subtitle = styled(Typography)(({ theme }) => ({
-  color: 'rgba(255, 255, 255, 0.9)',
-  fontSize: '1.25rem',
-  lineHeight: 1.6,
-  marginBottom: theme.spacing(4),
-  maxWidth: '500px',
+  color: landingTokens.inkMuted,
+  fontSize: '1.15rem',
+  lineHeight: 1.7,
+  marginBottom: theme.spacing(5),
+  maxWidth: 480,
   [theme.breakpoints.down('md')]: {
-    fontSize: '1.1rem',
-    maxWidth: 'none',
+    margin: `0 auto ${theme.spacing(5)}`,
   },
 }))
 
 const ButtonGroup = styled(Box)(({ theme }) => ({
   display: 'flex',
   gap: theme.spacing(2),
-  marginBottom: theme.spacing(6),
+  marginBottom: theme.spacing(3),
   [theme.breakpoints.down('md')]: {
     justifyContent: 'center',
   },
@@ -157,283 +119,276 @@ const ButtonGroup = styled(Box)(({ theme }) => ({
 }))
 
 const PrimaryButton = styled(Button)<ButtonProps & LinkProps>(({ theme }) => ({
-  backgroundColor: 'white',
-  color: theme.palette.primary.main,
   fontWeight: 600,
-  fontSize: '1.1rem',
+  fontSize: '1.05rem',
   padding: theme.spacing(1.5, 4),
-  borderRadius: theme.spacing(1),
-  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
-  transition: 'all 0.3s ease',
+  boxShadow: '0 8px 24px -8px rgba(37, 83, 118, 0.5)',
   '&:hover': {
-    backgroundColor: '#f8fafc',
-    transform: 'translateY(-2px)',
-    boxShadow: '0 8px 30px rgba(0, 0, 0, 0.15)',
+    boxShadow: '0 12px 28px -8px rgba(37, 83, 118, 0.55)',
+    transform: 'translateY(-1px)',
   },
 }))
 
 const SecondaryButton = styled(Button)<ButtonProps & LinkProps>(({ theme }) => ({
-  borderColor: 'white',
-  color: 'white',
   fontWeight: 600,
-  fontSize: '1.1rem',
+  fontSize: '1.05rem',
   padding: theme.spacing(1.5, 4),
-  borderRadius: theme.spacing(1),
-  transition: 'all 0.3s ease',
+  color: landingTokens.ink,
+  borderColor: landingTokens.hairline,
+  backgroundColor: landingTokens.surface,
   '&:hover': {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderColor: 'white',
-    transform: 'translateY(-2px)',
+    borderColor: landingTokens.ink,
+    backgroundColor: landingTokens.surface,
   },
 }))
 
-const FeaturesSidebar = styled(Box)(({ theme }) => ({
-  backgroundColor: 'rgba(255, 255, 255, 0.95)',
-  borderRadius: theme.spacing(2),
-  padding: theme.spacing(4),
-  boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1)',
-  backdropFilter: 'blur(10px)',
+const TrustLine = styled(Typography)(() => ({
+  color: landingTokens.inkMuted,
+  fontSize: '0.85rem',
+}))
+
+// --- Product mock ---------------------------------------------------------
+
+const MockArea = styled(Box)(({ theme }) => ({
+  position: 'relative',
+  animation: `${fadeUp} 0.7s ease 0.25s both`,
+  '@media (prefers-reduced-motion: reduce)': {
+    animation: 'none',
+  },
   [theme.breakpoints.down('md')]: {
+    maxWidth: 440,
     margin: '0 auto',
-    maxWidth: '400px',
-    marginBottom: theme.spacing(6),
+    width: '100%',
   },
 }))
 
-const FeatureItem = styled(Box)(({ theme }) => ({
+const BackCard = styled(Box)(({ theme }) => ({
+  position: 'absolute',
+  inset: theme.spacing(3, -2, -3, 2),
+  backgroundColor: landingTokens.surface,
+  border: `1px solid ${landingTokens.hairline}`,
+  borderRadius: theme.spacing(2.5),
+  transform: 'rotate(3deg)',
+  opacity: 0.7,
+}))
+
+const MainCard = styled(Box)(({ theme }) => ({
+  position: 'relative',
+  backgroundColor: landingTokens.surface,
+  border: `1px solid ${landingTokens.hairline}`,
+  borderRadius: theme.spacing(2.5),
+  padding: theme.spacing(3.5),
+  boxShadow: '0 32px 64px -32px rgba(28, 43, 54, 0.3)',
+}))
+
+const CardHeader = styled(Box)(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   gap: theme.spacing(2),
-  marginBottom: theme.spacing(3),
-  '&:last-child': {
-    marginBottom: 0,
-  },
+  paddingBottom: theme.spacing(2.5),
+  borderBottom: `1px solid ${landingTokens.hairline}`,
 }))
 
-const FeatureIcon = styled(Box)(({ theme }) => ({
-  width: 48,
-  height: 48,
-  borderRadius: theme.spacing(1),
+const IconChip = styled(Box)(({ theme }) => ({
+  width: 44,
+  height: 44,
+  borderRadius: theme.spacing(1.5),
+  backgroundColor: landingTokens.blueTint,
+  color: theme.palette.primary.main,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  fontSize: '1.5rem',
-  fontWeight: 600,
-  color: 'white',
+  flexShrink: 0,
 }))
 
-const FeatureContent = styled(Box)(() => ({
+const CardHeaderText = styled(Box)(() => ({
   flex: 1,
+  minWidth: 0,
 }))
 
-const FeatureTitle = styled(Typography)(({ theme }) => ({
+const EventTitle = styled(Typography)(() => ({
   fontWeight: 600,
-  color: theme.palette.text.primary,
-  marginBottom: theme.spacing(0.5),
+  color: landingTokens.ink,
+  fontSize: '1.05rem',
+  lineHeight: 1.3,
 }))
 
-const FeatureDescription = styled(Typography)(({ theme }) => ({
-  fontSize: '0.9rem',
-  color: theme.palette.text.secondary,
-  lineHeight: 1.4,
+const EventMeta = styled(Typography)(() => ({
+  color: landingTokens.inkMuted,
+  fontSize: '0.85rem',
 }))
 
-const NavBar = styled(Box)(({ theme }) => ({
-  position: 'absolute',
-  top: 0,
-  left: 0,
-  right: 0,
-  zIndex: 10,
+const AvatarRow = styled(Box)(() => ({
+  display: 'flex',
+  '& > *:not(:first-of-type)': {
+    marginLeft: -8,
+  },
+}))
+
+const InitialAvatar = styled(Box, {
+  shouldForwardProp: prop => prop !== 'bg' && prop !== 'fg',
+})<{ bg: string; fg: string }>(({ bg, fg }) => ({
+  width: 30,
+  height: 30,
+  borderRadius: '50%',
+  backgroundColor: bg,
+  color: fg,
+  border: `2px solid ${landingTokens.surface}`,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  fontSize: '0.7rem',
+  fontWeight: 600,
+}))
+
+const ItemRow = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing(1.75),
   padding: theme.spacing(2, 0),
-  backdropFilter: 'blur(10px)',
-  borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-  transition: 'padding 0.3s ease',
+  '&:not(:last-of-type)': {
+    borderBottom: `1px solid ${landingTokens.hairline}`,
+  },
 }))
 
-const NavContent = styled(Container)(() => ({
+const ItemIcon = styled(Box)(({ theme }) => ({
+  width: 34,
+  height: 34,
+  borderRadius: theme.spacing(1),
+  backgroundColor: landingTokens.paper,
+  color: landingTokens.inkMuted,
   display: 'flex',
-  justifyContent: 'space-between',
   alignItems: 'center',
+  justifyContent: 'center',
+  flexShrink: 0,
 }))
 
-const NavRightGroup = styled(Box)(({ theme }) => ({
+const ItemName = styled(Typography)(() => ({
+  flex: 1,
+  fontWeight: 500,
+  fontSize: '0.95rem',
+  color: landingTokens.ink,
+}))
+
+const StatusChip = styled(Box, {
+  shouldForwardProp: prop => prop !== 'reserved',
+})<{ reserved?: boolean }>(({ reserved }) => ({
+  padding: '3px 12px',
+  borderRadius: 999,
+  fontSize: '0.75rem',
+  fontWeight: 600,
+  whiteSpace: 'nowrap',
+  ...(reserved
+    ? { backgroundColor: '#e7f2eb', color: '#2f7a52' }
+    : { border: `1px solid ${landingTokens.hairline}`, color: landingTokens.inkMuted }),
+}))
+
+const FloatingBadge = styled(Box)(({ theme }) => ({
+  position: 'absolute',
+  top: theme.spacing(-2.5),
+  right: theme.spacing(-1.5),
   display: 'flex',
   alignItems: 'center',
-  gap: theme.spacing(4),
-}))
-
-const NavLinks = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  gap: theme.spacing(4),
-  [theme.breakpoints.down('md')]: {
-    display: 'none',
+  gap: theme.spacing(1),
+  backgroundColor: landingTokens.surface,
+  border: `1px solid ${landingTokens.hairline}`,
+  borderRadius: 999,
+  padding: theme.spacing(1, 2),
+  boxShadow: '0 12px 24px -12px rgba(28, 43, 54, 0.25)',
+  transform: 'rotate(2deg)',
+  zIndex: 1,
+  [theme.breakpoints.down('sm')]: {
+    right: theme.spacing(0.5),
   },
 }))
 
-const NavLink = styled(Typography)(() => ({
-  color: 'rgba(255, 255, 255, 0.9)',
-  textDecoration: 'none',
-  fontWeight: 500,
-  transition: 'color 0.3s ease',
-  cursor: 'pointer',
-  '&:hover': {
-    color: 'white',
-  },
+const FloatingBadgeText = styled(Typography)(() => ({
+  fontSize: '0.8rem',
+  fontWeight: 600,
+  color: landingTokens.ink,
 }))
 
-const handleSmoothScroll = (elementId: string) => {
-  const element = document.getElementById(elementId)
-  if (element) {
-    element.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start',
-    })
-  }
-}
-
-const LoginButton = styled(Button)<ButtonProps & LinkProps>(() => ({
-  color: 'white',
-  borderColor: 'rgba(255, 255, 255, 0.3)',
-  fontWeight: 500,
-  transition: 'all 0.3s ease',
-  '&:hover': {
-    borderColor: 'white',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-  },
-}))
-
-const features = [
-  {
-    icon: '📅',
-    title: 'Événements organisés',
-    description: 'Créez des événements pour toutes vos célébrations et invitez vos proches facilement.',
-    bgColor: '#f59e0b',
-  },
-  {
-    icon: '👨‍👩‍👧‍👦',
-    title: 'Partage en famille',
-    description: 'Partagez vos listes de souhaits avec famille et amis pour des surprises réussies.',
-    bgColor: '#10b981',
-  },
-  {
-    icon: '✨',
-    title: 'Expérience magique',
-    description: 'Interface intuitive et design élégant pour une expérience utilisateur exceptionnelle.',
-    bgColor: '#8b5cf6',
-  },
+const mockItems = [
+  { name: 'Machine à expresso', reserved: true },
+  { name: 'Plaid en laine mérinos', reserved: true },
+  { name: 'Coffret de thés verts', reserved: false },
 ]
 
-const navItems = [
-  { label: 'Fonctionnalités', targetId: 'features' },
-  { label: 'FAQ', targetId: 'faq' },
+const mockAvatars = [
+  { initials: 'CL', bg: '#edf2f6', fg: '#255376' },
+  { initials: 'MA', bg: '#f3eee4', fg: '#a87b2d' },
+  { initials: 'JD', bg: '#e7f2eb', fg: '#2f7a52' },
 ]
 
 export const HeroSection = () => {
-  // Generate star positions
-  const smallStars = Array.from({ length: 70 }, (_, i) => ({
-    id: i,
-    top: Math.random() * 100,
-    left: Math.random() * 100,
-    delay: Math.random() * 1.5,
-  }))
-
-  const bigStars = Array.from({ length: 25 }, (_, i) => ({
-    id: i,
-    top: Math.random() * 100,
-    left: Math.random() * 100,
-    delay: Math.random() * 1,
-  }))
-
   return (
     <HeroContainer>
-      <StarsContainer id="stars">
-        {/* Small twinkling stars */}
-        {smallStars.map(star => (
-          <StarPoint
-            key={`small-${star.id}`}
-            sx={{
-              top: `${star.top}%`,
-              left: `${star.left}%`,
-              animationDelay: `${star.delay}s`,
-            }}
-          />
-        ))}
-
-        {/* Bigger shimmering stars */}
-        {bigStars.map(star => (
-          <BiggerStar
-            key={`big-${star.id}`}
-            sx={{
-              top: `${star.top}%`,
-              left: `${star.left}%`,
-              animationDelay: `${star.delay}s`,
-            }}
-          />
-        ))}
-      </StarsContainer>
-
-      <NavBar>
-        <NavContent maxWidth="lg">
-          <Logo variant="full" color="white" />
-          <NavRightGroup>
-            <NavLinks>
-              {navItems.map(item => (
-                <NavLink key={item.label} onClick={() => handleSmoothScroll(item.targetId)}>
-                  {item.label}
-                </NavLink>
-              ))}
-            </NavLinks>
-            <LoginButton variant="outlined" component={Link} to="/login">
-              Connexion
-            </LoginButton>
-          </NavRightGroup>
-        </NavContent>
-      </NavBar>
-
       <ContentWrapper maxWidth="lg">
         <MainContent>
-          <GradientTitle variant="h1">
-            Organisez vos
-            <br />
-            <span
-              style={{
-                background: 'linear-gradient(135deg, #60a5fa 0%, #93c5fd 50%, #dbeafe 100%)',
-                backgroundClip: 'text',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                textShadow: '0 0 30px rgba(147, 197, 253, 0.8)',
-              }}
-            >
-              moments magiques
-            </span>
-          </GradientTitle>
+          <Kicker>
+            <KickerRule />
+            <KickerText>Listes de souhaits partagées</KickerText>
+          </Kicker>
+
+          <HeroTitle variant="h1">
+            Le bon cadeau,
+            <br />à <em>chaque</em> occasion.
+          </HeroTitle>
 
           <Subtitle>
-            Partagez vos souhaits avec vos proches et découvrez leurs envies. Parfait pour les anniversaires, Noël,
-            mariages et plus encore.
+            Créez vos listes de souhaits, partagez-les avec vos proches et réservez les cadeaux en toute discrétion.
+            Anniversaires, Noël, mariages — tout au même endroit.
           </Subtitle>
 
           <ButtonGroup>
             <PrimaryButton variant="contained" size="large" component={Link} to="/register">
-              Créer ma première liste
+              Créer ma liste gratuitement
             </PrimaryButton>
             <SecondaryButton variant="outlined" size="large" component={Link} to="/login">
-              Découvrir
+              Se connecter
             </SecondaryButton>
           </ButtonGroup>
+
+          <TrustLine>Gratuit · Réservations discrètes · Secret Santa intégré</TrustLine>
         </MainContent>
 
-        <FeaturesSidebar>
-          {features.map((feature, index) => (
-            <FeatureItem key={index}>
-              <FeatureIcon style={{ backgroundColor: feature.bgColor }}>{feature.icon}</FeatureIcon>
-              <FeatureContent>
-                <FeatureTitle>{feature.title}</FeatureTitle>
-                <FeatureDescription>{feature.description}</FeatureDescription>
-              </FeatureContent>
-            </FeatureItem>
-          ))}
-        </FeaturesSidebar>
+        <MockArea aria-hidden="true">
+          <BackCard />
+          <FloatingBadge>
+            <ShuffleRounded sx={{ fontSize: 18, color: 'primary.main' }} />
+            <FloatingBadgeText>Secret Santa · tirage effectué</FloatingBadgeText>
+          </FloatingBadge>
+          <MainCard>
+            <CardHeader>
+              <IconChip>
+                <CalendarMonthRounded fontSize="small" />
+              </IconChip>
+              <CardHeaderText>
+                <EventTitle>Noël en famille</EventTitle>
+                <EventMeta>25 décembre · 8 participants</EventMeta>
+              </CardHeaderText>
+              <AvatarRow>
+                {mockAvatars.map(avatar => (
+                  <InitialAvatar key={avatar.initials} bg={avatar.bg} fg={avatar.fg}>
+                    {avatar.initials}
+                  </InitialAvatar>
+                ))}
+              </AvatarRow>
+            </CardHeader>
+
+            <Box>
+              {mockItems.map(item => (
+                <ItemRow key={item.name}>
+                  <ItemIcon>
+                    <RedeemRounded sx={{ fontSize: 18 }} />
+                  </ItemIcon>
+                  <ItemName>{item.name}</ItemName>
+                  <StatusChip reserved={item.reserved}>{item.reserved ? 'Réservé' : 'Disponible'}</StatusChip>
+                </ItemRow>
+              ))}
+            </Box>
+          </MainCard>
+        </MockArea>
       </ContentWrapper>
     </HeroContainer>
   )
