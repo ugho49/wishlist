@@ -26,6 +26,7 @@ import { P } from 'ts-pattern'
 
 const REJECTION_TYPENAMES = [
   'ValidationRejection',
+  'BusinessRuleRejection',
   'UnauthorizedRejection',
   'ForbiddenRejection',
   'NotFoundRejection',
@@ -51,6 +52,7 @@ export const rejectionPattern = { __typename: P.string.endsWith('Rejection') } a
 
 const DEFAULT_MESSAGES: Record<RejectionTypename, string> = {
   ValidationRejection: 'Certaines informations saisies sont invalides',
+  BusinessRuleRejection: 'Cette action ne peut pas être effectuée',
   UnauthorizedRejection: 'Vous devez être connecté pour effectuer cette action',
   ForbiddenRejection: "Vous n'avez pas les droits nécessaires pour effectuer cette action",
   NotFoundRejection: "Cette ressource n'existe pas ou a été supprimée",

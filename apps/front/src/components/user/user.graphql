@@ -104,6 +104,10 @@ mutation ChangeUserPassword($input: ChangeUserPasswordInput!) {
         message
       }
     }
+    ... on BusinessRuleRejection {
+      code
+      message
+    }
   }
 }
 

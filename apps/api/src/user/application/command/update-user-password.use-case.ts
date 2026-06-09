@@ -1,5 +1,6 @@
-import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common'
+import { Inject, Injectable, Logger } from '@nestjs/common'
 import { PasswordManager } from '@wishlist/api/auth'
+import { BusinessRuleException } from '@wishlist/api/core'
 import { REPOSITORIES } from '@wishlist/api/repositories'
 import { UserId } from '@wishlist/common'
 
@@ -31,7 +32,7 @@ export class UpdateUserPasswordUseCase {
     })
 
     if (!oldPasswordMatch) {
-      throw new BadRequestException("Old password don't match with user password")
+      throw new BusinessRuleException('WRONG_OLD_PASSWORD', "Old password don't match with user password")
     }
 
     const newPasswordHash = await PasswordManager.hash(newPassword)

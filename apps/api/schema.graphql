@@ -99,6 +99,15 @@ enum AttendeeRole {
   USER
 }
 
+enum BusinessRuleCode {
+  WRONG_OLD_PASSWORD
+}
+
+type BusinessRuleRejection {
+  code: BusinessRuleCode!
+  message: String!
+}
+
 union CancelSecretSantaResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | VoidOutput
 
 input ChangeUserPasswordInput {
@@ -106,7 +115,7 @@ input ChangeUserPasswordInput {
   oldPassword: String!
 }
 
-union ChangeUserPasswordResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+union ChangeUserPasswordResult = BusinessRuleRejection | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
 type ClosestFriendsOutput {
   users: [User!]!

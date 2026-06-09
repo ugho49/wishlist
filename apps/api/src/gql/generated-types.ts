@@ -118,6 +118,16 @@ export enum AttendeeRole {
   User = 'USER'
 }
 
+export enum BusinessRuleCode {
+  WrongOldPassword = 'WRONG_OLD_PASSWORD'
+}
+
+export type BusinessRuleRejection = {
+  __typename: 'BusinessRuleRejection';
+  code: BusinessRuleCode;
+  message: Scalars['String']['output'];
+};
+
 export type CancelSecretSantaResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | VoidOutput;
 
 export type ChangeUserPasswordInput = {
@@ -125,7 +135,7 @@ export type ChangeUserPasswordInput = {
   oldPassword: Scalars['String']['input'];
 };
 
-export type ChangeUserPasswordResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+export type ChangeUserPasswordResult = BusinessRuleRejection | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
 export type ClosestFriendsOutput = {
   __typename: 'ClosestFriendsOutput';

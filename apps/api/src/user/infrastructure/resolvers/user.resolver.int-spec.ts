@@ -360,6 +360,10 @@ describe('UserResolver (GraphQL)', () => {
               message
             }
           }
+          ... on BusinessRuleRejection {
+            code
+            message
+          }
           ... on InternalErrorRejection {
             message
           }
@@ -396,8 +400,11 @@ describe('UserResolver (GraphQL)', () => {
 
       const res = await request.post('/graphql').send({ query: mutation, variables: { input } }).expect(200)
 
-      // BadRequestException -> InternalErrorRejection (not a specifically-mapped exception type).
-      expect(res.body.data.changeUserPassword.__typename).toBe('InternalErrorRejection')
+      expect(res.body.data.changeUserPassword).toEqual({
+        __typename: 'BusinessRuleRejection',
+        code: 'WRONG_OLD_PASSWORD',
+        message: "Old password don't match with user password",
+      })
 
       await expectTable(Fixtures.USER_TABLE)
         .row(0)

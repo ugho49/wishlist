@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form'
 import { match } from 'ts-pattern'
 import { z } from 'zod'
 
-import { rejectionMessage, rejectionPattern, useChangeUserPasswordMutation } from '../../gql'
+import { BusinessRuleCode, rejectionMessage, rejectionPattern, useChangeUserPasswordMutation } from '../../gql'
 import { useToast } from '../../hooks/useToast'
 import { Card } from '../common/Card'
 import { Subtitle } from '../common/Subtitle'
@@ -50,9 +50,9 @@ export const UserTabPassword = () => {
         addToast({ message: 'Mot de passe mis à jour', variant: 'info' })
         resetForm()
       })
-      // A wrong old password arrives as InternalErrorRejection (BadRequestException
-      // on the API side), not ValidationRejection, so it gets the default message
-      // like the other rejections until the API exposes a typed case for it.
+      .with({ __typename: 'BusinessRuleRejection', code: BusinessRuleCode.WrongOldPassword }, () =>
+        setError('oldPassword', { message: "L'ancien mot de passe est incorrect" }),
+      )
       .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
       .exhaustive()
   }
