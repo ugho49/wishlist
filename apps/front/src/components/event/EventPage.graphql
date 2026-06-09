@@ -1,0 +1,42 @@
+query EventPageGetEvent($eventId: EventId!) {
+  event(id: $eventId) {
+    __typename
+    ... on Event {
+      id
+      title
+      description
+      icon
+      eventDate
+      attendees {
+        id
+        userId
+        pendingEmail
+        role
+        user {
+          id
+          firstName
+          lastName
+          email
+          pictureUrl
+        }
+      }
+      wishlists {
+        id
+        title
+        logoUrl
+        config {
+          hideItems
+        }
+        owner {
+          id
+          firstName
+          lastName
+          pictureUrl
+        }
+      }
+    }
+    ... on NotFoundRejection {
+      message
+    }
+  }
+}

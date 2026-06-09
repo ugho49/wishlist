@@ -1,6 +1,17 @@
 import type { TransitionProps } from '@mui/material/transitions'
-import type { UpdateSecretSantaInputDto } from '@wishlist/common'
 import type React from 'react'
+
+export type SecretSantaFormInput = {
+  budget?: number
+  description?: string
+}
+
+// The current values fed into the dialog may come straight from a GraphQL
+// object where nullable fields are `null` rather than `undefined`.
+export type SecretSantaFormValues = {
+  budget?: number | null
+  description?: string | null
+}
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import CloseIcon from '@mui/icons-material/Close'
@@ -56,8 +67,8 @@ export type EditSecretSantaFormDialogProps = {
   open: boolean
   title: string
   saveButtonText: string
-  input: UpdateSecretSantaInputDto
-  handleSubmit: (output: UpdateSecretSantaInputDto) => void
+  input: SecretSantaFormValues
+  handleSubmit: (output: SecretSantaFormInput) => void
   handleClose: () => void
 }
 
@@ -79,8 +90,8 @@ export const EditSecretSantaFormDialog = ({
   } = useForm<FormFields>({
     resolver: zodResolver(schema),
     defaultValues: {
-      budget: input.budget,
-      description: input.description,
+      budget: input.budget ?? undefined,
+      description: input.description ?? undefined,
     },
   })
 
@@ -99,8 +110,8 @@ export const EditSecretSantaFormDialog = ({
   useEffect(() => {
     if (!input) return
 
-    setValue('description', input.description)
-    setValue('budget', input.budget)
+    setValue('description', input.description ?? undefined)
+    setValue('budget', input.budget ?? undefined)
   }, [input])
 
   return (

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 
 import { OnboardingService } from '../core/services/onboarding.service'
-import { useFetchUserInfo } from './domain/useFetchUserInfo'
+import { useUserProfileCurrentUserQuery } from '../gql'
 
 const mapState = (state: RootState) => ({
   pictureUrl: state.userProfile.pictureUrl,
@@ -12,7 +12,10 @@ const mapState = (state: RootState) => ({
 })
 
 export const useProfilePicturePrompt = () => {
-  const { user } = useFetchUserInfo()
+  const { data } = useUserProfileCurrentUserQuery(undefined, {
+    select: d => d.currentUser,
+  })
+  const user = data?.__typename === 'User' ? data : undefined
   const { pictureUrl, userId } = useSelector(mapState)
   const [shouldShowPrompt, setShouldShowPrompt] = useState(false)
 

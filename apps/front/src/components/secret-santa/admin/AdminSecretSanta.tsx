@@ -1,4 +1,6 @@
-import type { SecretSantaDto, SecretSantaUserId, UpdateSecretSantaInputDto } from '@wishlist/common'
+import type { SecretSantaUserId } from '@wishlist/common'
+import type { SecretSantaFormInput } from '../EditSecretSantaFormDialog'
+import type { SecretSantaItem } from '../secret-santa.types'
 
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance'
@@ -21,10 +23,10 @@ import {
   useTheme,
 } from '@mui/material'
 import { DataGrid } from '@mui/x-data-grid'
-import { SecretSantaStatus } from '@wishlist/common'
 import { DateTime } from 'luxon'
 import { useState } from 'react'
 
+import { SecretSantaStatus } from '../../../gql'
 import { eurosFormatter } from '../../../utils/currency.utils'
 import { BreaklineText } from '../../common/BreaklineText'
 import { ConfirmButton } from '../../common/ConfirmButton'
@@ -32,12 +34,12 @@ import { ConfirmIconButton } from '../../common/ConfirmIconButton'
 import { EditSecretSantaFormDialog } from '../EditSecretSantaFormDialog'
 
 type AdminSecretSantaProps = {
-  secretSanta: SecretSantaDto
+  secretSanta: SecretSantaItem
   loading?: boolean
   deleteSecretSanta: () => void
   startSecretSanta: () => void
   cancelSecretSanta: () => void
-  updateSecretSanta: (input: UpdateSecretSantaInputDto) => void
+  updateSecretSanta: (input: SecretSantaFormInput) => void
   removeSecretSantaUser: (secretSantaUserId: SecretSantaUserId) => void
 }
 
@@ -90,7 +92,7 @@ export const AdminSecretSanta = ({
             </ListItemIcon>
             <ListItemText
               primary="Créé le"
-              secondary={DateTime.fromISO(secretSanta.created_at || '').toLocaleString(
+              secondary={DateTime.fromISO(secretSanta.createdAt || '').toLocaleString(
                 DateTime.DATETIME_MED_WITH_SECONDS,
               )}
             />
@@ -126,7 +128,7 @@ export const AdminSecretSanta = ({
         justifyContent="flex-end"
         mb={2}
       >
-        {secretSanta.status === SecretSantaStatus.CREATED && (
+        {secretSanta.status === SecretSantaStatus.Created && (
           <>
             <Button
               sx={{ padding: '3px 10px' }}
@@ -172,7 +174,7 @@ export const AdminSecretSanta = ({
           </>
         )}
 
-        {secretSanta.status === SecretSantaStatus.STARTED && (
+        {secretSanta.status === SecretSantaStatus.Started && (
           <ConfirmButton
             sx={{ padding: '3px 10px' }}
             confirmTitle="Confirmer l'annulation du tirage"
@@ -200,10 +202,10 @@ export const AdminSecretSanta = ({
         }}
         rows={secretSanta.users.map(u => ({
           id: u.id,
-          firstname: u.attendee.user?.firstname,
-          lastname: u.attendee.user?.lastname,
-          email: u.attendee.user?.email ?? u.attendee.pending_email,
-          pictureUrl: u.attendee.user?.picture_url,
+          firstname: u.attendee.user?.firstName,
+          lastname: u.attendee.user?.lastName,
+          email: u.attendee.user?.email ?? u.attendee.pendingEmail,
+          pictureUrl: u.attendee.user?.pictureUrl ?? undefined,
           exclusions: u.exclusions.length,
         }))}
         columns={[
@@ -235,7 +237,7 @@ export const AdminSecretSanta = ({
                   confirmTitle="Supprimer le participant"
                   confirmText="Êtes-vous sûr de vouloir supprimer ce participant ?"
                   onClick={() => removeSecretSantaUser(row.id)}
-                  disabled={secretSanta.status !== SecretSantaStatus.CREATED || loading}
+                  disabled={secretSanta.status !== SecretSantaStatus.Created || loading}
                   size="small"
                   color="error"
                 >

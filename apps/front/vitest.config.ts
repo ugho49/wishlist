@@ -8,6 +8,7 @@ export default mergeConfig(
     test: {
       globals: true,
       environment: 'jsdom',
+      setupFiles: ['./src/test-setup.ts'],
       include: ['src/**/*.spec.{ts,tsx}'],
       reporters: ['default', 'junit'],
       outputFile: '../../junit_reports/unit/front.xml',

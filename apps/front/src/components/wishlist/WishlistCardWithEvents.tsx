@@ -1,5 +1,5 @@
-import type { WishlistWithEventsDto } from '@wishlist/common'
 import type { RootState } from '../../core'
+import type { WishlistListItem } from './wishlist.types'
 
 import PublicIcon from '@mui/icons-material/Public'
 import { styled, Typography } from '@mui/material'
@@ -14,7 +14,7 @@ import { EventIcon } from '../event/EventIcon'
 import { WishlistAvatar } from './WishlistAvatar'
 
 export type WishlistCardWithEventsProps = {
-  wishlist: WishlistWithEventsDto
+  wishlist: WishlistListItem
 }
 
 const WishlistCardContent = styled(Card)(({ theme }) => ({
@@ -141,13 +141,13 @@ export const WishlistCardWithEvents = ({ wishlist }: WishlistCardWithEventsProps
   const userProfile = useSelector((state: RootState) => state.userProfile)
   const navigate = useNavigate()
   const past =
-    wishlist.events.filter(e => DateTime.fromISO(e.event_date) < DateTime.now().minus({ days: 1 })).length ===
+    wishlist.events.filter(e => DateTime.fromISO(e.eventDate) < DateTime.now().minus({ days: 1 })).length ===
     wishlist.events.length
 
-  const isPublic = !wishlist.config.hide_items
+  const isPublic = !wishlist.config.hideItems
   const maxEventsToShow = 1
   const eventsToShow = wishlist.events
-    .toSorted((a, b) => DateTime.fromISO(a.event_date).toMillis() - DateTime.fromISO(b.event_date).toMillis())
+    .toSorted((a, b) => DateTime.fromISO(a.eventDate).toMillis() - DateTime.fromISO(b.eventDate).toMillis())
     .slice(0, maxEventsToShow)
   const remainingEventsCount = wishlist.events.length - maxEventsToShow
 
@@ -175,7 +175,7 @@ export const WishlistCardWithEvents = ({ wishlist }: WishlistCardWithEventsProps
       <WishlistEvents>
         {eventsToShow.map(event => (
           <EventItem key={event.id}>
-            <EventIcon icon={event.icon} size="small" />
+            <EventIcon icon={event.icon ?? undefined} size="small" />
             <EventName>{event.title}</EventName>
           </EventItem>
         ))}

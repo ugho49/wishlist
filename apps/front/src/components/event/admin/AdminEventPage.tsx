@@ -1,22 +1,14 @@
-import type {
-  AttendeeId,
-  EventId,
-  SecretSantaUserId,
-  UpdateEventInputDto,
-  UpdateSecretSantaInputDto,
-} from '@wishlist/common'
-import type { AxiosError } from 'axios'
+import type { AttendeeId, EventId, SecretSantaUserId } from '@wishlist/common'
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import DeleteIcon from '@mui/icons-material/Delete'
 import LocalPoliceOutlinedIcon from '@mui/icons-material/LocalPoliceOutlined'
 import SaveIcon from '@mui/icons-material/Save'
-import { Box, Button, List, ListItem, ListItemIcon, ListItemText, Stack, TextField } from '@mui/material'
+import { Alert, Box, Button, List, ListItem, ListItemIcon, ListItemText, Stack, TextField } from '@mui/material'
 import { styled, useTheme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { AttendeeRole } from '@wishlist/common'
+import { useQueryClient } from '@tanstack/react-query'
 import { ConfirmButton } from '@wishlist/front-components/common/ConfirmButton'
 import { WishlistDatePicker } from '@wishlist/front-components/common/DatePicker'
 import { EmojiSelectorWithBadge } from '@wishlist/front-components/common/EmojiSelectorWithBadge'
@@ -24,9 +16,26 @@ import { TextareaMarkdown } from '@wishlist/front-components/common/TextareaMark
 import { DateTime } from 'luxon'
 import { useEffect, useMemo } from 'react'
 import { Controller, useForm } from 'react-hook-form'
+import { match } from 'ts-pattern'
 import z from 'zod'
 
-import { useApi, useToast } from '../../../hooks'
+import {
+  AttendeeRole,
+  isRejection,
+  rejectionMessage,
+  rejectionPattern,
+  useAdminDeleteEventAttendeeMutation,
+  useAdminDeleteEventMutation,
+  useAdminEventGetEventQuery,
+  useAdminUpdateEventMutation,
+  useCancelSecretSantaMutation,
+  useDeleteSecretSantaMutation,
+  useDeleteSecretSantaUserMutation,
+  useStartSecretSantaMutation,
+  useUpdateSecretSantaMutation,
+} from '../../../gql'
+import { useToast } from '../../../hooks'
+import { useSecretSanta } from '../../../hooks/domain/useSecretSanta'
 import { Card } from '../../common/Card'
 import { Loader } from '../../common/Loader'
 import { Subtitle } from '../../common/Subtitle'
@@ -57,7 +66,6 @@ interface AdminEventPageProps {
 
 export const AdminEventPage = ({ eventId }: AdminEventPageProps) => {
   const queryClient = useQueryClient()
-  const { admin: api } = useApi()
   const { addToast } = useToast()
   const theme = useTheme()
   const smallScreen = useMediaQuery(theme.breakpoints.down('md'))
@@ -72,133 +80,169 @@ export const AdminEventPage = ({ eventId }: AdminEventPageProps) => {
     resolver: zodResolver(schema),
   })
 
-  const { data: event, isLoading: loadingEvent } = useQuery({
-    queryKey: ['admin', 'event', { eventId }],
-    queryFn: ({ signal }) => api.event.getById(eventId, { signal }),
-  })
+  const { data, isLoading: loadingEvent } = useAdminEventGetEventQuery({ id: eventId }, { select: d => d.adminEvent })
+  const event = data?.__typename === 'Event' ? data : undefined
+  const queryRejection = data && isRejection(data) ? data : undefined
 
-  const { data: secretSanta, isLoading: loadingSecretSanta } = useQuery({
-    queryKey: ['admin', 'secret-santa', { eventId }],
-    queryFn: ({ signal }) => api.secretSanta.get(eventId, { signal }),
-  })
+  const { secretSanta, loading: loadingSecretSanta } = useSecretSanta(eventId)
 
-  const { mutateAsync: deleteAttendee, isPending: loadingDeleteAttendee } = useMutation({
-    mutationKey: ['admin', 'event.deleteAttendee', { eventId }],
-    mutationFn: (attendeeId: AttendeeId) => api.eventAttendee.deleteAttendee({ eventId, attendeeId }),
-    onSuccess: () => {
-      addToast({ message: 'Participant supprimé avec succès', variant: 'success' })
-      queryClient.invalidateQueries({ queryKey: ['admin', 'event', { eventId }] })
-      queryClient.invalidateQueries({ queryKey: ['admin', 'secret-santa', { eventId }] })
+  const invalidateEvent = () => queryClient.invalidateQueries({ queryKey: ['AdminEventGetEvent', { id: eventId }] })
+  const invalidateSecretSanta = () =>
+    queryClient.invalidateQueries({ queryKey: ['GetSecretSantaForEvent', { eventId }] })
+
+  const { mutateAsync: deleteAttendeeMutation, isPending: loadingDeleteAttendee } = useAdminDeleteEventAttendeeMutation(
+    {
+      onError: error => {
+        addToast({ message: 'Impossible de supprimer ce participant', variant: 'error' })
+        console.error(error)
+      },
     },
+  )
+
+  const deleteAttendee = async (attendeeId: AttendeeId) => {
+    const res = await deleteAttendeeMutation({ eventId, attendeeId })
+    match(res.adminDeleteEventAttendee)
+      .with({ __typename: 'VoidOutput' }, () => {
+        addToast({ message: 'Participant supprimé avec succès', variant: 'success' })
+        void invalidateEvent()
+        void invalidateSecretSanta()
+      })
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
+  }
+
+  const { mutateAsync: deleteSecretSantaMutation, isPending: loadingDeleteSecretSanta } = useDeleteSecretSantaMutation({
+    onError: () => addToast({ message: 'Impossible de supprimer le secret santa', variant: 'error' }),
+  })
+
+  const deleteSecretSanta = async () => {
+    const res = await deleteSecretSantaMutation({ id: secretSanta!.id })
+    match(res.deleteSecretSanta)
+      .with({ __typename: 'VoidOutput' }, () => {
+        addToast({ message: 'Secret santa supprimé avec succès', variant: 'success' })
+        void invalidateSecretSanta()
+      })
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
+  }
+
+  const { mutateAsync: startSecretSantaMutation, isPending: loadingStartSecretSanta } = useStartSecretSantaMutation({
+    onError: () => addToast({ message: 'Impossible de lancer le secret santa', variant: 'error' }),
+  })
+
+  const startSecretSanta = async () => {
+    const res = await startSecretSantaMutation({ id: secretSanta!.id })
+    match(res.startSecretSanta)
+      .with({ __typename: 'VoidOutput' }, () => {
+        addToast({ message: 'Secret santa lancé avec succès', variant: 'success' })
+        void invalidateSecretSanta()
+      })
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
+  }
+
+  const { mutateAsync: cancelSecretSantaMutation, isPending: loadingCancelSecretSanta } = useCancelSecretSantaMutation({
+    onError: () => addToast({ message: "Impossible d'annuler le secret santa", variant: 'error' }),
+  })
+
+  const cancelSecretSanta = async () => {
+    const res = await cancelSecretSantaMutation({ id: secretSanta!.id })
+    match(res.cancelSecretSanta)
+      .with({ __typename: 'VoidOutput' }, () => {
+        addToast({ message: 'Secret santa annulé avec succès', variant: 'success' })
+        void invalidateSecretSanta()
+      })
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
+  }
+
+  const { mutateAsync: removeSecretSantaUserMutation, isPending: loadingRemoveSecretSantaUser } =
+    useDeleteSecretSantaUserMutation({
+      onError: () => addToast({ message: "Impossible de supprimer l'utilisateur du secret santa", variant: 'error' }),
+    })
+
+  const removeSecretSantaUser = async (secretSantaUserId: SecretSantaUserId) => {
+    const res = await removeSecretSantaUserMutation({ id: secretSanta!.id, secretSantaUserId })
+    match(res.deleteSecretSantaUser)
+      .with({ __typename: 'VoidOutput' }, () => {
+        addToast({ message: 'Utilisateur supprimé du secret santa avec succès', variant: 'success' })
+        void invalidateSecretSanta()
+      })
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
+  }
+
+  const { mutateAsync: updateSecretSantaMutation, isPending: loadingUpdateSecretSanta } = useUpdateSecretSantaMutation({
+    onError: () => addToast({ message: 'Impossible de modifier le secret santa', variant: 'error' }),
+  })
+
+  const updateSecretSanta = async (input: { budget?: number; description?: string }) => {
+    const res = await updateSecretSantaMutation({ id: secretSanta!.id, input })
+    match(res.updateSecretSanta)
+      .with({ __typename: 'VoidOutput' }, () => {
+        addToast({ message: 'Secret santa modifié avec succès', variant: 'success' })
+        void invalidateSecretSanta()
+      })
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
+  }
+
+  const { mutateAsync: updateEventMutation, isPending: loadingUpdateEvent } = useAdminUpdateEventMutation({
+    onError: () => addToast({ message: "Impossible de modifier l'évènement", variant: 'error' }),
+  })
+
+  const { mutateAsync: deleteEventMutation, isPending: loadingDeleteEvent } = useAdminDeleteEventMutation({
     onError: error => {
-      const axiosError = error as AxiosError<{ message: string }>
-      addToast({ message: axiosError.response?.data.message, variant: 'error' })
+      addToast({ message: "Impossible de supprimer l'évènement", variant: 'error' })
       console.error(error)
     },
   })
 
-  const { mutateAsync: deleteSecretSanta, isPending: loadingDeleteSecretSanta } = useMutation({
-    mutationKey: ['admin', 'secret-santa.delete', { secretSantaId: secretSanta?.id }],
-    mutationFn: () => api.secretSanta.delete(secretSanta!.id),
-    onSuccess: () => {
-      addToast({ message: 'Secret santa supprimé avec succès', variant: 'success' })
-      queryClient.invalidateQueries({ queryKey: ['admin', 'secret-santa', { eventId }] })
-    },
-    onError: () => addToast({ message: 'Impossible de supprimer le secret santa', variant: 'error' }),
-  })
-
-  const { mutateAsync: startSecretSanta, isPending: loadingStartSecretSanta } = useMutation({
-    mutationKey: ['admin', 'secret-santa.start', { secretSantaId: secretSanta?.id }],
-    mutationFn: () => api.secretSanta.start(secretSanta!.id),
-    onSuccess: () => {
-      addToast({ message: 'Secret santa lancé avec succès', variant: 'success' })
-      queryClient.invalidateQueries({ queryKey: ['admin', 'secret-santa', { eventId }] })
-    },
-    onError: () => addToast({ message: 'Impossible de lancer le secret santa', variant: 'error' }),
-  })
-
-  const { mutateAsync: cancelSecretSanta, isPending: loadingCancelSecretSanta } = useMutation({
-    mutationKey: ['admin', 'secret-santa.cancel', { secretSantaId: secretSanta?.id }],
-    mutationFn: () => api.secretSanta.cancel(secretSanta!.id),
-    onSuccess: () => {
-      addToast({ message: 'Secret santa annulé avec succès', variant: 'success' })
-      queryClient.invalidateQueries({ queryKey: ['admin', 'secret-santa', { eventId }] })
-    },
-    onError: () => addToast({ message: "Impossible d'annuler le secret santa", variant: 'error' }),
-  })
-
-  const { mutateAsync: removeSecretSantaUser, isPending: loadingRemoveSecretSantaUser } = useMutation({
-    mutationKey: ['admin', 'secret-santa.removeUser', { secretSantaId: secretSanta?.id }],
-    mutationFn: (secretSantaUserId: SecretSantaUserId) =>
-      api.secretSanta.deleteUser(secretSanta!.id, secretSantaUserId),
-    onSuccess: () => {
-      addToast({ message: 'Utilisateur supprimé du secret santa avec succès', variant: 'success' })
-      queryClient.invalidateQueries({ queryKey: ['admin', 'secret-santa', { eventId }] })
-    },
-    onError: () => addToast({ message: "Impossible de supprimer l'utilisateur du secret santa", variant: 'error' }),
-  })
-
-  const { mutateAsync: updateSecretSanta, isPending: loadingUpdateSecretSanta } = useMutation({
-    mutationKey: ['admin', 'secret-santa.update', { secretSantaId: secretSanta?.id }],
-    mutationFn: (input: UpdateSecretSantaInputDto) => api.secretSanta.update(secretSanta!.id, input),
-    onSuccess: () => {
-      addToast({ message: 'Secret santa modifié avec succès', variant: 'success' })
-      queryClient.invalidateQueries({ queryKey: ['admin', 'secret-santa', { eventId }] })
-    },
-    onError: () => addToast({ message: 'Impossible de modifier le secret santa', variant: 'error' }),
-  })
-
-  const { mutateAsync: updateEvent, isPending: loadingUpdateEvent } = useMutation({
-    mutationKey: ['admin', 'event.update', { eventId }],
-    mutationFn: (input: UpdateEventInputDto) => api.event.update(eventId, input),
-    onSuccess: () => {
-      addToast({ message: 'Évènement modifié avec succès', variant: 'success' })
-      queryClient.invalidateQueries({ queryKey: ['admin', 'event', { eventId }] })
-    },
-    onError: () => addToast({ message: "Impossible de modifier l'évènement", variant: 'error' }),
-  })
-
-  const { mutateAsync: deleteEvent, isPending: loadingDeleteEvent } = useMutation({
-    mutationKey: ['admin', 'event.delete', { eventId }],
-    mutationFn: () => api.event.delete(eventId),
-    onSuccess: () => {
-      addToast({ message: 'Évènement supprimé avec succès', variant: 'success' })
-      queryClient.invalidateQueries({ queryKey: ['admin', 'event', { eventId }] })
-    },
-    onError: error => {
-      const axiosError = error as AxiosError<{ message: string }>
-      addToast({
-        message: `Impossible de supprimer l'évènement: ${axiosError.response?.data.message}`,
-        variant: 'error',
+  const deleteEvent = async () => {
+    const res = await deleteEventMutation({ id: eventId })
+    match(res.adminDeleteEvent)
+      .with({ __typename: 'VoidOutput' }, () => {
+        addToast({ message: 'Évènement supprimé avec succès', variant: 'success' })
+        void invalidateEvent()
       })
-    },
-  })
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
+  }
 
   const maintainerName = useMemo(() => {
     if (!event) return ''
-    const user = event.attendees.find(attendee => attendee.role === AttendeeRole.MAINTAINER)
+    const user = event.attendees.find(attendee => attendee.role === AttendeeRole.Maintainer)
     if (!user) return ''
-    return `${user.user?.firstname} ${user.user?.lastname}`
+    return `${user.user?.firstName} ${user.user?.lastName}`
   }, [event])
 
   useEffect(() => {
     if (event) {
       setValue('title', event.title)
-      setValue('description', event.description)
-      setValue('eventDate', DateTime.fromISO(event.event_date))
-      setValue('icon', event.icon)
+      setValue('description', event.description ?? undefined)
+      setValue('eventDate', DateTime.fromISO(event.eventDate))
+      setValue('icon', event.icon ?? undefined)
     }
   }, [event, setValue])
 
   const onSubmit = async (data: FormFields) => {
     const isoDate = data.eventDate!.toISODate()!
-    const body: UpdateEventInputDto = {
-      title: data.title,
-      description: data.description === '' ? undefined : data.description,
-      icon: data.icon,
-      event_date: new Date(isoDate),
-    }
-    await updateEvent(body)
+    const res = await updateEventMutation({
+      id: eventId,
+      input: {
+        title: data.title,
+        description: data.description === '' ? undefined : data.description,
+        icon: data.icon,
+        eventDate: isoDate,
+      },
+    })
+    match(res.adminUpdateEvent)
+      .with({ __typename: 'VoidOutput' }, () => {
+        addToast({ message: 'Évènement modifié avec succès', variant: 'success' })
+        void invalidateEvent()
+      })
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
   }
 
   const loadingEdit =
@@ -216,6 +260,7 @@ export const AdminEventPage = ({ eventId }: AdminEventPageProps) => {
       <Title>Editer l'évènement</Title>
 
       <CardStack>
+        {queryRejection && <Alert severity="error">{rejectionMessage(queryRejection)}</Alert>}
         <Card>
           <Loader loading={loadingEvent}>
             <Stack direction="row" flexWrap="wrap" gap={smallScreen ? 0 : 3}>
@@ -235,7 +280,7 @@ export const AdminEventPage = ({ eventId }: AdminEventPageProps) => {
                   </ListItemIcon>
                   <ListItemText
                     primary="Créé le"
-                    secondary={DateTime.fromISO(event?.created_at || '').toLocaleString(
+                    secondary={DateTime.fromISO(event?.createdAt || '').toLocaleString(
                       DateTime.DATETIME_MED_WITH_SECONDS,
                     )}
                   />

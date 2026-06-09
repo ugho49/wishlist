@@ -1,0 +1,28 @@
+query WishlistListPage($filters: PaginationFilters!) {
+  wishlists(filters: $filters) {
+    __typename
+    ... on GetWishlistsPagedResponse {
+      data {
+        id
+        title
+        description
+        logoUrl
+        config {
+          hideItems
+        }
+        events {
+          id
+          title
+          icon
+          eventDate
+        }
+      }
+      pagination {
+        totalPages
+        totalElements
+        pageNumber
+        pageSize
+      }
+    }
+  }
+}

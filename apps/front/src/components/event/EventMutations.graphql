@@ -1,0 +1,72 @@
+mutation CreateEvent($input: CreateEventInput!) {
+  createEvent(input: $input) {
+    __typename
+    ... on Event {
+      id
+    }
+    ... on ValidationRejection {
+      errors {
+        field
+        message
+      }
+    }
+  }
+}
+
+mutation UpdateEvent($id: EventId!, $input: UpdateEventInput!) {
+  updateEvent(id: $id, input: $input) {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+    ... on ValidationRejection {
+      errors {
+        field
+        message
+      }
+    }
+  }
+}
+
+mutation DeleteEvent($id: EventId!) {
+  deleteEvent(id: $id) {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+  }
+}
+
+mutation AddEventAttendee($eventId: EventId!, $input: AddEventAttendeeInput!) {
+  addEventAttendee(eventId: $eventId, input: $input) {
+    __typename
+    ... on EventAttendee {
+      id
+      userId
+      pendingEmail
+      role
+      user {
+        id
+        firstName
+        lastName
+        email
+        pictureUrl
+      }
+    }
+    ... on ValidationRejection {
+      errors {
+        field
+        message
+      }
+    }
+  }
+}
+
+mutation RemoveEventAttendee($eventId: EventId!, $attendeeId: AttendeeId!) {
+  removeEventAttendee(eventId: $eventId, attendeeId: $attendeeId) {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+  }
+}

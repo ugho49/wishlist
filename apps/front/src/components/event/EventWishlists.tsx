@@ -1,30 +1,30 @@
-import type { DetailedEventDto } from '@wishlist/common'
+import type { EventId } from '@wishlist/common'
+import type { EventWishlist } from './event.types'
 
 import AddIcon from '@mui/icons-material/Add'
 import { Box, Grid } from '@mui/material'
 import { useNavigate } from '@tanstack/react-router'
-import { useMemo } from 'react'
 
 import { FabAutoGrow } from '../common/FabAutoGrow'
 import { EmptyListsState } from '../wishlist/EmptyListsState'
 import { WishlistCardWithOwner } from '../wishlist/WishlistCardWithOwner'
 
 export type EventWishlistsProps = {
-  event: DetailedEventDto
+  eventId: EventId
+  wishlists: EventWishlist[]
 }
 
-export const EventWishlists = ({ event }: EventWishlistsProps) => {
-  const nbOfItems = useMemo(() => event.wishlists.length, [event])
+export const EventWishlists = ({ eventId, wishlists }: EventWishlistsProps) => {
   const navigate = useNavigate()
 
-  const handleAddList = () => navigate({ to: '/wishlists/new', search: { fromEvent: event.id } })
+  const handleAddList = () => navigate({ to: '/wishlists/new', search: { fromEvent: eventId } })
 
   return (
     <Box className="wishlists">
-      {nbOfItems > 0 && (
+      {wishlists.length > 0 && (
         <>
           <Grid container spacing={3}>
-            {event.wishlists
+            {[...wishlists]
               .sort((a, b) => a.title.localeCompare(b.title))
               .map(wishlist => (
                 <Grid key={wishlist.id} size={{ xs: 12, md: 6, xl: 4 }}>
@@ -37,7 +37,7 @@ export const EventWishlists = ({ event }: EventWishlistsProps) => {
         </>
       )}
 
-      {nbOfItems === 0 && (
+      {wishlists.length === 0 && (
         <EmptyListsState
           sx={{ marginTop: '50px' }}
           onAddListClick={() => handleAddList()}

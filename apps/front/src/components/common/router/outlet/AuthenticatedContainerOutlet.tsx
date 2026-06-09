@@ -1,11 +1,13 @@
 import { Box, Container, containerClasses, styled, useMediaQuery, useTheme } from '@mui/material'
 import { Outlet } from '@tanstack/react-router'
-import { useFetchUserInfo } from '@wishlist/front-hooks'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useDispatch } from 'react-redux'
 
 import { setUser } from '../../../../core/store/features'
+import { useUserProfileCurrentUserQuery } from '../../../../gql'
+import { useLogout } from '../../../../hooks/useLogout'
 import { useProfilePicturePrompt } from '../../../../hooks/useProfilePicturePrompt'
+import { useToast } from '../../../../hooks/useToast'
 import { ProfilePicturePromptModal } from '../../../user/ProfilePicturePromptModal'
 import { MobileBottomNavigation } from '../../MobileBottomNavigation'
 import { MobileTopBar } from '../../MobileTopBar'
@@ -29,11 +31,25 @@ const ContainerStyled = styled(Container)(({ theme }) => ({
 }))
 
 export const AuthenticatedContainerOutlet = () => {
-  const { user } = useFetchUserInfo()
+  const { data } = useUserProfileCurrentUserQuery(undefined, { select: d => d.currentUser })
+  const user = data?.__typename === 'User' ? data : undefined
   const theme = useTheme()
   const dispatch = useDispatch()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const { shouldShowPrompt, handlePromptClosed } = useProfilePicturePrompt()
+  const { addToast } = useToast()
+  const logout = useLogout()
+  const sessionInvalidatedRef = useRef(false)
+
+  // An UnauthorizedRejection here means the stored token is no longer valid:
+  // end the session instead of leaving the layout in a half-logged-in state.
+  useEffect(() => {
+    if (data?.__typename === 'UnauthorizedRejection' && !sessionInvalidatedRef.current) {
+      sessionInvalidatedRef.current = true
+      addToast({ message: 'Votre session a expiré, veuillez vous reconnecter', variant: 'warning' })
+      void logout()
+    }
+  }, [data, addToast, logout])
 
   useEffect(() => {
     if (user) {
@@ -41,11 +57,11 @@ export const AuthenticatedContainerOutlet = () => {
         setUser({
           id: user.id,
           email: user.email,
-          firstName: user.firstname,
-          lastName: user.lastname,
-          birthday: user.birthday,
-          pictureUrl: user.picture_url,
-          social: user.social,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          birthday: user.birthday ?? undefined,
+          pictureUrl: user.pictureUrl ?? undefined,
+          social: user.socials ?? [],
         }),
       )
     }

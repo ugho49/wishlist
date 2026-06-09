@@ -1,12 +1,15 @@
-import type { EventId, UpdateSecretSantaInputDto } from '@wishlist/common'
+import type { EventId } from '@wishlist/common'
+import type { SecretSantaFormInput } from './EditSecretSantaFormDialog'
 
 import AddIcon from '@mui/icons-material/Add'
 import { Box, Button, Stack, styled, Typography } from '@mui/material'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
+import { match } from 'ts-pattern'
 
 import EmptySecretSantaIllustration from '../../assets/illustrations/secret-santa.png'
-import { useApi, useToast } from '../../hooks'
+import { rejectionMessage, rejectionPattern, useCreateSecretSantaMutation } from '../../gql'
+import { useToast } from '../../hooks'
 import { EditSecretSantaFormDialog } from './EditSecretSantaFormDialog'
 
 const EmptyStateContainer = styled(Stack)(({ theme }) => ({
@@ -71,24 +74,34 @@ type NoSecretSantaProps = {
 
 export const NoSecretSanta = ({ eventId }: NoSecretSantaProps) => {
   const queryClient = useQueryClient()
-  const api = useApi()
   const { addToast } = useToast()
   const [openModal, setOpenModal] = useState(false)
 
-  const { mutateAsync: createSecretSanta, isPending: loading } = useMutation({
-    mutationKey: ['secret-santa.create', { eventId }],
-    mutationFn: (input: UpdateSecretSantaInputDto) => {
-      return api.secretSanta.create({
-        event_id: eventId,
-        ...input,
-      })
-    },
+  const { mutateAsync: createSecretSantaMutation, isPending: loading } = useCreateSecretSantaMutation({
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-    onSuccess: output => {
-      addToast({ message: 'Secret santa créé avec succès', variant: 'success' })
-      queryClient.setQueryData(['secret-santa', { eventId }], output)
-    },
   })
+
+  const createSecretSanta = async (input: SecretSantaFormInput) => {
+    const res = await createSecretSantaMutation({
+      input: { eventId, budget: input.budget, description: input.description },
+    })
+    await match(res.createSecretSanta)
+      .with({ __typename: 'SecretSanta' }, async () => {
+        addToast({ message: 'Secret santa créé avec succès', variant: 'success' })
+        await queryClient.invalidateQueries({ queryKey: ['GetSecretSantaForEvent', { eventId }] })
+      })
+      .with({ __typename: 'ValidationRejection' }, rejection =>
+        addToast({
+          message:
+            rejection.errors.length > 0
+              ? rejection.errors.map(error => error.message).join(', ')
+              : rejectionMessage(rejection),
+          variant: 'error',
+        }),
+      )
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
+  }
 
   return (
     <>

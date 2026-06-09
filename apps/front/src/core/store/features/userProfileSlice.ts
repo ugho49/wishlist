@@ -1,5 +1,6 @@
 import type { PayloadAction } from '@reduxjs/toolkit'
-import type { UserId, UserSocialDto, UserSocialId } from '@wishlist/common'
+import type { UserId, UserSocialId } from '@wishlist/common'
+import type { UserSocial } from '../../../gql'
 
 import { createSlice } from '@reduxjs/toolkit'
 
@@ -10,7 +11,7 @@ export interface UserProfileState {
   email?: string
   pictureUrl?: string
   birthday?: string
-  social?: UserSocialDto[]
+  social?: UserSocial[]
   isUserLoaded: boolean
 }
 
@@ -42,7 +43,7 @@ export const userProfileSlice = createSlice({
       state.email = action.payload.email
       state.birthday = action.payload.birthday
     },
-    addUserSocial: (state, action: PayloadAction<UserSocialDto>) => {
+    addUserSocial: (state, action: PayloadAction<UserSocial>) => {
       state.social = [...(state.social || []), action.payload]
     },
     removeUserSocial: (state, action: PayloadAction<UserSocialId>) => {

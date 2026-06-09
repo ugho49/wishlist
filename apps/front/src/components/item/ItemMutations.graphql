@@ -1,0 +1,102 @@
+mutation CreateItem($input: CreateItemInput!) {
+  createItem(input: $input) {
+    __typename
+    ... on Item {
+      id
+      name
+      description
+      url
+      score
+      isSuggested
+      pictureUrl
+      takenById
+      takenAt
+      createdAt
+      takerUser {
+        id
+        firstName
+        pictureUrl
+      }
+    }
+    ... on ValidationRejection {
+      errors {
+        field
+        message
+      }
+    }
+  }
+}
+
+mutation UpdateItem($itemId: ItemId!, $input: UpdateItemInput!) {
+  updateItem(itemId: $itemId, input: $input) {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+    ... on ValidationRejection {
+      errors {
+        field
+        message
+      }
+    }
+  }
+}
+
+mutation DeleteItem($itemId: ItemId!) {
+  deleteItem(itemId: $itemId) {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+  }
+}
+
+mutation ToggleItem($itemId: ItemId!) {
+  toggleItem(itemId: $itemId) {
+    __typename
+    ... on ToggleItemOutput {
+      takenById
+      takenAt
+    }
+  }
+}
+
+mutation ScanItemUrl($input: ScanItemUrlInput!) {
+  scanItemUrl(input: $input) {
+    __typename
+    ... on ScanItemUrlOutput {
+      pictureUrl
+    }
+  }
+}
+
+mutation ImportItems($input: ImportItemsInput!) {
+  importItems(input: $input) {
+    __typename
+    ... on ImportItemsOutput {
+      items {
+        id
+        name
+        description
+        url
+        score
+        isSuggested
+        pictureUrl
+        takenById
+        takenAt
+        createdAt
+        takerUser {
+          id
+          firstName
+          pictureUrl
+        }
+      }
+    }
+    ... on ValidationRejection {
+      errors {
+        field
+        message
+      }
+    }
+  }
+}

@@ -1,16 +1,17 @@
-import type { DetailedEventDto, UpdateEventInputDto } from '@wishlist/common'
+import type { EventDetail } from './event.types'
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import DeleteIcon from '@mui/icons-material/Delete'
 import SaveIcon from '@mui/icons-material/Save'
 import { Box, Button, Stack, TextField } from '@mui/material'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import { DateTime } from 'luxon'
 import { Controller, useForm } from 'react-hook-form'
+import { match } from 'ts-pattern'
 import { z } from 'zod'
 
-import { useApi } from '../../hooks/useApi'
+import { rejectionMessage, rejectionPattern, useDeleteEventMutation, useUpdateEventMutation } from '../../gql'
 import { useToast } from '../../hooks/useToast'
 import { Card } from '../common/Card'
 import { CharsRemaining } from '../common/CharsRemaining'
@@ -33,11 +34,10 @@ const schema = z.object({
 type FormFields = z.infer<typeof schema>
 
 export type EditEventInformationsProps = {
-  event: DetailedEventDto
+  event: EventDetail
 }
 
 export const EditEventInformations = ({ event }: EditEventInformationsProps) => {
-  const api = useApi()
   const { addToast } = useToast()
   const queryClient = useQueryClient()
   const navigate = useNavigate()
@@ -53,55 +53,50 @@ export const EditEventInformations = ({ event }: EditEventInformationsProps) => 
     defaultValues: {
       title: event.title,
       description: event.description || '',
-      eventDate: DateTime.fromISO(event.event_date),
-      icon: event.icon,
+      eventDate: DateTime.fromISO(event.eventDate),
+      icon: event.icon ?? undefined,
     },
   })
 
   const formValues = watch()
 
-  const { mutateAsync: updateEvent, isPending: loading } = useMutation({
-    mutationKey: ['event.update', { id: event.id }],
-    mutationFn: (data: UpdateEventInputDto) => api.event.update(event.id, data),
+  const { mutateAsync: updateEventMutation, isPending: loading } = useUpdateEventMutation({
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-    onSuccess: (_output, data) => {
-      addToast({ message: 'Évènement mis à jour', variant: 'info' })
-
-      queryClient.setQueryData(['event', { id: event.id }], (old: DetailedEventDto) => ({
-        ...old,
-        ...data,
-        event_date: data.event_date.toISOString(),
-      }))
-    },
   })
-
-  const { mutateAsync: handleDelete } = useMutation({
-    mutationKey: ['event.delete', { id: event.id }],
-    mutationFn: () => api.event.delete(event.id),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['events'] })
-    },
+  const { mutateAsync: deleteEventMutation } = useDeleteEventMutation({
+    onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
   })
 
   const onSubmit = async (data: FormFields) => {
     const isoDate = data.eventDate!.toISODate()!
-    const body: UpdateEventInputDto = {
-      title: data.title,
-      description: data.description === '' ? undefined : data.description,
-      icon: data.icon,
-      event_date: new Date(isoDate),
-    }
-    await updateEvent(body)
+    const res = await updateEventMutation({
+      id: event.id,
+      input: {
+        title: data.title,
+        description: data.description === '' ? undefined : data.description,
+        icon: data.icon,
+        eventDate: isoDate,
+      },
+    })
+    match(res.updateEvent)
+      .with({ __typename: 'VoidOutput' }, () => {
+        addToast({ message: 'Évènement mis à jour', variant: 'info' })
+        void queryClient.invalidateQueries({ queryKey: ['EventPageGetEvent', { eventId: event.id }] })
+      })
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
   }
 
   const deleteEvent = async () => {
-    try {
-      await handleDelete()
-      addToast({ message: "L'évènement à bien été supprimée", variant: 'success' })
-      void navigate({ to: '/events' })
-    } catch {
-      addToast({ message: "Une erreur s'est produite", variant: 'error' })
-    }
+    const res = await deleteEventMutation({ id: event.id })
+    match(res.deleteEvent)
+      .with({ __typename: 'VoidOutput' }, () => {
+        void queryClient.invalidateQueries({ queryKey: ['EventListPageGetEvents'] })
+        addToast({ message: "L'évènement à bien été supprimée", variant: 'success' })
+        void navigate({ to: '/events' })
+      })
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
   }
 
   return (

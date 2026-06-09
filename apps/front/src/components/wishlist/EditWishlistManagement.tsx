@@ -1,10 +1,17 @@
-import type { DetailedWishlistDto, MiniUserDto, UserId } from '@wishlist/common'
+import type { UserId } from '@wishlist/common'
+import type { DetailedWishlist } from './wishlist.types'
 
 import PersonRemoveIcon from '@mui/icons-material/PersonRemove'
 import { Avatar, Box, Stack, Typography } from '@mui/material'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
+import { match } from 'ts-pattern'
 
-import { useApi } from '../../hooks/useApi'
+import {
+  rejectionMessage,
+  rejectionPattern,
+  useAddWishlistCoOwnerMutation,
+  useRemoveWishlistCoOwnerMutation,
+} from '../../gql'
 import { useToast } from '../../hooks/useToast'
 import { Card } from '../common/Card'
 import { ConfirmButton } from '../common/ConfirmButton'
@@ -12,33 +19,42 @@ import { Subtitle } from '../common/Subtitle'
 import { SearchUserSelect } from '../user/SearchUserSelect'
 
 export type EditWishlistManagementProps = {
-  wishlist: DetailedWishlistDto
+  wishlist: DetailedWishlist
 }
 
 export const EditWishlistManagement = ({ wishlist }: EditWishlistManagementProps) => {
-  const api = useApi()
   const queryClient = useQueryClient()
   const { addToast } = useToast()
+  const invalidateWishlist = () =>
+    queryClient.invalidateQueries({ queryKey: ['WishlistPage', { wishlistId: wishlist.id }] })
 
-  const { mutateAsync: addCoOwner } = useMutation({
-    mutationKey: ['wishlist.addCoOwner', { id: wishlist.id }],
-    mutationFn: (userId: UserId) => api.wishlist.addCoOwner(wishlist.id, { user_id: userId }),
+  const { mutateAsync: addCoOwnerMutation } = useAddWishlistCoOwnerMutation({
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-    onSuccess: () => {
-      addToast({ message: 'Co-gestionnaire ajouté avec succès', variant: 'success' })
-      void queryClient.invalidateQueries({ queryKey: ['wishlist', { id: wishlist.id }] })
-    },
   })
+  const addCoOwner = async (userId: UserId) => {
+    const res = await addCoOwnerMutation({ id: wishlist.id, input: { userId } })
+    match(res.addWishlistCoOwner)
+      .with({ __typename: 'VoidOutput' }, () => {
+        addToast({ message: 'Co-gestionnaire ajouté avec succès', variant: 'success' })
+        void invalidateWishlist()
+      })
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
+  }
 
-  const { mutateAsync: removeCoOwner } = useMutation({
-    mutationKey: ['wishlist.removeCoOwner', { id: wishlist.id }],
-    mutationFn: () => api.wishlist.removeCoOwner(wishlist.id),
+  const { mutateAsync: removeCoOwnerMutation } = useRemoveWishlistCoOwnerMutation({
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-    onSuccess: () => {
-      addToast({ message: 'Co-gestionnaire retiré avec succès', variant: 'success' })
-      void queryClient.invalidateQueries({ queryKey: ['wishlist', { id: wishlist.id }] })
-    },
   })
+  const removeCoOwner = async () => {
+    const res = await removeCoOwnerMutation({ id: wishlist.id })
+    match(res.removeWishlistCoOwner)
+      .with({ __typename: 'VoidOutput' }, () => {
+        addToast({ message: 'Co-gestionnaire retiré avec succès', variant: 'success' })
+        void invalidateWishlist()
+      })
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
+  }
 
   return (
     <Card>
@@ -49,18 +65,18 @@ export const EditWishlistManagement = ({ wishlist }: EditWishlistManagementProps
           (ajouter/supprimer des items, modifier la liste, etc.).
         </Typography>
 
-        {wishlist.co_owner ? (
+        {wishlist.coOwner ? (
           <Stack direction="row" alignItems="center" gap={2}>
-            <Avatar src={wishlist.co_owner.picture_url} sx={{ width: 40, height: 40 }}>
-              {wishlist.co_owner.firstname[0]}
-              {wishlist.co_owner.lastname[0]}
+            <Avatar src={wishlist.coOwner.pictureUrl ?? undefined} sx={{ width: 40, height: 40 }}>
+              {wishlist.coOwner.firstName[0]}
+              {wishlist.coOwner.lastName[0]}
             </Avatar>
             <Box flex={1}>
               <Typography variant="body1" fontWeight={500}>
-                {wishlist.co_owner.firstname} {wishlist.co_owner.lastname}
+                {wishlist.coOwner.firstName} {wishlist.coOwner.lastName}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                {wishlist.co_owner.email}
+                {wishlist.coOwner.email}
               </Typography>
             </Box>
             <ConfirmButton
@@ -69,7 +85,7 @@ export const EditWishlistManagement = ({ wishlist }: EditWishlistManagementProps
                 <span>
                   Êtes-vous sûr de vouloir retirer le co-gestionnaire{' '}
                   <b>
-                    {wishlist.co_owner.firstname} {wishlist.co_owner.lastname}
+                    {wishlist.coOwner.firstName} {wishlist.coOwner.lastName}
                   </b>{' '}
                   ?
                 </span>
@@ -86,7 +102,9 @@ export const EditWishlistManagement = ({ wishlist }: EditWishlistManagementProps
         ) : (
           <SearchUserSelect
             label="Ajouter un co-gestionnaire"
-            onChange={value => addCoOwner((value as MiniUserDto).id)}
+            onChange={value => {
+              if (typeof value !== 'string') void addCoOwner(value.id)
+            }}
             excludedEmails={[wishlist.owner.email]}
             acceptNewUsers={false}
           />

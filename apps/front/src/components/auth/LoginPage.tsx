@@ -1,18 +1,15 @@
-import type { LoginInputDto, LoginOutputDto } from '@wishlist/common'
-
 import { zodResolver } from '@hookform/resolvers/zod'
 import LoginIcon from '@mui/icons-material/Login'
 import { Alert, Button, Divider, Stack, styled, TextField, Typography } from '@mui/material'
-import { useMutation } from '@tanstack/react-query'
 import { useNavigate, useSearch } from '@tanstack/react-router'
-import { AxiosError } from 'axios'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useDispatch } from 'react-redux'
+import { match, P } from 'ts-pattern'
 import { z } from 'zod'
 
 import { setTokens } from '../../core/store/features'
-import { useApi } from '../../hooks/useApi'
+import { rejectionMessage, rejectionPattern, useAuthLoginMutation, useAuthLoginWithGoogleMutation } from '../../gql'
 import { useToast } from '../../hooks/useToast'
 import { RouterLink } from '../common/RouterLink'
 import { GoogleButton } from './GoogleButton'
@@ -49,7 +46,6 @@ const DividerStyled = styled(Divider)(() => ({
 }))
 
 export const LoginPage = () => {
-  const api = useApi()
   const dispatch = useDispatch()
   const { addToast } = useToast()
   const [socialLoading, setSocialLoading] = useState(false)
@@ -65,12 +61,12 @@ export const LoginPage = () => {
     defaultValues: { email: emailFromSearch || '' },
   })
 
-  const handleLoginSuccess = (param: LoginOutputDto) => {
+  const handleLoginSuccess = (accessToken: string) => {
     addToast({ message: 'Heureux de vous revoir 🤓', variant: 'default' })
 
     dispatch(
       setTokens({
-        accessToken: param.access_token,
+        accessToken,
       }),
     )
 
@@ -82,25 +78,38 @@ export const LoginPage = () => {
     addToast({ message: "Une erreur s'est produite", variant: 'error' })
   }
 
-  const { mutateAsync: login } = useMutation({
-    mutationKey: ['login'],
-    mutationFn: (data: LoginInputDto) => api.auth.login(data),
-    onSuccess: data => handleLoginSuccess(data),
-    onError: e => {
-      if (e instanceof AxiosError && (e.response?.status === 401 || e.response?.status === 403)) {
-        setError('root', { message: 'Email ou mot de passe incorrect' })
-      } else {
-        setError('root', { message: "Une erreur s'est produite." })
-      }
-    },
+  const { mutateAsync: loginMutation } = useAuthLoginMutation({
+    onError: () => setError('root', { message: "Une erreur s'est produite." }),
   })
-
-  const { mutateAsync: loginWithGoogle } = useMutation({
-    mutationKey: ['loginWithGoogle'],
-    mutationFn: (code: string) => api.auth.loginWithGoogle({ code, createUserIfNotExists: false }),
-    onSuccess: data => handleLoginSuccess(data),
+  const { mutateAsync: loginWithGoogleMutation } = useAuthLoginWithGoogleMutation({
     onError: () => onSocialError(),
   })
+
+  const login = async (data: FormFields) => {
+    const res = await loginMutation({ input: data })
+    match(res.login)
+      .with({ __typename: 'LoginOutput' }, output => handleLoginSuccess(output.accessToken))
+      .with({ __typename: P.union('UnauthorizedRejection', 'ValidationRejection') }, () =>
+        setError('root', { message: 'Email ou mot de passe incorrect' }),
+      )
+      .with(rejectionPattern, rejection => setError('root', { message: rejectionMessage(rejection) }))
+      .exhaustive()
+  }
+
+  const loginWithGoogle = async (code: string) => {
+    const res = await loginWithGoogleMutation({ input: { code, createUserIfNotExists: false } })
+    match(res.loginWithGoogle)
+      .with({ __typename: 'LoginWithGoogleOutput' }, output => handleLoginSuccess(output.accessToken))
+      .with({ __typename: 'UnauthorizedRejection' }, () => {
+        setSocialLoading(false)
+        addToast({ message: 'Impossible de vous connecter avec ce compte Google', variant: 'error' })
+      })
+      .with(rejectionPattern, rejection => {
+        setSocialLoading(false)
+        addToast({ message: rejectionMessage(rejection), variant: 'error' })
+      })
+      .exhaustive()
+  }
 
   const onSubmit = (data: FormFields) => login(data)
 

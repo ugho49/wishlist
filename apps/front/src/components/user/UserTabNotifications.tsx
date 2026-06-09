@@ -1,12 +1,18 @@
-import type { UpdateUserEmailSettingsInputDto } from '@wishlist/common'
 import type { FormEvent } from 'react'
 
 import SaveIcon from '@mui/icons-material/Save'
-import { Box, Button, Checkbox, FormControlLabel, Stack, Typography } from '@mui/material'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { Alert, Box, Button, Checkbox, FormControlLabel, Stack, Typography } from '@mui/material'
+import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
+import { match } from 'ts-pattern'
 
-import { useApi } from '../../hooks/useApi'
+import {
+  isRejection,
+  rejectionMessage,
+  rejectionPattern,
+  useUpdateUserEmailSettingsMutation,
+  useUserProfileEmailSettingsQuery,
+} from '../../gql'
 import { useToast } from '../../hooks/useToast'
 import { Card } from '../common/Card'
 import { InputLabel } from '../common/InputLabel'
@@ -15,43 +21,49 @@ import { Subtitle } from '../common/Subtitle'
 
 export const UserTabNotifications = () => {
   const { addToast } = useToast()
-  const api = useApi()
   const queryClient = useQueryClient()
   const [dailyNewItemNotification, setDailyNewItemNotification] = useState(true)
 
-  const { data: value, isLoading: loadingNotificationSettings } = useQuery({
-    queryKey: ['user.getEmailSettings'],
-    queryFn: ({ signal }) => api.user.getEmailSettings({ signal }),
+  const { data, isLoading: loadingNotificationSettings } = useUserProfileEmailSettingsQuery(undefined, {
+    select: d => d.currentUser,
   })
+  const emailSettings = data?.__typename === 'User' ? data.emailSettings : undefined
+  const queryRejection = data && isRejection(data) ? data : undefined
 
-  const { mutateAsync: updateEmailSettings, isPending: loading } = useMutation({
-    mutationKey: ['user.updateEmailSettings'],
-    mutationFn: (data: UpdateUserEmailSettingsInputDto) => api.user.updateUserEmailSettings(data),
+  const { mutateAsync: updateEmailSettings, isPending: loading } = useUpdateUserEmailSettingsMutation({
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-    onSuccess: output => {
-      addToast({ message: 'Préférences de notification mis à jour', variant: 'info' })
-      queryClient.setQueryData(['user.getEmailSettings'], output)
-    },
   })
 
   useEffect(() => {
-    if (value) {
-      setDailyNewItemNotification(value.daily_new_item_notification)
+    if (emailSettings) {
+      setDailyNewItemNotification(emailSettings.dailyNewItemNotification)
     }
-  }, [value])
+  }, [emailSettings])
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault()
 
-    await updateEmailSettings({
-      daily_new_item_notification: dailyNewItemNotification,
+    const res = await updateEmailSettings({
+      input: {
+        dailyNewItemNotification,
+      },
     })
+
+    match(res.updateUserEmailSettings)
+      .with({ __typename: 'UserEmailSettings' }, () => {
+        addToast({ message: 'Préférences de notification mis à jour', variant: 'info' })
+        void queryClient.invalidateQueries({ queryKey: ['UserProfileEmailSettings'] })
+      })
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
   }
 
   return (
     <Card>
       <Loader loading={loadingNotificationSettings}>
         <Subtitle>Gérer les notifications de mail</Subtitle>
+
+        {queryRejection && <Alert severity="error">{rejectionMessage(queryRejection)}</Alert>}
 
         <Stack component="form" onSubmit={onSubmit} noValidate gap={3}>
           <Box>

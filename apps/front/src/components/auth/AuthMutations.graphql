@@ -1,0 +1,98 @@
+mutation AuthLogin($input: LoginInput!) {
+  login(input: $input) {
+    __typename
+    ... on LoginOutput {
+      accessToken
+    }
+    ... on ValidationRejection {
+      errors {
+        field
+        message
+      }
+    }
+    ... on UnauthorizedRejection {
+      message
+    }
+  }
+}
+
+mutation AuthLoginWithGoogle($input: LoginWithGoogleInput!) {
+  loginWithGoogle(input: $input) {
+    __typename
+    ... on LoginWithGoogleOutput {
+      accessToken
+      newUserCreated
+      linkedToExistingUser
+    }
+    ... on ValidationRejection {
+      errors {
+        field
+        message
+      }
+    }
+    ... on UnauthorizedRejection {
+      message
+    }
+  }
+}
+
+mutation AuthRegisterUser($input: RegisterUserInput!) {
+  registerUser(input: $input) {
+    __typename
+    ... on User {
+      id
+      email
+    }
+    ... on ValidationRejection {
+      errors {
+        field
+        message
+      }
+    }
+  }
+}
+
+mutation AuthSendResetPasswordEmail($input: SendResetPasswordEmailInput!) {
+  sendResetPasswordEmail(input: $input) {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+    ... on ValidationRejection {
+      errors {
+        field
+        message
+      }
+    }
+  }
+}
+
+mutation AuthResetPassword($input: ResetPasswordInput!) {
+  resetPassword(input: $input) {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+    ... on ValidationRejection {
+      errors {
+        field
+        message
+      }
+    }
+  }
+}
+
+mutation AuthConfirmEmailChange($input: ConfirmEmailChangeInput!) {
+  confirmEmailChange(input: $input) {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+    ... on ValidationRejection {
+      errors {
+        field
+        message
+      }
+    }
+  }
+}

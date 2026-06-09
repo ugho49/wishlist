@@ -1,4 +1,4 @@
-import type { EventWithCountsDto } from '@wishlist/common'
+import type { EventListItem } from './event.types'
 
 import { styled } from '@mui/material'
 import { useNavigate } from '@tanstack/react-router'
@@ -92,12 +92,13 @@ const EventInfoItem = styled('div')(({ theme }) => ({
 }))
 
 export type EventCardProps = {
-  event: EventWithCountsDto
+  event: EventListItem
 }
 
 export const EventCard = ({ event }: EventCardProps) => {
-  const numberOfAttendees = event.attendees.length
-  const past = DateTime.fromISO(event.event_date) < DateTime.now().minus({ days: 1 })
+  const numberOfAttendees = event.attendeeIds.length
+  const numberOfWishlists = event.wishlistIds.length
+  const past = DateTime.fromISO(event.eventDate) < DateTime.now().minus({ days: 1 })
   const navigate = useNavigate()
 
   return (
@@ -107,11 +108,11 @@ export const EventCard = ({ event }: EventCardProps) => {
       hoverable
     >
       <EventHeader>
-        <EventIcon icon={event.icon} className="event-icon" />
+        <EventIcon icon={event.icon ?? undefined} className="event-icon" />
         <EventTextContent>
           <EventTitle className="event-title">{event.title}</EventTitle>
           <EventDate className="event-date">
-            {DateTime.fromISO(event.event_date).toLocaleString(DateTime.DATE_MED)}
+            {DateTime.fromISO(event.eventDate).toLocaleString(DateTime.DATE_MED)}
           </EventDate>
         </EventTextContent>
       </EventHeader>
@@ -121,7 +122,7 @@ export const EventCard = ({ event }: EventCardProps) => {
           {numberOfAttendees} {numberOfAttendees > 1 ? 'participants' : 'participant'}
         </EventInfoItem>
         <EventInfoItem>
-          {event.nb_wishlists} {event.nb_wishlists > 1 ? 'listes' : 'liste'}
+          {numberOfWishlists} {numberOfWishlists > 1 ? 'listes' : 'liste'}
         </EventInfoItem>
       </EventInfos>
     </EventCardContent>

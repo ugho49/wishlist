@@ -1,14 +1,12 @@
-import type { ResetPasswordInputDto } from '@wishlist/common'
-
 import { zodResolver } from '@hookform/resolvers/zod'
 import AttachEmailIcon from '@mui/icons-material/AttachEmail'
 import { Box, Button, Stack, styled, TextField, Typography } from '@mui/material'
-import { useMutation } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { match } from 'ts-pattern'
 import { z } from 'zod'
 
-import { useApi } from '../../hooks/useApi'
+import { rejectionMessage, rejectionPattern, useAuthSendResetPasswordEmailMutation } from '../../gql'
 import { useToast } from '../../hooks/useToast'
 import { RouterLink } from '../common/RouterLink'
 
@@ -48,7 +46,6 @@ const FooterStackStyled = styled(Stack)(({ theme }) => ({
 }))
 
 export const ForgotPasswordPage = () => {
-  const api = useApi()
   const { addToast } = useToast()
   const [resetCodeSent, setResetCodeSent] = useState(false)
 
@@ -58,17 +55,20 @@ export const ForgotPasswordPage = () => {
     formState: { isSubmitting, errors: formErrors },
   } = useForm<FormFields>({ resolver: zodResolver(schema) })
 
-  const { mutateAsync: sendResetPasswordEmail } = useMutation({
-    mutationKey: ['user.sendResetPasswordEmail'],
-    mutationFn: (data: ResetPasswordInputDto) => api.user.sendResetUserPasswordEmail(data),
+  const { mutateAsync: sendResetPasswordEmail } = useAuthSendResetPasswordEmailMutation({
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-    onSuccess: () => {
-      setResetCodeSent(true)
-      addToast({ message: 'Un email vient de vous être envoyé pour réinitialiser le mot de passe', variant: 'info' })
-    },
   })
 
-  const onSubmit = (data: FormFields) => sendResetPasswordEmail(data)
+  const onSubmit = async (data: FormFields) => {
+    const res = await sendResetPasswordEmail({ input: data })
+    match(res.sendResetPasswordEmail)
+      .with({ __typename: 'VoidOutput' }, () => {
+        setResetCodeSent(true)
+        addToast({ message: 'Un email vient de vous être envoyé pour réinitialiser le mot de passe', variant: 'info' })
+      })
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
+  }
 
   return (
     <Stack spacing={4} alignItems="center">

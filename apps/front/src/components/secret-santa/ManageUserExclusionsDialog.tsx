@@ -1,4 +1,5 @@
-import type { EventId, SecretSantaId, SecretSantaUserDto, SecretSantaUserId } from '@wishlist/common'
+import type { EventId, SecretSantaId, SecretSantaUserId } from '@wishlist/common'
+import type { SecretSantaUserItem } from './secret-santa.types'
 
 import CloseIcon from '@mui/icons-material/Close'
 import {
@@ -18,17 +19,19 @@ import {
   Stack,
   Typography,
 } from '@mui/material'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useState } from 'react'
+import { match } from 'ts-pattern'
 
-import { useApi, useToast } from '../../hooks'
+import { rejectionMessage, rejectionPattern, useUpdateSecretSantaUserMutation } from '../../gql'
+import { useToast } from '../../hooks'
 
 export interface ManageUserExclusionsDialogProps {
   open: boolean
   eventId: EventId
   secretSantaId: SecretSantaId
-  secretSantaUser: SecretSantaUserDto
-  otherSecretSantaUser: SecretSantaUserDto[]
+  secretSantaUser: SecretSantaUserItem
+  otherSecretSantaUser: SecretSantaUserItem[]
   handleClose: () => void
 }
 
@@ -41,7 +44,6 @@ export const ManageUserExclusionsDialog = ({
   handleClose,
 }: ManageUserExclusionsDialogProps) => {
   const queryClient = useQueryClient()
-  const api = useApi()
   const { addToast } = useToast()
   const [selected, setSelected] = useState<SecretSantaUserId[]>([])
 
@@ -58,19 +60,34 @@ export const ManageUserExclusionsDialog = ({
     [selected],
   )
 
-  const { mutateAsync: updateUser, isPending: loadingUpdateUser } = useMutation({
-    mutationKey: ['secret-santa.user.update', { secretSantaId, secretSantaUserId: secretSantaUser?.id }],
-    mutationFn: () =>
-      api.secretSanta.updateUser(secretSantaId, secretSantaUser.id, {
-        exclusions: selected,
-      }),
+  const { mutateAsync: updateUserMutation, isPending: loadingUpdateUser } = useUpdateSecretSantaUserMutation({
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-    onSuccess: async () => {
-      handleClose()
-      addToast({ message: 'Les exclusions ont été mises à jour', variant: 'success' })
-      await queryClient.invalidateQueries({ queryKey: ['secret-santa', { eventId }] })
-    },
   })
+
+  const updateUser = async () => {
+    const res = await updateUserMutation({
+      id: secretSantaId,
+      secretSantaUserId: secretSantaUser.id,
+      input: { exclusions: selected },
+    })
+    await match(res.updateSecretSantaUser)
+      .with({ __typename: 'VoidOutput' }, async () => {
+        handleClose()
+        addToast({ message: 'Les exclusions ont été mises à jour', variant: 'success' })
+        await queryClient.invalidateQueries({ queryKey: ['GetSecretSantaForEvent', { eventId }] })
+      })
+      .with({ __typename: 'ValidationRejection' }, rejection =>
+        addToast({
+          message:
+            rejection.errors.length > 0
+              ? rejection.errors.map(error => error.message).join(', ')
+              : rejectionMessage(rejection),
+          variant: 'error',
+        }),
+      )
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
+  }
 
   useEffect(() => {
     setSelected(secretSantaUser?.exclusions || [])
@@ -105,14 +122,14 @@ export const ManageUserExclusionsDialog = ({
             >
               <ListItemButton onClick={() => toggleSelect(santaUser.id)}>
                 <ListItemAvatar>
-                  <Avatar src={santaUser.attendee.user?.picture_url} />
+                  <Avatar src={santaUser.attendee.user?.pictureUrl ?? undefined} />
                 </ListItemAvatar>
                 <ListItemText
                   id={santaUser.id}
                   primary={
-                    santaUser.attendee.pending_email
-                      ? santaUser.attendee.pending_email
-                      : `${santaUser.attendee.user?.firstname} ${santaUser.attendee.user?.lastname}`
+                    santaUser.attendee.pendingEmail
+                      ? santaUser.attendee.pendingEmail
+                      : `${santaUser.attendee.user?.firstName} ${santaUser.attendee.user?.lastName}`
                   }
                 />
               </ListItemButton>

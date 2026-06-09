@@ -1,24 +1,34 @@
 import type { EventId } from '@wishlist/common'
 
-import { useQuery } from '@tanstack/react-query'
+import { useEffect } from 'react'
 
-import { useApi } from '../useApi'
+import { isRejection, rejectionMessage, useGetSecretSantaForEventQuery } from '../../gql'
+import { useToast } from '../useToast'
 
 type Options = {
   enabled: boolean
 }
 
 export const useSecretSanta = (eventId: EventId | undefined, options: Options = { enabled: true }) => {
-  const api = useApi()
-
-  const { data, isLoading } = useQuery({
-    queryKey: ['secret-santa', { eventId }],
-    queryFn: ({ signal }) => {
-      if (!eventId) return undefined
-      return api.secretSanta.get(eventId, { signal })
+  const { addToast } = useToast()
+  const { data, isLoading } = useGetSecretSantaForEventQuery(
+    { eventId: eventId as EventId },
+    {
+      enabled: options.enabled && !!eventId,
+      // The `secretSanta` field is nullable: it resolves to null when no secret
+      // santa exists for the event, a normal state exposed as `undefined`.
+      select: d => d.secretSanta ?? undefined,
     },
-    enabled: options.enabled,
-  })
+  )
 
-  return { secretSanta: data, loading: isLoading }
+  const rejection = data && isRejection(data) ? data : undefined
+  const secretSanta = data && !isRejection(data) ? data : undefined
+
+  useEffect(() => {
+    if (rejection) {
+      addToast({ message: rejectionMessage(rejection), variant: 'error' })
+    }
+  }, [rejection, addToast])
+
+  return { secretSanta, rejection, loading: isLoading }
 }

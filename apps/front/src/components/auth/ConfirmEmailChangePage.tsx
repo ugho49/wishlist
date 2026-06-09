@@ -1,12 +1,10 @@
-import type { ConfirmEmailChangeInputDto } from '@wishlist/common'
-
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import { CircularProgress, Stack, styled, Typography } from '@mui/material'
-import { useMutation } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import { useEffect, useRef, useState } from 'react'
+import { match } from 'ts-pattern'
 
-import { useApi } from '../../hooks/useApi'
+import { rejectionPattern, useAuthConfirmEmailChangeMutation } from '../../gql'
 import { RouterLink } from '../common/RouterLink'
 
 const ContainerStyled = styled(Stack)(({ theme }) => ({
@@ -63,17 +61,17 @@ type ConfirmEmailChangePageProps = {
 
 export const ConfirmEmailChangePage = (props: ConfirmEmailChangePageProps) => {
   const { email, token } = props
-  const api = useApi()
   const [error, setError] = useState<boolean>(false)
   const [redirectTimeoutInSeconds, setRedirectTimeoutInSeconds] = useState<number>(0)
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
   const navigate = useNavigate()
 
-  const { mutateAsync: confirmEmailChange, isPending } = useMutation({
-    mutationKey: ['user.confirmEmailChange'],
-    mutationFn: (data: ConfirmEmailChangeInputDto) => api.user.confirmEmailChange(data),
+  const { mutateAsync: confirmEmailChange, isPending } = useAuthConfirmEmailChangeMutation({
     onError: () => setError(true),
-    onSuccess: () => {
+  })
+
+  useEffect(() => {
+    const onSuccess = () => {
       setRedirectTimeoutInSeconds(10)
 
       const interval = setInterval(() => {
@@ -91,21 +89,22 @@ export const ConfirmEmailChangePage = (props: ConfirmEmailChangePageProps) => {
         void navigate({ to: '/user/profile' })
       }, 10000)
       timeoutRef.current = timeout
-    },
-  })
-
-  useEffect(() => {
-    if (email && token) {
-      void confirmEmailChange({
-        new_email: email,
-        token,
-      })
     }
 
-    if (!email || !token) {
+    const confirm = async () => {
+      const res = await confirmEmailChange({ input: { newEmail: email, token } })
+      match(res.confirmEmailChange)
+        .with({ __typename: 'VoidOutput' }, () => onSuccess())
+        .with(rejectionPattern, () => setError(true))
+        .exhaustive()
+    }
+
+    if (email && token) {
+      void confirm()
+    } else {
       setError(true)
     }
-  }, [email, token, confirmEmailChange])
+  }, [email, token, confirmEmailChange, navigate])
 
   useEffect(() => {
     return () => {

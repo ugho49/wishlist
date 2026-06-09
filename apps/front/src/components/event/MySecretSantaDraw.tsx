@@ -78,9 +78,9 @@ export const MySecretSantaDraw = ({ eventId }: MySecretSantaDrawProps) => {
       <Stack direction="column" sx={{ flex: 1 }}>
         <InfoRow>
           <InfoText>Votre Secret Santa est :</InfoText>
-          <StyledAvatar src={draw.user?.picture_url} />
+          <StyledAvatar src={draw.user?.pictureUrl ?? undefined} />
           <DrawName>
-            {draw.pending_email ? draw.pending_email : `${draw.user?.firstname} ${draw.user?.lastname}`}
+            {draw.pendingEmail ? draw.pendingEmail : `${draw.user?.firstName} ${draw.user?.lastName}`}
           </DrawName>
         </InfoRow>
         <DescriptionText>Vous devez offrir un cadeau à cette personne lors de l'événement !</DescriptionText>

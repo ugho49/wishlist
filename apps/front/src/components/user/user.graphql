@@ -1,0 +1,186 @@
+query UserProfileCurrentUser {
+  currentUser {
+    __typename
+    ... on User {
+      id
+      email
+      firstName
+      lastName
+      birthday
+      pictureUrl
+      createdAt
+      socials {
+        id
+        socialType
+        name
+        email
+        pictureUrl
+        createdAt
+        updatedAt
+      }
+    }
+  }
+}
+
+query UserProfileEmailSettings {
+  currentUser {
+    __typename
+    ... on User {
+      id
+      emailSettings {
+        dailyNewItemNotification
+      }
+    }
+  }
+}
+
+query UserPendingEmailChange {
+  pendingEmailChange {
+    __typename
+    ... on PendingEmailChange {
+      newEmail
+      expiredAt
+    }
+  }
+}
+
+query SearchUsersSelect($keyword: String!) {
+  searchUsers(keyword: $keyword) {
+    __typename
+    ... on SearchUsersOutput {
+      users {
+        id
+        firstName
+        lastName
+        email
+        pictureUrl
+      }
+    }
+  }
+}
+
+query UserClosestFriends($limit: Int) {
+  closestFriends(limit: $limit) {
+    __typename
+    ... on ClosestFriendsOutput {
+      users {
+        id
+        firstName
+        lastName
+        email
+        pictureUrl
+      }
+    }
+  }
+}
+
+mutation UpdateUserProfile($input: UpdateUserProfileInput!) {
+  updateUserProfile(input: $input) {
+    __typename
+    ... on User {
+      id
+      firstName
+      lastName
+      birthday
+    }
+    ... on ValidationRejection {
+      errors {
+        field
+        message
+      }
+    }
+  }
+}
+
+mutation ChangeUserPassword($input: ChangeUserPasswordInput!) {
+  changeUserPassword(input: $input) {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+    ... on ValidationRejection {
+      errors {
+        field
+        message
+      }
+    }
+  }
+}
+
+mutation UpdateUserEmailSettings($input: UpdateUserEmailSettingsInput!) {
+  updateUserEmailSettings(input: $input) {
+    __typename
+    ... on UserEmailSettings {
+      dailyNewItemNotification
+    }
+    ... on ValidationRejection {
+      errors {
+        field
+        message
+      }
+    }
+  }
+}
+
+mutation LinkCurrentUserWithGoogle($input: LinkUserToGoogleInput!) {
+  linkCurrentUserWithGoogle(input: $input) {
+    __typename
+    ... on UserSocial {
+      id
+      socialType
+      name
+      email
+      pictureUrl
+      createdAt
+      updatedAt
+    }
+    ... on ValidationRejection {
+      errors {
+        field
+        message
+      }
+    }
+  }
+}
+
+mutation UnlinkCurrentUserSocial($socialId: UserSocialId!) {
+  unlinkCurrentUserSocial(socialId: $socialId) {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+  }
+}
+
+mutation UpdateUserPictureFromSocial($input: UpdateUserPictureFromSocialInput!) {
+  updateUserPictureFromSocial(input: $input) {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+  }
+}
+
+mutation RemoveCurrentUserPicture {
+  removeUserPicture {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+  }
+}
+
+mutation RequestUserEmailChange($input: RequestEmailChangeInput!) {
+  requestEmailChange(input: $input) {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+    ... on ValidationRejection {
+      errors {
+        field
+        message
+      }
+    }
+  }
+}

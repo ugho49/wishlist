@@ -1,18 +1,21 @@
-import type { LoginOutputDto } from '@wishlist/common'
-
 import { zodResolver } from '@hookform/resolvers/zod'
 import PersonAddIcon from '@mui/icons-material/PersonAdd'
 import { Alert, Button, Divider, Stack, styled, TextField, Typography } from '@mui/material'
-import { useMutation } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
-import { AxiosError } from 'axios'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useDispatch } from 'react-redux'
+import { match } from 'ts-pattern'
 import { z } from 'zod'
 
 import { setTokens } from '../../core/store/features'
-import { useApi } from '../../hooks/useApi'
+import {
+  rejectionMessage,
+  rejectionPattern,
+  useAuthLoginMutation,
+  useAuthLoginWithGoogleMutation,
+  useAuthRegisterUserMutation,
+} from '../../gql'
 import { useToast } from '../../hooks/useToast'
 import { zodRequiredString } from '../../utils/validation'
 import { RouterLink } from '../common/RouterLink'
@@ -52,7 +55,6 @@ const DividerStyled = styled(Divider)(() => ({
 }))
 
 export const RegisterPage = () => {
-  const api = useApi()
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const { addToast } = useToast()
@@ -65,12 +67,12 @@ export const RegisterPage = () => {
     formState: { isSubmitting, errors: formErrors },
   } = useForm<FormFields>({ resolver: zodResolver(schema) })
 
-  const handleRegisterSuccess = (param: LoginOutputDto, from: 'social' | 'email') => {
+  const handleRegisterSuccess = (accessToken: string, from: 'social' | 'email') => {
     addToast({ message: 'Bienvenue sur wishlist 👋', variant: 'default' })
 
     dispatch(
       setTokens({
-        accessToken: param.access_token,
+        accessToken,
       }),
     )
 
@@ -78,35 +80,61 @@ export const RegisterPage = () => {
     void navigate({ to: '/welcome', search: { from } })
   }
 
-  const { mutateAsync: registerUser } = useMutation({
-    mutationKey: ['register'],
-    mutationFn: async (data: FormFields) => {
-      await api.user.register(data)
-      return api.auth.login({ email: data.email, password: data.password })
-    },
-    onSuccess: data => handleRegisterSuccess(data, 'email'),
-    onError: e => {
-      if (e instanceof AxiosError && e.response?.status === 422) {
-        setError('root', { message: 'Cet email est déjà utilisé' })
-      } else {
-        setError('root', { message: "Une erreur s'est produite." })
-      }
-    },
-  })
-
-  const { mutateAsync: registerWithGoogle } = useMutation({
-    mutationKey: ['registerWithGoogle'],
-    mutationFn: (code: string) => api.auth.loginWithGoogle({ code, createUserIfNotExists: true }),
-    onSuccess: data => handleRegisterSuccess(data, 'social'),
-    onError: () => onSocialError(),
-  })
-
-  const onSubmit = (data: FormFields) => registerUser(data)
-
   const onSocialError = () => {
     setSocialLoading(false)
     addToast({ message: "Une erreur s'est produite", variant: 'error' })
   }
+
+  const { mutateAsync: registerUserMutation } = useAuthRegisterUserMutation({
+    onError: () => setError('root', { message: "Une erreur s'est produite." }),
+  })
+  const { mutateAsync: loginMutation } = useAuthLoginMutation({
+    onError: () => setError('root', { message: "Une erreur s'est produite." }),
+  })
+  const { mutateAsync: loginWithGoogleMutation } = useAuthLoginWithGoogleMutation({
+    onError: () => onSocialError(),
+  })
+
+  const registerUser = async (data: FormFields) => {
+    const registerRes = await registerUserMutation({ input: data })
+    const registered = match(registerRes.registerUser)
+      .returnType<boolean>()
+      .with({ __typename: 'User' }, () => true)
+      .with({ __typename: 'ValidationRejection' }, () => {
+        setError('root', { message: 'Cet email est déjà utilisé' })
+        return false
+      })
+      .with(rejectionPattern, rejection => {
+        setError('root', { message: rejectionMessage(rejection) })
+        return false
+      })
+      .exhaustive()
+
+    if (!registered) return
+
+    const loginRes = await loginMutation({ input: { email: data.email, password: data.password } })
+    match(loginRes.login)
+      .with({ __typename: 'LoginOutput' }, output => handleRegisterSuccess(output.accessToken, 'email'))
+      .with(rejectionPattern, () => {
+        // Account created but auto-login failed: let the user sign in manually
+        addToast({ message: 'Votre compte a été créé, veuillez vous connecter', variant: 'info' })
+        void navigate({ to: '/login', search: { email: data.email } })
+      })
+      .exhaustive()
+  }
+
+  const registerWithGoogle = async (code: string) => {
+    const res = await loginWithGoogleMutation({ input: { code, createUserIfNotExists: true } })
+    match(res.loginWithGoogle)
+      .with({ __typename: 'LoginWithGoogleOutput' }, output => handleRegisterSuccess(output.accessToken, 'social'))
+      .with(rejectionPattern, rejection => {
+        setSocialLoading(false)
+        addToast({ message: rejectionMessage(rejection), variant: 'error' })
+      })
+      .exhaustive()
+  }
+
+  const onSubmit = (data: FormFields) => registerUser(data)
 
   return (
     <Stack spacing={4} alignItems="center">

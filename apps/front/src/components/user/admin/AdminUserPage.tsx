@@ -6,17 +6,27 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import HistoryIcon from '@mui/icons-material/History'
 import LanguageIcon from '@mui/icons-material/Language'
 import SaveIcon from '@mui/icons-material/Save'
-import { Box, Button, List, ListItem, ListItemIcon, ListItemText, Stack, TextField } from '@mui/material'
+import { Alert, Box, Button, List, ListItem, ListItemIcon, ListItemText, Stack, TextField } from '@mui/material'
 import { styled, useTheme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
-import { useQuery } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate, useSearch } from '@tanstack/react-router'
 import { AdminListEvents } from '@wishlist/front-components/event/admin/AdminListEvents'
 import { DateTime } from 'luxon'
 import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
+import { match } from 'ts-pattern'
 
-import { useApi, useToast } from '../../../hooks'
+import { uploadAdminUserPicture } from '../../../api/upload'
+import {
+  isRejection,
+  rejectionMessage,
+  rejectionPattern,
+  useAdminRemoveUserPictureMutation,
+  useAdminUpdateUserProfileMutation,
+  useAdminUserDetailQuery,
+} from '../../../gql'
+import { useToast } from '../../../hooks'
 import { Card } from '../../common/Card'
 import { CharsRemaining } from '../../common/CharsRemaining'
 import { ConfirmButton } from '../../common/ConfirmButton'
@@ -60,7 +70,7 @@ interface AdminUserPageProps {
 export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
   const { addToast } = useToast()
   const { user: currentUser } = useSelector(mapState)
-  const { admin: api } = useApi()
+  const queryClient = useQueryClient()
   const theme = useTheme()
   const smallScreen = useMediaQuery(theme.breakpoints.down('md'))
   const [loading, setLoading] = useState(false)
@@ -78,75 +88,73 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
     void navigate({ to: '/admin/users/$userId', params: { userId }, search: prev => ({ ...prev, eventPage: page }) })
   }
 
-  const { data: value, isLoading: loadingUser } = useQuery({
-    queryKey: ['admin', 'user', { id: userId }],
-    queryFn: ({ signal }) => api.user.getById(userId, { signal }),
+  const { data, isLoading: loadingUser } = useAdminUserDetailQuery({ userId }, { select: d => d.adminUser })
+  const value = data?.__typename === 'UserFull' ? data : undefined
+  const queryRejection = data && isRejection(data) ? data : undefined
+
+  const { mutateAsync: updateUser } = useAdminUpdateUserProfileMutation({
+    onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
+    onSettled: () => setLoading(false),
   })
+  const { mutateAsync: removeUserPicture } = useAdminRemoveUserPictureMutation()
+
+  const invalidateUser = () => queryClient.invalidateQueries({ queryKey: ['AdminUserDetail', { userId }] })
 
   const isCurrentUser = currentUser?.id === userId
 
   useEffect(() => {
     if (value) {
       setEmail(value.email)
-      setFirstname(value.firstname)
-      setLastname(value.lastname)
+      setFirstname(value.firstName)
+      setLastname(value.lastName)
       setBirthday(value?.birthday ? DateTime.fromISO(value.birthday) : null)
-      setEnabled(value.is_enabled)
-      setPictureUrl(value.picture_url || '')
+      setEnabled(value.isEnabled)
+      setPictureUrl(value.pictureUrl || '')
     }
   }, [value])
 
-  const disableUser = async () => {
+  const setUserEnabled = async (isEnabled: boolean) => {
     setLoading(true)
-    setEnabled(false)
-    try {
-      // TODO: useMutation
-      await api.user.update(userId, { is_enabled: false })
-      addToast({ message: 'Utilisateur désactivé', variant: 'success' })
-    } catch {
-      addToast({ message: "Une erreur s'est produite", variant: 'error' })
-    } finally {
-      setLoading(false)
-    }
+    setEnabled(isEnabled)
+    const res = await updateUser({ userId, input: { isEnabled } })
+    match(res.adminUpdateUserProfile)
+      .with({ __typename: 'VoidOutput' }, () => {
+        void invalidateUser()
+        addToast({ message: isEnabled ? 'Utilisateur activé' : 'Utilisateur désactivé', variant: 'success' })
+      })
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
   }
 
-  const enableUser = async () => {
-    setLoading(true)
-    setEnabled(true)
-    try {
-      // TODO: useMutation
-      await api.user.update(userId, { is_enabled: true })
-      addToast({ message: 'Utilisateur activé', variant: 'success' })
-    } catch {
-      addToast({ message: "Une erreur s'est produite", variant: 'error' })
-    } finally {
-      setLoading(false)
-    }
-  }
+  const disableUser = () => setUserEnabled(false)
+  const enableUser = () => setUserEnabled(true)
 
   const updateProfile = async (e: FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    try {
-      // TODO: useMutation
-      await api.user.update(userId, {
+    const res = await updateUser({
+      userId,
+      input: {
         firstname,
         lastname,
-        birthday: birthday !== null ? new Date(birthday.toISODate() || '') : undefined,
+        birthday: birthday !== null ? birthday.toISODate() || undefined : undefined,
         email,
+      },
+    })
+    match(res.adminUpdateUserProfile)
+      .with({ __typename: 'VoidOutput' }, () => {
+        void invalidateUser()
+        addToast({ message: 'Profil mis à jour', variant: 'success' })
       })
-
-      addToast({ message: 'Profil mis à jour', variant: 'success' })
-    } catch {
-      addToast({ message: "Une erreur s'est produite", variant: 'error' })
-    } finally {
-      setLoading(false)
-    }
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
   }
 
   return (
     <Loader loading={loadingUser}>
       <Title>Editer l'utilisateur</Title>
+
+      {queryRejection && <Alert severity="error">{rejectionMessage(queryRejection)}</Alert>}
 
       <UpdatePasswordModal
         userId={userId}
@@ -159,10 +167,23 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
           size="120px"
           pictureUrl={pictureUrl}
           socials={[]}
-          onPictureUpdated={url => setPictureUrl(url || '')}
-          uploadPictureHandler={file => api.user.uploadPicture(userId, file)}
+          onPictureUpdated={url => {
+            setPictureUrl(url || '')
+            void invalidateUser()
+          }}
+          uploadPictureHandler={file => uploadAdminUserPicture(userId, file)}
           updatePictureFromSocialHandler={() => Promise.resolve()}
-          deletePictureHandler={() => api.user.deletePicture(userId)}
+          deletePictureHandler={async () => {
+            const res = await removeUserPicture({ userId })
+            // AvatarUpdateButton owns the error UI for this handler: throwing keeps
+            // its catch path (error toast) and prevents it from clearing the picture.
+            match(res.adminRemoveUserPicture)
+              .with({ __typename: 'VoidOutput' }, () => undefined)
+              .with(rejectionPattern, rejection => {
+                throw new Error(rejectionMessage(rejection))
+              })
+              .exhaustive()
+          }}
         />
       </Stack>
 
@@ -183,7 +204,7 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
                 </ListItemIcon>
                 <ListItemText
                   primary="Inscrit le"
-                  secondary={DateTime.fromISO(value?.created_at || '').toLocaleString(
+                  secondary={DateTime.fromISO(value?.createdAt || '').toLocaleString(
                     DateTime.DATETIME_MED_WITH_SECONDS,
                   )}
                 />
@@ -197,8 +218,8 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
                 <ListItemText
                   primary="Dernière connexion le"
                   secondary={
-                    value?.last_connected_at
-                      ? DateTime.fromISO(value.last_connected_at).toLocaleString(DateTime.DATETIME_MED_WITH_SECONDS)
+                    value?.lastConnectedAt
+                      ? DateTime.fromISO(value.lastConnectedAt).toLocaleString(DateTime.DATETIME_MED_WITH_SECONDS)
                       : ' - '
                   }
                 />
@@ -209,7 +230,7 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
                 <ListItemIcon>
                   <LanguageIcon />
                 </ListItemIcon>
-                <ListItemText primary="Dernière IP connue" secondary={value?.last_ip || ' - '} />
+                <ListItemText primary="Dernière IP connue" secondary={value?.lastIp || ' - '} />
               </ListItem>
             </List>
           </Stack>

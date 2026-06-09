@@ -1,14 +1,22 @@
-import type { AddEventAttendeeInputDto, AttendeeDto, AttendeeId, DetailedEventDto, EventId } from '@wishlist/common'
+import type { AttendeeId, EventId } from '@wishlist/common'
 import type { RootState } from '../../core'
+import type { EventAttendee } from './event.types'
 
 import DeleteIcon from '@mui/icons-material/Delete'
 import { Box, Divider, List, ListItem, ListItemButton } from '@mui/material'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { AttendeeRole } from '@wishlist/common'
+import { useQueryClient } from '@tanstack/react-query'
 import { useMemo } from 'react'
 import { useSelector } from 'react-redux'
+import { match } from 'ts-pattern'
 
-import { useApi, useToast } from '../../hooks'
+import {
+  AttendeeRole,
+  rejectionMessage,
+  rejectionPattern,
+  useAddEventAttendeeMutation,
+  useRemoveEventAttendeeMutation,
+} from '../../gql'
+import { useToast } from '../../hooks'
 import { Card } from '../common/Card'
 import { ConfirmIconButton } from '../common/ConfirmIconButton'
 import { Subtitle } from '../common/Subtitle'
@@ -17,54 +25,51 @@ import { ListItemAttendee } from './ListItemAttendee'
 
 export type EditEventAttendeesProps = {
   eventId: EventId
-  attendees: AttendeeDto[]
+  attendees: EventAttendee[]
 }
 
 const mapState = (state: RootState) => ({ email: state.auth.user?.email, id: state.auth.user?.id })
 
 export const EditEventAttendees = ({ eventId, attendees }: EditEventAttendeesProps) => {
   const { id: currentUserId, email: currentUserEmail } = useSelector(mapState)
-  const api = useApi()
   const { addToast } = useToast()
+  const queryClient = useQueryClient()
 
   const attendeeEmails = useMemo(
-    () => attendees.map(attendee => (attendee.pending_email ? attendee.pending_email : attendee.user?.email || '')),
+    () => attendees.map(attendee => (attendee.pendingEmail ? attendee.pendingEmail : attendee.user?.email || '')),
     [attendees],
   )
 
-  const queryClient = useQueryClient()
+  const invalidateEvent = () => queryClient.invalidateQueries({ queryKey: ['EventPageGetEvent', { eventId }] })
 
-  const { mutateAsync: addAttendee, isPending: addAttendeePending } = useMutation({
-    mutationKey: ['event.addAttendee', { id: eventId }],
-    mutationFn: (attendee: AddEventAttendeeInputDto) =>
-      api.attendee.addAttendee(eventId, {
-        email: attendee.email,
-        role: attendee.role,
-      }),
-    onSuccess: newAttendee => {
-      addToast({ message: "Participant ajouté à l'évènement !", variant: 'info' })
-
-      queryClient.setQueryData(['event', { id: eventId }], (old: DetailedEventDto) => ({
-        ...old,
-        attendees: [newAttendee, ...attendees],
-      }))
-    },
+  const { mutateAsync: addAttendeeMutation, isPending: addAttendeePending } = useAddEventAttendeeMutation({
     onError: () => addToast({ message: "Impossible d'ajouter ce participant", variant: 'error' }),
   })
-
-  const { mutateAsync: deleteAttendee, isPending: deleteAttendeePending } = useMutation({
-    mutationKey: ['event.deleteAttendee', { id: eventId }],
-    mutationFn: (attendeeId: AttendeeId) => api.attendee.deleteAttendee({ eventId, attendeeId }),
-    onSuccess: (_, attendeeId) => {
-      addToast({ message: "Participant supprimé de l'évènement !", variant: 'info' })
-
-      queryClient.setQueryData(['event', { id: eventId }], (old: DetailedEventDto) => ({
-        ...old,
-        attendees: [...attendees].filter(a => a.id !== attendeeId),
-      }))
-    },
+  const { mutateAsync: removeAttendeeMutation, isPending: deleteAttendeePending } = useRemoveEventAttendeeMutation({
     onError: () => addToast({ message: 'Impossible de supprimer ce participant', variant: 'error' }),
   })
+
+  const addAttendee = async (email: string) => {
+    const res = await addAttendeeMutation({ eventId, input: { email, role: AttendeeRole.User } })
+    match(res.addEventAttendee)
+      .with({ __typename: 'EventAttendee' }, () => {
+        addToast({ message: "Participant ajouté à l'évènement !", variant: 'info' })
+        void invalidateEvent()
+      })
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
+  }
+
+  const deleteAttendee = async (attendeeId: AttendeeId) => {
+    const res = await removeAttendeeMutation({ eventId, attendeeId })
+    match(res.removeEventAttendee)
+      .with({ __typename: 'VoidOutput' }, () => {
+        addToast({ message: "Participant supprimé de l'évènement !", variant: 'info' })
+        void invalidateEvent()
+      })
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
+  }
 
   const loading = useMemo(
     () => addAttendeePending || deleteAttendeePending,
@@ -80,9 +85,7 @@ export const EditEventAttendees = ({ eventId, attendees }: EditEventAttendeesPro
           label="Ajouter un nouveau participant à l'évènement ?"
           disabled={loading}
           excludedEmails={[...attendeeEmails, currentUserEmail || '']}
-          onChange={value =>
-            addAttendee({ email: typeof value === 'string' ? value : value.email, role: AttendeeRole.USER })
-          }
+          onChange={value => addAttendee(typeof value === 'string' ? value : value.email)}
         />
       </Box>
 
@@ -102,9 +105,9 @@ export const EditEventAttendees = ({ eventId, attendees }: EditEventAttendeesPro
                   <>
                     Êtes-vous sur de retirer le participant{' '}
                     <b>
-                      {attendee.pending_email
-                        ? attendee.pending_email
-                        : `${attendee.user?.firstname} ${attendee.user?.lastname}`}
+                      {attendee.pendingEmail
+                        ? attendee.pendingEmail
+                        : `${attendee.user?.firstName} ${attendee.user?.lastName}`}
                     </b>{' '}
                     de l'évènement ?
                   </>
@@ -117,11 +120,11 @@ export const EditEventAttendees = ({ eventId, attendees }: EditEventAttendeesPro
           >
             <ListItemButton>
               <ListItemAttendee
-                role={attendee.role as AttendeeRole}
-                userName={`${attendee.user?.firstname} ${attendee.user?.lastname}`}
-                isPending={!!attendee.pending_email}
-                email={attendee.pending_email ?? attendee.user?.email ?? ''}
-                pictureUrl={attendee.user?.picture_url}
+                role={attendee.role}
+                userName={`${attendee.user?.firstName} ${attendee.user?.lastName}`}
+                isPending={!!attendee.pendingEmail}
+                email={attendee.pendingEmail ?? attendee.user?.email ?? ''}
+                pictureUrl={attendee.user?.pictureUrl ?? undefined}
               />
             </ListItemButton>
           </ListItem>

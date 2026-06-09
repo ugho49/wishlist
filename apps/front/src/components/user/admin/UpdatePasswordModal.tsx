@@ -12,8 +12,9 @@ import {
   TextField,
 } from '@mui/material'
 import { useState } from 'react'
+import { match } from 'ts-pattern'
 
-import { useApi } from '../../../hooks/useApi'
+import { rejectionMessage, rejectionPattern, useAdminUpdateUserProfileMutation } from '../../../gql'
 import { useToast } from '../../../hooks/useToast'
 
 export type UpdatePasswordModalProps = {
@@ -23,23 +24,27 @@ export type UpdatePasswordModalProps = {
 }
 
 export const UpdatePasswordModal = ({ onClose, open, userId }: UpdatePasswordModalProps) => {
-  const { admin: api } = useApi()
   const [newPassword, setNewPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const { addToast } = useToast()
 
+  const { mutateAsync: updateUser } = useAdminUpdateUserProfileMutation({
+    onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
+    onSettled: () => setLoading(false),
+  })
+
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    try {
-      await api.user.update(userId, { new_password: newPassword })
-      addToast({ message: 'Mot de passe mis à jour', variant: 'success' })
-      setLoading(false)
-      setNewPassword('')
-      onClose()
-    } catch {
-      addToast({ message: "Une erreur s'est produite", variant: 'error' })
-    }
+    const res = await updateUser({ userId, input: { newPassword } })
+    match(res.adminUpdateUserProfile)
+      .with({ __typename: 'VoidOutput' }, () => {
+        addToast({ message: 'Mot de passe mis à jour', variant: 'success' })
+        setNewPassword('')
+        onClose()
+      })
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
   }
 
   return (

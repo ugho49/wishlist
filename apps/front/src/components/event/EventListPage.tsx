@@ -1,10 +1,8 @@
 import AddIcon from '@mui/icons-material/Add'
-import { Box, Grid } from '@mui/material'
-import { useQuery } from '@tanstack/react-query'
+import { Alert, Box, Grid } from '@mui/material'
 import { useNavigate, useSearch } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
 
-import { useApi } from '../../hooks/useApi'
+import { isRejection, rejectionMessage, useEventListPageGetEventsQuery } from '../../gql'
 import { FabAutoGrow } from '../common/FabAutoGrow'
 import { Loader } from '../common/Loader'
 import { Pagination } from '../common/Pagination'
@@ -13,20 +11,18 @@ import { EmptyEventsState } from './EmptyEventsState'
 import { EventCard } from './EventCard'
 
 export const EventListPage = () => {
-  const api = useApi()
-  const [totalElements, setTotalElements] = useState(0)
   const { page: currentPage } = useSearch({ from: '/_authenticated/_with-layout/events/' })
   const navigate = useNavigate()
-  const { data: value, isLoading: loading } = useQuery({
-    queryKey: ['events', { page: currentPage }],
-    queryFn: ({ signal }) => api.event.getAll({ p: currentPage }, { signal }),
-  })
+  const { data, isLoading: loading } = useEventListPageGetEventsQuery(
+    { filters: { page: currentPage } },
+    { select: d => d.events },
+  )
+  const pagedEvents = data?.__typename === 'GetEventsPagedResponse' ? data : undefined
+  const queryRejection = data && isRejection(data) ? data : undefined
 
-  useEffect(() => {
-    if (value) {
-      setTotalElements(value.pagination.total_elements)
-    }
-  }, [value])
+  const events = pagedEvents?.data ?? []
+  const totalElements = pagedEvents?.pagination.totalElements ?? 0
+  const totalPages = pagedEvents?.pagination.totalPages
 
   const handleAddEventClick = () => navigate({ to: '/events/new' })
 
@@ -35,8 +31,9 @@ export const EventListPage = () => {
       {totalElements > 0 && <Title>Évènements</Title>}
 
       <Loader loading={loading}>
+        {queryRejection && <Alert severity="error">{rejectionMessage(queryRejection)}</Alert>}
         <Grid container spacing={3}>
-          {(value?.resources || []).map(event => (
+          {events.map(event => (
             <Grid key={event.id} size={{ xs: 12, lg: 6 }}>
               <EventCard event={event} />
             </Grid>
@@ -47,10 +44,10 @@ export const EventListPage = () => {
       {totalElements > 0 && (
         <>
           <Pagination
-            totalPage={value?.pagination.total_pages}
+            totalPage={totalPages}
             currentPage={currentPage}
             disabled={loading}
-            hide={value?.pagination.total_pages === 1}
+            hide={totalPages === 1}
             onChange={value => navigate({ from: '/events', search: prev => ({ ...prev, page: value }) })}
           />
 
@@ -63,7 +60,7 @@ export const EventListPage = () => {
         </>
       )}
 
-      {totalElements === 0 && !loading && (
+      {totalElements === 0 && !loading && !queryRejection && (
         <EmptyEventsState sx={{ marginTop: '100px' }} onAddEventClick={() => handleAddEventClick()} />
       )}
     </Box>

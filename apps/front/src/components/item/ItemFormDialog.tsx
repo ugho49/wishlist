@@ -1,14 +1,9 @@
 import type { TransitionProps } from '@mui/material/transitions'
-import type {
-  AddItemForListInputDto,
-  DetailedWishlistDto,
-  ItemDto,
-  ItemId,
-  UpdateItemInputDto,
-  WishlistId,
-} from '@wishlist/common'
+import type { WishlistId } from '@wishlist/common'
 import type React from 'react'
 import type { FormEvent } from 'react'
+import type * as Types from '../../gql/__generated__/types'
+import type { WishlistItem } from '../wishlist/wishlist.types'
 
 import CameraAltIcon from '@mui/icons-material/CameraAlt'
 import CloseIcon from '@mui/icons-material/Close'
@@ -29,11 +24,19 @@ import {
   Typography,
   useMediaQuery,
 } from '@mui/material'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useApi, useToast } from '@wishlist/front-hooks'
+import { useQueryClient } from '@tanstack/react-query'
+import { useToast } from '@wishlist/front-hooks'
 import { forwardRef, useCallback, useEffect, useMemo, useState } from 'react'
 import { TidyURL } from 'tidy-url'
+import { match } from 'ts-pattern'
 
+import {
+  rejectionMessage,
+  rejectionPattern,
+  useCreateItemMutation,
+  useScanItemUrlMutation,
+  useUpdateItemMutation,
+} from '../../gql'
 import { isValidUrl } from '../../utils/router.utils'
 import { CharsRemaining } from '../common/CharsRemaining'
 import { InputLabel } from '../common/InputLabel'
@@ -55,7 +58,7 @@ const Transition = forwardRef(function Transition(
 type ModeProps<T> = T extends 'create'
   ? { mode: 'create'; item?: never }
   : T extends 'edit'
-    ? { mode: 'edit'; item: ItemDto }
+    ? { mode: 'edit'; item: WishlistItem }
     : never
 
 export type ItemFormDialogProps = (ModeProps<'create'> | ModeProps<'edit'>) & {
@@ -67,7 +70,6 @@ export type ItemFormDialogProps = (ModeProps<'create'> | ModeProps<'edit'>) & {
 
 export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistId }: ItemFormDialogProps) => {
   const { addToast } = useToast()
-  const api = useApi()
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [url, setUrl] = useState('')
@@ -91,32 +93,14 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
     setScore(null)
   }
 
-  const { mutateAsync: createItem, isPending: createItemPending } = useMutation({
-    mutationKey: ['item.create'],
-    mutationFn: (data: AddItemForListInputDto) => api.item.create(data),
+  const invalidateWishlist = () => queryClient.invalidateQueries({ queryKey: ['WishlistPage', { wishlistId }] })
+
+  const { mutateAsync: createItem, isPending: createItemPending } = useCreateItemMutation({
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-    onSuccess: newItem => {
-      addToast({ message: 'Souhait créé avec succès', variant: 'success' })
-      queryClient.setQueryData(['wishlist', { id: wishlistId }], (old: DetailedWishlistDto) => ({
-        ...old,
-        items: [...old.items, newItem],
-      }))
-      resetForm()
-    },
   })
 
-  const { mutateAsync: updateItem, isPending: updateItemPending } = useMutation({
-    mutationKey: ['item.update', { id: item?.id }],
-    mutationFn: (props: { itemId: ItemId; data: UpdateItemInputDto }) => api.item.update(props.itemId, props.data),
+  const { mutateAsync: updateItem, isPending: updateItemPending } = useUpdateItemMutation({
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-    onSuccess: (_output, props) => {
-      const { itemId, data } = props
-      addToast({ message: 'Le souhait à bien été modifié', variant: 'success' })
-      queryClient.setQueryData(['wishlist', { id: wishlistId }], (old: DetailedWishlistDto) => ({
-        ...old,
-        items: old.items.map(item => (item.id === itemId ? { ...item, ...data } : item)),
-      }))
-    },
   })
 
   const loading = useMemo(() => createItemPending || updateItemPending, [createItemPending, updateItemPending])
@@ -124,26 +108,38 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault()
 
-    const base: UpdateItemInputDto = {
+    const base: Types.UpdateItemInput = {
       name,
       description: description === '' ? undefined : description,
       url: url === '' ? undefined : TidyURL.clean(url).url,
-      picture_url: pictureUrl === '' ? undefined : pictureUrl,
+      pictureUrl: pictureUrl === '' ? undefined : pictureUrl,
       score: score === null ? undefined : score,
     }
 
     if (mode === 'create') {
-      await createItem({
-        wishlist_id: wishlistId,
-        ...base,
-      })
+      const res = await createItem({ input: { wishlistId, ...base } })
+      match(res.createItem)
+        .with({ __typename: 'Item' }, () => {
+          addToast({ message: 'Souhait créé avec succès', variant: 'success' })
+          void invalidateWishlist()
+          resetForm()
+          handleClose()
+        })
+        .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+        .exhaustive()
     }
 
     if (mode === 'edit') {
-      await updateItem({ itemId: item.id, data: base })
+      const res = await updateItem({ itemId: item.id, input: base })
+      match(res.updateItem)
+        .with({ __typename: 'VoidOutput' }, () => {
+          addToast({ message: 'Le souhait à bien été modifié', variant: 'success' })
+          void invalidateWishlist()
+          handleClose()
+        })
+        .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+        .exhaustive()
     }
-
-    handleClose()
   }
 
   useEffect(() => {
@@ -152,9 +148,14 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
     setName(item.name)
     setDescription(item.description || '')
     setUrl(item.url || '')
-    setPictureUrl(item.picture_url || '')
+    setPictureUrl(item.pictureUrl || '')
     setScore(item.score || null)
   }, [item])
+
+  const { mutateAsync: scanItemUrl } = useScanItemUrlMutation({
+    onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
+    onSettled: () => setScanUrlLoading(false),
+  })
 
   const scanUrl = useCallback(
     async (urlToScan: string) => {
@@ -164,21 +165,13 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
 
       setScanUrlLoading(true)
 
-      try {
-        const { picture_url } = await api.item.scanUrl({ url: urlToScan })
-
-        if (picture_url) {
-          setPictureUrl(picture_url)
-        } else {
-          setPictureUrl('')
-        }
-      } catch {
-        addToast({ message: "Une erreur s'est produite", variant: 'error' })
-      } finally {
-        setScanUrlLoading(false)
-      }
+      const res = await scanItemUrl({ input: { url: urlToScan } })
+      match(res.scanItemUrl)
+        .with({ __typename: 'ScanItemUrlOutput' }, output => setPictureUrl(output.pictureUrl || ''))
+        .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+        .exhaustive()
     },
-    [scanUrlLoading],
+    [scanUrlLoading, scanItemUrl, addToast],
   )
 
   return (

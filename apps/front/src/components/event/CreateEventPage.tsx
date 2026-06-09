@@ -1,4 +1,3 @@
-import type { MiniUserDto } from '@wishlist/common'
 import type { DateTime } from 'luxon'
 import type { RootState } from '../../core'
 
@@ -22,15 +21,14 @@ import {
   Stepper,
   TextField,
 } from '@mui/material'
-import { useMutation } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
-import { AttendeeRole } from '@wishlist/common'
 import { useMemo, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { useSelector } from 'react-redux'
+import { match } from 'ts-pattern'
 import { z } from 'zod'
 
-import { useApi } from '../../hooks/useApi'
+import { AttendeeRole, rejectionMessage, rejectionPattern, useCreateEventMutation } from '../../gql'
 import { useToast } from '../../hooks/useToast'
 import { Card } from '../common/Card'
 import { CharsRemaining } from '../common/CharsRemaining'
@@ -44,8 +42,16 @@ import { ListItemAttendee } from './ListItemAttendee'
 
 const steps = ['Informations', 'Participants']
 
+type SelectedUser = {
+  id: string
+  email: string
+  firstName: string
+  lastName: string
+  pictureUrl?: string | null
+}
+
 type Attendee = {
-  user: string | MiniUserDto
+  user: string | SelectedUser
   role: AttendeeRole
 }
 
@@ -64,7 +70,6 @@ type FormFields = z.infer<typeof schema>
 const mapState = (state: RootState) => state.auth.user?.email
 
 export const CreateEventPage = () => {
-  const api = useApi()
   const currentUserEmail = useSelector(mapState)
   const { addToast } = useToast()
   const navigate = useNavigate()
@@ -98,28 +103,32 @@ export const CreateEventPage = () => {
     [attendees],
   )
 
-  const { mutateAsync: createEvent, isPending: loading } = useMutation({
-    mutationKey: ['event.create'],
-    mutationFn: () => {
-      const isoDate = formValues.eventDate!.toISODate()!
-      return api.event.create({
+  const { mutateAsync: createEventMutation, isPending: loading } = useCreateEventMutation({
+    onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
+  })
+
+  const createEvent = async () => {
+    const isoDate = formValues.eventDate!.toISODate()!
+    const res = await createEventMutation({
+      input: {
         title: formValues.title,
         description: formValues.description === '' ? undefined : formValues.description,
         icon: formValues.icon,
-        event_date: new Date(isoDate),
+        eventDate: isoDate,
         attendees: attendees.map(attendee => ({
           email: typeof attendee.user === 'string' ? attendee.user : attendee.user.email,
           role: attendee.role,
         })),
+      },
+    })
+    match(res.createEvent)
+      .with({ __typename: 'Event' }, created => {
+        addToast({ message: 'Evènement créé avec succès', variant: 'success' })
+        void navigate({ to: '/events/$eventId', params: { eventId: created.id } })
       })
-    },
-    onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-    onSuccess: output => {
-      addToast({ message: 'Evènement créé avec succès', variant: 'success' })
-
-      void navigate({ to: '/events/$eventId', params: { eventId: output.id } })
-    },
-  })
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
+  }
 
   return (
     <Box>
@@ -226,7 +235,7 @@ export const CreateEventPage = () => {
                     setAttendees(prevState => [
                       {
                         user: val,
-                        role: AttendeeRole.USER,
+                        role: AttendeeRole.User,
                       },
                       ...prevState,
                     ])
@@ -260,12 +269,14 @@ export const CreateEventPage = () => {
                             role={attendee.role}
                             userName={
                               typeof attendee.user !== 'string'
-                                ? `${attendee.user?.firstname} ${attendee.user?.lastname}`
+                                ? `${attendee.user?.firstName} ${attendee.user?.lastName}`
                                 : ''
                             }
                             isPending={typeof attendee.user === 'string'}
                             email={typeof attendee.user === 'string' ? attendee.user : attendee.user.email}
-                            pictureUrl={typeof attendee.user !== 'string' ? attendee.user.picture_url : undefined}
+                            pictureUrl={
+                              typeof attendee.user !== 'string' ? (attendee.user.pictureUrl ?? undefined) : undefined
+                            }
                           />
                         </ListItemButton>
                       </ListItem>

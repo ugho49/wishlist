@@ -12,11 +12,20 @@ import {
   Typography,
   Zoom,
 } from '@mui/material'
+import { useQueryClient } from '@tanstack/react-query'
 import { useDispatch, useSelector } from 'react-redux'
+import { match } from 'ts-pattern'
 
+import { uploadUserPicture } from '../../api/upload'
 import { updatePicture } from '../../core/store/features'
-import { useFetchUserInfo } from '../../hooks/domain/useFetchUserInfo'
-import { useApi } from '../../hooks/useApi'
+import {
+  rejectionMessage,
+  rejectionPattern,
+  useRemoveCurrentUserPictureMutation,
+  useUpdateUserPictureFromSocialMutation,
+  useUserProfileCurrentUserQuery,
+} from '../../gql'
+import { useToast } from '../../hooks/useToast'
 import { AvatarUpdateButton } from './AvatarUpdateButton'
 
 type ProfilePicturePromptModalProps = {
@@ -78,9 +87,16 @@ const SecondaryButton = styled(Button)(({ theme }) => ({
 
 export const ProfilePicturePromptModal = ({ open, onClose }: ProfilePicturePromptModalProps) => {
   const dispatch = useDispatch()
-  const { user } = useFetchUserInfo()
+  const queryClient = useQueryClient()
+  const { addToast } = useToast()
+  const { data } = useUserProfileCurrentUserQuery(undefined, {
+    select: d => d.currentUser,
+  })
+  const user = data?.__typename === 'User' ? data : undefined
   const pictureUrl = useSelector(mapState)
-  const api = useApi()
+
+  const { mutateAsync: updatePictureFromSocial } = useUpdateUserPictureFromSocialMutation()
+  const { mutateAsync: removePicture } = useRemoveCurrentUserPictureMutation()
 
   const handleClose = () => {
     onClose()
@@ -88,6 +104,7 @@ export const ProfilePicturePromptModal = ({ open, onClose }: ProfilePicturePromp
 
   const handlePictureUpdated = (newPictureUrl: string | undefined) => {
     dispatch(updatePicture(newPictureUrl))
+    void queryClient.invalidateQueries({ queryKey: ['UserProfileCurrentUser'] })
   }
 
   return (
@@ -103,11 +120,31 @@ export const ProfilePicturePromptModal = ({ open, onClose }: ProfilePicturePromp
 
         <AvatarUpdateButton
           pictureUrl={pictureUrl}
-          socials={user?.social || []}
+          socials={user?.socials || []}
           onPictureUpdated={handlePictureUpdated}
-          uploadPictureHandler={file => api.user.uploadPicture(file)}
-          updatePictureFromSocialHandler={socialId => api.user.updatePictureFromSocial(socialId)}
-          deletePictureHandler={() => api.user.deletePicture()}
+          uploadPictureHandler={file => uploadUserPicture(file)}
+          updatePictureFromSocialHandler={async socialId => {
+            const res = await updatePictureFromSocial({ input: { socialId } })
+            match(res.updateUserPictureFromSocial)
+              .with({ __typename: 'VoidOutput' }, () => undefined)
+              .with(rejectionPattern, rejection => {
+                addToast({ message: rejectionMessage(rejection), variant: 'error' })
+                // AvatarUpdateButton applies the new picture unless the handler throws
+                throw new Error(rejectionMessage(rejection))
+              })
+              .exhaustive()
+          }}
+          deletePictureHandler={async () => {
+            const res = await removePicture({})
+            match(res.removeUserPicture)
+              .with({ __typename: 'VoidOutput' }, () => undefined)
+              .with(rejectionPattern, rejection => {
+                addToast({ message: rejectionMessage(rejection), variant: 'error' })
+                // AvatarUpdateButton removes the picture unless the handler throws
+                throw new Error(rejectionMessage(rejection))
+              })
+              .exhaustive()
+          }}
           size="120px"
         />
       </DialogContent>

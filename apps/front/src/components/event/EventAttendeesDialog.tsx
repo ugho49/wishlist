@@ -1,4 +1,4 @@
-import type { AttendeeDto, AttendeeRole } from '@wishlist/common'
+import type { EventAttendee } from './event.types'
 
 import CloseIcon from '@mui/icons-material/Close'
 import {
@@ -21,7 +21,7 @@ export interface EventAttendeesDialogProps {
   handleClose: () => void
   eventId: string
   currentUserCanEdit: boolean
-  attendees: AttendeeDto[]
+  attendees: EventAttendee[]
 }
 
 export const EventAttendeesDialog = ({
@@ -46,11 +46,11 @@ export const EventAttendeesDialog = ({
           {attendees.map(attendee => (
             <ListItem key={attendee.id}>
               <ListItemAttendee
-                role={attendee.role as AttendeeRole}
-                userName={`${attendee.user?.firstname} ${attendee.user?.lastname}`}
-                isPending={!!attendee.pending_email}
-                email={attendee.pending_email ?? attendee.user?.email ?? ''}
-                pictureUrl={attendee.user?.picture_url}
+                role={attendee.role}
+                userName={`${attendee.user?.firstName} ${attendee.user?.lastName}`}
+                isPending={!!attendee.pendingEmail}
+                email={attendee.pendingEmail ?? attendee.user?.email ?? ''}
+                pictureUrl={attendee.user?.pictureUrl ?? undefined}
               />
             </ListItem>
           ))}

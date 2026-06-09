@@ -1,0 +1,21 @@
+query EventListPageGetEvents($filters: EventPaginationFilters!) {
+  events(filters: $filters) {
+    __typename
+    ... on GetEventsPagedResponse {
+      data {
+        id
+        title
+        icon
+        eventDate
+        attendeeIds
+        wishlistIds
+      }
+      pagination {
+        totalPages
+        totalElements
+        pageNumber
+        pageSize
+      }
+    }
+  }
+}

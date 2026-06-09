@@ -1,7 +1,8 @@
 import type { TransitionProps } from '@mui/material/transitions'
 import type { GridColDef } from '@mui/x-data-grid'
-import type { AttendeeDto, AttendeeId, EventId, SecretSantaId, SecretSantaUserDto } from '@wishlist/common'
+import type { AttendeeId, EventId, SecretSantaId } from '@wishlist/common'
 import type React from 'react'
+import type { SecretSantaAttendee, SecretSantaUserItem } from './secret-santa.types'
 
 import CloseIcon from '@mui/icons-material/Close'
 import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt'
@@ -19,10 +20,12 @@ import {
   useMediaQuery,
 } from '@mui/material'
 import { DataGrid } from '@mui/x-data-grid'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { forwardRef, useEffect, useMemo, useState } from 'react'
+import { match } from 'ts-pattern'
 
-import { useApi, useToast } from '../../hooks'
+import { rejectionMessage, rejectionPattern, useAddSecretSantaUsersMutation } from '../../gql'
+import { useToast } from '../../hooks'
 import { Status } from '../common/Status'
 
 const Transition = forwardRef(function Transition(
@@ -41,9 +44,9 @@ export type AddSecretSantaUsersFormDialogProps = {
   open: boolean
   eventId: EventId
   secretSantaId: SecretSantaId
-  eventAttendees: AttendeeDto[]
-  secretSantaAttendees: AttendeeDto[]
-  handleSubmit: (newSecretSantaUsers: SecretSantaUserDto[]) => void
+  eventAttendees: SecretSantaAttendee[]
+  secretSantaAttendees: SecretSantaAttendee[]
+  handleSubmit: (newSecretSantaUsers: SecretSantaUserItem[]) => void
   handleClose: () => void
 }
 
@@ -97,21 +100,34 @@ export const AddSecretSantaUsersFormDialog = ({
   handleSubmit,
   handleClose,
 }: AddSecretSantaUsersFormDialogProps) => {
-  const api = useApi()
   const queryClient = useQueryClient()
   const { addToast } = useToast()
   const [selectedIds, setSelectedIds] = useState<AttendeeId[]>([])
   const isFullscreen = useMediaQuery(theme => theme.breakpoints.down('md'))
 
-  const { mutateAsync: addUsers, isPending: loading } = useMutation({
-    mutationKey: ['secret-santa.add-users', { id: secretSantaId }],
-    mutationFn: () => api.secretSanta.addUsers(secretSantaId, { attendee_ids: selectedIds }),
+  const { mutateAsync: addUsersMutation, isPending: loading } = useAddSecretSantaUsersMutation({
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-    onSuccess: async data => {
-      handleSubmit(data.users)
-      await queryClient.invalidateQueries({ queryKey: ['secret-santa', { eventId }] })
-    },
   })
+
+  const addUsers = async () => {
+    const res = await addUsersMutation({ id: secretSantaId, input: { attendeeIds: selectedIds } })
+    await match(res.addSecretSantaUsers)
+      .with({ __typename: 'AddSecretSantaUsersOutput' }, async output => {
+        handleSubmit(output.users)
+        await queryClient.invalidateQueries({ queryKey: ['GetSecretSantaForEvent', { eventId }] })
+      })
+      .with({ __typename: 'ValidationRejection' }, rejection =>
+        addToast({
+          message:
+            rejection.errors.length > 0
+              ? rejection.errors.map(error => error.message).join(', ')
+              : rejectionMessage(rejection),
+          variant: 'error',
+        }),
+      )
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
+  }
 
   useEffect(() => {
     if (!open) {
@@ -124,11 +140,11 @@ export const AddSecretSantaUsersFormDialog = ({
       .filter(a => !secretSantaAttendees.find(s => s.id === a.id))
       .map<RowType>(a => ({
         id: a.id,
-        firstname: a.user?.firstname,
-        lastname: a.user?.lastname,
-        email: a.user?.email ?? a.pending_email ?? '',
-        pictureUrl: a.user?.picture_url,
-        isPending: !!a.pending_email,
+        firstname: a.user?.firstName,
+        lastname: a.user?.lastName,
+        email: a.user?.email ?? a.pendingEmail ?? '',
+        pictureUrl: a.user?.pictureUrl ?? undefined,
+        isPending: !!a.pendingEmail,
       }))
   }, [eventAttendees, secretSantaAttendees])
 

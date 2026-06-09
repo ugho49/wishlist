@@ -1,16 +1,30 @@
 import type { EventId } from '@wishlist/common'
 
-import { useQuery } from '@tanstack/react-query'
+import { useEffect } from 'react'
 
-import { useApi } from '../useApi'
+import { isRejection, rejectionMessage, useGetMySecretSantaDrawQuery } from '../../gql'
+import { useToast } from '../useToast'
 
 export const useMySecretSantaDraw = (eventId: EventId) => {
-  const api = useApi()
+  const { addToast } = useToast()
+  const { data, isLoading } = useGetMySecretSantaDrawQuery(
+    { eventId },
+    {
+      // The `mySecretSantaDraw` field is nullable: it resolves to null when the
+      // current user has no draw (e.g. draw not started), a normal state
+      // exposed as `undefined`.
+      select: d => d.mySecretSantaDraw ?? undefined,
+    },
+  )
 
-  const { data, isLoading } = useQuery({
-    queryKey: ['secret-santa.draw', { eventId }],
-    queryFn: ({ signal }) => api.secretSanta.getMyDraw(eventId, { signal }),
-  })
+  const rejection = data && isRejection(data) ? data : undefined
+  const mySecretSantaDraw = data && !isRejection(data) ? data : undefined
 
-  return { mySecretSantaDraw: data, loading: isLoading }
+  useEffect(() => {
+    if (rejection) {
+      addToast({ message: rejectionMessage(rejection), variant: 'error' })
+    }
+  }, [rejection, addToast])
+
+  return { mySecretSantaDraw, rejection, loading: isLoading }
 }

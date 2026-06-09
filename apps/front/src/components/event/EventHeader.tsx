@@ -1,4 +1,5 @@
-import type { AttendeeDto, EventId } from '@wishlist/common'
+import type { EventId } from '@wishlist/common'
+import type { EventAttendee } from './event.types'
 
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard'
@@ -152,7 +153,7 @@ export type EventHeaderProps = {
   title: string
   eventDate: string
   eventId: EventId
-  attendees: AttendeeDto[]
+  attendees: EventAttendee[]
   currentUserCanEdit: boolean
   openAttendeesDialog: () => void
 }

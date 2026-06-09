@@ -1,82 +1,85 @@
 import type { GridColDef } from '@mui/x-data-grid'
-import type { UserWithoutSocialsDto } from '@wishlist/common'
 import type { FormEvent } from 'react'
+import type { AdminUsersListQuery } from '../../../gql'
 
-import { Avatar, Box, Button, Stack, styled, TextField } from '@mui/material'
+import { Alert, Avatar, Box, Button, Stack, styled, TextField } from '@mui/material'
 import { DataGrid } from '@mui/x-data-grid'
-import { useQuery } from '@tanstack/react-query'
 import { useNavigate, useSearch } from '@tanstack/react-router'
 import { Card } from '@wishlist/front-components/common/Card'
 import { Title } from '@wishlist/front-components/common/Title'
 import { DateTime } from 'luxon'
 import { useEffect, useState } from 'react'
 
-import { useApi } from '../../../hooks'
+import { isRejection, rejectionMessage, useAdminUsersListQuery } from '../../../gql'
 import { Status } from '../../common/Status'
+
+type AdminUserRow = Extract<AdminUsersListQuery['adminUsers'], { __typename: 'AdminGetAllUsers' }>['data'][number]
 
 const SearchButton = styled(Button)(() => ({
   padding: '8px 10px',
 }))
 
-const columns: GridColDef<UserWithoutSocialsDto>[] = [
+const columns: GridColDef<AdminUserRow>[] = [
   {
-    field: 'is_enabled',
+    field: 'isEnabled',
     headerName: '',
     width: 20,
     sortable: false,
     filterable: false,
     display: 'flex',
-    renderCell: ({ row: user }) => <Status color={user.is_enabled ? 'success' : 'error'} />,
+    renderCell: ({ row: user }) => <Status color={user.isEnabled ? 'success' : 'error'} />,
   },
   {
-    field: 'picture_url',
+    field: 'pictureUrl',
     headerName: '',
     width: 20,
     sortable: false,
     filterable: false,
     display: 'flex',
     renderCell: ({ row: user }) => (
-      <Avatar src={user.picture_url} sx={{ width: '30px', height: '30px' }}>
-        {user.firstname.substring(0, 1).toUpperCase()}
+      <Avatar src={user.pictureUrl ?? undefined} sx={{ width: '30px', height: '30px' }}>
+        {user.firstName.substring(0, 1).toUpperCase()}
       </Avatar>
     ),
   },
-  { field: 'firstname', headerName: 'First name', width: 170 },
-  { field: 'lastname', headerName: 'Last name', width: 170 },
+  { field: 'firstName', headerName: 'First name', width: 170 },
+  { field: 'lastName', headerName: 'Last name', width: 170 },
   { field: 'email', headerName: 'Email', flex: 1, minWidth: 250 },
   {
     field: 'admin',
     headerName: 'Is Admin',
     width: 100,
     type: 'boolean',
+    valueGetter: (_, row) => row.authorities.some(a => a === 'ROLE_ADMIN' || a === 'ROLE_SUPERADMIN'),
   },
   {
-    field: 'created_at',
+    field: 'createdAt',
     headerName: 'Created At',
     type: 'dateTime',
     width: 200,
-    valueGetter: (_, row) => new Date(row.created_at),
+    valueGetter: (_, row) => new Date(row.createdAt),
     renderCell: ({ value }) => DateTime.fromJSDate(value).toLocaleString(DateTime.DATETIME_MED),
   },
 ]
 
 export const AdminListUsers = () => {
-  const { admin: api } = useApi()
   const [totalElements, setTotalElements] = useState(0)
   const [pageSize, setPageSize] = useState(0)
   const { page: currentPage, search } = useSearch({ from: '/_authenticated/_with-layout/admin/users/' })
   const [inputSearch, setInputSearch] = useState(search)
   const navigate = useNavigate()
 
-  const { data: value, isLoading: loading } = useQuery({
-    queryKey: ['admin', 'users', { page: currentPage, search }],
-    queryFn: ({ signal }) => api.user.getAll({ p: currentPage, q: search }, { signal }),
-  })
+  const { data, isLoading: loading } = useAdminUsersListQuery(
+    { input: { page: currentPage, criteria: search } },
+    { select: d => d.adminUsers },
+  )
+  const value = data?.__typename === 'AdminGetAllUsers' ? data : undefined
+  const queryRejection = data && isRejection(data) ? data : undefined
 
   useEffect(() => {
     if (value) {
-      setTotalElements(value.pagination.total_elements)
-      setPageSize(value.pagination.pages_size)
+      setTotalElements(value.pagination.totalElements)
+      setPageSize(value.pagination.pageSize)
     }
   }, [value])
 
@@ -116,34 +119,38 @@ export const AdminListUsers = () => {
           </SearchButton>
         </Stack>
 
-        <DataGrid
-          isRowSelectable={() => true}
-          disableMultipleRowSelection={true}
-          disableColumnSelector={true}
-          isCellEditable={() => false}
-          localeText={{
-            noRowsLabel: 'Aucun utilisateur',
-          }}
-          onRowClick={data => navigate({ to: '/admin/users/$userId', params: { userId: data.row.id } })}
-          density="standard"
-          rows={value?.resources || []}
-          loading={loading}
-          columns={columns}
-          paginationMode="server"
-          rowCount={totalElements}
-          paginationModel={{
-            page: currentPage - 1,
-            pageSize,
-          }}
-          pageSizeOptions={[pageSize]}
-          onPaginationModelChange={({ page }) =>
-            navigate({
-              to: '/admin/users',
-              search: prev => ({ ...prev, page: page + 1, search }),
-            })
-          }
-          hideFooter={totalElements <= pageSize}
-        />
+        {queryRejection && <Alert severity="error">{rejectionMessage(queryRejection)}</Alert>}
+
+        {!queryRejection && (
+          <DataGrid
+            isRowSelectable={() => true}
+            disableMultipleRowSelection={true}
+            disableColumnSelector={true}
+            isCellEditable={() => false}
+            localeText={{
+              noRowsLabel: 'Aucun utilisateur',
+            }}
+            onRowClick={data => navigate({ to: '/admin/users/$userId', params: { userId: data.row.id } })}
+            density="standard"
+            rows={value?.data || []}
+            loading={loading}
+            columns={columns}
+            paginationMode="server"
+            rowCount={totalElements}
+            paginationModel={{
+              page: currentPage - 1,
+              pageSize,
+            }}
+            pageSizeOptions={[pageSize]}
+            onPaginationModelChange={({ page }) =>
+              navigate({
+                to: '/admin/users',
+                search: prev => ({ ...prev, page: page + 1, search }),
+              })
+            }
+            hideFooter={totalElements <= pageSize}
+          />
+        )}
       </Card>
     </Box>
   )

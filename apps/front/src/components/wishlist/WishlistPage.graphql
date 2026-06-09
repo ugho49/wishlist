@@ -1,15 +1,55 @@
 query WishlistPage($wishlistId: WishlistId!) {
   wishlist(id: $wishlistId) {
+    __typename
     ... on Wishlist {
       id
       title
       description
       logoUrl
+      ownerId
+      coOwnerId
+      config {
+        hideItems
+      }
       owner {
         id
         firstName
         lastName
+        email
+        pictureUrl
       }
+      coOwner {
+        id
+        firstName
+        lastName
+        email
+        pictureUrl
+      }
+      events {
+        id
+        title
+        icon
+        eventDate
+      }
+      items {
+        id
+        name
+        description
+        url
+        score
+        isSuggested
+        pictureUrl
+        takenById
+        takenAt
+        createdAt
+        takerUser {
+          id
+          firstName
+          pictureUrl
+        }
+      }
+      createdAt
+      updatedAt
     }
     ... on NotFoundRejection {
       __typename

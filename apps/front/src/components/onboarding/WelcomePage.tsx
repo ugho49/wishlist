@@ -2,14 +2,23 @@ import type { RootState } from '../../core'
 
 import ExploreIcon from '@mui/icons-material/Explore'
 import { Box, Button, Container, Stack, Step, StepLabel, Stepper, styled, Typography } from '@mui/material'
+import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
-import { useApi } from '@wishlist/front-hooks'
 import { useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import { match } from 'ts-pattern'
 
+import { uploadUserPicture } from '../../api/upload'
 import { OnboardingService } from '../../core/services/onboarding.service'
 import { updatePicture } from '../../core/store/features'
-import { useFetchUserInfo } from '../../hooks/domain/useFetchUserInfo'
+import {
+  rejectionMessage,
+  rejectionPattern,
+  useRemoveCurrentUserPictureMutation,
+  useUpdateUserPictureFromSocialMutation,
+  useUserProfileCurrentUserQuery,
+} from '../../gql'
+import { useToast } from '../../hooks/useToast'
 import { AvatarUpdateButton } from '../user/AvatarUpdateButton'
 import { ProfilePicturePromptModal } from '../user/ProfilePicturePromptModal'
 
@@ -103,10 +112,17 @@ const ActionButtons = styled(Stack)(({ theme }) => ({
 
 const ProfileStep = () => {
   const { pictureUrl, userId } = useSelector(mapState)
+  const { addToast } = useToast()
   const [openModal, setOpenModal] = useState(false)
-  const { user } = useFetchUserInfo()
-  const api = useApi()
+  const { data } = useUserProfileCurrentUserQuery(undefined, {
+    select: d => d.currentUser,
+  })
+  const user = data?.__typename === 'User' ? data : undefined
   const dispatch = useDispatch()
+  const queryClient = useQueryClient()
+
+  const { mutateAsync: updatePictureFromSocial } = useUpdateUserPictureFromSocialMutation()
+  const { mutateAsync: removePicture } = useRemoveCurrentUserPictureMutation()
 
   useEffect(() => {
     if (userId) {
@@ -117,6 +133,7 @@ const ProfileStep = () => {
 
   const handlePictureUpdated = (newPictureUrl: string | undefined) => {
     dispatch(updatePicture(newPictureUrl))
+    void queryClient.invalidateQueries({ queryKey: ['UserProfileCurrentUser'] })
   }
 
   return (
@@ -129,12 +146,32 @@ const ProfileStep = () => {
 
         <Stack alignItems="center" sx={{ mt: 2 }}>
           <AvatarUpdateButton
-            pictureUrl={pictureUrl || user?.picture_url}
-            socials={user?.social || []}
+            pictureUrl={pictureUrl || user?.pictureUrl || undefined}
+            socials={user?.socials || []}
             onPictureUpdated={handlePictureUpdated}
-            uploadPictureHandler={file => api.user.uploadPicture(file)}
-            updatePictureFromSocialHandler={socialId => api.user.updatePictureFromSocial(socialId)}
-            deletePictureHandler={() => api.user.deletePicture()}
+            uploadPictureHandler={file => uploadUserPicture(file)}
+            updatePictureFromSocialHandler={async socialId => {
+              const res = await updatePictureFromSocial({ input: { socialId } })
+              match(res.updateUserPictureFromSocial)
+                .with({ __typename: 'VoidOutput' }, () => undefined)
+                .with(rejectionPattern, rejection => {
+                  addToast({ message: rejectionMessage(rejection), variant: 'error' })
+                  // AvatarUpdateButton applies the new picture unless the handler throws
+                  throw new Error(rejectionMessage(rejection))
+                })
+                .exhaustive()
+            }}
+            deletePictureHandler={async () => {
+              const res = await removePicture({})
+              match(res.removeUserPicture)
+                .with({ __typename: 'VoidOutput' }, () => undefined)
+                .with(rejectionPattern, rejection => {
+                  addToast({ message: rejectionMessage(rejection), variant: 'error' })
+                  // AvatarUpdateButton removes the picture unless the handler throws
+                  throw new Error(rejectionMessage(rejection))
+                })
+                .exhaustive()
+            }}
             size="120px"
           />
         </Stack>
@@ -175,7 +212,10 @@ const steps = [profileStep, exploreStep]
 
 export const WelcomePage = () => {
   const navigate = useNavigate()
-  const { user } = useFetchUserInfo()
+  const { data } = useUserProfileCurrentUserQuery(undefined, {
+    select: d => d.currentUser,
+  })
+  const user = data?.__typename === 'User' ? data : undefined
   const [activeStep, setActiveStep] = useState(0)
   const currentStep = useMemo(() => steps[activeStep], [activeStep])
 
@@ -202,7 +242,7 @@ export const WelcomePage = () => {
   return (
     <WelcomeContainer>
       <HeroSection>
-        <WelcomeTitle variant="h1">Bienvenue{user?.firstname ? `, ${user.firstname}` : ''} ! 🎉</WelcomeTitle>
+        <WelcomeTitle variant="h1">Bienvenue{user?.firstName ? `, ${user.firstName}` : ''} ! 🎉</WelcomeTitle>
         <WelcomeSubtitle variant="h6">Nous sommes ravis de vous accueillir sur Wishlist.</WelcomeSubtitle>
       </HeroSection>
 
