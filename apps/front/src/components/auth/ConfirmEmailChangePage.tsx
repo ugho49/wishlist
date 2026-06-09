@@ -3,8 +3,7 @@ import { CircularProgress, Stack, styled, Typography } from '@mui/material'
 import { useNavigate } from '@tanstack/react-router'
 import { useEffect, useRef, useState } from 'react'
 
-import { useAuthConfirmEmailChangeMutation } from '../../gql'
-import { unwrapResult } from '../../gql/result'
+import { isRejection, useAuthConfirmEmailChangeMutation } from '../../gql'
 import { RouterLink } from '../common/RouterLink'
 
 const ContainerStyled = styled(Stack)(({ theme }) => ({
@@ -92,7 +91,10 @@ export const ConfirmEmailChangePage = (props: ConfirmEmailChangePageProps) => {
     if (email && token) {
       confirmEmailChange({ input: { newEmail: email, token } })
         .then(res => {
-          unwrapResult(res.confirmEmailChange, 'VoidOutput')
+          if (isRejection(res.confirmEmailChange)) {
+            setError(true)
+            return
+          }
           onSuccess()
         })
         .catch(() => setError(true))

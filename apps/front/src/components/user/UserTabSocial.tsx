@@ -12,8 +12,12 @@ import { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { addUserSocial, removeUserSocial } from '../../core/store/features'
-import { useLinkCurrentUserWithGoogleMutation, useUnlinkCurrentUserSocialMutation } from '../../gql'
-import { unwrapResult } from '../../gql/result'
+import {
+  isRejection,
+  rejectionMessage,
+  useLinkCurrentUserWithGoogleMutation,
+  useUnlinkCurrentUserSocialMutation,
+} from '../../gql'
 import { Card } from '../common/Card'
 import { ConfirmButton } from '../common/ConfirmButton'
 import { CustomIcon } from '../common/CustomIcon'
@@ -133,7 +137,10 @@ export const UserTabSocial = () => {
 
   const unlinkSocial = async (socialId: UserSocialId) => {
     const res = await unlinkSocialMutation({ socialId })
-    unwrapResult(res.unlinkCurrentUserSocial, 'VoidOutput')
+    if (isRejection(res.unlinkCurrentUserSocial)) {
+      addToast({ message: rejectionMessage(res.unlinkCurrentUserSocial), variant: 'error' })
+      return
+    }
     dispatch(removeUserSocial(socialId))
     void invalidateCurrentUser()
     addToast({ message: 'Compte google dissocié avec succès', variant: 'success' })
@@ -141,7 +148,11 @@ export const UserTabSocial = () => {
 
   const linkSocial = async (code: string) => {
     const res = await linkSocialMutation({ input: { code } })
-    const social = unwrapResult(res.linkCurrentUserWithGoogle, 'UserSocial')
+    const social = res.linkCurrentUserWithGoogle
+    if (isRejection(social)) {
+      addToast({ message: rejectionMessage(social), variant: 'error' })
+      return
+    }
     dispatch(addUserSocial(social))
     void invalidateCurrentUser()
     addToast({ message: 'Compte Google lié avec succès', variant: 'success' })

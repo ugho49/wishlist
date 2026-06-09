@@ -13,8 +13,7 @@ import { isValidEmail } from '@wishlist/common'
 import { debounce, uniqBy } from 'lodash'
 import { useEffect, useState } from 'react'
 
-import { fetchGql, SearchUsersSelectDocument, UserClosestFriendsDocument } from '../../gql'
-import { unwrapResult } from '../../gql/result'
+import { fetchGql, isRejection, SearchUsersSelectDocument, UserClosestFriendsDocument } from '../../gql'
 
 type MiniUser = Extract<SearchUsersSelectQuery['searchUsers'], { __typename: 'SearchUsersOutput' }>['users'][number]
 
@@ -85,8 +84,10 @@ export const SearchUserSelect = ({
       const res = await fetchGql<SearchUsersSelectQuery, SearchUsersSelectQueryVariables>(SearchUsersSelectDocument, {
         keyword: inputValue,
       })()
-      const users = unwrapResult(res.searchUsers, 'SearchUsersOutput').users
-      const usualUsers = users.map<UsualUserOptionType>(user => ({ type: 'usual', ...user }))
+      if (isRejection(res.searchUsers)) {
+        return
+      }
+      const usualUsers = res.searchUsers.users.map<UsualUserOptionType>(user => ({ type: 'usual', ...user }))
       setOptions(prev => {
         const combined = uniqBy([...(prev as UserOptionType[]), ...usualUsers], v => v.id)
         return sortOptionsForGrouping(combined)
@@ -100,8 +101,14 @@ export const SearchUserSelect = ({
     const res = await fetchGql<UserClosestFriendsQuery, UserClosestFriendsQueryVariables>(UserClosestFriendsDocument, {
       limit: 20,
     })()
-    const data = unwrapResult(res.closestFriends, 'ClosestFriendsOutput').users
-    const friends = data.map<FriendUserOptionType>((user, index) => ({ type: 'friend', order: index, ...user }))
+    if (isRejection(res.closestFriends)) {
+      return
+    }
+    const friends = res.closestFriends.users.map<FriendUserOptionType>((user, index) => ({
+      type: 'friend',
+      order: index,
+      ...user,
+    }))
     setOptions(prev => {
       const combined = uniqBy([...(prev as UserOptionType[]), ...friends], v => v.id)
       return sortOptionsForGrouping(combined)

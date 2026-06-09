@@ -8,8 +8,7 @@ import { useDispatch } from 'react-redux'
 import { z } from 'zod'
 
 import { setTokens } from '../../core/store/features'
-import { useAuthLoginMutation, useAuthLoginWithGoogleMutation } from '../../gql'
-import { GraphqlRejectionError, unwrapResult } from '../../gql/result'
+import { isRejection, rejectionMessage, useAuthLoginMutation, useAuthLoginWithGoogleMutation } from '../../gql'
 import { useToast } from '../../hooks/useToast'
 import { RouterLink } from '../common/RouterLink'
 import { GoogleButton } from './GoogleButton'
@@ -84,25 +83,39 @@ export const LoginPage = () => {
   const login = async (data: FormFields) => {
     try {
       const res = await loginMutation({ input: data })
-      const output = unwrapResult(res.login, 'LoginOutput')
-      handleLoginSuccess(output.accessToken)
-    } catch (e) {
-      if (
-        e instanceof GraphqlRejectionError &&
-        (e.typename === 'UnauthorizedRejection' || e.typename === 'ValidationRejection')
-      ) {
-        setError('root', { message: 'Email ou mot de passe incorrect' })
-      } else {
-        setError('root', { message: "Une erreur s'est produite." })
+      const result = res.login
+      switch (result.__typename) {
+        case 'LoginOutput':
+          handleLoginSuccess(result.accessToken)
+          break
+        case 'UnauthorizedRejection':
+        case 'ValidationRejection':
+          setError('root', { message: 'Email ou mot de passe incorrect' })
+          break
+        default:
+          setError('root', { message: rejectionMessage(result) })
       }
+    } catch {
+      setError('root', { message: "Une erreur s'est produite." })
     }
   }
 
   const loginWithGoogle = async (code: string) => {
     try {
       const res = await loginWithGoogleMutation({ input: { code, createUserIfNotExists: false } })
-      const output = unwrapResult(res.loginWithGoogle, 'LoginWithGoogleOutput')
-      handleLoginSuccess(output.accessToken)
+      const result = res.loginWithGoogle
+      if (isRejection(result)) {
+        setSocialLoading(false)
+        addToast({
+          message:
+            result.__typename === 'UnauthorizedRejection'
+              ? 'Impossible de vous connecter avec ce compte Google'
+              : rejectionMessage(result),
+          variant: 'error',
+        })
+        return
+      }
+      handleLoginSuccess(result.accessToken)
     } catch {
       onSocialError()
     }

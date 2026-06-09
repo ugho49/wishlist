@@ -10,8 +10,7 @@ import { DateTime } from 'luxon'
 import { Controller, useForm } from 'react-hook-form'
 import { z } from 'zod'
 
-import { useDeleteEventMutation, useUpdateEventMutation } from '../../gql'
-import { unwrapResult } from '../../gql/result'
+import { isRejection, rejectionMessage, useDeleteEventMutation, useUpdateEventMutation } from '../../gql'
 import { useToast } from '../../hooks/useToast'
 import { Card } from '../common/Card'
 import { CharsRemaining } from '../common/CharsRemaining'
@@ -75,7 +74,10 @@ export const EditEventInformations = ({ event }: EditEventInformationsProps) => 
           eventDate: isoDate,
         },
       })
-      unwrapResult(res.updateEvent, 'VoidOutput')
+      if (isRejection(res.updateEvent)) {
+        addToast({ message: rejectionMessage(res.updateEvent), variant: 'error' })
+        return
+      }
       addToast({ message: 'Évènement mis à jour', variant: 'info' })
       await queryClient.invalidateQueries({ queryKey: ['EventPageGetEvent', { eventId: event.id }] })
     } catch {
@@ -86,7 +88,10 @@ export const EditEventInformations = ({ event }: EditEventInformationsProps) => 
   const deleteEvent = async () => {
     try {
       const res = await deleteEventMutation({ id: event.id })
-      unwrapResult(res.deleteEvent, 'VoidOutput')
+      if (isRejection(res.deleteEvent)) {
+        addToast({ message: rejectionMessage(res.deleteEvent), variant: 'error' })
+        return
+      }
       await queryClient.invalidateQueries({ queryKey: ['EventListPageGetEvents'] })
       addToast({ message: "L'évènement à bien été supprimée", variant: 'success' })
       void navigate({ to: '/events' })

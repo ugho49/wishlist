@@ -1,14 +1,13 @@
 import type { WishlistId } from '@wishlist/common'
 import type { RootState } from '../../core'
 
-import { Box, Container, Stack } from '@mui/material'
+import { Alert, Box, Container, Stack } from '@mui/material'
 import { useNavigate, useSearch } from '@tanstack/react-router'
 import { FeatureFlags } from '@wishlist/common'
 import { useCallback, useMemo } from 'react'
 import { useSelector } from 'react-redux'
 
-import { useImportableItemsQuery, useWishlistPageQuery } from '../../gql'
-import { unwrapResultOrNotFound } from '../../gql/result'
+import { isRejection, rejectionMessage, useImportableItemsQuery, useWishlistPageQuery } from '../../gql'
 import { useFeatureFlag } from '../../hooks/useFeatureFlag'
 import { Description } from '../common/Description'
 import { Loader } from '../common/Loader'
@@ -33,10 +32,9 @@ export const WishlistPage = ({ wishlistId }: WishlistPageProps) => {
   const navigate = useNavigate()
   const currentUserId = useSelector(mapState)
 
-  const { data: wishlist, isLoading: loading } = useWishlistPageQuery(
-    { wishlistId },
-    { select: d => unwrapResultOrNotFound(d.wishlist, 'Wishlist') },
-  )
+  const { data, isLoading: loading } = useWishlistPageQuery({ wishlistId }, { select: d => d.wishlist })
+  const wishlist = data?.__typename === 'Wishlist' ? data : undefined
+  const queryRejection = data && isRejection(data) && data.__typename !== 'NotFoundRejection' ? data : undefined
 
   const currentUserCanEdit = useMemo(
     () => !!wishlist && (wishlist.owner.id === currentUserId || wishlist.coOwner?.id === currentUserId),
@@ -48,7 +46,7 @@ export const WishlistPage = ({ wishlistId }: WishlistPageProps) => {
     { wishlistId },
     {
       enabled: currentUserCanEdit && !isPublic && importItemsEnabled,
-      select: d => unwrapResultOrNotFound(d.importableItems, 'GetImportableItemsOutput')?.items ?? [],
+      select: d => (d.importableItems.__typename === 'GetImportableItemsOutput' ? d.importableItems.items : []),
     },
   )
 
@@ -89,7 +87,8 @@ export const WishlistPage = ({ wishlistId }: WishlistPageProps) => {
       />
       <Box>
         <Loader loading={loading}>
-          {!wishlist && <WishlistNotFound />}
+          {queryRejection && <Alert severity="error">{rejectionMessage(queryRejection)}</Alert>}
+          {!wishlist && !queryRejection && <WishlistNotFound />}
 
           {wishlist && (
             <>

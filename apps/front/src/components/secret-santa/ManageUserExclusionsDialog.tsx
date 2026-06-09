@@ -22,8 +22,7 @@ import {
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useState } from 'react'
 
-import { useUpdateSecretSantaUserMutation } from '../../gql'
-import { GraphqlRejectionError, unwrapResult } from '../../gql/result'
+import { isRejection, rejectionMessage, useUpdateSecretSantaUserMutation } from '../../gql'
 import { useToast } from '../../hooks'
 
 export interface ManageUserExclusionsDialogProps {
@@ -69,13 +68,20 @@ export const ManageUserExclusionsDialog = ({
         secretSantaUserId: secretSantaUser.id,
         input: { exclusions: selected },
       })
-      unwrapResult(res.updateSecretSantaUser, 'VoidOutput')
+      const result = res.updateSecretSantaUser
+      if (isRejection(result)) {
+        const message =
+          result.__typename === 'ValidationRejection' && result.errors.length > 0
+            ? result.errors.map(error => error.message).join(', ')
+            : rejectionMessage(result)
+        addToast({ message, variant: 'error' })
+        return
+      }
       handleClose()
       addToast({ message: 'Les exclusions ont été mises à jour', variant: 'success' })
       await queryClient.invalidateQueries({ queryKey: ['GetSecretSantaForEvent', { eventId }] })
-    } catch (error) {
-      const message = error instanceof GraphqlRejectionError ? error.message : "Une erreur s'est produite"
-      addToast({ message, variant: 'error' })
+    } catch {
+      addToast({ message: "Une erreur s'est produite", variant: 'error' })
     }
   }
 

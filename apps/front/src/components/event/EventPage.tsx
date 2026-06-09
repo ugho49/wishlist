@@ -1,12 +1,11 @@
 import type { EventId } from '@wishlist/common'
 import type { RootState } from '../../core'
 
-import { Box, Container, Stack } from '@mui/material'
+import { Alert, Box, Container, Stack } from '@mui/material'
 import { useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
 
-import { AttendeeRole, useEventPageGetEventQuery } from '../../gql'
-import { unwrapResultOrNotFound } from '../../gql/result'
+import { AttendeeRole, isRejection, rejectionMessage, useEventPageGetEventQuery } from '../../gql'
 import { useSecretSantaSuggestion } from '../../hooks'
 import { Description } from '../common/Description'
 import { Loader } from '../common/Loader'
@@ -27,10 +26,9 @@ interface EventPageProps {
 export const EventPage = ({ eventId }: EventPageProps) => {
   const currentUserId = useSelector(mapState)
   const [openAttendeesDialog, setOpenAttendeesDialog] = useState(false)
-  const { data: event, isLoading: loading } = useEventPageGetEventQuery(
-    { eventId },
-    { select: d => unwrapResultOrNotFound(d.event, 'Event') },
-  )
+  const { data, isLoading: loading } = useEventPageGetEventQuery({ eventId }, { select: d => d.event })
+  const event = data?.__typename === 'Event' ? data : undefined
+  const queryRejection = data && isRejection(data) && data.__typename !== 'NotFoundRejection' ? data : undefined
 
   const attendees = useMemo(() => event?.attendees ?? [], [event])
   const currentUserCanEdit = useMemo(
@@ -53,7 +51,8 @@ export const EventPage = ({ eventId }: EventPageProps) => {
       />
       <Box>
         <Loader loading={loading}>
-          {!event && <EventNotFound />}
+          {queryRejection && <Alert severity="error">{rejectionMessage(queryRejection)}</Alert>}
+          {!event && !queryRejection && <EventNotFound />}
           {event && (
             <>
               <EventHeader

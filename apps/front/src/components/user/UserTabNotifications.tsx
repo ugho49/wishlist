@@ -1,12 +1,16 @@
 import type { FormEvent } from 'react'
 
 import SaveIcon from '@mui/icons-material/Save'
-import { Box, Button, Checkbox, FormControlLabel, Stack, Typography } from '@mui/material'
+import { Alert, Box, Button, Checkbox, FormControlLabel, Stack, Typography } from '@mui/material'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 
-import { useUpdateUserEmailSettingsMutation, useUserProfileEmailSettingsQuery } from '../../gql'
-import { unwrapResult } from '../../gql/result'
+import {
+  isRejection,
+  rejectionMessage,
+  useUpdateUserEmailSettingsMutation,
+  useUserProfileEmailSettingsQuery,
+} from '../../gql'
 import { useToast } from '../../hooks/useToast'
 import { Card } from '../common/Card'
 import { InputLabel } from '../common/InputLabel'
@@ -18,9 +22,11 @@ export const UserTabNotifications = () => {
   const queryClient = useQueryClient()
   const [dailyNewItemNotification, setDailyNewItemNotification] = useState(true)
 
-  const { data: emailSettings, isLoading: loadingNotificationSettings } = useUserProfileEmailSettingsQuery(undefined, {
-    select: d => unwrapResult(d.currentUser, 'User').emailSettings,
+  const { data, isLoading: loadingNotificationSettings } = useUserProfileEmailSettingsQuery(undefined, {
+    select: d => d.currentUser,
   })
+  const emailSettings = data?.__typename === 'User' ? data.emailSettings : undefined
+  const queryRejection = data && isRejection(data) ? data : undefined
 
   const { mutateAsync: updateEmailSettings, isPending: loading } = useUpdateUserEmailSettingsMutation({
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
@@ -41,7 +47,10 @@ export const UserTabNotifications = () => {
       },
     })
 
-    unwrapResult(res.updateUserEmailSettings, 'UserEmailSettings')
+    if (isRejection(res.updateUserEmailSettings)) {
+      addToast({ message: rejectionMessage(res.updateUserEmailSettings), variant: 'error' })
+      return
+    }
 
     addToast({ message: 'Préférences de notification mis à jour', variant: 'info' })
     void queryClient.invalidateQueries({ queryKey: ['UserProfileEmailSettings'] })
@@ -51,6 +60,8 @@ export const UserTabNotifications = () => {
     <Card>
       <Loader loading={loadingNotificationSettings}>
         <Subtitle>Gérer les notifications de mail</Subtitle>
+
+        {queryRejection && <Alert severity="error">{rejectionMessage(queryRejection)}</Alert>}
 
         <Stack component="form" onSubmit={onSubmit} noValidate gap={3}>
           <Box>

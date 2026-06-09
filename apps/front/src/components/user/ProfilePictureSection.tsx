@@ -6,8 +6,13 @@ import { useDispatch, useSelector } from 'react-redux'
 
 import { uploadUserPicture } from '../../api/upload'
 import { updatePicture } from '../../core/store/features'
-import { useRemoveCurrentUserPictureMutation, useUpdateUserPictureFromSocialMutation } from '../../gql'
-import { unwrapResult } from '../../gql/result'
+import {
+  isRejection,
+  rejectionMessage,
+  useRemoveCurrentUserPictureMutation,
+  useUpdateUserPictureFromSocialMutation,
+} from '../../gql'
+import { useToast } from '../../hooks/useToast'
 import { Loader } from '../common/Loader'
 import { AvatarUpdateButton } from './AvatarUpdateButton'
 
@@ -19,6 +24,7 @@ export const ProfilePictureSection = () => {
   const dispatch = useDispatch()
   const userState = useSelector(mapState)
   const queryClient = useQueryClient()
+  const { addToast } = useToast()
 
   const { mutateAsync: updatePictureFromSocial } = useUpdateUserPictureFromSocialMutation()
   const { mutateAsync: removePicture } = useRemoveCurrentUserPictureMutation()
@@ -40,11 +46,19 @@ export const ProfilePictureSection = () => {
           uploadPictureHandler={file => uploadUserPicture(file)}
           updatePictureFromSocialHandler={async socialId => {
             const res = await updatePictureFromSocial({ input: { socialId } })
-            unwrapResult(res.updateUserPictureFromSocial, 'VoidOutput')
+            if (isRejection(res.updateUserPictureFromSocial)) {
+              addToast({ message: rejectionMessage(res.updateUserPictureFromSocial), variant: 'error' })
+              // AvatarUpdateButton applies the new picture unless the handler throws
+              throw new Error(rejectionMessage(res.updateUserPictureFromSocial))
+            }
           }}
           deletePictureHandler={async () => {
             const res = await removePicture({})
-            unwrapResult(res.removeUserPicture, 'VoidOutput')
+            if (isRejection(res.removeUserPicture)) {
+              addToast({ message: rejectionMessage(res.removeUserPicture), variant: 'error' })
+              // AvatarUpdateButton removes the picture unless the handler throws
+              throw new Error(rejectionMessage(res.removeUserPicture))
+            }
           }}
           size="120px"
         />

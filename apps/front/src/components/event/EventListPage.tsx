@@ -1,9 +1,8 @@
 import AddIcon from '@mui/icons-material/Add'
-import { Box, Grid } from '@mui/material'
+import { Alert, Box, Grid } from '@mui/material'
 import { useNavigate, useSearch } from '@tanstack/react-router'
 
-import { useEventListPageGetEventsQuery } from '../../gql'
-import { unwrapResult } from '../../gql/result'
+import { isRejection, rejectionMessage, useEventListPageGetEventsQuery } from '../../gql'
 import { FabAutoGrow } from '../common/FabAutoGrow'
 import { Loader } from '../common/Loader'
 import { Pagination } from '../common/Pagination'
@@ -16,12 +15,14 @@ export const EventListPage = () => {
   const navigate = useNavigate()
   const { data, isLoading: loading } = useEventListPageGetEventsQuery(
     { filters: { page: currentPage } },
-    { select: d => unwrapResult(d.events, 'GetEventsPagedResponse') },
+    { select: d => d.events },
   )
+  const pagedEvents = data?.__typename === 'GetEventsPagedResponse' ? data : undefined
+  const queryRejection = data && isRejection(data) ? data : undefined
 
-  const events = data?.data ?? []
-  const totalElements = data?.pagination.totalElements ?? 0
-  const totalPages = data?.pagination.totalPages
+  const events = pagedEvents?.data ?? []
+  const totalElements = pagedEvents?.pagination.totalElements ?? 0
+  const totalPages = pagedEvents?.pagination.totalPages
 
   const handleAddEventClick = () => navigate({ to: '/events/new' })
 
@@ -30,6 +31,7 @@ export const EventListPage = () => {
       {totalElements > 0 && <Title>Évènements</Title>}
 
       <Loader loading={loading}>
+        {queryRejection && <Alert severity="error">{rejectionMessage(queryRejection)}</Alert>}
         <Grid container spacing={3}>
           {events.map(event => (
             <Grid key={event.id} size={{ xs: 12, lg: 6 }}>
@@ -58,7 +60,7 @@ export const EventListPage = () => {
         </>
       )}
 
-      {totalElements === 0 && !loading && (
+      {totalElements === 0 && !loading && !queryRejection && (
         <EmptyEventsState sx={{ marginTop: '100px' }} onAddEventClick={() => handleAddEventClick()} />
       )}
     </Box>

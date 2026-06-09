@@ -2,18 +2,19 @@ import type { EventId, WishlistId } from '@wishlist/common'
 import type { WishlistEvent } from './wishlist.types'
 
 import DeleteIcon from '@mui/icons-material/Delete'
-import { Box, Divider, List, ListItem, ListItemAvatar, ListItemButton, ListItemText } from '@mui/material'
+import { Alert, Box, Divider, List, ListItem, ListItemAvatar, ListItemButton, ListItemText } from '@mui/material'
 import { useQueryClient } from '@tanstack/react-query'
 import { MAX_EVENTS_BY_LIST } from '@wishlist/common'
 import { DateTime } from 'luxon'
 import { useMemo } from 'react'
 
 import {
+  isRejection,
+  rejectionMessage,
   useEventSelectAvailableEventsQuery,
   useLinkWishlistToEventMutation,
   useUnlinkWishlistFromEventMutation,
 } from '../../gql'
-import { unwrapResult } from '../../gql/result'
 import { useToast } from '../../hooks/useToast'
 import { Card } from '../common/Card'
 import { ConfirmIconButton } from '../common/ConfirmIconButton'
@@ -30,31 +31,25 @@ export type EditWishlistEventsProps = {
 export const EditWishlistEvent = ({ wishlistId, events }: EditWishlistEventsProps) => {
   const { addToast } = useToast()
   const queryClient = useQueryClient()
-  const { data: availableEvents, isLoading: availableEventsLoading } = useEventSelectAvailableEventsQuery(
+  const { data: availableEventsData, isLoading: availableEventsLoading } = useEventSelectAvailableEventsQuery(
     { filters: { limit: 100, onlyFuture: true } },
-    { select: d => unwrapResult(d.events, 'GetEventsPagedResponse').data },
+    { select: d => d.events },
   )
+  const availableEvents =
+    availableEventsData?.__typename === 'GetEventsPagedResponse' ? availableEventsData.data : undefined
+  const availableEventsRejection =
+    availableEventsData && isRejection(availableEventsData) ? availableEventsData : undefined
 
   const invalidateWishlist = () => queryClient.invalidateQueries({ queryKey: ['WishlistPage', { wishlistId }] })
 
   const { mutateAsync: attachEventToWishlistMutation, isPending: attachEventToWishlistPending } =
     useLinkWishlistToEventMutation({
-      onSuccess: res => {
-        unwrapResult(res.linkWishlistToEvent, 'VoidOutput')
-        addToast({ message: 'La liaison entre cette liste et cet évènement à été ajoutée !', variant: 'info' })
-        void invalidateWishlist()
-      },
       onError: () =>
         addToast({ message: "Impossible d'ajouter la liaison entre cette liste et cet évènement", variant: 'error' }),
     })
 
   const { mutateAsync: detachEventFromWishlistMutation, isPending: detachEventFromWishlistPending } =
     useUnlinkWishlistFromEventMutation({
-      onSuccess: res => {
-        unwrapResult(res.unlinkWishlistFromEvent, 'VoidOutput')
-        addToast({ message: 'La liaison entre cette liste et cet évènement à été supprimée !', variant: 'info' })
-        void invalidateWishlist()
-      },
       onError: () =>
         addToast({
           message: 'Impossible de supprimer la liaison entre cette liste et cet évènement',
@@ -62,8 +57,25 @@ export const EditWishlistEvent = ({ wishlistId, events }: EditWishlistEventsProp
         }),
     })
 
-  const attachEventToWishlist = (eventId: EventId) => attachEventToWishlistMutation({ id: wishlistId, eventId })
-  const detachEventFromWishlist = (eventId: EventId) => detachEventFromWishlistMutation({ id: wishlistId, eventId })
+  const attachEventToWishlist = async (eventId: EventId) => {
+    const res = await attachEventToWishlistMutation({ id: wishlistId, eventId })
+    if (isRejection(res.linkWishlistToEvent)) {
+      addToast({ message: rejectionMessage(res.linkWishlistToEvent), variant: 'error' })
+      return
+    }
+    addToast({ message: 'La liaison entre cette liste et cet évènement à été ajoutée !', variant: 'info' })
+    void invalidateWishlist()
+  }
+
+  const detachEventFromWishlist = async (eventId: EventId) => {
+    const res = await detachEventFromWishlistMutation({ id: wishlistId, eventId })
+    if (isRejection(res.unlinkWishlistFromEvent)) {
+      addToast({ message: rejectionMessage(res.unlinkWishlistFromEvent), variant: 'error' })
+      return
+    }
+    addToast({ message: 'La liaison entre cette liste et cet évènement à été supprimée !', variant: 'info' })
+    void invalidateWishlist()
+  }
 
   const loading = useMemo(
     () => attachEventToWishlistPending || detachEventFromWishlistPending,
@@ -76,6 +88,12 @@ export const EditWishlistEvent = ({ wishlistId, events }: EditWishlistEventsProp
 
       <Box>
         <InputLabel>Ajouter un nouvel évènement sur la liste ?</InputLabel>
+
+        {availableEventsRejection && (
+          <Alert severity="error" sx={{ marginBottom: '15px' }}>
+            {rejectionMessage(availableEventsRejection)}
+          </Alert>
+        )}
 
         <SearchEventSelect
           loading={availableEventsLoading}

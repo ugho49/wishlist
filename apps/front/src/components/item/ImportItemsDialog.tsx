@@ -28,8 +28,7 @@ import { useToast } from '@wishlist/front-hooks'
 import clsx from 'clsx'
 import { forwardRef, useState } from 'react'
 
-import { useImportItemsMutation } from '../../gql'
-import { unwrapResult } from '../../gql/result'
+import { isRejection, rejectionMessage, useImportItemsMutation } from '../../gql'
 import { Card } from '../common/Card'
 import { Rating, RatingBubble } from '../common/Rating'
 import { Subtitle } from '../common/Subtitle'
@@ -171,23 +170,26 @@ export const ImportItemsDialog = ({
 
   // Import selected items mutation
   const { mutateAsync: importItemsMutation, isPending: isLoading } = useImportItemsMutation({
-    onSuccess: res => {
-      unwrapResult(res.importItems, 'ImportItemsOutput')
-      const count = selectedItemIds.size
-      const plural = count > 1
-      const message = `${count} souhait${plural ? 's' : ''} importé${plural ? 's' : ''} avec succès`
-
-      addToast({ message, variant: 'success' })
-      void queryClient.invalidateQueries({ queryKey: ['WishlistPage', { wishlistId }] })
-      void queryClient.invalidateQueries({ queryKey: ['ImportableItems', { wishlistId }] })
-      onComplete()
-    },
     onError: () => {
       addToast({ message: "Erreur lors de l'import des souhaits", variant: 'error' })
     },
   })
 
-  const importItems = () => importItemsMutation({ input: { wishlistId, sourceItemIds: Array.from(selectedItemIds) } })
+  const importItems = async () => {
+    const res = await importItemsMutation({ input: { wishlistId, sourceItemIds: Array.from(selectedItemIds) } })
+    if (isRejection(res.importItems)) {
+      addToast({ message: rejectionMessage(res.importItems), variant: 'error' })
+      return
+    }
+    const count = selectedItemIds.size
+    const plural = count > 1
+    const message = `${count} souhait${plural ? 's' : ''} importé${plural ? 's' : ''} avec succès`
+
+    addToast({ message, variant: 'success' })
+    void queryClient.invalidateQueries({ queryKey: ['WishlistPage', { wishlistId }] })
+    void queryClient.invalidateQueries({ queryKey: ['ImportableItems', { wishlistId }] })
+    onComplete()
+  }
 
   const toggleItemSelection = (itemId: ItemId) => {
     setSelectedItemIds(prev => {

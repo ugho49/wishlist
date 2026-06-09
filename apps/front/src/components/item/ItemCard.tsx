@@ -32,8 +32,7 @@ import { DateTime } from 'luxon'
 import React, { useCallback, useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
 
-import { useDeleteItemMutation, useToggleItemMutation } from '../../gql'
-import { unwrapResult } from '../../gql/result'
+import { isRejection, rejectionMessage, useDeleteItemMutation, useToggleItemMutation } from '../../gql'
 import { useToast } from '../../hooks'
 import { Card } from '../common/Card'
 import { ConfirmMenuItem } from '../common/ConfirmMenuItem'
@@ -374,46 +373,54 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
 
   const { mutateAsync: deleteItemMutation, isPending: deleteItemPending } = useDeleteItemMutation({
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-    onSuccess: res => {
-      unwrapResult(res.deleteItem, 'VoidOutput')
-      addToast({ message: 'Le souhait à bien été supprimé', variant: 'success' })
-      void queryClient.invalidateQueries({ queryKey: ['WishlistPage', { wishlistId: wishlist.id }] })
-    },
   })
-  const deleteItem = () => deleteItemMutation({ itemId: item.id })
+  const deleteItem = async () => {
+    const res = await deleteItemMutation({ itemId: item.id })
+    if (isRejection(res.deleteItem)) {
+      addToast({ message: rejectionMessage(res.deleteItem), variant: 'error' })
+      return
+    }
+    addToast({ message: 'Le souhait à bien été supprimé', variant: 'success' })
+    void queryClient.invalidateQueries({ queryKey: ['WishlistPage', { wishlistId: wishlist.id }] })
+  }
 
   const { mutateAsync: toggleItemMutation, isPending: toggleItemPending } = useToggleItemMutation({
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-    onSuccess: res => {
-      const output = unwrapResult(res.toggleItem, 'ToggleItemOutput')
-      const action = output.takenById != null ? 'check' : 'uncheck'
-      setTakenBy(
-        output.takenById != null
-          ? { id: output.takenById, firstName: currentUserProfile.firstName, pictureUrl: currentUserProfile.pictureUrl }
-          : undefined,
-      )
-
-      if (action === 'check') {
-        addToast({
-          message: (
-            <span>
-              Vous avez coché : <b>{item.name}</b>
-            </span>
-          ),
-          variant: 'success',
-        })
-      } else {
-        addToast({
-          message: (
-            <span>
-              Le souhait <b>{item.name}</b> est à nouveau disponible
-            </span>
-          ),
-          variant: 'info',
-        })
-      }
-    },
   })
+  const toggleItem = async () => {
+    const res = await toggleItemMutation({ itemId: item.id })
+    const output = res.toggleItem
+    if (isRejection(output)) {
+      addToast({ message: rejectionMessage(output), variant: 'error' })
+      return
+    }
+    const action = output.takenById != null ? 'check' : 'uncheck'
+    setTakenBy(
+      output.takenById != null
+        ? { id: output.takenById, firstName: currentUserProfile.firstName, pictureUrl: currentUserProfile.pictureUrl }
+        : undefined,
+    )
+
+    if (action === 'check') {
+      addToast({
+        message: (
+          <span>
+            Vous avez coché : <b>{item.name}</b>
+          </span>
+        ),
+        variant: 'success',
+      })
+    } else {
+      addToast({
+        message: (
+          <span>
+            Le souhait <b>{item.name}</b> est à nouveau disponible
+          </span>
+        ),
+        variant: 'info',
+      })
+    }
+  }
 
   const loading = useMemo(() => deleteItemPending || toggleItemPending, [deleteItemPending, toggleItemPending])
 
@@ -516,7 +523,7 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
               <ReservedButton
                 onClick={e => {
                   e.stopPropagation()
-                  void toggleItemMutation({ itemId: item.id })
+                  void toggleItem()
                 }}
                 disabled={loading || isTaken}
                 startIcon={<RedeemIcon />}
@@ -541,7 +548,7 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
             <ReleaseButton
               variant="contained"
               size="small"
-              onClick={() => toggleItemMutation({ itemId: item.id })}
+              onClick={() => toggleItem()}
               disabled={loading}
               startIcon={<RemoveCircleOutlineIcon />}
             >

@@ -5,7 +5,7 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import DeleteIcon from '@mui/icons-material/Delete'
 import LocalPoliceOutlinedIcon from '@mui/icons-material/LocalPoliceOutlined'
 import SaveIcon from '@mui/icons-material/Save'
-import { Box, Button, List, ListItem, ListItemIcon, ListItemText, Stack, TextField } from '@mui/material'
+import { Alert, Box, Button, List, ListItem, ListItemIcon, ListItemText, Stack, TextField } from '@mui/material'
 import { styled, useTheme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import { useQueryClient } from '@tanstack/react-query'
@@ -20,6 +20,8 @@ import z from 'zod'
 
 import {
   AttendeeRole,
+  isRejection,
+  rejectionMessage,
   useAdminDeleteEventAttendeeMutation,
   useAdminDeleteEventMutation,
   useAdminEventGetEventQuery,
@@ -30,7 +32,6 @@ import {
   useStartSecretSantaMutation,
   useUpdateSecretSantaMutation,
 } from '../../../gql'
-import { unwrapResult } from '../../../gql/result'
 import { useToast } from '../../../hooks'
 import { useSecretSanta } from '../../../hooks/domain/useSecretSanta'
 import { Card } from '../../common/Card'
@@ -77,10 +78,9 @@ export const AdminEventPage = ({ eventId }: AdminEventPageProps) => {
     resolver: zodResolver(schema),
   })
 
-  const { data: event, isLoading: loadingEvent } = useAdminEventGetEventQuery(
-    { id: eventId },
-    { select: d => unwrapResult(d.adminEvent, 'Event') },
-  )
+  const { data, isLoading: loadingEvent } = useAdminEventGetEventQuery({ id: eventId }, { select: d => d.adminEvent })
+  const event = data?.__typename === 'Event' ? data : undefined
+  const queryRejection = data && isRejection(data) ? data : undefined
 
   const { secretSanta, loading: loadingSecretSanta } = useSecretSanta(eventId)
 
@@ -94,7 +94,10 @@ export const AdminEventPage = ({ eventId }: AdminEventPageProps) => {
   const deleteAttendee = async (attendeeId: AttendeeId) => {
     try {
       const res = await deleteAttendeeMutation({ eventId, attendeeId })
-      unwrapResult(res.adminDeleteEventAttendee, 'VoidOutput')
+      if (isRejection(res.adminDeleteEventAttendee)) {
+        addToast({ message: rejectionMessage(res.adminDeleteEventAttendee), variant: 'error' })
+        return
+      }
       addToast({ message: 'Participant supprimé avec succès', variant: 'success' })
       await invalidateEvent()
       await invalidateSecretSanta()
@@ -109,7 +112,10 @@ export const AdminEventPage = ({ eventId }: AdminEventPageProps) => {
   const deleteSecretSanta = async () => {
     try {
       const res = await deleteSecretSantaMutation({ id: secretSanta!.id })
-      unwrapResult(res.deleteSecretSanta, 'VoidOutput')
+      if (isRejection(res.deleteSecretSanta)) {
+        addToast({ message: rejectionMessage(res.deleteSecretSanta), variant: 'error' })
+        return
+      }
       addToast({ message: 'Secret santa supprimé avec succès', variant: 'success' })
       await invalidateSecretSanta()
     } catch {
@@ -122,7 +128,10 @@ export const AdminEventPage = ({ eventId }: AdminEventPageProps) => {
   const startSecretSanta = async () => {
     try {
       const res = await startSecretSantaMutation({ id: secretSanta!.id })
-      unwrapResult(res.startSecretSanta, 'VoidOutput')
+      if (isRejection(res.startSecretSanta)) {
+        addToast({ message: rejectionMessage(res.startSecretSanta), variant: 'error' })
+        return
+      }
       addToast({ message: 'Secret santa lancé avec succès', variant: 'success' })
       await invalidateSecretSanta()
     } catch {
@@ -135,7 +144,10 @@ export const AdminEventPage = ({ eventId }: AdminEventPageProps) => {
   const cancelSecretSanta = async () => {
     try {
       const res = await cancelSecretSantaMutation({ id: secretSanta!.id })
-      unwrapResult(res.cancelSecretSanta, 'VoidOutput')
+      if (isRejection(res.cancelSecretSanta)) {
+        addToast({ message: rejectionMessage(res.cancelSecretSanta), variant: 'error' })
+        return
+      }
       addToast({ message: 'Secret santa annulé avec succès', variant: 'success' })
       await invalidateSecretSanta()
     } catch {
@@ -149,7 +161,10 @@ export const AdminEventPage = ({ eventId }: AdminEventPageProps) => {
   const removeSecretSantaUser = async (secretSantaUserId: SecretSantaUserId) => {
     try {
       const res = await removeSecretSantaUserMutation({ id: secretSanta!.id, secretSantaUserId })
-      unwrapResult(res.deleteSecretSantaUser, 'VoidOutput')
+      if (isRejection(res.deleteSecretSantaUser)) {
+        addToast({ message: rejectionMessage(res.deleteSecretSantaUser), variant: 'error' })
+        return
+      }
       addToast({ message: 'Utilisateur supprimé du secret santa avec succès', variant: 'success' })
       await invalidateSecretSanta()
     } catch {
@@ -162,7 +177,10 @@ export const AdminEventPage = ({ eventId }: AdminEventPageProps) => {
   const updateSecretSanta = async (input: { budget?: number; description?: string }) => {
     try {
       const res = await updateSecretSantaMutation({ id: secretSanta!.id, input })
-      unwrapResult(res.updateSecretSanta, 'VoidOutput')
+      if (isRejection(res.updateSecretSanta)) {
+        addToast({ message: rejectionMessage(res.updateSecretSanta), variant: 'error' })
+        return
+      }
       addToast({ message: 'Secret santa modifié avec succès', variant: 'success' })
       await invalidateSecretSanta()
     } catch {
@@ -177,7 +195,10 @@ export const AdminEventPage = ({ eventId }: AdminEventPageProps) => {
   const deleteEvent = async () => {
     try {
       const res = await deleteEventMutation({ id: eventId })
-      unwrapResult(res.adminDeleteEvent, 'VoidOutput')
+      if (isRejection(res.adminDeleteEvent)) {
+        addToast({ message: rejectionMessage(res.adminDeleteEvent), variant: 'error' })
+        return
+      }
       addToast({ message: 'Évènement supprimé avec succès', variant: 'success' })
       await invalidateEvent()
     } catch (error) {
@@ -214,7 +235,10 @@ export const AdminEventPage = ({ eventId }: AdminEventPageProps) => {
           eventDate: isoDate,
         },
       })
-      unwrapResult(res.adminUpdateEvent, 'VoidOutput')
+      if (isRejection(res.adminUpdateEvent)) {
+        addToast({ message: rejectionMessage(res.adminUpdateEvent), variant: 'error' })
+        return
+      }
       addToast({ message: 'Évènement modifié avec succès', variant: 'success' })
       await invalidateEvent()
     } catch {
@@ -237,6 +261,7 @@ export const AdminEventPage = ({ eventId }: AdminEventPageProps) => {
       <Title>Editer l'évènement</Title>
 
       <CardStack>
+        {queryRejection && <Alert severity="error">{rejectionMessage(queryRejection)}</Alert>}
         <Card>
           <Loader loading={loadingEvent}>
             <Stack direction="row" flexWrap="wrap" gap={smallScreen ? 0 : 3}>

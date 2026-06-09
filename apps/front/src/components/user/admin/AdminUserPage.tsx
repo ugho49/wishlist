@@ -6,7 +6,7 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import HistoryIcon from '@mui/icons-material/History'
 import LanguageIcon from '@mui/icons-material/Language'
 import SaveIcon from '@mui/icons-material/Save'
-import { Box, Button, List, ListItem, ListItemIcon, ListItemText, Stack, TextField } from '@mui/material'
+import { Alert, Box, Button, List, ListItem, ListItemIcon, ListItemText, Stack, TextField } from '@mui/material'
 import { styled, useTheme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import { useQueryClient } from '@tanstack/react-query'
@@ -18,11 +18,12 @@ import { useSelector } from 'react-redux'
 
 import { uploadAdminUserPicture } from '../../../api/upload'
 import {
+  isRejection,
+  rejectionMessage,
   useAdminRemoveUserPictureMutation,
   useAdminUpdateUserProfileMutation,
   useAdminUserDetailQuery,
 } from '../../../gql'
-import { unwrapResult } from '../../../gql/result'
 import { useToast } from '../../../hooks'
 import { Card } from '../../common/Card'
 import { CharsRemaining } from '../../common/CharsRemaining'
@@ -85,10 +86,9 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
     void navigate({ to: '/admin/users/$userId', params: { userId }, search: prev => ({ ...prev, eventPage: page }) })
   }
 
-  const { data: value, isLoading: loadingUser } = useAdminUserDetailQuery(
-    { userId },
-    { select: d => unwrapResult(d.adminUser, 'UserFull') },
-  )
+  const { data, isLoading: loadingUser } = useAdminUserDetailQuery({ userId }, { select: d => d.adminUser })
+  const value = data?.__typename === 'UserFull' ? data : undefined
+  const queryRejection = data && isRejection(data) ? data : undefined
 
   const { mutateAsync: updateUser } = useAdminUpdateUserProfileMutation()
   const { mutateAsync: removeUserPicture } = useAdminRemoveUserPictureMutation()
@@ -113,7 +113,11 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
     setEnabled(isEnabled)
     try {
       const res = await updateUser({ userId, input: { isEnabled } })
-      unwrapResult(res.adminUpdateUserProfile, 'VoidOutput')
+      const result = res.adminUpdateUserProfile
+      if (isRejection(result)) {
+        addToast({ message: rejectionMessage(result), variant: 'error' })
+        return
+      }
       void invalidateUser()
       addToast({ message: isEnabled ? 'Utilisateur activé' : 'Utilisateur désactivé', variant: 'success' })
     } catch {
@@ -139,7 +143,11 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
           email,
         },
       })
-      unwrapResult(res.adminUpdateUserProfile, 'VoidOutput')
+      const result = res.adminUpdateUserProfile
+      if (isRejection(result)) {
+        addToast({ message: rejectionMessage(result), variant: 'error' })
+        return
+      }
       void invalidateUser()
       addToast({ message: 'Profil mis à jour', variant: 'success' })
     } catch {
@@ -152,6 +160,8 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
   return (
     <Loader loading={loadingUser}>
       <Title>Editer l'utilisateur</Title>
+
+      {queryRejection && <Alert severity="error">{rejectionMessage(queryRejection)}</Alert>}
 
       <UpdatePasswordModal
         userId={userId}
@@ -172,7 +182,10 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
           updatePictureFromSocialHandler={() => Promise.resolve()}
           deletePictureHandler={async () => {
             const res = await removeUserPicture({ userId })
-            unwrapResult(res.adminRemoveUserPicture, 'VoidOutput')
+            const result = res.adminRemoveUserPicture
+            // AvatarUpdateButton owns the error UI for this handler: throwing keeps
+            // its catch path (error toast) and prevents it from clearing the picture.
+            if (isRejection(result)) throw new Error(rejectionMessage(result))
           }}
         />
       </Stack>

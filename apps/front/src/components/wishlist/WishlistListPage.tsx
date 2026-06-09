@@ -1,9 +1,8 @@
 import AddIcon from '@mui/icons-material/Add'
-import { Box, Grid } from '@mui/material'
+import { Alert, Box, Grid } from '@mui/material'
 import { useNavigate, useSearch } from '@tanstack/react-router'
 
-import { useWishlistListPageQuery } from '../../gql'
-import { unwrapResult } from '../../gql/result'
+import { isRejection, rejectionMessage, useWishlistListPageQuery } from '../../gql'
 import { FabAutoGrow } from '../common/FabAutoGrow'
 import { Loader } from '../common/Loader'
 import { Pagination } from '../common/Pagination'
@@ -15,12 +14,14 @@ export const WishlistListPage = () => {
   const { page: currentPage } = useSearch({ from: '/_authenticated/_with-layout/wishlists/' })
   const { data, isLoading: loading } = useWishlistListPageQuery(
     { filters: { page: currentPage } },
-    { select: d => unwrapResult(d.wishlists, 'GetWishlistsPagedResponse') },
+    { select: d => d.wishlists },
   )
   const navigate = useNavigate()
+  const wishlists = data?.__typename === 'GetWishlistsPagedResponse' ? data : undefined
+  const queryRejection = data && isRejection(data) ? data : undefined
 
-  const totalElements = data?.pagination.totalElements ?? 0
-  const totalPages = data?.pagination.totalPages
+  const totalElements = wishlists?.pagination.totalElements ?? 0
+  const totalPages = wishlists?.pagination.totalPages
 
   const handleAddList = () => navigate({ to: '/wishlists/new' })
 
@@ -29,8 +30,9 @@ export const WishlistListPage = () => {
       {totalElements > 0 && <Title>Mes listes</Title>}
 
       <Loader loading={loading}>
+        {queryRejection && <Alert severity="error">{rejectionMessage(queryRejection)}</Alert>}
         <Grid container spacing={3}>
-          {(data?.data ?? []).map(wishlist => (
+          {(wishlists?.data ?? []).map(wishlist => (
             <Grid key={wishlist.id} size={{ xs: 12, lg: 6 }}>
               <WishlistCardWithEvents wishlist={wishlist} />
             </Grid>
@@ -52,7 +54,7 @@ export const WishlistListPage = () => {
         </>
       )}
 
-      {totalElements === 0 && !loading && (
+      {totalElements === 0 && !loading && !queryRejection && (
         <EmptyListsState
           sx={{ marginTop: '100px' }}
           onAddListClick={() => handleAddList()}

@@ -18,11 +18,13 @@ import { useDispatch, useSelector } from 'react-redux'
 import { uploadUserPicture } from '../../api/upload'
 import { updatePicture } from '../../core/store/features'
 import {
+  isRejection,
+  rejectionMessage,
   useRemoveCurrentUserPictureMutation,
   useUpdateUserPictureFromSocialMutation,
   useUserProfileCurrentUserQuery,
 } from '../../gql'
-import { unwrapResult } from '../../gql/result'
+import { useToast } from '../../hooks/useToast'
 import { AvatarUpdateButton } from './AvatarUpdateButton'
 
 type ProfilePicturePromptModalProps = {
@@ -85,9 +87,11 @@ const SecondaryButton = styled(Button)(({ theme }) => ({
 export const ProfilePicturePromptModal = ({ open, onClose }: ProfilePicturePromptModalProps) => {
   const dispatch = useDispatch()
   const queryClient = useQueryClient()
-  const { data: user } = useUserProfileCurrentUserQuery(undefined, {
-    select: d => unwrapResult(d.currentUser, 'User'),
+  const { addToast } = useToast()
+  const { data } = useUserProfileCurrentUserQuery(undefined, {
+    select: d => d.currentUser,
   })
+  const user = data?.__typename === 'User' ? data : undefined
   const pictureUrl = useSelector(mapState)
 
   const { mutateAsync: updatePictureFromSocial } = useUpdateUserPictureFromSocialMutation()
@@ -120,11 +124,19 @@ export const ProfilePicturePromptModal = ({ open, onClose }: ProfilePicturePromp
           uploadPictureHandler={file => uploadUserPicture(file)}
           updatePictureFromSocialHandler={async socialId => {
             const res = await updatePictureFromSocial({ input: { socialId } })
-            unwrapResult(res.updateUserPictureFromSocial, 'VoidOutput')
+            if (isRejection(res.updateUserPictureFromSocial)) {
+              addToast({ message: rejectionMessage(res.updateUserPictureFromSocial), variant: 'error' })
+              // AvatarUpdateButton applies the new picture unless the handler throws
+              throw new Error(rejectionMessage(res.updateUserPictureFromSocial))
+            }
           }}
           deletePictureHandler={async () => {
             const res = await removePicture({})
-            unwrapResult(res.removeUserPicture, 'VoidOutput')
+            if (isRejection(res.removeUserPicture)) {
+              addToast({ message: rejectionMessage(res.removeUserPicture), variant: 'error' })
+              // AvatarUpdateButton removes the picture unless the handler throws
+              throw new Error(rejectionMessage(res.removeUserPicture))
+            }
           }}
           size="120px"
         />

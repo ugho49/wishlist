@@ -13,8 +13,7 @@ import {
 } from '@mui/material'
 import { useState } from 'react'
 
-import { useAdminUpdateUserProfileMutation } from '../../../gql'
-import { unwrapResult } from '../../../gql/result'
+import { isRejection, rejectionMessage, useAdminUpdateUserProfileMutation } from '../../../gql'
 import { useToast } from '../../../hooks/useToast'
 
 export type UpdatePasswordModalProps = {
@@ -35,13 +34,19 @@ export const UpdatePasswordModal = ({ onClose, open, userId }: UpdatePasswordMod
     setLoading(true)
     try {
       const res = await updateUser({ userId, input: { newPassword } })
-      unwrapResult(res.adminUpdateUserProfile, 'VoidOutput')
+      const result = res.adminUpdateUserProfile
+      if (isRejection(result)) {
+        addToast({ message: rejectionMessage(result), variant: 'error' })
+        setLoading(false)
+        return
+      }
       addToast({ message: 'Mot de passe mis à jour', variant: 'success' })
       setLoading(false)
       setNewPassword('')
       onClose()
     } catch {
       addToast({ message: "Une erreur s'est produite", variant: 'error' })
+      setLoading(false)
     }
   }
 

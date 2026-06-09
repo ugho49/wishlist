@@ -5,8 +5,7 @@ import { useNavigate, useSearch } from '@tanstack/react-router'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
-import { useAuthResetPasswordMutation } from '../../gql'
-import { unwrapResult } from '../../gql/result'
+import { isRejection, rejectionMessage, useAuthResetPasswordMutation } from '../../gql'
 import { useToast } from '../../hooks/useToast'
 import { RouterLink } from '../common/RouterLink'
 
@@ -81,7 +80,11 @@ export const RenewForgotPasswordPage = () => {
           newPassword: data.password,
         },
       })
-      unwrapResult(res.resetPassword, 'VoidOutput')
+      const result = res.resetPassword
+      if (isRejection(result)) {
+        addToast({ message: rejectionMessage(result), variant: 'error' })
+        return
+      }
       addToast({
         message: 'Le mot de passe à été réinitialisé avec succès. Vous pouvez maintenant vous connecter.',
         variant: 'success',

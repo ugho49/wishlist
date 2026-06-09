@@ -34,13 +34,12 @@ import { useNavigate, useSearch } from '@tanstack/react-router'
 import { MAX_EVENTS_BY_LIST } from '@wishlist/common'
 import uniq from 'lodash/uniq'
 import { DateTime } from 'luxon'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useInterval } from 'usehooks-ts'
 
 import { createWishlistMultipart } from '../../api/upload'
-import { useEventSelectAvailableEventsQuery } from '../../gql'
-import { unwrapResult } from '../../gql/result'
+import { isRejection, rejectionMessage, useEventSelectAvailableEventsQuery } from '../../gql'
 import { useToast } from '../../hooks'
 import { getRandomPlaceholderName } from '../../utils/wishlist.utils'
 import { Card } from '../common/Card'
@@ -134,10 +133,16 @@ export const CreateWishlistPage = () => {
     setNamePlaceholder(getRandomPlaceholderName())
   }, 2000)
 
-  const { data: availableEvents = [], isLoading: availableEventsLoading } = useEventSelectAvailableEventsQuery(
+  const { data: availableEventsData, isLoading: availableEventsLoading } = useEventSelectAvailableEventsQuery(
     { filters: { limit: 100, onlyFuture: true } },
-    { select: d => unwrapResult(d.events, 'GetEventsPagedResponse').data },
+    { select: d => d.events },
   )
+  const availableEvents = useMemo(
+    () => (availableEventsData?.__typename === 'GetEventsPagedResponse' ? availableEventsData.data : []),
+    [availableEventsData],
+  )
+  const availableEventsRejection =
+    availableEventsData && isRejection(availableEventsData) ? availableEventsData : undefined
   const { fromEvent } = useSearch({ from: '/_authenticated/_with-layout/wishlists/new' })
   const eventFromUrl = fromEvent ? availableEvents.find(e => e.id === fromEvent) : undefined
 
@@ -303,6 +308,12 @@ export const CreateWishlistPage = () => {
             {step === 3 && (
               <Stack>
                 <Subtitle>Gérer les évènements</Subtitle>
+
+                {availableEventsRejection && (
+                  <Alert severity="error" sx={{ marginBottom: '15px' }}>
+                    {rejectionMessage(availableEventsRejection)}
+                  </Alert>
+                )}
 
                 <Box>
                   <SearchEventSelect

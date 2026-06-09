@@ -6,8 +6,12 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
-import { useRequestUserEmailChangeMutation, useUserPendingEmailChangeQuery } from '../../gql'
-import { unwrapResult } from '../../gql/result'
+import {
+  isRejection,
+  rejectionMessage,
+  useRequestUserEmailChangeMutation,
+  useUserPendingEmailChangeQuery,
+} from '../../gql'
 import { useToast } from '../../hooks/useToast'
 import { Loader } from '../common/Loader'
 import { Subtitle } from '../common/Subtitle'
@@ -46,7 +50,11 @@ export const EmailChangeSection = () => {
 
   const onSubmit = async (data: FormFields) => {
     const res = await requestEmailChange({ input: { newEmail: data.newEmail } })
-    unwrapResult(res.requestEmailChange, 'VoidOutput')
+
+    if (isRejection(res.requestEmailChange)) {
+      addToast({ message: rejectionMessage(res.requestEmailChange), variant: 'error' })
+      return
+    }
 
     addToast({
       message:

@@ -11,8 +11,13 @@ import { Controller, useForm } from 'react-hook-form'
 import { z } from 'zod'
 
 import { uploadWishlistLogo } from '../../api/upload'
-import { useDeleteWishlistMutation, useRemoveWishlistLogoMutation, useUpdateWishlistMutation } from '../../gql'
-import { unwrapResult } from '../../gql/result'
+import {
+  isRejection,
+  rejectionMessage,
+  useDeleteWishlistMutation,
+  useRemoveWishlistLogoMutation,
+  useUpdateWishlistMutation,
+} from '../../gql'
 import { useToast } from '../../hooks/useToast'
 import { zodRequiredString } from '../../utils/validation'
 import { Card } from '../common/Card'
@@ -55,11 +60,6 @@ export const EditWishlistInformations = ({ wishlist }: EditWishlistInformationsP
 
   const { mutateAsync: updateWishlistMutation } = useUpdateWishlistMutation({
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-    onSuccess: res => {
-      unwrapResult(res.updateWishlist, 'VoidOutput')
-      addToast({ message: 'Liste mis à jour', variant: 'info' })
-      void invalidateWishlist()
-    },
   })
 
   const { mutateAsync: uploadLogo, isPending: uploadLogoPending } = useMutation({
@@ -72,22 +72,30 @@ export const EditWishlistInformations = ({ wishlist }: EditWishlistInformationsP
     },
   })
 
-  const { mutateAsync: removeLogo, isPending: removeLogoPending } = useRemoveWishlistLogoMutation({
+  const { mutateAsync: removeLogoMutation, isPending: removeLogoPending } = useRemoveWishlistLogoMutation({
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-    onSuccess: res => {
-      unwrapResult(res.removeWishlistLogo, 'VoidOutput')
-      setLogoUrl(undefined)
-      addToast({ message: 'Logo supprimé', variant: 'info' })
-      void invalidateWishlist()
-    },
   })
+
+  const removeLogo = async () => {
+    const res = await removeLogoMutation({ id: wishlist.id })
+    if (isRejection(res.removeWishlistLogo)) {
+      addToast({ message: rejectionMessage(res.removeWishlistLogo), variant: 'error' })
+      return
+    }
+    setLogoUrl(undefined)
+    addToast({ message: 'Logo supprimé', variant: 'info' })
+    void invalidateWishlist()
+  }
 
   const { mutateAsync: deleteWishlistMutation } = useDeleteWishlistMutation()
 
   const deleteWishlist = async () => {
     try {
       const res = await deleteWishlistMutation({ id: wishlist.id })
-      unwrapResult(res.deleteWishlist, 'VoidOutput')
+      if (isRejection(res.deleteWishlist)) {
+        addToast({ message: rejectionMessage(res.deleteWishlist), variant: 'error' })
+        return
+      }
       addToast({ message: 'La liste à bien été supprimée', variant: 'success' })
       void navigate({ to: '/wishlists' })
     } catch {
@@ -100,11 +108,18 @@ export const EditWishlistInformations = ({ wishlist }: EditWishlistInformationsP
     [removeLogoPending, uploadLogoPending],
   )
 
-  const onSubmit = (data: FormFields) =>
-    updateWishlistMutation({
+  const onSubmit = async (data: FormFields) => {
+    const res = await updateWishlistMutation({
       id: wishlist.id,
       input: { title: data.title, description: data.description === '' ? undefined : data.description },
     })
+    if (isRejection(res.updateWishlist)) {
+      addToast({ message: rejectionMessage(res.updateWishlist), variant: 'error' })
+      return
+    }
+    addToast({ message: 'Liste mis à jour', variant: 'info' })
+    void invalidateWishlist()
+  }
 
   return (
     <Stack gap={3}>
@@ -119,7 +134,7 @@ export const EditWishlistInformations = ({ wishlist }: EditWishlistInformationsP
                 await uploadLogo(file)
               }}
               onLogoRemove={async () => {
-                await removeLogo({ id: wishlist.id })
+                await removeLogo()
               }}
             />
           </Box>

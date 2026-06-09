@@ -1,4 +1,5 @@
 import type { SecretSantaUserId } from '@wishlist/common'
+import type { RejectionTypename } from '../../gql'
 import type { SecretSantaFormInput } from './EditSecretSantaFormDialog'
 import type { SecretSantaEvent, SecretSantaItem } from './secret-santa.types'
 
@@ -22,6 +23,8 @@ import { DateTime } from 'luxon'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import {
+  isRejection,
+  rejectionMessage,
   SecretSantaStatus,
   useCancelSecretSantaMutation,
   useDeleteSecretSantaMutation,
@@ -29,7 +32,6 @@ import {
   useStartSecretSantaMutation,
   useUpdateSecretSantaMutation,
 } from '../../gql'
-import { GraphqlRejectionError, unwrapResult } from '../../gql/result'
 import { useToast } from '../../hooks'
 import { eurosFormatter } from '../../utils/currency.utils'
 import { ConfirmButton } from '../common/ConfirmButton'
@@ -73,11 +75,20 @@ export const SecretSanta = ({ secretSanta, event }: SecretSantaProps) => {
     [queryClient, eventId],
   )
 
-  const onError = useCallback(
-    (error: unknown) => {
-      const message = error instanceof GraphqlRejectionError ? error.message : "Une erreur s'est produite"
+  // Validation rejections carry the server's business-rule messages (e.g. draw
+  // constraints), the other rejection members don't select `message`
+  const onRejection = useCallback(
+    (rejection: { __typename: RejectionTypename; errors?: { field: string; message: string }[] }) => {
+      const message = rejection.errors?.length
+        ? rejection.errors.map(error => error.message).join(', ')
+        : rejectionMessage(rejection)
       addToast({ message, variant: 'error' })
     },
+    [addToast],
+  )
+
+  const onNetworkError = useCallback(
+    () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
     [addToast],
   )
 
@@ -91,53 +102,65 @@ export const SecretSanta = ({ secretSanta, event }: SecretSantaProps) => {
     async (input: SecretSantaFormInput) => {
       try {
         const res = await updateMutation({ id: secretSanta.id, input })
-        unwrapResult(res.updateSecretSanta, 'VoidOutput')
+        if (isRejection(res.updateSecretSanta)) {
+          onRejection(res.updateSecretSanta)
+          return
+        }
         setBudget(input.budget)
         setDescription(input.description)
         addToast({ message: 'Le secret santa a été modifié', variant: 'success' })
         await invalidate()
-      } catch (error) {
-        onError(error)
+      } catch {
+        onNetworkError()
       }
     },
-    [updateMutation, secretSanta.id, addToast, invalidate, onError],
+    [updateMutation, secretSanta.id, addToast, invalidate, onRejection, onNetworkError],
   )
 
   const cancelSecretSanta = useCallback(async () => {
     try {
       const res = await cancelMutation({ id: secretSanta.id })
-      unwrapResult(res.cancelSecretSanta, 'VoidOutput')
+      if (isRejection(res.cancelSecretSanta)) {
+        onRejection(res.cancelSecretSanta)
+        return
+      }
       addToast({ message: 'Le tirage a été annulé', variant: 'success' })
       setStatus(SecretSantaStatus.Created)
       await invalidate()
-    } catch (error) {
-      onError(error)
+    } catch {
+      onNetworkError()
     }
-  }, [cancelMutation, secretSanta.id, addToast, invalidate, onError])
+  }, [cancelMutation, secretSanta.id, addToast, invalidate, onRejection, onNetworkError])
 
   const deleteSecretSanta = useCallback(async () => {
     try {
       const res = await deleteMutation({ id: secretSanta.id })
-      unwrapResult(res.deleteSecretSanta, 'VoidOutput')
+      if (isRejection(res.deleteSecretSanta)) {
+        onRejection(res.deleteSecretSanta)
+        return
+      }
       addToast({ message: 'Secret santa supprimé avec succès', variant: 'success' })
       await invalidate()
-    } catch (error) {
-      onError(error)
+    } catch {
+      onNetworkError()
     }
-  }, [deleteMutation, secretSanta.id, addToast, invalidate, onError])
+  }, [deleteMutation, secretSanta.id, addToast, invalidate, onRejection, onNetworkError])
 
   const removeSecretSantaUser = useCallback(
     async (secretSantaUserId: SecretSantaUserId) => {
       try {
         const res = await removeUserMutation({ id: secretSanta.id, secretSantaUserId })
-        unwrapResult(res.deleteSecretSantaUser, 'VoidOutput')
+        if (isRejection(res.deleteSecretSantaUser)) {
+          onRejection(res.deleteSecretSantaUser)
+          return
+        }
         setSecretSantaUsers(prev => prev.filter(u => u.id !== secretSantaUserId))
         await invalidate()
-      } catch (error) {
-        onError(error)
+      } catch {
+        onNetworkError()
       }
     },
-    [removeUserMutation, secretSanta.id, invalidate, onError],
+    [removeUserMutation, secretSanta.id, invalidate, onRejection, onNetworkError],
   )
 
   const startSecretSanta = useCallback(async () => {
@@ -151,15 +174,18 @@ export const SecretSanta = ({ secretSanta, event }: SecretSantaProps) => {
 
     try {
       const res = await startMutation({ id: secretSanta.id })
-      unwrapResult(res.startSecretSanta, 'VoidOutput')
+      if (isRejection(res.startSecretSanta)) {
+        onRejection(res.startSecretSanta)
+        return
+      }
       setStatus(SecretSantaStatus.Started)
       setDrawFinishedPopup(true)
       setTimeout(() => setDrawFinishedPopup(false), 10000)
       await invalidate()
-    } catch (error) {
-      onError(error)
+    } catch {
+      onNetworkError()
     }
-  }, [secretSantaUsers, startMutation, secretSanta.id, addToast, invalidate, onError])
+  }, [secretSantaUsers, startMutation, secretSanta.id, addToast, invalidate, onRejection, onNetworkError])
 
   const loading = useMemo(
     () => loadingStart || loadingCancel || loadingDelete || loadingUpdate || loadingRemoveUser,

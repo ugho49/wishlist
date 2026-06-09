@@ -29,8 +29,13 @@ import { useToast } from '@wishlist/front-hooks'
 import { forwardRef, useCallback, useEffect, useMemo, useState } from 'react'
 import { TidyURL } from 'tidy-url'
 
-import { useCreateItemMutation, useScanItemUrlMutation, useUpdateItemMutation } from '../../gql'
-import { unwrapResult } from '../../gql/result'
+import {
+  isRejection,
+  rejectionMessage,
+  useCreateItemMutation,
+  useScanItemUrlMutation,
+  useUpdateItemMutation,
+} from '../../gql'
 import { isValidUrl } from '../../utils/router.utils'
 import { CharsRemaining } from '../common/CharsRemaining'
 import { InputLabel } from '../common/InputLabel'
@@ -91,21 +96,10 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
 
   const { mutateAsync: createItem, isPending: createItemPending } = useCreateItemMutation({
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-    onSuccess: res => {
-      unwrapResult(res.createItem, 'Item')
-      addToast({ message: 'Souhait créé avec succès', variant: 'success' })
-      void invalidateWishlist()
-      resetForm()
-    },
   })
 
   const { mutateAsync: updateItem, isPending: updateItemPending } = useUpdateItemMutation({
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-    onSuccess: res => {
-      unwrapResult(res.updateItem, 'VoidOutput')
-      addToast({ message: 'Le souhait à bien été modifié', variant: 'success' })
-      void invalidateWishlist()
-    },
   })
 
   const loading = useMemo(() => createItemPending || updateItemPending, [createItemPending, updateItemPending])
@@ -122,11 +116,24 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
     }
 
     if (mode === 'create') {
-      await createItem({ input: { wishlistId, ...base } })
+      const res = await createItem({ input: { wishlistId, ...base } })
+      if (isRejection(res.createItem)) {
+        addToast({ message: rejectionMessage(res.createItem), variant: 'error' })
+        return
+      }
+      addToast({ message: 'Souhait créé avec succès', variant: 'success' })
+      void invalidateWishlist()
+      resetForm()
     }
 
     if (mode === 'edit') {
-      await updateItem({ itemId: item.id, input: base })
+      const res = await updateItem({ itemId: item.id, input: base })
+      if (isRejection(res.updateItem)) {
+        addToast({ message: rejectionMessage(res.updateItem), variant: 'error' })
+        return
+      }
+      addToast({ message: 'Le souhait à bien été modifié', variant: 'success' })
+      void invalidateWishlist()
     }
 
     handleClose()
@@ -154,10 +161,14 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
 
       try {
         const res = await scanItemUrl({ input: { url: urlToScan } })
-        const { pictureUrl } = unwrapResult(res.scanItemUrl, 'ScanItemUrlOutput')
+        const result = res.scanItemUrl
+        if (isRejection(result)) {
+          addToast({ message: rejectionMessage(result), variant: 'error' })
+          return
+        }
 
-        if (pictureUrl) {
-          setPictureUrl(pictureUrl)
+        if (result.pictureUrl) {
+          setPictureUrl(result.pictureUrl)
         } else {
           setPictureUrl('')
         }

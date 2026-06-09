@@ -8,8 +8,13 @@ import { useDispatch } from 'react-redux'
 import { z } from 'zod'
 
 import { setTokens } from '../../core/store/features'
-import { useAuthLoginMutation, useAuthLoginWithGoogleMutation, useAuthRegisterUserMutation } from '../../gql'
-import { GraphqlRejectionError, unwrapResult } from '../../gql/result'
+import {
+  isRejection,
+  rejectionMessage,
+  useAuthLoginMutation,
+  useAuthLoginWithGoogleMutation,
+  useAuthRegisterUserMutation,
+} from '../../gql'
 import { useToast } from '../../hooks/useToast'
 import { zodRequiredString } from '../../utils/validation'
 import { RouterLink } from '../common/RouterLink'
@@ -81,25 +86,41 @@ export const RegisterPage = () => {
   const registerUser = async (data: FormFields) => {
     try {
       const registerRes = await registerUserMutation({ input: data })
-      unwrapResult(registerRes.registerUser, 'User')
+      const registerResult = registerRes.registerUser
+      if (isRejection(registerResult)) {
+        setError('root', {
+          message:
+            registerResult.__typename === 'ValidationRejection'
+              ? 'Cet email est déjà utilisé'
+              : rejectionMessage(registerResult),
+        })
+        return
+      }
 
       const loginRes = await loginMutation({ input: { email: data.email, password: data.password } })
-      const output = unwrapResult(loginRes.login, 'LoginOutput')
-      handleRegisterSuccess(output.accessToken, 'email')
-    } catch (e) {
-      if (e instanceof GraphqlRejectionError && e.typename === 'ValidationRejection') {
-        setError('root', { message: 'Cet email est déjà utilisé' })
-      } else {
-        setError('root', { message: "Une erreur s'est produite." })
+      const loginResult = loginRes.login
+      if (isRejection(loginResult)) {
+        // Account created but auto-login failed: let the user sign in manually
+        addToast({ message: 'Votre compte a été créé, veuillez vous connecter', variant: 'info' })
+        void navigate({ to: '/login', search: { email: data.email } })
+        return
       }
+      handleRegisterSuccess(loginResult.accessToken, 'email')
+    } catch {
+      setError('root', { message: "Une erreur s'est produite." })
     }
   }
 
   const registerWithGoogle = async (code: string) => {
     try {
       const res = await loginWithGoogleMutation({ input: { code, createUserIfNotExists: true } })
-      const output = unwrapResult(res.loginWithGoogle, 'LoginWithGoogleOutput')
-      handleRegisterSuccess(output.accessToken, 'social')
+      const result = res.loginWithGoogle
+      if (isRejection(result)) {
+        setSocialLoading(false)
+        addToast({ message: rejectionMessage(result), variant: 'error' })
+        return
+      }
+      handleRegisterSuccess(result.accessToken, 'social')
     } catch {
       onSocialError()
     }

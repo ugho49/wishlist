@@ -11,11 +11,13 @@ import { uploadUserPicture } from '../../api/upload'
 import { OnboardingService } from '../../core/services/onboarding.service'
 import { updatePicture } from '../../core/store/features'
 import {
+  isRejection,
+  rejectionMessage,
   useRemoveCurrentUserPictureMutation,
   useUpdateUserPictureFromSocialMutation,
   useUserProfileCurrentUserQuery,
 } from '../../gql'
-import { unwrapResult } from '../../gql/result'
+import { useToast } from '../../hooks/useToast'
 import { AvatarUpdateButton } from '../user/AvatarUpdateButton'
 import { ProfilePicturePromptModal } from '../user/ProfilePicturePromptModal'
 
@@ -109,10 +111,12 @@ const ActionButtons = styled(Stack)(({ theme }) => ({
 
 const ProfileStep = () => {
   const { pictureUrl, userId } = useSelector(mapState)
+  const { addToast } = useToast()
   const [openModal, setOpenModal] = useState(false)
-  const { data: user } = useUserProfileCurrentUserQuery(undefined, {
-    select: d => unwrapResult(d.currentUser, 'User'),
+  const { data } = useUserProfileCurrentUserQuery(undefined, {
+    select: d => d.currentUser,
   })
+  const user = data?.__typename === 'User' ? data : undefined
   const dispatch = useDispatch()
   const queryClient = useQueryClient()
 
@@ -147,11 +151,19 @@ const ProfileStep = () => {
             uploadPictureHandler={file => uploadUserPicture(file)}
             updatePictureFromSocialHandler={async socialId => {
               const res = await updatePictureFromSocial({ input: { socialId } })
-              unwrapResult(res.updateUserPictureFromSocial, 'VoidOutput')
+              if (isRejection(res.updateUserPictureFromSocial)) {
+                addToast({ message: rejectionMessage(res.updateUserPictureFromSocial), variant: 'error' })
+                // AvatarUpdateButton applies the new picture unless the handler throws
+                throw new Error(rejectionMessage(res.updateUserPictureFromSocial))
+              }
             }}
             deletePictureHandler={async () => {
               const res = await removePicture({})
-              unwrapResult(res.removeUserPicture, 'VoidOutput')
+              if (isRejection(res.removeUserPicture)) {
+                addToast({ message: rejectionMessage(res.removeUserPicture), variant: 'error' })
+                // AvatarUpdateButton removes the picture unless the handler throws
+                throw new Error(rejectionMessage(res.removeUserPicture))
+              }
             }}
             size="120px"
           />
@@ -193,9 +205,10 @@ const steps = [profileStep, exploreStep]
 
 export const WelcomePage = () => {
   const navigate = useNavigate()
-  const { data: user } = useUserProfileCurrentUserQuery(undefined, {
-    select: d => unwrapResult(d.currentUser, 'User'),
+  const { data } = useUserProfileCurrentUserQuery(undefined, {
+    select: d => d.currentUser,
   })
+  const user = data?.__typename === 'User' ? data : undefined
   const [activeStep, setActiveStep] = useState(0)
   const currentStep = useMemo(() => steps[activeStep], [activeStep])
 

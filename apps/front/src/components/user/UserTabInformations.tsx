@@ -10,8 +10,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { z } from 'zod'
 
 import { updateUser as updateUserAction } from '../../core/store/features'
-import { useUpdateUserProfileMutation } from '../../gql'
-import { unwrapResult } from '../../gql/result'
+import { isRejection, rejectionMessage, useUpdateUserProfileMutation } from '../../gql'
 import { useToast } from '../../hooks/useToast'
 import { zodRequiredString } from '../../utils/validation'
 import { Card } from '../common/Card'
@@ -65,7 +64,10 @@ export const UserTabInformations = () => {
       },
     })
 
-    unwrapResult(res.updateUserProfile, 'User')
+    if (isRejection(res.updateUserProfile)) {
+      addToast({ message: rejectionMessage(res.updateUserProfile), variant: 'error' })
+      return
+    }
 
     addToast({ message: 'Profil mis à jour', variant: 'info' })
 

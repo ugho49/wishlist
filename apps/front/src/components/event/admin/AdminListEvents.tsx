@@ -2,12 +2,12 @@ import type { GridColDef } from '@mui/x-data-grid'
 import type { UserId } from '@wishlist/common'
 import type { AdminEventListItem } from './admin.types'
 
+import { Alert } from '@mui/material'
 import { DataGrid } from '@mui/x-data-grid'
 import { useNavigate } from '@tanstack/react-router'
 import { DateTime } from 'luxon'
 
-import { AttendeeRole, useAdminEventListEventsQuery } from '../../../gql'
-import { unwrapResult } from '../../../gql/result'
+import { AttendeeRole, isRejection, rejectionMessage, useAdminEventListEventsQuery } from '../../../gql'
 import { EventIcon } from '../EventIcon'
 
 const columns: GridColDef<AdminEventListItem>[] = [
@@ -73,12 +73,18 @@ export const AdminListEvents = ({ userId, currentPage, changeCurrentPage }: Admi
   const navigate = useNavigate()
   const { data, isLoading: loading } = useAdminEventListEventsQuery(
     { filters: { page: currentPage, userId } },
-    { select: d => unwrapResult(d.adminEvents, 'GetEventsPagedResponse') },
+    { select: d => d.adminEvents },
   )
+  const pagedEvents = data?.__typename === 'GetEventsPagedResponse' ? data : undefined
+  const queryRejection = data && isRejection(data) ? data : undefined
 
-  const events = data?.data ?? []
-  const totalElements = data?.pagination.totalElements ?? 0
-  const pageSize = data?.pagination.pageSize ?? 0
+  const events = pagedEvents?.data ?? []
+  const totalElements = pagedEvents?.pagination.totalElements ?? 0
+  const pageSize = pagedEvents?.pagination.pageSize ?? 0
+
+  if (queryRejection) {
+    return <Alert severity="error">{rejectionMessage(queryRejection)}</Alert>
+  }
 
   return (
     <DataGrid

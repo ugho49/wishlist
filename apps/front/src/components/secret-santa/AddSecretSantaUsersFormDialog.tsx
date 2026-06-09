@@ -23,8 +23,7 @@ import { DataGrid } from '@mui/x-data-grid'
 import { useQueryClient } from '@tanstack/react-query'
 import { forwardRef, useEffect, useMemo, useState } from 'react'
 
-import { useAddSecretSantaUsersMutation } from '../../gql'
-import { GraphqlRejectionError, unwrapResult } from '../../gql/result'
+import { isRejection, rejectionMessage, useAddSecretSantaUsersMutation } from '../../gql'
 import { useToast } from '../../hooks'
 import { Status } from '../common/Status'
 
@@ -110,12 +109,19 @@ export const AddSecretSantaUsersFormDialog = ({
   const addUsers = async () => {
     try {
       const res = await addUsersMutation({ id: secretSantaId, input: { attendeeIds: selectedIds } })
-      const output = unwrapResult(res.addSecretSantaUsers, 'AddSecretSantaUsersOutput')
-      handleSubmit(output.users)
+      const result = res.addSecretSantaUsers
+      if (isRejection(result)) {
+        const message =
+          result.__typename === 'ValidationRejection' && result.errors.length > 0
+            ? result.errors.map(error => error.message).join(', ')
+            : rejectionMessage(result)
+        addToast({ message, variant: 'error' })
+        return
+      }
+      handleSubmit(result.users)
       await queryClient.invalidateQueries({ queryKey: ['GetSecretSantaForEvent', { eventId }] })
-    } catch (error) {
-      const message = error instanceof GraphqlRejectionError ? error.message : "Une erreur s'est produite"
-      addToast({ message, variant: 'error' })
+    } catch {
+      addToast({ message: "Une erreur s'est produite", variant: 'error' })
     }
   }
 

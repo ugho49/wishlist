@@ -5,8 +5,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
-import { useAuthSendResetPasswordEmailMutation } from '../../gql'
-import { unwrapResult } from '../../gql/result'
+import { isRejection, rejectionMessage, useAuthSendResetPasswordEmailMutation } from '../../gql'
 import { useToast } from '../../hooks/useToast'
 import { RouterLink } from '../common/RouterLink'
 
@@ -60,7 +59,11 @@ export const ForgotPasswordPage = () => {
   const onSubmit = async (data: FormFields) => {
     try {
       const res = await sendResetPasswordEmail({ input: data })
-      unwrapResult(res.sendResetPasswordEmail, 'VoidOutput')
+      const result = res.sendResetPasswordEmail
+      if (isRejection(result)) {
+        addToast({ message: rejectionMessage(result), variant: 'error' })
+        return
+      }
       setResetCodeSent(true)
       addToast({ message: 'Un email vient de vous être envoyé pour réinitialiser le mot de passe', variant: 'info' })
     } catch {

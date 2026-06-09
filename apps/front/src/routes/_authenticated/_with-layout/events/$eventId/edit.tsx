@@ -4,7 +4,7 @@ import type { RootState } from '../../../../../core'
 import ForestIcon from '@mui/icons-material/Forest'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import PeopleIcon from '@mui/icons-material/People'
-import { Box, Container, Tab, Tabs } from '@mui/material'
+import { Alert, Box, Container, Tab, Tabs } from '@mui/material'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Loader } from '@wishlist/front-components/common/Loader'
 import { Title } from '@wishlist/front-components/common/Title'
@@ -16,8 +16,7 @@ import { SEO } from '@wishlist/front-components/SEO'
 import { useSelector } from 'react-redux'
 import z from 'zod'
 
-import { AttendeeRole, useEventPageGetEventQuery } from '../../../../../gql'
-import { unwrapResultOrNotFound } from '../../../../../gql/result'
+import { AttendeeRole, isRejection, rejectionMessage, useEventPageGetEventQuery } from '../../../../../gql'
 
 export enum TabValues {
   informations = 'informations',
@@ -59,10 +58,9 @@ function RouteComponent() {
   const { eventId } = Route.useParams()
   const { tab } = Route.useSearch()
   const currentUserId = useSelector(mapCurrentUserId)
-  const { data: event, isLoading: loading } = useEventPageGetEventQuery(
-    { eventId },
-    { select: d => unwrapResultOrNotFound(d.event, 'Event') },
-  )
+  const { data, isLoading: loading } = useEventPageGetEventQuery({ eventId }, { select: d => d.event })
+  const event = data?.__typename === 'Event' ? data : undefined
+  const queryRejection = data && isRejection(data) && data.__typename !== 'NotFoundRejection' ? data : undefined
   const currentUserCanEdit =
     event?.attendees.some(a => a.user?.id === currentUserId && a.role === AttendeeRole.Maintainer) ?? false
   const navigate = useNavigate({ from: '/events/$eventId/edit' })
@@ -81,7 +79,8 @@ function RouteComponent() {
       <Box>
         <Title>Modifier l'évènement</Title>
         <Loader loading={loading}>
-          {(!event || !currentUserCanEdit) && <EventNotFound />}
+          {queryRejection && <Alert severity="error">{rejectionMessage(queryRejection)}</Alert>}
+          {!queryRejection && (!event || !currentUserCanEdit) && <EventNotFound />}
           {event && currentUserCanEdit && (
             <Container maxWidth="md">
               <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: '20px' }}>

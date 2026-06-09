@@ -4,8 +4,7 @@ import { Alert, Box, Button, Stack, TextField } from '@mui/material'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
-import { useChangeUserPasswordMutation } from '../../gql'
-import { unwrapResult } from '../../gql/result'
+import { isRejection, rejectionMessage, useChangeUserPasswordMutation } from '../../gql'
 import { useToast } from '../../hooks/useToast'
 import { Card } from '../common/Card'
 import { Subtitle } from '../common/Subtitle'
@@ -45,7 +44,15 @@ export const UserTabPassword = () => {
       },
     })
 
-    unwrapResult(res.changeUserPassword, 'VoidOutput')
+    const result = res.changeUserPassword
+    if (isRejection(result)) {
+      if (result.__typename === 'ValidationRejection') {
+        setError('oldPassword', { message: "L'ancien mot de passe est incorrect" })
+      } else {
+        addToast({ message: rejectionMessage(result), variant: 'error' })
+      }
+      return
+    }
 
     addToast({ message: 'Mot de passe mis à jour', variant: 'info' })
     resetForm()

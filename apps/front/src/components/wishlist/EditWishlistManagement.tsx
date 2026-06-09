@@ -5,8 +5,12 @@ import PersonRemoveIcon from '@mui/icons-material/PersonRemove'
 import { Avatar, Box, Stack, Typography } from '@mui/material'
 import { useQueryClient } from '@tanstack/react-query'
 
-import { useAddWishlistCoOwnerMutation, useRemoveWishlistCoOwnerMutation } from '../../gql'
-import { unwrapResult } from '../../gql/result'
+import {
+  isRejection,
+  rejectionMessage,
+  useAddWishlistCoOwnerMutation,
+  useRemoveWishlistCoOwnerMutation,
+} from '../../gql'
 import { useToast } from '../../hooks/useToast'
 import { Card } from '../common/Card'
 import { ConfirmButton } from '../common/ConfirmButton'
@@ -25,23 +29,29 @@ export const EditWishlistManagement = ({ wishlist }: EditWishlistManagementProps
 
   const { mutateAsync: addCoOwnerMutation } = useAddWishlistCoOwnerMutation({
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-    onSuccess: res => {
-      unwrapResult(res.addWishlistCoOwner, 'VoidOutput')
-      addToast({ message: 'Co-gestionnaire ajouté avec succès', variant: 'success' })
-      void invalidateWishlist()
-    },
   })
-  const addCoOwner = (userId: UserId) => addCoOwnerMutation({ id: wishlist.id, input: { userId } })
+  const addCoOwner = async (userId: UserId) => {
+    const res = await addCoOwnerMutation({ id: wishlist.id, input: { userId } })
+    if (isRejection(res.addWishlistCoOwner)) {
+      addToast({ message: rejectionMessage(res.addWishlistCoOwner), variant: 'error' })
+      return
+    }
+    addToast({ message: 'Co-gestionnaire ajouté avec succès', variant: 'success' })
+    void invalidateWishlist()
+  }
 
   const { mutateAsync: removeCoOwnerMutation } = useRemoveWishlistCoOwnerMutation({
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-    onSuccess: res => {
-      unwrapResult(res.removeWishlistCoOwner, 'VoidOutput')
-      addToast({ message: 'Co-gestionnaire retiré avec succès', variant: 'success' })
-      void invalidateWishlist()
-    },
   })
-  const removeCoOwner = () => removeCoOwnerMutation({ id: wishlist.id })
+  const removeCoOwner = async () => {
+    const res = await removeCoOwnerMutation({ id: wishlist.id })
+    if (isRejection(res.removeWishlistCoOwner)) {
+      addToast({ message: rejectionMessage(res.removeWishlistCoOwner), variant: 'error' })
+      return
+    }
+    addToast({ message: 'Co-gestionnaire retiré avec succès', variant: 'success' })
+    void invalidateWishlist()
+  }
 
   return (
     <Card>
@@ -90,7 +100,7 @@ export const EditWishlistManagement = ({ wishlist }: EditWishlistManagementProps
           <SearchUserSelect
             label="Ajouter un co-gestionnaire"
             onChange={value => {
-              if (typeof value !== 'string') addCoOwner(value.id)
+              if (typeof value !== 'string') void addCoOwner(value.id)
             }}
             excludedEmails={[wishlist.owner.email]}
             acceptNewUsers={false}

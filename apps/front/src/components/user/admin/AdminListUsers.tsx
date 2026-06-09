@@ -2,7 +2,7 @@ import type { GridColDef } from '@mui/x-data-grid'
 import type { FormEvent } from 'react'
 import type { AdminUsersListQuery } from '../../../gql'
 
-import { Avatar, Box, Button, Stack, styled, TextField } from '@mui/material'
+import { Alert, Avatar, Box, Button, Stack, styled, TextField } from '@mui/material'
 import { DataGrid } from '@mui/x-data-grid'
 import { useNavigate, useSearch } from '@tanstack/react-router'
 import { Card } from '@wishlist/front-components/common/Card'
@@ -10,8 +10,7 @@ import { Title } from '@wishlist/front-components/common/Title'
 import { DateTime } from 'luxon'
 import { useEffect, useState } from 'react'
 
-import { useAdminUsersListQuery } from '../../../gql'
-import { unwrapResult } from '../../../gql/result'
+import { isRejection, rejectionMessage, useAdminUsersListQuery } from '../../../gql'
 import { Status } from '../../common/Status'
 
 type AdminUserRow = Extract<AdminUsersListQuery['adminUsers'], { __typename: 'AdminGetAllUsers' }>['data'][number]
@@ -70,10 +69,12 @@ export const AdminListUsers = () => {
   const [inputSearch, setInputSearch] = useState(search)
   const navigate = useNavigate()
 
-  const { data: value, isLoading: loading } = useAdminUsersListQuery(
+  const { data, isLoading: loading } = useAdminUsersListQuery(
     { input: { page: currentPage, criteria: search } },
-    { select: d => unwrapResult(d.adminUsers, 'AdminGetAllUsers') },
+    { select: d => d.adminUsers },
   )
+  const value = data?.__typename === 'AdminGetAllUsers' ? data : undefined
+  const queryRejection = data && isRejection(data) ? data : undefined
 
   useEffect(() => {
     if (value) {
@@ -118,34 +119,38 @@ export const AdminListUsers = () => {
           </SearchButton>
         </Stack>
 
-        <DataGrid
-          isRowSelectable={() => true}
-          disableMultipleRowSelection={true}
-          disableColumnSelector={true}
-          isCellEditable={() => false}
-          localeText={{
-            noRowsLabel: 'Aucun utilisateur',
-          }}
-          onRowClick={data => navigate({ to: '/admin/users/$userId', params: { userId: data.row.id } })}
-          density="standard"
-          rows={value?.data || []}
-          loading={loading}
-          columns={columns}
-          paginationMode="server"
-          rowCount={totalElements}
-          paginationModel={{
-            page: currentPage - 1,
-            pageSize,
-          }}
-          pageSizeOptions={[pageSize]}
-          onPaginationModelChange={({ page }) =>
-            navigate({
-              to: '/admin/users',
-              search: prev => ({ ...prev, page: page + 1, search }),
-            })
-          }
-          hideFooter={totalElements <= pageSize}
-        />
+        {queryRejection && <Alert severity="error">{rejectionMessage(queryRejection)}</Alert>}
+
+        {!queryRejection && (
+          <DataGrid
+            isRowSelectable={() => true}
+            disableMultipleRowSelection={true}
+            disableColumnSelector={true}
+            isCellEditable={() => false}
+            localeText={{
+              noRowsLabel: 'Aucun utilisateur',
+            }}
+            onRowClick={data => navigate({ to: '/admin/users/$userId', params: { userId: data.row.id } })}
+            density="standard"
+            rows={value?.data || []}
+            loading={loading}
+            columns={columns}
+            paginationMode="server"
+            rowCount={totalElements}
+            paginationModel={{
+              page: currentPage - 1,
+              pageSize,
+            }}
+            pageSizeOptions={[pageSize]}
+            onPaginationModelChange={({ page }) =>
+              navigate({
+                to: '/admin/users',
+                search: prev => ({ ...prev, page: page + 1, search }),
+              })
+            }
+            hideFooter={totalElements <= pageSize}
+          />
+        )}
       </Card>
     </Box>
   )

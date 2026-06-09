@@ -27,8 +27,7 @@ import { Controller, useForm } from 'react-hook-form'
 import { useSelector } from 'react-redux'
 import { z } from 'zod'
 
-import { AttendeeRole, useCreateEventMutation } from '../../gql'
-import { unwrapResult } from '../../gql/result'
+import { AttendeeRole, isRejection, rejectionMessage, useCreateEventMutation } from '../../gql'
 import { useToast } from '../../hooks/useToast'
 import { Card } from '../common/Card'
 import { CharsRemaining } from '../common/CharsRemaining'
@@ -120,7 +119,11 @@ export const CreateEventPage = () => {
           })),
         },
       })
-      const created = unwrapResult(res.createEvent, 'Event')
+      const created = res.createEvent
+      if (isRejection(created)) {
+        addToast({ message: rejectionMessage(created), variant: 'error' })
+        return
+      }
       addToast({ message: 'Evènement créé avec succès', variant: 'success' })
       void navigate({ to: '/events/$eventId', params: { eventId: created.id } })
     } catch {

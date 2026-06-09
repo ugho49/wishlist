@@ -7,8 +7,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 
 import EmptySecretSantaIllustration from '../../assets/illustrations/secret-santa.png'
-import { useCreateSecretSantaMutation } from '../../gql'
-import { GraphqlRejectionError, unwrapResult } from '../../gql/result'
+import { isRejection, rejectionMessage, useCreateSecretSantaMutation } from '../../gql'
 import { useToast } from '../../hooks'
 import { EditSecretSantaFormDialog } from './EditSecretSantaFormDialog'
 
@@ -84,12 +83,19 @@ export const NoSecretSanta = ({ eventId }: NoSecretSantaProps) => {
       const res = await createSecretSantaMutation({
         input: { eventId, budget: input.budget, description: input.description },
       })
-      unwrapResult(res.createSecretSanta, 'SecretSanta')
+      const result = res.createSecretSanta
+      if (isRejection(result)) {
+        const message =
+          result.__typename === 'ValidationRejection' && result.errors.length > 0
+            ? result.errors.map(error => error.message).join(', ')
+            : rejectionMessage(result)
+        addToast({ message, variant: 'error' })
+        return
+      }
       addToast({ message: 'Secret santa créé avec succès', variant: 'success' })
       await queryClient.invalidateQueries({ queryKey: ['GetSecretSantaForEvent', { eventId }] })
-    } catch (error) {
-      const message = error instanceof GraphqlRejectionError ? error.message : "Une erreur s'est produite"
-      addToast({ message, variant: 'error' })
+    } catch {
+      addToast({ message: "Une erreur s'est produite", variant: 'error' })
     }
   }
 

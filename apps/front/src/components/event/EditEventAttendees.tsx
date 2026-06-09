@@ -8,8 +8,13 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useMemo } from 'react'
 import { useSelector } from 'react-redux'
 
-import { AttendeeRole, useAddEventAttendeeMutation, useRemoveEventAttendeeMutation } from '../../gql'
-import { unwrapResult } from '../../gql/result'
+import {
+  AttendeeRole,
+  isRejection,
+  rejectionMessage,
+  useAddEventAttendeeMutation,
+  useRemoveEventAttendeeMutation,
+} from '../../gql'
 import { useToast } from '../../hooks'
 import { Card } from '../common/Card'
 import { ConfirmIconButton } from '../common/ConfirmIconButton'
@@ -42,7 +47,10 @@ export const EditEventAttendees = ({ eventId, attendees }: EditEventAttendeesPro
   const addAttendee = async (email: string) => {
     try {
       const res = await addAttendeeMutation({ eventId, input: { email, role: AttendeeRole.User } })
-      unwrapResult(res.addEventAttendee, 'EventAttendee')
+      if (isRejection(res.addEventAttendee)) {
+        addToast({ message: rejectionMessage(res.addEventAttendee), variant: 'error' })
+        return
+      }
       addToast({ message: "Participant ajouté à l'évènement !", variant: 'info' })
       await invalidateEvent()
     } catch {
@@ -53,7 +61,10 @@ export const EditEventAttendees = ({ eventId, attendees }: EditEventAttendeesPro
   const deleteAttendee = async (attendeeId: AttendeeId) => {
     try {
       const res = await removeAttendeeMutation({ eventId, attendeeId })
-      unwrapResult(res.removeEventAttendee, 'VoidOutput')
+      if (isRejection(res.removeEventAttendee)) {
+        addToast({ message: rejectionMessage(res.removeEventAttendee), variant: 'error' })
+        return
+      }
       addToast({ message: "Participant supprimé de l'évènement !", variant: 'info' })
       await invalidateEvent()
     } catch {
