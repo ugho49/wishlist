@@ -53,14 +53,9 @@
       "options": {
         "buildTargetName": "build",
         "previewTargetName": "preview",
+        "testTargetName": "test",
         "serveTargetName": "serve",
         "serveStaticTargetName": "serve-static"
-      }
-    },
-    {
-      "plugin": "@nx/vitest",
-      "options": {
-        "testTargetName": "test"
       }
     }
   ],
@@ -73,6 +68,5 @@
       "!{projectRoot}/tsconfig.spec.json",
       "!{projectRoot}/src/test-setup.[jt]s"
     ]
-  },
-  "analytics": false
+  }
 }
