@@ -1,5 +1,5 @@
 // Render helper from react-email — single entry point for turning a template into HTML.
-export { render } from '@react-email/components'
+export { render } from 'react-email'
 
 export { EmailLayout } from './components/layout'
 export { ButtonFallback, Callout, ContentSection, Heading, Paragraph, PrimaryButton } from './components/ui'

@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactNode } from 'react'
 
-import { Button, Link, Section, Text } from '@react-email/components'
+import { Button, Link, Section, Text } from 'react-email'
 
 import * as styles from '../styles'
 

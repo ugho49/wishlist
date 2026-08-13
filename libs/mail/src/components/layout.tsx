@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 
-import { Body, Container, Head, Html, Img, Preview, Section, Text } from '@react-email/components'
+import { Body, Container, Head, Html, Img, Preview, Section, Text } from 'react-email'
 
 import * as styles from '../styles'
 
