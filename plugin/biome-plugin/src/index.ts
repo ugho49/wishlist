@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs'
 import { basename, dirname, join } from 'node:path'
-import { type CreateNodesV2, createNodesFromFiles } from '@nx/devkit'
+import { type CreateNodes, createNodesFromFiles } from '@nx/devkit'
 
 export type BiomePluginOptions = {
   lintTargetName?: string
@@ -8,7 +8,7 @@ export type BiomePluginOptions = {
   checkTargetName?: string
 }
 
-export const createNodesV2: CreateNodesV2<BiomePluginOptions> = [
+export const createNodesV2: CreateNodes<BiomePluginOptions> = [
   '**/biome.{json,jsonc}',
   async (configFiles, options, context) => {
     // Get root biome.json or biome.jsonc path

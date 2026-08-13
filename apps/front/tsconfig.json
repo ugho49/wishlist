@@ -5,7 +5,8 @@
   "compilerOptions": {
     "jsx": "react-jsx",
     "moduleResolution": "bundler",
-    "module": "ESNext"
+    "module": "ESNext",
+    "ignoreDeprecations": "6.0"
   },
   "references": [
     {
