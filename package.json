@@ -17,7 +17,9 @@
     "docker:up": "docker compose -f ./docker/docker-compose.yml -f ./docker/docker-compose.local.yml up -d",
     "docker:down": "docker compose -f ./docker/docker-compose.yml -f ./docker/docker-compose.local.yml down --remove-orphans",
     "typecheck": "nx run-many --target=typecheck --exclude=@wishlist/source",
-    "bump-deps": "npx npm-check-updates -u -i --format group"
+    "bump-deps": "npx npm-check-updates -u -i --format group",
+    "db:migrate": "nx run api:drizzle:migrate",
+    "db:seed": "nx run api:drizzle:seed"
   },
   "engines": {
     "node": ">=24"

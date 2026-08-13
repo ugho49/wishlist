@@ -1,7 +1,6 @@
-import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common'
+import { Inject, Injectable, Logger } from '@nestjs/common'
 import { relations as drizzleRelations, schema as drizzleSchema } from '@wishlist/api-drizzle'
 import { drizzle, NodePgDatabase } from 'drizzle-orm/node-postgres'
-import { migrate } from 'drizzle-orm/node-postgres/migrator'
 
 import { DatabaseConfig } from './database.config'
 import { DATABASE_CONFIG_TOKEN } from './database.module-definitions'
@@ -9,7 +8,7 @@ import { DATABASE_CONFIG_TOKEN } from './database.module-definitions'
 export const mergedSchema = { ...drizzleSchema, ...drizzleRelations }
 
 @Injectable()
-export class DatabaseService implements OnModuleInit {
+export class DatabaseService {
   private readonly logger = new Logger(DatabaseService.name)
 
   public readonly schema: typeof mergedSchema = mergedSchema
@@ -31,29 +30,6 @@ export class DatabaseService implements OnModuleInit {
         ? { logQuery: (query, params) => this.logger.log('SQL Query', { query, params }) }
         : false,
     })
-  }
-
-  async onModuleInit() {
-    this.logger.log('🔍 Checking database connection...')
-    await this.ping()
-    this.logger.log('🔍 Database connection is ok ✅')
-
-    if (this.config.runMigrations) {
-      await this.runMigrations()
-    } else {
-      this.logger.log('❌ Migrations are not enabled, skipping ...')
-    }
-  }
-
-  async runMigrations(): Promise<void> {
-    const migrationsFolder = this.config.migrationsFolder
-    this.logger.log('🔍 Running migrations...', { migrationsFolder })
-
-    await migrate(this.db, {
-      migrationsFolder,
-    })
-
-    this.logger.log('Migrations completed ✅')
   }
 
   async ping(): Promise<void> {

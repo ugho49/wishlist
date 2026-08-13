@@ -17,11 +17,5 @@ export class DatabaseConfig {
   database!: string
 
   @IsBoolean()
-  runMigrations!: boolean
-
-  @IsString()
-  migrationsFolder!: string
-
-  @IsBoolean()
   verbose!: boolean
 }

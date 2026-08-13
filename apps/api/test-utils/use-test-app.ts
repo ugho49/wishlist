@@ -49,8 +49,7 @@ export function useTestApp() {
     })
 
     await client.connect()
-    await dropDatabase()
-    await Promise.all([databaseService.runMigrations(), clearMails()])
+    await clearMails()
 
     fixtures = new Fixtures(client)
   })
@@ -66,19 +65,6 @@ export function useTestApp() {
     await client.end()
     await app.close()
   })
-
-  async function dropDatabase(): Promise<void> {
-    const allTables = await client.query(
-      `SELECT schemaname, tablename FROM pg_catalog.pg_tables WHERE schemaname IN ('drizzle', 'public')`,
-    )
-    const tables = allTables.rows.map(row => `${row.schemaname}.${row.tablename}`)
-
-    for (const table of tables) {
-      await client.query(`DROP TABLE IF EXISTS ${table} CASCADE`)
-    }
-
-    logger.log(`Database dropped (${tables.length} tables) ✅`)
-  }
 
   async function truncateDatabase(): Promise<void> {
     logger.log('Truncating database ...')

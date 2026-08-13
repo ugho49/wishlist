@@ -1,10 +1,28 @@
 import type { AbstractStartedContainer } from 'testcontainers'
 
+import { spawnSync } from 'node:child_process'
 import { join } from 'node:path'
 import * as dotenv from 'dotenv'
 import { DockerComposeEnvironment } from 'testcontainers'
 
 let teardown = false
+
+function runMigrations() {
+  console.log('🔄 Running Drizzle migrations...')
+
+  const migrateResult = spawnSync('yarn', ['db:migrate'], {
+    cwd: process.cwd(),
+    stdio: 'inherit',
+    env: process.env,
+  })
+
+  if (migrateResult.error) {
+    console.error(`❌ Failed to run Drizzle migrations with error ${migrateResult.error}`)
+    throw new Error('Failed to run Drizzle migrations')
+  }
+
+  console.log('✅ Migrations completed\n')
+}
 
 export default async function () {
   const rootFolder = process.cwd()
@@ -40,6 +58,8 @@ export default async function () {
       process.env[key] = process.env[variable]
     }
   }
+
+  runMigrations()
 
   return async () => {
     if (teardown) {

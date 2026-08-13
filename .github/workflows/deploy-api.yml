@@ -11,10 +11,41 @@ permissions:
   contents: write
 
 jobs:
+  run-drizzle-migrations:
+      name: Run Drizzle Migrations
+      runs-on: ubuntu-latest
+      environment: production
+      timeout-minutes: 5
+      env:
+        DB_HOST: ${{ secrets.DB_HOST }}
+        DB_PORT: ${{ secrets.DB_PORT }}
+        DB_USERNAME: ${{ secrets.DB_USERNAME }}
+        DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        DB_NAME: ${{ secrets.DB_NAME }}
+      steps:
+        - name: Checkout
+          uses: actions/checkout@v6
+
+        - name: Setup
+          uses: ./.github/actions/setup
+
+        - name: Connect to Tailscale
+          uses: tailscale/github-action@v4
+          with:
+            oauth-client-id: ${{ secrets.TAILSCALE_OAUTH_CLIENT_ID }}
+            oauth-secret: ${{ secrets.TAILSCALE_OAUTH_SECRET }}
+            tags: tag:wishlist-ci
+
+        - name: Run migrations
+          run: |
+            echo "Running Drizzle migrations..."
+            yarn db:migrate
+
   deploy-to-vps:
     name: Deploy to VPS
     runs-on: ubuntu-latest
     environment: production
+    needs: run-drizzle-migrations
     timeout-minutes: 10
     steps:
       - name: Checkout
