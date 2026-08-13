@@ -23,9 +23,6 @@
     "node": ">=24"
   },
   "dependencies": {
-    "@bull-board/api": "6.16.2",
-    "@bull-board/express": "6.16.2",
-    "@bull-board/nestjs": "6.16.2",
     "@emoji-mart/data": "1.2.1",
     "@emoji-mart/react": "1.1.1",
     "@emotion/react": "11.14.0",

@@ -2810,52 +2810,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@bull-board/api@npm:6.16.2":
-  version: 6.16.2
-  resolution: "@bull-board/api@npm:6.16.2"
-  dependencies:
-    redis-info: "npm:^3.1.0"
-  peerDependencies:
-    "@bull-board/ui": 6.16.2
-  checksum: 10c0/050a2c886e5647eac6e888dd26304e90f4ebb4569529d2f65a7eefbade82fdb9d0ae94da803764cbb715282b814ee8dd535882cfe82e6aa7ff56a2092fadee78
-  languageName: node
-  linkType: hard
-
-"@bull-board/express@npm:6.16.2":
-  version: 6.16.2
-  resolution: "@bull-board/express@npm:6.16.2"
-  dependencies:
-    "@bull-board/api": "npm:6.16.2"
-    "@bull-board/ui": "npm:6.16.2"
-    ejs: "npm:^3.1.10"
-    express: "npm:^5.2.0"
-  checksum: 10c0/a557420c1143f616dc16665350433216ddb343d3b3ef378b6242a82800d510947e5bdb137bd674c3bd9957489a857eb9895cb8771d61b78419c2e3e3e6f437f3
-  languageName: node
-  linkType: hard
-
-"@bull-board/nestjs@npm:6.16.2":
-  version: 6.16.2
-  resolution: "@bull-board/nestjs@npm:6.16.2"
-  peerDependencies:
-    "@bull-board/api": ^6.16.2
-    "@nestjs/bull-shared": ^10.0.0 || ^11.0.0
-    "@nestjs/common": ^9.0.0 || ^10.0.0 || ^11.0.0
-    "@nestjs/core": ^9.0.0 || ^10.0.0 || ^11.0.0
-    reflect-metadata: ^0.1.13 || ^0.2.0
-    rxjs: ^7.8.1
-  checksum: 10c0/90be30c49dccfb59313431b17374c65daeca31cac54360e1505dfb4a504f0c9572114685f30bfe55d7ef6598ad3528e7188c47aeb616515d20e3232e2d22d6ca
-  languageName: node
-  linkType: hard
-
-"@bull-board/ui@npm:6.16.2":
-  version: 6.16.2
-  resolution: "@bull-board/ui@npm:6.16.2"
-  dependencies:
-    "@bull-board/api": "npm:6.16.2"
-  checksum: 10c0/92676e55d6c2fed910f42f03824638fa17b842ea7bc91e924a1c31a34d21b768297fb06c0a9a32e4c2605d7f768883235d0eba1d9cf960c05b060c55074e4557
-  languageName: node
-  linkType: hard
-
 "@commitlint/cli@npm:20.2.0":
   version: 20.2.0
   resolution: "@commitlint/cli@npm:20.2.0"
@@ -13869,9 +13823,6 @@ __metadata:
   resolution: "@wishlist/source@workspace:."
   dependencies:
     "@biomejs/biome": "npm:2.3.12"
-    "@bull-board/api": "npm:6.16.2"
-    "@bull-board/express": "npm:6.16.2"
-    "@bull-board/nestjs": "npm:6.16.2"
     "@commitlint/cli": "npm:20.2.0"
     "@commitlint/config-conventional": "npm:20.2.0"
     "@emoji-mart/data": "npm:1.2.1"
@@ -17825,7 +17776,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ejs@npm:^3.1.10, ejs@npm:^3.1.7":
+"ejs@npm:^3.1.7":
   version: 3.1.10
   resolution: "ejs@npm:3.1.10"
   dependencies:
@@ -18973,7 +18924,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"express@npm:5.2.1, express@npm:^5.2.0":
+"express@npm:5.2.1":
   version: 5.2.1
   resolution: "express@npm:5.2.1"
   dependencies:
@@ -22825,7 +22776,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash@npm:4.17.21, lodash@npm:^4.17.11, lodash@npm:^4.17.15, lodash@npm:^4.17.21":
+"lodash@npm:4.17.21, lodash@npm:^4.17.15, lodash@npm:^4.17.21":
   version: 4.17.21
   resolution: "lodash@npm:4.17.21"
   checksum: 10c0/d8cbea072bb08655bb4c989da418994b073a608dffa608b09ac04b43a791b12aeae7cd7ad919aa4c925f33b48490b5cfe6c1f71d827956071dae2e7bb3a6b74c
@@ -27351,15 +27302,6 @@ __metadata:
   version: 1.2.0
   resolution: "redis-errors@npm:1.2.0"
   checksum: 10c0/5b316736e9f532d91a35bff631335137a4f974927bb2fb42bf8c2f18879173a211787db8ac4c3fde8f75ed6233eb0888e55d52510b5620e30d69d7d719c8b8a7
-  languageName: node
-  linkType: hard
-
-"redis-info@npm:^3.1.0":
-  version: 3.1.0
-  resolution: "redis-info@npm:3.1.0"
-  dependencies:
-    lodash: "npm:^4.17.11"
-  checksum: 10c0/ec0f31d97893c5828cec7166486d74198c92160c60073b6f2fe805cdf575a10ddcccc7641737d44b8f451355f0ab5b6c7b0d79e8fc24742b75dd625f91ffee38
   languageName: node
   linkType: hard
 
