@@ -4,7 +4,6 @@ import ManageHistoryIcon from '@mui/icons-material/ManageHistory'
 import { Box, Grid, styled, Typography } from '@mui/material'
 import { useNavigate } from '@tanstack/react-router'
 
-import { environment } from '../../environment'
 import { Card } from '../common/Card'
 import { Title } from '../common/Title'
 
@@ -54,7 +53,7 @@ export const AdminPage = () => {
       title: 'Gestion des queues',
       description: 'Accéder au dashboard de gestion des queues bullMQ',
       icon: <ManageHistoryIcon />,
-      onClick: () => window.open(`${environment.apiBaseUrl}/queues`, '_blank'),
+      onClick: () => window.open('http://wishlist-durabull.tailf24158.ts.net:3000', '_blank'),
     },
   ]
 
