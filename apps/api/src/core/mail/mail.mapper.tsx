@@ -1,3 +1,6 @@
+// biome-ignore assist/source/organizeImports: react-dom and react need to be imported in order to work correctly. Webpack will add them in build package.json
+// biome-ignore lint/correctness/noUnusedImports: Cf above comment
+import type * as ReactDOM from 'react-dom'
 import type { ReactElement } from 'react'
 
 import {

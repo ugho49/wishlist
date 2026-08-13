@@ -19,7 +19,7 @@ import { QUEUES, QueueName } from './queues.type'
       imports: [ConfigModule.forFeature(queueConfig)],
       inject: [queueConfig.KEY],
       useFactory: (config: ConfigType<typeof queueConfig>) => ({
-        prefix: "bull",
+        prefix: 'bull',
         connection: {
           host: config.valkey.host,
           port: config.valkey.port,
