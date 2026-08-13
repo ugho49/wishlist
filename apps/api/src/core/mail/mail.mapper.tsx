@@ -1,7 +1,6 @@
-// biome-ignore assist/source/organizeImports: react-dom and react need to be imported in order to work correctly. Webpack will add them in build package.json
-// biome-ignore lint/correctness/noUnusedImports: Cf above comment
-import type * as ReactDOM from 'react-dom'
 import type { ReactElement } from 'react'
+// biome-ignore lint/correctness/noUnusedImports: react-dom/server is loaded at runtime by react-email's render, but it is only a peer dependency. Nx resolves it from this import to add it to the generated build package.json
+import type * as ReactDOM from 'react-dom'
 
 import {
   AddedToEventEmail,
