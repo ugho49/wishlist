@@ -1,11 +1,11 @@
 import { dirname } from 'node:path'
-import { type CreateNodes, createNodesFromFiles } from '@nx/devkit'
+import { type CreateNodesV2, createNodesFromFiles } from '@nx/devkit'
 
 export type IntegrationTestsPluginOptions = {
   intTestTargetName?: string
 }
 
-export const createNodesV2: CreateNodes<IntegrationTestsPluginOptions> = [
+export const createNodesV2: CreateNodesV2<IntegrationTestsPluginOptions> = [
   '**/vitest.config.int.ts',
   async (configFiles, options, context) => {
     return await createNodesFromFiles(
