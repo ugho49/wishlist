@@ -1,21 +1,34 @@
-import { Box, Stack, Typography } from '@mui/material'
+import { Container, Stack, Typography } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import { Link } from '@tanstack/react-router'
 
-const FooterContainer = styled(Box)(({ theme }) => ({
-  backgroundColor: theme.palette.primary.dark,
-  color: 'white',
-  padding: theme.spacing(2, 0),
-  gap: theme.spacing(2),
+import { landingTokens } from './landing.tokens'
+
+const FooterContainer = styled('footer')(({ theme }) => ({
+  backgroundColor: landingTokens.deepBlue,
+  padding: theme.spacing(2.5, 0),
+}))
+
+const FooterContent = styled(Container)(({ theme }) => ({
   display: 'flex',
-  flexDirection: 'column',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  gap: theme.spacing(2),
+  [theme.breakpoints.down('sm')]: {
+    flexDirection: 'column',
+    gap: theme.spacing(1.5),
+  },
+}))
+
+const Copyright = styled(Typography)(() => ({
+  color: 'rgba(255, 255, 255, 0.55)',
+  fontSize: '0.85rem',
 }))
 
 const FooterLinkItem = styled(Typography)(() => ({
-  color: '#d1d5db',
-  textDecoration: 'none',
-  cursor: 'pointer',
-  transition: 'color 0.3s ease',
+  color: 'rgba(255, 255, 255, 0.65)',
+  fontSize: '0.85rem',
+  transition: 'color 0.2s ease',
   '&:hover': {
     color: 'white',
   },
@@ -28,17 +41,18 @@ const FooterLinkItem = styled(Typography)(() => ({
 export const FooterSection = () => {
   return (
     <FooterContainer>
-      <Stack direction="row" spacing={3} justifyContent="center" alignItems="center">
-        <FooterLinkItem variant="body2">
-          <Link to="/privacy">Confidentialité</Link>
-        </FooterLinkItem>
-        <FooterLinkItem variant="body2">
-          <Link to="/terms">Conditions</Link>
-        </FooterLinkItem>
-      </Stack>
-      <Typography variant="body2" color="grey.400" textAlign="center">
-        © {new Date().getFullYear()} Wishlist. Tous droits réservés.
-      </Typography>
+      <FooterContent maxWidth="lg">
+        <Copyright>© {new Date().getFullYear()} Wishlist. Tous droits réservés.</Copyright>
+
+        <Stack direction="row" spacing={3}>
+          <FooterLinkItem>
+            <Link to="/privacy">Confidentialité</Link>
+          </FooterLinkItem>
+          <FooterLinkItem>
+            <Link to="/terms">Conditions</Link>
+          </FooterLinkItem>
+        </Stack>
+      </FooterContent>
     </FooterContainer>
   )
 }

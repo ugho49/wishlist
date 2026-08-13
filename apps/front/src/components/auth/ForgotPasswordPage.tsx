@@ -1,5 +1,4 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import AttachEmailIcon from '@mui/icons-material/AttachEmail'
 import { Box, Button, Stack, styled, TextField, Typography } from '@mui/material'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -9,20 +8,13 @@ import { z } from 'zod'
 import { rejectionMessage, rejectionPattern, useAuthSendResetPasswordEmailMutation } from '../../gql'
 import { useToast } from '../../hooks/useToast'
 import { RouterLink } from '../common/RouterLink'
+import { AuthFormHeader } from './AuthFormHeader'
 
 const schema = z.object({
   email: z.email('Email invalide').max(200, '200 caractères maximum'),
 })
 
 type FormFields = z.infer<typeof schema>
-
-const TitleStyled = styled(Typography)(({ theme }) => ({
-  fontSize: '1.75rem',
-  fontWeight: 600,
-  color: theme.palette.text.primary,
-  textAlign: 'center',
-  marginBottom: 24,
-}))
 
 const ButtonStyled = styled(Button)(() => ({
   paddingTop: 12,
@@ -71,7 +63,7 @@ export const ForgotPasswordPage = () => {
   }
 
   return (
-    <Stack spacing={4} alignItems="center">
+    <Stack spacing={4}>
       {resetCodeSent ? (
         <MessageBoxStyled>
           <Typography variant="body1" gutterBottom>
@@ -84,7 +76,10 @@ export const ForgotPasswordPage = () => {
         </MessageBoxStyled>
       ) : (
         <>
-          <TitleStyled variant="h4">Mot de passe oublié</TitleStyled>
+          <AuthFormHeader
+            title="Mot de passe oublié"
+            subtitle="Indiquez l'email utilisé lors de l'inscription, nous vous enverrons un lien de réinitialisation."
+          />
 
           <Stack component="form" onSubmit={handleSubmit(onSubmit)} spacing={3} width="100%">
             <TextField
@@ -92,7 +87,7 @@ export const ForgotPasswordPage = () => {
               type="email"
               label="Email"
               fullWidth
-              placeholder="Entrer l'email que vous avez utilisé lors de l'inscription"
+              placeholder="votre@email.com"
               autoComplete="email"
               autoFocus
               error={!!formErrors.email}
@@ -106,8 +101,6 @@ export const ForgotPasswordPage = () => {
               size="large"
               color="primary"
               loading={isSubmitting}
-              loadingPosition="start"
-              startIcon={<AttachEmailIcon />}
               disabled={isSubmitting}
             >
               Réinitialisez mon mot de passe

@@ -1,5 +1,4 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import PersonAddIcon from '@mui/icons-material/PersonAdd'
 import { Alert, Button, Divider, Stack, styled, TextField, Typography } from '@mui/material'
 import { useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
@@ -19,6 +18,7 @@ import {
 import { useToast } from '../../hooks/useToast'
 import { zodRequiredString } from '../../utils/validation'
 import { RouterLink } from '../common/RouterLink'
+import { AuthFormHeader } from './AuthFormHeader'
 import { GoogleButton } from './GoogleButton'
 
 const schema = z.object({
@@ -29,13 +29,6 @@ const schema = z.object({
 })
 
 type FormFields = z.infer<typeof schema>
-
-const TitleStyled = styled(Typography)(({ theme }) => ({
-  fontSize: '1.75rem',
-  fontWeight: 600,
-  color: theme.palette.text.primary,
-  textAlign: 'center',
-}))
 
 const SocialButtonsStack = styled(Stack)(() => ({
   width: '100%',
@@ -137,8 +130,11 @@ export const RegisterPage = () => {
   const onSubmit = (data: FormFields) => registerUser(data)
 
   return (
-    <Stack spacing={4} alignItems="center">
-      <TitleStyled variant="h4">Créer un compte</TitleStyled>
+    <Stack spacing={4}>
+      <AuthFormHeader
+        title="Créer un compte"
+        subtitle="Rejoignez vos proches sur Wishlist en moins d'une minute. C'est gratuit."
+      />
 
       <Stack component="form" onSubmit={handleSubmit(onSubmit)} spacing={3} width="100%">
         {formErrors.root && <Alert severity="error">{formErrors.root.message}</Alert>}
@@ -193,8 +189,6 @@ export const RegisterPage = () => {
           size="large"
           fullWidth
           loading={isSubmitting}
-          loadingPosition="start"
-          startIcon={<PersonAddIcon />}
           disabled={isSubmitting || socialLoading}
         >
           Créer mon compte

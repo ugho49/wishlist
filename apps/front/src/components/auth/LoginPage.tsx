@@ -1,5 +1,4 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import LoginIcon from '@mui/icons-material/Login'
 import { Alert, Button, Divider, Stack, styled, TextField, Typography } from '@mui/material'
 import { useNavigate, useSearch } from '@tanstack/react-router'
 import { useState } from 'react'
@@ -12,6 +11,7 @@ import { setTokens } from '../../core/store/features'
 import { rejectionMessage, rejectionPattern, useAuthLoginMutation, useAuthLoginWithGoogleMutation } from '../../gql'
 import { useToast } from '../../hooks/useToast'
 import { RouterLink } from '../common/RouterLink'
+import { AuthFormHeader } from './AuthFormHeader'
 import { GoogleButton } from './GoogleButton'
 
 const schema = z.object({
@@ -20,13 +20,6 @@ const schema = z.object({
 })
 
 type FormFields = z.infer<typeof schema>
-
-const TitleStyled = styled(Typography)(({ theme }) => ({
-  fontSize: '1.75rem',
-  fontWeight: 600,
-  color: theme.palette.text.primary,
-  textAlign: 'center',
-}))
 
 const ButtonStyled = styled(Button)(() => ({
   paddingTop: 12,
@@ -114,8 +107,8 @@ export const LoginPage = () => {
   const onSubmit = (data: FormFields) => login(data)
 
   return (
-    <Stack spacing={4} alignItems="center">
-      <TitleStyled variant="h4">Connexion</TitleStyled>
+    <Stack spacing={4}>
+      <AuthFormHeader title="Connexion" subtitle="Heureux de vous revoir ! Connectez-vous pour retrouver vos listes." />
 
       <Stack component="form" onSubmit={handleSubmit(onSubmit)} spacing={3} width="100%">
         {formErrors.root && <Alert severity="error">{formErrors.root.message}</Alert>}
@@ -149,8 +142,6 @@ export const LoginPage = () => {
           color="primary"
           fullWidth
           loading={isSubmitting}
-          loadingPosition="start"
-          startIcon={<LoginIcon />}
           disabled={isSubmitting || socialLoading}
         >
           Se connecter
