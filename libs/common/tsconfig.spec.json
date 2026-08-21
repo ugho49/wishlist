@@ -5,6 +5,6 @@
     "types": ["bun", "node"],
     "declaration": true
   },
-  "files": ["./test-utils/bun-matchers.d.ts"],
-  "include": ["src/**/*.d.ts", "src/**/*.spec.ts", "test-utils/**/*.ts"]
+  "files": ["../../bun-matchers.d.ts"],
+  "include": ["src/**/*.d.ts", "src/**/*.spec.ts"]
 }

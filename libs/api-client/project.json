@@ -17,7 +17,7 @@
     "test": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "mkdir -p ../../junit_reports/unit && bun test $(find . -type f -name '*.spec.ts') --preload ./test-utils/matchers.ts --pass-with-no-tests --reporter=junit --reporter-outfile=../../junit_reports/unit/api-client.xml",
+        "command": "mkdir -p ../../junit_reports/unit && bun test $(find . -type f -name '*.spec.ts') --preload ../../bun.matchers.ts --pass-with-no-tests --reporter=junit --reporter-outfile=../../junit_reports/unit/api-client.xml",
         "cwd": "{projectRoot}",
         "forwardAllArgs": true
       }
