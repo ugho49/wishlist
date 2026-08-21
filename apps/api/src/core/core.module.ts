@@ -42,20 +42,15 @@ const mailModule = MailModule.registerAsync({
 
 const databaseModule = DatabaseModule.registerAsync({
   inject: [ConfigService],
-  useFactory: (config: ConfigService) => {
-    const dbMigrationsFolder = config.get<string>('DB_MIGRATIONS_FOLDER', path('drizzle/migrations'))
-
-    return {
-      username: config.get<string>('DB_USERNAME', ''),
-      password: config.get<string>('DB_PASSWORD', ''),
-      database: config.get<string>('DB_NAME', ''),
-      host: config.get<string>('DB_HOST', ''),
-      port: parseInt(config.get<string>('DB_PORT', '5432'), 10),
-      runMigrations: config.get<string>('DB_RUN_MIGRATIONS', 'true') === 'true',
-      migrationsFolder: dbMigrationsFolder,
-      verbose: config.get<string>('DB_VERBOSE', 'false') === 'true',
-    }
-  },
+  useFactory: (config: ConfigService) => ({
+    username: config.get<string>('DB_USERNAME', ''),
+    password: config.get<string>('DB_PASSWORD', ''),
+    database: config.get<string>('DB_NAME', ''),
+    host: config.get<string>('DB_HOST', ''),
+    port: parseInt(config.get<string>('DB_PORT', '5432'), 10),
+    runMigrations: config.get<string>('DB_RUN_MIGRATIONS', 'true') === 'true',
+    verbose: config.get<string>('DB_VERBOSE', 'false') === 'true',
+  }),
 })
 
 const frontendRoutesModule = FrontendRoutesModule.registerAsync({

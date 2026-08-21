@@ -1,7 +1,6 @@
 import { YogaDriver, type YogaDriverConfig } from '@graphql-yoga/nestjs'
 import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspection'
 import { Module } from '@nestjs/common'
-import { ConfigModule, ConfigService } from '@nestjs/config'
 import { GraphQLModule as NestGraphQLModule } from '@nestjs/graphql'
 
 import { DataLoaderModule } from '../../dataloader/dataloader.module'
@@ -15,10 +14,10 @@ import { useErrorTransformPlugin } from './graphql-error.plugin'
   imports: [
     NestGraphQLModule.forRootAsync<YogaDriverConfig>({
       driver: YogaDriver,
-      imports: [DataLoaderModule, ConfigModule],
-      inject: [DataLoaderService, ConfigService],
-      useFactory: (dataLoaderService: DataLoaderService, configService: ConfigService) => ({
-        typePaths: [configService.get<string>('GRAPHQL_TYPE_PATHS', path('**/*.graphql'))],
+      imports: [DataLoaderModule],
+      inject: [DataLoaderService],
+      useFactory: (dataLoaderService: DataLoaderService) => ({
+        typePaths: [path('src/**/*.graphql')],
         plugins: [
           useBlockGetRequests(),
           useLoggingPlugin(),
