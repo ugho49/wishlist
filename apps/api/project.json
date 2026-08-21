@@ -39,7 +39,7 @@
     "test": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "bun test $(find . -type f -name '*.spec.ts' ! -name '*.int-spec.ts') --preload ./test-utils/matchers.ts --reporter=junit --reporter-outfile=../../junit_reports/unit/api.xml",
+        "command": "mkdir -p ../../junit_reports/unit && bun test $(find . -type f -name '*.spec.ts' ! -name '*.int-spec.ts') --preload ./test-utils/matchers.ts --pass-with-no-tests --reporter=junit --reporter-outfile=../../junit_reports/unit/api.xml",
         "cwd": "{projectRoot}",
         "forwardAllArgs": true
       }
@@ -47,7 +47,7 @@
     "test:int": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "bun test $(find . -type f -name '*.int-spec.ts') --preload ./test-utils/global-setup.ts --preload ./test-utils/matchers.ts --timeout 30000 --max-concurrency 1 --reporter=junit --reporter-outfile=../../junit_reports/integration/api.xml",
+        "command": "mkdir -p ../../junit_reports/integration && bun test $(find . -type f -name '*.int-spec.ts') --preload ./test-utils/global-setup.ts --preload ./test-utils/matchers.ts --timeout 30000 --max-concurrency 1 --pass-with-no-tests --reporter=junit --reporter-outfile=../../junit_reports/integration/api.xml",
         "cwd": "{projectRoot}",
         "forwardAllArgs": true
       }

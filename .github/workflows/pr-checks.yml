@@ -117,6 +117,7 @@ jobs:
         with:
           name: unit-test-reports
           path: junit_reports/unit/
+          if-no-files-found: ignore
           retention-days: 7
 
   test-int:
@@ -142,6 +143,7 @@ jobs:
         with:
           name: integration-test-reports
           path: junit_reports/integration/
+          if-no-files-found: ignore
           retention-days: 7
 
   check-codegen:

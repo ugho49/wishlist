@@ -11,7 +11,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `bun serve:all` - Start all applications concurrently
 
 ### Testing
-- `bun test:unit` - Run unit tests (bun:test for the API, Vitest for the front)
+- `bun test:unit` - Run unit tests (bun:test for the API and libs, Vitest for the front)
 - `bun test:int` - Run API integration tests with Docker Compose
 - `bun typecheck` - Run TypeScript type checking across all projects
 - Single test execution: Use Nx to run specific tests: `nx test <project-name>`
@@ -104,7 +104,7 @@ This is an Nx monorepo containing a wishlist application with React frontend and
 - **Secret Santa**: Complex feature with exclusion rules, budget constraints, and automated draw logic
 
 ### Testing Architecture
-- **Unit Tests**: bun:test for the API, Vitest for the frontend
+- **Unit Tests**: bun:test for the API and libs, Vitest for the frontend
 - **Integration Tests**: bun:test with Docker Compose for real database testing
 - **Test Utilities**: Comprehensive fixtures and assertions in `apps/api/test-utils/`
 - **No Parallel Files**: Disabled for test stability with shared resources
