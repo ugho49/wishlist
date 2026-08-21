@@ -1,4 +1,5 @@
 {
   "name": "front",
+  "private": true,
   "type": "module"
 }
