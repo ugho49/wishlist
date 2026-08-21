@@ -21,7 +21,7 @@ Wishlist App is a collaborative platform designed to make gift-giving easier and
 
 ### Prerequisites
 
-- **Bun**: 1.3.13+
+- **Bun**: 1.4.0+
 - **Docker**: For local database
 
 ### Installation

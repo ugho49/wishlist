@@ -31,8 +31,8 @@
       "@wishlist/mail": ["libs/mail/src/index.ts"],
       "@wishlist/front-components/*": ["apps/front/src/components/*"],
       "@wishlist/front-hooks": ["apps/front/src/hooks"],
-      "@wishlist/plugin/biome": ["plugin/biome-plugin/src/index.ts"],
-      "@wishlist/plugin/drizzle": ["plugin/drizzle-plugin/src/index.ts"]
+      "@wishlist/biome-plugin": ["plugin/biome-plugin/src/index.ts"],
+      "@wishlist/drizzle-plugin": ["plugin/drizzle-plugin/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
