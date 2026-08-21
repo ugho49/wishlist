@@ -1,5 +1,6 @@
+import type { ConfigType } from '@nestjs/config'
+
 import { Inject, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common'
-import { ConfigType } from '@nestjs/config'
 import { EventBus } from '@nestjs/cqrs'
 import { REPOSITORIES } from '@wishlist/api/repositories'
 import { DateTime } from 'luxon'
@@ -7,8 +8,8 @@ import { DateTime } from 'luxon'
 import {
   PasswordVerificationCreatedEvent,
   UserPasswordVerification,
-  UserPasswordVerificationRepository,
-  UserRepository,
+  type UserPasswordVerificationRepository,
+  type UserRepository,
 } from '../../domain'
 import userConfig from '../../infrastructure/user.config'
 

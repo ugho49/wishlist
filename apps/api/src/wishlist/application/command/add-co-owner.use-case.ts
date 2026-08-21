@@ -1,10 +1,10 @@
 import { BadRequestException, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common'
 import { EventBus } from '@nestjs/cqrs'
 import { REPOSITORIES } from '@wishlist/api/repositories'
-import { UserRepository } from '@wishlist/api/user'
-import { ICurrentUser, UserId, WishlistId } from '@wishlist/common'
+import { type UserRepository } from '@wishlist/api/user'
+import { type ICurrentUser, type UserId, type WishlistId } from '@wishlist/common'
 
-import { UserAddedAsCoOwnerToWishlistEvent, WishlistRepository } from '../../domain'
+import { UserAddedAsCoOwnerToWishlistEvent, type WishlistRepository } from '../../domain'
 
 export type AddCoOwnerInput = {
   currentUser: ICurrentUser

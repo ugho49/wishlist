@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { REPOSITORIES } from '@wishlist/api/repositories'
-import { AttendeeId } from '@wishlist/common'
+import { type AttendeeId } from '@wishlist/common'
 
-import { EventAttendee, EventAttendeeRepository } from '../../domain'
+import { EventAttendee, type EventAttendeeRepository } from '../../domain'
 
 export type GetEventAttendeesByIdsInput = {
   attendeeIds: AttendeeId[]

@@ -1,6 +1,6 @@
-import { ICurrentUser } from '@wishlist/common'
+import { type ICurrentUser } from '@wishlist/common'
 
-import { DataLoaders } from '../../dataloader/dataloader.service'
+import { type DataLoaders } from '../../dataloader/dataloader.service'
 
 export type GraphQLContext = {
   req: Request & { user?: ICurrentUser }

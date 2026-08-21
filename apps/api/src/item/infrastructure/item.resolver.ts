@@ -3,23 +3,23 @@ import type { ICurrentUser, WishlistId } from '@wishlist/common'
 import { Logger } from '@nestjs/common'
 import { Args, Context, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 import { GqlCurrentUser } from '@wishlist/api/auth'
-import { GraphQLContext, ZodPipe } from '@wishlist/api/core'
-import { ItemId, UserId } from '@wishlist/common'
+import { type GraphQLContext, ZodPipe } from '@wishlist/api/core'
+import { type ItemId, type UserId } from '@wishlist/common'
 
 import {
-  CreateItemInput,
-  CreateItemResult,
-  DeleteItemResult,
-  GetImportableItemsOutput,
-  ImportItemsInput,
-  ImportItemsResult,
-  Item,
-  ScanItemUrlInput,
-  ScanItemUrlResult,
-  ToggleItemResult,
-  UpdateItemInput,
-  UpdateItemResult,
-  User,
+  type CreateItemInput,
+  type CreateItemResult,
+  type DeleteItemResult,
+  type GetImportableItemsOutput,
+  type ImportItemsInput,
+  type ImportItemsResult,
+  type Item,
+  type ScanItemUrlInput,
+  type ScanItemUrlResult,
+  type ToggleItemResult,
+  type UpdateItemInput,
+  type UpdateItemResult,
+  type User,
 } from '../../gql/generated-types'
 import { CreateItemUseCase } from '../application/command/create-item.use-case'
 import { DeleteItemUseCase } from '../application/command/delete-item.use-case'

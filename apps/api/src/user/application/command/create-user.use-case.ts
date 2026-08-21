@@ -4,7 +4,7 @@ import { PasswordManager } from '@wishlist/api/auth'
 import { REPOSITORIES } from '@wishlist/api/repositories'
 import { MiniUserDto } from '@wishlist/common'
 
-import { User, UserCreatedEvent, UserRepository } from '../../domain'
+import { User, UserCreatedEvent, type UserRepository } from '../../domain'
 import { userMapper } from '../../infrastructure'
 
 export type CreateUserInput = {

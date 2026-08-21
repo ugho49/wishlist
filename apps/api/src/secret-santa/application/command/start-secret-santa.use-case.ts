@@ -3,10 +3,10 @@ import type { ICurrentUser, SecretSantaId } from '@wishlist/common'
 import { BadRequestException, ForbiddenException, Inject, Injectable, Logger } from '@nestjs/common'
 import { EventBus } from '@nestjs/cqrs'
 import { TransactionManager } from '@wishlist/api/core'
-import { EventRepository } from '@wishlist/api/event'
+import { type EventRepository } from '@wishlist/api/event'
 import { REPOSITORIES } from '@wishlist/api/repositories'
 
-import { SecretSantaRepository, SecretSantaStartedEvent, SecretSantaUserRepository } from '../../domain'
+import { type SecretSantaRepository, SecretSantaStartedEvent, type SecretSantaUserRepository } from '../../domain'
 
 export type StartSecretSantaInput = {
   currentUser: ICurrentUser

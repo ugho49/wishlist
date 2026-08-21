@@ -1,6 +1,6 @@
 import z from 'zod'
 
-import { PaginationFilters } from '../../gql/generated-types'
+import { type PaginationFilters } from '../../gql/generated-types'
 
 export const PaginationFiltersSchema = z.object({
   page: z.number().min(1).default(1),

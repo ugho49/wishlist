@@ -1,8 +1,8 @@
 import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { REPOSITORIES } from '@wishlist/api/repositories'
-import { UserId, UserSocialId } from '@wishlist/common'
+import { type UserId, type UserSocialId } from '@wishlist/common'
 
-import { UserSocialRepository } from '../../domain'
+import { type UserSocialRepository } from '../../domain'
 
 export type UnlinkUserSocialInput = {
   userId: UserId

@@ -1,7 +1,7 @@
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { REPOSITORIES } from '@wishlist/api/repositories'
-import { User, UserRepository } from '@wishlist/api/user'
+import { User, type UserRepository } from '@wishlist/api/user'
 import { LoginOutputDto } from '@wishlist/common'
 
 import { PasswordManager } from '../../infrastructure'

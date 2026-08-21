@@ -4,12 +4,12 @@ import { ApiConsumes, ApiTags } from '@nestjs/swagger'
 import {
   createPagedResponse,
   GetAllUsersQueryDto,
-  ICurrentUser,
+  type ICurrentUser,
   PagedResponse,
   UpdateFullUserProfileInputDto,
   UpdateUserPictureOutputDto,
   UserDto,
-  UserId,
+  type UserId,
   UserWithoutSocialsDto,
 } from '@wishlist/common'
 

@@ -1,6 +1,7 @@
+import type { ConfigType } from '@nestjs/config'
+
 import { Inject, Injectable, InternalServerErrorException, Logger, UnauthorizedException } from '@nestjs/common'
-import { ConfigType } from '@nestjs/config'
-import { OAuth2Client, TokenPayload } from 'google-auth-library'
+import { OAuth2Client, type TokenPayload } from 'google-auth-library'
 
 import authConfig from '../auth.config'
 

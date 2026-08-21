@@ -1,9 +1,10 @@
+import type { ConfigType } from '@nestjs/config'
+
 import { Inject, Injectable, Logger } from '@nestjs/common'
-import { ConfigType } from '@nestjs/config'
 import { Queue } from 'bullmq'
 
 import queueConfig from './queue.config'
-import { BullMQJobOptions, QUEUES, QueueName } from './queues.type'
+import { type BullMQJobOptions, QUEUES, QueueName } from './queues.type'
 
 @Injectable()
 export class QueueService {

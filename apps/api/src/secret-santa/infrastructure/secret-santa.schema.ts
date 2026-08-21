@@ -5,7 +5,7 @@ import type {
   UpdateSecretSantaUserInput,
 } from '../../gql/generated-types'
 
-import { AttendeeId, EventId, SecretSantaId, SecretSantaUserId } from '@wishlist/common'
+import { type AttendeeId, type EventId, type SecretSantaId, type SecretSantaUserId } from '@wishlist/common'
 import z from 'zod'
 
 export const SecretSantaIdSchema = z.string().transform(val => val as SecretSantaId)

@@ -1,8 +1,8 @@
 import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common'
 import { REPOSITORIES } from '@wishlist/api/repositories'
-import { EventId, ICurrentUser } from '@wishlist/common'
+import { type EventId, type ICurrentUser } from '@wishlist/common'
 
-import { EventRepository } from '../../domain'
+import { type EventRepository } from '../../domain'
 
 export type UpdateEventInput = {
   currentUser: ICurrentUser

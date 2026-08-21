@@ -1,2 +1,4 @@
+export type { DrizzleTransaction } from './transaction-manager'
+
 export { DatabaseService } from './database.service'
-export { DrizzleTransaction, TransactionManager } from './transaction-manager'
+export { TransactionManager } from './transaction-manager'

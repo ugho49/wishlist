@@ -3,7 +3,7 @@ import type { WishlistItem } from '../domain'
 
 import { userMapper } from '@wishlist/api/user'
 
-import { Item as GqlItem } from '../../gql/generated-types'
+import { type Item as GqlItem } from '../../gql/generated-types'
 
 function toDto(param: { item: WishlistItem; displayUserAndSuggested: boolean }): ItemDto {
   const { displayUserAndSuggested, item } = param

@@ -2,7 +2,7 @@ import { Query, Resolver } from '@nestjs/graphql'
 import { match } from 'ts-pattern'
 
 import { Public } from '../../auth/infrastructure/decorators/public.metadata'
-import { HealthResult, HealthStatus } from '../../gql/generated-types'
+import { type HealthResult, HealthStatus } from '../../gql/generated-types'
 import { HealthService } from './health.service'
 
 @Resolver()

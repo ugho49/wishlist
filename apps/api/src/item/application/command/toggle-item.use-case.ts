@@ -1,10 +1,10 @@
 import { Inject, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common'
 import { REPOSITORIES } from '@wishlist/api/repositories'
-import { UserRepository, userMapper } from '@wishlist/api/user'
-import { Wishlist, WishlistRepository } from '@wishlist/api/wishlist'
-import { ICurrentUser, ItemId, ToggleItemOutputDto } from '@wishlist/common'
+import { type UserRepository, userMapper } from '@wishlist/api/user'
+import { Wishlist, type WishlistRepository } from '@wishlist/api/wishlist'
+import { type ICurrentUser, type ItemId, ToggleItemOutputDto } from '@wishlist/common'
 
-import { WishlistItem, WishlistItemRepository } from '../../domain'
+import { WishlistItem, type WishlistItemRepository } from '../../domain'
 
 export type ToggleItemInput = {
   currentUser: ICurrentUser

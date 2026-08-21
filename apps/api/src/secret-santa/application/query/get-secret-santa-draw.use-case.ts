@@ -1,10 +1,10 @@
 import type { AttendeeDto, EventId, ICurrentUser } from '@wishlist/common'
 
 import { Inject, Injectable } from '@nestjs/common'
-import { EventAttendeeRepository, eventAttendeeMapper } from '@wishlist/api/event'
+import { type EventAttendeeRepository, eventAttendeeMapper } from '@wishlist/api/event'
 import { REPOSITORIES } from '@wishlist/api/repositories'
 
-import { SecretSantaUserRepository } from '../../domain'
+import { type SecretSantaUserRepository } from '../../domain'
 
 export type GetSecretSantaDrawInput = {
   currentUser: ICurrentUser

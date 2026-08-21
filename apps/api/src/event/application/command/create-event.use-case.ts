@@ -1,11 +1,17 @@
 import { Inject, Injectable, Logger } from '@nestjs/common'
 import { EventBus } from '@nestjs/cqrs'
 import { REPOSITORIES } from '@wishlist/api/repositories'
-import { UserRepository } from '@wishlist/api/user'
-import { AttendeeRole, ICurrentUser, MiniEventDto } from '@wishlist/common'
+import { type UserRepository } from '@wishlist/api/user'
+import { AttendeeRole, type ICurrentUser, MiniEventDto } from '@wishlist/common'
 import { uniq } from 'lodash'
 
-import { AttendeeAddedEvent, Event, EventAttendee, EventAttendeeRepository, EventRepository } from '../../domain'
+import {
+  AttendeeAddedEvent,
+  Event,
+  EventAttendee,
+  type EventAttendeeRepository,
+  type EventRepository,
+} from '../../domain'
 import { eventMapper } from '../../infrastructure'
 
 type NewEventAttendee = {

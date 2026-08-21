@@ -4,7 +4,8 @@
     "outDir": "../../dist/out-tsc",
     "types": ["node"],
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
+    "emitDecoratorMetadata": true,
+    "verbatimModuleSyntax": true
   },
   "exclude": ["src/**/*.int-spec.ts", "src/**/*.spec.ts"],
   "include": ["src/**/*.ts", "codegen.ts"]

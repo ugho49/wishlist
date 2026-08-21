@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { REPOSITORIES } from '@wishlist/api/repositories'
-import { ICurrentUser } from '@wishlist/common'
+import { type ICurrentUser } from '@wishlist/common'
 
-import { UserEmailChangeVerificationRepository } from '../../domain'
+import { type UserEmailChangeVerificationRepository } from '../../domain'
 
 export type GetPendingEmailChangeResult = { newEmail: string; expiredAt: string } | undefined
 

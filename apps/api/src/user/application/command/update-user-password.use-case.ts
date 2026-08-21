@@ -2,9 +2,9 @@ import { Inject, Injectable, Logger } from '@nestjs/common'
 import { PasswordManager } from '@wishlist/api/auth'
 import { BusinessRuleException } from '@wishlist/api/core'
 import { REPOSITORIES } from '@wishlist/api/repositories'
-import { UserId } from '@wishlist/common'
+import { type UserId } from '@wishlist/common'
 
-import { UserRepository } from '../../domain'
+import { type UserRepository } from '../../domain'
 
 export type UpdateUserPasswordInput = {
   userId: UserId

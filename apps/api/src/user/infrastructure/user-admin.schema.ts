@@ -1,6 +1,6 @@
 import z from 'zod'
 
-import { AdminGetAllUsersPaginationFilters, AdminUpdateUserProfileInput } from '../../gql/generated-types'
+import { type AdminGetAllUsersPaginationFilters, type AdminUpdateUserProfileInput } from '../../gql/generated-types'
 
 export const AdminGetAllUsersPaginationFiltersSchema = z.object({
   page: z.number().int().min(1).optional(),

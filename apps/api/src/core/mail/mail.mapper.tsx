@@ -18,7 +18,7 @@ import {
 } from '@wishlist/mail'
 import { match } from 'ts-pattern'
 
-import { MailPayload, MailTemplate } from './mail.type'
+import { type MailPayload, MailTemplate } from './mail.type'
 
 /**
  * Maps a queued mail payload to its react-email component, narrowing the

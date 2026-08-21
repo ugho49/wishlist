@@ -1,10 +1,10 @@
 import type { AttendeeId, ICurrentUser, SecretSantaId, SecretSantaUserDto } from '@wishlist/common'
 
 import { BadRequestException, ForbiddenException, Inject, Injectable, Logger } from '@nestjs/common'
-import { EventRepository } from '@wishlist/api/event'
+import { type EventRepository } from '@wishlist/api/event'
 import { REPOSITORIES } from '@wishlist/api/repositories'
 
-import { SecretSantaRepository, SecretSantaUser, SecretSantaUserRepository } from '../../domain'
+import { type SecretSantaRepository, SecretSantaUser, type SecretSantaUserRepository } from '../../domain'
 import { secretSantaMapper } from '../../infrastructure'
 
 export type AddSecretSantaUsersInput = {

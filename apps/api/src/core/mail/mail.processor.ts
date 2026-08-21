@@ -11,7 +11,7 @@ import { QueueName, WithPinoContext } from '../queue'
 import { MailConfig } from './mail.config'
 import { mapPayloadToTemplate } from './mail.mapper'
 import { MAIL_CONFIG_TOKEN } from './mail.module-definitions'
-import { MailPayload } from './mail.type'
+import { type MailPayload } from './mail.type'
 
 @Processor(QueueName.MAILS, { concurrency: 5 })
 export class MailProcessor extends WorkerHost {

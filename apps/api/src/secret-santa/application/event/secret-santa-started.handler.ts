@@ -1,5 +1,5 @@
 import { Logger } from '@nestjs/common'
-import { EventsHandler, IEventHandler } from '@nestjs/cqrs'
+import { EventsHandler, type IEventHandler } from '@nestjs/cqrs'
 import { chunk as createChunks } from 'lodash'
 
 import { FrontendRoutesService } from '../../../core'

@@ -5,14 +5,14 @@ import { DEFAULT_RESULT_NUMBER } from '@wishlist/api/core'
 import {
   CreateEventInputDto,
   DetailedEventDto,
-  EventId,
+  type EventId,
   EventWithCountsDto,
   GetEventsQueryDto,
-  ICurrentUser,
+  type ICurrentUser,
   MiniEventDto,
   PagedResponse,
   UpdateEventInputDto,
-  UserId,
+  type UserId,
 } from '@wishlist/common'
 
 import { CreateEventUseCase } from '../../application/command/create-event.use-case'

@@ -1,4 +1,4 @@
-import { BusinessRuleCode } from '../common/business-rule.exception'
+import { type BusinessRuleCode } from '../common/business-rule.exception'
 
 type FieldError = {
   field: string

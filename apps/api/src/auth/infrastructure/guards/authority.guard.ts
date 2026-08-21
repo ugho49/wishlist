@@ -1,9 +1,9 @@
-import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common'
+import { type CanActivate, type ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
 import { GqlExecutionContext } from '@nestjs/graphql'
-import { ICurrentUser } from '@wishlist/common'
+import { type ICurrentUser } from '@wishlist/common'
 
-import { HasAuthoritiesMetadataKey, HasAuthoritiesMetadataParamType } from '../decorators/authority.decorator'
+import { HasAuthoritiesMetadataKey, type HasAuthoritiesMetadataParamType } from '../decorators/authority.decorator'
 
 @Injectable()
 export class AuthorityGuard implements CanActivate {

@@ -3,18 +3,18 @@ import type { ICurrentUser } from '@wishlist/common'
 import { NotFoundException } from '@nestjs/common'
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql'
 import { GqlCurrentUser, IsAdmin } from '@wishlist/api/auth'
-import { DEFAULT_RESULT_NUMBER, GraphQLContext, ZodPipe } from '@wishlist/api/core'
-import { AttendeeId, createPagedResponse, EventId } from '@wishlist/common'
+import { DEFAULT_RESULT_NUMBER, type GraphQLContext, ZodPipe } from '@wishlist/api/core'
+import { type AttendeeId, createPagedResponse, type EventId } from '@wishlist/common'
 
 import {
-  AdminDeleteEventAttendeeResult,
-  AdminDeleteEventResult,
-  AdminEventPaginationFilters,
-  AdminGetEventByIdResult,
-  AdminGetEventsResult,
-  AdminUpdateEventResult,
-  Event as GqlEvent,
-  UpdateEventInput,
+  type AdminDeleteEventAttendeeResult,
+  type AdminDeleteEventResult,
+  type AdminEventPaginationFilters,
+  type AdminGetEventByIdResult,
+  type AdminGetEventsResult,
+  type AdminUpdateEventResult,
+  type Event as GqlEvent,
+  type UpdateEventInput,
 } from '../../../gql/generated-types'
 import { DeleteAttendeeUseCase } from '../../application/command/delete-attendee.use-case'
 import { DeleteEventUseCase } from '../../application/command/delete-event.use-case'

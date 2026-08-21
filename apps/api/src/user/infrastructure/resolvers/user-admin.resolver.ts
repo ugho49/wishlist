@@ -3,17 +3,17 @@ import type { ICurrentUser } from '@wishlist/common'
 import { NotFoundException } from '@nestjs/common'
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql'
 import { GqlCurrentUser, IsAdmin } from '@wishlist/api/auth'
-import { DEFAULT_RESULT_NUMBER, GraphQLContext, ZodPipe } from '@wishlist/api/core'
-import { createPagedResponse, UserId } from '@wishlist/common'
+import { DEFAULT_RESULT_NUMBER, type GraphQLContext, ZodPipe } from '@wishlist/api/core'
+import { createPagedResponse, type UserId } from '@wishlist/common'
 
 import {
-  AdminDeleteUserResult,
-  AdminGetAllUsersPaginationFilters,
-  AdminGetAllUsersResult,
-  AdminGetUserByIdResult,
-  AdminRemoveUserPictureResult,
-  AdminUpdateUserProfileInput,
-  AdminUpdateUserProfileResult,
+  type AdminDeleteUserResult,
+  type AdminGetAllUsersPaginationFilters,
+  type AdminGetAllUsersResult,
+  type AdminGetUserByIdResult,
+  type AdminRemoveUserPictureResult,
+  type AdminUpdateUserProfileInput,
+  type AdminUpdateUserProfileResult,
 } from '../../../gql/generated-types'
 import { DeleteUserUseCase } from '../../application/command/delete-user.use-case'
 import { RemoveUserPictureUseCase } from '../../application/command/remove-user-picture.use-case'

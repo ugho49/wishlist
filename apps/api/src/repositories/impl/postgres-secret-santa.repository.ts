@@ -1,11 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
-import { EventId, SecretSantaId, SecretSantaStatus, uuid } from '@wishlist/common'
+import { type EventId, type SecretSantaId, SecretSantaStatus, uuid } from '@wishlist/common'
 import { eq } from 'drizzle-orm'
 
 import * as schema from '../../../drizzle/schema'
-import { DatabaseService, DrizzleTransaction } from '../../core/database'
+import { DatabaseService, type DrizzleTransaction } from '../../core/database'
 import { SecretSanta } from '../../secret-santa/domain/model/secret-santa.model'
-import { SecretSantaRepository } from '../../secret-santa/domain/repository/secret-santa.repository'
+import { type SecretSantaRepository } from '../../secret-santa/domain/repository/secret-santa.repository'
 import { PostgresSecretSantaUserRepository } from './postgres-secret-santa-user.repository'
 
 @Injectable()

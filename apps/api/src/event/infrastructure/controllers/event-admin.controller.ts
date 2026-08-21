@@ -4,10 +4,10 @@ import { CurrentUser, IsAdmin } from '@wishlist/api/auth'
 import { DEFAULT_RESULT_NUMBER } from '@wishlist/api/core'
 import {
   DetailedEventDto,
-  EventId,
+  type EventId,
   EventWithCountsDto,
   GetAllEventsPaginationQueryDto,
-  ICurrentUser,
+  type ICurrentUser,
   PagedResponse,
   UpdateEventInputDto,
 } from '@wishlist/common'

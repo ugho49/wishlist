@@ -1,10 +1,14 @@
 import { NotFoundException } from '@nestjs/common'
 import { Args, Context, Query, Resolver } from '@nestjs/graphql'
 import { GqlCurrentUser } from '@wishlist/api/auth'
-import { DEFAULT_RESULT_NUMBER, GraphQLContext, ZodPipe } from '@wishlist/api/core'
-import { createPagedResponse, EventId, UserId } from '@wishlist/common'
+import { DEFAULT_RESULT_NUMBER, type GraphQLContext, ZodPipe } from '@wishlist/api/core'
+import { createPagedResponse, type EventId, type UserId } from '@wishlist/common'
 
-import { EventPaginationFilters, GetEventByIdResult, GetMyEventsResult } from '../../../gql/generated-types'
+import {
+  type EventPaginationFilters,
+  type GetEventByIdResult,
+  type GetMyEventsResult,
+} from '../../../gql/generated-types'
 import { GetEventsByUserUseCase } from '../../application/query/get-events-by-user.use-case'
 import { eventMapper } from '../event.mapper'
 import { EventPaginationFiltersSchema } from '../event.schema'

@@ -1,6 +1,6 @@
 import { BullModule, getQueueToken } from '@nestjs/bullmq'
 import { Global, Module } from '@nestjs/common'
-import { ConfigModule, ConfigType } from '@nestjs/config'
+import { ConfigModule, type ConfigType } from '@nestjs/config'
 import { Queue } from 'bullmq'
 
 import queueConfig from './queue.config'

@@ -1,8 +1,8 @@
 import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common'
-import { WishlistItem, WishlistItemRepository } from '@wishlist/api/item'
+import { WishlistItem, type WishlistItemRepository } from '@wishlist/api/item'
 import { REPOSITORIES } from '@wishlist/api/repositories'
-import { WishlistRepository } from '@wishlist/api/wishlist'
-import { ICurrentUser, WishlistId } from '@wishlist/common'
+import { type WishlistRepository } from '@wishlist/api/wishlist'
+import { type ICurrentUser, type WishlistId } from '@wishlist/common'
 import { TidyURL } from 'tidy-url'
 
 export type CreateItemInput = {

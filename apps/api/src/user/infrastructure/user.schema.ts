@@ -11,7 +11,7 @@ import type {
   UpdateUserProfileInput,
 } from '../../gql/generated-types'
 
-import { UserId, UserSocialId } from '@wishlist/common'
+import { type UserId, type UserSocialId } from '@wishlist/common'
 import z from 'zod'
 
 export const UserIdSchema = z.string().transform(val => val as UserId)

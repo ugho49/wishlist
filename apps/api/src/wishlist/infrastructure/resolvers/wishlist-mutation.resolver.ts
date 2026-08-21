@@ -3,18 +3,18 @@ import type { ICurrentUser } from '@wishlist/common'
 import { Args, Mutation, Resolver } from '@nestjs/graphql'
 import { GqlCurrentUser } from '@wishlist/api/auth'
 import { ZodPipe } from '@wishlist/api/core'
-import { EventId, WishlistId } from '@wishlist/common'
+import { type EventId, type WishlistId } from '@wishlist/common'
 
 import {
-  AddWishlistCoOwnerInput,
-  AddWishlistCoOwnerResult,
-  DeleteWishlistResult,
-  LinkWishlistToEventResult,
-  RemoveWishlistCoOwnerResult,
-  RemoveWishlistLogoResult,
-  UnlinkWishlistFromEventResult,
-  UpdateWishlistInput,
-  UpdateWishlistResult,
+  type AddWishlistCoOwnerInput,
+  type AddWishlistCoOwnerResult,
+  type DeleteWishlistResult,
+  type LinkWishlistToEventResult,
+  type RemoveWishlistCoOwnerResult,
+  type RemoveWishlistLogoResult,
+  type UnlinkWishlistFromEventResult,
+  type UpdateWishlistInput,
+  type UpdateWishlistResult,
 } from '../../../gql/generated-types'
 import { AddCoOwnerUseCase } from '../../application/command/add-co-owner.use-case'
 import { DeleteWishlistUseCase } from '../../application/command/delete-wishlist.use-case'

@@ -3,7 +3,7 @@ import { Injectable, Logger } from '@nestjs/common'
 import { Queue } from 'bullmq'
 
 import { QueueName } from '../queue'
-import { MailPayload } from './mail.type'
+import { type MailPayload } from './mail.type'
 
 @Injectable()
 export class MailService {

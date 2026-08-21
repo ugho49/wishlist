@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common'
-import { UserId, UserSocialId } from '@wishlist/common'
+import { type UserId, type UserSocialId } from '@wishlist/common'
 import DataLoader from 'dataloader'
 
-import { User, UserFull, UserSocial } from '../../gql/generated-types'
+import { type User, type UserFull, type UserSocial } from '../../gql/generated-types'
 import { GetUserSocialsByIdsUseCase } from '../application/query/get-user-socials-by-ids.use-case'
 import { GetUserSocialsByUserIdsUseCase } from '../application/query/get-user-socials-by-user-ids.use-case'
 import { GetUsersByIdsUseCase } from '../application/query/get-users-by-ids.use-case'

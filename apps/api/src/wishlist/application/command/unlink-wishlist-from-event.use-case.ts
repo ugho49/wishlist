@@ -1,8 +1,8 @@
 import { BadRequestException, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common'
 import { REPOSITORIES } from '@wishlist/api/repositories'
-import { EventId, ICurrentUser, WishlistId } from '@wishlist/common'
+import { type EventId, type ICurrentUser, type WishlistId } from '@wishlist/common'
 
-import { WishlistRepository } from '../../domain'
+import { type WishlistRepository } from '../../domain'
 
 export type UnlinkWishlistFromEventInput = {
   currentUser: ICurrentUser

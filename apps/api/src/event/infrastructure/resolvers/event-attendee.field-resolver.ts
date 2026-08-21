@@ -1,7 +1,7 @@
 import { Context, Parent, ResolveField, Resolver } from '@nestjs/graphql'
-import { GraphQLContext } from '@wishlist/api/core'
+import { type GraphQLContext } from '@wishlist/api/core'
 
-import { EventAttendee, User } from '../../../gql/generated-types'
+import { type EventAttendee, type User } from '../../../gql/generated-types'
 
 @Resolver('EventAttendee')
 export class EventAttendeeFieldResolver {

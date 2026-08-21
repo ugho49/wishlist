@@ -1,4 +1,4 @@
-import { Injectable, OnModuleInit } from '@nestjs/common'
+import { Injectable, type OnModuleInit } from '@nestjs/common'
 import { QueueName, QueueService } from '@wishlist/api/core'
 
 import { ItemNotificationJobName } from './item.type'

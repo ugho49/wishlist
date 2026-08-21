@@ -1,7 +1,7 @@
-import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus } from '@nestjs/common'
+import { type ArgumentsHost, Catch, type ExceptionFilter, HttpException, HttpStatus } from '@nestjs/common'
 import tracer from 'dd-trace'
 import { USER_KEEP } from 'dd-trace/ext/priority'
-import { Response } from 'express'
+import { type Response } from 'express'
 
 @Catch(Error)
 export class GlobalExceptionFilter implements ExceptionFilter {

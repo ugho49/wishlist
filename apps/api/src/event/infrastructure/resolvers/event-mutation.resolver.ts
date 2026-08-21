@@ -3,18 +3,18 @@ import type { ICurrentUser } from '@wishlist/common'
 import { NotFoundException } from '@nestjs/common'
 import { Args, Context, Mutation, Resolver } from '@nestjs/graphql'
 import { GqlCurrentUser } from '@wishlist/api/auth'
-import { GraphQLContext, ZodPipe } from '@wishlist/api/core'
-import { AttendeeId, EventId } from '@wishlist/common'
+import { type GraphQLContext, ZodPipe } from '@wishlist/api/core'
+import { type AttendeeId, type EventId } from '@wishlist/common'
 
 import {
-  AddEventAttendeeInput,
-  AddEventAttendeeResult,
-  CreateEventInput,
-  CreateEventResult,
-  DeleteEventResult,
-  RemoveEventAttendeeResult,
-  UpdateEventInput,
-  UpdateEventResult,
+  type AddEventAttendeeInput,
+  type AddEventAttendeeResult,
+  type CreateEventInput,
+  type CreateEventResult,
+  type DeleteEventResult,
+  type RemoveEventAttendeeResult,
+  type UpdateEventInput,
+  type UpdateEventResult,
 } from '../../../gql/generated-types'
 import { AddAttendeeUseCase } from '../../application/command/add-attendee.use-case'
 import { CreateEventUseCase } from '../../application/command/create-event.use-case'

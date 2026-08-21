@@ -1,7 +1,13 @@
 import { Body, Controller, Delete, Param, Post } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 import { CurrentUser } from '@wishlist/api/auth'
-import { AddEventAttendeeInputDto, AttendeeDto, AttendeeId, EventId, ICurrentUser } from '@wishlist/common'
+import {
+  AddEventAttendeeInputDto,
+  AttendeeDto,
+  type AttendeeId,
+  type EventId,
+  type ICurrentUser,
+} from '@wishlist/common'
 
 import { AddAttendeeUseCase } from '../../application/command/add-attendee.use-case'
 import { DeleteAttendeeUseCase } from '../../application/command/delete-attendee.use-case'

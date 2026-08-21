@@ -3,7 +3,7 @@ import { EventBus } from '@nestjs/cqrs'
 import { TransactionManager } from '@wishlist/api/core'
 import { REPOSITORIES } from '@wishlist/api/repositories'
 
-import { EmailChangedEvent, UserEmailChangeVerificationRepository, UserRepository } from '../../domain'
+import { EmailChangedEvent, type UserEmailChangeVerificationRepository, type UserRepository } from '../../domain'
 
 export type ConfirmEmailChangeInput = {
   newEmail: string

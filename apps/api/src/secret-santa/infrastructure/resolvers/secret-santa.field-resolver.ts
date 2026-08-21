@@ -1,8 +1,8 @@
 import { NotFoundException } from '@nestjs/common'
 import { Context, Parent, ResolveField, Resolver } from '@nestjs/graphql'
-import { GraphQLContext } from '@wishlist/api/core'
+import { type GraphQLContext } from '@wishlist/api/core'
 
-import { Event, EventAttendee, SecretSanta, SecretSantaUser } from '../../../gql/generated-types'
+import { type Event, type EventAttendee, type SecretSanta, type SecretSantaUser } from '../../../gql/generated-types'
 
 @Resolver('SecretSanta')
 export class SecretSantaFieldResolver {

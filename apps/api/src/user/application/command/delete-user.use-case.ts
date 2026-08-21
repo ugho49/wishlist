@@ -1,8 +1,8 @@
 import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common'
 import { REPOSITORIES } from '@wishlist/api/repositories'
-import { ICurrentUser, UserId } from '@wishlist/common'
+import { type ICurrentUser, type UserId } from '@wishlist/common'
 
-import { UserRepository } from '../../domain'
+import { type UserRepository } from '../../domain'
 
 export type DeleteUserInput = {
   currentUser: ICurrentUser

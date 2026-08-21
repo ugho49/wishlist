@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { EventRepository } from '@wishlist/api/event'
+import { type EventRepository } from '@wishlist/api/event'
 import { REPOSITORIES } from '@wishlist/api/repositories'
-import { EventId, ICurrentUser } from '@wishlist/common'
+import { type EventId, type ICurrentUser } from '@wishlist/common'
 
 import { Event } from '../../domain'
 

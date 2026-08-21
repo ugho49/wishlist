@@ -2,7 +2,12 @@ import { Args, Mutation, Resolver } from '@nestjs/graphql'
 import { ZodPipe } from '@wishlist/api/core'
 import { RealIP } from 'nestjs-real-ip'
 
-import { LoginInput, LoginResult, LoginWithGoogleInput, LoginWithGoogleResult } from '../../gql/generated-types'
+import {
+  type LoginInput,
+  type LoginResult,
+  type LoginWithGoogleInput,
+  type LoginWithGoogleResult,
+} from '../../gql/generated-types'
 import { LoginUseCase } from '../application/commands/login.use-case'
 import { LoginWithGoogleUseCase } from '../application/commands/login-with-google.use-case'
 import { LoginInputSchema, LoginWithGoogleInputSchema } from './auth.schema'

@@ -1,10 +1,10 @@
 import { Inject, Logger } from '@nestjs/common'
-import { EventsHandler, IEventHandler } from '@nestjs/cqrs'
+import { EventsHandler, type IEventHandler } from '@nestjs/cqrs'
 import { FrontendRoutesService, MailService, MailTemplate, TransactionManager } from '@wishlist/api/core'
-import { EventAttendeeRepository } from '@wishlist/api/event'
+import { type EventAttendeeRepository } from '@wishlist/api/event'
 import { REPOSITORIES } from '@wishlist/api/repositories'
 
-import { UserCreatedEvent, UserEmailSetting, UserEmailSettingRepository } from '../../domain'
+import { UserCreatedEvent, UserEmailSetting, type UserEmailSettingRepository } from '../../domain'
 
 @EventsHandler(UserCreatedEvent)
 export class UserCreatedHandler implements IEventHandler<UserCreatedEvent> {

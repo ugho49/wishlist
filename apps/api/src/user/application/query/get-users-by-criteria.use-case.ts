@@ -1,9 +1,9 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common'
 import { REPOSITORIES } from '@wishlist/api/repositories'
-import { ICurrentUser, MiniUserDto } from '@wishlist/common'
+import { type ICurrentUser, MiniUserDto } from '@wishlist/common'
 import { isEmpty } from 'lodash'
 
-import { UserRepository } from '../../domain'
+import { type UserRepository } from '../../domain'
 import { userMapper } from '../../infrastructure'
 
 export type GetUsersByCriteriaInput = {

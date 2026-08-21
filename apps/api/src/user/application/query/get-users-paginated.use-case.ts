@@ -1,7 +1,7 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common'
 import { REPOSITORIES } from '@wishlist/api/repositories'
 
-import { User, UserRepository } from '../../domain'
+import { User, type UserRepository } from '../../domain'
 
 export type GetUsersPaginatedInput = {
   criteria?: string

@@ -1,14 +1,14 @@
 import { PaginationFiltersSchema } from '@wishlist/api/core/graphql'
-import { AttendeeId, AttendeeRole, EventId, UserId } from '@wishlist/common'
+import { type AttendeeId, AttendeeRole, type EventId, type UserId } from '@wishlist/common'
 import z from 'zod'
 
 import {
-  AddEventAttendeeInput,
-  AdminEventPaginationFilters,
-  CreateEventInput,
-  EventPaginationFilters,
+  type AddEventAttendeeInput,
+  type AdminEventPaginationFilters,
+  type CreateEventInput,
+  type EventPaginationFilters,
   AttendeeRole as GqlAttendeeRole,
-  UpdateEventInput,
+  type UpdateEventInput,
 } from '../../gql/generated-types'
 
 export const EventIdSchema = z.string().transform(val => val as EventId)

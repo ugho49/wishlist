@@ -1,8 +1,8 @@
 import { ForbiddenException, HttpException, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common'
-import { Plugin } from 'graphql-yoga'
+import { type Plugin } from 'graphql-yoga'
 
 import { BusinessRuleException } from '../common/business-rule.exception'
-import { Rejection } from './rejection.types'
+import { type Rejection } from './rejection.types'
 import { ZodValidationException } from './zod-validation.exception'
 
 function transformException(exception: Error): Rejection {

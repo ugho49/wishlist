@@ -1,8 +1,8 @@
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common'
-import { EventRepository, eventMapper } from '@wishlist/api/event'
+import { type EventRepository, eventMapper } from '@wishlist/api/event'
 import { REPOSITORIES } from '@wishlist/api/repositories'
-import { WishlistRepository } from '@wishlist/api/wishlist'
-import { DetailedEventDto, EventId, ICurrentUser } from '@wishlist/common'
+import { type WishlistRepository } from '@wishlist/api/wishlist'
+import { DetailedEventDto, type EventId, type ICurrentUser } from '@wishlist/common'
 
 export type GetEventByIdInput = {
   currentUser: ICurrentUser
