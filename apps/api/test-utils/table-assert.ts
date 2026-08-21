@@ -1,6 +1,6 @@
 import type { Client } from 'pg'
 
-import { expect } from 'vitest'
+import { expect } from 'bun:test'
 
 type DbAssertion = () => Promise<unknown>
 

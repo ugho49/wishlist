@@ -3,15 +3,15 @@ import type { TableAssertSortOptions } from './table-assert'
 
 import { Logger } from '@nestjs/common'
 import { DatabaseService } from '@wishlist/api/core'
-import axios, { AxiosInstance } from 'axios'
-import pg, { Client } from 'pg'
-import * as request from 'supertest'
-import { afterAll, beforeAll, beforeEach } from 'vitest'
+import axios, { type AxiosInstance } from 'axios'
+import pg from 'pg'
+import request from 'supertest'
 
 import { createApp } from '../src/bootstrap'
 import { Fixtures } from './fixtures'
 import { MailsAssert } from './mail-assert'
 import { TableAssert } from './table-assert'
+import { afterAll, beforeAll, beforeEach } from 'bun:test'
 
 export type RequestApp = InstanceType<(typeof request)['agent']>
 
@@ -25,13 +25,11 @@ pgTypes.setTypeParser(pgTypes.builtins.DATE, value => new Date(value))
 export function useTestApp() {
   let app: INestApplication
   let databaseService: DatabaseService
-  let client: Client
+  let client: pg.Client
   let logger: Logger
   let fixtures: Fixtures
   let needToClearMails = false
-  const http: AxiosInstance = axios.create({
-    baseURL: `http://localhost:${process.env['DOCKER_MAIL_PORT_1080']}`,
-  })
+  let http: AxiosInstance
 
   beforeAll(async () => {
     app = await createApp()
@@ -39,7 +37,7 @@ export function useTestApp() {
     await app.init()
     logger = new Logger('UseTestApp')
 
-    client = new Client({
+    client = new pg.Client({
       host: databaseService.config.host,
       port: databaseService.config.port,
       user: databaseService.config.username,
@@ -49,6 +47,9 @@ export function useTestApp() {
     })
 
     await client.connect()
+    http = axios.create({
+      baseURL: `http://localhost:${process.env['DOCKER_MAIL_PORT_1080']}`,
+    })
     await clearMails()
 
     fixtures = new Fixtures(client)
