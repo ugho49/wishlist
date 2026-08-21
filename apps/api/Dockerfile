@@ -5,7 +5,7 @@ ARG API_VERSION
 
 WORKDIR /app
 
-RUN apk add --no-cache python3 make g++ tzdata \
+RUN apk add --no-cache tzdata \
     && cp /usr/share/zoneinfo/Europe/Paris /etc/localtime \
     && echo "Europe/Paris" > /etc/timezone
 ENV TZ=Europe/Paris

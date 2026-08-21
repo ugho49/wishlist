@@ -1,10 +1,10 @@
 import type { INestApplication } from '@nestjs/common'
+import type { SQL } from 'bun'
 import type { TableAssertSortOptions } from './table-assert'
 
 import { Logger } from '@nestjs/common'
 import { DatabaseService } from '@wishlist/api/core'
 import axios, { type AxiosInstance } from 'axios'
-import pg from 'pg'
 import request from 'supertest'
 
 import { createApp } from '../src/bootstrap'
@@ -17,15 +17,9 @@ export type RequestApp = InstanceType<(typeof request)['agent']>
 
 export type SignedAs = 'BASE_USER' | 'ADMIN_USER'
 
-const pgTypes = pg.types
-
-pgTypes.setTypeParser(pgTypes.builtins.NUMERIC, value => parseFloat(value))
-pgTypes.setTypeParser(pgTypes.builtins.DATE, value => new Date(value))
-
 export function useTestApp() {
   let app: INestApplication
-  let databaseService: DatabaseService
-  let client: pg.Client
+  let sql: SQL
   let logger: Logger
   let fixtures: Fixtures
   let needToClearMails = false
@@ -33,26 +27,17 @@ export function useTestApp() {
 
   beforeAll(async () => {
     app = await createApp()
-    databaseService = app.get<DatabaseService>(DatabaseService)
+    const databaseService = app.get<DatabaseService>(DatabaseService)
     await app.init()
     logger = new Logger('UseTestApp')
 
-    client = new pg.Client({
-      host: databaseService.config.host,
-      port: databaseService.config.port,
-      user: databaseService.config.username,
-      password: databaseService.config.password,
-      database: databaseService.config.database,
-      ssl: false,
-    })
-
-    await client.connect()
+    sql = databaseService.sql
     http = axios.create({
       baseURL: `http://localhost:${process.env['DOCKER_MAIL_PORT_1080']}`,
     })
     await clearMails()
 
-    fixtures = new Fixtures(client)
+    fixtures = new Fixtures(sql)
   })
 
   beforeEach(async () => {
@@ -63,20 +48,19 @@ export function useTestApp() {
   })
 
   afterAll(async () => {
-    await client.end()
     await app.close()
   })
 
   async function truncateDatabase(): Promise<void> {
     logger.log('Truncating database ...')
 
-    const allTables = await client.query(
-      `SELECT schemaname, tablename FROM pg_catalog.pg_tables WHERE schemaname = 'public'`,
-    )
-    const tables = allTables.rows.map(row => `${row.schemaname}.${row.tablename}`)
+    const allTables = await sql<{ schemaname: string; tablename: string }[]>`
+      SELECT schemaname, tablename FROM pg_catalog.pg_tables WHERE schemaname = 'public'
+    `
+    const tables = allTables.map(row => `${row.schemaname}.${row.tablename}`)
 
     for (const table of tables) {
-      await client.query(`TRUNCATE TABLE ${table} CASCADE`)
+      await sql.unsafe(`TRUNCATE TABLE ${table} CASCADE`)
     }
 
     logger.log(`Database truncated (${tables.length} tables) ✅`)
@@ -89,7 +73,7 @@ export function useTestApp() {
   }
 
   return {
-    expectTable: (table: string, sortOptions?: TableAssertSortOptions) => new TableAssert(client, table, sortOptions),
+    expectTable: (table: string, sortOptions?: TableAssertSortOptions) => new TableAssert(sql, table, sortOptions),
     expectMail: () => {
       needToClearMails = true
       return new MailsAssert(http)

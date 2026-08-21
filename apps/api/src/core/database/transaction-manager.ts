@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common'
-import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
-import { DatabaseService, mergedSchema } from './database.service'
+import { DatabaseService, type DrizzleDatabase } from './database.service'
 
-export type DrizzleTransaction = NodePgDatabase<typeof mergedSchema>
+export type DrizzleTransaction = Parameters<Parameters<DrizzleDatabase['transaction']>[0]>[0]
 
 @Injectable()
 export class TransactionManager {
