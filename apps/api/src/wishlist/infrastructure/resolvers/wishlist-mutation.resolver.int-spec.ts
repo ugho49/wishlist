@@ -1,6 +1,6 @@
 import type { RequestApp } from '@wishlist/api-test-utils'
 
-import { Fixtures, useTestApp } from '@wishlist/api-test-utils'
+import { Factories, Tables, useTestApp } from '@wishlist/api-test-utils'
 import { uuid } from '@wishlist/common'
 
 const GRAPHQL_PATH = '/graphql'
@@ -17,11 +17,11 @@ const GRAPHQL_PATH = '/graphql'
  *   other HttpException    -> InternalErrorRejection
  */
 describe('WishlistMutationResolver (GraphQL)', () => {
-  const { getRequest, getFixtures, expectTable } = useTestApp()
-  let fixtures: Fixtures
+  const { getRequest, getFactories, expectTable } = useTestApp()
+  let factories: Factories
 
   beforeEach(() => {
-    fixtures = getFixtures()
+    factories = getFactories()
   })
 
   // ---------------------------------------------------------------------------
@@ -64,18 +64,20 @@ describe('WishlistMutationResolver (GraphQL)', () => {
 
       beforeEach(async () => {
         request = await getRequest({ signedAs: 'BASE_USER' })
-        currentUserId = await fixtures.getSignedUserId('BASE_USER')
+        currentUserId = await factories.getSignedUserId('BASE_USER')
       })
 
       it('should update the wishlist successfully', async () => {
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Test Event',
           maintainerId: currentUserId,
         })
 
-        const wishlistId = await fixtures.insertWishlist({
+        const { id: wishlistId } = await factories.wishlist.create({
           eventIds: [eventId],
-          userId: currentUserId,
+          ownerId: currentUserId,
           title: 'Original',
           description: 'Original description',
         })
@@ -90,7 +92,7 @@ describe('WishlistMutationResolver (GraphQL)', () => {
 
         expect(res.body.data.updateWishlist).toEqual({ __typename: 'VoidOutput', success: true })
 
-        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+        await expectTable(Tables.WISHLIST).hasNumberOfRows(1).row(0).toMatchObject({
           id: wishlistId,
           title: 'Updated',
           description: 'Updated description',
@@ -107,14 +109,16 @@ describe('WishlistMutationResolver (GraphQL)', () => {
           field: 'description',
         },
       ])('should return ValidationRejection when invalid input: $case', async ({ input, field }) => {
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Test Event',
           maintainerId: currentUserId,
         })
 
-        const wishlistId = await fixtures.insertWishlist({
+        const { id: wishlistId } = await factories.wishlist.create({
           eventIds: [eventId],
-          userId: currentUserId,
+          ownerId: currentUserId,
           title: 'Original',
         })
 
@@ -128,7 +132,7 @@ describe('WishlistMutationResolver (GraphQL)', () => {
           expect.arrayContaining([expect.objectContaining({ field })]),
         )
 
-        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+        await expectTable(Tables.WISHLIST).hasNumberOfRows(1).row(0).toMatchObject({
           id: wishlistId,
           title: 'Original',
         })
@@ -144,20 +148,22 @@ describe('WishlistMutationResolver (GraphQL)', () => {
       })
 
       it('should return UnauthorizedRejection when user is not owner/co-owner', async () => {
-        const otherUserId = await fixtures.insertUser({
+        const { id: otherUserId } = await factories.user.create({
           email: 'other@test.com',
-          firstname: 'Other',
-          lastname: 'User',
+          firstName: 'Other',
+          lastName: 'User',
         })
 
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Other Event',
           maintainerId: otherUserId,
         })
 
-        const wishlistId = await fixtures.insertWishlist({
+        const { id: wishlistId } = await factories.wishlist.create({
           eventIds: [eventId],
-          userId: otherUserId,
+          ownerId: otherUserId,
           title: 'Other Wishlist',
         })
 
@@ -168,7 +174,7 @@ describe('WishlistMutationResolver (GraphQL)', () => {
 
         expect(res.body.data.updateWishlist.__typename).toBe('UnauthorizedRejection')
 
-        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+        await expectTable(Tables.WISHLIST).hasNumberOfRows(1).row(0).toMatchObject({
           id: wishlistId,
           title: 'Other Wishlist',
         })
@@ -210,18 +216,20 @@ describe('WishlistMutationResolver (GraphQL)', () => {
 
       beforeEach(async () => {
         request = await getRequest({ signedAs: 'BASE_USER' })
-        currentUserId = await fixtures.getSignedUserId('BASE_USER')
+        currentUserId = await factories.getSignedUserId('BASE_USER')
       })
 
       it('should delete the wishlist successfully', async () => {
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Test Event',
           maintainerId: currentUserId,
         })
 
-        const wishlistId = await fixtures.insertWishlist({
+        const { id: wishlistId } = await factories.wishlist.create({
           eventIds: [eventId],
-          userId: currentUserId,
+          ownerId: currentUserId,
           title: 'My Wishlist',
         })
 
@@ -232,7 +240,7 @@ describe('WishlistMutationResolver (GraphQL)', () => {
 
         expect(res.body.data.deleteWishlist).toEqual({ __typename: 'VoidOutput', success: true })
 
-        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(0)
+        await expectTable(Tables.WISHLIST).hasNumberOfRows(0)
       })
 
       it('should return NotFoundRejection when wishlist does not exist', async () => {
@@ -245,20 +253,22 @@ describe('WishlistMutationResolver (GraphQL)', () => {
       })
 
       it('should return UnauthorizedRejection when user is not owner/co-owner and not delete it', async () => {
-        const otherUserId = await fixtures.insertUser({
+        const { id: otherUserId } = await factories.user.create({
           email: 'other@test.com',
-          firstname: 'Other',
-          lastname: 'User',
+          firstName: 'Other',
+          lastName: 'User',
         })
 
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Other Event',
           maintainerId: otherUserId,
         })
 
-        const wishlistId = await fixtures.insertWishlist({
+        const { id: wishlistId } = await factories.wishlist.create({
           eventIds: [eventId],
-          userId: otherUserId,
+          ownerId: otherUserId,
           title: 'Other Wishlist',
         })
 
@@ -269,7 +279,7 @@ describe('WishlistMutationResolver (GraphQL)', () => {
 
         expect(res.body.data.deleteWishlist.__typename).toBe('UnauthorizedRejection')
 
-        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1)
+        await expectTable(Tables.WISHLIST).hasNumberOfRows(1)
       })
     })
   })
@@ -308,23 +318,27 @@ describe('WishlistMutationResolver (GraphQL)', () => {
 
       beforeEach(async () => {
         request = await getRequest({ signedAs: 'BASE_USER' })
-        currentUserId = await fixtures.getSignedUserId('BASE_USER')
+        currentUserId = await factories.getSignedUserId('BASE_USER')
       })
 
       it('should link the wishlist to another event successfully', async () => {
-        const { eventId: firstEventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: firstEventId },
+        } = await factories.event.createWithMaintainer({
           title: 'First Event',
           maintainerId: currentUserId,
         })
 
-        const { eventId: secondEventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: secondEventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Second Event',
           maintainerId: currentUserId,
         })
 
-        const wishlistId = await fixtures.insertWishlist({
+        const { id: wishlistId } = await factories.wishlist.create({
           eventIds: [firstEventId],
-          userId: currentUserId,
+          ownerId: currentUserId,
           title: 'My Wishlist',
         })
 
@@ -335,11 +349,13 @@ describe('WishlistMutationResolver (GraphQL)', () => {
 
         expect(res.body.data.linkWishlistToEvent).toEqual({ __typename: 'VoidOutput', success: true })
 
-        await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(2)
+        await expectTable(Tables.EVENT_WISHLIST).hasNumberOfRows(2)
       })
 
       it('should return NotFoundRejection when wishlist does not exist', async () => {
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Event',
           maintainerId: currentUserId,
         })
@@ -353,24 +369,28 @@ describe('WishlistMutationResolver (GraphQL)', () => {
       })
 
       it('should return UnauthorizedRejection when user is not owner/co-owner', async () => {
-        const otherUserId = await fixtures.insertUser({
+        const { id: otherUserId } = await factories.user.create({
           email: 'other@test.com',
-          firstname: 'Other',
-          lastname: 'User',
+          firstName: 'Other',
+          lastName: 'User',
         })
 
-        const { eventId: otherEventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: otherEventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Other Event',
           maintainerId: otherUserId,
         })
 
-        const wishlistId = await fixtures.insertWishlist({
+        const { id: wishlistId } = await factories.wishlist.create({
           eventIds: [otherEventId],
-          userId: otherUserId,
+          ownerId: otherUserId,
           title: 'Other Wishlist',
         })
 
-        const { eventId: myEventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: myEventId },
+        } = await factories.event.createWithMaintainer({
           title: 'My Event',
           maintainerId: currentUserId,
         })
@@ -382,7 +402,7 @@ describe('WishlistMutationResolver (GraphQL)', () => {
 
         expect(res.body.data.linkWishlistToEvent.__typename).toBe('UnauthorizedRejection')
 
-        await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(1)
+        await expectTable(Tables.EVENT_WISHLIST).hasNumberOfRows(1)
       })
     })
   })
@@ -421,23 +441,27 @@ describe('WishlistMutationResolver (GraphQL)', () => {
 
       beforeEach(async () => {
         request = await getRequest({ signedAs: 'BASE_USER' })
-        currentUserId = await fixtures.getSignedUserId('BASE_USER')
+        currentUserId = await factories.getSignedUserId('BASE_USER')
       })
 
       it('should unlink the wishlist from an event successfully (keeping at least one)', async () => {
-        const { eventId: firstEventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: firstEventId },
+        } = await factories.event.createWithMaintainer({
           title: 'First Event',
           maintainerId: currentUserId,
         })
 
-        const { eventId: secondEventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: secondEventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Second Event',
           maintainerId: currentUserId,
         })
 
-        const wishlistId = await fixtures.insertWishlist({
+        const { id: wishlistId } = await factories.wishlist.create({
           eventIds: [firstEventId, secondEventId],
-          userId: currentUserId,
+          ownerId: currentUserId,
           title: 'My Wishlist',
         })
 
@@ -448,7 +472,7 @@ describe('WishlistMutationResolver (GraphQL)', () => {
 
         expect(res.body.data.unlinkWishlistFromEvent).toEqual({ __typename: 'VoidOutput', success: true })
 
-        await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+        await expectTable(Tables.EVENT_WISHLIST).hasNumberOfRows(1).row(0).toMatchObject({
           event_id: firstEventId,
           wishlist_id: wishlistId,
         })
@@ -464,25 +488,29 @@ describe('WishlistMutationResolver (GraphQL)', () => {
       })
 
       it('should return UnauthorizedRejection when user is not owner/co-owner', async () => {
-        const otherUserId = await fixtures.insertUser({
+        const { id: otherUserId } = await factories.user.create({
           email: 'other@test.com',
-          firstname: 'Other',
-          lastname: 'User',
+          firstName: 'Other',
+          lastName: 'User',
         })
 
-        const { eventId: firstEventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: firstEventId },
+        } = await factories.event.createWithMaintainer({
           title: 'First Event',
           maintainerId: otherUserId,
         })
 
-        const { eventId: secondEventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: secondEventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Second Event',
           maintainerId: otherUserId,
         })
 
-        const wishlistId = await fixtures.insertWishlist({
+        const { id: wishlistId } = await factories.wishlist.create({
           eventIds: [firstEventId, secondEventId],
-          userId: otherUserId,
+          ownerId: otherUserId,
           title: 'Other Wishlist',
         })
 
@@ -493,7 +521,7 @@ describe('WishlistMutationResolver (GraphQL)', () => {
 
         expect(res.body.data.unlinkWishlistFromEvent.__typename).toBe('UnauthorizedRejection')
 
-        await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(2)
+        await expectTable(Tables.EVENT_WISHLIST).hasNumberOfRows(2)
       })
     })
   })
@@ -532,24 +560,26 @@ describe('WishlistMutationResolver (GraphQL)', () => {
 
       beforeEach(async () => {
         request = await getRequest({ signedAs: 'BASE_USER' })
-        currentUserId = await fixtures.getSignedUserId('BASE_USER')
+        currentUserId = await factories.getSignedUserId('BASE_USER')
       })
 
       it('should add a co-owner to a public wishlist successfully', async () => {
-        const coOwnerId = await fixtures.insertUser({
+        const { id: coOwnerId } = await factories.user.create({
           email: 'coowner@test.com',
-          firstname: 'Co',
-          lastname: 'Owner',
+          firstName: 'Co',
+          lastName: 'Owner',
         })
 
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Test Event',
           maintainerId: currentUserId,
         })
 
-        const wishlistId = await fixtures.insertWishlist({
+        const { id: wishlistId } = await factories.wishlist.create({
           eventIds: [eventId],
-          userId: currentUserId,
+          ownerId: currentUserId,
           title: 'Public Wishlist',
           hideItems: false,
         })
@@ -561,17 +591,17 @@ describe('WishlistMutationResolver (GraphQL)', () => {
 
         expect(res.body.data.addWishlistCoOwner).toEqual({ __typename: 'VoidOutput', success: true })
 
-        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+        await expectTable(Tables.WISHLIST).hasNumberOfRows(1).row(0).toMatchObject({
           id: wishlistId,
           co_owner_id: coOwnerId,
         })
       })
 
       it('should return NotFoundRejection when wishlist does not exist', async () => {
-        const coOwnerId = await fixtures.insertUser({
+        const { id: coOwnerId } = await factories.user.create({
           email: 'coowner@test.com',
-          firstname: 'Co',
-          lastname: 'Owner',
+          firstName: 'Co',
+          lastName: 'Owner',
         })
 
         const res = await request
@@ -583,26 +613,28 @@ describe('WishlistMutationResolver (GraphQL)', () => {
       })
 
       it('should return UnauthorizedRejection when user is not the owner', async () => {
-        const otherUserId = await fixtures.insertUser({
+        const { id: otherUserId } = await factories.user.create({
           email: 'other@test.com',
-          firstname: 'Other',
-          lastname: 'User',
+          firstName: 'Other',
+          lastName: 'User',
         })
 
-        const coOwnerId = await fixtures.insertUser({
+        const { id: coOwnerId } = await factories.user.create({
           email: 'coowner@test.com',
-          firstname: 'Co',
-          lastname: 'Owner',
+          firstName: 'Co',
+          lastName: 'Owner',
         })
 
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Other Event',
           maintainerId: otherUserId,
         })
 
-        const wishlistId = await fixtures.insertWishlist({
+        const { id: wishlistId } = await factories.wishlist.create({
           eventIds: [eventId],
-          userId: otherUserId,
+          ownerId: otherUserId,
           title: 'Other Wishlist',
           hideItems: false,
         })
@@ -614,7 +646,7 @@ describe('WishlistMutationResolver (GraphQL)', () => {
 
         expect(res.body.data.addWishlistCoOwner.__typename).toBe('UnauthorizedRejection')
 
-        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+        await expectTable(Tables.WISHLIST).hasNumberOfRows(1).row(0).toMatchObject({
           id: wishlistId,
           co_owner_id: null,
         })
@@ -656,24 +688,26 @@ describe('WishlistMutationResolver (GraphQL)', () => {
 
       beforeEach(async () => {
         request = await getRequest({ signedAs: 'BASE_USER' })
-        currentUserId = await fixtures.getSignedUserId('BASE_USER')
+        currentUserId = await factories.getSignedUserId('BASE_USER')
       })
 
       it('should remove the co-owner successfully', async () => {
-        const coOwnerId = await fixtures.insertUser({
+        const { id: coOwnerId } = await factories.user.create({
           email: 'coowner@test.com',
-          firstname: 'Co',
-          lastname: 'Owner',
+          firstName: 'Co',
+          lastName: 'Owner',
         })
 
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Test Event',
           maintainerId: currentUserId,
         })
 
-        const wishlistId = await fixtures.insertWishlist({
+        const { id: wishlistId } = await factories.wishlist.create({
           eventIds: [eventId],
-          userId: currentUserId,
+          ownerId: currentUserId,
           title: 'Public Wishlist',
           hideItems: false,
           coOwnerId,
@@ -686,7 +720,7 @@ describe('WishlistMutationResolver (GraphQL)', () => {
 
         expect(res.body.data.removeWishlistCoOwner).toEqual({ __typename: 'VoidOutput', success: true })
 
-        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+        await expectTable(Tables.WISHLIST).hasNumberOfRows(1).row(0).toMatchObject({
           id: wishlistId,
           co_owner_id: null,
         })
@@ -702,26 +736,28 @@ describe('WishlistMutationResolver (GraphQL)', () => {
       })
 
       it('should return UnauthorizedRejection when user is not the owner', async () => {
-        const otherUserId = await fixtures.insertUser({
+        const { id: otherUserId } = await factories.user.create({
           email: 'other@test.com',
-          firstname: 'Other',
-          lastname: 'User',
+          firstName: 'Other',
+          lastName: 'User',
         })
 
-        const coOwnerId = await fixtures.insertUser({
+        const { id: coOwnerId } = await factories.user.create({
           email: 'coowner@test.com',
-          firstname: 'Co',
-          lastname: 'Owner',
+          firstName: 'Co',
+          lastName: 'Owner',
         })
 
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Other Event',
           maintainerId: otherUserId,
         })
 
-        const wishlistId = await fixtures.insertWishlist({
+        const { id: wishlistId } = await factories.wishlist.create({
           eventIds: [eventId],
-          userId: otherUserId,
+          ownerId: otherUserId,
           title: 'Other Wishlist',
           hideItems: false,
           coOwnerId,
@@ -734,7 +770,7 @@ describe('WishlistMutationResolver (GraphQL)', () => {
 
         expect(res.body.data.removeWishlistCoOwner.__typename).toBe('UnauthorizedRejection')
 
-        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+        await expectTable(Tables.WISHLIST).hasNumberOfRows(1).row(0).toMatchObject({
           id: wishlistId,
           co_owner_id: coOwnerId,
         })
@@ -776,18 +812,20 @@ describe('WishlistMutationResolver (GraphQL)', () => {
 
       beforeEach(async () => {
         request = await getRequest({ signedAs: 'BASE_USER' })
-        currentUserId = await fixtures.getSignedUserId('BASE_USER')
+        currentUserId = await factories.getSignedUserId('BASE_USER')
       })
 
       it('should remove the wishlist logo successfully', async () => {
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Test Event',
           maintainerId: currentUserId,
         })
 
-        const wishlistId = await fixtures.insertWishlist({
+        const { id: wishlistId } = await factories.wishlist.create({
           eventIds: [eventId],
-          userId: currentUserId,
+          ownerId: currentUserId,
           title: 'My Wishlist',
         })
 
@@ -798,7 +836,7 @@ describe('WishlistMutationResolver (GraphQL)', () => {
 
         expect(res.body.data.removeWishlistLogo).toEqual({ __typename: 'VoidOutput', success: true })
 
-        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+        await expectTable(Tables.WISHLIST).hasNumberOfRows(1).row(0).toMatchObject({
           id: wishlistId,
           logo_url: null,
         })
@@ -814,20 +852,22 @@ describe('WishlistMutationResolver (GraphQL)', () => {
       })
 
       it('should return UnauthorizedRejection when user is not owner/co-owner', async () => {
-        const otherUserId = await fixtures.insertUser({
+        const { id: otherUserId } = await factories.user.create({
           email: 'other@test.com',
-          firstname: 'Other',
-          lastname: 'User',
+          firstName: 'Other',
+          lastName: 'User',
         })
 
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Other Event',
           maintainerId: otherUserId,
         })
 
-        const wishlistId = await fixtures.insertWishlist({
+        const { id: wishlistId } = await factories.wishlist.create({
           eventIds: [eventId],
-          userId: otherUserId,
+          ownerId: otherUserId,
           title: 'Other Wishlist',
         })
 

@@ -1,20 +1,20 @@
 import type { RequestApp } from '@wishlist/api-test-utils'
 
-import { Fixtures, useTestApp } from '@wishlist/api-test-utils'
+import { BASE_USER_EMAIL, Factories, Tables, useTestApp } from '@wishlist/api-test-utils'
 import { SecretSantaStatus, uuid } from '@wishlist/common'
 
 const SUCCESS_TYPENAMES = ['SecretSanta', 'EventAttendee', 'VoidOutput', 'AddSecretSantaUsersOutput']
 
 describe('SecretSantaResolver (GraphQL)', () => {
-  const { getRequest, getFixtures, expectTable, expectMail } = useTestApp()
-  let fixtures: Fixtures
+  const { getRequest, getFactories, expectTable, expectMail } = useTestApp()
+  let factories: Factories
   let request: RequestApp
   let currentUserId: string
 
   beforeEach(async () => {
-    fixtures = getFixtures()
+    factories = getFactories()
     request = await getRequest({ signedAs: 'BASE_USER' })
-    currentUserId = await fixtures.getSignedUserId('BASE_USER')
+    currentUserId = await factories.getSignedUserId('BASE_USER')
   })
 
   // Asserts the operation did NOT return a success payload (rejection or top-level error)
@@ -64,7 +64,9 @@ describe('SecretSantaResolver (GraphQL)', () => {
     })
 
     it('should return null when no secret santa exists for event', async () => {
-      const { eventId } = await fixtures.insertEventWithMaintainer({
+      const {
+        event: { id: eventId },
+      } = await factories.event.createWithMaintainer({
         title: 'Test Event',
         description: 'Test Description',
         maintainerId: currentUserId,
@@ -76,13 +78,15 @@ describe('SecretSantaResolver (GraphQL)', () => {
     })
 
     it('should return secret santa with resolved event when current user is maintainer', async () => {
-      const { eventId } = await fixtures.insertEventWithMaintainer({
+      const {
+        event: { id: eventId },
+      } = await factories.event.createWithMaintainer({
         title: 'Test Event',
         description: 'Test Description',
         maintainerId: currentUserId,
       })
 
-      const secretSantaId = await fixtures.insertSecretSanta({
+      const { id: secretSantaId } = await factories.secretSanta.create({
         eventId,
         description: 'Secret Santa Description',
         budget: 50,
@@ -108,19 +112,21 @@ describe('SecretSantaResolver (GraphQL)', () => {
     })
 
     it('should return ForbiddenRejection when current user is not part of event', async () => {
-      const otherUserId = await fixtures.insertUser({
+      const { id: otherUserId } = await factories.user.create({
         email: 'other@test.fr',
-        firstname: 'Other',
-        lastname: 'User',
+        firstName: 'Other',
+        lastName: 'User',
       })
 
-      const { eventId } = await fixtures.insertEventWithMaintainer({
+      const {
+        event: { id: eventId },
+      } = await factories.event.createWithMaintainer({
         title: 'Test Event',
         description: 'Test Description',
         maintainerId: otherUserId,
       })
 
-      await fixtures.insertSecretSanta({
+      await factories.secretSanta.create({
         eventId,
         description: 'Secret Santa Description',
         budget: 50,
@@ -164,18 +170,21 @@ describe('SecretSantaResolver (GraphQL)', () => {
     })
 
     it('should return null when secret santa is not started and user has no draw', async () => {
-      const { eventId, attendeeId } = await fixtures.insertEventWithMaintainer({
+      const {
+        event: { id: eventId },
+        attendee: { id: attendeeId },
+      } = await factories.event.createWithMaintainer({
         title: 'Test Event',
         description: 'Test Description',
         maintainerId: currentUserId,
       })
 
-      const secretSantaId = await fixtures.insertSecretSanta({
+      const { id: secretSantaId } = await factories.secretSanta.create({
         eventId,
         status: SecretSantaStatus.CREATED,
       })
 
-      await fixtures.insertSecretSantaUser({ secretSantaId, attendeeId })
+      await factories.secretSantaUser.create({ secretSantaId, attendeeId })
 
       const res = await request.post('/graphql').send({ query, variables: { eventId } }).expect(200)
 
@@ -183,30 +192,33 @@ describe('SecretSantaResolver (GraphQL)', () => {
     })
 
     it('should return draw with resolved attendee/user when started and user has a draw', async () => {
-      const { eventId, attendeeId } = await fixtures.insertEventWithMaintainer({
+      const {
+        event: { id: eventId },
+        attendee: { id: attendeeId },
+      } = await factories.event.createWithMaintainer({
         title: 'Test Event',
         description: 'Test Description',
         maintainerId: currentUserId,
       })
 
-      const targetUserId = await fixtures.insertUser({
+      const { id: targetUserId } = await factories.user.create({
         email: 'target@test.fr',
-        firstname: 'Target',
-        lastname: 'User',
+        firstName: 'Target',
+        lastName: 'User',
       })
-      const targetAttendeeId = await fixtures.insertActiveAttendee({ eventId, userId: targetUserId })
+      const { id: targetAttendeeId } = await factories.eventAttendee.create({ eventId, userId: targetUserId })
 
-      const secretSantaId = await fixtures.insertSecretSanta({
+      const { id: secretSantaId } = await factories.secretSanta.create({
         eventId,
         status: SecretSantaStatus.STARTED,
       })
 
-      const targetSecretSantaUserId = await fixtures.insertSecretSantaUser({
+      const { id: targetSecretSantaUserId } = await factories.secretSantaUser.create({
         secretSantaId,
         attendeeId: targetAttendeeId,
       })
 
-      await fixtures.insertSecretSantaUser({
+      await factories.secretSantaUser.create({
         secretSantaId,
         attendeeId,
         drawUserId: targetSecretSantaUserId,
@@ -270,11 +282,13 @@ describe('SecretSantaResolver (GraphQL)', () => {
         .expect(200)
 
       expectNotSuccess(res, 'createSecretSanta')
-      await expectTable(Fixtures.SECRET_SANTA_TABLE).hasNumberOfRows(0)
+      await expectTable(Tables.SECRET_SANTA).hasNumberOfRows(0)
     })
 
     it('should create secret santa with resolved event when user is event maintainer', async () => {
-      const { eventId } = await fixtures.insertEventWithMaintainer({
+      const {
+        event: { id: eventId },
+      } = await factories.event.createWithMaintainer({
         title: 'Test Event',
         description: 'Test Description',
         maintainerId: currentUserId,
@@ -300,7 +314,7 @@ describe('SecretSantaResolver (GraphQL)', () => {
         },
       })
 
-      await expectTable(Fixtures.SECRET_SANTA_TABLE).hasNumberOfRows(1).row(0).toEqual({
+      await expectTable(Tables.SECRET_SANTA).hasNumberOfRows(1).row(0).toEqual({
         id: res.body.data.createSecretSanta.id,
         event_id: eventId,
         description: 'Test Secret Santa',
@@ -326,7 +340,7 @@ describe('SecretSantaResolver (GraphQL)', () => {
       const res = await request.post('/graphql').send({ query, variables: { input } })
 
       expectNotSuccess(res, 'createSecretSanta')
-      await expectTable(Fixtures.SECRET_SANTA_TABLE).hasNumberOfRows(0)
+      await expectTable(Tables.SECRET_SANTA).hasNumberOfRows(0)
     })
 
     it.each([
@@ -335,7 +349,9 @@ describe('SecretSantaResolver (GraphQL)', () => {
     ])('should return ValidationRejection when budget is not positive ($budget) (parity with REST @IsPositive)', async ({
       budget,
     }) => {
-      const { eventId } = await fixtures.insertEventWithMaintainer({
+      const {
+        event: { id: eventId },
+      } = await factories.event.createWithMaintainer({
         title: 'Test Event',
         description: 'Test Description',
         maintainerId: currentUserId,
@@ -347,17 +363,19 @@ describe('SecretSantaResolver (GraphQL)', () => {
         .expect(200)
 
       expect(res.body.data.createSecretSanta.__typename).toBe('ValidationRejection')
-      await expectTable(Fixtures.SECRET_SANTA_TABLE).hasNumberOfRows(0)
+      await expectTable(Tables.SECRET_SANTA).hasNumberOfRows(0)
     })
 
     it('should return ForbiddenRejection and not change db when user is not in event', async () => {
-      const otherUserId = await fixtures.insertUser({
+      const { id: otherUserId } = await factories.user.create({
         email: 'other@test.fr',
-        firstname: 'Other',
-        lastname: 'User',
+        firstName: 'Other',
+        lastName: 'User',
       })
 
-      const { eventId } = await fixtures.insertEventWithMaintainer({
+      const {
+        event: { id: eventId },
+      } = await factories.event.createWithMaintainer({
         title: 'Test Event',
         description: 'Test Description',
         maintainerId: otherUserId,
@@ -369,17 +387,19 @@ describe('SecretSantaResolver (GraphQL)', () => {
         .expect(200)
 
       expect(res.body.data.createSecretSanta).toMatchObject({ __typename: 'ForbiddenRejection' })
-      await expectTable(Fixtures.SECRET_SANTA_TABLE).hasNumberOfRows(0)
+      await expectTable(Tables.SECRET_SANTA).hasNumberOfRows(0)
     })
 
     it('should not succeed when secret santa already exists for event', async () => {
-      const { eventId } = await fixtures.insertEventWithMaintainer({
+      const {
+        event: { id: eventId },
+      } = await factories.event.createWithMaintainer({
         title: 'Test Event',
         description: 'Test Description',
         maintainerId: currentUserId,
       })
 
-      await fixtures.insertSecretSanta({ eventId, status: SecretSantaStatus.CREATED })
+      await factories.secretSanta.create({ eventId, status: SecretSantaStatus.CREATED })
 
       const res = await request
         .post('/graphql')
@@ -387,7 +407,7 @@ describe('SecretSantaResolver (GraphQL)', () => {
         .expect(200)
 
       expectNotSuccess(res, 'createSecretSanta')
-      await expectTable(Fixtures.SECRET_SANTA_TABLE).hasNumberOfRows(1)
+      await expectTable(Tables.SECRET_SANTA).hasNumberOfRows(1)
     })
   })
 
@@ -418,13 +438,15 @@ describe('SecretSantaResolver (GraphQL)', () => {
     })
 
     it('should update secret santa when user is maintainer', async () => {
-      const { eventId } = await fixtures.insertEventWithMaintainer({
+      const {
+        event: { id: eventId },
+      } = await factories.event.createWithMaintainer({
         title: 'Test Event',
         description: 'Test Description',
         maintainerId: currentUserId,
       })
 
-      const secretSantaId = await fixtures.insertSecretSanta({
+      const { id: secretSantaId } = await factories.secretSanta.create({
         eventId,
         description: 'Original Description',
         budget: 50,
@@ -438,7 +460,7 @@ describe('SecretSantaResolver (GraphQL)', () => {
 
       expect(res.body.data.updateSecretSanta).toMatchObject({ __typename: 'VoidOutput', success: true })
 
-      await expectTable(Fixtures.SECRET_SANTA_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+      await expectTable(Tables.SECRET_SANTA).hasNumberOfRows(1).row(0).toMatchObject({
         id: secretSantaId,
         description: 'Updated Description',
         budget: 100,
@@ -446,19 +468,21 @@ describe('SecretSantaResolver (GraphQL)', () => {
     })
 
     it('should return ForbiddenRejection and not change db when user is not maintainer', async () => {
-      const otherUserId = await fixtures.insertUser({
+      const { id: otherUserId } = await factories.user.create({
         email: 'other@test.fr',
-        firstname: 'Other',
-        lastname: 'User',
+        firstName: 'Other',
+        lastName: 'User',
       })
 
-      const { eventId } = await fixtures.insertEventWithMaintainer({
+      const {
+        event: { id: eventId },
+      } = await factories.event.createWithMaintainer({
         title: 'Test Event',
         description: 'Test Description',
         maintainerId: otherUserId,
       })
 
-      const secretSantaId = await fixtures.insertSecretSanta({
+      const { id: secretSantaId } = await factories.secretSanta.create({
         eventId,
         description: 'Original Description',
         status: SecretSantaStatus.CREATED,
@@ -470,20 +494,22 @@ describe('SecretSantaResolver (GraphQL)', () => {
         .expect(200)
 
       expect(res.body.data.updateSecretSanta).toMatchObject({ __typename: 'ForbiddenRejection' })
-      await expectTable(Fixtures.SECRET_SANTA_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+      await expectTable(Tables.SECRET_SANTA).hasNumberOfRows(1).row(0).toMatchObject({
         id: secretSantaId,
         description: 'Original Description',
       })
     })
 
     it('should not succeed when secret santa is already started', async () => {
-      const { eventId } = await fixtures.insertEventWithMaintainer({
+      const {
+        event: { id: eventId },
+      } = await factories.event.createWithMaintainer({
         title: 'Test Event',
         description: 'Test Description',
         maintainerId: currentUserId,
       })
 
-      const secretSantaId = await fixtures.insertSecretSanta({
+      const { id: secretSantaId } = await factories.secretSanta.create({
         eventId,
         status: SecretSantaStatus.STARTED,
       })
@@ -524,13 +550,15 @@ describe('SecretSantaResolver (GraphQL)', () => {
     })
 
     it('should delete secret santa when user is maintainer', async () => {
-      const { eventId } = await fixtures.insertEventWithMaintainer({
+      const {
+        event: { id: eventId },
+      } = await factories.event.createWithMaintainer({
         title: 'Test Event',
         description: 'Test Description',
         maintainerId: currentUserId,
       })
 
-      const secretSantaId = await fixtures.insertSecretSanta({
+      const { id: secretSantaId } = await factories.secretSanta.create({
         eventId,
         status: SecretSantaStatus.CREATED,
       })
@@ -541,17 +569,19 @@ describe('SecretSantaResolver (GraphQL)', () => {
         .expect(200)
 
       expect(res.body.data.deleteSecretSanta).toMatchObject({ __typename: 'VoidOutput', success: true })
-      await expectTable(Fixtures.SECRET_SANTA_TABLE).hasNumberOfRows(0)
+      await expectTable(Tables.SECRET_SANTA).hasNumberOfRows(0)
     })
 
     it('should not succeed and not change db when secret santa is started', async () => {
-      const { eventId } = await fixtures.insertEventWithMaintainer({
+      const {
+        event: { id: eventId },
+      } = await factories.event.createWithMaintainer({
         title: 'Test Event',
         description: 'Test Description',
         maintainerId: currentUserId,
       })
 
-      const secretSantaId = await fixtures.insertSecretSanta({
+      const { id: secretSantaId } = await factories.secretSanta.create({
         eventId,
         status: SecretSantaStatus.STARTED,
       })
@@ -562,23 +592,25 @@ describe('SecretSantaResolver (GraphQL)', () => {
         .expect(200)
 
       expectNotSuccess(res, 'deleteSecretSanta')
-      await expectTable(Fixtures.SECRET_SANTA_TABLE).hasNumberOfRows(1)
+      await expectTable(Tables.SECRET_SANTA).hasNumberOfRows(1)
     })
 
     it('should return ForbiddenRejection and not change db when user is not maintainer', async () => {
-      const otherUserId = await fixtures.insertUser({
+      const { id: otherUserId } = await factories.user.create({
         email: 'other@test.fr',
-        firstname: 'Other',
-        lastname: 'User',
+        firstName: 'Other',
+        lastName: 'User',
       })
 
-      const { eventId } = await fixtures.insertEventWithMaintainer({
+      const {
+        event: { id: eventId },
+      } = await factories.event.createWithMaintainer({
         title: 'Test Event',
         description: 'Test Description',
         maintainerId: otherUserId,
       })
 
-      const secretSantaId = await fixtures.insertSecretSanta({
+      const { id: secretSantaId } = await factories.secretSanta.create({
         eventId,
         status: SecretSantaStatus.CREATED,
       })
@@ -589,7 +621,7 @@ describe('SecretSantaResolver (GraphQL)', () => {
         .expect(200)
 
       expect(res.body.data.deleteSecretSanta).toMatchObject({ __typename: 'ForbiddenRejection' })
-      await expectTable(Fixtures.SECRET_SANTA_TABLE).hasNumberOfRows(1)
+      await expectTable(Tables.SECRET_SANTA).hasNumberOfRows(1)
     })
   })
 
@@ -626,33 +658,40 @@ describe('SecretSantaResolver (GraphQL)', () => {
     })
 
     it('should start secret santa and send emails when user is maintainer and min users added', async () => {
-      const { eventId, attendeeId: maintainerAttendeeId } = await fixtures.insertEventWithMaintainer({
+      const {
+        event: { id: eventId },
+        attendee: { id: maintainerAttendeeId },
+      } = await factories.event.createWithMaintainer({
         title: 'Test Event',
         description: 'Test Description',
         maintainerId: currentUserId,
       })
 
-      const { attendeeId: attendee2Id } = await fixtures.insertUserAndAddItToEventAsAttendee({
+      const {
+        attendee: { id: attendee2Id },
+      } = await factories.user.createAndJoinEvent({
         email: 'user2@test.fr',
-        firstname: 'User2',
-        lastname: 'Test',
+        firstName: 'User2',
+        lastName: 'Test',
         eventId,
       })
-      const { attendeeId: attendee3Id } = await fixtures.insertUserAndAddItToEventAsAttendee({
+      const {
+        attendee: { id: attendee3Id },
+      } = await factories.user.createAndJoinEvent({
         email: 'user3@test.fr',
-        firstname: 'User3',
-        lastname: 'Test',
+        firstName: 'User3',
+        lastName: 'Test',
         eventId,
       })
 
-      const secretSantaId = await fixtures.insertSecretSanta({
+      const { id: secretSantaId } = await factories.secretSanta.create({
         eventId,
         status: SecretSantaStatus.CREATED,
       })
 
-      await fixtures.insertSecretSantaUser({ secretSantaId, attendeeId: maintainerAttendeeId })
-      await fixtures.insertSecretSantaUser({ secretSantaId, attendeeId: attendee2Id })
-      await fixtures.insertSecretSantaUser({ secretSantaId, attendeeId: attendee3Id })
+      await factories.secretSantaUser.create({ secretSantaId, attendeeId: maintainerAttendeeId })
+      await factories.secretSantaUser.create({ secretSantaId, attendeeId: attendee2Id })
+      await factories.secretSantaUser.create({ secretSantaId, attendeeId: attendee3Id })
 
       const res = await request
         .post('/graphql')
@@ -661,7 +700,7 @@ describe('SecretSantaResolver (GraphQL)', () => {
 
       expect(res.body.data.startSecretSanta).toMatchObject({ __typename: 'VoidOutput', success: true })
 
-      await expectTable(Fixtures.SECRET_SANTA_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+      await expectTable(Tables.SECRET_SANTA).hasNumberOfRows(1).row(0).toMatchObject({
         id: secretSantaId,
         status: 'started',
       })
@@ -670,43 +709,50 @@ describe('SecretSantaResolver (GraphQL)', () => {
         .waitFor(500)
         .hasNumberOfEmails(3)
         .hasSubject('[Wishlist] Votre tirage au sort secret santa')
-        .hasReceivers(['user2@test.fr', 'user3@test.fr', Fixtures.BASE_USER_EMAIL])
+        .hasReceivers(['user2@test.fr', 'user3@test.fr', BASE_USER_EMAIL])
     })
 
     it('should return ForbiddenRejection and not change db when user is not maintainer', async () => {
-      const otherUserId = await fixtures.insertUser({
+      const { id: otherUserId } = await factories.user.create({
         email: 'other@test.fr',
-        firstname: 'Other',
-        lastname: 'User',
+        firstName: 'Other',
+        lastName: 'User',
       })
 
-      const { eventId, attendeeId: maintainerAttendeeId } = await fixtures.insertEventWithMaintainer({
+      const {
+        event: { id: eventId },
+        attendee: { id: maintainerAttendeeId },
+      } = await factories.event.createWithMaintainer({
         title: 'Test Event',
         description: 'Test Description',
         maintainerId: otherUserId,
       })
 
-      const { attendeeId: attendee2Id } = await fixtures.insertUserAndAddItToEventAsAttendee({
+      const {
+        attendee: { id: attendee2Id },
+      } = await factories.user.createAndJoinEvent({
         email: 'user2@test.fr',
-        firstname: 'User2',
-        lastname: 'Test',
+        firstName: 'User2',
+        lastName: 'Test',
         eventId,
       })
-      const { attendeeId: attendee3Id } = await fixtures.insertUserAndAddItToEventAsAttendee({
+      const {
+        attendee: { id: attendee3Id },
+      } = await factories.user.createAndJoinEvent({
         email: 'user3@test.fr',
-        firstname: 'User3',
-        lastname: 'Test',
+        firstName: 'User3',
+        lastName: 'Test',
         eventId,
       })
 
-      const secretSantaId = await fixtures.insertSecretSanta({
+      const { id: secretSantaId } = await factories.secretSanta.create({
         eventId,
         status: SecretSantaStatus.CREATED,
       })
 
-      await fixtures.insertSecretSantaUser({ secretSantaId, attendeeId: maintainerAttendeeId })
-      await fixtures.insertSecretSantaUser({ secretSantaId, attendeeId: attendee2Id })
-      await fixtures.insertSecretSantaUser({ secretSantaId, attendeeId: attendee3Id })
+      await factories.secretSantaUser.create({ secretSantaId, attendeeId: maintainerAttendeeId })
+      await factories.secretSantaUser.create({ secretSantaId, attendeeId: attendee2Id })
+      await factories.secretSantaUser.create({ secretSantaId, attendeeId: attendee3Id })
 
       const res = await request
         .post('/graphql')
@@ -714,25 +760,28 @@ describe('SecretSantaResolver (GraphQL)', () => {
         .expect(200)
 
       expect(res.body.data.startSecretSanta).toMatchObject({ __typename: 'ForbiddenRejection' })
-      await expectTable(Fixtures.SECRET_SANTA_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+      await expectTable(Tables.SECRET_SANTA).hasNumberOfRows(1).row(0).toMatchObject({
         id: secretSantaId,
         status: 'created',
       })
     })
 
     it('should not succeed and not change db when not enough users to start', async () => {
-      const { eventId, attendeeId } = await fixtures.insertEventWithMaintainer({
+      const {
+        event: { id: eventId },
+        attendee: { id: attendeeId },
+      } = await factories.event.createWithMaintainer({
         title: 'Test Event',
         description: 'Test Description',
         maintainerId: currentUserId,
       })
 
-      const secretSantaId = await fixtures.insertSecretSanta({
+      const { id: secretSantaId } = await factories.secretSanta.create({
         eventId,
         status: SecretSantaStatus.CREATED,
       })
 
-      await fixtures.insertSecretSantaUser({ secretSantaId, attendeeId })
+      await factories.secretSantaUser.create({ secretSantaId, attendeeId })
 
       const res = await request
         .post('/graphql')
@@ -740,7 +789,7 @@ describe('SecretSantaResolver (GraphQL)', () => {
         .expect(200)
 
       expectNotSuccess(res, 'startSecretSanta')
-      await expectTable(Fixtures.SECRET_SANTA_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+      await expectTable(Tables.SECRET_SANTA).hasNumberOfRows(1).row(0).toMatchObject({
         id: secretSantaId,
         status: 'created',
       })
@@ -774,26 +823,31 @@ describe('SecretSantaResolver (GraphQL)', () => {
     })
 
     it('should cancel secret santa and send emails when user is maintainer', async () => {
-      const { eventId, attendeeId: maintainerAttendeeId } = await fixtures.insertEventWithMaintainer({
+      const {
+        event: { id: eventId },
+        attendee: { id: maintainerAttendeeId },
+      } = await factories.event.createWithMaintainer({
         title: 'Test Event',
         description: 'Test Description',
         maintainerId: currentUserId,
       })
 
-      const { attendeeId: attendee2Id } = await fixtures.insertUserAndAddItToEventAsAttendee({
+      const {
+        attendee: { id: attendee2Id },
+      } = await factories.user.createAndJoinEvent({
         email: 'user2@test.fr',
-        firstname: 'User2',
-        lastname: 'Test',
+        firstName: 'User2',
+        lastName: 'Test',
         eventId,
       })
 
-      const secretSantaId = await fixtures.insertSecretSanta({
+      const { id: secretSantaId } = await factories.secretSanta.create({
         eventId,
         status: SecretSantaStatus.STARTED,
       })
 
-      await fixtures.insertSecretSantaUser({ secretSantaId, attendeeId: maintainerAttendeeId })
-      await fixtures.insertSecretSantaUser({ secretSantaId, attendeeId: attendee2Id })
+      await factories.secretSantaUser.create({ secretSantaId, attendeeId: maintainerAttendeeId })
+      await factories.secretSantaUser.create({ secretSantaId, attendeeId: attendee2Id })
 
       const res = await request
         .post('/graphql')
@@ -802,7 +856,7 @@ describe('SecretSantaResolver (GraphQL)', () => {
 
       expect(res.body.data.cancelSecretSanta).toMatchObject({ __typename: 'VoidOutput', success: true })
 
-      await expectTable(Fixtures.SECRET_SANTA_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+      await expectTable(Tables.SECRET_SANTA).hasNumberOfRows(1).row(0).toMatchObject({
         id: secretSantaId,
         status: 'created',
       })
@@ -811,23 +865,25 @@ describe('SecretSantaResolver (GraphQL)', () => {
         .waitFor(500)
         .hasNumberOfEmails(1)
         .hasSubject("[Wishlist] Le secret santa viens d'être annulé")
-        .hasReceivers([Fixtures.BASE_USER_EMAIL, 'user2@test.fr'])
+        .hasReceivers([BASE_USER_EMAIL, 'user2@test.fr'])
     })
 
     it('should return ForbiddenRejection and not change db when user is not maintainer', async () => {
-      const otherUserId = await fixtures.insertUser({
+      const { id: otherUserId } = await factories.user.create({
         email: 'other@test.fr',
-        firstname: 'Other',
-        lastname: 'User',
+        firstName: 'Other',
+        lastName: 'User',
       })
 
-      const { eventId } = await fixtures.insertEventWithMaintainer({
+      const {
+        event: { id: eventId },
+      } = await factories.event.createWithMaintainer({
         title: 'Test Event',
         description: 'Test Description',
         maintainerId: otherUserId,
       })
 
-      const secretSantaId = await fixtures.insertSecretSanta({
+      const { id: secretSantaId } = await factories.secretSanta.create({
         eventId,
         status: SecretSantaStatus.STARTED,
       })
@@ -838,7 +894,7 @@ describe('SecretSantaResolver (GraphQL)', () => {
         .expect(200)
 
       expect(res.body.data.cancelSecretSanta).toMatchObject({ __typename: 'ForbiddenRejection' })
-      await expectTable(Fixtures.SECRET_SANTA_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+      await expectTable(Tables.SECRET_SANTA).hasNumberOfRows(1).row(0).toMatchObject({
         id: secretSantaId,
         status: 'started',
       })
@@ -892,20 +948,22 @@ describe('SecretSantaResolver (GraphQL)', () => {
     })
 
     it('should add users with resolved attendee when user is maintainer', async () => {
-      const { eventId } = await fixtures.insertEventWithMaintainer({
+      const {
+        event: { id: eventId },
+      } = await factories.event.createWithMaintainer({
         title: 'Test Event',
         description: 'Test Description',
         maintainerId: currentUserId,
       })
 
-      const user2Id = await fixtures.insertUser({
+      const { id: user2Id } = await factories.user.create({
         email: 'user2@test.fr',
-        firstname: 'User2',
-        lastname: 'Test',
+        firstName: 'User2',
+        lastName: 'Test',
       })
-      const attendee2Id = await fixtures.insertActiveAttendee({ eventId, userId: user2Id })
+      const { id: attendee2Id } = await factories.eventAttendee.create({ eventId, userId: user2Id })
 
-      const secretSantaId = await fixtures.insertSecretSanta({
+      const { id: secretSantaId } = await factories.secretSanta.create({
         eventId,
         status: SecretSantaStatus.CREATED,
       })
@@ -936,7 +994,7 @@ describe('SecretSantaResolver (GraphQL)', () => {
         ],
       })
 
-      await expectTable(Fixtures.SECRET_SANTA_USER_TABLE).hasNumberOfRows(1).row(0).toEqual({
+      await expectTable(Tables.SECRET_SANTA_USER).hasNumberOfRows(1).row(0).toEqual({
         id: res.body.data.addSecretSantaUsers.users[0].id,
         secret_santa_id: secretSantaId,
         attendee_id: attendee2Id,
@@ -948,20 +1006,22 @@ describe('SecretSantaResolver (GraphQL)', () => {
     })
 
     it('should deduplicate attendeeIds (parity with REST @Transform(uniq))', async () => {
-      const { eventId } = await fixtures.insertEventWithMaintainer({
+      const {
+        event: { id: eventId },
+      } = await factories.event.createWithMaintainer({
         title: 'Test Event',
         description: 'Test Description',
         maintainerId: currentUserId,
       })
 
-      const user2Id = await fixtures.insertUser({
+      const { id: user2Id } = await factories.user.create({
         email: 'user2@test.fr',
-        firstname: 'User2',
-        lastname: 'Test',
+        firstName: 'User2',
+        lastName: 'Test',
       })
-      const attendee2Id = await fixtures.insertActiveAttendee({ eventId, userId: user2Id })
+      const { id: attendee2Id } = await factories.eventAttendee.create({ eventId, userId: user2Id })
 
-      const secretSantaId = await fixtures.insertSecretSanta({
+      const { id: secretSantaId } = await factories.secretSanta.create({
         eventId,
         status: SecretSantaStatus.CREATED,
       })
@@ -974,24 +1034,26 @@ describe('SecretSantaResolver (GraphQL)', () => {
       // Duplicate ids in a single request must collapse to one SecretSantaUser row (no draw corruption).
       expect(res.body.data.addSecretSantaUsers.__typename).toBe('AddSecretSantaUsersOutput')
       expect(res.body.data.addSecretSantaUsers.users).toHaveLength(1)
-      await expectTable(Fixtures.SECRET_SANTA_USER_TABLE).hasNumberOfRows(1)
+      await expectTable(Tables.SECRET_SANTA_USER).hasNumberOfRows(1)
     })
 
     it('should not succeed and not change db when secret santa is started', async () => {
-      const { eventId } = await fixtures.insertEventWithMaintainer({
+      const {
+        event: { id: eventId },
+      } = await factories.event.createWithMaintainer({
         title: 'Test Event',
         description: 'Test Description',
         maintainerId: currentUserId,
       })
 
-      const user2Id = await fixtures.insertUser({
+      const { id: user2Id } = await factories.user.create({
         email: 'user2@test.fr',
-        firstname: 'User2',
-        lastname: 'Test',
+        firstName: 'User2',
+        lastName: 'Test',
       })
-      const attendee2Id = await fixtures.insertActiveAttendee({ eventId, userId: user2Id })
+      const { id: attendee2Id } = await factories.eventAttendee.create({ eventId, userId: user2Id })
 
-      const secretSantaId = await fixtures.insertSecretSanta({
+      const { id: secretSantaId } = await factories.secretSanta.create({
         eventId,
         status: SecretSantaStatus.STARTED,
       })
@@ -1002,30 +1064,32 @@ describe('SecretSantaResolver (GraphQL)', () => {
         .expect(200)
 
       expectNotSuccess(res, 'addSecretSantaUsers')
-      await expectTable(Fixtures.SECRET_SANTA_USER_TABLE).hasNumberOfRows(0)
+      await expectTable(Tables.SECRET_SANTA_USER).hasNumberOfRows(0)
     })
 
     it('should return ForbiddenRejection and not change db when user is not maintainer', async () => {
-      const otherUserId = await fixtures.insertUser({
+      const { id: otherUserId } = await factories.user.create({
         email: 'other@test.fr',
-        firstname: 'Other',
-        lastname: 'User',
+        firstName: 'Other',
+        lastName: 'User',
       })
 
-      const { eventId } = await fixtures.insertEventWithMaintainer({
+      const {
+        event: { id: eventId },
+      } = await factories.event.createWithMaintainer({
         title: 'Test Event',
         description: 'Test Description',
         maintainerId: otherUserId,
       })
 
-      const user2Id = await fixtures.insertUser({
+      const { id: user2Id } = await factories.user.create({
         email: 'user2@test.fr',
-        firstname: 'User2',
-        lastname: 'Test',
+        firstName: 'User2',
+        lastName: 'Test',
       })
-      const attendee2Id = await fixtures.insertActiveAttendee({ eventId, userId: user2Id })
+      const { id: attendee2Id } = await factories.eventAttendee.create({ eventId, userId: user2Id })
 
-      const secretSantaId = await fixtures.insertSecretSanta({
+      const { id: secretSantaId } = await factories.secretSanta.create({
         eventId,
         status: SecretSantaStatus.CREATED,
       })
@@ -1036,7 +1100,7 @@ describe('SecretSantaResolver (GraphQL)', () => {
         .expect(200)
 
       expect(res.body.data.addSecretSantaUsers).toMatchObject({ __typename: 'ForbiddenRejection' })
-      await expectTable(Fixtures.SECRET_SANTA_USER_TABLE).hasNumberOfRows(0)
+      await expectTable(Tables.SECRET_SANTA_USER).hasNumberOfRows(0)
     })
   })
 
@@ -1071,22 +1135,38 @@ describe('SecretSantaResolver (GraphQL)', () => {
     })
 
     it('should update exclusions when user is maintainer', async () => {
-      const { eventId } = await fixtures.insertEventWithMaintainer({
+      const {
+        event: { id: eventId },
+      } = await factories.event.createWithMaintainer({
         title: 'Test Event',
         description: 'Test Description',
         maintainerId: currentUserId,
       })
 
-      const user2Id = await fixtures.insertUser({ email: 'user2@test.fr', firstname: 'User2', lastname: 'Test' })
-      const user3Id = await fixtures.insertUser({ email: 'user3@test.fr', firstname: 'User3', lastname: 'Test' })
+      const { id: user2Id } = await factories.user.create({
+        email: 'user2@test.fr',
+        firstName: 'User2',
+        lastName: 'Test',
+      })
+      const { id: user3Id } = await factories.user.create({
+        email: 'user3@test.fr',
+        firstName: 'User3',
+        lastName: 'Test',
+      })
 
-      const attendee2Id = await fixtures.insertActiveAttendee({ eventId, userId: user2Id })
-      const attendee3Id = await fixtures.insertActiveAttendee({ eventId, userId: user3Id })
+      const { id: attendee2Id } = await factories.eventAttendee.create({ eventId, userId: user2Id })
+      const { id: attendee3Id } = await factories.eventAttendee.create({ eventId, userId: user3Id })
 
-      const secretSantaId = await fixtures.insertSecretSanta({ eventId, status: SecretSantaStatus.CREATED })
+      const { id: secretSantaId } = await factories.secretSanta.create({ eventId, status: SecretSantaStatus.CREATED })
 
-      const secretSantaUser2Id = await fixtures.insertSecretSantaUser({ secretSantaId, attendeeId: attendee2Id })
-      const secretSantaUser3Id = await fixtures.insertSecretSantaUser({ secretSantaId, attendeeId: attendee3Id })
+      const { id: secretSantaUser2Id } = await factories.secretSantaUser.create({
+        secretSantaId,
+        attendeeId: attendee2Id,
+      })
+      const { id: secretSantaUser3Id } = await factories.secretSantaUser.create({
+        secretSantaId,
+        attendeeId: attendee3Id,
+      })
 
       const res = await request
         .post('/graphql')
@@ -1102,7 +1182,7 @@ describe('SecretSantaResolver (GraphQL)', () => {
 
       expect(res.body.data.updateSecretSantaUser).toMatchObject({ __typename: 'VoidOutput', success: true })
 
-      await expectTable(Fixtures.SECRET_SANTA_USER_TABLE)
+      await expectTable(Tables.SECRET_SANTA_USER)
         .row(0)
         .toMatchObject({
           id: secretSantaUser2Id,
@@ -1111,22 +1191,38 @@ describe('SecretSantaResolver (GraphQL)', () => {
     })
 
     it('should not succeed and not change db when secret santa is started', async () => {
-      const { eventId } = await fixtures.insertEventWithMaintainer({
+      const {
+        event: { id: eventId },
+      } = await factories.event.createWithMaintainer({
         title: 'Test Event',
         description: 'Test Description',
         maintainerId: currentUserId,
       })
 
-      const user2Id = await fixtures.insertUser({ email: 'user2@test.fr', firstname: 'User2', lastname: 'Test' })
-      const user3Id = await fixtures.insertUser({ email: 'user3@test.fr', firstname: 'User3', lastname: 'Test' })
+      const { id: user2Id } = await factories.user.create({
+        email: 'user2@test.fr',
+        firstName: 'User2',
+        lastName: 'Test',
+      })
+      const { id: user3Id } = await factories.user.create({
+        email: 'user3@test.fr',
+        firstName: 'User3',
+        lastName: 'Test',
+      })
 
-      const attendee2Id = await fixtures.insertActiveAttendee({ eventId, userId: user2Id })
-      const attendee3Id = await fixtures.insertActiveAttendee({ eventId, userId: user3Id })
+      const { id: attendee2Id } = await factories.eventAttendee.create({ eventId, userId: user2Id })
+      const { id: attendee3Id } = await factories.eventAttendee.create({ eventId, userId: user3Id })
 
-      const secretSantaId = await fixtures.insertSecretSanta({ eventId, status: SecretSantaStatus.STARTED })
+      const { id: secretSantaId } = await factories.secretSanta.create({ eventId, status: SecretSantaStatus.STARTED })
 
-      const secretSantaUser2Id = await fixtures.insertSecretSantaUser({ secretSantaId, attendeeId: attendee2Id })
-      const secretSantaUser3Id = await fixtures.insertSecretSantaUser({ secretSantaId, attendeeId: attendee3Id })
+      const { id: secretSantaUser2Id } = await factories.secretSantaUser.create({
+        secretSantaId,
+        attendeeId: attendee2Id,
+      })
+      const { id: secretSantaUser3Id } = await factories.secretSantaUser.create({
+        secretSantaId,
+        attendeeId: attendee3Id,
+      })
 
       const res = await request
         .post('/graphql')
@@ -1141,35 +1237,51 @@ describe('SecretSantaResolver (GraphQL)', () => {
         .expect(200)
 
       expectNotSuccess(res, 'updateSecretSantaUser')
-      await expectTable(Fixtures.SECRET_SANTA_USER_TABLE).row(0).toMatchObject({
+      await expectTable(Tables.SECRET_SANTA_USER).row(0).toMatchObject({
         id: secretSantaUser2Id,
         exclusions: [],
       })
     })
 
     it('should return ForbiddenRejection and not change db when user is not maintainer', async () => {
-      const otherUserId = await fixtures.insertUser({
+      const { id: otherUserId } = await factories.user.create({
         email: 'other@test.fr',
-        firstname: 'Other',
-        lastname: 'User',
+        firstName: 'Other',
+        lastName: 'User',
       })
 
-      const { eventId } = await fixtures.insertEventWithMaintainer({
+      const {
+        event: { id: eventId },
+      } = await factories.event.createWithMaintainer({
         title: 'Test Event',
         description: 'Test Description',
         maintainerId: otherUserId,
       })
 
-      const user2Id = await fixtures.insertUser({ email: 'user2@test.fr', firstname: 'User2', lastname: 'Test' })
-      const user3Id = await fixtures.insertUser({ email: 'user3@test.fr', firstname: 'User3', lastname: 'Test' })
+      const { id: user2Id } = await factories.user.create({
+        email: 'user2@test.fr',
+        firstName: 'User2',
+        lastName: 'Test',
+      })
+      const { id: user3Id } = await factories.user.create({
+        email: 'user3@test.fr',
+        firstName: 'User3',
+        lastName: 'Test',
+      })
 
-      const attendee2Id = await fixtures.insertActiveAttendee({ eventId, userId: user2Id })
-      const attendee3Id = await fixtures.insertActiveAttendee({ eventId, userId: user3Id })
+      const { id: attendee2Id } = await factories.eventAttendee.create({ eventId, userId: user2Id })
+      const { id: attendee3Id } = await factories.eventAttendee.create({ eventId, userId: user3Id })
 
-      const secretSantaId = await fixtures.insertSecretSanta({ eventId, status: SecretSantaStatus.CREATED })
+      const { id: secretSantaId } = await factories.secretSanta.create({ eventId, status: SecretSantaStatus.CREATED })
 
-      const secretSantaUser2Id = await fixtures.insertSecretSantaUser({ secretSantaId, attendeeId: attendee2Id })
-      const secretSantaUser3Id = await fixtures.insertSecretSantaUser({ secretSantaId, attendeeId: attendee3Id })
+      const { id: secretSantaUser2Id } = await factories.secretSantaUser.create({
+        secretSantaId,
+        attendeeId: attendee2Id,
+      })
+      const { id: secretSantaUser3Id } = await factories.secretSantaUser.create({
+        secretSantaId,
+        attendeeId: attendee3Id,
+      })
 
       const res = await request
         .post('/graphql')
@@ -1184,7 +1296,7 @@ describe('SecretSantaResolver (GraphQL)', () => {
         .expect(200)
 
       expect(res.body.data.updateSecretSantaUser).toMatchObject({ __typename: 'ForbiddenRejection' })
-      await expectTable(Fixtures.SECRET_SANTA_USER_TABLE).row(0).toMatchObject({
+      await expectTable(Tables.SECRET_SANTA_USER).row(0).toMatchObject({
         id: secretSantaUser2Id,
         exclusions: [],
       })
@@ -1218,18 +1330,27 @@ describe('SecretSantaResolver (GraphQL)', () => {
     })
 
     it('should remove user when user is maintainer and secret santa is not started', async () => {
-      const { eventId } = await fixtures.insertEventWithMaintainer({
+      const {
+        event: { id: eventId },
+      } = await factories.event.createWithMaintainer({
         title: 'Test Event',
         description: 'Test Description',
         maintainerId: currentUserId,
       })
 
-      const user2Id = await fixtures.insertUser({ email: 'user2@test.fr', firstname: 'User2', lastname: 'Test' })
-      const attendee2Id = await fixtures.insertActiveAttendee({ eventId, userId: user2Id })
+      const { id: user2Id } = await factories.user.create({
+        email: 'user2@test.fr',
+        firstName: 'User2',
+        lastName: 'Test',
+      })
+      const { id: attendee2Id } = await factories.eventAttendee.create({ eventId, userId: user2Id })
 
-      const secretSantaId = await fixtures.insertSecretSanta({ eventId, status: SecretSantaStatus.CREATED })
+      const { id: secretSantaId } = await factories.secretSanta.create({ eventId, status: SecretSantaStatus.CREATED })
 
-      const secretSantaUserId = await fixtures.insertSecretSantaUser({ secretSantaId, attendeeId: attendee2Id })
+      const { id: secretSantaUserId } = await factories.secretSantaUser.create({
+        secretSantaId,
+        attendeeId: attendee2Id,
+      })
 
       const res = await request
         .post('/graphql')
@@ -1237,22 +1358,31 @@ describe('SecretSantaResolver (GraphQL)', () => {
         .expect(200)
 
       expect(res.body.data.deleteSecretSantaUser).toMatchObject({ __typename: 'VoidOutput', success: true })
-      await expectTable(Fixtures.SECRET_SANTA_USER_TABLE).hasNumberOfRows(0)
+      await expectTable(Tables.SECRET_SANTA_USER).hasNumberOfRows(0)
     })
 
     it('should not succeed and not change db when secret santa is started', async () => {
-      const { eventId } = await fixtures.insertEventWithMaintainer({
+      const {
+        event: { id: eventId },
+      } = await factories.event.createWithMaintainer({
         title: 'Test Event',
         description: 'Test Description',
         maintainerId: currentUserId,
       })
 
-      const user2Id = await fixtures.insertUser({ email: 'user2@test.fr', firstname: 'User2', lastname: 'Test' })
-      const attendee2Id = await fixtures.insertActiveAttendee({ eventId, userId: user2Id })
+      const { id: user2Id } = await factories.user.create({
+        email: 'user2@test.fr',
+        firstName: 'User2',
+        lastName: 'Test',
+      })
+      const { id: attendee2Id } = await factories.eventAttendee.create({ eventId, userId: user2Id })
 
-      const secretSantaId = await fixtures.insertSecretSanta({ eventId, status: SecretSantaStatus.STARTED })
+      const { id: secretSantaId } = await factories.secretSanta.create({ eventId, status: SecretSantaStatus.STARTED })
 
-      const secretSantaUserId = await fixtures.insertSecretSantaUser({ secretSantaId, attendeeId: attendee2Id })
+      const { id: secretSantaUserId } = await factories.secretSantaUser.create({
+        secretSantaId,
+        attendeeId: attendee2Id,
+      })
 
       const res = await request
         .post('/graphql')
@@ -1260,28 +1390,37 @@ describe('SecretSantaResolver (GraphQL)', () => {
         .expect(200)
 
       expectNotSuccess(res, 'deleteSecretSantaUser')
-      await expectTable(Fixtures.SECRET_SANTA_USER_TABLE).hasNumberOfRows(1)
+      await expectTable(Tables.SECRET_SANTA_USER).hasNumberOfRows(1)
     })
 
     it('should return ForbiddenRejection and not change db when user is not maintainer', async () => {
-      const otherUserId = await fixtures.insertUser({
+      const { id: otherUserId } = await factories.user.create({
         email: 'other@test.fr',
-        firstname: 'Other',
-        lastname: 'User',
+        firstName: 'Other',
+        lastName: 'User',
       })
 
-      const { eventId } = await fixtures.insertEventWithMaintainer({
+      const {
+        event: { id: eventId },
+      } = await factories.event.createWithMaintainer({
         title: 'Test Event',
         description: 'Test Description',
         maintainerId: otherUserId,
       })
 
-      const user2Id = await fixtures.insertUser({ email: 'user2@test.fr', firstname: 'User2', lastname: 'Test' })
-      const attendee2Id = await fixtures.insertActiveAttendee({ eventId, userId: user2Id })
+      const { id: user2Id } = await factories.user.create({
+        email: 'user2@test.fr',
+        firstName: 'User2',
+        lastName: 'Test',
+      })
+      const { id: attendee2Id } = await factories.eventAttendee.create({ eventId, userId: user2Id })
 
-      const secretSantaId = await fixtures.insertSecretSanta({ eventId, status: SecretSantaStatus.CREATED })
+      const { id: secretSantaId } = await factories.secretSanta.create({ eventId, status: SecretSantaStatus.CREATED })
 
-      const secretSantaUserId = await fixtures.insertSecretSantaUser({ secretSantaId, attendeeId: attendee2Id })
+      const { id: secretSantaUserId } = await factories.secretSantaUser.create({
+        secretSantaId,
+        attendeeId: attendee2Id,
+      })
 
       const res = await request
         .post('/graphql')
@@ -1289,7 +1428,7 @@ describe('SecretSantaResolver (GraphQL)', () => {
         .expect(200)
 
       expect(res.body.data.deleteSecretSantaUser).toMatchObject({ __typename: 'ForbiddenRejection' })
-      await expectTable(Fixtures.SECRET_SANTA_USER_TABLE).hasNumberOfRows(1)
+      await expectTable(Tables.SECRET_SANTA_USER).hasNumberOfRows(1)
     })
   })
 })

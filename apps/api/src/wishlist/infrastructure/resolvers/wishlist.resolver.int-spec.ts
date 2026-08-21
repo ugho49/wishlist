@@ -1,6 +1,6 @@
 import type { RequestApp } from '@wishlist/api-test-utils'
 
-import { Fixtures, useTestApp } from '@wishlist/api-test-utils'
+import { BASE_USER_EMAIL, Factories, Tables, useTestApp } from '@wishlist/api-test-utils'
 import { uuid } from '@wishlist/common'
 
 type GraphQLResponseBody = {
@@ -25,15 +25,15 @@ function expectNotSucceeded(body: GraphQLResponseBody, fieldName: string): void 
 }
 
 describe('WishlistResolver (GraphQL)', () => {
-  const { getRequest, getFixtures, expectTable } = useTestApp()
-  let fixtures: Fixtures
+  const { getRequest, getFactories, expectTable } = useTestApp()
+  let factories: Factories
   let request: RequestApp
   let currentUserId: string
 
   beforeEach(async () => {
-    fixtures = getFixtures()
+    factories = getFactories()
     request = await getRequest({ signedAs: 'BASE_USER' })
-    currentUserId = await fixtures.getSignedUserId('BASE_USER')
+    currentUserId = await factories.getSignedUserId('BASE_USER')
   })
 
   describe('Query wishlist', () => {
@@ -78,13 +78,15 @@ describe('WishlistResolver (GraphQL)', () => {
 
     it('should not succeed when not authenticated', async () => {
       const unauthenticated = await getRequest()
-      const { eventId } = await fixtures.insertEventWithMaintainer({
+      const {
+        event: { id: eventId },
+      } = await factories.event.createWithMaintainer({
         title: 'My event',
         maintainerId: currentUserId,
       })
-      const wishlistId = await fixtures.insertWishlist({
+      const { id: wishlistId } = await factories.wishlist.create({
         eventIds: [eventId],
-        userId: currentUserId,
+        ownerId: currentUserId,
         title: 'My wishlist',
       })
 
@@ -97,22 +99,26 @@ describe('WishlistResolver (GraphQL)', () => {
     })
 
     it('should return the wishlist with nested owner, coOwner and events on happy path', async () => {
-      const { eventId } = await fixtures.insertEventWithMaintainer({
+      const {
+        event: { id: eventId },
+      } = await factories.event.createWithMaintainer({
         title: 'Birthday',
         description: 'Birthday party',
         maintainerId: currentUserId,
       })
 
-      const { userId: coOwnerId } = await fixtures.insertUserAndAddItToEventAsAttendee({
+      const {
+        user: { id: coOwnerId },
+      } = await factories.user.createAndJoinEvent({
         email: 'co-owner@test.com',
-        firstname: 'Co',
-        lastname: 'Owner',
+        firstName: 'Co',
+        lastName: 'Owner',
         eventId,
       })
 
-      const wishlistId = await fixtures.insertWishlist({
+      const { id: wishlistId } = await factories.wishlist.create({
         eventIds: [eventId],
-        userId: currentUserId,
+        ownerId: currentUserId,
         title: 'My wishlist',
         description: 'My wishlist description',
         hideItems: false,
@@ -136,7 +142,7 @@ describe('WishlistResolver (GraphQL)', () => {
         config: { hideItems: false },
         owner: {
           id: currentUserId,
-          email: Fixtures.BASE_USER_EMAIL,
+          email: BASE_USER_EMAIL,
           firstName: 'John',
           lastName: 'Doe',
         },
@@ -149,13 +155,15 @@ describe('WishlistResolver (GraphQL)', () => {
     })
 
     it('should return coOwner as null when there is no coOwner', async () => {
-      const { eventId } = await fixtures.insertEventWithMaintainer({
+      const {
+        event: { id: eventId },
+      } = await factories.event.createWithMaintainer({
         title: 'Event without co-owner',
         maintainerId: currentUserId,
       })
-      const wishlistId = await fixtures.insertWishlist({
+      const { id: wishlistId } = await factories.wishlist.create({
         eventIds: [eventId],
-        userId: currentUserId,
+        ownerId: currentUserId,
         title: 'Solo wishlist',
       })
 
@@ -174,24 +182,28 @@ describe('WishlistResolver (GraphQL)', () => {
 
     it('should resolve events as empty when the current user has no access to the linked event', async () => {
       // wishlist is shared between two events, current user only has access to one of them
-      const { eventId: accessibleEventId } = await fixtures.insertEventWithMaintainer({
+      const {
+        event: { id: accessibleEventId },
+      } = await factories.event.createWithMaintainer({
         title: 'Accessible event',
         maintainerId: currentUserId,
       })
 
-      const otherUserId = await fixtures.insertUser({
+      const { id: otherUserId } = await factories.user.create({
         email: 'other@test.com',
-        firstname: 'Other',
-        lastname: 'User',
+        firstName: 'Other',
+        lastName: 'User',
       })
-      const { eventId: hiddenEventId } = await fixtures.insertEventWithMaintainer({
+      const {
+        event: { id: hiddenEventId },
+      } = await factories.event.createWithMaintainer({
         title: 'Hidden event',
         maintainerId: otherUserId,
       })
 
-      const wishlistId = await fixtures.insertWishlist({
+      const { id: wishlistId } = await factories.wishlist.create({
         eventIds: [accessibleEventId, hiddenEventId],
-        userId: currentUserId,
+        ownerId: currentUserId,
         title: 'Multi-event wishlist',
       })
 
@@ -219,18 +231,20 @@ describe('WishlistResolver (GraphQL)', () => {
     })
 
     it('should return NotFoundRejection when the current user has no access to the wishlist (forbidden surfaced as not found)', async () => {
-      const otherUserId = await fixtures.insertUser({
+      const { id: otherUserId } = await factories.user.create({
         email: 'stranger@test.com',
-        firstname: 'Stranger',
-        lastname: 'User',
+        firstName: 'Stranger',
+        lastName: 'User',
       })
-      const { eventId } = await fixtures.insertEventWithMaintainer({
+      const {
+        event: { id: eventId },
+      } = await factories.event.createWithMaintainer({
         title: 'Private event',
         maintainerId: otherUserId,
       })
-      const wishlistId = await fixtures.insertWishlist({
+      const { id: wishlistId } = await factories.wishlist.create({
         eventIds: [eventId],
-        userId: otherUserId,
+        ownerId: otherUserId,
         title: 'Private wishlist',
       })
 
@@ -290,26 +304,28 @@ describe('WishlistResolver (GraphQL)', () => {
     })
 
     it('should return only the wishlists owned by the current user with nested fields', async () => {
-      const { eventId } = await fixtures.insertEventWithMaintainer({
+      const {
+        event: { id: eventId },
+      } = await factories.event.createWithMaintainer({
         title: 'My event',
         maintainerId: currentUserId,
       })
 
-      const myWishlistId = await fixtures.insertWishlist({
+      const { id: myWishlistId } = await factories.wishlist.create({
         eventIds: [eventId],
-        userId: currentUserId,
+        ownerId: currentUserId,
         title: 'Mine',
       })
 
       // a wishlist owned by another user should NOT appear
-      const otherUserId = await fixtures.insertUser({
+      const { id: otherUserId } = await factories.user.create({
         email: 'other2@test.com',
-        firstname: 'Other',
-        lastname: 'Two',
+        firstName: 'Other',
+        lastName: 'Two',
       })
-      await fixtures.insertWishlist({
+      await factories.wishlist.create({
         eventIds: [eventId],
-        userId: otherUserId,
+        ownerId: otherUserId,
         title: 'Not mine',
       })
 
@@ -326,7 +342,7 @@ describe('WishlistResolver (GraphQL)', () => {
         id: myWishlistId,
         title: 'Mine',
         ownerId: currentUserId,
-        owner: { id: currentUserId, email: Fixtures.BASE_USER_EMAIL },
+        owner: { id: currentUserId, email: BASE_USER_EMAIL },
         events: [{ id: eventId, title: 'My event' }],
       })
       expect(result.pagination).toMatchObject({
@@ -338,15 +354,17 @@ describe('WishlistResolver (GraphQL)', () => {
     })
 
     it('should apply default pagination (page 1, limit 10) when no filters are provided', async () => {
-      const { eventId } = await fixtures.insertEventWithMaintainer({
+      const {
+        event: { id: eventId },
+      } = await factories.event.createWithMaintainer({
         title: 'Many wishlists event',
         maintainerId: currentUserId,
       })
 
       for (let i = 0; i < 12; i++) {
-        await fixtures.insertWishlist({
+        await factories.wishlist.create({
           eventIds: [eventId],
-          userId: currentUserId,
+          ownerId: currentUserId,
           title: `Wishlist ${i}`,
         })
       }
@@ -368,15 +386,17 @@ describe('WishlistResolver (GraphQL)', () => {
     })
 
     it('should honor explicit page and limit filters', async () => {
-      const { eventId } = await fixtures.insertEventWithMaintainer({
+      const {
+        event: { id: eventId },
+      } = await factories.event.createWithMaintainer({
         title: 'Paginated event',
         maintainerId: currentUserId,
       })
 
       for (let i = 0; i < 5; i++) {
-        await fixtures.insertWishlist({
+        await factories.wishlist.create({
           eventIds: [eventId],
-          userId: currentUserId,
+          ownerId: currentUserId,
           title: `Wishlist ${i}`,
         })
       }
@@ -425,23 +445,25 @@ describe('WishlistResolver (GraphQL)', () => {
     })
 
     it('should not leak wishlists between users and keep DB state unchanged (read-only query)', async () => {
-      const { eventId } = await fixtures.insertEventWithMaintainer({
+      const {
+        event: { id: eventId },
+      } = await factories.event.createWithMaintainer({
         title: 'Shared event',
         maintainerId: currentUserId,
       })
-      await fixtures.insertWishlist({
+      await factories.wishlist.create({
         eventIds: [eventId],
-        userId: currentUserId,
+        ownerId: currentUserId,
         title: 'Mine',
       })
-      const otherUserId = await fixtures.insertUser({
+      const { id: otherUserId } = await factories.user.create({
         email: 'other3@test.com',
-        firstname: 'Other',
-        lastname: 'Three',
+        firstName: 'Other',
+        lastName: 'Three',
       })
-      await fixtures.insertWishlist({
+      await factories.wishlist.create({
         eventIds: [eventId],
-        userId: otherUserId,
+        ownerId: otherUserId,
         title: 'Theirs',
       })
 
@@ -452,7 +474,7 @@ describe('WishlistResolver (GraphQL)', () => {
 
       expect(res.body.data.wishlists.data).toHaveLength(1)
       // a read-only query must not mutate the table
-      await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(2)
+      await expectTable(Tables.WISHLIST).hasNumberOfRows(2)
     })
   })
 })

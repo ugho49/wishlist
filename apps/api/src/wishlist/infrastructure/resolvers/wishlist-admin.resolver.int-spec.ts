@@ -1,6 +1,6 @@
 import type { RequestApp } from '@wishlist/api-test-utils'
 
-import { Fixtures, useTestApp } from '@wishlist/api-test-utils'
+import { Factories, useTestApp } from '@wishlist/api-test-utils'
 import { uuid } from '@wishlist/common'
 
 const GRAPHQL_PATH = '/graphql'
@@ -13,11 +13,11 @@ const GRAPHQL_PATH = '/graphql'
  * with a ForbiddenRejection.
  */
 describe('WishlistAdminResolver (GraphQL)', () => {
-  const { getRequest, getFixtures } = useTestApp()
-  let fixtures: Fixtures
+  const { getRequest, getFactories } = useTestApp()
+  let factories: Factories
 
   beforeEach(() => {
-    fixtures = getFixtures()
+    factories = getFactories()
   })
 
   describe('Query adminWishlists', () => {
@@ -79,36 +79,40 @@ describe('WishlistAdminResolver (GraphQL)', () => {
       })
 
       it("should return a paginated list of a given user's wishlists", async () => {
-        const targetUserId = await fixtures.insertUser({
+        const { id: targetUserId } = await factories.user.create({
           email: 'target@test.fr',
-          firstname: 'Target',
-          lastname: 'User',
+          firstName: 'Target',
+          lastName: 'User',
         })
 
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Target Event',
           maintainerId: targetUserId,
         })
 
-        const wishlistId = await fixtures.insertWishlist({
+        const { id: wishlistId } = await factories.wishlist.create({
           eventIds: [eventId],
-          userId: targetUserId,
+          ownerId: targetUserId,
           title: 'Target Wishlist',
         })
 
         // A wishlist owned by another user, which must NOT be returned
-        const otherUserId = await fixtures.insertUser({
+        const { id: otherUserId } = await factories.user.create({
           email: 'other@test.fr',
-          firstname: 'Other',
-          lastname: 'User',
+          firstName: 'Other',
+          lastName: 'User',
         })
-        const { eventId: otherEventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: otherEventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Other Event',
           maintainerId: otherUserId,
         })
-        await fixtures.insertWishlist({
+        await factories.wishlist.create({
           eventIds: [otherEventId],
-          userId: otherUserId,
+          ownerId: otherUserId,
           title: 'Other Wishlist',
         })
 
@@ -129,20 +133,22 @@ describe('WishlistAdminResolver (GraphQL)', () => {
       })
 
       it('should respect pagination (limit / page)', async () => {
-        const targetUserId = await fixtures.insertUser({
+        const { id: targetUserId } = await factories.user.create({
           email: 'target@test.fr',
-          firstname: 'Target',
-          lastname: 'User',
+          firstName: 'Target',
+          lastName: 'User',
         })
 
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Target Event',
           maintainerId: targetUserId,
         })
 
-        await fixtures.insertWishlist({ eventIds: [eventId], userId: targetUserId, title: 'WL 1' })
-        await fixtures.insertWishlist({ eventIds: [eventId], userId: targetUserId, title: 'WL 2' })
-        await fixtures.insertWishlist({ eventIds: [eventId], userId: targetUserId, title: 'WL 3' })
+        await factories.wishlist.create({ eventIds: [eventId], ownerId: targetUserId, title: 'WL 1' })
+        await factories.wishlist.create({ eventIds: [eventId], ownerId: targetUserId, title: 'WL 2' })
+        await factories.wishlist.create({ eventIds: [eventId], ownerId: targetUserId, title: 'WL 3' })
 
         const firstPage = await request
           .post(GRAPHQL_PATH)
@@ -171,10 +177,10 @@ describe('WishlistAdminResolver (GraphQL)', () => {
       })
 
       it('should return an empty list when the user has no wishlist', async () => {
-        const targetUserId = await fixtures.insertUser({
+        const { id: targetUserId } = await factories.user.create({
           email: 'target@test.fr',
-          firstname: 'Target',
-          lastname: 'User',
+          firstName: 'Target',
+          lastName: 'User',
         })
 
         const res = await request

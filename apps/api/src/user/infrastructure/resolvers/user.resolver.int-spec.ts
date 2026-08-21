@@ -1,7 +1,7 @@
 import type { RequestApp } from '@wishlist/api-test-utils'
 
 import { PasswordManager } from '@wishlist/api/auth'
-import { Fixtures, useTestApp } from '@wishlist/api-test-utils'
+import { BASE_USER_EMAIL, DEFAULT_USER_PASSWORD, Factories, Tables, useTestApp } from '@wishlist/api-test-utils'
 import { DateTime } from 'luxon'
 
 /**
@@ -36,15 +36,15 @@ import { DateTime } from 'luxon'
  *  - pendingEmailChange (depends on requestEmailChange flow)
  */
 describe('UserResolver (GraphQL)', () => {
-  const { getRequest, getFixtures, expectTable } = useTestApp()
-  let fixtures: Fixtures
+  const { getRequest, getFactories, expectTable } = useTestApp()
+  let factories: Factories
   let request: RequestApp
   let currentUserId: string
 
   beforeEach(async () => {
-    fixtures = getFixtures()
+    factories = getFactories()
     request = await getRequest({ signedAs: 'BASE_USER' })
-    currentUserId = await fixtures.getSignedUserId('BASE_USER')
+    currentUserId = await factories.getSignedUserId('BASE_USER')
   })
 
   describe('Query currentUser', () => {
@@ -85,7 +85,7 @@ describe('UserResolver (GraphQL)', () => {
         id: currentUserId,
         firstName: 'John',
         lastName: 'Doe',
-        email: Fixtures.BASE_USER_EMAIL,
+        email: BASE_USER_EMAIL,
         isEnabled: true,
       })
     })
@@ -165,8 +165,8 @@ describe('UserResolver (GraphQL)', () => {
       })
 
       // BASE_USER is seeded by getRequest({ signedAs }) in beforeEach, so 2 rows total.
-      await expectTable(Fixtures.USER_TABLE).hasNumberOfRows(2)
-      await expectTable(Fixtures.USER_TABLE)
+      await expectTable(Tables.USER).hasNumberOfRows(2)
+      await expectTable(Tables.USER)
         .row(1)
         .toMatchObject({
           id: created.id,
@@ -184,7 +184,7 @@ describe('UserResolver (GraphQL)', () => {
         })
 
       // The use-case also creates the default email settings row.
-      await expectTable(Fixtures.USER_EMAIL_SETTING_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+      await expectTable(Tables.USER_EMAIL_SETTING).hasNumberOfRows(1).row(0).toMatchObject({
         user_id: created.id,
         daily_new_item_notification: true,
       })
@@ -194,13 +194,13 @@ describe('UserResolver (GraphQL)', () => {
       const anon = await getRequest()
       const input = {
         // BASE_USER already exists from beforeEach.
-        email: Fixtures.BASE_USER_EMAIL,
-        password: Fixtures.DEFAULT_USER_PASSWORD,
+        email: BASE_USER_EMAIL,
+        password: DEFAULT_USER_PASSWORD,
         firstname: 'John',
         lastname: 'Doe',
       }
 
-      await expectTable(Fixtures.USER_TABLE).hasNumberOfRows(1)
+      await expectTable(Tables.USER).hasNumberOfRows(1)
 
       const res = await anon.post('/graphql').send({ query: mutation, variables: { input } }).expect(200)
 
@@ -210,7 +210,7 @@ describe('UserResolver (GraphQL)', () => {
       })
 
       // No extra user created.
-      await expectTable(Fixtures.USER_TABLE).hasNumberOfRows(1)
+      await expectTable(Tables.USER).hasNumberOfRows(1)
     })
 
     it.each([
@@ -246,7 +246,7 @@ describe('UserResolver (GraphQL)', () => {
       }
 
       // Only the seeded BASE_USER exists, no new user persisted.
-      await expectTable(Fixtures.USER_TABLE).hasNumberOfRows(1)
+      await expectTable(Tables.USER).hasNumberOfRows(1)
     })
   })
 
@@ -285,7 +285,7 @@ describe('UserResolver (GraphQL)', () => {
       expect(typename !== 'User' || hasTopLevelError).toBe(true)
 
       // Seeded user unchanged.
-      await expectTable(Fixtures.USER_TABLE).row(0).toMatchObject({
+      await expectTable(Tables.USER).row(0).toMatchObject({
         first_name: 'John',
         last_name: 'Doe',
       })
@@ -304,7 +304,7 @@ describe('UserResolver (GraphQL)', () => {
         lastName: 'UPDATED',
       })
 
-      await expectTable(Fixtures.USER_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+      await expectTable(Tables.USER).hasNumberOfRows(1).row(0).toMatchObject({
         id: currentUserId,
         first_name: 'Updated',
         last_name: 'UPDATED',
@@ -339,7 +339,7 @@ describe('UserResolver (GraphQL)', () => {
       }
 
       // Profile not mutated.
-      await expectTable(Fixtures.USER_TABLE).row(0).toMatchObject({
+      await expectTable(Tables.USER).row(0).toMatchObject({
         first_name: 'John',
         last_name: 'Doe',
       })
@@ -372,7 +372,7 @@ describe('UserResolver (GraphQL)', () => {
     `
 
     it('should change the password (happy path) and persist the new hash', async () => {
-      const input = { oldPassword: Fixtures.DEFAULT_USER_PASSWORD, newPassword: 'NewPassword456' }
+      const input = { oldPassword: DEFAULT_USER_PASSWORD, newPassword: 'NewPassword456' }
 
       const res = await request.post('/graphql').send({ query: mutation, variables: { input } }).expect(200)
 
@@ -381,7 +381,7 @@ describe('UserResolver (GraphQL)', () => {
         success: true,
       })
 
-      await expectTable(Fixtures.USER_TABLE)
+      await expectTable(Tables.USER)
         .hasNumberOfRows(1)
         .row(0)
         .expectColumn<string>('password_enc', async value => {
@@ -389,7 +389,7 @@ describe('UserResolver (GraphQL)', () => {
           expect(matchesNew, 'New password should match').toBe(true)
           const matchesOld = await PasswordManager.verify({
             hash: value,
-            plainPassword: Fixtures.DEFAULT_USER_PASSWORD,
+            plainPassword: DEFAULT_USER_PASSWORD,
           })
           expect(matchesOld, 'Old password should no longer match').toBe(false)
         })
@@ -406,12 +406,12 @@ describe('UserResolver (GraphQL)', () => {
         message: "Old password don't match with user password",
       })
 
-      await expectTable(Fixtures.USER_TABLE)
+      await expectTable(Tables.USER)
         .row(0)
         .expectColumn<string>('password_enc', async value => {
           const matchesOld = await PasswordManager.verify({
             hash: value,
-            plainPassword: Fixtures.DEFAULT_USER_PASSWORD,
+            plainPassword: DEFAULT_USER_PASSWORD,
           })
           expect(matchesOld, 'Old password should remain valid').toBe(true)
         })
@@ -425,7 +425,7 @@ describe('UserResolver (GraphQL)', () => {
       },
       {
         case: 'new password too short',
-        input: { oldPassword: Fixtures.DEFAULT_USER_PASSWORD, newPassword: '123' },
+        input: { oldPassword: DEFAULT_USER_PASSWORD, newPassword: '123' },
         fields: ['newPassword'],
       },
     ])('should reject with ValidationRejection: $case', async ({ input, fields }) => {
@@ -472,9 +472,9 @@ describe('UserResolver (GraphQL)', () => {
     })
 
     it('should return the email settings when they exist', async () => {
-      await fixtures.insertUserEmailSettings({
+      await factories.userEmailSetting.create({
         userId: currentUserId,
-        emailSettings: { daily_new_item_notification: true },
+        dailyNewItemNotification: true,
       })
 
       const res = await request.post('/graphql').send({ query }).expect(200)
@@ -501,9 +501,9 @@ describe('UserResolver (GraphQL)', () => {
     `
 
     it('should update the email settings (happy path) and persist them', async () => {
-      const settingId = await fixtures.insertUserEmailSettings({
+      const { id: settingId } = await factories.userEmailSetting.create({
         userId: currentUserId,
-        emailSettings: { daily_new_item_notification: true },
+        dailyNewItemNotification: true,
       })
 
       const input = { dailyNewItemNotification: false }
@@ -514,7 +514,7 @@ describe('UserResolver (GraphQL)', () => {
         dailyNewItemNotification: false,
       })
 
-      await expectTable(Fixtures.USER_EMAIL_SETTING_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+      await expectTable(Tables.USER_EMAIL_SETTING).hasNumberOfRows(1).row(0).toMatchObject({
         id: settingId,
         user_id: currentUserId,
         daily_new_item_notification: false,
@@ -525,13 +525,13 @@ describe('UserResolver (GraphQL)', () => {
     it('should reject with NotFoundRejection when no settings row exists', async () => {
       // updateUserEmailSettings does NOT upsert: the use-case throws NotFoundException when the
       // signed-in user has no settings row, surfaced as NotFoundRejection by the error plugin.
-      await expectTable(Fixtures.USER_EMAIL_SETTING_TABLE).hasNumberOfRows(0)
+      await expectTable(Tables.USER_EMAIL_SETTING).hasNumberOfRows(0)
 
       const input = { dailyNewItemNotification: false }
       const res = await request.post('/graphql').send({ query: mutation, variables: { input } }).expect(200)
 
       expect(res.body.data.updateUserEmailSettings.__typename).toBe('NotFoundRejection')
-      await expectTable(Fixtures.USER_EMAIL_SETTING_TABLE).hasNumberOfRows(0)
+      await expectTable(Tables.USER_EMAIL_SETTING).hasNumberOfRows(0)
     })
   })
 
@@ -603,10 +603,10 @@ describe('UserResolver (GraphQL)', () => {
     })
 
     it('should return matching users excluding the current user', async () => {
-      const targetId = await fixtures.insertUser({
+      const { id: targetId } = await factories.user.create({
         email: 'zorglub@test.fr',
-        firstname: 'Zorglub',
-        lastname: 'Searchable',
+        firstName: 'Zorglub',
+        lastName: 'Searchable',
       })
 
       const res = await request

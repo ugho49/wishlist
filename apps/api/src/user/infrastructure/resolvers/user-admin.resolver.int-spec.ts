@@ -1,19 +1,19 @@
 import type { RequestApp } from '@wishlist/api-test-utils'
 
-import { Fixtures, useTestApp } from '@wishlist/api-test-utils'
+import { Factories, Tables, useTestApp } from '@wishlist/api-test-utils'
 import { Authorities, uuid } from '@wishlist/common'
 import { DateTime } from 'luxon'
 
 const GRAPHQL_PATH = '/graphql'
 
 describe('UserAdminResolver (GraphQL)', () => {
-  const { getRequest, getFixtures, expectTable } = useTestApp()
-  let fixtures: Fixtures
+  const { getRequest, getFactories, expectTable } = useTestApp()
+  let factories: Factories
   let request: RequestApp
   let adminUserId: string
 
   beforeEach(() => {
-    fixtures = getFixtures()
+    factories = getFactories()
   })
 
   // ---------------------------------------------------------------------------
@@ -52,10 +52,10 @@ describe('UserAdminResolver (GraphQL)', () => {
 
     it('should not succeed when unauthenticated', async () => {
       const unauthenticatedRequest = await getRequest()
-      const targetUserId = await fixtures.insertUser({
+      const { id: targetUserId } = await factories.user.create({
         email: 'target@test.fr',
-        firstname: 'Target',
-        lastname: 'User',
+        firstName: 'Target',
+        lastName: 'User',
       })
 
       const res = await unauthenticatedRequest
@@ -75,10 +75,10 @@ describe('UserAdminResolver (GraphQL)', () => {
       })
 
       it('should reject with ForbiddenRejection', async () => {
-        const targetUserId = await fixtures.insertUser({
+        const { id: targetUserId } = await factories.user.create({
           email: 'target@test.fr',
-          firstname: 'Target',
-          lastname: 'User',
+          firstName: 'Target',
+          lastName: 'User',
         })
 
         const res = await baseRequest
@@ -93,14 +93,14 @@ describe('UserAdminResolver (GraphQL)', () => {
     describe('when user is authenticated as ADMIN_USER', () => {
       beforeEach(async () => {
         request = await getRequest({ signedAs: 'ADMIN_USER' })
-        adminUserId = await fixtures.getSignedUserId('ADMIN_USER')
+        adminUserId = await factories.getSignedUserId('ADMIN_USER')
       })
 
       it('should return the user', async () => {
-        const targetUserId = await fixtures.insertUser({
+        const { id: targetUserId } = await factories.user.create({
           email: 'target@test.fr',
-          firstname: 'Target',
-          lastname: 'User',
+          firstName: 'Target',
+          lastName: 'User',
         })
 
         const res = await request
@@ -108,7 +108,7 @@ describe('UserAdminResolver (GraphQL)', () => {
           .send({ query, variables: { userId: targetUserId } })
           .expect(200)
 
-        // insertUser never persists a birthday, so it is always null here.
+        // user factory never persists a birthday, so it is always null here.
         expect(res.body.data.adminUser).toMatchObject({
           __typename: 'UserFull',
           id: targetUserId,
@@ -208,8 +208,8 @@ describe('UserAdminResolver (GraphQL)', () => {
 
       it('should return a paginated list of users', async () => {
         // The signed-in ADMIN_USER already counts as one user.
-        await fixtures.insertUser({ email: 'a@test.fr', firstname: 'Alice', lastname: 'A' })
-        await fixtures.insertUser({ email: 'b@test.fr', firstname: 'Bob', lastname: 'B' })
+        await factories.user.create({ email: 'a@test.fr', firstName: 'Alice', lastName: 'A' })
+        await factories.user.create({ email: 'b@test.fr', firstName: 'Bob', lastName: 'B' })
 
         const res = await request
           .post(GRAPHQL_PATH)
@@ -226,8 +226,8 @@ describe('UserAdminResolver (GraphQL)', () => {
       })
 
       it('should respect pagination (limit / page)', async () => {
-        await fixtures.insertUser({ email: 'a@test.fr', firstname: 'Alice', lastname: 'A' })
-        await fixtures.insertUser({ email: 'b@test.fr', firstname: 'Bob', lastname: 'B' })
+        await factories.user.create({ email: 'a@test.fr', firstName: 'Alice', lastName: 'A' })
+        await factories.user.create({ email: 'b@test.fr', firstName: 'Bob', lastName: 'B' })
 
         const firstPage = await request
           .post(GRAPHQL_PATH)
@@ -256,8 +256,8 @@ describe('UserAdminResolver (GraphQL)', () => {
       })
 
       it('should filter by criteria', async () => {
-        await fixtures.insertUser({ email: 'alice@test.fr', firstname: 'Alice', lastname: 'Wonder' })
-        await fixtures.insertUser({ email: 'bob@test.fr', firstname: 'Bob', lastname: 'Builder' })
+        await factories.user.create({ email: 'alice@test.fr', firstName: 'Alice', lastName: 'Wonder' })
+        await factories.user.create({ email: 'bob@test.fr', firstName: 'Bob', lastName: 'Builder' })
 
         const res = await request
           .post(GRAPHQL_PATH)
@@ -309,10 +309,10 @@ describe('UserAdminResolver (GraphQL)', () => {
 
     it('should not succeed when unauthenticated', async () => {
       const unauthenticatedRequest = await getRequest()
-      const targetUserId = await fixtures.insertUser({
+      const { id: targetUserId } = await factories.user.create({
         email: 'target@test.fr',
-        firstname: 'Target',
-        lastname: 'User',
+        firstName: 'Target',
+        lastName: 'User',
       })
 
       const res = await unauthenticatedRequest
@@ -323,18 +323,15 @@ describe('UserAdminResolver (GraphQL)', () => {
       expect(res.body.data?.adminUpdateUserProfile?.__typename).not.toBe('VoidOutput')
 
       // No DB change: only the target user exists, unchanged.
-      await expectTable(Fixtures.USER_TABLE)
-        .hasNumberOfRows(1)
-        .row(0)
-        .toMatchObject({ id: targetUserId, first_name: 'Target' })
+      await expectTable(Tables.USER).hasNumberOfRows(1).row(0).toMatchObject({ id: targetUserId, first_name: 'Target' })
     })
 
     it('should reject a BASE_USER with ForbiddenRejection and not modify the user', async () => {
       const baseRequest = await getRequest({ signedAs: 'BASE_USER' })
-      const targetUserId = await fixtures.insertUser({
+      const { id: targetUserId } = await factories.user.create({
         email: 'target@test.fr',
-        firstname: 'Target',
-        lastname: 'User',
+        firstName: 'Target',
+        lastName: 'User',
       })
 
       const res = await baseRequest
@@ -346,7 +343,7 @@ describe('UserAdminResolver (GraphQL)', () => {
 
       // BASE_USER (test@test.fr) + target (target@test.fr) = 2 rows, sorted email ASC ->
       // 'target@test.fr' < 'test@test.fr', so the target is at index 0 and must be unchanged.
-      await expectTable(Fixtures.USER_TABLE, { email: 'ASC' })
+      await expectTable(Tables.USER, { email: 'ASC' })
         .hasNumberOfRows(2)
         .row(0)
         .toMatchObject({ id: targetUserId, first_name: 'Target' })
@@ -355,14 +352,14 @@ describe('UserAdminResolver (GraphQL)', () => {
     describe('when user is authenticated as ADMIN_USER', () => {
       beforeEach(async () => {
         request = await getRequest({ signedAs: 'ADMIN_USER' })
-        adminUserId = await fixtures.getSignedUserId('ADMIN_USER')
+        adminUserId = await factories.getSignedUserId('ADMIN_USER')
       })
 
       it('should update the user profile and persist changes', async () => {
-        const targetUserId = await fixtures.insertUser({
+        const { id: targetUserId } = await factories.user.create({
           email: 'target@test.fr',
-          firstname: 'Target',
-          lastname: 'User',
+          firstName: 'Target',
+          lastName: 'User',
         })
 
         const birthday = DateTime.fromObject({ year: 1990, month: 1, day: 15 }).toISODate()
@@ -389,7 +386,7 @@ describe('UserAdminResolver (GraphQL)', () => {
         // ADMIN_USER (admin@admin.fr) sorts before updated@test.fr -> target at index 1.
         // Email is lowercased by the use-case (already lowercase here); isEnabled is applied as-is.
         // The `birthday` column is a `date` stored from `new Date('1990-01-15')`.
-        await expectTable(Fixtures.USER_TABLE, { email: 'ASC' })
+        await expectTable(Tables.USER, { email: 'ASC' })
           .row(1)
           .toMatchObject({
             id: targetUserId,
@@ -411,10 +408,10 @@ describe('UserAdminResolver (GraphQL)', () => {
       })
 
       it('should return UnauthorizedRejection when admin tries to update another admin', async () => {
-        const otherAdminId = await fixtures.insertUser({
+        const { id: otherAdminId } = await factories.user.create({
           email: 'other-admin@test.fr',
-          firstname: 'Other',
-          lastname: 'Admin',
+          firstName: 'Other',
+          lastName: 'Admin',
           authorities: [Authorities.ROLE_ADMIN],
         })
 
@@ -426,9 +423,7 @@ describe('UserAdminResolver (GraphQL)', () => {
         expect(res.body.data.adminUpdateUserProfile).toMatchObject({ __typename: 'UnauthorizedRejection' })
 
         // admin@admin.fr (signed) < other-admin@test.fr -> other admin at index 1, unchanged.
-        await expectTable(Fixtures.USER_TABLE, { email: 'ASC' })
-          .row(1)
-          .toMatchObject({ id: otherAdminId, first_name: 'Other' })
+        await expectTable(Tables.USER, { email: 'ASC' }).row(1).toMatchObject({ id: otherAdminId, first_name: 'Other' })
       })
 
       it('should return NotFoundRejection when user does not exist', async () => {
@@ -446,10 +441,10 @@ describe('UserAdminResolver (GraphQL)', () => {
         { input: { firstname: '' }, case: 'empty firstname' },
         { input: { birthday: 'not-a-date' }, case: 'invalid birthday' },
       ])('should return ValidationRejection when $case', async ({ input }) => {
-        const targetUserId = await fixtures.insertUser({
+        const { id: targetUserId } = await factories.user.create({
           email: 'target@test.fr',
-          firstname: 'Target',
-          lastname: 'User',
+          firstName: 'Target',
+          lastName: 'User',
         })
 
         const res = await request
@@ -485,10 +480,10 @@ describe('UserAdminResolver (GraphQL)', () => {
 
     it('should not succeed when unauthenticated', async () => {
       const unauthenticatedRequest = await getRequest()
-      const targetUserId = await fixtures.insertUser({
+      const { id: targetUserId } = await factories.user.create({
         email: 'target@test.fr',
-        firstname: 'Target',
-        lastname: 'User',
+        firstName: 'Target',
+        lastName: 'User',
       })
 
       const res = await unauthenticatedRequest
@@ -498,15 +493,15 @@ describe('UserAdminResolver (GraphQL)', () => {
 
       expect(res.body.data?.adminDeleteUser?.__typename).not.toBe('VoidOutput')
 
-      await expectTable(Fixtures.USER_TABLE).hasNumberOfRows(1)
+      await expectTable(Tables.USER).hasNumberOfRows(1)
     })
 
     it('should reject a BASE_USER with ForbiddenRejection and not delete the user', async () => {
       const baseRequest = await getRequest({ signedAs: 'BASE_USER' })
-      const targetUserId = await fixtures.insertUser({
+      const { id: targetUserId } = await factories.user.create({
         email: 'target@test.fr',
-        firstname: 'Target',
-        lastname: 'User',
+        firstName: 'Target',
+        lastName: 'User',
       })
 
       const res = await baseRequest
@@ -517,24 +512,24 @@ describe('UserAdminResolver (GraphQL)', () => {
       expect(res.body.data.adminDeleteUser).toMatchObject({ __typename: 'ForbiddenRejection' })
 
       // BASE_USER (signed) + target user = 2 rows, nothing deleted.
-      await expectTable(Fixtures.USER_TABLE).hasNumberOfRows(2)
+      await expectTable(Tables.USER).hasNumberOfRows(2)
     })
 
     describe('when user is authenticated as ADMIN_USER', () => {
       beforeEach(async () => {
         request = await getRequest({ signedAs: 'ADMIN_USER' })
-        adminUserId = await fixtures.getSignedUserId('ADMIN_USER')
+        adminUserId = await factories.getSignedUserId('ADMIN_USER')
       })
 
       it('should delete the user and persist the deletion', async () => {
-        const targetUserId = await fixtures.insertUser({
+        const { id: targetUserId } = await factories.user.create({
           email: 'target@test.fr',
-          firstname: 'Target',
-          lastname: 'User',
+          firstName: 'Target',
+          lastName: 'User',
         })
 
         // ADMIN_USER (signed) + target user = 2 rows before deletion.
-        await expectTable(Fixtures.USER_TABLE).hasNumberOfRows(2)
+        await expectTable(Tables.USER).hasNumberOfRows(2)
 
         const res = await request
           .post(GRAPHQL_PATH)
@@ -544,7 +539,7 @@ describe('UserAdminResolver (GraphQL)', () => {
         expect(res.body.data.adminDeleteUser).toEqual({ __typename: 'VoidOutput', success: true })
 
         // Only the signed-in admin remains.
-        await expectTable(Fixtures.USER_TABLE).hasNumberOfRows(1).row(0).toMatchObject({ id: adminUserId })
+        await expectTable(Tables.USER).hasNumberOfRows(1).row(0).toMatchObject({ id: adminUserId })
       })
 
       it('should return UnauthorizedRejection when admin deletes themselves', async () => {
@@ -555,14 +550,14 @@ describe('UserAdminResolver (GraphQL)', () => {
 
         expect(res.body.data.adminDeleteUser).toMatchObject({ __typename: 'UnauthorizedRejection' })
 
-        await expectTable(Fixtures.USER_TABLE).hasNumberOfRows(1)
+        await expectTable(Tables.USER).hasNumberOfRows(1)
       })
 
       it('should return UnauthorizedRejection when admin tries to delete another admin', async () => {
-        const otherAdminId = await fixtures.insertUser({
+        const { id: otherAdminId } = await factories.user.create({
           email: 'other-admin@test.fr',
-          firstname: 'Other',
-          lastname: 'Admin',
+          firstName: 'Other',
+          lastName: 'Admin',
           authorities: [Authorities.ROLE_ADMIN],
         })
 
@@ -573,7 +568,7 @@ describe('UserAdminResolver (GraphQL)', () => {
 
         expect(res.body.data.adminDeleteUser).toMatchObject({ __typename: 'UnauthorizedRejection' })
 
-        await expectTable(Fixtures.USER_TABLE).hasNumberOfRows(2)
+        await expectTable(Tables.USER).hasNumberOfRows(2)
       })
 
       it('should return NotFoundRejection when user does not exist', async () => {
@@ -584,7 +579,7 @@ describe('UserAdminResolver (GraphQL)', () => {
 
         expect(res.body.data.adminDeleteUser).toMatchObject({ __typename: 'NotFoundRejection' })
 
-        await expectTable(Fixtures.USER_TABLE).hasNumberOfRows(1)
+        await expectTable(Tables.USER).hasNumberOfRows(1)
       })
     })
   })
@@ -609,10 +604,10 @@ describe('UserAdminResolver (GraphQL)', () => {
 
     it('should not succeed when unauthenticated', async () => {
       const unauthenticatedRequest = await getRequest()
-      const targetUserId = await fixtures.insertUser({
+      const { id: targetUserId } = await factories.user.create({
         email: 'target@test.fr',
-        firstname: 'Target',
-        lastname: 'User',
+        firstName: 'Target',
+        lastName: 'User',
       })
 
       const res = await unauthenticatedRequest
@@ -625,10 +620,10 @@ describe('UserAdminResolver (GraphQL)', () => {
 
     it('should reject a BASE_USER with ForbiddenRejection', async () => {
       const baseRequest = await getRequest({ signedAs: 'BASE_USER' })
-      const targetUserId = await fixtures.insertUser({
+      const { id: targetUserId } = await factories.user.create({
         email: 'target@test.fr',
-        firstname: 'Target',
-        lastname: 'User',
+        firstName: 'Target',
+        lastName: 'User',
       })
 
       const res = await baseRequest
@@ -645,10 +640,10 @@ describe('UserAdminResolver (GraphQL)', () => {
       })
 
       it('should remove the user picture and persist the change', async () => {
-        const targetUserId = await fixtures.insertUser({
+        const { id: targetUserId } = await factories.user.create({
           email: 'target@test.fr',
-          firstname: 'Target',
-          lastname: 'User',
+          firstName: 'Target',
+          lastName: 'User',
         })
 
         const res = await request
@@ -659,9 +654,7 @@ describe('UserAdminResolver (GraphQL)', () => {
         expect(res.body.data.adminRemoveUserPicture).toEqual({ __typename: 'VoidOutput', success: true })
 
         // admin@admin.fr (signed) < target@test.fr -> target at index 1.
-        await expectTable(Fixtures.USER_TABLE, { email: 'ASC' })
-          .row(1)
-          .toMatchObject({ id: targetUserId, picture_url: null })
+        await expectTable(Tables.USER, { email: 'ASC' }).row(1).toMatchObject({ id: targetUserId, picture_url: null })
       })
 
       it('should return NotFoundRejection when user does not exist', async () => {

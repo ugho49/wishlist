@@ -1,3 +1,4 @@
+export type { DrizzleDatabase } from './database.service'
 export type { DrizzleTransaction } from './transaction-manager'
 
 export { createSqlClient } from './create-sql-client'

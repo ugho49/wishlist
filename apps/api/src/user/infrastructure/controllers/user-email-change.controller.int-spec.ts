@@ -1,12 +1,14 @@
-import { Fixtures, RequestApp, useTestApp } from '@wishlist/api-test-utils'
+import type { RequestApp } from '@wishlist/api-test-utils'
+
+import { BASE_USER_EMAIL, Factories, Tables, useTestApp } from '@wishlist/api-test-utils'
 import { DateTime } from 'luxon'
 
 describe('UserEmailChangeController', () => {
-  const { getRequest, expectTable, getFixtures, expectMail } = useTestApp()
-  let fixtures: Fixtures
+  const { getRequest, expectTable, getFactories, expectMail } = useTestApp()
+  let factories: Factories
 
   beforeEach(() => {
-    fixtures = getFixtures()
+    factories = getFactories()
   })
 
   describe('GET /user/email-change/pending', () => {
@@ -23,7 +25,7 @@ describe('UserEmailChangeController', () => {
 
       beforeEach(async () => {
         request = await getRequest({ signedAs: 'BASE_USER' })
-        currentUserId = await fixtures.getSignedUserId('BASE_USER')
+        currentUserId = await factories.getSignedUserId('BASE_USER')
       })
 
       it('should return undefined when no pending email change', async () => {
@@ -39,7 +41,7 @@ describe('UserEmailChangeController', () => {
         const newEmail = 'newemail@test.fr'
         const expiredAt = DateTime.now().plus({ hour: 1 }).toJSDate()
 
-        await fixtures.insertUserEmailChangeVerification({
+        await factories.userEmailChangeVerification.create({
           userId: currentUserId,
           newEmail,
           token: 'test-token',
@@ -58,7 +60,7 @@ describe('UserEmailChangeController', () => {
       })
 
       it('should return undefined when pending email change is expired', async () => {
-        await fixtures.insertUserEmailChangeVerification({
+        await factories.userEmailChangeVerification.create({
           userId: currentUserId,
           newEmail: 'newemail@test.fr',
           token: 'test-token',
@@ -89,7 +91,7 @@ describe('UserEmailChangeController', () => {
 
       beforeEach(async () => {
         request = await getRequest({ signedAs: 'BASE_USER' })
-        currentUserId = await fixtures.getSignedUserId('BASE_USER')
+        currentUserId = await factories.getSignedUserId('BASE_USER')
       })
 
       it.each([
@@ -127,11 +129,11 @@ describe('UserEmailChangeController', () => {
       })
 
       it('should fail when new email is the same as current email', async () => {
-        await expectTable(Fixtures.USER_EMAIL_CHANGE_VERIFICATION_TABLE).hasNumberOfRows(0)
+        await expectTable(Tables.USER_EMAIL_CHANGE_VERIFICATION).hasNumberOfRows(0)
 
         await request
           .post(path)
-          .send({ new_email: Fixtures.BASE_USER_EMAIL })
+          .send({ new_email: BASE_USER_EMAIL })
           .expect(400)
           .expect(({ body }) =>
             expect(body).toMatchObject({
@@ -139,18 +141,18 @@ describe('UserEmailChangeController', () => {
             }),
           )
 
-        await expectTable(Fixtures.USER_EMAIL_CHANGE_VERIFICATION_TABLE).hasNumberOfRows(0)
+        await expectTable(Tables.USER_EMAIL_CHANGE_VERIFICATION).hasNumberOfRows(0)
         await expectMail().waitFor(500).hasNumberOfEmails(0)
       })
 
       it('should fail when new email is already taken by another user', async () => {
-        await fixtures.insertUser({
+        await factories.user.create({
           email: 'existing@test.fr',
-          firstname: 'Existing',
-          lastname: 'User',
+          firstName: 'Existing',
+          lastName: 'User',
         })
 
-        await expectTable(Fixtures.USER_EMAIL_CHANGE_VERIFICATION_TABLE).hasNumberOfRows(0)
+        await expectTable(Tables.USER_EMAIL_CHANGE_VERIFICATION).hasNumberOfRows(0)
 
         await request
           .post(path)
@@ -162,19 +164,19 @@ describe('UserEmailChangeController', () => {
             }),
           )
 
-        await expectTable(Fixtures.USER_EMAIL_CHANGE_VERIFICATION_TABLE).hasNumberOfRows(0)
+        await expectTable(Tables.USER_EMAIL_CHANGE_VERIFICATION).hasNumberOfRows(0)
         await expectMail().waitFor(500).hasNumberOfEmails(0)
       })
 
       it('should fail when there is already a pending email change request', async () => {
-        await fixtures.insertUserEmailChangeVerification({
+        await factories.userEmailChangeVerification.create({
           userId: currentUserId,
           newEmail: 'pending@test.fr',
           token: 'token',
           expiredAt: DateTime.now().plus({ hour: 1 }).toJSDate(),
         })
 
-        await expectTable(Fixtures.USER_EMAIL_CHANGE_VERIFICATION_TABLE).hasNumberOfRows(1)
+        await expectTable(Tables.USER_EMAIL_CHANGE_VERIFICATION).hasNumberOfRows(1)
 
         await request
           .post(path)
@@ -186,18 +188,18 @@ describe('UserEmailChangeController', () => {
             }),
           )
 
-        await expectTable(Fixtures.USER_EMAIL_CHANGE_VERIFICATION_TABLE).hasNumberOfRows(1)
+        await expectTable(Tables.USER_EMAIL_CHANGE_VERIFICATION).hasNumberOfRows(1)
         await expectMail().waitFor(500).hasNumberOfEmails(0)
       })
 
       it('should create email change verification when valid input', async () => {
         const newEmail = 'newemail@test.fr'
 
-        await expectTable(Fixtures.USER_EMAIL_CHANGE_VERIFICATION_TABLE).hasNumberOfRows(0)
+        await expectTable(Tables.USER_EMAIL_CHANGE_VERIFICATION).hasNumberOfRows(0)
 
         await request.post(path).send({ new_email: newEmail }).expect(201)
 
-        await expectTable(Fixtures.USER_EMAIL_CHANGE_VERIFICATION_TABLE)
+        await expectTable(Tables.USER_EMAIL_CHANGE_VERIFICATION)
           .hasNumberOfRows(1)
           .row(0)
           .toEqual({
@@ -223,7 +225,7 @@ describe('UserEmailChangeController', () => {
             {
               subject: "[Wishlist] Demande de changement d'adresse email",
               from: 'contact@wishlistapp.fr',
-              to: Fixtures.BASE_USER_EMAIL,
+              to: BASE_USER_EMAIL,
             },
           ])
       })
@@ -231,18 +233,18 @@ describe('UserEmailChangeController', () => {
       it('should create email change verification when valid input and pending email change request exists but expired', async () => {
         const newEmail = 'newemail@test.fr'
 
-        await fixtures.insertUserEmailChangeVerification({
+        await factories.userEmailChangeVerification.create({
           userId: currentUserId,
           newEmail: 'pending@test.fr',
           token: 'token',
           expiredAt: DateTime.now().minus({ hour: 1 }).toJSDate(),
         })
 
-        await expectTable(Fixtures.USER_EMAIL_CHANGE_VERIFICATION_TABLE).hasNumberOfRows(1)
+        await expectTable(Tables.USER_EMAIL_CHANGE_VERIFICATION).hasNumberOfRows(1)
 
         await request.post(path).send({ new_email: newEmail }).expect(201)
 
-        await expectTable(Fixtures.USER_EMAIL_CHANGE_VERIFICATION_TABLE)
+        await expectTable(Tables.USER_EMAIL_CHANGE_VERIFICATION)
           .hasNumberOfRows(2)
           .row(1)
           .toEqual({
@@ -295,7 +297,7 @@ describe('UserEmailChangeController', () => {
     })
 
     it('should fail when no verification found for email and token', async () => {
-      await fixtures.insertBaseUser()
+      await factories.user.createBase()
 
       await request
         .post(path)
@@ -309,11 +311,11 @@ describe('UserEmailChangeController', () => {
     })
 
     it('should fail when verification is expired', async () => {
-      const userId = await fixtures.insertBaseUser()
+      const { id: userId } = await factories.user.createBase()
       const newEmail = 'newemail@test.fr'
       const token = 'test-token'
 
-      await fixtures.insertUserEmailChangeVerification({
+      await factories.userEmailChangeVerification.create({
         userId,
         newEmail,
         token,
@@ -331,24 +333,24 @@ describe('UserEmailChangeController', () => {
         )
 
       // Verification should not be deleted
-      await expectTable(Fixtures.USER_EMAIL_CHANGE_VERIFICATION_TABLE).hasNumberOfRows(1)
+      await expectTable(Tables.USER_EMAIL_CHANGE_VERIFICATION).hasNumberOfRows(1)
       // User email should not be changed
-      await expectTable(Fixtures.USER_TABLE).row(0).toMatchObject({
-        email: Fixtures.BASE_USER_EMAIL,
+      await expectTable(Tables.USER).row(0).toMatchObject({
+        email: BASE_USER_EMAIL,
       })
     })
 
     it('should fail when new email is already taken by another user', async () => {
-      const userId = await fixtures.insertBaseUser()
-      await fixtures.insertUser({
+      const { id: userId } = await factories.user.createBase()
+      await factories.user.create({
         email: 'other@test.fr',
-        firstname: 'Other',
-        lastname: 'User',
+        firstName: 'Other',
+        lastName: 'User',
       })
       const newEmail = 'other@test.fr'
       const token = 'test-token'
 
-      await fixtures.insertUserEmailChangeVerification({
+      await factories.userEmailChangeVerification.create({
         userId,
         newEmail,
         token,
@@ -366,37 +368,37 @@ describe('UserEmailChangeController', () => {
         )
 
       // Verification should not be deleted
-      await expectTable(Fixtures.USER_EMAIL_CHANGE_VERIFICATION_TABLE).hasNumberOfRows(1)
+      await expectTable(Tables.USER_EMAIL_CHANGE_VERIFICATION).hasNumberOfRows(1)
       // User email should not be changed
-      await expectTable(Fixtures.USER_TABLE).row(0).toMatchObject({
-        email: Fixtures.BASE_USER_EMAIL,
+      await expectTable(Tables.USER).row(0).toMatchObject({
+        email: BASE_USER_EMAIL,
       })
     })
 
     it('should change email with valid input', async () => {
-      const userId = await fixtures.insertBaseUser()
+      const { id: userId } = await factories.user.createBase()
       const newEmail = 'newemail@test.fr'
       const token = 'test-token'
 
-      await fixtures.insertUserEmailChangeVerification({
+      await factories.userEmailChangeVerification.create({
         userId,
         newEmail,
         token,
         expiredAt: DateTime.now().plus({ hour: 1 }).toJSDate(),
       })
 
-      await expectTable(Fixtures.USER_EMAIL_CHANGE_VERIFICATION_TABLE).hasNumberOfRows(1)
+      await expectTable(Tables.USER_EMAIL_CHANGE_VERIFICATION).hasNumberOfRows(1)
 
       await request.post(path).send({ new_email: newEmail, token }).expect(201)
 
       // User email should be updated
-      await expectTable(Fixtures.USER_TABLE).row(0).toMatchObject({
+      await expectTable(Tables.USER).row(0).toMatchObject({
         id: userId,
         email: newEmail,
       })
 
       // Verification should be invalidated
-      await expectTable(Fixtures.USER_EMAIL_CHANGE_VERIFICATION_TABLE)
+      await expectTable(Tables.USER_EMAIL_CHANGE_VERIFICATION)
         .row(0)
         .toMatchObject({
           expired_at: expect.toBeBefore(DateTime.now().toJSDate()),
@@ -410,7 +412,7 @@ describe('UserEmailChangeController', () => {
           {
             subject: '[Wishlist] Votre adresse email a été modifiée',
             from: 'contact@wishlistapp.fr',
-            to: Fixtures.BASE_USER_EMAIL,
+            to: BASE_USER_EMAIL,
           },
           {
             subject: '[Wishlist] Votre adresse email a été mise à jour',

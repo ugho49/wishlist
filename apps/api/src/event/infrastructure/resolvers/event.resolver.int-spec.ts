@@ -1,19 +1,19 @@
 import type { RequestApp } from '@wishlist/api-test-utils'
 
-import { Fixtures, useTestApp } from '@wishlist/api-test-utils'
+import { BASE_USER_EMAIL, Factories, useTestApp } from '@wishlist/api-test-utils'
 import { uuid } from '@wishlist/common'
 import { DateTime } from 'luxon'
 
 describe('EventResolver (GraphQL)', () => {
-  const { getRequest, getFixtures } = useTestApp()
-  let fixtures: Fixtures
+  const { getRequest, getFactories } = useTestApp()
+  let factories: Factories
   let request: RequestApp
   let currentUserId: string
 
   beforeEach(async () => {
-    fixtures = getFixtures()
+    factories = getFactories()
     request = await getRequest({ signedAs: 'BASE_USER' })
-    currentUserId = await fixtures.getSignedUserId('BASE_USER')
+    currentUserId = await factories.getSignedUserId('BASE_USER')
   })
 
   describe('Query event', () => {
@@ -46,7 +46,9 @@ describe('EventResolver (GraphQL)', () => {
 
     it('should not succeed when not authenticated', async () => {
       const unauthRequest = await getRequest()
-      const { eventId } = await fixtures.insertEventWithMaintainer({
+      const {
+        event: { id: eventId },
+      } = await factories.event.createWithMaintainer({
         title: 'My event',
         maintainerId: currentUserId,
       })
@@ -61,7 +63,9 @@ describe('EventResolver (GraphQL)', () => {
 
     it('should return the event when user is a participant', async () => {
       const eventDate = DateTime.now().plus({ days: 30 }).toJSDate()
-      const { eventId } = await fixtures.insertEventWithMaintainer({
+      const {
+        event: { id: eventId },
+      } = await factories.event.createWithMaintainer({
         title: 'Christmas',
         description: 'A nice event',
         eventDate,
@@ -97,12 +101,14 @@ describe('EventResolver (GraphQL)', () => {
     })
 
     it('should return NotFoundRejection when user is not part of the event', async () => {
-      const otherUserId = await fixtures.insertUser({
+      const { id: otherUserId } = await factories.user.create({
         email: 'other@test.fr',
-        firstname: 'Other',
-        lastname: 'User',
+        firstName: 'Other',
+        lastName: 'User',
       })
-      const { eventId } = await fixtures.insertEventWithMaintainer({
+      const {
+        event: { id: eventId },
+      } = await factories.event.createWithMaintainer({
         title: 'Private event',
         maintainerId: otherUserId,
       })
@@ -146,23 +152,28 @@ describe('EventResolver (GraphQL)', () => {
 
       it('should resolve nested wishlists, attendees and attendee.user', async () => {
         const eventDate = DateTime.now().plus({ days: 30 }).toJSDate()
-        const { eventId, attendeeId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+          attendee: { id: attendeeId },
+        } = await factories.event.createWithMaintainer({
           title: 'Event with relations',
           eventDate,
           maintainerId: currentUserId,
         })
 
-        const { userId: secondUserId, attendeeId: secondAttendeeId } =
-          await fixtures.insertUserAndAddItToEventAsAttendee({
-            email: 'guest@test.fr',
-            firstname: 'Guest',
-            lastname: 'Person',
-            eventId,
-          })
+        const {
+          user: { id: secondUserId },
+          attendee: { id: secondAttendeeId },
+        } = await factories.user.createAndJoinEvent({
+          email: 'guest@test.fr',
+          firstName: 'Guest',
+          lastName: 'Person',
+          eventId,
+        })
 
-        const wishlistId = await fixtures.insertWishlist({
+        const { id: wishlistId } = await factories.wishlist.create({
           eventIds: [eventId],
-          userId: currentUserId,
+          ownerId: currentUserId,
           title: 'My wishlist',
           description: 'Wishlist description',
           hideItems: false,
@@ -193,7 +204,7 @@ describe('EventResolver (GraphQL)', () => {
           role: 'MAINTAINER',
           user: {
             id: currentUserId,
-            email: Fixtures.BASE_USER_EMAIL,
+            email: BASE_USER_EMAIL,
           },
         })
 
@@ -210,7 +221,9 @@ describe('EventResolver (GraphQL)', () => {
       })
 
       it('should resolve empty arrays when event has no wishlists', async () => {
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Empty event',
           maintainerId: currentUserId,
         })
@@ -264,17 +277,19 @@ describe('EventResolver (GraphQL)', () => {
     })
 
     it('should return only events the current user participates in', async () => {
-      const { eventId: myEventId } = await fixtures.insertEventWithMaintainer({
+      const {
+        event: { id: myEventId },
+      } = await factories.event.createWithMaintainer({
         title: 'My event',
         maintainerId: currentUserId,
       })
 
-      const otherUserId = await fixtures.insertUser({
+      const { id: otherUserId } = await factories.user.create({
         email: 'other@test.fr',
-        firstname: 'Other',
-        lastname: 'User',
+        firstName: 'Other',
+        lastName: 'User',
       })
-      await fixtures.insertEventWithMaintainer({
+      await factories.event.createWithMaintainer({
         title: 'Not my event',
         maintainerId: otherUserId,
       })
@@ -297,7 +312,7 @@ describe('EventResolver (GraphQL)', () => {
 
     it('should paginate results using filters { page, limit }', async () => {
       for (let i = 0; i < 3; i++) {
-        await fixtures.insertEventWithMaintainer({
+        await factories.event.createWithMaintainer({
           title: `Event ${i}`,
           eventDate: DateTime.now()
             .plus({ days: i + 1 })

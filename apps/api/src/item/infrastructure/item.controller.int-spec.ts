@@ -1,15 +1,15 @@
 import type { RequestApp } from '@wishlist/api-test-utils'
 
-import { Fixtures, useTestApp } from '@wishlist/api-test-utils'
+import { Factories, Tables, useTestApp } from '@wishlist/api-test-utils'
 import { AttendeeRole, uuid } from '@wishlist/common'
 import { DateTime } from 'luxon'
 
 describe('ItemController', () => {
-  const { getRequest, getFixtures, expectTable } = useTestApp()
-  let fixtures: Fixtures
+  const { getRequest, getFactories, expectTable } = useTestApp()
+  let factories: Factories
 
   beforeEach(() => {
-    fixtures = getFixtures()
+    factories = getFactories()
   })
 
   describe('GET /item/importable', () => {
@@ -27,20 +27,22 @@ describe('ItemController', () => {
 
       beforeEach(async () => {
         request = await getRequest({ signedAs: 'BASE_USER' })
-        currentUserId = await fixtures.getSignedUserId('BASE_USER')
+        currentUserId = await factories.getSignedUserId('BASE_USER')
       })
 
       it('should return empty array when user has no old wishlists', async () => {
         // Create a target wishlist for the query parameter
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Target Event',
           description: 'Description',
           maintainerId: currentUserId,
         })
 
-        const targetWishlistId = await fixtures.insertWishlist({
+        const { id: targetWishlistId } = await factories.wishlist.create({
           eventIds: [eventId],
-          userId: currentUserId,
+          ownerId: currentUserId,
           title: 'Target Wishlist',
         })
 
@@ -50,21 +52,25 @@ describe('ItemController', () => {
 
       it('should return empty array when old wishlists have no items', async () => {
         // Create target wishlist
-        const { eventId: targetEventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: targetEventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Target Event',
           description: 'Description',
           maintainerId: currentUserId,
         })
 
-        const targetWishlistId = await fixtures.insertWishlist({
+        const { id: targetWishlistId } = await factories.wishlist.create({
           eventIds: [targetEventId],
-          userId: currentUserId,
+          ownerId: currentUserId,
           title: 'Target Wishlist',
         })
 
         // Create event finished more than 2 months ago
         const oldEventDate = DateTime.now().minus({ months: 3 }).toJSDate()
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Old Event',
           description: 'Description',
           maintainerId: currentUserId,
@@ -72,9 +78,9 @@ describe('ItemController', () => {
         })
 
         // Create wishlist linked to old event
-        await fixtures.insertWishlist({
+        await factories.wishlist.create({
           eventIds: [eventId],
-          userId: currentUserId,
+          ownerId: currentUserId,
           title: 'Old Wishlist',
         })
 
@@ -84,21 +90,25 @@ describe('ItemController', () => {
 
       it('should return importable items from old wishlists', async () => {
         // Create target wishlist
-        const { eventId: targetEventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: targetEventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Target Event',
           description: 'Description',
           maintainerId: currentUserId,
         })
 
-        const targetWishlistId = await fixtures.insertWishlist({
+        const { id: targetWishlistId } = await factories.wishlist.create({
           eventIds: [targetEventId],
-          userId: currentUserId,
+          ownerId: currentUserId,
           title: 'Target Wishlist',
         })
 
         // Create event finished more than 2 months ago
         const oldEventDate = DateTime.now().minus({ months: 3 }).toJSDate()
-        const { eventId: oldEventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: oldEventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Old Event',
           description: 'Description',
           maintainerId: currentUserId,
@@ -106,20 +116,20 @@ describe('ItemController', () => {
         })
 
         // Create wishlist linked to old event
-        const oldWishlistId = await fixtures.insertWishlist({
+        const { id: oldWishlistId } = await factories.wishlist.create({
           eventIds: [oldEventId],
-          userId: currentUserId,
+          ownerId: currentUserId,
           title: 'Old Wishlist',
         })
 
         // Create items - one not taken, one taken, one suggested
-        const notTakenItemId = await fixtures.insertItem({
+        const { id: notTakenItemId } = await factories.item.create({
           wishlistId: oldWishlistId,
           name: 'Not Taken Item',
           description: 'Should be importable',
         })
 
-        await fixtures.insertItem({
+        await factories.item.create({
           wishlistId: oldWishlistId,
           name: 'Taken Item',
           description: 'Should not be importable',
@@ -127,7 +137,7 @@ describe('ItemController', () => {
           takenAt: new Date(),
         })
 
-        await fixtures.insertItem({
+        await factories.item.create({
           wishlistId: oldWishlistId,
           name: 'Suggested Item',
           description: 'Should not be importable',
@@ -146,21 +156,25 @@ describe('ItemController', () => {
 
       it('should not return items from wishlists with events finished less than 2 months ago', async () => {
         // Create target wishlist
-        const { eventId: targetEventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: targetEventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Target Event',
           description: 'Description',
           maintainerId: currentUserId,
         })
 
-        const targetWishlistId = await fixtures.insertWishlist({
+        const { id: targetWishlistId } = await factories.wishlist.create({
           eventIds: [targetEventId],
-          userId: currentUserId,
+          ownerId: currentUserId,
           title: 'Target Wishlist',
         })
 
         // Create event finished 1 month ago (less than 2 months)
         const recentEventDate = DateTime.now().minus({ months: 1 }).toJSDate()
-        const { eventId: recentEventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: recentEventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Recent Event',
           description: 'Description',
           maintainerId: currentUserId,
@@ -168,13 +182,13 @@ describe('ItemController', () => {
         })
 
         // Create wishlist linked to recent event
-        const recentWishlistId = await fixtures.insertWishlist({
+        const { id: recentWishlistId } = await factories.wishlist.create({
           eventIds: [recentEventId],
-          userId: currentUserId,
+          ownerId: currentUserId,
           title: 'Recent Wishlist',
         })
 
-        await fixtures.insertItem({
+        await factories.item.create({
           wishlistId: recentWishlistId,
           name: 'Recent Item',
           description: 'Should not be importable',
@@ -186,21 +200,25 @@ describe('ItemController', () => {
 
       it('should not return items from wishlists with at least one event not finished more than 2 months ago', async () => {
         // Create target wishlist
-        const { eventId: targetEventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: targetEventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Target Event',
           description: 'Description',
           maintainerId: currentUserId,
         })
 
-        const targetWishlistId = await fixtures.insertWishlist({
+        const { id: targetWishlistId } = await factories.wishlist.create({
           eventIds: [targetEventId],
-          userId: currentUserId,
+          ownerId: currentUserId,
           title: 'Target Wishlist',
         })
 
         // Create one old event and one recent event
         const oldEventDate = DateTime.now().minus({ months: 3 }).toJSDate()
-        const { eventId: oldEventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: oldEventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Old Event',
           description: 'Description',
           maintainerId: currentUserId,
@@ -208,7 +226,9 @@ describe('ItemController', () => {
         })
 
         const recentEventDate = DateTime.now().minus({ months: 1 }).toJSDate()
-        const { eventId: recentEventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: recentEventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Recent Event',
           description: 'Description',
           maintainerId: currentUserId,
@@ -216,13 +236,13 @@ describe('ItemController', () => {
         })
 
         // Create wishlist linked to both events (one old, one recent)
-        const mixedWishlistId = await fixtures.insertWishlist({
+        const { id: mixedWishlistId } = await factories.wishlist.create({
           eventIds: [oldEventId, recentEventId],
-          userId: currentUserId,
+          ownerId: currentUserId,
           title: 'Mixed Wishlist',
         })
 
-        await fixtures.insertItem({
+        await factories.item.create({
           wishlistId: mixedWishlistId,
           name: 'Mixed Event Item',
           description: 'Should not be importable because one event is recent',
@@ -234,28 +254,32 @@ describe('ItemController', () => {
 
       it('should only return items from current user wishlists', async () => {
         // Create target wishlist
-        const { eventId: targetEventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: targetEventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Target Event',
           description: 'Description',
           maintainerId: currentUserId,
         })
 
-        const targetWishlistId = await fixtures.insertWishlist({
+        const { id: targetWishlistId } = await factories.wishlist.create({
           eventIds: [targetEventId],
-          userId: currentUserId,
+          ownerId: currentUserId,
           title: 'Target Wishlist',
         })
 
         // Create another user
-        const otherUserId = await fixtures.insertUser({
+        const { id: otherUserId } = await factories.user.create({
           email: 'other@test.com',
-          firstname: 'Other',
-          lastname: 'User',
+          firstName: 'Other',
+          lastName: 'User',
         })
 
         // Create old event for other user
         const oldEventDate = DateTime.now().minus({ months: 3 }).toJSDate()
-        const { eventId: otherEventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: otherEventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Other Event',
           description: 'Description',
           maintainerId: otherUserId,
@@ -263,13 +287,13 @@ describe('ItemController', () => {
         })
 
         // Create wishlist for other user
-        const otherWishlistId = await fixtures.insertWishlist({
+        const { id: otherWishlistId } = await factories.wishlist.create({
           eventIds: [otherEventId],
-          userId: otherUserId,
+          ownerId: otherUserId,
           title: 'Other Wishlist',
         })
 
-        await fixtures.insertItem({
+        await factories.item.create({
           wishlistId: otherWishlistId,
           name: 'Other User Item',
           description: 'Should not be importable',
@@ -281,21 +305,25 @@ describe('ItemController', () => {
 
       it('should return multiple importable items ordered by creation date', async () => {
         // Create target wishlist
-        const { eventId: targetEventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: targetEventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Target Event',
           description: 'Description',
           maintainerId: currentUserId,
         })
 
-        const targetWishlistId = await fixtures.insertWishlist({
+        const { id: targetWishlistId } = await factories.wishlist.create({
           eventIds: [targetEventId],
-          userId: currentUserId,
+          ownerId: currentUserId,
           title: 'Target Wishlist',
         })
 
         // Create event finished more than 2 months ago
         const oldEventDate = DateTime.now().minus({ months: 3 }).toJSDate()
-        const { eventId: oldEventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: oldEventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Old Event',
           description: 'Description',
           maintainerId: currentUserId,
@@ -303,24 +331,24 @@ describe('ItemController', () => {
         })
 
         // Create wishlist linked to old event
-        const oldWishlistId = await fixtures.insertWishlist({
+        const { id: oldWishlistId } = await factories.wishlist.create({
           eventIds: [oldEventId],
-          userId: currentUserId,
+          ownerId: currentUserId,
           title: 'Old Wishlist',
         })
 
         // Create multiple items
-        const item1Id = await fixtures.insertItem({
+        const { id: item1Id } = await factories.item.create({
           wishlistId: oldWishlistId,
           name: 'Item 1',
         })
 
-        const item2Id = await fixtures.insertItem({
+        const { id: item2Id } = await factories.item.create({
           wishlistId: oldWishlistId,
           name: 'Item 2',
         })
 
-        const item3Id = await fixtures.insertItem({
+        const { id: item3Id } = await factories.item.create({
           wishlistId: oldWishlistId,
           name: 'Item 3',
         })
@@ -354,7 +382,7 @@ describe('ItemController', () => {
 
       beforeEach(async () => {
         request = await getRequest({ signedAs: 'BASE_USER' })
-        currentUserId = await fixtures.getSignedUserId('BASE_USER')
+        currentUserId = await factories.getSignedUserId('BASE_USER')
       })
 
       it.each([
@@ -418,13 +446,15 @@ describe('ItemController', () => {
             })
           })
 
-        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(0)
+        await expectTable(Tables.ITEM).hasNumberOfRows(0)
       })
 
       it('should successfully import multiple items from old wishlists', async () => {
         // Create old event (more than 2 months ago)
         const oldEventDate = DateTime.now().minus({ months: 3 }).toJSDate()
-        const { eventId: oldEventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: oldEventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Old Event',
           description: 'Description',
           maintainerId: currentUserId,
@@ -432,14 +462,14 @@ describe('ItemController', () => {
         })
 
         // Create old wishlist
-        const oldWishlistId = await fixtures.insertWishlist({
+        const { id: oldWishlistId } = await factories.wishlist.create({
           eventIds: [oldEventId],
-          userId: currentUserId,
+          ownerId: currentUserId,
           title: 'Old Wishlist',
         })
 
         // Create importable items
-        const item1Id = await fixtures.insertItem({
+        const { id: item1Id } = await factories.item.create({
           wishlistId: oldWishlistId,
           name: 'Item 1',
           description: 'Description 1',
@@ -448,7 +478,7 @@ describe('ItemController', () => {
           pictureUrl: 'https://example1.com/pic.jpg',
         })
 
-        const item2Id = await fixtures.insertItem({
+        const { id: item2Id } = await factories.item.create({
           wishlistId: oldWishlistId,
           name: 'Item 2',
           description: 'Description 2',
@@ -458,7 +488,9 @@ describe('ItemController', () => {
 
         // Create new event
         const newEventDate = DateTime.now().plus({ days: 30 }).toJSDate()
-        const { eventId: newEventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: newEventId },
+        } = await factories.event.createWithMaintainer({
           title: 'New Event',
           description: 'Description',
           maintainerId: currentUserId,
@@ -466,9 +498,9 @@ describe('ItemController', () => {
         })
 
         // Create target wishlist
-        const targetWishlistId = await fixtures.insertWishlist({
+        const { id: targetWishlistId } = await factories.wishlist.create({
           eventIds: [newEventId],
-          userId: currentUserId,
+          ownerId: currentUserId,
           title: 'Target Wishlist',
         })
 
@@ -500,25 +532,27 @@ describe('ItemController', () => {
         })
 
         // Verify database - should have 4 items total (2 old + 2 imported)
-        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(4)
+        await expectTable(Tables.ITEM).hasNumberOfRows(4)
       })
 
       it('should return 401 when user does not have access to target wishlist', async () => {
-        const otherUserId = await fixtures.insertUser({
+        const { id: otherUserId } = await factories.user.create({
           email: 'other@test.com',
-          firstname: 'Other',
-          lastname: 'User',
+          firstName: 'Other',
+          lastName: 'User',
         })
 
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Test Event',
           description: 'Description',
           maintainerId: otherUserId,
         })
 
-        const otherWishlistId = await fixtures.insertWishlist({
+        const { id: otherWishlistId } = await factories.wishlist.create({
           eventIds: [eventId],
-          userId: otherUserId,
+          ownerId: otherUserId,
           title: 'Other Wishlist',
         })
 
@@ -536,19 +570,21 @@ describe('ItemController', () => {
             })
           })
 
-        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(0)
+        await expectTable(Tables.ITEM).hasNumberOfRows(0)
       })
 
       it('should return empty array when source items not found', async () => {
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Test Event',
           description: 'Description',
           maintainerId: currentUserId,
         })
 
-        const wishlistId = await fixtures.insertWishlist({
+        const { id: wishlistId } = await factories.wishlist.create({
           eventIds: [eventId],
-          userId: currentUserId,
+          ownerId: currentUserId,
           title: 'My Wishlist',
         })
 
@@ -563,19 +599,21 @@ describe('ItemController', () => {
           .expect(201)
 
         expect(response.body).toEqual([])
-        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(0)
+        await expectTable(Tables.ITEM).hasNumberOfRows(0)
       })
 
       it('should return 401 when trying to import items from another user wishlist', async () => {
-        const otherUserId = await fixtures.insertUser({
+        const { id: otherUserId } = await factories.user.create({
           email: 'other@test.com',
-          firstname: 'Other',
-          lastname: 'User',
+          firstName: 'Other',
+          lastName: 'User',
         })
 
         // Create old event for other user
         const oldEventDate = DateTime.now().minus({ months: 3 }).toJSDate()
-        const { eventId: oldEventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: oldEventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Old Event',
           description: 'Description',
           maintainerId: otherUserId,
@@ -583,29 +621,31 @@ describe('ItemController', () => {
         })
 
         // Create old wishlist for other user
-        const oldWishlistId = await fixtures.insertWishlist({
+        const { id: oldWishlistId } = await factories.wishlist.create({
           eventIds: [oldEventId],
-          userId: otherUserId,
+          ownerId: otherUserId,
           title: 'Other User Wishlist',
         })
 
         // Create item in other user's wishlist
-        const itemId = await fixtures.insertItem({
+        const { id: itemId } = await factories.item.create({
           wishlistId: oldWishlistId,
           name: 'Other User Item',
           description: 'Should not be importable',
         })
 
         // Create target wishlist for current user
-        const { eventId: newEventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: newEventId },
+        } = await factories.event.createWithMaintainer({
           title: 'New Event',
           description: 'Description',
           maintainerId: currentUserId,
         })
 
-        const targetWishlistId = await fixtures.insertWishlist({
+        const { id: targetWishlistId } = await factories.wishlist.create({
           eventIds: [newEventId],
-          userId: currentUserId,
+          ownerId: currentUserId,
           title: 'My Wishlist',
         })
 
@@ -624,13 +664,15 @@ describe('ItemController', () => {
           })
 
         // Only the original item should exist
-        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1)
+        await expectTable(Tables.ITEM).hasNumberOfRows(1)
       })
 
       it('should return 500 when trying to import suggested items', async () => {
         // Create old event
         const oldEventDate = DateTime.now().minus({ months: 3 }).toJSDate()
-        const { eventId: oldEventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: oldEventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Old Event',
           description: 'Description',
           maintainerId: currentUserId,
@@ -638,29 +680,31 @@ describe('ItemController', () => {
         })
 
         // Create old wishlist
-        const oldWishlistId = await fixtures.insertWishlist({
+        const { id: oldWishlistId } = await factories.wishlist.create({
           eventIds: [oldEventId],
-          userId: currentUserId,
+          ownerId: currentUserId,
           title: 'Old Wishlist',
         })
 
         // Create a suggested item
-        const suggestedItemId = await fixtures.insertItem({
+        const { id: suggestedItemId } = await factories.item.create({
           wishlistId: oldWishlistId,
           name: 'Suggested Item',
           isSuggested: true,
         })
 
         // Create target wishlist
-        const { eventId: newEventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: newEventId },
+        } = await factories.event.createWithMaintainer({
           title: 'New Event',
           description: 'Description',
           maintainerId: currentUserId,
         })
 
-        const targetWishlistId = await fixtures.insertWishlist({
+        const { id: targetWishlistId } = await factories.wishlist.create({
           eventIds: [newEventId],
-          userId: currentUserId,
+          ownerId: currentUserId,
           title: 'Target Wishlist',
         })
 
@@ -673,45 +717,47 @@ describe('ItemController', () => {
           .expect(500)
 
         // Only the original item should exist
-        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1)
+        await expectTable(Tables.ITEM).hasNumberOfRows(1)
       })
 
       it('should import taken items without their taken status', async () => {
-        const otherUserId = await fixtures.insertUser({
+        const { id: otherUserId } = await factories.user.create({
           email: 'other@test.com',
-          firstname: 'Other',
-          lastname: 'User',
+          firstName: 'Other',
+          lastName: 'User',
         })
 
         // Create old event
         const oldEventDate = DateTime.now().minus({ months: 3 }).toJSDate()
-        const { eventId: oldEventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: oldEventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Old Event',
           description: 'Description',
           maintainerId: currentUserId,
           eventDate: oldEventDate,
         })
 
-        await fixtures.insertActiveAttendee({
+        await factories.eventAttendee.create({
           eventId: oldEventId,
           userId: otherUserId,
           role: AttendeeRole.USER,
         })
 
         // Create old wishlist
-        const oldWishlistId = await fixtures.insertWishlist({
+        const { id: oldWishlistId } = await factories.wishlist.create({
           eventIds: [oldEventId],
-          userId: currentUserId,
+          ownerId: currentUserId,
           title: 'Old Wishlist',
         })
 
         // Create one regular item and one taken item
-        const regularItemId = await fixtures.insertItem({
+        const { id: regularItemId } = await factories.item.create({
           wishlistId: oldWishlistId,
           name: 'Regular Item',
         })
 
-        const takenItemId = await fixtures.insertItem({
+        const { id: takenItemId } = await factories.item.create({
           wishlistId: oldWishlistId,
           name: 'Taken Item',
           takerId: otherUserId,
@@ -719,15 +765,17 @@ describe('ItemController', () => {
         })
 
         // Create target wishlist
-        const { eventId: newEventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: newEventId },
+        } = await factories.event.createWithMaintainer({
           title: 'New Event',
           description: 'Description',
           maintainerId: currentUserId,
         })
 
-        const targetWishlistId = await fixtures.insertWishlist({
+        const { id: targetWishlistId } = await factories.wishlist.create({
           eventIds: [newEventId],
-          userId: currentUserId,
+          ownerId: currentUserId,
           title: 'Target Wishlist',
         })
 
@@ -749,7 +797,7 @@ describe('ItemController', () => {
         })
 
         // Verify database - should have 4 items (2 old + 2 imported)
-        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(4)
+        await expectTable(Tables.ITEM).hasNumberOfRows(4)
       })
     })
   })
@@ -774,19 +822,21 @@ describe('ItemController', () => {
 
       beforeEach(async () => {
         request = await getRequest({ signedAs: 'BASE_USER' })
-        currentUserId = await fixtures.getSignedUserId('BASE_USER')
+        currentUserId = await factories.getSignedUserId('BASE_USER')
       })
 
       it('should create item successfully for own wishlist', async () => {
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Test Event',
           description: 'Description',
           maintainerId: currentUserId,
         })
 
-        const wishlistId = await fixtures.insertWishlist({
+        const { id: wishlistId } = await factories.wishlist.create({
           eventIds: [eventId],
-          userId: currentUserId,
+          ownerId: currentUserId,
           title: 'My Wishlist',
         })
 
@@ -816,7 +866,7 @@ describe('ItemController', () => {
             })
           })
 
-        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+        await expectTable(Tables.ITEM).hasNumberOfRows(1).row(0).toMatchObject({
           id: response.body.id,
           name: 'Test Item',
           description: 'Test description',
@@ -831,27 +881,29 @@ describe('ItemController', () => {
       })
 
       it('should create item successfully for other user wishlist and mark it as suggested', async () => {
-        const otherUserId = await fixtures.insertUser({
+        const { id: otherUserId } = await factories.user.create({
           email: 'other@test.com',
-          firstname: 'Other',
-          lastname: 'User',
+          firstName: 'Other',
+          lastName: 'User',
         })
 
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Test Event',
           description: 'Description',
           maintainerId: currentUserId,
         })
 
-        await fixtures.insertActiveAttendee({
+        await factories.eventAttendee.create({
           eventId,
           userId: otherUserId,
           role: AttendeeRole.USER,
         })
 
-        const wishlistId = await fixtures.insertWishlist({
+        const { id: wishlistId } = await factories.wishlist.create({
           eventIds: [eventId],
-          userId: otherUserId,
+          ownerId: otherUserId,
           title: 'My Wishlist',
         })
 
@@ -881,7 +933,7 @@ describe('ItemController', () => {
             })
           })
 
-        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+        await expectTable(Tables.ITEM).hasNumberOfRows(1).row(0).toMatchObject({
           id: response.body.id,
           name: 'Test Item',
           description: 'Test description',
@@ -896,21 +948,23 @@ describe('ItemController', () => {
       })
 
       it('should create item successfully as co-owner without marking it as suggested', async () => {
-        const otherUserId = await fixtures.insertUser({
+        const { id: otherUserId } = await factories.user.create({
           email: 'other@test.com',
-          firstname: 'Other',
-          lastname: 'User',
+          firstName: 'Other',
+          lastName: 'User',
         })
 
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Test Event',
           description: 'Description',
           maintainerId: otherUserId,
         })
 
-        const wishlistId = await fixtures.insertWishlist({
+        const { id: wishlistId } = await factories.wishlist.create({
           eventIds: [eventId],
-          userId: otherUserId,
+          ownerId: otherUserId,
           title: 'Other Wishlist',
           coOwnerId: currentUserId,
         })
@@ -941,7 +995,7 @@ describe('ItemController', () => {
             })
           })
 
-        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+        await expectTable(Tables.ITEM).hasNumberOfRows(1).row(0).toMatchObject({
           id: response.body.id,
           name: 'Co-owner Item',
           description: 'Created by co-owner',
@@ -1041,25 +1095,27 @@ describe('ItemController', () => {
             })
           })
 
-        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(0)
+        await expectTable(Tables.ITEM).hasNumberOfRows(0)
       })
 
       it('should return 401 when user does not have access to wishlist', async () => {
-        const otherUserId = await fixtures.insertUser({
+        const { id: otherUserId } = await factories.user.create({
           email: 'other@test.com',
-          firstname: 'Other',
-          lastname: 'User',
+          firstName: 'Other',
+          lastName: 'User',
         })
 
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Test Event',
           description: 'Description',
           maintainerId: otherUserId,
         })
 
-        const wishlistId = await fixtures.insertWishlist({
+        const { id: wishlistId } = await factories.wishlist.create({
           eventIds: [eventId],
-          userId: otherUserId,
+          ownerId: otherUserId,
           title: 'Other Wishlist',
         })
 
@@ -1077,31 +1133,33 @@ describe('ItemController', () => {
             })
           })
 
-        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(0)
+        await expectTable(Tables.ITEM).hasNumberOfRows(0)
       })
 
       it('should create suggested item when user is not wishlist owner', async () => {
-        const otherUserId = await fixtures.insertUser({
+        const { id: otherUserId } = await factories.user.create({
           email: 'other@test.com',
-          firstname: 'Other',
-          lastname: 'User',
+          firstName: 'Other',
+          lastName: 'User',
         })
 
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Test Event',
           description: 'Description',
           maintainerId: otherUserId,
         })
 
-        await fixtures.insertActiveAttendee({
+        await factories.eventAttendee.create({
           eventId,
           userId: currentUserId,
           role: AttendeeRole.USER,
         })
 
-        const wishlistId = await fixtures.insertWishlist({
+        const { id: wishlistId } = await factories.wishlist.create({
           eventIds: [eventId],
-          userId: otherUserId,
+          ownerId: otherUserId,
           title: 'Other Wishlist',
         })
 
@@ -1123,7 +1181,7 @@ describe('ItemController', () => {
             })
           })
 
-        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+        await expectTable(Tables.ITEM).hasNumberOfRows(1).row(0).toMatchObject({
           id: response.body.id,
           name: 'Suggested Item',
           is_suggested: true,
@@ -1150,23 +1208,25 @@ describe('ItemController', () => {
 
       beforeEach(async () => {
         request = await getRequest({ signedAs: 'BASE_USER' })
-        currentUserId = await fixtures.getSignedUserId('BASE_USER')
+        currentUserId = await factories.getSignedUserId('BASE_USER')
       })
 
       it('should update item successfully', async () => {
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Test Event',
           description: 'Description',
           maintainerId: currentUserId,
         })
 
-        const wishlistId = await fixtures.insertWishlist({
+        const { id: wishlistId } = await factories.wishlist.create({
           eventIds: [eventId],
-          userId: currentUserId,
+          ownerId: currentUserId,
           title: 'My Wishlist',
         })
 
-        const itemId = await fixtures.insertItem({
+        const { id: itemId } = await factories.item.create({
           wishlistId,
           name: 'Original Item',
           description: 'Original description',
@@ -1184,7 +1244,7 @@ describe('ItemController', () => {
 
         await request.put(path(itemId)).send(updateData).expect(200)
 
-        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+        await expectTable(Tables.ITEM).hasNumberOfRows(1).row(0).toMatchObject({
           id: itemId,
           name: 'Updated Item',
           description: 'Updated description',
@@ -1196,26 +1256,28 @@ describe('ItemController', () => {
       })
 
       it('should update item successfully as co-owner', async () => {
-        const otherUserId = await fixtures.insertUser({
+        const { id: otherUserId } = await factories.user.create({
           email: 'other@test.com',
-          firstname: 'Other',
-          lastname: 'User',
+          firstName: 'Other',
+          lastName: 'User',
         })
 
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Test Event',
           description: 'Description',
           maintainerId: otherUserId,
         })
 
-        const wishlistId = await fixtures.insertWishlist({
+        const { id: wishlistId } = await factories.wishlist.create({
           eventIds: [eventId],
-          userId: otherUserId,
+          ownerId: otherUserId,
           title: 'Other Wishlist',
           coOwnerId: currentUserId,
         })
 
-        const itemId = await fixtures.insertItem({
+        const { id: itemId } = await factories.item.create({
           wishlistId,
           name: 'Original Item',
           description: 'Original description',
@@ -1233,7 +1295,7 @@ describe('ItemController', () => {
 
         await request.put(path(itemId)).send(updateData).expect(200)
 
-        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+        await expectTable(Tables.ITEM).hasNumberOfRows(1).row(0).toMatchObject({
           id: itemId,
           name: 'Updated by Co-owner',
           description: 'Updated by co-owner',
@@ -1296,19 +1358,21 @@ describe('ItemController', () => {
           message: ['picture_url must be shorter than or equal to 1000 characters'],
         },
       ])('should return 400 when invalid input: $case', async ({ body, message }) => {
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Test Event',
           description: 'Description',
           maintainerId: currentUserId,
         })
 
-        const wishlistId = await fixtures.insertWishlist({
+        const { id: wishlistId } = await factories.wishlist.create({
           eventIds: [eventId],
-          userId: currentUserId,
+          ownerId: currentUserId,
           title: 'My Wishlist',
         })
 
-        const itemId = await fixtures.insertItem({
+        const { id: itemId } = await factories.item.create({
           wishlistId,
           name: 'Test Item',
         })
@@ -1332,25 +1396,27 @@ describe('ItemController', () => {
       })
 
       it('should return 401 when user does not have access to item', async () => {
-        const otherUserId = await fixtures.insertUser({
+        const { id: otherUserId } = await factories.user.create({
           email: 'other@test.com',
-          firstname: 'Other',
-          lastname: 'User',
+          firstName: 'Other',
+          lastName: 'User',
         })
 
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Test Event',
           description: 'Description',
           maintainerId: otherUserId,
         })
 
-        const wishlistId = await fixtures.insertWishlist({
+        const { id: wishlistId } = await factories.wishlist.create({
           eventIds: [eventId],
-          userId: otherUserId,
+          ownerId: otherUserId,
           title: 'Other Wishlist',
         })
 
-        const itemId = await fixtures.insertItem({
+        const { id: itemId } = await factories.item.create({
           wishlistId,
           name: 'Test Item',
         })
@@ -1358,38 +1424,40 @@ describe('ItemController', () => {
         await request.put(path(itemId)).send({ name: 'Updated Item' }).expect(401)
 
         // Verify no changes were made
-        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+        await expectTable(Tables.ITEM).hasNumberOfRows(1).row(0).toMatchObject({
           id: itemId,
           name: 'Test Item',
         })
       })
 
       it('should return 404 when trying to update suggested item as list owner', async () => {
-        const otherUserId = await fixtures.insertUser({
+        const { id: otherUserId } = await factories.user.create({
           email: 'other@test.com',
-          firstname: 'Other',
-          lastname: 'User',
+          firstName: 'Other',
+          lastName: 'User',
         })
 
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Test Event',
           description: 'Description',
           maintainerId: currentUserId,
         })
 
-        await fixtures.insertActiveAttendee({
+        await factories.eventAttendee.create({
           eventId,
           userId: otherUserId,
           role: AttendeeRole.USER,
         })
 
-        const wishlistId = await fixtures.insertWishlist({
+        const { id: wishlistId } = await factories.wishlist.create({
           eventIds: [eventId],
-          userId: currentUserId,
+          ownerId: currentUserId,
           title: 'My Wishlist',
         })
 
-        const itemId = await fixtures.insertItem({
+        const { id: itemId } = await factories.item.create({
           wishlistId,
           name: 'Suggested Item',
           isSuggested: true,
@@ -1397,50 +1465,52 @@ describe('ItemController', () => {
 
         await request.put(path(itemId)).send({ name: 'Updated Item' }).expect(404)
 
-        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+        await expectTable(Tables.ITEM).hasNumberOfRows(1).row(0).toMatchObject({
           id: itemId,
           name: 'Suggested Item',
         })
       })
 
       it('should return 401 when trying to update suggested item taken by someone else', async () => {
-        const otherUserId = await fixtures.insertUser({
+        const { id: otherUserId } = await factories.user.create({
           email: 'other@test.com',
-          firstname: 'Other',
-          lastname: 'User',
+          firstName: 'Other',
+          lastName: 'User',
         })
 
-        const thirdUserId = await fixtures.insertUser({
+        const { id: thirdUserId } = await factories.user.create({
           email: 'third@test.com',
-          firstname: 'Third',
-          lastname: 'User',
+          firstName: 'Third',
+          lastName: 'User',
         })
 
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Test Event',
           description: 'Description',
           maintainerId: otherUserId,
         })
 
-        await fixtures.insertActiveAttendee({
+        await factories.eventAttendee.create({
           eventId,
           userId: currentUserId,
           role: AttendeeRole.USER,
         })
 
-        await fixtures.insertActiveAttendee({
+        await factories.eventAttendee.create({
           eventId,
           userId: thirdUserId,
           role: AttendeeRole.USER,
         })
 
-        const wishlistId = await fixtures.insertWishlist({
+        const { id: wishlistId } = await factories.wishlist.create({
           eventIds: [eventId],
-          userId: otherUserId,
+          ownerId: otherUserId,
           title: 'Other Wishlist',
         })
 
-        const itemId = await fixtures.insertItem({
+        const { id: itemId } = await factories.item.create({
           wishlistId,
           name: 'Suggested Item',
           isSuggested: true,
@@ -1461,31 +1531,33 @@ describe('ItemController', () => {
       })
 
       it('should return 401 when trying to update non-suggested item as non-owner', async () => {
-        const otherUserId = await fixtures.insertUser({
+        const { id: otherUserId } = await factories.user.create({
           email: 'other@test.com',
-          firstname: 'Other',
-          lastname: 'User',
+          firstName: 'Other',
+          lastName: 'User',
         })
 
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Test Event',
           description: 'Description',
           maintainerId: otherUserId,
         })
 
-        await fixtures.insertActiveAttendee({
+        await factories.eventAttendee.create({
           eventId,
           userId: currentUserId,
           role: AttendeeRole.USER,
         })
 
-        const wishlistId = await fixtures.insertWishlist({
+        const { id: wishlistId } = await factories.wishlist.create({
           eventIds: [eventId],
-          userId: otherUserId,
+          ownerId: otherUserId,
           title: 'Other Wishlist',
         })
 
-        const itemId = await fixtures.insertItem({
+        const { id: itemId } = await factories.item.create({
           wishlistId,
           name: 'Regular Item',
           isSuggested: false,
@@ -1520,23 +1592,25 @@ describe('ItemController', () => {
 
       beforeEach(async () => {
         request = await getRequest({ signedAs: 'BASE_USER' })
-        currentUserId = await fixtures.getSignedUserId('BASE_USER')
+        currentUserId = await factories.getSignedUserId('BASE_USER')
       })
 
       it('should delete item successfully', async () => {
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Test Event',
           description: 'Description',
           maintainerId: currentUserId,
         })
 
-        const wishlistId = await fixtures.insertWishlist({
+        const { id: wishlistId } = await factories.wishlist.create({
           eventIds: [eventId],
-          userId: currentUserId,
+          ownerId: currentUserId,
           title: 'My Wishlist',
         })
 
-        const itemId = await fixtures.insertItem({
+        const { id: itemId } = await factories.item.create({
           wishlistId,
           name: 'Test Item',
           description: 'Test description',
@@ -1544,30 +1618,32 @@ describe('ItemController', () => {
 
         await request.delete(path(itemId)).expect(200)
 
-        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(0)
+        await expectTable(Tables.ITEM).hasNumberOfRows(0)
       })
 
       it('should delete item successfully as co-owner', async () => {
-        const otherUserId = await fixtures.insertUser({
+        const { id: otherUserId } = await factories.user.create({
           email: 'other@test.com',
-          firstname: 'Other',
-          lastname: 'User',
+          firstName: 'Other',
+          lastName: 'User',
         })
 
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Test Event',
           description: 'Description',
           maintainerId: otherUserId,
         })
 
-        const wishlistId = await fixtures.insertWishlist({
+        const { id: wishlistId } = await factories.wishlist.create({
           eventIds: [eventId],
-          userId: otherUserId,
+          ownerId: otherUserId,
           title: 'Other Wishlist',
           coOwnerId: currentUserId,
         })
 
-        const itemId = await fixtures.insertItem({
+        const { id: itemId } = await factories.item.create({
           wishlistId,
           name: 'Test Item',
           description: 'Test description',
@@ -1575,7 +1651,7 @@ describe('ItemController', () => {
 
         await request.delete(path(itemId)).expect(200)
 
-        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(0)
+        await expectTable(Tables.ITEM).hasNumberOfRows(0)
       })
 
       it('should return 404 when item not found', async () => {
@@ -1585,25 +1661,27 @@ describe('ItemController', () => {
       })
 
       it('should return 401 when user does not have access to item', async () => {
-        const otherUserId = await fixtures.insertUser({
+        const { id: otherUserId } = await factories.user.create({
           email: 'other@test.com',
-          firstname: 'Other',
-          lastname: 'User',
+          firstName: 'Other',
+          lastName: 'User',
         })
 
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Test Event',
           description: 'Description',
           maintainerId: otherUserId,
         })
 
-        const wishlistId = await fixtures.insertWishlist({
+        const { id: wishlistId } = await factories.wishlist.create({
           eventIds: [eventId],
-          userId: otherUserId,
+          ownerId: otherUserId,
           title: 'Other Wishlist',
         })
 
-        const itemId = await fixtures.insertItem({
+        const { id: itemId } = await factories.item.create({
           wishlistId,
           name: 'Test Item',
         })
@@ -1611,35 +1689,37 @@ describe('ItemController', () => {
         await request.delete(path(itemId)).expect(401)
 
         // Verify item still exists
-        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1)
+        await expectTable(Tables.ITEM).hasNumberOfRows(1)
       })
 
       it('should return 401 when trying to delete suggested item as list owner', async () => {
-        const otherUserId = await fixtures.insertUser({
+        const { id: otherUserId } = await factories.user.create({
           email: 'other@test.com',
-          firstname: 'Other',
-          lastname: 'User',
+          firstName: 'Other',
+          lastName: 'User',
         })
 
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Test Event',
           description: 'Description',
           maintainerId: currentUserId,
         })
 
-        await fixtures.insertActiveAttendee({
+        await factories.eventAttendee.create({
           eventId,
           userId: otherUserId,
           role: AttendeeRole.USER,
         })
 
-        const wishlistId = await fixtures.insertWishlist({
+        const { id: wishlistId } = await factories.wishlist.create({
           eventIds: [eventId],
-          userId: currentUserId,
+          ownerId: currentUserId,
           title: 'My Wishlist',
         })
 
-        const itemId = await fixtures.insertItem({
+        const { id: itemId } = await factories.item.create({
           wishlistId,
           name: 'Suggested Item',
           isSuggested: true,
@@ -1647,47 +1727,49 @@ describe('ItemController', () => {
 
         await request.delete(path(itemId)).expect(401)
 
-        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1)
+        await expectTable(Tables.ITEM).hasNumberOfRows(1)
       })
 
       it('should return 401 when trying to delete suggested item taken by someone else', async () => {
-        const otherUserId = await fixtures.insertUser({
+        const { id: otherUserId } = await factories.user.create({
           email: 'other@test.com',
-          firstname: 'Other',
-          lastname: 'User',
+          firstName: 'Other',
+          lastName: 'User',
         })
 
-        const thirdUserId = await fixtures.insertUser({
+        const { id: thirdUserId } = await factories.user.create({
           email: 'third@test.com',
-          firstname: 'Third',
-          lastname: 'User',
+          firstName: 'Third',
+          lastName: 'User',
         })
 
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Test Event',
           description: 'Description',
           maintainerId: otherUserId,
         })
 
-        await fixtures.insertActiveAttendee({
+        await factories.eventAttendee.create({
           eventId,
           userId: currentUserId,
           role: AttendeeRole.USER,
         })
 
-        await fixtures.insertActiveAttendee({
+        await factories.eventAttendee.create({
           eventId,
           userId: thirdUserId,
           role: AttendeeRole.USER,
         })
 
-        const wishlistId = await fixtures.insertWishlist({
+        const { id: wishlistId } = await factories.wishlist.create({
           eventIds: [eventId],
-          userId: otherUserId,
+          ownerId: otherUserId,
           title: 'Other Wishlist',
         })
 
-        const itemId = await fixtures.insertItem({
+        const { id: itemId } = await factories.item.create({
           wishlistId,
           name: 'Suggested Item',
           isSuggested: true,
@@ -1705,35 +1787,37 @@ describe('ItemController', () => {
             })
           })
 
-        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1)
+        await expectTable(Tables.ITEM).hasNumberOfRows(1)
       })
 
       it('should return 401 when trying to delete non-suggested item as non-owner', async () => {
-        const otherUserId = await fixtures.insertUser({
+        const { id: otherUserId } = await factories.user.create({
           email: 'other@test.com',
-          firstname: 'Other',
-          lastname: 'User',
+          firstName: 'Other',
+          lastName: 'User',
         })
 
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Test Event',
           description: 'Description',
           maintainerId: otherUserId,
         })
 
-        await fixtures.insertActiveAttendee({
+        await factories.eventAttendee.create({
           eventId,
           userId: currentUserId,
           role: AttendeeRole.USER,
         })
 
-        const wishlistId = await fixtures.insertWishlist({
+        const { id: wishlistId } = await factories.wishlist.create({
           eventIds: [eventId],
-          userId: otherUserId,
+          ownerId: otherUserId,
           title: 'Other Wishlist',
         })
 
-        const itemId = await fixtures.insertItem({
+        const { id: itemId } = await factories.item.create({
           wishlistId,
           name: 'Regular Item',
           isSuggested: false,
@@ -1749,37 +1833,39 @@ describe('ItemController', () => {
             })
           })
 
-        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1)
+        await expectTable(Tables.ITEM).hasNumberOfRows(1)
       })
 
       it('should convert to suggested item when deleting taken non-suggested item', async () => {
-        const otherUserId = await fixtures.insertUser({
+        const { id: otherUserId } = await factories.user.create({
           email: 'other@test.com',
-          firstname: 'Other',
-          lastname: 'User',
+          firstName: 'Other',
+          lastName: 'User',
         })
 
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Test Event',
           description: 'Description',
           maintainerId: currentUserId,
         })
 
-        await fixtures.insertActiveAttendee({
+        await factories.eventAttendee.create({
           eventId,
           userId: otherUserId,
           role: AttendeeRole.USER,
         })
 
-        const wishlistId = await fixtures.insertWishlist({
+        const { id: wishlistId } = await factories.wishlist.create({
           eventIds: [eventId],
-          userId: currentUserId,
+          ownerId: currentUserId,
           title: 'My Wishlist',
         })
 
         const takenAt = new Date()
 
-        const itemId = await fixtures.insertItem({
+        const { id: itemId } = await factories.item.create({
           wishlistId,
           name: 'Taken Item',
           isSuggested: false,
@@ -1790,7 +1876,7 @@ describe('ItemController', () => {
         await request.delete(path(itemId)).expect(200)
 
         // Verify item is converted to suggested instead of deleted
-        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+        await expectTable(Tables.ITEM).hasNumberOfRows(1).row(0).toMatchObject({
           id: itemId,
           name: 'Taken Item',
           is_suggested: true,
@@ -1816,35 +1902,37 @@ describe('ItemController', () => {
 
       beforeEach(async () => {
         request = await getRequest({ signedAs: 'BASE_USER' })
-        currentUserId = await fixtures.getSignedUserId('BASE_USER')
+        currentUserId = await factories.getSignedUserId('BASE_USER')
       })
 
       it('should toggle item (check) successfully', async () => {
-        const otherUserId = await fixtures.insertUser({
+        const { id: otherUserId } = await factories.user.create({
           email: 'other@test.com',
-          firstname: 'Other',
-          lastname: 'User',
+          firstName: 'Other',
+          lastName: 'User',
         })
 
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Test Event',
           description: 'Description',
           maintainerId: otherUserId,
         })
 
-        await fixtures.insertActiveAttendee({
+        await factories.eventAttendee.create({
           eventId,
           userId: currentUserId,
           role: AttendeeRole.USER,
         })
 
-        const wishlistId = await fixtures.insertWishlist({
+        const { id: wishlistId } = await factories.wishlist.create({
           eventIds: [eventId],
-          userId: otherUserId,
+          ownerId: otherUserId,
           title: 'Other Wishlist',
         })
 
-        const itemId = await fixtures.insertItem({
+        const { id: itemId } = await factories.item.create({
           wishlistId,
           name: 'Test Item',
           isSuggested: false,
@@ -1865,7 +1953,7 @@ describe('ItemController', () => {
             })
           })
 
-        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+        await expectTable(Tables.ITEM).hasNumberOfRows(1).row(0).toMatchObject({
           id: itemId,
           name: 'Test Item',
           taker_id: currentUserId,
@@ -1874,31 +1962,33 @@ describe('ItemController', () => {
       })
 
       it('should toggle item (uncheck) successfully', async () => {
-        const otherUserId = await fixtures.insertUser({
+        const { id: otherUserId } = await factories.user.create({
           email: 'other@test.com',
-          firstname: 'Other',
-          lastname: 'User',
+          firstName: 'Other',
+          lastName: 'User',
         })
 
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Test Event',
           description: 'Description',
           maintainerId: otherUserId,
         })
 
-        await fixtures.insertActiveAttendee({
+        await factories.eventAttendee.create({
           eventId,
           userId: currentUserId,
           role: AttendeeRole.USER,
         })
 
-        const wishlistId = await fixtures.insertWishlist({
+        const { id: wishlistId } = await factories.wishlist.create({
           eventIds: [eventId],
-          userId: otherUserId,
+          ownerId: otherUserId,
           title: 'Other Wishlist',
         })
 
-        const itemId = await fixtures.insertItem({
+        const { id: itemId } = await factories.item.create({
           wishlistId,
           name: 'Test Item',
           isSuggested: false,
@@ -1913,7 +2003,7 @@ describe('ItemController', () => {
             expect(body).toEqual({})
           })
 
-        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+        await expectTable(Tables.ITEM).hasNumberOfRows(1).row(0).toMatchObject({
           id: itemId,
           name: 'Test Item',
           taker_id: null,
@@ -1928,25 +2018,27 @@ describe('ItemController', () => {
       })
 
       it('should return 401 when user does not have access to item', async () => {
-        const otherUserId = await fixtures.insertUser({
+        const { id: otherUserId } = await factories.user.create({
           email: 'other@test.com',
-          firstname: 'Other',
-          lastname: 'User',
+          firstName: 'Other',
+          lastName: 'User',
         })
 
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Test Event',
           description: 'Description',
           maintainerId: otherUserId,
         })
 
-        const wishlistId = await fixtures.insertWishlist({
+        const { id: wishlistId } = await factories.wishlist.create({
           eventIds: [eventId],
-          userId: otherUserId,
+          ownerId: otherUserId,
           title: 'Other Wishlist',
         })
 
-        const itemId = await fixtures.insertItem({
+        const { id: itemId } = await factories.item.create({
           wishlistId,
           name: 'Test Item',
         })
@@ -1955,32 +2047,34 @@ describe('ItemController', () => {
       })
 
       it('should return 404 when trying to check suggested item as list owner with hideItems', async () => {
-        const otherUserId = await fixtures.insertUser({
+        const { id: otherUserId } = await factories.user.create({
           email: 'other@test.com',
-          firstname: 'Other',
-          lastname: 'User',
+          firstName: 'Other',
+          lastName: 'User',
         })
 
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Test Event',
           description: 'Description',
           maintainerId: currentUserId,
         })
 
-        await fixtures.insertActiveAttendee({
+        await factories.eventAttendee.create({
           eventId,
           userId: otherUserId,
           role: AttendeeRole.USER,
         })
 
-        const wishlistId = await fixtures.insertWishlist({
+        const { id: wishlistId } = await factories.wishlist.create({
           eventIds: [eventId],
-          userId: currentUserId,
+          ownerId: currentUserId,
           title: 'My Wishlist',
           hideItems: true,
         })
 
-        const itemId = await fixtures.insertItem({
+        const { id: itemId } = await factories.item.create({
           wishlistId,
           name: 'Suggested Item',
           isSuggested: true,
@@ -1990,20 +2084,22 @@ describe('ItemController', () => {
       })
 
       it('should return 401 when trying to check own items as list owner with hideItems', async () => {
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Test Event',
           description: 'Description',
           maintainerId: currentUserId,
         })
 
-        const wishlistId = await fixtures.insertWishlist({
+        const { id: wishlistId } = await factories.wishlist.create({
           eventIds: [eventId],
-          userId: currentUserId,
+          ownerId: currentUserId,
           title: 'My Wishlist',
           hideItems: true,
         })
 
-        const itemId = await fixtures.insertItem({
+        const { id: itemId } = await factories.item.create({
           wishlistId,
           name: 'My Item',
           isSuggested: false,
@@ -2021,43 +2117,45 @@ describe('ItemController', () => {
       })
 
       it('should return 401 when trying to uncheck item taken by someone else', async () => {
-        const otherUserId = await fixtures.insertUser({
+        const { id: otherUserId } = await factories.user.create({
           email: 'other@test.com',
-          firstname: 'Other',
-          lastname: 'User',
+          firstName: 'Other',
+          lastName: 'User',
         })
 
-        const thirdUserId = await fixtures.insertUser({
+        const { id: thirdUserId } = await factories.user.create({
           email: 'third@test.com',
-          firstname: 'Third',
-          lastname: 'User',
+          firstName: 'Third',
+          lastName: 'User',
         })
 
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Test Event',
           description: 'Description',
           maintainerId: otherUserId,
         })
 
-        await fixtures.insertActiveAttendee({
+        await factories.eventAttendee.create({
           eventId,
           userId: currentUserId,
           role: AttendeeRole.USER,
         })
 
-        await fixtures.insertActiveAttendee({
+        await factories.eventAttendee.create({
           eventId,
           userId: thirdUserId,
           role: AttendeeRole.USER,
         })
 
-        const wishlistId = await fixtures.insertWishlist({
+        const { id: wishlistId } = await factories.wishlist.create({
           eventIds: [eventId],
-          userId: otherUserId,
+          ownerId: otherUserId,
           title: 'Other Wishlist',
         })
 
-        const itemId = await fixtures.insertItem({
+        const { id: itemId } = await factories.item.create({
           wishlistId,
           name: 'Test Item',
           isSuggested: false,
@@ -2077,20 +2175,22 @@ describe('ItemController', () => {
       })
 
       it('should return 401 when trying to uncheck own items as list owner with hideItems', async () => {
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Test Event',
           description: 'Description',
           maintainerId: currentUserId,
         })
 
-        const wishlistId = await fixtures.insertWishlist({
+        const { id: wishlistId } = await factories.wishlist.create({
           eventIds: [eventId],
-          userId: currentUserId,
+          ownerId: currentUserId,
           title: 'My Wishlist',
           hideItems: true,
         })
 
-        const itemId = await fixtures.insertItem({
+        const { id: itemId } = await factories.item.create({
           wishlistId,
           name: 'My Item',
           isSuggested: false,

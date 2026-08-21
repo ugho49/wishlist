@@ -1,6 +1,13 @@
 import type { SQL } from 'bun'
+import type { Table } from 'drizzle-orm'
+
+import { getTableName } from 'drizzle-orm'
 
 import { expect } from 'bun:test'
+
+function quoteIdent(name: string): string {
+  return `"${name.replaceAll('"', '""')}"`
+}
 
 type DbAssertion = () => Promise<unknown>
 
@@ -18,9 +25,13 @@ export class TableAssert {
 
   constructor(
     private readonly sql: SQL,
-    private readonly tableName: string,
+    table: Table,
     private readonly sortOptions?: TableAssertSortOptions,
-  ) {}
+  ) {
+    this.tableName = quoteIdent(getTableName(table))
+  }
+
+  private readonly tableName: string
 
   hasNumberOfRows(expected: number): this {
     this.assertions.add(async () => {
@@ -48,10 +59,10 @@ export class TableAssert {
    * @example
    *
    * ```ts
-   * await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1).check()
+   * await expectTable(Tables.ITEM).hasNumberOfRows(1).check()
    *
    * // Same as:
-   * await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1)
+   * await expectTable(Tables.ITEM).hasNumberOfRows(1)
    * ```
    */
   async check() {
@@ -173,10 +184,10 @@ class TableRowAssert {
    * @example
    *
    * ```ts
-   * await expectTable(Fixtures.ITEM_TABLE).row(0).toEqual({ id: '1', name: 'Item 1' }).check()
+   * await expectTable(Tables.ITEM).row(0).toEqual({ id: '1', name: 'Item 1' }).check()
    *
    * // Same as:
-   * await expectTable(Fixtures.ITEM_TABLE).row(0).toEqual({ id: '1', name: 'Item 1' })
+   * await expectTable(Tables.ITEM).row(0).toEqual({ id: '1', name: 'Item 1' })
    * ```
    */
   check() {

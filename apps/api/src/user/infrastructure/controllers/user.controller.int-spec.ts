@@ -1,16 +1,16 @@
 import type { RequestApp } from '@wishlist/api-test-utils'
 
 import { PasswordManager } from '@wishlist/api/auth'
-import { Fixtures, useTestApp } from '@wishlist/api-test-utils'
+import { BASE_USER_EMAIL, DEFAULT_USER_PASSWORD, Factories, Tables, useTestApp } from '@wishlist/api-test-utils'
 import { sleep } from '@wishlist/common'
 import { DateTime } from 'luxon'
 
 describe('UserController', () => {
-  const { getRequest, expectTable, getFixtures, expectMail } = useTestApp()
-  let fixtures: Fixtures
+  const { getRequest, expectTable, getFactories, expectMail } = useTestApp()
+  let factories: Factories
 
   beforeEach(() => {
-    fixtures = getFixtures()
+    factories = getFactories()
   })
 
   describe('GET /user', () => {
@@ -31,7 +31,7 @@ describe('UserController', () => {
         .expect(({ body }) =>
           expect(body).toEqual({
             id: expect.toBeString(),
-            email: Fixtures.BASE_USER_EMAIL,
+            email: BASE_USER_EMAIL,
             firstname: 'John',
             lastname: 'Doe',
             last_connected_at: expect.toBeDateString(),
@@ -98,32 +98,32 @@ describe('UserController', () => {
           expect(body).toMatchObject({ error: 'Bad Request', message: expect.arrayContaining(message) }),
         )
 
-      await expectTable(Fixtures.USER_TABLE).hasNumberOfRows(0)
+      await expectTable(Tables.USER).hasNumberOfRows(0)
     })
 
     describe('when valid input', () => {
       const input = {
-        email: Fixtures.BASE_USER_EMAIL,
-        password: Fixtures.DEFAULT_USER_PASSWORD,
+        email: BASE_USER_EMAIL,
+        password: DEFAULT_USER_PASSWORD,
         firstname: 'John',
         lastname: 'Doe',
       }
 
       it('should fail when email already exists', async () => {
-        await fixtures.insertBaseUser()
+        await factories.user.createBase()
 
-        await expectTable(Fixtures.USER_TABLE).hasNumberOfRows(1)
+        await expectTable(Tables.USER).hasNumberOfRows(1)
         await request
           .post(path)
           .send(input)
           .expect(401)
           .expect(({ body }) => expect(body).toMatchObject({ message: 'User email already taken' }))
 
-        await expectTable(Fixtures.USER_TABLE).hasNumberOfRows(1)
+        await expectTable(Tables.USER).hasNumberOfRows(1)
       })
 
       it('should create user', async () => {
-        await expectTable(Fixtures.USER_TABLE).hasNumberOfRows(0)
+        await expectTable(Tables.USER).hasNumberOfRows(0)
         const res = await request
           .post(path)
           .send(input)
@@ -131,7 +131,7 @@ describe('UserController', () => {
           .expect(({ body }) =>
             expect(body).toEqual({
               id: expect.toBeString(),
-              email: Fixtures.BASE_USER_EMAIL,
+              email: BASE_USER_EMAIL,
               firstname: 'John',
               lastname: 'Doe',
             }),
@@ -139,12 +139,12 @@ describe('UserController', () => {
 
         const userId = res.body.id
 
-        await expectTable(Fixtures.USER_TABLE)
+        await expectTable(Tables.USER)
           .hasNumberOfRows(1)
           .row(0)
           .toMatchObject({
             id: userId,
-            email: Fixtures.BASE_USER_EMAIL,
+            email: BASE_USER_EMAIL,
             first_name: 'John',
             last_name: 'Doe',
             authorities: ['ROLE_USER'],
@@ -159,7 +159,7 @@ describe('UserController', () => {
             expect(res, 'Password should match').toBe(true)
           })
 
-        await expectTable(Fixtures.USER_EMAIL_SETTING_TABLE).hasNumberOfRows(1).row(0).toEqual({
+        await expectTable(Tables.USER_EMAIL_SETTING).hasNumberOfRows(1).row(0).toEqual({
           id: expect.toBeString(),
           user_id: userId,
           daily_new_item_notification: true,
@@ -173,36 +173,38 @@ describe('UserController', () => {
           .mail(0)
           .hasSubject('[Wishlist] Bienvenue !!!')
           .hasSender('contact@wishlistapp.fr')
-          .hasReceiver(Fixtures.BASE_USER_EMAIL)
+          .hasReceiver(BASE_USER_EMAIL)
       })
 
       it('should create user and join event if invited as pending', async () => {
-        const creatorId = await fixtures.insertAdminUser()
+        const { id: creatorId } = await factories.user.createAdmin()
 
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Event',
           description: 'Description',
           eventDate: new Date(),
           maintainerId: creatorId,
         })
 
-        const attendeeId = await fixtures.insertPendingAttendee({
+        const { id: attendeeId } = await factories.eventAttendee.createPending({
           eventId,
-          tempUserEmail: Fixtures.BASE_USER_EMAIL,
+          tempUserEmail: BASE_USER_EMAIL,
         })
 
-        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(2).row(1).toMatchObject({
+        await expectTable(Tables.EVENT_ATTENDEE).hasNumberOfRows(2).row(1).toMatchObject({
           id: attendeeId,
           event_id: eventId,
           user_id: null,
-          temp_user_email: Fixtures.BASE_USER_EMAIL,
+          temp_user_email: BASE_USER_EMAIL,
         })
 
         const res = await request.post(path).send(input).expect(201)
 
         await sleep(500)
 
-        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(2).row(1).toMatchObject({
+        await expectTable(Tables.EVENT_ATTENDEE).hasNumberOfRows(2).row(1).toMatchObject({
           id: attendeeId,
           event_id: eventId,
           user_id: res.body.id,
@@ -284,7 +286,7 @@ describe('UserController', () => {
         })
         .expect(200)
 
-      await expectTable(Fixtures.USER_TABLE)
+      await expectTable(Tables.USER)
         .hasNumberOfRows(1)
         .row(0)
         .toMatchObject({
@@ -351,10 +353,10 @@ describe('UserController', () => {
           expect(body).toMatchObject({ error: 'Bad Request', message: "Old password don't match with user password" }),
         )
 
-      await expectTable(Fixtures.USER_TABLE)
+      await expectTable(Tables.USER)
         .row(0)
         .expectColumn<string>('password_enc', async value => {
-          const res = await PasswordManager.verify({ hash: value, plainPassword: Fixtures.DEFAULT_USER_PASSWORD })
+          const res = await PasswordManager.verify({ hash: value, plainPassword: DEFAULT_USER_PASSWORD })
           expect(res, 'Password should match').toBe(true)
         })
     })
@@ -365,12 +367,12 @@ describe('UserController', () => {
       await request
         .put(path)
         .send({
-          old_password: Fixtures.DEFAULT_USER_PASSWORD,
+          old_password: DEFAULT_USER_PASSWORD,
           new_password: newPassword,
         })
         .expect(200)
 
-      await expectTable(Fixtures.USER_TABLE)
+      await expectTable(Tables.USER)
         .row(0)
         .expectColumn<string>('password_enc', async value => {
           const res = await PasswordManager.verify({ hash: value, plainPassword: newPassword })
@@ -394,7 +396,7 @@ describe('UserController', () => {
 
       beforeEach(async () => {
         request = await getRequest({ signedAs: 'BASE_USER' })
-        currentUserId = await fixtures.getSignedUserId('BASE_USER')
+        currentUserId = await factories.getSignedUserId('BASE_USER')
       })
 
       it('should return 400 when limit is greater than max limit', async () => {
@@ -421,40 +423,46 @@ describe('UserController', () => {
 
       it('should return closest friends based on common events', async () => {
         // Create additional users
-        const user2Id = await fixtures.insertUser({
+        const { id: user2Id } = await factories.user.create({
           email: 'user2@test.com',
-          firstname: 'Alice',
-          lastname: 'Smith',
+          firstName: 'Alice',
+          lastName: 'Smith',
         })
 
-        const user3Id = await fixtures.insertUser({
+        const { id: user3Id } = await factories.user.create({
           email: 'user3@test.com',
-          firstname: 'Bob',
-          lastname: 'Johnson',
+          firstName: 'Bob',
+          lastName: 'Johnson',
         })
 
-        const user4Id = await fixtures.insertUser({
+        const { id: user4Id } = await factories.user.create({
           email: 'user4@test.com',
-          firstname: 'Charlie',
-          lastname: 'Brown',
+          firstName: 'Charlie',
+          lastName: 'Brown',
         })
 
         // Create events
-        const { eventId: event1Id } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: event1Id },
+        } = await factories.event.createWithMaintainer({
           title: 'Event 1',
           description: 'First event',
           eventDate: DateTime.now().plus({ days: 1 }).toJSDate(),
           maintainerId: currentUserId,
         })
 
-        const { eventId: event2Id } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: event2Id },
+        } = await factories.event.createWithMaintainer({
           title: 'Event 2',
           description: 'Second event',
           eventDate: DateTime.now().plus({ days: 2 }).toJSDate(),
           maintainerId: currentUserId,
         })
 
-        const { eventId: event3Id } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: event3Id },
+        } = await factories.event.createWithMaintainer({
           title: 'Event 3',
           description: 'Third event',
           eventDate: DateTime.now().plus({ days: 3 }).toJSDate(),
@@ -463,14 +471,14 @@ describe('UserController', () => {
 
         // Add attendees to events
         // user2 participates in 2 events with current user (event1, event2)
-        await fixtures.insertActiveAttendee({ eventId: event1Id, userId: user2Id })
-        await fixtures.insertActiveAttendee({ eventId: event2Id, userId: user2Id })
+        await factories.eventAttendee.create({ eventId: event1Id, userId: user2Id })
+        await factories.eventAttendee.create({ eventId: event2Id, userId: user2Id })
 
         // user3 participates in 1 event with current user (event1)
-        await fixtures.insertActiveAttendee({ eventId: event1Id, userId: user3Id })
+        await factories.eventAttendee.create({ eventId: event1Id, userId: user3Id })
 
         // user4 participates in 1 event with current user (event3)
-        await fixtures.insertActiveAttendee({ eventId: event3Id, userId: user4Id })
+        await factories.eventAttendee.create({ eventId: event3Id, userId: user4Id })
 
         await request
           .get(path)
@@ -504,27 +512,29 @@ describe('UserController', () => {
 
       it('should respect limit parameter', async () => {
         // Create users and events
-        const user2Id = await fixtures.insertUser({
+        const { id: user2Id } = await factories.user.create({
           email: 'user2@test.com',
-          firstname: 'Alice',
-          lastname: 'Smith',
+          firstName: 'Alice',
+          lastName: 'Smith',
         })
 
-        const user3Id = await fixtures.insertUser({
+        const { id: user3Id } = await factories.user.create({
           email: 'user3@test.com',
-          firstname: 'Bob',
-          lastname: 'Johnson',
+          firstName: 'Bob',
+          lastName: 'Johnson',
         })
 
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Event',
           description: 'Test event',
           eventDate: DateTime.now().plus({ days: 1 }).toJSDate(),
           maintainerId: currentUserId,
         })
 
-        await fixtures.insertActiveAttendee({ eventId, userId: user2Id })
-        await fixtures.insertActiveAttendee({ eventId, userId: user3Id })
+        await factories.eventAttendee.create({ eventId, userId: user2Id })
+        await factories.eventAttendee.create({ eventId, userId: user3Id })
 
         await request
           .get(path)
@@ -537,72 +547,82 @@ describe('UserController', () => {
 
       it('should handle complex scenario with many users and events', async () => {
         // Create 6 additional users
-        const aliceId = await fixtures.insertUser({
+        const { id: aliceId } = await factories.user.create({
           email: 'alice@test.com',
-          firstname: 'Alice',
-          lastname: 'Wonder',
+          firstName: 'Alice',
+          lastName: 'Wonder',
         })
 
-        const bobId = await fixtures.insertUser({
+        const { id: bobId } = await factories.user.create({
           email: 'bob@test.com',
-          firstname: 'Bob',
-          lastname: 'Builder',
+          firstName: 'Bob',
+          lastName: 'Builder',
         })
 
-        const charlieId = await fixtures.insertUser({
+        const { id: charlieId } = await factories.user.create({
           email: 'charlie@test.com',
-          firstname: 'Charlie',
-          lastname: 'Chaplin',
+          firstName: 'Charlie',
+          lastName: 'Chaplin',
         })
 
-        const dianaId = await fixtures.insertUser({
+        const { id: dianaId } = await factories.user.create({
           email: 'diana@test.com',
-          firstname: 'Diana',
-          lastname: 'Prince',
+          firstName: 'Diana',
+          lastName: 'Prince',
         })
 
-        const eveId = await fixtures.insertUser({
+        const { id: eveId } = await factories.user.create({
           email: 'eve@test.com',
-          firstname: 'Eve',
-          lastname: 'Adams',
+          firstName: 'Eve',
+          lastName: 'Adams',
         })
 
-        const frankId = await fixtures.insertUser({
+        const { id: frankId } = await factories.user.create({
           email: 'frank@test.com',
-          firstname: 'Frank',
-          lastname: 'Sinatra',
+          firstName: 'Frank',
+          lastName: 'Sinatra',
         })
 
         // Create 5 events
-        const { eventId: birthdayId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: birthdayId },
+        } = await factories.event.createWithMaintainer({
           title: 'Birthday Party',
           description: 'Annual birthday celebration',
           eventDate: DateTime.now().plus({ days: 1 }).toJSDate(),
           maintainerId: currentUserId,
         })
 
-        const { eventId: christmasId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: christmasId },
+        } = await factories.event.createWithMaintainer({
           title: 'Christmas Party',
           description: 'Holiday celebration',
           eventDate: DateTime.now().plus({ days: 30 }).toJSDate(),
           maintainerId: currentUserId,
         })
 
-        const { eventId: weddingId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: weddingId },
+        } = await factories.event.createWithMaintainer({
           title: 'Wedding',
           description: 'Wedding ceremony',
           eventDate: DateTime.now().plus({ days: 60 }).toJSDate(),
           maintainerId: currentUserId,
         })
 
-        const { eventId: babyShowerId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: babyShowerId },
+        } = await factories.event.createWithMaintainer({
           title: 'Baby Shower',
           description: 'Baby shower party',
           eventDate: DateTime.now().plus({ days: 90 }).toJSDate(),
           maintainerId: currentUserId,
         })
 
-        const { eventId: graduationId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: graduationId },
+        } = await factories.event.createWithMaintainer({
           title: 'Graduation',
           description: 'Graduation ceremony',
           eventDate: DateTime.now().plus({ days: 120 }).toJSDate(),
@@ -610,27 +630,27 @@ describe('UserController', () => {
         })
 
         // Alice participates in 4 events with current user (closest friend)
-        await fixtures.insertActiveAttendee({ eventId: birthdayId, userId: aliceId })
-        await fixtures.insertActiveAttendee({ eventId: christmasId, userId: aliceId })
-        await fixtures.insertActiveAttendee({ eventId: weddingId, userId: aliceId })
-        await fixtures.insertActiveAttendee({ eventId: babyShowerId, userId: aliceId })
+        await factories.eventAttendee.create({ eventId: birthdayId, userId: aliceId })
+        await factories.eventAttendee.create({ eventId: christmasId, userId: aliceId })
+        await factories.eventAttendee.create({ eventId: weddingId, userId: aliceId })
+        await factories.eventAttendee.create({ eventId: babyShowerId, userId: aliceId })
 
         // Bob participates in 3 events with current user
-        await fixtures.insertActiveAttendee({ eventId: birthdayId, userId: bobId })
-        await fixtures.insertActiveAttendee({ eventId: christmasId, userId: bobId })
-        await fixtures.insertActiveAttendee({ eventId: weddingId, userId: bobId })
+        await factories.eventAttendee.create({ eventId: birthdayId, userId: bobId })
+        await factories.eventAttendee.create({ eventId: christmasId, userId: bobId })
+        await factories.eventAttendee.create({ eventId: weddingId, userId: bobId })
 
         // Charlie participates in 3 events with current user (tied with Bob)
-        await fixtures.insertActiveAttendee({ eventId: christmasId, userId: charlieId })
-        await fixtures.insertActiveAttendee({ eventId: babyShowerId, userId: charlieId })
-        await fixtures.insertActiveAttendee({ eventId: graduationId, userId: charlieId })
+        await factories.eventAttendee.create({ eventId: christmasId, userId: charlieId })
+        await factories.eventAttendee.create({ eventId: babyShowerId, userId: charlieId })
+        await factories.eventAttendee.create({ eventId: graduationId, userId: charlieId })
 
         // Diana participates in 2 events with current user
-        await fixtures.insertActiveAttendee({ eventId: weddingId, userId: dianaId })
-        await fixtures.insertActiveAttendee({ eventId: babyShowerId, userId: dianaId })
+        await factories.eventAttendee.create({ eventId: weddingId, userId: dianaId })
+        await factories.eventAttendee.create({ eventId: babyShowerId, userId: dianaId })
 
         // Eve participates in 1 event with current user
-        await fixtures.insertActiveAttendee({ eventId: graduationId, userId: eveId })
+        await factories.eventAttendee.create({ eventId: graduationId, userId: eveId })
 
         // Frank doesn't participate in any events with current user (should not appear)
 
@@ -691,27 +711,29 @@ describe('UserController', () => {
 
       it('should handle users who participate in events but not with current user', async () => {
         // Create another maintainer
-        const otherMaintainerId = await fixtures.insertUser({
+        const { id: otherMaintainerId } = await factories.user.create({
           email: 'other@test.com',
-          firstname: 'Other',
-          lastname: 'User',
+          firstName: 'Other',
+          lastName: 'User',
         })
 
         // Create users
-        const user1Id = await fixtures.insertUser({
+        const { id: user1Id } = await factories.user.create({
           email: 'user1@test.com',
-          firstname: 'User',
-          lastname: 'One',
+          firstName: 'User',
+          lastName: 'One',
         })
 
-        const user2Id = await fixtures.insertUser({
+        const { id: user2Id } = await factories.user.create({
           email: 'user2@test.com',
-          firstname: 'User',
-          lastname: 'Two',
+          firstName: 'User',
+          lastName: 'Two',
         })
 
         // Create events - current user participates in event1
-        const { eventId: event1Id } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: event1Id },
+        } = await factories.event.createWithMaintainer({
           title: 'Event 1',
           description: 'Current user event',
           eventDate: DateTime.now().plus({ days: 1 }).toJSDate(),
@@ -719,7 +741,9 @@ describe('UserController', () => {
         })
 
         // Other maintainer creates event2 - current user doesn't participate
-        const { eventId: event2Id } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: event2Id },
+        } = await factories.event.createWithMaintainer({
           title: 'Event 2',
           description: 'Other user event',
           eventDate: DateTime.now().plus({ days: 2 }).toJSDate(),
@@ -727,10 +751,10 @@ describe('UserController', () => {
         })
 
         // user1 participates with current user in event1
-        await fixtures.insertActiveAttendee({ eventId: event1Id, userId: user1Id })
+        await factories.eventAttendee.create({ eventId: event1Id, userId: user1Id })
 
         // user2 only participates in event2 (not with current user)
-        await fixtures.insertActiveAttendee({ eventId: event2Id, userId: user2Id })
+        await factories.eventAttendee.create({ eventId: event2Id, userId: user2Id })
 
         await request
           .get(path)
@@ -751,7 +775,7 @@ describe('UserController', () => {
 
       it('should return empty array when user participates in events but no other users do', async () => {
         // Current user is maintainer but no other attendees
-        await fixtures.insertEventWithMaintainer({
+        await factories.event.createWithMaintainer({
           title: 'Solo Event',
           description: 'Event with only current user',
           eventDate: DateTime.now().plus({ days: 1 }).toJSDate(),

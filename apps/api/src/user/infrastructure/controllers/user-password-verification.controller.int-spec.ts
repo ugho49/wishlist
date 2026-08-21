@@ -1,13 +1,13 @@
 import { PasswordManager } from '@wishlist/api/auth'
-import { Fixtures, useTestApp } from '@wishlist/api-test-utils'
+import { BASE_USER_EMAIL, Factories, Tables, useTestApp } from '@wishlist/api-test-utils'
 import { DateTime } from 'luxon'
 
 describe('UserPasswordVerificationController', () => {
-  const { getRequest, expectTable, getFixtures, expectMail } = useTestApp()
-  let fixtures: Fixtures
+  const { getRequest, expectTable, getFactories, expectMail } = useTestApp()
+  let factories: Factories
 
   beforeEach(() => {
-    fixtures = getFixtures()
+    factories = getFactories()
   })
 
   describe('POST /user/forgot-password/send-reset-email', () => {
@@ -20,7 +20,7 @@ describe('UserPasswordVerificationController', () => {
     })
 
     it('should fail with not existing email', async () => {
-      await fixtures.insertBaseUser()
+      await factories.user.createBase()
 
       const request = await getRequest()
 
@@ -28,14 +28,14 @@ describe('UserPasswordVerificationController', () => {
     })
 
     it('should send reset email when valid input', async () => {
-      const userId = await fixtures.insertBaseUser()
+      const { id: userId } = await factories.user.createBase()
 
       const request = await getRequest()
 
-      await expectTable(Fixtures.USER_PASSWORD_VERIFICATION_TABLE).hasNumberOfRows(0)
-      await request.post(path).send({ email: Fixtures.BASE_USER_EMAIL }).expect(201)
+      await expectTable(Tables.USER_PASSWORD_VERIFICATION).hasNumberOfRows(0)
+      await request.post(path).send({ email: BASE_USER_EMAIL }).expect(201)
 
-      await expectTable(Fixtures.USER_PASSWORD_VERIFICATION_TABLE)
+      await expectTable(Tables.USER_PASSWORD_VERIFICATION)
         .hasNumberOfRows(1)
         .row(0)
         .toEqual({
@@ -53,12 +53,12 @@ describe('UserPasswordVerificationController', () => {
         .mail(0)
         .hasSubject('[Wishlist] Reinitialiser le mot de passe')
         .hasSender('contact@wishlistapp.fr')
-        .hasReceiver(Fixtures.BASE_USER_EMAIL)
+        .hasReceiver(BASE_USER_EMAIL)
     })
 
     it('should fail when there is still a valid reset attempt', async () => {
-      const userId = await fixtures.insertBaseUser()
-      await fixtures.insertUserPasswordVerification({
+      const { id: userId } = await factories.user.createBase()
+      await factories.userPasswordVerification.create({
         userId,
         token: 'token',
         expiredAt: DateTime.now().plus({ hour: 1 }).toJSDate(),
@@ -66,10 +66,10 @@ describe('UserPasswordVerificationController', () => {
 
       const request = await getRequest()
 
-      await expectTable(Fixtures.USER_PASSWORD_VERIFICATION_TABLE).hasNumberOfRows(1)
-      await request.post(path).send({ email: Fixtures.BASE_USER_EMAIL }).expect(401)
+      await expectTable(Tables.USER_PASSWORD_VERIFICATION).hasNumberOfRows(1)
+      await request.post(path).send({ email: BASE_USER_EMAIL }).expect(401)
 
-      await expectTable(Fixtures.USER_PASSWORD_VERIFICATION_TABLE).hasNumberOfRows(1)
+      await expectTable(Tables.USER_PASSWORD_VERIFICATION).hasNumberOfRows(1)
       await expectMail().waitFor(500).hasNumberOfEmails(0)
     })
   })
@@ -114,13 +114,13 @@ describe('UserPasswordVerificationController', () => {
     })
 
     it('should fail with no reset token in database for user', async () => {
-      await fixtures.insertBaseUser()
+      await factories.user.createBase()
 
       const request = await getRequest()
 
       return request
         .post(path)
-        .send({ email: Fixtures.BASE_USER_EMAIL, token: 'reset-token', new_password: 'NewPassword123' })
+        .send({ email: BASE_USER_EMAIL, token: 'reset-token', new_password: 'NewPassword123' })
         .expect(401)
         .expect(({ body }) =>
           expect(body).toMatchObject({
@@ -130,8 +130,8 @@ describe('UserPasswordVerificationController', () => {
     })
 
     it('should fail with invalid token', async () => {
-      const userId = await fixtures.insertBaseUser()
-      await fixtures.insertUserPasswordVerification({
+      const { id: userId } = await factories.user.createBase()
+      await factories.userPasswordVerification.create({
         userId,
         token: 'reset-token',
         expiredAt: DateTime.now().plus({ hour: 1 }).toJSDate(),
@@ -141,7 +141,7 @@ describe('UserPasswordVerificationController', () => {
 
       return request
         .post(path)
-        .send({ email: Fixtures.BASE_USER_EMAIL, token: 'wrong-token', new_password: 'NewPassword123' })
+        .send({ email: BASE_USER_EMAIL, token: 'wrong-token', new_password: 'NewPassword123' })
         .expect(401)
         .expect(({ body }) =>
           expect(body).toMatchObject({
@@ -151,8 +151,8 @@ describe('UserPasswordVerificationController', () => {
     })
 
     it('should fail with expired token', async () => {
-      const userId = await fixtures.insertBaseUser()
-      await fixtures.insertUserPasswordVerification({
+      const { id: userId } = await factories.user.createBase()
+      await factories.userPasswordVerification.create({
         userId,
         token: 'reset-token',
         expiredAt: DateTime.now().minus({ hour: 1 }).toJSDate(),
@@ -162,7 +162,7 @@ describe('UserPasswordVerificationController', () => {
 
       return request
         .post(path)
-        .send({ email: Fixtures.BASE_USER_EMAIL, token: 'reset-token', new_password: 'NewPassword123' })
+        .send({ email: BASE_USER_EMAIL, token: 'reset-token', new_password: 'NewPassword123' })
         .expect(401)
         .expect(({ body }) =>
           expect(body).toMatchObject({
@@ -172,8 +172,8 @@ describe('UserPasswordVerificationController', () => {
     })
 
     it('should reset the password with valid input', async () => {
-      const userId = await fixtures.insertBaseUser()
-      await fixtures.insertUserPasswordVerification({
+      const { id: userId } = await factories.user.createBase()
+      await factories.userPasswordVerification.create({
         userId,
         token: 'reset-token',
         expiredAt: DateTime.now().plus({ hour: 1 }).toJSDate(),
@@ -185,17 +185,17 @@ describe('UserPasswordVerificationController', () => {
 
       await request
         .post(path)
-        .send({ email: Fixtures.BASE_USER_EMAIL, token: 'reset-token', new_password: newPassword })
+        .send({ email: BASE_USER_EMAIL, token: 'reset-token', new_password: newPassword })
         .expect(201)
 
-      await expectTable(Fixtures.USER_TABLE)
+      await expectTable(Tables.USER)
         .row(0)
         .expectColumn<string>('password_enc', async value => {
           const res = await PasswordManager.verify({ hash: value, plainPassword: newPassword })
           expect(res, 'Password should match').toBe(true)
         })
 
-      await expectTable(Fixtures.USER_PASSWORD_VERIFICATION_TABLE).hasNumberOfRows(0)
+      await expectTable(Tables.USER_PASSWORD_VERIFICATION).hasNumberOfRows(0)
     })
   })
 })

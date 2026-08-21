@@ -1,11 +1,11 @@
-import { Fixtures, useTestApp } from '@wishlist/api-test-utils'
+import { Factories, Tables, useTestApp } from '@wishlist/api-test-utils'
 
 describe('UserEmailSettingsController', () => {
-  const { getRequest, expectTable, getFixtures } = useTestApp()
-  let fixtures: Fixtures
+  const { getRequest, expectTable, getFactories } = useTestApp()
+  let factories: Factories
 
   beforeEach(() => {
-    fixtures = getFixtures()
+    factories = getFactories()
   })
 
   describe('GET /user/email-settings', () => {
@@ -20,9 +20,9 @@ describe('UserEmailSettingsController', () => {
     it('should return existing email settings', async () => {
       const request = await getRequest({ signedAs: 'BASE_USER' })
 
-      await fixtures.insertUserEmailSettings({
-        userId: await fixtures.getSignedUserId('BASE_USER'),
-        emailSettings: { daily_new_item_notification: false },
+      await factories.userEmailSetting.create({
+        userId: await factories.getSignedUserId('BASE_USER'),
+        dailyNewItemNotification: false,
       })
 
       await request
@@ -83,11 +83,11 @@ describe('UserEmailSettingsController', () => {
 
     it('should update existing email settings', async () => {
       const request = await getRequest({ signedAs: 'BASE_USER' })
-      const currentUserId = await fixtures.getSignedUserId('BASE_USER')
+      const currentUserId = await factories.getSignedUserId('BASE_USER')
 
-      await fixtures.insertUserEmailSettings({
+      await factories.userEmailSetting.create({
         userId: currentUserId,
-        emailSettings: { daily_new_item_notification: true },
+        dailyNewItemNotification: true,
       })
 
       await request
@@ -101,7 +101,7 @@ describe('UserEmailSettingsController', () => {
         })
 
       // Verify database was updated
-      await expectTable(Fixtures.USER_EMAIL_SETTING_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+      await expectTable(Tables.USER_EMAIL_SETTING).hasNumberOfRows(1).row(0).toMatchObject({
         user_id: currentUserId,
         daily_new_item_notification: false,
       })

@@ -1,5 +1,6 @@
 import type { INestApplication } from '@nestjs/common'
 import type { SQL } from 'bun'
+import type { Table } from 'drizzle-orm'
 import type { TableAssertSortOptions } from './table-assert'
 
 import { Logger } from '@nestjs/common'
@@ -8,20 +9,20 @@ import axios, { type AxiosInstance } from 'axios'
 import request from 'supertest'
 
 import { createApp } from '../src/bootstrap'
-import { Fixtures } from './fixtures'
+import { ADMIN_USER_EMAIL, BASE_USER_EMAIL, DEFAULT_USER_PASSWORD, Factories, type SignedAs } from './factories'
 import { MailsAssert } from './mail-assert'
 import { TableAssert } from './table-assert'
 import { afterAll, beforeAll, beforeEach } from 'bun:test'
 
 export type RequestApp = InstanceType<(typeof request)['agent']>
 
-export type SignedAs = 'BASE_USER' | 'ADMIN_USER'
+export type { SignedAs }
 
 export function useTestApp() {
   let app: INestApplication
   let sql: SQL
   let logger: Logger
-  let fixtures: Fixtures
+  let factories: Factories
   let needToClearMails = false
   let http: AxiosInstance
 
@@ -37,7 +38,7 @@ export function useTestApp() {
     })
     await clearMails()
 
-    fixtures = new Fixtures(sql)
+    factories = new Factories(databaseService.db)
   })
 
   beforeEach(async () => {
@@ -73,30 +74,30 @@ export function useTestApp() {
   }
 
   return {
-    expectTable: (table: string, sortOptions?: TableAssertSortOptions) => new TableAssert(sql, table, sortOptions),
+    expectTable: (table: Table, sortOptions?: TableAssertSortOptions) => new TableAssert(sql, table, sortOptions),
     expectMail: () => {
       needToClearMails = true
       return new MailsAssert(http)
     },
-    getFixtures: () => fixtures,
+    getFactories: () => factories,
     getRequest: async (options?: { signedAs?: SignedAs }): Promise<RequestApp> => {
       const requestAppServer = request.agent(app.getHttpServer())
       const authPath = '/auth/login'
       let token = ''
 
       if (options?.signedAs === 'BASE_USER') {
-        await fixtures.insertBaseUser()
+        await factories.user.createBase()
         token = await requestAppServer
           .post(authPath)
-          .send({ email: Fixtures.BASE_USER_EMAIL, password: Fixtures.DEFAULT_USER_PASSWORD })
+          .send({ email: BASE_USER_EMAIL, password: DEFAULT_USER_PASSWORD })
           .then(res => res.body.access_token)
       }
 
       if (options?.signedAs === 'ADMIN_USER') {
-        await fixtures.insertAdminUser()
+        await factories.user.createAdmin()
         token = await requestAppServer
           .post(authPath)
-          .send({ email: Fixtures.ADMIN_USER_EMAIL, password: Fixtures.DEFAULT_USER_PASSWORD })
+          .send({ email: ADMIN_USER_EMAIL, password: DEFAULT_USER_PASSWORD })
           .then(res => res.body.access_token)
       }
 

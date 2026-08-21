@@ -1,6 +1,6 @@
 import type { RequestApp } from '@wishlist/api-test-utils'
 
-import { Fixtures, useTestApp } from '@wishlist/api-test-utils'
+import { Factories, Tables, useTestApp } from '@wishlist/api-test-utils'
 import { uuid } from '@wishlist/common'
 import { DateTime } from 'luxon'
 
@@ -20,11 +20,11 @@ const GRAPHQL_PATH = '/graphql'
 const futureDate = () => DateTime.now().plus({ days: 30 }).toISODate() as string
 
 describe('EventMutationResolver (GraphQL)', () => {
-  const { getRequest, getFixtures, expectTable } = useTestApp()
-  let fixtures: Fixtures
+  const { getRequest, getFactories, expectTable } = useTestApp()
+  let factories: Factories
 
   beforeEach(() => {
-    fixtures = getFixtures()
+    factories = getFactories()
   })
 
   describe('Mutation createEvent', () => {
@@ -61,7 +61,7 @@ describe('EventMutationResolver (GraphQL)', () => {
         .expect(200)
 
       expect(res.body.data?.createEvent?.__typename).not.toBe('Event')
-      await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(0)
+      await expectTable(Tables.EVENT).hasNumberOfRows(0)
     })
 
     describe('when user is authenticated', () => {
@@ -70,7 +70,7 @@ describe('EventMutationResolver (GraphQL)', () => {
 
       beforeEach(async () => {
         request = await getRequest({ signedAs: 'BASE_USER' })
-        currentUserId = await fixtures.getSignedUserId('BASE_USER')
+        currentUserId = await factories.getSignedUserId('BASE_USER')
       })
 
       it('should create an event successfully (creator becomes maintainer attendee)', async () => {
@@ -96,14 +96,14 @@ describe('EventMutationResolver (GraphQL)', () => {
         // Creator is automatically added as a maintainer attendee.
         expect(res.body.data.createEvent.attendeeIds).toHaveLength(1)
 
-        await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+        await expectTable(Tables.EVENT).hasNumberOfRows(1).row(0).toMatchObject({
           id: res.body.data.createEvent.id,
           title: 'Christmas',
           description: 'Family party',
           icon: '🎄',
         })
 
-        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+        await expectTable(Tables.EVENT_ATTENDEE).hasNumberOfRows(1).row(0).toMatchObject({
           event_id: res.body.data.createEvent.id,
           user_id: currentUserId,
           role: 'maintainer',
@@ -129,8 +129,8 @@ describe('EventMutationResolver (GraphQL)', () => {
         expect(res.body.data.createEvent.__typename).toBe('Event')
         expect(res.body.data.createEvent.attendeeIds).toHaveLength(2)
 
-        await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(1)
-        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(2)
+        await expectTable(Tables.EVENT).hasNumberOfRows(1)
+        await expectTable(Tables.EVENT_ATTENDEE).hasNumberOfRows(2)
       })
 
       it.each([
@@ -151,7 +151,7 @@ describe('EventMutationResolver (GraphQL)', () => {
           expect.arrayContaining([expect.objectContaining({ field: expect.stringContaining(field) })]),
         )
 
-        await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(0)
+        await expectTable(Tables.EVENT).hasNumberOfRows(0)
       })
     })
   })
@@ -193,11 +193,13 @@ describe('EventMutationResolver (GraphQL)', () => {
 
       beforeEach(async () => {
         request = await getRequest({ signedAs: 'BASE_USER' })
-        currentUserId = await fixtures.getSignedUserId('BASE_USER')
+        currentUserId = await factories.getSignedUserId('BASE_USER')
       })
 
       it('should update an event the user maintains', async () => {
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Original',
           maintainerId: currentUserId,
         })
@@ -213,7 +215,7 @@ describe('EventMutationResolver (GraphQL)', () => {
 
         expect(res.body.data.updateEvent).toEqual({ __typename: 'VoidOutput', success: true })
 
-        await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+        await expectTable(Tables.EVENT).hasNumberOfRows(1).row(0).toMatchObject({
           id: eventId,
           title: 'Updated Title',
           description: 'New desc',
@@ -221,7 +223,9 @@ describe('EventMutationResolver (GraphQL)', () => {
       })
 
       it('should return ValidationRejection when title is empty', async () => {
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Original',
           maintainerId: currentUserId,
         })
@@ -233,7 +237,7 @@ describe('EventMutationResolver (GraphQL)', () => {
 
         expect(res.body.data.updateEvent.__typename).toBe('ValidationRejection')
 
-        await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(1).row(0).toMatchObject({ title: 'Original' })
+        await expectTable(Tables.EVENT).hasNumberOfRows(1).row(0).toMatchObject({ title: 'Original' })
       })
 
       it('should return NotFoundRejection when the event does not exist', async () => {
@@ -246,13 +250,15 @@ describe('EventMutationResolver (GraphQL)', () => {
       })
 
       it('should return UnauthorizedRejection when the user is not a maintainer', async () => {
-        const otherUserId = await fixtures.insertUser({
+        const { id: otherUserId } = await factories.user.create({
           email: 'other@test.com',
-          firstname: 'Other',
-          lastname: 'User',
+          firstName: 'Other',
+          lastName: 'User',
         })
 
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Original',
           maintainerId: otherUserId,
         })
@@ -264,7 +270,7 @@ describe('EventMutationResolver (GraphQL)', () => {
 
         expect(res.body.data.updateEvent.__typename).toBe('UnauthorizedRejection')
 
-        await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(1).row(0).toMatchObject({ title: 'Original' })
+        await expectTable(Tables.EVENT).hasNumberOfRows(1).row(0).toMatchObject({ title: 'Original' })
       })
     })
   })
@@ -300,11 +306,13 @@ describe('EventMutationResolver (GraphQL)', () => {
 
       beforeEach(async () => {
         request = await getRequest({ signedAs: 'BASE_USER' })
-        currentUserId = await fixtures.getSignedUserId('BASE_USER')
+        currentUserId = await factories.getSignedUserId('BASE_USER')
       })
 
       it('should delete an event the user maintains (no wishlists)', async () => {
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'To Delete',
           maintainerId: currentUserId,
         })
@@ -316,8 +324,8 @@ describe('EventMutationResolver (GraphQL)', () => {
 
         expect(res.body.data.deleteEvent).toEqual({ __typename: 'VoidOutput', success: true })
 
-        await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(0)
-        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(0)
+        await expectTable(Tables.EVENT).hasNumberOfRows(0)
+        await expectTable(Tables.EVENT_ATTENDEE).hasNumberOfRows(0)
       })
 
       it('should return NotFoundRejection when the event does not exist', async () => {
@@ -330,13 +338,15 @@ describe('EventMutationResolver (GraphQL)', () => {
       })
 
       it('should return UnauthorizedRejection when the user is not a maintainer', async () => {
-        const otherUserId = await fixtures.insertUser({
+        const { id: otherUserId } = await factories.user.create({
           email: 'other@test.com',
-          firstname: 'Other',
-          lastname: 'User',
+          firstName: 'Other',
+          lastName: 'User',
         })
 
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Other Event',
           maintainerId: otherUserId,
         })
@@ -348,7 +358,7 @@ describe('EventMutationResolver (GraphQL)', () => {
 
         expect(res.body.data.deleteEvent.__typename).toBe('UnauthorizedRejection')
 
-        await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(1)
+        await expectTable(Tables.EVENT).hasNumberOfRows(1)
       })
     })
   })
@@ -392,11 +402,13 @@ describe('EventMutationResolver (GraphQL)', () => {
 
       beforeEach(async () => {
         request = await getRequest({ signedAs: 'BASE_USER' })
-        currentUserId = await fixtures.getSignedUserId('BASE_USER')
+        currentUserId = await factories.getSignedUserId('BASE_USER')
       })
 
       it('should add a pending attendee to an event the user maintains', async () => {
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Event',
           maintainerId: currentUserId,
         })
@@ -417,11 +429,13 @@ describe('EventMutationResolver (GraphQL)', () => {
         })
 
         // 1 maintainer + 1 new attendee
-        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(2)
+        await expectTable(Tables.EVENT_ATTENDEE).hasNumberOfRows(2)
       })
 
       it('should return ValidationRejection when the email is invalid', async () => {
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Event',
           maintainerId: currentUserId,
         })
@@ -436,7 +450,7 @@ describe('EventMutationResolver (GraphQL)', () => {
           expect.arrayContaining([expect.objectContaining({ field: 'email' })]),
         )
 
-        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(1)
+        await expectTable(Tables.EVENT_ATTENDEE).hasNumberOfRows(1)
       })
 
       it('should return NotFoundRejection when the event does not exist', async () => {
@@ -449,13 +463,15 @@ describe('EventMutationResolver (GraphQL)', () => {
       })
 
       it('should return UnauthorizedRejection when the user is not a maintainer', async () => {
-        const otherUserId = await fixtures.insertUser({
+        const { id: otherUserId } = await factories.user.create({
           email: 'other@test.com',
-          firstname: 'Other',
-          lastname: 'User',
+          firstName: 'Other',
+          lastName: 'User',
         })
 
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Other Event',
           maintainerId: otherUserId,
         })
@@ -467,7 +483,7 @@ describe('EventMutationResolver (GraphQL)', () => {
 
         expect(res.body.data.addEventAttendee.__typename).toBe('UnauthorizedRejection')
 
-        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(1)
+        await expectTable(Tables.EVENT_ATTENDEE).hasNumberOfRows(1)
       })
     })
   })
@@ -503,16 +519,18 @@ describe('EventMutationResolver (GraphQL)', () => {
 
       beforeEach(async () => {
         request = await getRequest({ signedAs: 'BASE_USER' })
-        currentUserId = await fixtures.getSignedUserId('BASE_USER')
+        currentUserId = await factories.getSignedUserId('BASE_USER')
       })
 
       it('should remove a pending attendee from an event the user maintains', async () => {
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Event',
           maintainerId: currentUserId,
         })
 
-        const attendeeId = await fixtures.insertPendingAttendee({
+        const { id: attendeeId } = await factories.eventAttendee.createPending({
           eventId,
           tempUserEmail: 'pending@test.com',
         })
@@ -525,14 +543,16 @@ describe('EventMutationResolver (GraphQL)', () => {
         expect(res.body.data.removeEventAttendee).toEqual({ __typename: 'VoidOutput', success: true })
 
         // Only the maintainer attendee remains
-        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+        await expectTable(Tables.EVENT_ATTENDEE).hasNumberOfRows(1).row(0).toMatchObject({
           user_id: currentUserId,
           role: 'maintainer',
         })
       })
 
       it('should return NotFoundRejection when the attendee does not exist on the event', async () => {
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Event',
           maintainerId: currentUserId,
         })
@@ -546,18 +566,20 @@ describe('EventMutationResolver (GraphQL)', () => {
       })
 
       it('should return UnauthorizedRejection when the user is not a maintainer', async () => {
-        const otherUserId = await fixtures.insertUser({
+        const { id: otherUserId } = await factories.user.create({
           email: 'other@test.com',
-          firstname: 'Other',
-          lastname: 'User',
+          firstName: 'Other',
+          lastName: 'User',
         })
 
-        const { eventId } = await fixtures.insertEventWithMaintainer({
+        const {
+          event: { id: eventId },
+        } = await factories.event.createWithMaintainer({
           title: 'Other Event',
           maintainerId: otherUserId,
         })
 
-        const attendeeId = await fixtures.insertPendingAttendee({
+        const { id: attendeeId } = await factories.eventAttendee.createPending({
           eventId,
           tempUserEmail: 'pending@test.com',
         })
@@ -569,7 +591,7 @@ describe('EventMutationResolver (GraphQL)', () => {
 
         expect(res.body.data.removeEventAttendee.__typename).toBe('UnauthorizedRejection')
 
-        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(2)
+        await expectTable(Tables.EVENT_ATTENDEE).hasNumberOfRows(2)
       })
     })
   })

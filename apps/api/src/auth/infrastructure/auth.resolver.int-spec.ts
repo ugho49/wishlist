@@ -1,14 +1,14 @@
 import type { RequestApp } from '@wishlist/api-test-utils'
 
-import { Fixtures, useTestApp } from '@wishlist/api-test-utils'
+import { Factories, useTestApp } from '@wishlist/api-test-utils'
 
 describe('AuthResolver (GraphQL)', () => {
-  const { getRequest, getFixtures } = useTestApp()
-  let fixtures: Fixtures
+  const { getRequest, getFactories } = useTestApp()
+  let factories: Factories
   let request: RequestApp
 
   beforeEach(async () => {
-    fixtures = getFixtures()
+    factories = getFactories()
     // Auth mutations are public, so we use an unauthenticated request
     request = await getRequest()
   })
@@ -38,10 +38,10 @@ describe('AuthResolver (GraphQL)', () => {
       const email = 'login-happy@test.fr'
       const password = 'SuperSecret123'
 
-      await fixtures.insertUser({
+      await factories.user.create({
         email,
-        firstname: 'Happy',
-        lastname: 'Path',
+        firstName: 'Happy',
+        lastName: 'Path',
         password,
       })
 
@@ -60,10 +60,10 @@ describe('AuthResolver (GraphQL)', () => {
     it('should be case insensitive on email', async () => {
       const password = 'SuperSecret123'
 
-      await fixtures.insertUser({
+      await factories.user.create({
         email: 'casing@test.fr',
-        firstname: 'Case',
-        lastname: 'Insensitive',
+        firstName: 'Case',
+        lastName: 'Insensitive',
         password,
       })
 
@@ -93,10 +93,10 @@ describe('AuthResolver (GraphQL)', () => {
     it('should reject with UnauthorizedRejection when the password is wrong', async () => {
       const email = 'wrong-password@test.fr'
 
-      await fixtures.insertUser({
+      await factories.user.create({
         email,
-        firstname: 'Wrong',
-        lastname: 'Password',
+        firstName: 'Wrong',
+        lastName: 'Password',
         password: 'GoodPassword123',
       })
 
