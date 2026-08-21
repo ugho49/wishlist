@@ -44,7 +44,6 @@ function createNodesInternal(params: { configFilePath: string; options?: Drizzle
   }
 
   const seedExists = existsSync(join(root, 'drizzle', 'seed.ts'))
-  const migrateScriptExists = existsSync(join(root, 'drizzle', 'migrate.ts'))
 
   // Project configuration to be merged into the rest of the Nx configuration
   return {
@@ -72,12 +71,12 @@ function createNodesInternal(params: { configFilePath: string; options?: Drizzle
             inputs: ['default', '^default', { externalDependencies: ['drizzle-kit'] }],
           },
           [options?.migrateTargetName ?? 'drizzle:migrate']: {
-            command: migrateScriptExists ? 'bun drizzle/migrate.ts' : 'drizzle-kit migrate',
+            command: 'drizzle-kit migrate',
             options: {
               cwd: '{projectRoot}',
               color: true,
             },
-            inputs: ['default', '^default', { externalDependencies: migrateScriptExists ? ['bun'] : ['drizzle-kit'] }],
+            inputs: ['default', '^default', { externalDependencies: ['drizzle-kit'] }],
           },
           ...(seedExists ? seedTarget : {}),
         },
