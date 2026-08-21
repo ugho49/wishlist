@@ -58,7 +58,7 @@ jobs:
       - name: Get affected projects
         id: affected-projects
         run: |
-          PROJECTS=$(yarn nx show projects --affected --base=${{ steps.nx-shas.outputs.base }} --head=${{ steps.nx-shas.outputs.head }} --exclude=@wishlist/source --json)
+          PROJECTS=$(bun nx show projects --affected --base=${{ steps.nx-shas.outputs.base }} --head=${{ steps.nx-shas.outputs.head }} --exclude=@wishlist/source --json)
           echo "projects=${PROJECTS}" >> "$GITHUB_OUTPUT"
           echo "Affected projects: ${PROJECTS}"
 
@@ -75,7 +75,7 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: Run check
-        run: yarn check
+        run: bun check
 
   typecheck:
     name: Type Check
@@ -92,7 +92,7 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: Run affected typecheck
-        run: yarn nx affected --target=typecheck --base=${{ needs.install.outputs.nx_base }} --head=${{ needs.install.outputs.nx_head }} --exclude=@wishlist/source --parallel=3 --output-style=stream
+        run: bun nx affected --target=typecheck --base=${{ needs.install.outputs.nx_base }} --head=${{ needs.install.outputs.nx_head }} --exclude=@wishlist/source --parallel=3 --output-style=stream
 
   test-unit:
     name: Unit Tests
@@ -109,7 +109,7 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: Run affected unit tests
-        run: yarn nx affected --target=test --base=${{ needs.install.outputs.nx_base }} --head=${{ needs.install.outputs.nx_head }} --exclude=@wishlist/source --parallel=3 --output-style=stream
+        run: bun nx affected --target=test --base=${{ needs.install.outputs.nx_base }} --head=${{ needs.install.outputs.nx_head }} --exclude=@wishlist/source --parallel=3 --output-style=stream
 
       - name: Upload test reports
         if: always()
@@ -133,10 +133,8 @@ jobs:
       - name: Setup
         uses: ./.github/actions/setup
 
-      # Testcontainers runs natively against the runner's Docker daemon,
-      # so no SSH tunnel / autoforward is required (unlike CircleCI).
       - name: Run affected integration tests
-        run: yarn nx affected --target=test:int --base=${{ needs.install.outputs.nx_base }} --head=${{ needs.install.outputs.nx_head }} --exclude=@wishlist/source --parallel=3 --output-style=stream
+        run: bun nx affected --target=test:int --base=${{ needs.install.outputs.nx_base }} --head=${{ needs.install.outputs.nx_head }} --exclude=@wishlist/source --parallel=3 --output-style=stream
 
       - name: Upload test reports
         if: always()
@@ -160,7 +158,7 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: Run codegen
-        run: yarn nx run api:codegen
+        run: bun nx run api:codegen
 
       - name: Check schema.graphql is up to date
         run: |
@@ -168,7 +166,7 @@ jobs:
             echo "schema.graphql is up to date"
           else
             echo "Error: schema.graphql is not up to date. Some GraphQL files were modified without running codegen."
-            echo "--> Please run 'yarn nx run api:codegen' locally and commit the changes."
+            echo "--> Please run 'bun nx run api:codegen' locally and commit the changes."
             exit 1
           fi
 
@@ -181,6 +179,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+
+      - name: Setup Bun
+        uses: ./.github/actions/setup
+
+      - name: Generate pruned package.json
+        run: bun nx run api:generate-pruned-package-json
 
       - name: Build and push API image
         uses: ./.github/actions/docker-build-push
@@ -211,8 +215,8 @@ jobs:
         env:
           VITE_APP_VERSION: ${{ needs.install.outputs.version }}
         run: |
-          yarn nx run front:codegen
-          yarn nx build front
+          bun nx run front:codegen
+          bun nx build front
 
       # Uploaded so the Deploy Front workflow (same run) can deploy it without rebuilding.
       - name: Upload front build
