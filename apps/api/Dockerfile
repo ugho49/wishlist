@@ -10,18 +10,13 @@ RUN apk add --no-cache python3 make g++ tzdata \
     && echo "Europe/Paris" > /etc/timezone
 ENV TZ=Europe/Paris
 
-COPY bunfig.toml bun.lock package.json ./
-COPY apps/api/package.json ./apps/api/package.json
-COPY apps/front/package.json ./apps/front/package.json
-COPY libs/api-client/package.json ./libs/api-client/package.json
-COPY libs/common/package.json ./libs/common/package.json
-COPY libs/mail/package.json ./libs/mail/package.json
-COPY plugin/biome-plugin/package.json ./plugin/biome-plugin/package.json
-COPY plugin/drizzle-plugin/package.json ./plugin/drizzle-plugin/package.json
+# Must be pre-generated before docker build:
+#   bun nx run api:generate-pruned-package-json
+COPY apps/api/pruned-package.json ./package.json
+COPY apps/api/pruned-bun.lock ./bun.lock
+COPY bunfig.toml ./
 
-# --ignore-scripts skips the root "husky" postinstall (dev-only). Native
-# addons listed in trustedDependencies still ship prebuilt binaries.
-RUN bun install --frozen-lockfile --production --ignore-scripts
+RUN bun install --production --frozen-lockfile
 
 COPY tsconfig.base.json ./
 COPY apps/api ./apps/api

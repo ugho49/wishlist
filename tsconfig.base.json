@@ -32,6 +32,7 @@
       "@wishlist/front-components/*": ["apps/front/src/components/*"],
       "@wishlist/front-hooks": ["apps/front/src/hooks"],
       "@wishlist/biome-plugin": ["plugin/biome-plugin/src/index.ts"],
+      "@wishlist/bun-plugin": ["plugin/bun-plugin/src/index.ts"],
       "@wishlist/drizzle-plugin": ["plugin/drizzle-plugin/src/index.ts"]
     }
   },

@@ -180,6 +180,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Generate pruned package.json
+        run: bun nx run api:generate-pruned-package-json
+
       - name: Build and push API image
         uses: ./.github/actions/docker-build-push
         with:

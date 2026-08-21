@@ -1,0 +1,35 @@
+{
+  "name": "bun-plugin",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "plugin/bun-plugin/src",
+  "projectType": "library",
+  "tags": ["plugin"],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/plugin/bun-plugin",
+        "main": "plugin/bun-plugin/src/index.ts",
+        "tsConfig": "plugin/bun-plugin/tsconfig.lib.json",
+        "assets": [
+          {
+            "input": "./plugin/bun-plugin/src",
+            "glob": "**/!(*.ts)",
+            "output": "./src"
+          },
+          {
+            "input": "./plugin/bun-plugin/src",
+            "glob": "**/*.d.ts",
+            "output": "./src"
+          },
+          {
+            "input": "./plugin/bun-plugin",
+            "glob": "executors.json",
+            "output": "."
+          }
+        ]
+      }
+    }
+  }
+}

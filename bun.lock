@@ -139,7 +139,6 @@
         "globals": "16.5.0",
         "husky": "9.1.7",
         "jest-extended": "7.0.0",
-        "jiti": "2.6.1",
         "jsdom": "27.4.0",
         "lint-staged": "16.2.7",
         "nx": "22.3.3",
@@ -171,6 +170,10 @@
     },
     "plugin/biome-plugin": {
       "name": "@wishlist/biome-plugin",
+      "version": "0.0.1",
+    },
+    "plugin/bun-plugin": {
+      "name": "@wishlist/bun-plugin",
       "version": "0.0.1",
     },
     "plugin/drizzle-plugin": {

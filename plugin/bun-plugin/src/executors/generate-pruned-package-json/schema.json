@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/schema",
+  "version": 2,
+  "title": "Generate pruned package.json",
+  "description": "Generate a production package.json and matching bun.lock for Docker images",
+  "type": "object",
+  "properties": {
+    "outputPath": {
+      "type": "string",
+      "description": "Path to the generated pruned package.json"
+    },
+    "lockfileOutputPath": {
+      "type": "string",
+      "description": "Path to the generated pruned bun.lock. Defaults to pruned-bun.lock next to outputPath."
+    }
+  },
+  "required": ["outputPath"]
+}

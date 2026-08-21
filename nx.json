@@ -34,6 +34,9 @@
       }
     },
     {
+      "plugin": "@wishlist/bun-plugin"
+    },
+    {
       "plugin": "@nx/vite/plugin",
       "options": {
         "buildTargetName": "build",

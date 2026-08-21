@@ -51,12 +51,6 @@
         "cwd": "{projectRoot}",
         "forwardAllArgs": true
       }
-    },
-    "generate-pruned-package-json": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "jiti tools/generate-pruned-package-json.ts api apps/api/pruned-package.json"
-      }
     }
   }
 }
