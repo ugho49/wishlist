@@ -3,7 +3,7 @@ import { PasswordManager } from '@wishlist/api/auth'
 import { TransactionManager } from '@wishlist/api/core'
 import { REPOSITORIES } from '@wishlist/api/repositories'
 
-import { UserPasswordVerificationRepository, UserRepository } from '../../domain'
+import { type UserPasswordVerificationRepository, type UserRepository } from '../../domain'
 
 export type ResetUserPasswordInput = {
   email: string

@@ -6,7 +6,7 @@ import { eventMapper } from '@wishlist/api/event'
 import { itemMapper } from '@wishlist/api/item'
 import { userMapper } from '@wishlist/api/user'
 
-import { Wishlist as GqlWishlist } from '../../gql/generated-types'
+import { type Wishlist as GqlWishlist } from '../../gql/generated-types'
 
 function toDetailedWishlistDto(params: {
   wishlist: Wishlist

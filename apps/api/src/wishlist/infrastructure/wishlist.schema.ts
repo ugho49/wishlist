@@ -1,7 +1,11 @@
-import { EventId, UserId, WishlistId } from '@wishlist/common'
+import { type EventId, type UserId, type WishlistId } from '@wishlist/common'
 import z from 'zod'
 
-import { AddWishlistCoOwnerInput, AdminWishlistPaginationFilters, UpdateWishlistInput } from '../../gql/generated-types'
+import {
+  type AddWishlistCoOwnerInput,
+  type AdminWishlistPaginationFilters,
+  type UpdateWishlistInput,
+} from '../../gql/generated-types'
 
 export const WishlistIdSchema = z.string().transform(val => val as WishlistId)
 export const EventIdSchema = z.string().transform(val => val as EventId)

@@ -14,8 +14,8 @@ import { match } from 'ts-pattern'
 
 import {
   AttendeeRole as GqlAttendeeRole,
-  Event as GqlEvent,
-  EventAttendee as GqlEventAttendee,
+  type Event as GqlEvent,
+  type EventAttendee as GqlEventAttendee,
 } from '../../gql/generated-types'
 import { eventAttendeeMapper } from './event-attendee.mapper'
 

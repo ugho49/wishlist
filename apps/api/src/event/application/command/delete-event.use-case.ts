@@ -1,10 +1,10 @@
 import { BadRequestException, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common'
 import { TransactionManager } from '@wishlist/api/core'
 import { REPOSITORIES } from '@wishlist/api/repositories'
-import { WishlistRepository } from '@wishlist/api/wishlist'
-import { EventId, ICurrentUser } from '@wishlist/common'
+import { type WishlistRepository } from '@wishlist/api/wishlist'
+import { type EventId, type ICurrentUser } from '@wishlist/common'
 
-import { EventAttendeeRepository, EventRepository } from '../../domain'
+import { type EventAttendeeRepository, type EventRepository } from '../../domain'
 
 export type DeleteEventInput = {
   currentUser: ICurrentUser

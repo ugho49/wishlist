@@ -2,9 +2,9 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "../../dist/out-tsc",
-    "types": ["vitest/globals", "node"],
+    "types": ["bun", "node"],
     "declaration": true
   },
-  "files": ["../../global.d.ts"],
+  "files": ["../../bun-matchers.d.ts"],
   "include": ["src/**/*.d.ts", "src/**/*.spec.ts"]
 }

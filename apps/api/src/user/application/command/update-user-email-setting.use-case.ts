@@ -1,8 +1,8 @@
 import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { REPOSITORIES } from '@wishlist/api/repositories'
-import { ICurrentUser, UserEmailSettingsDto } from '@wishlist/common'
+import { type ICurrentUser, UserEmailSettingsDto } from '@wishlist/common'
 
-import { UserEmailSettingRepository } from '../../domain'
+import { type UserEmailSettingRepository } from '../../domain'
 import { userEmailSettingMapper } from '../../infrastructure'
 
 export type UpdateUserEmailSettingInput = {

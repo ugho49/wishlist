@@ -1,15 +1,16 @@
+import type { ConfigType } from '@nestjs/config'
+
 import { BadRequestException, Inject, Injectable, UnauthorizedException } from '@nestjs/common'
-import { ConfigType } from '@nestjs/config'
 import { EventBus } from '@nestjs/cqrs'
 import { REPOSITORIES } from '@wishlist/api/repositories'
-import { ICurrentUser } from '@wishlist/common'
+import { type ICurrentUser } from '@wishlist/common'
 import { DateTime } from 'luxon'
 
 import {
   EmailChangeVerificationCreatedEvent,
   UserEmailChangeVerification,
-  UserEmailChangeVerificationRepository,
-  UserRepository,
+  type UserEmailChangeVerificationRepository,
+  type UserRepository,
 } from '../../domain'
 import userConfig from '../../infrastructure/user.config'
 

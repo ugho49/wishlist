@@ -1,5 +1,10 @@
-name: Setup
-description: Setup Node and Yarn, restore the dependency cache and install dependencies
+name: Setup Bun
+description: Setup Bun and restore cached dependencies
+
+outputs:
+  cache-hit:
+    description: Whether the cache was hit
+    value: ${{ steps.cache-deps.outputs.cache-hit }}
 
 runs:
   using: composite
@@ -7,19 +12,28 @@ runs:
     - name: Setup Node
       uses: actions/setup-node@v6
       with:
-        node-version-file: .nvmrc
+        node-version: lts/*
+
+    - name: Setup Bun
+      uses: oven-sh/setup-bun@v2
+      with:
+        bun-version-file: ".bun-version"
 
     - name: Restore cached dependencies
+      id: cache-deps
       uses: actions/cache@v5
       with:
         path: |
           node_modules
-          .yarn/cache
-          .yarn/install-state.gz
-        key: ${{ runner.os }}-yarn-${{ hashFiles('yarn.lock') }}
+          apps/*/node_modules
+          libs/*/node_modules
+          plugin/*/node_modules
+          ~/.bun/install/cache
+        key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock', '**/package.json') }}
         restore-keys: |
-          ${{ runner.os }}-yarn-
+          ${{ runner.os }}-bun-
 
     - name: Install dependencies
+      if: steps.cache-deps.outputs.cache-hit != 'true'
       shell: bash
-      run: yarn install --immutable
+      run: bun install --frozen-lockfile

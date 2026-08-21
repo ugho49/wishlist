@@ -1,7 +1,8 @@
+import type { ConfigType } from '@nestjs/config'
+
 import { Inject, Injectable } from '@nestjs/common'
-import { ConfigType } from '@nestjs/config'
 import { PassportStrategy } from '@nestjs/passport'
-import { AccessTokenJwtPayload, createCurrentUserFromPayload } from '@wishlist/common'
+import { type AccessTokenJwtPayload, createCurrentUserFromPayload } from '@wishlist/common'
 import { ExtractJwt, Strategy } from 'passport-jwt'
 
 import authConfig from '../auth.config'

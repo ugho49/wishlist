@@ -7,13 +7,13 @@ import {
   CreateWishlistInputDto,
   DetailedWishlistDto,
   GetPaginationQueryDto,
-  ICurrentUser,
+  type ICurrentUser,
   LinkUnlinkWishlistInputDto,
   PagedResponse,
   UpdateWishlistInputDto,
   UpdateWishlistLogoOutputDto,
-  UserId,
-  WishlistId,
+  type UserId,
+  type WishlistId,
   WishlistWithEventsDto,
 } from '@wishlist/common'
 

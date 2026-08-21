@@ -5,10 +5,10 @@ import { match } from 'ts-pattern'
 
 import {
   AttendeeRole as GqlAttendeeRole,
-  EventAttendee as GqlEventAttendee,
-  SecretSanta as GqlSecretSanta,
+  type EventAttendee as GqlEventAttendee,
+  type SecretSanta as GqlSecretSanta,
   SecretSantaStatus as GqlSecretSantaStatus,
-  SecretSantaUser as GqlSecretSantaUser,
+  type SecretSantaUser as GqlSecretSantaUser,
 } from '../../gql/generated-types'
 
 function toGqlSecretSantaStatus(status: SecretSantaStatus): GqlSecretSantaStatus {

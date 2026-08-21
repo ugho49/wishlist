@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { REPOSITORIES } from '@wishlist/api/repositories'
-import { UserSocialId } from '@wishlist/common'
+import { type UserSocialId } from '@wishlist/common'
 
-import { UserSocial, UserSocialRepository } from '../../domain'
+import { UserSocial, type UserSocialRepository } from '../../domain'
 
 export type GetUserSocialsByIdsInput = {
   userSocialIds: UserSocialId[]

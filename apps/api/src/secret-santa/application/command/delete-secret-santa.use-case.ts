@@ -1,10 +1,10 @@
 import type { ICurrentUser, SecretSantaId } from '@wishlist/common'
 
 import { ForbiddenException, Inject, Injectable, Logger } from '@nestjs/common'
-import { EventRepository } from '@wishlist/api/event'
+import { type EventRepository } from '@wishlist/api/event'
 import { REPOSITORIES } from '@wishlist/api/repositories'
 
-import { SecretSantaRepository } from '../../domain'
+import { type SecretSantaRepository } from '../../domain'
 
 export type DeleteSecretSantaInput = {
   currentUser: ICurrentUser

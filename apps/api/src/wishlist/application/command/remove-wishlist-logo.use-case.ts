@@ -1,9 +1,9 @@
 import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common'
 import { BucketService } from '@wishlist/api/core'
 import { REPOSITORIES } from '@wishlist/api/repositories'
-import { ICurrentUser, WishlistId } from '@wishlist/common'
+import { type ICurrentUser, type WishlistId } from '@wishlist/common'
 
-import { WishlistRepository } from '../../domain'
+import { type WishlistRepository } from '../../domain'
 
 export type RemoveWishlistLogoInput = {
   currentUser: ICurrentUser

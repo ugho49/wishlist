@@ -3,7 +3,7 @@ import { IsAdmin } from '@wishlist/api/auth'
 import { DEFAULT_RESULT_NUMBER, ZodPipe } from '@wishlist/api/core'
 import { createPagedResponse } from '@wishlist/common'
 
-import { AdminGetWishlistsResult, AdminWishlistPaginationFilters } from '../../../gql/generated-types'
+import { type AdminGetWishlistsResult, type AdminWishlistPaginationFilters } from '../../../gql/generated-types'
 import { GetWishlistsByUserUseCase } from '../../application/query/get-wishlists-by-user.use-case'
 import { wishlistMapper } from '../wishlist.mapper'
 import { AdminWishlistPaginationFiltersSchema } from '../wishlist.schema'

@@ -1,9 +1,9 @@
 import { BadRequestException, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common'
-import { EventRepository } from '@wishlist/api/event'
+import { type EventRepository } from '@wishlist/api/event'
 import { REPOSITORIES } from '@wishlist/api/repositories'
-import { EventId, ICurrentUser, MAX_EVENTS_BY_LIST, WishlistId } from '@wishlist/common'
+import { type EventId, type ICurrentUser, MAX_EVENTS_BY_LIST, type WishlistId } from '@wishlist/common'
 
-import { WishlistRepository } from '../../domain'
+import { type WishlistRepository } from '../../domain'
 
 export type LinkWishlistToEventInput = {
   currentUser: ICurrentUser

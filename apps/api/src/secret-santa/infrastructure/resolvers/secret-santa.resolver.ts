@@ -3,23 +3,23 @@ import type { ICurrentUser } from '@wishlist/common'
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql'
 import { GqlCurrentUser } from '@wishlist/api/auth'
 import { ZodPipe } from '@wishlist/api/core'
-import { EventId, SecretSantaId, SecretSantaUserId } from '@wishlist/common'
+import { type EventId, type SecretSantaId, type SecretSantaUserId } from '@wishlist/common'
 
 import {
-  AddSecretSantaUsersInput,
-  AddSecretSantaUsersResult,
-  CancelSecretSantaResult,
-  CreateSecretSantaInput,
-  CreateSecretSantaResult,
-  DeleteSecretSantaResult,
-  DeleteSecretSantaUserResult,
-  GetMySecretSantaDrawResult,
-  GetSecretSantaForEventResult,
-  StartSecretSantaResult,
-  UpdateSecretSantaInput,
-  UpdateSecretSantaResult,
-  UpdateSecretSantaUserInput,
-  UpdateSecretSantaUserResult,
+  type AddSecretSantaUsersInput,
+  type AddSecretSantaUsersResult,
+  type CancelSecretSantaResult,
+  type CreateSecretSantaInput,
+  type CreateSecretSantaResult,
+  type DeleteSecretSantaResult,
+  type DeleteSecretSantaUserResult,
+  type GetMySecretSantaDrawResult,
+  type GetSecretSantaForEventResult,
+  type StartSecretSantaResult,
+  type UpdateSecretSantaInput,
+  type UpdateSecretSantaResult,
+  type UpdateSecretSantaUserInput,
+  type UpdateSecretSantaUserResult,
 } from '../../../gql/generated-types'
 import { AddSecretSantaUsersUseCase } from '../../application/command/add-secret-santa-users.use-case'
 import { CancelSecretSantaUseCase } from '../../application/command/cancel-secret-santa.use-case'

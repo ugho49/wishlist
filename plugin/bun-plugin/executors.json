@@ -1,0 +1,9 @@
+{
+  "executors": {
+    "generate-pruned-package-json": {
+      "implementation": "./src/executors/generate-pruned-package-json/generate-pruned-package-json",
+      "schema": "./src/executors/generate-pruned-package-json/schema.json",
+      "description": "Generate a production package.json and matching bun.lock for Docker images"
+    }
+  }
+}

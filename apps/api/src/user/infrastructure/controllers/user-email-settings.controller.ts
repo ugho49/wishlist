@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Put } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
-import { ICurrentUser, UpdateUserEmailSettingsInputDto, UserEmailSettingsDto } from '@wishlist/common'
+import { type ICurrentUser, UpdateUserEmailSettingsInputDto, UserEmailSettingsDto } from '@wishlist/common'
 
 import { CurrentUser } from '../../../auth'
 import { UpdateUserEmailSettingUseCase } from '../../application/command/update-user-email-setting.use-case'

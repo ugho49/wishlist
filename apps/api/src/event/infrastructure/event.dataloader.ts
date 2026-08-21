@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common'
-import { EventId, ICurrentUser } from '@wishlist/common'
+import { type EventId, type ICurrentUser } from '@wishlist/common'
 import DataLoader from 'dataloader'
 
-import { Event } from '../../gql/generated-types'
+import { type Event } from '../../gql/generated-types'
 import { GetEventsByIdsUseCase } from '../application/query/get-events-by-ids.use-case'
 import { eventMapper } from './event.mapper'
 

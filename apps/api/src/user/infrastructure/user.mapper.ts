@@ -11,10 +11,10 @@ import { DateTime } from 'luxon'
 import { match } from 'ts-pattern'
 
 import {
-  User as GqlUser,
+  type User as GqlUser,
   UserAuthorities as GqlUserAuthorities,
-  UserFull as GqlUserFull,
-  UserSocial as GqlUserSocial,
+  type UserFull as GqlUserFull,
+  type UserSocial as GqlUserSocial,
 } from '../../gql/generated-types'
 
 function toMiniUserDto(model: User): MiniUserDto {

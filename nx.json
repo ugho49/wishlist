@@ -17,7 +17,7 @@
   },
   "plugins": [
     {
-      "plugin": "@wishlist/plugin/biome",
+      "plugin": "@wishlist/biome-plugin",
       "options": {
         "lintTargetName": "lint",
         "formatTargetName": "format",
@@ -25,13 +25,7 @@
       }
     },
     {
-      "plugin": "@wishlist/plugin/integration-test",
-      "options": {
-        "intTestTargetName": "test:int"
-      }
-    },
-    {
-      "plugin": "@wishlist/plugin/drizzle",
+      "plugin": "@wishlist/drizzle-plugin",
       "options": {
         "studioTargetName": "drizzle:studio",
         "generateTargetName": "drizzle:generate",
@@ -40,13 +34,7 @@
       }
     },
     {
-      "plugin": "@nx/webpack/plugin",
-      "options": {
-        "buildTargetName": "build",
-        "previewTargetName": "preview",
-        "serveTargetName": "serve",
-        "serveStaticTargetName": "serve-static"
-      }
+      "plugin": "@wishlist/bun-plugin"
     },
     {
       "plugin": "@nx/vite/plugin",
@@ -61,7 +49,7 @@
   ],
   "namedInputs": {
     "default": ["{projectRoot}/**/*", "sharedGlobals"],
-    "sharedGlobals": ["{workspaceRoot}/yarn.lock", "{workspaceRoot}/.github/workflows/*"],
+    "sharedGlobals": ["{workspaceRoot}/bun.lock", "{workspaceRoot}/.github/workflows/*"],
     "production": [
       "default",
       "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",

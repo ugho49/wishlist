@@ -2,39 +2,39 @@ import type { ICurrentUser } from '@wishlist/common'
 
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql'
 import { GqlCurrentUser, Public } from '@wishlist/api/auth'
-import { GraphQLContext, ZodPipe } from '@wishlist/api/core'
-import { UserId, UserSocialId } from '@wishlist/common'
+import { type GraphQLContext, ZodPipe } from '@wishlist/api/core'
+import { type UserId, type UserSocialId } from '@wishlist/common'
 import { RealIP } from 'nestjs-real-ip'
 
 import {
-  ChangeUserPasswordInput,
-  ChangeUserPasswordResult,
-  ClosestFriendsResult,
-  ConfirmEmailChangeInput,
-  ConfirmEmailChangeResult,
-  GetPendingEmailChangeResult,
-  LinkUserToGoogleInput,
-  LinkUserToGoogleResult,
-  PendingEmailChange,
-  RegisterUserInput,
-  RegisterUserResult,
-  RemoveUserPictureResult,
-  RequestEmailChangeInput,
-  RequestEmailChangeResult,
-  ResetPasswordInput,
-  ResetPasswordResult,
-  SearchUsersResult,
-  SendResetPasswordEmailInput,
-  SendResetPasswordEmailResult,
-  UnlinkCurrentUserSocialResult,
-  UpdateUserEmailSettingsInput,
-  UpdateUserEmailSettingsResult,
-  UpdateUserPictureFromSocialInput,
-  UpdateUserPictureFromSocialResult,
-  UpdateUserProfileInput,
-  UpdateUserProfileResult,
-  User,
-  UserEmailSettings,
+  type ChangeUserPasswordInput,
+  type ChangeUserPasswordResult,
+  type ClosestFriendsResult,
+  type ConfirmEmailChangeInput,
+  type ConfirmEmailChangeResult,
+  type GetPendingEmailChangeResult,
+  type LinkUserToGoogleInput,
+  type LinkUserToGoogleResult,
+  type PendingEmailChange,
+  type RegisterUserInput,
+  type RegisterUserResult,
+  type RemoveUserPictureResult,
+  type RequestEmailChangeInput,
+  type RequestEmailChangeResult,
+  type ResetPasswordInput,
+  type ResetPasswordResult,
+  type SearchUsersResult,
+  type SendResetPasswordEmailInput,
+  type SendResetPasswordEmailResult,
+  type UnlinkCurrentUserSocialResult,
+  type UpdateUserEmailSettingsInput,
+  type UpdateUserEmailSettingsResult,
+  type UpdateUserPictureFromSocialInput,
+  type UpdateUserPictureFromSocialResult,
+  type UpdateUserProfileInput,
+  type UpdateUserProfileResult,
+  type User,
+  type UserEmailSettings,
 } from '../../../gql/generated-types'
 import { ConfirmEmailChangeUseCase } from '../../application/command/confirm-email-change.use-case'
 import { CreateEmailChangeVerificationUseCase } from '../../application/command/create-email-change-verification.use-case'

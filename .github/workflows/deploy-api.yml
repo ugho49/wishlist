@@ -39,7 +39,7 @@ jobs:
         - name: Run migrations
           run: |
             echo "Running Drizzle migrations..."
-            yarn db:migrate
+            bun db:migrate
 
   deploy-to-vps:
     name: Deploy to VPS

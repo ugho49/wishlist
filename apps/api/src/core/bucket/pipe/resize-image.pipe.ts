@@ -1,7 +1,6 @@
 import type { PipeTransform } from '@nestjs/common'
 
 import { Logger } from '@nestjs/common'
-import sharp from 'sharp'
 
 type OptionsResizeImagePipe = { width: number; height: number }
 
@@ -21,14 +20,7 @@ export class ResizeImagePipe implements PipeTransform<Express.Multer.File> {
       return image
     }
     try {
-      const buffer = await sharp(image.buffer, { failOn: 'none' })
-        .resize({
-          width: this.options.width,
-          height: this.options.height,
-          fit: 'cover',
-        })
-        .webp({ effort: 3 })
-        .toBuffer()
+      const buffer = await new Bun.Image(image.buffer).resize(this.options.width, this.options.height).webp().toBuffer()
       return { ...image, buffer, mimetype: 'image/webp' }
     } catch (e) {
       this.logger.error('Fail to resize image', e)

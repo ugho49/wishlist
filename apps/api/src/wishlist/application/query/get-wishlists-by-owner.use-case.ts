@@ -1,10 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { DEFAULT_RESULT_NUMBER } from '@wishlist/api/core'
-import { EventRepository } from '@wishlist/api/event'
+import { type EventRepository } from '@wishlist/api/event'
 import { REPOSITORIES } from '@wishlist/api/repositories'
-import { createPagedResponse, PagedResponse, UserId, WishlistWithEventsDto } from '@wishlist/common'
+import { createPagedResponse, PagedResponse, type UserId, WishlistWithEventsDto } from '@wishlist/common'
 
-import { WishlistRepository } from '../../domain'
+import { type WishlistRepository } from '../../domain'
 import { wishlistMapper } from '../../infrastructure'
 
 export type GetWishlistsByOwnerInput = {

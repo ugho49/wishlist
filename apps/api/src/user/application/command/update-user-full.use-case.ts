@@ -1,9 +1,9 @@
 import { BadRequestException, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common'
 import { PasswordManager } from '@wishlist/api/auth'
 import { REPOSITORIES } from '@wishlist/api/repositories'
-import { ICurrentUser, UserId } from '@wishlist/common'
+import { type ICurrentUser, type UserId } from '@wishlist/common'
 
-import { UserRepository } from '../../domain'
+import { type UserRepository } from '../../domain'
 
 export type UpdateUserFullInput = {
   userId: UserId

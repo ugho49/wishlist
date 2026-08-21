@@ -2,7 +2,7 @@ import type { Element } from 'domhandler'
 
 import { Injectable, Logger } from '@nestjs/common'
 import { ScanItemOutputDto } from '@wishlist/common'
-import { Cheerio, load as loadHtml } from 'cheerio'
+import { type Cheerio, load as loadHtml } from 'cheerio'
 
 export type ScanItemUrlInput = {
   url: string

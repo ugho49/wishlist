@@ -1,10 +1,10 @@
 import { BadRequestException, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common'
 import { EventBus } from '@nestjs/cqrs'
 import { REPOSITORIES } from '@wishlist/api/repositories'
-import { UserRepository } from '@wishlist/api/user'
-import { AttendeeDto, AttendeeRole, EventId, ICurrentUser } from '@wishlist/common'
+import { type UserRepository } from '@wishlist/api/user'
+import { AttendeeDto, AttendeeRole, type EventId, type ICurrentUser } from '@wishlist/common'
 
-import { AttendeeAddedEvent, EventAttendee, EventAttendeeRepository, EventRepository } from '../../domain'
+import { AttendeeAddedEvent, EventAttendee, type EventAttendeeRepository, type EventRepository } from '../../domain'
 import { eventAttendeeMapper } from '../../infrastructure'
 
 export type AddAttendeeInput = {

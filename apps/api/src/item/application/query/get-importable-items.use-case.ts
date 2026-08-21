@@ -1,9 +1,9 @@
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common'
 import { REPOSITORIES } from '@wishlist/api/repositories'
-import { WishlistRepository } from '@wishlist/api/wishlist'
-import { UserId, WishlistId } from '@wishlist/common'
+import { type WishlistRepository } from '@wishlist/api/wishlist'
+import { type UserId, type WishlistId } from '@wishlist/common'
 
-import { WishlistItem, WishlistItemRepository } from '../../domain'
+import { WishlistItem, type WishlistItemRepository } from '../../domain'
 
 export type GetImportableItemsInput = {
   userId: UserId

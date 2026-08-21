@@ -1,6 +1,7 @@
 import type { SecretSantaUser } from './secret-santa-draw.service'
 
 import { SecretSantaDrawService } from './secret-santa-draw.service'
+import { describe, expect, it } from 'bun:test'
 
 describe('SecretSantaDrawService', () => {
   it('should throw error if not enough attendees', () => {

@@ -1,5 +1,5 @@
 import { Logger } from '@nestjs/common'
-import { EventsHandler, IEventHandler } from '@nestjs/cqrs'
+import { EventsHandler, type IEventHandler } from '@nestjs/cqrs'
 import { FrontendRoutesService, MailService, MailTemplate } from '@wishlist/api/core'
 
 import { AttendeeAddedEvent, Event } from '../../domain'

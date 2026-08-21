@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { EventRepository, eventMapper } from '@wishlist/api/event'
+import { type EventRepository, eventMapper } from '@wishlist/api/event'
 import { REPOSITORIES } from '@wishlist/api/repositories'
-import { createPagedResponse, EventWithCountsDto, PagedResponse, UserId } from '@wishlist/common'
+import { createPagedResponse, EventWithCountsDto, PagedResponse, type UserId } from '@wishlist/common'
 
 type GetEventsForUserInput = {
   userId: UserId

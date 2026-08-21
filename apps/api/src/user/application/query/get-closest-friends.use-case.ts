@@ -1,8 +1,8 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common'
 import { REPOSITORIES } from '@wishlist/api/repositories'
-import { MiniUserDto, UserId } from '@wishlist/common'
+import { MiniUserDto, type UserId } from '@wishlist/common'
 
-import { UserRepository } from '../../domain'
+import { type UserRepository } from '../../domain'
 import { userMapper } from '../../infrastructure'
 
 const MAX_LIMIT = 50

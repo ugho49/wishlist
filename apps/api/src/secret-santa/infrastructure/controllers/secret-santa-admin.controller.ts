@@ -2,11 +2,11 @@ import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestj
 import { ApiTags } from '@nestjs/swagger'
 import { CurrentUser, IsAdmin } from '@wishlist/api/auth'
 import {
-  EventId,
-  ICurrentUser,
+  type EventId,
+  type ICurrentUser,
   SecretSantaDto,
-  SecretSantaId,
-  SecretSantaUserId,
+  type SecretSantaId,
+  type SecretSantaUserId,
   UpdateSecretSantaInputDto,
 } from '@wishlist/common'
 

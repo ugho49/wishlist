@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common'
-import { DatabaseService, DrizzleTransaction } from '@wishlist/api/core'
-import { UserPasswordVerificationRepository } from '@wishlist/api/user'
+import { DatabaseService, type DrizzleTransaction } from '@wishlist/api/core'
+import { type UserPasswordVerificationRepository } from '@wishlist/api/user'
 import { schema } from '@wishlist/api-drizzle'
-import { UserId, UserPasswordVerificationId, uuid } from '@wishlist/common'
+import { type UserId, type UserPasswordVerificationId, uuid } from '@wishlist/common'
 import { eq } from 'drizzle-orm'
 
 import { UserPasswordVerification } from '../../user'

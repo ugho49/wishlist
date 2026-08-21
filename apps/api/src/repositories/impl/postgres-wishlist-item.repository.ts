@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
-import { DatabaseService, DrizzleTransaction } from '@wishlist/api/core'
-import { NewItemsForWishlist, WishlistItem, WishlistItemRepository } from '@wishlist/api/item'
+import { DatabaseService, type DrizzleTransaction } from '@wishlist/api/core'
+import { type NewItemsForWishlist, WishlistItem, type WishlistItemRepository } from '@wishlist/api/item'
 import { schema } from '@wishlist/api-drizzle'
-import { ItemId, UserId, uuid, WishlistId } from '@wishlist/common'
-import { and, eq, gt, inArray, isNull, ne, sql } from 'drizzle-orm'
+import { type ItemId, type UserId, uuid, type WishlistId } from '@wishlist/common'
+import { and, eq, gt, inArray, isNull, lt, max, ne, sql } from 'drizzle-orm'
 import { DateTime } from 'luxon'
 
 import { PostgresUserRepository } from './postgres-user.repository'
@@ -83,7 +83,7 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
 
   async findImportableItems(params: { userId: UserId; wishlistId: WishlistId }): Promise<WishlistItem[]> {
     const { userId, wishlistId } = params
-    const twoMonthsAgo = DateTime.now().minus({ months: 2 }).toJSDate()
+    const twoMonthsAgo = DateTime.now().minus({ months: 2 }).toFormat('yyyy-MM-dd')
 
     // Find all wishlists of the user where all linked events are finished more than 2 months ago
     const eligibleWishlistsSubquery = this.databaseService.db
@@ -101,7 +101,7 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
         ),
       )
       .groupBy(schema.eventWishlist.wishlistId)
-      .having(sql`MAX(${schema.event.eventDate}) < ${twoMonthsAgo}`)
+      .having(lt(max(schema.event.eventDate), twoMonthsAgo))
       .as('eligible_wishlists')
 
     // Find items that already exist in the target wishlist (with importSourceId)

@@ -1,4 +1,4 @@
-import { BackoffOptions, KeepJobs } from 'bullmq'
+import { type BackoffOptions, type KeepJobs } from 'bullmq'
 
 export const QUEUES = Symbol('QUEUES')
 

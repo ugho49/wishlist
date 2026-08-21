@@ -1,10 +1,24 @@
 import { Injectable } from '@nestjs/common'
-import { AttendeeId, EventId, ICurrentUser, UserId, UserSocialId, WishlistId } from '@wishlist/common'
+import {
+  type AttendeeId,
+  type EventId,
+  type ICurrentUser,
+  type UserId,
+  type UserSocialId,
+  type WishlistId,
+} from '@wishlist/common'
 import DataLoader from 'dataloader'
 
 import { EventDataLoaderFactory } from '../event/infrastructure/event.dataloader'
 import { EventAttendeeDataLoaderFactory } from '../event/infrastructure/event-attendee.dataloader'
-import { Event, EventAttendee, User, UserFull, UserSocial, Wishlist } from '../gql/generated-types'
+import {
+  type Event,
+  type EventAttendee,
+  type User,
+  type UserFull,
+  type UserSocial,
+  type Wishlist,
+} from '../gql/generated-types'
 import { UserDataLoaderFactory } from '../user/infrastructure/user.dataloader'
 import { WishlistDataLoaderFactory } from '../wishlist/infrastructure/wishlist.dataloader'
 

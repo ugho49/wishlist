@@ -1,7 +1,8 @@
 import type { AxiosInstance } from 'axios'
 
 import { sleep } from '@wishlist/common'
-import { expect } from 'vitest'
+
+import { expect } from 'bun:test'
 
 type MailAssertion = () => Promise<unknown>
 

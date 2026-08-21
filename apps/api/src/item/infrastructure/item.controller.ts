@@ -4,15 +4,15 @@ import { CurrentUser } from '@wishlist/api/auth'
 import {
   AddItemForListInputDto,
   GetImportableItemsInputDto,
-  ICurrentUser,
+  type ICurrentUser,
   ImportItemsInputDto,
   ItemDto,
-  ItemId,
+  type ItemId,
   ScanItemInputDto,
   ScanItemOutputDto,
   ToggleItemOutputDto,
   UpdateItemInputDto,
-  UserId,
+  type UserId,
 } from '@wishlist/common'
 
 import { CreateItemUseCase } from '../application/command/create-item.use-case'

@@ -1,6 +1,6 @@
 import type { CreateItemInput, ImportItemsInput, ScanItemUrlInput, UpdateItemInput } from '../../gql/generated-types'
 
-import { ItemId, WishlistId } from '@wishlist/common'
+import { type ItemId, type WishlistId } from '@wishlist/common'
 import z from 'zod'
 
 export const ItemIdSchema = z.string().transform(val => val as ItemId)

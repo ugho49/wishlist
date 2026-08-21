@@ -1,10 +1,15 @@
 import { NotFoundException } from '@nestjs/common'
 import { Args, Context, Query, Resolver } from '@nestjs/graphql'
 import { GqlCurrentUser } from '@wishlist/api/auth'
-import { DEFAULT_RESULT_NUMBER, GraphQLContext, PaginationFiltersSchema, ZodPipe } from '@wishlist/api/core'
-import { createPagedResponse, UserId, WishlistId } from '@wishlist/common'
+import { DEFAULT_RESULT_NUMBER, type GraphQLContext, PaginationFiltersSchema, ZodPipe } from '@wishlist/api/core'
+import { createPagedResponse, type UserId, type WishlistId } from '@wishlist/common'
 
-import { GetMyWishlistsResult, GetWishlistByIdResult, PaginationFilters, Wishlist } from '../../../gql/generated-types'
+import {
+  type GetMyWishlistsResult,
+  type GetWishlistByIdResult,
+  type PaginationFilters,
+  type Wishlist,
+} from '../../../gql/generated-types'
 import { GetWishlistsByUserUseCase } from '../../application/query/get-wishlists-by-user.use-case'
 import { wishlistMapper } from '../wishlist.mapper'
 

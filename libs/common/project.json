@@ -4,5 +4,23 @@
   "sourceRoot": "libs/common/src",
   "projectType": "library",
   "tags": [],
-  "targets": {}
+  "targets": {
+    "typecheck": {
+      "cache": true,
+      "inputs": ["production", "^production", { "externalDependencies": ["typescript"] }],
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit -p tsconfig.lib.json",
+        "cwd": "{projectRoot}"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "mkdir -p ../../junit_reports/unit && bun test $(find . -type f -name '*.spec.ts') --preload ../../bun.matchers.ts --pass-with-no-tests --reporter=junit --reporter-outfile=../../junit_reports/unit/common.xml",
+        "cwd": "{projectRoot}",
+        "forwardAllArgs": true
+      }
+    }
+  }
 }

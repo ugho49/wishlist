@@ -15,7 +15,7 @@ import { FileInterceptor } from '@nestjs/platform-express'
 import { ApiConsumes, ApiTags } from '@nestjs/swagger'
 import {
   ChangeUserPasswordInputDto,
-  ICurrentUser,
+  type ICurrentUser,
   LimitQueryDto,
   LinkUserToGoogleInputDto,
   MiniUserDto,
@@ -23,9 +23,9 @@ import {
   UpdateUserPictureOutputDto,
   UpdateUserProfileInputDto,
   UserDto,
-  UserId,
+  type UserId,
   UserSocialDto,
-  UserSocialId,
+  type UserSocialId,
 } from '@wishlist/common'
 import { RealIP } from 'nestjs-real-ip'
 

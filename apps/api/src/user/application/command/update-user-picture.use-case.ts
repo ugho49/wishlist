@@ -1,9 +1,9 @@
 import { Inject, Injectable, Logger } from '@nestjs/common'
 import { BucketService } from '@wishlist/api/core'
 import { REPOSITORIES } from '@wishlist/api/repositories'
-import { UserId, uuid } from '@wishlist/common'
+import { type UserId, uuid } from '@wishlist/common'
 
-import { UserRepository } from '../../domain'
+import { type UserRepository } from '../../domain'
 
 export type UpdateUserPictureResult = {
   pictureUrl: string

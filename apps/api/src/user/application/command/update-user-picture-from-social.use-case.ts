@@ -1,9 +1,9 @@
 import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { BucketService } from '@wishlist/api/core'
 import { REPOSITORIES } from '@wishlist/api/repositories'
-import { UserId, UserSocialId } from '@wishlist/common'
+import { type UserId, type UserSocialId } from '@wishlist/common'
 
-import { UserRepository, UserSocialRepository } from '../../domain'
+import { type UserRepository, type UserSocialRepository } from '../../domain'
 
 export type UpdateUserPictureFromSocialInput = {
   userId: UserId

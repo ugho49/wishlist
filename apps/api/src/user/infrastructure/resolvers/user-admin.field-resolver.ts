@@ -1,7 +1,7 @@
 import { Context, Parent, ResolveField, Resolver } from '@nestjs/graphql'
-import { GraphQLContext } from '@wishlist/api/core'
+import { type GraphQLContext } from '@wishlist/api/core'
 
-import { UserFull, UserSocial } from '../../../gql/generated-types'
+import { type UserFull, type UserSocial } from '../../../gql/generated-types'
 
 @Resolver('UserFull')
 export class UserAdminFieldResolver {

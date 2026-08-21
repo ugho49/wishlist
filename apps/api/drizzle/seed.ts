@@ -1,13 +1,13 @@
 import { faker } from '@faker-js/faker'
 import { createConsola } from 'consola'
 import dotenv from 'dotenv'
-import { drizzle } from 'drizzle-orm/node-postgres'
+import { drizzle } from 'drizzle-orm/bun-sql'
 import { reset } from 'drizzle-seed'
 import { sample } from 'lodash'
 import { DateTime } from 'luxon'
-import { Client } from 'pg'
 
 import { PasswordManager } from '../src/auth/infrastructure/util/password-manager'
+import { createSqlClient } from '../src/core/database/create-sql-client'
 import * as schema from './schema'
 
 dotenv.config()
@@ -49,18 +49,17 @@ function getRandomUserWithExclusion(exclude: string) {
 async function main() {
   consola.box('Database seeding')
 
-  const client = new Client({
+  const client = createSqlClient({
     host: process.env.DB_HOST!,
     port: parseInt(process.env.DB_PORT!),
-    user: process.env.DB_USERNAME!,
+    username: process.env.DB_USERNAME!,
     password: process.env.DB_PASSWORD!,
     database: process.env.DB_NAME!,
-    ssl: false,
   })
 
   try {
     consola.start('Checking database connection...')
-    await client.connect()
+    await client`SELECT 1`
     consola.success('Connected to the database !')
   } catch (error) {
     consola.error('Failed to connect to the database', error)

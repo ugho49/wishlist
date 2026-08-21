@@ -2,9 +2,9 @@ import { BadRequestException, Inject, Injectable, Logger, UnauthorizedException 
 import { GoogleAuthService } from '@wishlist/api/auth'
 import { TransactionManager } from '@wishlist/api/core'
 import { REPOSITORIES } from '@wishlist/api/repositories'
-import { UserId, UserSocialDto, UserSocialType } from '@wishlist/common'
+import { type UserId, UserSocialDto, UserSocialType } from '@wishlist/common'
 
-import { UserRepository, UserSocial, UserSocialRepository } from '../../domain'
+import { type UserRepository, UserSocial, type UserSocialRepository } from '../../domain'
 import { userMapper } from '../../infrastructure'
 
 export type LinkUserToGoogleInput = {

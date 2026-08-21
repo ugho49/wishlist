@@ -1,9 +1,9 @@
 import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common'
 import { BucketService } from '@wishlist/api/core'
 import { REPOSITORIES } from '@wishlist/api/repositories'
-import { ICurrentUser, UpdateWishlistLogoOutputDto, WishlistId } from '@wishlist/common'
+import { type ICurrentUser, UpdateWishlistLogoOutputDto, type WishlistId } from '@wishlist/common'
 
-import { WishlistRepository } from '../../domain'
+import { type WishlistRepository } from '../../domain'
 
 export type UploadWishlistLogoInput = {
   currentUser: ICurrentUser

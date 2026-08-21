@@ -1,4 +1,4 @@
-import { UserId } from '@wishlist/common'
+import { type UserId } from '@wishlist/common'
 
 export class EmailChangeVerificationCreatedEvent {
   public readonly userId: UserId

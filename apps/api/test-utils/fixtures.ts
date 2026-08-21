@@ -1,10 +1,14 @@
 import type { SecretSantaStatus } from '@wishlist/common'
-import type { Client } from 'pg'
+import type { SQL } from 'bun'
 import type { SignedAs } from './use-test-app'
 
 import { PasswordManager } from '@wishlist/api/auth'
 import { AttendeeRole, Authorities, uuid } from '@wishlist/common'
 import { DateTime } from 'luxon'
+
+function toSqlArray(values: readonly string[]): string {
+  return `{${values.map(value => `"${value.replaceAll('\\', '\\\\').replaceAll('"', '\\"')}"`).join(',')}}`
+}
 
 export class Fixtures {
   static readonly USER_TABLE = '"user"'
@@ -22,7 +26,7 @@ export class Fixtures {
   static readonly BASE_USER_EMAIL = 'test@test.fr'
   static readonly ADMIN_USER_EMAIL = 'admin@admin.fr'
 
-  constructor(private readonly client: Client) {}
+  constructor(private readonly sql: SQL) {}
 
   async getSignedUserId(signedAs: SignedAs): Promise<string> {
     let email = ''
@@ -38,17 +42,17 @@ export class Fixtures {
         throw new Error(`Unknown signedAs value: ${signedAs}`)
     }
 
-    const result = await this.client.query(`SELECT id FROM ${Fixtures.USER_TABLE} WHERE email = $1`, [email])
+    const result = await this.sql.unsafe(`SELECT id FROM ${Fixtures.USER_TABLE} WHERE email = $1`, [email])
 
-    if (result.rows.length > 1) {
+    if (result.length > 1) {
       throw new Error(`Multiple users found for email: ${email}`)
     }
 
-    if (result.rows.length === 0) {
+    if (result.length === 0) {
       throw new Error(`No user found for email: ${email}`)
     }
 
-    return result.rows[0]!.id
+    return result[0]!.id
   }
 
   async insertUser(parameters: {
@@ -62,9 +66,9 @@ export class Fixtures {
     const { email, firstname, lastname, password, authorities } = parameters
     const passwordEnc = await PasswordManager.hash(password ?? Fixtures.DEFAULT_USER_PASSWORD)
 
-    await this.client.query(
+    await this.sql.unsafe(
       `INSERT INTO ${Fixtures.USER_TABLE} (id, email, first_name, last_name, password_enc, authorities) VALUES ($1, $2, $3, $4, $5, $6)`,
-      [id, email, firstname, lastname, passwordEnc, authorities ?? [Authorities.ROLE_USER]],
+      [id, email, firstname, lastname, passwordEnc, toSqlArray(authorities ?? [Authorities.ROLE_USER])],
     )
 
     return id
@@ -103,7 +107,7 @@ export class Fixtures {
     const { userId, emailSettings } = parameters
     const id = uuid()
 
-    await this.client.query(
+    await this.sql.unsafe(
       `INSERT INTO ${Fixtures.USER_EMAIL_SETTING_TABLE} (id, user_id, daily_new_item_notification) VALUES ($1, $2, $3)`,
       [id, userId, emailSettings.daily_new_item_notification],
     )
@@ -120,7 +124,7 @@ export class Fixtures {
     const id = uuid()
     const { title, description, icon, eventDate } = parameters
 
-    await this.client.query(
+    await this.sql.unsafe(
       `INSERT INTO ${Fixtures.EVENT_TABLE} (id, title, description, icon, event_date) VALUES ($1, $2, $3, $4, $5)`,
       [id, title, description, icon, eventDate.toISOString().split('T')[0] as string],
     )
@@ -152,13 +156,13 @@ export class Fixtures {
     const id = uuid()
     const { eventIds, title, description, userId, hideItems, coOwnerId } = parameters
 
-    await this.client.query(
+    await this.sql.unsafe(
       `INSERT INTO ${Fixtures.WISHLIST_TABLE} (id, title, description, owner_id, hide_items, co_owner_id) VALUES ($1, $2, $3, $4, $5, $6)`,
       [id, title, description, userId, hideItems ?? true, coOwnerId ?? null],
     )
 
     for (const eventId of eventIds) {
-      await this.client.query(`INSERT INTO ${Fixtures.EVENT_WISHLIST_TABLE} (event_id, wishlist_id) VALUES ($1, $2)`, [
+      await this.sql.unsafe(`INSERT INTO ${Fixtures.EVENT_WISHLIST_TABLE} (event_id, wishlist_id) VALUES ($1, $2)`, [
         eventId,
         id,
       ])
@@ -175,7 +179,7 @@ export class Fixtures {
     const id = uuid()
     const { eventId, tempUserEmail, role } = parameters
 
-    await this.client.query(
+    await this.sql.unsafe(
       `INSERT INTO ${Fixtures.EVENT_ATTENDEE_TABLE} (id, event_id, temp_user_email, role) VALUES ($1, $2, $3, $4)`,
       [id, eventId, tempUserEmail, role ?? AttendeeRole.USER],
     )
@@ -187,7 +191,7 @@ export class Fixtures {
     const id = uuid()
     const { eventId, userId, role } = parameters
 
-    await this.client.query(
+    await this.sql.unsafe(
       `INSERT INTO ${Fixtures.EVENT_ATTENDEE_TABLE} (id, event_id, user_id, role) VALUES ($1, $2, $3, $4)`,
       [id, eventId, userId, role ?? AttendeeRole.USER],
     )
@@ -211,7 +215,7 @@ export class Fixtures {
     const { userId, token, expiredAt } = parameters
     const id = uuid()
 
-    await this.client.query(
+    await this.sql.unsafe(
       `INSERT INTO ${Fixtures.USER_PASSWORD_VERIFICATION_TABLE} (id, user_id, token, expired_at) VALUES ($1, $2, $3, $4)`,
       [id, userId, token, expiredAt],
     )
@@ -228,7 +232,7 @@ export class Fixtures {
     const { userId, newEmail, token, expiredAt } = parameters
     const id = uuid()
 
-    await this.client.query(
+    await this.sql.unsafe(
       `INSERT INTO ${Fixtures.USER_EMAIL_CHANGE_VERIFICATION_TABLE} (id, user_id, new_email, token, expired_at) VALUES ($1, $2, $3, $4, $5)`,
       [id, userId, newEmail, token, expiredAt],
     )
@@ -245,7 +249,7 @@ export class Fixtures {
     const id = uuid()
     const { eventId, description, budget, status } = parameters
 
-    await this.client.query(
+    await this.sql.unsafe(
       `INSERT INTO ${Fixtures.SECRET_SANTA_TABLE} (id, event_id, description, budget, status) VALUES ($1, $2, $3, $4, $5)`,
       [id, eventId, description ?? null, budget, status],
     )
@@ -262,9 +266,9 @@ export class Fixtures {
     const id = uuid()
     const { secretSantaId, attendeeId, drawUserId, exclusions } = parameters
 
-    await this.client.query(
+    await this.sql.unsafe(
       `INSERT INTO ${Fixtures.SECRET_SANTA_USER_TABLE} (id, secret_santa_id, attendee_id, draw_user_id, exclusions) VALUES ($1, $2, $3, $4, $5)`,
-      [id, secretSantaId, attendeeId, drawUserId, exclusions ?? []],
+      [id, secretSantaId, attendeeId, drawUserId, toSqlArray(exclusions ?? [])],
     )
 
     return id
@@ -284,7 +288,7 @@ export class Fixtures {
     const id = uuid()
     const { wishlistId, name, description, url, isSuggested, score, takerId, takenAt, pictureUrl } = parameters
 
-    await this.client.query(
+    await this.sql.unsafe(
       `INSERT INTO ${Fixtures.ITEM_TABLE} (id, wishlist_id, name, description, url, is_suggested, score, taker_id, taken_at, picture_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
       [id, wishlistId, name, description, url, isSuggested ?? false, score, takerId, takenAt, pictureUrl],
     )

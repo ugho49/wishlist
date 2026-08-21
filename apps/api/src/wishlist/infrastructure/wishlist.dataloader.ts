@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common'
-import { ICurrentUser, WishlistId } from '@wishlist/common'
+import { type ICurrentUser, type WishlistId } from '@wishlist/common'
 import DataLoader from 'dataloader'
 
-import { Wishlist } from '../../gql/generated-types'
+import { type Wishlist } from '../../gql/generated-types'
 import { GetWishlistsByIdsUseCase } from '../application/query/get-wishlists-by-ids.use-case'
 import { wishlistMapper } from './wishlist.mapper'
 

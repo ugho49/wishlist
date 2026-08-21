@@ -1,11 +1,11 @@
 import { Inject, Injectable, Logger } from '@nestjs/common'
 import { FrontendRoutesService, MailService, MailTemplate } from '@wishlist/api/core'
 import { REPOSITORIES } from '@wishlist/api/repositories'
-import { WishlistRepository } from '@wishlist/api/wishlist'
-import { WishlistId } from '@wishlist/common'
+import { type WishlistRepository } from '@wishlist/api/wishlist'
+import { type WishlistId } from '@wishlist/common'
 import { DateTime } from 'luxon'
 
-import { NewItemsForWishlist, WishlistItemRepository } from '../../domain'
+import { type NewItemsForWishlist, type WishlistItemRepository } from '../../domain'
 
 @Injectable()
 export class NotifyNewItemsUseCase {

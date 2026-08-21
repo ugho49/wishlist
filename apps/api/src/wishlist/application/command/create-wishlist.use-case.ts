@@ -1,12 +1,12 @@
 import { Inject, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common'
 import { BucketService } from '@wishlist/api/core'
-import { EventRepository } from '@wishlist/api/event'
+import { type EventRepository } from '@wishlist/api/event'
 import { REPOSITORIES } from '@wishlist/api/repositories'
-import { UserRepository } from '@wishlist/api/user'
-import { DetailedWishlistDto, EventId, ICurrentUser } from '@wishlist/common'
+import { type UserRepository } from '@wishlist/api/user'
+import { DetailedWishlistDto, type EventId, type ICurrentUser } from '@wishlist/common'
 import { uniq } from 'lodash'
 
-import { Wishlist, WishlistRepository } from '../../domain'
+import { Wishlist, type WishlistRepository } from '../../domain'
 import { wishlistMapper } from '../../infrastructure'
 
 export type CreateWishlistInput = {

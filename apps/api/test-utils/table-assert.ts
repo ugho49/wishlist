@@ -1,6 +1,6 @@
-import type { Client } from 'pg'
+import type { SQL } from 'bun'
 
-import { expect } from 'vitest'
+import { expect } from 'bun:test'
 
 type DbAssertion = () => Promise<unknown>
 
@@ -17,16 +17,16 @@ export class TableAssert {
   private readonly cachedRows = new Map<number, FetchValueResult['value']>()
 
   constructor(
-    private readonly client: Client,
+    private readonly sql: SQL,
     private readonly tableName: string,
     private readonly sortOptions?: TableAssertSortOptions,
   ) {}
 
   hasNumberOfRows(expected: number): this {
     this.assertions.add(async () => {
-      const raw = await this.client.query(`SELECT COUNT(*) FROM ${this.tableName}`)
+      const raw = await this.sql.unsafe(`SELECT COUNT(*) FROM ${this.tableName}`)
 
-      const count = parseInt(raw.rows[0]?.count as string, 10)
+      const count = Number(raw[0]?.count)
 
       expect(count, `Wrong number of rows for table ${this.tableName}`).toEqual(expected)
     })
@@ -83,13 +83,48 @@ export class TableAssert {
           .join(', ')}`
       : ''
 
-    const result = await this.client.query(`SELECT * FROM ${this.tableName} ${orderBy} OFFSET ${index} LIMIT 1`)
+    const result = await this.sql.unsafe(`SELECT * FROM ${this.tableName} ${orderBy} OFFSET ${index} LIMIT 1`)
 
-    const value = result.rows.length === 1 ? result.rows[0] : undefined
+    const value = result.length === 1 ? decodePgRow(result[0] as Record<string, unknown>) : undefined
     this.cachedRows.set(index, value)
 
     return { ...returnValue, value }
   }
+}
+
+function decodePgRow(row: Record<string, unknown>): Record<string, unknown> {
+  return Object.fromEntries(Object.entries(row).map(([key, value]) => [key, decodePgValue(value)]))
+}
+
+function decodePgValue(value: unknown): unknown {
+  if (typeof value !== 'string') {
+    return value
+  }
+
+  if (/^-?\d+(\.\d+)?$/.test(value)) {
+    return Number(value)
+  }
+
+  if (value.startsWith('{') && value.endsWith('}')) {
+    return parsePgArray(value)
+  }
+
+  return value
+}
+
+function parsePgArray(literal: string): string[] {
+  const inner = literal.slice(1, -1)
+  if (!inner) {
+    return []
+  }
+
+  return inner.split(',').map(item => {
+    const trimmed = item.trim()
+    if (trimmed.startsWith('"') && trimmed.endsWith('"')) {
+      return trimmed.slice(1, -1).replaceAll('\\"', '"')
+    }
+    return trimmed
+  })
 }
 
 class TableRowAssert {

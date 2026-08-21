@@ -1,8 +1,8 @@
 import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common'
 import { REPOSITORIES } from '@wishlist/api/repositories'
-import { ICurrentUser, WishlistId } from '@wishlist/common'
+import { type ICurrentUser, type WishlistId } from '@wishlist/common'
 
-import { WishlistRepository } from '../../domain'
+import { type WishlistRepository } from '../../domain'
 
 export type UpdateWishlistInput = {
   currentUser: ICurrentUser

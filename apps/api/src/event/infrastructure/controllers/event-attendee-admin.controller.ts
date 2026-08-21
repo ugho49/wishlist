@@ -1,7 +1,7 @@
 import { Controller, Delete, Param } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 import { CurrentUser, IsAdmin } from '@wishlist/api/auth'
-import { AttendeeId, EventId, ICurrentUser } from '@wishlist/common'
+import { type AttendeeId, type EventId, type ICurrentUser } from '@wishlist/common'
 
 import { DeleteAttendeeUseCase } from '../../application/command/delete-attendee.use-case'
 

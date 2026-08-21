@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
-import { DatabaseService, DrizzleTransaction } from '@wishlist/api/core'
-import { EventAttendee, EventAttendeeRepository } from '@wishlist/api/event'
+import { DatabaseService, type DrizzleTransaction } from '@wishlist/api/core'
+import { EventAttendee, type EventAttendeeRepository } from '@wishlist/api/event'
 import { schema } from '@wishlist/api-drizzle'
-import { AttendeeId, AttendeeRole, EventId, uuid } from '@wishlist/common'
+import { type AttendeeId, AttendeeRole, type EventId, uuid } from '@wishlist/common'
 import { and, eq, inArray, or } from 'drizzle-orm'
 
 import { PostgresUserRepository } from './postgres-user.repository'

@@ -5,20 +5,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Development Commands
 
 ### Building and Running
-- `yarn build` - Build all projects in the monorepo
-- `yarn serve:front` - Start the React frontend development server (port 4200)
-- `yarn serve:api` - Start the NestJS API development server
-- `yarn serve:all` - Start all applications concurrently
+- `bun build` - Build all projects in the monorepo
+- `bun serve:front` - Start the React frontend development server (port 4200)
+- `bun serve:api` - Start the NestJS API development server
+- `bun serve:all` - Start all applications concurrently
 
 ### Testing
-- `yarn test` - Run unit tests for all projects using Vitest
-- `yarn test:int` - Run integration tests with Testcontainers and Docker orchestration
-- `yarn typecheck` - Run TypeScript type checking across all projects
+- `bun test:unit` - Run unit tests (bun:test for the API and libs, Vitest for the front)
+- `bun test:int` - Run API integration tests with Docker Compose
+- `bun typecheck` - Run TypeScript type checking across all projects
 - Single test execution: Use Nx to run specific tests: `nx test <project-name>`
 
 ### Quality Assurance
-- `yarn check` - Run Biome check (replaces ESLint)
-- `yarn check:fix` - Fix Biome violations automatically
+- `bun check` - Run Biome check (replaces ESLint)
+- `bun check:fix` - Fix Biome violations automatically
 - Pre-commit hooks automatically check and fix code with Biome via lint-staged
 - Conventional commits enforced via commitlint
 
@@ -31,13 +31,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Migrations**: Stored in `apps/api/drizzle/migrations/`
 
 ### Docker Environment
-- `yarn docker:up` - Start PostgreSQL, MailDev, and Adminer for development
-- `yarn docker:down` - Stop and clean up Docker containers
+- `bun docker:up` - Start PostgreSQL, MailDev, and Adminer for development
+- `bun docker:down` - Stop and clean up Docker containers
 - Adminer available for database management in local environment
 
 ## Architecture Overview
 
-This is an Nx monorepo containing a wishlist application with React frontend and NestJS backend, requiring Node.js 24+.
+This is an Nx monorepo containing a wishlist application with React frontend and NestJS backend, using **Bun** as runtime and package manager.
 
 ### Project Structure
 - **apps/api/** - NestJS backend with Domain-Driven Design and CQRS
@@ -104,9 +104,9 @@ This is an Nx monorepo containing a wishlist application with React frontend and
 - **Secret Santa**: Complex feature with exclusion rules, budget constraints, and automated draw logic
 
 ### Testing Architecture
-- **Unit Tests**: Vitest with 20s timeout, configured workspace-wide
-- **Integration Tests**: Testcontainers with Docker Compose orchestration for real database testing
-- **Test Utilities**: Comprehensive fixtures and assertions in `apps/api/src/test-utils/`
+- **Unit Tests**: bun:test for the API and libs, Vitest for the frontend
+- **Integration Tests**: bun:test with Docker Compose for real database testing
+- **Test Utilities**: Comprehensive fixtures and assertions in `apps/api/test-utils/`
 - **No Parallel Files**: Disabled for test stability with shared resources
 
 ### Database Schema Patterns
@@ -120,7 +120,7 @@ This is an Nx monorepo containing a wishlist application with React frontend and
 - **Monorepo**: Nx with proper build dependencies and caching
 - **Code Quality**: Biome (replaces ESLint and Prettier) with security rules and import sorting
 - **Git Hooks**: Husky for pre-commit formatting and conventional commit validation
-- **Package Manager**: Yarn
+- **Package Manager**: Bun
 
 ## Integration Testing Guidelines
 

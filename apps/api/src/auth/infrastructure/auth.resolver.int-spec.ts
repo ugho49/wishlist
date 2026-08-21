@@ -51,11 +51,10 @@ describe('AuthResolver (GraphQL)', () => {
         .expect(200)
 
       expect(res.body.errors).toBeUndefined()
-      expect(res.body.data.login).toMatchObject({
-        __typename: 'LoginOutput',
-        accessToken: expect.toBeString(),
-      })
-      expect(res.body.data.login.accessToken.length).toBeGreaterThan(0)
+      const accessToken = res.body.data.login.accessToken
+      expect(res.body.data.login.__typename).toBe('LoginOutput')
+      expect(accessToken).toBeString()
+      expect(accessToken.length).toBeGreaterThan(0)
     })
 
     it('should be case insensitive on email', async () => {
