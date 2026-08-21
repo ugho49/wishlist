@@ -4,7 +4,6 @@ import './tracer'
 
 import { Logger } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
-import 'pg'
 
 import { createApp } from './bootstrap'
 
