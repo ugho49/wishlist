@@ -21,7 +21,7 @@
         "cwd": "{projectRoot}"
       }
     },
-    "dev": {
+    "serve:watch-codegen": {
       "executor": "nx:run-commands",
       "options": {
         "commands": ["nx run api:codegen --watch", "nx run api:serve"]

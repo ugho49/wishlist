@@ -7,8 +7,10 @@
   "scripts": {
     "postinstall": "husky",
     "serve:all": "nx run-many --target=serve",
-    "serve:front": "nx dev front",
-    "serve:api": "nx dev api",
+    "serve:front": "nx serve front",
+    "serve:front:with-codegen": "nx run front:serve:watch-codegen",
+    "serve:api": "nx serve api",
+    "serve:api:with-codegen": "nx run api:serve:watch-codegen",
     "build": "nx run-many --target=build",
     "test:unit": "nx run-many --target=test --exclude=@wishlist/source",
     "test:int": "nx run-many --target=test:int",

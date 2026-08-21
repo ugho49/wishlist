@@ -12,18 +12,18 @@
         "forwardAllArgs": true
       }
     },
-    "dev": {
-      "executor": "nx:run-commands",
-      "options": {
-        "commands": ["nx run front:codegen --watch", "nx run front:serve"]
-      }
-    },
     "serve": {
       "continuous": true,
       "executor": "nx:run-commands",
       "options": {
         "command": "vite --config vite.config.ts",
         "cwd": "{projectRoot}"
+      }
+    },
+    "serve:watch-codegen": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": ["nx run front:codegen --watch", "nx run front:serve"]
       }
     },
     "test": {
