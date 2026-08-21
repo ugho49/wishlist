@@ -34,12 +34,12 @@ function createNodesInternal(params: { configFilePath: string; options?: Drizzle
 
   const seedTarget = {
     [options?.seedTargetName ?? 'drizzle:seed']: {
-      command: 'yarn tsx drizzle/seed.ts',
+      command: 'bun drizzle/seed.ts',
       options: {
         cwd: '{projectRoot}',
         color: true,
       },
-      inputs: ['default', '^default', { externalDependencies: ['tsx'] }],
+      inputs: ['default', '^default', { externalDependencies: ['bun'] }],
     },
   }
 

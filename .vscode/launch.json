@@ -17,16 +17,15 @@
       "type": "node",
       "request": "launch",
       "name": "Start api server",
-      "runtimeExecutable": "yarn",
+      "runtimeExecutable": "bun",
       "runtimeArgs": ["nx", "serve", "api"],
       "env": {
-        "NODE_OPTIONS": "--inspect=9229"
+        "BUN_OPTIONS": "--inspect=9229"
       },
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
       "skipFiles": ["<node_internals>/**"],
-      "sourceMaps": true,
-      "outFiles": ["${workspaceFolder}/dist/apps/api/**/*.js", "${workspaceFolder}/apps/api/dist/**/*.js"]
+      "sourceMaps": true
     }
   ],
   "compounds": [

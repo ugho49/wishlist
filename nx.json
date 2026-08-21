@@ -25,27 +25,12 @@
       }
     },
     {
-      "plugin": "@wishlist/plugin/integration-test",
-      "options": {
-        "intTestTargetName": "test:int"
-      }
-    },
-    {
       "plugin": "@wishlist/plugin/drizzle",
       "options": {
         "studioTargetName": "drizzle:studio",
         "generateTargetName": "drizzle:generate",
         "migrateTargetName": "drizzle:migrate",
         "seedTargetName": "drizzle:seed"
-      }
-    },
-    {
-      "plugin": "@nx/webpack/plugin",
-      "options": {
-        "buildTargetName": "build",
-        "previewTargetName": "preview",
-        "serveTargetName": "serve",
-        "serveStaticTargetName": "serve-static"
       }
     },
     {
@@ -61,7 +46,7 @@
   ],
   "namedInputs": {
     "default": ["{projectRoot}/**/*", "sharedGlobals"],
-    "sharedGlobals": ["{workspaceRoot}/yarn.lock", "{workspaceRoot}/.github/workflows/*"],
+    "sharedGlobals": ["{workspaceRoot}/bun.lock", "{workspaceRoot}/.github/workflows/*"],
     "production": [
       "default",
       "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",

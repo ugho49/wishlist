@@ -1,25 +1,29 @@
-FROM node:24.12-alpine as base
+FROM oven/bun:1.3.13-alpine
 
 ARG API_VERSION
 
-FROM base AS builder
+WORKDIR /app
 
-RUN apk add --update --no-cache g++ make py3-pip
+RUN apk add --no-cache python3 make g++ tzdata \
+    && cp /usr/share/zoneinfo/Europe/Paris /etc/localtime \
+    && echo "Europe/Paris" > /etc/timezone
+ENV TZ=Europe/Paris
 
-WORKDIR /usr/src/app
+# pruned-package.json must be pre-generated in CI before docker build:
+#   bun nx run api:generate-pruned-package-json
+COPY apps/api/pruned-package.json ./package.json
+COPY bun.lock ./
+COPY apps/api ./apps/api
+COPY libs ./libs
+COPY tsconfig.base.json ./
 
-COPY . .
+RUN bun install --production --frozen-lockfile
 
-RUN yarn --immutable
-RUN yarn nx run api:build:production
-RUN yarn workspaces focus --production
-RUN cd dist/apps/api && yarn install --immutable
+WORKDIR /app/apps/api
 
-FROM base as production
-
-# Basic environment variables
-ENV API_VERSION=${API_VERSION}
 ENV PORT=3000
+ENV NODE_ENV=production
+ENV API_VERSION=${API_VERSION}
 
 # Datadog environment variables
 ENV DD_ENV=prod
@@ -29,10 +33,6 @@ ENV DD_LOGS_INJECTION=true
 ENV DD_TRACE_SAMPLE_RATE=1
 ENV DD_RUNTIME_METRICS_ENABLED=true
 
-WORKDIR /usr/src/app
-
-COPY --from=builder /usr/src/app/dist ./dist
-
 EXPOSE 3000
 
-CMD ["node", "dist/apps/api/main"]
+CMD ["bun", "run", "src/main.ts"]
