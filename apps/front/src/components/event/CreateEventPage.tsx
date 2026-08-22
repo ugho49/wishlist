@@ -31,7 +31,7 @@ import { useToast } from '../../hooks/useToast'
 import { Card } from '../common/Card'
 import { CharsRemaining } from '../common/CharsRemaining'
 import { WishlistDatePicker } from '../common/DatePicker'
-import { EmojiSelectorWithBadge } from '../common/EmojiSelectorWithBadge'
+import { EmojiSelector } from '../common/EmojiSelector'
 import { Subtitle } from '../common/Subtitle'
 import { TextareaMarkdown } from '../common/TextareaMarkdown'
 import { Title } from '../common/Title'
@@ -152,7 +152,7 @@ export const CreateEventPage = () => {
                   control={control}
                   name="icon"
                   render={({ field }) => (
-                    <EmojiSelectorWithBadge value={field.value} onChange={value => field.onChange(value)} />
+                    <EmojiSelector value={field.value} onChange={value => field.onChange(value)} />
                   )}
                 />
 

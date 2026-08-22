@@ -11,7 +11,7 @@ import useMediaQuery from '@mui/material/useMediaQuery'
 import { useQueryClient } from '@tanstack/react-query'
 import { ConfirmButton } from '@wishlist/front-components/common/ConfirmButton'
 import { WishlistDatePicker } from '@wishlist/front-components/common/DatePicker'
-import { EmojiSelectorWithBadge } from '@wishlist/front-components/common/EmojiSelectorWithBadge'
+import { EmojiSelector } from '@wishlist/front-components/common/EmojiSelector'
 import { TextareaMarkdown } from '@wishlist/front-components/common/TextareaMarkdown'
 import { DateTime } from 'luxon'
 import { useEffect, useMemo } from 'react'
@@ -312,9 +312,7 @@ export const AdminEventPage = ({ eventId }: AdminEventPageProps) => {
               <Controller
                 control={control}
                 name="icon"
-                render={({ field }) => (
-                  <EmojiSelectorWithBadge value={field.value} onChange={value => field.onChange(value)} />
-                )}
+                render={({ field }) => <EmojiSelector value={field.value} onChange={value => field.onChange(value)} />}
               />
               <Box sx={{ flex: 1 }}>
                 <TextField
