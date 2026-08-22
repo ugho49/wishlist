@@ -20,6 +20,7 @@ export class Fixtures {
   static readonly EVENT_WISHLIST_TABLE = 'event_wishlist'
   static readonly WISHLIST_TABLE = 'wishlist'
   static readonly ITEM_TABLE = 'item'
+  static readonly ITEM_TAKER_TABLE = 'item_taker'
   static readonly SECRET_SANTA_TABLE = 'secret_santa'
   static readonly SECRET_SANTA_USER_TABLE = 'secret_santa_user'
   static readonly DEFAULT_USER_PASSWORD = 'Password123'
@@ -311,10 +312,24 @@ export class Fixtures {
     const { wishlistId, name, description, url, isSuggested, score, takerId, takenAt, pictureUrl } = parameters
 
     await this.sql.unsafe(
-      `INSERT INTO ${Fixtures.ITEM_TABLE} (id, wishlist_id, name, description, url, is_suggested, score, taker_id, taken_at, picture_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
-      [id, wishlistId, name, description, url, isSuggested ?? false, score, takerId, takenAt, pictureUrl],
+      `INSERT INTO ${Fixtures.ITEM_TABLE} (id, wishlist_id, name, description, url, is_suggested, score, picture_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+      [id, wishlistId, name, description, url, isSuggested ?? false, score, pictureUrl],
     )
 
+    if (takerId) {
+      await this.insertItemTaker({ itemId: id, userId: takerId, takenAt })
+    }
+
     return id
+  }
+
+  async insertItemTaker(parameters: { itemId: string; userId: string; takenAt?: Date }): Promise<void> {
+    const { itemId, userId, takenAt } = parameters
+
+    await this.sql.unsafe(`INSERT INTO ${Fixtures.ITEM_TAKER_TABLE} (item_id, user_id, taken_at) VALUES ($1, $2, $3)`, [
+      itemId,
+      userId,
+      takenAt ?? new Date(),
+    ])
   }
 }

@@ -17,7 +17,7 @@ import { Card } from '../common/Card'
 import { CharsRemaining } from '../common/CharsRemaining'
 import { ConfirmButton } from '../common/ConfirmButton'
 import { WishlistDatePicker } from '../common/DatePicker'
-import { EmojiSelectorWithBadge } from '../common/EmojiSelectorWithBadge'
+import { EmojiSelector } from '../common/EmojiSelector'
 import { Subtitle } from '../common/Subtitle'
 import { TextareaMarkdown } from '../common/TextareaMarkdown'
 
@@ -109,9 +109,7 @@ export const EditEventInformations = ({ event }: EditEventInformationsProps) => 
             <Controller
               control={control}
               name="icon"
-              render={({ field }) => (
-                <EmojiSelectorWithBadge value={field.value} onChange={value => field.onChange(value)} />
-              )}
+              render={({ field }) => <EmojiSelector value={field.value} onChange={value => field.onChange(value)} />}
             />
             <Box sx={{ flex: 1 }}>
               <TextField

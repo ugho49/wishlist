@@ -446,6 +446,7 @@ describe('WishlistController', () => {
                   url: 'https://example.com',
                   score: 5,
                   is_suggested: false,
+                  takers: [],
                   created_at: expect.toBeDateString(),
                 },
                 {
@@ -453,19 +454,24 @@ describe('WishlistController', () => {
                   name: 'Suggested Item',
                   description: 'Suggested Description',
                   is_suggested: true,
+                  takers: [],
                   created_at: expect.toBeDateString(),
                 },
                 {
                   id: takenItemId,
                   name: 'Taken Item',
                   is_suggested: false,
-                  taken_by: {
-                    id: takerId,
-                    email: 'taker@test.com',
-                    firstname: 'Taker',
-                    lastname: 'TAKER',
-                  },
-                  taken_at: '2024-01-01T10:00:00.000Z',
+                  takers: [
+                    {
+                      user: {
+                        id: takerId,
+                        email: 'taker@test.com',
+                        firstname: 'Taker',
+                        lastname: 'TAKER',
+                      },
+                      taken_at: '2024-01-01T10:00:00.000Z',
+                    },
+                  ],
                   created_at: expect.toBeDateString(),
                 },
               ],
@@ -595,25 +601,31 @@ describe('WishlistController', () => {
                   id: normalItemId,
                   name: 'Normal Item',
                   is_suggested: false,
+                  takers: [],
                   created_at: expect.toBeDateString(),
                 },
                 {
                   id: suggestedItemId,
                   name: 'Suggested Item',
                   is_suggested: true,
+                  takers: [],
                   created_at: expect.toBeDateString(),
                 },
                 {
                   id: takenItemId,
                   name: 'Taken Item',
                   is_suggested: false,
-                  taken_by: {
-                    id: currentUserId,
-                    firstname: 'John',
-                    lastname: 'Doe',
-                    email: Fixtures.BASE_USER_EMAIL,
-                  },
-                  taken_at: '2024-01-01T10:00:00.000Z',
+                  takers: [
+                    {
+                      user: {
+                        id: currentUserId,
+                        firstname: 'John',
+                        lastname: 'Doe',
+                        email: Fixtures.BASE_USER_EMAIL,
+                      },
+                      taken_at: '2024-01-01T10:00:00.000Z',
+                    },
+                  ],
                   created_at: expect.toBeDateString(),
                 },
               ]),

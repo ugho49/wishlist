@@ -679,8 +679,14 @@ describe('ItemResolver (GraphQL)', () => {
         toggleItem(itemId: $itemId) {
           __typename
           ... on ToggleItemOutput {
-            takenById
-            takenAt
+            takers {
+              userId
+              takenAt
+              user {
+                id
+                firstName
+              }
+            }
           }
           ... on UnauthorizedRejection {
             message
@@ -738,13 +744,25 @@ describe('ItemResolver (GraphQL)', () => {
 
         expect(res.body.data.toggleItem).toMatchObject({
           __typename: 'ToggleItemOutput',
-          takenById: currentUserId,
-          takenAt: expect.toBeString(),
+          takers: [
+            {
+              userId: currentUserId,
+              takenAt: expect.toBeString(),
+              user: {
+                id: currentUserId,
+                firstName: 'John',
+              },
+            },
+          ],
         })
 
         await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
           id: itemId,
-          taker_id: currentUserId,
+        })
+
+        await expectTable(Fixtures.ITEM_TAKER_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+          item_id: itemId,
+          user_id: currentUserId,
           taken_at: expect.toBeDate(),
         })
       })
@@ -785,15 +803,57 @@ describe('ItemResolver (GraphQL)', () => {
 
         expect(res.body.data.toggleItem).toEqual({
           __typename: 'ToggleItemOutput',
-          takenById: null,
-          takenAt: null,
+          takers: [],
         })
 
         await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
           id: itemId,
-          taker_id: null,
-          taken_at: null,
         })
+
+        await expectTable(Fixtures.ITEM_TAKER_TABLE).hasNumberOfRows(0)
+      })
+
+      it('should join an item already taken by someone else', async () => {
+        const otherUserId = await fixtures.insertUser({
+          email: 'other@test.com',
+          firstname: 'Other',
+          lastname: 'User',
+        })
+
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Test Event',
+          maintainerId: otherUserId,
+        })
+
+        await fixtures.insertActiveAttendee({
+          eventId,
+          userId: currentUserId,
+          role: AttendeeRole.PARTICIPANT,
+        })
+
+        const wishlistId = await fixtures.insertWishlist({
+          eventIds: [eventId],
+          userId: otherUserId,
+          title: 'Other Wishlist',
+        })
+
+        const itemId = await fixtures.insertItem({
+          wishlistId,
+          name: 'Test Item',
+          isSuggested: false,
+          takerId: otherUserId,
+          takenAt: new Date(),
+        })
+
+        const res = await request.post('/graphql').send({ query: mutation, variables: { itemId } }).expect(200)
+
+        expect(res.body.data.toggleItem.__typename).toBe('ToggleItemOutput')
+        expect(res.body.data.toggleItem.takers).toHaveLength(2)
+        expect(res.body.data.toggleItem.takers.map((taker: { userId: string }) => taker.userId).sort()).toEqual(
+          [currentUserId, otherUserId].sort(),
+        )
+
+        await expectTable(Fixtures.ITEM_TAKER_TABLE).hasNumberOfRows(2)
       })
 
       it('should return NotFoundRejection when item does not exist', async () => {
@@ -832,9 +892,9 @@ describe('ItemResolver (GraphQL)', () => {
         // Item should remain untaken
         await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
           id: itemId,
-          taker_id: null,
-          taken_at: null,
         })
+
+        await expectTable(Fixtures.ITEM_TAKER_TABLE).hasNumberOfRows(0)
       })
     })
   })
@@ -1124,23 +1184,40 @@ describe('ItemResolver (GraphQL)', () => {
     })
   })
 
-  describe('Field resolver Item.takerUser', () => {
-    // The Item.takerUser field resolver returns undefined when the parent Item has no
-    // takenById, otherwise it loads the user via the dataloader. Every Item-returning
-    // operation in this resolver (createItem / importItems / importableItems) produces
-    // an Item with no taker, so we assert the resolver returns null (no taker) for a fresh item.
+  describe('Field resolver ItemTaker.user', () => {
     const createMutation = /* GraphQL */ `
       mutation CreateItem($input: CreateItemInput!) {
         createItem(input: $input) {
           __typename
           ... on Item {
             id
-            takenById
-            takerUser {
-              id
-              firstName
-              lastName
-              email
+            takers {
+              userId
+              user {
+                id
+                firstName
+                lastName
+                email
+              }
+            }
+          }
+        }
+      }
+    `
+
+    const toggleMutation = /* GraphQL */ `
+      mutation ToggleItem($itemId: ItemId!) {
+        toggleItem(itemId: $itemId) {
+          __typename
+          ... on ToggleItemOutput {
+            takers {
+              userId
+              user {
+                id
+                firstName
+                lastName
+                email
+              }
             }
           }
         }
@@ -1155,7 +1232,7 @@ describe('ItemResolver (GraphQL)', () => {
       currentUserId = await fixtures.getSignedUserId('BASE_USER')
     })
 
-    it('should return null takerUser for a freshly created (untaken) item', async () => {
+    it('should return empty takers for a freshly created (untaken) item', async () => {
       const { eventId } = await fixtures.insertEventWithMaintainer({
         title: 'Test Event',
         maintainerId: currentUserId,
@@ -1174,8 +1251,51 @@ describe('ItemResolver (GraphQL)', () => {
 
       expect(res.body.data.createItem).toMatchObject({
         __typename: 'Item',
-        takenById: null,
-        takerUser: null,
+        takers: [],
+      })
+    })
+
+    it('should resolve taker users after joining a reservation', async () => {
+      const otherUserId = await fixtures.insertUser({
+        email: 'other@test.com',
+        firstname: 'Other',
+        lastname: 'User',
+      })
+
+      const { eventId } = await fixtures.insertEventWithMaintainer({
+        title: 'Test Event',
+        maintainerId: otherUserId,
+      })
+
+      await fixtures.insertActiveAttendee({
+        eventId,
+        userId: currentUserId,
+        role: AttendeeRole.PARTICIPANT,
+      })
+
+      const wishlistId = await fixtures.insertWishlist({
+        eventIds: [eventId],
+        userId: otherUserId,
+        title: 'Other Wishlist',
+      })
+
+      const itemId = await fixtures.insertItem({ wishlistId, name: 'Shared Gift', isSuggested: false })
+
+      const res = await request.post('/graphql').send({ query: toggleMutation, variables: { itemId } }).expect(200)
+
+      expect(res.body.data.toggleItem).toMatchObject({
+        __typename: 'ToggleItemOutput',
+        takers: [
+          {
+            userId: currentUserId,
+            user: {
+              id: currentUserId,
+              firstName: 'John',
+              lastName: 'Doe',
+              email: 'test@test.fr',
+            },
+          },
+        ],
       })
     })
   })

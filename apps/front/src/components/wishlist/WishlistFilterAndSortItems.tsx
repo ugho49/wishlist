@@ -96,7 +96,7 @@ export const sortOptions: SelectOption<SortType>[] = [
 ]
 
 export const applyFilter = (item: WishlistItem, filter: FilterType): boolean => {
-  const checked = item.takenById != null
+  const checked = item.takers.length > 0
 
   if (filter === FilterType.CHECKED && checked) {
     return true

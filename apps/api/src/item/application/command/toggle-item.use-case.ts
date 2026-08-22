@@ -2,7 +2,7 @@ import { Inject, Injectable, Logger, NotFoundException, UnauthorizedException } 
 import { REPOSITORIES } from '@wishlist/api/repositories'
 import { type UserRepository, userMapper } from '@wishlist/api/user'
 import { Wishlist, type WishlistRepository } from '@wishlist/api/wishlist'
-import { type ICurrentUser, type ItemId, ToggleItemOutputDto } from '@wishlist/common'
+import { type ICurrentUser, type ItemId, type ItemTakerDto, ToggleItemOutputDto } from '@wishlist/common'
 
 import { WishlistItem, type WishlistItemRepository } from '../../domain'
 
@@ -35,16 +35,12 @@ export class ToggleItemUseCase {
 
     const wishlist = await this.wishlistRepository.findByIdOrFail(item.wishlistId)
 
-    if (item.isTakenBySomeone()) {
-      await this.uncheck({ item, wishlist, currentUser: command.currentUser })
-      return {}
-    }
-
-    const updatedItem = await this.check({ item, wishlist, currentUser: command.currentUser })
+    const updatedItem = item.isTakenBy(command.currentUser.id)
+      ? await this.uncheck({ item, wishlist, currentUser: command.currentUser })
+      : await this.check({ item, wishlist, currentUser: command.currentUser })
 
     return {
-      taken_by: userMapper.toMiniUserDto(updatedItem.takenBy!),
-      taken_at: updatedItem.takenAt?.toISOString(),
+      takers: ToggleItemUseCase.toTakerDtos(updatedItem),
     }
   }
 
@@ -72,13 +68,13 @@ export class ToggleItemUseCase {
     return updatedItem
   }
 
-  private async uncheck(params: { item: WishlistItem; wishlist: Wishlist; currentUser: ICurrentUser }): Promise<void> {
+  private async uncheck(params: {
+    item: WishlistItem
+    wishlist: Wishlist
+    currentUser: ICurrentUser
+  }): Promise<WishlistItem> {
     this.logger.log('Unchecking item...', { itemId: params.item.id })
     const { item, wishlist, currentUser } = params
-
-    if (!item.isTakenBy(currentUser.id)) {
-      throw new UnauthorizedException('You cannot uncheck this item, you are not the one who as check it')
-    }
 
     if (wishlist.isOwner(currentUser.id) && wishlist.hideItems) {
       if (item.isSuggested) {
@@ -88,8 +84,17 @@ export class ToggleItemUseCase {
       throw new UnauthorizedException('You cannot uncheck your own items')
     }
 
-    const updatedItem = item.uncheck()
+    const updatedItem = item.uncheck(currentUser.id)
 
     await this.itemRepository.save(updatedItem)
+
+    return updatedItem
+  }
+
+  private static toTakerDtos(item: WishlistItem): ItemTakerDto[] {
+    return item.takers.map(taker => ({
+      user: userMapper.toMiniUserDto(taker.user),
+      taken_at: taker.takenAt.toISOString(),
+    }))
   }
 }

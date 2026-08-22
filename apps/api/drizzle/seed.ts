@@ -21,6 +21,7 @@ const eventAttendeesValues: (typeof schema.eventAttendee.$inferInsert)[] = []
 const wishlistsValues: (typeof schema.wishlist.$inferInsert)[] = []
 const eventWishlistsValues: (typeof schema.eventWishlist.$inferInsert)[] = []
 const itemsValues: (typeof schema.item.$inferInsert)[] = []
+const itemTakersValues: (typeof schema.itemTaker.$inferInsert)[] = []
 
 const getRandomUser = () => sample(usersValues)!
 const getAttendeesForUser = (userId: string) => eventAttendeesValues.filter(attendee => attendee.userId === userId)
@@ -288,6 +289,33 @@ async function main() {
 
   await db.insert(schema.item).values(itemsValues)
   consola.success(`${itemsValues.length} items seeded`)
+
+  consola.start('Seeding item takers...')
+
+  for (const item of itemsValues) {
+    const wishlist = wishlistsValues.find(wishlist => wishlist.id === item.wishlistId)
+    if (!wishlist) continue
+
+    const shouldBeTaken = faker.datatype.boolean({ probability: 0.35 })
+    if (!shouldBeTaken) continue
+
+    const eligibleUsers = usersValues.filter(user => user.id !== wishlist.ownerId)
+    const numberOfTakers = faker.number.int({ min: 1, max: Math.min(3, eligibleUsers.length) })
+    const takers = faker.helpers.arrayElements(eligibleUsers, numberOfTakers)
+
+    for (const taker of takers) {
+      itemTakersValues.push({
+        itemId: item.id,
+        userId: taker.id,
+        takenAt: faker.date.recent({ days: 30 }),
+      })
+    }
+  }
+
+  if (itemTakersValues.length > 0) {
+    await db.insert(schema.itemTaker).values(itemTakersValues)
+  }
+  consola.success(`${itemTakersValues.length} item takers seeded`)
 
   consola.box('Seeding complete')
   process.exit(0)

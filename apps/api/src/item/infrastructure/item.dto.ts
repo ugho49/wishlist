@@ -2,6 +2,15 @@ import type { ItemId, UserId } from '@wishlist/common'
 
 import { Field, ObjectType } from '@nestjs/graphql'
 
+@ObjectType('ItemTaker')
+export class GqlItemTaker {
+  @Field(() => String)
+  declare userId: UserId
+
+  @Field(() => String)
+  declare takenAt: string
+}
+
 @ObjectType('Item')
 export class GqlItem {
   @Field(() => String)
@@ -25,11 +34,8 @@ export class GqlItem {
   @Field(() => String, { nullable: true })
   declare pictureUrl?: string
 
-  @Field(() => String, { nullable: true })
-  declare takenById?: UserId
-
-  @Field(() => String, { nullable: true })
-  declare takenAt?: string
+  @Field(() => [GqlItemTaker])
+  declare takers: GqlItemTaker[]
 
   @Field(() => String)
   declare createdAt: string

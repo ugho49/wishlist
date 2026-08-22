@@ -812,6 +812,7 @@ describe('ItemController', () => {
               score: 5,
               picture_url: 'https://example.com/pic.jpg',
               is_suggested: false,
+              takers: [],
               created_at: expect.toBeDateString(),
             })
           })
@@ -877,6 +878,7 @@ describe('ItemController', () => {
               score: 5,
               picture_url: 'https://example.com/pic.jpg',
               is_suggested: true,
+              takers: [],
               created_at: expect.toBeDateString(),
             })
           })
@@ -937,6 +939,7 @@ describe('ItemController', () => {
               score: 4,
               picture_url: 'https://example.com/pic.jpg',
               is_suggested: false,
+              takers: [],
               created_at: expect.toBeDateString(),
             })
           })
@@ -1119,6 +1122,7 @@ describe('ItemController', () => {
               id: expect.toBeString(),
               name: 'Suggested Item',
               is_suggested: true,
+              takers: [],
               created_at: expect.toBeDateString(),
             })
           })
@@ -1794,7 +1798,11 @@ describe('ItemController', () => {
           id: itemId,
           name: 'Taken Item',
           is_suggested: true,
-          taker_id: otherUserId,
+        })
+
+        await expectTable(Fixtures.ITEM_TAKER_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+          item_id: itemId,
+          user_id: otherUserId,
           taken_at: takenAt,
         })
       })
@@ -1855,20 +1863,28 @@ describe('ItemController', () => {
           .expect(201)
           .expect(({ body }) => {
             expect(body).toEqual({
-              taken_by: {
-                id: currentUserId,
-                email: 'test@test.fr',
-                firstname: 'John',
-                lastname: 'Doe',
-              },
-              taken_at: expect.toBeDateString(),
+              takers: [
+                {
+                  user: {
+                    id: currentUserId,
+                    email: 'test@test.fr',
+                    firstname: 'John',
+                    lastname: 'Doe',
+                  },
+                  taken_at: expect.toBeDateString(),
+                },
+              ],
             })
           })
 
         await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
           id: itemId,
           name: 'Test Item',
-          taker_id: currentUserId,
+        })
+
+        await expectTable(Fixtures.ITEM_TAKER_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+          item_id: itemId,
+          user_id: currentUserId,
           taken_at: expect.toBeDate(),
         })
       })
@@ -1910,15 +1926,15 @@ describe('ItemController', () => {
           .post(path(itemId))
           .expect(201)
           .expect(({ body }) => {
-            expect(body).toEqual({})
+            expect(body).toEqual({ takers: [] })
           })
 
         await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
           id: itemId,
           name: 'Test Item',
-          taker_id: null,
-          taken_at: null,
         })
+
+        await expectTable(Fixtures.ITEM_TAKER_TABLE).hasNumberOfRows(0)
       })
 
       it('should return 404 when item not found', async () => {
@@ -2020,7 +2036,7 @@ describe('ItemController', () => {
           })
       })
 
-      it('should return 401 when trying to uncheck item taken by someone else', async () => {
+      it('should join an item already taken by someone else', async () => {
         const otherUserId = await fixtures.insertUser({
           email: 'other@test.com',
           firstname: 'Other',
@@ -2067,13 +2083,101 @@ describe('ItemController', () => {
 
         await request
           .post(path(itemId))
-          .expect(401)
+          .expect(201)
           .expect(({ body }) => {
-            expect(body).toMatchObject({
-              error: 'Unauthorized',
-              message: 'You cannot uncheck this item, you are not the one who as check it',
+            expect(body.takers).toHaveLength(2)
+            expect(body.takers).toEqual(
+              expect.arrayContaining([
+                expect.objectContaining({
+                  user: expect.objectContaining({ id: thirdUserId }),
+                  taken_at: expect.toBeDateString(),
+                }),
+                expect.objectContaining({
+                  user: expect.objectContaining({
+                    id: currentUserId,
+                    email: 'test@test.fr',
+                    firstname: 'John',
+                    lastname: 'Doe',
+                  }),
+                  taken_at: expect.toBeDateString(),
+                }),
+              ]),
+            )
+          })
+
+        await expectTable(Fixtures.ITEM_TAKER_TABLE).hasNumberOfRows(2)
+      })
+
+      it('should leave an item without removing other takers', async () => {
+        const otherUserId = await fixtures.insertUser({
+          email: 'other@test.com',
+          firstname: 'Other',
+          lastname: 'User',
+        })
+
+        const thirdUserId = await fixtures.insertUser({
+          email: 'third@test.com',
+          firstname: 'Third',
+          lastname: 'User',
+        })
+
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Test Event',
+          description: 'Description',
+          maintainerId: otherUserId,
+        })
+
+        await fixtures.insertActiveAttendee({
+          eventId,
+          userId: currentUserId,
+          role: AttendeeRole.PARTICIPANT,
+        })
+
+        await fixtures.insertActiveAttendee({
+          eventId,
+          userId: thirdUserId,
+          role: AttendeeRole.PARTICIPANT,
+        })
+
+        const wishlistId = await fixtures.insertWishlist({
+          eventIds: [eventId],
+          userId: otherUserId,
+          title: 'Other Wishlist',
+        })
+
+        const itemId = await fixtures.insertItem({
+          wishlistId,
+          name: 'Test Item',
+          isSuggested: false,
+          takerId: currentUserId,
+          takenAt: new Date(),
+        })
+
+        await fixtures.insertItemTaker({ itemId, userId: thirdUserId })
+
+        await request
+          .post(path(itemId))
+          .expect(201)
+          .expect(({ body }) => {
+            expect(body).toEqual({
+              takers: [
+                {
+                  user: {
+                    id: thirdUserId,
+                    email: 'third@test.com',
+                    firstname: 'Third',
+                    lastname: 'User',
+                  },
+                  taken_at: expect.toBeDateString(),
+                },
+              ],
             })
           })
+
+        await expectTable(Fixtures.ITEM_TAKER_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+          item_id: itemId,
+          user_id: thirdUserId,
+        })
       })
 
       it('should return 401 when trying to uncheck own items as list owner with hideItems', async () => {

@@ -307,10 +307,14 @@ export type Item = {
   name: Scalars['String']['output'];
   pictureUrl?: Maybe<Scalars['String']['output']>;
   score?: Maybe<Scalars['Int']['output']>;
-  takenAt?: Maybe<Scalars['String']['output']>;
-  takenById?: Maybe<Scalars['UserId']['output']>;
-  takerUser?: Maybe<User>;
+  takers: Array<ItemTaker>;
   url?: Maybe<Scalars['String']['output']>;
+};
+
+export type ItemTaker = {
+  __typename: 'ItemTaker';
+  takenAt: Scalars['String']['output'];
+  userId: Scalars['UserId']['output'];
 };
 
 export type LinkUserToGoogleInput = {
@@ -845,8 +849,7 @@ export type StartSecretSantaResult = ForbiddenRejection | InternalErrorRejection
 
 export type ToggleItemOutput = {
   __typename: 'ToggleItemOutput';
-  takenAt?: Maybe<Scalars['String']['output']>;
-  takenById?: Maybe<Scalars['UserId']['output']>;
+  takers: Array<ItemTaker>;
 };
 
 export type ToggleItemResult = ForbiddenRejection | InternalErrorRejection | ToggleItemOutput | UnauthorizedRejection | ValidationRejection;

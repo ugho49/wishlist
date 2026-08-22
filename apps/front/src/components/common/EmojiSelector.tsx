@@ -16,7 +16,7 @@ const EmojiButton = styled(Button)(({ theme }) => ({
   minWidth: '56px',
   height: '56px', // Match TextField default height
   fontSize: '1.5rem',
-  borderRadius: '4px', // Match TextField border radius
+  borderRadius: theme.shape.borderRadius,
   border: `1px solid ${theme.palette.divider}`,
   backgroundColor: theme.palette.background.paper,
   '&:hover': {

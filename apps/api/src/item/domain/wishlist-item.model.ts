@@ -1,6 +1,11 @@
 import type { User } from '@wishlist/api/user'
 import type { ItemId, UserId, WishlistId } from '@wishlist/common'
 
+export type ItemTaker = {
+  user: User
+  takenAt: Date
+}
+
 export type WishlistItemProps = {
   id: ItemId
   importSourceId?: ItemId
@@ -11,8 +16,7 @@ export type WishlistItemProps = {
   score?: number
   isSuggested: boolean
   imageUrl?: string
-  takenBy?: User
-  takenAt?: Date
+  takers: ItemTaker[]
   createdAt: Date
   updatedAt: Date
 }
@@ -27,8 +31,7 @@ export class WishlistItem {
   public readonly score?: number
   public readonly isSuggested: boolean
   public readonly imageUrl?: string
-  public readonly takenBy?: User
-  public readonly takenAt?: Date
+  public readonly takers: ItemTaker[]
   public readonly createdAt: Date
   public readonly updatedAt: Date
 
@@ -42,8 +45,7 @@ export class WishlistItem {
     this.score = props.score
     this.isSuggested = props.isSuggested
     this.imageUrl = props.imageUrl
-    this.takenBy = props.takenBy
-    this.takenAt = props.takenAt
+    this.takers = props.takers
     this.createdAt = props.createdAt
     this.updatedAt = props.updatedAt
   }
@@ -58,8 +60,7 @@ export class WishlistItem {
     imageUrl?: string
     wishlistId: WishlistId
     importSourceId?: ItemId
-    takenBy?: User
-    takenAt?: Date
+    takers?: ItemTaker[]
   }): WishlistItem {
     const now = new Date()
 
@@ -73,8 +74,7 @@ export class WishlistItem {
       isSuggested: params.isSuggested,
       imageUrl: params.imageUrl,
       importSourceId: params.importSourceId,
-      takenBy: params.takenBy,
-      takenAt: params.takenAt,
+      takers: params.takers ?? [],
       createdAt: now,
       updatedAt: now,
     })
@@ -104,6 +104,7 @@ export class WishlistItem {
       isSuggested: false,
       imageUrl: this.imageUrl,
       importSourceId: this.id,
+      takers: [],
       createdAt: now,
       updatedAt: now,
     })
@@ -120,27 +121,33 @@ export class WishlistItem {
   }
 
   isTakenBySomeone() {
-    return this.takenBy !== undefined
+    return this.takers.length > 0
   }
 
   isTakenBy(userId: UserId) {
-    return this.takenBy?.id === userId
+    return this.takers.some(taker => taker.user.id === userId)
   }
 
   check(user: User): WishlistItem {
+    if (this.isTakenBy(user.id)) {
+      return this
+    }
+
     return new WishlistItem({
       ...this,
-      takenBy: user,
-      takenAt: new Date(),
+      takers: [...this.takers, { user, takenAt: new Date() }],
       updatedAt: new Date(),
     })
   }
 
-  uncheck(): WishlistItem {
+  uncheck(userId: UserId): WishlistItem {
+    if (!this.isTakenBy(userId)) {
+      return this
+    }
+
     return new WishlistItem({
       ...this,
-      takenBy: undefined,
-      takenAt: undefined,
+      takers: this.takers.filter(taker => taker.user.id !== userId),
       updatedAt: new Date(),
     })
   }

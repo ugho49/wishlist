@@ -13,7 +13,7 @@ import {
   type GetImportableItemsOutput,
   type ImportItemsInput,
   type ImportItemsResult,
-  type Item,
+  type ItemTaker,
   type ScanItemUrlInput,
   type ScanItemUrlResult,
   type ToggleItemResult,
@@ -38,10 +38,23 @@ import {
   WishlistIdSchema,
 } from './item.schema'
 
+@Resolver('ItemTaker')
+export class ItemTakerFieldResolver {
+  private readonly logger = new Logger(ItemTakerFieldResolver.name)
+
+  @ResolveField()
+  async user(@Parent() taker: ItemTaker, @Context() ctx: GraphQLContext): Promise<User | undefined> {
+    const user = await ctx.loaders.user.load(taker.userId as UserId)
+    if (!user) {
+      this.logger.warn('Taker user not found', { userId: taker.userId })
+      return undefined
+    }
+    return user
+  }
+}
+
 @Resolver('Item')
 export class ItemResolver {
-  private readonly logger = new Logger(ItemResolver.name)
-
   constructor(
     private readonly createItemUseCase: CreateItemUseCase,
     private readonly updateItemUseCase: UpdateItemUseCase,
@@ -51,17 +64,6 @@ export class ItemResolver {
     private readonly getImportableItemsUseCase: GetImportableItemsUseCase,
     private readonly importItemsUseCase: ImportItemsUseCase,
   ) {}
-
-  @ResolveField()
-  async takerUser(@Parent() item: Item, @Context() ctx: GraphQLContext): Promise<User | undefined> {
-    if (!item.takenById) return undefined
-    const takerUser = await ctx.loaders.user.load(item.takenById as UserId)
-    if (!takerUser) {
-      this.logger.warn(`Taker user not found for item ${item.id}`, { itemId: item.id, takenById: item.takenById })
-      return undefined
-    }
-    return takerUser
-  }
 
   @Query()
   async importableItems(
@@ -152,8 +154,11 @@ export class ItemResolver {
 
     return {
       __typename: 'ToggleItemOutput',
-      takenById: result.taken_by?.id,
-      takenAt: result.taken_at,
+      takers: result.takers.map(taker => ({
+        __typename: 'ItemTaker' as const,
+        userId: taker.user.id,
+        takenAt: taker.taken_at,
+      })),
     }
   }
 

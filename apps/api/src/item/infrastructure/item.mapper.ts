@@ -1,9 +1,24 @@
-import type { ItemDto } from '@wishlist/common'
+import type { ItemDto, ItemTakerDto } from '@wishlist/common'
 import type { WishlistItem } from '../domain'
 
 import { userMapper } from '@wishlist/api/user'
 
-import { type Item as GqlItem } from '../../gql/generated-types'
+import { type Item as GqlItem, type ItemTaker as GqlItemTaker } from '../../gql/generated-types'
+
+function toTakerDtos(item: WishlistItem): ItemTakerDto[] {
+  return item.takers.map(taker => ({
+    user: userMapper.toMiniUserDto(taker.user),
+    taken_at: taker.takenAt.toISOString(),
+  }))
+}
+
+function toGqlTakers(item: WishlistItem): GqlItemTaker[] {
+  return item.takers.map(taker => ({
+    __typename: 'ItemTaker',
+    userId: taker.user.id,
+    takenAt: taker.takenAt.toISOString(),
+  }))
+}
 
 function toDto(param: { item: WishlistItem; displayUserAndSuggested: boolean }): ItemDto {
   const { displayUserAndSuggested, item } = param
@@ -20,8 +35,7 @@ function toDto(param: { item: WishlistItem; displayUserAndSuggested: boolean }):
 
   if (displayUserAndSuggested) {
     dto.is_suggested = item.isSuggested
-    dto.taken_by = item.takenBy ? userMapper.toMiniUserDto(item.takenBy) : undefined
-    dto.taken_at = item.takenAt?.toISOString()
+    dto.takers = toTakerDtos(item)
   }
 
   return dto
@@ -39,12 +53,12 @@ function toGqlItem(param: { item: WishlistItem; displayUserAndSuggested: boolean
     url: item.url,
     pictureUrl: item.imageUrl,
     createdAt: item.createdAt.toISOString(),
+    takers: [],
   }
 
   if (displayUserAndSuggested) {
     dto.isSuggested = item.isSuggested
-    dto.takenById = item.takenBy ? item.takenBy.id : undefined
-    dto.takenAt = item.takenAt?.toISOString()
+    dto.takers = toGqlTakers(item)
   }
 
   return dto
@@ -53,4 +67,5 @@ function toGqlItem(param: { item: WishlistItem; displayUserAndSuggested: boolean
 export const itemMapper = {
   toDto,
   toGqlItem,
+  toGqlTakers,
 }

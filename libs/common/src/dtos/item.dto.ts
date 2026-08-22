@@ -14,6 +14,11 @@ import {
   Min,
 } from 'class-validator'
 
+export class ItemTakerDto {
+  declare user: MiniUserDto
+  declare taken_at: string
+}
+
 export class ItemDto {
   declare id: ItemId
   declare name: string
@@ -22,14 +27,12 @@ export class ItemDto {
   declare score?: number
   declare is_suggested?: boolean
   declare picture_url?: string
-  declare taken_by?: MiniUserDto
-  declare taken_at?: string
+  declare takers?: ItemTakerDto[]
   declare created_at: string
 }
 
 export class ToggleItemOutputDto {
-  declare taken_by?: MiniUserDto
-  declare taken_at?: string
+  declare takers: ItemTakerDto[]
 }
 
 export class ScanItemOutputDto {

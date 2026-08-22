@@ -304,10 +304,15 @@ export type Item = {
   name: Scalars['String']['output'];
   pictureUrl?: Maybe<Scalars['String']['output']>;
   score?: Maybe<Scalars['Int']['output']>;
-  takenAt?: Maybe<Scalars['String']['output']>;
-  takenById?: Maybe<Scalars['UserId']['output']>;
-  takerUser?: Maybe<User>;
+  takers: Array<ItemTaker>;
   url?: Maybe<Scalars['String']['output']>;
+};
+
+export type ItemTaker = {
+  __typename?: 'ItemTaker';
+  takenAt: Scalars['String']['output'];
+  user: User;
+  userId: Scalars['UserId']['output'];
 };
 
 export type LinkUserToGoogleInput = {
@@ -844,8 +849,7 @@ export type StartSecretSantaResult = ForbiddenRejection | InternalErrorRejection
 
 export type ToggleItemOutput = {
   __typename?: 'ToggleItemOutput';
-  takenAt?: Maybe<Scalars['String']['output']>;
-  takenById?: Maybe<Scalars['UserId']['output']>;
+  takers: Array<ItemTaker>;
 };
 
 export type ToggleItemResult = ForbiddenRejection | InternalErrorRejection | ToggleItemOutput | UnauthorizedRejection | ValidationRejection;
@@ -1287,7 +1291,7 @@ export type ImportableItemsQueryVariables = Exact<{
 
 export type ImportableItemsQuery = { __typename?: 'Query', importableItems:
     | { __typename: 'ForbiddenRejection' }
-    | { __typename: 'GetImportableItemsOutput', items: Array<{ __typename?: 'Item', id: Ids["ItemId"], name: string, description?: string | null, url?: string | null, score?: number | null, isSuggested?: boolean | null, pictureUrl?: string | null, takenById?: Ids["UserId"] | null, takenAt?: string | null, createdAt: string, takerUser?: { __typename?: 'User', id: Ids["UserId"], firstName: string, pictureUrl?: string | null } | null }> }
+    | { __typename: 'GetImportableItemsOutput', items: Array<{ __typename?: 'Item', id: Ids["ItemId"], name: string, description?: string | null, url?: string | null, score?: number | null, isSuggested?: boolean | null, pictureUrl?: string | null, createdAt: string, takers: Array<{ __typename?: 'ItemTaker', userId: Ids["UserId"], takenAt: string, user: { __typename?: 'User', id: Ids["UserId"], firstName: string, lastName: string, pictureUrl?: string | null } }> }> }
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'UnauthorizedRejection' }
    };
@@ -1300,7 +1304,7 @@ export type CreateItemMutationVariables = Exact<{
 export type CreateItemMutation = { __typename?: 'Mutation', createItem:
     | { __typename: 'ForbiddenRejection' }
     | { __typename: 'InternalErrorRejection' }
-    | { __typename: 'Item', id: Ids["ItemId"], name: string, description?: string | null, url?: string | null, score?: number | null, isSuggested?: boolean | null, pictureUrl?: string | null, takenById?: Ids["UserId"] | null, takenAt?: string | null, createdAt: string, takerUser?: { __typename?: 'User', id: Ids["UserId"], firstName: string, pictureUrl?: string | null } | null }
+    | { __typename: 'Item', id: Ids["ItemId"], name: string, description?: string | null, url?: string | null, score?: number | null, isSuggested?: boolean | null, pictureUrl?: string | null, createdAt: string, takers: Array<{ __typename?: 'ItemTaker', userId: Ids["UserId"], takenAt: string, user: { __typename?: 'User', id: Ids["UserId"], firstName: string, lastName: string, pictureUrl?: string | null } }> }
     | { __typename: 'UnauthorizedRejection' }
     | { __typename: 'ValidationRejection', errors: Array<{ __typename?: 'FieldError', field: string, message: string }> }
    };
@@ -1340,7 +1344,7 @@ export type ToggleItemMutationVariables = Exact<{
 export type ToggleItemMutation = { __typename?: 'Mutation', toggleItem:
     | { __typename: 'ForbiddenRejection' }
     | { __typename: 'InternalErrorRejection' }
-    | { __typename: 'ToggleItemOutput', takenById?: Ids["UserId"] | null, takenAt?: string | null }
+    | { __typename: 'ToggleItemOutput', takers: Array<{ __typename?: 'ItemTaker', userId: Ids["UserId"], takenAt: string, user: { __typename?: 'User', id: Ids["UserId"], firstName: string, lastName: string, pictureUrl?: string | null } }> }
     | { __typename: 'UnauthorizedRejection' }
     | { __typename: 'ValidationRejection' }
    };
@@ -1365,7 +1369,7 @@ export type ImportItemsMutationVariables = Exact<{
 
 export type ImportItemsMutation = { __typename?: 'Mutation', importItems:
     | { __typename: 'ForbiddenRejection' }
-    | { __typename: 'ImportItemsOutput', items: Array<{ __typename?: 'Item', id: Ids["ItemId"], name: string, description?: string | null, url?: string | null, score?: number | null, isSuggested?: boolean | null, pictureUrl?: string | null, takenById?: Ids["UserId"] | null, takenAt?: string | null, createdAt: string, takerUser?: { __typename?: 'User', id: Ids["UserId"], firstName: string, pictureUrl?: string | null } | null }> }
+    | { __typename: 'ImportItemsOutput', items: Array<{ __typename?: 'Item', id: Ids["ItemId"], name: string, description?: string | null, url?: string | null, score?: number | null, isSuggested?: boolean | null, pictureUrl?: string | null, createdAt: string, takers: Array<{ __typename?: 'ItemTaker', userId: Ids["UserId"], takenAt: string, user: { __typename?: 'User', id: Ids["UserId"], firstName: string, lastName: string, pictureUrl?: string | null } }> }> }
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'UnauthorizedRejection' }
     | { __typename: 'ValidationRejection', errors: Array<{ __typename?: 'FieldError', field: string, message: string }> }
@@ -1854,7 +1858,7 @@ export type WishlistPageQuery = { __typename?: 'Query', wishlist?:
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'NotFoundRejection' }
     | { __typename: 'UnauthorizedRejection' }
-    | { __typename: 'Wishlist', id: Ids["WishlistId"], title: string, description?: string | null, logoUrl?: string | null, ownerId: Ids["UserId"], coOwnerId?: Ids["UserId"] | null, createdAt: string, updatedAt: string, config: { __typename?: 'WishlistConfig', hideItems: boolean }, owner: { __typename?: 'User', id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl?: string | null }, coOwner?: { __typename?: 'User', id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl?: string | null } | null, events: Array<{ __typename?: 'Event', id: Ids["EventId"], title: string, icon?: string | null, eventDate: string }>, items: Array<{ __typename?: 'Item', id: Ids["ItemId"], name: string, description?: string | null, url?: string | null, score?: number | null, isSuggested?: boolean | null, pictureUrl?: string | null, takenById?: Ids["UserId"] | null, takenAt?: string | null, createdAt: string, takerUser?: { __typename?: 'User', id: Ids["UserId"], firstName: string, pictureUrl?: string | null } | null }> }
+    | { __typename: 'Wishlist', id: Ids["WishlistId"], title: string, description?: string | null, logoUrl?: string | null, ownerId: Ids["UserId"], coOwnerId?: Ids["UserId"] | null, createdAt: string, updatedAt: string, config: { __typename?: 'WishlistConfig', hideItems: boolean }, owner: { __typename?: 'User', id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl?: string | null }, coOwner?: { __typename?: 'User', id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl?: string | null } | null, events: Array<{ __typename?: 'Event', id: Ids["EventId"], title: string, icon?: string | null, eventDate: string }>, items: Array<{ __typename?: 'Item', id: Ids["ItemId"], name: string, description?: string | null, url?: string | null, score?: number | null, isSuggested?: boolean | null, pictureUrl?: string | null, createdAt: string, takers: Array<{ __typename?: 'ItemTaker', userId: Ids["UserId"], takenAt: string, user: { __typename?: 'User', id: Ids["UserId"], firstName: string, lastName: string, pictureUrl?: string | null } }> }> }
    | null };
 
 export type AdminListWishlistsForUserQueryVariables = Exact<{

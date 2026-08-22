@@ -1,5 +1,11 @@
 scalar ItemId
 
+type ItemTaker {
+  userId: UserId!
+  user: User! @resolved
+  takenAt: String!
+}
+
 type Item {
   id: ItemId!
   name: String!
@@ -8,9 +14,7 @@ type Item {
   score: Int
   isSuggested: Boolean
   pictureUrl: String
-  takenById: UserId
-  takerUser: User
-  takenAt: String
+  takers: [ItemTaker!]!
   createdAt: String!
 }
 
@@ -49,8 +53,7 @@ input ImportItemsInput {
 ########################################################
 
 type ToggleItemOutput {
-  takenById: UserId
-  takenAt: String
+  takers: [ItemTaker!]!
 }
 
 type ScanItemUrlOutput {
