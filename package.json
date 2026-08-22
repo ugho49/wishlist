@@ -21,7 +21,8 @@
     "typecheck": "nx run-many --target=typecheck --exclude=@wishlist/source",
     "bump-deps": "npx npm-check-updates -u -i --format group",
     "db:migrate": "nx run api:drizzle:migrate",
-    "db:seed": "nx run api:drizzle:seed"
+    "db:seed": "nx run api:drizzle:seed",
+    "mail:preview": "nx run mail:preview"
   },
   "dependencies": {
     "@emoji-mart/data": "1.2.1",
