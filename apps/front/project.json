@@ -16,8 +16,7 @@
       "continuous": true,
       "executor": "nx:run-commands",
       "options": {
-        "command": "vite --config vite.config.ts",
-        "cwd": "{projectRoot}"
+        "command": "nx run front:dev"
       }
     },
     "serve:watch-codegen": {

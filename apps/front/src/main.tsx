@@ -1,3 +1,5 @@
+// Kept as a belt-and-suspenders import. The polyfill is also loaded from
+// @wishlist/common so split chunks that evaluate decorated DTOs still have it.
 import 'reflect-metadata';
 
 import { CssBaseline, ThemeProvider } from '@mui/material';

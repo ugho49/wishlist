@@ -33,6 +33,14 @@ const config: UserConfig = {
     commonjsOptions: {
       transformMixedEsModules: true,
     },
+    rolldownOptions: {
+      output: {
+        // TanStack Router code-splitting can evaluate @wishlist/common DTOs
+        // (Reflect.getMetadata) before the entry's reflect-metadata polyfill.
+        // https://rolldown.rs/reference/OutputOptions.strictExecutionOrder
+        strictExecutionOrder: true,
+      },
+    },
   },
 
   resolve: {
