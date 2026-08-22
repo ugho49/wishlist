@@ -1,3 +1,4 @@
+/// <reference types="bun-types/test-globals" />
 /** biome-ignore-all lint/suspicious/noExplicitAny: bun:test matchers */
 import type CustomMatchers from 'jest-extended'
 
