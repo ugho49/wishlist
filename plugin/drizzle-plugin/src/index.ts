@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
-import { type CreateNodesV2, createNodesFromFiles } from '@nx/devkit';
+import { type CreateNodes, createNodesFromFiles } from '@nx/devkit';
 
 export type DrizzlePluginOptions = {
   studioTargetName?: string;
@@ -9,7 +9,7 @@ export type DrizzlePluginOptions = {
   seedTargetName?: string;
 };
 
-export const createNodesV2: CreateNodesV2<DrizzlePluginOptions> = [
+export const createNodesV2: CreateNodes<DrizzlePluginOptions> = [
   '**/drizzle.config.ts',
   async (configFiles, options, context) =>
     await createNodesFromFiles(

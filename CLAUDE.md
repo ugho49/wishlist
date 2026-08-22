@@ -22,6 +22,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Pre-commit hooks automatically check and fix code with Biome via lint-staged
 - Conventional commits enforced via commitlint
 
+### TypeScript (two packages on purpose)
+TypeScript 7 ships a native `tsc` but **no compiler API** — `require('typescript')` only exports `version`. Nx, Vite, and `@nx/js:tsc` still import that API, so `"typescript": "7.x"` as a drop-in breaks the workspace (`readConfigFile is not a function`). Bun as runtime does not change this.
+
+Keep both until TypeScript 7 exposes a stable programmatic API that Nx supports (expected around 7.1):
+
+- `@typescript/native` (`npm:typescript@7.x`) — the `tsc` binary used by `bun typecheck`
+- `typescript` (`npm:@typescript/typescript6@6.x`) — JS API for Nx / Vite / plugin builds
+
+When bumping: raise `@typescript/native` for the compiler, and the `typescript` alias only for 6.x patches. Collapse to a single `typescript` dependency only after Nx can `require('typescript')` on 7.x. See the [Nx TypeScript 7 guide](https://nx.dev/docs/technologies/typescript/guides/typescript-7).
+
 ### Database Operations
 - **Drizzle Studio**: `nx run api:drizzle:studio` - Open database management UI
 - **Generate Migration**: `nx run api:drizzle:generate --name <migration-name>`

@@ -2,7 +2,7 @@
   "name": "@wishlist/bun-plugin",
   "version": "0.0.1",
   "private": true,
-  "type": "commonjs",
+  "type": "module",
   "main": "./src/index.ts",
   "executors": "./executors.json"
 }
