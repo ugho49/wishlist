@@ -80,14 +80,14 @@ export class Event {
   canEdit(currentUser: ICurrentUser): boolean {
     return this.canAccessByRole({
       currentUser,
-      acceptedRoles: [AttendeeRole.MAINTAINER],
+      acceptedRoles: [AttendeeRole.CREATOR, AttendeeRole.ADMIN],
     })
   }
 
   canView(currentUser: ICurrentUser): boolean {
     return this.canAccessByRole({
       currentUser,
-      acceptedRoles: [AttendeeRole.MAINTAINER, AttendeeRole.USER],
+      acceptedRoles: [AttendeeRole.CREATOR, AttendeeRole.ADMIN, AttendeeRole.PARTICIPANT],
     })
   }
 

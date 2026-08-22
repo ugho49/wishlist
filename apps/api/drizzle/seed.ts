@@ -143,12 +143,12 @@ async function main() {
 
     eventsValues.push(event)
 
-    const maintainer = getRandomUser()
+    const creator = getRandomUser()
     eventAttendeesValues.push({
       id: faker.string.uuid(),
       eventId: event.id,
-      userId: maintainer.id,
-      role: 'maintainer',
+      userId: creator.id,
+      role: 'creator',
     })
 
     const numberOfAttendees = faker.number.int({ min: 0, max: 10 })
@@ -161,16 +161,16 @@ async function main() {
           id: faker.string.uuid(),
           eventId: event.id,
           tempUserEmail: faker.internet.email(),
-          role: 'user',
+          role: 'participant',
         })
       } else {
-        const attendee = getRandomUserWithExclusion(maintainer.id)
+        const attendee = getRandomUserWithExclusion(creator.id)
 
         eventAttendeesValues.push({
           id: faker.string.uuid(),
           eventId: event.id,
           userId: attendee.id,
-          role: 'user',
+          role: 'participant',
         })
       }
     }

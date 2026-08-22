@@ -43,8 +43,9 @@ function toGqlSecretSanta(dto: SecretSantaDto): GqlSecretSanta {
 
 function toGqlSecretSantaDraw(attendee: AttendeeDto): GqlEventAttendee {
   const role = match(attendee.role)
-    .with(AttendeeRole.MAINTAINER, () => GqlAttendeeRole.Maintainer)
-    .with(AttendeeRole.USER, () => GqlAttendeeRole.User)
+    .with(AttendeeRole.CREATOR, () => GqlAttendeeRole.Creator)
+    .with(AttendeeRole.ADMIN, () => GqlAttendeeRole.Admin)
+    .with(AttendeeRole.PARTICIPANT, () => GqlAttendeeRole.Participant)
     .exhaustive()
 
   return {

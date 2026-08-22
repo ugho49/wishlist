@@ -2,8 +2,9 @@ scalar EventId
 scalar AttendeeId
 
 enum AttendeeRole {
-  MAINTAINER
-  USER
+  CREATOR
+  ADMIN
+  PARTICIPANT
 }
 
 type EventAttendee {
@@ -127,6 +128,14 @@ union RemoveEventAttendeeResult =
   | NotFoundRejection
   | InternalErrorRejection
 
+union UpdateEventAttendeeRoleResult =
+  | VoidOutput
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | NotFoundRejection
+  | InternalErrorRejection
+
 union AdminGetEventByIdResult =
   | Event
   | ValidationRejection
@@ -179,6 +188,11 @@ extend type Mutation {
   deleteEvent(id: EventId!): DeleteEventResult!
   addEventAttendee(eventId: EventId!, input: AddEventAttendeeInput!): AddEventAttendeeResult!
   removeEventAttendee(eventId: EventId!, attendeeId: AttendeeId!): RemoveEventAttendeeResult!
+  updateEventAttendeeRole(
+    eventId: EventId!
+    attendeeId: AttendeeId!
+    role: AttendeeRole!
+  ): UpdateEventAttendeeRoleResult!
   adminUpdateEvent(id: EventId!, input: UpdateEventInput!): AdminUpdateEventResult!
   adminDeleteEvent(id: EventId!): AdminDeleteEventResult!
   adminDeleteEventAttendee(eventId: EventId!, attendeeId: AttendeeId!): AdminDeleteEventAttendeeResult!

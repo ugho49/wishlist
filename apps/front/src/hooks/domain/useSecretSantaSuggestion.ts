@@ -159,7 +159,7 @@ interface UseSecretSantaSuggestionProps {
  * Hook to determine if the Secret Santa suggestion card should be displayed
  *
  * Conditions:
- * - User must be a maintainer (currentUserCanEdit = true)
+ * - User must be a creator or admin (currentUserCanEdit = true)
  * - No Secret Santa should exist yet
  * - Event date must be between December 15 and January 1, OR
  * - Event title must contain Christmas-related keywords
@@ -185,7 +185,7 @@ export function useSecretSantaSuggestion({
   }, [eventId])
 
   const shouldShowSuggestion = useMemo(() => {
-    // Must be maintainer
+    // Must be creator or admin
     if (!currentUserCanEdit) return false
 
     // Check if user has dismissed the suggestion

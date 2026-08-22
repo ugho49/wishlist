@@ -235,7 +235,7 @@ export const CreateEventPage = () => {
                     setAttendees(prevState => [
                       {
                         user: val,
-                        role: AttendeeRole.User,
+                        role: AttendeeRole.Participant,
                       },
                       ...prevState,
                     ])

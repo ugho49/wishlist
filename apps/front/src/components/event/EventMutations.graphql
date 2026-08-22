@@ -70,3 +70,12 @@ mutation RemoveEventAttendee($eventId: EventId!, $attendeeId: AttendeeId!) {
     }
   }
 }
+
+mutation UpdateEventAttendeeRole($eventId: EventId!, $attendeeId: AttendeeId!, $role: AttendeeRole!) {
+  updateEventAttendeeRole(eventId: $eventId, attendeeId: $attendeeId, role: $role) {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+  }
+}

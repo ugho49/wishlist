@@ -95,8 +95,9 @@ input AdminWishlistPaginationFilters {
 scalar AttendeeId
 
 enum AttendeeRole {
-  MAINTAINER
-  USER
+  ADMIN
+  CREATOR
+  PARTICIPANT
 }
 
 enum BusinessRuleCode {
@@ -358,6 +359,7 @@ type Mutation {
   unlinkCurrentUserSocial(socialId: UserSocialId!): UnlinkCurrentUserSocialResult!
   unlinkWishlistFromEvent(eventId: EventId!, id: WishlistId!): UnlinkWishlistFromEventResult!
   updateEvent(id: EventId!, input: UpdateEventInput!): UpdateEventResult!
+  updateEventAttendeeRole(attendeeId: AttendeeId!, eventId: EventId!, role: AttendeeRole!): UpdateEventAttendeeRoleResult!
   updateItem(input: UpdateItemInput!, itemId: ItemId!): UpdateItemResult!
   updateSecretSanta(id: SecretSantaId!, input: UpdateSecretSantaInput!): UpdateSecretSantaResult!
   updateSecretSantaUser(id: SecretSantaId!, input: UpdateSecretSantaUserInput!, secretSantaUserId: SecretSantaUserId!): UpdateSecretSantaUserResult!
@@ -506,6 +508,8 @@ type UnauthorizedRejection {
 union UnlinkCurrentUserSocialResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
 union UnlinkWishlistFromEventResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
+union UpdateEventAttendeeRoleResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
 input UpdateEventInput {
   description: String

@@ -21,7 +21,7 @@ describe('EventAttendeeController', () => {
         .post(path(uuid()))
         .send({
           email: 'test@example.com',
-          role: AttendeeRole.USER,
+          role: AttendeeRole.PARTICIPANT,
         })
         .expect(401)
     })
@@ -44,7 +44,7 @@ describe('EventAttendeeController', () => {
         {
           body: { email: 'test@example.com', role: 'invalid-role' },
           case: 'invalid role',
-          message: ['role must be one of the following values: maintainer, user'],
+          message: ['role must be one of the following values: creator, admin, participant'],
         },
       ])('should return 400 when invalid input: $case', async ({ body, message }) => {
         const { eventId } = await fixtures.insertEventWithMaintainer({
@@ -76,14 +76,14 @@ describe('EventAttendeeController', () => {
           .post(path(eventId))
           .send({
             email: 'new-attendee@example.com',
-            role: AttendeeRole.USER,
+            role: AttendeeRole.PARTICIPANT,
           })
           .expect(201)
           .expect(({ body }) => {
             expect(body).toEqual({
               id: expect.toBeString(),
               pending_email: 'new-attendee@example.com',
-              role: AttendeeRole.USER,
+              role: AttendeeRole.PARTICIPANT,
             })
           })
 
@@ -96,7 +96,7 @@ describe('EventAttendeeController', () => {
             id: createdId,
             event_id: eventId,
             temp_user_email: 'new-attendee@example.com',
-            role: AttendeeRole.USER,
+            role: AttendeeRole.PARTICIPANT,
           })
 
         await expectMail()
@@ -124,13 +124,13 @@ describe('EventAttendeeController', () => {
           .post(path(eventId))
           .send({
             email: 'other@example.com',
-            role: AttendeeRole.USER,
+            role: AttendeeRole.PARTICIPANT,
           })
           .expect(201)
           .expect(({ body }) => {
             expect(body).toEqual({
               id: expect.toBeString(),
-              role: AttendeeRole.USER,
+              role: AttendeeRole.PARTICIPANT,
               user: {
                 id: otherUserId,
                 email: 'other@example.com',
@@ -149,7 +149,7 @@ describe('EventAttendeeController', () => {
             id: createdId,
             event_id: eventId,
             user_id: otherUserId,
-            role: AttendeeRole.USER,
+            role: AttendeeRole.PARTICIPANT,
           })
 
         await expectMail()
@@ -167,7 +167,7 @@ describe('EventAttendeeController', () => {
           .post(path(nonExistentEventId))
           .send({
             email: 'test@example.com',
-            role: AttendeeRole.USER,
+            role: AttendeeRole.PARTICIPANT,
           })
           .expect(404)
           .expect(({ body }) =>
@@ -197,13 +197,13 @@ describe('EventAttendeeController', () => {
           .post(path(eventId))
           .send({
             email: 'test@example.com',
-            role: AttendeeRole.USER,
+            role: AttendeeRole.PARTICIPANT,
           })
           .expect(401)
           .expect(({ body }) =>
             expect(body).toMatchObject({
               error: 'Unauthorized',
-              message: 'Only maintainers of the event can add an attendee',
+              message: 'Only creators and admins of the event can add an attendee',
             }),
           )
 
@@ -227,7 +227,7 @@ describe('EventAttendeeController', () => {
           .post(path(eventId))
           .send({
             email: existingEmail,
-            role: AttendeeRole.USER,
+            role: AttendeeRole.PARTICIPANT,
           })
           .expect(400)
           .expect(({ body }) =>
@@ -238,6 +238,54 @@ describe('EventAttendeeController', () => {
           )
 
         await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(2) // maintainer + existing attendee
+      })
+
+      it('should return 400 when assigning creator role', async () => {
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Test Event',
+          description: 'Test Description',
+          maintainerId: currentUserId,
+        })
+
+        await request
+          .post(path(eventId))
+          .send({
+            email: 'new-attendee@example.com',
+            role: AttendeeRole.CREATOR,
+          })
+          .expect(400)
+          .expect(({ body }) =>
+            expect(body).toMatchObject({
+              error: 'Bad Request',
+              message: 'Cannot assign the creator role to an attendee',
+            }),
+          )
+
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(1)
+      })
+
+      it('should add attendee when user is admin of the event', async () => {
+        const creatorId = await fixtures.insertUser({
+          email: 'creator@example.com',
+          firstname: 'Creator',
+          lastname: 'User',
+        })
+        const { eventId } = await fixtures.insertEventWithCreator({
+          title: 'Test Event',
+          description: 'Test Description',
+          creatorId,
+        })
+        await fixtures.insertAdminAttendee({ eventId, userId: currentUserId })
+
+        await request
+          .post(path(eventId))
+          .send({
+            email: 'new-attendee@example.com',
+            role: AttendeeRole.PARTICIPANT,
+          })
+          .expect(201)
+
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(3)
       })
     })
   })
@@ -307,7 +355,7 @@ describe('EventAttendeeController', () => {
           .expect(({ body }) =>
             expect(body).toMatchObject({
               error: 'Unauthorized',
-              message: 'Only maintainers of the event can delete an attendee',
+              message: 'Only creators and admins of the event can delete an attendee',
             }),
           )
 
@@ -494,6 +542,258 @@ describe('EventAttendeeController', () => {
         await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(2) // 1 attendee for eventId1 and 1 for eventId2
         await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(1) // linked to eventId2
         await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1) // wishlist still exists
+      })
+
+      it('should return 409 when trying to delete the creator', async () => {
+        const creatorId = await fixtures.insertUser({
+          email: 'creator@example.com',
+          firstname: 'Creator',
+          lastname: 'User',
+        })
+        const { eventId, attendeeId: creatorAttendeeId } = await fixtures.insertEventWithCreator({
+          title: 'Test Event',
+          description: 'Test Description',
+          creatorId,
+        })
+        await fixtures.insertAdminAttendee({ eventId, userId: currentUserId })
+
+        await request
+          .delete(path({ eventId, attendeeId: creatorAttendeeId }))
+          .expect(409)
+          .expect(({ body }) =>
+            expect(body).toMatchObject({
+              error: 'Conflict',
+              message: 'You cannot delete the creator of the event',
+            }),
+          )
+
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(2)
+      })
+    })
+  })
+
+  describe('PUT /event/:eventId/attendee/:attendeeId', () => {
+    const path = (params: { eventId: string; attendeeId: string }) =>
+      `/event/${params.eventId}/attendee/${params.attendeeId}`
+
+    it('should return unauthorized if not authenticated', async () => {
+      const request = await getRequest()
+
+      await request
+        .put(path({ eventId: uuid(), attendeeId: uuid() }))
+        .send({ role: AttendeeRole.ADMIN })
+        .expect(401)
+    })
+
+    describe('when user is authenticated', () => {
+      let request: RequestApp
+      let currentUserId: string
+
+      beforeEach(async () => {
+        request = await getRequest({ signedAs: 'BASE_USER' })
+        currentUserId = await fixtures.getSignedUserId('BASE_USER')
+      })
+
+      it.each([
+        {
+          body: {},
+          case: 'empty body',
+          message: [
+            'role must be one of the following values: creator, admin, participant',
+            'role should not be empty',
+          ],
+        },
+        {
+          body: { role: 'invalid-role' },
+          case: 'invalid role',
+          message: ['role must be one of the following values: creator, admin, participant'],
+        },
+      ])('should return 400 when invalid input: $case', async ({ body, message }) => {
+        const { eventId, attendeeId } = await fixtures.insertEventWithMaintainer({
+          title: 'Test Event',
+          description: 'Test Description',
+          maintainerId: currentUserId,
+        })
+
+        await request
+          .put(path({ eventId, attendeeId }))
+          .send(body)
+          .expect(400)
+          .expect(({ body }) =>
+            expect(body).toMatchObject({
+              error: 'Bad Request',
+              message: expect.arrayContaining(message),
+            }),
+          )
+      })
+
+      it('should update attendee role from participant to admin', async () => {
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Test Event',
+          description: 'Test Description',
+          maintainerId: currentUserId,
+        })
+        const otherUserId = await fixtures.insertUser({
+          email: 'attendee@example.com',
+          firstname: 'Attendee',
+          lastname: 'User',
+        })
+        const attendeeId = await fixtures.insertActiveAttendee({
+          eventId,
+          userId: otherUserId,
+          role: AttendeeRole.PARTICIPANT,
+        })
+
+        await request.put(path({ eventId, attendeeId })).send({ role: AttendeeRole.ADMIN }).expect(200)
+
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(2).row(1).toMatchObject({
+          id: attendeeId,
+          role: AttendeeRole.ADMIN,
+        })
+      })
+
+      it('should update attendee role when current user is admin', async () => {
+        const creatorId = await fixtures.insertUser({
+          email: 'creator@example.com',
+          firstname: 'Creator',
+          lastname: 'User',
+        })
+        const { eventId } = await fixtures.insertEventWithCreator({
+          title: 'Test Event',
+          description: 'Test Description',
+          creatorId,
+        })
+        await fixtures.insertAdminAttendee({ eventId, userId: currentUserId })
+        const otherUserId = await fixtures.insertUser({
+          email: 'attendee@example.com',
+          firstname: 'Attendee',
+          lastname: 'User',
+        })
+        const attendeeId = await fixtures.insertActiveAttendee({
+          eventId,
+          userId: otherUserId,
+          role: AttendeeRole.PARTICIPANT,
+        })
+
+        await request.put(path({ eventId, attendeeId })).send({ role: AttendeeRole.ADMIN }).expect(200)
+
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(3).row(2).toMatchObject({
+          id: attendeeId,
+          role: AttendeeRole.ADMIN,
+        })
+      })
+
+      it('should return 401 when user is not creator or admin of event', async () => {
+        const otherUserId = await fixtures.insertUser({
+          email: 'other@example.com',
+          firstname: 'Other',
+          lastname: 'User',
+        })
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Test Event',
+          description: 'Test Description',
+          maintainerId: otherUserId,
+        })
+        const attendeeId = await fixtures.insertPendingAttendee({
+          eventId,
+          tempUserEmail: 'attendee@example.com',
+        })
+
+        await request
+          .put(path({ eventId, attendeeId }))
+          .send({ role: AttendeeRole.ADMIN })
+          .expect(401)
+          .expect(({ body }) =>
+            expect(body).toMatchObject({
+              error: 'Unauthorized',
+              message: 'Only creators and admins of the event can update an attendee role',
+            }),
+          )
+      })
+
+      it('should return 409 when trying to change own role', async () => {
+        const { eventId, attendeeId } = await fixtures.insertEventWithMaintainer({
+          title: 'Test Event',
+          description: 'Test Description',
+          maintainerId: currentUserId,
+        })
+
+        await request
+          .put(path({ eventId, attendeeId }))
+          .send({ role: AttendeeRole.ADMIN })
+          .expect(409)
+          .expect(({ body }) =>
+            expect(body).toMatchObject({
+              error: 'Conflict',
+              message: 'You cannot change your own role',
+            }),
+          )
+      })
+
+      it('should return 409 when trying to change the creator role', async () => {
+        const creatorId = await fixtures.insertUser({
+          email: 'creator@example.com',
+          firstname: 'Creator',
+          lastname: 'User',
+        })
+        const { eventId, attendeeId: creatorAttendeeId } = await fixtures.insertEventWithCreator({
+          title: 'Test Event',
+          description: 'Test Description',
+          creatorId,
+        })
+        await fixtures.insertAdminAttendee({ eventId, userId: currentUserId })
+
+        await request
+          .put(path({ eventId, attendeeId: creatorAttendeeId }))
+          .send({ role: AttendeeRole.ADMIN })
+          .expect(409)
+          .expect(({ body }) =>
+            expect(body).toMatchObject({
+              error: 'Conflict',
+              message: 'You cannot change the creator role',
+            }),
+          )
+      })
+
+      it('should return 400 when assigning creator role', async () => {
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Test Event',
+          description: 'Test Description',
+          maintainerId: currentUserId,
+        })
+        const otherUserId = await fixtures.insertUser({
+          email: 'attendee@example.com',
+          firstname: 'Attendee',
+          lastname: 'User',
+        })
+        const attendeeId = await fixtures.insertActiveAttendee({
+          eventId,
+          userId: otherUserId,
+        })
+
+        await request
+          .put(path({ eventId, attendeeId }))
+          .send({ role: AttendeeRole.CREATOR })
+          .expect(400)
+          .expect(({ body }) =>
+            expect(body).toMatchObject({
+              error: 'Bad Request',
+              message: 'Cannot assign the creator role to an attendee',
+            }),
+          )
+      })
+
+      it('should return 404 when attendee does not exist', async () => {
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Test Event',
+          description: 'Test Description',
+          maintainerId: currentUserId,
+        })
+
+        await request
+          .put(path({ eventId, attendeeId: uuid() }))
+          .send({ role: AttendeeRole.ADMIN })
+          .expect(404)
       })
     })
   })

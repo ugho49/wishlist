@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger } from '@nestjs/common'
+import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common'
 import { EventBus } from '@nestjs/cqrs'
 import { REPOSITORIES } from '@wishlist/api/repositories'
 import { type UserRepository } from '@wishlist/api/user'
@@ -52,7 +52,7 @@ export class CreateEventUseCase {
     const eventId = this.eventRepository.newId()
     const attendees: EventAttendee[] = []
 
-    // Add the current user as maintainer attendee
+    // Add the current user as creator attendee
     const currentUser = await this.userRepository.findByIdOrFail(input.currentUser.id)
 
     attendees.push(
@@ -60,14 +60,19 @@ export class CreateEventUseCase {
         id: this.attendeeRepository.newId(),
         eventId,
         user: currentUser,
-        role: AttendeeRole.MAINTAINER,
+        role: AttendeeRole.CREATOR,
       }),
     )
 
     for (const attendee of input.newEvent.attendees ?? []) {
       const user = existingUsers.find(u => u.email === attendee.email)
       const id = this.attendeeRepository.newId()
-      const role = attendee.role ?? AttendeeRole.USER
+      const role = attendee.role ?? AttendeeRole.PARTICIPANT
+
+      if (role === AttendeeRole.CREATOR) {
+        throw new BadRequestException('Cannot assign the creator role to an invited attendee')
+      }
+
       const newAttendee = user
         ? EventAttendee.createFromExistingUser({ id, eventId, user, role })
         : EventAttendee.createFromNonExistingUser({

@@ -12,11 +12,12 @@ import { EditEventAttendees } from '@wishlist/front-components/event/EditEventAt
 import { EditEventInformations } from '@wishlist/front-components/event/EditEventInformations'
 import { EditSecretSanta } from '@wishlist/front-components/event/EditSecretSanta'
 import { EventNotFound } from '@wishlist/front-components/event/EventNotFound'
+import { canEditEvent } from '@wishlist/front-components/event/event-permissions'
 import { SEO } from '@wishlist/front-components/SEO'
 import { useSelector } from 'react-redux'
 import z from 'zod'
 
-import { AttendeeRole, isRejection, rejectionMessage, useEventPageGetEventQuery } from '../../../../../gql'
+import { isRejection, rejectionMessage, useEventPageGetEventQuery } from '../../../../../gql'
 
 export enum TabValues {
   informations = 'informations',
@@ -61,8 +62,7 @@ function RouteComponent() {
   const { data, isLoading: loading } = useEventPageGetEventQuery({ eventId }, { select: d => d.event })
   const event = data?.__typename === 'Event' ? data : undefined
   const queryRejection = data && isRejection(data) && data.__typename !== 'NotFoundRejection' ? data : undefined
-  const currentUserCanEdit =
-    event?.attendees.some(a => a.user?.id === currentUserId && a.role === AttendeeRole.Maintainer) ?? false
+  const currentUserCanEdit = canEditEvent(event?.attendees ?? [], currentUserId)
   const navigate = useNavigate({ from: '/events/$eventId/edit' })
 
   const handleTabChange = (newValue: TabValues) => {

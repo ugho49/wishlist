@@ -26,7 +26,7 @@ export class UpdateEventUseCase {
     const event = await this.eventRepository.findByIdOrFail(input.eventId)
 
     if (!event.canEdit(input.currentUser)) {
-      throw new UnauthorizedException('Only maintainers of the event can update it')
+      throw new UnauthorizedException('Only creators and admins of the event can update it')
     }
 
     const updatedEvent = event.update({

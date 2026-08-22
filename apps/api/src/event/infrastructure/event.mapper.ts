@@ -68,8 +68,9 @@ function toGqlEvent(event: Event): GqlEvent {
 
 function toGqlEventAttendee(eventAttendee: EventAttendee): GqlEventAttendee {
   const role = match(eventAttendee.role)
-    .with(AttendeeRole.MAINTAINER, () => GqlAttendeeRole.Maintainer)
-    .with(AttendeeRole.USER, () => GqlAttendeeRole.User)
+    .with(AttendeeRole.CREATOR, () => GqlAttendeeRole.Creator)
+    .with(AttendeeRole.ADMIN, () => GqlAttendeeRole.Admin)
+    .with(AttendeeRole.PARTICIPANT, () => GqlAttendeeRole.Participant)
     .exhaustive()
 
   return {
@@ -83,8 +84,9 @@ function toGqlEventAttendee(eventAttendee: EventAttendee): GqlEventAttendee {
 
 function toGqlEventAttendeeFromDto(attendee: AttendeeDto): GqlEventAttendee {
   const role = match(attendee.role)
-    .with(AttendeeRole.MAINTAINER, () => GqlAttendeeRole.Maintainer)
-    .with(AttendeeRole.USER, () => GqlAttendeeRole.User)
+    .with(AttendeeRole.CREATOR, () => GqlAttendeeRole.Creator)
+    .with(AttendeeRole.ADMIN, () => GqlAttendeeRole.Admin)
+    .with(AttendeeRole.PARTICIPANT, () => GqlAttendeeRole.Participant)
     .exhaustive()
 
   return {

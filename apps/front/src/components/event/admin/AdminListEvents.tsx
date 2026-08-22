@@ -30,13 +30,13 @@ const columns: GridColDef<AdminEventListItem>[] = [
     renderCell: ({ value }) => DateTime.fromJSDate(value).toLocaleString(DateTime.DATE_SHORT),
   },
   {
-    field: 'maintainer',
-    headerName: 'Maintainer',
+    field: 'creator',
+    headerName: 'Créateur',
     width: 170,
     valueGetter: (_, row) => {
-      const maintainer = row.attendees.find(attendee => attendee.role === AttendeeRole.Maintainer)?.user
-      if (!maintainer) return 'Unknown'
-      return `${maintainer.firstName} ${maintainer.lastName}`
+      const creator = row.attendees.find(attendee => attendee.role === AttendeeRole.Creator)?.user
+      if (!creator) return 'Unknown'
+      return `${creator.firstName} ${creator.lastName}`
     },
   },
   {

@@ -3,8 +3,8 @@ import type { AttendeeId, EventId, SecretSantaUserId } from '@wishlist/common'
 import { zodResolver } from '@hookform/resolvers/zod'
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import DeleteIcon from '@mui/icons-material/Delete'
-import LocalPoliceOutlinedIcon from '@mui/icons-material/LocalPoliceOutlined'
 import SaveIcon from '@mui/icons-material/Save'
+import WorkspacePremiumOutlinedIcon from '@mui/icons-material/WorkspacePremiumOutlined'
 import { Alert, Box, Button, List, ListItem, ListItemIcon, ListItemText, Stack, TextField } from '@mui/material'
 import { styled, useTheme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
@@ -209,9 +209,9 @@ export const AdminEventPage = ({ eventId }: AdminEventPageProps) => {
       .exhaustive()
   }
 
-  const maintainerName = useMemo(() => {
+  const creatorName = useMemo(() => {
     if (!event) return ''
-    const user = event.attendees.find(attendee => attendee.role === AttendeeRole.Maintainer)
+    const user = event.attendees.find(attendee => attendee.role === AttendeeRole.Creator)
     if (!user) return ''
     return `${user.user?.firstName} ${user.user?.lastName}`
   }, [event])
@@ -267,9 +267,9 @@ export const AdminEventPage = ({ eventId }: AdminEventPageProps) => {
               <List dense sx={{ flexGrow: 1 }}>
                 <ListItem>
                   <ListItemIcon>
-                    <LocalPoliceOutlinedIcon />
+                    <WorkspacePremiumOutlinedIcon />
                   </ListItemIcon>
-                  <ListItemText primary="Maintenu par" secondary={maintainerName} />
+                  <ListItemText primary="Créé par" secondary={creatorName} />
                 </ListItem>
               </List>
 

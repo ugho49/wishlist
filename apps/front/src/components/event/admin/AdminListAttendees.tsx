@@ -93,7 +93,7 @@ export const AdminListAttendees = ({ attendees, deleteAttendee, loading = false 
                   confirmTitle="Supprimer le participant"
                   confirmText="Êtes-vous sûr de vouloir supprimer ce participant ?"
                   onClick={() => deleteAttendee(row.id)}
-                  disabled={row.role === AttendeeRole.Maintainer || loading}
+                  disabled={row.role === AttendeeRole.Creator || loading}
                   size="small"
                   color="error"
                 >
