@@ -2,9 +2,14 @@ import type { EventId, UserId } from '@wishlist/common'
 
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard'
 import { Avatar, alpha, Box, Stack, styled, useMediaQuery } from '@mui/material'
+import { DateTime } from 'luxon'
+import { useCallback, useRef, useState } from 'react'
 
 import { useMySecretSantaDraw, useSecretSantaDrawReveal } from '../../hooks'
 import { SecretSantaBaubleScratch } from './SecretSantaBaubleScratch'
+
+const EASTER_EGG_CLICKS = 4
+const EASTER_EGG_CLICK_MS = 450
 
 const Container = styled(Stack)(({ theme }) => ({
   padding: '12px',
@@ -18,6 +23,7 @@ const Container = styled(Stack)(({ theme }) => ({
   textAlign: 'left',
   borderLeft: '8px solid #2f7d31',
   gap: '16px',
+  userSelect: 'none',
 }))
 
 const IconWrapper = styled('div')({
@@ -62,13 +68,28 @@ const DescriptionText = styled(Box)(({ theme }) => ({
 
 type MySecretSantaDrawProps = {
   eventId: EventId
+  eventTitle: string
+  eventDate: string
   currentUserId?: UserId
 }
 
-export const MySecretSantaDraw = ({ eventId, currentUserId }: MySecretSantaDrawProps) => {
+export const MySecretSantaDraw = ({ eventId, eventTitle, eventDate, currentUserId }: MySecretSantaDrawProps) => {
   const { mySecretSantaDraw: draw } = useMySecretSantaDraw(eventId)
   const { isRevealed, markRevealed } = useSecretSantaDrawReveal(eventId, currentUserId)
   const prefersReducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)')
+  const [replayScratch, setReplayScratch] = useState(false)
+  const clickStreakRef = useRef({ count: 0, lastAt: 0 })
+
+  const handleBannerClick = useCallback(() => {
+    const now = Date.now()
+    const { count, lastAt } = clickStreakRef.current
+    const nextCount = now - lastAt > EASTER_EGG_CLICK_MS ? 1 : count + 1
+    clickStreakRef.current = { count: nextCount, lastAt: now }
+    if (nextCount >= EASTER_EGG_CLICKS) {
+      clickStreakRef.current = { count: 0, lastAt: 0 }
+      setReplayScratch(true)
+    }
+  }, [])
 
   if (!draw) {
     return
@@ -76,25 +97,43 @@ export const MySecretSantaDraw = ({ eventId, currentUserId }: MySecretSantaDrawP
 
   const displayName = draw.pendingEmail ? draw.pendingEmail : `${draw.user?.firstName} ${draw.user?.lastName}`
   const pictureUrl = draw.user?.pictureUrl ?? undefined
-  const showScratch = Boolean(currentUserId) && !isRevealed && !prefersReducedMotion
+  const eventIsPast = DateTime.fromISO(eventDate).startOf('day') < DateTime.now().startOf('day')
+  const firstVisitScratch = Boolean(currentUserId) && !isRevealed && !prefersReducedMotion && !eventIsPast
 
-  if (showScratch) {
-    return <SecretSantaBaubleScratch displayName={displayName} pictureUrl={pictureUrl} onRevealed={markRevealed} />
+  if (firstVisitScratch) {
+    return (
+      <SecretSantaBaubleScratch
+        displayName={displayName}
+        eventTitle={eventTitle}
+        pictureUrl={pictureUrl}
+        onRevealed={markRevealed}
+      />
+    )
   }
 
   return (
-    <Container direction="row" alignItems="flex-start">
-      <IconWrapper>
-        <CardGiftcardIcon fontSize="small" />
-      </IconWrapper>
-      <Stack direction="column" sx={{ flex: 1 }}>
-        <InfoRow>
-          <InfoText>Votre Secret Santa est :</InfoText>
-          <StyledAvatar src={pictureUrl} />
-          <DrawName>{displayName}</DrawName>
-        </InfoRow>
-        <DescriptionText>Vous devez offrir un cadeau à cette personne lors de l'événement !</DescriptionText>
-      </Stack>
-    </Container>
+    <>
+      {replayScratch && (
+        <SecretSantaBaubleScratch
+          displayName={displayName}
+          eventTitle={eventTitle}
+          pictureUrl={pictureUrl}
+          onRevealed={() => setReplayScratch(false)}
+        />
+      )}
+      <Container direction="row" alignItems="flex-start" onClick={handleBannerClick}>
+        <IconWrapper>
+          <CardGiftcardIcon fontSize="small" />
+        </IconWrapper>
+        <Stack direction="column" sx={{ flex: 1 }}>
+          <InfoRow>
+            <InfoText>Votre Secret Santa est :</InfoText>
+            <StyledAvatar src={pictureUrl} />
+            <DrawName>{displayName}</DrawName>
+          </InfoRow>
+          <DescriptionText>Vous devez offrir un cadeau à cette personne lors de l'événement !</DescriptionText>
+        </Stack>
+      </Container>
+    </>
   )
 }
