@@ -1,7 +1,7 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: vitest*/
-import 'vitest'
+import 'vitest';
 
-import type CustomMatchers from 'jest-extended'
+import type CustomMatchers from 'jest-extended';
 
 declare module 'vitest' {
   interface Assertion<T = any> extends CustomMatchers<T> {}

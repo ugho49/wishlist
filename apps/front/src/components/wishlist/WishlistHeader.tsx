@@ -1,11 +1,11 @@
-import type { FilterType, SortType } from './WishlistFilterAndSortItems'
-import type { DetailedWishlist } from './wishlist.types'
+import type { FilterType, SortType } from './WishlistFilterAndSortItems';
+import type { DetailedWishlist } from './wishlist.types';
 
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
-import EditIcon from '@mui/icons-material/Edit'
-import FilterListIcon from '@mui/icons-material/FilterList'
-import PublicIcon from '@mui/icons-material/Public'
-import SortIcon from '@mui/icons-material/Sort'
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import EditIcon from '@mui/icons-material/Edit';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import PublicIcon from '@mui/icons-material/Public';
+import SortIcon from '@mui/icons-material/Sort';
 import {
   Box,
   Button,
@@ -19,14 +19,14 @@ import {
   styled,
   Tooltip,
   Typography,
-} from '@mui/material'
-import { useNavigate } from '@tanstack/react-router'
-import { useCallback, useState } from 'react'
+} from '@mui/material';
+import { useNavigate } from '@tanstack/react-router';
+import { useCallback, useState } from 'react';
 
-import { getAvatarUrl } from '../../utils/wishlist.utils'
-import { ImportItemsButton } from './ImportItemsButton'
-import { WishlistAvatar } from './WishlistAvatar'
-import { filterOptions, sortOptions } from './WishlistFilterAndSortItems'
+import { getAvatarUrl } from '../../utils/wishlist.utils';
+import { ImportItemsButton } from './ImportItemsButton';
+import { WishlistAvatar } from './WishlistAvatar';
+import { filterOptions, sortOptions } from './WishlistFilterAndSortItems';
 
 const HeaderContent = styled(Box)(({ theme }) => ({
   display: 'flex',
@@ -40,20 +40,20 @@ const HeaderContent = styled(Box)(({ theme }) => ({
     flexDirection: 'column',
     gap: theme.spacing(2),
   },
-}))
+}));
 
 const LeftSection = styled(Stack)(({ theme }) => ({
   flexDirection: 'row',
   gap: theme.spacing(3),
   alignItems: 'center',
   flex: 1,
-}))
+}));
 
 const TitleContainer = styled(Stack)(({ theme }) => ({
   gap: theme.spacing(1),
   flex: 1,
   minWidth: 0,
-}))
+}));
 
 const WishlistTitle = styled(Box)(({ theme }) => ({
   fontWeight: 400,
@@ -69,7 +69,7 @@ const WishlistTitle = styled(Box)(({ theme }) => ({
   [theme.breakpoints.up('md')]: {
     fontSize: '1.5rem',
   },
-}))
+}));
 
 const EventInfoBox = styled(Box)(({ theme }) => ({
   display: 'flex',
@@ -80,14 +80,14 @@ const EventInfoBox = styled(Box)(({ theme }) => ({
   '&:hover': {
     color: theme.palette.primary.main,
   },
-}))
+}));
 
 const PublicIndicatorBox = styled(Box)(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   gap: theme.spacing(0.5),
   color: theme.palette.text.secondary,
-}))
+}));
 
 const MetadataStack = styled(Stack)(({ theme }) => ({
   flexDirection: 'row',
@@ -99,7 +99,7 @@ const MetadataStack = styled(Stack)(({ theme }) => ({
     flexDirection: 'column',
     gap: theme.spacing(1),
   },
-}))
+}));
 
 const RightSection = styled(Box)(({ theme }) => ({
   flexShrink: 0,
@@ -110,7 +110,7 @@ const RightSection = styled(Box)(({ theme }) => ({
     width: '100%',
     justifyContent: 'center',
   },
-}))
+}));
 
 const UpdateButton = styled(Button)(({ theme }) => ({
   textTransform: 'none',
@@ -118,7 +118,7 @@ const UpdateButton = styled(Button)(({ theme }) => ({
   fontSize: '0.875rem',
   padding: theme.spacing(1, 2),
   border: `1px solid ${theme.palette.divider}`,
-}))
+}));
 
 const CompactIconButton = styled(IconButton)(({ theme }) => ({
   border: `1px solid ${theme.palette.divider}`,
@@ -126,20 +126,20 @@ const CompactIconButton = styled(IconButton)(({ theme }) => ({
   padding: theme.spacing(1),
   height: '40px',
   width: '40px',
-}))
+}));
 
 export type WishlistHeaderProps = {
-  wishlist: DetailedWishlist
-  currentUserCanEdit: boolean
-  isPublic: boolean
-  hasImportableItems: boolean
-  sort: SortType
-  filter: FilterType
-  onSortChange: (sort: SortType) => void
-  onFilterChange: (filter: FilterType) => void
-  onOpenEventDialog: () => void
-  onOpenImportDialog: () => void
-}
+  wishlist: DetailedWishlist;
+  currentUserCanEdit: boolean;
+  isPublic: boolean;
+  hasImportableItems: boolean;
+  sort: SortType;
+  filter: FilterType;
+  onSortChange: (sort: SortType) => void;
+  onFilterChange: (filter: FilterType) => void;
+  onOpenEventDialog: () => void;
+  onOpenImportDialog: () => void;
+};
 
 export const WishlistHeader = ({
   wishlist,
@@ -153,43 +153,43 @@ export const WishlistHeader = ({
   onOpenEventDialog,
   onOpenImportDialog,
 }: WishlistHeaderProps) => {
-  const [sortAnchorEl, setSortAnchorEl] = useState<null | HTMLElement>(null)
-  const [filterAnchorEl, setFilterAnchorEl] = useState<null | HTMLElement>(null)
-  const navigate = useNavigate()
+  const [sortAnchorEl, setSortAnchorEl] = useState<null | HTMLElement>(null);
+  const [filterAnchorEl, setFilterAnchorEl] = useState<null | HTMLElement>(null);
+  const navigate = useNavigate();
   const handleNavigateToEdit = useCallback(() => {
-    void navigate({ to: '/wishlists/$wishlistId/edit', params: { wishlistId: wishlist.id } })
-  }, [navigate, wishlist])
+    void navigate({ to: '/wishlists/$wishlistId/edit', params: { wishlistId: wishlist.id } });
+  }, [navigate, wishlist]);
 
-  const sortMenuOpen = Boolean(sortAnchorEl)
-  const filterMenuOpen = Boolean(filterAnchorEl)
+  const sortMenuOpen = Boolean(sortAnchorEl);
+  const filterMenuOpen = Boolean(filterAnchorEl);
 
   const handleOpenSortMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setSortAnchorEl(event.currentTarget)
-  }
+    setSortAnchorEl(event.currentTarget);
+  };
 
   const handleCloseSortMenu = () => {
-    setSortAnchorEl(null)
-  }
+    setSortAnchorEl(null);
+  };
 
   const handleOpenFilterMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setFilterAnchorEl(event.currentTarget)
-  }
+    setFilterAnchorEl(event.currentTarget);
+  };
 
   const handleCloseFilterMenu = () => {
-    setFilterAnchorEl(null)
-  }
+    setFilterAnchorEl(null);
+  };
 
   const handleSortChange = (newSort: SortType) => {
-    onSortChange(newSort)
-    handleCloseSortMenu()
-  }
+    onSortChange(newSort);
+    handleCloseSortMenu();
+  };
 
   const handleFilterChange = (newFilter: FilterType) => {
-    onFilterChange(newFilter)
-    handleCloseFilterMenu()
-  }
+    onFilterChange(newFilter);
+    handleCloseFilterMenu();
+  };
 
-  const hasActiveFilter = filter !== ''
+  const hasActiveFilter = filter !== '';
 
   return (
     <Container maxWidth="lg">
@@ -252,7 +252,7 @@ export const WishlistHeader = ({
             <CompactIconButton
               size="small"
               onClick={handleOpenSortMenu}
-              color={sort !== 'name_asc' ? 'primary' : 'default'}
+              color={sort === 'name_asc' ? 'default' : 'primary'}
             >
               <SortIcon fontSize="small" />
             </CompactIconButton>
@@ -333,5 +333,5 @@ export const WishlistHeader = ({
         ))}
       </Menu>
     </Container>
-  )
-}
+  );
+};

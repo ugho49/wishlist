@@ -1,7 +1,7 @@
-import type { EventId } from '@wishlist/common'
-import type { WishlistEvent } from './wishlist.types'
+import type { EventId } from '@wishlist/common';
+import type { WishlistEvent } from './wishlist.types';
 
-import CloseIcon from '@mui/icons-material/Close'
+import CloseIcon from '@mui/icons-material/Close';
 import {
   Button,
   Dialog,
@@ -14,19 +14,19 @@ import {
   ListItemButton,
   ListItemText,
   Stack,
-} from '@mui/material'
-import { useNavigate } from '@tanstack/react-router'
-import { DateTime } from 'luxon'
+} from '@mui/material';
+import { useNavigate } from '@tanstack/react-router';
+import { DateTime } from 'luxon';
 
-import { RouterLink } from '../common/RouterLink'
-import { EventIcon } from '../event/EventIcon'
+import { RouterLink } from '../common/RouterLink';
+import { EventIcon } from '../event/EventIcon';
 
 export interface EventDialogProps {
-  open: boolean
-  handleClose: () => void
-  events: WishlistEvent[]
-  wishlistId: string
-  currentUserCanEdit: boolean
+  open: boolean;
+  handleClose: () => void;
+  events: WishlistEvent[];
+  wishlistId: string;
+  currentUserCanEdit: boolean;
 }
 
 export const WishlistEventsDialog = ({
@@ -36,11 +36,11 @@ export const WishlistEventsDialog = ({
   wishlistId,
   currentUserCanEdit,
 }: EventDialogProps) => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const handleEventClick = (eventId: EventId) => {
-    void navigate({ to: '/events/$eventId', params: { eventId } })
-  }
+    void navigate({ to: '/events/$eventId', params: { eventId } });
+  };
 
   return (
     <Dialog onClose={() => handleClose()} open={open}>
@@ -75,5 +75,5 @@ export const WishlistEventsDialog = ({
         </DialogActions>
       )}
     </Dialog>
-  )
-}
+  );
+};

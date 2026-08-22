@@ -1,75 +1,75 @@
-import type { Element } from 'domhandler'
+import type { Element } from 'domhandler';
 
-import { Injectable, Logger } from '@nestjs/common'
-import { ScanItemOutputDto } from '@wishlist/common'
-import { type Cheerio, load as loadHtml } from 'cheerio'
+import { Injectable, Logger } from '@nestjs/common';
+import { ScanItemOutputDto } from '@wishlist/common';
+import { type Cheerio, load as loadHtml } from 'cheerio';
 
 export type ScanItemUrlInput = {
-  url: string
-}
+  url: string;
+};
 
 @Injectable()
 export class ScanItemUrlUseCase {
-  private readonly logger = new Logger(ScanItemUrlUseCase.name)
+  private readonly logger = new Logger(ScanItemUrlUseCase.name);
 
   async execute(query: ScanItemUrlInput): Promise<ScanItemOutputDto> {
-    const picture_url = await this.scanUrl(query.url)
-    return { picture_url }
+    const picture_url = await this.scanUrl(query.url);
+    return { picture_url };
   }
 
   private async scanUrl(url: string) {
     try {
-      this.logger.log('Scrap img for => ', { url })
+      this.logger.log('Scrap img for => ', { url });
 
-      const response = await this.fetch(url, { timeout: 3_000, method: 'GET' })
-      const html = await response.text()
+      const response = await this.fetch(url, { timeout: 3_000, method: 'GET' });
+      const html = await response.text();
 
       if (!html) {
-        this.logger.warn('No html found')
-        return null
+        this.logger.warn('No html found');
+        return null;
       }
 
       if (this.hasBotDetection(html)) {
-        this.logger.log('Bot detection detected.')
-        return null
+        this.logger.log('Bot detection detected.');
+        return null;
       }
 
       // Charger le contenu HTML dans Cheerio
-      const $ = loadHtml(html)
+      const $ = loadHtml(html);
 
-      const title = $('title').text().trim()
-      const mainImageElement = $('[property="og:image"], [name="og:image"]')
+      const title = $('title').text().trim();
+      const mainImageElement = $('[property="og:image"], [name="og:image"]');
 
-      const ogImageUrl = mainImageElement.attr('content') || mainImageElement.attr('src')
+      const ogImageUrl = mainImageElement.attr('content') || mainImageElement.attr('src');
 
       if (ogImageUrl) {
-        return await this.sanitizeAndCheckUrl({ imageUrl: ogImageUrl, websiteUrl: url })
+        return await this.sanitizeAndCheckUrl({ imageUrl: ogImageUrl, websiteUrl: url });
       }
 
-      let titleImageElements: Cheerio<Element> = $(`img[alt*="${title}"]`)
+      let titleImageElements: Cheerio<Element> = $(`img[alt*="${title}"]`);
       if (titleImageElements.length === 0) {
-        titleImageElements = $(`img[alt*="${title.split(' : Amazon')[0]}"]`)
+        titleImageElements = $(`img[alt*="${title.split(' : Amazon')[0]}"]`);
       }
       if (titleImageElements.length === 0) {
-        titleImageElements = $(`img[alt*="${title.substring(0, 20)}"]`)
+        titleImageElements = $(`img[alt*="${title.substring(0, 20)}"]`);
       }
-      const titleImageUrl = this.getBiggestImage(titleImageElements)
+      const titleImageUrl = this.getBiggestImage(titleImageElements);
 
       if (titleImageUrl) {
-        return await this.sanitizeAndCheckUrl({ imageUrl: titleImageUrl, websiteUrl: url })
+        return await this.sanitizeAndCheckUrl({ imageUrl: titleImageUrl, websiteUrl: url });
       }
 
-      this.logger.log('Aucune image principale trouvée.', response)
-      return null
+      this.logger.log('Aucune image principale trouvée.', response);
+      return null;
     } catch (error) {
-      this.logger.error("Une erreur s'est produite lors de la récupération de l'image:", error)
-      return null
+      this.logger.error("Une erreur s'est produite lors de la récupération de l'image:", error);
+      return null;
     }
   }
 
   private async fetch(url: string, { timeout, method } = { timeout: 1_500, method: 'GET' }) {
-    const controller = new AbortController()
-    const id = setTimeout(() => controller.abort(), timeout)
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
     try {
       return await fetch(url, {
         signal: controller.signal,
@@ -91,17 +91,17 @@ export class ScanItemUrlUseCase {
           'Sec-Fetch-Site': 'none',
           'Sec-Fetch-User': '?1',
         },
-      })
+      });
     } catch {
-      throw new Error(`Timeout: ${timeout}ms`)
+      throw new Error(`Timeout: ${timeout}ms`);
     } finally {
-      clearTimeout(id)
+      clearTimeout(id);
     }
   }
 
   private baseHostname(url: string) {
-    const url1 = new URL(url)
-    return `${url1.protocol}//${url1.hostname}`
+    const url1 = new URL(url);
+    return `${url1.protocol}//${url1.hostname}`;
   }
 
   private getRandomUA(): string {
@@ -149,48 +149,48 @@ export class ScanItemUrlUseCase {
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36 OPR/76.0.4017.123',
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36 OPR/77.0.4054.64',
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36 OPR/77.0.4054.64',
-    ]
+    ];
 
-    const randomIndex = Math.floor(Math.random() * UAs.length)
-    return UAs[randomIndex]!
+    const randomIndex = Math.floor(Math.random() * UAs.length);
+    return UAs[randomIndex]!;
   }
 
   // Fonction pour extraire la partie de droite de l'URL
   private extractRightPart(url: string) {
-    const lastHttpIndex = url.lastIndexOf('http')
+    const lastHttpIndex = url.lastIndexOf('http');
     if (lastHttpIndex !== -1) {
-      return url.substring(lastHttpIndex)
+      return url.substring(lastHttpIndex);
     }
-    return url
+    return url;
   }
 
   private isValidUrl(url: string) {
     try {
-      new URL(url)
-      return true
+      new URL(url);
+      return true;
     } catch {
-      return false
+      return false;
     }
   }
 
   private sanitizeAndCheckUrl(params: { imageUrl: string; websiteUrl: string }) {
-    let sanitizedImageUrl = params.imageUrl
+    let sanitizedImageUrl = params.imageUrl;
 
     if (sanitizedImageUrl.startsWith('//')) {
-      sanitizedImageUrl = `https:${sanitizedImageUrl}`
+      sanitizedImageUrl = `https:${sanitizedImageUrl}`;
     }
 
     if (sanitizedImageUrl.startsWith('/')) {
-      const baseWebsiteUrl = this.baseHostname(params.websiteUrl)
-      sanitizedImageUrl = `${baseWebsiteUrl}${sanitizedImageUrl}`
+      const baseWebsiteUrl = this.baseHostname(params.websiteUrl);
+      sanitizedImageUrl = `${baseWebsiteUrl}${sanitizedImageUrl}`;
     }
 
-    sanitizedImageUrl = decodeURIComponent(sanitizedImageUrl)
+    sanitizedImageUrl = decodeURIComponent(sanitizedImageUrl);
 
     // Extraire la partie de droite de l'URL
-    const rightPart = this.extractRightPart(sanitizedImageUrl)
+    const rightPart = this.extractRightPart(sanitizedImageUrl);
 
-    this.logger.log('Image principale trouvée:', rightPart)
+    this.logger.log('Image principale trouvée:', rightPart);
 
     // Vérifier si l'image est accessible
     // const imageResponse = await this.fetch(rightPart, { method: 'HEAD', timeout: 1_500 });
@@ -199,9 +199,9 @@ export class ScanItemUrlUseCase {
     //   return null;
     // }
 
-    this.logger.log("L'image est accessible.")
+    this.logger.log("L'image est accessible.");
 
-    return rightPart
+    return rightPart;
   }
 
   private hasBotDetection(html: string) {
@@ -209,22 +209,22 @@ export class ScanItemUrlUseCase {
       '<title>Attention Required! | Cloudflare</title>',
       '<p id="cmsg">Please enable JS and disable any ad blocker</p>',
       'To discuss automated access to Amazon data please contact api-services-support@amazon.com.',
-    ]
-    return keywords.some(keyword => html.includes(keyword))
+    ];
+    return keywords.some(keyword => html.includes(keyword));
   }
 
   private getBiggestImage(titleImageElements: Cheerio<Element>) {
-    if (titleImageElements.length === 0) return null
+    if (titleImageElements.length === 0) return null;
 
     const imgUrls = titleImageElements
       .toArray()
       .map(element => {
-        const url = element.attribs['data-src'] || element.attribs['src']
-        const path = this.isValidUrl(url!) ? new URL(url!).pathname : url
-        return { url, path }
+        const url = element.attribs['data-src'] || element.attribs['src'];
+        const path = this.isValidUrl(url!) ? new URL(url!).pathname : url;
+        return { url, path };
       })
-      .sort((a, b) => a.path!.localeCompare(b.path!))
+      .sort((a, b) => a.path!.localeCompare(b.path!));
 
-    return imgUrls[0]!.url
+    return imgUrls[0]!.url;
   }
 }

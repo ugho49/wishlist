@@ -1,11 +1,12 @@
-import type { ICurrentUser, WishlistId } from '@wishlist/common'
+import type { ICurrentUser, WishlistId } from '@wishlist/common';
 
-import { Logger } from '@nestjs/common'
-import { Args, Context, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
-import { GqlCurrentUser } from '@wishlist/api/auth'
-import { type GraphQLContext, ZodPipe } from '@wishlist/api/core'
-import { type ItemId, type UserId } from '@wishlist/common'
+import { Logger } from '@nestjs/common';
+import { Args, Context, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
+import { type ItemId, type UserId } from '@wishlist/common';
 
+import { GqlCurrentUser } from '../../auth/infrastructure/decorators/user.decorator';
+import { type GraphQLContext } from '../../core/graphql/graphql.context';
+import { ZodPipe } from '../../core/graphql/zod-pipe';
 import {
   type CreateItemInput,
   type CreateItemResult,
@@ -20,15 +21,15 @@ import {
   type UpdateItemInput,
   type UpdateItemResult,
   type User,
-} from '../../gql/generated-types'
-import { CreateItemUseCase } from '../application/command/create-item.use-case'
-import { DeleteItemUseCase } from '../application/command/delete-item.use-case'
-import { ImportItemsUseCase } from '../application/command/import-items.use-case'
-import { ToggleItemUseCase } from '../application/command/toggle-item.use-case'
-import { UpdateItemUseCase } from '../application/command/update-item.use-case'
-import { GetImportableItemsUseCase } from '../application/query/get-importable-items.use-case'
-import { ScanItemUrlUseCase } from '../application/query/scan-item-url.use-case'
-import { itemMapper } from './item.mapper'
+} from '../../gql/generated-types';
+import { CreateItemUseCase } from '../application/command/create-item.use-case';
+import { DeleteItemUseCase } from '../application/command/delete-item.use-case';
+import { ImportItemsUseCase } from '../application/command/import-items.use-case';
+import { ToggleItemUseCase } from '../application/command/toggle-item.use-case';
+import { UpdateItemUseCase } from '../application/command/update-item.use-case';
+import { GetImportableItemsUseCase } from '../application/query/get-importable-items.use-case';
+import { ScanItemUrlUseCase } from '../application/query/scan-item-url.use-case';
+import { itemMapper } from './item.mapper';
 import {
   CreateItemInputSchema,
   ImportItemsInputSchema,
@@ -36,20 +37,20 @@ import {
   ScanItemUrlInputSchema,
   UpdateItemInputSchema,
   WishlistIdSchema,
-} from './item.schema'
+} from './item.schema';
 
 @Resolver('ItemTaker')
 export class ItemTakerFieldResolver {
-  private readonly logger = new Logger(ItemTakerFieldResolver.name)
+  private readonly logger = new Logger(ItemTakerFieldResolver.name);
 
   @ResolveField()
   async user(@Parent() taker: ItemTaker, @Context() ctx: GraphQLContext): Promise<User | undefined> {
-    const user = await ctx.loaders.user.load(taker.userId as UserId)
+    const user = await ctx.loaders.user.load(taker.userId as UserId);
     if (!user) {
-      this.logger.warn('Taker user not found', { userId: taker.userId })
-      return undefined
+      this.logger.warn('Taker user not found', { userId: taker.userId });
+      return undefined;
     }
-    return user
+    return user;
   }
 }
 
@@ -70,12 +71,12 @@ export class ItemResolver {
     @Args('wishlistId', new ZodPipe(WishlistIdSchema)) wishlistId: WishlistId,
     @GqlCurrentUser() currentUser: ICurrentUser,
   ): Promise<GetImportableItemsOutput> {
-    const items = await this.getImportableItemsUseCase.execute({ userId: currentUser.id, wishlistId })
+    const items = await this.getImportableItemsUseCase.execute({ userId: currentUser.id, wishlistId });
 
     return {
       __typename: 'GetImportableItemsOutput',
       items: items.map(item => itemMapper.toGqlItem({ item, displayUserAndSuggested: false })),
-    }
+    };
   }
 
   @Mutation()
@@ -87,12 +88,12 @@ export class ItemResolver {
       currentUser,
       wishlistId: input.wishlistId,
       sourceItemIds: input.sourceItemIds,
-    })
+    });
 
     return {
       __typename: 'ImportItemsOutput',
       items: items.map(item => itemMapper.toGqlItem({ item, displayUserAndSuggested: false })),
-    }
+    };
   }
 
   @Mutation()
@@ -110,9 +111,9 @@ export class ItemResolver {
         url: input.url ?? undefined,
         pictureUrl: input.pictureUrl ?? undefined,
       },
-    })
+    });
 
-    return itemMapper.toGqlItem({ item, displayUserAndSuggested: true })
+    return itemMapper.toGqlItem({ item, displayUserAndSuggested: true });
   }
 
   @Mutation()
@@ -131,9 +132,9 @@ export class ItemResolver {
         url: input.url ?? undefined,
         pictureUrl: input.pictureUrl ?? undefined,
       },
-    })
+    });
 
-    return { __typename: 'VoidOutput', success: true }
+    return { __typename: 'VoidOutput', success: true };
   }
 
   @Mutation()
@@ -141,8 +142,8 @@ export class ItemResolver {
     @Args('itemId', new ZodPipe(ItemIdSchema)) itemId: ItemId,
     @GqlCurrentUser() currentUser: ICurrentUser,
   ): Promise<DeleteItemResult> {
-    await this.deleteItemUseCase.execute({ itemId, currentUser })
-    return { __typename: 'VoidOutput', success: true }
+    await this.deleteItemUseCase.execute({ itemId, currentUser });
+    return { __typename: 'VoidOutput', success: true };
   }
 
   @Mutation()
@@ -150,7 +151,7 @@ export class ItemResolver {
     @Args('itemId', new ZodPipe(ItemIdSchema)) itemId: ItemId,
     @GqlCurrentUser() currentUser: ICurrentUser,
   ): Promise<ToggleItemResult> {
-    const result = await this.toggleItemUseCase.execute({ itemId, currentUser })
+    const result = await this.toggleItemUseCase.execute({ itemId, currentUser });
 
     return {
       __typename: 'ToggleItemOutput',
@@ -159,18 +160,18 @@ export class ItemResolver {
         userId: taker.user.id,
         takenAt: taker.taken_at,
       })),
-    }
+    };
   }
 
   @Mutation()
   async scanItemUrl(
     @Args('input', new ZodPipe(ScanItemUrlInputSchema)) input: ScanItemUrlInput,
   ): Promise<ScanItemUrlResult> {
-    const result = await this.scanItemUrlUseCase.execute({ url: input.url })
+    const result = await this.scanItemUrlUseCase.execute({ url: input.url });
 
     return {
       __typename: 'ScanItemUrlOutput',
       pictureUrl: result.picture_url,
-    }
+    };
   }
 }

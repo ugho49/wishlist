@@ -1,27 +1,27 @@
-import type { RootState } from '../core'
+import type { RootState } from '../core/store';
 
-import { GoogleOAuthProvider } from '@react-oauth/google'
-import { createRootRoute, Navigate, Outlet } from '@tanstack/react-router'
-import { FeatureFlags } from '@wishlist/common'
-import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { useEffect } from 'react'
-import { useSelector } from 'react-redux'
+import { GoogleOAuthProvider } from '@react-oauth/google';
+import { createRootRoute, Navigate, Outlet } from '@tanstack/react-router';
+import { FeatureFlags } from '@wishlist/common';
+import { useLDClient } from 'launchdarkly-react-client-sdk';
+import { useEffect } from 'react';
+import { useSelector } from 'react-redux';
 
-import { MaintenancePage } from '../components/common/MaintenancePage'
-import { ScrollToTop } from '../components/common/ScrollToTop'
-import { SEO } from '../components/SEO'
-import { SessionWatcher } from '../core/router/SessionWatcher'
-import { environment } from '../environment'
-import { useFeatureFlag } from '../hooks/useFeatureFlag'
+import { MaintenancePage } from '../components/common/MaintenancePage';
+import { ScrollToTop } from '../components/common/ScrollToTop';
+import { SEO } from '../components/SEO';
+import { SessionWatcher } from '../core/router/SessionWatcher';
+import { environment } from '../environment';
+import { useFeatureFlag } from '../hooks/useFeatureFlag';
 
-const mapUserProfileState = (state: RootState) => state.userProfile
+const mapUserProfileState = (state: RootState) => state.userProfile;
 
 export const Route = createRootRoute({
   notFoundComponent: () => <Navigate to="/" />,
   component: () => {
-    const maintenancePageEnabled = useFeatureFlag(FeatureFlags.FRONTEND_MAINTENANCE_PAGE_ENABLED)
-    const ldClient = useLDClient()
-    const userProfile = useSelector(mapUserProfileState)
+    const maintenancePageEnabled = useFeatureFlag(FeatureFlags.FRONTEND_MAINTENANCE_PAGE_ENABLED);
+    const ldClient = useLDClient();
+    const userProfile = useSelector(mapUserProfileState);
 
     useEffect(() => {
       if (userProfile.isUserLoaded) {
@@ -31,13 +31,13 @@ export const Route = createRootRoute({
           email: userProfile.email,
           firstName: userProfile.firstName,
           lastName: userProfile.lastName,
-        })
+        });
       } else {
-        ldClient?.identify({ anonymous: true })
+        ldClient?.identify({ anonymous: true });
       }
-    }, [userProfile, ldClient])
+    }, [userProfile, ldClient]);
 
-    if (maintenancePageEnabled) return <MaintenancePage />
+    if (maintenancePageEnabled) return <MaintenancePage />;
 
     return (
       <>
@@ -48,6 +48,6 @@ export const Route = createRootRoute({
           <Outlet />
         </GoogleOAuthProvider>
       </>
-    )
+    );
   },
-})
+});

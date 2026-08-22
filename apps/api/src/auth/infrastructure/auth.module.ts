@@ -1,16 +1,16 @@
-import { Global, Module } from '@nestjs/common'
-import { ConfigModule, type ConfigType } from '@nestjs/config'
-import { APP_GUARD } from '@nestjs/core'
-import { JwtModule } from '@nestjs/jwt'
-import { PassportModule } from '@nestjs/passport'
+import { Global, Module } from '@nestjs/common';
+import { ConfigModule, type ConfigType } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtModule } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
 
-import { handlers } from '../application'
-import { GoogleAuthService } from '.'
-import authConfig from './auth.config'
-import { AuthController } from './auth.controller'
-import { AuthResolver } from './auth.resolver'
-import { AuthGuard } from './guards/auth.guard'
-import { JwtStrategy } from './strategies/jwt.strategy'
+import { handlers } from '../application';
+import authConfig from './auth.config';
+import { AuthController } from './auth.controller';
+import { AuthResolver } from './auth.resolver';
+import { AuthGuard } from './guards/auth.guard';
+import { GoogleAuthService } from './social/google-auth.service';
+import { JwtStrategy } from './strategies/jwt.strategy';
 
 @Global()
 @Module({

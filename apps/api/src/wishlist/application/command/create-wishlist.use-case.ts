@@ -1,28 +1,30 @@
-import { Inject, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common'
-import { BucketService } from '@wishlist/api/core'
-import { type EventRepository } from '@wishlist/api/event'
-import { REPOSITORIES } from '@wishlist/api/repositories'
-import { type UserRepository } from '@wishlist/api/user'
-import { DetailedWishlistDto, type EventId, type ICurrentUser } from '@wishlist/common'
-import { uniq } from 'lodash'
+import type { WishlistRepository } from '../../domain/wishlist.repository';
 
-import { Wishlist, type WishlistRepository } from '../../domain'
-import { wishlistMapper } from '../../infrastructure'
+import { Inject, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { DetailedWishlistDto, type EventId, type ICurrentUser } from '@wishlist/common';
+import { uniq } from 'lodash';
+
+import { BucketService } from '../../../core/bucket/bucket.service';
+import { type EventRepository } from '../../../event/domain/repository/event.repository';
+import { REPOSITORIES } from '../../../repositories/repositories.constants';
+import { type UserRepository } from '../../../user/domain/repository/user.repository';
+import { Wishlist } from '../../domain/wishlist.model';
+import { wishlistMapper } from '../../infrastructure/wishlist.mapper';
 
 export type CreateWishlistInput = {
-  currentUser: ICurrentUser
+  currentUser: ICurrentUser;
   newWishlist: {
-    title: string
-    description?: string
-    eventIds: EventId[]
-    hideItems?: boolean
-    imageFile?: Express.Multer.File
-  }
-}
+    title: string;
+    description?: string;
+    eventIds: EventId[];
+    hideItems?: boolean;
+    imageFile?: Express.Multer.File;
+  };
+};
 
 @Injectable()
 export class CreateWishlistUseCase {
-  private readonly logger = new Logger(CreateWishlistUseCase.name)
+  private readonly logger = new Logger(CreateWishlistUseCase.name);
 
   constructor(
     @Inject(REPOSITORIES.WISHLIST) private readonly wishlistRepository: WishlistRepository,
@@ -32,22 +34,22 @@ export class CreateWishlistUseCase {
   ) {}
 
   async execute(command: CreateWishlistInput): Promise<DetailedWishlistDto> {
-    this.logger.log('Create wishlist request received', { command })
+    this.logger.log('Create wishlist request received', { command });
 
-    const eventIds = uniq(command.newWishlist.eventIds)
-    const events = await this.eventRepository.findByIds(eventIds)
+    const eventIds = uniq(command.newWishlist.eventIds);
+    const events = await this.eventRepository.findByIds(eventIds);
 
     if (events.length !== eventIds.length) {
-      throw new NotFoundException('One or more events not found')
+      throw new NotFoundException('One or more events not found');
     }
 
     for (const event of events) {
       if (!event.canAddWishlist(command.currentUser.id)) {
-        throw new UnauthorizedException(`You cannot add the wishlist to the event ${event.id}`)
+        throw new UnauthorizedException(`You cannot add the wishlist to the event ${event.id}`);
       }
     }
 
-    const owner = await this.userRepository.findByIdOrFail(command.currentUser.id)
+    const owner = await this.userRepository.findByIdOrFail(command.currentUser.id);
 
     let wishlist = Wishlist.create({
       id: this.wishlistRepository.newId(),
@@ -56,25 +58,25 @@ export class CreateWishlistUseCase {
       owner,
       eventIds,
       hideItems: command.newWishlist.hideItems === undefined ? true : command.newWishlist.hideItems,
-    })
+    });
 
     if (command.newWishlist.imageFile) {
-      const fileDestination = this.bucketService.getLogoDestination(wishlist.id)
+      const fileDestination = this.bucketService.getLogoDestination(wishlist.id);
       const logoUrl = await this.bucketService.uploadFile({
         destination: fileDestination,
         file: command.newWishlist.imageFile,
-      })
+      });
 
-      wishlist = wishlist.updateLogoUrl(logoUrl)
+      wishlist = wishlist.updateLogoUrl(logoUrl);
     }
 
-    this.logger.log('Saving wishlist...', { wishlistId: wishlist.id })
-    await this.wishlistRepository.save(wishlist)
+    this.logger.log('Saving wishlist...', { wishlistId: wishlist.id });
+    await this.wishlistRepository.save(wishlist);
 
     return wishlistMapper.toDetailedWishlistDto({
       wishlist,
       currentUserId: command.currentUser.id,
       events,
-    })
+    });
   }
 }

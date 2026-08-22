@@ -1,22 +1,23 @@
-import { Inject, Injectable, Logger } from '@nestjs/common'
-import { BucketService } from '@wishlist/api/core'
-import { REPOSITORIES } from '@wishlist/api/repositories'
-import { type UserId, uuid } from '@wishlist/common'
+import type { UserRepository } from '../../domain/repository/user.repository';
 
-import { type UserRepository } from '../../domain'
+import { Inject, Injectable, Logger } from '@nestjs/common';
+import { type UserId, uuid } from '@wishlist/common';
+
+import { BucketService } from '../../../core/bucket/bucket.service';
+import { REPOSITORIES } from '../../../repositories/repositories.constants';
 
 export type UpdateUserPictureResult = {
-  pictureUrl: string
-}
+  pictureUrl: string;
+};
 
 export type UpdateUserPictureInput = {
-  userId: UserId
-  file: Express.Multer.File
-}
+  userId: UserId;
+  file: Express.Multer.File;
+};
 
 @Injectable()
 export class UpdateUserPictureUseCase {
-  private readonly logger = new Logger(UpdateUserPictureUseCase.name)
+  private readonly logger = new Logger(UpdateUserPictureUseCase.name);
 
   constructor(
     @Inject(REPOSITORIES.USER)
@@ -25,29 +26,29 @@ export class UpdateUserPictureUseCase {
   ) {}
 
   async execute(command: UpdateUserPictureInput): Promise<UpdateUserPictureResult> {
-    this.logger.log('Update user picture request received', { command })
-    const { userId, file } = command
+    this.logger.log('Update user picture request received', { command });
+    const { userId, file } = command;
 
-    const user = await this.userRepository.findByIdOrFail(userId)
+    const user = await this.userRepository.findByIdOrFail(userId);
 
     try {
-      this.logger.log('Removing user picture in bucket...', { userId })
-      await this.bucketService.removeIfExist({ destination: `pictures/${userId}/` }) // TODO: to be removed
-      await this.bucketService.removeIfExist({ destination: `pictures/users/${userId}/` })
+      this.logger.log('Removing user picture in bucket...', { userId });
+      await this.bucketService.removeIfExist({ destination: `pictures/${userId}/` }); // TODO: to be removed
+      await this.bucketService.removeIfExist({ destination: `pictures/users/${userId}/` });
     } catch (e) {
-      this.logger.error('Fail to delete existing picture for user', userId, e)
+      this.logger.error('Fail to delete existing picture for user', userId, e);
     }
 
     const publicUrl = await this.bucketService.upload({
       destination: `pictures/users/${userId}/${uuid()}`,
       data: file.buffer,
       contentType: file.mimetype,
-    })
+    });
 
-    const updatedUser = user.updatePicture(publicUrl)
-    this.logger.log('Saving user...', { userId, updatedFields: ['pictureUrl'] })
-    await this.userRepository.save(updatedUser)
+    const updatedUser = user.updatePicture(publicUrl);
+    this.logger.log('Saving user...', { userId, updatedFields: ['pictureUrl'] });
+    await this.userRepository.save(updatedUser);
 
-    return { pictureUrl: publicUrl }
+    return { pictureUrl: publicUrl };
   }
 }

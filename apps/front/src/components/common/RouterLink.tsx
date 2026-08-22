@@ -1,7 +1,7 @@
-import type { LinkComponent } from '@tanstack/react-router'
+import type { LinkComponent } from '@tanstack/react-router';
 
-import { Link } from '@mui/material'
-import { Link as TanStackLink } from '@tanstack/react-router'
+import { Link } from '@mui/material';
+import { Link as TanStackLink } from '@tanstack/react-router';
 
 /**
  * RouterLink component that combines MUI Link styling with TanStack Router navigation.
@@ -22,5 +22,5 @@ import { Link as TanStackLink } from '@tanstack/react-router'
  */
 export const RouterLink: LinkComponent<typeof Link> = props => {
   // biome-ignore lint/suspicious/noExplicitAny: MUI component prop type incompatibility with TanStack Router Link
-  return <Link {...(props as any)} component={TanStackLink} />
-}
+  return <Link {...(props as any)} component={TanStackLink} />;
+};

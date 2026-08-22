@@ -1,11 +1,11 @@
-import { Section, Text } from 'react-email'
+import { Section, Text } from 'react-email';
 
-import { EmailLayout } from '../components/layout'
-import { ButtonFallback, ContentSection, Heading, Paragraph, PrimaryButton } from '../components/ui'
-import * as styles from '../styles'
+import { EmailLayout } from '../components/layout';
+import { ButtonFallback, ContentSection, Heading, Paragraph, PrimaryButton } from '../components/ui';
+import * as styles from '../styles';
 
 export interface WelcomeUserEmailProps {
-  readonly mainUrl: string
+  readonly mainUrl: string;
 }
 
 export default function WelcomeUserEmail({ mainUrl }: WelcomeUserEmailProps) {
@@ -59,9 +59,9 @@ export default function WelcomeUserEmail({ mainUrl }: WelcomeUserEmailProps) {
         <ButtonFallback href={mainUrl} />
       </Section>
     </EmailLayout>
-  )
+  );
 }
 
 WelcomeUserEmail.PreviewProps = {
   mainUrl: 'https://wishlistapp.fr',
-} satisfies WelcomeUserEmailProps
+} satisfies WelcomeUserEmailProps;

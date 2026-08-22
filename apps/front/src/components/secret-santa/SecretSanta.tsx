@@ -1,26 +1,26 @@
-import type { SecretSantaUserId } from '@wishlist/common'
-import type { SecretSantaFormInput } from './EditSecretSantaFormDialog'
-import type { SecretSantaEvent, SecretSantaItem } from './secret-santa.types'
+import type { SecretSantaUserId } from '@wishlist/common';
+import type { SecretSantaFormInput } from './EditSecretSantaFormDialog';
+import type { SecretSantaEvent, SecretSantaItem } from './secret-santa.types';
 
-import AccountBalanceIcon from '@mui/icons-material/AccountBalance'
-import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt'
-import CancelIcon from '@mui/icons-material/Cancel'
-import CheckCircleIcon from '@mui/icons-material/CheckCircle'
-import DeleteIcon from '@mui/icons-material/Delete'
-import GroupIcon from '@mui/icons-material/Group'
-import InfoIcon from '@mui/icons-material/Info'
-import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt'
-import PersonOffIcon from '@mui/icons-material/PersonOff'
-import TuneIcon from '@mui/icons-material/Tune'
-import { Alert, AlertTitle, Avatar, Button, Chip, IconButton, Stack, Tooltip, Typography } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
-import useMediaQuery from '@mui/material/useMediaQuery'
-import { DataGrid } from '@mui/x-data-grid'
-import { useQueryClient } from '@tanstack/react-query'
-import { SecretSantaDrawService } from '@wishlist/common'
-import { DateTime } from 'luxon'
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { match } from 'ts-pattern'
+import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
+import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt';
+import CancelIcon from '@mui/icons-material/Cancel';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import DeleteIcon from '@mui/icons-material/Delete';
+import GroupIcon from '@mui/icons-material/Group';
+import InfoIcon from '@mui/icons-material/Info';
+import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt';
+import PersonOffIcon from '@mui/icons-material/PersonOff';
+import TuneIcon from '@mui/icons-material/Tune';
+import { Alert, AlertTitle, Avatar, Button, Chip, IconButton, Stack, Tooltip, Typography } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { DataGrid } from '@mui/x-data-grid';
+import { useQueryClient } from '@tanstack/react-query';
+import { SecretSantaDrawService } from '@wishlist/common';
+import { DateTime } from 'luxon';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { match } from 'ts-pattern';
 
 import {
   rejectionMessage,
@@ -31,160 +31,160 @@ import {
   useDeleteSecretSantaUserMutation,
   useStartSecretSantaMutation,
   useUpdateSecretSantaMutation,
-} from '../../gql'
-import { useToast } from '../../hooks'
-import { eurosFormatter } from '../../utils/currency.utils'
-import { ConfirmButton } from '../common/ConfirmButton'
-import { ConfirmIconButton } from '../common/ConfirmIconButton'
-import { Description } from '../common/Description'
-import { AddSecretSantaUsersFormDialog } from './AddSecretSantaUsersFormDialog'
-import { EditSecretSantaFormDialog } from './EditSecretSantaFormDialog'
-import { ManageUserExclusionsDialog } from './ManageUserExclusionsDialog'
+} from '../../gql';
+import { useToast } from '../../hooks';
+import { eurosFormatter } from '../../utils/currency.utils';
+import { ConfirmButton } from '../common/ConfirmButton';
+import { ConfirmIconButton } from '../common/ConfirmIconButton';
+import { Description } from '../common/Description';
+import { AddSecretSantaUsersFormDialog } from './AddSecretSantaUsersFormDialog';
+import { EditSecretSantaFormDialog } from './EditSecretSantaFormDialog';
+import { ManageUserExclusionsDialog } from './ManageUserExclusionsDialog';
 
 type SecretSantaProps = {
-  secretSanta: SecretSantaItem
-  event: SecretSantaEvent
-}
+  secretSanta: SecretSantaItem;
+  event: SecretSantaEvent;
+};
 
 // Validation rejections carry the server's business-rule messages (e.g. draw
 // constraints), the other rejection members don't select `message`
 const validationMessage = (rejection: { __typename: 'ValidationRejection'; errors: { message: string }[] }) =>
-  rejection.errors.length > 0 ? rejection.errors.map(error => error.message).join(', ') : rejectionMessage(rejection)
+  rejection.errors.length > 0 ? rejection.errors.map(error => error.message).join(', ') : rejectionMessage(rejection);
 
 export const SecretSanta = ({ secretSanta, event }: SecretSantaProps) => {
-  const queryClient = useQueryClient()
-  const { addToast } = useToast()
-  const theme = useTheme()
-  const smallScreen = useMediaQuery(theme.breakpoints.down('md'))
-  const [openEditModal, setOpenEditModal] = useState(false)
-  const [openSecretSantaUsersModal, setOpenSecretSantaUsersModal] = useState(false)
-  const [drawFinishedPopup, setDrawFinishedPopup] = useState(false)
-  const [status, setStatus] = useState(secretSanta.status)
-  const [description, setDescription] = useState(secretSanta.description)
-  const [budget, setBudget] = useState(secretSanta.budget)
-  const [currentUserIdModalExclusion, setCurrentUserIdModalExclusion] = useState<string | undefined>()
-  const [secretSantaUsers, setSecretSantaUsers] = useState(secretSanta.users || [])
-  const eventAttendees = useMemo(() => event.attendees || [], [event])
-  const eventId = event.id
-  const eventInPast = DateTime.fromISO(event.eventDate) < DateTime.now()
+  const queryClient = useQueryClient();
+  const { addToast } = useToast();
+  const theme = useTheme();
+  const smallScreen = useMediaQuery(theme.breakpoints.down('md'));
+  const [openEditModal, setOpenEditModal] = useState(false);
+  const [openSecretSantaUsersModal, setOpenSecretSantaUsersModal] = useState(false);
+  const [drawFinishedPopup, setDrawFinishedPopup] = useState(false);
+  const [status, setStatus] = useState(secretSanta.status);
+  const [description, setDescription] = useState(secretSanta.description);
+  const [budget, setBudget] = useState(secretSanta.budget);
+  const [currentUserIdModalExclusion, setCurrentUserIdModalExclusion] = useState<string | undefined>();
+  const [secretSantaUsers, setSecretSantaUsers] = useState(secretSanta.users || []);
+  const eventAttendees = useMemo(() => event.attendees || [], [event]);
+  const eventId = event.id;
+  const eventInPast = DateTime.fromISO(event.eventDate) < DateTime.now();
 
   useEffect(() => {
-    setStatus(secretSanta.status)
-    setDescription(secretSanta.description)
-    setBudget(secretSanta.budget)
-    setSecretSantaUsers(secretSanta.users || [])
-  }, [secretSanta])
+    setStatus(secretSanta.status);
+    setDescription(secretSanta.description);
+    setBudget(secretSanta.budget);
+    setSecretSantaUsers(secretSanta.users || []);
+  }, [secretSanta]);
 
   const invalidate = useCallback(
     () => queryClient.invalidateQueries({ queryKey: ['GetSecretSantaForEvent', { eventId }] }),
     [queryClient, eventId],
-  )
+  );
 
   const onNetworkError = useCallback(
     () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
     [addToast],
-  )
+  );
 
   const { mutateAsync: startMutation, isPending: loadingStart } = useStartSecretSantaMutation({
     onError: onNetworkError,
-  })
+  });
   const { mutateAsync: updateMutation, isPending: loadingUpdate } = useUpdateSecretSantaMutation({
     onError: onNetworkError,
-  })
+  });
   const { mutateAsync: cancelMutation, isPending: loadingCancel } = useCancelSecretSantaMutation({
     onError: onNetworkError,
-  })
+  });
   const { mutateAsync: deleteMutation, isPending: loadingDelete } = useDeleteSecretSantaMutation({
     onError: onNetworkError,
-  })
+  });
   const { mutateAsync: removeUserMutation, isPending: loadingRemoveUser } = useDeleteSecretSantaUserMutation({
     onError: onNetworkError,
-  })
+  });
 
   const updateSecretSanta = useCallback(
     async (input: SecretSantaFormInput) => {
-      const res = await updateMutation({ id: secretSanta.id, input })
+      const res = await updateMutation({ id: secretSanta.id, input });
       await match(res.updateSecretSanta)
         .with({ __typename: 'VoidOutput' }, async () => {
-          setBudget(input.budget)
-          setDescription(input.description)
-          addToast({ message: 'Le secret santa a été modifié', variant: 'success' })
-          await invalidate()
+          setBudget(input.budget);
+          setDescription(input.description);
+          addToast({ message: 'Le secret santa a été modifié', variant: 'success' });
+          await invalidate();
         })
         .with({ __typename: 'ValidationRejection' }, rejection =>
           addToast({ message: validationMessage(rejection), variant: 'error' }),
         )
         .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
-        .exhaustive()
+        .exhaustive();
     },
     [updateMutation, secretSanta.id, addToast, invalidate],
-  )
+  );
 
   const cancelSecretSanta = useCallback(async () => {
-    const res = await cancelMutation({ id: secretSanta.id })
+    const res = await cancelMutation({ id: secretSanta.id });
     await match(res.cancelSecretSanta)
       .with({ __typename: 'VoidOutput' }, async () => {
-        addToast({ message: 'Le tirage a été annulé', variant: 'success' })
-        setStatus(SecretSantaStatus.Created)
-        await invalidate()
+        addToast({ message: 'Le tirage a été annulé', variant: 'success' });
+        setStatus(SecretSantaStatus.Created);
+        await invalidate();
       })
       .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
-      .exhaustive()
-  }, [cancelMutation, secretSanta.id, addToast, invalidate])
+      .exhaustive();
+  }, [cancelMutation, secretSanta.id, addToast, invalidate]);
 
   const deleteSecretSanta = useCallback(async () => {
-    const res = await deleteMutation({ id: secretSanta.id })
+    const res = await deleteMutation({ id: secretSanta.id });
     await match(res.deleteSecretSanta)
       .with({ __typename: 'VoidOutput' }, async () => {
-        addToast({ message: 'Secret santa supprimé avec succès', variant: 'success' })
-        await invalidate()
+        addToast({ message: 'Secret santa supprimé avec succès', variant: 'success' });
+        await invalidate();
       })
       .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
-      .exhaustive()
-  }, [deleteMutation, secretSanta.id, addToast, invalidate])
+      .exhaustive();
+  }, [deleteMutation, secretSanta.id, addToast, invalidate]);
 
   const removeSecretSantaUser = useCallback(
     async (secretSantaUserId: SecretSantaUserId) => {
-      const res = await removeUserMutation({ id: secretSanta.id, secretSantaUserId })
+      const res = await removeUserMutation({ id: secretSanta.id, secretSantaUserId });
       await match(res.deleteSecretSantaUser)
         .with({ __typename: 'VoidOutput' }, async () => {
-          setSecretSantaUsers(prev => prev.filter(u => u.id !== secretSantaUserId))
-          await invalidate()
+          setSecretSantaUsers(prev => prev.filter(u => u.id !== secretSantaUserId));
+          await invalidate();
         })
         .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
-        .exhaustive()
+        .exhaustive();
     },
     [removeUserMutation, secretSanta.id, invalidate, addToast],
-  )
+  );
 
   const startSecretSanta = useCallback(async () => {
-    const secretSantaService = new SecretSantaDrawService(secretSantaUsers)
-    const { reason, isPossible } = secretSantaService.isDrawPossible()
+    const secretSantaService = new SecretSantaDrawService(secretSantaUsers);
+    const { reason, isPossible } = secretSantaService.isDrawPossible();
 
     if (!isPossible) {
-      addToast({ message: reason, variant: 'warning' })
-      return
+      addToast({ message: reason, variant: 'warning' });
+      return;
     }
 
-    const res = await startMutation({ id: secretSanta.id })
+    const res = await startMutation({ id: secretSanta.id });
     await match(res.startSecretSanta)
       .with({ __typename: 'VoidOutput' }, async () => {
-        setStatus(SecretSantaStatus.Started)
-        setDrawFinishedPopup(true)
-        setTimeout(() => setDrawFinishedPopup(false), 10000)
-        await invalidate()
+        setStatus(SecretSantaStatus.Started);
+        setDrawFinishedPopup(true);
+        setTimeout(() => setDrawFinishedPopup(false), 10000);
+        await invalidate();
       })
       .with({ __typename: 'ValidationRejection' }, rejection =>
         addToast({ message: validationMessage(rejection), variant: 'error' }),
       )
       .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
-      .exhaustive()
-  }, [secretSantaUsers, startMutation, secretSanta.id, addToast, invalidate])
+      .exhaustive();
+  }, [secretSantaUsers, startMutation, secretSanta.id, addToast, invalidate]);
 
   const loading = useMemo(
     () => loadingStart || loadingCancel || loadingDelete || loadingUpdate || loadingRemoveUser,
     [loadingStart, loadingCancel, loadingDelete, loadingUpdate, loadingRemoveUser],
-  )
+  );
 
   return (
     <Stack>
@@ -193,8 +193,8 @@ export const SecretSanta = ({ secretSanta, event }: SecretSantaProps) => {
         open={openEditModal}
         saveButtonText="Modifier"
         handleSubmit={input => {
-          setOpenEditModal(false)
-          void updateSecretSanta(input)
+          setOpenEditModal(false);
+          void updateSecretSanta(input);
         }}
         handleClose={() => setOpenEditModal(false)}
         input={{ budget, description }}
@@ -203,8 +203,8 @@ export const SecretSanta = ({ secretSanta, event }: SecretSantaProps) => {
       <AddSecretSantaUsersFormDialog
         open={openSecretSantaUsersModal}
         handleSubmit={newSecretSantaUsers => {
-          setSecretSantaUsers(prev => [...prev, ...newSecretSantaUsers])
-          setOpenSecretSantaUsersModal(false)
+          setSecretSantaUsers(prev => [...prev, ...newSecretSantaUsers]);
+          setOpenSecretSantaUsersModal(false);
         }}
         handleClose={() => setOpenSecretSantaUsersModal(false)}
         secretSantaId={secretSanta.id}
@@ -417,5 +417,5 @@ export const SecretSanta = ({ secretSanta, event }: SecretSantaProps) => {
         </Stack>
       </Stack>
     </Stack>
-  )
-}
+  );
+};

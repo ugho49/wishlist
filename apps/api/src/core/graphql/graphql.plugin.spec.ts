@@ -1,34 +1,34 @@
-import { parse } from 'graphql'
+import { parse } from 'graphql';
 
-import { obfuscateQuery, obfuscateSensitiveData } from './graphql.plugin'
+import { obfuscateQuery, obfuscateSensitiveData } from './graphql.plugin';
 
 describe('GraphQL Plugin', () => {
   describe('obfuscateSensitiveData', () => {
     it('should return null when data is null', () => {
-      expect(obfuscateSensitiveData(null)).toBeNull()
-    })
+      expect(obfuscateSensitiveData(null)).toBeNull();
+    });
 
     it('should return undefined when data is undefined', () => {
-      expect(obfuscateSensitiveData(undefined)).toBeUndefined()
-    })
+      expect(obfuscateSensitiveData(undefined)).toBeUndefined();
+    });
 
     it('should return primitive values unchanged', () => {
-      expect(obfuscateSensitiveData('string')).toBe('string')
-      expect(obfuscateSensitiveData(123)).toBe(123)
-      expect(obfuscateSensitiveData(true)).toBe(true)
-    })
+      expect(obfuscateSensitiveData('string')).toBe('string');
+      expect(obfuscateSensitiveData(123)).toBe(123);
+      expect(obfuscateSensitiveData(true)).toBe(true);
+    });
 
     it('should obfuscate sensitive fields in object', () => {
       const input = {
         email: 'test@test.fr',
         password: 'secret123',
-      }
+      };
 
       expect(obfuscateSensitiveData(input)).toEqual({
         email: 'test@test.fr',
         password: '[REDACTED]',
-      })
-    })
+      });
+    });
 
     it('should obfuscate sensitive fields case-insensitively', () => {
       const input = {
@@ -36,15 +36,15 @@ describe('GraphQL Plugin', () => {
         PASSWORD: 'secret',
         AccessToken: 'token123',
         APIKEY: 'key123',
-      }
+      };
 
       expect(obfuscateSensitiveData(input)).toEqual({
         Password: '[REDACTED]',
         PASSWORD: '[REDACTED]',
         AccessToken: '[REDACTED]',
         APIKEY: '[REDACTED]',
-      })
-    })
+      });
+    });
 
     it.each([
       'password',
@@ -59,12 +59,12 @@ describe('GraphQL Plugin', () => {
       'currentPassword',
       'newPassword',
     ])('should obfuscate field: %s', fieldName => {
-      const input = { [fieldName]: 'sensitive-value' }
+      const input = { [fieldName]: 'sensitive-value' };
 
       expect(obfuscateSensitiveData(input)).toEqual({
         [fieldName]: '[REDACTED]',
-      })
-    })
+      });
+    });
 
     it('should obfuscate nested objects', () => {
       const input = {
@@ -75,7 +75,7 @@ describe('GraphQL Plugin', () => {
             apiKey: 'key123',
           },
         },
-      }
+      };
 
       expect(obfuscateSensitiveData(input)).toEqual({
         user: {
@@ -85,8 +85,8 @@ describe('GraphQL Plugin', () => {
             apiKey: '[REDACTED]',
           },
         },
-      })
-    })
+      });
+    });
 
     it('should obfuscate entire field when field name is sensitive', () => {
       const input = {
@@ -94,24 +94,24 @@ describe('GraphQL Plugin', () => {
           username: 'user',
           password: 'secret',
         },
-      }
+      };
 
       expect(obfuscateSensitiveData(input)).toEqual({
         credentials: '[REDACTED]',
-      })
-    })
+      });
+    });
 
     it('should obfuscate sensitive fields in arrays', () => {
-      const input = [{ password: 'secret1' }, { password: 'secret2' }]
+      const input = [{ password: 'secret1' }, { password: 'secret2' }];
 
-      expect(obfuscateSensitiveData(input)).toEqual([{ password: '[REDACTED]' }, { password: '[REDACTED]' }])
-    })
+      expect(obfuscateSensitiveData(input)).toEqual([{ password: '[REDACTED]' }, { password: '[REDACTED]' }]);
+    });
 
     it('should handle mixed arrays with objects and primitives', () => {
-      const input = ['string', 123, { password: 'secret' }, null]
+      const input = ['string', 123, { password: 'secret' }, null];
 
-      expect(obfuscateSensitiveData(input)).toEqual(['string', 123, { password: '[REDACTED]' }, null])
-    })
+      expect(obfuscateSensitiveData(input)).toEqual(['string', 123, { password: '[REDACTED]' }, null]);
+    });
 
     it('should handle deeply nested structures', () => {
       const input = {
@@ -127,7 +127,7 @@ describe('GraphQL Plugin', () => {
             },
           },
         },
-      }
+      };
 
       expect(obfuscateSensitiveData(input)).toEqual({
         level1: {
@@ -142,8 +142,8 @@ describe('GraphQL Plugin', () => {
             },
           },
         },
-      })
-    })
+      });
+    });
 
     it('should handle GraphQL login mutation variables', () => {
       const input = {
@@ -151,24 +151,24 @@ describe('GraphQL Plugin', () => {
           email: 'test1@test.fr',
           password: 'test',
         },
-      }
+      };
 
       expect(obfuscateSensitiveData(input)).toEqual({
         input: {
           email: 'test1@test.fr',
           password: '[REDACTED]',
         },
-      })
-    })
+      });
+    });
 
     it('should handle empty objects', () => {
-      expect(obfuscateSensitiveData({})).toEqual({})
-    })
+      expect(obfuscateSensitiveData({})).toEqual({});
+    });
 
     it('should handle empty arrays', () => {
-      expect(obfuscateSensitiveData([])).toEqual([])
-    })
-  })
+      expect(obfuscateSensitiveData([])).toEqual([]);
+    });
+  });
 
   describe('obfuscateQuery', () => {
     it('should obfuscate password in inline login mutation', () => {
@@ -180,14 +180,14 @@ describe('GraphQL Plugin', () => {
           }
         }
       }
-    `)
+    `);
 
-      const result = obfuscateQuery(query)
+      const result = obfuscateQuery(query);
 
-      expect(result).toContain('email: "test1@test.fr"')
-      expect(result).toContain('password: "[REDACTED]"')
-      expect(result).not.toContain('password: "test"')
-    })
+      expect(result).toContain('email: "test1@test.fr"');
+      expect(result).toContain('password: "[REDACTED]"');
+      expect(result).not.toContain('password: "test"');
+    });
 
     it('should obfuscate sensitive arguments at top level', () => {
       const query = parse(`
@@ -196,13 +196,13 @@ describe('GraphQL Plugin', () => {
           success
         }
       }
-    `)
+    `);
 
-      const result = obfuscateQuery(query)
+      const result = obfuscateQuery(query);
 
-      expect(result).toContain('token: "[REDACTED]"')
-      expect(result).not.toContain('secret-token')
-    })
+      expect(result).toContain('token: "[REDACTED]"');
+      expect(result).not.toContain('secret-token');
+    });
 
     it('should obfuscate multiple sensitive fields in input object', () => {
       const query = parse(`
@@ -211,15 +211,15 @@ describe('GraphQL Plugin', () => {
           success
         }
       }
-    `)
+    `);
 
-      const result = obfuscateQuery(query)
+      const result = obfuscateQuery(query);
 
-      expect(result).toContain('currentPassword: "[REDACTED]"')
-      expect(result).toContain('newPassword: "[REDACTED]"')
-      expect(result).not.toContain('old123')
-      expect(result).not.toContain('new456')
-    })
+      expect(result).toContain('currentPassword: "[REDACTED]"');
+      expect(result).toContain('newPassword: "[REDACTED]"');
+      expect(result).not.toContain('old123');
+      expect(result).not.toContain('new456');
+    });
 
     it('should not obfuscate non-sensitive fields', () => {
       const query = parse(`
@@ -229,12 +229,12 @@ describe('GraphQL Plugin', () => {
           name
         }
       }
-    `)
+    `);
 
-      const result = obfuscateQuery(query)
+      const result = obfuscateQuery(query);
 
-      expect(result).toContain('id: "123"')
-    })
+      expect(result).toContain('id: "123"');
+    });
 
     it('should handle queries without sensitive data', () => {
       const query = parse(`
@@ -244,14 +244,14 @@ describe('GraphQL Plugin', () => {
           email
         }
       }
-    `)
+    `);
 
-      const result = obfuscateQuery(query)
+      const result = obfuscateQuery(query);
 
-      expect(result).toContain('users')
-      expect(result).toContain('id')
-      expect(result).toContain('email')
-    })
+      expect(result).toContain('users');
+      expect(result).toContain('id');
+      expect(result).toContain('email');
+    });
 
     it('should obfuscate sensitive fields case-insensitively', () => {
       const query = parse(`
@@ -260,13 +260,13 @@ describe('GraphQL Plugin', () => {
           token
         }
       }
-    `)
+    `);
 
-      const result = obfuscateQuery(query)
+      const result = obfuscateQuery(query);
 
-      expect(result).toContain('Password: "[REDACTED]"')
-      expect(result).not.toContain('"secret"')
-    })
+      expect(result).toContain('Password: "[REDACTED]"');
+      expect(result).not.toContain('"secret"');
+    });
 
     it('should handle nested input objects', () => {
       const query = parse(`
@@ -275,14 +275,14 @@ describe('GraphQL Plugin', () => {
           id
         }
       }
-    `)
+    `);
 
-      const result = obfuscateQuery(query)
+      const result = obfuscateQuery(query);
 
-      expect(result).toContain('name: "John"')
-      expect(result).toContain('password: "[REDACTED]"')
-      expect(result).not.toContain('secret123')
-    })
+      expect(result).toContain('name: "John"');
+      expect(result).toContain('password: "[REDACTED]"');
+      expect(result).not.toContain('secret123');
+    });
 
     it('should obfuscate apiKey argument', () => {
       const query = parse(`
@@ -291,12 +291,12 @@ describe('GraphQL Plugin', () => {
           success
         }
       }
-    `)
+    `);
 
-      const result = obfuscateQuery(query)
+      const result = obfuscateQuery(query);
 
-      expect(result).toContain('apiKey: "[REDACTED]"')
-      expect(result).not.toContain('my-secret-key')
-    })
-  })
-})
+      expect(result).toContain('apiKey: "[REDACTED]"');
+      expect(result).not.toContain('my-secret-key');
+    });
+  });
+});

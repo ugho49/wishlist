@@ -1,14 +1,14 @@
-import { zodResolver } from '@hookform/resolvers/zod'
-import SaveAsIcon from '@mui/icons-material/SaveAs'
-import { Button, Stack, styled, TextField, Typography } from '@mui/material'
-import { useNavigate, useSearch } from '@tanstack/react-router'
-import { useForm } from 'react-hook-form'
-import { match } from 'ts-pattern'
-import { z } from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod';
+import SaveAsIcon from '@mui/icons-material/SaveAs';
+import { Button, Stack, styled, TextField, Typography } from '@mui/material';
+import { useNavigate, useSearch } from '@tanstack/react-router';
+import { useForm } from 'react-hook-form';
+import { match } from 'ts-pattern';
+import { z } from 'zod';
 
-import { rejectionMessage, rejectionPattern, useAuthResetPasswordMutation } from '../../gql'
-import { useToast } from '../../hooks/useToast'
-import { RouterLink } from '../common/RouterLink'
+import { rejectionMessage, rejectionPattern, useAuthResetPasswordMutation } from '../../gql';
+import { useToast } from '../../hooks/useToast';
+import { RouterLink } from '../common/RouterLink';
 
 const schema = z
   .object({
@@ -18,9 +18,9 @@ const schema = z
   .refine(data => data.password === data.confirmPassword, {
     message: 'Les mots de passe ne correspondent pas',
     path: ['confirmPassword'],
-  })
+  });
 
-type FormFields = z.infer<typeof schema>
+type FormFields = z.infer<typeof schema>;
 
 const TitleStyled = styled(Typography)(({ theme }) => ({
   fontSize: '1.75rem',
@@ -28,27 +28,27 @@ const TitleStyled = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.primary,
   textAlign: 'center',
   marginBottom: 24,
-}))
+}));
 
 const ButtonStyled = styled(Button)(() => ({
   paddingTop: 12,
   paddingBottom: 12,
   fontSize: '1rem',
   fontWeight: 600,
-}))
+}));
 
 const FooterStackStyled = styled(Stack)(({ theme }) => ({
   marginTop: theme.spacing(2.5),
   gap: theme.spacing(1),
   alignItems: 'center',
-}))
+}));
 
 const ErrorMessageStyled = styled(Typography)(({ theme }) => ({
   textAlign: 'center',
   color: theme.palette.error.main,
   fontSize: '1.1rem',
   fontWeight: 500,
-}))
+}));
 
 const InfoMessageStyled = styled(Typography)(({ theme }) => ({
   textAlign: 'center',
@@ -57,22 +57,22 @@ const InfoMessageStyled = styled(Typography)(({ theme }) => ({
   padding: theme.spacing(2),
   borderRadius: theme.shape.borderRadius,
   border: `1px solid ${theme.palette.grey[200]}`,
-}))
+}));
 
 export const RenewForgotPasswordPage = () => {
-  const { email, token } = useSearch({ from: '/_anonymous-with-layout/forgot-password/renew' })
-  const { addToast } = useToast()
-  const navigate = useNavigate()
+  const { email, token } = useSearch({ from: '/_anonymous-with-layout/forgot-password/renew' });
+  const { addToast } = useToast();
+  const navigate = useNavigate();
 
   const {
     register,
     handleSubmit,
     formState: { isSubmitting, errors: formErrors },
-  } = useForm<FormFields>({ resolver: zodResolver(schema) })
+  } = useForm<FormFields>({ resolver: zodResolver(schema) });
 
   const { mutateAsync: resetPassword } = useAuthResetPasswordMutation({
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-  })
+  });
 
   const onSubmit = async (data: FormFields) => {
     const res = await resetPassword({
@@ -81,18 +81,18 @@ export const RenewForgotPasswordPage = () => {
         token,
         newPassword: data.password,
       },
-    })
+    });
     match(res.resetPassword)
       .with({ __typename: 'VoidOutput' }, () => {
         addToast({
           message: 'Le mot de passe à été réinitialisé avec succès. Vous pouvez maintenant vous connecter.',
           variant: 'success',
-        })
-        void navigate({ to: '/login', search: { email } })
+        });
+        void navigate({ to: '/login', search: { email } });
       })
       .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
-      .exhaustive()
-  }
+      .exhaustive();
+  };
 
   if (!email || !token) {
     return (
@@ -100,7 +100,7 @@ export const RenewForgotPasswordPage = () => {
         <ErrorMessageStyled variant="h6">Cette URL n'est pas valide</ErrorMessageStyled>
         <RouterLink to="/forgot-password">Demander un nouveau lien</RouterLink>
       </Stack>
-    )
+    );
   }
 
   return (
@@ -159,5 +159,5 @@ export const RenewForgotPasswordPage = () => {
         </Stack>
       </FooterStackStyled>
     </Stack>
-  )
-}
+  );
+};

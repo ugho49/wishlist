@@ -1,20 +1,29 @@
-import { ConflictException, Inject, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common'
-import { TransactionManager } from '@wishlist/api/core'
-import { REPOSITORIES } from '@wishlist/api/repositories'
-import { type WishlistRepository } from '@wishlist/api/wishlist'
-import { type AttendeeId, type EventId, type ICurrentUser } from '@wishlist/common'
+import type { EventRepository } from '../../domain/repository/event.repository';
+import type { EventAttendeeRepository } from '../../domain/repository/event-attendee.repository';
 
-import { type EventAttendeeRepository, type EventRepository } from '../../domain'
+import {
+  ConflictException,
+  Inject,
+  Injectable,
+  Logger,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { type AttendeeId, type EventId, type ICurrentUser } from '@wishlist/common';
+
+import { TransactionManager } from '../../../core/database/transaction-manager';
+import { REPOSITORIES } from '../../../repositories/repositories.constants';
+import { type WishlistRepository } from '../../../wishlist/domain/wishlist.repository';
 
 export type DeleteAttendeeInput = {
-  currentUser: ICurrentUser
-  attendeeId: AttendeeId
-  eventId: EventId
-}
+  currentUser: ICurrentUser;
+  attendeeId: AttendeeId;
+  eventId: EventId;
+};
 
 @Injectable()
 export class DeleteAttendeeUseCase {
-  private readonly logger = new Logger(DeleteAttendeeUseCase.name)
+  private readonly logger = new Logger(DeleteAttendeeUseCase.name);
 
   constructor(
     @Inject(REPOSITORIES.EVENT_ATTENDEE)
@@ -27,62 +36,62 @@ export class DeleteAttendeeUseCase {
   ) {}
 
   async execute(input: DeleteAttendeeInput): Promise<void> {
-    this.logger.log('Delete attendee request received', { input })
-    const { attendeeId, currentUser, eventId } = input
+    this.logger.log('Delete attendee request received', { input });
+    const { attendeeId, currentUser, eventId } = input;
 
-    const event = await this.eventRepository.findByIdOrFail(eventId)
+    const event = await this.eventRepository.findByIdOrFail(eventId);
 
     if (!event.canEdit(currentUser)) {
-      throw new UnauthorizedException('Only creators and admins of the event can delete an attendee')
+      throw new UnauthorizedException('Only creators and admins of the event can delete an attendee');
     }
 
-    const attendee = event.attendees.find(a => a.id === attendeeId)
+    const attendee = event.attendees.find(a => a.id === attendeeId);
 
     if (!attendee) {
-      throw new NotFoundException('Attendee not found')
+      throw new NotFoundException('Attendee not found');
     }
 
     if (attendee.user?.id === currentUser.id) {
-      throw new ConflictException('You cannot delete yourself from the event')
+      throw new ConflictException('You cannot delete yourself from the event');
     }
 
     if (attendee.isCreator()) {
-      throw new ConflictException('You cannot delete the creator of the event')
+      throw new ConflictException('You cannot delete the creator of the event');
     }
 
-    const attendeeUserId = attendee.user?.id
+    const attendeeUserId = attendee.user?.id;
 
     const attendeeWishlistsForEvent =
       attendeeUserId === undefined
         ? []
         : (await this.wishlistRepository.findByEvent(attendee.eventId)).filter(wishlist =>
             wishlist.isOwner(attendeeUserId),
-          )
+          );
 
     await this.transactionManager.runInTransaction(async tx => {
-      this.logger.log('Removing attendee from event...', { attendeeId, eventId })
+      this.logger.log('Removing attendee from event...', { attendeeId, eventId });
       // Remove the attendee from the event
-      await this.attendeeRepository.delete(attendeeId, tx)
+      await this.attendeeRepository.delete(attendeeId, tx);
 
-      this.logger.log('Checking wishlists where the attendee is the owner...', { eventId, attendeeId })
+      this.logger.log('Checking wishlists where the attendee is the owner...', { eventId, attendeeId });
       // Check if this is ok for the wishlists
       for (const wishlist of attendeeWishlistsForEvent) {
         if (wishlist.eventIds.length > 1) {
-          this.logger.log('Unlinking event from wishlist...', { wishlistId: wishlist.id, eventId: attendee.eventId })
-          const updatedWishlist = wishlist.unlinkEvent(attendee.eventId)
-          await this.wishlistRepository.save(updatedWishlist, tx)
-          continue
+          this.logger.log('Unlinking event from wishlist...', { wishlistId: wishlist.id, eventId: attendee.eventId });
+          const updatedWishlist = wishlist.unlinkEvent(attendee.eventId);
+          await this.wishlistRepository.save(updatedWishlist, tx);
+          continue;
         }
 
         if (wishlist.eventIds.length === 1 && wishlist.items.length > 0) {
           throw new ConflictException(
             'You cannot remove this attendee from the event because he have a list in this event and the list have only this event attached',
-          )
+          );
         }
 
-        this.logger.log('Deleting wishlist...', { wishlistId: wishlist.id })
-        await this.wishlistRepository.delete(wishlist.id, tx)
+        this.logger.log('Deleting wishlist...', { wishlistId: wishlist.id });
+        await this.wishlistRepository.delete(wishlist.id, tx);
       }
-    })
+    });
   }
 }

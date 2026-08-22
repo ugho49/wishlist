@@ -1,27 +1,27 @@
-import type React from 'react'
-import type { WishlistItem } from './wishlist.types'
+import type React from 'react';
+import type { WishlistItem } from './wishlist.types';
 
-import AccessTimeIcon from '@mui/icons-material/AccessTime'
-import CheckBoxIcon from '@mui/icons-material/CheckBox'
-import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank'
-import Diversity3Icon from '@mui/icons-material/Diversity3'
-import FilterListIcon from '@mui/icons-material/FilterList'
-import PersonOutlineIcon from '@mui/icons-material/PersonOutline'
-import SortIcon from '@mui/icons-material/Sort'
-import SortByAlphaIcon from '@mui/icons-material/SortByAlpha'
-import StarIcon from '@mui/icons-material/Star'
-import StarBorderIcon from '@mui/icons-material/StarBorder'
-import WatchLaterIcon from '@mui/icons-material/WatchLater'
-import { Box, Grid, inputBaseClasses, MenuItem, menuItemClasses, Select, styled } from '@mui/material'
-import { useEffect } from 'react'
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import CheckBoxIcon from '@mui/icons-material/CheckBox';
+import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
+import Diversity3Icon from '@mui/icons-material/Diversity3';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
+import SortIcon from '@mui/icons-material/Sort';
+import SortByAlphaIcon from '@mui/icons-material/SortByAlpha';
+import StarIcon from '@mui/icons-material/Star';
+import StarBorderIcon from '@mui/icons-material/StarBorder';
+import WatchLaterIcon from '@mui/icons-material/WatchLater';
+import { Box, Grid, inputBaseClasses, MenuItem, menuItemClasses, Select, styled } from '@mui/material';
+import { useEffect } from 'react';
 
-import { InputLabel } from '../common/InputLabel'
+import { InputLabel } from '../common/InputLabel';
 
 type SelectOption<T> = {
-  value: T
-  label: string | React.ReactNode
-  icon?: React.ReactNode
-}
+  value: T;
+  label: string | React.ReactNode;
+  icon?: React.ReactNode;
+};
 
 export enum FilterType {
   NONE = '',
@@ -65,7 +65,7 @@ export const filterOptions: SelectOption<FilterType>[] = [
     label: 'Souhaits non suggérés',
     icon: <PersonOutlineIcon fontSize="small" />,
   },
-]
+];
 
 export const sortOptions: SelectOption<SortType>[] = [
   {
@@ -93,72 +93,72 @@ export const sortOptions: SelectOption<SortType>[] = [
     label: "Le plus petit nombre d'étoiles",
     icon: <StarBorderIcon fontSize="small" />,
   },
-]
+];
 
 export const applyFilter = (item: WishlistItem, filter: FilterType): boolean => {
-  const checked = item.takers.length > 0
+  const checked = item.takers.length > 0;
 
   if (filter === FilterType.CHECKED && checked) {
-    return true
+    return true;
   }
 
   if (filter === FilterType.UNCHECKED && !checked) {
-    return true
+    return true;
   }
 
   if (filter === FilterType.SUGGESTED && item.isSuggested) {
-    return true
+    return true;
   }
 
   if (filter === FilterType.NOT_SUGGESTED && !item.isSuggested) {
-    return true
+    return true;
   }
 
-  return filter === FilterType.NONE
-}
+  return filter === FilterType.NONE;
+};
 
 export const applySort = (a: WishlistItem, b: WishlistItem, sort: SortType): number => {
   if (sort === SortType.NAME_DESC) {
-    return b.name.localeCompare(a.name)
+    return b.name.localeCompare(a.name);
   }
 
   if (sort === SortType.SCORE_ASC) {
-    return (a.score || 0) - (b.score || 0)
+    return (a.score || 0) - (b.score || 0);
   }
 
   if (sort === SortType.SCORE_DESC) {
-    return (b.score || 0) - (a.score || 0)
+    return (b.score || 0) - (a.score || 0);
   }
 
   if (sort === SortType.CREATED_AT_ASC) {
-    return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
   }
 
   if (sort === SortType.CREATED_AT_DESC) {
-    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   }
 
   // Default sort by name ASC
-  return a.name.localeCompare(b.name)
-}
+  return a.name.localeCompare(b.name);
+};
 
 export type WishFilterSortSelectProps = {
-  sort: SortType
-  onSortChange: (sort: SortType) => void
-  filter: FilterType
-  onFilterChange: (filter: FilterType) => void
-  items: WishlistItem[]
-  onChange: (items: WishlistItem[]) => void
-  displayFilterSelect?: boolean
-  displaySortSelect?: boolean
-}
+  sort: SortType;
+  onSortChange: (sort: SortType) => void;
+  filter: FilterType;
+  onFilterChange: (filter: FilterType) => void;
+  items: WishlistItem[];
+  onChange: (items: WishlistItem[]) => void;
+  displayFilterSelect?: boolean;
+  displaySortSelect?: boolean;
+};
 
 const SelectStyled = styled(Select)({
   [`&.${inputBaseClasses.root}`]: {
     width: '100%',
     height: '28px',
   },
-})
+});
 
 const MenuItemStyled = styled(MenuItem)({
   [`&, &.${menuItemClasses.root}`]: {
@@ -166,13 +166,13 @@ const MenuItemStyled = styled(MenuItem)({
     alignItems: 'center',
     gap: '8px',
   },
-})
+});
 
 const BoxStyled = styled(Box)({
   display: 'flex',
   alignItems: 'center',
   gap: '8px',
-})
+});
 
 export const WishlistFilterAndSortItems = ({
   items,
@@ -185,9 +185,9 @@ export const WishlistFilterAndSortItems = ({
   displaySortSelect = true,
 }: WishFilterSortSelectProps) => {
   useEffect(() => {
-    const newItems = items.filter(item => applyFilter(item, filter)).sort((a, b) => applySort(a, b, sort))
-    onChange(newItems)
-  }, [items, sort, filter])
+    const newItems = items.filter(item => applyFilter(item, filter)).sort((a, b) => applySort(a, b, sort));
+    onChange(newItems);
+  }, [items, sort, filter]);
 
   return (
     <Grid container spacing={2} sx={{ marginBottom: '30px' }}>
@@ -203,13 +203,13 @@ export const WishlistFilterAndSortItems = ({
             value={sort}
             onChange={e => onSortChange(e.target.value as SortType)}
             renderValue={value => {
-              const option = sortOptions.find(opt => opt.value === value)
+              const option = sortOptions.find(opt => opt.value === value);
               return (
                 <BoxStyled>
                   {option?.icon}
                   {option?.label}
                 </BoxStyled>
-              )
+              );
             }}
           >
             {sortOptions.map(opt => (
@@ -232,13 +232,13 @@ export const WishlistFilterAndSortItems = ({
             value={filter}
             onChange={e => onFilterChange(e.target.value as FilterType)}
             renderValue={value => {
-              const option = filterOptions.find(opt => opt.value === value)
+              const option = filterOptions.find(opt => opt.value === value);
               return (
                 <BoxStyled>
                   {option?.icon}
                   {option?.label}
                 </BoxStyled>
-              )
+              );
             }}
           >
             {filterOptions.map(opt => (
@@ -251,5 +251,5 @@ export const WishlistFilterAndSortItems = ({
         </Grid>
       )}
     </Grid>
-  )
-}
+  );
+};

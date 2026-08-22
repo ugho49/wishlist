@@ -1,3 +1,3 @@
 export type CommonRequestOptions = {
-  signal: AbortSignal
-}
+  signal: AbortSignal;
+};

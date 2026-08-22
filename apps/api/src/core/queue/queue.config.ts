@@ -1,6 +1,6 @@
-import { registerAs } from '@nestjs/config'
-import { mapConfigOrThrow } from '@wishlist/common'
-import { z } from 'zod'
+import { registerAs } from '@nestjs/config';
+import { mapConfigOrThrow } from '@wishlist/common';
+import { z } from 'zod';
 
 const schema = z.object({
   VALKEY_HOST: z.string('Missing VALKEY_HOST environment variable'),
@@ -12,7 +12,7 @@ const schema = z.object({
     .transform(val => val === 'true')
     .optional()
     .default(true),
-})
+});
 
 export default registerAs('queue', () =>
   mapConfigOrThrow(schema, process.env, data => ({
@@ -24,4 +24,4 @@ export default registerAs('queue', () =>
     },
     scheduledJobsEnabled: data.SCHEDULED_JOBS_ENABLED,
   })),
-)
+);

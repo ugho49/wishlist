@@ -1,31 +1,31 @@
-import { zodResolver } from '@hookform/resolvers/zod'
-import EmailIcon from '@mui/icons-material/Email'
-import InfoIcon from '@mui/icons-material/Info'
-import { Alert, Button, Stack, TextField, Typography } from '@mui/material'
-import { useQueryClient } from '@tanstack/react-query'
-import { useForm } from 'react-hook-form'
-import { match } from 'ts-pattern'
-import { z } from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod';
+import EmailIcon from '@mui/icons-material/Email';
+import InfoIcon from '@mui/icons-material/Info';
+import { Alert, Button, Stack, TextField, Typography } from '@mui/material';
+import { useQueryClient } from '@tanstack/react-query';
+import { useForm } from 'react-hook-form';
+import { match } from 'ts-pattern';
+import { z } from 'zod';
 
 import {
   rejectionMessage,
   rejectionPattern,
   useRequestUserEmailChangeMutation,
   useUserPendingEmailChangeQuery,
-} from '../../gql'
-import { useToast } from '../../hooks/useToast'
-import { Loader } from '../common/Loader'
-import { Subtitle } from '../common/Subtitle'
+} from '../../gql';
+import { useToast } from '../../hooks/useToast';
+import { Loader } from '../common/Loader';
+import { Subtitle } from '../common/Subtitle';
 
 const schema = z.object({
   newEmail: z.email('Email invalide').min(1, 'Email requis').max(200, '200 caractères maximum'),
-})
+});
 
-type FormFields = z.infer<typeof schema>
+type FormFields = z.infer<typeof schema>;
 
 export const EmailChangeSection = () => {
-  const { addToast } = useToast()
-  const queryClient = useQueryClient()
+  const { addToast } = useToast();
+  const queryClient = useQueryClient();
 
   const {
     register,
@@ -37,20 +37,20 @@ export const EmailChangeSection = () => {
     defaultValues: {
       newEmail: '',
     },
-  })
+  });
 
   const { data: pendingChange, isLoading: loadingPendingChange } = useUserPendingEmailChangeQuery(undefined, {
     select: d => (d.pendingEmailChange?.__typename === 'PendingEmailChange' ? d.pendingEmailChange : undefined),
-  })
+  });
 
   const { mutateAsync: requestEmailChange } = useRequestUserEmailChangeMutation({
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-  })
+  });
 
-  const expiresAt = pendingChange ? new Date(pendingChange.expiredAt).toLocaleString('fr-FR') : undefined
+  const expiresAt = pendingChange ? new Date(pendingChange.expiredAt).toLocaleString('fr-FR') : undefined;
 
   const onSubmit = async (data: FormFields) => {
-    const res = await requestEmailChange({ input: { newEmail: data.newEmail } })
+    const res = await requestEmailChange({ input: { newEmail: data.newEmail } });
 
     match(res.requestEmailChange)
       .with({ __typename: 'VoidOutput' }, () => {
@@ -58,13 +58,13 @@ export const EmailChangeSection = () => {
           message:
             'Un email de confirmation a été envoyé à votre nouvelle adresse. Vérifiez votre boîte de réception pour confirmer le changement.',
           variant: 'success',
-        })
-        reset()
-        void queryClient.invalidateQueries({ queryKey: ['UserPendingEmailChange'] })
+        });
+        reset();
+        void queryClient.invalidateQueries({ queryKey: ['UserPendingEmailChange'] });
       })
       .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
-      .exhaustive()
-  }
+      .exhaustive();
+  };
 
   return (
     <Loader loading={loadingPendingChange}>
@@ -118,5 +118,5 @@ export const EmailChangeSection = () => {
         </Alert>
       )}
     </Loader>
-  )
-}
+  );
+};

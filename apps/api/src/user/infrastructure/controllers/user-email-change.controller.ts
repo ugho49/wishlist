@@ -1,16 +1,17 @@
-import { Body, Controller, Get, Post } from '@nestjs/common'
-import { ApiTags } from '@nestjs/swagger'
-import { CurrentUser, Public } from '@wishlist/api/auth'
+import { Body, Controller, Get, Post } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import {
   ConfirmEmailChangeInputDto,
   type ICurrentUser,
   type PendingEmailChangeDto,
   RequestEmailChangeInputDto,
-} from '@wishlist/common'
+} from '@wishlist/common';
 
-import { ConfirmEmailChangeUseCase } from '../../application/command/confirm-email-change.use-case'
-import { CreateEmailChangeVerificationUseCase } from '../../application/command/create-email-change-verification.use-case'
-import { GetPendingEmailChangeUseCase } from '../../application/query/get-pending-email-change.use-case'
+import { Public } from '../../../auth/infrastructure/decorators/public.metadata';
+import { CurrentUser } from '../../../auth/infrastructure/decorators/user.decorator';
+import { ConfirmEmailChangeUseCase } from '../../application/command/confirm-email-change.use-case';
+import { CreateEmailChangeVerificationUseCase } from '../../application/command/create-email-change-verification.use-case';
+import { GetPendingEmailChangeUseCase } from '../../application/query/get-pending-email-change.use-case';
 
 @ApiTags('User Email Change')
 @Controller('/user/email-change')
@@ -23,16 +24,16 @@ export class UserEmailChangeController {
 
   @Get('/pending')
   async getPendingEmailChange(@CurrentUser() currentUser: ICurrentUser): Promise<PendingEmailChangeDto | undefined> {
-    const result = await this.getPendingEmailChangeUseCase.execute({ currentUser })
+    const result = await this.getPendingEmailChangeUseCase.execute({ currentUser });
 
     if (!result) {
-      return undefined
+      return undefined;
     }
 
     return {
       new_email: result.newEmail,
       expired_at: result.expiredAt,
-    }
+    };
   }
 
   @Post('/request')
@@ -43,7 +44,7 @@ export class UserEmailChangeController {
     await this.createEmailChangeVerificationUseCase.execute({
       currentUser,
       newEmail: dto.new_email,
-    })
+    });
   }
 
   @Public()
@@ -52,6 +53,6 @@ export class UserEmailChangeController {
     await this.confirmEmailChangeUseCase.execute({
       newEmail: dto.new_email,
       token: dto.token,
-    })
+    });
   }
 }

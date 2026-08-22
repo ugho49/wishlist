@@ -1,27 +1,25 @@
-import type { CreateAxiosDefaults } from 'axios'
+import type { CreateAxiosDefaults } from 'axios';
 
-import axios from 'axios'
+import axios from 'axios';
 
-import {
-  AdminEventAttendeeService,
-  AdminEventService,
-  AdminSecretSantaService,
-  AdminUserService,
-  AdminWishlistService,
-  AuthService,
-  EventAttendeeService,
-  EventService,
-  ItemService,
-  SecretSantaService,
-  UserService,
-  WishlistService,
-} from './services'
+import { AdminEventService } from './services/admin-event.service';
+import { AdminEventAttendeeService } from './services/admin-event-attendee.service';
+import { AdminSecretSantaService } from './services/admin-secret-santa.service';
+import { AdminUserService } from './services/admin-user.service';
+import { AdminWishlistService } from './services/admin-wishlist.service';
+import { AuthService } from './services/auth.service';
+import { EventService } from './services/event.service';
+import { EventAttendeeService } from './services/event-attendee.service';
+import { ItemService } from './services/item.service';
+import { SecretSantaService } from './services/secret-santa.service';
+import { UserService } from './services/user.service';
+import { WishlistService } from './services/wishlist.service';
 
 type ClientServiceParams = {
-  baseURL: string
-  timeoutInMs?: number
-  accessToken?: string
-}
+  baseURL: string;
+  timeoutInMs?: number;
+  accessToken?: string;
+};
 
 export class ApiClient {
   private constructor(
@@ -33,11 +31,11 @@ export class ApiClient {
     public readonly attendee: EventAttendeeService,
     public readonly secretSanta: SecretSantaService,
     public readonly admin: {
-      user: AdminUserService
-      event: AdminEventService
-      eventAttendee: AdminEventAttendeeService
-      secretSanta: AdminSecretSantaService
-      wishlist: AdminWishlistService
+      user: AdminUserService;
+      event: AdminEventService;
+      eventAttendee: AdminEventAttendeeService;
+      secretSanta: AdminSecretSantaService;
+      wishlist: AdminWishlistService;
     },
   ) {}
 
@@ -45,13 +43,13 @@ export class ApiClient {
     const config: CreateAxiosDefaults = {
       baseURL: params.baseURL,
       timeout: params?.timeoutInMs ?? 10_000, // 10 seconds
-    }
+    };
 
     if (params.accessToken) {
-      config.headers = { Authorization: `Bearer ${params.accessToken}` }
+      config.headers = { Authorization: `Bearer ${params.accessToken}` };
     }
 
-    const client = axios.create(config)
+    const client = axios.create(config);
 
     return new ApiClient(
       new AuthService(client),
@@ -68,6 +66,6 @@ export class ApiClient {
         eventAttendee: new AdminEventAttendeeService(client),
         secretSanta: new AdminSecretSantaService(client),
       },
-    )
+    );
   }
 }

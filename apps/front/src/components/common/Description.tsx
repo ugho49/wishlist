@@ -1,10 +1,10 @@
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
-import { alpha, Box, Collapse, Stack, styled } from '@mui/material'
-import { useLayoutEffect, useRef, useState } from 'react'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import { alpha, Box, Collapse, Stack, styled } from '@mui/material';
+import { useLayoutEffect, useRef, useState } from 'react';
 
-import { Card } from './Card'
-import { MarkdownContent } from './MarkdownContent'
+import { Card } from './Card';
+import { MarkdownContent } from './MarkdownContent';
 
 const DescriptionCard = styled(Card)<{ collapsable: boolean }>(({ theme, collapsable }) => ({
   position: 'relative',
@@ -21,13 +21,13 @@ const DescriptionCard = styled(Card)<{ collapsable: boolean }>(({ theme, collaps
   borderLeft: `8px solid ${theme.palette.primary.main}`,
   cursor: collapsable ? 'pointer' : 'default',
   transition: 'background-color 0.2s ease-in-out',
-}))
+}));
 
 const DescriptionContainer = styled(Stack)(() => ({
   flexDirection: 'row',
   alignItems: 'flex-start',
   gap: '16px',
-}))
+}));
 
 const IconWrapper = styled(Box)(({ theme }) => ({
   color: theme.palette.primary.main,
@@ -38,13 +38,13 @@ const IconWrapper = styled(Box)(({ theme }) => ({
   height: '24px',
   paddingTop: '6px',
   flexShrink: 0,
-}))
+}));
 
 const ContentWrapper = styled(Box)({
   flex: 1,
   overflow: 'hidden',
   position: 'relative',
-})
+});
 
 const EllipsisOverlay = styled(Box)(() => ({
   position: 'absolute',
@@ -57,29 +57,29 @@ const EllipsisOverlay = styled(Box)(() => ({
   alignItems: 'flex-end',
   justifyContent: 'center',
   paddingBottom: '4px',
-}))
+}));
 
-const MAX_HEIGHT = 110 // Maximum height in pixels before showing collapse button
+const MAX_HEIGHT = 110; // Maximum height in pixels before showing collapse button
 
-export const Description = ({ text, allowMarkdown = false }: { text: string; allowMarkdown?: boolean }) => {
-  const [isCollapsable, setIsCollapsable] = useState<boolean | null>(null)
-  const [isExpanded, setIsExpanded] = useState(false)
-  const contentRef = useRef<HTMLDivElement>(null)
-  const isInitialized = useRef(false)
+export const Description = ({ text }: { text: string }) => {
+  const [isCollapsable, setIsCollapsable] = useState<boolean | null>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const isInitialized = useRef(false);
 
   useLayoutEffect(() => {
     if (contentRef.current && !isInitialized.current) {
-      const contentHeight = contentRef.current.scrollHeight
-      setIsCollapsable(contentHeight > MAX_HEIGHT)
-      isInitialized.current = true
+      const contentHeight = contentRef.current.scrollHeight;
+      setIsCollapsable(contentHeight > MAX_HEIGHT);
+      isInitialized.current = true;
     }
-  }, [])
+  }, []);
 
   const toggleExpanded = () => {
     if (isCollapsable) {
-      setIsExpanded(prev => !prev)
+      setIsExpanded(prev => !prev);
     }
-  }
+  };
 
   // Don't render until we know if it's collapsable or not
   if (isCollapsable === null) {
@@ -96,7 +96,7 @@ export const Description = ({ text, allowMarkdown = false }: { text: string; all
           </ContentWrapper>
         </DescriptionContainer>
       </DescriptionCard>
-    )
+    );
   }
 
   return (
@@ -129,5 +129,5 @@ export const Description = ({ text, allowMarkdown = false }: { text: string; all
         </EllipsisOverlay>
       )}
     </DescriptionCard>
-  )
-}
+  );
+};

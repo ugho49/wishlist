@@ -1,12 +1,12 @@
-import { Injectable } from '@nestjs/common'
-import { type UserId, type UserSocialId } from '@wishlist/common'
-import DataLoader from 'dataloader'
+import { Injectable } from '@nestjs/common';
+import { type UserId, type UserSocialId } from '@wishlist/common';
+import DataLoader from 'dataloader';
 
-import { type User, type UserFull, type UserSocial } from '../../gql/generated-types'
-import { GetUserSocialsByIdsUseCase } from '../application/query/get-user-socials-by-ids.use-case'
-import { GetUserSocialsByUserIdsUseCase } from '../application/query/get-user-socials-by-user-ids.use-case'
-import { GetUsersByIdsUseCase } from '../application/query/get-users-by-ids.use-case'
-import { userMapper } from './user.mapper'
+import { type User, type UserFull, type UserSocial } from '../../gql/generated-types';
+import { GetUserSocialsByIdsUseCase } from '../application/query/get-user-socials-by-ids.use-case';
+import { GetUserSocialsByUserIdsUseCase } from '../application/query/get-user-socials-by-user-ids.use-case';
+import { GetUsersByIdsUseCase } from '../application/query/get-users-by-ids.use-case';
+import { userMapper } from './user.mapper';
 
 @Injectable()
 export class UserDataLoaderFactory {
@@ -18,34 +18,34 @@ export class UserDataLoaderFactory {
 
   createUserLoader() {
     return new DataLoader<UserId, User | null>(async (userIds: readonly UserId[]) => {
-      const users = await this.getUsersByIdsUseCase.execute({ userIds: [...userIds] })
-      const userMap = new Map(users.map(user => [user.id, userMapper.toGqlUser(user)]))
-      return userIds.map(id => userMap.get(id) ?? null)
-    })
+      const users = await this.getUsersByIdsUseCase.execute({ userIds: [...userIds] });
+      const userMap = new Map(users.map(user => [user.id, userMapper.toGqlUser(user)]));
+      return userIds.map(id => userMap.get(id) ?? null);
+    });
   }
 
   createUserFullLoader() {
     return new DataLoader<UserId, UserFull | null>(async (userIds: readonly UserId[]) => {
-      const users = await this.getUsersByIdsUseCase.execute({ userIds: [...userIds] })
-      const userMap = new Map(users.map(user => [user.id, userMapper.toGqlUserFull(user)]))
-      return userIds.map(id => userMap.get(id) ?? null)
-    })
+      const users = await this.getUsersByIdsUseCase.execute({ userIds: [...userIds] });
+      const userMap = new Map(users.map(user => [user.id, userMapper.toGqlUserFull(user)]));
+      return userIds.map(id => userMap.get(id) ?? null);
+    });
   }
 
   createUserSocialsByUserLoader() {
     return new DataLoader<UserId, UserSocial[]>(async (userIds: readonly UserId[]) => {
-      const userSocialMap = await this.getUserSocialsByUserIdsUseCase.execute({ userIds: [...userIds] })
-      return userIds.map(id => (userSocialMap.get(id) ?? []).map(userSocial => userMapper.toGqlUserSocial(userSocial)))
-    })
+      const userSocialMap = await this.getUserSocialsByUserIdsUseCase.execute({ userIds: [...userIds] });
+      return userIds.map(id => (userSocialMap.get(id) ?? []).map(userSocial => userMapper.toGqlUserSocial(userSocial)));
+    });
   }
 
   createUserSocialLoader() {
     return new DataLoader<UserSocialId, UserSocial | null>(async (userSocialIds: readonly UserSocialId[]) => {
-      const userSocials = await this.getUserSocialsByIdsUseCase.execute({ userSocialIds: [...userSocialIds] })
+      const userSocials = await this.getUserSocialsByIdsUseCase.execute({ userSocialIds: [...userSocialIds] });
       const userSocialMap = new Map(
         userSocials.map(userSocial => [userSocial.id, userMapper.toGqlUserSocial(userSocial)]),
-      )
-      return userSocialIds.map(id => userSocialMap.get(id) ?? null)
-    })
+      );
+      return userSocialIds.map(id => userSocialMap.get(id) ?? null);
+    });
   }
 }

@@ -1,10 +1,10 @@
-import type { EventId } from '@wishlist/common'
+import type { EventId } from '@wishlist/common';
 
-import { createFileRoute } from '@tanstack/react-router'
-import { SEO } from '@wishlist/front-components/SEO'
-import z from 'zod'
+import { createFileRoute } from '@tanstack/react-router';
+import { SEO } from '@wishlist/front-components/SEO';
+import z from 'zod';
 
-import { CreateWishlistPage } from '../../../../components/wishlist/CreateWishlistPage'
+import { CreateWishlistPage } from '../../../../components/wishlist/CreateWishlistPage';
 
 export const Route = createFileRoute('/_authenticated/_with-layout/wishlists/new')({
   component: () => (
@@ -20,4 +20,4 @@ export const Route = createFileRoute('/_authenticated/_with-layout/wishlists/new
   validateSearch: z.object({
     fromEvent: z.optional(z.custom<EventId>()),
   }),
-})
+});

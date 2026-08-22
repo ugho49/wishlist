@@ -1,7 +1,8 @@
-import { Injectable, type OnModuleInit } from '@nestjs/common'
-import { QueueName, QueueService } from '@wishlist/api/core'
+import { Injectable, type OnModuleInit } from '@nestjs/common';
 
-import { ItemNotificationJobName } from './item.type'
+import { QueueService } from '../../core/queue/queue.service';
+import { QueueName } from '../../core/queue/queues.type';
+import { ItemNotificationJobName } from './item.type';
 
 @Injectable()
 export class ItemScheduler implements OnModuleInit {
@@ -14,6 +15,6 @@ export class ItemScheduler implements OnModuleInit {
       data: {},
       // Fire at 10:15 AM every day
       repeatPattern: '15 10 * * *',
-    })
+    });
   }
 }

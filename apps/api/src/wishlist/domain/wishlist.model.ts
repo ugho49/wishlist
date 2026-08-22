@@ -1,58 +1,58 @@
-import type { WishlistItem } from '@wishlist/api/item'
-import type { User } from '@wishlist/api/user'
-import type { EventId, UserId, WishlistId } from '@wishlist/common'
+import type { EventId, UserId, WishlistId } from '@wishlist/common';
+import type { WishlistItem } from '../../item/domain/wishlist-item.model';
+import type { User } from '../../user/domain/model/user.model';
 
 export type WishlistProps = {
-  id: WishlistId
-  title: string
-  description?: string
-  owner: User
-  coOwner?: User
-  hideItems: boolean
-  logoUrl?: string
-  eventIds: EventId[]
-  items: WishlistItem[]
-  createdAt: Date
-  updatedAt: Date
-}
+  id: WishlistId;
+  title: string;
+  description?: string;
+  owner: User;
+  coOwner?: User;
+  hideItems: boolean;
+  logoUrl?: string;
+  eventIds: EventId[];
+  items: WishlistItem[];
+  createdAt: Date;
+  updatedAt: Date;
+};
 
 export class Wishlist {
-  public readonly id: WishlistId
-  public readonly title: string
-  public readonly description?: string
-  public readonly owner: User
-  public readonly coOwner?: User
-  public readonly hideItems: boolean
-  public readonly logoUrl?: string
-  public readonly eventIds: EventId[]
-  public readonly items: WishlistItem[]
-  public readonly createdAt: Date
-  public readonly updatedAt: Date
+  public readonly id: WishlistId;
+  public readonly title: string;
+  public readonly description?: string;
+  public readonly owner: User;
+  public readonly coOwner?: User;
+  public readonly hideItems: boolean;
+  public readonly logoUrl?: string;
+  public readonly eventIds: EventId[];
+  public readonly items: WishlistItem[];
+  public readonly createdAt: Date;
+  public readonly updatedAt: Date;
 
   constructor(props: WishlistProps) {
-    this.id = props.id
-    this.title = props.title
-    this.description = props.description
-    this.owner = props.owner
-    this.coOwner = props.coOwner
-    this.hideItems = props.hideItems
-    this.items = props.items
-    this.logoUrl = props.logoUrl
-    this.eventIds = props.eventIds
-    this.createdAt = props.createdAt
-    this.updatedAt = props.updatedAt
+    this.id = props.id;
+    this.title = props.title;
+    this.description = props.description;
+    this.owner = props.owner;
+    this.coOwner = props.coOwner;
+    this.hideItems = props.hideItems;
+    this.items = props.items;
+    this.logoUrl = props.logoUrl;
+    this.eventIds = props.eventIds;
+    this.createdAt = props.createdAt;
+    this.updatedAt = props.updatedAt;
   }
 
   static create(params: {
-    id: WishlistId
-    title: string
-    eventIds: EventId[]
-    description?: string
-    owner: User
-    hideItems: boolean
-    logoUrl?: string
+    id: WishlistId;
+    title: string;
+    eventIds: EventId[];
+    description?: string;
+    owner: User;
+    hideItems: boolean;
+    logoUrl?: string;
   }): Wishlist {
-    const now = new Date()
+    const now = new Date();
 
     return new Wishlist({
       id: params.id,
@@ -65,7 +65,7 @@ export class Wishlist {
       items: [],
       createdAt: now,
       updatedAt: now,
-    })
+    });
   }
 
   update(params: { title: string; description?: string }) {
@@ -74,7 +74,7 @@ export class Wishlist {
       title: params.title,
       description: params.description,
       updatedAt: new Date(),
-    })
+    });
   }
 
   updateLogoUrl(logoUrl?: string) {
@@ -82,11 +82,11 @@ export class Wishlist {
       ...this,
       logoUrl,
       updatedAt: new Date(),
-    })
+    });
   }
 
   isLinkedToEvent(id: EventId): boolean {
-    return this.eventIds.includes(id)
+    return this.eventIds.includes(id);
   }
 
   linkEvent(eventId: EventId) {
@@ -94,7 +94,7 @@ export class Wishlist {
       ...this,
       eventIds: [...this.eventIds, eventId],
       updatedAt: new Date(),
-    })
+    });
   }
 
   unlinkEvent(eventId: EventId) {
@@ -102,19 +102,19 @@ export class Wishlist {
       ...this,
       eventIds: this.eventIds.filter(id => id !== eventId),
       updatedAt: new Date(),
-    })
+    });
   }
 
   isOwner(userId: UserId) {
-    return this.owner.id === userId
+    return this.owner.id === userId;
   }
 
   isCoOwner(userId: UserId) {
-    return this.coOwner?.id === userId
+    return this.coOwner?.id === userId;
   }
 
   isOwnerOrCoOwner(userId: UserId) {
-    return this.isOwner(userId) || this.isCoOwner(userId)
+    return this.isOwner(userId) || this.isCoOwner(userId);
   }
 
   addCoOwner(coOwner: User) {
@@ -122,7 +122,7 @@ export class Wishlist {
       ...this,
       coOwner,
       updatedAt: new Date(),
-    })
+    });
   }
 
   removeCoOwner() {
@@ -130,36 +130,36 @@ export class Wishlist {
       ...this,
       coOwner: undefined,
       updatedAt: new Date(),
-    })
+    });
   }
 
   isListHiddingItems(): boolean {
-    return this.hideItems
+    return this.hideItems;
   }
 
   canDisplayItemSensitiveInformations(currentUserId: UserId): boolean {
     // If hideItems is false, we want to display all items, including suggested and with the taker
-    if (!this.isListHiddingItems()) return true
+    if (!this.isListHiddingItems()) return true;
 
     // If we are the owner or co-owner of the list, we not want the information to be displayed
-    return !this.isOwnerOrCoOwner(currentUserId)
+    return !this.isOwnerOrCoOwner(currentUserId);
   }
 
   getItemsToDisplay(currentUserId: UserId): WishlistItem[] {
-    return this.items.filter(item => this.canShowItem({ item, currentUserId }))
+    return this.items.filter(item => this.canShowItem({ item, currentUserId }));
   }
 
   private canShowItem(params: { item: WishlistItem; currentUserId: UserId }): boolean {
-    const { item, currentUserId } = params
+    const { item, currentUserId } = params;
 
     // If hideItems is false, we force items to be shown, even if they are suggested
-    if (!this.isListHiddingItems()) return true
+    if (!this.isListHiddingItems()) return true;
 
     // If we are not the owner or co-owner of the list, display all items
-    if (!this.isOwnerOrCoOwner(currentUserId)) return true
+    if (!this.isOwnerOrCoOwner(currentUserId)) return true;
 
     // In this case, current user is owner or co-owner of the list
     // we want to show him only the item that are not suggested
-    return !item.isSuggested
+    return !item.isSuggested;
   }
 }

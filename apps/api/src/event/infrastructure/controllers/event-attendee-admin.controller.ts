@@ -1,9 +1,10 @@
-import { Controller, Delete, Param } from '@nestjs/common'
-import { ApiTags } from '@nestjs/swagger'
-import { CurrentUser, IsAdmin } from '@wishlist/api/auth'
-import { type AttendeeId, type EventId, type ICurrentUser } from '@wishlist/common'
+import { Controller, Delete, Param } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
+import { type AttendeeId, type EventId, type ICurrentUser } from '@wishlist/common';
 
-import { DeleteAttendeeUseCase } from '../../application/command/delete-attendee.use-case'
+import { IsAdmin } from '../../../auth/infrastructure/decorators/admin.decorator';
+import { CurrentUser } from '../../../auth/infrastructure/decorators/user.decorator';
+import { DeleteAttendeeUseCase } from '../../application/command/delete-attendee.use-case';
 
 @IsAdmin()
 @ApiTags('ADMIN - Event Attendee')
@@ -21,6 +22,6 @@ export class EventAttendeeAdminController {
       currentUser,
       attendeeId,
       eventId,
-    })
+    });
   }
 }

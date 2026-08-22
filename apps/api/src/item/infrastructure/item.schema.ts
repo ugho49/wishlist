@@ -1,10 +1,10 @@
-import type { CreateItemInput, ImportItemsInput, ScanItemUrlInput, UpdateItemInput } from '../../gql/generated-types'
+import type { CreateItemInput, ImportItemsInput, ScanItemUrlInput, UpdateItemInput } from '../../gql/generated-types';
 
-import { type ItemId, type WishlistId } from '@wishlist/common'
-import z from 'zod'
+import { type ItemId, type WishlistId } from '@wishlist/common';
+import z from 'zod';
 
-export const ItemIdSchema = z.string().transform(val => val as ItemId)
-export const WishlistIdSchema = z.string().transform(val => val as WishlistId)
+export const ItemIdSchema = z.string().transform(val => val as ItemId);
+export const WishlistIdSchema = z.string().transform(val => val as WishlistId);
 
 export const CreateItemInputSchema = z.object({
   wishlistId: WishlistIdSchema,
@@ -13,7 +13,7 @@ export const CreateItemInputSchema = z.object({
   url: z.url().max(1000).optional(),
   score: z.number().int().min(0).max(5).optional(),
   pictureUrl: z.url().max(1000).optional(),
-}) satisfies z.ZodType<CreateItemInput>
+}) satisfies z.ZodType<CreateItemInput>;
 
 export const UpdateItemInputSchema = z.object({
   name: z.string().nonempty().max(40),
@@ -21,13 +21,13 @@ export const UpdateItemInputSchema = z.object({
   url: z.url().max(1000).optional(),
   score: z.number().int().min(0).max(5).optional(),
   pictureUrl: z.url().max(1000).optional(),
-}) satisfies z.ZodType<UpdateItemInput>
+}) satisfies z.ZodType<UpdateItemInput>;
 
 export const ScanItemUrlInputSchema = z.object({
   url: z.url(),
-}) satisfies z.ZodType<ScanItemUrlInput>
+}) satisfies z.ZodType<ScanItemUrlInput>;
 
 export const ImportItemsInputSchema = z.object({
   wishlistId: WishlistIdSchema,
   sourceItemIds: z.array(ItemIdSchema).min(1),
-}) satisfies z.ZodType<ImportItemsInput>
+}) satisfies z.ZodType<ImportItemsInput>;

@@ -1,26 +1,29 @@
-import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common'
-import { EventBus } from '@nestjs/cqrs'
-import { PasswordManager } from '@wishlist/api/auth'
-import { REPOSITORIES } from '@wishlist/api/repositories'
-import { MiniUserDto } from '@wishlist/common'
+import type { UserRepository } from '../../domain/repository/user.repository';
 
-import { User, UserCreatedEvent, type UserRepository } from '../../domain'
-import { userMapper } from '../../infrastructure'
+import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { EventBus } from '@nestjs/cqrs';
+import { MiniUserDto } from '@wishlist/common';
+
+import { PasswordManager } from '../../../auth/infrastructure/util/password-manager';
+import { REPOSITORIES } from '../../../repositories/repositories.constants';
+import { UserCreatedEvent } from '../../domain/event/user-created.event';
+import { User } from '../../domain/model/user.model';
+import { userMapper } from '../../infrastructure/user.mapper';
 
 export type CreateUserInput = {
   newUser: {
-    firstname: string
-    lastname: string
-    email: string
-    password: string
-    birthday?: Date
-  }
-  ip: string
-}
+    firstname: string;
+    lastname: string;
+    email: string;
+    password: string;
+    birthday?: Date;
+  };
+  ip: string;
+};
 
 @Injectable()
 export class CreateUserUseCase {
-  private readonly logger = new Logger(CreateUserUseCase.name)
+  private readonly logger = new Logger(CreateUserUseCase.name);
 
   constructor(
     @Inject(REPOSITORIES.USER)
@@ -37,12 +40,12 @@ export class CreateUserUseCase {
         },
         ip: input.ip,
       },
-    })
+    });
 
-    const { newUser, ip } = input
+    const { newUser, ip } = input;
 
     if (await this.userRepository.findByEmail(newUser.email)) {
-      throw new UnauthorizedException('User email already taken')
+      throw new UnauthorizedException('User email already taken');
     }
 
     const user = User.create({
@@ -53,13 +56,13 @@ export class CreateUserUseCase {
       birthday: newUser.birthday,
       passwordEnc: newUser.password ? await PasswordManager.hash(newUser.password) : undefined,
       ip,
-    })
+    });
 
-    this.logger.log('Creating user...', { userId: user.id })
-    await this.userRepository.save(user)
+    this.logger.log('Creating user...', { userId: user.id });
+    await this.userRepository.save(user);
 
-    await this.eventBus.publish(new UserCreatedEvent({ user }))
+    await this.eventBus.publish(new UserCreatedEvent({ user }));
 
-    return userMapper.toMiniUserDto(user)
+    return userMapper.toMiniUserDto(user);
   }
 }

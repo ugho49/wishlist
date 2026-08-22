@@ -1,13 +1,14 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common'
-import { REPOSITORIES } from '@wishlist/api/repositories'
-import { type ICurrentUser, UserEmailSettingsDto } from '@wishlist/common'
+import type { UserEmailSettingRepository } from '../../domain/repository/user-email-setting.repository';
 
-import { type UserEmailSettingRepository } from '../../domain'
-import { userEmailSettingMapper } from '../../infrastructure'
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { type ICurrentUser, UserEmailSettingsDto } from '@wishlist/common';
+
+import { REPOSITORIES } from '../../../repositories/repositories.constants';
+import { userEmailSettingMapper } from '../../infrastructure/email-settings.mapper';
 
 export type GetUserEmailSettingInput = {
-  currentUser: ICurrentUser
-}
+  currentUser: ICurrentUser;
+};
 
 @Injectable()
 export class GetUserEmailSettingUseCase {
@@ -17,12 +18,12 @@ export class GetUserEmailSettingUseCase {
   ) {}
 
   async execute(query: GetUserEmailSettingInput): Promise<UserEmailSettingsDto> {
-    const userEmailSetting = await this.userEmailSettingRepository.findByUserId(query.currentUser.id)
+    const userEmailSetting = await this.userEmailSettingRepository.findByUserId(query.currentUser.id);
 
     if (!userEmailSetting) {
-      throw new NotFoundException('User email setting not found')
+      throw new NotFoundException('User email setting not found');
     }
 
-    return userEmailSettingMapper.toDto(userEmailSetting)
+    return userEmailSettingMapper.toDto(userEmailSetting);
   }
 }

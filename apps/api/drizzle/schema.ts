@@ -10,9 +10,9 @@ import type {
   UserPasswordVerificationId,
   UserSocialId,
   WishlistId,
-} from '@wishlist/common'
+} from '@wishlist/common';
 
-import { sql } from 'drizzle-orm'
+import { sql } from 'drizzle-orm';
 import {
   boolean,
   check,
@@ -25,22 +25,22 @@ import {
   unique,
   uniqueIndex,
   varchar,
-} from 'drizzle-orm/pg-core'
+} from 'drizzle-orm/pg-core';
 
-import { brandedUuid, numericNullable, timestamps, timestampWithTimezone } from './helpers'
+import { brandedUuid, numericNullable, timestamps, timestampWithTimezone } from './helpers';
 
 // Custom branded UUID types
-const eventId = brandedUuid<EventId>()
-const attendeeId = brandedUuid<AttendeeId>()
-const userId = brandedUuid<UserId>()
-const userPasswordVerificationId = brandedUuid<UserPasswordVerificationId>()
-const userEmailChangeVerificationId = brandedUuid<UserEmailChangeVerificationId>()
-const userEmailSettingId = brandedUuid<UserEmailSettingId>()
-const userSocialId = brandedUuid<UserSocialId>()
-const secretSantaId = brandedUuid<SecretSantaId>()
-const secretSantaUserId = brandedUuid<SecretSantaUserId>()
-const wishlistId = brandedUuid<WishlistId>()
-const itemId = brandedUuid<ItemId>()
+const eventId = brandedUuid<EventId>();
+const attendeeId = brandedUuid<AttendeeId>();
+const userId = brandedUuid<UserId>();
+const userPasswordVerificationId = brandedUuid<UserPasswordVerificationId>();
+const userEmailChangeVerificationId = brandedUuid<UserEmailChangeVerificationId>();
+const userEmailSettingId = brandedUuid<UserEmailSettingId>();
+const userSocialId = brandedUuid<UserSocialId>();
+const secretSantaId = brandedUuid<SecretSantaId>();
+const secretSantaUserId = brandedUuid<SecretSantaUserId>();
+const wishlistId = brandedUuid<WishlistId>();
+const itemId = brandedUuid<ItemId>();
 
 export const event = pgTable('event', {
   id: eventId().primaryKey().notNull(),
@@ -49,7 +49,7 @@ export const event = pgTable('event', {
   icon: varchar({ length: 10 }),
   eventDate: date('event_date').notNull(),
   ...timestamps,
-})
+});
 
 export const eventAttendee = pgTable(
   'event_attendee',
@@ -69,7 +69,7 @@ export const eventAttendee = pgTable(
       sql`((user_id IS NOT NULL) AND (temp_user_email IS NULL)) OR ((user_id IS NULL) AND (temp_user_email IS NOT NULL))`,
     ),
   ],
-)
+);
 
 export const userPasswordVerification = pgTable(
   'user_password_verification',
@@ -87,7 +87,7 @@ export const userPasswordVerification = pgTable(
       name: 'user_password_verification_user_id_fkey',
     }).onDelete('cascade'),
   ],
-)
+);
 
 export const userEmailChangeVerification = pgTable(
   'user_email_change_verification',
@@ -106,7 +106,7 @@ export const userEmailChangeVerification = pgTable(
       name: 'user_email_change_verification_user_id_fkey',
     }).onDelete('cascade'),
   ],
-)
+);
 
 export const userEmailSetting = pgTable(
   'user_email_setting',
@@ -124,7 +124,7 @@ export const userEmailSetting = pgTable(
     }).onDelete('cascade'),
     unique('user_email_setting_user_id_key').on(table.userId),
   ],
-)
+);
 
 export const userSocial = pgTable(
   'user_social',
@@ -145,7 +145,7 @@ export const userSocial = pgTable(
     unique('user_social_user_id_social_type_key').on(table.userId, table.socialType),
     unique('user_social_social_id_social_type_key').on(table.socialId, table.socialType),
   ],
-)
+);
 
 export const user = pgTable(
   'user',
@@ -164,7 +164,7 @@ export const user = pgTable(
     ...timestamps,
   },
   _ => [uniqueIndex('user_email_unique_idx').using('btree', sql`lower((email)::text)`)],
-)
+);
 
 export const wishlist = pgTable(
   'wishlist',
@@ -183,7 +183,7 @@ export const wishlist = pgTable(
     foreignKey({ columns: [table.coOwnerId], foreignColumns: [user.id] }).onDelete('set null'),
     check('chk_co_owner', sql`co_owner_id IS DISTINCT FROM owner_id`),
   ],
-)
+);
 
 export const item = pgTable(
   'item',
@@ -204,7 +204,7 @@ export const item = pgTable(
     foreignKey({ columns: [table.importSourceId], foreignColumns: [table.id] }).onDelete('set null'),
     check('chk_import_source_id', sql`import_source_id IS DISTINCT FROM id`),
   ],
-)
+);
 
 export const itemTaker = pgTable(
   'item_taker',
@@ -218,7 +218,7 @@ export const itemTaker = pgTable(
     foreignKey({ columns: [table.itemId], foreignColumns: [item.id] }).onDelete('cascade'),
     foreignKey({ columns: [table.userId], foreignColumns: [user.id] }).onDelete('cascade'),
   ],
-)
+);
 
 export const secretSanta = pgTable(
   'secret_santa',
@@ -234,7 +234,7 @@ export const secretSanta = pgTable(
     foreignKey({ columns: [table.eventId], foreignColumns: [event.id] }).onDelete('cascade'),
     unique().on(table.eventId),
   ],
-)
+);
 
 export const secretSantaUser = pgTable(
   'secret_santa_user',
@@ -251,7 +251,7 @@ export const secretSantaUser = pgTable(
     foreignKey({ columns: [table.attendeeId], foreignColumns: [eventAttendee.id] }),
     uniqueIndex('secret_santa_user_secret_santa_id_attendee_id_key').on(table.secretSantaId, table.attendeeId),
   ],
-)
+);
 
 export const eventWishlist = pgTable(
   'event_wishlist',
@@ -264,4 +264,4 @@ export const eventWishlist = pgTable(
     foreignKey({ columns: [table.wishlistId], foreignColumns: [wishlist.id] }).onDelete('cascade'),
     foreignKey({ columns: [table.eventId], foreignColumns: [event.id] }).onDelete('cascade'),
   ],
-)
+);

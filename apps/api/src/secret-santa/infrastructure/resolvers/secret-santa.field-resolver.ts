@@ -1,18 +1,18 @@
-import { NotFoundException } from '@nestjs/common'
-import { Context, Parent, ResolveField, Resolver } from '@nestjs/graphql'
-import { type GraphQLContext } from '@wishlist/api/core'
+import { NotFoundException } from '@nestjs/common';
+import { Context, Parent, ResolveField, Resolver } from '@nestjs/graphql';
 
-import { type Event, type EventAttendee, type SecretSanta, type SecretSantaUser } from '../../../gql/generated-types'
+import { type GraphQLContext } from '../../../core/graphql/graphql.context';
+import { type Event, type EventAttendee, type SecretSanta, type SecretSantaUser } from '../../../gql/generated-types';
 
 @Resolver('SecretSanta')
 export class SecretSantaFieldResolver {
   @ResolveField()
   async event(@Parent() secretSanta: SecretSanta, @Context() ctx: GraphQLContext): Promise<Event> {
-    const event = await ctx.loaders.event.load(secretSanta.eventId)
+    const event = await ctx.loaders.event.load(secretSanta.eventId);
     if (!event) {
-      throw new NotFoundException(`Event with id ${secretSanta.eventId} of secret santa ${secretSanta.id} not found`)
+      throw new NotFoundException(`Event with id ${secretSanta.eventId} of secret santa ${secretSanta.id} not found`);
     }
-    return event
+    return event;
   }
 }
 
@@ -20,10 +20,10 @@ export class SecretSantaFieldResolver {
 export class SecretSantaUserFieldResolver {
   @ResolveField()
   async attendee(@Parent() user: SecretSantaUser, @Context() ctx: GraphQLContext): Promise<EventAttendee> {
-    const attendee = await ctx.loaders.eventAttendee.load(user.attendeeId)
+    const attendee = await ctx.loaders.eventAttendee.load(user.attendeeId);
     if (!attendee) {
-      throw new NotFoundException(`Attendee with id ${user.attendeeId} of secret santa user ${user.id} not found`)
+      throw new NotFoundException(`Attendee with id ${user.attendeeId} of secret santa user ${user.id} not found`);
     }
-    return attendee
+    return attendee;
   }
 }

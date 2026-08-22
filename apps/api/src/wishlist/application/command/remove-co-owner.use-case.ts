@@ -1,32 +1,33 @@
-import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common'
-import { REPOSITORIES } from '@wishlist/api/repositories'
-import { type ICurrentUser, type WishlistId } from '@wishlist/common'
+import type { WishlistRepository } from '../../domain/wishlist.repository';
 
-import { type WishlistRepository } from '../../domain'
+import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { type ICurrentUser, type WishlistId } from '@wishlist/common';
+
+import { REPOSITORIES } from '../../../repositories/repositories.constants';
 
 export type RemoveCoOwnerInput = {
-  currentUser: ICurrentUser
-  wishlistId: WishlistId
-}
+  currentUser: ICurrentUser;
+  wishlistId: WishlistId;
+};
 
 @Injectable()
 export class RemoveCoOwnerUseCase {
-  private readonly logger = new Logger(RemoveCoOwnerUseCase.name)
+  private readonly logger = new Logger(RemoveCoOwnerUseCase.name);
 
   constructor(@Inject(REPOSITORIES.WISHLIST) private readonly wishlistRepository: WishlistRepository) {}
 
   async execute(command: RemoveCoOwnerInput): Promise<void> {
-    this.logger.log('Remove co-owner request received', { command })
-    const wishlist = await this.wishlistRepository.findByIdOrFail(command.wishlistId)
+    this.logger.log('Remove co-owner request received', { command });
+    const wishlist = await this.wishlistRepository.findByIdOrFail(command.wishlistId);
 
     // Only the owner can remove the co-owner
     if (!wishlist.isOwner(command.currentUser.id)) {
-      throw new UnauthorizedException('Only the owner can remove the co-owner')
+      throw new UnauthorizedException('Only the owner can remove the co-owner');
     }
 
-    const updatedWishlist = wishlist.removeCoOwner()
+    const updatedWishlist = wishlist.removeCoOwner();
 
-    this.logger.log('Saving wishlist...', { wishlistId: updatedWishlist.id, updatedFields: ['coOwner'] })
-    await this.wishlistRepository.save(updatedWishlist)
+    this.logger.log('Saving wishlist...', { wishlistId: updatedWishlist.id, updatedFields: ['coOwner'] });
+    await this.wishlistRepository.save(updatedWishlist);
   }
 }

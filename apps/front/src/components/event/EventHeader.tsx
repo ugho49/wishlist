@@ -1,11 +1,11 @@
-import type { EventId } from '@wishlist/common'
-import type { EventAttendee } from './event.types'
+import type { EventId } from '@wishlist/common';
+import type { EventAttendee } from './event.types';
 
-import AccessTimeIcon from '@mui/icons-material/AccessTime'
-import CardGiftcardIcon from '@mui/icons-material/CardGiftcard'
-import EditIcon from '@mui/icons-material/Edit'
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
-import PeopleIcon from '@mui/icons-material/People'
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
+import EditIcon from '@mui/icons-material/Edit';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import PeopleIcon from '@mui/icons-material/People';
 import {
   Box,
   Button,
@@ -20,13 +20,13 @@ import {
   Tooltip,
   Typography,
   useMediaQuery,
-} from '@mui/material'
-import { useNavigate } from '@tanstack/react-router'
-import { DateTime } from 'luxon'
-import { useCallback, useState } from 'react'
+} from '@mui/material';
+import { useNavigate } from '@tanstack/react-router';
+import { DateTime } from 'luxon';
+import { useCallback, useState } from 'react';
 
-import { TabValues } from '../../routes/_authenticated/_with-layout/events/$eventId/edit'
-import { EventIcon } from './EventIcon'
+import { TabValues } from '../../routes/_authenticated/_with-layout/events/$eventId/edit';
+import { EventIcon } from './EventIcon';
 
 const HeaderContent = styled(Box)(({ theme }) => ({
   display: 'flex',
@@ -40,20 +40,20 @@ const HeaderContent = styled(Box)(({ theme }) => ({
     flexDirection: 'column',
     gap: theme.spacing(2),
   },
-}))
+}));
 
 const LeftSection = styled(Stack)(({ theme }) => ({
   flexDirection: 'row',
   gap: theme.spacing(3),
   alignItems: 'center',
   flex: 1,
-}))
+}));
 
 const TitleContainer = styled(Stack)(({ theme }) => ({
   gap: theme.spacing(1),
   flex: 1,
   minWidth: 0,
-}))
+}));
 
 const EventTitle = styled(Box)(({ theme }) => ({
   fontWeight: 400,
@@ -69,7 +69,7 @@ const EventTitle = styled(Box)(({ theme }) => ({
   [theme.breakpoints.up('md')]: {
     fontSize: '1.5rem',
   },
-}))
+}));
 
 const MetadataStack = styled(Stack)(({ theme }) => ({
   flexDirection: 'row',
@@ -81,14 +81,14 @@ const MetadataStack = styled(Stack)(({ theme }) => ({
     flexDirection: 'column',
     gap: theme.spacing(1),
   },
-}))
+}));
 
 const MetadataBox = styled(Box)(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   gap: theme.spacing(0.5),
   color: theme.palette.text.secondary,
-}))
+}));
 
 const ClickableMetadataBox = styled(MetadataBox)(({ theme }) => ({
   cursor: 'pointer',
@@ -96,13 +96,13 @@ const ClickableMetadataBox = styled(MetadataBox)(({ theme }) => ({
   '&:hover': {
     color: theme.palette.primary.main,
   },
-}))
+}));
 
 const RightSection = styled(Box)(({ theme }) => ({
   display: 'flex',
   gap: theme.spacing(1),
   alignItems: 'center',
-}))
+}));
 
 const UpdateButton = styled(Button)(({ theme }) => ({
   textTransform: 'none',
@@ -111,7 +111,7 @@ const UpdateButton = styled(Button)(({ theme }) => ({
   fontSize: '0.875rem',
   padding: theme.spacing(1, 2),
   border: `1px solid ${theme.palette.divider}`,
-}))
+}));
 
 const CompactIconButton = styled(IconButton)(({ theme }) => ({
   border: `1px solid ${theme.palette.divider}`,
@@ -119,17 +119,17 @@ const CompactIconButton = styled(IconButton)(({ theme }) => ({
   padding: theme.spacing(1),
   height: '40px',
   width: '40px',
-}))
+}));
 
 const ReponsiveUpdateButton = (props: { eventId: EventId }) => {
-  const { eventId } = props
-  const isDownMd = useMediaQuery(theme => theme.breakpoints.down('md'))
-  const isUpSm = useMediaQuery(theme => theme.breakpoints.up('sm'))
-  const navigate = useNavigate()
+  const { eventId } = props;
+  const isDownMd = useMediaQuery(theme => theme.breakpoints.down('md'));
+  const isUpSm = useMediaQuery(theme => theme.breakpoints.up('sm'));
+  const navigate = useNavigate();
 
   const handleNavigateToEdit = useCallback(() => {
-    void navigate({ to: '/events/$eventId/edit', params: { eventId } })
-  }, [navigate, eventId])
+    void navigate({ to: '/events/$eventId/edit', params: { eventId } });
+  }, [navigate, eventId]);
 
   if (isDownMd && isUpSm) {
     return (
@@ -138,25 +138,25 @@ const ReponsiveUpdateButton = (props: { eventId: EventId }) => {
           <EditIcon fontSize="small" />
         </CompactIconButton>
       </Tooltip>
-    )
+    );
   }
 
   return (
     <UpdateButton variant="outlined" color="primary" startIcon={<EditIcon />} onClick={handleNavigateToEdit}>
       Modifier
     </UpdateButton>
-  )
-}
+  );
+};
 
 export type EventHeaderProps = {
-  icon?: string
-  title: string
-  eventDate: string
-  eventId: EventId
-  attendees: EventAttendee[]
-  currentUserCanEdit: boolean
-  openAttendeesDialog: () => void
-}
+  icon?: string;
+  title: string;
+  eventDate: string;
+  eventId: EventId;
+  attendees: EventAttendee[];
+  currentUserCanEdit: boolean;
+  openAttendeesDialog: () => void;
+};
 
 export const EventHeader = ({
   icon,
@@ -167,27 +167,27 @@ export const EventHeader = ({
   currentUserCanEdit,
   openAttendeesDialog,
 }: EventHeaderProps) => {
-  const navigate = useNavigate()
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
-  const menuOpen = Boolean(anchorEl)
+  const navigate = useNavigate();
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const menuOpen = Boolean(anchorEl);
 
   const handleOpenMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget)
-  }
+    setAnchorEl(event.currentTarget);
+  };
 
   const handleCloseMenu = () => {
-    setAnchorEl(null)
-  }
+    setAnchorEl(null);
+  };
 
   const handleSecretSanta = () => {
-    handleCloseMenu()
-    void navigate({ to: '/events/$eventId/edit', params: { eventId }, search: { tab: TabValues.secretSanta } })
-  }
+    handleCloseMenu();
+    void navigate({ to: '/events/$eventId/edit', params: { eventId }, search: { tab: TabValues.secretSanta } });
+  };
 
   const handleAttendees = () => {
-    handleCloseMenu()
-    void navigate({ to: '/events/$eventId/edit', params: { eventId }, search: { tab: TabValues.attendees } })
-  }
+    handleCloseMenu();
+    void navigate({ to: '/events/$eventId/edit', params: { eventId }, search: { tab: TabValues.attendees } });
+  };
 
   return (
     <Container maxWidth="lg">
@@ -261,5 +261,5 @@ export const EventHeader = ({
         </MenuItem>
       </Menu>
     </Container>
-  )
-}
+  );
+};

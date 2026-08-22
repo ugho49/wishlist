@@ -1,5 +1,5 @@
-import { PinoLogger } from 'pino-nestjs'
-import { Store, storage } from 'pino-nestjs/dist/storage'
+import { PinoLogger } from 'pino-nestjs';
+import { Store, storage } from 'pino-nestjs/dist/storage';
 
 /**
  * Decorator that wraps BullMQ processor methods with Pino async context storage.
@@ -19,16 +19,14 @@ import { Store, storage } from 'pino-nestjs/dist/storage'
  * ```
  */
 export function WithPinoContext(): MethodDecorator {
-  return (target: unknown, propertyKey: string | symbol, descriptor: PropertyDescriptor) => {
-    const originalMethod = descriptor.value
+  return (_target: unknown, _propertyKey: string | symbol, descriptor: PropertyDescriptor) => {
+    const originalMethod = descriptor.value;
 
     descriptor.value = function (...args: unknown[]) {
       // Create a new Pino logger context for this job execution
-      return storage.run(new Store(PinoLogger.root.child({})), async () => {
-        return await originalMethod.apply(this, args)
-      })
-    }
+      return storage.run(new Store(PinoLogger.root.child({})), async () => await originalMethod.apply(this, args));
+    };
 
-    return descriptor
-  }
+    return descriptor;
+  };
 }

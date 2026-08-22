@@ -1,12 +1,12 @@
-import { Link, Section, Text } from 'react-email'
+import { Link, Section, Text } from 'react-email';
 
-import { EmailLayout } from '../components/layout'
-import { Callout, ContentSection, Heading, Paragraph, PrimaryButton } from '../components/ui'
-import * as styles from '../styles'
+import { EmailLayout } from '../components/layout';
+import { Callout, ContentSection, Heading, Paragraph, PrimaryButton } from '../components/ui';
+import * as styles from '../styles';
 
 export interface ConfirmEmailChangeEmailProps {
-  readonly url: string
-  readonly newEmail: string
+  readonly url: string;
+  readonly newEmail: string;
 }
 
 export default function ConfirmEmailChangeEmail({ url, newEmail }: ConfirmEmailChangeEmailProps) {
@@ -56,10 +56,10 @@ export default function ConfirmEmailChangeEmail({ url, newEmail }: ConfirmEmailC
         </Paragraph>
       </ContentSection>
     </EmailLayout>
-  )
+  );
 }
 
 ConfirmEmailChangeEmail.PreviewProps = {
   url: 'https://wishlistapp.fr/confirm-email?token=preview',
   newEmail: 'nouvelle.adresse@example.com',
-} satisfies ConfirmEmailChangeEmailProps
+} satisfies ConfirmEmailChangeEmailProps;

@@ -1,4 +1,4 @@
-import type { RootState } from '../../core'
+import type { RootState } from '../../core/store';
 
 import {
   Backdrop,
@@ -11,29 +11,29 @@ import {
   styled,
   Typography,
   Zoom,
-} from '@mui/material'
-import { useQueryClient } from '@tanstack/react-query'
-import { useDispatch, useSelector } from 'react-redux'
-import { match } from 'ts-pattern'
+} from '@mui/material';
+import { useQueryClient } from '@tanstack/react-query';
+import { useDispatch, useSelector } from 'react-redux';
+import { match } from 'ts-pattern';
 
-import { uploadUserPicture } from '../../api/upload'
-import { updatePicture } from '../../core/store/features'
+import { uploadUserPicture } from '../../api/upload';
+import { updatePicture } from '../../core/store/features/userProfileSlice';
 import {
   rejectionMessage,
   rejectionPattern,
   useRemoveCurrentUserPictureMutation,
   useUpdateUserPictureFromSocialMutation,
   useUserProfileCurrentUserQuery,
-} from '../../gql'
-import { useToast } from '../../hooks/useToast'
-import { AvatarUpdateButton } from './AvatarUpdateButton'
+} from '../../gql';
+import { useToast } from '../../hooks/useToast';
+import { AvatarUpdateButton } from './AvatarUpdateButton';
 
 type ProfilePicturePromptModalProps = {
-  open: boolean
-  onClose: () => void
-}
+  open: boolean;
+  onClose: () => void;
+};
 
-const mapState = (state: RootState) => state.userProfile.pictureUrl
+const mapState = (state: RootState) => state.userProfile.pictureUrl;
 
 const StyledDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialog-paper': {
@@ -42,12 +42,12 @@ const StyledDialog = styled(Dialog)(({ theme }) => ({
     maxWidth: 500,
     width: '90vw',
   },
-}))
+}));
 
 const StyledBackdrop = styled(Backdrop)(() => ({
   backdropFilter: 'blur(8px)',
   backgroundColor: 'rgba(0, 0, 0, 0.3)',
-}))
+}));
 
 const HeaderSection = styled(Box)(({ theme }) => ({
   marginBottom: theme.spacing(3),
@@ -55,57 +55,57 @@ const HeaderSection = styled(Box)(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing(2),
-}))
+}));
 
 const ModalTitle = styled(Typography)(({ theme }) => ({
   fontSize: '1.5rem',
   fontWeight: 600,
   color: theme.palette.text.primary,
   marginBottom: theme.spacing(1),
-}))
+}));
 
 const ModalDescription = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
   lineHeight: 1.6,
-}))
+}));
 
 const ActionSection = styled(Stack)(({ theme }) => ({
   gap: theme.spacing(2),
-}))
+}));
 
 const PrimaryButton = styled(Button)(({ theme }) => ({
   padding: theme.spacing(1.5, 4),
   fontSize: '1rem',
   fontWeight: 600,
   borderRadius: theme.spacing(3),
-}))
+}));
 
 const SecondaryButton = styled(Button)(({ theme }) => ({
   padding: theme.spacing(1, 2),
   fontSize: '0.9rem',
-}))
+}));
 
 export const ProfilePicturePromptModal = ({ open, onClose }: ProfilePicturePromptModalProps) => {
-  const dispatch = useDispatch()
-  const queryClient = useQueryClient()
-  const { addToast } = useToast()
+  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
+  const { addToast } = useToast();
   const { data } = useUserProfileCurrentUserQuery(undefined, {
     select: d => d.currentUser,
-  })
-  const user = data?.__typename === 'User' ? data : undefined
-  const pictureUrl = useSelector(mapState)
+  });
+  const user = data?.__typename === 'User' ? data : undefined;
+  const pictureUrl = useSelector(mapState);
 
-  const { mutateAsync: updatePictureFromSocial } = useUpdateUserPictureFromSocialMutation()
-  const { mutateAsync: removePicture } = useRemoveCurrentUserPictureMutation()
+  const { mutateAsync: updatePictureFromSocial } = useUpdateUserPictureFromSocialMutation();
+  const { mutateAsync: removePicture } = useRemoveCurrentUserPictureMutation();
 
   const handleClose = () => {
-    onClose()
-  }
+    onClose();
+  };
 
   const handlePictureUpdated = (newPictureUrl: string | undefined) => {
-    dispatch(updatePicture(newPictureUrl))
-    void queryClient.invalidateQueries({ queryKey: ['UserProfileCurrentUser'] })
-  }
+    dispatch(updatePicture(newPictureUrl));
+    void queryClient.invalidateQueries({ queryKey: ['UserProfileCurrentUser'] });
+  };
 
   return (
     <StyledDialog open={open} slots={{ backdrop: StyledBackdrop, transition: Zoom }} maxWidth="sm" fullWidth>
@@ -124,26 +124,26 @@ export const ProfilePicturePromptModal = ({ open, onClose }: ProfilePicturePromp
           onPictureUpdated={handlePictureUpdated}
           uploadPictureHandler={file => uploadUserPicture(file)}
           updatePictureFromSocialHandler={async socialId => {
-            const res = await updatePictureFromSocial({ input: { socialId } })
+            const res = await updatePictureFromSocial({ input: { socialId } });
             match(res.updateUserPictureFromSocial)
               .with({ __typename: 'VoidOutput' }, () => undefined)
               .with(rejectionPattern, rejection => {
-                addToast({ message: rejectionMessage(rejection), variant: 'error' })
+                addToast({ message: rejectionMessage(rejection), variant: 'error' });
                 // AvatarUpdateButton applies the new picture unless the handler throws
-                throw new Error(rejectionMessage(rejection))
+                throw new Error(rejectionMessage(rejection));
               })
-              .exhaustive()
+              .exhaustive();
           }}
           deletePictureHandler={async () => {
-            const res = await removePicture({})
+            const res = await removePicture({});
             match(res.removeUserPicture)
               .with({ __typename: 'VoidOutput' }, () => undefined)
               .with(rejectionPattern, rejection => {
-                addToast({ message: rejectionMessage(rejection), variant: 'error' })
+                addToast({ message: rejectionMessage(rejection), variant: 'error' });
                 // AvatarUpdateButton removes the picture unless the handler throws
-                throw new Error(rejectionMessage(rejection))
+                throw new Error(rejectionMessage(rejection));
               })
-              .exhaustive()
+              .exhaustive();
           }}
           size="120px"
         />
@@ -164,5 +164,5 @@ export const ProfilePicturePromptModal = ({ open, onClose }: ProfilePicturePromp
         </ActionSection>
       </DialogActions>
     </StyledDialog>
-  )
-}
+  );
+};

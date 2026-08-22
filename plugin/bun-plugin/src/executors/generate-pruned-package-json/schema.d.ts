@@ -1,4 +1,4 @@
 export interface GeneratePrunedPackageJsonExecutorSchema {
-  outputPath: string
-  lockfileOutputPath?: string
+  outputPath: string;
+  lockfileOutputPath?: string;
 }

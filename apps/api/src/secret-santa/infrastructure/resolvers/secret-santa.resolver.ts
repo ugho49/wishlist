@@ -1,11 +1,11 @@
-import type { ICurrentUser } from '@wishlist/common'
+import type { ICurrentUser } from '@wishlist/common';
 
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql'
-import { GqlCurrentUser } from '@wishlist/api/auth'
-import { ZodPipe } from '@wishlist/api/core'
-import { eventMapper } from '@wishlist/api/event'
-import { type EventId, type SecretSantaId, type SecretSantaUserId } from '@wishlist/common'
+import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { type EventId, type SecretSantaId, type SecretSantaUserId } from '@wishlist/common';
 
+import { GqlCurrentUser } from '../../../auth/infrastructure/decorators/user.decorator';
+import { ZodPipe } from '../../../core/graphql/zod-pipe';
+import { eventMapper } from '../../../event/infrastructure/event.mapper';
 import {
   type AddSecretSantaUsersInput,
   type AddSecretSantaUsersResult,
@@ -21,18 +21,18 @@ import {
   type UpdateSecretSantaResult,
   type UpdateSecretSantaUserInput,
   type UpdateSecretSantaUserResult,
-} from '../../../gql/generated-types'
-import { AddSecretSantaUsersUseCase } from '../../application/command/add-secret-santa-users.use-case'
-import { CancelSecretSantaUseCase } from '../../application/command/cancel-secret-santa.use-case'
-import { CreateSecretSantaUseCase } from '../../application/command/create-secret-santa.use-case'
-import { DeleteSecretSantaUseCase } from '../../application/command/delete-secret-santa.use-case'
-import { DeleteSecretSantaUserUseCase } from '../../application/command/delete-secret-santa-user.use-case'
-import { StartSecretSantaUseCase } from '../../application/command/start-secret-santa.use-case'
-import { UpdateSecretSantaUseCase } from '../../application/command/update-secret-santa.use-case'
-import { UpdateSecretSantaUserUseCase } from '../../application/command/update-secret-santa-user.use-case'
-import { GetSecretSantaUseCase } from '../../application/query/get-secret-santa.use-case'
-import { GetSecretSantaDrawUseCase } from '../../application/query/get-secret-santa-draw.use-case'
-import { secretSantaGqlMapper } from '../secret-santa.gql-mapper'
+} from '../../../gql/generated-types';
+import { AddSecretSantaUsersUseCase } from '../../application/command/add-secret-santa-users.use-case';
+import { CancelSecretSantaUseCase } from '../../application/command/cancel-secret-santa.use-case';
+import { CreateSecretSantaUseCase } from '../../application/command/create-secret-santa.use-case';
+import { DeleteSecretSantaUseCase } from '../../application/command/delete-secret-santa.use-case';
+import { DeleteSecretSantaUserUseCase } from '../../application/command/delete-secret-santa-user.use-case';
+import { StartSecretSantaUseCase } from '../../application/command/start-secret-santa.use-case';
+import { UpdateSecretSantaUseCase } from '../../application/command/update-secret-santa.use-case';
+import { UpdateSecretSantaUserUseCase } from '../../application/command/update-secret-santa-user.use-case';
+import { GetSecretSantaUseCase } from '../../application/query/get-secret-santa.use-case';
+import { GetSecretSantaDrawUseCase } from '../../application/query/get-secret-santa-draw.use-case';
+import { secretSantaGqlMapper } from '../secret-santa.gql-mapper';
 import {
   AddSecretSantaUsersInputSchema,
   CreateSecretSantaInputSchema,
@@ -41,7 +41,7 @@ import {
   SecretSantaUserIdSchema,
   UpdateSecretSantaInputSchema,
   UpdateSecretSantaUserInputSchema,
-} from '../secret-santa.schema'
+} from '../secret-santa.schema';
 
 @Resolver()
 export class SecretSantaResolver {
@@ -63,9 +63,9 @@ export class SecretSantaResolver {
     @Args('eventId', new ZodPipe(EventIdSchema)) eventId: EventId,
     @GqlCurrentUser() currentUser: ICurrentUser,
   ): Promise<GetSecretSantaForEventResult | null> {
-    const result = await this.getSecretSantaUseCase.execute({ currentUser, eventId })
-    if (!result) return null
-    return secretSantaGqlMapper.toGqlSecretSanta(result)
+    const result = await this.getSecretSantaUseCase.execute({ currentUser, eventId });
+    if (!result) return null;
+    return secretSantaGqlMapper.toGqlSecretSanta(result);
   }
 
   @Query()
@@ -73,9 +73,9 @@ export class SecretSantaResolver {
     @Args('eventId', new ZodPipe(EventIdSchema)) eventId: EventId,
     @GqlCurrentUser() currentUser: ICurrentUser,
   ): Promise<GetMySecretSantaDrawResult | null> {
-    const result = await this.getSecretSantaDrawUseCase.execute({ currentUser, eventId })
-    if (!result) return null
-    return eventMapper.toGqlEventAttendeeFromDto(result)
+    const result = await this.getSecretSantaDrawUseCase.execute({ currentUser, eventId });
+    if (!result) return null;
+    return eventMapper.toGqlEventAttendeeFromDto(result);
   }
 
   @Mutation()
@@ -88,9 +88,9 @@ export class SecretSantaResolver {
       eventId: input.eventId,
       budget: input.budget ?? undefined,
       description: input.description ?? undefined,
-    })
+    });
 
-    return secretSantaGqlMapper.toGqlSecretSanta(result)
+    return secretSantaGqlMapper.toGqlSecretSanta(result);
   }
 
   @Mutation()
@@ -104,9 +104,9 @@ export class SecretSantaResolver {
       currentUser,
       description: input.description ?? undefined,
       budget: input.budget ?? undefined,
-    })
+    });
 
-    return { __typename: 'VoidOutput', success: true }
+    return { __typename: 'VoidOutput', success: true };
   }
 
   @Mutation()
@@ -114,8 +114,8 @@ export class SecretSantaResolver {
     @Args('id', new ZodPipe(SecretSantaIdSchema)) id: SecretSantaId,
     @GqlCurrentUser() currentUser: ICurrentUser,
   ): Promise<DeleteSecretSantaResult> {
-    await this.deleteSecretSantaUseCase.execute({ currentUser, secretSantaId: id })
-    return { __typename: 'VoidOutput', success: true }
+    await this.deleteSecretSantaUseCase.execute({ currentUser, secretSantaId: id });
+    return { __typename: 'VoidOutput', success: true };
   }
 
   @Mutation()
@@ -123,8 +123,8 @@ export class SecretSantaResolver {
     @Args('id', new ZodPipe(SecretSantaIdSchema)) id: SecretSantaId,
     @GqlCurrentUser() currentUser: ICurrentUser,
   ): Promise<StartSecretSantaResult> {
-    await this.startSecretSantaUseCase.execute({ secretSantaId: id, currentUser })
-    return { __typename: 'VoidOutput', success: true }
+    await this.startSecretSantaUseCase.execute({ secretSantaId: id, currentUser });
+    return { __typename: 'VoidOutput', success: true };
   }
 
   @Mutation()
@@ -132,8 +132,8 @@ export class SecretSantaResolver {
     @Args('id', new ZodPipe(SecretSantaIdSchema)) id: SecretSantaId,
     @GqlCurrentUser() currentUser: ICurrentUser,
   ): Promise<CancelSecretSantaResult> {
-    await this.cancelSecretSantaUseCase.execute({ secretSantaId: id, currentUser })
-    return { __typename: 'VoidOutput', success: true }
+    await this.cancelSecretSantaUseCase.execute({ secretSantaId: id, currentUser });
+    return { __typename: 'VoidOutput', success: true };
   }
 
   @Mutation()
@@ -146,12 +146,12 @@ export class SecretSantaResolver {
       secretSantaId: id,
       currentUser,
       attendeeIds: input.attendeeIds,
-    })
+    });
 
     return {
       __typename: 'AddSecretSantaUsersOutput',
       users: users.map(secretSantaGqlMapper.toGqlSecretSantaUser),
-    }
+    };
   }
 
   @Mutation()
@@ -166,9 +166,9 @@ export class SecretSantaResolver {
       secretSantaUserId,
       currentUser,
       exclusions: input.exclusions,
-    })
+    });
 
-    return { __typename: 'VoidOutput', success: true }
+    return { __typename: 'VoidOutput', success: true };
   }
 
   @Mutation()
@@ -177,7 +177,7 @@ export class SecretSantaResolver {
     @Args('secretSantaUserId', new ZodPipe(SecretSantaUserIdSchema)) secretSantaUserId: SecretSantaUserId,
     @GqlCurrentUser() currentUser: ICurrentUser,
   ): Promise<DeleteSecretSantaUserResult> {
-    await this.deleteSecretSantaUserUseCase.execute({ secretSantaId: id, secretSantaUserId, currentUser })
-    return { __typename: 'VoidOutput', success: true }
+    await this.deleteSecretSantaUserUseCase.execute({ secretSantaId: id, secretSantaUserId, currentUser });
+    return { __typename: 'VoidOutput', success: true };
   }
 }

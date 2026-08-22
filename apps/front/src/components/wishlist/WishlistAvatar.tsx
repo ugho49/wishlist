@@ -1,6 +1,6 @@
-import PersonIcon from '@mui/icons-material/Person'
-import { Avatar, type SvgIconOwnProps, type SxProps, styled, type Theme } from '@mui/material'
-import clsx from 'clsx'
+import PersonIcon from '@mui/icons-material/Person';
+import { Avatar, type SvgIconOwnProps, type SxProps, styled, type Theme } from '@mui/material';
+import clsx from 'clsx';
 
 const AvatarStyled = styled(Avatar)(({ theme }) => ({
   width: '65px',
@@ -16,19 +16,17 @@ const AvatarStyled = styled(Avatar)(({ theme }) => ({
   '&.no-background': {
     background: 'none',
   },
-}))
+}));
 
 export type WishlistAvatarProps = {
-  src?: string
-  className?: string
-  sx?: SxProps<Theme>
-  iconSize?: SvgIconOwnProps['fontSize']
-}
+  src?: string;
+  className?: string;
+  sx?: SxProps<Theme>;
+  iconSize?: SvgIconOwnProps['fontSize'];
+};
 
-export const WishlistAvatar = ({ src, className, sx, iconSize = 'medium' }: WishlistAvatarProps) => {
-  return (
-    <AvatarStyled src={src} className={clsx(className, src && 'no-background')} sx={sx}>
-      <PersonIcon fontSize={iconSize} />
-    </AvatarStyled>
-  )
-}
+export const WishlistAvatar = ({ src, className, sx, iconSize = 'medium' }: WishlistAvatarProps) => (
+  <AvatarStyled src={src} className={clsx(className, src && 'no-background')} sx={sx}>
+    <PersonIcon fontSize={iconSize} />
+  </AvatarStyled>
+);

@@ -1,23 +1,23 @@
-import type { GridColDef } from '@mui/x-data-grid'
-import type { FormEvent } from 'react'
-import type { AdminUsersListQuery } from '../../../gql'
+import type { GridColDef } from '@mui/x-data-grid';
+import type { FormEvent } from 'react';
+import type { AdminUsersListQuery } from '../../../gql';
 
-import { Alert, Avatar, Box, Button, Stack, styled, TextField } from '@mui/material'
-import { DataGrid } from '@mui/x-data-grid'
-import { useNavigate, useSearch } from '@tanstack/react-router'
-import { Card } from '@wishlist/front-components/common/Card'
-import { Title } from '@wishlist/front-components/common/Title'
-import { DateTime } from 'luxon'
-import { useEffect, useState } from 'react'
+import { Alert, Avatar, Box, Button, Stack, styled, TextField } from '@mui/material';
+import { DataGrid } from '@mui/x-data-grid';
+import { useNavigate, useSearch } from '@tanstack/react-router';
+import { Card } from '@wishlist/front-components/common/Card';
+import { Title } from '@wishlist/front-components/common/Title';
+import { DateTime } from 'luxon';
+import { useEffect, useState } from 'react';
 
-import { isRejection, rejectionMessage, useAdminUsersListQuery } from '../../../gql'
-import { Status } from '../../common/Status'
+import { isRejection, rejectionMessage, useAdminUsersListQuery } from '../../../gql';
+import { Status } from '../../common/Status';
 
-type AdminUserRow = Extract<AdminUsersListQuery['adminUsers'], { __typename: 'AdminGetAllUsers' }>['data'][number]
+type AdminUserRow = Extract<AdminUsersListQuery['adminUsers'], { __typename: 'AdminGetAllUsers' }>['data'][number];
 
 const SearchButton = styled(Button)(() => ({
   padding: '8px 10px',
-}))
+}));
 
 const columns: GridColDef<AdminUserRow>[] = [
   {
@@ -60,36 +60,36 @@ const columns: GridColDef<AdminUserRow>[] = [
     valueGetter: (_, row) => new Date(row.createdAt),
     renderCell: ({ value }) => DateTime.fromJSDate(value).toLocaleString(DateTime.DATETIME_MED),
   },
-]
+];
 
 export const AdminListUsers = () => {
-  const [totalElements, setTotalElements] = useState(0)
-  const [pageSize, setPageSize] = useState(0)
-  const { page: currentPage, search } = useSearch({ from: '/_authenticated/_with-layout/admin/users/' })
-  const [inputSearch, setInputSearch] = useState(search)
-  const navigate = useNavigate()
+  const [totalElements, setTotalElements] = useState(0);
+  const [pageSize, setPageSize] = useState(0);
+  const { page: currentPage, search } = useSearch({ from: '/_authenticated/_with-layout/admin/users/' });
+  const [inputSearch, setInputSearch] = useState(search);
+  const navigate = useNavigate();
 
   const { data, isLoading: loading } = useAdminUsersListQuery(
     { input: { page: currentPage, criteria: search } },
     { select: d => d.adminUsers },
-  )
-  const value = data?.__typename === 'AdminGetAllUsers' ? data : undefined
-  const queryRejection = data && isRejection(data) ? data : undefined
+  );
+  const value = data?.__typename === 'AdminGetAllUsers' ? data : undefined;
+  const queryRejection = data && isRejection(data) ? data : undefined;
 
   useEffect(() => {
     if (value) {
-      setTotalElements(value.pagination.totalElements)
-      setPageSize(value.pagination.pageSize)
+      setTotalElements(value.pagination.totalElements);
+      setPageSize(value.pagination.pageSize);
     }
-  }, [value])
+  }, [value]);
 
   const applySearch = (e: FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     void navigate({
       to: '/admin/users',
       search: prev => ({ ...prev, page: 1, search: inputSearch }),
-    })
-  }
+    });
+  };
 
   return (
     <Box>
@@ -130,7 +130,7 @@ export const AdminListUsers = () => {
             localeText={{
               noRowsLabel: 'Aucun utilisateur',
             }}
-            onRowClick={data => navigate({ to: '/admin/users/$userId', params: { userId: data.row.id } })}
+            onRowClick={({ row }) => navigate({ to: '/admin/users/$userId', params: { userId: row.id } })}
             density="standard"
             rows={value?.data || []}
             loading={loading}
@@ -153,5 +153,5 @@ export const AdminListUsers = () => {
         )}
       </Card>
     </Box>
-  )
-}
+  );
+};

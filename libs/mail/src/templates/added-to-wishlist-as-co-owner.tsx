@@ -1,13 +1,13 @@
-import { Section, Text } from 'react-email'
+import { Section, Text } from 'react-email';
 
-import { EmailLayout } from '../components/layout'
-import { ButtonFallback, Callout, ContentSection, Heading, Paragraph, PrimaryButton } from '../components/ui'
-import * as styles from '../styles'
+import { EmailLayout } from '../components/layout';
+import { ButtonFallback, Callout, ContentSection, Heading, Paragraph, PrimaryButton } from '../components/ui';
+import * as styles from '../styles';
 
 export interface AddedToWishlistAsCoOwnerEmailProps {
-  readonly wishlistTitle: string
-  readonly wishlistUrl: string
-  readonly invitedBy: string
+  readonly wishlistTitle: string;
+  readonly wishlistUrl: string;
+  readonly invitedBy: string;
 }
 
 export default function AddedToWishlistAsCoOwnerEmail({
@@ -81,11 +81,11 @@ export default function AddedToWishlistAsCoOwnerEmail({
         <ButtonFallback href={wishlistUrl} />
       </Section>
     </EmailLayout>
-  )
+  );
 }
 
 AddedToWishlistAsCoOwnerEmail.PreviewProps = {
   wishlistTitle: 'Ma liste de Noël',
   wishlistUrl: 'https://wishlistapp.fr/wishlists/preview',
   invitedBy: 'Marie Dupont',
-} satisfies AddedToWishlistAsCoOwnerEmailProps
+} satisfies AddedToWishlistAsCoOwnerEmailProps;

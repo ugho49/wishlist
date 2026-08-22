@@ -1,18 +1,21 @@
-import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common'
-import { EventBus } from '@nestjs/cqrs'
-import { TransactionManager } from '@wishlist/api/core'
-import { REPOSITORIES } from '@wishlist/api/repositories'
+import type { UserRepository } from '../../domain/repository/user.repository';
+import type { UserEmailChangeVerificationRepository } from '../../domain/repository/user-email-change-verification.repository';
 
-import { EmailChangedEvent, type UserEmailChangeVerificationRepository, type UserRepository } from '../../domain'
+import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { EventBus } from '@nestjs/cqrs';
+
+import { TransactionManager } from '../../../core/database/transaction-manager';
+import { REPOSITORIES } from '../../../repositories/repositories.constants';
+import { EmailChangedEvent } from '../../domain/event/email-changed.event';
 
 export type ConfirmEmailChangeInput = {
-  newEmail: string
-  token: string
-}
+  newEmail: string;
+  token: string;
+};
 
 @Injectable()
 export class ConfirmEmailChangeUseCase {
-  private readonly logger = new Logger(ConfirmEmailChangeUseCase.name)
+  private readonly logger = new Logger(ConfirmEmailChangeUseCase.name);
 
   constructor(
     @Inject(REPOSITORIES.USER)
@@ -24,41 +27,41 @@ export class ConfirmEmailChangeUseCase {
   ) {}
 
   async execute(input: ConfirmEmailChangeInput): Promise<void> {
-    this.logger.log('Confirm email change request received', { input })
+    this.logger.log('Confirm email change request received', { input });
     // Normalize email to lowercase
-    const newEmail = input.newEmail.toLowerCase()
+    const newEmail = input.newEmail.toLowerCase();
 
     // Find the verification by token and email
-    const verification = await this.emailChangeVerificationRepository.findByTokenAndEmail(input.token, newEmail)
+    const verification = await this.emailChangeVerificationRepository.findByTokenAndEmail(input.token, newEmail);
 
     if (!verification) {
-      throw new UnauthorizedException('This email change verification is not valid')
+      throw new UnauthorizedException('This email change verification is not valid');
     }
 
     if (verification.isExpired()) {
-      throw new UnauthorizedException('This email change verification has expired')
+      throw new UnauthorizedException('This email change verification has expired');
     }
 
     // Check if the new email is still available
-    const existingUser = await this.userRepository.findByEmail(newEmail)
+    const existingUser = await this.userRepository.findByEmail(newEmail);
     if (existingUser && existingUser.id !== verification.user.id) {
-      throw new UnauthorizedException('This email is already in use by another user')
+      throw new UnauthorizedException('This email is already in use by another user');
     }
 
-    const oldEmail = verification.user.email
-    const updatedUser = verification.user.updateEmail(newEmail)
-    const invalidatedVerification = verification.invalidate()
+    const oldEmail = verification.user.email;
+    const updatedUser = verification.user.updateEmail(newEmail);
+    const invalidatedVerification = verification.invalidate();
 
     this.logger.log('Updating user email and invalidating verification...', {
       userId: updatedUser.id,
       oldEmail,
       newEmail,
-    })
+    });
     // Update user email and invalidate verification in a transaction
     await this.transactionManager.runInTransaction(async tx => {
-      await this.userRepository.save(updatedUser, tx)
-      await this.emailChangeVerificationRepository.save(invalidatedVerification, tx)
-    })
+      await this.userRepository.save(updatedUser, tx);
+      await this.emailChangeVerificationRepository.save(invalidatedVerification, tx);
+    });
 
     // Publish event to notify of email change
     this.eventBus.publish(
@@ -67,6 +70,6 @@ export class ConfirmEmailChangeUseCase {
         oldEmail,
         newEmail,
       }),
-    )
+    );
   }
 }

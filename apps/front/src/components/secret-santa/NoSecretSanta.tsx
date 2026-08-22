@@ -1,21 +1,21 @@
-import type { EventId } from '@wishlist/common'
-import type { SecretSantaFormInput } from './EditSecretSantaFormDialog'
+import type { EventId } from '@wishlist/common';
+import type { SecretSantaFormInput } from './EditSecretSantaFormDialog';
 
-import AddIcon from '@mui/icons-material/Add'
-import { Box, Button, Stack, styled, Typography } from '@mui/material'
-import { useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
-import { match } from 'ts-pattern'
+import AddIcon from '@mui/icons-material/Add';
+import { Box, Button, Stack, styled, Typography } from '@mui/material';
+import { useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
+import { match } from 'ts-pattern';
 
-import EmptySecretSantaIllustration from '../../assets/illustrations/secret-santa.png'
-import { rejectionMessage, rejectionPattern, useCreateSecretSantaMutation } from '../../gql'
-import { useToast } from '../../hooks'
-import { EditSecretSantaFormDialog } from './EditSecretSantaFormDialog'
+import EmptySecretSantaIllustration from '../../assets/illustrations/secret-santa.png';
+import { rejectionMessage, rejectionPattern, useCreateSecretSantaMutation } from '../../gql';
+import { useToast } from '../../hooks';
+import { EditSecretSantaFormDialog } from './EditSecretSantaFormDialog';
 
 const EmptyStateContainer = styled(Stack)(({ theme }) => ({
   alignItems: 'center',
   gap: theme.spacing(2),
-}))
+}));
 
 const IllustrationWrapper = styled(Box)(() => ({
   animation: 'fadeInUp 0.6s ease-out',
@@ -29,7 +29,7 @@ const IllustrationWrapper = styled(Box)(() => ({
       transform: 'translateY(0)',
     },
   },
-}))
+}));
 
 const Illustration = styled('img')(({ theme }) => ({
   width: '150px',
@@ -38,21 +38,21 @@ const Illustration = styled('img')(({ theme }) => ({
     width: '100px',
     height: '100px',
   },
-}))
+}));
 
 const EmptyStateTitle = styled(Typography)(({ theme }) => ({
   fontSize: '1.25rem',
   fontWeight: 500,
   color: theme.palette.text.primary,
   textAlign: 'center',
-}))
+}));
 
 const EmptyStateSubtitle = styled(Typography)(({ theme }) => ({
   fontSize: '0.95rem',
   color: theme.palette.text.secondary,
   textAlign: 'center',
   maxWidth: '400px',
-}))
+}));
 
 const AddListButton = styled(Button)(({ theme }) => ({
   marginTop: theme.spacing(1),
@@ -66,29 +66,29 @@ const AddListButton = styled(Button)(({ theme }) => ({
     transform: 'translateY(-2px)',
   },
   transition: 'all 0.3s ease',
-}))
+}));
 
 type NoSecretSantaProps = {
-  eventId: EventId
-}
+  eventId: EventId;
+};
 
 export const NoSecretSanta = ({ eventId }: NoSecretSantaProps) => {
-  const queryClient = useQueryClient()
-  const { addToast } = useToast()
-  const [openModal, setOpenModal] = useState(false)
+  const queryClient = useQueryClient();
+  const { addToast } = useToast();
+  const [openModal, setOpenModal] = useState(false);
 
   const { mutateAsync: createSecretSantaMutation, isPending: loading } = useCreateSecretSantaMutation({
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-  })
+  });
 
   const createSecretSanta = async (input: SecretSantaFormInput) => {
     const res = await createSecretSantaMutation({
       input: { eventId, budget: input.budget, description: input.description },
-    })
+    });
     await match(res.createSecretSanta)
       .with({ __typename: 'SecretSanta' }, async () => {
-        addToast({ message: 'Secret santa créé avec succès', variant: 'success' })
-        await queryClient.invalidateQueries({ queryKey: ['GetSecretSantaForEvent', { eventId }] })
+        addToast({ message: 'Secret santa créé avec succès', variant: 'success' });
+        await queryClient.invalidateQueries({ queryKey: ['GetSecretSantaForEvent', { eventId }] });
       })
       .with({ __typename: 'ValidationRejection' }, rejection =>
         addToast({
@@ -100,8 +100,8 @@ export const NoSecretSanta = ({ eventId }: NoSecretSantaProps) => {
         }),
       )
       .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
-      .exhaustive()
-  }
+      .exhaustive();
+  };
 
   return (
     <>
@@ -131,12 +131,12 @@ export const NoSecretSanta = ({ eventId }: NoSecretSantaProps) => {
         open={openModal}
         saveButtonText="Créer"
         handleSubmit={input => {
-          setOpenModal(false)
-          void createSecretSanta(input)
+          setOpenModal(false);
+          void createSecretSanta(input);
         }}
         handleClose={() => setOpenModal(false)}
         input={{}}
       />
     </>
-  )
-}
+  );
+};

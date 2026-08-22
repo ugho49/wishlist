@@ -1,13 +1,13 @@
-import type { ReactNode } from 'react'
+import type { ReactNode } from 'react';
 
-import { Body, Container, Head, Html, Img, Preview, Section, Text } from 'react-email'
+import { Body, Container, Head, Html, Img, Preview, Section, Text } from 'react-email';
 
-import * as styles from '../styles'
+import * as styles from '../styles';
 
 interface EmailLayoutProps {
   /** Short text shown in the inbox preview line (after the subject). */
-  readonly preview: string
-  readonly children: ReactNode
+  readonly preview: string;
+  readonly children: ReactNode;
 }
 
 /**
@@ -36,5 +36,5 @@ export function EmailLayout({ preview, children }: EmailLayoutProps) {
         </Container>
       </Body>
     </Html>
-  )
+  );
 }

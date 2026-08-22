@@ -1,4 +1,5 @@
-import type { User, UserSocial } from '../domain'
+import type { User } from '../domain/model/user.model';
+import type { UserSocial } from '../domain/model/user-social.model';
 
 import {
   Authorities,
@@ -6,16 +7,16 @@ import {
   type UserDto,
   type UserSocialDto,
   type UserWithoutSocialsDto,
-} from '@wishlist/common'
-import { DateTime } from 'luxon'
-import { match } from 'ts-pattern'
+} from '@wishlist/common';
+import { DateTime } from 'luxon';
+import { match } from 'ts-pattern';
 
 import {
   type User as GqlUser,
   UserAuthorities as GqlUserAuthorities,
   type UserFull as GqlUserFull,
   type UserSocial as GqlUserSocial,
-} from '../../gql/generated-types'
+} from '../../gql/generated-types';
 
 function toMiniUserDto(model: User): MiniUserDto {
   return {
@@ -24,7 +25,7 @@ function toMiniUserDto(model: User): MiniUserDto {
     lastname: model.lastName,
     email: model.email,
     picture_url: model.pictureUrl,
-  }
+  };
 }
 
 function toUserWithoutSocialsDto(user: User): UserWithoutSocialsDto {
@@ -37,7 +38,7 @@ function toUserWithoutSocialsDto(user: User): UserWithoutSocialsDto {
     last_ip: user.lastIp,
     created_at: user.createdAt.toISOString(),
     updated_at: user.updatedAt.toISOString(),
-  }
+  };
 }
 
 function toUserSocialDto(social: UserSocial): UserSocialDto {
@@ -50,16 +51,16 @@ function toUserSocialDto(social: UserSocial): UserSocialDto {
     picture_url: social.pictureUrl,
     created_at: social.createdAt.toISOString(),
     updated_at: social.updatedAt.toISOString(),
-  }
+  };
 }
 
 function toUserDto(params: { user: User; socials: UserSocial[] }): UserDto {
-  const { user, socials } = params
+  const { user, socials } = params;
 
   return {
     ...toUserWithoutSocialsDto(user),
     social: socials.map(social => toUserSocialDto(social)),
-  }
+  };
 }
 
 function toGqlUser(user: User): GqlUser {
@@ -74,7 +75,7 @@ function toGqlUser(user: User): GqlUser {
     isEnabled: user.isEnabled,
     createdAt: user.createdAt.toISOString(),
     updatedAt: user.updatedAt.toISOString(),
-  }
+  };
 }
 
 function toGqlUserFull(user: User): GqlUserFull {
@@ -83,10 +84,10 @@ function toGqlUserFull(user: User): GqlUserFull {
       .with(Authorities.ROLE_USER, () => GqlUserAuthorities.RoleUser)
       .with(Authorities.ROLE_ADMIN, () => GqlUserAuthorities.RoleAdmin)
       .with(Authorities.ROLE_SUPERADMIN, () => GqlUserAuthorities.RoleSuperadmin)
-      .exhaustive()
+      .exhaustive();
 
-    return gqlAuthority
-  })
+    return gqlAuthority;
+  });
 
   return {
     ...toGqlUser(user),
@@ -95,7 +96,7 @@ function toGqlUserFull(user: User): GqlUserFull {
     isEnabled: user.isEnabled,
     lastConnectedAt: user.lastConnectedAt?.toISOString(),
     lastIp: user.lastIp,
-  }
+  };
 }
 
 function toGqlUserSocial(social: UserSocial): GqlUserSocial {
@@ -108,7 +109,7 @@ function toGqlUserSocial(social: UserSocial): GqlUserSocial {
     pictureUrl: social.pictureUrl,
     createdAt: social.createdAt.toISOString(),
     updatedAt: social.updatedAt.toISOString(),
-  }
+  };
 }
 
 export const userMapper = {
@@ -119,4 +120,4 @@ export const userMapper = {
   toGqlUser,
   toGqlUserFull,
   toGqlUserSocial,
-}
+};

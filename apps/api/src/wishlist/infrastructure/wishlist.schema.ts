@@ -1,27 +1,27 @@
-import { type EventId, type UserId, type WishlistId } from '@wishlist/common'
-import z from 'zod'
+import { type EventId, type UserId, type WishlistId } from '@wishlist/common';
+import z from 'zod';
 
 import {
   type AddWishlistCoOwnerInput,
   type AdminWishlistPaginationFilters,
   type UpdateWishlistInput,
-} from '../../gql/generated-types'
+} from '../../gql/generated-types';
 
-export const WishlistIdSchema = z.string().transform(val => val as WishlistId)
-export const EventIdSchema = z.string().transform(val => val as EventId)
-export const UserIdSchema = z.string().transform(val => val as UserId)
+export const WishlistIdSchema = z.string().transform(val => val as WishlistId);
+export const EventIdSchema = z.string().transform(val => val as EventId);
+export const UserIdSchema = z.string().transform(val => val as UserId);
 
 export const UpdateWishlistInputSchema = z.object({
   title: z.string().nonempty().max(100),
   description: z.string().max(2000).optional(),
-}) satisfies z.ZodType<UpdateWishlistInput>
+}) satisfies z.ZodType<UpdateWishlistInput>;
 
 export const AddWishlistCoOwnerInputSchema = z.object({
   userId: UserIdSchema,
-}) satisfies z.ZodType<AddWishlistCoOwnerInput>
+}) satisfies z.ZodType<AddWishlistCoOwnerInput>;
 
 export const AdminWishlistPaginationFiltersSchema = z.object({
   page: z.number().int().min(1).optional(),
   limit: z.number().int().min(1).optional(),
   userId: UserIdSchema,
-}) satisfies z.ZodType<AdminWishlistPaginationFilters>
+}) satisfies z.ZodType<AdminWishlistPaginationFilters>;

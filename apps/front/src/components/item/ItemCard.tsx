@@ -1,14 +1,14 @@
-import type { WishlistId } from '@wishlist/common'
-import type { RootState } from '../../core'
-import type { WishlistItem } from '../wishlist/wishlist.types'
+import type { WishlistId } from '@wishlist/common';
+import type { RootState } from '../../core/store';
+import type { WishlistItem } from '../wishlist/wishlist.types';
 
-import CardGiftcardIcon from '@mui/icons-material/CardGiftcard'
-import DeleteForeverTwoToneIcon from '@mui/icons-material/DeleteForeverTwoTone'
-import EditTwoToneIcon from '@mui/icons-material/EditTwoTone'
-import MoreVertIcon from '@mui/icons-material/MoreVert'
-import RedeemIcon from '@mui/icons-material/Redeem'
-import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline'
-import TipsAndUpdatesTwoToneIcon from '@mui/icons-material/TipsAndUpdatesTwoTone'
+import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
+import DeleteForeverTwoToneIcon from '@mui/icons-material/DeleteForeverTwoTone';
+import EditTwoToneIcon from '@mui/icons-material/EditTwoTone';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import RedeemIcon from '@mui/icons-material/Redeem';
+import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
+import TipsAndUpdatesTwoToneIcon from '@mui/icons-material/TipsAndUpdatesTwoTone';
 import {
   Avatar,
   AvatarGroup,
@@ -24,22 +24,22 @@ import {
   MenuItem,
   styled,
   Typography,
-} from '@mui/material'
-import { useQueryClient } from '@tanstack/react-query'
-import { useNavigate, useSearch } from '@tanstack/react-router'
-import clsx from 'clsx'
-import { DateTime } from 'luxon'
-import React, { useCallback, useMemo, useState } from 'react'
-import { useSelector } from 'react-redux'
-import { match } from 'ts-pattern'
+} from '@mui/material';
+import { useQueryClient } from '@tanstack/react-query';
+import { useNavigate, useSearch } from '@tanstack/react-router';
+import clsx from 'clsx';
+import { DateTime } from 'luxon';
+import React, { useCallback, useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { match } from 'ts-pattern';
 
-import { rejectionMessage, rejectionPattern, useDeleteItemMutation, useToggleItemMutation } from '../../gql'
-import { useToast } from '../../hooks'
-import { Card } from '../common/Card'
-import { ConfirmMenuItem } from '../common/ConfirmMenuItem'
-import { Rating, RatingBubble } from '../common/Rating'
-import { ItemFormDialog } from './ItemFormDialog'
-import { type ItemTakerDetails, ItemTakersDialog } from './ItemTakersDialog'
+import { rejectionMessage, rejectionPattern, useDeleteItemMutation, useToggleItemMutation } from '../../gql';
+import { useToast } from '../../hooks';
+import { Card } from '../common/Card';
+import { ConfirmMenuItem } from '../common/ConfirmMenuItem';
+import { Rating, RatingBubble } from '../common/Rating';
+import { ItemFormDialog } from './ItemFormDialog';
+import { type ItemTakerDetails, ItemTakersDialog } from './ItemTakersDialog';
 
 // Modern card styling with vertical layout
 const ItemCardStyled = styled(Card)(({ theme }) => ({
@@ -78,7 +78,7 @@ const ItemCardStyled = styled(Card)(({ theme }) => ({
       },
     },
   },
-}))
+}));
 
 // Suggested item badge
 const SuggestedBadge = styled(Chip)(({ theme }) => ({
@@ -96,7 +96,7 @@ const SuggestedBadge = styled(Chip)(({ theme }) => ({
     color: 'inherit',
     fontSize: '0.8rem',
   },
-}))
+}));
 
 // Item image container with full width and fade effect
 const ItemImageContainer = styled(Box)(({ theme }) => ({
@@ -109,7 +109,7 @@ const ItemImageContainer = styled(Box)(({ theme }) => ({
   width: '100%',
   overflow: 'hidden',
   background: `linear-gradient(135deg, ${alpha(theme.palette.primary.light, 0.1)} 0%, ${alpha(theme.palette.primary.main, 0.15)} 100%)`,
-}))
+}));
 
 // Item image with responsive sizing - properly centered
 const ItemImage = styled('img')({
@@ -120,14 +120,14 @@ const ItemImage = styled('img')({
   cursor: 'pointer',
   opacity: 1,
   transition: 'all 0.2s ease',
-})
+});
 
 const RatingBubbleStyled = styled(RatingBubble)(() => ({
   position: 'absolute',
   bottom: '8px',
   right: '8px',
   zIndex: 3,
-}))
+}));
 
 // Item image placeholder when no image - beautiful gift icon with gradient background
 const ItemImagePlaceholder = styled(Box)(({ theme }) => ({
@@ -145,7 +145,7 @@ const ItemImagePlaceholder = styled(Box)(({ theme }) => ({
     color: theme.palette.primary.main,
     opacity: 0.7,
   },
-}))
+}));
 
 // Gradient overlay for image fade effect - fade to black inside the image
 const ImageGradientOverlay = styled(Box)({
@@ -157,7 +157,7 @@ const ImageGradientOverlay = styled(Box)({
   background: 'linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.2) 100%)',
   pointerEvents: 'none',
   zIndex: 1,
-})
+});
 
 // Item content container - vertical layout with reduced margins
 const ItemContent = styled(Box)({
@@ -166,7 +166,7 @@ const ItemContent = styled(Box)({
   flexGrow: 1,
   padding: '16px',
   gap: '4px',
-})
+});
 
 // Item title with modern typography and link styling
 const ItemTitle = styled('div')(({ theme }) => ({
@@ -182,7 +182,7 @@ const ItemTitle = styled('div')(({ theme }) => ({
   WebkitBoxOrient: 'vertical',
   transition: 'all 0.2s ease',
   marginBottom: '4px',
-}))
+}));
 
 // Clickable title with link styling - always underlined when there's a URL
 const ClickableTitle = styled(Link)(({ theme }) => ({
@@ -198,7 +198,7 @@ const ClickableTitle = styled(Link)(({ theme }) => ({
     color: theme.palette.primary.dark,
     textDecorationColor: theme.palette.primary.dark,
   },
-}))
+}));
 
 // Item description with subtle styling and minimal margins
 const ItemDescription = styled(Typography)(({ theme }) => ({
@@ -214,7 +214,7 @@ const ItemDescription = styled(Typography)(({ theme }) => ({
   fontStyle: 'italic',
   margin: '0',
   padding: '0',
-}))
+}));
 
 // Reserved indicator - positioned at top with badges
 const ReservedIndicator = styled(Box)<{ isReservedByMe: boolean }>(({ theme, isReservedByMe }) => ({
@@ -250,7 +250,7 @@ const ReservedIndicator = styled(Box)<{ isReservedByMe: boolean }>(({ theme, isR
     outline: `2px solid ${theme.palette.common.white}`,
     outlineOffset: 2,
   },
-}))
+}));
 
 const ReservedAvatarGroup = styled(AvatarGroup)(() => ({
   '& .MuiAvatar-root': {
@@ -261,7 +261,7 @@ const ReservedAvatarGroup = styled(AvatarGroup)(() => ({
     backgroundColor: 'white',
     color: 'black',
   },
-}))
+}));
 
 // Action button with modern styling and proper text sizing
 const ActionButton = styled(Button)(() => ({
@@ -274,7 +274,7 @@ const ActionButton = styled(Button)(() => ({
   minWidth: '120px',
   whiteSpace: 'nowrap',
   transition: 'all 0.2s ease',
-}))
+}));
 
 const ReleaseButton = styled(ActionButton)(({ theme }) => ({
   paddingTop: '0',
@@ -293,7 +293,7 @@ const ReleaseButton = styled(ActionButton)(({ theme }) => ({
   '& .MuiSvgIcon-root': {
     fontSize: '0.875rem',
   },
-}))
+}));
 
 // Reserved button variant
 const ReservedButton = styled(ActionButton)(({ theme }) => ({
@@ -303,7 +303,7 @@ const ReservedButton = styled(ActionButton)(({ theme }) => ({
     background: `linear-gradient(135deg, ${theme.palette.success.dark} 0%, ${theme.palette.success.main} 100%)`,
     boxShadow: `0 4px 12px ${alpha(theme.palette.success.main, 0.3)}`,
   },
-}))
+}));
 
 // Actions container with reduced padding and proper button spacing
 const ActionsContainer = styled(Box)({
@@ -313,7 +313,7 @@ const ActionsContainer = styled(Box)({
   marginTop: 'auto',
   paddingTop: '8px',
   flexWrap: 'wrap',
-})
+});
 
 // Card footer with date and actions
 const ItemFooter = styled(Box)(({ theme }) => ({
@@ -326,13 +326,13 @@ const ItemFooter = styled(Box)(({ theme }) => ({
   fontSize: '0.75rem',
   color: theme.palette.text.secondary,
   marginTop: 'auto',
-}))
+}));
 
 // Date container in metadata
 const DateContainer = styled(Box)({
   display: 'flex',
   alignItems: 'center',
-})
+});
 
 // Actions menu container - always visible
 const ActionsMenuContainer = styled(Box)({
@@ -340,28 +340,28 @@ const ActionsMenuContainer = styled(Box)({
   top: '12px',
   left: '12px',
   zIndex: 2,
-})
+});
 
 export type ItemCardProps = {
   wishlist: {
-    id: WishlistId
-    ownerId: string
-    coOwnerId?: string
-    hideItems: boolean
-  }
-  item: WishlistItem
-  onImageClick?: () => void
-}
+    id: WishlistId;
+    ownerId: string;
+    coOwnerId?: string;
+    hideItems: boolean;
+  };
+  item: WishlistItem;
+  onImageClick?: () => void;
+};
 
 const toTakers = (
   takers: Array<{
-    takenAt: string
+    takenAt: string;
     user: {
-      id: string
-      firstName?: string | null
-      lastName?: string | null
-      pictureUrl?: string | null
-    }
+      id: string;
+      firstName?: string | null;
+      lastName?: string | null;
+      pictureUrl?: string | null;
+    };
   }>,
 ): ItemTakerDetails[] =>
   takers.map(taker => ({
@@ -370,60 +370,60 @@ const toTakers = (
     lastName: taker.user.lastName,
     pictureUrl: taker.user.pictureUrl,
     takenAt: taker.takenAt,
-  }))
+  }));
 
-const mapState = (state: RootState) => state.auth.user?.id
+const mapState = (state: RootState) => state.auth.user?.id;
 
 export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
-  const currentUserId = useSelector(mapState)
-  const { addToast } = useToast()
-  const queryClient = useQueryClient()
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
-  const { currentItemId } = useSearch({ from: '/_authenticated/_with-layout/wishlists/$wishlistId/' })
-  const [takers, setTakers] = useState<ItemTakerDetails[]>(() => toTakers(item.takers))
-  const [takersDialogOpen, setTakersDialogOpen] = useState(false)
-  const isDialogOpen = useMemo(() => currentItemId === item.id, [currentItemId, item.id])
-  const navigate = useNavigate({ from: '/wishlists/$wishlistId' })
+  const currentUserId = useSelector(mapState);
+  const { addToast } = useToast();
+  const queryClient = useQueryClient();
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const { currentItemId } = useSearch({ from: '/_authenticated/_with-layout/wishlists/$wishlistId/' });
+  const [takers, setTakers] = useState<ItemTakerDetails[]>(() => toTakers(item.takers));
+  const [takersDialogOpen, setTakersDialogOpen] = useState(false);
+  const isDialogOpen = useMemo(() => currentItemId === item.id, [currentItemId, item.id]);
+  const navigate = useNavigate({ from: '/wishlists/$wishlistId' });
   const setDialogOpen = useCallback(
     (open: boolean) => {
-      void navigate({ search: prev => ({ ...prev, currentItemId: open ? item.id : undefined }) })
+      void navigate({ search: prev => ({ ...prev, currentItemId: open ? item.id : undefined }) });
     },
     [item.id, navigate],
-  )
+  );
 
-  const isTaken = takers.length > 0
-  const isOwnerOrCoOwner = currentUserId === wishlist.ownerId || wishlist.coOwnerId === currentUserId
-  const canReserve = !isOwnerOrCoOwner || !wishlist.hideItems
-  const canEdit = (isOwnerOrCoOwner || item.isSuggested) && !isTaken
-  const isReservedByCurrentUser = takers.some(taker => taker.id === currentUserId)
+  const isTaken = takers.length > 0;
+  const isOwnerOrCoOwner = currentUserId === wishlist.ownerId || wishlist.coOwnerId === currentUserId;
+  const canReserve = !isOwnerOrCoOwner || !wishlist.hideItems;
+  const canEdit = (isOwnerOrCoOwner || item.isSuggested) && !isTaken;
+  const isReservedByCurrentUser = takers.some(taker => taker.id === currentUserId);
 
-  const openMenu = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget)
-  const closeMenu = () => setAnchorEl(null)
+  const openMenu = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
+  const closeMenu = () => setAnchorEl(null);
 
   const { mutateAsync: deleteItemMutation, isPending: deleteItemPending } = useDeleteItemMutation({
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-  })
+  });
   const deleteItem = async () => {
-    const res = await deleteItemMutation({ itemId: item.id })
+    const res = await deleteItemMutation({ itemId: item.id });
     match(res.deleteItem)
       .with({ __typename: 'VoidOutput' }, () => {
-        addToast({ message: 'Le souhait à bien été supprimé', variant: 'success' })
-        void queryClient.invalidateQueries({ queryKey: ['WishlistPage', { wishlistId: wishlist.id }] })
+        addToast({ message: 'Le souhait à bien été supprimé', variant: 'success' });
+        void queryClient.invalidateQueries({ queryKey: ['WishlistPage', { wishlistId: wishlist.id }] });
       })
       .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
-      .exhaustive()
-  }
+      .exhaustive();
+  };
 
   const { mutateAsync: toggleItemMutation, isPending: toggleItemPending } = useToggleItemMutation({
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-  })
+  });
   const toggleItem = async () => {
-    const res = await toggleItemMutation({ itemId: item.id })
+    const res = await toggleItemMutation({ itemId: item.id });
     match(res.toggleItem)
       .with({ __typename: 'ToggleItemOutput' }, output => {
-        const nextTakers = toTakers(output.takers)
-        const action = nextTakers.some(taker => taker.id === currentUserId) ? 'check' : 'uncheck'
-        setTakers(nextTakers)
+        const nextTakers = toTakers(output.takers);
+        const action = nextTakers.some(taker => taker.id === currentUserId) ? 'check' : 'uncheck';
+        setTakers(nextTakers);
 
         if (action === 'check') {
           addToast({
@@ -438,7 +438,7 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
                 </span>
               ),
             variant: 'success',
-          })
+          });
         } else if (nextTakers.length > 0) {
           addToast({
             message: (
@@ -447,7 +447,7 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
               </span>
             ),
             variant: 'info',
-          })
+          });
         } else {
           addToast({
             message: (
@@ -456,16 +456,16 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
               </span>
             ),
             variant: 'info',
-          })
+          });
         }
       })
       .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
-      .exhaustive()
-  }
+      .exhaustive();
+  };
 
-  const loading = useMemo(() => deleteItemPending || toggleItemPending, [deleteItemPending, toggleItemPending])
+  const loading = useMemo(() => deleteItemPending || toggleItemPending, [deleteItemPending, toggleItemPending]);
 
-  const shouldShowReserveButton = canReserve
+  const shouldShowReserveButton = canReserve;
 
   return (
     <>
@@ -503,14 +503,14 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
             aria-haspopup="dialog"
             aria-label={`Voir les réservations de ${item.name}`}
             onClick={event => {
-              event.stopPropagation()
-              setTakersDialogOpen(true)
+              event.stopPropagation();
+              setTakersDialogOpen(true);
             }}
             onKeyDown={event => {
               if (event.key === 'Enter' || event.key === ' ') {
-                event.preventDefault()
-                event.stopPropagation()
-                setTakersDialogOpen(true)
+                event.preventDefault();
+                event.stopPropagation();
+                setTakersDialogOpen(true);
               }
             }}
           >
@@ -576,8 +576,8 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
             {shouldShowReserveButton && !isReservedByCurrentUser && (
               <ReservedButton
                 onClick={e => {
-                  e.stopPropagation()
-                  void toggleItem()
+                  e.stopPropagation();
+                  void toggleItem();
                 }}
                 disabled={loading}
                 startIcon={<RedeemIcon />}
@@ -616,8 +616,8 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
       <Menu id="item-menu" anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={closeMenu}>
         <MenuItem
           onClick={() => {
-            closeMenu()
-            setDialogOpen(true)
+            closeMenu();
+            setDialogOpen(true);
           }}
         >
           <ListItemIcon>
@@ -659,5 +659,5 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
         takers={takers}
       />
     </>
-  )
-}
+  );
+};

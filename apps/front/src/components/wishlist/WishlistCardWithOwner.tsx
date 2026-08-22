@@ -1,13 +1,13 @@
-import type { WishlistId } from '@wishlist/common'
+import type { WishlistId } from '@wishlist/common';
 
-import PublicIcon from '@mui/icons-material/Public'
-import { styled, Typography } from '@mui/material'
-import { useNavigate } from '@tanstack/react-router'
-import clsx from 'clsx'
+import PublicIcon from '@mui/icons-material/Public';
+import { styled, Typography } from '@mui/material';
+import { useNavigate } from '@tanstack/react-router';
+import clsx from 'clsx';
 
-import { getAvatarUrl } from '../../utils/wishlist.utils'
-import { Card } from '../common/Card'
-import { WishlistAvatar } from './WishlistAvatar'
+import { getAvatarUrl } from '../../utils/wishlist.utils';
+import { Card } from '../common/Card';
+import { WishlistAvatar } from './WishlistAvatar';
 
 /**
  * Card shown inside an event's wishlist grid. The wishlist data is supplied by
@@ -15,16 +15,16 @@ import { WishlistAvatar } from './WishlistAvatar'
  * reads (camelCase GraphQL shape).
  */
 export type WishlistCardWithOwnerWishlist = {
-  id: WishlistId
-  title: string
-  logoUrl?: string | null
-  config: { hideItems: boolean }
-  owner: { firstName: string; lastName: string; pictureUrl?: string | null }
-}
+  id: WishlistId;
+  title: string;
+  logoUrl?: string | null;
+  config: { hideItems: boolean };
+  owner: { firstName: string; lastName: string; pictureUrl?: string | null };
+};
 
 export type WishlistCardWithOwnerProps = {
-  wishlist: WishlistCardWithOwnerWishlist
-}
+  wishlist: WishlistCardWithOwnerWishlist;
+};
 
 const WishlistCardContent = styled(Card)(({ theme }) => ({
   display: 'flex',
@@ -42,12 +42,12 @@ const WishlistCardContent = styled(Card)(({ theme }) => ({
       boxShadow: `0 8px 25px ${theme.palette.primary.main}30`,
     },
   },
-}))
+}));
 
 const AvatarContainer = styled('div')({
   position: 'relative',
   zIndex: 1,
-})
+});
 
 const ContentContainer = styled('div')({
   flex: 1,
@@ -57,7 +57,7 @@ const ContentContainer = styled('div')({
   minWidth: 0,
   zIndex: 1,
   gap: '4px',
-})
+});
 
 const WishlistTitle = styled(Typography)(({ theme }) => ({
   color: theme.palette.primary.main,
@@ -68,7 +68,7 @@ const WishlistTitle = styled(Typography)(({ theme }) => ({
   whiteSpace: 'nowrap',
   textTransform: 'uppercase',
   transition: 'all 0.3s ease',
-}))
+}));
 
 const OwnerInfo = styled(Typography)(({ theme }) => ({
   fontSize: '0.85rem',
@@ -81,7 +81,7 @@ const OwnerInfo = styled(Typography)(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   gap: '4px',
-}))
+}));
 
 const PublicBadge = styled('div')(({ theme }) => ({
   position: 'absolute',
@@ -96,16 +96,16 @@ const PublicBadge = styled('div')(({ theme }) => ({
   justifyContent: 'center',
   border: `2px solid ${theme.palette.background.paper}`,
   zIndex: 2,
-}))
+}));
 
 const PublicIconStyled = styled(PublicIcon)(() => ({
   fontSize: '12px',
   color: 'white',
-}))
+}));
 
 export const WishlistCardWithOwner = ({ wishlist }: WishlistCardWithOwnerProps) => {
-  const navigate = useNavigate()
-  const isPublic = !wishlist.config.hideItems
+  const navigate = useNavigate();
+  const isPublic = !wishlist.config.hideItems;
 
   return (
     <WishlistCardContent
@@ -132,5 +132,5 @@ export const WishlistCardWithOwner = ({ wishlist }: WishlistCardWithOwnerProps) 
         </OwnerInfo>
       </ContentContainer>
     </WishlistCardContent>
-  )
-}
+  );
+};

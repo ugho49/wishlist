@@ -1,21 +1,21 @@
-import { Helmet } from 'react-helmet-async'
+import { Helmet } from 'react-helmet-async';
 
 export interface SEOProps {
-  title?: string
-  description?: string
-  keywords?: string
-  ogImage?: string
-  ogType?: 'website' | 'article'
-  canonical?: string
-  indexByRobots?: boolean
+  title?: string;
+  description?: string;
+  keywords?: string;
+  ogImage?: string;
+  ogType?: 'website' | 'article';
+  canonical?: string;
+  indexByRobots?: boolean;
 }
 
-const DEFAULT_TITLE = 'Wishlist - Créez et partagez vos listes de souhaits'
+const DEFAULT_TITLE = 'Wishlist - Créez et partagez vos listes de souhaits';
 const DEFAULT_DESCRIPTION =
-  'Créez, gérez et partagez facilement vos listes de souhaits pour tous vos événements : anniversaires, mariages, Noël. Organisez vos cadeaux et faites plaisir à vos proches.'
-const DEFAULT_KEYWORDS = 'liste de souhaits, wishlist, cadeaux, anniversaire, mariage, noël, partage, événements'
-const DEFAULT_OG_IMAGE = 'https://wishlistapp.fr/logo_text_350x150.png'
-const SITE_URL = 'https://wishlistapp.fr'
+  'Créez, gérez et partagez facilement vos listes de souhaits pour tous vos événements : anniversaires, mariages, Noël. Organisez vos cadeaux et faites plaisir à vos proches.';
+const DEFAULT_KEYWORDS = 'liste de souhaits, wishlist, cadeaux, anniversaire, mariage, noël, partage, événements';
+const DEFAULT_OG_IMAGE = 'https://wishlistapp.fr/logo_text_350x150.png';
+const SITE_URL = 'https://wishlistapp.fr';
 
 /**
  * SEO component for managing page metadata
@@ -30,8 +30,8 @@ export function SEO({
   canonical,
   indexByRobots = false,
 }: SEOProps) {
-  const fullTitle = title ? `Wishlist | ${title}` : DEFAULT_TITLE
-  const canonicalUrl = canonical ? `${SITE_URL}${canonical}` : SITE_URL
+  const fullTitle = title ? `Wishlist | ${title}` : DEFAULT_TITLE;
+  const canonicalUrl = canonical ? `${SITE_URL}${canonical}` : SITE_URL;
 
   return (
     <Helmet>
@@ -54,5 +54,5 @@ export function SEO({
       <meta property="og:description" content={description} />
       <meta property="og:image" content={ogImage} />
     </Helmet>
-  )
+  );
 }

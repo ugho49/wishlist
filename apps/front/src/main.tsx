@@ -1,42 +1,42 @@
-import 'reflect-metadata'
+import 'reflect-metadata';
 
-import { CssBaseline, ThemeProvider } from '@mui/material'
-import { LocalizationProvider } from '@mui/x-date-pickers'
-import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon'
-import { TanStackDevtools } from '@tanstack/react-devtools'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { ReactQueryDevtoolsPanel } from '@tanstack/react-query-devtools'
-import { RouterProvider } from '@tanstack/react-router'
-import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
-import { LDProvider } from 'launchdarkly-react-client-sdk'
-import * as ReactDOM from 'react-dom/client'
-import { HelmetProvider } from 'react-helmet-async'
-import { Toaster } from 'react-hot-toast'
-import { Provider as ReduxProvider } from 'react-redux'
+import { CssBaseline, ThemeProvider } from '@mui/material';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon';
+import { TanStackDevtools } from '@tanstack/react-devtools';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtoolsPanel } from '@tanstack/react-query-devtools';
+import { RouterProvider } from '@tanstack/react-router';
+import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
+import { LDProvider } from 'launchdarkly-react-client-sdk';
+import * as ReactDOM from 'react-dom/client';
+import { HelmetProvider } from 'react-helmet-async';
+import { Toaster } from 'react-hot-toast';
+import { Provider as ReduxProvider } from 'react-redux';
 
-import { store } from './core'
-import { environment } from './environment'
-import { router } from './router'
-import { theme } from './theme'
+import { store } from './core/store';
+import { environment } from './environment';
+import { router } from './router';
+import { theme } from './theme';
 
 function main() {
   const needRedirect =
     window.location.hostname === 'wishlist-stephan.web.app' ||
-    window.location.hostname === 'wishlist-stephan.firebaseapp.com'
+    window.location.hostname === 'wishlist-stephan.firebaseapp.com';
 
   if (needRedirect) {
     // Set referrer policy to no-referrer
-    const meta = document.createElement('meta')
-    meta.name = 'referrer'
-    meta.content = 'no-referrer'
-    document.head.appendChild(meta)
+    const meta = document.createElement('meta');
+    meta.name = 'referrer';
+    meta.content = 'no-referrer';
+    document.head.appendChild(meta);
 
     // Use replace() to redirect without adding to browser history and without referrer
-    window.location.replace('https://wishlistapp.fr')
-    return
+    window.location.replace('https://wishlistapp.fr');
+    return;
   }
 
-  const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
+  const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -46,16 +46,16 @@ function main() {
         retry: false,
       },
     },
-  })
+  });
 
   if (environment.env === 'development') {
     // Used for the TanStack Query Devtools extension in browser
     // @ts-expect-error - This is a global variable for the TanStack Query client
-    window.__TANSTACK_QUERY_CLIENT__ = queryClient
+    window.__TANSTACK_QUERY_CLIENT__ = queryClient;
   }
 
   // @ts-expect-error - This is a global variable for the Wishlist environment
-  window.__WISHLIST_ENVIRONMENT__ = environment
+  window.__WISHLIST_ENVIRONMENT__ = environment;
 
   root.render(
     <HelmetProvider>
@@ -87,7 +87,7 @@ function main() {
         </QueryClientProvider>
       </LDProvider>
     </HelmetProvider>,
-  )
+  );
 }
 
-main()
+main();

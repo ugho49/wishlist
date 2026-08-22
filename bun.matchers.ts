@@ -1,9 +1,9 @@
-import 'reflect-metadata'
+import 'reflect-metadata';
 
-import jestExtendedMatchers from 'jest-extended'
+import jestExtendedMatchers from 'jest-extended';
 
-import { expect } from 'bun:test'
+import { expect } from 'bun:test';
 
 expect.extend({
   ...jestExtendedMatchers,
-})
+});

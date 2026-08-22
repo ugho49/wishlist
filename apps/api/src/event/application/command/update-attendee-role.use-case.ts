@@ -1,3 +1,6 @@
+import type { EventRepository } from '../../domain/repository/event.repository';
+import type { EventAttendeeRepository } from '../../domain/repository/event-attendee.repository';
+
 import {
   BadRequestException,
   ConflictException,
@@ -6,22 +9,21 @@ import {
   Logger,
   NotFoundException,
   UnauthorizedException,
-} from '@nestjs/common'
-import { REPOSITORIES } from '@wishlist/api/repositories'
-import { type AttendeeId, AttendeeRole, type EventId, type ICurrentUser } from '@wishlist/common'
+} from '@nestjs/common';
+import { type AttendeeId, AttendeeRole, type EventId, type ICurrentUser } from '@wishlist/common';
 
-import { type EventAttendeeRepository, type EventRepository } from '../../domain'
+import { REPOSITORIES } from '../../../repositories/repositories.constants';
 
 export type UpdateAttendeeRoleInput = {
-  currentUser: ICurrentUser
-  eventId: EventId
-  attendeeId: AttendeeId
-  role: AttendeeRole
-}
+  currentUser: ICurrentUser;
+  eventId: EventId;
+  attendeeId: AttendeeId;
+  role: AttendeeRole;
+};
 
 @Injectable()
 export class UpdateAttendeeRoleUseCase {
-  private readonly logger = new Logger(UpdateAttendeeRoleUseCase.name)
+  private readonly logger = new Logger(UpdateAttendeeRoleUseCase.name);
 
   constructor(
     @Inject(REPOSITORIES.EVENT)
@@ -31,40 +33,40 @@ export class UpdateAttendeeRoleUseCase {
   ) {}
 
   async execute(input: UpdateAttendeeRoleInput): Promise<void> {
-    this.logger.log('Update attendee role request received', { input })
-    const { attendeeId, currentUser, eventId, role } = input
+    this.logger.log('Update attendee role request received', { input });
+    const { attendeeId, currentUser, eventId, role } = input;
 
-    const event = await this.eventRepository.findByIdOrFail(eventId)
+    const event = await this.eventRepository.findByIdOrFail(eventId);
 
     if (!event.canEdit(currentUser)) {
-      throw new UnauthorizedException('Only creators and admins of the event can update an attendee role')
+      throw new UnauthorizedException('Only creators and admins of the event can update an attendee role');
     }
 
-    const attendee = event.attendees.find(a => a.id === attendeeId)
+    const attendee = event.attendees.find(a => a.id === attendeeId);
 
     if (!attendee) {
-      throw new NotFoundException('Attendee not found')
+      throw new NotFoundException('Attendee not found');
     }
 
     if (attendee.user?.id === currentUser.id) {
-      throw new ConflictException('You cannot change your own role')
+      throw new ConflictException('You cannot change your own role');
     }
 
     if (attendee.isCreator()) {
-      throw new ConflictException('You cannot change the creator role')
+      throw new ConflictException('You cannot change the creator role');
     }
 
     if (role === AttendeeRole.CREATOR) {
-      throw new BadRequestException('Cannot assign the creator role to an attendee')
+      throw new BadRequestException('Cannot assign the creator role to an attendee');
     }
 
     if (role !== AttendeeRole.ADMIN && role !== AttendeeRole.PARTICIPANT) {
-      throw new BadRequestException('Role must be admin or participant')
+      throw new BadRequestException('Role must be admin or participant');
     }
 
-    const updatedAttendee = attendee.updateRole(role)
+    const updatedAttendee = attendee.updateRole(role);
 
-    this.logger.log('Saving attendee role...', { attendeeId, eventId, role })
-    await this.attendeeRepository.save(updatedAttendee)
+    this.logger.log('Saving attendee role...', { attendeeId, eventId, role });
+    await this.attendeeRepository.save(updatedAttendee);
   }
 }

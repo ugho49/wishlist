@@ -1,17 +1,17 @@
-import type { MaxFileSizeValidatorOptions as NestMaxFileSizeValidatorOptions } from '@nestjs/common'
+import type { MaxFileSizeValidatorOptions as NestMaxFileSizeValidatorOptions } from '@nestjs/common';
 
-import { MaxFileSizeValidator as NestMaxFileSizeValidator } from '@nestjs/common'
+import { MaxFileSizeValidator as NestMaxFileSizeValidator } from '@nestjs/common';
 
 export type MaxFileSizeValidatorOptions = NestMaxFileSizeValidatorOptions & {
-  errorMessage?: string
-}
+  errorMessage?: string;
+};
 
 export class MaxFileSizeValidator extends NestMaxFileSizeValidator {
   constructor(private readonly options: MaxFileSizeValidatorOptions) {
-    super(options)
+    super(options);
   }
 
   override buildErrorMessage(): string {
-    return this.options.errorMessage ? this.options.errorMessage : super.buildErrorMessage()
+    return this.options.errorMessage ? this.options.errorMessage : super.buildErrorMessage();
   }
 }

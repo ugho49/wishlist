@@ -1,13 +1,14 @@
-import { Logger } from '@nestjs/common'
-import { EventsHandler, type IEventHandler } from '@nestjs/cqrs'
+import { Logger } from '@nestjs/common';
+import { EventsHandler, type IEventHandler } from '@nestjs/cqrs';
 
-import { FrontendRoutesService } from '../../../core'
-import { MailService, MailTemplate } from '../../../core/mail'
-import { SecretSantaCancelledEvent } from '../../domain/event/secret-santa-cancelled.event'
+import { FrontendRoutesService } from '../../../core/frontend-routes/frontend-routes.service';
+import { MailService } from '../../../core/mail/mail.service';
+import { MailTemplate } from '../../../core/mail/mail.type';
+import { SecretSantaCancelledEvent } from '../../domain/event/secret-santa-cancelled.event';
 
 @EventsHandler(SecretSantaCancelledEvent)
 export class SecretSantaCancelledHandler implements IEventHandler<SecretSantaCancelledEvent> {
-  private readonly logger = new Logger(SecretSantaCancelledHandler.name)
+  private readonly logger = new Logger(SecretSantaCancelledHandler.name);
 
   constructor(
     private readonly mailService: MailService,
@@ -15,10 +16,10 @@ export class SecretSantaCancelledHandler implements IEventHandler<SecretSantaCan
   ) {}
 
   async handle(params: SecretSantaCancelledEvent) {
-    this.logger.log('Secret santa cancelled event received', { params })
-    const { eventTitle, eventId, attendeeEmails } = params
+    this.logger.log('Secret santa cancelled event received', { params });
+    const { eventTitle, eventId, attendeeEmails } = params;
 
-    this.logger.log('Sending email to attendees', { eventTitle, eventId, attendeeEmails })
+    this.logger.log('Sending email to attendees', { eventTitle, eventId, attendeeEmails });
     await this.mailService.sendMail({
       to: attendeeEmails,
       subject: "[Wishlist] Le secret santa viens d'être annulé",
@@ -27,6 +28,6 @@ export class SecretSantaCancelledHandler implements IEventHandler<SecretSantaCan
         eventTitle,
         eventUrl: this.frontendRoutes.routes.event.byId(eventId),
       },
-    })
+    });
   }
 }

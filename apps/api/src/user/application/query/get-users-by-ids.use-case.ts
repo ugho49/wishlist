@@ -1,12 +1,14 @@
-import { Inject, Injectable } from '@nestjs/common'
-import { REPOSITORIES } from '@wishlist/api/repositories'
-import { type UserId } from '@wishlist/common'
+import type { UserRepository } from '../../domain/repository/user.repository';
 
-import { User, type UserRepository } from '../../domain'
+import { Inject, Injectable } from '@nestjs/common';
+import { type UserId } from '@wishlist/common';
+
+import { REPOSITORIES } from '../../../repositories/repositories.constants';
+import { User } from '../../domain/model/user.model';
 
 export type GetUsersByIdsInput = {
-  userIds: UserId[]
-}
+  userIds: UserId[];
+};
 
 @Injectable()
 export class GetUsersByIdsUseCase {
@@ -16,6 +18,6 @@ export class GetUsersByIdsUseCase {
   ) {}
 
   execute(query: GetUsersByIdsInput): Promise<User[]> {
-    return this.userRepository.findByIds(query.userIds)
+    return this.userRepository.findByIds(query.userIds);
   }
 }

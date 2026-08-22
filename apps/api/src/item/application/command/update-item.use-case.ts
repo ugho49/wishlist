@@ -1,26 +1,27 @@
-import { Inject, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common'
-import { REPOSITORIES } from '@wishlist/api/repositories'
-import { type WishlistRepository } from '@wishlist/api/wishlist'
-import { type ICurrentUser, type ItemId } from '@wishlist/common'
-import { TidyURL } from 'tidy-url'
+import type { WishlistItemRepository } from '../../domain/wishlist-item.repository';
 
-import { type WishlistItemRepository } from '../../domain'
+import { Inject, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { type ICurrentUser, type ItemId } from '@wishlist/common';
+import { TidyURL } from 'tidy-url';
+
+import { REPOSITORIES } from '../../../repositories/repositories.constants';
+import { type WishlistRepository } from '../../../wishlist/domain/wishlist.repository';
 
 export type UpdateItemInput = {
-  currentUser: ICurrentUser
-  itemId: ItemId
+  currentUser: ICurrentUser;
+  itemId: ItemId;
   updateItem: {
-    name?: string
-    description?: string
-    score?: number
-    url?: string
-    pictureUrl?: string
-  }
-}
+    name?: string;
+    description?: string;
+    score?: number;
+    url?: string;
+    pictureUrl?: string;
+  };
+};
 
 @Injectable()
 export class UpdateItemUseCase {
-  private readonly logger = new Logger(UpdateItemUseCase.name)
+  private readonly logger = new Logger(UpdateItemUseCase.name);
 
   constructor(
     @Inject(REPOSITORIES.WISHLIST_ITEM) private readonly itemRepository: WishlistItemRepository,
@@ -28,30 +29,32 @@ export class UpdateItemUseCase {
   ) {}
 
   async execute(command: UpdateItemInput): Promise<void> {
-    this.logger.log('Update item request received', { command })
-    const item = await this.itemRepository.findByIdOrFail(command.itemId)
+    this.logger.log('Update item request received', { command });
+    const item = await this.itemRepository.findByIdOrFail(command.itemId);
     const hasAccess = await this.wishlistRepository.hasAccess({
       wishlistId: item.wishlistId,
       userId: command.currentUser.id,
-    })
+    });
 
     if (!hasAccess) {
-      throw new UnauthorizedException('You cannot update this item, you are not the owner of the list or a participant')
+      throw new UnauthorizedException(
+        'You cannot update this item, you are not the owner of the list or a participant',
+      );
     }
 
-    const wishlist = await this.wishlistRepository.findByIdOrFail(item.wishlistId)
-    const isOwnerOrCoOwnerOfList = wishlist.isOwnerOrCoOwner(command.currentUser.id)
+    const wishlist = await this.wishlistRepository.findByIdOrFail(item.wishlistId);
+    const isOwnerOrCoOwnerOfList = wishlist.isOwnerOrCoOwner(command.currentUser.id);
 
     if (item.isSuggested && isOwnerOrCoOwnerOfList && wishlist.hideItems) {
-      throw new NotFoundException('Item not found')
+      throw new NotFoundException('Item not found');
     }
 
     if (item.isSuggested && item.isTakenBySomeone() && !item.isTakenBy(command.currentUser.id)) {
-      throw new UnauthorizedException('You cannot update this item, is already take by someone else')
+      throw new UnauthorizedException('You cannot update this item, is already take by someone else');
     }
 
     if (!item.isSuggested && !isOwnerOrCoOwnerOfList) {
-      throw new UnauthorizedException('You cannot update this item, only the creator of the list can')
+      throw new UnauthorizedException('You cannot update this item, only the creator of the list can');
     }
 
     const updatedItem = item.update({
@@ -60,9 +63,9 @@ export class UpdateItemUseCase {
       url: command.updateItem.url ? TidyURL.clean(command.updateItem.url).url : undefined,
       imageUrl: command.updateItem.pictureUrl,
       score: command.updateItem.score,
-    })
+    });
 
-    this.logger.log('Saving item...', { itemId: item.id, updatedItem })
-    await this.itemRepository.save(updatedItem)
+    this.logger.log('Saving item...', { itemId: item.id, updatedItem });
+    await this.itemRepository.save(updatedItem);
   }
 }

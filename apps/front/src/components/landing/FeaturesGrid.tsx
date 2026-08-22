@@ -1,12 +1,12 @@
-import { Box, Button, Chip, Container, Fade, Typography } from '@mui/material'
-import { styled } from '@mui/material/styles'
-import { useState } from 'react'
+import { Box, Button, Chip, Container, Fade, Typography } from '@mui/material';
+import { styled } from '@mui/material/styles';
+import { useState } from 'react';
 
 const FeaturesContainer = styled(Box)(({ theme }) => ({
   padding: theme.spacing(12, 0),
   backgroundColor: '#fafafa',
   position: 'relative',
-}))
+}));
 
 const SectionTitle = styled(Typography)(({ theme }) => ({
   textAlign: 'center',
@@ -20,7 +20,7 @@ const SectionTitle = styled(Typography)(({ theme }) => ({
   [theme.breakpoints.down('sm')]: {
     fontSize: '2rem',
   },
-}))
+}));
 
 const SectionSubtitle = styled(Typography)(({ theme }) => ({
   textAlign: 'center',
@@ -32,7 +32,7 @@ const SectionSubtitle = styled(Typography)(({ theme }) => ({
     fontSize: '1.1rem',
     margin: `0 auto ${theme.spacing(8)}`,
   },
-}))
+}));
 
 const FeaturesGrid = styled(Box)(({ theme }) => ({
   display: 'grid',
@@ -46,7 +46,7 @@ const FeaturesGrid = styled(Box)(({ theme }) => ({
     gridTemplateColumns: '1fr',
     gap: theme.spacing(3),
   },
-}))
+}));
 
 const FeatureCard = styled(Box)(({ theme }) => ({
   backgroundColor: 'white',
@@ -60,7 +60,7 @@ const FeatureCard = styled(Box)(({ theme }) => ({
     transform: 'translateY(-4px)',
     boxShadow: '0 8px 40px rgba(0, 0, 0, 0.12)',
   },
-}))
+}));
 
 const FeatureIconWrapper = styled(Box)(({ theme }) => ({
   width: 64,
@@ -71,20 +71,20 @@ const FeatureIconWrapper = styled(Box)(({ theme }) => ({
   justifyContent: 'center',
   marginBottom: theme.spacing(3),
   fontSize: '2rem',
-}))
+}));
 
 const FeatureTitle = styled(Typography)(({ theme }) => ({
   fontWeight: 600,
   fontSize: '1.25rem',
   color: theme.palette.text.primary,
   marginBottom: theme.spacing(2),
-}))
+}));
 
 const FeatureDescription = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
   lineHeight: 1.6,
   fontSize: '0.95rem',
-}))
+}));
 
 const BadgeChip = styled(Chip)(({ theme }) => ({
   position: 'absolute',
@@ -93,37 +93,37 @@ const BadgeChip = styled(Chip)(({ theme }) => ({
   fontSize: '0.75rem',
   height: 24,
   fontWeight: 600,
-}))
+}));
 
 const PopularBadge = styled(BadgeChip)(() => ({
   backgroundColor: '#fef3c7',
   color: '#d97706',
   border: '1px solid #fcd34d',
-}))
+}));
 
 const NewBadge = styled(BadgeChip)(() => ({
   backgroundColor: '#dcfce7',
   color: '#16a34a',
   border: '1px solid #86efac',
-}))
+}));
 
 const EssentialBadge = styled(BadgeChip)(() => ({
   backgroundColor: '#fce7f3',
   color: '#be185d',
   border: '1px solid #f9a8d4',
-}))
+}));
 
 const ProBadge = styled(BadgeChip)(() => ({
   backgroundColor: '#e0e7ff',
   color: '#4338ca',
   border: '1px solid #a5b4fc',
-}))
+}));
 
 const ComingSoonBadge = styled(BadgeChip)(() => ({
   backgroundColor: '#f3e8ff',
   color: '#7c3aed',
   border: '1px solid #c4b5fd',
-}))
+}));
 
 const ShowMoreButton = styled(Button)(({ theme }) => ({
   marginTop: theme.spacing(6),
@@ -144,21 +144,21 @@ const ShowMoreButton = styled(Button)(({ theme }) => ({
   '&:active': {
     transform: 'translateY(0)',
   },
-}))
+}));
 
 const ShowMoreContainer = styled(Box)(() => ({
   display: 'flex',
   justifyContent: 'center',
   width: '100%',
-}))
+}));
 
 interface Feature {
-  icon: string
-  title: string
-  description: string
-  iconBg: string
-  badge?: 'Populaire' | 'Nouveau' | 'Essentiel' | 'Pro' | 'Bientôt'
-  priority?: number // pour l'ordre d'affichage
+  icon: string;
+  title: string;
+  description: string;
+  iconBg: string;
+  badge?: 'Populaire' | 'Nouveau' | 'Essentiel' | 'Pro' | 'Bientôt';
+  priority?: number; // pour l'ordre d'affichage
 }
 
 const features: Feature[] = [
@@ -232,52 +232,52 @@ const features: Feature[] = [
     description: 'Mises à jour instantanées pour tous les membres de la famille.',
     iconBg: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)',
   },
-]
+];
 
 const getBadgeComponent = (badge: Feature['badge']) => {
   switch (badge) {
     case 'Populaire':
-      return <PopularBadge label="Populaire" size="small" />
+      return <PopularBadge label="Populaire" size="small" />;
     case 'Nouveau':
-      return <NewBadge label="Nouveau" size="small" />
+      return <NewBadge label="Nouveau" size="small" />;
     case 'Essentiel':
-      return <EssentialBadge label="Essentiel" size="small" />
+      return <EssentialBadge label="Essentiel" size="small" />;
     case 'Pro':
-      return <ProBadge label="Pro" size="small" />
+      return <ProBadge label="Pro" size="small" />;
     case 'Bientôt':
-      return <ComingSoonBadge label="Bientôt" size="small" />
+      return <ComingSoonBadge label="Bientôt" size="small" />;
     default:
-      return null
+      return null;
   }
-}
+};
 
 export const FeaturesGridSection = () => {
-  const [showAll, setShowAll] = useState(false)
+  const [showAll, setShowAll] = useState(false);
 
   // Nombre de features à afficher initialement
-  const INITIAL_FEATURES_COUNT = 6
+  const INITIAL_FEATURES_COUNT = 6;
 
   // Séparer les features prioritaires et les autres
   const sortedFeatures = [...features].sort((a, b) => {
-    if (a.priority && b.priority) return a.priority - b.priority
-    if (a.priority) return -1
-    if (b.priority) return 1
-    return 0
-  })
+    if (a.priority && b.priority) return a.priority - b.priority;
+    if (a.priority) return -1;
+    if (b.priority) return 1;
+    return 0;
+  });
 
-  const displayedFeatures = showAll ? sortedFeatures : sortedFeatures.slice(0, INITIAL_FEATURES_COUNT)
-  const hasMoreFeatures = sortedFeatures.length > INITIAL_FEATURES_COUNT
+  const displayedFeatures = showAll ? sortedFeatures : sortedFeatures.slice(0, INITIAL_FEATURES_COUNT);
+  const hasMoreFeatures = sortedFeatures.length > INITIAL_FEATURES_COUNT;
 
   const handleToggle = () => {
     if (showAll) {
       // Smooth scroll vers le haut de la section quand on réduit
-      const featuresSection = document.getElementById('features')
+      const featuresSection = document.getElementById('features');
       if (featuresSection) {
-        featuresSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        featuresSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     }
-    setShowAll(!showAll)
-  }
+    setShowAll(!showAll);
+  };
 
   return (
     <FeaturesContainer id="features">
@@ -342,5 +342,5 @@ export const FeaturesGridSection = () => {
         )}
       </Container>
     </FeaturesContainer>
-  )
-}
+  );
+};

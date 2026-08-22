@@ -1,8 +1,8 @@
-import { Global, Module } from '@nestjs/common'
+import { Global, Module } from '@nestjs/common';
 
-import { ConfigurableDatabaseModule } from './database.module-definitions'
-import { DatabaseService } from './database.service'
-import { TransactionManager } from './transaction-manager'
+import { ConfigurableDatabaseModule } from './database.module-definitions';
+import { DatabaseService } from './database.service';
+import { TransactionManager } from './transaction-manager';
 
 @Global()
 @Module({

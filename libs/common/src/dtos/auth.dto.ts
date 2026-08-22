@@ -1,10 +1,10 @@
-import { Transform } from 'class-transformer'
-import { IsBoolean, IsEmail, IsNotEmpty, IsString, MaxLength } from 'class-validator'
+import { Transform } from 'class-transformer';
+import { IsBoolean, IsEmail, IsNotEmpty, IsString, MaxLength } from 'class-validator';
 
 export class LoginOutputDto {
-  declare access_token: string
-  declare new_user_created?: boolean
-  declare linked_to_existing_user?: boolean
+  declare access_token: string;
+  declare new_user_created?: boolean;
+  declare linked_to_existing_user?: boolean;
 }
 
 export class LoginInputDto {
@@ -12,24 +12,24 @@ export class LoginInputDto {
   @IsNotEmpty()
   @MaxLength(200)
   @Transform(({ value }) => value.toLowerCase())
-  declare email: string
+  declare email: string;
 
   @IsNotEmpty()
-  declare password: string
+  declare password: string;
 }
 
 export class LoginWithGoogleInputDto {
   @IsString()
   @IsNotEmpty()
-  declare code: string
+  declare code: string;
 
   @IsBoolean()
   @IsNotEmpty()
-  declare createUserIfNotExists: boolean
+  declare createUserIfNotExists: boolean;
 }
 
 export class RefreshTokenInputDto {
   @IsString()
   @IsNotEmpty()
-  declare token: string
+  declare token: string;
 }

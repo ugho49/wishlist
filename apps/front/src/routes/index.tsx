@@ -1,20 +1,20 @@
-import type { RootState } from '../core'
+import type { RootState } from '../core/store';
 
-import { createFileRoute, Navigate } from '@tanstack/react-router'
-import { SEO } from '@wishlist/front-components/SEO'
-import { useSelector } from 'react-redux'
+import { createFileRoute, Navigate } from '@tanstack/react-router';
+import { SEO } from '@wishlist/front-components/SEO';
+import { useSelector } from 'react-redux';
 
-import { LandingPage } from '../components/landing/LandingPage'
+import { LandingPage } from '../components/landing/LandingPage';
 
-const mapAuthState = (state: RootState) => state.auth
+const mapAuthState = (state: RootState) => state.auth;
 
 export const Route = createFileRoute('/')({
   component: () => {
-    const { accessToken } = useSelector(mapAuthState)
-    const isLoggedIn = accessToken !== undefined
+    const { accessToken } = useSelector(mapAuthState);
+    const isLoggedIn = accessToken !== undefined;
 
     if (isLoggedIn) {
-      return <Navigate to="/events" replace />
+      return <Navigate to="/events" replace />;
     }
 
     return (
@@ -22,6 +22,6 @@ export const Route = createFileRoute('/')({
         <SEO indexByRobots />
         <LandingPage />
       </>
-    )
+    );
   },
-})
+});

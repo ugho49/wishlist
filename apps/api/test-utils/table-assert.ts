@@ -1,20 +1,20 @@
-import type { SQL } from 'bun'
+import type { SQL } from 'bun';
 
-import { expect } from 'bun:test'
+import { expect } from 'bun:test';
 
-type DbAssertion = () => Promise<unknown>
+type DbAssertion = () => Promise<unknown>;
 
 type FetchValueResult = {
-  value: Record<string, unknown> | undefined
-  index: number
-  tableName: string
-}
+  value: Record<string, unknown> | undefined;
+  index: number;
+  tableName: string;
+};
 
-export type TableAssertSortOptions = Record<string, 'ASC' | 'DESC'>
+export type TableAssertSortOptions = Record<string, 'ASC' | 'DESC'>;
 
 export class TableAssert {
-  private readonly assertions = new Set<DbAssertion>()
-  private readonly cachedRows = new Map<number, FetchValueResult['value']>()
+  private readonly assertions = new Set<DbAssertion>();
+  private readonly cachedRows = new Map<number, FetchValueResult['value']>();
 
   constructor(
     private readonly sql: SQL,
@@ -24,14 +24,14 @@ export class TableAssert {
 
   hasNumberOfRows(expected: number): this {
     this.assertions.add(async () => {
-      const raw = await this.sql.unsafe(`SELECT COUNT(*) FROM ${this.tableName}`)
+      const raw = await this.sql.unsafe(`SELECT COUNT(*) FROM ${this.tableName}`);
 
-      const count = Number(raw[0]?.count)
+      const count = Number(raw[0]?.count);
 
-      expect(count, `Wrong number of rows for table ${this.tableName}`).toEqual(expected)
-    })
+      expect(count, `Wrong number of rows for table ${this.tableName}`).toEqual(expected);
+    });
 
-    return this
+    return this;
   }
 
   row(index = 0): TableRowAssert {
@@ -39,7 +39,7 @@ export class TableAssert {
       this,
       () => this.fetchValue(index),
       assertion => this.assertions.add(assertion),
-    )
+    );
   }
 
   /**
@@ -56,14 +56,14 @@ export class TableAssert {
    */
   async check() {
     for (const assertion of this.assertions) {
-      await assertion()
+      await assertion();
     }
   }
 
   // Thenable pattern: allow to chain assertions with await without a check() call
   // biome-ignore lint/suspicious/noThenProperty: Thenable pattern expected here
   then(onFulfilled: () => unknown, onRejected?: (error: unknown) => unknown): Promise<unknown> {
-    return this.check().then(onFulfilled, onRejected)
+    return this.check().then(onFulfilled, onRejected);
   }
 
   private async fetchValue(index: number): Promise<FetchValueResult> {
@@ -71,60 +71,60 @@ export class TableAssert {
       value: undefined,
       index,
       tableName: this.tableName,
-    }
+    };
 
     if (this.cachedRows.has(index)) {
-      return { ...returnValue, value: this.cachedRows.get(index) }
+      return { ...returnValue, value: this.cachedRows.get(index) };
     }
 
     const orderBy = this.sortOptions
       ? `ORDER BY ${Object.entries(this.sortOptions)
           .map(([column, order]) => `${column} ${order}`)
           .join(', ')}`
-      : ''
+      : '';
 
-    const result = await this.sql.unsafe(`SELECT * FROM ${this.tableName} ${orderBy} OFFSET ${index} LIMIT 1`)
+    const result = await this.sql.unsafe(`SELECT * FROM ${this.tableName} ${orderBy} OFFSET ${index} LIMIT 1`);
 
-    const value = result.length === 1 ? decodePgRow(result[0] as Record<string, unknown>) : undefined
-    this.cachedRows.set(index, value)
+    const value = result.length === 1 ? decodePgRow(result[0] as Record<string, unknown>) : undefined;
+    this.cachedRows.set(index, value);
 
-    return { ...returnValue, value }
+    return { ...returnValue, value };
   }
 }
 
 function decodePgRow(row: Record<string, unknown>): Record<string, unknown> {
-  return Object.fromEntries(Object.entries(row).map(([key, value]) => [key, decodePgValue(value)]))
+  return Object.fromEntries(Object.entries(row).map(([key, value]) => [key, decodePgValue(value)]));
 }
 
 function decodePgValue(value: unknown): unknown {
   if (typeof value !== 'string') {
-    return value
+    return value;
   }
 
   if (/^-?\d+(\.\d+)?$/.test(value)) {
-    return Number(value)
+    return Number(value);
   }
 
   if (value.startsWith('{') && value.endsWith('}')) {
-    return parsePgArray(value)
+    return parsePgArray(value);
   }
 
-  return value
+  return value;
 }
 
 function parsePgArray(literal: string): string[] {
-  const inner = literal.slice(1, -1)
+  const inner = literal.slice(1, -1);
   if (!inner) {
-    return []
+    return [];
   }
 
   return inner.split(',').map(item => {
-    const trimmed = item.trim()
+    const trimmed = item.trim();
     if (trimmed.startsWith('"') && trimmed.endsWith('"')) {
-      return trimmed.slice(1, -1).replaceAll('\\"', '"')
+      return trimmed.slice(1, -1).replaceAll('\\"', '"');
     }
-    return trimmed
-  })
+    return trimmed;
+  });
 }
 
 class TableRowAssert {
@@ -136,35 +136,35 @@ class TableRowAssert {
 
   toEqual(expected: Record<string, unknown>): this {
     this.addAssertion(async () => {
-      const { value, index, tableName } = await this.fetchValue()
-      expect(value, `Wrong value for row[${index}] of table ${tableName}`).toEqual(expected)
-    })
+      const { value, index, tableName } = await this.fetchValue();
+      expect(value, `Wrong value for row[${index}] of table ${tableName}`).toEqual(expected);
+    });
 
-    return this
+    return this;
   }
 
   toMatchObject(expected: Record<string, unknown>): this {
     this.addAssertion(async () => {
-      const { value, index, tableName } = await this.fetchValue()
-      expect(value, `Wrong value for row[${index}] of table ${tableName}`).toMatchObject(expected)
-    })
+      const { value, index, tableName } = await this.fetchValue();
+      expect(value, `Wrong value for row[${index}] of table ${tableName}`).toMatchObject(expected);
+    });
 
-    return this
+    return this;
   }
 
   expectColumn<T>(columnName: string, checker: (value: T | undefined) => unknown | Promise<unknown>): this {
     this.addAssertion(async () => {
-      const { value } = await this.fetchValue()
-      const columnValue = value?.[columnName] as T | undefined
+      const { value } = await this.fetchValue();
+      const columnValue = value?.[columnName] as T | undefined;
 
-      await checker(columnValue)
-    })
+      await checker(columnValue);
+    });
 
-    return this
+    return this;
   }
 
   row(index = 0): TableRowAssert {
-    return this.parent.row(index)
+    return this.parent.row(index);
   }
 
   /**
@@ -180,12 +180,12 @@ class TableRowAssert {
    * ```
    */
   check() {
-    return this.parent.check()
+    return this.parent.check();
   }
 
   // Thenable pattern: allow to chain assertions with await without a check() call
   // biome-ignore lint/suspicious/noThenProperty: Thenable pattern expected here
   then(onFulfilled: () => unknown, onRejected?: (error: unknown) => unknown): Promise<unknown> {
-    return this.check().then(onFulfilled, onRejected)
+    return this.check().then(onFulfilled, onRejected);
   }
 }

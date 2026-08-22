@@ -1,7 +1,7 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { SEO } from '@wishlist/front-components/SEO'
+import { createFileRoute } from '@tanstack/react-router';
+import { SEO } from '@wishlist/front-components/SEO';
 
-import { TermsOfServicePage } from '../components/legal/TermsOfServicePage'
+import { TermsOfServicePage } from '../components/legal/TermsOfServicePage';
 
 export const Route = createFileRoute('/terms')({
   component: () => (
@@ -15,4 +15,4 @@ export const Route = createFileRoute('/terms')({
       <TermsOfServicePage />
     </>
   ),
-})
+});

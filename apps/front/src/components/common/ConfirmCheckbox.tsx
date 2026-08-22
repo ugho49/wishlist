@@ -1,21 +1,21 @@
-import type { SxProps, Theme } from '@mui/material/styles'
-import type React from 'react'
+import type { SxProps, Theme } from '@mui/material/styles';
+import type React from 'react';
 
-import { Button, Checkbox, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material'
-import { useCallback, useState } from 'react'
+import { Button, Checkbox, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
+import { useCallback, useState } from 'react';
 
 export type ConfirmCheckboxProps = {
-  confirmTitle: string | React.ReactNode
-  confirmText: string | React.ReactNode
-  confirmButton?: string
-  cancelButton?: string
-  onChange: (check: boolean) => void
-  disabled?: boolean
-  loading?: boolean
-  checked: boolean
-  confirmOnUncheck?: boolean
-  sx?: SxProps<Theme>
-}
+  confirmTitle: string | React.ReactNode;
+  confirmText: string | React.ReactNode;
+  confirmButton?: string;
+  cancelButton?: string;
+  onChange: (check: boolean) => void;
+  disabled?: boolean;
+  loading?: boolean;
+  checked: boolean;
+  confirmOnUncheck?: boolean;
+  sx?: SxProps<Theme>;
+};
 
 export const ConfirmCheckbox = ({
   confirmTitle,
@@ -28,9 +28,9 @@ export const ConfirmCheckbox = ({
   onChange,
   sx,
 }: ConfirmCheckboxProps) => {
-  const [openDialog, setOpenDialog] = useState(false)
-  const [nextState, setNextState] = useState<boolean | undefined>()
-  const closeDialog = useCallback(() => setOpenDialog(false), [])
+  const [openDialog, setOpenDialog] = useState(false);
+  const [nextState, setNextState] = useState<boolean | undefined>();
+  const closeDialog = useCallback(() => setOpenDialog(false), []);
 
   return (
     <>
@@ -38,13 +38,13 @@ export const ConfirmCheckbox = ({
         sx={sx}
         checked={checked}
         onChange={e => {
-          const nextChecked = e.target.checked
+          const nextChecked = e.target.checked;
           if (checked && !confirmOnUncheck) {
-            onChange(nextChecked)
-            return
+            onChange(nextChecked);
+            return;
           }
-          setNextState(nextChecked)
-          setOpenDialog(true)
+          setNextState(nextChecked);
+          setOpenDialog(true);
         }}
         disabled={disabled}
       />
@@ -57,8 +57,8 @@ export const ConfirmCheckbox = ({
           <Button onClick={() => closeDialog()}>{cancelButton || 'Annuler'}</Button>
           <Button
             onClick={() => {
-              onChange(nextState || false)
-              closeDialog()
+              onChange(nextState || false);
+              closeDialog();
             }}
             autoFocus
           >
@@ -67,5 +67,5 @@ export const ConfirmCheckbox = ({
         </DialogActions>
       </Dialog>
     </>
-  )
-}
+  );
+};

@@ -1,9 +1,9 @@
-import { Controller, Get } from '@nestjs/common'
-import { ApiTags } from '@nestjs/swagger'
-import { HealthCheck } from '@nestjs/terminus'
+import { Controller, Get } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
+import { HealthCheck } from '@nestjs/terminus';
 
-import { Public } from '../../auth/infrastructure/decorators/public.metadata'
-import { HealthService } from './health.service'
+import { Public } from '../../auth/infrastructure/decorators/public.metadata';
+import { HealthService } from './health.service';
 
 @ApiTags('Health')
 @Controller('/health')
@@ -14,6 +14,6 @@ export class HealthController {
   @Public()
   @HealthCheck()
   check() {
-    return this.healthService.check()
+    return this.healthService.check();
   }
 }

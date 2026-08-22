@@ -1,29 +1,30 @@
-import type { RequestApp } from '@wishlist/api-test-utils'
+import type { RequestApp } from '@wishlist/api-test-utils';
 
-import { PasswordManager } from '@wishlist/api/auth'
-import { Fixtures, useTestApp } from '@wishlist/api-test-utils'
-import { sleep } from '@wishlist/common'
-import { DateTime } from 'luxon'
+import { Fixtures, useTestApp } from '@wishlist/api-test-utils';
+import { sleep } from '@wishlist/common';
+import { DateTime } from 'luxon';
+
+import { PasswordManager } from '../../../auth/infrastructure/util/password-manager';
 
 describe('UserController', () => {
-  const { getRequest, expectTable, getFixtures, expectMail } = useTestApp()
-  let fixtures: Fixtures
+  const { getRequest, expectTable, getFixtures, expectMail } = useTestApp();
+  let fixtures: Fixtures;
 
   beforeEach(() => {
-    fixtures = getFixtures()
-  })
+    fixtures = getFixtures();
+  });
 
   describe('GET /user', () => {
-    const path = '/user'
+    const path = '/user';
 
     it('should return unauthorized if not authenticated', async () => {
-      const request = await getRequest()
+      const request = await getRequest();
 
-      await request.get(path).expect(401)
-    })
+      await request.get(path).expect(401);
+    });
 
     it('should return user infos if authenticated', async () => {
-      const request = await getRequest({ signedAs: 'BASE_USER' })
+      const request = await getRequest({ signedAs: 'BASE_USER' });
 
       await request
         .get(path)
@@ -42,18 +43,18 @@ describe('UserController', () => {
             created_at: expect.toBeDateString(),
             updated_at: expect.toBeDateString(),
           }),
-        )
-    })
-  })
+        );
+    });
+  });
 
   describe('POST /user/register', () => {
-    const path = '/user/register'
+    const path = '/user/register';
 
-    let request: RequestApp
+    let request: RequestApp;
 
     beforeEach(async () => {
-      request = await getRequest()
-    })
+      request = await getRequest();
+    });
 
     it.each([
       {
@@ -89,17 +90,17 @@ describe('UserController', () => {
           'lastname must be shorter than or equal to 50 characters',
         ],
       },
-    ])('should return 400 when invalid input: $case', async ({ body, message }) => {
+    ])('should return 400 when invalid input: $case', async ({ body: payload, message }) => {
       await request
         .post(path)
-        .send(body)
+        .send(payload)
         .expect(400)
         .expect(({ body }) =>
           expect(body).toMatchObject({ error: 'Bad Request', message: expect.arrayContaining(message) }),
-        )
+        );
 
-      await expectTable(Fixtures.USER_TABLE).hasNumberOfRows(0)
-    })
+      await expectTable(Fixtures.USER_TABLE).hasNumberOfRows(0);
+    });
 
     describe('when valid input', () => {
       const input = {
@@ -107,23 +108,23 @@ describe('UserController', () => {
         password: Fixtures.DEFAULT_USER_PASSWORD,
         firstname: 'John',
         lastname: 'Doe',
-      }
+      };
 
       it('should fail when email already exists', async () => {
-        await fixtures.insertBaseUser()
+        await fixtures.insertBaseUser();
 
-        await expectTable(Fixtures.USER_TABLE).hasNumberOfRows(1)
+        await expectTable(Fixtures.USER_TABLE).hasNumberOfRows(1);
         await request
           .post(path)
           .send(input)
           .expect(401)
-          .expect(({ body }) => expect(body).toMatchObject({ message: 'User email already taken' }))
+          .expect(({ body }) => expect(body).toMatchObject({ message: 'User email already taken' }));
 
-        await expectTable(Fixtures.USER_TABLE).hasNumberOfRows(1)
-      })
+        await expectTable(Fixtures.USER_TABLE).hasNumberOfRows(1);
+      });
 
       it('should create user', async () => {
-        await expectTable(Fixtures.USER_TABLE).hasNumberOfRows(0)
+        await expectTable(Fixtures.USER_TABLE).hasNumberOfRows(0);
         const res = await request
           .post(path)
           .send(input)
@@ -135,9 +136,9 @@ describe('UserController', () => {
               firstname: 'John',
               lastname: 'Doe',
             }),
-          )
+          );
 
-        const userId = res.body.id
+        const userId = res.body.id;
 
         await expectTable(Fixtures.USER_TABLE)
           .hasNumberOfRows(1)
@@ -155,9 +156,9 @@ describe('UserController', () => {
             updated_at: expect.toBeDate(),
           })
           .expectColumn<string>('password_enc', async value => {
-            const res = await PasswordManager.verify({ hash: value, plainPassword: input.password })
-            expect(res, 'Password should match').toBe(true)
-          })
+            const passwordMatches = await PasswordManager.verify({ hash: value, plainPassword: input.password });
+            expect(passwordMatches, 'Password should match').toBe(true);
+          });
 
         await expectTable(Fixtures.USER_EMAIL_SETTING_TABLE).hasNumberOfRows(1).row(0).toEqual({
           id: expect.toBeString(),
@@ -165,7 +166,7 @@ describe('UserController', () => {
           daily_new_item_notification: true,
           created_at: expect.toBeDate(),
           updated_at: expect.toBeDate(),
-        })
+        });
 
         await expectMail()
           .waitFor(500)
@@ -173,53 +174,53 @@ describe('UserController', () => {
           .mail(0)
           .hasSubject('[Wishlist] Bienvenue !!!')
           .hasSender('contact@wishlistapp.fr')
-          .hasReceiver(Fixtures.BASE_USER_EMAIL)
-      })
+          .hasReceiver(Fixtures.BASE_USER_EMAIL);
+      });
 
       it('should create user and join event if invited as pending', async () => {
-        const creatorId = await fixtures.insertAdminUser()
+        const creatorId = await fixtures.insertAdminUser();
 
         const { eventId } = await fixtures.insertEventWithMaintainer({
           title: 'Event',
           description: 'Description',
           eventDate: new Date(),
           maintainerId: creatorId,
-        })
+        });
 
         const attendeeId = await fixtures.insertPendingAttendee({
           eventId,
           tempUserEmail: Fixtures.BASE_USER_EMAIL,
-        })
+        });
 
         await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(2).row(1).toMatchObject({
           id: attendeeId,
           event_id: eventId,
           user_id: null,
           temp_user_email: Fixtures.BASE_USER_EMAIL,
-        })
+        });
 
-        const res = await request.post(path).send(input).expect(201)
+        const res = await request.post(path).send(input).expect(201);
 
-        await sleep(500)
+        await sleep(500);
 
         await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(2).row(1).toMatchObject({
           id: attendeeId,
           event_id: eventId,
           user_id: res.body.id,
           temp_user_email: null,
-        })
-      })
-    })
-  })
+        });
+      });
+    });
+  });
 
   describe('PUT /user', () => {
-    const path = '/user'
+    const path = '/user';
 
     it('should return unauthorized if not authenticated', async () => {
-      const request = await getRequest()
+      const request = await getRequest();
 
-      await request.put(path).expect(401)
-    })
+      await request.put(path).expect(401);
+    });
 
     it.each([
       {
@@ -258,22 +259,22 @@ describe('UserController', () => {
         case: 'birthday in future',
         message: [expect.stringMatching('maximal allowed date for birthday is')],
       },
-    ])('should return 400 when invalid input: $case', async ({ body, message }) => {
-      const request = await getRequest({ signedAs: 'BASE_USER' })
+    ])('should return 400 when invalid input: $case', async ({ body: payload, message }) => {
+      const request = await getRequest({ signedAs: 'BASE_USER' });
 
       await request
         .put(path)
-        .send(body)
+        .send(payload)
         .expect(400)
         .expect(({ body }) =>
           expect(body).toMatchObject({ error: 'Bad Request', message: expect.arrayContaining(message) }),
-        )
-    })
+        );
+    });
 
     it('should update user when valid input', async () => {
-      const request = await getRequest({ signedAs: 'BASE_USER' })
+      const request = await getRequest({ signedAs: 'BASE_USER' });
 
-      const birthday = DateTime.fromObject({ year: 1993, month: 11, day: 15 }).toISODate()
+      const birthday = DateTime.fromObject({ year: 1993, month: 11, day: 15 }).toISODate();
 
       await request
         .put(path)
@@ -282,7 +283,7 @@ describe('UserController', () => {
           lastname: 'UPDATED',
           birthday,
         })
-        .expect(200)
+        .expect(200);
 
       await expectTable(Fixtures.USER_TABLE)
         .hasNumberOfRows(1)
@@ -291,19 +292,19 @@ describe('UserController', () => {
           first_name: 'Updated',
           last_name: 'UPDATED',
           birthday: new Date('1993-11-15'),
-        })
-    })
-  })
+        });
+    });
+  });
 
   describe('PUT /user/change-password', () => {
-    const path = '/user/change-password'
-    const newPassword = 'NewPassword123'
+    const path = '/user/change-password';
+    const newPassword = 'NewPassword123';
 
     it('should return unauthorized if not authenticated', async () => {
-      const request = await getRequest()
+      const request = await getRequest();
 
-      await request.put(path).expect(401)
-    })
+      await request.put(path).expect(401);
+    });
 
     it.each([
       {
@@ -325,20 +326,20 @@ describe('UserController', () => {
         case: 'new_password too short',
         message: ['new_password must be longer than or equal to 8 characters'],
       },
-    ])('should return 400 when invalid input: $case', async ({ body, message }) => {
-      const request = await getRequest({ signedAs: 'BASE_USER' })
+    ])('should return 400 when invalid input: $case', async ({ body: payload, message }) => {
+      const request = await getRequest({ signedAs: 'BASE_USER' });
 
       await request
         .put(path)
-        .send(body)
+        .send(payload)
         .expect(400)
         .expect(({ body }) =>
           expect(body).toMatchObject({ error: 'Bad Request', message: expect.arrayContaining(message) }),
-        )
-    })
+        );
+    });
 
     it('should not update user password when old password not match', async () => {
-      const request = await getRequest({ signedAs: 'BASE_USER' })
+      const request = await getRequest({ signedAs: 'BASE_USER' });
 
       await request
         .put(path)
@@ -349,18 +350,18 @@ describe('UserController', () => {
         .expect(400)
         .expect(({ body }) =>
           expect(body).toMatchObject({ error: 'Bad Request', message: "Old password don't match with user password" }),
-        )
+        );
 
       await expectTable(Fixtures.USER_TABLE)
         .row(0)
         .expectColumn<string>('password_enc', async value => {
-          const res = await PasswordManager.verify({ hash: value, plainPassword: Fixtures.DEFAULT_USER_PASSWORD })
-          expect(res, 'Password should match').toBe(true)
-        })
-    })
+          const res = await PasswordManager.verify({ hash: value, plainPassword: Fixtures.DEFAULT_USER_PASSWORD });
+          expect(res, 'Password should match').toBe(true);
+        });
+    });
 
     it('should update user password when valid input', async () => {
-      const request = await getRequest({ signedAs: 'BASE_USER' })
+      const request = await getRequest({ signedAs: 'BASE_USER' });
 
       await request
         .put(path)
@@ -368,34 +369,34 @@ describe('UserController', () => {
           old_password: Fixtures.DEFAULT_USER_PASSWORD,
           new_password: newPassword,
         })
-        .expect(200)
+        .expect(200);
 
       await expectTable(Fixtures.USER_TABLE)
         .row(0)
         .expectColumn<string>('password_enc', async value => {
-          const res = await PasswordManager.verify({ hash: value, plainPassword: newPassword })
-          expect(res, 'Password should match').toBe(true)
-        })
-    })
-  })
+          const res = await PasswordManager.verify({ hash: value, plainPassword: newPassword });
+          expect(res, 'Password should match').toBe(true);
+        });
+    });
+  });
 
   describe('GET /user/closest-friends', () => {
-    const path = '/user/closest-friends'
+    const path = '/user/closest-friends';
 
     it('should return unauthorized if not authenticated', async () => {
-      const request = await getRequest()
+      const request = await getRequest();
 
-      await request.get(path).expect(401)
-    })
+      await request.get(path).expect(401);
+    });
 
     describe('when user is authenticated', () => {
-      let request: RequestApp
-      let currentUserId: string
+      let request: RequestApp;
+      let currentUserId: string;
 
       beforeEach(async () => {
-        request = await getRequest({ signedAs: 'BASE_USER' })
-        currentUserId = await fixtures.getSignedUserId('BASE_USER')
-      })
+        request = await getRequest({ signedAs: 'BASE_USER' });
+        currentUserId = await fixtures.getSignedUserId('BASE_USER');
+      });
 
       it('should return 400 when limit is greater than max limit', async () => {
         await request
@@ -407,17 +408,17 @@ describe('UserController', () => {
               error: 'Bad Request',
               message: 'Limit cannot be greater than 50',
             }),
-          )
-      })
+          );
+      });
 
       it('should return empty array when no common events', async () => {
         await request
           .get(path)
           .expect(200)
           .expect(({ body }) => {
-            expect(body).toEqual([])
-          })
-      })
+            expect(body).toEqual([]);
+          });
+      });
 
       it('should return closest friends based on common events', async () => {
         // Create additional users
@@ -425,19 +426,19 @@ describe('UserController', () => {
           email: 'user2@test.com',
           firstname: 'Alice',
           lastname: 'Smith',
-        })
+        });
 
         const user3Id = await fixtures.insertUser({
           email: 'user3@test.com',
           firstname: 'Bob',
           lastname: 'Johnson',
-        })
+        });
 
         const user4Id = await fixtures.insertUser({
           email: 'user4@test.com',
           firstname: 'Charlie',
           lastname: 'Brown',
-        })
+        });
 
         // Create events
         const { eventId: event1Id } = await fixtures.insertEventWithMaintainer({
@@ -445,32 +446,32 @@ describe('UserController', () => {
           description: 'First event',
           eventDate: DateTime.now().plus({ days: 1 }).toJSDate(),
           maintainerId: currentUserId,
-        })
+        });
 
         const { eventId: event2Id } = await fixtures.insertEventWithMaintainer({
           title: 'Event 2',
           description: 'Second event',
           eventDate: DateTime.now().plus({ days: 2 }).toJSDate(),
           maintainerId: currentUserId,
-        })
+        });
 
         const { eventId: event3Id } = await fixtures.insertEventWithMaintainer({
           title: 'Event 3',
           description: 'Third event',
           eventDate: DateTime.now().plus({ days: 3 }).toJSDate(),
           maintainerId: currentUserId,
-        })
+        });
 
         // Add attendees to events
         // user2 participates in 2 events with current user (event1, event2)
-        await fixtures.insertActiveAttendee({ eventId: event1Id, userId: user2Id })
-        await fixtures.insertActiveAttendee({ eventId: event2Id, userId: user2Id })
+        await fixtures.insertActiveAttendee({ eventId: event1Id, userId: user2Id });
+        await fixtures.insertActiveAttendee({ eventId: event2Id, userId: user2Id });
 
         // user3 participates in 1 event with current user (event1)
-        await fixtures.insertActiveAttendee({ eventId: event1Id, userId: user3Id })
+        await fixtures.insertActiveAttendee({ eventId: event1Id, userId: user3Id });
 
         // user4 participates in 1 event with current user (event3)
-        await fixtures.insertActiveAttendee({ eventId: event3Id, userId: user4Id })
+        await fixtures.insertActiveAttendee({ eventId: event3Id, userId: user4Id });
 
         await request
           .get(path)
@@ -498,9 +499,9 @@ describe('UserController', () => {
                 lastname: expect.stringMatching(/^(Johnson|Brown)$/),
                 email: expect.stringMatching(/^(user3@test\.com|user4@test\.com)$/),
               }),
-            ])
-          })
-      })
+            ]);
+          });
+      });
 
       it('should respect limit parameter', async () => {
         // Create users and events
@@ -508,32 +509,32 @@ describe('UserController', () => {
           email: 'user2@test.com',
           firstname: 'Alice',
           lastname: 'Smith',
-        })
+        });
 
         const user3Id = await fixtures.insertUser({
           email: 'user3@test.com',
           firstname: 'Bob',
           lastname: 'Johnson',
-        })
+        });
 
         const { eventId } = await fixtures.insertEventWithMaintainer({
           title: 'Event',
           description: 'Test event',
           eventDate: DateTime.now().plus({ days: 1 }).toJSDate(),
           maintainerId: currentUserId,
-        })
+        });
 
-        await fixtures.insertActiveAttendee({ eventId, userId: user2Id })
-        await fixtures.insertActiveAttendee({ eventId, userId: user3Id })
+        await fixtures.insertActiveAttendee({ eventId, userId: user2Id });
+        await fixtures.insertActiveAttendee({ eventId, userId: user3Id });
 
         await request
           .get(path)
           .query({ limit: 1 })
           .expect(200)
           .expect(({ body }) => {
-            expect(body).toHaveLength(1)
-          })
-      })
+            expect(body).toHaveLength(1);
+          });
+      });
 
       it('should handle complex scenario with many users and events', async () => {
         // Create 6 additional users
@@ -541,37 +542,37 @@ describe('UserController', () => {
           email: 'alice@test.com',
           firstname: 'Alice',
           lastname: 'Wonder',
-        })
+        });
 
         const bobId = await fixtures.insertUser({
           email: 'bob@test.com',
           firstname: 'Bob',
           lastname: 'Builder',
-        })
+        });
 
         const charlieId = await fixtures.insertUser({
           email: 'charlie@test.com',
           firstname: 'Charlie',
           lastname: 'Chaplin',
-        })
+        });
 
         const dianaId = await fixtures.insertUser({
           email: 'diana@test.com',
           firstname: 'Diana',
           lastname: 'Prince',
-        })
+        });
 
         const eveId = await fixtures.insertUser({
           email: 'eve@test.com',
           firstname: 'Eve',
           lastname: 'Adams',
-        })
+        });
 
         const frankId = await fixtures.insertUser({
           email: 'frank@test.com',
           firstname: 'Frank',
           lastname: 'Sinatra',
-        })
+        });
 
         // Create 5 events
         const { eventId: birthdayId } = await fixtures.insertEventWithMaintainer({
@@ -579,58 +580,58 @@ describe('UserController', () => {
           description: 'Annual birthday celebration',
           eventDate: DateTime.now().plus({ days: 1 }).toJSDate(),
           maintainerId: currentUserId,
-        })
+        });
 
         const { eventId: christmasId } = await fixtures.insertEventWithMaintainer({
           title: 'Christmas Party',
           description: 'Holiday celebration',
           eventDate: DateTime.now().plus({ days: 30 }).toJSDate(),
           maintainerId: currentUserId,
-        })
+        });
 
         const { eventId: weddingId } = await fixtures.insertEventWithMaintainer({
           title: 'Wedding',
           description: 'Wedding ceremony',
           eventDate: DateTime.now().plus({ days: 60 }).toJSDate(),
           maintainerId: currentUserId,
-        })
+        });
 
         const { eventId: babyShowerId } = await fixtures.insertEventWithMaintainer({
           title: 'Baby Shower',
           description: 'Baby shower party',
           eventDate: DateTime.now().plus({ days: 90 }).toJSDate(),
           maintainerId: currentUserId,
-        })
+        });
 
         const { eventId: graduationId } = await fixtures.insertEventWithMaintainer({
           title: 'Graduation',
           description: 'Graduation ceremony',
           eventDate: DateTime.now().plus({ days: 120 }).toJSDate(),
           maintainerId: currentUserId,
-        })
+        });
 
         // Alice participates in 4 events with current user (closest friend)
-        await fixtures.insertActiveAttendee({ eventId: birthdayId, userId: aliceId })
-        await fixtures.insertActiveAttendee({ eventId: christmasId, userId: aliceId })
-        await fixtures.insertActiveAttendee({ eventId: weddingId, userId: aliceId })
-        await fixtures.insertActiveAttendee({ eventId: babyShowerId, userId: aliceId })
+        await fixtures.insertActiveAttendee({ eventId: birthdayId, userId: aliceId });
+        await fixtures.insertActiveAttendee({ eventId: christmasId, userId: aliceId });
+        await fixtures.insertActiveAttendee({ eventId: weddingId, userId: aliceId });
+        await fixtures.insertActiveAttendee({ eventId: babyShowerId, userId: aliceId });
 
         // Bob participates in 3 events with current user
-        await fixtures.insertActiveAttendee({ eventId: birthdayId, userId: bobId })
-        await fixtures.insertActiveAttendee({ eventId: christmasId, userId: bobId })
-        await fixtures.insertActiveAttendee({ eventId: weddingId, userId: bobId })
+        await fixtures.insertActiveAttendee({ eventId: birthdayId, userId: bobId });
+        await fixtures.insertActiveAttendee({ eventId: christmasId, userId: bobId });
+        await fixtures.insertActiveAttendee({ eventId: weddingId, userId: bobId });
 
         // Charlie participates in 3 events with current user (tied with Bob)
-        await fixtures.insertActiveAttendee({ eventId: christmasId, userId: charlieId })
-        await fixtures.insertActiveAttendee({ eventId: babyShowerId, userId: charlieId })
-        await fixtures.insertActiveAttendee({ eventId: graduationId, userId: charlieId })
+        await fixtures.insertActiveAttendee({ eventId: christmasId, userId: charlieId });
+        await fixtures.insertActiveAttendee({ eventId: babyShowerId, userId: charlieId });
+        await fixtures.insertActiveAttendee({ eventId: graduationId, userId: charlieId });
 
         // Diana participates in 2 events with current user
-        await fixtures.insertActiveAttendee({ eventId: weddingId, userId: dianaId })
-        await fixtures.insertActiveAttendee({ eventId: babyShowerId, userId: dianaId })
+        await fixtures.insertActiveAttendee({ eventId: weddingId, userId: dianaId });
+        await fixtures.insertActiveAttendee({ eventId: babyShowerId, userId: dianaId });
 
         // Eve participates in 1 event with current user
-        await fixtures.insertActiveAttendee({ eventId: graduationId, userId: eveId })
+        await fixtures.insertActiveAttendee({ eventId: graduationId, userId: eveId });
 
         // Frank doesn't participate in any events with current user (should not appear)
 
@@ -638,7 +639,7 @@ describe('UserController', () => {
           .get(path)
           .expect(200)
           .expect(({ body }) => {
-            expect(body).toHaveLength(5) // All except Frank
+            expect(body).toHaveLength(5); // All except Frank
 
             // Alice should be first (4 common events)
             expect(body[0]).toEqual({
@@ -646,10 +647,10 @@ describe('UserController', () => {
               firstname: 'Alice',
               lastname: 'Wonder',
               email: 'alice@test.com',
-            })
+            });
 
             // Bob and Charlie should be 2nd and 3rd (3 common events each)
-            const bobAndCharlie = body.slice(1, 3)
+            const bobAndCharlie = body.slice(1, 3);
             expect(bobAndCharlie).toEqual(
               expect.arrayContaining([
                 {
@@ -665,7 +666,7 @@ describe('UserController', () => {
                   email: 'charlie@test.com',
                 },
               ]),
-            )
+            );
 
             // Diana should be 4th (2 common events)
             expect(body[3]).toEqual({
@@ -673,7 +674,7 @@ describe('UserController', () => {
               firstname: 'Diana',
               lastname: 'Prince',
               email: 'diana@test.com',
-            })
+            });
 
             // Eve should be 5th (1 common event)
             expect(body[4]).toEqual({
@@ -681,13 +682,13 @@ describe('UserController', () => {
               firstname: 'Eve',
               lastname: 'Adams',
               email: 'eve@test.com',
-            })
+            });
 
             // Frank should not appear (0 common events)
             // biome-ignore lint/suspicious/noExplicitAny: for the test
-            expect(body.map((u: any) => u.id)).not.toContain(frankId)
-          })
-      })
+            expect(body.map((u: any) => u.id)).not.toContain(frankId);
+          });
+      });
 
       it('should handle users who participate in events but not with current user', async () => {
         // Create another maintainer
@@ -695,20 +696,20 @@ describe('UserController', () => {
           email: 'other@test.com',
           firstname: 'Other',
           lastname: 'User',
-        })
+        });
 
         // Create users
         const user1Id = await fixtures.insertUser({
           email: 'user1@test.com',
           firstname: 'User',
           lastname: 'One',
-        })
+        });
 
         const user2Id = await fixtures.insertUser({
           email: 'user2@test.com',
           firstname: 'User',
           lastname: 'Two',
-        })
+        });
 
         // Create events - current user participates in event1
         const { eventId: event1Id } = await fixtures.insertEventWithMaintainer({
@@ -716,7 +717,7 @@ describe('UserController', () => {
           description: 'Current user event',
           eventDate: DateTime.now().plus({ days: 1 }).toJSDate(),
           maintainerId: currentUserId,
-        })
+        });
 
         // Other maintainer creates event2 - current user doesn't participate
         const { eventId: event2Id } = await fixtures.insertEventWithMaintainer({
@@ -724,30 +725,30 @@ describe('UserController', () => {
           description: 'Other user event',
           eventDate: DateTime.now().plus({ days: 2 }).toJSDate(),
           maintainerId: otherMaintainerId,
-        })
+        });
 
         // user1 participates with current user in event1
-        await fixtures.insertActiveAttendee({ eventId: event1Id, userId: user1Id })
+        await fixtures.insertActiveAttendee({ eventId: event1Id, userId: user1Id });
 
         // user2 only participates in event2 (not with current user)
-        await fixtures.insertActiveAttendee({ eventId: event2Id, userId: user2Id })
+        await fixtures.insertActiveAttendee({ eventId: event2Id, userId: user2Id });
 
         await request
           .get(path)
           .expect(200)
           .expect(({ body }) => {
-            expect(body).toHaveLength(1)
+            expect(body).toHaveLength(1);
             expect(body[0]).toEqual({
               id: user1Id,
               firstname: 'User',
               lastname: 'One',
               email: 'user1@test.com',
-            })
+            });
             // user2 should not appear as they don't share events with current user
             // biome-ignore lint/suspicious/noExplicitAny: for the test
-            expect(body.map((u: any) => u.id)).not.toContain(user2Id)
-          })
-      })
+            expect(body.map((u: any) => u.id)).not.toContain(user2Id);
+          });
+      });
 
       it('should return empty array when user participates in events but no other users do', async () => {
         // Current user is maintainer but no other attendees
@@ -756,19 +757,19 @@ describe('UserController', () => {
           description: 'Event with only current user',
           eventDate: DateTime.now().plus({ days: 1 }).toJSDate(),
           maintainerId: currentUserId,
-        })
+        });
 
         await request
           .get(path)
           .expect(200)
           .expect(({ body }) => {
-            expect(body).toEqual([])
-          })
-      })
-    })
-  })
+            expect(body).toEqual([]);
+          });
+      });
+    });
+  });
 
   // TODO: GET /user/search
   // TODO: DELETE /user/picture
   // TODO: PUT /user/picture
-})
+});

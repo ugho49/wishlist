@@ -1,60 +1,60 @@
-import type { UserId } from '@wishlist/common'
-import type { DetailedWishlist } from './wishlist.types'
+import type { UserId } from '@wishlist/common';
+import type { DetailedWishlist } from './wishlist.types';
 
-import PersonRemoveIcon from '@mui/icons-material/PersonRemove'
-import { Avatar, Box, Stack, Typography } from '@mui/material'
-import { useQueryClient } from '@tanstack/react-query'
-import { match } from 'ts-pattern'
+import PersonRemoveIcon from '@mui/icons-material/PersonRemove';
+import { Avatar, Box, Stack, Typography } from '@mui/material';
+import { useQueryClient } from '@tanstack/react-query';
+import { match } from 'ts-pattern';
 
 import {
   rejectionMessage,
   rejectionPattern,
   useAddWishlistCoOwnerMutation,
   useRemoveWishlistCoOwnerMutation,
-} from '../../gql'
-import { useToast } from '../../hooks/useToast'
-import { Card } from '../common/Card'
-import { ConfirmButton } from '../common/ConfirmButton'
-import { Subtitle } from '../common/Subtitle'
-import { SearchUserSelect } from '../user/SearchUserSelect'
+} from '../../gql';
+import { useToast } from '../../hooks/useToast';
+import { Card } from '../common/Card';
+import { ConfirmButton } from '../common/ConfirmButton';
+import { Subtitle } from '../common/Subtitle';
+import { SearchUserSelect } from '../user/SearchUserSelect';
 
 export type EditWishlistManagementProps = {
-  wishlist: DetailedWishlist
-}
+  wishlist: DetailedWishlist;
+};
 
 export const EditWishlistManagement = ({ wishlist }: EditWishlistManagementProps) => {
-  const queryClient = useQueryClient()
-  const { addToast } = useToast()
+  const queryClient = useQueryClient();
+  const { addToast } = useToast();
   const invalidateWishlist = () =>
-    queryClient.invalidateQueries({ queryKey: ['WishlistPage', { wishlistId: wishlist.id }] })
+    queryClient.invalidateQueries({ queryKey: ['WishlistPage', { wishlistId: wishlist.id }] });
 
   const { mutateAsync: addCoOwnerMutation } = useAddWishlistCoOwnerMutation({
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-  })
+  });
   const addCoOwner = async (userId: UserId) => {
-    const res = await addCoOwnerMutation({ id: wishlist.id, input: { userId } })
+    const res = await addCoOwnerMutation({ id: wishlist.id, input: { userId } });
     match(res.addWishlistCoOwner)
       .with({ __typename: 'VoidOutput' }, () => {
-        addToast({ message: 'Co-gestionnaire ajouté avec succès', variant: 'success' })
-        void invalidateWishlist()
+        addToast({ message: 'Co-gestionnaire ajouté avec succès', variant: 'success' });
+        void invalidateWishlist();
       })
       .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
-      .exhaustive()
-  }
+      .exhaustive();
+  };
 
   const { mutateAsync: removeCoOwnerMutation } = useRemoveWishlistCoOwnerMutation({
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-  })
+  });
   const removeCoOwner = async () => {
-    const res = await removeCoOwnerMutation({ id: wishlist.id })
+    const res = await removeCoOwnerMutation({ id: wishlist.id });
     match(res.removeWishlistCoOwner)
       .with({ __typename: 'VoidOutput' }, () => {
-        addToast({ message: 'Co-gestionnaire retiré avec succès', variant: 'success' })
-        void invalidateWishlist()
+        addToast({ message: 'Co-gestionnaire retiré avec succès', variant: 'success' });
+        void invalidateWishlist();
       })
       .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
-      .exhaustive()
-  }
+      .exhaustive();
+  };
 
   return (
     <Card>
@@ -103,7 +103,7 @@ export const EditWishlistManagement = ({ wishlist }: EditWishlistManagementProps
           <SearchUserSelect
             label="Ajouter un co-gestionnaire"
             onChange={value => {
-              if (typeof value !== 'string') void addCoOwner(value.id)
+              if (typeof value !== 'string') void addCoOwner(value.id);
             }}
             excludedEmails={[wishlist.owner.email]}
             acceptNewUsers={false}
@@ -111,5 +111,5 @@ export const EditWishlistManagement = ({ wishlist }: EditWishlistManagementProps
         )}
       </Stack>
     </Card>
-  )
-}
+  );
+};

@@ -1,50 +1,50 @@
-import type { DetailedWishlist } from './wishlist.types'
+import type { DetailedWishlist } from './wishlist.types';
 
-import { zodResolver } from '@hookform/resolvers/zod'
-import DeleteIcon from '@mui/icons-material/Delete'
-import SaveIcon from '@mui/icons-material/Save'
-import { Box, Button, Stack, TextField } from '@mui/material'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useNavigate } from '@tanstack/react-router'
-import { useMemo, useState } from 'react'
-import { Controller, useForm } from 'react-hook-form'
-import { match } from 'ts-pattern'
-import { z } from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod';
+import DeleteIcon from '@mui/icons-material/Delete';
+import SaveIcon from '@mui/icons-material/Save';
+import { Box, Button, Stack, TextField } from '@mui/material';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from '@tanstack/react-router';
+import { useMemo, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { match } from 'ts-pattern';
+import { z } from 'zod';
 
-import { uploadWishlistLogo } from '../../api/upload'
+import { uploadWishlistLogo } from '../../api/upload';
 import {
   rejectionMessage,
   rejectionPattern,
   useDeleteWishlistMutation,
   useRemoveWishlistLogoMutation,
   useUpdateWishlistMutation,
-} from '../../gql'
-import { useToast } from '../../hooks/useToast'
-import { zodRequiredString } from '../../utils/validation'
-import { Card } from '../common/Card'
-import { ConfirmButton } from '../common/ConfirmButton'
-import { Subtitle } from '../common/Subtitle'
-import { TextareaMarkdown } from '../common/TextareaMarkdown'
-import { WishlistLogoActions } from './WishlistLogoActions'
+} from '../../gql';
+import { useToast } from '../../hooks/useToast';
+import { zodRequiredString } from '../../utils/validation';
+import { Card } from '../common/Card';
+import { ConfirmButton } from '../common/ConfirmButton';
+import { Subtitle } from '../common/Subtitle';
+import { TextareaMarkdown } from '../common/TextareaMarkdown';
+import { WishlistLogoActions } from './WishlistLogoActions';
 
 export type EditWishlistInformationsProps = {
-  wishlist: DetailedWishlist
-}
+  wishlist: DetailedWishlist;
+};
 
 const schema = z.object({
   title: zodRequiredString().max(100, '100 caractères maximum'),
   description: z.string().max(2000, '2000 caractères maximum').optional(),
-})
+});
 
-type FormFields = z.infer<typeof schema>
+type FormFields = z.infer<typeof schema>;
 
 export const EditWishlistInformations = ({ wishlist }: EditWishlistInformationsProps) => {
-  const queryClient = useQueryClient()
-  const { addToast } = useToast()
-  const [logoUrl, setLogoUrl] = useState<string | undefined>(wishlist.logoUrl ?? undefined)
-  const navigate = useNavigate()
+  const queryClient = useQueryClient();
+  const { addToast } = useToast();
+  const [logoUrl, setLogoUrl] = useState<string | undefined>(wishlist.logoUrl ?? undefined);
+  const navigate = useNavigate();
   const invalidateWishlist = () =>
-    queryClient.invalidateQueries({ queryKey: ['WishlistPage', { wishlistId: wishlist.id }] })
+    queryClient.invalidateQueries({ queryKey: ['WishlistPage', { wishlistId: wishlist.id }] });
 
   const {
     register,
@@ -57,71 +57,71 @@ export const EditWishlistInformations = ({ wishlist }: EditWishlistInformationsP
       title: wishlist.title || '',
       description: wishlist.description ?? undefined,
     },
-  })
+  });
 
   const { mutateAsync: updateWishlistMutation } = useUpdateWishlistMutation({
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-  })
+  });
 
   const { mutateAsync: uploadLogo, isPending: uploadLogoPending } = useMutation({
     mutationFn: (file: File) => uploadWishlistLogo(wishlist.id, file),
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
     onSuccess: output => {
-      setLogoUrl(output.logo_url)
-      addToast({ message: 'Logo mis à jour', variant: 'info' })
-      void invalidateWishlist()
+      setLogoUrl(output.logo_url);
+      addToast({ message: 'Logo mis à jour', variant: 'info' });
+      void invalidateWishlist();
     },
-  })
+  });
 
   const { mutateAsync: removeLogoMutation, isPending: removeLogoPending } = useRemoveWishlistLogoMutation({
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-  })
+  });
 
   const removeLogo = async () => {
-    const res = await removeLogoMutation({ id: wishlist.id })
+    const res = await removeLogoMutation({ id: wishlist.id });
     match(res.removeWishlistLogo)
       .with({ __typename: 'VoidOutput' }, () => {
-        setLogoUrl(undefined)
-        addToast({ message: 'Logo supprimé', variant: 'info' })
-        void invalidateWishlist()
+        setLogoUrl(undefined);
+        addToast({ message: 'Logo supprimé', variant: 'info' });
+        void invalidateWishlist();
       })
       .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
-      .exhaustive()
-  }
+      .exhaustive();
+  };
 
   const { mutateAsync: deleteWishlistMutation } = useDeleteWishlistMutation({
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-  })
+  });
 
   const deleteWishlist = async () => {
-    const res = await deleteWishlistMutation({ id: wishlist.id })
+    const res = await deleteWishlistMutation({ id: wishlist.id });
     match(res.deleteWishlist)
       .with({ __typename: 'VoidOutput' }, () => {
-        addToast({ message: 'La liste à bien été supprimée', variant: 'success' })
-        void navigate({ to: '/wishlists' })
+        addToast({ message: 'La liste à bien été supprimée', variant: 'success' });
+        void navigate({ to: '/wishlists' });
       })
       .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
-      .exhaustive()
-  }
+      .exhaustive();
+  };
 
   const loadingLogoUpdate = useMemo(
     () => removeLogoPending || uploadLogoPending,
     [removeLogoPending, uploadLogoPending],
-  )
+  );
 
   const onSubmit = async (data: FormFields) => {
     const res = await updateWishlistMutation({
       id: wishlist.id,
       input: { title: data.title, description: data.description === '' ? undefined : data.description },
-    })
+    });
     match(res.updateWishlist)
       .with({ __typename: 'VoidOutput' }, () => {
-        addToast({ message: 'Liste mis à jour', variant: 'info' })
-        void invalidateWishlist()
+        addToast({ message: 'Liste mis à jour', variant: 'info' });
+        void invalidateWishlist();
       })
       .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
-      .exhaustive()
-  }
+      .exhaustive();
+  };
 
   return (
     <Stack gap={3}>
@@ -133,10 +133,10 @@ export const EditWishlistInformations = ({ wishlist }: EditWishlistInformationsP
               loading={loadingLogoUpdate}
               logoUrl={logoUrl}
               onLogoChange={async file => {
-                await uploadLogo(file)
+                await uploadLogo(file);
               }}
               onLogoRemove={async () => {
-                await removeLogo()
+                await removeLogo();
               }}
             />
           </Box>
@@ -212,5 +212,5 @@ export const EditWishlistInformations = ({ wishlist }: EditWishlistInformationsP
         </Box>
       </Stack>
     </Stack>
-  )
-}
+  );
+};

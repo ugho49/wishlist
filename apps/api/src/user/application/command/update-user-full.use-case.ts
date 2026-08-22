@@ -1,26 +1,27 @@
-import { BadRequestException, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common'
-import { PasswordManager } from '@wishlist/api/auth'
-import { REPOSITORIES } from '@wishlist/api/repositories'
-import { type ICurrentUser, type UserId } from '@wishlist/common'
+import type { UserRepository } from '../../domain/repository/user.repository';
 
-import { type UserRepository } from '../../domain'
+import { BadRequestException, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { type ICurrentUser, type UserId } from '@wishlist/common';
+
+import { PasswordManager } from '../../../auth/infrastructure/util/password-manager';
+import { REPOSITORIES } from '../../../repositories/repositories.constants';
 
 export type UpdateUserFullInput = {
-  userId: UserId
-  currentUser: ICurrentUser
+  userId: UserId;
+  currentUser: ICurrentUser;
   updateUser: {
-    email?: string
-    newPassword?: string
-    firstname?: string
-    lastname?: string
-    birthday?: Date
-    isEnabled?: boolean
-  }
-}
+    email?: string;
+    newPassword?: string;
+    firstname?: string;
+    lastname?: string;
+    birthday?: Date;
+    isEnabled?: boolean;
+  };
+};
 
 @Injectable()
 export class UpdateUserFullUseCase {
-  private readonly logger = new Logger(UpdateUserFullUseCase.name)
+  private readonly logger = new Logger(UpdateUserFullUseCase.name);
 
   constructor(
     @Inject(REPOSITORIES.USER)
@@ -28,59 +29,59 @@ export class UpdateUserFullUseCase {
   ) {}
 
   async execute(input: UpdateUserFullInput): Promise<void> {
-    this.logger.log('Update user full request received', { userId: input.userId })
-    const { userId, currentUser, updateUser } = input
+    this.logger.log('Update user full request received', { userId: input.userId });
+    const { userId, currentUser, updateUser } = input;
 
     if (userId === currentUser.id) {
-      throw new UnauthorizedException('You cannot update yourself')
+      throw new UnauthorizedException('You cannot update yourself');
     }
 
-    let user = await this.userRepository.findByIdOrFail(userId)
-    const canUpdateUser = (currentUser.isSuperAdmin && !user.isSuperAdmin()) || !user.isAdmin()
+    let user = await this.userRepository.findByIdOrFail(userId);
+    const canUpdateUser = (currentUser.isSuperAdmin && !user.isSuperAdmin()) || !user.isAdmin();
 
     if (!canUpdateUser) {
-      throw new UnauthorizedException('You cannot update this user')
+      throw new UnauthorizedException('You cannot update this user');
     }
 
-    const updatedFields: string[] = []
+    const updatedFields: string[] = [];
 
     if (updateUser.email && user.email !== updateUser.email) {
-      const userWithSameEmail = await this.userRepository.findByEmail(updateUser.email)
+      const userWithSameEmail = await this.userRepository.findByEmail(updateUser.email);
 
       if (userWithSameEmail) {
-        throw new BadRequestException('A user already exist with this email')
+        throw new BadRequestException('A user already exist with this email');
       }
 
-      user = user.updateEmail(updateUser.email)
-      updatedFields.push('email')
+      user = user.updateEmail(updateUser.email);
+      updatedFields.push('email');
     }
 
     if (updateUser.newPassword) {
-      user = user.updatePassword(await PasswordManager.hash(updateUser.newPassword))
-      updatedFields.push('password')
+      user = user.updatePassword(await PasswordManager.hash(updateUser.newPassword));
+      updatedFields.push('password');
     }
 
     if (updateUser.firstname) {
-      user = user.updateFirstName(updateUser.firstname)
-      updatedFields.push('firstname')
+      user = user.updateFirstName(updateUser.firstname);
+      updatedFields.push('firstname');
     }
 
     if (updateUser.lastname) {
-      user = user.updateLastName(updateUser.lastname)
-      updatedFields.push('lastname')
+      user = user.updateLastName(updateUser.lastname);
+      updatedFields.push('lastname');
     }
 
     if (updateUser.birthday) {
-      user = user.updateBirthday(updateUser.birthday)
-      updatedFields.push('birthday')
+      user = user.updateBirthday(updateUser.birthday);
+      updatedFields.push('birthday');
     }
 
     if (updateUser.isEnabled !== undefined) {
-      user = user.updateIsEnabled(updateUser.isEnabled)
-      updatedFields.push('isEnabled')
+      user = user.updateIsEnabled(updateUser.isEnabled);
+      updatedFields.push('isEnabled');
     }
 
-    this.logger.log('Updating user...', { userId, updatedFields })
-    await this.userRepository.save(user)
+    this.logger.log('Updating user...', { userId, updatedFields });
+    await this.userRepository.save(user);
   }
 }

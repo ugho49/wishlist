@@ -1,21 +1,21 @@
-import type { RootState } from '../../core'
-import type { WishlistListItem } from './wishlist.types'
+import type { RootState } from '../../core/store';
+import type { WishlistListItem } from './wishlist.types';
 
-import PublicIcon from '@mui/icons-material/Public'
-import { styled, Typography } from '@mui/material'
-import { useNavigate } from '@tanstack/react-router'
-import clsx from 'clsx'
-import { DateTime } from 'luxon'
-import { useSelector } from 'react-redux'
+import PublicIcon from '@mui/icons-material/Public';
+import { styled, Typography } from '@mui/material';
+import { useNavigate } from '@tanstack/react-router';
+import clsx from 'clsx';
+import { DateTime } from 'luxon';
+import { useSelector } from 'react-redux';
 
-import { getAvatarUrl } from '../../utils/wishlist.utils'
-import { Card } from '../common/Card'
-import { EventIcon } from '../event/EventIcon'
-import { WishlistAvatar } from './WishlistAvatar'
+import { getAvatarUrl } from '../../utils/wishlist.utils';
+import { Card } from '../common/Card';
+import { EventIcon } from '../event/EventIcon';
+import { WishlistAvatar } from './WishlistAvatar';
 
 export type WishlistCardWithEventsProps = {
-  wishlist: WishlistListItem
-}
+  wishlist: WishlistListItem;
+};
 
 const WishlistCardContent = styled(Card)(({ theme }) => ({
   display: 'flex',
@@ -55,7 +55,7 @@ const WishlistCardContent = styled(Card)(({ theme }) => ({
       },
     },
   },
-}))
+}));
 
 const WishlistHeader = styled('div')({
   display: 'flex',
@@ -63,7 +63,7 @@ const WishlistHeader = styled('div')({
   justifyContent: 'center',
   gap: '12px',
   marginBottom: '16px',
-})
+});
 
 const WishlistTitleContainer = styled('div')({
   display: 'flex',
@@ -71,7 +71,7 @@ const WishlistTitleContainer = styled('div')({
   alignItems: 'center',
   flex: 1,
   minWidth: 0,
-})
+});
 
 const WishlistTitle = styled('div')(({ theme }) => ({
   color: theme.palette.primary.main,
@@ -84,14 +84,14 @@ const WishlistTitle = styled('div')(({ theme }) => ({
   letterSpacing: '0.05em',
   textAlign: 'center',
   maxWidth: '100%',
-}))
+}));
 
 const PublicIndicator = styled(PublicIcon)(({ theme }) => ({
   fontSize: '14px',
   color: theme.palette.text.secondary,
   marginLeft: '6px',
   opacity: 0.7,
-}))
+}));
 
 const WishlistEvents = styled('div')(({ theme }) => ({
   marginTop: 'auto',
@@ -102,7 +102,7 @@ const WishlistEvents = styled('div')(({ theme }) => ({
   alignItems: 'center',
   justifyContent: 'center',
   gap: '6px',
-}))
+}));
 
 const EventItem = styled('div')(({ theme }) => ({
   display: 'flex',
@@ -111,7 +111,7 @@ const EventItem = styled('div')(({ theme }) => ({
   fontSize: '0.8rem',
   color: theme.palette.text.secondary,
   flexShrink: 0,
-}))
+}));
 
 const EventName = styled(Typography)(({ theme }) => ({
   fontSize: '0.8rem',
@@ -127,7 +127,7 @@ const EventName = styled(Typography)(({ theme }) => ({
   [theme.breakpoints.down('sm')]: {
     maxWidth: '260px',
   },
-}))
+}));
 
 const MoreEventsIndicator = styled('span')(({ theme }) => ({
   fontSize: '0.75rem',
@@ -135,21 +135,21 @@ const MoreEventsIndicator = styled('span')(({ theme }) => ({
   fontStyle: 'italic',
   whiteSpace: 'nowrap',
   textAlign: 'center',
-}))
+}));
 
 export const WishlistCardWithEvents = ({ wishlist }: WishlistCardWithEventsProps) => {
-  const userProfile = useSelector((state: RootState) => state.userProfile)
-  const navigate = useNavigate()
+  const userProfile = useSelector((state: RootState) => state.userProfile);
+  const navigate = useNavigate();
   const past =
     wishlist.events.filter(e => DateTime.fromISO(e.eventDate) < DateTime.now().minus({ days: 1 })).length ===
-    wishlist.events.length
+    wishlist.events.length;
 
-  const isPublic = !wishlist.config.hideItems
-  const maxEventsToShow = 1
+  const isPublic = !wishlist.config.hideItems;
+  const maxEventsToShow = 1;
   const eventsToShow = wishlist.events
     .toSorted((a, b) => DateTime.fromISO(a.eventDate).toMillis() - DateTime.fromISO(b.eventDate).toMillis())
-    .slice(0, maxEventsToShow)
-  const remainingEventsCount = wishlist.events.length - maxEventsToShow
+    .slice(0, maxEventsToShow);
+  const remainingEventsCount = wishlist.events.length - maxEventsToShow;
 
   return (
     <WishlistCardContent
@@ -187,5 +187,5 @@ export const WishlistCardWithEvents = ({ wishlist }: WishlistCardWithEventsProps
         )}
       </WishlistEvents>
     </WishlistCardContent>
-  )
-}
+  );
+};

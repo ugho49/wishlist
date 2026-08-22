@@ -1,21 +1,23 @@
-import type { ICurrentUser, SecretSantaId } from '@wishlist/common'
+import type { ICurrentUser, SecretSantaId } from '@wishlist/common';
+import type { SecretSantaRepository } from '../../domain/repository/secret-santa.repository';
+import type { SecretSantaUserRepository } from '../../domain/repository/secret-santa-user.repository';
 
-import { BadRequestException, ForbiddenException, Inject, Injectable, Logger } from '@nestjs/common'
-import { EventBus } from '@nestjs/cqrs'
-import { TransactionManager } from '@wishlist/api/core'
-import { type EventRepository } from '@wishlist/api/event'
-import { REPOSITORIES } from '@wishlist/api/repositories'
+import { BadRequestException, ForbiddenException, Inject, Injectable, Logger } from '@nestjs/common';
+import { EventBus } from '@nestjs/cqrs';
 
-import { type SecretSantaRepository, SecretSantaStartedEvent, type SecretSantaUserRepository } from '../../domain'
+import { TransactionManager } from '../../../core/database/transaction-manager';
+import { type EventRepository } from '../../../event/domain/repository/event.repository';
+import { REPOSITORIES } from '../../../repositories/repositories.constants';
+import { SecretSantaStartedEvent } from '../../domain/event/secret-santa-started.event';
 
 export type StartSecretSantaInput = {
-  currentUser: ICurrentUser
-  secretSantaId: SecretSantaId
-}
+  currentUser: ICurrentUser;
+  secretSantaId: SecretSantaId;
+};
 
 @Injectable()
 export class StartSecretSantaUseCase {
-  private readonly logger = new Logger(StartSecretSantaUseCase.name)
+  private readonly logger = new Logger(StartSecretSantaUseCase.name);
 
   constructor(
     @Inject(REPOSITORIES.SECRET_SANTA) private readonly secretSantaRepository: SecretSantaRepository,
@@ -26,40 +28,40 @@ export class StartSecretSantaUseCase {
   ) {}
 
   async execute(command: StartSecretSantaInput): Promise<void> {
-    this.logger.log('Start secret santa request received', { command })
-    let secretSanta = await this.secretSantaRepository.findByIdOrFail(command.secretSantaId)
+    this.logger.log('Start secret santa request received', { command });
+    let secretSanta = await this.secretSantaRepository.findByIdOrFail(command.secretSantaId);
 
-    const event = await this.eventRepository.findByIdOrFail(secretSanta.eventId)
+    const event = await this.eventRepository.findByIdOrFail(secretSanta.eventId);
 
     if (!event.canEdit(command.currentUser)) {
-      throw new ForbiddenException('Event cannot be edited by this user')
+      throw new ForbiddenException('Event cannot be edited by this user');
     }
 
     if (secretSanta.isStarted()) {
-      throw new ForbiddenException('Secret santa already started')
+      throw new ForbiddenException('Secret santa already started');
     }
 
     if (event.isFinished()) {
-      throw new BadRequestException('Event is already finished')
+      throw new BadRequestException('Event is already finished');
     }
 
     try {
-      this.logger.log('Starting secret santa and assigning draw...', { secretSantaId: secretSanta.id })
-      secretSanta = secretSanta.startAndAssignDraw()
+      this.logger.log('Starting secret santa and assigning draw...', { secretSantaId: secretSanta.id });
+      secretSanta = secretSanta.startAndAssignDraw();
     } catch (error) {
-      throw new BadRequestException(error)
+      throw new BadRequestException(error);
     }
 
-    this.logger.log('Saving secret santa...', { secretSantaId: secretSanta.id, secretSanta })
+    this.logger.log('Saving secret santa...', { secretSantaId: secretSanta.id, secretSanta });
     await this.transactionManager.runInTransaction(async tx => {
-      await this.secretSantaUserRepository.saveAll(secretSanta.users, tx)
-      await this.secretSantaRepository.save(secretSanta, tx)
-    })
+      await this.secretSantaUserRepository.saveAll(secretSanta.users, tx);
+      await this.secretSantaRepository.save(secretSanta, tx);
+    });
 
     const drawns = secretSanta.users.flatMap(user => {
-      const attendee = event.attendees.find(a => a.id === user.attendeeId)
-      return attendee ? [{ email: attendee.getEmail() }] : []
-    })
+      const attendee = event.attendees.find(a => a.id === user.attendeeId);
+      return attendee ? [{ email: attendee.getEmail() }] : [];
+    });
 
     await this.eventBus.publish(
       new SecretSantaStartedEvent({
@@ -69,6 +71,6 @@ export class StartSecretSantaUseCase {
         description: secretSanta.description ?? undefined,
         drawns,
       }),
-    )
+    );
   }
 }

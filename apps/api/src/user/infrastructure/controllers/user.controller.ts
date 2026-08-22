@@ -10,9 +10,9 @@ import {
   Query,
   UploadedFile,
   UseInterceptors,
-} from '@nestjs/common'
-import { FileInterceptor } from '@nestjs/platform-express'
-import { ApiConsumes, ApiTags } from '@nestjs/swagger'
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import {
   ChangeUserPasswordInputDto,
   type ICurrentUser,
@@ -26,25 +26,26 @@ import {
   type UserId,
   UserSocialDto,
   type UserSocialId,
-} from '@wishlist/common'
-import { RealIP } from 'nestjs-real-ip'
+} from '@wishlist/common';
+import { RealIP } from 'nestjs-real-ip';
 
-import { CurrentUser, Public } from '../../../auth'
+import { Public } from '../../../auth/infrastructure/decorators/public.metadata';
+import { CurrentUser } from '../../../auth/infrastructure/decorators/user.decorator';
 
-import 'multer'
+import 'multer';
 
-import { CreateUserUseCase } from '../../application/command/create-user.use-case'
-import { LinkUserToGoogleUseCase } from '../../application/command/link-user-to-google.use-case'
-import { RemoveUserPictureUseCase } from '../../application/command/remove-user-picture.use-case'
-import { UnlinkUserSocialUseCase } from '../../application/command/unlink-user-social.use-case'
-import { UpdateUserUseCase } from '../../application/command/update-user.use-case'
-import { UpdateUserPasswordUseCase } from '../../application/command/update-user-password.use-case'
-import { UpdateUserPictureUseCase } from '../../application/command/update-user-picture.use-case'
-import { UpdateUserPictureFromSocialUseCase } from '../../application/command/update-user-picture-from-social.use-case'
-import { GetClosestFriendsUseCase } from '../../application/query/get-closest-friends.use-case'
-import { GetUserByIdUseCase } from '../../application/query/get-user-by-id.use-case'
-import { GetUsersByCriteriaUseCase } from '../../application/query/get-users-by-criteria.use-case'
-import { userPictureFileValidators, userPictureResizePipe } from '../user.validator'
+import { CreateUserUseCase } from '../../application/command/create-user.use-case';
+import { LinkUserToGoogleUseCase } from '../../application/command/link-user-to-google.use-case';
+import { RemoveUserPictureUseCase } from '../../application/command/remove-user-picture.use-case';
+import { UnlinkUserSocialUseCase } from '../../application/command/unlink-user-social.use-case';
+import { UpdateUserUseCase } from '../../application/command/update-user.use-case';
+import { UpdateUserPasswordUseCase } from '../../application/command/update-user-password.use-case';
+import { UpdateUserPictureUseCase } from '../../application/command/update-user-picture.use-case';
+import { UpdateUserPictureFromSocialUseCase } from '../../application/command/update-user-picture-from-social.use-case';
+import { GetClosestFriendsUseCase } from '../../application/query/get-closest-friends.use-case';
+import { GetUserByIdUseCase } from '../../application/query/get-user-by-id.use-case';
+import { GetUsersByCriteriaUseCase } from '../../application/query/get-users-by-criteria.use-case';
+import { userPictureFileValidators, userPictureResizePipe } from '../user.validator';
 
 @ApiTags('User')
 @Controller('/user')
@@ -65,7 +66,7 @@ export class UserController {
 
   @Get()
   getInfos(@CurrentUser('id') currentUserId: UserId): Promise<UserDto> {
-    return this.getUserByIdUseCase.execute({ userId: currentUserId })
+    return this.getUserByIdUseCase.execute({ userId: currentUserId });
   }
 
   @Public()
@@ -80,7 +81,7 @@ export class UserController {
         firstname: dto.firstname,
         lastname: dto.lastname,
       },
-    })
+    });
   }
 
   @Post('/link-social/google')
@@ -88,7 +89,7 @@ export class UserController {
     @CurrentUser('id') currentUserId: UserId,
     @Body() dto: LinkUserToGoogleInputDto,
   ): Promise<UserSocialDto> {
-    return this.linkUserToGoogleUseCase.execute({ code: dto.code, userId: currentUserId })
+    return this.linkUserToGoogleUseCase.execute({ code: dto.code, userId: currentUserId });
   }
 
   @Delete('/unlink-social/:socialId')
@@ -96,7 +97,7 @@ export class UserController {
     @CurrentUser('id') currentUserId: UserId,
     @Param('socialId') socialId: UserSocialId,
   ): Promise<void> {
-    return this.unlinkUserSocialUseCase.execute({ userId: currentUserId, socialId })
+    return this.unlinkUserSocialUseCase.execute({ userId: currentUserId, socialId });
   }
 
   @Put()
@@ -108,7 +109,7 @@ export class UserController {
         lastname: dto.lastname,
         birthday: dto.birthday,
       },
-    })
+    });
   }
 
   @Put('/change-password')
@@ -120,7 +121,7 @@ export class UserController {
       userId: currentUserId,
       oldPassword: dto.old_password,
       newPassword: dto.new_password,
-    })
+    });
   }
 
   @Get('/search')
@@ -131,7 +132,7 @@ export class UserController {
     return this.getUsersByCriteriaUseCase.execute({
       currentUser,
       criteria,
-    })
+    });
   }
 
   @Get('/closest-friends')
@@ -139,7 +140,7 @@ export class UserController {
     @CurrentUser('id') currentUserId: UserId,
     @Query() queryParams: LimitQueryDto,
   ): Promise<MiniUserDto[]> {
-    return this.getClosestFriendsUseCase.execute({ userId: currentUserId, limit: queryParams.limit ?? 20 })
+    return this.getClosestFriendsUseCase.execute({ userId: currentUserId, limit: queryParams.limit ?? 20 });
   }
 
   @Post('/upload-picture')
@@ -150,17 +151,17 @@ export class UserController {
     @UploadedFile(userPictureFileValidators, userPictureResizePipe)
     file: Express.Multer.File,
   ): Promise<UpdateUserPictureOutputDto> {
-    const result = await this.updateUserPictureUseCase.execute({ userId: currentUserId, file })
-    return { picture_url: result.pictureUrl }
+    const result = await this.updateUserPictureUseCase.execute({ userId: currentUserId, file });
+    return { picture_url: result.pictureUrl };
   }
 
   @Put('/picture')
   async updatePictureFromSocial(@CurrentUser('id') currentUserId: UserId, @Query('social_id') socialId: UserSocialId) {
-    await this.updateUserPictureFromSocialUseCase.execute({ userId: currentUserId, socialId })
+    await this.updateUserPictureFromSocialUseCase.execute({ userId: currentUserId, socialId });
   }
 
   @Delete('/picture')
   async removePicture(@CurrentUser('id') currentUserId: UserId) {
-    await this.removeUserPictureUseCase.execute({ userId: currentUserId })
+    await this.removeUserPictureUseCase.execute({ userId: currentUserId });
   }
 }

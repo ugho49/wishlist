@@ -1,19 +1,20 @@
-import { BadRequestException, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common'
-import { type EventRepository } from '@wishlist/api/event'
-import { REPOSITORIES } from '@wishlist/api/repositories'
-import { type EventId, type ICurrentUser, MAX_EVENTS_BY_LIST, type WishlistId } from '@wishlist/common'
+import type { WishlistRepository } from '../../domain/wishlist.repository';
 
-import { type WishlistRepository } from '../../domain'
+import { BadRequestException, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { type EventId, type ICurrentUser, MAX_EVENTS_BY_LIST, type WishlistId } from '@wishlist/common';
+
+import { type EventRepository } from '../../../event/domain/repository/event.repository';
+import { REPOSITORIES } from '../../../repositories/repositories.constants';
 
 export type LinkWishlistToEventInput = {
-  currentUser: ICurrentUser
-  wishlistId: WishlistId
-  eventId: EventId
-}
+  currentUser: ICurrentUser;
+  wishlistId: WishlistId;
+  eventId: EventId;
+};
 
 @Injectable()
 export class LinkWishlistToEventUseCase {
-  private readonly logger = new Logger(LinkWishlistToEventUseCase.name)
+  private readonly logger = new Logger(LinkWishlistToEventUseCase.name);
 
   constructor(
     @Inject(REPOSITORIES.WISHLIST)
@@ -23,32 +24,32 @@ export class LinkWishlistToEventUseCase {
   ) {}
 
   async execute(command: LinkWishlistToEventInput): Promise<void> {
-    this.logger.log('Link wishlist to event request received', { command })
-    const { currentUser, wishlistId, eventId } = command
+    this.logger.log('Link wishlist to event request received', { command });
+    const { currentUser, wishlistId, eventId } = command;
 
-    const wishlist = await this.wishlistRepository.findByIdOrFail(wishlistId)
+    const wishlist = await this.wishlistRepository.findByIdOrFail(wishlistId);
 
     if (!wishlist.isOwnerOrCoOwner(currentUser.id)) {
-      throw new UnauthorizedException('Only the owner or co-owner of the list can update it')
+      throw new UnauthorizedException('Only the owner or co-owner of the list can update it');
     }
 
-    const event = await this.eventRepository.findByIdOrFail(eventId)
+    const event = await this.eventRepository.findByIdOrFail(eventId);
 
     if (!event.canAddWishlist(currentUser.id)) {
-      throw new UnauthorizedException('You cannot add the wishlist to this event')
+      throw new UnauthorizedException('You cannot add the wishlist to this event');
     }
 
     if (wishlist.eventIds.length >= MAX_EVENTS_BY_LIST) {
-      throw new UnauthorizedException(`You cannot link your list to more than ${MAX_EVENTS_BY_LIST} events`)
+      throw new UnauthorizedException(`You cannot link your list to more than ${MAX_EVENTS_BY_LIST} events`);
     }
 
     if (wishlist.isLinkedToEvent(eventId)) {
-      throw new BadRequestException('Wishlist is already linked to this event')
+      throw new BadRequestException('Wishlist is already linked to this event');
     }
 
-    const updatedWishlist = wishlist.linkEvent(eventId)
+    const updatedWishlist = wishlist.linkEvent(eventId);
 
-    this.logger.log('Saving wishlist...', { wishlistId: updatedWishlist.id, updatedFields: ['eventIds'] })
-    await this.wishlistRepository.save(updatedWishlist)
+    this.logger.log('Saving wishlist...', { wishlistId: updatedWishlist.id, updatedFields: ['eventIds'] });
+    await this.wishlistRepository.save(updatedWishlist);
   }
 }

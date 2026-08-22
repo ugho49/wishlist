@@ -1,18 +1,19 @@
-import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common'
-import { BucketService } from '@wishlist/api/core'
-import { REPOSITORIES } from '@wishlist/api/repositories'
-import { type ICurrentUser, type WishlistId } from '@wishlist/common'
+import type { WishlistRepository } from '../../domain/wishlist.repository';
 
-import { type WishlistRepository } from '../../domain'
+import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { type ICurrentUser, type WishlistId } from '@wishlist/common';
+
+import { BucketService } from '../../../core/bucket/bucket.service';
+import { REPOSITORIES } from '../../../repositories/repositories.constants';
 
 export type RemoveWishlistLogoInput = {
-  currentUser: ICurrentUser
-  wishlistId: WishlistId
-}
+  currentUser: ICurrentUser;
+  wishlistId: WishlistId;
+};
 
 @Injectable()
 export class RemoveWishlistLogoUseCase {
-  private readonly logger = new Logger(RemoveWishlistLogoUseCase.name)
+  private readonly logger = new Logger(RemoveWishlistLogoUseCase.name);
 
   constructor(
     @Inject(REPOSITORIES.WISHLIST) private readonly wishlistRepository: WishlistRepository,
@@ -20,20 +21,20 @@ export class RemoveWishlistLogoUseCase {
   ) {}
 
   async execute(command: RemoveWishlistLogoInput): Promise<void> {
-    this.logger.log('Remove wishlist logo request received', { command })
-    const wishlist = await this.wishlistRepository.findByIdOrFail(command.wishlistId)
+    this.logger.log('Remove wishlist logo request received', { command });
+    const wishlist = await this.wishlistRepository.findByIdOrFail(command.wishlistId);
 
     if (!wishlist.isOwnerOrCoOwner(command.currentUser.id)) {
-      throw new UnauthorizedException('You cannot modify this wishlist')
+      throw new UnauthorizedException('You cannot modify this wishlist');
     }
 
-    const destination = this.bucketService.getLogoDestination(command.wishlistId)
-    this.logger.log('Removing logo from bucket...', { wishlistId: command.wishlistId, destination })
-    await this.bucketService.removeIfExist({ destination })
+    const destination = this.bucketService.getLogoDestination(command.wishlistId);
+    this.logger.log('Removing logo from bucket...', { wishlistId: command.wishlistId, destination });
+    await this.bucketService.removeIfExist({ destination });
 
-    const updatedWishlist = wishlist.updateLogoUrl(undefined)
+    const updatedWishlist = wishlist.updateLogoUrl(undefined);
 
-    this.logger.log('Saving wishlist...', { wishlistId: updatedWishlist.id, updatedFields: ['logoUrl'] })
-    await this.wishlistRepository.save(updatedWishlist)
+    this.logger.log('Saving wishlist...', { wishlistId: updatedWishlist.id, updatedFields: ['logoUrl'] });
+    await this.wishlistRepository.save(updatedWishlist);
   }
 }

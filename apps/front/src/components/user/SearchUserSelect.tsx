@@ -3,26 +3,26 @@ import type {
   SearchUsersSelectQueryVariables,
   UserClosestFriendsQuery,
   UserClosestFriendsQueryVariables,
-} from '../../gql'
+} from '../../gql';
 
-import PersonIcon from '@mui/icons-material/Person'
-import { Autocomplete, Avatar, createFilterOptions, Stack, TextField } from '@mui/material'
-import { blue, grey, orange } from '@mui/material/colors'
-import { styled } from '@mui/material/styles'
-import { isValidEmail } from '@wishlist/common'
-import { debounce, uniqBy } from 'lodash'
-import { useEffect, useState } from 'react'
+import PersonIcon from '@mui/icons-material/Person';
+import { Autocomplete, Avatar, createFilterOptions, Stack, TextField } from '@mui/material';
+import { blue, grey, orange } from '@mui/material/colors';
+import { styled } from '@mui/material/styles';
+import { isValidEmail } from '@wishlist/common';
+import { debounce, uniqBy } from 'lodash';
+import { useEffect, useState } from 'react';
 
-import { fetchGql, isRejection, SearchUsersSelectDocument, UserClosestFriendsDocument } from '../../gql'
+import { fetchGql, isRejection, SearchUsersSelectDocument, UserClosestFriendsDocument } from '../../gql';
 
-type MiniUser = Extract<SearchUsersSelectQuery['searchUsers'], { __typename: 'SearchUsersOutput' }>['users'][number]
+type MiniUser = Extract<SearchUsersSelectQuery['searchUsers'], { __typename: 'SearchUsersOutput' }>['users'][number];
 
-type UsualUserOptionType = MiniUser & { type: 'usual' }
-type FriendUserOptionType = MiniUser & { type: 'friend'; order: number }
-type UserOptionType = UsualUserOptionType | FriendUserOptionType
+type UsualUserOptionType = MiniUser & { type: 'usual' };
+type FriendUserOptionType = MiniUser & { type: 'friend'; order: number };
+type UserOptionType = UsualUserOptionType | FriendUserOptionType;
 
-type OptionType = UserOptionType | string
-const filter = createFilterOptions<OptionType>()
+type OptionType = UserOptionType | string;
+const filter = createFilterOptions<OptionType>();
 
 const GroupHeader = styled('div')(({ theme }) => ({
   position: 'sticky',
@@ -39,7 +39,7 @@ const GroupHeader = styled('div')(({ theme }) => ({
     color: grey[300],
     borderBottom: `1px solid ${grey[700]}`,
   }),
-}))
+}));
 
 const GroupItems = styled('ul')({
   padding: 0,
@@ -54,15 +54,15 @@ const GroupItems = styled('ul')({
       zIndex: 5,
     },
   },
-})
+});
 
 export type SearchUserSelectProps = {
-  label?: string
-  disabled?: boolean
-  onChange: (value: OptionType) => void
-  excludedEmails: string[]
-  acceptNewUsers?: boolean
-}
+  label?: string;
+  disabled?: boolean;
+  onChange: (value: OptionType) => void;
+  excludedEmails: string[];
+  acceptNewUsers?: boolean;
+};
 
 export const SearchUserSelect = ({
   disabled,
@@ -71,99 +71,99 @@ export const SearchUserSelect = ({
   label,
   acceptNewUsers = true,
 }: SearchUserSelectProps) => {
-  const [loading, setLoading] = useState(false)
-  const [options, setOptions] = useState<OptionType[]>([])
-  const [inputValue, setInputValue] = useState('')
+  const [loading, setLoading] = useState(false);
+  const [options, setOptions] = useState<OptionType[]>([]);
+  const [inputValue, setInputValue] = useState('');
 
-  const searchUser = async (inputValue: string) => {
-    setLoading(true)
+  const searchUser = async (keyword: string) => {
+    setLoading(true);
     try {
-      if (inputValue.trim() === '' || inputValue.trim().length < 2) {
-        return
+      if (keyword.trim() === '' || keyword.trim().length < 2) {
+        return;
       }
       const res = await fetchGql<SearchUsersSelectQuery, SearchUsersSelectQueryVariables>(SearchUsersSelectDocument, {
-        keyword: inputValue,
-      })()
+        keyword,
+      })();
       if (isRejection(res.searchUsers)) {
-        return
+        return;
       }
-      const usualUsers = res.searchUsers.users.map<UsualUserOptionType>(user => ({ type: 'usual', ...user }))
+      const usualUsers = res.searchUsers.users.map<UsualUserOptionType>(user => ({ type: 'usual', ...user }));
       setOptions(prev => {
-        const combined = uniqBy([...(prev as UserOptionType[]), ...usualUsers], v => v.id)
-        return sortOptionsForGrouping(combined)
-      })
+        const combined = uniqBy([...(prev as UserOptionType[]), ...usualUsers], v => v.id);
+        return sortOptionsForGrouping(combined);
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const getClosestFriends = async () => {
     const res = await fetchGql<UserClosestFriendsQuery, UserClosestFriendsQueryVariables>(UserClosestFriendsDocument, {
       limit: 20,
-    })()
+    })();
     if (isRejection(res.closestFriends)) {
-      return
+      return;
     }
     const friends = res.closestFriends.users.map<FriendUserOptionType>((user, index) => ({
       type: 'friend',
       order: index,
       ...user,
-    }))
+    }));
     setOptions(prev => {
-      const combined = uniqBy([...(prev as UserOptionType[]), ...friends], v => v.id)
-      return sortOptionsForGrouping(combined)
-    })
-  }
+      const combined = uniqBy([...(prev as UserOptionType[]), ...friends], v => v.id);
+      return sortOptionsForGrouping(combined);
+    });
+  };
 
-  const sortOptionsForGrouping = (options: UserOptionType[]): UserOptionType[] => {
-    const friends: FriendUserOptionType[] = []
-    const others: UsualUserOptionType[] = []
+  const sortOptionsForGrouping = (userOptions: UserOptionType[]): UserOptionType[] => {
+    const friends: FriendUserOptionType[] = [];
+    const others: UsualUserOptionType[] = [];
 
-    options.forEach(option => {
+    userOptions.forEach(option => {
       if (option.type === 'friend') {
-        friends.push(option)
+        friends.push(option);
       } else {
-        others.push(option)
+        others.push(option);
       }
-    })
+    });
 
     // Tri des amis récurrents : par order, puis alphabétique en cas d'égalité
     friends.sort((a, b) => {
       if (a.order !== b.order) {
-        return a.order - b.order
+        return a.order - b.order;
       }
       // En cas d'égalité d'ordre, tri alphabétique
-      const nameA = `${a.firstName} ${a.lastName}`.toLowerCase()
-      const nameB = `${b.firstName} ${b.lastName}`.toLowerCase()
-      return nameA.localeCompare(nameB)
-    })
+      const nameA = `${a.firstName} ${a.lastName}`.toLowerCase();
+      const nameB = `${b.firstName} ${b.lastName}`.toLowerCase();
+      return nameA.localeCompare(nameB);
+    });
 
     // Tri des autres utilisateurs par ordre alphabétique
     others.sort((a, b) => {
-      const nameA = `${a.firstName} ${a.lastName}`.toLowerCase()
-      const nameB = `${b.firstName} ${b.lastName}`.toLowerCase()
-      return nameA.localeCompare(nameB)
-    })
+      const nameA = `${a.firstName} ${a.lastName}`.toLowerCase();
+      const nameB = `${b.firstName} ${b.lastName}`.toLowerCase();
+      return nameA.localeCompare(nameB);
+    });
 
     // Retourner d'abord les amis, puis les autres
-    return [...friends, ...others]
-  }
+    return [...friends, ...others];
+  };
 
   const getGroupByFunction = (option: OptionType): string => {
     if (typeof option === 'string') {
-      return 'Invitation par email'
+      return 'Invitation par email';
     }
     if (option.type === 'friend') {
-      return 'Amis récurrents'
+      return 'Amis récurrents';
     }
-    return 'Autres utilisateurs'
-  }
+    return 'Autres utilisateurs';
+  };
 
   useEffect(() => {
-    void getClosestFriends()
-  }, [])
+    void getClosestFriends();
+  }, []);
 
-  const searchUserDebounced = debounce(searchUser, 400)
+  const searchUserDebounced = debounce(searchUser, 400);
 
   return (
     <Autocomplete
@@ -174,7 +174,7 @@ export const SearchUserSelect = ({
       value={null}
       inputValue={inputValue}
       onInputChange={(_, newInputValue) => {
-        setInputValue(newInputValue)
+        setInputValue(newInputValue);
       }}
       loadingText="Chargement..."
       noOptionsText="Aucun résultat"
@@ -183,29 +183,29 @@ export const SearchUserSelect = ({
       loading={loading}
       onChange={(_, value) => {
         if (value) {
-          onChange(value)
-          setInputValue('') // Vider l'input après sélection
+          onChange(value);
+          setInputValue(''); // Vider l'input après sélection
         }
       }}
       filterOptions={(values, params) => {
-        const filtered = filter(values, params) as OptionType[]
-        const { inputValue } = params
+        const filtered = filter(values, params) as OptionType[];
+        const { inputValue: searchText } = params;
 
         const containValue = filtered.some(option => {
-          if (typeof option === 'string') return option === inputValue
-          return option.email === inputValue
-        })
+          if (typeof option === 'string') return option === searchText;
+          return option.email === searchText;
+        });
 
-        if (!containValue && inputValue && isValidEmail(inputValue) && acceptNewUsers) {
-          filtered.push(inputValue.toLowerCase())
+        if (!containValue && searchText && isValidEmail(searchText) && acceptNewUsers) {
+          filtered.push(searchText.toLowerCase());
         }
 
         // Trier les options filtrées en maintenant le groupement
-        const userOptions = filtered.filter((option): option is UserOptionType => typeof option !== 'string')
-        const emailOptions = filtered.filter((option): option is string => typeof option === 'string')
-        const sortedUserOptions = sortOptionsForGrouping(userOptions)
+        const userOptions = filtered.filter((option): option is UserOptionType => typeof option !== 'string');
+        const emailOptions = filtered.filter((option): option is string => typeof option === 'string');
+        const sortedUserOptions = sortOptionsForGrouping(userOptions);
 
-        return [...sortedUserOptions, ...emailOptions]
+        return [...sortedUserOptions, ...emailOptions];
       }}
       groupBy={getGroupByFunction}
       renderGroup={params => (
@@ -215,16 +215,16 @@ export const SearchUserSelect = ({
         </li>
       )}
       getOptionDisabled={option => {
-        const email = typeof option === 'string' ? option : option.email
-        return excludedEmails.includes(email)
+        const email = typeof option === 'string' ? option : option.email;
+        return excludedEmails.includes(email);
       }}
       getOptionLabel={option => {
         if (typeof option === 'string') {
-          if (acceptNewUsers) return `Inviter le participant par son email: ${option}`
-          return `Utilisateur inconnu: ${option}`
+          if (acceptNewUsers) return `Inviter le participant par son email: ${option}`;
+          return `Utilisateur inconnu: ${option}`;
         }
 
-        return `${option.firstName} ${option.lastName} (${option.email})`
+        return `${option.firstName} ${option.lastName} (${option.email})`;
       }}
       renderOption={(props, option) => (
         <li {...props}>
@@ -236,7 +236,7 @@ export const SearchUserSelect = ({
                 bgcolor: typeof option === 'string' ? orange[100] : blue[100],
                 color: typeof option === 'string' ? orange[600] : blue[600],
               }}
-              src={typeof option !== 'string' ? (option?.pictureUrl ?? undefined) : undefined}
+              src={typeof option === 'string' ? undefined : (option?.pictureUrl ?? undefined)}
             >
               <PersonIcon />
             </Avatar>
@@ -262,10 +262,10 @@ export const SearchUserSelect = ({
           label={label}
           slotProps={{ htmlInput: { ...params.inputProps } }}
           onChange={e => {
-            const value = e.target.value
-            setInputValue(value)
-            if (value.length > 1) setLoading(true)
-            searchUserDebounced(value)
+            const value = e.target.value;
+            setInputValue(value);
+            if (value.length > 1) setLoading(true);
+            searchUserDebounced(value);
           }}
           placeholder="Rechercher un participant ..."
           helperText={
@@ -276,5 +276,5 @@ export const SearchUserSelect = ({
         />
       )}
     />
-  )
-}
+  );
+};

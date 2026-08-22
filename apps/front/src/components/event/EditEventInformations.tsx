@@ -1,25 +1,25 @@
-import type { EventDetail } from './event.types'
+import type { EventDetail } from './event.types';
 
-import { zodResolver } from '@hookform/resolvers/zod'
-import DeleteIcon from '@mui/icons-material/Delete'
-import SaveIcon from '@mui/icons-material/Save'
-import { Box, Button, Stack, TextField } from '@mui/material'
-import { useQueryClient } from '@tanstack/react-query'
-import { useNavigate } from '@tanstack/react-router'
-import { DateTime } from 'luxon'
-import { Controller, useForm } from 'react-hook-form'
-import { match } from 'ts-pattern'
-import { z } from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod';
+import DeleteIcon from '@mui/icons-material/Delete';
+import SaveIcon from '@mui/icons-material/Save';
+import { Box, Button, Stack, TextField } from '@mui/material';
+import { useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from '@tanstack/react-router';
+import { DateTime } from 'luxon';
+import { Controller, useForm } from 'react-hook-form';
+import { match } from 'ts-pattern';
+import { z } from 'zod';
 
-import { rejectionMessage, rejectionPattern, useDeleteEventMutation, useUpdateEventMutation } from '../../gql'
-import { useToast } from '../../hooks/useToast'
-import { Card } from '../common/Card'
-import { CharsRemaining } from '../common/CharsRemaining'
-import { ConfirmButton } from '../common/ConfirmButton'
-import { WishlistDatePicker } from '../common/DatePicker'
-import { EmojiSelector } from '../common/EmojiSelector'
-import { Subtitle } from '../common/Subtitle'
-import { TextareaMarkdown } from '../common/TextareaMarkdown'
+import { rejectionMessage, rejectionPattern, useDeleteEventMutation, useUpdateEventMutation } from '../../gql';
+import { useToast } from '../../hooks/useToast';
+import { Card } from '../common/Card';
+import { CharsRemaining } from '../common/CharsRemaining';
+import { ConfirmButton } from '../common/ConfirmButton';
+import { WishlistDatePicker } from '../common/DatePicker';
+import { EmojiSelector } from '../common/EmojiSelector';
+import { Subtitle } from '../common/Subtitle';
+import { TextareaMarkdown } from '../common/TextareaMarkdown';
 
 const schema = z.object({
   icon: z.string().optional(),
@@ -29,18 +29,18 @@ const schema = z.object({
     .custom<DateTime>()
     .nullable()
     .refine(date => date !== null, "La date de l'événement est requise"),
-})
+});
 
-type FormFields = z.infer<typeof schema>
+type FormFields = z.infer<typeof schema>;
 
 export type EditEventInformationsProps = {
-  event: EventDetail
-}
+  event: EventDetail;
+};
 
 export const EditEventInformations = ({ event }: EditEventInformationsProps) => {
-  const { addToast } = useToast()
-  const queryClient = useQueryClient()
-  const navigate = useNavigate()
+  const { addToast } = useToast();
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const {
     register,
@@ -56,19 +56,19 @@ export const EditEventInformations = ({ event }: EditEventInformationsProps) => 
       eventDate: DateTime.fromISO(event.eventDate),
       icon: event.icon ?? undefined,
     },
-  })
+  });
 
-  const formValues = watch()
+  const formValues = watch();
 
   const { mutateAsync: updateEventMutation, isPending: loading } = useUpdateEventMutation({
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-  })
+  });
   const { mutateAsync: deleteEventMutation } = useDeleteEventMutation({
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-  })
+  });
 
   const onSubmit = async (data: FormFields) => {
-    const isoDate = data.eventDate!.toISODate()!
+    const isoDate = data.eventDate!.toISODate()!;
     const res = await updateEventMutation({
       id: event.id,
       input: {
@@ -77,27 +77,27 @@ export const EditEventInformations = ({ event }: EditEventInformationsProps) => 
         icon: data.icon,
         eventDate: isoDate,
       },
-    })
+    });
     match(res.updateEvent)
       .with({ __typename: 'VoidOutput' }, () => {
-        addToast({ message: 'Évènement mis à jour', variant: 'info' })
-        void queryClient.invalidateQueries({ queryKey: ['EventPageGetEvent', { eventId: event.id }] })
+        addToast({ message: 'Évènement mis à jour', variant: 'info' });
+        void queryClient.invalidateQueries({ queryKey: ['EventPageGetEvent', { eventId: event.id }] });
       })
       .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
-      .exhaustive()
-  }
+      .exhaustive();
+  };
 
   const deleteEvent = async () => {
-    const res = await deleteEventMutation({ id: event.id })
+    const res = await deleteEventMutation({ id: event.id });
     match(res.deleteEvent)
       .with({ __typename: 'VoidOutput' }, () => {
-        void queryClient.invalidateQueries({ queryKey: ['EventListPageGetEvents'] })
-        addToast({ message: "L'évènement à bien été supprimée", variant: 'success' })
-        void navigate({ to: '/events' })
+        void queryClient.invalidateQueries({ queryKey: ['EventListPageGetEvents'] });
+        addToast({ message: "L'évènement à bien été supprimée", variant: 'success' });
+        void navigate({ to: '/events' });
       })
       .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
-      .exhaustive()
-  }
+      .exhaustive();
+  };
 
   return (
     <Stack gap={3}>
@@ -206,5 +206,5 @@ export const EditEventInformations = ({ event }: EditEventInformationsProps) => 
         </Box>
       </Stack>
     </Stack>
-  )
-}
+  );
+};

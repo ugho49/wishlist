@@ -1,14 +1,15 @@
-import { Logger } from '@nestjs/common'
-import { EventsHandler, type IEventHandler } from '@nestjs/cqrs'
-import { chunk as createChunks } from 'lodash'
+import { Logger } from '@nestjs/common';
+import { EventsHandler, type IEventHandler } from '@nestjs/cqrs';
+import { chunk as createChunks } from 'lodash';
 
-import { FrontendRoutesService } from '../../../core'
-import { MailService, MailTemplate } from '../../../core/mail'
-import { SecretSantaStartedEvent } from '../../domain/event/secret-santa-started.event'
+import { FrontendRoutesService } from '../../../core/frontend-routes/frontend-routes.service';
+import { MailService } from '../../../core/mail/mail.service';
+import { MailTemplate } from '../../../core/mail/mail.type';
+import { SecretSantaStartedEvent } from '../../domain/event/secret-santa-started.event';
 
 @EventsHandler(SecretSantaStartedEvent)
 export class SecretSantaStartedHandler implements IEventHandler<SecretSantaStartedEvent> {
-  private readonly logger = new Logger(SecretSantaStartedHandler.name)
+  private readonly logger = new Logger(SecretSantaStartedHandler.name);
 
   constructor(
     private readonly mailService: MailService,
@@ -16,19 +17,19 @@ export class SecretSantaStartedHandler implements IEventHandler<SecretSantaStart
   ) {}
 
   async handle(params: SecretSantaStartedEvent) {
-    this.logger.log('Secret santa started event received', { params })
-    const { eventTitle, eventId, drawns, budget, description } = params
-    const eventUrl = this.frontendRoutes.routes.event.byId(eventId)
+    this.logger.log('Secret santa started event received', { params });
+    const { eventTitle, eventId, drawns, budget, description } = params;
+    const eventUrl = this.frontendRoutes.routes.event.byId(eventId);
     const eurosFormatter = Intl.NumberFormat('fr-FR', {
       style: 'currency',
       currency: 'EUR',
-    })
-    const budgetFormatted = budget ? eurosFormatter.format(budget) : 'non défini'
-    const descriptionFormatted = description || 'non définie'
+    });
+    const budgetFormatted = budget ? eurosFormatter.format(budget) : 'non défini';
+    const descriptionFormatted = description || 'non définie';
 
-    const chunks = createChunks(drawns, 10)
+    const chunks = createChunks(drawns, 10);
 
-    this.logger.log('Sending emails to attendees...', { eventTitle, eventId, drawns })
+    this.logger.log('Sending emails to attendees...', { eventTitle, eventId, drawns });
     for (const chunk of chunks) {
       await Promise.all(
         chunk.map(({ email }) =>
@@ -44,8 +45,8 @@ export class SecretSantaStartedHandler implements IEventHandler<SecretSantaStart
             },
           }),
         ),
-      )
+      );
     }
-    this.logger.log('Emails sent to attendees', { eventTitle, eventId, drawns })
+    this.logger.log('Emails sent to attendees', { eventTitle, eventId, drawns });
   }
 }

@@ -1,4 +1,4 @@
-import type { Response } from 'express'
+import type { Response } from 'express';
 
 /**
  * Will allow to add context in logs and spans (like `companyId`, `absoluteMonth`, etc.)
@@ -19,6 +19,6 @@ export class Observability {
     this.response.locals = {
       ...this.response.locals,
       ...context,
-    }
+    };
   }
 }

@@ -1,10 +1,10 @@
-import type { RootState } from '../../core'
+import type { RootState } from '../../core/store';
 
-import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings'
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
-import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted'
-import LogoutIcon from '@mui/icons-material/Logout'
-import PersonIcon from '@mui/icons-material/Person'
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
+import LogoutIcon from '@mui/icons-material/Logout';
+import PersonIcon from '@mui/icons-material/Person';
 import {
   Avatar,
   Box,
@@ -17,20 +17,20 @@ import {
   styled,
   useMediaQuery,
   useTheme,
-} from '@mui/material'
-import { useLocation, useNavigate } from '@tanstack/react-router'
-import { useCallback } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+} from '@mui/material';
+import { useLocation, useNavigate } from '@tanstack/react-router';
+import { useCallback } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
-import LogoSvg from '../../assets/logo/logo.svg?react'
-import LogoTextSvg from '../../assets/logo/logo_text.svg?react'
-import { closeDrawer } from '../../core/store/features'
-import { useLogout } from '../../hooks/useLogout'
-import { useToast } from '../../hooks/useToast'
+import LogoSvg from '../../assets/logo/logo.svg?react';
+import LogoTextSvg from '../../assets/logo/logo_text.svg?react';
+import { closeDrawer } from '../../core/store/features/drawerSlice';
+import { useLogout } from '../../hooks/useLogout';
+import { useToast } from '../../hooks/useToast';
 
-const mapAuthState = (state: RootState) => state.auth
-const mapUserProfileState = (state: RootState) => state.userProfile
-const mapDrawerState = (state: RootState) => state.drawer
+const mapAuthState = (state: RootState) => state.auth;
+const mapUserProfileState = (state: RootState) => state.userProfile;
+const mapDrawerState = (state: RootState) => state.drawer;
 
 const DrawerStyled = styled(Drawer)(({ theme }) => ({
   width: 280,
@@ -49,13 +49,13 @@ const DrawerStyled = styled(Drawer)(({ theme }) => ({
       maxWidth: '320px',
     },
   },
-}))
+}));
 
 const DrawerContentStyled = styled(Box)(() => ({
   height: '100%',
   display: 'flex',
   flexDirection: 'column',
-}))
+}));
 
 const LogoSectionStyled = styled(Box)(({ theme }) => ({
   padding: theme.spacing(3),
@@ -67,31 +67,31 @@ const LogoSectionStyled = styled(Box)(({ theme }) => ({
   justifyContent: 'center',
   cursor: 'pointer',
   gap: 20,
-}))
+}));
 
 const LogoIconStyled = styled(LogoSvg)(() => ({
   height: 38,
   width: 38,
   color: 'white',
-}))
+}));
 
 const LogoTextStyled = styled(LogoTextSvg)(() => ({
   height: 60,
   color: 'white',
-}))
+}));
 
 const MainListStyled = styled(List)(({ theme }) => ({
   flex: 1,
   paddingTop: theme.spacing(2),
   paddingBottom: theme.spacing(2),
-}))
+}));
 
 const ListItemStyled = styled(ListItem)(() => ({
   padding: 0,
   marginBottom: 4,
   paddingLeft: 16,
   paddingRight: 16,
-}))
+}));
 
 const ListItemButtonStyled = styled(ListItemButton)(({ theme }) => ({
   borderRadius: theme.spacing(2),
@@ -115,12 +115,12 @@ const ListItemButtonStyled = styled(ListItemButton)(({ theme }) => ({
       color: theme.palette.primary.main,
     },
   },
-}))
+}));
 
 const ListItemIconStyled = styled(ListItemIcon)(({ theme }) => ({
   minWidth: 40,
   color: theme.palette.text.secondary,
-}))
+}));
 
 const UserSectionStyled = styled(Box)(({ theme }) => ({
   padding: theme.spacing(1),
@@ -147,14 +147,14 @@ const UserSectionStyled = styled(Box)(({ theme }) => ({
   },
   // Supprimer le highlight par défaut sur mobile
   WebkitTapHighlightColor: 'transparent',
-}))
+}));
 
 const UserAvatarStyled = styled(Avatar)(({ theme }) => ({
   width: 48,
   height: 48,
   border: `2px solid ${theme.palette.grey[300]}`,
   transition: 'all 0.2s ease-in-out',
-}))
+}));
 
 const UserInfoStyled = styled(Box)(() => ({
   display: 'flex',
@@ -162,7 +162,7 @@ const UserInfoStyled = styled(Box)(() => ({
   flex: 1,
   minWidth: 0,
   gap: '4px',
-}))
+}));
 
 const UserNameStyled = styled(Box)(({ theme }) => ({
   fontSize: '1rem',
@@ -172,7 +172,7 @@ const UserNameStyled = styled(Box)(({ theme }) => ({
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
-}))
+}));
 
 const UserRoleStyled = styled(Box)(({ theme }) => ({
   fontSize: '0.85rem',
@@ -181,7 +181,7 @@ const UserRoleStyled = styled(Box)(({ theme }) => ({
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
-}))
+}));
 
 const BottomSectionStyled = styled(Box)(({ theme }) => ({
   borderTop: `1px solid ${theme.palette.grey[200]}`,
@@ -190,48 +190,48 @@ const BottomSectionStyled = styled(Box)(({ theme }) => ({
   [theme.breakpoints.down('md')]: {
     paddingBottom: '68px',
   },
-}))
+}));
 
 export const SideNavigation = () => {
-  const { user } = useSelector(mapAuthState)
-  const { pictureUrl, firstName, email } = useSelector(mapUserProfileState)
-  const { isOpen: isDrawerOpen } = useSelector(mapDrawerState)
-  const dispatch = useDispatch()
-  const navigate = useNavigate()
-  const location = useLocation()
-  const { addToast } = useToast()
-  const logout = useLogout()
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+  const { user } = useSelector(mapAuthState);
+  const { pictureUrl, firstName, email } = useSelector(mapUserProfileState);
+  const { isOpen: isDrawerOpen } = useSelector(mapDrawerState);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { addToast } = useToast();
+  const logout = useLogout();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const handleLogout = useCallback(async () => {
-    addToast({ message: 'A bientôt 👋', variant: 'default' })
-    await logout()
-  }, [addToast, logout])
+    addToast({ message: 'A bientôt 👋', variant: 'default' });
+    await logout();
+  }, [addToast, logout]);
 
   const handleNavigation = async (route: string) => {
     if (route === 'logout') {
-      await handleLogout()
-      return
+      await handleLogout();
+      return;
     }
-    void navigate({ to: route })
+    void navigate({ to: route });
     // Close mobile drawer after navigation
     if (isMobile) {
-      dispatch(closeDrawer())
+      dispatch(closeDrawer());
     }
-  }
+  };
 
   const handleDrawerClose = () => {
-    dispatch(closeDrawer())
-  }
+    dispatch(closeDrawer());
+  };
 
   const isRouteActive = (route: string) => {
-    const pathname = location.pathname
-    if (route === pathname) return true
+    const pathname = location.pathname;
+    if (route === pathname) return true;
     // Handle nested routes (e.g., /events/123 should activate /events)
-    if (route !== '/' && pathname.startsWith(`${route}/`)) return true
-    return false
-  }
+    if (route !== '/' && pathname.startsWith(`${route}/`)) return true;
+    return false;
+  };
 
   const mainMenuItems = [
     {
@@ -244,14 +244,14 @@ export const SideNavigation = () => {
       value: '/wishlists',
       icon: <FormatListBulletedIcon />,
     },
-  ]
+  ];
 
   if (user?.isAdmin) {
     mainMenuItems.push({
       label: 'Admin',
       value: '/admin',
       icon: <AdminPanelSettingsIcon />,
-    })
+    });
   }
 
   const bottomMenuItems = [
@@ -265,7 +265,7 @@ export const SideNavigation = () => {
       value: 'logout',
       icon: <LogoutIcon />,
     },
-  ]
+  ];
 
   const drawerContent = (
     <DrawerContentStyled>
@@ -309,8 +309,8 @@ export const SideNavigation = () => {
           onClick={() => handleNavigation('/user/profile')}
           onKeyDown={async event => {
             if (event.key === 'Enter' || event.key === ' ') {
-              event.preventDefault()
-              await handleNavigation('/user/profile')
+              event.preventDefault();
+              await handleNavigation('/user/profile');
             }
           }}
           tabIndex={0}
@@ -353,7 +353,7 @@ export const SideNavigation = () => {
         ))}
       </BottomSectionStyled>
     </DrawerContentStyled>
-  )
+  );
 
   return (
     <DrawerStyled
@@ -365,5 +365,5 @@ export const SideNavigation = () => {
     >
       {drawerContent}
     </DrawerStyled>
-  )
-}
+  );
+};

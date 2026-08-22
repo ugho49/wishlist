@@ -1,7 +1,7 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { SEO } from '@wishlist/front-components/SEO'
+import { createFileRoute } from '@tanstack/react-router';
+import { SEO } from '@wishlist/front-components/SEO';
 
-import { CreateEventPage } from '../../../../components/event/CreateEventPage'
+import { CreateEventPage } from '../../../../components/event/CreateEventPage';
 
 export const Route = createFileRoute('/_authenticated/_with-layout/events/new')({
   component: () => (
@@ -14,4 +14,4 @@ export const Route = createFileRoute('/_authenticated/_with-layout/events/new')(
       <CreateEventPage />
     </>
   ),
-})
+});

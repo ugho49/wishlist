@@ -1,7 +1,7 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { SEO } from '@wishlist/front-components/SEO'
+import { createFileRoute } from '@tanstack/react-router';
+import { SEO } from '@wishlist/front-components/SEO';
 
-import { PrivacyPolicyPage } from '../components/legal/PrivacyPolicyPage'
+import { PrivacyPolicyPage } from '../components/legal/PrivacyPolicyPage';
 
 export const Route = createFileRoute('/privacy')({
   component: () => (
@@ -15,4 +15,4 @@ export const Route = createFileRoute('/privacy')({
       <PrivacyPolicyPage />
     </>
   ),
-})
+});

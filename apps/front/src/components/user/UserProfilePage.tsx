@@ -1,20 +1,20 @@
-import type { RootState } from '../../core'
+import type { RootState } from '../../core/store';
 
-import LockIcon from '@mui/icons-material/Lock'
-import NotificationsIcon from '@mui/icons-material/Notifications'
-import PortraitIcon from '@mui/icons-material/Portrait'
-import ShareIcon from '@mui/icons-material/Share'
-import { Box, Stack, Tab, Tabs } from '@mui/material'
-import { styled, useTheme } from '@mui/material/styles'
-import useMediaQuery from '@mui/material/useMediaQuery'
-import { useNavigate, useSearch } from '@tanstack/react-router'
-import { useSelector } from 'react-redux'
+import LockIcon from '@mui/icons-material/Lock';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import PortraitIcon from '@mui/icons-material/Portrait';
+import ShareIcon from '@mui/icons-material/Share';
+import { Box, Stack, Tab, Tabs } from '@mui/material';
+import { styled, useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { useNavigate, useSearch } from '@tanstack/react-router';
+import { useSelector } from 'react-redux';
 
-import { ProfilePictureSection } from './ProfilePictureSection'
-import { UserTabInformations } from './UserTabInformations'
-import { UserTabNotifications } from './UserTabNotifications'
-import { UserTabPassword } from './UserTabPassword'
-import { UserTabSocial } from './UserTabSocial'
+import { ProfilePictureSection } from './ProfilePictureSection';
+import { UserTabInformations } from './UserTabInformations';
+import { UserTabNotifications } from './UserTabNotifications';
+import { UserTabPassword } from './UserTabPassword';
+import { UserTabSocial } from './UserTabSocial';
 
 const ProfileSection = styled(Box)(() => ({
   display: 'flex',
@@ -22,25 +22,25 @@ const ProfileSection = styled(Box)(() => ({
   alignItems: 'center',
   gap: 24,
   marginBottom: 18,
-}))
+}));
 
 const UserNameAndEmail = styled(Box)(() => ({
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
   gap: 2,
-}))
+}));
 
 const Name = styled(Box)(({ theme }) => ({
   fontWeight: 500,
   fontSize: '1.3rem',
   color: theme.palette.text.primary,
-}))
+}));
 
 const Email = styled(Box)(({ theme }) => ({
   fontSize: '0.9rem',
   color: theme.palette.text.secondary,
-}))
+}));
 
 export enum TabValues {
   informations = 'informations',
@@ -70,16 +70,16 @@ const tabs = [
     label: 'Mot de passe',
     icon: <LockIcon />,
   },
-]
+];
 
-const mapState = (state: RootState) => state.userProfile
+const mapState = (state: RootState) => state.userProfile;
 
 export const UserProfilePage = () => {
-  const theme = useTheme()
-  const { tab } = useSearch({ from: '/_authenticated/_with-layout/user/profile' })
-  const navigate = useNavigate({ from: '/user/profile' })
-  const smallScreen = useMediaQuery(theme.breakpoints.down('sm'))
-  const userState = useSelector(mapState)
+  const theme = useTheme();
+  const { tab } = useSearch({ from: '/_authenticated/_with-layout/user/profile' });
+  const navigate = useNavigate({ from: '/user/profile' });
+  const smallScreen = useMediaQuery(theme.breakpoints.down('sm'));
+  const userState = useSelector(mapState);
 
   return (
     <Box>
@@ -102,13 +102,13 @@ export const UserProfilePage = () => {
           scrollButtons="auto"
           allowScrollButtonsMobile
         >
-          {tabs.map(tab => (
+          {tabs.map(tabItem => (
             <Tab
-              key={tab.value}
-              value={tab.value}
-              label={smallScreen ? undefined : tab.label}
+              key={tabItem.value}
+              value={tabItem.value}
+              label={smallScreen ? undefined : tabItem.label}
               iconPosition="start"
-              icon={tab.icon}
+              icon={tabItem.icon}
             />
           ))}
         </Tabs>
@@ -120,5 +120,5 @@ export const UserProfilePage = () => {
         {tab === TabValues.password && <UserTabPassword />}
       </Stack>
     </Box>
-  )
-}
+  );
+};

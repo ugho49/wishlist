@@ -1,12 +1,14 @@
-import { Logger } from '@nestjs/common'
-import { EventsHandler, type IEventHandler } from '@nestjs/cqrs'
-import { FrontendRoutesService, MailService, MailTemplate } from '@wishlist/api/core'
+import { Logger } from '@nestjs/common';
+import { EventsHandler, type IEventHandler } from '@nestjs/cqrs';
 
-import { EmailChangeVerificationCreatedEvent } from '../../domain'
+import { FrontendRoutesService } from '../../../core/frontend-routes/frontend-routes.service';
+import { MailService } from '../../../core/mail/mail.service';
+import { MailTemplate } from '../../../core/mail/mail.type';
+import { EmailChangeVerificationCreatedEvent } from '../../domain/event/email-change-verification-created.event';
 
 @EventsHandler(EmailChangeVerificationCreatedEvent)
 export class EmailChangeVerificationCreatedHandler implements IEventHandler<EmailChangeVerificationCreatedEvent> {
-  private readonly logger = new Logger(EmailChangeVerificationCreatedHandler.name)
+  private readonly logger = new Logger(EmailChangeVerificationCreatedHandler.name);
 
   constructor(
     private readonly mailService: MailService,
@@ -14,12 +16,12 @@ export class EmailChangeVerificationCreatedHandler implements IEventHandler<Emai
   ) {}
 
   async handle(params: EmailChangeVerificationCreatedEvent) {
-    this.logger.log('Email change verification created event received, sending confirmation emails...', { params })
+    this.logger.log('Email change verification created event received, sending confirmation emails...', { params });
 
     const confirmationUrl = this.frontendRoutes.routes.user.confirmEmailChange({
       email: params.newEmail,
       token: params.token,
-    })
+    });
 
     await Promise.all([
       this.mailService.sendMail({
@@ -39,6 +41,6 @@ export class EmailChangeVerificationCreatedHandler implements IEventHandler<Emai
           newEmail: params.newEmail,
         },
       }),
-    ])
+    ]);
   }
 }

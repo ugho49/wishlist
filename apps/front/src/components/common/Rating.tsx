@@ -1,16 +1,16 @@
-import type { RatingProps as MuiRatingProps } from '@mui/material'
+import type { RatingProps as MuiRatingProps } from '@mui/material';
 
-import FavoriteIcon from '@mui/icons-material/Favorite'
-import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder'
-import { alpha, Rating as MuiRating, ratingClasses, Stack, styled } from '@mui/material'
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import { alpha, Rating as MuiRating, ratingClasses, Stack, styled } from '@mui/material';
 
 export type RatingProps = {
-  value: MuiRatingProps['value']
-  disabled?: MuiRatingProps['disabled']
-  onChange?: MuiRatingProps['onChange']
-  size?: MuiRatingProps['size']
-  readOnly?: MuiRatingProps['readOnly']
-}
+  value: MuiRatingProps['value'];
+  disabled?: MuiRatingProps['disabled'];
+  onChange?: MuiRatingProps['onChange'];
+  size?: MuiRatingProps['size'];
+  readOnly?: MuiRatingProps['readOnly'];
+};
 
 const MuiRatingStyled = styled(MuiRating)(({ theme }) => ({
   [`& .${ratingClasses.iconFilled}`]: {
@@ -19,7 +19,7 @@ const MuiRatingStyled = styled(MuiRating)(({ theme }) => ({
   [`& .${ratingClasses.iconHover}`]: {
     color: theme.palette.primary.main,
   },
-}))
+}));
 
 export const RatingBubble = styled(Stack)(({ theme }) => ({
   width: 'fit-content',
@@ -33,18 +33,16 @@ export const RatingBubble = styled(Stack)(({ theme }) => ({
   color: theme.palette.text.secondary,
   backdropFilter: 'blur(8px)',
   boxShadow: `0 2px 8px ${alpha(theme.palette.common.black, 0.1)}`,
-}))
+}));
 
-export const Rating = ({ value, disabled, onChange, size, readOnly }: RatingProps) => {
-  return (
-    <MuiRatingStyled
-      value={value}
-      disabled={disabled}
-      onChange={onChange}
-      size={size}
-      readOnly={readOnly}
-      icon={<FavoriteIcon fontSize="inherit" />}
-      emptyIcon={<FavoriteBorderIcon fontSize="inherit" />}
-    />
-  )
-}
+export const Rating = ({ value, disabled, onChange, size, readOnly }: RatingProps) => (
+  <MuiRatingStyled
+    value={value}
+    disabled={disabled}
+    onChange={onChange}
+    size={size}
+    readOnly={readOnly}
+    icon={<FavoriteIcon fontSize="inherit" />}
+    emptyIcon={<FavoriteBorderIcon fontSize="inherit" />}
+  />
+);

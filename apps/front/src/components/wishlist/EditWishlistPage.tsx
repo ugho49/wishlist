@@ -1,22 +1,22 @@
-import type { WishlistId } from '@wishlist/common'
-import type { RootState } from '../../core'
+import type { WishlistId } from '@wishlist/common';
+import type { RootState } from '../../core/store';
 
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
-import ManageAccountsIcon from '@mui/icons-material/ManageAccounts'
-import { Alert, Box, Container, Tab, Tabs } from '@mui/material'
-import { useNavigate, useSearch } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
-import { useSelector } from 'react-redux'
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
+import { Alert, Box, Container, Tab, Tabs } from '@mui/material';
+import { useNavigate, useSearch } from '@tanstack/react-router';
+import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 
-import { isRejection, rejectionMessage, useWishlistPageQuery } from '../../gql'
-import { Loader } from '../common/Loader'
-import { Title } from '../common/Title'
-import { SEO } from '../SEO'
-import { EditWishlistEvent } from './EditWishlistEvents'
-import { EditWishlistInformations } from './EditWishlistInformations'
-import { EditWishlistManagement } from './EditWishlistManagement'
-import { WishlistNotFound } from './WishlistNotFound'
+import { isRejection, rejectionMessage, useWishlistPageQuery } from '../../gql';
+import { Loader } from '../common/Loader';
+import { Title } from '../common/Title';
+import { SEO } from '../SEO';
+import { EditWishlistEvent } from './EditWishlistEvents';
+import { EditWishlistInformations } from './EditWishlistInformations';
+import { EditWishlistManagement } from './EditWishlistManagement';
+import { WishlistNotFound } from './WishlistNotFound';
 
 export enum TabValues {
   informations = 'informations',
@@ -35,38 +35,38 @@ const BASE_TABS = [
     label: 'Evènements',
     icon: <CalendarMonthIcon />,
   },
-]
+];
 
 const MANAGEMENT_TAB = {
   value: TabValues.management,
   label: 'Gestion',
   icon: <ManageAccountsIcon />,
-}
+};
 
-const mapState = (state: RootState) => state.auth.user?.id
+const mapState = (state: RootState) => state.auth.user?.id;
 
 interface EditWishlistPageProps {
-  wishlistId: WishlistId
+  wishlistId: WishlistId;
 }
 
 export const EditWishlistPage = ({ wishlistId }: EditWishlistPageProps) => {
-  const [tabs, setTabs] = useState(BASE_TABS)
-  const { tab } = useSearch({ from: '/_authenticated/_with-layout/wishlists/$wishlistId/edit' })
-  const { data, isLoading: loading } = useWishlistPageQuery({ wishlistId }, { select: d => d.wishlist })
-  const wishlist = data?.__typename === 'Wishlist' ? data : undefined
-  const queryRejection = data && isRejection(data) && data.__typename !== 'NotFoundRejection' ? data : undefined
-  const currentUserId = useSelector(mapState)
-  const navigate = useNavigate({ from: '/wishlists/$wishlistId/edit' })
+  const [tabs, setTabs] = useState(BASE_TABS);
+  const { tab } = useSearch({ from: '/_authenticated/_with-layout/wishlists/$wishlistId/edit' });
+  const { data, isLoading: loading } = useWishlistPageQuery({ wishlistId }, { select: d => d.wishlist });
+  const wishlist = data?.__typename === 'Wishlist' ? data : undefined;
+  const queryRejection = data && isRejection(data) && data.__typename !== 'NotFoundRejection' ? data : undefined;
+  const currentUserId = useSelector(mapState);
+  const navigate = useNavigate({ from: '/wishlists/$wishlistId/edit' });
   const currentUserCanEdit =
-    !!wishlist && (wishlist.owner.id === currentUserId || wishlist.coOwner?.id === currentUserId)
-  const isOwner = wishlist?.owner.id === currentUserId
-  const isPublic = wishlist?.config.hideItems === false
+    !!wishlist && (wishlist.owner.id === currentUserId || wishlist.coOwner?.id === currentUserId);
+  const isOwner = wishlist?.owner.id === currentUserId;
+  const isPublic = wishlist?.config.hideItems === false;
 
   useEffect(() => {
     if (isPublic && isOwner) {
-      setTabs(prev => [...prev, MANAGEMENT_TAB])
+      setTabs(prev => [...prev, MANAGEMENT_TAB]);
     }
-  }, [isPublic, isOwner])
+  }, [isPublic, isOwner]);
 
   return (
     <>
@@ -90,8 +90,14 @@ export const EditWishlistPage = ({ wishlistId }: EditWishlistPageProps) => {
                   scrollButtons="auto"
                   allowScrollButtonsMobile
                 >
-                  {tabs.map(tab => (
-                    <Tab key={tab.value} value={tab.value} label={tab.label} iconPosition="start" icon={tab.icon} />
+                  {tabs.map(tabItem => (
+                    <Tab
+                      key={tabItem.value}
+                      value={tabItem.value}
+                      label={tabItem.label}
+                      iconPosition="start"
+                      icon={tabItem.icon}
+                    />
                   ))}
                 </Tabs>
               </Box>
@@ -103,5 +109,5 @@ export const EditWishlistPage = ({ wishlistId }: EditWishlistPageProps) => {
         </Loader>
       </Box>
     </>
-  )
-}
+  );
+};

@@ -1,11 +1,11 @@
-import type { PagedResponse } from '../dtos'
+import type { PagedResponse } from '../dtos/common.dto';
 
 export function createPagedResponse<T>(params: {
-  resources: T[]
-  options: { pageSize: number; pageNumber?: number; totalElements: number }
+  resources: T[];
+  options: { pageSize: number; pageNumber?: number; totalElements: number };
 }): PagedResponse<T> {
-  const { options, resources } = params
-  const { pageNumber, totalElements, pageSize } = options
+  const { options, resources } = params;
+  const { pageNumber, totalElements, pageSize } = options;
 
   return {
     resources,
@@ -15,5 +15,5 @@ export function createPagedResponse<T>(params: {
       total_pages: Math.ceil(totalElements / pageSize),
       pages_size: pageSize,
     },
-  }
+  };
 }

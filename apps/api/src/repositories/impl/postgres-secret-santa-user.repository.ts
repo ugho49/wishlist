@@ -1,35 +1,37 @@
-import { Injectable } from '@nestjs/common'
-import { type EventId, type SecretSantaId, type SecretSantaUserId, type UserId, uuid } from '@wishlist/common'
-import { and, eq, sql } from 'drizzle-orm'
+import type * as drizzleSchema from '../../../drizzle/schema';
+import type { DrizzleTransaction } from '../../core/database/transaction-manager';
 
-import * as schema from '../../../drizzle/schema'
-import { DatabaseService, type DrizzleTransaction } from '../../core/database'
-import { SecretSantaUser } from '../../secret-santa/domain/model/secret-santa-user.model'
-import { type SecretSantaUserRepository } from '../../secret-santa/domain/repository/secret-santa-user.repository'
+import { Injectable } from '@nestjs/common';
+import { type EventId, type SecretSantaId, type SecretSantaUserId, type UserId, uuid } from '@wishlist/common';
+import { and, eq, sql } from 'drizzle-orm';
+
+import { DatabaseService } from '../../core/database/database.service';
+import { SecretSantaUser } from '../../secret-santa/domain/model/secret-santa-user.model';
+import { type SecretSantaUserRepository } from '../../secret-santa/domain/repository/secret-santa-user.repository';
 
 @Injectable()
 export class PostgresSecretSantaUserRepository implements SecretSantaUserRepository {
   constructor(private readonly databaseService: DatabaseService) {}
 
   newId(): SecretSantaUserId {
-    return uuid() as SecretSantaUserId
+    return uuid() as SecretSantaUserId;
   }
 
   async findBySecretSantaId(secretSantaId: SecretSantaId): Promise<SecretSantaUser[]> {
-    const { schema, db } = this.databaseService
+    const { schema, db } = this.databaseService;
 
     const users = await db.query.secretSantaUser.findMany({
       where: eq(schema.secretSantaUser.secretSantaId, secretSantaId),
-    })
+    });
 
-    return users.map(PostgresSecretSantaUserRepository.toModel)
+    return users.map(PostgresSecretSantaUserRepository.toModel);
   }
 
   async saveAll(users: SecretSantaUser[], tx?: DrizzleTransaction): Promise<void> {
-    const { schema, db } = this.databaseService
-    const client = tx || db
+    const { schema, db } = this.databaseService;
+    const client = tx || db;
 
-    if (users.length === 0) return
+    if (users.length === 0) return;
 
     await client
       .insert(schema.secretSantaUser)
@@ -51,14 +53,14 @@ export class PostgresSecretSantaUserRepository implements SecretSantaUserReposit
           exclusions: sql`excluded.exclusions`,
           updatedAt: sql`excluded.updated_at`,
         },
-      })
+      });
   }
 
   async findDrawSecretSantaUserForEvent(param: {
-    eventId: EventId
-    userId: UserId
+    eventId: EventId;
+    userId: UserId;
   }): Promise<SecretSantaUser | undefined> {
-    const { schema, db } = this.databaseService
+    const { schema, db } = this.databaseService;
 
     const currentUser = await db
       .select({
@@ -68,24 +70,24 @@ export class PostgresSecretSantaUserRepository implements SecretSantaUserReposit
       .innerJoin(schema.eventAttendee, eq(schema.secretSantaUser.attendeeId, schema.eventAttendee.id))
       .innerJoin(schema.secretSanta, eq(schema.secretSantaUser.secretSantaId, schema.secretSanta.id))
       .where(and(eq(schema.secretSanta.eventId, param.eventId), eq(schema.eventAttendee.userId, param.userId)))
-      .limit(1)
+      .limit(1);
 
-    const drawUserId = currentUser.length === 0 ? undefined : currentUser[0]!.user.drawUserId
+    const drawUserId = currentUser.length === 0 ? undefined : currentUser[0]!.user.drawUserId;
 
-    if (!drawUserId) return undefined
+    if (!drawUserId) return undefined;
 
     const drawUser = await db.query.secretSantaUser.findFirst({
       where: eq(schema.secretSantaUser.id, drawUserId),
-    })
+    });
 
-    if (!drawUser) return undefined
+    if (!drawUser) return undefined;
 
-    return PostgresSecretSantaUserRepository.toModel(drawUser)
+    return PostgresSecretSantaUserRepository.toModel(drawUser);
   }
 
   async delete(id: SecretSantaUserId, tx?: DrizzleTransaction): Promise<void> {
-    const { schema, db } = this.databaseService
-    const client = tx || db
+    const { schema, db } = this.databaseService;
+    const client = tx || db;
 
     await client.transaction(async (subTx: DrizzleTransaction) => {
       // Remove the user from all exclusion lists first
@@ -94,14 +96,14 @@ export class PostgresSecretSantaUserRepository implements SecretSantaUserReposit
         .set({
           exclusions: sql`array_remove(exclusions, ${id})`,
         })
-        .where(sql`${id} = ANY(exclusions)`)
+        .where(sql`${id} = ANY(exclusions)`);
 
       // Then delete the user
-      await subTx.delete(schema.secretSantaUser).where(eq(schema.secretSantaUser.id, id))
-    })
+      await subTx.delete(schema.secretSantaUser).where(eq(schema.secretSantaUser.id, id));
+    });
   }
 
-  static toModel(row: typeof schema.secretSantaUser.$inferSelect): SecretSantaUser {
+  static toModel(row: typeof drizzleSchema.secretSantaUser.$inferSelect): SecretSantaUser {
     return new SecretSantaUser({
       id: row.id,
       attendeeId: row.attendeeId,
@@ -110,6 +112,6 @@ export class PostgresSecretSantaUserRepository implements SecretSantaUserReposit
       exclusions: row.exclusions,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
-    })
+    });
   }
 }

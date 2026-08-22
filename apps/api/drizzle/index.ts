@@ -1,5 +1,5 @@
-import * as drizzleRelations from './relations'
-import * as drizzleSchema from './schema'
+import * as drizzleRelations from './relations';
+import * as drizzleSchema from './schema';
 
-export const schema = drizzleSchema
-export const relations = drizzleRelations
+export const schema = drizzleSchema;
+export const relations = drizzleRelations;

@@ -1,15 +1,15 @@
-import type { EventId } from '@wishlist/common'
+import type { EventId } from '@wishlist/common';
 
-import CloseIcon from '@mui/icons-material/Close'
-import ForestIcon from '@mui/icons-material/Forest'
-import { alpha, Button, IconButton, keyframes, Stack, styled, Typography } from '@mui/material'
-import { useNavigate } from '@tanstack/react-router'
+import CloseIcon from '@mui/icons-material/Close';
+import ForestIcon from '@mui/icons-material/Forest';
+import { alpha, Button, IconButton, keyframes, Stack, styled, Typography } from '@mui/material';
+import { useNavigate } from '@tanstack/react-router';
 
-import { TabValues } from '../../routes/_authenticated/_with-layout/events/$eventId/edit'
+import { TabValues } from '../../routes/_authenticated/_with-layout/events/$eventId/edit';
 
 interface SecretSantaSuggestionCardProps {
-  eventId: EventId
-  onDismiss: () => void
+  eventId: EventId;
+  onDismiss: () => void;
 }
 
 const glow = keyframes`
@@ -22,7 +22,7 @@ const glow = keyframes`
   100% {
     filter: drop-shadow(0 0 4px ${alpha('#66bb6a', 0.6)});
   }
-`
+`;
 
 const GradientCard = styled(Stack)(({ theme }) => ({
   background: alpha('#f1f8f4', 1),
@@ -42,7 +42,7 @@ const GradientCard = styled(Stack)(({ theme }) => ({
     bottom: 0,
     background: `linear-gradient(135deg, ${alpha('#81c784', 0.15)} 0%, transparent 50%, ${alpha('#ef5350', 0.08)} 100%)`,
   },
-}))
+}));
 
 const IconContainer = styled('div')(({ theme }) => ({
   display: 'flex',
@@ -58,12 +58,12 @@ const IconContainer = styled('div')(({ theme }) => ({
     width: '64px',
     height: '64px',
   },
-}))
+}));
 
 const StyledIcon = styled(ForestIcon)({
   fontSize: '48px',
   color: '#66bb6a',
-})
+});
 
 const ContentStack = styled(Stack)(({ theme }) => ({
   flex: 1,
@@ -75,7 +75,7 @@ const ContentStack = styled(Stack)(({ theme }) => ({
   [theme.breakpoints.down('lg')]: {
     flexDirection: 'column',
   },
-}))
+}));
 
 const Title = styled(Typography)({
   color: '#1b5e20',
@@ -83,7 +83,7 @@ const Title = styled(Typography)({
   fontSize: '24px',
   position: 'relative',
   zIndex: 1,
-})
+});
 
 const Description = styled(Typography)({
   color: '#1b5e20',
@@ -91,12 +91,12 @@ const Description = styled(Typography)({
   lineHeight: 1.5,
   position: 'relative',
   zIndex: 1,
-})
+});
 
 const TextContainer = styled(Stack)({
   flex: 1,
   gap: '12px',
-})
+});
 
 const ActionButton = styled(Button)(({ theme }) => ({
   backgroundColor: theme.palette.mode === 'dark' ? '#2e7d32' : '#4caf50',
@@ -124,7 +124,7 @@ const ActionButton = styled(Button)(({ theme }) => ({
     padding: '10px 24px',
     alignSelf: 'stretch',
   },
-}))
+}));
 
 const CloseButton = styled(IconButton)(({ theme }) => ({
   position: 'absolute',
@@ -138,14 +138,14 @@ const CloseButton = styled(IconButton)(({ theme }) => ({
     color: '#1b5e20',
     backgroundColor: alpha('#1b5e20', 0.08),
   },
-}))
+}));
 
 export function SecretSantaSuggestionCard({ eventId, onDismiss }: SecretSantaSuggestionCardProps) {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const handleCreateSecretSanta = () => {
-    void navigate({ to: '/events/$eventId/edit', params: { eventId }, search: { tab: TabValues.secretSanta } })
-  }
+    void navigate({ to: '/events/$eventId/edit', params: { eventId }, search: { tab: TabValues.secretSanta } });
+  };
 
   return (
     <GradientCard direction={{ xs: 'column', sm: 'row' }} spacing={3} alignItems={{ xs: 'center', sm: 'center' }}>
@@ -170,5 +170,5 @@ export function SecretSantaSuggestionCard({ eventId, onDismiss }: SecretSantaSug
         </ActionButton>
       </ContentStack>
     </GradientCard>
-  )
+  );
 }

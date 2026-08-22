@@ -1,13 +1,13 @@
-import { Section, Text } from 'react-email'
+import { Section, Text } from 'react-email';
 
-import { EmailLayout } from '../components/layout'
-import { ButtonFallback, Callout, ContentSection, Heading, Paragraph, PrimaryButton } from '../components/ui'
-import * as styles from '../styles'
+import { EmailLayout } from '../components/layout';
+import { ButtonFallback, Callout, ContentSection, Heading, Paragraph, PrimaryButton } from '../components/ui';
+import * as styles from '../styles';
 
 export interface AddedToEventNewUserEmailProps {
-  readonly eventTitle: string
-  readonly registerUrl: string
-  readonly invitedBy: string
+  readonly eventTitle: string;
+  readonly registerUrl: string;
+  readonly invitedBy: string;
 }
 
 export default function AddedToEventNewUserEmail({
@@ -75,11 +75,11 @@ export default function AddedToEventNewUserEmail({
         <ButtonFallback href={registerUrl} />
       </Section>
     </EmailLayout>
-  )
+  );
 }
 
 AddedToEventNewUserEmail.PreviewProps = {
   eventTitle: 'Noël en famille 2026',
   registerUrl: 'https://wishlistapp.fr/register?invitation=preview',
   invitedBy: 'Marie Dupont',
-} satisfies AddedToEventNewUserEmailProps
+} satisfies AddedToEventNewUserEmailProps;

@@ -1,11 +1,11 @@
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
-import GroupsIcon from '@mui/icons-material/Groups'
-import ManageHistoryIcon from '@mui/icons-material/ManageHistory'
-import { Box, Grid, styled, Typography } from '@mui/material'
-import { useNavigate } from '@tanstack/react-router'
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import GroupsIcon from '@mui/icons-material/Groups';
+import ManageHistoryIcon from '@mui/icons-material/ManageHistory';
+import { Box, Grid, styled, Typography } from '@mui/material';
+import { useNavigate } from '@tanstack/react-router';
 
-import { Card } from '../common/Card'
-import { Title } from '../common/Title'
+import { Card } from '../common/Card';
+import { Title } from '../common/Title';
 
 const AdminCard = styled(Card)(({ theme }) => ({
   display: 'flex',
@@ -14,7 +14,7 @@ const AdminCard = styled(Card)(({ theme }) => ({
   alignItems: 'center',
   height: '100%',
   gap: theme.spacing(2),
-}))
+}));
 
 const IconWrapper = styled(Box)(({ theme }) => ({
   display: 'flex',
@@ -28,10 +28,10 @@ const IconWrapper = styled(Box)(({ theme }) => ({
   '& svg': {
     fontSize: 40,
   },
-}))
+}));
 
 export const AdminPage = () => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const adminSections = [
     {
@@ -55,7 +55,7 @@ export const AdminPage = () => {
       icon: <ManageHistoryIcon />,
       onClick: () => window.open('http://wishlist-durabull.tailf24158.ts.net:3000', '_blank'),
     },
-  ]
+  ];
 
   return (
     <Box>
@@ -77,5 +77,5 @@ export const AdminPage = () => {
         ))}
       </Grid>
     </Box>
-  )
-}
+  );
+};

@@ -1,19 +1,21 @@
-import { BadRequestException, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common'
-import { TransactionManager } from '@wishlist/api/core'
-import { REPOSITORIES } from '@wishlist/api/repositories'
-import { type WishlistRepository } from '@wishlist/api/wishlist'
-import { type EventId, type ICurrentUser } from '@wishlist/common'
+import type { EventRepository } from '../../domain/repository/event.repository';
+import type { EventAttendeeRepository } from '../../domain/repository/event-attendee.repository';
 
-import { type EventAttendeeRepository, type EventRepository } from '../../domain'
+import { BadRequestException, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { type EventId, type ICurrentUser } from '@wishlist/common';
+
+import { TransactionManager } from '../../../core/database/transaction-manager';
+import { REPOSITORIES } from '../../../repositories/repositories.constants';
+import { type WishlistRepository } from '../../../wishlist/domain/wishlist.repository';
 
 export type DeleteEventInput = {
-  currentUser: ICurrentUser
-  eventId: EventId
-}
+  currentUser: ICurrentUser;
+  eventId: EventId;
+};
 
 @Injectable()
 export class DeleteEventUseCase {
-  private readonly logger = new Logger(DeleteEventUseCase.name)
+  private readonly logger = new Logger(DeleteEventUseCase.name);
 
   constructor(
     @Inject(REPOSITORIES.EVENT) private readonly eventRepository: EventRepository,
@@ -23,29 +25,29 @@ export class DeleteEventUseCase {
   ) {}
 
   async execute(input: DeleteEventInput): Promise<void> {
-    this.logger.log('Delete event request received', { input })
-    const { currentUser, eventId } = input
+    this.logger.log('Delete event request received', { input });
+    const { currentUser, eventId } = input;
 
-    const event = await this.eventRepository.findByIdOrFail(eventId)
+    const event = await this.eventRepository.findByIdOrFail(eventId);
 
     if (!event.canEdit(currentUser)) {
-      throw new UnauthorizedException('Only creators and admins of the event can delete it')
+      throw new UnauthorizedException('Only creators and admins of the event can delete it');
     }
 
-    const wishlists = await this.wishlistRepository.findByEvent(event.id)
+    const wishlists = await this.wishlistRepository.findByEvent(event.id);
 
     if (wishlists.length > 0) {
-      throw new BadRequestException('Event has wishlists, cannot delete it')
+      throw new BadRequestException('Event has wishlists, cannot delete it');
     }
 
     await this.transactionManager.runInTransaction(async tx => {
-      this.logger.log('Deleting attendees...', { eventId })
+      this.logger.log('Deleting attendees...', { eventId });
       for (const attendee of event.attendees) {
-        await this.attendeeRepository.delete(attendee.id, tx)
+        await this.attendeeRepository.delete(attendee.id, tx);
       }
 
-      this.logger.log('Deleting event...', { eventId })
-      await this.eventRepository.delete(event.id, tx)
-    })
+      this.logger.log('Deleting event...', { eventId });
+      await this.eventRepository.delete(event.id, tx);
+    });
   }
 }

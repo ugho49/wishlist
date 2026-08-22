@@ -1,17 +1,18 @@
-import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common'
-import { REPOSITORIES } from '@wishlist/api/repositories'
-import { type UserId, type UserSocialId } from '@wishlist/common'
+import type { UserSocialRepository } from '../../domain/repository/user-social.repository';
 
-import { type UserSocialRepository } from '../../domain'
+import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { type UserId, type UserSocialId } from '@wishlist/common';
+
+import { REPOSITORIES } from '../../../repositories/repositories.constants';
 
 export type UnlinkUserSocialInput = {
-  userId: UserId
-  socialId: UserSocialId
-}
+  userId: UserId;
+  socialId: UserSocialId;
+};
 
 @Injectable()
 export class UnlinkUserSocialUseCase {
-  private readonly logger = new Logger(UnlinkUserSocialUseCase.name)
+  private readonly logger = new Logger(UnlinkUserSocialUseCase.name);
 
   constructor(
     @Inject(REPOSITORIES.USER_SOCIAL)
@@ -19,15 +20,15 @@ export class UnlinkUserSocialUseCase {
   ) {}
 
   async execute(input: UnlinkUserSocialInput): Promise<void> {
-    this.logger.log('Unlink user social request received', { input })
-    const { userId, socialId } = input
+    this.logger.log('Unlink user social request received', { input });
+    const { userId, socialId } = input;
 
-    const socials = await this.userSocialRepository.findByUserId(userId)
-    const social = socials.find(s => s.id === socialId)
+    const socials = await this.userSocialRepository.findByUserId(userId);
+    const social = socials.find(s => s.id === socialId);
 
-    if (!social) throw new NotFoundException('This social id does not exist')
+    if (!social) throw new NotFoundException('This social id does not exist');
 
-    this.logger.log('Deleting user social...', { userId, socialId })
-    await this.userSocialRepository.delete(socialId)
+    this.logger.log('Deleting user social...', { userId, socialId });
+    await this.userSocialRepository.delete(socialId);
   }
 }

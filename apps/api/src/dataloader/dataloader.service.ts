@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable } from '@nestjs/common';
 import {
   type AttendeeId,
   type EventId,
@@ -6,11 +6,11 @@ import {
   type UserId,
   type UserSocialId,
   type WishlistId,
-} from '@wishlist/common'
-import DataLoader from 'dataloader'
+} from '@wishlist/common';
+import DataLoader from 'dataloader';
 
-import { EventDataLoaderFactory } from '../event/infrastructure/event.dataloader'
-import { EventAttendeeDataLoaderFactory } from '../event/infrastructure/event-attendee.dataloader'
+import { EventDataLoaderFactory } from '../event/infrastructure/event.dataloader';
+import { EventAttendeeDataLoaderFactory } from '../event/infrastructure/event-attendee.dataloader';
 import {
   type Event,
   type EventAttendee,
@@ -18,19 +18,19 @@ import {
   type UserFull,
   type UserSocial,
   type Wishlist,
-} from '../gql/generated-types'
-import { UserDataLoaderFactory } from '../user/infrastructure/user.dataloader'
-import { WishlistDataLoaderFactory } from '../wishlist/infrastructure/wishlist.dataloader'
+} from '../gql/generated-types';
+import { UserDataLoaderFactory } from '../user/infrastructure/user.dataloader';
+import { WishlistDataLoaderFactory } from '../wishlist/infrastructure/wishlist.dataloader';
 
 export type DataLoaders = {
-  user: DataLoader<UserId, User | null>
-  userFull: DataLoader<UserId, UserFull | null>
-  userSocialsByUser: DataLoader<UserId, UserSocial[]>
-  userSocial: DataLoader<UserSocialId, UserSocial | null>
-  wishlist: DataLoader<WishlistId, Wishlist | null>
-  event: DataLoader<EventId, Event | null>
-  eventAttendee: DataLoader<AttendeeId, EventAttendee | null>
-}
+  user: DataLoader<UserId, User | null>;
+  userFull: DataLoader<UserId, UserFull | null>;
+  userSocialsByUser: DataLoader<UserId, UserSocial[]>;
+  userSocial: DataLoader<UserSocialId, UserSocial | null>;
+  wishlist: DataLoader<WishlistId, Wishlist | null>;
+  event: DataLoader<EventId, Event | null>;
+  eventAttendee: DataLoader<AttendeeId, EventAttendee | null>;
+};
 
 @Injectable()
 export class DataLoaderService {
@@ -50,6 +50,6 @@ export class DataLoaderService {
       wishlist: this.wishlistDataLoaderFactory.createLoader(getCurrentUser),
       event: this.eventDataLoaderFactory.createLoader(getCurrentUser),
       eventAttendee: this.eventAttendeeDataLoaderFactory.createLoader(),
-    }
+    };
   }
 }

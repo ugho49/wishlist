@@ -1,8 +1,8 @@
-import { Global, Module } from '@nestjs/common'
+import { Global, Module } from '@nestjs/common';
 
-import { ConfigurableMailModule } from './mail.module-definitions'
-import { MailProcessor } from './mail.processor'
-import { MailService } from './mail.service'
+import { ConfigurableMailModule } from './mail.module-definitions';
+import { MailProcessor } from './mail.processor';
+import { MailService } from './mail.service';
 
 @Global()
 @Module({

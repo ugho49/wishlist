@@ -1,18 +1,21 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common'
-import { DatabaseService, type DrizzleTransaction } from '@wishlist/api/core'
-import { Event, type EventAttendeeRepository, type EventRepository } from '@wishlist/api/event'
-import { schema } from '@wishlist/api-drizzle'
-import { type EventId, type UserId, uuid } from '@wishlist/common'
-import { and, count, desc, eq, gte, inArray, type SelectedFields } from 'drizzle-orm'
-import { DateTime } from 'luxon'
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { schema } from '@wishlist/api-drizzle';
+import { type EventId, type UserId, uuid } from '@wishlist/common';
+import { and, count, desc, eq, gte, inArray, type SelectedFields } from 'drizzle-orm';
+import { DateTime } from 'luxon';
 
-import { REPOSITORIES } from '../repositories.constants'
-import { PostgresEventAttendeeRepository } from './postgres-event-attendee.repository'
+import { DatabaseService } from '../../core/database/database.service';
+import { type DrizzleTransaction } from '../../core/database/transaction-manager';
+import { Event } from '../../event/domain/model/event.model';
+import { type EventRepository } from '../../event/domain/repository/event.repository';
+import { type EventAttendeeRepository } from '../../event/domain/repository/event-attendee.repository';
+import { REPOSITORIES } from '../repositories.constants';
+import { PostgresEventAttendeeRepository } from './postgres-event-attendee.repository';
 
 type RowType = typeof schema.event.$inferSelect & {
-  attendees: (typeof schema.eventAttendee.$inferSelect & { user: typeof schema.user.$inferSelect | null })[]
-  eventWishlists: (typeof schema.eventWishlist.$inferSelect)[]
-}
+  attendees: (typeof schema.eventAttendee.$inferSelect & { user: typeof schema.user.$inferSelect | null })[];
+  eventWishlists: (typeof schema.eventWishlist.$inferSelect)[];
+};
 
 @Injectable()
 export class PostgresEventRepository implements EventRepository {
@@ -22,46 +25,46 @@ export class PostgresEventRepository implements EventRepository {
   ) {}
 
   newId(): EventId {
-    return uuid() as EventId
+    return uuid() as EventId;
   }
 
   async findById(id: EventId): Promise<Event | undefined> {
     const result = await this.databaseService.db.query.event.findFirst({
       where: eq(schema.event.id, id),
       with: { attendees: { with: { user: true } }, eventWishlists: true },
-    })
+    });
 
-    if (!result) return undefined
+    if (!result) return undefined;
 
-    return PostgresEventRepository.toModel(result)
+    return PostgresEventRepository.toModel(result);
   }
 
   async findByIds(ids: EventId[]): Promise<Event[]> {
     const result = await this.databaseService.db.query.event.findMany({
       where: inArray(schema.event.id, ids),
       with: { attendees: { with: { user: true } }, eventWishlists: true },
-    })
+    });
 
-    return result.map(PostgresEventRepository.toModel)
+    return result.map(PostgresEventRepository.toModel);
   }
 
   async findByIdOrFail(id: EventId): Promise<Event> {
-    const event = await this.findById(id)
+    const event = await this.findById(id);
     if (!event) {
-      throw new NotFoundException('Event not found')
+      throw new NotFoundException('Event not found');
     }
-    return event
+    return event;
   }
 
   async findAllPaginated(params: {
-    pagination: { take: number; skip: number }
+    pagination: { take: number; skip: number };
   }): Promise<{ events: Event[]; totalCount: number }> {
     // Get total count
-    const totalCountResult = await this.databaseService.db.select({ count: count() }).from(schema.event)
+    const totalCountResult = await this.databaseService.db.select({ count: count() }).from(schema.event);
 
-    const totalCount = totalCountResult[0]?.count ?? 0
+    const totalCount = totalCountResult[0]?.count ?? 0;
 
-    if (totalCount === 0) return { events: [], totalCount }
+    if (totalCount === 0) return { events: [], totalCount };
 
     // Get full event data with attendees
     const result = await this.databaseService.db.query.event.findMany({
@@ -69,17 +72,17 @@ export class PostgresEventRepository implements EventRepository {
       orderBy: desc(schema.event.createdAt),
       limit: params.pagination.take,
       offset: params.pagination.skip,
-    })
+    });
 
-    const events = result.map(PostgresEventRepository.toModel)
+    const events = result.map(PostgresEventRepository.toModel);
 
-    return { events, totalCount }
+    return { events, totalCount };
   }
 
   async findByUserIdPaginated(params: {
-    userId: UserId
-    pagination: { take: number; skip: number }
-    onlyFuture: boolean
+    userId: UserId;
+    pagination: { take: number; skip: number };
+    onlyFuture: boolean;
   }): Promise<{ events: Event[]; totalCount: number }> {
     // biome-ignore lint/suspicious/noExplicitAny: type is too complex
     const baseQuery = (selectFields: SelectedFields<any, typeof schema.event>) =>
@@ -92,18 +95,18 @@ export class PostgresEventRepository implements EventRepository {
             eq(schema.eventAttendee.userId, params.userId),
             ...(params.onlyFuture ? [gte(schema.event.eventDate, DateTime.now().toISODate())] : []),
           ),
-        )
+        );
 
-    const totalCountResult = (await baseQuery({ count: count() })) as Array<{ count: number }>
-    const totalCount = totalCountResult[0]?.count ?? 0
+    const totalCountResult = (await baseQuery({ count: count() })) as Array<{ count: number }>;
+    const totalCount = totalCountResult[0]?.count ?? 0;
 
-    if (totalCount === 0) return { events: [], totalCount }
+    if (totalCount === 0) return { events: [], totalCount };
 
     // Get ordered event IDs
     const orderedEventIds = (await baseQuery({ id: schema.event.id })
       .orderBy(desc(schema.event.eventDate), desc(schema.event.createdAt))
       .limit(params.pagination.take)
-      .offset(params.pagination.skip)) as Array<{ id: EventId }>
+      .offset(params.pagination.skip)) as Array<{ id: EventId }>;
 
     // Get full event data with attendees
     const validEvents = await this.databaseService.db.query.event.findMany({
@@ -112,20 +115,20 @@ export class PostgresEventRepository implements EventRepository {
         orderedEventIds.map(row => row.id),
       ),
       with: { attendees: { with: { user: true } }, eventWishlists: true },
-    })
+    });
 
     // Maintain order
-    const eventsMap = new Map(validEvents.map(e => [e.id, e]))
+    const eventsMap = new Map(validEvents.map(e => [e.id, e]));
     const events = orderedEventIds
       .map(row => eventsMap.get(row.id))
       .filter((event): event is NonNullable<RowType> => event !== undefined)
-      .map(PostgresEventRepository.toModel)
+      .map(PostgresEventRepository.toModel);
 
-    return { events, totalCount }
+    return { events, totalCount };
   }
 
   async save(event: Event, tx?: DrizzleTransaction): Promise<void> {
-    const client = tx ?? this.databaseService.db
+    const client = tx ?? this.databaseService.db;
 
     await client.transaction(async subTx => {
       await subTx
@@ -148,31 +151,31 @@ export class PostgresEventRepository implements EventRepository {
             eventDate: event.eventDate.toISOString().split('T')[0] as string, // Convert to YYYY-MM-DD format
             updatedAt: event.updatedAt,
           },
-        })
+        });
 
       // Get existing attendees
       const existingAttendees = await subTx.query.eventAttendee.findMany({
         where: eq(schema.eventAttendee.eventId, event.id),
-      })
+      });
 
       // Delete attendees that are not in the new list
       const attendeeIdsToDelete = existingAttendees
         .filter(attendee => !event.attendees.some(a => a.id === attendee.id))
-        .map(a => a.id)
+        .map(a => a.id);
 
-      await subTx.delete(schema.eventAttendee).where(inArray(schema.eventAttendee.id, attendeeIdsToDelete))
+      await subTx.delete(schema.eventAttendee).where(inArray(schema.eventAttendee.id, attendeeIdsToDelete));
 
       // Save others
       for (const attendee of event.attendees) {
-        await this.attendeeRepository.save(attendee, subTx)
+        await this.attendeeRepository.save(attendee, subTx);
       }
-    })
+    });
   }
 
   async delete(id: EventId, tx?: DrizzleTransaction): Promise<void> {
-    const client = tx ?? this.databaseService.db
+    const client = tx ?? this.databaseService.db;
 
-    await client.delete(schema.event).where(eq(schema.event.id, id))
+    await client.delete(schema.event).where(eq(schema.event.id, id));
   }
 
   static toModel(row: RowType): Event {
@@ -186,6 +189,6 @@ export class PostgresEventRepository implements EventRepository {
       wishlistIds: row.eventWishlists.map(eventWishlist => eventWishlist.wishlistId),
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
-    })
+    });
   }
 }

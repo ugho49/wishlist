@@ -25,23 +25,23 @@ const PLACEHOLDER_NAMES = [
   'Killian',
   'Bastien',
   'Clément',
-]
+];
 
 export const getRandomPlaceholderName = (): string => {
-  const randomIndex = Math.floor(Math.random() * PLACEHOLDER_NAMES.length)
+  const randomIndex = Math.floor(Math.random() * PLACEHOLDER_NAMES.length);
   // eslint-disable-next-line security/detect-object-injection
-  return PLACEHOLDER_NAMES[randomIndex]!
-}
+  return PLACEHOLDER_NAMES[randomIndex]!;
+};
 
 export const getAvatarUrl = (params: {
-  wishlist: { logoUrl?: string | null; config: { hideItems: boolean } }
-  ownerPictureUrl?: string | null
+  wishlist: { logoUrl?: string | null; config: { hideItems: boolean } };
+  ownerPictureUrl?: string | null;
 }): string | undefined => {
-  const { wishlist, ownerPictureUrl } = params
+  const { wishlist, ownerPictureUrl } = params;
 
   if (wishlist.config.hideItems) {
-    return wishlist.logoUrl ?? ownerPictureUrl ?? undefined
+    return wishlist.logoUrl ?? ownerPictureUrl ?? undefined;
   }
 
-  return wishlist.logoUrl ?? undefined
-}
+  return wishlist.logoUrl ?? undefined;
+};

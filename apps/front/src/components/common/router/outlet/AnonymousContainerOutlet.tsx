@@ -1,15 +1,15 @@
-import { Box, Container, Stack, styled } from '@mui/material'
-import { Outlet, useNavigate } from '@tanstack/react-router'
+import { Box, Container, Stack, styled } from '@mui/material';
+import { Outlet, useNavigate } from '@tanstack/react-router';
 
-import { Card } from '../../Card'
-import { Logo } from '../../Logo'
+import { Card } from '../../Card';
+import { Logo } from '../../Logo';
 
 const Root = styled(Box)(({ theme }) => ({
   minHeight: '100vh',
   display: 'flex',
   alignItems: 'center',
   paddingBlock: theme.spacing(4),
-}))
+}));
 
 const LogoContainer = styled(Box)({
   cursor: 'pointer',
@@ -17,16 +17,16 @@ const LogoContainer = styled(Box)({
   '&:hover': {
     opacity: 0.8,
   },
-})
+});
 
 const OutletContainer = styled(Card)(() => ({
   borderRadius: 24,
   padding: 32,
   boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important',
-}))
+}));
 
 export const AnonymousContainerOutlet = () => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   return (
     <Root>
@@ -42,5 +42,5 @@ export const AnonymousContainerOutlet = () => {
         </Stack>
       </Container>
     </Root>
-  )
-}
+  );
+};

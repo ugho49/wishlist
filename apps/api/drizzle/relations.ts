@@ -1,4 +1,4 @@
-import { relations } from 'drizzle-orm/relations'
+import { relations } from 'drizzle-orm/relations';
 
 import {
   event,
@@ -14,7 +14,7 @@ import {
   userPasswordVerification,
   userSocial,
   wishlist,
-} from './schema'
+} from './schema';
 
 export const eventAttendeeRelations = relations(eventAttendee, ({ one, many }) => ({
   event: one(event, {
@@ -26,13 +26,13 @@ export const eventAttendeeRelations = relations(eventAttendee, ({ one, many }) =
     references: [user.id],
   }),
   secretSantaUsers: many(secretSantaUser),
-}))
+}));
 
 export const eventRelations = relations(event, ({ many }) => ({
   attendees: many(eventAttendee),
   secretSantas: many(secretSanta),
   eventWishlists: many(eventWishlist),
-}))
+}));
 
 export const userRelations = relations(user, ({ many }) => ({
   passwordVerifications: many(userPasswordVerification),
@@ -42,35 +42,35 @@ export const userRelations = relations(user, ({ many }) => ({
   wishlists: many(wishlist, { relationName: 'ownedWishlists' }),
   coOwnedWishlists: many(wishlist, { relationName: 'coOwnedWishlists' }),
   itemTakers: many(itemTaker),
-}))
+}));
 
 export const userPasswordVerificationRelations = relations(userPasswordVerification, ({ one }) => ({
   user: one(user, {
     fields: [userPasswordVerification.userId],
     references: [user.id],
   }),
-}))
+}));
 
 export const userEmailChangeVerificationRelations = relations(userEmailChangeVerification, ({ one }) => ({
   user: one(user, {
     fields: [userEmailChangeVerification.userId],
     references: [user.id],
   }),
-}))
+}));
 
 export const userEmailSettingRelations = relations(userEmailSetting, ({ one }) => ({
   user: one(user, {
     fields: [userEmailSetting.userId],
     references: [user.id],
   }),
-}))
+}));
 
 export const userSocialRelations = relations(userSocial, ({ one }) => ({
   user: one(user, {
     fields: [userSocial.userId],
     references: [user.id],
   }),
-}))
+}));
 
 export const wishlistRelations = relations(wishlist, ({ one, many }) => ({
   owner: one(user, {
@@ -85,7 +85,7 @@ export const wishlistRelations = relations(wishlist, ({ one, many }) => ({
   }),
   items: many(item),
   eventWishlists: many(eventWishlist),
-}))
+}));
 
 export const itemRelations = relations(item, ({ one, many }) => ({
   wishlist: one(wishlist, {
@@ -93,7 +93,7 @@ export const itemRelations = relations(item, ({ one, many }) => ({
     references: [wishlist.id],
   }),
   takers: many(itemTaker),
-}))
+}));
 
 export const itemTakerRelations = relations(itemTaker, ({ one }) => ({
   item: one(item, {
@@ -104,7 +104,7 @@ export const itemTakerRelations = relations(itemTaker, ({ one }) => ({
     fields: [itemTaker.userId],
     references: [user.id],
   }),
-}))
+}));
 
 export const secretSantaRelations = relations(secretSanta, ({ one, many }) => ({
   event: one(event, {
@@ -112,7 +112,7 @@ export const secretSantaRelations = relations(secretSanta, ({ one, many }) => ({
     references: [event.id],
   }),
   secretSantaUsers: many(secretSantaUser),
-}))
+}));
 
 export const secretSantaUserRelations = relations(secretSantaUser, ({ one, many }) => ({
   secretSanta: one(secretSanta, {
@@ -131,7 +131,7 @@ export const secretSantaUserRelations = relations(secretSantaUser, ({ one, many 
     fields: [secretSantaUser.attendeeId],
     references: [eventAttendee.id],
   }),
-}))
+}));
 
 export const eventWishlistRelations = relations(eventWishlist, ({ one }) => ({
   wishlist: one(wishlist, {
@@ -142,4 +142,4 @@ export const eventWishlistRelations = relations(eventWishlist, ({ one }) => ({
     fields: [eventWishlist.eventId],
     references: [event.id],
   }),
-}))
+}));

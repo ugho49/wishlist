@@ -1,8 +1,8 @@
-import type { FrontendRoutesConfig } from './frontend-routes.config'
+import type { FrontendRoutesConfig } from './frontend-routes.config';
 
-import { ConfigurableModuleBuilder } from '@nestjs/common'
+import { ConfigurableModuleBuilder } from '@nestjs/common';
 
 export const {
   ConfigurableModuleClass: ConfigurableFrontendRoutesModule,
   MODULE_OPTIONS_TOKEN: FRONTEND_ROUTES_CONFIG_TOKEN,
-} = new ConfigurableModuleBuilder<FrontendRoutesConfig>().build()
+} = new ConfigurableModuleBuilder<FrontendRoutesConfig>().build();

@@ -1,16 +1,16 @@
-import type { EventDetail } from './event.types'
+import type { EventDetail } from './event.types';
 
-import { Stack } from '@mui/material'
+import { Stack } from '@mui/material';
 
-import { useSecretSanta } from '../../hooks/domain/useSecretSanta'
-import { Loader } from '../common/Loader'
-import { NoSecretSanta } from '../secret-santa/NoSecretSanta'
-import { SecretSanta } from '../secret-santa/SecretSanta'
+import { useSecretSanta } from '../../hooks/domain/useSecretSanta';
+import { Loader } from '../common/Loader';
+import { NoSecretSanta } from '../secret-santa/NoSecretSanta';
+import { SecretSanta } from '../secret-santa/SecretSanta';
 
-type EditSecretSantaProps = { event: EventDetail }
+type EditSecretSantaProps = { event: EventDetail };
 
 export const EditSecretSanta = ({ event }: EditSecretSantaProps) => {
-  const { secretSanta, loading } = useSecretSanta(event.id)
+  const { secretSanta, loading } = useSecretSanta(event.id);
 
   return (
     <Stack marginTop={5}>
@@ -18,5 +18,5 @@ export const EditSecretSanta = ({ event }: EditSecretSantaProps) => {
         {secretSanta ? <SecretSanta event={event} secretSanta={secretSanta} /> : <NoSecretSanta eventId={event.id} />}
       </Loader>
     </Stack>
-  )
-}
+  );
+};

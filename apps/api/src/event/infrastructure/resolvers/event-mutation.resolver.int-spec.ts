@@ -1,8 +1,8 @@
-import type { RequestApp } from '@wishlist/api-test-utils'
+import type { RequestApp } from '@wishlist/api-test-utils';
 
-import { Fixtures, useTestApp } from '@wishlist/api-test-utils'
-import { uuid } from '@wishlist/common'
-import { DateTime } from 'luxon'
+import { Fixtures, useTestApp } from '@wishlist/api-test-utils';
+import { uuid } from '@wishlist/common';
+import { DateTime } from 'luxon';
 
 /**
  * Integration tests for the GraphQL EventMutationResolver.
@@ -15,17 +15,17 @@ import { DateTime } from 'luxon'
  *   ForbiddenException      -> ForbiddenRejection
  *   other HttpException     -> InternalErrorRejection
  */
-const GRAPHQL_PATH = '/graphql'
+const GRAPHQL_PATH = '/graphql';
 
-const futureDate = () => DateTime.now().plus({ days: 30 }).toISODate() as string
+const futureDate = () => DateTime.now().plus({ days: 30 }).toISODate() as string;
 
 describe('EventMutationResolver (GraphQL)', () => {
-  const { getRequest, getFixtures, expectTable } = useTestApp()
-  let fixtures: Fixtures
+  const { getRequest, getFixtures, expectTable } = useTestApp();
+  let fixtures: Fixtures;
 
   beforeEach(() => {
-    fixtures = getFixtures()
-  })
+    fixtures = getFixtures();
+  });
 
   describe('Mutation createEvent', () => {
     const mutation = /* GraphQL */ `
@@ -51,30 +51,30 @@ describe('EventMutationResolver (GraphQL)', () => {
           }
         }
       }
-    `
+    `;
 
     it('should not succeed when not authenticated', async () => {
-      const request = await getRequest()
+      const request = await getRequest();
       const res = await request
         .post(GRAPHQL_PATH)
         .send({ query: mutation, variables: { input: { title: 'My Event', eventDate: futureDate() } } })
-        .expect(200)
+        .expect(200);
 
-      expect(res.body.data?.createEvent?.__typename).not.toBe('Event')
-      await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(0)
-    })
+      expect(res.body.data?.createEvent?.__typename).not.toBe('Event');
+      await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(0);
+    });
 
     describe('when user is authenticated', () => {
-      let request: RequestApp
-      let currentUserId: string
+      let request: RequestApp;
+      let currentUserId: string;
 
       beforeEach(async () => {
-        request = await getRequest({ signedAs: 'BASE_USER' })
-        currentUserId = await fixtures.getSignedUserId('BASE_USER')
-      })
+        request = await getRequest({ signedAs: 'BASE_USER' });
+        currentUserId = await fixtures.getSignedUserId('BASE_USER');
+      });
 
       it('should create an event successfully (creator becomes maintainer attendee)', async () => {
-        const eventDate = futureDate()
+        const eventDate = futureDate();
         const res = await request
           .post(GRAPHQL_PATH)
           .send({
@@ -83,7 +83,7 @@ describe('EventMutationResolver (GraphQL)', () => {
               input: { title: 'Christmas', description: 'Family party', icon: '🎄', eventDate },
             },
           })
-          .expect(200)
+          .expect(200);
 
         expect(res.body.data.createEvent).toMatchObject({
           __typename: 'Event',
@@ -92,26 +92,26 @@ describe('EventMutationResolver (GraphQL)', () => {
           description: 'Family party',
           icon: '🎄',
           eventDate,
-        })
+        });
         // Creator is automatically added as a maintainer attendee.
-        expect(res.body.data.createEvent.attendeeIds).toHaveLength(1)
+        expect(res.body.data.createEvent.attendeeIds).toHaveLength(1);
 
         await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
           id: res.body.data.createEvent.id,
           title: 'Christmas',
           description: 'Family party',
           icon: '🎄',
-        })
+        });
 
         await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
           event_id: res.body.data.createEvent.id,
           user_id: currentUserId,
           role: 'creator',
-        })
-      })
+        });
+      });
 
       it('should create an event with an additional attendee', async () => {
-        const eventDate = futureDate()
+        const eventDate = futureDate();
         const res = await request
           .post(GRAPHQL_PATH)
           .send({
@@ -124,14 +124,14 @@ describe('EventMutationResolver (GraphQL)', () => {
               },
             },
           })
-          .expect(200)
+          .expect(200);
 
-        expect(res.body.data.createEvent.__typename).toBe('Event')
-        expect(res.body.data.createEvent.attendeeIds).toHaveLength(2)
+        expect(res.body.data.createEvent.__typename).toBe('Event');
+        expect(res.body.data.createEvent.attendeeIds).toHaveLength(2);
 
-        await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(1)
-        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(2)
-      })
+        await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(1);
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(2);
+      });
 
       it.each([
         { case: 'empty title', input: { title: '', eventDate: futureDate() }, field: 'title' },
@@ -144,17 +144,17 @@ describe('EventMutationResolver (GraphQL)', () => {
           field: 'attendees',
         },
       ])('should return ValidationRejection when invalid input: $case', async ({ input, field }) => {
-        const res = await request.post(GRAPHQL_PATH).send({ query: mutation, variables: { input } }).expect(200)
+        const res = await request.post(GRAPHQL_PATH).send({ query: mutation, variables: { input } }).expect(200);
 
-        expect(res.body.data.createEvent.__typename).toBe('ValidationRejection')
+        expect(res.body.data.createEvent.__typename).toBe('ValidationRejection');
         expect(res.body.data.createEvent.errors).toEqual(
           expect.arrayContaining([expect.objectContaining({ field: expect.stringContaining(field) })]),
-        )
+        );
 
-        await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(0)
-      })
-    })
-  })
+        await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(0);
+      });
+    });
+  });
 
   describe('Mutation updateEvent', () => {
     const mutation = /* GraphQL */ `
@@ -175,99 +175,99 @@ describe('EventMutationResolver (GraphQL)', () => {
           }
         }
       }
-    `
+    `;
 
     it('should not succeed when not authenticated', async () => {
-      const request = await getRequest()
+      const request = await getRequest();
       const res = await request
         .post(GRAPHQL_PATH)
         .send({ query: mutation, variables: { id: uuid(), input: { title: 'Updated', eventDate: futureDate() } } })
-        .expect(200)
+        .expect(200);
 
-      expect(res.body.data?.updateEvent?.__typename).not.toBe('VoidOutput')
-    })
+      expect(res.body.data?.updateEvent?.__typename).not.toBe('VoidOutput');
+    });
 
     describe('when user is authenticated', () => {
-      let request: RequestApp
-      let currentUserId: string
+      let request: RequestApp;
+      let currentUserId: string;
 
       beforeEach(async () => {
-        request = await getRequest({ signedAs: 'BASE_USER' })
-        currentUserId = await fixtures.getSignedUserId('BASE_USER')
-      })
+        request = await getRequest({ signedAs: 'BASE_USER' });
+        currentUserId = await fixtures.getSignedUserId('BASE_USER');
+      });
 
       it('should update an event the user maintains', async () => {
         const { eventId } = await fixtures.insertEventWithMaintainer({
           title: 'Original',
           maintainerId: currentUserId,
-        })
+        });
 
-        const eventDate = futureDate()
+        const eventDate = futureDate();
         const res = await request
           .post(GRAPHQL_PATH)
           .send({
             query: mutation,
             variables: { id: eventId, input: { title: 'Updated Title', description: 'New desc', eventDate } },
           })
-          .expect(200)
+          .expect(200);
 
-        expect(res.body.data.updateEvent).toEqual({ __typename: 'VoidOutput', success: true })
+        expect(res.body.data.updateEvent).toEqual({ __typename: 'VoidOutput', success: true });
 
         await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
           id: eventId,
           title: 'Updated Title',
           description: 'New desc',
-        })
-      })
+        });
+      });
 
       it('should return ValidationRejection when title is empty', async () => {
         const { eventId } = await fixtures.insertEventWithMaintainer({
           title: 'Original',
           maintainerId: currentUserId,
-        })
+        });
 
         const res = await request
           .post(GRAPHQL_PATH)
           .send({ query: mutation, variables: { id: eventId, input: { title: '', eventDate: futureDate() } } })
-          .expect(200)
+          .expect(200);
 
-        expect(res.body.data.updateEvent.__typename).toBe('ValidationRejection')
+        expect(res.body.data.updateEvent.__typename).toBe('ValidationRejection');
 
-        await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(1).row(0).toMatchObject({ title: 'Original' })
-      })
+        await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(1).row(0).toMatchObject({ title: 'Original' });
+      });
 
       it('should return NotFoundRejection when the event does not exist', async () => {
         const res = await request
           .post(GRAPHQL_PATH)
           .send({ query: mutation, variables: { id: uuid(), input: { title: 'Updated', eventDate: futureDate() } } })
-          .expect(200)
+          .expect(200);
 
-        expect(res.body.data.updateEvent.__typename).toBe('NotFoundRejection')
-      })
+        expect(res.body.data.updateEvent.__typename).toBe('NotFoundRejection');
+      });
 
       it('should return UnauthorizedRejection when the user is not a maintainer', async () => {
         const otherUserId = await fixtures.insertUser({
           email: 'other@test.com',
           firstname: 'Other',
           lastname: 'User',
-        })
+        });
 
         const { eventId } = await fixtures.insertEventWithMaintainer({
           title: 'Original',
           maintainerId: otherUserId,
-        })
+        });
 
         const res = await request
           .post(GRAPHQL_PATH)
           .send({ query: mutation, variables: { id: eventId, input: { title: 'Hacked', eventDate: futureDate() } } })
-          .expect(200)
+          .expect(200);
 
-        expect(res.body.data.updateEvent.__typename).toBe('UnauthorizedRejection')
+        expect(res.body.data.updateEvent.__typename).toBe('UnauthorizedRejection');
 
-        await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(1).row(0).toMatchObject({ title: 'Original' })
-      })
-    })
-  })
+        await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(1).row(0).toMatchObject({ title: 'Original' });
+      });
+    });
+  });
 
   describe('Mutation deleteEvent', () => {
     const mutation = /* GraphQL */ `
@@ -282,76 +282,76 @@ describe('EventMutationResolver (GraphQL)', () => {
           }
         }
       }
-    `
+    `;
 
     it('should not succeed when not authenticated', async () => {
-      const request = await getRequest()
+      const request = await getRequest();
       const res = await request
         .post(GRAPHQL_PATH)
         .send({ query: mutation, variables: { id: uuid() } })
-        .expect(200)
+        .expect(200);
 
-      expect(res.body.data?.deleteEvent?.__typename).not.toBe('VoidOutput')
-    })
+      expect(res.body.data?.deleteEvent?.__typename).not.toBe('VoidOutput');
+    });
 
     describe('when user is authenticated', () => {
-      let request: RequestApp
-      let currentUserId: string
+      let request: RequestApp;
+      let currentUserId: string;
 
       beforeEach(async () => {
-        request = await getRequest({ signedAs: 'BASE_USER' })
-        currentUserId = await fixtures.getSignedUserId('BASE_USER')
-      })
+        request = await getRequest({ signedAs: 'BASE_USER' });
+        currentUserId = await fixtures.getSignedUserId('BASE_USER');
+      });
 
       it('should delete an event the user maintains (no wishlists)', async () => {
         const { eventId } = await fixtures.insertEventWithMaintainer({
           title: 'To Delete',
           maintainerId: currentUserId,
-        })
+        });
 
         const res = await request
           .post(GRAPHQL_PATH)
           .send({ query: mutation, variables: { id: eventId } })
-          .expect(200)
+          .expect(200);
 
-        expect(res.body.data.deleteEvent).toEqual({ __typename: 'VoidOutput', success: true })
+        expect(res.body.data.deleteEvent).toEqual({ __typename: 'VoidOutput', success: true });
 
-        await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(0)
-        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(0)
-      })
+        await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(0);
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(0);
+      });
 
       it('should return NotFoundRejection when the event does not exist', async () => {
         const res = await request
           .post(GRAPHQL_PATH)
           .send({ query: mutation, variables: { id: uuid() } })
-          .expect(200)
+          .expect(200);
 
-        expect(res.body.data.deleteEvent.__typename).toBe('NotFoundRejection')
-      })
+        expect(res.body.data.deleteEvent.__typename).toBe('NotFoundRejection');
+      });
 
       it('should return UnauthorizedRejection when the user is not a maintainer', async () => {
         const otherUserId = await fixtures.insertUser({
           email: 'other@test.com',
           firstname: 'Other',
           lastname: 'User',
-        })
+        });
 
         const { eventId } = await fixtures.insertEventWithMaintainer({
           title: 'Other Event',
           maintainerId: otherUserId,
-        })
+        });
 
         const res = await request
           .post(GRAPHQL_PATH)
           .send({ query: mutation, variables: { id: eventId } })
-          .expect(200)
+          .expect(200);
 
-        expect(res.body.data.deleteEvent.__typename).toBe('UnauthorizedRejection')
+        expect(res.body.data.deleteEvent.__typename).toBe('UnauthorizedRejection');
 
-        await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(1)
-      })
-    })
-  })
+        await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(1);
+      });
+    });
+  });
 
   describe('Mutation addEventAttendee', () => {
     const mutation = /* GraphQL */ `
@@ -374,32 +374,32 @@ describe('EventMutationResolver (GraphQL)', () => {
           }
         }
       }
-    `
+    `;
 
     it('should not succeed when not authenticated', async () => {
-      const request = await getRequest()
+      const request = await getRequest();
       const res = await request
         .post(GRAPHQL_PATH)
         .send({ query: mutation, variables: { eventId: uuid(), input: { email: 'a@test.com' } } })
-        .expect(200)
+        .expect(200);
 
-      expect(res.body.data?.addEventAttendee?.__typename).not.toBe('EventAttendee')
-    })
+      expect(res.body.data?.addEventAttendee?.__typename).not.toBe('EventAttendee');
+    });
 
     describe('when user is authenticated', () => {
-      let request: RequestApp
-      let currentUserId: string
+      let request: RequestApp;
+      let currentUserId: string;
 
       beforeEach(async () => {
-        request = await getRequest({ signedAs: 'BASE_USER' })
-        currentUserId = await fixtures.getSignedUserId('BASE_USER')
-      })
+        request = await getRequest({ signedAs: 'BASE_USER' });
+        currentUserId = await fixtures.getSignedUserId('BASE_USER');
+      });
 
       it('should add a pending attendee to an event the user maintains', async () => {
         const { eventId } = await fixtures.insertEventWithMaintainer({
           title: 'Event',
           maintainerId: currentUserId,
-        })
+        });
 
         const res = await request
           .post(GRAPHQL_PATH)
@@ -407,70 +407,70 @@ describe('EventMutationResolver (GraphQL)', () => {
             query: mutation,
             variables: { eventId, input: { email: 'invited@test.com', role: 'PARTICIPANT' } },
           })
-          .expect(200)
+          .expect(200);
 
         expect(res.body.data.addEventAttendee).toMatchObject({
           __typename: 'EventAttendee',
           id: expect.toBeString(),
           pendingEmail: 'invited@test.com',
           role: 'PARTICIPANT',
-        })
+        });
 
         // 1 maintainer + 1 new attendee
-        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(2)
-      })
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(2);
+      });
 
       it('should return ValidationRejection when the email is invalid', async () => {
         const { eventId } = await fixtures.insertEventWithMaintainer({
           title: 'Event',
           maintainerId: currentUserId,
-        })
+        });
 
         const res = await request
           .post(GRAPHQL_PATH)
           .send({ query: mutation, variables: { eventId, input: { email: 'not-an-email' } } })
-          .expect(200)
+          .expect(200);
 
-        expect(res.body.data.addEventAttendee.__typename).toBe('ValidationRejection')
+        expect(res.body.data.addEventAttendee.__typename).toBe('ValidationRejection');
         expect(res.body.data.addEventAttendee.errors).toEqual(
           expect.arrayContaining([expect.objectContaining({ field: 'email' })]),
-        )
+        );
 
-        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(1)
-      })
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(1);
+      });
 
       it('should return NotFoundRejection when the event does not exist', async () => {
         const res = await request
           .post(GRAPHQL_PATH)
           .send({ query: mutation, variables: { eventId: uuid(), input: { email: 'invited@test.com' } } })
-          .expect(200)
+          .expect(200);
 
-        expect(res.body.data.addEventAttendee.__typename).toBe('NotFoundRejection')
-      })
+        expect(res.body.data.addEventAttendee.__typename).toBe('NotFoundRejection');
+      });
 
       it('should return UnauthorizedRejection when the user is not a maintainer', async () => {
         const otherUserId = await fixtures.insertUser({
           email: 'other@test.com',
           firstname: 'Other',
           lastname: 'User',
-        })
+        });
 
         const { eventId } = await fixtures.insertEventWithMaintainer({
           title: 'Other Event',
           maintainerId: otherUserId,
-        })
+        });
 
         const res = await request
           .post(GRAPHQL_PATH)
           .send({ query: mutation, variables: { eventId, input: { email: 'invited@test.com' } } })
-          .expect(200)
+          .expect(200);
 
-        expect(res.body.data.addEventAttendee.__typename).toBe('UnauthorizedRejection')
+        expect(res.body.data.addEventAttendee.__typename).toBe('UnauthorizedRejection');
 
-        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(1)
-      })
-    })
-  })
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(1);
+      });
+    });
+  });
 
   describe('Mutation removeEventAttendee', () => {
     const mutation = /* GraphQL */ `
@@ -485,94 +485,94 @@ describe('EventMutationResolver (GraphQL)', () => {
           }
         }
       }
-    `
+    `;
 
     it('should not succeed when not authenticated', async () => {
-      const request = await getRequest()
+      const request = await getRequest();
       const res = await request
         .post(GRAPHQL_PATH)
         .send({ query: mutation, variables: { eventId: uuid(), attendeeId: uuid() } })
-        .expect(200)
+        .expect(200);
 
-      expect(res.body.data?.removeEventAttendee?.__typename).not.toBe('VoidOutput')
-    })
+      expect(res.body.data?.removeEventAttendee?.__typename).not.toBe('VoidOutput');
+    });
 
     describe('when user is authenticated', () => {
-      let request: RequestApp
-      let currentUserId: string
+      let request: RequestApp;
+      let currentUserId: string;
 
       beforeEach(async () => {
-        request = await getRequest({ signedAs: 'BASE_USER' })
-        currentUserId = await fixtures.getSignedUserId('BASE_USER')
-      })
+        request = await getRequest({ signedAs: 'BASE_USER' });
+        currentUserId = await fixtures.getSignedUserId('BASE_USER');
+      });
 
       it('should remove a pending attendee from an event the user maintains', async () => {
         const { eventId } = await fixtures.insertEventWithMaintainer({
           title: 'Event',
           maintainerId: currentUserId,
-        })
+        });
 
         const attendeeId = await fixtures.insertPendingAttendee({
           eventId,
           tempUserEmail: 'pending@test.com',
-        })
+        });
 
         const res = await request
           .post(GRAPHQL_PATH)
           .send({ query: mutation, variables: { eventId, attendeeId } })
-          .expect(200)
+          .expect(200);
 
-        expect(res.body.data.removeEventAttendee).toEqual({ __typename: 'VoidOutput', success: true })
+        expect(res.body.data.removeEventAttendee).toEqual({ __typename: 'VoidOutput', success: true });
 
         // Only the maintainer attendee remains
         await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
           user_id: currentUserId,
           role: 'creator',
-        })
-      })
+        });
+      });
 
       it('should return NotFoundRejection when the attendee does not exist on the event', async () => {
         const { eventId } = await fixtures.insertEventWithMaintainer({
           title: 'Event',
           maintainerId: currentUserId,
-        })
+        });
 
         const res = await request
           .post(GRAPHQL_PATH)
           .send({ query: mutation, variables: { eventId, attendeeId: uuid() } })
-          .expect(200)
+          .expect(200);
 
-        expect(res.body.data.removeEventAttendee.__typename).toBe('NotFoundRejection')
-      })
+        expect(res.body.data.removeEventAttendee.__typename).toBe('NotFoundRejection');
+      });
 
       it('should return UnauthorizedRejection when the user is not a maintainer', async () => {
         const otherUserId = await fixtures.insertUser({
           email: 'other@test.com',
           firstname: 'Other',
           lastname: 'User',
-        })
+        });
 
         const { eventId } = await fixtures.insertEventWithMaintainer({
           title: 'Other Event',
           maintainerId: otherUserId,
-        })
+        });
 
         const attendeeId = await fixtures.insertPendingAttendee({
           eventId,
           tempUserEmail: 'pending@test.com',
-        })
+        });
 
         const res = await request
           .post(GRAPHQL_PATH)
           .send({ query: mutation, variables: { eventId, attendeeId } })
-          .expect(200)
+          .expect(200);
 
-        expect(res.body.data.removeEventAttendee.__typename).toBe('UnauthorizedRejection')
+        expect(res.body.data.removeEventAttendee.__typename).toBe('UnauthorizedRejection');
 
-        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(2)
-      })
-    })
-  })
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(2);
+      });
+    });
+  });
 
   describe('Mutation updateEventAttendeeRole', () => {
     const mutation = /* GraphQL */ `
@@ -587,74 +587,74 @@ describe('EventMutationResolver (GraphQL)', () => {
           }
         }
       }
-    `
+    `;
 
     it('should not succeed when not authenticated', async () => {
-      const request = await getRequest()
+      const request = await getRequest();
       const res = await request
         .post(GRAPHQL_PATH)
         .send({ query: mutation, variables: { eventId: uuid(), attendeeId: uuid(), role: 'ADMIN' } })
-        .expect(200)
+        .expect(200);
 
-      expect(res.body.data?.updateEventAttendeeRole?.__typename).not.toBe('VoidOutput')
-    })
+      expect(res.body.data?.updateEventAttendeeRole?.__typename).not.toBe('VoidOutput');
+    });
 
     describe('when user is authenticated', () => {
-      let request: RequestApp
-      let currentUserId: string
+      let request: RequestApp;
+      let currentUserId: string;
 
       beforeEach(async () => {
-        request = await getRequest({ signedAs: 'BASE_USER' })
-        currentUserId = await fixtures.getSignedUserId('BASE_USER')
-      })
+        request = await getRequest({ signedAs: 'BASE_USER' });
+        currentUserId = await fixtures.getSignedUserId('BASE_USER');
+      });
 
       it('should update an attendee role when the user is creator', async () => {
         const { eventId } = await fixtures.insertEventWithMaintainer({
           title: 'Event',
           maintainerId: currentUserId,
-        })
+        });
         const attendeeId = await fixtures.insertPendingAttendee({
           eventId,
           tempUserEmail: 'pending@test.com',
-        })
+        });
 
         const res = await request
           .post(GRAPHQL_PATH)
           .send({ query: mutation, variables: { eventId, attendeeId, role: 'ADMIN' } })
-          .expect(200)
+          .expect(200);
 
-        expect(res.body.data.updateEventAttendeeRole).toEqual({ __typename: 'VoidOutput', success: true })
+        expect(res.body.data.updateEventAttendeeRole).toEqual({ __typename: 'VoidOutput', success: true });
 
         await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(2).row(1).toMatchObject({
           id: attendeeId,
           role: 'admin',
-        })
-      })
+        });
+      });
 
       it('should return UnauthorizedRejection when the user is not a creator or admin', async () => {
         const otherUserId = await fixtures.insertUser({
           email: 'other@test.com',
           firstname: 'Other',
           lastname: 'User',
-        })
+        });
 
         const { eventId } = await fixtures.insertEventWithMaintainer({
           title: 'Other Event',
           maintainerId: otherUserId,
-        })
+        });
 
         const attendeeId = await fixtures.insertPendingAttendee({
           eventId,
           tempUserEmail: 'pending@test.com',
-        })
+        });
 
         const res = await request
           .post(GRAPHQL_PATH)
           .send({ query: mutation, variables: { eventId, attendeeId, role: 'ADMIN' } })
-          .expect(200)
+          .expect(200);
 
-        expect(res.body.data.updateEventAttendeeRole.__typename).toBe('UnauthorizedRejection')
-      })
-    })
-  })
-})
+        expect(res.body.data.updateEventAttendeeRole.__typename).toBe('UnauthorizedRejection');
+      });
+    });
+  });
+});

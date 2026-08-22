@@ -1,21 +1,21 @@
-import type { EventId } from '@wishlist/common'
-import type { EventWishlist } from './event.types'
+import type { EventId } from '@wishlist/common';
+import type { EventWishlist } from './event.types';
 
-import AddIcon from '@mui/icons-material/Add'
-import { Box, Grid } from '@mui/material'
-import { useNavigate } from '@tanstack/react-router'
+import AddIcon from '@mui/icons-material/Add';
+import { Box, Grid } from '@mui/material';
+import { useNavigate } from '@tanstack/react-router';
 
-import { FabAutoGrow } from '../common/FabAutoGrow'
-import { EmptyListsState } from '../wishlist/EmptyListsState'
-import { WishlistCardWithOwner } from '../wishlist/WishlistCardWithOwner'
-import { WishlistCardWithOwnerSkeleton } from '../wishlist/WishlistCardWithOwnerSkeleton'
+import { FabAutoGrow } from '../common/FabAutoGrow';
+import { EmptyListsState } from '../wishlist/EmptyListsState';
+import { WishlistCardWithOwner } from '../wishlist/WishlistCardWithOwner';
+import { WishlistCardWithOwnerSkeleton } from '../wishlist/WishlistCardWithOwnerSkeleton';
 
-const SKELETON_KEYS = ['s1', 's2', 's3', 's4', 's5', 's6'] as const
+const SKELETON_KEYS = ['s1', 's2', 's3', 's4', 's5', 's6'] as const;
 
-export type EventWishlistsProps = { loading: true } | { loading?: false; eventId: EventId; wishlists: EventWishlist[] }
+export type EventWishlistsProps = { loading: true } | { loading?: false; eventId: EventId; wishlists: EventWishlist[] };
 
 export const EventWishlists = (props: EventWishlistsProps) => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   if (props.loading) {
     return (
@@ -28,11 +28,11 @@ export const EventWishlists = (props: EventWishlistsProps) => {
           ))}
         </Grid>
       </Box>
-    )
+    );
   }
 
-  const { eventId, wishlists } = props
-  const handleAddList = () => navigate({ to: '/wishlists/new', search: { fromEvent: eventId } })
+  const { eventId, wishlists } = props;
+  const handleAddList = () => navigate({ to: '/wishlists/new', search: { fromEvent: eventId } });
 
   return (
     <Box className="wishlists">
@@ -61,5 +61,5 @@ export const EventWishlists = (props: EventWishlistsProps) => {
         />
       )}
     </Box>
-  )
-}
+  );
+};

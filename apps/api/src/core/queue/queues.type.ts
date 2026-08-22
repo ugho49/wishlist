@@ -1,6 +1,6 @@
-import { type BackoffOptions, type KeepJobs } from 'bullmq'
+import { type BackoffOptions, type KeepJobs } from 'bullmq';
 
-export const QUEUES = Symbol('QUEUES')
+export const QUEUES = Symbol('QUEUES');
 
 export enum QueueName {
   MAILS = 'mails',
@@ -8,20 +8,20 @@ export enum QueueName {
 }
 
 export interface BullMQJobOptions {
-  delay?: number
-  priority?: number
-  backoff?: BackoffOptions
-  removeOnComplete?: boolean | KeepJobs
-  removeOnFail?: boolean | KeepJobs
-  attempts?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10
+  delay?: number;
+  priority?: number;
+  backoff?: BackoffOptions;
+  removeOnComplete?: boolean | KeepJobs;
+  removeOnFail?: boolean | KeepJobs;
+  attempts?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
   repeat?: {
-    pattern?: string
-    key?: string
-  }
+    pattern?: string;
+    key?: string;
+  };
   deduplication?: {
-    id: string
-    ttl?: number
-    extend?: boolean
-    replace?: boolean
-  }
+    id: string;
+    ttl?: number;
+    extend?: boolean;
+    replace?: boolean;
+  };
 }

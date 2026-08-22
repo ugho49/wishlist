@@ -1,23 +1,23 @@
-import type { AttendeeId, EventId, SecretSantaUserId } from '@wishlist/common'
+import type { AttendeeId, EventId, SecretSantaUserId } from '@wishlist/common';
 
-import { zodResolver } from '@hookform/resolvers/zod'
-import AccessTimeIcon from '@mui/icons-material/AccessTime'
-import DeleteIcon from '@mui/icons-material/Delete'
-import SaveIcon from '@mui/icons-material/Save'
-import WorkspacePremiumOutlinedIcon from '@mui/icons-material/WorkspacePremiumOutlined'
-import { Alert, Box, Button, List, ListItem, ListItemIcon, ListItemText, Stack, TextField } from '@mui/material'
-import { styled, useTheme } from '@mui/material/styles'
-import useMediaQuery from '@mui/material/useMediaQuery'
-import { useQueryClient } from '@tanstack/react-query'
-import { ConfirmButton } from '@wishlist/front-components/common/ConfirmButton'
-import { WishlistDatePicker } from '@wishlist/front-components/common/DatePicker'
-import { EmojiSelector } from '@wishlist/front-components/common/EmojiSelector'
-import { TextareaMarkdown } from '@wishlist/front-components/common/TextareaMarkdown'
-import { DateTime } from 'luxon'
-import { useEffect, useMemo } from 'react'
-import { Controller, useForm } from 'react-hook-form'
-import { match } from 'ts-pattern'
-import z from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import DeleteIcon from '@mui/icons-material/Delete';
+import SaveIcon from '@mui/icons-material/Save';
+import WorkspacePremiumOutlinedIcon from '@mui/icons-material/WorkspacePremiumOutlined';
+import { Alert, Box, Button, List, ListItem, ListItemIcon, ListItemText, Stack, TextField } from '@mui/material';
+import { styled, useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { useQueryClient } from '@tanstack/react-query';
+import { ConfirmButton } from '@wishlist/front-components/common/ConfirmButton';
+import { WishlistDatePicker } from '@wishlist/front-components/common/DatePicker';
+import { EmojiSelector } from '@wishlist/front-components/common/EmojiSelector';
+import { TextareaMarkdown } from '@wishlist/front-components/common/TextareaMarkdown';
+import { DateTime } from 'luxon';
+import { useEffect, useMemo } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { match } from 'ts-pattern';
+import z from 'zod';
 
 import {
   AttendeeRole,
@@ -33,20 +33,20 @@ import {
   useDeleteSecretSantaUserMutation,
   useStartSecretSantaMutation,
   useUpdateSecretSantaMutation,
-} from '../../../gql'
-import { useToast } from '../../../hooks'
-import { useSecretSanta } from '../../../hooks/domain/useSecretSanta'
-import { Card } from '../../common/Card'
-import { Loader } from '../../common/Loader'
-import { Subtitle } from '../../common/Subtitle'
-import { Title } from '../../common/Title'
-import { AdminSecretSanta } from '../../secret-santa/admin/AdminSecretSanta'
-import { AdminListWishlistsForEvent } from '../../wishlist/admin/AdminListWishlistsForEvent'
-import { AdminListAttendees } from './AdminListAttendees'
+} from '../../../gql';
+import { useToast } from '../../../hooks';
+import { useSecretSanta } from '../../../hooks/domain/useSecretSanta';
+import { Card } from '../../common/Card';
+import { Loader } from '../../common/Loader';
+import { Subtitle } from '../../common/Subtitle';
+import { Title } from '../../common/Title';
+import { AdminSecretSanta } from '../../secret-santa/admin/AdminSecretSanta';
+import { AdminListWishlistsForEvent } from '../../wishlist/admin/AdminListWishlistsForEvent';
+import { AdminListAttendees } from './AdminListAttendees';
 
 const CardStack = styled(Stack)(() => ({
   gap: 32,
-}))
+}));
 
 const schema = z.object({
   icon: z.string().optional(),
@@ -56,19 +56,19 @@ const schema = z.object({
     .custom<DateTime>()
     .nullable()
     .refine(date => date !== null, "La date de l'événement est requise"),
-})
+});
 
-type FormFields = z.infer<typeof schema>
+type FormFields = z.infer<typeof schema>;
 
 interface AdminEventPageProps {
-  eventId: EventId
+  eventId: EventId;
 }
 
 export const AdminEventPage = ({ eventId }: AdminEventPageProps) => {
-  const queryClient = useQueryClient()
-  const { addToast } = useToast()
-  const theme = useTheme()
-  const smallScreen = useMediaQuery(theme.breakpoints.down('md'))
+  const queryClient = useQueryClient();
+  const { addToast } = useToast();
+  const theme = useTheme();
+  const smallScreen = useMediaQuery(theme.breakpoints.down('md'));
 
   const {
     register,
@@ -78,172 +78,172 @@ export const AdminEventPage = ({ eventId }: AdminEventPageProps) => {
     setValue,
   } = useForm<FormFields>({
     resolver: zodResolver(schema),
-  })
+  });
 
-  const { data, isLoading: loadingEvent } = useAdminEventGetEventQuery({ id: eventId }, { select: d => d.adminEvent })
-  const event = data?.__typename === 'Event' ? data : undefined
-  const queryRejection = data && isRejection(data) ? data : undefined
+  const { data, isLoading: loadingEvent } = useAdminEventGetEventQuery({ id: eventId }, { select: d => d.adminEvent });
+  const event = data?.__typename === 'Event' ? data : undefined;
+  const queryRejection = data && isRejection(data) ? data : undefined;
 
-  const { secretSanta, loading: loadingSecretSanta } = useSecretSanta(eventId)
+  const { secretSanta, loading: loadingSecretSanta } = useSecretSanta(eventId);
 
-  const invalidateEvent = () => queryClient.invalidateQueries({ queryKey: ['AdminEventGetEvent', { id: eventId }] })
+  const invalidateEvent = () => queryClient.invalidateQueries({ queryKey: ['AdminEventGetEvent', { id: eventId }] });
   const invalidateSecretSanta = () =>
-    queryClient.invalidateQueries({ queryKey: ['GetSecretSantaForEvent', { eventId }] })
+    queryClient.invalidateQueries({ queryKey: ['GetSecretSantaForEvent', { eventId }] });
 
   const { mutateAsync: deleteAttendeeMutation, isPending: loadingDeleteAttendee } = useAdminDeleteEventAttendeeMutation(
     {
       onError: error => {
-        addToast({ message: 'Impossible de supprimer ce participant', variant: 'error' })
-        console.error(error)
+        addToast({ message: 'Impossible de supprimer ce participant', variant: 'error' });
+        console.error(error);
       },
     },
-  )
+  );
 
   const deleteAttendee = async (attendeeId: AttendeeId) => {
-    const res = await deleteAttendeeMutation({ eventId, attendeeId })
+    const res = await deleteAttendeeMutation({ eventId, attendeeId });
     match(res.adminDeleteEventAttendee)
       .with({ __typename: 'VoidOutput' }, () => {
-        addToast({ message: 'Participant supprimé avec succès', variant: 'success' })
-        void invalidateEvent()
-        void invalidateSecretSanta()
+        addToast({ message: 'Participant supprimé avec succès', variant: 'success' });
+        void invalidateEvent();
+        void invalidateSecretSanta();
       })
       .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
-      .exhaustive()
-  }
+      .exhaustive();
+  };
 
   const { mutateAsync: deleteSecretSantaMutation, isPending: loadingDeleteSecretSanta } = useDeleteSecretSantaMutation({
     onError: () => addToast({ message: 'Impossible de supprimer le secret santa', variant: 'error' }),
-  })
+  });
 
   const deleteSecretSanta = async () => {
-    const res = await deleteSecretSantaMutation({ id: secretSanta!.id })
+    const res = await deleteSecretSantaMutation({ id: secretSanta!.id });
     match(res.deleteSecretSanta)
       .with({ __typename: 'VoidOutput' }, () => {
-        addToast({ message: 'Secret santa supprimé avec succès', variant: 'success' })
-        void invalidateSecretSanta()
+        addToast({ message: 'Secret santa supprimé avec succès', variant: 'success' });
+        void invalidateSecretSanta();
       })
       .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
-      .exhaustive()
-  }
+      .exhaustive();
+  };
 
   const { mutateAsync: startSecretSantaMutation, isPending: loadingStartSecretSanta } = useStartSecretSantaMutation({
     onError: () => addToast({ message: 'Impossible de lancer le secret santa', variant: 'error' }),
-  })
+  });
 
   const startSecretSanta = async () => {
-    const res = await startSecretSantaMutation({ id: secretSanta!.id })
+    const res = await startSecretSantaMutation({ id: secretSanta!.id });
     match(res.startSecretSanta)
       .with({ __typename: 'VoidOutput' }, () => {
-        addToast({ message: 'Secret santa lancé avec succès', variant: 'success' })
-        void invalidateSecretSanta()
+        addToast({ message: 'Secret santa lancé avec succès', variant: 'success' });
+        void invalidateSecretSanta();
       })
       .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
-      .exhaustive()
-  }
+      .exhaustive();
+  };
 
   const { mutateAsync: cancelSecretSantaMutation, isPending: loadingCancelSecretSanta } = useCancelSecretSantaMutation({
     onError: () => addToast({ message: "Impossible d'annuler le secret santa", variant: 'error' }),
-  })
+  });
 
   const cancelSecretSanta = async () => {
-    const res = await cancelSecretSantaMutation({ id: secretSanta!.id })
+    const res = await cancelSecretSantaMutation({ id: secretSanta!.id });
     match(res.cancelSecretSanta)
       .with({ __typename: 'VoidOutput' }, () => {
-        addToast({ message: 'Secret santa annulé avec succès', variant: 'success' })
-        void invalidateSecretSanta()
+        addToast({ message: 'Secret santa annulé avec succès', variant: 'success' });
+        void invalidateSecretSanta();
       })
       .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
-      .exhaustive()
-  }
+      .exhaustive();
+  };
 
   const { mutateAsync: removeSecretSantaUserMutation, isPending: loadingRemoveSecretSantaUser } =
     useDeleteSecretSantaUserMutation({
       onError: () => addToast({ message: "Impossible de supprimer l'utilisateur du secret santa", variant: 'error' }),
-    })
+    });
 
   const removeSecretSantaUser = async (secretSantaUserId: SecretSantaUserId) => {
-    const res = await removeSecretSantaUserMutation({ id: secretSanta!.id, secretSantaUserId })
+    const res = await removeSecretSantaUserMutation({ id: secretSanta!.id, secretSantaUserId });
     match(res.deleteSecretSantaUser)
       .with({ __typename: 'VoidOutput' }, () => {
-        addToast({ message: 'Utilisateur supprimé du secret santa avec succès', variant: 'success' })
-        void invalidateSecretSanta()
+        addToast({ message: 'Utilisateur supprimé du secret santa avec succès', variant: 'success' });
+        void invalidateSecretSanta();
       })
       .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
-      .exhaustive()
-  }
+      .exhaustive();
+  };
 
   const { mutateAsync: updateSecretSantaMutation, isPending: loadingUpdateSecretSanta } = useUpdateSecretSantaMutation({
     onError: () => addToast({ message: 'Impossible de modifier le secret santa', variant: 'error' }),
-  })
+  });
 
   const updateSecretSanta = async (input: { budget?: number; description?: string }) => {
-    const res = await updateSecretSantaMutation({ id: secretSanta!.id, input })
+    const res = await updateSecretSantaMutation({ id: secretSanta!.id, input });
     match(res.updateSecretSanta)
       .with({ __typename: 'VoidOutput' }, () => {
-        addToast({ message: 'Secret santa modifié avec succès', variant: 'success' })
-        void invalidateSecretSanta()
+        addToast({ message: 'Secret santa modifié avec succès', variant: 'success' });
+        void invalidateSecretSanta();
       })
       .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
-      .exhaustive()
-  }
+      .exhaustive();
+  };
 
   const { mutateAsync: updateEventMutation, isPending: loadingUpdateEvent } = useAdminUpdateEventMutation({
     onError: () => addToast({ message: "Impossible de modifier l'évènement", variant: 'error' }),
-  })
+  });
 
   const { mutateAsync: deleteEventMutation, isPending: loadingDeleteEvent } = useAdminDeleteEventMutation({
     onError: error => {
-      addToast({ message: "Impossible de supprimer l'évènement", variant: 'error' })
-      console.error(error)
+      addToast({ message: "Impossible de supprimer l'évènement", variant: 'error' });
+      console.error(error);
     },
-  })
+  });
 
   const deleteEvent = async () => {
-    const res = await deleteEventMutation({ id: eventId })
+    const res = await deleteEventMutation({ id: eventId });
     match(res.adminDeleteEvent)
       .with({ __typename: 'VoidOutput' }, () => {
-        addToast({ message: 'Évènement supprimé avec succès', variant: 'success' })
-        void invalidateEvent()
+        addToast({ message: 'Évènement supprimé avec succès', variant: 'success' });
+        void invalidateEvent();
       })
       .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
-      .exhaustive()
-  }
+      .exhaustive();
+  };
 
   const creatorName = useMemo(() => {
-    if (!event) return ''
-    const user = event.attendees.find(attendee => attendee.role === AttendeeRole.Creator)
-    if (!user) return ''
-    return `${user.user?.firstName} ${user.user?.lastName}`
-  }, [event])
+    if (!event) return '';
+    const user = event.attendees.find(attendee => attendee.role === AttendeeRole.Creator);
+    if (!user) return '';
+    return `${user.user?.firstName} ${user.user?.lastName}`;
+  }, [event]);
 
   useEffect(() => {
     if (event) {
-      setValue('title', event.title)
-      setValue('description', event.description ?? undefined)
-      setValue('eventDate', DateTime.fromISO(event.eventDate))
-      setValue('icon', event.icon ?? undefined)
+      setValue('title', event.title);
+      setValue('description', event.description ?? undefined);
+      setValue('eventDate', DateTime.fromISO(event.eventDate));
+      setValue('icon', event.icon ?? undefined);
     }
-  }, [event, setValue])
+  }, [event, setValue]);
 
-  const onSubmit = async (data: FormFields) => {
-    const isoDate = data.eventDate!.toISODate()!
+  const onSubmit = async (formValues: FormFields) => {
+    const isoDate = formValues.eventDate!.toISODate()!;
     const res = await updateEventMutation({
       id: eventId,
       input: {
-        title: data.title,
-        description: data.description === '' ? undefined : data.description,
-        icon: data.icon,
+        title: formValues.title,
+        description: formValues.description === '' ? undefined : formValues.description,
+        icon: formValues.icon,
         eventDate: isoDate,
       },
-    })
+    });
     match(res.adminUpdateEvent)
       .with({ __typename: 'VoidOutput' }, () => {
-        addToast({ message: 'Évènement modifié avec succès', variant: 'success' })
-        void invalidateEvent()
+        addToast({ message: 'Évènement modifié avec succès', variant: 'success' });
+        void invalidateEvent();
       })
       .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
-      .exhaustive()
-  }
+      .exhaustive();
+  };
 
   const loadingEdit =
     loadingDeleteSecretSanta ||
@@ -253,7 +253,7 @@ export const AdminEventPage = ({ eventId }: AdminEventPageProps) => {
     loadingUpdateSecretSanta ||
     loadingDeleteAttendee ||
     loadingUpdateEvent ||
-    loadingDeleteEvent
+    loadingDeleteEvent;
 
   return (
     <Box>
@@ -426,5 +426,5 @@ export const AdminEventPage = ({ eventId }: AdminEventPageProps) => {
         </Card>
       </CardStack>
     </Box>
-  )
-}
+  );
+};

@@ -1,15 +1,15 @@
-import { Global, Module } from '@nestjs/common'
-import { ConfigModule, ConfigService } from '@nestjs/config'
-import { ScheduleModule } from '@nestjs/schedule'
+import { Global, Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 
-import { path } from '../helpers'
-import { BucketModule } from './bucket/bucket.module'
-import coreConfig from './core.config'
-import { DatabaseModule } from './database/database.module'
-import { FrontendRoutesModule } from './frontend-routes/frontend-routes.module'
-import { HealthModule } from './health/health.module'
-import { MailModule } from './mail/mail.module'
-import { QueueModule } from './queue/queue.module'
+import { path } from '../helpers';
+import { BucketModule } from './bucket/bucket.module';
+import coreConfig from './core.config';
+import { DatabaseModule } from './database/database.module';
+import { FrontendRoutesModule } from './frontend-routes/frontend-routes.module';
+import { HealthModule } from './health/health.module';
+import { MailModule } from './mail/mail.module';
+import { QueueModule } from './queue/queue.module';
 
 const bucketModule = BucketModule.registerAsync({
   inject: [ConfigService],
@@ -17,28 +17,26 @@ const bucketModule = BucketModule.registerAsync({
     const firebaseServiceAccountKeyPath = config.get<string>(
       'FIREBASE_SERVICE_ACCOUNT_KEY_PATH',
       path('firebase/firebase-config.json'),
-    )
+    );
 
     return {
       firebaseServiceAccountKeyPath,
       bucketName: config.get<string>('FIREBASE_BUCKET_NAME', ''),
       isMock: config.get<string>('FIREBASE_BUCKET_MOCK', 'false') === 'true',
-    }
+    };
   },
-})
+});
 
 const mailModule = MailModule.registerAsync({
   inject: [ConfigService],
-  useFactory: (config: ConfigService) => {
-    return {
-      from: 'Wishlist App <contact@wishlistapp.fr>',
-      host: config.get<string>('MAIL_HOST', 'localhost'),
-      port: parseInt(config.get<string>('MAIL_PORT', '1025'), 10),
-      username: config.get<string>('MAIL_USERNAME', ''),
-      password: config.get<string>('MAIL_PASSWORD', ''),
-    }
-  },
-})
+  useFactory: (config: ConfigService) => ({
+    from: 'Wishlist App <contact@wishlistapp.fr>',
+    host: config.get<string>('MAIL_HOST', 'localhost'),
+    port: parseInt(config.get<string>('MAIL_PORT', '1025'), 10),
+    username: config.get<string>('MAIL_USERNAME', ''),
+    password: config.get<string>('MAIL_PASSWORD', ''),
+  }),
+});
 
 const databaseModule = DatabaseModule.registerAsync({
   inject: [ConfigService],
@@ -51,16 +49,14 @@ const databaseModule = DatabaseModule.registerAsync({
     runMigrations: config.get<string>('DB_RUN_MIGRATIONS', 'true') === 'true',
     verbose: config.get<string>('DB_VERBOSE', 'false') === 'true',
   }),
-})
+});
 
 const frontendRoutesModule = FrontendRoutesModule.registerAsync({
   inject: [ConfigService],
-  useFactory: (config: ConfigService) => {
-    return {
-      baseUrl: config.getOrThrow<string>('FRONTEND_BASE_URL'),
-    }
-  },
-})
+  useFactory: (config: ConfigService) => ({
+    baseUrl: config.getOrThrow<string>('FRONTEND_BASE_URL'),
+  }),
+});
 
 @Global()
 @Module({

@@ -1,140 +1,140 @@
-import { zodResolver } from '@hookform/resolvers/zod'
-import PersonAddIcon from '@mui/icons-material/PersonAdd'
-import { Alert, Button, Divider, Stack, styled, TextField, Typography } from '@mui/material'
-import { useNavigate } from '@tanstack/react-router'
-import { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { useDispatch } from 'react-redux'
-import { match } from 'ts-pattern'
-import { z } from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import { Alert, Button, Divider, Stack, styled, TextField, Typography } from '@mui/material';
+import { useNavigate } from '@tanstack/react-router';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { useDispatch } from 'react-redux';
+import { match } from 'ts-pattern';
+import { z } from 'zod';
 
-import { setTokens } from '../../core/store/features'
+import { setTokens } from '../../core/store/features/authSlice';
 import {
   rejectionMessage,
   rejectionPattern,
   useAuthLoginMutation,
   useAuthLoginWithGoogleMutation,
   useAuthRegisterUserMutation,
-} from '../../gql'
-import { useToast } from '../../hooks/useToast'
-import { zodRequiredString } from '../../utils/validation'
-import { RouterLink } from '../common/RouterLink'
-import { GoogleButton } from './GoogleButton'
+} from '../../gql';
+import { useToast } from '../../hooks/useToast';
+import { zodRequiredString } from '../../utils/validation';
+import { RouterLink } from '../common/RouterLink';
+import { GoogleButton } from './GoogleButton';
 
 const schema = z.object({
   email: z.email({ message: 'Email invalide' }).max(200, '200 caractères maximum'),
   password: z.string().min(8, '8 caractères minimum').max(50, '50 caractères maximum'),
   firstname: zodRequiredString().max(50, '50 caractères maximum'),
   lastname: zodRequiredString().max(50, '50 caractères maximum'),
-})
+});
 
-type FormFields = z.infer<typeof schema>
+type FormFields = z.infer<typeof schema>;
 
 const TitleStyled = styled(Typography)(({ theme }) => ({
   fontSize: '1.75rem',
   fontWeight: 600,
   color: theme.palette.text.primary,
   textAlign: 'center',
-}))
+}));
 
 const SocialButtonsStack = styled(Stack)(() => ({
   width: '100%',
   gap: 12,
-}))
+}));
 
 const ButtonStyled = styled(Button)(() => ({
   paddingTop: 12,
   paddingBottom: 12,
   fontSize: '1rem',
   fontWeight: 600,
-}))
+}));
 
 const DividerStyled = styled(Divider)(() => ({
   marginTop: 16,
   marginBottom: 16,
-}))
+}));
 
 export const RegisterPage = () => {
-  const dispatch = useDispatch()
-  const navigate = useNavigate()
-  const { addToast } = useToast()
-  const [socialLoading, setSocialLoading] = useState(false)
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { addToast } = useToast();
+  const [socialLoading, setSocialLoading] = useState(false);
 
   const {
     register,
     setError,
     handleSubmit,
     formState: { isSubmitting, errors: formErrors },
-  } = useForm<FormFields>({ resolver: zodResolver(schema) })
+  } = useForm<FormFields>({ resolver: zodResolver(schema) });
 
   const handleRegisterSuccess = (accessToken: string, from: 'social' | 'email') => {
-    addToast({ message: 'Bienvenue sur wishlist 👋', variant: 'default' })
+    addToast({ message: 'Bienvenue sur wishlist 👋', variant: 'default' });
 
     dispatch(
       setTokens({
         accessToken,
       }),
-    )
+    );
 
     // Redirect to welcome page for new users
-    void navigate({ to: '/welcome', search: { from } })
-  }
+    void navigate({ to: '/welcome', search: { from } });
+  };
 
   const onSocialError = () => {
-    setSocialLoading(false)
-    addToast({ message: "Une erreur s'est produite", variant: 'error' })
-  }
+    setSocialLoading(false);
+    addToast({ message: "Une erreur s'est produite", variant: 'error' });
+  };
 
   const { mutateAsync: registerUserMutation } = useAuthRegisterUserMutation({
     onError: () => setError('root', { message: "Une erreur s'est produite." }),
-  })
+  });
   const { mutateAsync: loginMutation } = useAuthLoginMutation({
     onError: () => setError('root', { message: "Une erreur s'est produite." }),
-  })
+  });
   const { mutateAsync: loginWithGoogleMutation } = useAuthLoginWithGoogleMutation({
     onError: () => onSocialError(),
-  })
+  });
 
   const registerUser = async (data: FormFields) => {
-    const registerRes = await registerUserMutation({ input: data })
+    const registerRes = await registerUserMutation({ input: data });
     const registered = match(registerRes.registerUser)
       .returnType<boolean>()
       .with({ __typename: 'User' }, () => true)
       .with({ __typename: 'ValidationRejection' }, () => {
-        setError('root', { message: 'Cet email est déjà utilisé' })
-        return false
+        setError('root', { message: 'Cet email est déjà utilisé' });
+        return false;
       })
       .with(rejectionPattern, rejection => {
-        setError('root', { message: rejectionMessage(rejection) })
-        return false
+        setError('root', { message: rejectionMessage(rejection) });
+        return false;
       })
-      .exhaustive()
+      .exhaustive();
 
-    if (!registered) return
+    if (!registered) return;
 
-    const loginRes = await loginMutation({ input: { email: data.email, password: data.password } })
+    const loginRes = await loginMutation({ input: { email: data.email, password: data.password } });
     match(loginRes.login)
       .with({ __typename: 'LoginOutput' }, output => handleRegisterSuccess(output.accessToken, 'email'))
       .with(rejectionPattern, () => {
         // Account created but auto-login failed: let the user sign in manually
-        addToast({ message: 'Votre compte a été créé, veuillez vous connecter', variant: 'info' })
-        void navigate({ to: '/login', search: { email: data.email } })
+        addToast({ message: 'Votre compte a été créé, veuillez vous connecter', variant: 'info' });
+        void navigate({ to: '/login', search: { email: data.email } });
       })
-      .exhaustive()
-  }
+      .exhaustive();
+  };
 
   const registerWithGoogle = async (code: string) => {
-    const res = await loginWithGoogleMutation({ input: { code, createUserIfNotExists: true } })
+    const res = await loginWithGoogleMutation({ input: { code, createUserIfNotExists: true } });
     match(res.loginWithGoogle)
       .with({ __typename: 'LoginWithGoogleOutput' }, output => handleRegisterSuccess(output.accessToken, 'social'))
       .with(rejectionPattern, rejection => {
-        setSocialLoading(false)
-        addToast({ message: rejectionMessage(rejection), variant: 'error' })
+        setSocialLoading(false);
+        addToast({ message: rejectionMessage(rejection), variant: 'error' });
       })
-      .exhaustive()
-  }
+      .exhaustive();
+  };
 
-  const onSubmit = (data: FormFields) => registerUser(data)
+  const onSubmit = (data: FormFields) => registerUser(data);
 
   return (
     <Stack spacing={4} alignItems="center">
@@ -230,5 +230,5 @@ export const RegisterPage = () => {
         <RouterLink to="/forgot-password">Mot de passe oublié ?</RouterLink>
       </Stack>
     </Stack>
-  )
-}
+  );
+};

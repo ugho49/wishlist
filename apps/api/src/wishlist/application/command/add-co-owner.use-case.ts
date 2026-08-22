@@ -1,20 +1,22 @@
-import { BadRequestException, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common'
-import { EventBus } from '@nestjs/cqrs'
-import { REPOSITORIES } from '@wishlist/api/repositories'
-import { type UserRepository } from '@wishlist/api/user'
-import { type ICurrentUser, type UserId, type WishlistId } from '@wishlist/common'
+import type { WishlistRepository } from '../../domain/wishlist.repository';
 
-import { UserAddedAsCoOwnerToWishlistEvent, type WishlistRepository } from '../../domain'
+import { BadRequestException, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { EventBus } from '@nestjs/cqrs';
+import { type ICurrentUser, type UserId, type WishlistId } from '@wishlist/common';
+
+import { REPOSITORIES } from '../../../repositories/repositories.constants';
+import { type UserRepository } from '../../../user/domain/repository/user.repository';
+import { UserAddedAsCoOwnerToWishlistEvent } from '../../domain/event/user-added-as-co-owner-to-wishlist.event';
 
 export type AddCoOwnerInput = {
-  currentUser: ICurrentUser
-  wishlistId: WishlistId
-  coOwnerId: UserId
-}
+  currentUser: ICurrentUser;
+  wishlistId: WishlistId;
+  coOwnerId: UserId;
+};
 
 @Injectable()
 export class AddCoOwnerUseCase {
-  private readonly logger = new Logger(AddCoOwnerUseCase.name)
+  private readonly logger = new Logger(AddCoOwnerUseCase.name);
 
   constructor(
     @Inject(REPOSITORIES.WISHLIST) private readonly wishlistRepository: WishlistRepository,
@@ -23,32 +25,32 @@ export class AddCoOwnerUseCase {
   ) {}
 
   async execute(command: AddCoOwnerInput): Promise<void> {
-    this.logger.log('Add co-owner request received', { command })
-    const wishlist = await this.wishlistRepository.findByIdOrFail(command.wishlistId)
+    this.logger.log('Add co-owner request received', { command });
+    const wishlist = await this.wishlistRepository.findByIdOrFail(command.wishlistId);
 
     // Only the owner can add a co-owner
     if (!wishlist.isOwner(command.currentUser.id)) {
-      throw new UnauthorizedException('Only the owner can add a co-owner')
+      throw new UnauthorizedException('Only the owner can add a co-owner');
     }
 
     // Cannot add co-owner to private lists
     if (wishlist.hideItems) {
-      throw new BadRequestException('Cannot add co-owner to private lists')
+      throw new BadRequestException('Cannot add co-owner to private lists');
     }
 
     // Cannot add the owner as co-owner
     if (wishlist.isOwner(command.coOwnerId)) {
-      throw new BadRequestException('Cannot add the owner as co-owner')
+      throw new BadRequestException('Cannot add the owner as co-owner');
     }
 
     // Fetch the co-owner user
-    const coOwner = await this.userRepository.findByIdOrFail(command.coOwnerId)
+    const coOwner = await this.userRepository.findByIdOrFail(command.coOwnerId);
 
-    const updatedWishlist = wishlist.addCoOwner(coOwner)
+    const updatedWishlist = wishlist.addCoOwner(coOwner);
 
-    this.logger.log('Saving wishlist...', { wishlistId: updatedWishlist.id, updatedFields: ['coOwner'] })
-    await this.wishlistRepository.save(updatedWishlist)
+    this.logger.log('Saving wishlist...', { wishlistId: updatedWishlist.id, updatedFields: ['coOwner'] });
+    await this.wishlistRepository.save(updatedWishlist);
 
-    await this.eventBus.publish(new UserAddedAsCoOwnerToWishlistEvent({ wishlist: updatedWishlist }))
+    await this.eventBus.publish(new UserAddedAsCoOwnerToWishlistEvent({ wishlist: updatedWishlist }));
   }
 }

@@ -1,33 +1,33 @@
-import type { UserSocialId } from '@wishlist/common'
-import type { RootState } from '../../core'
+import type { UserSocialId } from '@wishlist/common';
+import type { RootState } from '../../core/store';
 
-import CheckIcon from '@mui/icons-material/Check'
-import DeleteForeverIcon from '@mui/icons-material/DeleteForever'
-import { Button, Stack, styled } from '@mui/material'
-import { useGoogleLogin } from '@react-oauth/google'
-import { useQueryClient } from '@tanstack/react-query'
-import { UserSocialType } from '@wishlist/common'
-import { useToast } from '@wishlist/front-hooks'
-import { useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { match } from 'ts-pattern'
+import CheckIcon from '@mui/icons-material/Check';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import { Button, Stack, styled } from '@mui/material';
+import { useGoogleLogin } from '@react-oauth/google';
+import { useQueryClient } from '@tanstack/react-query';
+import { UserSocialType } from '@wishlist/common';
+import { useToast } from '@wishlist/front-hooks';
+import { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { match } from 'ts-pattern';
 
-import { addUserSocial, removeUserSocial } from '../../core/store/features'
+import { addUserSocial, removeUserSocial } from '../../core/store/features/userProfileSlice';
 import {
   rejectionMessage,
   rejectionPattern,
   useLinkCurrentUserWithGoogleMutation,
   useUnlinkCurrentUserSocialMutation,
-} from '../../gql'
-import { Card } from '../common/Card'
-import { ConfirmButton } from '../common/ConfirmButton'
-import { CustomIcon } from '../common/CustomIcon'
-import { Loader } from '../common/Loader'
-import { Subtitle } from '../common/Subtitle'
+} from '../../gql';
+import { Card } from '../common/Card';
+import { ConfirmButton } from '../common/ConfirmButton';
+import { CustomIcon } from '../common/CustomIcon';
+import { Loader } from '../common/Loader';
+import { Subtitle } from '../common/Subtitle';
 
 const SocialsContainer = styled(Stack)(() => ({
   gap: '20px',
-}))
+}));
 
 const SectionContainer = styled('div')(({ theme }) => ({
   display: 'flex',
@@ -44,13 +44,13 @@ const SectionContainer = styled('div')(({ theme }) => ({
     gap: theme.spacing(1.5),
     textAlign: 'center',
   },
-}))
+}));
 
 const TextContainer = styled('div')(() => ({
   display: 'flex',
   flexDirection: 'column',
   gap: '10px',
-}))
+}));
 
 const SocialTitle = styled('div')(({ theme }) => ({
   display: 'flex',
@@ -59,13 +59,13 @@ const SocialTitle = styled('div')(({ theme }) => ({
   fontSize: '1.1rem',
   color: theme.palette.primary.main,
   gap: theme.spacing(1),
-}))
+}));
 
 const SocialDescription = styled('div')(({ theme }) => ({
   fontSize: '0.9rem',
   color: theme.palette.text.secondary,
   lineHeight: 1.4,
-}))
+}));
 
 const ButtonWrapper = styled('div')(({ theme }) => ({
   display: 'flex',
@@ -73,92 +73,92 @@ const ButtonWrapper = styled('div')(({ theme }) => ({
   [theme.breakpoints.down('sm')]: {
     marginLeft: 0,
   },
-}))
+}));
 
 const ConnectedUserInfo = styled('div')(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   gap: theme.spacing(1.5),
-}))
+}));
 
 const UserAvatar = styled('img')(({ theme }) => ({
   width: 32,
   height: 32,
   borderRadius: '50%',
   border: `2px solid ${theme.palette.grey[300]}`,
-}))
+}));
 
 const UserDetails = styled('div')(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing(0.25),
-}))
+}));
 
 const UserName = styled('div')(({ theme }) => ({
   fontWeight: 500,
   fontSize: '0.9rem',
   color: theme.palette.text.primary,
-}))
+}));
 
 const UserEmail = styled('div')(({ theme }) => ({
   fontSize: '0.8rem',
   color: theme.palette.text.secondary,
-}))
+}));
 
-const mapState = (state: RootState) => state.userProfile
+const mapState = (state: RootState) => state.userProfile;
 
 export const UserTabSocial = () => {
-  const userState = useSelector(mapState)
-  const [loadingSocial, setLoadingSocial] = useState(false)
-  const dispatch = useDispatch()
-  const queryClient = useQueryClient()
-  const { addToast } = useToast()
-  const googleSocial = (userState.social || []).find(s => s.socialType === UserSocialType.GOOGLE)
+  const userState = useSelector(mapState);
+  const [loadingSocial, setLoadingSocial] = useState(false);
+  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
+  const { addToast } = useToast();
+  const googleSocial = (userState.social || []).find(s => s.socialType === UserSocialType.GOOGLE);
 
-  const invalidateCurrentUser = () => queryClient.invalidateQueries({ queryKey: ['UserProfileCurrentUser'] })
+  const invalidateCurrentUser = () => queryClient.invalidateQueries({ queryKey: ['UserProfileCurrentUser'] });
 
   const linkGoogle = useGoogleLogin({
     onSuccess: response => linkSocial(response.code),
     onError: () => {
-      setLoadingSocial(false)
-      addToast({ message: "Une erreur s'est produite", variant: 'error' })
+      setLoadingSocial(false);
+      addToast({ message: "Une erreur s'est produite", variant: 'error' });
     },
     flow: 'auth-code',
-  })
+  });
 
   const { mutateAsync: unlinkSocialMutation } = useUnlinkCurrentUserSocialMutation({
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
     onSettled: () => setLoadingSocial(false),
-  })
+  });
 
   const { mutateAsync: linkSocialMutation } = useLinkCurrentUserWithGoogleMutation({
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
     onSettled: () => setLoadingSocial(false),
-  })
+  });
 
   const unlinkSocial = async (socialId: UserSocialId) => {
-    const res = await unlinkSocialMutation({ socialId })
+    const res = await unlinkSocialMutation({ socialId });
     match(res.unlinkCurrentUserSocial)
       .with({ __typename: 'VoidOutput' }, () => {
-        dispatch(removeUserSocial(socialId))
-        void invalidateCurrentUser()
-        addToast({ message: 'Compte google dissocié avec succès', variant: 'success' })
+        dispatch(removeUserSocial(socialId));
+        void invalidateCurrentUser();
+        addToast({ message: 'Compte google dissocié avec succès', variant: 'success' });
       })
       .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
-      .exhaustive()
-  }
+      .exhaustive();
+  };
 
   const linkSocial = async (code: string) => {
-    const res = await linkSocialMutation({ input: { code } })
+    const res = await linkSocialMutation({ input: { code } });
     match(res.linkCurrentUserWithGoogle)
       .with({ __typename: 'UserSocial' }, social => {
-        dispatch(addUserSocial(social))
-        void invalidateCurrentUser()
-        addToast({ message: 'Compte Google lié avec succès', variant: 'success' })
+        dispatch(addUserSocial(social));
+        void invalidateCurrentUser();
+        addToast({ message: 'Compte Google lié avec succès', variant: 'success' });
       })
       .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
-      .exhaustive()
-  }
+      .exhaustive();
+  };
 
   return (
     <Card>
@@ -205,8 +205,8 @@ export const UserTabSocial = () => {
                   disabled={loadingSocial}
                   variant="contained"
                   onClick={() => {
-                    setLoadingSocial(true)
-                    linkGoogle()
+                    setLoadingSocial(true);
+                    linkGoogle();
                   }}
                 >
                   Lier votre compte Google
@@ -217,5 +217,5 @@ export const UserTabSocial = () => {
         </SocialsContainer>
       </Loader>
     </Card>
-  )
-}
+  );
+};

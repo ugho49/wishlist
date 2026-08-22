@@ -1,102 +1,102 @@
-import type { AxiosInstance } from 'axios'
+import type { AxiosInstance } from 'axios';
 
-import { sleep } from '@wishlist/common'
+import { sleep } from '@wishlist/common';
 
-import { expect } from 'bun:test'
+import { expect } from 'bun:test';
 
-type MailAssertion = () => Promise<unknown>
+type MailAssertion = () => Promise<unknown>;
 
-type MailContact = { address: string }
+type MailContact = { address: string };
 
 type MaildevEmailDto = {
-  subject: string
-  from: MailContact[]
-  to: MailContact[]
-}
+  subject: string;
+  from: MailContact[];
+  to: MailContact[];
+};
 
 type GetMailResult = {
-  mail: MaildevEmailDto | undefined
-  index: number
-}
+  mail: MaildevEmailDto | undefined;
+  index: number;
+};
 
 type AssertMail = {
-  subject: string
-  from: string | string[]
-  to: string | string[]
-}
+  subject: string;
+  from: string | string[];
+  to: string | string[];
+};
 
 export class MailsAssert {
-  private readonly assertions = new Set<MailAssertion>()
+  private readonly assertions = new Set<MailAssertion>();
 
-  private mailsCached: MaildevEmailDto[] = []
-  private dataFetched = false
+  private mailsCached: MaildevEmailDto[] = [];
+  private dataFetched = false;
 
   constructor(private readonly http: AxiosInstance) {}
 
   waitFor(ms: number): this {
-    this.assertions.add(() => sleep(ms))
+    this.assertions.add(() => sleep(ms));
 
-    return this
+    return this;
   }
 
   hasReceiveInAnyOrder(expected: AssertMail[]): this {
     this.assertions.add(async () => {
-      const mails = await this.getMails()
+      const mails = await this.getMails();
 
       for (const expectedMail of expected) {
-        const expectedTo = Array.isArray(expectedMail.to) ? expectedMail.to : [expectedMail.to]
-        const expectedFrom = Array.isArray(expectedMail.from) ? expectedMail.from : [expectedMail.from]
+        const expectedTo = Array.isArray(expectedMail.to) ? expectedMail.to : [expectedMail.to];
+        const expectedFrom = Array.isArray(expectedMail.from) ? expectedMail.from : [expectedMail.from];
 
         const mail = mails.find(
-          mail =>
-            expectedTo.every(to => mail.to.some(t => t.address === to)) &&
-            expectedFrom.every(from => mail.from.some(f => f.address === from)) &&
-            mail.subject === expectedMail.subject,
-        )
+          candidate =>
+            expectedTo.every(to => candidate.to.some(t => t.address === to)) &&
+            expectedFrom.every(from => candidate.from.some(f => f.address === from)) &&
+            candidate.subject === expectedMail.subject,
+        );
 
         expect(
           mail,
           `Mail with receiver(s) "${expectedTo.join(', ')}" and sender "${expectedFrom.join(', ')}" and subject "${expectedMail.subject}" not found`,
-        ).toBeDefined()
+        ).toBeDefined();
       }
-    })
+    });
 
-    return this
+    return this;
   }
 
   hasNumberOfEmails(expected: number): this {
     this.assertions.add(async () => {
-      const mails = await this.getMails()
+      const mails = await this.getMails();
 
-      expect(mails.length, 'Wrong number of length for mails').toEqual(expected)
-    })
+      expect(mails.length, 'Wrong number of length for mails').toEqual(expected);
+    });
 
-    return this
+    return this;
   }
 
   hasReceivers(expected: string[]): this {
     this.assertions.add(async () => {
-      const mails = await this.getMails()
+      const mails = await this.getMails();
 
       expect(
         mails.flatMap(mail => mail.to.map(to => to.address)),
         'Wrong receivers for mails',
-      ).toIncludeAllMembers(expected)
-    })
+      ).toIncludeAllMembers(expected);
+    });
 
-    return this
+    return this;
   }
 
   hasSubject(subject: string): this {
     this.assertions.add(async () => {
-      const mails = await this.getMails()
+      const mails = await this.getMails();
 
       for (const mail of mails) {
-        expect(mail.subject, `Wrong subject for mail to ${mail.to.map(to => to.address).join(', ')}`).toEqual(subject)
+        expect(mail.subject, `Wrong subject for mail to ${mail.to.map(to => to.address).join(', ')}`).toEqual(subject);
       }
-    })
+    });
 
-    return this
+    return this;
   }
 
   mail(index = 0): MailAssert {
@@ -107,7 +107,7 @@ export class MailsAssert {
           .then(mails => mails[index])
           .then(mail => ({ mail, index })),
       assertion => this.assertions.add(assertion),
-    )
+    );
   }
 
   /**
@@ -124,27 +124,27 @@ export class MailsAssert {
    */
   async check() {
     for (const assertion of this.assertions) {
-      await assertion()
+      await assertion();
     }
   }
 
   // Thenable pattern: allow to chain assertions with await without a check() call
   // biome-ignore lint/suspicious/noThenProperty: Thenable pattern expected here
   then(onFulfilled: () => unknown, onRejected?: (error: unknown) => unknown): Promise<unknown> {
-    return this.check().then(onFulfilled, onRejected)
+    return this.check().then(onFulfilled, onRejected);
   }
 
   private async getMails(): Promise<MaildevEmailDto[]> {
     if (this.dataFetched) {
-      return this.mailsCached
+      return this.mailsCached;
     }
 
-    const { data } = await this.http.get<MaildevEmailDto[]>('/email')
+    const { data } = await this.http.get<MaildevEmailDto[]>('/email');
 
-    this.mailsCached = data
-    this.dataFetched = true
+    this.mailsCached = data;
+    this.dataFetched = true;
 
-    return data
+    return data;
   }
 }
 
@@ -157,43 +157,43 @@ class MailAssert {
 
   hasSubject(subject: string): this {
     this.addAssertion(async () => {
-      const { mail, index } = await this.getMail()
-      expect(mail?.subject, `Wrong value for subject of mail[${index}]`).toEqual(subject)
-    })
+      const { mail, index } = await this.getMail();
+      expect(mail?.subject, `Wrong value for subject of mail[${index}]`).toEqual(subject);
+    });
 
-    return this
+    return this;
   }
 
   hasReceiver(mailAddress: string[] | string): this {
-    const receiverEmails = Array.isArray(mailAddress) ? mailAddress : [mailAddress]
+    const receiverEmails = Array.isArray(mailAddress) ? mailAddress : [mailAddress];
 
     this.addAssertion(async () => {
-      const { mail, index } = await this.getMail()
+      const { mail, index } = await this.getMail();
       expect(
         mail?.to?.map(value => value.address),
         `Wrong value for receiver of mail[${index}]`,
-      ).toEqual(receiverEmails)
-    })
+      ).toEqual(receiverEmails);
+    });
 
-    return this
+    return this;
   }
 
   hasSender(mailAddress: string[] | string): this {
-    const senderEmails = Array.isArray(mailAddress) ? mailAddress : [mailAddress]
+    const senderEmails = Array.isArray(mailAddress) ? mailAddress : [mailAddress];
 
     this.addAssertion(async () => {
-      const { mail, index } = await this.getMail()
+      const { mail, index } = await this.getMail();
       expect(
         mail?.from?.map(value => value.address),
         `Wrong value for sender of mail[${index}]`,
-      ).toEqual(senderEmails)
-    })
+      ).toEqual(senderEmails);
+    });
 
-    return this
+    return this;
   }
 
   mail(index = 0): MailAssert {
-    return this.parent.mail(index)
+    return this.parent.mail(index);
   }
 
   /**
@@ -208,12 +208,12 @@ class MailAssert {
    * ```
    */
   check() {
-    return this.parent.check()
+    return this.parent.check();
   }
 
   // Thenable pattern: allow to chain assertions with await without a check() call
   // biome-ignore lint/suspicious/noThenProperty: Thenable pattern expected here
   then(onFulfilled: () => unknown, onRejected?: (error: unknown) => unknown): Promise<unknown> {
-    return this.check().then(onFulfilled, onRejected)
+    return this.check().then(onFulfilled, onRejected);
   }
 }
