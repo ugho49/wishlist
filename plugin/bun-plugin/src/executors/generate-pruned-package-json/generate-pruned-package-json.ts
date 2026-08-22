@@ -36,7 +36,7 @@ const runExecutor: PromiseExecutor<GeneratePrunedPackageJsonExecutorSchema> = as
     root: context.root,
     isProduction: true,
     skipPackageManager: true,
-  }) as PackageJsonLike;
+  }) as unknown as PackageJsonLike;
 
   stripWorkspaceProtocolDependencies(prunedPackageJson);
   await copyTrustedDependencies(context.root, prunedPackageJson);
