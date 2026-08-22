@@ -8,10 +8,10 @@ import { useSelector } from 'react-redux'
 import { AttendeeRole, isRejection, rejectionMessage, useEventPageGetEventQuery } from '../../gql'
 import { useSecretSantaSuggestion } from '../../hooks'
 import { Description } from '../common/Description'
-import { Loader } from '../common/Loader'
 import { SEO } from '../SEO'
 import { EventAttendeesDialog } from './EventAttendeesDialog'
 import { EventHeader } from './EventHeader'
+import { EventHeaderSkeleton } from './EventHeaderSkeleton'
 import { EventNotFound } from './EventNotFound'
 import { EventWishlists } from './EventWishlists'
 import { MySecretSantaDraw } from './MySecretSantaDraw'
@@ -50,45 +50,52 @@ export const EventPage = ({ eventId }: EventPageProps) => {
         canonical={`/events/${eventId}`}
       />
       <Box>
-        <Loader loading={loading}>
-          {queryRejection && <Alert severity="error">{rejectionMessage(queryRejection)}</Alert>}
-          {!event && !queryRejection && <EventNotFound />}
-          {event && (
-            <>
-              <EventHeader
-                icon={event.icon ?? undefined}
-                title={event.title}
-                eventId={event.id}
-                eventDate={event.eventDate}
-                attendees={attendees}
-                currentUserCanEdit={currentUserCanEdit}
-                openAttendeesDialog={() => setOpenAttendeesDialog(true)}
-              />
+        {loading && (
+          <>
+            <EventHeaderSkeleton />
+            <Container maxWidth="lg">
+              <Stack gap="20px" sx={{ paddingTop: 3 }}>
+                <EventWishlists loading />
+              </Stack>
+            </Container>
+          </>
+        )}
 
-              <Container maxWidth="lg">
-                <Stack gap="20px" sx={{ paddingTop: 3 }}>
-                  {shouldShowSuggestion && (
-                    <SecretSantaSuggestionCard eventId={event.id} onDismiss={dismissSuggestion} />
-                  )}
+        {!loading && queryRejection && <Alert severity="error">{rejectionMessage(queryRejection)}</Alert>}
+        {!loading && !event && !queryRejection && <EventNotFound />}
+        {!loading && event && (
+          <>
+            <EventHeader
+              icon={event.icon ?? undefined}
+              title={event.title}
+              eventId={event.id}
+              eventDate={event.eventDate}
+              attendees={attendees}
+              currentUserCanEdit={currentUserCanEdit}
+              openAttendeesDialog={() => setOpenAttendeesDialog(true)}
+            />
 
-                  <MySecretSantaDraw eventId={event.id} />
+            <Container maxWidth="lg">
+              <Stack gap="20px" sx={{ paddingTop: 3 }}>
+                {shouldShowSuggestion && <SecretSantaSuggestionCard eventId={event.id} onDismiss={dismissSuggestion} />}
 
-                  {event.description && <Description text={event.description} allowMarkdown />}
+                <MySecretSantaDraw eventId={event.id} />
 
-                  <EventWishlists eventId={event.id} wishlists={event.wishlists} />
-                </Stack>
-              </Container>
+                {event.description && <Description text={event.description} allowMarkdown />}
 
-              <EventAttendeesDialog
-                open={openAttendeesDialog}
-                handleClose={() => setOpenAttendeesDialog(false)}
-                currentUserCanEdit={currentUserCanEdit}
-                eventId={event.id}
-                attendees={attendees}
-              />
-            </>
-          )}
-        </Loader>
+                <EventWishlists eventId={event.id} wishlists={event.wishlists} />
+              </Stack>
+            </Container>
+
+            <EventAttendeesDialog
+              open={openAttendeesDialog}
+              handleClose={() => setOpenAttendeesDialog(false)}
+              currentUserCanEdit={currentUserCanEdit}
+              eventId={event.id}
+              attendees={attendees}
+            />
+          </>
+        )}
       </Box>
     </>
   )
