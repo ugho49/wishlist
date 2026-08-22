@@ -1,11 +1,9 @@
-import type { AttendeeDto, SecretSantaDto, SecretSantaUserDto } from '@wishlist/common'
+import type { SecretSantaDto, SecretSantaUserDto } from '@wishlist/common'
 
-import { AttendeeRole, SecretSantaStatus } from '@wishlist/common'
+import { SecretSantaStatus } from '@wishlist/common'
 import { match } from 'ts-pattern'
 
 import {
-  AttendeeRole as GqlAttendeeRole,
-  type EventAttendee as GqlEventAttendee,
   type SecretSanta as GqlSecretSanta,
   SecretSantaStatus as GqlSecretSantaStatus,
   type SecretSantaUser as GqlSecretSantaUser,
@@ -41,24 +39,7 @@ function toGqlSecretSanta(dto: SecretSantaDto): GqlSecretSanta {
   }
 }
 
-function toGqlSecretSantaDraw(attendee: AttendeeDto): GqlEventAttendee {
-  const role = match(attendee.role)
-    .with(AttendeeRole.CREATOR, () => GqlAttendeeRole.Creator)
-    .with(AttendeeRole.ADMIN, () => GqlAttendeeRole.Admin)
-    .with(AttendeeRole.PARTICIPANT, () => GqlAttendeeRole.Participant)
-    .exhaustive()
-
-  return {
-    __typename: 'EventAttendee',
-    id: attendee.id,
-    userId: attendee.user?.id,
-    pendingEmail: attendee.pending_email,
-    role,
-  }
-}
-
 export const secretSantaGqlMapper = {
   toGqlSecretSanta,
   toGqlSecretSantaUser,
-  toGqlSecretSantaDraw,
 }

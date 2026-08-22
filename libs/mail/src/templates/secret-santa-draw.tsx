@@ -7,22 +7,15 @@ import * as styles from '../styles'
 export interface SecretSantaDrawEmailProps {
   readonly eventTitle: string
   readonly eventUrl: string
-  readonly secretSantaName: string
   readonly budget: string
   readonly description: string
 }
 
-export default function SecretSantaDrawEmail({
-  eventTitle,
-  eventUrl,
-  secretSantaName,
-  budget,
-  description,
-}: SecretSantaDrawEmailProps) {
+export default function SecretSantaDrawEmail({ eventTitle, eventUrl, budget, description }: SecretSantaDrawEmailProps) {
   return (
-    <EmailLayout preview="Découvrez votre tirage au sort Secret Santa">
+    <EmailLayout preview="Le tirage Secret Santa a eu lieu — viens découvrir le tien">
       <ContentSection>
-        <Heading>🎅 Résultat du tirage Secret Santa !</Heading>
+        <Heading>🎅 Le tirage Secret Santa a eu lieu !</Heading>
         <Paragraph style={{ textAlign: 'center' }}>Le tirage au sort a eu lieu pour l'événement :</Paragraph>
         <Paragraph style={{ ...styles.accent, textAlign: 'center', fontSize: '18px', margin: 0 }}>
           {eventTitle}
@@ -30,18 +23,18 @@ export default function SecretSantaDrawEmail({
       </ContentSection>
 
       <Callout background={styles.palette.success.background} style={{ padding: '30px' }}>
-        <Text style={{ ...styles.calloutText(styles.palette.success.text), fontSize: '16px', margin: '0 0 15px 0' }}>
-          Vous devez offrir un cadeau à :
-        </Text>
         <Text
           style={{
             ...styles.calloutTitle(styles.palette.success.text),
-            fontSize: '28px',
-            lineHeight: '34px',
-            margin: 0,
+            fontSize: '22px',
+            lineHeight: '28px',
+            margin: '0 0 12px 0',
           }}
         >
-          🎁 {secretSantaName}
+          Ton Secret Santa t'attend
+        </Text>
+        <Text style={{ ...styles.calloutText(styles.palette.success.text), fontSize: '16px', margin: 0 }}>
+          Rends-toi sur l'événement et gratte la boule de Noël pour découvrir à qui tu dois offrir un cadeau.
         </Text>
       </Callout>
 
@@ -80,9 +73,9 @@ export default function SecretSantaDrawEmail({
 
       <Section style={styles.buttonSection}>
         <Paragraph style={{ textAlign: 'center', fontSize: '15px', lineHeight: '22px', margin: '0 0 20px 0' }}>
-          Cliquez sur le bouton ci-dessous pour voir la liste de souhaits et toutes les informations de l'événement :
+          Cliquez sur le bouton ci-dessous pour découvrir votre tirage et consulter l'événement :
         </Paragraph>
-        <PrimaryButton href={eventUrl}>Voir la liste de {secretSantaName}</PrimaryButton>
+        <PrimaryButton href={eventUrl}>Découvre ton Secret Santa ici</PrimaryButton>
         <ButtonFallback href={eventUrl} />
       </Section>
     </EmailLayout>
@@ -92,7 +85,6 @@ export default function SecretSantaDrawEmail({
 SecretSantaDrawEmail.PreviewProps = {
   eventTitle: 'Noël en famille 2026',
   eventUrl: 'https://wishlistapp.fr/events/preview',
-  secretSantaName: 'Marie Dupont',
   budget: '30,00 €',
   description: 'Cadeaux faits maison appréciés',
 } satisfies SecretSantaDrawEmailProps

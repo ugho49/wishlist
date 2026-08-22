@@ -15,7 +15,6 @@ const payloads: MailPayload[] = [
     context: {
       eventTitle: 'Noël',
       eventUrl: 'https://x/e',
-      secretSantaName: 'Marie',
       budget: '30 €',
       description: 'X',
     },

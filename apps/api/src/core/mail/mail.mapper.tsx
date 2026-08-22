@@ -34,7 +34,6 @@ export const mapPayloadToTemplate = (payload: MailPayload): ReactElement =>
         description={context.description}
         eventTitle={context.eventTitle}
         eventUrl={context.eventUrl}
-        secretSantaName={context.secretSantaName}
       />
     ))
     .with({ template: MailTemplate.SECRET_SANTA_CANCEL }, ({ context }) => (

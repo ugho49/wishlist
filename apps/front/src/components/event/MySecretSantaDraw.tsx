@@ -1,9 +1,10 @@
-import type { EventId } from '@wishlist/common'
+import type { EventId, UserId } from '@wishlist/common'
 
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard'
-import { Avatar, alpha, Box, Stack, styled } from '@mui/material'
+import { Avatar, alpha, Box, Stack, styled, useMediaQuery } from '@mui/material'
 
-import { useMySecretSantaDraw } from '../../hooks/domain/useMySecretSantaDraw'
+import { useMySecretSantaDraw, useSecretSantaDrawReveal } from '../../hooks'
+import { SecretSantaBaubleScratch } from './SecretSantaBaubleScratch'
 
 const Container = styled(Stack)(({ theme }) => ({
   padding: '12px',
@@ -16,7 +17,7 @@ const Container = styled(Stack)(({ theme }) => ({
   fontWeight: 400,
   textAlign: 'left',
   borderLeft: '8px solid #2f7d31',
-  gap: '16px', // Utilise gap au lieu de spacing pour éviter les marges automatiques
+  gap: '16px',
 }))
 
 const IconWrapper = styled('div')({
@@ -26,7 +27,7 @@ const IconWrapper = styled('div')({
   justifyContent: 'center',
   width: '24px',
   height: '24px',
-  marginTop: '4px', // Compense la line-height pour aligner avec la première ligne
+  marginTop: '4px',
   flexShrink: 0,
 })
 
@@ -61,13 +62,24 @@ const DescriptionText = styled(Box)(({ theme }) => ({
 
 type MySecretSantaDrawProps = {
   eventId: EventId
+  currentUserId?: UserId
 }
 
-export const MySecretSantaDraw = ({ eventId }: MySecretSantaDrawProps) => {
+export const MySecretSantaDraw = ({ eventId, currentUserId }: MySecretSantaDrawProps) => {
   const { mySecretSantaDraw: draw } = useMySecretSantaDraw(eventId)
+  const { isRevealed, markRevealed } = useSecretSantaDrawReveal(eventId, currentUserId)
+  const prefersReducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)')
 
   if (!draw) {
     return
+  }
+
+  const displayName = draw.pendingEmail ? draw.pendingEmail : `${draw.user?.firstName} ${draw.user?.lastName}`
+  const pictureUrl = draw.user?.pictureUrl ?? undefined
+  const showScratch = Boolean(currentUserId) && !isRevealed && !prefersReducedMotion
+
+  if (showScratch) {
+    return <SecretSantaBaubleScratch displayName={displayName} pictureUrl={pictureUrl} onRevealed={markRevealed} />
   }
 
   return (
@@ -78,10 +90,8 @@ export const MySecretSantaDraw = ({ eventId }: MySecretSantaDrawProps) => {
       <Stack direction="column" sx={{ flex: 1 }}>
         <InfoRow>
           <InfoText>Votre Secret Santa est :</InfoText>
-          <StyledAvatar src={draw.user?.pictureUrl ?? undefined} />
-          <DrawName>
-            {draw.pendingEmail ? draw.pendingEmail : `${draw.user?.firstName} ${draw.user?.lastName}`}
-          </DrawName>
+          <StyledAvatar src={pictureUrl} />
+          <DrawName>{displayName}</DrawName>
         </InfoRow>
         <DescriptionText>Vous devez offrir un cadeau à cette personne lors de l'événement !</DescriptionText>
       </Stack>

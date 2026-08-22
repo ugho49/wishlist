@@ -31,7 +31,7 @@ export class SecretSantaStartedHandler implements IEventHandler<SecretSantaStart
     this.logger.log('Sending emails to attendees...', { eventTitle, eventId, drawns })
     for (const chunk of chunks) {
       await Promise.all(
-        chunk.map(({ email, secretSantaName }) =>
+        chunk.map(({ email }) =>
           this.mailService.sendMail({
             to: email,
             subject: '[Wishlist] Votre tirage au sort secret santa',
@@ -39,7 +39,6 @@ export class SecretSantaStartedHandler implements IEventHandler<SecretSantaStart
             context: {
               eventTitle,
               eventUrl,
-              secretSantaName,
               budget: budgetFormatted,
               description: descriptionFormatted,
             },

@@ -2,7 +2,6 @@ import type { EventId } from '@wishlist/common'
 
 type Drawn = {
   email: string
-  secretSantaName: string
 }
 
 export class SecretSantaStartedEvent {

@@ -77,7 +77,7 @@ export const EventPage = ({ eventId }: EventPageProps) => {
               <Stack gap="20px" sx={{ paddingTop: 3 }}>
                 {shouldShowSuggestion && <SecretSantaSuggestionCard eventId={event.id} onDismiss={dismissSuggestion} />}
 
-                <MySecretSantaDraw eventId={event.id} />
+                <MySecretSantaDraw eventId={event.id} currentUserId={currentUserId} />
 
                 {event.description && <Description text={event.description} allowMarkdown />}
 
