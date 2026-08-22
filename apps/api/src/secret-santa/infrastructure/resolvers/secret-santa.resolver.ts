@@ -3,6 +3,7 @@ import type { ICurrentUser } from '@wishlist/common'
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql'
 import { GqlCurrentUser } from '@wishlist/api/auth'
 import { ZodPipe } from '@wishlist/api/core'
+import { eventMapper } from '@wishlist/api/event'
 import { type EventId, type SecretSantaId, type SecretSantaUserId } from '@wishlist/common'
 
 import {
@@ -74,7 +75,7 @@ export class SecretSantaResolver {
   ): Promise<GetMySecretSantaDrawResult | null> {
     const result = await this.getSecretSantaDrawUseCase.execute({ currentUser, eventId })
     if (!result) return null
-    return secretSantaGqlMapper.toGqlSecretSantaDraw(result)
+    return eventMapper.toGqlEventAttendeeFromDto(result)
   }
 
   @Mutation()

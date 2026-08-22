@@ -56,18 +56,10 @@ export class StartSecretSantaUseCase {
       await this.secretSantaRepository.save(secretSanta, tx)
     })
 
-    const drawns: { email: string; secretSantaName: string }[] = []
-
-    for (const user of secretSanta.users) {
-      const attendee = event.attendees.find(a => a.id === user.attendeeId)!
-      const drawSecretSantaUser = secretSanta.users.find(s => s.id === user.drawUserId)!
-      const drawAttendee = event.attendees.find(a => a.id === drawSecretSantaUser?.attendeeId)!
-
-      drawns.push({
-        email: attendee.getEmail(),
-        secretSantaName: drawAttendee.getFullNameOrPendingEmail(),
-      })
-    }
+    const drawns = secretSanta.users.flatMap(user => {
+      const attendee = event.attendees.find(a => a.id === user.attendeeId)
+      return attendee ? [{ email: attendee.getEmail() }] : []
+    })
 
     await this.eventBus.publish(
       new SecretSantaStartedEvent({

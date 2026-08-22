@@ -20,7 +20,6 @@ export type WelcomeUserContext = {
 export type SecretSantaDrawContext = {
   eventTitle: string
   eventUrl: string
-  secretSantaName: string
   budget: string
   description: string
 }
