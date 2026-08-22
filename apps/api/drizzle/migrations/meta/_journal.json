@@ -64,6 +64,13 @@
       "when": 1765270495345,
       "tag": "0008_remove-circular-dep",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1787386061230,
+      "tag": "0009_rename-attendee-roles",
+      "breakpoints": true
     }
   ]
 }

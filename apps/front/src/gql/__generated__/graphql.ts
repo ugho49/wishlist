@@ -413,6 +413,30 @@ export const useRemoveEventAttendeeMutation = <
   }
     )};
 
+export const UpdateEventAttendeeRoleDocument = `
+    mutation UpdateEventAttendeeRole($eventId: EventId!, $attendeeId: AttendeeId!, $role: AttendeeRole!) {
+  updateEventAttendeeRole(eventId: $eventId, attendeeId: $attendeeId, role: $role) {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+  }
+}
+    `;
+
+export const useUpdateEventAttendeeRoleMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<Types.UpdateEventAttendeeRoleMutation, TError, Types.UpdateEventAttendeeRoleMutationVariables, TContext>) => {
+    
+    return useMutation<Types.UpdateEventAttendeeRoleMutation, TError, Types.UpdateEventAttendeeRoleMutationVariables, TContext>(
+      {
+    mutationKey: ['UpdateEventAttendeeRole'],
+    mutationFn: (variables?: Types.UpdateEventAttendeeRoleMutationVariables) => fetchGql<Types.UpdateEventAttendeeRoleMutation, Types.UpdateEventAttendeeRoleMutationVariables>(UpdateEventAttendeeRoleDocument, variables)(),
+    ...options
+  }
+    )};
+
 export const EventPageGetEventDocument = `
     query EventPageGetEvent($eventId: EventId!) {
   event(id: $eventId) {

@@ -190,7 +190,7 @@ describe('EventResolver (GraphQL)', () => {
 
         const maintainerAttendee = event.attendees.find((a: { id: string }) => a.id === attendeeId)
         expect(maintainerAttendee).toMatchObject({
-          role: 'MAINTAINER',
+          role: 'CREATOR',
           user: {
             id: currentUserId,
             email: Fixtures.BASE_USER_EMAIL,
@@ -199,7 +199,7 @@ describe('EventResolver (GraphQL)', () => {
 
         const guestAttendee = event.attendees.find((a: { id: string }) => a.id === secondAttendeeId)
         expect(guestAttendee).toMatchObject({
-          role: 'USER',
+          role: 'PARTICIPANT',
           user: {
             id: secondUserId,
             email: 'guest@test.fr',

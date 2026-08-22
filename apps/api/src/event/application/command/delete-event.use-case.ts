@@ -29,7 +29,7 @@ export class DeleteEventUseCase {
     const event = await this.eventRepository.findByIdOrFail(eventId)
 
     if (!event.canEdit(currentUser)) {
-      throw new UnauthorizedException('Only maintainers of the event can delete it')
+      throw new UnauthorizedException('Only creators and admins of the event can delete it')
     }
 
     const wishlists = await this.wishlistRepository.findByEvent(event.id)

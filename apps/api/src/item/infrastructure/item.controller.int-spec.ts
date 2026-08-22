@@ -695,7 +695,7 @@ describe('ItemController', () => {
         await fixtures.insertActiveAttendee({
           eventId: oldEventId,
           userId: otherUserId,
-          role: AttendeeRole.USER,
+          role: AttendeeRole.PARTICIPANT,
         })
 
         // Create old wishlist
@@ -846,7 +846,7 @@ describe('ItemController', () => {
         await fixtures.insertActiveAttendee({
           eventId,
           userId: otherUserId,
-          role: AttendeeRole.USER,
+          role: AttendeeRole.PARTICIPANT,
         })
 
         const wishlistId = await fixtures.insertWishlist({
@@ -1096,7 +1096,7 @@ describe('ItemController', () => {
         await fixtures.insertActiveAttendee({
           eventId,
           userId: currentUserId,
-          role: AttendeeRole.USER,
+          role: AttendeeRole.PARTICIPANT,
         })
 
         const wishlistId = await fixtures.insertWishlist({
@@ -1380,7 +1380,7 @@ describe('ItemController', () => {
         await fixtures.insertActiveAttendee({
           eventId,
           userId: otherUserId,
-          role: AttendeeRole.USER,
+          role: AttendeeRole.PARTICIPANT,
         })
 
         const wishlistId = await fixtures.insertWishlist({
@@ -1425,13 +1425,13 @@ describe('ItemController', () => {
         await fixtures.insertActiveAttendee({
           eventId,
           userId: currentUserId,
-          role: AttendeeRole.USER,
+          role: AttendeeRole.PARTICIPANT,
         })
 
         await fixtures.insertActiveAttendee({
           eventId,
           userId: thirdUserId,
-          role: AttendeeRole.USER,
+          role: AttendeeRole.PARTICIPANT,
         })
 
         const wishlistId = await fixtures.insertWishlist({
@@ -1476,7 +1476,7 @@ describe('ItemController', () => {
         await fixtures.insertActiveAttendee({
           eventId,
           userId: currentUserId,
-          role: AttendeeRole.USER,
+          role: AttendeeRole.PARTICIPANT,
         })
 
         const wishlistId = await fixtures.insertWishlist({
@@ -1630,7 +1630,7 @@ describe('ItemController', () => {
         await fixtures.insertActiveAttendee({
           eventId,
           userId: otherUserId,
-          role: AttendeeRole.USER,
+          role: AttendeeRole.PARTICIPANT,
         })
 
         const wishlistId = await fixtures.insertWishlist({
@@ -1672,13 +1672,13 @@ describe('ItemController', () => {
         await fixtures.insertActiveAttendee({
           eventId,
           userId: currentUserId,
-          role: AttendeeRole.USER,
+          role: AttendeeRole.PARTICIPANT,
         })
 
         await fixtures.insertActiveAttendee({
           eventId,
           userId: thirdUserId,
-          role: AttendeeRole.USER,
+          role: AttendeeRole.PARTICIPANT,
         })
 
         const wishlistId = await fixtures.insertWishlist({
@@ -1724,7 +1724,7 @@ describe('ItemController', () => {
         await fixtures.insertActiveAttendee({
           eventId,
           userId: currentUserId,
-          role: AttendeeRole.USER,
+          role: AttendeeRole.PARTICIPANT,
         })
 
         const wishlistId = await fixtures.insertWishlist({
@@ -1768,7 +1768,7 @@ describe('ItemController', () => {
         await fixtures.insertActiveAttendee({
           eventId,
           userId: otherUserId,
-          role: AttendeeRole.USER,
+          role: AttendeeRole.PARTICIPANT,
         })
 
         const wishlistId = await fixtures.insertWishlist({
@@ -1835,7 +1835,7 @@ describe('ItemController', () => {
         await fixtures.insertActiveAttendee({
           eventId,
           userId: currentUserId,
-          role: AttendeeRole.USER,
+          role: AttendeeRole.PARTICIPANT,
         })
 
         const wishlistId = await fixtures.insertWishlist({
@@ -1889,7 +1889,7 @@ describe('ItemController', () => {
         await fixtures.insertActiveAttendee({
           eventId,
           userId: currentUserId,
-          role: AttendeeRole.USER,
+          role: AttendeeRole.PARTICIPANT,
         })
 
         const wishlistId = await fixtures.insertWishlist({
@@ -1970,7 +1970,7 @@ describe('ItemController', () => {
         await fixtures.insertActiveAttendee({
           eventId,
           userId: otherUserId,
-          role: AttendeeRole.USER,
+          role: AttendeeRole.PARTICIPANT,
         })
 
         const wishlistId = await fixtures.insertWishlist({
@@ -2042,13 +2042,13 @@ describe('ItemController', () => {
         await fixtures.insertActiveAttendee({
           eventId,
           userId: currentUserId,
-          role: AttendeeRole.USER,
+          role: AttendeeRole.PARTICIPANT,
         })
 
         await fixtures.insertActiveAttendee({
           eventId,
           userId: thirdUserId,
-          role: AttendeeRole.USER,
+          role: AttendeeRole.PARTICIPANT,
         })
 
         const wishlistId = await fixtures.insertWishlist({

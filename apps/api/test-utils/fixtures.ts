@@ -132,6 +132,19 @@ export class Fixtures {
     return id
   }
 
+  async insertEventWithCreator(parameters: {
+    title: string
+    description?: string
+    icon?: string
+    eventDate?: Date
+    creatorId: string
+  }): Promise<{ eventId: string; attendeeId: string; eventDate: DateTime }> {
+    const eventDate = parameters.eventDate ?? DateTime.now().plus({ days: 30 }).toJSDate()
+    const eventId = await this.insertEvent({ ...parameters, eventDate })
+    const attendeeId = await this.insertCreatorAttendee({ eventId, userId: parameters.creatorId })
+    return { eventId, attendeeId, eventDate: DateTime.fromJSDate(eventDate) }
+  }
+
   async insertEventWithMaintainer(parameters: {
     title: string
     description?: string
@@ -139,10 +152,7 @@ export class Fixtures {
     eventDate?: Date
     maintainerId: string
   }): Promise<{ eventId: string; attendeeId: string; eventDate: DateTime }> {
-    const eventDate = parameters.eventDate ?? DateTime.now().plus({ days: 30 }).toJSDate()
-    const eventId = await this.insertEvent({ ...parameters, eventDate })
-    const attendeeId = await this.insertMaintainerAttendee({ eventId, userId: parameters.maintainerId })
-    return { eventId, attendeeId, eventDate: DateTime.fromJSDate(eventDate) }
+    return await this.insertEventWithCreator({ ...parameters, creatorId: parameters.maintainerId })
   }
 
   async insertWishlist(parameters: {
@@ -181,7 +191,7 @@ export class Fixtures {
 
     await this.sql.unsafe(
       `INSERT INTO ${Fixtures.EVENT_ATTENDEE_TABLE} (id, event_id, temp_user_email, role) VALUES ($1, $2, $3, $4)`,
-      [id, eventId, tempUserEmail, role ?? AttendeeRole.USER],
+      [id, eventId, tempUserEmail, role ?? AttendeeRole.PARTICIPANT],
     )
 
     return id
@@ -193,18 +203,30 @@ export class Fixtures {
 
     await this.sql.unsafe(
       `INSERT INTO ${Fixtures.EVENT_ATTENDEE_TABLE} (id, event_id, user_id, role) VALUES ($1, $2, $3, $4)`,
-      [id, eventId, userId, role ?? AttendeeRole.USER],
+      [id, eventId, userId, role ?? AttendeeRole.PARTICIPANT],
     )
 
     return id
   }
 
-  insertMaintainerAttendee(parameters: { eventId: string; userId: string }): Promise<string> {
+  insertCreatorAttendee(parameters: { eventId: string; userId: string }): Promise<string> {
     return this.insertActiveAttendee({
       eventId: parameters.eventId,
       userId: parameters.userId,
-      role: AttendeeRole.MAINTAINER,
+      role: AttendeeRole.CREATOR,
     })
+  }
+
+  insertAdminAttendee(parameters: { eventId: string; userId: string }): Promise<string> {
+    return this.insertActiveAttendee({
+      eventId: parameters.eventId,
+      userId: parameters.userId,
+      role: AttendeeRole.ADMIN,
+    })
+  }
+
+  insertMaintainerAttendee(parameters: { eventId: string; userId: string }): Promise<string> {
+    return this.insertCreatorAttendee(parameters)
   }
 
   async insertUserPasswordVerification(parameters: {

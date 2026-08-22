@@ -13,8 +13,6 @@ import {
   Divider,
   IconButton,
   List,
-  ListItem,
-  ListItemButton,
   Stack,
   Step,
   StepLabel,
@@ -38,7 +36,8 @@ import { Subtitle } from '../common/Subtitle'
 import { TextareaMarkdown } from '../common/TextareaMarkdown'
 import { Title } from '../common/Title'
 import { SearchUserSelect } from '../user/SearchUserSelect'
-import { ListItemAttendee } from './ListItemAttendee'
+import { AttendeeRolesGuide } from './AttendeeRolesGuide'
+import { AttendeeListItem, ListItemAttendee } from './ListItemAttendee'
 
 const steps = ['Informations', 'Participants']
 
@@ -142,10 +141,7 @@ export const CreateEventPage = () => {
           ))}
         </Stepper>
       </Box>
-      <Container
-        maxWidth={step === 1 ? 'md' : 'sm'}
-        sx={{ marginTop: '40px', transition: 'max-width 0.3s ease-in-out' }}
-      >
+      <Container maxWidth="md" sx={{ marginTop: '40px', transition: 'max-width 0.3s ease-in-out' }}>
         <Card>
           {step === 1 && (
             <Stack component="form" noValidate gap={3}>
@@ -219,8 +215,10 @@ export const CreateEventPage = () => {
           )}
 
           {step === 2 && (
-            <Stack>
-              <Subtitle>Gérer les participants</Subtitle>
+            <Stack gap={2}>
+              <Subtitle sx={{ marginBottom: 0 }}>Gérer les participants</Subtitle>
+
+              <AttendeeRolesGuide />
 
               <Box>
                 {/*TODO: add a way to add all attendees from a specific event
@@ -235,7 +233,7 @@ export const CreateEventPage = () => {
                     setAttendees(prevState => [
                       {
                         user: val,
-                        role: AttendeeRole.User,
+                        role: AttendeeRole.Participant,
                       },
                       ...prevState,
                     ])
@@ -246,41 +244,60 @@ export const CreateEventPage = () => {
 
               {attendees.length > 0 && (
                 <>
-                  <Divider sx={{ marginTop: '20px', marginBottom: '10px' }} />
+                  <Divider />
 
-                  <List sx={{ maxHeight: '250px', overflow: 'auto' }}>
-                    {attendees.map(attendee => (
-                      <ListItem
-                        className="animated zoomIn fast"
-                        key={typeof attendee.user === 'string' ? attendee.user : attendee.user.id}
-                        disablePadding
-                        secondaryAction={
-                          <IconButton
-                            edge="end"
-                            aria-label="delete"
-                            onClick={() => setAttendees(prev => prev.filter(value => value !== attendee))}
-                          >
-                            <DeleteIcon />
-                          </IconButton>
-                        }
-                      >
-                        <ListItemButton>
+                  <List disablePadding sx={{ maxHeight: '280px', overflow: 'auto' }}>
+                    {attendees.map(attendee => {
+                      const attendeeEmail = typeof attendee.user === 'string' ? attendee.user : attendee.user.email
+                      const attendeeKey = typeof attendee.user === 'string' ? attendee.user : attendee.user.id
+
+                      return (
+                        <AttendeeListItem
+                          className="animated zoomIn fast"
+                          key={attendeeKey}
+                          secondaryAction={
+                            <IconButton
+                              edge="end"
+                              aria-label="delete"
+                              onClick={() =>
+                                setAttendees(prev =>
+                                  prev.filter(value => {
+                                    const valueEmail = typeof value.user === 'string' ? value.user : value.user.email
+                                    return valueEmail !== attendeeEmail
+                                  }),
+                                )
+                              }
+                            >
+                              <DeleteIcon />
+                            </IconButton>
+                          }
+                        >
                           <ListItemAttendee
                             role={attendee.role}
                             userName={
                               typeof attendee.user !== 'string'
-                                ? `${attendee.user?.firstName} ${attendee.user?.lastName}`
+                                ? `${attendee.user.firstName} ${attendee.user.lastName}`
                                 : ''
                             }
                             isPending={typeof attendee.user === 'string'}
-                            email={typeof attendee.user === 'string' ? attendee.user : attendee.user.email}
+                            email={attendeeEmail}
                             pictureUrl={
                               typeof attendee.user !== 'string' ? (attendee.user.pictureUrl ?? undefined) : undefined
                             }
+                            roleEditable
+                            roleDisabled={loading}
+                            onRoleChange={role =>
+                              setAttendees(prev =>
+                                prev.map(value => {
+                                  const valueEmail = typeof value.user === 'string' ? value.user : value.user.email
+                                  return valueEmail === attendeeEmail ? { ...value, role } : value
+                                }),
+                              )
+                            }
                           />
-                        </ListItemButton>
-                      </ListItem>
-                    ))}
+                        </AttendeeListItem>
+                      )
+                    })}
                   </List>
                 </>
               )}

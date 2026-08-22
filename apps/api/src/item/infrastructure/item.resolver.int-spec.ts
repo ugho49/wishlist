@@ -288,7 +288,7 @@ describe('ItemResolver (GraphQL)', () => {
         await fixtures.insertActiveAttendee({
           eventId,
           userId: currentUserId,
-          role: AttendeeRole.USER,
+          role: AttendeeRole.PARTICIPANT,
         })
 
         const wishlistId = await fixtures.insertWishlist({
@@ -723,7 +723,7 @@ describe('ItemResolver (GraphQL)', () => {
         await fixtures.insertActiveAttendee({
           eventId,
           userId: currentUserId,
-          role: AttendeeRole.USER,
+          role: AttendeeRole.PARTICIPANT,
         })
 
         const wishlistId = await fixtures.insertWishlist({
@@ -764,7 +764,7 @@ describe('ItemResolver (GraphQL)', () => {
         await fixtures.insertActiveAttendee({
           eventId,
           userId: currentUserId,
-          role: AttendeeRole.USER,
+          role: AttendeeRole.PARTICIPANT,
         })
 
         const wishlistId = await fixtures.insertWishlist({

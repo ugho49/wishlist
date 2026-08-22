@@ -12,7 +12,9 @@ import {
   type CreateEventInput,
   type CreateEventResult,
   type DeleteEventResult,
+  AttendeeRole as GqlAttendeeRole,
   type RemoveEventAttendeeResult,
+  type UpdateEventAttendeeRoleResult,
   type UpdateEventInput,
   type UpdateEventResult,
 } from '../../../gql/generated-types'
@@ -20,6 +22,7 @@ import { AddAttendeeUseCase } from '../../application/command/add-attendee.use-c
 import { CreateEventUseCase } from '../../application/command/create-event.use-case'
 import { DeleteAttendeeUseCase } from '../../application/command/delete-attendee.use-case'
 import { DeleteEventUseCase } from '../../application/command/delete-event.use-case'
+import { UpdateAttendeeRoleUseCase } from '../../application/command/update-attendee-role.use-case'
 import { UpdateEventUseCase } from '../../application/command/update-event.use-case'
 import { eventMapper } from '../event.mapper'
 import {
@@ -27,6 +30,7 @@ import {
   AttendeeIdSchema,
   CreateEventInputSchema,
   EventIdSchema,
+  GqlAttendeeRoleSchema,
   toDomainAttendeeRole,
   UpdateEventInputSchema,
 } from '../event.schema'
@@ -39,6 +43,7 @@ export class EventMutationResolver {
     private readonly deleteEventUseCase: DeleteEventUseCase,
     private readonly addAttendeeUseCase: AddAttendeeUseCase,
     private readonly deleteAttendeeUseCase: DeleteAttendeeUseCase,
+    private readonly updateAttendeeRoleUseCase: UpdateAttendeeRoleUseCase,
   ) {}
 
   @Mutation()
@@ -124,6 +129,22 @@ export class EventMutationResolver {
     @GqlCurrentUser() currentUser: ICurrentUser,
   ): Promise<RemoveEventAttendeeResult> {
     await this.deleteAttendeeUseCase.execute({ currentUser, eventId, attendeeId })
+    return { __typename: 'VoidOutput', success: true }
+  }
+
+  @Mutation()
+  async updateEventAttendeeRole(
+    @Args('eventId', new ZodPipe(EventIdSchema)) eventId: EventId,
+    @Args('attendeeId', new ZodPipe(AttendeeIdSchema)) attendeeId: AttendeeId,
+    @Args('role', new ZodPipe(GqlAttendeeRoleSchema)) role: GqlAttendeeRole,
+    @GqlCurrentUser() currentUser: ICurrentUser,
+  ): Promise<UpdateEventAttendeeRoleResult> {
+    await this.updateAttendeeRoleUseCase.execute({
+      currentUser,
+      eventId,
+      attendeeId,
+      role: toDomainAttendeeRole(role),
+    })
     return { __typename: 'VoidOutput', success: true }
   }
 }

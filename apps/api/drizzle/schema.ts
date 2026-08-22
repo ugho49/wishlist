@@ -58,7 +58,7 @@ export const eventAttendee = pgTable(
     eventId: eventId('event_id').notNull(),
     userId: userId('user_id'),
     tempUserEmail: varchar('temp_user_email', { length: 200 }),
-    role: varchar({ length: 50 }).default('user').notNull(),
+    role: varchar({ length: 50 }).default('participant').notNull(),
   },
   table => [
     foreignKey({ columns: [table.eventId], foreignColumns: [event.id] }).onDelete('cascade'),

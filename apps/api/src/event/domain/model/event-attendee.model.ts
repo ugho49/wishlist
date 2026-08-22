@@ -1,5 +1,6 @@
 import type { User } from '@wishlist/api/user'
-import type { AttendeeId, AttendeeRole, EventId } from '@wishlist/common'
+
+import { type AttendeeId, AttendeeRole, type EventId } from '@wishlist/common'
 
 export type EventAttendeeProps = {
   id: AttendeeId
@@ -85,6 +86,17 @@ export class EventAttendee {
       ...this,
       user,
       pendingEmail: undefined,
+    })
+  }
+
+  isCreator(): boolean {
+    return this.role === AttendeeRole.CREATOR
+  }
+
+  updateRole(role: AttendeeRole): EventAttendee {
+    return new EventAttendee({
+      ...this,
+      role,
     })
   }
 }

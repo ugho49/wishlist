@@ -3,7 +3,7 @@ import type { RootState } from '../../core'
 import type { EventAttendee } from './event.types'
 
 import DeleteIcon from '@mui/icons-material/Delete'
-import { Box, Divider, List, ListItem, ListItemButton } from '@mui/material'
+import { Box, Divider, List, Stack } from '@mui/material'
 import { useQueryClient } from '@tanstack/react-query'
 import { useMemo } from 'react'
 import { useSelector } from 'react-redux'
@@ -15,13 +15,15 @@ import {
   rejectionPattern,
   useAddEventAttendeeMutation,
   useRemoveEventAttendeeMutation,
+  useUpdateEventAttendeeRoleMutation,
 } from '../../gql'
 import { useToast } from '../../hooks'
 import { Card } from '../common/Card'
 import { ConfirmIconButton } from '../common/ConfirmIconButton'
 import { Subtitle } from '../common/Subtitle'
 import { SearchUserSelect } from '../user/SearchUserSelect'
-import { ListItemAttendee } from './ListItemAttendee'
+import { AttendeeRolesGuide } from './AttendeeRolesGuide'
+import { AttendeeListItem, ListItemAttendee } from './ListItemAttendee'
 
 export type EditEventAttendeesProps = {
   eventId: EventId
@@ -48,9 +50,12 @@ export const EditEventAttendees = ({ eventId, attendees }: EditEventAttendeesPro
   const { mutateAsync: removeAttendeeMutation, isPending: deleteAttendeePending } = useRemoveEventAttendeeMutation({
     onError: () => addToast({ message: 'Impossible de supprimer ce participant', variant: 'error' }),
   })
+  const { mutateAsync: updateRoleMutation, isPending: updateRolePending } = useUpdateEventAttendeeRoleMutation({
+    onError: () => addToast({ message: 'Impossible de modifier le rôle', variant: 'error' }),
+  })
 
   const addAttendee = async (email: string) => {
-    const res = await addAttendeeMutation({ eventId, input: { email, role: AttendeeRole.User } })
+    const res = await addAttendeeMutation({ eventId, input: { email, role: AttendeeRole.Participant } })
     match(res.addEventAttendee)
       .with({ __typename: 'EventAttendee' }, () => {
         addToast({ message: "Participant ajouté à l'évènement !", variant: 'info' })
@@ -71,65 +76,87 @@ export const EditEventAttendees = ({ eventId, attendees }: EditEventAttendeesPro
       .exhaustive()
   }
 
+  const updateRole = async (attendeeId: AttendeeId, role: AttendeeRole) => {
+    const res = await updateRoleMutation({ eventId, attendeeId, role })
+    match(res.updateEventAttendeeRole)
+      .with({ __typename: 'VoidOutput' }, () => {
+        addToast({ message: 'Rôle mis à jour', variant: 'info' })
+        void invalidateEvent()
+      })
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive()
+  }
+
   const loading = useMemo(
-    () => addAttendeePending || deleteAttendeePending,
-    [addAttendeePending, deleteAttendeePending],
+    () => addAttendeePending || deleteAttendeePending || updateRolePending,
+    [addAttendeePending, deleteAttendeePending, updateRolePending],
   )
 
   return (
-    <Card>
-      <Subtitle>Gérer les participants</Subtitle>
+    <Stack gap={2}>
+      <AttendeeRolesGuide />
 
-      <Box>
-        <SearchUserSelect
-          label="Ajouter un nouveau participant à l'évènement ?"
-          disabled={loading}
-          excludedEmails={[...attendeeEmails, currentUserEmail || '']}
-          onChange={value => addAttendee(typeof value === 'string' ? value : value.email)}
-        />
-      </Box>
+      <Card>
+        <Subtitle>Gérer les participants</Subtitle>
 
-      <Divider sx={{ marginBlock: '20px' }} />
+        <Box>
+          <SearchUserSelect
+            label="Ajouter un nouveau participant à l'évènement ?"
+            disabled={loading}
+            excludedEmails={[...attendeeEmails, currentUserEmail || '']}
+            onChange={value => addAttendee(typeof value === 'string' ? value : value.email)}
+          />
+        </Box>
 
-      <List>
-        {attendees.map(attendee => (
-          <ListItem
-            key={attendee.id}
-            className="animated zoomIn fast"
-            disablePadding
-            secondaryAction={
-              <ConfirmIconButton
-                disabled={attendee?.user?.id === currentUserId}
-                confirmTitle="Enlever ce participant ?"
-                confirmText={
-                  <>
-                    Êtes-vous sur de retirer le participant{' '}
-                    <b>
-                      {attendee.pendingEmail
-                        ? attendee.pendingEmail
-                        : `${attendee.user?.firstName} ${attendee.user?.lastName}`}
-                    </b>{' '}
-                    de l'évènement ?
-                  </>
+        <Divider sx={{ marginBlock: '20px' }} />
+
+        <List disablePadding>
+          {attendees.map(attendee => {
+            const isCurrentUser = attendee.user?.id === currentUserId
+            const isCreator = attendee.role === AttendeeRole.Creator
+            const canDelete = !isCurrentUser && !isCreator
+            const canChangeRole = !isCurrentUser && !isCreator
+
+            return (
+              <AttendeeListItem
+                key={attendee.id}
+                className="animated zoomIn fast"
+                secondaryAction={
+                  <ConfirmIconButton
+                    disabled={!canDelete || loading}
+                    confirmTitle="Enlever ce participant ?"
+                    confirmText={
+                      <>
+                        Êtes-vous sur de retirer le participant{' '}
+                        <b>
+                          {attendee.pendingEmail
+                            ? attendee.pendingEmail
+                            : `${attendee.user?.firstName} ${attendee.user?.lastName}`}
+                        </b>{' '}
+                        de l'évènement ?
+                      </>
+                    }
+                    onClick={() => deleteAttendee(attendee.id)}
+                  >
+                    <DeleteIcon />
+                  </ConfirmIconButton>
                 }
-                onClick={() => deleteAttendee(attendee.id)}
               >
-                <DeleteIcon />
-              </ConfirmIconButton>
-            }
-          >
-            <ListItemButton>
-              <ListItemAttendee
-                role={attendee.role}
-                userName={`${attendee.user?.firstName} ${attendee.user?.lastName}`}
-                isPending={!!attendee.pendingEmail}
-                email={attendee.pendingEmail ?? attendee.user?.email ?? ''}
-                pictureUrl={attendee.user?.pictureUrl ?? undefined}
-              />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
-    </Card>
+                <ListItemAttendee
+                  role={attendee.role}
+                  userName={`${attendee.user?.firstName} ${attendee.user?.lastName}`}
+                  isPending={!!attendee.pendingEmail}
+                  email={attendee.pendingEmail ?? attendee.user?.email ?? ''}
+                  pictureUrl={attendee.user?.pictureUrl ?? undefined}
+                  roleEditable={canChangeRole}
+                  roleDisabled={loading}
+                  onRoleChange={role => updateRole(attendee.id, role)}
+                />
+              </AttendeeListItem>
+            )
+          })}
+        </List>
+      </Card>
+    </Stack>
   )
 }

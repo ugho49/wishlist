@@ -37,7 +37,7 @@ export class AddAttendeeUseCase {
     const event = await this.eventRepository.findByIdOrFail(eventId)
 
     if (!event.canEdit(currentUser)) {
-      throw new UnauthorizedException('Only maintainers of the event can add an attendee')
+      throw new UnauthorizedException('Only creators and admins of the event can add an attendee')
     }
 
     const attendeeAlreadyExists = event.attendees.some(attendee => attendee.getEmail() === input.newAttendee.email)
@@ -47,7 +47,11 @@ export class AddAttendeeUseCase {
     }
 
     const user = await this.userRepository.findByEmail(input.newAttendee.email)
-    const role = input.newAttendee.role ?? AttendeeRole.USER
+    const role = input.newAttendee.role ?? AttendeeRole.PARTICIPANT
+
+    if (role === AttendeeRole.CREATOR) {
+      throw new BadRequestException('Cannot assign the creator role to an attendee')
+    }
     const attendeeId = this.attendeeRepository.newId()
 
     const newAttendee = user

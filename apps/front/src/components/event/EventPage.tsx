@@ -5,7 +5,7 @@ import { Alert, Box, Container, Stack } from '@mui/material'
 import { useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
 
-import { AttendeeRole, isRejection, rejectionMessage, useEventPageGetEventQuery } from '../../gql'
+import { isRejection, rejectionMessage, useEventPageGetEventQuery } from '../../gql'
 import { useSecretSantaSuggestion } from '../../hooks'
 import { Description } from '../common/Description'
 import { SEO } from '../SEO'
@@ -14,6 +14,7 @@ import { EventHeader } from './EventHeader'
 import { EventHeaderSkeleton } from './EventHeaderSkeleton'
 import { EventNotFound } from './EventNotFound'
 import { EventWishlists } from './EventWishlists'
+import { canEditEvent } from './event-permissions'
 import { MySecretSantaDraw } from './MySecretSantaDraw'
 import { SecretSantaSuggestionCard } from './SecretSantaSuggestionCard'
 
@@ -31,10 +32,7 @@ export const EventPage = ({ eventId }: EventPageProps) => {
   const queryRejection = data && isRejection(data) && data.__typename !== 'NotFoundRejection' ? data : undefined
 
   const attendees = useMemo(() => event?.attendees ?? [], [event])
-  const currentUserCanEdit = useMemo(
-    () => attendees.some(a => a.user?.id === currentUserId && a.role === AttendeeRole.Maintainer),
-    [attendees, currentUserId],
-  )
+  const currentUserCanEdit = useMemo(() => canEditEvent(attendees, currentUserId), [attendees, currentUserId])
   const { shouldShowSuggestion, dismissSuggestion } = useSecretSantaSuggestion({
     eventId: eventId,
     eventTitle: event?.title,

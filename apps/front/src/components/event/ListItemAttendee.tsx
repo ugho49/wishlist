@@ -1,20 +1,57 @@
-import LocalPoliceOutlinedIcon from '@mui/icons-material/LocalPoliceOutlined'
+import type { AttendeeRole } from '../../gql'
+
 import PersonIcon from '@mui/icons-material/Person'
-import { Avatar, ListItemAvatar, ListItemText, Stack, Tooltip } from '@mui/material'
+import { Avatar, ListItem, ListItemAvatar, ListItemText, styled } from '@mui/material'
 import { blue, orange } from '@mui/material/colors'
 
-import { AttendeeRole } from '../../gql'
+import { AttendeeRoleChip } from './AttendeeRoleChip'
 
-type ListItemAttendee = {
+type ListItemAttendeeProps = {
   userName: string
   role: AttendeeRole
   email: string
   pictureUrl?: string
   isPending: boolean
+  roleEditable?: boolean
+  roleDisabled?: boolean
+  onRoleChange?: (role: AttendeeRole) => void
 }
 
-export const ListItemAttendee = (params: ListItemAttendee) => {
-  const { userName, email, isPending, pictureUrl, role } = params
+export const AttendeeListItem = styled(ListItem)(({ theme }) => ({
+  alignItems: 'center',
+  paddingRight: theme.spacing(7),
+  [theme.breakpoints.down('sm')]: {
+    paddingLeft: 0,
+    paddingRight: theme.spacing(6),
+  },
+  '.MuiListItemSecondaryAction-root': {
+    right: theme.spacing(0.5),
+  },
+}))
+
+const AttendeeText = styled(ListItemText)({
+  minWidth: 0,
+  marginTop: 0,
+  marginBottom: 0,
+})
+
+const UserName = styled('b')({
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+  minWidth: 0,
+  display: 'block',
+})
+
+const RoleChipSlot = styled('div')(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  flexShrink: 0,
+  marginLeft: theme.spacing(1),
+}))
+
+export const ListItemAttendee = (params: ListItemAttendeeProps) => {
+  const { userName, email, isPending, pictureUrl, role, roleEditable, roleDisabled, onRoleChange } = params
   return (
     <>
       <ListItemAvatar>
@@ -28,19 +65,15 @@ export const ListItemAttendee = (params: ListItemAttendee) => {
           <PersonIcon />
         </Avatar>
       </ListItemAvatar>
-      <ListItemText
-        primary={
-          <Stack flexDirection="row" gap={1} alignItems="center">
-            {role === AttendeeRole.Maintainer && (
-              <Tooltip title="Admin de la liste">
-                <LocalPoliceOutlinedIcon fontSize="small" />
-              </Tooltip>
-            )}
-            <b>{isPending ? email : userName}</b>
-          </Stack>
-        }
+      <AttendeeText
+        primaryTypographyProps={{ component: 'div' }}
+        secondaryTypographyProps={{ component: 'span' }}
+        primary={<UserName>{isPending ? email : userName}</UserName>}
         secondary={isPending ? 'Invitation en attente de validation' : email}
       />
+      <RoleChipSlot>
+        <AttendeeRoleChip role={role} editable={roleEditable} disabled={roleDisabled} onRoleChange={onRoleChange} />
+      </RoleChipSlot>
     </>
   )
 }

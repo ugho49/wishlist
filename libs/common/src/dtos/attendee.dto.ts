@@ -35,3 +35,9 @@ export class AddEventAttendeeForEventInputDto extends AddEventAttendeeInputDto {
   @IsNotEmpty()
   declare event_id: EventId
 }
+
+export class UpdateEventAttendeeRoleInputDto {
+  @IsEnum(AttendeeRole)
+  @IsNotEmpty()
+  declare role: AttendeeRole
+}

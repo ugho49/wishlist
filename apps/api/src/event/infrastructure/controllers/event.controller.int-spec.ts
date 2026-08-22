@@ -65,7 +65,7 @@ describe('EventController', () => {
                   attendees: [
                     {
                       id: maintainerAttendeeId,
-                      role: 'maintainer',
+                      role: 'creator',
                       user: {
                         id: currentUserId,
                         email: Fixtures.BASE_USER_EMAIL,
@@ -76,7 +76,7 @@ describe('EventController', () => {
                     {
                       id: attendeeId1,
                       pending_email: 'temp@temp.fr',
-                      role: 'user',
+                      role: 'participant',
                     },
                   ],
                   created_at: expect.toBeDateString(),
@@ -344,7 +344,7 @@ describe('EventController', () => {
         await request.get(path(eventId)).expect(401)
       })
 
-      it('should return event when current user is attendee MAINTAINER', async () => {
+      it('should return event when current user is attendee CREATOR', async () => {
         const userId2 = await fixtures.insertUser({
           email: 'user2@user2.fr',
           firstname: 'User2',
@@ -401,7 +401,7 @@ describe('EventController', () => {
               attendees: expect.toIncludeSameMembers([
                 {
                   id: maintainerAttendeeId,
-                  role: 'maintainer',
+                  role: 'creator',
                   user: {
                     id: currentUserId,
                     email: Fixtures.BASE_USER_EMAIL,
@@ -411,7 +411,7 @@ describe('EventController', () => {
                 },
                 {
                   id: activeAttendeeId,
-                  role: 'user',
+                  role: 'participant',
                   user: {
                     id: userId2,
                     email: 'user2@user2.fr',
@@ -422,7 +422,7 @@ describe('EventController', () => {
                 {
                   id: pendingAttendeeId,
                   pending_email: 'temp@temp.fr',
-                  role: 'user',
+                  role: 'participant',
                 },
               ]),
               created_at: expect.toBeDateString(),
@@ -431,7 +431,7 @@ describe('EventController', () => {
           )
       })
 
-      it('should return event when current user is attendee USER', async () => {
+      it('should return event when current user is attendee PARTICIPANT', async () => {
         const creatorId = await fixtures.insertUser({
           email: 'user2@user2.fr',
           firstname: 'User2',
@@ -540,7 +540,7 @@ describe('EventController', () => {
             attendees: [{ email: 'test@test.com', role: 'invalid-role' }],
           },
           case: 'invalid attendee role',
-          message: ['attendees.0.role must be one of the following values: maintainer, user'],
+          message: ['attendees.0.role must be one of the following values: creator, admin, participant'],
         },
         {
           body: {
@@ -601,7 +601,7 @@ describe('EventController', () => {
         await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
           event_id: createdEventId,
           user_id: currentUserId,
-          role: 'maintainer',
+          role: 'creator',
         })
       })
 
@@ -624,11 +624,11 @@ describe('EventController', () => {
           attendees: [
             {
               email: user1Email,
-              role: 'maintainer',
+              role: 'admin',
             },
             {
               email: user2Email,
-              role: 'user',
+              role: 'participant',
             },
           ],
         }
@@ -664,19 +664,19 @@ describe('EventController', () => {
           .toMatchObject({
             event_id: createdEventId,
             user_id: currentUserId,
-            role: 'maintainer',
+            role: 'creator',
           })
           .row(1)
           .toMatchObject({
             event_id: createdEventId,
             user_id: user1Id,
-            role: 'maintainer',
+            role: 'admin',
           })
           .row(2)
           .toMatchObject({
             event_id: createdEventId,
             temp_user_email: user2Email,
-            role: 'user',
+            role: 'participant',
           })
 
         await expectMail()
@@ -745,6 +745,40 @@ describe('EventController', () => {
             event_date: DateTime.now().plus({ days: 1 }).toISODate(),
           })
           .expect(401)
+      })
+
+      it('should update event when user is admin of the event', async () => {
+        const creatorId = await fixtures.insertUser({
+          email: 'creator@test.com',
+          firstname: 'Creator',
+          lastname: 'User',
+        })
+
+        const { eventId } = await fixtures.insertEventWithCreator({
+          title: 'Event',
+          description: 'Description',
+          creatorId,
+        })
+        await fixtures.insertAdminAttendee({ eventId, userId: currentUserId })
+
+        const eventDate = DateTime.now().plus({ days: 2 }).toISODate()
+        await request
+          .put(path(eventId))
+          .send({
+            title: 'Updated by admin',
+            description: 'Updated Description',
+            event_date: eventDate,
+          })
+          .expect(200)
+
+        await expectTable(Fixtures.EVENT_TABLE)
+          .hasNumberOfRows(1)
+          .row(0)
+          .toMatchObject({
+            id: eventId,
+            title: 'Updated by admin',
+            event_date: new Date(eventDate),
+          })
       })
 
       it.each([
@@ -909,6 +943,26 @@ describe('EventController', () => {
         await request.delete(path(eventId)).expect(401)
 
         await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(1)
+      })
+
+      it('should delete event when user is admin of the event', async () => {
+        const creatorId = await fixtures.insertUser({
+          email: 'creator@test.com',
+          firstname: 'Creator',
+          lastname: 'User',
+        })
+
+        const { eventId } = await fixtures.insertEventWithCreator({
+          title: 'Event',
+          description: 'Description',
+          creatorId,
+        })
+        await fixtures.insertAdminAttendee({ eventId, userId: currentUserId })
+
+        await request.delete(path(eventId)).expect(200)
+
+        await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(0)
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(0)
       })
 
       it('should return 400 when event has wishlists', async () => {

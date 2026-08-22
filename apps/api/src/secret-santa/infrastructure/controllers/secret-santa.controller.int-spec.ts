@@ -166,7 +166,7 @@ describe('SecretSantaController', () => {
         .expect(({ body }) => {
           expect(body).toEqual({
             id: targetAttendeeId,
-            role: 'user',
+            role: 'participant',
             user: {
               id: targetUserId,
               email: 'target@test.fr',
@@ -676,7 +676,7 @@ describe('SecretSantaController', () => {
                 id: expect.toBeString(),
                 attendee: {
                   id: attendee2Id,
-                  role: 'user',
+                  role: 'participant',
                   user: {
                     id: user2Id,
                     email: 'user2@test.fr',

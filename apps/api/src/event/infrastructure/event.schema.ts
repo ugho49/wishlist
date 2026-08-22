@@ -1,5 +1,6 @@
 import { PaginationFiltersSchema } from '@wishlist/api/core/graphql'
 import { type AttendeeId, AttendeeRole, type EventId, type UserId } from '@wishlist/common'
+import { match } from 'ts-pattern'
 import z from 'zod'
 
 import {
@@ -15,9 +16,9 @@ export const EventIdSchema = z.string().transform(val => val as EventId)
 export const AttendeeIdSchema = z.string().transform(val => val as AttendeeId)
 export const UserIdSchema = z.string().transform(val => val as UserId)
 
-// The GraphQL AttendeeRole enum wire values (MAINTAINER / USER) map to the
-// domain AttendeeRole enum values (maintainer / user).
-const GqlAttendeeRoleSchema = z.enum(GqlAttendeeRole)
+// The GraphQL AttendeeRole enum wire values (CREATOR / ADMIN / PARTICIPANT) map to the
+// domain AttendeeRole enum values (creator / admin / participant).
+export const GqlAttendeeRoleSchema = z.enum(GqlAttendeeRole)
 
 export const EventPaginationFiltersSchema = PaginationFiltersSchema.extend({
   onlyFuture: z.boolean().default(false),
@@ -63,8 +64,14 @@ export const AddEventAttendeeInputSchema = z.object({
   role: GqlAttendeeRoleSchema.optional(),
 }) satisfies z.ZodType<AddEventAttendeeInput>
 
-// Maps GraphQL enum value (MAINTAINER / USER) to the domain AttendeeRole enum.
+// Maps GraphQL enum value (CREATOR / ADMIN / PARTICIPANT) to the domain AttendeeRole enum.
+export function toDomainAttendeeRole(role: GqlAttendeeRole): AttendeeRole
+export function toDomainAttendeeRole(role?: GqlAttendeeRole): AttendeeRole | undefined
 export function toDomainAttendeeRole(role?: GqlAttendeeRole): AttendeeRole | undefined {
   if (!role) return undefined
-  return role === GqlAttendeeRole.Maintainer ? AttendeeRole.MAINTAINER : AttendeeRole.USER
+  return match(role)
+    .with(GqlAttendeeRole.Creator, () => AttendeeRole.CREATOR)
+    .with(GqlAttendeeRole.Admin, () => AttendeeRole.ADMIN)
+    .with(GqlAttendeeRole.Participant, () => AttendeeRole.PARTICIPANT)
+    .exhaustive()
 }

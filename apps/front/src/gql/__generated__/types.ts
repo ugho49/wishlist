@@ -109,8 +109,9 @@ export type AdminWishlistPaginationFilters = {
 };
 
 export enum AttendeeRole {
-  Maintainer = 'MAINTAINER',
-  User = 'USER'
+  Admin = 'ADMIN',
+  Creator = 'CREATOR',
+  Participant = 'PARTICIPANT'
 }
 
 export enum BusinessRuleCode {
@@ -384,6 +385,7 @@ export type Mutation = {
   unlinkCurrentUserSocial: UnlinkCurrentUserSocialResult;
   unlinkWishlistFromEvent: UnlinkWishlistFromEventResult;
   updateEvent: UpdateEventResult;
+  updateEventAttendeeRole: UpdateEventAttendeeRoleResult;
   updateItem: UpdateItemResult;
   updateSecretSanta: UpdateSecretSantaResult;
   updateSecretSantaUser: UpdateSecretSantaUserResult;
@@ -592,6 +594,13 @@ export type MutationUnlinkWishlistFromEventArgs = {
 export type MutationUpdateEventArgs = {
   id: Scalars['EventId']['input'];
   input: UpdateEventInput;
+};
+
+
+export type MutationUpdateEventAttendeeRoleArgs = {
+  attendeeId: Scalars['AttendeeId']['input'];
+  eventId: Scalars['EventId']['input'];
+  role: AttendeeRole;
 };
 
 
@@ -849,6 +858,8 @@ export type UnauthorizedRejection = {
 export type UnlinkCurrentUserSocialResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
 export type UnlinkWishlistFromEventResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+
+export type UpdateEventAttendeeRoleResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
 export type UpdateEventInput = {
   description?: InputMaybe<Scalars['String']['input']>;
@@ -1149,6 +1160,22 @@ export type RemoveEventAttendeeMutationVariables = Exact<{
 
 
 export type RemoveEventAttendeeMutation = { __typename?: 'Mutation', removeEventAttendee:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'NotFoundRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection' }
+    | { __typename: 'VoidOutput', success: boolean }
+   };
+
+export type UpdateEventAttendeeRoleMutationVariables = Exact<{
+  eventId: Scalars['EventId']['input'];
+  attendeeId: Scalars['AttendeeId']['input'];
+  role: AttendeeRole;
+}>;
+
+
+export type UpdateEventAttendeeRoleMutation = { __typename?: 'Mutation', updateEventAttendeeRole:
     | { __typename: 'ForbiddenRejection' }
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'NotFoundRejection' }

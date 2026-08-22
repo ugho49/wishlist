@@ -33,7 +33,7 @@ export class DeleteAttendeeUseCase {
     const event = await this.eventRepository.findByIdOrFail(eventId)
 
     if (!event.canEdit(currentUser)) {
-      throw new UnauthorizedException('Only maintainers of the event can delete an attendee')
+      throw new UnauthorizedException('Only creators and admins of the event can delete an attendee')
     }
 
     const attendee = event.attendees.find(a => a.id === attendeeId)
@@ -44,6 +44,10 @@ export class DeleteAttendeeUseCase {
 
     if (attendee.user?.id === currentUser.id) {
       throw new ConflictException('You cannot delete yourself from the event')
+    }
+
+    if (attendee.isCreator()) {
+      throw new ConflictException('You cannot delete the creator of the event')
     }
 
     const attendeeUserId = attendee.user?.id

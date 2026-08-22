@@ -217,7 +217,7 @@ describe('SecretSantaResolver (GraphQL)', () => {
       expect(res.body.data.mySecretSantaDraw).toMatchObject({
         __typename: 'EventAttendee',
         id: targetAttendeeId,
-        role: 'USER',
+        role: 'PARTICIPANT',
         user: {
           id: targetUserId,
           email: 'target@test.fr',
@@ -924,7 +924,7 @@ describe('SecretSantaResolver (GraphQL)', () => {
             exclusions: [],
             attendee: {
               id: attendee2Id,
-              role: 'USER',
+              role: 'PARTICIPANT',
               user: {
                 id: user2Id,
                 email: 'user2@test.fr',
