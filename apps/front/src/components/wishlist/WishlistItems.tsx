@@ -14,6 +14,7 @@ import { ItemCard } from '../item/ItemCard'
 import { ItemCardSkeleton } from '../item/ItemCardSkeleton'
 import { ItemFormDialog } from '../item/ItemFormDialog'
 import { EmptyItemsState } from './EmptyItemsState'
+import { SharedReservationIntro } from './SharedReservationIntro'
 import { applyFilter, applySort } from './WishlistFilterAndSortItems'
 
 const SKELETON_KEYS = ['s1', 's2', 's3', 's4', 's5', 's6', 's7', 's8'] as const
@@ -151,6 +152,7 @@ const WishlistItemsLoaded = ({
   })
   const nbOfItems = useMemo(() => wishlist.items.length, [wishlist.items])
   const ownerOrCoOwnerOfTheList = currentUserId === wishlist.owner.id || wishlist.coOwner?.id === currentUserId
+  const canReserveItems = !ownerOrCoOwnerOfTheList || !wishlist.config.hideItems
   const [currentItem, setCurrentItem] = useState<WishlistItem | null>(null)
   const navigate = useNavigate({ from: '/wishlists/$wishlistId' })
 
@@ -167,6 +169,7 @@ const WishlistItemsLoaded = ({
     <Box className="items">
       {nbOfItems > 0 && (
         <>
+          {canReserveItems && <SharedReservationIntro />}
           <Grid container spacing={3}>
             {itemsFilteredAndSorted.map(item => (
               <Grid key={item.id} size={{ xs: 12, sm: 6, lg: 4, xl: 3 }}>
