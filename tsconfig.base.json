@@ -6,7 +6,7 @@
     "rootDir": ".",
     "sourceMap": true,
     "declaration": false,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "allowJs": true,
     "emitDecoratorMetadata": true,
     "esModuleInterop": true,
@@ -20,19 +20,18 @@
     "lib": ["ESNext", "dom"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
-    "baseUrl": ".",
     "strict": true,
     "paths": {
-      "@wishlist/api-client": ["libs/api-client/src/index.ts"],
-      "@wishlist/api-drizzle": ["apps/api/drizzle/index.ts"],
-      "@wishlist/api-test-utils": ["apps/api/test-utils/index.ts"],
-      "@wishlist/common": ["libs/common/src/index.ts"],
-      "@wishlist/mail": ["libs/mail/src/index.ts"],
-      "@wishlist/front-components/*": ["apps/front/src/components/*"],
-      "@wishlist/front-hooks": ["apps/front/src/hooks"],
-      "@wishlist/biome-plugin": ["plugin/biome-plugin/src/index.ts"],
-      "@wishlist/bun-plugin": ["plugin/bun-plugin/src/index.ts"],
-      "@wishlist/drizzle-plugin": ["plugin/drizzle-plugin/src/index.ts"]
+      "@wishlist/api-client": ["./libs/api-client/src/index.ts"],
+      "@wishlist/api-drizzle": ["./apps/api/drizzle/index.ts"],
+      "@wishlist/api-test-utils": ["./apps/api/test-utils/index.ts"],
+      "@wishlist/common": ["./libs/common/src/index.ts"],
+      "@wishlist/mail": ["./libs/mail/src/index.ts"],
+      "@wishlist/front-components/*": ["./apps/front/src/components/*"],
+      "@wishlist/front-hooks": ["./apps/front/src/hooks"],
+      "@wishlist/biome-plugin": ["./plugin/biome-plugin/src/index.ts"],
+      "@wishlist/bun-plugin": ["./plugin/bun-plugin/src/index.ts"],
+      "@wishlist/drizzle-plugin": ["./plugin/drizzle-plugin/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
