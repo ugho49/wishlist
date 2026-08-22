@@ -16,6 +16,7 @@ query ImportableItems($wishlistId: WishlistId!) {
           user {
             id
             firstName
+            lastName
             pictureUrl
           }
         }

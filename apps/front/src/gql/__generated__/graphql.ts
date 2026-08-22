@@ -741,6 +741,7 @@ export const ImportableItemsDocument = `
           user {
             id
             firstName
+            lastName
             pictureUrl
           }
         }
@@ -785,6 +786,7 @@ export const CreateItemDocument = `
         user {
           id
           firstName
+          lastName
           pictureUrl
         }
       }
@@ -878,6 +880,7 @@ export const ToggleItemDocument = `
         user {
           id
           firstName
+          lastName
           pictureUrl
         }
       }
@@ -942,6 +945,7 @@ export const ImportItemsDocument = `
           user {
             id
             firstName
+            lastName
             pictureUrl
           }
         }
@@ -2104,6 +2108,7 @@ export const WishlistPageDocument = `
           user {
             id
             firstName
+            lastName
             pictureUrl
           }
         }

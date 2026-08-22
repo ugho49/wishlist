@@ -15,6 +15,7 @@ mutation CreateItem($input: CreateItemInput!) {
         user {
           id
           firstName
+          lastName
           pictureUrl
         }
       }
@@ -63,6 +64,7 @@ mutation ToggleItem($itemId: ItemId!) {
         user {
           id
           firstName
+          lastName
           pictureUrl
         }
       }
@@ -97,6 +99,7 @@ mutation ImportItems($input: ImportItemsInput!) {
           user {
             id
             firstName
+            lastName
             pictureUrl
           }
         }

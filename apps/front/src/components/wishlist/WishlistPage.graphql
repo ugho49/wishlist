@@ -45,6 +45,7 @@ query WishlistPage($wishlistId: WishlistId!) {
           user {
             id
             firstName
+            lastName
             pictureUrl
           }
         }

@@ -23,7 +23,6 @@ import {
   Menu,
   MenuItem,
   styled,
-  Tooltip,
   Typography,
 } from '@mui/material'
 import { useQueryClient } from '@tanstack/react-query'
@@ -40,6 +39,7 @@ import { Card } from '../common/Card'
 import { ConfirmMenuItem } from '../common/ConfirmMenuItem'
 import { Rating, RatingBubble } from '../common/Rating'
 import { ItemFormDialog } from './ItemFormDialog'
+import { type ItemTakerDetails, ItemTakersDialog } from './ItemTakersDialog'
 
 // Modern card styling with vertical layout
 const ItemCardStyled = styled(Card)(({ theme }) => ({
@@ -240,6 +240,16 @@ const ReservedIndicator = styled(Box)<{ isReservedByMe: boolean }>(({ theme, isR
   boxShadow: isReservedByMe
     ? `0 6px 20px ${alpha(theme.palette.primary.main, 0.4)}`
     : `0 4px 12px ${alpha(theme.palette.success.main, 0.3)}`,
+  cursor: 'pointer',
+  userSelect: 'none',
+  transition: 'filter 0.15s ease',
+  '&:hover': {
+    filter: 'brightness(1.1)',
+  },
+  '&:focus-visible': {
+    outline: `2px solid ${theme.palette.common.white}`,
+    outlineOffset: 2,
+  },
 }))
 
 const ReservedAvatarGroup = styled(AvatarGroup)(() => ({
@@ -343,17 +353,23 @@ export type ItemCardProps = {
   onImageClick?: () => void
 }
 
-type Taker = {
-  id: string
-  firstName?: string | null
-  pictureUrl?: string | null
-}
-
-const toTakers = (takers: WishlistItem['takers']): Taker[] =>
+const toTakers = (
+  takers: Array<{
+    takenAt: string
+    user: {
+      id: string
+      firstName?: string | null
+      lastName?: string | null
+      pictureUrl?: string | null
+    }
+  }>,
+): ItemTakerDetails[] =>
   takers.map(taker => ({
     id: taker.user.id,
     firstName: taker.user.firstName,
+    lastName: taker.user.lastName,
     pictureUrl: taker.user.pictureUrl,
+    takenAt: taker.takenAt,
   }))
 
 const mapState = (state: RootState) => state.auth.user?.id
@@ -364,7 +380,8 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
   const queryClient = useQueryClient()
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
   const { currentItemId } = useSearch({ from: '/_authenticated/_with-layout/wishlists/$wishlistId/' })
-  const [takers, setTakers] = useState<Taker[]>(() => toTakers(item.takers))
+  const [takers, setTakers] = useState<ItemTakerDetails[]>(() => toTakers(item.takers))
+  const [takersDialogOpen, setTakersDialogOpen] = useState(false)
   const isDialogOpen = useMemo(() => currentItemId === item.id, [currentItemId, item.id])
   const navigate = useNavigate({ from: '/wishlists/$wishlistId' })
   const setDialogOpen = useCallback(
@@ -404,11 +421,7 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
     const res = await toggleItemMutation({ itemId: item.id })
     match(res.toggleItem)
       .with({ __typename: 'ToggleItemOutput' }, output => {
-        const nextTakers = output.takers.map(taker => ({
-          id: taker.user.id,
-          firstName: taker.user.firstName,
-          pictureUrl: taker.user.pictureUrl,
-        }))
+        const nextTakers = toTakers(output.takers)
         const action = nextTakers.some(taker => taker.id === currentUserId) ? 'check' : 'uncheck'
         setTakers(nextTakers)
 
@@ -483,14 +496,31 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
 
         {/* Reserved indicator - elegant and compact */}
         {isTaken && (
-          <ReservedIndicator isReservedByMe={isReservedByCurrentUser}>
+          <ReservedIndicator
+            isReservedByMe={isReservedByCurrentUser}
+            role="button"
+            tabIndex={0}
+            aria-haspopup="dialog"
+            aria-label={`Voir les réservations de ${item.name}`}
+            onClick={event => {
+              event.stopPropagation()
+              setTakersDialogOpen(true)
+            }}
+            onKeyDown={event => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault()
+                event.stopPropagation()
+                setTakersDialogOpen(true)
+              }
+            }}
+          >
             <RedeemIcon sx={{ fontSize: '1rem' }} />
             <span>Réservé</span>
             <ReservedAvatarGroup max={3} spacing="small">
               {takers.map(taker => (
-                <Tooltip key={taker.id} title={taker.firstName ?? ''}>
-                  <Avatar src={taker.pictureUrl ?? undefined}>{taker.firstName?.toUpperCase()?.charAt(0)}</Avatar>
-                </Tooltip>
+                <Avatar key={taker.id} src={taker.pictureUrl ?? undefined}>
+                  {taker.firstName?.toUpperCase()?.charAt(0)}
+                </Avatar>
               ))}
             </ReservedAvatarGroup>
           </ReservedIndicator>
@@ -620,6 +650,13 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
         wishlistId={wishlist.id}
         open={isDialogOpen}
         handleClose={() => setDialogOpen(false)}
+      />
+
+      <ItemTakersDialog
+        open={takersDialogOpen}
+        handleClose={() => setTakersDialogOpen(false)}
+        itemName={item.name}
+        takers={takers}
       />
     </>
   )
