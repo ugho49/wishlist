@@ -11,15 +11,16 @@ import { useSelector } from 'react-redux'
 
 import { FabAutoGrow } from '../common/FabAutoGrow'
 import { ItemCard } from '../item/ItemCard'
+import { ItemCardSkeleton } from '../item/ItemCardSkeleton'
 import { ItemFormDialog } from '../item/ItemFormDialog'
 import { EmptyItemsState } from './EmptyItemsState'
 import { applyFilter, applySort } from './WishlistFilterAndSortItems'
 
-export type WishlistTabItemsProps = {
-  wishlist: DetailedWishlist
-  hasImportableItems: boolean
-  onImportItems: () => void
-}
+const SKELETON_KEYS = ['s1', 's2', 's3', 's4', 's5', 's6', 's7', 's8'] as const
+
+export type WishlistTabItemsProps =
+  | { loading: true }
+  | { loading?: false; wishlist: DetailedWishlist; hasImportableItems: boolean; onImportItems: () => void }
 
 // Image modal component
 const ImageModal = ({
@@ -113,7 +114,33 @@ const ImageModal = ({
 
 const mapState = (state: RootState) => state.auth.user?.id
 
-export const WishlistItems = ({ wishlist, hasImportableItems, onImportItems }: WishlistTabItemsProps) => {
+export const WishlistItems = (props: WishlistTabItemsProps) => {
+  if (props.loading) {
+    return (
+      <Box className="items">
+        <Grid container spacing={3} aria-busy>
+          {SKELETON_KEYS.map(key => (
+            <Grid key={key} size={{ xs: 12, sm: 6, lg: 4, xl: 3 }}>
+              <ItemCardSkeleton />
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
+    )
+  }
+
+  return <WishlistItemsLoaded {...props} />
+}
+
+const WishlistItemsLoaded = ({
+  wishlist,
+  hasImportableItems,
+  onImportItems,
+}: {
+  wishlist: DetailedWishlist
+  hasImportableItems: boolean
+  onImportItems: () => void
+}) => {
   const currentUserId = useSelector(mapState)
   const {
     displayAddItemFormDialog: openItemFormDialog,

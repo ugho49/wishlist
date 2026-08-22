@@ -8,15 +8,30 @@ import { useNavigate } from '@tanstack/react-router'
 import { FabAutoGrow } from '../common/FabAutoGrow'
 import { EmptyListsState } from '../wishlist/EmptyListsState'
 import { WishlistCardWithOwner } from '../wishlist/WishlistCardWithOwner'
+import { WishlistCardWithOwnerSkeleton } from '../wishlist/WishlistCardWithOwnerSkeleton'
 
-export type EventWishlistsProps = {
-  eventId: EventId
-  wishlists: EventWishlist[]
-}
+const SKELETON_KEYS = ['s1', 's2', 's3', 's4', 's5', 's6'] as const
 
-export const EventWishlists = ({ eventId, wishlists }: EventWishlistsProps) => {
+export type EventWishlistsProps = { loading: true } | { loading?: false; eventId: EventId; wishlists: EventWishlist[] }
+
+export const EventWishlists = (props: EventWishlistsProps) => {
   const navigate = useNavigate()
 
+  if (props.loading) {
+    return (
+      <Box className="wishlists">
+        <Grid container spacing={3} aria-busy>
+          {SKELETON_KEYS.map(key => (
+            <Grid key={key} size={{ xs: 12, md: 6, xl: 4 }}>
+              <WishlistCardWithOwnerSkeleton />
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
+    )
+  }
+
+  const { eventId, wishlists } = props
   const handleAddList = () => navigate({ to: '/wishlists/new', search: { fromEvent: eventId } })
 
   return (

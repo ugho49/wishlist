@@ -10,11 +10,11 @@ import { useSelector } from 'react-redux'
 import { isRejection, rejectionMessage, useImportableItemsQuery, useWishlistPageQuery } from '../../gql'
 import { useFeatureFlag } from '../../hooks/useFeatureFlag'
 import { Description } from '../common/Description'
-import { Loader } from '../common/Loader'
 import { ImportItemsDialog } from '../item/ImportItemsDialog'
 import { SEO } from '../SEO'
 import { WishlistEventsDialog } from './WishlistEventsDialog'
 import { WishlistHeader } from './WishlistHeader'
+import { WishlistHeaderSkeleton } from './WishlistHeaderSkeleton'
 import { WishlistItems } from './WishlistItems'
 import { WishlistNotFound } from './WishlistNotFound'
 
@@ -86,57 +86,66 @@ export const WishlistPage = ({ wishlistId }: WishlistPageProps) => {
         canonical={`/wishlists/${wishlistId}`}
       />
       <Box>
-        <Loader loading={loading}>
-          {queryRejection && <Alert severity="error">{rejectionMessage(queryRejection)}</Alert>}
-          {!wishlist && !queryRejection && <WishlistNotFound />}
+        {loading && (
+          <>
+            <WishlistHeaderSkeleton />
+            <Container maxWidth="lg">
+              <Stack gap="20px" sx={{ paddingTop: 3 }}>
+                <WishlistItems loading />
+              </Stack>
+            </Container>
+          </>
+        )}
 
-          {wishlist && (
-            <>
-              <WishlistHeader
-                wishlist={wishlist}
-                currentUserCanEdit={currentUserCanEdit}
-                isPublic={isPublic}
-                hasImportableItems={importableItems.length > 0}
-                sort={sort}
-                filter={filter}
-                onSortChange={setSort}
-                onFilterChange={setFilter}
-                onOpenEventDialog={() => setShowEventDialog(true)}
-                onOpenImportDialog={() => setShowImportDialog(true)}
-              />
+        {!loading && queryRejection && <Alert severity="error">{rejectionMessage(queryRejection)}</Alert>}
+        {!loading && !wishlist && !queryRejection && <WishlistNotFound />}
 
-              <Container maxWidth="lg">
-                <Stack gap="20px" sx={{ paddingTop: 3 }}>
-                  {wishlist.description && <Description text={wishlist.description} allowMarkdown />}
+        {!loading && wishlist && (
+          <>
+            <WishlistHeader
+              wishlist={wishlist}
+              currentUserCanEdit={currentUserCanEdit}
+              isPublic={isPublic}
+              hasImportableItems={importableItems.length > 0}
+              sort={sort}
+              filter={filter}
+              onSortChange={setSort}
+              onFilterChange={setFilter}
+              onOpenEventDialog={() => setShowEventDialog(true)}
+              onOpenImportDialog={() => setShowImportDialog(true)}
+            />
 
-                  <WishlistItems
-                    wishlist={wishlist}
-                    hasImportableItems={importableItems.length > 0}
-                    onImportItems={() => setShowImportDialog(true)}
-                  />
-                </Stack>
-              </Container>
+            <Container maxWidth="lg">
+              <Stack gap="20px" sx={{ paddingTop: 3 }}>
+                {wishlist.description && <Description text={wishlist.description} allowMarkdown />}
 
-              <WishlistEventsDialog
-                open={showEventDialog}
-                handleClose={() => setShowEventDialog(false)}
-                wishlistId={wishlist.id}
-                events={wishlist.events}
-                currentUserCanEdit={currentUserCanEdit}
-              />
-
-              {currentUserCanEdit && importableItems.length > 0 && (
-                <ImportItemsDialog
-                  open={showImportDialog && importItemsEnabled}
-                  wishlistId={wishlist.id}
-                  importableItems={importableItems}
-                  onClose={() => setShowImportDialog(false)}
-                  onComplete={() => setShowImportDialog(false)}
+                <WishlistItems
+                  wishlist={wishlist}
+                  hasImportableItems={importableItems.length > 0}
+                  onImportItems={() => setShowImportDialog(true)}
                 />
-              )}
-            </>
-          )}
-        </Loader>
+              </Stack>
+            </Container>
+
+            <WishlistEventsDialog
+              open={showEventDialog}
+              handleClose={() => setShowEventDialog(false)}
+              wishlistId={wishlist.id}
+              events={wishlist.events}
+              currentUserCanEdit={currentUserCanEdit}
+            />
+
+            {currentUserCanEdit && importableItems.length > 0 && (
+              <ImportItemsDialog
+                open={showImportDialog && importItemsEnabled}
+                wishlistId={wishlist.id}
+                importableItems={importableItems}
+                onClose={() => setShowImportDialog(false)}
+                onComplete={() => setShowImportDialog(false)}
+              />
+            )}
+          </>
+        )}
       </Box>
     </>
   )

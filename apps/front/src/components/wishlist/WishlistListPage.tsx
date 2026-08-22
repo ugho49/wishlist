@@ -4,11 +4,13 @@ import { useNavigate, useSearch } from '@tanstack/react-router'
 
 import { isRejection, rejectionMessage, useWishlistListPageQuery } from '../../gql'
 import { FabAutoGrow } from '../common/FabAutoGrow'
-import { Loader } from '../common/Loader'
 import { Pagination } from '../common/Pagination'
 import { Title } from '../common/Title'
 import { EmptyListsState } from './EmptyListsState'
 import { WishlistCardWithEvents } from './WishlistCardWithEvents'
+import { WishlistCardWithEventsSkeleton } from './WishlistCardWithEventsSkeleton'
+
+const SKELETON_KEYS = ['s1', 's2', 's3', 's4'] as const
 
 export const WishlistListPage = () => {
   const { page: currentPage } = useSearch({ from: '/_authenticated/_with-layout/wishlists/' })
@@ -27,10 +29,21 @@ export const WishlistListPage = () => {
 
   return (
     <Box>
-      {totalElements > 0 && <Title>Mes listes</Title>}
+      {(loading || totalElements > 0) && <Title>Mes listes</Title>}
 
-      <Loader loading={loading}>
-        {queryRejection && <Alert severity="error">{rejectionMessage(queryRejection)}</Alert>}
+      {queryRejection && <Alert severity="error">{rejectionMessage(queryRejection)}</Alert>}
+
+      {loading && (
+        <Grid container spacing={3} aria-busy>
+          {SKELETON_KEYS.map(key => (
+            <Grid key={key} size={{ xs: 12, lg: 6 }}>
+              <WishlistCardWithEventsSkeleton />
+            </Grid>
+          ))}
+        </Grid>
+      )}
+
+      {!loading && (
         <Grid container spacing={3}>
           {(wishlists?.data ?? []).map(wishlist => (
             <Grid key={wishlist.id} size={{ xs: 12, lg: 6 }}>
@@ -38,7 +51,7 @@ export const WishlistListPage = () => {
             </Grid>
           ))}
         </Grid>
-      </Loader>
+      )}
 
       {totalElements > 0 && (
         <>
