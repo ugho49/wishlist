@@ -1,11 +1,9 @@
-import LocalPoliceOutlinedIcon from '@mui/icons-material/LocalPoliceOutlined'
-import PersonIcon from '@mui/icons-material/Person'
-import WorkspacePremiumOutlinedIcon from '@mui/icons-material/WorkspacePremiumOutlined'
-import { Avatar, ListItem, ListItemAvatar, ListItemText, Stack, styled, Tooltip } from '@mui/material'
-import { blue, orange } from '@mui/material/colors'
-import { match } from 'ts-pattern'
+import type { AttendeeRole } from '../../gql'
 
-import { AttendeeRole } from '../../gql'
+import PersonIcon from '@mui/icons-material/Person'
+import { Avatar, ListItem, ListItemAvatar, ListItemText, styled } from '@mui/material'
+import { blue, orange } from '@mui/material/colors'
+
 import { AttendeeRoleChip } from './AttendeeRoleChip'
 
 type ListItemAttendeeProps = {
@@ -37,18 +35,12 @@ const AttendeeText = styled(ListItemText)({
   marginBottom: 0,
 })
 
-const NameRow = styled(Stack)(({ theme }) => ({
-  flexDirection: 'row',
-  alignItems: 'center',
-  gap: theme.spacing(1),
-  minWidth: 0,
-}))
-
 const UserName = styled('b')({
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
   minWidth: 0,
+  display: 'block',
 })
 
 const RoleChipSlot = styled('div')(({ theme }) => ({
@@ -57,21 +49,6 @@ const RoleChipSlot = styled('div')(({ theme }) => ({
   flexShrink: 0,
   marginLeft: theme.spacing(1),
 }))
-
-const RoleBadge = ({ role }: { role: AttendeeRole }) =>
-  match(role)
-    .with(AttendeeRole.Creator, () => (
-      <Tooltip title="Créateur">
-        <WorkspacePremiumOutlinedIcon fontSize="small" />
-      </Tooltip>
-    ))
-    .with(AttendeeRole.Admin, () => (
-      <Tooltip title="Admin">
-        <LocalPoliceOutlinedIcon fontSize="small" />
-      </Tooltip>
-    ))
-    .with(AttendeeRole.Participant, () => null)
-    .exhaustive()
 
 export const ListItemAttendee = (params: ListItemAttendeeProps) => {
   const { userName, email, isPending, pictureUrl, role, roleEditable, roleDisabled, onRoleChange } = params
@@ -91,12 +68,7 @@ export const ListItemAttendee = (params: ListItemAttendeeProps) => {
       <AttendeeText
         primaryTypographyProps={{ component: 'div' }}
         secondaryTypographyProps={{ component: 'span' }}
-        primary={
-          <NameRow>
-            <RoleBadge role={role} />
-            <UserName>{isPending ? email : userName}</UserName>
-          </NameRow>
-        }
+        primary={<UserName>{isPending ? email : userName}</UserName>}
         secondary={isPending ? 'Invitation en attente de validation' : email}
       />
       <RoleChipSlot>

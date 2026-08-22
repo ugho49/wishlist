@@ -9,6 +9,8 @@ import { DataGrid } from '@mui/x-data-grid'
 import { AttendeeRole } from '../../../gql'
 import { ConfirmIconButton } from '../../common/ConfirmIconButton'
 import { RouterLink } from '../../common/RouterLink'
+import { AttendeeRoleChip } from '../AttendeeRoleChip'
+import { getAttendeeRoleLabel } from '../attendee-role'
 
 type AdminListAttendeesProps = {
   attendees: AdminEventAttendee[]
@@ -69,7 +71,11 @@ export const AdminListAttendees = ({ attendees, deleteAttendee, loading = false 
           },
           {
             field: 'role',
+            headerName: 'Rôle',
             width: 150,
+            display: 'flex',
+            valueGetter: (_, row) => getAttendeeRoleLabel(row.role),
+            renderCell: ({ row }) => <AttendeeRoleChip role={row.role} />,
           },
           {
             field: 'pending',
