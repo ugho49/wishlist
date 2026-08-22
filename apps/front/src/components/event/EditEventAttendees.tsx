@@ -3,7 +3,7 @@ import type { RootState } from '../../core'
 import type { EventAttendee } from './event.types'
 
 import DeleteIcon from '@mui/icons-material/Delete'
-import { Box, Divider, List, ListItem, ListItemButton, MenuItem, Select, Stack, styled } from '@mui/material'
+import { Box, Divider, List, Stack } from '@mui/material'
 import { useQueryClient } from '@tanstack/react-query'
 import { useMemo } from 'react'
 import { useSelector } from 'react-redux'
@@ -22,7 +22,8 @@ import { Card } from '../common/Card'
 import { ConfirmIconButton } from '../common/ConfirmIconButton'
 import { Subtitle } from '../common/Subtitle'
 import { SearchUserSelect } from '../user/SearchUserSelect'
-import { ListItemAttendee } from './ListItemAttendee'
+import { AttendeeRolesGuide } from './AttendeeRolesGuide'
+import { AttendeeListItem, ListItemAttendee } from './ListItemAttendee'
 
 export type EditEventAttendeesProps = {
   eventId: EventId
@@ -30,23 +31,6 @@ export type EditEventAttendeesProps = {
 }
 
 const mapState = (state: RootState) => ({ email: state.auth.user?.email, id: state.auth.user?.id })
-
-const ASSIGNABLE_ROLES = [
-  { value: AttendeeRole.Admin, label: 'Admin' },
-  { value: AttendeeRole.Participant, label: 'Participant' },
-] as const
-
-const AttendeeListItem = styled(ListItem)(({ theme }) => ({
-  '.MuiListItemSecondaryAction-root': {
-    display: 'flex',
-    alignItems: 'center',
-    gap: theme.spacing(1),
-  },
-}))
-
-const RoleSelect = styled(Select)({
-  minWidth: 140,
-})
 
 export const EditEventAttendees = ({ eventId, attendees }: EditEventAttendeesProps) => {
   const { id: currentUserId, email: currentUserEmail } = useSelector(mapState)
@@ -109,52 +93,35 @@ export const EditEventAttendees = ({ eventId, attendees }: EditEventAttendeesPro
   )
 
   return (
-    <Card>
-      <Subtitle>Gérer les participants</Subtitle>
+    <Stack gap={2}>
+      <AttendeeRolesGuide />
 
-      <Box>
-        <SearchUserSelect
-          label="Ajouter un nouveau participant à l'évènement ?"
-          disabled={loading}
-          excludedEmails={[...attendeeEmails, currentUserEmail || '']}
-          onChange={value => addAttendee(typeof value === 'string' ? value : value.email)}
-        />
-      </Box>
+      <Card>
+        <Subtitle>Gérer les participants</Subtitle>
 
-      <Divider sx={{ marginBlock: '20px' }} />
+        <Box>
+          <SearchUserSelect
+            label="Ajouter un nouveau participant à l'évènement ?"
+            disabled={loading}
+            excludedEmails={[...attendeeEmails, currentUserEmail || '']}
+            onChange={value => addAttendee(typeof value === 'string' ? value : value.email)}
+          />
+        </Box>
 
-      <List>
-        {attendees.map(attendee => {
-          const isCurrentUser = attendee.user?.id === currentUserId
-          const isCreator = attendee.role === AttendeeRole.Creator
-          const canDelete = !isCurrentUser && !isCreator
-          const canChangeRole = !isCurrentUser && !isCreator
+        <Divider sx={{ marginBlock: '20px' }} />
 
-          return (
-            <AttendeeListItem
-              key={attendee.id}
-              className="animated zoomIn fast"
-              disablePadding
-              secondaryAction={
-                <Stack direction="row" alignItems="center" gap={1}>
-                  {canChangeRole ? (
-                    <RoleSelect
-                      size="small"
-                      value={attendee.role}
-                      disabled={loading}
-                      onClick={event => event.stopPropagation()}
-                      onChange={event => {
-                        const role = event.target.value as AttendeeRole
-                        if (role !== attendee.role) void updateRole(attendee.id, role)
-                      }}
-                    >
-                      {ASSIGNABLE_ROLES.map(option => (
-                        <MenuItem key={option.value} value={option.value}>
-                          {option.label}
-                        </MenuItem>
-                      ))}
-                    </RoleSelect>
-                  ) : null}
+        <List disablePadding>
+          {attendees.map(attendee => {
+            const isCurrentUser = attendee.user?.id === currentUserId
+            const isCreator = attendee.role === AttendeeRole.Creator
+            const canDelete = !isCurrentUser && !isCreator
+            const canChangeRole = !isCurrentUser && !isCreator
+
+            return (
+              <AttendeeListItem
+                key={attendee.id}
+                className="animated zoomIn fast"
+                secondaryAction={
                   <ConfirmIconButton
                     disabled={!canDelete || loading}
                     confirmTitle="Enlever ce participant ?"
@@ -173,22 +140,23 @@ export const EditEventAttendees = ({ eventId, attendees }: EditEventAttendeesPro
                   >
                     <DeleteIcon />
                   </ConfirmIconButton>
-                </Stack>
-              }
-            >
-              <ListItemButton>
+                }
+              >
                 <ListItemAttendee
                   role={attendee.role}
                   userName={`${attendee.user?.firstName} ${attendee.user?.lastName}`}
                   isPending={!!attendee.pendingEmail}
                   email={attendee.pendingEmail ?? attendee.user?.email ?? ''}
                   pictureUrl={attendee.user?.pictureUrl ?? undefined}
+                  roleEditable={canChangeRole}
+                  roleDisabled={loading}
+                  onRoleChange={role => updateRole(attendee.id, role)}
                 />
-              </ListItemButton>
-            </AttendeeListItem>
-          )
-        })}
-      </List>
-    </Card>
+              </AttendeeListItem>
+            )
+          })}
+        </List>
+      </Card>
+    </Stack>
   )
 }
