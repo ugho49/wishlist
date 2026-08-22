@@ -1,11 +1,11 @@
-import type { DateTime } from 'luxon'
-import type { RootState } from '../../core'
+import type { DateTime } from 'luxon';
+import type { RootState } from '../../core/store';
 
-import { zodResolver } from '@hookform/resolvers/zod'
-import DeleteIcon from '@mui/icons-material/Delete'
-import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft'
-import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'
-import SaveIcon from '@mui/icons-material/Save'
+import { zodResolver } from '@hookform/resolvers/zod';
+import DeleteIcon from '@mui/icons-material/Delete';
+import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
+import SaveIcon from '@mui/icons-material/Save';
 import {
   Box,
   Button,
@@ -18,41 +18,41 @@ import {
   StepLabel,
   Stepper,
   TextField,
-} from '@mui/material'
-import { useNavigate } from '@tanstack/react-router'
-import { useMemo, useState } from 'react'
-import { Controller, useForm } from 'react-hook-form'
-import { useSelector } from 'react-redux'
-import { match } from 'ts-pattern'
-import { z } from 'zod'
+} from '@mui/material';
+import { useNavigate } from '@tanstack/react-router';
+import { useMemo, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { useSelector } from 'react-redux';
+import { match } from 'ts-pattern';
+import { z } from 'zod';
 
-import { AttendeeRole, rejectionMessage, rejectionPattern, useCreateEventMutation } from '../../gql'
-import { useToast } from '../../hooks/useToast'
-import { Card } from '../common/Card'
-import { CharsRemaining } from '../common/CharsRemaining'
-import { WishlistDatePicker } from '../common/DatePicker'
-import { EmojiSelector } from '../common/EmojiSelector'
-import { Subtitle } from '../common/Subtitle'
-import { TextareaMarkdown } from '../common/TextareaMarkdown'
-import { Title } from '../common/Title'
-import { SearchUserSelect } from '../user/SearchUserSelect'
-import { AttendeeRolesGuide } from './AttendeeRolesGuide'
-import { AttendeeListItem, ListItemAttendee } from './ListItemAttendee'
+import { AttendeeRole, rejectionMessage, rejectionPattern, useCreateEventMutation } from '../../gql';
+import { useToast } from '../../hooks/useToast';
+import { Card } from '../common/Card';
+import { CharsRemaining } from '../common/CharsRemaining';
+import { WishlistDatePicker } from '../common/DatePicker';
+import { EmojiSelector } from '../common/EmojiSelector';
+import { Subtitle } from '../common/Subtitle';
+import { TextareaMarkdown } from '../common/TextareaMarkdown';
+import { Title } from '../common/Title';
+import { SearchUserSelect } from '../user/SearchUserSelect';
+import { AttendeeRolesGuide } from './AttendeeRolesGuide';
+import { AttendeeListItem, ListItemAttendee } from './ListItemAttendee';
 
-const steps = ['Informations', 'Participants']
+const steps = ['Informations', 'Participants'];
 
 type SelectedUser = {
-  id: string
-  email: string
-  firstName: string
-  lastName: string
-  pictureUrl?: string | null
-}
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  pictureUrl?: string | null;
+};
 
 type Attendee = {
-  user: string | SelectedUser
-  role: AttendeeRole
-}
+  user: string | SelectedUser;
+  role: AttendeeRole;
+};
 
 const schema = z.object({
   icon: z.string().optional(),
@@ -62,18 +62,18 @@ const schema = z.object({
     .custom<DateTime>()
     .nullable()
     .refine(date => date !== null, "La date de l'événement est requise"),
-})
+});
 
-type FormFields = z.infer<typeof schema>
+type FormFields = z.infer<typeof schema>;
 
-const mapState = (state: RootState) => state.auth.user?.email
+const mapState = (state: RootState) => state.auth.user?.email;
 
 export const CreateEventPage = () => {
-  const currentUserEmail = useSelector(mapState)
-  const { addToast } = useToast()
-  const navigate = useNavigate()
-  const [step, setStep] = useState(1)
-  const [attendees, setAttendees] = useState<Attendee[]>([])
+  const currentUserEmail = useSelector(mapState);
+  const { addToast } = useToast();
+  const navigate = useNavigate();
+  const [step, setStep] = useState(1);
+  const [attendees, setAttendees] = useState<Attendee[]>([]);
 
   const {
     register,
@@ -89,25 +89,25 @@ export const CreateEventPage = () => {
       eventDate: null,
       icon: undefined,
     },
-  })
+  });
 
-  const formValues = watch()
+  const formValues = watch();
 
   const attendeeEmails = useMemo(
     () =>
       attendees.map(attendee => {
-        if (typeof attendee.user === 'string') return attendee.user
-        return attendee.user.email
+        if (typeof attendee.user === 'string') return attendee.user;
+        return attendee.user.email;
       }),
     [attendees],
-  )
+  );
 
   const { mutateAsync: createEventMutation, isPending: loading } = useCreateEventMutation({
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-  })
+  });
 
   const createEvent = async () => {
-    const isoDate = formValues.eventDate!.toISODate()!
+    const isoDate = formValues.eventDate!.toISODate()!;
     const res = await createEventMutation({
       input: {
         title: formValues.title,
@@ -119,15 +119,15 @@ export const CreateEventPage = () => {
           role: attendee.role,
         })),
       },
-    })
+    });
     match(res.createEvent)
       .with({ __typename: 'Event' }, created => {
-        addToast({ message: 'Evènement créé avec succès', variant: 'success' })
-        void navigate({ to: '/events/$eventId', params: { eventId: created.id } })
+        addToast({ message: 'Evènement créé avec succès', variant: 'success' });
+        void navigate({ to: '/events/$eventId', params: { eventId: created.id } });
       })
       .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
-      .exhaustive()
-  }
+      .exhaustive();
+  };
 
   return (
     <Box>
@@ -236,7 +236,7 @@ export const CreateEventPage = () => {
                         role: AttendeeRole.Participant,
                       },
                       ...prevState,
-                    ])
+                    ]);
                   }}
                   excludedEmails={[...attendeeEmails, currentUserEmail || '']}
                 />
@@ -248,8 +248,8 @@ export const CreateEventPage = () => {
 
                   <List disablePadding sx={{ maxHeight: '280px', overflow: 'auto' }}>
                     {attendees.map(attendee => {
-                      const attendeeEmail = typeof attendee.user === 'string' ? attendee.user : attendee.user.email
-                      const attendeeKey = typeof attendee.user === 'string' ? attendee.user : attendee.user.id
+                      const attendeeEmail = typeof attendee.user === 'string' ? attendee.user : attendee.user.email;
+                      const attendeeKey = typeof attendee.user === 'string' ? attendee.user : attendee.user.id;
 
                       return (
                         <AttendeeListItem
@@ -262,8 +262,8 @@ export const CreateEventPage = () => {
                               onClick={() =>
                                 setAttendees(prev =>
                                   prev.filter(value => {
-                                    const valueEmail = typeof value.user === 'string' ? value.user : value.user.email
-                                    return valueEmail !== attendeeEmail
+                                    const valueEmail = typeof value.user === 'string' ? value.user : value.user.email;
+                                    return valueEmail !== attendeeEmail;
                                   }),
                                 )
                               }
@@ -275,28 +275,28 @@ export const CreateEventPage = () => {
                           <ListItemAttendee
                             role={attendee.role}
                             userName={
-                              typeof attendee.user !== 'string'
-                                ? `${attendee.user.firstName} ${attendee.user.lastName}`
-                                : ''
+                              typeof attendee.user === 'string'
+                                ? ''
+                                : `${attendee.user.firstName} ${attendee.user.lastName}`
                             }
                             isPending={typeof attendee.user === 'string'}
                             email={attendeeEmail}
                             pictureUrl={
-                              typeof attendee.user !== 'string' ? (attendee.user.pictureUrl ?? undefined) : undefined
+                              typeof attendee.user === 'string' ? undefined : (attendee.user.pictureUrl ?? undefined)
                             }
                             roleEditable
                             roleDisabled={loading}
                             onRoleChange={role =>
                               setAttendees(prev =>
                                 prev.map(value => {
-                                  const valueEmail = typeof value.user === 'string' ? value.user : value.user.email
-                                  return valueEmail === attendeeEmail ? { ...value, role } : value
+                                  const valueEmail = typeof value.user === 'string' ? value.user : value.user.email;
+                                  return valueEmail === attendeeEmail ? { ...value, role } : value;
                                 }),
                               )
                             }
                           />
                         </AttendeeListItem>
-                      )
+                      );
                     })}
                   </List>
                 </>
@@ -337,5 +337,5 @@ export const CreateEventPage = () => {
         </Card>
       </Container>
     </Box>
-  )
-}
+  );
+};

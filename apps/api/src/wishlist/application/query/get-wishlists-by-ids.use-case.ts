@@ -1,13 +1,15 @@
-import { Inject, Injectable } from '@nestjs/common'
-import { REPOSITORIES } from '@wishlist/api/repositories'
-import { type ICurrentUser, type WishlistId } from '@wishlist/common'
+import type { WishlistRepository } from '../../domain/wishlist.repository';
 
-import { Wishlist, type WishlistRepository } from '../../domain'
+import { Inject, Injectable } from '@nestjs/common';
+import { type ICurrentUser, type WishlistId } from '@wishlist/common';
+
+import { REPOSITORIES } from '../../../repositories/repositories.constants';
+import { Wishlist } from '../../domain/wishlist.model';
 
 export type GetWishlistsByIdsInput = {
-  currentUser: ICurrentUser
-  wishlistIds: WishlistId[]
-}
+  currentUser: ICurrentUser;
+  wishlistIds: WishlistId[];
+};
 
 @Injectable()
 export class GetWishlistsByIdsUseCase {
@@ -26,8 +28,8 @@ export class GetWishlistsByIdsUseCase {
     )
       .filter(Boolean)
       .map((hasAccess, index) => (hasAccess ? input.wishlistIds[index] : undefined))
-      .filter((wishlistId): wishlistId is WishlistId => wishlistId !== undefined)
+      .filter((wishlistId): wishlistId is WishlistId => wishlistId !== undefined);
 
-    return this.wishlistRepository.findByIds(wishlistIds)
+    return this.wishlistRepository.findByIds(wishlistIds);
   }
 }

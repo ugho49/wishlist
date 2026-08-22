@@ -1,6 +1,6 @@
-import type { ReactElement } from 'react'
+import type { ReactElement } from 'react';
 // biome-ignore lint/correctness/noUnusedImports: react-dom/server is loaded at runtime by react-email's render, but it is only a peer dependency. Nx resolves it from this import to add it to the generated build package.json
-import type * as ReactDOM from 'react-dom'
+import type * as ReactDOM from 'react-dom';
 
 import {
   AddedToEventEmail,
@@ -15,10 +15,10 @@ import {
   SecretSantaCancelEmail,
   SecretSantaDrawEmail,
   WelcomeUserEmail,
-} from '@wishlist/mail'
-import { match } from 'ts-pattern'
+} from '@wishlist/mail';
+import { match } from 'ts-pattern';
 
-import { type MailPayload, MailTemplate } from './mail.type'
+import { type MailPayload, MailTemplate } from './mail.type';
 
 /**
  * Maps a queued mail payload to its react-email component, narrowing the
@@ -76,4 +76,4 @@ export const mapPayloadToTemplate = (payload: MailPayload): ReactElement =>
     .with({ template: MailTemplate.EMAIL_CHANGED_SUCCESS }, ({ context }) => (
       <EmailChangedSuccessEmail email={context.email} />
     ))
-    .exhaustive()
+    .exhaustive();

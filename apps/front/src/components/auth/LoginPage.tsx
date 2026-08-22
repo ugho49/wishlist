@@ -1,56 +1,56 @@
-import { zodResolver } from '@hookform/resolvers/zod'
-import LoginIcon from '@mui/icons-material/Login'
-import { Alert, Button, Divider, Stack, styled, TextField, Typography } from '@mui/material'
-import { useNavigate, useSearch } from '@tanstack/react-router'
-import { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { useDispatch } from 'react-redux'
-import { match, P } from 'ts-pattern'
-import { z } from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod';
+import LoginIcon from '@mui/icons-material/Login';
+import { Alert, Button, Divider, Stack, styled, TextField, Typography } from '@mui/material';
+import { useNavigate, useSearch } from '@tanstack/react-router';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { useDispatch } from 'react-redux';
+import { match, P } from 'ts-pattern';
+import { z } from 'zod';
 
-import { setTokens } from '../../core/store/features'
-import { rejectionMessage, rejectionPattern, useAuthLoginMutation, useAuthLoginWithGoogleMutation } from '../../gql'
-import { useToast } from '../../hooks/useToast'
-import { RouterLink } from '../common/RouterLink'
-import { GoogleButton } from './GoogleButton'
+import { setTokens } from '../../core/store/features/authSlice';
+import { rejectionMessage, rejectionPattern, useAuthLoginMutation, useAuthLoginWithGoogleMutation } from '../../gql';
+import { useToast } from '../../hooks/useToast';
+import { RouterLink } from '../common/RouterLink';
+import { GoogleButton } from './GoogleButton';
 
 const schema = z.object({
   email: z.email('Email invalide'),
   password: z.string().min(1, 'Ce champ ne peut pas être vide'),
-})
+});
 
-type FormFields = z.infer<typeof schema>
+type FormFields = z.infer<typeof schema>;
 
 const TitleStyled = styled(Typography)(({ theme }) => ({
   fontSize: '1.75rem',
   fontWeight: 600,
   color: theme.palette.text.primary,
   textAlign: 'center',
-}))
+}));
 
 const ButtonStyled = styled(Button)(() => ({
   paddingTop: 12,
   paddingBottom: 12,
   fontSize: '1rem',
   fontWeight: 600,
-}))
+}));
 
 const SocialButtonsStack = styled(Stack)(() => ({
   width: '100%',
   gap: 12,
-}))
+}));
 
 const DividerStyled = styled(Divider)(() => ({
   marginTop: 16,
   marginBottom: 16,
-}))
+}));
 
 export const LoginPage = () => {
-  const dispatch = useDispatch()
-  const { addToast } = useToast()
-  const [socialLoading, setSocialLoading] = useState(false)
-  const navigate = useNavigate()
-  const { redirectUrl, email: emailFromSearch } = useSearch({ from: '/_anonymous-with-layout/login' })
+  const dispatch = useDispatch();
+  const { addToast } = useToast();
+  const [socialLoading, setSocialLoading] = useState(false);
+  const navigate = useNavigate();
+  const { redirectUrl, email: emailFromSearch } = useSearch({ from: '/_anonymous-with-layout/login' });
   const {
     register,
     setError,
@@ -59,59 +59,59 @@ export const LoginPage = () => {
   } = useForm<FormFields>({
     resolver: zodResolver(schema),
     defaultValues: { email: emailFromSearch || '' },
-  })
+  });
 
   const handleLoginSuccess = (accessToken: string) => {
-    addToast({ message: 'Heureux de vous revoir 🤓', variant: 'default' })
+    addToast({ message: 'Heureux de vous revoir 🤓', variant: 'default' });
 
     dispatch(
       setTokens({
         accessToken,
       }),
-    )
+    );
 
-    void navigate({ to: redirectUrl })
-  }
+    void navigate({ to: redirectUrl });
+  };
 
   const onSocialError = () => {
-    setSocialLoading(false)
-    addToast({ message: "Une erreur s'est produite", variant: 'error' })
-  }
+    setSocialLoading(false);
+    addToast({ message: "Une erreur s'est produite", variant: 'error' });
+  };
 
   const { mutateAsync: loginMutation } = useAuthLoginMutation({
     onError: () => setError('root', { message: "Une erreur s'est produite." }),
-  })
+  });
   const { mutateAsync: loginWithGoogleMutation } = useAuthLoginWithGoogleMutation({
     onError: () => onSocialError(),
-  })
+  });
 
   const login = async (data: FormFields) => {
-    const res = await loginMutation({ input: data })
+    const res = await loginMutation({ input: data });
     match(res.login)
       .with({ __typename: 'LoginOutput' }, output => handleLoginSuccess(output.accessToken))
       .with({ __typename: P.union('UnauthorizedRejection', 'ValidationRejection') }, () =>
         setError('root', { message: 'Email ou mot de passe incorrect' }),
       )
       .with(rejectionPattern, rejection => setError('root', { message: rejectionMessage(rejection) }))
-      .exhaustive()
-  }
+      .exhaustive();
+  };
 
   const loginWithGoogle = async (code: string) => {
-    const res = await loginWithGoogleMutation({ input: { code, createUserIfNotExists: false } })
+    const res = await loginWithGoogleMutation({ input: { code, createUserIfNotExists: false } });
     match(res.loginWithGoogle)
       .with({ __typename: 'LoginWithGoogleOutput' }, output => handleLoginSuccess(output.accessToken))
       .with({ __typename: 'UnauthorizedRejection' }, () => {
-        setSocialLoading(false)
-        addToast({ message: 'Impossible de vous connecter avec ce compte Google', variant: 'error' })
+        setSocialLoading(false);
+        addToast({ message: 'Impossible de vous connecter avec ce compte Google', variant: 'error' });
       })
       .with(rejectionPattern, rejection => {
-        setSocialLoading(false)
-        addToast({ message: rejectionMessage(rejection), variant: 'error' })
+        setSocialLoading(false);
+        addToast({ message: rejectionMessage(rejection), variant: 'error' });
       })
-      .exhaustive()
-  }
+      .exhaustive();
+  };
 
-  const onSubmit = (data: FormFields) => login(data)
+  const onSubmit = (data: FormFields) => login(data);
 
   return (
     <Stack spacing={4} alignItems="center">
@@ -194,5 +194,5 @@ export const LoginPage = () => {
         <RouterLink to="/forgot-password">Mot de passe oublié ?</RouterLink>
       </Stack>
     </Stack>
-  )
-}
+  );
+};

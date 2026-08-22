@@ -1,12 +1,12 @@
-import type { INestApplication } from '@nestjs/common'
+import type { INestApplication } from '@nestjs/common';
 
-import { ValidationPipe } from '@nestjs/common'
-import { NestFactory } from '@nestjs/core'
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
-import { Logger } from 'pino-nestjs'
+import { ValidationPipe } from '@nestjs/common';
+import { NestFactory } from '@nestjs/core';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { Logger } from 'pino-nestjs';
 
-import { AppModule } from './app.module'
-import { GlobalExceptionFilter } from './core/filters/exception.filter'
+import { AppModule } from './app.module';
+import { GlobalExceptionFilter } from './core/filters/exception.filter';
 
 function bootstrapSwagger(app: INestApplication) {
   const swaggerConfig = new DocumentBuilder()
@@ -15,25 +15,25 @@ function bootstrapSwagger(app: INestApplication) {
     .setVersion('1.0.0')
     .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }, 'JWT-Auth')
     .addSecurityRequirements('JWT-Auth')
-    .build()
+    .build();
 
-  const document = SwaggerModule.createDocument(app, swaggerConfig)
-  SwaggerModule.setup('swagger', app, document)
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup('swagger', app, document);
 }
 
 export async function createApp(): Promise<INestApplication> {
   const app = await NestFactory.create(AppModule, {
     bufferLogs: true,
-  })
+  });
 
-  app.useLogger(app.get(Logger))
+  app.useLogger(app.get(Logger));
 
-  app.useGlobalPipes(new ValidationPipe({ transform: true, stopAtFirstError: true }))
-  app.useGlobalFilters(new GlobalExceptionFilter())
-  app.enableCors()
-  app.enableShutdownHooks()
+  app.useGlobalPipes(new ValidationPipe({ transform: true, stopAtFirstError: true }));
+  app.useGlobalFilters(new GlobalExceptionFilter());
+  app.enableCors();
+  app.enableShutdownHooks();
 
-  bootstrapSwagger(app)
+  bootstrapSwagger(app);
 
-  return app
+  return app;
 }

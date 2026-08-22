@@ -1,18 +1,20 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common'
-import { REPOSITORIES } from '@wishlist/api/repositories'
+import type { UserRepository } from '../../domain/repository/user.repository';
 
-import { User, type UserRepository } from '../../domain'
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+
+import { REPOSITORIES } from '../../../repositories/repositories.constants';
+import { User } from '../../domain/model/user.model';
 
 export type GetUsersPaginatedInput = {
-  criteria?: string
-  pageNumber: number
-  pageSize: number
-}
+  criteria?: string;
+  pageNumber: number;
+  pageSize: number;
+};
 
 export type GetUsersPaginatedOutput = {
-  users: User[]
-  totalCount: number
-}
+  users: User[];
+  totalCount: number;
+};
 
 @Injectable()
 export class GetUsersPaginatedUseCase {
@@ -22,21 +24,21 @@ export class GetUsersPaginatedUseCase {
   ) {}
 
   async execute(query: GetUsersPaginatedInput): Promise<GetUsersPaginatedOutput> {
-    const { criteria, pageNumber, pageSize } = query
-    const skip = pageSize * (pageNumber - 1)
+    const { criteria, pageNumber, pageSize } = query;
+    const skip = pageSize * (pageNumber - 1);
 
     if (criteria && criteria.trim().length < 2) {
-      throw new BadRequestException('Invalid search criteria')
+      throw new BadRequestException('Invalid search criteria');
     }
 
     const { users, totalCount } = await this.userRepository.findAllPaginated({
       criteria,
       pagination: { take: pageSize, skip },
-    })
+    });
 
     return {
       users,
       totalCount,
-    }
+    };
   }
 }

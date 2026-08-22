@@ -1,11 +1,14 @@
-import type { ICurrentUser } from '@wishlist/common'
+import type { ICurrentUser } from '@wishlist/common';
 
-import { NotFoundException } from '@nestjs/common'
-import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql'
-import { GqlCurrentUser, IsAdmin } from '@wishlist/api/auth'
-import { DEFAULT_RESULT_NUMBER, type GraphQLContext, ZodPipe } from '@wishlist/api/core'
-import { createPagedResponse, type UserId } from '@wishlist/common'
+import { NotFoundException } from '@nestjs/common';
+import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { createPagedResponse, type UserId } from '@wishlist/common';
 
+import { IsAdmin } from '../../../auth/infrastructure/decorators/admin.decorator';
+import { GqlCurrentUser } from '../../../auth/infrastructure/decorators/user.decorator';
+import { DEFAULT_RESULT_NUMBER } from '../../../core/common/pagination';
+import { type GraphQLContext } from '../../../core/graphql/graphql.context';
+import { ZodPipe } from '../../../core/graphql/zod-pipe';
 import {
   type AdminDeleteUserResult,
   type AdminGetAllUsersPaginationFilters,
@@ -14,14 +17,14 @@ import {
   type AdminRemoveUserPictureResult,
   type AdminUpdateUserProfileInput,
   type AdminUpdateUserProfileResult,
-} from '../../../gql/generated-types'
-import { DeleteUserUseCase } from '../../application/command/delete-user.use-case'
-import { RemoveUserPictureUseCase } from '../../application/command/remove-user-picture.use-case'
-import { UpdateUserFullUseCase } from '../../application/command/update-user-full.use-case'
-import { GetUsersPaginatedUseCase } from '../../application/query/get-users-paginated.use-case'
-import { userMapper } from '../user.mapper'
-import { UserIdSchema } from '../user.schema'
-import { AdminGetAllUsersPaginationFiltersSchema, AdminUpdateUserProfileInputSchema } from '../user-admin.schema'
+} from '../../../gql/generated-types';
+import { DeleteUserUseCase } from '../../application/command/delete-user.use-case';
+import { RemoveUserPictureUseCase } from '../../application/command/remove-user-picture.use-case';
+import { UpdateUserFullUseCase } from '../../application/command/update-user-full.use-case';
+import { GetUsersPaginatedUseCase } from '../../application/query/get-users-paginated.use-case';
+import { userMapper } from '../user.mapper';
+import { UserIdSchema } from '../user.schema';
+import { AdminGetAllUsersPaginationFiltersSchema, AdminUpdateUserProfileInputSchema } from '../user-admin.schema';
 
 @IsAdmin()
 @Resolver()
@@ -38,32 +41,32 @@ export class UserAdminResolver {
     @Args('userId', new ZodPipe(UserIdSchema)) userId: UserId,
     @Context() ctx: GraphQLContext,
   ): Promise<AdminGetUserByIdResult> {
-    const result = await ctx.loaders.userFull.load(userId)
+    const result = await ctx.loaders.userFull.load(userId);
 
     if (!result) {
-      throw new NotFoundException(`User with id ${userId} not found`)
+      throw new NotFoundException(`User with id ${userId} not found`);
     }
 
-    return result
+    return result;
   }
 
   @Query()
   async adminUsers(
     @Args('input', new ZodPipe(AdminGetAllUsersPaginationFiltersSchema)) input: AdminGetAllUsersPaginationFilters,
   ): Promise<AdminGetAllUsersResult> {
-    const pageSize = input.limit ?? DEFAULT_RESULT_NUMBER
-    const pageNumber = input.page ?? 1
+    const pageSize = input.limit ?? DEFAULT_RESULT_NUMBER;
+    const pageNumber = input.page ?? 1;
 
     const { users, totalCount } = await this.getUsersPaginatedUseCase.execute({
       criteria: input.criteria ?? undefined,
       pageNumber,
       pageSize,
-    })
+    });
 
     const pagedResponse = createPagedResponse({
       resources: users.map(user => userMapper.toGqlUserFull(user)),
       options: { pageSize, totalElements: totalCount, pageNumber },
-    })
+    });
 
     return {
       __typename: 'AdminGetAllUsers',
@@ -75,7 +78,7 @@ export class UserAdminResolver {
         pageNumber: pagedResponse.pagination.page_number,
         pageSize: pagedResponse.pagination.pages_size,
       },
-    }
+    };
   }
 
   @Mutation()
@@ -96,9 +99,9 @@ export class UserAdminResolver {
         birthday: input.birthday ? new Date(input.birthday) : undefined,
         isEnabled: input.isEnabled ?? undefined,
       },
-    })
+    });
 
-    return { __typename: 'VoidOutput', success: true }
+    return { __typename: 'VoidOutput', success: true };
   }
 
   @Mutation()
@@ -106,15 +109,15 @@ export class UserAdminResolver {
     @Args('userId', new ZodPipe(UserIdSchema)) userId: UserId,
     @GqlCurrentUser() currentUser: ICurrentUser,
   ): Promise<AdminDeleteUserResult> {
-    await this.deleteUserUseCase.execute({ userId, currentUser })
-    return { __typename: 'VoidOutput', success: true }
+    await this.deleteUserUseCase.execute({ userId, currentUser });
+    return { __typename: 'VoidOutput', success: true };
   }
 
   @Mutation()
   async adminRemoveUserPicture(
     @Args('userId', new ZodPipe(UserIdSchema)) userId: UserId,
   ): Promise<AdminRemoveUserPictureResult> {
-    await this.removeUserPictureUseCase.execute({ userId })
-    return { __typename: 'VoidOutput', success: true }
+    await this.removeUserPictureUseCase.execute({ userId });
+    return { __typename: 'VoidOutput', success: true };
   }
 }

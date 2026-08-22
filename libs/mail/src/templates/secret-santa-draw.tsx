@@ -1,14 +1,14 @@
-import { Section, Text } from 'react-email'
+import { Section, Text } from 'react-email';
 
-import { EmailLayout } from '../components/layout'
-import { ButtonFallback, Callout, ContentSection, Heading, Paragraph, PrimaryButton } from '../components/ui'
-import * as styles from '../styles'
+import { EmailLayout } from '../components/layout';
+import { ButtonFallback, Callout, ContentSection, Heading, Paragraph, PrimaryButton } from '../components/ui';
+import * as styles from '../styles';
 
 export interface SecretSantaDrawEmailProps {
-  readonly eventTitle: string
-  readonly eventUrl: string
-  readonly budget: string
-  readonly description: string
+  readonly eventTitle: string;
+  readonly eventUrl: string;
+  readonly budget: string;
+  readonly description: string;
 }
 
 export default function SecretSantaDrawEmail({ eventTitle, eventUrl, budget, description }: SecretSantaDrawEmailProps) {
@@ -79,7 +79,7 @@ export default function SecretSantaDrawEmail({ eventTitle, eventUrl, budget, des
         <ButtonFallback href={eventUrl} />
       </Section>
     </EmailLayout>
-  )
+  );
 }
 
 SecretSantaDrawEmail.PreviewProps = {
@@ -87,4 +87,4 @@ SecretSantaDrawEmail.PreviewProps = {
   eventUrl: 'https://wishlistapp.fr/events/preview',
   budget: '30,00 €',
   description: 'Cadeaux faits maison appréciés',
-} satisfies SecretSantaDrawEmailProps
+} satisfies SecretSantaDrawEmailProps;

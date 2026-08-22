@@ -1,16 +1,16 @@
-import type { MouseEvent } from 'react'
+import type { MouseEvent } from 'react';
 
-import data from '@emoji-mart/data'
-import Picker from '@emoji-mart/react'
-import AddReactionOutlinedIcon from '@mui/icons-material/AddReactionOutlined'
-import CloseIcon from '@mui/icons-material/Close'
-import { Button, IconButton, Popover, styled } from '@mui/material'
-import { useState } from 'react'
+import data from '@emoji-mart/data';
+import Picker from '@emoji-mart/react';
+import AddReactionOutlinedIcon from '@mui/icons-material/AddReactionOutlined';
+import CloseIcon from '@mui/icons-material/Close';
+import { Button, IconButton, Popover, styled } from '@mui/material';
+import { useState } from 'react';
 
 const EmojiButtonContainer = styled('div')({
   position: 'relative',
   display: 'inline-block',
-})
+});
 
 const EmojiButton = styled(Button)(({ theme }) => ({
   minWidth: '56px',
@@ -23,7 +23,7 @@ const EmojiButton = styled(Button)(({ theme }) => ({
     backgroundColor: theme.palette.action.hover,
     borderColor: theme.palette.primary.main,
   },
-}))
+}));
 
 const RemoveButton = styled(IconButton)(({ theme }) => ({
   position: 'absolute',
@@ -41,34 +41,34 @@ const RemoveButton = styled(IconButton)(({ theme }) => ({
     color: theme.palette.error.contrastText,
     borderColor: theme.palette.error.main,
   },
-}))
+}));
 
 export type EmojiSelectorProps = {
-  value?: string
-  onChange: (emoji: string | undefined) => void
-  disabled?: boolean
-}
+  value?: string;
+  onChange: (emoji: string | undefined) => void;
+  disabled?: boolean;
+};
 
 export const EmojiSelector = ({ value, onChange, disabled }: EmojiSelectorProps) => {
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
-  const open = Boolean(anchorEl)
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
 
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget)
-  }
+    setAnchorEl(event.currentTarget);
+  };
 
   const handleClose = () => {
-    setAnchorEl(null)
-  }
+    setAnchorEl(null);
+  };
 
   const handleEmojiSelect = (emoji: { native: string }) => {
-    onChange(emoji.native)
-    handleClose()
-  }
+    onChange(emoji.native);
+    handleClose();
+  };
 
   const handleRemoveEmoji = () => {
-    onChange(undefined)
-  }
+    onChange(undefined);
+  };
 
   return (
     <>
@@ -115,5 +115,5 @@ export const EmojiSelector = ({ value, onChange, disabled }: EmojiSelectorProps)
         />
       </Popover>
     </>
-  )
-}
+  );
+};

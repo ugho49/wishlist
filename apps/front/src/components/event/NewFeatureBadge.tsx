@@ -1,4 +1,4 @@
-import { Chip, styled } from '@mui/material'
+import { Chip, styled } from '@mui/material';
 
 const Badge = styled(Chip)({
   height: 20,
@@ -14,6 +14,6 @@ const Badge = styled(Chip)({
     '0%, 100%': { transform: 'scale(1)' },
     '50%': { transform: 'scale(1.05)' },
   },
-})
+});
 
-export const NewFeatureBadge = () => <Badge label="Nouveau" size="small" />
+export const NewFeatureBadge = () => <Badge label="Nouveau" size="small" />;

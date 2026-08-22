@@ -1,13 +1,13 @@
-import type { EventId } from '@wishlist/common'
+import type { EventId } from '@wishlist/common';
 
 export class SecretSantaCancelledEvent {
-  public readonly eventTitle: string
-  public readonly eventId: EventId
-  public readonly attendeeEmails: string[]
+  public readonly eventTitle: string;
+  public readonly eventId: EventId;
+  public readonly attendeeEmails: string[];
 
   constructor(props: { eventTitle: string; eventId: EventId; attendeeEmails: string[] }) {
-    this.eventId = props.eventId
-    this.eventTitle = props.eventTitle
-    this.attendeeEmails = props.attendeeEmails
+    this.eventId = props.eventId;
+    this.eventTitle = props.eventTitle;
+    this.attendeeEmails = props.attendeeEmails;
   }
 }

@@ -1,39 +1,40 @@
-import { PasswordManager } from '@wishlist/api/auth'
-import { Fixtures, useTestApp } from '@wishlist/api-test-utils'
-import { DateTime } from 'luxon'
+import { Fixtures, useTestApp } from '@wishlist/api-test-utils';
+import { DateTime } from 'luxon';
+
+import { PasswordManager } from '../../../auth/infrastructure/util/password-manager';
 
 describe('UserPasswordVerificationController', () => {
-  const { getRequest, expectTable, getFixtures, expectMail } = useTestApp()
-  let fixtures: Fixtures
+  const { getRequest, expectTable, getFixtures, expectMail } = useTestApp();
+  let fixtures: Fixtures;
 
   beforeEach(() => {
-    fixtures = getFixtures()
-  })
+    fixtures = getFixtures();
+  });
 
   describe('POST /user/forgot-password/send-reset-email', () => {
-    const path = '/user/forgot-password/send-reset-email'
+    const path = '/user/forgot-password/send-reset-email';
 
     it('should fail with invalid email', async () => {
-      const request = await getRequest()
+      const request = await getRequest();
 
-      return request.post(path).send({ email: 'invalid-email' }).expect(400)
-    })
+      return request.post(path).send({ email: 'invalid-email' }).expect(400);
+    });
 
     it('should fail with not existing email', async () => {
-      await fixtures.insertBaseUser()
+      await fixtures.insertBaseUser();
 
-      const request = await getRequest()
+      const request = await getRequest();
 
-      return request.post(path).send({ email: 'not-existing-mail@test.fr' }).expect(404)
-    })
+      return request.post(path).send({ email: 'not-existing-mail@test.fr' }).expect(404);
+    });
 
     it('should send reset email when valid input', async () => {
-      const userId = await fixtures.insertBaseUser()
+      const userId = await fixtures.insertBaseUser();
 
-      const request = await getRequest()
+      const request = await getRequest();
 
-      await expectTable(Fixtures.USER_PASSWORD_VERIFICATION_TABLE).hasNumberOfRows(0)
-      await request.post(path).send({ email: Fixtures.BASE_USER_EMAIL }).expect(201)
+      await expectTable(Fixtures.USER_PASSWORD_VERIFICATION_TABLE).hasNumberOfRows(0);
+      await request.post(path).send({ email: Fixtures.BASE_USER_EMAIL }).expect(201);
 
       await expectTable(Fixtures.USER_PASSWORD_VERIFICATION_TABLE)
         .hasNumberOfRows(1)
@@ -45,7 +46,7 @@ describe('UserPasswordVerificationController', () => {
           expired_at: expect.toBeAfter(new Date()),
           created_at: expect.toBeDate(),
           updated_at: expect.toBeDate(),
-        })
+        });
 
       await expectMail()
         .waitFor(500)
@@ -53,32 +54,32 @@ describe('UserPasswordVerificationController', () => {
         .mail(0)
         .hasSubject('[Wishlist] Reinitialiser le mot de passe')
         .hasSender('contact@wishlistapp.fr')
-        .hasReceiver(Fixtures.BASE_USER_EMAIL)
-    })
+        .hasReceiver(Fixtures.BASE_USER_EMAIL);
+    });
 
     it('should fail when there is still a valid reset attempt', async () => {
-      const userId = await fixtures.insertBaseUser()
+      const userId = await fixtures.insertBaseUser();
       await fixtures.insertUserPasswordVerification({
         userId,
         token: 'token',
         expiredAt: DateTime.now().plus({ hour: 1 }).toJSDate(),
-      })
+      });
 
-      const request = await getRequest()
+      const request = await getRequest();
 
-      await expectTable(Fixtures.USER_PASSWORD_VERIFICATION_TABLE).hasNumberOfRows(1)
-      await request.post(path).send({ email: Fixtures.BASE_USER_EMAIL }).expect(401)
+      await expectTable(Fixtures.USER_PASSWORD_VERIFICATION_TABLE).hasNumberOfRows(1);
+      await request.post(path).send({ email: Fixtures.BASE_USER_EMAIL }).expect(401);
 
-      await expectTable(Fixtures.USER_PASSWORD_VERIFICATION_TABLE).hasNumberOfRows(1)
-      await expectMail().waitFor(500).hasNumberOfEmails(0)
-    })
-  })
+      await expectTable(Fixtures.USER_PASSWORD_VERIFICATION_TABLE).hasNumberOfRows(1);
+      await expectMail().waitFor(500).hasNumberOfEmails(0);
+    });
+  });
 
   describe('POST /user/forgot-password/reset', () => {
-    const path = '/user/forgot-password/reset'
+    const path = '/user/forgot-password/reset';
 
     it('should fail with empty input', async () => {
-      const request = await getRequest()
+      const request = await getRequest();
 
       return request
         .post(path)
@@ -92,11 +93,11 @@ describe('UserPasswordVerificationController', () => {
               'new_password must be shorter than or equal to 50 characters',
             ],
           }),
-        )
-    })
+        );
+    });
 
     it('should fail with invalid input', async () => {
-      const request = await getRequest()
+      const request = await getRequest();
 
       return request
         .post(path)
@@ -110,13 +111,13 @@ describe('UserPasswordVerificationController', () => {
               'new_password must be longer than or equal to 8 characters',
             ],
           }),
-        )
-    })
+        );
+    });
 
     it('should fail with no reset token in database for user', async () => {
-      await fixtures.insertBaseUser()
+      await fixtures.insertBaseUser();
 
-      const request = await getRequest()
+      const request = await getRequest();
 
       return request
         .post(path)
@@ -126,18 +127,18 @@ describe('UserPasswordVerificationController', () => {
           expect(body).toMatchObject({
             message: 'This reset code is not valid',
           }),
-        )
-    })
+        );
+    });
 
     it('should fail with invalid token', async () => {
-      const userId = await fixtures.insertBaseUser()
+      const userId = await fixtures.insertBaseUser();
       await fixtures.insertUserPasswordVerification({
         userId,
         token: 'reset-token',
         expiredAt: DateTime.now().plus({ hour: 1 }).toJSDate(),
-      })
+      });
 
-      const request = await getRequest()
+      const request = await getRequest();
 
       return request
         .post(path)
@@ -147,18 +148,18 @@ describe('UserPasswordVerificationController', () => {
           expect(body).toMatchObject({
             message: 'This reset code is not valid',
           }),
-        )
-    })
+        );
+    });
 
     it('should fail with expired token', async () => {
-      const userId = await fixtures.insertBaseUser()
+      const userId = await fixtures.insertBaseUser();
       await fixtures.insertUserPasswordVerification({
         userId,
         token: 'reset-token',
         expiredAt: DateTime.now().minus({ hour: 1 }).toJSDate(),
-      })
+      });
 
-      const request = await getRequest()
+      const request = await getRequest();
 
       return request
         .post(path)
@@ -168,34 +169,34 @@ describe('UserPasswordVerificationController', () => {
           expect(body).toMatchObject({
             message: 'This reset code is expired',
           }),
-        )
-    })
+        );
+    });
 
     it('should reset the password with valid input', async () => {
-      const userId = await fixtures.insertBaseUser()
+      const userId = await fixtures.insertBaseUser();
       await fixtures.insertUserPasswordVerification({
         userId,
         token: 'reset-token',
         expiredAt: DateTime.now().plus({ hour: 1 }).toJSDate(),
-      })
+      });
 
-      const request = await getRequest()
+      const request = await getRequest();
 
-      const newPassword = 'NewPassword123'
+      const newPassword = 'NewPassword123';
 
       await request
         .post(path)
         .send({ email: Fixtures.BASE_USER_EMAIL, token: 'reset-token', new_password: newPassword })
-        .expect(201)
+        .expect(201);
 
       await expectTable(Fixtures.USER_TABLE)
         .row(0)
         .expectColumn<string>('password_enc', async value => {
-          const res = await PasswordManager.verify({ hash: value, plainPassword: newPassword })
-          expect(res, 'Password should match').toBe(true)
-        })
+          const res = await PasswordManager.verify({ hash: value, plainPassword: newPassword });
+          expect(res, 'Password should match').toBe(true);
+        });
 
-      await expectTable(Fixtures.USER_PASSWORD_VERIFICATION_TABLE).hasNumberOfRows(0)
-    })
-  })
-})
+      await expectTable(Fixtures.USER_PASSWORD_VERIFICATION_TABLE).hasNumberOfRows(0);
+    });
+  });
+});

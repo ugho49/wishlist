@@ -1,19 +1,21 @@
-import { Inject, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common'
-import { PasswordManager } from '@wishlist/api/auth'
-import { TransactionManager } from '@wishlist/api/core'
-import { REPOSITORIES } from '@wishlist/api/repositories'
+import type { UserRepository } from '../../domain/repository/user.repository';
+import type { UserPasswordVerificationRepository } from '../../domain/repository/user-password-verification.repository';
 
-import { type UserPasswordVerificationRepository, type UserRepository } from '../../domain'
+import { Inject, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
+
+import { PasswordManager } from '../../../auth/infrastructure/util/password-manager';
+import { TransactionManager } from '../../../core/database/transaction-manager';
+import { REPOSITORIES } from '../../../repositories/repositories.constants';
 
 export type ResetUserPasswordInput = {
-  email: string
-  token: string
-  newPassword: string
-}
+  email: string;
+  token: string;
+  newPassword: string;
+};
 
 @Injectable()
 export class ResetUserPasswordUseCase {
-  private readonly logger = new Logger(ResetUserPasswordUseCase.name)
+  private readonly logger = new Logger(ResetUserPasswordUseCase.name);
 
   constructor(
     @Inject(REPOSITORIES.USER)
@@ -24,32 +26,32 @@ export class ResetUserPasswordUseCase {
   ) {}
 
   async execute(input: ResetUserPasswordInput): Promise<void> {
-    this.logger.log('Reset user password request received', { email: input.email, token: input.token })
-    const user = await this.userRepository.findByEmail(input.email)
+    this.logger.log('Reset user password request received', { email: input.email, token: input.token });
+    const user = await this.userRepository.findByEmail(input.email);
 
     if (!user) {
-      throw new NotFoundException('User not found')
+      throw new NotFoundException('User not found');
     }
 
-    const passwordVerifications = await this.passwordVerificationRepository.findByUserId(user.id)
+    const passwordVerifications = await this.passwordVerificationRepository.findByUserId(user.id);
 
-    const passwordVerification = passwordVerifications.find(verification => verification.token === input.token)
+    const passwordVerification = passwordVerifications.find(verification => verification.token === input.token);
 
     if (!passwordVerification) {
-      throw new UnauthorizedException('This reset code is not valid')
+      throw new UnauthorizedException('This reset code is not valid');
     }
 
     if (passwordVerification.isExpired()) {
-      throw new UnauthorizedException('This reset code is expired')
+      throw new UnauthorizedException('This reset code is expired');
     }
 
-    const newPasswordEncoded = await PasswordManager.hash(input.newPassword)
-    const updatedUser = user.updatePassword(newPasswordEncoded)
+    const newPasswordEncoded = await PasswordManager.hash(input.newPassword);
+    const updatedUser = user.updatePassword(newPasswordEncoded);
 
-    this.logger.log('Saving user and deleting password verification...', { userId: user.id })
+    this.logger.log('Saving user and deleting password verification...', { userId: user.id });
     await this.transactionManager.runInTransaction(async tx => {
-      await this.userRepository.save(updatedUser, tx)
-      await this.passwordVerificationRepository.delete(passwordVerification.id, tx)
-    })
+      await this.userRepository.save(updatedUser, tx);
+      await this.passwordVerificationRepository.delete(passwordVerification.id, tx);
+    });
   }
 }

@@ -1,7 +1,9 @@
-import { ParseFilePipe } from '@nestjs/common'
-import { ACCEPTED_IMG_FORMATS } from '@wishlist/common'
+import { ParseFilePipe } from '@nestjs/common';
+import { ACCEPTED_IMG_FORMATS } from '@wishlist/common';
 
-import { FileTypeValidator, MaxFileSizeValidator, ResizeImagePipe } from '../../core/bucket'
+import { ResizeImagePipe } from '../../core/bucket/pipe/resize-image.pipe';
+import { FileTypeValidator } from '../../core/bucket/validators/file-type.validator';
+import { MaxFileSizeValidator } from '../../core/bucket/validators/max-file-size.validator';
 
 export const wishlistLogoFileValidators = (fileIsRequired: boolean) =>
   new ParseFilePipe({
@@ -16,7 +18,7 @@ export const wishlistLogoFileValidators = (fileIsRequired: boolean) =>
       }),
     ],
     fileIsRequired,
-  })
+  });
 
 export const wishlistLogoResizePipe = (fileIsRequired: boolean) =>
-  new ResizeImagePipe({ width: 500, height: 500 }, fileIsRequired)
+  new ResizeImagePipe({ width: 500, height: 500 }, fileIsRequired);

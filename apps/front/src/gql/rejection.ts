@@ -22,7 +22,7 @@
  * deriving query data).
  */
 
-import { P } from 'ts-pattern'
+import { P } from 'ts-pattern';
 
 const REJECTION_TYPENAMES = [
   'ValidationRejection',
@@ -31,24 +31,24 @@ const REJECTION_TYPENAMES = [
   'ForbiddenRejection',
   'NotFoundRejection',
   'InternalErrorRejection',
-] as const
+] as const;
 
-export type RejectionTypename = (typeof REJECTION_TYPENAMES)[number]
+export type RejectionTypename = (typeof REJECTION_TYPENAMES)[number];
 
-type WithTypename = { __typename: string }
+type WithTypename = { __typename: string };
 
-export type RejectionOf<R extends WithTypename> = Extract<R, { __typename: RejectionTypename }>
-export type SuccessOf<R extends WithTypename> = Exclude<R, { __typename: RejectionTypename }>
+export type RejectionOf<R extends WithTypename> = Extract<R, { __typename: RejectionTypename }>;
+export type SuccessOf<R extends WithTypename> = Exclude<R, { __typename: RejectionTypename }>;
 
 export function isRejection<R extends WithTypename>(result: R): result is RejectionOf<R> {
-  return (REJECTION_TYPENAMES as readonly string[]).includes(result.__typename)
+  return (REJECTION_TYPENAMES as readonly string[]).includes(result.__typename);
 }
 
 /**
  * ts-pattern pattern matching every rejection member of a result union,
  * whatever subset of rejection types the union declares.
  */
-export const rejectionPattern = { __typename: P.string.endsWith('Rejection') } as const
+export const rejectionPattern = { __typename: P.string.endsWith('Rejection') } as const;
 
 const DEFAULT_MESSAGES: Record<RejectionTypename, string> = {
   ValidationRejection: 'Certaines informations saisies sont invalides',
@@ -57,8 +57,8 @@ const DEFAULT_MESSAGES: Record<RejectionTypename, string> = {
   ForbiddenRejection: "Vous n'avez pas les droits nécessaires pour effectuer cette action",
   NotFoundRejection: "Cette ressource n'existe pas ou a été supprimée",
   InternalErrorRejection: "Une erreur s'est produite. Veuillez réessayer plus tard",
-}
+};
 
 export function rejectionMessage(rejection: { __typename: RejectionTypename }): string {
-  return DEFAULT_MESSAGES[rejection.__typename]
+  return DEFAULT_MESSAGES[rejection.__typename];
 }

@@ -1,19 +1,21 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
-import { DatabaseService, type DrizzleTransaction } from '@wishlist/api/core'
-import { Wishlist, type WishlistRepository } from '@wishlist/api/wishlist'
-import { schema } from '@wishlist/api-drizzle'
-import { type EventId, type UserId, uuid, type WishlistId } from '@wishlist/common'
-import { and, count, desc, eq, exists, inArray, or, sql } from 'drizzle-orm'
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { schema } from '@wishlist/api-drizzle';
+import { type EventId, type UserId, uuid, type WishlistId } from '@wishlist/common';
+import { and, count, desc, eq, exists, inArray, or, sql } from 'drizzle-orm';
 
-import { PostgresUserRepository } from './postgres-user.repository'
-import { PostgresWishlistItemRepository } from './postgres-wishlist-item.repository'
+import { DatabaseService } from '../../core/database/database.service';
+import { type DrizzleTransaction } from '../../core/database/transaction-manager';
+import { Wishlist } from '../../wishlist/domain/wishlist.model';
+import { type WishlistRepository } from '../../wishlist/domain/wishlist.repository';
+import { PostgresUserRepository } from './postgres-user.repository';
+import { PostgresWishlistItemRepository } from './postgres-wishlist-item.repository';
 
 @Injectable()
 export class PostgresWishlistRepository implements WishlistRepository {
   constructor(private readonly databaseService: DatabaseService) {}
 
   newId(): WishlistId {
-    return uuid() as WishlistId
+    return uuid() as WishlistId;
   }
 
   async findById(wishlistId: WishlistId): Promise<Wishlist | undefined> {
@@ -25,9 +27,9 @@ export class PostgresWishlistRepository implements WishlistRepository {
         eventWishlists: true,
         items: { with: { takers: { with: { user: true } } } },
       },
-    })
+    });
 
-    return result ? PostgresWishlistRepository.toModel(result) : undefined
+    return result ? PostgresWishlistRepository.toModel(result) : undefined;
   }
 
   async findByIds(wishlistIds: WishlistId[]): Promise<Wishlist[]> {
@@ -39,20 +41,20 @@ export class PostgresWishlistRepository implements WishlistRepository {
         eventWishlists: true,
         items: { with: { takers: { with: { user: true } } } },
       },
-    })
+    });
 
-    return result.map(PostgresWishlistRepository.toModel)
+    return result.map(PostgresWishlistRepository.toModel);
   }
 
   async findByIdOrFail(wishlistId: WishlistId): Promise<Wishlist> {
-    const wishlist = await this.findById(wishlistId)
-    if (!wishlist) throw new NotFoundException('Wishlist not found')
-    return wishlist
+    const wishlist = await this.findById(wishlistId);
+    if (!wishlist) throw new NotFoundException('Wishlist not found');
+    return wishlist;
   }
 
   async findByEvent(eventId: EventId): Promise<Wishlist[]> {
     const result = await this.databaseService.db.query.wishlist.findMany({
-      where: (wishlist, { exists }) =>
+      where: wishlist =>
         exists(
           this.databaseService.db
             .select()
@@ -65,9 +67,9 @@ export class PostgresWishlistRepository implements WishlistRepository {
         eventWishlists: true,
         items: { with: { takers: { with: { user: true } } } },
       },
-    })
+    });
 
-    return result.map(PostgresWishlistRepository.toModel)
+    return result.map(PostgresWishlistRepository.toModel);
   }
 
   async findByOwner(userId: UserId): Promise<Wishlist[]> {
@@ -79,24 +81,24 @@ export class PostgresWishlistRepository implements WishlistRepository {
         eventWishlists: true,
         items: { with: { takers: { with: { user: true } } } },
       },
-    })
+    });
 
-    return result.map(PostgresWishlistRepository.toModel)
+    return result.map(PostgresWishlistRepository.toModel);
   }
 
   async findByUserPaginated(params: {
-    userId: UserId
-    pagination: { take: number; skip: number }
+    userId: UserId;
+    pagination: { take: number; skip: number };
   }): Promise<{ wishlists: Wishlist[]; totalCount: number }> {
     // Get total count
     const totalCountResult = await this.databaseService.db
       .select({ count: count() })
       .from(schema.wishlist)
-      .where(or(eq(schema.wishlist.ownerId, params.userId), eq(schema.wishlist.coOwnerId, params.userId)))
+      .where(or(eq(schema.wishlist.ownerId, params.userId), eq(schema.wishlist.coOwnerId, params.userId)));
 
-    const totalCount = totalCountResult[0]?.count ?? 0
+    const totalCount = totalCountResult[0]?.count ?? 0;
 
-    if (totalCount === 0) return { wishlists: [], totalCount }
+    if (totalCount === 0) return { wishlists: [], totalCount };
 
     // Première requête : récupérer les IDs des wishlists dans le bon ordre
     const orderedWishlistIds = await this.databaseService.db
@@ -108,7 +110,7 @@ export class PostgresWishlistRepository implements WishlistRepository {
       .groupBy(schema.wishlist.id)
       .orderBy(desc(sql<string>`MAX(${schema.event.eventDate})`), desc(schema.wishlist.createdAt))
       .limit(params.pagination.take)
-      .offset(params.pagination.skip)
+      .offset(params.pagination.skip);
 
     // Deuxième requête : récupérer toutes les données nécessaires pour toModel
     const validWishlists = await this.databaseService.db.query.wishlist.findMany({
@@ -122,20 +124,20 @@ export class PostgresWishlistRepository implements WishlistRepository {
         eventWishlists: true,
         items: { with: { takers: { with: { user: true } } } },
       },
-    })
+    });
 
     // Réordonner selon l'ordre de la première requête
-    const wishlistsMap = new Map(validWishlists.map(w => [w.id, w]))
+    const wishlistsMap = new Map(validWishlists.map(w => [w.id, w]));
     const wishlists = orderedWishlistIds
       .map(row => wishlistsMap.get(row.id))
       .filter((wishlist): wishlist is NonNullable<typeof wishlist> => wishlist !== undefined)
-      .map(PostgresWishlistRepository.toModel)
+      .map(PostgresWishlistRepository.toModel);
 
-    return { wishlists, totalCount }
+    return { wishlists, totalCount };
   }
 
   async save(wishlist: Wishlist, tx?: DrizzleTransaction): Promise<void> {
-    const client = tx || this.databaseService.db
+    const client = tx || this.databaseService.db;
 
     await client.transaction(async (subTx: DrizzleTransaction) => {
       await subTx
@@ -162,10 +164,10 @@ export class PostgresWishlistRepository implements WishlistRepository {
             logoUrl: wishlist.logoUrl ?? null,
             updatedAt: wishlist.updatedAt,
           },
-        })
+        });
 
       // Remove all eventWishlists
-      await subTx.delete(schema.eventWishlist).where(eq(schema.eventWishlist.wishlistId, wishlist.id))
+      await subTx.delete(schema.eventWishlist).where(eq(schema.eventWishlist.wishlistId, wishlist.id));
 
       // Add new eventWishlists
       await subTx.insert(schema.eventWishlist).values(
@@ -173,14 +175,14 @@ export class PostgresWishlistRepository implements WishlistRepository {
           eventId,
           wishlistId: wishlist.id,
         })),
-      )
-    })
+      );
+    });
   }
 
   async delete(wishlistId: WishlistId, tx?: DrizzleTransaction): Promise<void> {
-    const client = tx || this.databaseService.db
+    const client = tx || this.databaseService.db;
 
-    await client.delete(schema.wishlist).where(eq(schema.wishlist.id, wishlistId))
+    await client.delete(schema.wishlist).where(eq(schema.wishlist.id, wishlistId));
   }
 
   async hasAccess(params: { wishlistId: WishlistId; userId: UserId }): Promise<boolean> {
@@ -209,9 +211,9 @@ export class PostgresWishlistRepository implements WishlistRepository {
           ),
         ),
       )
-      .limit(1)
+      .limit(1);
 
-    return result.length > 0
+    return result.length > 0;
   }
 
   async findEmailsToNotify(params: { ownerId: UserId; wishlistId: WishlistId }): Promise<string[]> {
@@ -231,19 +233,19 @@ export class PostgresWishlistRepository implements WishlistRepository {
           // Include users who either have no email settings (default to notify) or have notifications enabled
           or(sql`${schema.userEmailSetting.id} IS NULL`, eq(schema.userEmailSetting.dailyNewItemNotification, true)),
         ),
-      )
+      );
 
-    return result.map(row => row.email).filter((email): email is string => email !== null)
+    return result.map(row => row.email).filter((email): email is string => email !== null);
   }
 
   static toModel(
     row: typeof schema.wishlist.$inferSelect & {
-      owner: typeof schema.user.$inferSelect
-      coOwner: typeof schema.user.$inferSelect | null
-      eventWishlists: (typeof schema.eventWishlist.$inferSelect)[]
+      owner: typeof schema.user.$inferSelect;
+      coOwner: typeof schema.user.$inferSelect | null;
+      eventWishlists: (typeof schema.eventWishlist.$inferSelect)[];
       items: (typeof schema.item.$inferSelect & {
-        takers: (typeof schema.itemTaker.$inferSelect & { user: typeof schema.user.$inferSelect })[]
-      })[]
+        takers: (typeof schema.itemTaker.$inferSelect & { user: typeof schema.user.$inferSelect })[];
+      })[];
     },
   ): Wishlist {
     return new Wishlist({
@@ -258,6 +260,6 @@ export class PostgresWishlistRepository implements WishlistRepository {
       items: row.items.map(item => PostgresWishlistItemRepository.toModel(item)),
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
-    })
+    });
   }
 }

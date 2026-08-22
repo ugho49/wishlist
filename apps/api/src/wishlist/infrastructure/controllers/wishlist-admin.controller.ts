@@ -1,10 +1,10 @@
-import { Controller, Get, Query } from '@nestjs/common'
-import { ApiTags } from '@nestjs/swagger'
-import { DEFAULT_RESULT_NUMBER } from '@wishlist/api/core'
-import { GetAllWishlistsPaginationQueryDto, PagedResponse, WishlistWithEventsDto } from '@wishlist/common'
+import { Controller, Get, Query } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
+import { GetAllWishlistsPaginationQueryDto, PagedResponse, WishlistWithEventsDto } from '@wishlist/common';
 
-import { IsAdmin } from '../../../auth'
-import { GetWishlistsByOwnerUseCase } from '../../application/query/get-wishlists-by-owner.use-case'
+import { IsAdmin } from '../../../auth/infrastructure/decorators/admin.decorator';
+import { DEFAULT_RESULT_NUMBER } from '../../../core/common/pagination';
+import { GetWishlistsByOwnerUseCase } from '../../application/query/get-wishlists-by-owner.use-case';
 
 @IsAdmin()
 @ApiTags('ADMIN - Wishlist')
@@ -20,6 +20,6 @@ export class WishlistAdminController {
       ownerId: queryParams.user_id,
       pageNumber: queryParams.p ?? 1,
       pageSize: DEFAULT_RESULT_NUMBER,
-    })
+    });
   }
 }

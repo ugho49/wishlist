@@ -1,23 +1,23 @@
-import type { EventId } from '@wishlist/common'
-import type { RootState } from '../../../../../core'
+import type { EventId } from '@wishlist/common';
+import type { RootState } from '../../../../../core/store';
 
-import ForestIcon from '@mui/icons-material/Forest'
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
-import PeopleIcon from '@mui/icons-material/People'
-import { Alert, Box, Container, Tab, Tabs } from '@mui/material'
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { Loader } from '@wishlist/front-components/common/Loader'
-import { Title } from '@wishlist/front-components/common/Title'
-import { EditEventAttendees } from '@wishlist/front-components/event/EditEventAttendees'
-import { EditEventInformations } from '@wishlist/front-components/event/EditEventInformations'
-import { EditSecretSanta } from '@wishlist/front-components/event/EditSecretSanta'
-import { EventNotFound } from '@wishlist/front-components/event/EventNotFound'
-import { canEditEvent } from '@wishlist/front-components/event/event-permissions'
-import { SEO } from '@wishlist/front-components/SEO'
-import { useSelector } from 'react-redux'
-import z from 'zod'
+import ForestIcon from '@mui/icons-material/Forest';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import PeopleIcon from '@mui/icons-material/People';
+import { Alert, Box, Container, Tab, Tabs } from '@mui/material';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { Loader } from '@wishlist/front-components/common/Loader';
+import { Title } from '@wishlist/front-components/common/Title';
+import { EditEventAttendees } from '@wishlist/front-components/event/EditEventAttendees';
+import { EditEventInformations } from '@wishlist/front-components/event/EditEventInformations';
+import { EditSecretSanta } from '@wishlist/front-components/event/EditSecretSanta';
+import { EventNotFound } from '@wishlist/front-components/event/EventNotFound';
+import { canEditEvent } from '@wishlist/front-components/event/event-permissions';
+import { SEO } from '@wishlist/front-components/SEO';
+import { useSelector } from 'react-redux';
+import z from 'zod';
 
-import { isRejection, rejectionMessage, useEventPageGetEventQuery } from '../../../../../gql'
+import { isRejection, rejectionMessage, useEventPageGetEventQuery } from '../../../../../gql';
 
 export enum TabValues {
   informations = 'informations',
@@ -33,7 +33,7 @@ export const Route = createFileRoute('/_authenticated/_with-layout/events/$event
     parse: params => ({ eventId: params.eventId as EventId }),
   },
   component: RouteComponent,
-})
+});
 
 const tabs = [
   {
@@ -51,23 +51,23 @@ const tabs = [
     label: 'Secret Santa',
     icon: <ForestIcon />,
   },
-]
+];
 
-const mapCurrentUserId = (state: RootState) => state.auth.user?.id
+const mapCurrentUserId = (state: RootState) => state.auth.user?.id;
 
 function RouteComponent() {
-  const { eventId } = Route.useParams()
-  const { tab } = Route.useSearch()
-  const currentUserId = useSelector(mapCurrentUserId)
-  const { data, isLoading: loading } = useEventPageGetEventQuery({ eventId }, { select: d => d.event })
-  const event = data?.__typename === 'Event' ? data : undefined
-  const queryRejection = data && isRejection(data) && data.__typename !== 'NotFoundRejection' ? data : undefined
-  const currentUserCanEdit = canEditEvent(event?.attendees ?? [], currentUserId)
-  const navigate = useNavigate({ from: '/events/$eventId/edit' })
+  const { eventId } = Route.useParams();
+  const { tab } = Route.useSearch();
+  const currentUserId = useSelector(mapCurrentUserId);
+  const { data, isLoading: loading } = useEventPageGetEventQuery({ eventId }, { select: d => d.event });
+  const event = data?.__typename === 'Event' ? data : undefined;
+  const queryRejection = data && isRejection(data) && data.__typename !== 'NotFoundRejection' ? data : undefined;
+  const currentUserCanEdit = canEditEvent(event?.attendees ?? [], currentUserId);
+  const navigate = useNavigate({ from: '/events/$eventId/edit' });
 
   const handleTabChange = (newValue: TabValues) => {
-    void navigate({ search: { tab: newValue } })
-  }
+    void navigate({ search: { tab: newValue } });
+  };
 
   return (
     <>
@@ -91,8 +91,14 @@ function RouteComponent() {
                   scrollButtons="auto"
                   allowScrollButtonsMobile
                 >
-                  {tabs.map(tab => (
-                    <Tab key={tab.value} value={tab.value} label={tab.label} iconPosition="start" icon={tab.icon} />
+                  {tabs.map(tabItem => (
+                    <Tab
+                      key={tabItem.value}
+                      value={tabItem.value}
+                      label={tabItem.label}
+                      iconPosition="start"
+                      icon={tabItem.icon}
+                    />
                   ))}
                 </Tabs>
               </Box>
@@ -106,5 +112,5 @@ function RouteComponent() {
         </Loader>
       </Box>
     </>
-  )
+  );
 }

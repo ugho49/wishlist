@@ -1,25 +1,27 @@
-import type { AttendeeId, ICurrentUser, SecretSantaId, SecretSantaUserDto } from '@wishlist/common'
+import type { AttendeeId, ICurrentUser, SecretSantaId, SecretSantaUserDto } from '@wishlist/common';
+import type { SecretSantaRepository } from '../../domain/repository/secret-santa.repository';
+import type { SecretSantaUserRepository } from '../../domain/repository/secret-santa-user.repository';
 
-import { BadRequestException, ForbiddenException, Inject, Injectable, Logger } from '@nestjs/common'
-import { type EventRepository } from '@wishlist/api/event'
-import { REPOSITORIES } from '@wishlist/api/repositories'
+import { BadRequestException, ForbiddenException, Inject, Injectable, Logger } from '@nestjs/common';
 
-import { type SecretSantaRepository, SecretSantaUser, type SecretSantaUserRepository } from '../../domain'
-import { secretSantaMapper } from '../../infrastructure'
+import { type EventRepository } from '../../../event/domain/repository/event.repository';
+import { REPOSITORIES } from '../../../repositories/repositories.constants';
+import { SecretSantaUser } from '../../domain/model/secret-santa-user.model';
+import { secretSantaMapper } from '../../infrastructure/secret-santa.mapper';
 
 export type AddSecretSantaUsersInput = {
-  currentUser: ICurrentUser
-  secretSantaId: SecretSantaId
-  attendeeIds: AttendeeId[]
-}
+  currentUser: ICurrentUser;
+  secretSantaId: SecretSantaId;
+  attendeeIds: AttendeeId[];
+};
 
 export type AddSecretSantaUsersResult = {
-  users: SecretSantaUserDto[]
-}
+  users: SecretSantaUserDto[];
+};
 
 @Injectable()
 export class AddSecretSantaUsersUseCase {
-  private readonly logger = new Logger(AddSecretSantaUsersUseCase.name)
+  private readonly logger = new Logger(AddSecretSantaUsersUseCase.name);
 
   constructor(
     @Inject(REPOSITORIES.SECRET_SANTA) private readonly secretSantaRepository: SecretSantaRepository,
@@ -28,25 +30,25 @@ export class AddSecretSantaUsersUseCase {
   ) {}
 
   async execute(command: AddSecretSantaUsersInput): Promise<AddSecretSantaUsersResult> {
-    this.logger.log('Add secret santa users request received', { command })
-    const secretSanta = await this.secretSantaRepository.findByIdOrFail(command.secretSantaId)
-    const event = await this.eventRepository.findByIdOrFail(secretSanta.eventId)
+    this.logger.log('Add secret santa users request received', { command });
+    const secretSanta = await this.secretSantaRepository.findByIdOrFail(command.secretSantaId);
+    const event = await this.eventRepository.findByIdOrFail(secretSanta.eventId);
 
     if (!event.canEdit(command.currentUser)) {
-      throw new ForbiddenException('Event cannot be edited by this user')
+      throw new ForbiddenException('Event cannot be edited by this user');
     }
 
     if (!secretSanta.canBeModified()) {
-      throw new ForbiddenException('Secret santa already started')
+      throw new ForbiddenException('Secret santa already started');
     }
 
     if (!secretSanta.canAddUsers(command.attendeeIds)) {
-      throw new BadRequestException('One attendee is already in the secret santa')
+      throw new BadRequestException('One attendee is already in the secret santa');
     }
 
     for (const attendeeId of command.attendeeIds) {
       if (!event.attendees.some(a => a.id === attendeeId)) {
-        throw new BadRequestException(`Attendee ${attendeeId} not found for event`)
+        throw new BadRequestException(`Attendee ${attendeeId} not found for event`);
       }
     }
 
@@ -56,15 +58,15 @@ export class AddSecretSantaUsersUseCase {
         secretSantaId: secretSanta.id,
         attendeeId,
       }),
-    )
+    );
 
-    this.logger.log('Creating secret santa users...', { secretSantaId: secretSanta.id, users })
-    await this.secretSantaUserRepository.saveAll(users)
+    this.logger.log('Creating secret santa users...', { secretSantaId: secretSanta.id, users });
+    await this.secretSantaUserRepository.saveAll(users);
 
     const userDtos = users.map(user =>
       secretSantaMapper.toSecretSantaUserDto(user, event.attendees.find(a => a.id === user.attendeeId)!),
-    )
+    );
 
-    return { users: userDtos }
+    return { users: userDtos };
   }
 }

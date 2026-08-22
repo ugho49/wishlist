@@ -1,8 +1,8 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { SEO } from '@wishlist/front-components/SEO'
-import z from 'zod'
+import { createFileRoute } from '@tanstack/react-router';
+import { SEO } from '@wishlist/front-components/SEO';
+import z from 'zod';
 
-import { RenewForgotPasswordPage } from '../../../components/auth/RenewForgotPasswordPage'
+import { RenewForgotPasswordPage } from '../../../components/auth/RenewForgotPasswordPage';
 
 export const Route = createFileRoute('/_anonymous-with-layout/forgot-password/renew')({
   validateSearch: z.object({
@@ -19,4 +19,4 @@ export const Route = createFileRoute('/_anonymous-with-layout/forgot-password/re
       <RenewForgotPasswordPage />
     </>
   ),
-})
+});

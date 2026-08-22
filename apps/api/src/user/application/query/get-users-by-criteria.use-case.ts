@@ -1,15 +1,16 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common'
-import { REPOSITORIES } from '@wishlist/api/repositories'
-import { type ICurrentUser, MiniUserDto } from '@wishlist/common'
-import { isEmpty } from 'lodash'
+import type { UserRepository } from '../../domain/repository/user.repository';
 
-import { type UserRepository } from '../../domain'
-import { userMapper } from '../../infrastructure'
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { type ICurrentUser, MiniUserDto } from '@wishlist/common';
+import { isEmpty } from 'lodash';
+
+import { REPOSITORIES } from '../../../repositories/repositories.constants';
+import { userMapper } from '../../infrastructure/user.mapper';
 
 export type GetUsersByCriteriaInput = {
-  currentUser: ICurrentUser
-  criteria: string
-}
+  currentUser: ICurrentUser;
+  criteria: string;
+};
 
 @Injectable()
 export class GetUsersByCriteriaUseCase {
@@ -19,18 +20,18 @@ export class GetUsersByCriteriaUseCase {
   ) {}
 
   async execute(query: GetUsersByCriteriaInput): Promise<MiniUserDto[]> {
-    const { criteria } = query
+    const { criteria } = query;
 
     if (isEmpty(criteria) || criteria.trim().length < 2) {
-      throw new BadRequestException('Invalid search criteria')
+      throw new BadRequestException('Invalid search criteria');
     }
 
     const users = await this.userRepository.findAllByCriteria({
       criteria,
       ignoreUserId: query.currentUser.id,
       limit: 10,
-    })
+    });
 
-    return users.map(user => userMapper.toMiniUserDto(user))
+    return users.map(user => userMapper.toMiniUserDto(user));
   }
 }

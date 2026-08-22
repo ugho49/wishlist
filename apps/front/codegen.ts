@@ -1,6 +1,6 @@
-import type { CodegenConfig } from '@graphql-codegen/cli'
+import type { CodegenConfig } from '@graphql-codegen/cli';
 
-import { gqlScalarIds } from '../../libs/common/src/ids'
+import { gqlScalarIds } from '../../libs/common/src/ids';
 
 const config: CodegenConfig = {
   schema: '../api/schema.graphql',
@@ -42,6 +42,6 @@ const config: CodegenConfig = {
       },
     },
   },
-}
+};
 
-export default config
+export default config;

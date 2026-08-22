@@ -1,31 +1,31 @@
-import type { RootState } from '../../core'
+import type { RootState } from '../../core/store';
 
-import ExploreIcon from '@mui/icons-material/Explore'
-import { Box, Button, Container, Stack, Step, StepLabel, Stepper, styled, Typography } from '@mui/material'
-import { useQueryClient } from '@tanstack/react-query'
-import { useNavigate } from '@tanstack/react-router'
-import { useEffect, useMemo, useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { match } from 'ts-pattern'
+import ExploreIcon from '@mui/icons-material/Explore';
+import { Box, Button, Container, Stack, Step, StepLabel, Stepper, styled, Typography } from '@mui/material';
+import { useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from '@tanstack/react-router';
+import { useEffect, useMemo, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { match } from 'ts-pattern';
 
-import { uploadUserPicture } from '../../api/upload'
-import { OnboardingService } from '../../core/services/onboarding.service'
-import { updatePicture } from '../../core/store/features'
+import { uploadUserPicture } from '../../api/upload';
+import { OnboardingService } from '../../core/services/onboarding.service';
+import { updatePicture } from '../../core/store/features/userProfileSlice';
 import {
   rejectionMessage,
   rejectionPattern,
   useRemoveCurrentUserPictureMutation,
   useUpdateUserPictureFromSocialMutation,
   useUserProfileCurrentUserQuery,
-} from '../../gql'
-import { useToast } from '../../hooks/useToast'
-import { AvatarUpdateButton } from '../user/AvatarUpdateButton'
-import { ProfilePicturePromptModal } from '../user/ProfilePicturePromptModal'
+} from '../../gql';
+import { useToast } from '../../hooks/useToast';
+import { AvatarUpdateButton } from '../user/AvatarUpdateButton';
+import { ProfilePicturePromptModal } from '../user/ProfilePicturePromptModal';
 
 const mapState = (state: RootState) => ({
   pictureUrl: state.userProfile.pictureUrl,
   userId: state.auth.user?.id,
-})
+});
 
 const WelcomeContainer = styled(Container)(({ theme }) => ({
   minHeight: '100vh',
@@ -34,12 +34,12 @@ const WelcomeContainer = styled(Container)(({ theme }) => ({
   justifyContent: 'center',
   alignItems: 'center',
   padding: theme.spacing(3),
-}))
+}));
 
 const HeroSection = styled(Box)(({ theme }) => ({
   textAlign: 'center',
   marginBottom: theme.spacing(6),
-}))
+}));
 
 const WelcomeTitle = styled(Typography)(({ theme }) => ({
   fontSize: '2.5rem',
@@ -49,7 +49,7 @@ const WelcomeTitle = styled(Typography)(({ theme }) => ({
   [theme.breakpoints.down('md')]: {
     fontSize: '2rem',
   },
-}))
+}));
 
 const WelcomeSubtitle = styled(Typography)(({ theme }) => ({
   fontSize: '1.25rem',
@@ -57,13 +57,13 @@ const WelcomeSubtitle = styled(Typography)(({ theme }) => ({
   marginBottom: theme.spacing(4),
   maxWidth: 600,
   margin: '0 auto',
-}))
+}));
 
 const StepsContainer = styled(Box)(({ theme }) => ({
   width: '100%',
   maxWidth: 800,
   marginBottom: theme.spacing(6),
-}))
+}));
 
 const StepCard = styled(Box)(({ theme }) => ({
   display: 'flex',
@@ -73,7 +73,7 @@ const StepCard = styled(Box)(({ theme }) => ({
   borderRadius: theme.spacing(2),
   backgroundColor: theme.palette.background.paper,
   boxShadow: theme.shadows[2],
-}))
+}));
 
 const StepIcon = styled(Box)(({ theme }) => ({
   width: 80,
@@ -86,20 +86,20 @@ const StepIcon = styled(Box)(({ theme }) => ({
   justifyContent: 'center',
   marginBottom: theme.spacing(2),
   fontSize: '2rem',
-}))
+}));
 
 const StepTitle = styled(Typography)(({ theme }) => ({
   fontSize: '1.5rem',
   marginRight: 'auto',
   fontWeight: 600,
   marginBottom: theme.spacing(1),
-}))
+}));
 
 const StepDescription = styled(Typography)(({ theme }) => ({
   textAlign: 'left',
   color: theme.palette.text.secondary,
   maxWidth: 300,
-}))
+}));
 
 const ActionButtons = styled(Stack)(({ theme }) => ({
   flexDirection: 'row',
@@ -108,33 +108,33 @@ const ActionButtons = styled(Stack)(({ theme }) => ({
     flexDirection: 'column',
     width: '100%',
   },
-}))
+}));
 
 const ProfileStep = () => {
-  const { pictureUrl, userId } = useSelector(mapState)
-  const { addToast } = useToast()
-  const [openModal, setOpenModal] = useState(false)
+  const { pictureUrl, userId } = useSelector(mapState);
+  const { addToast } = useToast();
+  const [openModal, setOpenModal] = useState(false);
   const { data } = useUserProfileCurrentUserQuery(undefined, {
     select: d => d.currentUser,
-  })
-  const user = data?.__typename === 'User' ? data : undefined
-  const dispatch = useDispatch()
-  const queryClient = useQueryClient()
+  });
+  const user = data?.__typename === 'User' ? data : undefined;
+  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
 
-  const { mutateAsync: updatePictureFromSocial } = useUpdateUserPictureFromSocialMutation()
-  const { mutateAsync: removePicture } = useRemoveCurrentUserPictureMutation()
+  const { mutateAsync: updatePictureFromSocial } = useUpdateUserPictureFromSocialMutation();
+  const { mutateAsync: removePicture } = useRemoveCurrentUserPictureMutation();
 
   useEffect(() => {
     if (userId) {
-      const onboardingService = new OnboardingService(userId)
-      onboardingService.markSetProfilePictureAsShown()
+      const onboardingService = new OnboardingService(userId);
+      onboardingService.markSetProfilePictureAsShown();
     }
-  }, [userId])
+  }, [userId]);
 
   const handlePictureUpdated = (newPictureUrl: string | undefined) => {
-    dispatch(updatePicture(newPictureUrl))
-    void queryClient.invalidateQueries({ queryKey: ['UserProfileCurrentUser'] })
-  }
+    dispatch(updatePicture(newPictureUrl));
+    void queryClient.invalidateQueries({ queryKey: ['UserProfileCurrentUser'] });
+  };
 
   return (
     <>
@@ -151,26 +151,26 @@ const ProfileStep = () => {
             onPictureUpdated={handlePictureUpdated}
             uploadPictureHandler={file => uploadUserPicture(file)}
             updatePictureFromSocialHandler={async socialId => {
-              const res = await updatePictureFromSocial({ input: { socialId } })
+              const res = await updatePictureFromSocial({ input: { socialId } });
               match(res.updateUserPictureFromSocial)
                 .with({ __typename: 'VoidOutput' }, () => undefined)
                 .with(rejectionPattern, rejection => {
-                  addToast({ message: rejectionMessage(rejection), variant: 'error' })
+                  addToast({ message: rejectionMessage(rejection), variant: 'error' });
                   // AvatarUpdateButton applies the new picture unless the handler throws
-                  throw new Error(rejectionMessage(rejection))
+                  throw new Error(rejectionMessage(rejection));
                 })
-                .exhaustive()
+                .exhaustive();
             }}
             deletePictureHandler={async () => {
-              const res = await removePicture({})
+              const res = await removePicture({});
               match(res.removeUserPicture)
                 .with({ __typename: 'VoidOutput' }, () => undefined)
                 .with(rejectionPattern, rejection => {
-                  addToast({ message: rejectionMessage(rejection), variant: 'error' })
+                  addToast({ message: rejectionMessage(rejection), variant: 'error' });
                   // AvatarUpdateButton removes the picture unless the handler throws
-                  throw new Error(rejectionMessage(rejection))
+                  throw new Error(rejectionMessage(rejection));
                 })
-                .exhaustive()
+                .exhaustive();
             }}
             size="120px"
           />
@@ -179,65 +179,63 @@ const ProfileStep = () => {
 
       <ProfilePicturePromptModal open={openModal} onClose={() => setOpenModal(false)} />
     </>
-  )
-}
+  );
+};
 
-const ExploreStep = () => {
-  return (
-    <StepCard>
-      <StepIcon>
-        <ExploreIcon />
-      </StepIcon>
-      <StepTitle variant="h4">Explorez les fonctionnalités</StepTitle>
-      <StepDescription variant="body1">
-        Créez des évènements, partagez vos wishlists et organisez des Secret Santa !
-      </StepDescription>
-    </StepCard>
-  )
-}
+const ExploreStep = () => (
+  <StepCard>
+    <StepIcon>
+      <ExploreIcon />
+    </StepIcon>
+    <StepTitle variant="h4">Explorez les fonctionnalités</StepTitle>
+    <StepDescription variant="body1">
+      Créez des évènements, partagez vos wishlists et organisez des Secret Santa !
+    </StepDescription>
+  </StepCard>
+);
 
 const profileStep = {
   id: 'profile',
   title: 'Personnalisez votre profil',
   component: <ProfileStep />,
-}
+};
 
 const exploreStep = {
   id: 'explore',
   title: 'Explorez les fonctionnalités',
   component: <ExploreStep />,
-}
+};
 
-const steps = [profileStep, exploreStep]
+const steps = [profileStep, exploreStep];
 
 export const WelcomePage = () => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const { data } = useUserProfileCurrentUserQuery(undefined, {
     select: d => d.currentUser,
-  })
-  const user = data?.__typename === 'User' ? data : undefined
-  const [activeStep, setActiveStep] = useState(0)
-  const currentStep = useMemo(() => steps[activeStep], [activeStep])
+  });
+  const user = data?.__typename === 'User' ? data : undefined;
+  const [activeStep, setActiveStep] = useState(0);
+  const currentStep = useMemo(() => steps[activeStep], [activeStep]);
 
   const handleNext = () => {
     if (activeStep < steps.length - 1) {
-      setActiveStep(activeStep + 1)
+      setActiveStep(activeStep + 1);
     }
 
     if (activeStep < steps.length - 1) {
-      setActiveStep(activeStep + 1)
+      setActiveStep(activeStep + 1);
     }
-  }
+  };
 
   const handleBack = () => {
     if (activeStep > 0) {
-      setActiveStep(activeStep - 1)
+      setActiveStep(activeStep - 1);
     }
-  }
+  };
 
   const handleFinishOnboarding = () => {
-    void navigate({ to: '/events' })
-  }
+    void navigate({ to: '/events' });
+  };
 
   return (
     <WelcomeContainer>
@@ -276,5 +274,5 @@ export const WelcomePage = () => {
         )}
       </ActionButtons>
     </WelcomeContainer>
-  )
-}
+  );
+};

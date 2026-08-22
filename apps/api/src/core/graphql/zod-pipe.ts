@@ -1,18 +1,18 @@
-import type { ZodType } from 'zod'
+import type { ZodType } from 'zod';
 
-import { Injectable, type PipeTransform } from '@nestjs/common'
+import { Injectable, type PipeTransform } from '@nestjs/common';
 
-import { ZodValidationException } from './zod-validation.exception'
+import { ZodValidationException } from './zod-validation.exception';
 
 @Injectable()
 export class ZodPipe implements PipeTransform {
   constructor(private readonly schema: ZodType) {}
 
   transform(value: unknown) {
-    const result = this.schema.safeParse(value)
+    const result = this.schema.safeParse(value);
     if (!result.success) {
-      throw new ZodValidationException(result.error)
+      throw new ZodValidationException(result.error);
     }
-    return result.data
+    return result.data;
   }
 }

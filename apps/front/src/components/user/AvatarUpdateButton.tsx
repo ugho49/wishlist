@@ -1,13 +1,13 @@
-import type { UserSocialId } from '@wishlist/common'
-import type React from 'react'
-import type { UploadPictureResult } from '../../api/upload'
-import type { UserSocial } from '../../gql'
+import type { UserSocialId } from '@wishlist/common';
+import type React from 'react';
+import type { UploadPictureResult } from '../../api/upload';
+import type { UserSocial } from '../../gql';
 
-import AddAPhotoIcon from '@mui/icons-material/AddAPhoto'
-import CloudUploadIcon from '@mui/icons-material/CloudUpload'
-import EditIcon from '@mui/icons-material/Edit'
-import GoogleIcon from '@mui/icons-material/Google'
-import NoPhotographyIcon from '@mui/icons-material/NoPhotography'
+import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import EditIcon from '@mui/icons-material/Edit';
+import GoogleIcon from '@mui/icons-material/Google';
+import NoPhotographyIcon from '@mui/icons-material/NoPhotography';
 import {
   Avatar,
   Box,
@@ -20,13 +20,13 @@ import {
   Stack,
   styled,
   Typography,
-} from '@mui/material'
-import clsx from 'clsx'
-import { useRef, useState } from 'react'
+} from '@mui/material';
+import clsx from 'clsx';
+import { useRef, useState } from 'react';
 
-import { useToast } from '../../hooks/useToast'
-import { ACCEPT_IMG, sanitizeImgToUrl } from '../../utils/images.utils'
-import { AvatarCropperModal } from '../common/AvatarCropperModal'
+import { useToast } from '../../hooks/useToast';
+import { ACCEPT_IMG, sanitizeImgToUrl } from '../../utils/images.utils';
+import { AvatarCropperModal } from '../common/AvatarCropperModal';
 
 const AvatarSection = styled(Box)(({ theme }) => ({
   display: 'flex',
@@ -34,11 +34,11 @@ const AvatarSection = styled(Box)(({ theme }) => ({
   alignItems: 'center',
   justifyContent: 'center',
   gap: theme.spacing(2),
-}))
+}));
 
 const AvatarContainer = styled(Box)(() => ({
   position: 'relative',
-}))
+}));
 
 const StyledAvatar = styled(Avatar)(({ theme }) => ({
   '&.clickable': {
@@ -51,7 +51,7 @@ const StyledAvatar = styled(Avatar)(({ theme }) => ({
   '&.with-picture': {
     border: `4px solid ${theme.palette.primary.main}`,
   },
-}))
+}));
 
 const MenuButton = styled(IconButton)(({ theme }) => ({
   position: 'absolute',
@@ -66,17 +66,17 @@ const MenuButton = styled(IconButton)(({ theme }) => ({
     transform: 'scale(1.1)',
   },
   boxShadow: theme.shadows[3],
-}))
+}));
 
 export type AvatarUpdateButtonProps = {
-  uploadPictureHandler: (file: File) => Promise<UploadPictureResult>
-  updatePictureFromSocialHandler: (socialId: UserSocialId) => Promise<void>
-  deletePictureHandler: () => Promise<void>
-  onPictureUpdated: (pictureUrl: string | undefined) => void
-  pictureUrl?: string
-  socials: UserSocial[]
-  size?: string
-}
+  uploadPictureHandler: (file: File) => Promise<UploadPictureResult>;
+  updatePictureFromSocialHandler: (socialId: UserSocialId) => Promise<void>;
+  deletePictureHandler: () => Promise<void>;
+  onPictureUpdated: (pictureUrl: string | undefined) => void;
+  pictureUrl?: string;
+  socials: UserSocial[];
+  size?: string;
+};
 
 export const AvatarUpdateButton = ({
   pictureUrl,
@@ -87,77 +87,77 @@ export const AvatarUpdateButton = ({
   onPictureUpdated,
   size = '60px',
 }: AvatarUpdateButtonProps) => {
-  const [loading, setLoading] = useState(false)
-  const [imageSrc, setImageSrc] = useState<string | undefined>(undefined)
-  const [anchorElMenu, setAnchorElMenu] = useState<null | HTMLElement>(null)
-  const { addToast } = useToast()
-  const inputFileRef = useRef<HTMLInputElement | null>(null)
+  const [loading, setLoading] = useState(false);
+  const [imageSrc, setImageSrc] = useState<string | undefined>(undefined);
+  const [anchorElMenu, setAnchorElMenu] = useState<null | HTMLElement>(null);
+  const { addToast } = useToast();
+  const inputFileRef = useRef<HTMLInputElement | null>(null);
 
-  const openMenu = (event: React.MouseEvent<HTMLElement>) => setAnchorElMenu(event.currentTarget)
-  const closeMenu = () => setAnchorElMenu(null)
+  const openMenu = (event: React.MouseEvent<HTMLElement>) => setAnchorElMenu(event.currentTarget);
+  const closeMenu = () => setAnchorElMenu(null);
 
   const removePicture = async () => {
-    setLoading(true)
-    closeMenu()
+    setLoading(true);
+    closeMenu();
     try {
-      await deletePictureHandler()
-      onPictureUpdated(undefined)
+      await deletePictureHandler();
+      onPictureUpdated(undefined);
     } catch {
-      addToast({ message: "Une erreur s'est produite", variant: 'error' })
+      addToast({ message: "Une erreur s'est produite", variant: 'error' });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const selectAPicture = () => {
-    closeMenu()
-    inputFileRef.current?.click()
-  }
+    closeMenu();
+    inputFileRef.current?.click();
+  };
 
   const onFileInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files) return
+    if (!e.target.files) return;
 
-    const file = e.target.files[0]
-    if (!file) return
+    const file = e.target.files[0];
+    if (!file) return;
 
-    const imageDataUrl = await sanitizeImgToUrl(file)
+    const imageDataUrl = await sanitizeImgToUrl(file);
 
-    setImageSrc(imageDataUrl)
+    setImageSrc(imageDataUrl);
 
-    e.target.value = ''
-  }
+    e.target.value = '';
+  };
 
   const uploadProfilePicture = async (file: File) => {
-    setLoading(true)
+    setLoading(true);
 
     try {
-      const res = await uploadPictureHandler(file)
-      onPictureUpdated(res.picture_url)
+      const res = await uploadPictureHandler(file);
+      onPictureUpdated(res.picture_url);
     } catch (e) {
       // biome-ignore lint/suspicious/noExplicitAny: wtf
-      const error = (e as any)?.response?.data?.message as string
-      addToast({ message: error || "Une erreur s'est produite", variant: 'error' })
+      const error = (e as any)?.response?.data?.message as string;
+      addToast({ message: error || "Une erreur s'est produite", variant: 'error' });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const updateWithSocialPicture = async (social?: UserSocial) => {
-    closeMenu()
+    closeMenu();
 
-    if (!social) return
+    if (!social) return;
 
-    setLoading(true)
+    setLoading(true);
 
     try {
-      await updatePictureFromSocialHandler(social.id)
-      onPictureUpdated(social.pictureUrl!)
+      await updatePictureFromSocialHandler(social.id);
+      onPictureUpdated(social.pictureUrl!);
     } catch {
-      addToast({ message: "Une erreur s'est produite", variant: 'error' })
+      addToast({ message: "Une erreur s'est produite", variant: 'error' });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <>
@@ -166,8 +166,8 @@ export const AvatarUpdateButton = ({
           imageSrc={imageSrc}
           handleClose={() => setImageSrc(undefined)}
           handleSave={async file => {
-            setImageSrc(undefined)
-            await uploadProfilePicture(file)
+            setImageSrc(undefined);
+            await uploadProfilePicture(file);
           }}
         />
       )}
@@ -239,5 +239,5 @@ export const AvatarUpdateButton = ({
         )}
       </Menu>
     </>
-  )
-}
+  );
+};

@@ -1,8 +1,8 @@
-import { alpha, Box, type BoxProps, Link, styled } from '@mui/material'
-import Markdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
+import { alpha, Box, type BoxProps, Link, styled } from '@mui/material';
+import Markdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
-import { isValidUrl } from '../../utils/router.utils'
+import { isValidUrl } from '../../utils/router.utils';
 
 const MarkdownContainer = styled(Box)(({ theme }) => ({
   fontSize: '1em',
@@ -93,7 +93,7 @@ const MarkdownContainer = styled(Box)(({ theme }) => ({
   '& strong': {
     fontWeight: 500,
   },
-}))
+}));
 
 const markdownComponents = {
   a: ({ href, children }: { href?: string; children?: React.ReactNode }) =>
@@ -105,18 +105,16 @@ const markdownComponents = {
       <p>{children}</p>
     ),
   img: ({ src, alt }: { src?: string; alt?: string }) => <img src={src && isValidUrl(src) ? src : ''} alt={alt} />,
-}
+};
 
 type MarkdownContentProps = BoxProps & {
-  text: string
-}
+  text: string;
+};
 
-export const MarkdownContent = ({ text, ...props }: MarkdownContentProps) => {
-  return (
-    <MarkdownContainer {...props}>
-      <Markdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
-        {text}
-      </Markdown>
-    </MarkdownContainer>
-  )
-}
+export const MarkdownContent = ({ text, ...props }: MarkdownContentProps) => (
+  <MarkdownContainer {...props}>
+    <Markdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+      {text}
+    </Markdown>
+  </MarkdownContainer>
+);

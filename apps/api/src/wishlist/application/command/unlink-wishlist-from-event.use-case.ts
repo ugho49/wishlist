@@ -1,18 +1,19 @@
-import { BadRequestException, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common'
-import { REPOSITORIES } from '@wishlist/api/repositories'
-import { type EventId, type ICurrentUser, type WishlistId } from '@wishlist/common'
+import type { WishlistRepository } from '../../domain/wishlist.repository';
 
-import { type WishlistRepository } from '../../domain'
+import { BadRequestException, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { type EventId, type ICurrentUser, type WishlistId } from '@wishlist/common';
+
+import { REPOSITORIES } from '../../../repositories/repositories.constants';
 
 export type UnlinkWishlistFromEventInput = {
-  currentUser: ICurrentUser
-  wishlistId: WishlistId
-  eventId: EventId
-}
+  currentUser: ICurrentUser;
+  wishlistId: WishlistId;
+  eventId: EventId;
+};
 
 @Injectable()
 export class UnlinkWishlistFromEventUseCase {
-  private readonly logger = new Logger(UnlinkWishlistFromEventUseCase.name)
+  private readonly logger = new Logger(UnlinkWishlistFromEventUseCase.name);
 
   constructor(
     @Inject(REPOSITORIES.WISHLIST)
@@ -20,29 +21,29 @@ export class UnlinkWishlistFromEventUseCase {
   ) {}
 
   async execute(command: UnlinkWishlistFromEventInput): Promise<void> {
-    this.logger.log('Unlink wishlist from event request received', { command })
-    const { currentUser, wishlistId, eventId } = command
+    this.logger.log('Unlink wishlist from event request received', { command });
+    const { currentUser, wishlistId, eventId } = command;
 
     // 1. Find wishlist and check ownership
-    const wishlist = await this.wishlistRepository.findByIdOrFail(wishlistId)
+    const wishlist = await this.wishlistRepository.findByIdOrFail(wishlistId);
 
     if (!wishlist.isOwnerOrCoOwner(currentUser.id)) {
-      throw new UnauthorizedException('Only the owner or co-owner of the list can update it')
+      throw new UnauthorizedException('Only the owner or co-owner of the list can update it');
     }
 
     // 2. Check if wishlist is linked to this event
     if (!wishlist.isLinkedToEvent(eventId)) {
-      throw new BadRequestException('Wishlist is not linked to this event')
+      throw new BadRequestException('Wishlist is not linked to this event');
     }
 
     // 3. Check if wishlist has at least 2 events (must keep at least one)
     if (wishlist.eventIds.length === 1) {
-      throw new BadRequestException('A wishlist must be linked to at least one event. Delete the wishlist instead.')
+      throw new BadRequestException('A wishlist must be linked to at least one event. Delete the wishlist instead.');
     }
 
     // 4. Unlink wishlist from event
-    const updatedWishlist = wishlist.unlinkEvent(eventId)
-    this.logger.log('Saving wishlist...', { wishlistId: updatedWishlist.id, updatedFields: ['eventIds'] })
-    await this.wishlistRepository.save(updatedWishlist)
+    const updatedWishlist = wishlist.unlinkEvent(eventId);
+    this.logger.log('Saving wishlist...', { wishlistId: updatedWishlist.id, updatedFields: ['eventIds'] });
+    await this.wishlistRepository.save(updatedWishlist);
   }
 }

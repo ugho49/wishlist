@@ -1,14 +1,14 @@
-import type { SxProps, Theme } from '@mui/material'
+import type { SxProps, Theme } from '@mui/material';
 
-import AddIcon from '@mui/icons-material/Add'
-import { Box, Button, Stack, styled, Typography } from '@mui/material'
+import AddIcon from '@mui/icons-material/Add';
+import { Box, Button, Stack, styled, Typography } from '@mui/material';
 
-import EmptyWishlistIllustration from '../../assets/illustrations/empty-wishlists.png'
+import EmptyWishlistIllustration from '../../assets/illustrations/empty-wishlists.png';
 
 const EmptyStateContainer = styled(Stack)(({ theme }) => ({
   alignItems: 'center',
   gap: theme.spacing(2),
-}))
+}));
 
 const IllustrationWrapper = styled(Box)(() => ({
   animation: 'fadeInUp 0.6s ease-out',
@@ -22,7 +22,7 @@ const IllustrationWrapper = styled(Box)(() => ({
       transform: 'translateY(0)',
     },
   },
-}))
+}));
 
 const Illustration = styled('img')(({ theme }) => ({
   width: '150px',
@@ -31,21 +31,21 @@ const Illustration = styled('img')(({ theme }) => ({
     width: '100px',
     height: '100px',
   },
-}))
+}));
 
 const EmptyStateTitle = styled(Typography)(({ theme }) => ({
   fontSize: '1.25rem',
   fontWeight: 500,
   color: theme.palette.text.primary,
   textAlign: 'center',
-}))
+}));
 
 const EmptyStateSubtitle = styled(Typography)(({ theme }) => ({
   fontSize: '0.95rem',
   color: theme.palette.text.secondary,
   textAlign: 'center',
   maxWidth: '400px',
-}))
+}));
 
 const AddListButton = styled(Button)(({ theme }) => ({
   marginTop: theme.spacing(1),
@@ -59,32 +59,30 @@ const AddListButton = styled(Button)(({ theme }) => ({
     transform: 'translateY(-2px)',
   },
   transition: 'all 0.3s ease',
-}))
+}));
 
 export type EmptyListsStateProps = {
-  title: string
-  subtitle: string
-  sx?: SxProps<Theme>
-  onAddListClick: () => void
-}
+  title: string;
+  subtitle: string;
+  sx?: SxProps<Theme>;
+  onAddListClick: () => void;
+};
 
-export const EmptyListsState = ({ onAddListClick, sx }: EmptyListsStateProps) => {
-  return (
-    <EmptyStateContainer sx={sx}>
-      <IllustrationWrapper>
-        <Illustration src={EmptyWishlistIllustration} alt="Empty Wishlist" />
-      </IllustrationWrapper>
+export const EmptyListsState = ({ onAddListClick, sx }: EmptyListsStateProps) => (
+  <EmptyStateContainer sx={sx}>
+    <IllustrationWrapper>
+      <Illustration src={EmptyWishlistIllustration} alt="Empty Wishlist" />
+    </IllustrationWrapper>
 
-      <Box textAlign="center">
-        <EmptyStateTitle>Aucune liste pour le moment</EmptyStateTitle>
-        <EmptyStateSubtitle>
-          Créez votre première liste de souhaits pour cet événement et partagez vos envies !
-        </EmptyStateSubtitle>
-      </Box>
+    <Box textAlign="center">
+      <EmptyStateTitle>Aucune liste pour le moment</EmptyStateTitle>
+      <EmptyStateSubtitle>
+        Créez votre première liste de souhaits pour cet événement et partagez vos envies !
+      </EmptyStateSubtitle>
+    </Box>
 
-      <AddListButton variant="contained" color="primary" onClick={() => onAddListClick()} startIcon={<AddIcon />}>
-        Ajouter ma liste
-      </AddListButton>
-    </EmptyStateContainer>
-  )
-}
+    <AddListButton variant="contained" color="primary" onClick={() => onAddListClick()} startIcon={<AddIcon />}>
+      Ajouter ma liste
+    </AddListButton>
+  </EmptyStateContainer>
+);

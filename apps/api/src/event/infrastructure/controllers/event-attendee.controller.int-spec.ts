@@ -1,21 +1,21 @@
-import type { RequestApp } from '@wishlist/api-test-utils'
+import type { RequestApp } from '@wishlist/api-test-utils';
 
-import { Fixtures, useTestApp } from '@wishlist/api-test-utils'
-import { AttendeeRole, uuid } from '@wishlist/common'
+import { Fixtures, useTestApp } from '@wishlist/api-test-utils';
+import { AttendeeRole, uuid } from '@wishlist/common';
 
 describe('EventAttendeeController', () => {
-  const { getRequest, getFixtures, expectTable, expectMail } = useTestApp()
-  let fixtures: Fixtures
+  const { getRequest, getFixtures, expectTable, expectMail } = useTestApp();
+  let fixtures: Fixtures;
 
   beforeEach(() => {
-    fixtures = getFixtures()
-  })
+    fixtures = getFixtures();
+  });
 
   describe('POST /event/:eventId/attendee', () => {
-    const path = (eventId: string) => `/event/${eventId}/attendee`
+    const path = (eventId: string) => `/event/${eventId}/attendee`;
 
     it('should return unauthorized if not authenticated', async () => {
-      const request = await getRequest()
+      const request = await getRequest();
 
       await request
         .post(path(uuid()))
@@ -23,17 +23,17 @@ describe('EventAttendeeController', () => {
           email: 'test@example.com',
           role: AttendeeRole.PARTICIPANT,
         })
-        .expect(401)
-    })
+        .expect(401);
+    });
 
     describe('when user is authenticated', () => {
-      let request: RequestApp
-      let currentUserId: string
+      let request: RequestApp;
+      let currentUserId: string;
 
       beforeEach(async () => {
-        request = await getRequest({ signedAs: 'BASE_USER' })
-        currentUserId = await fixtures.getSignedUserId('BASE_USER')
-      })
+        request = await getRequest({ signedAs: 'BASE_USER' });
+        currentUserId = await fixtures.getSignedUserId('BASE_USER');
+      });
 
       it.each([
         {
@@ -46,31 +46,31 @@ describe('EventAttendeeController', () => {
           case: 'invalid role',
           message: ['role must be one of the following values: creator, admin, participant'],
         },
-      ])('should return 400 when invalid input: $case', async ({ body, message }) => {
+      ])('should return 400 when invalid input: $case', async ({ body: payload, message }) => {
         const { eventId } = await fixtures.insertEventWithMaintainer({
           title: 'Test Event',
           description: 'Test Description',
           maintainerId: currentUserId,
-        })
+        });
 
         await request
           .post(path(eventId))
-          .send(body)
+          .send(payload)
           .expect(400)
           .expect(({ body }) =>
             expect(body).toMatchObject({
               error: 'Bad Request',
               message: expect.arrayContaining(message),
             }),
-          )
-      })
+          );
+      });
 
       it('should create pending attendee successfully', async () => {
         const { eventId } = await fixtures.insertEventWithMaintainer({
           title: 'Test Event',
           description: 'Test Description',
           maintainerId: currentUserId,
-        })
+        });
 
         const response = await request
           .post(path(eventId))
@@ -84,10 +84,10 @@ describe('EventAttendeeController', () => {
               id: expect.toBeString(),
               pending_email: 'new-attendee@example.com',
               role: AttendeeRole.PARTICIPANT,
-            })
-          })
+            });
+          });
 
-        const createdId = response.body.id
+        const createdId = response.body.id;
 
         await expectTable(Fixtures.EVENT_ATTENDEE_TABLE)
           .hasNumberOfRows(2) // maintainer + new attendee
@@ -97,28 +97,28 @@ describe('EventAttendeeController', () => {
             event_id: eventId,
             temp_user_email: 'new-attendee@example.com',
             role: AttendeeRole.PARTICIPANT,
-          })
+          });
 
         await expectMail()
           .waitFor(500)
           .hasNumberOfEmails(1)
           .mail(0)
           .hasSubject('[Wishlist] Vous participez à un nouvel événement')
-          .hasReceiver('new-attendee@example.com')
-      })
+          .hasReceiver('new-attendee@example.com');
+      });
 
       it('should create active attendee successfully', async () => {
         const { eventId } = await fixtures.insertEventWithMaintainer({
           title: 'Test Event',
           description: 'Test Description',
           maintainerId: currentUserId,
-        })
+        });
 
         const otherUserId = await fixtures.insertUser({
           email: 'other@example.com',
           firstname: 'Other',
           lastname: 'User',
-        })
+        });
 
         const response = await request
           .post(path(eventId))
@@ -137,10 +137,10 @@ describe('EventAttendeeController', () => {
                 firstname: 'Other',
                 lastname: 'User',
               },
-            })
-          })
+            });
+          });
 
-        const createdId = response.body.id
+        const createdId = response.body.id;
 
         await expectTable(Fixtures.EVENT_ATTENDEE_TABLE)
           .hasNumberOfRows(2) // maintainer + new attendee
@@ -150,18 +150,18 @@ describe('EventAttendeeController', () => {
             event_id: eventId,
             user_id: otherUserId,
             role: AttendeeRole.PARTICIPANT,
-          })
+          });
 
         await expectMail()
           .waitFor(500)
           .hasNumberOfEmails(1)
           .mail(0)
           .hasSubject('[Wishlist] Vous participez à un nouvel événement')
-          .hasReceiver('other@example.com')
-      })
+          .hasReceiver('other@example.com');
+      });
 
       it('should return 404 when event does not exist', async () => {
-        const nonExistentEventId = uuid()
+        const nonExistentEventId = uuid();
 
         await request
           .post(path(nonExistentEventId))
@@ -175,23 +175,23 @@ describe('EventAttendeeController', () => {
               error: 'Not Found',
               message: 'Event not found',
             }),
-          )
+          );
 
-        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(0)
-      })
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(0);
+      });
 
       it('should return 401 when user is not maintainer of event', async () => {
         const otherUserId = await fixtures.insertUser({
           email: 'other@example.com',
           firstname: 'Other',
           lastname: 'User',
-        })
+        });
 
         const { eventId } = await fixtures.insertEventWithMaintainer({
           title: 'Test Event',
           description: 'Test Description',
           maintainerId: otherUserId,
-        })
+        });
 
         await request
           .post(path(eventId))
@@ -205,23 +205,23 @@ describe('EventAttendeeController', () => {
               error: 'Unauthorized',
               message: 'Only creators and admins of the event can add an attendee',
             }),
-          )
+          );
 
-        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(1) // only maintainer
-      })
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(1); // only maintainer
+      });
 
       it('should return 400 when attendee already exists for this event', async () => {
         const { eventId } = await fixtures.insertEventWithMaintainer({
           title: 'Test Event',
           description: 'Test Description',
           maintainerId: currentUserId,
-        })
+        });
 
-        const existingEmail = 'existing@example.com'
+        const existingEmail = 'existing@example.com';
         await fixtures.insertPendingAttendee({
           eventId,
           tempUserEmail: existingEmail,
-        })
+        });
 
         await request
           .post(path(eventId))
@@ -235,17 +235,17 @@ describe('EventAttendeeController', () => {
               error: 'Bad Request',
               message: 'This attendee already exist for this event',
             }),
-          )
+          );
 
-        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(2) // maintainer + existing attendee
-      })
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(2); // maintainer + existing attendee
+      });
 
       it('should return 400 when assigning creator role', async () => {
         const { eventId } = await fixtures.insertEventWithMaintainer({
           title: 'Test Event',
           description: 'Test Description',
           maintainerId: currentUserId,
-        })
+        });
 
         await request
           .post(path(eventId))
@@ -259,23 +259,23 @@ describe('EventAttendeeController', () => {
               error: 'Bad Request',
               message: 'Cannot assign the creator role to an attendee',
             }),
-          )
+          );
 
-        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(1)
-      })
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(1);
+      });
 
       it('should add attendee when user is admin of the event', async () => {
         const creatorId = await fixtures.insertUser({
           email: 'creator@example.com',
           firstname: 'Creator',
           lastname: 'User',
-        })
+        });
         const { eventId } = await fixtures.insertEventWithCreator({
           title: 'Test Event',
           description: 'Test Description',
           creatorId,
-        })
-        await fixtures.insertAdminAttendee({ eventId, userId: currentUserId })
+        });
+        await fixtures.insertAdminAttendee({ eventId, userId: currentUserId });
 
         await request
           .post(path(eventId))
@@ -283,42 +283,42 @@ describe('EventAttendeeController', () => {
             email: 'new-attendee@example.com',
             role: AttendeeRole.PARTICIPANT,
           })
-          .expect(201)
+          .expect(201);
 
-        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(3)
-      })
-    })
-  })
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(3);
+      });
+    });
+  });
 
   describe('DELETE /event/:eventId/attendee/:attendeeId', () => {
     const path = (params: { eventId: string; attendeeId: string }) =>
-      `/event/${params.eventId}/attendee/${params.attendeeId}`
+      `/event/${params.eventId}/attendee/${params.attendeeId}`;
 
     it('should return unauthorized if not authenticated', async () => {
-      const request = await getRequest()
-      const eventId = uuid()
-      const attendeeId = uuid()
+      const request = await getRequest();
+      const eventId = uuid();
+      const attendeeId = uuid();
 
-      await request.delete(path({ eventId, attendeeId })).expect(401)
-    })
+      await request.delete(path({ eventId, attendeeId })).expect(401);
+    });
 
     describe('when user is authenticated', () => {
-      let request: RequestApp
-      let currentUserId: string
+      let request: RequestApp;
+      let currentUserId: string;
 
       beforeEach(async () => {
-        request = await getRequest({ signedAs: 'BASE_USER' })
-        currentUserId = await fixtures.getSignedUserId('BASE_USER')
-      })
+        request = await getRequest({ signedAs: 'BASE_USER' });
+        currentUserId = await fixtures.getSignedUserId('BASE_USER');
+      });
 
       it('should return 404 when attendee does not exist', async () => {
         const { eventId } = await fixtures.insertEventWithMaintainer({
           title: 'Test Event',
           description: 'Test Description',
           maintainerId: currentUserId,
-        })
+        });
 
-        const nonExistentAttendeeId = uuid()
+        const nonExistentAttendeeId = uuid();
 
         await request
           .delete(path({ eventId, attendeeId: nonExistentAttendeeId }))
@@ -328,26 +328,26 @@ describe('EventAttendeeController', () => {
               error: 'Not Found',
               message: 'Attendee not found',
             }),
-          )
-      })
+          );
+      });
 
       it('should return 401 when user is not maintainer of event', async () => {
         const otherUserId = await fixtures.insertUser({
           email: 'other@example.com',
           firstname: 'Other',
           lastname: 'User',
-        })
+        });
 
         const { eventId } = await fixtures.insertEventWithMaintainer({
           title: 'Test Event',
           description: 'Test Description',
           maintainerId: otherUserId,
-        })
+        });
 
         const attendeeId = await fixtures.insertPendingAttendee({
           eventId,
           tempUserEmail: 'attendee@example.com',
-        })
+        });
 
         await request
           .delete(path({ eventId, attendeeId }))
@@ -357,17 +357,17 @@ describe('EventAttendeeController', () => {
               error: 'Unauthorized',
               message: 'Only creators and admins of the event can delete an attendee',
             }),
-          )
+          );
 
-        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(2) // maintainer + attendee
-      })
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(2); // maintainer + attendee
+      });
 
       it('should return 409 when trying to delete yourself', async () => {
         const { eventId, attendeeId } = await fixtures.insertEventWithMaintainer({
           title: 'Test Event',
           description: 'Test Description',
           maintainerId: currentUserId,
-        })
+        });
 
         await request
           .delete(path({ eventId, attendeeId }))
@@ -377,40 +377,40 @@ describe('EventAttendeeController', () => {
               error: 'Conflict',
               message: 'You cannot delete yourself from the event',
             }),
-          )
+          );
 
-        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(1) // maintainer still exists
-      })
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(1); // maintainer still exists
+      });
 
       it('should return 409 when attendee has wishlist with items', async () => {
         const otherUserId = await fixtures.insertUser({
           email: 'attendee@example.com',
           firstname: 'Attendee',
           lastname: 'User',
-        })
+        });
 
         const { eventId } = await fixtures.insertEventWithMaintainer({
           title: 'Test Event',
           description: 'Test Description',
           maintainerId: currentUserId,
-        })
+        });
 
         const attendeeId = await fixtures.insertActiveAttendee({
           eventId,
           userId: otherUserId,
-        })
+        });
 
         const wishlistId = await fixtures.insertWishlist({
           eventIds: [eventId],
           userId: otherUserId,
           title: 'Test Wishlist',
-        })
+        });
 
         await fixtures.insertItem({
           wishlistId,
           name: 'Test Item',
           description: 'Test Description',
-        })
+        });
 
         await request
           .delete(path({ eventId, attendeeId }))
@@ -421,141 +421,141 @@ describe('EventAttendeeController', () => {
               message:
                 'You cannot remove this attendee from the event because he have a list in this event and the list have only this event attached',
             }),
-          )
+          );
 
-        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(2) // maintainer + attendee
-        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1)
-        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1)
-      })
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(2); // maintainer + attendee
+        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1);
+        await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(1);
+      });
 
       it('should delete pending attendee successfully', async () => {
         const { eventId } = await fixtures.insertEventWithMaintainer({
           title: 'Test Event',
           description: 'Test Description',
           maintainerId: currentUserId,
-        })
+        });
 
         const attendeeId = await fixtures.insertPendingAttendee({
           eventId,
           tempUserEmail: 'attendee@example.com',
-        })
+        });
 
-        await request.delete(path({ eventId, attendeeId })).expect(200)
+        await request.delete(path({ eventId, attendeeId })).expect(200);
 
-        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(1) // only maintainer remains
-      })
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(1); // only maintainer remains
+      });
 
       it('should delete active attendee successfully', async () => {
         const otherUserId = await fixtures.insertUser({
           email: 'attendee@example.com',
           firstname: 'Attendee',
           lastname: 'User',
-        })
+        });
 
         const { eventId } = await fixtures.insertEventWithMaintainer({
           title: 'Test Event',
           description: 'Test Description',
           maintainerId: currentUserId,
-        })
+        });
 
         const attendeeId = await fixtures.insertActiveAttendee({
           eventId,
           userId: otherUserId,
-        })
+        });
 
-        await request.delete(path({ eventId, attendeeId })).expect(200)
+        await request.delete(path({ eventId, attendeeId })).expect(200);
 
-        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(1) // only maintainer remains
-      })
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(1); // only maintainer remains
+      });
 
       it('should delete active attendee successfully if a wishlist exists but from another attendee', async () => {
         const { eventId } = await fixtures.insertEventWithMaintainer({
           title: 'Test Event',
           description: 'Test Description',
           maintainerId: currentUserId,
-        })
+        });
 
         await fixtures.insertWishlist({
           eventIds: [eventId],
           userId: currentUserId,
           title: 'Test Wishlist',
-        })
+        });
 
         const { attendeeId: attendeeId1 } = await fixtures.insertUserAndAddItToEventAsAttendee({
           email: 'attendee1@example.com',
           firstname: 'User 1',
           lastname: 'User 1',
           eventId,
-        })
+        });
 
         await fixtures.insertUserAndAddItToEventAsAttendee({
           email: 'attendee2@example.com',
           firstname: 'User 2',
           lastname: 'User 2',
           eventId,
-        })
+        });
 
-        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(3)
-        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1)
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(3);
+        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1);
 
-        await request.delete(path({ eventId, attendeeId: attendeeId1 })).expect(200)
+        await request.delete(path({ eventId, attendeeId: attendeeId1 })).expect(200);
 
-        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(2) // 2 attendee remaining (attendee2 and maintainer)
-        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1) // wishlist still exists
-      })
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(2); // 2 attendee remaining (attendee2 and maintainer)
+        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1); // wishlist still exists
+      });
 
       it('should unlink wishlist from event when attendee has wishlist linked to multiple events', async () => {
         const otherUserId = await fixtures.insertUser({
           email: 'attendee@example.com',
           firstname: 'Attendee',
           lastname: 'User',
-        })
+        });
 
         const { eventId: eventId1 } = await fixtures.insertEventWithMaintainer({
           title: 'Test Event 1',
           description: 'Test Description 1',
           maintainerId: currentUserId,
-        })
+        });
 
         const { eventId: eventId2 } = await fixtures.insertEventWithMaintainer({
           title: 'Test Event 2',
           description: 'Test Description 2',
           maintainerId: otherUserId,
-        })
+        });
 
         const attendeeId = await fixtures.insertActiveAttendee({
           eventId: eventId1,
           userId: otherUserId,
-        })
+        });
 
         await fixtures.insertWishlist({
           eventIds: [eventId1, eventId2],
           userId: otherUserId,
           title: 'Test Wishlist',
-        })
+        });
 
-        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(3) // 2 attendees for eventId1 and 1 for eventId2
-        await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(2) // linked to eventId1 and eventId2
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(3); // 2 attendees for eventId1 and 1 for eventId2
+        await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(2); // linked to eventId1 and eventId2
 
-        await request.delete(path({ eventId: eventId1, attendeeId })).expect(200)
+        await request.delete(path({ eventId: eventId1, attendeeId })).expect(200);
 
-        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(2) // 1 attendee for eventId1 and 1 for eventId2
-        await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(1) // linked to eventId2
-        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1) // wishlist still exists
-      })
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(2); // 1 attendee for eventId1 and 1 for eventId2
+        await expectTable(Fixtures.EVENT_WISHLIST_TABLE).hasNumberOfRows(1); // linked to eventId2
+        await expectTable(Fixtures.WISHLIST_TABLE).hasNumberOfRows(1); // wishlist still exists
+      });
 
       it('should return 409 when trying to delete the creator', async () => {
         const creatorId = await fixtures.insertUser({
           email: 'creator@example.com',
           firstname: 'Creator',
           lastname: 'User',
-        })
+        });
         const { eventId, attendeeId: creatorAttendeeId } = await fixtures.insertEventWithCreator({
           title: 'Test Event',
           description: 'Test Description',
           creatorId,
-        })
-        await fixtures.insertAdminAttendee({ eventId, userId: currentUserId })
+        });
+        await fixtures.insertAdminAttendee({ eventId, userId: currentUserId });
 
         await request
           .delete(path({ eventId, attendeeId: creatorAttendeeId }))
@@ -565,34 +565,34 @@ describe('EventAttendeeController', () => {
               error: 'Conflict',
               message: 'You cannot delete the creator of the event',
             }),
-          )
+          );
 
-        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(2)
-      })
-    })
-  })
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(2);
+      });
+    });
+  });
 
   describe('PUT /event/:eventId/attendee/:attendeeId', () => {
     const path = (params: { eventId: string; attendeeId: string }) =>
-      `/event/${params.eventId}/attendee/${params.attendeeId}`
+      `/event/${params.eventId}/attendee/${params.attendeeId}`;
 
     it('should return unauthorized if not authenticated', async () => {
-      const request = await getRequest()
+      const request = await getRequest();
 
       await request
         .put(path({ eventId: uuid(), attendeeId: uuid() }))
         .send({ role: AttendeeRole.ADMIN })
-        .expect(401)
-    })
+        .expect(401);
+    });
 
     describe('when user is authenticated', () => {
-      let request: RequestApp
-      let currentUserId: string
+      let request: RequestApp;
+      let currentUserId: string;
 
       beforeEach(async () => {
-        request = await getRequest({ signedAs: 'BASE_USER' })
-        currentUserId = await fixtures.getSignedUserId('BASE_USER')
-      })
+        request = await getRequest({ signedAs: 'BASE_USER' });
+        currentUserId = await fixtures.getSignedUserId('BASE_USER');
+      });
 
       it.each([
         {
@@ -605,96 +605,96 @@ describe('EventAttendeeController', () => {
           case: 'invalid role',
           message: ['role must be one of the following values: creator, admin, participant'],
         },
-      ])('should return 400 when invalid input: $case', async ({ body, message }) => {
+      ])('should return 400 when invalid input: $case', async ({ body: payload, message }) => {
         const { eventId, attendeeId } = await fixtures.insertEventWithMaintainer({
           title: 'Test Event',
           description: 'Test Description',
           maintainerId: currentUserId,
-        })
+        });
 
         await request
           .put(path({ eventId, attendeeId }))
-          .send(body)
+          .send(payload)
           .expect(400)
           .expect(({ body }) =>
             expect(body).toMatchObject({
               error: 'Bad Request',
               message: expect.arrayContaining(message),
             }),
-          )
-      })
+          );
+      });
 
       it('should update attendee role from participant to admin', async () => {
         const { eventId } = await fixtures.insertEventWithMaintainer({
           title: 'Test Event',
           description: 'Test Description',
           maintainerId: currentUserId,
-        })
+        });
         const otherUserId = await fixtures.insertUser({
           email: 'attendee@example.com',
           firstname: 'Attendee',
           lastname: 'User',
-        })
+        });
         const attendeeId = await fixtures.insertActiveAttendee({
           eventId,
           userId: otherUserId,
           role: AttendeeRole.PARTICIPANT,
-        })
+        });
 
-        await request.put(path({ eventId, attendeeId })).send({ role: AttendeeRole.ADMIN }).expect(200)
+        await request.put(path({ eventId, attendeeId })).send({ role: AttendeeRole.ADMIN }).expect(200);
 
         await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(2).row(1).toMatchObject({
           id: attendeeId,
           role: AttendeeRole.ADMIN,
-        })
-      })
+        });
+      });
 
       it('should update attendee role when current user is admin', async () => {
         const creatorId = await fixtures.insertUser({
           email: 'creator@example.com',
           firstname: 'Creator',
           lastname: 'User',
-        })
+        });
         const { eventId } = await fixtures.insertEventWithCreator({
           title: 'Test Event',
           description: 'Test Description',
           creatorId,
-        })
-        await fixtures.insertAdminAttendee({ eventId, userId: currentUserId })
+        });
+        await fixtures.insertAdminAttendee({ eventId, userId: currentUserId });
         const otherUserId = await fixtures.insertUser({
           email: 'attendee@example.com',
           firstname: 'Attendee',
           lastname: 'User',
-        })
+        });
         const attendeeId = await fixtures.insertActiveAttendee({
           eventId,
           userId: otherUserId,
           role: AttendeeRole.PARTICIPANT,
-        })
+        });
 
-        await request.put(path({ eventId, attendeeId })).send({ role: AttendeeRole.ADMIN }).expect(200)
+        await request.put(path({ eventId, attendeeId })).send({ role: AttendeeRole.ADMIN }).expect(200);
 
         await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(3).row(2).toMatchObject({
           id: attendeeId,
           role: AttendeeRole.ADMIN,
-        })
-      })
+        });
+      });
 
       it('should return 401 when user is not creator or admin of event', async () => {
         const otherUserId = await fixtures.insertUser({
           email: 'other@example.com',
           firstname: 'Other',
           lastname: 'User',
-        })
+        });
         const { eventId } = await fixtures.insertEventWithMaintainer({
           title: 'Test Event',
           description: 'Test Description',
           maintainerId: otherUserId,
-        })
+        });
         const attendeeId = await fixtures.insertPendingAttendee({
           eventId,
           tempUserEmail: 'attendee@example.com',
-        })
+        });
 
         await request
           .put(path({ eventId, attendeeId }))
@@ -705,15 +705,15 @@ describe('EventAttendeeController', () => {
               error: 'Unauthorized',
               message: 'Only creators and admins of the event can update an attendee role',
             }),
-          )
-      })
+          );
+      });
 
       it('should return 409 when trying to change own role', async () => {
         const { eventId, attendeeId } = await fixtures.insertEventWithMaintainer({
           title: 'Test Event',
           description: 'Test Description',
           maintainerId: currentUserId,
-        })
+        });
 
         await request
           .put(path({ eventId, attendeeId }))
@@ -724,21 +724,21 @@ describe('EventAttendeeController', () => {
               error: 'Conflict',
               message: 'You cannot change your own role',
             }),
-          )
-      })
+          );
+      });
 
       it('should return 409 when trying to change the creator role', async () => {
         const creatorId = await fixtures.insertUser({
           email: 'creator@example.com',
           firstname: 'Creator',
           lastname: 'User',
-        })
+        });
         const { eventId, attendeeId: creatorAttendeeId } = await fixtures.insertEventWithCreator({
           title: 'Test Event',
           description: 'Test Description',
           creatorId,
-        })
-        await fixtures.insertAdminAttendee({ eventId, userId: currentUserId })
+        });
+        await fixtures.insertAdminAttendee({ eventId, userId: currentUserId });
 
         await request
           .put(path({ eventId, attendeeId: creatorAttendeeId }))
@@ -749,24 +749,24 @@ describe('EventAttendeeController', () => {
               error: 'Conflict',
               message: 'You cannot change the creator role',
             }),
-          )
-      })
+          );
+      });
 
       it('should return 400 when assigning creator role', async () => {
         const { eventId } = await fixtures.insertEventWithMaintainer({
           title: 'Test Event',
           description: 'Test Description',
           maintainerId: currentUserId,
-        })
+        });
         const otherUserId = await fixtures.insertUser({
           email: 'attendee@example.com',
           firstname: 'Attendee',
           lastname: 'User',
-        })
+        });
         const attendeeId = await fixtures.insertActiveAttendee({
           eventId,
           userId: otherUserId,
-        })
+        });
 
         await request
           .put(path({ eventId, attendeeId }))
@@ -777,21 +777,21 @@ describe('EventAttendeeController', () => {
               error: 'Bad Request',
               message: 'Cannot assign the creator role to an attendee',
             }),
-          )
-      })
+          );
+      });
 
       it('should return 404 when attendee does not exist', async () => {
         const { eventId } = await fixtures.insertEventWithMaintainer({
           title: 'Test Event',
           description: 'Test Description',
           maintainerId: currentUserId,
-        })
+        });
 
         await request
           .put(path({ eventId, attendeeId: uuid() }))
           .send({ role: AttendeeRole.ADMIN })
-          .expect(404)
-      })
-    })
-  })
-})
+          .expect(404);
+      });
+    });
+  });
+});

@@ -1,7 +1,7 @@
-import { Global, Module } from '@nestjs/common'
+import { Global, Module } from '@nestjs/common';
 
-import { ConfigurableFrontendRoutesModule } from './frontend-routes.module-definitions'
-import { FrontendRoutesService } from './frontend-routes.service'
+import { ConfigurableFrontendRoutesModule } from './frontend-routes.module-definitions';
+import { FrontendRoutesService } from './frontend-routes.service';
 
 @Global()
 @Module({

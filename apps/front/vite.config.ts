@@ -1,12 +1,12 @@
-import type { UserConfig } from 'vite'
+import type { UserConfig } from 'vite';
 
-import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin'
-import { devtools } from '@tanstack/devtools-vite'
-import { tanstackRouter } from '@tanstack/router-plugin/vite'
-import react from '@vitejs/plugin-react'
-import browserslistToEsbuild from 'browserslist-to-esbuild'
-import { defineConfig } from 'vite'
-import svgr from 'vite-plugin-svgr'
+import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
+import { devtools } from '@tanstack/devtools-vite';
+import { tanstackRouter } from '@tanstack/router-plugin/vite';
+import react from '@vitejs/plugin-react';
+import browserslistToEsbuild from 'browserslist-to-esbuild';
+import { defineConfig } from 'vite';
+import svgr from 'vite-plugin-svgr';
 
 const config: UserConfig = {
   root: __dirname,
@@ -51,6 +51,6 @@ const config: UserConfig = {
   // worker: {
   //  plugins: [ nxViteTsPaths() ],
   // },
-}
+};
 
-export default defineConfig(config)
+export default defineConfig(config);

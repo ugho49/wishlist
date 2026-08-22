@@ -1,11 +1,11 @@
-import CloseIcon from '@mui/icons-material/Close'
-import RedeemIcon from '@mui/icons-material/Redeem'
-import { alpha, Box, IconButton, Stack, styled, Typography } from '@mui/material'
-import { useState } from 'react'
+import CloseIcon from '@mui/icons-material/Close';
+import RedeemIcon from '@mui/icons-material/Redeem';
+import { alpha, Box, IconButton, Stack, styled, Typography } from '@mui/material';
+import { useState } from 'react';
 
-import { NewFeatureBadge } from '../event/NewFeatureBadge'
+import { NewFeatureBadge } from '../event/NewFeatureBadge';
 
-const DISMISS_KEY = 'wl_shared_reservation_intro_dismissed'
+const DISMISS_KEY = 'wl_shared_reservation_intro_dismissed';
 
 const Banner = styled(Box)(({ theme }) => ({
   position: 'relative',
@@ -16,7 +16,7 @@ const Banner = styled(Box)(({ theme }) => ({
   marginBottom: theme.spacing(3),
   background: `linear-gradient(135deg, ${theme.palette.grey[50]} 0%, ${alpha(theme.palette.primary.main, 0.08)} 100%)`,
   border: `1px solid ${theme.palette.divider}`,
-}))
+}));
 
 const IconWrap = styled(Box)(({ theme }) => ({
   width: 40,
@@ -29,48 +29,48 @@ const IconWrap = styled(Box)(({ theme }) => ({
   backgroundColor: theme.palette.common.white,
   color: theme.palette.primary.main,
   boxShadow: `0 1px 3px ${alpha(theme.palette.primary.main, 0.16)}`,
-}))
+}));
 
 const Title = styled(Typography)({
   fontWeight: 700,
   fontSize: '1rem',
   lineHeight: 1.3,
-})
+});
 
 const Description = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
   fontSize: '0.85rem',
   lineHeight: 1.5,
-}))
+}));
 
 const CloseButton = styled(IconButton)(({ theme }) => ({
   position: 'absolute',
   top: theme.spacing(1),
   right: theme.spacing(1),
   color: theme.palette.text.secondary,
-}))
+}));
 
 const readDismissed = () => {
   try {
-    return localStorage.getItem(DISMISS_KEY) === 'true'
+    return localStorage.getItem(DISMISS_KEY) === 'true';
   } catch {
-    return false
+    return false;
   }
-}
+};
 
 const persistDismissed = () => {
   try {
-    localStorage.setItem(DISMISS_KEY, 'true')
+    localStorage.setItem(DISMISS_KEY, 'true');
   } catch {
     // Ignore if localStorage is unavailable
   }
-}
+};
 
 export const SharedReservationIntro = () => {
-  const [visible, setVisible] = useState(() => !readDismissed())
+  const [visible, setVisible] = useState(() => !readDismissed());
 
   if (!visible) {
-    return null
+    return null;
   }
 
   return (
@@ -78,8 +78,8 @@ export const SharedReservationIntro = () => {
       <CloseButton
         aria-label="Fermer"
         onClick={() => {
-          persistDismissed()
-          setVisible(false)
+          persistDismissed();
+          setVisible(false);
         }}
       >
         <CloseIcon fontSize="small" />
@@ -108,5 +108,5 @@ export const SharedReservationIntro = () => {
         </Description>
       </Stack>
     </Banner>
-  )
-}
+  );
+};

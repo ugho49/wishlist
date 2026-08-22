@@ -1,12 +1,12 @@
-import type { BoxProps } from '@mui/material'
-import type { PropsWithChildren } from 'react'
+import type { BoxProps } from '@mui/material';
+import type { PropsWithChildren } from 'react';
 
-import { Box, styled } from '@mui/material'
-import clsx from 'clsx'
+import { Box, styled } from '@mui/material';
+import clsx from 'clsx';
 
 export type CardProps = BoxProps & {
-  hoverable?: boolean
-}
+  hoverable?: boolean;
+};
 
 const BoxStyled = styled(Box)(({ theme }) => ({
   width: '100%',
@@ -27,23 +27,23 @@ const BoxStyled = styled(Box)(({ theme }) => ({
   '&.hoverable:focus:not(:focus-visible)': {
     outline: 'none',
   },
-}))
+}));
 
 export const Card = ({ children, hoverable = false, className, onClick, ...props }: PropsWithChildren<CardProps>) => {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault()
+      e.preventDefault();
       if (onClick) {
         const mouseEvent = new MouseEvent('click', {
           bubbles: true,
           cancelable: true,
           view: window,
-        })
-        Object.defineProperty(mouseEvent, 'target', { value: e.currentTarget, enumerable: true })
-        onClick(mouseEvent as unknown as React.MouseEvent<HTMLDivElement>)
+        });
+        Object.defineProperty(mouseEvent, 'target', { value: e.currentTarget, enumerable: true });
+        onClick(mouseEvent as unknown as React.MouseEvent<HTMLDivElement>);
       }
     }
-  }
+  };
 
   return (
     <BoxStyled
@@ -57,5 +57,5 @@ export const Card = ({ children, hoverable = false, className, onClick, ...props
     >
       {children}
     </BoxStyled>
-  )
-}
+  );
+};

@@ -1,7 +1,7 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { SEO } from '@wishlist/front-components/SEO'
+import { createFileRoute } from '@tanstack/react-router';
+import { SEO } from '@wishlist/front-components/SEO';
 
-import { ForgotPasswordPage } from '../../../components/auth/ForgotPasswordPage'
+import { ForgotPasswordPage } from '../../../components/auth/ForgotPasswordPage';
 
 export const Route = createFileRoute('/_anonymous-with-layout/forgot-password/')({
   component: () => (
@@ -15,4 +15,4 @@ export const Route = createFileRoute('/_anonymous-with-layout/forgot-password/')
       <ForgotPasswordPage />
     </>
   ),
-})
+});

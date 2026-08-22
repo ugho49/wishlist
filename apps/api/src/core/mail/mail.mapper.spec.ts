@@ -1,9 +1,9 @@
-import { render } from '@wishlist/mail'
+import { render } from '@wishlist/mail';
 
-import { mapPayloadToTemplate } from './mail.mapper'
-import { MailPayload, MailTemplate } from './mail.type'
+import { mapPayloadToTemplate } from './mail.mapper';
+import { MailPayload, MailTemplate } from './mail.type';
 
-const base = { to: 'test@test.fr', subject: 'Test' }
+const base = { to: 'test@test.fr', subject: 'Test' };
 
 // One payload per template so every react-email component is rendered at least once.
 const payloads: MailPayload[] = [
@@ -48,18 +48,18 @@ const payloads: MailPayload[] = [
   { ...base, template: MailTemplate.EMAIL_CHANGE_NOTIFICATION, context: { newEmail: 'new@test.fr' } },
   { ...base, template: MailTemplate.EMAIL_CHANGED_CONFIRMATION, context: { newEmail: 'new@test.fr' } },
   { ...base, template: MailTemplate.EMAIL_CHANGED_SUCCESS, context: { email: 'new@test.fr' } },
-]
+];
 
 describe('mapPayloadToTemplate', () => {
   it('maps every MailTemplate value to a payload (exhaustive coverage)', () => {
-    const covered = new Set(payloads.map(p => p.template))
-    expect(covered).toEqual(new Set(Object.values(MailTemplate)))
-  })
+    const covered = new Set(payloads.map(p => p.template));
+    expect(covered).toEqual(new Set(Object.values(MailTemplate)));
+  });
 
   it.each(payloads.map(p => [p.template, p] as const))('renders %s to non-empty html', async (_template, payload) => {
-    const html = await render(mapPayloadToTemplate(payload))
+    const html = await render(mapPayloadToTemplate(payload));
 
-    expect(html).toContain('<html')
-    expect(html).toContain('Wishlist')
-  })
-})
+    expect(html).toContain('<html');
+    expect(html).toContain('Wishlist');
+  });
+});

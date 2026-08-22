@@ -1,8 +1,8 @@
 /** biome-ignore-all lint/style/noNonNullAssertion: Env variables are ok here */
-import dotenv from 'dotenv'
-import { defineConfig } from 'drizzle-kit'
+import dotenv from 'dotenv';
+import { defineConfig } from 'drizzle-kit';
 
-dotenv.config()
+dotenv.config();
 
 export default defineConfig({
   dialect: 'postgresql',
@@ -17,4 +17,4 @@ export default defineConfig({
     ssl: false,
   },
   casing: 'snake_case',
-})
+});

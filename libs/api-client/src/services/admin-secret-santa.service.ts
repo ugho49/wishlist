@@ -4,9 +4,9 @@ import type {
   SecretSantaId,
   SecretSantaUserId,
   UpdateSecretSantaInputDto,
-} from '@wishlist/common'
-import type { AxiosInstance } from 'axios'
-import type { CommonRequestOptions } from './common'
+} from '@wishlist/common';
+import type { AxiosInstance } from 'axios';
+import type { CommonRequestOptions } from './common';
 
 export class AdminSecretSantaService {
   constructor(private readonly client: AxiosInstance) {}
@@ -14,26 +14,26 @@ export class AdminSecretSantaService {
   get(eventId: EventId, options?: CommonRequestOptions): Promise<SecretSantaDto | null> {
     return this.client
       .get('/admin/secret-santa', { params: { eventId }, signal: options?.signal })
-      .then(res => res.data)
+      .then(res => res.data);
   }
 
   async update(secretSantaId: SecretSantaId, data: UpdateSecretSantaInputDto): Promise<void> {
-    await this.client.patch(`/admin/secret-santa/${secretSantaId}`, data)
+    await this.client.patch(`/admin/secret-santa/${secretSantaId}`, data);
   }
 
   async start(secretSantaId: SecretSantaId): Promise<void> {
-    await this.client.post(`/admin/secret-santa/${secretSantaId}/start`, {})
+    await this.client.post(`/admin/secret-santa/${secretSantaId}/start`, {});
   }
 
   async cancel(secretSantaId: SecretSantaId): Promise<void> {
-    await this.client.post(`/admin/secret-santa/${secretSantaId}/cancel`, {})
+    await this.client.post(`/admin/secret-santa/${secretSantaId}/cancel`, {});
   }
 
   async delete(secretSantaId: SecretSantaId): Promise<void> {
-    await this.client.delete(`/admin/secret-santa/${secretSantaId}`)
+    await this.client.delete(`/admin/secret-santa/${secretSantaId}`);
   }
 
   async deleteUser(secretSantaId: SecretSantaId, secretSantaUserId: SecretSantaUserId): Promise<void> {
-    await this.client.delete(`/admin/secret-santa/${secretSantaId}/user/${secretSantaUserId}`)
+    await this.client.delete(`/admin/secret-santa/${secretSantaId}/user/${secretSantaUserId}`);
   }
 }

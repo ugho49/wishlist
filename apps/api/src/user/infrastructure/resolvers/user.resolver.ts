@@ -1,11 +1,13 @@
-import type { ICurrentUser } from '@wishlist/common'
+import type { ICurrentUser } from '@wishlist/common';
 
-import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql'
-import { GqlCurrentUser, Public } from '@wishlist/api/auth'
-import { type GraphQLContext, ZodPipe } from '@wishlist/api/core'
-import { type UserId, type UserSocialId } from '@wishlist/common'
-import { RealIP } from 'nestjs-real-ip'
+import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { type UserId, type UserSocialId } from '@wishlist/common';
+import { RealIP } from 'nestjs-real-ip';
 
+import { Public } from '../../../auth/infrastructure/decorators/public.metadata';
+import { GqlCurrentUser } from '../../../auth/infrastructure/decorators/user.decorator';
+import { type GraphQLContext } from '../../../core/graphql/graphql.context';
+import { ZodPipe } from '../../../core/graphql/zod-pipe';
 import {
   type ChangeUserPasswordInput,
   type ChangeUserPasswordResult,
@@ -35,22 +37,22 @@ import {
   type UpdateUserProfileResult,
   type User,
   type UserEmailSettings,
-} from '../../../gql/generated-types'
-import { ConfirmEmailChangeUseCase } from '../../application/command/confirm-email-change.use-case'
-import { CreateEmailChangeVerificationUseCase } from '../../application/command/create-email-change-verification.use-case'
-import { CreatePasswordVerificationUseCase } from '../../application/command/create-password-verification.use-case'
-import { CreateUserUseCase } from '../../application/command/create-user.use-case'
-import { LinkUserToGoogleUseCase } from '../../application/command/link-user-to-google.use-case'
-import { RemoveUserPictureUseCase } from '../../application/command/remove-user-picture.use-case'
-import { ResetUserPasswordUseCase } from '../../application/command/reset-user-password.use-case'
-import { UnlinkUserSocialUseCase } from '../../application/command/unlink-user-social.use-case'
-import { UpdateUserUseCase } from '../../application/command/update-user.use-case'
-import { UpdateUserEmailSettingUseCase } from '../../application/command/update-user-email-setting.use-case'
-import { UpdateUserPasswordUseCase } from '../../application/command/update-user-password.use-case'
-import { UpdateUserPictureFromSocialUseCase } from '../../application/command/update-user-picture-from-social.use-case'
-import { GetClosestFriendsUseCase } from '../../application/query/get-closest-friends.use-case'
-import { GetPendingEmailChangeUseCase } from '../../application/query/get-pending-email-change.use-case'
-import { GetUsersByCriteriaUseCase } from '../../application/query/get-users-by-criteria.use-case'
+} from '../../../gql/generated-types';
+import { ConfirmEmailChangeUseCase } from '../../application/command/confirm-email-change.use-case';
+import { CreateEmailChangeVerificationUseCase } from '../../application/command/create-email-change-verification.use-case';
+import { CreatePasswordVerificationUseCase } from '../../application/command/create-password-verification.use-case';
+import { CreateUserUseCase } from '../../application/command/create-user.use-case';
+import { LinkUserToGoogleUseCase } from '../../application/command/link-user-to-google.use-case';
+import { RemoveUserPictureUseCase } from '../../application/command/remove-user-picture.use-case';
+import { ResetUserPasswordUseCase } from '../../application/command/reset-user-password.use-case';
+import { UnlinkUserSocialUseCase } from '../../application/command/unlink-user-social.use-case';
+import { UpdateUserUseCase } from '../../application/command/update-user.use-case';
+import { UpdateUserEmailSettingUseCase } from '../../application/command/update-user-email-setting.use-case';
+import { UpdateUserPasswordUseCase } from '../../application/command/update-user-password.use-case';
+import { UpdateUserPictureFromSocialUseCase } from '../../application/command/update-user-picture-from-social.use-case';
+import { GetClosestFriendsUseCase } from '../../application/query/get-closest-friends.use-case';
+import { GetPendingEmailChangeUseCase } from '../../application/query/get-pending-email-change.use-case';
+import { GetUsersByCriteriaUseCase } from '../../application/query/get-users-by-criteria.use-case';
 import {
   ChangeUserPasswordInputSchema,
   ClosestFriendsLimitSchema,
@@ -64,7 +66,7 @@ import {
   UpdateUserEmailSettingsInputSchema,
   UpdateUserPictureFromSocialInputSchema,
   UpdateUserProfileInputSchema,
-} from '../user.schema'
+} from '../user.schema';
 
 @Resolver()
 export class UserResolver {
@@ -88,11 +90,11 @@ export class UserResolver {
 
   @Query()
   async currentUser(@GqlCurrentUser('id') currentUserId: UserId, @Context() ctx: GraphQLContext): Promise<User> {
-    const user = await ctx.loaders.user.load(currentUserId)
+    const user = await ctx.loaders.user.load(currentUserId);
     if (!user) {
-      throw new Error('User not found')
+      throw new Error('User not found');
     }
-    return user
+    return user;
   }
 
   @Query()
@@ -101,13 +103,13 @@ export class UserResolver {
     @GqlCurrentUser() currentUser: ICurrentUser,
     @Context() ctx: GraphQLContext,
   ): Promise<SearchUsersResult> {
-    const miniUsers = await this.getUsersByCriteriaUseCase.execute({ currentUser, criteria: keyword })
-    const users = await Promise.all(miniUsers.map(user => ctx.loaders.user.load(user.id)))
+    const miniUsers = await this.getUsersByCriteriaUseCase.execute({ currentUser, criteria: keyword });
+    const users = await Promise.all(miniUsers.map(user => ctx.loaders.user.load(user.id)));
 
     return {
       __typename: 'SearchUsersOutput',
       users: users.filter((user): user is User => !!user),
-    }
+    };
   }
 
   @Query()
@@ -116,13 +118,13 @@ export class UserResolver {
     @GqlCurrentUser('id') currentUserId: UserId,
     @Context() ctx: GraphQLContext,
   ): Promise<ClosestFriendsResult> {
-    const miniUsers = await this.getClosestFriendsUseCase.execute({ userId: currentUserId, limit: limit ?? 20 })
-    const users = await Promise.all(miniUsers.map(user => ctx.loaders.user.load(user.id)))
+    const miniUsers = await this.getClosestFriendsUseCase.execute({ userId: currentUserId, limit: limit ?? 20 });
+    const users = await Promise.all(miniUsers.map(user => ctx.loaders.user.load(user.id)));
 
     return {
       __typename: 'ClosestFriendsOutput',
       users: users.filter((user): user is User => !!user),
-    }
+    };
   }
 
   @Public()
@@ -141,15 +143,15 @@ export class UserResolver {
         lastname: input.lastname,
         birthday: input.birthday ? new Date(input.birthday) : undefined,
       },
-    })
+    });
 
-    const loadedUser = await ctx.loaders.user.load(user.id)
+    const loadedUser = await ctx.loaders.user.load(user.id);
 
     if (!loadedUser) {
-      throw new Error('Failed to load user')
+      throw new Error('Failed to load user');
     }
 
-    return loadedUser
+    return loadedUser;
   }
 
   @Mutation()
@@ -161,13 +163,13 @@ export class UserResolver {
     const userSocial = await this.linkUserToGoogleUseCase.execute({
       code: input.code,
       userId: currentUserId,
-    })
+    });
 
-    const loadedUserSocial = await ctx.loaders.userSocial.load(userSocial.id)
+    const loadedUserSocial = await ctx.loaders.userSocial.load(userSocial.id);
     if (!loadedUserSocial) {
-      throw new Error('Failed to load user social')
+      throw new Error('Failed to load user social');
     }
-    return loadedUserSocial
+    return loadedUserSocial;
   }
 
   @Mutation()
@@ -175,8 +177,8 @@ export class UserResolver {
     @Args('socialId', { type: () => String }) id: UserSocialId,
     @GqlCurrentUser('id') currentUserId: UserId,
   ): Promise<UnlinkCurrentUserSocialResult> {
-    await this.unlinkUserSocialUseCase.execute({ userId: currentUserId, socialId: id })
-    return { __typename: 'VoidOutput', success: true }
+    await this.unlinkUserSocialUseCase.execute({ userId: currentUserId, socialId: id });
+    return { __typename: 'VoidOutput', success: true };
   }
 
   @Mutation()
@@ -192,13 +194,13 @@ export class UserResolver {
         lastname: input.lastname,
         birthday: input.birthday ? new Date(input.birthday) : undefined,
       },
-    })
+    });
 
-    const loadedUser = await ctx.loaders.user.load(currentUserId)
+    const loadedUser = await ctx.loaders.user.load(currentUserId);
     if (!loadedUser) {
-      throw new Error('Failed to load user')
+      throw new Error('Failed to load user');
     }
-    return loadedUser
+    return loadedUser;
   }
 
   @Mutation()
@@ -210,8 +212,8 @@ export class UserResolver {
       userId: currentUserId,
       oldPassword: input.oldPassword,
       newPassword: input.newPassword,
-    })
-    return { __typename: 'VoidOutput', success: true }
+    });
+    return { __typename: 'VoidOutput', success: true };
   }
 
   @Mutation()
@@ -222,31 +224,31 @@ export class UserResolver {
     await this.updateUserPictureFromSocialUseCase.execute({
       userId: currentUserId,
       socialId: input.socialId,
-    })
-    return { __typename: 'VoidOutput', success: true }
+    });
+    return { __typename: 'VoidOutput', success: true };
   }
 
   @Mutation()
   async removeUserPicture(@GqlCurrentUser('id') currentUserId: UserId): Promise<RemoveUserPictureResult> {
-    await this.removeUserPictureUseCase.execute({ userId: currentUserId })
-    return { __typename: 'VoidOutput', success: true }
+    await this.removeUserPictureUseCase.execute({ userId: currentUserId });
+    return { __typename: 'VoidOutput', success: true };
   }
 
   @Query()
   async pendingEmailChange(@GqlCurrentUser() currentUser: ICurrentUser): Promise<GetPendingEmailChangeResult | null> {
-    const result = await this.getPendingEmailChangeUseCase.execute({ currentUser })
+    const result = await this.getPendingEmailChangeUseCase.execute({ currentUser });
 
     if (!result) {
-      return null
+      return null;
     }
 
     const pendingEmailChange: PendingEmailChange = {
       __typename: 'PendingEmailChange',
       newEmail: result.newEmail,
       expiredAt: result.expiredAt,
-    }
+    };
 
-    return pendingEmailChange
+    return pendingEmailChange;
   }
 
   @Mutation()
@@ -257,8 +259,8 @@ export class UserResolver {
     await this.createEmailChangeVerificationUseCase.execute({
       currentUser,
       newEmail: input.newEmail,
-    })
-    return { __typename: 'VoidOutput', success: true }
+    });
+    return { __typename: 'VoidOutput', success: true };
   }
 
   @Public()
@@ -269,8 +271,8 @@ export class UserResolver {
     await this.confirmEmailChangeUseCase.execute({
       newEmail: input.newEmail,
       token: input.token,
-    })
-    return { __typename: 'VoidOutput', success: true }
+    });
+    return { __typename: 'VoidOutput', success: true };
   }
 
   @Mutation()
@@ -281,14 +283,14 @@ export class UserResolver {
     const result = await this.updateUserEmailSettingUseCase.execute({
       currentUser,
       dailyNewItemNotification: input.dailyNewItemNotification,
-    })
+    });
 
     const settings: UserEmailSettings = {
       __typename: 'UserEmailSettings',
       dailyNewItemNotification: result.daily_new_item_notification,
-    }
+    };
 
-    return settings
+    return settings;
   }
 
   @Public()
@@ -296,8 +298,8 @@ export class UserResolver {
   async sendResetPasswordEmail(
     @Args('input', new ZodPipe(SendResetPasswordEmailInputSchema)) input: SendResetPasswordEmailInput,
   ): Promise<SendResetPasswordEmailResult> {
-    await this.createPasswordVerificationUseCase.execute({ email: input.email })
-    return { __typename: 'VoidOutput', success: true }
+    await this.createPasswordVerificationUseCase.execute({ email: input.email });
+    return { __typename: 'VoidOutput', success: true };
   }
 
   @Public()
@@ -309,7 +311,7 @@ export class UserResolver {
       email: input.email,
       token: input.token,
       newPassword: input.newPassword,
-    })
-    return { __typename: 'VoidOutput', success: true }
+    });
+    return { __typename: 'VoidOutput', success: true };
   }
 }

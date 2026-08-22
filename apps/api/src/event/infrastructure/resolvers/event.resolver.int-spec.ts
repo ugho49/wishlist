@@ -1,20 +1,20 @@
-import type { RequestApp } from '@wishlist/api-test-utils'
+import type { RequestApp } from '@wishlist/api-test-utils';
 
-import { Fixtures, useTestApp } from '@wishlist/api-test-utils'
-import { uuid } from '@wishlist/common'
-import { DateTime } from 'luxon'
+import { Fixtures, useTestApp } from '@wishlist/api-test-utils';
+import { uuid } from '@wishlist/common';
+import { DateTime } from 'luxon';
 
 describe('EventResolver (GraphQL)', () => {
-  const { getRequest, getFixtures } = useTestApp()
-  let fixtures: Fixtures
-  let request: RequestApp
-  let currentUserId: string
+  const { getRequest, getFixtures } = useTestApp();
+  let fixtures: Fixtures;
+  let request: RequestApp;
+  let currentUserId: string;
 
   beforeEach(async () => {
-    fixtures = getFixtures()
-    request = await getRequest({ signedAs: 'BASE_USER' })
-    currentUserId = await fixtures.getSignedUserId('BASE_USER')
-  })
+    fixtures = getFixtures();
+    request = await getRequest({ signedAs: 'BASE_USER' });
+    currentUserId = await fixtures.getSignedUserId('BASE_USER');
+  });
 
   describe('Query event', () => {
     const query = /* GraphQL */ `
@@ -42,36 +42,36 @@ describe('EventResolver (GraphQL)', () => {
           }
         }
       }
-    `
+    `;
 
     it('should not succeed when not authenticated', async () => {
-      const unauthRequest = await getRequest()
+      const unauthRequest = await getRequest();
       const { eventId } = await fixtures.insertEventWithMaintainer({
         title: 'My event',
         maintainerId: currentUserId,
-      })
+      });
 
       const res = await unauthRequest
         .post('/graphql')
         .send({ query, variables: { id: eventId } })
-        .expect(200)
+        .expect(200);
 
-      expect(res.body.data?.event?.__typename).not.toBe('Event')
-    })
+      expect(res.body.data?.event?.__typename).not.toBe('Event');
+    });
 
     it('should return the event when user is a participant', async () => {
-      const eventDate = DateTime.now().plus({ days: 30 }).toJSDate()
+      const eventDate = DateTime.now().plus({ days: 30 }).toJSDate();
       const { eventId } = await fixtures.insertEventWithMaintainer({
         title: 'Christmas',
         description: 'A nice event',
         eventDate,
         maintainerId: currentUserId,
-      })
+      });
 
       const res = await request
         .post('/graphql')
         .send({ query, variables: { id: eventId } })
-        .expect(200)
+        .expect(200);
 
       expect(res.body.data.event).toMatchObject({
         __typename: 'Event',
@@ -79,43 +79,43 @@ describe('EventResolver (GraphQL)', () => {
         title: 'Christmas',
         description: 'A nice event',
         eventDate: expect.any(String),
-      })
-      expect(res.body.data.event.attendeeIds).toHaveLength(1)
-      expect(res.body.data.event.createdAt).toEqual(expect.any(String))
-      expect(res.body.data.event.updatedAt).toEqual(expect.any(String))
-    })
+      });
+      expect(res.body.data.event.attendeeIds).toHaveLength(1);
+      expect(res.body.data.event.createdAt).toEqual(expect.any(String));
+      expect(res.body.data.event.updatedAt).toEqual(expect.any(String));
+    });
 
     it('should return NotFoundRejection when event does not exist', async () => {
       const res = await request
         .post('/graphql')
         .send({ query, variables: { id: uuid() } })
-        .expect(200)
+        .expect(200);
 
       expect(res.body.data.event).toMatchObject({
         __typename: 'NotFoundRejection',
-      })
-    })
+      });
+    });
 
     it('should return NotFoundRejection when user is not part of the event', async () => {
       const otherUserId = await fixtures.insertUser({
         email: 'other@test.fr',
         firstname: 'Other',
         lastname: 'User',
-      })
+      });
       const { eventId } = await fixtures.insertEventWithMaintainer({
         title: 'Private event',
         maintainerId: otherUserId,
-      })
+      });
 
       const res = await request
         .post('/graphql')
         .send({ query, variables: { id: eventId } })
-        .expect(200)
+        .expect(200);
 
       expect(res.body.data.event).toMatchObject({
         __typename: 'NotFoundRejection',
-      })
-    })
+      });
+    });
 
     describe('nested field resolvers', () => {
       const nestedQuery = /* GraphQL */ `
@@ -142,15 +142,15 @@ describe('EventResolver (GraphQL)', () => {
             }
           }
         }
-      `
+      `;
 
       it('should resolve nested wishlists, attendees and attendee.user', async () => {
-        const eventDate = DateTime.now().plus({ days: 30 }).toJSDate()
+        const eventDate = DateTime.now().plus({ days: 30 }).toJSDate();
         const { eventId, attendeeId } = await fixtures.insertEventWithMaintainer({
           title: 'Event with relations',
           eventDate,
           maintainerId: currentUserId,
-        })
+        });
 
         const { userId: secondUserId, attendeeId: secondAttendeeId } =
           await fixtures.insertUserAndAddItToEventAsAttendee({
@@ -158,7 +158,7 @@ describe('EventResolver (GraphQL)', () => {
             firstname: 'Guest',
             lastname: 'Person',
             eventId,
-          })
+          });
 
         const wishlistId = await fixtures.insertWishlist({
           eventIds: [eventId],
@@ -166,38 +166,38 @@ describe('EventResolver (GraphQL)', () => {
           title: 'My wishlist',
           description: 'Wishlist description',
           hideItems: false,
-        })
+        });
 
         const res = await request
           .post('/graphql')
           .send({ query: nestedQuery, variables: { id: eventId } })
-          .expect(200)
+          .expect(200);
 
-        const event = res.body.data.event
-        expect(event.__typename).toBe('Event')
-        expect(event.id).toBe(eventId)
+        const event = res.body.data.event;
+        expect(event.__typename).toBe('Event');
+        expect(event.id).toBe(eventId);
 
-        expect(event.wishlists).toHaveLength(1)
+        expect(event.wishlists).toHaveLength(1);
         expect(event.wishlists[0]).toMatchObject({
           id: wishlistId,
           title: 'My wishlist',
           description: 'Wishlist description',
-        })
+        });
 
-        expect(event.attendees).toHaveLength(2)
-        const attendeeIds = event.attendees.map((a: { id: string }) => a.id)
-        expect(attendeeIds).toEqual(expect.arrayContaining([attendeeId, secondAttendeeId]))
+        expect(event.attendees).toHaveLength(2);
+        const attendeeIds = event.attendees.map((a: { id: string }) => a.id);
+        expect(attendeeIds).toEqual(expect.arrayContaining([attendeeId, secondAttendeeId]));
 
-        const maintainerAttendee = event.attendees.find((a: { id: string }) => a.id === attendeeId)
+        const maintainerAttendee = event.attendees.find((a: { id: string }) => a.id === attendeeId);
         expect(maintainerAttendee).toMatchObject({
           role: 'CREATOR',
           user: {
             id: currentUserId,
             email: Fixtures.BASE_USER_EMAIL,
           },
-        })
+        });
 
-        const guestAttendee = event.attendees.find((a: { id: string }) => a.id === secondAttendeeId)
+        const guestAttendee = event.attendees.find((a: { id: string }) => a.id === secondAttendeeId);
         expect(guestAttendee).toMatchObject({
           role: 'PARTICIPANT',
           user: {
@@ -206,27 +206,27 @@ describe('EventResolver (GraphQL)', () => {
             firstName: 'Guest',
             lastName: 'Person',
           },
-        })
-      })
+        });
+      });
 
       it('should resolve empty arrays when event has no wishlists', async () => {
         const { eventId } = await fixtures.insertEventWithMaintainer({
           title: 'Empty event',
           maintainerId: currentUserId,
-        })
+        });
 
         const res = await request
           .post('/graphql')
           .send({ query: nestedQuery, variables: { id: eventId } })
-          .expect(200)
+          .expect(200);
 
-        const event = res.body.data.event
-        expect(event.__typename).toBe('Event')
-        expect(event.wishlists).toEqual([])
-        expect(event.attendees).toHaveLength(1)
-      })
-    })
-  })
+        const event = res.body.data.event;
+        expect(event.__typename).toBe('Event');
+        expect(event.wishlists).toEqual([]);
+        expect(event.attendees).toHaveLength(1);
+      });
+    });
+  });
 
   describe('Query events', () => {
     const query = /* GraphQL */ `
@@ -250,50 +250,50 @@ describe('EventResolver (GraphQL)', () => {
           }
         }
       }
-    `
+    `;
 
     it('should not succeed when not authenticated', async () => {
-      const unauthRequest = await getRequest()
+      const unauthRequest = await getRequest();
 
       const res = await unauthRequest
         .post('/graphql')
         .send({ query, variables: { filters: {} } })
-        .expect(200)
+        .expect(200);
 
-      expect(res.body.data?.events?.__typename).not.toBe('GetEventsPagedResponse')
-    })
+      expect(res.body.data?.events?.__typename).not.toBe('GetEventsPagedResponse');
+    });
 
     it('should return only events the current user participates in', async () => {
       const { eventId: myEventId } = await fixtures.insertEventWithMaintainer({
         title: 'My event',
         maintainerId: currentUserId,
-      })
+      });
 
       const otherUserId = await fixtures.insertUser({
         email: 'other@test.fr',
         firstname: 'Other',
         lastname: 'User',
-      })
+      });
       await fixtures.insertEventWithMaintainer({
         title: 'Not my event',
         maintainerId: otherUserId,
-      })
+      });
 
       const res = await request
         .post('/graphql')
         .send({ query, variables: { filters: {} } })
-        .expect(200)
+        .expect(200);
 
-      const result = res.body.data.events
-      expect(result.__typename).toBe('GetEventsPagedResponse')
-      expect(result.data).toHaveLength(1)
-      expect(result.data[0]).toMatchObject({ id: myEventId, title: 'My event' })
+      const result = res.body.data.events;
+      expect(result.__typename).toBe('GetEventsPagedResponse');
+      expect(result.data).toHaveLength(1);
+      expect(result.data[0]).toMatchObject({ id: myEventId, title: 'My event' });
       expect(result.pagination).toMatchObject({
         totalElements: 1,
         totalPages: 1,
         pageNumber: 1,
-      })
-    })
+      });
+    });
 
     it('should paginate results using filters { page, limit }', async () => {
       for (let i = 0; i < 3; i++) {
@@ -303,13 +303,13 @@ describe('EventResolver (GraphQL)', () => {
             .plus({ days: i + 1 })
             .toJSDate(),
           maintainerId: currentUserId,
-        })
+        });
       }
 
       const firstPage = await request
         .post('/graphql')
         .send({ query, variables: { filters: { page: 1, limit: 2 } } })
-        .expect(200)
+        .expect(200);
 
       expect(firstPage.body.data.events).toMatchObject({
         __typename: 'GetEventsPagedResponse',
@@ -319,13 +319,13 @@ describe('EventResolver (GraphQL)', () => {
           pageNumber: 1,
           pageSize: 2,
         },
-      })
-      expect(firstPage.body.data.events.data).toHaveLength(2)
+      });
+      expect(firstPage.body.data.events.data).toHaveLength(2);
 
       const secondPage = await request
         .post('/graphql')
         .send({ query, variables: { filters: { page: 2, limit: 2 } } })
-        .expect(200)
+        .expect(200);
 
       expect(secondPage.body.data.events).toMatchObject({
         __typename: 'GetEventsPagedResponse',
@@ -335,19 +335,19 @@ describe('EventResolver (GraphQL)', () => {
           pageNumber: 2,
           pageSize: 2,
         },
-      })
-      expect(secondPage.body.data.events.data).toHaveLength(1)
+      });
+      expect(secondPage.body.data.events.data).toHaveLength(1);
 
-      const firstPageIds = firstPage.body.data.events.data.map((e: { id: string }) => e.id)
-      const secondPageIds = secondPage.body.data.events.data.map((e: { id: string }) => e.id)
-      expect(firstPageIds).not.toEqual(expect.arrayContaining(secondPageIds))
-    })
+      const firstPageIds = firstPage.body.data.events.data.map((e: { id: string }) => e.id);
+      const secondPageIds = secondPage.body.data.events.data.map((e: { id: string }) => e.id);
+      expect(firstPageIds).not.toEqual(expect.arrayContaining(secondPageIds));
+    });
 
     it('should return an empty paged response when user has no events', async () => {
       const res = await request
         .post('/graphql')
         .send({ query, variables: { filters: {} } })
-        .expect(200)
+        .expect(200);
 
       expect(res.body.data.events).toMatchObject({
         __typename: 'GetEventsPagedResponse',
@@ -357,7 +357,7 @@ describe('EventResolver (GraphQL)', () => {
           totalPages: 0,
           pageNumber: 1,
         },
-      })
-    })
-  })
-})
+      });
+    });
+  });
+});

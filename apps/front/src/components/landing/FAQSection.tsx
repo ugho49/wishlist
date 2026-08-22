@@ -1,13 +1,13 @@
-import { Box, Container, Typography, useMediaQuery, useTheme } from '@mui/material'
-import { styled } from '@mui/material/styles'
-import { useEffect, useMemo, useRef } from 'react'
+import { Box, Container, Typography, useMediaQuery, useTheme } from '@mui/material';
+import { styled } from '@mui/material/styles';
+import { useEffect, useMemo, useRef } from 'react';
 
 const FAQSectionContainer = styled(Box)(({ theme }) => ({
   padding: theme.spacing(8, 0, 12),
   backgroundColor: 'white',
   borderTop: '1px solid #e5e7eb',
   borderBottom: '1px solid #e5e7eb',
-}))
+}));
 
 const FAQTitle = styled(Typography)(({ theme }) => ({
   textAlign: 'center',
@@ -19,7 +19,7 @@ const FAQTitle = styled(Typography)(({ theme }) => ({
     fontSize: '1.75rem',
     marginBottom: theme.spacing(5),
   },
-}))
+}));
 
 const FAQContainerWrapper = styled(Box)(({ theme }) => ({
   position: 'relative',
@@ -52,7 +52,7 @@ const FAQContainerWrapper = styled(Box)(({ theme }) => ({
       width: `${FAQ_ANIMATION_CONFIG.FADE_WIDTH_MOBILE}px`,
     },
   },
-}))
+}));
 
 const FAQContainer = styled(Box)(() => ({
   overflowX: 'auto',
@@ -71,7 +71,7 @@ const FAQContainer = styled(Box)(() => ({
   '&:active': {
     cursor: 'grabbing',
   },
-}))
+}));
 
 const FAQScrollWrapper = styled(Box)(({ theme }) => ({
   display: 'flex',
@@ -82,7 +82,7 @@ const FAQScrollWrapper = styled(Box)(({ theme }) => ({
   [theme.breakpoints.down('sm')]: {
     gap: `${FAQ_ANIMATION_CONFIG.CARD_GAP_MOBILE}px`,
   },
-}))
+}));
 
 const FAQCard = styled(Box)(({ theme }) => ({
   backgroundColor: '#fafafa',
@@ -104,7 +104,7 @@ const FAQCard = styled(Box)(({ theme }) => ({
     maxWidth: `${FAQ_ANIMATION_CONFIG.CARD_WIDTH_MOBILE}px`,
     padding: theme.spacing(3),
   },
-}))
+}));
 
 const FAQQuestion = styled(Typography)(({ theme }) => ({
   fontWeight: 600,
@@ -115,7 +115,7 @@ const FAQQuestion = styled(Typography)(({ theme }) => ({
     fontSize: '1rem',
     marginBottom: theme.spacing(1.5),
   },
-}))
+}));
 
 const FAQAnswer = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
@@ -124,7 +124,7 @@ const FAQAnswer = styled(Typography)(({ theme }) => ({
     fontSize: '0.9rem',
     lineHeight: 1.5,
   },
-}))
+}));
 
 // Configuration de l'animation FAQ
 const FAQ_ANIMATION_CONFIG = {
@@ -140,44 +140,44 @@ const FAQ_ANIMATION_CONFIG = {
   FADE_WIDTH_MOBILE: 20, // largeur du fondu sur les côtés sur mobile (px)
   CARD_WIDTH_MOBILE: 260, // largeur des cartes FAQ sur mobile
   CARD_GAP_MOBILE: 16, // espacement entre les cartes sur mobile
-} as const
+} as const;
 
 const InfiniteScrollFAQ = ({ faqs }: { faqs: Array<{ question: string; answer: string }> }) => {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const wrapperRef = useRef<HTMLDivElement>(null)
-  const animationRef = useRef<number>(0)
-  const isUserScrollingRef = useRef(false)
-  const isHoveringRef = useRef(false)
-  const lastUserScrollTime = useRef(Date.now() - FAQ_ANIMATION_CONFIG.INITIAL_DELAY)
-  const isDraggingRef = useRef(false)
-  const startXRef = useRef(0)
-  const scrollLeftRef = useRef(0)
-  const scrollAccumulator = useRef(0)
+  const containerRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const animationRef = useRef<number>(0);
+  const isUserScrollingRef = useRef(false);
+  const isHoveringRef = useRef(false);
+  const lastUserScrollTime = useRef(Date.now() - FAQ_ANIMATION_CONFIG.INITIAL_DELAY);
+  const isDraggingRef = useRef(false);
+  const startXRef = useRef(0);
+  const scrollLeftRef = useRef(0);
+  const scrollAccumulator = useRef(0);
 
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const scrollSpeed = useMemo(
     () => (isMobile ? FAQ_ANIMATION_CONFIG.SCROLL_SPEED_MOBILE : FAQ_ANIMATION_CONFIG.SCROLL_SPEED),
     [isMobile],
-  )
+  );
 
   const cardWidth = useMemo(
     () =>
       (isMobile ? FAQ_ANIMATION_CONFIG.CARD_WIDTH_MOBILE : FAQ_ANIMATION_CONFIG.CARD_WIDTH) +
       (isMobile ? FAQ_ANIMATION_CONFIG.CARD_GAP_MOBILE : FAQ_ANIMATION_CONFIG.CARD_GAP),
     [isMobile],
-  )
+  );
 
   useEffect(() => {
-    const container = containerRef.current
-    const wrapper = wrapperRef.current
-    if (!container || !wrapper) return
+    const container = containerRef.current;
+    const wrapper = wrapperRef.current;
+    if (!container || !wrapper) return;
 
-    const totalWidth = cardWidth * faqs.length
+    const totalWidth = cardWidth * faqs.length;
 
     const animate = () => {
-      const currentTime = Date.now()
+      const currentTime = Date.now();
 
       // Si l'utilisateur a scrollé récemment ou hover, attendre avant de reprendre l'animation
       if (
@@ -185,115 +185,115 @@ const InfiniteScrollFAQ = ({ faqs }: { faqs: Array<{ question: string; answer: s
         isDraggingRef.current ||
         isHoveringRef.current
       ) {
-        animationRef.current = requestAnimationFrame(animate)
-        return
+        animationRef.current = requestAnimationFrame(animate);
+        return;
       }
 
       if (!isUserScrollingRef.current && !isDraggingRef.current && !isHoveringRef.current) {
         // Accumuler les petites valeurs de scroll pour gérer les vitesses très lentes
-        scrollAccumulator.current += scrollSpeed
+        scrollAccumulator.current += scrollSpeed;
 
         // N'appliquer le scroll que quand on a au moins 1 pixel à déplacer
         if (scrollAccumulator.current >= 1) {
-          const scrollAmount = Math.floor(scrollAccumulator.current)
-          container.scrollLeft += scrollAmount
-          scrollAccumulator.current -= scrollAmount
+          const scrollAmount = Math.floor(scrollAccumulator.current);
+          container.scrollLeft += scrollAmount;
+          scrollAccumulator.current -= scrollAmount;
         }
       }
 
-      animationRef.current = requestAnimationFrame(animate)
-    }
+      animationRef.current = requestAnimationFrame(animate);
+    };
 
     // Détecter le scroll utilisateur (wheel, touch)
     const handleWheel = () => {
-      isUserScrollingRef.current = true
-      lastUserScrollTime.current = Date.now()
+      isUserScrollingRef.current = true;
+      lastUserScrollTime.current = Date.now();
       setTimeout(() => {
-        isUserScrollingRef.current = false
-      }, FAQ_ANIMATION_CONFIG.USER_SCROLL_DETECTION_DELAY)
-    }
+        isUserScrollingRef.current = false;
+      }, FAQ_ANIMATION_CONFIG.USER_SCROLL_DETECTION_DELAY);
+    };
 
     // Gérer le scroll infini sans interférer avec l'animation
     const handleScroll = () => {
-      const { scrollLeft, scrollWidth, clientWidth } = container
+      const { scrollLeft, scrollWidth, clientWidth } = container;
 
       if (scrollLeft <= 0) {
-        container.scrollLeft = totalWidth - 1
+        container.scrollLeft = totalWidth - 1;
       } else if (scrollLeft >= scrollWidth - clientWidth - 1) {
-        container.scrollLeft = totalWidth + 1
+        container.scrollLeft = totalWidth + 1;
       }
-    }
+    };
 
     // Gestionnaires pour le drag scroll
     const handleMouseDown = (e: MouseEvent) => {
-      isDraggingRef.current = true
-      startXRef.current = e.pageX - container.offsetLeft
-      scrollLeftRef.current = container.scrollLeft
-      lastUserScrollTime.current = Date.now()
-      container.style.cursor = 'grabbing'
-      container.style.userSelect = 'none'
-    }
+      isDraggingRef.current = true;
+      startXRef.current = e.pageX - container.offsetLeft;
+      scrollLeftRef.current = container.scrollLeft;
+      lastUserScrollTime.current = Date.now();
+      container.style.cursor = 'grabbing';
+      container.style.userSelect = 'none';
+    };
 
     const handleMouseUp = () => {
-      isDraggingRef.current = false
-      container.style.cursor = 'grab'
-      container.style.userSelect = 'auto'
-    }
+      isDraggingRef.current = false;
+      container.style.cursor = 'grab';
+      container.style.userSelect = 'auto';
+    };
 
     const handleMouseMove = (e: MouseEvent) => {
-      if (!isDraggingRef.current) return
-      e.preventDefault()
-      const x = e.pageX - container.offsetLeft
-      const walk = (x - startXRef.current) * FAQ_ANIMATION_CONFIG.DRAG_SENSITIVITY
-      container.scrollLeft = scrollLeftRef.current - walk
-      lastUserScrollTime.current = Date.now()
-    }
+      if (!isDraggingRef.current) return;
+      e.preventDefault();
+      const x = e.pageX - container.offsetLeft;
+      const walk = (x - startXRef.current) * FAQ_ANIMATION_CONFIG.DRAG_SENSITIVITY;
+      container.scrollLeft = scrollLeftRef.current - walk;
+      lastUserScrollTime.current = Date.now();
+    };
 
     // Gestionnaires pour le hover
     const handleMouseEnter = () => {
-      isHoveringRef.current = true
-      lastUserScrollTime.current = Date.now()
-    }
+      isHoveringRef.current = true;
+      lastUserScrollTime.current = Date.now();
+    };
 
     const handleMouseLeaveContainer = () => {
-      isHoveringRef.current = false
+      isHoveringRef.current = false;
       // Arrêter le drag si on sort du container
       if (isDraggingRef.current) {
-        isDraggingRef.current = false
-        container.style.cursor = 'grab'
-        container.style.userSelect = 'auto'
+        isDraggingRef.current = false;
+        container.style.cursor = 'grab';
+        container.style.userSelect = 'auto';
       }
-    }
+    };
 
-    container.addEventListener('scroll', handleScroll, { passive: true })
-    container.addEventListener('wheel', handleWheel, { passive: true })
-    container.addEventListener('touchstart', handleWheel, { passive: true })
-    container.addEventListener('mouseenter', handleMouseEnter, { passive: true })
-    container.addEventListener('mouseleave', handleMouseLeaveContainer, { passive: true })
-    container.addEventListener('mousedown', handleMouseDown)
-    container.addEventListener('mouseup', handleMouseUp)
-    container.addEventListener('mousemove', handleMouseMove)
+    container.addEventListener('scroll', handleScroll, { passive: true });
+    container.addEventListener('wheel', handleWheel, { passive: true });
+    container.addEventListener('touchstart', handleWheel, { passive: true });
+    container.addEventListener('mouseenter', handleMouseEnter, { passive: true });
+    container.addEventListener('mouseleave', handleMouseLeaveContainer, { passive: true });
+    container.addEventListener('mousedown', handleMouseDown);
+    container.addEventListener('mouseup', handleMouseUp);
+    container.addEventListener('mousemove', handleMouseMove);
 
     // Positionner au milieu au démarrage
-    container.scrollLeft = totalWidth
+    container.scrollLeft = totalWidth;
 
     // Démarrer l'animation immédiatement
-    animationRef.current = requestAnimationFrame(animate)
+    animationRef.current = requestAnimationFrame(animate);
 
     return () => {
       if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current)
+        cancelAnimationFrame(animationRef.current);
       }
-      container.removeEventListener('scroll', handleScroll)
-      container.removeEventListener('wheel', handleWheel)
-      container.removeEventListener('touchstart', handleWheel)
-      container.removeEventListener('mouseenter', handleMouseEnter)
-      container.removeEventListener('mouseleave', handleMouseLeaveContainer)
-      container.removeEventListener('mousedown', handleMouseDown)
-      container.removeEventListener('mouseup', handleMouseUp)
-      container.removeEventListener('mousemove', handleMouseMove)
-    }
-  }, [faqs.length, cardWidth, scrollSpeed])
+      container.removeEventListener('scroll', handleScroll);
+      container.removeEventListener('wheel', handleWheel);
+      container.removeEventListener('touchstart', handleWheel);
+      container.removeEventListener('mouseenter', handleMouseEnter);
+      container.removeEventListener('mouseleave', handleMouseLeaveContainer);
+      container.removeEventListener('mousedown', handleMouseDown);
+      container.removeEventListener('mouseup', handleMouseUp);
+      container.removeEventListener('mousemove', handleMouseMove);
+    };
+  }, [faqs.length, cardWidth, scrollSpeed]);
 
   return (
     <FAQContainerWrapper>
@@ -323,8 +323,8 @@ const InfiniteScrollFAQ = ({ faqs }: { faqs: Array<{ question: string; answer: s
         </FAQScrollWrapper>
       </FAQContainer>
     </FAQContainerWrapper>
-  )
-}
+  );
+};
 
 const DEFAULT_FAQS = [
   {
@@ -356,19 +356,17 @@ const DEFAULT_FAQS = [
     question: 'Comment réserver un cadeau ?',
     answer: 'Cliquez simplement sur un article dans une liste pour le réserver et éviter les doublons.',
   },
-]
+];
 
 interface FAQSectionProps {
-  faqs?: Array<{ question: string; answer: string }>
+  faqs?: Array<{ question: string; answer: string }>;
 }
 
-export const FAQSection = ({ faqs = DEFAULT_FAQS }: FAQSectionProps) => {
-  return (
-    <FAQSectionContainer id="faq">
-      <Container maxWidth="xl" sx={{ px: { xs: 2, sm: 3, md: 4 } }}>
-        <FAQTitle>Questions fréquentes</FAQTitle>
-        <InfiniteScrollFAQ faqs={faqs} />
-      </Container>
-    </FAQSectionContainer>
-  )
-}
+export const FAQSection = ({ faqs = DEFAULT_FAQS }: FAQSectionProps) => (
+  <FAQSectionContainer id="faq">
+    <Container maxWidth="xl" sx={{ px: { xs: 2, sm: 3, md: 4 } }}>
+      <FAQTitle>Questions fréquentes</FAQTitle>
+      <InfiniteScrollFAQ faqs={faqs} />
+    </Container>
+  </FAQSectionContainer>
+);

@@ -1,62 +1,62 @@
-import type { RootState } from '../core'
+import type { RootState } from '../core/store';
 
-import { useEffect, useState } from 'react'
-import { useSelector } from 'react-redux'
+import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 
-import { OnboardingService } from '../core/services/onboarding.service'
-import { useUserProfileCurrentUserQuery } from '../gql'
+import { OnboardingService } from '../core/services/onboarding.service';
+import { useUserProfileCurrentUserQuery } from '../gql';
 
 const mapState = (state: RootState) => ({
   pictureUrl: state.userProfile.pictureUrl,
   userId: state.auth.user?.id,
-})
+});
 
 export const useProfilePicturePrompt = () => {
   const { data } = useUserProfileCurrentUserQuery(undefined, {
     select: d => d.currentUser,
-  })
-  const user = data?.__typename === 'User' ? data : undefined
-  const { pictureUrl, userId } = useSelector(mapState)
-  const [shouldShowPrompt, setShouldShowPrompt] = useState(false)
+  });
+  const user = data?.__typename === 'User' ? data : undefined;
+  const { pictureUrl, userId } = useSelector(mapState);
+  const [shouldShowPrompt, setShouldShowPrompt] = useState(false);
 
   useEffect(() => {
     if (!userId) {
-      return
+      return;
     }
 
-    const onboardingService = new OnboardingService(userId)
+    const onboardingService = new OnboardingService(userId);
 
     // Don't show prompt if:
     // - User is not loaded yet
     // - User already has a profile picture
     // - We've already shown the prompt
     if (!user || onboardingService.isSetProfilePictureAsBeenShown()) {
-      return
+      return;
     }
 
     if (pictureUrl) {
       // We don't want to show the prompt if the user already has a profile picture and decide to remove it afterwards
-      onboardingService.markSetProfilePictureAsShown()
-      return
+      onboardingService.markSetProfilePictureAsShown();
+      return;
     }
 
     // Show prompt only for users without profile pictures
     // and after a short delay to avoid interrupting initial loading
     const timer = setTimeout(() => {
-      setShouldShowPrompt(true)
+      setShouldShowPrompt(true);
       // We mark the prompt as shown to avoid showing it again
-      onboardingService.markSetProfilePictureAsShown()
-    }, 500) // 500ms delay
+      onboardingService.markSetProfilePictureAsShown();
+    }, 500); // 500ms delay
 
-    return () => clearTimeout(timer)
-  }, [user, pictureUrl, userId])
+    return () => clearTimeout(timer);
+  }, [user, pictureUrl, userId]);
 
   const handlePromptClosed = () => {
-    setShouldShowPrompt(false)
-  }
+    setShouldShowPrompt(false);
+  };
 
   return {
     shouldShowPrompt,
     handlePromptClosed,
-  }
-}
+  };
+};

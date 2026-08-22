@@ -1,24 +1,28 @@
-import { BadRequestException, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common'
-import { EventBus } from '@nestjs/cqrs'
-import { REPOSITORIES } from '@wishlist/api/repositories'
-import { type UserRepository } from '@wishlist/api/user'
-import { AttendeeDto, AttendeeRole, type EventId, type ICurrentUser } from '@wishlist/common'
+import type { EventRepository } from '../../domain/repository/event.repository';
+import type { EventAttendeeRepository } from '../../domain/repository/event-attendee.repository';
 
-import { AttendeeAddedEvent, EventAttendee, type EventAttendeeRepository, type EventRepository } from '../../domain'
-import { eventAttendeeMapper } from '../../infrastructure'
+import { BadRequestException, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { EventBus } from '@nestjs/cqrs';
+import { AttendeeDto, AttendeeRole, type EventId, type ICurrentUser } from '@wishlist/common';
+
+import { REPOSITORIES } from '../../../repositories/repositories.constants';
+import { type UserRepository } from '../../../user/domain/repository/user.repository';
+import { AttendeeAddedEvent } from '../../domain/event/attendee-added.event';
+import { EventAttendee } from '../../domain/model/event-attendee.model';
+import { eventAttendeeMapper } from '../../infrastructure/event-attendee.mapper';
 
 export type AddAttendeeInput = {
-  currentUser: ICurrentUser
-  eventId: EventId
+  currentUser: ICurrentUser;
+  eventId: EventId;
   newAttendee: {
-    email: string
-    role?: AttendeeRole
-  }
-}
+    email: string;
+    role?: AttendeeRole;
+  };
+};
 
 @Injectable()
 export class AddAttendeeUseCase {
-  private readonly logger = new Logger(AddAttendeeUseCase.name)
+  private readonly logger = new Logger(AddAttendeeUseCase.name);
 
   constructor(
     @Inject(REPOSITORIES.EVENT)
@@ -31,28 +35,28 @@ export class AddAttendeeUseCase {
   ) {}
 
   async execute(input: AddAttendeeInput): Promise<AttendeeDto> {
-    const { eventId, currentUser } = input
-    this.logger.log('Add attendee request received', { eventId, currentUser })
+    const { eventId, currentUser } = input;
+    this.logger.log('Add attendee request received', { eventId, currentUser });
 
-    const event = await this.eventRepository.findByIdOrFail(eventId)
+    const event = await this.eventRepository.findByIdOrFail(eventId);
 
     if (!event.canEdit(currentUser)) {
-      throw new UnauthorizedException('Only creators and admins of the event can add an attendee')
+      throw new UnauthorizedException('Only creators and admins of the event can add an attendee');
     }
 
-    const attendeeAlreadyExists = event.attendees.some(attendee => attendee.getEmail() === input.newAttendee.email)
+    const attendeeAlreadyExists = event.attendees.some(attendee => attendee.getEmail() === input.newAttendee.email);
 
     if (attendeeAlreadyExists) {
-      throw new BadRequestException('This attendee already exist for this event')
+      throw new BadRequestException('This attendee already exist for this event');
     }
 
-    const user = await this.userRepository.findByEmail(input.newAttendee.email)
-    const role = input.newAttendee.role ?? AttendeeRole.PARTICIPANT
+    const user = await this.userRepository.findByEmail(input.newAttendee.email);
+    const role = input.newAttendee.role ?? AttendeeRole.PARTICIPANT;
 
     if (role === AttendeeRole.CREATOR) {
-      throw new BadRequestException('Cannot assign the creator role to an attendee')
+      throw new BadRequestException('Cannot assign the creator role to an attendee');
     }
-    const attendeeId = this.attendeeRepository.newId()
+    const attendeeId = this.attendeeRepository.newId();
 
     const newAttendee = user
       ? EventAttendee.createFromExistingUser({
@@ -66,12 +70,12 @@ export class AddAttendeeUseCase {
           eventId,
           pendingEmail: input.newAttendee.email,
           role,
-        })
+        });
 
-    this.logger.log('Saving attendee...', { newAttendee })
-    await this.attendeeRepository.save(newAttendee)
+    this.logger.log('Saving attendee...', { newAttendee });
+    await this.attendeeRepository.save(newAttendee);
 
-    const invitedBy = await this.userRepository.findByIdOrFail(currentUser.id)
+    const invitedBy = await this.userRepository.findByIdOrFail(currentUser.id);
 
     await this.eventBus.publish(
       new AttendeeAddedEvent({
@@ -79,8 +83,8 @@ export class AddAttendeeUseCase {
         newAttendee: newAttendee,
         invitedBy,
       }),
-    )
+    );
 
-    return eventAttendeeMapper.toAttendeeDto(newAttendee)
+    return eventAttendeeMapper.toAttendeeDto(newAttendee);
   }
 }

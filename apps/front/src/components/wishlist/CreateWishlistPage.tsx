@@ -1,13 +1,13 @@
-import type { WishlistId } from '@wishlist/common'
-import type { RootState } from '../../core'
-import type { SelectableEvent } from '../event/SearchEventSelect'
+import type { WishlistId } from '@wishlist/common';
+import type { RootState } from '../../core/store';
+import type { SelectableEvent } from '../event/SearchEventSelect';
 
-import AccountCircleTwoToneIcon from '@mui/icons-material/AccountCircleTwoTone'
-import DeleteIcon from '@mui/icons-material/Delete'
-import Diversity1TwoToneIcon from '@mui/icons-material/Diversity1TwoTone'
-import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft'
-import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'
-import SaveIcon from '@mui/icons-material/Save'
+import AccountCircleTwoToneIcon from '@mui/icons-material/AccountCircleTwoTone';
+import DeleteIcon from '@mui/icons-material/Delete';
+import Diversity1TwoToneIcon from '@mui/icons-material/Diversity1TwoTone';
+import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
+import SaveIcon from '@mui/icons-material/Save';
 import {
   Alert,
   Box,
@@ -28,31 +28,31 @@ import {
   Stepper,
   styled,
   TextField,
-} from '@mui/material'
-import { useMutation } from '@tanstack/react-query'
-import { useNavigate, useSearch } from '@tanstack/react-router'
-import { MAX_EVENTS_BY_LIST } from '@wishlist/common'
-import uniq from 'lodash/uniq'
-import { DateTime } from 'luxon'
-import { useEffect, useMemo, useState } from 'react'
-import { useSelector } from 'react-redux'
-import { useInterval } from 'usehooks-ts'
+} from '@mui/material';
+import { useMutation } from '@tanstack/react-query';
+import { useNavigate, useSearch } from '@tanstack/react-router';
+import { MAX_EVENTS_BY_LIST } from '@wishlist/common';
+import uniq from 'lodash/uniq';
+import { DateTime } from 'luxon';
+import { useEffect, useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { useInterval } from 'usehooks-ts';
 
-import { createWishlistMultipart } from '../../api/upload'
-import { isRejection, rejectionMessage, useEventSelectAvailableEventsQuery } from '../../gql'
-import { useToast } from '../../hooks'
-import { getRandomPlaceholderName } from '../../utils/wishlist.utils'
-import { Card } from '../common/Card'
-import { InputLabel } from '../common/InputLabel'
-import { Loader } from '../common/Loader'
-import { Subtitle } from '../common/Subtitle'
-import { TextareaMarkdown } from '../common/TextareaMarkdown'
-import { Title } from '../common/Title'
-import { EventIcon } from '../event/EventIcon'
-import { SearchEventSelect } from '../event/SearchEventSelect'
-import { WishlistLogoActions } from './WishlistLogoActions'
+import { createWishlistMultipart } from '../../api/upload';
+import { isRejection, rejectionMessage, useEventSelectAvailableEventsQuery } from '../../gql';
+import { useToast } from '../../hooks';
+import { getRandomPlaceholderName } from '../../utils/wishlist.utils';
+import { Card } from '../common/Card';
+import { InputLabel } from '../common/InputLabel';
+import { Loader } from '../common/Loader';
+import { Subtitle } from '../common/Subtitle';
+import { TextareaMarkdown } from '../common/TextareaMarkdown';
+import { Title } from '../common/Title';
+import { EventIcon } from '../event/EventIcon';
+import { SearchEventSelect } from '../event/SearchEventSelect';
+import { WishlistLogoActions } from './WishlistLogoActions';
 
-const steps = ['Type de liste', 'Informations', 'Evènements']
+const steps = ['Type de liste', 'Informations', 'Evènements'];
 
 const OptionCard = styled(Button)(({ theme }) => ({
   backgroundColor: theme.palette.grey[50],
@@ -75,7 +75,7 @@ const OptionCard = styled(Button)(({ theme }) => ({
     transform: 'translateY(-1px)',
     boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
   },
-}))
+}));
 
 const OptionTitle = styled('span')(({ theme }) => ({
   fontSize: '1rem',
@@ -84,7 +84,7 @@ const OptionTitle = styled('span')(({ theme }) => ({
   lineHeight: 1.4,
   display: 'block',
   marginBottom: '4px',
-}))
+}));
 
 const OptionDescription = styled('span')(({ theme }) => ({
   fontSize: '0.875rem',
@@ -92,7 +92,7 @@ const OptionDescription = styled('span')(({ theme }) => ({
   color: theme.palette.text.secondary,
   lineHeight: 1.5,
   display: 'block',
-}))
+}));
 
 const IconWrapper = styled(Box)(({ theme }) => ({
   display: 'flex',
@@ -106,57 +106,57 @@ const IconWrapper = styled(Box)(({ theme }) => ({
   '& svg': {
     fontSize: 24,
   },
-}))
+}));
 
 const ListOfTitle = styled(Box)(({ theme }) => ({
   fontSize: '1.1rem',
   color: theme.palette.primary.main,
   lineHeight: 1.4,
-}))
+}));
 
-const mapState = (state: RootState) => state.userProfile.firstName
+const mapState = (state: RootState) => state.userProfile.firstName;
 
 export const CreateWishlistPage = () => {
-  const { addToast } = useToast()
-  const navigate = useNavigate()
-  const userFirstName = useSelector(mapState)
-  const [step, setStep] = useState(1)
-  const [ownerName, setOwnerName] = useState('')
-  const [description, setDescription] = useState('')
-  const [isListForSomeoneElse, setIsListForSomeoneElse] = useState(false)
-  const [hideItems, setHideItems] = useState(true)
-  const [events, setEvents] = useState<SelectableEvent[]>([])
-  const [namePlaceholder, setNamePlaceholder] = useState<string>(getRandomPlaceholderName())
-  const [logo, setLogo] = useState<File | undefined>()
+  const { addToast } = useToast();
+  const navigate = useNavigate();
+  const userFirstName = useSelector(mapState);
+  const [step, setStep] = useState(1);
+  const [ownerName, setOwnerName] = useState('');
+  const [description, setDescription] = useState('');
+  const [isListForSomeoneElse, setIsListForSomeoneElse] = useState(false);
+  const [hideItems, setHideItems] = useState(true);
+  const [events, setEvents] = useState<SelectableEvent[]>([]);
+  const [namePlaceholder, setNamePlaceholder] = useState<string>(getRandomPlaceholderName());
+  const [logo, setLogo] = useState<File | undefined>();
 
   useInterval(() => {
-    setNamePlaceholder(getRandomPlaceholderName())
-  }, 2000)
+    setNamePlaceholder(getRandomPlaceholderName());
+  }, 2000);
 
   const { data: availableEventsData, isLoading: availableEventsLoading } = useEventSelectAvailableEventsQuery(
     { filters: { limit: 100, onlyFuture: true } },
     { select: d => d.events },
-  )
+  );
   const availableEvents = useMemo(
     () => (availableEventsData?.__typename === 'GetEventsPagedResponse' ? availableEventsData.data : []),
     [availableEventsData],
-  )
+  );
   const availableEventsRejection =
-    availableEventsData && isRejection(availableEventsData) ? availableEventsData : undefined
-  const { fromEvent } = useSearch({ from: '/_authenticated/_with-layout/wishlists/new' })
-  const eventFromUrl = fromEvent ? availableEvents.find(e => e.id === fromEvent) : undefined
+    availableEventsData && isRejection(availableEventsData) ? availableEventsData : undefined;
+  const { fromEvent } = useSearch({ from: '/_authenticated/_with-layout/wishlists/new' });
+  const eventFromUrl = fromEvent ? availableEvents.find(e => e.id === fromEvent) : undefined;
 
-  const nextStepEnabled = ownerName?.trim() !== ''
-  const createEnabled = events.length > 0
+  const nextStepEnabled = ownerName?.trim() !== '';
+  const createEnabled = events.length > 0;
 
   useEffect(() => {
     if (eventFromUrl !== undefined) {
       setEvents(prev => {
-        if (prev.some(e => e.id === eventFromUrl.id)) return prev
-        return [...prev, eventFromUrl]
-      })
+        if (prev.some(e => e.id === eventFromUrl.id)) return prev;
+        return [...prev, eventFromUrl];
+      });
     }
-  }, [eventFromUrl])
+  }, [eventFromUrl]);
 
   const { mutateAsync: createWishlist, isPending: loading } = useMutation({
     mutationFn: () =>
@@ -171,10 +171,10 @@ export const CreateWishlistPage = () => {
       ),
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
     onSuccess: wishlist => {
-      addToast({ message: 'Liste créé avec succès', variant: 'success' })
-      void navigate({ to: '/wishlists/$wishlistId', params: { wishlistId: wishlist.id } })
+      addToast({ message: 'Liste créé avec succès', variant: 'success' });
+      void navigate({ to: '/wishlists/$wishlistId', params: { wishlistId: wishlist.id } });
     },
-  })
+  });
 
   return (
     <Box>
@@ -198,11 +198,11 @@ export const CreateWishlistPage = () => {
                 <Stack gap={2}>
                   <OptionCard
                     onClick={() => {
-                      setStep(2)
-                      setOwnerName(userFirstName!)
-                      setHideItems(true)
-                      setIsListForSomeoneElse(false)
-                      setLogo(undefined)
+                      setStep(2);
+                      setOwnerName(userFirstName!);
+                      setHideItems(true);
+                      setIsListForSomeoneElse(false);
+                      setLogo(undefined);
                     }}
                   >
                     <IconWrapper>
@@ -216,10 +216,10 @@ export const CreateWishlistPage = () => {
 
                   <OptionCard
                     onClick={() => {
-                      setStep(2)
-                      setOwnerName('')
-                      setHideItems(false)
-                      setIsListForSomeoneElse(true)
+                      setStep(2);
+                      setOwnerName('');
+                      setHideItems(false);
+                      setIsListForSomeoneElse(true);
                     }}
                   >
                     <IconWrapper>
@@ -402,5 +402,5 @@ export const CreateWishlistPage = () => {
         </Container>
       </Loader>
     </Box>
-  )
-}
+  );
+};

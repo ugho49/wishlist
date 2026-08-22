@@ -1,9 +1,9 @@
-import { Wishlist } from '../wishlist.model'
+import { Wishlist } from '../wishlist.model';
 
 export class UserAddedAsCoOwnerToWishlistEvent {
-  public readonly wishlist: Wishlist
+  public readonly wishlist: Wishlist;
 
   constructor(props: { wishlist: Wishlist }) {
-    this.wishlist = props.wishlist
+    this.wishlist = props.wishlist;
   }
 }

@@ -1,5 +1,0 @@
-export * from './event/attendee-added.event'
-export * from './model/event.model'
-export * from './model/event-attendee.model'
-export * from './repository/event.repository'
-export * from './repository/event-attendee.repository'

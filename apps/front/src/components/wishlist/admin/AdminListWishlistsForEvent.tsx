@@ -1,12 +1,12 @@
-import type { GridColDef } from '@mui/x-data-grid'
-import type { UserId, WishlistId } from '@wishlist/common'
+import type { GridColDef } from '@mui/x-data-grid';
+import type { UserId, WishlistId } from '@wishlist/common';
 
-import ListIcon from '@mui/icons-material/List'
-import { Avatar } from '@mui/material'
-import { DataGrid } from '@mui/x-data-grid'
-import { DateTime } from 'luxon'
+import ListIcon from '@mui/icons-material/List';
+import { Avatar } from '@mui/material';
+import { DataGrid } from '@mui/x-data-grid';
+import { DateTime } from 'luxon';
 
-import { RouterLink } from '../../common/RouterLink'
+import { RouterLink } from '../../common/RouterLink';
 
 /**
  * The admin event page supplies these wishlists from its own GraphQL query
@@ -14,14 +14,14 @@ import { RouterLink } from '../../common/RouterLink'
  * reads here, in the camelCase GraphQL shape.
  */
 export type AdminEventWishlist = {
-  id: WishlistId
-  title: string
-  logoUrl?: string | null
-  config: { hideItems: boolean }
-  createdAt: string
-  owner: { id: UserId; firstName: string; lastName: string }
-  coOwner?: { id: UserId; firstName: string; lastName: string } | null
-}
+  id: WishlistId;
+  title: string;
+  logoUrl?: string | null;
+  config: { hideItems: boolean };
+  createdAt: string;
+  owner: { id: UserId; firstName: string; lastName: string };
+  coOwner?: { id: UserId; firstName: string; lastName: string } | null;
+};
 
 const columns: GridColDef<AdminEventWishlist>[] = [
   {
@@ -43,13 +43,11 @@ const columns: GridColDef<AdminEventWishlist>[] = [
     headerName: 'Owner',
     width: 300,
     valueGetter: (_, row) => `${row.owner.firstName} ${row.owner.lastName}`,
-    renderCell: ({ row }) => {
-      return (
-        <RouterLink key={row.owner.id} to="/admin/users/$userId" params={{ userId: row.owner.id }}>
-          {row.owner.firstName} {row.owner.lastName}
-        </RouterLink>
-      )
-    },
+    renderCell: ({ row }) => (
+      <RouterLink key={row.owner.id} to="/admin/users/$userId" params={{ userId: row.owner.id }}>
+        {row.owner.firstName} {row.owner.lastName}
+      </RouterLink>
+    ),
   },
   {
     field: 'coOwner',
@@ -57,12 +55,12 @@ const columns: GridColDef<AdminEventWishlist>[] = [
     width: 300,
     valueGetter: (_, row) => `${row.coOwner?.firstName} ${row.coOwner?.lastName}`,
     renderCell: ({ row }) => {
-      if (!row.coOwner) return '-'
+      if (!row.coOwner) return '-';
       return (
         <RouterLink key={row.coOwner.id} to="/admin/users/$userId" params={{ userId: row.coOwner.id }}>
           {row.coOwner.firstName} {row.coOwner.lastName}
         </RouterLink>
-      )
+      );
     },
   },
   {
@@ -82,27 +80,25 @@ const columns: GridColDef<AdminEventWishlist>[] = [
     valueGetter: (_, row) => new Date(row.createdAt),
     renderCell: ({ value }) => DateTime.fromJSDate(value).toLocaleString(DateTime.DATETIME_MED),
   },
-]
+];
 
 type AdminListWishlistsForEventProps = {
-  wishlists: AdminEventWishlist[]
-}
+  wishlists: AdminEventWishlist[];
+};
 
-export const AdminListWishlistsForEvent = ({ wishlists }: AdminListWishlistsForEventProps) => {
-  return (
-    <div style={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
-      <DataGrid
-        isRowSelectable={() => false}
-        density="standard"
-        rows={wishlists}
-        columns={columns}
-        paginationMode="client"
-        localeText={{
-          noRowsLabel: 'Aucune liste',
-        }}
-        hideFooter
-        disableColumnMenu
-      />
-    </div>
-  )
-}
+export const AdminListWishlistsForEvent = ({ wishlists }: AdminListWishlistsForEventProps) => (
+  <div style={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
+    <DataGrid
+      isRowSelectable={() => false}
+      density="standard"
+      rows={wishlists}
+      columns={columns}
+      paginationMode="client"
+      localeText={{
+        noRowsLabel: 'Aucune liste',
+      }}
+      hideFooter
+      disableColumnMenu
+    />
+  </div>
+);

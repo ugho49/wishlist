@@ -1,15 +1,18 @@
-import { Inject, Injectable, Logger } from '@nestjs/common'
-import { FrontendRoutesService, MailService, MailTemplate } from '@wishlist/api/core'
-import { REPOSITORIES } from '@wishlist/api/repositories'
-import { type WishlistRepository } from '@wishlist/api/wishlist'
-import { type WishlistId } from '@wishlist/common'
-import { DateTime } from 'luxon'
+import type { NewItemsForWishlist, WishlistItemRepository } from '../../domain/wishlist-item.repository';
 
-import { type NewItemsForWishlist, type WishlistItemRepository } from '../../domain'
+import { Inject, Injectable, Logger } from '@nestjs/common';
+import { type WishlistId } from '@wishlist/common';
+import { DateTime } from 'luxon';
+
+import { FrontendRoutesService } from '../../../core/frontend-routes/frontend-routes.service';
+import { MailService } from '../../../core/mail/mail.service';
+import { MailTemplate } from '../../../core/mail/mail.type';
+import { REPOSITORIES } from '../../../repositories/repositories.constants';
+import { type WishlistRepository } from '../../../wishlist/domain/wishlist.repository';
 
 @Injectable()
 export class NotifyNewItemsUseCase {
-  private readonly logger = new Logger(NotifyNewItemsUseCase.name)
+  private readonly logger = new Logger(NotifyNewItemsUseCase.name);
 
   constructor(
     @Inject(REPOSITORIES.WISHLIST_ITEM) private readonly itemRepository: WishlistItemRepository,
@@ -20,24 +23,24 @@ export class NotifyNewItemsUseCase {
 
   async execute(): Promise<void> {
     try {
-      const oneDayAgo = DateTime.now().minus({ days: 1 }).toJSDate()
+      const oneDayAgo = DateTime.now().minus({ days: 1 }).toJSDate();
 
-      this.logger.log(`Fetching new items to send daily notification since "${oneDayAgo.toISOString()}" ...`)
+      this.logger.log(`Fetching new items to send daily notification since "${oneDayAgo.toISOString()}" ...`);
 
-      const newItemsForWishlists = await this.itemRepository.findAllNewItems(oneDayAgo)
+      const newItemsForWishlists = await this.itemRepository.findAllNewItems(oneDayAgo);
 
       if (newItemsForWishlists.length === 0) {
-        this.logger.log('No new items to send daily notification')
-        return
+        this.logger.log('No new items to send daily notification');
+        return;
       }
 
-      this.logger.log(`Found ${newItemsForWishlists.length} new items to send daily notification`)
+      this.logger.log(`Found ${newItemsForWishlists.length} new items to send daily notification`);
 
       for (const newItemsForWishlist of newItemsForWishlists) {
-        await this.notify(newItemsForWishlist)
+        await this.notify(newItemsForWishlist);
       }
     } catch (e) {
-      this.logger.error('Fail to send new item notification', e)
+      this.logger.error('Fail to send new item notification', e);
     }
   }
 
@@ -46,41 +49,41 @@ export class NotifyNewItemsUseCase {
       this.logger.log(`Notifying wishlist "${dto.wishlistId}" ...`, {
         wishlistId: dto.wishlistId,
         nbNewItems: dto.nbNewItems,
-      })
+      });
 
       const allEmailToNotify = await this.wishlistRepository.findEmailsToNotify({
         wishlistId: dto.wishlistId,
         ownerId: dto.ownerId,
-      })
+      });
 
       if (allEmailToNotify.length === 0) {
-        this.logger.log(`No emails to notify for wishlist ${dto.wishlistId}`)
-        return
+        this.logger.log(`No emails to notify for wishlist ${dto.wishlistId}`);
+        return;
       }
 
       this.logger.log(
         `Notifying ${allEmailToNotify.length} peoples for new items in wishlist "${dto.wishlistId}" ...`,
         { wishlistId: dto.wishlistId },
-      )
+      );
 
       await this.sendNotifyEmail({
         emails: allEmailToNotify,
         nbNewItems: dto.nbNewItems,
         wishlist: { id: dto.wishlistId, title: dto.wishlistTitle },
         ownerName: dto.ownerName,
-      })
+      });
 
-      this.logger.log(`✅ New items notification sent successfully for wishlist "${dto.wishlistId}"`)
+      this.logger.log(`✅ New items notification sent successfully for wishlist "${dto.wishlistId}"`);
     } catch (e) {
-      this.logger.error(`Fail to notify new items for wishlist ${dto.wishlistId}`, e)
+      this.logger.error(`Fail to notify new items for wishlist ${dto.wishlistId}`, e);
     }
   }
 
   private async sendNotifyEmail(param: {
-    emails: string[]
-    wishlist: { id: WishlistId; title: string }
-    ownerName: string
-    nbNewItems: number
+    emails: string[];
+    wishlist: { id: WishlistId; title: string };
+    ownerName: string;
+    nbNewItems: number;
   }) {
     await this.mailService.sendMail({
       to: param.emails,
@@ -92,6 +95,6 @@ export class NotifyNewItemsUseCase {
         nbItems: param.nbNewItems,
         userName: param.ownerName,
       },
-    })
+    });
   }
 }

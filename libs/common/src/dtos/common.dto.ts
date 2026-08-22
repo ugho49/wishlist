@@ -1,12 +1,12 @@
-import { Transform } from 'class-transformer'
-import { IsInt, IsOptional, IsPositive, Min } from 'class-validator'
+import { Transform } from 'class-transformer';
+import { IsInt, IsOptional, IsPositive, Min } from 'class-validator';
 
 export class GetPaginationQueryDto {
   @IsInt()
   @Min(1)
   @IsOptional()
   @Transform(({ value }) => parseInt(value, 10))
-  declare p?: number
+  declare p?: number;
 }
 
 export class LimitQueryDto {
@@ -15,17 +15,17 @@ export class LimitQueryDto {
   @IsPositive()
   @IsOptional()
   @Transform(({ value }) => parseInt(value, 10))
-  declare limit?: number
+  declare limit?: number;
 }
 
 export class PaginationDto {
-  declare total_pages: number
-  declare total_elements: number
-  declare page_number: number
-  declare pages_size: number
+  declare total_pages: number;
+  declare total_elements: number;
+  declare page_number: number;
+  declare pages_size: number;
 }
 
 export class PagedResponse<T> {
-  declare resources: T[]
-  declare pagination: PaginationDto
+  declare resources: T[];
+  declare pagination: PaginationDto;
 }

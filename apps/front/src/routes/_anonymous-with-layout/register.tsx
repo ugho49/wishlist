@@ -1,7 +1,7 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { SEO } from '@wishlist/front-components/SEO'
+import { createFileRoute } from '@tanstack/react-router';
+import { SEO } from '@wishlist/front-components/SEO';
 
-import { RegisterPage } from '../../components/auth/RegisterPage'
+import { RegisterPage } from '../../components/auth/RegisterPage';
 
 export const Route = createFileRoute('/_anonymous-with-layout/register')({
   component: () => (
@@ -15,4 +15,4 @@ export const Route = createFileRoute('/_anonymous-with-layout/register')({
       <RegisterPage />
     </>
   ),
-})
+});

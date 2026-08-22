@@ -1,46 +1,46 @@
-import type { WishlistId } from '@wishlist/common'
-import type { RootState } from '../../core'
+import type { WishlistId } from '@wishlist/common';
+import type { RootState } from '../../core/store';
 
-import { Alert, Box, Container, Stack } from '@mui/material'
-import { useNavigate, useSearch } from '@tanstack/react-router'
-import { FeatureFlags } from '@wishlist/common'
-import { useCallback, useMemo } from 'react'
-import { useSelector } from 'react-redux'
+import { Alert, Box, Container, Stack } from '@mui/material';
+import { useNavigate, useSearch } from '@tanstack/react-router';
+import { FeatureFlags } from '@wishlist/common';
+import { useCallback, useMemo } from 'react';
+import { useSelector } from 'react-redux';
 
-import { isRejection, rejectionMessage, useImportableItemsQuery, useWishlistPageQuery } from '../../gql'
-import { useFeatureFlag } from '../../hooks/useFeatureFlag'
-import { Description } from '../common/Description'
-import { ImportItemsDialog } from '../item/ImportItemsDialog'
-import { SEO } from '../SEO'
-import { WishlistEventsDialog } from './WishlistEventsDialog'
-import { WishlistHeader } from './WishlistHeader'
-import { WishlistHeaderSkeleton } from './WishlistHeaderSkeleton'
-import { WishlistItems } from './WishlistItems'
-import { WishlistNotFound } from './WishlistNotFound'
+import { isRejection, rejectionMessage, useImportableItemsQuery, useWishlistPageQuery } from '../../gql';
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
+import { Description } from '../common/Description';
+import { ImportItemsDialog } from '../item/ImportItemsDialog';
+import { SEO } from '../SEO';
+import { WishlistEventsDialog } from './WishlistEventsDialog';
+import { WishlistHeader } from './WishlistHeader';
+import { WishlistHeaderSkeleton } from './WishlistHeaderSkeleton';
+import { WishlistItems } from './WishlistItems';
+import { WishlistNotFound } from './WishlistNotFound';
 
 interface WishlistPageProps {
-  wishlistId: WishlistId
+  wishlistId: WishlistId;
 }
 
-const mapState = (state: RootState) => state.auth.user?.id
+const mapState = (state: RootState) => state.auth.user?.id;
 
 export const WishlistPage = ({ wishlistId }: WishlistPageProps) => {
-  const importItemsEnabled = useFeatureFlag(FeatureFlags.FRONTEND_WISHLIST_IMPORT_ITEMS_ENABLED)
+  const importItemsEnabled = useFeatureFlag(FeatureFlags.FRONTEND_WISHLIST_IMPORT_ITEMS_ENABLED);
   const { showEventDialog, showImportDialog, sort, filter } = useSearch({
     from: '/_authenticated/_with-layout/wishlists/$wishlistId/',
-  })
-  const navigate = useNavigate()
-  const currentUserId = useSelector(mapState)
+  });
+  const navigate = useNavigate();
+  const currentUserId = useSelector(mapState);
 
-  const { data, isLoading: loading } = useWishlistPageQuery({ wishlistId }, { select: d => d.wishlist })
-  const wishlist = data?.__typename === 'Wishlist' ? data : undefined
-  const queryRejection = data && isRejection(data) && data.__typename !== 'NotFoundRejection' ? data : undefined
+  const { data, isLoading: loading } = useWishlistPageQuery({ wishlistId }, { select: d => d.wishlist });
+  const wishlist = data?.__typename === 'Wishlist' ? data : undefined;
+  const queryRejection = data && isRejection(data) && data.__typename !== 'NotFoundRejection' ? data : undefined;
 
   const currentUserCanEdit = useMemo(
     () => !!wishlist && (wishlist.owner.id === currentUserId || wishlist.coOwner?.id === currentUserId),
     [wishlist, currentUserId],
-  )
-  const isPublic = useMemo(() => wishlist?.config.hideItems === false, [wishlist])
+  );
+  const isPublic = useMemo(() => wishlist?.config.hideItems === false, [wishlist]);
 
   const { data: importableItems = [] } = useImportableItemsQuery(
     { wishlistId },
@@ -48,35 +48,35 @@ export const WishlistPage = ({ wishlistId }: WishlistPageProps) => {
       enabled: currentUserCanEdit && !isPublic && importItemsEnabled,
       select: d => (d.importableItems.__typename === 'GetImportableItemsOutput' ? d.importableItems.items : []),
     },
-  )
+  );
 
   const setShowEventDialog = useCallback(
     (show: boolean) => {
-      void navigate({ from: '/wishlists/$wishlistId', search: prev => ({ ...prev, showEventDialog: show }) })
+      void navigate({ from: '/wishlists/$wishlistId', search: prev => ({ ...prev, showEventDialog: show }) });
     },
     [navigate],
-  )
+  );
 
   const setShowImportDialog = useCallback(
     (show: boolean) => {
-      void navigate({ from: '/wishlists/$wishlistId', search: prev => ({ ...prev, showImportDialog: show }) })
+      void navigate({ from: '/wishlists/$wishlistId', search: prev => ({ ...prev, showImportDialog: show }) });
     },
     [navigate],
-  )
+  );
 
   const setSort = useCallback(
     (newSort: typeof sort) => {
-      void navigate({ from: '/wishlists/$wishlistId', search: prev => ({ ...prev, sort: newSort }) })
+      void navigate({ from: '/wishlists/$wishlistId', search: prev => ({ ...prev, sort: newSort }) });
     },
     [navigate],
-  )
+  );
 
   const setFilter = useCallback(
     (newFilter: typeof filter) => {
-      void navigate({ from: '/wishlists/$wishlistId', search: prev => ({ ...prev, filter: newFilter }) })
+      void navigate({ from: '/wishlists/$wishlistId', search: prev => ({ ...prev, filter: newFilter }) });
     },
     [navigate],
-  )
+  );
 
   return (
     <>
@@ -117,7 +117,7 @@ export const WishlistPage = ({ wishlistId }: WishlistPageProps) => {
 
             <Container maxWidth="lg">
               <Stack gap="20px" sx={{ paddingTop: 3 }}>
-                {wishlist.description && <Description text={wishlist.description} allowMarkdown />}
+                {wishlist.description && <Description text={wishlist.description} />}
 
                 <WishlistItems
                   wishlist={wishlist}
@@ -148,5 +148,5 @@ export const WishlistPage = ({ wishlistId }: WishlistPageProps) => {
         )}
       </Box>
     </>
-  )
-}
+  );
+};

@@ -1,13 +1,13 @@
-import type { TransitionProps } from '@mui/material/transitions'
-import type { WishlistId } from '@wishlist/common'
-import type React from 'react'
-import type { FormEvent } from 'react'
-import type * as Types from '../../gql/__generated__/types'
-import type { WishlistItem } from '../wishlist/wishlist.types'
+import type { TransitionProps } from '@mui/material/transitions';
+import type { WishlistId } from '@wishlist/common';
+import type React from 'react';
+import type { FormEvent } from 'react';
+import type * as Types from '../../gql/__generated__/types';
+import type { WishlistItem } from '../wishlist/wishlist.types';
 
-import CameraAltIcon from '@mui/icons-material/CameraAlt'
-import CloseIcon from '@mui/icons-material/Close'
-import SaveIcon from '@mui/icons-material/Save'
+import CameraAltIcon from '@mui/icons-material/CameraAlt';
+import CloseIcon from '@mui/icons-material/Close';
+import SaveIcon from '@mui/icons-material/Save';
 import {
   AppBar,
   Avatar,
@@ -23,12 +23,12 @@ import {
   Toolbar,
   Typography,
   useMediaQuery,
-} from '@mui/material'
-import { useQueryClient } from '@tanstack/react-query'
-import { useToast } from '@wishlist/front-hooks'
-import { forwardRef, useCallback, useEffect, useMemo, useState } from 'react'
-import { TidyURL } from 'tidy-url'
-import { match } from 'ts-pattern'
+} from '@mui/material';
+import { useQueryClient } from '@tanstack/react-query';
+import { useToast } from '@wishlist/front-hooks';
+import { forwardRef, useCallback, useEffect, useMemo, useState } from 'react';
+import { TidyURL } from 'tidy-url';
+import { match } from 'ts-pattern';
 
 import {
   rejectionMessage,
@@ -36,77 +36,77 @@ import {
   useCreateItemMutation,
   useScanItemUrlMutation,
   useUpdateItemMutation,
-} from '../../gql'
-import { isValidUrl } from '../../utils/router.utils'
-import { CharsRemaining } from '../common/CharsRemaining'
-import { InputLabel } from '../common/InputLabel'
-import { Rating } from '../common/Rating'
-import { Subtitle } from '../common/Subtitle'
+} from '../../gql';
+import { isValidUrl } from '../../utils/router.utils';
+import { CharsRemaining } from '../common/CharsRemaining';
+import { InputLabel } from '../common/InputLabel';
+import { Rating } from '../common/Rating';
+import { Subtitle } from '../common/Subtitle';
 
-const Transition = forwardRef(function Transition(
+const Transition = forwardRef(function TransitionComponent(
   props: TransitionProps & { children: React.ReactElement },
   ref: React.Ref<unknown>,
 ) {
-  const { children, ...other } = props
+  const { children, ...other } = props;
   return (
     <Slide direction="up" ref={ref} {...other}>
       {children}
     </Slide>
-  )
-})
+  );
+});
 
 type ModeProps<T> = T extends 'create'
   ? { mode: 'create'; item?: never }
   : T extends 'edit'
     ? { mode: 'edit'; item: WishlistItem }
-    : never
+    : never;
 
 export type ItemFormDialogProps = (ModeProps<'create'> | ModeProps<'edit'>) & {
-  open: boolean
-  wishlistId: WishlistId
-  title: string
-  handleClose: () => void
-}
+  open: boolean;
+  wishlistId: WishlistId;
+  title: string;
+  handleClose: () => void;
+};
 
 export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistId }: ItemFormDialogProps) => {
-  const { addToast } = useToast()
-  const [name, setName] = useState('')
-  const [description, setDescription] = useState('')
-  const [url, setUrl] = useState('')
-  const [pictureUrl, setPictureUrl] = useState('')
-  const [validPictureUrl, setValidPictureUrl] = useState<boolean | undefined>(true)
-  const [score, setScore] = useState<number | null>(null)
-  const [scanUrlLoading, setScanUrlLoading] = useState(false)
-  const queryClient = useQueryClient()
+  const { addToast } = useToast();
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [url, setUrl] = useState('');
+  const [pictureUrl, setPictureUrl] = useState('');
+  const [validPictureUrl, setValidPictureUrl] = useState<boolean | undefined>(true);
+  const [score, setScore] = useState<number | null>(null);
+  const [scanUrlLoading, setScanUrlLoading] = useState(false);
+  const queryClient = useQueryClient();
 
-  const isFullscreen = useMediaQuery(theme => theme.breakpoints.down('md'))
+  const isFullscreen = useMediaQuery(theme => theme.breakpoints.down('md'));
 
-  const invalidUrl = url !== '' && !isValidUrl(url)
+  const invalidUrl = url !== '' && !isValidUrl(url);
   const formIsValid =
-    name.trim() !== '' && !invalidUrl && ((pictureUrl && validPictureUrl === true) || !pictureUrl) && !scanUrlLoading
+    name.trim() !== '' && !invalidUrl && ((pictureUrl && validPictureUrl === true) || !pictureUrl) && !scanUrlLoading;
 
   const resetForm = () => {
-    setName('')
-    setDescription('')
-    setUrl('')
-    setPictureUrl('')
-    setScore(null)
-  }
+    setName('');
+    setDescription('');
+    setUrl('');
+    setPictureUrl('');
+    setScore(null);
+  };
 
-  const invalidateWishlist = () => queryClient.invalidateQueries({ queryKey: ['WishlistPage', { wishlistId }] })
+  const invalidateWishlist = () => queryClient.invalidateQueries({ queryKey: ['WishlistPage', { wishlistId }] });
 
   const { mutateAsync: createItem, isPending: createItemPending } = useCreateItemMutation({
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-  })
+  });
 
   const { mutateAsync: updateItem, isPending: updateItemPending } = useUpdateItemMutation({
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-  })
+  });
 
-  const loading = useMemo(() => createItemPending || updateItemPending, [createItemPending, updateItemPending])
+  const loading = useMemo(() => createItemPending || updateItemPending, [createItemPending, updateItemPending]);
 
   const onSubmit = async (e: FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     const base: Types.UpdateItemInput = {
       name,
@@ -114,65 +114,65 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
       url: url === '' ? undefined : TidyURL.clean(url).url,
       pictureUrl: pictureUrl === '' ? undefined : pictureUrl,
       score: score === null ? undefined : score,
-    }
+    };
 
     if (mode === 'create') {
-      const res = await createItem({ input: { wishlistId, ...base } })
+      const res = await createItem({ input: { wishlistId, ...base } });
       match(res.createItem)
         .with({ __typename: 'Item' }, () => {
-          addToast({ message: 'Souhait créé avec succès', variant: 'success' })
-          void invalidateWishlist()
-          resetForm()
-          handleClose()
+          addToast({ message: 'Souhait créé avec succès', variant: 'success' });
+          void invalidateWishlist();
+          resetForm();
+          handleClose();
         })
         .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
-        .exhaustive()
+        .exhaustive();
     }
 
     if (mode === 'edit') {
-      const res = await updateItem({ itemId: item.id, input: base })
+      const res = await updateItem({ itemId: item.id, input: base });
       match(res.updateItem)
         .with({ __typename: 'VoidOutput' }, () => {
-          addToast({ message: 'Le souhait à bien été modifié', variant: 'success' })
-          void invalidateWishlist()
-          handleClose()
+          addToast({ message: 'Le souhait à bien été modifié', variant: 'success' });
+          void invalidateWishlist();
+          handleClose();
         })
         .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
-        .exhaustive()
+        .exhaustive();
     }
-  }
+  };
 
   useEffect(() => {
-    if (!item) return
+    if (!item) return;
 
-    setName(item.name)
-    setDescription(item.description || '')
-    setUrl(item.url || '')
-    setPictureUrl(item.pictureUrl || '')
-    setScore(item.score || null)
-  }, [item])
+    setName(item.name);
+    setDescription(item.description || '');
+    setUrl(item.url || '');
+    setPictureUrl(item.pictureUrl || '');
+    setScore(item.score || null);
+  }, [item]);
 
   const { mutateAsync: scanItemUrl } = useScanItemUrlMutation({
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
     onSettled: () => setScanUrlLoading(false),
-  })
+  });
 
   const scanUrl = useCallback(
     async (urlToScan: string) => {
-      if (scanUrlLoading) return
-      if (!urlToScan) return
-      if (!isValidUrl(urlToScan)) return
+      if (scanUrlLoading) return;
+      if (!urlToScan) return;
+      if (!isValidUrl(urlToScan)) return;
 
-      setScanUrlLoading(true)
+      setScanUrlLoading(true);
 
-      const res = await scanItemUrl({ input: { url: urlToScan } })
+      const res = await scanItemUrl({ input: { url: urlToScan } });
       match(res.scanItemUrl)
         .with({ __typename: 'ScanItemUrlOutput' }, output => setPictureUrl(output.pictureUrl || ''))
         .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
-        .exhaustive()
+        .exhaustive();
     },
     [scanUrlLoading, scanItemUrl, addToast],
-  )
+  );
 
   return (
     <Dialog
@@ -251,9 +251,9 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
                       component="button"
                       disabled={loading || scanUrlLoading}
                       onClick={e => {
-                        e.preventDefault()
+                        e.preventDefault();
                         // biome-ignore lint/nursery/noFloatingPromises: it's okay to not await here
-                        scanUrl(url)
+                        scanUrl(url);
                       }}
                     >
                       Scanner l'url
@@ -262,12 +262,12 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
                 </>
               }
               onChange={e => {
-                const newVal = e.target.value
+                const newVal = e.target.value;
                 if (pictureUrl === '' && url === '') {
                   // biome-ignore lint/nursery/noFloatingPromises: it's okay to not await here
-                  scanUrl(newVal)
+                  scanUrl(newVal);
                 }
-                setUrl(newVal)
+                setUrl(newVal);
               }}
             />
           </Box>
@@ -290,8 +290,8 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
                 </>
               }
               onChange={e => {
-                setValidPictureUrl(undefined)
-                setPictureUrl(e.target.value)
+                setValidPictureUrl(undefined);
+                setPictureUrl(e.target.value);
               }}
             />
 
@@ -333,5 +333,5 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
         </Stack>
       </Container>
     </Dialog>
-  )
-}
+  );
+};

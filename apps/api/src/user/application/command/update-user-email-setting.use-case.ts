@@ -1,18 +1,19 @@
-import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common'
-import { REPOSITORIES } from '@wishlist/api/repositories'
-import { type ICurrentUser, UserEmailSettingsDto } from '@wishlist/common'
+import type { UserEmailSettingRepository } from '../../domain/repository/user-email-setting.repository';
 
-import { type UserEmailSettingRepository } from '../../domain'
-import { userEmailSettingMapper } from '../../infrastructure'
+import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { type ICurrentUser, UserEmailSettingsDto } from '@wishlist/common';
+
+import { REPOSITORIES } from '../../../repositories/repositories.constants';
+import { userEmailSettingMapper } from '../../infrastructure/email-settings.mapper';
 
 export type UpdateUserEmailSettingInput = {
-  currentUser: ICurrentUser
-  dailyNewItemNotification: boolean
-}
+  currentUser: ICurrentUser;
+  dailyNewItemNotification: boolean;
+};
 
 @Injectable()
 export class UpdateUserEmailSettingUseCase {
-  private readonly logger = new Logger(UpdateUserEmailSettingUseCase.name)
+  private readonly logger = new Logger(UpdateUserEmailSettingUseCase.name);
 
   constructor(
     @Inject(REPOSITORIES.USER_EMAIL_SETTING)
@@ -20,25 +21,25 @@ export class UpdateUserEmailSettingUseCase {
   ) {}
 
   async execute(input: UpdateUserEmailSettingInput): Promise<UserEmailSettingsDto> {
-    this.logger.log('Update user email setting request received', { input })
-    const { currentUser, dailyNewItemNotification } = input
+    this.logger.log('Update user email setting request received', { input });
+    const { currentUser, dailyNewItemNotification } = input;
 
-    const userEmailSetting = await this.userEmailSettingRepository.findByUserId(currentUser.id)
+    const userEmailSetting = await this.userEmailSettingRepository.findByUserId(currentUser.id);
 
     if (!userEmailSetting) {
-      throw new NotFoundException('User email setting not found')
+      throw new NotFoundException('User email setting not found');
     }
 
     const updatedUserEmailSetting = userEmailSetting.updatePreferences({
       dailyNewItemNotification,
-    })
+    });
 
     this.logger.log('Saving user email setting...', {
       userId: currentUser.id,
       updatedFields: ['dailyNewItemNotification'],
-    })
-    await this.userEmailSettingRepository.save(updatedUserEmailSetting)
+    });
+    await this.userEmailSettingRepository.save(updatedUserEmailSetting);
 
-    return userEmailSettingMapper.toDto(updatedUserEmailSetting)
+    return userEmailSettingMapper.toDto(updatedUserEmailSetting);
   }
 }

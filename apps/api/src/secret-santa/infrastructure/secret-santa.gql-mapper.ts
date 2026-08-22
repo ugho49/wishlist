@@ -1,19 +1,19 @@
-import type { SecretSantaDto, SecretSantaUserDto } from '@wishlist/common'
+import type { SecretSantaDto, SecretSantaUserDto } from '@wishlist/common';
 
-import { SecretSantaStatus } from '@wishlist/common'
-import { match } from 'ts-pattern'
+import { SecretSantaStatus } from '@wishlist/common';
+import { match } from 'ts-pattern';
 
 import {
   type SecretSanta as GqlSecretSanta,
   SecretSantaStatus as GqlSecretSantaStatus,
   type SecretSantaUser as GqlSecretSantaUser,
-} from '../../gql/generated-types'
+} from '../../gql/generated-types';
 
 function toGqlSecretSantaStatus(status: SecretSantaStatus): GqlSecretSantaStatus {
   return match(status)
     .with(SecretSantaStatus.CREATED, () => GqlSecretSantaStatus.Created)
     .with(SecretSantaStatus.STARTED, () => GqlSecretSantaStatus.Started)
-    .exhaustive()
+    .exhaustive();
 }
 
 function toGqlSecretSantaUser(dto: SecretSantaUserDto): GqlSecretSantaUser {
@@ -22,7 +22,7 @@ function toGqlSecretSantaUser(dto: SecretSantaUserDto): GqlSecretSantaUser {
     id: dto.id,
     attendeeId: dto.attendee.id,
     exclusions: dto.exclusions,
-  }
+  };
 }
 
 function toGqlSecretSanta(dto: SecretSantaDto): GqlSecretSanta {
@@ -36,10 +36,10 @@ function toGqlSecretSanta(dto: SecretSantaDto): GqlSecretSanta {
     users: dto.users.map(toGqlSecretSantaUser),
     createdAt: dto.created_at,
     updatedAt: dto.updated_at,
-  }
+  };
 }
 
 export const secretSantaGqlMapper = {
   toGqlSecretSanta,
   toGqlSecretSantaUser,
-}
+};

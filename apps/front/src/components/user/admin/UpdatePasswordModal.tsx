@@ -1,5 +1,5 @@
-import type { UserId } from '@wishlist/common'
-import type { FormEvent } from 'react'
+import type { UserId } from '@wishlist/common';
+import type { FormEvent } from 'react';
 
 import {
   Box,
@@ -10,42 +10,42 @@ import {
   DialogContentText,
   DialogTitle,
   TextField,
-} from '@mui/material'
-import { useState } from 'react'
-import { match } from 'ts-pattern'
+} from '@mui/material';
+import { useState } from 'react';
+import { match } from 'ts-pattern';
 
-import { rejectionMessage, rejectionPattern, useAdminUpdateUserProfileMutation } from '../../../gql'
-import { useToast } from '../../../hooks/useToast'
+import { rejectionMessage, rejectionPattern, useAdminUpdateUserProfileMutation } from '../../../gql';
+import { useToast } from '../../../hooks/useToast';
 
 export type UpdatePasswordModalProps = {
-  open: boolean
-  onClose: () => void
-  userId: UserId
-}
+  open: boolean;
+  onClose: () => void;
+  userId: UserId;
+};
 
 export const UpdatePasswordModal = ({ onClose, open, userId }: UpdatePasswordModalProps) => {
-  const [newPassword, setNewPassword] = useState('')
-  const [loading, setLoading] = useState(false)
-  const { addToast } = useToast()
+  const [newPassword, setNewPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const { addToast } = useToast();
 
   const { mutateAsync: updateUser } = useAdminUpdateUserProfileMutation({
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
     onSettled: () => setLoading(false),
-  })
+  });
 
   const onSubmit = async (e: FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    const res = await updateUser({ userId, input: { newPassword } })
+    e.preventDefault();
+    setLoading(true);
+    const res = await updateUser({ userId, input: { newPassword } });
     match(res.adminUpdateUserProfile)
       .with({ __typename: 'VoidOutput' }, () => {
-        addToast({ message: 'Mot de passe mis à jour', variant: 'success' })
-        setNewPassword('')
-        onClose()
+        addToast({ message: 'Mot de passe mis à jour', variant: 'success' });
+        setNewPassword('');
+        onClose();
       })
       .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
-      .exhaustive()
-  }
+      .exhaustive();
+  };
 
   return (
     <Dialog open={open} onClose={() => onClose()}>
@@ -79,5 +79,5 @@ export const UpdatePasswordModal = ({ onClose, open, userId }: UpdatePasswordMod
         </DialogActions>
       </Box>
     </Dialog>
-  )
-}
+  );
+};

@@ -1,25 +1,28 @@
-import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common'
-import { WishlistItem, type WishlistItemRepository } from '@wishlist/api/item'
-import { REPOSITORIES } from '@wishlist/api/repositories'
-import { type WishlistRepository } from '@wishlist/api/wishlist'
-import { type ICurrentUser, type WishlistId } from '@wishlist/common'
-import { TidyURL } from 'tidy-url'
+import type { WishlistItemRepository } from '../../domain/wishlist-item.repository';
+
+import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { type ICurrentUser, type WishlistId } from '@wishlist/common';
+import { TidyURL } from 'tidy-url';
+
+import { REPOSITORIES } from '../../../repositories/repositories.constants';
+import { type WishlistRepository } from '../../../wishlist/domain/wishlist.repository';
+import { WishlistItem } from '../../domain/wishlist-item.model';
 
 export type CreateItemInput = {
-  currentUser: ICurrentUser
-  wishlistId: WishlistId
+  currentUser: ICurrentUser;
+  wishlistId: WishlistId;
   newItem: {
-    name: string
-    description?: string
-    score?: number
-    url?: string
-    pictureUrl?: string
-  }
-}
+    name: string;
+    description?: string;
+    score?: number;
+    url?: string;
+    pictureUrl?: string;
+  };
+};
 
 @Injectable()
 export class CreateItemUseCase {
-  private readonly logger = new Logger(CreateItemUseCase.name)
+  private readonly logger = new Logger(CreateItemUseCase.name);
 
   constructor(
     @Inject(REPOSITORIES.WISHLIST)
@@ -29,19 +32,19 @@ export class CreateItemUseCase {
   ) {}
 
   async execute(command: CreateItemInput): Promise<WishlistItem> {
-    this.logger.log('Create item request received', { command })
-    const wishlist = await this.wishlistRepository.findByIdOrFail(command.wishlistId)
+    this.logger.log('Create item request received', { command });
+    const wishlist = await this.wishlistRepository.findByIdOrFail(command.wishlistId);
     const hasAccess = await this.wishlistRepository.hasAccess({
       wishlistId: wishlist.id,
       userId: command.currentUser.id,
-    })
+    });
 
     if (!hasAccess) {
-      throw new UnauthorizedException('You cannot add items to this wishlist')
+      throw new UnauthorizedException('You cannot add items to this wishlist');
     }
 
-    const isSuggested = !wishlist.isOwnerOrCoOwner(command.currentUser.id)
-    const url = command.newItem.url ? TidyURL.clean(command.newItem.url).url : undefined
+    const isSuggested = !wishlist.isOwnerOrCoOwner(command.currentUser.id);
+    const url = command.newItem.url ? TidyURL.clean(command.newItem.url).url : undefined;
 
     const item = WishlistItem.create({
       id: this.itemRepository.newId(),
@@ -52,11 +55,11 @@ export class CreateItemUseCase {
       url,
       imageUrl: command.newItem.pictureUrl,
       isSuggested,
-    })
+    });
 
-    this.logger.log('Saving item...', { item })
-    await this.itemRepository.save(item)
+    this.logger.log('Saving item...', { item });
+    await this.itemRepository.save(item);
 
-    return item
+    return item;
   }
 }

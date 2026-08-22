@@ -1,36 +1,22 @@
-import type { Wishlist } from '@wishlist/api/wishlist'
-import type { Event, EventAttendee } from '../domain'
+import type { Wishlist } from '../../wishlist/domain/wishlist.model';
+import type { Event } from '../domain/model/event.model';
+import type { EventAttendee } from '../domain/model/event-attendee.model';
 
-import { wishlistMapper } from '@wishlist/api/wishlist'
-import {
-  type AttendeeDto,
-  AttendeeRole,
-  type DetailedEventDto,
-  type EventWithCountsDto,
-  type MiniEventDto,
-} from '@wishlist/common'
-import { DateTime } from 'luxon'
-import { match } from 'ts-pattern'
+import { type AttendeeDto, AttendeeRole, type DetailedEventDto, type EventWithCountsDto } from '@wishlist/common';
+import { DateTime } from 'luxon';
+import { match } from 'ts-pattern';
 
 import {
   AttendeeRole as GqlAttendeeRole,
   type Event as GqlEvent,
   type EventAttendee as GqlEventAttendee,
-} from '../../gql/generated-types'
-import { eventAttendeeMapper } from './event-attendee.mapper'
-
-function toMiniEventDto(event: Event): MiniEventDto {
-  return {
-    id: event.id,
-    title: event.title,
-    description: event.description,
-    icon: event.icon,
-    event_date: DateTime.fromJSDate(event.eventDate).toISODate() || '',
-  }
-}
+} from '../../gql/generated-types';
+import { wishlistMapper } from '../../wishlist/infrastructure/wishlist.mapper';
+import { eventAttendeeMapper } from './event-attendee.mapper';
+import { toMiniEventDto } from './event-mini.mapper';
 
 function toDetailedEventDto(params: { event: Event; wishlists: Wishlist[] }): DetailedEventDto {
-  const { event, wishlists } = params
+  const { event, wishlists } = params;
 
   return {
     ...toMiniEventDto(event),
@@ -38,7 +24,7 @@ function toDetailedEventDto(params: { event: Event; wishlists: Wishlist[] }): De
     attendees: event.attendees.map(eventAttendeeMapper.toAttendeeDto),
     created_at: event.createdAt.toISOString(),
     updated_at: event.updatedAt.toISOString(),
-  }
+  };
 }
 
 function toEventWithCountsDto(event: Event): EventWithCountsDto {
@@ -48,7 +34,7 @@ function toEventWithCountsDto(event: Event): EventWithCountsDto {
     attendees: event.attendees.map(eventAttendeeMapper.toAttendeeDto),
     created_at: event.createdAt.toISOString(),
     updated_at: event.updatedAt.toISOString(),
-  }
+  };
 }
 
 function toGqlEvent(event: Event): GqlEvent {
@@ -63,7 +49,7 @@ function toGqlEvent(event: Event): GqlEvent {
     updatedAt: event.updatedAt.toISOString(),
     wishlistIds: event.wishlistIds,
     attendeeIds: event.attendees.map(attendee => attendee.id),
-  }
+  };
 }
 
 function toGqlEventAttendee(eventAttendee: EventAttendee): GqlEventAttendee {
@@ -71,7 +57,7 @@ function toGqlEventAttendee(eventAttendee: EventAttendee): GqlEventAttendee {
     .with(AttendeeRole.CREATOR, () => GqlAttendeeRole.Creator)
     .with(AttendeeRole.ADMIN, () => GqlAttendeeRole.Admin)
     .with(AttendeeRole.PARTICIPANT, () => GqlAttendeeRole.Participant)
-    .exhaustive()
+    .exhaustive();
 
   return {
     __typename: 'EventAttendee',
@@ -79,7 +65,7 @@ function toGqlEventAttendee(eventAttendee: EventAttendee): GqlEventAttendee {
     userId: eventAttendee.user?.id,
     pendingEmail: eventAttendee.pendingEmail,
     role,
-  }
+  };
 }
 
 function toGqlEventAttendeeFromDto(attendee: AttendeeDto): GqlEventAttendee {
@@ -87,7 +73,7 @@ function toGqlEventAttendeeFromDto(attendee: AttendeeDto): GqlEventAttendee {
     .with(AttendeeRole.CREATOR, () => GqlAttendeeRole.Creator)
     .with(AttendeeRole.ADMIN, () => GqlAttendeeRole.Admin)
     .with(AttendeeRole.PARTICIPANT, () => GqlAttendeeRole.Participant)
-    .exhaustive()
+    .exhaustive();
 
   return {
     __typename: 'EventAttendee',
@@ -95,7 +81,7 @@ function toGqlEventAttendeeFromDto(attendee: AttendeeDto): GqlEventAttendee {
     userId: attendee.user?.id,
     pendingEmail: attendee.pending_email,
     role,
-  }
+  };
 }
 
 export const eventMapper = {
@@ -105,4 +91,4 @@ export const eventMapper = {
   toGqlEvent,
   toGqlEventAttendee,
   toGqlEventAttendeeFromDto,
-}
+};

@@ -1,5 +1,5 @@
-import type { EventId } from '@wishlist/common'
-import type { SecretSantaItemFragment, SecretSantaUserItemFragment } from '../../gql'
+import type { EventId } from '@wishlist/common';
+import type { SecretSantaItemFragment, SecretSantaUserItemFragment } from '../../gql';
 
 /**
  * Shared GraphQL-derived types for the secret-santa feature, re-exported under
@@ -7,11 +7,11 @@ import type { SecretSantaItemFragment, SecretSantaUserItemFragment } from '../..
  * them) share a single contract that mirrors the `SecretSantaItem` /
  * `SecretSantaUserItem` GraphQL fragments.
  */
-export type SecretSantaItem = SecretSantaItemFragment
+export type SecretSantaItem = SecretSantaItemFragment;
 
-export type SecretSantaUserItem = SecretSantaUserItemFragment
+export type SecretSantaUserItem = SecretSantaUserItemFragment;
 
-export type SecretSantaAttendee = SecretSantaUserItemFragment['attendee']
+export type SecretSantaAttendee = SecretSantaUserItemFragment['attendee'];
 
 /**
  * Minimal event shape consumed by the secret-santa components. The event
@@ -19,7 +19,7 @@ export type SecretSantaAttendee = SecretSantaUserItemFragment['attendee']
  * satisfies this (camelCase fields, GraphQL `EventAttendee` attendees).
  */
 export type SecretSantaEvent = {
-  id: EventId
-  eventDate: string
-  attendees: SecretSantaAttendee[]
-}
+  id: EventId;
+  eventDate: string;
+  attendees: SecretSantaAttendee[];
+};

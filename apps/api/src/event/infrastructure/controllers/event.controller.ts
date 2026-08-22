@@ -1,7 +1,5 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common'
-import { ApiTags } from '@nestjs/swagger'
-import { CurrentUser } from '@wishlist/api/auth'
-import { DEFAULT_RESULT_NUMBER } from '@wishlist/api/core'
+import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import {
   CreateEventInputDto,
   DetailedEventDto,
@@ -13,13 +11,15 @@ import {
   PagedResponse,
   UpdateEventInputDto,
   type UserId,
-} from '@wishlist/common'
+} from '@wishlist/common';
 
-import { CreateEventUseCase } from '../../application/command/create-event.use-case'
-import { DeleteEventUseCase } from '../../application/command/delete-event.use-case'
-import { UpdateEventUseCase } from '../../application/command/update-event.use-case'
-import { GetEventByIdUseCase } from '../../application/query/get-event-by-id.use-case'
-import { GetEventsForUserUseCase } from '../../application/query/get-events-for-user.use-case'
+import { CurrentUser } from '../../../auth/infrastructure/decorators/user.decorator';
+import { DEFAULT_RESULT_NUMBER } from '../../../core/common/pagination';
+import { CreateEventUseCase } from '../../application/command/create-event.use-case';
+import { DeleteEventUseCase } from '../../application/command/delete-event.use-case';
+import { UpdateEventUseCase } from '../../application/command/update-event.use-case';
+import { GetEventByIdUseCase } from '../../application/query/get-event-by-id.use-case';
+import { GetEventsForUserUseCase } from '../../application/query/get-events-for-user.use-case';
 
 @ApiTags('Event')
 @Controller('/event')
@@ -42,12 +42,12 @@ export class EventController {
       pageNumber: queryParams.p ?? 1,
       pageSize: queryParams.limit ?? DEFAULT_RESULT_NUMBER,
       ignorePastEvents: queryParams.only_future === undefined ? false : queryParams.only_future,
-    })
+    });
   }
 
   @Get('/:id')
   getEventById(@Param('id') eventId: EventId, @CurrentUser() currentUser: ICurrentUser): Promise<DetailedEventDto> {
-    return this.getEventByIdUseCase.execute({ currentUser, eventId })
+    return this.getEventByIdUseCase.execute({ currentUser, eventId });
   }
 
   @Post()
@@ -61,7 +61,7 @@ export class EventController {
         eventDate: dto.event_date,
         attendees: dto.attendees?.map(attendee => ({ email: attendee.email, role: attendee.role })),
       },
-    })
+    });
   }
 
   @Put('/:id')
@@ -79,11 +79,11 @@ export class EventController {
         icon: dto.icon,
         eventDate: dto.event_date,
       },
-    })
+    });
   }
 
   @Delete('/:id')
   async deleteEvent(@Param('id') eventId: EventId, @CurrentUser() currentUser: ICurrentUser): Promise<void> {
-    await this.deleteEventUseCase.execute({ currentUser, eventId })
+    await this.deleteEventUseCase.execute({ currentUser, eventId });
   }
 }

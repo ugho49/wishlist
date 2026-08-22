@@ -1,13 +1,13 @@
-import { InjectQueue } from '@nestjs/bullmq'
-import { Injectable, Logger } from '@nestjs/common'
-import { Queue } from 'bullmq'
+import { InjectQueue } from '@nestjs/bullmq';
+import { Injectable, Logger } from '@nestjs/common';
+import { Queue } from 'bullmq';
 
-import { QueueName } from '../queue'
-import { type MailPayload } from './mail.type'
+import { QueueName } from '../queue/queues.type';
+import { type MailPayload } from './mail.type';
 
 @Injectable()
 export class MailService {
-  private readonly logger = new Logger(MailService.name)
+  private readonly logger = new Logger(MailService.name);
 
   constructor(
     @InjectQueue(QueueName.MAILS)
@@ -15,7 +15,7 @@ export class MailService {
   ) {}
 
   async sendMail(param: MailPayload) {
-    this.logger.log(`Publishing to queue ${QueueName.MAILS} in order to be processed`, { param })
+    this.logger.log(`Publishing to queue ${QueueName.MAILS} in order to be processed`, { param });
 
     await this.queue.add('send-mail', param satisfies MailPayload, {
       removeOnComplete: 100,
@@ -25,6 +25,6 @@ export class MailService {
         type: 'exponential',
         delay: 2000,
       },
-    })
+    });
   }
 }

@@ -1,12 +1,13 @@
-import { Args, Query, Resolver } from '@nestjs/graphql'
-import { IsAdmin } from '@wishlist/api/auth'
-import { DEFAULT_RESULT_NUMBER, ZodPipe } from '@wishlist/api/core'
-import { createPagedResponse } from '@wishlist/common'
+import { Args, Query, Resolver } from '@nestjs/graphql';
+import { createPagedResponse } from '@wishlist/common';
 
-import { type AdminGetWishlistsResult, type AdminWishlistPaginationFilters } from '../../../gql/generated-types'
-import { GetWishlistsByUserUseCase } from '../../application/query/get-wishlists-by-user.use-case'
-import { wishlistMapper } from '../wishlist.mapper'
-import { AdminWishlistPaginationFiltersSchema } from '../wishlist.schema'
+import { IsAdmin } from '../../../auth/infrastructure/decorators/admin.decorator';
+import { DEFAULT_RESULT_NUMBER } from '../../../core/common/pagination';
+import { ZodPipe } from '../../../core/graphql/zod-pipe';
+import { type AdminGetWishlistsResult, type AdminWishlistPaginationFilters } from '../../../gql/generated-types';
+import { GetWishlistsByUserUseCase } from '../../application/query/get-wishlists-by-user.use-case';
+import { wishlistMapper } from '../wishlist.mapper';
+import { AdminWishlistPaginationFiltersSchema } from '../wishlist.schema';
 
 @IsAdmin()
 @Resolver()
@@ -17,19 +18,19 @@ export class WishlistAdminResolver {
   async adminWishlists(
     @Args('filters', new ZodPipe(AdminWishlistPaginationFiltersSchema)) filters: AdminWishlistPaginationFilters,
   ): Promise<AdminGetWishlistsResult> {
-    const pageSize = filters.limit ?? DEFAULT_RESULT_NUMBER
-    const pageNumber = filters.page ?? 1
+    const pageSize = filters.limit ?? DEFAULT_RESULT_NUMBER;
+    const pageNumber = filters.page ?? 1;
 
     const { wishlists, totalCount } = await this.getWishlistsByUserUseCase.execute({
       userId: filters.userId,
       pageNumber,
       pageSize,
-    })
+    });
 
     const pagedResponse = createPagedResponse({
       resources: wishlists.map(wishlist => wishlistMapper.toGqlWishlist({ wishlist, currentUserId: filters.userId })),
       options: { pageSize, totalElements: totalCount, pageNumber },
-    })
+    });
 
     return {
       __typename: 'AdminGetWishlists',
@@ -41,6 +42,6 @@ export class WishlistAdminResolver {
         pageNumber: pagedResponse.pagination.page_number,
         pageSize: pagedResponse.pagination.pages_size,
       },
-    }
+    };
   }
 }

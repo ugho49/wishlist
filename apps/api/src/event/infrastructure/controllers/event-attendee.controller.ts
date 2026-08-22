@@ -1,6 +1,5 @@
-import { Body, Controller, Delete, Param, Post, Put } from '@nestjs/common'
-import { ApiTags } from '@nestjs/swagger'
-import { CurrentUser } from '@wishlist/api/auth'
+import { Body, Controller, Delete, Param, Post, Put } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import {
   AddEventAttendeeInputDto,
   AttendeeDto,
@@ -8,11 +7,12 @@ import {
   type EventId,
   type ICurrentUser,
   UpdateEventAttendeeRoleInputDto,
-} from '@wishlist/common'
+} from '@wishlist/common';
 
-import { AddAttendeeUseCase } from '../../application/command/add-attendee.use-case'
-import { DeleteAttendeeUseCase } from '../../application/command/delete-attendee.use-case'
-import { UpdateAttendeeRoleUseCase } from '../../application/command/update-attendee-role.use-case'
+import { CurrentUser } from '../../../auth/infrastructure/decorators/user.decorator';
+import { AddAttendeeUseCase } from '../../application/command/add-attendee.use-case';
+import { DeleteAttendeeUseCase } from '../../application/command/delete-attendee.use-case';
+import { UpdateAttendeeRoleUseCase } from '../../application/command/update-attendee-role.use-case';
 
 @ApiTags('Event Attendee')
 @Controller('/event/:eventId/attendee')
@@ -36,7 +36,7 @@ export class EventAttendeeController {
         email: dto.email,
         role: dto.role,
       },
-    })
+    });
   }
 
   @Put('/:attendeeId')
@@ -51,7 +51,7 @@ export class EventAttendeeController {
       eventId,
       attendeeId,
       role: dto.role,
-    })
+    });
   }
 
   @Delete('/:attendeeId')
@@ -64,6 +64,6 @@ export class EventAttendeeController {
       currentUser,
       attendeeId,
       eventId,
-    })
+    });
   }
 }

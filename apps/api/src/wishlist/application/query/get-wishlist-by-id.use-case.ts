@@ -1,15 +1,16 @@
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common'
-import { type EventRepository } from '@wishlist/api/event'
-import { REPOSITORIES } from '@wishlist/api/repositories'
-import { DetailedWishlistDto, type ICurrentUser, type WishlistId } from '@wishlist/common'
+import type { WishlistRepository } from '../../domain/wishlist.repository';
 
-import { type WishlistRepository } from '../../domain'
-import { wishlistMapper } from '../../infrastructure'
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { DetailedWishlistDto, type ICurrentUser, type WishlistId } from '@wishlist/common';
+
+import { type EventRepository } from '../../../event/domain/repository/event.repository';
+import { REPOSITORIES } from '../../../repositories/repositories.constants';
+import { wishlistMapper } from '../../infrastructure/wishlist.mapper';
 
 export type GetWishlistByIdInput = {
-  currentUser: ICurrentUser
-  wishlistId: WishlistId
-}
+  currentUser: ICurrentUser;
+  wishlistId: WishlistId;
+};
 
 @Injectable()
 export class GetWishlistByIdUseCase {
@@ -22,19 +23,19 @@ export class GetWishlistByIdUseCase {
     const hasAccess = await this.wishlistRepository.hasAccess({
       wishlistId: input.wishlistId,
       userId: input.currentUser.id,
-    })
+    });
 
     if (!hasAccess) {
-      throw new UnauthorizedException('You cannot access this wishlist')
+      throw new UnauthorizedException('You cannot access this wishlist');
     }
 
-    const wishlist = await this.wishlistRepository.findByIdOrFail(input.wishlistId)
-    const events = await this.eventRepository.findByIds(wishlist.eventIds)
+    const wishlist = await this.wishlistRepository.findByIdOrFail(input.wishlistId);
+    const events = await this.eventRepository.findByIds(wishlist.eventIds);
 
     return wishlistMapper.toDetailedWishlistDto({
       wishlist,
       events,
       currentUserId: input.currentUser.id,
-    })
+    });
   }
 }

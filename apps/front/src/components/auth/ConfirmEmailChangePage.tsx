@@ -1,11 +1,11 @@
-import CheckCircleIcon from '@mui/icons-material/CheckCircle'
-import { CircularProgress, Stack, styled, Typography } from '@mui/material'
-import { useNavigate } from '@tanstack/react-router'
-import { useEffect, useRef, useState } from 'react'
-import { match } from 'ts-pattern'
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import { CircularProgress, Stack, styled, Typography } from '@mui/material';
+import { useNavigate } from '@tanstack/react-router';
+import { useEffect, useRef, useState } from 'react';
+import { match } from 'ts-pattern';
 
-import { rejectionPattern, useAuthConfirmEmailChangeMutation } from '../../gql'
-import { RouterLink } from '../common/RouterLink'
+import { rejectionPattern, useAuthConfirmEmailChangeMutation } from '../../gql';
+import { RouterLink } from '../common/RouterLink';
 
 const ContainerStyled = styled(Stack)(({ theme }) => ({
   height: '100vh',
@@ -13,7 +13,7 @@ const ContainerStyled = styled(Stack)(({ theme }) => ({
   gap: theme.spacing(4),
   alignItems: 'center',
   padding: theme.spacing(4),
-}))
+}));
 
 const TitleStyled = styled(Typography)(({ theme }) => ({
   fontSize: '1.75rem',
@@ -21,20 +21,20 @@ const TitleStyled = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.primary,
   textAlign: 'center',
   marginBottom: 24,
-}))
+}));
 
 const FooterStackStyled = styled(Stack)(({ theme }) => ({
   marginTop: theme.spacing(2.5),
   gap: theme.spacing(1),
   alignItems: 'center',
-}))
+}));
 
 const ErrorMessageStyled = styled(Typography)(({ theme }) => ({
   textAlign: 'center',
   color: theme.palette.error.main,
   fontSize: '1.3rem',
   fontWeight: 600,
-}))
+}));
 
 const InfoMessageStyled = styled(Typography)(({ theme }) => ({
   textAlign: 'center',
@@ -43,7 +43,7 @@ const InfoMessageStyled = styled(Typography)(({ theme }) => ({
   padding: theme.spacing(2),
   borderRadius: theme.shape.borderRadius,
   border: `1px solid ${theme.palette.grey[200]}`,
-}))
+}));
 
 const SuccessMessageStyled = styled(Stack)(({ theme }) => ({
   textAlign: 'center',
@@ -52,65 +52,66 @@ const SuccessMessageStyled = styled(Stack)(({ theme }) => ({
   borderRadius: theme.shape.borderRadius,
   border: `2px solid ${theme.palette.success.main}`,
   gap: theme.spacing(2),
-}))
+}));
 
 type ConfirmEmailChangePageProps = {
-  email: string
-  token: string
-}
+  email: string;
+  token: string;
+};
 
 export const ConfirmEmailChangePage = (props: ConfirmEmailChangePageProps) => {
-  const { email, token } = props
-  const [error, setError] = useState<boolean>(false)
-  const [redirectTimeoutInSeconds, setRedirectTimeoutInSeconds] = useState<number>(0)
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
-  const navigate = useNavigate()
+  const { email, token } = props;
+  const [error, setError] = useState<boolean>(false);
+  const [redirectTimeoutInSeconds, setRedirectTimeoutInSeconds] = useState<number>(0);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const navigate = useNavigate();
 
   const { mutateAsync: confirmEmailChange, isPending } = useAuthConfirmEmailChangeMutation({
     onError: () => setError(true),
-  })
+  });
 
   useEffect(() => {
     const onSuccess = () => {
-      setRedirectTimeoutInSeconds(10)
+      setRedirectTimeoutInSeconds(10);
 
       const interval = setInterval(() => {
         setRedirectTimeoutInSeconds(prev => {
-          const newTimeout = prev - 1
+          const newTimeout = prev - 1;
           if (newTimeout <= 0) {
-            clearInterval(interval)
-            return 0
+            clearInterval(interval);
+            return 0;
           }
-          return newTimeout
-        })
-      }, 1000)
+          return newTimeout;
+        });
+      }, 1000);
 
       const timeout = setTimeout(() => {
-        void navigate({ to: '/user/profile' })
-      }, 10000)
-      timeoutRef.current = timeout
-    }
+        void navigate({ to: '/user/profile' });
+      }, 10000);
+      timeoutRef.current = timeout;
+    };
 
     const confirm = async () => {
-      const res = await confirmEmailChange({ input: { newEmail: email, token } })
+      const res = await confirmEmailChange({ input: { newEmail: email, token } });
       match(res.confirmEmailChange)
         .with({ __typename: 'VoidOutput' }, () => onSuccess())
         .with(rejectionPattern, () => setError(true))
-        .exhaustive()
-    }
+        .exhaustive();
+    };
 
     if (email && token) {
-      void confirm()
+      void confirm();
     } else {
-      setError(true)
+      setError(true);
     }
-  }, [email, token, confirmEmailChange, navigate])
+  }, [email, token, confirmEmailChange, navigate]);
 
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current)
-    }
-  }, [])
+  useEffect(
+    () => () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    },
+    [],
+  );
 
   if (error) {
     return (
@@ -122,7 +123,7 @@ export const ConfirmEmailChangePage = (props: ConfirmEmailChangePageProps) => {
         </InfoMessageStyled>
         <RouterLink to="/user/profile">Retour au profil</RouterLink>
       </ContainerStyled>
-    )
+    );
   }
 
   if (isPending) {
@@ -134,7 +135,7 @@ export const ConfirmEmailChangePage = (props: ConfirmEmailChangePageProps) => {
           Nous confirmons votre changement d'adresse email vers <strong>{email}</strong>
         </InfoMessageStyled>
       </ContainerStyled>
-    )
+    );
   }
 
   return (
@@ -162,5 +163,5 @@ export const ConfirmEmailChangePage = (props: ConfirmEmailChangePageProps) => {
         )}
       </FooterStackStyled>
     </ContainerStyled>
-  )
-}
+  );
+};

@@ -1,7 +1,7 @@
-import type { EventId, SecretSantaId, SecretSantaUserId } from '@wishlist/common'
-import type { SecretSantaUserItem } from './secret-santa.types'
+import type { EventId, SecretSantaId, SecretSantaUserId } from '@wishlist/common';
+import type { SecretSantaUserItem } from './secret-santa.types';
 
-import CloseIcon from '@mui/icons-material/Close'
+import CloseIcon from '@mui/icons-material/Close';
 import {
   Avatar,
   Button,
@@ -18,21 +18,21 @@ import {
   ListItemText,
   Stack,
   Typography,
-} from '@mui/material'
-import { useQueryClient } from '@tanstack/react-query'
-import { useCallback, useEffect, useState } from 'react'
-import { match } from 'ts-pattern'
+} from '@mui/material';
+import { useQueryClient } from '@tanstack/react-query';
+import { useCallback, useEffect, useState } from 'react';
+import { match } from 'ts-pattern';
 
-import { rejectionMessage, rejectionPattern, useUpdateSecretSantaUserMutation } from '../../gql'
-import { useToast } from '../../hooks'
+import { rejectionMessage, rejectionPattern, useUpdateSecretSantaUserMutation } from '../../gql';
+import { useToast } from '../../hooks';
 
 export interface ManageUserExclusionsDialogProps {
-  open: boolean
-  eventId: EventId
-  secretSantaId: SecretSantaId
-  secretSantaUser: SecretSantaUserItem
-  otherSecretSantaUser: SecretSantaUserItem[]
-  handleClose: () => void
+  open: boolean;
+  eventId: EventId;
+  secretSantaId: SecretSantaId;
+  secretSantaUser: SecretSantaUserItem;
+  otherSecretSantaUser: SecretSantaUserItem[];
+  handleClose: () => void;
 }
 
 export const ManageUserExclusionsDialog = ({
@@ -43,38 +43,38 @@ export const ManageUserExclusionsDialog = ({
   otherSecretSantaUser,
   handleClose,
 }: ManageUserExclusionsDialogProps) => {
-  const queryClient = useQueryClient()
-  const { addToast } = useToast()
-  const [selected, setSelected] = useState<SecretSantaUserId[]>([])
+  const queryClient = useQueryClient();
+  const { addToast } = useToast();
+  const [selected, setSelected] = useState<SecretSantaUserId[]>([]);
 
   const toggleSelect = useCallback(
     (id: SecretSantaUserId) => {
-      const checked = selected.includes(id)
+      const checked = selected.includes(id);
 
       if (checked) {
-        setSelected(prev => prev.filter(i => i !== id))
+        setSelected(prev => prev.filter(i => i !== id));
       } else {
-        setSelected(prev => [...prev, id])
+        setSelected(prev => [...prev, id]);
       }
     },
     [selected],
-  )
+  );
 
   const { mutateAsync: updateUserMutation, isPending: loadingUpdateUser } = useUpdateSecretSantaUserMutation({
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-  })
+  });
 
   const updateUser = async () => {
     const res = await updateUserMutation({
       id: secretSantaId,
       secretSantaUserId: secretSantaUser.id,
       input: { exclusions: selected },
-    })
+    });
     await match(res.updateSecretSantaUser)
       .with({ __typename: 'VoidOutput' }, async () => {
-        handleClose()
-        addToast({ message: 'Les exclusions ont été mises à jour', variant: 'success' })
-        await queryClient.invalidateQueries({ queryKey: ['GetSecretSantaForEvent', { eventId }] })
+        handleClose();
+        addToast({ message: 'Les exclusions ont été mises à jour', variant: 'success' });
+        await queryClient.invalidateQueries({ queryKey: ['GetSecretSantaForEvent', { eventId }] });
       })
       .with({ __typename: 'ValidationRejection' }, rejection =>
         addToast({
@@ -86,12 +86,12 @@ export const ManageUserExclusionsDialog = ({
         }),
       )
       .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
-      .exhaustive()
-  }
+      .exhaustive();
+  };
 
   useEffect(() => {
-    setSelected(secretSantaUser?.exclusions || [])
-  }, [secretSantaUser])
+    setSelected(secretSantaUser?.exclusions || []);
+  }, [secretSantaUser]);
 
   return (
     <Dialog onClose={() => handleClose()} open={open} fullWidth maxWidth="xs" disableEscapeKeyDown={loadingUpdateUser}>
@@ -143,5 +143,5 @@ export const ManageUserExclusionsDialog = ({
         </Button>
       </DialogActions>
     </Dialog>
-  )
-}
+  );
+};

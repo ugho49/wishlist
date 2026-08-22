@@ -1,16 +1,16 @@
-import type { AttendeeId, EventId } from '../ids'
-import type { MiniUserDto } from './user.dto'
+import type { AttendeeId, EventId } from '../ids';
+import type { MiniUserDto } from './user.dto';
 
-import { Transform } from 'class-transformer'
-import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator'
+import { Transform } from 'class-transformer';
+import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
 
-import { AttendeeRole } from '../enums'
+import { AttendeeRole } from '../enums/attendee.enum';
 
 export class AttendeeDto {
-  declare id: AttendeeId
-  declare user?: MiniUserDto
-  declare pending_email?: string
-  declare role: AttendeeRole
+  declare id: AttendeeId;
+  declare user?: MiniUserDto;
+  declare pending_email?: string;
+  declare role: AttendeeRole;
 }
 
 export class AddEventAttendeeInputDto {
@@ -19,11 +19,11 @@ export class AddEventAttendeeInputDto {
   @IsEmail()
   @IsString()
   @IsNotEmpty()
-  declare email: string
+  declare email: string;
 
   @IsEnum(AttendeeRole)
   @IsOptional()
-  declare role?: AttendeeRole
+  declare role?: AttendeeRole;
 }
 
 /**
@@ -33,11 +33,11 @@ export class AddEventAttendeeInputDto {
 export class AddEventAttendeeForEventInputDto extends AddEventAttendeeInputDto {
   @IsString()
   @IsNotEmpty()
-  declare event_id: EventId
+  declare event_id: EventId;
 }
 
 export class UpdateEventAttendeeRoleInputDto {
   @IsEnum(AttendeeRole)
   @IsNotEmpty()
-  declare role: AttendeeRole
+  declare role: AttendeeRole;
 }

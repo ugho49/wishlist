@@ -1,22 +1,22 @@
-import type { MouseEvent } from 'react'
+import type { MouseEvent } from 'react';
 
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
-import { Chip, Menu, MenuItem, Stack, styled } from '@mui/material'
-import { useState } from 'react'
-import { match } from 'ts-pattern'
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import { Chip, Menu, MenuItem, Stack, styled } from '@mui/material';
+import { useState } from 'react';
+import { match } from 'ts-pattern';
 
-import { AttendeeRole } from '../../gql'
-import { ASSIGNABLE_ATTENDEE_ROLES, getAttendeeRoleIcon, getAttendeeRoleLabel } from './attendee-role'
+import { AttendeeRole } from '../../gql';
+import { ASSIGNABLE_ATTENDEE_ROLES, getAttendeeRoleIcon, getAttendeeRoleLabel } from './attendee-role';
 
 export type AttendeeRoleChipProps = {
-  role: AttendeeRole
-  editable?: boolean
-  disabled?: boolean
-  onRoleChange?: (role: AttendeeRole) => void
-}
+  role: AttendeeRole;
+  editable?: boolean;
+  disabled?: boolean;
+  onRoleChange?: (role: AttendeeRole) => void;
+};
 
 const RoleChip = styled(Chip, { shouldForwardProp: prop => prop !== 'roleVariant' })<{
-  roleVariant: AttendeeRole
+  roleVariant: AttendeeRole;
 }>(({ theme, roleVariant }) => ({
   height: 24,
   fontWeight: 600,
@@ -47,27 +47,27 @@ const RoleChip = styled(Chip, { shouldForwardProp: prop => prop !== 'roleVariant
     paddingLeft: theme.spacing(1),
     paddingRight: theme.spacing(1),
   },
-}))
+}));
 
 const ChipLabel = styled('span')({
   display: 'inline-flex',
   alignItems: 'center',
   gap: 2,
-})
+});
 
 const DropdownIcon = styled(KeyboardArrowDownIcon)({
   fontSize: 16,
   display: 'block',
-})
+});
 
 export const AttendeeRoleChip = ({ role, editable = false, disabled = false, onRoleChange }: AttendeeRoleChipProps) => {
-  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
-  const canOpenMenu = editable && !disabled && !!onRoleChange
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const canOpenMenu = editable && !disabled && !!onRoleChange;
 
   const openMenu = (event: MouseEvent<HTMLElement>) => {
-    event.stopPropagation()
-    if (canOpenMenu) setAnchorEl(event.currentTarget)
-  }
+    event.stopPropagation();
+    if (canOpenMenu) setAnchorEl(event.currentTarget);
+  };
 
   return (
     <>
@@ -93,14 +93,14 @@ export const AttendeeRoleChip = ({ role, editable = false, disabled = false, onR
           transformOrigin={{ vertical: 'top', horizontal: 'left' }}
         >
           {ASSIGNABLE_ATTENDEE_ROLES.map(assignableRole => {
-            const OptionIcon = getAttendeeRoleIcon(assignableRole)
+            const OptionIcon = getAttendeeRoleIcon(assignableRole);
             return (
               <MenuItem
                 key={assignableRole}
                 selected={assignableRole === role}
                 onClick={() => {
-                  setAnchorEl(null)
-                  if (assignableRole !== role) onRoleChange?.(assignableRole)
+                  setAnchorEl(null);
+                  if (assignableRole !== role) onRoleChange?.(assignableRole);
                 }}
               >
                 <Stack direction="row" alignItems="center" gap={1}>
@@ -108,10 +108,10 @@ export const AttendeeRoleChip = ({ role, editable = false, disabled = false, onR
                   {getAttendeeRoleLabel(assignableRole)}
                 </Stack>
               </MenuItem>
-            )
+            );
           })}
         </Menu>
       ) : null}
     </>
-  )
-}
+  );
+};

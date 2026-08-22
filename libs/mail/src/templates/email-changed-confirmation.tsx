@@ -1,11 +1,11 @@
-import { Text } from 'react-email'
+import { Text } from 'react-email';
 
-import { EmailLayout } from '../components/layout'
-import { Callout, ContentSection, Heading, Paragraph } from '../components/ui'
-import * as styles from '../styles'
+import { EmailLayout } from '../components/layout';
+import { Callout, ContentSection, Heading, Paragraph } from '../components/ui';
+import * as styles from '../styles';
 
 export interface EmailChangedConfirmationEmailProps {
-  readonly newEmail: string
+  readonly newEmail: string;
 }
 
 export default function EmailChangedConfirmationEmail({ newEmail }: EmailChangedConfirmationEmailProps) {
@@ -45,9 +45,9 @@ export default function EmailChangedConfirmationEmail({ newEmail }: EmailChanged
         </Paragraph>
       </ContentSection>
     </EmailLayout>
-  )
+  );
 }
 
 EmailChangedConfirmationEmail.PreviewProps = {
   newEmail: 'nouvelle.adresse@example.com',
-} satisfies EmailChangedConfirmationEmailProps
+} satisfies EmailChangedConfirmationEmailProps;

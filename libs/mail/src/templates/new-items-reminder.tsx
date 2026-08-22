@@ -1,14 +1,14 @@
-import { Section, Text } from 'react-email'
+import { Section, Text } from 'react-email';
 
-import { EmailLayout } from '../components/layout'
-import { ButtonFallback, Callout, ContentSection, Heading, Paragraph, PrimaryButton } from '../components/ui'
-import * as styles from '../styles'
+import { EmailLayout } from '../components/layout';
+import { ButtonFallback, Callout, ContentSection, Heading, Paragraph, PrimaryButton } from '../components/ui';
+import * as styles from '../styles';
 
 export interface NewItemsReminderEmailProps {
-  readonly wishlistTitle: string
-  readonly wishlistUrl: string
-  readonly nbItems: number
-  readonly userName: string
+  readonly wishlistTitle: string;
+  readonly wishlistUrl: string;
+  readonly nbItems: number;
+  readonly userName: string;
 }
 
 export default function NewItemsReminderEmail({
@@ -17,7 +17,7 @@ export default function NewItemsReminderEmail({
   nbItems,
   userName,
 }: NewItemsReminderEmailProps) {
-  const itemsLabel = nbItems === 1 ? 'nouveau souhait ajouté' : 'nouveaux souhaits ajoutés'
+  const itemsLabel = nbItems === 1 ? 'nouveau souhait ajouté' : 'nouveaux souhaits ajoutés';
 
   return (
     <EmailLayout preview={`${userName} a ajouté de nouveaux articles à sa liste`}>
@@ -83,7 +83,7 @@ export default function NewItemsReminderEmail({
         <ButtonFallback href={wishlistUrl} />
       </Section>
     </EmailLayout>
-  )
+  );
 }
 
 NewItemsReminderEmail.PreviewProps = {
@@ -91,4 +91,4 @@ NewItemsReminderEmail.PreviewProps = {
   wishlistUrl: 'https://wishlistapp.fr/wishlists/preview',
   nbItems: 3,
   userName: 'Marie',
-} satisfies NewItemsReminderEmailProps
+} satisfies NewItemsReminderEmailProps;

@@ -1,9 +1,9 @@
-import type { UserId } from '@wishlist/common'
+import type { UserId } from '@wishlist/common';
 
-import { createFileRoute } from '@tanstack/react-router'
-import z from 'zod'
+import { createFileRoute } from '@tanstack/react-router';
+import z from 'zod';
 
-import { AdminUserPage } from '../../../../../components/user/admin/AdminUserPage'
+import { AdminUserPage } from '../../../../../components/user/admin/AdminUserPage';
 
 export const Route = createFileRoute('/_authenticated/_with-layout/admin/users/$userId')({
   params: {
@@ -13,7 +13,7 @@ export const Route = createFileRoute('/_authenticated/_with-layout/admin/users/$
     eventPage: z.number().optional().default(1),
   }),
   component: () => {
-    const { userId } = Route.useParams()
-    return <AdminUserPage userId={userId} />
+    const { userId } = Route.useParams();
+    return <AdminUserPage userId={userId} />;
   },
-})
+});

@@ -1,9 +1,9 @@
-import type { Algorithm } from 'jsonwebtoken'
-import type { StringValue } from 'ms'
+import type { Algorithm } from 'jsonwebtoken';
+import type { StringValue } from 'ms';
 
-import { registerAs } from '@nestjs/config'
-import { mapConfigOrThrow } from '@wishlist/common'
-import { z } from 'zod'
+import { registerAs } from '@nestjs/config';
+import { mapConfigOrThrow } from '@wishlist/common';
+import { z } from 'zod';
 
 const schema = z.object({
   AUTH_ISSUER: z.string('Missing AUTH_ISSUER environment variable'),
@@ -12,7 +12,7 @@ const schema = z.object({
   AUTH_ACCESS_TOKEN_ALGORITHM: z.string().optional().default('HS512'),
   GOOGLE_OAUTH_CLIENT_ID: z.string('Missing GOOGLE_OAUTH_CLIENT_ID environment variable'),
   GOOGLE_OAUTH_CLIENT_SECRET: z.string('Missing GOOGLE_OAUTH_CLIENT_SECRET environment variable'),
-})
+});
 
 export default registerAs('auth', () =>
   mapConfigOrThrow(schema, process.env, data => ({
@@ -29,4 +29,4 @@ export default registerAs('auth', () =>
       },
     },
   })),
-)
+);

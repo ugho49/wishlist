@@ -1,21 +1,21 @@
-import type { TransitionProps } from '@mui/material/transitions'
-import type React from 'react'
+import type { TransitionProps } from '@mui/material/transitions';
+import type React from 'react';
 
 export type SecretSantaFormInput = {
-  budget?: number
-  description?: string
-}
+  budget?: number;
+  description?: string;
+};
 
 // The current values fed into the dialog may come straight from a GraphQL
 // object where nullable fields are `null` rather than `undefined`.
 export type SecretSantaFormValues = {
-  budget?: number | null
-  description?: string | null
-}
+  budget?: number | null;
+  description?: string | null;
+};
 
-import { zodResolver } from '@hookform/resolvers/zod'
-import CloseIcon from '@mui/icons-material/Close'
-import SaveIcon from '@mui/icons-material/Save'
+import { zodResolver } from '@hookform/resolvers/zod';
+import CloseIcon from '@mui/icons-material/Close';
+import SaveIcon from '@mui/icons-material/Save';
 import {
   Alert,
   AlertTitle,
@@ -30,23 +30,23 @@ import {
   TextField,
   Toolbar,
   Typography,
-} from '@mui/material'
-import useMediaQuery from '@mui/material/useMediaQuery'
-import { forwardRef, useEffect } from 'react'
-import { useForm } from 'react-hook-form'
-import { z } from 'zod'
+} from '@mui/material';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { forwardRef, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
-const Transition = forwardRef(function Transition(
+const Transition = forwardRef(function TransitionComponent(
   props: TransitionProps & { children: React.ReactElement },
   ref: React.Ref<unknown>,
 ) {
-  const { children, ...other } = props
+  const { children, ...other } = props;
   return (
     <Slide direction="up" ref={ref} {...other}>
       {children}
     </Slide>
-  )
-})
+  );
+});
 
 const schema = z.object({
   budget: z
@@ -59,18 +59,18 @@ const schema = z.object({
     .max(2000, 'Nombre de caractères maximum 2000')
     .transform(v => (v === '' ? undefined : v))
     .optional(),
-})
+});
 
-type FormFields = z.infer<typeof schema>
+type FormFields = z.infer<typeof schema>;
 
 export type EditSecretSantaFormDialogProps = {
-  open: boolean
-  title: string
-  saveButtonText: string
-  input: SecretSantaFormValues
-  handleSubmit: (output: SecretSantaFormInput) => void
-  handleClose: () => void
-}
+  open: boolean;
+  title: string;
+  saveButtonText: string;
+  input: SecretSantaFormValues;
+  handleSubmit: (output: SecretSantaFormInput) => void;
+  handleClose: () => void;
+};
 
 export const EditSecretSantaFormDialog = ({
   open,
@@ -80,7 +80,7 @@ export const EditSecretSantaFormDialog = ({
   handleSubmit,
   handleClose,
 }: EditSecretSantaFormDialogProps) => {
-  const isFullscreen = useMediaQuery(theme => theme.breakpoints.down('md'))
+  const isFullscreen = useMediaQuery(theme => theme.breakpoints.down('md'));
   const {
     register,
     handleSubmit: handleFormSubmit,
@@ -93,26 +93,26 @@ export const EditSecretSantaFormDialog = ({
       budget: input.budget ?? undefined,
       description: input.description ?? undefined,
     },
-  })
+  });
 
   const onSubmit = (data: FormFields) => {
     handleSubmit({
       budget: data.budget ?? undefined,
       description: data.description ?? undefined,
-    })
-  }
+    });
+  };
 
   const onClose = () => {
-    reset()
-    handleClose()
-  }
+    reset();
+    handleClose();
+  };
 
   useEffect(() => {
-    if (!input) return
+    if (!input) return;
 
-    setValue('description', input.description ?? undefined)
-    setValue('budget', input.budget ?? undefined)
-  }, [input])
+    setValue('description', input.description ?? undefined);
+    setValue('budget', input.budget ?? undefined);
+  }, [input]);
 
   return (
     <Dialog
@@ -184,5 +184,5 @@ export const EditSecretSantaFormDialog = ({
         </Stack>
       </Container>
     </Dialog>
-  )
-}
+  );
+};

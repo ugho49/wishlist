@@ -1,17 +1,18 @@
-import { Logger } from '@nestjs/common'
-import { EventsHandler, type IEventHandler } from '@nestjs/cqrs'
-import { MailService, MailTemplate } from '@wishlist/api/core'
+import { Logger } from '@nestjs/common';
+import { EventsHandler, type IEventHandler } from '@nestjs/cqrs';
 
-import { EmailChangedEvent } from '../../domain'
+import { MailService } from '../../../core/mail/mail.service';
+import { MailTemplate } from '../../../core/mail/mail.type';
+import { EmailChangedEvent } from '../../domain/event/email-changed.event';
 
 @EventsHandler(EmailChangedEvent)
 export class EmailChangedhandler implements IEventHandler<EmailChangedEvent> {
-  private readonly logger = new Logger(EmailChangedhandler.name)
+  private readonly logger = new Logger(EmailChangedhandler.name);
 
   constructor(private readonly mailService: MailService) {}
 
   async handle(params: EmailChangedEvent) {
-    this.logger.log('Email changed event received, sending confirmation emails...', { params })
+    this.logger.log('Email changed event received, sending confirmation emails...', { params });
 
     await Promise.all([
       // Send confirmation email to the old email address
@@ -32,6 +33,6 @@ export class EmailChangedhandler implements IEventHandler<EmailChangedEvent> {
           email: params.newEmail,
         },
       }),
-    ])
+    ]);
   }
 }

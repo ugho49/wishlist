@@ -1,27 +1,27 @@
-import type { RootState } from '../../core'
-import type { DetailedWishlist, WishlistItem } from './wishlist.types'
+import type { RootState } from '../../core/store';
+import type { DetailedWishlist, WishlistItem } from './wishlist.types';
 
-import AddIcon from '@mui/icons-material/Add'
-import CloseIcon from '@mui/icons-material/Close'
-import OpenInNewIcon from '@mui/icons-material/OpenInNew'
-import { Box, Fade, Grid, IconButton, Modal, Stack, useMediaQuery, useTheme } from '@mui/material'
-import { useNavigate, useSearch } from '@tanstack/react-router'
-import { useMemo, useState } from 'react'
-import { useSelector } from 'react-redux'
+import AddIcon from '@mui/icons-material/Add';
+import CloseIcon from '@mui/icons-material/Close';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import { Box, Fade, Grid, IconButton, Modal, Stack, useMediaQuery, useTheme } from '@mui/material';
+import { useNavigate, useSearch } from '@tanstack/react-router';
+import { useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
 
-import { FabAutoGrow } from '../common/FabAutoGrow'
-import { ItemCard } from '../item/ItemCard'
-import { ItemCardSkeleton } from '../item/ItemCardSkeleton'
-import { ItemFormDialog } from '../item/ItemFormDialog'
-import { EmptyItemsState } from './EmptyItemsState'
-import { SharedReservationIntro } from './SharedReservationIntro'
-import { applyFilter, applySort } from './WishlistFilterAndSortItems'
+import { FabAutoGrow } from '../common/FabAutoGrow';
+import { ItemCard } from '../item/ItemCard';
+import { ItemCardSkeleton } from '../item/ItemCardSkeleton';
+import { ItemFormDialog } from '../item/ItemFormDialog';
+import { EmptyItemsState } from './EmptyItemsState';
+import { SharedReservationIntro } from './SharedReservationIntro';
+import { applyFilter, applySort } from './WishlistFilterAndSortItems';
 
-const SKELETON_KEYS = ['s1', 's2', 's3', 's4', 's5', 's6', 's7', 's8'] as const
+const SKELETON_KEYS = ['s1', 's2', 's3', 's4', 's5', 's6', 's7', 's8'] as const;
 
 export type WishlistTabItemsProps =
   | { loading: true }
-  | { loading?: false; wishlist: DetailedWishlist; hasImportableItems: boolean; onImportItems: () => void }
+  | { loading?: false; wishlist: DetailedWishlist; hasImportableItems: boolean; onImportItems: () => void };
 
 // Image modal component
 const ImageModal = ({
@@ -30,13 +30,13 @@ const ImageModal = ({
   open,
   onClose,
 }: {
-  imageUrl?: string
-  itemUrl?: string
-  open: boolean
-  onClose: () => void
+  imageUrl?: string;
+  itemUrl?: string;
+  open: boolean;
+  onClose: () => void;
 }) => {
-  const theme = useTheme()
-  const smallScreen = useMediaQuery(theme.breakpoints.only('xs'))
+  const theme = useTheme();
+  const smallScreen = useMediaQuery(theme.breakpoints.only('xs'));
 
   return (
     <Modal open={open} onClose={onClose} autoFocus={false} disableAutoFocus>
@@ -110,10 +110,10 @@ const ImageModal = ({
         </Stack>
       </Fade>
     </Modal>
-  )
-}
+  );
+};
 
-const mapState = (state: RootState) => state.auth.user?.id
+const mapState = (state: RootState) => state.auth.user?.id;
 
 export const WishlistItems = (props: WishlistTabItemsProps) => {
   if (props.loading) {
@@ -127,43 +127,44 @@ export const WishlistItems = (props: WishlistTabItemsProps) => {
           ))}
         </Grid>
       </Box>
-    )
+    );
   }
 
-  return <WishlistItemsLoaded {...props} />
-}
+  return <WishlistItemsLoaded {...props} />;
+};
 
 const WishlistItemsLoaded = ({
   wishlist,
   hasImportableItems,
   onImportItems,
 }: {
-  wishlist: DetailedWishlist
-  hasImportableItems: boolean
-  onImportItems: () => void
+  wishlist: DetailedWishlist;
+  hasImportableItems: boolean;
+  onImportItems: () => void;
 }) => {
-  const currentUserId = useSelector(mapState)
+  const currentUserId = useSelector(mapState);
   const {
     displayAddItemFormDialog: openItemFormDialog,
     sort,
     filter,
   } = useSearch({
     from: '/_authenticated/_with-layout/wishlists/$wishlistId/',
-  })
-  const nbOfItems = useMemo(() => wishlist.items.length, [wishlist.items])
-  const ownerOrCoOwnerOfTheList = currentUserId === wishlist.owner.id || wishlist.coOwner?.id === currentUserId
-  const canReserveItems = !ownerOrCoOwnerOfTheList || !wishlist.config.hideItems
-  const [currentItem, setCurrentItem] = useState<WishlistItem | null>(null)
-  const navigate = useNavigate({ from: '/wishlists/$wishlistId' })
+  });
+  const nbOfItems = useMemo(() => wishlist.items.length, [wishlist.items]);
+  const ownerOrCoOwnerOfTheList = currentUserId === wishlist.owner.id || wishlist.coOwner?.id === currentUserId;
+  const canReserveItems = !ownerOrCoOwnerOfTheList || !wishlist.config.hideItems;
+  const [currentItem, setCurrentItem] = useState<WishlistItem | null>(null);
+  const navigate = useNavigate({ from: '/wishlists/$wishlistId' });
 
   const setOpenItemFormDialog = (open: boolean) => {
-    void navigate({ search: prev => ({ ...prev, displayAddItemFormDialog: open }) })
-  }
+    void navigate({ search: prev => ({ ...prev, displayAddItemFormDialog: open }) });
+  };
 
   // Apply filter and sort to items
-  const itemsFilteredAndSorted = useMemo(() => {
-    return wishlist.items.filter(item => applyFilter(item, filter)).sort((a, b) => applySort(a, b, sort))
-  }, [wishlist.items, filter, sort])
+  const itemsFilteredAndSorted = useMemo(
+    () => wishlist.items.filter(item => applyFilter(item, filter)).sort((a, b) => applySort(a, b, sort)),
+    [wishlist.items, filter, sort],
+  );
 
   return (
     <Box className="items">
@@ -221,5 +222,5 @@ const WishlistItemsLoaded = ({
         onClose={() => setCurrentItem(null)}
       />
     </Box>
-  )
-}
+  );
+};

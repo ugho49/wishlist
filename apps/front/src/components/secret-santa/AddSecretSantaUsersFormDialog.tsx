@@ -1,11 +1,11 @@
-import type { TransitionProps } from '@mui/material/transitions'
-import type { GridColDef } from '@mui/x-data-grid'
-import type { AttendeeId, EventId, SecretSantaId } from '@wishlist/common'
-import type React from 'react'
-import type { SecretSantaAttendee, SecretSantaUserItem } from './secret-santa.types'
+import type { TransitionProps } from '@mui/material/transitions';
+import type { GridColDef } from '@mui/x-data-grid';
+import type { AttendeeId, EventId, SecretSantaId } from '@wishlist/common';
+import type React from 'react';
+import type { SecretSantaAttendee, SecretSantaUserItem } from './secret-santa.types';
 
-import CloseIcon from '@mui/icons-material/Close'
-import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt'
+import CloseIcon from '@mui/icons-material/Close';
+import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt';
 import {
   AppBar,
   Avatar,
@@ -18,46 +18,46 @@ import {
   Toolbar,
   Typography,
   useMediaQuery,
-} from '@mui/material'
-import { DataGrid } from '@mui/x-data-grid'
-import { useQueryClient } from '@tanstack/react-query'
-import { forwardRef, useEffect, useMemo, useState } from 'react'
-import { match } from 'ts-pattern'
+} from '@mui/material';
+import { DataGrid } from '@mui/x-data-grid';
+import { useQueryClient } from '@tanstack/react-query';
+import { forwardRef, useEffect, useMemo, useState } from 'react';
+import { match } from 'ts-pattern';
 
-import { rejectionMessage, rejectionPattern, useAddSecretSantaUsersMutation } from '../../gql'
-import { useToast } from '../../hooks'
-import { Status } from '../common/Status'
+import { rejectionMessage, rejectionPattern, useAddSecretSantaUsersMutation } from '../../gql';
+import { useToast } from '../../hooks';
+import { Status } from '../common/Status';
 
-const Transition = forwardRef(function Transition(
+const Transition = forwardRef(function TransitionComponent(
   props: TransitionProps & { children: React.ReactElement },
   ref: React.Ref<unknown>,
 ) {
-  const { children, ...other } = props
+  const { children, ...other } = props;
   return (
     <Slide direction="up" ref={ref} {...other}>
       {children}
     </Slide>
-  )
-})
+  );
+});
 
 export type AddSecretSantaUsersFormDialogProps = {
-  open: boolean
-  eventId: EventId
-  secretSantaId: SecretSantaId
-  eventAttendees: SecretSantaAttendee[]
-  secretSantaAttendees: SecretSantaAttendee[]
-  handleSubmit: (newSecretSantaUsers: SecretSantaUserItem[]) => void
-  handleClose: () => void
-}
+  open: boolean;
+  eventId: EventId;
+  secretSantaId: SecretSantaId;
+  eventAttendees: SecretSantaAttendee[];
+  secretSantaAttendees: SecretSantaAttendee[];
+  handleSubmit: (newSecretSantaUsers: SecretSantaUserItem[]) => void;
+  handleClose: () => void;
+};
 
 type RowType = {
-  id: string
-  firstname?: string
-  lastname?: string
-  email: string
-  pictureUrl?: string
-  isPending: boolean
-}
+  id: string;
+  firstname?: string;
+  lastname?: string;
+  email: string;
+  pictureUrl?: string;
+  isPending: boolean;
+};
 
 const columns: GridColDef<RowType>[] = [
   {
@@ -89,7 +89,7 @@ const columns: GridColDef<RowType>[] = [
       />
     ),
   },
-]
+];
 
 export const AddSecretSantaUsersFormDialog = ({
   open,
@@ -100,21 +100,21 @@ export const AddSecretSantaUsersFormDialog = ({
   handleSubmit,
   handleClose,
 }: AddSecretSantaUsersFormDialogProps) => {
-  const queryClient = useQueryClient()
-  const { addToast } = useToast()
-  const [selectedIds, setSelectedIds] = useState<AttendeeId[]>([])
-  const isFullscreen = useMediaQuery(theme => theme.breakpoints.down('md'))
+  const queryClient = useQueryClient();
+  const { addToast } = useToast();
+  const [selectedIds, setSelectedIds] = useState<AttendeeId[]>([]);
+  const isFullscreen = useMediaQuery(theme => theme.breakpoints.down('md'));
 
   const { mutateAsync: addUsersMutation, isPending: loading } = useAddSecretSantaUsersMutation({
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-  })
+  });
 
   const addUsers = async () => {
-    const res = await addUsersMutation({ id: secretSantaId, input: { attendeeIds: selectedIds } })
+    const res = await addUsersMutation({ id: secretSantaId, input: { attendeeIds: selectedIds } });
     await match(res.addSecretSantaUsers)
       .with({ __typename: 'AddSecretSantaUsersOutput' }, async output => {
-        handleSubmit(output.users)
-        await queryClient.invalidateQueries({ queryKey: ['GetSecretSantaForEvent', { eventId }] })
+        handleSubmit(output.users);
+        await queryClient.invalidateQueries({ queryKey: ['GetSecretSantaForEvent', { eventId }] });
       })
       .with({ __typename: 'ValidationRejection' }, rejection =>
         addToast({
@@ -126,27 +126,29 @@ export const AddSecretSantaUsersFormDialog = ({
         }),
       )
       .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
-      .exhaustive()
-  }
+      .exhaustive();
+  };
 
   useEffect(() => {
     if (!open) {
-      setSelectedIds([])
+      setSelectedIds([]);
     }
-  }, [open])
+  }, [open]);
 
-  const rows = useMemo(() => {
-    return eventAttendees
-      .filter(a => !secretSantaAttendees.find(s => s.id === a.id))
-      .map<RowType>(a => ({
-        id: a.id,
-        firstname: a.user?.firstName,
-        lastname: a.user?.lastName,
-        email: a.user?.email ?? a.pendingEmail ?? '',
-        pictureUrl: a.user?.pictureUrl ?? undefined,
-        isPending: !!a.pendingEmail,
-      }))
-  }, [eventAttendees, secretSantaAttendees])
+  const rows = useMemo(
+    () =>
+      eventAttendees
+        .filter(a => !secretSantaAttendees.find(s => s.id === a.id))
+        .map<RowType>(a => ({
+          id: a.id,
+          firstname: a.user?.firstName,
+          lastname: a.user?.lastName,
+          email: a.user?.email ?? a.pendingEmail ?? '',
+          pictureUrl: a.user?.pictureUrl ?? undefined,
+          isPending: !!a.pendingEmail,
+        })),
+    [eventAttendees, secretSantaAttendees],
+  );
 
   return (
     <Dialog
@@ -200,5 +202,5 @@ export const AddSecretSantaUsersFormDialog = ({
         </Stack>
       </Container>
     </Dialog>
-  )
-}
+  );
+};

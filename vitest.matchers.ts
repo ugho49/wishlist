@@ -1,8 +1,8 @@
-import 'reflect-metadata'
+import 'reflect-metadata';
 
-import jestExtendedMatchers from 'jest-extended'
-import { expect } from 'vitest'
+import jestExtendedMatchers from 'jest-extended';
+import { expect } from 'vitest';
 
 expect.extend({
   ...jestExtendedMatchers,
-})
+});

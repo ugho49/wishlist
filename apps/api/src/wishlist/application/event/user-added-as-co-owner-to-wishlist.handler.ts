@@ -1,12 +1,14 @@
-import { Logger } from '@nestjs/common'
-import { EventsHandler, type IEventHandler } from '@nestjs/cqrs'
-import { FrontendRoutesService, MailService, MailTemplate } from '@wishlist/api/core'
+import { Logger } from '@nestjs/common';
+import { EventsHandler, type IEventHandler } from '@nestjs/cqrs';
 
-import { UserAddedAsCoOwnerToWishlistEvent } from '../../domain'
+import { FrontendRoutesService } from '../../../core/frontend-routes/frontend-routes.service';
+import { MailService } from '../../../core/mail/mail.service';
+import { MailTemplate } from '../../../core/mail/mail.type';
+import { UserAddedAsCoOwnerToWishlistEvent } from '../../domain/event/user-added-as-co-owner-to-wishlist.event';
 
 @EventsHandler(UserAddedAsCoOwnerToWishlistEvent)
 export class UserAddedAsCoOwnerToWishlistHandler implements IEventHandler<UserAddedAsCoOwnerToWishlistEvent> {
-  private readonly logger = new Logger(UserAddedAsCoOwnerToWishlistHandler.name)
+  private readonly logger = new Logger(UserAddedAsCoOwnerToWishlistHandler.name);
 
   constructor(
     private readonly mailService: MailService,
@@ -14,14 +16,14 @@ export class UserAddedAsCoOwnerToWishlistHandler implements IEventHandler<UserAd
   ) {}
 
   async handle(params: UserAddedAsCoOwnerToWishlistEvent) {
-    this.logger.log('User added as co-owner to wishlist event received', { wishlistId: params.wishlist.id })
+    this.logger.log('User added as co-owner to wishlist event received', { wishlistId: params.wishlist.id });
     if (!params.wishlist.coOwner) {
-      this.logger.error('Co-owner is not set')
-      return
+      this.logger.error('Co-owner is not set');
+      return;
     }
 
     try {
-      this.logger.log('Sending mail to co-owner...', { wishlistId: params.wishlist.id })
+      this.logger.log('Sending mail to co-owner...', { wishlistId: params.wishlist.id });
       await this.mailService.sendMail({
         to: params.wishlist.coOwner.email,
         subject: "[Wishlist] Vous avez été ajouté comme co-gestionnaire d'une liste",
@@ -31,9 +33,9 @@ export class UserAddedAsCoOwnerToWishlistHandler implements IEventHandler<UserAd
           wishlistUrl: this.frontendRoutes.routes.wishlist.byId(params.wishlist.id),
           invitedBy: `${params.wishlist.owner.firstName} ${params.wishlist.owner.lastName}`,
         },
-      })
+      });
     } catch (error) {
-      this.logger.error('Fail to send mail to co-owner', error)
+      this.logger.error('Fail to send mail to co-owner', error);
     }
   }
 }

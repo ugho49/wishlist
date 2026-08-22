@@ -1,13 +1,16 @@
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common'
-import { type EventRepository, eventMapper } from '@wishlist/api/event'
-import { REPOSITORIES } from '@wishlist/api/repositories'
-import { type WishlistRepository } from '@wishlist/api/wishlist'
-import { DetailedEventDto, type EventId, type ICurrentUser } from '@wishlist/common'
+import type { EventRepository } from '../../domain/repository/event.repository';
+
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { DetailedEventDto, type EventId, type ICurrentUser } from '@wishlist/common';
+
+import { REPOSITORIES } from '../../../repositories/repositories.constants';
+import { type WishlistRepository } from '../../../wishlist/domain/wishlist.repository';
+import { eventMapper } from '../../infrastructure/event.mapper';
 
 export type GetEventByIdInput = {
-  currentUser: ICurrentUser
-  eventId: EventId
-}
+  currentUser: ICurrentUser;
+  eventId: EventId;
+};
 
 @Injectable()
 export class GetEventByIdUseCase {
@@ -17,14 +20,14 @@ export class GetEventByIdUseCase {
   ) {}
 
   async execute(input: GetEventByIdInput): Promise<DetailedEventDto> {
-    const event = await this.eventRepository.findByIdOrFail(input.eventId)
+    const event = await this.eventRepository.findByIdOrFail(input.eventId);
 
     if (!event.canView(input.currentUser)) {
-      throw new UnauthorizedException('You cannot access this event')
+      throw new UnauthorizedException('You cannot access this event');
     }
 
-    const wishlists = await this.wishlistRepository.findByEvent(event.id)
+    const wishlists = await this.wishlistRepository.findByEvent(event.id);
 
-    return eventMapper.toDetailedEventDto({ event, wishlists })
+    return eventMapper.toDetailedEventDto({ event, wishlists });
   }
 }

@@ -1,40 +1,40 @@
-import type { RootState } from '../../core'
+import type { RootState } from '../../core/store';
 
-import { zodResolver } from '@hookform/resolvers/zod'
-import SaveIcon from '@mui/icons-material/Save'
-import { Box, Button, Stack, TextField } from '@mui/material'
-import { useQueryClient } from '@tanstack/react-query'
-import { DateTime } from 'luxon'
-import { Controller, useForm } from 'react-hook-form'
-import { useDispatch, useSelector } from 'react-redux'
-import { match } from 'ts-pattern'
-import { z } from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod';
+import SaveIcon from '@mui/icons-material/Save';
+import { Box, Button, Stack, TextField } from '@mui/material';
+import { useQueryClient } from '@tanstack/react-query';
+import { DateTime } from 'luxon';
+import { Controller, useForm } from 'react-hook-form';
+import { useDispatch, useSelector } from 'react-redux';
+import { match } from 'ts-pattern';
+import { z } from 'zod';
 
-import { updateUser as updateUserAction } from '../../core/store/features'
-import { rejectionMessage, rejectionPattern, useUpdateUserProfileMutation } from '../../gql'
-import { useToast } from '../../hooks/useToast'
-import { zodRequiredString } from '../../utils/validation'
-import { Card } from '../common/Card'
-import { WishlistDatePicker } from '../common/DatePicker'
-import { Loader } from '../common/Loader'
-import { Subtitle } from '../common/Subtitle'
-import { EmailChangeSection } from './EmailChangeSection'
+import { updateUser as updateUserAction } from '../../core/store/features/userProfileSlice';
+import { rejectionMessage, rejectionPattern, useUpdateUserProfileMutation } from '../../gql';
+import { useToast } from '../../hooks/useToast';
+import { zodRequiredString } from '../../utils/validation';
+import { Card } from '../common/Card';
+import { WishlistDatePicker } from '../common/DatePicker';
+import { Loader } from '../common/Loader';
+import { Subtitle } from '../common/Subtitle';
+import { EmailChangeSection } from './EmailChangeSection';
 
-const mapState = (state: RootState) => state.userProfile
+const mapState = (state: RootState) => state.userProfile;
 
 const schema = z.object({
   firstname: zodRequiredString().max(50, '50 caractères maximum'),
   lastname: zodRequiredString().max(50, '50 caractères maximum'),
   birthday: z.custom<DateTime>().nullable(),
-})
+});
 
-type FormFields = z.infer<typeof schema>
+type FormFields = z.infer<typeof schema>;
 
 export const UserTabInformations = () => {
-  const userState = useSelector(mapState)
-  const dispatch = useDispatch()
-  const { addToast } = useToast()
-  const queryClient = useQueryClient()
+  const userState = useSelector(mapState);
+  const dispatch = useDispatch();
+  const { addToast } = useToast();
+  const queryClient = useQueryClient();
 
   const {
     register,
@@ -48,14 +48,14 @@ export const UserTabInformations = () => {
       lastname: userState.lastName || '',
       birthday: userState.birthday ? DateTime.fromISO(userState.birthday) : null,
     },
-  })
+  });
 
   const { mutateAsync: update } = useUpdateUserProfileMutation({
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-  })
+  });
 
   const onSubmit = async (data: FormFields) => {
-    const birthday = data.birthday !== null ? data.birthday.toISODate() || undefined : undefined
+    const birthday = data.birthday === null ? undefined : data.birthday.toISODate() || undefined;
 
     const res = await update({
       input: {
@@ -63,11 +63,11 @@ export const UserTabInformations = () => {
         lastname: data.lastname,
         birthday,
       },
-    })
+    });
 
     match(res.updateUserProfile)
       .with({ __typename: 'User' }, () => {
-        addToast({ message: 'Profil mis à jour', variant: 'info' })
+        addToast({ message: 'Profil mis à jour', variant: 'info' });
 
         dispatch(
           updateUserAction({
@@ -75,13 +75,13 @@ export const UserTabInformations = () => {
             lastName: data.lastname,
             birthday,
           }),
-        )
+        );
 
-        void queryClient.invalidateQueries({ queryKey: ['UserProfileCurrentUser'] })
+        void queryClient.invalidateQueries({ queryKey: ['UserProfileCurrentUser'] });
       })
       .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
-      .exhaustive()
-  }
+      .exhaustive();
+  };
 
   return (
     <Stack gap={3}>
@@ -159,5 +159,5 @@ export const UserTabInformations = () => {
         <EmailChangeSection />
       </Card>
     </Stack>
-  )
-}
+  );
+};

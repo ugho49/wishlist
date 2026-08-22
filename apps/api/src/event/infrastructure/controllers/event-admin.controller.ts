@@ -1,7 +1,5 @@
-import { Body, Controller, Delete, Get, Param, Put, Query } from '@nestjs/common'
-import { ApiTags } from '@nestjs/swagger'
-import { CurrentUser, IsAdmin } from '@wishlist/api/auth'
-import { DEFAULT_RESULT_NUMBER } from '@wishlist/api/core'
+import { Body, Controller, Delete, Get, Param, Put, Query } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import {
   DetailedEventDto,
   type EventId,
@@ -10,13 +8,16 @@ import {
   type ICurrentUser,
   PagedResponse,
   UpdateEventInputDto,
-} from '@wishlist/common'
+} from '@wishlist/common';
 
-import { DeleteEventUseCase } from '../../application/command/delete-event.use-case'
-import { UpdateEventUseCase } from '../../application/command/update-event.use-case'
-import { GetEventByIdUseCase } from '../../application/query/get-event-by-id.use-case'
-import { GetEventsUseCase } from '../../application/query/get-events.use-case'
-import { GetEventsForUserUseCase } from '../../application/query/get-events-for-user.use-case'
+import { IsAdmin } from '../../../auth/infrastructure/decorators/admin.decorator';
+import { CurrentUser } from '../../../auth/infrastructure/decorators/user.decorator';
+import { DEFAULT_RESULT_NUMBER } from '../../../core/common/pagination';
+import { DeleteEventUseCase } from '../../application/command/delete-event.use-case';
+import { UpdateEventUseCase } from '../../application/command/update-event.use-case';
+import { GetEventByIdUseCase } from '../../application/query/get-event-by-id.use-case';
+import { GetEventsUseCase } from '../../application/query/get-events.use-case';
+import { GetEventsForUserUseCase } from '../../application/query/get-events-for-user.use-case';
 
 @IsAdmin()
 @ApiTags('ADMIN - Event')
@@ -32,13 +33,13 @@ export class EventAdminController {
 
   @Get('/:id')
   getById(@Param('id') id: EventId, @CurrentUser() currentUser: ICurrentUser): Promise<DetailedEventDto> {
-    return this.getEventByIdUseCase.execute({ currentUser, eventId: id })
+    return this.getEventByIdUseCase.execute({ currentUser, eventId: id });
   }
 
   @Get()
   getAllPaginated(@Query() queryParams: GetAllEventsPaginationQueryDto): Promise<PagedResponse<EventWithCountsDto>> {
-    const pageNumber = queryParams.p ?? 1
-    const pageSize = DEFAULT_RESULT_NUMBER
+    const pageNumber = queryParams.p ?? 1;
+    const pageSize = DEFAULT_RESULT_NUMBER;
 
     if (queryParams.user_id) {
       return this.getEventsForUserUseCase.execute({
@@ -46,10 +47,10 @@ export class EventAdminController {
         pageNumber,
         pageSize,
         ignorePastEvents: false,
-      })
+      });
     }
 
-    return this.getEventsUseCase.execute({ pageNumber, pageSize })
+    return this.getEventsUseCase.execute({ pageNumber, pageSize });
   }
 
   @Put('/:id')
@@ -67,11 +68,11 @@ export class EventAdminController {
         icon: dto.icon,
         eventDate: dto.event_date,
       },
-    })
+    });
   }
 
   @Delete('/:id')
   async deleteEvent(@Param('id') eventId: EventId, @CurrentUser() currentUser: ICurrentUser): Promise<void> {
-    await this.deleteEventUseCase.execute({ currentUser, eventId })
+    await this.deleteEventUseCase.execute({ currentUser, eventId });
   }
 }

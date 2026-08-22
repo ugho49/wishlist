@@ -1,11 +1,11 @@
-import type { RootState } from '../../core'
+import type { RootState } from '../../core/store';
 
-import MenuIcon from '@mui/icons-material/Menu'
-import { BottomNavigation, BottomNavigationAction, bottomNavigationActionClasses, Paper, styled } from '@mui/material'
-import { useLocation, useNavigate } from '@tanstack/react-router'
-import { useDispatch, useSelector } from 'react-redux'
+import MenuIcon from '@mui/icons-material/Menu';
+import { BottomNavigation, BottomNavigationAction, bottomNavigationActionClasses, Paper, styled } from '@mui/material';
+import { useLocation, useNavigate } from '@tanstack/react-router';
+import { useDispatch, useSelector } from 'react-redux';
 
-import { closeDrawer, toggleDrawer } from '../../core/store/features'
+import { closeDrawer, toggleDrawer } from '../../core/store/features/drawerSlice';
 
 const PaperStyled = styled(Paper)<{ isDrawerOpen: boolean }>(({ theme, isDrawerOpen }) => ({
   position: 'fixed',
@@ -19,7 +19,7 @@ const PaperStyled = styled(Paper)<{ isDrawerOpen: boolean }>(({ theme, isDrawerO
   backdropFilter: 'blur(16px)',
   boxShadow: isDrawerOpen ? 'none' : '0 -1px 4px rgba(0, 0, 0, 0.04), 0 -2px 8px rgba(0, 0, 0, 0.02)',
   borderRadius: 0,
-}))
+}));
 
 const BottomNavigationStyled = styled(BottomNavigation)(({ theme }) => ({
   position: 'relative',
@@ -39,31 +39,31 @@ const BottomNavigationStyled = styled(BottomNavigation)(({ theme }) => ({
   [`&.${bottomNavigationActionClasses.selected}:after`]: {
     transform: 'scaleX(1)',
   },
-}))
+}));
 
 export const MobileBottomNavigation = () => {
-  const dispatch = useDispatch()
-  const navigate = useNavigate()
-  const location = useLocation()
-  const isDrawerOpen = useSelector((state: RootState) => state.drawer.isOpen)
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const isDrawerOpen = useSelector((state: RootState) => state.drawer.isOpen);
 
   const getSelectedValue = () => {
-    if (isDrawerOpen) return 'menu'
-    if (location.pathname.startsWith('/events')) return 'events'
-    return ''
-  }
+    if (isDrawerOpen) return 'menu';
+    if (location.pathname.startsWith('/events')) return 'events';
+    return '';
+  };
 
   const handleChange = (_: React.SyntheticEvent, newValue: string) => {
     if (newValue === 'menu') {
-      dispatch(toggleDrawer()) // Toggle drawer via Redux
+      dispatch(toggleDrawer()); // Toggle drawer via Redux
     } else if (newValue === 'events') {
       // Close drawer if open and navigate to events
       if (isDrawerOpen) {
-        dispatch(closeDrawer())
+        dispatch(closeDrawer());
       }
-      void navigate({ to: '/events' })
+      void navigate({ to: '/events' });
     }
-  }
+  };
 
   return (
     <PaperStyled elevation={0} isDrawerOpen={isDrawerOpen}>
@@ -72,5 +72,5 @@ export const MobileBottomNavigation = () => {
         {/* <BottomNavigationAction label="Événements" value="events" icon={<CalendarMonthIcon />} /> */}
       </BottomNavigationStyled>
     </PaperStyled>
-  )
-}
+  );
+};

@@ -1,8 +1,8 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { SEO } from '@wishlist/front-components/SEO'
-import z from 'zod'
+import { createFileRoute } from '@tanstack/react-router';
+import { SEO } from '@wishlist/front-components/SEO';
+import z from 'zod';
 
-import { EventListPage } from '../../../../components/event/EventListPage'
+import { EventListPage } from '../../../../components/event/EventListPage';
 
 export const Route = createFileRoute('/_authenticated/_with-layout/events/')({
   validateSearch: z.object({
@@ -18,4 +18,4 @@ export const Route = createFileRoute('/_authenticated/_with-layout/events/')({
       <EventListPage />
     </>
   ),
-})
+});

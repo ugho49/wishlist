@@ -1,7 +1,7 @@
-import { Injectable } from '@nestjs/common'
-import { type HealthIndicatorResult, HealthIndicatorService } from '@nestjs/terminus'
+import { Injectable } from '@nestjs/common';
+import { type HealthIndicatorResult, HealthIndicatorService } from '@nestjs/terminus';
 
-import { DatabaseService } from '../database/database.service'
+import { DatabaseService } from '../database/database.service';
 
 @Injectable()
 export class DatabaseHealthIndicator {
@@ -11,13 +11,13 @@ export class DatabaseHealthIndicator {
   ) {}
 
   async pingCheck<Key extends string = string>(key: Key): Promise<HealthIndicatorResult<Key>> {
-    const indicator = this.healthIndicatorService.check(key)
+    const indicator = this.healthIndicatorService.check(key);
 
     try {
-      await this.databaseService.ping()
-      return indicator.up()
+      await this.databaseService.ping();
+      return indicator.up();
     } catch {
-      return indicator.down()
+      return indicator.down();
     }
   }
 }

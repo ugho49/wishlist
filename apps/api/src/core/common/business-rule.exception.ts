@@ -1,11 +1,11 @@
-import { BadRequestException } from '@nestjs/common'
+import { BadRequestException } from '@nestjs/common';
 
 /**
  * Codes must stay in sync with the `BusinessRuleCode` enum in core/graphql/base.graphql.
  */
-export const BUSINESS_RULE_CODES = ['WRONG_OLD_PASSWORD'] as const
+export const BUSINESS_RULE_CODES = ['WRONG_OLD_PASSWORD'] as const;
 
-export type BusinessRuleCode = (typeof BUSINESS_RULE_CODES)[number]
+export type BusinessRuleCode = (typeof BUSINESS_RULE_CODES)[number];
 
 /**
  * A domain business-rule violation that clients can act on programmatically.
@@ -19,6 +19,6 @@ export class BusinessRuleException extends BadRequestException {
     public readonly code: BusinessRuleCode,
     message: string,
   ) {
-    super(message)
+    super(message);
   }
 }

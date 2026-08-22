@@ -1,11 +1,12 @@
-import type { ICurrentUser } from '@wishlist/common'
+import type { ICurrentUser } from '@wishlist/common';
 
-import { NotFoundException } from '@nestjs/common'
-import { Args, Context, Mutation, Resolver } from '@nestjs/graphql'
-import { GqlCurrentUser } from '@wishlist/api/auth'
-import { type GraphQLContext, ZodPipe } from '@wishlist/api/core'
-import { type AttendeeId, type EventId } from '@wishlist/common'
+import { NotFoundException } from '@nestjs/common';
+import { Args, Context, Mutation, Resolver } from '@nestjs/graphql';
+import { type AttendeeId, type EventId } from '@wishlist/common';
 
+import { GqlCurrentUser } from '../../../auth/infrastructure/decorators/user.decorator';
+import { type GraphQLContext } from '../../../core/graphql/graphql.context';
+import { ZodPipe } from '../../../core/graphql/zod-pipe';
 import {
   type AddEventAttendeeInput,
   type AddEventAttendeeResult,
@@ -17,14 +18,14 @@ import {
   type UpdateEventAttendeeRoleResult,
   type UpdateEventInput,
   type UpdateEventResult,
-} from '../../../gql/generated-types'
-import { AddAttendeeUseCase } from '../../application/command/add-attendee.use-case'
-import { CreateEventUseCase } from '../../application/command/create-event.use-case'
-import { DeleteAttendeeUseCase } from '../../application/command/delete-attendee.use-case'
-import { DeleteEventUseCase } from '../../application/command/delete-event.use-case'
-import { UpdateAttendeeRoleUseCase } from '../../application/command/update-attendee-role.use-case'
-import { UpdateEventUseCase } from '../../application/command/update-event.use-case'
-import { eventMapper } from '../event.mapper'
+} from '../../../gql/generated-types';
+import { AddAttendeeUseCase } from '../../application/command/add-attendee.use-case';
+import { CreateEventUseCase } from '../../application/command/create-event.use-case';
+import { DeleteAttendeeUseCase } from '../../application/command/delete-attendee.use-case';
+import { DeleteEventUseCase } from '../../application/command/delete-event.use-case';
+import { UpdateAttendeeRoleUseCase } from '../../application/command/update-attendee-role.use-case';
+import { UpdateEventUseCase } from '../../application/command/update-event.use-case';
+import { eventMapper } from '../event.mapper';
 import {
   AddEventAttendeeInputSchema,
   AttendeeIdSchema,
@@ -33,7 +34,7 @@ import {
   GqlAttendeeRoleSchema,
   toDomainAttendeeRole,
   UpdateEventInputSchema,
-} from '../event.schema'
+} from '../event.schema';
 
 @Resolver()
 export class EventMutationResolver {
@@ -64,15 +65,15 @@ export class EventMutationResolver {
           role: toDomainAttendeeRole(attendee.role ?? undefined),
         })),
       },
-    })
+    });
 
     // The create use-case returns a MiniEventDto; reload the full Event via the
     // dataloader so the resolver returns a complete Event object type.
-    const loadedEvent = await ctx.loaders.event.load(createdEvent.id)
+    const loadedEvent = await ctx.loaders.event.load(createdEvent.id);
     if (!loadedEvent) {
-      throw new NotFoundException(`Event with id ${createdEvent.id} not found`)
+      throw new NotFoundException(`Event with id ${createdEvent.id} not found`);
     }
-    return loadedEvent
+    return loadedEvent;
   }
 
   @Mutation()
@@ -90,9 +91,9 @@ export class EventMutationResolver {
         icon: input.icon ?? undefined,
         eventDate: new Date(input.eventDate),
       },
-    })
+    });
 
-    return { __typename: 'VoidOutput', success: true }
+    return { __typename: 'VoidOutput', success: true };
   }
 
   @Mutation()
@@ -100,8 +101,8 @@ export class EventMutationResolver {
     @Args('id', new ZodPipe(EventIdSchema)) id: EventId,
     @GqlCurrentUser() currentUser: ICurrentUser,
   ): Promise<DeleteEventResult> {
-    await this.deleteEventUseCase.execute({ currentUser, eventId: id })
-    return { __typename: 'VoidOutput', success: true }
+    await this.deleteEventUseCase.execute({ currentUser, eventId: id });
+    return { __typename: 'VoidOutput', success: true };
   }
 
   @Mutation()
@@ -117,9 +118,9 @@ export class EventMutationResolver {
         email: input.email,
         role: toDomainAttendeeRole(input.role ?? undefined),
       },
-    })
+    });
 
-    return eventMapper.toGqlEventAttendeeFromDto(attendee)
+    return eventMapper.toGqlEventAttendeeFromDto(attendee);
   }
 
   @Mutation()
@@ -128,8 +129,8 @@ export class EventMutationResolver {
     @Args('attendeeId', new ZodPipe(AttendeeIdSchema)) attendeeId: AttendeeId,
     @GqlCurrentUser() currentUser: ICurrentUser,
   ): Promise<RemoveEventAttendeeResult> {
-    await this.deleteAttendeeUseCase.execute({ currentUser, eventId, attendeeId })
-    return { __typename: 'VoidOutput', success: true }
+    await this.deleteAttendeeUseCase.execute({ currentUser, eventId, attendeeId });
+    return { __typename: 'VoidOutput', success: true };
   }
 
   @Mutation()
@@ -144,7 +145,7 @@ export class EventMutationResolver {
       eventId,
       attendeeId,
       role: toDomainAttendeeRole(role),
-    })
-    return { __typename: 'VoidOutput', success: true }
+    });
+    return { __typename: 'VoidOutput', success: true };
   }
 }

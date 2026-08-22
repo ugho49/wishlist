@@ -1,60 +1,60 @@
-import type { ConfigType } from '@nestjs/config'
+import type { ConfigType } from '@nestjs/config';
 
-import { Inject, Injectable, InternalServerErrorException, Logger, UnauthorizedException } from '@nestjs/common'
-import { OAuth2Client, type TokenPayload } from 'google-auth-library'
+import { Inject, Injectable, InternalServerErrorException, Logger, UnauthorizedException } from '@nestjs/common';
+import { OAuth2Client, type TokenPayload } from 'google-auth-library';
 
-import authConfig from '../auth.config'
+import authConfig from '../auth.config';
 
 @Injectable()
 export class GoogleAuthService {
-  private readonly logger = new Logger(GoogleAuthService.name)
-  private readonly client: OAuth2Client
+  private readonly logger = new Logger(GoogleAuthService.name);
+  private readonly client: OAuth2Client;
 
   constructor(@Inject(authConfig.KEY) config: ConfigType<typeof authConfig>) {
-    const googleConfig = config.social.google
+    const googleConfig = config.social.google;
 
     this.client = new OAuth2Client({
       clientId: googleConfig.clientId,
       clientSecret: googleConfig.clientSecret,
       redirectUri: 'postmessage',
-    })
+    });
 
     this.logger.log('Created Google OAuth2Client', {
       clientId: googleConfig.clientId,
-    })
+    });
   }
 
   async getGoogleAccountFromCode(code: string): Promise<TokenPayload> {
-    this.logger.log('Exchange code to ID token...')
-    const idToken = await this.exchangeCodeToIdToken(code)
+    this.logger.log('Exchange code to ID token...');
+    const idToken = await this.exchangeCodeToIdToken(code);
 
     if (!idToken) {
-      throw new UnauthorizedException('Invalid code')
+      throw new UnauthorizedException('Invalid code');
     }
 
-    return this.verify(idToken)
+    return this.verify(idToken);
   }
 
   private async verify(token: string) {
-    this.logger.log('Verifying ID token...')
+    this.logger.log('Verifying ID token...');
     const ticket = await this.client.verifyIdToken({
       idToken: token,
-    })
-    const payload = ticket.getPayload()
+    });
+    const payload = ticket.getPayload();
 
     if (!payload) {
-      throw new UnauthorizedException('Your token is not valid')
+      throw new UnauthorizedException('Your token is not valid');
     }
 
-    return payload
+    return payload;
   }
 
   private async exchangeCodeToIdToken(code: string) {
     try {
-      const response = await this.client.getToken({ code })
-      return response.tokens.id_token
+      const response = await this.client.getToken({ code });
+      return response.tokens.id_token;
     } catch (error) {
-      throw new InternalServerErrorException(error, 'Error getting token from code')
+      throw new InternalServerErrorException(error, 'Error getting token from code');
     }
   }
 }

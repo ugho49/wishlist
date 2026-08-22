@@ -1,6 +1,5 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common'
-import { ApiTags } from '@nestjs/swagger'
-import { CurrentUser, IsAdmin } from '@wishlist/api/auth'
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import {
   type EventId,
   type ICurrentUser,
@@ -8,14 +7,16 @@ import {
   type SecretSantaId,
   type SecretSantaUserId,
   UpdateSecretSantaInputDto,
-} from '@wishlist/common'
+} from '@wishlist/common';
 
-import { CancelSecretSantaUseCase } from '../../application/command/cancel-secret-santa.use-case'
-import { DeleteSecretSantaUseCase } from '../../application/command/delete-secret-santa.use-case'
-import { DeleteSecretSantaUserUseCase } from '../../application/command/delete-secret-santa-user.use-case'
-import { StartSecretSantaUseCase } from '../../application/command/start-secret-santa.use-case'
-import { UpdateSecretSantaUseCase } from '../../application/command/update-secret-santa.use-case'
-import { GetSecretSantaUseCase } from '../../application/query/get-secret-santa.use-case'
+import { IsAdmin } from '../../../auth/infrastructure/decorators/admin.decorator';
+import { CurrentUser } from '../../../auth/infrastructure/decorators/user.decorator';
+import { CancelSecretSantaUseCase } from '../../application/command/cancel-secret-santa.use-case';
+import { DeleteSecretSantaUseCase } from '../../application/command/delete-secret-santa.use-case';
+import { DeleteSecretSantaUserUseCase } from '../../application/command/delete-secret-santa-user.use-case';
+import { StartSecretSantaUseCase } from '../../application/command/start-secret-santa.use-case';
+import { UpdateSecretSantaUseCase } from '../../application/command/update-secret-santa.use-case';
+import { GetSecretSantaUseCase } from '../../application/query/get-secret-santa.use-case';
 
 @IsAdmin()
 @ApiTags('ADMIN - Secret Santa')
@@ -35,7 +36,7 @@ export class SecretSantaAdminController {
     @CurrentUser() currentUser: ICurrentUser,
     @Query('eventId') eventId: EventId,
   ): Promise<SecretSantaDto | undefined> {
-    return this.getSecretSantaUseCase.execute({ currentUser, eventId })
+    return this.getSecretSantaUseCase.execute({ currentUser, eventId });
   }
 
   @Patch('/:id')
@@ -49,7 +50,7 @@ export class SecretSantaAdminController {
       currentUser,
       description: dto.description,
       budget: dto.budget,
-    })
+    });
   }
 
   @Delete('/:id')
@@ -57,7 +58,7 @@ export class SecretSantaAdminController {
     @Param('id') secretSantaId: SecretSantaId,
     @CurrentUser() currentUser: ICurrentUser,
   ): Promise<void> {
-    await this.deleteSecretSantaUseCase.execute({ currentUser, secretSantaId })
+    await this.deleteSecretSantaUseCase.execute({ currentUser, secretSantaId });
   }
 
   @Post('/:id/start')
@@ -68,7 +69,7 @@ export class SecretSantaAdminController {
     await this.startSecretSantaUseCase.execute({
       secretSantaId,
       currentUser,
-    })
+    });
   }
 
   @Post('/:id/cancel')
@@ -79,7 +80,7 @@ export class SecretSantaAdminController {
     await this.cancelSecretSantaUseCase.execute({
       secretSantaId,
       currentUser,
-    })
+    });
   }
 
   @Delete('/:id/user/:secretSantaUserId')
@@ -92,6 +93,6 @@ export class SecretSantaAdminController {
       secretSantaId,
       secretSantaUserId,
       currentUser,
-    })
+    });
   }
 }

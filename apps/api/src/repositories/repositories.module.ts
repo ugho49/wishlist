@@ -1,17 +1,17 @@
-import { Global, Module, type Type } from '@nestjs/common'
+import { Global, Module, type Type } from '@nestjs/common';
 
-import { PostgresEventRepository } from './impl/postgres-event.repository'
-import { PostgresEventAttendeeRepository } from './impl/postgres-event-attendee.repository'
-import { PostgresSecretSantaRepository } from './impl/postgres-secret-santa.repository'
-import { PostgresSecretSantaUserRepository } from './impl/postgres-secret-santa-user.repository'
-import { PostgresUserRepository } from './impl/postgres-user.repository'
-import { PostgresUserEmailChangeVerificationRepository } from './impl/postgres-user-email-change-verification'
-import { PostgresUserEmailSettingRepository } from './impl/postgres-user-email-setting.repository'
-import { PostgresUserPasswordVerificationRepository } from './impl/postgres-user-password-verification'
-import { PostgresUserSocialRepository } from './impl/postgres-user-social.repository'
-import { PostgresWishlistRepository } from './impl/postgres-wishlist.repository'
-import { PostgresWishlistItemRepository } from './impl/postgres-wishlist-item.repository'
-import { REPOSITORIES } from './repositories.constants'
+import { PostgresEventRepository } from './impl/postgres-event.repository';
+import { PostgresEventAttendeeRepository } from './impl/postgres-event-attendee.repository';
+import { PostgresSecretSantaRepository } from './impl/postgres-secret-santa.repository';
+import { PostgresSecretSantaUserRepository } from './impl/postgres-secret-santa-user.repository';
+import { PostgresUserRepository } from './impl/postgres-user.repository';
+import { PostgresUserEmailChangeVerificationRepository } from './impl/postgres-user-email-change-verification';
+import { PostgresUserEmailSettingRepository } from './impl/postgres-user-email-setting.repository';
+import { PostgresUserPasswordVerificationRepository } from './impl/postgres-user-password-verification';
+import { PostgresUserSocialRepository } from './impl/postgres-user-social.repository';
+import { PostgresWishlistRepository } from './impl/postgres-wishlist.repository';
+import { PostgresWishlistItemRepository } from './impl/postgres-wishlist-item.repository';
+import { REPOSITORIES } from './repositories.constants';
 
 const repositoryProviders: Record<keyof typeof REPOSITORIES, Type<unknown>> = {
   EVENT_ATTENDEE: PostgresEventAttendeeRepository,
@@ -25,7 +25,7 @@ const repositoryProviders: Record<keyof typeof REPOSITORIES, Type<unknown>> = {
   USER_SOCIAL: PostgresUserSocialRepository,
   WISHLIST: PostgresWishlistRepository,
   WISHLIST_ITEM: PostgresWishlistItemRepository,
-}
+};
 
 @Global()
 @Module({

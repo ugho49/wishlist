@@ -1,7 +1,7 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { SEO } from '@wishlist/front-components/SEO'
+import { createFileRoute } from '@tanstack/react-router';
+import { SEO } from '@wishlist/front-components/SEO';
 
-import { WelcomePage } from '../../components/onboarding/WelcomePage'
+import { WelcomePage } from '../../components/onboarding/WelcomePage';
 
 export const Route = createFileRoute('/_authenticated/welcome')({
   component: () => (
@@ -14,4 +14,4 @@ export const Route = createFileRoute('/_authenticated/welcome')({
       <WelcomePage />
     </>
   ),
-})
+});

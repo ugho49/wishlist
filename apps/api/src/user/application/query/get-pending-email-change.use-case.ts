@@ -1,14 +1,15 @@
-import { Inject, Injectable } from '@nestjs/common'
-import { REPOSITORIES } from '@wishlist/api/repositories'
-import { type ICurrentUser } from '@wishlist/common'
+import type { UserEmailChangeVerificationRepository } from '../../domain/repository/user-email-change-verification.repository';
 
-import { type UserEmailChangeVerificationRepository } from '../../domain'
+import { Inject, Injectable } from '@nestjs/common';
+import { type ICurrentUser } from '@wishlist/common';
 
-export type GetPendingEmailChangeResult = { newEmail: string; expiredAt: string } | undefined
+import { REPOSITORIES } from '../../../repositories/repositories.constants';
+
+export type GetPendingEmailChangeResult = { newEmail: string; expiredAt: string } | undefined;
 
 export type GetPendingEmailChangeInput = {
-  currentUser: ICurrentUser
-}
+  currentUser: ICurrentUser;
+};
 
 @Injectable()
 export class GetPendingEmailChangeUseCase {
@@ -18,18 +19,18 @@ export class GetPendingEmailChangeUseCase {
   ) {}
 
   async execute(query: GetPendingEmailChangeInput): Promise<GetPendingEmailChangeResult> {
-    const verifications = await this.emailChangeVerificationRepository.findByUserId(query.currentUser.id)
+    const verifications = await this.emailChangeVerificationRepository.findByUserId(query.currentUser.id);
 
     // Find the first non-expired verification
-    const activeVerification = verifications.find(v => !v.isExpired())
+    const activeVerification = verifications.find(v => !v.isExpired());
 
     if (!activeVerification) {
-      return undefined
+      return undefined;
     }
 
     return {
       newEmail: activeVerification.newEmail,
       expiredAt: activeVerification.expiredAt.toISOString(),
-    }
+    };
   }
 }

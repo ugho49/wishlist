@@ -1,7 +1,7 @@
-import { Injectable } from '@nestjs/common'
-import { type HealthCheckResult, HealthCheckService } from '@nestjs/terminus'
+import { Injectable } from '@nestjs/common';
+import { type HealthCheckResult, HealthCheckService } from '@nestjs/terminus';
 
-import { DatabaseHealthIndicator } from './database.indicator'
+import { DatabaseHealthIndicator } from './database.indicator';
 
 @Injectable()
 export class HealthService {
@@ -11,6 +11,6 @@ export class HealthService {
   ) {}
 
   check(): Promise<HealthCheckResult> {
-    return this.health.check([() => this.databaseHealthIndicator.pingCheck('database')])
+    return this.health.check([() => this.databaseHealthIndicator.pingCheck('database')]);
   }
 }

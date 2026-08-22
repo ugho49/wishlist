@@ -1,23 +1,23 @@
-import type { DrizzleTransaction } from '@wishlist/api/core'
-import type { ItemId, UserId, WishlistId } from '@wishlist/common'
-import type { WishlistItem } from './wishlist-item.model'
+import type { ItemId, UserId, WishlistId } from '@wishlist/common';
+import type { DrizzleTransaction } from '../../core/database/transaction-manager';
+import type { WishlistItem } from './wishlist-item.model';
 
 export interface NewItemsForWishlist {
-  wishlistId: WishlistId
-  wishlistTitle: string
-  ownerId: UserId
-  ownerName: string
-  nbNewItems: number
+  wishlistId: WishlistId;
+  wishlistTitle: string;
+  ownerId: UserId;
+  ownerName: string;
+  nbNewItems: number;
 }
 
 export interface WishlistItemRepository {
-  newId(): ItemId
-  findById(id: ItemId): Promise<WishlistItem | undefined>
-  findByIds(ids: ItemId[]): Promise<WishlistItem[]>
-  findByIdOrFail(id: ItemId): Promise<WishlistItem>
-  findByWishlist(wishlistId: WishlistId): Promise<WishlistItem[]>
-  findAllNewItems(since: Date): Promise<NewItemsForWishlist[]>
-  findImportableItems(params: { userId: UserId; wishlistId: WishlistId }): Promise<WishlistItem[]>
-  save(item: WishlistItem, tx?: DrizzleTransaction): Promise<void>
-  delete(id: ItemId, tx?: DrizzleTransaction): Promise<void>
+  newId(): ItemId;
+  findById(id: ItemId): Promise<WishlistItem | undefined>;
+  findByIds(ids: ItemId[]): Promise<WishlistItem[]>;
+  findByIdOrFail(id: ItemId): Promise<WishlistItem>;
+  findByWishlist(wishlistId: WishlistId): Promise<WishlistItem[]>;
+  findAllNewItems(since: Date): Promise<NewItemsForWishlist[]>;
+  findImportableItems(params: { userId: UserId; wishlistId: WishlistId }): Promise<WishlistItem[]>;
+  save(item: WishlistItem, tx?: DrizzleTransaction): Promise<void>;
+  delete(id: ItemId, tx?: DrizzleTransaction): Promise<void>;
 }

@@ -1,11 +1,12 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.3.12/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.5.10/schema.json",
   "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
   "files": {
     "ignoreUnknown": false,
     "includes": ["**", "!node_modules", "!dist", "!junit_reports", "!.nx", "!bun.lock"]
   },
   "formatter": {
+    "trailingNewline": true,
     "formatWithErrors": false,
     "indentStyle": "space",
     "indentWidth": 2,
@@ -20,33 +21,39 @@
   "linter": {
     "domains": {
       "test": "all",
-      "project": "recommended"
+      "project": "recommended",
+      "types": "all"
     },
     "rules": {
-      "recommended": true,
       "nursery": {
-        // Combinaison of @typescript-eslint/explicit-module-boundary-types and @typescript-eslint/explicit-function-return-type
-        // it is used to enforce the use of explicit types for modules and functions return types
-        // previously eslint was enforcing only return types, so a lot of code is not compliant
-        // "useExplicitType": "error",
+        // "useExplicitType": "warn",
+        "noUnsafePlusOperands": "error",
+        "noIdenticalTestTitle": "error",
+        "noUnnecessaryTemplateExpression": "error",
+        "useTestHooksOnTop": "error",
         "noFloatingPromises": "error",
         "noMisusedPromises": "error",
-        "noDuplicateArgumentNames": "error",
-        "noDuplicateEnumValueNames": "error",
-        "noDuplicateFieldDefinitionNames": "error",
-        "noDuplicateInputFieldNames": "error",
-        "noDuplicateVariableNames": "error"
+        "noDuplicateFieldDefinitionNames": "error"
       },
       "complexity": {
         "noStaticOnlyClass": "off",
-        "noEmptyTypeParameters": "error"
+        "noEmptyTypeParameters": "error",
+        "noUselessUndefined": "error",
+        "noUselessCatchBinding": "error"
       },
       "correctness": {
         "noUnusedPrivateClassMembers": "error",
         "noUnusedVariables": "error",
-        "noUnusedImports": { "level": "error", "fix": "safe" }
+        "noUnusedFunctionParameters": "error",
+        "noUnusedImports": { "level": "error", "fix": "safe" },
+        "useGraphqlNamedOperations": "error",
+        "noDuplicateVariableNames": "error",
+        "noDuplicateArgumentNames": "error",
+        "noDuplicateEnumValueNames": "error",
+        "noDuplicateInputFieldNames": "error"
       },
       "style": {
+        "useForOf": "error",
         "useReadonlyClassProperties": "error",
         "useImportType": "error",
         "noInferrableTypes": "error",
@@ -62,19 +69,26 @@
         "useConsistentArrayType": "error",
         "useConst": "error",
         "useThrowOnlyError": "error",
-        "useGraphqlNamingConvention": "error",
-        "useDeprecatedReason": "error"
+        "useNodejsImportProtocol": "error",
+        "useConsistentArrowReturn": "error"
       },
       "performance": {
-        "noAccumulatingSpread": "off"
+        "noAccumulatingSpread": "off",
+        "noBarrelFile": "error"
       },
       "suspicious": {
+        "noUnusedExpressions": "error",
         "useAwait": "error",
         "noImplicitAnyLet": "error",
         "noExplicitAny": "error",
         "noUnassignedVariables": "error",
         "noVar": "error",
-        "noDuplicateFields": "error"
+        "noDuplicateFields": "error",
+        "noEmptySource": "error",
+        "noImportCycles": "error",
+        "noDuplicateDependencies": "error",
+        "noDuplicateGraphqlOperationName": "error",
+        "noShadow": "error"
       }
     }
   },
@@ -83,7 +97,7 @@
       "jsxQuoteStyle": "double",
       "quoteProperties": "asNeeded",
       "trailingCommas": "all",
-      "semicolons": "asNeeded",
+      "semicolons": "always",
       "arrowParentheses": "asNeeded",
       "quoteStyle": "single"
     }

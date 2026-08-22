@@ -1,18 +1,18 @@
-import { IsNumber, IsString } from 'class-validator'
+import { IsNumber, IsString } from 'class-validator';
 
 export class MailConfig {
   @IsString()
-  from!: string
+  from!: string;
 
   @IsString()
-  host!: string
+  host!: string;
 
   @IsNumber()
-  port!: number
+  port!: number;
 
   @IsString()
-  username!: string
+  username!: string;
 
   @IsString()
-  password!: string
+  password!: string;
 }

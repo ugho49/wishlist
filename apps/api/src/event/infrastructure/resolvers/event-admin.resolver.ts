@@ -1,11 +1,14 @@
-import type { ICurrentUser } from '@wishlist/common'
+import type { ICurrentUser } from '@wishlist/common';
 
-import { NotFoundException } from '@nestjs/common'
-import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql'
-import { GqlCurrentUser, IsAdmin } from '@wishlist/api/auth'
-import { DEFAULT_RESULT_NUMBER, type GraphQLContext, ZodPipe } from '@wishlist/api/core'
-import { type AttendeeId, createPagedResponse, type EventId } from '@wishlist/common'
+import { NotFoundException } from '@nestjs/common';
+import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { type AttendeeId, createPagedResponse, type EventId } from '@wishlist/common';
 
+import { IsAdmin } from '../../../auth/infrastructure/decorators/admin.decorator';
+import { GqlCurrentUser } from '../../../auth/infrastructure/decorators/user.decorator';
+import { DEFAULT_RESULT_NUMBER } from '../../../core/common/pagination';
+import { type GraphQLContext } from '../../../core/graphql/graphql.context';
+import { ZodPipe } from '../../../core/graphql/zod-pipe';
 import {
   type AdminDeleteEventAttendeeResult,
   type AdminDeleteEventResult,
@@ -15,18 +18,18 @@ import {
   type AdminUpdateEventResult,
   type Event as GqlEvent,
   type UpdateEventInput,
-} from '../../../gql/generated-types'
-import { DeleteAttendeeUseCase } from '../../application/command/delete-attendee.use-case'
-import { DeleteEventUseCase } from '../../application/command/delete-event.use-case'
-import { UpdateEventUseCase } from '../../application/command/update-event.use-case'
-import { GetEventsUseCase } from '../../application/query/get-events.use-case'
-import { GetEventsForUserUseCase } from '../../application/query/get-events-for-user.use-case'
+} from '../../../gql/generated-types';
+import { DeleteAttendeeUseCase } from '../../application/command/delete-attendee.use-case';
+import { DeleteEventUseCase } from '../../application/command/delete-event.use-case';
+import { UpdateEventUseCase } from '../../application/command/update-event.use-case';
+import { GetEventsUseCase } from '../../application/query/get-events.use-case';
+import { GetEventsForUserUseCase } from '../../application/query/get-events-for-user.use-case';
 import {
   AdminEventPaginationFiltersSchema,
   AttendeeIdSchema,
   EventIdSchema,
   UpdateEventInputSchema,
-} from '../event.schema'
+} from '../event.schema';
 
 @IsAdmin()
 @Resolver()
@@ -45,11 +48,11 @@ export class EventAdminResolver {
     @Context() ctx: GraphQLContext,
   ): Promise<AdminGetEventByIdResult> {
     // canView returns true for admins, so the dataloader resolves any event.
-    const event = await ctx.loaders.event.load(id)
+    const event = await ctx.loaders.event.load(id);
     if (!event) {
-      throw new NotFoundException(`Event with id ${id} not found`)
+      throw new NotFoundException(`Event with id ${id} not found`);
     }
-    return event
+    return event;
   }
 
   @Query()
@@ -57,8 +60,8 @@ export class EventAdminResolver {
     @Args('filters', new ZodPipe(AdminEventPaginationFiltersSchema)) filters: AdminEventPaginationFilters,
     @Context() ctx: GraphQLContext,
   ): Promise<AdminGetEventsResult> {
-    const pageSize = filters.limit ?? DEFAULT_RESULT_NUMBER
-    const pageNumber = filters.page ?? 1
+    const pageSize = filters.limit ?? DEFAULT_RESULT_NUMBER;
+    const pageNumber = filters.page ?? 1;
 
     const pagedDtos = filters.userId
       ? await this.getEventsForUserUseCase.execute({
@@ -67,11 +70,11 @@ export class EventAdminResolver {
           pageSize,
           ignorePastEvents: false,
         })
-      : await this.getEventsUseCase.execute({ pageNumber, pageSize })
+      : await this.getEventsUseCase.execute({ pageNumber, pageSize });
 
     // Load full Event object types (with wishlistIds/attendeeIds) for the page of ids.
-    const loadedEvents = await ctx.loaders.event.loadMany(pagedDtos.resources.map(event => event.id))
-    const events = loadedEvents.filter((event): event is GqlEvent => event !== null && !(event instanceof Error))
+    const loadedEvents = await ctx.loaders.event.loadMany(pagedDtos.resources.map(event => event.id));
+    const events = loadedEvents.filter((event): event is GqlEvent => event !== null && !(event instanceof Error));
 
     const pagedResponse = createPagedResponse({
       resources: events,
@@ -80,7 +83,7 @@ export class EventAdminResolver {
         totalElements: pagedDtos.pagination.total_elements,
         pageNumber,
       },
-    })
+    });
 
     return {
       __typename: 'GetEventsPagedResponse',
@@ -92,7 +95,7 @@ export class EventAdminResolver {
         pageNumber: pagedResponse.pagination.page_number,
         pageSize: pagedResponse.pagination.pages_size,
       },
-    }
+    };
   }
 
   @Mutation()
@@ -110,9 +113,9 @@ export class EventAdminResolver {
         icon: input.icon ?? undefined,
         eventDate: new Date(input.eventDate),
       },
-    })
+    });
 
-    return { __typename: 'VoidOutput', success: true }
+    return { __typename: 'VoidOutput', success: true };
   }
 
   @Mutation()
@@ -120,8 +123,8 @@ export class EventAdminResolver {
     @Args('id', new ZodPipe(EventIdSchema)) id: EventId,
     @GqlCurrentUser() currentUser: ICurrentUser,
   ): Promise<AdminDeleteEventResult> {
-    await this.deleteEventUseCase.execute({ currentUser, eventId: id })
-    return { __typename: 'VoidOutput', success: true }
+    await this.deleteEventUseCase.execute({ currentUser, eventId: id });
+    return { __typename: 'VoidOutput', success: true };
   }
 
   @Mutation()
@@ -130,7 +133,7 @@ export class EventAdminResolver {
     @Args('attendeeId', new ZodPipe(AttendeeIdSchema)) attendeeId: AttendeeId,
     @GqlCurrentUser() currentUser: ICurrentUser,
   ): Promise<AdminDeleteEventAttendeeResult> {
-    await this.deleteAttendeeUseCase.execute({ currentUser, eventId, attendeeId })
-    return { __typename: 'VoidOutput', success: true }
+    await this.deleteAttendeeUseCase.execute({ currentUser, eventId, attendeeId });
+    return { __typename: 'VoidOutput', success: true };
   }
 }

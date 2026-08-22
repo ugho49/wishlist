@@ -1,6 +1,5 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common'
-import { ApiTags } from '@nestjs/swagger'
-import { CurrentUser } from '@wishlist/api/auth'
+import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import {
   AddItemForListInputDto,
   GetImportableItemsInputDto,
@@ -13,16 +12,17 @@ import {
   ToggleItemOutputDto,
   UpdateItemInputDto,
   type UserId,
-} from '@wishlist/common'
+} from '@wishlist/common';
 
-import { CreateItemUseCase } from '../application/command/create-item.use-case'
-import { DeleteItemUseCase } from '../application/command/delete-item.use-case'
-import { ImportItemsUseCase } from '../application/command/import-items.use-case'
-import { ToggleItemUseCase } from '../application/command/toggle-item.use-case'
-import { UpdateItemUseCase } from '../application/command/update-item.use-case'
-import { GetImportableItemsUseCase } from '../application/query/get-importable-items.use-case'
-import { ScanItemUrlUseCase } from '../application/query/scan-item-url.use-case'
-import { itemMapper } from './item.mapper'
+import { CurrentUser } from '../../auth/infrastructure/decorators/user.decorator';
+import { CreateItemUseCase } from '../application/command/create-item.use-case';
+import { DeleteItemUseCase } from '../application/command/delete-item.use-case';
+import { ImportItemsUseCase } from '../application/command/import-items.use-case';
+import { ToggleItemUseCase } from '../application/command/toggle-item.use-case';
+import { UpdateItemUseCase } from '../application/command/update-item.use-case';
+import { GetImportableItemsUseCase } from '../application/query/get-importable-items.use-case';
+import { ScanItemUrlUseCase } from '../application/query/scan-item-url.use-case';
+import { itemMapper } from './item.mapper';
 
 @ApiTags('Item')
 @Controller('/item')
@@ -43,8 +43,8 @@ export class ItemController {
     @CurrentUser('id') userId: UserId,
     @Query() dto: GetImportableItemsInputDto,
   ): Promise<ItemDto[]> {
-    const items = await this.getImportableItemsUseCase.execute({ userId, wishlistId: dto.wishlist_id })
-    return items.map(item => itemMapper.toDto({ item, displayUserAndSuggested: false }))
+    const items = await this.getImportableItemsUseCase.execute({ userId, wishlistId: dto.wishlist_id });
+    return items.map(item => itemMapper.toDto({ item, displayUserAndSuggested: false }));
   }
 
   @Post('/import')
@@ -53,15 +53,15 @@ export class ItemController {
       currentUser,
       wishlistId: dto.wishlist_id,
       sourceItemIds: dto.source_item_ids,
-    })
+    });
 
-    return items.map(item => itemMapper.toDto({ item, displayUserAndSuggested: false }))
+    return items.map(item => itemMapper.toDto({ item, displayUserAndSuggested: false }));
   }
 
   // Scan an item url to get the picture url
   @Post('/scan-url')
   scanItemUrl(@Body() dto: ScanItemInputDto): Promise<ScanItemOutputDto> {
-    return this.scanItemUrlUseCase.execute({ url: dto.url })
+    return this.scanItemUrlUseCase.execute({ url: dto.url });
   }
 
   @Post()
@@ -76,9 +76,9 @@ export class ItemController {
         url: dto.url,
         pictureUrl: dto.picture_url,
       },
-    })
+    });
 
-    return itemMapper.toDto({ item, displayUserAndSuggested: true })
+    return itemMapper.toDto({ item, displayUserAndSuggested: true });
   }
 
   @Put('/:id')
@@ -97,16 +97,16 @@ export class ItemController {
         url: dto.url,
         pictureUrl: dto.picture_url,
       },
-    })
+    });
   }
 
   @Delete('/:id')
   async deleteItem(@Param('id') itemId: ItemId, @CurrentUser() currentUser: ICurrentUser): Promise<void> {
-    await this.deleteItemUseCase.execute({ itemId, currentUser })
+    await this.deleteItemUseCase.execute({ itemId, currentUser });
   }
 
   @Post('/:id/toggle')
   toggleItem(@Param('id') itemId: ItemId, @CurrentUser() currentUser: ICurrentUser): Promise<ToggleItemOutputDto> {
-    return this.toggleItemUseCase.execute({ itemId, currentUser })
+    return this.toggleItemUseCase.execute({ itemId, currentUser });
   }
 }

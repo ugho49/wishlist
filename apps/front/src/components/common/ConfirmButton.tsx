@@ -1,27 +1,27 @@
-import type { ButtonProps } from '@mui/material'
-import type { Theme } from '@mui/material/styles'
-import type { SxProps } from '@mui/system'
-import type React from 'react'
-import type { PropsWithChildren } from 'react'
+import type { ButtonProps } from '@mui/material';
+import type { Theme } from '@mui/material/styles';
+import type { SxProps } from '@mui/system';
+import type React from 'react';
+import type { PropsWithChildren } from 'react';
 
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material'
-import { useCallback, useMemo, useState } from 'react'
+import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
+import { useCallback, useMemo, useState } from 'react';
 
 export type ConfirmButtonProps = {
-  confirmTitle: string | React.ReactNode
-  confirmText: string | React.ReactNode
-  confirmButton?: string
-  cancelButton?: string
-  onClick: () => void
-  disabled?: boolean
-  loading?: boolean
-  startIcon?: ButtonProps['startIcon']
-  endIcon?: ButtonProps['endIcon']
-  color?: ButtonProps['color']
-  size?: ButtonProps['size']
-  variant?: ButtonProps['variant']
-  sx?: SxProps<Theme>
-}
+  confirmTitle: string | React.ReactNode;
+  confirmText: string | React.ReactNode;
+  confirmButton?: string;
+  cancelButton?: string;
+  onClick: () => void;
+  disabled?: boolean;
+  loading?: boolean;
+  startIcon?: ButtonProps['startIcon'];
+  endIcon?: ButtonProps['endIcon'];
+  color?: ButtonProps['color'];
+  size?: ButtonProps['size'];
+  variant?: ButtonProps['variant'];
+  sx?: SxProps<Theme>;
+};
 
 export const ConfirmButton = ({
   confirmTitle,
@@ -39,15 +39,14 @@ export const ConfirmButton = ({
   endIcon,
   sx,
 }: PropsWithChildren<ConfirmButtonProps>) => {
-  const [openDialog, setOpenDialog] = useState(false)
+  const [openDialog, setOpenDialog] = useState(false);
 
-  const closeDialog = useCallback(() => setOpenDialog(false), [])
+  const closeDialog = useCallback(() => setOpenDialog(false), []);
 
   const loadingPosition = useMemo(() => {
-    if (startIcon) return 'start'
-    if (endIcon) return 'end'
-    return undefined
-  }, [startIcon, endIcon])
+    if (startIcon) return 'start';
+    if (endIcon) return 'end';
+  }, [startIcon, endIcon]);
 
   return (
     <>
@@ -74,8 +73,8 @@ export const ConfirmButton = ({
           <Button onClick={() => closeDialog()}>{cancelButton || 'Annuler'}</Button>
           <Button
             onClick={() => {
-              closeDialog()
-              onClick()
+              closeDialog();
+              onClick();
             }}
             autoFocus
           >
@@ -84,5 +83,5 @@ export const ConfirmButton = ({
         </DialogActions>
       </Dialog>
     </>
-  )
-}
+  );
+};

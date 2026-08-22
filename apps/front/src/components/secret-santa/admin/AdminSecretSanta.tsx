@@ -1,16 +1,16 @@
-import type { SecretSantaUserId } from '@wishlist/common'
-import type { SecretSantaFormInput } from '../EditSecretSantaFormDialog'
-import type { SecretSantaItem } from '../secret-santa.types'
+import type { SecretSantaUserId } from '@wishlist/common';
+import type { SecretSantaFormInput } from '../EditSecretSantaFormDialog';
+import type { SecretSantaItem } from '../secret-santa.types';
 
-import AccessTimeIcon from '@mui/icons-material/AccessTime'
-import AccountBalanceIcon from '@mui/icons-material/AccountBalance'
-import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt'
-import CancelIcon from '@mui/icons-material/Cancel'
-import DeleteIcon from '@mui/icons-material/Delete'
-import InfoIcon from '@mui/icons-material/Info'
-import NumbersIcon from '@mui/icons-material/Numbers'
-import ShortTextIcon from '@mui/icons-material/ShortText'
-import TuneIcon from '@mui/icons-material/Tune'
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
+import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt';
+import CancelIcon from '@mui/icons-material/Cancel';
+import DeleteIcon from '@mui/icons-material/Delete';
+import InfoIcon from '@mui/icons-material/Info';
+import NumbersIcon from '@mui/icons-material/Numbers';
+import ShortTextIcon from '@mui/icons-material/ShortText';
+import TuneIcon from '@mui/icons-material/Tune';
 import {
   Avatar,
   Button,
@@ -21,27 +21,27 @@ import {
   Stack,
   useMediaQuery,
   useTheme,
-} from '@mui/material'
-import { DataGrid } from '@mui/x-data-grid'
-import { DateTime } from 'luxon'
-import { useState } from 'react'
+} from '@mui/material';
+import { DataGrid } from '@mui/x-data-grid';
+import { DateTime } from 'luxon';
+import { useState } from 'react';
 
-import { SecretSantaStatus } from '../../../gql'
-import { eurosFormatter } from '../../../utils/currency.utils'
-import { BreaklineText } from '../../common/BreaklineText'
-import { ConfirmButton } from '../../common/ConfirmButton'
-import { ConfirmIconButton } from '../../common/ConfirmIconButton'
-import { EditSecretSantaFormDialog } from '../EditSecretSantaFormDialog'
+import { SecretSantaStatus } from '../../../gql';
+import { eurosFormatter } from '../../../utils/currency.utils';
+import { BreaklineText } from '../../common/BreaklineText';
+import { ConfirmButton } from '../../common/ConfirmButton';
+import { ConfirmIconButton } from '../../common/ConfirmIconButton';
+import { EditSecretSantaFormDialog } from '../EditSecretSantaFormDialog';
 
 type AdminSecretSantaProps = {
-  secretSanta: SecretSantaItem
-  loading?: boolean
-  deleteSecretSanta: () => void
-  startSecretSanta: () => void
-  cancelSecretSanta: () => void
-  updateSecretSanta: (input: SecretSantaFormInput) => void
-  removeSecretSantaUser: (secretSantaUserId: SecretSantaUserId) => void
-}
+  secretSanta: SecretSantaItem;
+  loading?: boolean;
+  deleteSecretSanta: () => void;
+  startSecretSanta: () => void;
+  cancelSecretSanta: () => void;
+  updateSecretSanta: (input: SecretSantaFormInput) => void;
+  removeSecretSantaUser: (secretSantaUserId: SecretSantaUserId) => void;
+};
 
 export const AdminSecretSanta = ({
   secretSanta,
@@ -52,9 +52,9 @@ export const AdminSecretSanta = ({
   updateSecretSanta,
   removeSecretSantaUser,
 }: AdminSecretSantaProps) => {
-  const theme = useTheme()
-  const smallScreen = useMediaQuery(theme.breakpoints.down('md'))
-  const [openEditModal, setOpenEditModal] = useState(false)
+  const theme = useTheme();
+  const smallScreen = useMediaQuery(theme.breakpoints.down('md'));
+  const [openEditModal, setOpenEditModal] = useState(false);
 
   return (
     <div style={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -63,8 +63,8 @@ export const AdminSecretSanta = ({
         open={openEditModal}
         saveButtonText="Modifier"
         handleSubmit={input => {
-          setOpenEditModal(false)
-          void updateSecretSanta(input)
+          setOpenEditModal(false);
+          void updateSecretSanta(input);
         }}
         handleClose={() => setOpenEditModal(false)}
         input={{ budget: secretSanta.budget, description: secretSanta.description }}
@@ -249,5 +249,5 @@ export const AdminSecretSanta = ({
         ]}
       />
     </div>
-  )
-}
+  );
+};

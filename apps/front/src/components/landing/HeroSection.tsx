@@ -1,11 +1,11 @@
-import type { ButtonProps } from '@mui/material'
-import type { LinkProps } from '@tanstack/react-router'
+import type { ButtonProps } from '@mui/material';
+import type { LinkProps } from '@tanstack/react-router';
 
-import { Box, Button, Container, Typography } from '@mui/material'
-import { keyframes, styled } from '@mui/material/styles'
-import { Link } from '@tanstack/react-router'
+import { Box, Button, Container, Typography } from '@mui/material';
+import { keyframes, styled } from '@mui/material/styles';
+import { Link } from '@tanstack/react-router';
 
-import { Logo } from '../common/Logo'
+import { Logo } from '../common/Logo';
 
 // Animations
 const twinkle = keyframes`
@@ -19,7 +19,7 @@ const twinkle = keyframes`
     transform: scale(1.5);
     filter: brightness(1.5);
   }
-`
+`;
 
 const shimmer = keyframes`
   0% { 
@@ -34,7 +34,7 @@ const shimmer = keyframes`
     opacity: 0.4;
     filter: brightness(1);
   }
-`
+`;
 
 const colorShift = keyframes`
   0%, 100% {
@@ -49,7 +49,7 @@ const colorShift = keyframes`
   75% {
     filter: hue-rotate(-2deg) brightness(1.02) saturate(1.05);
   }
-`
+`;
 
 const HeroContainer = styled(Box)(() => ({
   background: 'linear-gradient(135deg, #1a3a52 0%, #255376 50%, #1a3a52 100%)',
@@ -59,7 +59,7 @@ const HeroContainer = styled(Box)(() => ({
   display: 'flex',
   alignItems: 'center',
   animation: `${colorShift} 10s ease-in-out infinite`,
-}))
+}));
 
 // Container for all stars
 const StarsContainer = styled(Box)(() => ({
@@ -70,7 +70,7 @@ const StarsContainer = styled(Box)(() => ({
   bottom: 0,
   pointerEvents: 'none',
   zIndex: 0,
-}))
+}));
 
 // Animated Star Points
 const StarPoint = styled(Box)(() => ({
@@ -82,7 +82,7 @@ const StarPoint = styled(Box)(() => ({
   pointerEvents: 'none',
   boxShadow: '0 0 10px rgba(255, 255, 255, 1), 0 0 20px rgba(147, 197, 253, 0.8)',
   animation: `${twinkle} 1.5s ease-in-out infinite`,
-}))
+}));
 
 const BiggerStar = styled(Box)(() => ({
   position: 'absolute',
@@ -93,7 +93,7 @@ const BiggerStar = styled(Box)(() => ({
   pointerEvents: 'none',
   boxShadow: '0 0 15px rgba(255, 255, 255, 1), 0 0 30px rgba(147, 197, 253, 1)',
   animation: `${shimmer} 1s ease-in-out infinite`,
-}))
+}));
 
 const ContentWrapper = styled(Container)(({ theme }) => ({
   position: 'relative',
@@ -109,11 +109,11 @@ const ContentWrapper = styled(Container)(({ theme }) => ({
     textAlign: 'center',
     paddingTop: theme.spacing(14),
   },
-}))
+}));
 
 const MainContent = styled(Box)(() => ({
   color: 'white',
-}))
+}));
 
 const GradientTitle = styled(Typography)(({ theme }) => ({
   background: 'linear-gradient(135deg, #ffffff 0%, #e0f2fe 100%)',
@@ -130,7 +130,7 @@ const GradientTitle = styled(Typography)(({ theme }) => ({
   [theme.breakpoints.down('sm')]: {
     fontSize: '2rem',
   },
-}))
+}));
 
 const Subtitle = styled(Typography)(({ theme }) => ({
   color: 'rgba(255, 255, 255, 0.9)',
@@ -142,7 +142,7 @@ const Subtitle = styled(Typography)(({ theme }) => ({
     fontSize: '1.1rem',
     maxWidth: 'none',
   },
-}))
+}));
 
 const ButtonGroup = styled(Box)(({ theme }) => ({
   display: 'flex',
@@ -154,7 +154,7 @@ const ButtonGroup = styled(Box)(({ theme }) => ({
   [theme.breakpoints.down('sm')]: {
     flexDirection: 'column',
   },
-}))
+}));
 
 const PrimaryButton = styled(Button)<ButtonProps & LinkProps>(({ theme }) => ({
   backgroundColor: 'white',
@@ -170,7 +170,7 @@ const PrimaryButton = styled(Button)<ButtonProps & LinkProps>(({ theme }) => ({
     transform: 'translateY(-2px)',
     boxShadow: '0 8px 30px rgba(0, 0, 0, 0.15)',
   },
-}))
+}));
 
 const SecondaryButton = styled(Button)<ButtonProps & LinkProps>(({ theme }) => ({
   borderColor: 'white',
@@ -185,7 +185,7 @@ const SecondaryButton = styled(Button)<ButtonProps & LinkProps>(({ theme }) => (
     borderColor: 'white',
     transform: 'translateY(-2px)',
   },
-}))
+}));
 
 const FeaturesSidebar = styled(Box)(({ theme }) => ({
   backgroundColor: 'rgba(255, 255, 255, 0.95)',
@@ -198,7 +198,7 @@ const FeaturesSidebar = styled(Box)(({ theme }) => ({
     maxWidth: '400px',
     marginBottom: theme.spacing(6),
   },
-}))
+}));
 
 const FeatureItem = styled(Box)(({ theme }) => ({
   display: 'flex',
@@ -208,7 +208,7 @@ const FeatureItem = styled(Box)(({ theme }) => ({
   '&:last-child': {
     marginBottom: 0,
   },
-}))
+}));
 
 const FeatureIcon = styled(Box)(({ theme }) => ({
   width: 48,
@@ -220,23 +220,23 @@ const FeatureIcon = styled(Box)(({ theme }) => ({
   fontSize: '1.5rem',
   fontWeight: 600,
   color: 'white',
-}))
+}));
 
 const FeatureContent = styled(Box)(() => ({
   flex: 1,
-}))
+}));
 
 const FeatureTitle = styled(Typography)(({ theme }) => ({
   fontWeight: 600,
   color: theme.palette.text.primary,
   marginBottom: theme.spacing(0.5),
-}))
+}));
 
 const FeatureDescription = styled(Typography)(({ theme }) => ({
   fontSize: '0.9rem',
   color: theme.palette.text.secondary,
   lineHeight: 1.4,
-}))
+}));
 
 const NavBar = styled(Box)(({ theme }) => ({
   position: 'absolute',
@@ -248,19 +248,19 @@ const NavBar = styled(Box)(({ theme }) => ({
   backdropFilter: 'blur(10px)',
   borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
   transition: 'padding 0.3s ease',
-}))
+}));
 
 const NavContent = styled(Container)(() => ({
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'center',
-}))
+}));
 
 const NavRightGroup = styled(Box)(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   gap: theme.spacing(4),
-}))
+}));
 
 const NavLinks = styled(Box)(({ theme }) => ({
   display: 'flex',
@@ -268,7 +268,7 @@ const NavLinks = styled(Box)(({ theme }) => ({
   [theme.breakpoints.down('md')]: {
     display: 'none',
   },
-}))
+}));
 
 const NavLink = styled(Typography)(() => ({
   color: 'rgba(255, 255, 255, 0.9)',
@@ -279,17 +279,17 @@ const NavLink = styled(Typography)(() => ({
   '&:hover': {
     color: 'white',
   },
-}))
+}));
 
 const handleSmoothScroll = (elementId: string) => {
-  const element = document.getElementById(elementId)
+  const element = document.getElementById(elementId);
   if (element) {
     element.scrollIntoView({
       behavior: 'smooth',
       block: 'start',
-    })
+    });
   }
-}
+};
 
 const LoginButton = styled(Button)<ButtonProps & LinkProps>(() => ({
   color: 'white',
@@ -300,7 +300,7 @@ const LoginButton = styled(Button)<ButtonProps & LinkProps>(() => ({
     borderColor: 'white',
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
   },
-}))
+}));
 
 const features = [
   {
@@ -321,12 +321,12 @@ const features = [
     description: 'Interface intuitive et design élégant pour une expérience utilisateur exceptionnelle.',
     bgColor: '#8b5cf6',
   },
-]
+];
 
 const navItems = [
   { label: 'Fonctionnalités', targetId: 'features' },
   { label: 'FAQ', targetId: 'faq' },
-]
+];
 
 export const HeroSection = () => {
   // Generate star positions
@@ -335,14 +335,14 @@ export const HeroSection = () => {
     top: Math.random() * 100,
     left: Math.random() * 100,
     delay: Math.random() * 1.5,
-  }))
+  }));
 
   const bigStars = Array.from({ length: 25 }, (_, i) => ({
     id: i,
     top: Math.random() * 100,
     left: Math.random() * 100,
     delay: Math.random() * 1,
-  }))
+  }));
 
   return (
     <HeroContainer>
@@ -436,5 +436,5 @@ export const HeroSection = () => {
         </FeaturesSidebar>
       </ContentWrapper>
     </HeroContainer>
-  )
-}
+  );
+};

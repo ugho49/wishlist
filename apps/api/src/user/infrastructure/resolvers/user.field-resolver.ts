@@ -1,12 +1,12 @@
-import type { ICurrentUser } from '@wishlist/common'
+import type { ICurrentUser } from '@wishlist/common';
 
-import { Context, Parent, ResolveField, Resolver } from '@nestjs/graphql'
-import { GqlCurrentUser } from '@wishlist/api/auth'
-import { type GraphQLContext } from '@wishlist/api/core'
-import { type UserId } from '@wishlist/common'
+import { Context, Parent, ResolveField, Resolver } from '@nestjs/graphql';
+import { type UserId } from '@wishlist/common';
 
-import { type User, type UserEmailSettings, type UserSocial } from '../../../gql/generated-types'
-import { GetUserEmailSettingUseCase } from '../../application/query/get-user-email-setting.use-case'
+import { GqlCurrentUser } from '../../../auth/infrastructure/decorators/user.decorator';
+import { type GraphQLContext } from '../../../core/graphql/graphql.context';
+import { type User, type UserEmailSettings, type UserSocial } from '../../../gql/generated-types';
+import { GetUserEmailSettingUseCase } from '../../application/query/get-user-email-setting.use-case';
 
 @Resolver('User')
 export class UserFieldResolver {
@@ -18,8 +18,8 @@ export class UserFieldResolver {
     @Context() ctx: GraphQLContext,
     @GqlCurrentUser('id') currentUserId: UserId,
   ): Promise<UserSocial[] | null> {
-    if (user.id !== currentUserId) return Promise.resolve(null)
-    return ctx.loaders.userSocialsByUser.load(user.id)
+    if (user.id !== currentUserId) return Promise.resolve(null);
+    return ctx.loaders.userSocialsByUser.load(user.id);
   }
 
   @ResolveField()
@@ -27,13 +27,13 @@ export class UserFieldResolver {
     @Parent() user: User,
     @GqlCurrentUser() currentUser: ICurrentUser,
   ): Promise<UserEmailSettings | null> {
-    if (user.id !== currentUser.id) return null
+    if (user.id !== currentUser.id) return null;
 
-    const result = await this.getUserEmailSettingUseCase.execute({ currentUser })
+    const result = await this.getUserEmailSettingUseCase.execute({ currentUser });
 
     return {
       __typename: 'UserEmailSettings',
       dailyNewItemNotification: result.daily_new_item_notification,
-    }
+    };
   }
 }

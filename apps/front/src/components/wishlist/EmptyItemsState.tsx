@@ -1,10 +1,10 @@
-import type { SxProps, Theme } from '@mui/material'
+import type { SxProps, Theme } from '@mui/material';
 
-import AddIcon from '@mui/icons-material/Add'
-import { Box, Button, Stack, styled, Typography } from '@mui/material'
+import AddIcon from '@mui/icons-material/Add';
+import { Box, Button, Stack, styled, Typography } from '@mui/material';
 
-import EmptyItemsIllustration from '../../assets/illustrations/empty-items.png'
-import { ImportItemsButton } from './ImportItemsButton'
+import EmptyItemsIllustration from '../../assets/illustrations/empty-items.png';
+import { ImportItemsButton } from './ImportItemsButton';
 
 const EmptyStateContainer = styled(Stack)(({ theme }) => ({
   alignItems: 'center',
@@ -14,7 +14,7 @@ const EmptyStateContainer = styled(Stack)(({ theme }) => ({
   [theme.breakpoints.down('md')]: {
     marginTop: theme.spacing(0),
   },
-}))
+}));
 
 const Illustration = styled('img')(({ theme }) => ({
   width: '150px',
@@ -23,21 +23,21 @@ const Illustration = styled('img')(({ theme }) => ({
     width: '100px',
     height: '100px',
   },
-}))
+}));
 
 const EmptyStateTitle = styled(Typography)(({ theme }) => ({
   fontSize: '1.25rem',
   fontWeight: 500,
   color: theme.palette.text.primary,
   textAlign: 'center',
-}))
+}));
 
 const EmptyStateSubtitle = styled(Typography)(({ theme }) => ({
   fontSize: '0.95rem',
   color: theme.palette.text.secondary,
   textAlign: 'center',
   maxWidth: '400px',
-}))
+}));
 
 const ButtonsContainer = styled(Stack)(({ theme }) => ({
   flexDirection: 'row',
@@ -48,7 +48,7 @@ const ButtonsContainer = styled(Stack)(({ theme }) => ({
   [theme.breakpoints.down('lg')]: {
     flexDirection: 'column',
   },
-}))
+}));
 
 const AddItemButton = styled(Button)(({ theme }) => ({
   borderRadius: '24px',
@@ -61,15 +61,15 @@ const AddItemButton = styled(Button)(({ theme }) => ({
     transform: 'translateY(-2px)',
   },
   transition: 'all 0.3s ease',
-}))
+}));
 
 export type EmptyItemsStateProps = {
-  onAddItem: () => void
-  isOwner: boolean
-  hasImportableItems: boolean
-  onImportItems: () => void
-  sx?: SxProps<Theme>
-}
+  onAddItem: () => void;
+  isOwner: boolean;
+  hasImportableItems: boolean;
+  onImportItems: () => void;
+  sx?: SxProps<Theme>;
+};
 
 export const EmptyItemsState = ({
   onAddItem,
@@ -77,33 +77,31 @@ export const EmptyItemsState = ({
   hasImportableItems,
   onImportItems,
   sx,
-}: EmptyItemsStateProps) => {
-  return (
-    <EmptyStateContainer sx={sx}>
-      <Box>
-        <Illustration src={EmptyItemsIllustration} alt="Empty Items" />
-      </Box>
+}: EmptyItemsStateProps) => (
+  <EmptyStateContainer sx={sx}>
+    <Box>
+      <Illustration src={EmptyItemsIllustration} alt="Empty Items" />
+    </Box>
 
-      <Box textAlign="center">
-        <EmptyStateTitle>Aucun souhait pour le moment</EmptyStateTitle>
-        <EmptyStateSubtitle>
-          {!isOwner && 'Cette liste ne contient aucun souhait. Vous pouvez suggérer un souhait !'}
-          {isOwner && !hasImportableItems && 'Ajoutez votre premier souhait à cette liste et partagez vos envies !'}
-          {isOwner && hasImportableItems && "Commencez par importer d'anciens souhaits ou ajoutez-en de nouveaux !"}
-        </EmptyStateSubtitle>
-      </Box>
+    <Box textAlign="center">
+      <EmptyStateTitle>Aucun souhait pour le moment</EmptyStateTitle>
+      <EmptyStateSubtitle>
+        {!isOwner && 'Cette liste ne contient aucun souhait. Vous pouvez suggérer un souhait !'}
+        {isOwner && !hasImportableItems && 'Ajoutez votre premier souhait à cette liste et partagez vos envies !'}
+        {isOwner && hasImportableItems && "Commencez par importer d'anciens souhaits ou ajoutez-en de nouveaux !"}
+      </EmptyStateSubtitle>
+    </Box>
 
-      <ButtonsContainer>
-        {isOwner && hasImportableItems && (
-          <ImportItemsButton onClick={onImportItems} rounded sx={{ fontSize: '1rem' }}>
-            Importer d'anciens souhaits
-          </ImportItemsButton>
-        )}
+    <ButtonsContainer>
+      {isOwner && hasImportableItems && (
+        <ImportItemsButton onClick={onImportItems} rounded sx={{ fontSize: '1rem' }}>
+          Importer d'anciens souhaits
+        </ImportItemsButton>
+      )}
 
-        <AddItemButton variant="contained" color="primary" onClick={onAddItem} startIcon={<AddIcon />}>
-          {isOwner ? 'Ajouter un souhait' : 'Suggérer un souhait'}
-        </AddItemButton>
-      </ButtonsContainer>
-    </EmptyStateContainer>
-  )
-}
+      <AddItemButton variant="contained" color="primary" onClick={onAddItem} startIcon={<AddIcon />}>
+        {isOwner ? 'Ajouter un souhait' : 'Suggérer un souhait'}
+      </AddItemButton>
+    </ButtonsContainer>
+  </EmptyStateContainer>
+);

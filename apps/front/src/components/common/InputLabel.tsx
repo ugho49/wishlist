@@ -1,12 +1,12 @@
-import type { SxProps, Theme } from '@mui/material/styles'
-import type { PropsWithChildren } from 'react'
+import type { SxProps, Theme } from '@mui/material/styles';
+import type { PropsWithChildren } from 'react';
 
-import { inputLabelClasses, InputLabel as MuiInputLabel, styled } from '@mui/material'
+import { inputLabelClasses, InputLabel as MuiInputLabel, styled } from '@mui/material';
 
 export type InputLabelProps = {
-  required?: boolean
-  sx?: SxProps<Theme>
-}
+  required?: boolean;
+  sx?: SxProps<Theme>;
+};
 
 const InputLabelStyled = styled(MuiInputLabel)(({ theme }) => ({
   [`&.${inputLabelClasses.root}`]: {
@@ -21,12 +21,10 @@ const InputLabelStyled = styled(MuiInputLabel)(({ theme }) => ({
       marginLeft: '2px',
     },
   },
-}))
+}));
 
-export const InputLabel = ({ required = false, children, sx }: PropsWithChildren<InputLabelProps>) => {
-  return (
-    <InputLabelStyled required={required} sx={sx}>
-      {children}
-    </InputLabelStyled>
-  )
-}
+export const InputLabel = ({ required = false, children, sx }: PropsWithChildren<InputLabelProps>) => (
+  <InputLabelStyled required={required} sx={sx}>
+    {children}
+  </InputLabelStyled>
+);

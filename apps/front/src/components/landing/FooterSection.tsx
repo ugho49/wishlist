@@ -1,6 +1,6 @@
-import { Box, Stack, Typography } from '@mui/material'
-import { styled } from '@mui/material/styles'
-import { Link } from '@tanstack/react-router'
+import { Box, Stack, Typography } from '@mui/material';
+import { styled } from '@mui/material/styles';
+import { Link } from '@tanstack/react-router';
 
 const FooterContainer = styled(Box)(({ theme }) => ({
   backgroundColor: theme.palette.primary.dark,
@@ -9,7 +9,7 @@ const FooterContainer = styled(Box)(({ theme }) => ({
   gap: theme.spacing(2),
   display: 'flex',
   flexDirection: 'column',
-}))
+}));
 
 const FooterLinkItem = styled(Typography)(() => ({
   color: '#d1d5db',
@@ -23,22 +23,20 @@ const FooterLinkItem = styled(Typography)(() => ({
     color: 'inherit',
     textDecoration: 'none',
   },
-}))
+}));
 
-export const FooterSection = () => {
-  return (
-    <FooterContainer>
-      <Stack direction="row" spacing={3} justifyContent="center" alignItems="center">
-        <FooterLinkItem variant="body2">
-          <Link to="/privacy">Confidentialité</Link>
-        </FooterLinkItem>
-        <FooterLinkItem variant="body2">
-          <Link to="/terms">Conditions</Link>
-        </FooterLinkItem>
-      </Stack>
-      <Typography variant="body2" color="grey.400" textAlign="center">
-        © {new Date().getFullYear()} Wishlist. Tous droits réservés.
-      </Typography>
-    </FooterContainer>
-  )
-}
+export const FooterSection = () => (
+  <FooterContainer>
+    <Stack direction="row" spacing={3} justifyContent="center" alignItems="center">
+      <FooterLinkItem variant="body2">
+        <Link to="/privacy">Confidentialité</Link>
+      </FooterLinkItem>
+      <FooterLinkItem variant="body2">
+        <Link to="/terms">Conditions</Link>
+      </FooterLinkItem>
+    </Stack>
+    <Typography variant="body2" color="grey.400" textAlign="center">
+      © {new Date().getFullYear()} Wishlist. Tous droits réservés.
+    </Typography>
+  </FooterContainer>
+);

@@ -1,12 +1,12 @@
-import type { EventId } from '@wishlist/common'
+import type { EventId } from '@wishlist/common';
 
-import { useEffect } from 'react'
+import { useEffect } from 'react';
 
-import { isRejection, rejectionMessage, useGetMySecretSantaDrawQuery } from '../../gql'
-import { useToast } from '../useToast'
+import { isRejection, rejectionMessage, useGetMySecretSantaDrawQuery } from '../../gql';
+import { useToast } from '../useToast';
 
 export const useMySecretSantaDraw = (eventId: EventId) => {
-  const { addToast } = useToast()
+  const { addToast } = useToast();
   const { data, isLoading } = useGetMySecretSantaDrawQuery(
     { eventId },
     {
@@ -15,16 +15,16 @@ export const useMySecretSantaDraw = (eventId: EventId) => {
       // exposed as `undefined`.
       select: d => d.mySecretSantaDraw ?? undefined,
     },
-  )
+  );
 
-  const rejection = data && isRejection(data) ? data : undefined
-  const mySecretSantaDraw = data && !isRejection(data) ? data : undefined
+  const rejection = data && isRejection(data) ? data : undefined;
+  const mySecretSantaDraw = data && !isRejection(data) ? data : undefined;
 
   useEffect(() => {
     if (rejection) {
-      addToast({ message: rejectionMessage(rejection), variant: 'error' })
+      addToast({ message: rejectionMessage(rejection), variant: 'error' });
     }
-  }, [rejection, addToast])
+  }, [rejection, addToast]);
 
-  return { mySecretSantaDraw, rejection, loading: isLoading }
-}
+  return { mySecretSantaDraw, rejection, loading: isLoading };
+};

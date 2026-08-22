@@ -1,13 +1,13 @@
-import type { AttendeeId, EventId } from '@wishlist/common'
-import type { RootState } from '../../core'
-import type { EventAttendee } from './event.types'
+import type { AttendeeId, EventId } from '@wishlist/common';
+import type { RootState } from '../../core/store';
+import type { EventAttendee } from './event.types';
 
-import DeleteIcon from '@mui/icons-material/Delete'
-import { Box, Divider, List, Stack } from '@mui/material'
-import { useQueryClient } from '@tanstack/react-query'
-import { useMemo } from 'react'
-import { useSelector } from 'react-redux'
-import { match } from 'ts-pattern'
+import DeleteIcon from '@mui/icons-material/Delete';
+import { Box, Divider, List, Stack } from '@mui/material';
+import { useQueryClient } from '@tanstack/react-query';
+import { useMemo } from 'react';
+import { useSelector } from 'react-redux';
+import { match } from 'ts-pattern';
 
 import {
   AttendeeRole,
@@ -16,81 +16,81 @@ import {
   useAddEventAttendeeMutation,
   useRemoveEventAttendeeMutation,
   useUpdateEventAttendeeRoleMutation,
-} from '../../gql'
-import { useToast } from '../../hooks'
-import { Card } from '../common/Card'
-import { ConfirmIconButton } from '../common/ConfirmIconButton'
-import { Subtitle } from '../common/Subtitle'
-import { SearchUserSelect } from '../user/SearchUserSelect'
-import { AttendeeRolesGuide } from './AttendeeRolesGuide'
-import { AttendeeListItem, ListItemAttendee } from './ListItemAttendee'
+} from '../../gql';
+import { useToast } from '../../hooks';
+import { Card } from '../common/Card';
+import { ConfirmIconButton } from '../common/ConfirmIconButton';
+import { Subtitle } from '../common/Subtitle';
+import { SearchUserSelect } from '../user/SearchUserSelect';
+import { AttendeeRolesGuide } from './AttendeeRolesGuide';
+import { AttendeeListItem, ListItemAttendee } from './ListItemAttendee';
 
 export type EditEventAttendeesProps = {
-  eventId: EventId
-  attendees: EventAttendee[]
-}
+  eventId: EventId;
+  attendees: EventAttendee[];
+};
 
-const mapState = (state: RootState) => ({ email: state.auth.user?.email, id: state.auth.user?.id })
+const mapState = (state: RootState) => ({ email: state.auth.user?.email, id: state.auth.user?.id });
 
 export const EditEventAttendees = ({ eventId, attendees }: EditEventAttendeesProps) => {
-  const { id: currentUserId, email: currentUserEmail } = useSelector(mapState)
-  const { addToast } = useToast()
-  const queryClient = useQueryClient()
+  const { id: currentUserId, email: currentUserEmail } = useSelector(mapState);
+  const { addToast } = useToast();
+  const queryClient = useQueryClient();
 
   const attendeeEmails = useMemo(
     () => attendees.map(attendee => (attendee.pendingEmail ? attendee.pendingEmail : attendee.user?.email || '')),
     [attendees],
-  )
+  );
 
-  const invalidateEvent = () => queryClient.invalidateQueries({ queryKey: ['EventPageGetEvent', { eventId }] })
+  const invalidateEvent = () => queryClient.invalidateQueries({ queryKey: ['EventPageGetEvent', { eventId }] });
 
   const { mutateAsync: addAttendeeMutation, isPending: addAttendeePending } = useAddEventAttendeeMutation({
     onError: () => addToast({ message: "Impossible d'ajouter ce participant", variant: 'error' }),
-  })
+  });
   const { mutateAsync: removeAttendeeMutation, isPending: deleteAttendeePending } = useRemoveEventAttendeeMutation({
     onError: () => addToast({ message: 'Impossible de supprimer ce participant', variant: 'error' }),
-  })
+  });
   const { mutateAsync: updateRoleMutation, isPending: updateRolePending } = useUpdateEventAttendeeRoleMutation({
     onError: () => addToast({ message: 'Impossible de modifier le rôle', variant: 'error' }),
-  })
+  });
 
   const addAttendee = async (email: string) => {
-    const res = await addAttendeeMutation({ eventId, input: { email, role: AttendeeRole.Participant } })
+    const res = await addAttendeeMutation({ eventId, input: { email, role: AttendeeRole.Participant } });
     match(res.addEventAttendee)
       .with({ __typename: 'EventAttendee' }, () => {
-        addToast({ message: "Participant ajouté à l'évènement !", variant: 'info' })
-        void invalidateEvent()
+        addToast({ message: "Participant ajouté à l'évènement !", variant: 'info' });
+        void invalidateEvent();
       })
       .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
-      .exhaustive()
-  }
+      .exhaustive();
+  };
 
   const deleteAttendee = async (attendeeId: AttendeeId) => {
-    const res = await removeAttendeeMutation({ eventId, attendeeId })
+    const res = await removeAttendeeMutation({ eventId, attendeeId });
     match(res.removeEventAttendee)
       .with({ __typename: 'VoidOutput' }, () => {
-        addToast({ message: "Participant supprimé de l'évènement !", variant: 'info' })
-        void invalidateEvent()
+        addToast({ message: "Participant supprimé de l'évènement !", variant: 'info' });
+        void invalidateEvent();
       })
       .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
-      .exhaustive()
-  }
+      .exhaustive();
+  };
 
   const updateRole = async (attendeeId: AttendeeId, role: AttendeeRole) => {
-    const res = await updateRoleMutation({ eventId, attendeeId, role })
+    const res = await updateRoleMutation({ eventId, attendeeId, role });
     match(res.updateEventAttendeeRole)
       .with({ __typename: 'VoidOutput' }, () => {
-        addToast({ message: 'Rôle mis à jour', variant: 'info' })
-        void invalidateEvent()
+        addToast({ message: 'Rôle mis à jour', variant: 'info' });
+        void invalidateEvent();
       })
       .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
-      .exhaustive()
-  }
+      .exhaustive();
+  };
 
   const loading = useMemo(
     () => addAttendeePending || deleteAttendeePending || updateRolePending,
     [addAttendeePending, deleteAttendeePending, updateRolePending],
-  )
+  );
 
   return (
     <Stack gap={2}>
@@ -112,10 +112,10 @@ export const EditEventAttendees = ({ eventId, attendees }: EditEventAttendeesPro
 
         <List disablePadding>
           {attendees.map(attendee => {
-            const isCurrentUser = attendee.user?.id === currentUserId
-            const isCreator = attendee.role === AttendeeRole.Creator
-            const canDelete = !isCurrentUser && !isCreator
-            const canChangeRole = !isCurrentUser && !isCreator
+            const isCurrentUser = attendee.user?.id === currentUserId;
+            const isCreator = attendee.role === AttendeeRole.Creator;
+            const canDelete = !isCurrentUser && !isCreator;
+            const canChangeRole = !isCurrentUser && !isCreator;
 
             return (
               <AttendeeListItem
@@ -153,10 +153,10 @@ export const EditEventAttendees = ({ eventId, attendees }: EditEventAttendeesPro
                   onRoleChange={role => updateRole(attendee.id, role)}
                 />
               </AttendeeListItem>
-            )
+            );
           })}
         </List>
       </Card>
     </Stack>
-  )
-}
+  );
+};

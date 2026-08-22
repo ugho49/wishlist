@@ -1,21 +1,21 @@
-import { IsBoolean, IsNumber, IsString } from 'class-validator'
+import { IsBoolean, IsNumber, IsString } from 'class-validator';
 
 export class DatabaseConfig {
   @IsString()
-  host!: string
+  host!: string;
 
   @IsNumber()
-  port!: number
+  port!: number;
 
   @IsString()
-  username!: string
+  username!: string;
 
   @IsString()
-  password!: string
+  password!: string;
 
   @IsString()
-  database!: string
+  database!: string;
 
   @IsBoolean()
-  verbose!: boolean
+  verbose!: boolean;
 }

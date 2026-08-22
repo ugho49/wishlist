@@ -1,10 +1,10 @@
-import { useTestApp } from '@wishlist/api-test-utils'
+import { useTestApp } from '@wishlist/api-test-utils';
 
 describe('HealthController', () => {
-  const { getRequest } = useTestApp()
+  const { getRequest } = useTestApp();
 
   it('GET /health', async () => {
-    const request = await getRequest()
+    const request = await getRequest();
 
     await request
       .get('/health')
@@ -22,6 +22,6 @@ describe('HealthController', () => {
             status: 'up',
           },
         },
-      })
-  })
-})
+      });
+  });
+});

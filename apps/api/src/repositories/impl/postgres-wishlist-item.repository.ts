@@ -1,60 +1,62 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
-import { DatabaseService, type DrizzleTransaction } from '@wishlist/api/core'
-import { type NewItemsForWishlist, WishlistItem, type WishlistItemRepository } from '@wishlist/api/item'
-import { schema } from '@wishlist/api-drizzle'
-import { type ItemId, type UserId, uuid, type WishlistId } from '@wishlist/common'
-import { and, eq, gt, inArray, isNull, lt, max, ne, notExists, sql } from 'drizzle-orm'
-import { DateTime } from 'luxon'
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { schema } from '@wishlist/api-drizzle';
+import { type ItemId, type UserId, uuid, type WishlistId } from '@wishlist/common';
+import { and, eq, gt, inArray, isNull, lt, max, ne, notExists, sql } from 'drizzle-orm';
+import { DateTime } from 'luxon';
 
-import { PostgresUserRepository } from './postgres-user.repository'
+import { DatabaseService } from '../../core/database/database.service';
+import { type DrizzleTransaction } from '../../core/database/transaction-manager';
+import { WishlistItem } from '../../item/domain/wishlist-item.model';
+import { type NewItemsForWishlist, type WishlistItemRepository } from '../../item/domain/wishlist-item.repository';
+import { PostgresUserRepository } from './postgres-user.repository';
 
-const takersWithUser = { takers: { with: { user: true } } } as const
+const takersWithUser = { takers: { with: { user: true } } } as const;
 
 type ItemRowWithTakers = typeof schema.item.$inferSelect & {
-  takers: (typeof schema.itemTaker.$inferSelect & { user: typeof schema.user.$inferSelect })[]
-}
+  takers: (typeof schema.itemTaker.$inferSelect & { user: typeof schema.user.$inferSelect })[];
+};
 
 @Injectable()
 export class PostgresWishlistItemRepository implements WishlistItemRepository {
   constructor(private readonly databaseService: DatabaseService) {}
 
   newId(): ItemId {
-    return uuid() as ItemId
+    return uuid() as ItemId;
   }
 
   async findById(id: ItemId): Promise<WishlistItem | undefined> {
     const result = await this.databaseService.db.query.item.findFirst({
       where: eq(schema.item.id, id),
       with: takersWithUser,
-    })
+    });
 
-    return result ? PostgresWishlistItemRepository.toModel(result) : undefined
+    return result ? PostgresWishlistItemRepository.toModel(result) : undefined;
   }
 
   async findByIds(ids: ItemId[]): Promise<WishlistItem[]> {
-    if (ids.length === 0) return []
+    if (ids.length === 0) return [];
 
     const result = await this.databaseService.db.query.item.findMany({
       where: inArray(schema.item.id, ids),
       with: takersWithUser,
-    })
+    });
 
-    return result.map(PostgresWishlistItemRepository.toModel)
+    return result.map(PostgresWishlistItemRepository.toModel);
   }
 
   async findByIdOrFail(id: ItemId): Promise<WishlistItem> {
-    const result = await this.findById(id)
-    if (!result) throw new NotFoundException('Item not found')
-    return result
+    const result = await this.findById(id);
+    if (!result) throw new NotFoundException('Item not found');
+    return result;
   }
 
   async findByWishlist(wishlistId: WishlistId): Promise<WishlistItem[]> {
     const result = await this.databaseService.db.query.item.findMany({
       where: eq(schema.item.wishlistId, wishlistId),
       with: takersWithUser,
-    })
+    });
 
-    return result.map(PostgresWishlistItemRepository.toModel)
+    return result.map(PostgresWishlistItemRepository.toModel);
   }
 
   async findAllNewItems(since: Date): Promise<NewItemsForWishlist[]> {
@@ -76,7 +78,7 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
         schema.wishlist.ownerId,
         schema.user.firstName,
         schema.user.lastName,
-      )
+      );
 
     return rows.map(row => ({
       wishlistId: row.wishlistId,
@@ -84,12 +86,12 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
       ownerId: row.ownerId,
       ownerName: row.ownerName,
       nbNewItems: row.nbNewItems,
-    }))
+    }));
   }
 
   async findImportableItems(params: { userId: UserId; wishlistId: WishlistId }): Promise<WishlistItem[]> {
-    const { userId, wishlistId } = params
-    const twoMonthsAgo = DateTime.now().minus({ months: 2 }).toFormat('yyyy-MM-dd')
+    const { userId, wishlistId } = params;
+    const twoMonthsAgo = DateTime.now().minus({ months: 2 }).toFormat('yyyy-MM-dd');
 
     // Find all wishlists of the user where all linked events are finished more than 2 months ago
     const eligibleWishlistsSubquery = this.databaseService.db
@@ -108,7 +110,7 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
       )
       .groupBy(schema.eventWishlist.wishlistId)
       .having(lt(max(schema.event.eventDate), twoMonthsAgo))
-      .as('eligible_wishlists')
+      .as('eligible_wishlists');
 
     // Find items that already exist in the target wishlist (with importSourceId)
     const alreadyImportedItemsSubquery = this.databaseService.db
@@ -117,7 +119,7 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
       })
       .from(schema.item)
       .where(and(eq(schema.item.wishlistId, wishlistId), sql`${schema.item.importSourceId} IS NOT NULL`))
-      .as('already_imported_items')
+      .as('already_imported_items');
 
     // Get all items from these wishlists that are not taken, not suggested, and not already imported
     const result = await this.databaseService.db
@@ -136,13 +138,13 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
           ),
         ),
       )
-      .orderBy(schema.item.createdAt)
+      .orderBy(schema.item.createdAt);
 
-    return result.map(row => PostgresWishlistItemRepository.toModel({ ...row.item, takers: [] }))
+    return result.map(row => PostgresWishlistItemRepository.toModel({ ...row.item, takers: [] }));
   }
 
   async save(item: WishlistItem, tx?: DrizzleTransaction): Promise<void> {
-    const client = tx ?? this.databaseService.db
+    const client = tx ?? this.databaseService.db;
 
     await client.transaction(async subTx => {
       await subTx
@@ -172,9 +174,9 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
             isSuggested: item.isSuggested,
             updatedAt: item.updatedAt,
           },
-        })
+        });
 
-      await subTx.delete(schema.itemTaker).where(eq(schema.itemTaker.itemId, item.id))
+      await subTx.delete(schema.itemTaker).where(eq(schema.itemTaker.itemId, item.id));
 
       if (item.takers.length > 0) {
         await subTx.insert(schema.itemTaker).values(
@@ -183,14 +185,14 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
             userId: taker.user.id,
             takenAt: taker.takenAt,
           })),
-        )
+        );
       }
-    })
+    });
   }
 
   async delete(id: ItemId, tx?: DrizzleTransaction): Promise<void> {
-    const client = tx ?? this.databaseService.db
-    await client.delete(schema.item).where(eq(schema.item.id, id))
+    const client = tx ?? this.databaseService.db;
+    await client.delete(schema.item).where(eq(schema.item.id, id));
   }
 
   static toModel(row: ItemRowWithTakers): WishlistItem {
@@ -210,6 +212,6 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
       })),
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
-    })
+    });
   }
 }

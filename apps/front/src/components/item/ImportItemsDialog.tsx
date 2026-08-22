@@ -1,12 +1,12 @@
-import type { TransitionProps } from '@mui/material/transitions'
-import type { ItemId, WishlistId } from '@wishlist/common'
-import type React from 'react'
-import type { WishlistItem } from '../wishlist/wishlist.types'
+import type { TransitionProps } from '@mui/material/transitions';
+import type { ItemId, WishlistId } from '@wishlist/common';
+import type React from 'react';
+import type { WishlistItem } from '../wishlist/wishlist.types';
 
-import AddIcon from '@mui/icons-material/Add'
-import CardGiftcardIcon from '@mui/icons-material/CardGiftcard'
-import CloseIcon from '@mui/icons-material/Close'
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
+import AddIcon from '@mui/icons-material/Add';
+import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
+import CloseIcon from '@mui/icons-material/Close';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import {
   Alert,
   AppBar,
@@ -22,30 +22,30 @@ import {
   Toolbar,
   Typography,
   useMediaQuery,
-} from '@mui/material'
-import { useQueryClient } from '@tanstack/react-query'
-import { useToast } from '@wishlist/front-hooks'
-import clsx from 'clsx'
-import { forwardRef, useState } from 'react'
-import { match } from 'ts-pattern'
+} from '@mui/material';
+import { useQueryClient } from '@tanstack/react-query';
+import { useToast } from '@wishlist/front-hooks';
+import clsx from 'clsx';
+import { forwardRef, useState } from 'react';
+import { match } from 'ts-pattern';
 
-import { rejectionMessage, rejectionPattern, useImportItemsMutation } from '../../gql'
-import { Card } from '../common/Card'
-import { Rating, RatingBubble } from '../common/Rating'
-import { Subtitle } from '../common/Subtitle'
-import { ImportItemsButton } from '../wishlist/ImportItemsButton'
+import { rejectionMessage, rejectionPattern, useImportItemsMutation } from '../../gql';
+import { Card } from '../common/Card';
+import { Rating, RatingBubble } from '../common/Rating';
+import { Subtitle } from '../common/Subtitle';
+import { ImportItemsButton } from '../wishlist/ImportItemsButton';
 
-const Transition = forwardRef(function Transition(
+const Transition = forwardRef(function TransitionComponent(
   props: TransitionProps & { children: React.ReactElement },
   ref: React.Ref<unknown>,
 ) {
-  const { children, ...other } = props
+  const { children, ...other } = props;
   return (
     <Slide direction="up" ref={ref} {...other}>
       {children}
     </Slide>
-  )
-})
+  );
+});
 
 const ItemCard = styled(Card)(({ theme }) => ({
   display: 'flex',
@@ -64,7 +64,7 @@ const ItemCard = styled(Card)(({ theme }) => ({
     border: '2px solid #764ba2',
     background: `linear-gradient(135deg, ${alpha('#667eea', 0.05)} 0%, ${alpha('#764ba2', 0.08)} 100%)`,
   },
-}))
+}));
 
 const ItemsListContainer = styled(Box)({
   display: 'flex',
@@ -72,7 +72,7 @@ const ItemsListContainer = styled(Box)({
   gap: '16px',
   flexGrow: 1,
   overflow: 'auto',
-})
+});
 
 const ItemImageContainer = styled(Box)(({ theme }) => ({
   position: 'relative',
@@ -83,14 +83,14 @@ const ItemImageContainer = styled(Box)(({ theme }) => ({
   background: `linear-gradient(135deg, ${alpha(theme.palette.primary.light, 0.1)} 0%, ${alpha(theme.palette.primary.main, 0.15)} 100%)`,
   flexShrink: 0,
   marginRight: theme.spacing(2),
-}))
+}));
 
 const ItemImage = styled('img')({
   width: '100%',
   height: '100%',
   objectFit: 'cover',
   opacity: 1,
-})
+});
 
 const ItemImagePlaceholder = styled(Box)(({ theme }) => ({
   width: '100%',
@@ -103,21 +103,21 @@ const ItemImagePlaceholder = styled(Box)(({ theme }) => ({
     color: theme.palette.primary.main,
     opacity: 0.6,
   },
-}))
+}));
 
 const ItemTitleContainer = styled(Box)(({ theme }) => ({
   fontWeight: 600,
   fontSize: '1rem',
   color: theme.palette.text.primary,
   lineHeight: 1.4,
-}))
+}));
 
 const ItemDescription = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
   fontSize: '0.875rem',
   fontStyle: 'italic',
   lineHeight: 1.4,
-}))
+}));
 
 const ItemUrl = styled(Link)(({ theme }) => ({
   color: theme.palette.primary.main,
@@ -125,7 +125,7 @@ const ItemUrl = styled(Link)(({ theme }) => ({
     textDecoration: 'underline',
     color: theme.palette.primary.dark,
   },
-}))
+}));
 
 const ItemContentWrapper = styled(Box)({
   display: 'flex',
@@ -134,7 +134,7 @@ const ItemContentWrapper = styled(Box)({
   justifyContent: 'space-between',
   flexGrow: 1,
   minHeight: '100px',
-})
+});
 
 const BottomActionStack = styled(Stack)(({ theme }) => ({
   position: 'sticky',
@@ -146,14 +146,14 @@ const BottomActionStack = styled(Stack)(({ theme }) => ({
   alignItems: 'center',
   borderTop: `1px solid ${theme.palette.divider}`,
   backgroundColor: '#f9fafb',
-}))
+}));
 
 export interface ImportItemsDialogProps {
-  open: boolean
-  wishlistId: WishlistId
-  importableItems: WishlistItem[]
-  onClose: () => void
-  onComplete: () => void
+  open: boolean;
+  wishlistId: WishlistId;
+  importableItems: WishlistItem[];
+  onClose: () => void;
+  onComplete: () => void;
 }
 
 export const ImportItemsDialog = ({
@@ -163,69 +163,69 @@ export const ImportItemsDialog = ({
   onComplete,
   importableItems,
 }: ImportItemsDialogProps) => {
-  const { addToast } = useToast()
-  const queryClient = useQueryClient()
-  const [selectedItemIds, setSelectedItemIds] = useState<Set<ItemId>>(new Set())
+  const { addToast } = useToast();
+  const queryClient = useQueryClient();
+  const [selectedItemIds, setSelectedItemIds] = useState<Set<ItemId>>(new Set());
 
-  const isFullscreen = useMediaQuery(theme => theme.breakpoints.down('md'))
+  const isFullscreen = useMediaQuery(theme => theme.breakpoints.down('md'));
 
   // Import selected items mutation
   const { mutateAsync: importItemsMutation, isPending: isLoading } = useImportItemsMutation({
     onError: () => {
-      addToast({ message: "Erreur lors de l'import des souhaits", variant: 'error' })
+      addToast({ message: "Erreur lors de l'import des souhaits", variant: 'error' });
     },
-  })
+  });
 
   const importItems = async () => {
-    const res = await importItemsMutation({ input: { wishlistId, sourceItemIds: Array.from(selectedItemIds) } })
+    const res = await importItemsMutation({ input: { wishlistId, sourceItemIds: Array.from(selectedItemIds) } });
     match(res.importItems)
       .with({ __typename: 'ImportItemsOutput' }, () => {
-        const count = selectedItemIds.size
-        const plural = count > 1
-        const message = `${count} souhait${plural ? 's' : ''} importé${plural ? 's' : ''} avec succès`
+        const count = selectedItemIds.size;
+        const plural = count > 1;
+        const message = `${count} souhait${plural ? 's' : ''} importé${plural ? 's' : ''} avec succès`;
 
-        addToast({ message, variant: 'success' })
-        void queryClient.invalidateQueries({ queryKey: ['WishlistPage', { wishlistId }] })
-        void queryClient.invalidateQueries({ queryKey: ['ImportableItems', { wishlistId }] })
-        onComplete()
+        addToast({ message, variant: 'success' });
+        void queryClient.invalidateQueries({ queryKey: ['WishlistPage', { wishlistId }] });
+        void queryClient.invalidateQueries({ queryKey: ['ImportableItems', { wishlistId }] });
+        onComplete();
       })
       .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
-      .exhaustive()
-  }
+      .exhaustive();
+  };
 
   const toggleItemSelection = (itemId: ItemId) => {
     setSelectedItemIds(prev => {
-      const newSet = new Set(prev)
+      const newSet = new Set(prev);
       if (newSet.has(itemId)) {
-        newSet.delete(itemId)
+        newSet.delete(itemId);
       } else {
-        newSet.add(itemId)
+        newSet.add(itemId);
       }
-      return newSet
-    })
-  }
+      return newSet;
+    });
+  };
 
   const selectAll = () => {
-    setSelectedItemIds(new Set(importableItems.map(item => item.id)))
-  }
+    setSelectedItemIds(new Set(importableItems.map(item => item.id)));
+  };
 
   const deselectAll = () => {
-    setSelectedItemIds(new Set())
-  }
+    setSelectedItemIds(new Set());
+  };
 
   const handleImport = async () => {
     if (selectedItemIds.size === 0) {
-      onClose()
-      onComplete()
-      return
+      onClose();
+      onComplete();
+      return;
     }
-    await importItems()
-  }
+    await importItems();
+  };
 
   const handleSkip = () => {
-    onClose()
-    onComplete()
-  }
+    onClose();
+    onComplete();
+  };
 
   return (
     <Dialog
@@ -345,5 +345,5 @@ export const ImportItemsDialog = ({
         </ImportItemsButton>
       </BottomActionStack>
     </Dialog>
-  )
-}
+  );
+};

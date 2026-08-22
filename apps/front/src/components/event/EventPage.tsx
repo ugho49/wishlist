@@ -1,44 +1,44 @@
-import type { EventId } from '@wishlist/common'
-import type { RootState } from '../../core'
+import type { EventId } from '@wishlist/common';
+import type { RootState } from '../../core/store';
 
-import { Alert, Box, Container, Stack } from '@mui/material'
-import { useMemo, useState } from 'react'
-import { useSelector } from 'react-redux'
+import { Alert, Box, Container, Stack } from '@mui/material';
+import { useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
 
-import { isRejection, rejectionMessage, useEventPageGetEventQuery } from '../../gql'
-import { useSecretSantaSuggestion } from '../../hooks'
-import { Description } from '../common/Description'
-import { SEO } from '../SEO'
-import { EventAttendeesDialog } from './EventAttendeesDialog'
-import { EventHeader } from './EventHeader'
-import { EventHeaderSkeleton } from './EventHeaderSkeleton'
-import { EventNotFound } from './EventNotFound'
-import { EventWishlists } from './EventWishlists'
-import { canEditEvent } from './event-permissions'
-import { MySecretSantaDraw } from './MySecretSantaDraw'
-import { SecretSantaSuggestionCard } from './SecretSantaSuggestionCard'
+import { isRejection, rejectionMessage, useEventPageGetEventQuery } from '../../gql';
+import { useSecretSantaSuggestion } from '../../hooks';
+import { Description } from '../common/Description';
+import { SEO } from '../SEO';
+import { EventAttendeesDialog } from './EventAttendeesDialog';
+import { EventHeader } from './EventHeader';
+import { EventHeaderSkeleton } from './EventHeaderSkeleton';
+import { EventNotFound } from './EventNotFound';
+import { EventWishlists } from './EventWishlists';
+import { canEditEvent } from './event-permissions';
+import { MySecretSantaDraw } from './MySecretSantaDraw';
+import { SecretSantaSuggestionCard } from './SecretSantaSuggestionCard';
 
-const mapState = (state: RootState) => state.auth.user?.id
+const mapState = (state: RootState) => state.auth.user?.id;
 
 interface EventPageProps {
-  eventId: EventId
+  eventId: EventId;
 }
 
 export const EventPage = ({ eventId }: EventPageProps) => {
-  const currentUserId = useSelector(mapState)
-  const [openAttendeesDialog, setOpenAttendeesDialog] = useState(false)
-  const { data, isLoading: loading } = useEventPageGetEventQuery({ eventId }, { select: d => d.event })
-  const event = data?.__typename === 'Event' ? data : undefined
-  const queryRejection = data && isRejection(data) && data.__typename !== 'NotFoundRejection' ? data : undefined
+  const currentUserId = useSelector(mapState);
+  const [openAttendeesDialog, setOpenAttendeesDialog] = useState(false);
+  const { data, isLoading: loading } = useEventPageGetEventQuery({ eventId }, { select: d => d.event });
+  const event = data?.__typename === 'Event' ? data : undefined;
+  const queryRejection = data && isRejection(data) && data.__typename !== 'NotFoundRejection' ? data : undefined;
 
-  const attendees = useMemo(() => event?.attendees ?? [], [event])
-  const currentUserCanEdit = useMemo(() => canEditEvent(attendees, currentUserId), [attendees, currentUserId])
+  const attendees = useMemo(() => event?.attendees ?? [], [event]);
+  const currentUserCanEdit = useMemo(() => canEditEvent(attendees, currentUserId), [attendees, currentUserId]);
   const { shouldShowSuggestion, dismissSuggestion } = useSecretSantaSuggestion({
     eventId: eventId,
     eventTitle: event?.title,
     eventDate: event?.eventDate,
     currentUserCanEdit,
-  })
+  });
 
   return (
     <>
@@ -84,7 +84,7 @@ export const EventPage = ({ eventId }: EventPageProps) => {
                   currentUserId={currentUserId}
                 />
 
-                {event.description && <Description text={event.description} allowMarkdown />}
+                {event.description && <Description text={event.description} />}
 
                 <EventWishlists eventId={event.id} wishlists={event.wishlists} />
               </Stack>
@@ -101,5 +101,5 @@ export const EventPage = ({ eventId }: EventPageProps) => {
         )}
       </Box>
     </>
-  )
-}
+  );
+};

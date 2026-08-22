@@ -1,14 +1,14 @@
-import { ArrowBack } from '@mui/icons-material'
-import { Box, Button, Container, Divider, Typography } from '@mui/material'
-import { styled } from '@mui/material/styles'
-import { Link, useNavigate } from '@tanstack/react-router'
+import { ArrowBack } from '@mui/icons-material';
+import { Box, Button, Container, Divider, Typography } from '@mui/material';
+import { styled } from '@mui/material/styles';
+import { Link, useNavigate } from '@tanstack/react-router';
 
 const PageContainer = styled(Box)(({ theme }) => ({
   minHeight: '100vh',
   backgroundColor: '#fafafa',
   paddingTop: theme.spacing(4),
   paddingBottom: theme.spacing(8),
-}))
+}));
 
 const ContentWrapper = styled(Container)(({ theme }) => ({
   backgroundColor: 'white',
@@ -21,7 +21,7 @@ const ContentWrapper = styled(Container)(({ theme }) => ({
   [theme.breakpoints.down('sm')]: {
     padding: theme.spacing(3),
   },
-}))
+}));
 
 const BackButton = styled(Button)(({ theme }) => ({
   marginBottom: theme.spacing(4),
@@ -29,7 +29,7 @@ const BackButton = styled(Button)(({ theme }) => ({
   '&:hover': {
     backgroundColor: 'rgba(25, 118, 210, 0.04)',
   },
-}))
+}));
 
 const PageTitle = styled(Typography)(({ theme }) => ({
   fontSize: '2.5rem',
@@ -42,13 +42,13 @@ const PageTitle = styled(Typography)(({ theme }) => ({
   [theme.breakpoints.down('sm')]: {
     fontSize: '1.75rem',
   },
-}))
+}));
 
 const LastUpdated = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
   marginBottom: theme.spacing(4),
   fontStyle: 'italic',
-}))
+}));
 
 const SectionTitle = styled(Typography)(({ theme }) => ({
   fontSize: '1.5rem',
@@ -56,20 +56,20 @@ const SectionTitle = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.primary,
   marginTop: theme.spacing(4),
   marginBottom: theme.spacing(2),
-}))
+}));
 
 const SectionContent = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.primary,
   lineHeight: 1.7,
   marginBottom: theme.spacing(2),
-}))
+}));
 
 const ContactBox = styled(Box)(({ theme }) => ({
   backgroundColor: '#f5f5f5',
   borderRadius: theme.spacing(1),
   padding: theme.spacing(3),
   marginTop: theme.spacing(4),
-}))
+}));
 
 const HighlightBox = styled(Box)(({ theme }) => ({
   backgroundColor: '#e3f2fd',
@@ -78,10 +78,10 @@ const HighlightBox = styled(Box)(({ theme }) => ({
   padding: theme.spacing(2),
   marginTop: theme.spacing(2),
   marginBottom: theme.spacing(2),
-}))
+}));
 
 export const TermsOfServicePage = () => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   return (
     <PageContainer>
@@ -234,5 +234,5 @@ export const TermsOfServicePage = () => {
         </ContactBox>
       </ContentWrapper>
     </PageContainer>
-  )
-}
+  );
+};

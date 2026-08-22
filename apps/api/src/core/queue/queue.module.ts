@@ -1,11 +1,11 @@
-import { BullModule, getQueueToken } from '@nestjs/bullmq'
-import { Global, Module } from '@nestjs/common'
-import { ConfigModule, type ConfigType } from '@nestjs/config'
-import { Queue } from 'bullmq'
+import { BullModule, getQueueToken } from '@nestjs/bullmq';
+import { Global, Module } from '@nestjs/common';
+import { ConfigModule, type ConfigType } from '@nestjs/config';
+import { Queue } from 'bullmq';
 
-import queueConfig from './queue.config'
-import { QueueService } from './queue.service'
-import { QUEUES, QueueName } from './queues.type'
+import queueConfig from './queue.config';
+import { QueueService } from './queue.service';
+import { QUEUES, QueueName } from './queues.type';
 
 @Global()
 @Module({

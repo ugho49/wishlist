@@ -1,24 +1,24 @@
-import { zodResolver } from '@hookform/resolvers/zod'
-import SaveIcon from '@mui/icons-material/Save'
-import { Alert, Box, Button, Stack, TextField } from '@mui/material'
-import { useForm } from 'react-hook-form'
-import { match } from 'ts-pattern'
-import { z } from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod';
+import SaveIcon from '@mui/icons-material/Save';
+import { Alert, Box, Button, Stack, TextField } from '@mui/material';
+import { useForm } from 'react-hook-form';
+import { match } from 'ts-pattern';
+import { z } from 'zod';
 
-import { BusinessRuleCode, rejectionMessage, rejectionPattern, useChangeUserPasswordMutation } from '../../gql'
-import { useToast } from '../../hooks/useToast'
-import { Card } from '../common/Card'
-import { Subtitle } from '../common/Subtitle'
+import { BusinessRuleCode, rejectionMessage, rejectionPattern, useChangeUserPasswordMutation } from '../../gql';
+import { useToast } from '../../hooks/useToast';
+import { Card } from '../common/Card';
+import { Subtitle } from '../common/Subtitle';
 
 const schema = z.object({
   oldPassword: z.string().min(1, 'Ce champ ne peut pas être vide'),
   newPassword: z.string().min(8, '8 caractères minimum').max(50, '50 caractères maximum'),
-})
+});
 
-type FormFields = z.infer<typeof schema>
+type FormFields = z.infer<typeof schema>;
 
 export const UserTabPassword = () => {
-  const { addToast } = useToast()
+  const { addToast } = useToast();
 
   const {
     register,
@@ -26,16 +26,16 @@ export const UserTabPassword = () => {
     reset: resetForm,
     setError,
     formState: { isSubmitting, errors: formErrors },
-  } = useForm<FormFields>({ resolver: zodResolver(schema) })
+  } = useForm<FormFields>({ resolver: zodResolver(schema) });
 
   const { mutateAsync: changePassword } = useChangeUserPasswordMutation({
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-  })
+  });
 
   const onSubmit = async (data: FormFields) => {
     if (data.oldPassword === data.newPassword) {
-      setError('root', { message: "Le nouveau mot de passe doit être différent de l'ancien" })
-      return
+      setError('root', { message: "Le nouveau mot de passe doit être différent de l'ancien" });
+      return;
     }
 
     const res = await changePassword({
@@ -43,19 +43,19 @@ export const UserTabPassword = () => {
         oldPassword: data.oldPassword,
         newPassword: data.newPassword,
       },
-    })
+    });
 
     match(res.changeUserPassword)
       .with({ __typename: 'VoidOutput' }, () => {
-        addToast({ message: 'Mot de passe mis à jour', variant: 'info' })
-        resetForm()
+        addToast({ message: 'Mot de passe mis à jour', variant: 'info' });
+        resetForm();
       })
       .with({ __typename: 'BusinessRuleRejection', code: BusinessRuleCode.WrongOldPassword }, () =>
         setError('oldPassword', { message: "L'ancien mot de passe est incorrect" }),
       )
       .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
-      .exhaustive()
-  }
+      .exhaustive();
+  };
 
   return (
     <Card>
@@ -106,5 +106,5 @@ export const UserTabPassword = () => {
         </Stack>
       </Stack>
     </Card>
-  )
-}
+  );
+};

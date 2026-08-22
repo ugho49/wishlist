@@ -1,12 +1,14 @@
-import { Inject, Injectable } from '@nestjs/common'
-import { REPOSITORIES } from '@wishlist/api/repositories'
-import { type UserSocialId } from '@wishlist/common'
+import type { UserSocialRepository } from '../../domain/repository/user-social.repository';
 
-import { UserSocial, type UserSocialRepository } from '../../domain'
+import { Inject, Injectable } from '@nestjs/common';
+import { type UserSocialId } from '@wishlist/common';
+
+import { REPOSITORIES } from '../../../repositories/repositories.constants';
+import { UserSocial } from '../../domain/model/user-social.model';
 
 export type GetUserSocialsByIdsInput = {
-  userSocialIds: UserSocialId[]
-}
+  userSocialIds: UserSocialId[];
+};
 
 @Injectable()
 export class GetUserSocialsByIdsUseCase {
@@ -16,6 +18,6 @@ export class GetUserSocialsByIdsUseCase {
   ) {}
 
   execute(input: GetUserSocialsByIdsInput): Promise<UserSocial[]> {
-    return this.userSocialRepository.findByIds(input.userSocialIds)
+    return this.userSocialRepository.findByIds(input.userSocialIds);
   }
 }

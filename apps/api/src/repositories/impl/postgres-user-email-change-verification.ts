@@ -1,28 +1,29 @@
-import { Injectable } from '@nestjs/common'
-import { DatabaseService, type DrizzleTransaction } from '@wishlist/api/core'
-import { type UserEmailChangeVerificationRepository } from '@wishlist/api/user'
-import { schema } from '@wishlist/api-drizzle'
-import { type UserEmailChangeVerificationId, type UserId, uuid } from '@wishlist/common'
-import { and, eq } from 'drizzle-orm'
+import { Injectable } from '@nestjs/common';
+import { schema } from '@wishlist/api-drizzle';
+import { type UserEmailChangeVerificationId, type UserId, uuid } from '@wishlist/common';
+import { and, eq } from 'drizzle-orm';
 
-import { UserEmailChangeVerification } from '../../user'
-import { PostgresUserRepository } from './postgres-user.repository'
+import { DatabaseService } from '../../core/database/database.service';
+import { type DrizzleTransaction } from '../../core/database/transaction-manager';
+import { UserEmailChangeVerification } from '../../user/domain/model/user-email-change-verification.model';
+import { type UserEmailChangeVerificationRepository } from '../../user/domain/repository/user-email-change-verification.repository';
+import { PostgresUserRepository } from './postgres-user.repository';
 
 @Injectable()
 export class PostgresUserEmailChangeVerificationRepository implements UserEmailChangeVerificationRepository {
   constructor(private readonly databaseService: DatabaseService) {}
 
   newId(): UserEmailChangeVerificationId {
-    return uuid() as UserEmailChangeVerificationId
+    return uuid() as UserEmailChangeVerificationId;
   }
 
   async findByUserId(userId: UserId): Promise<UserEmailChangeVerification[]> {
     const verifications = await this.databaseService.db.query.userEmailChangeVerification.findMany({
       where: eq(schema.userEmailChangeVerification.userId, userId),
       with: { user: true },
-    })
+    });
 
-    return verifications.map(PostgresUserEmailChangeVerificationRepository.toModel)
+    return verifications.map(PostgresUserEmailChangeVerificationRepository.toModel);
   }
 
   async findByTokenAndEmail(token: string, email: string): Promise<UserEmailChangeVerification | undefined> {
@@ -32,13 +33,13 @@ export class PostgresUserEmailChangeVerificationRepository implements UserEmailC
         eq(schema.userEmailChangeVerification.newEmail, email),
       ),
       with: { user: true },
-    })
+    });
 
-    return verification ? PostgresUserEmailChangeVerificationRepository.toModel(verification) : undefined
+    return verification ? PostgresUserEmailChangeVerificationRepository.toModel(verification) : undefined;
   }
 
   async save(verification: UserEmailChangeVerification, tx?: DrizzleTransaction): Promise<void> {
-    const client = tx || this.databaseService.db
+    const client = tx || this.databaseService.db;
 
     await client
       .insert(schema.userEmailChangeVerification)
@@ -59,7 +60,7 @@ export class PostgresUserEmailChangeVerificationRepository implements UserEmailC
           expiredAt: verification.expiredAt,
           updatedAt: verification.updatedAt,
         },
-      })
+      });
   }
 
   static toModel(
@@ -73,6 +74,6 @@ export class PostgresUserEmailChangeVerificationRepository implements UserEmailC
       expiredAt: row.expiredAt,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
-    })
+    });
   }
 }

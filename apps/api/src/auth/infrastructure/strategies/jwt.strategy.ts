@@ -1,11 +1,11 @@
-import type { ConfigType } from '@nestjs/config'
+import type { ConfigType } from '@nestjs/config';
 
-import { Inject, Injectable } from '@nestjs/common'
-import { PassportStrategy } from '@nestjs/passport'
-import { type AccessTokenJwtPayload, createCurrentUserFromPayload } from '@wishlist/common'
-import { ExtractJwt, Strategy } from 'passport-jwt'
+import { Inject, Injectable } from '@nestjs/common';
+import { PassportStrategy } from '@nestjs/passport';
+import { type AccessTokenJwtPayload, createCurrentUserFromPayload } from '@wishlist/common';
+import { ExtractJwt, Strategy } from 'passport-jwt';
 
-import authConfig from '../auth.config'
+import authConfig from '../auth.config';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -15,10 +15,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       ignoreExpiration: false,
       secretOrKey: config.accessToken.secret,
       algorithms: [config.accessToken.algorithm],
-    })
+    });
   }
 
   validate(payload: AccessTokenJwtPayload) {
-    return createCurrentUserFromPayload(payload)
+    return createCurrentUserFromPayload(payload);
   }
 }

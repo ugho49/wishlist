@@ -3,8 +3,21 @@
   "files": {
     "includes": ["!src/gql/generated-types.ts", "!schema.graphql"]
   },
+  "overrides": [
+    {
+      "includes": ["drizzle/schema/index.ts"],
+      "linter": { "rules": { "performance": { "noBarrelFile": "off" } } }
+    }
+  ],
   "linter": {
+    "domains": {
+      "drizzle": "recommended"
+    },
     "rules": {
+      "nursery": {
+        "noDrizzleDeleteWithoutWhere": "error",
+        "noDrizzleUpdateWithoutWhere": "error"
+      },
       "style": {
         "useImportType": "off"
       }

@@ -1,14 +1,14 @@
-import type { GridColDef } from '@mui/x-data-grid'
-import type { UserId } from '@wishlist/common'
-import type { AdminEventListItem } from './admin.types'
+import type { GridColDef } from '@mui/x-data-grid';
+import type { UserId } from '@wishlist/common';
+import type { AdminEventListItem } from './admin.types';
 
-import { Alert } from '@mui/material'
-import { DataGrid } from '@mui/x-data-grid'
-import { useNavigate } from '@tanstack/react-router'
-import { DateTime } from 'luxon'
+import { Alert } from '@mui/material';
+import { DataGrid } from '@mui/x-data-grid';
+import { useNavigate } from '@tanstack/react-router';
+import { DateTime } from 'luxon';
 
-import { AttendeeRole, isRejection, rejectionMessage, useAdminEventListEventsQuery } from '../../../gql'
-import { EventIcon } from '../EventIcon'
+import { AttendeeRole, isRejection, rejectionMessage, useAdminEventListEventsQuery } from '../../../gql';
+import { EventIcon } from '../EventIcon';
 
 const columns: GridColDef<AdminEventListItem>[] = [
   {
@@ -34,9 +34,9 @@ const columns: GridColDef<AdminEventListItem>[] = [
     headerName: 'Créateur',
     width: 170,
     valueGetter: (_, row) => {
-      const creator = row.attendees.find(attendee => attendee.role === AttendeeRole.Creator)?.user
-      if (!creator) return 'Unknown'
-      return `${creator.firstName} ${creator.lastName}`
+      const creator = row.attendees.find(attendee => attendee.role === AttendeeRole.Creator)?.user;
+      if (!creator) return 'Unknown';
+      return `${creator.firstName} ${creator.lastName}`;
     },
   },
   {
@@ -61,29 +61,29 @@ const columns: GridColDef<AdminEventListItem>[] = [
     valueGetter: (_, row) => new Date(row.createdAt),
     renderCell: ({ value }) => DateTime.fromJSDate(value).toLocaleString(DateTime.DATETIME_MED),
   },
-]
+];
 
 type AdminListEventsProps = {
-  userId?: UserId
-  currentPage: number
-  changeCurrentPage: (page: number) => void
-}
+  userId?: UserId;
+  currentPage: number;
+  changeCurrentPage: (page: number) => void;
+};
 
 export const AdminListEvents = ({ userId, currentPage, changeCurrentPage }: AdminListEventsProps) => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const { data, isLoading: loading } = useAdminEventListEventsQuery(
     { filters: { page: currentPage, userId } },
     { select: d => d.adminEvents },
-  )
-  const pagedEvents = data?.__typename === 'GetEventsPagedResponse' ? data : undefined
-  const queryRejection = data && isRejection(data) ? data : undefined
+  );
+  const pagedEvents = data?.__typename === 'GetEventsPagedResponse' ? data : undefined;
+  const queryRejection = data && isRejection(data) ? data : undefined;
 
-  const events = pagedEvents?.data ?? []
-  const totalElements = pagedEvents?.pagination.totalElements ?? 0
-  const pageSize = pagedEvents?.pagination.pageSize ?? 0
+  const events = pagedEvents?.data ?? [];
+  const totalElements = pagedEvents?.pagination.totalElements ?? 0;
+  const pageSize = pagedEvents?.pagination.pageSize ?? 0;
 
   if (queryRejection) {
-    return <Alert severity="error">{rejectionMessage(queryRejection)}</Alert>
+    return <Alert severity="error">{rejectionMessage(queryRejection)}</Alert>;
   }
 
   return (
@@ -92,7 +92,7 @@ export const AdminListEvents = ({ userId, currentPage, changeCurrentPage }: Admi
       disableMultipleRowSelection={true}
       disableColumnSelector={true}
       isCellEditable={() => false}
-      onRowClick={data => navigate({ to: `/admin/events/${data.row.id}` })}
+      onRowClick={({ row }) => navigate({ to: `/admin/events/${row.id}` })}
       density="standard"
       rows={events}
       loading={loading}
@@ -110,5 +110,5 @@ export const AdminListEvents = ({ userId, currentPage, changeCurrentPage }: Admi
       onPaginationModelChange={({ page }) => void changeCurrentPage(page + 1)}
       hideFooter={totalElements <= pageSize}
     />
-  )
-}
+  );
+};

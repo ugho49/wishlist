@@ -1,8 +1,8 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { SEO } from '@wishlist/front-components/SEO'
-import z from 'zod'
+import { createFileRoute } from '@tanstack/react-router';
+import { SEO } from '@wishlist/front-components/SEO';
+import z from 'zod';
 
-import { LoginPage } from '../../components/auth/LoginPage'
+import { LoginPage } from '../../components/auth/LoginPage';
 
 export const Route = createFileRoute('/_anonymous-with-layout/login')({
   validateSearch: z.object({
@@ -20,4 +20,4 @@ export const Route = createFileRoute('/_anonymous-with-layout/login')({
       <LoginPage />
     </>
   ),
-})
+});

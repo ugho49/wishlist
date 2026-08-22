@@ -1,22 +1,22 @@
-import type { Params as PinoParams } from 'pino-nestjs'
+import type { Params as PinoParams } from 'pino-nestjs';
 
-import { join, resolve } from 'node:path'
-import { fileURLToPath } from 'node:url'
-import { RequestMethod } from '@nestjs/common'
-import { getClientIp } from '@supercharge/request-ip'
-import { uuid } from '@wishlist/common'
-import { kinds, tags, types } from 'dd-trace/ext'
+import { join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { RequestMethod } from '@nestjs/common';
+import { getClientIp } from '@supercharge/request-ip';
+import { uuid } from '@wishlist/common';
+import { kinds, tags, types } from 'dd-trace/ext';
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = resolve(__filename, '../..')
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = resolve(__filename, '../..');
 
-export const path = (...paths: string[]) => join(__dirname, ...paths)
+export const path = (...paths: string[]) => join(__dirname, ...paths);
 
-const DEFAULT_HEALTHCHECK_PATH = '/health'
+const DEFAULT_HEALTHCHECK_PATH = '/health';
 
 export function pinoLoggerConfig(serviceName: string): PinoParams {
-  const excludePaths = [DEFAULT_HEALTHCHECK_PATH]
-  const pretty = process.env.NODE_ENV !== 'production'
+  const excludePaths = [DEFAULT_HEALTHCHECK_PATH];
+  const pretty = process.env.NODE_ENV !== 'production';
 
   return {
     pinoHttp: {
@@ -26,11 +26,11 @@ export function pinoLoggerConfig(serviceName: string): PinoParams {
       errorKey: 'error', // For Datadog
       timestamp: () => `,"timestamp":"${new Date(Date.now()).toISOString()}"`,
       genReqId: (req, res) => {
-        const existingId = req.id ?? req.headers['x-request-id']
-        if (existingId) return existingId as string
-        const id = uuid()
-        res.setHeader('X-Request-Id', id)
-        return id
+        const existingId = req.id ?? req.headers['x-request-id'];
+        if (existingId) return existingId as string;
+        const id = uuid();
+        res.setHeader('X-Request-Id', id);
+        return id;
       },
       autoLogging: {
         ignore: req => excludePaths.includes(req.url || ''),
@@ -58,29 +58,29 @@ export function pinoLoggerConfig(serviceName: string): PinoParams {
       },
       customLogLevel: (_message, res, error) => {
         if (res.statusCode >= 400 && res.statusCode < 500) {
-          return 'warn'
+          return 'warn';
         }
         if (res.statusCode >= 500 || error) {
-          return 'error'
+          return 'error';
         }
 
-        return 'info'
+        return 'info';
       },
       customSuccessMessage: (req, res) => {
-        const { method, url } = req
-        const originalUrl = (req as unknown as { originalUrl?: string }).originalUrl
-        const contextString = `[${method}] [${originalUrl || url}]`
-        const { statusCode } = res
+        const { method, url } = req;
+        const originalUrl = (req as unknown as { originalUrl?: string }).originalUrl;
+        const contextString = `[${method}] [${originalUrl || url}]`;
+        const { statusCode } = res;
 
-        return `${contextString} - [${statusCode}] `
+        return `${contextString} - [${statusCode}] `;
       },
       customErrorMessage: (_req, _res, error) => error?.message,
       customProps: (req, res) => {
         // biome-ignore lint/suspicious/noExplicitAny: res is too complex
-        const customProps = (res as any).locals ?? {}
+        const customProps = (res as any).locals ?? {};
 
         // Extract IP address (handles proxied requests)
-        const ip = getClientIp(req)
+        const ip = getClientIp(req);
 
         return {
           ...customProps,
@@ -97,7 +97,7 @@ export function pinoLoggerConfig(serviceName: string): PinoParams {
           [tags.HTTP_USERAGENT]: req.headers['user-agent'],
           'http.version': req.httpVersion,
           context_name: 'express.request',
-        }
+        };
       },
       redact: {
         paths: ['req.headers', 'res.headers'], // Hide headers on Datadog
@@ -108,9 +108,9 @@ export function pinoLoggerConfig(serviceName: string): PinoParams {
       },
     },
     renameContext: 'caller', // For pino-pretty
-    exclude: excludePaths.map(path => ({
+    exclude: excludePaths.map(excludePath => ({
       method: RequestMethod.ALL,
-      path: path,
+      path: excludePath,
     })),
-  } satisfies PinoParams
+  } satisfies PinoParams;
 }

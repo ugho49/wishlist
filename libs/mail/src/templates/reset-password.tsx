@@ -1,11 +1,11 @@
-import { Link, Section, Text } from 'react-email'
+import { Link, Section, Text } from 'react-email';
 
-import { EmailLayout } from '../components/layout'
-import { Callout, ContentSection, Heading, Paragraph, PrimaryButton } from '../components/ui'
-import * as styles from '../styles'
+import { EmailLayout } from '../components/layout';
+import { Callout, ContentSection, Heading, Paragraph, PrimaryButton } from '../components/ui';
+import * as styles from '../styles';
 
 export interface ResetPasswordEmailProps {
-  readonly url: string
+  readonly url: string;
 }
 
 export default function ResetPasswordEmail({ url }: ResetPasswordEmailProps) {
@@ -55,9 +55,9 @@ export default function ResetPasswordEmail({ url }: ResetPasswordEmailProps) {
         </Paragraph>
       </ContentSection>
     </EmailLayout>
-  )
+  );
 }
 
 ResetPasswordEmail.PreviewProps = {
   url: 'https://wishlistapp.fr/reset-password?token=preview',
-} satisfies ResetPasswordEmailProps
+} satisfies ResetPasswordEmailProps;

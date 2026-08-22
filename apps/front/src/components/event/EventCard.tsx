@@ -1,12 +1,12 @@
-import type { EventListItem } from './event.types'
+import type { EventListItem } from './event.types';
 
-import { styled } from '@mui/material'
-import { useNavigate } from '@tanstack/react-router'
-import clsx from 'clsx'
-import { DateTime } from 'luxon'
+import { styled } from '@mui/material';
+import { useNavigate } from '@tanstack/react-router';
+import clsx from 'clsx';
+import { DateTime } from 'luxon';
 
-import { Card } from '../common/Card'
-import { EventIcon } from './EventIcon'
+import { Card } from '../common/Card';
+import { EventIcon } from './EventIcon';
 
 const EventCardContent = styled(Card)(({ theme }) => ({
   display: 'flex',
@@ -41,21 +41,21 @@ const EventCardContent = styled(Card)(({ theme }) => ({
       borderTopColor: theme.palette.grey[200],
     },
   },
-}))
+}));
 
 const EventHeader = styled('div')({
   display: 'flex',
   alignItems: 'center',
   gap: '16px',
   marginBottom: '12px',
-})
+});
 
 const EventTextContent = styled('div')({
   display: 'flex',
   flexDirection: 'column',
   flex: 1,
   minWidth: 0,
-})
+});
 
 const EventTitle = styled('div')(({ theme }) => ({
   color: theme.palette.primary.main,
@@ -67,13 +67,13 @@ const EventTitle = styled('div')(({ theme }) => ({
   textTransform: 'uppercase',
   letterSpacing: '0.05em',
   marginBottom: '2px',
-}))
+}));
 
 const EventDate = styled('div')(({ theme }) => ({
   color: theme.palette.text.secondary,
   fontSize: '0.8rem',
   fontWeight: 400,
-}))
+}));
 
 const EventInfos = styled('div')(({ theme }) => ({
   display: 'flex',
@@ -85,21 +85,21 @@ const EventInfos = styled('div')(({ theme }) => ({
   marginTop: 'auto',
   paddingTop: '12px',
   borderTop: `1px solid ${theme.palette.divider}`,
-}))
+}));
 
 const EventInfoItem = styled('div')(({ theme }) => ({
   color: theme.palette.text.secondary,
-}))
+}));
 
 export type EventCardProps = {
-  event: EventListItem
-}
+  event: EventListItem;
+};
 
 export const EventCard = ({ event }: EventCardProps) => {
-  const numberOfAttendees = event.attendeeIds.length
-  const numberOfWishlists = event.wishlistIds.length
-  const past = DateTime.fromISO(event.eventDate) < DateTime.now().minus({ days: 1 })
-  const navigate = useNavigate()
+  const numberOfAttendees = event.attendeeIds.length;
+  const numberOfWishlists = event.wishlistIds.length;
+  const past = DateTime.fromISO(event.eventDate) < DateTime.now().minus({ days: 1 });
+  const navigate = useNavigate();
 
   return (
     <EventCardContent
@@ -126,5 +126,5 @@ export const EventCard = ({ event }: EventCardProps) => {
         </EventInfoItem>
       </EventInfos>
     </EventCardContent>
-  )
-}
+  );
+};

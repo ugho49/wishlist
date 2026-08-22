@@ -9,22 +9,22 @@ import type {
   UpdateUserEmailSettingsInput,
   UpdateUserPictureFromSocialInput,
   UpdateUserProfileInput,
-} from '../../gql/generated-types'
+} from '../../gql/generated-types';
 
-import { type UserId, type UserSocialId } from '@wishlist/common'
-import z from 'zod'
+import { type UserId, type UserSocialId } from '@wishlist/common';
+import z from 'zod';
 
-export const UserIdSchema = z.string().transform(val => val as UserId)
+export const UserIdSchema = z.string().transform(val => val as UserId);
 
-export const SearchUsersKeywordSchema = z.string().trim().min(2).max(100)
+export const SearchUsersKeywordSchema = z.string().trim().min(2).max(100);
 
-export const ClosestFriendsLimitSchema = z.number().int().min(1).max(50).optional()
+export const ClosestFriendsLimitSchema = z.number().int().min(1).max(50).optional();
 
 export const UpdateUserProfileInputSchema = z.object({
   firstname: z.string().nonempty().max(50),
   lastname: z.string().nonempty().max(50),
   birthday: z.iso.date({ message: 'must be in format YYYY-MM-DD' }).optional(),
-}) satisfies z.ZodType<UpdateUserProfileInput>
+}) satisfies z.ZodType<UpdateUserProfileInput>;
 
 export const RegisterUserInputSchema = z.object({
   firstname: z.string().nonempty().max(50),
@@ -32,40 +32,40 @@ export const RegisterUserInputSchema = z.object({
   email: z.email().toLowerCase(),
   password: z.string().min(8).max(50),
   birthday: z.iso.date({ message: 'must be in format YYYY-MM-DD' }).optional(),
-}) satisfies z.ZodType<RegisterUserInput>
+}) satisfies z.ZodType<RegisterUserInput>;
 
 export const LinkUserToGoogleInputSchema = z.object({
   code: z.string(),
-}) satisfies z.ZodType<LinkUserToGoogleInput>
+}) satisfies z.ZodType<LinkUserToGoogleInput>;
 
 export const ChangeUserPasswordInputSchema = z.object({
   oldPassword: z.string().min(8).max(50),
   newPassword: z.string().min(8).max(50),
-}) satisfies z.ZodType<ChangeUserPasswordInput>
+}) satisfies z.ZodType<ChangeUserPasswordInput>;
 
 export const UpdateUserPictureFromSocialInputSchema = z.object({
   socialId: z.string().transform(val => val as UserSocialId),
-}) satisfies z.ZodType<UpdateUserPictureFromSocialInput>
+}) satisfies z.ZodType<UpdateUserPictureFromSocialInput>;
 
 export const RequestEmailChangeInputSchema = z.object({
   newEmail: z.email().max(200).toLowerCase(),
-}) satisfies z.ZodType<RequestEmailChangeInput>
+}) satisfies z.ZodType<RequestEmailChangeInput>;
 
 export const ConfirmEmailChangeInputSchema = z.object({
   newEmail: z.email().toLowerCase(),
   token: z.string().nonempty(),
-}) satisfies z.ZodType<ConfirmEmailChangeInput>
+}) satisfies z.ZodType<ConfirmEmailChangeInput>;
 
 export const UpdateUserEmailSettingsInputSchema = z.object({
   dailyNewItemNotification: z.boolean(),
-}) satisfies z.ZodType<UpdateUserEmailSettingsInput>
+}) satisfies z.ZodType<UpdateUserEmailSettingsInput>;
 
 export const SendResetPasswordEmailInputSchema = z.object({
   email: z.email().toLowerCase(),
-}) satisfies z.ZodType<SendResetPasswordEmailInput>
+}) satisfies z.ZodType<SendResetPasswordEmailInput>;
 
 export const ResetPasswordInputSchema = z.object({
   email: z.email().toLowerCase(),
   token: z.string().nonempty(),
   newPassword: z.string().min(8).max(50),
-}) satisfies z.ZodType<ResetPasswordInput>
+}) satisfies z.ZodType<ResetPasswordInput>;

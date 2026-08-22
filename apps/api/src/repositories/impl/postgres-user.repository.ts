@@ -1,48 +1,52 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
-import { DatabaseService, DEFAULT_RESULT_NUMBER, type DrizzleTransaction } from '@wishlist/api/core'
-import { User, type UserRepository } from '@wishlist/api/user'
-import { schema } from '@wishlist/api-drizzle'
-import { type Authorities, type UserId, uuid } from '@wishlist/common'
-import { and, asc, count, desc, eq, inArray, like, ne, or, type SQL, sql } from 'drizzle-orm'
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { schema } from '@wishlist/api-drizzle';
+import { type Authorities, type UserId, uuid } from '@wishlist/common';
+import { and, asc, count, desc, eq, inArray, like, ne, or, type SQL, sql } from 'drizzle-orm';
+
+import { DEFAULT_RESULT_NUMBER } from '../../core/common/pagination';
+import { DatabaseService } from '../../core/database/database.service';
+import { type DrizzleTransaction } from '../../core/database/transaction-manager';
+import { User } from '../../user/domain/model/user.model';
+import { type UserRepository } from '../../user/domain/repository/user.repository';
 
 @Injectable()
 export class PostgresUserRepository implements UserRepository {
   constructor(private readonly databaseService: DatabaseService) {}
 
   newId(): UserId {
-    return uuid() as UserId
+    return uuid() as UserId;
   }
 
   async findById(id: UserId): Promise<User | undefined> {
-    const user = await this.databaseService.db.query.user.findFirst({ where: eq(schema.user.id, id) })
-    return user ? PostgresUserRepository.toModel(user) : undefined
+    const user = await this.databaseService.db.query.user.findFirst({ where: eq(schema.user.id, id) });
+    return user ? PostgresUserRepository.toModel(user) : undefined;
   }
 
   async findByIds(userIds: UserId[]): Promise<User[]> {
-    const users = await this.databaseService.db.query.user.findMany({ where: inArray(schema.user.id, userIds) })
-    return users.map(user => PostgresUserRepository.toModel(user))
+    const users = await this.databaseService.db.query.user.findMany({ where: inArray(schema.user.id, userIds) });
+    return users.map(user => PostgresUserRepository.toModel(user));
   }
 
   async findByIdOrFail(id: UserId): Promise<User> {
-    const user = await this.findById(id)
-    if (!user) throw new NotFoundException('User not found')
-    return user
+    const user = await this.findById(id);
+    if (!user) throw new NotFoundException('User not found');
+    return user;
   }
 
   async findByEmail(email: string): Promise<User | undefined> {
-    const user = await this.databaseService.db.query.user.findFirst({ where: eq(schema.user.email, email) })
-    return user ? PostgresUserRepository.toModel(user) : undefined
+    const user = await this.databaseService.db.query.user.findFirst({ where: eq(schema.user.email, email) });
+    return user ? PostgresUserRepository.toModel(user) : undefined;
   }
 
   async findByEmails(emails: string[]): Promise<User[]> {
-    const users = await this.databaseService.db.query.user.findMany({ where: inArray(schema.user.email, emails) })
-    return users.map(user => PostgresUserRepository.toModel(user))
+    const users = await this.databaseService.db.query.user.findMany({ where: inArray(schema.user.email, emails) });
+    return users.map(user => PostgresUserRepository.toModel(user));
   }
 
   async findAllByCriteria(params: { criteria: string; ignoreUserId?: UserId; limit?: number }): Promise<User[]> {
-    const { criteria, ignoreUserId, limit } = params
+    const { criteria, ignoreUserId, limit } = params;
 
-    const searchKey = criteria.trim().toLowerCase().normalize('NFC')
+    const searchKey = criteria.trim().toLowerCase().normalize('NFC');
 
     const users = await this.databaseService.db.query.user.findMany({
       where: and(
@@ -55,49 +59,49 @@ export class PostgresUserRepository implements UserRepository {
       ),
       limit: limit ?? DEFAULT_RESULT_NUMBER,
       orderBy: [asc(schema.user.firstName)],
-    })
+    });
 
-    return users.map(user => PostgresUserRepository.toModel(user))
+    return users.map(user => PostgresUserRepository.toModel(user));
   }
 
   async findAllPaginated(params: {
-    criteria?: string
-    pagination: { take: number; skip: number }
+    criteria?: string;
+    pagination: { take: number; skip: number };
   }): Promise<{ users: User[]; totalCount: number }> {
-    let whereCondition: SQL | undefined
+    let whereCondition: SQL | undefined;
 
     if (params.criteria) {
-      const searchKey = params.criteria.trim().toLowerCase().normalize('NFC')
+      const searchKey = params.criteria.trim().toLowerCase().normalize('NFC');
 
       whereCondition = or(
         like(sql`lower(${schema.user.firstName})`, `%${searchKey}%`),
         like(sql`lower(${schema.user.lastName})`, `%${searchKey}%`),
         like(sql`lower(${schema.user.email})`, `%${searchKey}%`),
-      )
+      );
     }
 
     // Get total count
     const totalCountResult = await this.databaseService.db
       .select({ count: count() })
       .from(schema.user)
-      .where(whereCondition)
+      .where(whereCondition);
 
-    const totalCount = totalCountResult[0]?.count ?? 0
+    const totalCount = totalCountResult[0]?.count ?? 0;
 
-    if (totalCount === 0) return { users: [], totalCount }
+    if (totalCount === 0) return { users: [], totalCount };
 
     const users = await this.databaseService.db.query.user.findMany({
       where: whereCondition,
       limit: params.pagination.take,
       offset: params.pagination.skip,
       orderBy: [desc(schema.user.createdAt)],
-    })
+    });
 
-    return { users: users.map(user => PostgresUserRepository.toModel(user)), totalCount }
+    return { users: users.map(user => PostgresUserRepository.toModel(user)), totalCount };
   }
 
   async save(user: User, tx?: DrizzleTransaction): Promise<void> {
-    const client = tx ?? this.databaseService.db
+    const client = tx ?? this.databaseService.db;
 
     await client
       .insert(schema.user)
@@ -131,18 +135,18 @@ export class PostgresUserRepository implements UserRepository {
           pictureUrl: user.pictureUrl ?? null,
           updatedAt: user.updatedAt,
         },
-      })
+      });
   }
 
   async delete(userId: UserId): Promise<void> {
-    await this.databaseService.db.delete(schema.user).where(eq(schema.user.id, userId))
+    await this.databaseService.db.delete(schema.user).where(eq(schema.user.id, userId));
   }
 
   async findClosestFriends(userId: UserId, limit: number): Promise<User[]> {
     const userEventsSubquery = this.databaseService.db
       .select({ eventId: schema.eventAttendee.eventId })
       .from(schema.eventAttendee)
-      .where(eq(schema.eventAttendee.userId, userId))
+      .where(eq(schema.eventAttendee.userId, userId));
 
     const result = await this.databaseService.db
       .select({
@@ -154,9 +158,9 @@ export class PostgresUserRepository implements UserRepository {
       .where(and(ne(schema.user.id, userId), inArray(schema.eventAttendee.eventId, userEventsSubquery)))
       .groupBy(schema.user.id)
       .orderBy(desc(count()))
-      .limit(limit)
+      .limit(limit);
 
-    return result.map(row => PostgresUserRepository.toModel(row.user))
+    return result.map(row => PostgresUserRepository.toModel(row.user));
   }
 
   static toModel(row: typeof schema.user.$inferSelect): User {
@@ -174,6 +178,6 @@ export class PostgresUserRepository implements UserRepository {
       pictureUrl: row.pictureUrl ?? undefined,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
-    })
+    });
   }
 }

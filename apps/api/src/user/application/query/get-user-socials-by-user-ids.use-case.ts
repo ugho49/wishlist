@@ -1,12 +1,14 @@
-import { Inject, Injectable } from '@nestjs/common'
-import { REPOSITORIES } from '@wishlist/api/repositories'
-import { type UserId } from '@wishlist/common'
+import type { UserSocialRepository } from '../../domain/repository/user-social.repository';
 
-import { UserSocial, type UserSocialRepository } from '../../domain'
+import { Inject, Injectable } from '@nestjs/common';
+import { type UserId } from '@wishlist/common';
+
+import { REPOSITORIES } from '../../../repositories/repositories.constants';
+import { UserSocial } from '../../domain/model/user-social.model';
 
 export type GetUserSocialsByUserIdsInput = {
-  userIds: UserId[]
-}
+  userIds: UserId[];
+};
 
 @Injectable()
 export class GetUserSocialsByUserIdsUseCase {
@@ -16,14 +18,14 @@ export class GetUserSocialsByUserIdsUseCase {
   ) {}
 
   async execute(query: GetUserSocialsByUserIdsInput): Promise<Map<UserId, UserSocial[]>> {
-    const userSocials = await this.userSocialRepository.findByUserIds(query.userIds)
+    const userSocials = await this.userSocialRepository.findByUserIds(query.userIds);
 
     return userSocials.reduce((acc, userSocial) => {
       if (!acc.has(userSocial.user.id)) {
-        acc.set(userSocial.user.id, [])
+        acc.set(userSocial.user.id, []);
       }
-      acc.get(userSocial.user.id)?.push(userSocial)
-      return acc
-    }, new Map<UserId, UserSocial[]>())
+      acc.get(userSocial.user.id)?.push(userSocial);
+      return acc;
+    }, new Map<UserId, UserSocial[]>());
   }
 }

@@ -1,10 +1,10 @@
-import type { ICurrentUser } from '@wishlist/common'
+import type { ICurrentUser } from '@wishlist/common';
 
-import { Args, Mutation, Resolver } from '@nestjs/graphql'
-import { GqlCurrentUser } from '@wishlist/api/auth'
-import { ZodPipe } from '@wishlist/api/core'
-import { type EventId, type WishlistId } from '@wishlist/common'
+import { Args, Mutation, Resolver } from '@nestjs/graphql';
+import { type EventId, type WishlistId } from '@wishlist/common';
 
+import { GqlCurrentUser } from '../../../auth/infrastructure/decorators/user.decorator';
+import { ZodPipe } from '../../../core/graphql/zod-pipe';
 import {
   type AddWishlistCoOwnerInput,
   type AddWishlistCoOwnerResult,
@@ -15,20 +15,20 @@ import {
   type UnlinkWishlistFromEventResult,
   type UpdateWishlistInput,
   type UpdateWishlistResult,
-} from '../../../gql/generated-types'
-import { AddCoOwnerUseCase } from '../../application/command/add-co-owner.use-case'
-import { DeleteWishlistUseCase } from '../../application/command/delete-wishlist.use-case'
-import { LinkWishlistToEventUseCase } from '../../application/command/link-wishlist-to-event.use-case'
-import { RemoveCoOwnerUseCase } from '../../application/command/remove-co-owner.use-case'
-import { RemoveWishlistLogoUseCase } from '../../application/command/remove-wishlist-logo.use-case'
-import { UnlinkWishlistFromEventUseCase } from '../../application/command/unlink-wishlist-from-event.use-case'
-import { UpdateWishlistUseCase } from '../../application/command/update-wishlist.use-case'
+} from '../../../gql/generated-types';
+import { AddCoOwnerUseCase } from '../../application/command/add-co-owner.use-case';
+import { DeleteWishlistUseCase } from '../../application/command/delete-wishlist.use-case';
+import { LinkWishlistToEventUseCase } from '../../application/command/link-wishlist-to-event.use-case';
+import { RemoveCoOwnerUseCase } from '../../application/command/remove-co-owner.use-case';
+import { RemoveWishlistLogoUseCase } from '../../application/command/remove-wishlist-logo.use-case';
+import { UnlinkWishlistFromEventUseCase } from '../../application/command/unlink-wishlist-from-event.use-case';
+import { UpdateWishlistUseCase } from '../../application/command/update-wishlist.use-case';
 import {
   AddWishlistCoOwnerInputSchema,
   EventIdSchema,
   UpdateWishlistInputSchema,
   WishlistIdSchema,
-} from '../wishlist.schema'
+} from '../wishlist.schema';
 
 @Resolver()
 export class WishlistMutationResolver {
@@ -52,9 +52,9 @@ export class WishlistMutationResolver {
       wishlistId,
       currentUser,
       updateWishlist: { title: input.title, description: input.description ?? undefined },
-    })
+    });
 
-    return { __typename: 'VoidOutput', success: true }
+    return { __typename: 'VoidOutput', success: true };
   }
 
   @Mutation()
@@ -62,8 +62,8 @@ export class WishlistMutationResolver {
     @Args('id', new ZodPipe(WishlistIdSchema)) wishlistId: WishlistId,
     @GqlCurrentUser() currentUser: ICurrentUser,
   ): Promise<DeleteWishlistResult> {
-    await this.deleteWishlistUseCase.execute({ wishlistId, currentUser })
-    return { __typename: 'VoidOutput', success: true }
+    await this.deleteWishlistUseCase.execute({ wishlistId, currentUser });
+    return { __typename: 'VoidOutput', success: true };
   }
 
   @Mutation()
@@ -72,8 +72,8 @@ export class WishlistMutationResolver {
     @Args('eventId', new ZodPipe(EventIdSchema)) eventId: EventId,
     @GqlCurrentUser() currentUser: ICurrentUser,
   ): Promise<LinkWishlistToEventResult> {
-    await this.linkWishlistToEventUseCase.execute({ wishlistId, currentUser, eventId })
-    return { __typename: 'VoidOutput', success: true }
+    await this.linkWishlistToEventUseCase.execute({ wishlistId, currentUser, eventId });
+    return { __typename: 'VoidOutput', success: true };
   }
 
   @Mutation()
@@ -82,8 +82,8 @@ export class WishlistMutationResolver {
     @Args('eventId', new ZodPipe(EventIdSchema)) eventId: EventId,
     @GqlCurrentUser() currentUser: ICurrentUser,
   ): Promise<UnlinkWishlistFromEventResult> {
-    await this.unlinkWishlistFromEventUseCase.execute({ wishlistId, currentUser, eventId })
-    return { __typename: 'VoidOutput', success: true }
+    await this.unlinkWishlistFromEventUseCase.execute({ wishlistId, currentUser, eventId });
+    return { __typename: 'VoidOutput', success: true };
   }
 
   @Mutation()
@@ -92,8 +92,8 @@ export class WishlistMutationResolver {
     @Args('input', new ZodPipe(AddWishlistCoOwnerInputSchema)) input: AddWishlistCoOwnerInput,
     @GqlCurrentUser() currentUser: ICurrentUser,
   ): Promise<AddWishlistCoOwnerResult> {
-    await this.addCoOwnerUseCase.execute({ wishlistId, currentUser, coOwnerId: input.userId })
-    return { __typename: 'VoidOutput', success: true }
+    await this.addCoOwnerUseCase.execute({ wishlistId, currentUser, coOwnerId: input.userId });
+    return { __typename: 'VoidOutput', success: true };
   }
 
   @Mutation()
@@ -101,8 +101,8 @@ export class WishlistMutationResolver {
     @Args('id', new ZodPipe(WishlistIdSchema)) wishlistId: WishlistId,
     @GqlCurrentUser() currentUser: ICurrentUser,
   ): Promise<RemoveWishlistCoOwnerResult> {
-    await this.removeCoOwnerUseCase.execute({ wishlistId, currentUser })
-    return { __typename: 'VoidOutput', success: true }
+    await this.removeCoOwnerUseCase.execute({ wishlistId, currentUser });
+    return { __typename: 'VoidOutput', success: true };
   }
 
   @Mutation()
@@ -110,7 +110,7 @@ export class WishlistMutationResolver {
     @Args('id', new ZodPipe(WishlistIdSchema)) wishlistId: WishlistId,
     @GqlCurrentUser() currentUser: ICurrentUser,
   ): Promise<RemoveWishlistLogoResult> {
-    await this.removeWishlistLogoUseCase.execute({ wishlistId, currentUser })
-    return { __typename: 'VoidOutput', success: true }
+    await this.removeWishlistLogoUseCase.execute({ wishlistId, currentUser });
+    return { __typename: 'VoidOutput', success: true };
   }
 }

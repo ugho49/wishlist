@@ -1,17 +1,17 @@
-import type { Area } from 'react-easy-crop'
+import type { Area } from 'react-easy-crop';
 
-import { Box, Button, Modal, Slider as SliderBase, styled, Typography } from '@mui/material'
-import { useCallback, useState } from 'react'
-import Cropper from 'react-easy-crop'
+import { Box, Button, Modal, Slider as SliderBase, styled, Typography } from '@mui/material';
+import { useCallback, useState } from 'react';
+import Cropper from 'react-easy-crop';
 
-import { useToast } from '../../hooks/useToast'
-import { getCroppedImg } from '../../utils/canvas.utils'
+import { useToast } from '../../hooks/useToast';
+import { getCroppedImg } from '../../utils/canvas.utils';
 
 export type AvatarCropperModalProps = {
-  imageSrc: string
-  handleSave: (file: File) => void | Promise<void>
-  handleClose: () => void
-}
+  imageSrc: string;
+  handleSave: (file: File) => void | Promise<void>;
+  handleClose: () => void;
+};
 
 const ModalContainer = styled(Box)(({ theme }) => ({
   position: 'absolute',
@@ -29,14 +29,14 @@ const ModalContainer = styled(Box)(({ theme }) => ({
     height: 600,
     width: 600,
   },
-}))
+}));
 
 const CropContainer = styled('div')({
   position: 'relative',
   background: '#333',
   width: '100%',
   height: '100%',
-})
+});
 
 const Controls = styled(Box)(({ theme }) => ({
   display: 'flex',
@@ -47,19 +47,19 @@ const Controls = styled(Box)(({ theme }) => ({
     flexDirection: 'row',
     alignItems: 'center',
   },
-}))
+}));
 
 const SliderContainer = styled(Box)({
   display: 'flex',
   flex: '1',
   alignItems: 'center',
-})
+});
 
 const SliderLabel = styled(Typography)(({ theme }) => ({
   [theme.breakpoints.down('xs')]: {
     minWidth: 65,
   },
-}))
+}));
 
 const Slider = styled(SliderBase)(({ theme }) => ({
   padding: '22px 0px',
@@ -69,36 +69,36 @@ const Slider = styled(SliderBase)(({ theme }) => ({
     alignItems: 'center',
     margin: '0 16px',
   },
-}))
+}));
 
 const CropButton = styled(Button)({
   flexShrink: 0,
-})
+});
 
 export const AvatarCropperModal = ({ handleClose, imageSrc, handleSave }: AvatarCropperModalProps) => {
-  const { addToast } = useToast()
-  const [crop, setCrop] = useState({ x: 0, y: 0 })
-  const [rotation, setRotation] = useState(0)
-  const [zoom, setZoom] = useState<number>(1)
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area>({ width: 0, height: 0, x: 0, y: 0 })
-  const [loading, setLoading] = useState(false)
+  const { addToast } = useToast();
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [rotation, setRotation] = useState(0);
+  const [zoom, setZoom] = useState<number>(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area>({ width: 0, height: 0, x: 0, y: 0 });
+  const [loading, setLoading] = useState(false);
 
-  const onCropComplete = useCallback((_croppedArea: Area, croppedAreaPixels: Area) => {
-    setCroppedAreaPixels(croppedAreaPixels)
-  }, [])
+  const onCropComplete = useCallback((_croppedArea: Area, croppedPixels: Area) => {
+    setCroppedAreaPixels(croppedPixels);
+  }, []);
 
   const getCroppedImage = useCallback(async () => {
-    setLoading(true)
+    setLoading(true);
     try {
-      const croppedImage = await getCroppedImg(imageSrc, croppedAreaPixels, rotation)
-      await handleSave(croppedImage)
+      const croppedImage = await getCroppedImg(imageSrc, croppedAreaPixels, rotation);
+      await handleSave(croppedImage);
     } catch {
-      addToast({ message: "Une erreur s'est produite lors du redimensionnement de l'image", variant: 'error' })
-      handleClose()
+      addToast({ message: "Une erreur s'est produite lors du redimensionnement de l'image", variant: 'error' });
+      handleClose();
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [imageSrc, croppedAreaPixels, rotation, handleSave, addToast, handleClose])
+  }, [imageSrc, croppedAreaPixels, rotation, handleSave, addToast, handleClose]);
 
   return (
     <Modal open onClose={handleClose}>
@@ -126,10 +126,10 @@ export const AvatarCropperModal = ({ handleClose, imageSrc, handleSave }: Avatar
               max={3}
               step={0.1}
               aria-labelledby="Zoom"
-              onChange={(_e, zoom) => {
+              onChange={(_e, zoomValue) => {
                 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                 // @ts-expect-error
-                setZoom(zoom)
+                setZoom(zoomValue);
               }}
             />
           </SliderContainer>
@@ -141,10 +141,10 @@ export const AvatarCropperModal = ({ handleClose, imageSrc, handleSave }: Avatar
               max={360}
               step={1}
               aria-labelledby="Rotation"
-              onChange={(_e, rotation) => {
+              onChange={(_e, rotationValue) => {
                 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                 // @ts-expect-error
-                setRotation(rotation)
+                setRotation(rotationValue);
               }}
             />
           </SliderContainer>
@@ -163,5 +163,5 @@ export const AvatarCropperModal = ({ handleClose, imageSrc, handleSave }: Avatar
         </Controls>
       </ModalContainer>
     </Modal>
-  )
-}
+  );
+};

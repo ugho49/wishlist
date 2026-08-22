@@ -1,13 +1,13 @@
-import { Section, Text } from 'react-email'
+import { Section, Text } from 'react-email';
 
-import { EmailLayout } from '../components/layout'
-import { ButtonFallback, Callout, ContentSection, Heading, Paragraph, PrimaryButton } from '../components/ui'
-import * as styles from '../styles'
+import { EmailLayout } from '../components/layout';
+import { ButtonFallback, Callout, ContentSection, Heading, Paragraph, PrimaryButton } from '../components/ui';
+import * as styles from '../styles';
 
 export interface AddedToEventEmailProps {
-  readonly eventTitle: string
-  readonly eventUrl: string
-  readonly invitedBy: string
+  readonly eventTitle: string;
+  readonly eventUrl: string;
+  readonly invitedBy: string;
 }
 
 export default function AddedToEventEmail({ eventTitle, eventUrl, invitedBy }: AddedToEventEmailProps) {
@@ -59,11 +59,11 @@ export default function AddedToEventEmail({ eventTitle, eventUrl, invitedBy }: A
         <ButtonFallback href={eventUrl} />
       </Section>
     </EmailLayout>
-  )
+  );
 }
 
 AddedToEventEmail.PreviewProps = {
   eventTitle: 'Noël en famille 2026',
   eventUrl: 'https://wishlistapp.fr/events/preview',
   invitedBy: 'Marie Dupont',
-} satisfies AddedToEventEmailProps
+} satisfies AddedToEventEmailProps;
