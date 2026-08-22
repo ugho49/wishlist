@@ -145,8 +145,8 @@
     "@types/supertest": "6.0.3",
     "@typescript/native": "npm:typescript@7.0.2",
     "@vitejs/plugin-react": "6.1.0",
-    "@vitest/coverage-v8": "4.0.16",
-    "@vitest/ui": "4.0.16",
+    "@vitest/coverage-v8": "4.1.11",
+    "@vitest/ui": "4.1.11",
     "browserslist-to-esbuild": "2.1.1",
     "consola": "3.4.2",
     "drizzle-kit": "0.31.8",
@@ -165,7 +165,6 @@
     "unplugin-swc": "1.5.9",
     "vite": "8.2.2",
     "vite-plugin-svgr": "4.5.0",
-    "vite-tsconfig-paths": "6.0.3",
-    "vitest": "4.0.16"
+    "vitest": "4.1.11"
   }
 }

@@ -6,10 +6,9 @@ import react from '@vitejs/plugin-react';
 import browserslistToEsbuild from 'browserslist-to-esbuild';
 import { defineConfig } from 'vite';
 import svgr from 'vite-plugin-svgr';
-import tsconfigPaths from 'vite-tsconfig-paths';
 
 const config: UserConfig = {
-  root: __dirname,
+  root: import.meta.dirname,
   cacheDir: '../../node_modules/.vite/apps/front',
 
   server: {
@@ -36,6 +35,10 @@ const config: UserConfig = {
     },
   },
 
+  resolve: {
+    tsconfigPaths: true,
+  },
+
   plugins: [
     devtools(),
     tanstackRouter({
@@ -44,7 +47,6 @@ const config: UserConfig = {
     }),
     react(),
     svgr(),
-    tsconfigPaths(),
   ],
 };
 
