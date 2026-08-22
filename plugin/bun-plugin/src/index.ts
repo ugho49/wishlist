@@ -1,11 +1,11 @@
 import { dirname } from 'node:path';
-import { type CreateNodesV2, createNodesFromFiles } from '@nx/devkit';
+import { type CreateNodes, createNodesFromFiles } from '@nx/devkit';
 
 export type BunPluginOptions = {
   generatePrunedPackageJsonTargetName?: string;
 };
 
-export const createNodesV2: CreateNodesV2<BunPluginOptions> = [
+export const createNodesV2: CreateNodes<BunPluginOptions> = [
   'apps/*/Dockerfile',
   async (configFiles, options, context) =>
     await createNodesFromFiles(
