@@ -5,6 +5,7 @@ import {
   eventAttendee,
   eventWishlist,
   item,
+  itemTaker,
   secretSanta,
   secretSantaUser,
   user,
@@ -40,7 +41,7 @@ export const userRelations = relations(user, ({ many }) => ({
   socials: many(userSocial),
   wishlists: many(wishlist, { relationName: 'ownedWishlists' }),
   coOwnedWishlists: many(wishlist, { relationName: 'coOwnedWishlists' }),
-  items: many(item),
+  itemTakers: many(itemTaker),
 }))
 
 export const userPasswordVerificationRelations = relations(userPasswordVerification, ({ one }) => ({
@@ -86,13 +87,21 @@ export const wishlistRelations = relations(wishlist, ({ one, many }) => ({
   eventWishlists: many(eventWishlist),
 }))
 
-export const itemRelations = relations(item, ({ one }) => ({
+export const itemRelations = relations(item, ({ one, many }) => ({
   wishlist: one(wishlist, {
     fields: [item.wishlistId],
     references: [wishlist.id],
   }),
-  taker: one(user, {
-    fields: [item.takerId],
+  takers: many(itemTaker),
+}))
+
+export const itemTakerRelations = relations(itemTaker, ({ one }) => ({
+  item: one(item, {
+    fields: [itemTaker.itemId],
+    references: [item.id],
+  }),
+  user: one(user, {
+    fields: [itemTaker.userId],
     references: [user.id],
   }),
 }))

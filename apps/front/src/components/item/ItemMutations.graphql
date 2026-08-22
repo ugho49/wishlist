@@ -9,14 +9,16 @@ mutation CreateItem($input: CreateItemInput!) {
       score
       isSuggested
       pictureUrl
-      takenById
-      takenAt
-      createdAt
-      takerUser {
-        id
-        firstName
-        pictureUrl
+      takers {
+        userId
+        takenAt
+        user {
+          id
+          firstName
+          pictureUrl
+        }
       }
+      createdAt
     }
     ... on ValidationRejection {
       errors {
@@ -55,8 +57,15 @@ mutation ToggleItem($itemId: ItemId!) {
   toggleItem(itemId: $itemId) {
     __typename
     ... on ToggleItemOutput {
-      takenById
-      takenAt
+      takers {
+        userId
+        takenAt
+        user {
+          id
+          firstName
+          pictureUrl
+        }
+      }
     }
   }
 }
@@ -82,14 +91,16 @@ mutation ImportItems($input: ImportItemsInput!) {
         score
         isSuggested
         pictureUrl
-        takenById
-        takenAt
-        createdAt
-        takerUser {
-          id
-          firstName
-          pictureUrl
+        takers {
+          userId
+          takenAt
+          user {
+            id
+            firstName
+            pictureUrl
+          }
         }
+        createdAt
       }
     }
     ... on ValidationRejection {

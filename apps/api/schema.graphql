@@ -279,13 +279,17 @@ type Item {
   name: String!
   pictureUrl: String
   score: Int
-  takenAt: String
-  takenById: UserId
-  takerUser: User
+  takers: [ItemTaker!]!
   url: String
 }
 
 scalar ItemId
+
+type ItemTaker {
+  takenAt: String!
+  user: User! @resolved
+  userId: UserId!
+}
 
 input LinkUserToGoogleInput {
   code: String!
@@ -495,8 +499,7 @@ union SendResetPasswordEmailResult = ForbiddenRejection | InternalErrorRejection
 union StartSecretSantaResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
 type ToggleItemOutput {
-  takenAt: String
-  takenById: UserId
+  takers: [ItemTaker!]!
 }
 
 union ToggleItemResult = ForbiddenRejection | InternalErrorRejection | ToggleItemOutput | UnauthorizedRejection | ValidationRejection

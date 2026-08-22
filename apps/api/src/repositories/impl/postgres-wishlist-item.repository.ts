@@ -3,10 +3,16 @@ import { DatabaseService, type DrizzleTransaction } from '@wishlist/api/core'
 import { type NewItemsForWishlist, WishlistItem, type WishlistItemRepository } from '@wishlist/api/item'
 import { schema } from '@wishlist/api-drizzle'
 import { type ItemId, type UserId, uuid, type WishlistId } from '@wishlist/common'
-import { and, eq, gt, inArray, isNull, lt, max, ne, sql } from 'drizzle-orm'
+import { and, eq, gt, inArray, isNull, lt, max, ne, notExists, sql } from 'drizzle-orm'
 import { DateTime } from 'luxon'
 
 import { PostgresUserRepository } from './postgres-user.repository'
+
+const takersWithUser = { takers: { with: { user: true } } } as const
+
+type ItemRowWithTakers = typeof schema.item.$inferSelect & {
+  takers: (typeof schema.itemTaker.$inferSelect & { user: typeof schema.user.$inferSelect })[]
+}
 
 @Injectable()
 export class PostgresWishlistItemRepository implements WishlistItemRepository {
@@ -19,7 +25,7 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
   async findById(id: ItemId): Promise<WishlistItem | undefined> {
     const result = await this.databaseService.db.query.item.findFirst({
       where: eq(schema.item.id, id),
-      with: { taker: true },
+      with: takersWithUser,
     })
 
     return result ? PostgresWishlistItemRepository.toModel(result) : undefined
@@ -30,7 +36,7 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
 
     const result = await this.databaseService.db.query.item.findMany({
       where: inArray(schema.item.id, ids),
-      with: { taker: true },
+      with: takersWithUser,
     })
 
     return result.map(PostgresWishlistItemRepository.toModel)
@@ -45,7 +51,7 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
   async findByWishlist(wishlistId: WishlistId): Promise<WishlistItem[]> {
     const result = await this.databaseService.db.query.item.findMany({
       where: eq(schema.item.wishlistId, wishlistId),
-      with: { taker: true },
+      with: takersWithUser,
     })
 
     return result.map(PostgresWishlistItemRepository.toModel)
@@ -124,50 +130,62 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
       .where(
         and(
           eq(schema.item.isSuggested, false),
-          isNull(schema.item.takerId),
           isNull(alreadyImportedItemsSubquery.importSourceId),
+          notExists(
+            this.databaseService.db.select().from(schema.itemTaker).where(eq(schema.itemTaker.itemId, schema.item.id)),
+          ),
         ),
       )
       .orderBy(schema.item.createdAt)
 
-    return result.map(row => PostgresWishlistItemRepository.toModel({ ...row.item, taker: null }))
+    return result.map(row => PostgresWishlistItemRepository.toModel({ ...row.item, takers: [] }))
   }
 
   async save(item: WishlistItem, tx?: DrizzleTransaction): Promise<void> {
     const client = tx ?? this.databaseService.db
 
-    await client
-      .insert(schema.item)
-      .values({
-        id: item.id,
-        wishlistId: item.wishlistId,
-        name: item.name,
-        description: item.description,
-        url: item.url,
-        score: item.score,
-        isSuggested: item.isSuggested,
-        takerId: item.takenBy?.id,
-        takenAt: item.takenAt,
-        pictureUrl: item.imageUrl,
-        importSourceId: item.importSourceId,
-        createdAt: item.createdAt,
-        updatedAt: item.updatedAt,
-      })
-      .onConflictDoUpdate({
-        target: schema.item.id,
-        set: {
+    await client.transaction(async subTx => {
+      await subTx
+        .insert(schema.item)
+        .values({
+          id: item.id,
+          wishlistId: item.wishlistId,
           name: item.name,
-          description: item.description ?? null,
-          importSourceId: item.importSourceId ?? null,
-          url: item.url ?? null,
-          pictureUrl: item.imageUrl ?? null,
-          score: item.score ?? null,
+          description: item.description,
+          url: item.url,
+          score: item.score,
           isSuggested: item.isSuggested,
-          takerId: item.takenBy?.id ?? null,
-          takenAt: item.takenAt ?? null,
+          pictureUrl: item.imageUrl,
+          importSourceId: item.importSourceId,
+          createdAt: item.createdAt,
           updatedAt: item.updatedAt,
-        },
-      })
+        })
+        .onConflictDoUpdate({
+          target: schema.item.id,
+          set: {
+            name: item.name,
+            description: item.description ?? null,
+            importSourceId: item.importSourceId ?? null,
+            url: item.url ?? null,
+            pictureUrl: item.imageUrl ?? null,
+            score: item.score ?? null,
+            isSuggested: item.isSuggested,
+            updatedAt: item.updatedAt,
+          },
+        })
+
+      await subTx.delete(schema.itemTaker).where(eq(schema.itemTaker.itemId, item.id))
+
+      if (item.takers.length > 0) {
+        await subTx.insert(schema.itemTaker).values(
+          item.takers.map(taker => ({
+            itemId: item.id,
+            userId: taker.user.id,
+            takenAt: taker.takenAt,
+          })),
+        )
+      }
+    })
   }
 
   async delete(id: ItemId, tx?: DrizzleTransaction): Promise<void> {
@@ -175,11 +193,7 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
     await client.delete(schema.item).where(eq(schema.item.id, id))
   }
 
-  static toModel(
-    row: typeof schema.item.$inferSelect & {
-      taker: typeof schema.user.$inferSelect | null
-    },
-  ): WishlistItem {
+  static toModel(row: ItemRowWithTakers): WishlistItem {
     return new WishlistItem({
       id: row.id,
       importSourceId: row.importSourceId ?? undefined,
@@ -190,8 +204,10 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
       score: row.score ?? undefined,
       isSuggested: row.isSuggested,
       imageUrl: row.pictureUrl ?? undefined,
-      takenBy: row.taker ? PostgresUserRepository.toModel(row.taker) : undefined,
-      takenAt: row.takenAt ?? undefined,
+      takers: row.takers.map(taker => ({
+        user: PostgresUserRepository.toModel(taker.user),
+        takenAt: taker.takenAt,
+      })),
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     })

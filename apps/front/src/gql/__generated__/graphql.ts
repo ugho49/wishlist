@@ -735,14 +735,16 @@ export const ImportableItemsDocument = `
         score
         isSuggested
         pictureUrl
-        takenById
-        takenAt
-        createdAt
-        takerUser {
-          id
-          firstName
-          pictureUrl
+        takers {
+          userId
+          takenAt
+          user {
+            id
+            firstName
+            pictureUrl
+          }
         }
+        createdAt
       }
     }
   }
@@ -777,14 +779,16 @@ export const CreateItemDocument = `
       score
       isSuggested
       pictureUrl
-      takenById
-      takenAt
-      createdAt
-      takerUser {
-        id
-        firstName
-        pictureUrl
+      takers {
+        userId
+        takenAt
+        user {
+          id
+          firstName
+          pictureUrl
+        }
       }
+      createdAt
     }
     ... on ValidationRejection {
       errors {
@@ -868,8 +872,15 @@ export const ToggleItemDocument = `
   toggleItem(itemId: $itemId) {
     __typename
     ... on ToggleItemOutput {
-      takenById
-      takenAt
+      takers {
+        userId
+        takenAt
+        user {
+          id
+          firstName
+          pictureUrl
+        }
+      }
     }
   }
 }
@@ -925,14 +936,16 @@ export const ImportItemsDocument = `
         score
         isSuggested
         pictureUrl
-        takenById
-        takenAt
-        createdAt
-        takerUser {
-          id
-          firstName
-          pictureUrl
+        takers {
+          userId
+          takenAt
+          user {
+            id
+            firstName
+            pictureUrl
+          }
         }
+        createdAt
       }
     }
     ... on ValidationRejection {
@@ -2085,14 +2098,16 @@ export const WishlistPageDocument = `
         score
         isSuggested
         pictureUrl
-        takenById
-        takenAt
-        createdAt
-        takerUser {
-          id
-          firstName
-          pictureUrl
+        takers {
+          userId
+          takenAt
+          user {
+            id
+            firstName
+            pictureUrl
+          }
         }
+        createdAt
       }
       createdAt
       updatedAt

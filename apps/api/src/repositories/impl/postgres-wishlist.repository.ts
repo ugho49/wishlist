@@ -23,7 +23,7 @@ export class PostgresWishlistRepository implements WishlistRepository {
         owner: true,
         coOwner: true,
         eventWishlists: true,
-        items: { with: { taker: true } },
+        items: { with: { takers: { with: { user: true } } } },
       },
     })
 
@@ -37,7 +37,7 @@ export class PostgresWishlistRepository implements WishlistRepository {
         owner: true,
         coOwner: true,
         eventWishlists: true,
-        items: { with: { taker: true } },
+        items: { with: { takers: { with: { user: true } } } },
       },
     })
 
@@ -63,7 +63,7 @@ export class PostgresWishlistRepository implements WishlistRepository {
         owner: true,
         coOwner: true,
         eventWishlists: true,
-        items: { with: { taker: true } },
+        items: { with: { takers: { with: { user: true } } } },
       },
     })
 
@@ -77,7 +77,7 @@ export class PostgresWishlistRepository implements WishlistRepository {
         owner: true,
         coOwner: true,
         eventWishlists: true,
-        items: { with: { taker: true } },
+        items: { with: { takers: { with: { user: true } } } },
       },
     })
 
@@ -120,7 +120,7 @@ export class PostgresWishlistRepository implements WishlistRepository {
         owner: true,
         coOwner: true,
         eventWishlists: true,
-        items: { with: { taker: true } },
+        items: { with: { takers: { with: { user: true } } } },
       },
     })
 
@@ -241,7 +241,9 @@ export class PostgresWishlistRepository implements WishlistRepository {
       owner: typeof schema.user.$inferSelect
       coOwner: typeof schema.user.$inferSelect | null
       eventWishlists: (typeof schema.eventWishlist.$inferSelect)[]
-      items: (typeof schema.item.$inferSelect & { taker: typeof schema.user.$inferSelect | null })[]
+      items: (typeof schema.item.$inferSelect & {
+        takers: (typeof schema.itemTaker.$inferSelect & { user: typeof schema.user.$inferSelect })[]
+      })[]
     },
   ): Wishlist {
     return new Wishlist({

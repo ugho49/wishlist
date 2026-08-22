@@ -39,14 +39,16 @@ query WishlistPage($wishlistId: WishlistId!) {
         score
         isSuggested
         pictureUrl
-        takenById
-        takenAt
-        createdAt
-        takerUser {
-          id
-          firstName
-          pictureUrl
+        takers {
+          userId
+          takenAt
+          user {
+            id
+            firstName
+            pictureUrl
+          }
         }
+        createdAt
       }
       createdAt
       updatedAt

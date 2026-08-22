@@ -11,6 +11,7 @@ import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline'
 import TipsAndUpdatesTwoToneIcon from '@mui/icons-material/TipsAndUpdatesTwoTone'
 import {
   Avatar,
+  AvatarGroup,
   alpha,
   Box,
   Button,
@@ -224,8 +225,10 @@ const ReservedIndicator = styled(Box)<{ isReservedByMe: boolean }>(({ theme, isR
   zIndex: 2,
   display: 'flex',
   alignItems: 'center',
-  width: '150px',
-  justifyContent: 'space-between',
+  gap: '8px',
+  width: 'max-content',
+  maxWidth: 'calc(100% - 72px)',
+  justifyContent: 'center',
   fontSize: '0.9rem',
   color: theme.palette.success.contrastText,
   fontWeight: 500,
@@ -239,12 +242,15 @@ const ReservedIndicator = styled(Box)<{ isReservedByMe: boolean }>(({ theme, isR
     : `0 4px 12px ${alpha(theme.palette.success.main, 0.3)}`,
 }))
 
-const ReservedIndicatorAvatar = styled(Avatar)(() => ({
-  height: '30px',
-  width: '30px',
-  bgcolor: 'white',
-  color: 'black',
-  border: '1px solid white',
+const ReservedAvatarGroup = styled(AvatarGroup)(() => ({
+  '& .MuiAvatar-root': {
+    height: '28px',
+    width: '28px',
+    fontSize: '0.75rem',
+    border: '1px solid white',
+    backgroundColor: 'white',
+    color: 'black',
+  },
 }))
 
 // Action button with modern styling and proper text sizing
@@ -343,17 +349,22 @@ type Taker = {
   pictureUrl?: string | null
 }
 
+const toTakers = (takers: WishlistItem['takers']): Taker[] =>
+  takers.map(taker => ({
+    id: taker.user.id,
+    firstName: taker.user.firstName,
+    pictureUrl: taker.user.pictureUrl,
+  }))
+
 const mapState = (state: RootState) => state.auth.user?.id
-const mapProfile = (state: RootState) => state.userProfile
 
 export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
   const currentUserId = useSelector(mapState)
-  const currentUserProfile = useSelector(mapProfile)
   const { addToast } = useToast()
   const queryClient = useQueryClient()
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
   const { currentItemId } = useSearch({ from: '/_authenticated/_with-layout/wishlists/$wishlistId/' })
-  const [takenBy, setTakenBy] = useState<Taker | undefined>(item.takerUser ?? undefined)
+  const [takers, setTakers] = useState<Taker[]>(() => toTakers(item.takers))
   const isDialogOpen = useMemo(() => currentItemId === item.id, [currentItemId, item.id])
   const navigate = useNavigate({ from: '/wishlists/$wishlistId' })
   const setDialogOpen = useCallback(
@@ -363,11 +374,11 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
     [item.id, navigate],
   )
 
-  const isTaken = useMemo(() => takenBy !== undefined, [takenBy])
+  const isTaken = takers.length > 0
   const isOwnerOrCoOwner = currentUserId === wishlist.ownerId || wishlist.coOwnerId === currentUserId
   const canReserve = !isOwnerOrCoOwner || !wishlist.hideItems
   const canEdit = (isOwnerOrCoOwner || item.isSuggested) && !isTaken
-  const isReservedByCurrentUser = takenBy?.id === currentUserId
+  const isReservedByCurrentUser = takers.some(taker => taker.id === currentUserId)
 
   const openMenu = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget)
   const closeMenu = () => setAnchorEl(null)
@@ -393,25 +404,36 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
     const res = await toggleItemMutation({ itemId: item.id })
     match(res.toggleItem)
       .with({ __typename: 'ToggleItemOutput' }, output => {
-        const action = output.takenById != null ? 'check' : 'uncheck'
-        setTakenBy(
-          output.takenById != null
-            ? {
-                id: output.takenById,
-                firstName: currentUserProfile.firstName,
-                pictureUrl: currentUserProfile.pictureUrl,
-              }
-            : undefined,
-        )
+        const nextTakers = output.takers.map(taker => ({
+          id: taker.user.id,
+          firstName: taker.user.firstName,
+          pictureUrl: taker.user.pictureUrl,
+        }))
+        const action = nextTakers.some(taker => taker.id === currentUserId) ? 'check' : 'uncheck'
+        setTakers(nextTakers)
 
         if (action === 'check') {
           addToast({
+            message:
+              nextTakers.length > 1 ? (
+                <span>
+                  Vous participez à la réservation de <b>{item.name}</b>
+                </span>
+              ) : (
+                <span>
+                  Vous avez coché : <b>{item.name}</b>
+                </span>
+              ),
+            variant: 'success',
+          })
+        } else if (nextTakers.length > 0) {
+          addToast({
             message: (
               <span>
-                Vous avez coché : <b>{item.name}</b>
+                Vous ne participez plus à la réservation de <b>{item.name}</b>
               </span>
             ),
-            variant: 'success',
+            variant: 'info',
           })
         } else {
           addToast({
@@ -430,13 +452,7 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
 
   const loading = useMemo(() => deleteItemPending || toggleItemPending, [deleteItemPending, toggleItemPending])
 
-  // Determine if we should show reserve button
-  const shouldShowReserveButton = useMemo(() => {
-    if (!canReserve) return false
-    // Hide button if item is taken by someone else
-    if (isTaken && !isReservedByCurrentUser) return false
-    return true
-  }, [canReserve, isTaken, isReservedByCurrentUser])
+  const shouldShowReserveButton = canReserve
 
   return (
     <>
@@ -470,11 +486,13 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
           <ReservedIndicator isReservedByMe={isReservedByCurrentUser}>
             <RedeemIcon sx={{ fontSize: '1rem' }} />
             <span>Réservé</span>
-            <Tooltip title={takenBy?.firstName ?? ''}>
-              <ReservedIndicatorAvatar src={takenBy?.pictureUrl ?? undefined}>
-                {takenBy?.firstName?.toUpperCase()?.charAt(0)}
-              </ReservedIndicatorAvatar>
-            </Tooltip>
+            <ReservedAvatarGroup max={3} spacing="small">
+              {takers.map(taker => (
+                <Tooltip key={taker.id} title={taker.firstName ?? ''}>
+                  <Avatar src={taker.pictureUrl ?? undefined}>{taker.firstName?.toUpperCase()?.charAt(0)}</Avatar>
+                </Tooltip>
+              ))}
+            </ReservedAvatarGroup>
           </ReservedIndicator>
         )}
 
@@ -531,10 +549,10 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
                   e.stopPropagation()
                   void toggleItem()
                 }}
-                disabled={loading || isTaken}
+                disabled={loading}
                 startIcon={<RedeemIcon />}
               >
-                Réserver
+                {isTaken ? 'Participer' : 'Réserver'}
               </ReservedButton>
             )}
           </ActionsContainer>

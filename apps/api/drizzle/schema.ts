@@ -197,15 +197,26 @@ export const item = pgTable(
     isSuggested: boolean('is_suggested').default(false).notNull(),
     score: integer(),
     importSourceId: itemId('import_source_id'),
-    takerId: userId('taker_id'),
-    takenAt: timestampWithTimezone('taken_at'),
     ...timestamps,
   },
   table => [
     foreignKey({ columns: [table.wishlistId], foreignColumns: [wishlist.id] }).onDelete('cascade'),
-    foreignKey({ columns: [table.takerId], foreignColumns: [user.id] }).onDelete('set null'),
     foreignKey({ columns: [table.importSourceId], foreignColumns: [table.id] }).onDelete('set null'),
     check('chk_import_source_id', sql`import_source_id IS DISTINCT FROM id`),
+  ],
+)
+
+export const itemTaker = pgTable(
+  'item_taker',
+  {
+    itemId: itemId('item_id').notNull(),
+    userId: userId('user_id').notNull(),
+    takenAt: timestampWithTimezone('taken_at').notNull(),
+  },
+  table => [
+    primaryKey({ columns: [table.itemId, table.userId] }),
+    foreignKey({ columns: [table.itemId], foreignColumns: [item.id] }).onDelete('cascade'),
+    foreignKey({ columns: [table.userId], foreignColumns: [user.id] }).onDelete('cascade'),
   ],
 )
 
