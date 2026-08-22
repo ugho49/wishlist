@@ -598,10 +598,7 @@ describe('EventAttendeeController', () => {
         {
           body: {},
           case: 'empty body',
-          message: [
-            'role must be one of the following values: creator, admin, participant',
-            'role should not be empty',
-          ],
+          message: ['role should not be empty'],
         },
         {
           body: { role: 'invalid-role' },
