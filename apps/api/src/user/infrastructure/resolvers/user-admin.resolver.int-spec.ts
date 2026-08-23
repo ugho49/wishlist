@@ -1,8 +1,10 @@
 import type { RequestApp } from '@wishlist/api-test-utils';
 
 import { Fixtures, useTestApp } from '@wishlist/api-test-utils';
-import { Authorities, uuid } from '@wishlist/common';
+import { uuid } from '@wishlist/common';
 import { DateTime } from 'luxon';
+
+import { Authorities } from '../../domain/authorities.enum';
 
 const GRAPHQL_PATH = '/graphql';
 

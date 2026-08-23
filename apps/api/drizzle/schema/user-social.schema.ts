@@ -1,9 +1,13 @@
 import { relations } from 'drizzle-orm';
-import { foreignKey, pgTable, unique, varchar } from 'drizzle-orm/pg-core';
+import { foreignKey, pgEnum, pgTable, unique, varchar } from 'drizzle-orm/pg-core';
 
+import { UserSocialType } from '../../src/user/domain/user-social-type.enum';
+import { tsEnumToPgEnum } from '../enum';
 import { timestamps } from '../helpers';
 import { userId, userSocialId } from '../ids';
 import { user } from './user.schema';
+
+export const userSocialTypeEnum = pgEnum('user_social_type', tsEnumToPgEnum(UserSocialType));
 
 export const userSocial = pgTable(
   'user_social',
@@ -13,7 +17,7 @@ export const userSocial = pgTable(
     email: varchar({ length: 200 }).notNull(),
     name: varchar({ length: 200 }),
     socialId: varchar('social_id', { length: 1000 }).notNull(),
-    socialType: varchar('social_type', { length: 50 }).notNull(),
+    socialType: userSocialTypeEnum('social_type').notNull(),
     pictureUrl: varchar('picture_url', { length: 1000 }),
     ...timestamps,
   },

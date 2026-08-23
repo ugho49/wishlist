@@ -10,9 +10,10 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { type AttendeeId, AttendeeRole, type EventId, type ICurrentUser } from '@wishlist/common';
+import { type AttendeeId, type EventId, type ICurrentUser } from '@wishlist/common';
 
 import { REPOSITORIES } from '../../../repositories/repositories.constants';
+import { AttendeeRole } from '../../domain/attendee-role.enum';
 
 export type UpdateAttendeeRoleInput = {
   currentUser: ICurrentUser;

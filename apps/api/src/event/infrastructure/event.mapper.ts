@@ -1,7 +1,6 @@
 import type { Event } from '../domain/model/event.model';
 import type { EventAttendee } from '../domain/model/event-attendee.model';
 
-import { AttendeeRole } from '@wishlist/common';
 import { DateTime } from 'luxon';
 import { match } from 'ts-pattern';
 
@@ -10,6 +9,7 @@ import {
   type Event as GqlEvent,
   type EventAttendee as GqlEventAttendee,
 } from '../../gql/generated-types';
+import { AttendeeRole } from '../domain/attendee-role.enum';
 
 function toGqlEvent(event: Event): GqlEvent {
   return {

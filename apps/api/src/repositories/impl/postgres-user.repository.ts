@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { schema } from '@wishlist/api-drizzle';
-import { type Authorities, type UserId, uuid } from '@wishlist/common';
+import { type UserId, uuid } from '@wishlist/common';
 import { and, asc, count, desc, eq, inArray, like, ne, or, type SQL, sql } from 'drizzle-orm';
 
 import { DEFAULT_RESULT_NUMBER } from '../../core/common/pagination';
@@ -113,7 +113,7 @@ export class PostgresUserRepository implements UserRepository {
         birthday: user.birthday?.toISOString(),
         passwordEnc: user.passwordEnc,
         isEnabled: user.isEnabled,
-        authorities: user.authorities as Authorities[],
+        authorities: user.authorities,
         lastIp: user.lastIp,
         lastConnectedAt: user.lastConnectedAt,
         pictureUrl: user.pictureUrl,
@@ -129,7 +129,7 @@ export class PostgresUserRepository implements UserRepository {
           birthday: user.birthday?.toISOString() ?? null,
           passwordEnc: user.passwordEnc,
           isEnabled: user.isEnabled,
-          authorities: user.authorities as Authorities[],
+          authorities: user.authorities,
           lastIp: user.lastIp,
           lastConnectedAt: user.lastConnectedAt,
           pictureUrl: user.pictureUrl ?? null,
@@ -172,7 +172,7 @@ export class PostgresUserRepository implements UserRepository {
       birthday: row.birthday ? new Date(row.birthday) : undefined,
       passwordEnc: row.passwordEnc ?? undefined,
       isEnabled: row.isEnabled,
-      authorities: row.authorities as Authorities[],
+      authorities: row.authorities,
       lastIp: row.lastIp ?? undefined,
       lastConnectedAt: row.lastConnectedAt ?? undefined,
       pictureUrl: row.pictureUrl ?? undefined,

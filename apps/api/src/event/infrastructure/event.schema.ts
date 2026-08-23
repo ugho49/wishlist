@@ -1,4 +1,4 @@
-import { type AttendeeId, AttendeeRole, type EventId, type UserId } from '@wishlist/common';
+import { type AttendeeId, type EventId, type UserId } from '@wishlist/common';
 import { match } from 'ts-pattern';
 import z from 'zod';
 
@@ -11,6 +11,7 @@ import {
   AttendeeRole as GqlAttendeeRole,
   type UpdateEventInput,
 } from '../../gql/generated-types';
+import { AttendeeRole } from '../domain/attendee-role.enum';
 
 export const EventIdSchema = z.string().transform(val => val as EventId);
 export const AttendeeIdSchema = z.string().transform(val => val as AttendeeId);

@@ -1,6 +1,5 @@
 import type { UpdateUserPictureHttpResponse, UserSocialId } from '@wishlist/common';
 import type React from 'react';
-import type { UserSocial } from '../../gql';
 
 import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
@@ -23,6 +22,7 @@ import {
 import clsx from 'clsx';
 import { useRef, useState } from 'react';
 
+import { type UserSocial, UserSocialType } from '../../gql';
 import { useToast } from '../../hooks/useToast';
 import { ACCEPT_IMG, sanitizeImgToUrl } from '../../utils/images.utils';
 import { AvatarCropperModal } from '../common/AvatarCropperModal';
@@ -91,6 +91,7 @@ export const AvatarUpdateButton = ({
   const [anchorElMenu, setAnchorElMenu] = useState<null | HTMLElement>(null);
   const { addToast } = useToast();
   const inputFileRef = useRef<HTMLInputElement | null>(null);
+  const googleSocial = socials.find(s => s.socialType === UserSocialType.Google);
 
   const openMenu = (event: React.MouseEvent<HTMLElement>) => setAnchorElMenu(event.currentTarget);
   const closeMenu = () => setAnchorElMenu(null);
@@ -231,17 +232,14 @@ export const AvatarUpdateButton = ({
             <ListItemText>Supprimer la photo</ListItemText>
           </MenuItem>
         )}
-        {socials.find(s => s.socialType === 'google') && (
-          <MenuItem onClick={() => updateWithSocialPicture(socials.find(s => s.socialType === 'google'))}>
+        {googleSocial && (
+          <MenuItem onClick={() => updateWithSocialPicture(googleSocial)}>
             <ListItemIcon>
               <GoogleIcon fontSize="small" />
             </ListItemIcon>
             <ListItemText>Utiliser ma photo google</ListItemText>
             <ListItemIcon sx={{ marginLeft: '50px', justifyContent: 'flex-end' }}>
-              <Avatar
-                src={socials.find(s => s.socialType === 'google')?.pictureUrl ?? undefined}
-                sx={{ width: '20px', height: '20px' }}
-              />
+              <Avatar src={googleSocial.pictureUrl ?? undefined} sx={{ width: '20px', height: '20px' }} />
             </ListItemIcon>
           </MenuItem>
         )}

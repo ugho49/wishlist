@@ -1,7 +1,9 @@
-import type { AttendeeId, EventId, SecretSantaId, SecretSantaStatus, SecretSantaUserId } from '@wishlist/common';
+import type { AttendeeId, EventId, SecretSantaId, SecretSantaUserId } from '@wishlist/common';
 import type { SecretSantaUser } from './secret-santa-user.model';
 
-import { SecretSantaDrawService, SecretSantaStatus as Status } from '@wishlist/common';
+import { SecretSantaDrawService } from '@wishlist/common';
+
+import { SecretSantaStatus } from '../secret-santa-status.enum';
 
 export type SecretSantaProps = {
   id: SecretSantaId;
@@ -41,7 +43,7 @@ export class SecretSanta {
       id: props.id,
       description: props.description,
       budget: props.budget,
-      status: Status.CREATED,
+      status: SecretSantaStatus.CREATED,
       eventId: props.eventId,
       users: [],
       createdAt: now,
@@ -50,11 +52,11 @@ export class SecretSanta {
   }
 
   isStarted(): boolean {
-    return this.status === Status.STARTED;
+    return this.status === SecretSantaStatus.STARTED;
   }
 
   isCreated(): boolean {
-    return this.status === Status.CREATED;
+    return this.status === SecretSantaStatus.CREATED;
   }
 
   canBeModified(): boolean {
@@ -127,7 +129,7 @@ export class SecretSanta {
     return new SecretSanta({
       ...this,
       users: updatedUsers,
-      status: Status.STARTED,
+      status: SecretSantaStatus.STARTED,
       updatedAt: new Date(),
     });
   }
@@ -142,7 +144,7 @@ export class SecretSanta {
     return new SecretSanta({
       ...this,
       users: resetUsers,
-      status: Status.CREATED,
+      status: SecretSantaStatus.CREATED,
       updatedAt: new Date(),
     });
   }

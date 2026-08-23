@@ -3,11 +3,12 @@ import type { EventAttendeeRepository } from '../../domain/repository/event-atte
 
 import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common';
 import { EventBus } from '@nestjs/cqrs';
-import { AttendeeRole, type ICurrentUser } from '@wishlist/common';
+import { type ICurrentUser } from '@wishlist/common';
 import { uniq } from 'lodash';
 
 import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { type UserRepository } from '../../../user/domain/repository/user.repository';
+import { AttendeeRole } from '../../domain/attendee-role.enum';
 import { AttendeeAddedEvent } from '../../domain/event/attendee-added.event';
 import { Event } from '../../domain/model/event.model';
 import { EventAttendee } from '../../domain/model/event-attendee.model';

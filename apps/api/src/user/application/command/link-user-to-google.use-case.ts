@@ -2,12 +2,13 @@ import type { UserRepository } from '../../domain/repository/user.repository';
 import type { UserSocialRepository } from '../../domain/repository/user-social.repository';
 
 import { BadRequestException, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
-import { type UserId, UserSocialType } from '@wishlist/common';
+import { type UserId } from '@wishlist/common';
 
 import { GoogleAuthService } from '../../../auth/infrastructure/social/google-auth.service';
 import { TransactionManager } from '../../../core/database/transaction-manager';
 import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { UserSocial } from '../../domain/model/user-social.model';
+import { UserSocialType } from '../../domain/user-social-type.enum';
 
 export type LinkUserToGoogleInput = {
   code: string;

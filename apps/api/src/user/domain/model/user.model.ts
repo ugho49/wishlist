@@ -1,6 +1,6 @@
-import type { Authorities, UserId } from '@wishlist/common';
+import type { UserId } from '@wishlist/common';
 
-import { Authorities as Auth } from '@wishlist/common';
+import { Authorities } from '../authorities.enum';
 
 export type UserProps = {
   id: UserId;
@@ -68,7 +68,7 @@ export class User {
       birthday: params.birthday,
       passwordEnc: params.passwordEnc,
       isEnabled: true,
-      authorities: [Auth.ROLE_USER],
+      authorities: [Authorities.ROLE_USER],
       lastIp: params.ip,
       lastConnectedAt: now,
       pictureUrl: params.pictureUrl,
@@ -78,11 +78,11 @@ export class User {
   }
 
   isSuperAdmin(): boolean {
-    return this.authorities.includes(Auth.ROLE_SUPERADMIN);
+    return this.authorities.includes(Authorities.ROLE_SUPERADMIN);
   }
 
   isAdmin(): boolean {
-    return this.isSuperAdmin() || this.authorities.includes(Auth.ROLE_ADMIN);
+    return this.isSuperAdmin() || this.authorities.includes(Authorities.ROLE_ADMIN);
   }
 
   updateFirstName(firstName: string): User {

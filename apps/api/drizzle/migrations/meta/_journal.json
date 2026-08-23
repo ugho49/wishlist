@@ -78,6 +78,13 @@
       "when": 1787400305414,
       "tag": "0010_multi-item-takers",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1787482166319,
+      "tag": "0011_add-pg-enums",
+      "breakpoints": true
     }
   ]
 }

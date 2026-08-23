@@ -579,7 +579,7 @@ export type UserProfileCurrentUserQuery = { currentUser:
     | { __typename: 'ForbiddenRejection' }
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'UnauthorizedRejection' }
-    | { __typename: 'User', id: Ids["UserId"], email: string, firstName: string, lastName: string, birthday: string | null, pictureUrl: string | null, createdAt: string, socials: Array<{ id: Ids["UserSocialId"], socialType: string, name: string | null, email: string, pictureUrl: string | null, createdAt: string, updatedAt: string }> | null }
+    | { __typename: 'User', id: Ids["UserId"], email: string, firstName: string, lastName: string, birthday: string | null, pictureUrl: string | null, createdAt: string, socials: Array<{ id: Ids["UserSocialId"], socialType: Types.UserSocialType, name: string | null, email: string, pictureUrl: string | null, createdAt: string, updatedAt: string }> | null }
    };
 
 export type UserProfileEmailSettingsQueryVariables = Exact<{ [key: string]: never; }>;
@@ -677,7 +677,7 @@ export type LinkCurrentUserWithGoogleMutation = { linkCurrentUserWithGoogle:
     | { __typename: 'ForbiddenRejection' }
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'UnauthorizedRejection' }
-    | { __typename: 'UserSocial', id: Ids["UserSocialId"], socialType: string, name: string | null, email: string, pictureUrl: string | null, createdAt: string, updatedAt: string }
+    | { __typename: 'UserSocial', id: Ids["UserSocialId"], socialType: Types.UserSocialType, name: string | null, email: string, pictureUrl: string | null, createdAt: string, updatedAt: string }
     | { __typename: 'ValidationRejection', errors: Array<{ field: string, message: string }> }
    };
 

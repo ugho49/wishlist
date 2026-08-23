@@ -1,5 +1,6 @@
 import type { JwtService } from '@nestjs/jwt';
-import type { AccessTokenJwtPayload, Authorities, UserId } from '@wishlist/common';
+import type { AccessTokenJwtPayload, UserId } from '@wishlist/common';
+import type { Authorities } from '../../../user/domain/authorities.enum';
 
 import { Logger } from '@nestjs/common';
 

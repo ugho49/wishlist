@@ -6,7 +6,6 @@ import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { Button, Stack, styled } from '@mui/material';
 import { useGoogleLogin } from '@react-oauth/google';
 import { useQueryClient } from '@tanstack/react-query';
-import { UserSocialType } from '@wishlist/common';
 import { useToast } from '@wishlist/front-hooks';
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -16,6 +15,7 @@ import { addUserSocial, removeUserSocial } from '../../core/store/features/userP
 import {
   rejectionMessage,
   rejectionPattern,
+  UserSocialType,
   useLinkCurrentUserWithGoogleMutation,
   useUnlinkCurrentUserSocialMutation,
 } from '../../gql';
@@ -113,7 +113,7 @@ export const UserTabSocial = () => {
   const dispatch = useDispatch();
   const queryClient = useQueryClient();
   const { addToast } = useToast();
-  const googleSocial = (userState.social || []).find(s => s.socialType === UserSocialType.GOOGLE);
+  const googleSocial = (userState.social || []).find(s => s.socialType === UserSocialType.Google);
 
   const invalidateCurrentUser = () => queryClient.invalidateQueries({ queryKey: ['UserProfileCurrentUser'] });
 

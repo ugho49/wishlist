@@ -3,7 +3,6 @@ import type { LoginOutput } from '../login.types';
 import { BadRequestException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { EventBus } from '@nestjs/cqrs';
 import { JwtService } from '@nestjs/jwt';
-import { UserSocialType } from '@wishlist/common';
 import { type TokenPayload } from 'google-auth-library';
 
 import { TransactionManager } from '../../../core/database/transaction-manager';
@@ -13,6 +12,7 @@ import { User } from '../../../user/domain/model/user.model';
 import { UserSocial } from '../../../user/domain/model/user-social.model';
 import { type UserRepository } from '../../../user/domain/repository/user.repository';
 import { type UserSocialRepository } from '../../../user/domain/repository/user-social.repository';
+import { UserSocialType } from '../../../user/domain/user-social-type.enum';
 import { GoogleAuthService } from '../../infrastructure/social/google-auth.service';
 import { CommonLoginUseCase } from './common-login.use-case';
 

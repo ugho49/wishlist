@@ -1,11 +1,13 @@
-import type { SecretSantaStatus } from '@wishlist/common';
 import type { SQL } from 'bun';
 import type { SignedAs } from './use-test-app';
 
-import { AttendeeRole, Authorities, uuid } from '@wishlist/common';
+import { uuid } from '@wishlist/common';
 import { DateTime } from 'luxon';
 
 import { PasswordManager } from '../src/auth/infrastructure/util/password-manager';
+import { AttendeeRole } from '../src/event/domain/attendee-role.enum';
+import { type SecretSantaStatus } from '../src/secret-santa/domain/secret-santa-status.enum';
+import { Authorities } from '../src/user/domain/authorities.enum';
 
 function toSqlArray(values: readonly string[]): string {
   return `{${values.map(value => `"${value.replaceAll('\\', '\\\\').replaceAll('"', '\\"')}"`).join(',')}}`;
