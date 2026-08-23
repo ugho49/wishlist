@@ -4,7 +4,23 @@
 export { render } from 'react-email';
 
 export { EmailLayout } from './components/layout';
-export { ButtonFallback, Callout, ContentSection, Heading, Paragraph, PrimaryButton } from './components/ui';
+export {
+  ButtonFallback,
+  Callout,
+  CalloutText,
+  ContentSection,
+  CtaBlock,
+  DetailRow,
+  Divider,
+  Eyebrow,
+  FeatureItem,
+  Heading,
+  HighlightCard,
+  Paragraph,
+  PrimaryButton,
+  SectionTitle,
+  Step,
+} from './components/ui';
 // Shared building blocks (exposed so the preview server and consumers can reuse them).
 export * from './styles';
 export { type AddedToEventEmailProps, default as AddedToEventEmail } from './templates/added-to-event';

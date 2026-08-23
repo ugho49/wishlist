@@ -1,8 +1,15 @@
-import { Section, Text } from 'react-email';
-
 import { EmailLayout } from '../components/layout';
-import { ButtonFallback, ContentSection, Heading, Paragraph, PrimaryButton } from '../components/ui';
-import * as styles from '../styles';
+import {
+  Callout,
+  ContentSection,
+  CtaBlock,
+  Eyebrow,
+  FeatureItem,
+  Heading,
+  Paragraph,
+  SectionTitle,
+  Step,
+} from '../components/ui';
 
 export interface WelcomeUserEmailProps {
   readonly mainUrl: string;
@@ -11,9 +18,10 @@ export interface WelcomeUserEmailProps {
 export default function WelcomeUserEmail({ mainUrl }: WelcomeUserEmailProps) {
   return (
     <EmailLayout preview="Bienvenue sur Wishlist !">
-      <ContentSection style={{ padding: '40px 30px 20px 30px' }}>
-        <Heading style={{ fontSize: '28px', lineHeight: '34px' }}>Bienvenue sur Wishlist ! 🎉</Heading>
-        <Paragraph style={{ textAlign: 'center', margin: '0 0 10px 0' }}>
+      <ContentSection>
+        <Eyebrow>Bienvenue</Eyebrow>
+        <Heading>Bienvenue sur Wishlist</Heading>
+        <Paragraph style={{ textAlign: 'center' }}>
           Nous sommes ravis de vous accueillir dans notre communauté !
         </Paragraph>
         <Paragraph style={{ margin: 0 }}>
@@ -22,42 +30,29 @@ export default function WelcomeUserEmail({ mainUrl }: WelcomeUserEmailProps) {
         </Paragraph>
       </ContentSection>
 
-      <ContentSection style={{ padding: '20px 30px' }}>
-        <Text style={{ ...styles.sectionTitle, fontSize: '20px', lineHeight: '26px' }}>
-          Que pouvez-vous faire avec Wishlist ?
-        </Text>
-        <Text style={{ ...styles.listItem, paddingLeft: '10px' }}>
-          <span style={styles.accent}>✓</span> <b>Créer des événements</b> : Anniversaires, Noël, mariages, etc.
-        </Text>
-        <Text style={{ ...styles.listItem, paddingLeft: '10px' }}>
-          <span style={styles.accent}>✓</span> <b>Partager vos listes de souhaits</b> : Vos proches sauront quoi vous
-          offrir
-        </Text>
-        <Text style={{ ...styles.listItem, paddingLeft: '10px' }}>
-          <span style={styles.accent}>✓</span> <b>Organiser un Secret Santa</b> : Tirage au sort automatique avec budget
-        </Text>
-        <Text style={{ ...styles.listItem, paddingLeft: '10px', margin: 0 }}>
-          <span style={styles.accent}>✓</span> <b>Inviter vos amis</b> : Partagez facilement vos événements
-        </Text>
+      <ContentSection compact>
+        <SectionTitle>Que pouvez-vous faire avec Wishlist ?</SectionTitle>
+        <FeatureItem>
+          <b>Créer des événements</b> : Anniversaires, Noël, mariages, etc.
+        </FeatureItem>
+        <FeatureItem>
+          <b>Partager vos listes de souhaits</b> : Vos proches sauront quoi vous offrir
+        </FeatureItem>
+        <FeatureItem>
+          <b>Organiser un Secret Santa</b> : Tirage au sort automatique avec budget
+        </FeatureItem>
+        <FeatureItem>
+          <b>Inviter vos amis</b> : Partagez facilement vos événements
+        </FeatureItem>
       </ContentSection>
 
-      <Section style={{ ...styles.callout(styles.palette.neutral.background), padding: '25px 30px' }}>
-        <Text style={{ ...styles.sectionTitle }}>Pour bien démarrer :</Text>
-        <Text style={styles.listItem}>
-          <b>1.</b> Créez votre premier événement
-        </Text>
-        <Text style={styles.listItem}>
-          <b>2.</b> Ajoutez vos souhaits à votre liste
-        </Text>
-        <Text style={{ ...styles.listItem, margin: 0 }}>
-          <b>3.</b> Invitez vos proches à rejoindre l'événement
-        </Text>
-      </Section>
+      <Callout title="Pour bien démarrer" variant="tip">
+        <Step n={1}>Créez votre premier événement</Step>
+        <Step n={2}>Ajoutez vos souhaits à votre liste</Step>
+        <Step n={3}>Invitez vos proches à rejoindre l'événement</Step>
+      </Callout>
 
-      <Section style={styles.buttonSection}>
-        <PrimaryButton href={mainUrl}>Découvrir Wishlist</PrimaryButton>
-        <ButtonFallback href={mainUrl} />
-      </Section>
+      <CtaBlock href={mainUrl}>Découvrir Wishlist</CtaBlock>
     </EmailLayout>
   );
 }
