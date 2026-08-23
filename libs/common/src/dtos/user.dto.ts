@@ -1,9 +1,9 @@
 import type { UserSocialType } from '../enums/user-social.enum';
 import type { UserId, UserSocialId } from '../ids';
 
-export class UpdateUserPictureOutputDto {
-  declare picture_url: string;
-}
+export type UpdateUserPictureHttpResponse = {
+  picture_url: string;
+};
 
 export class UserSocialDto {
   declare id: UserSocialId;

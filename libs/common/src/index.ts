@@ -11,7 +11,6 @@ export * from './dtos/auth.dto';
 export * from './dtos/common.dto';
 export * from './dtos/event.dto';
 export * from './dtos/item.dto';
-export * from './dtos/secret-santa.dto';
 export * from './dtos/user.dto';
 export * from './dtos/wishlist.dto';
 export * from './enums/attendee.enum';

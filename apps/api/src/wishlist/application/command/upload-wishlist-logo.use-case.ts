@@ -1,7 +1,7 @@
 import type { WishlistRepository } from '../../domain/wishlist.repository';
 
 import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
-import { type ICurrentUser, UpdateWishlistLogoOutputDto, type WishlistId } from '@wishlist/common';
+import { type ICurrentUser, type WishlistId } from '@wishlist/common';
 
 import { BucketService } from '../../../core/bucket/bucket.service';
 import { REPOSITORIES } from '../../../repositories/repositories.constants';
@@ -10,6 +10,10 @@ export type UploadWishlistLogoInput = {
   currentUser: ICurrentUser;
   wishlistId: WishlistId;
   file: Express.Multer.File;
+};
+
+export type UploadWishlistLogoResult = {
+  logoUrl: string;
 };
 
 @Injectable()
@@ -21,7 +25,7 @@ export class UploadWishlistLogoUseCase {
     private readonly bucketService: BucketService,
   ) {}
 
-  async execute(command: UploadWishlistLogoInput): Promise<UpdateWishlistLogoOutputDto> {
+  async execute(command: UploadWishlistLogoInput): Promise<UploadWishlistLogoResult> {
     this.logger.log('Upload wishlist logo request received', { command });
     const wishlist = await this.wishlistRepository.findByIdOrFail(command.wishlistId);
 
@@ -49,6 +53,6 @@ export class UploadWishlistLogoUseCase {
     this.logger.log('Saving wishlist...', { wishlistId: updatedWishlist.id, updatedFields: ['logoUrl'] });
     await this.wishlistRepository.save(updatedWishlist);
 
-    return { logo_url: newLogoUrl };
+    return { logoUrl: newLogoUrl };
   }
 }

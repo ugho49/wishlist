@@ -1,12 +1,16 @@
-import type { EventId } from '../ids';
+import type { EventId, WishlistId } from '../ids';
 
 import { ArrayMaxSize, ArrayNotEmpty, IsBoolean, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
 
 import { MAX_EVENTS_BY_LIST } from '../constants';
 
-export class UpdateWishlistLogoOutputDto {
-  declare logo_url: string;
-}
+export type UploadWishlistLogoHttpResponse = {
+  logo_url: string;
+};
+
+export type CreateWishlistHttpResponse = {
+  id: WishlistId;
+};
 
 export class CreateWishlistInputDto {
   @MaxLength(100)

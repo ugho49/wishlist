@@ -2,9 +2,10 @@ import { Controller, Param, Post, UploadedFile, UseInterceptors } from '@nestjs/
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import {
+  type CreateWishlistHttpResponse,
   CreateWishlistInputDto,
   type ICurrentUser,
-  UpdateWishlistLogoOutputDto,
+  type UploadWishlistLogoHttpResponse,
   type WishlistId,
 } from '@wishlist/common';
 
@@ -30,7 +31,7 @@ export class WishlistController {
     @ValidJsonBody('data') dto: CreateWishlistInputDto,
     @UploadedFile(wishlistLogoFileValidators(false), wishlistLogoResizePipe(false))
     imageFile?: Express.Multer.File,
-  ): Promise<{ id: WishlistId }> {
+  ): Promise<CreateWishlistHttpResponse> {
     const wishlist = await this.createWishlistUseCase.execute({
       currentUser,
       newWishlist: {
@@ -48,12 +49,13 @@ export class WishlistController {
   @Post('/:id/upload-logo')
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('file'))
-  uploadLogo(
+  async uploadLogo(
     @Param('id') wishlistId: WishlistId,
     @CurrentUser() currentUser: ICurrentUser,
     @UploadedFile(wishlistLogoFileValidators(true), wishlistLogoResizePipe(true))
     file: Express.Multer.File,
-  ): Promise<UpdateWishlistLogoOutputDto> {
-    return this.uploadWishlistLogoUseCase.execute({ wishlistId, currentUser, file });
+  ): Promise<UploadWishlistLogoHttpResponse> {
+    const { logoUrl } = await this.uploadWishlistLogoUseCase.execute({ wishlistId, currentUser, file });
+    return { logo_url: logoUrl };
   }
 }
