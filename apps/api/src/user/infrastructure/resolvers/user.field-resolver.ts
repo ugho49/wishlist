@@ -7,6 +7,7 @@ import { GqlCurrentUser } from '../../../auth/infrastructure/decorators/user.dec
 import { type GraphQLContext } from '../../../core/graphql/graphql.context';
 import { type User, type UserEmailSettings, type UserSocial } from '../../../gql/generated-types';
 import { GetUserEmailSettingUseCase } from '../../application/query/get-user-email-setting.use-case';
+import { userMapper } from '../user.mapper';
 
 @Resolver('User')
 export class UserFieldResolver {
@@ -29,11 +30,8 @@ export class UserFieldResolver {
   ): Promise<UserEmailSettings | null> {
     if (user.id !== currentUser.id) return null;
 
-    const result = await this.getUserEmailSettingUseCase.execute({ currentUser });
+    const { userEmailSetting } = await this.getUserEmailSettingUseCase.execute({ currentUser });
 
-    return {
-      __typename: 'UserEmailSettings',
-      dailyNewItemNotification: result.daily_new_item_notification,
-    };
+    return userMapper.toGqlUserEmailSettings(userEmailSetting);
   }
 }

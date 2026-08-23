@@ -36,7 +36,6 @@ import {
   type UpdateUserProfileInput,
   type UpdateUserProfileResult,
   type User,
-  type UserEmailSettings,
 } from '../../../gql/generated-types';
 import { ConfirmEmailChangeUseCase } from '../../application/command/confirm-email-change.use-case';
 import { CreateEmailChangeVerificationUseCase } from '../../application/command/create-email-change-verification.use-case';
@@ -265,17 +264,12 @@ export class UserResolver {
     @Args('input', new ZodPipe(UpdateUserEmailSettingsInputSchema)) input: UpdateUserEmailSettingsInput,
     @GqlCurrentUser() currentUser: ICurrentUser,
   ): Promise<UpdateUserEmailSettingsResult> {
-    const result = await this.updateUserEmailSettingUseCase.execute({
+    const { userEmailSetting } = await this.updateUserEmailSettingUseCase.execute({
       currentUser,
       dailyNewItemNotification: input.dailyNewItemNotification,
     });
 
-    const settings: UserEmailSettings = {
-      __typename: 'UserEmailSettings',
-      dailyNewItemNotification: result.daily_new_item_notification,
-    };
-
-    return settings;
+    return userMapper.toGqlUserEmailSettings(userEmailSetting);
   }
 
   @Public()

@@ -1,4 +1,5 @@
 import type { User } from '../domain/model/user.model';
+import type { UserEmailSetting } from '../domain/model/user-email-setting.model';
 import type { UserSocial } from '../domain/model/user-social.model';
 
 import { Authorities, type MiniUserDto } from '@wishlist/common';
@@ -8,6 +9,7 @@ import { match } from 'ts-pattern';
 import {
   type User as GqlUser,
   UserAuthorities as GqlUserAuthorities,
+  type UserEmailSettings as GqlUserEmailSettings,
   type UserFull as GqlUserFull,
   type UserSocial as GqlUserSocial,
 } from '../../gql/generated-types';
@@ -71,9 +73,17 @@ function toGqlUserSocial(social: UserSocial): GqlUserSocial {
   };
 }
 
+function toGqlUserEmailSettings(userEmailSetting: UserEmailSetting): GqlUserEmailSettings {
+  return {
+    __typename: 'UserEmailSettings',
+    dailyNewItemNotification: userEmailSetting.dailyNewItemNotification,
+  };
+}
+
 export const userMapper = {
   toMiniUserDto,
   toGqlUser,
   toGqlUserFull,
   toGqlUserSocial,
+  toGqlUserEmailSettings,
 };

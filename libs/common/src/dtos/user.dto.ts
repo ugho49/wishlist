@@ -23,7 +23,3 @@ export class MiniUserDto {
   declare email: string;
   declare picture_url?: string;
 }
-
-export class UserEmailSettingsDto {
-  declare daily_new_item_notification: boolean;
-}
