@@ -6,7 +6,10 @@ import { environment } from '../environment';
 const GRAPHQL_ENDPOINT = `${environment.apiBaseUrl}/graphql`;
 
 export const fetchGql =
-  <TData, TVariables>(query: string, variables?: TVariables): ((context?: QueryFunctionContext) => Promise<TData>) =>
+  <TData, TVariables>(
+    query: string | { toString(): string },
+    variables?: TVariables,
+  ): ((context?: QueryFunctionContext) => Promise<TData>) =>
   async context => {
     const token = localStorage.getItem(LS_KEYS.ACCESS_TOKEN);
 
@@ -21,7 +24,7 @@ export const fetchGql =
     const response = await fetch(GRAPHQL_ENDPOINT, {
       method: 'POST',
       headers,
-      body: JSON.stringify({ query, variables }),
+      body: JSON.stringify({ query: String(query), variables }),
       signal: context?.signal,
     });
 

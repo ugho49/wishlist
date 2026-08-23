@@ -106,8 +106,8 @@ export const SecretSanta = ({ secretSanta, event }: SecretSantaProps) => {
       const res = await updateMutation({ id: secretSanta.id, input });
       await match(res.updateSecretSanta)
         .with({ __typename: 'VoidOutput' }, async () => {
-          setBudget(input.budget);
-          setDescription(input.description);
+          setBudget(input.budget ?? null);
+          setDescription(input.description ?? null);
           addToast({ message: 'Le secret santa a été modifié', variant: 'success' });
           await invalidate();
         })

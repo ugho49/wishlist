@@ -2,7 +2,7 @@ import type { PromiseExecutor } from '@nx/devkit';
 import type { GeneratePrunedPackageJsonExecutorSchema } from './schema';
 
 import { execFileSync } from 'node:child_process';
-import { copyFile, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { copyFile, cp, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { createPackageJson } from '@nx/js';
@@ -12,6 +12,7 @@ type PackageJsonLike = {
   devDependencies?: Record<string, string>;
   peerDependencies?: Record<string, string>;
   trustedDependencies?: string[];
+  patchedDependencies?: Record<string, string>;
   [key: string]: unknown;
 };
 
@@ -39,7 +40,7 @@ const runExecutor: PromiseExecutor<GeneratePrunedPackageJsonExecutorSchema> = as
   }) as unknown as PackageJsonLike;
 
   stripWorkspaceProtocolDependencies(prunedPackageJson);
-  await copyTrustedDependencies(context.root, prunedPackageJson);
+  await copyRootInstallMetadata(context.root, prunedPackageJson);
 
   await mkdir(dirname(outputPath), { recursive: true });
   await writeFile(outputPath, `${JSON.stringify(prunedPackageJson, null, 2)}\n`);
@@ -69,10 +70,13 @@ function stripWorkspaceProtocolDependencies(pkg: PackageJsonLike): void {
   }
 }
 
-async function copyTrustedDependencies(workspaceRoot: string, pkg: PackageJsonLike): Promise<void> {
+async function copyRootInstallMetadata(workspaceRoot: string, pkg: PackageJsonLike): Promise<void> {
   const rootPackageJson = JSON.parse(await readFile(join(workspaceRoot, 'package.json'), 'utf8')) as PackageJsonLike;
   if (rootPackageJson.trustedDependencies?.length) {
     pkg.trustedDependencies = rootPackageJson.trustedDependencies;
+  }
+  if (rootPackageJson.patchedDependencies && Object.keys(rootPackageJson.patchedDependencies).length > 0) {
+    pkg.patchedDependencies = rootPackageJson.patchedDependencies;
   }
 }
 
@@ -86,6 +90,7 @@ async function generatePrunedLockfile(params: {
     await writeFile(join(tmp, 'package.json'), `${JSON.stringify(params.prunedPackageJson, null, 2)}\n`);
     await copyFile(join(params.workspaceRoot, 'bunfig.toml'), join(tmp, 'bunfig.toml'));
     await copyFile(join(params.workspaceRoot, 'bun.lock'), join(tmp, 'bun.lock'));
+    await cp(join(params.workspaceRoot, 'patches'), join(tmp, 'patches'), { recursive: true });
 
     execFileSync('bun', ['install', '--lockfile-only', '--ignore-scripts'], {
       cwd: tmp,

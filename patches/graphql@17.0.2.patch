@@ -1,0 +1,166 @@
+diff --git a/package.json b/package.json
+index ea6af5445a2b1a3088efed30e331af83933b7e2e..0351bcefb744666a39b23d461290007480d48b49 100644
+--- a/package.json
++++ b/package.json
+@@ -40,7 +40,7 @@
+     "./error": {
+       "development": {
+         "module": "./__dev__/error/index.mjs",
+-        "bun": "./__dev__/error/index.mjs",
++        "bun": "./__dev__/error/index.js",
+         "module-sync": "./__dev__/error/index.mjs",
+         "node": "./__dev__/error/index.js",
+         "require": "./__dev__/error/index.js",
+@@ -48,7 +48,7 @@
+       },
+       "default": {
+         "module": "./error/index.mjs",
+-        "bun": "./error/index.mjs",
++        "bun": "./error/index.js",
+         "module-sync": "./error/index.mjs",
+         "node": "./error/index.js",
+         "require": "./error/index.js",
+@@ -58,7 +58,7 @@
+     "./execution": {
+       "development": {
+         "module": "./__dev__/execution/index.mjs",
+-        "bun": "./__dev__/execution/index.mjs",
++        "bun": "./__dev__/execution/index.js",
+         "module-sync": "./__dev__/execution/index.mjs",
+         "node": "./__dev__/execution/index.js",
+         "require": "./__dev__/execution/index.js",
+@@ -66,7 +66,7 @@
+       },
+       "default": {
+         "module": "./execution/index.mjs",
+-        "bun": "./execution/index.mjs",
++        "bun": "./execution/index.js",
+         "module-sync": "./execution/index.mjs",
+         "node": "./execution/index.js",
+         "require": "./execution/index.js",
+@@ -76,7 +76,7 @@
+     ".": {
+       "development": {
+         "module": "./__dev__/index.mjs",
+-        "bun": "./__dev__/index.mjs",
++        "bun": "./__dev__/index.js",
+         "module-sync": "./__dev__/index.mjs",
+         "node": "./__dev__/index.js",
+         "require": "./__dev__/index.js",
+@@ -84,7 +84,7 @@
+       },
+       "default": {
+         "module": "./index.mjs",
+-        "bun": "./index.mjs",
++        "bun": "./index.js",
+         "module-sync": "./index.mjs",
+         "node": "./index.js",
+         "require": "./index.js",
+@@ -94,7 +94,7 @@
+     "./language": {
+       "development": {
+         "module": "./__dev__/language/index.mjs",
+-        "bun": "./__dev__/language/index.mjs",
++        "bun": "./__dev__/language/index.js",
+         "module-sync": "./__dev__/language/index.mjs",
+         "node": "./__dev__/language/index.js",
+         "require": "./__dev__/language/index.js",
+@@ -102,7 +102,7 @@
+       },
+       "default": {
+         "module": "./language/index.mjs",
+-        "bun": "./language/index.mjs",
++        "bun": "./language/index.js",
+         "module-sync": "./language/index.mjs",
+         "node": "./language/index.js",
+         "require": "./language/index.js",
+@@ -112,7 +112,7 @@
+     "./type": {
+       "development": {
+         "module": "./__dev__/type/index.mjs",
+-        "bun": "./__dev__/type/index.mjs",
++        "bun": "./__dev__/type/index.js",
+         "module-sync": "./__dev__/type/index.mjs",
+         "node": "./__dev__/type/index.js",
+         "require": "./__dev__/type/index.js",
+@@ -120,7 +120,7 @@
+       },
+       "default": {
+         "module": "./type/index.mjs",
+-        "bun": "./type/index.mjs",
++        "bun": "./type/index.js",
+         "module-sync": "./type/index.mjs",
+         "node": "./type/index.js",
+         "require": "./type/index.js",
+@@ -130,7 +130,7 @@
+     "./utilities": {
+       "development": {
+         "module": "./__dev__/utilities/index.mjs",
+-        "bun": "./__dev__/utilities/index.mjs",
++        "bun": "./__dev__/utilities/index.js",
+         "module-sync": "./__dev__/utilities/index.mjs",
+         "node": "./__dev__/utilities/index.js",
+         "require": "./__dev__/utilities/index.js",
+@@ -138,7 +138,7 @@
+       },
+       "default": {
+         "module": "./utilities/index.mjs",
+-        "bun": "./utilities/index.mjs",
++        "bun": "./utilities/index.js",
+         "module-sync": "./utilities/index.mjs",
+         "node": "./utilities/index.js",
+         "require": "./utilities/index.js",
+@@ -148,7 +148,7 @@
+     "./validation": {
+       "development": {
+         "module": "./__dev__/validation/index.mjs",
+-        "bun": "./__dev__/validation/index.mjs",
++        "bun": "./__dev__/validation/index.js",
+         "module-sync": "./__dev__/validation/index.mjs",
+         "node": "./__dev__/validation/index.js",
+         "require": "./__dev__/validation/index.js",
+@@ -156,7 +156,7 @@
+       },
+       "default": {
+         "module": "./validation/index.mjs",
+-        "bun": "./validation/index.mjs",
++        "bun": "./validation/index.js",
+         "module-sync": "./validation/index.mjs",
+         "node": "./validation/index.js",
+         "require": "./validation/index.js",
+@@ -166,7 +166,7 @@
+     "./*.js": {
+       "development": {
+         "module": "./__dev__/*.mjs",
+-        "bun": "./__dev__/*.mjs",
++        "bun": "./__dev__/*.js",
+         "module-sync": "./__dev__/*.mjs",
+         "node": "./__dev__/*.js",
+         "require": "./__dev__/*.js",
+@@ -174,7 +174,7 @@
+       },
+       "default": {
+         "module": "./*.mjs",
+-        "bun": "./*.mjs",
++        "bun": "./*.js",
+         "module-sync": "./*.mjs",
+         "node": "./*.js",
+         "require": "./*.js",
+@@ -184,7 +184,7 @@
+     "./*": {
+       "development": {
+         "module": "./__dev__/*.mjs",
+-        "bun": "./__dev__/*.mjs",
++        "bun": "./__dev__/*.js",
+         "module-sync": "./__dev__/*.mjs",
+         "node": "./__dev__/*.js",
+         "require": "./__dev__/*.js",
+@@ -192,7 +192,7 @@
+       },
+       "default": {
+         "module": "./*.mjs",
+-        "bun": "./*.mjs",
++        "bun": "./*.js",
+         "module-sync": "./*.mjs",
+         "node": "./*.js",
+         "require": "./*.js",

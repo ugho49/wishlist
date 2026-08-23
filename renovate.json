@@ -20,12 +20,5 @@
   "github-actions": {
     "managerFilePatterns": ["/^\\.github/workflows/[^/]+\\.ya?ml$/", "/^\\.github/actions/.+/action\\.ya?ml$/"]
   },
-  "ignoreDeps": ["postgres", "prodrigestivill/postgres-backup-local", "valkey/valkey", "traefik"],
-  "packageRules": [
-    {
-      "description": "GraphQL 17 is ESM-only; NestJS still require()s it in CJS",
-      "matchPackageNames": ["graphql"],
-      "allowedVersions": "<17"
-    }
-  ]
+  "ignoreDeps": ["postgres", "prodrigestivill/postgres-backup-local", "valkey/valkey", "traefik"]
 }

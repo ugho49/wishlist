@@ -15,6 +15,7 @@ ENV TZ=Europe/Paris
 COPY apps/api/pruned-package.json ./package.json
 COPY apps/api/pruned-bun.lock ./bun.lock
 COPY bunfig.toml ./
+COPY patches ./patches
 
 RUN bun install --production --frozen-lockfile
 
