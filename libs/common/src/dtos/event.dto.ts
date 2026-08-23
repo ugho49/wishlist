@@ -1,24 +1,6 @@
-import type { EventId, UserId } from '../ids';
+import type { EventId } from '../ids';
+import type { AttendeeDto } from './attendee.dto';
 import type { WishlistWithOwnerDto } from './wishlist.dto';
-
-import { Transform, Type } from 'class-transformer';
-import {
-  IsBoolean,
-  IsDate,
-  IsInt,
-  IsNotEmpty,
-  IsOptional,
-  IsPositive,
-  IsString,
-  Matches,
-  Max,
-  MaxLength,
-  MinDate,
-  ValidateNested,
-} from 'class-validator';
-
-import { AddEventAttendeeInputDto, type AttendeeDto } from './attendee.dto';
-import { GetPaginationQueryDto } from './common.dto';
 
 export class MiniEventDto {
   declare id: EventId;
@@ -40,56 +22,4 @@ export class DetailedEventDto extends MiniEventDto {
   declare attendees: AttendeeDto[];
   declare created_at: string;
   declare updated_at: string;
-}
-
-export class GetAllEventsPaginationQueryDto extends GetPaginationQueryDto {
-  @IsString()
-  @IsOptional()
-  declare user_id?: UserId;
-}
-
-export class UpdateEventInputDto {
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(100)
-  declare title: string;
-
-  @IsString()
-  @IsOptional()
-  @MaxLength(2000)
-  declare description?: string;
-
-  @IsString()
-  @IsOptional()
-  @MaxLength(10)
-  @Matches(/^[\p{Emoji}\p{Emoji_Modifier}\p{Emoji_Component}\p{Emoji_Modifier_Base}\p{Emoji_Presentation}]+$/u, {
-    message: 'icon must be a valid emoji',
-  })
-  declare icon?: string;
-
-  @MinDate(new Date(new Date().toDateString()), { message: 'event_date must not be earlier than today' })
-  @IsDate()
-  @IsNotEmpty()
-  @Transform(({ value }) => new Date(value))
-  declare event_date: Date;
-}
-
-export class CreateEventInputDto extends UpdateEventInputDto {
-  @ValidateNested({ each: true })
-  @Type(() => AddEventAttendeeInputDto)
-  declare attendees?: AddEventAttendeeInputDto[];
-}
-
-export class GetEventsQueryDto extends GetPaginationQueryDto {
-  @IsBoolean()
-  @IsOptional()
-  @Transform(({ value }) => value === 'true')
-  declare only_future?: boolean;
-
-  @IsInt()
-  @IsPositive()
-  @Max(200)
-  @IsOptional()
-  @Transform(({ value }) => parseInt(value, 10))
-  declare limit?: number;
 }

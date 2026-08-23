@@ -1,18 +1,5 @@
-import type { ItemId, WishlistId } from '../ids';
+import type { ItemId } from '../ids';
 import type { MiniUserDto } from './user.dto';
-
-import {
-  ArrayNotEmpty,
-  IsArray,
-  IsInt,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  IsUrl,
-  Max,
-  MaxLength,
-  Min,
-} from 'class-validator';
 
 export class ItemTakerDto {
   declare user: MiniUserDto;
@@ -37,61 +24,4 @@ export class ToggleItemOutputDto {
 
 export class ScanItemOutputDto {
   declare picture_url: string | null;
-}
-
-export class UpdateItemInputDto {
-  @MaxLength(40)
-  @IsString()
-  @IsNotEmpty()
-  declare name: string;
-
-  @MaxLength(120)
-  @IsString()
-  @IsOptional()
-  declare description?: string;
-
-  @IsUrl()
-  @MaxLength(1000)
-  @IsOptional()
-  declare url?: string;
-
-  @Min(0)
-  @Max(5)
-  @IsInt()
-  @IsOptional()
-  declare score?: number;
-
-  @IsUrl()
-  @MaxLength(1000)
-  @IsOptional()
-  declare picture_url?: string;
-}
-
-export class AddItemForListInputDto extends UpdateItemInputDto {
-  @IsString()
-  @IsNotEmpty()
-  declare wishlist_id: WishlistId;
-}
-
-export class GetImportableItemsInputDto {
-  @IsString()
-  @IsNotEmpty()
-  declare wishlist_id: WishlistId;
-}
-
-export class ImportItemsInputDto {
-  @IsString()
-  @IsNotEmpty()
-  declare wishlist_id: WishlistId;
-
-  @IsString({ each: true })
-  @ArrayNotEmpty()
-  @IsArray()
-  declare source_item_ids: ItemId[];
-}
-
-export class ScanItemInputDto {
-  @IsString()
-  @IsNotEmpty()
-  declare url: string;
 }

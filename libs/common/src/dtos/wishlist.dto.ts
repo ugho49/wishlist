@@ -1,4 +1,4 @@
-import type { EventId, UserId, WishlistId } from '../ids';
+import type { EventId, WishlistId } from '../ids';
 import type { MiniEventDto } from './event.dto';
 import type { ItemDto } from './item.dto';
 import type { MiniUserDto } from './user.dto';
@@ -6,7 +6,6 @@ import type { MiniUserDto } from './user.dto';
 import { ArrayMaxSize, ArrayNotEmpty, IsBoolean, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
 
 import { MAX_EVENTS_BY_LIST } from '../constants';
-import { GetPaginationQueryDto } from './common.dto';
 
 export class WishlistConfigDto {
   declare hide_items: boolean;
@@ -45,19 +44,7 @@ export class WishlistWithEventsDto extends WishlistWithOwnerDto {
   declare events: MiniEventDto[];
 }
 
-export class GetAllWishlistsPaginationQueryDto extends GetPaginationQueryDto {
-  @IsString()
-  @IsNotEmpty()
-  declare user_id: UserId;
-}
-
-export class LinkUnlinkWishlistInputDto {
-  @IsString()
-  @IsNotEmpty()
-  declare event_id: EventId;
-}
-
-export class UpdateWishlistInputDto {
+export class CreateWishlistInputDto {
   @MaxLength(100)
   @IsString()
   @IsNotEmpty()
@@ -67,9 +54,7 @@ export class UpdateWishlistInputDto {
   @IsString()
   @IsOptional()
   declare description?: string;
-}
 
-export class CreateWishlistInputDto extends UpdateWishlistInputDto {
   @IsBoolean()
   @IsOptional()
   declare hide_items?: boolean;
@@ -78,10 +63,4 @@ export class CreateWishlistInputDto extends UpdateWishlistInputDto {
   @IsString({ each: true })
   @ArrayNotEmpty()
   declare event_ids: EventId[];
-}
-
-export class AddCoOwnerInputDto {
-  @IsString()
-  @IsNotEmpty()
-  declare user_id: UserId;
 }

@@ -81,23 +81,33 @@ export function useTestApp() {
     getFixtures: () => fixtures,
     getRequest: async (options?: { signedAs?: SignedAs }): Promise<RequestApp> => {
       const requestAppServer = request.agent(app.getHttpServer());
-      const authPath = '/auth/login';
       let token = '';
+
+      const loginViaGraphql = async (email: string, password: string) => {
+        const res = await requestAppServer.post('/graphql').send({
+          query: /* GraphQL */ `
+            mutation Login($input: LoginInput!) {
+              login(input: $input) {
+                __typename
+                ... on LoginOutput {
+                  accessToken
+                }
+              }
+            }
+          `,
+          variables: { input: { email, password } },
+        });
+        return res.body.data.login.accessToken as string;
+      };
 
       if (options?.signedAs === 'BASE_USER') {
         await fixtures.insertBaseUser();
-        token = await requestAppServer
-          .post(authPath)
-          .send({ email: Fixtures.BASE_USER_EMAIL, password: Fixtures.DEFAULT_USER_PASSWORD })
-          .then(res => res.body.access_token);
+        token = await loginViaGraphql(Fixtures.BASE_USER_EMAIL, Fixtures.DEFAULT_USER_PASSWORD);
       }
 
       if (options?.signedAs === 'ADMIN_USER') {
         await fixtures.insertAdminUser();
-        token = await requestAppServer
-          .post(authPath)
-          .send({ email: Fixtures.ADMIN_USER_EMAIL, password: Fixtures.DEFAULT_USER_PASSWORD })
-          .then(res => res.body.access_token);
+        token = await loginViaGraphql(Fixtures.ADMIN_USER_EMAIL, Fixtures.DEFAULT_USER_PASSWORD);
       }
 
       return token ? requestAppServer.auth(token, { type: 'bearer' }) : requestAppServer;
