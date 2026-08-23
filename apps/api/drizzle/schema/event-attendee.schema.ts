@@ -1,7 +1,7 @@
-import { AttendeeRole } from '@wishlist/common/enums/attendee.enum';
 import { relations, sql } from 'drizzle-orm';
 import { check, foreignKey, pgEnum, pgTable, unique, varchar } from 'drizzle-orm/pg-core';
 
+import { AttendeeRole } from '../../src/event/domain/attendee-role.enum';
 import { tsEnumToPgEnum } from '../enum';
 import { attendeeId, eventId, userId } from '../ids';
 import { event } from './event.schema';

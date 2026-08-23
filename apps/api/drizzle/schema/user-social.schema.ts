@@ -1,7 +1,7 @@
-import { UserSocialType } from '@wishlist/common/enums/user-social.enum';
 import { relations } from 'drizzle-orm';
 import { foreignKey, pgEnum, pgTable, unique, varchar } from 'drizzle-orm/pg-core';
 
+import { UserSocialType } from '../../src/user/domain/user-social-type.enum';
 import { tsEnumToPgEnum } from '../enum';
 import { timestamps } from '../helpers';
 import { userId, userSocialId } from '../ids';

@@ -1,8 +1,10 @@
 import type { RequestApp } from '@wishlist/api-test-utils';
 
 import { Fixtures, useTestApp } from '@wishlist/api-test-utils';
-import { AttendeeRole, uuid } from '@wishlist/common';
+import { uuid } from '@wishlist/common';
 import { DateTime } from 'luxon';
+
+import { AttendeeRole } from '../../event/domain/attendee-role.enum';
 
 /**
  * Integration tests for the GraphQL ItemResolver.

@@ -1,6 +1,7 @@
-import type { UserId, UserSocialId, UserSocialType } from '@wishlist/common';
+import type { UserId, UserSocialId } from '@wishlist/common';
 import type { DrizzleTransaction } from '../../../core/database/transaction-manager';
 import type { UserSocial } from '../model/user-social.model';
+import type { UserSocialType } from '../user-social-type.enum';
 
 export interface UserSocialRepository {
   newId(): UserSocialId;

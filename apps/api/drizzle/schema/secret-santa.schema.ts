@@ -1,7 +1,7 @@
-import { SecretSantaStatus } from '@wishlist/common/enums/secret-santa.enum';
 import { relations } from 'drizzle-orm';
 import { foreignKey, pgEnum, pgTable, text, unique } from 'drizzle-orm/pg-core';
 
+import { SecretSantaStatus } from '../../src/secret-santa/domain/secret-santa-status.enum';
 import { tsEnumToPgEnum } from '../enum';
 import { numericNullable, timestamps } from '../helpers';
 import { eventId, secretSantaId } from '../ids';

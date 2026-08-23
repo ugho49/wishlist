@@ -1,7 +1,6 @@
 import type { SecretSanta } from '../domain/model/secret-santa.model';
 import type { SecretSantaUser } from '../domain/model/secret-santa-user.model';
 
-import { SecretSantaStatus } from '@wishlist/common';
 import { match } from 'ts-pattern';
 
 import {
@@ -9,6 +8,7 @@ import {
   SecretSantaStatus as GqlSecretSantaStatus,
   type SecretSantaUser as GqlSecretSantaUser,
 } from '../../gql/generated-types';
+import { SecretSantaStatus } from '../domain/secret-santa-status.enum';
 
 function toGqlSecretSantaStatus(status: SecretSantaStatus): GqlSecretSantaStatus {
   return match(status)

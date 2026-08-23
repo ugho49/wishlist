@@ -968,9 +968,14 @@ export type UserSocial = {
   id: Scalars['UserSocialId']['output'];
   name?: Maybe<Scalars['String']['output']>;
   pictureUrl?: Maybe<Scalars['String']['output']>;
-  socialType: Scalars['String']['output'];
+  socialType: UserSocialType;
   updatedAt: Scalars['String']['output'];
 };
+
+export enum UserSocialType {
+  Facebook = 'FACEBOOK',
+  Google = 'GOOGLE'
+}
 
 export type ValidationRejection = {
   __typename: 'ValidationRejection';

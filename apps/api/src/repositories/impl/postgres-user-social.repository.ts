@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { schema } from '@wishlist/api-drizzle';
-import { type UserId, type UserSocialId, type UserSocialType, uuid } from '@wishlist/common';
+import { type UserId, type UserSocialId, uuid } from '@wishlist/common';
 import { and, eq, inArray } from 'drizzle-orm';
 
 import { DatabaseService } from '../../core/database/database.service';
 import { type DrizzleTransaction } from '../../core/database/transaction-manager';
 import { UserSocial } from '../../user/domain/model/user-social.model';
 import { type UserSocialRepository } from '../../user/domain/repository/user-social.repository';
+import { type UserSocialType } from '../../user/domain/user-social-type.enum';
 import { PostgresUserRepository } from './postgres-user.repository';
 
 @Injectable()

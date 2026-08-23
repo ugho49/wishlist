@@ -1,6 +1,8 @@
 import type { User } from '../../../user/domain/model/user.model';
 
-import { type AttendeeId, AttendeeRole, type EventId } from '@wishlist/common';
+import { type AttendeeId, type EventId } from '@wishlist/common';
+
+import { AttendeeRole } from '../attendee-role.enum';
 
 export type EventAttendeeProps = {
   id: AttendeeId;

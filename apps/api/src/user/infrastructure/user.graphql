@@ -1,11 +1,16 @@
 scalar UserSocialId
 scalar UserId
 
+enum UserSocialType {
+  GOOGLE
+  FACEBOOK
+}
+
 type UserSocial {
   id: UserSocialId!
   email: String!
   name: String
-  socialType: String!
+  socialType: UserSocialType!
   pictureUrl: String
   createdAt: String!
   updatedAt: String!

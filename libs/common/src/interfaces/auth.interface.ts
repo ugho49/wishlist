@@ -1,10 +1,9 @@
-import type { Authorities } from '../enums/auth.enum';
 import type { UserId } from '../ids';
 
 export interface AccessTokenJwtPayload {
   sub: UserId;
   email: string;
-  authorities: Authorities[];
+  authorities: string[];
 }
 
 export interface RefreshTokenJwtPayload {
@@ -14,7 +13,7 @@ export interface RefreshTokenJwtPayload {
 export interface ICurrentUser {
   id: UserId;
   email: string;
-  authorities: Authorities[];
+  authorities: string[];
   isAdmin: boolean;
   isSuperAdmin: boolean;
 }

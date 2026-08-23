@@ -1,5 +1,4 @@
 import { faker } from '@faker-js/faker';
-import { AttendeeRole, Authorities } from '@wishlist/common';
 import { createConsola } from 'consola';
 import dotenv from 'dotenv';
 import { drizzle } from 'drizzle-orm/bun-sql';
@@ -9,6 +8,8 @@ import { DateTime } from 'luxon';
 
 import { PasswordManager } from '../src/auth/infrastructure/util/password-manager';
 import { createSqlClient } from '../src/core/database/create-sql-client';
+import { AttendeeRole } from '../src/event/domain/attendee-role.enum';
+import { Authorities } from '../src/user/domain/authorities.enum';
 import * as schema from './schema';
 
 dotenv.config();

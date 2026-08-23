@@ -1,7 +1,9 @@
 import type { RequestApp } from '@wishlist/api-test-utils';
 
 import { Fixtures, useTestApp } from '@wishlist/api-test-utils';
-import { SecretSantaStatus, uuid } from '@wishlist/common';
+import { uuid } from '@wishlist/common';
+
+import { SecretSantaStatus } from '../../domain/secret-santa-status.enum';
 
 const SUCCESS_TYPENAMES = ['SecretSanta', 'EventAttendee', 'VoidOutput', 'AddSecretSantaUsersOutput'];
 

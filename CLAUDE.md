@@ -52,7 +52,7 @@ This is an Nx monorepo containing a wishlist application with React frontend and
 ### Project Structure
 - **apps/api/** - NestJS backend with Domain-Driven Design and CQRS
 - **apps/front/** - React frontend with Vite, Material-UI, and Redux Toolkit
-- **libs/common/** - Shared DTOs, enums, branded types, and interfaces
+- **libs/common/** - Shared DTOs, branded types, and interfaces
 
 ### Backend Architecture (NestJS)
 - **Domain-Driven Design** with application, domain, and infrastructure layers
@@ -120,7 +120,7 @@ This is an Nx monorepo containing a wishlist application with React frontend and
 
 ### Database Schema Patterns
 - **Branded Types**: EventId, UserId, AttendeeId etc. for compile-time type safety
-- **PostgreSQL enums**: TypeScript string enums in `libs/common` → Postgres enums via `tsEnumToPgEnum()` from `apps/api/drizzle/enum.ts`. Import the enum file (`@wishlist/common/enums/...`) in Drizzle schemas, not the `@wishlist/common` barrel (drizzle-kit cannot load class-validator DTOs).
+- **PostgreSQL enums**: Domain TypeScript string enums in `apps/api/src/{domain}/domain/` → Postgres enums via `tsEnumToPgEnum()` from `apps/api/drizzle/enum.ts`. Drizzle schemas import the domain enum file directly. The frontend uses GraphQL-generated enums, not domain enums.
 - **Migration Strategy**: Currently migrating from TypeORM to Drizzle (both entity definitions present)
 - **Junction Tables**: Many-to-many relationships (event_wishlist, attendee_exclusion)
 - **Audit Fields**: createdAt/updatedAt with automatic timezone handling

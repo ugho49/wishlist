@@ -1,7 +1,7 @@
-import { Authorities } from '@wishlist/common/enums/auth.enum';
 import { relations, sql } from 'drizzle-orm';
 import { boolean, date, pgEnum, pgTable, uniqueIndex, varchar } from 'drizzle-orm/pg-core';
 
+import { Authorities } from '../../src/user/domain/authorities.enum';
 import { tsEnumToPgEnum } from '../enum';
 import { timestamps, timestampWithTimezone } from '../helpers';
 import { userId } from '../ids';

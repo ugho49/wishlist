@@ -1,5 +1,7 @@
-import type { UserSocialId, UserSocialType } from '@wishlist/common';
+import type { UserSocialId } from '@wishlist/common';
 import type { User } from './user.model';
+
+import { type UserSocialType } from '../user-social-type.enum';
 
 export type UserSocialProps = {
   id: UserSocialId;

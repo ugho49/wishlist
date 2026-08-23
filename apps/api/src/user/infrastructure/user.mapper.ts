@@ -2,7 +2,6 @@ import type { User } from '../domain/model/user.model';
 import type { UserEmailSetting } from '../domain/model/user-email-setting.model';
 import type { UserSocial } from '../domain/model/user-social.model';
 
-import { Authorities } from '@wishlist/common';
 import { DateTime } from 'luxon';
 import { match } from 'ts-pattern';
 
@@ -12,7 +11,10 @@ import {
   type UserEmailSettings as GqlUserEmailSettings,
   type UserFull as GqlUserFull,
   type UserSocial as GqlUserSocial,
+  UserSocialType as GqlUserSocialType,
 } from '../../gql/generated-types';
+import { Authorities } from '../domain/authorities.enum';
+import { UserSocialType } from '../domain/user-social-type.enum';
 
 function toGqlUser(user: User): GqlUser {
   return {
@@ -51,12 +53,17 @@ function toGqlUserFull(user: User): GqlUserFull {
 }
 
 function toGqlUserSocial(social: UserSocial): GqlUserSocial {
+  const socialType = match(social.socialType)
+    .with(UserSocialType.GOOGLE, () => GqlUserSocialType.Google)
+    .with(UserSocialType.FACEBOOK, () => GqlUserSocialType.Facebook)
+    .exhaustive();
+
   return {
     __typename: 'UserSocial',
     id: social.id,
     email: social.email,
     name: social.name,
-    socialType: social.socialType,
+    socialType,
     pictureUrl: social.pictureUrl,
     createdAt: social.createdAt.toISOString(),
     updatedAt: social.updatedAt.toISOString(),
