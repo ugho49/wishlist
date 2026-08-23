@@ -30,6 +30,7 @@
     "@emoji-mart/react": "1.1.1",
     "@emotion/react": "11.14.0",
     "@emotion/styled": "11.14.1",
+    "@graphql-typed-document-node/core": "3.2.0",
     "@graphql-yoga/nestjs": "3.23.0",
     "@graphql-yoga/plugin-disable-introspection": "2.23.0",
     "@hookform/resolvers": "5.9.1",
@@ -73,7 +74,7 @@
     "firebase-admin": "14.3.0",
     "get-orientation": "1.1.2",
     "google-auth-library": "11.0.2",
-    "graphql": "16.14.2",
+    "graphql": "17.0.2",
     "graphql-yoga": "5.22.0",
     "ioredis": "6.0.0",
     "jwt-decode": "4.0.0",
@@ -167,5 +168,8 @@
     "vite": "8.2.2",
     "vite-plugin-svgr": "5.2.0",
     "vitest": "4.1.11"
+  },
+  "patchedDependencies": {
+    "graphql@17.0.2": "patches/graphql@17.0.2.patch"
   }
 }

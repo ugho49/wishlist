@@ -15,7 +15,6 @@ const config: CodegenConfig = {
           },
         },
         'typescript',
-        'typescript-operations',
       ],
       config: {
         scalars: {
@@ -27,17 +26,23 @@ const config: CodegenConfig = {
       plugins: [
         {
           add: {
-            content: ["import type * as Types from './types'"],
+            content: ["import type { Ids } from '@wishlist/common'"],
           },
         },
+        'typescript-operations',
         'typescript-react-query',
       ],
       config: {
+        scalars: {
+          ...gqlScalarIds,
+        },
+        importSchemaTypesFrom: './src/gql/__generated__/types',
+        namespacedImportName: 'Types',
+        documentMode: 'string',
         fetcher: {
           func: '../fetcher#fetchGql',
           isReactHook: false,
         },
-        importOperationTypesFrom: 'Types',
         reactQueryVersion: 5,
       },
     },

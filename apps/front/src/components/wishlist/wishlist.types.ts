@@ -1,11 +1,15 @@
-import type * as Types from '../../gql/__generated__/types';
+import type {
+  AdminListWishlistsForUserQuery,
+  WishlistListPageQuery,
+  WishlistPageQuery,
+} from '../../gql/__generated__/graphql';
 
 /**
  * The success member of the `WishlistPage` query union — the fully detailed
  * wishlist (with items, events, owner, coOwner, config) used across the
  * wishlist detail / edit pages.
  */
-export type DetailedWishlist = Extract<Types.WishlistPageQuery['wishlist'], { __typename: 'Wishlist' }>;
+export type DetailedWishlist = Extract<WishlistPageQuery['wishlist'], { __typename: 'Wishlist' }>;
 
 /** A single item as returned by the `WishlistPage` query. */
 export type WishlistItem = DetailedWishlist['items'][number];
@@ -18,12 +22,12 @@ export type WishlistEvent = DetailedWishlist['events'][number];
  * query — used by the "my lists" grid.
  */
 export type WishlistListItem = Extract<
-  Types.WishlistListPageQuery['wishlists'],
+  WishlistListPageQuery['wishlists'],
   { __typename: 'GetWishlistsPagedResponse' }
 >['data'][number];
 
 /** A row in the admin "wishlists for a user" table. */
 export type AdminUserWishlistRow = Extract<
-  Types.AdminListWishlistsForUserQuery['adminWishlists'],
+  AdminListWishlistsForUserQuery['adminWishlists'],
   { __typename: 'AdminGetWishlists' }
 >['data'][number];

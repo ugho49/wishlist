@@ -1,8 +1,896 @@
-import type * as Types from './types'
+/** Internal type. DO NOT USE DIRECTLY. */
+type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
+/** Internal type. DO NOT USE DIRECTLY. */
+export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
+import type { Ids } from '@wishlist/common'
+import type * as Types from './types';
+
+import { DocumentTypeDecoration } from '@graphql-typed-document-node/core';
 import { useMutation, useQuery, UseMutationOptions, UseQueryOptions } from '@tanstack/react-query';
 import { fetchGql } from '../fetcher';
+export type AuthLoginMutationVariables = Exact<{
+  input: Types.LoginInput;
+}>;
 
-export const SecretSantaUserItemFragmentDoc = `
+
+export type AuthLoginMutation = { login:
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'LoginOutput', accessToken: string }
+    | { __typename: 'UnauthorizedRejection', message: string }
+    | { __typename: 'ValidationRejection', errors: Array<{ field: string, message: string }> }
+   };
+
+export type AuthLoginWithGoogleMutationVariables = Exact<{
+  input: Types.LoginWithGoogleInput;
+}>;
+
+
+export type AuthLoginWithGoogleMutation = { loginWithGoogle:
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'LoginWithGoogleOutput', accessToken: string, newUserCreated: boolean | null, linkedToExistingUser: boolean | null }
+    | { __typename: 'UnauthorizedRejection', message: string }
+    | { __typename: 'ValidationRejection', errors: Array<{ field: string, message: string }> }
+   };
+
+export type AuthRegisterUserMutationVariables = Exact<{
+  input: Types.RegisterUserInput;
+}>;
+
+
+export type AuthRegisterUserMutation = { registerUser:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'User', id: Ids["UserId"], email: string }
+    | { __typename: 'ValidationRejection', errors: Array<{ field: string, message: string }> }
+   };
+
+export type AuthSendResetPasswordEmailMutationVariables = Exact<{
+  input: Types.SendResetPasswordEmailInput;
+}>;
+
+
+export type AuthSendResetPasswordEmailMutation = { sendResetPasswordEmail:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection', errors: Array<{ field: string, message: string }> }
+    | { __typename: 'VoidOutput', success: boolean }
+   };
+
+export type AuthResetPasswordMutationVariables = Exact<{
+  input: Types.ResetPasswordInput;
+}>;
+
+
+export type AuthResetPasswordMutation = { resetPassword:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection', errors: Array<{ field: string, message: string }> }
+    | { __typename: 'VoidOutput', success: boolean }
+   };
+
+export type AuthConfirmEmailChangeMutationVariables = Exact<{
+  input: Types.ConfirmEmailChangeInput;
+}>;
+
+
+export type AuthConfirmEmailChangeMutation = { confirmEmailChange:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection', errors: Array<{ field: string, message: string }> }
+    | { __typename: 'VoidOutput', success: boolean }
+   };
+
+export type EventListPageGetEventsQueryVariables = Exact<{
+  filters: Types.EventPaginationFilters;
+}>;
+
+
+export type EventListPageGetEventsQuery = { events:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'GetEventsPagedResponse', data: Array<{ id: Ids["EventId"], title: string, icon: string | null, eventDate: string, attendeeIds: Array<Ids["AttendeeId"]>, wishlistIds: Array<Ids["WishlistId"]> }>, pagination: { totalPages: number, totalElements: number, pageNumber: number, pageSize: number } }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+   };
+
+export type CreateEventMutationVariables = Exact<{
+  input: Types.CreateEventInput;
+}>;
+
+
+export type CreateEventMutation = { createEvent:
+    | { __typename: 'Event', id: Ids["EventId"] }
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'NotFoundRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection', errors: Array<{ field: string, message: string }> }
+   };
+
+export type UpdateEventMutationVariables = Exact<{
+  id: Ids["EventId"];
+  input: Types.UpdateEventInput;
+}>;
+
+
+export type UpdateEventMutation = { updateEvent:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'NotFoundRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection', errors: Array<{ field: string, message: string }> }
+    | { __typename: 'VoidOutput', success: boolean }
+   };
+
+export type DeleteEventMutationVariables = Exact<{
+  id: Ids["EventId"];
+}>;
+
+
+export type DeleteEventMutation = { deleteEvent:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'NotFoundRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection' }
+    | { __typename: 'VoidOutput', success: boolean }
+   };
+
+export type AddEventAttendeeMutationVariables = Exact<{
+  eventId: Ids["EventId"];
+  input: Types.AddEventAttendeeInput;
+}>;
+
+
+export type AddEventAttendeeMutation = { addEventAttendee:
+    | { __typename: 'EventAttendee', id: Ids["AttendeeId"], userId: Ids["UserId"] | null, pendingEmail: string | null, role: Types.AttendeeRole, user: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null } | null }
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'NotFoundRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection', errors: Array<{ field: string, message: string }> }
+   };
+
+export type RemoveEventAttendeeMutationVariables = Exact<{
+  eventId: Ids["EventId"];
+  attendeeId: Ids["AttendeeId"];
+}>;
+
+
+export type RemoveEventAttendeeMutation = { removeEventAttendee:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'NotFoundRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection' }
+    | { __typename: 'VoidOutput', success: boolean }
+   };
+
+export type UpdateEventAttendeeRoleMutationVariables = Exact<{
+  eventId: Ids["EventId"];
+  attendeeId: Ids["AttendeeId"];
+  role: Types.AttendeeRole;
+}>;
+
+
+export type UpdateEventAttendeeRoleMutation = { updateEventAttendeeRole:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'NotFoundRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection' }
+    | { __typename: 'VoidOutput', success: boolean }
+   };
+
+export type EventPageGetEventQueryVariables = Exact<{
+  eventId: Ids["EventId"];
+}>;
+
+
+export type EventPageGetEventQuery = { event:
+    | { __typename: 'Event', id: Ids["EventId"], title: string, description: string | null, icon: string | null, eventDate: string, attendees: Array<{ id: Ids["AttendeeId"], userId: Ids["UserId"] | null, pendingEmail: string | null, role: Types.AttendeeRole, user: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null } | null }>, wishlists: Array<{ id: Ids["WishlistId"], title: string, logoUrl: string | null, config: { hideItems: boolean }, owner: { id: Ids["UserId"], firstName: string, lastName: string, pictureUrl: string | null } }> }
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'NotFoundRejection', message: string }
+    | { __typename: 'UnauthorizedRejection' }
+   | null };
+
+export type EventSelectAvailableEventsQueryVariables = Exact<{
+  filters: Types.EventPaginationFilters;
+}>;
+
+
+export type EventSelectAvailableEventsQuery = { events:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'GetEventsPagedResponse', data: Array<{ id: Ids["EventId"], title: string, icon: string | null, eventDate: string }> }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+   };
+
+export type AdminEventListEventsQueryVariables = Exact<{
+  filters: Types.AdminEventPaginationFilters;
+}>;
+
+
+export type AdminEventListEventsQuery = { adminEvents:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'GetEventsPagedResponse', data: Array<{ id: Ids["EventId"], title: string, icon: string | null, eventDate: string, wishlistIds: Array<Ids["WishlistId"]>, createdAt: string, attendees: Array<{ id: Ids["AttendeeId"], role: Types.AttendeeRole, user: { id: Ids["UserId"], firstName: string, lastName: string } | null }> }>, pagination: { totalPages: number, totalElements: number, pageNumber: number, pageSize: number } }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection' }
+   };
+
+export type AdminEventGetEventQueryVariables = Exact<{
+  id: Ids["EventId"];
+}>;
+
+
+export type AdminEventGetEventQuery = { adminEvent:
+    | { __typename: 'Event', id: Ids["EventId"], title: string, description: string | null, icon: string | null, eventDate: string, createdAt: string, attendees: Array<{ id: Ids["AttendeeId"], userId: Ids["UserId"] | null, pendingEmail: string | null, role: Types.AttendeeRole, user: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null } | null }>, wishlists: Array<{ id: Ids["WishlistId"], title: string, logoUrl: string | null, createdAt: string, config: { hideItems: boolean }, owner: { id: Ids["UserId"], firstName: string, lastName: string, pictureUrl: string | null }, coOwner: { id: Ids["UserId"], firstName: string, lastName: string } | null }> }
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'NotFoundRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection' }
+   };
+
+export type AdminUpdateEventMutationVariables = Exact<{
+  id: Ids["EventId"];
+  input: Types.UpdateEventInput;
+}>;
+
+
+export type AdminUpdateEventMutation = { adminUpdateEvent:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'NotFoundRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection', errors: Array<{ field: string, message: string }> }
+    | { __typename: 'VoidOutput', success: boolean }
+   };
+
+export type AdminDeleteEventMutationVariables = Exact<{
+  id: Ids["EventId"];
+}>;
+
+
+export type AdminDeleteEventMutation = { adminDeleteEvent:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'NotFoundRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection' }
+    | { __typename: 'VoidOutput', success: boolean }
+   };
+
+export type AdminDeleteEventAttendeeMutationVariables = Exact<{
+  eventId: Ids["EventId"];
+  attendeeId: Ids["AttendeeId"];
+}>;
+
+
+export type AdminDeleteEventAttendeeMutation = { adminDeleteEventAttendee:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'NotFoundRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection' }
+    | { __typename: 'VoidOutput', success: boolean }
+   };
+
+export type ImportableItemsQueryVariables = Exact<{
+  wishlistId: Ids["WishlistId"];
+}>;
+
+
+export type ImportableItemsQuery = { importableItems:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'GetImportableItemsOutput', items: Array<{ id: Ids["ItemId"], name: string, description: string | null, url: string | null, score: number | null, isSuggested: boolean | null, pictureUrl: string | null, createdAt: string, takers: Array<{ userId: Ids["UserId"], takenAt: string, user: { id: Ids["UserId"], firstName: string, lastName: string, pictureUrl: string | null } }> }> }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+   };
+
+export type CreateItemMutationVariables = Exact<{
+  input: Types.CreateItemInput;
+}>;
+
+
+export type CreateItemMutation = { createItem:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'Item', id: Ids["ItemId"], name: string, description: string | null, url: string | null, score: number | null, isSuggested: boolean | null, pictureUrl: string | null, createdAt: string, takers: Array<{ userId: Ids["UserId"], takenAt: string, user: { id: Ids["UserId"], firstName: string, lastName: string, pictureUrl: string | null } }> }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection', errors: Array<{ field: string, message: string }> }
+   };
+
+export type UpdateItemMutationVariables = Exact<{
+  itemId: Ids["ItemId"];
+  input: Types.UpdateItemInput;
+}>;
+
+
+export type UpdateItemMutation = { updateItem:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection', errors: Array<{ field: string, message: string }> }
+    | { __typename: 'VoidOutput', success: boolean }
+   };
+
+export type DeleteItemMutationVariables = Exact<{
+  itemId: Ids["ItemId"];
+}>;
+
+
+export type DeleteItemMutation = { deleteItem:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection' }
+    | { __typename: 'VoidOutput', success: boolean }
+   };
+
+export type ToggleItemMutationVariables = Exact<{
+  itemId: Ids["ItemId"];
+}>;
+
+
+export type ToggleItemMutation = { toggleItem:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'ToggleItemOutput', takers: Array<{ userId: Ids["UserId"], takenAt: string, user: { id: Ids["UserId"], firstName: string, lastName: string, pictureUrl: string | null } }> }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection' }
+   };
+
+export type ScanItemUrlMutationVariables = Exact<{
+  input: Types.ScanItemUrlInput;
+}>;
+
+
+export type ScanItemUrlMutation = { scanItemUrl:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'ScanItemUrlOutput', pictureUrl: string | null }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection' }
+   };
+
+export type ImportItemsMutationVariables = Exact<{
+  input: Types.ImportItemsInput;
+}>;
+
+
+export type ImportItemsMutation = { importItems:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'ImportItemsOutput', items: Array<{ id: Ids["ItemId"], name: string, description: string | null, url: string | null, score: number | null, isSuggested: boolean | null, pictureUrl: string | null, createdAt: string, takers: Array<{ userId: Ids["UserId"], takenAt: string, user: { id: Ids["UserId"], firstName: string, lastName: string, pictureUrl: string | null } }> }> }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection', errors: Array<{ field: string, message: string }> }
+   };
+
+export type SecretSantaUserItemFragment = { id: Ids["SecretSantaUserId"], attendeeId: Ids["AttendeeId"], exclusions: Array<Ids["SecretSantaUserId"]>, attendee: { id: Ids["AttendeeId"], pendingEmail: string | null, role: Types.AttendeeRole, userId: Ids["UserId"] | null, user: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null } | null } };
+
+export type SecretSantaItemFragment = { id: Ids["SecretSantaId"], eventId: Ids["EventId"], description: string | null, budget: number | null, status: Types.SecretSantaStatus, createdAt: string, updatedAt: string, users: Array<{ id: Ids["SecretSantaUserId"], attendeeId: Ids["AttendeeId"], exclusions: Array<Ids["SecretSantaUserId"]>, attendee: { id: Ids["AttendeeId"], pendingEmail: string | null, role: Types.AttendeeRole, userId: Ids["UserId"] | null, user: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null } | null } }> };
+
+export type GetSecretSantaForEventQueryVariables = Exact<{
+  eventId: Ids["EventId"];
+}>;
+
+
+export type GetSecretSantaForEventQuery = { secretSanta:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'SecretSanta', id: Ids["SecretSantaId"], eventId: Ids["EventId"], description: string | null, budget: number | null, status: Types.SecretSantaStatus, createdAt: string, updatedAt: string, users: Array<{ id: Ids["SecretSantaUserId"], attendeeId: Ids["AttendeeId"], exclusions: Array<Ids["SecretSantaUserId"]>, attendee: { id: Ids["AttendeeId"], pendingEmail: string | null, role: Types.AttendeeRole, userId: Ids["UserId"] | null, user: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null } | null } }> }
+    | { __typename: 'UnauthorizedRejection' }
+   | null };
+
+export type GetMySecretSantaDrawQueryVariables = Exact<{
+  eventId: Ids["EventId"];
+}>;
+
+
+export type GetMySecretSantaDrawQuery = { mySecretSantaDraw:
+    | { __typename: 'EventAttendee', id: Ids["AttendeeId"], pendingEmail: string | null, role: Types.AttendeeRole, userId: Ids["UserId"] | null, user: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null } | null }
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+   | null };
+
+export type CreateSecretSantaMutationVariables = Exact<{
+  input: Types.CreateSecretSantaInput;
+}>;
+
+
+export type CreateSecretSantaMutation = { createSecretSanta:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'SecretSanta', id: Ids["SecretSantaId"], eventId: Ids["EventId"], description: string | null, budget: number | null, status: Types.SecretSantaStatus, createdAt: string, updatedAt: string, users: Array<{ id: Ids["SecretSantaUserId"], attendeeId: Ids["AttendeeId"], exclusions: Array<Ids["SecretSantaUserId"]>, attendee: { id: Ids["AttendeeId"], pendingEmail: string | null, role: Types.AttendeeRole, userId: Ids["UserId"] | null, user: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null } | null } }> }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection', errors: Array<{ field: string, message: string }> }
+   };
+
+export type UpdateSecretSantaMutationVariables = Exact<{
+  id: Ids["SecretSantaId"];
+  input: Types.UpdateSecretSantaInput;
+}>;
+
+
+export type UpdateSecretSantaMutation = { updateSecretSanta:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection', errors: Array<{ field: string, message: string }> }
+    | { __typename: 'VoidOutput', success: boolean }
+   };
+
+export type DeleteSecretSantaMutationVariables = Exact<{
+  id: Ids["SecretSantaId"];
+}>;
+
+
+export type DeleteSecretSantaMutation = { deleteSecretSanta:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'VoidOutput', success: boolean }
+   };
+
+export type StartSecretSantaMutationVariables = Exact<{
+  id: Ids["SecretSantaId"];
+}>;
+
+
+export type StartSecretSantaMutation = { startSecretSanta:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection', errors: Array<{ field: string, message: string }> }
+    | { __typename: 'VoidOutput', success: boolean }
+   };
+
+export type CancelSecretSantaMutationVariables = Exact<{
+  id: Ids["SecretSantaId"];
+}>;
+
+
+export type CancelSecretSantaMutation = { cancelSecretSanta:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'VoidOutput', success: boolean }
+   };
+
+export type AddSecretSantaUsersMutationVariables = Exact<{
+  id: Ids["SecretSantaId"];
+  input: Types.AddSecretSantaUsersInput;
+}>;
+
+
+export type AddSecretSantaUsersMutation = { addSecretSantaUsers:
+    | { __typename: 'AddSecretSantaUsersOutput', users: Array<{ id: Ids["SecretSantaUserId"], attendeeId: Ids["AttendeeId"], exclusions: Array<Ids["SecretSantaUserId"]>, attendee: { id: Ids["AttendeeId"], pendingEmail: string | null, role: Types.AttendeeRole, userId: Ids["UserId"] | null, user: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null } | null } }> }
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection', errors: Array<{ field: string, message: string }> }
+   };
+
+export type UpdateSecretSantaUserMutationVariables = Exact<{
+  id: Ids["SecretSantaId"];
+  secretSantaUserId: Ids["SecretSantaUserId"];
+  input: Types.UpdateSecretSantaUserInput;
+}>;
+
+
+export type UpdateSecretSantaUserMutation = { updateSecretSantaUser:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection', errors: Array<{ field: string, message: string }> }
+    | { __typename: 'VoidOutput', success: boolean }
+   };
+
+export type DeleteSecretSantaUserMutationVariables = Exact<{
+  id: Ids["SecretSantaId"];
+  secretSantaUserId: Ids["SecretSantaUserId"];
+}>;
+
+
+export type DeleteSecretSantaUserMutation = { deleteSecretSantaUser:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'VoidOutput', success: boolean }
+   };
+
+export type AdminUsersListQueryVariables = Exact<{
+  input?: Types.AdminGetAllUsersPaginationFilters | null | undefined;
+}>;
+
+
+export type AdminUsersListQuery = { adminUsers:
+    | { __typename: 'AdminGetAllUsers', data: Array<{ id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null, isEnabled: boolean, authorities: Array<Types.UserAuthorities>, createdAt: string }>, pagination: { totalPages: number, totalElements: number, pageNumber: number, pageSize: number } }
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection' }
+   };
+
+export type AdminUserDetailQueryVariables = Exact<{
+  userId: Ids["UserId"];
+}>;
+
+
+export type AdminUserDetailQuery = { adminUser:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'UserFull', id: Ids["UserId"], firstName: string, lastName: string, email: string, birthday: string | null, pictureUrl: string | null, isEnabled: boolean, authorities: Array<Types.UserAuthorities>, createdAt: string, lastConnectedAt: string | null, lastIp: string | null }
+    | { __typename: 'ValidationRejection' }
+   };
+
+export type AdminUpdateUserProfileMutationVariables = Exact<{
+  userId: Ids["UserId"];
+  input: Types.AdminUpdateUserProfileInput;
+}>;
+
+
+export type AdminUpdateUserProfileMutation = { adminUpdateUserProfile:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection', errors: Array<{ field: string, message: string }> }
+    | { __typename: 'VoidOutput', success: boolean }
+   };
+
+export type AdminDeleteUserMutationVariables = Exact<{
+  userId: Ids["UserId"];
+}>;
+
+
+export type AdminDeleteUserMutation = { adminDeleteUser:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection' }
+    | { __typename: 'VoidOutput', success: boolean }
+   };
+
+export type AdminRemoveUserPictureMutationVariables = Exact<{
+  userId: Ids["UserId"];
+}>;
+
+
+export type AdminRemoveUserPictureMutation = { adminRemoveUserPicture:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection' }
+    | { __typename: 'VoidOutput', success: boolean }
+   };
+
+export type UserProfileCurrentUserQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type UserProfileCurrentUserQuery = { currentUser:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'User', id: Ids["UserId"], email: string, firstName: string, lastName: string, birthday: string | null, pictureUrl: string | null, createdAt: string, socials: Array<{ id: Ids["UserSocialId"], socialType: string, name: string | null, email: string, pictureUrl: string | null, createdAt: string, updatedAt: string }> | null }
+   };
+
+export type UserProfileEmailSettingsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type UserProfileEmailSettingsQuery = { currentUser:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'User', id: Ids["UserId"], emailSettings: { dailyNewItemNotification: boolean } | null }
+   };
+
+export type UserPendingEmailChangeQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type UserPendingEmailChangeQuery = { pendingEmailChange:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'PendingEmailChange', newEmail: string, expiredAt: string }
+    | { __typename: 'UnauthorizedRejection' }
+   | null };
+
+export type SearchUsersSelectQueryVariables = Exact<{
+  keyword: string;
+}>;
+
+
+export type SearchUsersSelectQuery = { searchUsers:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'SearchUsersOutput', users: Array<{ id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null }> }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection' }
+   };
+
+export type UserClosestFriendsQueryVariables = Exact<{
+  limit?: number | null | undefined;
+}>;
+
+
+export type UserClosestFriendsQuery = { closestFriends:
+    | { __typename: 'ClosestFriendsOutput', users: Array<{ id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null }> }
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection' }
+   };
+
+export type UpdateUserProfileMutationVariables = Exact<{
+  input: Types.UpdateUserProfileInput;
+}>;
+
+
+export type UpdateUserProfileMutation = { updateUserProfile:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'User', id: Ids["UserId"], firstName: string, lastName: string, birthday: string | null }
+    | { __typename: 'ValidationRejection', errors: Array<{ field: string, message: string }> }
+   };
+
+export type ChangeUserPasswordMutationVariables = Exact<{
+  input: Types.ChangeUserPasswordInput;
+}>;
+
+
+export type ChangeUserPasswordMutation = { changeUserPassword:
+    | { __typename: 'BusinessRuleRejection', code: Types.BusinessRuleCode, message: string }
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection', errors: Array<{ field: string, message: string }> }
+    | { __typename: 'VoidOutput', success: boolean }
+   };
+
+export type UpdateUserEmailSettingsMutationVariables = Exact<{
+  input: Types.UpdateUserEmailSettingsInput;
+}>;
+
+
+export type UpdateUserEmailSettingsMutation = { updateUserEmailSettings:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'UserEmailSettings', dailyNewItemNotification: boolean }
+    | { __typename: 'ValidationRejection', errors: Array<{ field: string, message: string }> }
+   };
+
+export type LinkCurrentUserWithGoogleMutationVariables = Exact<{
+  input: Types.LinkUserToGoogleInput;
+}>;
+
+
+export type LinkCurrentUserWithGoogleMutation = { linkCurrentUserWithGoogle:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'UserSocial', id: Ids["UserSocialId"], socialType: string, name: string | null, email: string, pictureUrl: string | null, createdAt: string, updatedAt: string }
+    | { __typename: 'ValidationRejection', errors: Array<{ field: string, message: string }> }
+   };
+
+export type UnlinkCurrentUserSocialMutationVariables = Exact<{
+  socialId: Ids["UserSocialId"];
+}>;
+
+
+export type UnlinkCurrentUserSocialMutation = { unlinkCurrentUserSocial:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection' }
+    | { __typename: 'VoidOutput', success: boolean }
+   };
+
+export type UpdateUserPictureFromSocialMutationVariables = Exact<{
+  input: Types.UpdateUserPictureFromSocialInput;
+}>;
+
+
+export type UpdateUserPictureFromSocialMutation = { updateUserPictureFromSocial:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection' }
+    | { __typename: 'VoidOutput', success: boolean }
+   };
+
+export type RemoveCurrentUserPictureMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type RemoveCurrentUserPictureMutation = { removeUserPicture:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection' }
+    | { __typename: 'VoidOutput', success: boolean }
+   };
+
+export type RequestUserEmailChangeMutationVariables = Exact<{
+  input: Types.RequestEmailChangeInput;
+}>;
+
+
+export type RequestUserEmailChangeMutation = { requestEmailChange:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection', errors: Array<{ field: string, message: string }> }
+    | { __typename: 'VoidOutput', success: boolean }
+   };
+
+export type WishlistListPageQueryVariables = Exact<{
+  filters: Types.PaginationFilters;
+}>;
+
+
+export type WishlistListPageQuery = { wishlists:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'GetWishlistsPagedResponse', data: Array<{ id: Ids["WishlistId"], title: string, description: string | null, logoUrl: string | null, config: { hideItems: boolean }, events: Array<{ id: Ids["EventId"], title: string, icon: string | null, eventDate: string }> }>, pagination: { totalPages: number, totalElements: number, pageNumber: number, pageSize: number } }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+   };
+
+export type UpdateWishlistMutationVariables = Exact<{
+  id: Ids["WishlistId"];
+  input: Types.UpdateWishlistInput;
+}>;
+
+
+export type UpdateWishlistMutation = { updateWishlist:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'NotFoundRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection', errors: Array<{ field: string, message: string }> }
+    | { __typename: 'VoidOutput', success: boolean }
+   };
+
+export type DeleteWishlistMutationVariables = Exact<{
+  id: Ids["WishlistId"];
+}>;
+
+
+export type DeleteWishlistMutation = { deleteWishlist:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'NotFoundRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection' }
+    | { __typename: 'VoidOutput', success: boolean }
+   };
+
+export type LinkWishlistToEventMutationVariables = Exact<{
+  id: Ids["WishlistId"];
+  eventId: Ids["EventId"];
+}>;
+
+
+export type LinkWishlistToEventMutation = { linkWishlistToEvent:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'NotFoundRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection', errors: Array<{ field: string, message: string }> }
+    | { __typename: 'VoidOutput', success: boolean }
+   };
+
+export type UnlinkWishlistFromEventMutationVariables = Exact<{
+  id: Ids["WishlistId"];
+  eventId: Ids["EventId"];
+}>;
+
+
+export type UnlinkWishlistFromEventMutation = { unlinkWishlistFromEvent:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'NotFoundRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection', errors: Array<{ field: string, message: string }> }
+    | { __typename: 'VoidOutput', success: boolean }
+   };
+
+export type AddWishlistCoOwnerMutationVariables = Exact<{
+  id: Ids["WishlistId"];
+  input: Types.AddWishlistCoOwnerInput;
+}>;
+
+
+export type AddWishlistCoOwnerMutation = { addWishlistCoOwner:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'NotFoundRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection', errors: Array<{ field: string, message: string }> }
+    | { __typename: 'VoidOutput', success: boolean }
+   };
+
+export type RemoveWishlistCoOwnerMutationVariables = Exact<{
+  id: Ids["WishlistId"];
+}>;
+
+
+export type RemoveWishlistCoOwnerMutation = { removeWishlistCoOwner:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'NotFoundRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection' }
+    | { __typename: 'VoidOutput', success: boolean }
+   };
+
+export type RemoveWishlistLogoMutationVariables = Exact<{
+  id: Ids["WishlistId"];
+}>;
+
+
+export type RemoveWishlistLogoMutation = { removeWishlistLogo:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'NotFoundRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection' }
+    | { __typename: 'VoidOutput', success: boolean }
+   };
+
+export type WishlistPageQueryVariables = Exact<{
+  wishlistId: Ids["WishlistId"];
+}>;
+
+
+export type WishlistPageQuery = { wishlist:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'NotFoundRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'Wishlist', id: Ids["WishlistId"], title: string, description: string | null, logoUrl: string | null, ownerId: Ids["UserId"], coOwnerId: Ids["UserId"] | null, createdAt: string, updatedAt: string, config: { hideItems: boolean }, owner: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null }, coOwner: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null } | null, events: Array<{ id: Ids["EventId"], title: string, icon: string | null, eventDate: string }>, items: Array<{ id: Ids["ItemId"], name: string, description: string | null, url: string | null, score: number | null, isSuggested: boolean | null, pictureUrl: string | null, createdAt: string, takers: Array<{ userId: Ids["UserId"], takenAt: string, user: { id: Ids["UserId"], firstName: string, lastName: string, pictureUrl: string | null } }> }> }
+   | null };
+
+export type AdminListWishlistsForUserQueryVariables = Exact<{
+  filters: Types.AdminWishlistPaginationFilters;
+}>;
+
+
+export type AdminListWishlistsForUserQuery = { adminWishlists:
+    | { __typename: 'AdminGetWishlists', data: Array<{ id: Ids["WishlistId"], title: string, logoUrl: string | null, coOwnerId: Ids["UserId"] | null, createdAt: string, config: { hideItems: boolean }, events: Array<{ id: Ids["EventId"], title: string }> }>, pagination: { totalPages: number, totalElements: number, pageNumber: number, pageSize: number } }
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection' }
+   };
+
+
+export class TypedDocumentString<TResult, TVariables>
+  extends String
+  implements DocumentTypeDecoration<TResult, TVariables>
+{
+  __apiType?: NonNullable<DocumentTypeDecoration<TResult, TVariables>['__apiType']>;
+  private value: string;
+  public __meta__?: Record<string, any> | undefined;
+
+  constructor(value: string, __meta__?: Record<string, any> | undefined) {
+    super(value);
+    this.value = value;
+    this.__meta__ = __meta__;
+  }
+
+  override toString(): string & DocumentTypeDecoration<TResult, TVariables> {
+    return this.value;
+  }
+}
+export const SecretSantaUserItemFragmentDoc = new TypedDocumentString(`
     fragment SecretSantaUserItem on SecretSantaUser {
   id
   attendeeId
@@ -21,8 +909,8 @@ export const SecretSantaUserItemFragmentDoc = `
     }
   }
 }
-    `;
-export const SecretSantaItemFragmentDoc = `
+    `, {"fragmentName":"SecretSantaUserItem"});
+export const SecretSantaItemFragmentDoc = new TypedDocumentString(`
     fragment SecretSantaItem on SecretSanta {
   id
   eventId
@@ -35,8 +923,25 @@ export const SecretSantaItemFragmentDoc = `
     ...SecretSantaUserItem
   }
 }
-    ${SecretSantaUserItemFragmentDoc}`;
-export const AuthLoginDocument = `
+    fragment SecretSantaUserItem on SecretSantaUser {
+  id
+  attendeeId
+  exclusions
+  attendee {
+    id
+    pendingEmail
+    role
+    userId
+    user {
+      id
+      firstName
+      lastName
+      email
+      pictureUrl
+    }
+  }
+}`, {"fragmentName":"SecretSantaItem"});
+export const AuthLoginDocument = new TypedDocumentString(`
     mutation AuthLogin($input: LoginInput!) {
   login(input: $input) {
     __typename
@@ -54,22 +959,22 @@ export const AuthLoginDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useAuthLoginMutation = <
       TError = unknown,
       TContext = unknown
-    >(options?: UseMutationOptions<Types.AuthLoginMutation, TError, Types.AuthLoginMutationVariables, TContext>) => {
+    >(options?: UseMutationOptions<AuthLoginMutation, TError, AuthLoginMutationVariables, TContext>) => {
     
-    return useMutation<Types.AuthLoginMutation, TError, Types.AuthLoginMutationVariables, TContext>(
+    return useMutation<AuthLoginMutation, TError, AuthLoginMutationVariables, TContext>(
       {
     mutationKey: ['AuthLogin'],
-    mutationFn: (variables?: Types.AuthLoginMutationVariables) => fetchGql<Types.AuthLoginMutation, Types.AuthLoginMutationVariables>(AuthLoginDocument, variables)(),
+    mutationFn: (variables?: AuthLoginMutationVariables) => fetchGql<AuthLoginMutation, AuthLoginMutationVariables>(AuthLoginDocument, variables)(),
     ...options
   }
     )};
 
-export const AuthLoginWithGoogleDocument = `
+export const AuthLoginWithGoogleDocument = new TypedDocumentString(`
     mutation AuthLoginWithGoogle($input: LoginWithGoogleInput!) {
   loginWithGoogle(input: $input) {
     __typename
@@ -89,22 +994,22 @@ export const AuthLoginWithGoogleDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useAuthLoginWithGoogleMutation = <
       TError = unknown,
       TContext = unknown
-    >(options?: UseMutationOptions<Types.AuthLoginWithGoogleMutation, TError, Types.AuthLoginWithGoogleMutationVariables, TContext>) => {
+    >(options?: UseMutationOptions<AuthLoginWithGoogleMutation, TError, AuthLoginWithGoogleMutationVariables, TContext>) => {
     
-    return useMutation<Types.AuthLoginWithGoogleMutation, TError, Types.AuthLoginWithGoogleMutationVariables, TContext>(
+    return useMutation<AuthLoginWithGoogleMutation, TError, AuthLoginWithGoogleMutationVariables, TContext>(
       {
     mutationKey: ['AuthLoginWithGoogle'],
-    mutationFn: (variables?: Types.AuthLoginWithGoogleMutationVariables) => fetchGql<Types.AuthLoginWithGoogleMutation, Types.AuthLoginWithGoogleMutationVariables>(AuthLoginWithGoogleDocument, variables)(),
+    mutationFn: (variables?: AuthLoginWithGoogleMutationVariables) => fetchGql<AuthLoginWithGoogleMutation, AuthLoginWithGoogleMutationVariables>(AuthLoginWithGoogleDocument, variables)(),
     ...options
   }
     )};
 
-export const AuthRegisterUserDocument = `
+export const AuthRegisterUserDocument = new TypedDocumentString(`
     mutation AuthRegisterUser($input: RegisterUserInput!) {
   registerUser(input: $input) {
     __typename
@@ -120,22 +1025,22 @@ export const AuthRegisterUserDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useAuthRegisterUserMutation = <
       TError = unknown,
       TContext = unknown
-    >(options?: UseMutationOptions<Types.AuthRegisterUserMutation, TError, Types.AuthRegisterUserMutationVariables, TContext>) => {
+    >(options?: UseMutationOptions<AuthRegisterUserMutation, TError, AuthRegisterUserMutationVariables, TContext>) => {
     
-    return useMutation<Types.AuthRegisterUserMutation, TError, Types.AuthRegisterUserMutationVariables, TContext>(
+    return useMutation<AuthRegisterUserMutation, TError, AuthRegisterUserMutationVariables, TContext>(
       {
     mutationKey: ['AuthRegisterUser'],
-    mutationFn: (variables?: Types.AuthRegisterUserMutationVariables) => fetchGql<Types.AuthRegisterUserMutation, Types.AuthRegisterUserMutationVariables>(AuthRegisterUserDocument, variables)(),
+    mutationFn: (variables?: AuthRegisterUserMutationVariables) => fetchGql<AuthRegisterUserMutation, AuthRegisterUserMutationVariables>(AuthRegisterUserDocument, variables)(),
     ...options
   }
     )};
 
-export const AuthSendResetPasswordEmailDocument = `
+export const AuthSendResetPasswordEmailDocument = new TypedDocumentString(`
     mutation AuthSendResetPasswordEmail($input: SendResetPasswordEmailInput!) {
   sendResetPasswordEmail(input: $input) {
     __typename
@@ -150,22 +1055,22 @@ export const AuthSendResetPasswordEmailDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useAuthSendResetPasswordEmailMutation = <
       TError = unknown,
       TContext = unknown
-    >(options?: UseMutationOptions<Types.AuthSendResetPasswordEmailMutation, TError, Types.AuthSendResetPasswordEmailMutationVariables, TContext>) => {
+    >(options?: UseMutationOptions<AuthSendResetPasswordEmailMutation, TError, AuthSendResetPasswordEmailMutationVariables, TContext>) => {
     
-    return useMutation<Types.AuthSendResetPasswordEmailMutation, TError, Types.AuthSendResetPasswordEmailMutationVariables, TContext>(
+    return useMutation<AuthSendResetPasswordEmailMutation, TError, AuthSendResetPasswordEmailMutationVariables, TContext>(
       {
     mutationKey: ['AuthSendResetPasswordEmail'],
-    mutationFn: (variables?: Types.AuthSendResetPasswordEmailMutationVariables) => fetchGql<Types.AuthSendResetPasswordEmailMutation, Types.AuthSendResetPasswordEmailMutationVariables>(AuthSendResetPasswordEmailDocument, variables)(),
+    mutationFn: (variables?: AuthSendResetPasswordEmailMutationVariables) => fetchGql<AuthSendResetPasswordEmailMutation, AuthSendResetPasswordEmailMutationVariables>(AuthSendResetPasswordEmailDocument, variables)(),
     ...options
   }
     )};
 
-export const AuthResetPasswordDocument = `
+export const AuthResetPasswordDocument = new TypedDocumentString(`
     mutation AuthResetPassword($input: ResetPasswordInput!) {
   resetPassword(input: $input) {
     __typename
@@ -180,22 +1085,22 @@ export const AuthResetPasswordDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useAuthResetPasswordMutation = <
       TError = unknown,
       TContext = unknown
-    >(options?: UseMutationOptions<Types.AuthResetPasswordMutation, TError, Types.AuthResetPasswordMutationVariables, TContext>) => {
+    >(options?: UseMutationOptions<AuthResetPasswordMutation, TError, AuthResetPasswordMutationVariables, TContext>) => {
     
-    return useMutation<Types.AuthResetPasswordMutation, TError, Types.AuthResetPasswordMutationVariables, TContext>(
+    return useMutation<AuthResetPasswordMutation, TError, AuthResetPasswordMutationVariables, TContext>(
       {
     mutationKey: ['AuthResetPassword'],
-    mutationFn: (variables?: Types.AuthResetPasswordMutationVariables) => fetchGql<Types.AuthResetPasswordMutation, Types.AuthResetPasswordMutationVariables>(AuthResetPasswordDocument, variables)(),
+    mutationFn: (variables?: AuthResetPasswordMutationVariables) => fetchGql<AuthResetPasswordMutation, AuthResetPasswordMutationVariables>(AuthResetPasswordDocument, variables)(),
     ...options
   }
     )};
 
-export const AuthConfirmEmailChangeDocument = `
+export const AuthConfirmEmailChangeDocument = new TypedDocumentString(`
     mutation AuthConfirmEmailChange($input: ConfirmEmailChangeInput!) {
   confirmEmailChange(input: $input) {
     __typename
@@ -210,22 +1115,22 @@ export const AuthConfirmEmailChangeDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useAuthConfirmEmailChangeMutation = <
       TError = unknown,
       TContext = unknown
-    >(options?: UseMutationOptions<Types.AuthConfirmEmailChangeMutation, TError, Types.AuthConfirmEmailChangeMutationVariables, TContext>) => {
+    >(options?: UseMutationOptions<AuthConfirmEmailChangeMutation, TError, AuthConfirmEmailChangeMutationVariables, TContext>) => {
     
-    return useMutation<Types.AuthConfirmEmailChangeMutation, TError, Types.AuthConfirmEmailChangeMutationVariables, TContext>(
+    return useMutation<AuthConfirmEmailChangeMutation, TError, AuthConfirmEmailChangeMutationVariables, TContext>(
       {
     mutationKey: ['AuthConfirmEmailChange'],
-    mutationFn: (variables?: Types.AuthConfirmEmailChangeMutationVariables) => fetchGql<Types.AuthConfirmEmailChangeMutation, Types.AuthConfirmEmailChangeMutationVariables>(AuthConfirmEmailChangeDocument, variables)(),
+    mutationFn: (variables?: AuthConfirmEmailChangeMutationVariables) => fetchGql<AuthConfirmEmailChangeMutation, AuthConfirmEmailChangeMutationVariables>(AuthConfirmEmailChangeDocument, variables)(),
     ...options
   }
     )};
 
-export const EventListPageGetEventsDocument = `
+export const EventListPageGetEventsDocument = new TypedDocumentString(`
     query EventListPageGetEvents($filters: EventPaginationFilters!) {
   events(filters: $filters) {
     __typename
@@ -247,25 +1152,25 @@ export const EventListPageGetEventsDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useEventListPageGetEventsQuery = <
-      TData = Types.EventListPageGetEventsQuery,
+      TData = EventListPageGetEventsQuery,
       TError = unknown
     >(
-      variables: Types.EventListPageGetEventsQueryVariables,
-      options?: Omit<UseQueryOptions<Types.EventListPageGetEventsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<Types.EventListPageGetEventsQuery, TError, TData>['queryKey'] }
+      variables: EventListPageGetEventsQueryVariables,
+      options?: Omit<UseQueryOptions<EventListPageGetEventsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<EventListPageGetEventsQuery, TError, TData>['queryKey'] }
     ) => {
     
-    return useQuery<Types.EventListPageGetEventsQuery, TError, TData>(
+    return useQuery<EventListPageGetEventsQuery, TError, TData>(
       {
     queryKey: ['EventListPageGetEvents', variables],
-    queryFn: fetchGql<Types.EventListPageGetEventsQuery, Types.EventListPageGetEventsQueryVariables>(EventListPageGetEventsDocument, variables),
+    queryFn: fetchGql<EventListPageGetEventsQuery, EventListPageGetEventsQueryVariables>(EventListPageGetEventsDocument, variables),
     ...options
   }
     )};
 
-export const CreateEventDocument = `
+export const CreateEventDocument = new TypedDocumentString(`
     mutation CreateEvent($input: CreateEventInput!) {
   createEvent(input: $input) {
     __typename
@@ -280,22 +1185,22 @@ export const CreateEventDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useCreateEventMutation = <
       TError = unknown,
       TContext = unknown
-    >(options?: UseMutationOptions<Types.CreateEventMutation, TError, Types.CreateEventMutationVariables, TContext>) => {
+    >(options?: UseMutationOptions<CreateEventMutation, TError, CreateEventMutationVariables, TContext>) => {
     
-    return useMutation<Types.CreateEventMutation, TError, Types.CreateEventMutationVariables, TContext>(
+    return useMutation<CreateEventMutation, TError, CreateEventMutationVariables, TContext>(
       {
     mutationKey: ['CreateEvent'],
-    mutationFn: (variables?: Types.CreateEventMutationVariables) => fetchGql<Types.CreateEventMutation, Types.CreateEventMutationVariables>(CreateEventDocument, variables)(),
+    mutationFn: (variables?: CreateEventMutationVariables) => fetchGql<CreateEventMutation, CreateEventMutationVariables>(CreateEventDocument, variables)(),
     ...options
   }
     )};
 
-export const UpdateEventDocument = `
+export const UpdateEventDocument = new TypedDocumentString(`
     mutation UpdateEvent($id: EventId!, $input: UpdateEventInput!) {
   updateEvent(id: $id, input: $input) {
     __typename
@@ -310,22 +1215,22 @@ export const UpdateEventDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useUpdateEventMutation = <
       TError = unknown,
       TContext = unknown
-    >(options?: UseMutationOptions<Types.UpdateEventMutation, TError, Types.UpdateEventMutationVariables, TContext>) => {
+    >(options?: UseMutationOptions<UpdateEventMutation, TError, UpdateEventMutationVariables, TContext>) => {
     
-    return useMutation<Types.UpdateEventMutation, TError, Types.UpdateEventMutationVariables, TContext>(
+    return useMutation<UpdateEventMutation, TError, UpdateEventMutationVariables, TContext>(
       {
     mutationKey: ['UpdateEvent'],
-    mutationFn: (variables?: Types.UpdateEventMutationVariables) => fetchGql<Types.UpdateEventMutation, Types.UpdateEventMutationVariables>(UpdateEventDocument, variables)(),
+    mutationFn: (variables?: UpdateEventMutationVariables) => fetchGql<UpdateEventMutation, UpdateEventMutationVariables>(UpdateEventDocument, variables)(),
     ...options
   }
     )};
 
-export const DeleteEventDocument = `
+export const DeleteEventDocument = new TypedDocumentString(`
     mutation DeleteEvent($id: EventId!) {
   deleteEvent(id: $id) {
     __typename
@@ -334,22 +1239,22 @@ export const DeleteEventDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useDeleteEventMutation = <
       TError = unknown,
       TContext = unknown
-    >(options?: UseMutationOptions<Types.DeleteEventMutation, TError, Types.DeleteEventMutationVariables, TContext>) => {
+    >(options?: UseMutationOptions<DeleteEventMutation, TError, DeleteEventMutationVariables, TContext>) => {
     
-    return useMutation<Types.DeleteEventMutation, TError, Types.DeleteEventMutationVariables, TContext>(
+    return useMutation<DeleteEventMutation, TError, DeleteEventMutationVariables, TContext>(
       {
     mutationKey: ['DeleteEvent'],
-    mutationFn: (variables?: Types.DeleteEventMutationVariables) => fetchGql<Types.DeleteEventMutation, Types.DeleteEventMutationVariables>(DeleteEventDocument, variables)(),
+    mutationFn: (variables?: DeleteEventMutationVariables) => fetchGql<DeleteEventMutation, DeleteEventMutationVariables>(DeleteEventDocument, variables)(),
     ...options
   }
     )};
 
-export const AddEventAttendeeDocument = `
+export const AddEventAttendeeDocument = new TypedDocumentString(`
     mutation AddEventAttendee($eventId: EventId!, $input: AddEventAttendeeInput!) {
   addEventAttendee(eventId: $eventId, input: $input) {
     __typename
@@ -374,22 +1279,22 @@ export const AddEventAttendeeDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useAddEventAttendeeMutation = <
       TError = unknown,
       TContext = unknown
-    >(options?: UseMutationOptions<Types.AddEventAttendeeMutation, TError, Types.AddEventAttendeeMutationVariables, TContext>) => {
+    >(options?: UseMutationOptions<AddEventAttendeeMutation, TError, AddEventAttendeeMutationVariables, TContext>) => {
     
-    return useMutation<Types.AddEventAttendeeMutation, TError, Types.AddEventAttendeeMutationVariables, TContext>(
+    return useMutation<AddEventAttendeeMutation, TError, AddEventAttendeeMutationVariables, TContext>(
       {
     mutationKey: ['AddEventAttendee'],
-    mutationFn: (variables?: Types.AddEventAttendeeMutationVariables) => fetchGql<Types.AddEventAttendeeMutation, Types.AddEventAttendeeMutationVariables>(AddEventAttendeeDocument, variables)(),
+    mutationFn: (variables?: AddEventAttendeeMutationVariables) => fetchGql<AddEventAttendeeMutation, AddEventAttendeeMutationVariables>(AddEventAttendeeDocument, variables)(),
     ...options
   }
     )};
 
-export const RemoveEventAttendeeDocument = `
+export const RemoveEventAttendeeDocument = new TypedDocumentString(`
     mutation RemoveEventAttendee($eventId: EventId!, $attendeeId: AttendeeId!) {
   removeEventAttendee(eventId: $eventId, attendeeId: $attendeeId) {
     __typename
@@ -398,22 +1303,22 @@ export const RemoveEventAttendeeDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useRemoveEventAttendeeMutation = <
       TError = unknown,
       TContext = unknown
-    >(options?: UseMutationOptions<Types.RemoveEventAttendeeMutation, TError, Types.RemoveEventAttendeeMutationVariables, TContext>) => {
+    >(options?: UseMutationOptions<RemoveEventAttendeeMutation, TError, RemoveEventAttendeeMutationVariables, TContext>) => {
     
-    return useMutation<Types.RemoveEventAttendeeMutation, TError, Types.RemoveEventAttendeeMutationVariables, TContext>(
+    return useMutation<RemoveEventAttendeeMutation, TError, RemoveEventAttendeeMutationVariables, TContext>(
       {
     mutationKey: ['RemoveEventAttendee'],
-    mutationFn: (variables?: Types.RemoveEventAttendeeMutationVariables) => fetchGql<Types.RemoveEventAttendeeMutation, Types.RemoveEventAttendeeMutationVariables>(RemoveEventAttendeeDocument, variables)(),
+    mutationFn: (variables?: RemoveEventAttendeeMutationVariables) => fetchGql<RemoveEventAttendeeMutation, RemoveEventAttendeeMutationVariables>(RemoveEventAttendeeDocument, variables)(),
     ...options
   }
     )};
 
-export const UpdateEventAttendeeRoleDocument = `
+export const UpdateEventAttendeeRoleDocument = new TypedDocumentString(`
     mutation UpdateEventAttendeeRole($eventId: EventId!, $attendeeId: AttendeeId!, $role: AttendeeRole!) {
   updateEventAttendeeRole(eventId: $eventId, attendeeId: $attendeeId, role: $role) {
     __typename
@@ -422,22 +1327,22 @@ export const UpdateEventAttendeeRoleDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useUpdateEventAttendeeRoleMutation = <
       TError = unknown,
       TContext = unknown
-    >(options?: UseMutationOptions<Types.UpdateEventAttendeeRoleMutation, TError, Types.UpdateEventAttendeeRoleMutationVariables, TContext>) => {
+    >(options?: UseMutationOptions<UpdateEventAttendeeRoleMutation, TError, UpdateEventAttendeeRoleMutationVariables, TContext>) => {
     
-    return useMutation<Types.UpdateEventAttendeeRoleMutation, TError, Types.UpdateEventAttendeeRoleMutationVariables, TContext>(
+    return useMutation<UpdateEventAttendeeRoleMutation, TError, UpdateEventAttendeeRoleMutationVariables, TContext>(
       {
     mutationKey: ['UpdateEventAttendeeRole'],
-    mutationFn: (variables?: Types.UpdateEventAttendeeRoleMutationVariables) => fetchGql<Types.UpdateEventAttendeeRoleMutation, Types.UpdateEventAttendeeRoleMutationVariables>(UpdateEventAttendeeRoleDocument, variables)(),
+    mutationFn: (variables?: UpdateEventAttendeeRoleMutationVariables) => fetchGql<UpdateEventAttendeeRoleMutation, UpdateEventAttendeeRoleMutationVariables>(UpdateEventAttendeeRoleDocument, variables)(),
     ...options
   }
     )};
 
-export const EventPageGetEventDocument = `
+export const EventPageGetEventDocument = new TypedDocumentString(`
     query EventPageGetEvent($eventId: EventId!) {
   event(id: $eventId) {
     __typename
@@ -480,25 +1385,25 @@ export const EventPageGetEventDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useEventPageGetEventQuery = <
-      TData = Types.EventPageGetEventQuery,
+      TData = EventPageGetEventQuery,
       TError = unknown
     >(
-      variables: Types.EventPageGetEventQueryVariables,
-      options?: Omit<UseQueryOptions<Types.EventPageGetEventQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<Types.EventPageGetEventQuery, TError, TData>['queryKey'] }
+      variables: EventPageGetEventQueryVariables,
+      options?: Omit<UseQueryOptions<EventPageGetEventQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<EventPageGetEventQuery, TError, TData>['queryKey'] }
     ) => {
     
-    return useQuery<Types.EventPageGetEventQuery, TError, TData>(
+    return useQuery<EventPageGetEventQuery, TError, TData>(
       {
     queryKey: ['EventPageGetEvent', variables],
-    queryFn: fetchGql<Types.EventPageGetEventQuery, Types.EventPageGetEventQueryVariables>(EventPageGetEventDocument, variables),
+    queryFn: fetchGql<EventPageGetEventQuery, EventPageGetEventQueryVariables>(EventPageGetEventDocument, variables),
     ...options
   }
     )};
 
-export const EventSelectAvailableEventsDocument = `
+export const EventSelectAvailableEventsDocument = new TypedDocumentString(`
     query EventSelectAvailableEvents($filters: EventPaginationFilters!) {
   events(filters: $filters) {
     __typename
@@ -512,25 +1417,25 @@ export const EventSelectAvailableEventsDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useEventSelectAvailableEventsQuery = <
-      TData = Types.EventSelectAvailableEventsQuery,
+      TData = EventSelectAvailableEventsQuery,
       TError = unknown
     >(
-      variables: Types.EventSelectAvailableEventsQueryVariables,
-      options?: Omit<UseQueryOptions<Types.EventSelectAvailableEventsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<Types.EventSelectAvailableEventsQuery, TError, TData>['queryKey'] }
+      variables: EventSelectAvailableEventsQueryVariables,
+      options?: Omit<UseQueryOptions<EventSelectAvailableEventsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<EventSelectAvailableEventsQuery, TError, TData>['queryKey'] }
     ) => {
     
-    return useQuery<Types.EventSelectAvailableEventsQuery, TError, TData>(
+    return useQuery<EventSelectAvailableEventsQuery, TError, TData>(
       {
     queryKey: ['EventSelectAvailableEvents', variables],
-    queryFn: fetchGql<Types.EventSelectAvailableEventsQuery, Types.EventSelectAvailableEventsQueryVariables>(EventSelectAvailableEventsDocument, variables),
+    queryFn: fetchGql<EventSelectAvailableEventsQuery, EventSelectAvailableEventsQueryVariables>(EventSelectAvailableEventsDocument, variables),
     ...options
   }
     )};
 
-export const AdminEventListEventsDocument = `
+export const AdminEventListEventsDocument = new TypedDocumentString(`
     query AdminEventListEvents($filters: AdminEventPaginationFilters!) {
   adminEvents(filters: $filters) {
     __typename
@@ -561,25 +1466,25 @@ export const AdminEventListEventsDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useAdminEventListEventsQuery = <
-      TData = Types.AdminEventListEventsQuery,
+      TData = AdminEventListEventsQuery,
       TError = unknown
     >(
-      variables: Types.AdminEventListEventsQueryVariables,
-      options?: Omit<UseQueryOptions<Types.AdminEventListEventsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<Types.AdminEventListEventsQuery, TError, TData>['queryKey'] }
+      variables: AdminEventListEventsQueryVariables,
+      options?: Omit<UseQueryOptions<AdminEventListEventsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<AdminEventListEventsQuery, TError, TData>['queryKey'] }
     ) => {
     
-    return useQuery<Types.AdminEventListEventsQuery, TError, TData>(
+    return useQuery<AdminEventListEventsQuery, TError, TData>(
       {
     queryKey: ['AdminEventListEvents', variables],
-    queryFn: fetchGql<Types.AdminEventListEventsQuery, Types.AdminEventListEventsQueryVariables>(AdminEventListEventsDocument, variables),
+    queryFn: fetchGql<AdminEventListEventsQuery, AdminEventListEventsQueryVariables>(AdminEventListEventsDocument, variables),
     ...options
   }
     )};
 
-export const AdminEventGetEventDocument = `
+export const AdminEventGetEventDocument = new TypedDocumentString(`
     query AdminEventGetEvent($id: EventId!) {
   adminEvent(id: $id) {
     __typename
@@ -626,25 +1531,25 @@ export const AdminEventGetEventDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useAdminEventGetEventQuery = <
-      TData = Types.AdminEventGetEventQuery,
+      TData = AdminEventGetEventQuery,
       TError = unknown
     >(
-      variables: Types.AdminEventGetEventQueryVariables,
-      options?: Omit<UseQueryOptions<Types.AdminEventGetEventQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<Types.AdminEventGetEventQuery, TError, TData>['queryKey'] }
+      variables: AdminEventGetEventQueryVariables,
+      options?: Omit<UseQueryOptions<AdminEventGetEventQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<AdminEventGetEventQuery, TError, TData>['queryKey'] }
     ) => {
     
-    return useQuery<Types.AdminEventGetEventQuery, TError, TData>(
+    return useQuery<AdminEventGetEventQuery, TError, TData>(
       {
     queryKey: ['AdminEventGetEvent', variables],
-    queryFn: fetchGql<Types.AdminEventGetEventQuery, Types.AdminEventGetEventQueryVariables>(AdminEventGetEventDocument, variables),
+    queryFn: fetchGql<AdminEventGetEventQuery, AdminEventGetEventQueryVariables>(AdminEventGetEventDocument, variables),
     ...options
   }
     )};
 
-export const AdminUpdateEventDocument = `
+export const AdminUpdateEventDocument = new TypedDocumentString(`
     mutation AdminUpdateEvent($id: EventId!, $input: UpdateEventInput!) {
   adminUpdateEvent(id: $id, input: $input) {
     __typename
@@ -659,22 +1564,22 @@ export const AdminUpdateEventDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useAdminUpdateEventMutation = <
       TError = unknown,
       TContext = unknown
-    >(options?: UseMutationOptions<Types.AdminUpdateEventMutation, TError, Types.AdminUpdateEventMutationVariables, TContext>) => {
+    >(options?: UseMutationOptions<AdminUpdateEventMutation, TError, AdminUpdateEventMutationVariables, TContext>) => {
     
-    return useMutation<Types.AdminUpdateEventMutation, TError, Types.AdminUpdateEventMutationVariables, TContext>(
+    return useMutation<AdminUpdateEventMutation, TError, AdminUpdateEventMutationVariables, TContext>(
       {
     mutationKey: ['AdminUpdateEvent'],
-    mutationFn: (variables?: Types.AdminUpdateEventMutationVariables) => fetchGql<Types.AdminUpdateEventMutation, Types.AdminUpdateEventMutationVariables>(AdminUpdateEventDocument, variables)(),
+    mutationFn: (variables?: AdminUpdateEventMutationVariables) => fetchGql<AdminUpdateEventMutation, AdminUpdateEventMutationVariables>(AdminUpdateEventDocument, variables)(),
     ...options
   }
     )};
 
-export const AdminDeleteEventDocument = `
+export const AdminDeleteEventDocument = new TypedDocumentString(`
     mutation AdminDeleteEvent($id: EventId!) {
   adminDeleteEvent(id: $id) {
     __typename
@@ -683,22 +1588,22 @@ export const AdminDeleteEventDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useAdminDeleteEventMutation = <
       TError = unknown,
       TContext = unknown
-    >(options?: UseMutationOptions<Types.AdminDeleteEventMutation, TError, Types.AdminDeleteEventMutationVariables, TContext>) => {
+    >(options?: UseMutationOptions<AdminDeleteEventMutation, TError, AdminDeleteEventMutationVariables, TContext>) => {
     
-    return useMutation<Types.AdminDeleteEventMutation, TError, Types.AdminDeleteEventMutationVariables, TContext>(
+    return useMutation<AdminDeleteEventMutation, TError, AdminDeleteEventMutationVariables, TContext>(
       {
     mutationKey: ['AdminDeleteEvent'],
-    mutationFn: (variables?: Types.AdminDeleteEventMutationVariables) => fetchGql<Types.AdminDeleteEventMutation, Types.AdminDeleteEventMutationVariables>(AdminDeleteEventDocument, variables)(),
+    mutationFn: (variables?: AdminDeleteEventMutationVariables) => fetchGql<AdminDeleteEventMutation, AdminDeleteEventMutationVariables>(AdminDeleteEventDocument, variables)(),
     ...options
   }
     )};
 
-export const AdminDeleteEventAttendeeDocument = `
+export const AdminDeleteEventAttendeeDocument = new TypedDocumentString(`
     mutation AdminDeleteEventAttendee($eventId: EventId!, $attendeeId: AttendeeId!) {
   adminDeleteEventAttendee(eventId: $eventId, attendeeId: $attendeeId) {
     __typename
@@ -707,22 +1612,22 @@ export const AdminDeleteEventAttendeeDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useAdminDeleteEventAttendeeMutation = <
       TError = unknown,
       TContext = unknown
-    >(options?: UseMutationOptions<Types.AdminDeleteEventAttendeeMutation, TError, Types.AdminDeleteEventAttendeeMutationVariables, TContext>) => {
+    >(options?: UseMutationOptions<AdminDeleteEventAttendeeMutation, TError, AdminDeleteEventAttendeeMutationVariables, TContext>) => {
     
-    return useMutation<Types.AdminDeleteEventAttendeeMutation, TError, Types.AdminDeleteEventAttendeeMutationVariables, TContext>(
+    return useMutation<AdminDeleteEventAttendeeMutation, TError, AdminDeleteEventAttendeeMutationVariables, TContext>(
       {
     mutationKey: ['AdminDeleteEventAttendee'],
-    mutationFn: (variables?: Types.AdminDeleteEventAttendeeMutationVariables) => fetchGql<Types.AdminDeleteEventAttendeeMutation, Types.AdminDeleteEventAttendeeMutationVariables>(AdminDeleteEventAttendeeDocument, variables)(),
+    mutationFn: (variables?: AdminDeleteEventAttendeeMutationVariables) => fetchGql<AdminDeleteEventAttendeeMutation, AdminDeleteEventAttendeeMutationVariables>(AdminDeleteEventAttendeeDocument, variables)(),
     ...options
   }
     )};
 
-export const ImportableItemsDocument = `
+export const ImportableItemsDocument = new TypedDocumentString(`
     query ImportableItems($wishlistId: WishlistId!) {
   importableItems(wishlistId: $wishlistId) {
     __typename
@@ -750,25 +1655,25 @@ export const ImportableItemsDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useImportableItemsQuery = <
-      TData = Types.ImportableItemsQuery,
+      TData = ImportableItemsQuery,
       TError = unknown
     >(
-      variables: Types.ImportableItemsQueryVariables,
-      options?: Omit<UseQueryOptions<Types.ImportableItemsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<Types.ImportableItemsQuery, TError, TData>['queryKey'] }
+      variables: ImportableItemsQueryVariables,
+      options?: Omit<UseQueryOptions<ImportableItemsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<ImportableItemsQuery, TError, TData>['queryKey'] }
     ) => {
     
-    return useQuery<Types.ImportableItemsQuery, TError, TData>(
+    return useQuery<ImportableItemsQuery, TError, TData>(
       {
     queryKey: ['ImportableItems', variables],
-    queryFn: fetchGql<Types.ImportableItemsQuery, Types.ImportableItemsQueryVariables>(ImportableItemsDocument, variables),
+    queryFn: fetchGql<ImportableItemsQuery, ImportableItemsQueryVariables>(ImportableItemsDocument, variables),
     ...options
   }
     )};
 
-export const CreateItemDocument = `
+export const CreateItemDocument = new TypedDocumentString(`
     mutation CreateItem($input: CreateItemInput!) {
   createItem(input: $input) {
     __typename
@@ -800,22 +1705,22 @@ export const CreateItemDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useCreateItemMutation = <
       TError = unknown,
       TContext = unknown
-    >(options?: UseMutationOptions<Types.CreateItemMutation, TError, Types.CreateItemMutationVariables, TContext>) => {
+    >(options?: UseMutationOptions<CreateItemMutation, TError, CreateItemMutationVariables, TContext>) => {
     
-    return useMutation<Types.CreateItemMutation, TError, Types.CreateItemMutationVariables, TContext>(
+    return useMutation<CreateItemMutation, TError, CreateItemMutationVariables, TContext>(
       {
     mutationKey: ['CreateItem'],
-    mutationFn: (variables?: Types.CreateItemMutationVariables) => fetchGql<Types.CreateItemMutation, Types.CreateItemMutationVariables>(CreateItemDocument, variables)(),
+    mutationFn: (variables?: CreateItemMutationVariables) => fetchGql<CreateItemMutation, CreateItemMutationVariables>(CreateItemDocument, variables)(),
     ...options
   }
     )};
 
-export const UpdateItemDocument = `
+export const UpdateItemDocument = new TypedDocumentString(`
     mutation UpdateItem($itemId: ItemId!, $input: UpdateItemInput!) {
   updateItem(itemId: $itemId, input: $input) {
     __typename
@@ -830,22 +1735,22 @@ export const UpdateItemDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useUpdateItemMutation = <
       TError = unknown,
       TContext = unknown
-    >(options?: UseMutationOptions<Types.UpdateItemMutation, TError, Types.UpdateItemMutationVariables, TContext>) => {
+    >(options?: UseMutationOptions<UpdateItemMutation, TError, UpdateItemMutationVariables, TContext>) => {
     
-    return useMutation<Types.UpdateItemMutation, TError, Types.UpdateItemMutationVariables, TContext>(
+    return useMutation<UpdateItemMutation, TError, UpdateItemMutationVariables, TContext>(
       {
     mutationKey: ['UpdateItem'],
-    mutationFn: (variables?: Types.UpdateItemMutationVariables) => fetchGql<Types.UpdateItemMutation, Types.UpdateItemMutationVariables>(UpdateItemDocument, variables)(),
+    mutationFn: (variables?: UpdateItemMutationVariables) => fetchGql<UpdateItemMutation, UpdateItemMutationVariables>(UpdateItemDocument, variables)(),
     ...options
   }
     )};
 
-export const DeleteItemDocument = `
+export const DeleteItemDocument = new TypedDocumentString(`
     mutation DeleteItem($itemId: ItemId!) {
   deleteItem(itemId: $itemId) {
     __typename
@@ -854,22 +1759,22 @@ export const DeleteItemDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useDeleteItemMutation = <
       TError = unknown,
       TContext = unknown
-    >(options?: UseMutationOptions<Types.DeleteItemMutation, TError, Types.DeleteItemMutationVariables, TContext>) => {
+    >(options?: UseMutationOptions<DeleteItemMutation, TError, DeleteItemMutationVariables, TContext>) => {
     
-    return useMutation<Types.DeleteItemMutation, TError, Types.DeleteItemMutationVariables, TContext>(
+    return useMutation<DeleteItemMutation, TError, DeleteItemMutationVariables, TContext>(
       {
     mutationKey: ['DeleteItem'],
-    mutationFn: (variables?: Types.DeleteItemMutationVariables) => fetchGql<Types.DeleteItemMutation, Types.DeleteItemMutationVariables>(DeleteItemDocument, variables)(),
+    mutationFn: (variables?: DeleteItemMutationVariables) => fetchGql<DeleteItemMutation, DeleteItemMutationVariables>(DeleteItemDocument, variables)(),
     ...options
   }
     )};
 
-export const ToggleItemDocument = `
+export const ToggleItemDocument = new TypedDocumentString(`
     mutation ToggleItem($itemId: ItemId!) {
   toggleItem(itemId: $itemId) {
     __typename
@@ -887,22 +1792,22 @@ export const ToggleItemDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useToggleItemMutation = <
       TError = unknown,
       TContext = unknown
-    >(options?: UseMutationOptions<Types.ToggleItemMutation, TError, Types.ToggleItemMutationVariables, TContext>) => {
+    >(options?: UseMutationOptions<ToggleItemMutation, TError, ToggleItemMutationVariables, TContext>) => {
     
-    return useMutation<Types.ToggleItemMutation, TError, Types.ToggleItemMutationVariables, TContext>(
+    return useMutation<ToggleItemMutation, TError, ToggleItemMutationVariables, TContext>(
       {
     mutationKey: ['ToggleItem'],
-    mutationFn: (variables?: Types.ToggleItemMutationVariables) => fetchGql<Types.ToggleItemMutation, Types.ToggleItemMutationVariables>(ToggleItemDocument, variables)(),
+    mutationFn: (variables?: ToggleItemMutationVariables) => fetchGql<ToggleItemMutation, ToggleItemMutationVariables>(ToggleItemDocument, variables)(),
     ...options
   }
     )};
 
-export const ScanItemUrlDocument = `
+export const ScanItemUrlDocument = new TypedDocumentString(`
     mutation ScanItemUrl($input: ScanItemUrlInput!) {
   scanItemUrl(input: $input) {
     __typename
@@ -911,22 +1816,22 @@ export const ScanItemUrlDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useScanItemUrlMutation = <
       TError = unknown,
       TContext = unknown
-    >(options?: UseMutationOptions<Types.ScanItemUrlMutation, TError, Types.ScanItemUrlMutationVariables, TContext>) => {
+    >(options?: UseMutationOptions<ScanItemUrlMutation, TError, ScanItemUrlMutationVariables, TContext>) => {
     
-    return useMutation<Types.ScanItemUrlMutation, TError, Types.ScanItemUrlMutationVariables, TContext>(
+    return useMutation<ScanItemUrlMutation, TError, ScanItemUrlMutationVariables, TContext>(
       {
     mutationKey: ['ScanItemUrl'],
-    mutationFn: (variables?: Types.ScanItemUrlMutationVariables) => fetchGql<Types.ScanItemUrlMutation, Types.ScanItemUrlMutationVariables>(ScanItemUrlDocument, variables)(),
+    mutationFn: (variables?: ScanItemUrlMutationVariables) => fetchGql<ScanItemUrlMutation, ScanItemUrlMutationVariables>(ScanItemUrlDocument, variables)(),
     ...options
   }
     )};
 
-export const ImportItemsDocument = `
+export const ImportItemsDocument = new TypedDocumentString(`
     mutation ImportItems($input: ImportItemsInput!) {
   importItems(input: $input) {
     __typename
@@ -960,47 +1865,76 @@ export const ImportItemsDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useImportItemsMutation = <
       TError = unknown,
       TContext = unknown
-    >(options?: UseMutationOptions<Types.ImportItemsMutation, TError, Types.ImportItemsMutationVariables, TContext>) => {
+    >(options?: UseMutationOptions<ImportItemsMutation, TError, ImportItemsMutationVariables, TContext>) => {
     
-    return useMutation<Types.ImportItemsMutation, TError, Types.ImportItemsMutationVariables, TContext>(
+    return useMutation<ImportItemsMutation, TError, ImportItemsMutationVariables, TContext>(
       {
     mutationKey: ['ImportItems'],
-    mutationFn: (variables?: Types.ImportItemsMutationVariables) => fetchGql<Types.ImportItemsMutation, Types.ImportItemsMutationVariables>(ImportItemsDocument, variables)(),
+    mutationFn: (variables?: ImportItemsMutationVariables) => fetchGql<ImportItemsMutation, ImportItemsMutationVariables>(ImportItemsDocument, variables)(),
     ...options
   }
     )};
 
-export const GetSecretSantaForEventDocument = `
+export const GetSecretSantaForEventDocument = new TypedDocumentString(`
     query GetSecretSantaForEvent($eventId: EventId!) {
   secretSanta(eventId: $eventId) {
     __typename
     ...SecretSantaItem
   }
 }
-    ${SecretSantaItemFragmentDoc}`;
+    fragment SecretSantaUserItem on SecretSantaUser {
+  id
+  attendeeId
+  exclusions
+  attendee {
+    id
+    pendingEmail
+    role
+    userId
+    user {
+      id
+      firstName
+      lastName
+      email
+      pictureUrl
+    }
+  }
+}
+fragment SecretSantaItem on SecretSanta {
+  id
+  eventId
+  description
+  budget
+  status
+  createdAt
+  updatedAt
+  users {
+    ...SecretSantaUserItem
+  }
+}`);
 
 export const useGetSecretSantaForEventQuery = <
-      TData = Types.GetSecretSantaForEventQuery,
+      TData = GetSecretSantaForEventQuery,
       TError = unknown
     >(
-      variables: Types.GetSecretSantaForEventQueryVariables,
-      options?: Omit<UseQueryOptions<Types.GetSecretSantaForEventQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<Types.GetSecretSantaForEventQuery, TError, TData>['queryKey'] }
+      variables: GetSecretSantaForEventQueryVariables,
+      options?: Omit<UseQueryOptions<GetSecretSantaForEventQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GetSecretSantaForEventQuery, TError, TData>['queryKey'] }
     ) => {
     
-    return useQuery<Types.GetSecretSantaForEventQuery, TError, TData>(
+    return useQuery<GetSecretSantaForEventQuery, TError, TData>(
       {
     queryKey: ['GetSecretSantaForEvent', variables],
-    queryFn: fetchGql<Types.GetSecretSantaForEventQuery, Types.GetSecretSantaForEventQueryVariables>(GetSecretSantaForEventDocument, variables),
+    queryFn: fetchGql<GetSecretSantaForEventQuery, GetSecretSantaForEventQueryVariables>(GetSecretSantaForEventDocument, variables),
     ...options
   }
     )};
 
-export const GetMySecretSantaDrawDocument = `
+export const GetMySecretSantaDrawDocument = new TypedDocumentString(`
     query GetMySecretSantaDraw($eventId: EventId!) {
   mySecretSantaDraw(eventId: $eventId) {
     __typename
@@ -1019,25 +1953,25 @@ export const GetMySecretSantaDrawDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useGetMySecretSantaDrawQuery = <
-      TData = Types.GetMySecretSantaDrawQuery,
+      TData = GetMySecretSantaDrawQuery,
       TError = unknown
     >(
-      variables: Types.GetMySecretSantaDrawQueryVariables,
-      options?: Omit<UseQueryOptions<Types.GetMySecretSantaDrawQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<Types.GetMySecretSantaDrawQuery, TError, TData>['queryKey'] }
+      variables: GetMySecretSantaDrawQueryVariables,
+      options?: Omit<UseQueryOptions<GetMySecretSantaDrawQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GetMySecretSantaDrawQuery, TError, TData>['queryKey'] }
     ) => {
     
-    return useQuery<Types.GetMySecretSantaDrawQuery, TError, TData>(
+    return useQuery<GetMySecretSantaDrawQuery, TError, TData>(
       {
     queryKey: ['GetMySecretSantaDraw', variables],
-    queryFn: fetchGql<Types.GetMySecretSantaDrawQuery, Types.GetMySecretSantaDrawQueryVariables>(GetMySecretSantaDrawDocument, variables),
+    queryFn: fetchGql<GetMySecretSantaDrawQuery, GetMySecretSantaDrawQueryVariables>(GetMySecretSantaDrawDocument, variables),
     ...options
   }
     )};
 
-export const CreateSecretSantaDocument = `
+export const CreateSecretSantaDocument = new TypedDocumentString(`
     mutation CreateSecretSanta($input: CreateSecretSantaInput!) {
   createSecretSanta(input: $input) {
     __typename
@@ -1050,22 +1984,51 @@ export const CreateSecretSantaDocument = `
     }
   }
 }
-    ${SecretSantaItemFragmentDoc}`;
+    fragment SecretSantaUserItem on SecretSantaUser {
+  id
+  attendeeId
+  exclusions
+  attendee {
+    id
+    pendingEmail
+    role
+    userId
+    user {
+      id
+      firstName
+      lastName
+      email
+      pictureUrl
+    }
+  }
+}
+fragment SecretSantaItem on SecretSanta {
+  id
+  eventId
+  description
+  budget
+  status
+  createdAt
+  updatedAt
+  users {
+    ...SecretSantaUserItem
+  }
+}`);
 
 export const useCreateSecretSantaMutation = <
       TError = unknown,
       TContext = unknown
-    >(options?: UseMutationOptions<Types.CreateSecretSantaMutation, TError, Types.CreateSecretSantaMutationVariables, TContext>) => {
+    >(options?: UseMutationOptions<CreateSecretSantaMutation, TError, CreateSecretSantaMutationVariables, TContext>) => {
     
-    return useMutation<Types.CreateSecretSantaMutation, TError, Types.CreateSecretSantaMutationVariables, TContext>(
+    return useMutation<CreateSecretSantaMutation, TError, CreateSecretSantaMutationVariables, TContext>(
       {
     mutationKey: ['CreateSecretSanta'],
-    mutationFn: (variables?: Types.CreateSecretSantaMutationVariables) => fetchGql<Types.CreateSecretSantaMutation, Types.CreateSecretSantaMutationVariables>(CreateSecretSantaDocument, variables)(),
+    mutationFn: (variables?: CreateSecretSantaMutationVariables) => fetchGql<CreateSecretSantaMutation, CreateSecretSantaMutationVariables>(CreateSecretSantaDocument, variables)(),
     ...options
   }
     )};
 
-export const UpdateSecretSantaDocument = `
+export const UpdateSecretSantaDocument = new TypedDocumentString(`
     mutation UpdateSecretSanta($id: SecretSantaId!, $input: UpdateSecretSantaInput!) {
   updateSecretSanta(id: $id, input: $input) {
     __typename
@@ -1080,22 +2043,22 @@ export const UpdateSecretSantaDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useUpdateSecretSantaMutation = <
       TError = unknown,
       TContext = unknown
-    >(options?: UseMutationOptions<Types.UpdateSecretSantaMutation, TError, Types.UpdateSecretSantaMutationVariables, TContext>) => {
+    >(options?: UseMutationOptions<UpdateSecretSantaMutation, TError, UpdateSecretSantaMutationVariables, TContext>) => {
     
-    return useMutation<Types.UpdateSecretSantaMutation, TError, Types.UpdateSecretSantaMutationVariables, TContext>(
+    return useMutation<UpdateSecretSantaMutation, TError, UpdateSecretSantaMutationVariables, TContext>(
       {
     mutationKey: ['UpdateSecretSanta'],
-    mutationFn: (variables?: Types.UpdateSecretSantaMutationVariables) => fetchGql<Types.UpdateSecretSantaMutation, Types.UpdateSecretSantaMutationVariables>(UpdateSecretSantaDocument, variables)(),
+    mutationFn: (variables?: UpdateSecretSantaMutationVariables) => fetchGql<UpdateSecretSantaMutation, UpdateSecretSantaMutationVariables>(UpdateSecretSantaDocument, variables)(),
     ...options
   }
     )};
 
-export const DeleteSecretSantaDocument = `
+export const DeleteSecretSantaDocument = new TypedDocumentString(`
     mutation DeleteSecretSanta($id: SecretSantaId!) {
   deleteSecretSanta(id: $id) {
     __typename
@@ -1104,22 +2067,22 @@ export const DeleteSecretSantaDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useDeleteSecretSantaMutation = <
       TError = unknown,
       TContext = unknown
-    >(options?: UseMutationOptions<Types.DeleteSecretSantaMutation, TError, Types.DeleteSecretSantaMutationVariables, TContext>) => {
+    >(options?: UseMutationOptions<DeleteSecretSantaMutation, TError, DeleteSecretSantaMutationVariables, TContext>) => {
     
-    return useMutation<Types.DeleteSecretSantaMutation, TError, Types.DeleteSecretSantaMutationVariables, TContext>(
+    return useMutation<DeleteSecretSantaMutation, TError, DeleteSecretSantaMutationVariables, TContext>(
       {
     mutationKey: ['DeleteSecretSanta'],
-    mutationFn: (variables?: Types.DeleteSecretSantaMutationVariables) => fetchGql<Types.DeleteSecretSantaMutation, Types.DeleteSecretSantaMutationVariables>(DeleteSecretSantaDocument, variables)(),
+    mutationFn: (variables?: DeleteSecretSantaMutationVariables) => fetchGql<DeleteSecretSantaMutation, DeleteSecretSantaMutationVariables>(DeleteSecretSantaDocument, variables)(),
     ...options
   }
     )};
 
-export const StartSecretSantaDocument = `
+export const StartSecretSantaDocument = new TypedDocumentString(`
     mutation StartSecretSanta($id: SecretSantaId!) {
   startSecretSanta(id: $id) {
     __typename
@@ -1134,22 +2097,22 @@ export const StartSecretSantaDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useStartSecretSantaMutation = <
       TError = unknown,
       TContext = unknown
-    >(options?: UseMutationOptions<Types.StartSecretSantaMutation, TError, Types.StartSecretSantaMutationVariables, TContext>) => {
+    >(options?: UseMutationOptions<StartSecretSantaMutation, TError, StartSecretSantaMutationVariables, TContext>) => {
     
-    return useMutation<Types.StartSecretSantaMutation, TError, Types.StartSecretSantaMutationVariables, TContext>(
+    return useMutation<StartSecretSantaMutation, TError, StartSecretSantaMutationVariables, TContext>(
       {
     mutationKey: ['StartSecretSanta'],
-    mutationFn: (variables?: Types.StartSecretSantaMutationVariables) => fetchGql<Types.StartSecretSantaMutation, Types.StartSecretSantaMutationVariables>(StartSecretSantaDocument, variables)(),
+    mutationFn: (variables?: StartSecretSantaMutationVariables) => fetchGql<StartSecretSantaMutation, StartSecretSantaMutationVariables>(StartSecretSantaDocument, variables)(),
     ...options
   }
     )};
 
-export const CancelSecretSantaDocument = `
+export const CancelSecretSantaDocument = new TypedDocumentString(`
     mutation CancelSecretSanta($id: SecretSantaId!) {
   cancelSecretSanta(id: $id) {
     __typename
@@ -1158,22 +2121,22 @@ export const CancelSecretSantaDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useCancelSecretSantaMutation = <
       TError = unknown,
       TContext = unknown
-    >(options?: UseMutationOptions<Types.CancelSecretSantaMutation, TError, Types.CancelSecretSantaMutationVariables, TContext>) => {
+    >(options?: UseMutationOptions<CancelSecretSantaMutation, TError, CancelSecretSantaMutationVariables, TContext>) => {
     
-    return useMutation<Types.CancelSecretSantaMutation, TError, Types.CancelSecretSantaMutationVariables, TContext>(
+    return useMutation<CancelSecretSantaMutation, TError, CancelSecretSantaMutationVariables, TContext>(
       {
     mutationKey: ['CancelSecretSanta'],
-    mutationFn: (variables?: Types.CancelSecretSantaMutationVariables) => fetchGql<Types.CancelSecretSantaMutation, Types.CancelSecretSantaMutationVariables>(CancelSecretSantaDocument, variables)(),
+    mutationFn: (variables?: CancelSecretSantaMutationVariables) => fetchGql<CancelSecretSantaMutation, CancelSecretSantaMutationVariables>(CancelSecretSantaDocument, variables)(),
     ...options
   }
     )};
 
-export const AddSecretSantaUsersDocument = `
+export const AddSecretSantaUsersDocument = new TypedDocumentString(`
     mutation AddSecretSantaUsers($id: SecretSantaId!, $input: AddSecretSantaUsersInput!) {
   addSecretSantaUsers(id: $id, input: $input) {
     __typename
@@ -1190,22 +2153,39 @@ export const AddSecretSantaUsersDocument = `
     }
   }
 }
-    ${SecretSantaUserItemFragmentDoc}`;
+    fragment SecretSantaUserItem on SecretSantaUser {
+  id
+  attendeeId
+  exclusions
+  attendee {
+    id
+    pendingEmail
+    role
+    userId
+    user {
+      id
+      firstName
+      lastName
+      email
+      pictureUrl
+    }
+  }
+}`);
 
 export const useAddSecretSantaUsersMutation = <
       TError = unknown,
       TContext = unknown
-    >(options?: UseMutationOptions<Types.AddSecretSantaUsersMutation, TError, Types.AddSecretSantaUsersMutationVariables, TContext>) => {
+    >(options?: UseMutationOptions<AddSecretSantaUsersMutation, TError, AddSecretSantaUsersMutationVariables, TContext>) => {
     
-    return useMutation<Types.AddSecretSantaUsersMutation, TError, Types.AddSecretSantaUsersMutationVariables, TContext>(
+    return useMutation<AddSecretSantaUsersMutation, TError, AddSecretSantaUsersMutationVariables, TContext>(
       {
     mutationKey: ['AddSecretSantaUsers'],
-    mutationFn: (variables?: Types.AddSecretSantaUsersMutationVariables) => fetchGql<Types.AddSecretSantaUsersMutation, Types.AddSecretSantaUsersMutationVariables>(AddSecretSantaUsersDocument, variables)(),
+    mutationFn: (variables?: AddSecretSantaUsersMutationVariables) => fetchGql<AddSecretSantaUsersMutation, AddSecretSantaUsersMutationVariables>(AddSecretSantaUsersDocument, variables)(),
     ...options
   }
     )};
 
-export const UpdateSecretSantaUserDocument = `
+export const UpdateSecretSantaUserDocument = new TypedDocumentString(`
     mutation UpdateSecretSantaUser($id: SecretSantaId!, $secretSantaUserId: SecretSantaUserId!, $input: UpdateSecretSantaUserInput!) {
   updateSecretSantaUser(
     id: $id
@@ -1224,22 +2204,22 @@ export const UpdateSecretSantaUserDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useUpdateSecretSantaUserMutation = <
       TError = unknown,
       TContext = unknown
-    >(options?: UseMutationOptions<Types.UpdateSecretSantaUserMutation, TError, Types.UpdateSecretSantaUserMutationVariables, TContext>) => {
+    >(options?: UseMutationOptions<UpdateSecretSantaUserMutation, TError, UpdateSecretSantaUserMutationVariables, TContext>) => {
     
-    return useMutation<Types.UpdateSecretSantaUserMutation, TError, Types.UpdateSecretSantaUserMutationVariables, TContext>(
+    return useMutation<UpdateSecretSantaUserMutation, TError, UpdateSecretSantaUserMutationVariables, TContext>(
       {
     mutationKey: ['UpdateSecretSantaUser'],
-    mutationFn: (variables?: Types.UpdateSecretSantaUserMutationVariables) => fetchGql<Types.UpdateSecretSantaUserMutation, Types.UpdateSecretSantaUserMutationVariables>(UpdateSecretSantaUserDocument, variables)(),
+    mutationFn: (variables?: UpdateSecretSantaUserMutationVariables) => fetchGql<UpdateSecretSantaUserMutation, UpdateSecretSantaUserMutationVariables>(UpdateSecretSantaUserDocument, variables)(),
     ...options
   }
     )};
 
-export const DeleteSecretSantaUserDocument = `
+export const DeleteSecretSantaUserDocument = new TypedDocumentString(`
     mutation DeleteSecretSantaUser($id: SecretSantaId!, $secretSantaUserId: SecretSantaUserId!) {
   deleteSecretSantaUser(id: $id, secretSantaUserId: $secretSantaUserId) {
     __typename
@@ -1248,22 +2228,22 @@ export const DeleteSecretSantaUserDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useDeleteSecretSantaUserMutation = <
       TError = unknown,
       TContext = unknown
-    >(options?: UseMutationOptions<Types.DeleteSecretSantaUserMutation, TError, Types.DeleteSecretSantaUserMutationVariables, TContext>) => {
+    >(options?: UseMutationOptions<DeleteSecretSantaUserMutation, TError, DeleteSecretSantaUserMutationVariables, TContext>) => {
     
-    return useMutation<Types.DeleteSecretSantaUserMutation, TError, Types.DeleteSecretSantaUserMutationVariables, TContext>(
+    return useMutation<DeleteSecretSantaUserMutation, TError, DeleteSecretSantaUserMutationVariables, TContext>(
       {
     mutationKey: ['DeleteSecretSantaUser'],
-    mutationFn: (variables?: Types.DeleteSecretSantaUserMutationVariables) => fetchGql<Types.DeleteSecretSantaUserMutation, Types.DeleteSecretSantaUserMutationVariables>(DeleteSecretSantaUserDocument, variables)(),
+    mutationFn: (variables?: DeleteSecretSantaUserMutationVariables) => fetchGql<DeleteSecretSantaUserMutation, DeleteSecretSantaUserMutationVariables>(DeleteSecretSantaUserDocument, variables)(),
     ...options
   }
     )};
 
-export const AdminUsersListDocument = `
+export const AdminUsersListDocument = new TypedDocumentString(`
     query AdminUsersList($input: AdminGetAllUsersPaginationFilters) {
   adminUsers(input: $input) {
     __typename
@@ -1287,25 +2267,25 @@ export const AdminUsersListDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useAdminUsersListQuery = <
-      TData = Types.AdminUsersListQuery,
+      TData = AdminUsersListQuery,
       TError = unknown
     >(
-      variables?: Types.AdminUsersListQueryVariables,
-      options?: Omit<UseQueryOptions<Types.AdminUsersListQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<Types.AdminUsersListQuery, TError, TData>['queryKey'] }
+      variables?: AdminUsersListQueryVariables,
+      options?: Omit<UseQueryOptions<AdminUsersListQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<AdminUsersListQuery, TError, TData>['queryKey'] }
     ) => {
     
-    return useQuery<Types.AdminUsersListQuery, TError, TData>(
+    return useQuery<AdminUsersListQuery, TError, TData>(
       {
     queryKey: variables === undefined ? ['AdminUsersList'] : ['AdminUsersList', variables],
-    queryFn: fetchGql<Types.AdminUsersListQuery, Types.AdminUsersListQueryVariables>(AdminUsersListDocument, variables),
+    queryFn: fetchGql<AdminUsersListQuery, AdminUsersListQueryVariables>(AdminUsersListDocument, variables),
     ...options
   }
     )};
 
-export const AdminUserDetailDocument = `
+export const AdminUserDetailDocument = new TypedDocumentString(`
     query AdminUserDetail($userId: UserId!) {
   adminUser(userId: $userId) {
     __typename
@@ -1324,25 +2304,25 @@ export const AdminUserDetailDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useAdminUserDetailQuery = <
-      TData = Types.AdminUserDetailQuery,
+      TData = AdminUserDetailQuery,
       TError = unknown
     >(
-      variables: Types.AdminUserDetailQueryVariables,
-      options?: Omit<UseQueryOptions<Types.AdminUserDetailQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<Types.AdminUserDetailQuery, TError, TData>['queryKey'] }
+      variables: AdminUserDetailQueryVariables,
+      options?: Omit<UseQueryOptions<AdminUserDetailQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<AdminUserDetailQuery, TError, TData>['queryKey'] }
     ) => {
     
-    return useQuery<Types.AdminUserDetailQuery, TError, TData>(
+    return useQuery<AdminUserDetailQuery, TError, TData>(
       {
     queryKey: ['AdminUserDetail', variables],
-    queryFn: fetchGql<Types.AdminUserDetailQuery, Types.AdminUserDetailQueryVariables>(AdminUserDetailDocument, variables),
+    queryFn: fetchGql<AdminUserDetailQuery, AdminUserDetailQueryVariables>(AdminUserDetailDocument, variables),
     ...options
   }
     )};
 
-export const AdminUpdateUserProfileDocument = `
+export const AdminUpdateUserProfileDocument = new TypedDocumentString(`
     mutation AdminUpdateUserProfile($userId: UserId!, $input: AdminUpdateUserProfileInput!) {
   adminUpdateUserProfile(userId: $userId, input: $input) {
     __typename
@@ -1357,22 +2337,22 @@ export const AdminUpdateUserProfileDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useAdminUpdateUserProfileMutation = <
       TError = unknown,
       TContext = unknown
-    >(options?: UseMutationOptions<Types.AdminUpdateUserProfileMutation, TError, Types.AdminUpdateUserProfileMutationVariables, TContext>) => {
+    >(options?: UseMutationOptions<AdminUpdateUserProfileMutation, TError, AdminUpdateUserProfileMutationVariables, TContext>) => {
     
-    return useMutation<Types.AdminUpdateUserProfileMutation, TError, Types.AdminUpdateUserProfileMutationVariables, TContext>(
+    return useMutation<AdminUpdateUserProfileMutation, TError, AdminUpdateUserProfileMutationVariables, TContext>(
       {
     mutationKey: ['AdminUpdateUserProfile'],
-    mutationFn: (variables?: Types.AdminUpdateUserProfileMutationVariables) => fetchGql<Types.AdminUpdateUserProfileMutation, Types.AdminUpdateUserProfileMutationVariables>(AdminUpdateUserProfileDocument, variables)(),
+    mutationFn: (variables?: AdminUpdateUserProfileMutationVariables) => fetchGql<AdminUpdateUserProfileMutation, AdminUpdateUserProfileMutationVariables>(AdminUpdateUserProfileDocument, variables)(),
     ...options
   }
     )};
 
-export const AdminDeleteUserDocument = `
+export const AdminDeleteUserDocument = new TypedDocumentString(`
     mutation AdminDeleteUser($userId: UserId!) {
   adminDeleteUser(userId: $userId) {
     __typename
@@ -1381,22 +2361,22 @@ export const AdminDeleteUserDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useAdminDeleteUserMutation = <
       TError = unknown,
       TContext = unknown
-    >(options?: UseMutationOptions<Types.AdminDeleteUserMutation, TError, Types.AdminDeleteUserMutationVariables, TContext>) => {
+    >(options?: UseMutationOptions<AdminDeleteUserMutation, TError, AdminDeleteUserMutationVariables, TContext>) => {
     
-    return useMutation<Types.AdminDeleteUserMutation, TError, Types.AdminDeleteUserMutationVariables, TContext>(
+    return useMutation<AdminDeleteUserMutation, TError, AdminDeleteUserMutationVariables, TContext>(
       {
     mutationKey: ['AdminDeleteUser'],
-    mutationFn: (variables?: Types.AdminDeleteUserMutationVariables) => fetchGql<Types.AdminDeleteUserMutation, Types.AdminDeleteUserMutationVariables>(AdminDeleteUserDocument, variables)(),
+    mutationFn: (variables?: AdminDeleteUserMutationVariables) => fetchGql<AdminDeleteUserMutation, AdminDeleteUserMutationVariables>(AdminDeleteUserDocument, variables)(),
     ...options
   }
     )};
 
-export const AdminRemoveUserPictureDocument = `
+export const AdminRemoveUserPictureDocument = new TypedDocumentString(`
     mutation AdminRemoveUserPicture($userId: UserId!) {
   adminRemoveUserPicture(userId: $userId) {
     __typename
@@ -1405,22 +2385,22 @@ export const AdminRemoveUserPictureDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useAdminRemoveUserPictureMutation = <
       TError = unknown,
       TContext = unknown
-    >(options?: UseMutationOptions<Types.AdminRemoveUserPictureMutation, TError, Types.AdminRemoveUserPictureMutationVariables, TContext>) => {
+    >(options?: UseMutationOptions<AdminRemoveUserPictureMutation, TError, AdminRemoveUserPictureMutationVariables, TContext>) => {
     
-    return useMutation<Types.AdminRemoveUserPictureMutation, TError, Types.AdminRemoveUserPictureMutationVariables, TContext>(
+    return useMutation<AdminRemoveUserPictureMutation, TError, AdminRemoveUserPictureMutationVariables, TContext>(
       {
     mutationKey: ['AdminRemoveUserPicture'],
-    mutationFn: (variables?: Types.AdminRemoveUserPictureMutationVariables) => fetchGql<Types.AdminRemoveUserPictureMutation, Types.AdminRemoveUserPictureMutationVariables>(AdminRemoveUserPictureDocument, variables)(),
+    mutationFn: (variables?: AdminRemoveUserPictureMutationVariables) => fetchGql<AdminRemoveUserPictureMutation, AdminRemoveUserPictureMutationVariables>(AdminRemoveUserPictureDocument, variables)(),
     ...options
   }
     )};
 
-export const UserProfileCurrentUserDocument = `
+export const UserProfileCurrentUserDocument = new TypedDocumentString(`
     query UserProfileCurrentUser {
   currentUser {
     __typename
@@ -1444,25 +2424,25 @@ export const UserProfileCurrentUserDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useUserProfileCurrentUserQuery = <
-      TData = Types.UserProfileCurrentUserQuery,
+      TData = UserProfileCurrentUserQuery,
       TError = unknown
     >(
-      variables?: Types.UserProfileCurrentUserQueryVariables,
-      options?: Omit<UseQueryOptions<Types.UserProfileCurrentUserQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<Types.UserProfileCurrentUserQuery, TError, TData>['queryKey'] }
+      variables?: UserProfileCurrentUserQueryVariables,
+      options?: Omit<UseQueryOptions<UserProfileCurrentUserQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<UserProfileCurrentUserQuery, TError, TData>['queryKey'] }
     ) => {
     
-    return useQuery<Types.UserProfileCurrentUserQuery, TError, TData>(
+    return useQuery<UserProfileCurrentUserQuery, TError, TData>(
       {
     queryKey: variables === undefined ? ['UserProfileCurrentUser'] : ['UserProfileCurrentUser', variables],
-    queryFn: fetchGql<Types.UserProfileCurrentUserQuery, Types.UserProfileCurrentUserQueryVariables>(UserProfileCurrentUserDocument, variables),
+    queryFn: fetchGql<UserProfileCurrentUserQuery, UserProfileCurrentUserQueryVariables>(UserProfileCurrentUserDocument, variables),
     ...options
   }
     )};
 
-export const UserProfileEmailSettingsDocument = `
+export const UserProfileEmailSettingsDocument = new TypedDocumentString(`
     query UserProfileEmailSettings {
   currentUser {
     __typename
@@ -1474,25 +2454,25 @@ export const UserProfileEmailSettingsDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useUserProfileEmailSettingsQuery = <
-      TData = Types.UserProfileEmailSettingsQuery,
+      TData = UserProfileEmailSettingsQuery,
       TError = unknown
     >(
-      variables?: Types.UserProfileEmailSettingsQueryVariables,
-      options?: Omit<UseQueryOptions<Types.UserProfileEmailSettingsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<Types.UserProfileEmailSettingsQuery, TError, TData>['queryKey'] }
+      variables?: UserProfileEmailSettingsQueryVariables,
+      options?: Omit<UseQueryOptions<UserProfileEmailSettingsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<UserProfileEmailSettingsQuery, TError, TData>['queryKey'] }
     ) => {
     
-    return useQuery<Types.UserProfileEmailSettingsQuery, TError, TData>(
+    return useQuery<UserProfileEmailSettingsQuery, TError, TData>(
       {
     queryKey: variables === undefined ? ['UserProfileEmailSettings'] : ['UserProfileEmailSettings', variables],
-    queryFn: fetchGql<Types.UserProfileEmailSettingsQuery, Types.UserProfileEmailSettingsQueryVariables>(UserProfileEmailSettingsDocument, variables),
+    queryFn: fetchGql<UserProfileEmailSettingsQuery, UserProfileEmailSettingsQueryVariables>(UserProfileEmailSettingsDocument, variables),
     ...options
   }
     )};
 
-export const UserPendingEmailChangeDocument = `
+export const UserPendingEmailChangeDocument = new TypedDocumentString(`
     query UserPendingEmailChange {
   pendingEmailChange {
     __typename
@@ -1502,25 +2482,25 @@ export const UserPendingEmailChangeDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useUserPendingEmailChangeQuery = <
-      TData = Types.UserPendingEmailChangeQuery,
+      TData = UserPendingEmailChangeQuery,
       TError = unknown
     >(
-      variables?: Types.UserPendingEmailChangeQueryVariables,
-      options?: Omit<UseQueryOptions<Types.UserPendingEmailChangeQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<Types.UserPendingEmailChangeQuery, TError, TData>['queryKey'] }
+      variables?: UserPendingEmailChangeQueryVariables,
+      options?: Omit<UseQueryOptions<UserPendingEmailChangeQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<UserPendingEmailChangeQuery, TError, TData>['queryKey'] }
     ) => {
     
-    return useQuery<Types.UserPendingEmailChangeQuery, TError, TData>(
+    return useQuery<UserPendingEmailChangeQuery, TError, TData>(
       {
     queryKey: variables === undefined ? ['UserPendingEmailChange'] : ['UserPendingEmailChange', variables],
-    queryFn: fetchGql<Types.UserPendingEmailChangeQuery, Types.UserPendingEmailChangeQueryVariables>(UserPendingEmailChangeDocument, variables),
+    queryFn: fetchGql<UserPendingEmailChangeQuery, UserPendingEmailChangeQueryVariables>(UserPendingEmailChangeDocument, variables),
     ...options
   }
     )};
 
-export const SearchUsersSelectDocument = `
+export const SearchUsersSelectDocument = new TypedDocumentString(`
     query SearchUsersSelect($keyword: String!) {
   searchUsers(keyword: $keyword) {
     __typename
@@ -1535,25 +2515,25 @@ export const SearchUsersSelectDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useSearchUsersSelectQuery = <
-      TData = Types.SearchUsersSelectQuery,
+      TData = SearchUsersSelectQuery,
       TError = unknown
     >(
-      variables: Types.SearchUsersSelectQueryVariables,
-      options?: Omit<UseQueryOptions<Types.SearchUsersSelectQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<Types.SearchUsersSelectQuery, TError, TData>['queryKey'] }
+      variables: SearchUsersSelectQueryVariables,
+      options?: Omit<UseQueryOptions<SearchUsersSelectQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<SearchUsersSelectQuery, TError, TData>['queryKey'] }
     ) => {
     
-    return useQuery<Types.SearchUsersSelectQuery, TError, TData>(
+    return useQuery<SearchUsersSelectQuery, TError, TData>(
       {
     queryKey: ['SearchUsersSelect', variables],
-    queryFn: fetchGql<Types.SearchUsersSelectQuery, Types.SearchUsersSelectQueryVariables>(SearchUsersSelectDocument, variables),
+    queryFn: fetchGql<SearchUsersSelectQuery, SearchUsersSelectQueryVariables>(SearchUsersSelectDocument, variables),
     ...options
   }
     )};
 
-export const UserClosestFriendsDocument = `
+export const UserClosestFriendsDocument = new TypedDocumentString(`
     query UserClosestFriends($limit: Int) {
   closestFriends(limit: $limit) {
     __typename
@@ -1568,25 +2548,25 @@ export const UserClosestFriendsDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useUserClosestFriendsQuery = <
-      TData = Types.UserClosestFriendsQuery,
+      TData = UserClosestFriendsQuery,
       TError = unknown
     >(
-      variables?: Types.UserClosestFriendsQueryVariables,
-      options?: Omit<UseQueryOptions<Types.UserClosestFriendsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<Types.UserClosestFriendsQuery, TError, TData>['queryKey'] }
+      variables?: UserClosestFriendsQueryVariables,
+      options?: Omit<UseQueryOptions<UserClosestFriendsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<UserClosestFriendsQuery, TError, TData>['queryKey'] }
     ) => {
     
-    return useQuery<Types.UserClosestFriendsQuery, TError, TData>(
+    return useQuery<UserClosestFriendsQuery, TError, TData>(
       {
     queryKey: variables === undefined ? ['UserClosestFriends'] : ['UserClosestFriends', variables],
-    queryFn: fetchGql<Types.UserClosestFriendsQuery, Types.UserClosestFriendsQueryVariables>(UserClosestFriendsDocument, variables),
+    queryFn: fetchGql<UserClosestFriendsQuery, UserClosestFriendsQueryVariables>(UserClosestFriendsDocument, variables),
     ...options
   }
     )};
 
-export const UpdateUserProfileDocument = `
+export const UpdateUserProfileDocument = new TypedDocumentString(`
     mutation UpdateUserProfile($input: UpdateUserProfileInput!) {
   updateUserProfile(input: $input) {
     __typename
@@ -1604,22 +2584,22 @@ export const UpdateUserProfileDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useUpdateUserProfileMutation = <
       TError = unknown,
       TContext = unknown
-    >(options?: UseMutationOptions<Types.UpdateUserProfileMutation, TError, Types.UpdateUserProfileMutationVariables, TContext>) => {
+    >(options?: UseMutationOptions<UpdateUserProfileMutation, TError, UpdateUserProfileMutationVariables, TContext>) => {
     
-    return useMutation<Types.UpdateUserProfileMutation, TError, Types.UpdateUserProfileMutationVariables, TContext>(
+    return useMutation<UpdateUserProfileMutation, TError, UpdateUserProfileMutationVariables, TContext>(
       {
     mutationKey: ['UpdateUserProfile'],
-    mutationFn: (variables?: Types.UpdateUserProfileMutationVariables) => fetchGql<Types.UpdateUserProfileMutation, Types.UpdateUserProfileMutationVariables>(UpdateUserProfileDocument, variables)(),
+    mutationFn: (variables?: UpdateUserProfileMutationVariables) => fetchGql<UpdateUserProfileMutation, UpdateUserProfileMutationVariables>(UpdateUserProfileDocument, variables)(),
     ...options
   }
     )};
 
-export const ChangeUserPasswordDocument = `
+export const ChangeUserPasswordDocument = new TypedDocumentString(`
     mutation ChangeUserPassword($input: ChangeUserPasswordInput!) {
   changeUserPassword(input: $input) {
     __typename
@@ -1638,22 +2618,22 @@ export const ChangeUserPasswordDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useChangeUserPasswordMutation = <
       TError = unknown,
       TContext = unknown
-    >(options?: UseMutationOptions<Types.ChangeUserPasswordMutation, TError, Types.ChangeUserPasswordMutationVariables, TContext>) => {
+    >(options?: UseMutationOptions<ChangeUserPasswordMutation, TError, ChangeUserPasswordMutationVariables, TContext>) => {
     
-    return useMutation<Types.ChangeUserPasswordMutation, TError, Types.ChangeUserPasswordMutationVariables, TContext>(
+    return useMutation<ChangeUserPasswordMutation, TError, ChangeUserPasswordMutationVariables, TContext>(
       {
     mutationKey: ['ChangeUserPassword'],
-    mutationFn: (variables?: Types.ChangeUserPasswordMutationVariables) => fetchGql<Types.ChangeUserPasswordMutation, Types.ChangeUserPasswordMutationVariables>(ChangeUserPasswordDocument, variables)(),
+    mutationFn: (variables?: ChangeUserPasswordMutationVariables) => fetchGql<ChangeUserPasswordMutation, ChangeUserPasswordMutationVariables>(ChangeUserPasswordDocument, variables)(),
     ...options
   }
     )};
 
-export const UpdateUserEmailSettingsDocument = `
+export const UpdateUserEmailSettingsDocument = new TypedDocumentString(`
     mutation UpdateUserEmailSettings($input: UpdateUserEmailSettingsInput!) {
   updateUserEmailSettings(input: $input) {
     __typename
@@ -1668,22 +2648,22 @@ export const UpdateUserEmailSettingsDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useUpdateUserEmailSettingsMutation = <
       TError = unknown,
       TContext = unknown
-    >(options?: UseMutationOptions<Types.UpdateUserEmailSettingsMutation, TError, Types.UpdateUserEmailSettingsMutationVariables, TContext>) => {
+    >(options?: UseMutationOptions<UpdateUserEmailSettingsMutation, TError, UpdateUserEmailSettingsMutationVariables, TContext>) => {
     
-    return useMutation<Types.UpdateUserEmailSettingsMutation, TError, Types.UpdateUserEmailSettingsMutationVariables, TContext>(
+    return useMutation<UpdateUserEmailSettingsMutation, TError, UpdateUserEmailSettingsMutationVariables, TContext>(
       {
     mutationKey: ['UpdateUserEmailSettings'],
-    mutationFn: (variables?: Types.UpdateUserEmailSettingsMutationVariables) => fetchGql<Types.UpdateUserEmailSettingsMutation, Types.UpdateUserEmailSettingsMutationVariables>(UpdateUserEmailSettingsDocument, variables)(),
+    mutationFn: (variables?: UpdateUserEmailSettingsMutationVariables) => fetchGql<UpdateUserEmailSettingsMutation, UpdateUserEmailSettingsMutationVariables>(UpdateUserEmailSettingsDocument, variables)(),
     ...options
   }
     )};
 
-export const LinkCurrentUserWithGoogleDocument = `
+export const LinkCurrentUserWithGoogleDocument = new TypedDocumentString(`
     mutation LinkCurrentUserWithGoogle($input: LinkUserToGoogleInput!) {
   linkCurrentUserWithGoogle(input: $input) {
     __typename
@@ -1704,22 +2684,22 @@ export const LinkCurrentUserWithGoogleDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useLinkCurrentUserWithGoogleMutation = <
       TError = unknown,
       TContext = unknown
-    >(options?: UseMutationOptions<Types.LinkCurrentUserWithGoogleMutation, TError, Types.LinkCurrentUserWithGoogleMutationVariables, TContext>) => {
+    >(options?: UseMutationOptions<LinkCurrentUserWithGoogleMutation, TError, LinkCurrentUserWithGoogleMutationVariables, TContext>) => {
     
-    return useMutation<Types.LinkCurrentUserWithGoogleMutation, TError, Types.LinkCurrentUserWithGoogleMutationVariables, TContext>(
+    return useMutation<LinkCurrentUserWithGoogleMutation, TError, LinkCurrentUserWithGoogleMutationVariables, TContext>(
       {
     mutationKey: ['LinkCurrentUserWithGoogle'],
-    mutationFn: (variables?: Types.LinkCurrentUserWithGoogleMutationVariables) => fetchGql<Types.LinkCurrentUserWithGoogleMutation, Types.LinkCurrentUserWithGoogleMutationVariables>(LinkCurrentUserWithGoogleDocument, variables)(),
+    mutationFn: (variables?: LinkCurrentUserWithGoogleMutationVariables) => fetchGql<LinkCurrentUserWithGoogleMutation, LinkCurrentUserWithGoogleMutationVariables>(LinkCurrentUserWithGoogleDocument, variables)(),
     ...options
   }
     )};
 
-export const UnlinkCurrentUserSocialDocument = `
+export const UnlinkCurrentUserSocialDocument = new TypedDocumentString(`
     mutation UnlinkCurrentUserSocial($socialId: UserSocialId!) {
   unlinkCurrentUserSocial(socialId: $socialId) {
     __typename
@@ -1728,22 +2708,22 @@ export const UnlinkCurrentUserSocialDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useUnlinkCurrentUserSocialMutation = <
       TError = unknown,
       TContext = unknown
-    >(options?: UseMutationOptions<Types.UnlinkCurrentUserSocialMutation, TError, Types.UnlinkCurrentUserSocialMutationVariables, TContext>) => {
+    >(options?: UseMutationOptions<UnlinkCurrentUserSocialMutation, TError, UnlinkCurrentUserSocialMutationVariables, TContext>) => {
     
-    return useMutation<Types.UnlinkCurrentUserSocialMutation, TError, Types.UnlinkCurrentUserSocialMutationVariables, TContext>(
+    return useMutation<UnlinkCurrentUserSocialMutation, TError, UnlinkCurrentUserSocialMutationVariables, TContext>(
       {
     mutationKey: ['UnlinkCurrentUserSocial'],
-    mutationFn: (variables?: Types.UnlinkCurrentUserSocialMutationVariables) => fetchGql<Types.UnlinkCurrentUserSocialMutation, Types.UnlinkCurrentUserSocialMutationVariables>(UnlinkCurrentUserSocialDocument, variables)(),
+    mutationFn: (variables?: UnlinkCurrentUserSocialMutationVariables) => fetchGql<UnlinkCurrentUserSocialMutation, UnlinkCurrentUserSocialMutationVariables>(UnlinkCurrentUserSocialDocument, variables)(),
     ...options
   }
     )};
 
-export const UpdateUserPictureFromSocialDocument = `
+export const UpdateUserPictureFromSocialDocument = new TypedDocumentString(`
     mutation UpdateUserPictureFromSocial($input: UpdateUserPictureFromSocialInput!) {
   updateUserPictureFromSocial(input: $input) {
     __typename
@@ -1752,22 +2732,22 @@ export const UpdateUserPictureFromSocialDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useUpdateUserPictureFromSocialMutation = <
       TError = unknown,
       TContext = unknown
-    >(options?: UseMutationOptions<Types.UpdateUserPictureFromSocialMutation, TError, Types.UpdateUserPictureFromSocialMutationVariables, TContext>) => {
+    >(options?: UseMutationOptions<UpdateUserPictureFromSocialMutation, TError, UpdateUserPictureFromSocialMutationVariables, TContext>) => {
     
-    return useMutation<Types.UpdateUserPictureFromSocialMutation, TError, Types.UpdateUserPictureFromSocialMutationVariables, TContext>(
+    return useMutation<UpdateUserPictureFromSocialMutation, TError, UpdateUserPictureFromSocialMutationVariables, TContext>(
       {
     mutationKey: ['UpdateUserPictureFromSocial'],
-    mutationFn: (variables?: Types.UpdateUserPictureFromSocialMutationVariables) => fetchGql<Types.UpdateUserPictureFromSocialMutation, Types.UpdateUserPictureFromSocialMutationVariables>(UpdateUserPictureFromSocialDocument, variables)(),
+    mutationFn: (variables?: UpdateUserPictureFromSocialMutationVariables) => fetchGql<UpdateUserPictureFromSocialMutation, UpdateUserPictureFromSocialMutationVariables>(UpdateUserPictureFromSocialDocument, variables)(),
     ...options
   }
     )};
 
-export const RemoveCurrentUserPictureDocument = `
+export const RemoveCurrentUserPictureDocument = new TypedDocumentString(`
     mutation RemoveCurrentUserPicture {
   removeUserPicture {
     __typename
@@ -1776,22 +2756,22 @@ export const RemoveCurrentUserPictureDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useRemoveCurrentUserPictureMutation = <
       TError = unknown,
       TContext = unknown
-    >(options?: UseMutationOptions<Types.RemoveCurrentUserPictureMutation, TError, Types.RemoveCurrentUserPictureMutationVariables, TContext>) => {
+    >(options?: UseMutationOptions<RemoveCurrentUserPictureMutation, TError, RemoveCurrentUserPictureMutationVariables, TContext>) => {
     
-    return useMutation<Types.RemoveCurrentUserPictureMutation, TError, Types.RemoveCurrentUserPictureMutationVariables, TContext>(
+    return useMutation<RemoveCurrentUserPictureMutation, TError, RemoveCurrentUserPictureMutationVariables, TContext>(
       {
     mutationKey: ['RemoveCurrentUserPicture'],
-    mutationFn: (variables?: Types.RemoveCurrentUserPictureMutationVariables) => fetchGql<Types.RemoveCurrentUserPictureMutation, Types.RemoveCurrentUserPictureMutationVariables>(RemoveCurrentUserPictureDocument, variables)(),
+    mutationFn: (variables?: RemoveCurrentUserPictureMutationVariables) => fetchGql<RemoveCurrentUserPictureMutation, RemoveCurrentUserPictureMutationVariables>(RemoveCurrentUserPictureDocument, variables)(),
     ...options
   }
     )};
 
-export const RequestUserEmailChangeDocument = `
+export const RequestUserEmailChangeDocument = new TypedDocumentString(`
     mutation RequestUserEmailChange($input: RequestEmailChangeInput!) {
   requestEmailChange(input: $input) {
     __typename
@@ -1806,22 +2786,22 @@ export const RequestUserEmailChangeDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useRequestUserEmailChangeMutation = <
       TError = unknown,
       TContext = unknown
-    >(options?: UseMutationOptions<Types.RequestUserEmailChangeMutation, TError, Types.RequestUserEmailChangeMutationVariables, TContext>) => {
+    >(options?: UseMutationOptions<RequestUserEmailChangeMutation, TError, RequestUserEmailChangeMutationVariables, TContext>) => {
     
-    return useMutation<Types.RequestUserEmailChangeMutation, TError, Types.RequestUserEmailChangeMutationVariables, TContext>(
+    return useMutation<RequestUserEmailChangeMutation, TError, RequestUserEmailChangeMutationVariables, TContext>(
       {
     mutationKey: ['RequestUserEmailChange'],
-    mutationFn: (variables?: Types.RequestUserEmailChangeMutationVariables) => fetchGql<Types.RequestUserEmailChangeMutation, Types.RequestUserEmailChangeMutationVariables>(RequestUserEmailChangeDocument, variables)(),
+    mutationFn: (variables?: RequestUserEmailChangeMutationVariables) => fetchGql<RequestUserEmailChangeMutation, RequestUserEmailChangeMutationVariables>(RequestUserEmailChangeDocument, variables)(),
     ...options
   }
     )};
 
-export const WishlistListPageDocument = `
+export const WishlistListPageDocument = new TypedDocumentString(`
     query WishlistListPage($filters: PaginationFilters!) {
   wishlists(filters: $filters) {
     __typename
@@ -1850,25 +2830,25 @@ export const WishlistListPageDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useWishlistListPageQuery = <
-      TData = Types.WishlistListPageQuery,
+      TData = WishlistListPageQuery,
       TError = unknown
     >(
-      variables: Types.WishlistListPageQueryVariables,
-      options?: Omit<UseQueryOptions<Types.WishlistListPageQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<Types.WishlistListPageQuery, TError, TData>['queryKey'] }
+      variables: WishlistListPageQueryVariables,
+      options?: Omit<UseQueryOptions<WishlistListPageQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<WishlistListPageQuery, TError, TData>['queryKey'] }
     ) => {
     
-    return useQuery<Types.WishlistListPageQuery, TError, TData>(
+    return useQuery<WishlistListPageQuery, TError, TData>(
       {
     queryKey: ['WishlistListPage', variables],
-    queryFn: fetchGql<Types.WishlistListPageQuery, Types.WishlistListPageQueryVariables>(WishlistListPageDocument, variables),
+    queryFn: fetchGql<WishlistListPageQuery, WishlistListPageQueryVariables>(WishlistListPageDocument, variables),
     ...options
   }
     )};
 
-export const UpdateWishlistDocument = `
+export const UpdateWishlistDocument = new TypedDocumentString(`
     mutation UpdateWishlist($id: WishlistId!, $input: UpdateWishlistInput!) {
   updateWishlist(id: $id, input: $input) {
     __typename
@@ -1883,22 +2863,22 @@ export const UpdateWishlistDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useUpdateWishlistMutation = <
       TError = unknown,
       TContext = unknown
-    >(options?: UseMutationOptions<Types.UpdateWishlistMutation, TError, Types.UpdateWishlistMutationVariables, TContext>) => {
+    >(options?: UseMutationOptions<UpdateWishlistMutation, TError, UpdateWishlistMutationVariables, TContext>) => {
     
-    return useMutation<Types.UpdateWishlistMutation, TError, Types.UpdateWishlistMutationVariables, TContext>(
+    return useMutation<UpdateWishlistMutation, TError, UpdateWishlistMutationVariables, TContext>(
       {
     mutationKey: ['UpdateWishlist'],
-    mutationFn: (variables?: Types.UpdateWishlistMutationVariables) => fetchGql<Types.UpdateWishlistMutation, Types.UpdateWishlistMutationVariables>(UpdateWishlistDocument, variables)(),
+    mutationFn: (variables?: UpdateWishlistMutationVariables) => fetchGql<UpdateWishlistMutation, UpdateWishlistMutationVariables>(UpdateWishlistDocument, variables)(),
     ...options
   }
     )};
 
-export const DeleteWishlistDocument = `
+export const DeleteWishlistDocument = new TypedDocumentString(`
     mutation DeleteWishlist($id: WishlistId!) {
   deleteWishlist(id: $id) {
     __typename
@@ -1907,22 +2887,22 @@ export const DeleteWishlistDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useDeleteWishlistMutation = <
       TError = unknown,
       TContext = unknown
-    >(options?: UseMutationOptions<Types.DeleteWishlistMutation, TError, Types.DeleteWishlistMutationVariables, TContext>) => {
+    >(options?: UseMutationOptions<DeleteWishlistMutation, TError, DeleteWishlistMutationVariables, TContext>) => {
     
-    return useMutation<Types.DeleteWishlistMutation, TError, Types.DeleteWishlistMutationVariables, TContext>(
+    return useMutation<DeleteWishlistMutation, TError, DeleteWishlistMutationVariables, TContext>(
       {
     mutationKey: ['DeleteWishlist'],
-    mutationFn: (variables?: Types.DeleteWishlistMutationVariables) => fetchGql<Types.DeleteWishlistMutation, Types.DeleteWishlistMutationVariables>(DeleteWishlistDocument, variables)(),
+    mutationFn: (variables?: DeleteWishlistMutationVariables) => fetchGql<DeleteWishlistMutation, DeleteWishlistMutationVariables>(DeleteWishlistDocument, variables)(),
     ...options
   }
     )};
 
-export const LinkWishlistToEventDocument = `
+export const LinkWishlistToEventDocument = new TypedDocumentString(`
     mutation LinkWishlistToEvent($id: WishlistId!, $eventId: EventId!) {
   linkWishlistToEvent(id: $id, eventId: $eventId) {
     __typename
@@ -1937,22 +2917,22 @@ export const LinkWishlistToEventDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useLinkWishlistToEventMutation = <
       TError = unknown,
       TContext = unknown
-    >(options?: UseMutationOptions<Types.LinkWishlistToEventMutation, TError, Types.LinkWishlistToEventMutationVariables, TContext>) => {
+    >(options?: UseMutationOptions<LinkWishlistToEventMutation, TError, LinkWishlistToEventMutationVariables, TContext>) => {
     
-    return useMutation<Types.LinkWishlistToEventMutation, TError, Types.LinkWishlistToEventMutationVariables, TContext>(
+    return useMutation<LinkWishlistToEventMutation, TError, LinkWishlistToEventMutationVariables, TContext>(
       {
     mutationKey: ['LinkWishlistToEvent'],
-    mutationFn: (variables?: Types.LinkWishlistToEventMutationVariables) => fetchGql<Types.LinkWishlistToEventMutation, Types.LinkWishlistToEventMutationVariables>(LinkWishlistToEventDocument, variables)(),
+    mutationFn: (variables?: LinkWishlistToEventMutationVariables) => fetchGql<LinkWishlistToEventMutation, LinkWishlistToEventMutationVariables>(LinkWishlistToEventDocument, variables)(),
     ...options
   }
     )};
 
-export const UnlinkWishlistFromEventDocument = `
+export const UnlinkWishlistFromEventDocument = new TypedDocumentString(`
     mutation UnlinkWishlistFromEvent($id: WishlistId!, $eventId: EventId!) {
   unlinkWishlistFromEvent(id: $id, eventId: $eventId) {
     __typename
@@ -1967,22 +2947,22 @@ export const UnlinkWishlistFromEventDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useUnlinkWishlistFromEventMutation = <
       TError = unknown,
       TContext = unknown
-    >(options?: UseMutationOptions<Types.UnlinkWishlistFromEventMutation, TError, Types.UnlinkWishlistFromEventMutationVariables, TContext>) => {
+    >(options?: UseMutationOptions<UnlinkWishlistFromEventMutation, TError, UnlinkWishlistFromEventMutationVariables, TContext>) => {
     
-    return useMutation<Types.UnlinkWishlistFromEventMutation, TError, Types.UnlinkWishlistFromEventMutationVariables, TContext>(
+    return useMutation<UnlinkWishlistFromEventMutation, TError, UnlinkWishlistFromEventMutationVariables, TContext>(
       {
     mutationKey: ['UnlinkWishlistFromEvent'],
-    mutationFn: (variables?: Types.UnlinkWishlistFromEventMutationVariables) => fetchGql<Types.UnlinkWishlistFromEventMutation, Types.UnlinkWishlistFromEventMutationVariables>(UnlinkWishlistFromEventDocument, variables)(),
+    mutationFn: (variables?: UnlinkWishlistFromEventMutationVariables) => fetchGql<UnlinkWishlistFromEventMutation, UnlinkWishlistFromEventMutationVariables>(UnlinkWishlistFromEventDocument, variables)(),
     ...options
   }
     )};
 
-export const AddWishlistCoOwnerDocument = `
+export const AddWishlistCoOwnerDocument = new TypedDocumentString(`
     mutation AddWishlistCoOwner($id: WishlistId!, $input: AddWishlistCoOwnerInput!) {
   addWishlistCoOwner(id: $id, input: $input) {
     __typename
@@ -1997,22 +2977,22 @@ export const AddWishlistCoOwnerDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useAddWishlistCoOwnerMutation = <
       TError = unknown,
       TContext = unknown
-    >(options?: UseMutationOptions<Types.AddWishlistCoOwnerMutation, TError, Types.AddWishlistCoOwnerMutationVariables, TContext>) => {
+    >(options?: UseMutationOptions<AddWishlistCoOwnerMutation, TError, AddWishlistCoOwnerMutationVariables, TContext>) => {
     
-    return useMutation<Types.AddWishlistCoOwnerMutation, TError, Types.AddWishlistCoOwnerMutationVariables, TContext>(
+    return useMutation<AddWishlistCoOwnerMutation, TError, AddWishlistCoOwnerMutationVariables, TContext>(
       {
     mutationKey: ['AddWishlistCoOwner'],
-    mutationFn: (variables?: Types.AddWishlistCoOwnerMutationVariables) => fetchGql<Types.AddWishlistCoOwnerMutation, Types.AddWishlistCoOwnerMutationVariables>(AddWishlistCoOwnerDocument, variables)(),
+    mutationFn: (variables?: AddWishlistCoOwnerMutationVariables) => fetchGql<AddWishlistCoOwnerMutation, AddWishlistCoOwnerMutationVariables>(AddWishlistCoOwnerDocument, variables)(),
     ...options
   }
     )};
 
-export const RemoveWishlistCoOwnerDocument = `
+export const RemoveWishlistCoOwnerDocument = new TypedDocumentString(`
     mutation RemoveWishlistCoOwner($id: WishlistId!) {
   removeWishlistCoOwner(id: $id) {
     __typename
@@ -2021,22 +3001,22 @@ export const RemoveWishlistCoOwnerDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useRemoveWishlistCoOwnerMutation = <
       TError = unknown,
       TContext = unknown
-    >(options?: UseMutationOptions<Types.RemoveWishlistCoOwnerMutation, TError, Types.RemoveWishlistCoOwnerMutationVariables, TContext>) => {
+    >(options?: UseMutationOptions<RemoveWishlistCoOwnerMutation, TError, RemoveWishlistCoOwnerMutationVariables, TContext>) => {
     
-    return useMutation<Types.RemoveWishlistCoOwnerMutation, TError, Types.RemoveWishlistCoOwnerMutationVariables, TContext>(
+    return useMutation<RemoveWishlistCoOwnerMutation, TError, RemoveWishlistCoOwnerMutationVariables, TContext>(
       {
     mutationKey: ['RemoveWishlistCoOwner'],
-    mutationFn: (variables?: Types.RemoveWishlistCoOwnerMutationVariables) => fetchGql<Types.RemoveWishlistCoOwnerMutation, Types.RemoveWishlistCoOwnerMutationVariables>(RemoveWishlistCoOwnerDocument, variables)(),
+    mutationFn: (variables?: RemoveWishlistCoOwnerMutationVariables) => fetchGql<RemoveWishlistCoOwnerMutation, RemoveWishlistCoOwnerMutationVariables>(RemoveWishlistCoOwnerDocument, variables)(),
     ...options
   }
     )};
 
-export const RemoveWishlistLogoDocument = `
+export const RemoveWishlistLogoDocument = new TypedDocumentString(`
     mutation RemoveWishlistLogo($id: WishlistId!) {
   removeWishlistLogo(id: $id) {
     __typename
@@ -2045,22 +3025,22 @@ export const RemoveWishlistLogoDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useRemoveWishlistLogoMutation = <
       TError = unknown,
       TContext = unknown
-    >(options?: UseMutationOptions<Types.RemoveWishlistLogoMutation, TError, Types.RemoveWishlistLogoMutationVariables, TContext>) => {
+    >(options?: UseMutationOptions<RemoveWishlistLogoMutation, TError, RemoveWishlistLogoMutationVariables, TContext>) => {
     
-    return useMutation<Types.RemoveWishlistLogoMutation, TError, Types.RemoveWishlistLogoMutationVariables, TContext>(
+    return useMutation<RemoveWishlistLogoMutation, TError, RemoveWishlistLogoMutationVariables, TContext>(
       {
     mutationKey: ['RemoveWishlistLogo'],
-    mutationFn: (variables?: Types.RemoveWishlistLogoMutationVariables) => fetchGql<Types.RemoveWishlistLogoMutation, Types.RemoveWishlistLogoMutationVariables>(RemoveWishlistLogoDocument, variables)(),
+    mutationFn: (variables?: RemoveWishlistLogoMutationVariables) => fetchGql<RemoveWishlistLogoMutation, RemoveWishlistLogoMutationVariables>(RemoveWishlistLogoDocument, variables)(),
     ...options
   }
     )};
 
-export const WishlistPageDocument = `
+export const WishlistPageDocument = new TypedDocumentString(`
     query WishlistPage($wishlistId: WishlistId!) {
   wishlist(id: $wishlistId) {
     __typename
@@ -2122,25 +3102,25 @@ export const WishlistPageDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useWishlistPageQuery = <
-      TData = Types.WishlistPageQuery,
+      TData = WishlistPageQuery,
       TError = unknown
     >(
-      variables: Types.WishlistPageQueryVariables,
-      options?: Omit<UseQueryOptions<Types.WishlistPageQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<Types.WishlistPageQuery, TError, TData>['queryKey'] }
+      variables: WishlistPageQueryVariables,
+      options?: Omit<UseQueryOptions<WishlistPageQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<WishlistPageQuery, TError, TData>['queryKey'] }
     ) => {
     
-    return useQuery<Types.WishlistPageQuery, TError, TData>(
+    return useQuery<WishlistPageQuery, TError, TData>(
       {
     queryKey: ['WishlistPage', variables],
-    queryFn: fetchGql<Types.WishlistPageQuery, Types.WishlistPageQueryVariables>(WishlistPageDocument, variables),
+    queryFn: fetchGql<WishlistPageQuery, WishlistPageQueryVariables>(WishlistPageDocument, variables),
     ...options
   }
     )};
 
-export const AdminListWishlistsForUserDocument = `
+export const AdminListWishlistsForUserDocument = new TypedDocumentString(`
     query AdminListWishlistsForUser($filters: AdminWishlistPaginationFilters!) {
   adminWishlists(filters: $filters) {
     __typename
@@ -2168,20 +3148,20 @@ export const AdminListWishlistsForUserDocument = `
     }
   }
 }
-    `;
+    `);
 
 export const useAdminListWishlistsForUserQuery = <
-      TData = Types.AdminListWishlistsForUserQuery,
+      TData = AdminListWishlistsForUserQuery,
       TError = unknown
     >(
-      variables: Types.AdminListWishlistsForUserQueryVariables,
-      options?: Omit<UseQueryOptions<Types.AdminListWishlistsForUserQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<Types.AdminListWishlistsForUserQuery, TError, TData>['queryKey'] }
+      variables: AdminListWishlistsForUserQueryVariables,
+      options?: Omit<UseQueryOptions<AdminListWishlistsForUserQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<AdminListWishlistsForUserQuery, TError, TData>['queryKey'] }
     ) => {
     
-    return useQuery<Types.AdminListWishlistsForUserQuery, TError, TData>(
+    return useQuery<AdminListWishlistsForUserQuery, TError, TData>(
       {
     queryKey: ['AdminListWishlistsForUser', variables],
-    queryFn: fetchGql<Types.AdminListWishlistsForUserQuery, Types.AdminListWishlistsForUserQueryVariables>(AdminListWishlistsForUserDocument, variables),
+    queryFn: fetchGql<AdminListWishlistsForUserQuery, AdminListWishlistsForUserQueryVariables>(AdminListWishlistsForUserDocument, variables),
     ...options
   }
     )};
