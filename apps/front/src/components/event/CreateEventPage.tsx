@@ -64,7 +64,8 @@ const schema = z.object({
     .refine(date => date !== null, "La date de l'événement est requise"),
 });
 
-type FormFields = z.infer<typeof schema>;
+type FormInput = z.input<typeof schema>;
+type FormFields = z.output<typeof schema>;
 
 const mapState = (state: RootState) => state.auth.user?.email;
 
@@ -81,7 +82,7 @@ export const CreateEventPage = () => {
     handleSubmit,
     watch,
     formState: { errors },
-  } = useForm<FormFields>({
+  } = useForm<FormInput, unknown, FormFields>({
     resolver: zodResolver(schema),
     defaultValues: {
       title: '',
@@ -144,10 +145,22 @@ export const CreateEventPage = () => {
       <Container maxWidth="md" sx={{ marginTop: '40px', transition: 'max-width 0.3s ease-in-out' }}>
         <Card>
           {step === 1 && (
-            <Stack component="form" noValidate gap={3}>
+            <Stack
+              component="form"
+              noValidate
+              sx={{
+                gap: 3,
+              }}
+            >
               <Subtitle sx={{ marginBottom: '16px' }}>Informations</Subtitle>
 
-              <Stack direction="row" gap={2} alignItems="flex-start">
+              <Stack
+                direction="row"
+                sx={{
+                  gap: 2,
+                  alignItems: 'flex-start',
+                }}
+              >
                 <Controller
                   control={control}
                   name="icon"
@@ -215,7 +228,11 @@ export const CreateEventPage = () => {
           )}
 
           {step === 2 && (
-            <Stack gap={2}>
+            <Stack
+              sx={{
+                gap: 2,
+              }}
+            >
               <Subtitle sx={{ marginBottom: 0 }}>Gérer les participants</Subtitle>
 
               <AttendeeRolesGuide />
@@ -304,7 +321,14 @@ export const CreateEventPage = () => {
             </Stack>
           )}
 
-          <Stack direction="row" justifyContent="space-between" alignItems="center" marginTop={3}>
+          <Stack
+            direction="row"
+            sx={{
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginTop: 3,
+            }}
+          >
             <Box>
               {step > 1 && (
                 <Button

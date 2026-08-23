@@ -62,8 +62,22 @@ export const ItemTakersDialog = ({ open, handleClose, itemName, takers }: ItemTa
   return (
     <Dialog onClose={() => handleClose()} open={open} fullWidth maxWidth="xs">
       <DialogTitle>
-        <Stack direction="row" alignItems="center" justifyContent="space-between" gap={1}>
-          <Stack direction="row" alignItems="center" gap={1} minWidth={0}>
+        <Stack
+          direction="row"
+          sx={{
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 1,
+          }}
+        >
+          <Stack
+            direction="row"
+            sx={{
+              alignItems: 'center',
+              gap: 1,
+              minWidth: 0,
+            }}
+          >
             <RedeemIcon color="primary" />
             <span>Réservations</span>
           </Stack>

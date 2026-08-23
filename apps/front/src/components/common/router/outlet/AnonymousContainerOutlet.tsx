@@ -31,7 +31,13 @@ export const AnonymousContainerOutlet = () => {
   return (
     <Root>
       <Container component="main" maxWidth="sm">
-        <Stack direction="column" alignItems="center" spacing={4}>
+        <Stack
+          direction="column"
+          spacing={4}
+          sx={{
+            alignItems: 'center',
+          }}
+        >
           <LogoContainer onClick={() => navigate({ to: '/' })}>
             <Logo height={48} variant="full" />
           </LogoContainer>

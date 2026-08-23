@@ -94,7 +94,13 @@ export const UserProfilePage = () => {
         </UserNameAndEmail>
       </ProfileSection>
 
-      <Box sx={{ borderBottom: 1, borderColor: 'divider' }} mb={4}>
+      <Box
+        sx={{
+          mb: 4,
+          borderBottom: 1,
+          borderColor: 'divider',
+        }}
+      >
         <Tabs
           value={tab}
           onChange={(_, newValue) => navigate({ search: { tab: newValue as TabValues } })}

@@ -20,7 +20,13 @@ export const Status = ({ color = 'primary', colorGradient = 'light', text }: Pro
   const theme = useTheme();
 
   return (
-    <Stack flexDirection="row" alignItems="center" gap={1}>
+    <Stack
+      sx={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 1,
+      }}
+    >
       <Bullet sx={{ backgroundColor: theme.palette[color][colorGradient] }} />
       {text && <Box>{text}</Box>}
     </Stack>

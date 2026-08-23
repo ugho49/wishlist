@@ -65,7 +65,14 @@ export const UserTabNotifications = () => {
 
         {queryRejection && <Alert severity="error">{rejectionMessage(queryRejection)}</Alert>}
 
-        <Stack component="form" onSubmit={onSubmit} noValidate gap={3}>
+        <Stack
+          component="form"
+          onSubmit={onSubmit}
+          noValidate
+          sx={{
+            gap: 3,
+          }}
+        >
           <Box>
             <InputLabel>Notifications de mail</InputLabel>
             <FormControlLabel
@@ -87,7 +94,12 @@ export const UserTabNotifications = () => {
             />
           </Box>
 
-          <Stack direction="row" justifyContent="center">
+          <Stack
+            direction="row"
+            sx={{
+              justifyContent: 'center',
+            }}
+          >
             <Button
               type="submit"
               variant="contained"

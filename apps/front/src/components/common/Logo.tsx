@@ -45,7 +45,7 @@ export const Logo = ({ height = 48, variant = 'full', color, sx, ...props }: Log
   }
 
   return (
-    <Stack direction="row" alignItems="center" spacing={1.5} sx={sx} {...props}>
+    <Stack direction="row" spacing={1.5} {...props} sx={[{ alignItems: 'center' }, ...(Array.isArray(sx) ? sx : [sx])]}>
       <LogoIconStyled style={{ height, width: height }} color={color} />
       <LogoTextStyled style={{ height: height * 0.8 }} color={color} />
     </Stack>

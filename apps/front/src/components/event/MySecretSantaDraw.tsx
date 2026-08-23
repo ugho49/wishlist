@@ -121,7 +121,7 @@ export const MySecretSantaDraw = ({ eventId, eventTitle, eventDate, currentUserI
           onRevealed={() => setReplayScratch(false)}
         />
       )}
-      <Container direction="row" alignItems="flex-start" onClick={handleBannerClick}>
+      <Container direction="row" sx={{ alignItems: 'flex-start' }} onClick={handleBannerClick}>
         <IconWrapper>
           <CardGiftcardIcon fontSize="small" />
         </IconWrapper>

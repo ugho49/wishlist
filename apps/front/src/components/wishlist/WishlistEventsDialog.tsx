@@ -45,7 +45,13 @@ export const WishlistEventsDialog = ({
   return (
     <Dialog onClose={() => handleClose()} open={open}>
       <DialogTitle>
-        <Stack direction="row" alignItems="center" justifyContent="space-between">
+        <Stack
+          direction="row"
+          sx={{
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
           <span>Sélectionner un évènement</span>
           <IconButton onClick={() => handleClose()}>
             <CloseIcon />

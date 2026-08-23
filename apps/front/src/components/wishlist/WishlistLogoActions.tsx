@@ -47,12 +47,24 @@ export const WishlistLogoActions = (props: WishlistLogoActionsProps) => {
       )}
       <Box>
         <InputLabel>Logo de la liste</InputLabel>
-        <Stack direction="row" gap={2}>
+        <Stack
+          direction="row"
+          sx={{
+            gap: 2,
+          }}
+        >
           <Avatar src={logoUrl} sx={{ width: 70, height: 70, bgcolor: grey[200], color: grey[400] }}>
             <PersonIcon fontSize="large" />
           </Avatar>
 
-          <Stack direction="column" justifyContent="center" gap={1} marginLeft={5}>
+          <Stack
+            direction="column"
+            sx={{
+              justifyContent: 'center',
+              gap: 1,
+              marginLeft: 5,
+            }}
+          >
             <Box>
               <Button variant="outlined" component="label" disabled={loading} size="small">
                 Choisir une image

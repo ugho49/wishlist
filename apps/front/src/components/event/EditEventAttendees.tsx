@@ -93,7 +93,11 @@ export const EditEventAttendees = ({ eventId, attendees }: EditEventAttendeesPro
   );
 
   return (
-    <Stack gap={2}>
+    <Stack
+      sx={{
+        gap: 2,
+      }}
+    >
       <AttendeeRolesGuide />
 
       <Card>

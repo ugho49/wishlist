@@ -6,7 +6,7 @@ import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import Diversity3Icon from '@mui/icons-material/Diversity3';
 import FilterListIcon from '@mui/icons-material/FilterList';
-import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
+import PersonOutlinedIcon from '@mui/icons-material/PersonOutlined';
 import SortIcon from '@mui/icons-material/Sort';
 import SortByAlphaIcon from '@mui/icons-material/SortByAlpha';
 import StarIcon from '@mui/icons-material/Star';
@@ -63,7 +63,7 @@ export const filterOptions: SelectOption<FilterType>[] = [
   {
     value: FilterType.NOT_SUGGESTED,
     label: 'Souhaits non suggérés',
-    icon: <PersonOutlineIcon fontSize="small" />,
+    icon: <PersonOutlinedIcon fontSize="small" />,
   },
 ];
 

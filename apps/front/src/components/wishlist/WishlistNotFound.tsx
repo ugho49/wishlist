@@ -6,7 +6,11 @@ import { Title } from '../common/Title';
 export const WishlistNotFound = () => (
   <Box>
     <Title>Liste introuvable</Title>
-    <Stack alignItems="center">
+    <Stack
+      sx={{
+        alignItems: 'center',
+      }}
+    >
       <p>Cette liste n'existe pas ou bien n'est pas accessible</p>
       <p>
         <b>Plusieurs raison possible :</b> celle ci à été supprimée, vous n'avez pas les droits pour y accéder ou bien

@@ -84,13 +84,30 @@ export const UserTabInformations = () => {
   };
 
   return (
-    <Stack gap={3}>
+    <Stack
+      sx={{
+        gap: 3,
+      }}
+    >
       <Card>
         <Loader loading={!userState.isUserLoaded}>
           <Subtitle>Modifier les informations</Subtitle>
 
-          <Stack component="form" onSubmit={handleSubmit(onSubmit)} noValidate gap={3}>
-            <Stack direction="row" flexWrap="wrap" gap={3}>
+          <Stack
+            component="form"
+            onSubmit={handleSubmit(onSubmit)}
+            noValidate
+            sx={{
+              gap: 3,
+            }}
+          >
+            <Stack
+              direction="row"
+              sx={{
+                flexWrap: 'wrap',
+                gap: 3,
+              }}
+            >
               <Box sx={{ flexGrow: 1 }}>
                 <TextField
                   {...register('firstname')}
@@ -137,7 +154,12 @@ export const UserTabInformations = () => {
               />
             </Box>
 
-            <Stack direction="row" justifyContent="center">
+            <Stack
+              direction="row"
+              sx={{
+                justifyContent: 'center',
+              }}
+            >
               <Button
                 sx={{ marginTop: '8px' }}
                 type="submit"

@@ -40,6 +40,7 @@ const TitleStyled = styled(Typography)(({ theme }) => ({
 const SocialButtonsStack = styled(Stack)(() => ({
   width: '100%',
   gap: 12,
+  alignItems: 'center',
 }));
 
 const ButtonStyled = styled(Button)(() => ({
@@ -137,10 +138,22 @@ export const RegisterPage = () => {
   const onSubmit = (data: FormFields) => registerUser(data);
 
   return (
-    <Stack spacing={4} alignItems="center">
+    <Stack
+      spacing={4}
+      sx={{
+        alignItems: 'center',
+      }}
+    >
       <TitleStyled variant="h4">Créer un compte</TitleStyled>
 
-      <Stack component="form" onSubmit={handleSubmit(onSubmit)} spacing={3} width="100%">
+      <Stack
+        component="form"
+        onSubmit={handleSubmit(onSubmit)}
+        spacing={3}
+        sx={{
+          width: '100%',
+        }}
+      >
         {formErrors.root && <Alert severity="error">{formErrors.root.message}</Alert>}
 
         <Stack direction="row" spacing={2}>
@@ -201,12 +214,17 @@ export const RegisterPage = () => {
         </ButtonStyled>
 
         <DividerStyled>
-          <Typography variant="body2" color="text.secondary">
+          <Typography
+            variant="body2"
+            sx={{
+              color: 'text.secondary',
+            }}
+          >
             ou
           </Typography>
         </DividerStyled>
 
-        <SocialButtonsStack alignItems="center">
+        <SocialButtonsStack>
           <GoogleButton
             loading={socialLoading}
             disabled={socialLoading}
@@ -220,9 +238,25 @@ export const RegisterPage = () => {
         </SocialButtonsStack>
       </Stack>
 
-      <Stack spacing={2} alignItems="center">
-        <Stack direction="row" alignItems="center" spacing={1}>
-          <Typography variant="body2" color="text.secondary">
+      <Stack
+        spacing={2}
+        sx={{
+          alignItems: 'center',
+        }}
+      >
+        <Stack
+          direction="row"
+          spacing={1}
+          sx={{
+            alignItems: 'center',
+          }}
+        >
+          <Typography
+            variant="body2"
+            sx={{
+              color: 'text.secondary',
+            }}
+          >
             Déjà inscrit ?
           </Typography>
           <RouterLink to="/login">Se connecter</RouterLink>

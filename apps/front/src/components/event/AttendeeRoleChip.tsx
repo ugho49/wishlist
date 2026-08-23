@@ -103,7 +103,13 @@ export const AttendeeRoleChip = ({ role, editable = false, disabled = false, onR
                   if (assignableRole !== role) onRoleChange?.(assignableRole);
                 }}
               >
-                <Stack direction="row" alignItems="center" gap={1}>
+                <Stack
+                  direction="row"
+                  sx={{
+                    alignItems: 'center',
+                    gap: 1,
+                  }}
+                >
                   <OptionIcon fontSize="small" />
                   {getAttendeeRoleLabel(assignableRole)}
                 </Stack>

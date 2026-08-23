@@ -59,23 +59,52 @@ export const EditWishlistManagement = ({ wishlist }: EditWishlistManagementProps
   return (
     <Card>
       <Subtitle>Co-gestionnaire</Subtitle>
-      <Stack gap={4}>
-        <Typography variant="body2" color="text.secondary">
+      <Stack
+        sx={{
+          gap: 4,
+        }}
+      >
+        <Typography
+          variant="body2"
+          sx={{
+            color: 'text.secondary',
+          }}
+        >
           Pour les listes publiques, vous pouvez ajouter un co-gestionnaire qui pourra gérer la liste comme vous
           (ajouter/supprimer des items, modifier la liste, etc.).
         </Typography>
 
         {wishlist.coOwner ? (
-          <Stack direction="row" alignItems="center" gap={2}>
+          <Stack
+            direction="row"
+            sx={{
+              alignItems: 'center',
+              gap: 2,
+            }}
+          >
             <Avatar src={wishlist.coOwner.pictureUrl ?? undefined} sx={{ width: 40, height: 40 }}>
               {wishlist.coOwner.firstName[0]}
               {wishlist.coOwner.lastName[0]}
             </Avatar>
-            <Box flex={1}>
-              <Typography variant="body1" fontWeight={500}>
+            <Box
+              sx={{
+                flex: 1,
+              }}
+            >
+              <Typography
+                variant="body1"
+                sx={{
+                  fontWeight: 500,
+                }}
+              >
                 {wishlist.coOwner.firstName} {wishlist.coOwner.lastName}
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography
+                variant="body2"
+                sx={{
+                  color: 'text.secondary',
+                }}
+              >
                 {wishlist.coOwner.email}
               </Typography>
             </Box>

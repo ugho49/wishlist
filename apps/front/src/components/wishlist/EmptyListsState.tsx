@@ -74,7 +74,11 @@ export const EmptyListsState = ({ onAddListClick, sx }: EmptyListsStateProps) =>
       <Illustration src={EmptyWishlistIllustration} alt="Empty Wishlist" />
     </IllustrationWrapper>
 
-    <Box textAlign="center">
+    <Box
+      sx={{
+        textAlign: 'center',
+      }}
+    >
       <EmptyStateTitle>Aucune liste pour le moment</EmptyStateTitle>
       <EmptyStateSubtitle>
         Créez votre première liste de souhaits pour cet événement et partagez vos envies !

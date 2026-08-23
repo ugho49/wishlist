@@ -220,7 +220,12 @@ export const WishlistHeader = ({
                 <Tooltip title="Tout le monde peut ajouter, cocher ou voir les souhaits cochés, même le créateur de la liste">
                   <PublicIndicatorBox>
                     <PublicIcon fontSize="small" />
-                    <Typography variant="body2" fontWeight={500}>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontWeight: 500,
+                      }}
+                    >
                       Liste publique créée par {wishlist.owner.firstName} {wishlist.owner.lastName}
                       {wishlist.coOwner && (
                         <>

@@ -72,7 +72,11 @@ export const EmptyEventsState = ({ onAddEventClick, sx }: EmptyEventsStateProps)
       <Illustration src={EmptyEventsIllustration} alt="Empty Events" />
     </IllustrationWrapper>
 
-    <Box textAlign="center">
+    <Box
+      sx={{
+        textAlign: 'center',
+      }}
+    >
       <EmptyStateTitle>Aucun événement pour le moment</EmptyStateTitle>
       <EmptyStateSubtitle>
         Créez votre premier événement pour commencer à organiser vos échanges de cadeaux et listes de souhaits !

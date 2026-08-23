@@ -110,7 +110,11 @@ export const NoSecretSanta = ({ eventId }: NoSecretSantaProps) => {
           <Illustration src={EmptySecretSantaIllustration} alt="Empty Secret Santa" />
         </IllustrationWrapper>
 
-        <Box textAlign="center">
+        <Box
+          sx={{
+            textAlign: 'center',
+          }}
+        >
           <EmptyStateTitle>Aucun secret santa n'est en cours pour cet évènement</EmptyStateTitle>
           <EmptyStateSubtitle>Vous pouvez en créer un en cliquant sur le bouton ci-dessous.</EmptyStateSubtitle>
         </Box>

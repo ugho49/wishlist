@@ -85,14 +85,27 @@ export const SharedReservationIntro = () => {
         <CloseIcon fontSize="small" />
       </CloseButton>
 
-      <Stack gap={1.5}>
+      <Stack
+        sx={{
+          gap: 1.5,
+        }}
+      >
         <Stack
           direction={{ xs: 'column', sm: 'row' }}
-          alignItems={{ xs: 'flex-start', sm: 'center' }}
-          justifyContent="space-between"
-          gap={1}
+          sx={{
+            alignItems: { xs: 'flex-start', sm: 'center' },
+            justifyContent: 'space-between',
+            gap: 1,
+          }}
         >
-          <Stack direction="row" alignItems="center" gap={1.5} minWidth={0}>
+          <Stack
+            direction="row"
+            sx={{
+              alignItems: 'center',
+              gap: 1.5,
+              minWidth: 0,
+            }}
+          >
             <IconWrap>
               <RedeemIcon fontSize="small" />
             </IconWrap>

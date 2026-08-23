@@ -48,25 +48,45 @@ const RoleDescription = styled(Typography)(({ theme }) => ({
 
 export const AttendeeRolesGuide = () => (
   <Guide>
-    <Stack gap={2}>
+    <Stack
+      sx={{
+        gap: 2,
+      }}
+    >
       <Stack
         direction={{ xs: 'column', sm: 'row' }}
-        alignItems={{ xs: 'flex-start', sm: 'center' }}
-        justifyContent="space-between"
-        gap={1}
+        sx={{
+          alignItems: { xs: 'flex-start', sm: 'center' },
+          justifyContent: 'space-between',
+          gap: 1,
+        }}
       >
         <Box>
-          <Typography fontWeight={700} fontSize="1rem">
+          <Typography
+            sx={{
+              fontWeight: 700,
+              fontSize: '1rem',
+            }}
+          >
             Les rôles des participants
           </Typography>
-          <Typography color="text.secondary" fontSize="0.85rem">
+          <Typography
+            sx={{
+              color: 'text.secondary',
+              fontSize: '0.85rem',
+            }}
+          >
             Chaque personne invitée a un rôle, qui définit ce qu’elle peut faire sur l’événement.
           </Typography>
         </Box>
         <NewFeatureBadge />
       </Stack>
 
-      <Stack gap={1.5}>
+      <Stack
+        sx={{
+          gap: 1.5,
+        }}
+      >
         {ROLES.map(role => {
           const Icon = getAttendeeRoleIcon(role);
           return (

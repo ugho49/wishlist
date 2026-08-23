@@ -58,7 +58,8 @@ const schema = z.object({
     .refine(date => date !== null, "La date de l'événement est requise"),
 });
 
-type FormFields = z.infer<typeof schema>;
+type FormInput = z.input<typeof schema>;
+type FormFields = z.output<typeof schema>;
 
 interface AdminEventPageProps {
   eventId: EventId;
@@ -76,7 +77,7 @@ export const AdminEventPage = ({ eventId }: AdminEventPageProps) => {
     handleSubmit,
     formState: { errors },
     setValue,
-  } = useForm<FormFields>({
+  } = useForm<FormInput, unknown, FormFields>({
     resolver: zodResolver(schema),
   });
 
@@ -263,7 +264,13 @@ export const AdminEventPage = ({ eventId }: AdminEventPageProps) => {
         {queryRejection && <Alert severity="error">{rejectionMessage(queryRejection)}</Alert>}
         <Card>
           <Loader loading={loadingEvent}>
-            <Stack direction="row" flexWrap="wrap" gap={smallScreen ? 0 : 3}>
+            <Stack
+              direction="row"
+              sx={{
+                flexWrap: 'wrap',
+                gap: smallScreen ? 0 : 3,
+              }}
+            >
               <List dense sx={{ flexGrow: 1 }}>
                 <ListItem>
                   <ListItemIcon>
@@ -287,7 +294,13 @@ export const AdminEventPage = ({ eventId }: AdminEventPageProps) => {
                 </ListItem>
               </List>
 
-              <Stack sx={{ flexGrow: 1 }} alignItems="center" justifyContent="center">
+              <Stack
+                sx={{
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexGrow: 1,
+                }}
+              >
                 <ConfirmButton
                   confirmTitle="Supprimer l'évènement"
                   confirmText="Etes vous sûr de supprimer l'évènement ? Cela supprimera toutes les listes associés !"
@@ -307,8 +320,20 @@ export const AdminEventPage = ({ eventId }: AdminEventPageProps) => {
         <Card>
           <Subtitle>Modifier les informations</Subtitle>
 
-          <Stack component="form" onSubmit={handleSubmit(onSubmit)} gap={3}>
-            <Stack direction="row" gap={3} alignItems="flex-start">
+          <Stack
+            component="form"
+            onSubmit={handleSubmit(onSubmit)}
+            sx={{
+              gap: 3,
+            }}
+          >
+            <Stack
+              direction="row"
+              sx={{
+                gap: 3,
+                alignItems: 'flex-start',
+              }}
+            >
               <Controller
                 control={control}
                 name="icon"
@@ -372,7 +397,12 @@ export const AdminEventPage = ({ eventId }: AdminEventPageProps) => {
               />
             </Stack>
 
-            <Stack direction="row" justifyContent="center">
+            <Stack
+              direction="row"
+              sx={{
+                justifyContent: 'center',
+              }}
+            >
               <Button
                 sx={{ marginTop: '8px' }}
                 type="submit"

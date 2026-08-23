@@ -142,13 +142,23 @@ export const ConfirmEmailChangePage = (props: ConfirmEmailChangePageProps) => {
     <ContainerStyled>
       <SuccessMessageStyled>
         <CheckCircleIcon sx={{ fontSize: 60, alignSelf: 'center' }} />
-        <Typography variant="h6" fontWeight={600}>
+        <Typography
+          variant="h6"
+          sx={{
+            fontWeight: 600,
+          }}
+        >
           Votre adresse email a été changée avec succès 🎉
         </Typography>
         <Typography variant="body1">
           Votre nouvelle adresse email est maintenant <strong>{email}</strong>
         </Typography>
-        <Typography variant="body2" color="text.secondary">
+        <Typography
+          variant="body2"
+          sx={{
+            color: 'text.secondary',
+          }}
+        >
           Vous pouvez maintenant vous connecter avec votre nouvelle adresse email.
         </Typography>
       </SuccessMessageStyled>
@@ -156,7 +166,12 @@ export const ConfirmEmailChangePage = (props: ConfirmEmailChangePageProps) => {
       <FooterStackStyled>
         <RouterLink to="/user/profile">Retour au profil</RouterLink>
         {redirectTimeoutInSeconds > 0 && (
-          <Typography variant="body2" color="text.secondary">
+          <Typography
+            variant="body2"
+            sx={{
+              color: 'text.secondary',
+            }}
+          >
             Vous allez être automatiquement redirigé dans {redirectTimeoutInSeconds} seconde
             {redirectTimeoutInSeconds > 1 ? 's' : ''}.
           </Typography>

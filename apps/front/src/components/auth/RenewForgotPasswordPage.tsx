@@ -96,7 +96,12 @@ export const RenewForgotPasswordPage = () => {
 
   if (!email || !token) {
     return (
-      <Stack spacing={4} alignItems="center">
+      <Stack
+        spacing={4}
+        sx={{
+          alignItems: 'center',
+        }}
+      >
         <ErrorMessageStyled variant="h6">Cette URL n'est pas valide</ErrorMessageStyled>
         <RouterLink to="/forgot-password">Demander un nouveau lien</RouterLink>
       </Stack>
@@ -104,14 +109,26 @@ export const RenewForgotPasswordPage = () => {
   }
 
   return (
-    <Stack spacing={4} alignItems="center">
+    <Stack
+      spacing={4}
+      sx={{
+        alignItems: 'center',
+      }}
+    >
       <TitleStyled variant="h4">Changer de mot de passe</TitleStyled>
 
       <InfoMessageStyled variant="body1">
         Vous êtes en train de définir un nouveau mot de passe pour <strong>{email}</strong>
       </InfoMessageStyled>
 
-      <Stack component="form" onSubmit={handleSubmit(onSubmit)} spacing={3} width="100%">
+      <Stack
+        component="form"
+        onSubmit={handleSubmit(onSubmit)}
+        spacing={3}
+        sx={{
+          width: '100%',
+        }}
+      >
         <TextField
           {...register('password')}
           label="Nouveau mot de passe"
@@ -151,8 +168,19 @@ export const RenewForgotPasswordPage = () => {
       </Stack>
 
       <FooterStackStyled>
-        <Stack direction="row" alignItems="center" spacing={1}>
-          <Typography variant="body2" color="text.secondary">
+        <Stack
+          direction="row"
+          spacing={1}
+          sx={{
+            alignItems: 'center',
+          }}
+        >
+          <Typography
+            variant="body2"
+            sx={{
+              color: 'text.secondary',
+            }}
+          >
             Déjà inscrit ?
           </Typography>
           <RouterLink to="/login">Me connecter</RouterLink>

@@ -198,8 +198,17 @@ export const AvatarUpdateButton = ({
         </AvatarContainer>
 
         {!pictureUrl && (
-          <Stack alignItems="center">
-            <Typography variant="body2" color="text.secondary">
+          <Stack
+            sx={{
+              alignItems: 'center',
+            }}
+          >
+            <Typography
+              variant="body2"
+              sx={{
+                color: 'text.secondary',
+              }}
+            >
               Cliquez sur l'icône ci-dessus pour ajouter une photo
             </Typography>
           </Stack>

@@ -155,8 +155,10 @@ export const AddSecretSantaUsersFormDialog = ({
       fullScreen={isFullscreen}
       maxWidth="xl"
       open={open}
-      onClose={handleClose}
-      disableEscapeKeyDown={loading}
+      onClose={(_event, reason) => {
+        if (loading && reason === 'escapeKeyDown') return;
+        handleClose();
+      }}
       slots={{ transition: Transition }}
     >
       <AppBar sx={{ position: 'sticky' }}>
@@ -170,7 +172,11 @@ export const AddSecretSantaUsersFormDialog = ({
         </Toolbar>
       </AppBar>
       <Container sx={{ marginTop: '40px' }}>
-        <Stack alignItems="center">
+        <Stack
+          sx={{
+            alignItems: 'center',
+          }}
+        >
           <Button
             disabled={loading || selectedIds.length === 0}
             loading={loading}

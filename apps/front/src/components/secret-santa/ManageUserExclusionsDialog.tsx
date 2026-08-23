@@ -94,9 +94,23 @@ export const ManageUserExclusionsDialog = ({
   }, [secretSantaUser]);
 
   return (
-    <Dialog onClose={() => handleClose()} open={open} fullWidth maxWidth="xs" disableEscapeKeyDown={loadingUpdateUser}>
+    <Dialog
+      onClose={(_event, reason) => {
+        if (loadingUpdateUser && reason === 'escapeKeyDown') return;
+        handleClose();
+      }}
+      open={open}
+      fullWidth
+      maxWidth="xs"
+    >
       <DialogTitle>
-        <Stack direction="row" alignItems="center" justifyContent="space-between">
+        <Stack
+          direction="row"
+          sx={{
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
           <span>Exclusions</span>
           <IconButton onClick={() => handleClose()} disabled={loadingUpdateUser}>
             <CloseIcon />

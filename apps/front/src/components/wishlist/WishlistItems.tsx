@@ -42,9 +42,9 @@ const ImageModal = ({
     <Modal open={open} onClose={onClose} autoFocus={false} disableAutoFocus>
       <Fade in={open}>
         <Stack
-          alignItems="center"
-          gap={2}
           sx={{
+            alignItems: 'center',
+            gap: 2,
             position: 'absolute',
             top: '50%',
             left: '50%',
@@ -71,7 +71,12 @@ const ImageModal = ({
             />
           </Box>
 
-          <Stack direction="row" gap={2}>
+          <Stack
+            direction="row"
+            sx={{
+              gap: 2,
+            }}
+          >
             <IconButton
               aria-label="close"
               size="large"
@@ -154,7 +159,7 @@ const WishlistItemsLoaded = ({
   const ownerOrCoOwnerOfTheList = currentUserId === wishlist.owner.id || wishlist.coOwner?.id === currentUserId;
   const canReserveItems = !ownerOrCoOwnerOfTheList || !wishlist.config.hideItems;
   const [currentItem, setCurrentItem] = useState<WishlistItem | null>(null);
-  const navigate = useNavigate({ from: '/wishlists/$wishlistId' });
+  const navigate = useNavigate({ from: '/wishlists/$wishlistId/' });
 
   const setOpenItemFormDialog = (open: boolean) => {
     void navigate({ search: prev => ({ ...prev, displayAddItemFormDialog: open }) });

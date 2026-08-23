@@ -52,7 +52,12 @@ export const EventPage = ({ eventId }: EventPageProps) => {
           <>
             <EventHeaderSkeleton />
             <Container maxWidth="lg">
-              <Stack gap="20px" sx={{ paddingTop: 3 }}>
+              <Stack
+                sx={{
+                  gap: '20px',
+                  paddingTop: 3,
+                }}
+              >
                 <EventWishlists loading />
               </Stack>
             </Container>
@@ -74,7 +79,12 @@ export const EventPage = ({ eventId }: EventPageProps) => {
             />
 
             <Container maxWidth="lg">
-              <Stack gap="20px" sx={{ paddingTop: 3 }}>
+              <Stack
+                sx={{
+                  gap: '20px',
+                  paddingTop: 3,
+                }}
+              >
                 {shouldShowSuggestion && <SecretSantaSuggestionCard eventId={event.id} onDismiss={dismissSuggestion} />}
 
                 <MySecretSantaDraw
