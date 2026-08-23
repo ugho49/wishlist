@@ -151,15 +151,11 @@ export class ItemResolver {
     @Args('itemId', new ZodPipe(ItemIdSchema)) itemId: ItemId,
     @GqlCurrentUser() currentUser: ICurrentUser,
   ): Promise<ToggleItemResult> {
-    const result = await this.toggleItemUseCase.execute({ itemId, currentUser });
+    const { takers } = await this.toggleItemUseCase.execute({ itemId, currentUser });
 
     return {
       __typename: 'ToggleItemOutput',
-      takers: result.takers.map(taker => ({
-        __typename: 'ItemTaker' as const,
-        userId: taker.user.id,
-        takenAt: taker.taken_at,
-      })),
+      takers: takers.map(taker => itemMapper.toGqlItemTaker(taker)),
     };
   }
 
@@ -167,11 +163,11 @@ export class ItemResolver {
   async scanItemUrl(
     @Args('input', new ZodPipe(ScanItemUrlInputSchema)) input: ScanItemUrlInput,
   ): Promise<ScanItemUrlResult> {
-    const result = await this.scanItemUrlUseCase.execute({ url: input.url });
+    const { pictureUrl } = await this.scanItemUrlUseCase.execute({ url: input.url });
 
     return {
       __typename: 'ScanItemUrlOutput',
-      pictureUrl: result.picture_url,
+      pictureUrl,
     };
   }
 }

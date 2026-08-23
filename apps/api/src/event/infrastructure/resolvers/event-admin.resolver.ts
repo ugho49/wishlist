@@ -16,7 +16,6 @@ import {
   type AdminGetEventByIdResult,
   type AdminGetEventsResult,
   type AdminUpdateEventResult,
-  type Event as GqlEvent,
   type UpdateEventInput,
 } from '../../../gql/generated-types';
 import { DeleteAttendeeUseCase } from '../../application/command/delete-attendee.use-case';
@@ -24,6 +23,7 @@ import { DeleteEventUseCase } from '../../application/command/delete-event.use-c
 import { UpdateEventUseCase } from '../../application/command/update-event.use-case';
 import { GetEventsUseCase } from '../../application/query/get-events.use-case';
 import { GetEventsForUserUseCase } from '../../application/query/get-events-for-user.use-case';
+import { eventMapper } from '../event.mapper';
 import {
   AdminEventPaginationFiltersSchema,
   AttendeeIdSchema,
@@ -58,12 +58,11 @@ export class EventAdminResolver {
   @Query()
   async adminEvents(
     @Args('filters', new ZodPipe(AdminEventPaginationFiltersSchema)) filters: AdminEventPaginationFilters,
-    @Context() ctx: GraphQLContext,
   ): Promise<AdminGetEventsResult> {
     const pageSize = filters.limit ?? DEFAULT_RESULT_NUMBER;
     const pageNumber = filters.page ?? 1;
 
-    const pagedDtos = filters.userId
+    const { events, totalCount: totalEventsCount } = filters.userId
       ? await this.getEventsForUserUseCase.execute({
           userId: filters.userId,
           pageNumber,
@@ -72,15 +71,11 @@ export class EventAdminResolver {
         })
       : await this.getEventsUseCase.execute({ pageNumber, pageSize });
 
-    // Load full Event object types (with wishlistIds/attendeeIds) for the page of ids.
-    const loadedEvents = await ctx.loaders.event.loadMany(pagedDtos.resources.map(event => event.id));
-    const events = loadedEvents.filter((event): event is GqlEvent => event !== null && !(event instanceof Error));
-
     const pagedResponse = createPagedResponse({
-      resources: events,
+      resources: events.map(event => eventMapper.toGqlEvent(event)),
       options: {
         pageSize,
-        totalElements: pagedDtos.pagination.total_elements,
+        totalElements: totalEventsCount,
         pageNumber,
       },
     });

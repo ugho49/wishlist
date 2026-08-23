@@ -19,7 +19,6 @@ import { PasswordVerificationCreatedHandler } from './event/password-verificatio
 import { UserCreatedHandler } from './event/user-created.handler';
 import { GetClosestFriendsUseCase } from './query/get-closest-friends.use-case';
 import { GetPendingEmailChangeUseCase } from './query/get-pending-email-change.use-case';
-import { GetUserByIdUseCase } from './query/get-user-by-id.use-case';
 import { GetUserEmailSettingUseCase } from './query/get-user-email-setting.use-case';
 import { GetUserSocialsByIdsUseCase } from './query/get-user-socials-by-ids.use-case';
 import { GetUserSocialsByUserIdsUseCase } from './query/get-user-socials-by-user-ids.use-case';
@@ -47,7 +46,6 @@ export const handlers = [
   // Queries
   GetUserEmailSettingUseCase,
   GetPendingEmailChangeUseCase,
-  GetUserByIdUseCase,
   GetUsersByIdsUseCase,
   GetUsersByCriteriaUseCase,
   GetUsersPaginatedUseCase,

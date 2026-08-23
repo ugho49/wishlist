@@ -1,6 +1,7 @@
+import type { LoginOutput } from '../login.types';
+
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { LoginOutputDto } from '@wishlist/common';
 
 import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { User } from '../../../user/domain/model/user.model';
@@ -24,7 +25,7 @@ export class LoginUseCase extends CommonLoginUseCase {
     super({ jwtService, loggerName: LoginUseCase.name });
   }
 
-  async execute(command: LoginInput): Promise<LoginOutputDto> {
+  async execute(command: LoginInput): Promise<LoginOutput> {
     const { email, password, ip } = command;
     this.logger.log('Login request received', { email });
 
@@ -37,7 +38,7 @@ export class LoginUseCase extends CommonLoginUseCase {
 
     this.logger.log('Login successful', { email });
 
-    return { access_token: accessToken };
+    return { accessToken };
   }
 
   private async validateUserByEmailPassword(email: string, password: string): Promise<User> {

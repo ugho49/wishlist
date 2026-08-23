@@ -2,17 +2,20 @@ import type { UserRepository } from '../../domain/repository/user.repository';
 import type { UserSocialRepository } from '../../domain/repository/user-social.repository';
 
 import { BadRequestException, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
-import { type UserId, UserSocialDto, UserSocialType } from '@wishlist/common';
+import { type UserId, UserSocialType } from '@wishlist/common';
 
 import { GoogleAuthService } from '../../../auth/infrastructure/social/google-auth.service';
 import { TransactionManager } from '../../../core/database/transaction-manager';
 import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { UserSocial } from '../../domain/model/user-social.model';
-import { userMapper } from '../../infrastructure/user.mapper';
 
 export type LinkUserToGoogleInput = {
   code: string;
   userId: UserId;
+};
+
+export type LinkUserToGoogleOutput = {
+  userSocial: UserSocial;
 };
 
 @Injectable()
@@ -28,7 +31,7 @@ export class LinkUserToGoogleUseCase {
     private readonly transactionManager: TransactionManager,
   ) {}
 
-  async execute(input: LinkUserToGoogleInput): Promise<UserSocialDto> {
+  async execute(input: LinkUserToGoogleInput): Promise<LinkUserToGoogleOutput> {
     this.logger.log('Link user to Google request received', { input });
     const { code, userId } = input;
 
@@ -77,6 +80,6 @@ export class LinkUserToGoogleUseCase {
       await this.userSocialRepository.save(social, tx);
     });
 
-    return userMapper.toUserSocialDto(social);
+    return { userSocial: social };
   }
 }

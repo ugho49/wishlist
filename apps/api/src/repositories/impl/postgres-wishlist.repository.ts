@@ -72,20 +72,6 @@ export class PostgresWishlistRepository implements WishlistRepository {
     return result.map(PostgresWishlistRepository.toModel);
   }
 
-  async findByOwner(userId: UserId): Promise<Wishlist[]> {
-    const result = await this.databaseService.db.query.wishlist.findMany({
-      where: or(eq(schema.wishlist.ownerId, userId), eq(schema.wishlist.coOwnerId, userId)),
-      with: {
-        owner: true,
-        coOwner: true,
-        eventWishlists: true,
-        items: { with: { takers: { with: { user: true } } } },
-      },
-    });
-
-    return result.map(PostgresWishlistRepository.toModel);
-  }
-
   async findByUserPaginated(params: {
     userId: UserId;
     pagination: { take: number; skip: number };

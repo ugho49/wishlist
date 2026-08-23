@@ -6,7 +6,13 @@
  * Auth + base URL mirror the GraphQL fetcher (`../gql/fetcher`): the access
  * token is read from localStorage and the base URL from the environment.
  */
-import type { UserId, WishlistId } from '@wishlist/common';
+import type {
+  CreateWishlistHttpResponse,
+  UpdateUserPictureHttpResponse,
+  UploadWishlistLogoHttpResponse,
+  UserId,
+  WishlistId,
+} from '@wishlist/common';
 
 import { LS_KEYS } from '../core/services/auth.service';
 import { environment } from '../environment';
@@ -32,22 +38,19 @@ async function postForm<T>(path: string, form: FormData, method: 'POST' | 'PUT' 
   return (text ? JSON.parse(text) : undefined) as T;
 }
 
-export type UploadPictureResult = { picture_url: string };
-export type UploadLogoResult = { logo_url: string };
-
-export function uploadUserPicture(file: File): Promise<UploadPictureResult> {
+export function uploadUserPicture(file: File): Promise<UpdateUserPictureHttpResponse> {
   const form = new FormData();
   form.append('file', file);
   return postForm('/user/upload-picture', form);
 }
 
-export function uploadAdminUserPicture(userId: UserId, file: File): Promise<UploadPictureResult> {
+export function uploadAdminUserPicture(userId: UserId, file: File): Promise<UpdateUserPictureHttpResponse> {
   const form = new FormData();
   form.append('file', file);
   return postForm(`/admin/user/${userId}/upload-picture`, form);
 }
 
-export function uploadWishlistLogo(wishlistId: WishlistId, file: File): Promise<UploadLogoResult> {
+export function uploadWishlistLogo(wishlistId: WishlistId, file: File): Promise<UploadWishlistLogoHttpResponse> {
   const form = new FormData();
   form.append('file', file);
   return postForm(`/wishlist/${wishlistId}/upload-logo`, form);
@@ -58,7 +61,7 @@ export function uploadWishlistLogo(wishlistId: WishlistId, file: File): Promise<
  * `data` is the JSON payload (serialized into the `data` field) and `image` is
  * the optional logo file. Returns the created wishlist id.
  */
-export function createWishlistMultipart<T = { id: WishlistId }>(data: unknown, image?: File): Promise<T> {
+export function createWishlistMultipart(data: unknown, image?: File): Promise<CreateWishlistHttpResponse> {
   const form = new FormData();
   form.append('data', JSON.stringify(data));
   if (image) {

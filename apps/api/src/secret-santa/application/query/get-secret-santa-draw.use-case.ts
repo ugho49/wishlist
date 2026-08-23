@@ -1,10 +1,10 @@
-import type { AttendeeDto, EventId, ICurrentUser } from '@wishlist/common';
+import type { EventId, ICurrentUser } from '@wishlist/common';
+import type { EventAttendee } from '../../../event/domain/model/event-attendee.model';
 import type { SecretSantaUserRepository } from '../../domain/repository/secret-santa-user.repository';
 
 import { Inject, Injectable } from '@nestjs/common';
 
 import { type EventAttendeeRepository } from '../../../event/domain/repository/event-attendee.repository';
-import { eventAttendeeMapper } from '../../../event/infrastructure/event-attendee.mapper';
 import { REPOSITORIES } from '../../../repositories/repositories.constants';
 
 export type GetSecretSantaDrawInput = {
@@ -12,7 +12,9 @@ export type GetSecretSantaDrawInput = {
   eventId: EventId;
 };
 
-export type GetSecretSantaDrawResult = AttendeeDto | undefined;
+export type GetSecretSantaDrawResult = {
+  attendee: EventAttendee | undefined;
+};
 
 @Injectable()
 export class GetSecretSantaDrawUseCase {
@@ -27,10 +29,10 @@ export class GetSecretSantaDrawUseCase {
       userId: query.currentUser.id,
     });
 
-    if (!secretSantaUser) return undefined;
+    if (!secretSantaUser) return { attendee: undefined };
 
     const attendee = await this.attendeeRepository.findById(secretSantaUser.attendeeId);
 
-    return attendee ? eventAttendeeMapper.toAttendeeDto(attendee) : undefined;
+    return { attendee };
   }
 }

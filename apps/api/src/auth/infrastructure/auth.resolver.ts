@@ -34,7 +34,7 @@ export class AuthResolver {
 
     return {
       __typename: 'LoginOutput',
-      accessToken: result.access_token,
+      accessToken: result.accessToken,
     };
   }
 
@@ -51,9 +51,9 @@ export class AuthResolver {
 
     return {
       __typename: 'LoginWithGoogleOutput',
-      accessToken: result.access_token,
-      newUserCreated: result.new_user_created,
-      linkedToExistingUser: result.linked_to_existing_user,
+      accessToken: result.accessToken,
+      newUserCreated: result.newUserCreated,
+      linkedToExistingUser: result.linkedToExistingUser,
     };
   }
 }

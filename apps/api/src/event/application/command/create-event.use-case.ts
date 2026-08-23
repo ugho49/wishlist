@@ -3,7 +3,7 @@ import type { EventAttendeeRepository } from '../../domain/repository/event-atte
 
 import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common';
 import { EventBus } from '@nestjs/cqrs';
-import { AttendeeRole, type ICurrentUser, MiniEventDto } from '@wishlist/common';
+import { AttendeeRole, type ICurrentUser } from '@wishlist/common';
 import { uniq } from 'lodash';
 
 import { REPOSITORIES } from '../../../repositories/repositories.constants';
@@ -11,7 +11,6 @@ import { type UserRepository } from '../../../user/domain/repository/user.reposi
 import { AttendeeAddedEvent } from '../../domain/event/attendee-added.event';
 import { Event } from '../../domain/model/event.model';
 import { EventAttendee } from '../../domain/model/event-attendee.model';
-import { eventMapper } from '../../infrastructure/event.mapper';
 
 type NewEventAttendee = {
   email: string;
@@ -31,6 +30,10 @@ export type CreateEventInput = {
   newEvent: NewEvent;
 };
 
+export type CreateEventOutput = {
+  event: Event;
+};
+
 @Injectable()
 export class CreateEventUseCase {
   private readonly logger = new Logger(CreateEventUseCase.name);
@@ -42,7 +45,7 @@ export class CreateEventUseCase {
     private readonly eventBus: EventBus,
   ) {}
 
-  async execute(input: CreateEventInput): Promise<MiniEventDto> {
+  async execute(input: CreateEventInput): Promise<CreateEventOutput> {
     this.logger.log('Create event request received', { input });
     const attendeeEmails = uniq(input.newEvent.attendees?.map(a => a.email) ?? [])
       // Remove the current user from the list of attendees
@@ -100,6 +103,6 @@ export class CreateEventUseCase {
       await this.eventBus.publish(new AttendeeAddedEvent({ event, newAttendee: attendee, invitedBy: currentUser }));
     }
 
-    return eventMapper.toMiniEventDto(event);
+    return { event };
   }
 }

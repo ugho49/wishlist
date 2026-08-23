@@ -1,14 +1,18 @@
+import type { UserEmailSetting } from '../../domain/model/user-email-setting.model';
 import type { UserEmailSettingRepository } from '../../domain/repository/user-email-setting.repository';
 
 import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { type ICurrentUser, UserEmailSettingsDto } from '@wishlist/common';
+import { type ICurrentUser } from '@wishlist/common';
 
 import { REPOSITORIES } from '../../../repositories/repositories.constants';
-import { userEmailSettingMapper } from '../../infrastructure/email-settings.mapper';
 
 export type UpdateUserEmailSettingInput = {
   currentUser: ICurrentUser;
   dailyNewItemNotification: boolean;
+};
+
+export type UpdateUserEmailSettingOutput = {
+  userEmailSetting: UserEmailSetting;
 };
 
 @Injectable()
@@ -20,7 +24,7 @@ export class UpdateUserEmailSettingUseCase {
     private readonly userEmailSettingRepository: UserEmailSettingRepository,
   ) {}
 
-  async execute(input: UpdateUserEmailSettingInput): Promise<UserEmailSettingsDto> {
+  async execute(input: UpdateUserEmailSettingInput): Promise<UpdateUserEmailSettingOutput> {
     this.logger.log('Update user email setting request received', { input });
     const { currentUser, dailyNewItemNotification } = input;
 
@@ -40,6 +44,6 @@ export class UpdateUserEmailSettingUseCase {
     });
     await this.userEmailSettingRepository.save(updatedUserEmailSetting);
 
-    return userEmailSettingMapper.toDto(updatedUserEmailSetting);
+    return { userEmailSetting: updatedUserEmailSetting };
   }
 }

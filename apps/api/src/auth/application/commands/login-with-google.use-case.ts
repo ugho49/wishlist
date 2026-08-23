@@ -1,7 +1,9 @@
+import type { LoginOutput } from '../login.types';
+
 import { BadRequestException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { EventBus } from '@nestjs/cqrs';
 import { JwtService } from '@nestjs/jwt';
-import { LoginOutputDto, UserSocialType } from '@wishlist/common';
+import { UserSocialType } from '@wishlist/common';
 import { type TokenPayload } from 'google-auth-library';
 
 import { TransactionManager } from '../../../core/database/transaction-manager';
@@ -35,7 +37,7 @@ export class LoginWithGoogleUseCase extends CommonLoginUseCase {
     super({ jwtService, loggerName: LoginWithGoogleUseCase.name });
   }
 
-  async execute(command: LoginWithGoogleInput): Promise<LoginOutputDto> {
+  async execute(command: LoginWithGoogleInput): Promise<LoginOutput> {
     const { code, ip, createUserIfNotExists } = command;
     this.logger.log('Login with Google request received', { code });
     const payload = await this.googleAuthService.getGoogleAccountFromCode(code);
@@ -71,7 +73,7 @@ export class LoginWithGoogleUseCase extends CommonLoginUseCase {
     userSocial: UserSocial;
     payload: TokenPayload;
     ip: string;
-  }): Promise<LoginOutputDto> {
+  }): Promise<LoginOutput> {
     this.logger.log('Login with Google and update...');
     const { userSocial, payload, ip } = params;
     const { user } = userSocial;
@@ -91,10 +93,10 @@ export class LoginWithGoogleUseCase extends CommonLoginUseCase {
       await this.userRepository.save(updatedUser, tx);
     });
 
-    return { access_token: this.createAccessToken(updatedUser) };
+    return { accessToken: this.createAccessToken(updatedUser) };
   }
 
-  private async createUserWithGoogleAndLogin(params: { payload: TokenPayload; ip: string }): Promise<LoginOutputDto> {
+  private async createUserWithGoogleAndLogin(params: { payload: TokenPayload; ip: string }): Promise<LoginOutput> {
     const { payload, ip } = params;
     this.logger.log('Creating user with Google and login...', { payload, ip });
 
@@ -132,14 +134,14 @@ export class LoginWithGoogleUseCase extends CommonLoginUseCase {
 
     await this.eventBus.publish(new UserCreatedEvent({ user }));
 
-    return { access_token: this.createAccessToken(user), new_user_created: true };
+    return { accessToken: this.createAccessToken(user), newUserCreated: true };
   }
 
   private async linkUserToGoogleAndLogin(params: {
     user: User;
     payload: TokenPayload;
     ip: string;
-  }): Promise<LoginOutputDto> {
+  }): Promise<LoginOutput> {
     const { user, payload, ip } = params;
     this.logger.log('Linking user to Google and login...', { user, payload, ip });
 
@@ -166,7 +168,7 @@ export class LoginWithGoogleUseCase extends CommonLoginUseCase {
       await this.userRepository.save(updatedUser, tx);
     });
 
-    return { access_token: this.createAccessToken(updatedUser), linked_to_existing_user: true };
+    return { accessToken: this.createAccessToken(updatedUser), linkedToExistingUser: true };
   }
 
   private checkUserIsEnabled(user: User) {

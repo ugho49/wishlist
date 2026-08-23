@@ -1,67 +1,18 @@
 import type { User } from '../domain/model/user.model';
+import type { UserEmailSetting } from '../domain/model/user-email-setting.model';
 import type { UserSocial } from '../domain/model/user-social.model';
 
-import {
-  Authorities,
-  type MiniUserDto,
-  type UserDto,
-  type UserSocialDto,
-  type UserWithoutSocialsDto,
-} from '@wishlist/common';
+import { Authorities } from '@wishlist/common';
 import { DateTime } from 'luxon';
 import { match } from 'ts-pattern';
 
 import {
   type User as GqlUser,
   UserAuthorities as GqlUserAuthorities,
+  type UserEmailSettings as GqlUserEmailSettings,
   type UserFull as GqlUserFull,
   type UserSocial as GqlUserSocial,
 } from '../../gql/generated-types';
-
-function toMiniUserDto(model: User): MiniUserDto {
-  return {
-    id: model.id,
-    firstname: model.firstName,
-    lastname: model.lastName,
-    email: model.email,
-    picture_url: model.pictureUrl,
-  };
-}
-
-function toUserWithoutSocialsDto(user: User): UserWithoutSocialsDto {
-  return {
-    ...toMiniUserDto(user),
-    admin: user.isAdmin(),
-    birthday: user.birthday ? DateTime.fromJSDate(user.birthday).toISODate() || '' : undefined,
-    is_enabled: user.isEnabled,
-    last_connected_at: user.lastConnectedAt?.toISOString(),
-    last_ip: user.lastIp,
-    created_at: user.createdAt.toISOString(),
-    updated_at: user.updatedAt.toISOString(),
-  };
-}
-
-function toUserSocialDto(social: UserSocial): UserSocialDto {
-  return {
-    id: social.id,
-    email: social.email,
-    name: social.name,
-    social_id: social.socialId,
-    social_type: social.socialType,
-    picture_url: social.pictureUrl,
-    created_at: social.createdAt.toISOString(),
-    updated_at: social.updatedAt.toISOString(),
-  };
-}
-
-function toUserDto(params: { user: User; socials: UserSocial[] }): UserDto {
-  const { user, socials } = params;
-
-  return {
-    ...toUserWithoutSocialsDto(user),
-    social: socials.map(social => toUserSocialDto(social)),
-  };
-}
 
 function toGqlUser(user: User): GqlUser {
   return {
@@ -112,12 +63,16 @@ function toGqlUserSocial(social: UserSocial): GqlUserSocial {
   };
 }
 
+function toGqlUserEmailSettings(userEmailSetting: UserEmailSetting): GqlUserEmailSettings {
+  return {
+    __typename: 'UserEmailSettings',
+    dailyNewItemNotification: userEmailSetting.dailyNewItemNotification,
+  };
+}
+
 export const userMapper = {
-  toMiniUserDto,
-  toUserWithoutSocialsDto,
-  toUserDto,
-  toUserSocialDto,
   toGqlUser,
   toGqlUserFull,
   toGqlUserSocial,
+  toGqlUserEmailSettings,
 };

@@ -1,6 +1,5 @@
-import type { UserSocialId } from '@wishlist/common';
+import type { UpdateUserPictureHttpResponse, UserSocialId } from '@wishlist/common';
 import type React from 'react';
-import type { UploadPictureResult } from '../../api/upload';
 import type { UserSocial } from '../../gql';
 
 import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
@@ -69,7 +68,7 @@ const MenuButton = styled(IconButton)(({ theme }) => ({
 }));
 
 export type AvatarUpdateButtonProps = {
-  uploadPictureHandler: (file: File) => Promise<UploadPictureResult>;
+  uploadPictureHandler: (file: File) => Promise<UpdateUserPictureHttpResponse>;
   updatePictureFromSocialHandler: (socialId: UserSocialId) => Promise<void>;
   deletePictureHandler: () => Promise<void>;
   onPictureUpdated: (pictureUrl: string | undefined) => void;

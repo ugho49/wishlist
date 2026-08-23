@@ -1,4 +1,3 @@
-import type { WishlistId } from '@wishlist/common';
 import type { RootState } from '../../core/store';
 import type { SelectableEvent } from '../event/SearchEventSelect';
 
@@ -160,7 +159,7 @@ export const CreateWishlistPage = () => {
 
   const { mutateAsync: createWishlist, isPending: loading } = useMutation({
     mutationFn: () =>
-      createWishlistMultipart<{ id: WishlistId }>(
+      createWishlistMultipart(
         {
           title: `Liste de ${ownerName}`,
           description: description === '' ? undefined : description,

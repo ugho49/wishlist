@@ -1,10 +1,10 @@
+import type { Event } from '../../domain/model/event.model';
 import type { EventRepository } from '../../domain/repository/event.repository';
 
 import { Inject, Injectable } from '@nestjs/common';
-import { createPagedResponse, EventWithCountsDto, PagedResponse, type UserId } from '@wishlist/common';
+import { type UserId } from '@wishlist/common';
 
 import { REPOSITORIES } from '../../../repositories/repositories.constants';
-import { eventMapper } from '../../infrastructure/event.mapper';
 
 type GetEventsForUserInput = {
   userId: UserId;
@@ -13,11 +13,16 @@ type GetEventsForUserInput = {
   ignorePastEvents: boolean;
 };
 
+export type GetEventsForUserOutput = {
+  events: Event[];
+  totalCount: number;
+};
+
 @Injectable()
 export class GetEventsForUserUseCase {
   constructor(@Inject(REPOSITORIES.EVENT) private readonly eventRepository: EventRepository) {}
 
-  async execute(query: GetEventsForUserInput): Promise<PagedResponse<EventWithCountsDto>> {
+  async execute(query: GetEventsForUserInput): Promise<GetEventsForUserOutput> {
     const { userId, pageNumber, pageSize, ignorePastEvents } = query;
 
     const skip = (pageNumber - 1) * pageSize;
@@ -28,9 +33,6 @@ export class GetEventsForUserUseCase {
       onlyFuture: ignorePastEvents,
     });
 
-    return createPagedResponse({
-      resources: events.map(event => eventMapper.toEventWithCountsDto(event)),
-      options: { pageSize, totalElements: totalCount, pageNumber },
-    });
+    return { events, totalCount };
   }
 }
