@@ -155,9 +155,6 @@
     "apps/front": {
       "name": "front",
     },
-    "libs/api-client": {
-      "name": "@wishlist/api-client",
-    },
     "libs/common": {
       "name": "@wishlist/common",
     },
@@ -1906,8 +1903,6 @@
     "@whatwg-node/server": ["@whatwg-node/server@0.11.0", "", { "dependencies": { "@envelop/instrumentation": "^1.0.0", "@whatwg-node/disposablestack": "^0.0.6", "@whatwg-node/fetch": "^0.10.13", "@whatwg-node/promise-helpers": "^1.3.2", "tslib": "^2.6.3" } }, "sha512-VSdkwnJRr8Yv9UgB2aXB3VUPWwd6Oqnn0hycFwhg9pZgWxJXb7JmhsiXe9tmpMwjHFxli12PGcz9aI63YYloGQ=="],
 
     "@wishlist/api": ["@wishlist/api@workspace:apps/api"],
-
-    "@wishlist/api-client": ["@wishlist/api-client@workspace:libs/api-client"],
 
     "@wishlist/biome-plugin": ["@wishlist/biome-plugin@workspace:plugin/biome-plugin"],
 

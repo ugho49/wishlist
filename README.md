@@ -116,8 +116,7 @@ bun docker:down       # Stop services
 │   │   └── drizzle/            # Database schema & migrations
 │   └── front/                  # React frontend
 ├── libs/
-│   ├── common/                 # Shared DTOs, types, branded types
-│   └── api-client/             # Generated type-safe API client
+│   └── common/                 # Shared DTOs, types, branded types
 └── docker/                     # Docker Compose configuration
 ```
 
