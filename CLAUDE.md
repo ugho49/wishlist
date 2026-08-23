@@ -4,7 +4,7 @@ Guidance for Claude Code when working in this repository.
 
 Nested docs (read the one that matches the files you are changing):
 
-- [`apps/api/CLAUDE.md`](apps/api/CLAUDE.md) — NestJS API, GraphQL, use cases, Drizzle, integration tests
+- [`apps/api/CLAUDE.md`](apps/api/CLAUDE.md) — NestJS API, GraphQL, use cases, Drizzle, unit and integration tests
 - [`apps/front/CLAUDE.md`](apps/front/CLAUDE.md) — React frontend, MUI, GraphQL documents, uploads
 - [`libs/common/CLAUDE.md`](libs/common/CLAUDE.md) — shared branded IDs and remaining HTTP types
 - [`libs/mail/CLAUDE.md`](libs/mail/CLAUDE.md) — react-email templates
