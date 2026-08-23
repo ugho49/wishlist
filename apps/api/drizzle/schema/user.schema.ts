@@ -1,6 +1,8 @@
+import { Authorities } from '@wishlist/common/enums/auth.enum';
 import { relations, sql } from 'drizzle-orm';
-import { boolean, date, pgTable, uniqueIndex, varchar } from 'drizzle-orm/pg-core';
+import { boolean, date, pgEnum, pgTable, uniqueIndex, varchar } from 'drizzle-orm/pg-core';
 
+import { tsEnumToPgEnum } from '../enum';
 import { timestamps, timestampWithTimezone } from '../helpers';
 import { userId } from '../ids';
 import { itemTaker } from './item-taker.schema';
@@ -9,6 +11,8 @@ import { userEmailSetting } from './user-email-setting.schema';
 import { userPasswordVerification } from './user-password-verification.schema';
 import { userSocial } from './user-social.schema';
 import { wishlist } from './wishlist.schema';
+
+export const userAuthoritiesEnum = pgEnum('user_authorities', tsEnumToPgEnum(Authorities));
 
 export const user = pgTable(
   'user',
@@ -20,7 +24,7 @@ export const user = pgTable(
     birthday: date(),
     passwordEnc: varchar('password_enc', { length: 500 }),
     isEnabled: boolean('is_enabled').default(true).notNull(),
-    authorities: varchar({ length: 100 }).array().default(['ROLE_USER']).notNull(),
+    authorities: userAuthoritiesEnum().array().default([Authorities.ROLE_USER]).notNull(),
     lastIp: varchar('last_ip', { length: 50 }),
     lastConnectedAt: timestampWithTimezone('last_connected_at'),
     pictureUrl: varchar('picture_url', { length: 1000 }),

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { schema } from '@wishlist/api-drizzle';
-import { type UserId, type UserSocialId, UserSocialType, uuid } from '@wishlist/common';
+import { type UserId, type UserSocialId, type UserSocialType, uuid } from '@wishlist/common';
 import { and, eq, inArray } from 'drizzle-orm';
 
 import { DatabaseService } from '../../core/database/database.service';
@@ -93,7 +93,7 @@ export class PostgresUserSocialRepository implements UserSocialRepository {
       email: row.email,
       name: row.name ?? undefined,
       socialId: row.socialId,
-      socialType: row.socialType as UserSocialType,
+      socialType: row.socialType,
       pictureUrl: row.pictureUrl ?? undefined,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,

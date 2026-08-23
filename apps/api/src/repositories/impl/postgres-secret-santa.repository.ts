@@ -2,7 +2,7 @@ import type * as drizzleSchema from '../../../drizzle/schema';
 import type { DrizzleTransaction } from '../../core/database/transaction-manager';
 
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { type EventId, type SecretSantaId, SecretSantaStatus, uuid } from '@wishlist/common';
+import { type EventId, type SecretSantaId, uuid } from '@wishlist/common';
 import { eq } from 'drizzle-orm';
 
 import { DatabaseService } from '../../core/database/database.service';
@@ -108,7 +108,7 @@ export class PostgresSecretSantaRepository implements SecretSantaRepository {
       eventId: secretSanta.eventId,
       description: secretSanta.description || undefined,
       budget: secretSanta.budget || undefined,
-      status: secretSanta.status as SecretSantaStatus,
+      status: secretSanta.status,
       users: secretSanta.secretSantaUsers.map(user => PostgresSecretSantaUserRepository.toModel(user)),
       createdAt: secretSanta.createdAt,
       updatedAt: secretSanta.updatedAt,

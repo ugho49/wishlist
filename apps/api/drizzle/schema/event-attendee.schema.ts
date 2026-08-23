@@ -1,10 +1,14 @@
+import { AttendeeRole } from '@wishlist/common/enums/attendee.enum';
 import { relations, sql } from 'drizzle-orm';
-import { check, foreignKey, pgTable, unique, varchar } from 'drizzle-orm/pg-core';
+import { check, foreignKey, pgEnum, pgTable, unique, varchar } from 'drizzle-orm/pg-core';
 
+import { tsEnumToPgEnum } from '../enum';
 import { attendeeId, eventId, userId } from '../ids';
 import { event } from './event.schema';
 import { secretSantaUser } from './secret-santa-user.schema';
 import { user } from './user.schema';
+
+export const attendeeRoleEnum = pgEnum('attendee_role', tsEnumToPgEnum(AttendeeRole));
 
 export const eventAttendee = pgTable(
   'event_attendee',
@@ -13,7 +17,7 @@ export const eventAttendee = pgTable(
     eventId: eventId('event_id').notNull(),
     userId: userId('user_id'),
     tempUserEmail: varchar('temp_user_email', { length: 200 }),
-    role: varchar({ length: 50 }).default('participant').notNull(),
+    role: attendeeRoleEnum().default(AttendeeRole.PARTICIPANT).notNull(),
   },
   table => [
     foreignKey({ columns: [table.eventId], foreignColumns: [event.id] }).onDelete('cascade'),

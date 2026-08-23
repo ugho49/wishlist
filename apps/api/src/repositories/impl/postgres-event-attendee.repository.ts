@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { schema } from '@wishlist/api-drizzle';
-import { type AttendeeId, AttendeeRole, type EventId, uuid } from '@wishlist/common';
+import { type AttendeeId, type EventId, uuid } from '@wishlist/common';
 import { and, eq, inArray, or } from 'drizzle-orm';
 
 import { DatabaseService } from '../../core/database/database.service';
@@ -111,7 +111,7 @@ export class PostgresEventAttendeeRepository implements EventAttendeeRepository 
       eventId: attendee.eventId,
       user: attendee.user ? PostgresUserRepository.toModel(attendee.user) : undefined,
       pendingEmail: attendee.tempUserEmail ?? undefined,
-      role: attendee.role as AttendeeRole,
+      role: attendee.role,
     });
   }
 }

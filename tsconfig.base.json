@@ -25,6 +25,7 @@
       "@wishlist/api-drizzle": ["./apps/api/drizzle/index.ts"],
       "@wishlist/api-test-utils": ["./apps/api/test-utils/index.ts"],
       "@wishlist/common": ["./libs/common/src/index.ts"],
+      "@wishlist/common/enums/*": ["./libs/common/src/enums/*"],
       "@wishlist/mail": ["./libs/mail/src/index.ts"],
       "@wishlist/front-components/*": ["./apps/front/src/components/*"],
       "@wishlist/front-hooks": ["./apps/front/src/hooks"],

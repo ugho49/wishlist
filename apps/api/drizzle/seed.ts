@@ -1,4 +1,5 @@
 import { faker } from '@faker-js/faker';
+import { AttendeeRole, Authorities } from '@wishlist/common';
 import { createConsola } from 'consola';
 import dotenv from 'dotenv';
 import { drizzle } from 'drizzle-orm/bun-sql';
@@ -89,7 +90,7 @@ async function main() {
     firstName: 'Admin',
     lastName: 'ADMIN',
     pictureUrl: faker.image.avatar(),
-    authorities: ['ROLE_SUPERADMIN'],
+    authorities: [Authorities.ROLE_SUPERADMIN],
     passwordEnc: usersPasswordEnc,
   });
 
@@ -101,7 +102,7 @@ async function main() {
       lastName: faker.person.lastName(),
       birthday: faker.date.birthdate().toISOString(),
       pictureUrl: faker.image.avatar(),
-      authorities: ['ROLE_USER'],
+      authorities: [Authorities.ROLE_USER],
       passwordEnc: usersPasswordEnc,
     });
   }
@@ -149,7 +150,7 @@ async function main() {
       id: faker.string.uuid(),
       eventId: event.id,
       userId: creator.id,
-      role: 'creator',
+      role: AttendeeRole.CREATOR,
     });
 
     const numberOfAttendees = faker.number.int({ min: 0, max: 10 });
@@ -162,7 +163,7 @@ async function main() {
           id: faker.string.uuid(),
           eventId: event.id,
           tempUserEmail: faker.internet.email(),
-          role: 'participant',
+          role: AttendeeRole.PARTICIPANT,
         });
       } else {
         const attendee = getRandomUserWithExclusion(creator.id);
@@ -171,7 +172,7 @@ async function main() {
           id: faker.string.uuid(),
           eventId: event.id,
           userId: attendee.id,
-          role: 'participant',
+          role: AttendeeRole.PARTICIPANT,
         });
       }
     }
