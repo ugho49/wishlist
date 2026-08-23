@@ -80,13 +80,80 @@ Yoga plugin `useErrorTransformPlugin` maps thrown Nest exceptions onto the field
 - `bun serve:api` — NestJS API
 - `bun serve:api:with-codegen` — API + GraphQL codegen in watch mode
 
+## Unit tests
+
+Business logic branches (every `throw`, guard clause, conditional, early return in `execute()`) belong in **unit tests**. Integration tests cover wiring: auth guards, Zod pipes, GraphQL round-trips, and database state. Do not re-test use-case branches in int-specs.
+
+**A new use case is not done until it has a colocated unit spec.** Add `{name}.use-case.spec.ts` next to `{name}.use-case.ts` in the same PR. Cover every authorization check, business-rule `throw`, and happy path in `execute()`.
+
+**Use-case specs** (`*.use-case.spec.ts`) live next to the use case:
+
+```
+src/item/application/command/toggle-item.use-case.ts
+src/item/application/command/toggle-item.use-case.spec.ts
+```
+
+- `bun:test`, use `it()` (not `test()`), nested `describe` blocks
+- Instantiate the use case in `beforeEach` (no `Test.createTestingModule`)
+- Mock dependencies with `createMock<T>()` from `test-utils/mocks`
+- Reset with `mock.clearAllMocks()` in `beforeEach`
+- Default happy-path `mockResolvedValue` in `beforeEach`; error cases override with `mockResolvedValueOnce`
+- Real domain models via builders; mock only repositories / `EventBus` / infrastructure
+- `Logger.overrideLogger(false)` in `beforeAll` to keep Nest logs out of the output
+
+```typescript
+describe('ToggleItemUseCase', () => {
+  const itemRepository = createMock<WishlistItemRepository>()
+  const wishlistRepository = createMock<WishlistRepository>()
+  const userRepository = createMock<UserRepository>()
+
+  let useCase: ToggleItemUseCase
+  let owner: User
+  let item: WishlistItem
+
+  beforeAll(() => {
+    Logger.overrideLogger(false)
+  })
+
+  beforeEach(() => {
+    mock.clearAllMocks()
+    owner = new UserBuilder().withEmail('owner@test.fr').build()
+    const wishlist = new WishlistBuilder().withOwner(owner).build()
+    item = new WishlistItemBuilder().withWishlistId(wishlist.id).build()
+
+    itemRepository.findByIdOrFail.mockResolvedValue(item)
+    wishlistRepository.hasAccess.mockResolvedValue(true)
+    wishlistRepository.findByIdOrFail.mockResolvedValue(wishlist)
+    userRepository.findByIdOrFail.mockResolvedValue(owner)
+
+    useCase = new ToggleItemUseCase(itemRepository, wishlistRepository, userRepository)
+  })
+
+  it('should reject when the user has no access to the wishlist', async () => {
+    wishlistRepository.hasAccess.mockResolvedValueOnce(false)
+
+    await expect(useCase.execute({ currentUser: toCurrentUser(owner), itemId: item.id })).rejects.toThrow(
+      UnauthorizedException,
+    )
+    expect(itemRepository.save).not.toHaveBeenCalled()
+  })
+})
+```
+
+**Builders** (`test-utils/builders/`) — fluent `with*()` / `as*()` methods, `build()` creates the domain model (`Model.create()` when possible). Keep auto-generated fields (`id`, `createdAt`, `updatedAt`) inside `build()`, not on the builder API. Convert a `User` to `ICurrentUser` with `toCurrentUser(user)`.
+
+**Examples**
+- `src/item/application/command/toggle-item.use-case.spec.ts`
+- `src/item/application/command/delete-item.use-case.spec.ts`
+- `src/event/application/command/add-attendee.use-case.spec.ts`
+
 ## Integration tests
 
 Most int-specs target GraphQL resolvers (`*.resolver.int-spec.ts`). A few REST controller specs remain for multipart routes and `GET /health`.
 
 - **Unit tests**: `bun nx run api:test`
 - **Int tests**: `bun nx run api:test:int` (need docker to be up, auto create containers at start)
-- **Utilities**: `test-utils/`
+- **Utilities**: `test-utils/` (`createMock`, builders for unit tests; `useTestApp` / fixtures for int tests)
 - **No parallel files**: disabled for stability with shared resources
 - **Auth**: `getRequest({ signedAs })` logs in via the GraphQL `login` mutation
 
@@ -245,7 +312,7 @@ Register new command/query/event-handler classes in `application/index.ts` `hand
 3. **Transactions** — `TransactionManager.runInTransaction` only for multiple SQL queries. Pass tx context when needed.
 4. **Events** — publish after successful commands via `EventBus`; use for emails and other side effects.
 5. **Errors** — domain / Nest exceptions (`BusinessRuleException`, `NotFoundException`). Validate GraphQL input with Zod + `ZodPipe` in resolvers, not inside every use case.
-6. **Tests** — follow the integration guidelines above.
+6. **Tests** — every new use case **must** ship with a colocated `*.use-case.spec.ts` covering its branches. Integration tests cover GraphQL wiring, not those branches. See the unit-test section above.
 
 ### Repository tokens
 
