@@ -8,7 +8,6 @@ import 'reflect-metadata';
 export * from './constants';
 export * from './dtos/attendee.dto';
 export * from './dtos/common.dto';
-export * from './dtos/event.dto';
 export * from './dtos/item.dto';
 export * from './dtos/user.dto';
 export * from './dtos/wishlist.dto';

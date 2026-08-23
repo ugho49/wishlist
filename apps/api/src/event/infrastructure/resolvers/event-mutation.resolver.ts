@@ -1,11 +1,9 @@
 import type { ICurrentUser } from '@wishlist/common';
 
-import { NotFoundException } from '@nestjs/common';
-import { Args, Context, Mutation, Resolver } from '@nestjs/graphql';
+import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { type AttendeeId, type EventId } from '@wishlist/common';
 
 import { GqlCurrentUser } from '../../../auth/infrastructure/decorators/user.decorator';
-import { type GraphQLContext } from '../../../core/graphql/graphql.context';
 import { ZodPipe } from '../../../core/graphql/zod-pipe';
 import {
   type AddEventAttendeeInput,
@@ -51,9 +49,8 @@ export class EventMutationResolver {
   async createEvent(
     @Args('input', new ZodPipe(CreateEventInputSchema)) input: CreateEventInput,
     @GqlCurrentUser() currentUser: ICurrentUser,
-    @Context() ctx: GraphQLContext,
   ): Promise<CreateEventResult> {
-    const createdEvent = await this.createEventUseCase.execute({
+    const { event } = await this.createEventUseCase.execute({
       currentUser,
       newEvent: {
         title: input.title,
@@ -67,13 +64,7 @@ export class EventMutationResolver {
       },
     });
 
-    // The create use-case returns a MiniEventDto; reload the full Event via the
-    // dataloader so the resolver returns a complete Event object type.
-    const loadedEvent = await ctx.loaders.event.load(createdEvent.id);
-    if (!loadedEvent) {
-      throw new NotFoundException(`Event with id ${createdEvent.id} not found`);
-    }
-    return loadedEvent;
+    return eventMapper.toGqlEvent(event);
   }
 
   @Mutation()

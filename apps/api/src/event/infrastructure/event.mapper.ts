@@ -10,7 +10,6 @@ import {
   type Event as GqlEvent,
   type EventAttendee as GqlEventAttendee,
 } from '../../gql/generated-types';
-import { toMiniEventDto } from './event-mini.mapper';
 
 function toGqlEvent(event: Event): GqlEvent {
   return {
@@ -60,7 +59,6 @@ function toGqlEventAttendeeFromDto(attendee: AttendeeDto): GqlEventAttendee {
 }
 
 export const eventMapper = {
-  toMiniEventDto,
   toGqlEvent,
   toGqlEventAttendee,
   toGqlEventAttendeeFromDto,
