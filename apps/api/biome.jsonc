@@ -7,6 +7,10 @@
     {
       "includes": ["drizzle/schema/index.ts"],
       "linter": { "rules": { "performance": { "noBarrelFile": "off" } } }
+    },
+    {
+      "includes": ["drizzle/schema/**"],
+      "linter": { "rules": { "suspicious": { "noImportCycles": "off" } } }
     }
   ],
   "linter": {

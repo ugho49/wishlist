@@ -37,7 +37,7 @@ When bumping: raise `@typescript/native` for the compiler, and the `typescript` 
 - **Generate Migration**: `nx run api:drizzle:generate --name <migration-name>`
 - **Run Migrations**: `nx run api:drizzle:migrate`
 - **Seed Database**: `nx run api:drizzle:seed` - Populate database with sample data
-- **Schema**: Located in `apps/api/drizzle/schema.ts`
+- **Schema**: Split by table in `apps/api/drizzle/schema/` (barrel: `apps/api/drizzle/schema/index.ts`)
 - **Migrations**: Stored in `apps/api/drizzle/migrations/`
 
 ### Docker Environment

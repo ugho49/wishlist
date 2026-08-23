@@ -6,7 +6,7 @@ dotenv.config();
 
 export default defineConfig({
   dialect: 'postgresql',
-  schema: './drizzle/schema.ts',
+  schema: './drizzle/schema/index.ts',
   out: './drizzle/migrations',
   dbCredentials: {
     host: process.env.DB_HOST!,
