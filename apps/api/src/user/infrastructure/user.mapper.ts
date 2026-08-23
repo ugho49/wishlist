@@ -1,7 +1,7 @@
 import type { User } from '../domain/model/user.model';
 import type { UserSocial } from '../domain/model/user-social.model';
 
-import { Authorities, type MiniUserDto, type UserSocialDto } from '@wishlist/common';
+import { Authorities, type MiniUserDto } from '@wishlist/common';
 import { DateTime } from 'luxon';
 import { match } from 'ts-pattern';
 
@@ -19,19 +19,6 @@ function toMiniUserDto(model: User): MiniUserDto {
     lastname: model.lastName,
     email: model.email,
     picture_url: model.pictureUrl,
-  };
-}
-
-function toUserSocialDto(social: UserSocial): UserSocialDto {
-  return {
-    id: social.id,
-    email: social.email,
-    name: social.name,
-    social_id: social.socialId,
-    social_type: social.socialType,
-    picture_url: social.pictureUrl,
-    created_at: social.createdAt.toISOString(),
-    updated_at: social.updatedAt.toISOString(),
   };
 }
 
@@ -86,7 +73,6 @@ function toGqlUserSocial(social: UserSocial): GqlUserSocial {
 
 export const userMapper = {
   toMiniUserDto,
-  toUserSocialDto,
   toGqlUser,
   toGqlUserFull,
   toGqlUserSocial,

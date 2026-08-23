@@ -2,13 +2,11 @@ import type { UserRepository } from '../../domain/repository/user.repository';
 
 import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { EventBus } from '@nestjs/cqrs';
-import { MiniUserDto } from '@wishlist/common';
 
 import { PasswordManager } from '../../../auth/infrastructure/util/password-manager';
 import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { UserCreatedEvent } from '../../domain/event/user-created.event';
 import { User } from '../../domain/model/user.model';
-import { userMapper } from '../../infrastructure/user.mapper';
 
 export type CreateUserInput = {
   newUser: {
@@ -21,6 +19,10 @@ export type CreateUserInput = {
   ip: string;
 };
 
+export type CreateUserOutput = {
+  user: User;
+};
+
 @Injectable()
 export class CreateUserUseCase {
   private readonly logger = new Logger(CreateUserUseCase.name);
@@ -31,7 +33,7 @@ export class CreateUserUseCase {
     private readonly eventBus: EventBus,
   ) {}
 
-  async execute(input: CreateUserInput): Promise<MiniUserDto> {
+  async execute(input: CreateUserInput): Promise<CreateUserOutput> {
     this.logger.log('Create user request received', {
       payload: {
         newUser: {
@@ -63,6 +65,6 @@ export class CreateUserUseCase {
 
     await this.eventBus.publish(new UserCreatedEvent({ user }));
 
-    return userMapper.toMiniUserDto(user);
+    return { user };
   }
 }

@@ -1,16 +1,20 @@
+import type { User } from '../../domain/model/user.model';
 import type { UserRepository } from '../../domain/repository/user.repository';
 
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
-import { MiniUserDto, type UserId } from '@wishlist/common';
+import { type UserId } from '@wishlist/common';
 
 import { REPOSITORIES } from '../../../repositories/repositories.constants';
-import { userMapper } from '../../infrastructure/user.mapper';
 
 const MAX_LIMIT = 50;
 
 export type GetClosestFriendsInput = {
   userId: UserId;
   limit: number;
+};
+
+export type GetClosestFriendsOutput = {
+  users: User[];
 };
 
 @Injectable()
@@ -20,7 +24,7 @@ export class GetClosestFriendsUseCase {
     private readonly userRepository: UserRepository,
   ) {}
 
-  async execute(query: GetClosestFriendsInput): Promise<MiniUserDto[]> {
+  async execute(query: GetClosestFriendsInput): Promise<GetClosestFriendsOutput> {
     const { userId, limit } = query;
 
     if (limit > MAX_LIMIT) {
@@ -29,6 +33,6 @@ export class GetClosestFriendsUseCase {
 
     const closestFriends = await this.userRepository.findClosestFriends(userId, limit);
 
-    return closestFriends.map(user => userMapper.toMiniUserDto(user));
+    return { users: closestFriends };
   }
 }

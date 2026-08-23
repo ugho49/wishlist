@@ -53,6 +53,7 @@ import { UpdateUserPictureFromSocialUseCase } from '../../application/command/up
 import { GetClosestFriendsUseCase } from '../../application/query/get-closest-friends.use-case';
 import { GetPendingEmailChangeUseCase } from '../../application/query/get-pending-email-change.use-case';
 import { GetUsersByCriteriaUseCase } from '../../application/query/get-users-by-criteria.use-case';
+import { userMapper } from '../user.mapper';
 import {
   ChangeUserPasswordInputSchema,
   ClosestFriendsLimitSchema,
@@ -101,14 +102,12 @@ export class UserResolver {
   async searchUsers(
     @Args('keyword', new ZodPipe(SearchUsersKeywordSchema)) keyword: string,
     @GqlCurrentUser() currentUser: ICurrentUser,
-    @Context() ctx: GraphQLContext,
   ): Promise<SearchUsersResult> {
-    const miniUsers = await this.getUsersByCriteriaUseCase.execute({ currentUser, criteria: keyword });
-    const users = await Promise.all(miniUsers.map(user => ctx.loaders.user.load(user.id)));
+    const { users } = await this.getUsersByCriteriaUseCase.execute({ currentUser, criteria: keyword });
 
     return {
       __typename: 'SearchUsersOutput',
-      users: users.filter((user): user is User => !!user),
+      users: users.map(user => userMapper.toGqlUser(user)),
     };
   }
 
@@ -116,14 +115,12 @@ export class UserResolver {
   async closestFriends(
     @Args('limit', new ZodPipe(ClosestFriendsLimitSchema)) limit: number | undefined,
     @GqlCurrentUser('id') currentUserId: UserId,
-    @Context() ctx: GraphQLContext,
   ): Promise<ClosestFriendsResult> {
-    const miniUsers = await this.getClosestFriendsUseCase.execute({ userId: currentUserId, limit: limit ?? 20 });
-    const users = await Promise.all(miniUsers.map(user => ctx.loaders.user.load(user.id)));
+    const { users } = await this.getClosestFriendsUseCase.execute({ userId: currentUserId, limit: limit ?? 20 });
 
     return {
       __typename: 'ClosestFriendsOutput',
-      users: users.filter((user): user is User => !!user),
+      users: users.map(user => userMapper.toGqlUser(user)),
     };
   }
 
@@ -132,9 +129,8 @@ export class UserResolver {
   async registerUser(
     @Args('input', new ZodPipe(RegisterUserInputSchema)) input: RegisterUserInput,
     @RealIP() ip: string,
-    @Context() ctx: GraphQLContext,
   ): Promise<RegisterUserResult> {
-    const user = await this.createUserUseCase.execute({
+    const { user } = await this.createUserUseCase.execute({
       ip,
       newUser: {
         email: input.email,
@@ -145,31 +141,20 @@ export class UserResolver {
       },
     });
 
-    const loadedUser = await ctx.loaders.user.load(user.id);
-
-    if (!loadedUser) {
-      throw new Error('Failed to load user');
-    }
-
-    return loadedUser;
+    return userMapper.toGqlUser(user);
   }
 
   @Mutation()
   async linkCurrentUserWithGoogle(
     @Args('input', new ZodPipe(LinkUserToGoogleInputSchema)) input: LinkUserToGoogleInput,
     @GqlCurrentUser('id') currentUserId: UserId,
-    @Context() ctx: GraphQLContext,
   ): Promise<LinkUserToGoogleResult> {
-    const userSocial = await this.linkUserToGoogleUseCase.execute({
+    const { userSocial } = await this.linkUserToGoogleUseCase.execute({
       code: input.code,
       userId: currentUserId,
     });
 
-    const loadedUserSocial = await ctx.loaders.userSocial.load(userSocial.id);
-    if (!loadedUserSocial) {
-      throw new Error('Failed to load user social');
-    }
-    return loadedUserSocial;
+    return userMapper.toGqlUserSocial(userSocial);
   }
 
   @Mutation()
