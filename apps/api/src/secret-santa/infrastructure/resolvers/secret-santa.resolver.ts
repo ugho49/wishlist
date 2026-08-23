@@ -73,9 +73,9 @@ export class SecretSantaResolver {
     @Args('eventId', new ZodPipe(EventIdSchema)) eventId: EventId,
     @GqlCurrentUser() currentUser: ICurrentUser,
   ): Promise<GetMySecretSantaDrawResult | null> {
-    const result = await this.getSecretSantaDrawUseCase.execute({ currentUser, eventId });
-    if (!result) return null;
-    return eventMapper.toGqlEventAttendeeFromDto(result);
+    const { attendee } = await this.getSecretSantaDrawUseCase.execute({ currentUser, eventId });
+    if (!attendee) return null;
+    return eventMapper.toGqlEventAttendee(attendee);
   }
 
   @Mutation()

@@ -111,7 +111,7 @@ export class EventMutationResolver {
     @Args('input', new ZodPipe(AddEventAttendeeInputSchema)) input: AddEventAttendeeInput,
     @GqlCurrentUser() currentUser: ICurrentUser,
   ): Promise<AddEventAttendeeResult> {
-    const attendee = await this.addAttendeeUseCase.execute({
+    const { attendee } = await this.addAttendeeUseCase.execute({
       currentUser,
       eventId,
       newAttendee: {
@@ -120,7 +120,7 @@ export class EventMutationResolver {
       },
     });
 
-    return eventMapper.toGqlEventAttendeeFromDto(attendee);
+    return eventMapper.toGqlEventAttendee(attendee);
   }
 
   @Mutation()

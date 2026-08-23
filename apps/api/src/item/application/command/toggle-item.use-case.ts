@@ -1,18 +1,21 @@
 import type { WishlistItemRepository } from '../../domain/wishlist-item.repository';
 
 import { Inject, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
-import { type ICurrentUser, type ItemId, type ItemTakerDto, ToggleItemOutputDto } from '@wishlist/common';
+import { type ICurrentUser, type ItemId } from '@wishlist/common';
 
 import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { type UserRepository } from '../../../user/domain/repository/user.repository';
-import { userMapper } from '../../../user/infrastructure/user.mapper';
 import { Wishlist } from '../../../wishlist/domain/wishlist.model';
 import { type WishlistRepository } from '../../../wishlist/domain/wishlist.repository';
-import { WishlistItem } from '../../domain/wishlist-item.model';
+import { type ItemTaker, WishlistItem } from '../../domain/wishlist-item.model';
 
 export type ToggleItemInput = {
   currentUser: ICurrentUser;
   itemId: ItemId;
+};
+
+export type ToggleItemOutput = {
+  takers: ItemTaker[];
 };
 
 @Injectable()
@@ -25,7 +28,7 @@ export class ToggleItemUseCase {
     @Inject(REPOSITORIES.USER) private readonly userRepository: UserRepository,
   ) {}
 
-  async execute(command: ToggleItemInput): Promise<ToggleItemOutputDto> {
+  async execute(command: ToggleItemInput): Promise<ToggleItemOutput> {
     this.logger.log('Toggle item request received', { command });
     const item = await this.itemRepository.findByIdOrFail(command.itemId);
     const hasAccess = await this.wishlistRepository.hasAccess({
@@ -46,7 +49,7 @@ export class ToggleItemUseCase {
       : await this.check({ item, wishlist, currentUser: command.currentUser });
 
     return {
-      takers: ToggleItemUseCase.toTakerDtos(updatedItem),
+      takers: updatedItem.takers,
     };
   }
 
@@ -95,12 +98,5 @@ export class ToggleItemUseCase {
     await this.itemRepository.save(updatedItem);
 
     return updatedItem;
-  }
-
-  private static toTakerDtos(item: WishlistItem): ItemTakerDto[] {
-    return item.takers.map(taker => ({
-      user: userMapper.toMiniUserDto(taker.user),
-      taken_at: taker.takenAt.toISOString(),
-    }));
   }
 }

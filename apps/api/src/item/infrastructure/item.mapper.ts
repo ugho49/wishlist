@@ -1,13 +1,13 @@
-import type { WishlistItem } from '../domain/wishlist-item.model';
+import type { ItemTaker, WishlistItem } from '../domain/wishlist-item.model';
 
 import { type Item as GqlItem, type ItemTaker as GqlItemTaker } from '../../gql/generated-types';
 
-function toGqlTakers(item: WishlistItem): GqlItemTaker[] {
-  return item.takers.map(taker => ({
+function toGqlItemTaker(taker: ItemTaker): GqlItemTaker {
+  return {
     __typename: 'ItemTaker',
     userId: taker.user.id,
     takenAt: taker.takenAt.toISOString(),
-  }));
+  };
 }
 
 function toGqlItem(param: { item: WishlistItem; displayUserAndSuggested: boolean }): GqlItem {
@@ -27,7 +27,7 @@ function toGqlItem(param: { item: WishlistItem; displayUserAndSuggested: boolean
 
   if (displayUserAndSuggested) {
     dto.isSuggested = item.isSuggested;
-    dto.takers = toGqlTakers(item);
+    dto.takers = item.takers.map(taker => toGqlItemTaker(taker));
   }
 
   return dto;
@@ -35,5 +35,5 @@ function toGqlItem(param: { item: WishlistItem; displayUserAndSuggested: boolean
 
 export const itemMapper = {
   toGqlItem,
-  toGqlTakers,
+  toGqlItemTaker,
 };

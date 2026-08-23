@@ -151,15 +151,11 @@ export class ItemResolver {
     @Args('itemId', new ZodPipe(ItemIdSchema)) itemId: ItemId,
     @GqlCurrentUser() currentUser: ICurrentUser,
   ): Promise<ToggleItemResult> {
-    const result = await this.toggleItemUseCase.execute({ itemId, currentUser });
+    const { takers } = await this.toggleItemUseCase.execute({ itemId, currentUser });
 
     return {
       __typename: 'ToggleItemOutput',
-      takers: result.takers.map(taker => ({
-        __typename: 'ItemTaker' as const,
-        userId: taker.user.id,
-        takenAt: taker.taken_at,
-      })),
+      takers: takers.map(taker => itemMapper.toGqlItemTaker(taker)),
     };
   }
 

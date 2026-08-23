@@ -1,21 +1,25 @@
+import type { Event } from '../../domain/model/event.model';
 import type { EventRepository } from '../../domain/repository/event.repository';
 
 import { Inject, Injectable } from '@nestjs/common';
-import { createPagedResponse, EventWithCountsDto, PagedResponse } from '@wishlist/common';
 
 import { REPOSITORIES } from '../../../repositories/repositories.constants';
-import { eventMapper } from '../../infrastructure/event.mapper';
 
 export type GetEventsInput = {
   pageNumber: number;
   pageSize: number;
 };
 
+export type GetEventsOutput = {
+  events: Event[];
+  totalCount: number;
+};
+
 @Injectable()
 export class GetEventsUseCase {
   constructor(@Inject(REPOSITORIES.EVENT) private readonly eventRepository: EventRepository) {}
 
-  async execute(input: GetEventsInput): Promise<PagedResponse<EventWithCountsDto>> {
+  async execute(input: GetEventsInput): Promise<GetEventsOutput> {
     const { pageNumber, pageSize } = input;
 
     const skip = (pageNumber - 1) * pageSize;
@@ -24,9 +28,6 @@ export class GetEventsUseCase {
       pagination: { take: pageSize, skip },
     });
 
-    return createPagedResponse({
-      resources: events.map(event => eventMapper.toEventWithCountsDto(event)),
-      options: { pageSize, totalElements: totalCount, pageNumber },
-    });
+    return { events, totalCount };
   }
 }

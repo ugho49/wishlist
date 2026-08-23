@@ -3,13 +3,12 @@ import type { EventAttendeeRepository } from '../../domain/repository/event-atte
 
 import { BadRequestException, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { EventBus } from '@nestjs/cqrs';
-import { AttendeeDto, AttendeeRole, type EventId, type ICurrentUser } from '@wishlist/common';
+import { AttendeeRole, type EventId, type ICurrentUser } from '@wishlist/common';
 
 import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { type UserRepository } from '../../../user/domain/repository/user.repository';
 import { AttendeeAddedEvent } from '../../domain/event/attendee-added.event';
 import { EventAttendee } from '../../domain/model/event-attendee.model';
-import { eventAttendeeMapper } from '../../infrastructure/event-attendee.mapper';
 
 export type AddAttendeeInput = {
   currentUser: ICurrentUser;
@@ -18,6 +17,10 @@ export type AddAttendeeInput = {
     email: string;
     role?: AttendeeRole;
   };
+};
+
+export type AddAttendeeOutput = {
+  attendee: EventAttendee;
 };
 
 @Injectable()
@@ -34,7 +37,7 @@ export class AddAttendeeUseCase {
     private readonly eventBus: EventBus,
   ) {}
 
-  async execute(input: AddAttendeeInput): Promise<AttendeeDto> {
+  async execute(input: AddAttendeeInput): Promise<AddAttendeeOutput> {
     const { eventId, currentUser } = input;
     this.logger.log('Add attendee request received', { eventId, currentUser });
 
@@ -85,6 +88,6 @@ export class AddAttendeeUseCase {
       }),
     );
 
-    return eventAttendeeMapper.toAttendeeDto(newAttendee);
+    return { attendee: newAttendee };
   }
 }
