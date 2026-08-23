@@ -1,34 +1,46 @@
-import type { SecretSantaDto, SecretSantaUserDto } from '@wishlist/common';
-import type { Event } from '../../event/domain/model/event.model';
-import type { EventAttendee } from '../../event/domain/model/event-attendee.model';
 import type { SecretSanta } from '../domain/model/secret-santa.model';
 import type { SecretSantaUser } from '../domain/model/secret-santa-user.model';
 
-import { eventMapper } from '../../event/infrastructure/event.mapper';
-import { eventAttendeeMapper } from '../../event/infrastructure/event-attendee.mapper';
+import { SecretSantaStatus } from '@wishlist/common';
+import { match } from 'ts-pattern';
 
-function toSecretSantaDto(model: SecretSanta, event: Event): SecretSantaDto {
+import {
+  type SecretSanta as GqlSecretSanta,
+  SecretSantaStatus as GqlSecretSantaStatus,
+  type SecretSantaUser as GqlSecretSantaUser,
+} from '../../gql/generated-types';
+
+function toGqlSecretSantaStatus(status: SecretSantaStatus): GqlSecretSantaStatus {
+  return match(status)
+    .with(SecretSantaStatus.CREATED, () => GqlSecretSantaStatus.Created)
+    .with(SecretSantaStatus.STARTED, () => GqlSecretSantaStatus.Started)
+    .exhaustive();
+}
+
+function toGqlSecretSantaUser(user: SecretSantaUser): GqlSecretSantaUser {
   return {
-    id: model.id,
-    description: model.description,
-    budget: model.budget,
-    status: model.status,
-    event: eventMapper.toMiniEventDto(event),
-    users: model.users.map(user => toSecretSantaUserDto(user, event.attendees.find(a => a.id === user.attendeeId)!)),
-    created_at: model.createdAt.toISOString(),
-    updated_at: model.updatedAt.toISOString(),
+    __typename: 'SecretSantaUser',
+    id: user.id,
+    attendeeId: user.attendeeId,
+    exclusions: user.exclusions,
   };
 }
 
-function toSecretSantaUserDto(model: SecretSantaUser, attendee: EventAttendee): SecretSantaUserDto {
+function toGqlSecretSanta(secretSanta: SecretSanta): GqlSecretSanta {
   return {
-    id: model.id,
-    attendee: eventAttendeeMapper.toAttendeeDto(attendee),
-    exclusions: model.exclusions,
+    __typename: 'SecretSanta',
+    id: secretSanta.id,
+    eventId: secretSanta.eventId,
+    description: secretSanta.description,
+    budget: secretSanta.budget,
+    status: toGqlSecretSantaStatus(secretSanta.status),
+    users: secretSanta.users.map(toGqlSecretSantaUser),
+    createdAt: secretSanta.createdAt.toISOString(),
+    updatedAt: secretSanta.updatedAt.toISOString(),
   };
 }
 
 export const secretSantaMapper = {
-  toSecretSantaDto,
-  toSecretSantaUserDto,
+  toGqlSecretSanta,
+  toGqlSecretSantaUser,
 };

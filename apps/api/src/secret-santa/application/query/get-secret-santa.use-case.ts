@@ -1,18 +1,20 @@
-import type { EventId, ICurrentUser, SecretSantaDto } from '@wishlist/common';
+import type { EventId, ICurrentUser } from '@wishlist/common';
+import type { SecretSanta } from '../../domain/model/secret-santa.model';
 import type { SecretSantaRepository } from '../../domain/repository/secret-santa.repository';
 
 import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
 
 import { type EventRepository } from '../../../event/domain/repository/event.repository';
 import { REPOSITORIES } from '../../../repositories/repositories.constants';
-import { secretSantaMapper } from '../../infrastructure/secret-santa.mapper';
 
 export type GetSecretSantaInput = {
   currentUser: ICurrentUser;
   eventId: EventId;
 };
 
-export type GetSecretSantaResult = SecretSantaDto | undefined;
+export type GetSecretSantaResult = {
+  secretSanta: SecretSanta | undefined;
+};
 
 @Injectable()
 export class GetSecretSantaUseCase {
@@ -26,7 +28,7 @@ export class GetSecretSantaUseCase {
       eventId: query.eventId,
     });
 
-    if (!secretSanta) return undefined;
+    if (!secretSanta) return { secretSanta: undefined };
 
     const event = await this.eventRepository.findByIdOrFail(query.eventId);
 
@@ -34,6 +36,6 @@ export class GetSecretSantaUseCase {
       throw new ForbiddenException('Event cannot be viewed by this user');
     }
 
-    return secretSantaMapper.toSecretSantaDto(secretSanta, event);
+    return { secretSanta };
   }
 }

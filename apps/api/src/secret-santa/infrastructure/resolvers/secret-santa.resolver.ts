@@ -32,7 +32,7 @@ import { UpdateSecretSantaUseCase } from '../../application/command/update-secre
 import { UpdateSecretSantaUserUseCase } from '../../application/command/update-secret-santa-user.use-case';
 import { GetSecretSantaUseCase } from '../../application/query/get-secret-santa.use-case';
 import { GetSecretSantaDrawUseCase } from '../../application/query/get-secret-santa-draw.use-case';
-import { secretSantaGqlMapper } from '../secret-santa.gql-mapper';
+import { secretSantaMapper } from '../secret-santa.mapper';
 import {
   AddSecretSantaUsersInputSchema,
   CreateSecretSantaInputSchema,
@@ -63,9 +63,9 @@ export class SecretSantaResolver {
     @Args('eventId', new ZodPipe(EventIdSchema)) eventId: EventId,
     @GqlCurrentUser() currentUser: ICurrentUser,
   ): Promise<GetSecretSantaForEventResult | null> {
-    const result = await this.getSecretSantaUseCase.execute({ currentUser, eventId });
-    if (!result) return null;
-    return secretSantaGqlMapper.toGqlSecretSanta(result);
+    const { secretSanta } = await this.getSecretSantaUseCase.execute({ currentUser, eventId });
+    if (!secretSanta) return null;
+    return secretSantaMapper.toGqlSecretSanta(secretSanta);
   }
 
   @Query()
@@ -83,14 +83,14 @@ export class SecretSantaResolver {
     @Args('input', new ZodPipe(CreateSecretSantaInputSchema)) input: CreateSecretSantaInput,
     @GqlCurrentUser() currentUser: ICurrentUser,
   ): Promise<CreateSecretSantaResult> {
-    const result = await this.createSecretSantaUseCase.execute({
+    const { secretSanta } = await this.createSecretSantaUseCase.execute({
       currentUser,
       eventId: input.eventId,
       budget: input.budget ?? undefined,
       description: input.description ?? undefined,
     });
 
-    return secretSantaGqlMapper.toGqlSecretSanta(result);
+    return secretSantaMapper.toGqlSecretSanta(secretSanta);
   }
 
   @Mutation()
@@ -150,7 +150,7 @@ export class SecretSantaResolver {
 
     return {
       __typename: 'AddSecretSantaUsersOutput',
-      users: users.map(secretSantaGqlMapper.toGqlSecretSantaUser),
+      users: users.map(secretSantaMapper.toGqlSecretSantaUser),
     };
   }
 

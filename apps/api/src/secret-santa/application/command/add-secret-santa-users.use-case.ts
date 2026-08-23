@@ -1,4 +1,4 @@
-import type { AttendeeId, ICurrentUser, SecretSantaId, SecretSantaUserDto } from '@wishlist/common';
+import type { AttendeeId, ICurrentUser, SecretSantaId } from '@wishlist/common';
 import type { SecretSantaRepository } from '../../domain/repository/secret-santa.repository';
 import type { SecretSantaUserRepository } from '../../domain/repository/secret-santa-user.repository';
 
@@ -7,7 +7,6 @@ import { BadRequestException, ForbiddenException, Inject, Injectable, Logger } f
 import { type EventRepository } from '../../../event/domain/repository/event.repository';
 import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { SecretSantaUser } from '../../domain/model/secret-santa-user.model';
-import { secretSantaMapper } from '../../infrastructure/secret-santa.mapper';
 
 export type AddSecretSantaUsersInput = {
   currentUser: ICurrentUser;
@@ -16,7 +15,7 @@ export type AddSecretSantaUsersInput = {
 };
 
 export type AddSecretSantaUsersResult = {
-  users: SecretSantaUserDto[];
+  users: SecretSantaUser[];
 };
 
 @Injectable()
@@ -63,10 +62,6 @@ export class AddSecretSantaUsersUseCase {
     this.logger.log('Creating secret santa users...', { secretSantaId: secretSanta.id, users });
     await this.secretSantaUserRepository.saveAll(users);
 
-    const userDtos = users.map(user =>
-      secretSantaMapper.toSecretSantaUserDto(user, event.attendees.find(a => a.id === user.attendeeId)!),
-    );
-
-    return { users: userDtos };
+    return { users };
   }
 }
