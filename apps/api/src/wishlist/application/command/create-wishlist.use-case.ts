@@ -1,7 +1,7 @@
 import type { WishlistRepository } from '../../domain/wishlist.repository';
 
 import { Inject, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
-import { DetailedWishlistDto, type EventId, type ICurrentUser } from '@wishlist/common';
+import { type EventId, type ICurrentUser } from '@wishlist/common';
 import { uniq } from 'lodash';
 
 import { BucketService } from '../../../core/bucket/bucket.service';
@@ -9,7 +9,6 @@ import { type EventRepository } from '../../../event/domain/repository/event.rep
 import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { type UserRepository } from '../../../user/domain/repository/user.repository';
 import { Wishlist } from '../../domain/wishlist.model';
-import { wishlistMapper } from '../../infrastructure/wishlist.mapper';
 
 export type CreateWishlistInput = {
   currentUser: ICurrentUser;
@@ -33,7 +32,7 @@ export class CreateWishlistUseCase {
     private readonly bucketService: BucketService,
   ) {}
 
-  async execute(command: CreateWishlistInput): Promise<DetailedWishlistDto> {
+  async execute(command: CreateWishlistInput): Promise<Wishlist> {
     this.logger.log('Create wishlist request received', { command });
 
     const eventIds = uniq(command.newWishlist.eventIds);
@@ -73,10 +72,6 @@ export class CreateWishlistUseCase {
     this.logger.log('Saving wishlist...', { wishlistId: wishlist.id });
     await this.wishlistRepository.save(wishlist);
 
-    return wishlistMapper.toDetailedWishlistDto({
-      wishlist,
-      currentUserId: command.currentUser.id,
-      events,
-    });
+    return wishlist;
   }
 }

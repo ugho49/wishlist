@@ -24,25 +24,6 @@ export class MiniUserDto {
   declare picture_url?: string;
 }
 
-export class UserWithoutSocialsDto extends MiniUserDto {
-  declare birthday?: string;
-  declare admin: boolean;
-  declare is_enabled: boolean;
-  declare last_connected_at?: string;
-  declare last_ip?: string;
-  declare created_at: string;
-  declare updated_at: string;
-}
-
-export class UserDto extends UserWithoutSocialsDto {
-  declare social: UserSocialDto[];
-}
-
 export class UserEmailSettingsDto {
   declare daily_new_item_notification: boolean;
-}
-
-export class PendingEmailChangeDto {
-  declare new_email: string;
-  declare expired_at: string;
 }

@@ -19,7 +19,3 @@ export class SecretSantaDto {
   declare created_at: string;
   declare updated_at: string;
 }
-
-export class CreateSecretSantaUsersOutputDto {
-  declare users: SecretSantaUserDto[];
-}

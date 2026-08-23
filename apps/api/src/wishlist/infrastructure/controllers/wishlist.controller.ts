@@ -3,7 +3,6 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import {
   CreateWishlistInputDto,
-  DetailedWishlistDto,
   type ICurrentUser,
   UpdateWishlistLogoOutputDto,
   type WishlistId,
@@ -26,13 +25,13 @@ export class WishlistController {
   @Post()
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('image'))
-  createWishlistWithLogo(
+  async createWishlistWithLogo(
     @CurrentUser() currentUser: ICurrentUser,
     @ValidJsonBody('data') dto: CreateWishlistInputDto,
     @UploadedFile(wishlistLogoFileValidators(false), wishlistLogoResizePipe(false))
     imageFile?: Express.Multer.File,
-  ): Promise<DetailedWishlistDto> {
-    return this.createWishlistUseCase.execute({
+  ): Promise<{ id: WishlistId }> {
+    const wishlist = await this.createWishlistUseCase.execute({
       currentUser,
       newWishlist: {
         title: dto.title,
@@ -42,6 +41,8 @@ export class WishlistController {
         imageFile,
       },
     });
+
+    return { id: wishlist.id };
   }
 
   @Post('/:id/upload-logo')
