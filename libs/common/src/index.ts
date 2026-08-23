@@ -5,11 +5,10 @@
 // the app entry, so the polyfill must be a real dependency of this module.
 import 'reflect-metadata';
 
+export * from './api/common.api';
+export * from './api/user.api';
+export * from './api/wishlist.api';
 export * from './constants';
-export * from './dtos/common.dto';
-export * from './dtos/item.dto';
-export * from './dtos/user.dto';
-export * from './dtos/wishlist.dto';
 export * from './enums/attendee.enum';
 export * from './enums/auth.enum';
 export * from './enums/secret-santa.enum';

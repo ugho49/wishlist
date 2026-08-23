@@ -12,7 +12,7 @@ export type CreateWishlistHttpResponse = {
   id: WishlistId;
 };
 
-export class CreateWishlistInputDto {
+export class CreateWishlistHttpRequest {
   @MaxLength(100)
   @IsString()
   @IsNotEmpty()

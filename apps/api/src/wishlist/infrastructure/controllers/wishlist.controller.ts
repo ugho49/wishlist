@@ -2,8 +2,8 @@ import { Controller, Param, Post, UploadedFile, UseInterceptors } from '@nestjs/
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import {
+  CreateWishlistHttpRequest,
   type CreateWishlistHttpResponse,
-  CreateWishlistInputDto,
   type ICurrentUser,
   type UploadWishlistLogoHttpResponse,
   type WishlistId,
@@ -28,7 +28,7 @@ export class WishlistController {
   @UseInterceptors(FileInterceptor('image'))
   async createWishlistWithLogo(
     @CurrentUser() currentUser: ICurrentUser,
-    @ValidJsonBody('data') dto: CreateWishlistInputDto,
+    @ValidJsonBody('data') dto: CreateWishlistHttpRequest,
     @UploadedFile(wishlistLogoFileValidators(false), wishlistLogoResizePipe(false))
     imageFile?: Express.Multer.File,
   ): Promise<CreateWishlistHttpResponse> {

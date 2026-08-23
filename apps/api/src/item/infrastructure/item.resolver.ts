@@ -163,11 +163,11 @@ export class ItemResolver {
   async scanItemUrl(
     @Args('input', new ZodPipe(ScanItemUrlInputSchema)) input: ScanItemUrlInput,
   ): Promise<ScanItemUrlResult> {
-    const result = await this.scanItemUrlUseCase.execute({ url: input.url });
+    const { pictureUrl } = await this.scanItemUrlUseCase.execute({ url: input.url });
 
     return {
       __typename: 'ScanItemUrlOutput',
-      pictureUrl: result.picture_url,
+      pictureUrl,
     };
   }
 }

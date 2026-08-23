@@ -2,7 +2,7 @@ import type { User } from '../domain/model/user.model';
 import type { UserEmailSetting } from '../domain/model/user-email-setting.model';
 import type { UserSocial } from '../domain/model/user-social.model';
 
-import { Authorities, type MiniUserDto } from '@wishlist/common';
+import { Authorities } from '@wishlist/common';
 import { DateTime } from 'luxon';
 import { match } from 'ts-pattern';
 
@@ -13,16 +13,6 @@ import {
   type UserFull as GqlUserFull,
   type UserSocial as GqlUserSocial,
 } from '../../gql/generated-types';
-
-function toMiniUserDto(model: User): MiniUserDto {
-  return {
-    id: model.id,
-    firstname: model.firstName,
-    lastname: model.lastName,
-    email: model.email,
-    picture_url: model.pictureUrl,
-  };
-}
 
 function toGqlUser(user: User): GqlUser {
   return {
@@ -81,7 +71,6 @@ function toGqlUserEmailSettings(userEmailSetting: UserEmailSetting): GqlUserEmai
 }
 
 export const userMapper = {
-  toMiniUserDto,
   toGqlUser,
   toGqlUserFull,
   toGqlUserSocial,

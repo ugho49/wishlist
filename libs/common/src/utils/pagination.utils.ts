@@ -1,9 +1,9 @@
-import type { PagedResponse } from '../dtos/common.dto';
+import type { PagedHttpResponse } from '../api/common.api';
 
 export function createPagedResponse<T>(params: {
   resources: T[];
   options: { pageSize: number; pageNumber?: number; totalElements: number };
-}): PagedResponse<T> {
+}): PagedHttpResponse<T> {
   const { options, resources } = params;
   const { pageNumber, totalElements, pageSize } = options;
 

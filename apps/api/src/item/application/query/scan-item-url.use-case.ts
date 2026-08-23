@@ -1,20 +1,23 @@
 import type { Element } from 'domhandler';
 
 import { Injectable, Logger } from '@nestjs/common';
-import { ScanItemOutputDto } from '@wishlist/common';
 import { type Cheerio, load as loadHtml } from 'cheerio';
 
 export type ScanItemUrlInput = {
   url: string;
 };
 
+export type ScanItemUrlOutput = {
+  pictureUrl: string | null;
+};
+
 @Injectable()
 export class ScanItemUrlUseCase {
   private readonly logger = new Logger(ScanItemUrlUseCase.name);
 
-  async execute(query: ScanItemUrlInput): Promise<ScanItemOutputDto> {
-    const picture_url = await this.scanUrl(query.url);
-    return { picture_url };
+  async execute(query: ScanItemUrlInput): Promise<ScanItemUrlOutput> {
+    const pictureUrl = await this.scanUrl(query.url);
+    return { pictureUrl };
   }
 
   private async scanUrl(url: string) {
