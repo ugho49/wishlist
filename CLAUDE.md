@@ -53,7 +53,6 @@ This is an Nx monorepo containing a wishlist application with React frontend and
 - **apps/api/** - NestJS backend with Domain-Driven Design and CQRS
 - **apps/front/** - React frontend with Vite, Material-UI, and Redux Toolkit
 - **libs/common/** - Shared DTOs, enums, branded types, and interfaces
-- **libs/api-client/** - Generated type-safe API client for frontend
 
 ### Backend Architecture (NestJS)
 - **Domain-Driven Design** with application, domain, and infrastructure layers
