@@ -6,7 +6,6 @@
 import 'reflect-metadata';
 
 export * from './constants';
-export * from './dtos/attendee.dto';
 export * from './dtos/common.dto';
 export * from './dtos/item.dto';
 export * from './dtos/user.dto';
@@ -21,7 +20,6 @@ export * from './interfaces/auth.interface';
 export * from './services/secret-santa-draw.service';
 export * from './utils/auth.utils';
 export * from './utils/config.utils';
-export * from './utils/event.utils';
 export * from './utils/id.utils';
 export * from './utils/pagination.utils';
 export * from './utils/string.utils';

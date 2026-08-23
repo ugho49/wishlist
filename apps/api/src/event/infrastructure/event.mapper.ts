@@ -1,7 +1,7 @@
 import type { Event } from '../domain/model/event.model';
 import type { EventAttendee } from '../domain/model/event-attendee.model';
 
-import { type AttendeeDto, AttendeeRole } from '@wishlist/common';
+import { AttendeeRole } from '@wishlist/common';
 import { DateTime } from 'luxon';
 import { match } from 'ts-pattern';
 
@@ -42,24 +42,7 @@ function toGqlEventAttendee(eventAttendee: EventAttendee): GqlEventAttendee {
   };
 }
 
-function toGqlEventAttendeeFromDto(attendee: AttendeeDto): GqlEventAttendee {
-  const role = match(attendee.role)
-    .with(AttendeeRole.CREATOR, () => GqlAttendeeRole.Creator)
-    .with(AttendeeRole.ADMIN, () => GqlAttendeeRole.Admin)
-    .with(AttendeeRole.PARTICIPANT, () => GqlAttendeeRole.Participant)
-    .exhaustive();
-
-  return {
-    __typename: 'EventAttendee',
-    id: attendee.id,
-    userId: attendee.user?.id,
-    pendingEmail: attendee.pending_email,
-    role,
-  };
-}
-
 export const eventMapper = {
   toGqlEvent,
   toGqlEventAttendee,
-  toGqlEventAttendeeFromDto,
 };
