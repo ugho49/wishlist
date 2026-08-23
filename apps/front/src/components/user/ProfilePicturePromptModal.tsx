@@ -71,6 +71,9 @@ const ModalDescription = styled(Typography)(({ theme }) => ({
 
 const ActionSection = styled(Stack)(({ theme }) => ({
   gap: theme.spacing(2),
+  flexDirection: 'row',
+  justifyContent: 'center',
+  width: '100%',
 }));
 
 const PrimaryButton = styled(Button)(({ theme }) => ({
@@ -150,7 +153,7 @@ export const ProfilePicturePromptModal = ({ open, onClose }: ProfilePicturePromp
       </DialogContent>
 
       <DialogActions>
-        <ActionSection direction="row" justifyContent="center" width="100%">
+        <ActionSection>
           {!pictureUrl && (
             <SecondaryButton variant="outlined" onClick={handleClose}>
               Plus tard

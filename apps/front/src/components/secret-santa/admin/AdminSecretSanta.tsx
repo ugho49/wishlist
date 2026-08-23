@@ -69,7 +69,13 @@ export const AdminSecretSanta = ({
         handleClose={() => setOpenEditModal(false)}
         input={{ budget: secretSanta.budget, description: secretSanta.description }}
       />
-      <Stack direction="row" flexWrap="wrap" gap={smallScreen ? 0 : 3}>
+      <Stack
+        direction="row"
+        sx={{
+          flexWrap: 'wrap',
+          gap: smallScreen ? 0 : 3,
+        }}
+      >
         <List dense sx={{ flexGrow: 1 }}>
           <ListItem>
             <ListItemIcon>
@@ -121,12 +127,14 @@ export const AdminSecretSanta = ({
       </Stack>
 
       <Stack
-        flexDirection="row"
-        alignItems="center"
-        gap={smallScreen ? 2 : 4}
-        flexWrap="wrap"
-        justifyContent="flex-end"
-        mb={2}
+        sx={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: smallScreen ? 2 : 4,
+          flexWrap: 'wrap',
+          justifyContent: 'flex-end',
+          mb: 2,
+        }}
       >
         {secretSanta.status === SecretSantaStatus.Created && (
           <>

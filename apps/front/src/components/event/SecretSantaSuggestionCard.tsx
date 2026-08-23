@@ -148,7 +148,11 @@ export function SecretSantaSuggestionCard({ eventId, onDismiss }: SecretSantaSug
   };
 
   return (
-    <GradientCard direction={{ xs: 'column', sm: 'row' }} spacing={3} alignItems={{ xs: 'center', sm: 'center' }}>
+    <GradientCard
+      direction={{ xs: 'column', sm: 'row' }}
+      spacing={3}
+      sx={{ alignItems: { xs: 'center', sm: 'center' } }}
+    >
       <CloseButton onClick={onDismiss} aria-label="Fermer la suggestion">
         <CloseIcon />
       </CloseButton>

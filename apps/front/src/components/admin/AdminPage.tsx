@@ -66,10 +66,22 @@ export const AdminPage = () => {
           <Grid key={section.id} size={{ xs: 12, sm: 6, lg: 4 }}>
             <AdminCard hoverable onClick={() => section.onClick()}>
               <IconWrapper>{section.icon}</IconWrapper>
-              <Typography variant="h6" align="center" fontWeight={600}>
+              <Typography
+                variant="h6"
+                align="center"
+                sx={{
+                  fontWeight: 600,
+                }}
+              >
                 {section.title}
               </Typography>
-              <Typography variant="body2" align="center" color="text.secondary">
+              <Typography
+                variant="body2"
+                align="center"
+                sx={{
+                  color: 'text.secondary',
+                }}
+              >
                 {section.description}
               </Typography>
             </AdminCard>

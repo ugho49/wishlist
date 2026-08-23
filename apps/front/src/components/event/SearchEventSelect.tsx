@@ -46,7 +46,14 @@ export const SearchEventSelect = ({
     getOptionLabel={option => option.title}
     renderOption={(props, option) => (
       <li {...props}>
-        <Stack direction="row" gap={2} alignItems="center" sx={{ width: '100%' }}>
+        <Stack
+          direction="row"
+          sx={{
+            gap: 2,
+            alignItems: 'center',
+            width: '100%',
+          }}
+        >
           <ListItemAvatar sx={{ minWidth: 'auto' }}>
             <EventIcon icon={option.icon ?? undefined} />
           </ListItemAvatar>
@@ -61,7 +68,7 @@ export const SearchEventSelect = ({
       <TextField
         {...params}
         label={label}
-        slotProps={{ htmlInput: { ...params.inputProps } }}
+        slotProps={params.slotProps}
         placeholder="Sélectionner un évènement"
         error={error}
         helperText={`Vous ne pouvez pas séléctionner plus de ${MAX_EVENTS_BY_LIST} évènements auxquels vous souhaitez que cette liste apparaisse`}

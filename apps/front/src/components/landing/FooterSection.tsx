@@ -27,7 +27,14 @@ const FooterLinkItem = styled(Typography)(() => ({
 
 export const FooterSection = () => (
   <FooterContainer>
-    <Stack direction="row" spacing={3} justifyContent="center" alignItems="center">
+    <Stack
+      direction="row"
+      spacing={3}
+      sx={{
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}
+    >
       <FooterLinkItem variant="body2">
         <Link to="/privacy">Confidentialité</Link>
       </FooterLinkItem>
@@ -35,7 +42,13 @@ export const FooterSection = () => (
         <Link to="/terms">Conditions</Link>
       </FooterLinkItem>
     </Stack>
-    <Typography variant="body2" color="grey.400" textAlign="center">
+    <Typography
+      variant="body2"
+      sx={{
+        color: 'grey.400',
+        textAlign: 'center',
+      }}
+    >
       © {new Date().getFullYear()} Wishlist. Tous droits réservés.
     </Typography>
   </FooterContainer>

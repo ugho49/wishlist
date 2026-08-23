@@ -124,11 +124,19 @@ export const EditWishlistInformations = ({ wishlist }: EditWishlistInformationsP
   };
 
   return (
-    <Stack gap={3}>
+    <Stack
+      sx={{
+        gap: 3,
+      }}
+    >
       <Card>
         <Subtitle>Modifier les informations</Subtitle>
         <Stack>
-          <Box marginBottom={3}>
+          <Box
+            sx={{
+              marginBottom: 3,
+            }}
+          >
             <WishlistLogoActions
               loading={loadingLogoUpdate}
               logoUrl={logoUrl}
@@ -140,7 +148,13 @@ export const EditWishlistInformations = ({ wishlist }: EditWishlistInformationsP
               }}
             />
           </Box>
-          <Stack component="form" onSubmit={handleSubmit(onSubmit)} gap={3}>
+          <Stack
+            component="form"
+            onSubmit={handleSubmit(onSubmit)}
+            sx={{
+              gap: 3,
+            }}
+          >
             <Box>
               <TextField
                 {...register('title')}
@@ -175,7 +189,12 @@ export const EditWishlistInformations = ({ wishlist }: EditWishlistInformationsP
               />
             </Box>
 
-            <Stack direction="row" justifyContent="center">
+            <Stack
+              direction="row"
+              sx={{
+                justifyContent: 'center',
+              }}
+            >
               <Button
                 type="submit"
                 variant="contained"
@@ -192,7 +211,11 @@ export const EditWishlistInformations = ({ wishlist }: EditWishlistInformationsP
         </Stack>
       </Card>
 
-      <Stack alignItems="center">
+      <Stack
+        sx={{
+          alignItems: 'center',
+        }}
+      >
         <Box>
           <ConfirmButton
             confirmTitle="Supprimer la liste"

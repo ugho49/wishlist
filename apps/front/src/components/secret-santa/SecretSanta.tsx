@@ -223,7 +223,11 @@ export const SecretSanta = ({ secretSanta, event }: SecretSantaProps) => {
       />
 
       {drawFinishedPopup && (
-        <Stack mb={4}>
+        <Stack
+          sx={{
+            mb: 4,
+          }}
+        >
           <Alert severity="success" className="animated zoomIn faster">
             <AlertTitle>Tirage effectué avec succès !</AlertTitle>
             <Typography variant="body2">Les participants ont reçu un email avec leur tirage secret santa.</Typography>
@@ -232,7 +236,11 @@ export const SecretSanta = ({ secretSanta, event }: SecretSantaProps) => {
       )}
 
       {eventInPast && (
-        <Stack mb={4}>
+        <Stack
+          sx={{
+            mb: 4,
+          }}
+        >
           <Alert severity="warning" className="animated zoomIn faster">
             <AlertTitle>L'événement est passé</AlertTitle>
             <Typography variant="body2">Vous ne pouvez plus lancer le tirage secret santa.</Typography>
@@ -240,9 +248,29 @@ export const SecretSanta = ({ secretSanta, event }: SecretSantaProps) => {
         </Stack>
       )}
 
-      <Stack flexDirection="row" alignItems="start" justifyContent="space-between" mb={4} gap={1}>
-        <Stack alignItems="start" gap={1}>
-          <Stack flexDirection="row" alignItems="center" gap={1} flexWrap="wrap">
+      <Stack
+        sx={{
+          flexDirection: 'row',
+          alignItems: 'start',
+          justifyContent: 'space-between',
+          mb: 4,
+          gap: 1,
+        }}
+      >
+        <Stack
+          sx={{
+            alignItems: 'start',
+            gap: 1,
+          }}
+        >
+          <Stack
+            sx={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 1,
+              flexWrap: 'wrap',
+            }}
+          >
             <Chip
               variant="outlined"
               size="small"
@@ -265,10 +293,26 @@ export const SecretSanta = ({ secretSanta, event }: SecretSantaProps) => {
             />
           )}
         </Stack>
-        <Stack flexDirection="row" alignItems="center" gap={smallScreen ? 2 : 4} flexWrap="wrap" justifyContent="end">
+        <Stack
+          sx={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: smallScreen ? 2 : 4,
+            flexWrap: 'wrap',
+            justifyContent: 'end',
+          }}
+        >
           {status === SecretSantaStatus.Created && (
             <>
-              <Stack flexDirection="row" alignItems="center" gap={1} flexWrap="wrap" justifyContent="end">
+              <Stack
+                sx={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 1,
+                  flexWrap: 'wrap',
+                  justifyContent: 'end',
+                }}
+              >
                 <ConfirmButton
                   confirmTitle="Confirmer la suppression du secret santa"
                   confirmText="Êtes-vous sûr de vouloir supprimer le secret santa ? Cette action est irréversible."
@@ -331,7 +375,11 @@ export const SecretSanta = ({ secretSanta, event }: SecretSantaProps) => {
       </Stack>
 
       {secretSanta.description && (
-        <Stack mb={4}>
+        <Stack
+          sx={{
+            mb: 4,
+          }}
+        >
           <Description text={secretSanta.description} />
         </Stack>
       )}
@@ -387,7 +435,12 @@ export const SecretSanta = ({ secretSanta, event }: SecretSantaProps) => {
                 renderCell: ({ row }) => (
                   <>
                     {status === SecretSantaStatus.Created && (
-                      <Stack flexDirection="row" gap={1}>
+                      <Stack
+                        sx={{
+                          flexDirection: 'row',
+                          gap: 1,
+                        }}
+                      >
                         {secretSantaUsers.length > 1 && (
                           <IconButton color="info" size="small" onClick={() => setCurrentUserIdModalExclusion(row.id)}>
                             <Tooltip title="Gérer les exclusions">

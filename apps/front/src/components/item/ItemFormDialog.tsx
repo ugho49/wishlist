@@ -199,7 +199,14 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
       >
         <Subtitle>Renseigner les informations sur le souhait</Subtitle>
 
-        <Stack component="form" onSubmit={onSubmit} noValidate gap={2}>
+        <Stack
+          component="form"
+          onSubmit={onSubmit}
+          noValidate
+          sx={{
+            gap: 2,
+          }}
+        >
           <Box>
             <TextField
               label="Titre du souhait"
@@ -272,7 +279,13 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
             />
           </Box>
 
-          <Stack direction="row" flexWrap="wrap" gap={2}>
+          <Stack
+            direction="row"
+            sx={{
+              flexWrap: 'wrap',
+              gap: 2,
+            }}
+          >
             <TextField
               label="URL de photo"
               type="url"

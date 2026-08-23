@@ -247,7 +247,14 @@ export const ImportItemsDialog = ({
         </Toolbar>
       </AppBar>
 
-      <Stack padding={3} gap={2} direction="column" sx={{ backgroundColor: 'rgb(249, 250, 251)' }}>
+      <Stack
+        direction="column"
+        sx={{
+          padding: 3,
+          gap: 2,
+          backgroundColor: 'rgb(249, 250, 251)',
+        }}
+      >
         <Subtitle sx={{ marginBottom: 0 }}>Importer d'anciens souhaits</Subtitle>
 
         <Alert severity="info" icon={<InfoOutlinedIcon />}>
@@ -255,8 +262,21 @@ export const ImportItemsDialog = ({
           dans vos anciennes listes. Sélectionnez ceux que vous souhaitez importer dans votre nouvelle liste.
         </Alert>
 
-        <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={1}>
-          <Stack direction="row" gap={1}>
+        <Stack
+          direction="row"
+          sx={{
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: 1,
+          }}
+        >
+          <Stack
+            direction="row"
+            sx={{
+              gap: 1,
+            }}
+          >
             <Button
               size="small"
               variant={selectedItemIds.size === 0 ? 'text' : 'outlined'}
@@ -297,7 +317,12 @@ export const ImportItemsDialog = ({
                 </ItemImageContainer>
 
                 <ItemContentWrapper>
-                  <Stack direction="column" gap={1}>
+                  <Stack
+                    direction="column"
+                    sx={{
+                      gap: 1,
+                    }}
+                  >
                     <ItemTitleContainer>
                       {item.url ? (
                         <ItemUrl

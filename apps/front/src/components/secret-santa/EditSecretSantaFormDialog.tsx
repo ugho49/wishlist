@@ -136,7 +136,14 @@ export const EditSecretSantaFormDialog = ({
         maxWidth="sm"
         sx={isFullscreen ? { marginBlock: '40px' } : { marginTop: '20px', marginBottom: '40px' }}
       >
-        <Stack component="form" onSubmit={handleFormSubmit(onSubmit)} noValidate gap={2}>
+        <Stack
+          component="form"
+          onSubmit={handleFormSubmit(onSubmit)}
+          noValidate
+          sx={{
+            gap: 2,
+          }}
+        >
           <Alert severity="info">
             <AlertTitle>Toutes les valeurs sont optionnelles</AlertTitle>
             <Typography variant="body2">

@@ -7,7 +7,7 @@ import DeleteForeverTwoToneIcon from '@mui/icons-material/DeleteForeverTwoTone';
 import EditTwoToneIcon from '@mui/icons-material/EditTwoTone';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import RedeemIcon from '@mui/icons-material/Redeem';
-import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
+import RemoveCircleOutlinedIcon from '@mui/icons-material/RemoveCircleOutlined';
 import TipsAndUpdatesTwoToneIcon from '@mui/icons-material/TipsAndUpdatesTwoTone';
 import {
   Avatar,
@@ -383,7 +383,7 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
   const [takers, setTakers] = useState<ItemTakerDetails[]>(() => toTakers(item.takers));
   const [takersDialogOpen, setTakersDialogOpen] = useState(false);
   const isDialogOpen = useMemo(() => currentItemId === item.id, [currentItemId, item.id]);
-  const navigate = useNavigate({ from: '/wishlists/$wishlistId' });
+  const navigate = useNavigate({ from: '/wishlists/$wishlistId/' });
   const setDialogOpen = useCallback(
     (open: boolean) => {
       void navigate({ search: prev => ({ ...prev, currentItemId: open ? item.id : undefined }) });
@@ -604,7 +604,7 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
               size="small"
               onClick={() => toggleItem()}
               disabled={loading}
-              startIcon={<RemoveCircleOutlineIcon />}
+              startIcon={<RemoveCircleOutlinedIcon />}
             >
               Libérer
             </ReleaseButton>

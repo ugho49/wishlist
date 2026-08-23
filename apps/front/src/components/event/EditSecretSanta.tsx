@@ -13,7 +13,11 @@ export const EditSecretSanta = ({ event }: EditSecretSantaProps) => {
   const { secretSanta, loading } = useSecretSanta(event.id);
 
   return (
-    <Stack marginTop={5}>
+    <Stack
+      sx={{
+        marginTop: 5,
+      }}
+    >
       <Loader loading={loading}>
         {secretSanta ? <SecretSanta event={event} secretSanta={secretSanta} /> : <NoSecretSanta eventId={event.id} />}
       </Loader>

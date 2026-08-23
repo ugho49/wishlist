@@ -98,13 +98,15 @@ export const AdminListUsers = () => {
       <Card>
         <Stack
           direction="row"
-          justifyContent="space-between"
-          alignItems="center"
-          gap={2}
           component="form"
           noValidate
           onSubmit={applySearch}
-          mb={5}
+          sx={{
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            gap: 2,
+            mb: 5,
+          }}
         >
           <TextField
             size="small"

@@ -144,7 +144,12 @@ const ProfileStep = () => {
           Ajoutez votre photo de profil pour que vos amis vous reconnaissent facilement.
         </StepDescription>
 
-        <Stack alignItems="center" sx={{ mt: 2 }}>
+        <Stack
+          sx={{
+            alignItems: 'center',
+            mt: 2,
+          }}
+        >
           <AvatarUpdateButton
             pictureUrl={pictureUrl || user?.pictureUrl || undefined}
             socials={user?.socials || []}

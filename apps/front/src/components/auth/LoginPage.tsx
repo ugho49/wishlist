@@ -38,6 +38,7 @@ const ButtonStyled = styled(Button)(() => ({
 const SocialButtonsStack = styled(Stack)(() => ({
   width: '100%',
   gap: 12,
+  alignItems: 'center',
 }));
 
 const DividerStyled = styled(Divider)(() => ({
@@ -114,10 +115,22 @@ export const LoginPage = () => {
   const onSubmit = (data: FormFields) => login(data);
 
   return (
-    <Stack spacing={4} alignItems="center">
+    <Stack
+      spacing={4}
+      sx={{
+        alignItems: 'center',
+      }}
+    >
       <TitleStyled variant="h4">Connexion</TitleStyled>
 
-      <Stack component="form" onSubmit={handleSubmit(onSubmit)} spacing={3} width="100%">
+      <Stack
+        component="form"
+        onSubmit={handleSubmit(onSubmit)}
+        spacing={3}
+        sx={{
+          width: '100%',
+        }}
+      >
         {formErrors.root && <Alert severity="error">{formErrors.root.message}</Alert>}
 
         <TextField
@@ -157,12 +170,17 @@ export const LoginPage = () => {
         </ButtonStyled>
 
         <DividerStyled>
-          <Typography variant="body2" color="text.secondary">
+          <Typography
+            variant="body2"
+            sx={{
+              color: 'text.secondary',
+            }}
+          >
             ou
           </Typography>
         </DividerStyled>
 
-        <SocialButtonsStack alignItems="center">
+        <SocialButtonsStack>
           <GoogleButton
             loading={socialLoading}
             disabled={socialLoading}
@@ -184,9 +202,25 @@ export const LoginPage = () => {
         </SocialButtonsStack>
       </Stack>
 
-      <Stack spacing={2} alignItems="center">
-        <Stack direction="row" alignItems="center" spacing={1}>
-          <Typography variant="body2" color="text.secondary">
+      <Stack
+        spacing={2}
+        sx={{
+          alignItems: 'center',
+        }}
+      >
+        <Stack
+          direction="row"
+          spacing={1}
+          sx={{
+            alignItems: 'center',
+          }}
+        >
+          <Typography
+            variant="body2"
+            sx={{
+              color: 'text.secondary',
+            }}
+          >
             Pas encore inscrit ?
           </Typography>
           <RouterLink to="/register">Créer un compte</RouterLink>

@@ -72,12 +72,25 @@ export const EmailChangeSection = () => {
 
       {!pendingChange && (
         <>
-          <Typography variant="body2" color="text.secondary" sx={{ marginTop: 1, marginBottom: 3 }}>
+          <Typography
+            variant="body2"
+            sx={{
+              color: 'text.secondary',
+              marginTop: 1,
+              marginBottom: 3,
+            }}
+          >
             Pour changer votre adresse email, entrez votre nouvelle adresse ci-dessous. Un email de confirmation sera
             envoyé à cette nouvelle adresse.
           </Typography>
 
-          <Stack component="form" onSubmit={handleSubmit(onSubmit)} gap={3}>
+          <Stack
+            component="form"
+            onSubmit={handleSubmit(onSubmit)}
+            sx={{
+              gap: 3,
+            }}
+          >
             <TextField
               {...register('newEmail')}
               label="Nouvelle adresse email"
@@ -89,7 +102,12 @@ export const EmailChangeSection = () => {
               helperText={formErrors.newEmail?.message}
             />
 
-            <Stack direction="row" justifyContent="center">
+            <Stack
+              direction="row"
+              sx={{
+                justifyContent: 'center',
+              }}
+            >
               <Button
                 type="submit"
                 variant="contained"
@@ -108,10 +126,21 @@ export const EmailChangeSection = () => {
 
       {pendingChange && (
         <Alert severity="info" icon={<InfoIcon />} sx={{ marginTop: 2 }}>
-          <Typography variant="body1" fontWeight={500} gutterBottom>
+          <Typography
+            variant="body1"
+            gutterBottom
+            sx={{
+              fontWeight: 500,
+            }}
+          >
             Changement d'email en attente
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography
+            variant="body2"
+            sx={{
+              color: 'text.secondary',
+            }}
+          >
             Un email de confirmation a été envoyé à <strong>{pendingChange.newEmail}</strong>. Vérifiez votre boîte de
             réception et cliquez sur le lien de confirmation avant <strong>{expiresAt}</strong>.
           </Typography>

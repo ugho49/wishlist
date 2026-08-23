@@ -42,7 +42,7 @@ export const Title = ({ children, ...props }: PropsWithChildren<TitleProps>) => 
   const { canGoBack, handleGoBack } = useBackNavigation();
 
   return (
-    <TitleRoot direction="row" gap={1} {...props}>
+    <TitleRoot direction="row" sx={{ gap: 1 }} {...props}>
       {canGoBack && isDesktop && (
         <BackButton onClick={handleGoBack} aria-label="go back" size="small">
           <ArrowBackIcon fontSize="small" />

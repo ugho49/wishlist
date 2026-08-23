@@ -7,6 +7,10 @@ import browserslistToEsbuild from 'browserslist-to-esbuild';
 import { defineConfig } from 'vite';
 import svgr from 'vite-plugin-svgr';
 
+const isNxGraphCreation = Boolean(
+  (globalThis as typeof globalThis & { NX_GRAPH_CREATION?: boolean }).NX_GRAPH_CREATION,
+);
+
 const config: UserConfig = {
   root: import.meta.dirname,
   cacheDir: '../../node_modules/.vite/apps/front',
@@ -52,6 +56,9 @@ const config: UserConfig = {
     tanstackRouter({
       target: 'react',
       autoCodeSplitting: true,
+      // Nx loads this Vite config while hashing the workspace. Skip writing
+      // routeTree.gen.ts then, otherwise Nx warns and pollutes --json stdout.
+      enableRouteGeneration: !isNxGraphCreation,
     }),
     react(),
     svgr(),

@@ -37,7 +37,7 @@ jobs:
       version: ${{ steps.compute-version.outputs.version }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           # Fetch all history so Nx affected has a base to compare against.
           fetch-depth: 0
@@ -58,8 +58,21 @@ jobs:
       - name: Get affected projects
         id: affected-projects
         run: |
-          PROJECTS=$(bun nx show projects --affected --base=${{ steps.nx-shas.outputs.base }} --head=${{ steps.nx-shas.outputs.head }} --exclude=@wishlist/source --json)
-          echo "projects=${PROJECTS}" >> "$GITHUB_OUTPUT"
+          set -euo pipefail
+          RAW=$(bun nx show projects --affected --base="${{ steps.nx-shas.outputs.base }}" --head="${{ steps.nx-shas.outputs.head }}" --exclude=@wishlist/source --json)
+          # Nx can print warnings on stdout before the JSON array (e.g. when a
+          # generated file is rewritten while the graph is computed).
+          PROJECTS=$(printf '%s\n' "$RAW" | grep -E '^\[.*\]$' | tail -n 1)
+          if [ -z "${PROJECTS}" ]; then
+            echo "Failed to parse affected projects from Nx output:" >&2
+            printf '%s\n' "$RAW" >&2
+            exit 1
+          fi
+          {
+            echo "projects<<EOF"
+            printf '%s\n' "$PROJECTS"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
           echo "Affected projects: ${PROJECTS}"
 
   check:
@@ -69,7 +82,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup
         uses: ./.github/actions/setup
@@ -84,7 +97,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -101,7 +114,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -127,7 +140,7 @@ jobs:
     timeout-minutes: 20
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -154,7 +167,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup
         uses: ./.github/actions/setup
@@ -180,7 +193,7 @@ jobs:
     timeout-minutes: 20
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup
         uses: ./.github/actions/setup
@@ -208,7 +221,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup
         uses: ./.github/actions/setup

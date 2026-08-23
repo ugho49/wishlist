@@ -9,42 +9,45 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TermsRouteImport } from './routes/terms'
-import { Route as PrivacyRouteImport } from './routes/privacy'
-import { Route as ConfirmEmailChangeRouteImport } from './routes/confirm-email-change'
-import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
-import { Route as AnonymousWithLayoutRouteImport } from './routes/_anonymous-with-layout'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthenticatedWelcomeRouteImport } from './routes/_authenticated/welcome'
-import { Route as AuthenticatedWithLayoutRouteImport } from './routes/_authenticated/_with-layout'
-import { Route as AnonymousWithLayoutRegisterRouteImport } from './routes/_anonymous-with-layout/register'
+import { Route as AnonymousWithLayoutRouteImport } from './routes/_anonymous-with-layout'
+import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
+import { Route as ConfirmEmailChangeRouteImport } from './routes/confirm-email-change'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AnonymousWithLayoutLoginRouteImport } from './routes/_anonymous-with-layout/login'
+import { Route as AnonymousWithLayoutRegisterRouteImport } from './routes/_anonymous-with-layout/register'
+import { Route as AuthenticatedWithLayoutRouteImport } from './routes/_authenticated/_with-layout'
+import { Route as AuthenticatedWelcomeRouteImport } from './routes/_authenticated/welcome'
 import { Route as AnonymousWithLayoutForgotPasswordIndexRouteImport } from './routes/_anonymous-with-layout/forgot-password/index'
-import { Route as AuthenticatedWithLayoutAdminRouteImport } from './routes/_authenticated/_with-layout/admin'
 import { Route as AnonymousWithLayoutForgotPasswordRenewRouteImport } from './routes/_anonymous-with-layout/forgot-password/renew'
-import { Route as AuthenticatedWithLayoutWishlistsIndexRouteImport } from './routes/_authenticated/_with-layout/wishlists/index'
-import { Route as AuthenticatedWithLayoutEventsIndexRouteImport } from './routes/_authenticated/_with-layout/events/index'
+import { Route as AuthenticatedWithLayoutAdminRouteImport } from './routes/_authenticated/_with-layout/admin'
 import { Route as AuthenticatedWithLayoutAdminIndexRouteImport } from './routes/_authenticated/_with-layout/admin/index'
-import { Route as AuthenticatedWithLayoutWishlistsNewRouteImport } from './routes/_authenticated/_with-layout/wishlists/new'
-import { Route as AuthenticatedWithLayoutUserProfileRouteImport } from './routes/_authenticated/_with-layout/user/profile'
+import { Route as AuthenticatedWithLayoutEventsIndexRouteImport } from './routes/_authenticated/_with-layout/events/index'
 import { Route as AuthenticatedWithLayoutEventsNewRouteImport } from './routes/_authenticated/_with-layout/events/new'
-import { Route as AuthenticatedWithLayoutWishlistsWishlistIdIndexRouteImport } from './routes/_authenticated/_with-layout/wishlists/$wishlistId/index'
-import { Route as AuthenticatedWithLayoutEventsEventIdIndexRouteImport } from './routes/_authenticated/_with-layout/events/$eventId/index'
-import { Route as AuthenticatedWithLayoutAdminUsersIndexRouteImport } from './routes/_authenticated/_with-layout/admin/users/index'
+import { Route as AuthenticatedWithLayoutUserProfileRouteImport } from './routes/_authenticated/_with-layout/user/profile'
+import { Route as AuthenticatedWithLayoutWishlistsIndexRouteImport } from './routes/_authenticated/_with-layout/wishlists/index'
+import { Route as AuthenticatedWithLayoutWishlistsNewRouteImport } from './routes/_authenticated/_with-layout/wishlists/new'
 import { Route as AuthenticatedWithLayoutAdminEventsIndexRouteImport } from './routes/_authenticated/_with-layout/admin/events/index'
-import { Route as AuthenticatedWithLayoutWishlistsWishlistIdEditRouteImport } from './routes/_authenticated/_with-layout/wishlists/$wishlistId/edit'
-import { Route as AuthenticatedWithLayoutEventsEventIdEditRouteImport } from './routes/_authenticated/_with-layout/events/$eventId/edit'
-import { Route as AuthenticatedWithLayoutAdminUsersUserIdRouteImport } from './routes/_authenticated/_with-layout/admin/users/$userId'
 import { Route as AuthenticatedWithLayoutAdminEventsEventIdRouteImport } from './routes/_authenticated/_with-layout/admin/events/$eventId'
+import { Route as AuthenticatedWithLayoutAdminUsersIndexRouteImport } from './routes/_authenticated/_with-layout/admin/users/index'
+import { Route as AuthenticatedWithLayoutAdminUsersUserIdRouteImport } from './routes/_authenticated/_with-layout/admin/users/$userId'
+import { Route as AuthenticatedWithLayoutEventsEventIdIndexRouteImport } from './routes/_authenticated/_with-layout/events/$eventId/index'
+import { Route as AuthenticatedWithLayoutEventsEventIdEditRouteImport } from './routes/_authenticated/_with-layout/events/$eventId/edit'
+import { Route as AuthenticatedWithLayoutWishlistsWishlistIdIndexRouteImport } from './routes/_authenticated/_with-layout/wishlists/$wishlistId/index'
+import { Route as AuthenticatedWithLayoutWishlistsWishlistIdEditRouteImport } from './routes/_authenticated/_with-layout/wishlists/$wishlistId/edit'
 
-const TermsRoute = TermsRouteImport.update({
-  id: '/terms',
-  path: '/terms',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PrivacyRoute = PrivacyRouteImport.update({
-  id: '/privacy',
-  path: '/privacy',
+const AnonymousWithLayoutRoute = AnonymousWithLayoutRouteImport.update({
+  id: '/_anonymous-with-layout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRoute = AuthenticatedRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ConfirmEmailChangeRoute = ConfirmEmailChangeRouteImport.update({
@@ -52,44 +55,47 @@ const ConfirmEmailChangeRoute = ConfirmEmailChangeRouteImport.update({
   path: '/confirm-email-change',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedRoute = AuthenticatedRouteImport.update({
-  id: '/_authenticated',
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AnonymousWithLayoutRoute = AnonymousWithLayoutRouteImport.update({
-  id: '/_anonymous-with-layout',
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthenticatedWelcomeRoute = AuthenticatedWelcomeRouteImport.update({
-  id: '/welcome',
-  path: '/welcome',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedWithLayoutRoute = AuthenticatedWithLayoutRouteImport.update({
-  id: '/_with-layout',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AnonymousWithLayoutRegisterRoute =
-  AnonymousWithLayoutRegisterRouteImport.update({
-    id: '/register',
-    path: '/register',
-    getParentRoute: () => AnonymousWithLayoutRoute,
-  } as any)
 const AnonymousWithLayoutLoginRoute =
   AnonymousWithLayoutLoginRouteImport.update({
     id: '/login',
     path: '/login',
     getParentRoute: () => AnonymousWithLayoutRoute,
   } as any)
+const AnonymousWithLayoutRegisterRoute =
+  AnonymousWithLayoutRegisterRouteImport.update({
+    id: '/register',
+    path: '/register',
+    getParentRoute: () => AnonymousWithLayoutRoute,
+  } as any)
+const AuthenticatedWithLayoutRoute = AuthenticatedWithLayoutRouteImport.update({
+  id: '/_with-layout',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedWelcomeRoute = AuthenticatedWelcomeRouteImport.update({
+  id: '/welcome',
+  path: '/welcome',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AnonymousWithLayoutForgotPasswordIndexRoute =
   AnonymousWithLayoutForgotPasswordIndexRouteImport.update({
     id: '/forgot-password/',
     path: '/forgot-password/',
+    getParentRoute: () => AnonymousWithLayoutRoute,
+  } as any)
+const AnonymousWithLayoutForgotPasswordRenewRoute =
+  AnonymousWithLayoutForgotPasswordRenewRouteImport.update({
+    id: '/forgot-password/renew',
+    path: '/forgot-password/renew',
     getParentRoute: () => AnonymousWithLayoutRoute,
   } as any)
 const AuthenticatedWithLayoutAdminRoute =
@@ -98,40 +104,16 @@ const AuthenticatedWithLayoutAdminRoute =
     path: '/admin',
     getParentRoute: () => AuthenticatedWithLayoutRoute,
   } as any)
-const AnonymousWithLayoutForgotPasswordRenewRoute =
-  AnonymousWithLayoutForgotPasswordRenewRouteImport.update({
-    id: '/forgot-password/renew',
-    path: '/forgot-password/renew',
-    getParentRoute: () => AnonymousWithLayoutRoute,
-  } as any)
-const AuthenticatedWithLayoutWishlistsIndexRoute =
-  AuthenticatedWithLayoutWishlistsIndexRouteImport.update({
-    id: '/wishlists/',
-    path: '/wishlists/',
-    getParentRoute: () => AuthenticatedWithLayoutRoute,
-  } as any)
-const AuthenticatedWithLayoutEventsIndexRoute =
-  AuthenticatedWithLayoutEventsIndexRouteImport.update({
-    id: '/events/',
-    path: '/events/',
-    getParentRoute: () => AuthenticatedWithLayoutRoute,
-  } as any)
 const AuthenticatedWithLayoutAdminIndexRoute =
   AuthenticatedWithLayoutAdminIndexRouteImport.update({
     id: '/',
     path: '/',
     getParentRoute: () => AuthenticatedWithLayoutAdminRoute,
   } as any)
-const AuthenticatedWithLayoutWishlistsNewRoute =
-  AuthenticatedWithLayoutWishlistsNewRouteImport.update({
-    id: '/wishlists/new',
-    path: '/wishlists/new',
-    getParentRoute: () => AuthenticatedWithLayoutRoute,
-  } as any)
-const AuthenticatedWithLayoutUserProfileRoute =
-  AuthenticatedWithLayoutUserProfileRouteImport.update({
-    id: '/user/profile',
-    path: '/user/profile',
+const AuthenticatedWithLayoutEventsIndexRoute =
+  AuthenticatedWithLayoutEventsIndexRouteImport.update({
+    id: '/events/',
+    path: '/events/',
     getParentRoute: () => AuthenticatedWithLayoutRoute,
   } as any)
 const AuthenticatedWithLayoutEventsNewRoute =
@@ -140,23 +122,23 @@ const AuthenticatedWithLayoutEventsNewRoute =
     path: '/events/new',
     getParentRoute: () => AuthenticatedWithLayoutRoute,
   } as any)
-const AuthenticatedWithLayoutWishlistsWishlistIdIndexRoute =
-  AuthenticatedWithLayoutWishlistsWishlistIdIndexRouteImport.update({
-    id: '/wishlists/$wishlistId/',
-    path: '/wishlists/$wishlistId/',
+const AuthenticatedWithLayoutUserProfileRoute =
+  AuthenticatedWithLayoutUserProfileRouteImport.update({
+    id: '/user/profile',
+    path: '/user/profile',
     getParentRoute: () => AuthenticatedWithLayoutRoute,
   } as any)
-const AuthenticatedWithLayoutEventsEventIdIndexRoute =
-  AuthenticatedWithLayoutEventsEventIdIndexRouteImport.update({
-    id: '/events/$eventId/',
-    path: '/events/$eventId/',
+const AuthenticatedWithLayoutWishlistsIndexRoute =
+  AuthenticatedWithLayoutWishlistsIndexRouteImport.update({
+    id: '/wishlists/',
+    path: '/wishlists/',
     getParentRoute: () => AuthenticatedWithLayoutRoute,
   } as any)
-const AuthenticatedWithLayoutAdminUsersIndexRoute =
-  AuthenticatedWithLayoutAdminUsersIndexRouteImport.update({
-    id: '/users/',
-    path: '/users/',
-    getParentRoute: () => AuthenticatedWithLayoutAdminRoute,
+const AuthenticatedWithLayoutWishlistsNewRoute =
+  AuthenticatedWithLayoutWishlistsNewRouteImport.update({
+    id: '/wishlists/new',
+    path: '/wishlists/new',
+    getParentRoute: () => AuthenticatedWithLayoutRoute,
   } as any)
 const AuthenticatedWithLayoutAdminEventsIndexRoute =
   AuthenticatedWithLayoutAdminEventsIndexRouteImport.update({
@@ -164,10 +146,28 @@ const AuthenticatedWithLayoutAdminEventsIndexRoute =
     path: '/events/',
     getParentRoute: () => AuthenticatedWithLayoutAdminRoute,
   } as any)
-const AuthenticatedWithLayoutWishlistsWishlistIdEditRoute =
-  AuthenticatedWithLayoutWishlistsWishlistIdEditRouteImport.update({
-    id: '/wishlists/$wishlistId/edit',
-    path: '/wishlists/$wishlistId/edit',
+const AuthenticatedWithLayoutAdminEventsEventIdRoute =
+  AuthenticatedWithLayoutAdminEventsEventIdRouteImport.update({
+    id: '/events/$eventId',
+    path: '/events/$eventId',
+    getParentRoute: () => AuthenticatedWithLayoutAdminRoute,
+  } as any)
+const AuthenticatedWithLayoutAdminUsersIndexRoute =
+  AuthenticatedWithLayoutAdminUsersIndexRouteImport.update({
+    id: '/users/',
+    path: '/users/',
+    getParentRoute: () => AuthenticatedWithLayoutAdminRoute,
+  } as any)
+const AuthenticatedWithLayoutAdminUsersUserIdRoute =
+  AuthenticatedWithLayoutAdminUsersUserIdRouteImport.update({
+    id: '/users/$userId',
+    path: '/users/$userId',
+    getParentRoute: () => AuthenticatedWithLayoutAdminRoute,
+  } as any)
+const AuthenticatedWithLayoutEventsEventIdIndexRoute =
+  AuthenticatedWithLayoutEventsEventIdIndexRouteImport.update({
+    id: '/events/$eventId/',
+    path: '/events/$eventId/',
     getParentRoute: () => AuthenticatedWithLayoutRoute,
   } as any)
 const AuthenticatedWithLayoutEventsEventIdEditRoute =
@@ -176,17 +176,17 @@ const AuthenticatedWithLayoutEventsEventIdEditRoute =
     path: '/events/$eventId/edit',
     getParentRoute: () => AuthenticatedWithLayoutRoute,
   } as any)
-const AuthenticatedWithLayoutAdminUsersUserIdRoute =
-  AuthenticatedWithLayoutAdminUsersUserIdRouteImport.update({
-    id: '/users/$userId',
-    path: '/users/$userId',
-    getParentRoute: () => AuthenticatedWithLayoutAdminRoute,
+const AuthenticatedWithLayoutWishlistsWishlistIdIndexRoute =
+  AuthenticatedWithLayoutWishlistsWishlistIdIndexRouteImport.update({
+    id: '/wishlists/$wishlistId/',
+    path: '/wishlists/$wishlistId/',
+    getParentRoute: () => AuthenticatedWithLayoutRoute,
   } as any)
-const AuthenticatedWithLayoutAdminEventsEventIdRoute =
-  AuthenticatedWithLayoutAdminEventsEventIdRouteImport.update({
-    id: '/events/$eventId',
-    path: '/events/$eventId',
-    getParentRoute: () => AuthenticatedWithLayoutAdminRoute,
+const AuthenticatedWithLayoutWishlistsWishlistIdEditRoute =
+  AuthenticatedWithLayoutWishlistsWishlistIdEditRouteImport.update({
+    id: '/wishlists/$wishlistId/edit',
+    path: '/wishlists/$wishlistId/edit',
+    getParentRoute: () => AuthenticatedWithLayoutRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -199,21 +199,21 @@ export interface FileRoutesByFullPath {
   '/welcome': typeof AuthenticatedWelcomeRoute
   '/forgot-password/renew': typeof AnonymousWithLayoutForgotPasswordRenewRoute
   '/admin': typeof AuthenticatedWithLayoutAdminRouteWithChildren
-  '/forgot-password': typeof AnonymousWithLayoutForgotPasswordIndexRoute
+  '/forgot-password/': typeof AnonymousWithLayoutForgotPasswordIndexRoute
   '/events/new': typeof AuthenticatedWithLayoutEventsNewRoute
   '/user/profile': typeof AuthenticatedWithLayoutUserProfileRoute
   '/wishlists/new': typeof AuthenticatedWithLayoutWishlistsNewRoute
   '/admin/': typeof AuthenticatedWithLayoutAdminIndexRoute
-  '/events': typeof AuthenticatedWithLayoutEventsIndexRoute
-  '/wishlists': typeof AuthenticatedWithLayoutWishlistsIndexRoute
+  '/events/': typeof AuthenticatedWithLayoutEventsIndexRoute
+  '/wishlists/': typeof AuthenticatedWithLayoutWishlistsIndexRoute
   '/admin/events/$eventId': typeof AuthenticatedWithLayoutAdminEventsEventIdRoute
   '/admin/users/$userId': typeof AuthenticatedWithLayoutAdminUsersUserIdRoute
   '/events/$eventId/edit': typeof AuthenticatedWithLayoutEventsEventIdEditRoute
   '/wishlists/$wishlistId/edit': typeof AuthenticatedWithLayoutWishlistsWishlistIdEditRoute
-  '/admin/events': typeof AuthenticatedWithLayoutAdminEventsIndexRoute
-  '/admin/users': typeof AuthenticatedWithLayoutAdminUsersIndexRoute
-  '/events/$eventId': typeof AuthenticatedWithLayoutEventsEventIdIndexRoute
-  '/wishlists/$wishlistId': typeof AuthenticatedWithLayoutWishlistsWishlistIdIndexRoute
+  '/admin/events/': typeof AuthenticatedWithLayoutAdminEventsIndexRoute
+  '/admin/users/': typeof AuthenticatedWithLayoutAdminUsersIndexRoute
+  '/events/$eventId/': typeof AuthenticatedWithLayoutEventsEventIdIndexRoute
+  '/wishlists/$wishlistId/': typeof AuthenticatedWithLayoutWishlistsWishlistIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -282,21 +282,21 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/forgot-password/renew'
     | '/admin'
-    | '/forgot-password'
+    | '/forgot-password/'
     | '/events/new'
     | '/user/profile'
     | '/wishlists/new'
     | '/admin/'
-    | '/events'
-    | '/wishlists'
+    | '/events/'
+    | '/wishlists/'
     | '/admin/events/$eventId'
     | '/admin/users/$userId'
     | '/events/$eventId/edit'
     | '/wishlists/$wishlistId/edit'
-    | '/admin/events'
-    | '/admin/users'
-    | '/events/$eventId'
-    | '/wishlists/$wishlistId'
+    | '/admin/events/'
+    | '/admin/users/'
+    | '/events/$eventId/'
+    | '/wishlists/$wishlistId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -364,18 +364,25 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/terms': {
-      id: '/terms'
-      path: '/terms'
-      fullPath: '/terms'
-      preLoaderRoute: typeof TermsRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/privacy': {
-      id: '/privacy'
-      path: '/privacy'
-      fullPath: '/privacy'
-      preLoaderRoute: typeof PrivacyRouteImport
+    '/_anonymous-with-layout': {
+      id: '/_anonymous-with-layout'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AnonymousWithLayoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/confirm-email-change': {
@@ -385,47 +392,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConfirmEmailChangeRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated': {
-      id: '/_authenticated'
-      path: ''
-      fullPath: ''
-      preLoaderRoute: typeof AuthenticatedRouteImport
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_anonymous-with-layout': {
-      id: '/_anonymous-with-layout'
-      path: ''
-      fullPath: ''
-      preLoaderRoute: typeof AnonymousWithLayoutRouteImport
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/welcome': {
-      id: '/_authenticated/welcome'
-      path: '/welcome'
-      fullPath: '/welcome'
-      preLoaderRoute: typeof AuthenticatedWelcomeRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/_with-layout': {
-      id: '/_authenticated/_with-layout'
-      path: ''
-      fullPath: ''
-      preLoaderRoute: typeof AuthenticatedWithLayoutRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_anonymous-with-layout/register': {
-      id: '/_anonymous-with-layout/register'
-      path: '/register'
-      fullPath: '/register'
-      preLoaderRoute: typeof AnonymousWithLayoutRegisterRouteImport
-      parentRoute: typeof AnonymousWithLayoutRoute
     }
     '/_anonymous-with-layout/login': {
       id: '/_anonymous-with-layout/login'
@@ -434,11 +413,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AnonymousWithLayoutLoginRouteImport
       parentRoute: typeof AnonymousWithLayoutRoute
     }
+    '/_anonymous-with-layout/register': {
+      id: '/_anonymous-with-layout/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof AnonymousWithLayoutRegisterRouteImport
+      parentRoute: typeof AnonymousWithLayoutRoute
+    }
+    '/_authenticated/_with-layout': {
+      id: '/_authenticated/_with-layout'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedWithLayoutRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/welcome': {
+      id: '/_authenticated/welcome'
+      path: '/welcome'
+      fullPath: '/welcome'
+      preLoaderRoute: typeof AuthenticatedWelcomeRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_anonymous-with-layout/forgot-password/': {
       id: '/_anonymous-with-layout/forgot-password/'
       path: '/forgot-password'
-      fullPath: '/forgot-password'
+      fullPath: '/forgot-password/'
       preLoaderRoute: typeof AnonymousWithLayoutForgotPasswordIndexRouteImport
+      parentRoute: typeof AnonymousWithLayoutRoute
+    }
+    '/_anonymous-with-layout/forgot-password/renew': {
+      id: '/_anonymous-with-layout/forgot-password/renew'
+      path: '/forgot-password/renew'
+      fullPath: '/forgot-password/renew'
+      preLoaderRoute: typeof AnonymousWithLayoutForgotPasswordRenewRouteImport
       parentRoute: typeof AnonymousWithLayoutRoute
     }
     '/_authenticated/_with-layout/admin': {
@@ -448,27 +455,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedWithLayoutAdminRouteImport
       parentRoute: typeof AuthenticatedWithLayoutRoute
     }
-    '/_anonymous-with-layout/forgot-password/renew': {
-      id: '/_anonymous-with-layout/forgot-password/renew'
-      path: '/forgot-password/renew'
-      fullPath: '/forgot-password/renew'
-      preLoaderRoute: typeof AnonymousWithLayoutForgotPasswordRenewRouteImport
-      parentRoute: typeof AnonymousWithLayoutRoute
-    }
-    '/_authenticated/_with-layout/wishlists/': {
-      id: '/_authenticated/_with-layout/wishlists/'
-      path: '/wishlists'
-      fullPath: '/wishlists'
-      preLoaderRoute: typeof AuthenticatedWithLayoutWishlistsIndexRouteImport
-      parentRoute: typeof AuthenticatedWithLayoutRoute
-    }
-    '/_authenticated/_with-layout/events/': {
-      id: '/_authenticated/_with-layout/events/'
-      path: '/events'
-      fullPath: '/events'
-      preLoaderRoute: typeof AuthenticatedWithLayoutEventsIndexRouteImport
-      parentRoute: typeof AuthenticatedWithLayoutRoute
-    }
     '/_authenticated/_with-layout/admin/': {
       id: '/_authenticated/_with-layout/admin/'
       path: '/'
@@ -476,18 +462,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedWithLayoutAdminIndexRouteImport
       parentRoute: typeof AuthenticatedWithLayoutAdminRoute
     }
-    '/_authenticated/_with-layout/wishlists/new': {
-      id: '/_authenticated/_with-layout/wishlists/new'
-      path: '/wishlists/new'
-      fullPath: '/wishlists/new'
-      preLoaderRoute: typeof AuthenticatedWithLayoutWishlistsNewRouteImport
-      parentRoute: typeof AuthenticatedWithLayoutRoute
-    }
-    '/_authenticated/_with-layout/user/profile': {
-      id: '/_authenticated/_with-layout/user/profile'
-      path: '/user/profile'
-      fullPath: '/user/profile'
-      preLoaderRoute: typeof AuthenticatedWithLayoutUserProfileRouteImport
+    '/_authenticated/_with-layout/events/': {
+      id: '/_authenticated/_with-layout/events/'
+      path: '/events'
+      fullPath: '/events/'
+      preLoaderRoute: typeof AuthenticatedWithLayoutEventsIndexRouteImport
       parentRoute: typeof AuthenticatedWithLayoutRoute
     }
     '/_authenticated/_with-layout/events/new': {
@@ -497,39 +476,60 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedWithLayoutEventsNewRouteImport
       parentRoute: typeof AuthenticatedWithLayoutRoute
     }
-    '/_authenticated/_with-layout/wishlists/$wishlistId/': {
-      id: '/_authenticated/_with-layout/wishlists/$wishlistId/'
-      path: '/wishlists/$wishlistId'
-      fullPath: '/wishlists/$wishlistId'
-      preLoaderRoute: typeof AuthenticatedWithLayoutWishlistsWishlistIdIndexRouteImport
+    '/_authenticated/_with-layout/user/profile': {
+      id: '/_authenticated/_with-layout/user/profile'
+      path: '/user/profile'
+      fullPath: '/user/profile'
+      preLoaderRoute: typeof AuthenticatedWithLayoutUserProfileRouteImport
       parentRoute: typeof AuthenticatedWithLayoutRoute
     }
-    '/_authenticated/_with-layout/events/$eventId/': {
-      id: '/_authenticated/_with-layout/events/$eventId/'
-      path: '/events/$eventId'
-      fullPath: '/events/$eventId'
-      preLoaderRoute: typeof AuthenticatedWithLayoutEventsEventIdIndexRouteImport
+    '/_authenticated/_with-layout/wishlists/': {
+      id: '/_authenticated/_with-layout/wishlists/'
+      path: '/wishlists'
+      fullPath: '/wishlists/'
+      preLoaderRoute: typeof AuthenticatedWithLayoutWishlistsIndexRouteImport
       parentRoute: typeof AuthenticatedWithLayoutRoute
     }
-    '/_authenticated/_with-layout/admin/users/': {
-      id: '/_authenticated/_with-layout/admin/users/'
-      path: '/users'
-      fullPath: '/admin/users'
-      preLoaderRoute: typeof AuthenticatedWithLayoutAdminUsersIndexRouteImport
-      parentRoute: typeof AuthenticatedWithLayoutAdminRoute
+    '/_authenticated/_with-layout/wishlists/new': {
+      id: '/_authenticated/_with-layout/wishlists/new'
+      path: '/wishlists/new'
+      fullPath: '/wishlists/new'
+      preLoaderRoute: typeof AuthenticatedWithLayoutWishlistsNewRouteImport
+      parentRoute: typeof AuthenticatedWithLayoutRoute
     }
     '/_authenticated/_with-layout/admin/events/': {
       id: '/_authenticated/_with-layout/admin/events/'
       path: '/events'
-      fullPath: '/admin/events'
+      fullPath: '/admin/events/'
       preLoaderRoute: typeof AuthenticatedWithLayoutAdminEventsIndexRouteImport
       parentRoute: typeof AuthenticatedWithLayoutAdminRoute
     }
-    '/_authenticated/_with-layout/wishlists/$wishlistId/edit': {
-      id: '/_authenticated/_with-layout/wishlists/$wishlistId/edit'
-      path: '/wishlists/$wishlistId/edit'
-      fullPath: '/wishlists/$wishlistId/edit'
-      preLoaderRoute: typeof AuthenticatedWithLayoutWishlistsWishlistIdEditRouteImport
+    '/_authenticated/_with-layout/admin/events/$eventId': {
+      id: '/_authenticated/_with-layout/admin/events/$eventId'
+      path: '/events/$eventId'
+      fullPath: '/admin/events/$eventId'
+      preLoaderRoute: typeof AuthenticatedWithLayoutAdminEventsEventIdRouteImport
+      parentRoute: typeof AuthenticatedWithLayoutAdminRoute
+    }
+    '/_authenticated/_with-layout/admin/users/': {
+      id: '/_authenticated/_with-layout/admin/users/'
+      path: '/users'
+      fullPath: '/admin/users/'
+      preLoaderRoute: typeof AuthenticatedWithLayoutAdminUsersIndexRouteImport
+      parentRoute: typeof AuthenticatedWithLayoutAdminRoute
+    }
+    '/_authenticated/_with-layout/admin/users/$userId': {
+      id: '/_authenticated/_with-layout/admin/users/$userId'
+      path: '/users/$userId'
+      fullPath: '/admin/users/$userId'
+      preLoaderRoute: typeof AuthenticatedWithLayoutAdminUsersUserIdRouteImport
+      parentRoute: typeof AuthenticatedWithLayoutAdminRoute
+    }
+    '/_authenticated/_with-layout/events/$eventId/': {
+      id: '/_authenticated/_with-layout/events/$eventId/'
+      path: '/events/$eventId'
+      fullPath: '/events/$eventId/'
+      preLoaderRoute: typeof AuthenticatedWithLayoutEventsEventIdIndexRouteImport
       parentRoute: typeof AuthenticatedWithLayoutRoute
     }
     '/_authenticated/_with-layout/events/$eventId/edit': {
@@ -539,19 +539,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedWithLayoutEventsEventIdEditRouteImport
       parentRoute: typeof AuthenticatedWithLayoutRoute
     }
-    '/_authenticated/_with-layout/admin/users/$userId': {
-      id: '/_authenticated/_with-layout/admin/users/$userId'
-      path: '/users/$userId'
-      fullPath: '/admin/users/$userId'
-      preLoaderRoute: typeof AuthenticatedWithLayoutAdminUsersUserIdRouteImport
-      parentRoute: typeof AuthenticatedWithLayoutAdminRoute
+    '/_authenticated/_with-layout/wishlists/$wishlistId/': {
+      id: '/_authenticated/_with-layout/wishlists/$wishlistId/'
+      path: '/wishlists/$wishlistId'
+      fullPath: '/wishlists/$wishlistId/'
+      preLoaderRoute: typeof AuthenticatedWithLayoutWishlistsWishlistIdIndexRouteImport
+      parentRoute: typeof AuthenticatedWithLayoutRoute
     }
-    '/_authenticated/_with-layout/admin/events/$eventId': {
-      id: '/_authenticated/_with-layout/admin/events/$eventId'
-      path: '/events/$eventId'
-      fullPath: '/admin/events/$eventId'
-      preLoaderRoute: typeof AuthenticatedWithLayoutAdminEventsEventIdRouteImport
-      parentRoute: typeof AuthenticatedWithLayoutAdminRoute
+    '/_authenticated/_with-layout/wishlists/$wishlistId/edit': {
+      id: '/_authenticated/_with-layout/wishlists/$wishlistId/edit'
+      path: '/wishlists/$wishlistId/edit'
+      fullPath: '/wishlists/$wishlistId/edit'
+      preLoaderRoute: typeof AuthenticatedWithLayoutWishlistsWishlistIdEditRouteImport
+      parentRoute: typeof AuthenticatedWithLayoutRoute
     }
   }
 }

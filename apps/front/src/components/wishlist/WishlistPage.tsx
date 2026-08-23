@@ -52,28 +52,28 @@ export const WishlistPage = ({ wishlistId }: WishlistPageProps) => {
 
   const setShowEventDialog = useCallback(
     (show: boolean) => {
-      void navigate({ from: '/wishlists/$wishlistId', search: prev => ({ ...prev, showEventDialog: show }) });
+      void navigate({ from: '/wishlists/$wishlistId/', search: prev => ({ ...prev, showEventDialog: show }) });
     },
     [navigate],
   );
 
   const setShowImportDialog = useCallback(
     (show: boolean) => {
-      void navigate({ from: '/wishlists/$wishlistId', search: prev => ({ ...prev, showImportDialog: show }) });
+      void navigate({ from: '/wishlists/$wishlistId/', search: prev => ({ ...prev, showImportDialog: show }) });
     },
     [navigate],
   );
 
   const setSort = useCallback(
     (newSort: typeof sort) => {
-      void navigate({ from: '/wishlists/$wishlistId', search: prev => ({ ...prev, sort: newSort }) });
+      void navigate({ from: '/wishlists/$wishlistId/', search: prev => ({ ...prev, sort: newSort }) });
     },
     [navigate],
   );
 
   const setFilter = useCallback(
     (newFilter: typeof filter) => {
-      void navigate({ from: '/wishlists/$wishlistId', search: prev => ({ ...prev, filter: newFilter }) });
+      void navigate({ from: '/wishlists/$wishlistId/', search: prev => ({ ...prev, filter: newFilter }) });
     },
     [navigate],
   );
@@ -90,7 +90,12 @@ export const WishlistPage = ({ wishlistId }: WishlistPageProps) => {
           <>
             <WishlistHeaderSkeleton />
             <Container maxWidth="lg">
-              <Stack gap="20px" sx={{ paddingTop: 3 }}>
+              <Stack
+                sx={{
+                  gap: '20px',
+                  paddingTop: 3,
+                }}
+              >
                 <WishlistItems loading />
               </Stack>
             </Container>
@@ -116,7 +121,12 @@ export const WishlistPage = ({ wishlistId }: WishlistPageProps) => {
             />
 
             <Container maxWidth="lg">
-              <Stack gap="20px" sx={{ paddingTop: 3 }}>
+              <Stack
+                sx={{
+                  gap: '20px',
+                  paddingTop: 3,
+                }}
+              >
                 {wishlist.description && <Description text={wishlist.description} />}
 
                 <WishlistItems

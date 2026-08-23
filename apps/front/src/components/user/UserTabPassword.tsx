@@ -63,8 +63,21 @@ export const UserTabPassword = () => {
 
       {formErrors.root && <Alert severity="error">{formErrors.root.message}</Alert>}
 
-      <Stack component="form" onSubmit={handleSubmit(onSubmit)} noValidate gap={3}>
-        <Stack direction="row" flexWrap="wrap" gap={3}>
+      <Stack
+        component="form"
+        onSubmit={handleSubmit(onSubmit)}
+        noValidate
+        sx={{
+          gap: 3,
+        }}
+      >
+        <Stack
+          direction="row"
+          sx={{
+            flexWrap: 'wrap',
+            gap: 3,
+          }}
+        >
           <Box sx={{ flex: '1 1 300px', minWidth: '200px' }}>
             <TextField
               {...register('oldPassword')}
@@ -90,7 +103,12 @@ export const UserTabPassword = () => {
             />
           </Box>
         </Stack>
-        <Stack direction="row" justifyContent="center">
+        <Stack
+          direction="row"
+          sx={{
+            justifyContent: 'center',
+          }}
+        >
           <Button
             sx={{ marginTop: '8px' }}
             type="submit"

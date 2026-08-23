@@ -195,7 +195,11 @@ export const CreateWishlistPage = () => {
               <Box>
                 <Subtitle>Pour qui créer la liste ?</Subtitle>
 
-                <Stack gap={2}>
+                <Stack
+                  sx={{
+                    gap: 2,
+                  }}
+                >
                   <OptionCard
                     onClick={() => {
                       setStep(2);
@@ -241,8 +245,18 @@ export const CreateWishlistPage = () => {
               <Box component="form" noValidate>
                 <Subtitle>Ajouter les informations</Subtitle>
 
-                <Stack gap={3}>
-                  <Stack direction="row" gap={3} alignItems="center">
+                <Stack
+                  sx={{
+                    gap: 3,
+                  }}
+                >
+                  <Stack
+                    direction="row"
+                    sx={{
+                      gap: 3,
+                      alignItems: 'center',
+                    }}
+                  >
                     <ListOfTitle>Liste de</ListOfTitle>
                     <Box sx={{ flex: 1 }}>
                       <TextField
@@ -363,7 +377,14 @@ export const CreateWishlistPage = () => {
             )}
 
             {step > 1 && (
-              <Stack direction="row" justifyContent="space-between" alignItems="center" marginTop={3}>
+              <Stack
+                direction="row"
+                sx={{
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginTop: 3,
+                }}
+              >
                 <Box>
                   {step > 1 && (
                     <Button

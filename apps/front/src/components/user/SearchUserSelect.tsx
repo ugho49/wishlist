@@ -228,7 +228,13 @@ export const SearchUserSelect = ({
       }}
       renderOption={(props, option) => (
         <li {...props}>
-          <Stack direction="row" gap={1} alignItems="center">
+          <Stack
+            direction="row"
+            sx={{
+              gap: 1,
+              alignItems: 'center',
+            }}
+          >
             <Avatar
               sx={{
                 width: '30px',
@@ -260,7 +266,7 @@ export const SearchUserSelect = ({
         <TextField
           {...params}
           label={label}
-          slotProps={{ htmlInput: { ...params.inputProps } }}
+          slotProps={params.slotProps}
           onChange={e => {
             const value = e.target.value;
             setInputValue(value);

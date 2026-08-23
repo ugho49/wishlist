@@ -61,7 +61,7 @@ export const EventListPage = () => {
             currentPage={currentPage}
             disabled={loading}
             hide={totalPages === 1}
-            onChange={value => navigate({ from: '/events', search: prev => ({ ...prev, page: value }) })}
+            onChange={value => navigate({ from: '/events/', search: prev => ({ ...prev, page: value }) })}
           />
 
           <FabAutoGrow

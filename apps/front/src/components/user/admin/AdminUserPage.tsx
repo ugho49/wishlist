@@ -162,7 +162,14 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
         onClose={() => setUpdatePasswordModalOpen(false)}
       />
 
-      <Stack direction="row" justifyContent="center" flexWrap="wrap" mb={2}>
+      <Stack
+        direction="row"
+        sx={{
+          justifyContent: 'center',
+          flexWrap: 'wrap',
+          mb: 2,
+        }}
+      >
         <AvatarUpdateButton
           size="120px"
           pictureUrl={pictureUrl}
@@ -196,7 +203,13 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
 
       <CardStack>
         <Card>
-          <Stack direction="row" flexWrap="wrap" gap={smallScreen ? 0 : 3}>
+          <Stack
+            direction="row"
+            sx={{
+              flexWrap: 'wrap',
+              gap: smallScreen ? 0 : 3,
+            }}
+          >
             <List dense sx={{ flexGrow: 1 }}>
               <ListItem>
                 <ListItemIcon>
@@ -236,7 +249,15 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
           </Stack>
 
           {!isCurrentUser && (
-            <Stack mt="16px" direction="row" justifyContent="center" gap={1} flexWrap="wrap">
+            <Stack
+              direction="row"
+              sx={{
+                mt: '16px',
+                justifyContent: 'center',
+                gap: 1,
+                flexWrap: 'wrap',
+              }}
+            >
               <ConfirmButton
                 sx={{ padding: '3px 10px' }}
                 confirmTitle={enabled ? "Désactiver l'utilisateur" : "Activer l'utilisateur"}
@@ -270,8 +291,20 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
         <Card>
           <Subtitle>Modifier les informations</Subtitle>
 
-          <Stack component="form" gap={3} onSubmit={updateProfile}>
-            <Stack direction="row" flexWrap="wrap" gap={3}>
+          <Stack
+            component="form"
+            onSubmit={updateProfile}
+            sx={{
+              gap: 3,
+            }}
+          >
+            <Stack
+              direction="row"
+              sx={{
+                flexWrap: 'wrap',
+                gap: 3,
+              }}
+            >
               <Box sx={{ flex: '1 1 300px', minWidth: '200px' }}>
                 <TextField
                   autoComplete="off"
@@ -303,7 +336,13 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
               </Box>
             </Stack>
 
-            <Stack direction="row" flexWrap="wrap" gap={3}>
+            <Stack
+              direction="row"
+              sx={{
+                flexWrap: 'wrap',
+                gap: 3,
+              }}
+            >
               <Box sx={{ flex: '1 1 300px', minWidth: '200px' }}>
                 <TextField
                   label="Email"
@@ -331,7 +370,12 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
             </Stack>
 
             {!isCurrentUser && (
-              <Stack direction="row" justifyContent="center">
+              <Stack
+                direction="row"
+                sx={{
+                  justifyContent: 'center',
+                }}
+              >
                 <Button
                   sx={{ marginTop: '8px' }}
                   type="submit"

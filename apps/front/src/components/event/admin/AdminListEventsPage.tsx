@@ -6,7 +6,7 @@ import { AdminListEvents } from './AdminListEvents';
 
 export const AdminListEventsPage = () => {
   const { page: currentPage } = useSearch({ from: '/_authenticated/_with-layout/admin/events/' });
-  const navigate = useNavigate({ from: '/admin/events' });
+  const navigate = useNavigate({ from: '/admin/events/' });
 
   const changeCurrentPage = (page: number) => {
     void navigate({ search: prev => ({ ...prev, page }) });

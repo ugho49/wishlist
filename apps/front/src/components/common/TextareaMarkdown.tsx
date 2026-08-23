@@ -391,7 +391,11 @@ export const TextareaMarkdown = forwardRef<HTMLInputElement, TextareaMarkdownPro
           )}
 
           {mode === 'preview' && (
-            <Stack gap={1}>
+            <Stack
+              sx={{
+                gap: 1,
+              }}
+            >
               {displayValue === '' ? (
                 <PreviewContainer text="*Aucun contenu à prévisualiser*" />
               ) : (

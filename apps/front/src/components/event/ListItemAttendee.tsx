@@ -66,8 +66,10 @@ export const ListItemAttendee = (params: ListItemAttendeeProps) => {
         </Avatar>
       </ListItemAvatar>
       <AttendeeText
-        primaryTypographyProps={{ component: 'div' }}
-        secondaryTypographyProps={{ component: 'span' }}
+        slotProps={{
+          primary: { component: 'div' },
+          secondary: { component: 'span' },
+        }}
         primary={<UserName>{isPending ? email : userName}</UserName>}
         secondary={isPending ? 'Invitation en attente de validation' : email}
       />

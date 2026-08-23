@@ -83,7 +83,11 @@ export const EmptyItemsState = ({
       <Illustration src={EmptyItemsIllustration} alt="Empty Items" />
     </Box>
 
-    <Box textAlign="center">
+    <Box
+      sx={{
+        textAlign: 'center',
+      }}
+    >
       <EmptyStateTitle>Aucun souhait pour le moment</EmptyStateTitle>
       <EmptyStateSubtitle>
         {!isOwner && 'Cette liste ne contient aucun souhait. Vous pouvez suggérer un souhait !'}

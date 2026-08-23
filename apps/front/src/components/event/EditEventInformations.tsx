@@ -31,7 +31,8 @@ const schema = z.object({
     .refine(date => date !== null, "La date de l'événement est requise"),
 });
 
-type FormFields = z.infer<typeof schema>;
+type FormInput = z.input<typeof schema>;
+type FormFields = z.output<typeof schema>;
 
 export type EditEventInformationsProps = {
   event: EventDetail;
@@ -48,7 +49,7 @@ export const EditEventInformations = ({ event }: EditEventInformationsProps) => 
     handleSubmit,
     formState: { errors },
     watch,
-  } = useForm<FormFields>({
+  } = useForm<FormInput, unknown, FormFields>({
     resolver: zodResolver(schema),
     defaultValues: {
       title: event.title,
@@ -100,12 +101,26 @@ export const EditEventInformations = ({ event }: EditEventInformationsProps) => 
   };
 
   return (
-    <Stack gap={3}>
+    <Stack
+      sx={{
+        gap: 3,
+      }}
+    >
       <Card component="form" onSubmit={handleSubmit(onSubmit)}>
         <Subtitle>Modifier les informations</Subtitle>
 
-        <Stack gap={4}>
-          <Stack direction="row" gap={2} alignItems="flex-start">
+        <Stack
+          sx={{
+            gap: 4,
+          }}
+        >
+          <Stack
+            direction="row"
+            sx={{
+              gap: 2,
+              alignItems: 'flex-start',
+            }}
+          >
             <Controller
               control={control}
               name="icon"
@@ -169,7 +184,13 @@ export const EditEventInformations = ({ event }: EditEventInformationsProps) => 
             />
           </Stack>
 
-          <Stack direction="row" justifyContent="center" marginTop={4}>
+          <Stack
+            direction="row"
+            sx={{
+              justifyContent: 'center',
+              marginTop: 4,
+            }}
+          >
             <Button
               type="submit"
               variant="contained"
@@ -185,7 +206,11 @@ export const EditEventInformations = ({ event }: EditEventInformationsProps) => 
         </Stack>
       </Card>
 
-      <Stack alignItems="center">
+      <Stack
+        sx={{
+          alignItems: 'center',
+        }}
+      >
         <Box>
           <ConfirmButton
             confirmTitle="Supprimer l'évènement"

@@ -33,7 +33,12 @@ const getColumns = (userId: UserId): GridColDef<AdminUserWishlistRow>[] => [
     resizable: true,
     valueGetter: (_, row) => row.events.map(event => event.title).join(', '),
     renderCell: ({ row }) => (
-      <Stack gap={1} direction="row">
+      <Stack
+        direction="row"
+        sx={{
+          gap: 1,
+        }}
+      >
         {row.events.map(event => (
           <RouterLink key={event.id} to="/admin/events/$eventId" params={{ eventId: event.id }}>
             {event.title}

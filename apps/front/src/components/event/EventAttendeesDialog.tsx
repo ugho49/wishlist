@@ -33,7 +33,13 @@ export const EventAttendeesDialog = ({
 }: EventAttendeesDialogProps) => (
   <Dialog onClose={() => handleClose()} open={open} fullWidth maxWidth="xs">
     <DialogTitle>
-      <Stack direction="row" alignItems="center" justifyContent="space-between">
+      <Stack
+        direction="row"
+        sx={{
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+      >
         <span>Participants</span>
         <IconButton onClick={() => handleClose()}>
           <CloseIcon />

@@ -71,14 +71,24 @@ export const ForgotPasswordPage = () => {
   };
 
   return (
-    <Stack spacing={4} alignItems="center">
+    <Stack
+      spacing={4}
+      sx={{
+        alignItems: 'center',
+      }}
+    >
       {resetCodeSent ? (
         <MessageBoxStyled>
           <Typography variant="body1" gutterBottom>
             Un email 📩 vient de vous être envoyé pour réinitialiser le mot de passe. Aller regarder dans votre boite
             mail 😊
           </Typography>
-          <Typography variant="body2" fontWeight={600}>
+          <Typography
+            variant="body2"
+            sx={{
+              fontWeight: 600,
+            }}
+          >
             (Pensez aussi à regarder dans les spams)
           </Typography>
         </MessageBoxStyled>
@@ -86,7 +96,14 @@ export const ForgotPasswordPage = () => {
         <>
           <TitleStyled variant="h4">Mot de passe oublié</TitleStyled>
 
-          <Stack component="form" onSubmit={handleSubmit(onSubmit)} spacing={3} width="100%">
+          <Stack
+            component="form"
+            onSubmit={handleSubmit(onSubmit)}
+            spacing={3}
+            sx={{
+              width: '100%',
+            }}
+          >
             <TextField
               {...register('email')}
               type="email"
@@ -117,8 +134,19 @@ export const ForgotPasswordPage = () => {
       )}
 
       <FooterStackStyled>
-        <Stack direction="row" alignItems="center" spacing={1}>
-          <Typography variant="body2" color="text.secondary">
+        <Stack
+          direction="row"
+          spacing={1}
+          sx={{
+            alignItems: 'center',
+          }}
+        >
+          <Typography
+            variant="body2"
+            sx={{
+              color: 'text.secondary',
+            }}
+          >
             Déjà inscrit ?
           </Typography>
           <RouterLink to="/login">Me connecter</RouterLink>
