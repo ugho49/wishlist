@@ -37,11 +37,13 @@ import {
   useScanItemUrlMutation,
   useUpdateItemMutation,
 } from '../../gql';
+import { getClothingDetailsPlaceholder, getClothingKind, shouldShowClothingSizeHint } from '../../utils/clothing.utils';
 import { isValidUrl } from '../../utils/router.utils';
 import { CharsRemaining } from '../common/CharsRemaining';
 import { InputLabel } from '../common/InputLabel';
 import { Rating } from '../common/Rating';
 import { Subtitle } from '../common/Subtitle';
+import { ClothingSizeHint } from './ClothingSizeHint';
 
 const Transition = forwardRef(function TransitionComponent(
   props: TransitionProps & { children: React.ReactElement },
@@ -84,6 +86,8 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
   const invalidUrl = url !== '' && !isValidUrl(url);
   const formIsValid =
     name.trim() !== '' && !invalidUrl && ((pictureUrl && validPictureUrl === true) || !pictureUrl) && !scanUrlLoading;
+  const clothingKind = getClothingKind(name);
+  const showClothingSizeHint = shouldShowClothingSizeHint(name, description);
 
   const resetForm = () => {
     setName('');
@@ -220,8 +224,9 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
               helperText={<CharsRemaining max={40} value={name} />}
               onChange={e => setName(e.target.value)}
             />
-            {/* TODO: suggest to "add size" if it's clothe */}
           </Box>
+
+          <ClothingSizeHint title={name} description={description} />
 
           <Box>
             <TextField
@@ -230,12 +235,12 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
               disabled={loading}
               fullWidth
               value={description}
+              color={showClothingSizeHint ? 'warning' : undefined}
               slotProps={{ htmlInput: { maxLength: 120 } }}
-              placeholder="Ajouter du détail à votre souhait"
+              placeholder={getClothingDetailsPlaceholder(clothingKind)}
               helperText={<CharsRemaining max={120} value={description} />}
               onChange={e => setDescription(e.target.value)}
             />
-            {/* TODO: suggest to "add size" if it's clothe */}
           </Box>
 
           <Box>
