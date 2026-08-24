@@ -1,6 +1,45 @@
-import { descriptionMentionsSize, isClothingItemTitle, shouldShowClothingSizeHint } from './clothing.utils';
+import {
+  descriptionMentionsSize,
+  getClothingDetailsPlaceholder,
+  getClothingKind,
+  getClothingSizeHintKind,
+  isClothingItemTitle,
+  shouldShowClothingSizeHint,
+} from './clothing.utils';
 
 describe('clothing.utils', () => {
+  describe('getClothingKind', () => {
+    it.each(['Chaussures de running', 'Baskets Air Max', 'Sneakers blanches', 'Bottes de pluie', 'Sandales été'])(
+      'should detect shoes: "%s"',
+      title => {
+        expect(getClothingKind(title)).toBe('shoe');
+      },
+    );
+
+    it.each([
+      'Pull Nike',
+      'T-shirt blanc',
+      'Jean slim',
+      'Pantalon cargo',
+      'Robe d été',
+      'Veste en cuir',
+      'Sweat à capuche',
+      'Chaussettes invisibles',
+      'Soutien-gorge',
+      'Coupe-vent',
+      'Vêtement de sport',
+    ])('should detect garments: "%s"', title => {
+      expect(getClothingKind(title)).toBe('garment');
+    });
+
+    it.each(['Livre Harry Potter', 'Jeanne', 'Shortcut clavier', '', null, undefined])(
+      'should return null for unrelated or empty titles: "%s"',
+      title => {
+        expect(getClothingKind(title)).toBeNull();
+      },
+    );
+  });
+
   describe('isClothingItemTitle', () => {
     it.each([
       'Pull Nike',
@@ -83,6 +122,35 @@ describe('clothing.utils', () => {
 
     it('should not show the hint for a non-clothing title', () => {
       expect(shouldShowClothingSizeHint('Livre Harry Potter', '')).toBe(false);
+    });
+  });
+
+  describe('getClothingSizeHintKind', () => {
+    it('should return garment for a clothing title without a size', () => {
+      expect(getClothingSizeHintKind('Pull Nike', '')).toBe('garment');
+    });
+
+    it('should return shoe for a footwear title without a size', () => {
+      expect(getClothingSizeHintKind('Baskets Air Max', '')).toBe('shoe');
+    });
+
+    it('should hide the hint once a size is mentioned', () => {
+      expect(getClothingSizeHintKind('Baskets Air Max', 'Pointure 42')).toBeNull();
+      expect(getClothingSizeHintKind('Pull Nike', 'Taille M')).toBeNull();
+    });
+  });
+
+  describe('getClothingDetailsPlaceholder', () => {
+    it('should suggest a clothing size for garments', () => {
+      expect(getClothingDetailsPlaceholder('garment')).toBe('Ex : Taille M, couleur, matière…');
+    });
+
+    it('should suggest a shoe size for footwear', () => {
+      expect(getClothingDetailsPlaceholder('shoe')).toBe('Ex : Pointure 42, couleur…');
+    });
+
+    it('should keep the default placeholder otherwise', () => {
+      expect(getClothingDetailsPlaceholder(null)).toBe('Ajouter du détail à votre souhait');
     });
   });
 });

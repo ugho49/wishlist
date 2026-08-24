@@ -37,7 +37,7 @@ import {
   useScanItemUrlMutation,
   useUpdateItemMutation,
 } from '../../gql';
-import { isClothingItemTitle, shouldShowClothingSizeHint } from '../../utils/clothing.utils';
+import { getClothingDetailsPlaceholder, getClothingKind, shouldShowClothingSizeHint } from '../../utils/clothing.utils';
 import { isValidUrl } from '../../utils/router.utils';
 import { CharsRemaining } from '../common/CharsRemaining';
 import { InputLabel } from '../common/InputLabel';
@@ -86,7 +86,7 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
   const invalidUrl = url !== '' && !isValidUrl(url);
   const formIsValid =
     name.trim() !== '' && !invalidUrl && ((pictureUrl && validPictureUrl === true) || !pictureUrl) && !scanUrlLoading;
-  const clothingTitle = isClothingItemTitle(name);
+  const clothingKind = getClothingKind(name);
   const showClothingSizeHint = shouldShowClothingSizeHint(name, description);
 
   const resetForm = () => {
@@ -237,7 +237,7 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
               value={description}
               color={showClothingSizeHint ? 'warning' : undefined}
               slotProps={{ htmlInput: { maxLength: 120 } }}
-              placeholder={clothingTitle ? 'Ex : Taille M, couleur, matière…' : 'Ajouter du détail à votre souhait'}
+              placeholder={getClothingDetailsPlaceholder(clothingKind)}
               helperText={<CharsRemaining max={120} value={description} />}
               onChange={e => setDescription(e.target.value)}
             />

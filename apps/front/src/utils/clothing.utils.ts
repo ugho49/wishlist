@@ -15,15 +15,62 @@ function tokenize(value: string): string[] {
   return normalized.split(/\s+/);
 }
 
+function matchesKeywords(words: string[], keywords: Set<string>, compounds: Set<string> = new Set()): boolean {
+  if (words.some(word => keywords.has(word))) return true;
+
+  for (let i = 0; i < words.length - 1; i++) {
+    const compound = `${words[i]}${words[i + 1]}`;
+    if (compounds.has(compound) || keywords.has(compound)) return true;
+  }
+
+  return false;
+}
+
 /**
- * Garment types that typically need a size (FR + common EN).
- * Short generic words like "top" or "haut" are omitted to avoid false positives.
+ * Footwear that needs a shoe size / pointure (FR + common EN).
  */
-const CLOTHING_WORDS = new Set([
+const SHOE_WORDS = new Set([
   'ballerine',
   'ballerines',
   'basket',
   'baskets',
+  'boot',
+  'boots',
+  'botte',
+  'bottes',
+  'bottine',
+  'bottines',
+  'chausson',
+  'chaussons',
+  'chaussure',
+  'chaussures',
+  'claquette',
+  'claquettes',
+  'derby',
+  'derbys',
+  'escarpin',
+  'escarpins',
+  'mocassin',
+  'mocassins',
+  'pantoufle',
+  'pantoufles',
+  'richelieu',
+  'richelieus',
+  'sabot',
+  'sabots',
+  'sandale',
+  'sandales',
+  'sneaker',
+  'sneakers',
+  'tong',
+  'tongs',
+]);
+
+/**
+ * Garment types that typically need a clothing size / taille (FR + common EN).
+ * Short generic words like "top" or "haut" are omitted to avoid false positives.
+ */
+const GARMENT_WORDS = new Set([
   'bermuda',
   'bermudas',
   'blazer',
@@ -34,12 +81,6 @@ const CLOTHING_WORDS = new Set([
   'blousons',
   'bonnet',
   'bonnets',
-  'boot',
-  'boots',
-  'botte',
-  'bottes',
-  'bottine',
-  'bottines',
   'boxer',
   'boxers',
   'brassiere',
@@ -56,16 +97,10 @@ const CLOTHING_WORDS = new Set([
   'chapeaux',
   'chaussette',
   'chaussettes',
-  'chausson',
-  'chaussons',
-  'chaussure',
-  'chaussures',
   'chemise',
   'chemises',
   'chemisier',
   'chemisiers',
-  'claquette',
-  'claquettes',
   'coat',
   'coats',
   'collant',
@@ -78,14 +113,10 @@ const CLOTHING_WORDS = new Set([
   'culottes',
   'debardeur',
   'debardeurs',
-  'derby',
-  'derbys',
   'doudoune',
   'doudounes',
   'dress',
   'dresses',
-  'escarpin',
-  'escarpins',
   'gant',
   'gants',
   'gilet',
@@ -116,12 +147,8 @@ const CLOTHING_WORDS = new Set([
   'maillots',
   'manteau',
   'manteaux',
-  'mocassin',
-  'mocassins',
   'nuisette',
   'nuisettes',
-  'pantoufle',
-  'pantoufles',
   'pantalon',
   'pantalons',
   'pants',
@@ -137,16 +164,10 @@ const CLOTHING_WORDS = new Set([
   'pulls',
   'pyjama',
   'pyjamas',
-  'richelieu',
-  'richelieus',
   'robe',
   'robes',
-  'sabot',
-  'sabots',
   'salopette',
   'salopettes',
-  'sandale',
-  'sandales',
   'shirt',
   'shirts',
   'short',
@@ -157,8 +178,6 @@ const CLOTHING_WORDS = new Set([
   'slips',
   'smoking',
   'smokings',
-  'sneaker',
-  'sneakers',
   'socks',
   'survet',
   'survetement',
@@ -171,8 +190,6 @@ const CLOTHING_WORDS = new Set([
   'sweatshirts',
   'teeshirt',
   'teeshirts',
-  'tong',
-  'tongs',
   'trench',
   'trenchs',
   'trousers',
@@ -186,24 +203,26 @@ const CLOTHING_WORDS = new Set([
   'vetements',
 ]);
 
-const CLOTHING_COMPOUNDS = new Set(['soutiengorge', 'coupevent', 'croptop']);
+const GARMENT_COMPOUNDS = new Set(['soutiengorge', 'coupevent', 'croptop']);
 
 const SIZE_KEYWORDS = new Set(['taille', 'pointure', 'size', 'sizes']);
 
 const SIZE_TOKENS = new Set(['xxxs', 'xxs', 'xs', 'xl', 'xxl', 'xxxl', 'xxxxl', '2xl', '3xl', '4xl', '5xl']);
 
-export function isClothingItemTitle(title: string | null | undefined): boolean {
-  if (!title?.trim()) return false;
+export type ClothingKind = 'shoe' | 'garment';
+
+export function getClothingKind(title: string | null | undefined): ClothingKind | null {
+  if (!title?.trim()) return null;
 
   const words = tokenize(title);
-  if (words.some(word => CLOTHING_WORDS.has(word))) return true;
+  if (matchesKeywords(words, SHOE_WORDS)) return 'shoe';
+  if (matchesKeywords(words, GARMENT_WORDS, GARMENT_COMPOUNDS)) return 'garment';
 
-  for (let i = 0; i < words.length - 1; i++) {
-    const compound = `${words[i]}${words[i + 1]}`;
-    if (CLOTHING_COMPOUNDS.has(compound) || CLOTHING_WORDS.has(compound)) return true;
-  }
+  return null;
+}
 
-  return false;
+export function isClothingItemTitle(title: string | null | undefined): boolean {
+  return getClothingKind(title) !== null;
 }
 
 export function descriptionMentionsSize(description: string | null | undefined): boolean {
@@ -219,5 +238,20 @@ export function shouldShowClothingSizeHint(
   title: string | null | undefined,
   description: string | null | undefined,
 ): boolean {
-  return isClothingItemTitle(title) && !descriptionMentionsSize(description);
+  return getClothingSizeHintKind(title, description) !== null;
+}
+
+export function getClothingSizeHintKind(
+  title: string | null | undefined,
+  description: string | null | undefined,
+): ClothingKind | null {
+  const kind = getClothingKind(title);
+  if (!kind || descriptionMentionsSize(description)) return null;
+  return kind;
+}
+
+export function getClothingDetailsPlaceholder(kind: ClothingKind | null): string {
+  if (kind === 'shoe') return 'Ex : Pointure 42, couleur…';
+  if (kind === 'garment') return 'Ex : Taille M, couleur, matière…';
+  return 'Ajouter du détail à votre souhait';
 }
