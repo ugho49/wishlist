@@ -1,8 +1,16 @@
-import { Section, Text } from 'react-email';
-
 import { EmailLayout } from '../components/layout';
-import { ButtonFallback, Callout, ContentSection, Heading, Paragraph, PrimaryButton } from '../components/ui';
-import * as styles from '../styles';
+import {
+  Callout,
+  ContentSection,
+  CtaBlock,
+  DetailRow,
+  Eyebrow,
+  FeatureItem,
+  Heading,
+  HighlightCard,
+  Paragraph,
+  SectionTitle,
+} from '../components/ui';
 
 export interface SecretSantaDrawEmailProps {
   readonly eventTitle: string;
@@ -15,69 +23,35 @@ export default function SecretSantaDrawEmail({ eventTitle, eventUrl, budget, des
   return (
     <EmailLayout preview="Le tirage Secret Santa a eu lieu — viens découvrir le tien">
       <ContentSection>
-        <Heading>🎅 Le tirage Secret Santa a eu lieu !</Heading>
-        <Paragraph style={{ textAlign: 'center' }}>Le tirage au sort a eu lieu pour l'événement :</Paragraph>
-        <Paragraph style={{ ...styles.accent, textAlign: 'center', fontSize: '18px', margin: 0 }}>
-          {eventTitle}
-        </Paragraph>
+        <Eyebrow>Secret Santa</Eyebrow>
+        <Heading>Le tirage a eu lieu</Heading>
+        <Paragraph style={{ textAlign: 'center', margin: 0 }}>Le tirage au sort a eu lieu pour l'événement :</Paragraph>
       </ContentSection>
 
-      <Callout background={styles.palette.success.background} style={{ padding: '30px' }}>
-        <Text
-          style={{
-            ...styles.calloutTitle(styles.palette.success.text),
-            fontSize: '22px',
-            lineHeight: '28px',
-            margin: '0 0 12px 0',
-          }}
-        >
-          Ton Secret Santa t'attend
-        </Text>
-        <Text style={{ ...styles.calloutText(styles.palette.success.text), fontSize: '16px', margin: 0 }}>
-          Rends-toi sur l'événement et gratte la boule de Noël pour découvrir à qui tu dois offrir un cadeau.
-        </Text>
+      <HighlightCard>{eventTitle}</HighlightCard>
+
+      <Callout title="Ton Secret Santa t'attend" variant="success">
+        Rends-toi sur l'événement et gratte la boule de Noël pour découvrir à qui tu dois offrir un cadeau.
       </Callout>
 
-      <ContentSection style={{ padding: '25px 30px 20px 30px' }}>
-        <Text style={styles.sectionTitle}>📋 Détails du Secret Santa :</Text>
-        <Text style={{ ...styles.listItem, fontSize: '15px', lineHeight: '24px', margin: '0 0 12px 0' }}>
-          <span style={styles.accent}>💰 Budget maximum :</span> {budget}
-        </Text>
-        <Text style={{ ...styles.listItem, fontSize: '15px', lineHeight: '24px', margin: 0 }}>
-          <span style={styles.accent}>📝 Description :</span> {description}
-        </Text>
+      <ContentSection compact>
+        <SectionTitle>Détails du Secret Santa</SectionTitle>
+        <DetailRow label="Budget maximum :" value={budget} />
+        <DetailRow label="Description :" value={description} />
       </ContentSection>
 
-      <Section style={{ ...styles.callout(styles.palette.neutral.background) }}>
-        <Text style={{ ...styles.sectionTitle, fontSize: '16px', lineHeight: '22px', margin: '0 0 12px 0' }}>
-          💡 Conseils pour votre cadeau :
-        </Text>
-        <Text style={{ ...styles.listItem, fontSize: '14px', lineHeight: '21px', margin: '0 0 8px 0' }}>
-          • Consultez la liste de souhaits de cette personne pour trouver l'inspiration
-        </Text>
-        <Text style={{ ...styles.listItem, fontSize: '14px', lineHeight: '21px', margin: '0 0 8px 0' }}>
-          • Respectez le budget maximum indiqué ci-dessus
-        </Text>
-        <Text style={{ ...styles.listItem, fontSize: '14px', lineHeight: '21px', margin: 0 }}>
-          • Gardez le secret jusqu'à l'échange des cadeaux !
-        </Text>
-      </Section>
-
-      <Callout background={styles.palette.warning.background}>
-        <Text style={styles.calloutTitle(styles.palette.warning.text)}>🤫 Rappel important</Text>
-        <Text style={styles.calloutText(styles.palette.warning.text)}>
-          Ne révélez à personne qui est votre Secret Santa ! C'est le principe du jeu. Consultez la liste de la personne
-          tirée au sort pour vous inspirer.
-        </Text>
+      <Callout title="Conseils pour votre cadeau" variant="tip">
+        <FeatureItem>Consultez la liste de souhaits de cette personne pour trouver l'inspiration</FeatureItem>
+        <FeatureItem>Respectez le budget maximum indiqué ci-dessus</FeatureItem>
+        <FeatureItem>Gardez le secret jusqu'à l'échange des cadeaux !</FeatureItem>
       </Callout>
 
-      <Section style={styles.buttonSection}>
-        <Paragraph style={{ textAlign: 'center', fontSize: '15px', lineHeight: '22px', margin: '0 0 20px 0' }}>
-          Cliquez sur le bouton ci-dessous pour découvrir votre tirage et consulter l'événement :
-        </Paragraph>
-        <PrimaryButton href={eventUrl}>Découvre ton Secret Santa ici</PrimaryButton>
-        <ButtonFallback href={eventUrl} />
-      </Section>
+      <Callout title="Rappel important" variant="warning">
+        Ne révélez à personne qui est votre Secret Santa ! C'est le principe du jeu. Consultez la liste de la personne
+        tirée au sort pour vous inspirer.
+      </Callout>
+
+      <CtaBlock href={eventUrl}>Découvre ton Secret Santa ici</CtaBlock>
     </EmailLayout>
   );
 }
