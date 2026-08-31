@@ -7,8 +7,7 @@ import { DatabaseService } from '../../core/database/database.service';
 import { type DrizzleTransaction } from '../../core/database/transaction-manager';
 import { UserAccount } from '../../user/domain/model/user-account.model';
 import { type UserAccountRepository } from '../../user/domain/repository/user-account.repository';
-import { UserAccountProvider } from '../../user/domain/user-account-provider.enum';
-import { PostgresUserRepository } from './postgres-user.repository';
+import { type UserAccountProvider } from '../../user/domain/user-account-provider.enum';
 
 @Injectable()
 export class PostgresUserAccountRepository implements UserAccountRepository {
@@ -27,16 +26,14 @@ export class PostgresUserAccountRepository implements UserAccountRepository {
         eq(schema.userAccount.providerAccountId, providerAccountId),
         eq(schema.userAccount.provider, provider),
       ),
-      with: { user: true },
     });
 
     return userAccount ? PostgresUserAccountRepository.toModel(userAccount) : undefined;
   }
 
-  async findPasswordByUserId(userId: UserId): Promise<UserAccount | undefined> {
+  async findByUserIdAndProvider(userId: UserId, provider: UserAccountProvider): Promise<UserAccount | undefined> {
     const userAccount = await this.databaseService.db.query.userAccount.findFirst({
-      where: and(eq(schema.userAccount.userId, userId), eq(schema.userAccount.provider, UserAccountProvider.PASSWORD)),
-      with: { user: true },
+      where: and(eq(schema.userAccount.userId, userId), eq(schema.userAccount.provider, provider)),
     });
 
     return userAccount ? PostgresUserAccountRepository.toModel(userAccount) : undefined;
@@ -45,7 +42,6 @@ export class PostgresUserAccountRepository implements UserAccountRepository {
   async findByUserId(userId: UserId): Promise<UserAccount[]> {
     const userAccounts = await this.databaseService.db.query.userAccount.findMany({
       where: eq(schema.userAccount.userId, userId),
-      with: { user: true },
     });
 
     return userAccounts.map(userAccount => PostgresUserAccountRepository.toModel(userAccount));
@@ -54,7 +50,6 @@ export class PostgresUserAccountRepository implements UserAccountRepository {
   async findByUserIds(userIds: UserId[]): Promise<UserAccount[]> {
     const userAccounts = await this.databaseService.db.query.userAccount.findMany({
       where: inArray(schema.userAccount.userId, userIds),
-      with: { user: true },
     });
 
     return userAccounts.map(userAccount => PostgresUserAccountRepository.toModel(userAccount));
@@ -63,7 +58,6 @@ export class PostgresUserAccountRepository implements UserAccountRepository {
   async findByIds(userAccountIds: UserAccountId[]): Promise<UserAccount[]> {
     const userAccounts = await this.databaseService.db.query.userAccount.findMany({
       where: inArray(schema.userAccount.id, userAccountIds),
-      with: { user: true },
     });
 
     return userAccounts.map(userAccount => PostgresUserAccountRepository.toModel(userAccount));
@@ -75,7 +69,7 @@ export class PostgresUserAccountRepository implements UserAccountRepository {
     const values = {
       id: userAccount.id,
       email: userAccount.email,
-      userId: userAccount.user.id,
+      userId: userAccount.userId,
       provider: userAccount.provider,
       providerAccountId: userAccount.providerAccountId,
       passwordHash: userAccount.passwordHash,
@@ -118,10 +112,10 @@ export class PostgresUserAccountRepository implements UserAccountRepository {
     await client.delete(schema.userAccount).where(eq(schema.userAccount.id, id));
   }
 
-  static toModel(row: typeof schema.userAccount.$inferSelect & { user: typeof schema.user.$inferSelect }): UserAccount {
+  static toModel(row: typeof schema.userAccount.$inferSelect): UserAccount {
     return new UserAccount({
       id: row.id,
-      user: PostgresUserRepository.toModel(row.user),
+      userId: row.userId,
       email: row.email,
       provider: row.provider,
       providerAccountId: row.providerAccountId ?? undefined,

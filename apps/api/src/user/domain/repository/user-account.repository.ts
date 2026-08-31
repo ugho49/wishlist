@@ -8,8 +8,8 @@ export interface UserAccountRepository {
   findByIds(userAccountIds: UserAccountId[]): Promise<UserAccount[]>;
   findByUserId(userId: UserId): Promise<UserAccount[]>;
   findByUserIds(userIds: UserId[]): Promise<UserAccount[]>;
+  findByUserIdAndProvider(userId: UserId, provider: UserAccountProvider): Promise<UserAccount | undefined>;
   findByProviderAccountId(providerAccountId: string, provider: UserAccountProvider): Promise<UserAccount | undefined>;
-  findPasswordByUserId(userId: UserId): Promise<UserAccount | undefined>;
   save(userAccount: UserAccount, tx?: DrizzleTransaction): Promise<void>;
   delete(id: UserAccountId, tx?: DrizzleTransaction): Promise<void>;
 }

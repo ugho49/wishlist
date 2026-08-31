@@ -21,10 +21,10 @@ export class GetUserAccountsByUserIdsUseCase {
     const userAccounts = await this.userAccountRepository.findByUserIds(query.userIds);
 
     return userAccounts.reduce((acc, userAccount) => {
-      if (!acc.has(userAccount.user.id)) {
-        acc.set(userAccount.user.id, []);
+      if (!acc.has(userAccount.userId)) {
+        acc.set(userAccount.userId, []);
       }
-      acc.get(userAccount.user.id)?.push(userAccount);
+      acc.get(userAccount.userId)?.push(userAccount);
       return acc;
     }, new Map<UserId, UserAccount[]>());
   }

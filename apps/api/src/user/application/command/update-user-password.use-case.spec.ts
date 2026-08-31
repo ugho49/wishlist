@@ -32,7 +32,7 @@ describe('UpdateUserPasswordUseCase', () => {
     const passwordHash = await PasswordManager.hash(OLD_PASSWORD);
     user = new UserBuilder().withEmail('jean@test.fr').build();
     userRepository.findByIdOrFail.mockResolvedValue(user);
-    userAccountRepository.findPasswordByUserId.mockResolvedValue(
+    userAccountRepository.findByUserIdAndProvider.mockResolvedValue(
       new UserAccountBuilder().buildPassword(user, passwordHash),
     );
 
@@ -47,7 +47,7 @@ describe('UpdateUserPasswordUseCase', () => {
   });
 
   it('should update the password when the old password matches', async () => {
-    const existingAccount = await userAccountRepository.findPasswordByUserId(user.id);
+    const existingAccount = await userAccountRepository.findByUserIdAndProvider(user.id);
     await useCase.execute({ userId: user.id, oldPassword: OLD_PASSWORD, newPassword: NEW_PASSWORD });
 
     expect(userAccountRepository.save).toHaveBeenCalledTimes(1);

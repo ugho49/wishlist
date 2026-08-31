@@ -8,6 +8,7 @@ import { PasswordManager } from '../../../auth/infrastructure/util/password-mana
 import { TransactionManager } from '../../../core/database/transaction-manager';
 import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { UserAccount } from '../../domain/model/user-account.model';
+import { UserAccountProvider } from '../../domain/user-account-provider.enum';
 
 export type UpdateUserFullInput = {
   userId: UserId;
@@ -65,12 +66,15 @@ export class UpdateUserFullUseCase {
 
     if (updateUser.newPassword) {
       const passwordHash = await PasswordManager.hash(updateUser.newPassword);
-      const existingPasswordAccount = await this.userAccountRepository.findPasswordByUserId(userId);
+      const existingPasswordAccount = await this.userAccountRepository.findByUserIdAndProvider(
+        userId,
+        UserAccountProvider.PASSWORD,
+      );
       passwordAccount = existingPasswordAccount
         ? existingPasswordAccount.updatePasswordHash(passwordHash)
-        : UserAccount.createPassword({
+        : UserAccount.createPasswordAccount({
             id: this.userAccountRepository.newId(),
-            user,
+            userId: user.id,
             email: user.email,
             passwordHash,
           });

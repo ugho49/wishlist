@@ -7,6 +7,7 @@ import { type UserId } from '@wishlist/common';
 import { PasswordManager } from '../../../auth/infrastructure/util/password-manager';
 import { BusinessRuleException } from '../../../core/common/business-rule.exception';
 import { REPOSITORIES } from '../../../repositories/repositories.constants';
+import { UserAccountProvider } from '../../domain/user-account-provider.enum';
 
 export type UpdateUserPasswordInput = {
   userId: UserId;
@@ -30,7 +31,10 @@ export class UpdateUserPasswordUseCase {
     const { userId, oldPassword, newPassword } = input;
 
     await this.userRepository.findByIdOrFail(userId);
-    const passwordAccount = await this.userAccountRepository.findPasswordByUserId(userId);
+    const passwordAccount = await this.userAccountRepository.findByUserIdAndProvider(
+      userId,
+      UserAccountProvider.PASSWORD,
+    );
     const oldPasswordMatch = await PasswordManager.verify({
       hash: passwordAccount?.passwordHash,
       plainPassword: oldPassword,

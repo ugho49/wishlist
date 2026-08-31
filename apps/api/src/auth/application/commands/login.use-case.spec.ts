@@ -33,7 +33,7 @@ describe('LoginUseCase', () => {
     passwordHash = await PasswordManager.hash(PASSWORD);
     user = new UserBuilder().withEmail('jean@test.fr').build();
     userRepository.findByEmail.mockResolvedValue(user);
-    userAccountRepository.findPasswordByUserId.mockResolvedValue(
+    userAccountRepository.findByUserIdAndProvider.mockResolvedValue(
       new UserAccountBuilder().buildPassword(user, passwordHash),
     );
     jwtService.sign.mockReturnValue('token');
@@ -68,7 +68,7 @@ describe('LoginUseCase', () => {
   });
 
   it('should reject when the user has no password', async () => {
-    userAccountRepository.findPasswordByUserId.mockResolvedValueOnce(undefined);
+    userAccountRepository.findByUserIdAndProvider.mockResolvedValueOnce(undefined);
 
     await expect(useCase.execute({ email: 'jean@test.fr', password: PASSWORD, ip: '127.0.0.1' })).rejects.toThrow(
       UnauthorizedException,

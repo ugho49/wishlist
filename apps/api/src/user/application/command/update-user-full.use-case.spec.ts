@@ -33,7 +33,7 @@ describe('UpdateUserFullUseCase', () => {
     target = new UserBuilder().withEmail('target@test.fr').withName({ firstName: 'Jean', lastName: 'Dupont' }).build();
     userRepository.findByIdOrFail.mockResolvedValue(target);
     userRepository.findByEmail.mockResolvedValue(undefined);
-    userAccountRepository.findPasswordByUserId.mockResolvedValue(undefined);
+    userAccountRepository.findByUserIdAndProvider.mockResolvedValue(undefined);
     userAccountRepository.newId.mockReturnValue(crypto.randomUUID() as never);
     transactionManager.runInTransaction.mockImplementation(async callback => callback(undefined as never));
 

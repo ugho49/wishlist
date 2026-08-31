@@ -48,9 +48,9 @@ export class UserAccountBuilder {
   }
 
   buildPassword(user: User, passwordHash: string): UserAccount {
-    return UserAccount.createPassword({
+    return UserAccount.createPasswordAccount({
       id: uuid() as UserAccountId,
-      user,
+      userId: user.id,
       email: this.data.email ?? user.email,
       passwordHash,
     });
@@ -62,9 +62,9 @@ export class UserAccountBuilder {
       throw new Error('UserAccountBuilder requires a user');
     }
 
-    return UserAccount.createSocial({
+    return UserAccount.createSocialAccount({
       id: uuid() as UserAccountId,
-      user: accountUser,
+      userId: accountUser.id,
       email: this.data.email ?? accountUser.email,
       provider: this.data.provider,
       providerAccountId: this.data.providerAccountId,

@@ -65,9 +65,9 @@ export class CreateUserUseCase {
       ip,
     });
 
-    const passwordAccount = UserAccount.createPassword({
+    const passwordAccount = UserAccount.createPasswordAccount({
       id: this.userAccountRepository.newId(),
-      user,
+      userId: user.id,
       email: user.email,
       passwordHash: await PasswordManager.hash(newUser.password),
     });

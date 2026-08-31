@@ -79,12 +79,12 @@ export class LoginWithGoogleUseCase extends CommonLoginUseCase {
   }): Promise<LoginOutput> {
     this.logger.log('Login with Google and update...');
     const { userAccount, payload, ip } = params;
-    const { user } = userAccount;
+    const user = await this.userRepository.findByIdOrFail(userAccount.userId);
 
     this.checkUserIsEnabled(user);
 
     let updatedUserAccount = userAccount.updateEmail(payload.email!);
-    let updatedUser = userAccount.user.updateLastConnection(ip);
+    let updatedUser = user.updateLastConnection(ip);
 
     if (user.pictureUrl === userAccount.pictureUrl && payload.picture !== userAccount.pictureUrl) {
       updatedUser = updatedUser.updatePicture(payload.picture);
@@ -120,9 +120,9 @@ export class LoginWithGoogleUseCase extends CommonLoginUseCase {
       ip,
     });
 
-    const userAccount = UserAccount.createSocial({
+    const userAccount = UserAccount.createSocialAccount({
       id: this.userAccountRepository.newId(),
-      user,
+      userId: user.id,
       email: payload.email!,
       provider: UserAccountProvider.GOOGLE,
       providerAccountId: payload.sub,
@@ -149,9 +149,9 @@ export class LoginWithGoogleUseCase extends CommonLoginUseCase {
 
     this.checkUserIsEnabled(user);
 
-    const userAccount = UserAccount.createSocial({
+    const userAccount = UserAccount.createSocialAccount({
       id: this.userAccountRepository.newId(),
-      user,
+      userId: user.id,
       email: payload.email!,
       provider: UserAccountProvider.GOOGLE,
       providerAccountId: payload.sub,

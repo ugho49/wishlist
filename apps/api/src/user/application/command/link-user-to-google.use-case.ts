@@ -63,9 +63,9 @@ export class LinkUserToGoogleUseCase {
       throw new BadRequestException('Email is not given by Google');
     }
 
-    const account = UserAccount.createSocial({
+    const account = UserAccount.createSocialAccount({
       id: this.userAccountRepository.newId(),
-      user,
+      userId: user.id,
       email: payload.email,
       provider: UserAccountProvider.GOOGLE,
       providerAccountId: payload.sub,

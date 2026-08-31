@@ -1,12 +1,11 @@
-import type { UserAccountId } from '@wishlist/common';
+import type { UserAccountId, UserId } from '@wishlist/common';
 import type { SocialAccountProvider } from '../user-account-provider.enum';
-import type { User } from './user.model';
 
 import { UserAccountProvider } from '../user-account-provider.enum';
 
 export type UserAccountProps = {
   id: UserAccountId;
-  user: User;
+  userId: UserId;
   provider: UserAccountProvider;
   email: string;
   providerAccountId?: string;
@@ -18,7 +17,7 @@ export type UserAccountProps = {
 
 export class UserAccount {
   public readonly id: UserAccountId;
-  public readonly user: User;
+  public readonly userId: UserId;
   public readonly provider: UserAccountProvider;
   public readonly email: string;
   public readonly providerAccountId?: string;
@@ -29,7 +28,7 @@ export class UserAccount {
 
   constructor(props: UserAccountProps) {
     this.id = props.id;
-    this.user = props.user;
+    this.userId = props.userId;
     this.provider = props.provider;
     this.email = props.email;
     this.providerAccountId = props.providerAccountId;
@@ -39,11 +38,16 @@ export class UserAccount {
     this.updatedAt = props.updatedAt;
   }
 
-  static createPassword(params: { id: UserAccountId; user: User; email: string; passwordHash: string }): UserAccount {
+  static createPasswordAccount(params: {
+    id: UserAccountId;
+    userId: UserId;
+    email: string;
+    passwordHash: string;
+  }): UserAccount {
     const now = new Date();
     return new UserAccount({
       id: params.id,
-      user: params.user,
+      userId: params.userId,
       provider: UserAccountProvider.PASSWORD,
       email: params.email,
       passwordHash: params.passwordHash,
@@ -52,9 +56,9 @@ export class UserAccount {
     });
   }
 
-  static createSocial(params: {
+  static createSocialAccount(params: {
     id: UserAccountId;
-    user: User;
+    userId: UserId;
     email: string;
     provider: SocialAccountProvider;
     providerAccountId: string;
@@ -63,7 +67,7 @@ export class UserAccount {
     const now = new Date();
     return new UserAccount({
       id: params.id,
-      user: params.user,
+      userId: params.userId,
       provider: params.provider,
       email: params.email,
       providerAccountId: params.providerAccountId,

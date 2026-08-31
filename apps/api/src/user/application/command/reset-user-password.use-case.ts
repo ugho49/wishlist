@@ -8,6 +8,7 @@ import { PasswordManager } from '../../../auth/infrastructure/util/password-mana
 import { TransactionManager } from '../../../core/database/transaction-manager';
 import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { UserAccount } from '../../domain/model/user-account.model';
+import { UserAccountProvider } from '../../domain/user-account-provider.enum';
 
 export type ResetUserPasswordInput = {
   email: string;
@@ -50,12 +51,15 @@ export class ResetUserPasswordUseCase {
     }
 
     const passwordHash = await PasswordManager.hash(input.newPassword);
-    const existingPasswordAccount = await this.userAccountRepository.findPasswordByUserId(user.id);
+    const existingPasswordAccount = await this.userAccountRepository.findByUserIdAndProvider(
+      user.id,
+      UserAccountProvider.PASSWORD,
+    );
     const passwordAccount = existingPasswordAccount
       ? existingPasswordAccount.updatePasswordHash(passwordHash)
-      : UserAccount.createPassword({
+      : UserAccount.createPasswordAccount({
           id: this.userAccountRepository.newId(),
-          user,
+          userId: user.id,
           email: user.email,
           passwordHash,
         });

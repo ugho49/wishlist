@@ -37,7 +37,7 @@ describe('ResetUserPasswordUseCase', () => {
     verification = new UserPasswordVerificationBuilder().withUser(user).withToken('valid-token').build();
 
     userRepository.findByEmail.mockResolvedValue(user);
-    userAccountRepository.findPasswordByUserId.mockResolvedValue(undefined);
+    userAccountRepository.findByUserIdAndProvider.mockResolvedValue(undefined);
     userAccountRepository.newId.mockReturnValue(new UserAccountBuilder().buildPassword(user, 'tmp').id);
     passwordVerificationRepository.findByUserId.mockResolvedValue([verification]);
     transactionManager.runInTransaction.mockImplementation(async callback => callback(undefined as never));
@@ -92,7 +92,7 @@ describe('ResetUserPasswordUseCase', () => {
 
   it('should update the existing password account', async () => {
     const existing = new UserAccountBuilder().buildPassword(user, await PasswordManager.hash('OldSecret123!'));
-    userAccountRepository.findPasswordByUserId.mockResolvedValueOnce(existing);
+    userAccountRepository.findByUserIdAndProvider.mockResolvedValueOnce(existing);
 
     await useCase.execute({ email: user.email, token: 'valid-token', newPassword: 'NewSecret456!' });
 
