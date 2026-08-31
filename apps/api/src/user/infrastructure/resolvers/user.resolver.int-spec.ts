@@ -91,6 +91,40 @@ describe('UserResolver (GraphQL)', () => {
       });
     });
 
+    it('should resolve the sessions field for the current user', async () => {
+      const queryWithSessions = /* GraphQL */ `
+        query CurrentUserWithSessions {
+          currentUser {
+            __typename
+            ... on User {
+              id
+              sessions {
+                id
+                ip
+                current
+                createdAt
+                lastUsedAt
+                expiresAt
+              }
+            }
+          }
+        }
+      `;
+
+      const res = await request.post('/graphql').send({ query: queryWithSessions }).expect(200);
+
+      const user = res.body.data.currentUser;
+      expect(user.__typename).toBe('User');
+      expect(user.sessions).toHaveLength(1);
+      expect(user.sessions[0]).toMatchObject({
+        id: expect.toBeString(),
+        current: true,
+        createdAt: expect.toBeString(),
+        lastUsedAt: expect.toBeString(),
+        expiresAt: expect.toBeString(),
+      });
+    });
+
     it('should resolve the accounts field for the current user as an array', async () => {
       const queryWithAccounts = /* GraphQL */ `
         query CurrentUserWithAccounts {

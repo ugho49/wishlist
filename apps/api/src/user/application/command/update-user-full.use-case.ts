@@ -1,5 +1,6 @@
 import type { UserRepository } from '../../domain/repository/user.repository';
 import type { UserAccountRepository } from '../../domain/repository/user-account.repository';
+import type { UserRefreshTokenRepository } from '../../domain/repository/user-refresh-token.repository';
 
 import { BadRequestException, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { type ICurrentUser, type UserId } from '@wishlist/common';
@@ -32,6 +33,8 @@ export class UpdateUserFullUseCase {
     private readonly userRepository: UserRepository,
     @Inject(REPOSITORIES.USER_ACCOUNT)
     private readonly userAccountRepository: UserAccountRepository,
+    @Inject(REPOSITORIES.USER_REFRESH_TOKEN)
+    private readonly refreshTokenRepository: UserRefreshTokenRepository,
     private readonly transactionManager: TransactionManager,
   ) {}
 
@@ -102,10 +105,14 @@ export class UpdateUserFullUseCase {
     }
 
     this.logger.log('Updating user...', { userId, updatedFields });
+    const shouldRevokeSessions = Boolean(updateUser.newPassword) || updateUser.isEnabled === false;
     await this.transactionManager.runInTransaction(async tx => {
       await this.userRepository.save(user, tx);
       if (passwordAccount) {
         await this.userAccountRepository.save(passwordAccount, tx);
+      }
+      if (shouldRevokeSessions) {
+        await this.refreshTokenRepository.revokeAllByUserId(userId, { tx });
       }
     });
   }

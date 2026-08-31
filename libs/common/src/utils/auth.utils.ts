@@ -11,5 +11,6 @@ export function createCurrentUserFromPayload(payload: AccessTokenJwtPayload): IC
     authorities: authorities,
     isAdmin,
     isSuperAdmin,
+    sessionId: payload.sid,
   };
 }

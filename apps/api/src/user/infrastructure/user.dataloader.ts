@@ -2,9 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { type UserAccountId, type UserId } from '@wishlist/common';
 import DataLoader from 'dataloader';
 
-import { type User, type UserAccount, type UserFull } from '../../gql/generated-types';
+import { type User, type UserAccount, type UserFull, type UserSession } from '../../gql/generated-types';
 import { GetUserAccountsByIdsUseCase } from '../application/query/get-user-accounts-by-ids.use-case';
 import { GetUserAccountsByUserIdsUseCase } from '../application/query/get-user-accounts-by-user-ids.use-case';
+import { GetUserSessionsByUserIdsUseCase } from '../application/query/get-user-sessions-by-user-ids.use-case';
 import { GetUsersByIdsUseCase } from '../application/query/get-users-by-ids.use-case';
 import { userMapper } from './user.mapper';
 
@@ -14,6 +15,7 @@ export class UserDataLoaderFactory {
     private readonly getUsersByIdsUseCase: GetUsersByIdsUseCase,
     private readonly getUserAccountsByUserIdsUseCase: GetUserAccountsByUserIdsUseCase,
     private readonly getUserAccountsByIdsUseCase: GetUserAccountsByIdsUseCase,
+    private readonly getUserSessionsByUserIdsUseCase: GetUserSessionsByUserIdsUseCase,
   ) {}
 
   createUserLoader() {
@@ -48,6 +50,13 @@ export class UserDataLoaderFactory {
         userAccounts.map(userAccount => [userAccount.id, userMapper.toGqlUserAccount(userAccount)]),
       );
       return userAccountIds.map(id => userAccountMap.get(id) ?? null);
+    });
+  }
+
+  createUserSessionsByUserLoader() {
+    return new DataLoader<UserId, UserSession[]>(async (userIds: readonly UserId[]) => {
+      const sessionMap = await this.getUserSessionsByUserIdsUseCase.execute({ userIds: [...userIds] });
+      return userIds.map(id => (sessionMap.get(id) ?? []).map(session => userMapper.toGqlUserSession(session)));
     });
   }
 }

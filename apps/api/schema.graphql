@@ -73,6 +73,10 @@ union AdminGetWishlistsResult = AdminGetWishlists | ForbiddenRejection | Interna
 
 union AdminRemoveUserPictureResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
+union AdminRevokeAllUserSessionsResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
+union AdminRevokeUserSessionResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
 union AdminUpdateEventResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
 input AdminUpdateUserProfileInput {
@@ -306,6 +310,7 @@ input LoginInput {
 
 type LoginOutput {
   accessToken: String!
+  refreshToken: String!
 }
 
 union LoginResult = InternalErrorRejection | LoginOutput | UnauthorizedRejection | ValidationRejection
@@ -319,9 +324,16 @@ type LoginWithGoogleOutput {
   accessToken: String!
   linkedToExistingUser: Boolean
   newUserCreated: Boolean
+  refreshToken: String!
 }
 
 union LoginWithGoogleResult = InternalErrorRejection | LoginWithGoogleOutput | UnauthorizedRejection | ValidationRejection
+
+input LogoutInput {
+  refreshToken: String!
+}
+
+union LogoutResult = InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
 type Mutation {
   addEventAttendee(eventId: EventId!, input: AddEventAttendeeInput!): AddEventAttendeeResult!
@@ -331,6 +343,8 @@ type Mutation {
   adminDeleteEventAttendee(attendeeId: AttendeeId!, eventId: EventId!): AdminDeleteEventAttendeeResult!
   adminDeleteUser(userId: UserId!): AdminDeleteUserResult!
   adminRemoveUserPicture(userId: UserId!): AdminRemoveUserPictureResult!
+  adminRevokeAllUserSessions(userId: UserId!): AdminRevokeAllUserSessionsResult!
+  adminRevokeUserSession(sessionId: UserRefreshTokenId!, userId: UserId!): AdminRevokeUserSessionResult!
   adminUpdateEvent(id: EventId!, input: UpdateEventInput!): AdminUpdateEventResult!
   adminUpdateUserProfile(input: AdminUpdateUserProfileInput!, userId: UserId!): AdminUpdateUserProfileResult!
   cancelSecretSanta(id: SecretSantaId!): CancelSecretSantaResult!
@@ -349,6 +363,8 @@ type Mutation {
   linkWishlistToEvent(eventId: EventId!, id: WishlistId!): LinkWishlistToEventResult!
   login(input: LoginInput!): LoginResult!
   loginWithGoogle(input: LoginWithGoogleInput!): LoginWithGoogleResult!
+  logout(input: LogoutInput!): LogoutResult!
+  refreshSession(input: RefreshSessionInput!): RefreshSessionResult!
   registerUser(input: RegisterUserInput!): RegisterUserResult!
   removeEventAttendee(attendeeId: AttendeeId!, eventId: EventId!): RemoveEventAttendeeResult!
   removeUserPicture: RemoveUserPictureResult!
@@ -356,6 +372,8 @@ type Mutation {
   removeWishlistLogo(id: WishlistId!): RemoveWishlistLogoResult!
   requestEmailChange(input: RequestEmailChangeInput!): RequestEmailChangeResult!
   resetPassword(input: ResetPasswordInput!): ResetPasswordResult!
+  revokeAllOtherSessions: RevokeAllOtherSessionsResult!
+  revokeSession(input: RevokeSessionInput!): RevokeSessionResult!
   scanItemUrl(input: ScanItemUrlInput!): ScanItemUrlResult!
   sendResetPasswordEmail(input: SendResetPasswordEmailInput!): SendResetPasswordEmailResult!
   startSecretSanta(id: SecretSantaId!): StartSecretSantaResult!
@@ -414,6 +432,12 @@ type Query {
   wishlists(filters: PaginationFilters!): GetMyWishlistsResult!
 }
 
+input RefreshSessionInput {
+  refreshToken: String!
+}
+
+union RefreshSessionResult = InternalErrorRejection | LoginOutput | UnauthorizedRejection | ValidationRejection
+
 input RegisterUserInput {
   birthday: String
   email: String!
@@ -445,6 +469,14 @@ input ResetPasswordInput {
 }
 
 union ResetPasswordResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
+union RevokeAllOtherSessionsResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
+input RevokeSessionInput {
+  sessionId: UserRefreshTokenId!
+}
+
+union RevokeSessionResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
 input ScanItemUrlInput {
   url: String!
@@ -584,6 +616,7 @@ type User {
   isEnabled: Boolean!
   lastName: String!
   pictureUrl: String
+  sessions: [UserSession!] @resolved
   updatedAt: String!
 }
 
@@ -623,14 +656,25 @@ type UserFull {
   firstName: String!
   id: UserId!
   isEnabled: Boolean!
-  lastConnectedAt: String
-  lastIp: String
   lastName: String!
   pictureUrl: String
+  sessions: [UserSession!]! @resolved
   updatedAt: String!
 }
 
 scalar UserId
+
+scalar UserRefreshTokenId
+
+type UserSession {
+  createdAt: String!
+  current: Boolean! @resolved
+  expiresAt: String!
+  id: UserRefreshTokenId!
+  ip: String
+  lastUsedAt: String!
+  userAgent: String
+}
 
 type ValidationRejection {
   errors: [FieldError!]!

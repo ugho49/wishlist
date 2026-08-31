@@ -19,7 +19,6 @@ export type CreateUserInput = {
     password: string;
     birthday?: Date;
   };
-  ip: string;
 };
 
 export type CreateUserOutput = {
@@ -46,11 +45,10 @@ export class CreateUserUseCase {
           ...input.newUser,
           password: '********',
         },
-        ip: input.ip,
       },
     });
 
-    const { newUser, ip } = input;
+    const { newUser } = input;
 
     if (await this.userRepository.findByEmail(newUser.email)) {
       throw new UnauthorizedException('User email already taken');
@@ -62,7 +60,6 @@ export class CreateUserUseCase {
       firstName: newUser.firstname,
       lastName: newUser.lastname,
       birthday: newUser.birthday,
-      ip,
     });
 
     const passwordAccount = UserAccount.createPasswordAccount({

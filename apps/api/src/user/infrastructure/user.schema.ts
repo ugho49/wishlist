@@ -5,16 +5,19 @@ import type {
   RegisterUserInput,
   RequestEmailChangeInput,
   ResetPasswordInput,
+  RevokeSessionInput,
   SendResetPasswordEmailInput,
   UpdateUserEmailSettingsInput,
   UpdateUserPictureFromAccountInput,
   UpdateUserProfileInput,
 } from '../../gql/generated-types';
 
-import { type UserAccountId, type UserId } from '@wishlist/common';
+import { type UserAccountId, type UserId, type UserRefreshTokenId } from '@wishlist/common';
 import z from 'zod';
 
 export const UserIdSchema = z.string().transform(val => val as UserId);
+
+export const UserRefreshTokenIdSchema = z.string().transform(val => val as UserRefreshTokenId);
 
 export const SearchUsersKeywordSchema = z.string().trim().min(2).max(100);
 
@@ -69,3 +72,7 @@ export const ResetPasswordInputSchema = z.object({
   token: z.string().nonempty(),
   newPassword: z.string().min(8).max(50),
 }) satisfies z.ZodType<ResetPasswordInput>;
+
+export const RevokeSessionInputSchema = z.object({
+  sessionId: UserRefreshTokenIdSchema,
+}) satisfies z.ZodType<RevokeSessionInput>;

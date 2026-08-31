@@ -1,5 +1,6 @@
 import type { RootState } from '../../core/store';
 
+import DevicesIcon from '@mui/icons-material/Devices';
 import LockIcon from '@mui/icons-material/Lock';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import PortraitIcon from '@mui/icons-material/Portrait';
@@ -14,6 +15,7 @@ import { ProfilePictureSection } from './ProfilePictureSection';
 import { UserTabInformations } from './UserTabInformations';
 import { UserTabNotifications } from './UserTabNotifications';
 import { UserTabPassword } from './UserTabPassword';
+import { UserTabSessions } from './UserTabSessions';
 import { UserTabSocial } from './UserTabSocial';
 
 const ProfileSection = styled(Box)(() => ({
@@ -46,6 +48,7 @@ export enum TabValues {
   informations = 'informations',
   notifications = 'notifications',
   social = 'social',
+  sessions = 'sessions',
   password = 'password',
 }
 
@@ -59,6 +62,11 @@ const tabs = [
     value: TabValues.social,
     label: 'Connexion social',
     icon: <ShareIcon />,
+  },
+  {
+    value: TabValues.sessions,
+    label: 'Sessions',
+    icon: <DevicesIcon />,
   },
   {
     value: TabValues.notifications,
@@ -123,6 +131,7 @@ export const UserProfilePage = () => {
         {tab === TabValues.informations && <UserTabInformations />}
         {tab === TabValues.notifications && <UserTabNotifications />}
         {tab === TabValues.social && <UserTabSocial />}
+        {tab === TabValues.sessions && <UserTabSessions />}
         {tab === TabValues.password && <UserTabPassword />}
       </Stack>
     </Box>

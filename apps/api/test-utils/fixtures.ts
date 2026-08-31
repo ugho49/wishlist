@@ -16,6 +16,7 @@ function toSqlArray(values: readonly string[]): string {
 export class Fixtures {
   static readonly USER_TABLE = '"user"';
   static readonly USER_ACCOUNT_TABLE = 'user_account';
+  static readonly USER_REFRESH_TOKEN_TABLE = 'user_refresh_token';
   static readonly USER_EMAIL_SETTING_TABLE = 'user_email_setting';
   static readonly USER_PASSWORD_VERIFICATION_TABLE = 'user_password_verification';
   static readonly USER_EMAIL_CHANGE_VERIFICATION_TABLE = 'user_email_change_verification';
@@ -90,6 +91,25 @@ export class Fixtures {
     const userId = await this.insertUser(parameters);
     const attendeeId = await this.insertActiveAttendee({ eventId: parameters.eventId, userId });
     return { userId, attendeeId };
+  }
+
+  async insertUserRefreshToken(parameters: {
+    userId: string;
+    tokenHash: string;
+    expiresAt: Date;
+    revokedAt?: Date | null;
+    ip?: string;
+    userAgent?: string;
+  }): Promise<string> {
+    const id = uuid();
+    const { userId, tokenHash, expiresAt, revokedAt, ip, userAgent } = parameters;
+
+    await this.sql.unsafe(
+      `INSERT INTO ${Fixtures.USER_REFRESH_TOKEN_TABLE} (id, user_id, token_hash, user_agent, ip, expires_at, revoked_at) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      [id, userId, tokenHash, userAgent ?? null, ip ?? null, expiresAt.toISOString(), revokedAt?.toISOString() ?? null],
+    );
+
+    return id;
   }
 
   insertAdminUser(): Promise<string> {

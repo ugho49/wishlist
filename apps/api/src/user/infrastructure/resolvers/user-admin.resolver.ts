@@ -2,7 +2,7 @@ import type { ICurrentUser } from '@wishlist/common';
 
 import { NotFoundException } from '@nestjs/common';
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { createPagedResponse, type UserId } from '@wishlist/common';
+import { createPagedResponse, type UserId, type UserRefreshTokenId } from '@wishlist/common';
 
 import { IsAdmin } from '../../../auth/infrastructure/decorators/admin.decorator';
 import { GqlCurrentUser } from '../../../auth/infrastructure/decorators/user.decorator';
@@ -15,15 +15,19 @@ import {
   type AdminGetAllUsersResult,
   type AdminGetUserByIdResult,
   type AdminRemoveUserPictureResult,
+  type AdminRevokeAllUserSessionsResult,
+  type AdminRevokeUserSessionResult,
   type AdminUpdateUserProfileInput,
   type AdminUpdateUserProfileResult,
 } from '../../../gql/generated-types';
+import { AdminRevokeAllUserSessionsUseCase } from '../../application/command/admin-revoke-all-user-sessions.use-case';
+import { AdminRevokeUserSessionUseCase } from '../../application/command/admin-revoke-user-session.use-case';
 import { DeleteUserUseCase } from '../../application/command/delete-user.use-case';
 import { RemoveUserPictureUseCase } from '../../application/command/remove-user-picture.use-case';
 import { UpdateUserFullUseCase } from '../../application/command/update-user-full.use-case';
 import { GetUsersPaginatedUseCase } from '../../application/query/get-users-paginated.use-case';
 import { userMapper } from '../user.mapper';
-import { UserIdSchema } from '../user.schema';
+import { UserIdSchema, UserRefreshTokenIdSchema } from '../user.schema';
 import { AdminGetAllUsersPaginationFiltersSchema, AdminUpdateUserProfileInputSchema } from '../user-admin.schema';
 
 @IsAdmin()
@@ -34,6 +38,8 @@ export class UserAdminResolver {
     private readonly updateUserFullUseCase: UpdateUserFullUseCase,
     private readonly deleteUserUseCase: DeleteUserUseCase,
     private readonly removeUserPictureUseCase: RemoveUserPictureUseCase,
+    private readonly adminRevokeUserSessionUseCase: AdminRevokeUserSessionUseCase,
+    private readonly adminRevokeAllUserSessionsUseCase: AdminRevokeAllUserSessionsUseCase,
   ) {}
 
   @Query()
@@ -118,6 +124,25 @@ export class UserAdminResolver {
     @Args('userId', new ZodPipe(UserIdSchema)) userId: UserId,
   ): Promise<AdminRemoveUserPictureResult> {
     await this.removeUserPictureUseCase.execute({ userId });
+    return { __typename: 'VoidOutput', success: true };
+  }
+
+  @Mutation()
+  async adminRevokeUserSession(
+    @Args('userId', new ZodPipe(UserIdSchema)) userId: UserId,
+    @Args('sessionId', new ZodPipe(UserRefreshTokenIdSchema)) sessionId: UserRefreshTokenId,
+    @GqlCurrentUser() currentUser: ICurrentUser,
+  ): Promise<AdminRevokeUserSessionResult> {
+    await this.adminRevokeUserSessionUseCase.execute({ currentUser, userId, sessionId });
+    return { __typename: 'VoidOutput', success: true };
+  }
+
+  @Mutation()
+  async adminRevokeAllUserSessions(
+    @Args('userId', new ZodPipe(UserIdSchema)) userId: UserId,
+    @GqlCurrentUser() currentUser: ICurrentUser,
+  ): Promise<AdminRevokeAllUserSessionsResult> {
+    await this.adminRevokeAllUserSessionsUseCase.execute({ currentUser, userId });
     return { __typename: 'VoidOutput', success: true };
   }
 }

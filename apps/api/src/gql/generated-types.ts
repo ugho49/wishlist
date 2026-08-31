@@ -22,6 +22,7 @@ export type Scalars = {
   SecretSantaUserId: { input: Ids["SecretSantaUserId"]; output: Ids["SecretSantaUserId"]; }
   UserAccountId: { input: Ids["UserAccountId"]; output: Ids["UserAccountId"]; }
   UserId: { input: Ids["UserId"]; output: Ids["UserId"]; }
+  UserRefreshTokenId: { input: Ids["UserRefreshTokenId"]; output: Ids["UserRefreshTokenId"]; }
   WishlistId: { input: Ids["WishlistId"]; output: Ids["WishlistId"]; }
 };
 
@@ -90,6 +91,10 @@ export type AdminGetWishlists = {
 export type AdminGetWishlistsResult = AdminGetWishlists | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection;
 
 export type AdminRemoveUserPictureResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+
+export type AdminRevokeAllUserSessionsResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+
+export type AdminRevokeUserSessionResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
 export type AdminUpdateEventResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
@@ -330,6 +335,7 @@ export type LoginInput = {
 export type LoginOutput = {
   __typename: 'LoginOutput';
   accessToken: Scalars['String']['output'];
+  refreshToken: Scalars['String']['output'];
 };
 
 export type LoginResult = InternalErrorRejection | LoginOutput | UnauthorizedRejection | ValidationRejection;
@@ -344,9 +350,16 @@ export type LoginWithGoogleOutput = {
   accessToken: Scalars['String']['output'];
   linkedToExistingUser?: Maybe<Scalars['Boolean']['output']>;
   newUserCreated?: Maybe<Scalars['Boolean']['output']>;
+  refreshToken: Scalars['String']['output'];
 };
 
 export type LoginWithGoogleResult = InternalErrorRejection | LoginWithGoogleOutput | UnauthorizedRejection | ValidationRejection;
+
+export type LogoutInput = {
+  refreshToken: Scalars['String']['input'];
+};
+
+export type LogoutResult = InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
 export type Mutation = {
   __typename: 'Mutation';
@@ -357,6 +370,8 @@ export type Mutation = {
   adminDeleteEventAttendee: AdminDeleteEventAttendeeResult;
   adminDeleteUser: AdminDeleteUserResult;
   adminRemoveUserPicture: AdminRemoveUserPictureResult;
+  adminRevokeAllUserSessions: AdminRevokeAllUserSessionsResult;
+  adminRevokeUserSession: AdminRevokeUserSessionResult;
   adminUpdateEvent: AdminUpdateEventResult;
   adminUpdateUserProfile: AdminUpdateUserProfileResult;
   cancelSecretSanta: CancelSecretSantaResult;
@@ -375,6 +390,8 @@ export type Mutation = {
   linkWishlistToEvent: LinkWishlistToEventResult;
   login: LoginResult;
   loginWithGoogle: LoginWithGoogleResult;
+  logout: LogoutResult;
+  refreshSession: RefreshSessionResult;
   registerUser: RegisterUserResult;
   removeEventAttendee: RemoveEventAttendeeResult;
   removeUserPicture: RemoveUserPictureResult;
@@ -382,6 +399,8 @@ export type Mutation = {
   removeWishlistLogo: RemoveWishlistLogoResult;
   requestEmailChange: RequestEmailChangeResult;
   resetPassword: ResetPasswordResult;
+  revokeAllOtherSessions: RevokeAllOtherSessionsResult;
+  revokeSession: RevokeSessionResult;
   scanItemUrl: ScanItemUrlResult;
   sendResetPasswordEmail: SendResetPasswordEmailResult;
   startSecretSanta: StartSecretSantaResult;
@@ -435,6 +454,17 @@ export type MutationAdminDeleteUserArgs = {
 
 
 export type MutationAdminRemoveUserPictureArgs = {
+  userId: Scalars['UserId']['input'];
+};
+
+
+export type MutationAdminRevokeAllUserSessionsArgs = {
+  userId: Scalars['UserId']['input'];
+};
+
+
+export type MutationAdminRevokeUserSessionArgs = {
+  sessionId: Scalars['UserRefreshTokenId']['input'];
   userId: Scalars['UserId']['input'];
 };
 
@@ -533,6 +563,16 @@ export type MutationLoginWithGoogleArgs = {
 };
 
 
+export type MutationLogoutArgs = {
+  input: LogoutInput;
+};
+
+
+export type MutationRefreshSessionArgs = {
+  input: RefreshSessionInput;
+};
+
+
 export type MutationRegisterUserArgs = {
   input: RegisterUserInput;
 };
@@ -561,6 +601,11 @@ export type MutationRequestEmailChangeArgs = {
 
 export type MutationResetPasswordArgs = {
   input: ResetPasswordInput;
+};
+
+
+export type MutationRevokeSessionArgs = {
+  input: RevokeSessionInput;
 };
 
 
@@ -762,6 +807,12 @@ export type QueryWishlistsArgs = {
   filters: PaginationFilters;
 };
 
+export type RefreshSessionInput = {
+  refreshToken: Scalars['String']['input'];
+};
+
+export type RefreshSessionResult = InternalErrorRejection | LoginOutput | UnauthorizedRejection | ValidationRejection;
+
 export type RegisterUserInput = {
   birthday?: InputMaybe<Scalars['String']['input']>;
   email: Scalars['String']['input'];
@@ -793,6 +844,14 @@ export type ResetPasswordInput = {
 };
 
 export type ResetPasswordResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+
+export type RevokeAllOtherSessionsResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+
+export type RevokeSessionInput = {
+  sessionId: Scalars['UserRefreshTokenId']['input'];
+};
+
+export type RevokeSessionResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
 export type ScanItemUrlInput = {
   url: Scalars['String']['input'];
@@ -970,11 +1029,19 @@ export type UserFull = {
   firstName: Scalars['String']['output'];
   id: Scalars['UserId']['output'];
   isEnabled: Scalars['Boolean']['output'];
-  lastConnectedAt?: Maybe<Scalars['String']['output']>;
-  lastIp?: Maybe<Scalars['String']['output']>;
   lastName: Scalars['String']['output'];
   pictureUrl?: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['String']['output'];
+};
+
+export type UserSession = {
+  __typename: 'UserSession';
+  createdAt: Scalars['String']['output'];
+  expiresAt: Scalars['String']['output'];
+  id: Scalars['UserRefreshTokenId']['output'];
+  ip?: Maybe<Scalars['String']['output']>;
+  lastUsedAt: Scalars['String']['output'];
+  userAgent?: Maybe<Scalars['String']['output']>;
 };
 
 export type ValidationRejection = {

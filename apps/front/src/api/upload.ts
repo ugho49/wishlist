@@ -14,11 +14,11 @@ import type {
   WishlistId,
 } from '@wishlist/common';
 
-import { LS_KEYS } from '../core/services/auth.service';
+import { getValidAccessToken } from '../core/services/session-refresh';
 import { environment } from '../environment';
 
-function authHeaders(): Record<string, string> {
-  const token = localStorage.getItem(LS_KEYS.ACCESS_TOKEN);
+async function authHeaders(): Promise<Record<string, string>> {
+  const token = await getValidAccessToken();
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
@@ -26,7 +26,7 @@ async function postForm<T>(path: string, form: FormData, method: 'POST' | 'PUT' 
   // NB: do not set Content-Type manually — the browser adds the multipart boundary.
   const response = await fetch(`${environment.apiBaseUrl}${path}`, {
     method,
-    headers: authHeaders(),
+    headers: await authHeaders(),
     body: form,
   });
 

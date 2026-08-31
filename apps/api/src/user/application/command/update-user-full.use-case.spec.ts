@@ -1,5 +1,6 @@
 import type { UserRepository } from '../../domain/repository/user.repository';
 import type { UserAccountRepository } from '../../domain/repository/user-account.repository';
+import type { UserRefreshTokenRepository } from '../../domain/repository/user-refresh-token.repository';
 
 import { BadRequestException, Logger, UnauthorizedException } from '@nestjs/common';
 
@@ -16,6 +17,7 @@ import { beforeAll, beforeEach, describe, expect, it, mock } from 'bun:test';
 describe('UpdateUserFullUseCase', () => {
   const userRepository = createMock<UserRepository>();
   const userAccountRepository = createMock<UserAccountRepository>();
+  const refreshTokenRepository = createMock<UserRefreshTokenRepository>();
   const transactionManager = createMock<TransactionManager>();
 
   let useCase: UpdateUserFullUseCase;
@@ -37,7 +39,12 @@ describe('UpdateUserFullUseCase', () => {
     userAccountRepository.newId.mockReturnValue(crypto.randomUUID() as never);
     transactionManager.runInTransaction.mockImplementation(async callback => callback(undefined as never));
 
-    useCase = new UpdateUserFullUseCase(userRepository, userAccountRepository, transactionManager);
+    useCase = new UpdateUserFullUseCase(
+      userRepository,
+      userAccountRepository,
+      refreshTokenRepository,
+      transactionManager,
+    );
   });
 
   it('should reject when the current user tries to update themselves', async () => {
@@ -122,6 +129,7 @@ describe('UpdateUserFullUseCase', () => {
     expect(savedAccount).toBeInstanceOf(UserAccount);
     expect(savedAccount?.provider).toBe(UserAccountProvider.PASSWORD);
     expect(await PasswordManager.verify({ hash: savedAccount?.passwordHash, plainPassword: 'Secret123!' })).toBe(true);
+    expect(refreshTokenRepository.revokeAllByUserId).toHaveBeenCalledWith(target.id, { tx: undefined });
   });
 
   it('should update an admin when requested by a super-admin', async () => {
@@ -139,5 +147,6 @@ describe('UpdateUserFullUseCase', () => {
     const savedUser = userRepository.save.mock.calls[0]?.[0];
     expect(savedUser?.firstName).toBe('Paul');
     expect(userAccountRepository.save).not.toHaveBeenCalled();
+    expect(refreshTokenRepository.revokeAllByUserId).not.toHaveBeenCalled();
   });
 });

@@ -17,6 +17,7 @@ import {
   type User,
   type UserAccount,
   type UserFull,
+  type UserSession,
   type Wishlist,
 } from '../gql/generated-types';
 import { UserDataLoaderFactory } from '../user/infrastructure/user.dataloader';
@@ -27,6 +28,7 @@ export type DataLoaders = {
   userFull: DataLoader<UserId, UserFull | null>;
   userAccountsByUser: DataLoader<UserId, UserAccount[]>;
   userAccount: DataLoader<UserAccountId, UserAccount | null>;
+  userSessionsByUser: DataLoader<UserId, UserSession[]>;
   wishlist: DataLoader<WishlistId, Wishlist | null>;
   event: DataLoader<EventId, Event | null>;
   eventAttendee: DataLoader<AttendeeId, EventAttendee | null>;
@@ -47,6 +49,7 @@ export class DataLoaderService {
       userFull: this.userDataLoaderFactory.createUserFullLoader(),
       userAccountsByUser: this.userDataLoaderFactory.createUserAccountsByUserLoader(),
       userAccount: this.userDataLoaderFactory.createUserAccountLoader(),
+      userSessionsByUser: this.userDataLoaderFactory.createUserSessionsByUserLoader(),
       wishlist: this.wishlistDataLoaderFactory.createLoader(getCurrentUser),
       event: this.eventDataLoaderFactory.createLoader(getCurrentUser),
       eventAttendee: this.eventAttendeeDataLoaderFactory.createLoader(),

@@ -15,7 +15,7 @@ export type AuthLoginMutationVariables = Exact<{
 
 export type AuthLoginMutation = { login:
     | { __typename: 'InternalErrorRejection' }
-    | { __typename: 'LoginOutput', accessToken: string }
+    | { __typename: 'LoginOutput', accessToken: string, refreshToken: string }
     | { __typename: 'UnauthorizedRejection', message: string }
     | { __typename: 'ValidationRejection', errors: Array<{ field: string, message: string }> }
    };
@@ -27,9 +27,33 @@ export type AuthLoginWithGoogleMutationVariables = Exact<{
 
 export type AuthLoginWithGoogleMutation = { loginWithGoogle:
     | { __typename: 'InternalErrorRejection' }
-    | { __typename: 'LoginWithGoogleOutput', accessToken: string, newUserCreated: boolean | null, linkedToExistingUser: boolean | null }
+    | { __typename: 'LoginWithGoogleOutput', accessToken: string, refreshToken: string, newUserCreated: boolean | null, linkedToExistingUser: boolean | null }
     | { __typename: 'UnauthorizedRejection', message: string }
     | { __typename: 'ValidationRejection', errors: Array<{ field: string, message: string }> }
+   };
+
+export type AuthRefreshSessionMutationVariables = Exact<{
+  input: Types.RefreshSessionInput;
+}>;
+
+
+export type AuthRefreshSessionMutation = { refreshSession:
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'LoginOutput', accessToken: string, refreshToken: string }
+    | { __typename: 'UnauthorizedRejection', message: string }
+    | { __typename: 'ValidationRejection' }
+   };
+
+export type AuthLogoutMutationVariables = Exact<{
+  input: Types.LogoutInput;
+}>;
+
+
+export type AuthLogoutMutation = { logout:
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection' }
+    | { __typename: 'VoidOutput', success: boolean }
    };
 
 export type AuthRegisterUserMutationVariables = Exact<{
@@ -528,7 +552,7 @@ export type AdminUserDetailQuery = { adminUser:
     | { __typename: 'ForbiddenRejection' }
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'UnauthorizedRejection' }
-    | { __typename: 'UserFull', id: Ids["UserId"], firstName: string, lastName: string, email: string, birthday: string | null, pictureUrl: string | null, isEnabled: boolean, authorities: Array<Types.UserAuthorities>, createdAt: string, lastConnectedAt: string | null, lastIp: string | null, accounts: Array<{ id: Ids["UserAccountId"], provider: Types.UserAccountProvider, email: string, pictureUrl: string | null, createdAt: string }> }
+    | { __typename: 'UserFull', id: Ids["UserId"], firstName: string, lastName: string, email: string, birthday: string | null, pictureUrl: string | null, isEnabled: boolean, authorities: Array<Types.UserAuthorities>, createdAt: string, accounts: Array<{ id: Ids["UserAccountId"], provider: Types.UserAccountProvider, email: string, pictureUrl: string | null, createdAt: string }>, sessions: Array<{ id: Ids["UserRefreshTokenId"], ip: string | null, userAgent: string | null, createdAt: string, lastUsedAt: string, expiresAt: string, current: boolean }> }
     | { __typename: 'ValidationRejection' }
    };
 
@@ -572,6 +596,35 @@ export type AdminRemoveUserPictureMutation = { adminRemoveUserPicture:
     | { __typename: 'VoidOutput', success: boolean }
    };
 
+export type AdminRevokeUserSessionMutationVariables = Exact<{
+  userId: Ids["UserId"];
+  sessionId: Ids["UserRefreshTokenId"];
+}>;
+
+
+export type AdminRevokeUserSessionMutation = { adminRevokeUserSession:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'NotFoundRejection', message: string }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection' }
+    | { __typename: 'VoidOutput', success: boolean }
+   };
+
+export type AdminRevokeAllUserSessionsMutationVariables = Exact<{
+  userId: Ids["UserId"];
+}>;
+
+
+export type AdminRevokeAllUserSessionsMutation = { adminRevokeAllUserSessions:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'NotFoundRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection' }
+    | { __typename: 'VoidOutput', success: boolean }
+   };
+
 export type UserProfileCurrentUserQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -579,7 +632,7 @@ export type UserProfileCurrentUserQuery = { currentUser:
     | { __typename: 'ForbiddenRejection' }
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'UnauthorizedRejection' }
-    | { __typename: 'User', id: Ids["UserId"], email: string, firstName: string, lastName: string, birthday: string | null, pictureUrl: string | null, createdAt: string, accounts: Array<{ id: Ids["UserAccountId"], provider: Types.UserAccountProvider, email: string, pictureUrl: string | null, createdAt: string, updatedAt: string }> | null }
+    | { __typename: 'User', id: Ids["UserId"], email: string, firstName: string, lastName: string, birthday: string | null, pictureUrl: string | null, createdAt: string, accounts: Array<{ id: Ids["UserAccountId"], provider: Types.UserAccountProvider, email: string, pictureUrl: string | null, createdAt: string, updatedAt: string }> | null, sessions: Array<{ id: Ids["UserRefreshTokenId"], ip: string | null, userAgent: string | null, createdAt: string, lastUsedAt: string, expiresAt: string, current: boolean }> | null }
    };
 
 export type UserProfileEmailSettingsQueryVariables = Exact<{ [key: string]: never; }>;
@@ -728,6 +781,31 @@ export type RequestUserEmailChangeMutation = { requestEmailChange:
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'UnauthorizedRejection' }
     | { __typename: 'ValidationRejection', errors: Array<{ field: string, message: string }> }
+    | { __typename: 'VoidOutput', success: boolean }
+   };
+
+export type RevokeUserSessionMutationVariables = Exact<{
+  input: Types.RevokeSessionInput;
+}>;
+
+
+export type RevokeUserSessionMutation = { revokeSession:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'NotFoundRejection', message: string }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection' }
+    | { __typename: 'VoidOutput', success: boolean }
+   };
+
+export type RevokeAllOtherUserSessionsMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type RevokeAllOtherUserSessionsMutation = { revokeAllOtherSessions:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection' }
     | { __typename: 'VoidOutput', success: boolean }
    };
 
@@ -947,6 +1025,7 @@ export const AuthLoginDocument = new TypedDocumentString(`
     __typename
     ... on LoginOutput {
       accessToken
+      refreshToken
     }
     ... on ValidationRejection {
       errors {
@@ -980,6 +1059,7 @@ export const AuthLoginWithGoogleDocument = new TypedDocumentString(`
     __typename
     ... on LoginWithGoogleOutput {
       accessToken
+      refreshToken
       newUserCreated
       linkedToExistingUser
     }
@@ -1005,6 +1085,58 @@ export const useAuthLoginWithGoogleMutation = <
       {
     mutationKey: ['AuthLoginWithGoogle'],
     mutationFn: (variables?: AuthLoginWithGoogleMutationVariables) => fetchGql<AuthLoginWithGoogleMutation, AuthLoginWithGoogleMutationVariables>(AuthLoginWithGoogleDocument, variables)(),
+    ...options
+  }
+    )};
+
+export const AuthRefreshSessionDocument = new TypedDocumentString(`
+    mutation AuthRefreshSession($input: RefreshSessionInput!) {
+  refreshSession(input: $input) {
+    __typename
+    ... on LoginOutput {
+      accessToken
+      refreshToken
+    }
+    ... on UnauthorizedRejection {
+      message
+    }
+  }
+}
+    `);
+
+export const useAuthRefreshSessionMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<AuthRefreshSessionMutation, TError, AuthRefreshSessionMutationVariables, TContext>) => {
+    
+    return useMutation<AuthRefreshSessionMutation, TError, AuthRefreshSessionMutationVariables, TContext>(
+      {
+    mutationKey: ['AuthRefreshSession'],
+    mutationFn: (variables?: AuthRefreshSessionMutationVariables) => fetchGql<AuthRefreshSessionMutation, AuthRefreshSessionMutationVariables>(AuthRefreshSessionDocument, variables)(),
+    ...options
+  }
+    )};
+
+export const AuthLogoutDocument = new TypedDocumentString(`
+    mutation AuthLogout($input: LogoutInput!) {
+  logout(input: $input) {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+  }
+}
+    `);
+
+export const useAuthLogoutMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<AuthLogoutMutation, TError, AuthLogoutMutationVariables, TContext>) => {
+    
+    return useMutation<AuthLogoutMutation, TError, AuthLogoutMutationVariables, TContext>(
+      {
+    mutationKey: ['AuthLogout'],
+    mutationFn: (variables?: AuthLogoutMutationVariables) => fetchGql<AuthLogoutMutation, AuthLogoutMutationVariables>(AuthLogoutDocument, variables)(),
     ...options
   }
     )};
@@ -2299,14 +2431,21 @@ export const AdminUserDetailDocument = new TypedDocumentString(`
       isEnabled
       authorities
       createdAt
-      lastConnectedAt
-      lastIp
       accounts {
         id
         provider
         email
         pictureUrl
         createdAt
+      }
+      sessions {
+        id
+        ip
+        userAgent
+        createdAt
+        lastUsedAt
+        expiresAt
+        current
       }
     }
   }
@@ -2407,6 +2546,57 @@ export const useAdminRemoveUserPictureMutation = <
   }
     )};
 
+export const AdminRevokeUserSessionDocument = new TypedDocumentString(`
+    mutation AdminRevokeUserSession($userId: UserId!, $sessionId: UserRefreshTokenId!) {
+  adminRevokeUserSession(userId: $userId, sessionId: $sessionId) {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+    ... on NotFoundRejection {
+      message
+    }
+  }
+}
+    `);
+
+export const useAdminRevokeUserSessionMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<AdminRevokeUserSessionMutation, TError, AdminRevokeUserSessionMutationVariables, TContext>) => {
+    
+    return useMutation<AdminRevokeUserSessionMutation, TError, AdminRevokeUserSessionMutationVariables, TContext>(
+      {
+    mutationKey: ['AdminRevokeUserSession'],
+    mutationFn: (variables?: AdminRevokeUserSessionMutationVariables) => fetchGql<AdminRevokeUserSessionMutation, AdminRevokeUserSessionMutationVariables>(AdminRevokeUserSessionDocument, variables)(),
+    ...options
+  }
+    )};
+
+export const AdminRevokeAllUserSessionsDocument = new TypedDocumentString(`
+    mutation AdminRevokeAllUserSessions($userId: UserId!) {
+  adminRevokeAllUserSessions(userId: $userId) {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+  }
+}
+    `);
+
+export const useAdminRevokeAllUserSessionsMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<AdminRevokeAllUserSessionsMutation, TError, AdminRevokeAllUserSessionsMutationVariables, TContext>) => {
+    
+    return useMutation<AdminRevokeAllUserSessionsMutation, TError, AdminRevokeAllUserSessionsMutationVariables, TContext>(
+      {
+    mutationKey: ['AdminRevokeAllUserSessions'],
+    mutationFn: (variables?: AdminRevokeAllUserSessionsMutationVariables) => fetchGql<AdminRevokeAllUserSessionsMutation, AdminRevokeAllUserSessionsMutationVariables>(AdminRevokeAllUserSessionsDocument, variables)(),
+    ...options
+  }
+    )};
+
 export const UserProfileCurrentUserDocument = new TypedDocumentString(`
     query UserProfileCurrentUser {
   currentUser {
@@ -2426,6 +2616,15 @@ export const UserProfileCurrentUserDocument = new TypedDocumentString(`
         pictureUrl
         createdAt
         updatedAt
+      }
+      sessions {
+        id
+        ip
+        userAgent
+        createdAt
+        lastUsedAt
+        expiresAt
+        current
       }
     }
   }
@@ -2802,6 +3001,57 @@ export const useRequestUserEmailChangeMutation = <
       {
     mutationKey: ['RequestUserEmailChange'],
     mutationFn: (variables?: RequestUserEmailChangeMutationVariables) => fetchGql<RequestUserEmailChangeMutation, RequestUserEmailChangeMutationVariables>(RequestUserEmailChangeDocument, variables)(),
+    ...options
+  }
+    )};
+
+export const RevokeUserSessionDocument = new TypedDocumentString(`
+    mutation RevokeUserSession($input: RevokeSessionInput!) {
+  revokeSession(input: $input) {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+    ... on NotFoundRejection {
+      message
+    }
+  }
+}
+    `);
+
+export const useRevokeUserSessionMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<RevokeUserSessionMutation, TError, RevokeUserSessionMutationVariables, TContext>) => {
+    
+    return useMutation<RevokeUserSessionMutation, TError, RevokeUserSessionMutationVariables, TContext>(
+      {
+    mutationKey: ['RevokeUserSession'],
+    mutationFn: (variables?: RevokeUserSessionMutationVariables) => fetchGql<RevokeUserSessionMutation, RevokeUserSessionMutationVariables>(RevokeUserSessionDocument, variables)(),
+    ...options
+  }
+    )};
+
+export const RevokeAllOtherUserSessionsDocument = new TypedDocumentString(`
+    mutation RevokeAllOtherUserSessions {
+  revokeAllOtherSessions {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+  }
+}
+    `);
+
+export const useRevokeAllOtherUserSessionsMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<RevokeAllOtherUserSessionsMutation, TError, RevokeAllOtherUserSessionsMutationVariables, TContext>) => {
+    
+    return useMutation<RevokeAllOtherUserSessionsMutation, TError, RevokeAllOtherUserSessionsMutationVariables, TContext>(
+      {
+    mutationKey: ['RevokeAllOtherUserSessions'],
+    mutationFn: (variables?: RevokeAllOtherUserSessionsMutationVariables) => fetchGql<RevokeAllOtherUserSessionsMutation, RevokeAllOtherUserSessionsMutationVariables>(RevokeAllOtherUserSessionsDocument, variables)(),
     ...options
   }
     )};

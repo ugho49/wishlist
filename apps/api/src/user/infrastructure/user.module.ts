@@ -8,6 +8,7 @@ import { UserFieldResolver } from './resolvers/user.field-resolver';
 import { UserResolver } from './resolvers/user.resolver';
 import { UserAdminFieldResolver } from './resolvers/user-admin.field-resolver';
 import { UserAdminResolver } from './resolvers/user-admin.resolver';
+import { UserSessionFieldResolver } from './resolvers/user-session.field-resolver';
 import userConfig from './user.config';
 import { UserDataLoaderFactory } from './user.dataloader';
 
@@ -20,6 +21,7 @@ import { UserDataLoaderFactory } from './user.dataloader';
     UserFieldResolver,
     UserAdminResolver,
     UserAdminFieldResolver,
+    UserSessionFieldResolver,
     UserDataLoaderFactory,
   ],
   exports: [UserDataLoaderFactory],

@@ -1,6 +1,7 @@
 import type { User } from '../domain/model/user.model';
 import type { UserAccount } from '../domain/model/user-account.model';
 import type { UserEmailSetting } from '../domain/model/user-email-setting.model';
+import type { UserRefreshToken } from '../domain/model/user-refresh-token.model';
 
 import { DateTime } from 'luxon';
 import { match } from 'ts-pattern';
@@ -12,6 +13,7 @@ import {
   UserAuthorities as GqlUserAuthorities,
   type UserEmailSettings as GqlUserEmailSettings,
   type UserFull as GqlUserFull,
+  type UserSession as GqlUserSession,
 } from '../../gql/generated-types';
 import { Authorities } from '../domain/authorities.enum';
 import { UserAccountProvider } from '../domain/user-account-provider.enum';
@@ -47,8 +49,6 @@ function toGqlUserFull(user: User): GqlUserFull {
     __typename: 'UserFull',
     authorities,
     isEnabled: user.isEnabled,
-    lastConnectedAt: user.lastConnectedAt?.toISOString(),
-    lastIp: user.lastIp,
   };
 }
 
@@ -77,9 +77,22 @@ function toGqlUserEmailSettings(userEmailSetting: UserEmailSetting): GqlUserEmai
   };
 }
 
+function toGqlUserSession(session: UserRefreshToken): GqlUserSession {
+  return {
+    __typename: 'UserSession',
+    id: session.id,
+    ip: session.ip,
+    userAgent: session.userAgent,
+    createdAt: session.createdAt.toISOString(),
+    lastUsedAt: session.lastUsedAt.toISOString(),
+    expiresAt: session.expiresAt.toISOString(),
+  };
+}
+
 export const userMapper = {
   toGqlUser,
   toGqlUserFull,
   toGqlUserAccount,
   toGqlUserEmailSettings,
+  toGqlUserSession,
 };

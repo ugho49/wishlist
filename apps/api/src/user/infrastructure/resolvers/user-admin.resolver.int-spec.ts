@@ -186,6 +186,78 @@ describe('UserAdminResolver (GraphQL)', () => {
 
         expect(res.body.data.adminUser.__typename).not.toBe('UserFull');
       });
+
+      it('should return the user sessions for a user who has logged in', async () => {
+        const queryWithSessions = /* GraphQL */ `
+          query AdminGetUserSessions($userId: UserId!) {
+            adminUser(userId: $userId) {
+              __typename
+              ... on UserFull {
+                id
+                sessions {
+                  id
+                  ip
+                  current
+                  createdAt
+                  lastUsedAt
+                  expiresAt
+                }
+              }
+            }
+          }
+        `;
+
+        const res = await request
+          .post(GRAPHQL_PATH)
+          .send({ query: queryWithSessions, variables: { userId: adminUserId } })
+          .expect(200);
+
+        expect(res.body.data.adminUser).toMatchObject({
+          __typename: 'UserFull',
+          id: adminUserId,
+        });
+        expect(res.body.data.adminUser.sessions).toHaveLength(1);
+        expect(res.body.data.adminUser.sessions[0]).toMatchObject({
+          id: expect.toBeString(),
+          current: true,
+          createdAt: expect.toBeString(),
+          lastUsedAt: expect.toBeString(),
+          expiresAt: expect.toBeString(),
+        });
+      });
+
+      it('should return an empty sessions list when the user has never logged in', async () => {
+        const targetUserId = await fixtures.insertUser({
+          email: 'no-session@test.fr',
+          firstname: 'No',
+          lastname: 'Session',
+        });
+
+        const queryWithSessions = /* GraphQL */ `
+          query AdminGetUserSessions($userId: UserId!) {
+            adminUser(userId: $userId) {
+              __typename
+              ... on UserFull {
+                id
+                sessions {
+                  id
+                }
+              }
+            }
+          }
+        `;
+
+        const res = await request
+          .post(GRAPHQL_PATH)
+          .send({ query: queryWithSessions, variables: { userId: targetUserId } })
+          .expect(200);
+
+        expect(res.body.data.adminUser).toMatchObject({
+          __typename: 'UserFull',
+          id: targetUserId,
+          sessions: [],
+        });
+      });
     });
   });
 
@@ -716,6 +788,108 @@ describe('UserAdminResolver (GraphQL)', () => {
           .expect(200);
 
         expect(res.body.data.adminRemoveUserPicture).toMatchObject({ __typename: 'NotFoundRejection' });
+      });
+    });
+  });
+
+  describe('Mutation adminRevokeAllUserSessions', () => {
+    const mutation = /* GraphQL */ `
+      mutation AdminRevokeAllUserSessions($userId: UserId!) {
+        adminRevokeAllUserSessions(userId: $userId) {
+          __typename
+          ... on VoidOutput {
+            success
+          }
+          ... on ForbiddenRejection {
+            message
+          }
+          ... on NotFoundRejection {
+            message
+          }
+        }
+      }
+    `;
+
+    it('should reject a BASE_USER with ForbiddenRejection', async () => {
+      const baseRequest = await getRequest({ signedAs: 'BASE_USER' });
+      const targetUserId = await fixtures.insertUser({
+        email: 'target@test.fr',
+        firstname: 'Target',
+        lastname: 'User',
+      });
+
+      const res = await baseRequest
+        .post(GRAPHQL_PATH)
+        .send({ query: mutation, variables: { userId: targetUserId } })
+        .expect(200);
+
+      expect(res.body.data.adminRevokeAllUserSessions).toMatchObject({ __typename: 'ForbiddenRejection' });
+    });
+
+    describe('when user is authenticated as ADMIN_USER', () => {
+      beforeEach(async () => {
+        request = await getRequest({ signedAs: 'ADMIN_USER' });
+      });
+
+      it('should revoke all sessions of the target user', async () => {
+        const password = Fixtures.DEFAULT_USER_PASSWORD;
+        const email = 'session-target@test.fr';
+        const targetUserId = await fixtures.insertUser({
+          email,
+          firstname: 'Session',
+          lastname: 'Target',
+          password,
+        });
+
+        const loginRes = await request
+          .post(GRAPHQL_PATH)
+          .send({
+            query: /* GraphQL */ `
+              mutation Login($input: LoginInput!) {
+                login(input: $input) {
+                  __typename
+                  ... on LoginOutput {
+                    refreshToken
+                  }
+                }
+              }
+            `,
+            variables: { input: { email, password } },
+          })
+          .expect(200);
+
+        expect(loginRes.body.data.login.__typename).toBe('LoginOutput');
+
+        const res = await request
+          .post(GRAPHQL_PATH)
+          .send({ query: mutation, variables: { userId: targetUserId } })
+          .expect(200);
+
+        expect(res.body.data.adminRevokeAllUserSessions).toEqual({ __typename: 'VoidOutput', success: true });
+
+        const sessionsRes = await request
+          .post(GRAPHQL_PATH)
+          .send({
+            query: /* GraphQL */ `
+              query AdminGetUserSessions($userId: UserId!) {
+                adminUser(userId: $userId) {
+                  __typename
+                  ... on UserFull {
+                    sessions {
+                      id
+                    }
+                  }
+                }
+              }
+            `,
+            variables: { userId: targetUserId },
+          })
+          .expect(200);
+
+        expect(sessionsRes.body.data.adminUser).toMatchObject({
+          __typename: 'UserFull',
+          sessions: [],
+        });
       });
     });
   });

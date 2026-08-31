@@ -1,10 +1,8 @@
-import type { UserId } from '@wishlist/common';
+import type { UserId, UserRefreshTokenId } from '@wishlist/common';
 import type { FormEvent } from 'react';
 import type { RootState } from '../../../core/store';
 
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import HistoryIcon from '@mui/icons-material/History';
-import LanguageIcon from '@mui/icons-material/Language';
 import SaveIcon from '@mui/icons-material/Save';
 import { Alert, Box, Button, List, ListItem, ListItemIcon, ListItemText, Stack, TextField } from '@mui/material';
 import { styled, useTheme } from '@mui/material/styles';
@@ -23,6 +21,8 @@ import {
   rejectionMessage,
   rejectionPattern,
   useAdminRemoveUserPictureMutation,
+  useAdminRevokeAllUserSessionsMutation,
+  useAdminRevokeUserSessionMutation,
   useAdminUpdateUserProfileMutation,
   useAdminUserDetailQuery,
 } from '../../../gql';
@@ -37,6 +37,7 @@ import { Title } from '../../common/Title';
 import { AdminListWishlistsForUser } from '../../wishlist/admin/AdminListWishlistsForUser';
 import { AvatarUpdateButton } from '../AvatarUpdateButton';
 import { AdminListUserAccounts } from './AdminListUserAccounts';
+import { AdminListUserSessions } from './AdminListUserSessions';
 import { UpdatePasswordModal } from './UpdatePasswordModal';
 
 const mapState = (state: RootState) => state.auth;
@@ -98,8 +99,32 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
     onSettled: () => setLoading(false),
   });
   const { mutateAsync: removeUserPicture } = useAdminRemoveUserPictureMutation();
+  const { mutateAsync: revokeSession, isPending: revokingSession } = useAdminRevokeUserSessionMutation();
+  const { mutateAsync: revokeAllSessions, isPending: revokingAllSessions } = useAdminRevokeAllUserSessionsMutation();
 
   const invalidateUser = () => queryClient.invalidateQueries({ queryKey: ['AdminUserDetail', { userId }] });
+
+  const revokeUserSession = async (sessionId: UserRefreshTokenId) => {
+    const res = await revokeSession({ userId, sessionId });
+    match(res.adminRevokeUserSession)
+      .with({ __typename: 'VoidOutput' }, () => {
+        addToast({ message: 'Session révoquée', variant: 'info' });
+        void invalidateUser();
+      })
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive();
+  };
+
+  const revokeAllUserSessions = async () => {
+    const res = await revokeAllSessions({ userId });
+    match(res.adminRevokeAllUserSessions)
+      .with({ __typename: 'VoidOutput' }, () => {
+        addToast({ message: 'Toutes les sessions ont été révoquées', variant: 'info' });
+        void invalidateUser();
+      })
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive();
+  };
 
   const isCurrentUser = currentUser?.id === userId;
 
@@ -224,29 +249,6 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
                 />
               </ListItem>
             </List>
-            <List dense sx={{ flexGrow: 1 }}>
-              <ListItem>
-                <ListItemIcon>
-                  <HistoryIcon />
-                </ListItemIcon>
-                <ListItemText
-                  primary="Dernière connexion le"
-                  secondary={
-                    value?.lastConnectedAt
-                      ? DateTime.fromISO(value.lastConnectedAt).toLocaleString(DateTime.DATETIME_MED_WITH_SECONDS)
-                      : ' - '
-                  }
-                />
-              </ListItem>
-            </List>
-            <List dense sx={{ flexGrow: 1 }}>
-              <ListItem>
-                <ListItemIcon>
-                  <LanguageIcon />
-                </ListItemIcon>
-                <ListItemText primary="Dernière IP connue" secondary={value?.lastIp || ' - '} />
-              </ListItem>
-            </List>
           </Stack>
 
           {!isCurrentUser && (
@@ -292,6 +294,40 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
         <Card>
           <Subtitle>Comptes de connexion ({value?.accounts.length ?? 0})</Subtitle>
           <AdminListUserAccounts accounts={value?.accounts ?? []} />
+        </Card>
+
+        <Card>
+          <Stack
+            direction="row"
+            sx={{
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              gap: 2,
+              flexWrap: 'wrap',
+              mb: 2,
+            }}
+          >
+            <Subtitle sx={{ mb: 0 }}>Sessions ({value?.sessions.length ?? 0})</Subtitle>
+            {(value?.sessions.length ?? 0) > 0 && !isCurrentUser && (
+              <ConfirmButton
+                confirmTitle="Révoquer toutes les sessions"
+                confirmText="L'utilisateur devra se reconnecter sur tous ses appareils."
+                onClick={() => void revokeAllUserSessions()}
+                loading={revokingAllSessions}
+                disabled={loading || revokingSession || revokingAllSessions}
+                size="small"
+                variant="outlined"
+                color="error"
+              >
+                Révoquer toutes
+              </ConfirmButton>
+            )}
+          </Stack>
+          <AdminListUserSessions
+            sessions={value?.sessions ?? []}
+            disabled={isCurrentUser || loading || revokingSession || revokingAllSessions}
+            onRevoke={sessionId => void revokeUserSession(sessionId)}
+          />
         </Card>
 
         <Card>

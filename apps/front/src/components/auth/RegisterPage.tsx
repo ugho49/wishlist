@@ -68,12 +68,13 @@ export const RegisterPage = () => {
     formState: { isSubmitting, errors: formErrors },
   } = useForm<FormFields>({ resolver: zodResolver(schema) });
 
-  const handleRegisterSuccess = (accessToken: string, from: 'social' | 'email') => {
+  const handleRegisterSuccess = (accessToken: string, refreshToken: string, from: 'social' | 'email') => {
     addToast({ message: 'Bienvenue sur wishlist 👋', variant: 'default' });
 
     dispatch(
       setTokens({
         accessToken,
+        refreshToken,
       }),
     );
 
@@ -115,7 +116,9 @@ export const RegisterPage = () => {
 
     const loginRes = await loginMutation({ input: { email: data.email, password: data.password } });
     match(loginRes.login)
-      .with({ __typename: 'LoginOutput' }, output => handleRegisterSuccess(output.accessToken, 'email'))
+      .with({ __typename: 'LoginOutput' }, output =>
+        handleRegisterSuccess(output.accessToken, output.refreshToken, 'email'),
+      )
       .with(rejectionPattern, () => {
         // Account created but auto-login failed: let the user sign in manually
         addToast({ message: 'Votre compte a été créé, veuillez vous connecter', variant: 'info' });
@@ -127,7 +130,9 @@ export const RegisterPage = () => {
   const registerWithGoogle = async (code: string) => {
     const res = await loginWithGoogleMutation({ input: { code, createUserIfNotExists: true } });
     match(res.loginWithGoogle)
-      .with({ __typename: 'LoginWithGoogleOutput' }, output => handleRegisterSuccess(output.accessToken, 'social'))
+      .with({ __typename: 'LoginWithGoogleOutput' }, output =>
+        handleRegisterSuccess(output.accessToken, output.refreshToken, 'social'),
+      )
       .with(rejectionPattern, rejection => {
         setSocialLoading(false);
         addToast({ message: rejectionMessage(rejection), variant: 'error' });
