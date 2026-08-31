@@ -124,6 +124,49 @@ describe('UserAdminResolver (GraphQL)', () => {
         });
       });
 
+      it('should return the user accounts including the password account', async () => {
+        const targetUserId = await fixtures.insertUser({
+          email: 'target-accounts@test.fr',
+          firstname: 'Target',
+          lastname: 'Accounts',
+        });
+
+        const queryWithAccounts = /* GraphQL */ `
+          query AdminGetUserAccounts($userId: UserId!) {
+            adminUser(userId: $userId) {
+              __typename
+              ... on UserFull {
+                id
+                accounts {
+                  email
+                  provider
+                  pictureUrl
+                  createdAt
+                }
+              }
+            }
+          }
+        `;
+
+        const res = await request
+          .post(GRAPHQL_PATH)
+          .send({ query: queryWithAccounts, variables: { userId: targetUserId } })
+          .expect(200);
+
+        expect(res.body.data.adminUser).toMatchObject({
+          __typename: 'UserFull',
+          id: targetUserId,
+          accounts: [
+            {
+              email: 'target-accounts@test.fr',
+              provider: 'PASSWORD',
+              pictureUrl: null,
+              createdAt: expect.toBeString(),
+            },
+          ],
+        });
+      });
+
       it('should return NotFoundRejection when user does not exist', async () => {
         const res = await request
           .post(GRAPHQL_PATH)

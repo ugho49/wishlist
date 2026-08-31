@@ -528,7 +528,7 @@ export type AdminUserDetailQuery = { adminUser:
     | { __typename: 'ForbiddenRejection' }
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'UnauthorizedRejection' }
-    | { __typename: 'UserFull', id: Ids["UserId"], firstName: string, lastName: string, email: string, birthday: string | null, pictureUrl: string | null, isEnabled: boolean, authorities: Array<Types.UserAuthorities>, createdAt: string, lastConnectedAt: string | null, lastIp: string | null }
+    | { __typename: 'UserFull', id: Ids["UserId"], firstName: string, lastName: string, email: string, birthday: string | null, pictureUrl: string | null, isEnabled: boolean, authorities: Array<Types.UserAuthorities>, createdAt: string, lastConnectedAt: string | null, lastIp: string | null, accounts: Array<{ id: Ids["UserAccountId"], provider: Types.UserAccountProvider, email: string, pictureUrl: string | null, createdAt: string }> }
     | { __typename: 'ValidationRejection' }
    };
 
@@ -2301,6 +2301,13 @@ export const AdminUserDetailDocument = new TypedDocumentString(`
       createdAt
       lastConnectedAt
       lastIp
+      accounts {
+        id
+        provider
+        email
+        pictureUrl
+        createdAt
+      }
     }
   }
 }

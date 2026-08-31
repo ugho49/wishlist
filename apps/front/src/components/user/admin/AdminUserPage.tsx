@@ -36,6 +36,7 @@ import { Subtitle } from '../../common/Subtitle';
 import { Title } from '../../common/Title';
 import { AdminListWishlistsForUser } from '../../wishlist/admin/AdminListWishlistsForUser';
 import { AvatarUpdateButton } from '../AvatarUpdateButton';
+import { AdminListUserAccounts } from './AdminListUserAccounts';
 import { UpdatePasswordModal } from './UpdatePasswordModal';
 
 const mapState = (state: RootState) => state.auth;
@@ -286,6 +287,11 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
               </Button>
             </Stack>
           )}
+        </Card>
+
+        <Card>
+          <Subtitle>Comptes de connexion ({value?.accounts.length ?? 0})</Subtitle>
+          <AdminListUserAccounts accounts={value?.accounts ?? []} />
         </Card>
 
         <Card>

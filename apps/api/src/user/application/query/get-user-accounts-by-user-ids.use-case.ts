@@ -5,7 +5,6 @@ import { type UserId } from '@wishlist/common';
 
 import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { UserAccount } from '../../domain/model/user-account.model';
-import { isSocialAccountProvider } from '../../domain/user-account-provider.enum';
 
 export type GetUserAccountsByUserIdsInput = {
   userIds: UserId[];
@@ -22,10 +21,6 @@ export class GetUserAccountsByUserIdsUseCase {
     const userAccounts = await this.userAccountRepository.findByUserIds(query.userIds);
 
     return userAccounts.reduce((acc, userAccount) => {
-      if (!isSocialAccountProvider(userAccount.provider)) {
-        return acc;
-      }
-
       if (!acc.has(userAccount.user.id)) {
         acc.set(userAccount.user.id, []);
       }

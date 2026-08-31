@@ -37,6 +37,13 @@ query AdminUserDetail($userId: UserId!) {
       createdAt
       lastConnectedAt
       lastIp
+      accounts {
+        id
+        provider
+        email
+        pictureUrl
+        createdAt
+      }
     }
   }
 }

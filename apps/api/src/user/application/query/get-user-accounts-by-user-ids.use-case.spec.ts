@@ -14,7 +14,7 @@ describe('GetUserAccountsByUserIdsUseCase', () => {
     useCase = new GetUserAccountsByUserIdsUseCase(userAccountRepository);
   });
 
-  it('should group social accounts by user id and exclude password accounts', async () => {
+  it('should group accounts by user id including password accounts', async () => {
     const user = new UserBuilder().build();
     const googleAccount = new UserAccountBuilder().withUser(user).withGoogle('google-1').build();
     const passwordAccount = new UserAccountBuilder().buildPassword(user, 'hash');
@@ -22,6 +22,6 @@ describe('GetUserAccountsByUserIdsUseCase', () => {
 
     const result = await useCase.execute({ userIds: [user.id] });
 
-    expect(result.get(user.id)).toEqual([googleAccount]);
+    expect(result.get(user.id)).toEqual([googleAccount, passwordAccount]);
   });
 });
