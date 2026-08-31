@@ -8,12 +8,22 @@ input LoginWithGoogleInput {
   createUserIfNotExists: Boolean!
 }
 
+input RefreshSessionInput {
+  refreshToken: String!
+}
+
+input LogoutInput {
+  refreshToken: String!
+}
+
 type LoginOutput {
   accessToken: String!
+  refreshToken: String!
 }
 
 type LoginWithGoogleOutput {
   accessToken: String!
+  refreshToken: String!
   newUserCreated: Boolean
   linkedToExistingUser: Boolean
 }
@@ -26,7 +36,13 @@ union LoginWithGoogleResult =
 
 union LoginResult = LoginOutput | ValidationRejection | UnauthorizedRejection | InternalErrorRejection
 
+union RefreshSessionResult = LoginOutput | ValidationRejection | UnauthorizedRejection | InternalErrorRejection
+
+union LogoutResult = VoidOutput | ValidationRejection | UnauthorizedRejection | InternalErrorRejection
+
 extend type Mutation {
   login(input: LoginInput!): LoginResult!
   loginWithGoogle(input: LoginWithGoogleInput!): LoginWithGoogleResult!
+  refreshSession(input: RefreshSessionInput!): RefreshSessionResult!
+  logout(input: LogoutInput!): LogoutResult!
 }

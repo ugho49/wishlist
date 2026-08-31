@@ -6,7 +6,7 @@ export const Route = createFileRoute('/_authenticated')({
   beforeLoad: ({ location }) => {
     const authService = new AuthService();
 
-    if (!authService.accessTokenService.isLocalStorageTokenValid()) {
+    if (!authService.isAuthenticated()) {
       throw redirect({ to: '/login', search: { redirectUrl: location.href } });
     }
   },

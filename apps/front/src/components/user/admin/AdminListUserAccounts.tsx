@@ -1,23 +1,18 @@
+import type { AdminUserDetailQuery } from '../../../gql';
+
 import PersonIcon from '@mui/icons-material/Person';
 import { Avatar, Box } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import { DateTime } from 'luxon';
-import { match } from 'ts-pattern';
 
-import { type AdminUserDetailQuery, UserAccountProvider } from '../../../gql';
+import { UserAccountProviderChip } from './UserAccountProviderChip';
+import { getAccountProviderLabel } from './user-account-provider';
 
 type AdminUserAccount = Extract<AdminUserDetailQuery['adminUser'], { __typename: 'UserFull' }>['accounts'][number];
 
 type AdminListUserAccountsProps = {
   accounts: AdminUserAccount[];
 };
-
-const accountProviderLabel = (provider: UserAccountProvider) =>
-  match(provider)
-    .with(UserAccountProvider.Password, () => 'Mot de passe')
-    .with(UserAccountProvider.Google, () => 'Google')
-    .with(UserAccountProvider.Facebook, () => 'Facebook')
-    .exhaustive();
 
 export const AdminListUserAccounts = ({ accounts }: AdminListUserAccountsProps) => (
   <div style={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -48,14 +43,16 @@ export const AdminListUserAccounts = ({ accounts }: AdminListUserAccountsProps) 
         {
           field: 'provider',
           headerName: 'Provider',
-          minWidth: 150,
-          valueGetter: (_, row) => accountProviderLabel(row.provider),
+          width: 150,
+          display: 'flex',
+          valueGetter: (_, row) => getAccountProviderLabel(row.provider),
+          renderCell: ({ row }) => <UserAccountProviderChip provider={row.provider} />,
         },
         {
           field: 'email',
           headerName: 'Email',
           flex: 1,
-          width: 350,
+          minWidth: 250,
         },
         {
           field: 'createdAt',

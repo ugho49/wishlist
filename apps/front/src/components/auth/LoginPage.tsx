@@ -62,12 +62,13 @@ export const LoginPage = () => {
     defaultValues: { email: emailFromSearch || '' },
   });
 
-  const handleLoginSuccess = (accessToken: string) => {
+  const handleLoginSuccess = (accessToken: string, refreshToken: string) => {
     addToast({ message: 'Heureux de vous revoir 🤓', variant: 'default' });
 
     dispatch(
       setTokens({
         accessToken,
+        refreshToken,
       }),
     );
 
@@ -89,7 +90,7 @@ export const LoginPage = () => {
   const login = async (data: FormFields) => {
     const res = await loginMutation({ input: data });
     match(res.login)
-      .with({ __typename: 'LoginOutput' }, output => handleLoginSuccess(output.accessToken))
+      .with({ __typename: 'LoginOutput' }, output => handleLoginSuccess(output.accessToken, output.refreshToken))
       .with({ __typename: P.union('UnauthorizedRejection', 'ValidationRejection') }, () =>
         setError('root', { message: 'Email ou mot de passe incorrect' }),
       )
@@ -100,7 +101,9 @@ export const LoginPage = () => {
   const loginWithGoogle = async (code: string) => {
     const res = await loginWithGoogleMutation({ input: { code, createUserIfNotExists: false } });
     match(res.loginWithGoogle)
-      .with({ __typename: 'LoginWithGoogleOutput' }, output => handleLoginSuccess(output.accessToken))
+      .with({ __typename: 'LoginWithGoogleOutput' }, output =>
+        handleLoginSuccess(output.accessToken, output.refreshToken),
+      )
       .with({ __typename: 'UnauthorizedRejection' }, () => {
         setSocialLoading(false);
         addToast({ message: 'Impossible de vous connecter avec ce compte Google', variant: 'error' });

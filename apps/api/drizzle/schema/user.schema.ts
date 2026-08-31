@@ -3,13 +3,14 @@ import { boolean, date, pgEnum, pgTable, uniqueIndex, varchar } from 'drizzle-or
 
 import { Authorities } from '../../src/user/domain/authorities.enum';
 import { tsEnumToPgEnum } from '../enum';
-import { timestamps, timestampWithTimezone } from '../helpers';
+import { timestamps } from '../helpers';
 import { userId } from '../ids';
 import { itemTaker } from './item-taker.schema';
 import { userAccount } from './user-account.schema';
 import { userEmailChangeVerification } from './user-email-change-verification.schema';
 import { userEmailSetting } from './user-email-setting.schema';
 import { userPasswordVerification } from './user-password-verification.schema';
+import { userRefreshToken } from './user-refresh-token.schema';
 import { wishlist } from './wishlist.schema';
 
 export const userAuthoritiesEnum = pgEnum('user_authorities', tsEnumToPgEnum(Authorities));
@@ -24,8 +25,6 @@ export const user = pgTable(
     birthday: date(),
     isEnabled: boolean('is_enabled').default(true).notNull(),
     authorities: userAuthoritiesEnum().array().default([Authorities.ROLE_USER]).notNull(),
-    lastIp: varchar('last_ip', { length: 50 }),
-    lastConnectedAt: timestampWithTimezone('last_connected_at'),
     pictureUrl: varchar('picture_url', { length: 1000 }),
     ...timestamps,
   },
@@ -37,6 +36,7 @@ export const userRelations = relations(user, ({ many }) => ({
   emailChangeVerifications: many(userEmailChangeVerification),
   emailSettings: many(userEmailSetting),
   accounts: many(userAccount),
+  refreshTokens: many(userRefreshToken),
   wishlists: many(wishlist, { relationName: 'ownedWishlists' }),
   coOwnedWishlists: many(wishlist, { relationName: 'coOwnedWishlists' }),
   itemTakers: many(itemTaker),

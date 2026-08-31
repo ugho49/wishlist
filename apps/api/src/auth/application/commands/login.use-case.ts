@@ -1,3 +1,5 @@
+import type { ConfigType } from '@nestjs/config';
+import type { UserRefreshTokenRepository } from '../../../user/domain/repository/user-refresh-token.repository';
 import type { LoginOutput } from '../login.types';
 
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
@@ -8,6 +10,7 @@ import { User } from '../../../user/domain/model/user.model';
 import { type UserRepository } from '../../../user/domain/repository/user.repository';
 import { type UserAccountRepository } from '../../../user/domain/repository/user-account.repository';
 import { UserAccountProvider } from '../../../user/domain/user-account-provider.enum';
+import authConfig from '../../infrastructure/auth.config';
 import { PasswordManager } from '../../infrastructure/util/password-manager';
 import { CommonLoginUseCase } from './common-login.use-case';
 
@@ -15,6 +18,7 @@ export type LoginInput = {
   email: string;
   password: string;
   ip: string;
+  userAgent?: string;
 };
 
 @Injectable()
@@ -24,25 +28,30 @@ export class LoginUseCase extends CommonLoginUseCase {
     private readonly userRepository: UserRepository,
     @Inject(REPOSITORIES.USER_ACCOUNT)
     private readonly userAccountRepository: UserAccountRepository,
+    @Inject(REPOSITORIES.USER_REFRESH_TOKEN)
+    refreshTokenRepository: UserRefreshTokenRepository,
+    @Inject(authConfig.KEY)
+    config: ConfigType<typeof authConfig>,
     jwtService: JwtService,
   ) {
-    super({ jwtService, loggerName: LoginUseCase.name });
+    super({
+      jwtService,
+      loggerName: LoginUseCase.name,
+      refreshTokenRepository,
+      refreshTokenDuration: config.refreshToken.duration,
+    });
   }
 
   async execute(command: LoginInput): Promise<LoginOutput> {
-    const { email, password, ip } = command;
+    const { email, password, ip, userAgent } = command;
     this.logger.log('Login request received', { email });
 
     const user = await this.validateUserByEmailPassword(email, password);
-
-    const accessToken = this.createAccessToken(user);
-    const updatedUser = user.updateLastConnection(ip);
-
-    await this.userRepository.save(updatedUser);
+    const tokens = await this.issueTokens({ user, ip, userAgent });
 
     this.logger.log('Login successful', { email });
 
-    return { accessToken };
+    return tokens;
   }
 
   private async validateUserByEmailPassword(email: string, password: string): Promise<User> {

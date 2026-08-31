@@ -1,6 +1,6 @@
 import type { QueryFunctionContext } from '@tanstack/react-query';
 
-import { LS_KEYS } from '../core/services/auth.service';
+import { getValidAccessToken } from '../core/services/session-refresh';
 import { environment } from '../environment';
 
 const GRAPHQL_ENDPOINT = `${environment.apiBaseUrl}/graphql`;
@@ -11,7 +11,7 @@ export const fetchGql =
     variables?: TVariables,
   ): ((context?: QueryFunctionContext) => Promise<TData>) =>
   async context => {
-    const token = localStorage.getItem(LS_KEYS.ACCESS_TOKEN);
+    const token = await getValidAccessToken();
 
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',

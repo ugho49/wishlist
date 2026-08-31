@@ -2,7 +2,6 @@ import type { ICurrentUser } from '@wishlist/common';
 
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { type UserAccountId, type UserId } from '@wishlist/common';
-import { RealIP } from 'nestjs-real-ip';
 
 import { Public } from '../../../auth/infrastructure/decorators/public.metadata';
 import { GqlCurrentUser } from '../../../auth/infrastructure/decorators/user.decorator';
@@ -25,6 +24,8 @@ import {
   type RequestEmailChangeResult,
   type ResetPasswordInput,
   type ResetPasswordResult,
+  type RevokeSessionInput,
+  type RevokeSessionResult,
   type SearchUsersResult,
   type SendResetPasswordEmailInput,
   type SendResetPasswordEmailResult,
@@ -44,6 +45,7 @@ import { CreateUserUseCase } from '../../application/command/create-user.use-cas
 import { LinkUserToGoogleUseCase } from '../../application/command/link-user-to-google.use-case';
 import { RemoveUserPictureUseCase } from '../../application/command/remove-user-picture.use-case';
 import { ResetUserPasswordUseCase } from '../../application/command/reset-user-password.use-case';
+import { RevokeUserSessionUseCase } from '../../application/command/revoke-user-session.use-case';
 import { UnlinkUserAccountUseCase } from '../../application/command/unlink-user-account.use-case';
 import { UpdateUserUseCase } from '../../application/command/update-user.use-case';
 import { UpdateUserEmailSettingUseCase } from '../../application/command/update-user-email-setting.use-case';
@@ -61,6 +63,7 @@ import {
   RegisterUserInputSchema,
   RequestEmailChangeInputSchema,
   ResetPasswordInputSchema,
+  RevokeSessionInputSchema,
   SearchUsersKeywordSchema,
   SendResetPasswordEmailInputSchema,
   UpdateUserEmailSettingsInputSchema,
@@ -84,6 +87,7 @@ export class UserResolver {
     private readonly updateUserEmailSettingUseCase: UpdateUserEmailSettingUseCase,
     private readonly createPasswordVerificationUseCase: CreatePasswordVerificationUseCase,
     private readonly resetUserPasswordUseCase: ResetUserPasswordUseCase,
+    private readonly revokeUserSessionUseCase: RevokeUserSessionUseCase,
     private readonly getUsersByCriteriaUseCase: GetUsersByCriteriaUseCase,
     private readonly getClosestFriendsUseCase: GetClosestFriendsUseCase,
   ) {}
@@ -127,10 +131,8 @@ export class UserResolver {
   @Mutation()
   async registerUser(
     @Args('input', new ZodPipe(RegisterUserInputSchema)) input: RegisterUserInput,
-    @RealIP() ip: string,
   ): Promise<RegisterUserResult> {
     const { user } = await this.createUserUseCase.execute({
-      ip,
       newUser: {
         email: input.email,
         password: input.password,
@@ -190,10 +192,10 @@ export class UserResolver {
   @Mutation()
   async changeUserPassword(
     @Args('input', new ZodPipe(ChangeUserPasswordInputSchema)) input: ChangeUserPasswordInput,
-    @GqlCurrentUser('id') currentUserId: UserId,
+    @GqlCurrentUser() currentUser: ICurrentUser,
   ): Promise<ChangeUserPasswordResult> {
     await this.updateUserPasswordUseCase.execute({
-      userId: currentUserId,
+      currentUser,
       oldPassword: input.oldPassword,
       newPassword: input.newPassword,
     });
@@ -290,6 +292,18 @@ export class UserResolver {
       email: input.email,
       token: input.token,
       newPassword: input.newPassword,
+    });
+    return { __typename: 'VoidOutput', success: true };
+  }
+
+  @Mutation()
+  async revokeSession(
+    @Args('input', new ZodPipe(RevokeSessionInputSchema)) input: RevokeSessionInput,
+    @GqlCurrentUser() currentUser: ICurrentUser,
+  ): Promise<RevokeSessionResult> {
+    await this.revokeUserSessionUseCase.execute({
+      currentUser,
+      sessionId: input.sessionId,
     });
     return { __typename: 'VoidOutput', success: true };
   }

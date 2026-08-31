@@ -1,3 +1,5 @@
+import { AdminRevokeAllUserSessionsUseCase } from './command/admin-revoke-all-user-sessions.use-case';
+import { AdminRevokeUserSessionUseCase } from './command/admin-revoke-user-session.use-case';
 import { ConfirmEmailChangeUseCase } from './command/confirm-email-change.use-case';
 import { CreateEmailChangeVerificationUseCase } from './command/create-email-change-verification.use-case';
 import { CreatePasswordVerificationUseCase } from './command/create-password-verification.use-case';
@@ -6,6 +8,7 @@ import { DeleteUserUseCase } from './command/delete-user.use-case';
 import { LinkUserToGoogleUseCase } from './command/link-user-to-google.use-case';
 import { RemoveUserPictureUseCase } from './command/remove-user-picture.use-case';
 import { ResetUserPasswordUseCase } from './command/reset-user-password.use-case';
+import { RevokeUserSessionUseCase } from './command/revoke-user-session.use-case';
 import { UnlinkUserAccountUseCase } from './command/unlink-user-account.use-case';
 import { UpdateUserUseCase } from './command/update-user.use-case';
 import { UpdateUserEmailSettingUseCase } from './command/update-user-email-setting.use-case';
@@ -22,6 +25,7 @@ import { GetPendingEmailChangeUseCase } from './query/get-pending-email-change.u
 import { GetUserAccountsByIdsUseCase } from './query/get-user-accounts-by-ids.use-case';
 import { GetUserAccountsByUserIdsUseCase } from './query/get-user-accounts-by-user-ids.use-case';
 import { GetUserEmailSettingUseCase } from './query/get-user-email-setting.use-case';
+import { GetUserSessionsByUserIdsUseCase } from './query/get-user-sessions-by-user-ids.use-case';
 import { GetUsersByCriteriaUseCase } from './query/get-users-by-criteria.use-case';
 import { GetUsersByIdsUseCase } from './query/get-users-by-ids.use-case';
 import { GetUsersPaginatedUseCase } from './query/get-users-paginated.use-case';
@@ -35,6 +39,9 @@ export const handlers = [
   LinkUserToGoogleUseCase,
   UnlinkUserAccountUseCase,
   ResetUserPasswordUseCase,
+  RevokeUserSessionUseCase,
+  AdminRevokeUserSessionUseCase,
+  AdminRevokeAllUserSessionsUseCase,
   UpdateUserEmailSettingUseCase,
   UpdateUserUseCase,
   UpdateUserFullUseCase,
@@ -52,6 +59,7 @@ export const handlers = [
   GetClosestFriendsUseCase,
   GetUserAccountsByUserIdsUseCase,
   GetUserAccountsByIdsUseCase,
+  GetUserSessionsByUserIdsUseCase,
   // Events handlers
   UserCreatedHandler,
   PasswordVerificationCreatedHandler,

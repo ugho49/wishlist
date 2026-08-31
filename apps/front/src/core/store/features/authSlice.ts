@@ -8,6 +8,7 @@ import { AuthService } from '../../services/auth.service';
 
 const authService = new AuthService();
 const accessTokenService = authService.accessTokenService;
+const refreshTokenService = authService.refreshTokenService;
 
 export interface AuthState {
   user?: ICurrentUser;
@@ -29,14 +30,16 @@ export const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    setTokens: (state, action: PayloadAction<{ accessToken: string }>) => {
-      const { accessToken } = action.payload;
+    setTokens: (state, action: PayloadAction<{ accessToken: string; refreshToken: string }>) => {
+      const { accessToken, refreshToken } = action.payload;
       accessTokenService.storeTokenInLocalStorage(accessToken);
+      refreshTokenService.storeTokenInLocalStorage(refreshToken);
       state.accessToken = accessToken;
       state.user = createCurrentUserFromPayload(accessTokenService.decodeToken(accessToken));
     },
     resetAuthState: state => {
       accessTokenService.removeTokenFromStorage();
+      refreshTokenService.removeTokenFromStorage();
       state.user = undefined;
       state.accessToken = undefined;
     },

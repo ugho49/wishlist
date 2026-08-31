@@ -52,7 +52,6 @@ describe('CreateUserUseCase', () => {
           email: 'taken@test.fr',
           password: 'Secret123!',
         },
-        ip: '127.0.0.1',
       }),
     ).rejects.toThrow(UnauthorizedException);
     expect(userRepository.save).not.toHaveBeenCalled();
@@ -69,7 +68,6 @@ describe('CreateUserUseCase', () => {
         password: 'Secret123!',
         birthday: new Date('1990-01-01'),
       },
-      ip: '127.0.0.1',
     });
 
     expect(user).toBeInstanceOf(User);

@@ -8,37 +8,48 @@ import { useInterval } from 'usehooks-ts';
 import { useLogout } from '../../hooks/useLogout';
 import { useToast } from '../../hooks/useToast';
 import { AuthService } from '../services/auth.service';
+import { refreshSessionTokens } from '../services/session-refresh';
 
 const mapAuthState = (state: RootState) => state.auth;
-const accessTokenService = new AuthService().accessTokenService;
+const authService = new AuthService();
+const REFRESH_BEFORE_EXPIRY_MS = 60_000;
+const CHECK_INTERVAL_MS = 5_000;
 
-/**
- * Watches the access token for expiry and logs the user out when it lapses.
- * (The GraphQL fetcher reads the token straight from localStorage, so there is
- * no longer an HTTP client instance to keep in sync.)
- */
 export const SessionWatcher: React.FC = () => {
   const { accessToken } = useSelector(mapAuthState);
   const { addToast } = useToast();
   const logout = useLogout();
 
+  const expireSession = useCallback(async () => {
+    addToast({ message: 'Votre session a expiré', variant: 'warning' });
+    await logout();
+  }, [addToast, logout]);
+
   const checkTokenExpiration = useCallback(async () => {
-    // TODO change this to refreshToken -->
-    if (accessToken && accessTokenService.isExpired(accessToken)) {
-      // TODO get new accessToken from refreshToken when expired
-      addToast({ message: 'Votre session à expiré', variant: 'warning' });
-      await logout();
+    const refreshToken = authService.refreshTokenService.getTokenFromLocalStorage();
+
+    if (accessToken && !authService.accessTokenService.isExpiringWithin(accessToken, REFRESH_BEFORE_EXPIRY_MS)) {
+      return;
     }
-  }, [accessToken, addToast, logout]);
+
+    if (!refreshToken) {
+      if (accessToken) await expireSession();
+      return;
+    }
+
+    const nextAccessToken = await refreshSessionTokens();
+    if (!nextAccessToken) {
+      await expireSession();
+    }
+  }, [accessToken, expireSession]);
 
   useEffect(() => {
     void checkTokenExpiration();
   }, [checkTokenExpiration]);
 
-  // Check token expiration every second ->
   useInterval(() => {
     void checkTokenExpiration();
-  }, 1000);
+  }, CHECK_INTERVAL_MS);
 
   return null;
 };

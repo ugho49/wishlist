@@ -1,5 +1,6 @@
 scalar UserAccountId
 scalar UserId
+scalar UserRefreshTokenId
 
 enum UserAccountProvider {
   PASSWORD
@@ -16,6 +17,16 @@ type UserAccount {
   updatedAt: String!
 }
 
+type UserSession {
+  id: UserRefreshTokenId!
+  ip: String
+  userAgent: String
+  createdAt: String!
+  lastUsedAt: String!
+  expiresAt: String!
+  current: Boolean! @resolved
+}
+
 type User {
   id: UserId!
   firstName: String!
@@ -27,6 +38,7 @@ type User {
   createdAt: String!
   updatedAt: String!
   accounts: [UserAccount!] @resolved
+  sessions: [UserSession!] @resolved
   emailSettings: UserEmailSettings @resolved
 }
 
@@ -119,6 +131,10 @@ input ResetPasswordInput {
   newPassword: String!
 }
 
+input RevokeSessionInput {
+  sessionId: UserRefreshTokenId!
+}
+
 union RegisterUserResult =
   | User
   | ValidationRejection
@@ -204,6 +220,14 @@ union ResetPasswordResult =
   | ForbiddenRejection
   | InternalErrorRejection
 
+union RevokeSessionResult =
+  | VoidOutput
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | NotFoundRejection
+  | InternalErrorRejection
+
 extend type Query {
   currentUser: GetCurrentUserResult!
   pendingEmailChange: GetPendingEmailChangeResult
@@ -224,4 +248,5 @@ extend type Mutation {
   updateUserEmailSettings(input: UpdateUserEmailSettingsInput!): UpdateUserEmailSettingsResult!
   sendResetPasswordEmail(input: SendResetPasswordEmailInput!): SendResetPasswordEmailResult!
   resetPassword(input: ResetPasswordInput!): ResetPasswordResult!
+  revokeSession(input: RevokeSessionInput!): RevokeSessionResult!
 }

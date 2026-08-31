@@ -1,4 +1,4 @@
-import type { ICurrentUser, UserId } from '@wishlist/common';
+import type { ICurrentUser, UserId, UserRefreshTokenId } from '@wishlist/common';
 
 import { uuid } from '@wishlist/common';
 
@@ -55,7 +55,6 @@ export class UserBuilder {
       email: this.data.email,
       firstName: this.data.firstName,
       lastName: this.data.lastName,
-      ip: '127.0.0.1',
     });
 
     if (
@@ -74,12 +73,13 @@ export class UserBuilder {
   }
 }
 
-export function toCurrentUser(user: User): ICurrentUser {
+export function toCurrentUser(user: User, sessionId?: UserRefreshTokenId): ICurrentUser {
   return {
     id: user.id,
     email: user.email,
     authorities: user.authorities,
     isAdmin: user.isAdmin(),
     isSuperAdmin: user.isSuperAdmin(),
+    sessionId,
   };
 }

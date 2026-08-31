@@ -10,8 +10,6 @@ export type UserProps = {
   birthday?: Date;
   isEnabled: boolean;
   authorities: Authorities[];
-  lastIp?: string;
-  lastConnectedAt?: Date;
   pictureUrl?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -25,8 +23,6 @@ export class User {
   public readonly birthday?: Date;
   public readonly isEnabled: boolean;
   public readonly authorities: Authorities[];
-  public readonly lastIp?: string;
-  public readonly lastConnectedAt?: Date;
   public readonly pictureUrl?: string;
   public readonly createdAt: Date;
   public readonly updatedAt: Date;
@@ -39,8 +35,6 @@ export class User {
     this.birthday = props.birthday;
     this.isEnabled = props.isEnabled;
     this.authorities = props.authorities;
-    this.lastIp = props.lastIp;
-    this.lastConnectedAt = props.lastConnectedAt;
     this.pictureUrl = props.pictureUrl;
     this.createdAt = props.createdAt;
     this.updatedAt = props.updatedAt;
@@ -52,7 +46,6 @@ export class User {
     firstName: string;
     lastName: string;
     birthday?: Date;
-    ip: string;
     pictureUrl?: string;
   }): User {
     const now = new Date();
@@ -64,8 +57,6 @@ export class User {
       birthday: params.birthday,
       isEnabled: true,
       authorities: [Authorities.ROLE_USER],
-      lastIp: params.ip,
-      lastConnectedAt: now,
       pictureUrl: params.pictureUrl,
       createdAt: now,
       updatedAt: now,
@@ -116,15 +107,6 @@ export class User {
     return new User({
       ...this,
       isEnabled,
-      updatedAt: new Date(),
-    });
-  }
-
-  updateLastConnection(ip: string): User {
-    return new User({
-      ...this,
-      lastIp: ip,
-      lastConnectedAt: new Date(),
       updatedAt: new Date(),
     });
   }

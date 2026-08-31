@@ -17,6 +17,15 @@ query UserProfileCurrentUser {
         createdAt
         updatedAt
       }
+      sessions {
+        id
+        ip
+        userAgent
+        createdAt
+        lastUsedAt
+        expiresAt
+        current
+      }
     }
   }
 }
@@ -183,6 +192,18 @@ mutation RequestUserEmailChange($input: RequestEmailChangeInput!) {
         field
         message
       }
+    }
+  }
+}
+
+mutation RevokeUserSession($input: RevokeSessionInput!) {
+  revokeSession(input: $input) {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+    ... on NotFoundRejection {
+      message
     }
   }
 }

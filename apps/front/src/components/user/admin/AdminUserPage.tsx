@@ -1,14 +1,10 @@
-import type { UserId } from '@wishlist/common';
+import type { UserId, UserRefreshTokenId } from '@wishlist/common';
 import type { FormEvent } from 'react';
 import type { RootState } from '../../../core/store';
 
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import HistoryIcon from '@mui/icons-material/History';
-import LanguageIcon from '@mui/icons-material/Language';
 import SaveIcon from '@mui/icons-material/Save';
-import { Alert, Box, Button, List, ListItem, ListItemIcon, ListItemText, Stack, TextField } from '@mui/material';
-import { styled, useTheme } from '@mui/material/styles';
-import useMediaQuery from '@mui/material/useMediaQuery';
+import { Alert, Box, Button, Chip, Stack, TextField } from '@mui/material';
+import { styled } from '@mui/material/styles';
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useSearch } from '@tanstack/react-router';
 import { AdminListEvents } from '@wishlist/front-components/event/admin/AdminListEvents';
@@ -23,6 +19,8 @@ import {
   rejectionMessage,
   rejectionPattern,
   useAdminRemoveUserPictureMutation,
+  useAdminRevokeAllUserSessionsMutation,
+  useAdminRevokeUserSessionMutation,
   useAdminUpdateUserProfileMutation,
   useAdminUserDetailQuery,
 } from '../../../gql';
@@ -37,16 +35,25 @@ import { Title } from '../../common/Title';
 import { AdminListWishlistsForUser } from '../../wishlist/admin/AdminListWishlistsForUser';
 import { AvatarUpdateButton } from '../AvatarUpdateButton';
 import { AdminListUserAccounts } from './AdminListUserAccounts';
+import { AdminListUserSessions } from './AdminListUserSessions';
 import { UpdatePasswordModal } from './UpdatePasswordModal';
 
 const mapState = (state: RootState) => state.auth;
 
-const UserNameAndEmail = styled('div')(({ theme }) => ({
+const Header = styled('div')(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
-  gap: 2,
+  gap: theme.spacing(0.5),
   marginBottom: theme.spacing(5),
+}));
+
+const NameRow = styled('div')(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  flexWrap: 'wrap',
+  gap: theme.spacing(1),
 }));
 
 const Name = styled('div')(({ theme }) => ({
@@ -58,6 +65,22 @@ const Name = styled('div')(({ theme }) => ({
 const Email = styled('div')(({ theme }) => ({
   fontSize: '0.9rem',
   color: theme.palette.text.secondary,
+}));
+
+const Meta = styled('div')(({ theme }) => ({
+  fontSize: '0.85rem',
+  color: theme.palette.text.secondary,
+}));
+
+const HeaderActions = styled('div')(({ theme }) => ({
+  display: 'flex',
+  justifyContent: 'center',
+  flexWrap: 'wrap',
+  gap: theme.spacing(1),
+  marginTop: theme.spacing(1.5),
+  '& .MuiButton-root': {
+    padding: '3px 10px',
+  },
 }));
 
 const CardStack = styled(Stack)(() => ({
@@ -72,8 +95,6 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
   const { addToast } = useToast();
   const { user: currentUser } = useSelector(mapState);
   const queryClient = useQueryClient();
-  const theme = useTheme();
-  const smallScreen = useMediaQuery(theme.breakpoints.down('md'));
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [firstname, setFirstname] = useState('');
@@ -98,8 +119,32 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
     onSettled: () => setLoading(false),
   });
   const { mutateAsync: removeUserPicture } = useAdminRemoveUserPictureMutation();
+  const { mutateAsync: revokeSession, isPending: revokingSession } = useAdminRevokeUserSessionMutation();
+  const { mutateAsync: revokeAllSessions, isPending: revokingAllSessions } = useAdminRevokeAllUserSessionsMutation();
 
   const invalidateUser = () => queryClient.invalidateQueries({ queryKey: ['AdminUserDetail', { userId }] });
+
+  const revokeUserSession = async (sessionId: UserRefreshTokenId) => {
+    const res = await revokeSession({ userId, sessionId });
+    match(res.adminRevokeUserSession)
+      .with({ __typename: 'VoidOutput' }, () => {
+        addToast({ message: 'Session révoquée', variant: 'info' });
+        void invalidateUser();
+      })
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive();
+  };
+
+  const revokeAllUserSessions = async () => {
+    const res = await revokeAllSessions({ userId });
+    match(res.adminRevokeAllUserSessions)
+      .with({ __typename: 'VoidOutput' }, () => {
+        addToast({ message: 'Toutes les sessions ont été révoquées', variant: 'info' });
+        void invalidateUser();
+      })
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive();
+  };
 
   const isCurrentUser = currentUser?.id === userId;
 
@@ -195,105 +240,44 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
         />
       </Stack>
 
-      <UserNameAndEmail>
-        <Name>
-          {firstname} {lastname}
-        </Name>
+      <Header>
+        <NameRow>
+          <Name>
+            {firstname} {lastname}
+          </Name>
+          {value ? (
+            <Chip size="small" color={enabled ? 'success' : 'default'} label={enabled ? 'Actif' : 'Désactivé'} />
+          ) : null}
+        </NameRow>
         <Email>{email}</Email>
-      </UserNameAndEmail>
+        {value?.createdAt ? (
+          <Meta>Inscrit le {DateTime.fromISO(value.createdAt).toLocaleString(DateTime.DATETIME_MED)}</Meta>
+        ) : null}
+        {!isCurrentUser && (
+          <HeaderActions>
+            <ConfirmButton
+              confirmTitle={enabled ? "Désactiver l'utilisateur" : "Activer l'utilisateur"}
+              confirmText={
+                enabled
+                  ? 'Êtes-vous sûr de vouloir désactiver cet utilisateur ?'
+                  : 'Êtes-vous sûr de vouloir activer cet utilisateur ?'
+              }
+              onClick={() => (enabled ? disableUser() : enableUser())}
+              disabled={loading}
+              size="small"
+              variant="outlined"
+              color={enabled ? 'error' : 'success'}
+            >
+              {enabled ? 'Désactiver' : 'Activer'}
+            </ConfirmButton>
+            <Button variant="outlined" size="small" disabled={loading} onClick={() => setUpdatePasswordModalOpen(true)}>
+              Changer le mot de passe
+            </Button>
+          </HeaderActions>
+        )}
+      </Header>
 
       <CardStack>
-        <Card>
-          <Stack
-            direction="row"
-            sx={{
-              flexWrap: 'wrap',
-              gap: smallScreen ? 0 : 3,
-            }}
-          >
-            <List dense sx={{ flexGrow: 1 }}>
-              <ListItem>
-                <ListItemIcon>
-                  <AccessTimeIcon />
-                </ListItemIcon>
-                <ListItemText
-                  primary="Inscrit le"
-                  secondary={DateTime.fromISO(value?.createdAt || '').toLocaleString(
-                    DateTime.DATETIME_MED_WITH_SECONDS,
-                  )}
-                />
-              </ListItem>
-            </List>
-            <List dense sx={{ flexGrow: 1 }}>
-              <ListItem>
-                <ListItemIcon>
-                  <HistoryIcon />
-                </ListItemIcon>
-                <ListItemText
-                  primary="Dernière connexion le"
-                  secondary={
-                    value?.lastConnectedAt
-                      ? DateTime.fromISO(value.lastConnectedAt).toLocaleString(DateTime.DATETIME_MED_WITH_SECONDS)
-                      : ' - '
-                  }
-                />
-              </ListItem>
-            </List>
-            <List dense sx={{ flexGrow: 1 }}>
-              <ListItem>
-                <ListItemIcon>
-                  <LanguageIcon />
-                </ListItemIcon>
-                <ListItemText primary="Dernière IP connue" secondary={value?.lastIp || ' - '} />
-              </ListItem>
-            </List>
-          </Stack>
-
-          {!isCurrentUser && (
-            <Stack
-              direction="row"
-              sx={{
-                mt: '16px',
-                justifyContent: 'center',
-                gap: 1,
-                flexWrap: 'wrap',
-              }}
-            >
-              <ConfirmButton
-                sx={{ padding: '3px 10px' }}
-                confirmTitle={enabled ? "Désactiver l'utilisateur" : "Activer l'utilisateur"}
-                confirmText={
-                  enabled
-                    ? 'Êtes-vous sûr de vouloir désactiver cet utilisateur ?'
-                    : 'Êtes-vous sûr de vouloir activer cet utilisateur ?'
-                }
-                onClick={() => (enabled ? disableUser() : enableUser())}
-                disabled={loading}
-                size="small"
-                variant="outlined"
-                color={enabled ? 'error' : 'success'}
-              >
-                {enabled ? "Désactiver l'utilisateur" : "Activer l'utilisateur"}
-              </ConfirmButton>
-
-              <Button
-                sx={{ padding: '3px 10px' }}
-                variant="outlined"
-                size="small"
-                disabled={loading}
-                onClick={() => setUpdatePasswordModalOpen(true)}
-              >
-                Changer le mot de passe
-              </Button>
-            </Stack>
-          )}
-        </Card>
-
-        <Card>
-          <Subtitle>Comptes de connexion ({value?.accounts.length ?? 0})</Subtitle>
-          <AdminListUserAccounts accounts={value?.accounts ?? []} />
-        </Card>
-
         <Card>
           <Subtitle>Modifier les informations</Subtitle>
 
@@ -397,6 +381,45 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
               </Stack>
             )}
           </Stack>
+        </Card>
+
+        <Card>
+          <Subtitle>Comptes de connexion ({value?.accounts.length ?? 0})</Subtitle>
+          <AdminListUserAccounts accounts={value?.accounts ?? []} />
+        </Card>
+
+        <Card>
+          <Stack
+            direction="row"
+            sx={{
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              gap: 2,
+              flexWrap: 'wrap',
+              mb: 2,
+            }}
+          >
+            <Subtitle sx={{ mb: 0 }}>Sessions ({value?.sessions.length ?? 0})</Subtitle>
+            {(value?.sessions.length ?? 0) > 0 && !isCurrentUser && (
+              <ConfirmButton
+                confirmTitle="Révoquer toutes les sessions"
+                confirmText="L'utilisateur devra se reconnecter sur tous ses appareils."
+                onClick={() => void revokeAllUserSessions()}
+                loading={revokingAllSessions}
+                disabled={loading || revokingSession || revokingAllSessions}
+                size="small"
+                variant="outlined"
+                color="error"
+              >
+                Révoquer toutes
+              </ConfirmButton>
+            )}
+          </Stack>
+          <AdminListUserSessions
+            sessions={value?.sessions ?? []}
+            disabled={isCurrentUser || loading || revokingSession || revokingAllSessions}
+            onRevoke={sessionId => void revokeUserSession(sessionId)}
+          />
         </Card>
 
         <Card>

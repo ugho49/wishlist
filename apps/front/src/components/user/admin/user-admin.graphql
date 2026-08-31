@@ -35,14 +35,21 @@ query AdminUserDetail($userId: UserId!) {
       isEnabled
       authorities
       createdAt
-      lastConnectedAt
-      lastIp
       accounts {
         id
         provider
         email
         pictureUrl
         createdAt
+      }
+      sessions {
+        id
+        ip
+        userAgent
+        createdAt
+        lastUsedAt
+        expiresAt
+        current
       }
     }
   }
@@ -74,6 +81,27 @@ mutation AdminDeleteUser($userId: UserId!) {
 
 mutation AdminRemoveUserPicture($userId: UserId!) {
   adminRemoveUserPicture(userId: $userId) {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+  }
+}
+
+mutation AdminRevokeUserSession($userId: UserId!, $sessionId: UserRefreshTokenId!) {
+  adminRevokeUserSession(userId: $userId, sessionId: $sessionId) {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+    ... on NotFoundRejection {
+      message
+    }
+  }
+}
+
+mutation AdminRevokeAllUserSessions($userId: UserId!) {
+  adminRevokeAllUserSessions(userId: $userId) {
     __typename
     ... on VoidOutput {
       success
