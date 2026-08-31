@@ -24,7 +24,6 @@ import {
   type RequestEmailChangeResult,
   type ResetPasswordInput,
   type ResetPasswordResult,
-  type RevokeAllOtherSessionsResult,
   type RevokeSessionInput,
   type RevokeSessionResult,
   type SearchUsersResult,
@@ -46,7 +45,6 @@ import { CreateUserUseCase } from '../../application/command/create-user.use-cas
 import { LinkUserToGoogleUseCase } from '../../application/command/link-user-to-google.use-case';
 import { RemoveUserPictureUseCase } from '../../application/command/remove-user-picture.use-case';
 import { ResetUserPasswordUseCase } from '../../application/command/reset-user-password.use-case';
-import { RevokeAllOtherUserSessionsUseCase } from '../../application/command/revoke-all-other-user-sessions.use-case';
 import { RevokeUserSessionUseCase } from '../../application/command/revoke-user-session.use-case';
 import { UnlinkUserAccountUseCase } from '../../application/command/unlink-user-account.use-case';
 import { UpdateUserUseCase } from '../../application/command/update-user.use-case';
@@ -90,7 +88,6 @@ export class UserResolver {
     private readonly createPasswordVerificationUseCase: CreatePasswordVerificationUseCase,
     private readonly resetUserPasswordUseCase: ResetUserPasswordUseCase,
     private readonly revokeUserSessionUseCase: RevokeUserSessionUseCase,
-    private readonly revokeAllOtherUserSessionsUseCase: RevokeAllOtherUserSessionsUseCase,
     private readonly getUsersByCriteriaUseCase: GetUsersByCriteriaUseCase,
     private readonly getClosestFriendsUseCase: GetClosestFriendsUseCase,
   ) {}
@@ -308,12 +305,6 @@ export class UserResolver {
       currentUser,
       sessionId: input.sessionId,
     });
-    return { __typename: 'VoidOutput', success: true };
-  }
-
-  @Mutation()
-  async revokeAllOtherSessions(@GqlCurrentUser() currentUser: ICurrentUser): Promise<RevokeAllOtherSessionsResult> {
-    await this.revokeAllOtherUserSessionsUseCase.execute({ currentUser });
     return { __typename: 'VoidOutput', success: true };
   }
 }

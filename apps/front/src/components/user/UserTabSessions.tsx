@@ -12,7 +12,6 @@ import {
   rejectionMessage,
   rejectionPattern,
   type UserProfileCurrentUserQuery,
-  useRevokeAllOtherUserSessionsMutation,
   useRevokeUserSessionMutation,
   useUserProfileCurrentUserQuery,
 } from '../../gql';
@@ -76,18 +75,6 @@ const SessionActions = styled('div')(({ theme }) => ({
   },
 }));
 
-const HeaderRow = styled('div')(({ theme }) => ({
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  gap: theme.spacing(2),
-  marginBottom: theme.spacing(1),
-  [theme.breakpoints.down('sm')]: {
-    flexDirection: 'column',
-    alignItems: 'stretch',
-  },
-}));
-
 const deviceIcon = (deviceType: DeviceType) =>
   match(deviceType)
     .with('mobile', () => <PhoneIphoneIcon />)
@@ -104,7 +91,6 @@ export const UserTabSessions = () => {
   const logout = useLogout();
   const { data, isLoading } = useUserProfileCurrentUserQuery();
   const { mutateAsync: revokeSession, isPending: revokingOne } = useRevokeUserSessionMutation();
-  const { mutateAsync: revokeOthers, isPending: revokingOthers } = useRevokeAllOtherUserSessionsMutation();
 
   const sessions: UserSessionItem[] = data?.currentUser.__typename === 'User' ? (data.currentUser.sessions ?? []) : [];
 
@@ -126,39 +112,9 @@ export const UserTabSessions = () => {
       .exhaustive();
   };
 
-  const disconnectOthers = async () => {
-    const res = await revokeOthers({});
-    match(res.revokeAllOtherSessions)
-      .with({ __typename: 'VoidOutput' }, () => {
-        addToast({ message: 'Les autres appareils ont été déconnectés', variant: 'info' });
-        void invalidate();
-      })
-      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
-      .exhaustive();
-  };
-
-  const otherSessionsCount = sessions.filter(session => !session.current).length;
-
   return (
     <Card>
-      <HeaderRow>
-        <Subtitle sx={{ mb: 0 }}>Appareils connectés ({sessions.length})</Subtitle>
-        {otherSessionsCount > 0 && (
-          <ConfirmButton
-            confirmTitle="Déconnecter les autres appareils"
-            confirmText="Tous les autres appareils devront se reconnecter."
-            onClick={() => void disconnectOthers()}
-            loading={revokingOthers}
-            disabled={revokingOne || revokingOthers}
-            size="small"
-            variant="text"
-            color="error"
-            startIcon={<LogoutIcon fontSize="small" />}
-          >
-            Déconnecter les autres
-          </ConfirmButton>
-        )}
-      </HeaderRow>
+      <Subtitle>Appareils connectés ({sessions.length})</Subtitle>
 
       <Loader loading={isLoading}>
         {sessions.length === 0 ? (
@@ -193,7 +149,7 @@ export const UserTabSessions = () => {
                       }
                       onClick={() => void disconnectSession(session)}
                       loading={revokingOne}
-                      disabled={revokingOne || revokingOthers}
+                      disabled={revokingOne}
                       size="small"
                       variant="text"
                       color="error"

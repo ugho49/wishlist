@@ -399,7 +399,6 @@ export type Mutation = {
   removeWishlistLogo: RemoveWishlistLogoResult;
   requestEmailChange: RequestEmailChangeResult;
   resetPassword: ResetPasswordResult;
-  revokeAllOtherSessions: RevokeAllOtherSessionsResult;
   revokeSession: RevokeSessionResult;
   scanItemUrl: ScanItemUrlResult;
   sendResetPasswordEmail: SendResetPasswordEmailResult;
@@ -844,8 +843,6 @@ export type ResetPasswordInput = {
 };
 
 export type ResetPasswordResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
-
-export type RevokeAllOtherSessionsResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
 export type RevokeSessionInput = {
   sessionId: Scalars['UserRefreshTokenId']['input'];

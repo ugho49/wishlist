@@ -207,12 +207,3 @@ mutation RevokeUserSession($input: RevokeSessionInput!) {
     }
   }
 }
-
-mutation RevokeAllOtherUserSessions {
-  revokeAllOtherSessions {
-    __typename
-    ... on VoidOutput {
-      success
-    }
-  }
-}

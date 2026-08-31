@@ -228,13 +228,6 @@ union RevokeSessionResult =
   | NotFoundRejection
   | InternalErrorRejection
 
-union RevokeAllOtherSessionsResult =
-  | VoidOutput
-  | ValidationRejection
-  | UnauthorizedRejection
-  | ForbiddenRejection
-  | InternalErrorRejection
-
 extend type Query {
   currentUser: GetCurrentUserResult!
   pendingEmailChange: GetPendingEmailChangeResult
@@ -256,5 +249,4 @@ extend type Mutation {
   sendResetPasswordEmail(input: SendResetPasswordEmailInput!): SendResetPasswordEmailResult!
   resetPassword(input: ResetPasswordInput!): ResetPasswordResult!
   revokeSession(input: RevokeSessionInput!): RevokeSessionResult!
-  revokeAllOtherSessions: RevokeAllOtherSessionsResult!
 }

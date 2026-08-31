@@ -798,17 +798,6 @@ export type RevokeUserSessionMutation = { revokeSession:
     | { __typename: 'VoidOutput', success: boolean }
    };
 
-export type RevokeAllOtherUserSessionsMutationVariables = Exact<{ [key: string]: never; }>;
-
-
-export type RevokeAllOtherUserSessionsMutation = { revokeAllOtherSessions:
-    | { __typename: 'ForbiddenRejection' }
-    | { __typename: 'InternalErrorRejection' }
-    | { __typename: 'UnauthorizedRejection' }
-    | { __typename: 'ValidationRejection' }
-    | { __typename: 'VoidOutput', success: boolean }
-   };
-
 export type WishlistListPageQueryVariables = Exact<{
   filters: Types.PaginationFilters;
 }>;
@@ -3028,30 +3017,6 @@ export const useRevokeUserSessionMutation = <
       {
     mutationKey: ['RevokeUserSession'],
     mutationFn: (variables?: RevokeUserSessionMutationVariables) => fetchGql<RevokeUserSessionMutation, RevokeUserSessionMutationVariables>(RevokeUserSessionDocument, variables)(),
-    ...options
-  }
-    )};
-
-export const RevokeAllOtherUserSessionsDocument = new TypedDocumentString(`
-    mutation RevokeAllOtherUserSessions {
-  revokeAllOtherSessions {
-    __typename
-    ... on VoidOutput {
-      success
-    }
-  }
-}
-    `);
-
-export const useRevokeAllOtherUserSessionsMutation = <
-      TError = unknown,
-      TContext = unknown
-    >(options?: UseMutationOptions<RevokeAllOtherUserSessionsMutation, TError, RevokeAllOtherUserSessionsMutationVariables, TContext>) => {
-    
-    return useMutation<RevokeAllOtherUserSessionsMutation, TError, RevokeAllOtherUserSessionsMutationVariables, TContext>(
-      {
-    mutationKey: ['RevokeAllOtherUserSessions'],
-    mutationFn: (variables?: RevokeAllOtherUserSessionsMutationVariables) => fetchGql<RevokeAllOtherUserSessionsMutation, RevokeAllOtherUserSessionsMutationVariables>(RevokeAllOtherUserSessionsDocument, variables)(),
     ...options
   }
     )};

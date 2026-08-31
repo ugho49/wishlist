@@ -372,7 +372,6 @@ type Mutation {
   removeWishlistLogo(id: WishlistId!): RemoveWishlistLogoResult!
   requestEmailChange(input: RequestEmailChangeInput!): RequestEmailChangeResult!
   resetPassword(input: ResetPasswordInput!): ResetPasswordResult!
-  revokeAllOtherSessions: RevokeAllOtherSessionsResult!
   revokeSession(input: RevokeSessionInput!): RevokeSessionResult!
   scanItemUrl(input: ScanItemUrlInput!): ScanItemUrlResult!
   sendResetPasswordEmail(input: SendResetPasswordEmailInput!): SendResetPasswordEmailResult!
@@ -469,8 +468,6 @@ input ResetPasswordInput {
 }
 
 union ResetPasswordResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
-
-union RevokeAllOtherSessionsResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
 input RevokeSessionInput {
   sessionId: UserRefreshTokenId!

@@ -8,7 +8,6 @@ import { DeleteUserUseCase } from './command/delete-user.use-case';
 import { LinkUserToGoogleUseCase } from './command/link-user-to-google.use-case';
 import { RemoveUserPictureUseCase } from './command/remove-user-picture.use-case';
 import { ResetUserPasswordUseCase } from './command/reset-user-password.use-case';
-import { RevokeAllOtherUserSessionsUseCase } from './command/revoke-all-other-user-sessions.use-case';
 import { RevokeUserSessionUseCase } from './command/revoke-user-session.use-case';
 import { UnlinkUserAccountUseCase } from './command/unlink-user-account.use-case';
 import { UpdateUserUseCase } from './command/update-user.use-case';
@@ -41,7 +40,6 @@ export const handlers = [
   UnlinkUserAccountUseCase,
   ResetUserPasswordUseCase,
   RevokeUserSessionUseCase,
-  RevokeAllOtherUserSessionsUseCase,
   AdminRevokeUserSessionUseCase,
   AdminRevokeAllUserSessionsUseCase,
   UpdateUserEmailSettingUseCase,
