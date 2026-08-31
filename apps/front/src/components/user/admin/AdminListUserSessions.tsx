@@ -78,21 +78,6 @@ export const AdminListUserSessions = ({ sessions, onRevoke, disabled }: AdminLis
           valueGetter: (_, row) => parseUserAgent(row.userAgent).deviceLabel,
         },
         {
-          field: 'engine',
-          headerName: 'Moteur',
-          minWidth: 130,
-          valueGetter: (_, row) => {
-            const parsed = parseUserAgent(row.userAgent);
-            return [parsed.engine, parsed.engineVersion].filter(Boolean).join(' ') || '—';
-          },
-        },
-        {
-          field: 'cpu',
-          headerName: 'CPU',
-          width: 110,
-          valueGetter: (_, row) => parseUserAgent(row.userAgent).cpu || '—',
-        },
-        {
           field: 'ip',
           headerName: 'IP',
           minWidth: 130,

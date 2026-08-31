@@ -177,8 +177,6 @@ export const UserTabSessions = () => {
                     </Stack>
                     <SessionMeta>
                       {parsed.deviceLabel}
-                      {parsed.engine ? ` · ${[parsed.engine, parsed.engineVersion].filter(Boolean).join(' ')}` : ''}
-                      {parsed.cpu ? ` · ${parsed.cpu}` : ''}
                       {session.ip ? ` · ${session.ip}` : ''}
                     </SessionMeta>
                     <SessionMeta>

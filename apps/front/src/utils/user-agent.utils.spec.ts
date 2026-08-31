@@ -23,16 +23,12 @@ describe('parseUserAgent', () => {
     expect(parsed.deviceLabel).toBe('Apple Macintosh');
     expect(parsed.label).toContain('Chrome');
     expect(parsed.label).toContain('macOS');
-    expect(parsed.engine).toBe('Blink');
-    expect(parsed.engineVersion).toBeDefined();
   });
 
-  it('should extract CPU architecture from a Linux UA', () => {
+  it('should extract Linux as a desktop OS', () => {
     const parsed = parseUserAgent(CHROME_LINUX);
 
     expect(parsed.os).toBe('Linux');
-    expect(parsed.cpu).toBe('amd64');
-    expect(parsed.engine).toBe('Blink');
     expect(parsed.deviceType).toBe('desktop');
   });
 

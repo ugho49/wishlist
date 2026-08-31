@@ -29,7 +29,7 @@ export abstract class CommonLoginUseCase {
     this.refreshTokenDuration = params.refreshTokenDuration;
   }
 
-  public createAccessToken(params: {
+  private createAccessToken(params: {
     id: UserId;
     email: string;
     authorities: Authorities[];

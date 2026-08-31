@@ -10,9 +10,6 @@ export type ParsedUserAgent = {
   deviceType: DeviceType;
   deviceVendor?: string;
   deviceModel?: string;
-  cpu?: string;
-  engine?: string;
-  engineVersion?: string;
   label: string;
   deviceLabel: string;
 };
@@ -58,9 +55,6 @@ export function parseUserAgent(userAgent?: string | null): ParsedUserAgent {
   const deviceType = deviceTypeFromUa(result.device.type);
   const deviceVendor = result.device.vendor;
   const deviceModel = result.device.model;
-  const cpu = result.cpu.architecture;
-  const engine = result.engine.name;
-  const engineVersion = result.engine.version;
 
   const browserLabel = joinParts(browser, browserVersion);
   const osLabel = joinParts(os, osVersion);
@@ -74,9 +68,6 @@ export function parseUserAgent(userAgent?: string | null): ParsedUserAgent {
     deviceType,
     deviceVendor,
     deviceModel,
-    cpu,
-    engine,
-    engineVersion,
     label: [browserLabel, osLabel].filter(Boolean).join(' · '),
     deviceLabel,
   };
