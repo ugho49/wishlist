@@ -1,20 +1,20 @@
 import type { User } from '../domain/model/user.model';
+import type { UserAccount } from '../domain/model/user-account.model';
 import type { UserEmailSetting } from '../domain/model/user-email-setting.model';
-import type { UserSocial } from '../domain/model/user-social.model';
 
 import { DateTime } from 'luxon';
 import { match } from 'ts-pattern';
 
 import {
   type User as GqlUser,
+  type UserAccount as GqlUserAccount,
+  UserAccountProvider as GqlUserAccountProvider,
   UserAuthorities as GqlUserAuthorities,
   type UserEmailSettings as GqlUserEmailSettings,
   type UserFull as GqlUserFull,
-  type UserSocial as GqlUserSocial,
-  UserSocialType as GqlUserSocialType,
 } from '../../gql/generated-types';
 import { Authorities } from '../domain/authorities.enum';
-import { UserSocialType } from '../domain/user-social-type.enum';
+import { UserAccountProvider } from '../domain/user-account-provider.enum';
 
 function toGqlUser(user: User): GqlUser {
   return {
@@ -52,21 +52,21 @@ function toGqlUserFull(user: User): GqlUserFull {
   };
 }
 
-function toGqlUserSocial(social: UserSocial): GqlUserSocial {
-  const socialType = match(social.socialType)
-    .with(UserSocialType.GOOGLE, () => GqlUserSocialType.Google)
-    .with(UserSocialType.FACEBOOK, () => GqlUserSocialType.Facebook)
+function toGqlUserAccount(account: UserAccount): GqlUserAccount {
+  const provider = match(account.provider)
+    .with(UserAccountProvider.PASSWORD, () => GqlUserAccountProvider.Password)
+    .with(UserAccountProvider.GOOGLE, () => GqlUserAccountProvider.Google)
+    .with(UserAccountProvider.FACEBOOK, () => GqlUserAccountProvider.Facebook)
     .exhaustive();
 
   return {
-    __typename: 'UserSocial',
-    id: social.id,
-    email: social.email,
-    name: social.name,
-    socialType,
-    pictureUrl: social.pictureUrl,
-    createdAt: social.createdAt.toISOString(),
-    updatedAt: social.updatedAt.toISOString(),
+    __typename: 'UserAccount',
+    id: account.id,
+    email: account.email,
+    provider,
+    pictureUrl: account.pictureUrl,
+    createdAt: account.createdAt.toISOString(),
+    updatedAt: account.updatedAt.toISOString(),
   };
 }
 
@@ -80,6 +80,6 @@ function toGqlUserEmailSettings(userEmailSetting: UserEmailSetting): GqlUserEmai
 export const userMapper = {
   toGqlUser,
   toGqlUserFull,
-  toGqlUserSocial,
+  toGqlUserAccount,
   toGqlUserEmailSettings,
 };

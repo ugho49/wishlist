@@ -6,6 +6,8 @@ import { JwtService } from '@nestjs/jwt';
 import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { User } from '../../../user/domain/model/user.model';
 import { type UserRepository } from '../../../user/domain/repository/user.repository';
+import { type UserAccountRepository } from '../../../user/domain/repository/user-account.repository';
+import { UserAccountProvider } from '../../../user/domain/user-account-provider.enum';
 import { PasswordManager } from '../../infrastructure/util/password-manager';
 import { CommonLoginUseCase } from './common-login.use-case';
 
@@ -20,6 +22,8 @@ export class LoginUseCase extends CommonLoginUseCase {
   constructor(
     @Inject(REPOSITORIES.USER)
     private readonly userRepository: UserRepository,
+    @Inject(REPOSITORIES.USER_ACCOUNT)
+    private readonly userAccountRepository: UserAccountRepository,
     jwtService: JwtService,
   ) {
     super({ jwtService, loggerName: LoginUseCase.name });
@@ -52,8 +56,17 @@ export class LoginUseCase extends CommonLoginUseCase {
       throw new UnauthorizedException('User is disabled');
     }
 
+    const passwordAccount = await this.userAccountRepository.findByUserIdAndProvider(
+      user.id,
+      UserAccountProvider.PASSWORD,
+    );
+
+    if (!passwordAccount?.passwordHash) {
+      throw new UnauthorizedException('Incorrect login');
+    }
+
     const passwordVerified = await PasswordManager.verify({
-      hash: user.passwordEnc || undefined,
+      hash: passwordAccount.passwordHash,
       plainPassword: password,
     });
 

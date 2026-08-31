@@ -1,20 +1,24 @@
 import type { UserRepository } from '../../domain/repository/user.repository';
+import type { UserAccountRepository } from '../../domain/repository/user-account.repository';
 import type { UserPasswordVerificationRepository } from '../../domain/repository/user-password-verification.repository';
 
 import { Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 
 import { UserBuilder } from '../../../../test-utils/builders/user.builder';
+import { UserAccountBuilder } from '../../../../test-utils/builders/user-account.builder';
 import { UserPasswordVerificationBuilder } from '../../../../test-utils/builders/user-password-verification.builder';
 import { createMock } from '../../../../test-utils/mocks';
 import { PasswordManager } from '../../../auth/infrastructure/util/password-manager';
 import { TransactionManager } from '../../../core/database/transaction-manager';
 import { User } from '../../domain/model/user.model';
 import { UserPasswordVerification } from '../../domain/model/user-password-verification.model';
+import { UserAccountProvider } from '../../domain/user-account-provider.enum';
 import { ResetUserPasswordUseCase } from './reset-user-password.use-case';
 import { beforeAll, beforeEach, describe, expect, it, mock } from 'bun:test';
 
 describe('ResetUserPasswordUseCase', () => {
   const userRepository = createMock<UserRepository>();
+  const userAccountRepository = createMock<UserAccountRepository>();
   const passwordVerificationRepository = createMock<UserPasswordVerificationRepository>();
   const transactionManager = createMock<TransactionManager>();
 
@@ -33,10 +37,17 @@ describe('ResetUserPasswordUseCase', () => {
     verification = new UserPasswordVerificationBuilder().withUser(user).withToken('valid-token').build();
 
     userRepository.findByEmail.mockResolvedValue(user);
+    userAccountRepository.findByUserIdAndProvider.mockResolvedValue(undefined);
+    userAccountRepository.newId.mockReturnValue(new UserAccountBuilder().buildPassword(user, 'tmp').id);
     passwordVerificationRepository.findByUserId.mockResolvedValue([verification]);
     transactionManager.runInTransaction.mockImplementation(async callback => callback(undefined as never));
 
-    useCase = new ResetUserPasswordUseCase(userRepository, passwordVerificationRepository, transactionManager);
+    useCase = new ResetUserPasswordUseCase(
+      userRepository,
+      userAccountRepository,
+      passwordVerificationRepository,
+      transactionManager,
+    );
   });
 
   it('should reject when the user does not exist', async () => {
@@ -66,13 +77,30 @@ describe('ResetUserPasswordUseCase', () => {
     expect(transactionManager.runInTransaction).not.toHaveBeenCalled();
   });
 
-  it('should update the password and delete the verification', async () => {
+  it('should create a password account when the user has none', async () => {
     await useCase.execute({ email: user.email, token: 'valid-token', newPassword: 'NewSecret456!' });
 
-    expect(userRepository.save).toHaveBeenCalledTimes(1);
-    const savedUser = userRepository.save.mock.calls[0]?.[0];
-    expect(savedUser?.passwordEnc).toBeDefined();
-    expect(await PasswordManager.verify({ hash: savedUser?.passwordEnc, plainPassword: 'NewSecret456!' })).toBe(true);
+    expect(userAccountRepository.save).toHaveBeenCalledTimes(1);
+    const savedAccount = userAccountRepository.save.mock.calls[0]?.[0];
+    expect(savedAccount?.provider).toBe(UserAccountProvider.PASSWORD);
+    expect(savedAccount?.passwordHash).toBeDefined();
+    expect(await PasswordManager.verify({ hash: savedAccount?.passwordHash, plainPassword: 'NewSecret456!' })).toBe(
+      true,
+    );
     expect(passwordVerificationRepository.delete).toHaveBeenCalledWith(verification.id, undefined);
+  });
+
+  it('should update the existing password account', async () => {
+    const existing = new UserAccountBuilder().buildPassword(user, await PasswordManager.hash('OldSecret123!'));
+    userAccountRepository.findByUserIdAndProvider.mockResolvedValueOnce(existing);
+
+    await useCase.execute({ email: user.email, token: 'valid-token', newPassword: 'NewSecret456!' });
+
+    expect(userAccountRepository.save).toHaveBeenCalledTimes(1);
+    const savedAccount = userAccountRepository.save.mock.calls[0]?.[0];
+    expect(savedAccount?.id).toBe(existing.id);
+    expect(await PasswordManager.verify({ hash: savedAccount?.passwordHash, plainPassword: 'NewSecret456!' })).toBe(
+      true,
+    );
   });
 });

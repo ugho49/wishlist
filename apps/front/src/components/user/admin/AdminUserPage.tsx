@@ -36,6 +36,7 @@ import { Subtitle } from '../../common/Subtitle';
 import { Title } from '../../common/Title';
 import { AdminListWishlistsForUser } from '../../wishlist/admin/AdminListWishlistsForUser';
 import { AvatarUpdateButton } from '../AvatarUpdateButton';
+import { AdminListUserAccounts } from './AdminListUserAccounts';
 import { UpdatePasswordModal } from './UpdatePasswordModal';
 
 const mapState = (state: RootState) => state.auth;
@@ -173,13 +174,13 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
         <AvatarUpdateButton
           size="120px"
           pictureUrl={pictureUrl}
-          socials={[]}
+          accounts={[]}
           onPictureUpdated={url => {
             setPictureUrl(url || '');
             void invalidateUser();
           }}
           uploadPictureHandler={file => uploadAdminUserPicture(userId, file)}
-          updatePictureFromSocialHandler={() => Promise.resolve()}
+          updatePictureFromAccountHandler={() => Promise.resolve()}
           deletePictureHandler={async () => {
             const res = await removeUserPicture({ userId });
             // AvatarUpdateButton owns the error UI for this handler: throwing keeps
@@ -286,6 +287,11 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
               </Button>
             </Stack>
           )}
+        </Card>
+
+        <Card>
+          <Subtitle>Comptes de connexion ({value?.accounts.length ?? 0})</Subtitle>
+          <AdminListUserAccounts accounts={value?.accounts ?? []} />
         </Card>
 
         <Card>

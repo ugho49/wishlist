@@ -15,7 +15,7 @@ import {
   rejectionMessage,
   rejectionPattern,
   useRemoveCurrentUserPictureMutation,
-  useUpdateUserPictureFromSocialMutation,
+  useUpdateUserPictureFromAccountMutation,
   useUserProfileCurrentUserQuery,
 } from '../../gql';
 import { useToast } from '../../hooks/useToast';
@@ -121,7 +121,7 @@ const ProfileStep = () => {
   const dispatch = useDispatch();
   const queryClient = useQueryClient();
 
-  const { mutateAsync: updatePictureFromSocial } = useUpdateUserPictureFromSocialMutation();
+  const { mutateAsync: updatePictureFromAccount } = useUpdateUserPictureFromAccountMutation();
   const { mutateAsync: removePicture } = useRemoveCurrentUserPictureMutation();
 
   useEffect(() => {
@@ -152,12 +152,12 @@ const ProfileStep = () => {
         >
           <AvatarUpdateButton
             pictureUrl={pictureUrl || user?.pictureUrl || undefined}
-            socials={user?.socials || []}
+            accounts={user?.accounts || []}
             onPictureUpdated={handlePictureUpdated}
             uploadPictureHandler={file => uploadUserPicture(file)}
-            updatePictureFromSocialHandler={async socialId => {
-              const res = await updatePictureFromSocial({ input: { socialId } });
-              match(res.updateUserPictureFromSocial)
+            updatePictureFromAccountHandler={async accountId => {
+              const res = await updatePictureFromAccount({ input: { accountId } });
+              match(res.updateUserPictureFromAccount)
                 .with({ __typename: 'VoidOutput' }, () => undefined)
                 .with(rejectionPattern, rejection => {
                   addToast({ message: rejectionMessage(rejection), variant: 'error' });

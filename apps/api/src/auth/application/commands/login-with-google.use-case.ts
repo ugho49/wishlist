@@ -9,10 +9,10 @@ import { TransactionManager } from '../../../core/database/transaction-manager';
 import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { UserCreatedEvent } from '../../../user/domain/event/user-created.event';
 import { User } from '../../../user/domain/model/user.model';
-import { UserSocial } from '../../../user/domain/model/user-social.model';
+import { UserAccount } from '../../../user/domain/model/user-account.model';
 import { type UserRepository } from '../../../user/domain/repository/user.repository';
-import { type UserSocialRepository } from '../../../user/domain/repository/user-social.repository';
-import { UserSocialType } from '../../../user/domain/user-social-type.enum';
+import { type UserAccountRepository } from '../../../user/domain/repository/user-account.repository';
+import { UserAccountProvider } from '../../../user/domain/user-account-provider.enum';
 import { GoogleAuthService } from '../../infrastructure/social/google-auth.service';
 import { CommonLoginUseCase } from './common-login.use-case';
 
@@ -27,8 +27,8 @@ export class LoginWithGoogleUseCase extends CommonLoginUseCase {
   constructor(
     @Inject(REPOSITORIES.USER)
     private readonly userRepository: UserRepository,
-    @Inject(REPOSITORIES.USER_SOCIAL)
-    private readonly userSocialRepository: UserSocialRepository,
+    @Inject(REPOSITORIES.USER_ACCOUNT)
+    private readonly userAccountRepository: UserAccountRepository,
     private readonly googleAuthService: GoogleAuthService,
     private readonly transactionManager: TransactionManager,
     private readonly eventBus: EventBus,
@@ -50,10 +50,13 @@ export class LoginWithGoogleUseCase extends CommonLoginUseCase {
       throw new UnauthorizedException('Email must be verified');
     }
 
-    const userSocial = await this.userSocialRepository.findBySocialId(payload.sub, UserSocialType.GOOGLE);
+    const userAccount = await this.userAccountRepository.findByProviderAccountId(
+      payload.sub,
+      UserAccountProvider.GOOGLE,
+    );
 
-    if (userSocial) {
-      return this.loginWithGoogleAndUpdate({ payload, ip, userSocial });
+    if (userAccount) {
+      return this.loginWithGoogleAndUpdate({ payload, ip, userAccount });
     }
 
     const user = await this.userRepository.findByEmail(payload.email);
@@ -70,26 +73,26 @@ export class LoginWithGoogleUseCase extends CommonLoginUseCase {
   }
 
   private async loginWithGoogleAndUpdate(params: {
-    userSocial: UserSocial;
+    userAccount: UserAccount;
     payload: TokenPayload;
     ip: string;
   }): Promise<LoginOutput> {
     this.logger.log('Login with Google and update...');
-    const { userSocial, payload, ip } = params;
-    const { user } = userSocial;
+    const { userAccount, payload, ip } = params;
+    const user = await this.userRepository.findByIdOrFail(userAccount.userId);
 
     this.checkUserIsEnabled(user);
 
-    let updatedUserSocial = userSocial.updateEmail(payload.email!).updateName(payload.name);
-    let updatedUser = userSocial.user.updateLastConnection(ip);
+    let updatedUserAccount = userAccount.updateEmail(payload.email!);
+    let updatedUser = user.updateLastConnection(ip);
 
-    if (user.pictureUrl === userSocial.pictureUrl && payload.picture !== userSocial.pictureUrl) {
+    if (user.pictureUrl === userAccount.pictureUrl && payload.picture !== userAccount.pictureUrl) {
       updatedUser = updatedUser.updatePicture(payload.picture);
-      updatedUserSocial = updatedUserSocial.updatePictureUrl(payload.picture);
+      updatedUserAccount = updatedUserAccount.updatePictureUrl(payload.picture);
     }
 
     await this.transactionManager.runInTransaction(async tx => {
-      await this.userSocialRepository.save(updatedUserSocial, tx);
+      await this.userAccountRepository.save(updatedUserAccount, tx);
       await this.userRepository.save(updatedUser, tx);
     });
 
@@ -117,19 +120,18 @@ export class LoginWithGoogleUseCase extends CommonLoginUseCase {
       ip,
     });
 
-    const userSocial = UserSocial.create({
-      id: this.userSocialRepository.newId(),
-      user,
+    const userAccount = UserAccount.createSocialAccount({
+      id: this.userAccountRepository.newId(),
+      userId: user.id,
       email: payload.email!,
-      name: payload.name,
-      socialId: payload.sub,
-      socialType: UserSocialType.GOOGLE,
+      provider: UserAccountProvider.GOOGLE,
+      providerAccountId: payload.sub,
       pictureUrl: payload.picture,
     });
 
     await this.transactionManager.runInTransaction(async tx => {
       await this.userRepository.save(user, tx);
-      await this.userSocialRepository.save(userSocial, tx);
+      await this.userAccountRepository.save(userAccount, tx);
     });
 
     await this.eventBus.publish(new UserCreatedEvent({ user }));
@@ -147,13 +149,12 @@ export class LoginWithGoogleUseCase extends CommonLoginUseCase {
 
     this.checkUserIsEnabled(user);
 
-    const userSocial = UserSocial.create({
-      id: this.userSocialRepository.newId(),
-      user,
+    const userAccount = UserAccount.createSocialAccount({
+      id: this.userAccountRepository.newId(),
+      userId: user.id,
       email: payload.email!,
-      name: payload.name,
-      socialId: payload.sub,
-      socialType: UserSocialType.GOOGLE,
+      provider: UserAccountProvider.GOOGLE,
+      providerAccountId: payload.sub,
       pictureUrl: payload.picture,
     });
 
@@ -164,7 +165,7 @@ export class LoginWithGoogleUseCase extends CommonLoginUseCase {
     }
 
     await this.transactionManager.runInTransaction(async tx => {
-      await this.userSocialRepository.save(userSocial, tx);
+      await this.userAccountRepository.save(userAccount, tx);
       await this.userRepository.save(updatedUser, tx);
     });
 

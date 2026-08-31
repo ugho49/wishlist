@@ -1,4 +1,4 @@
-import type { UserSocialId } from '@wishlist/common';
+import type { UserAccountId } from '@wishlist/common';
 import type { RootState } from '../../core/store';
 
 import CheckIcon from '@mui/icons-material/Check';
@@ -11,13 +11,13 @@ import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { match } from 'ts-pattern';
 
-import { addUserSocial, removeUserSocial } from '../../core/store/features/userProfileSlice';
+import { addUserAccount, removeUserAccount } from '../../core/store/features/userProfileSlice';
 import {
   rejectionMessage,
   rejectionPattern,
-  UserSocialType,
+  UserAccountProvider,
   useLinkCurrentUserWithGoogleMutation,
-  useUnlinkCurrentUserSocialMutation,
+  useUnlinkCurrentUserAccountMutation,
 } from '../../gql';
 import { Card } from '../common/Card';
 import { ConfirmButton } from '../common/ConfirmButton';
@@ -94,12 +94,6 @@ const UserDetails = styled('div')(({ theme }) => ({
   gap: theme.spacing(0.25),
 }));
 
-const UserName = styled('div')(({ theme }) => ({
-  fontWeight: 500,
-  fontSize: '0.9rem',
-  color: theme.palette.text.primary,
-}));
-
 const UserEmail = styled('div')(({ theme }) => ({
   fontSize: '0.8rem',
   color: theme.palette.text.secondary,
@@ -113,7 +107,7 @@ export const UserTabSocial = () => {
   const dispatch = useDispatch();
   const queryClient = useQueryClient();
   const { addToast } = useToast();
-  const googleSocial = (userState.social || []).find(s => s.socialType === UserSocialType.Google);
+  const googleAccount = (userState.accounts || []).find(account => account.provider === UserAccountProvider.Google);
 
   const invalidateCurrentUser = () => queryClient.invalidateQueries({ queryKey: ['UserProfileCurrentUser'] });
 
@@ -126,7 +120,7 @@ export const UserTabSocial = () => {
     flow: 'auth-code',
   });
 
-  const { mutateAsync: unlinkSocialMutation } = useUnlinkCurrentUserSocialMutation({
+  const { mutateAsync: unlinkAccountMutation } = useUnlinkCurrentUserAccountMutation({
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
     onSettled: () => setLoadingSocial(false),
   });
@@ -136,11 +130,11 @@ export const UserTabSocial = () => {
     onSettled: () => setLoadingSocial(false),
   });
 
-  const unlinkSocial = async (socialId: UserSocialId) => {
-    const res = await unlinkSocialMutation({ socialId });
-    match(res.unlinkCurrentUserSocial)
+  const unlinkAccount = async (accountId: UserAccountId) => {
+    const res = await unlinkAccountMutation({ accountId });
+    match(res.unlinkCurrentUserAccount)
       .with({ __typename: 'VoidOutput' }, () => {
-        dispatch(removeUserSocial(socialId));
+        dispatch(removeUserAccount(accountId));
         void invalidateCurrentUser();
         addToast({ message: 'Compte google dissocié avec succès', variant: 'success' });
       })
@@ -151,8 +145,8 @@ export const UserTabSocial = () => {
   const linkSocial = async (code: string) => {
     const res = await linkSocialMutation({ input: { code } });
     match(res.linkCurrentUserWithGoogle)
-      .with({ __typename: 'UserSocial' }, social => {
-        dispatch(addUserSocial(social));
+      .with({ __typename: 'UserAccount' }, account => {
+        dispatch(addUserAccount(account));
         void invalidateCurrentUser();
         addToast({ message: 'Compte Google lié avec succès', variant: 'success' });
       })
@@ -171,14 +165,13 @@ export const UserTabSocial = () => {
               <SocialTitle>
                 <CustomIcon name="google" style={{ width: 24.5, height: 24.5 }} />
                 <span>Authentification via Google</span>{' '}
-                {googleSocial && <CheckIcon fontSize="small" color="success" />}
+                {googleAccount && <CheckIcon fontSize="small" color="success" />}
               </SocialTitle>
-              {googleSocial ? (
+              {googleAccount ? (
                 <ConnectedUserInfo>
-                  <UserAvatar src={googleSocial.pictureUrl ?? undefined} alt="Avatar Google" />
+                  <UserAvatar src={googleAccount.pictureUrl ?? undefined} alt="Avatar Google" />
                   <UserDetails>
-                    <UserName>{googleSocial.name}</UserName>
-                    <UserEmail>{googleSocial.email}</UserEmail>
+                    <UserEmail>{googleAccount.email}</UserEmail>
                   </UserDetails>
                 </ConnectedUserInfo>
               ) : (
@@ -186,7 +179,7 @@ export const UserTabSocial = () => {
               )}
             </TextContainer>
             <ButtonWrapper>
-              {googleSocial ? (
+              {googleAccount ? (
                 <ConfirmButton
                   confirmTitle="Dissocier votre compte Google"
                   confirmText="Voulez-vous vraiment dissocier votre compte Google ?"
@@ -195,7 +188,7 @@ export const UserTabSocial = () => {
                   startIcon={<DeleteForeverIcon />}
                   color="error"
                   variant="text"
-                  onClick={() => unlinkSocial(googleSocial.id)}
+                  onClick={() => unlinkAccount(googleAccount.id)}
                 >
                   Dissocier
                 </ConfirmButton>

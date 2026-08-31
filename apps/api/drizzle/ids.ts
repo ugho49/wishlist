@@ -4,11 +4,11 @@ import type {
   ItemId,
   SecretSantaId,
   SecretSantaUserId,
+  UserAccountId,
   UserEmailChangeVerificationId,
   UserEmailSettingId,
   UserId,
   UserPasswordVerificationId,
-  UserSocialId,
   WishlistId,
 } from '@wishlist/common';
 
@@ -20,7 +20,7 @@ export const userId = brandedUuid<UserId>();
 export const userPasswordVerificationId = brandedUuid<UserPasswordVerificationId>();
 export const userEmailChangeVerificationId = brandedUuid<UserEmailChangeVerificationId>();
 export const userEmailSettingId = brandedUuid<UserEmailSettingId>();
-export const userSocialId = brandedUuid<UserSocialId>();
+export const userAccountId = brandedUuid<UserAccountId>();
 export const secretSantaId = brandedUuid<SecretSantaId>();
 export const secretSantaUserId = brandedUuid<SecretSantaUserId>();
 export const wishlistId = brandedUuid<WishlistId>();

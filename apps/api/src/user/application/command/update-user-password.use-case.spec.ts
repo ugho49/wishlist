@@ -1,8 +1,10 @@
 import type { UserRepository } from '../../domain/repository/user.repository';
+import type { UserAccountRepository } from '../../domain/repository/user-account.repository';
 
 import { Logger } from '@nestjs/common';
 
 import { UserBuilder } from '../../../../test-utils/builders/user.builder';
+import { UserAccountBuilder } from '../../../../test-utils/builders/user-account.builder';
 import { createMock } from '../../../../test-utils/mocks';
 import { PasswordManager } from '../../../auth/infrastructure/util/password-manager';
 import { BusinessRuleException } from '../../../core/common/business-rule.exception';
@@ -15,6 +17,7 @@ const NEW_PASSWORD = 'NewSecret456!';
 
 describe('UpdateUserPasswordUseCase', () => {
   const userRepository = createMock<UserRepository>();
+  const userAccountRepository = createMock<UserAccountRepository>();
 
   let useCase: UpdateUserPasswordUseCase;
   let user: User;
@@ -27,26 +30,30 @@ describe('UpdateUserPasswordUseCase', () => {
     mock.clearAllMocks();
 
     const passwordHash = await PasswordManager.hash(OLD_PASSWORD);
-    user = new UserBuilder().withEmail('jean@test.fr').withPasswordEnc(passwordHash).build();
+    user = new UserBuilder().withEmail('jean@test.fr').build();
     userRepository.findByIdOrFail.mockResolvedValue(user);
+    userAccountRepository.findByUserIdAndProvider.mockResolvedValue(
+      new UserAccountBuilder().buildPassword(user, passwordHash),
+    );
 
-    useCase = new UpdateUserPasswordUseCase(userRepository);
+    useCase = new UpdateUserPasswordUseCase(userRepository, userAccountRepository);
   });
 
   it('should reject when the old password does not match', async () => {
     await expect(
       useCase.execute({ userId: user.id, oldPassword: 'WrongPassword1!', newPassword: NEW_PASSWORD }),
     ).rejects.toThrow(BusinessRuleException);
-    expect(userRepository.save).not.toHaveBeenCalled();
+    expect(userAccountRepository.save).not.toHaveBeenCalled();
   });
 
   it('should update the password when the old password matches', async () => {
+    const existingAccount = await userAccountRepository.findByUserIdAndProvider(user.id);
     await useCase.execute({ userId: user.id, oldPassword: OLD_PASSWORD, newPassword: NEW_PASSWORD });
 
-    expect(userRepository.save).toHaveBeenCalledTimes(1);
-    const savedUser = userRepository.save.mock.calls[0]?.[0];
-    expect(savedUser?.passwordEnc).toBeDefined();
-    expect(savedUser?.passwordEnc).not.toBe(user.passwordEnc);
-    expect(await PasswordManager.verify({ hash: savedUser?.passwordEnc, plainPassword: NEW_PASSWORD })).toBe(true);
+    expect(userAccountRepository.save).toHaveBeenCalledTimes(1);
+    const savedAccount = userAccountRepository.save.mock.calls[0]?.[0];
+    expect(savedAccount?.passwordHash).toBeDefined();
+    expect(savedAccount?.passwordHash).not.toBe(existingAccount?.passwordHash);
+    expect(await PasswordManager.verify({ hash: savedAccount?.passwordHash, plainPassword: NEW_PASSWORD })).toBe(true);
   });
 });

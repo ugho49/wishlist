@@ -1,16 +1,16 @@
-scalar UserSocialId
+scalar UserAccountId
 scalar UserId
 
-enum UserSocialType {
+enum UserAccountProvider {
+  PASSWORD
   GOOGLE
   FACEBOOK
 }
 
-type UserSocial {
-  id: UserSocialId!
+type UserAccount {
+  id: UserAccountId!
   email: String!
-  name: String
-  socialType: UserSocialType!
+  provider: UserAccountProvider!
   pictureUrl: String
   createdAt: String!
   updatedAt: String!
@@ -26,7 +26,7 @@ type User {
   isEnabled: Boolean!
   createdAt: String!
   updatedAt: String!
-  socials: [UserSocial!] @resolved
+  accounts: [UserAccount!] @resolved
   emailSettings: UserEmailSettings @resolved
 }
 
@@ -92,8 +92,8 @@ input ChangeUserPasswordInput {
   newPassword: String!
 }
 
-input UpdateUserPictureFromSocialInput {
-  socialId: UserSocialId!
+input UpdateUserPictureFromAccountInput {
+  accountId: UserAccountId!
 }
 
 input RequestEmailChangeInput {
@@ -127,7 +127,7 @@ union RegisterUserResult =
   | InternalErrorRejection
 
 union LinkUserToGoogleResult =
-  | UserSocial
+  | UserAccount
   | ValidationRejection
   | UnauthorizedRejection
   | ForbiddenRejection
@@ -140,7 +140,7 @@ union UpdateUserProfileResult =
   | ForbiddenRejection
   | InternalErrorRejection
 
-union UnlinkCurrentUserSocialResult =
+union UnlinkCurrentUserAccountResult =
   | VoidOutput
   | ValidationRejection
   | UnauthorizedRejection
@@ -155,7 +155,7 @@ union ChangeUserPasswordResult =
   | ForbiddenRejection
   | InternalErrorRejection
 
-union UpdateUserPictureFromSocialResult =
+union UpdateUserPictureFromAccountResult =
   | VoidOutput
   | ValidationRejection
   | UnauthorizedRejection
@@ -214,10 +214,10 @@ extend type Query {
 extend type Mutation {
   registerUser(input: RegisterUserInput!): RegisterUserResult!
   linkCurrentUserWithGoogle(input: LinkUserToGoogleInput!): LinkUserToGoogleResult!
-  unlinkCurrentUserSocial(socialId: UserSocialId!): UnlinkCurrentUserSocialResult!
+  unlinkCurrentUserAccount(accountId: UserAccountId!): UnlinkCurrentUserAccountResult!
   updateUserProfile(input: UpdateUserProfileInput!): UpdateUserProfileResult!
   changeUserPassword(input: ChangeUserPasswordInput!): ChangeUserPasswordResult!
-  updateUserPictureFromSocial(input: UpdateUserPictureFromSocialInput!): UpdateUserPictureFromSocialResult!
+  updateUserPictureFromAccount(input: UpdateUserPictureFromAccountInput!): UpdateUserPictureFromAccountResult!
   removeUserPicture: RemoveUserPictureResult!
   requestEmailChange(input: RequestEmailChangeInput!): RequestEmailChangeResult!
   confirmEmailChange(input: ConfirmEmailChangeInput!): ConfirmEmailChangeResult!

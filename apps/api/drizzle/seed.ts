@@ -10,6 +10,7 @@ import { PasswordManager } from '../src/auth/infrastructure/util/password-manage
 import { createSqlClient } from '../src/core/database/create-sql-client';
 import { AttendeeRole } from '../src/event/domain/attendee-role.enum';
 import { Authorities } from '../src/user/domain/authorities.enum';
+import { UserAccountProvider } from '../src/user/domain/user-account-provider.enum';
 import * as schema from './schema';
 
 dotenv.config();
@@ -17,6 +18,7 @@ dotenv.config();
 const consola = createConsola();
 
 const usersValues: (typeof schema.user.$inferInsert)[] = [];
+const userAccountValues: (typeof schema.userAccount.$inferInsert)[] = [];
 const userEmailSettingValues: (typeof schema.userEmailSetting.$inferInsert)[] = [];
 const eventsValues: (typeof schema.event.$inferInsert)[] = [];
 const eventAttendeesValues: (typeof schema.eventAttendee.$inferInsert)[] = [];
@@ -83,7 +85,7 @@ async function main() {
   }
 
   consola.start('Seeding users and settings...');
-  const usersPasswordEnc = await PasswordManager.hash('test');
+  const usersPasswordHash = await PasswordManager.hash('test');
 
   usersValues.push({
     id: 'bc675663-8dce-4977-a4ab-146db663580e', // admin id is hardcoded in the seed
@@ -92,7 +94,6 @@ async function main() {
     lastName: 'ADMIN',
     pictureUrl: faker.image.avatar(),
     authorities: [Authorities.ROLE_SUPERADMIN],
-    passwordEnc: usersPasswordEnc,
   });
 
   for (let i = 0; i < 100; i++) {
@@ -104,7 +105,6 @@ async function main() {
       birthday: faker.date.birthdate().toISOString(),
       pictureUrl: faker.image.avatar(),
       authorities: [Authorities.ROLE_USER],
-      passwordEnc: usersPasswordEnc,
     });
   }
 
@@ -113,12 +113,23 @@ async function main() {
   consola.success(`${usersValues.length} users seeded`);
 
   for (const user of usersValues) {
+    userAccountValues.push({
+      id: faker.string.uuid(),
+      userId: user.id,
+      provider: UserAccountProvider.PASSWORD,
+      email: user.email,
+      passwordHash: usersPasswordHash,
+    });
     userEmailSettingValues.push({
       id: faker.string.uuid(),
       userId: user.id,
       dailyNewItemNotification: faker.datatype.boolean({ probability: 0.9 }),
     });
   }
+
+  await db.insert(schema.userAccount).values(userAccountValues);
+
+  consola.success(`${userAccountValues.length} user accounts seeded`);
 
   await db.insert(schema.userEmailSetting).values(userEmailSettingValues);
 

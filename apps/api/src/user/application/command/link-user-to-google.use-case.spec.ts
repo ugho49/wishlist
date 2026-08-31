@@ -1,23 +1,23 @@
-import type { UserSocialId } from '@wishlist/common';
+import type { UserAccountId } from '@wishlist/common';
 import type { UserRepository } from '../../domain/repository/user.repository';
-import type { UserSocialRepository } from '../../domain/repository/user-social.repository';
+import type { UserAccountRepository } from '../../domain/repository/user-account.repository';
 
 import { BadRequestException, Logger, UnauthorizedException } from '@nestjs/common';
 import { uuid } from '@wishlist/common';
 
 import { UserBuilder } from '../../../../test-utils/builders/user.builder';
+import { UserAccountBuilder } from '../../../../test-utils/builders/user-account.builder';
 import { createMock } from '../../../../test-utils/mocks';
 import { GoogleAuthService } from '../../../auth/infrastructure/social/google-auth.service';
 import { TransactionManager } from '../../../core/database/transaction-manager';
 import { User } from '../../domain/model/user.model';
-import { UserSocial } from '../../domain/model/user-social.model';
-import { UserSocialType } from '../../domain/user-social-type.enum';
+import { UserAccountProvider } from '../../domain/user-account-provider.enum';
 import { LinkUserToGoogleUseCase } from './link-user-to-google.use-case';
 import { beforeAll, beforeEach, describe, expect, it, mock } from 'bun:test';
 
 describe('LinkUserToGoogleUseCase', () => {
   const userRepository = createMock<UserRepository>();
-  const userSocialRepository = createMock<UserSocialRepository>();
+  const userAccountRepository = createMock<UserAccountRepository>();
   const googleAuthService = createMock<GoogleAuthService>();
   const transactionManager = createMock<TransactionManager>();
 
@@ -41,38 +41,30 @@ describe('LinkUserToGoogleUseCase', () => {
 
     user = new UserBuilder().withEmail('jean@test.fr').build();
     userRepository.findByIdOrFail.mockResolvedValue(user);
-    userSocialRepository.findByUserId.mockResolvedValue([]);
-    userSocialRepository.findBySocialId.mockResolvedValue(undefined);
-    userSocialRepository.newId.mockReturnValue(uuid() as UserSocialId);
+    userAccountRepository.findByUserId.mockResolvedValue([]);
+    userAccountRepository.findByProviderAccountId.mockResolvedValue(undefined);
+    userAccountRepository.newId.mockReturnValue(uuid() as UserAccountId);
     googleAuthService.getGoogleAccountFromCode.mockResolvedValue(googlePayload);
     transactionManager.runInTransaction.mockImplementation(async fn => fn({} as never));
 
-    useCase = new LinkUserToGoogleUseCase(userRepository, userSocialRepository, googleAuthService, transactionManager);
+    useCase = new LinkUserToGoogleUseCase(userRepository, userAccountRepository, googleAuthService, transactionManager);
   });
 
   it('should reject when the user is already linked to Google', async () => {
-    userSocialRepository.findByUserId.mockResolvedValueOnce([
-      UserSocial.create({
-        id: uuid() as UserSocialId,
-        user,
-        email: user.email,
-        socialId: 'existing',
-        socialType: UserSocialType.GOOGLE,
-      }),
+    userAccountRepository.findByUserId.mockResolvedValueOnce([
+      new UserAccountBuilder().withUser(user).withGoogle('existing').build(),
     ]);
 
     await expect(useCase.execute({ code: 'code', userId: user.id })).rejects.toThrow(BadRequestException);
   });
 
   it('should reject when the Google account is already linked to another user', async () => {
-    userSocialRepository.findBySocialId.mockResolvedValueOnce(
-      UserSocial.create({
-        id: uuid() as UserSocialId,
-        user: new UserBuilder().withEmail('other@test.fr').build(),
-        email: 'other@test.fr',
-        socialId: 'google-sub',
-        socialType: UserSocialType.GOOGLE,
-      }),
+    userAccountRepository.findByProviderAccountId.mockResolvedValueOnce(
+      new UserAccountBuilder()
+        .withUser(new UserBuilder().withEmail('other@test.fr').build())
+        .withEmail('other@test.fr')
+        .withGoogle('google-sub')
+        .build(),
     );
 
     await expect(useCase.execute({ code: 'code', userId: user.id })).rejects.toThrow(BadRequestException);
@@ -91,12 +83,12 @@ describe('LinkUserToGoogleUseCase', () => {
   });
 
   it('should link the Google account and copy the picture when the user has none', async () => {
-    const { userSocial } = await useCase.execute({ code: 'code', userId: user.id });
+    const { userAccount } = await useCase.execute({ code: 'code', userId: user.id });
 
-    expect(userSocial.socialType).toBe(UserSocialType.GOOGLE);
-    expect(userSocial.socialId).toBe('google-sub');
+    expect(userAccount.provider).toBe(UserAccountProvider.GOOGLE);
+    expect(userAccount.providerAccountId).toBe('google-sub');
     expect(userRepository.save).toHaveBeenCalledTimes(1);
-    expect(userSocialRepository.save).toHaveBeenCalledTimes(1);
+    expect(userAccountRepository.save).toHaveBeenCalledTimes(1);
     expect(userRepository.save.mock.calls[0]?.[0]?.pictureUrl).toBe('https://google/pic.png');
   });
 });

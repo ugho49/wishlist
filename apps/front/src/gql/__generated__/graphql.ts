@@ -528,7 +528,7 @@ export type AdminUserDetailQuery = { adminUser:
     | { __typename: 'ForbiddenRejection' }
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'UnauthorizedRejection' }
-    | { __typename: 'UserFull', id: Ids["UserId"], firstName: string, lastName: string, email: string, birthday: string | null, pictureUrl: string | null, isEnabled: boolean, authorities: Array<Types.UserAuthorities>, createdAt: string, lastConnectedAt: string | null, lastIp: string | null }
+    | { __typename: 'UserFull', id: Ids["UserId"], firstName: string, lastName: string, email: string, birthday: string | null, pictureUrl: string | null, isEnabled: boolean, authorities: Array<Types.UserAuthorities>, createdAt: string, lastConnectedAt: string | null, lastIp: string | null, accounts: Array<{ id: Ids["UserAccountId"], provider: Types.UserAccountProvider, email: string, pictureUrl: string | null, createdAt: string }> }
     | { __typename: 'ValidationRejection' }
    };
 
@@ -579,7 +579,7 @@ export type UserProfileCurrentUserQuery = { currentUser:
     | { __typename: 'ForbiddenRejection' }
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'UnauthorizedRejection' }
-    | { __typename: 'User', id: Ids["UserId"], email: string, firstName: string, lastName: string, birthday: string | null, pictureUrl: string | null, createdAt: string, socials: Array<{ id: Ids["UserSocialId"], socialType: Types.UserSocialType, name: string | null, email: string, pictureUrl: string | null, createdAt: string, updatedAt: string }> | null }
+    | { __typename: 'User', id: Ids["UserId"], email: string, firstName: string, lastName: string, birthday: string | null, pictureUrl: string | null, createdAt: string, accounts: Array<{ id: Ids["UserAccountId"], provider: Types.UserAccountProvider, email: string, pictureUrl: string | null, createdAt: string, updatedAt: string }> | null }
    };
 
 export type UserProfileEmailSettingsQueryVariables = Exact<{ [key: string]: never; }>;
@@ -677,16 +677,16 @@ export type LinkCurrentUserWithGoogleMutation = { linkCurrentUserWithGoogle:
     | { __typename: 'ForbiddenRejection' }
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'UnauthorizedRejection' }
-    | { __typename: 'UserSocial', id: Ids["UserSocialId"], socialType: Types.UserSocialType, name: string | null, email: string, pictureUrl: string | null, createdAt: string, updatedAt: string }
+    | { __typename: 'UserAccount', id: Ids["UserAccountId"], provider: Types.UserAccountProvider, email: string, pictureUrl: string | null, createdAt: string, updatedAt: string }
     | { __typename: 'ValidationRejection', errors: Array<{ field: string, message: string }> }
    };
 
-export type UnlinkCurrentUserSocialMutationVariables = Exact<{
-  socialId: Ids["UserSocialId"];
+export type UnlinkCurrentUserAccountMutationVariables = Exact<{
+  accountId: Ids["UserAccountId"];
 }>;
 
 
-export type UnlinkCurrentUserSocialMutation = { unlinkCurrentUserSocial:
+export type UnlinkCurrentUserAccountMutation = { unlinkCurrentUserAccount:
     | { __typename: 'ForbiddenRejection' }
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'UnauthorizedRejection' }
@@ -694,12 +694,12 @@ export type UnlinkCurrentUserSocialMutation = { unlinkCurrentUserSocial:
     | { __typename: 'VoidOutput', success: boolean }
    };
 
-export type UpdateUserPictureFromSocialMutationVariables = Exact<{
-  input: Types.UpdateUserPictureFromSocialInput;
+export type UpdateUserPictureFromAccountMutationVariables = Exact<{
+  input: Types.UpdateUserPictureFromAccountInput;
 }>;
 
 
-export type UpdateUserPictureFromSocialMutation = { updateUserPictureFromSocial:
+export type UpdateUserPictureFromAccountMutation = { updateUserPictureFromAccount:
     | { __typename: 'ForbiddenRejection' }
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'UnauthorizedRejection' }
@@ -2301,6 +2301,13 @@ export const AdminUserDetailDocument = new TypedDocumentString(`
       createdAt
       lastConnectedAt
       lastIp
+      accounts {
+        id
+        provider
+        email
+        pictureUrl
+        createdAt
+      }
     }
   }
 }
@@ -2412,10 +2419,9 @@ export const UserProfileCurrentUserDocument = new TypedDocumentString(`
       birthday
       pictureUrl
       createdAt
-      socials {
+      accounts {
         id
-        socialType
-        name
+        provider
         email
         pictureUrl
         createdAt
@@ -2667,10 +2673,9 @@ export const LinkCurrentUserWithGoogleDocument = new TypedDocumentString(`
     mutation LinkCurrentUserWithGoogle($input: LinkUserToGoogleInput!) {
   linkCurrentUserWithGoogle(input: $input) {
     __typename
-    ... on UserSocial {
+    ... on UserAccount {
       id
-      socialType
-      name
+      provider
       email
       pictureUrl
       createdAt
@@ -2699,9 +2704,9 @@ export const useLinkCurrentUserWithGoogleMutation = <
   }
     )};
 
-export const UnlinkCurrentUserSocialDocument = new TypedDocumentString(`
-    mutation UnlinkCurrentUserSocial($socialId: UserSocialId!) {
-  unlinkCurrentUserSocial(socialId: $socialId) {
+export const UnlinkCurrentUserAccountDocument = new TypedDocumentString(`
+    mutation UnlinkCurrentUserAccount($accountId: UserAccountId!) {
+  unlinkCurrentUserAccount(accountId: $accountId) {
     __typename
     ... on VoidOutput {
       success
@@ -2710,22 +2715,22 @@ export const UnlinkCurrentUserSocialDocument = new TypedDocumentString(`
 }
     `);
 
-export const useUnlinkCurrentUserSocialMutation = <
+export const useUnlinkCurrentUserAccountMutation = <
       TError = unknown,
       TContext = unknown
-    >(options?: UseMutationOptions<UnlinkCurrentUserSocialMutation, TError, UnlinkCurrentUserSocialMutationVariables, TContext>) => {
+    >(options?: UseMutationOptions<UnlinkCurrentUserAccountMutation, TError, UnlinkCurrentUserAccountMutationVariables, TContext>) => {
     
-    return useMutation<UnlinkCurrentUserSocialMutation, TError, UnlinkCurrentUserSocialMutationVariables, TContext>(
+    return useMutation<UnlinkCurrentUserAccountMutation, TError, UnlinkCurrentUserAccountMutationVariables, TContext>(
       {
-    mutationKey: ['UnlinkCurrentUserSocial'],
-    mutationFn: (variables?: UnlinkCurrentUserSocialMutationVariables) => fetchGql<UnlinkCurrentUserSocialMutation, UnlinkCurrentUserSocialMutationVariables>(UnlinkCurrentUserSocialDocument, variables)(),
+    mutationKey: ['UnlinkCurrentUserAccount'],
+    mutationFn: (variables?: UnlinkCurrentUserAccountMutationVariables) => fetchGql<UnlinkCurrentUserAccountMutation, UnlinkCurrentUserAccountMutationVariables>(UnlinkCurrentUserAccountDocument, variables)(),
     ...options
   }
     )};
 
-export const UpdateUserPictureFromSocialDocument = new TypedDocumentString(`
-    mutation UpdateUserPictureFromSocial($input: UpdateUserPictureFromSocialInput!) {
-  updateUserPictureFromSocial(input: $input) {
+export const UpdateUserPictureFromAccountDocument = new TypedDocumentString(`
+    mutation UpdateUserPictureFromAccount($input: UpdateUserPictureFromAccountInput!) {
+  updateUserPictureFromAccount(input: $input) {
     __typename
     ... on VoidOutput {
       success
@@ -2734,15 +2739,15 @@ export const UpdateUserPictureFromSocialDocument = new TypedDocumentString(`
 }
     `);
 
-export const useUpdateUserPictureFromSocialMutation = <
+export const useUpdateUserPictureFromAccountMutation = <
       TError = unknown,
       TContext = unknown
-    >(options?: UseMutationOptions<UpdateUserPictureFromSocialMutation, TError, UpdateUserPictureFromSocialMutationVariables, TContext>) => {
+    >(options?: UseMutationOptions<UpdateUserPictureFromAccountMutation, TError, UpdateUserPictureFromAccountMutationVariables, TContext>) => {
     
-    return useMutation<UpdateUserPictureFromSocialMutation, TError, UpdateUserPictureFromSocialMutationVariables, TContext>(
+    return useMutation<UpdateUserPictureFromAccountMutation, TError, UpdateUserPictureFromAccountMutationVariables, TContext>(
       {
-    mutationKey: ['UpdateUserPictureFromSocial'],
-    mutationFn: (variables?: UpdateUserPictureFromSocialMutationVariables) => fetchGql<UpdateUserPictureFromSocialMutation, UpdateUserPictureFromSocialMutationVariables>(UpdateUserPictureFromSocialDocument, variables)(),
+    mutationKey: ['UpdateUserPictureFromAccount'],
+    mutationFn: (variables?: UpdateUserPictureFromAccountMutationVariables) => fetchGql<UpdateUserPictureFromAccountMutation, UpdateUserPictureFromAccountMutationVariables>(UpdateUserPictureFromAccountDocument, variables)(),
     ...options
   }
     )};

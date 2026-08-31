@@ -1,12 +1,15 @@
 import type { UserRepository } from '../../domain/repository/user.repository';
+import type { UserAccountRepository } from '../../domain/repository/user-account.repository';
 
 import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { EventBus } from '@nestjs/cqrs';
 
 import { PasswordManager } from '../../../auth/infrastructure/util/password-manager';
+import { TransactionManager } from '../../../core/database/transaction-manager';
 import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { UserCreatedEvent } from '../../domain/event/user-created.event';
 import { User } from '../../domain/model/user.model';
+import { UserAccount } from '../../domain/model/user-account.model';
 
 export type CreateUserInput = {
   newUser: {
@@ -30,6 +33,9 @@ export class CreateUserUseCase {
   constructor(
     @Inject(REPOSITORIES.USER)
     private readonly userRepository: UserRepository,
+    @Inject(REPOSITORIES.USER_ACCOUNT)
+    private readonly userAccountRepository: UserAccountRepository,
+    private readonly transactionManager: TransactionManager,
     private readonly eventBus: EventBus,
   ) {}
 
@@ -56,12 +62,21 @@ export class CreateUserUseCase {
       firstName: newUser.firstname,
       lastName: newUser.lastname,
       birthday: newUser.birthday,
-      passwordEnc: newUser.password ? await PasswordManager.hash(newUser.password) : undefined,
       ip,
     });
 
+    const passwordAccount = UserAccount.createPasswordAccount({
+      id: this.userAccountRepository.newId(),
+      userId: user.id,
+      email: user.email,
+      passwordHash: await PasswordManager.hash(newUser.password),
+    });
+
     this.logger.log('Creating user...', { userId: user.id });
-    await this.userRepository.save(user);
+    await this.transactionManager.runInTransaction(async tx => {
+      await this.userRepository.save(user, tx);
+      await this.userAccountRepository.save(passwordAccount, tx);
+    });
 
     await this.eventBus.publish(new UserCreatedEvent({ user }));
 

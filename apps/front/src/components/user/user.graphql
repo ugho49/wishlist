@@ -9,10 +9,9 @@ query UserProfileCurrentUser {
       birthday
       pictureUrl
       createdAt
-      socials {
+      accounts {
         id
-        socialType
-        name
+        provider
         email
         pictureUrl
         createdAt
@@ -129,10 +128,9 @@ mutation UpdateUserEmailSettings($input: UpdateUserEmailSettingsInput!) {
 mutation LinkCurrentUserWithGoogle($input: LinkUserToGoogleInput!) {
   linkCurrentUserWithGoogle(input: $input) {
     __typename
-    ... on UserSocial {
+    ... on UserAccount {
       id
-      socialType
-      name
+      provider
       email
       pictureUrl
       createdAt
@@ -147,8 +145,8 @@ mutation LinkCurrentUserWithGoogle($input: LinkUserToGoogleInput!) {
   }
 }
 
-mutation UnlinkCurrentUserSocial($socialId: UserSocialId!) {
-  unlinkCurrentUserSocial(socialId: $socialId) {
+mutation UnlinkCurrentUserAccount($accountId: UserAccountId!) {
+  unlinkCurrentUserAccount(accountId: $accountId) {
     __typename
     ... on VoidOutput {
       success
@@ -156,8 +154,8 @@ mutation UnlinkCurrentUserSocial($socialId: UserSocialId!) {
   }
 }
 
-mutation UpdateUserPictureFromSocial($input: UpdateUserPictureFromSocialInput!) {
-  updateUserPictureFromSocial(input: $input) {
+mutation UpdateUserPictureFromAccount($input: UpdateUserPictureFromAccountInput!) {
+  updateUserPictureFromAccount(input: $input) {
     __typename
     ... on VoidOutput {
       success
