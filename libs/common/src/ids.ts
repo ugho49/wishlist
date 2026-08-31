@@ -7,7 +7,7 @@ export type SecretSantaId = Brand<string, 'SecretSantaId'>;
 export type UserPasswordVerificationId = Brand<string, 'UserPasswordVerificationId'>;
 export type UserEmailChangeVerificationId = Brand<string, 'UserEmailChangeVerificationId'>;
 export type UserId = Brand<string, 'UserId'>;
-export type UserSocialId = Brand<string, 'UserSocialId'>;
+export type UserAccountId = Brand<string, 'UserAccountId'>;
 export type UserEmailSettingId = Brand<string, 'UserEmailSettingId'>;
 export type ItemId = Brand<string, 'ItemId'>;
 export type WishlistId = Brand<string, 'WishlistId'>;
@@ -20,7 +20,7 @@ export type Ids = {
   UserPasswordVerificationId: UserPasswordVerificationId;
   UserEmailChangeVerificationId: UserEmailChangeVerificationId;
   UserId: UserId;
-  UserSocialId: UserSocialId;
+  UserAccountId: UserAccountId;
   UserEmailSettingId: UserEmailSettingId;
   ItemId: ItemId;
   WishlistId: WishlistId;
@@ -33,7 +33,7 @@ export const gqlScalarIds: Record<keyof Ids, string> = {
   WishlistId: getBrandedType('WishlistId'),
   AttendeeId: getBrandedType('AttendeeId'),
   UserId: getBrandedType('UserId'),
-  UserSocialId: getBrandedType('UserSocialId'),
+  UserAccountId: getBrandedType('UserAccountId'),
   UserEmailSettingId: getBrandedType('UserEmailSettingId'),
   UserEmailChangeVerificationId: getBrandedType('UserEmailChangeVerificationId'),
   UserPasswordVerificationId: getBrandedType('UserPasswordVerificationId'),

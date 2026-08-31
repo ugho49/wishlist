@@ -1,5 +1,5 @@
 import type { UserRepository } from '../../domain/repository/user.repository';
-import type { UserSocialRepository } from '../../domain/repository/user-social.repository';
+import type { UserAccountRepository } from '../../domain/repository/user-account.repository';
 
 import { BadRequestException, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { type UserId } from '@wishlist/common';
@@ -7,8 +7,8 @@ import { type UserId } from '@wishlist/common';
 import { GoogleAuthService } from '../../../auth/infrastructure/social/google-auth.service';
 import { TransactionManager } from '../../../core/database/transaction-manager';
 import { REPOSITORIES } from '../../../repositories/repositories.constants';
-import { UserSocial } from '../../domain/model/user-social.model';
-import { UserSocialType } from '../../domain/user-social-type.enum';
+import { UserAccount } from '../../domain/model/user-account.model';
+import { UserAccountProvider } from '../../domain/user-account-provider.enum';
 
 export type LinkUserToGoogleInput = {
   code: string;
@@ -16,7 +16,7 @@ export type LinkUserToGoogleInput = {
 };
 
 export type LinkUserToGoogleOutput = {
-  userSocial: UserSocial;
+  userAccount: UserAccount;
 };
 
 @Injectable()
@@ -26,8 +26,8 @@ export class LinkUserToGoogleUseCase {
   constructor(
     @Inject(REPOSITORIES.USER)
     private readonly userRepository: UserRepository,
-    @Inject(REPOSITORIES.USER_SOCIAL)
-    private readonly userSocialRepository: UserSocialRepository,
+    @Inject(REPOSITORIES.USER_ACCOUNT)
+    private readonly userAccountRepository: UserAccountRepository,
     private readonly googleAuthService: GoogleAuthService,
     private readonly transactionManager: TransactionManager,
   ) {}
@@ -37,18 +37,21 @@ export class LinkUserToGoogleUseCase {
     const { code, userId } = input;
 
     let user = await this.userRepository.findByIdOrFail(userId);
-    const socials = await this.userSocialRepository.findByUserId(userId);
-    const googleSocial = socials.find(s => s.socialType === UserSocialType.GOOGLE);
+    const accounts = await this.userAccountRepository.findByUserId(userId);
+    const googleAccount = accounts.find(item => item.provider === UserAccountProvider.GOOGLE);
 
-    if (googleSocial) {
+    if (googleAccount) {
       throw new BadRequestException('User already linked to a Google Account');
     }
 
     const payload = await this.googleAuthService.getGoogleAccountFromCode(code);
 
-    const existingSocial = await this.userSocialRepository.findBySocialId(payload.sub, UserSocialType.GOOGLE);
+    const existingAccount = await this.userAccountRepository.findByProviderAccountId(
+      payload.sub,
+      UserAccountProvider.GOOGLE,
+    );
 
-    if (existingSocial) {
+    if (existingAccount) {
       throw new BadRequestException('This Google Account is already linked to another user');
     }
 
@@ -60,13 +63,12 @@ export class LinkUserToGoogleUseCase {
       throw new BadRequestException('Email is not given by Google');
     }
 
-    const social = UserSocial.create({
-      id: this.userSocialRepository.newId(),
+    const account = UserAccount.createSocial({
+      id: this.userAccountRepository.newId(),
       user,
       email: payload.email,
-      name: payload.name,
-      socialId: payload.sub,
-      socialType: UserSocialType.GOOGLE,
+      provider: UserAccountProvider.GOOGLE,
+      providerAccountId: payload.sub,
       pictureUrl: payload.picture,
     });
 
@@ -75,12 +77,12 @@ export class LinkUserToGoogleUseCase {
       user = user.updatePicture(payload.picture);
     }
 
-    this.logger.log('Saving user and social...', { userId });
+    this.logger.log('Saving user and account...', { userId });
     await this.transactionManager.runInTransaction(async tx => {
       await this.userRepository.save(user, tx);
-      await this.userSocialRepository.save(social, tx);
+      await this.userAccountRepository.save(account, tx);
     });
 
-    return { userSocial: social };
+    return { userAccount: account };
   }
 }

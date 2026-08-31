@@ -1,16 +1,22 @@
 import type { UserRepository } from '../../domain/repository/user.repository';
+import type { UserAccountRepository } from '../../domain/repository/user-account.repository';
 
 import { BadRequestException, Logger, UnauthorizedException } from '@nestjs/common';
 
 import { toCurrentUser, UserBuilder } from '../../../../test-utils/builders/user.builder';
 import { createMock } from '../../../../test-utils/mocks';
 import { PasswordManager } from '../../../auth/infrastructure/util/password-manager';
+import { TransactionManager } from '../../../core/database/transaction-manager';
 import { User } from '../../domain/model/user.model';
+import { UserAccount } from '../../domain/model/user-account.model';
+import { UserAccountProvider } from '../../domain/user-account-provider.enum';
 import { UpdateUserFullUseCase } from './update-user-full.use-case';
 import { beforeAll, beforeEach, describe, expect, it, mock } from 'bun:test';
 
 describe('UpdateUserFullUseCase', () => {
   const userRepository = createMock<UserRepository>();
+  const userAccountRepository = createMock<UserAccountRepository>();
+  const transactionManager = createMock<TransactionManager>();
 
   let useCase: UpdateUserFullUseCase;
   let admin: User;
@@ -27,8 +33,11 @@ describe('UpdateUserFullUseCase', () => {
     target = new UserBuilder().withEmail('target@test.fr').withName({ firstName: 'Jean', lastName: 'Dupont' }).build();
     userRepository.findByIdOrFail.mockResolvedValue(target);
     userRepository.findByEmail.mockResolvedValue(undefined);
+    userAccountRepository.findPasswordByUserId.mockResolvedValue(undefined);
+    userAccountRepository.newId.mockReturnValue(crypto.randomUUID() as never);
+    transactionManager.runInTransaction.mockImplementation(async callback => callback(undefined as never));
 
-    useCase = new UpdateUserFullUseCase(userRepository);
+    useCase = new UpdateUserFullUseCase(userRepository, userAccountRepository, transactionManager);
   });
 
   it('should reject when the current user tries to update themselves', async () => {
@@ -108,8 +117,11 @@ describe('UpdateUserFullUseCase', () => {
     expect(savedUser?.lastName).toBe('Martin');
     expect(savedUser?.birthday).toEqual(birthday);
     expect(savedUser?.isEnabled).toBe(false);
-    expect(savedUser?.passwordEnc).toBeDefined();
-    expect(await PasswordManager.verify({ hash: savedUser?.passwordEnc, plainPassword: 'Secret123!' })).toBe(true);
+    expect(userAccountRepository.save).toHaveBeenCalledTimes(1);
+    const savedAccount = userAccountRepository.save.mock.calls[0]?.[0];
+    expect(savedAccount).toBeInstanceOf(UserAccount);
+    expect(savedAccount?.provider).toBe(UserAccountProvider.PASSWORD);
+    expect(await PasswordManager.verify({ hash: savedAccount?.passwordHash, plainPassword: 'Secret123!' })).toBe(true);
   });
 
   it('should update an admin when requested by a super-admin', async () => {
@@ -126,5 +138,6 @@ describe('UpdateUserFullUseCase', () => {
     expect(userRepository.save).toHaveBeenCalledTimes(1);
     const savedUser = userRepository.save.mock.calls[0]?.[0];
     expect(savedUser?.firstName).toBe('Paul');
+    expect(userAccountRepository.save).not.toHaveBeenCalled();
   });
 });

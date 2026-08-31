@@ -5,10 +5,10 @@ import { PostgresEventAttendeeRepository } from './impl/postgres-event-attendee.
 import { PostgresSecretSantaRepository } from './impl/postgres-secret-santa.repository';
 import { PostgresSecretSantaUserRepository } from './impl/postgres-secret-santa-user.repository';
 import { PostgresUserRepository } from './impl/postgres-user.repository';
+import { PostgresUserAccountRepository } from './impl/postgres-user-account.repository';
 import { PostgresUserEmailChangeVerificationRepository } from './impl/postgres-user-email-change-verification';
 import { PostgresUserEmailSettingRepository } from './impl/postgres-user-email-setting.repository';
 import { PostgresUserPasswordVerificationRepository } from './impl/postgres-user-password-verification';
-import { PostgresUserSocialRepository } from './impl/postgres-user-social.repository';
 import { PostgresWishlistRepository } from './impl/postgres-wishlist.repository';
 import { PostgresWishlistItemRepository } from './impl/postgres-wishlist-item.repository';
 import { REPOSITORIES } from './repositories.constants';
@@ -22,7 +22,7 @@ const repositoryProviders: Record<keyof typeof REPOSITORIES, Type<unknown>> = {
   USER_EMAIL_CHANGE_VERIFICATION: PostgresUserEmailChangeVerificationRepository,
   USER_EMAIL_SETTING: PostgresUserEmailSettingRepository,
   USER_PASSWORD_VERIFICATION: PostgresUserPasswordVerificationRepository,
-  USER_SOCIAL: PostgresUserSocialRepository,
+  USER_ACCOUNT: PostgresUserAccountRepository,
   WISHLIST: PostgresWishlistRepository,
   WISHLIST_ITEM: PostgresWishlistItemRepository,
 };

@@ -5,7 +5,7 @@ import { type UserId } from '@wishlist/common';
 
 import { GqlCurrentUser } from '../../../auth/infrastructure/decorators/user.decorator';
 import { type GraphQLContext } from '../../../core/graphql/graphql.context';
-import { type User, type UserEmailSettings, type UserSocial } from '../../../gql/generated-types';
+import { type User, type UserAccount, type UserEmailSettings } from '../../../gql/generated-types';
 import { GetUserEmailSettingUseCase } from '../../application/query/get-user-email-setting.use-case';
 import { userMapper } from '../user.mapper';
 
@@ -14,13 +14,13 @@ export class UserFieldResolver {
   constructor(private readonly getUserEmailSettingUseCase: GetUserEmailSettingUseCase) {}
 
   @ResolveField()
-  socials(
+  accounts(
     @Parent() user: User,
     @Context() ctx: GraphQLContext,
     @GqlCurrentUser('id') currentUserId: UserId,
-  ): Promise<UserSocial[] | null> {
+  ): Promise<UserAccount[] | null> {
     if (user.id !== currentUserId) return Promise.resolve(null);
-    return ctx.loaders.userSocialsByUser.load(user.id);
+    return ctx.loaders.userAccountsByUser.load(user.id);
   }
 
   @ResolveField()

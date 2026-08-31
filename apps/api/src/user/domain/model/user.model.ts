@@ -8,7 +8,6 @@ export type UserProps = {
   firstName: string;
   lastName: string;
   birthday?: Date;
-  passwordEnc?: string;
   isEnabled: boolean;
   authorities: Authorities[];
   lastIp?: string;
@@ -24,7 +23,6 @@ export class User {
   public readonly firstName: string;
   public readonly lastName: string;
   public readonly birthday?: Date;
-  public readonly passwordEnc?: string;
   public readonly isEnabled: boolean;
   public readonly authorities: Authorities[];
   public readonly lastIp?: string;
@@ -39,7 +37,6 @@ export class User {
     this.firstName = props.firstName;
     this.lastName = props.lastName;
     this.birthday = props.birthday;
-    this.passwordEnc = props.passwordEnc;
     this.isEnabled = props.isEnabled;
     this.authorities = props.authorities;
     this.lastIp = props.lastIp;
@@ -55,7 +52,6 @@ export class User {
     firstName: string;
     lastName: string;
     birthday?: Date;
-    passwordEnc?: string;
     ip: string;
     pictureUrl?: string;
   }): User {
@@ -66,7 +62,6 @@ export class User {
       firstName: params.firstName,
       lastName: params.lastName,
       birthday: params.birthday,
-      passwordEnc: params.passwordEnc,
       isEnabled: true,
       authorities: [Authorities.ROLE_USER],
       lastIp: params.ip,
@@ -113,14 +108,6 @@ export class User {
     return new User({
       ...this,
       email,
-      updatedAt: new Date(),
-    });
-  }
-
-  updatePassword(newPasswordEnc: string): User {
-    return new User({
-      ...this,
-      passwordEnc: newPasswordEnc,
       updatedAt: new Date(),
     });
   }

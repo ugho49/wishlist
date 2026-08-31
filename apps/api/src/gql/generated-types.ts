@@ -20,8 +20,8 @@ export type Scalars = {
   ItemId: { input: Ids["ItemId"]; output: Ids["ItemId"]; }
   SecretSantaId: { input: Ids["SecretSantaId"]; output: Ids["SecretSantaId"]; }
   SecretSantaUserId: { input: Ids["SecretSantaUserId"]; output: Ids["SecretSantaUserId"]; }
+  UserAccountId: { input: Ids["UserAccountId"]; output: Ids["UserAccountId"]; }
   UserId: { input: Ids["UserId"]; output: Ids["UserId"]; }
-  UserSocialId: { input: Ids["UserSocialId"]; output: Ids["UserSocialId"]; }
   WishlistId: { input: Ids["WishlistId"]; output: Ids["WishlistId"]; }
 };
 
@@ -318,7 +318,7 @@ export type LinkUserToGoogleInput = {
   code: Scalars['String']['input'];
 };
 
-export type LinkUserToGoogleResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | UserSocial | ValidationRejection;
+export type LinkUserToGoogleResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | UserAccount | ValidationRejection;
 
 export type LinkWishlistToEventResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
@@ -386,7 +386,7 @@ export type Mutation = {
   sendResetPasswordEmail: SendResetPasswordEmailResult;
   startSecretSanta: StartSecretSantaResult;
   toggleItem: ToggleItemResult;
-  unlinkCurrentUserSocial: UnlinkCurrentUserSocialResult;
+  unlinkCurrentUserAccount: UnlinkCurrentUserAccountResult;
   unlinkWishlistFromEvent: UnlinkWishlistFromEventResult;
   updateEvent: UpdateEventResult;
   updateEventAttendeeRole: UpdateEventAttendeeRoleResult;
@@ -394,7 +394,7 @@ export type Mutation = {
   updateSecretSanta: UpdateSecretSantaResult;
   updateSecretSantaUser: UpdateSecretSantaUserResult;
   updateUserEmailSettings: UpdateUserEmailSettingsResult;
-  updateUserPictureFromSocial: UpdateUserPictureFromSocialResult;
+  updateUserPictureFromAccount: UpdateUserPictureFromAccountResult;
   updateUserProfile: UpdateUserProfileResult;
   updateWishlist: UpdateWishlistResult;
 };
@@ -584,8 +584,8 @@ export type MutationToggleItemArgs = {
 };
 
 
-export type MutationUnlinkCurrentUserSocialArgs = {
-  socialId: Scalars['UserSocialId']['input'];
+export type MutationUnlinkCurrentUserAccountArgs = {
+  accountId: Scalars['UserAccountId']['input'];
 };
 
 
@@ -632,8 +632,8 @@ export type MutationUpdateUserEmailSettingsArgs = {
 };
 
 
-export type MutationUpdateUserPictureFromSocialArgs = {
-  input: UpdateUserPictureFromSocialInput;
+export type MutationUpdateUserPictureFromAccountArgs = {
+  input: UpdateUserPictureFromAccountInput;
 };
 
 
@@ -856,7 +856,7 @@ export type UnauthorizedRejection = {
   message: Scalars['String']['output'];
 };
 
-export type UnlinkCurrentUserSocialResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+export type UnlinkCurrentUserAccountResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
 export type UnlinkWishlistFromEventResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
@@ -900,11 +900,11 @@ export type UpdateUserEmailSettingsInput = {
 
 export type UpdateUserEmailSettingsResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | UserEmailSettings | ValidationRejection;
 
-export type UpdateUserPictureFromSocialInput = {
-  socialId: Scalars['UserSocialId']['input'];
+export type UpdateUserPictureFromAccountInput = {
+  accountId: Scalars['UserAccountId']['input'];
 };
 
-export type UpdateUserPictureFromSocialResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+export type UpdateUserPictureFromAccountResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
 export type UpdateUserProfileInput = {
   birthday?: InputMaybe<Scalars['String']['input']>;
@@ -934,6 +934,22 @@ export type User = {
   updatedAt: Scalars['String']['output'];
 };
 
+export type UserAccount = {
+  __typename: 'UserAccount';
+  createdAt: Scalars['String']['output'];
+  email: Scalars['String']['output'];
+  id: Scalars['UserAccountId']['output'];
+  pictureUrl?: Maybe<Scalars['String']['output']>;
+  provider: UserAccountProvider;
+  updatedAt: Scalars['String']['output'];
+};
+
+export enum UserAccountProvider {
+  Facebook = 'FACEBOOK',
+  Google = 'GOOGLE',
+  Password = 'PASSWORD'
+}
+
 export enum UserAuthorities {
   RoleAdmin = 'ROLE_ADMIN',
   RoleSuperadmin = 'ROLE_SUPERADMIN',
@@ -960,22 +976,6 @@ export type UserFull = {
   pictureUrl?: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['String']['output'];
 };
-
-export type UserSocial = {
-  __typename: 'UserSocial';
-  createdAt: Scalars['String']['output'];
-  email: Scalars['String']['output'];
-  id: Scalars['UserSocialId']['output'];
-  name?: Maybe<Scalars['String']['output']>;
-  pictureUrl?: Maybe<Scalars['String']['output']>;
-  socialType: UserSocialType;
-  updatedAt: Scalars['String']['output'];
-};
-
-export enum UserSocialType {
-  Facebook = 'FACEBOOK',
-  Google = 'GOOGLE'
-}
 
 export type ValidationRejection = {
   __typename: 'ValidationRejection';

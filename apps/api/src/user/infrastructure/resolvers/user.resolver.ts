@@ -1,7 +1,7 @@
 import type { ICurrentUser } from '@wishlist/common';
 
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { type UserId, type UserSocialId } from '@wishlist/common';
+import { type UserAccountId, type UserId } from '@wishlist/common';
 import { RealIP } from 'nestjs-real-ip';
 
 import { Public } from '../../../auth/infrastructure/decorators/public.metadata';
@@ -28,11 +28,11 @@ import {
   type SearchUsersResult,
   type SendResetPasswordEmailInput,
   type SendResetPasswordEmailResult,
-  type UnlinkCurrentUserSocialResult,
+  type UnlinkCurrentUserAccountResult,
   type UpdateUserEmailSettingsInput,
   type UpdateUserEmailSettingsResult,
-  type UpdateUserPictureFromSocialInput,
-  type UpdateUserPictureFromSocialResult,
+  type UpdateUserPictureFromAccountInput,
+  type UpdateUserPictureFromAccountResult,
   type UpdateUserProfileInput,
   type UpdateUserProfileResult,
   type User,
@@ -44,11 +44,11 @@ import { CreateUserUseCase } from '../../application/command/create-user.use-cas
 import { LinkUserToGoogleUseCase } from '../../application/command/link-user-to-google.use-case';
 import { RemoveUserPictureUseCase } from '../../application/command/remove-user-picture.use-case';
 import { ResetUserPasswordUseCase } from '../../application/command/reset-user-password.use-case';
-import { UnlinkUserSocialUseCase } from '../../application/command/unlink-user-social.use-case';
+import { UnlinkUserAccountUseCase } from '../../application/command/unlink-user-account.use-case';
 import { UpdateUserUseCase } from '../../application/command/update-user.use-case';
 import { UpdateUserEmailSettingUseCase } from '../../application/command/update-user-email-setting.use-case';
 import { UpdateUserPasswordUseCase } from '../../application/command/update-user-password.use-case';
-import { UpdateUserPictureFromSocialUseCase } from '../../application/command/update-user-picture-from-social.use-case';
+import { UpdateUserPictureFromAccountUseCase } from '../../application/command/update-user-picture-from-account.use-case';
 import { GetClosestFriendsUseCase } from '../../application/query/get-closest-friends.use-case';
 import { GetPendingEmailChangeUseCase } from '../../application/query/get-pending-email-change.use-case';
 import { GetUsersByCriteriaUseCase } from '../../application/query/get-users-by-criteria.use-case';
@@ -64,7 +64,7 @@ import {
   SearchUsersKeywordSchema,
   SendResetPasswordEmailInputSchema,
   UpdateUserEmailSettingsInputSchema,
-  UpdateUserPictureFromSocialInputSchema,
+  UpdateUserPictureFromAccountInputSchema,
   UpdateUserProfileInputSchema,
 } from '../user.schema';
 
@@ -73,10 +73,10 @@ export class UserResolver {
   constructor(
     private readonly createUserUseCase: CreateUserUseCase,
     private readonly linkUserToGoogleUseCase: LinkUserToGoogleUseCase,
-    private readonly unlinkUserSocialUseCase: UnlinkUserSocialUseCase,
+    private readonly unlinkUserAccountUseCase: UnlinkUserAccountUseCase,
     private readonly updateUserUseCase: UpdateUserUseCase,
     private readonly updateUserPasswordUseCase: UpdateUserPasswordUseCase,
-    private readonly updateUserPictureFromSocialUseCase: UpdateUserPictureFromSocialUseCase,
+    private readonly updateUserPictureFromAccountUseCase: UpdateUserPictureFromAccountUseCase,
     private readonly removeUserPictureUseCase: RemoveUserPictureUseCase,
     private readonly createEmailChangeVerificationUseCase: CreateEmailChangeVerificationUseCase,
     private readonly confirmEmailChangeUseCase: ConfirmEmailChangeUseCase,
@@ -148,20 +148,20 @@ export class UserResolver {
     @Args('input', new ZodPipe(LinkUserToGoogleInputSchema)) input: LinkUserToGoogleInput,
     @GqlCurrentUser('id') currentUserId: UserId,
   ): Promise<LinkUserToGoogleResult> {
-    const { userSocial } = await this.linkUserToGoogleUseCase.execute({
+    const { userAccount } = await this.linkUserToGoogleUseCase.execute({
       code: input.code,
       userId: currentUserId,
     });
 
-    return userMapper.toGqlUserSocial(userSocial);
+    return userMapper.toGqlUserAccount(userAccount);
   }
 
   @Mutation()
-  async unlinkCurrentUserSocial(
-    @Args('socialId', { type: () => String }) id: UserSocialId,
+  async unlinkCurrentUserAccount(
+    @Args('accountId', { type: () => String }) id: UserAccountId,
     @GqlCurrentUser('id') currentUserId: UserId,
-  ): Promise<UnlinkCurrentUserSocialResult> {
-    await this.unlinkUserSocialUseCase.execute({ userId: currentUserId, socialId: id });
+  ): Promise<UnlinkCurrentUserAccountResult> {
+    await this.unlinkUserAccountUseCase.execute({ userId: currentUserId, accountId: id });
     return { __typename: 'VoidOutput', success: true };
   }
 
@@ -201,13 +201,13 @@ export class UserResolver {
   }
 
   @Mutation()
-  async updateUserPictureFromSocial(
-    @Args('input', new ZodPipe(UpdateUserPictureFromSocialInputSchema)) input: UpdateUserPictureFromSocialInput,
+  async updateUserPictureFromAccount(
+    @Args('input', new ZodPipe(UpdateUserPictureFromAccountInputSchema)) input: UpdateUserPictureFromAccountInput,
     @GqlCurrentUser('id') currentUserId: UserId,
-  ): Promise<UpdateUserPictureFromSocialResult> {
-    await this.updateUserPictureFromSocialUseCase.execute({
+  ): Promise<UpdateUserPictureFromAccountResult> {
+    await this.updateUserPictureFromAccountUseCase.execute({
       userId: currentUserId,
-      socialId: input.socialId,
+      accountId: input.accountId,
     });
     return { __typename: 'VoidOutput', success: true };
   }

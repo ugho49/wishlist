@@ -11,7 +11,6 @@ type UserBuilderData = {
   firstName: string;
   lastName: string;
   authorities: Authorities[];
-  passwordEnc?: string;
   isEnabled: boolean;
 };
 
@@ -32,11 +31,6 @@ export class UserBuilder {
   withName(params: { firstName: string; lastName: string }): this {
     this.data.firstName = params.firstName;
     this.data.lastName = params.lastName;
-    return this;
-  }
-
-  withPasswordEnc(passwordEnc: string): this {
-    this.data.passwordEnc = passwordEnc;
     return this;
   }
 
@@ -61,7 +55,6 @@ export class UserBuilder {
       email: this.data.email,
       firstName: this.data.firstName,
       lastName: this.data.lastName,
-      passwordEnc: this.data.passwordEnc,
       ip: '127.0.0.1',
     });
 

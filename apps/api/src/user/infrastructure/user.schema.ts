@@ -7,11 +7,11 @@ import type {
   ResetPasswordInput,
   SendResetPasswordEmailInput,
   UpdateUserEmailSettingsInput,
-  UpdateUserPictureFromSocialInput,
+  UpdateUserPictureFromAccountInput,
   UpdateUserProfileInput,
 } from '../../gql/generated-types';
 
-import { type UserId, type UserSocialId } from '@wishlist/common';
+import { type UserAccountId, type UserId } from '@wishlist/common';
 import z from 'zod';
 
 export const UserIdSchema = z.string().transform(val => val as UserId);
@@ -43,9 +43,9 @@ export const ChangeUserPasswordInputSchema = z.object({
   newPassword: z.string().min(8).max(50),
 }) satisfies z.ZodType<ChangeUserPasswordInput>;
 
-export const UpdateUserPictureFromSocialInputSchema = z.object({
-  socialId: z.string().transform(val => val as UserSocialId),
-}) satisfies z.ZodType<UpdateUserPictureFromSocialInput>;
+export const UpdateUserPictureFromAccountInputSchema = z.object({
+  accountId: z.string().transform(val => val as UserAccountId),
+}) satisfies z.ZodType<UpdateUserPictureFromAccountInput>;
 
 export const RequestEmailChangeInputSchema = z.object({
   newEmail: z.email().max(200).toLowerCase(),

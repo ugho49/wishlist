@@ -61,7 +61,7 @@ export const AuthenticatedContainerOutlet = () => {
           lastName: user.lastName,
           birthday: user.birthday ?? undefined,
           pictureUrl: user.pictureUrl ?? undefined,
-          social: user.socials ?? [],
+          accounts: user.accounts ?? [],
         }),
       );
     }

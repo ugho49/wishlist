@@ -1,10 +1,13 @@
 import type { UserRepository } from '../../domain/repository/user.repository';
+import type { UserAccountRepository } from '../../domain/repository/user-account.repository';
 
 import { BadRequestException, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { type ICurrentUser, type UserId } from '@wishlist/common';
 
 import { PasswordManager } from '../../../auth/infrastructure/util/password-manager';
+import { TransactionManager } from '../../../core/database/transaction-manager';
 import { REPOSITORIES } from '../../../repositories/repositories.constants';
+import { UserAccount } from '../../domain/model/user-account.model';
 
 export type UpdateUserFullInput = {
   userId: UserId;
@@ -26,6 +29,9 @@ export class UpdateUserFullUseCase {
   constructor(
     @Inject(REPOSITORIES.USER)
     private readonly userRepository: UserRepository,
+    @Inject(REPOSITORIES.USER_ACCOUNT)
+    private readonly userAccountRepository: UserAccountRepository,
+    private readonly transactionManager: TransactionManager,
   ) {}
 
   async execute(input: UpdateUserFullInput): Promise<void> {
@@ -44,6 +50,7 @@ export class UpdateUserFullUseCase {
     }
 
     const updatedFields: string[] = [];
+    let passwordAccount: UserAccount | undefined;
 
     if (updateUser.email && user.email !== updateUser.email) {
       const userWithSameEmail = await this.userRepository.findByEmail(updateUser.email);
@@ -57,7 +64,16 @@ export class UpdateUserFullUseCase {
     }
 
     if (updateUser.newPassword) {
-      user = user.updatePassword(await PasswordManager.hash(updateUser.newPassword));
+      const passwordHash = await PasswordManager.hash(updateUser.newPassword);
+      const existingPasswordAccount = await this.userAccountRepository.findPasswordByUserId(userId);
+      passwordAccount = existingPasswordAccount
+        ? existingPasswordAccount.updatePasswordHash(passwordHash)
+        : UserAccount.createPassword({
+            id: this.userAccountRepository.newId(),
+            user,
+            email: user.email,
+            passwordHash,
+          });
       updatedFields.push('password');
     }
 
@@ -82,6 +98,11 @@ export class UpdateUserFullUseCase {
     }
 
     this.logger.log('Updating user...', { userId, updatedFields });
-    await this.userRepository.save(user);
+    await this.transactionManager.runInTransaction(async tx => {
+      await this.userRepository.save(user, tx);
+      if (passwordAccount) {
+        await this.userAccountRepository.save(passwordAccount, tx);
+      }
+    });
   }
 }

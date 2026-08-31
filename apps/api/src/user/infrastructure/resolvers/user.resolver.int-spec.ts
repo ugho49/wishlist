@@ -20,18 +20,18 @@ import { PasswordManager } from '../../../auth/infrastructure/util/password-mana
  * NotFoundRejection / InternalErrorRejection) thanks to the error-transform plugin.
  *
  * COVERED operations:
- *  - currentUser (Query)              -> unauthenticated + happy path + socials field
+ *  - currentUser (Query)              -> unauthenticated + happy path + accounts field
  *  - registerUser (Mutation)          -> happy path + DB verify, duplicate-email conflict, validation (it.each)
  *  - updateUserProfile (Mutation)     -> unauthenticated + happy path + DB verify + validation (it.each)
  *  - changeUserPassword (Mutation)    -> happy path + DB verify, wrong old password, validation (it.each)
  *  - User.emailSettings field resolver -> unauthenticated + happy path (with seeded settings), via currentUser
  *  - updateUserEmailSettings (Mutation)-> happy path + DB verify
- *  - User.socials field resolver      -> returns own socials shape; returns null for another user's record
+ *  - User.accounts field resolver     -> returns own accounts shape; returns null for another user's record
  *
  * INTENTIONALLY SKIPPED (require external integrations / OAuth / mail-token round-trips
  * that are out of scope for this high-value subset):
- *  - linkCurrentUserWithGoogle / unlinkCurrentUserSocial (Google OAuth dependency)
- *  - updateUserPictureFromSocial / removeUserPicture (bucket + social dependency)
+ *  - linkCurrentUserWithGoogle / unlinkCurrentUserAccount (Google OAuth dependency)
+ *  - updateUserPictureFromAccount / removeUserPicture (bucket + account dependency)
  *  - requestEmailChange / confirmEmailChange (mail token round-trip)
  *  - sendResetPasswordEmail / resetPassword (mail token round-trip)
  *  - pendingEmailChange (depends on requestEmailChange flow)
@@ -91,31 +91,31 @@ describe('UserResolver (GraphQL)', () => {
       });
     });
 
-    it('should resolve the socials field for the current user as an array', async () => {
-      const queryWithSocials = /* GraphQL */ `
-        query CurrentUserWithSocials {
+    it('should resolve the accounts field for the current user as an array', async () => {
+      const queryWithAccounts = /* GraphQL */ `
+        query CurrentUserWithAccounts {
           currentUser {
             __typename
             ... on User {
               id
-              socials {
+              accounts {
                 id
                 email
-                socialType
+                provider
               }
             }
           }
         }
       `;
 
-      const res = await request.post('/graphql').send({ query: queryWithSocials }).expect(200);
+      const res = await request.post('/graphql').send({ query: queryWithAccounts }).expect(200);
 
       const user = res.body.data.currentUser;
       expect(user.__typename).toBe('User');
       expect(user.id).toBe(currentUserId);
-      // No socials seeded -> own record resolves to an (empty) array, never null.
-      expect(Array.isArray(user.socials)).toBe(true);
-      expect(user.socials).toHaveLength(0);
+      // Password accounts are not exposed; no social accounts seeded -> empty array, never null.
+      expect(Array.isArray(user.accounts)).toBe(true);
+      expect(user.accounts).toHaveLength(0);
     });
   });
 
@@ -178,8 +178,17 @@ describe('UserResolver (GraphQL)', () => {
           is_enabled: true,
           created_at: expect.toBeDate(),
           updated_at: expect.toBeDate(),
+        });
+
+      await expectTable(Fixtures.USER_ACCOUNT_TABLE, { created_at: 'ASC' })
+        .hasNumberOfRows(2)
+        .row(1)
+        .toMatchObject({
+          user_id: created.id,
+          provider: 'password',
+          email: 'new.user@test.fr',
         })
-        .expectColumn<string>('password_enc', async value => {
+        .expectColumn<string>('password_hash', async value => {
           const ok = await PasswordManager.verify({ hash: value, plainPassword: input.password });
           expect(ok, 'Password should match').toBe(true);
         });
@@ -382,10 +391,10 @@ describe('UserResolver (GraphQL)', () => {
         success: true,
       });
 
-      await expectTable(Fixtures.USER_TABLE)
+      await expectTable(Fixtures.USER_ACCOUNT_TABLE)
         .hasNumberOfRows(1)
         .row(0)
-        .expectColumn<string>('password_enc', async value => {
+        .expectColumn<string>('password_hash', async value => {
           const matchesNew = await PasswordManager.verify({ hash: value, plainPassword: 'NewPassword456' });
           expect(matchesNew, 'New password should match').toBe(true);
           const matchesOld = await PasswordManager.verify({
@@ -407,9 +416,9 @@ describe('UserResolver (GraphQL)', () => {
         message: "Old password don't match with user password",
       });
 
-      await expectTable(Fixtures.USER_TABLE)
+      await expectTable(Fixtures.USER_ACCOUNT_TABLE)
         .row(0)
-        .expectColumn<string>('password_enc', async value => {
+        .expectColumn<string>('password_hash', async value => {
           const matchesOld = await PasswordManager.verify({
             hash: value,
             plainPassword: Fixtures.DEFAULT_USER_PASSWORD,
@@ -536,21 +545,21 @@ describe('UserResolver (GraphQL)', () => {
     });
   });
 
-  describe('User.socials field resolver', () => {
-    // The field resolver only exposes socials when the resolved User.id equals the
+  describe('User.accounts field resolver', () => {
+    // The field resolver only exposes accounts when the resolved User.id equals the
     // current user's id (returns null otherwise). The only schema entry point that
-    // returns a User and supports the socials field is currentUser, which always
+    // returns a User and supports the accounts field is currentUser, which always
     // resolves the signed-in user -> the id-equality guard always passes here, so we
     // verify the own-record path returns a (non-null) array. The "another user" guard
     // (returning null) is not reachable via the current schema and is left for a unit
     // test of UserFieldResolver.
-    it('should return a non-null socials array for the current user own record', async () => {
+    it('should return a non-null accounts array for the current user own record', async () => {
       const query = /* GraphQL */ `
-        query OwnSocials {
+        query OwnAccounts {
           currentUser {
             ... on User {
               id
-              socials {
+              accounts {
                 id
               }
             }
@@ -562,8 +571,8 @@ describe('UserResolver (GraphQL)', () => {
       const user = res.body.data.currentUser;
 
       expect(user.id).toBe(currentUserId);
-      expect(user.socials).not.toBeNull();
-      expect(Array.isArray(user.socials)).toBe(true);
+      expect(user.accounts).not.toBeNull();
+      expect(Array.isArray(user.accounts)).toBe(true);
     });
   });
 

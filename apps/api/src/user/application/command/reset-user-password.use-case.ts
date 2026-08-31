@@ -1,4 +1,5 @@
 import type { UserRepository } from '../../domain/repository/user.repository';
+import type { UserAccountRepository } from '../../domain/repository/user-account.repository';
 import type { UserPasswordVerificationRepository } from '../../domain/repository/user-password-verification.repository';
 
 import { Inject, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
@@ -6,6 +7,7 @@ import { Inject, Injectable, Logger, NotFoundException, UnauthorizedException } 
 import { PasswordManager } from '../../../auth/infrastructure/util/password-manager';
 import { TransactionManager } from '../../../core/database/transaction-manager';
 import { REPOSITORIES } from '../../../repositories/repositories.constants';
+import { UserAccount } from '../../domain/model/user-account.model';
 
 export type ResetUserPasswordInput = {
   email: string;
@@ -20,6 +22,8 @@ export class ResetUserPasswordUseCase {
   constructor(
     @Inject(REPOSITORIES.USER)
     private readonly userRepository: UserRepository,
+    @Inject(REPOSITORIES.USER_ACCOUNT)
+    private readonly userAccountRepository: UserAccountRepository,
     @Inject(REPOSITORIES.USER_PASSWORD_VERIFICATION)
     private readonly passwordVerificationRepository: UserPasswordVerificationRepository,
     private readonly transactionManager: TransactionManager,
@@ -45,12 +49,20 @@ export class ResetUserPasswordUseCase {
       throw new UnauthorizedException('This reset code is expired');
     }
 
-    const newPasswordEncoded = await PasswordManager.hash(input.newPassword);
-    const updatedUser = user.updatePassword(newPasswordEncoded);
+    const passwordHash = await PasswordManager.hash(input.newPassword);
+    const existingPasswordAccount = await this.userAccountRepository.findPasswordByUserId(user.id);
+    const passwordAccount = existingPasswordAccount
+      ? existingPasswordAccount.updatePasswordHash(passwordHash)
+      : UserAccount.createPassword({
+          id: this.userAccountRepository.newId(),
+          user,
+          email: user.email,
+          passwordHash,
+        });
 
-    this.logger.log('Saving user and deleting password verification...', { userId: user.id });
+    this.logger.log('Saving password account and deleting password verification...', { userId: user.id });
     await this.transactionManager.runInTransaction(async tx => {
-      await this.userRepository.save(updatedUser, tx);
+      await this.userAccountRepository.save(passwordAccount, tx);
       await this.passwordVerificationRepository.delete(passwordVerification.id, tx);
     });
   }

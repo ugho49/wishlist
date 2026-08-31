@@ -1,6 +1,6 @@
 import type { PayloadAction } from '@reduxjs/toolkit';
-import type { UserId, UserSocialId } from '@wishlist/common';
-import type { UserSocial } from '../../../gql';
+import type { UserAccountId, UserId } from '@wishlist/common';
+import type { UserAccount } from '../../../gql';
 
 import { createSlice } from '@reduxjs/toolkit';
 
@@ -11,7 +11,7 @@ export interface UserProfileState {
   email?: string;
   pictureUrl?: string;
   birthday?: string;
-  social?: UserSocial[];
+  accounts?: UserAccount[];
   isUserLoaded: boolean;
 }
 
@@ -24,7 +24,7 @@ const initialState: UserProfileState = {
   email: undefined,
   pictureUrl: undefined,
   birthday: undefined,
-  social: [],
+  accounts: [],
   isUserLoaded: false,
 };
 
@@ -36,18 +36,18 @@ export const userProfileSlice = createSlice({
       ...action.payload,
       isUserLoaded: true,
     }),
-    updateUser: (state, action: PayloadAction<Omit<StateWithoutIsUserLoaded, 'id' | 'social'>>) => {
+    updateUser: (state, action: PayloadAction<Omit<StateWithoutIsUserLoaded, 'id' | 'accounts'>>) => {
       state.firstName = action.payload.firstName;
       state.lastName = action.payload.lastName;
       state.pictureUrl = action.payload.pictureUrl;
       state.email = action.payload.email;
       state.birthday = action.payload.birthday;
     },
-    addUserSocial: (state, action: PayloadAction<UserSocial>) => {
-      state.social = [...(state.social || []), action.payload];
+    addUserAccount: (state, action: PayloadAction<UserAccount>) => {
+      state.accounts = [...(state.accounts || []), action.payload];
     },
-    removeUserSocial: (state, action: PayloadAction<UserSocialId>) => {
-      state.social = (state.social || []).filter(s => s.id !== action.payload);
+    removeUserAccount: (state, action: PayloadAction<UserAccountId>) => {
+      state.accounts = (state.accounts || []).filter(account => account.id !== action.payload);
     },
     updatePicture: (state, action: PayloadAction<UserProfileState['pictureUrl']>) => {
       state.pictureUrl = action.payload;
@@ -56,5 +56,5 @@ export const userProfileSlice = createSlice({
   },
 });
 
-export const { setUser, resetUserState, updatePicture, updateUser, addUserSocial, removeUserSocial } =
+export const { setUser, resetUserState, updatePicture, updateUser, addUserAccount, removeUserAccount } =
   userProfileSlice.actions;

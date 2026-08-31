@@ -173,13 +173,13 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
         <AvatarUpdateButton
           size="120px"
           pictureUrl={pictureUrl}
-          socials={[]}
+          accounts={[]}
           onPictureUpdated={url => {
             setPictureUrl(url || '');
             void invalidateUser();
           }}
           uploadPictureHandler={file => uploadAdminUserPicture(userId, file)}
-          updatePictureFromSocialHandler={() => Promise.resolve()}
+          updatePictureFromAccountHandler={() => Promise.resolve()}
           deletePictureHandler={async () => {
             const res = await removeUserPicture({ userId });
             // AvatarUpdateButton owns the error UI for this handler: throwing keeps

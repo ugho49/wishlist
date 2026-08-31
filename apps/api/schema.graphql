@@ -295,7 +295,7 @@ input LinkUserToGoogleInput {
   code: String!
 }
 
-union LinkUserToGoogleResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | UserSocial | ValidationRejection
+union LinkUserToGoogleResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | UserAccount | ValidationRejection
 
 union LinkWishlistToEventResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
@@ -360,7 +360,7 @@ type Mutation {
   sendResetPasswordEmail(input: SendResetPasswordEmailInput!): SendResetPasswordEmailResult!
   startSecretSanta(id: SecretSantaId!): StartSecretSantaResult!
   toggleItem(itemId: ItemId!): ToggleItemResult!
-  unlinkCurrentUserSocial(socialId: UserSocialId!): UnlinkCurrentUserSocialResult!
+  unlinkCurrentUserAccount(accountId: UserAccountId!): UnlinkCurrentUserAccountResult!
   unlinkWishlistFromEvent(eventId: EventId!, id: WishlistId!): UnlinkWishlistFromEventResult!
   updateEvent(id: EventId!, input: UpdateEventInput!): UpdateEventResult!
   updateEventAttendeeRole(attendeeId: AttendeeId!, eventId: EventId!, role: AttendeeRole!): UpdateEventAttendeeRoleResult!
@@ -368,7 +368,7 @@ type Mutation {
   updateSecretSanta(id: SecretSantaId!, input: UpdateSecretSantaInput!): UpdateSecretSantaResult!
   updateSecretSantaUser(id: SecretSantaId!, input: UpdateSecretSantaUserInput!, secretSantaUserId: SecretSantaUserId!): UpdateSecretSantaUserResult!
   updateUserEmailSettings(input: UpdateUserEmailSettingsInput!): UpdateUserEmailSettingsResult!
-  updateUserPictureFromSocial(input: UpdateUserPictureFromSocialInput!): UpdateUserPictureFromSocialResult!
+  updateUserPictureFromAccount(input: UpdateUserPictureFromAccountInput!): UpdateUserPictureFromAccountResult!
   updateUserProfile(input: UpdateUserProfileInput!): UpdateUserProfileResult!
   updateWishlist(id: WishlistId!, input: UpdateWishlistInput!): UpdateWishlistResult!
 }
@@ -508,7 +508,7 @@ type UnauthorizedRejection {
   message: String!
 }
 
-union UnlinkCurrentUserSocialResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+union UnlinkCurrentUserAccountResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
 union UnlinkWishlistFromEventResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
@@ -552,11 +552,11 @@ input UpdateUserEmailSettingsInput {
 
 union UpdateUserEmailSettingsResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | UserEmailSettings | ValidationRejection
 
-input UpdateUserPictureFromSocialInput {
-  socialId: UserSocialId!
+input UpdateUserPictureFromAccountInput {
+  accountId: UserAccountId!
 }
 
-union UpdateUserPictureFromSocialResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+union UpdateUserPictureFromAccountResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
 input UpdateUserProfileInput {
   birthday: String
@@ -574,6 +574,7 @@ input UpdateWishlistInput {
 union UpdateWishlistResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
 type User {
+  accounts: [UserAccount!] @resolved
   birthday: String
   createdAt: String!
   email: String!
@@ -583,8 +584,24 @@ type User {
   isEnabled: Boolean!
   lastName: String!
   pictureUrl: String
-  socials: [UserSocial!] @resolved
   updatedAt: String!
+}
+
+type UserAccount {
+  createdAt: String!
+  email: String!
+  id: UserAccountId!
+  pictureUrl: String
+  provider: UserAccountProvider!
+  updatedAt: String!
+}
+
+scalar UserAccountId
+
+enum UserAccountProvider {
+  FACEBOOK
+  GOOGLE
+  PASSWORD
 }
 
 enum UserAuthorities {
@@ -598,6 +615,7 @@ type UserEmailSettings {
 }
 
 type UserFull {
+  accounts: [UserAccount!]! @resolved
   authorities: [UserAuthorities!]!
   birthday: String
   createdAt: String!
@@ -609,28 +627,10 @@ type UserFull {
   lastIp: String
   lastName: String!
   pictureUrl: String
-  socials: [UserSocial!]! @resolved
   updatedAt: String!
 }
 
 scalar UserId
-
-type UserSocial {
-  createdAt: String!
-  email: String!
-  id: UserSocialId!
-  name: String
-  pictureUrl: String
-  socialType: UserSocialType!
-  updatedAt: String!
-}
-
-scalar UserSocialId
-
-enum UserSocialType {
-  FACEBOOK
-  GOOGLE
-}
 
 type ValidationRejection {
   errors: [FieldError!]!

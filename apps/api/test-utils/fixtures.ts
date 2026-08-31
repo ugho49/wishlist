@@ -15,6 +15,7 @@ function toSqlArray(values: readonly string[]): string {
 
 export class Fixtures {
   static readonly USER_TABLE = '"user"';
+  static readonly USER_ACCOUNT_TABLE = 'user_account';
   static readonly USER_EMAIL_SETTING_TABLE = 'user_email_setting';
   static readonly USER_PASSWORD_VERIFICATION_TABLE = 'user_password_verification';
   static readonly USER_EMAIL_CHANGE_VERIFICATION_TABLE = 'user_email_change_verification';
@@ -68,11 +69,16 @@ export class Fixtures {
   }): Promise<string> {
     const id = uuid();
     const { email, firstname, lastname, password, authorities } = parameters;
-    const passwordEnc = await PasswordManager.hash(password ?? Fixtures.DEFAULT_USER_PASSWORD);
+    const passwordHash = await PasswordManager.hash(password ?? Fixtures.DEFAULT_USER_PASSWORD);
 
     await this.sql.unsafe(
-      `INSERT INTO ${Fixtures.USER_TABLE} (id, email, first_name, last_name, password_enc, authorities) VALUES ($1, $2, $3, $4, $5, $6)`,
-      [id, email, firstname, lastname, passwordEnc, toSqlArray(authorities ?? [Authorities.ROLE_USER])],
+      `INSERT INTO ${Fixtures.USER_TABLE} (id, email, first_name, last_name, authorities) VALUES ($1, $2, $3, $4, $5)`,
+      [id, email, firstname, lastname, toSqlArray(authorities ?? [Authorities.ROLE_USER])],
+    );
+
+    await this.sql.unsafe(
+      `INSERT INTO ${Fixtures.USER_ACCOUNT_TABLE} (id, user_id, provider, email, password_hash) VALUES ($1, $2, $3, $4, $5)`,
+      [uuid(), id, 'password', email, passwordHash],
     );
 
     return id;

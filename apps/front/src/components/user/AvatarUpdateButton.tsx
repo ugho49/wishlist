@@ -1,4 +1,4 @@
-import type { UpdateUserPictureHttpResponse, UserSocialId } from '@wishlist/common';
+import type { UpdateUserPictureHttpResponse, UserAccountId } from '@wishlist/common';
 import type React from 'react';
 
 import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
@@ -22,7 +22,7 @@ import {
 import clsx from 'clsx';
 import { useRef, useState } from 'react';
 
-import { type UserSocial, UserSocialType } from '../../gql';
+import { type UserAccount, UserAccountProvider } from '../../gql';
 import { useToast } from '../../hooks/useToast';
 import { ACCEPT_IMG, sanitizeImgToUrl } from '../../utils/images.utils';
 import { AvatarCropperModal } from '../common/AvatarCropperModal';
@@ -69,19 +69,19 @@ const MenuButton = styled(IconButton)(({ theme }) => ({
 
 export type AvatarUpdateButtonProps = {
   uploadPictureHandler: (file: File) => Promise<UpdateUserPictureHttpResponse>;
-  updatePictureFromSocialHandler: (socialId: UserSocialId) => Promise<void>;
+  updatePictureFromAccountHandler: (accountId: UserAccountId) => Promise<void>;
   deletePictureHandler: () => Promise<void>;
   onPictureUpdated: (pictureUrl: string | undefined) => void;
   pictureUrl?: string;
-  socials: UserSocial[];
+  accounts: UserAccount[];
   size?: string;
 };
 
 export const AvatarUpdateButton = ({
   pictureUrl,
-  socials,
+  accounts,
   uploadPictureHandler,
-  updatePictureFromSocialHandler,
+  updatePictureFromAccountHandler,
   deletePictureHandler,
   onPictureUpdated,
   size = '60px',
@@ -91,7 +91,7 @@ export const AvatarUpdateButton = ({
   const [anchorElMenu, setAnchorElMenu] = useState<null | HTMLElement>(null);
   const { addToast } = useToast();
   const inputFileRef = useRef<HTMLInputElement | null>(null);
-  const googleSocial = socials.find(s => s.socialType === UserSocialType.Google);
+  const googleAccount = accounts.find(account => account.provider === UserAccountProvider.Google);
 
   const openMenu = (event: React.MouseEvent<HTMLElement>) => setAnchorElMenu(event.currentTarget);
   const closeMenu = () => setAnchorElMenu(null);
@@ -142,16 +142,16 @@ export const AvatarUpdateButton = ({
     }
   };
 
-  const updateWithSocialPicture = async (social?: UserSocial) => {
+  const updateWithAccountPicture = async (account?: UserAccount) => {
     closeMenu();
 
-    if (!social) return;
+    if (!account) return;
 
     setLoading(true);
 
     try {
-      await updatePictureFromSocialHandler(social.id);
-      onPictureUpdated(social.pictureUrl!);
+      await updatePictureFromAccountHandler(account.id);
+      onPictureUpdated(account.pictureUrl!);
     } catch {
       addToast({ message: "Une erreur s'est produite", variant: 'error' });
     } finally {
@@ -232,14 +232,14 @@ export const AvatarUpdateButton = ({
             <ListItemText>Supprimer la photo</ListItemText>
           </MenuItem>
         )}
-        {googleSocial && (
-          <MenuItem onClick={() => updateWithSocialPicture(googleSocial)}>
+        {googleAccount && (
+          <MenuItem onClick={() => updateWithAccountPicture(googleAccount)}>
             <ListItemIcon>
               <GoogleIcon fontSize="small" />
             </ListItemIcon>
             <ListItemText>Utiliser ma photo google</ListItemText>
             <ListItemIcon sx={{ marginLeft: '50px', justifyContent: 'flex-end' }}>
-              <Avatar src={googleSocial.pictureUrl ?? undefined} sx={{ width: '20px', height: '20px' }} />
+              <Avatar src={googleAccount.pictureUrl ?? undefined} sx={{ width: '20px', height: '20px' }} />
             </ListItemIcon>
           </MenuItem>
         )}
