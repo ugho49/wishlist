@@ -123,16 +123,18 @@ export const UserTabSessions = () => {
           <SessionsList>
             {sessions.map(session => {
               const parsed = parseUserAgent(session.userAgent);
+              const browserLabel = [parsed.browser, parsed.browserVersion].filter(Boolean).join(' ');
+              const osLabel = [parsed.os, parsed.osVersion].filter(Boolean).join(' ');
               return (
                 <SessionRow key={session.id}>
                   <SessionIcon>{deviceIcon(parsed.deviceType)}</SessionIcon>
                   <SessionDetails>
                     <Stack direction="row" sx={{ alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
-                      <Typography sx={{ fontWeight: 500 }}>{parsed.label}</Typography>
+                      <Typography sx={{ fontWeight: 500 }}>{browserLabel}</Typography>
                       {session.current && <Chip size="small" color="primary" label="Cet appareil" />}
                     </Stack>
                     <SessionMeta>
-                      {parsed.deviceLabel}
+                      {[parsed.deviceLabel, osLabel].filter(Boolean).join(' · ')}
                       {session.ip ? ` · ${session.ip}` : ''}
                     </SessionMeta>
                     <SessionMeta>
