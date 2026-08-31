@@ -69,6 +69,17 @@ export class UserRefreshToken {
     });
   }
 
+  rotate(params: { tokenHash: string; expiresAt: Date; ip?: string; userAgent?: string }): UserRefreshToken {
+    return new UserRefreshToken({
+      ...this,
+      tokenHash: params.tokenHash,
+      ip: params.ip ?? this.ip,
+      userAgent: params.userAgent ?? this.userAgent,
+      lastUsedAt: new Date(),
+      expiresAt: params.expiresAt,
+    });
+  }
+
   revoke(): UserRefreshToken {
     if (this.revokedAt) return this;
     return new UserRefreshToken({

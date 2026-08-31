@@ -4,7 +4,6 @@ import DevicesIcon from '@mui/icons-material/Devices';
 import LockIcon from '@mui/icons-material/Lock';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import PortraitIcon from '@mui/icons-material/Portrait';
-import ShareIcon from '@mui/icons-material/Share';
 import { Box, Stack, Tab, Tabs } from '@mui/material';
 import { styled, useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
@@ -12,11 +11,10 @@ import { useNavigate, useSearch } from '@tanstack/react-router';
 import { useSelector } from 'react-redux';
 
 import { ProfilePictureSection } from './ProfilePictureSection';
+import { UserTabConnections } from './UserTabConnections';
 import { UserTabInformations } from './UserTabInformations';
 import { UserTabNotifications } from './UserTabNotifications';
 import { UserTabPassword } from './UserTabPassword';
-import { UserTabSessions } from './UserTabSessions';
-import { UserTabSocial } from './UserTabSocial';
 
 const ProfileSection = styled(Box)(() => ({
   display: 'flex',
@@ -46,9 +44,8 @@ const Email = styled(Box)(({ theme }) => ({
 
 export enum TabValues {
   informations = 'informations',
+  connections = 'connections',
   notifications = 'notifications',
-  social = 'social',
-  sessions = 'sessions',
   password = 'password',
 }
 
@@ -59,13 +56,8 @@ const tabs = [
     icon: <PortraitIcon />,
   },
   {
-    value: TabValues.social,
-    label: 'Connexion social',
-    icon: <ShareIcon />,
-  },
-  {
-    value: TabValues.sessions,
-    label: 'Sessions',
+    value: TabValues.connections,
+    label: 'Connexions',
     icon: <DevicesIcon />,
   },
   {
@@ -129,9 +121,8 @@ export const UserProfilePage = () => {
       </Box>
       <Stack>
         {tab === TabValues.informations && <UserTabInformations />}
+        {tab === TabValues.connections && <UserTabConnections />}
         {tab === TabValues.notifications && <UserTabNotifications />}
-        {tab === TabValues.social && <UserTabSocial />}
-        {tab === TabValues.sessions && <UserTabSessions />}
         {tab === TabValues.password && <UserTabPassword />}
       </Stack>
     </Box>

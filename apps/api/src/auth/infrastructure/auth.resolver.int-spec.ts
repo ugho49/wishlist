@@ -290,9 +290,20 @@ describe('AuthResolver (GraphQL)', () => {
       expect(res.body.data.refreshSession).toMatchObject({
         __typename: 'LoginOutput',
         accessToken: expect.toBeString(),
-        refreshToken,
+        refreshToken: expect.toBeString(),
       });
+      expect(res.body.data.refreshSession.refreshToken).not.toBe(refreshToken);
       await expectTable(Fixtures.USER_REFRESH_TOKEN_TABLE).hasNumberOfRows(1);
+
+      const reused = await request
+        .post('/graphql')
+        .send({ query: refreshMutation, variables: { input: { refreshToken } } })
+        .expect(200);
+
+      expect(reused.body.data.refreshSession).toMatchObject({
+        __typename: 'UnauthorizedRejection',
+        message: 'Incorrect login',
+      });
     });
 
     it('should reject an expired refresh token', async () => {

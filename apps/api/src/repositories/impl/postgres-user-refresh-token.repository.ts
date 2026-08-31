@@ -72,6 +72,7 @@ export class PostgresUserRefreshTokenRepository implements UserRefreshTokenRepos
       .onConflictDoUpdate({
         target: [schema.userRefreshToken.id],
         set: {
+          tokenHash: session.tokenHash,
           userAgent: session.userAgent,
           ip: session.ip,
           lastUsedAt: session.lastUsedAt,

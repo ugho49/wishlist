@@ -1,3 +1,4 @@
+import type { ConfigType } from '@nestjs/config';
 import type { JwtService } from '@nestjs/jwt';
 import type { UserRepository } from '../../../user/domain/repository/user.repository';
 import type { UserRefreshTokenRepository } from '../../../user/domain/repository/user-refresh-token.repository';
@@ -9,6 +10,7 @@ import { UserRefreshTokenBuilder } from '../../../../test-utils/builders/user-re
 import { createMock } from '../../../../test-utils/mocks';
 import { User } from '../../../user/domain/model/user.model';
 import { UserRefreshToken } from '../../../user/domain/model/user-refresh-token.model';
+import authConfig from '../../infrastructure/auth.config';
 import { RefreshTokenManager } from '../../infrastructure/util/refresh-token';
 import { RefreshSessionUseCase } from './refresh-session.use-case';
 import { beforeAll, beforeEach, describe, expect, it, mock } from 'bun:test';
@@ -17,6 +19,7 @@ describe('RefreshSessionUseCase', () => {
   const userRepository = createMock<UserRepository>();
   const refreshTokenRepository = createMock<UserRefreshTokenRepository>();
   const jwtService = createMock<JwtService>();
+  const config = { refreshToken: { duration: '30d' } } as ConfigType<typeof authConfig>;
 
   let useCase: RefreshSessionUseCase;
   let user: User;
@@ -38,7 +41,7 @@ describe('RefreshSessionUseCase', () => {
     userRepository.findById.mockResolvedValue(user);
     jwtService.sign.mockReturnValue('new-access-token');
 
-    useCase = new RefreshSessionUseCase(userRepository, refreshTokenRepository, jwtService);
+    useCase = new RefreshSessionUseCase(userRepository, refreshTokenRepository, config, jwtService);
   });
 
   it('should reject when the refresh token is unknown', async () => {
@@ -80,10 +83,11 @@ describe('RefreshSessionUseCase', () => {
     expect(refreshTokenRepository.save).not.toHaveBeenCalled();
   });
 
-  it('should issue a new access token and touch the session', async () => {
+  it('should issue new tokens and rotate the refresh token', async () => {
     const result = await useCase.execute({ refreshToken: rawToken, ip: '10.0.0.2', userAgent: 'Firefox' });
 
-    expect(result).toEqual({ accessToken: 'new-access-token', refreshToken: rawToken });
+    expect(result.accessToken).toBe('new-access-token');
+    expect(result.refreshToken).not.toBe(rawToken);
     expect(jwtService.sign).toHaveBeenCalledWith({
       sub: user.id,
       email: user.email,
@@ -92,6 +96,9 @@ describe('RefreshSessionUseCase', () => {
     });
     expect(refreshTokenRepository.save).toHaveBeenCalledTimes(1);
     const saved = refreshTokenRepository.save.mock.calls[0]?.[0];
+    expect(saved?.id).toBe(session.id);
+    expect(saved?.tokenHash).toBe(RefreshTokenManager.hash(result.refreshToken));
+    expect(saved?.tokenHash).not.toBe(session.tokenHash);
     expect(saved?.ip).toBe('10.0.0.2');
     expect(saved?.userAgent).toBe('Firefox');
   });

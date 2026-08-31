@@ -151,11 +151,11 @@ export const UserTabSessions = () => {
             loading={revokingOthers}
             disabled={revokingOne || revokingOthers}
             size="small"
-            variant="outlined"
+            variant="text"
             color="error"
-            startIcon={<LogoutIcon />}
+            startIcon={<LogoutIcon fontSize="small" />}
           >
-            Déconnecter les autres appareils
+            Déconnecter les autres
           </ConfirmButton>
         )}
       </HeaderRow>
@@ -195,8 +195,9 @@ export const UserTabSessions = () => {
                       loading={revokingOne}
                       disabled={revokingOne || revokingOthers}
                       size="small"
-                      variant="outlined"
+                      variant="text"
                       color="error"
+                      startIcon={<LogoutIcon fontSize="small" />}
                     >
                       Déconnecter
                     </ConfirmButton>

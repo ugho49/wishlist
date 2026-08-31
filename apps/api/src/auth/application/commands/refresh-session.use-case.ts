@@ -1,3 +1,4 @@
+import type { ConfigType } from '@nestjs/config';
 import type { LoginOutput } from '../login.types';
 
 import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
@@ -7,6 +8,7 @@ import { type AccessTokenJwtPayload } from '@wishlist/common';
 import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { type UserRepository } from '../../../user/domain/repository/user.repository';
 import { type UserRefreshTokenRepository } from '../../../user/domain/repository/user-refresh-token.repository';
+import authConfig from '../../infrastructure/auth.config';
 import { RefreshTokenManager } from '../../infrastructure/util/refresh-token';
 
 export type RefreshSessionInput = {
@@ -24,6 +26,8 @@ export class RefreshSessionUseCase {
     private readonly userRepository: UserRepository,
     @Inject(REPOSITORIES.USER_REFRESH_TOKEN)
     private readonly refreshTokenRepository: UserRefreshTokenRepository,
+    @Inject(authConfig.KEY)
+    private readonly config: ConfigType<typeof authConfig>,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -42,8 +46,14 @@ export class RefreshSessionUseCase {
       throw new UnauthorizedException('Incorrect login');
     }
 
-    const updatedSession = session.touch({ ip: input.ip, userAgent: input.userAgent });
-    await this.refreshTokenRepository.save(updatedSession);
+    const rawRefreshToken = RefreshTokenManager.generateRaw();
+    const rotatedSession = session.rotate({
+      tokenHash: RefreshTokenManager.hash(rawRefreshToken),
+      expiresAt: RefreshTokenManager.durationToDate(this.config.refreshToken.duration),
+      ip: input.ip,
+      userAgent: input.userAgent,
+    });
+    await this.refreshTokenRepository.save(rotatedSession);
 
     const payload: AccessTokenJwtPayload = {
       sub: user.id,
@@ -56,7 +66,7 @@ export class RefreshSessionUseCase {
 
     return {
       accessToken: this.jwtService.sign(payload),
-      refreshToken: input.refreshToken,
+      refreshToken: rawRefreshToken,
     };
   }
 }

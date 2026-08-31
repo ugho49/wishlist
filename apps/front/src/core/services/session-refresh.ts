@@ -43,6 +43,13 @@ async function doRefresh(): Promise<string | undefined> {
   const payload = json.data?.refreshSession;
 
   if (payload?.__typename !== 'LoginOutput' || !payload.accessToken || !payload.refreshToken) {
+    const latestRefresh = authService.refreshTokenService.getTokenFromLocalStorage();
+    if (latestRefresh && latestRefresh !== refreshToken) {
+      const access = authService.accessTokenService.getTokenFromLocalStorage();
+      if (access && !authService.accessTokenService.isExpired(access.rawToken)) {
+        return access.rawToken;
+      }
+    }
     return undefined;
   }
 
