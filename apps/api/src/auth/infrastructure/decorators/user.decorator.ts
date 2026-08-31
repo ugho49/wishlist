@@ -1,5 +1,6 @@
 import type { ExecutionContext } from '@nestjs/common';
 import type { ICurrentUser } from '@wishlist/common';
+import type { GraphQLContext } from '../../../core/graphql/graphql.context';
 
 import { createParamDecorator } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
@@ -32,6 +33,7 @@ export const CurrentUser = createParamDecorator((data: keyof ICurrentUser, ctx: 
  */
 export const GqlCurrentUser = createParamDecorator((data: keyof ICurrentUser, context: ExecutionContext) => {
   const ctx = GqlExecutionContext.create(context);
-  const user = ctx.getContext().req.user as ICurrentUser;
+  const gqlContext = ctx.getContext() as GraphQLContext;
+  const user = gqlContext.user as ICurrentUser;
   return data ? user?.[data] : user;
 });

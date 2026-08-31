@@ -47,7 +47,7 @@ export abstract class CommonLoginUseCase {
     return this.jwtService.sign(payload);
   }
 
-  protected async issueTokens(params: { user: User; ip: string; userAgent?: string }): Promise<LoginOutput> {
+  protected async issueTokens(params: { user: User; ip?: string; userAgent?: string }): Promise<LoginOutput> {
     const { user, ip, userAgent } = params;
     const rawRefreshToken = RefreshTokenManager.generateRaw();
     const session = UserRefreshToken.create({

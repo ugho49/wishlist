@@ -1,6 +1,6 @@
 import { NotFoundException } from '@nestjs/common';
 import { Args, Context, Query, Resolver } from '@nestjs/graphql';
-import { createPagedResponse, type EventId, type UserId } from '@wishlist/common';
+import { createPagedResponse, type EventId, type ICurrentUser, type UserId } from '@wishlist/common';
 
 import { GqlCurrentUser } from '../../../auth/infrastructure/decorators/user.decorator';
 import { DEFAULT_RESULT_NUMBER } from '../../../core/common/pagination';
@@ -22,9 +22,10 @@ export class EventResolver {
   @Query()
   async event(
     @Args('id', { type: () => String }) id: EventId,
+    @GqlCurrentUser() currentUser: ICurrentUser,
     @Context() ctx: GraphQLContext,
   ): Promise<GetEventByIdResult> {
-    const event = await ctx.loaders.event.load(id);
+    const event = await ctx.loaders.getEventDataLoader(currentUser).load(id);
     if (!event) {
       throw new NotFoundException(`Event with id ${id} not found`);
     }

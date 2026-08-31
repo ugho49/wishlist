@@ -1,3 +1,5 @@
+import type { GraphQLContext } from '../../../core/graphql/graphql.context';
+
 import { type ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { GqlExecutionContext } from '@nestjs/graphql';
@@ -18,7 +20,8 @@ export class AuthGuard extends PassportAuthGuard('jwt') {
 
     if (contextType === 'graphql') {
       const ctx = GqlExecutionContext.create(context);
-      return ctx.getContext().req;
+      const gqlContext = ctx.getContext() as GraphQLContext;
+      return gqlContext.req;
     }
 
     return context.switchToHttp().getRequest();
@@ -45,10 +48,20 @@ export class AuthGuard extends PassportAuthGuard('jwt') {
     }
 
     const contextType = context.getType<'http' | 'graphql'>();
+    let observability: Observability;
 
     // Only set observability for HTTP requests (not GraphQL)
     if (contextType === 'http') {
-      const observability = new Observability(context.switchToHttp().getResponse());
+      observability = new Observability(context.switchToHttp().getResponse());
+      observability.setContext({ currentUser: user });
+    }
+
+    if (contextType === 'graphql') {
+      const ctx = GqlExecutionContext.create(context);
+      const gqlContext = ctx.getContext() as GraphQLContext;
+      gqlContext.user = user;
+
+      observability = new Observability(gqlContext.res);
       observability.setContext({ currentUser: user });
     }
 

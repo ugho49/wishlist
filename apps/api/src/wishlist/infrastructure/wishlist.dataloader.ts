@@ -10,13 +10,8 @@ import { wishlistMapper } from './wishlist.mapper';
 export class WishlistDataLoaderFactory {
   constructor(private readonly getWishlistsByIdsUseCase: GetWishlistsByIdsUseCase) {}
 
-  createLoader(getCurrentUser: () => ICurrentUser | undefined) {
+  createLoader(currentUser: ICurrentUser) {
     return new DataLoader<WishlistId, Wishlist | null>(async (wishlistIds: readonly WishlistId[]) => {
-      const currentUser = getCurrentUser();
-
-      // If no user, return null for all wishlists (DataLoader requires same length array)
-      if (!currentUser) return wishlistIds.map(() => null);
-
       const wishlists = await this.getWishlistsByIdsUseCase.execute({
         currentUser,
         wishlistIds: [...wishlistIds],

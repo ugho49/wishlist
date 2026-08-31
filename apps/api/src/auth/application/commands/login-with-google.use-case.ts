@@ -21,7 +21,7 @@ import { CommonLoginUseCase } from './common-login.use-case';
 
 export type LoginWithGoogleInput = {
   code: string;
-  ip: string;
+  ip?: string;
   userAgent?: string;
   createUserIfNotExists: boolean;
 };
@@ -88,7 +88,7 @@ export class LoginWithGoogleUseCase extends CommonLoginUseCase {
   private async loginWithGoogleAndUpdate(params: {
     userAccount: UserAccount;
     payload: TokenPayload;
-    ip: string;
+    ip?: string;
     userAgent?: string;
   }): Promise<LoginOutput> {
     this.logger.log('Login with Google and update...');
@@ -118,7 +118,7 @@ export class LoginWithGoogleUseCase extends CommonLoginUseCase {
 
   private async createUserWithGoogleAndLogin(params: {
     payload: TokenPayload;
-    ip: string;
+    ip?: string;
     userAgent?: string;
   }): Promise<LoginOutput> {
     const { payload, ip, userAgent } = params;
@@ -163,7 +163,7 @@ export class LoginWithGoogleUseCase extends CommonLoginUseCase {
   private async linkUserToGoogleAndLogin(params: {
     user: User;
     payload: TokenPayload;
-    ip: string;
+    ip?: string;
     userAgent?: string;
   }): Promise<LoginOutput> {
     const { user, payload, ip, userAgent } = params;

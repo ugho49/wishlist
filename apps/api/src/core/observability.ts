@@ -1,7 +1,7 @@
 import type { Response } from 'express';
 
 /**
- * Will allow to add context in logs and spans (like `companyId`, `absoluteMonth`, etc.)
+ * Will allow to add context in logs and spans
  */
 export class Observability {
   /**
