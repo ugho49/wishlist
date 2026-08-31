@@ -45,10 +45,11 @@ export class EventAdminResolver {
   @Query()
   async adminEvent(
     @Args('id', new ZodPipe(EventIdSchema)) id: EventId,
+    @GqlCurrentUser() currentUser: ICurrentUser,
     @Context() ctx: GraphQLContext,
   ): Promise<AdminGetEventByIdResult> {
     // canView returns true for admins, so the dataloader resolves any event.
-    const event = await ctx.loaders.event.load(id);
+    const event = await ctx.loaders.getEventDataLoader(currentUser).load(id);
     if (!event) {
       throw new NotFoundException(`Event with id ${id} not found`);
     }

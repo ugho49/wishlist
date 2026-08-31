@@ -1,5 +1,4 @@
 import { Args, Context, Mutation, Resolver } from '@nestjs/graphql';
-import { RealIP } from 'nestjs-real-ip';
 
 import { type GraphQLContext } from '../../core/graphql/graphql.context';
 import { ZodPipe } from '../../core/graphql/zod-pipe';
@@ -24,7 +23,6 @@ import {
   RefreshSessionInputSchema,
 } from './auth.schema';
 import { Public } from './decorators/public.metadata';
-import { getRequestUserAgent } from './util/request.utils';
 
 @Public()
 @Resolver()
@@ -39,14 +37,13 @@ export class AuthResolver {
   @Mutation()
   async login(
     @Args('input', new ZodPipe(LoginInputSchema)) input: LoginInput,
-    @RealIP() ip: string,
     @Context() ctx: GraphQLContext,
   ): Promise<LoginResult> {
     const result = await this.loginUseCase.execute({
       email: input.email,
       password: input.password,
-      ip,
-      userAgent: getRequestUserAgent(ctx.req),
+      ip: ctx.parsedRequest.ip,
+      userAgent: ctx.parsedRequest.userAgent,
     });
 
     return {
@@ -59,14 +56,13 @@ export class AuthResolver {
   @Mutation()
   async loginWithGoogle(
     @Args('input', new ZodPipe(LoginWithGoogleInputSchema)) input: LoginWithGoogleInput,
-    @RealIP() ip: string,
     @Context() ctx: GraphQLContext,
   ): Promise<LoginWithGoogleResult> {
     const result = await this.loginWithGoogleUseCase.execute({
       code: input.code,
       createUserIfNotExists: input.createUserIfNotExists,
-      ip,
-      userAgent: getRequestUserAgent(ctx.req),
+      ip: ctx.parsedRequest.ip,
+      userAgent: ctx.parsedRequest.userAgent,
     });
 
     return {
@@ -81,13 +77,12 @@ export class AuthResolver {
   @Mutation()
   async refreshSession(
     @Args('input', new ZodPipe(RefreshSessionInputSchema)) input: RefreshSessionInput,
-    @RealIP() ip: string,
     @Context() ctx: GraphQLContext,
   ): Promise<RefreshSessionResult> {
     const result = await this.refreshSessionUseCase.execute({
       refreshToken: input.refreshToken,
-      ip,
-      userAgent: getRequestUserAgent(ctx.req),
+      ip: ctx.parsedRequest.ip,
+      userAgent: ctx.parsedRequest.userAgent,
     });
 
     return {

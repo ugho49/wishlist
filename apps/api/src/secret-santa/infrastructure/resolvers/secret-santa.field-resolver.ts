@@ -1,14 +1,21 @@
+import type { ICurrentUser } from '@wishlist/common';
+
 import { NotFoundException } from '@nestjs/common';
 import { Context, Parent, ResolveField, Resolver } from '@nestjs/graphql';
 
+import { GqlCurrentUser } from '../../../auth/infrastructure/decorators/user.decorator';
 import { type GraphQLContext } from '../../../core/graphql/graphql.context';
 import { type Event, type EventAttendee, type SecretSanta, type SecretSantaUser } from '../../../gql/generated-types';
 
 @Resolver('SecretSanta')
 export class SecretSantaFieldResolver {
   @ResolveField()
-  async event(@Parent() secretSanta: SecretSanta, @Context() ctx: GraphQLContext): Promise<Event> {
-    const event = await ctx.loaders.event.load(secretSanta.eventId);
+  async event(
+    @Parent() secretSanta: SecretSanta,
+    @GqlCurrentUser() currentUser: ICurrentUser,
+    @Context() ctx: GraphQLContext,
+  ): Promise<Event> {
+    const event = await ctx.loaders.getEventDataLoader(currentUser).load(secretSanta.eventId);
     if (!event) {
       throw new NotFoundException(`Event with id ${secretSanta.eventId} of secret santa ${secretSanta.id} not found`);
     }

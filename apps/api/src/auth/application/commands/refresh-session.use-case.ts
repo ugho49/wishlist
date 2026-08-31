@@ -13,7 +13,7 @@ import { RefreshTokenManager } from '../../infrastructure/util/refresh-token';
 
 export type RefreshSessionInput = {
   refreshToken: string;
-  ip: string;
+  ip?: string;
   userAgent?: string;
 };
 

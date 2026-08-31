@@ -10,13 +10,8 @@ import { eventMapper } from './event.mapper';
 export class EventDataLoaderFactory {
   constructor(private readonly getEventsByIdsUseCase: GetEventsByIdsUseCase) {}
 
-  createLoader(getCurrentUser: () => ICurrentUser | undefined) {
+  createLoader(currentUser: ICurrentUser) {
     return new DataLoader<EventId, Event | null>(async (eventIds: readonly EventId[]) => {
-      const currentUser = getCurrentUser();
-
-      // If no user, return null for all events (DataLoader requires same length array)
-      if (!currentUser) return eventIds.map(() => null);
-
       const events = await this.getEventsByIdsUseCase.execute({ eventIds: [...eventIds], currentUser });
 
       // Map events to maintain order and length matching input IDs

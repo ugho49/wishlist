@@ -29,8 +29,8 @@ export type DataLoaders = {
   userAccountsByUser: DataLoader<UserId, UserAccount[]>;
   userAccount: DataLoader<UserAccountId, UserAccount | null>;
   userSessionsByUser: DataLoader<UserId, UserSession[]>;
-  wishlist: DataLoader<WishlistId, Wishlist | null>;
-  event: DataLoader<EventId, Event | null>;
+  getWishlistDataLoader: (currentUser: ICurrentUser) => DataLoader<WishlistId, Wishlist | null>;
+  getEventDataLoader: (currentUser: ICurrentUser) => DataLoader<EventId, Event | null>;
   eventAttendee: DataLoader<AttendeeId, EventAttendee | null>;
 };
 
@@ -43,15 +43,15 @@ export class DataLoaderService {
     private readonly eventAttendeeDataLoaderFactory: EventAttendeeDataLoaderFactory,
   ) {}
 
-  createLoaders(getCurrentUser: () => ICurrentUser | undefined): DataLoaders {
+  createLoaders(): DataLoaders {
     return {
       user: this.userDataLoaderFactory.createUserLoader(),
       userFull: this.userDataLoaderFactory.createUserFullLoader(),
       userAccountsByUser: this.userDataLoaderFactory.createUserAccountsByUserLoader(),
       userAccount: this.userDataLoaderFactory.createUserAccountLoader(),
       userSessionsByUser: this.userDataLoaderFactory.createUserSessionsByUserLoader(),
-      wishlist: this.wishlistDataLoaderFactory.createLoader(getCurrentUser),
-      event: this.eventDataLoaderFactory.createLoader(getCurrentUser),
+      getWishlistDataLoader: (currentUser: ICurrentUser) => this.wishlistDataLoaderFactory.createLoader(currentUser),
+      getEventDataLoader: (currentUser: ICurrentUser) => this.eventDataLoaderFactory.createLoader(currentUser),
       eventAttendee: this.eventAttendeeDataLoaderFactory.createLoader(),
     };
   }

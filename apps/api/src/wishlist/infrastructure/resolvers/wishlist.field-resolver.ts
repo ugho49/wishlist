@@ -1,6 +1,9 @@
+import type { ICurrentUser } from '@wishlist/common';
+
 import { NotFoundException } from '@nestjs/common';
 import { Context, Parent, ResolveField, Resolver } from '@nestjs/graphql';
 
+import { GqlCurrentUser } from '../../../auth/infrastructure/decorators/user.decorator';
 import { type GraphQLContext } from '../../../core/graphql/graphql.context';
 import { type Event, type User, type Wishlist } from '../../../gql/generated-types';
 
@@ -26,9 +29,13 @@ export class WishlistFieldResolver {
   }
 
   @ResolveField()
-  async events(@Parent() wishlist: Wishlist, @Context() ctx: GraphQLContext): Promise<Event[]> {
+  async events(
+    @Parent() wishlist: Wishlist,
+    @GqlCurrentUser() currentUser: ICurrentUser,
+    @Context() ctx: GraphQLContext,
+  ): Promise<Event[]> {
     if (wishlist.eventIds.length === 0) return [];
-    const events = await ctx.loaders.event.loadMany(wishlist.eventIds);
+    const events = await ctx.loaders.getEventDataLoader(currentUser).loadMany(wishlist.eventIds);
     // Filter out null values (events user doesn't have access to)
     return events.filter((event): event is Event => event !== null);
   }

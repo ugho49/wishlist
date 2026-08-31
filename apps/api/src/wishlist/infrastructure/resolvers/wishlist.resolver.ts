@@ -1,6 +1,6 @@
 import { NotFoundException } from '@nestjs/common';
 import { Args, Context, Query, Resolver } from '@nestjs/graphql';
-import { createPagedResponse, type UserId, type WishlistId } from '@wishlist/common';
+import { createPagedResponse, type ICurrentUser, type UserId, type WishlistId } from '@wishlist/common';
 
 import { GqlCurrentUser } from '../../../auth/infrastructure/decorators/user.decorator';
 import { DEFAULT_RESULT_NUMBER } from '../../../core/common/pagination';
@@ -23,9 +23,10 @@ export class WishlistResolver {
   @Query()
   async wishlist(
     @Args('id', { type: () => String }) id: WishlistId,
+    @GqlCurrentUser() currentUser: ICurrentUser,
     @Context() ctx: GraphQLContext,
   ): Promise<GetWishlistByIdResult> {
-    const wishlist = await ctx.loaders.wishlist.load(id);
+    const wishlist = await ctx.loaders.getWishlistDataLoader(currentUser).load(id);
     if (!wishlist) {
       throw new NotFoundException('Wishlist not found');
     }

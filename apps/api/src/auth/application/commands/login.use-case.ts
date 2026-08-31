@@ -17,7 +17,7 @@ import { CommonLoginUseCase } from './common-login.use-case';
 export type LoginInput = {
   email: string;
   password: string;
-  ip: string;
+  ip?: string;
   userAgent?: string;
 };
 

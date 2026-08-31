@@ -1,7 +1,10 @@
+import type { Request, Response } from 'express';
+
 import { YogaDriver, type YogaDriverConfig } from '@graphql-yoga/nestjs';
 import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspection';
 import { Module } from '@nestjs/common';
 import { GraphQLModule as NestGraphQLModule } from '@nestjs/graphql';
+import { getClientIp } from '@supercharge/request-ip';
 
 import { DataLoaderModule } from '../../dataloader/dataloader.module';
 import { DataLoaderService } from '../../dataloader/dataloader.service';
@@ -25,10 +28,24 @@ import { useErrorTransformPlugin } from './graphql-error.plugin';
           ...(process.env.NODE_ENV === 'production' ? [useDisableIntrospection()] : []),
         ],
         graphiql: process.env.NODE_ENV !== 'production',
-        context: ({ req }: Omit<GraphQLContext, 'loaders'>): GraphQLContext => ({
-          req,
-          loaders: dataLoaderService.createLoaders(() => req.user),
-        }),
+        context: ({ req, res }: { req: Request; res: Response }): GraphQLContext => {
+          const headers = req.headers;
+          const ip = getClientIp(req) ?? undefined;
+          const userAgent = headers['user-agent'] ?? undefined;
+
+          return {
+            res,
+            req,
+            parsedRequest: {
+              userAgent,
+              ip,
+              headers: {
+                authorization: headers.authorization ?? undefined,
+              },
+            },
+            loaders: dataLoaderService.createLoaders(),
+          };
+        },
       }),
     }),
   ],

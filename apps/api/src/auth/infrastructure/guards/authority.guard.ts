@@ -1,3 +1,5 @@
+import type { GraphQLContext } from '../../../core/graphql/graphql.context';
+
 import { type CanActivate, type ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { GqlExecutionContext } from '@nestjs/graphql';
@@ -21,7 +23,8 @@ export class AuthorityGuard implements CanActivate {
 
     if (contextType === 'graphql') {
       const ctx = GqlExecutionContext.create(context);
-      user = ctx.getContext().req.user as ICurrentUser;
+      const gqlContext = ctx.getContext() as GraphQLContext;
+      user = gqlContext.user as ICurrentUser;
     } else {
       const request = context.switchToHttp().getRequest();
       user = request.user as ICurrentUser;
