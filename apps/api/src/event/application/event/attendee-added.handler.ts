@@ -43,7 +43,7 @@ export class AttendeeAddedHandler implements IEventHandler<AttendeeAddedEvent> {
   }): Promise<void> {
     await this.mailService.sendMail({
       to: params.email,
-      subject: '[Wishlist] Vous participez à un nouvel événement',
+      subject: 'Vous participez à un nouvel événement',
       template: MailTemplate.ADDED_TO_EVENT,
       context: {
         eventTitle: params.event.title,
@@ -60,7 +60,7 @@ export class AttendeeAddedHandler implements IEventHandler<AttendeeAddedEvent> {
   }): Promise<void> {
     await this.mailService.sendMail({
       to: params.email,
-      subject: '[Wishlist] Vous participez à un nouvel événement',
+      subject: 'Vous participez à un nouvel événement',
       template: MailTemplate.ADDED_TO_EVENT_NEW_USER,
       context: {
         eventTitle: params.event.title,

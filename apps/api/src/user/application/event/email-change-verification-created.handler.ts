@@ -26,7 +26,7 @@ export class EmailChangeVerificationCreatedHandler implements IEventHandler<Emai
     await Promise.all([
       this.mailService.sendMail({
         to: params.newEmail,
-        subject: "[Wishlist] Confirmez votre changement d'adresse email",
+        subject: "Confirmez votre changement d'adresse email",
         template: MailTemplate.CONFIRM_EMAIL_CHANGE,
         context: {
           url: confirmationUrl,
@@ -35,7 +35,7 @@ export class EmailChangeVerificationCreatedHandler implements IEventHandler<Emai
       }),
       this.mailService.sendMail({
         to: params.oldEmail,
-        subject: "[Wishlist] Demande de changement d'adresse email",
+        subject: "Demande de changement d'adresse email",
         template: MailTemplate.EMAIL_CHANGE_NOTIFICATION,
         context: {
           newEmail: params.newEmail,
