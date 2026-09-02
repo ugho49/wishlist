@@ -27,17 +27,6 @@ const bucketModule = BucketModule.registerAsync({
   },
 });
 
-const mailModule = MailModule.registerAsync({
-  inject: [ConfigService],
-  useFactory: (config: ConfigService) => ({
-    from: 'Wishlist App <contact@wishlistapp.fr>',
-    host: config.get<string>('MAIL_HOST', 'localhost'),
-    port: parseInt(config.get<string>('MAIL_PORT', '1025'), 10),
-    username: config.get<string>('MAIL_USERNAME', ''),
-    password: config.get<string>('MAIL_PASSWORD', ''),
-  }),
-});
-
 const databaseModule = DatabaseModule.registerAsync({
   inject: [ConfigService],
   useFactory: (config: ConfigService) => ({
@@ -65,7 +54,7 @@ const frontendRoutesModule = FrontendRoutesModule.registerAsync({
     ScheduleModule.forRoot(),
     HealthModule,
     databaseModule,
-    mailModule,
+    MailModule,
     bucketModule,
     QueueModule,
     frontendRoutesModule,
