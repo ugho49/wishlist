@@ -28,7 +28,7 @@ export class WishlistAdminResolver {
     });
 
     const pagedResponse = createPagedResponse({
-      resources: wishlists.map(wishlist => wishlistMapper.toGqlWishlist({ wishlist, currentUserId: filters.userId })),
+      resources: wishlists.map(wishlist => wishlistMapper.toGqlWishlist({ wishlist })),
       options: { pageSize, totalElements: totalCount, pageNumber },
     });
 

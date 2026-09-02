@@ -36,7 +36,7 @@ export class WishlistItemBuilder {
   }
 
   takenBy(user: User): this {
-    this.data.takers = [...this.data.takers, { user, takenAt: new Date() }];
+    this.data.takers = [...this.data.takers, { userId: user.id, takenAt: new Date() }];
     return this;
   }
 

@@ -16,6 +16,7 @@ export interface WishlistItemRepository {
   findByIds(ids: ItemId[]): Promise<WishlistItem[]>;
   findByIdOrFail(id: ItemId): Promise<WishlistItem>;
   findByWishlist(wishlistId: WishlistId): Promise<WishlistItem[]>;
+  findByWishlistIds(wishlistIds: WishlistId[]): Promise<WishlistItem[]>;
   findAllNewItems(since: Date): Promise<NewItemsForWishlist[]>;
   findImportableItems(params: { userId: UserId; wishlistId: WishlistId }): Promise<WishlistItem[]>;
   save(item: WishlistItem, tx?: DrizzleTransaction): Promise<void>;

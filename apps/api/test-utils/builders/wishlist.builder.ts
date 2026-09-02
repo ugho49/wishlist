@@ -52,7 +52,7 @@ export class WishlistBuilder {
       id: uuid() as WishlistId,
       title: this.data.title,
       eventIds: this.data.eventIds,
-      owner: this.data.owner,
+      ownerId: this.data.owner.id,
       hideItems: this.data.hideItems,
     });
 

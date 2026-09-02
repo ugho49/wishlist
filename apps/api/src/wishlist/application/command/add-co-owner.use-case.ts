@@ -51,6 +51,6 @@ export class AddCoOwnerUseCase {
     this.logger.log('Saving wishlist...', { wishlistId: updatedWishlist.id, updatedFields: ['coOwner'] });
     await this.wishlistRepository.save(updatedWishlist);
 
-    await this.eventBus.publish(new UserAddedAsCoOwnerToWishlistEvent({ wishlist: updatedWishlist }));
+    await this.eventBus.publish(new UserAddedAsCoOwnerToWishlistEvent({ wishlist: updatedWishlist, coOwner }));
   }
 }

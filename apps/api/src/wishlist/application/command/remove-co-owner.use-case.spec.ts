@@ -52,6 +52,6 @@ describe('RemoveCoOwnerUseCase', () => {
 
     expect(wishlistRepository.save).toHaveBeenCalledTimes(1);
     const savedWishlist = wishlistRepository.save.mock.calls[0]?.[0];
-    expect(savedWishlist?.coOwner).toBeUndefined();
+    expect(savedWishlist?.coOwnerId).toBeUndefined();
   });
 });

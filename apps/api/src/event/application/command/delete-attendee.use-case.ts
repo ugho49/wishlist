@@ -1,3 +1,4 @@
+import type { WishlistItemRepository } from '../../../item/domain/wishlist-item.repository';
 import type { EventRepository } from '../../domain/repository/event.repository';
 import type { EventAttendeeRepository } from '../../domain/repository/event-attendee.repository';
 
@@ -32,6 +33,8 @@ export class DeleteAttendeeUseCase {
     private readonly eventRepository: EventRepository,
     @Inject(REPOSITORIES.WISHLIST)
     private readonly wishlistRepository: WishlistRepository,
+    @Inject(REPOSITORIES.WISHLIST_ITEM)
+    private readonly itemRepository: WishlistItemRepository,
     private readonly transactionManager: TransactionManager,
   ) {}
 
@@ -83,10 +86,16 @@ export class DeleteAttendeeUseCase {
           continue;
         }
 
-        if (wishlist.eventIds.length === 1 && wishlist.items.length > 0) {
-          throw new ConflictException(
-            'You cannot remove this attendee from the event because he have a list in this event and the list have only this event attached',
-          );
+        if (wishlist.eventIds.length === 1) {
+          this.logger.log('Checking if the wishlist has items...', { wishlistId: wishlist.id });
+          const items = await this.itemRepository.findByWishlist(wishlist.id);
+
+          if (items.length > 0) {
+            this.logger.log('The wishlist has items...', { wishlistId: wishlist.id });
+            throw new ConflictException(
+              'You cannot remove this attendee from the event because he have a list in this event and the list have only this event attached',
+            );
+          }
         }
 
         this.logger.log('Deleting wishlist...', { wishlistId: wishlist.id });

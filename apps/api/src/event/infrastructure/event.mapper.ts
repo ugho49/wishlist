@@ -22,7 +22,7 @@ function toGqlEvent(event: Event): GqlEvent {
     createdAt: event.createdAt.toISOString(),
     updatedAt: event.updatedAt.toISOString(),
     wishlistIds: event.wishlistIds,
-    attendeeIds: event.attendees.map(attendee => attendee.id),
+    attendees: event.attendees.map(attendee => toGqlEventAttendee(attendee)),
   };
 }
 

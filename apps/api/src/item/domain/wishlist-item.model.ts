@@ -2,7 +2,7 @@ import type { ItemId, UserId, WishlistId } from '@wishlist/common';
 import type { User } from '../../user/domain/model/user.model';
 
 export type ItemTaker = {
-  user: User;
+  userId: UserId;
   takenAt: Date;
 };
 
@@ -125,7 +125,7 @@ export class WishlistItem {
   }
 
   isTakenBy(userId: UserId) {
-    return this.takers.some(taker => taker.user.id === userId);
+    return this.takers.some(taker => taker.userId === userId);
   }
 
   check(user: User): WishlistItem {
@@ -135,7 +135,7 @@ export class WishlistItem {
 
     return new WishlistItem({
       ...this,
-      takers: [...this.takers, { user, takenAt: new Date() }],
+      takers: [...this.takers, { userId: user.id, takenAt: new Date() }],
       updatedAt: new Date(),
     });
   }
@@ -147,8 +147,37 @@ export class WishlistItem {
 
     return new WishlistItem({
       ...this,
-      takers: this.takers.filter(taker => taker.user.id !== userId),
+      takers: this.takers.filter(taker => taker.userId !== userId),
       updatedAt: new Date(),
     });
+  }
+
+  public static canDisplaySensitiveInformations(params: {
+    wishlist: { hideItems: boolean; isOwner: boolean; isCoOwner: boolean };
+  }): boolean {
+    const { wishlist } = params;
+
+    // If hideItems is false, we want to display all items, including suggested and with the taker
+    if (!wishlist.hideItems) return true;
+
+    // If we are the owner or co-owner of the list, we not want the information to be displayed
+    return !wishlist.isOwner && !wishlist.isCoOwner;
+  }
+
+  public static canShowItem(params: {
+    item: WishlistItem;
+    wishlist: { hideItems: boolean; isOwner: boolean; isCoOwner: boolean };
+  }): boolean {
+    const { item, wishlist } = params;
+
+    // If hideItems is false, we force items to be shown, even if they are suggested
+    if (!wishlist.hideItems) return true;
+
+    // If we are not the owner or co-owner of the list, display all items
+    if (!wishlist.isOwner && !wishlist.isCoOwner) return true;
+
+    // In this case, current user is owner or co-owner of the list
+    // we want to show him only the item that are not suggested
+    return !item.isSuggested;
   }
 }

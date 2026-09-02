@@ -96,7 +96,7 @@ export type EventCardProps = {
 };
 
 export const EventCard = ({ event }: EventCardProps) => {
-  const numberOfAttendees = event.attendeeIds.length;
+  const numberOfAttendees = event.attendees.length;
   const numberOfWishlists = event.wishlistIds.length;
   const past = DateTime.fromISO(event.eventDate) < DateTime.now().minus({ days: 1 });
   const navigate = useNavigate();

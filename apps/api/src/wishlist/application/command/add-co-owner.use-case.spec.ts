@@ -87,8 +87,10 @@ describe('AddCoOwnerUseCase', () => {
 
     expect(wishlistRepository.save).toHaveBeenCalledTimes(1);
     const savedWishlist = wishlistRepository.save.mock.calls[0]?.[0];
-    expect(savedWishlist?.coOwner?.id).toBe(coOwner.id);
+    expect(savedWishlist?.coOwnerId).toBe(coOwner.id);
     expect(eventBus.publish).toHaveBeenCalledTimes(1);
-    expect(eventBus.publish.mock.calls[0]?.[0]).toBeInstanceOf(UserAddedAsCoOwnerToWishlistEvent);
+    const publishedEvent = eventBus.publish.mock.calls[0]?.[0] as UserAddedAsCoOwnerToWishlistEvent;
+    expect(publishedEvent).toBeInstanceOf(UserAddedAsCoOwnerToWishlistEvent);
+    expect(publishedEvent.coOwner).toBe(coOwner);
   });
 });

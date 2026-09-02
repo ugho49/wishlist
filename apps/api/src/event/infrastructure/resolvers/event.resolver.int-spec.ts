@@ -27,7 +27,9 @@ describe('EventResolver (GraphQL)', () => {
             description
             eventDate
             wishlistIds
-            attendeeIds
+            attendees {
+              id
+            }
             createdAt
             updatedAt
           }
@@ -80,7 +82,7 @@ describe('EventResolver (GraphQL)', () => {
         description: 'A nice event',
         eventDate: expect.any(String),
       });
-      expect(res.body.data.event.attendeeIds).toHaveLength(1);
+      expect(res.body.data.event.attendees).toHaveLength(1);
       expect(res.body.data.event.createdAt).toEqual(expect.any(String));
       expect(res.body.data.event.updatedAt).toEqual(expect.any(String));
     });

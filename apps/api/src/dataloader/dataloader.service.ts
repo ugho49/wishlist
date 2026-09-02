@@ -1,3 +1,5 @@
+import type { WishlistItem } from '../item/domain/wishlist-item.model';
+
 import { Injectable } from '@nestjs/common';
 import {
   type AttendeeId,
@@ -20,6 +22,7 @@ import {
   type UserSession,
   type Wishlist,
 } from '../gql/generated-types';
+import { ItemDataLoaderFactory } from '../item/infrastructure/item.dataloader';
 import { UserDataLoaderFactory } from '../user/infrastructure/user.dataloader';
 import { WishlistDataLoaderFactory } from '../wishlist/infrastructure/wishlist.dataloader';
 
@@ -32,6 +35,7 @@ export type DataLoaders = {
   getWishlistDataLoader: (currentUser: ICurrentUser) => DataLoader<WishlistId, Wishlist | null>;
   getEventDataLoader: (currentUser: ICurrentUser) => DataLoader<EventId, Event | null>;
   eventAttendee: DataLoader<AttendeeId, EventAttendee | null>;
+  createItemsByWishlistLoader: (currentUser: ICurrentUser) => DataLoader<WishlistId, WishlistItem[]>;
 };
 
 @Injectable()
@@ -41,6 +45,7 @@ export class DataLoaderService {
     private readonly wishlistDataLoaderFactory: WishlistDataLoaderFactory,
     private readonly eventDataLoaderFactory: EventDataLoaderFactory,
     private readonly eventAttendeeDataLoaderFactory: EventAttendeeDataLoaderFactory,
+    private readonly itemDataLoaderFactory: ItemDataLoaderFactory,
   ) {}
 
   createLoaders(): DataLoaders {
@@ -53,6 +58,8 @@ export class DataLoaderService {
       getWishlistDataLoader: (currentUser: ICurrentUser) => this.wishlistDataLoaderFactory.createLoader(currentUser),
       getEventDataLoader: (currentUser: ICurrentUser) => this.eventDataLoaderFactory.createLoader(currentUser),
       eventAttendee: this.eventAttendeeDataLoaderFactory.createLoader(),
+      createItemsByWishlistLoader: (currentUser: ICurrentUser) =>
+        this.itemDataLoaderFactory.createLoaderByWishlists(currentUser),
     };
   }
 }

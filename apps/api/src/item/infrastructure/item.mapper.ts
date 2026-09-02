@@ -5,7 +5,7 @@ import { type Item as GqlItem, type ItemTaker as GqlItemTaker } from '../../gql/
 function toGqlItemTaker(taker: ItemTaker): GqlItemTaker {
   return {
     __typename: 'ItemTaker',
-    userId: taker.user.id,
+    userId: taker.userId,
     takenAt: taker.takenAt.toISOString(),
   };
 }

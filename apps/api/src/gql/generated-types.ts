@@ -200,7 +200,7 @@ export type DeleteWishlistResult = ForbiddenRejection | InternalErrorRejection |
 
 export type Event = {
   __typename: 'Event';
-  attendeeIds: Array<Scalars['AttendeeId']['output']>;
+  attendees: Array<EventAttendee>;
   createdAt: Scalars['String']['output'];
   description?: Maybe<Scalars['String']['output']>;
   eventDate: Scalars['String']['output'];
@@ -216,7 +216,6 @@ export type EventAttendee = {
   id: Scalars['AttendeeId']['output'];
   pendingEmail?: Maybe<Scalars['String']['output']>;
   role: AttendeeRole;
-  user?: Maybe<User>;
   userId?: Maybe<Scalars['UserId']['output']>;
 };
 
@@ -1060,7 +1059,6 @@ export type Wishlist = {
   description?: Maybe<Scalars['String']['output']>;
   eventIds: Array<Scalars['EventId']['output']>;
   id: Scalars['WishlistId']['output'];
-  items: Array<Item>;
   logoUrl?: Maybe<Scalars['String']['output']>;
   ownerId: Scalars['UserId']['output'];
   title: Scalars['String']['output'];
