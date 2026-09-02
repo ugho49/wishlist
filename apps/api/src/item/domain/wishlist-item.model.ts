@@ -135,7 +135,7 @@ export class WishlistItem {
 
     return new WishlistItem({
       ...this,
-      takers: [...this.takers, { user, takenAt: new Date() }],
+      takers: [...this.takers, { userId: user.id, takenAt: new Date() }],
       updatedAt: new Date(),
     });
   }

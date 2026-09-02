@@ -60,7 +60,7 @@ describe('ToggleItemUseCase', () => {
       const result = await useCase.execute({ currentUser: toCurrentUser(participant), itemId: item.id });
 
       expect(result.takers).toHaveLength(1);
-      expect(result.takers[0]?.user.id).toBe(participant.id);
+      expect(result.takers[0]?.userId).toBe(participant.id);
       expect(itemRepository.save).toHaveBeenCalledTimes(1);
     });
 
@@ -84,7 +84,7 @@ describe('ToggleItemUseCase', () => {
 
       const result = await useCase.execute({ currentUser: toCurrentUser(participant), itemId: item.id });
 
-      expect(result.takers.map(taker => taker.user.id).toSorted()).toEqual([otherTaker.id, participant.id].toSorted());
+      expect(result.takers.map(taker => taker.userId).toSorted()).toEqual([otherTaker.id, participant.id].toSorted());
       expect(itemRepository.save).toHaveBeenCalledTimes(1);
     });
   });
@@ -140,7 +140,7 @@ describe('ToggleItemUseCase', () => {
       const result = await useCase.execute({ currentUser: toCurrentUser(owner), itemId: item.id });
 
       expect(result.takers).toHaveLength(1);
-      expect(result.takers[0]?.user.id).toBe(owner.id);
+      expect(result.takers[0]?.userId).toBe(owner.id);
       expect(itemRepository.save).toHaveBeenCalledTimes(1);
     });
   });
