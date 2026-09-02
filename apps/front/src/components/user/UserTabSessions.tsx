@@ -1,8 +1,4 @@
-import DevicesIcon from '@mui/icons-material/Devices';
-import LaptopMacIcon from '@mui/icons-material/LaptopMac';
 import LogoutIcon from '@mui/icons-material/Logout';
-import PhoneIphoneIcon from '@mui/icons-material/PhoneIphone';
-import TabletMacIcon from '@mui/icons-material/TabletMac';
 import { Chip, Stack, styled, Typography } from '@mui/material';
 import { useQueryClient } from '@tanstack/react-query';
 import { DateTime } from 'luxon';
@@ -12,7 +8,6 @@ import {
   rejectionMessage,
   rejectionPattern,
   type UserProfileCurrentUserQuery,
-  UserSessionDeviceType,
   useRevokeUserSessionMutation,
   useUserProfileCurrentUserQuery,
 } from '../../gql';
@@ -22,6 +17,7 @@ import { Card } from '../common/Card';
 import { ConfirmButton } from '../common/ConfirmButton';
 import { Loader } from '../common/Loader';
 import { Subtitle } from '../common/Subtitle';
+import { SessionDeviceIcon } from './SessionDeviceIcon';
 
 type UserSessionItem = NonNullable<
   Extract<UserProfileCurrentUserQuery['currentUser'], { __typename: 'User' }>['sessions']
@@ -75,14 +71,6 @@ const SessionActions = styled('div')(({ theme }) => ({
   },
 }));
 
-const deviceIcon = (deviceType: UserSessionDeviceType) =>
-  match(deviceType)
-    .with(UserSessionDeviceType.Mobile, () => <PhoneIphoneIcon />)
-    .with(UserSessionDeviceType.Tablet, () => <TabletMacIcon />)
-    .with(UserSessionDeviceType.Desktop, () => <LaptopMacIcon />)
-    .with(UserSessionDeviceType.Unknown, () => <DevicesIcon />)
-    .exhaustive();
-
 const formatDate = (value: string) => DateTime.fromISO(value).toLocaleString(DateTime.DATETIME_MED);
 
 export const UserTabSessions = () => {
@@ -126,7 +114,9 @@ export const UserTabSessions = () => {
               const osLabel = [session.device.os, session.device.osVersion].filter(Boolean).join(' ');
               return (
                 <SessionRow key={session.id}>
-                  <SessionIcon>{deviceIcon(session.device.type)}</SessionIcon>
+                  <SessionIcon>
+                    <SessionDeviceIcon type={session.device.type} />
+                  </SessionIcon>
                   <SessionDetails>
                     <Stack direction="row" sx={{ alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
                       <Typography sx={{ fontWeight: 500 }}>{browserLabel}</Typography>

@@ -1,14 +1,11 @@
+import type { AdminUserDetailQuery } from '../../../gql';
+
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
-import DevicesIcon from '@mui/icons-material/Devices';
-import LaptopMacIcon from '@mui/icons-material/LaptopMac';
-import PhoneIphoneIcon from '@mui/icons-material/PhoneIphone';
-import TabletMacIcon from '@mui/icons-material/TabletMac';
 import { Box, IconButton, Tooltip } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import { DateTime } from 'luxon';
-import { match } from 'ts-pattern';
 
-import { type AdminUserDetailQuery, UserSessionDeviceType } from '../../../gql';
+import { SessionDeviceIcon } from '../SessionDeviceIcon';
 
 type AdminUserSession = Extract<AdminUserDetailQuery['adminUser'], { __typename: 'UserFull' }>['sessions'][number];
 
@@ -17,14 +14,6 @@ type AdminListUserSessionsProps = {
   onRevoke: (sessionId: AdminUserSession['id']) => void;
   disabled?: boolean;
 };
-
-const deviceIcon = (deviceType: UserSessionDeviceType) =>
-  match(deviceType)
-    .with(UserSessionDeviceType.Mobile, () => <PhoneIphoneIcon fontSize="small" />)
-    .with(UserSessionDeviceType.Tablet, () => <TabletMacIcon fontSize="small" />)
-    .with(UserSessionDeviceType.Desktop, () => <LaptopMacIcon fontSize="small" />)
-    .with(UserSessionDeviceType.Unknown, () => <DevicesIcon fontSize="small" />)
-    .exhaustive();
 
 export const AdminListUserSessions = ({ sessions, onRevoke, disabled }: AdminListUserSessionsProps) => (
   <div style={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -44,7 +33,9 @@ export const AdminListUserSessions = ({ sessions, onRevoke, disabled }: AdminLis
           filterable: false,
           display: 'flex',
           renderCell: ({ row }) => (
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>{deviceIcon(row.device.type)}</Box>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <SessionDeviceIcon type={row.device.type} fontSize="small" />
+            </Box>
           ),
         },
         {
