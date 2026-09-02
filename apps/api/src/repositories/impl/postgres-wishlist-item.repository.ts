@@ -59,6 +59,15 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
     return result.map(PostgresWishlistItemRepository.toModel);
   }
 
+  async findByWishlistIds(wishlistIds: WishlistId[]): Promise<WishlistItem[]> {
+    const result = await this.databaseService.db.query.item.findMany({
+      where: inArray(schema.item.wishlistId, wishlistIds),
+      with: takersWithUser,
+    });
+
+    return result.map(PostgresWishlistItemRepository.toModel);
+  }
+
   async findAllNewItems(since: Date): Promise<NewItemsForWishlist[]> {
     const rows = await this.databaseService.db
       .select({

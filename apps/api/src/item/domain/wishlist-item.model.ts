@@ -151,4 +151,33 @@ export class WishlistItem {
       updatedAt: new Date(),
     });
   }
+
+  public static canDisplaySensitiveInformations(params: {
+    wishlist: { hideItems: boolean; isOwner: boolean; isCoOwner: boolean };
+  }): boolean {
+    const { wishlist } = params;
+
+    // If hideItems is false, we want to display all items, including suggested and with the taker
+    if (!wishlist.hideItems) return true;
+
+    // If we are the owner or co-owner of the list, we not want the information to be displayed
+    return !wishlist.isOwner && !wishlist.isCoOwner;
+  }
+
+  public static canShowItem(params: {
+    item: WishlistItem;
+    wishlist: { hideItems: boolean; isOwner: boolean; isCoOwner: boolean };
+  }): boolean {
+    const { item, wishlist } = params;
+
+    // If hideItems is false, we force items to be shown, even if they are suggested
+    if (!wishlist.hideItems) return true;
+
+    // If we are not the owner or co-owner of the list, display all items
+    if (!wishlist.isOwner && !wishlist.isCoOwner) return true;
+
+    // In this case, current user is owner or co-owner of the list
+    // we want to show him only the item that are not suggested
+    return !item.isSuggested;
+  }
 }

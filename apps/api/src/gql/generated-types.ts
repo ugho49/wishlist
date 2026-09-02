@@ -1060,7 +1060,6 @@ export type Wishlist = {
   description?: Maybe<Scalars['String']['output']>;
   eventIds: Array<Scalars['EventId']['output']>;
   id: Scalars['WishlistId']['output'];
-  items: Array<Item>;
   logoUrl?: Maybe<Scalars['String']['output']>;
   ownerId: Scalars['UserId']['output'];
   title: Scalars['String']['output'];

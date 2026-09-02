@@ -1,13 +1,9 @@
-import type { UserId } from '@wishlist/common';
 import type { Wishlist } from '../domain/wishlist.model';
 
 import { type Wishlist as GqlWishlist } from '../../gql/generated-types';
-import { itemMapper } from '../../item/infrastructure/item.mapper';
 
-function toGqlWishlist(params: { wishlist: Wishlist; currentUserId: UserId }): GqlWishlist {
-  const { wishlist, currentUserId } = params;
-
-  const displayUserAndSuggested = wishlist.canDisplayItemSensitiveInformations(currentUserId);
+function toGqlWishlist(params: { wishlist: Wishlist }): GqlWishlist {
+  const { wishlist } = params;
 
   return {
     __typename: 'Wishlist',
@@ -15,12 +11,9 @@ function toGqlWishlist(params: { wishlist: Wishlist; currentUserId: UserId }): G
     title: wishlist.title,
     description: wishlist.description,
     logoUrl: wishlist.logoUrl,
-    ownerId: wishlist.owner.id,
-    coOwnerId: wishlist.coOwner?.id,
+    ownerId: wishlist.ownerId,
+    coOwnerId: wishlist.coOwnerId,
     eventIds: wishlist.eventIds,
-    items: wishlist
-      .getItemsToDisplay(currentUserId)
-      .map(item => itemMapper.toGqlItem({ item, displayUserAndSuggested })),
     config: { __typename: 'WishlistConfig', hideItems: wishlist.hideItems },
     createdAt: wishlist.createdAt.toISOString(),
     updatedAt: wishlist.updatedAt.toISOString(),

@@ -691,7 +691,7 @@ type Wishlist {
   eventIds: [EventId!]!
   events: [Event!]! @resolved
   id: WishlistId!
-  items: [Item!]!
+  items: [Item!]! @resolved
   logoUrl: String
   owner: User! @resolved
   ownerId: UserId!

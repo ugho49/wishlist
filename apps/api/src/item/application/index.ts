@@ -5,11 +5,13 @@ import { NotifyNewItemsUseCase } from './command/notify-new-items.use-case';
 import { ToggleItemUseCase } from './command/toggle-item.use-case';
 import { UpdateItemUseCase } from './command/update-item.use-case';
 import { GetImportableItemsUseCase } from './query/get-importable-items.use-case';
+import { GetItemsByWishlistsUseCase } from './query/get-items-by-wishlists.use-case';
 import { ScanItemUrlUseCase } from './query/scan-item-url.use-case';
 
 export const handlers = [
   // Queries
   GetImportableItemsUseCase,
+  GetItemsByWishlistsUseCase,
   ScanItemUrlUseCase,
   // Commands
   CreateItemUseCase,

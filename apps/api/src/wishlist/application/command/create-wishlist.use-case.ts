@@ -54,7 +54,7 @@ export class CreateWishlistUseCase {
       id: this.wishlistRepository.newId(),
       title: command.newWishlist.title,
       description: command.newWishlist.description,
-      owner,
+      ownerId: owner.id,
       eventIds,
       hideItems: command.newWishlist.hideItems === undefined ? true : command.newWishlist.hideItems,
     });

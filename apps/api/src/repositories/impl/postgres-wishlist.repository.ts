@@ -7,8 +7,6 @@ import { DatabaseService } from '../../core/database/database.service';
 import { type DrizzleTransaction } from '../../core/database/transaction-manager';
 import { Wishlist } from '../../wishlist/domain/wishlist.model';
 import { type WishlistRepository } from '../../wishlist/domain/wishlist.repository';
-import { PostgresUserRepository } from './postgres-user.repository';
-import { PostgresWishlistItemRepository } from './postgres-wishlist-item.repository';
 
 @Injectable()
 export class PostgresWishlistRepository implements WishlistRepository {
@@ -21,12 +19,7 @@ export class PostgresWishlistRepository implements WishlistRepository {
   async findById(wishlistId: WishlistId): Promise<Wishlist | undefined> {
     const result = await this.databaseService.db.query.wishlist.findFirst({
       where: eq(schema.wishlist.id, wishlistId),
-      with: {
-        owner: true,
-        coOwner: true,
-        eventWishlists: true,
-        items: { with: { takers: { with: { user: true } } } },
-      },
+      with: { eventWishlists: true },
     });
 
     return result ? PostgresWishlistRepository.toModel(result) : undefined;
@@ -35,12 +28,7 @@ export class PostgresWishlistRepository implements WishlistRepository {
   async findByIds(wishlistIds: WishlistId[]): Promise<Wishlist[]> {
     const result = await this.databaseService.db.query.wishlist.findMany({
       where: inArray(schema.wishlist.id, wishlistIds),
-      with: {
-        owner: true,
-        coOwner: true,
-        eventWishlists: true,
-        items: { with: { takers: { with: { user: true } } } },
-      },
+      with: { eventWishlists: true },
     });
 
     return result.map(PostgresWishlistRepository.toModel);
@@ -61,12 +49,7 @@ export class PostgresWishlistRepository implements WishlistRepository {
             .from(schema.eventWishlist)
             .where(and(eq(schema.eventWishlist.eventId, eventId), eq(schema.eventWishlist.wishlistId, wishlist.id))),
         ),
-      with: {
-        owner: true,
-        coOwner: true,
-        eventWishlists: true,
-        items: { with: { takers: { with: { user: true } } } },
-      },
+      with: { eventWishlists: true },
     });
 
     return result.map(PostgresWishlistRepository.toModel);
@@ -105,8 +88,6 @@ export class PostgresWishlistRepository implements WishlistRepository {
         orderedWishlistIds.map(row => row.id),
       ),
       with: {
-        owner: true,
-        coOwner: true,
         eventWishlists: true,
         items: { with: { takers: { with: { user: true } } } },
       },
@@ -132,8 +113,8 @@ export class PostgresWishlistRepository implements WishlistRepository {
           id: wishlist.id,
           title: wishlist.title,
           description: wishlist.description,
-          ownerId: wishlist.owner.id,
-          coOwnerId: wishlist.coOwner?.id,
+          ownerId: wishlist.ownerId,
+          coOwnerId: wishlist.coOwnerId,
           hideItems: wishlist.hideItems,
           logoUrl: wishlist.logoUrl,
           createdAt: wishlist.createdAt,
@@ -144,8 +125,8 @@ export class PostgresWishlistRepository implements WishlistRepository {
           set: {
             title: wishlist.title,
             description: wishlist.description ?? null,
-            ownerId: wishlist.owner.id,
-            coOwnerId: wishlist.coOwner?.id ?? null,
+            ownerId: wishlist.ownerId,
+            coOwnerId: wishlist.coOwnerId ?? null,
             hideItems: wishlist.hideItems,
             logoUrl: wishlist.logoUrl ?? null,
             updatedAt: wishlist.updatedAt,
@@ -226,24 +207,18 @@ export class PostgresWishlistRepository implements WishlistRepository {
 
   static toModel(
     row: typeof schema.wishlist.$inferSelect & {
-      owner: typeof schema.user.$inferSelect;
-      coOwner: typeof schema.user.$inferSelect | null;
       eventWishlists: (typeof schema.eventWishlist.$inferSelect)[];
-      items: (typeof schema.item.$inferSelect & {
-        takers: (typeof schema.itemTaker.$inferSelect & { user: typeof schema.user.$inferSelect })[];
-      })[];
     },
   ): Wishlist {
     return new Wishlist({
       id: row.id,
       title: row.title,
       description: row.description ?? undefined,
-      owner: PostgresUserRepository.toModel(row.owner),
-      coOwner: row.coOwner ? PostgresUserRepository.toModel(row.coOwner) : undefined,
+      ownerId: row.ownerId,
+      coOwnerId: row.coOwnerId ?? undefined,
       hideItems: row.hideItems,
       logoUrl: row.logoUrl ?? undefined,
       eventIds: row.eventWishlists.map(eventWishlist => eventWishlist.eventId),
-      items: row.items.map(item => PostgresWishlistItemRepository.toModel(item)),
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     });

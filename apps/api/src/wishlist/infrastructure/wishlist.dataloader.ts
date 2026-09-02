@@ -18,9 +18,7 @@ export class WishlistDataLoaderFactory {
       });
 
       // Map wishlists to maintain order and length matching input IDs
-      const wishlistMap = new Map(
-        wishlists.map(w => [w.id, wishlistMapper.toGqlWishlist({ wishlist: w, currentUserId: currentUser.id })]),
-      );
+      const wishlistMap = new Map(wishlists.map(w => [w.id, wishlistMapper.toGqlWishlist({ wishlist: w })]));
 
       return wishlistIds.map(id => wishlistMap.get(id) ?? null);
     });

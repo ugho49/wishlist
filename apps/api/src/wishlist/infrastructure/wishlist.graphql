@@ -15,7 +15,7 @@ type Wishlist {
   coOwner: User @resolved
   eventIds: [EventId!]!
   events: [Event!]! @resolved
-  items: [Item!]!
+  items: [Item!]! @resolved
   config: WishlistConfig!
   createdAt: String!
   updatedAt: String!
