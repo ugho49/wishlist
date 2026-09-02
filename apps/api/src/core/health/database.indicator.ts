@@ -10,8 +10,8 @@ export class DatabaseHealthIndicator {
     private readonly databaseService: DatabaseService,
   ) {}
 
-  async pingCheck<Key extends string = string>(key: Key): Promise<HealthIndicatorResult<Key>> {
-    const indicator = this.healthIndicatorService.check(key);
+  async pingCheck(): Promise<HealthIndicatorResult> {
+    const indicator = this.healthIndicatorService.check('database');
 
     try {
       await this.databaseService.ping();
