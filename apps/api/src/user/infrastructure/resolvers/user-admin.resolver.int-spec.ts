@@ -201,6 +201,12 @@ describe('UserAdminResolver (GraphQL)', () => {
                   createdAt
                   lastUsedAt
                   expiresAt
+                  device {
+                    browser
+                    os
+                    type
+                    label
+                  }
                 }
               }
             }
@@ -223,6 +229,67 @@ describe('UserAdminResolver (GraphQL)', () => {
           createdAt: expect.toBeString(),
           lastUsedAt: expect.toBeString(),
           expiresAt: expect.toBeString(),
+          device: {
+            browser: expect.toBeString(),
+            os: expect.toBeString(),
+            type: expect.toBeString(),
+            label: expect.toBeString(),
+          },
+        });
+      });
+
+      it('should return the parsed device instead of the raw user agent', async () => {
+        const targetUserId = await fixtures.insertUser({
+          email: 'session-device@test.fr',
+          firstname: 'Session',
+          lastname: 'Device',
+        });
+
+        await fixtures.insertUserRefreshToken({
+          userId: targetUserId,
+          tokenHash: 'a'.repeat(64),
+          expiresAt: DateTime.now().plus({ days: 7 }).toJSDate(),
+          userAgent:
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        });
+
+        const queryWithSessions = /* GraphQL */ `
+          query AdminGetUserSessions($userId: UserId!) {
+            adminUser(userId: $userId) {
+              __typename
+              ... on UserFull {
+                id
+                sessions {
+                  device {
+                    browser
+                    os
+                    type
+                    label
+                  }
+                }
+              }
+            }
+          }
+        `;
+
+        const res = await request
+          .post(GRAPHQL_PATH)
+          .send({ query: queryWithSessions, variables: { userId: targetUserId } })
+          .expect(200);
+
+        expect(res.body.data.adminUser).toMatchObject({
+          __typename: 'UserFull',
+          id: targetUserId,
+          sessions: [
+            {
+              device: {
+                browser: 'Chrome',
+                os: 'macOS',
+                type: 'DESKTOP',
+                label: 'Apple Macintosh',
+              },
+            },
+          ],
         });
       });
 

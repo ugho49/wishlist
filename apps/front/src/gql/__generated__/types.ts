@@ -1037,12 +1037,31 @@ export type UserSession = {
   __typename?: 'UserSession';
   createdAt: Scalars['String']['output'];
   current: Scalars['Boolean']['output'];
+  device: UserSessionDevice;
   expiresAt: Scalars['String']['output'];
   id: Scalars['UserRefreshTokenId']['output'];
   ip?: Maybe<Scalars['String']['output']>;
   lastUsedAt: Scalars['String']['output'];
-  userAgent?: Maybe<Scalars['String']['output']>;
 };
+
+export type UserSessionDevice = {
+  __typename?: 'UserSessionDevice';
+  browser: Scalars['String']['output'];
+  browserVersion?: Maybe<Scalars['String']['output']>;
+  label: Scalars['String']['output'];
+  model?: Maybe<Scalars['String']['output']>;
+  os: Scalars['String']['output'];
+  osVersion?: Maybe<Scalars['String']['output']>;
+  type: UserSessionDeviceType;
+  vendor?: Maybe<Scalars['String']['output']>;
+};
+
+export enum UserSessionDeviceType {
+  Desktop = 'DESKTOP',
+  Mobile = 'MOBILE',
+  Tablet = 'TABLET',
+  Unknown = 'UNKNOWN'
+}
 
 export type ValidationRejection = {
   __typename?: 'ValidationRejection';

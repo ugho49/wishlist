@@ -1,16 +1,11 @@
 import type { AdminUserDetailQuery } from '../../../gql';
 
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
-import DevicesIcon from '@mui/icons-material/Devices';
-import LaptopMacIcon from '@mui/icons-material/LaptopMac';
-import PhoneIphoneIcon from '@mui/icons-material/PhoneIphone';
-import TabletMacIcon from '@mui/icons-material/TabletMac';
 import { Box, IconButton, Tooltip } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import { DateTime } from 'luxon';
-import { match } from 'ts-pattern';
 
-import { type DeviceType, parseUserAgent } from '../../../utils/user-agent.utils';
+import { SessionDeviceIcon } from '../SessionDeviceIcon';
 
 type AdminUserSession = Extract<AdminUserDetailQuery['adminUser'], { __typename: 'UserFull' }>['sessions'][number];
 
@@ -19,14 +14,6 @@ type AdminListUserSessionsProps = {
   onRevoke: (sessionId: AdminUserSession['id']) => void;
   disabled?: boolean;
 };
-
-const deviceIcon = (deviceType: DeviceType) =>
-  match(deviceType)
-    .with('mobile', () => <PhoneIphoneIcon fontSize="small" />)
-    .with('tablet', () => <TabletMacIcon fontSize="small" />)
-    .with('desktop', () => <LaptopMacIcon fontSize="small" />)
-    .with('unknown', () => <DevicesIcon fontSize="small" />)
-    .exhaustive();
 
 export const AdminListUserSessions = ({ sessions, onRevoke, disabled }: AdminListUserSessionsProps) => (
   <div style={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -47,7 +34,7 @@ export const AdminListUserSessions = ({ sessions, onRevoke, disabled }: AdminLis
           display: 'flex',
           renderCell: ({ row }) => (
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              {deviceIcon(parseUserAgent(row.userAgent).deviceType)}
+              <SessionDeviceIcon type={row.device.type} fontSize="small" />
             </Box>
           ),
         },
@@ -56,26 +43,20 @@ export const AdminListUserSessions = ({ sessions, onRevoke, disabled }: AdminLis
           headerName: 'Navigateur',
           flex: 1,
           minWidth: 180,
-          valueGetter: (_, row) => {
-            const parsed = parseUserAgent(row.userAgent);
-            return [parsed.browser, parsed.browserVersion].filter(Boolean).join(' ');
-          },
+          valueGetter: (_, row) => [row.device.browser, row.device.browserVersion].filter(Boolean).join(' '),
         },
         {
           field: 'os',
           headerName: 'Système',
           flex: 1,
           minWidth: 160,
-          valueGetter: (_, row) => {
-            const parsed = parseUserAgent(row.userAgent);
-            return [parsed.os, parsed.osVersion].filter(Boolean).join(' ');
-          },
+          valueGetter: (_, row) => [row.device.os, row.device.osVersion].filter(Boolean).join(' '),
         },
         {
           field: 'deviceLabel',
           headerName: 'Appareil',
           minWidth: 140,
-          valueGetter: (_, row) => parseUserAgent(row.userAgent).deviceLabel,
+          valueGetter: (_, row) => row.device.label,
         },
         {
           field: 'ip',

@@ -1,17 +1,16 @@
 import { UAParser } from 'ua-parser-js';
 
-export type DeviceType = 'mobile' | 'tablet' | 'desktop' | 'unknown';
+export type SessionDeviceType = 'mobile' | 'tablet' | 'desktop' | 'unknown';
 
-export type ParsedUserAgent = {
+export type ParsedSessionDevice = {
   browser: string;
   browserVersion?: string;
   os: string;
   osVersion?: string;
-  deviceType: DeviceType;
-  deviceVendor?: string;
-  deviceModel?: string;
+  type: SessionDeviceType;
+  vendor?: string;
+  model?: string;
   label: string;
-  deviceLabel: string;
 };
 
 function joinParts(...parts: Array<string | undefined>): string | undefined {
@@ -19,31 +18,30 @@ function joinParts(...parts: Array<string | undefined>): string | undefined {
   return value || undefined;
 }
 
-function fallbackDeviceLabel(deviceType: DeviceType): string {
-  const labels: Record<DeviceType, string> = {
+function fallbackDeviceLabel(type: SessionDeviceType): string {
+  const labels: Record<SessionDeviceType, string> = {
     desktop: 'Ordinateur',
     tablet: 'Tablette',
     mobile: 'Mobile',
     unknown: 'Appareil',
   };
-  return labels[deviceType];
+  return labels[type];
 }
 
-function deviceTypeFromUa(type?: string): DeviceType {
+function deviceTypeFromUa(type?: string): SessionDeviceType {
   if (type === 'mobile') return 'mobile';
   if (type === 'tablet') return 'tablet';
   if (type === 'console' || type === 'smarttv' || type === 'wearable' || type === 'embedded') return 'unknown';
   return type ? 'unknown' : 'desktop';
 }
 
-export function parseUserAgent(userAgent?: string | null): ParsedUserAgent {
+export function parseUserAgent(userAgent?: string | null): ParsedSessionDevice {
   if (!userAgent) {
     return {
       browser: 'Navigateur inconnu',
       os: 'Système inconnu',
-      deviceType: 'unknown',
+      type: 'unknown',
       label: 'Appareil inconnu',
-      deviceLabel: 'Appareil inconnu',
     };
   }
 
@@ -52,23 +50,18 @@ export function parseUserAgent(userAgent?: string | null): ParsedUserAgent {
   const browserVersion = result.browser.version;
   const os = result.os.name ?? 'Système inconnu';
   const osVersion = result.os.version;
-  const deviceType = deviceTypeFromUa(result.device.type);
-  const deviceVendor = result.device.vendor;
-  const deviceModel = result.device.model;
-
-  const browserLabel = joinParts(browser, browserVersion);
-  const osLabel = joinParts(os, osVersion);
-  const deviceLabel = joinParts(deviceVendor, deviceModel) ?? fallbackDeviceLabel(deviceType);
+  const type = deviceTypeFromUa(result.device.type);
+  const vendor = result.device.vendor;
+  const model = result.device.model;
 
   return {
     browser,
     browserVersion,
     os,
     osVersion,
-    deviceType,
-    deviceVendor,
-    deviceModel,
-    label: [browserLabel, osLabel].filter(Boolean).join(' · '),
-    deviceLabel,
+    type,
+    vendor,
+    model,
+    label: joinParts(vendor, model) ?? fallbackDeviceLabel(type),
   };
 }

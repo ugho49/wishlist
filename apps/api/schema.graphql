@@ -665,11 +665,29 @@ scalar UserRefreshTokenId
 type UserSession {
   createdAt: String!
   current: Boolean! @resolved
+  device: UserSessionDevice!
   expiresAt: String!
   id: UserRefreshTokenId!
   ip: String
   lastUsedAt: String!
-  userAgent: String
+}
+
+type UserSessionDevice {
+  browser: String!
+  browserVersion: String
+  label: String!
+  model: String
+  os: String!
+  osVersion: String
+  type: UserSessionDeviceType!
+  vendor: String
+}
+
+enum UserSessionDeviceType {
+  DESKTOP
+  MOBILE
+  TABLET
+  UNKNOWN
 }
 
 type ValidationRejection {

@@ -45,7 +45,14 @@ query AdminUserDetail($userId: UserId!) {
       sessions {
         id
         ip
-        userAgent
+        device {
+          browser
+          browserVersion
+          os
+          osVersion
+          type
+          label
+        }
         createdAt
         lastUsedAt
         expiresAt
