@@ -12,12 +12,12 @@ import {
   rejectionMessage,
   rejectionPattern,
   type UserProfileCurrentUserQuery,
+  UserSessionDeviceType,
   useRevokeUserSessionMutation,
   useUserProfileCurrentUserQuery,
 } from '../../gql';
 import { useLogout } from '../../hooks/useLogout';
 import { useToast } from '../../hooks/useToast';
-import { type DeviceType, parseUserAgent } from '../../utils/user-agent.utils';
 import { Card } from '../common/Card';
 import { ConfirmButton } from '../common/ConfirmButton';
 import { Loader } from '../common/Loader';
@@ -75,12 +75,12 @@ const SessionActions = styled('div')(({ theme }) => ({
   },
 }));
 
-const deviceIcon = (deviceType: DeviceType) =>
+const deviceIcon = (deviceType: UserSessionDeviceType) =>
   match(deviceType)
-    .with('mobile', () => <PhoneIphoneIcon />)
-    .with('tablet', () => <TabletMacIcon />)
-    .with('desktop', () => <LaptopMacIcon />)
-    .with('unknown', () => <DevicesIcon />)
+    .with(UserSessionDeviceType.Mobile, () => <PhoneIphoneIcon />)
+    .with(UserSessionDeviceType.Tablet, () => <TabletMacIcon />)
+    .with(UserSessionDeviceType.Desktop, () => <LaptopMacIcon />)
+    .with(UserSessionDeviceType.Unknown, () => <DevicesIcon />)
     .exhaustive();
 
 const formatDate = (value: string) => DateTime.fromISO(value).toLocaleString(DateTime.DATETIME_MED);
@@ -122,19 +122,18 @@ export const UserTabSessions = () => {
         ) : (
           <SessionsList>
             {sessions.map(session => {
-              const parsed = parseUserAgent(session.userAgent);
-              const browserLabel = [parsed.browser, parsed.browserVersion].filter(Boolean).join(' ');
-              const osLabel = [parsed.os, parsed.osVersion].filter(Boolean).join(' ');
+              const browserLabel = [session.device.browser, session.device.browserVersion].filter(Boolean).join(' ');
+              const osLabel = [session.device.os, session.device.osVersion].filter(Boolean).join(' ');
               return (
                 <SessionRow key={session.id}>
-                  <SessionIcon>{deviceIcon(parsed.deviceType)}</SessionIcon>
+                  <SessionIcon>{deviceIcon(session.device.type)}</SessionIcon>
                   <SessionDetails>
                     <Stack direction="row" sx={{ alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
                       <Typography sx={{ fontWeight: 500 }}>{browserLabel}</Typography>
                       {session.current && <Chip size="small" color="primary" label="Cet appareil" />}
                     </Stack>
                     <SessionMeta>
-                      {[parsed.deviceLabel, osLabel].filter(Boolean).join(' · ')}
+                      {[session.device.label, osLabel].filter(Boolean).join(' · ')}
                       {session.ip ? ` · ${session.ip}` : ''}
                     </SessionMeta>
                     <SessionMeta>

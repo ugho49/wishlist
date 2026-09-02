@@ -552,7 +552,7 @@ export type AdminUserDetailQuery = { adminUser:
     | { __typename: 'ForbiddenRejection' }
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'UnauthorizedRejection' }
-    | { __typename: 'UserFull', id: Ids["UserId"], firstName: string, lastName: string, email: string, birthday: string | null, pictureUrl: string | null, isEnabled: boolean, authorities: Array<Types.UserAuthorities>, createdAt: string, accounts: Array<{ id: Ids["UserAccountId"], provider: Types.UserAccountProvider, email: string, pictureUrl: string | null, createdAt: string }>, sessions: Array<{ id: Ids["UserRefreshTokenId"], ip: string | null, userAgent: string | null, createdAt: string, lastUsedAt: string, expiresAt: string, current: boolean }> }
+    | { __typename: 'UserFull', id: Ids["UserId"], firstName: string, lastName: string, email: string, birthday: string | null, pictureUrl: string | null, isEnabled: boolean, authorities: Array<Types.UserAuthorities>, createdAt: string, accounts: Array<{ id: Ids["UserAccountId"], provider: Types.UserAccountProvider, email: string, pictureUrl: string | null, createdAt: string }>, sessions: Array<{ id: Ids["UserRefreshTokenId"], ip: string | null, createdAt: string, lastUsedAt: string, expiresAt: string, current: boolean, device: { browser: string, browserVersion: string | null, os: string, osVersion: string | null, type: Types.UserSessionDeviceType, label: string } }> }
     | { __typename: 'ValidationRejection' }
    };
 
@@ -632,7 +632,7 @@ export type UserProfileCurrentUserQuery = { currentUser:
     | { __typename: 'ForbiddenRejection' }
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'UnauthorizedRejection' }
-    | { __typename: 'User', id: Ids["UserId"], email: string, firstName: string, lastName: string, birthday: string | null, pictureUrl: string | null, createdAt: string, accounts: Array<{ id: Ids["UserAccountId"], provider: Types.UserAccountProvider, email: string, pictureUrl: string | null, createdAt: string, updatedAt: string }> | null, sessions: Array<{ id: Ids["UserRefreshTokenId"], ip: string | null, userAgent: string | null, createdAt: string, lastUsedAt: string, expiresAt: string, current: boolean }> | null }
+    | { __typename: 'User', id: Ids["UserId"], email: string, firstName: string, lastName: string, birthday: string | null, pictureUrl: string | null, createdAt: string, accounts: Array<{ id: Ids["UserAccountId"], provider: Types.UserAccountProvider, email: string, pictureUrl: string | null, createdAt: string, updatedAt: string }> | null, sessions: Array<{ id: Ids["UserRefreshTokenId"], ip: string | null, createdAt: string, lastUsedAt: string, expiresAt: string, current: boolean, device: { browser: string, browserVersion: string | null, os: string, osVersion: string | null, type: Types.UserSessionDeviceType, label: string } }> | null }
    };
 
 export type UserProfileEmailSettingsQueryVariables = Exact<{ [key: string]: never; }>;
@@ -2423,7 +2423,14 @@ export const AdminUserDetailDocument = new TypedDocumentString(`
       sessions {
         id
         ip
-        userAgent
+        device {
+          browser
+          browserVersion
+          os
+          osVersion
+          type
+          label
+        }
         createdAt
         lastUsedAt
         expiresAt
@@ -2602,7 +2609,14 @@ export const UserProfileCurrentUserDocument = new TypedDocumentString(`
       sessions {
         id
         ip
-        userAgent
+        device {
+          browser
+          browserVersion
+          os
+          osVersion
+          type
+          label
+        }
         createdAt
         lastUsedAt
         expiresAt

@@ -105,6 +105,12 @@ describe('UserResolver (GraphQL)', () => {
                 createdAt
                 lastUsedAt
                 expiresAt
+                device {
+                  browser
+                  os
+                  type
+                  label
+                }
               }
             }
           }
@@ -122,6 +128,12 @@ describe('UserResolver (GraphQL)', () => {
         createdAt: expect.toBeString(),
         lastUsedAt: expect.toBeString(),
         expiresAt: expect.toBeString(),
+        device: {
+          browser: expect.toBeString(),
+          os: expect.toBeString(),
+          type: expect.toBeString(),
+          label: expect.toBeString(),
+        },
       });
     });
 

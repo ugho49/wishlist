@@ -1,6 +1,5 @@
-import { describe, expect, it } from 'vitest';
-
-import { parseUserAgent } from './user-agent.utils';
+import { parseUserAgent } from './user-agent.parser';
+import { describe, expect, it } from 'bun:test';
 
 const CHROME_MAC =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
@@ -11,7 +10,12 @@ const CHROME_LINUX =
 
 describe('parseUserAgent', () => {
   it('should return an unknown device when the user agent is missing', () => {
-    expect(parseUserAgent(undefined).label).toBe('Appareil inconnu');
+    expect(parseUserAgent(undefined)).toEqual({
+      browser: 'Navigateur inconnu',
+      os: 'Système inconnu',
+      type: 'unknown',
+      label: 'Appareil inconnu',
+    });
   });
 
   it('should extract browser, OS and desktop device from a Chrome Mac UA', () => {
@@ -19,26 +23,26 @@ describe('parseUserAgent', () => {
 
     expect(parsed.browser).toBe('Chrome');
     expect(parsed.os).toBe('macOS');
-    expect(parsed.deviceType).toBe('desktop');
-    expect(parsed.deviceLabel).toBe('Apple Macintosh');
-    expect(parsed.label).toContain('Chrome');
-    expect(parsed.label).toContain('macOS');
+    expect(parsed.type).toBe('desktop');
+    expect(parsed.label).toBe('Apple Macintosh');
+    expect(parsed.vendor).toBe('Apple');
+    expect(parsed.model).toBe('Macintosh');
   });
 
   it('should extract Linux as a desktop OS', () => {
     const parsed = parseUserAgent(CHROME_LINUX);
 
     expect(parsed.os).toBe('Linux');
-    expect(parsed.deviceType).toBe('desktop');
+    expect(parsed.type).toBe('desktop');
   });
 
   it('should extract an iPhone as a mobile device', () => {
     const parsed = parseUserAgent(IPHONE);
 
-    expect(parsed.deviceType).toBe('mobile');
+    expect(parsed.type).toBe('mobile');
     expect(parsed.os).toBe('iOS');
-    expect(parsed.deviceVendor).toBe('Apple');
-    expect(parsed.deviceModel).toBe('iPhone');
-    expect(parsed.deviceLabel).toContain('iPhone');
+    expect(parsed.vendor).toBe('Apple');
+    expect(parsed.model).toBe('iPhone');
+    expect(parsed.label).toContain('iPhone');
   });
 });

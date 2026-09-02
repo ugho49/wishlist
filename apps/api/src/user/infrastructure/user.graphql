@@ -17,10 +17,28 @@ type UserAccount {
   updatedAt: String!
 }
 
+enum UserSessionDeviceType {
+  MOBILE
+  TABLET
+  DESKTOP
+  UNKNOWN
+}
+
+type UserSessionDevice {
+  browser: String!
+  browserVersion: String
+  os: String!
+  osVersion: String
+  type: UserSessionDeviceType!
+  vendor: String
+  model: String
+  label: String!
+}
+
 type UserSession {
   id: UserRefreshTokenId!
   ip: String
-  userAgent: String
+  device: UserSessionDevice!
   createdAt: String!
   lastUsedAt: String!
   expiresAt: String!
