@@ -1,31 +1,27 @@
 import type * as SMTPTransport from 'nodemailer/lib/smtp-transport';
 
-import { Processor, WorkerHost } from '@nestjs/bullmq';
-import { Inject, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { render } from '@wishlist/mail';
 import { Job } from 'bullmq';
 import { createTransport, type Transporter } from 'nodemailer';
-import { InjectPinoLogger, PinoLogger } from 'pino-nestjs';
 
-import { WithPinoContext } from '../queue/decorators/with-pino-context.decorator';
-import { QueueName } from '../queue/queues.type';
+import { QueueProcessor } from '../queue/queue.type';
+import { QueueName } from '../queue/queues.definitions';
 import { MailConfig } from './mail.config';
 import { mapPayloadToTemplate } from './mail.mapper';
 import { MAIL_CONFIG_TOKEN } from './mail.module-definitions';
 import { type MailPayload } from './mail.type';
 
-@Processor(QueueName.MAILS, { concurrency: 5 })
-export class MailProcessor extends WorkerHost {
+@Injectable()
+export class MailProcessor extends QueueProcessor(QueueName.MAILS) {
   private readonly logger = new Logger(MailProcessor.name);
   private readonly transporter: Transporter<SMTPTransport.SentMessageInfo>;
 
   constructor(
     @Inject(MAIL_CONFIG_TOKEN)
     private readonly config: MailConfig,
-    @InjectPinoLogger(MailProcessor.name)
-    private readonly pinoLogger: PinoLogger,
   ) {
-    super();
+    super({ concurrency: 5 });
 
     this.logger.log('Initializing mail transporter ...', {
       host: config.host,
@@ -43,10 +39,7 @@ export class MailProcessor extends WorkerHost {
     });
   }
 
-  @WithPinoContext()
   async process(job: Job<MailPayload>): Promise<void> {
-    this.pinoLogger.assign({ job: { id: job.id, name: job.name, queueName: job.queueName } });
-
     this.logger.log('Processing mail job ...');
 
     const { data } = job;
