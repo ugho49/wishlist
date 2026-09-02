@@ -2,7 +2,7 @@ import type { ItemId, UserId, WishlistId } from '@wishlist/common';
 import type { User } from '../../user/domain/model/user.model';
 
 export type ItemTaker = {
-  user: User;
+  userId: UserId;
   takenAt: Date;
 };
 
@@ -125,7 +125,7 @@ export class WishlistItem {
   }
 
   isTakenBy(userId: UserId) {
-    return this.takers.some(taker => taker.user.id === userId);
+    return this.takers.some(taker => taker.userId === userId);
   }
 
   check(user: User): WishlistItem {
@@ -147,7 +147,7 @@ export class WishlistItem {
 
     return new WishlistItem({
       ...this,
-      takers: this.takers.filter(taker => taker.user.id !== userId),
+      takers: this.takers.filter(taker => taker.userId !== userId),
       updatedAt: new Date(),
     });
   }

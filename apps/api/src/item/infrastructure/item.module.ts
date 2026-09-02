@@ -2,7 +2,8 @@ import { Module } from '@nestjs/common';
 
 import { handlers } from '../application';
 import { ItemDataLoaderFactory } from './item.dataloader';
-import { ItemResolver, ItemTakerFieldResolver } from './item.resolver';
+import { ItemTakerFieldResolver } from './item.field-resolver';
+import { ItemResolver } from './item.resolver';
 import { ItemScheduler } from './item.scheduler';
 import { ItemNotificationsProcessor } from './item-notifications.processor';
 

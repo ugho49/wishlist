@@ -8,12 +8,9 @@ import { DatabaseService } from '../../core/database/database.service';
 import { type DrizzleTransaction } from '../../core/database/transaction-manager';
 import { WishlistItem } from '../../item/domain/wishlist-item.model';
 import { type NewItemsForWishlist, type WishlistItemRepository } from '../../item/domain/wishlist-item.repository';
-import { PostgresUserRepository } from './postgres-user.repository';
-
-const takersWithUser = { takers: { with: { user: true } } } as const;
 
 type ItemRowWithTakers = typeof schema.item.$inferSelect & {
-  takers: (typeof schema.itemTaker.$inferSelect & { user: typeof schema.user.$inferSelect })[];
+  takers: (typeof schema.itemTaker.$inferSelect)[];
 };
 
 @Injectable()
@@ -27,7 +24,7 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
   async findById(id: ItemId): Promise<WishlistItem | undefined> {
     const result = await this.databaseService.db.query.item.findFirst({
       where: eq(schema.item.id, id),
-      with: takersWithUser,
+      with: { takers: true },
     });
 
     return result ? PostgresWishlistItemRepository.toModel(result) : undefined;
@@ -38,7 +35,7 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
 
     const result = await this.databaseService.db.query.item.findMany({
       where: inArray(schema.item.id, ids),
-      with: takersWithUser,
+      with: { takers: true },
     });
 
     return result.map(PostgresWishlistItemRepository.toModel);
@@ -53,7 +50,7 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
   async findByWishlist(wishlistId: WishlistId): Promise<WishlistItem[]> {
     const result = await this.databaseService.db.query.item.findMany({
       where: eq(schema.item.wishlistId, wishlistId),
-      with: takersWithUser,
+      with: { takers: true },
     });
 
     return result.map(PostgresWishlistItemRepository.toModel);
@@ -62,7 +59,7 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
   async findByWishlistIds(wishlistIds: WishlistId[]): Promise<WishlistItem[]> {
     const result = await this.databaseService.db.query.item.findMany({
       where: inArray(schema.item.wishlistId, wishlistIds),
-      with: takersWithUser,
+      with: { takers: true },
     });
 
     return result.map(PostgresWishlistItemRepository.toModel);
@@ -191,7 +188,7 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
         await subTx.insert(schema.itemTaker).values(
           item.takers.map(taker => ({
             itemId: item.id,
-            userId: taker.user.id,
+            userId: taker.userId,
             takenAt: taker.takenAt,
           })),
         );
@@ -216,7 +213,7 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
       isSuggested: row.isSuggested,
       imageUrl: row.pictureUrl ?? undefined,
       takers: row.takers.map(taker => ({
-        user: PostgresUserRepository.toModel(taker.user),
+        userId: taker.userId,
         takenAt: taker.takenAt,
       })),
       createdAt: row.createdAt,

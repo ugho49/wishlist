@@ -1,11 +1,9 @@
 import type { ICurrentUser, WishlistId } from '@wishlist/common';
 
-import { Logger } from '@nestjs/common';
-import { Args, Context, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
-import { type ItemId, type UserId } from '@wishlist/common';
+import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { type ItemId } from '@wishlist/common';
 
 import { GqlCurrentUser } from '../../auth/infrastructure/decorators/user.decorator';
-import { type GraphQLContext } from '../../core/graphql/graphql.context';
 import { ZodPipe } from '../../core/graphql/zod-pipe';
 import {
   type CreateItemInput,
@@ -14,13 +12,11 @@ import {
   type GetImportableItemsOutput,
   type ImportItemsInput,
   type ImportItemsResult,
-  type ItemTaker,
   type ScanItemUrlInput,
   type ScanItemUrlResult,
   type ToggleItemResult,
   type UpdateItemInput,
   type UpdateItemResult,
-  type User,
 } from '../../gql/generated-types';
 import { CreateItemUseCase } from '../application/command/create-item.use-case';
 import { DeleteItemUseCase } from '../application/command/delete-item.use-case';
@@ -38,21 +34,6 @@ import {
   UpdateItemInputSchema,
   WishlistIdSchema,
 } from './item.schema';
-
-@Resolver('ItemTaker')
-export class ItemTakerFieldResolver {
-  private readonly logger = new Logger(ItemTakerFieldResolver.name);
-
-  @ResolveField()
-  async user(@Parent() taker: ItemTaker, @Context() ctx: GraphQLContext): Promise<User | undefined> {
-    const user = await ctx.loaders.user.load(taker.userId as UserId);
-    if (!user) {
-      this.logger.warn('Taker user not found', { userId: taker.userId });
-      return undefined;
-    }
-    return user;
-  }
-}
 
 @Resolver('Item')
 export class ItemResolver {
