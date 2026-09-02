@@ -200,7 +200,7 @@ export type DeleteWishlistResult = ForbiddenRejection | InternalErrorRejection |
 
 export type Event = {
   __typename: 'Event';
-  attendeeIds: Array<Scalars['AttendeeId']['output']>;
+  attendees: Array<EventAttendee>;
   createdAt: Scalars['String']['output'];
   description?: Maybe<Scalars['String']['output']>;
   eventDate: Scalars['String']['output'];

@@ -180,8 +180,7 @@ union DeleteSecretSantaUserResult = ForbiddenRejection | InternalErrorRejection 
 union DeleteWishlistResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
 type Event {
-  attendeeIds: [AttendeeId!]!
-  attendees: [EventAttendee!]! @resolved
+  attendees: [EventAttendee!]!
   createdAt: String!
   description: String
   eventDate: String!
