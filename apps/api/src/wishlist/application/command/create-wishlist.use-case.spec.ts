@@ -80,6 +80,7 @@ describe('CreateWishlistUseCase', () => {
     expect(wishlist.id).toBe(wishlistId);
     expect(wishlist.title).toBe('Ma liste');
     expect(wishlist.description).toBe('Anniversaire');
+    expect(wishlist.ownerId).toBe(owner.id);
     expect(wishlist.hideItems).toBe(true);
     expect(wishlist.eventIds).toEqual([event.id]);
     expect(wishlist.logoUrl).toBeUndefined();

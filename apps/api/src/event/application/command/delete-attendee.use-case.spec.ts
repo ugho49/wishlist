@@ -1,5 +1,6 @@
 import type { AttendeeId, EventId } from '@wishlist/common';
 import type { TransactionManager } from '../../../core/database/transaction-manager';
+import type { WishlistItemRepository } from '../../../item/domain/wishlist-item.repository';
 import type { User } from '../../../user/domain/model/user.model';
 import type { WishlistRepository } from '../../../wishlist/domain/wishlist.repository';
 import type { Event } from '../../domain/model/event.model';
@@ -15,7 +16,6 @@ import { toCurrentUser, UserBuilder } from '../../../../test-utils/builders/user
 import { WishlistBuilder } from '../../../../test-utils/builders/wishlist.builder';
 import { WishlistItemBuilder } from '../../../../test-utils/builders/wishlist-item.builder';
 import { createMock } from '../../../../test-utils/mocks';
-import { Wishlist } from '../../../wishlist/domain/wishlist.model';
 import { AttendeeRole } from '../../domain/attendee-role.enum';
 import { DeleteAttendeeUseCase } from './delete-attendee.use-case';
 import { beforeAll, beforeEach, describe, expect, it, mock } from 'bun:test';
@@ -48,6 +48,7 @@ describe('DeleteAttendeeUseCase', () => {
   const attendeeRepository = createMock<EventAttendeeRepository>();
   const eventRepository = createMock<EventRepository>();
   const wishlistRepository = createMock<WishlistRepository>();
+  const itemRepository = createMock<WishlistItemRepository>();
   const transactionManager = createMock<TransactionManager>();
 
   let useCase: DeleteAttendeeUseCase;
@@ -70,9 +71,16 @@ describe('DeleteAttendeeUseCase', () => {
 
     eventRepository.findByIdOrFail.mockResolvedValue(event);
     wishlistRepository.findByEvent.mockResolvedValue([]);
+    itemRepository.findByWishlist.mockResolvedValue([]);
     transactionManager.runInTransaction.mockImplementation(async fn => fn({} as never));
 
-    useCase = new DeleteAttendeeUseCase(attendeeRepository, eventRepository, wishlistRepository, transactionManager);
+    useCase = new DeleteAttendeeUseCase(
+      attendeeRepository,
+      eventRepository,
+      wishlistRepository,
+      itemRepository,
+      transactionManager,
+    );
   });
 
   it('should reject when the current user cannot edit the event', async () => {
@@ -128,11 +136,11 @@ describe('DeleteAttendeeUseCase', () => {
   });
 
   it('should reject when the attendee wishlist has only this event and items', async () => {
-    const wishlist = new Wishlist({
-      ...new WishlistBuilder().withOwner(participant).withEventIds([event.id]).build(),
-      items: [new WishlistItemBuilder().build()],
-    });
+    const wishlist = new WishlistBuilder().withOwner(participant).withEventIds([event.id]).build();
     wishlistRepository.findByEvent.mockResolvedValueOnce([wishlist]);
+    itemRepository.findByWishlist.mockResolvedValueOnce([
+      new WishlistItemBuilder().withWishlistId(wishlist.id).build(),
+    ]);
 
     await expect(
       useCase.execute({
@@ -141,6 +149,7 @@ describe('DeleteAttendeeUseCase', () => {
         attendeeId: participantAttendee.id,
       }),
     ).rejects.toThrow(ConflictException);
+    expect(itemRepository.findByWishlist).toHaveBeenCalledWith(wishlist.id);
     expect(wishlistRepository.delete).not.toHaveBeenCalled();
     expect(wishlistRepository.save).not.toHaveBeenCalled();
   });
@@ -160,6 +169,7 @@ describe('DeleteAttendeeUseCase', () => {
     expect(wishlistRepository.save).toHaveBeenCalledTimes(1);
     const savedWishlist = wishlistRepository.save.mock.calls[0]?.[0];
     expect(savedWishlist?.eventIds).toEqual([otherEventId]);
+    expect(itemRepository.findByWishlist).not.toHaveBeenCalled();
     expect(wishlistRepository.delete).not.toHaveBeenCalled();
   });
 
@@ -174,6 +184,7 @@ describe('DeleteAttendeeUseCase', () => {
     });
 
     expect(attendeeRepository.delete).toHaveBeenCalledWith(participantAttendee.id, expect.anything());
+    expect(itemRepository.findByWishlist).toHaveBeenCalledWith(wishlist.id);
     expect(wishlistRepository.delete).toHaveBeenCalledWith(wishlist.id, expect.anything());
     expect(wishlistRepository.save).not.toHaveBeenCalled();
   });
