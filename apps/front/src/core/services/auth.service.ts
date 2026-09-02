@@ -49,9 +49,21 @@ class AccessTokenService {
     }
   }
 
+  hasSessionId(token: string): boolean {
+    try {
+      return Boolean(this.decodeToken(token).sid);
+    } catch {
+      return false;
+    }
+  }
+
+  isUsable(token: string): boolean {
+    return this.hasSessionId(token) && !this.isExpired(token);
+  }
+
   isLocalStorageTokenValid = (): boolean => {
     const token = this.getTokenFromLocalStorage();
-    return token !== undefined && !this.isExpired(token.rawToken);
+    return token !== undefined && this.isUsable(token.rawToken);
   };
 
   storeTokenInLocalStorage = (token: string) => {
