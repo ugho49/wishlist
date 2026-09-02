@@ -1,37 +1,19 @@
-import { Processor, WorkerHost } from '@nestjs/bullmq';
-import { Logger } from '@nestjs/common';
-import { Job } from 'bullmq';
-import { InjectPinoLogger, PinoLogger } from 'pino-nestjs';
+import { Injectable, Logger } from '@nestjs/common';
 
-import { WithPinoContext } from '../../core/queue/decorators/with-pino-context.decorator';
-import { QueueName } from '../../core/queue/queues.type';
+import { QueueProcessor } from '../../core/queue/queue.type';
+import { QueueName } from '../../core/queue/queues.definitions';
 import { NotifyNewItemsUseCase } from '../application/command/notify-new-items.use-case';
-import { ItemNotificationJobName } from './item.type';
 
-@Processor(QueueName.ITEMS_NOTIFICATIONS, { concurrency: 1 })
-export class ItemNotificationsProcessor extends WorkerHost {
+@Injectable()
+export class ItemNotificationsProcessor extends QueueProcessor(QueueName.ITEMS_NOTIFICATIONS) {
   private readonly logger = new Logger(ItemNotificationsProcessor.name);
 
-  constructor(
-    private readonly notifyNewItemsUseCase: NotifyNewItemsUseCase,
-    @InjectPinoLogger(ItemNotificationsProcessor.name)
-    private readonly pinoLogger: PinoLogger,
-  ) {
-    super();
+  constructor(private readonly notifyNewItemsUseCase: NotifyNewItemsUseCase) {
+    super({ concurrency: 1, repeat: { pattern: '15 10 * * *' } });
   }
 
-  @WithPinoContext()
-  async process(job: Job<void>): Promise<void> {
-    this.pinoLogger.assign({ job: { id: job.id, name: job.name, queueName: job.queueName, data: job.data } });
+  async process(): Promise<void> {
     this.logger.log('Processing item notifications job ...');
-
-    switch (job.name) {
-      case ItemNotificationJobName.DAILY_NEW_ITEMS_NOTIFIER:
-        await this.notifyNewItemsUseCase.execute();
-        break;
-      default:
-        this.logger.error('Unknown job name ...');
-        break;
-    }
+    await this.notifyNewItemsUseCase.execute();
   }
 }
