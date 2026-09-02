@@ -46,7 +46,7 @@ async function doRefresh(): Promise<string | undefined> {
     const latestRefresh = authService.refreshTokenService.getTokenFromLocalStorage();
     if (latestRefresh && latestRefresh !== refreshToken) {
       const access = authService.accessTokenService.getTokenFromLocalStorage();
-      if (access && !authService.accessTokenService.isExpired(access.rawToken)) {
+      if (access && authService.accessTokenService.isUsable(access.rawToken)) {
         return access.rawToken;
       }
     }
@@ -69,7 +69,7 @@ export function refreshSessionTokens(): Promise<string | undefined> {
 
 export async function getValidAccessToken(): Promise<string | undefined> {
   const access = authService.accessTokenService.getTokenFromLocalStorage();
-  if (access && !authService.accessTokenService.isExpired(access.rawToken)) {
+  if (access && authService.accessTokenService.isUsable(access.rawToken)) {
     return access.rawToken;
   }
 

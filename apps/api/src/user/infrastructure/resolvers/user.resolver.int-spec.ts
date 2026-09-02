@@ -1,9 +1,20 @@
 import type { RequestApp } from '@wishlist/api-test-utils';
 
+import { createHmac } from 'node:crypto';
 import { Fixtures, useTestApp } from '@wishlist/api-test-utils';
 import { DateTime } from 'luxon';
 
 import { PasswordManager } from '../../../auth/infrastructure/util/password-manager';
+
+function signAccessToken(payload: Record<string, unknown>): string {
+  const header = Buffer.from(JSON.stringify({ alg: 'HS512', typ: 'JWT' })).toString('base64url');
+  const body = Buffer.from(JSON.stringify(payload)).toString('base64url');
+  const data = `${header}.${body}`;
+  const signature = createHmac('sha512', process.env.AUTH_ACCESS_TOKEN_SECRET ?? '')
+    .update(data)
+    .digest('base64url');
+  return `${data}.${signature}`;
+}
 
 /**
  * GraphQL integration tests for the User resolver and User field resolver.
@@ -72,6 +83,30 @@ describe('UserResolver (GraphQL)', () => {
     it('should not succeed when not authenticated', async () => {
       const anon = await getRequest();
       const res = await anon.post('/graphql').send({ query }).expect(200);
+
+      const hasTopLevelError = Array.isArray(res.body.errors) && res.body.errors.length > 0;
+      const typename = res.body.data?.currentUser?.__typename;
+      expect(typename !== 'User' || hasTopLevelError).toBe(true);
+    });
+
+    it('should reject an access token without a session id', async () => {
+      const email = 'legacy-token@test.fr';
+      const userId = await fixtures.insertUser({
+        email,
+        firstname: 'Legacy',
+        lastname: 'Token',
+      });
+      const now = Math.floor(Date.now() / 1000);
+      const token = signAccessToken({
+        sub: userId,
+        email,
+        authorities: ['ROLE_USER'],
+        iat: now,
+        exp: now + 15 * 60,
+      });
+
+      const anon = await getRequest();
+      const res = await anon.post('/graphql').auth(token, { type: 'bearer' }).send({ query }).expect(200);
 
       const hasTopLevelError = Array.isArray(res.body.errors) && res.body.errors.length > 0;
       const typename = res.body.data?.currentUser?.__typename;

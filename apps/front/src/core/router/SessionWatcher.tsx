@@ -28,7 +28,11 @@ export const SessionWatcher: React.FC = () => {
   const checkTokenExpiration = useCallback(async () => {
     const refreshToken = authService.refreshTokenService.getTokenFromLocalStorage();
 
-    if (accessToken && !authService.accessTokenService.isExpiringWithin(accessToken, REFRESH_BEFORE_EXPIRY_MS)) {
+    if (
+      accessToken &&
+      authService.accessTokenService.hasSessionId(accessToken) &&
+      !authService.accessTokenService.isExpiringWithin(accessToken, REFRESH_BEFORE_EXPIRY_MS)
+    ) {
       return;
     }
 

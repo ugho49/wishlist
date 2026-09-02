@@ -1,6 +1,6 @@
 import type { ConfigType } from '@nestjs/config';
 
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { type AccessTokenJwtPayload, createCurrentUserFromPayload } from '@wishlist/common';
 import { ExtractJwt, Strategy } from 'passport-jwt';
@@ -19,6 +19,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   validate(payload: AccessTokenJwtPayload) {
+    if (!payload.sid) {
+      throw new UnauthorizedException('Invalid token');
+    }
+
     return createCurrentUserFromPayload(payload);
   }
 }

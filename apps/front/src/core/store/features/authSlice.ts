@@ -15,15 +15,23 @@ export interface AuthState {
   accessToken?: string;
 }
 
-const initUser = (): ICurrentUser | undefined => {
-  const value = accessTokenService.getTokenFromLocalStorage();
-  if (!value) return undefined;
-  return createCurrentUserFromPayload(value.payload);
+const readInitialAccessToken = () => {
+  const stored = accessTokenService.getTokenFromLocalStorage();
+  if (!stored) return;
+
+  if (accessTokenService.isUsable(stored.rawToken) || refreshTokenService.hasToken()) {
+    return stored;
+  }
+
+  accessTokenService.removeTokenFromStorage();
+  return;
 };
 
+const initialAccessToken = readInitialAccessToken();
+
 const initialState: AuthState = {
-  user: initUser(),
-  accessToken: accessTokenService.getTokenFromLocalStorage()?.rawToken,
+  user: initialAccessToken ? createCurrentUserFromPayload(initialAccessToken.payload) : undefined,
+  accessToken: initialAccessToken?.rawToken,
 };
 
 export const authSlice = createSlice({
