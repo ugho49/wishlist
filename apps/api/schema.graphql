@@ -196,7 +196,7 @@ type EventAttendee {
   id: AttendeeId!
   pendingEmail: String
   role: AttendeeRole!
-  user: User
+  user: User @resolved
   userId: UserId
 }
 

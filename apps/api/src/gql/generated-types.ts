@@ -216,7 +216,6 @@ export type EventAttendee = {
   id: Scalars['AttendeeId']['output'];
   pendingEmail?: Maybe<Scalars['String']['output']>;
   role: AttendeeRole;
-  user?: Maybe<User>;
   userId?: Maybe<Scalars['UserId']['output']>;
 };
 

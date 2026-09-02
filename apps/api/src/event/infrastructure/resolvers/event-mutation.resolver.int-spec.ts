@@ -38,7 +38,9 @@ describe('EventMutationResolver (GraphQL)', () => {
             description
             icon
             eventDate
-            attendeeIds
+            attendees {
+              id
+            }
           }
           ... on ValidationRejection {
             errors {
@@ -94,7 +96,7 @@ describe('EventMutationResolver (GraphQL)', () => {
           eventDate,
         });
         // Creator is automatically added as a maintainer attendee.
-        expect(res.body.data.createEvent.attendeeIds).toHaveLength(1);
+        expect(res.body.data.createEvent.attendees).toHaveLength(1);
 
         await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
           id: res.body.data.createEvent.id,
@@ -127,7 +129,7 @@ describe('EventMutationResolver (GraphQL)', () => {
           .expect(200);
 
         expect(res.body.data.createEvent.__typename).toBe('Event');
-        expect(res.body.data.createEvent.attendeeIds).toHaveLength(2);
+        expect(res.body.data.createEvent.attendees).toHaveLength(2);
 
         await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(1);
         await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(2);

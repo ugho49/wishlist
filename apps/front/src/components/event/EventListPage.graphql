@@ -7,7 +7,9 @@ query EventListPageGetEvents($filters: EventPaginationFilters!) {
         title
         icon
         eventDate
-        attendeeIds
+        attendees {
+          id
+        }
         wishlistIds
       }
       pagination {

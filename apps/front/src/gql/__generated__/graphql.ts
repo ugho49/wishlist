@@ -115,7 +115,7 @@ export type EventListPageGetEventsQueryVariables = Exact<{
 
 export type EventListPageGetEventsQuery = { events:
     | { __typename: 'ForbiddenRejection' }
-    | { __typename: 'GetEventsPagedResponse', data: Array<{ id: Ids["EventId"], title: string, icon: string | null, eventDate: string, attendeeIds: Array<Ids["AttendeeId"]>, wishlistIds: Array<Ids["WishlistId"]> }>, pagination: { totalPages: number, totalElements: number, pageNumber: number, pageSize: number } }
+    | { __typename: 'GetEventsPagedResponse', data: Array<{ id: Ids["EventId"], title: string, icon: string | null, eventDate: string, wishlistIds: Array<Ids["WishlistId"]>, attendees: Array<{ id: Ids["AttendeeId"] }> }>, pagination: { totalPages: number, totalElements: number, pageNumber: number, pageSize: number } }
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'UnauthorizedRejection' }
    };
@@ -1261,7 +1261,9 @@ export const EventListPageGetEventsDocument = new TypedDocumentString(`
         title
         icon
         eventDate
-        attendeeIds
+        attendees {
+          id
+        }
         wishlistIds
       }
       pagination {
