@@ -11,6 +11,6 @@ export class HealthService {
   ) {}
 
   check(): Promise<HealthCheckResult> {
-    return this.health.check([() => this.databaseHealthIndicator.pingCheck('database')]);
+    return this.health.check([() => this.databaseHealthIndicator.pingCheck()]);
   }
 }
