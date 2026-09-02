@@ -278,6 +278,7 @@ export type HealthResult = {
 };
 
 export enum HealthStatus {
+  Degraded = 'DEGRADED',
   Error = 'ERROR',
   Ok = 'OK',
   ShuttingDown = 'SHUTTING_DOWN'

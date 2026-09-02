@@ -17,6 +17,7 @@ export class HealthResolver {
       .with('error', () => HealthStatus.Error)
       .with('ok', () => HealthStatus.Ok)
       .with('shutting_down', () => HealthStatus.ShuttingDown)
+      .with('degraded', () => HealthStatus.Degraded)
       .exhaustive();
 
     return { __typename: 'HealthResult', status };

@@ -255,6 +255,7 @@ type HealthResult {
 }
 
 enum HealthStatus {
+  DEGRADED
   ERROR
   OK
   SHUTTING_DOWN

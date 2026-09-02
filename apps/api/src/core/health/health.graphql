@@ -2,6 +2,7 @@ enum HealthStatus {
   ERROR
   OK
   SHUTTING_DOWN
+  DEGRADED
 }
 
 type HealthResult {
