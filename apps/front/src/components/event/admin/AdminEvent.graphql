@@ -41,7 +41,6 @@ query AdminEventGetEvent($id: EventId!) {
       createdAt
       attendees {
         id
-        userId
         pendingEmail
         role
         user {

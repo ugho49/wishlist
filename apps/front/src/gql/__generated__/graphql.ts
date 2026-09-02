@@ -170,7 +170,7 @@ export type AddEventAttendeeMutationVariables = Exact<{
 
 
 export type AddEventAttendeeMutation = { addEventAttendee:
-    | { __typename: 'EventAttendee', id: Ids["AttendeeId"], userId: Ids["UserId"] | null, pendingEmail: string | null, role: Types.AttendeeRole, user: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null } | null }
+    | { __typename: 'EventAttendee', id: Ids["AttendeeId"], pendingEmail: string | null, role: Types.AttendeeRole, user: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null } | null }
     | { __typename: 'ForbiddenRejection' }
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'NotFoundRejection' }
@@ -215,7 +215,7 @@ export type EventPageGetEventQueryVariables = Exact<{
 
 
 export type EventPageGetEventQuery = { event:
-    | { __typename: 'Event', id: Ids["EventId"], title: string, description: string | null, icon: string | null, eventDate: string, attendees: Array<{ id: Ids["AttendeeId"], userId: Ids["UserId"] | null, pendingEmail: string | null, role: Types.AttendeeRole, user: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null } | null }>, wishlists: Array<{ id: Ids["WishlistId"], title: string, logoUrl: string | null, config: { hideItems: boolean }, owner: { id: Ids["UserId"], firstName: string, lastName: string, pictureUrl: string | null } }> }
+    | { __typename: 'Event', id: Ids["EventId"], title: string, description: string | null, icon: string | null, eventDate: string, attendees: Array<{ id: Ids["AttendeeId"], pendingEmail: string | null, role: Types.AttendeeRole, user: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null } | null }>, wishlists: Array<{ id: Ids["WishlistId"], title: string, logoUrl: string | null, config: { hideItems: boolean }, owner: { id: Ids["UserId"], firstName: string, lastName: string, pictureUrl: string | null } }> }
     | { __typename: 'ForbiddenRejection' }
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'NotFoundRejection', message: string }
@@ -253,7 +253,7 @@ export type AdminEventGetEventQueryVariables = Exact<{
 
 
 export type AdminEventGetEventQuery = { adminEvent:
-    | { __typename: 'Event', id: Ids["EventId"], title: string, description: string | null, icon: string | null, eventDate: string, createdAt: string, attendees: Array<{ id: Ids["AttendeeId"], userId: Ids["UserId"] | null, pendingEmail: string | null, role: Types.AttendeeRole, user: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null } | null }>, wishlists: Array<{ id: Ids["WishlistId"], title: string, logoUrl: string | null, createdAt: string, config: { hideItems: boolean }, owner: { id: Ids["UserId"], firstName: string, lastName: string, pictureUrl: string | null }, coOwner: { id: Ids["UserId"], firstName: string, lastName: string } | null }> }
+    | { __typename: 'Event', id: Ids["EventId"], title: string, description: string | null, icon: string | null, eventDate: string, createdAt: string, attendees: Array<{ id: Ids["AttendeeId"], pendingEmail: string | null, role: Types.AttendeeRole, user: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null } | null }>, wishlists: Array<{ id: Ids["WishlistId"], title: string, logoUrl: string | null, createdAt: string, config: { hideItems: boolean }, owner: { id: Ids["UserId"], firstName: string, lastName: string, pictureUrl: string | null }, coOwner: { id: Ids["UserId"], firstName: string, lastName: string } | null }> }
     | { __typename: 'ForbiddenRejection' }
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'NotFoundRejection' }
@@ -396,9 +396,9 @@ export type ImportItemsMutation = { importItems:
     | { __typename: 'ValidationRejection', errors: Array<{ field: string, message: string }> }
    };
 
-export type SecretSantaUserItemFragment = { id: Ids["SecretSantaUserId"], attendeeId: Ids["AttendeeId"], exclusions: Array<Ids["SecretSantaUserId"]>, attendee: { id: Ids["AttendeeId"], pendingEmail: string | null, role: Types.AttendeeRole, userId: Ids["UserId"] | null, user: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null } | null } };
+export type SecretSantaUserItemFragment = { id: Ids["SecretSantaUserId"], attendeeId: Ids["AttendeeId"], exclusions: Array<Ids["SecretSantaUserId"]>, attendee: { id: Ids["AttendeeId"], pendingEmail: string | null, role: Types.AttendeeRole, user: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null } | null } };
 
-export type SecretSantaItemFragment = { id: Ids["SecretSantaId"], eventId: Ids["EventId"], description: string | null, budget: number | null, status: Types.SecretSantaStatus, createdAt: string, updatedAt: string, users: Array<{ id: Ids["SecretSantaUserId"], attendeeId: Ids["AttendeeId"], exclusions: Array<Ids["SecretSantaUserId"]>, attendee: { id: Ids["AttendeeId"], pendingEmail: string | null, role: Types.AttendeeRole, userId: Ids["UserId"] | null, user: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null } | null } }> };
+export type SecretSantaItemFragment = { id: Ids["SecretSantaId"], eventId: Ids["EventId"], description: string | null, budget: number | null, status: Types.SecretSantaStatus, createdAt: string, updatedAt: string, users: Array<{ id: Ids["SecretSantaUserId"], attendeeId: Ids["AttendeeId"], exclusions: Array<Ids["SecretSantaUserId"]>, attendee: { id: Ids["AttendeeId"], pendingEmail: string | null, role: Types.AttendeeRole, user: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null } | null } }> };
 
 export type GetSecretSantaForEventQueryVariables = Exact<{
   eventId: Ids["EventId"];
@@ -408,7 +408,7 @@ export type GetSecretSantaForEventQueryVariables = Exact<{
 export type GetSecretSantaForEventQuery = { secretSanta:
     | { __typename: 'ForbiddenRejection' }
     | { __typename: 'InternalErrorRejection' }
-    | { __typename: 'SecretSanta', id: Ids["SecretSantaId"], eventId: Ids["EventId"], description: string | null, budget: number | null, status: Types.SecretSantaStatus, createdAt: string, updatedAt: string, users: Array<{ id: Ids["SecretSantaUserId"], attendeeId: Ids["AttendeeId"], exclusions: Array<Ids["SecretSantaUserId"]>, attendee: { id: Ids["AttendeeId"], pendingEmail: string | null, role: Types.AttendeeRole, userId: Ids["UserId"] | null, user: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null } | null } }> }
+    | { __typename: 'SecretSanta', id: Ids["SecretSantaId"], eventId: Ids["EventId"], description: string | null, budget: number | null, status: Types.SecretSantaStatus, createdAt: string, updatedAt: string, users: Array<{ id: Ids["SecretSantaUserId"], attendeeId: Ids["AttendeeId"], exclusions: Array<Ids["SecretSantaUserId"]>, attendee: { id: Ids["AttendeeId"], pendingEmail: string | null, role: Types.AttendeeRole, user: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null } | null } }> }
     | { __typename: 'UnauthorizedRejection' }
    | null };
 
@@ -418,7 +418,7 @@ export type GetMySecretSantaDrawQueryVariables = Exact<{
 
 
 export type GetMySecretSantaDrawQuery = { mySecretSantaDraw:
-    | { __typename: 'EventAttendee', id: Ids["AttendeeId"], pendingEmail: string | null, role: Types.AttendeeRole, userId: Ids["UserId"] | null, user: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null } | null }
+    | { __typename: 'EventAttendee', id: Ids["AttendeeId"], pendingEmail: string | null, role: Types.AttendeeRole, user: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null } | null }
     | { __typename: 'ForbiddenRejection' }
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'UnauthorizedRejection' }
@@ -432,7 +432,7 @@ export type CreateSecretSantaMutationVariables = Exact<{
 export type CreateSecretSantaMutation = { createSecretSanta:
     | { __typename: 'ForbiddenRejection' }
     | { __typename: 'InternalErrorRejection' }
-    | { __typename: 'SecretSanta', id: Ids["SecretSantaId"], eventId: Ids["EventId"], description: string | null, budget: number | null, status: Types.SecretSantaStatus, createdAt: string, updatedAt: string, users: Array<{ id: Ids["SecretSantaUserId"], attendeeId: Ids["AttendeeId"], exclusions: Array<Ids["SecretSantaUserId"]>, attendee: { id: Ids["AttendeeId"], pendingEmail: string | null, role: Types.AttendeeRole, userId: Ids["UserId"] | null, user: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null } | null } }> }
+    | { __typename: 'SecretSanta', id: Ids["SecretSantaId"], eventId: Ids["EventId"], description: string | null, budget: number | null, status: Types.SecretSantaStatus, createdAt: string, updatedAt: string, users: Array<{ id: Ids["SecretSantaUserId"], attendeeId: Ids["AttendeeId"], exclusions: Array<Ids["SecretSantaUserId"]>, attendee: { id: Ids["AttendeeId"], pendingEmail: string | null, role: Types.AttendeeRole, user: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null } | null } }> }
     | { __typename: 'UnauthorizedRejection' }
     | { __typename: 'ValidationRejection', errors: Array<{ field: string, message: string }> }
    };
@@ -495,7 +495,7 @@ export type AddSecretSantaUsersMutationVariables = Exact<{
 
 
 export type AddSecretSantaUsersMutation = { addSecretSantaUsers:
-    | { __typename: 'AddSecretSantaUsersOutput', users: Array<{ id: Ids["SecretSantaUserId"], attendeeId: Ids["AttendeeId"], exclusions: Array<Ids["SecretSantaUserId"]>, attendee: { id: Ids["AttendeeId"], pendingEmail: string | null, role: Types.AttendeeRole, userId: Ids["UserId"] | null, user: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null } | null } }> }
+    | { __typename: 'AddSecretSantaUsersOutput', users: Array<{ id: Ids["SecretSantaUserId"], attendeeId: Ids["AttendeeId"], exclusions: Array<Ids["SecretSantaUserId"]>, attendee: { id: Ids["AttendeeId"], pendingEmail: string | null, role: Types.AttendeeRole, user: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null } | null } }> }
     | { __typename: 'ForbiddenRejection' }
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'UnauthorizedRejection' }
@@ -966,7 +966,6 @@ export const SecretSantaUserItemFragmentDoc = new TypedDocumentString(`
     id
     pendingEmail
     role
-    userId
     user {
       id
       firstName
@@ -998,7 +997,6 @@ export const SecretSantaItemFragmentDoc = new TypedDocumentString(`
     id
     pendingEmail
     role
-    userId
     user {
       id
       firstName
@@ -1383,7 +1381,6 @@ export const AddEventAttendeeDocument = new TypedDocumentString(`
     __typename
     ... on EventAttendee {
       id
-      userId
       pendingEmail
       role
       user {
@@ -1477,7 +1474,6 @@ export const EventPageGetEventDocument = new TypedDocumentString(`
       eventDate
       attendees {
         id
-        userId
         pendingEmail
         role
         user {
@@ -1620,7 +1616,6 @@ export const AdminEventGetEventDocument = new TypedDocumentString(`
       createdAt
       attendees {
         id
-        userId
         pendingEmail
         role
         user {
@@ -2018,7 +2013,6 @@ export const GetSecretSantaForEventDocument = new TypedDocumentString(`
     id
     pendingEmail
     role
-    userId
     user {
       id
       firstName
@@ -2065,7 +2059,6 @@ export const GetMySecretSantaDrawDocument = new TypedDocumentString(`
       id
       pendingEmail
       role
-      userId
       user {
         id
         firstName
@@ -2115,7 +2108,6 @@ export const CreateSecretSantaDocument = new TypedDocumentString(`
     id
     pendingEmail
     role
-    userId
     user {
       id
       firstName
@@ -2284,7 +2276,6 @@ export const AddSecretSantaUsersDocument = new TypedDocumentString(`
     id
     pendingEmail
     role
-    userId
     user {
       id
       firstName

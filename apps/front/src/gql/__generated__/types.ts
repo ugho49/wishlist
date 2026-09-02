@@ -211,7 +211,6 @@ export type EventAttendee = {
   pendingEmail?: Maybe<Scalars['String']['output']>;
   role: AttendeeRole;
   user?: Maybe<User>;
-  userId?: Maybe<Scalars['UserId']['output']>;
 };
 
 export type EventPaginationFilters = {

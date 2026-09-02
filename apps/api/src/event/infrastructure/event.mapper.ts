@@ -9,6 +9,7 @@ import {
   type Event as GqlEvent,
   type EventAttendee as GqlEventAttendee,
 } from '../../gql/generated-types';
+import { userMapper } from '../../user/infrastructure/user.mapper';
 import { AttendeeRole } from '../domain/attendee-role.enum';
 
 function toGqlEvent(event: Event): GqlEvent {
@@ -36,7 +37,7 @@ function toGqlEventAttendee(eventAttendee: EventAttendee): GqlEventAttendee {
   return {
     __typename: 'EventAttendee',
     id: eventAttendee.id,
-    userId: eventAttendee.user?.id,
+    user: eventAttendee.user ? userMapper.toGqlUser(eventAttendee.user) : undefined,
     pendingEmail: eventAttendee.pendingEmail,
     role,
   };

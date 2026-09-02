@@ -9,7 +9,6 @@ query EventPageGetEvent($eventId: EventId!) {
       eventDate
       attendees {
         id
-        userId
         pendingEmail
         role
         user {

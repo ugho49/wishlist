@@ -9,8 +9,7 @@ enum AttendeeRole {
 
 type EventAttendee {
   id: AttendeeId!
-  userId: UserId
-  user: User @resolved
+  user: User
   pendingEmail: String
   role: AttendeeRole!
 }

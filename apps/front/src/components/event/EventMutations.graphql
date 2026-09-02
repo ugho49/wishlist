@@ -42,7 +42,6 @@ mutation AddEventAttendee($eventId: EventId!, $input: AddEventAttendeeInput!) {
     __typename
     ... on EventAttendee {
       id
-      userId
       pendingEmail
       role
       user {
