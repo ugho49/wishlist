@@ -29,7 +29,7 @@ export class UserAddedAsCoOwnerToWishlistHandler implements IEventHandler<UserAd
       this.logger.log('Sending mail to co-owner...', { wishlistId: wishlist.id });
       await this.mailService.sendMail({
         to: coOwner.email,
-        subject: "[Wishlist] Vous avez été ajouté comme co-gestionnaire d'une liste",
+        subject: "Vous avez été ajouté comme co-gestionnaire d'une liste",
         template: MailTemplate.ADDED_TO_WISHLIST_AS_CO_OWNER,
         context: {
           wishlistTitle: params.wishlist.title,

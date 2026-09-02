@@ -87,7 +87,7 @@ export class NotifyNewItemsUseCase {
   }) {
     await this.mailService.sendMail({
       to: param.emails,
-      subject: '[Wishlist] Des souhaits ont été ajoutés !!',
+      subject: 'Des souhaits ont été ajoutés !!',
       template: MailTemplate.NEW_ITEMS_REMINDER,
       context: {
         wishlistTitle: param.wishlist.title,

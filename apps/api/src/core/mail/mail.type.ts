@@ -1,3 +1,11 @@
+/**
+ * The sender email address.
+ * Each new domain addition must be validated by the email provider.
+ */
+export enum MailSender {
+  CONTACT = 'Wishlist App <contact@wishlistapp.fr>',
+}
+
 export enum MailTemplate {
   WELCOME_USER = 'welcome-user',
   SECRET_SANTA_DRAW = 'secret-santa-draw',
@@ -131,3 +139,7 @@ export type MailPayload = BaseMailPayload &
         context: EmailChangedSuccessContext;
       }
   );
+
+export type MailProvider = {
+  send(options: MailPayload): Promise<void>;
+};

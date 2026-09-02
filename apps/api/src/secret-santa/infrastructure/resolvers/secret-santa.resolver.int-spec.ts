@@ -669,7 +669,7 @@ describe('SecretSantaResolver (GraphQL)', () => {
       await expectMail()
         .waitFor(500)
         .hasNumberOfEmails(3)
-        .hasSubject('[Wishlist] Votre tirage au sort secret santa')
+        .hasSubject('Votre tirage au sort secret santa')
         .hasReceivers(['user2@test.fr', 'user3@test.fr', Fixtures.BASE_USER_EMAIL]);
     });
 
@@ -810,7 +810,7 @@ describe('SecretSantaResolver (GraphQL)', () => {
       await expectMail()
         .waitFor(500)
         .hasNumberOfEmails(1)
-        .hasSubject("[Wishlist] Le secret santa viens d'être annulé")
+        .hasSubject("Le secret santa viens d'être annulé")
         .hasReceivers([Fixtures.BASE_USER_EMAIL, 'user2@test.fr']);
     });
 

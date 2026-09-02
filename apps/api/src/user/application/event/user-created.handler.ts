@@ -49,7 +49,7 @@ export class UserCreatedHandler implements IEventHandler<UserCreatedEvent> {
       this.logger.log('Sending welcome email to user...', { userId: params.user.id });
       await this.mailService.sendMail({
         to: params.user.email,
-        subject: '[Wishlist] Bienvenue !!!',
+        subject: 'Bienvenue !!!',
         template: MailTemplate.WELCOME_USER,
         context: {
           mainUrl: this.frontendRoutes.routes.home(),

@@ -18,7 +18,7 @@ export class EmailChangedhandler implements IEventHandler<EmailChangedEvent> {
       // Send confirmation email to the old email address
       this.mailService.sendMail({
         to: params.oldEmail,
-        subject: '[Wishlist] Votre adresse email a été modifiée',
+        subject: 'Votre adresse email a été modifiée',
         template: MailTemplate.EMAIL_CHANGED_CONFIRMATION,
         context: {
           newEmail: params.newEmail,
@@ -27,7 +27,7 @@ export class EmailChangedhandler implements IEventHandler<EmailChangedEvent> {
       // Send confirmation email to the new email address
       this.mailService.sendMail({
         to: params.newEmail,
-        subject: '[Wishlist] Votre adresse email a été mise à jour',
+        subject: 'Votre adresse email a été mise à jour',
         template: MailTemplate.EMAIL_CHANGED_SUCCESS,
         context: {
           email: params.newEmail,

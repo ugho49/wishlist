@@ -22,7 +22,7 @@ export class SecretSantaCancelledHandler implements IEventHandler<SecretSantaCan
     this.logger.log('Sending email to attendees', { eventTitle, eventId, attendeeEmails });
     await this.mailService.sendMail({
       to: attendeeEmails,
-      subject: "[Wishlist] Le secret santa viens d'être annulé",
+      subject: "Le secret santa viens d'être annulé",
       template: MailTemplate.SECRET_SANTA_CANCEL,
       context: {
         eventTitle,

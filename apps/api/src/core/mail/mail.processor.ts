@@ -1,59 +1,19 @@
-import type * as SMTPTransport from 'nodemailer/lib/smtp-transport';
+import type { MailPayload, MailProvider } from './mail.type';
 
-import { Inject, Injectable, Logger } from '@nestjs/common';
-import { render } from '@wishlist/mail';
+import { Inject, Injectable } from '@nestjs/common';
 import { Job } from 'bullmq';
-import { createTransport, type Transporter } from 'nodemailer';
 
 import { QueueProcessor } from '../queue/queue.type';
 import { QueueName } from '../queue/queues.definitions';
-import { MailConfig } from './mail.config';
-import { mapPayloadToTemplate } from './mail.mapper';
-import { MAIL_CONFIG_TOKEN } from './mail.module-definitions';
-import { type MailPayload } from './mail.type';
+import { MAIL_PROVIDER } from './mail.constants';
 
 @Injectable()
 export class MailProcessor extends QueueProcessor(QueueName.MAILS) {
-  private readonly logger = new Logger(MailProcessor.name);
-  private readonly transporter: Transporter<SMTPTransport.SentMessageInfo>;
-
-  constructor(
-    @Inject(MAIL_CONFIG_TOKEN)
-    private readonly config: MailConfig,
-  ) {
+  constructor(@Inject(MAIL_PROVIDER) private readonly mailProvider: MailProvider) {
     super({ concurrency: 5 });
-
-    this.logger.log('Initializing mail transporter ...', {
-      host: config.host,
-      port: config.port,
-    });
-
-    this.transporter = createTransport({
-      host: config.host,
-      port: config.port,
-      secure: false, // Use `true` for port 465, `false` for all other ports
-      auth: {
-        user: config.username,
-        pass: config.password,
-      },
-    });
   }
 
-  async process(job: Job<MailPayload>): Promise<void> {
-    this.logger.log('Processing mail job ...');
-
-    const { data } = job;
-
-    this.logger.log('Rendering template ...', { template: data.template });
-    const html = await render(mapPayloadToTemplate(data));
-
-    this.logger.log('Sending mail ...', { to: data.to, subject: data.subject, template: data.template });
-
-    await this.transporter.sendMail({
-      from: this.config.from,
-      to: data.to,
-      subject: data.subject,
-      html,
-    });
+  async process(job: Job<MailPayload>) {
+    await this.mailProvider.send(job.data);
   }
 }

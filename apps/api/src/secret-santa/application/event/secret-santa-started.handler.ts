@@ -35,7 +35,7 @@ export class SecretSantaStartedHandler implements IEventHandler<SecretSantaStart
         chunk.map(({ email }) =>
           this.mailService.sendMail({
             to: email,
-            subject: '[Wishlist] Votre tirage au sort secret santa',
+            subject: 'Votre tirage au sort secret santa',
             template: MailTemplate.SECRET_SANTA_DRAW,
             context: {
               eventTitle,

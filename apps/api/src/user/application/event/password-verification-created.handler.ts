@@ -20,7 +20,7 @@ export class PasswordVerificationCreatedHandler implements IEventHandler<Passwor
 
     await this.mailService.sendMail({
       to: params.email,
-      subject: '[Wishlist] Reinitialiser le mot de passe',
+      subject: 'Reinitialiser le mot de passe',
       template: MailTemplate.RESET_PASSWORD,
       context: {
         url: this.frontendRoutes.routes.user.resetPassword({ email: params.email, token: params.token }),
