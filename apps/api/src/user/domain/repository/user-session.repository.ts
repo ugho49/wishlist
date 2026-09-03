@@ -8,7 +8,6 @@ export interface UserSessionRepository {
   findByTokenHash(tokenHash: string): Promise<UserSession | undefined>;
   findActiveByUserId(userId: UserId): Promise<UserSession[]>;
   findActiveByUserIds(userIds: UserId[]): Promise<UserSession[]>;
-  findNeedingDeviceBackfill(): Promise<UserSession[]>;
   save(session: UserSession, tx?: DrizzleTransaction): Promise<void>;
   revokeAllByUserId(userId: UserId, params?: { exceptId?: UserSessionId; tx?: DrizzleTransaction }): Promise<void>;
   deleteRevokedOlderThan(date: Date): Promise<number>;

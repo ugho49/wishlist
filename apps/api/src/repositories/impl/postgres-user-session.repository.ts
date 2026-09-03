@@ -7,7 +7,6 @@ import { DatabaseService } from '../../core/database/database.service';
 import { type DrizzleTransaction } from '../../core/database/transaction-manager';
 import { UserSession } from '../../user/domain/model/user-session.model';
 import { type UserSessionRepository } from '../../user/domain/repository/user-session.repository';
-import { UNKNOWN_SESSION_DEVICE } from '../../user/domain/user-session-device-type.enum';
 
 @Injectable()
 export class PostgresUserSessionRepository implements UserSessionRepository {
@@ -47,17 +46,6 @@ export class PostgresUserSessionRepository implements UserSessionRepository {
         gt(schema.userSession.expiresAt, new Date()),
       ),
       orderBy: [desc(schema.userSession.lastUsedAt)],
-    });
-
-    return rows.map(row => PostgresUserSessionRepository.toModel(row));
-  }
-
-  async findNeedingDeviceBackfill(): Promise<UserSession[]> {
-    const rows = await this.databaseService.db.query.userSession.findMany({
-      where: and(
-        isNotNull(schema.userSession.userAgent),
-        eq(schema.userSession.browser, UNKNOWN_SESSION_DEVICE.browser),
-      ),
     });
 
     return rows.map(row => PostgresUserSessionRepository.toModel(row));

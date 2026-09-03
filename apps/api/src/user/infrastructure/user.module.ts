@@ -12,7 +12,6 @@ import { UserSessionFieldResolver } from './resolvers/user-session.field-resolve
 import userConfig from './user.config';
 import { UserDataLoaderFactory } from './user.dataloader';
 import { UserSessionCleanupProcessor } from './user-session-cleanup.processor';
-import { UserSessionDeviceBackfill } from './user-session-device.backfill';
 
 @Module({
   imports: [ConfigModule.forFeature(userConfig)],
@@ -26,7 +25,6 @@ import { UserSessionDeviceBackfill } from './user-session-device.backfill';
     UserSessionFieldResolver,
     UserDataLoaderFactory,
     UserSessionCleanupProcessor,
-    UserSessionDeviceBackfill,
   ],
   exports: [UserDataLoaderFactory],
 })
