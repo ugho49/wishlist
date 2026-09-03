@@ -8,7 +8,6 @@ export interface WishlistRepository {
   findByIdOrFail(wishlistId: WishlistId): Promise<Wishlist>;
   findByIds(wishlistIds: WishlistId[]): Promise<Wishlist[]>;
   findByEvent(eventId: EventId): Promise<Wishlist[]>;
-  findEmailsToNotify(params: { ownerId: UserId; wishlistId: WishlistId }): Promise<string[]>;
   findByUserPaginated(params: {
     userId: UserId;
     pagination: { take: number; skip: number };

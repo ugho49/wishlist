@@ -1,8 +1,10 @@
-import type { ItemId, UserId, WishlistId } from '@wishlist/common';
+import type { EventId, ItemId, UserId, WishlistId } from '@wishlist/common';
 import type { DrizzleTransaction } from '../../core/database/transaction-manager';
 import type { WishlistItem } from './wishlist-item.model';
 
-export interface NewItemsForWishlist {
+export interface NewItemsForEventWishlist {
+  eventId: EventId;
+  eventTitle: string;
   wishlistId: WishlistId;
   wishlistTitle: string;
   ownerId: UserId;
@@ -17,7 +19,7 @@ export interface WishlistItemRepository {
   findByIdOrFail(id: ItemId): Promise<WishlistItem>;
   findByWishlist(wishlistId: WishlistId): Promise<WishlistItem[]>;
   findByWishlistIds(wishlistIds: WishlistId[]): Promise<WishlistItem[]>;
-  findAllNewItems(since: Date): Promise<NewItemsForWishlist[]>;
+  findAllNewItems(since: Date): Promise<NewItemsForEventWishlist[]>;
   findImportableItems(params: { userId: UserId; wishlistId: WishlistId }): Promise<WishlistItem[]>;
   save(item: WishlistItem, tx?: DrizzleTransaction): Promise<void>;
   delete(id: ItemId, tx?: DrizzleTransaction): Promise<void>;

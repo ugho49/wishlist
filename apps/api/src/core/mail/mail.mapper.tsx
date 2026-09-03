@@ -40,12 +40,7 @@ export const mapPayloadToTemplate = (payload: MailPayload): ReactElement =>
       <SecretSantaCancelEmail eventTitle={context.eventTitle} eventUrl={context.eventUrl} />
     ))
     .with({ template: MailTemplate.NEW_ITEMS_REMINDER }, ({ context }) => (
-      <NewItemsReminderEmail
-        nbItems={context.nbItems}
-        userName={context.userName}
-        wishlistTitle={context.wishlistTitle}
-        wishlistUrl={context.wishlistUrl}
-      />
+      <NewItemsReminderEmail eventTitle={context.eventTitle} eventUrl={context.eventUrl} updates={context.updates} />
     ))
     .with({ template: MailTemplate.ADDED_TO_EVENT }, ({ context }) => (
       <AddedToEventEmail eventTitle={context.eventTitle} eventUrl={context.eventUrl} invitedBy={context.invitedBy} />
