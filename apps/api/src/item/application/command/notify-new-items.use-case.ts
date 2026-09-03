@@ -1,14 +1,20 @@
-import type { NewItemsForWishlist, WishlistItemRepository } from '../../domain/wishlist-item.repository';
+import type { NewItemsForEventWishlist, WishlistItemRepository } from '../../domain/wishlist-item.repository';
 
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { type WishlistId } from '@wishlist/common';
+import { type EventId } from '@wishlist/common';
 import { DateTime } from 'luxon';
 
 import { FrontendRoutesService } from '../../../core/frontend-routes/frontend-routes.service';
 import { MailService } from '../../../core/mail/mail.service';
 import { MailTemplate } from '../../../core/mail/mail.type';
+import { type EventRepository } from '../../../event/domain/repository/event.repository';
 import { REPOSITORIES } from '../../../repositories/repositories.constants';
-import { type WishlistRepository } from '../../../wishlist/domain/wishlist.repository';
+
+type EventDigest = {
+  eventId: EventId;
+  eventTitle: string;
+  updates: NewItemsForEventWishlist[];
+};
 
 @Injectable()
 export class NotifyNewItemsUseCase {
@@ -16,7 +22,7 @@ export class NotifyNewItemsUseCase {
 
   constructor(
     @Inject(REPOSITORIES.WISHLIST_ITEM) private readonly itemRepository: WishlistItemRepository,
-    @Inject(REPOSITORIES.WISHLIST) private readonly wishlistRepository: WishlistRepository,
+    @Inject(REPOSITORIES.EVENT) private readonly eventRepository: EventRepository,
     private readonly mailService: MailService,
     private readonly frontendRoutes: FrontendRoutesService,
   ) {}
@@ -27,74 +33,119 @@ export class NotifyNewItemsUseCase {
 
       this.logger.log(`Fetching new items to send daily notification since "${oneDayAgo.toISOString()}" ...`);
 
-      const newItemsForWishlists = await this.itemRepository.findAllNewItems(oneDayAgo);
+      const rows = await this.itemRepository.findAllNewItems(oneDayAgo);
 
-      if (newItemsForWishlists.length === 0) {
+      if (rows.length === 0) {
         this.logger.log('No new items to send daily notification');
         return;
       }
 
-      this.logger.log(`Found ${newItemsForWishlists.length} new items to send daily notification`);
+      const digests = this.groupByEvent(rows);
+      this.logger.log(`Found new items across ${digests.length} event(s) to send daily notification`);
 
-      for (const newItemsForWishlist of newItemsForWishlists) {
-        await this.notify(newItemsForWishlist);
+      for (const digest of digests) {
+        await this.notify(digest);
       }
     } catch (e) {
       this.logger.error('Fail to send new item notification', e);
     }
   }
 
-  private async notify(dto: NewItemsForWishlist) {
+  private async notify(digest: EventDigest) {
     try {
-      this.logger.log(`Notifying wishlist "${dto.wishlistId}" ...`, {
-        wishlistId: dto.wishlistId,
-        nbNewItems: dto.nbNewItems,
+      this.logger.log(`Notifying event "${digest.eventId}" ...`, {
+        eventId: digest.eventId,
+        nbWishlists: digest.updates.length,
       });
 
-      const allEmailToNotify = await this.wishlistRepository.findEmailsToNotify({
-        wishlistId: dto.wishlistId,
-        ownerId: dto.ownerId,
-      });
+      const recipients = await this.eventRepository.findEmailsToNotify(digest.eventId);
 
-      if (allEmailToNotify.length === 0) {
-        this.logger.log(`No emails to notify for wishlist ${dto.wishlistId}`);
+      if (recipients.length === 0) {
+        this.logger.log(`No emails to notify for event ${digest.eventId}`);
         return;
       }
 
-      this.logger.log(
-        `Notifying ${allEmailToNotify.length} peoples for new items in wishlist "${dto.wishlistId}" ...`,
-        { wishlistId: dto.wishlistId },
-      );
+      const recapGroups = new Map<string, { emails: string[]; updates: NewItemsForEventWishlist[] }>();
 
-      await this.sendNotifyEmail({
-        emails: allEmailToNotify,
-        nbNewItems: dto.nbNewItems,
-        wishlist: { id: dto.wishlistId, title: dto.wishlistTitle },
-        ownerName: dto.ownerName,
-      });
+      for (const recipient of recipients) {
+        const updates = digest.updates.filter(update => update.ownerId !== recipient.userId);
+        if (updates.length === 0) continue;
 
-      this.logger.log(`✅ New items notification sent successfully for wishlist "${dto.wishlistId}"`);
+        const key = updates
+          .map(update => update.wishlistId)
+          .sort((a, b) => a.localeCompare(b))
+          .join(',');
+        const group = recapGroups.get(key);
+        if (group) {
+          group.emails.push(recipient.email);
+        } else {
+          recapGroups.set(key, { emails: [recipient.email], updates });
+        }
+      }
+
+      if (recapGroups.size === 0) {
+        this.logger.log(`No personalized recaps to send for event ${digest.eventId}`);
+        return;
+      }
+
+      for (const group of recapGroups.values()) {
+        this.logger.log(`Notifying ${group.emails.length} people for new items in event "${digest.eventId}" ...`, {
+          eventId: digest.eventId,
+        });
+
+        await this.sendNotifyEmail({
+          emails: group.emails,
+          eventId: digest.eventId,
+          eventTitle: digest.eventTitle,
+          updates: group.updates,
+        });
+      }
+
+      this.logger.log(`✅ New items notification sent successfully for event "${digest.eventId}"`);
     } catch (e) {
-      this.logger.error(`Fail to notify new items for wishlist ${dto.wishlistId}`, e);
+      this.logger.error(`Fail to notify new items for event ${digest.eventId}`, e);
     }
   }
 
   private async sendNotifyEmail(param: {
     emails: string[];
-    wishlist: { id: WishlistId; title: string };
-    ownerName: string;
-    nbNewItems: number;
+    eventId: EventId;
+    eventTitle: string;
+    updates: NewItemsForEventWishlist[];
   }) {
     await this.mailService.sendMail({
       to: param.emails,
-      subject: 'Des souhaits ont été ajoutés !!',
+      subject: `Nouveautés sur ${param.eventTitle}`,
       template: MailTemplate.NEW_ITEMS_REMINDER,
       context: {
-        wishlistTitle: param.wishlist.title,
-        wishlistUrl: this.frontendRoutes.routes.wishlist.byId(param.wishlist.id),
-        nbItems: param.nbNewItems,
-        userName: param.ownerName,
+        eventTitle: param.eventTitle,
+        eventUrl: this.frontendRoutes.routes.event.byId(param.eventId),
+        updates: param.updates.map(update => ({
+          ownerName: update.ownerName,
+          wishlistTitle: update.wishlistTitle,
+          wishlistUrl: this.frontendRoutes.routes.wishlist.byId(update.wishlistId),
+          nbItems: update.nbNewItems,
+        })),
       },
     });
+  }
+
+  private groupByEvent(rows: NewItemsForEventWishlist[]): EventDigest[] {
+    const byEvent = new Map<EventId, EventDigest>();
+
+    for (const row of rows) {
+      const existing = byEvent.get(row.eventId);
+      if (existing) {
+        existing.updates.push(row);
+      } else {
+        byEvent.set(row.eventId, {
+          eventId: row.eventId,
+          eventTitle: row.eventTitle,
+          updates: [row],
+        });
+      }
+    }
+
+    return [...byEvent.values()];
   }
 }

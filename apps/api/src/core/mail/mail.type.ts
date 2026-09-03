@@ -42,10 +42,14 @@ export type ResetPasswordContext = {
 };
 
 export type NewItemsReminderContext = {
-  wishlistTitle: string;
-  wishlistUrl: string;
-  nbItems: number;
-  userName: string;
+  eventTitle: string;
+  eventUrl: string;
+  updates: Array<{
+    ownerName: string;
+    wishlistTitle: string;
+    wishlistUrl: string;
+    nbItems: number;
+  }>;
 };
 
 export type AddedToEventContext = {

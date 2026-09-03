@@ -7,7 +7,7 @@ import { DateTime } from 'luxon';
 import { DatabaseService } from '../../core/database/database.service';
 import { type DrizzleTransaction } from '../../core/database/transaction-manager';
 import { WishlistItem } from '../../item/domain/wishlist-item.model';
-import { type NewItemsForWishlist, type WishlistItemRepository } from '../../item/domain/wishlist-item.repository';
+import { type NewItemsForEventWishlist, type WishlistItemRepository } from '../../item/domain/wishlist-item.repository';
 
 type ItemRowWithTakers = typeof schema.item.$inferSelect & {
   takers: (typeof schema.itemTaker.$inferSelect)[];
@@ -65,9 +65,11 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
     return result.map(PostgresWishlistItemRepository.toModel);
   }
 
-  async findAllNewItems(since: Date): Promise<NewItemsForWishlist[]> {
+  async findAllNewItems(since: Date): Promise<NewItemsForEventWishlist[]> {
     const rows = await this.databaseService.db
       .select({
+        eventId: schema.event.id,
+        eventTitle: schema.event.title,
         wishlistId: schema.item.wishlistId,
         wishlistTitle: schema.wishlist.title,
         ownerId: schema.wishlist.ownerId,
@@ -77,8 +79,12 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
       .from(schema.item)
       .innerJoin(schema.wishlist, eq(schema.wishlist.id, schema.item.wishlistId))
       .innerJoin(schema.user, eq(schema.user.id, schema.wishlist.ownerId))
+      .innerJoin(schema.eventWishlist, eq(schema.eventWishlist.wishlistId, schema.wishlist.id))
+      .innerJoin(schema.event, eq(schema.event.id, schema.eventWishlist.eventId))
       .where(and(eq(schema.item.isSuggested, false), gt(schema.item.createdAt, since)))
       .groupBy(
+        schema.event.id,
+        schema.event.title,
         schema.item.wishlistId,
         schema.wishlist.title,
         schema.wishlist.ownerId,
@@ -87,11 +93,13 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
       );
 
     return rows.map(row => ({
+      eventId: row.eventId,
+      eventTitle: row.eventTitle,
       wishlistId: row.wishlistId,
       wishlistTitle: row.wishlistTitle,
       ownerId: row.ownerId,
       ownerName: row.ownerName,
-      nbNewItems: row.nbNewItems,
+      nbNewItems: Number(row.nbNewItems),
     }));
   }
 

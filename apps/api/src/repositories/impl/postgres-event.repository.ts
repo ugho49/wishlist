@@ -1,7 +1,7 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { schema } from '@wishlist/api-drizzle';
 import { type EventId, type UserId, uuid } from '@wishlist/common';
-import { and, count, desc, eq, gte, inArray, type SelectedFields } from 'drizzle-orm';
+import { and, count, desc, eq, gte, inArray, isNotNull, isNull, or, type SelectedFields } from 'drizzle-orm';
 import { DateTime } from 'luxon';
 
 import { DatabaseService } from '../../core/database/database.service';
@@ -125,6 +125,26 @@ export class PostgresEventRepository implements EventRepository {
       .map(PostgresEventRepository.toModel);
 
     return { events, totalCount };
+  }
+
+  async findEmailsToNotify(eventId: EventId): Promise<Array<{ userId: UserId; email: string }>> {
+    const result = await this.databaseService.db
+      .select({
+        userId: schema.user.id,
+        email: schema.user.email,
+      })
+      .from(schema.eventAttendee)
+      .innerJoin(schema.user, eq(schema.user.id, schema.eventAttendee.userId))
+      .leftJoin(schema.userEmailSetting, eq(schema.userEmailSetting.userId, schema.user.id))
+      .where(
+        and(
+          eq(schema.eventAttendee.eventId, eventId),
+          isNotNull(schema.eventAttendee.userId),
+          or(isNull(schema.userEmailSetting.id), eq(schema.userEmailSetting.dailyNewItemNotification, true)),
+        ),
+      );
+
+    return result;
   }
 
   async save(event: Event, tx?: DrizzleTransaction): Promise<void> {

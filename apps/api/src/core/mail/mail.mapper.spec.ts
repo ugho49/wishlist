@@ -23,7 +23,11 @@ const payloads: MailPayload[] = [
   {
     ...base,
     template: MailTemplate.NEW_ITEMS_REMINDER,
-    context: { wishlistTitle: 'Liste', wishlistUrl: 'https://x/w', nbItems: 3, userName: 'Jean' },
+    context: {
+      eventTitle: 'Noël',
+      eventUrl: 'https://x/e',
+      updates: [{ ownerName: 'Jean', wishlistTitle: 'Liste', wishlistUrl: 'https://x/w', nbItems: 3 }],
+    },
   },
   {
     ...base,

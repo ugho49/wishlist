@@ -183,28 +183,6 @@ export class PostgresWishlistRepository implements WishlistRepository {
     return result.length > 0;
   }
 
-  async findEmailsToNotify(params: { ownerId: UserId; wishlistId: WishlistId }): Promise<string[]> {
-    const result = await this.databaseService.db
-      .select({ email: schema.user.email })
-      .from(schema.wishlist)
-      .leftJoin(schema.eventWishlist, eq(schema.wishlist.id, schema.eventWishlist.wishlistId))
-      .leftJoin(schema.event, eq(schema.eventWishlist.eventId, schema.event.id))
-      .leftJoin(schema.eventAttendee, eq(schema.event.id, schema.eventAttendee.eventId))
-      .leftJoin(schema.user, eq(schema.eventAttendee.userId, schema.user.id))
-      .leftJoin(schema.userEmailSetting, eq(schema.user.id, schema.userEmailSetting.userId))
-      .where(
-        and(
-          eq(schema.wishlist.id, params.wishlistId),
-          // Exclude the wishlist owner
-          sql`${schema.user.id} != ${params.ownerId}`,
-          // Include users who either have no email settings (default to notify) or have notifications enabled
-          or(sql`${schema.userEmailSetting.id} IS NULL`, eq(schema.userEmailSetting.dailyNewItemNotification, true)),
-        ),
-      );
-
-    return result.map(row => row.email).filter((email): email is string => email !== null);
-  }
-
   static toModel(
     row: typeof schema.wishlist.$inferSelect & {
       eventWishlists: (typeof schema.eventWishlist.$inferSelect)[];
