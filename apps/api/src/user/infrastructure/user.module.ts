@@ -11,6 +11,7 @@ import { UserAdminResolver } from './resolvers/user-admin.resolver';
 import { UserSessionFieldResolver } from './resolvers/user-session.field-resolver';
 import userConfig from './user.config';
 import { UserDataLoaderFactory } from './user.dataloader';
+import { UserSessionCleanupProcessor } from './user-session-cleanup.processor';
 import { UserSessionDeviceBackfill } from './user-session-device.backfill';
 
 @Module({
@@ -24,6 +25,7 @@ import { UserSessionDeviceBackfill } from './user-session-device.backfill';
     UserAdminFieldResolver,
     UserSessionFieldResolver,
     UserDataLoaderFactory,
+    UserSessionCleanupProcessor,
     UserSessionDeviceBackfill,
   ],
   exports: [UserDataLoaderFactory],

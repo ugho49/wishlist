@@ -11,4 +11,5 @@ export interface UserSessionRepository {
   findNeedingDeviceBackfill(): Promise<UserSession[]>;
   save(session: UserSession, tx?: DrizzleTransaction): Promise<void>;
   revokeAllByUserId(userId: UserId, params?: { exceptId?: UserSessionId; tx?: DrizzleTransaction }): Promise<void>;
+  deleteRevokedOlderThan(date: Date): Promise<number>;
 }

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { schema } from '@wishlist/api-drizzle';
 import { type UserId, type UserSessionId, uuid } from '@wishlist/common';
-import { and, desc, eq, gt, inArray, isNotNull, isNull, ne } from 'drizzle-orm';
+import { and, desc, eq, gt, inArray, isNotNull, isNull, lt, ne } from 'drizzle-orm';
 
 import { DatabaseService } from '../../core/database/database.service';
 import { type DrizzleTransaction } from '../../core/database/transaction-manager';
@@ -125,6 +125,15 @@ export class PostgresUserSessionRepository implements UserSessionRepository {
           params?.exceptId ? ne(schema.userSession.id, params.exceptId) : undefined,
         ),
       );
+  }
+
+  async deleteRevokedOlderThan(date: Date): Promise<number> {
+    const deleted = await this.databaseService.db
+      .delete(schema.userSession)
+      .where(and(isNotNull(schema.userSession.revokedAt), lt(schema.userSession.revokedAt, date)))
+      .returning({ id: schema.userSession.id });
+
+    return deleted.length;
   }
 
   static toModel(row: typeof schema.userSession.$inferSelect): UserSession {
