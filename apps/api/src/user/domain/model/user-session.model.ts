@@ -1,7 +1,7 @@
 import type { UserId, UserSessionId } from '@wishlist/common';
+import type { UserSessionDeviceType } from '../user-session-device-type.enum';
 
 import { parseUserAgent } from '../../infrastructure/user-agent.parser';
-import { UNKNOWN_SESSION_DEVICE, UserSessionDeviceType } from '../user-session-device-type.enum';
 
 export type UserSessionProps = {
   id: UserSessionId;
@@ -94,25 +94,6 @@ export class UserSession {
 
   isActive(now = new Date()): boolean {
     return this.revokedAt === undefined && this.expiresAt > now;
-  }
-
-  needsDeviceBackfill(): boolean {
-    return this.userAgent !== undefined && this.browser === UNKNOWN_SESSION_DEVICE.browser;
-  }
-
-  withParsedDevice(): UserSession {
-    const device = parseUserAgent(this.userAgent);
-    return new UserSession({
-      ...this,
-      browser: device.browser,
-      browserVersion: device.browserVersion,
-      os: device.os,
-      osVersion: device.osVersion,
-      deviceType: device.type,
-      vendor: device.vendor,
-      model: device.model,
-      label: device.label,
-    });
   }
 
   touch(params: { ip?: string }): UserSession {

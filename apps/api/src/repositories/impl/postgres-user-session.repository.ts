@@ -1,13 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { schema } from '@wishlist/api-drizzle';
 import { type UserId, type UserSessionId, uuid } from '@wishlist/common';
-import { and, desc, eq, gt, inArray, isNotNull, isNull, ne } from 'drizzle-orm';
+import { and, desc, eq, gt, inArray, isNotNull, isNull, lt, ne } from 'drizzle-orm';
 
 import { DatabaseService } from '../../core/database/database.service';
 import { type DrizzleTransaction } from '../../core/database/transaction-manager';
 import { UserSession } from '../../user/domain/model/user-session.model';
 import { type UserSessionRepository } from '../../user/domain/repository/user-session.repository';
-import { UNKNOWN_SESSION_DEVICE } from '../../user/domain/user-session-device-type.enum';
 
 @Injectable()
 export class PostgresUserSessionRepository implements UserSessionRepository {
@@ -47,17 +46,6 @@ export class PostgresUserSessionRepository implements UserSessionRepository {
         gt(schema.userSession.expiresAt, new Date()),
       ),
       orderBy: [desc(schema.userSession.lastUsedAt)],
-    });
-
-    return rows.map(row => PostgresUserSessionRepository.toModel(row));
-  }
-
-  async findNeedingDeviceBackfill(): Promise<UserSession[]> {
-    const rows = await this.databaseService.db.query.userSession.findMany({
-      where: and(
-        isNotNull(schema.userSession.userAgent),
-        eq(schema.userSession.browser, UNKNOWN_SESSION_DEVICE.browser),
-      ),
     });
 
     return rows.map(row => PostgresUserSessionRepository.toModel(row));
@@ -125,6 +113,15 @@ export class PostgresUserSessionRepository implements UserSessionRepository {
           params?.exceptId ? ne(schema.userSession.id, params.exceptId) : undefined,
         ),
       );
+  }
+
+  async deleteRevokedOlderThan(date: Date): Promise<number> {
+    const deleted = await this.databaseService.db
+      .delete(schema.userSession)
+      .where(and(isNotNull(schema.userSession.revokedAt), lt(schema.userSession.revokedAt, date)))
+      .returning({ id: schema.userSession.id });
+
+    return deleted.length;
   }
 
   static toModel(row: typeof schema.userSession.$inferSelect): UserSession {

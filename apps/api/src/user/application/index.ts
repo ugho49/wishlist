@@ -1,5 +1,6 @@
 import { AdminRevokeAllUserSessionsUseCase } from './command/admin-revoke-all-user-sessions.use-case';
 import { AdminRevokeUserSessionUseCase } from './command/admin-revoke-user-session.use-case';
+import { CleanupRevokedUserSessionsUseCase } from './command/cleanup-revoked-user-sessions.use-case';
 import { ConfirmEmailChangeUseCase } from './command/confirm-email-change.use-case';
 import { CreateEmailChangeVerificationUseCase } from './command/create-email-change-verification.use-case';
 import { CreatePasswordVerificationUseCase } from './command/create-password-verification.use-case';
@@ -32,6 +33,7 @@ import { GetUsersPaginatedUseCase } from './query/get-users-paginated.use-case';
 
 export const handlers = [
   // Commands
+  CleanupRevokedUserSessionsUseCase,
   CreateUserUseCase,
   CreateEmailChangeVerificationUseCase,
   ConfirmEmailChangeUseCase,
