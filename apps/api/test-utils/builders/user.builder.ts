@@ -1,4 +1,4 @@
-import type { ICurrentUser, UserId, UserRefreshTokenId } from '@wishlist/common';
+import type { ICurrentUser, UserId, UserSessionId } from '@wishlist/common';
 
 import { uuid } from '@wishlist/common';
 
@@ -73,7 +73,7 @@ export class UserBuilder {
   }
 }
 
-export function toCurrentUser(user: User, sessionId?: UserRefreshTokenId): ICurrentUser {
+export function toCurrentUser(user: User, sessionId?: UserSessionId): ICurrentUser {
   return {
     id: user.id,
     email: user.email,

@@ -1,15 +1,15 @@
-import type { ICurrentUser, UserId, UserRefreshTokenId } from '@wishlist/common';
+import type { ICurrentUser, UserId, UserSessionId } from '@wishlist/common';
 
 import { Inject, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 
 import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { type UserRepository } from '../../domain/repository/user.repository';
-import { type UserRefreshTokenRepository } from '../../domain/repository/user-refresh-token.repository';
+import { type UserSessionRepository } from '../../domain/repository/user-session.repository';
 
 export type AdminRevokeUserSessionInput = {
   currentUser: ICurrentUser;
   userId: UserId;
-  sessionId: UserRefreshTokenId;
+  sessionId: UserSessionId;
 };
 
 @Injectable()
@@ -19,8 +19,8 @@ export class AdminRevokeUserSessionUseCase {
   constructor(
     @Inject(REPOSITORIES.USER)
     private readonly userRepository: UserRepository,
-    @Inject(REPOSITORIES.USER_REFRESH_TOKEN)
-    private readonly refreshTokenRepository: UserRefreshTokenRepository,
+    @Inject(REPOSITORIES.USER_SESSION)
+    private readonly sessionRepository: UserSessionRepository,
   ) {}
 
   async execute(input: AdminRevokeUserSessionInput): Promise<void> {
@@ -33,7 +33,7 @@ export class AdminRevokeUserSessionUseCase {
       throw new UnauthorizedException('You cannot manage this user');
     }
 
-    const session = await this.refreshTokenRepository.findById(input.sessionId);
+    const session = await this.sessionRepository.findById(input.sessionId);
 
     if (!session || session.userId !== input.userId) {
       throw new NotFoundException('Session not found');
@@ -43,6 +43,6 @@ export class AdminRevokeUserSessionUseCase {
       return;
     }
 
-    await this.refreshTokenRepository.save(session.revoke());
+    await this.sessionRepository.save(session.revoke());
   }
 }

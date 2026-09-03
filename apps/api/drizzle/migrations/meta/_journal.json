@@ -99,6 +99,13 @@
       "when": 1788191659624,
       "tag": "0013_user-refresh-token",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1788427122198,
+      "tag": "0014_rename-user-refresh-token-to-user-session",
+      "breakpoints": true
     }
   ]
 }

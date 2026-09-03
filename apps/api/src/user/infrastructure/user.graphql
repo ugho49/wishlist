@@ -1,6 +1,6 @@
 scalar UserAccountId
 scalar UserId
-scalar UserRefreshTokenId
+scalar UserSessionId
 
 enum UserAccountProvider {
   PASSWORD
@@ -36,7 +36,7 @@ type UserSessionDevice {
 }
 
 type UserSession {
-  id: UserRefreshTokenId!
+  id: UserSessionId!
   ip: String
   device: UserSessionDevice!
   createdAt: String!
@@ -150,7 +150,7 @@ input ResetPasswordInput {
 }
 
 input RevokeSessionInput {
-  sessionId: UserRefreshTokenId!
+  sessionId: UserSessionId!
 }
 
 union RegisterUserResult =

@@ -4,7 +4,7 @@ import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/commo
 
 import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { type UserRepository } from '../../domain/repository/user.repository';
-import { type UserRefreshTokenRepository } from '../../domain/repository/user-refresh-token.repository';
+import { type UserSessionRepository } from '../../domain/repository/user-session.repository';
 
 export type AdminRevokeAllUserSessionsInput = {
   currentUser: ICurrentUser;
@@ -18,8 +18,8 @@ export class AdminRevokeAllUserSessionsUseCase {
   constructor(
     @Inject(REPOSITORIES.USER)
     private readonly userRepository: UserRepository,
-    @Inject(REPOSITORIES.USER_REFRESH_TOKEN)
-    private readonly refreshTokenRepository: UserRefreshTokenRepository,
+    @Inject(REPOSITORIES.USER_SESSION)
+    private readonly sessionRepository: UserSessionRepository,
   ) {}
 
   async execute(input: AdminRevokeAllUserSessionsInput): Promise<void> {
@@ -32,6 +32,6 @@ export class AdminRevokeAllUserSessionsUseCase {
       throw new UnauthorizedException('You cannot manage this user');
     }
 
-    await this.refreshTokenRepository.revokeAllByUserId(input.userId);
+    await this.sessionRepository.revokeAllByUserId(input.userId);
   }
 }

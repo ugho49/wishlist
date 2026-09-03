@@ -1,5 +1,5 @@
 import type { ConfigType } from '@nestjs/config';
-import type { UserRefreshTokenRepository } from '../../../user/domain/repository/user-refresh-token.repository';
+import type { UserSessionRepository } from '../../../user/domain/repository/user-session.repository';
 import type { LoginOutput } from '../login.types';
 
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
@@ -28,8 +28,8 @@ export class LoginUseCase extends CommonLoginUseCase {
     private readonly userRepository: UserRepository,
     @Inject(REPOSITORIES.USER_ACCOUNT)
     private readonly userAccountRepository: UserAccountRepository,
-    @Inject(REPOSITORIES.USER_REFRESH_TOKEN)
-    refreshTokenRepository: UserRefreshTokenRepository,
+    @Inject(REPOSITORIES.USER_SESSION)
+    sessionRepository: UserSessionRepository,
     @Inject(authConfig.KEY)
     config: ConfigType<typeof authConfig>,
     jwtService: JwtService,
@@ -37,7 +37,7 @@ export class LoginUseCase extends CommonLoginUseCase {
     super({
       jwtService,
       loggerName: LoginUseCase.name,
-      refreshTokenRepository,
+      sessionRepository,
       refreshTokenDuration: config.refreshToken.duration,
     });
   }

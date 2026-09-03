@@ -8,6 +8,7 @@ import { PasswordManager } from '../src/auth/infrastructure/util/password-manage
 import { AttendeeRole } from '../src/event/domain/attendee-role.enum';
 import { type SecretSantaStatus } from '../src/secret-santa/domain/secret-santa-status.enum';
 import { Authorities } from '../src/user/domain/authorities.enum';
+import { parseUserAgent } from '../src/user/infrastructure/user-agent.parser';
 
 function toSqlArray(values: readonly string[]): string {
   return `{${values.map(value => `"${value.replaceAll('\\', '\\\\').replaceAll('"', '\\"')}"`).join(',')}}`;
@@ -16,7 +17,7 @@ function toSqlArray(values: readonly string[]): string {
 export class Fixtures {
   static readonly USER_TABLE = '"user"';
   static readonly USER_ACCOUNT_TABLE = 'user_account';
-  static readonly USER_REFRESH_TOKEN_TABLE = 'user_refresh_token';
+  static readonly USER_SESSION_TABLE = 'user_session';
   static readonly USER_EMAIL_SETTING_TABLE = 'user_email_setting';
   static readonly USER_PASSWORD_VERIFICATION_TABLE = 'user_password_verification';
   static readonly USER_EMAIL_CHANGE_VERIFICATION_TABLE = 'user_email_change_verification';
@@ -93,7 +94,7 @@ export class Fixtures {
     return { userId, attendeeId };
   }
 
-  async insertUserRefreshToken(parameters: {
+  async insertUserSession(parameters: {
     userId: string;
     tokenHash: string;
     expiresAt: Date;
@@ -103,10 +104,27 @@ export class Fixtures {
   }): Promise<string> {
     const id = uuid();
     const { userId, tokenHash, expiresAt, revokedAt, ip, userAgent } = parameters;
+    const device = parseUserAgent(userAgent);
 
     await this.sql.unsafe(
-      `INSERT INTO ${Fixtures.USER_REFRESH_TOKEN_TABLE} (id, user_id, token_hash, user_agent, ip, expires_at, revoked_at) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-      [id, userId, tokenHash, userAgent ?? null, ip ?? null, expiresAt.toISOString(), revokedAt?.toISOString() ?? null],
+      `INSERT INTO ${Fixtures.USER_SESSION_TABLE} (id, user_id, token_hash, user_agent, browser, browser_version, os, os_version, device_type, vendor, model, label, ip, expires_at, revoked_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`,
+      [
+        id,
+        userId,
+        tokenHash,
+        userAgent ?? null,
+        device.browser,
+        device.browserVersion ?? null,
+        device.os,
+        device.osVersion ?? null,
+        device.type,
+        device.vendor ?? null,
+        device.model ?? null,
+        device.label,
+        ip ?? null,
+        expiresAt.toISOString(),
+        revokedAt?.toISOString() ?? null,
+      ],
     );
 
     return id;

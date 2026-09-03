@@ -99,6 +99,6 @@ extend type Mutation {
   adminUpdateUserProfile(userId: UserId!, input: AdminUpdateUserProfileInput!): AdminUpdateUserProfileResult!
   adminDeleteUser(userId: UserId!): AdminDeleteUserResult!
   adminRemoveUserPicture(userId: UserId!): AdminRemoveUserPictureResult!
-  adminRevokeUserSession(userId: UserId!, sessionId: UserRefreshTokenId!): AdminRevokeUserSessionResult!
+  adminRevokeUserSession(userId: UserId!, sessionId: UserSessionId!): AdminRevokeUserSessionResult!
   adminRevokeAllUserSessions(userId: UserId!): AdminRevokeAllUserSessionsResult!
 }

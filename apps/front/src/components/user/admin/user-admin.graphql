@@ -95,7 +95,7 @@ mutation AdminRemoveUserPicture($userId: UserId!) {
   }
 }
 
-mutation AdminRevokeUserSession($userId: UserId!, $sessionId: UserRefreshTokenId!) {
+mutation AdminRevokeUserSession($userId: UserId!, $sessionId: UserSessionId!) {
   adminRevokeUserSession(userId: $userId, sessionId: $sessionId) {
     __typename
     ... on VoidOutput {

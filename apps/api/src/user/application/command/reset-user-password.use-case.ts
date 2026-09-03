@@ -1,7 +1,7 @@
 import type { UserRepository } from '../../domain/repository/user.repository';
 import type { UserAccountRepository } from '../../domain/repository/user-account.repository';
 import type { UserPasswordVerificationRepository } from '../../domain/repository/user-password-verification.repository';
-import type { UserRefreshTokenRepository } from '../../domain/repository/user-refresh-token.repository';
+import type { UserSessionRepository } from '../../domain/repository/user-session.repository';
 
 import { Inject, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 
@@ -28,8 +28,8 @@ export class ResetUserPasswordUseCase {
     private readonly userAccountRepository: UserAccountRepository,
     @Inject(REPOSITORIES.USER_PASSWORD_VERIFICATION)
     private readonly passwordVerificationRepository: UserPasswordVerificationRepository,
-    @Inject(REPOSITORIES.USER_REFRESH_TOKEN)
-    private readonly refreshTokenRepository: UserRefreshTokenRepository,
+    @Inject(REPOSITORIES.USER_SESSION)
+    private readonly sessionRepository: UserSessionRepository,
     private readonly transactionManager: TransactionManager,
   ) {}
 
@@ -71,7 +71,7 @@ export class ResetUserPasswordUseCase {
     await this.transactionManager.runInTransaction(async tx => {
       await this.userAccountRepository.save(passwordAccount, tx);
       await this.passwordVerificationRepository.delete(passwordVerification.id, tx);
-      await this.refreshTokenRepository.revokeAllByUserId(user.id, { tx });
+      await this.sessionRepository.revokeAllByUserId(user.id, { tx });
     });
   }
 }

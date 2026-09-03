@@ -10,7 +10,7 @@ import { userAccount } from './user-account.schema';
 import { userEmailChangeVerification } from './user-email-change-verification.schema';
 import { userEmailSetting } from './user-email-setting.schema';
 import { userPasswordVerification } from './user-password-verification.schema';
-import { userRefreshToken } from './user-refresh-token.schema';
+import { userSession } from './user-session.schema';
 import { wishlist } from './wishlist.schema';
 
 export const userAuthoritiesEnum = pgEnum('user_authorities', tsEnumToPgEnum(Authorities));
@@ -36,7 +36,7 @@ export const userRelations = relations(user, ({ many }) => ({
   emailChangeVerifications: many(userEmailChangeVerification),
   emailSettings: many(userEmailSetting),
   accounts: many(userAccount),
-  refreshTokens: many(userRefreshToken),
+  sessions: many(userSession),
   wishlists: many(wishlist, { relationName: 'ownedWishlists' }),
   coOwnedWishlists: many(wishlist, { relationName: 'coOwnedWishlists' }),
   itemTakers: many(itemTaker),

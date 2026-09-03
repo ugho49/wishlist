@@ -1,5 +1,5 @@
 import type { UserRepository } from '../../domain/repository/user.repository';
-import type { UserRefreshTokenRepository } from '../../domain/repository/user-refresh-token.repository';
+import type { UserSessionRepository } from '../../domain/repository/user-session.repository';
 
 import { Logger, UnauthorizedException } from '@nestjs/common';
 
@@ -11,7 +11,7 @@ import { beforeAll, beforeEach, describe, expect, it, mock } from 'bun:test';
 
 describe('AdminRevokeAllUserSessionsUseCase', () => {
   const userRepository = createMock<UserRepository>();
-  const refreshTokenRepository = createMock<UserRefreshTokenRepository>();
+  const sessionRepository = createMock<UserSessionRepository>();
 
   let useCase: AdminRevokeAllUserSessionsUseCase;
   let admin: User;
@@ -26,19 +26,19 @@ describe('AdminRevokeAllUserSessionsUseCase', () => {
     admin = new UserBuilder().withEmail('admin@test.fr').asAdmin().build();
     target = new UserBuilder().withEmail('target@test.fr').build();
     userRepository.findByIdOrFail.mockResolvedValue(target);
-    useCase = new AdminRevokeAllUserSessionsUseCase(userRepository, refreshTokenRepository);
+    useCase = new AdminRevokeAllUserSessionsUseCase(userRepository, sessionRepository);
   });
 
   it('should reject when the admin targets themselves', async () => {
     await expect(useCase.execute({ currentUser: toCurrentUser(admin), userId: admin.id })).rejects.toThrow(
       UnauthorizedException,
     );
-    expect(refreshTokenRepository.revokeAllByUserId).not.toHaveBeenCalled();
+    expect(sessionRepository.revokeAllByUserId).not.toHaveBeenCalled();
   });
 
   it('should revoke all sessions of a regular user', async () => {
     await useCase.execute({ currentUser: toCurrentUser(admin), userId: target.id });
 
-    expect(refreshTokenRepository.revokeAllByUserId).toHaveBeenCalledWith(target.id);
+    expect(sessionRepository.revokeAllByUserId).toHaveBeenCalledWith(target.id);
   });
 });
