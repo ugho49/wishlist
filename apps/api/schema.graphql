@@ -343,7 +343,7 @@ type Mutation {
   adminDeleteUser(userId: UserId!): AdminDeleteUserResult!
   adminRemoveUserPicture(userId: UserId!): AdminRemoveUserPictureResult!
   adminRevokeAllUserSessions(userId: UserId!): AdminRevokeAllUserSessionsResult!
-  adminRevokeUserSession(sessionId: UserRefreshTokenId!, userId: UserId!): AdminRevokeUserSessionResult!
+  adminRevokeUserSession(sessionId: UserSessionId!, userId: UserId!): AdminRevokeUserSessionResult!
   adminUpdateEvent(id: EventId!, input: UpdateEventInput!): AdminUpdateEventResult!
   adminUpdateUserProfile(input: AdminUpdateUserProfileInput!, userId: UserId!): AdminUpdateUserProfileResult!
   cancelSecretSanta(id: SecretSantaId!): CancelSecretSantaResult!
@@ -469,7 +469,7 @@ input ResetPasswordInput {
 union ResetPasswordResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
 input RevokeSessionInput {
-  sessionId: UserRefreshTokenId!
+  sessionId: UserSessionId!
 }
 
 union RevokeSessionResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
@@ -660,14 +660,12 @@ type UserFull {
 
 scalar UserId
 
-scalar UserRefreshTokenId
-
 type UserSession {
   createdAt: String!
   current: Boolean! @resolved
   device: UserSessionDevice!
   expiresAt: String!
-  id: UserRefreshTokenId!
+  id: UserSessionId!
   ip: String
   lastUsedAt: String!
 }
@@ -689,6 +687,8 @@ enum UserSessionDeviceType {
   TABLET
   UNKNOWN
 }
+
+scalar UserSessionId
 
 type ValidationRejection {
   errors: [FieldError!]!

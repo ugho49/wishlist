@@ -1,10 +1,10 @@
-import type { UserId, UserRefreshTokenId } from '../ids';
+import type { UserId, UserSessionId } from '../ids';
 
 export interface AccessTokenJwtPayload {
   sub: UserId;
   email: string;
   authorities: string[];
-  sid?: UserRefreshTokenId;
+  sid?: UserSessionId;
 }
 
 export interface ICurrentUser {
@@ -13,5 +13,5 @@ export interface ICurrentUser {
   authorities: string[];
   isAdmin: boolean;
   isSuperAdmin: boolean;
-  sessionId?: UserRefreshTokenId;
+  sessionId?: UserSessionId;
 }

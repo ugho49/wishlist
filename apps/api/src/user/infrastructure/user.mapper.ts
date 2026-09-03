@@ -1,7 +1,7 @@
 import type { User } from '../domain/model/user.model';
 import type { UserAccount } from '../domain/model/user-account.model';
 import type { UserEmailSetting } from '../domain/model/user-email-setting.model';
-import type { UserRefreshToken } from '../domain/model/user-refresh-token.model';
+import type { UserSession } from '../domain/model/user-session.model';
 
 import { DateTime } from 'luxon';
 import { match } from 'ts-pattern';
@@ -19,7 +19,7 @@ import {
 } from '../../gql/generated-types';
 import { Authorities } from '../domain/authorities.enum';
 import { UserAccountProvider } from '../domain/user-account-provider.enum';
-import { parseUserAgent } from './user-agent.parser';
+import { UserSessionDeviceType } from '../domain/user-session-device-type.enum';
 
 function toGqlUser(user: User): GqlUser {
   return {
@@ -80,34 +80,33 @@ function toGqlUserEmailSettings(userEmailSetting: UserEmailSetting): GqlUserEmai
   };
 }
 
-function toGqlUserSessionDevice(userAgent?: string): GqlUserSessionDevice {
-  const parsed = parseUserAgent(userAgent);
-  const type = match(parsed.type)
-    .with('mobile', () => GqlUserSessionDeviceType.Mobile)
-    .with('tablet', () => GqlUserSessionDeviceType.Tablet)
-    .with('desktop', () => GqlUserSessionDeviceType.Desktop)
-    .with('unknown', () => GqlUserSessionDeviceType.Unknown)
+function toGqlUserSessionDevice(session: UserSession): GqlUserSessionDevice {
+  const type = match(session.deviceType)
+    .with(UserSessionDeviceType.MOBILE, () => GqlUserSessionDeviceType.Mobile)
+    .with(UserSessionDeviceType.TABLET, () => GqlUserSessionDeviceType.Tablet)
+    .with(UserSessionDeviceType.DESKTOP, () => GqlUserSessionDeviceType.Desktop)
+    .with(UserSessionDeviceType.UNKNOWN, () => GqlUserSessionDeviceType.Unknown)
     .exhaustive();
 
   return {
     __typename: 'UserSessionDevice',
-    browser: parsed.browser,
-    browserVersion: parsed.browserVersion,
-    os: parsed.os,
-    osVersion: parsed.osVersion,
+    browser: session.browser,
+    browserVersion: session.browserVersion,
+    os: session.os,
+    osVersion: session.osVersion,
     type,
-    vendor: parsed.vendor,
-    model: parsed.model,
-    label: parsed.label,
+    vendor: session.vendor,
+    model: session.model,
+    label: session.label,
   };
 }
 
-function toGqlUserSession(session: UserRefreshToken): GqlUserSession {
+function toGqlUserSession(session: UserSession): GqlUserSession {
   return {
     __typename: 'UserSession',
     id: session.id,
     ip: session.ip,
-    device: toGqlUserSessionDevice(session.userAgent),
+    device: toGqlUserSessionDevice(session),
     createdAt: session.createdAt.toISOString(),
     lastUsedAt: session.lastUsedAt.toISOString(),
     expiresAt: session.expiresAt.toISOString(),

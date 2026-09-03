@@ -2,7 +2,7 @@ import type { ICurrentUser } from '@wishlist/common';
 
 import { NotFoundException } from '@nestjs/common';
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { createPagedResponse, type UserId, type UserRefreshTokenId } from '@wishlist/common';
+import { createPagedResponse, type UserId, type UserSessionId } from '@wishlist/common';
 
 import { IsAdmin } from '../../../auth/infrastructure/decorators/admin.decorator';
 import { GqlCurrentUser } from '../../../auth/infrastructure/decorators/user.decorator';
@@ -27,7 +27,7 @@ import { RemoveUserPictureUseCase } from '../../application/command/remove-user-
 import { UpdateUserFullUseCase } from '../../application/command/update-user-full.use-case';
 import { GetUsersPaginatedUseCase } from '../../application/query/get-users-paginated.use-case';
 import { userMapper } from '../user.mapper';
-import { UserIdSchema, UserRefreshTokenIdSchema } from '../user.schema';
+import { UserIdSchema, UserSessionIdSchema } from '../user.schema';
 import { AdminGetAllUsersPaginationFiltersSchema, AdminUpdateUserProfileInputSchema } from '../user-admin.schema';
 
 @IsAdmin()
@@ -130,7 +130,7 @@ export class UserAdminResolver {
   @Mutation()
   async adminRevokeUserSession(
     @Args('userId', new ZodPipe(UserIdSchema)) userId: UserId,
-    @Args('sessionId', new ZodPipe(UserRefreshTokenIdSchema)) sessionId: UserRefreshTokenId,
+    @Args('sessionId', new ZodPipe(UserSessionIdSchema)) sessionId: UserSessionId,
     @GqlCurrentUser() currentUser: ICurrentUser,
   ): Promise<AdminRevokeUserSessionResult> {
     await this.adminRevokeUserSessionUseCase.execute({ currentUser, userId, sessionId });

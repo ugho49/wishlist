@@ -1,5 +1,5 @@
 import type { ConfigType } from '@nestjs/config';
-import type { UserId, UserRefreshTokenId } from '@wishlist/common';
+import type { UserId, UserSessionId } from '@wishlist/common';
 
 import { UnauthorizedException } from '@nestjs/common';
 import { uuid } from '@wishlist/common';
@@ -21,7 +21,7 @@ describe('JwtStrategy', () => {
   } as ConfigType<typeof authConfig>);
 
   const userId = uuid() as UserId;
-  const sessionId = uuid() as UserRefreshTokenId;
+  const sessionId = uuid() as UserSessionId;
 
   it('should reject a payload without sid', () => {
     expect(() =>

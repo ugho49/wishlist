@@ -15,7 +15,7 @@ export type Scalars = {
   SecretSantaUserId: { input: Ids["SecretSantaUserId"]; output: Ids["SecretSantaUserId"]; }
   UserAccountId: { input: Ids["UserAccountId"]; output: Ids["UserAccountId"]; }
   UserId: { input: Ids["UserId"]; output: Ids["UserId"]; }
-  UserRefreshTokenId: { input: Ids["UserRefreshTokenId"]; output: Ids["UserRefreshTokenId"]; }
+  UserSessionId: { input: Ids["UserSessionId"]; output: Ids["UserSessionId"]; }
   WishlistId: { input: Ids["WishlistId"]; output: Ids["WishlistId"]; }
 };
 
@@ -458,7 +458,7 @@ export type MutationAdminRevokeAllUserSessionsArgs = {
 
 
 export type MutationAdminRevokeUserSessionArgs = {
-  sessionId: Scalars['UserRefreshTokenId']['input'];
+  sessionId: Scalars['UserSessionId']['input'];
   userId: Scalars['UserId']['input'];
 };
 
@@ -840,7 +840,7 @@ export type ResetPasswordInput = {
 export type ResetPasswordResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
 export type RevokeSessionInput = {
-  sessionId: Scalars['UserRefreshTokenId']['input'];
+  sessionId: Scalars['UserSessionId']['input'];
 };
 
 export type RevokeSessionResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
@@ -1039,7 +1039,7 @@ export type UserSession = {
   current: Scalars['Boolean']['output'];
   device: UserSessionDevice;
   expiresAt: Scalars['String']['output'];
-  id: Scalars['UserRefreshTokenId']['output'];
+  id: Scalars['UserSessionId']['output'];
   ip?: Maybe<Scalars['String']['output']>;
   lastUsedAt: Scalars['String']['output'];
 };

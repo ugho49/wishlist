@@ -9,7 +9,7 @@ import type {
   UserEmailSettingId,
   UserId,
   UserPasswordVerificationId,
-  UserRefreshTokenId,
+  UserSessionId,
   WishlistId,
 } from '@wishlist/common';
 
@@ -22,7 +22,7 @@ export const userPasswordVerificationId = brandedUuid<UserPasswordVerificationId
 export const userEmailChangeVerificationId = brandedUuid<UserEmailChangeVerificationId>();
 export const userEmailSettingId = brandedUuid<UserEmailSettingId>();
 export const userAccountId = brandedUuid<UserAccountId>();
-export const userRefreshTokenId = brandedUuid<UserRefreshTokenId>();
+export const userSessionId = brandedUuid<UserSessionId>();
 export const secretSantaId = brandedUuid<SecretSantaId>();
 export const secretSantaUserId = brandedUuid<SecretSantaUserId>();
 export const wishlistId = brandedUuid<WishlistId>();

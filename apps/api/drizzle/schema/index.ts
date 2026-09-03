@@ -10,5 +10,5 @@ export * from './user-account.schema';
 export * from './user-email-change-verification.schema';
 export * from './user-email-setting.schema';
 export * from './user-password-verification.schema';
-export * from './user-refresh-token.schema';
+export * from './user-session.schema';
 export * from './wishlist.schema';

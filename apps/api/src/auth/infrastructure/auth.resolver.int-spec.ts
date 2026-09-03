@@ -63,7 +63,7 @@ describe('AuthResolver (GraphQL)', () => {
       expect(refreshToken).toBeString();
       expect(refreshToken.length).toBeGreaterThan(0);
 
-      await expectTable(Fixtures.USER_REFRESH_TOKEN_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+      await expectTable(Fixtures.USER_SESSION_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
         user_id: userId,
         revoked_at: null,
         token_hash: expect.toBeString(),
@@ -293,7 +293,7 @@ describe('AuthResolver (GraphQL)', () => {
         refreshToken: expect.toBeString(),
       });
       expect(res.body.data.refreshSession.refreshToken).not.toBe(refreshToken);
-      await expectTable(Fixtures.USER_REFRESH_TOKEN_TABLE).hasNumberOfRows(1);
+      await expectTable(Fixtures.USER_SESSION_TABLE).hasNumberOfRows(1);
 
       const reused = await request
         .post('/graphql')
@@ -312,7 +312,7 @@ describe('AuthResolver (GraphQL)', () => {
       const userId = await fixtures.insertUser({ email, firstname: 'Expired', lastname: 'User', password });
       const refreshToken = 'expired-refresh-token';
 
-      await fixtures.insertUserRefreshToken({
+      await fixtures.insertUserSession({
         userId,
         tokenHash: RefreshTokenManager.hash(refreshToken),
         expiresAt: DateTime.now().minus({ days: 1 }).toJSDate(),
@@ -408,7 +408,7 @@ describe('AuthResolver (GraphQL)', () => {
         .expect(200);
 
       expect(res.body.data.logout).toMatchObject({ __typename: 'VoidOutput', success: true });
-      await expectTable(Fixtures.USER_REFRESH_TOKEN_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+      await expectTable(Fixtures.USER_SESSION_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
         revoked_at: expect.toBeDate(),
       });
     });

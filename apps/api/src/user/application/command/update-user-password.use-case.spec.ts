@@ -1,6 +1,6 @@
 import type { UserRepository } from '../../domain/repository/user.repository';
 import type { UserAccountRepository } from '../../domain/repository/user-account.repository';
-import type { UserRefreshTokenRepository } from '../../domain/repository/user-refresh-token.repository';
+import type { UserSessionRepository } from '../../domain/repository/user-session.repository';
 
 import { Logger } from '@nestjs/common';
 
@@ -19,7 +19,7 @@ const NEW_PASSWORD = 'NewSecret456!';
 describe('UpdateUserPasswordUseCase', () => {
   const userRepository = createMock<UserRepository>();
   const userAccountRepository = createMock<UserAccountRepository>();
-  const refreshTokenRepository = createMock<UserRefreshTokenRepository>();
+  const sessionRepository = createMock<UserSessionRepository>();
 
   let useCase: UpdateUserPasswordUseCase;
   let user: User;
@@ -38,7 +38,7 @@ describe('UpdateUserPasswordUseCase', () => {
       new UserAccountBuilder().buildPassword(user, passwordHash),
     );
 
-    useCase = new UpdateUserPasswordUseCase(userRepository, userAccountRepository, refreshTokenRepository);
+    useCase = new UpdateUserPasswordUseCase(userRepository, userAccountRepository, sessionRepository);
   });
 
   it('should reject when the old password does not match', async () => {
@@ -46,7 +46,7 @@ describe('UpdateUserPasswordUseCase', () => {
       useCase.execute({ currentUser: toCurrentUser(user), oldPassword: 'WrongPassword1!', newPassword: NEW_PASSWORD }),
     ).rejects.toThrow(BusinessRuleException);
     expect(userAccountRepository.save).not.toHaveBeenCalled();
-    expect(refreshTokenRepository.revokeAllByUserId).not.toHaveBeenCalled();
+    expect(sessionRepository.revokeAllByUserId).not.toHaveBeenCalled();
   });
 
   it('should update the password when the old password matches', async () => {
@@ -58,6 +58,6 @@ describe('UpdateUserPasswordUseCase', () => {
     expect(savedAccount?.passwordHash).toBeDefined();
     expect(savedAccount?.passwordHash).not.toBe(existingAccount?.passwordHash);
     expect(await PasswordManager.verify({ hash: savedAccount?.passwordHash, plainPassword: NEW_PASSWORD })).toBe(true);
-    expect(refreshTokenRepository.revokeAllByUserId).toHaveBeenCalledWith(user.id, { exceptId: undefined });
+    expect(sessionRepository.revokeAllByUserId).toHaveBeenCalledWith(user.id, { exceptId: undefined });
   });
 });

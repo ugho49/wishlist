@@ -11,6 +11,7 @@ import { UserAdminResolver } from './resolvers/user-admin.resolver';
 import { UserSessionFieldResolver } from './resolvers/user-session.field-resolver';
 import userConfig from './user.config';
 import { UserDataLoaderFactory } from './user.dataloader';
+import { UserSessionDeviceBackfill } from './user-session-device.backfill';
 
 @Module({
   imports: [ConfigModule.forFeature(userConfig)],
@@ -23,6 +24,7 @@ import { UserDataLoaderFactory } from './user.dataloader';
     UserAdminFieldResolver,
     UserSessionFieldResolver,
     UserDataLoaderFactory,
+    UserSessionDeviceBackfill,
   ],
   exports: [UserDataLoaderFactory],
 })

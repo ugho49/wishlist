@@ -7,7 +7,7 @@ import { type AccessTokenJwtPayload } from '@wishlist/common';
 
 import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { type UserRepository } from '../../../user/domain/repository/user.repository';
-import { type UserRefreshTokenRepository } from '../../../user/domain/repository/user-refresh-token.repository';
+import { type UserSessionRepository } from '../../../user/domain/repository/user-session.repository';
 import authConfig from '../../infrastructure/auth.config';
 import { RefreshTokenManager } from '../../infrastructure/util/refresh-token';
 
@@ -24,8 +24,8 @@ export class RefreshSessionUseCase {
   constructor(
     @Inject(REPOSITORIES.USER)
     private readonly userRepository: UserRepository,
-    @Inject(REPOSITORIES.USER_REFRESH_TOKEN)
-    private readonly refreshTokenRepository: UserRefreshTokenRepository,
+    @Inject(REPOSITORIES.USER_SESSION)
+    private readonly sessionRepository: UserSessionRepository,
     @Inject(authConfig.KEY)
     private readonly config: ConfigType<typeof authConfig>,
     private readonly jwtService: JwtService,
@@ -34,7 +34,7 @@ export class RefreshSessionUseCase {
   async execute(input: RefreshSessionInput): Promise<LoginOutput> {
     this.logger.log('Refresh session request received');
 
-    const session = await this.refreshTokenRepository.findByTokenHash(RefreshTokenManager.hash(input.refreshToken));
+    const session = await this.sessionRepository.findByTokenHash(RefreshTokenManager.hash(input.refreshToken));
 
     if (!session?.isActive()) {
       throw new UnauthorizedException('Incorrect login');
@@ -51,9 +51,8 @@ export class RefreshSessionUseCase {
       tokenHash: RefreshTokenManager.hash(rawRefreshToken),
       expiresAt: RefreshTokenManager.durationToDate(this.config.refreshToken.duration),
       ip: input.ip,
-      userAgent: input.userAgent,
     });
-    await this.refreshTokenRepository.save(rotatedSession);
+    await this.sessionRepository.save(rotatedSession);
 
     const payload: AccessTokenJwtPayload = {
       sub: user.id,

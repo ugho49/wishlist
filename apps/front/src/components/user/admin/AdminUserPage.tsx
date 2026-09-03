@@ -1,4 +1,4 @@
-import type { UserId, UserRefreshTokenId } from '@wishlist/common';
+import type { UserId, UserSessionId } from '@wishlist/common';
 import type { FormEvent } from 'react';
 import type { RootState } from '../../../core/store';
 
@@ -124,7 +124,7 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
 
   const invalidateUser = () => queryClient.invalidateQueries({ queryKey: ['AdminUserDetail', { userId }] });
 
-  const revokeUserSession = async (sessionId: UserRefreshTokenId) => {
+  const revokeUserSession = async (sessionId: UserSessionId) => {
     const res = await revokeSession({ userId, sessionId });
     match(res.adminRevokeUserSession)
       .with({ __typename: 'VoidOutput' }, () => {

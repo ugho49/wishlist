@@ -1,10 +1,10 @@
-import type { UserRefreshTokenRepository } from '../../domain/repository/user-refresh-token.repository';
+import type { UserSessionRepository } from '../../domain/repository/user-session.repository';
 
 import { Inject, Injectable } from '@nestjs/common';
 import { type UserId } from '@wishlist/common';
 
 import { REPOSITORIES } from '../../../repositories/repositories.constants';
-import { UserRefreshToken } from '../../domain/model/user-refresh-token.model';
+import { UserSession } from '../../domain/model/user-session.model';
 
 export type GetUserSessionsByUserIdsInput = {
   userIds: UserId[];
@@ -13,12 +13,12 @@ export type GetUserSessionsByUserIdsInput = {
 @Injectable()
 export class GetUserSessionsByUserIdsUseCase {
   constructor(
-    @Inject(REPOSITORIES.USER_REFRESH_TOKEN)
-    private readonly refreshTokenRepository: UserRefreshTokenRepository,
+    @Inject(REPOSITORIES.USER_SESSION)
+    private readonly sessionRepository: UserSessionRepository,
   ) {}
 
-  async execute(query: GetUserSessionsByUserIdsInput): Promise<Map<UserId, UserRefreshToken[]>> {
-    const sessions = await this.refreshTokenRepository.findActiveByUserIds(query.userIds);
+  async execute(query: GetUserSessionsByUserIdsInput): Promise<Map<UserId, UserSession[]>> {
+    const sessions = await this.sessionRepository.findActiveByUserIds(query.userIds);
 
     return sessions.reduce((acc, session) => {
       if (!acc.has(session.userId)) {
@@ -26,6 +26,6 @@ export class GetUserSessionsByUserIdsUseCase {
       }
       acc.get(session.userId)?.push(session);
       return acc;
-    }, new Map<UserId, UserRefreshToken[]>());
+    }, new Map<UserId, UserSession[]>());
   }
 }

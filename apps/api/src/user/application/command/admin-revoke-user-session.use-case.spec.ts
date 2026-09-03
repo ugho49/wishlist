@@ -1,10 +1,10 @@
 import type { UserRepository } from '../../domain/repository/user.repository';
-import type { UserRefreshTokenRepository } from '../../domain/repository/user-refresh-token.repository';
+import type { UserSessionRepository } from '../../domain/repository/user-session.repository';
 
 import { Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 
 import { toCurrentUser, UserBuilder } from '../../../../test-utils/builders/user.builder';
-import { UserRefreshTokenBuilder } from '../../../../test-utils/builders/user-refresh-token.builder';
+import { UserSessionBuilder } from '../../../../test-utils/builders/user-session.builder';
 import { createMock } from '../../../../test-utils/mocks';
 import { User } from '../../domain/model/user.model';
 import { AdminRevokeUserSessionUseCase } from './admin-revoke-user-session.use-case';
@@ -12,7 +12,7 @@ import { beforeAll, beforeEach, describe, expect, it, mock } from 'bun:test';
 
 describe('AdminRevokeUserSessionUseCase', () => {
   const userRepository = createMock<UserRepository>();
-  const refreshTokenRepository = createMock<UserRefreshTokenRepository>();
+  const sessionRepository = createMock<UserSessionRepository>();
 
   let useCase: AdminRevokeUserSessionUseCase;
   let admin: User;
@@ -27,7 +27,7 @@ describe('AdminRevokeUserSessionUseCase', () => {
     admin = new UserBuilder().withEmail('admin@test.fr').asAdmin().build();
     target = new UserBuilder().withEmail('target@test.fr').build();
     userRepository.findByIdOrFail.mockResolvedValue(target);
-    useCase = new AdminRevokeUserSessionUseCase(userRepository, refreshTokenRepository);
+    useCase = new AdminRevokeUserSessionUseCase(userRepository, sessionRepository);
   });
 
   it('should reject when the admin targets themselves', async () => {
@@ -38,7 +38,7 @@ describe('AdminRevokeUserSessionUseCase', () => {
         sessionId: crypto.randomUUID() as never,
       }),
     ).rejects.toThrow(UnauthorizedException);
-    expect(refreshTokenRepository.save).not.toHaveBeenCalled();
+    expect(sessionRepository.save).not.toHaveBeenCalled();
   });
 
   it('should reject when an admin tries to manage another admin', async () => {
@@ -56,22 +56,22 @@ describe('AdminRevokeUserSessionUseCase', () => {
 
   it('should reject when the session does not belong to the user', async () => {
     const other = new UserBuilder().withEmail('other@test.fr').build();
-    const session = new UserRefreshTokenBuilder().build(other);
-    refreshTokenRepository.findById.mockResolvedValueOnce(session);
+    const session = new UserSessionBuilder().build(other);
+    sessionRepository.findById.mockResolvedValueOnce(session);
 
     await expect(
       useCase.execute({ currentUser: toCurrentUser(admin), userId: target.id, sessionId: session.id }),
     ).rejects.toThrow(NotFoundException);
-    expect(refreshTokenRepository.save).not.toHaveBeenCalled();
+    expect(sessionRepository.save).not.toHaveBeenCalled();
   });
 
   it('should revoke a session of a regular user', async () => {
-    const session = new UserRefreshTokenBuilder().build(target);
-    refreshTokenRepository.findById.mockResolvedValueOnce(session);
+    const session = new UserSessionBuilder().build(target);
+    sessionRepository.findById.mockResolvedValueOnce(session);
 
     await useCase.execute({ currentUser: toCurrentUser(admin), userId: target.id, sessionId: session.id });
 
-    expect(refreshTokenRepository.save).toHaveBeenCalledTimes(1);
-    expect(refreshTokenRepository.save.mock.calls[0]?.[0]?.revokedAt).toBeInstanceOf(Date);
+    expect(sessionRepository.save).toHaveBeenCalledTimes(1);
+    expect(sessionRepository.save.mock.calls[0]?.[0]?.revokedAt).toBeInstanceOf(Date);
   });
 });

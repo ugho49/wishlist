@@ -245,7 +245,7 @@ describe('UserAdminResolver (GraphQL)', () => {
           lastname: 'Device',
         });
 
-        await fixtures.insertUserRefreshToken({
+        await fixtures.insertUserSession({
           userId: targetUserId,
           tokenHash: 'a'.repeat(64),
           expiresAt: DateTime.now().plus({ days: 7 }).toJSDate(),

@@ -1,7 +1,7 @@
 import type { UserRepository } from '../../domain/repository/user.repository';
 import type { UserAccountRepository } from '../../domain/repository/user-account.repository';
 import type { UserPasswordVerificationRepository } from '../../domain/repository/user-password-verification.repository';
-import type { UserRefreshTokenRepository } from '../../domain/repository/user-refresh-token.repository';
+import type { UserSessionRepository } from '../../domain/repository/user-session.repository';
 
 import { Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 
@@ -21,7 +21,7 @@ describe('ResetUserPasswordUseCase', () => {
   const userRepository = createMock<UserRepository>();
   const userAccountRepository = createMock<UserAccountRepository>();
   const passwordVerificationRepository = createMock<UserPasswordVerificationRepository>();
-  const refreshTokenRepository = createMock<UserRefreshTokenRepository>();
+  const sessionRepository = createMock<UserSessionRepository>();
   const transactionManager = createMock<TransactionManager>();
 
   let useCase: ResetUserPasswordUseCase;
@@ -48,7 +48,7 @@ describe('ResetUserPasswordUseCase', () => {
       userRepository,
       userAccountRepository,
       passwordVerificationRepository,
-      refreshTokenRepository,
+      sessionRepository,
       transactionManager,
     );
   });
@@ -91,7 +91,7 @@ describe('ResetUserPasswordUseCase', () => {
       true,
     );
     expect(passwordVerificationRepository.delete).toHaveBeenCalledWith(verification.id, undefined);
-    expect(refreshTokenRepository.revokeAllByUserId).toHaveBeenCalledWith(user.id, { tx: undefined });
+    expect(sessionRepository.revokeAllByUserId).toHaveBeenCalledWith(user.id, { tx: undefined });
   });
 
   it('should update the existing password account', async () => {

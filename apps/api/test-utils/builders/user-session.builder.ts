@@ -1,11 +1,11 @@
-import type { UserId, UserRefreshTokenId } from '@wishlist/common';
+import type { UserId, UserSessionId } from '@wishlist/common';
 
 import { uuid } from '@wishlist/common';
 
 import { type User } from '../../src/user/domain/model/user.model';
-import { UserRefreshToken } from '../../src/user/domain/model/user-refresh-token.model';
+import { UserSession } from '../../src/user/domain/model/user-session.model';
 
-type UserRefreshTokenBuilderData = {
+type UserSessionBuilderData = {
   user?: User;
   tokenHash: string;
   userAgent?: string;
@@ -14,8 +14,8 @@ type UserRefreshTokenBuilderData = {
   revokedAt?: Date;
 };
 
-export class UserRefreshTokenBuilder {
-  private readonly data: UserRefreshTokenBuilderData = {
+export class UserSessionBuilder {
+  private readonly data: UserSessionBuilderData = {
     tokenHash: 'a'.repeat(64),
     ip: '127.0.0.1',
     userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36',
@@ -57,14 +57,14 @@ export class UserRefreshTokenBuilder {
     return this;
   }
 
-  build(user?: User): UserRefreshToken {
+  build(user?: User): UserSession {
     const sessionUser = user ?? this.data.user;
     if (!sessionUser) {
-      throw new Error('UserRefreshTokenBuilder requires a user');
+      throw new Error('UserSessionBuilder requires a user');
     }
 
-    const session = UserRefreshToken.create({
-      id: uuid() as UserRefreshTokenId,
+    const session = UserSession.create({
+      id: uuid() as UserSessionId,
       userId: sessionUser.id as UserId,
       tokenHash: this.data.tokenHash,
       userAgent: this.data.userAgent,

@@ -1,6 +1,6 @@
 import type { UserRepository } from '../../domain/repository/user.repository';
 import type { UserAccountRepository } from '../../domain/repository/user-account.repository';
-import type { UserRefreshTokenRepository } from '../../domain/repository/user-refresh-token.repository';
+import type { UserSessionRepository } from '../../domain/repository/user-session.repository';
 
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { type ICurrentUser } from '@wishlist/common';
@@ -25,8 +25,8 @@ export class UpdateUserPasswordUseCase {
     private readonly userRepository: UserRepository,
     @Inject(REPOSITORIES.USER_ACCOUNT)
     private readonly userAccountRepository: UserAccountRepository,
-    @Inject(REPOSITORIES.USER_REFRESH_TOKEN)
-    private readonly refreshTokenRepository: UserRefreshTokenRepository,
+    @Inject(REPOSITORIES.USER_SESSION)
+    private readonly sessionRepository: UserSessionRepository,
   ) {}
 
   async execute(input: UpdateUserPasswordInput): Promise<void> {
@@ -52,6 +52,6 @@ export class UpdateUserPasswordUseCase {
 
     this.logger.log('Saving password account...', { userId, updatedFields: ['password'] });
     await this.userAccountRepository.save(updatedAccount);
-    await this.refreshTokenRepository.revokeAllByUserId(userId, { exceptId: currentUser.sessionId });
+    await this.sessionRepository.revokeAllByUserId(userId, { exceptId: currentUser.sessionId });
   }
 }
