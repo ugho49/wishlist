@@ -10,7 +10,7 @@ import { EmptyListsState } from './EmptyListsState';
 import { WishlistCardWithEvents } from './WishlistCardWithEvents';
 import { WishlistCardWithEventsSkeleton } from './WishlistCardWithEventsSkeleton';
 
-const SKELETON_KEYS = ['s1', 's2', 's3', 's4'] as const;
+const SKELETON_KEYS = ['s1', 's2', 's3', 's4', 's5', 's6', 's7', 's8', 's9', 's10'] as const;
 
 export const WishlistListPage = () => {
   const { page: currentPage } = useSearch({ from: '/_authenticated/_with-layout/wishlists/' });

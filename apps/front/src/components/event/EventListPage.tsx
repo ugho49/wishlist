@@ -10,7 +10,7 @@ import { EmptyEventsState } from './EmptyEventsState';
 import { EventCard } from './EventCard';
 import { EventCardSkeleton } from './EventCardSkeleton';
 
-const SKELETON_KEYS = ['s1', 's2', 's3', 's4'] as const;
+const SKELETON_KEYS = ['s1', 's2', 's3', 's4', 's5', 's6', 's7', 's8', 's9', 's10'] as const;
 
 export const EventListPage = () => {
   const { page: currentPage } = useSearch({ from: '/_authenticated/_with-layout/events/' });
