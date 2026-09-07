@@ -1,15 +1,13 @@
-import type * as SMTPTransport from 'nodemailer/lib/smtp-transport';
-
 import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { createTransport, type Transporter } from 'nodemailer';
+import { createTransport, type SMTPSentMessageInfo, type Transporter } from 'nodemailer';
 
 import { type MailPayload, type MailProvider } from '../mail.type';
 import { getMailPayloadFromMailOptions } from './mail-provider.utils';
 
 export class MaildevMailProvider implements MailProvider {
   private readonly logger = new Logger(MaildevMailProvider.name);
-  private readonly transporter: Transporter<SMTPTransport.SentMessageInfo>;
+  private readonly transporter: Transporter<SMTPSentMessageInfo>;
 
   constructor(configService: ConfigService) {
     const maildevUrl = configService.get('MAILDEV_HOST', 'localhost');
