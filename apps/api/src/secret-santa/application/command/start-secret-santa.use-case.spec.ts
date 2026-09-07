@@ -129,7 +129,7 @@ describe('StartSecretSantaUseCase', () => {
       eventTitle: event.title,
       eventId: event.id,
       budget: 25,
-      drawns: event.attendees.map(attendee => ({ email: attendee.getEmail() })),
+      drawns: event.attendees.map(attendee => ({ email: attendee.getEmail(), userId: attendee.user?.id })),
     });
   });
 });

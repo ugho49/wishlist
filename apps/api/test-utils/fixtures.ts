@@ -20,6 +20,7 @@ export class Fixtures {
   static readonly USER_ACCOUNT_TABLE = 'user_account';
   static readonly USER_SESSION_TABLE = 'user_session';
   static readonly USER_EMAIL_SETTING_TABLE = 'user_email_setting';
+  static readonly USER_NOTIFICATION_TABLE = 'user_notification';
   static readonly USER_PASSWORD_VERIFICATION_TABLE = 'user_password_verification';
   static readonly USER_EMAIL_CHANGE_VERIFICATION_TABLE = 'user_email_change_verification';
   static readonly EVENT_TABLE = 'event';
@@ -189,6 +190,30 @@ export class Fixtures {
       [id, userId, emailSettings.daily_new_item_notification],
     );
 
+    return id;
+  }
+
+  async insertUserNotification(parameters: {
+    userId: string;
+    type: string;
+    title: string;
+    body: string;
+    eventId?: string;
+    readAt?: Date;
+  }): Promise<string> {
+    const id = uuid();
+    await this.sql.unsafe(
+      `INSERT INTO ${Fixtures.USER_NOTIFICATION_TABLE} (id, user_id, type, title, body, event_id, read_at) VALUES ($1, $2, $3::user_notification_type, $4, $5, $6, $7)`,
+      [
+        id,
+        parameters.userId,
+        parameters.type,
+        parameters.title,
+        parameters.body,
+        parameters.eventId ?? null,
+        parameters.readAt ?? null,
+      ],
+    );
     return id;
   }
 

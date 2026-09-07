@@ -9,6 +9,7 @@ import { GraphQLModule } from './core/graphql/graphql.module';
 import { EventModule } from './event/infrastructure/event.module';
 import { pinoLoggerConfig } from './helpers';
 import { ItemModule } from './item/infrastructure/item.module';
+import { NotificationModule } from './notification/infrastructure/notification.module';
 import { RepositoriesModule } from './repositories/repositories.module';
 import { SecretSantaModule } from './secret-santa/infrastructure/secret-santa.module';
 import { UserModule } from './user/infrastructure/user.module';
@@ -29,6 +30,7 @@ import { WishlistModule } from './wishlist/infrastructure/wishlist.module';
     UserModule,
     WishlistModule,
     ItemModule,
+    NotificationModule,
     EventModule,
     SecretSantaModule,
     // GraphQLModule must be AFTER all domain modules it depends on

@@ -20,6 +20,7 @@ export enum MailTemplate {
   EMAIL_CHANGED_CONFIRMATION = 'email-changed-confirmation',
   EMAIL_CHANGED_SUCCESS = 'email-changed-success',
   CALENDAR_REMINDER = 'calendar-reminder',
+  EVENT_REMINDER = 'event-reminder',
 }
 
 export type WelcomeUserContext = {
@@ -95,6 +96,12 @@ export type CalendarReminderContext = {
   actionUrl: string;
 };
 
+export type EventReminderContext = {
+  firstName: string;
+  eventTitle: string;
+  eventUrl: string;
+};
+
 type BaseMailPayload = {
   to: string | string[];
   subject: string;
@@ -153,6 +160,10 @@ export type MailPayload = BaseMailPayload &
     | {
         template: MailTemplate.CALENDAR_REMINDER;
         context: CalendarReminderContext;
+      }
+    | {
+        template: MailTemplate.EVENT_REMINDER;
+        context: EventReminderContext;
       }
   );
 

@@ -95,6 +95,10 @@ export class EventAttendee {
     return this.role === AttendeeRole.CREATOR;
   }
 
+  isMaintainer(): boolean {
+    return this.role === AttendeeRole.CREATOR || this.role === AttendeeRole.ADMIN;
+  }
+
   updateRole(role: AttendeeRole): EventAttendee {
     return new EventAttendee({
       ...this,

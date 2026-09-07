@@ -8,6 +8,7 @@ import type {
   UserEmailChangeVerificationId,
   UserEmailSettingId,
   UserId,
+  UserNotificationId,
   UserPasswordVerificationId,
   UserSessionId,
   WishlistId,
@@ -21,6 +22,7 @@ export const userId = brandedUuid<UserId>();
 export const userPasswordVerificationId = brandedUuid<UserPasswordVerificationId>();
 export const userEmailChangeVerificationId = brandedUuid<UserEmailChangeVerificationId>();
 export const userEmailSettingId = brandedUuid<UserEmailSettingId>();
+export const userNotificationId = brandedUuid<UserNotificationId>();
 export const userAccountId = brandedUuid<UserAccountId>();
 export const userSessionId = brandedUuid<UserSessionId>();
 export const secretSantaId = brandedUuid<SecretSantaId>();

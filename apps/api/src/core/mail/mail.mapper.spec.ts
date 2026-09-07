@@ -62,6 +62,15 @@ const payloads: MailPayload[] = [
       actionUrl: 'https://wishlistapp.fr/wishlists',
     },
   },
+  {
+    ...base,
+    template: MailTemplate.EVENT_REMINDER,
+    context: {
+      firstName: 'Marie',
+      eventTitle: 'Noël',
+      eventUrl: 'https://wishlistapp.fr/events/1',
+    },
+  },
 ];
 
 describe('mapPayloadToTemplate', () => {

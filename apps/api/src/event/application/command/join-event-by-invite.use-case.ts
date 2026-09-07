@@ -2,11 +2,13 @@ import type { EventRepository } from '../../domain/repository/event.repository';
 import type { EventAttendeeRepository } from '../../domain/repository/event-attendee.repository';
 
 import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { EventBus } from '@nestjs/cqrs';
 import { type ICurrentUser } from '@wishlist/common';
 
 import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { type UserRepository } from '../../../user/domain/repository/user.repository';
 import { AttendeeRole } from '../../domain/attendee-role.enum';
+import { AttendeeAddedEvent } from '../../domain/event/attendee-added.event';
 import { Event } from '../../domain/model/event.model';
 import { EventAttendee } from '../../domain/model/event-attendee.model';
 
@@ -27,6 +29,7 @@ export class JoinEventByInviteUseCase {
     @Inject(REPOSITORIES.EVENT) private readonly eventRepository: EventRepository,
     @Inject(REPOSITORIES.EVENT_ATTENDEE) private readonly attendeeRepository: EventAttendeeRepository,
     @Inject(REPOSITORIES.USER) private readonly userRepository: UserRepository,
+    private readonly eventBus: EventBus,
   ) {}
 
   async execute(input: JoinEventByInviteInput): Promise<JoinEventByInviteOutput> {
@@ -60,6 +63,14 @@ export class JoinEventByInviteUseCase {
     await this.attendeeRepository.save(attendee);
 
     const joined = await this.eventRepository.findByIdOrFail(event.id);
+    await this.eventBus.publish(
+      new AttendeeAddedEvent({
+        event: joined,
+        newAttendee: attendee,
+        invitedBy: user,
+      }),
+    );
+
     return { event: joined };
   }
 }

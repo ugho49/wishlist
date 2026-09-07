@@ -26,6 +26,11 @@ export class AttendeeAddedHandler implements IEventHandler<AttendeeAddedEvent> {
     };
 
     try {
+      if (event.newAttendee.user?.id === event.invitedBy.id) {
+        this.logger.log('Skipping welcome email for a self-joined attendee', { eventId: event.event.id });
+        return;
+      }
+
       if (event.newAttendee.isLinkedToUser()) {
         await this.sendEmailForExistingAttendee(params);
       } else {

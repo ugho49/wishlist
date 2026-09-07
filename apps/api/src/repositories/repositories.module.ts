@@ -8,6 +8,7 @@ import { PostgresUserRepository } from './impl/postgres-user.repository';
 import { PostgresUserAccountRepository } from './impl/postgres-user-account.repository';
 import { PostgresUserEmailChangeVerificationRepository } from './impl/postgres-user-email-change-verification';
 import { PostgresUserEmailSettingRepository } from './impl/postgres-user-email-setting.repository';
+import { PostgresUserNotificationRepository } from './impl/postgres-user-notification.repository';
 import { PostgresUserPasswordVerificationRepository } from './impl/postgres-user-password-verification';
 import { PostgresUserSessionRepository } from './impl/postgres-user-session.repository';
 import { PostgresWishlistRepository } from './impl/postgres-wishlist.repository';
@@ -22,6 +23,7 @@ const repositoryProviders: Record<keyof typeof REPOSITORIES, Type<unknown>> = {
   USER: PostgresUserRepository,
   USER_EMAIL_CHANGE_VERIFICATION: PostgresUserEmailChangeVerificationRepository,
   USER_EMAIL_SETTING: PostgresUserEmailSettingRepository,
+  USER_NOTIFICATION: PostgresUserNotificationRepository,
   USER_PASSWORD_VERIFICATION: PostgresUserPasswordVerificationRepository,
   USER_ACCOUNT: PostgresUserAccountRepository,
   USER_SESSION: PostgresUserSessionRepository,
