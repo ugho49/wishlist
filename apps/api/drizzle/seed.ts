@@ -125,6 +125,8 @@ async function main() {
       id: faker.string.uuid(),
       userId: user.id,
       dailyNewItemNotification: faker.datatype.boolean({ probability: 0.9 }),
+      birthdayReminder: faker.datatype.boolean({ probability: 0.9 }),
+      christmasReminder: faker.datatype.boolean({ probability: 0.9 }),
     });
   }
 

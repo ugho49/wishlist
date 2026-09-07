@@ -127,6 +127,13 @@
       "when": 1788820471969,
       "tag": "0017_user-gift-profile",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1788820707595,
+      "tag": "0018_calendar-reminders",
+      "breakpoints": true
     }
   ]
 }

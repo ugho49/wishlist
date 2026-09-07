@@ -644,6 +644,8 @@ input UpdateSecretSantaUserInput {
 union UpdateSecretSantaUserResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
 input UpdateUserEmailSettingsInput {
+  birthdayReminder: Boolean!
+  christmasReminder: Boolean!
   dailyNewItemNotification: Boolean!
 }
 
@@ -727,6 +729,8 @@ enum UserAuthorities {
 }
 
 type UserEmailSettings {
+  birthdayReminder: Boolean!
+  christmasReminder: Boolean!
   dailyNewItemNotification: Boolean!
 }
 

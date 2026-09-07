@@ -3,9 +3,11 @@ import type { EventId, WishlistId } from '@wishlist/common';
 export const frontendRoutesBuilder = (baseUrl: string) => ({
   home: () => baseUrl,
   wishlist: {
+    list: () => `${baseUrl}/wishlists`,
     byId: (wishlistId: WishlistId) => `${baseUrl}/wishlists/${wishlistId}`,
   },
   event: {
+    list: () => `${baseUrl}/events`,
     byId: (eventId: EventId) => `${baseUrl}/events/${eventId}`,
     invite: (token: string) => `${baseUrl}/invite/${token}`,
   },

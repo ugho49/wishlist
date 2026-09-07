@@ -52,6 +52,16 @@ const payloads: MailPayload[] = [
   { ...base, template: MailTemplate.EMAIL_CHANGE_NOTIFICATION, context: { newEmail: 'new@test.fr' } },
   { ...base, template: MailTemplate.EMAIL_CHANGED_CONFIRMATION, context: { newEmail: 'new@test.fr' } },
   { ...base, template: MailTemplate.EMAIL_CHANGED_SUCCESS, context: { email: 'new@test.fr' } },
+  {
+    ...base,
+    template: MailTemplate.CALENDAR_REMINDER,
+    context: {
+      firstName: 'Marie',
+      kind: 'birthday',
+      daysLeft: 7,
+      actionUrl: 'https://wishlistapp.fr/wishlists',
+    },
+  },
 ];
 
 describe('mapPayloadToTemplate', () => {
