@@ -409,6 +409,7 @@ type Mutation {
   updateSecretSanta(id: SecretSantaId!, input: UpdateSecretSantaInput!): UpdateSecretSantaResult!
   updateSecretSantaUser(id: SecretSantaId!, input: UpdateSecretSantaUserInput!, secretSantaUserId: SecretSantaUserId!): UpdateSecretSantaUserResult!
   updateUserEmailSettings(input: UpdateUserEmailSettingsInput!): UpdateUserEmailSettingsResult!
+  updateUserGiftProfile(input: UpdateUserGiftProfileInput!): UpdateUserGiftProfileResult!
   updateUserPictureFromAccount(input: UpdateUserPictureFromAccountInput!): UpdateUserPictureFromAccountResult!
   updateUserProfile(input: UpdateUserProfileInput!): UpdateUserProfileResult!
   updateWishlist(id: WishlistId!, input: UpdateWishlistInput!): UpdateWishlistResult!
@@ -648,6 +649,15 @@ input UpdateUserEmailSettingsInput {
 
 union UpdateUserEmailSettingsResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | UserEmailSettings | ValidationRejection
 
+input UpdateUserGiftProfileInput {
+  address: UpdateUserShippingAddressInput
+  clothingSize: String
+  notes: String
+  shoeSize: String
+}
+
+union UpdateUserGiftProfileResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | UserGiftProfile | ValidationRejection
+
 input UpdateUserPictureFromAccountInput {
   accountId: UserAccountId!
 }
@@ -661,6 +671,14 @@ input UpdateUserProfileInput {
 }
 
 union UpdateUserProfileResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | User | ValidationRejection
+
+input UpdateUserShippingAddressInput {
+  city: String!
+  country: String!
+  line1: String!
+  line2: String
+  postalCode: String!
+}
 
 input UpdateWishlistInput {
   description: String
@@ -676,6 +694,7 @@ type User {
   email: String!
   emailSettings: UserEmailSettings @resolved
   firstName: String!
+  giftProfile: UserGiftProfile @resolved
   id: UserId!
   isEnabled: Boolean!
   lastName: String!
@@ -726,6 +745,13 @@ type UserFull {
   updatedAt: String!
 }
 
+type UserGiftProfile {
+  address: UserShippingAddress
+  clothingSize: String
+  notes: String
+  shoeSize: String
+}
+
 scalar UserId
 
 type UserSession {
@@ -758,6 +784,14 @@ enum UserSessionDeviceType {
 
 scalar UserSessionId
 
+type UserShippingAddress {
+  city: String!
+  country: String!
+  line1: String!
+  line2: String
+  postalCode: String!
+}
+
 type ValidationRejection {
   errors: [FieldError!]!
 }
@@ -778,6 +812,7 @@ type Wishlist {
   items: [Item!]! @resolved
   logoUrl: String
   owner: User! @resolved
+  ownerGiftProfile: UserGiftProfile @resolved
   ownerId: UserId!
   title: String!
   updatedAt: String!

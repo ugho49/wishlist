@@ -721,6 +721,29 @@ export type UserClosestFriendsQuery = { closestFriends:
     | { __typename: 'ValidationRejection' }
    };
 
+export type UserGiftProfileQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type UserGiftProfileQuery = { currentUser:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'User', id: Ids["UserId"], giftProfile: { clothingSize: string | null, shoeSize: string | null, notes: string | null, address: { line1: string, line2: string | null, postalCode: string, city: string, country: string } | null } | null }
+   };
+
+export type UpdateUserGiftProfileMutationVariables = Exact<{
+  input: Types.UpdateUserGiftProfileInput;
+}>;
+
+
+export type UpdateUserGiftProfileMutation = { updateUserGiftProfile:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'UserGiftProfile', clothingSize: string | null, shoeSize: string | null, notes: string | null, address: { line1: string, line2: string | null, postalCode: string, city: string, country: string } | null }
+    | { __typename: 'ValidationRejection', errors: Array<{ field: string, message: string }> }
+   };
+
 export type UpdateUserProfileMutationVariables = Exact<{
   input: Types.UpdateUserProfileInput;
 }>;
@@ -962,7 +985,7 @@ export type WishlistPageQuery = { wishlist:
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'NotFoundRejection' }
     | { __typename: 'UnauthorizedRejection' }
-    | { __typename: 'Wishlist', id: Ids["WishlistId"], title: string, description: string | null, logoUrl: string | null, ownerId: Ids["UserId"], coOwnerId: Ids["UserId"] | null, createdAt: string, updatedAt: string, config: { hideItems: boolean }, owner: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null }, coOwner: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null } | null, events: Array<{ id: Ids["EventId"], title: string, icon: string | null, eventDate: string }>, items: Array<{ id: Ids["ItemId"], name: string, description: string | null, url: string | null, score: number | null, price: number | null, isSuggested: boolean | null, pictureUrl: string | null, createdAt: string, takers: Array<{ userId: Ids["UserId"], takenAt: string, user: { id: Ids["UserId"], firstName: string, lastName: string, pictureUrl: string | null } }> }> }
+    | { __typename: 'Wishlist', id: Ids["WishlistId"], title: string, description: string | null, logoUrl: string | null, ownerId: Ids["UserId"], coOwnerId: Ids["UserId"] | null, createdAt: string, updatedAt: string, config: { hideItems: boolean }, owner: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null }, coOwner: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null } | null, ownerGiftProfile: { clothingSize: string | null, shoeSize: string | null, notes: string | null, address: { line1: string, line2: string | null, postalCode: string, city: string, country: string } | null } | null, events: Array<{ id: Ids["EventId"], title: string, icon: string | null, eventDate: string }>, items: Array<{ id: Ids["ItemId"], name: string, description: string | null, url: string | null, score: number | null, price: number | null, isSuggested: boolean | null, pictureUrl: string | null, createdAt: string, takers: Array<{ userId: Ids["UserId"], takenAt: string, user: { id: Ids["UserId"], firstName: string, lastName: string, pictureUrl: string | null } }> }> }
    | null };
 
 export type AdminListWishlistsForUserQueryVariables = Exact<{
@@ -2946,6 +2969,84 @@ export const useUserClosestFriendsQuery = <
   }
     )};
 
+export const UserGiftProfileDocument = new TypedDocumentString(`
+    query UserGiftProfile {
+  currentUser {
+    __typename
+    ... on User {
+      id
+      giftProfile {
+        clothingSize
+        shoeSize
+        notes
+        address {
+          line1
+          line2
+          postalCode
+          city
+          country
+        }
+      }
+    }
+  }
+}
+    `);
+
+export const useUserGiftProfileQuery = <
+      TData = UserGiftProfileQuery,
+      TError = unknown
+    >(
+      variables?: UserGiftProfileQueryVariables,
+      options?: Omit<UseQueryOptions<UserGiftProfileQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<UserGiftProfileQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<UserGiftProfileQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['UserGiftProfile'] : ['UserGiftProfile', variables],
+    queryFn: fetchGql<UserGiftProfileQuery, UserGiftProfileQueryVariables>(UserGiftProfileDocument, variables),
+    ...options
+  }
+    )};
+
+export const UpdateUserGiftProfileDocument = new TypedDocumentString(`
+    mutation UpdateUserGiftProfile($input: UpdateUserGiftProfileInput!) {
+  updateUserGiftProfile(input: $input) {
+    __typename
+    ... on UserGiftProfile {
+      clothingSize
+      shoeSize
+      notes
+      address {
+        line1
+        line2
+        postalCode
+        city
+        country
+      }
+    }
+    ... on ValidationRejection {
+      errors {
+        field
+        message
+      }
+    }
+  }
+}
+    `);
+
+export const useUpdateUserGiftProfileMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<UpdateUserGiftProfileMutation, TError, UpdateUserGiftProfileMutationVariables, TContext>) => {
+    
+    return useMutation<UpdateUserGiftProfileMutation, TError, UpdateUserGiftProfileMutationVariables, TContext>(
+      {
+    mutationKey: ['UpdateUserGiftProfile'],
+    mutationFn: (variables?: UpdateUserGiftProfileMutationVariables) => fetchGql<UpdateUserGiftProfileMutation, UpdateUserGiftProfileMutationVariables>(UpdateUserGiftProfileDocument, variables)(),
+    ...options
+  }
+    )};
+
 export const UpdateUserProfileDocument = new TypedDocumentString(`
     mutation UpdateUserProfile($input: UpdateUserProfileInput!) {
   updateUserProfile(input: $input) {
@@ -3473,6 +3574,18 @@ export const WishlistPageDocument = new TypedDocumentString(`
         lastName
         email
         pictureUrl
+      }
+      ownerGiftProfile {
+        clothingSize
+        shoeSize
+        notes
+        address {
+          line1
+          line2
+          postalCode
+          city
+          country
+        }
       }
       events {
         id

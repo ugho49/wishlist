@@ -1,5 +1,6 @@
 import type { RootState } from '../../core/store';
 
+import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
 import DevicesIcon from '@mui/icons-material/Devices';
 import LockIcon from '@mui/icons-material/Lock';
 import NotificationsIcon from '@mui/icons-material/Notifications';
@@ -12,6 +13,7 @@ import { useSelector } from 'react-redux';
 
 import { ProfilePictureSection } from './ProfilePictureSection';
 import { UserTabConnections } from './UserTabConnections';
+import { UserTabGiftProfile } from './UserTabGiftProfile';
 import { UserTabInformations } from './UserTabInformations';
 import { UserTabNotifications } from './UserTabNotifications';
 import { UserTabPassword } from './UserTabPassword';
@@ -44,6 +46,7 @@ const Email = styled(Box)(({ theme }) => ({
 
 export enum TabValues {
   informations = 'informations',
+  gifts = 'gifts',
   connections = 'connections',
   notifications = 'notifications',
   password = 'password',
@@ -54,6 +57,11 @@ const tabs = [
     value: TabValues.informations,
     label: 'Informations',
     icon: <PortraitIcon />,
+  },
+  {
+    value: TabValues.gifts,
+    label: 'Cadeaux',
+    icon: <CardGiftcardIcon />,
   },
   {
     value: TabValues.connections,
@@ -121,6 +129,7 @@ export const UserProfilePage = () => {
       </Box>
       <Stack>
         {tab === TabValues.informations && <UserTabInformations />}
+        {tab === TabValues.gifts && <UserTabGiftProfile />}
         {tab === TabValues.connections && <UserTabConnections />}
         {tab === TabValues.notifications && <UserTabNotifications />}
         {tab === TabValues.password && <UserTabPassword />}

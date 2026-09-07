@@ -1,5 +1,6 @@
 import type { ICurrentUser } from '@wishlist/common';
 
+import { Inject } from '@nestjs/common';
 import { Context, Parent, ResolveField, Resolver } from '@nestjs/graphql';
 import { type UserId } from '@wishlist/common';
 
@@ -10,14 +11,20 @@ import {
   type UserAccount,
   UserAccountProvider,
   type UserEmailSettings,
+  type UserGiftProfile,
   type UserSession,
 } from '../../../gql/generated-types';
+import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { GetUserEmailSettingUseCase } from '../../application/query/get-user-email-setting.use-case';
+import { type UserRepository } from '../../domain/repository/user.repository';
 import { userMapper } from '../user.mapper';
 
 @Resolver('User')
 export class UserFieldResolver {
-  constructor(private readonly getUserEmailSettingUseCase: GetUserEmailSettingUseCase) {}
+  constructor(
+    private readonly getUserEmailSettingUseCase: GetUserEmailSettingUseCase,
+    @Inject(REPOSITORIES.USER) private readonly userRepository: UserRepository,
+  ) {}
 
   @ResolveField()
   async accounts(
@@ -52,5 +59,16 @@ export class UserFieldResolver {
     const { userEmailSetting } = await this.getUserEmailSettingUseCase.execute({ currentUser });
 
     return userMapper.toGqlUserEmailSettings(userEmailSetting);
+  }
+
+  @ResolveField()
+  async giftProfile(
+    @Parent() user: User,
+    @GqlCurrentUser('id') currentUserId: UserId,
+  ): Promise<UserGiftProfile | null> {
+    if (user.id !== currentUserId) return null;
+
+    const current = await this.userRepository.findByIdOrFail(currentUserId);
+    return userMapper.toGqlUserGiftProfile(current.getGiftProfile());
   }
 }

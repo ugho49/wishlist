@@ -437,6 +437,94 @@ describe('UserResolver (GraphQL)', () => {
     });
   });
 
+  describe('Mutation updateUserGiftProfile', () => {
+    const mutation = /* GraphQL */ `
+      mutation UpdateUserGiftProfile($input: UpdateUserGiftProfileInput!) {
+        updateUserGiftProfile(input: $input) {
+          __typename
+          ... on UserGiftProfile {
+            clothingSize
+            shoeSize
+            notes
+            address {
+              line1
+              line2
+              postalCode
+              city
+              country
+            }
+          }
+          ... on ValidationRejection {
+            errors {
+              field
+              message
+            }
+          }
+          ... on UnauthorizedRejection {
+            message
+          }
+        }
+      }
+    `;
+
+    it('should not succeed when not authenticated', async () => {
+      const anon = await getRequest();
+      const res = await anon
+        .post('/graphql')
+        .send({ query: mutation, variables: { input: { clothingSize: 'M' } } })
+        .expect(200);
+
+      expect(res.body.data?.updateUserGiftProfile?.__typename).not.toBe('UserGiftProfile');
+    });
+
+    it('should persist sizes, notes and address', async () => {
+      const res = await request
+        .post('/graphql')
+        .send({
+          query: mutation,
+          variables: {
+            input: {
+              clothingSize: 'M',
+              shoeSize: '42',
+              notes: 'Allergie au latex',
+              address: {
+                line1: '12 rue des Fleurs',
+                postalCode: '75011',
+                city: 'Paris',
+                country: 'France',
+              },
+            },
+          },
+        })
+        .expect(200);
+
+      expect(res.body.data.updateUserGiftProfile).toEqual({
+        __typename: 'UserGiftProfile',
+        clothingSize: 'M',
+        shoeSize: '42',
+        notes: 'Allergie au latex',
+        address: {
+          line1: '12 rue des Fleurs',
+          line2: null,
+          postalCode: '75011',
+          city: 'Paris',
+          country: 'France',
+        },
+      });
+
+      await expectTable(Fixtures.USER_TABLE).row(0).toMatchObject({
+        id: currentUserId,
+        clothing_size: 'M',
+        shoe_size: '42',
+        gift_notes: 'Allergie au latex',
+        address_line1: '12 rue des Fleurs',
+        address_postal_code: '75011',
+        address_city: 'Paris',
+        address_country: 'France',
+      });
+    });
+  });
+
   describe('Mutation changeUserPassword', () => {
     const mutation = /* GraphQL */ `
       mutation ChangeUserPassword($input: ChangeUserPasswordInput!) {

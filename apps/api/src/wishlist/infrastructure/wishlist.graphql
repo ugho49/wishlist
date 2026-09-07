@@ -16,6 +16,7 @@ type Wishlist {
   eventIds: [EventId!]!
   events: [Event!]! @resolved
   items: [Item!]! @resolved
+  ownerGiftProfile: UserGiftProfile @resolved
   config: WishlistConfig!
   createdAt: String!
   updatedAt: String!

@@ -25,6 +25,18 @@ query WishlistPage($wishlistId: WishlistId!) {
         email
         pictureUrl
       }
+      ownerGiftProfile {
+        clothingSize
+        shoeSize
+        notes
+        address {
+          line1
+          line2
+          postalCode
+          city
+          country
+        }
+      }
       events {
         id
         title

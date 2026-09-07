@@ -245,6 +245,117 @@ describe('WishlistResolver (GraphQL)', () => {
     });
   });
 
+  describe('Query wishlist ownerGiftProfile', () => {
+    const query = /* GraphQL */ `
+      query GetWishlistOwnerGiftProfile($id: WishlistId!) {
+        wishlist(id: $id) {
+          __typename
+          ... on Wishlist {
+            ownerGiftProfile {
+              clothingSize
+              shoeSize
+              notes
+              address {
+                line1
+                postalCode
+                city
+                country
+              }
+            }
+          }
+        }
+      }
+    `;
+
+    it('should hide the profile from the owner of a private list', async () => {
+      const { eventId } = await fixtures.insertEventWithMaintainer({
+        title: 'Birthday',
+        maintainerId: currentUserId,
+      });
+      await fixtures.updateUserGiftProfile({
+        userId: currentUserId,
+        clothingSize: 'M',
+        addressLine1: '12 rue des Fleurs',
+        addressPostalCode: '75011',
+        addressCity: 'Paris',
+        addressCountry: 'France',
+      });
+      const wishlistId = await fixtures.insertWishlist({
+        eventIds: [eventId],
+        userId: currentUserId,
+        title: 'Private list',
+      });
+
+      const res = await request
+        .post('/graphql')
+        .send({ query, variables: { id: wishlistId } })
+        .expect(200);
+
+      expect(res.body.data.wishlist.ownerGiftProfile).toBeNull();
+    });
+
+    it('should show sizes to a participant and reveal the address only after reservation', async () => {
+      const ownerId = await fixtures.insertUser({
+        email: 'marie-gift@test.fr',
+        firstname: 'Marie',
+        lastname: 'Dupont',
+      });
+      await fixtures.updateUserGiftProfile({
+        userId: ownerId,
+        clothingSize: 'M',
+        shoeSize: '38',
+        giftNotes: 'Allergie au latex',
+        addressLine1: '12 rue des Fleurs',
+        addressPostalCode: '75011',
+        addressCity: 'Paris',
+        addressCountry: 'France',
+      });
+      const { eventId } = await fixtures.insertEventWithMaintainer({
+        title: 'Birthday Marie',
+        maintainerId: ownerId,
+      });
+      await fixtures.insertActiveAttendee({ eventId, userId: currentUserId });
+      const wishlistId = await fixtures.insertWishlist({
+        eventIds: [eventId],
+        userId: ownerId,
+        title: 'Liste de Marie',
+      });
+
+      const before = await request
+        .post('/graphql')
+        .send({ query, variables: { id: wishlistId } })
+        .expect(200);
+      expect(before.body.data.wishlist.ownerGiftProfile).toEqual({
+        clothingSize: 'M',
+        shoeSize: '38',
+        notes: 'Allergie au latex',
+        address: null,
+      });
+
+      await fixtures.insertItem({
+        wishlistId,
+        name: 'Un livre',
+        takerId: currentUserId,
+      });
+
+      const after = await request
+        .post('/graphql')
+        .send({ query, variables: { id: wishlistId } })
+        .expect(200);
+      expect(after.body.data.wishlist.ownerGiftProfile).toEqual({
+        clothingSize: 'M',
+        shoeSize: '38',
+        notes: 'Allergie au latex',
+        address: {
+          line1: '12 rue des Fleurs',
+          postalCode: '75011',
+          city: 'Paris',
+          country: 'France',
+        },
+      });
+    });
+  });
+
   describe('Query wishlists', () => {
     const query = /* GraphQL */ `
       query GetMyWishlists($filters: PaginationFilters!) {

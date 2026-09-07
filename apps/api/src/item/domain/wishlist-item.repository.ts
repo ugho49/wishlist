@@ -47,6 +47,7 @@ export interface WishlistItemRepository {
     pagination: { take: number; skip: number };
     scope: TakenItemsScope;
   }): Promise<{ items: TakenGiftRecord[]; totalCount: number }>;
+  hasReservedOnWishlist(params: { userId: UserId; wishlistId: WishlistId }): Promise<boolean>;
   save(item: WishlistItem, tx?: DrizzleTransaction): Promise<void>;
   delete(id: ItemId, tx?: DrizzleTransaction): Promise<void>;
 }

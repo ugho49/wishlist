@@ -8,6 +8,7 @@ import type {
   RevokeSessionInput,
   SendResetPasswordEmailInput,
   UpdateUserEmailSettingsInput,
+  UpdateUserGiftProfileInput,
   UpdateUserPictureFromAccountInput,
   UpdateUserProfileInput,
 } from '../../gql/generated-types';
@@ -62,6 +63,21 @@ export const ConfirmEmailChangeInputSchema = z.object({
 export const UpdateUserEmailSettingsInputSchema = z.object({
   dailyNewItemNotification: z.boolean(),
 }) satisfies z.ZodType<UpdateUserEmailSettingsInput>;
+
+export const UpdateUserGiftProfileInputSchema = z.object({
+  clothingSize: z.string().trim().max(20).optional(),
+  shoeSize: z.string().trim().max(20).optional(),
+  notes: z.string().trim().max(500).optional(),
+  address: z
+    .object({
+      line1: z.string().trim().min(1).max(120),
+      line2: z.string().trim().max(120).optional(),
+      postalCode: z.string().trim().min(1).max(20),
+      city: z.string().trim().min(1).max(80),
+      country: z.string().trim().min(1).max(80),
+    })
+    .optional(),
+}) satisfies z.ZodType<UpdateUserGiftProfileInput>;
 
 export const SendResetPasswordEmailInputSchema = z.object({
   email: z.email().toLowerCase(),

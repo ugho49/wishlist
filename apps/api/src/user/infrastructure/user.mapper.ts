@@ -1,4 +1,4 @@
-import type { User } from '../domain/model/user.model';
+import type { User, UserGiftProfile } from '../domain/model/user.model';
 import type { UserAccount } from '../domain/model/user-account.model';
 import type { UserEmailSetting } from '../domain/model/user-email-setting.model';
 import type { UserSession } from '../domain/model/user-session.model';
@@ -13,6 +13,7 @@ import {
   UserAuthorities as GqlUserAuthorities,
   type UserEmailSettings as GqlUserEmailSettings,
   type UserFull as GqlUserFull,
+  type UserGiftProfile as GqlUserGiftProfile,
   type UserSession as GqlUserSession,
   type UserSessionDevice as GqlUserSessionDevice,
   UserSessionDeviceType as GqlUserSessionDeviceType,
@@ -73,6 +74,25 @@ function toGqlUserAccount(account: UserAccount): GqlUserAccount {
   };
 }
 
+function toGqlUserGiftProfile(profile: UserGiftProfile): GqlUserGiftProfile {
+  return {
+    __typename: 'UserGiftProfile',
+    clothingSize: profile.clothingSize,
+    shoeSize: profile.shoeSize,
+    notes: profile.notes,
+    address: profile.address
+      ? {
+          __typename: 'UserShippingAddress',
+          line1: profile.address.line1,
+          line2: profile.address.line2,
+          postalCode: profile.address.postalCode,
+          city: profile.address.city,
+          country: profile.address.country,
+        }
+      : undefined,
+  };
+}
+
 function toGqlUserEmailSettings(userEmailSetting: UserEmailSetting): GqlUserEmailSettings {
   return {
     __typename: 'UserEmailSettings',
@@ -118,5 +138,6 @@ export const userMapper = {
   toGqlUserFull,
   toGqlUserAccount,
   toGqlUserEmailSettings,
+  toGqlUserGiftProfile,
   toGqlUserSession,
 };

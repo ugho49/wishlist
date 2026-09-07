@@ -120,6 +120,13 @@
       "when": 1788818647018,
       "tag": "0016_item-price",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1788820471969,
+      "tag": "0017_user-gift-profile",
+      "breakpoints": true
     }
   ]
 }

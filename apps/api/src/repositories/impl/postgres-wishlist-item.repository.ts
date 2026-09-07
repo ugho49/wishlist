@@ -259,6 +259,16 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
     };
   }
 
+  async hasReservedOnWishlist(params: { userId: UserId; wishlistId: WishlistId }): Promise<boolean> {
+    const result = await this.databaseService.db
+      .select({ count: count() })
+      .from(schema.itemTaker)
+      .innerJoin(schema.item, eq(schema.item.id, schema.itemTaker.itemId))
+      .where(and(eq(schema.itemTaker.userId, params.userId), eq(schema.item.wishlistId, params.wishlistId)));
+
+    return (result[0]?.count ?? 0) > 0;
+  }
+
   async save(item: WishlistItem, tx?: DrizzleTransaction): Promise<void> {
     const client = tx ?? this.databaseService.db;
 
