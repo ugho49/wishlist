@@ -1,0 +1,38 @@
+query TakenItemsPage($filters: TakenItemsFilters!) {
+  myTakenItems(filters: $filters) {
+    __typename
+    ... on GetMyTakenItemsOutput {
+      data {
+        takenAt
+        wishlistId
+        wishlistTitle
+        item {
+          id
+          name
+          description
+          url
+          price
+          pictureUrl
+        }
+        recipient {
+          id
+          firstName
+          lastName
+          pictureUrl
+        }
+        events {
+          id
+          title
+          icon
+          eventDate
+        }
+      }
+      pagination {
+        totalPages
+        totalElements
+        pageNumber
+        pageSize
+      }
+    }
+  }
+}

@@ -1,19 +1,24 @@
 import type { ICurrentUser, WishlistId } from '@wishlist/common';
 
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { type ItemId } from '@wishlist/common';
+import { createPagedResponse, type ItemId } from '@wishlist/common';
+import { match } from 'ts-pattern';
 
 import { GqlCurrentUser } from '../../auth/infrastructure/decorators/user.decorator';
+import { DEFAULT_RESULT_NUMBER } from '../../core/common/pagination';
 import { ZodPipe } from '../../core/graphql/zod-pipe';
 import {
   type CreateItemInput,
   type CreateItemResult,
   type DeleteItemResult,
   type GetImportableItemsOutput,
+  type GetMyTakenItemsResult,
   type ImportItemsInput,
   type ImportItemsResult,
   type ScanItemUrlInput,
   type ScanItemUrlResult,
+  type TakenItemsFilters,
+  TakenItemsScope,
   type ToggleItemResult,
   type UpdateItemInput,
   type UpdateItemResult,
@@ -24,16 +29,28 @@ import { ImportItemsUseCase } from '../application/command/import-items.use-case
 import { ToggleItemUseCase } from '../application/command/toggle-item.use-case';
 import { UpdateItemUseCase } from '../application/command/update-item.use-case';
 import { GetImportableItemsUseCase } from '../application/query/get-importable-items.use-case';
+import { GetMyTakenItemsUseCase } from '../application/query/get-my-taken-items.use-case';
 import { ScanItemUrlUseCase } from '../application/query/scan-item-url.use-case';
+import { type TakenItemsScope as DomainTakenItemsScope } from '../domain/wishlist-item.repository';
 import { itemMapper } from './item.mapper';
 import {
   CreateItemInputSchema,
   ImportItemsInputSchema,
   ItemIdSchema,
   ScanItemUrlInputSchema,
+  TakenItemsFiltersSchema,
   UpdateItemInputSchema,
   WishlistIdSchema,
 } from './item.schema';
+
+function toDomainTakenItemsScope(scope?: TakenItemsScope | null): DomainTakenItemsScope {
+  if (!scope) return 'ALL';
+  return match(scope)
+    .with(TakenItemsScope.All, () => 'ALL' as const)
+    .with(TakenItemsScope.Upcoming, () => 'UPCOMING' as const)
+    .with(TakenItemsScope.Past, () => 'PAST' as const)
+    .exhaustive();
+}
 
 @Resolver('Item')
 export class ItemResolver {
@@ -44,8 +61,41 @@ export class ItemResolver {
     private readonly toggleItemUseCase: ToggleItemUseCase,
     private readonly scanItemUrlUseCase: ScanItemUrlUseCase,
     private readonly getImportableItemsUseCase: GetImportableItemsUseCase,
+    private readonly getMyTakenItemsUseCase: GetMyTakenItemsUseCase,
     private readonly importItemsUseCase: ImportItemsUseCase,
   ) {}
+
+  @Query()
+  async myTakenItems(
+    @Args('filters', new ZodPipe(TakenItemsFiltersSchema)) filters: TakenItemsFilters,
+    @GqlCurrentUser() currentUser: ICurrentUser,
+  ): Promise<GetMyTakenItemsResult> {
+    const pageSize = filters.limit ?? DEFAULT_RESULT_NUMBER;
+    const pageNumber = filters.page ?? 1;
+    const { items, totalCount } = await this.getMyTakenItemsUseCase.execute({
+      currentUser,
+      pageNumber,
+      pageSize,
+      scope: toDomainTakenItemsScope(filters.scope),
+    });
+
+    const pagedResponse = createPagedResponse({
+      resources: items.map(itemMapper.toGqlTakenGift),
+      options: { pageSize, totalElements: totalCount, pageNumber },
+    });
+
+    return {
+      __typename: 'GetMyTakenItemsOutput',
+      data: pagedResponse.resources,
+      pagination: {
+        __typename: 'Pagination',
+        totalPages: pagedResponse.pagination.total_pages,
+        totalElements: pagedResponse.pagination.total_elements,
+        pageNumber: pagedResponse.pagination.page_number,
+        pageSize: pagedResponse.pagination.pages_size,
+      },
+    };
+  }
 
   @Query()
   async importableItems(

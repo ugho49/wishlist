@@ -181,6 +181,235 @@ describe('ItemResolver (GraphQL)', () => {
     });
   });
 
+  describe('Query myTakenItems', () => {
+    const query = /* GraphQL */ `
+      query GetMyTakenItems($filters: TakenItemsFilters!) {
+        myTakenItems(filters: $filters) {
+          __typename
+          ... on GetMyTakenItemsOutput {
+            data {
+              takenAt
+              wishlistId
+              wishlistTitle
+              item {
+                id
+                name
+                description
+                price
+              }
+              recipient {
+                id
+                firstName
+                lastName
+              }
+              events {
+                id
+                title
+                eventDate
+              }
+            }
+            pagination {
+              totalElements
+              totalPages
+              pageNumber
+              pageSize
+            }
+          }
+          ... on UnauthorizedRejection {
+            message
+          }
+        }
+      }
+    `;
+
+    it('should not succeed when not authenticated', async () => {
+      const request = await getRequest();
+      const res = await request
+        .post('/graphql')
+        .send({ query, variables: { filters: { page: 1 } } })
+        .expect(200);
+
+      expect(res.body.data?.myTakenItems?.__typename).not.toBe('GetMyTakenItemsOutput');
+    });
+
+    describe('when user is authenticated', () => {
+      let request: RequestApp;
+      let currentUserId: string;
+
+      beforeEach(async () => {
+        request = await getRequest({ signedAs: 'BASE_USER' });
+        currentUserId = await fixtures.getSignedUserId('BASE_USER');
+      });
+
+      it('should return an empty list when the user has reserved nothing', async () => {
+        const res = await request
+          .post('/graphql')
+          .send({ query, variables: { filters: { page: 1 } } })
+          .expect(200);
+
+        expect(res.body.data.myTakenItems).toEqual({
+          __typename: 'GetMyTakenItemsOutput',
+          data: [],
+          pagination: {
+            totalElements: 0,
+            totalPages: 0,
+            pageNumber: 1,
+            pageSize: 10,
+          },
+        });
+      });
+
+      it('should return gifts reserved by the current user with recipient and events', async () => {
+        const recipientId = await fixtures.insertUser({
+          email: 'marie@test.fr',
+          firstname: 'Marie',
+          lastname: 'Dupont',
+        });
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Anniversaire Marie',
+          maintainerId: recipientId,
+          eventDate: new Date('2026-12-20T12:00:00.000Z'),
+        });
+        const wishlistId = await fixtures.insertWishlist({
+          eventIds: [eventId],
+          userId: recipientId,
+          title: 'Liste de Marie',
+        });
+        const itemId = await fixtures.insertItem({
+          wishlistId,
+          name: 'Un livre',
+          description: 'Roman',
+          takerId: currentUserId,
+        });
+
+        const res = await request
+          .post('/graphql')
+          .send({ query, variables: { filters: { page: 1 } } })
+          .expect(200);
+
+        expect(res.body.data.myTakenItems).toMatchObject({
+          __typename: 'GetMyTakenItemsOutput',
+          data: [
+            {
+              wishlistId,
+              wishlistTitle: 'Liste de Marie',
+              item: {
+                id: itemId,
+                name: 'Un livre',
+                description: 'Roman',
+              },
+              recipient: {
+                id: recipientId,
+                firstName: 'Marie',
+                lastName: 'Dupont',
+              },
+              events: [
+                {
+                  id: eventId,
+                  title: 'Anniversaire Marie',
+                  eventDate: '2026-12-20',
+                },
+              ],
+            },
+          ],
+          pagination: {
+            totalElements: 1,
+            pageNumber: 1,
+          },
+        });
+      });
+
+      it('should not return gifts reserved by someone else', async () => {
+        const otherUserId = await fixtures.insertUser({
+          email: 'other-giver@test.fr',
+          firstname: 'Other',
+          lastname: 'Giver',
+        });
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Event',
+          maintainerId: currentUserId,
+        });
+        const wishlistId = await fixtures.insertWishlist({
+          eventIds: [eventId],
+          userId: currentUserId,
+          title: 'My list',
+        });
+        await fixtures.insertItem({
+          wishlistId,
+          name: 'Not mine',
+          takerId: otherUserId,
+        });
+
+        const res = await request
+          .post('/graphql')
+          .send({ query, variables: { filters: { page: 1 } } })
+          .expect(200);
+
+        expect(res.body.data.myTakenItems).toMatchObject({
+          __typename: 'GetMyTakenItemsOutput',
+          data: [],
+          pagination: { totalElements: 0 },
+        });
+      });
+
+      it('should filter upcoming and past reservations by event date', async () => {
+        const recipientId = await fixtures.insertUser({
+          email: 'paul@test.fr',
+          firstname: 'Paul',
+          lastname: 'Martin',
+        });
+        const pastEventDate = DateTime.now().minus({ days: 10 }).toJSDate();
+        const futureEventDate = DateTime.now().plus({ days: 10 }).toJSDate();
+        const { eventId: pastEventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Noël dernier',
+          maintainerId: recipientId,
+          eventDate: pastEventDate,
+        });
+        const { eventId: futureEventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Noël prochain',
+          maintainerId: recipientId,
+          eventDate: futureEventDate,
+        });
+        const pastWishlistId = await fixtures.insertWishlist({
+          eventIds: [pastEventId],
+          userId: recipientId,
+          title: 'Liste passée',
+        });
+        const futureWishlistId = await fixtures.insertWishlist({
+          eventIds: [futureEventId],
+          userId: recipientId,
+          title: 'Liste à venir',
+        });
+        const pastItemId = await fixtures.insertItem({
+          wishlistId: pastWishlistId,
+          name: 'Déjà offert',
+          takerId: currentUserId,
+        });
+        const futureItemId = await fixtures.insertItem({
+          wishlistId: futureWishlistId,
+          name: 'À offrir',
+          takerId: currentUserId,
+        });
+
+        const pastRes = await request
+          .post('/graphql')
+          .send({ query, variables: { filters: { page: 1, scope: 'PAST' } } })
+          .expect(200);
+        const upcomingRes = await request
+          .post('/graphql')
+          .send({ query, variables: { filters: { page: 1, scope: 'UPCOMING' } } })
+          .expect(200);
+
+        expect(pastRes.body.data.myTakenItems.data.map((gift: { item: { id: string } }) => gift.item.id)).toEqual([
+          pastItemId,
+        ]);
+        expect(upcomingRes.body.data.myTakenItems.data.map((gift: { item: { id: string } }) => gift.item.id)).toEqual([
+          futureItemId,
+        ]);
+      });
+    });
+  });
+
   describe('Mutation createItem', () => {
     const mutation = /* GraphQL */ `
       mutation CreateItem($input: CreateItemInput!) {

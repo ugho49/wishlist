@@ -76,6 +76,46 @@ type ImportItemsOutput {
   items: [Item!]!
 }
 
+enum TakenItemsScope {
+  ALL
+  UPCOMING
+  PAST
+}
+
+type TakenGiftRecipient {
+  id: UserId!
+  firstName: String!
+  lastName: String!
+  pictureUrl: String
+}
+
+type TakenGiftEvent {
+  id: EventId!
+  title: String!
+  icon: String
+  eventDate: String!
+}
+
+type TakenGift {
+  item: Item!
+  takenAt: String!
+  wishlistId: WishlistId!
+  wishlistTitle: String!
+  recipient: TakenGiftRecipient!
+  events: [TakenGiftEvent!]!
+}
+
+type GetMyTakenItemsOutput {
+  data: [TakenGift!]!
+  pagination: Pagination!
+}
+
+input TakenItemsFilters {
+  page: Int
+  limit: Int
+  scope: TakenItemsScope
+}
+
 ########################################################
 ###############   Result Unions   ######################
 ########################################################
@@ -128,6 +168,12 @@ union ImportItemsResult =
   | ForbiddenRejection
   | InternalErrorRejection
 
+union GetMyTakenItemsResult =
+  | GetMyTakenItemsOutput
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+
 ########################################################
 ###############   Mutations   ##########################
 ########################################################
@@ -147,4 +193,5 @@ extend type Mutation {
 
 extend type Query {
   importableItems(wishlistId: WishlistId!): GetImportableItemsResult!
+  myTakenItems(filters: TakenItemsFilters!): GetMyTakenItemsResult!
 }
