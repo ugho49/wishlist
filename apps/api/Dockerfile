@@ -1,5 +1,5 @@
 # Keep in sync with .bun-version
-FROM oven/bun:1.4.0-alpine
+FROM oven/bun:1.4.2-alpine
 
 ARG API_VERSION
 
