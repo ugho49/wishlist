@@ -19,6 +19,7 @@ function toGqlItem(param: { item: WishlistItem; displayUserAndSuggested: boolean
     name: item.name,
     description: item.description,
     score: item.score,
+    price: item.price,
     url: item.url,
     pictureUrl: item.imageUrl,
     createdAt: item.createdAt.toISOString(),

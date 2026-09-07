@@ -14,6 +14,7 @@ export type WishlistItemProps = {
   description?: string;
   url?: string;
   score?: number;
+  price?: number;
   isSuggested: boolean;
   imageUrl?: string;
   takers: ItemTaker[];
@@ -29,6 +30,7 @@ export class WishlistItem {
   public readonly description?: string;
   public readonly url?: string;
   public readonly score?: number;
+  public readonly price?: number;
   public readonly isSuggested: boolean;
   public readonly imageUrl?: string;
   public readonly takers: ItemTaker[];
@@ -43,6 +45,7 @@ export class WishlistItem {
     this.description = props.description;
     this.url = props.url;
     this.score = props.score;
+    this.price = props.price;
     this.isSuggested = props.isSuggested;
     this.imageUrl = props.imageUrl;
     this.takers = props.takers;
@@ -56,6 +59,7 @@ export class WishlistItem {
     description?: string;
     url?: string;
     score?: number;
+    price?: number;
     isSuggested: boolean;
     imageUrl?: string;
     wishlistId: WishlistId;
@@ -71,6 +75,7 @@ export class WishlistItem {
       description: params.description,
       url: params.url,
       score: params.score,
+      price: params.price,
       isSuggested: params.isSuggested,
       imageUrl: params.imageUrl,
       importSourceId: params.importSourceId,
@@ -101,6 +106,7 @@ export class WishlistItem {
       description: this.description,
       url: this.url,
       score: this.score,
+      price: this.price,
       isSuggested: false,
       imageUrl: this.imageUrl,
       importSourceId: this.id,
@@ -116,6 +122,7 @@ export class WishlistItem {
     url?: string;
     imageUrl?: string;
     score?: number;
+    price?: number;
   }): WishlistItem {
     return new WishlistItem({ ...this, ...params, updatedAt: new Date() });
   }

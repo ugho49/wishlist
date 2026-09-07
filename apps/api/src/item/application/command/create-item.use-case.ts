@@ -15,6 +15,7 @@ export type CreateItemInput = {
     name: string;
     description?: string;
     score?: number;
+    price?: number;
     url?: string;
     pictureUrl?: string;
   };
@@ -52,6 +53,7 @@ export class CreateItemUseCase {
       name: command.newItem.name,
       description: command.newItem.description,
       score: command.newItem.score,
+      price: command.newItem.price,
       url,
       imageUrl: command.newItem.pictureUrl,
       isSuggested,

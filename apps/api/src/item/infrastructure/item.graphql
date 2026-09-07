@@ -12,6 +12,7 @@ type Item {
   description: String
   url: String
   score: Int
+  price: Float
   isSuggested: Boolean
   pictureUrl: String
   takers: [ItemTaker!]!
@@ -28,6 +29,7 @@ input CreateItemInput {
   description: String
   url: String
   score: Int
+  price: Float
   pictureUrl: String
 }
 
@@ -36,6 +38,7 @@ input UpdateItemInput {
   description: String
   url: String
   score: Int
+  price: Float
   pictureUrl: String
 }
 
@@ -57,7 +60,12 @@ type ToggleItemOutput {
 }
 
 type ScanItemUrlOutput {
+  title: String
+  description: String
   pictureUrl: String
+  price: Float
+  currency: String
+  merchant: String
 }
 
 type GetImportableItemsOutput {

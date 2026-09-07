@@ -78,6 +78,7 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
   const [pictureUrl, setPictureUrl] = useState('');
   const [validPictureUrl, setValidPictureUrl] = useState<boolean | undefined>(true);
   const [score, setScore] = useState<number | null>(null);
+  const [price, setPrice] = useState('');
   const [scanUrlLoading, setScanUrlLoading] = useState(false);
   const queryClient = useQueryClient();
 
@@ -95,6 +96,7 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
     setUrl('');
     setPictureUrl('');
     setScore(null);
+    setPrice('');
   };
 
   const invalidateWishlist = () => queryClient.invalidateQueries({ queryKey: ['WishlistPage', { wishlistId }] });
@@ -118,6 +120,7 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
       url: url === '' ? undefined : TidyURL.clean(url).url,
       pictureUrl: pictureUrl === '' ? undefined : pictureUrl,
       score: score === null ? undefined : score,
+      price: price === '' ? undefined : Number(price),
     };
 
     if (mode === 'create') {
@@ -154,6 +157,7 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
     setUrl(item.url || '');
     setPictureUrl(item.pictureUrl || '');
     setScore(item.score || null);
+    setPrice(item.price == null ? '' : String(item.price));
   }, [item]);
 
   const { mutateAsync: scanItemUrl } = useScanItemUrlMutation({
@@ -171,11 +175,16 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
 
       const res = await scanItemUrl({ input: { url: urlToScan } });
       match(res.scanItemUrl)
-        .with({ __typename: 'ScanItemUrlOutput' }, output => setPictureUrl(output.pictureUrl || ''))
+        .with({ __typename: 'ScanItemUrlOutput' }, output => {
+          setPictureUrl(output.pictureUrl || '');
+          if (output.title && name.trim() === '') setName(output.title);
+          if (output.description && description.trim() === '') setDescription(output.description);
+          if (output.price != null && price === '') setPrice(String(output.price));
+        })
         .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
         .exhaustive();
     },
-    [scanUrlLoading, scanItemUrl, addToast],
+    [scanUrlLoading, scanItemUrl, addToast, name, description, price],
   );
 
   return (
@@ -328,6 +337,20 @@ export const ItemFormDialog = ({ title, open, item, mode, handleClose, wishlistI
               </Avatar>
             )}
           </Stack>
+
+          <Box>
+            <TextField
+              label="Prix estimé (€)"
+              type="number"
+              autoComplete="off"
+              disabled={loading}
+              fullWidth
+              value={price}
+              placeholder="Ex: 29.90"
+              slotProps={{ htmlInput: { min: 0, step: '0.01' } }}
+              onChange={e => setPrice(e.target.value)}
+            />
+          </Box>
 
           <Box>
             <InputLabel>Niveau de préférence</InputLabel>

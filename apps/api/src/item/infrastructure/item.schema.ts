@@ -12,6 +12,7 @@ export const CreateItemInputSchema = z.object({
   description: z.string().max(120).optional(),
   url: z.url().max(1000).optional(),
   score: z.number().int().min(0).max(5).optional(),
+  price: z.number().nonnegative().max(1_000_000).optional(),
   pictureUrl: z.url().max(1000).optional(),
 }) satisfies z.ZodType<CreateItemInput>;
 
@@ -20,6 +21,7 @@ export const UpdateItemInputSchema = z.object({
   description: z.string().max(120).optional(),
   url: z.url().max(1000).optional(),
   score: z.number().int().min(0).max(5).optional(),
+  price: z.number().nonnegative().max(1_000_000).optional(),
   pictureUrl: z.url().max(1000).optional(),
 }) satisfies z.ZodType<UpdateItemInput>;
 

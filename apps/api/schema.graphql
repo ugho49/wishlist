@@ -154,6 +154,7 @@ input CreateItemInput {
   description: String
   name: String!
   pictureUrl: String
+  price: Float
   score: Int
   url: String
   wishlistId: WishlistId!
@@ -294,6 +295,7 @@ type Item {
   isSuggested: Boolean
   name: String!
   pictureUrl: String
+  price: Float
   score: Int
   takers: [ItemTaker!]!
   url: String
@@ -496,7 +498,12 @@ input ScanItemUrlInput {
 }
 
 type ScanItemUrlOutput {
+  currency: String
+  description: String
+  merchant: String
   pictureUrl: String
+  price: Float
+  title: String
 }
 
 union ScanItemUrlResult = ForbiddenRejection | InternalErrorRejection | ScanItemUrlOutput | UnauthorizedRejection | ValidationRejection
@@ -572,6 +579,7 @@ input UpdateItemInput {
   description: String
   name: String!
   pictureUrl: String
+  price: Float
   score: Int
   url: String
 }

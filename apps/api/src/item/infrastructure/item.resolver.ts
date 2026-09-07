@@ -89,6 +89,7 @@ export class ItemResolver {
         name: input.name,
         description: input.description ?? undefined,
         score: input.score ?? undefined,
+        price: input.price ?? undefined,
         url: input.url ?? undefined,
         pictureUrl: input.pictureUrl ?? undefined,
       },
@@ -110,6 +111,7 @@ export class ItemResolver {
         name: input.name,
         description: input.description ?? undefined,
         score: input.score ?? undefined,
+        price: input.price ?? undefined,
         url: input.url ?? undefined,
         pictureUrl: input.pictureUrl ?? undefined,
       },
@@ -144,11 +146,16 @@ export class ItemResolver {
   async scanItemUrl(
     @Args('input', new ZodPipe(ScanItemUrlInputSchema)) input: ScanItemUrlInput,
   ): Promise<ScanItemUrlResult> {
-    const { pictureUrl } = await this.scanItemUrlUseCase.execute({ url: input.url });
+    const scanned = await this.scanItemUrlUseCase.execute({ url: input.url });
 
     return {
       __typename: 'ScanItemUrlOutput',
-      pictureUrl,
+      title: scanned.title,
+      description: scanned.description,
+      pictureUrl: scanned.pictureUrl,
+      price: scanned.price,
+      currency: scanned.currency,
+      merchant: scanned.merchant,
     };
   }
 }

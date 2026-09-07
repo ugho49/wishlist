@@ -340,7 +340,7 @@ export type ImportableItemsQueryVariables = Exact<{
 
 export type ImportableItemsQuery = { importableItems:
     | { __typename: 'ForbiddenRejection' }
-    | { __typename: 'GetImportableItemsOutput', items: Array<{ id: Ids["ItemId"], name: string, description: string | null, url: string | null, score: number | null, isSuggested: boolean | null, pictureUrl: string | null, createdAt: string, takers: Array<{ userId: Ids["UserId"], takenAt: string, user: { id: Ids["UserId"], firstName: string, lastName: string, pictureUrl: string | null } }> }> }
+    | { __typename: 'GetImportableItemsOutput', items: Array<{ id: Ids["ItemId"], name: string, description: string | null, url: string | null, score: number | null, price: number | null, isSuggested: boolean | null, pictureUrl: string | null, createdAt: string, takers: Array<{ userId: Ids["UserId"], takenAt: string, user: { id: Ids["UserId"], firstName: string, lastName: string, pictureUrl: string | null } }> }> }
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'UnauthorizedRejection' }
    };
@@ -353,7 +353,7 @@ export type CreateItemMutationVariables = Exact<{
 export type CreateItemMutation = { createItem:
     | { __typename: 'ForbiddenRejection' }
     | { __typename: 'InternalErrorRejection' }
-    | { __typename: 'Item', id: Ids["ItemId"], name: string, description: string | null, url: string | null, score: number | null, isSuggested: boolean | null, pictureUrl: string | null, createdAt: string, takers: Array<{ userId: Ids["UserId"], takenAt: string, user: { id: Ids["UserId"], firstName: string, lastName: string, pictureUrl: string | null } }> }
+    | { __typename: 'Item', id: Ids["ItemId"], name: string, description: string | null, url: string | null, score: number | null, price: number | null, isSuggested: boolean | null, pictureUrl: string | null, createdAt: string, takers: Array<{ userId: Ids["UserId"], takenAt: string, user: { id: Ids["UserId"], firstName: string, lastName: string, pictureUrl: string | null } }> }
     | { __typename: 'UnauthorizedRejection' }
     | { __typename: 'ValidationRejection', errors: Array<{ field: string, message: string }> }
    };
@@ -406,7 +406,7 @@ export type ScanItemUrlMutationVariables = Exact<{
 export type ScanItemUrlMutation = { scanItemUrl:
     | { __typename: 'ForbiddenRejection' }
     | { __typename: 'InternalErrorRejection' }
-    | { __typename: 'ScanItemUrlOutput', pictureUrl: string | null }
+    | { __typename: 'ScanItemUrlOutput', title: string | null, description: string | null, pictureUrl: string | null, price: number | null, currency: string | null, merchant: string | null }
     | { __typename: 'UnauthorizedRejection' }
     | { __typename: 'ValidationRejection' }
    };
@@ -418,7 +418,7 @@ export type ImportItemsMutationVariables = Exact<{
 
 export type ImportItemsMutation = { importItems:
     | { __typename: 'ForbiddenRejection' }
-    | { __typename: 'ImportItemsOutput', items: Array<{ id: Ids["ItemId"], name: string, description: string | null, url: string | null, score: number | null, isSuggested: boolean | null, pictureUrl: string | null, createdAt: string, takers: Array<{ userId: Ids["UserId"], takenAt: string, user: { id: Ids["UserId"], firstName: string, lastName: string, pictureUrl: string | null } }> }> }
+    | { __typename: 'ImportItemsOutput', items: Array<{ id: Ids["ItemId"], name: string, description: string | null, url: string | null, score: number | null, price: number | null, isSuggested: boolean | null, pictureUrl: string | null, createdAt: string, takers: Array<{ userId: Ids["UserId"], takenAt: string, user: { id: Ids["UserId"], firstName: string, lastName: string, pictureUrl: string | null } }> }> }
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'UnauthorizedRejection' }
     | { __typename: 'ValidationRejection', errors: Array<{ field: string, message: string }> }
@@ -950,7 +950,7 @@ export type WishlistPageQuery = { wishlist:
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'NotFoundRejection' }
     | { __typename: 'UnauthorizedRejection' }
-    | { __typename: 'Wishlist', id: Ids["WishlistId"], title: string, description: string | null, logoUrl: string | null, ownerId: Ids["UserId"], coOwnerId: Ids["UserId"] | null, createdAt: string, updatedAt: string, config: { hideItems: boolean }, owner: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null }, coOwner: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null } | null, events: Array<{ id: Ids["EventId"], title: string, icon: string | null, eventDate: string }>, items: Array<{ id: Ids["ItemId"], name: string, description: string | null, url: string | null, score: number | null, isSuggested: boolean | null, pictureUrl: string | null, createdAt: string, takers: Array<{ userId: Ids["UserId"], takenAt: string, user: { id: Ids["UserId"], firstName: string, lastName: string, pictureUrl: string | null } }> }> }
+    | { __typename: 'Wishlist', id: Ids["WishlistId"], title: string, description: string | null, logoUrl: string | null, ownerId: Ids["UserId"], coOwnerId: Ids["UserId"] | null, createdAt: string, updatedAt: string, config: { hideItems: boolean }, owner: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null }, coOwner: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null } | null, events: Array<{ id: Ids["EventId"], title: string, icon: string | null, eventDate: string }>, items: Array<{ id: Ids["ItemId"], name: string, description: string | null, url: string | null, score: number | null, price: number | null, isSuggested: boolean | null, pictureUrl: string | null, createdAt: string, takers: Array<{ userId: Ids["UserId"], takenAt: string, user: { id: Ids["UserId"], firstName: string, lastName: string, pictureUrl: string | null } }> }> }
    | null };
 
 export type AdminListWishlistsForUserQueryVariables = Exact<{
@@ -1858,6 +1858,7 @@ export const ImportableItemsDocument = new TypedDocumentString(`
         description
         url
         score
+        price
         isSuggested
         pictureUrl
         takers {
@@ -1903,6 +1904,7 @@ export const CreateItemDocument = new TypedDocumentString(`
       description
       url
       score
+      price
       isSuggested
       pictureUrl
       takers {
@@ -2032,7 +2034,12 @@ export const ScanItemUrlDocument = new TypedDocumentString(`
   scanItemUrl(input: $input) {
     __typename
     ... on ScanItemUrlOutput {
+      title
+      description
       pictureUrl
+      price
+      currency
+      merchant
     }
   }
 }
@@ -2062,6 +2069,7 @@ export const ImportItemsDocument = new TypedDocumentString(`
         description
         url
         score
+        price
         isSuggested
         pictureUrl
         takers {
@@ -3409,6 +3417,7 @@ export const WishlistPageDocument = new TypedDocumentString(`
         description
         url
         score
+        price
         isSuggested
         pictureUrl
         takers {

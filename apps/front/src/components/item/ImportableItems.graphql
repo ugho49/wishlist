@@ -8,6 +8,7 @@ query ImportableItems($wishlistId: WishlistId!) {
         description
         url
         score
+        price
         isSuggested
         pictureUrl
         takers {

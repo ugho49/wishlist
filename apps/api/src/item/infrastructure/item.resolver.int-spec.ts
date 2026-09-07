@@ -1125,7 +1125,12 @@ describe('ItemResolver (GraphQL)', () => {
         scanItemUrl(input: $input) {
           __typename
           ... on ScanItemUrlOutput {
+            title
+            description
             pictureUrl
+            price
+            currency
+            merchant
           }
           ... on ValidationRejection {
             errors {
@@ -1180,7 +1185,12 @@ describe('ItemResolver (GraphQL)', () => {
 
         expect(res.body.data.scanItemUrl).toEqual({
           __typename: 'ScanItemUrlOutput',
+          title: null,
+          description: null,
           pictureUrl: null,
+          price: null,
+          currency: null,
+          merchant: null,
         });
       });
     });

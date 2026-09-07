@@ -14,6 +14,7 @@ export type UpdateItemInput = {
     name?: string;
     description?: string;
     score?: number;
+    price?: number;
     url?: string;
     pictureUrl?: string;
   };
@@ -63,6 +64,7 @@ export class UpdateItemUseCase {
       url: command.updateItem.url ? TidyURL.clean(command.updateItem.url).url : undefined,
       imageUrl: command.updateItem.pictureUrl,
       score: command.updateItem.score,
+      price: command.updateItem.price,
     });
 
     this.logger.log('Saving item...', { itemId: item.id, updatedItem });

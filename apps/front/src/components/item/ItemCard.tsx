@@ -200,6 +200,14 @@ const ClickableTitle = styled(Link)(({ theme }) => ({
   },
 }));
 
+const ItemPrice = styled(Typography)(({ theme }) => ({
+  color: theme.palette.primary.main,
+  fontWeight: 600,
+  fontSize: '0.95rem',
+  textAlign: 'center',
+  margin: 0,
+}));
+
 // Item description with subtle styling and minimal margins
 const ItemDescription = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
@@ -566,6 +574,12 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
               item.name
             )}
           </ItemTitle>
+
+          {item.price != null && (
+            <ItemPrice>
+              {new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(item.price)}
+            </ItemPrice>
+          )}
 
           {/* Description */}
           {item.description && <ItemDescription>{item.description}</ItemDescription>}
