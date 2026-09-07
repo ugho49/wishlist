@@ -186,6 +186,7 @@ type Event {
   eventDate: String!
   icon: String
   id: EventId!
+  inviteToken: String!
   title: String!
   updatedAt: String!
   wishlistIds: [WishlistId!]!
@@ -200,6 +201,18 @@ type EventAttendee {
 }
 
 scalar EventId
+
+type EventInvitePreview {
+  alreadyJoined: Boolean!
+  attendeeCount: Int!
+  description: String
+  eventDate: String!
+  hostDisplayName: String!
+  icon: String
+  title: String!
+}
+
+union EventInvitePreviewResult = EventInvitePreview | ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection
 
 input EventPaginationFilters {
   limit: Int
@@ -294,6 +307,8 @@ type ItemTaker {
   userId: UserId!
 }
 
+union JoinEventByInviteResult = Event | ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection
+
 input LinkUserToGoogleInput {
   code: String!
 }
@@ -358,6 +373,7 @@ type Mutation {
   deleteSecretSantaUser(id: SecretSantaId!, secretSantaUserId: SecretSantaUserId!): DeleteSecretSantaUserResult!
   deleteWishlist(id: WishlistId!): DeleteWishlistResult!
   importItems(input: ImportItemsInput!): ImportItemsResult!
+  joinEventByInvite(token: String!): JoinEventByInviteResult!
   linkCurrentUserWithGoogle(input: LinkUserToGoogleInput!): LinkUserToGoogleResult!
   linkWishlistToEvent(eventId: EventId!, id: WishlistId!): LinkWishlistToEventResult!
   login(input: LoginInput!): LoginResult!
@@ -419,6 +435,7 @@ type Query {
   closestFriends(limit: Int): ClosestFriendsResult!
   currentUser: GetCurrentUserResult!
   event(id: EventId!): GetEventByIdResult
+  eventInvitePreview(token: String!): EventInvitePreviewResult!
   events(filters: EventPaginationFilters!): GetMyEventsResult!
   health: HealthResult!
   importableItems(wishlistId: WishlistId!): GetImportableItemsResult!

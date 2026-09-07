@@ -659,4 +659,95 @@ describe('EventMutationResolver (GraphQL)', () => {
       });
     });
   });
+
+  describe('Mutation joinEventByInvite', () => {
+    const mutation = /* GraphQL */ `
+      mutation JoinEventByInvite($token: String!) {
+        joinEventByInvite(token: $token) {
+          __typename
+          ... on Event {
+            id
+            title
+            attendees {
+              role
+              user {
+                id
+              }
+            }
+          }
+          ... on UnauthorizedRejection {
+            message
+          }
+          ... on NotFoundRejection {
+            message
+          }
+        }
+      }
+    `;
+
+    it('should not succeed when not authenticated', async () => {
+      const request = await getRequest();
+      const res = await request
+        .post(GRAPHQL_PATH)
+        .send({ query: mutation, variables: { token: 'a'.repeat(32) } })
+        .expect(200);
+
+      expect(res.body.data?.joinEventByInvite?.__typename).not.toBe('Event');
+    });
+
+    describe('when user is authenticated', () => {
+      let request: RequestApp;
+      let currentUserId: string;
+
+      beforeEach(async () => {
+        request = await getRequest({ signedAs: 'BASE_USER' });
+        currentUserId = await fixtures.getSignedUserId('BASE_USER');
+      });
+
+      it('should join the event as a participant', async () => {
+        const ownerId = await fixtures.insertUser({
+          email: 'owner-invite@test.com',
+          firstname: 'Owner',
+          lastname: 'Invite',
+        });
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Housewarming',
+          maintainerId: ownerId,
+        });
+        const token = await fixtures.getEventInviteToken(eventId);
+
+        const res = await request.post(GRAPHQL_PATH).send({ query: mutation, variables: { token } }).expect(200);
+
+        expect(res.body.data.joinEventByInvite.__typename).toBe('Event');
+        expect(res.body.data.joinEventByInvite.id).toBe(eventId);
+        expect(res.body.data.joinEventByInvite.attendees).toEqual(
+          expect.arrayContaining([expect.objectContaining({ role: 'PARTICIPANT', user: { id: currentUserId } })]),
+        );
+
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(2);
+      });
+
+      it('should be idempotent when the user is already an attendee', async () => {
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Already there',
+          maintainerId: currentUserId,
+        });
+        const token = await fixtures.getEventInviteToken(eventId);
+
+        const res = await request.post(GRAPHQL_PATH).send({ query: mutation, variables: { token } }).expect(200);
+
+        expect(res.body.data.joinEventByInvite.__typename).toBe('Event');
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(1);
+      });
+
+      it('should return NotFoundRejection for an unknown token', async () => {
+        const res = await request
+          .post(GRAPHQL_PATH)
+          .send({ query: mutation, variables: { token: 'b'.repeat(32) } })
+          .expect(200);
+
+        expect(res.body.data.joinEventByInvite.__typename).toBe('NotFoundRejection');
+      });
+    });
+  });
 });

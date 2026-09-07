@@ -6,6 +6,7 @@ import { GqlExecutionContext } from '@nestjs/graphql';
 import { AuthGuard as PassportAuthGuard } from '@nestjs/passport';
 
 import { Observability } from '../../../core/observability';
+import { IS_OPTIONAL_AUTH_KEY } from '../decorators/optional-auth.metadata';
 import { IS_PUBLIC_KEY } from '../decorators/public.metadata';
 
 @Injectable()
@@ -32,6 +33,27 @@ export class AuthGuard extends PassportAuthGuard('jwt') {
       context.getHandler(),
       context.getClass(),
     ]);
+    const isOptionalAuth = this.reflector.getAllAndOverride<boolean>(IS_OPTIONAL_AUTH_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+
+    if (isOptionalAuth) {
+      const request = this.getRequest(context) as { headers?: { authorization?: string } };
+      if (!request.headers?.authorization) {
+        return true;
+      }
+
+      try {
+        const result = super.canActivate(context);
+        if (result instanceof Promise) {
+          return result.then(value => Boolean(value)).catch(() => true);
+        }
+        return result || true;
+      } catch {
+        return true;
+      }
+    }
 
     if (isPublic) {
       return true;

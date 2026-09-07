@@ -12,6 +12,7 @@ import {
   type CreateEventResult,
   type DeleteEventResult,
   AttendeeRole as GqlAttendeeRole,
+  type JoinEventByInviteResult,
   type RemoveEventAttendeeResult,
   type UpdateEventAttendeeRoleResult,
   type UpdateEventInput,
@@ -21,6 +22,7 @@ import { AddAttendeeUseCase } from '../../application/command/add-attendee.use-c
 import { CreateEventUseCase } from '../../application/command/create-event.use-case';
 import { DeleteAttendeeUseCase } from '../../application/command/delete-attendee.use-case';
 import { DeleteEventUseCase } from '../../application/command/delete-event.use-case';
+import { JoinEventByInviteUseCase } from '../../application/command/join-event-by-invite.use-case';
 import { UpdateAttendeeRoleUseCase } from '../../application/command/update-attendee-role.use-case';
 import { UpdateEventUseCase } from '../../application/command/update-event.use-case';
 import { eventMapper } from '../event.mapper';
@@ -29,6 +31,7 @@ import {
   AttendeeIdSchema,
   CreateEventInputSchema,
   EventIdSchema,
+  EventInviteTokenSchema,
   GqlAttendeeRoleSchema,
   toDomainAttendeeRole,
   UpdateEventInputSchema,
@@ -43,6 +46,7 @@ export class EventMutationResolver {
     private readonly addAttendeeUseCase: AddAttendeeUseCase,
     private readonly deleteAttendeeUseCase: DeleteAttendeeUseCase,
     private readonly updateAttendeeRoleUseCase: UpdateAttendeeRoleUseCase,
+    private readonly joinEventByInviteUseCase: JoinEventByInviteUseCase,
   ) {}
 
   @Mutation()
@@ -138,5 +142,14 @@ export class EventMutationResolver {
       role: toDomainAttendeeRole(role),
     });
     return { __typename: 'VoidOutput', success: true };
+  }
+
+  @Mutation()
+  async joinEventByInvite(
+    @Args('token', new ZodPipe(EventInviteTokenSchema)) token: string,
+    @GqlCurrentUser() currentUser: ICurrentUser,
+  ): Promise<JoinEventByInviteResult> {
+    const { event } = await this.joinEventByInviteUseCase.execute({ currentUser, token });
+    return eventMapper.toGqlEvent(event);
   }
 }

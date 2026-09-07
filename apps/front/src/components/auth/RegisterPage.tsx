@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import { Alert, Button, Divider, Stack, styled, TextField, Typography } from '@mui/material';
-import { useNavigate } from '@tanstack/react-router';
+import { useNavigate, useSearch } from '@tanstack/react-router';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
@@ -59,6 +59,7 @@ export const RegisterPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { addToast } = useToast();
+  const { redirectUrl } = useSearch({ from: '/_anonymous-with-layout/register' });
   const [socialLoading, setSocialLoading] = useState(false);
 
   const {
@@ -78,7 +79,11 @@ export const RegisterPage = () => {
       }),
     );
 
-    // Redirect to welcome page for new users
+    if (redirectUrl) {
+      void navigate({ to: redirectUrl });
+      return;
+    }
+
     void navigate({ to: '/welcome', search: { from } });
   };
 
@@ -264,7 +269,9 @@ export const RegisterPage = () => {
           >
             Déjà inscrit ?
           </Typography>
-          <RouterLink to="/login">Se connecter</RouterLink>
+          <RouterLink to="/login" search={redirectUrl ? { redirectUrl } : undefined}>
+            Se connecter
+          </RouterLink>
         </Stack>
         <RouterLink to="/forgot-password">Mot de passe oublié ?</RouterLink>
       </Stack>

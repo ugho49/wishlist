@@ -362,4 +362,73 @@ describe('EventResolver (GraphQL)', () => {
       });
     });
   });
+
+  describe('Query eventInvitePreview', () => {
+    const query = /* GraphQL */ `
+      query EventInvitePreview($token: String!) {
+        eventInvitePreview(token: $token) {
+          __typename
+          ... on EventInvitePreview {
+            title
+            eventDate
+            attendeeCount
+            hostDisplayName
+            alreadyJoined
+          }
+          ... on NotFoundRejection {
+            message
+          }
+          ... on ValidationRejection {
+            errors {
+              field
+              message
+            }
+          }
+        }
+      }
+    `;
+
+    it('should return a preview without authentication', async () => {
+      const unauthRequest = await getRequest();
+      const eventDate = DateTime.now().plus({ days: 21 }).toJSDate();
+      const { eventId } = await fixtures.insertEventWithMaintainer({
+        title: 'Baby shower',
+        eventDate,
+        maintainerId: currentUserId,
+      });
+      const token = await fixtures.getEventInviteToken(eventId);
+
+      const res = await unauthRequest.post('/graphql').send({ query, variables: { token } }).expect(200);
+
+      expect(res.body.data.eventInvitePreview).toMatchObject({
+        __typename: 'EventInvitePreview',
+        title: 'Baby shower',
+        eventDate: DateTime.fromJSDate(eventDate).toISODate(),
+        attendeeCount: 1,
+        alreadyJoined: false,
+      });
+    });
+
+    it('should mark alreadyJoined when the current user is an attendee', async () => {
+      const { eventId } = await fixtures.insertEventWithMaintainer({
+        title: 'Brunch',
+        maintainerId: currentUserId,
+      });
+      const token = await fixtures.getEventInviteToken(eventId);
+
+      const res = await request.post('/graphql').send({ query, variables: { token } }).expect(200);
+
+      expect(res.body.data.eventInvitePreview.alreadyJoined).toBe(true);
+    });
+
+    it('should return NotFoundRejection for an unknown token', async () => {
+      const unauthRequest = await getRequest();
+      const res = await unauthRequest
+        .post('/graphql')
+        .send({ query, variables: { token: 'a'.repeat(32) } })
+        .expect(200);
+
+      expect(res.body.data.eventInvitePreview.__typename).toBe('NotFoundRejection');
+    });
+  });
 });

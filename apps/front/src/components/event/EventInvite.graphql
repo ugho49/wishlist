@@ -1,0 +1,39 @@
+query EventInvitePreview($token: String!) {
+  eventInvitePreview(token: $token) {
+    __typename
+    ... on EventInvitePreview {
+      title
+      description
+      icon
+      eventDate
+      attendeeCount
+      hostDisplayName
+      alreadyJoined
+    }
+    ... on NotFoundRejection {
+      message
+    }
+    ... on ValidationRejection {
+      errors {
+        field
+        message
+      }
+    }
+  }
+}
+
+mutation JoinEventByInvite($token: String!) {
+  joinEventByInvite(token: $token) {
+    __typename
+    ... on Event {
+      id
+      title
+    }
+    ... on NotFoundRejection {
+      message
+    }
+    ... on UnauthorizedRejection {
+      message
+    }
+  }
+}

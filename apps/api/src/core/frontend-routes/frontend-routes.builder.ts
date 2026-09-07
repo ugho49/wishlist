@@ -7,6 +7,7 @@ export const frontendRoutesBuilder = (baseUrl: string) => ({
   },
   event: {
     byId: (eventId: EventId) => `${baseUrl}/events/${eventId}`,
+    invite: (token: string) => `${baseUrl}/invite/${token}`,
   },
   user: {
     register: () => `${baseUrl}/register`,

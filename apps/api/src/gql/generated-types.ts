@@ -206,6 +206,7 @@ export type Event = {
   eventDate: Scalars['String']['output'];
   icon?: Maybe<Scalars['String']['output']>;
   id: Scalars['EventId']['output'];
+  inviteToken: Scalars['String']['output'];
   title: Scalars['String']['output'];
   updatedAt: Scalars['String']['output'];
   wishlistIds: Array<Scalars['WishlistId']['output']>;
@@ -218,6 +219,19 @@ export type EventAttendee = {
   role: AttendeeRole;
   user?: Maybe<User>;
 };
+
+export type EventInvitePreview = {
+  __typename: 'EventInvitePreview';
+  alreadyJoined: Scalars['Boolean']['output'];
+  attendeeCount: Scalars['Int']['output'];
+  description?: Maybe<Scalars['String']['output']>;
+  eventDate: Scalars['String']['output'];
+  hostDisplayName: Scalars['String']['output'];
+  icon?: Maybe<Scalars['String']['output']>;
+  title: Scalars['String']['output'];
+};
+
+export type EventInvitePreviewResult = EventInvitePreview | ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection;
 
 export type EventPaginationFilters = {
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -319,6 +333,8 @@ export type ItemTaker = {
   userId: Scalars['UserId']['output'];
 };
 
+export type JoinEventByInviteResult = Event | ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection;
+
 export type LinkUserToGoogleInput = {
   code: Scalars['String']['input'];
 };
@@ -386,6 +402,7 @@ export type Mutation = {
   deleteSecretSantaUser: DeleteSecretSantaUserResult;
   deleteWishlist: DeleteWishlistResult;
   importItems: ImportItemsResult;
+  joinEventByInvite: JoinEventByInviteResult;
   linkCurrentUserWithGoogle: LinkUserToGoogleResult;
   linkWishlistToEvent: LinkWishlistToEventResult;
   login: LoginResult;
@@ -538,6 +555,11 @@ export type MutationDeleteWishlistArgs = {
 
 export type MutationImportItemsArgs = {
   input: ImportItemsInput;
+};
+
+
+export type MutationJoinEventByInviteArgs = {
+  token: Scalars['String']['input'];
 };
 
 
@@ -725,6 +747,7 @@ export type Query = {
   closestFriends: ClosestFriendsResult;
   currentUser: GetCurrentUserResult;
   event?: Maybe<GetEventByIdResult>;
+  eventInvitePreview: EventInvitePreviewResult;
   events: GetMyEventsResult;
   health: HealthResult;
   importableItems: GetImportableItemsResult;
@@ -769,6 +792,11 @@ export type QueryClosestFriendsArgs = {
 
 export type QueryEventArgs = {
   id: Scalars['EventId']['input'];
+};
+
+
+export type QueryEventInvitePreviewArgs = {
+  token: Scalars['String']['input'];
 };
 
 

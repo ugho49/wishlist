@@ -37,3 +37,11 @@ export const GqlCurrentUser = createParamDecorator((data: keyof ICurrentUser, co
   const user = gqlContext.user as ICurrentUser;
   return data ? user?.[data] : user;
 });
+
+export const GqlOptionalUser = createParamDecorator((data: keyof ICurrentUser, context: ExecutionContext) => {
+  const ctx = GqlExecutionContext.create(context);
+  const gqlContext = ctx.getContext() as GraphQLContext;
+  const user = gqlContext.user;
+  if (!user) return;
+  return data ? user[data] : user;
+});

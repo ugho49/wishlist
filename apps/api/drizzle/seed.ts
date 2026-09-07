@@ -9,6 +9,7 @@ import { DateTime } from 'luxon';
 import { PasswordManager } from '../src/auth/infrastructure/util/password-manager';
 import { createSqlClient } from '../src/core/database/create-sql-client';
 import { AttendeeRole } from '../src/event/domain/attendee-role.enum';
+import { Event } from '../src/event/domain/model/event.model';
 import { Authorities } from '../src/user/domain/authorities.enum';
 import { UserAccountProvider } from '../src/user/domain/user-account-provider.enum';
 import * as schema from './schema';
@@ -144,6 +145,7 @@ async function main() {
     const event: typeof schema.event.$inferInsert = {
       id: faker.string.uuid(),
       title: faker.book.title(),
+      inviteToken: Event.generateInviteToken(),
       eventDate: isPastEvent
         ? faker.date.past().toISOString()
         : faker.date
