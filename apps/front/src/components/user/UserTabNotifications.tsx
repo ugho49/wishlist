@@ -23,6 +23,8 @@ export const UserTabNotifications = () => {
   const { addToast } = useToast();
   const queryClient = useQueryClient();
   const [dailyNewItemNotification, setDailyNewItemNotification] = useState(true);
+  const [birthdayReminder, setBirthdayReminder] = useState(true);
+  const [christmasReminder, setChristmasReminder] = useState(true);
 
   const { data, isLoading: loadingNotificationSettings } = useUserProfileEmailSettingsQuery(undefined, {
     select: d => d.currentUser,
@@ -37,6 +39,8 @@ export const UserTabNotifications = () => {
   useEffect(() => {
     if (emailSettings) {
       setDailyNewItemNotification(emailSettings.dailyNewItemNotification);
+      setBirthdayReminder(emailSettings.birthdayReminder);
+      setChristmasReminder(emailSettings.christmasReminder);
     }
   }, [emailSettings]);
 
@@ -46,6 +50,8 @@ export const UserTabNotifications = () => {
     const res = await updateEmailSettings({
       input: {
         dailyNewItemNotification,
+        birthdayReminder,
+        christmasReminder,
       },
     });
 
@@ -88,6 +94,40 @@ export const UserTabNotifications = () => {
                   <Typography variant="body1">Recevoir les mails quotidien d'ajout de nouveaux souhaits</Typography>
                   <Typography variant="caption">
                     Utile pour ne pas avoir à se connecter tous les jours si rien ne change
+                  </Typography>
+                </Stack>
+              }
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={birthdayReminder}
+                  onChange={e => setBirthdayReminder(e.target.checked)}
+                  disabled={loading}
+                />
+              }
+              label={
+                <Stack>
+                  <Typography variant="body1">Rappel d’anniversaire (J-30 et J-7)</Typography>
+                  <Typography variant="caption">
+                    Un pense-bête pour mettre votre liste à jour. Aucun événement n’est créé.
+                  </Typography>
+                </Stack>
+              }
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={christmasReminder}
+                  onChange={e => setChristmasReminder(e.target.checked)}
+                  disabled={loading}
+                />
+              }
+              label={
+                <Stack>
+                  <Typography variant="body1">Rappel de Noël (25 novembre et 18 décembre)</Typography>
+                  <Typography variant="caption">
+                    Un pense-bête pour regarder les listes de vos proches. Aucun événement n’est créé.
                   </Typography>
                 </Stack>
               }

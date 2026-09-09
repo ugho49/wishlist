@@ -67,6 +67,8 @@ type PendingEmailChange {
 
 type UserEmailSettings {
   dailyNewItemNotification: Boolean!
+  birthdayReminder: Boolean!
+  christmasReminder: Boolean!
 }
 
 union GetCurrentUserResult = User | UnauthorizedRejection | ForbiddenRejection | InternalErrorRejection
@@ -137,6 +139,8 @@ input ConfirmEmailChangeInput {
 
 input UpdateUserEmailSettingsInput {
   dailyNewItemNotification: Boolean!
+  birthdayReminder: Boolean!
+  christmasReminder: Boolean!
 }
 
 input SendResetPasswordEmailInput {

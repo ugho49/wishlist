@@ -7,6 +7,7 @@ import { CreatePasswordVerificationUseCase } from './command/create-password-ver
 import { CreateUserUseCase } from './command/create-user.use-case';
 import { DeleteUserUseCase } from './command/delete-user.use-case';
 import { LinkUserToGoogleUseCase } from './command/link-user-to-google.use-case';
+import { NotifyCalendarRemindersUseCase } from './command/notify-calendar-reminders.use-case';
 import { RemoveUserPictureUseCase } from './command/remove-user-picture.use-case';
 import { ResetUserPasswordUseCase } from './command/reset-user-password.use-case';
 import { RevokeUserSessionUseCase } from './command/revoke-user-session.use-case';
@@ -44,6 +45,7 @@ export const handlers = [
   RevokeUserSessionUseCase,
   AdminRevokeUserSessionUseCase,
   AdminRevokeAllUserSessionsUseCase,
+  NotifyCalendarRemindersUseCase,
   UpdateUserEmailSettingUseCase,
   UpdateUserUseCase,
   UpdateUserFullUseCase,

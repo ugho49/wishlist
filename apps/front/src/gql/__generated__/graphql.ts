@@ -642,7 +642,7 @@ export type UserProfileEmailSettingsQuery = { currentUser:
     | { __typename: 'ForbiddenRejection' }
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'UnauthorizedRejection' }
-    | { __typename: 'User', id: Ids["UserId"], emailSettings: { dailyNewItemNotification: boolean } | null }
+    | { __typename: 'User', id: Ids["UserId"], emailSettings: { dailyNewItemNotification: boolean, birthdayReminder: boolean, christmasReminder: boolean } | null }
    };
 
 export type UserPendingEmailChangeQueryVariables = Exact<{ [key: string]: never; }>;
@@ -717,7 +717,7 @@ export type UpdateUserEmailSettingsMutation = { updateUserEmailSettings:
     | { __typename: 'ForbiddenRejection' }
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'UnauthorizedRejection' }
-    | { __typename: 'UserEmailSettings', dailyNewItemNotification: boolean }
+    | { __typename: 'UserEmailSettings', dailyNewItemNotification: boolean, birthdayReminder: boolean, christmasReminder: boolean }
     | { __typename: 'ValidationRejection', errors: Array<{ field: string, message: string }> }
    };
 
@@ -2651,6 +2651,8 @@ export const UserProfileEmailSettingsDocument = new TypedDocumentString(`
       id
       emailSettings {
         dailyNewItemNotification
+        birthdayReminder
+        christmasReminder
       }
     }
   }
@@ -2840,6 +2842,8 @@ export const UpdateUserEmailSettingsDocument = new TypedDocumentString(`
     __typename
     ... on UserEmailSettings {
       dailyNewItemNotification
+      birthdayReminder
+      christmasReminder
     }
     ... on ValidationRejection {
       errors {

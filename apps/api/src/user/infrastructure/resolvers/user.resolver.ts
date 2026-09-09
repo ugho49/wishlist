@@ -269,6 +269,8 @@ export class UserResolver {
     const { userEmailSetting } = await this.updateUserEmailSettingUseCase.execute({
       currentUser,
       dailyNewItemNotification: input.dailyNewItemNotification,
+      birthdayReminder: input.birthdayReminder,
+      christmasReminder: input.christmasReminder,
     });
 
     return userMapper.toGqlUserEmailSettings(userEmailSetting);
