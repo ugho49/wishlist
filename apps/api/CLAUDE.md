@@ -68,7 +68,7 @@ Yoga plugin `useErrorTransformPlugin` maps thrown Nest exceptions onto the field
 - **Studio**: `bun nx run api:drizzle:studio`
 - **Generate**: `bun nx run api:drizzle:generate --name <migration-name>`
 - **Migrate**: `bun nx run api:drizzle:migrate`
-- **Seed**: `bun nx run api:drizzle:seed`
+- **Seed**: `bun nx run api:drizzle:seed` — orchestrator `drizzle/seed.ts`, per-table seeders in `drizzle/seeders/`
 - **Schema**: `drizzle/schema/` (barrel: `drizzle/schema/index.ts`)
 - **Migrations**: `drizzle/migrations/`
 - **Enums**: domain TypeScript string enums in `src/{domain}/domain/` → Postgres via `tsEnumToPgEnum()` from `drizzle/enum.ts`. Drizzle schemas import the domain enum file directly. The frontend uses GraphQL-generated enums, not domain enums.
