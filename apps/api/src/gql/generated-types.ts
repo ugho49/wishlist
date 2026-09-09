@@ -272,6 +272,14 @@ export type GetMyEventsResult = ForbiddenRejection | GetEventsPagedResponse | In
 
 export type GetMySecretSantaDrawResult = EventAttendee | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection;
 
+export type GetMyTakenItemsOutput = {
+  __typename: 'GetMyTakenItemsOutput';
+  data: Array<TakenGift>;
+  pagination: Pagination;
+};
+
+export type GetMyTakenItemsResult = ForbiddenRejection | GetMyTakenItemsOutput | InternalErrorRejection | UnauthorizedRejection;
+
 export type GetMyWishlistsResult = ForbiddenRejection | GetWishlistsPagedResponse | InternalErrorRejection | UnauthorizedRejection;
 
 export type GetPendingEmailChangeResult = ForbiddenRejection | InternalErrorRejection | PendingEmailChange | UnauthorizedRejection;
@@ -754,6 +762,7 @@ export type Query = {
   health: HealthResult;
   importableItems: GetImportableItemsResult;
   mySecretSantaDraw?: Maybe<GetMySecretSantaDrawResult>;
+  myTakenItems: GetMyTakenItemsResult;
   pendingEmailChange?: Maybe<GetPendingEmailChangeResult>;
   searchUsers: SearchUsersResult;
   secretSanta?: Maybe<GetSecretSantaForEventResult>;
@@ -814,6 +823,11 @@ export type QueryImportableItemsArgs = {
 
 export type QueryMySecretSantaDrawArgs = {
   eventId: Scalars['EventId']['input'];
+};
+
+
+export type QueryMyTakenItemsArgs = {
+  filters: TakenItemsFilters;
 };
 
 
@@ -934,6 +948,44 @@ export type SendResetPasswordEmailInput = {
 export type SendResetPasswordEmailResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
 export type StartSecretSantaResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+
+export type TakenGift = {
+  __typename: 'TakenGift';
+  events: Array<TakenGiftEvent>;
+  item: Item;
+  recipient: TakenGiftRecipient;
+  takenAt: Scalars['String']['output'];
+  wishlistId: Scalars['WishlistId']['output'];
+  wishlistTitle: Scalars['String']['output'];
+};
+
+export type TakenGiftEvent = {
+  __typename: 'TakenGiftEvent';
+  eventDate: Scalars['String']['output'];
+  icon?: Maybe<Scalars['String']['output']>;
+  id: Scalars['EventId']['output'];
+  title: Scalars['String']['output'];
+};
+
+export type TakenGiftRecipient = {
+  __typename: 'TakenGiftRecipient';
+  firstName: Scalars['String']['output'];
+  id: Scalars['UserId']['output'];
+  lastName: Scalars['String']['output'];
+  pictureUrl?: Maybe<Scalars['String']['output']>;
+};
+
+export type TakenItemsFilters = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  page?: InputMaybe<Scalars['Int']['input']>;
+  scope?: InputMaybe<TakenItemsScope>;
+};
+
+export enum TakenItemsScope {
+  All = 'ALL',
+  Past = 'PAST',
+  Upcoming = 'UPCOMING'
+}
 
 export type ToggleItemOutput = {
   __typename: 'ToggleItemOutput';

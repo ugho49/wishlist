@@ -13,19 +13,20 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AnonymousWithLayoutRouteImport } from './routes/_anonymous-with-layout'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as ConfirmEmailChangeRouteImport } from './routes/confirm-email-change'
-import { Route as InviteTokenRouteImport } from './routes/invite/$token'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AnonymousWithLayoutLoginRouteImport } from './routes/_anonymous-with-layout/login'
 import { Route as AnonymousWithLayoutRegisterRouteImport } from './routes/_anonymous-with-layout/register'
 import { Route as AuthenticatedWithLayoutRouteImport } from './routes/_authenticated/_with-layout'
 import { Route as AuthenticatedWelcomeRouteImport } from './routes/_authenticated/welcome'
+import { Route as InviteTokenRouteImport } from './routes/invite/$token'
 import { Route as AnonymousWithLayoutForgotPasswordIndexRouteImport } from './routes/_anonymous-with-layout/forgot-password/index'
 import { Route as AnonymousWithLayoutForgotPasswordRenewRouteImport } from './routes/_anonymous-with-layout/forgot-password/renew'
 import { Route as AuthenticatedWithLayoutAdminRouteImport } from './routes/_authenticated/_with-layout/admin'
 import { Route as AuthenticatedWithLayoutAdminIndexRouteImport } from './routes/_authenticated/_with-layout/admin/index'
 import { Route as AuthenticatedWithLayoutEventsIndexRouteImport } from './routes/_authenticated/_with-layout/events/index'
 import { Route as AuthenticatedWithLayoutEventsNewRouteImport } from './routes/_authenticated/_with-layout/events/new'
+import { Route as AuthenticatedWithLayoutOfferedIndexRouteImport } from './routes/_authenticated/_with-layout/offered/index'
 import { Route as AuthenticatedWithLayoutUserProfileRouteImport } from './routes/_authenticated/_with-layout/user/profile'
 import { Route as AuthenticatedWithLayoutWishlistsIndexRouteImport } from './routes/_authenticated/_with-layout/wishlists/index'
 import { Route as AuthenticatedWithLayoutWishlistsNewRouteImport } from './routes/_authenticated/_with-layout/wishlists/new'
@@ -54,11 +55,6 @@ const AuthenticatedRoute = AuthenticatedRouteImport.update({
 const ConfirmEmailChangeRoute = ConfirmEmailChangeRouteImport.update({
   id: '/confirm-email-change',
   path: '/confirm-email-change',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const InviteTokenRoute = InviteTokenRouteImport.update({
-  id: '/invite/$token',
-  path: '/invite/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -91,6 +87,11 @@ const AuthenticatedWelcomeRoute = AuthenticatedWelcomeRouteImport.update({
   id: '/welcome',
   path: '/welcome',
   getParentRoute: () => AuthenticatedRoute,
+} as any)
+const InviteTokenRoute = InviteTokenRouteImport.update({
+  id: '/invite/$token',
+  path: '/invite/$token',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AnonymousWithLayoutForgotPasswordIndexRoute =
   AnonymousWithLayoutForgotPasswordIndexRouteImport.update({
@@ -126,6 +127,12 @@ const AuthenticatedWithLayoutEventsNewRoute =
   AuthenticatedWithLayoutEventsNewRouteImport.update({
     id: '/events/new',
     path: '/events/new',
+    getParentRoute: () => AuthenticatedWithLayoutRoute,
+  } as any)
+const AuthenticatedWithLayoutOfferedIndexRoute =
+  AuthenticatedWithLayoutOfferedIndexRouteImport.update({
+    id: '/offered/',
+    path: '/offered/',
     getParentRoute: () => AuthenticatedWithLayoutRoute,
   } as any)
 const AuthenticatedWithLayoutUserProfileRoute =
@@ -198,12 +205,12 @@ const AuthenticatedWithLayoutWishlistsWishlistIdEditRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/confirm-email-change': typeof ConfirmEmailChangeRoute
-  '/invite/$token': typeof InviteTokenRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/login': typeof AnonymousWithLayoutLoginRoute
   '/register': typeof AnonymousWithLayoutRegisterRoute
   '/welcome': typeof AuthenticatedWelcomeRoute
+  '/invite/$token': typeof InviteTokenRoute
   '/forgot-password/renew': typeof AnonymousWithLayoutForgotPasswordRenewRoute
   '/admin': typeof AuthenticatedWithLayoutAdminRouteWithChildren
   '/forgot-password/': typeof AnonymousWithLayoutForgotPasswordIndexRoute
@@ -212,6 +219,7 @@ export interface FileRoutesByFullPath {
   '/wishlists/new': typeof AuthenticatedWithLayoutWishlistsNewRoute
   '/admin/': typeof AuthenticatedWithLayoutAdminIndexRoute
   '/events/': typeof AuthenticatedWithLayoutEventsIndexRoute
+  '/offered/': typeof AuthenticatedWithLayoutOfferedIndexRoute
   '/wishlists/': typeof AuthenticatedWithLayoutWishlistsIndexRoute
   '/admin/events/$eventId': typeof AuthenticatedWithLayoutAdminEventsEventIdRoute
   '/admin/users/$userId': typeof AuthenticatedWithLayoutAdminUsersUserIdRoute
@@ -225,12 +233,12 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/confirm-email-change': typeof ConfirmEmailChangeRoute
-  '/invite/$token': typeof InviteTokenRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/login': typeof AnonymousWithLayoutLoginRoute
   '/register': typeof AnonymousWithLayoutRegisterRoute
   '/welcome': typeof AuthenticatedWelcomeRoute
+  '/invite/$token': typeof InviteTokenRoute
   '/forgot-password/renew': typeof AnonymousWithLayoutForgotPasswordRenewRoute
   '/forgot-password': typeof AnonymousWithLayoutForgotPasswordIndexRoute
   '/events/new': typeof AuthenticatedWithLayoutEventsNewRoute
@@ -238,6 +246,7 @@ export interface FileRoutesByTo {
   '/wishlists/new': typeof AuthenticatedWithLayoutWishlistsNewRoute
   '/admin': typeof AuthenticatedWithLayoutAdminIndexRoute
   '/events': typeof AuthenticatedWithLayoutEventsIndexRoute
+  '/offered': typeof AuthenticatedWithLayoutOfferedIndexRoute
   '/wishlists': typeof AuthenticatedWithLayoutWishlistsIndexRoute
   '/admin/events/$eventId': typeof AuthenticatedWithLayoutAdminEventsEventIdRoute
   '/admin/users/$userId': typeof AuthenticatedWithLayoutAdminUsersUserIdRoute
@@ -254,13 +263,13 @@ export interface FileRoutesById {
   '/_anonymous-with-layout': typeof AnonymousWithLayoutRouteWithChildren
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/confirm-email-change': typeof ConfirmEmailChangeRoute
-  '/invite/$token': typeof InviteTokenRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/_anonymous-with-layout/login': typeof AnonymousWithLayoutLoginRoute
   '/_anonymous-with-layout/register': typeof AnonymousWithLayoutRegisterRoute
   '/_authenticated/_with-layout': typeof AuthenticatedWithLayoutRouteWithChildren
   '/_authenticated/welcome': typeof AuthenticatedWelcomeRoute
+  '/invite/$token': typeof InviteTokenRoute
   '/_anonymous-with-layout/forgot-password/renew': typeof AnonymousWithLayoutForgotPasswordRenewRoute
   '/_authenticated/_with-layout/admin': typeof AuthenticatedWithLayoutAdminRouteWithChildren
   '/_anonymous-with-layout/forgot-password/': typeof AnonymousWithLayoutForgotPasswordIndexRoute
@@ -269,6 +278,7 @@ export interface FileRoutesById {
   '/_authenticated/_with-layout/wishlists/new': typeof AuthenticatedWithLayoutWishlistsNewRoute
   '/_authenticated/_with-layout/admin/': typeof AuthenticatedWithLayoutAdminIndexRoute
   '/_authenticated/_with-layout/events/': typeof AuthenticatedWithLayoutEventsIndexRoute
+  '/_authenticated/_with-layout/offered/': typeof AuthenticatedWithLayoutOfferedIndexRoute
   '/_authenticated/_with-layout/wishlists/': typeof AuthenticatedWithLayoutWishlistsIndexRoute
   '/_authenticated/_with-layout/admin/events/$eventId': typeof AuthenticatedWithLayoutAdminEventsEventIdRoute
   '/_authenticated/_with-layout/admin/users/$userId': typeof AuthenticatedWithLayoutAdminUsersUserIdRoute
@@ -284,12 +294,12 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/confirm-email-change'
-    | '/invite/$token'
     | '/privacy'
     | '/terms'
     | '/login'
     | '/register'
     | '/welcome'
+    | '/invite/$token'
     | '/forgot-password/renew'
     | '/admin'
     | '/forgot-password/'
@@ -298,6 +308,7 @@ export interface FileRouteTypes {
     | '/wishlists/new'
     | '/admin/'
     | '/events/'
+    | '/offered/'
     | '/wishlists/'
     | '/admin/events/$eventId'
     | '/admin/users/$userId'
@@ -311,12 +322,12 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/confirm-email-change'
-    | '/invite/$token'
     | '/privacy'
     | '/terms'
     | '/login'
     | '/register'
     | '/welcome'
+    | '/invite/$token'
     | '/forgot-password/renew'
     | '/forgot-password'
     | '/events/new'
@@ -324,6 +335,7 @@ export interface FileRouteTypes {
     | '/wishlists/new'
     | '/admin'
     | '/events'
+    | '/offered'
     | '/wishlists'
     | '/admin/events/$eventId'
     | '/admin/users/$userId'
@@ -339,13 +351,13 @@ export interface FileRouteTypes {
     | '/_anonymous-with-layout'
     | '/_authenticated'
     | '/confirm-email-change'
-    | '/invite/$token'
     | '/privacy'
     | '/terms'
     | '/_anonymous-with-layout/login'
     | '/_anonymous-with-layout/register'
     | '/_authenticated/_with-layout'
     | '/_authenticated/welcome'
+    | '/invite/$token'
     | '/_anonymous-with-layout/forgot-password/renew'
     | '/_authenticated/_with-layout/admin'
     | '/_anonymous-with-layout/forgot-password/'
@@ -354,6 +366,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_with-layout/wishlists/new'
     | '/_authenticated/_with-layout/admin/'
     | '/_authenticated/_with-layout/events/'
+    | '/_authenticated/_with-layout/offered/'
     | '/_authenticated/_with-layout/wishlists/'
     | '/_authenticated/_with-layout/admin/events/$eventId'
     | '/_authenticated/_with-layout/admin/users/$userId'
@@ -370,9 +383,9 @@ export interface RootRouteChildren {
   AnonymousWithLayoutRoute: typeof AnonymousWithLayoutRouteWithChildren
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   ConfirmEmailChangeRoute: typeof ConfirmEmailChangeRoute
-  InviteTokenRoute: typeof InviteTokenRoute
   PrivacyRoute: typeof PrivacyRoute
   TermsRoute: typeof TermsRoute
+  InviteTokenRoute: typeof InviteTokenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -403,13 +416,6 @@ declare module '@tanstack/react-router' {
       path: '/confirm-email-change'
       fullPath: '/confirm-email-change'
       preLoaderRoute: typeof ConfirmEmailChangeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/invite/$token': {
-      id: '/invite/$token'
-      path: '/invite/$token'
-      fullPath: '/invite/$token'
-      preLoaderRoute: typeof InviteTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy': {
@@ -454,6 +460,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedWelcomeRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/invite/$token': {
+      id: '/invite/$token'
+      path: '/invite/$token'
+      fullPath: '/invite/$token'
+      preLoaderRoute: typeof InviteTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_anonymous-with-layout/forgot-password/': {
       id: '/_anonymous-with-layout/forgot-password/'
       path: '/forgot-password'
@@ -494,6 +507,13 @@ declare module '@tanstack/react-router' {
       path: '/events/new'
       fullPath: '/events/new'
       preLoaderRoute: typeof AuthenticatedWithLayoutEventsNewRouteImport
+      parentRoute: typeof AuthenticatedWithLayoutRoute
+    }
+    '/_authenticated/_with-layout/offered/': {
+      id: '/_authenticated/_with-layout/offered/'
+      path: '/offered'
+      fullPath: '/offered/'
+      preLoaderRoute: typeof AuthenticatedWithLayoutOfferedIndexRouteImport
       parentRoute: typeof AuthenticatedWithLayoutRoute
     }
     '/_authenticated/_with-layout/user/profile': {
@@ -628,6 +648,7 @@ interface AuthenticatedWithLayoutRouteChildren {
   AuthenticatedWithLayoutUserProfileRoute: typeof AuthenticatedWithLayoutUserProfileRoute
   AuthenticatedWithLayoutWishlistsNewRoute: typeof AuthenticatedWithLayoutWishlistsNewRoute
   AuthenticatedWithLayoutEventsIndexRoute: typeof AuthenticatedWithLayoutEventsIndexRoute
+  AuthenticatedWithLayoutOfferedIndexRoute: typeof AuthenticatedWithLayoutOfferedIndexRoute
   AuthenticatedWithLayoutWishlistsIndexRoute: typeof AuthenticatedWithLayoutWishlistsIndexRoute
   AuthenticatedWithLayoutEventsEventIdEditRoute: typeof AuthenticatedWithLayoutEventsEventIdEditRoute
   AuthenticatedWithLayoutWishlistsWishlistIdEditRoute: typeof AuthenticatedWithLayoutWishlistsWishlistIdEditRoute
@@ -647,6 +668,8 @@ const AuthenticatedWithLayoutRouteChildren: AuthenticatedWithLayoutRouteChildren
       AuthenticatedWithLayoutWishlistsNewRoute,
     AuthenticatedWithLayoutEventsIndexRoute:
       AuthenticatedWithLayoutEventsIndexRoute,
+    AuthenticatedWithLayoutOfferedIndexRoute:
+      AuthenticatedWithLayoutOfferedIndexRoute,
     AuthenticatedWithLayoutWishlistsIndexRoute:
       AuthenticatedWithLayoutWishlistsIndexRoute,
     AuthenticatedWithLayoutEventsEventIdEditRoute:
@@ -683,9 +706,9 @@ const rootRouteChildren: RootRouteChildren = {
   AnonymousWithLayoutRoute: AnonymousWithLayoutRouteWithChildren,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   ConfirmEmailChangeRoute: ConfirmEmailChangeRoute,
-  InviteTokenRoute: InviteTokenRoute,
   PrivacyRoute: PrivacyRoute,
   TermsRoute: TermsRoute,
+  InviteTokenRoute: InviteTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

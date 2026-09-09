@@ -249,6 +249,13 @@ union GetMyEventsResult = ForbiddenRejection | GetEventsPagedResponse | Internal
 
 union GetMySecretSantaDrawResult = EventAttendee | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection
 
+type GetMyTakenItemsOutput {
+  data: [TakenGift!]!
+  pagination: Pagination!
+}
+
+union GetMyTakenItemsResult = ForbiddenRejection | GetMyTakenItemsOutput | InternalErrorRejection | UnauthorizedRejection
+
 union GetMyWishlistsResult = ForbiddenRejection | GetWishlistsPagedResponse | InternalErrorRejection | UnauthorizedRejection
 
 union GetPendingEmailChangeResult = ForbiddenRejection | InternalErrorRejection | PendingEmailChange | UnauthorizedRejection
@@ -442,6 +449,7 @@ type Query {
   health: HealthResult!
   importableItems(wishlistId: WishlistId!): GetImportableItemsResult!
   mySecretSantaDraw(eventId: EventId!): GetMySecretSantaDrawResult
+  myTakenItems(filters: TakenItemsFilters!): GetMyTakenItemsResult!
   pendingEmailChange: GetPendingEmailChangeResult
   searchUsers(keyword: String!): SearchUsersResult!
   secretSanta(eventId: EventId!): GetSecretSantaForEventResult
@@ -549,6 +557,41 @@ input SendResetPasswordEmailInput {
 union SendResetPasswordEmailResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
 union StartSecretSantaResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
+type TakenGift {
+  events: [TakenGiftEvent!]!
+  item: Item!
+  recipient: TakenGiftRecipient!
+  takenAt: String!
+  wishlistId: WishlistId!
+  wishlistTitle: String!
+}
+
+type TakenGiftEvent {
+  eventDate: String!
+  icon: String
+  id: EventId!
+  title: String!
+}
+
+type TakenGiftRecipient {
+  firstName: String!
+  id: UserId!
+  lastName: String!
+  pictureUrl: String
+}
+
+input TakenItemsFilters {
+  limit: Int
+  page: Int
+  scope: TakenItemsScope
+}
+
+enum TakenItemsScope {
+  ALL
+  PAST
+  UPCOMING
+}
 
 type ToggleItemOutput {
   takers: [ItemTaker!]!

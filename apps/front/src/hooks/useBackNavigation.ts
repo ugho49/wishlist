@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 interface UseBackNavigationOptions {
   /**
    * Routes considered as main routes where back button should not be shown
-   * @default ['/', '/events', '/wishlists', '/admin', '/user/profile']
+   * @default ['/', '/events', '/wishlists', '/offered', '/admin', '/user/profile']
    */
   mainRoutes?: string[];
 }
@@ -20,7 +20,7 @@ interface UseBackNavigationReturn {
   handleGoBack: () => void;
 }
 
-const DEFAULT_MAIN_ROUTES = ['/', '/events', '/wishlists', '/admin', '/user/profile'];
+const DEFAULT_MAIN_ROUTES = ['/', '/events', '/wishlists', '/offered', '/admin', '/user/profile'];
 
 /**
  * Hook to handle back navigation logic

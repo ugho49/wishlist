@@ -1,13 +1,18 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { schema } from '@wishlist/api-drizzle';
 import { type ItemId, type UserId, uuid, type WishlistId } from '@wishlist/common';
-import { and, eq, gt, inArray, isNull, lt, max, ne, notExists, sql } from 'drizzle-orm';
+import { and, count, desc, eq, gt, inArray, isNull, lt, max, ne, notExists, sql } from 'drizzle-orm';
 import { DateTime } from 'luxon';
 
 import { DatabaseService } from '../../core/database/database.service';
 import { type DrizzleTransaction } from '../../core/database/transaction-manager';
 import { WishlistItem } from '../../item/domain/wishlist-item.model';
-import { type NewItemsForEventWishlist, type WishlistItemRepository } from '../../item/domain/wishlist-item.repository';
+import {
+  type NewItemsForEventWishlist,
+  type TakenGiftRecord,
+  type TakenItemsScope,
+  type WishlistItemRepository,
+} from '../../item/domain/wishlist-item.repository';
 
 type ItemRowWithTakers = typeof schema.item.$inferSelect & {
   takers: (typeof schema.itemTaker.$inferSelect)[];
@@ -155,6 +160,103 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
       .orderBy(schema.item.createdAt);
 
     return result.map(row => PostgresWishlistItemRepository.toModel({ ...row.item, takers: [] }));
+  }
+
+  async findTakenByUser(params: {
+    userId: UserId;
+    pagination: { take: number; skip: number };
+    scope: TakenItemsScope;
+  }): Promise<{ items: TakenGiftRecord[]; totalCount: number }> {
+    const today = DateTime.now().toISODate();
+    const latestEventDate = sql`(
+      SELECT MAX(${schema.event.eventDate})
+      FROM ${schema.eventWishlist}
+      INNER JOIN ${schema.event} ON ${schema.event.id} = ${schema.eventWishlist.eventId}
+      WHERE ${schema.eventWishlist.wishlistId} = ${schema.wishlist.id}
+    )`;
+    let scopeCondition: ReturnType<typeof sql> | undefined;
+    if (params.scope === 'PAST') {
+      scopeCondition = sql`${latestEventDate} < ${today}`;
+    } else if (params.scope === 'UPCOMING') {
+      scopeCondition = sql`${latestEventDate} >= ${today}`;
+    }
+    const conditions = [eq(schema.itemTaker.userId, params.userId), ...(scopeCondition ? [scopeCondition] : [])];
+
+    const totalCountResult = await this.databaseService.db
+      .select({ count: count() })
+      .from(schema.itemTaker)
+      .innerJoin(schema.item, eq(schema.item.id, schema.itemTaker.itemId))
+      .innerJoin(schema.wishlist, eq(schema.wishlist.id, schema.item.wishlistId))
+      .where(and(...conditions));
+
+    const totalCount = totalCountResult[0]?.count ?? 0;
+    if (totalCount === 0) return { items: [], totalCount };
+
+    const rows = await this.databaseService.db
+      .select({
+        item: schema.item,
+        takenAt: schema.itemTaker.takenAt,
+        wishlistId: schema.wishlist.id,
+        wishlistTitle: schema.wishlist.title,
+        recipientId: schema.user.id,
+        recipientFirstName: schema.user.firstName,
+        recipientLastName: schema.user.lastName,
+        recipientPictureUrl: schema.user.pictureUrl,
+      })
+      .from(schema.itemTaker)
+      .innerJoin(schema.item, eq(schema.item.id, schema.itemTaker.itemId))
+      .innerJoin(schema.wishlist, eq(schema.wishlist.id, schema.item.wishlistId))
+      .innerJoin(schema.user, eq(schema.user.id, schema.wishlist.ownerId))
+      .where(and(...conditions))
+      .orderBy(desc(schema.itemTaker.takenAt))
+      .limit(params.pagination.take)
+      .offset(params.pagination.skip);
+
+    const wishlistIds = [...new Set(rows.map(row => row.wishlistId))];
+    const eventRows =
+      wishlistIds.length === 0
+        ? []
+        : await this.databaseService.db
+            .select({
+              wishlistId: schema.eventWishlist.wishlistId,
+              id: schema.event.id,
+              title: schema.event.title,
+              icon: schema.event.icon,
+              eventDate: schema.event.eventDate,
+            })
+            .from(schema.eventWishlist)
+            .innerJoin(schema.event, eq(schema.event.id, schema.eventWishlist.eventId))
+            .where(inArray(schema.eventWishlist.wishlistId, wishlistIds))
+            .orderBy(desc(schema.event.eventDate));
+
+    const eventsByWishlist = new Map<WishlistId, TakenGiftRecord['events']>();
+    for (const eventRow of eventRows) {
+      const events = eventsByWishlist.get(eventRow.wishlistId) ?? [];
+      events.push({
+        id: eventRow.id,
+        title: eventRow.title,
+        icon: eventRow.icon ?? undefined,
+        eventDate: new Date(eventRow.eventDate),
+      });
+      eventsByWishlist.set(eventRow.wishlistId, events);
+    }
+
+    return {
+      totalCount,
+      items: rows.map(row => ({
+        item: PostgresWishlistItemRepository.toModel({ ...row.item, takers: [] }),
+        takenAt: row.takenAt,
+        wishlistId: row.wishlistId,
+        wishlistTitle: row.wishlistTitle,
+        recipient: {
+          id: row.recipientId,
+          firstName: row.recipientFirstName,
+          lastName: row.recipientLastName,
+          pictureUrl: row.recipientPictureUrl ?? undefined,
+        },
+        events: eventsByWishlist.get(row.wishlistId) ?? [],
+      })),
+    };
   }
 
   async save(item: WishlistItem, tx?: DrizzleTransaction): Promise<void> {
