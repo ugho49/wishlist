@@ -38,7 +38,7 @@ function createNodesInternal(params: { configFilePath: string; options?: Drizzle
         cwd: '{projectRoot}',
         color: true,
       },
-      inputs: ['default', '^default', { externalDependencies: ['bun'] }],
+      inputs: ['default', '^default'],
     },
   };
 
