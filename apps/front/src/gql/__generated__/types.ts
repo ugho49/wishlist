@@ -1042,6 +1042,8 @@ export type UpdateSecretSantaUserInput = {
 export type UpdateSecretSantaUserResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
 export type UpdateUserEmailSettingsInput = {
+  birthdayReminder: Scalars['Boolean']['input'];
+  christmasReminder: Scalars['Boolean']['input'];
   dailyNewItemNotification: Scalars['Boolean']['input'];
 };
 
@@ -1126,6 +1128,8 @@ export enum UserAuthorities {
 
 export type UserEmailSettings = {
   __typename?: 'UserEmailSettings';
+  birthdayReminder: Scalars['Boolean']['output'];
+  christmasReminder: Scalars['Boolean']['output'];
   dailyNewItemNotification: Scalars['Boolean']['output'];
 };
 

@@ -10,6 +10,7 @@ type UserBuilderData = {
   email: string;
   firstName: string;
   lastName: string;
+  birthday?: Date;
   authorities: Authorities[];
   isEnabled: boolean;
 };
@@ -34,6 +35,11 @@ export class UserBuilder {
     return this;
   }
 
+  withBirthday(birthday: Date): this {
+    this.data.birthday = birthday;
+    return this;
+  }
+
   disabled(): this {
     this.data.isEnabled = false;
     return this;
@@ -55,6 +61,7 @@ export class UserBuilder {
       email: this.data.email,
       firstName: this.data.firstName,
       lastName: this.data.lastName,
+      birthday: this.data.birthday,
     });
 
     if (

@@ -6,6 +6,7 @@ import {
   AddedToEventEmail,
   AddedToEventNewUserEmail,
   AddedToWishlistAsCoOwnerEmail,
+  CalendarReminderEmail,
   ConfirmEmailChangeEmail,
   EmailChangedConfirmationEmail,
   EmailChangedSuccessEmail,
@@ -70,5 +71,13 @@ export const mapPayloadToTemplate = (payload: MailPayload): ReactElement =>
     ))
     .with({ template: MailTemplate.EMAIL_CHANGED_SUCCESS }, ({ context }) => (
       <EmailChangedSuccessEmail email={context.email} />
+    ))
+    .with({ template: MailTemplate.CALENDAR_REMINDER }, ({ context }) => (
+      <CalendarReminderEmail
+        firstName={context.firstName}
+        kind={context.kind}
+        daysLeft={context.daysLeft}
+        actionUrl={context.actionUrl}
+      />
     ))
     .exhaustive();

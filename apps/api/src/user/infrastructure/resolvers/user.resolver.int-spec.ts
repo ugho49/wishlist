@@ -632,6 +632,8 @@ describe('UserResolver (GraphQL)', () => {
             id
             emailSettings {
               dailyNewItemNotification
+              birthdayReminder
+              christmasReminder
             }
           }
           ... on UnauthorizedRejection {
@@ -663,6 +665,8 @@ describe('UserResolver (GraphQL)', () => {
       expect(user.id).toBe(currentUserId);
       expect(user.emailSettings).toEqual({
         dailyNewItemNotification: true,
+        birthdayReminder: true,
+        christmasReminder: true,
       });
     });
   });
@@ -674,6 +678,8 @@ describe('UserResolver (GraphQL)', () => {
           __typename
           ... on UserEmailSettings {
             dailyNewItemNotification
+            birthdayReminder
+            christmasReminder
           }
         }
       }
@@ -685,18 +691,22 @@ describe('UserResolver (GraphQL)', () => {
         emailSettings: { daily_new_item_notification: true },
       });
 
-      const input = { dailyNewItemNotification: false };
+      const input = { dailyNewItemNotification: false, birthdayReminder: false, christmasReminder: false };
       const res = await request.post('/graphql').send({ query: mutation, variables: { input } }).expect(200);
 
       expect(res.body.data.updateUserEmailSettings).toEqual({
         __typename: 'UserEmailSettings',
         dailyNewItemNotification: false,
+        birthdayReminder: false,
+        christmasReminder: false,
       });
 
       await expectTable(Fixtures.USER_EMAIL_SETTING_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
         id: settingId,
         user_id: currentUserId,
         daily_new_item_notification: false,
+        birthday_reminder: false,
+        christmas_reminder: false,
         updated_at: expect.toBeDate(),
       });
     });
@@ -706,7 +716,7 @@ describe('UserResolver (GraphQL)', () => {
       // signed-in user has no settings row, surfaced as NotFoundRejection by the error plugin.
       await expectTable(Fixtures.USER_EMAIL_SETTING_TABLE).hasNumberOfRows(0);
 
-      const input = { dailyNewItemNotification: false };
+      const input = { dailyNewItemNotification: false, birthdayReminder: false, christmasReminder: false };
       const res = await request.post('/graphql').send({ query: mutation, variables: { input } }).expect(200);
 
       expect(res.body.data.updateUserEmailSettings.__typename).toBe('NotFoundRejection');

@@ -9,6 +9,8 @@ import { REPOSITORIES } from '../../../repositories/repositories.constants';
 export type UpdateUserEmailSettingInput = {
   currentUser: ICurrentUser;
   dailyNewItemNotification: boolean;
+  birthdayReminder: boolean;
+  christmasReminder: boolean;
 };
 
 export type UpdateUserEmailSettingOutput = {
@@ -26,7 +28,7 @@ export class UpdateUserEmailSettingUseCase {
 
   async execute(input: UpdateUserEmailSettingInput): Promise<UpdateUserEmailSettingOutput> {
     this.logger.log('Update user email setting request received', { input });
-    const { currentUser, dailyNewItemNotification } = input;
+    const { currentUser, dailyNewItemNotification, birthdayReminder, christmasReminder } = input;
 
     const userEmailSetting = await this.userEmailSettingRepository.findByUserId(currentUser.id);
 
@@ -36,11 +38,13 @@ export class UpdateUserEmailSettingUseCase {
 
     const updatedUserEmailSetting = userEmailSetting.updatePreferences({
       dailyNewItemNotification,
+      birthdayReminder,
+      christmasReminder,
     });
 
     this.logger.log('Saving user email setting...', {
       userId: currentUser.id,
-      updatedFields: ['dailyNewItemNotification'],
+      updatedFields: ['dailyNewItemNotification', 'birthdayReminder', 'christmasReminder'],
     });
     await this.userEmailSettingRepository.save(updatedUserEmailSetting);
 
