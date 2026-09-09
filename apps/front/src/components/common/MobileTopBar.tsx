@@ -4,6 +4,7 @@ import { useNavigate } from '@tanstack/react-router';
 
 import LogoTextSvg from '../../assets/logo/logo_text.svg?react';
 import { useBackNavigation } from '../../hooks';
+import { NotificationBell } from '../notification/NotificationBell';
 
 const AppBarStyled = styled(AppBar)(({ theme }) => ({
   backgroundColor: theme.palette.primary.main,
@@ -64,6 +65,10 @@ export const MobileTopBar = () => {
         <LogoContainerStyled onClick={() => navigate({ to: '/' })}>
           <LogoSvgStyled />
         </LogoContainerStyled>
+
+        <Box sx={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)' }}>
+          <NotificationBell color="white" />
+        </Box>
       </ToolbarStyled>
     </AppBarStyled>
   );

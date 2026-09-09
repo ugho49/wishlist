@@ -1,0 +1,62 @@
+scalar UserNotificationId
+
+enum UserNotificationType {
+  ITEM_RESERVED
+  SECRET_SANTA_DRAWN
+  NEW_GUEST
+  EVENT_REMINDER
+}
+
+type UserNotification {
+  id: UserNotificationId!
+  type: UserNotificationType!
+  title: String!
+  body: String!
+  read: Boolean!
+  createdAt: String!
+  eventId: EventId
+  wishlistId: WishlistId
+  itemId: ItemId
+}
+
+type UserNotificationsPagedResponse {
+  data: [UserNotification!]!
+  pagination: Pagination!
+  unreadCount: Int!
+}
+
+type UnreadNotificationCount {
+  count: Int!
+}
+
+union GetMyNotificationsResult =
+  | UserNotificationsPagedResponse
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+
+union GetUnreadNotificationCountResult =
+  | UnreadNotificationCount
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+
+union MarkNotificationReadResult =
+  | VoidOutput
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | NotFoundRejection
+  | InternalErrorRejection
+
+union MarkAllNotificationsReadResult = VoidOutput | UnauthorizedRejection | ForbiddenRejection | InternalErrorRejection
+
+extend type Query {
+  myNotifications(filters: PaginationFilters): GetMyNotificationsResult!
+  unreadNotificationCount: GetUnreadNotificationCountResult!
+}
+
+extend type Mutation {
+  markNotificationRead(id: UserNotificationId!): MarkNotificationReadResult!
+  markAllNotificationsRead: MarkAllNotificationsReadResult!
+}

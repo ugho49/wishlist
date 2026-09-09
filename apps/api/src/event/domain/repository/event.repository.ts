@@ -17,6 +17,7 @@ export interface EventRepository {
     pagination: { take: number; skip: number };
   }): Promise<{ events: Event[]; totalCount: number }>;
   findEmailsToNotify(eventId: EventId): Promise<Array<{ userId: UserId; email: string }>>;
+  findByEventDate(eventDate: string): Promise<Event[]>;
   save(event: Event, tx?: DrizzleTransaction): Promise<void>;
   delete(id: EventId, tx?: DrizzleTransaction): Promise<void>;
 }

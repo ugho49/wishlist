@@ -60,7 +60,7 @@ export class StartSecretSantaUseCase {
 
     const drawns = secretSanta.users.flatMap(user => {
       const attendee = event.attendees.find(a => a.id === user.attendeeId);
-      return attendee ? [{ email: attendee.getEmail() }] : [];
+      return attendee ? [{ email: attendee.getEmail(), userId: attendee.user?.id }] : [];
     });
 
     await this.eventBus.publish(

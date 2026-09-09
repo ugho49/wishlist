@@ -11,6 +11,7 @@ import {
   EmailChangedConfirmationEmail,
   EmailChangedSuccessEmail,
   EmailChangeNotificationEmail,
+  EventReminderEmail,
   NewItemsReminderEmail,
   ResetPasswordEmail,
   SecretSantaCancelEmail,
@@ -79,5 +80,8 @@ export const mapPayloadToTemplate = (payload: MailPayload): ReactElement =>
         daysLeft={context.daysLeft}
         actionUrl={context.actionUrl}
       />
+    ))
+    .with({ template: MailTemplate.EVENT_REMINDER }, ({ context }) => (
+      <EventReminderEmail firstName={context.firstName} eventTitle={context.eventTitle} eventUrl={context.eventUrl} />
     ))
     .exhaustive();

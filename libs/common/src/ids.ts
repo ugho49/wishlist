@@ -10,6 +10,7 @@ export type UserId = Brand<string, 'UserId'>;
 export type UserAccountId = Brand<string, 'UserAccountId'>;
 export type UserSessionId = Brand<string, 'UserSessionId'>;
 export type UserEmailSettingId = Brand<string, 'UserEmailSettingId'>;
+export type UserNotificationId = Brand<string, 'UserNotificationId'>;
 export type ItemId = Brand<string, 'ItemId'>;
 export type WishlistId = Brand<string, 'WishlistId'>;
 
@@ -24,6 +25,7 @@ export type Ids = {
   UserAccountId: UserAccountId;
   UserSessionId: UserSessionId;
   UserEmailSettingId: UserEmailSettingId;
+  UserNotificationId: UserNotificationId;
   ItemId: ItemId;
   WishlistId: WishlistId;
 };
@@ -38,6 +40,7 @@ export const gqlScalarIds: Record<keyof Ids, string> = {
   UserAccountId: getBrandedType('UserAccountId'),
   UserSessionId: getBrandedType('UserSessionId'),
   UserEmailSettingId: getBrandedType('UserEmailSettingId'),
+  UserNotificationId: getBrandedType('UserNotificationId'),
   UserEmailChangeVerificationId: getBrandedType('UserEmailChangeVerificationId'),
   UserPasswordVerificationId: getBrandedType('UserPasswordVerificationId'),
   SecretSantaId: getBrandedType('SecretSantaId'),

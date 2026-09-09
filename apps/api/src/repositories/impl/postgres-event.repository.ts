@@ -138,6 +138,15 @@ export class PostgresEventRepository implements EventRepository {
     return { events, totalCount };
   }
 
+  async findByEventDate(eventDate: string): Promise<Event[]> {
+    const result = await this.databaseService.db.query.event.findMany({
+      where: eq(schema.event.eventDate, eventDate),
+      with: { attendees: { with: { user: true } }, eventWishlists: true },
+    });
+
+    return result.map(row => PostgresEventRepository.toModel(row));
+  }
+
   async findEmailsToNotify(eventId: EventId): Promise<Array<{ userId: UserId; email: string }>> {
     const result = await this.databaseService.db
       .select({

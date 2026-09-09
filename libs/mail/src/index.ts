@@ -33,6 +33,7 @@ export {
   default as EmailChangedSuccessEmail,
   type EmailChangedSuccessEmailProps,
 } from './templates/email-changed-success';
+export { default as EventReminderEmail, type EventReminderEmailProps } from './templates/event-reminder';
 export { default as NewItemsReminderEmail, type NewItemsReminderEmailProps } from './templates/new-items-reminder';
 export { default as ResetPasswordEmail, type ResetPasswordEmailProps } from './templates/reset-password';
 export { default as SecretSantaCancelEmail, type SecretSantaCancelEmailProps } from './templates/secret-santa-cancel';

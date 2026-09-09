@@ -424,6 +424,52 @@ export type ImportItemsMutation = { importItems:
     | { __typename: 'ValidationRejection', errors: Array<{ field: string, message: string }> }
    };
 
+export type MyNotificationsQueryVariables = Exact<{
+  filters?: Types.PaginationFilters | null | undefined;
+}>;
+
+
+export type MyNotificationsQuery = { myNotifications:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'UserNotificationsPagedResponse', unreadCount: number, data: Array<{ id: Ids["UserNotificationId"], type: Types.UserNotificationType, title: string, body: string, read: boolean, createdAt: string, eventId: Ids["EventId"] | null, wishlistId: Ids["WishlistId"] | null }>, pagination: { totalElements: number, totalPages: number, pageNumber: number, pageSize: number } }
+   };
+
+export type UnreadNotificationCountQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type UnreadNotificationCountQuery = { unreadNotificationCount:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'UnreadNotificationCount', count: number }
+   };
+
+export type MarkNotificationReadMutationVariables = Exact<{
+  id: Ids["UserNotificationId"];
+}>;
+
+
+export type MarkNotificationReadMutation = { markNotificationRead:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'NotFoundRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection' }
+    | { __typename: 'VoidOutput', success: boolean }
+   };
+
+export type MarkAllNotificationsReadMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type MarkAllNotificationsReadMutation = { markAllNotificationsRead:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'VoidOutput', success: boolean }
+   };
+
 export type TakenItemsPageQueryVariables = Exact<{
   filters: Types.TakenItemsFilters;
 }>;
@@ -2139,6 +2185,124 @@ export const useImportItemsMutation = <
       {
     mutationKey: ['ImportItems'],
     mutationFn: (variables?: ImportItemsMutationVariables) => fetchGql<ImportItemsMutation, ImportItemsMutationVariables>(ImportItemsDocument, variables)(),
+    ...options
+  }
+    )};
+
+export const MyNotificationsDocument = new TypedDocumentString(`
+    query MyNotifications($filters: PaginationFilters) {
+  myNotifications(filters: $filters) {
+    __typename
+    ... on UserNotificationsPagedResponse {
+      unreadCount
+      data {
+        id
+        type
+        title
+        body
+        read
+        createdAt
+        eventId
+        wishlistId
+      }
+      pagination {
+        totalElements
+        totalPages
+        pageNumber
+        pageSize
+      }
+    }
+  }
+}
+    `);
+
+export const useMyNotificationsQuery = <
+      TData = MyNotificationsQuery,
+      TError = unknown
+    >(
+      variables?: MyNotificationsQueryVariables,
+      options?: Omit<UseQueryOptions<MyNotificationsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<MyNotificationsQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<MyNotificationsQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['MyNotifications'] : ['MyNotifications', variables],
+    queryFn: fetchGql<MyNotificationsQuery, MyNotificationsQueryVariables>(MyNotificationsDocument, variables),
+    ...options
+  }
+    )};
+
+export const UnreadNotificationCountDocument = new TypedDocumentString(`
+    query UnreadNotificationCount {
+  unreadNotificationCount {
+    __typename
+    ... on UnreadNotificationCount {
+      count
+    }
+  }
+}
+    `);
+
+export const useUnreadNotificationCountQuery = <
+      TData = UnreadNotificationCountQuery,
+      TError = unknown
+    >(
+      variables?: UnreadNotificationCountQueryVariables,
+      options?: Omit<UseQueryOptions<UnreadNotificationCountQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<UnreadNotificationCountQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<UnreadNotificationCountQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['UnreadNotificationCount'] : ['UnreadNotificationCount', variables],
+    queryFn: fetchGql<UnreadNotificationCountQuery, UnreadNotificationCountQueryVariables>(UnreadNotificationCountDocument, variables),
+    ...options
+  }
+    )};
+
+export const MarkNotificationReadDocument = new TypedDocumentString(`
+    mutation MarkNotificationRead($id: UserNotificationId!) {
+  markNotificationRead(id: $id) {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+  }
+}
+    `);
+
+export const useMarkNotificationReadMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<MarkNotificationReadMutation, TError, MarkNotificationReadMutationVariables, TContext>) => {
+    
+    return useMutation<MarkNotificationReadMutation, TError, MarkNotificationReadMutationVariables, TContext>(
+      {
+    mutationKey: ['MarkNotificationRead'],
+    mutationFn: (variables?: MarkNotificationReadMutationVariables) => fetchGql<MarkNotificationReadMutation, MarkNotificationReadMutationVariables>(MarkNotificationReadDocument, variables)(),
+    ...options
+  }
+    )};
+
+export const MarkAllNotificationsReadDocument = new TypedDocumentString(`
+    mutation MarkAllNotificationsRead {
+  markAllNotificationsRead {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+  }
+}
+    `);
+
+export const useMarkAllNotificationsReadMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<MarkAllNotificationsReadMutation, TError, MarkAllNotificationsReadMutationVariables, TContext>) => {
+    
+    return useMutation<MarkAllNotificationsReadMutation, TError, MarkAllNotificationsReadMutationVariables, TContext>(
+      {
+    mutationKey: ['MarkAllNotificationsRead'],
+    mutationFn: (variables?: MarkAllNotificationsReadMutationVariables) => fetchGql<MarkAllNotificationsReadMutation, MarkAllNotificationsReadMutationVariables>(MarkAllNotificationsReadDocument, variables)(),
     ...options
   }
     )};

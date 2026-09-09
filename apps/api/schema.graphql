@@ -247,6 +247,8 @@ union GetImportableItemsResult = ForbiddenRejection | GetImportableItemsOutput |
 
 union GetMyEventsResult = ForbiddenRejection | GetEventsPagedResponse | InternalErrorRejection | UnauthorizedRejection
 
+union GetMyNotificationsResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | UserNotificationsPagedResponse
+
 union GetMySecretSantaDrawResult = EventAttendee | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection
 
 type GetMyTakenItemsOutput {
@@ -261,6 +263,8 @@ union GetMyWishlistsResult = ForbiddenRejection | GetWishlistsPagedResponse | In
 union GetPendingEmailChangeResult = ForbiddenRejection | InternalErrorRejection | PendingEmailChange | UnauthorizedRejection
 
 union GetSecretSantaForEventResult = ForbiddenRejection | InternalErrorRejection | SecretSanta | UnauthorizedRejection
+
+union GetUnreadNotificationCountResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | UnreadNotificationCount
 
 union GetWishlistByIdResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | Wishlist
 
@@ -358,6 +362,10 @@ input LogoutInput {
 
 union LogoutResult = InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
+union MarkAllNotificationsReadResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | VoidOutput
+
+union MarkNotificationReadResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
 type Mutation {
   addEventAttendee(eventId: EventId!, input: AddEventAttendeeInput!): AddEventAttendeeResult!
   addSecretSantaUsers(id: SecretSantaId!, input: AddSecretSantaUsersInput!): AddSecretSantaUsersResult!
@@ -388,6 +396,8 @@ type Mutation {
   login(input: LoginInput!): LoginResult!
   loginWithGoogle(input: LoginWithGoogleInput!): LoginWithGoogleResult!
   logout(input: LogoutInput!): LogoutResult!
+  markAllNotificationsRead: MarkAllNotificationsReadResult!
+  markNotificationRead(id: UserNotificationId!): MarkNotificationReadResult!
   refreshSession(input: RefreshSessionInput!): RefreshSessionResult!
   registerUser(input: RegisterUserInput!): RegisterUserResult!
   removeEventAttendee(attendeeId: AttendeeId!, eventId: EventId!): RemoveEventAttendeeResult!
@@ -449,11 +459,13 @@ type Query {
   events(filters: EventPaginationFilters!): GetMyEventsResult!
   health: HealthResult!
   importableItems(wishlistId: WishlistId!): GetImportableItemsResult!
+  myNotifications(filters: PaginationFilters): GetMyNotificationsResult!
   mySecretSantaDraw(eventId: EventId!): GetMySecretSantaDrawResult
   myTakenItems(filters: TakenItemsFilters!): GetMyTakenItemsResult!
   pendingEmailChange: GetPendingEmailChangeResult
   searchUsers(keyword: String!): SearchUsersResult!
   secretSanta(eventId: EventId!): GetSecretSantaForEventResult
+  unreadNotificationCount: GetUnreadNotificationCountResult!
   wishlist(id: WishlistId!): GetWishlistByIdResult
   wishlists(filters: PaginationFilters!): GetMyWishlistsResult!
 }
@@ -608,6 +620,10 @@ union UnlinkCurrentUserAccountResult = ForbiddenRejection | InternalErrorRejecti
 
 union UnlinkWishlistFromEventResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
+type UnreadNotificationCount {
+  count: Int!
+}
+
 union UpdateEventAttendeeRoleResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
 input UpdateEventInput {
@@ -757,6 +773,33 @@ type UserGiftProfile {
 }
 
 scalar UserId
+
+type UserNotification {
+  body: String!
+  createdAt: String!
+  eventId: EventId
+  id: UserNotificationId!
+  itemId: ItemId
+  read: Boolean!
+  title: String!
+  type: UserNotificationType!
+  wishlistId: WishlistId
+}
+
+scalar UserNotificationId
+
+enum UserNotificationType {
+  EVENT_REMINDER
+  ITEM_RESERVED
+  NEW_GUEST
+  SECRET_SANTA_DRAWN
+}
+
+type UserNotificationsPagedResponse {
+  data: [UserNotification!]!
+  pagination: Pagination!
+  unreadCount: Int!
+}
 
 type UserSession {
   createdAt: String!

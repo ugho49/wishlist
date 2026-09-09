@@ -26,6 +26,7 @@ import { Route as AuthenticatedWithLayoutAdminRouteImport } from './routes/_auth
 import { Route as AuthenticatedWithLayoutAdminIndexRouteImport } from './routes/_authenticated/_with-layout/admin/index'
 import { Route as AuthenticatedWithLayoutEventsIndexRouteImport } from './routes/_authenticated/_with-layout/events/index'
 import { Route as AuthenticatedWithLayoutEventsNewRouteImport } from './routes/_authenticated/_with-layout/events/new'
+import { Route as AuthenticatedWithLayoutNotificationsIndexRouteImport } from './routes/_authenticated/_with-layout/notifications/index'
 import { Route as AuthenticatedWithLayoutOfferedIndexRouteImport } from './routes/_authenticated/_with-layout/offered/index'
 import { Route as AuthenticatedWithLayoutUserProfileRouteImport } from './routes/_authenticated/_with-layout/user/profile'
 import { Route as AuthenticatedWithLayoutWishlistsIndexRouteImport } from './routes/_authenticated/_with-layout/wishlists/index'
@@ -129,6 +130,12 @@ const AuthenticatedWithLayoutEventsNewRoute =
     path: '/events/new',
     getParentRoute: () => AuthenticatedWithLayoutRoute,
   } as any)
+const AuthenticatedWithLayoutNotificationsIndexRoute =
+  AuthenticatedWithLayoutNotificationsIndexRouteImport.update({
+    id: '/notifications/',
+    path: '/notifications/',
+    getParentRoute: () => AuthenticatedWithLayoutRoute,
+  } as any)
 const AuthenticatedWithLayoutOfferedIndexRoute =
   AuthenticatedWithLayoutOfferedIndexRouteImport.update({
     id: '/offered/',
@@ -219,6 +226,7 @@ export interface FileRoutesByFullPath {
   '/wishlists/new': typeof AuthenticatedWithLayoutWishlistsNewRoute
   '/admin/': typeof AuthenticatedWithLayoutAdminIndexRoute
   '/events/': typeof AuthenticatedWithLayoutEventsIndexRoute
+  '/notifications/': typeof AuthenticatedWithLayoutNotificationsIndexRoute
   '/offered/': typeof AuthenticatedWithLayoutOfferedIndexRoute
   '/wishlists/': typeof AuthenticatedWithLayoutWishlistsIndexRoute
   '/admin/events/$eventId': typeof AuthenticatedWithLayoutAdminEventsEventIdRoute
@@ -246,6 +254,7 @@ export interface FileRoutesByTo {
   '/wishlists/new': typeof AuthenticatedWithLayoutWishlistsNewRoute
   '/admin': typeof AuthenticatedWithLayoutAdminIndexRoute
   '/events': typeof AuthenticatedWithLayoutEventsIndexRoute
+  '/notifications': typeof AuthenticatedWithLayoutNotificationsIndexRoute
   '/offered': typeof AuthenticatedWithLayoutOfferedIndexRoute
   '/wishlists': typeof AuthenticatedWithLayoutWishlistsIndexRoute
   '/admin/events/$eventId': typeof AuthenticatedWithLayoutAdminEventsEventIdRoute
@@ -278,6 +287,7 @@ export interface FileRoutesById {
   '/_authenticated/_with-layout/wishlists/new': typeof AuthenticatedWithLayoutWishlistsNewRoute
   '/_authenticated/_with-layout/admin/': typeof AuthenticatedWithLayoutAdminIndexRoute
   '/_authenticated/_with-layout/events/': typeof AuthenticatedWithLayoutEventsIndexRoute
+  '/_authenticated/_with-layout/notifications/': typeof AuthenticatedWithLayoutNotificationsIndexRoute
   '/_authenticated/_with-layout/offered/': typeof AuthenticatedWithLayoutOfferedIndexRoute
   '/_authenticated/_with-layout/wishlists/': typeof AuthenticatedWithLayoutWishlistsIndexRoute
   '/_authenticated/_with-layout/admin/events/$eventId': typeof AuthenticatedWithLayoutAdminEventsEventIdRoute
@@ -308,6 +318,7 @@ export interface FileRouteTypes {
     | '/wishlists/new'
     | '/admin/'
     | '/events/'
+    | '/notifications/'
     | '/offered/'
     | '/wishlists/'
     | '/admin/events/$eventId'
@@ -335,6 +346,7 @@ export interface FileRouteTypes {
     | '/wishlists/new'
     | '/admin'
     | '/events'
+    | '/notifications'
     | '/offered'
     | '/wishlists'
     | '/admin/events/$eventId'
@@ -366,6 +378,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_with-layout/wishlists/new'
     | '/_authenticated/_with-layout/admin/'
     | '/_authenticated/_with-layout/events/'
+    | '/_authenticated/_with-layout/notifications/'
     | '/_authenticated/_with-layout/offered/'
     | '/_authenticated/_with-layout/wishlists/'
     | '/_authenticated/_with-layout/admin/events/$eventId'
@@ -509,6 +522,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedWithLayoutEventsNewRouteImport
       parentRoute: typeof AuthenticatedWithLayoutRoute
     }
+    '/_authenticated/_with-layout/notifications/': {
+      id: '/_authenticated/_with-layout/notifications/'
+      path: '/notifications'
+      fullPath: '/notifications/'
+      preLoaderRoute: typeof AuthenticatedWithLayoutNotificationsIndexRouteImport
+      parentRoute: typeof AuthenticatedWithLayoutRoute
+    }
     '/_authenticated/_with-layout/offered/': {
       id: '/_authenticated/_with-layout/offered/'
       path: '/offered'
@@ -648,6 +668,7 @@ interface AuthenticatedWithLayoutRouteChildren {
   AuthenticatedWithLayoutUserProfileRoute: typeof AuthenticatedWithLayoutUserProfileRoute
   AuthenticatedWithLayoutWishlistsNewRoute: typeof AuthenticatedWithLayoutWishlistsNewRoute
   AuthenticatedWithLayoutEventsIndexRoute: typeof AuthenticatedWithLayoutEventsIndexRoute
+  AuthenticatedWithLayoutNotificationsIndexRoute: typeof AuthenticatedWithLayoutNotificationsIndexRoute
   AuthenticatedWithLayoutOfferedIndexRoute: typeof AuthenticatedWithLayoutOfferedIndexRoute
   AuthenticatedWithLayoutWishlistsIndexRoute: typeof AuthenticatedWithLayoutWishlistsIndexRoute
   AuthenticatedWithLayoutEventsEventIdEditRoute: typeof AuthenticatedWithLayoutEventsEventIdEditRoute
@@ -668,6 +689,8 @@ const AuthenticatedWithLayoutRouteChildren: AuthenticatedWithLayoutRouteChildren
       AuthenticatedWithLayoutWishlistsNewRoute,
     AuthenticatedWithLayoutEventsIndexRoute:
       AuthenticatedWithLayoutEventsIndexRoute,
+    AuthenticatedWithLayoutNotificationsIndexRoute:
+      AuthenticatedWithLayoutNotificationsIndexRoute,
     AuthenticatedWithLayoutOfferedIndexRoute:
       AuthenticatedWithLayoutOfferedIndexRoute,
     AuthenticatedWithLayoutWishlistsIndexRoute:

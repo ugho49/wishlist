@@ -1,3 +1,4 @@
+import type { EventBus } from '@nestjs/cqrs';
 import type { UserRepository } from '../../../user/domain/repository/user.repository';
 import type { EventRepository } from '../../domain/repository/event.repository';
 import type { EventAttendeeRepository } from '../../domain/repository/event-attendee.repository';
@@ -10,6 +11,7 @@ import { toCurrentUser, UserBuilder } from '../../../../test-utils/builders/user
 import { createMock } from '../../../../test-utils/mocks';
 import { User } from '../../../user/domain/model/user.model';
 import { AttendeeRole } from '../../domain/attendee-role.enum';
+import { AttendeeAddedEvent } from '../../domain/event/attendee-added.event';
 import { Event } from '../../domain/model/event.model';
 import { JoinEventByInviteUseCase } from './join-event-by-invite.use-case';
 import { beforeAll, beforeEach, describe, expect, it, mock } from 'bun:test';
@@ -18,6 +20,7 @@ describe('JoinEventByInviteUseCase', () => {
   const eventRepository = createMock<EventRepository>();
   const attendeeRepository = createMock<EventAttendeeRepository>();
   const userRepository = createMock<UserRepository>();
+  const eventBus = createMock<EventBus>();
 
   let useCase: JoinEventByInviteUseCase;
   let creator: User;
@@ -40,7 +43,7 @@ describe('JoinEventByInviteUseCase', () => {
     attendeeRepository.newId.mockReturnValue(attendeeId);
     userRepository.findByIdOrFail.mockResolvedValue(creator);
 
-    useCase = new JoinEventByInviteUseCase(eventRepository, attendeeRepository, userRepository);
+    useCase = new JoinEventByInviteUseCase(eventRepository, attendeeRepository, userRepository, eventBus);
   });
 
   it('should reject when the token is unknown', async () => {
@@ -61,6 +64,7 @@ describe('JoinEventByInviteUseCase', () => {
 
     expect(joined.id).toBe(event.id);
     expect(attendeeRepository.save).not.toHaveBeenCalled();
+    expect(eventBus.publish).not.toHaveBeenCalled();
   });
 
   it('should add the current user as a participant', async () => {
@@ -74,6 +78,7 @@ describe('JoinEventByInviteUseCase', () => {
     expect(saved?.user?.id).toBe(joiner.id);
     expect(saved?.role).toBe(AttendeeRole.PARTICIPANT);
     expect(eventRepository.findByIdOrFail).toHaveBeenCalledWith(event.id);
+    expect(eventBus.publish.mock.calls[0]?.[0]).toBeInstanceOf(AttendeeAddedEvent);
   });
 
   it('should convert a pending invite matching the current user email', async () => {

@@ -1,12 +1,14 @@
 import type { WishlistItemRepository } from '../../domain/wishlist-item.repository';
 
 import { Inject, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { EventBus } from '@nestjs/cqrs';
 import { type ICurrentUser, type ItemId } from '@wishlist/common';
 
 import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { type UserRepository } from '../../../user/domain/repository/user.repository';
 import { Wishlist } from '../../../wishlist/domain/wishlist.model';
 import { type WishlistRepository } from '../../../wishlist/domain/wishlist.repository';
+import { ItemReservedEvent } from '../../domain/event/item-reserved.event';
 import { type ItemTaker, WishlistItem } from '../../domain/wishlist-item.model';
 
 export type ToggleItemInput = {
@@ -26,6 +28,7 @@ export class ToggleItemUseCase {
     @Inject(REPOSITORIES.WISHLIST_ITEM) private readonly itemRepository: WishlistItemRepository,
     @Inject(REPOSITORIES.WISHLIST) private readonly wishlistRepository: WishlistRepository,
     @Inject(REPOSITORIES.USER) private readonly userRepository: UserRepository,
+    private readonly eventBus: EventBus,
   ) {}
 
   async execute(command: ToggleItemInput): Promise<ToggleItemOutput> {
@@ -73,6 +76,21 @@ export class ToggleItemUseCase {
     const updatedItem = item.check(user);
 
     await this.itemRepository.save(updatedItem);
+
+    await this.eventBus.publish(
+      new ItemReservedEvent({
+        itemId: updatedItem.id,
+        itemName: updatedItem.name,
+        wishlistId: wishlist.id,
+        wishlistTitle: wishlist.title,
+        hideItems: wishlist.hideItems,
+        ownerId: wishlist.ownerId,
+        coOwnerId: wishlist.coOwnerId,
+        eventIds: wishlist.eventIds,
+        actorId: user.id,
+        actorFirstName: user.firstName,
+      }),
+    );
 
     return updatedItem;
   }

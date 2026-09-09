@@ -134,6 +134,13 @@
       "when": 1788820707595,
       "tag": "0018_calendar-reminders",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1788821058739,
+      "tag": "0019_user-notifications",
+      "breakpoints": true
     }
   ]
 }

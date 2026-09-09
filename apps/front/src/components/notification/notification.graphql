@@ -1,0 +1,51 @@
+query MyNotifications($filters: PaginationFilters) {
+  myNotifications(filters: $filters) {
+    __typename
+    ... on UserNotificationsPagedResponse {
+      unreadCount
+      data {
+        id
+        type
+        title
+        body
+        read
+        createdAt
+        eventId
+        wishlistId
+      }
+      pagination {
+        totalElements
+        totalPages
+        pageNumber
+        pageSize
+      }
+    }
+  }
+}
+
+query UnreadNotificationCount {
+  unreadNotificationCount {
+    __typename
+    ... on UnreadNotificationCount {
+      count
+    }
+  }
+}
+
+mutation MarkNotificationRead($id: UserNotificationId!) {
+  markNotificationRead(id: $id) {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+  }
+}
+
+mutation MarkAllNotificationsRead {
+  markAllNotificationsRead {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+  }
+}

@@ -1,7 +1,8 @@
-import type { EventId } from '@wishlist/common';
+import type { EventId, UserId } from '@wishlist/common';
 
 type Drawn = {
   email: string;
+  userId?: UserId;
 };
 
 export class SecretSantaStartedEvent {

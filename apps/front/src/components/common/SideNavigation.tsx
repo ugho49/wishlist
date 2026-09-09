@@ -4,10 +4,12 @@ import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 import LogoutIcon from '@mui/icons-material/Logout';
+import NotificationsIcon from '@mui/icons-material/Notifications';
 import PersonIcon from '@mui/icons-material/Person';
 import RedeemIcon from '@mui/icons-material/Redeem';
 import {
   Avatar,
+  Badge,
   Box,
   Drawer,
   List,
@@ -26,6 +28,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import LogoSvg from '../../assets/logo/logo.svg?react';
 import LogoTextSvg from '../../assets/logo/logo_text.svg?react';
 import { closeDrawer } from '../../core/store/features/drawerSlice';
+import { useUnreadNotificationCountQuery } from '../../gql';
 import { useLogout } from '../../hooks/useLogout';
 import { useToast } from '../../hooks/useToast';
 
@@ -204,6 +207,11 @@ export const SideNavigation = () => {
   const logout = useLogout();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const { data: unreadData } = useUnreadNotificationCountQuery(undefined, {
+    select: d => d.unreadNotificationCount,
+    refetchInterval: 60_000,
+  });
+  const unreadCount = unreadData?.__typename === 'UnreadNotificationCount' ? unreadData.count : 0;
 
   const handleLogout = useCallback(async () => {
     addToast({ message: 'A bientôt 👋', variant: 'default' });
@@ -250,6 +258,11 @@ export const SideNavigation = () => {
       value: '/offered',
       icon: <RedeemIcon />,
     },
+    {
+      label: 'Notifications',
+      value: '/notifications',
+      icon: <NotificationsIcon />,
+    },
   ];
 
   if (user?.isAdmin) {
@@ -290,7 +303,13 @@ export const SideNavigation = () => {
                   color: isRouteActive(item.value) ? 'primary.main' : 'text.secondary',
                 }}
               >
-                {item.icon}
+                {item.value === '/notifications' ? (
+                  <Badge badgeContent={unreadCount} color="error" max={9}>
+                    {item.icon}
+                  </Badge>
+                ) : (
+                  item.icon
+                )}
               </ListItemIconStyled>
               <ListItemText
                 primary={item.label}

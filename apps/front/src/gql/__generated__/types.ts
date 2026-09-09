@@ -15,6 +15,7 @@ export type Scalars = {
   SecretSantaUserId: { input: Ids["SecretSantaUserId"]; output: Ids["SecretSantaUserId"]; }
   UserAccountId: { input: Ids["UserAccountId"]; output: Ids["UserAccountId"]; }
   UserId: { input: Ids["UserId"]; output: Ids["UserId"]; }
+  UserNotificationId: { input: Ids["UserNotificationId"]; output: Ids["UserNotificationId"]; }
   UserSessionId: { input: Ids["UserSessionId"]; output: Ids["UserSessionId"]; }
   WishlistId: { input: Ids["WishlistId"]; output: Ids["WishlistId"]; }
 };
@@ -264,6 +265,8 @@ export type GetImportableItemsResult = ForbiddenRejection | GetImportableItemsOu
 
 export type GetMyEventsResult = ForbiddenRejection | GetEventsPagedResponse | InternalErrorRejection | UnauthorizedRejection;
 
+export type GetMyNotificationsResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | UserNotificationsPagedResponse;
+
 export type GetMySecretSantaDrawResult = EventAttendee | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection;
 
 export type GetMyTakenItemsOutput = {
@@ -279,6 +282,8 @@ export type GetMyWishlistsResult = ForbiddenRejection | GetWishlistsPagedRespons
 export type GetPendingEmailChangeResult = ForbiddenRejection | InternalErrorRejection | PendingEmailChange | UnauthorizedRejection;
 
 export type GetSecretSantaForEventResult = ForbiddenRejection | InternalErrorRejection | SecretSanta | UnauthorizedRejection;
+
+export type GetUnreadNotificationCountResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | UnreadNotificationCount;
 
 export type GetWishlistByIdResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | Wishlist;
 
@@ -382,6 +387,10 @@ export type LogoutInput = {
 
 export type LogoutResult = InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
+export type MarkAllNotificationsReadResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | VoidOutput;
+
+export type MarkNotificationReadResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+
 export type Mutation = {
   __typename?: 'Mutation';
   addEventAttendee: AddEventAttendeeResult;
@@ -413,6 +422,8 @@ export type Mutation = {
   login: LoginResult;
   loginWithGoogle: LoginWithGoogleResult;
   logout: LogoutResult;
+  markAllNotificationsRead: MarkAllNotificationsReadResult;
+  markNotificationRead: MarkNotificationReadResult;
   refreshSession: RefreshSessionResult;
   registerUser: RegisterUserResult;
   removeEventAttendee: RemoveEventAttendeeResult;
@@ -595,6 +606,11 @@ export type MutationLogoutArgs = {
 };
 
 
+export type MutationMarkNotificationReadArgs = {
+  id: Scalars['UserNotificationId']['input'];
+};
+
+
 export type MutationRefreshSessionArgs = {
   input: RefreshSessionInput;
 };
@@ -762,11 +778,13 @@ export type Query = {
   events: GetMyEventsResult;
   health: HealthResult;
   importableItems: GetImportableItemsResult;
+  myNotifications: GetMyNotificationsResult;
   mySecretSantaDraw?: Maybe<GetMySecretSantaDrawResult>;
   myTakenItems: GetMyTakenItemsResult;
   pendingEmailChange?: Maybe<GetPendingEmailChangeResult>;
   searchUsers: SearchUsersResult;
   secretSanta?: Maybe<GetSecretSantaForEventResult>;
+  unreadNotificationCount: GetUnreadNotificationCountResult;
   wishlist?: Maybe<GetWishlistByIdResult>;
   wishlists: GetMyWishlistsResult;
 };
@@ -819,6 +837,11 @@ export type QueryEventsArgs = {
 
 export type QueryImportableItemsArgs = {
   wishlistId: Scalars['WishlistId']['input'];
+};
+
+
+export type QueryMyNotificationsArgs = {
+  filters?: InputMaybe<PaginationFilters>;
 };
 
 
@@ -1006,6 +1029,11 @@ export type UnlinkCurrentUserAccountResult = ForbiddenRejection | InternalErrorR
 
 export type UnlinkWishlistFromEventResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
+export type UnreadNotificationCount = {
+  __typename?: 'UnreadNotificationCount';
+  count: Scalars['Int']['output'];
+};
+
 export type UpdateEventAttendeeRoleResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
 export type UpdateEventInput = {
@@ -1155,6 +1183,33 @@ export type UserGiftProfile = {
   clothingSize?: Maybe<Scalars['String']['output']>;
   notes?: Maybe<Scalars['String']['output']>;
   shoeSize?: Maybe<Scalars['String']['output']>;
+};
+
+export type UserNotification = {
+  __typename?: 'UserNotification';
+  body: Scalars['String']['output'];
+  createdAt: Scalars['String']['output'];
+  eventId?: Maybe<Scalars['EventId']['output']>;
+  id: Scalars['UserNotificationId']['output'];
+  itemId?: Maybe<Scalars['ItemId']['output']>;
+  read: Scalars['Boolean']['output'];
+  title: Scalars['String']['output'];
+  type: UserNotificationType;
+  wishlistId?: Maybe<Scalars['WishlistId']['output']>;
+};
+
+export enum UserNotificationType {
+  EventReminder = 'EVENT_REMINDER',
+  ItemReserved = 'ITEM_RESERVED',
+  NewGuest = 'NEW_GUEST',
+  SecretSantaDrawn = 'SECRET_SANTA_DRAWN'
+}
+
+export type UserNotificationsPagedResponse = {
+  __typename?: 'UserNotificationsPagedResponse';
+  data: Array<UserNotification>;
+  pagination: Pagination;
+  unreadCount: Scalars['Int']['output'];
 };
 
 export type UserSession = {

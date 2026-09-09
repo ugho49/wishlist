@@ -1,3 +1,4 @@
+import type { EventBus } from '@nestjs/cqrs';
 import type { UserRepository } from '../../../user/domain/repository/user.repository';
 import type { WishlistRepository } from '../../../wishlist/domain/wishlist.repository';
 import type { WishlistItemRepository } from '../../domain/wishlist-item.repository';
@@ -10,6 +11,7 @@ import { WishlistItemBuilder } from '../../../../test-utils/builders/wishlist-it
 import { createMock } from '../../../../test-utils/mocks';
 import { User } from '../../../user/domain/model/user.model';
 import { Wishlist } from '../../../wishlist/domain/wishlist.model';
+import { ItemReservedEvent } from '../../domain/event/item-reserved.event';
 import { WishlistItem } from '../../domain/wishlist-item.model';
 import { ToggleItemUseCase } from './toggle-item.use-case';
 import { beforeAll, beforeEach, describe, expect, it, mock } from 'bun:test';
@@ -18,6 +20,7 @@ describe('ToggleItemUseCase', () => {
   const itemRepository = createMock<WishlistItemRepository>();
   const wishlistRepository = createMock<WishlistRepository>();
   const userRepository = createMock<UserRepository>();
+  const eventBus = createMock<EventBus>();
 
   let useCase: ToggleItemUseCase;
   let owner: User;
@@ -42,7 +45,7 @@ describe('ToggleItemUseCase', () => {
     wishlistRepository.findByIdOrFail.mockResolvedValue(wishlist);
     userRepository.findByIdOrFail.mockResolvedValue(participant);
 
-    useCase = new ToggleItemUseCase(itemRepository, wishlistRepository, userRepository);
+    useCase = new ToggleItemUseCase(itemRepository, wishlistRepository, userRepository, eventBus);
   });
 
   it('should reject when the user has no access to the wishlist', async () => {
@@ -62,6 +65,8 @@ describe('ToggleItemUseCase', () => {
       expect(result.takers).toHaveLength(1);
       expect(result.takers[0]?.userId).toBe(participant.id);
       expect(itemRepository.save).toHaveBeenCalledTimes(1);
+      expect(eventBus.publish).toHaveBeenCalledTimes(1);
+      expect(eventBus.publish.mock.calls[0]?.[0]).toBeInstanceOf(ItemReservedEvent);
     });
 
     it('should uncheck an item already taken by them', async () => {
@@ -74,6 +79,7 @@ describe('ToggleItemUseCase', () => {
       expect(result.takers).toEqual([]);
       expect(itemRepository.save).toHaveBeenCalledTimes(1);
       expect(userRepository.findByIdOrFail).not.toHaveBeenCalled();
+      expect(eventBus.publish).not.toHaveBeenCalled();
     });
 
     it('should join an item already taken by someone else', async () => {
