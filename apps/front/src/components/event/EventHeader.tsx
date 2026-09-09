@@ -4,6 +4,7 @@ import type { EventAttendee } from './event.types';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
 import EditIcon from '@mui/icons-material/Edit';
+import IosShareIcon from '@mui/icons-material/IosShare';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import PeopleIcon from '@mui/icons-material/People';
 import {
@@ -27,6 +28,7 @@ import { useCallback, useState } from 'react';
 
 import { TabValues } from '../../routes/_authenticated/_with-layout/events/$eventId/edit';
 import { EventIcon } from './EventIcon';
+import { ShareEventDialog } from './ShareEventDialog';
 
 const HeaderContent = styled(Box)(({ theme }) => ({
   display: 'flex',
@@ -154,6 +156,7 @@ export type EventHeaderProps = {
   eventDate: string;
   eventId: EventId;
   attendees: EventAttendee[];
+  inviteToken: string;
   currentUserCanEdit: boolean;
   openAttendeesDialog: () => void;
 };
@@ -164,12 +167,15 @@ export const EventHeader = ({
   eventDate,
   eventId,
   attendees,
+  inviteToken,
   currentUserCanEdit,
   openAttendeesDialog,
 }: EventHeaderProps) => {
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [shareOpen, setShareOpen] = useState(false);
   const menuOpen = Boolean(anchorEl);
+  const isDownSm = useMediaQuery(theme => theme.breakpoints.down('sm'));
 
   const handleOpenMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -218,18 +224,36 @@ export const EventHeader = ({
           </TitleContainer>
         </LeftSection>
 
-        {/* Right section - Action Button with Dropdown */}
-        {currentUserCanEdit && (
-          <RightSection>
-            <ReponsiveUpdateButton eventId={eventId} />
-
-            <Tooltip title="Plus d'options">
-              <CompactIconButton size="small" onClick={handleOpenMenu}>
-                <KeyboardArrowDownIcon />
+        <RightSection>
+          {isDownSm ? (
+            <Tooltip title="Partager l'événement">
+              <CompactIconButton size="small" onClick={() => setShareOpen(true)}>
+                <IosShareIcon fontSize="small" />
               </CompactIconButton>
             </Tooltip>
-          </RightSection>
-        )}
+          ) : (
+            <UpdateButton
+              variant="outlined"
+              color="primary"
+              startIcon={<IosShareIcon />}
+              onClick={() => setShareOpen(true)}
+            >
+              Partager
+            </UpdateButton>
+          )}
+
+          {currentUserCanEdit && (
+            <>
+              <ReponsiveUpdateButton eventId={eventId} />
+
+              <Tooltip title="Plus d'options">
+                <CompactIconButton size="small" onClick={handleOpenMenu}>
+                  <KeyboardArrowDownIcon />
+                </CompactIconButton>
+              </Tooltip>
+            </>
+          )}
+        </RightSection>
       </HeaderContent>
 
       {/* Actions Menu */}
@@ -260,6 +284,8 @@ export const EventHeader = ({
           <ListItemText>Gérer le Secret Santa</ListItemText>
         </MenuItem>
       </Menu>
+
+      <ShareEventDialog open={shareOpen} title={title} inviteToken={inviteToken} onClose={() => setShareOpen(false)} />
     </Container>
   );
 };

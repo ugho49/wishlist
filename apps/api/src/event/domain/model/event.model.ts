@@ -1,6 +1,8 @@
 import type { EventId, ICurrentUser, UserId, WishlistId } from '@wishlist/common';
 import type { EventAttendee } from './event-attendee.model';
 
+import { randomBytes } from 'node:crypto';
+
 import { AttendeeRole } from '../attendee-role.enum';
 
 export type EventProps = {
@@ -9,6 +11,7 @@ export type EventProps = {
   description?: string;
   icon?: string;
   eventDate: Date;
+  inviteToken: string;
   attendees: EventAttendee[];
   wishlistIds: WishlistId[];
   createdAt: Date;
@@ -21,6 +24,7 @@ export class Event {
   public readonly description?: string;
   public readonly icon?: string;
   public readonly eventDate: Date;
+  public readonly inviteToken: string;
   public readonly attendees: EventAttendee[];
   public readonly wishlistIds: WishlistId[];
   public readonly createdAt: Date;
@@ -32,10 +36,15 @@ export class Event {
     this.description = props.description;
     this.icon = props.icon;
     this.eventDate = props.eventDate;
+    this.inviteToken = props.inviteToken;
     this.attendees = props.attendees;
     this.wishlistIds = props.wishlistIds;
     this.createdAt = props.createdAt;
     this.updatedAt = props.updatedAt;
+  }
+
+  static generateInviteToken(): string {
+    return randomBytes(24).toString('base64url');
   }
 
   static create(param: {
@@ -58,6 +67,7 @@ export class Event {
       description: param.description,
       icon: param.icon,
       eventDate: param.eventDate,
+      inviteToken: Event.generateInviteToken(),
       attendees: param.attendees,
       wishlistIds: [],
       createdAt: now,

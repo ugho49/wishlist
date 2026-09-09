@@ -8,8 +8,10 @@ import {
   AttendeeRole as GqlAttendeeRole,
   type Event as GqlEvent,
   type EventAttendee as GqlEventAttendee,
+  type EventInvitePreview as GqlEventInvitePreview,
 } from '../../gql/generated-types';
 import { userMapper } from '../../user/infrastructure/user.mapper';
+import { type EventInvitePreview } from '../application/query/get-event-invite-preview.use-case';
 import { AttendeeRole } from '../domain/attendee-role.enum';
 
 function toGqlEvent(event: Event): GqlEvent {
@@ -20,6 +22,7 @@ function toGqlEvent(event: Event): GqlEvent {
     description: event.description,
     icon: event.icon,
     eventDate: DateTime.fromJSDate(event.eventDate).toISODate() || '',
+    inviteToken: event.inviteToken,
     createdAt: event.createdAt.toISOString(),
     updatedAt: event.updatedAt.toISOString(),
     wishlistIds: event.wishlistIds,
@@ -43,7 +46,21 @@ function toGqlEventAttendee(eventAttendee: EventAttendee): GqlEventAttendee {
   };
 }
 
+function toGqlEventInvitePreview(preview: EventInvitePreview): GqlEventInvitePreview {
+  return {
+    __typename: 'EventInvitePreview',
+    title: preview.title,
+    description: preview.description,
+    icon: preview.icon,
+    eventDate: DateTime.fromJSDate(preview.eventDate).toISODate() || '',
+    attendeeCount: preview.attendeeCount,
+    hostDisplayName: preview.hostDisplayName,
+    alreadyJoined: preview.alreadyJoined,
+  };
+}
+
 export const eventMapper = {
   toGqlEvent,
   toGqlEventAttendee,
+  toGqlEventInvitePreview,
 };

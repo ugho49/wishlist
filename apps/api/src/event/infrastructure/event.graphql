@@ -20,11 +20,22 @@ type Event {
   description: String
   icon: String
   eventDate: String!
+  inviteToken: String!
   wishlistIds: [WishlistId!]!
   wishlists: [Wishlist!]! @resolved
   attendees: [EventAttendee!]!
   createdAt: String!
   updatedAt: String!
+}
+
+type EventInvitePreview {
+  title: String!
+  description: String
+  icon: String
+  eventDate: String!
+  attendeeCount: Int!
+  hostDisplayName: String!
+  alreadyJoined: Boolean!
 }
 
 type GetEventsPagedResponse {
@@ -46,6 +57,22 @@ union GetEventByIdResult =
   | NotFoundRejection
 
 union GetMyEventsResult = GetEventsPagedResponse | UnauthorizedRejection | ForbiddenRejection | InternalErrorRejection
+
+union EventInvitePreviewResult =
+  | EventInvitePreview
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+  | NotFoundRejection
+
+union JoinEventByInviteResult =
+  | Event
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+  | NotFoundRejection
 
 ########################################################
 ###############   Input Types   ########################
@@ -176,6 +203,7 @@ union AdminDeleteEventAttendeeResult =
 extend type Query {
   event(id: EventId!): GetEventByIdResult
   events(filters: EventPaginationFilters!): GetMyEventsResult!
+  eventInvitePreview(token: String!): EventInvitePreviewResult!
   adminEvent(id: EventId!): AdminGetEventByIdResult!
   adminEvents(filters: AdminEventPaginationFilters!): AdminGetEventsResult!
 }
@@ -191,6 +219,7 @@ extend type Mutation {
     attendeeId: AttendeeId!
     role: AttendeeRole!
   ): UpdateEventAttendeeRoleResult!
+  joinEventByInvite(token: String!): JoinEventByInviteResult!
   adminUpdateEvent(id: EventId!, input: UpdateEventInput!): AdminUpdateEventResult!
   adminDeleteEvent(id: EventId!): AdminDeleteEventResult!
   adminDeleteEventAttendee(eventId: EventId!, attendeeId: AttendeeId!): AdminDeleteEventAttendeeResult!

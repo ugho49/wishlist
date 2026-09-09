@@ -74,6 +74,7 @@ export const EventPage = ({ eventId }: EventPageProps) => {
               eventId={event.id}
               eventDate={event.eventDate}
               attendees={attendees}
+              inviteToken={event.inviteToken}
               currentUserCanEdit={currentUserCanEdit}
               openAttendeesDialog={() => setOpenAttendeesDialog(true)}
             />

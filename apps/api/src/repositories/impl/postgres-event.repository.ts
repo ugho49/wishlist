@@ -39,6 +39,17 @@ export class PostgresEventRepository implements EventRepository {
     return PostgresEventRepository.toModel(result);
   }
 
+  async findByInviteToken(inviteToken: string): Promise<Event | undefined> {
+    const result = await this.databaseService.db.query.event.findFirst({
+      where: eq(schema.event.inviteToken, inviteToken),
+      with: { attendees: { with: { user: true } }, eventWishlists: true },
+    });
+
+    if (!result) return undefined;
+
+    return PostgresEventRepository.toModel(result);
+  }
+
   async findByIds(ids: EventId[]): Promise<Event[]> {
     const result = await this.databaseService.db.query.event.findMany({
       where: inArray(schema.event.id, ids),
@@ -159,6 +170,7 @@ export class PostgresEventRepository implements EventRepository {
           description: event.description,
           icon: event.icon,
           eventDate: event.eventDate.toISOString().split('T')[0] as string, // Convert to YYYY-MM-DD format
+          inviteToken: event.inviteToken,
           createdAt: event.createdAt,
           updatedAt: event.updatedAt,
         })
@@ -169,6 +181,7 @@ export class PostgresEventRepository implements EventRepository {
             description: event.description ?? null,
             icon: event.icon ?? null,
             eventDate: event.eventDate.toISOString().split('T')[0] as string, // Convert to YYYY-MM-DD format
+            inviteToken: event.inviteToken,
             updatedAt: event.updatedAt,
           },
         });
@@ -205,6 +218,7 @@ export class PostgresEventRepository implements EventRepository {
       description: row.description ?? undefined,
       icon: row.icon ?? undefined,
       eventDate: new Date(row.eventDate),
+      inviteToken: row.inviteToken,
       attendees: row.attendees.map(attendee => PostgresEventAttendeeRepository.toModel(attendee)),
       wishlistIds: row.eventWishlists.map(eventWishlist => eventWishlist.wishlistId),
       createdAt: row.createdAt,

@@ -65,6 +65,8 @@ export const AddEventAttendeeInputSchema = z.object({
   role: GqlAttendeeRoleSchema.optional(),
 }) satisfies z.ZodType<AddEventAttendeeInput>;
 
+export const EventInviteTokenSchema = z.string().trim().min(16).max(64);
+
 // Maps GraphQL enum value (CREATOR / ADMIN / PARTICIPANT) to the domain AttendeeRole enum.
 export function toDomainAttendeeRole(role: GqlAttendeeRole): AttendeeRole;
 export function toDomainAttendeeRole(role?: GqlAttendeeRole): AttendeeRole | undefined;

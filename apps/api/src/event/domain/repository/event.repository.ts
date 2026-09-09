@@ -7,6 +7,7 @@ export interface EventRepository {
   findById(id: EventId): Promise<Event | undefined>;
   findByIds(ids: EventId[]): Promise<Event[]>;
   findByIdOrFail(id: EventId): Promise<Event>;
+  findByInviteToken(inviteToken: string): Promise<Event | undefined>;
   findByUserIdPaginated(params: {
     userId: UserId;
     pagination: { take: number; skip: number };

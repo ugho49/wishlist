@@ -226,7 +226,9 @@ export const LoginPage = () => {
           >
             Pas encore inscrit ?
           </Typography>
-          <RouterLink to="/register">Créer un compte</RouterLink>
+          <RouterLink to="/register" search={redirectUrl === '/' ? undefined : { redirectUrl }}>
+            Créer un compte
+          </RouterLink>
         </Stack>
         <RouterLink to="/forgot-password">Mot de passe oublié ?</RouterLink>
       </Stack>

@@ -108,6 +108,34 @@ export type AuthConfirmEmailChangeMutation = { confirmEmailChange:
     | { __typename: 'VoidOutput', success: boolean }
    };
 
+export type EventInvitePreviewQueryVariables = Exact<{
+  token: string;
+}>;
+
+
+export type EventInvitePreviewQuery = { eventInvitePreview:
+    | { __typename: 'EventInvitePreview', title: string, description: string | null, icon: string | null, eventDate: string, attendeeCount: number, hostDisplayName: string, alreadyJoined: boolean }
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'NotFoundRejection', message: string }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection', errors: Array<{ field: string, message: string }> }
+   };
+
+export type JoinEventByInviteMutationVariables = Exact<{
+  token: string;
+}>;
+
+
+export type JoinEventByInviteMutation = { joinEventByInvite:
+    | { __typename: 'Event', id: Ids["EventId"], title: string }
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'NotFoundRejection', message: string }
+    | { __typename: 'UnauthorizedRejection', message: string }
+    | { __typename: 'ValidationRejection' }
+   };
+
 export type EventListPageGetEventsQueryVariables = Exact<{
   filters: Types.EventPaginationFilters;
 }>;
@@ -215,7 +243,7 @@ export type EventPageGetEventQueryVariables = Exact<{
 
 
 export type EventPageGetEventQuery = { event:
-    | { __typename: 'Event', id: Ids["EventId"], title: string, description: string | null, icon: string | null, eventDate: string, attendees: Array<{ id: Ids["AttendeeId"], pendingEmail: string | null, role: Types.AttendeeRole, user: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null } | null }>, wishlists: Array<{ id: Ids["WishlistId"], title: string, logoUrl: string | null, config: { hideItems: boolean }, owner: { id: Ids["UserId"], firstName: string, lastName: string, pictureUrl: string | null } }> }
+    | { __typename: 'Event', id: Ids["EventId"], title: string, description: string | null, icon: string | null, eventDate: string, inviteToken: string, attendees: Array<{ id: Ids["AttendeeId"], pendingEmail: string | null, role: Types.AttendeeRole, user: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null } | null }>, wishlists: Array<{ id: Ids["WishlistId"], title: string, logoUrl: string | null, config: { hideItems: boolean }, owner: { id: Ids["UserId"], firstName: string, lastName: string, pictureUrl: string | null } }> }
     | { __typename: 'ForbiddenRejection' }
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'NotFoundRejection', message: string }
@@ -1249,6 +1277,79 @@ export const useAuthConfirmEmailChangeMutation = <
   }
     )};
 
+export const EventInvitePreviewDocument = new TypedDocumentString(`
+    query EventInvitePreview($token: String!) {
+  eventInvitePreview(token: $token) {
+    __typename
+    ... on EventInvitePreview {
+      title
+      description
+      icon
+      eventDate
+      attendeeCount
+      hostDisplayName
+      alreadyJoined
+    }
+    ... on NotFoundRejection {
+      message
+    }
+    ... on ValidationRejection {
+      errors {
+        field
+        message
+      }
+    }
+  }
+}
+    `);
+
+export const useEventInvitePreviewQuery = <
+      TData = EventInvitePreviewQuery,
+      TError = unknown
+    >(
+      variables: EventInvitePreviewQueryVariables,
+      options?: Omit<UseQueryOptions<EventInvitePreviewQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<EventInvitePreviewQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<EventInvitePreviewQuery, TError, TData>(
+      {
+    queryKey: ['EventInvitePreview', variables],
+    queryFn: fetchGql<EventInvitePreviewQuery, EventInvitePreviewQueryVariables>(EventInvitePreviewDocument, variables),
+    ...options
+  }
+    )};
+
+export const JoinEventByInviteDocument = new TypedDocumentString(`
+    mutation JoinEventByInvite($token: String!) {
+  joinEventByInvite(token: $token) {
+    __typename
+    ... on Event {
+      id
+      title
+    }
+    ... on NotFoundRejection {
+      message
+    }
+    ... on UnauthorizedRejection {
+      message
+    }
+  }
+}
+    `);
+
+export const useJoinEventByInviteMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<JoinEventByInviteMutation, TError, JoinEventByInviteMutationVariables, TContext>) => {
+    
+    return useMutation<JoinEventByInviteMutation, TError, JoinEventByInviteMutationVariables, TContext>(
+      {
+    mutationKey: ['JoinEventByInvite'],
+    mutationFn: (variables?: JoinEventByInviteMutationVariables) => fetchGql<JoinEventByInviteMutation, JoinEventByInviteMutationVariables>(JoinEventByInviteDocument, variables)(),
+    ...options
+  }
+    )};
+
 export const EventListPageGetEventsDocument = new TypedDocumentString(`
     query EventListPageGetEvents($filters: EventPaginationFilters!) {
   events(filters: $filters) {
@@ -1472,6 +1573,7 @@ export const EventPageGetEventDocument = new TypedDocumentString(`
       description
       icon
       eventDate
+      inviteToken
       attendees {
         id
         pendingEmail

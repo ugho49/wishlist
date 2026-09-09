@@ -7,6 +7,7 @@ query EventPageGetEvent($eventId: EventId!) {
       description
       icon
       eventDate
+      inviteToken
       attendees {
         id
         pendingEmail

@@ -6,6 +6,7 @@ import { DateTime } from 'luxon';
 
 import { PasswordManager } from '../src/auth/infrastructure/util/password-manager';
 import { AttendeeRole } from '../src/event/domain/attendee-role.enum';
+import { Event } from '../src/event/domain/model/event.model';
 import { type SecretSantaStatus } from '../src/secret-santa/domain/secret-santa-status.enum';
 import { Authorities } from '../src/user/domain/authorities.enum';
 import { parseUserAgent } from '../src/user/infrastructure/user-agent.parser';
@@ -173,11 +174,23 @@ export class Fixtures {
     const { title, description, icon, eventDate } = parameters;
 
     await this.sql.unsafe(
-      `INSERT INTO ${Fixtures.EVENT_TABLE} (id, title, description, icon, event_date) VALUES ($1, $2, $3, $4, $5)`,
-      [id, title, description, icon, eventDate.toISOString().split('T')[0] as string],
+      `INSERT INTO ${Fixtures.EVENT_TABLE} (id, title, description, icon, event_date, invite_token) VALUES ($1, $2, $3, $4, $5, $6)`,
+      [id, title, description, icon, eventDate.toISOString().split('T')[0] as string, Event.generateInviteToken()],
     );
 
     return id;
+  }
+
+  async getEventInviteToken(eventId: string): Promise<string> {
+    const rows = await this.sql.unsafe<{ invite_token: string }[]>(
+      `SELECT invite_token FROM ${Fixtures.EVENT_TABLE} WHERE id = $1`,
+      [eventId],
+    );
+    const token = rows[0]?.invite_token;
+    if (!token) {
+      throw new Error(`Invite token not found for event ${eventId}`);
+    }
+    return token;
   }
 
   async insertEventWithCreator(parameters: {

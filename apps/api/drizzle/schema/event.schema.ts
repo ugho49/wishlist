@@ -13,6 +13,7 @@ export const event = pgTable('event', {
   description: text(),
   icon: varchar({ length: 10 }),
   eventDate: date('event_date').notNull(),
+  inviteToken: varchar('invite_token', { length: 64 }).notNull().unique(),
   ...timestamps,
 });
 
