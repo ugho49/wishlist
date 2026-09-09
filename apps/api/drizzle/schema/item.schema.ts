@@ -1,7 +1,7 @@
 import { relations, sql } from 'drizzle-orm';
 import { boolean, check, foreignKey, integer, pgTable, text, varchar } from 'drizzle-orm/pg-core';
 
-import { timestamps } from '../helpers';
+import { numericNullable, timestamps } from '../helpers';
 import { itemId, wishlistId } from '../ids';
 import { itemTaker } from './item-taker.schema';
 import { wishlist } from './wishlist.schema';
@@ -17,6 +17,7 @@ export const item = pgTable(
     pictureUrl: varchar('picture_url', { length: 1000 }),
     isSuggested: boolean('is_suggested').default(false).notNull(),
     score: integer(),
+    price: numericNullable('price'),
     importSourceId: itemId('import_source_id'),
     ...timestamps,
   },

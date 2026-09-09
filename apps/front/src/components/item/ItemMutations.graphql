@@ -7,6 +7,7 @@ mutation CreateItem($input: CreateItemInput!) {
       description
       url
       score
+      price
       isSuggested
       pictureUrl
       takers {
@@ -76,7 +77,12 @@ mutation ScanItemUrl($input: ScanItemUrlInput!) {
   scanItemUrl(input: $input) {
     __typename
     ... on ScanItemUrlOutput {
+      title
+      description
       pictureUrl
+      price
+      currency
+      merchant
     }
   }
 }
@@ -91,6 +97,7 @@ mutation ImportItems($input: ImportItemsInput!) {
         description
         url
         score
+        price
         isSuggested
         pictureUrl
         takers {

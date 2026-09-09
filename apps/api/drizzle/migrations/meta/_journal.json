@@ -113,6 +113,13 @@
       "when": 1788818592177,
       "tag": "0015_event-invite-token",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1788818647018,
+      "tag": "0016_item-price",
+      "breakpoints": true
     }
   ]
 }

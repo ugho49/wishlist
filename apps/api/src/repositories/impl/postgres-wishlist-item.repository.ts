@@ -170,6 +170,7 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
           description: item.description,
           url: item.url,
           score: item.score,
+          price: item.price,
           isSuggested: item.isSuggested,
           pictureUrl: item.imageUrl,
           importSourceId: item.importSourceId,
@@ -185,6 +186,7 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
             url: item.url ?? null,
             pictureUrl: item.imageUrl ?? null,
             score: item.score ?? null,
+            price: item.price,
             isSuggested: item.isSuggested,
             updatedAt: item.updatedAt,
           },
@@ -218,6 +220,7 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
       description: row.description ?? undefined,
       url: row.url ?? undefined,
       score: row.score ?? undefined,
+      price: row.price ?? undefined,
       isSuggested: row.isSuggested,
       imageUrl: row.pictureUrl ?? undefined,
       takers: row.takers.map(taker => ({

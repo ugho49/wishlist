@@ -173,6 +173,7 @@ export type CreateItemInput = {
   description?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
   pictureUrl?: InputMaybe<Scalars['String']['input']>;
+  price?: InputMaybe<Scalars['Float']['input']>;
   score?: InputMaybe<Scalars['Int']['input']>;
   url?: InputMaybe<Scalars['String']['input']>;
   wishlistId: Scalars['WishlistId']['input'];
@@ -322,6 +323,7 @@ export type Item = {
   isSuggested?: Maybe<Scalars['Boolean']['output']>;
   name: Scalars['String']['output'];
   pictureUrl?: Maybe<Scalars['String']['output']>;
+  price?: Maybe<Scalars['Float']['output']>;
   score?: Maybe<Scalars['Int']['output']>;
   takers: Array<ItemTaker>;
   url?: Maybe<Scalars['String']['output']>;
@@ -884,7 +886,12 @@ export type ScanItemUrlInput = {
 
 export type ScanItemUrlOutput = {
   __typename: 'ScanItemUrlOutput';
+  currency?: Maybe<Scalars['String']['output']>;
+  description?: Maybe<Scalars['String']['output']>;
+  merchant?: Maybe<Scalars['String']['output']>;
   pictureUrl?: Maybe<Scalars['String']['output']>;
+  price?: Maybe<Scalars['Float']['output']>;
+  title?: Maybe<Scalars['String']['output']>;
 };
 
 export type ScanItemUrlResult = ForbiddenRejection | InternalErrorRejection | ScanItemUrlOutput | UnauthorizedRejection | ValidationRejection;
@@ -959,6 +966,7 @@ export type UpdateItemInput = {
   description?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
   pictureUrl?: InputMaybe<Scalars['String']['input']>;
+  price?: InputMaybe<Scalars['Float']['input']>;
   score?: InputMaybe<Scalars['Int']['input']>;
   url?: InputMaybe<Scalars['String']['input']>;
 };
