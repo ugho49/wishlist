@@ -11,6 +11,8 @@ export const userEmailSetting = pgTable(
     id: userEmailSettingId().primaryKey().notNull(),
     userId: userId('user_id').notNull(),
     dailyNewItemNotification: boolean('daily_new_item_notification').default(true).notNull(),
+    birthdayReminder: boolean('birthday_reminder').default(true).notNull(),
+    christmasReminder: boolean('christmas_reminder').default(true).notNull(),
     ...timestamps,
   },
   table => [

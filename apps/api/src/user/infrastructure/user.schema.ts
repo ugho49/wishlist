@@ -61,6 +61,8 @@ export const ConfirmEmailChangeInputSchema = z.object({
 
 export const UpdateUserEmailSettingsInputSchema = z.object({
   dailyNewItemNotification: z.boolean(),
+  birthdayReminder: z.boolean(),
+  christmasReminder: z.boolean(),
 }) satisfies z.ZodType<UpdateUserEmailSettingsInput>;
 
 export const SendResetPasswordEmailInputSchema = z.object({

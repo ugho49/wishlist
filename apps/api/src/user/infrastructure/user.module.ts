@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
 import { handlers } from '../application';
+import { CalendarRemindersProcessor } from './calendar-reminders.processor';
 import { UserController } from './controllers/user.controller';
 import { UserAdminController } from './controllers/user-admin.controller';
 import { UserFieldResolver } from './resolvers/user.field-resolver';
@@ -24,6 +25,7 @@ import { UserSessionCleanupProcessor } from './user-session-cleanup.processor';
     UserAdminFieldResolver,
     UserSessionFieldResolver,
     UserDataLoaderFactory,
+    CalendarRemindersProcessor,
     UserSessionCleanupProcessor,
   ],
   exports: [UserDataLoaderFactory],

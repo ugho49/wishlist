@@ -17,6 +17,10 @@ export {
   default as AddedToWishlistAsCoOwnerEmail,
 } from './templates/added-to-wishlist-as-co-owner';
 export {
+  type CalendarReminderEmailProps,
+  default as CalendarReminderEmail,
+} from './templates/calendar-reminder';
+export {
   type ConfirmEmailChangeEmailProps,
   default as ConfirmEmailChangeEmail,
 } from './templates/confirm-email-change';

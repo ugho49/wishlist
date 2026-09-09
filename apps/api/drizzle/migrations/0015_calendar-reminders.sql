@@ -1,0 +1,2 @@
+ALTER TABLE "user_email_setting" ADD COLUMN "birthday_reminder" boolean DEFAULT true NOT NULL;--> statement-breakpoint
+ALTER TABLE "user_email_setting" ADD COLUMN "christmas_reminder" boolean DEFAULT true NOT NULL;
