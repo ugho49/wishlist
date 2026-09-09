@@ -3,10 +3,8 @@ import dotenv from 'dotenv';
 import { drizzle } from 'drizzle-orm/bun-sql';
 import { reset } from 'drizzle-seed';
 
-import { PasswordManager } from '../src/auth/infrastructure/util/password-manager';
 import { createSqlClient } from '../src/core/database/create-sql-client';
 import * as schema from './schema';
-import { ADMIN_USER } from './seeders/config';
 import { seedEvents } from './seeders/event.seeder';
 import { seedEventAttendees } from './seeders/event-attendee.seeder';
 import { seedEventWishlists } from './seeders/event-wishlist.seeder';
@@ -69,10 +67,8 @@ async function main() {
     consola.success('Database reset completed');
   }
 
-  const passwordHash = await PasswordManager.hash(ADMIN_USER.password);
-
   const users = await runSeeder('users', () => seedUsers(db));
-  await runSeeder('user accounts', () => seedUserAccounts(db, { users, passwordHash }));
+  await runSeeder('user accounts', () => seedUserAccounts(db, { users }));
   await runSeeder('user email settings', () => seedUserEmailSettings(db, { users }));
 
   const events = await runSeeder('events', () => seedEvents(db));

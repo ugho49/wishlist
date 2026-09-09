@@ -3,11 +3,11 @@ export const ADMIN_USER = {
   email: 'admin@admin.fr',
   firstName: 'Admin',
   lastName: 'ADMIN',
-  password: 'test',
 } as const;
 
 export const seedConfig = {
   users: {
+    password: 'test',
     count: 100,
     dailyNewItemNotificationProbability: 0.9,
     birthdayReminderProbability: 0.9,
