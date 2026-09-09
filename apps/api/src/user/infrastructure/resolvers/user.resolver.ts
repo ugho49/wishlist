@@ -32,6 +32,8 @@ import {
   type UnlinkCurrentUserAccountResult,
   type UpdateUserEmailSettingsInput,
   type UpdateUserEmailSettingsResult,
+  type UpdateUserGiftProfileInput,
+  type UpdateUserGiftProfileResult,
   type UpdateUserPictureFromAccountInput,
   type UpdateUserPictureFromAccountResult,
   type UpdateUserProfileInput,
@@ -49,6 +51,7 @@ import { RevokeUserSessionUseCase } from '../../application/command/revoke-user-
 import { UnlinkUserAccountUseCase } from '../../application/command/unlink-user-account.use-case';
 import { UpdateUserUseCase } from '../../application/command/update-user.use-case';
 import { UpdateUserEmailSettingUseCase } from '../../application/command/update-user-email-setting.use-case';
+import { UpdateUserGiftProfileUseCase } from '../../application/command/update-user-gift-profile.use-case';
 import { UpdateUserPasswordUseCase } from '../../application/command/update-user-password.use-case';
 import { UpdateUserPictureFromAccountUseCase } from '../../application/command/update-user-picture-from-account.use-case';
 import { GetClosestFriendsUseCase } from '../../application/query/get-closest-friends.use-case';
@@ -67,6 +70,7 @@ import {
   SearchUsersKeywordSchema,
   SendResetPasswordEmailInputSchema,
   UpdateUserEmailSettingsInputSchema,
+  UpdateUserGiftProfileInputSchema,
   UpdateUserPictureFromAccountInputSchema,
   UpdateUserProfileInputSchema,
 } from '../user.schema';
@@ -85,6 +89,7 @@ export class UserResolver {
     private readonly confirmEmailChangeUseCase: ConfirmEmailChangeUseCase,
     private readonly getPendingEmailChangeUseCase: GetPendingEmailChangeUseCase,
     private readonly updateUserEmailSettingUseCase: UpdateUserEmailSettingUseCase,
+    private readonly updateUserGiftProfileUseCase: UpdateUserGiftProfileUseCase,
     private readonly createPasswordVerificationUseCase: CreatePasswordVerificationUseCase,
     private readonly resetUserPasswordUseCase: ResetUserPasswordUseCase,
     private readonly revokeUserSessionUseCase: RevokeUserSessionUseCase,
@@ -187,6 +192,32 @@ export class UserResolver {
       throw new Error('Failed to load user');
     }
     return loadedUser;
+  }
+
+  @Mutation()
+  async updateUserGiftProfile(
+    @Args('input', new ZodPipe(UpdateUserGiftProfileInputSchema)) input: UpdateUserGiftProfileInput,
+    @GqlCurrentUser('id') currentUserId: UserId,
+  ): Promise<UpdateUserGiftProfileResult> {
+    const { profile } = await this.updateUserGiftProfileUseCase.execute({
+      userId: currentUserId,
+      profile: {
+        clothingSize: input.clothingSize ?? undefined,
+        shoeSize: input.shoeSize ?? undefined,
+        notes: input.notes ?? undefined,
+        address: input.address
+          ? {
+              line1: input.address.line1,
+              line2: input.address.line2 ?? undefined,
+              postalCode: input.address.postalCode,
+              city: input.address.city,
+              country: input.address.country,
+            }
+          : undefined,
+      },
+    });
+
+    return userMapper.toGqlUserGiftProfile(profile);
   }
 
   @Mutation()

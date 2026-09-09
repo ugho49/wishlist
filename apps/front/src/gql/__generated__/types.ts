@@ -434,6 +434,7 @@ export type Mutation = {
   updateSecretSanta: UpdateSecretSantaResult;
   updateSecretSantaUser: UpdateSecretSantaUserResult;
   updateUserEmailSettings: UpdateUserEmailSettingsResult;
+  updateUserGiftProfile: UpdateUserGiftProfileResult;
   updateUserPictureFromAccount: UpdateUserPictureFromAccountResult;
   updateUserProfile: UpdateUserProfileResult;
   updateWishlist: UpdateWishlistResult;
@@ -700,6 +701,11 @@ export type MutationUpdateSecretSantaUserArgs = {
 
 export type MutationUpdateUserEmailSettingsArgs = {
   input: UpdateUserEmailSettingsInput;
+};
+
+
+export type MutationUpdateUserGiftProfileArgs = {
+  input: UpdateUserGiftProfileInput;
 };
 
 
@@ -1041,6 +1047,15 @@ export type UpdateUserEmailSettingsInput = {
 
 export type UpdateUserEmailSettingsResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | UserEmailSettings | ValidationRejection;
 
+export type UpdateUserGiftProfileInput = {
+  address?: InputMaybe<UpdateUserShippingAddressInput>;
+  clothingSize?: InputMaybe<Scalars['String']['input']>;
+  notes?: InputMaybe<Scalars['String']['input']>;
+  shoeSize?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type UpdateUserGiftProfileResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | UserGiftProfile | ValidationRejection;
+
 export type UpdateUserPictureFromAccountInput = {
   accountId: Scalars['UserAccountId']['input'];
 };
@@ -1054,6 +1069,14 @@ export type UpdateUserProfileInput = {
 };
 
 export type UpdateUserProfileResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | User | ValidationRejection;
+
+export type UpdateUserShippingAddressInput = {
+  city: Scalars['String']['input'];
+  country: Scalars['String']['input'];
+  line1: Scalars['String']['input'];
+  line2?: InputMaybe<Scalars['String']['input']>;
+  postalCode: Scalars['String']['input'];
+};
 
 export type UpdateWishlistInput = {
   description?: InputMaybe<Scalars['String']['input']>;
@@ -1070,6 +1093,7 @@ export type User = {
   email: Scalars['String']['output'];
   emailSettings?: Maybe<UserEmailSettings>;
   firstName: Scalars['String']['output'];
+  giftProfile?: Maybe<UserGiftProfile>;
   id: Scalars['UserId']['output'];
   isEnabled: Scalars['Boolean']['output'];
   lastName: Scalars['String']['output'];
@@ -1121,6 +1145,14 @@ export type UserFull = {
   updatedAt: Scalars['String']['output'];
 };
 
+export type UserGiftProfile = {
+  __typename?: 'UserGiftProfile';
+  address?: Maybe<UserShippingAddress>;
+  clothingSize?: Maybe<Scalars['String']['output']>;
+  notes?: Maybe<Scalars['String']['output']>;
+  shoeSize?: Maybe<Scalars['String']['output']>;
+};
+
 export type UserSession = {
   __typename?: 'UserSession';
   createdAt: Scalars['String']['output'];
@@ -1151,6 +1183,15 @@ export enum UserSessionDeviceType {
   Unknown = 'UNKNOWN'
 }
 
+export type UserShippingAddress = {
+  __typename?: 'UserShippingAddress';
+  city: Scalars['String']['output'];
+  country: Scalars['String']['output'];
+  line1: Scalars['String']['output'];
+  line2?: Maybe<Scalars['String']['output']>;
+  postalCode: Scalars['String']['output'];
+};
+
 export type ValidationRejection = {
   __typename?: 'ValidationRejection';
   errors: Array<FieldError>;
@@ -1174,6 +1215,7 @@ export type Wishlist = {
   items: Array<Item>;
   logoUrl?: Maybe<Scalars['String']['output']>;
   owner: User;
+  ownerGiftProfile?: Maybe<UserGiftProfile>;
   ownerId: Scalars['UserId']['output'];
   title: Scalars['String']['output'];
   updatedAt: Scalars['String']['output'];

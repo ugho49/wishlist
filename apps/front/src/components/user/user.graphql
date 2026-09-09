@@ -89,6 +89,51 @@ query UserClosestFriends($limit: Int) {
   }
 }
 
+query UserGiftProfile {
+  currentUser {
+    __typename
+    ... on User {
+      id
+      giftProfile {
+        clothingSize
+        shoeSize
+        notes
+        address {
+          line1
+          line2
+          postalCode
+          city
+          country
+        }
+      }
+    }
+  }
+}
+
+mutation UpdateUserGiftProfile($input: UpdateUserGiftProfileInput!) {
+  updateUserGiftProfile(input: $input) {
+    __typename
+    ... on UserGiftProfile {
+      clothingSize
+      shoeSize
+      notes
+      address {
+        line1
+        line2
+        postalCode
+        city
+        country
+      }
+    }
+    ... on ValidationRejection {
+      errors {
+        field
+        message
+      }
+    }
+  }
+}
+
 mutation UpdateUserProfile($input: UpdateUserProfileInput!) {
   updateUserProfile(input: $input) {
     __typename

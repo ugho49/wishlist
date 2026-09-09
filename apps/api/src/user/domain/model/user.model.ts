@@ -2,12 +2,31 @@ import type { UserId } from '@wishlist/common';
 
 import { Authorities } from '../authorities.enum';
 
+export type UserShippingAddress = {
+  line1: string;
+  line2?: string;
+  postalCode: string;
+  city: string;
+  country: string;
+};
+
+export type UserGiftProfile = {
+  clothingSize?: string;
+  shoeSize?: string;
+  notes?: string;
+  address?: UserShippingAddress;
+};
+
 export type UserProps = {
   id: UserId;
   email: string;
   firstName: string;
   lastName: string;
   birthday?: Date;
+  clothingSize?: string;
+  shoeSize?: string;
+  giftNotes?: string;
+  address?: UserShippingAddress;
   isEnabled: boolean;
   authorities: Authorities[];
   pictureUrl?: string;
@@ -21,6 +40,10 @@ export class User {
   public readonly firstName: string;
   public readonly lastName: string;
   public readonly birthday?: Date;
+  public readonly clothingSize?: string;
+  public readonly shoeSize?: string;
+  public readonly giftNotes?: string;
+  public readonly address?: UserShippingAddress;
   public readonly isEnabled: boolean;
   public readonly authorities: Authorities[];
   public readonly pictureUrl?: string;
@@ -33,6 +56,10 @@ export class User {
     this.firstName = props.firstName;
     this.lastName = props.lastName;
     this.birthday = props.birthday;
+    this.clothingSize = props.clothingSize;
+    this.shoeSize = props.shoeSize;
+    this.giftNotes = props.giftNotes;
+    this.address = props.address;
     this.isEnabled = props.isEnabled;
     this.authorities = props.authorities;
     this.pictureUrl = props.pictureUrl;
@@ -117,5 +144,25 @@ export class User {
       pictureUrl,
       updatedAt: new Date(),
     });
+  }
+
+  updateGiftProfile(profile: UserGiftProfile): User {
+    return new User({
+      ...this,
+      clothingSize: profile.clothingSize,
+      shoeSize: profile.shoeSize,
+      giftNotes: profile.notes,
+      address: profile.address,
+      updatedAt: new Date(),
+    });
+  }
+
+  getGiftProfile(): UserGiftProfile {
+    return {
+      clothingSize: this.clothingSize,
+      shoeSize: this.shoeSize,
+      notes: this.giftNotes,
+      address: this.address,
+    };
   }
 }

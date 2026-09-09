@@ -17,6 +17,7 @@ import { WishlistHeader } from './WishlistHeader';
 import { WishlistHeaderSkeleton } from './WishlistHeaderSkeleton';
 import { WishlistItems } from './WishlistItems';
 import { WishlistNotFound } from './WishlistNotFound';
+import { WishlistOwnerGiftProfile } from './WishlistOwnerGiftProfile';
 
 interface WishlistPageProps {
   wishlistId: WishlistId;
@@ -128,6 +129,13 @@ export const WishlistPage = ({ wishlistId }: WishlistPageProps) => {
                 }}
               >
                 {wishlist.description && <Description text={wishlist.description} />}
+
+                {wishlist.ownerGiftProfile && (
+                  <WishlistOwnerGiftProfile
+                    ownerFirstName={wishlist.owner.firstName}
+                    profile={wishlist.ownerGiftProfile}
+                  />
+                )}
 
                 <WishlistItems
                   wishlist={wishlist}

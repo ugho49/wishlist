@@ -14,6 +14,7 @@ import { UnlinkUserAccountUseCase } from './command/unlink-user-account.use-case
 import { UpdateUserUseCase } from './command/update-user.use-case';
 import { UpdateUserEmailSettingUseCase } from './command/update-user-email-setting.use-case';
 import { UpdateUserFullUseCase } from './command/update-user-full.use-case';
+import { UpdateUserGiftProfileUseCase } from './command/update-user-gift-profile.use-case';
 import { UpdateUserPasswordUseCase } from './command/update-user-password.use-case';
 import { UpdateUserPictureUseCase } from './command/update-user-picture.use-case';
 import { UpdateUserPictureFromAccountUseCase } from './command/update-user-picture-from-account.use-case';
@@ -45,6 +46,7 @@ export const handlers = [
   AdminRevokeUserSessionUseCase,
   AdminRevokeAllUserSessionsUseCase,
   UpdateUserEmailSettingUseCase,
+  UpdateUserGiftProfileUseCase,
   UpdateUserUseCase,
   UpdateUserFullUseCase,
   UpdateUserPictureFromAccountUseCase,

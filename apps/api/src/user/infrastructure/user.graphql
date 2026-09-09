@@ -58,6 +58,22 @@ type User {
   accounts: [UserAccount!] @resolved
   sessions: [UserSession!] @resolved
   emailSettings: UserEmailSettings @resolved
+  giftProfile: UserGiftProfile @resolved
+}
+
+type UserShippingAddress {
+  line1: String!
+  line2: String
+  postalCode: String!
+  city: String!
+  country: String!
+}
+
+type UserGiftProfile {
+  clothingSize: String
+  shoeSize: String
+  notes: String
+  address: UserShippingAddress
 }
 
 type PendingEmailChange {
@@ -137,6 +153,21 @@ input ConfirmEmailChangeInput {
 
 input UpdateUserEmailSettingsInput {
   dailyNewItemNotification: Boolean!
+}
+
+input UpdateUserShippingAddressInput {
+  line1: String!
+  line2: String
+  postalCode: String!
+  city: String!
+  country: String!
+}
+
+input UpdateUserGiftProfileInput {
+  clothingSize: String
+  shoeSize: String
+  notes: String
+  address: UpdateUserShippingAddressInput
 }
 
 input SendResetPasswordEmailInput {
@@ -224,6 +255,13 @@ union UpdateUserEmailSettingsResult =
   | ForbiddenRejection
   | InternalErrorRejection
 
+union UpdateUserGiftProfileResult =
+  | UserGiftProfile
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+
 union SendResetPasswordEmailResult =
   | VoidOutput
   | ValidationRejection
@@ -264,6 +302,7 @@ extend type Mutation {
   requestEmailChange(input: RequestEmailChangeInput!): RequestEmailChangeResult!
   confirmEmailChange(input: ConfirmEmailChangeInput!): ConfirmEmailChangeResult!
   updateUserEmailSettings(input: UpdateUserEmailSettingsInput!): UpdateUserEmailSettingsResult!
+  updateUserGiftProfile(input: UpdateUserGiftProfileInput!): UpdateUserGiftProfileResult!
   sendResetPasswordEmail(input: SendResetPasswordEmailInput!): SendResetPasswordEmailResult!
   resetPassword(input: ResetPasswordInput!): ResetPasswordResult!
   revokeSession(input: RevokeSessionInput!): RevokeSessionResult!

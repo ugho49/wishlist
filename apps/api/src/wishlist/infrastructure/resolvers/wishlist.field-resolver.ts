@@ -9,13 +9,17 @@ import {
   type Event as GqlEvent,
   type Item as GqlItem,
   type User as GqlUser,
+  type UserGiftProfile as GqlUserGiftProfile,
   type Wishlist as GqlWishlist,
 } from '../../../gql/generated-types';
 import { WishlistItem } from '../../../item/domain/wishlist-item.model';
 import { itemMapper } from '../../../item/infrastructure/item.mapper';
+import { userMapper } from '../../../user/infrastructure/user.mapper';
+import { GetWishlistOwnerGiftProfileUseCase } from '../../application/query/get-wishlist-owner-gift-profile.use-case';
 
 @Resolver('Wishlist')
 export class WishlistFieldResolver {
+  constructor(private readonly getWishlistOwnerGiftProfileUseCase: GetWishlistOwnerGiftProfileUseCase) {}
   @ResolveField()
   async owner(@Parent() wishlist: GqlWishlist, @Context() ctx: GraphQLContext): Promise<GqlUser> {
     const owner = await ctx.loaders.user.load(wishlist.ownerId);
@@ -65,5 +69,17 @@ export class WishlistFieldResolver {
     return items
       .filter(item => WishlistItem.canShowItem({ item, wishlist: { hideItems, isOwner, isCoOwner } }))
       .map(item => itemMapper.toGqlItem({ item, displayUserAndSuggested }));
+  }
+
+  @ResolveField()
+  async ownerGiftProfile(
+    @Parent() wishlist: GqlWishlist,
+    @GqlCurrentUser() currentUser: ICurrentUser,
+  ): Promise<GqlUserGiftProfile | undefined> {
+    const profile = await this.getWishlistOwnerGiftProfileUseCase.execute({
+      currentUser,
+      wishlistId: wishlist.id,
+    });
+    return profile ? userMapper.toGqlUserGiftProfile(profile) : undefined;
   }
 }

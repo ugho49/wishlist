@@ -8,6 +8,7 @@ import { UnlinkWishlistFromEventUseCase } from './command/unlink-wishlist-from-e
 import { UpdateWishlistUseCase } from './command/update-wishlist.use-case';
 import { UploadWishlistLogoUseCase } from './command/upload-wishlist-logo.use-case';
 import { UserAddedAsCoOwnerToWishlistHandler } from './event/user-added-as-co-owner-to-wishlist.handler';
+import { GetWishlistOwnerGiftProfileUseCase } from './query/get-wishlist-owner-gift-profile.use-case';
 import { GetWishlistsByIdsUseCase } from './query/get-wishlists-by-ids.use-case';
 import { GetWishlistsByUserUseCase } from './query/get-wishlists-by-user.use-case';
 
@@ -25,6 +26,7 @@ export const handlers = [
   // Queries
   GetWishlistsByUserUseCase,
   GetWishlistsByIdsUseCase,
+  GetWishlistOwnerGiftProfileUseCase,
   // Event handlers
   UserAddedAsCoOwnerToWishlistHandler,
 ];

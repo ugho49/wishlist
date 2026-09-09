@@ -149,6 +149,34 @@ export class Fixtures {
     });
   }
 
+  async updateUserGiftProfile(parameters: {
+    userId: string;
+    clothingSize?: string;
+    shoeSize?: string;
+    giftNotes?: string;
+    addressLine1?: string;
+    addressPostalCode?: string;
+    addressCity?: string;
+    addressCountry?: string;
+  }): Promise<void> {
+    const { userId, clothingSize, shoeSize, giftNotes, addressLine1, addressPostalCode, addressCity, addressCountry } =
+      parameters;
+
+    await this.sql.unsafe(
+      `UPDATE ${Fixtures.USER_TABLE} SET clothing_size = $2, shoe_size = $3, gift_notes = $4, address_line1 = $5, address_postal_code = $6, address_city = $7, address_country = $8 WHERE id = $1`,
+      [
+        userId,
+        clothingSize ?? null,
+        shoeSize ?? null,
+        giftNotes ?? null,
+        addressLine1 ?? null,
+        addressPostalCode ?? null,
+        addressCity ?? null,
+        addressCountry ?? null,
+      ],
+    );
+  }
+
   async insertUserEmailSettings(parameters: {
     userId: string;
     emailSettings: { daily_new_item_notification: boolean };
