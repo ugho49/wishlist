@@ -1,6 +1,7 @@
 import type { EventAttendeeSeed, EventWishlistSeed, SeedDb, WishlistSeed } from './types';
 
 import { faker } from '@faker-js/faker';
+import { MAX_EVENTS_BY_LIST } from '@wishlist/common';
 
 import * as schema from '../schema';
 import { seedConfig } from './config';
@@ -11,20 +12,38 @@ export async function seedEventWishlists(
   deps: { wishlists: readonly WishlistSeed[]; attendees: readonly EventAttendeeSeed[] },
 ): Promise<EventWishlistSeed[]> {
   const attendeesByUserId = groupByKey(deps.attendees, attendee => attendee.userId);
+  const wishlistsByOwnerId = groupByKey(deps.wishlists, wishlist => wishlist.ownerId);
   const links: EventWishlistSeed[] = [];
 
-  for (const wishlist of deps.wishlists) {
-    const ownerEventIds = (attendeesByUserId.get(wishlist.ownerId) ?? []).map(attendee => attendee.eventId);
+  for (const [ownerId, ownerWishlists] of wishlistsByOwnerId) {
+    const ownerEventIds = faker.helpers.shuffle([
+      ...new Set((attendeesByUserId.get(ownerId) ?? []).map(attendee => attendee.eventId)),
+    ]);
     if (ownerEventIds.length === 0) continue;
 
-    const belongsToMultipleEvents = chance(seedConfig.wishlists.multipleEventsProbability) && ownerEventIds.length > 1;
+    const wishlistsToLink = ownerWishlists.slice(0, ownerEventIds.length);
+    const leftoverEventIds = ownerEventIds.slice(wishlistsToLink.length);
+    const eventsPerWishlist = new Map<string, number>();
 
-    const eventIds = belongsToMultipleEvents
-      ? faker.helpers.arrayElements(ownerEventIds, { min: 1, max: ownerEventIds.length - 1 })
-      : [pickOne(ownerEventIds)];
+    for (const [index, wishlist] of wishlistsToLink.entries()) {
+      const eventId = ownerEventIds[index];
+      if (!eventId) continue;
 
-    for (const eventId of eventIds) {
       links.push({ eventId, wishlistId: wishlist.id });
+      eventsPerWishlist.set(wishlist.id, 1);
+    }
+
+    for (const eventId of leftoverEventIds) {
+      if (!chance(seedConfig.wishlists.multipleEventsProbability)) continue;
+
+      const eligible = wishlistsToLink.filter(
+        candidate => (eventsPerWishlist.get(candidate.id) ?? 0) < MAX_EVENTS_BY_LIST,
+      );
+      if (eligible.length === 0) continue;
+
+      const wishlist = pickOne(eligible);
+      links.push({ eventId, wishlistId: wishlist.id });
+      eventsPerWishlist.set(wishlist.id, (eventsPerWishlist.get(wishlist.id) ?? 0) + 1);
     }
   }
 

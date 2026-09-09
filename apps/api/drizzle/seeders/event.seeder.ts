@@ -5,7 +5,30 @@ import { DateTime } from 'luxon';
 
 import * as schema from '../schema';
 import { seedConfig } from './config';
-import { chance, maybe, uuid } from './helpers';
+import { chance, maybe, pickOne, uuid } from './helpers';
+
+const EVENT_ICONS = [
+  '🎂',
+  '🎄',
+  '🎁',
+  '🎉',
+  '🥳',
+  '💍',
+  '🐣',
+  '🎃',
+  '🥂',
+  '🎓',
+  '🏠',
+  '✈️',
+  '⚽',
+  '🎵',
+  '💝',
+  '🌟',
+  '🌸',
+  '🎅',
+  '🎆',
+  '🎈',
+] as const;
 
 export async function seedEvents(db: SeedDb): Promise<EventSeed[]> {
   const events: EventSeed[] = Array.from({ length: seedConfig.events.count }, () => {
@@ -23,6 +46,7 @@ export async function seedEvents(db: SeedDb): Promise<EventSeed[]> {
             })
             .toISOString(),
       description: maybe(seedConfig.events.descriptionProbability, () => faker.lorem.paragraph()),
+      icon: maybe(seedConfig.events.iconProbability, () => pickOne(EVENT_ICONS)),
     };
   });
 

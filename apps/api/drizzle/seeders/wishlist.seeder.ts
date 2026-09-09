@@ -15,10 +15,14 @@ export async function seedWishlists(
 
   for (const user of deps.users) {
     const userAttendees = attendeesByUserId.get(user.id);
-    if (!userAttendees || userAttendees.length === 0) continue;
+    const userEventIds = [...new Set((userAttendees ?? []).map(attendee => attendee.eventId))];
+    if (userEventIds.length === 0) continue;
     if (!chance(seedConfig.wishlists.ownerHasWishlistProbability)) continue;
 
-    const count = intBetween(seedConfig.wishlists.perOwner);
+    const count = intBetween({
+      min: seedConfig.wishlists.perOwner.min,
+      max: Math.min(seedConfig.wishlists.perOwner.max, userEventIds.length),
+    });
 
     for (let i = 0; i < count; i++) {
       wishlists.push({

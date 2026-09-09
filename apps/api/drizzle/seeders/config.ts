@@ -17,6 +17,7 @@ export const seedConfig = {
     count: 100,
     pastProbability: 0.3,
     descriptionProbability: 0.3,
+    iconProbability: 0.5,
   },
   attendees: {
     extraPerEvent: { min: 0, max: 10 },
