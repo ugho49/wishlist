@@ -17,7 +17,10 @@ export async function seedItems(db: SeedDb, deps: { wishlists: readonly Wishlist
         id: uuid(),
         name: faker.commerce.productName(),
         wishlistId: wishlist.id,
-        pictureUrl: faker.image.urlPicsumPhotos(),
+        pictureUrl: faker.image.url({
+          width: intBetween({ min: 300, max: 700 }),
+          height: intBetween({ min: 300, max: 700 }),
+        }),
         description: maybe(seedConfig.items.descriptionProbability, () => faker.commerce.productDescription()),
         score: maybe(seedConfig.items.scoreProbability, () => faker.number.int({ min: 1, max: 5 })),
         isSuggested: chance(seedConfig.items.suggestedProbability),
