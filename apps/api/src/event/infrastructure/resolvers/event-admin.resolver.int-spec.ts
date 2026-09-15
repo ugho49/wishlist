@@ -84,6 +84,43 @@ describe('EventAdminResolver (GraphQL)', () => {
         expect(res.body.data.adminEvent).toMatchObject({ __typename: 'Event', id: eventId, title: 'Owned' });
       });
 
+      it('should resolve wishlists even when the admin is not an attendee', async () => {
+        const ownerId = await fixtures.insertUser({ email: 'owner@test.com', firstname: 'O', lastname: 'W' });
+        const { eventId } = await fixtures.insertEventWithMaintainer({ title: 'Owned', maintainerId: ownerId });
+        const wishlistId = await fixtures.insertWishlist({
+          eventIds: [eventId],
+          userId: ownerId,
+          title: 'Owner list',
+          hideItems: false,
+        });
+
+        const queryWithWishlists = /* GraphQL */ `
+          query AdminEventWishlists($id: EventId!) {
+            adminEvent(id: $id) {
+              __typename
+              ... on Event {
+                id
+                wishlists {
+                  id
+                  title
+                }
+              }
+            }
+          }
+        `;
+
+        const res = await request
+          .post(GRAPHQL_PATH)
+          .send({ query: queryWithWishlists, variables: { id: eventId } })
+          .expect(200);
+
+        expect(res.body.data.adminEvent).toMatchObject({
+          __typename: 'Event',
+          id: eventId,
+          wishlists: [{ id: wishlistId, title: 'Owner list' }],
+        });
+      });
+
       it('should return NotFoundRejection when the event does not exist', async () => {
         const res = await request
           .post(GRAPHQL_PATH)
@@ -168,6 +205,59 @@ describe('EventAdminResolver (GraphQL)', () => {
         expect(res.body.data.adminEvents.data).toEqual([
           expect.objectContaining({ id: targetEventId, title: 'Target Event' }),
         ]);
+      });
+    });
+  });
+
+  describe('Query adminEventsStats', () => {
+    const query = /* GraphQL */ `
+      query AdminEventsStats {
+        adminEventsStats {
+          __typename
+          ... on AdminEventsStats {
+            totalCount
+            upcomingCount
+            pastCount
+          }
+          ... on ForbiddenRejection {
+            message
+          }
+        }
+      }
+    `;
+
+    it('should reject with ForbiddenRejection for a non-admin user', async () => {
+      const request = await getRequest({ signedAs: 'BASE_USER' });
+      const res = await request.post(GRAPHQL_PATH).send({ query }).expect(200);
+      expect(res.body.data.adminEventsStats.__typename).toBe('ForbiddenRejection');
+    });
+
+    describe('when user is admin', () => {
+      let request: RequestApp;
+
+      beforeEach(async () => {
+        request = await getRequest({ signedAs: 'ADMIN_USER' });
+      });
+
+      it('should return event counts', async () => {
+        const ownerId = await fixtures.insertUser({ email: 'owner@test.com', firstname: 'O', lastname: 'W' });
+        await fixtures.insertEventWithMaintainer({
+          title: 'Upcoming',
+          maintainerId: ownerId,
+          eventDate: DateTime.now().plus({ days: 10 }).toJSDate(),
+        });
+        await fixtures.insertEventWithMaintainer({
+          title: 'Past',
+          maintainerId: ownerId,
+          eventDate: DateTime.now().minus({ days: 10 }).toJSDate(),
+        });
+
+        const res = await request.post(GRAPHQL_PATH).send({ query }).expect(200);
+
+        expect(res.body.data.adminEventsStats.__typename).toBe('AdminEventsStats');
+        expect(res.body.data.adminEventsStats.totalCount).toBeGreaterThanOrEqual(2);
+        expect(res.body.data.adminEventsStats.upcomingCount).toBeGreaterThanOrEqual(1);
+        expect(res.body.data.adminEventsStats.pastCount).toBeGreaterThanOrEqual(1);
       });
     });
   });

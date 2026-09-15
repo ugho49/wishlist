@@ -1,6 +1,7 @@
 import type { RootState } from '../../../core/store';
 
 import { createFileRoute, Navigate, Outlet } from '@tanstack/react-router';
+import { AdminLayout } from '@wishlist/front-components/admin/AdminLayout';
 import { SEO } from '@wishlist/front-components/SEO';
 import { useSelector } from 'react-redux';
 
@@ -18,7 +19,9 @@ export const Route = createFileRoute('/_authenticated/_with-layout/admin')({
     return (
       <>
         <SEO title="Administration" description="Panneau d'administration de Wishlist." />
-        <Outlet />
+        <AdminLayout>
+          <Outlet />
+        </AdminLayout>
       </>
     );
   },

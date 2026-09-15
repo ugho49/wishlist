@@ -261,6 +261,16 @@ export type AdminEventGetEventQuery = { adminEvent:
     | { __typename: 'ValidationRejection' }
    };
 
+export type AdminEventsStatsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type AdminEventsStatsQuery = { adminEventsStats:
+    | { __typename: 'AdminEventsStats', totalCount: number, upcomingCount: number, pastCount: number }
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+   };
+
 export type AdminUpdateEventMutationVariables = Exact<{
   id: Ids["EventId"];
   input: Types.UpdateEventInput;
@@ -609,6 +619,16 @@ export type AdminRevokeUserSessionMutation = { adminRevokeUserSession:
     | { __typename: 'UnauthorizedRejection' }
     | { __typename: 'ValidationRejection' }
     | { __typename: 'VoidOutput', success: boolean }
+   };
+
+export type AdminUsersStatsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type AdminUsersStatsQuery = { adminUsersStats:
+    | { __typename: 'AdminUsersStats', totalCount: number, enabledCount: number, adminCount: number }
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
    };
 
 export type AdminRevokeAllUserSessionsMutationVariables = Exact<{
@@ -1667,6 +1687,35 @@ export const useAdminEventGetEventQuery = <
   }
     )};
 
+export const AdminEventsStatsDocument = new TypedDocumentString(`
+    query AdminEventsStats {
+  adminEventsStats {
+    __typename
+    ... on AdminEventsStats {
+      totalCount
+      upcomingCount
+      pastCount
+    }
+  }
+}
+    `);
+
+export const useAdminEventsStatsQuery = <
+      TData = AdminEventsStatsQuery,
+      TError = unknown
+    >(
+      variables?: AdminEventsStatsQueryVariables,
+      options?: Omit<UseQueryOptions<AdminEventsStatsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<AdminEventsStatsQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<AdminEventsStatsQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['AdminEventsStats'] : ['AdminEventsStats', variables],
+    queryFn: fetchGql<AdminEventsStatsQuery, AdminEventsStatsQueryVariables>(AdminEventsStatsDocument, variables),
+    ...options
+  }
+    )};
+
 export const AdminUpdateEventDocument = new TypedDocumentString(`
     mutation AdminUpdateEvent($id: EventId!, $input: UpdateEventInput!) {
   adminUpdateEvent(id: $id, input: $input) {
@@ -2558,6 +2607,35 @@ export const useAdminRevokeUserSessionMutation = <
       {
     mutationKey: ['AdminRevokeUserSession'],
     mutationFn: (variables?: AdminRevokeUserSessionMutationVariables) => fetchGql<AdminRevokeUserSessionMutation, AdminRevokeUserSessionMutationVariables>(AdminRevokeUserSessionDocument, variables)(),
+    ...options
+  }
+    )};
+
+export const AdminUsersStatsDocument = new TypedDocumentString(`
+    query AdminUsersStats {
+  adminUsersStats {
+    __typename
+    ... on AdminUsersStats {
+      totalCount
+      enabledCount
+      adminCount
+    }
+  }
+}
+    `);
+
+export const useAdminUsersStatsQuery = <
+      TData = AdminUsersStatsQuery,
+      TError = unknown
+    >(
+      variables?: AdminUsersStatsQueryVariables,
+      options?: Omit<UseQueryOptions<AdminUsersStatsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<AdminUsersStatsQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<AdminUsersStatsQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['AdminUsersStats'] : ['AdminUsersStats', variables],
+    queryFn: fetchGql<AdminUsersStatsQuery, AdminUsersStatsQueryVariables>(AdminUsersStatsDocument, variables),
     ...options
   }
     )};

@@ -1,7 +1,7 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { schema } from '@wishlist/api-drizzle';
 import { type EventId, type UserId, uuid } from '@wishlist/common';
-import { and, count, desc, eq, gte, inArray, isNotNull, isNull, or, type SelectedFields } from 'drizzle-orm';
+import { and, count, desc, eq, gte, inArray, isNotNull, isNull, or, type SelectedFields, sql } from 'drizzle-orm';
 import { DateTime } from 'luxon';
 
 import { DatabaseService } from '../../core/database/database.service';
@@ -77,6 +77,23 @@ export class PostgresEventRepository implements EventRepository {
     const events = result.map(PostgresEventRepository.toModel);
 
     return { events, totalCount };
+  }
+
+  async countAdminStats(): Promise<{ totalCount: number; upcomingCount: number; pastCount: number }> {
+    const today = DateTime.now().toISODate() ?? '';
+    const [stats] = await this.databaseService.db
+      .select({
+        totalCount: sql<number>`cast(count(*) as int)`,
+        upcomingCount: sql<number>`cast(count(*) filter (where ${schema.event.eventDate} >= ${today}) as int)`,
+        pastCount: sql<number>`cast(count(*) filter (where ${schema.event.eventDate} < ${today}) as int)`,
+      })
+      .from(schema.event);
+
+    return {
+      totalCount: stats?.totalCount ?? 0,
+      upcomingCount: stats?.upcomingCount ?? 0,
+      pastCount: stats?.pastCount ?? 0,
+    };
   }
 
   async findByUserIdPaginated(params: {

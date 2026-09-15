@@ -1,33 +1,39 @@
+import type { GridColDef } from '@mui/x-data-grid';
 import type { UserId } from '@wishlist/common';
 import type { AdminUserWishlistRow } from '../wishlist.types';
 
 import ListIcon from '@mui/icons-material/List';
-import { Alert, Avatar, Stack } from '@mui/material';
-import { DataGrid, type GridColDef } from '@mui/x-data-grid';
+import { Alert, Avatar, Stack, styled } from '@mui/material';
 import { DateTime } from 'luxon';
 import { useState } from 'react';
 
 import { isRejection, rejectionMessage, useAdminListWishlistsForUserQuery } from '../../../gql';
+import { AdminDataGrid } from '../../admin/AdminDataGrid';
 import { RouterLink } from '../../common/RouterLink';
+
+const WishlistAvatar = styled(Avatar)({
+  width: 28,
+  height: 28,
+});
 
 const getColumns = (userId: UserId): GridColDef<AdminUserWishlistRow>[] => [
   {
     field: 'logoUrl',
     headerName: '',
-    width: 20,
+    width: 44,
     sortable: false,
     filterable: false,
     display: 'flex',
     renderCell: ({ row: wishlist }) => (
-      <Avatar src={wishlist.logoUrl ?? undefined} sx={{ width: '30px', height: '30px' }}>
+      <WishlistAvatar src={wishlist.logoUrl ?? undefined}>
         <ListIcon />
-      </Avatar>
+      </WishlistAvatar>
     ),
   },
-  { field: 'title', headerName: 'Title', width: 250 },
+  { field: 'title', headerName: 'Titre', width: 250 },
   {
     field: 'events',
-    headerName: 'Events',
+    headerName: 'Évènements',
     flex: 1,
     minWidth: 250,
     resizable: true,
@@ -49,14 +55,14 @@ const getColumns = (userId: UserId): GridColDef<AdminUserWishlistRow>[] => [
   },
   {
     field: 'role',
-    headerName: 'Role',
-    width: 100,
-    valueGetter: (_, row) => (userId === row.coOwnerId ? 'Co-owner' : 'Owner'),
+    headerName: 'Rôle',
+    width: 140,
+    valueGetter: (_, row) => (userId === row.coOwnerId ? 'Co-propriétaire' : 'Propriétaire'),
   },
   {
     field: 'config.hideItems',
-    headerName: 'Is Public',
-    width: 100,
+    headerName: 'Public',
+    width: 90,
     sortable: false,
     filterable: false,
     type: 'boolean',
@@ -64,9 +70,9 @@ const getColumns = (userId: UserId): GridColDef<AdminUserWishlistRow>[] => [
   },
   {
     field: 'createdAt',
-    headerName: 'Created At',
+    headerName: 'Créé le',
     type: 'dateTime',
-    width: 200,
+    width: 180,
     valueGetter: (_, row) => new Date(row.createdAt),
     renderCell: ({ value }) => DateTime.fromJSDate(value).toLocaleString(DateTime.DATETIME_MED),
   },
@@ -87,14 +93,13 @@ export const AdminListWishlistsForUser = ({ userId }: AdminListWishlistsForUserP
   const queryRejection = data && isRejection(data) ? data : undefined;
 
   const totalElements = wishlists?.pagination.totalElements ?? 0;
-  const pageSize = wishlists?.pagination.pageSize ?? 0;
+  const pageSize = wishlists?.pagination.pageSize ?? 10;
 
   return (
-    <div style={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
+    <>
       {queryRejection && <Alert severity="error">{rejectionMessage(queryRejection)}</Alert>}
-      <DataGrid
+      <AdminDataGrid
         isRowSelectable={() => false}
-        density="standard"
         rows={wishlists?.data ?? []}
         loading={loading}
         columns={getColumns(userId)}
@@ -111,6 +116,6 @@ export const AdminListWishlistsForUser = ({ userId }: AdminListWishlistsForUserP
         onPaginationModelChange={({ page }) => setCurrentPage(page + 1)}
         hideFooter={totalElements <= pageSize}
       />
-    </div>
+    </>
   );
 };

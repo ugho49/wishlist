@@ -100,6 +100,22 @@ export class PostgresUserRepository implements UserRepository {
     return { users: users.map(user => PostgresUserRepository.toModel(user)), totalCount };
   }
 
+  async countAdminStats(): Promise<{ totalCount: number; enabledCount: number; adminCount: number }> {
+    const [stats] = await this.databaseService.db
+      .select({
+        totalCount: sql<number>`cast(count(*) as int)`,
+        enabledCount: sql<number>`cast(count(*) filter (where ${schema.user.isEnabled}) as int)`,
+        adminCount: sql<number>`cast(count(*) filter (where 'ROLE_ADMIN' = any(${schema.user.authorities}) or 'ROLE_SUPERADMIN' = any(${schema.user.authorities})) as int)`,
+      })
+      .from(schema.user);
+
+    return {
+      totalCount: stats?.totalCount ?? 0,
+      enabledCount: stats?.enabledCount ?? 0,
+      adminCount: stats?.adminCount ?? 0,
+    };
+  }
+
   async save(user: User, tx?: DrizzleTransaction): Promise<void> {
     const client = tx ?? this.databaseService.db;
 

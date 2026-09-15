@@ -3,29 +3,29 @@ import type { UserId } from '@wishlist/common';
 import type { AdminEventListItem } from './admin.types';
 
 import { Alert } from '@mui/material';
-import { DataGrid } from '@mui/x-data-grid';
 import { useNavigate } from '@tanstack/react-router';
 import { DateTime } from 'luxon';
 
 import { AttendeeRole, isRejection, rejectionMessage, useAdminEventListEventsQuery } from '../../../gql';
+import { AdminDataGrid } from '../../admin/AdminDataGrid';
 import { EventIcon } from '../EventIcon';
 
 const columns: GridColDef<AdminEventListItem>[] = [
   {
     field: 'icon',
     headerName: '',
-    width: 20,
+    width: 44,
     sortable: false,
     filterable: false,
     display: 'flex',
     renderCell: ({ row }) => <EventIcon icon={row.icon ?? undefined} size="small" />,
   },
-  { field: 'title', headerName: 'Title', minWidth: 250, flex: 1 },
+  { field: 'title', headerName: 'Titre', minWidth: 250, flex: 1 },
   {
     field: 'eventDate',
-    headerName: 'Event Date',
+    headerName: 'Date',
     type: 'dateTime',
-    width: 100,
+    width: 120,
     valueGetter: (_, row) => new Date(row.eventDate),
     renderCell: ({ value }) => DateTime.fromJSDate(value).toLocaleString(DateTime.DATE_SHORT),
   },
@@ -35,29 +35,29 @@ const columns: GridColDef<AdminEventListItem>[] = [
     width: 170,
     valueGetter: (_, row) => {
       const creator = row.attendees.find(attendee => attendee.role === AttendeeRole.Creator)?.user;
-      if (!creator) return 'Unknown';
+      if (!creator) return 'Inconnu';
       return `${creator.firstName} ${creator.lastName}`;
     },
   },
   {
     field: 'nbWishlists',
-    headerName: '# Lists',
+    headerName: 'Listes',
     type: 'number',
-    width: 100,
+    width: 90,
     valueGetter: (_, row) => row.wishlistIds.length,
   },
   {
     field: 'attendees',
-    headerName: '# Attendees',
+    headerName: 'Participants',
     type: 'number',
-    width: 100,
+    width: 120,
     valueGetter: (_, row) => row.attendees.length,
   },
   {
     field: 'createdAt',
-    headerName: 'Created At',
+    headerName: 'Créé le',
     type: 'dateTime',
-    width: 200,
+    width: 180,
     valueGetter: (_, row) => new Date(row.createdAt),
     renderCell: ({ value }) => DateTime.fromJSDate(value).toLocaleString(DateTime.DATETIME_MED),
   },
@@ -80,20 +80,17 @@ export const AdminListEvents = ({ userId, currentPage, changeCurrentPage }: Admi
 
   const events = pagedEvents?.data ?? [];
   const totalElements = pagedEvents?.pagination.totalElements ?? 0;
-  const pageSize = pagedEvents?.pagination.pageSize ?? 0;
+  const pageSize = pagedEvents?.pagination.pageSize ?? 10;
 
   if (queryRejection) {
     return <Alert severity="error">{rejectionMessage(queryRejection)}</Alert>;
   }
 
   return (
-    <DataGrid
+    <AdminDataGrid
+      clickableRows
       isRowSelectable={() => true}
-      disableMultipleRowSelection={true}
-      disableColumnSelector={true}
-      isCellEditable={() => false}
       onRowClick={({ row }) => navigate({ to: `/admin/events/${row.id}` })}
-      density="standard"
       rows={events}
       loading={loading}
       columns={columns}

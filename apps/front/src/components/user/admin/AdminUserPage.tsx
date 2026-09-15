@@ -2,9 +2,15 @@ import type { UserId, UserSessionId } from '@wishlist/common';
 import type { FormEvent } from 'react';
 import type { RootState } from '../../../core/store';
 
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import DevicesIcon from '@mui/icons-material/Devices';
+import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
+import LinkIcon from '@mui/icons-material/Link';
+import PortraitIcon from '@mui/icons-material/Portrait';
 import SaveIcon from '@mui/icons-material/Save';
-import { Alert, Box, Button, Chip, Stack, TextField } from '@mui/material';
-import { styled } from '@mui/material/styles';
+import { Alert, Avatar, Box, Button, Chip, Stack, Tab, TextField } from '@mui/material';
+import { styled, useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useSearch } from '@tanstack/react-router';
 import { AdminListEvents } from '@wishlist/front-components/event/admin/AdminListEvents';
@@ -18,6 +24,7 @@ import {
   isRejection,
   rejectionMessage,
   rejectionPattern,
+  UserAuthorities,
   useAdminRemoveUserPictureMutation,
   useAdminRevokeAllUserSessionsMutation,
   useAdminRevokeUserSessionMutation,
@@ -25,13 +32,13 @@ import {
   useAdminUserDetailQuery,
 } from '../../../gql';
 import { useToast } from '../../../hooks';
-import { Card } from '../../common/Card';
+import { AdminPageHeader } from '../../admin/AdminPageHeader';
+import { AdminSection } from '../../admin/AdminSection';
+import { AdminTabs } from '../../admin/AdminTabs';
 import { CharsRemaining } from '../../common/CharsRemaining';
 import { ConfirmButton } from '../../common/ConfirmButton';
 import { WishlistDatePicker } from '../../common/DatePicker';
 import { Loader } from '../../common/Loader';
-import { Subtitle } from '../../common/Subtitle';
-import { Title } from '../../common/Title';
 import { AdminListWishlistsForUser } from '../../wishlist/admin/AdminListWishlistsForUser';
 import { AvatarUpdateButton } from '../AvatarUpdateButton';
 import { AdminListUserAccounts } from './AdminListUserAccounts';
@@ -40,51 +47,40 @@ import { UpdatePasswordModal } from './UpdatePasswordModal';
 
 const mapState = (state: RootState) => state.auth;
 
-const Header = styled('div')(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
+export enum AdminUserTab {
+  profile = 'profile',
+  accounts = 'accounts',
+  sessions = 'sessions',
+  events = 'events',
+  wishlists = 'wishlists',
+}
+
+const userTabs = [
+  { value: AdminUserTab.profile, label: 'Profil', icon: <PortraitIcon /> },
+  { value: AdminUserTab.accounts, label: 'Comptes', icon: <LinkIcon /> },
+  { value: AdminUserTab.sessions, label: 'Sessions', icon: <DevicesIcon /> },
+  { value: AdminUserTab.events, label: 'Évènements', icon: <CalendarMonthIcon /> },
+  { value: AdminUserTab.wishlists, label: 'Listes', icon: <FormatListBulletedIcon /> },
+];
+
+const FormActions = styled(Stack)(({ theme }) => ({
+  flexDirection: 'row',
+  justifyContent: 'flex-start',
+  marginTop: theme.spacing(1),
+}));
+
+const SessionsHeader = styled(Stack)(({ theme }) => ({
+  flexDirection: 'row',
+  justifyContent: 'flex-end',
   alignItems: 'center',
-  gap: theme.spacing(0.5),
-  marginBottom: theme.spacing(5),
+  marginBottom: theme.spacing(2),
 }));
 
-const NameRow = styled('div')(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  flexWrap: 'wrap',
-  gap: theme.spacing(1),
-}));
-
-const Name = styled('div')(({ theme }) => ({
-  fontWeight: 500,
-  fontSize: '1.3rem',
-  color: theme.palette.text.primary,
-}));
-
-const Email = styled('div')(({ theme }) => ({
-  fontSize: '0.9rem',
-  color: theme.palette.text.secondary,
-}));
-
-const Meta = styled('div')(({ theme }) => ({
-  fontSize: '0.85rem',
-  color: theme.palette.text.secondary,
-}));
-
-const HeaderActions = styled('div')(({ theme }) => ({
-  display: 'flex',
-  justifyContent: 'center',
-  flexWrap: 'wrap',
-  gap: theme.spacing(1),
-  marginTop: theme.spacing(1.5),
-  '& .MuiButton-root': {
-    padding: '3px 10px',
-  },
-}));
-
-const CardStack = styled(Stack)(() => ({
-  gap: 32,
+const HeaderUserAvatar = styled(Avatar)(({ theme }) => ({
+  width: 40,
+  height: 40,
+  fontSize: '1rem',
+  backgroundColor: theme.palette.primary.main,
 }));
 
 interface AdminUserPageProps {
@@ -95,6 +91,8 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
   const { addToast } = useToast();
   const { user: currentUser } = useSelector(mapState);
   const queryClient = useQueryClient();
+  const theme = useTheme();
+  const smallScreen = useMediaQuery(theme.breakpoints.down('sm'));
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [firstname, setFirstname] = useState('');
@@ -103,11 +101,11 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
   const [enabled, setEnabled] = useState(true);
   const [birthday, setBirthday] = useState<DateTime | null>(null);
   const [updatePasswordModalOpen, setUpdatePasswordModalOpen] = useState(false);
-  const { eventPage } = useSearch({ from: '/_authenticated/_with-layout/admin/users/$userId' });
-  const navigate = useNavigate();
+  const { eventPage, tab } = useSearch({ from: '/_authenticated/_with-layout/admin/users/$userId' });
+  const navigate = useNavigate({ from: '/admin/users/$userId' });
 
   const changeEventPage = (page: number) => {
-    void navigate({ to: '/admin/users/$userId', params: { userId }, search: prev => ({ ...prev, eventPage: page }) });
+    void navigate({ search: prev => ({ eventPage: page, tab: prev.tab }) });
   };
 
   const { data, isLoading: loadingUser } = useAdminUserDetailQuery({ userId }, { select: d => d.adminUser });
@@ -147,6 +145,9 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
   };
 
   const isCurrentUser = currentUser?.id === userId;
+  const isAdmin =
+    value?.authorities.some(a => a === UserAuthorities.RoleAdmin || a === UserAuthorities.RoleSuperadmin) ?? false;
+  const displayName = [firstname, lastname].filter(Boolean).join(' ') || 'Utilisateur';
 
   useEffect(() => {
     if (value) {
@@ -198,209 +199,230 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
 
   return (
     <Loader loading={loadingUser}>
-      <Title>Editer l'utilisateur</Title>
-
-      {queryRejection && <Alert severity="error">{rejectionMessage(queryRejection)}</Alert>}
-
       <UpdatePasswordModal
         userId={userId}
         open={updatePasswordModalOpen}
         onClose={() => setUpdatePasswordModalOpen(false)}
       />
 
-      <Stack
-        direction="row"
-        sx={{
-          justifyContent: 'center',
-          flexWrap: 'wrap',
-          mb: 2,
-        }}
-      >
-        <AvatarUpdateButton
-          size="120px"
-          pictureUrl={pictureUrl}
-          accounts={[]}
-          onPictureUpdated={url => {
-            setPictureUrl(url || '');
-            void invalidateUser();
-          }}
-          uploadPictureHandler={file => uploadAdminUserPicture(userId, file)}
-          updatePictureFromAccountHandler={() => Promise.resolve()}
-          deletePictureHandler={async () => {
-            const res = await removeUserPicture({ userId });
-            // AvatarUpdateButton owns the error UI for this handler: throwing keeps
-            // its catch path (error toast) and prevents it from clearing the picture.
-            match(res.adminRemoveUserPicture)
-              .with({ __typename: 'VoidOutput' }, () => undefined)
-              .with(rejectionPattern, rejection => {
-                throw new Error(rejectionMessage(rejection));
-              })
-              .exhaustive();
-          }}
-        />
-      </Stack>
-
-      <Header>
-        <NameRow>
-          <Name>
-            {firstname} {lastname}
-          </Name>
-          {value ? (
+      <AdminPageHeader
+        title={displayName}
+        breadcrumbs={[
+          { label: 'Admin', to: '/admin' },
+          { label: 'Utilisateurs', to: '/admin/users' },
+          { label: displayName },
+        ]}
+        avatar={
+          <HeaderUserAvatar src={pictureUrl || undefined}>
+            {(firstname || displayName).substring(0, 1).toUpperCase()}
+          </HeaderUserAvatar>
+        }
+        chips={
+          <>
             <Chip size="small" color={enabled ? 'success' : 'default'} label={enabled ? 'Actif' : 'Désactivé'} />
-          ) : null}
-        </NameRow>
-        <Email>{email}</Email>
-        {value?.createdAt ? (
-          <Meta>Inscrit le {DateTime.fromISO(value.createdAt).toLocaleString(DateTime.DATETIME_MED)}</Meta>
-        ) : null}
-        {!isCurrentUser && (
-          <HeaderActions>
-            <ConfirmButton
-              confirmTitle={enabled ? "Désactiver l'utilisateur" : "Activer l'utilisateur"}
-              confirmText={
-                enabled
-                  ? 'Êtes-vous sûr de vouloir désactiver cet utilisateur ?'
-                  : 'Êtes-vous sûr de vouloir activer cet utilisateur ?'
-              }
-              onClick={() => (enabled ? disableUser() : enableUser())}
-              disabled={loading}
-              size="small"
-              variant="outlined"
-              color={enabled ? 'error' : 'success'}
-            >
-              {enabled ? 'Désactiver' : 'Activer'}
-            </ConfirmButton>
-            <Button variant="outlined" size="small" disabled={loading} onClick={() => setUpdatePasswordModalOpen(true)}>
-              Changer le mot de passe
-            </Button>
-          </HeaderActions>
-        )}
-      </Header>
+            {isAdmin ? <Chip size="small" color="primary" label="Admin" /> : null}
+          </>
+        }
+        meta={
+          <>
+            {email}
+            {value?.createdAt
+              ? ` · Inscrit le ${DateTime.fromISO(value.createdAt).toLocaleString(DateTime.DATETIME_MED)}`
+              : ''}
+          </>
+        }
+        actions={
+          isCurrentUser ? undefined : (
+            <>
+              <ConfirmButton
+                confirmTitle={enabled ? "Désactiver l'utilisateur" : "Activer l'utilisateur"}
+                confirmText={
+                  enabled
+                    ? 'Êtes-vous sûr de vouloir désactiver cet utilisateur ?'
+                    : 'Êtes-vous sûr de vouloir activer cet utilisateur ?'
+                }
+                onClick={() => (enabled ? disableUser() : enableUser())}
+                disabled={loading}
+                size="small"
+                variant="outlined"
+                color={enabled ? 'error' : 'success'}
+              >
+                {enabled ? 'Désactiver' : 'Activer'}
+              </ConfirmButton>
+              <Button
+                variant="outlined"
+                size="small"
+                disabled={loading}
+                onClick={() => setUpdatePasswordModalOpen(true)}
+              >
+                Changer le mot de passe
+              </Button>
+            </>
+          )
+        }
+      />
 
-      <CardStack>
-        <Card>
-          <Subtitle>Modifier les informations</Subtitle>
+      {queryRejection && <Alert severity="error">{rejectionMessage(queryRejection)}</Alert>}
 
+      <AdminTabs
+        value={tab}
+        onChange={(_, newValue) =>
+          void navigate({
+            search: prev => ({ eventPage: prev.eventPage, tab: newValue as AdminUserTab }),
+          })
+        }
+        variant="scrollable"
+        scrollButtons="auto"
+        allowScrollButtonsMobile
+      >
+        {userTabs.map(tabItem => (
+          <Tab
+            key={tabItem.value}
+            value={tabItem.value}
+            label={smallScreen ? undefined : tabItem.label}
+            iconPosition="start"
+            icon={tabItem.icon}
+          />
+        ))}
+      </AdminTabs>
+
+      {tab === AdminUserTab.profile && (
+        <AdminSection>
           <Stack
-            component="form"
-            onSubmit={updateProfile}
             sx={{
               gap: 3,
             }}
           >
-            <Stack
-              direction="row"
-              sx={{
-                flexWrap: 'wrap',
-                gap: 3,
-              }}
-            >
-              <Box sx={{ flex: '1 1 300px', minWidth: '200px' }}>
-                <TextField
-                  autoComplete="off"
-                  label="Prénom"
-                  disabled={loading || isCurrentUser}
-                  fullWidth
-                  value={firstname}
-                  slotProps={{ htmlInput: { maxLength: 50 } }}
-                  placeholder="John"
-                  required
-                  helperText={<CharsRemaining max={50} value={firstname} />}
-                  onChange={e => setFirstname(e.target.value)}
-                />
-              </Box>
-
-              <Box sx={{ flex: '1 1 300px', minWidth: '200px' }}>
-                <TextField
-                  autoComplete="off"
-                  label="Nom"
-                  disabled={loading || isCurrentUser}
-                  fullWidth
-                  value={lastname}
-                  slotProps={{ htmlInput: { maxLength: 50 } }}
-                  placeholder="Doe"
-                  required
-                  helperText={<CharsRemaining max={50} value={lastname} />}
-                  onChange={e => setLastname(e.target.value)}
-                />
-              </Box>
-            </Stack>
-
-            <Stack
-              direction="row"
-              sx={{
-                flexWrap: 'wrap',
-                gap: 3,
-              }}
-            >
-              <Box sx={{ flex: '1 1 300px', minWidth: '200px' }}>
-                <TextField
-                  label="Email"
-                  type="email"
-                  autoComplete="off"
-                  disabled={loading || isCurrentUser}
-                  fullWidth
-                  value={email}
-                  placeholder="john@doe.fr"
-                  required
-                  onChange={e => setEmail(e.target.value)}
-                />
-              </Box>
-
-              <Box sx={{ flex: '1 1 300px', minWidth: '200px' }}>
-                <WishlistDatePicker
-                  label="Date de naissance"
-                  value={birthday}
-                  disabled={loading || isCurrentUser}
-                  onChange={date => setBirthday(date)}
-                  disableFuture
-                  fullWidth
-                />
-              </Box>
-            </Stack>
-
             {!isCurrentUser && (
+              <AvatarUpdateButton
+                size="56px"
+                pictureUrl={pictureUrl}
+                accounts={[]}
+                onPictureUpdated={url => {
+                  setPictureUrl(url || '');
+                  void invalidateUser();
+                }}
+                uploadPictureHandler={file => uploadAdminUserPicture(userId, file)}
+                updatePictureFromAccountHandler={() => Promise.resolve()}
+                deletePictureHandler={async () => {
+                  const res = await removeUserPicture({ userId });
+                  match(res.adminRemoveUserPicture)
+                    .with({ __typename: 'VoidOutput' }, () => undefined)
+                    .with(rejectionPattern, rejection => {
+                      throw new Error(rejectionMessage(rejection));
+                    })
+                    .exhaustive();
+                }}
+              />
+            )}
+            <Stack
+              component="form"
+              onSubmit={updateProfile}
+              sx={{
+                gap: 3,
+              }}
+            >
               <Stack
                 direction="row"
                 sx={{
-                  justifyContent: 'center',
+                  flexWrap: 'wrap',
+                  gap: 3,
                 }}
               >
-                <Button
-                  sx={{ marginTop: '8px' }}
-                  type="submit"
-                  variant="contained"
-                  size="small"
-                  loading={loading}
-                  loadingPosition="start"
-                  disabled={loading || isCurrentUser}
-                  startIcon={<SaveIcon />}
-                >
-                  Mettre à jour
-                </Button>
+                <Box sx={{ flex: '1 1 300px', minWidth: '200px' }}>
+                  <TextField
+                    autoComplete="off"
+                    label="Prénom"
+                    disabled={loading || isCurrentUser}
+                    fullWidth
+                    value={firstname}
+                    slotProps={{ htmlInput: { maxLength: 50 } }}
+                    placeholder="John"
+                    required
+                    helperText={<CharsRemaining max={50} value={firstname} />}
+                    onChange={e => setFirstname(e.target.value)}
+                  />
+                </Box>
+
+                <Box sx={{ flex: '1 1 300px', minWidth: '200px' }}>
+                  <TextField
+                    autoComplete="off"
+                    label="Nom"
+                    disabled={loading || isCurrentUser}
+                    fullWidth
+                    value={lastname}
+                    slotProps={{ htmlInput: { maxLength: 50 } }}
+                    placeholder="Doe"
+                    required
+                    helperText={<CharsRemaining max={50} value={lastname} />}
+                    onChange={e => setLastname(e.target.value)}
+                  />
+                </Box>
               </Stack>
-            )}
+
+              <Stack
+                direction="row"
+                sx={{
+                  flexWrap: 'wrap',
+                  gap: 3,
+                }}
+              >
+                <Box sx={{ flex: '1 1 300px', minWidth: '200px' }}>
+                  <TextField
+                    label="Email"
+                    type="email"
+                    autoComplete="off"
+                    disabled={loading || isCurrentUser}
+                    fullWidth
+                    value={email}
+                    placeholder="john@doe.fr"
+                    required
+                    onChange={e => setEmail(e.target.value)}
+                  />
+                </Box>
+
+                <Box sx={{ flex: '1 1 300px', minWidth: '200px' }}>
+                  <WishlistDatePicker
+                    label="Date de naissance"
+                    value={birthday}
+                    disabled={loading || isCurrentUser}
+                    onChange={date => setBirthday(date)}
+                    disableFuture
+                    fullWidth
+                  />
+                </Box>
+              </Stack>
+
+              {!isCurrentUser && (
+                <FormActions>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    size="small"
+                    loading={loading}
+                    loadingPosition="start"
+                    disabled={loading || isCurrentUser}
+                    startIcon={<SaveIcon />}
+                  >
+                    Mettre à jour
+                  </Button>
+                </FormActions>
+              )}
+            </Stack>
           </Stack>
-        </Card>
+        </AdminSection>
+      )}
 
-        <Card>
-          <Subtitle>Comptes de connexion ({value?.accounts.length ?? 0})</Subtitle>
+      {tab === AdminUserTab.accounts && (
+        <AdminSection>
           <AdminListUserAccounts accounts={value?.accounts ?? []} />
-        </Card>
+        </AdminSection>
+      )}
 
-        <Card>
-          <Stack
-            direction="row"
-            sx={{
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              gap: 2,
-              flexWrap: 'wrap',
-              mb: 2,
-            }}
-          >
-            <Subtitle sx={{ mb: 0 }}>Sessions ({value?.sessions.length ?? 0})</Subtitle>
-            {(value?.sessions.length ?? 0) > 0 && !isCurrentUser && (
+      {tab === AdminUserTab.sessions && (
+        <AdminSection>
+          {(value?.sessions.length ?? 0) > 0 && !isCurrentUser && (
+            <SessionsHeader>
               <ConfirmButton
                 confirmTitle="Révoquer toutes les sessions"
                 confirmText="L'utilisateur devra se reconnecter sur tous ses appareils."
@@ -413,25 +435,27 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
               >
                 Révoquer toutes
               </ConfirmButton>
-            )}
-          </Stack>
+            </SessionsHeader>
+          )}
           <AdminListUserSessions
             sessions={value?.sessions ?? []}
             disabled={isCurrentUser || loading || revokingSession || revokingAllSessions}
             onRevoke={sessionId => void revokeUserSession(sessionId)}
           />
-        </Card>
+        </AdminSection>
+      )}
 
-        <Card>
-          <Subtitle>Evènements</Subtitle>
+      {tab === AdminUserTab.events && (
+        <AdminSection>
           <AdminListEvents userId={userId} currentPage={eventPage} changeCurrentPage={changeEventPage} />
-        </Card>
+        </AdminSection>
+      )}
 
-        <Card>
-          <Subtitle>Wishlists</Subtitle>
+      {tab === AdminUserTab.wishlists && (
+        <AdminSection>
           <AdminListWishlistsForUser userId={userId} />
-        </Card>
-      </CardStack>
+        </AdminSection>
+      )}
     </Loader>
   );
 };

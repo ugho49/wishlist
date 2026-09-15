@@ -465,6 +465,58 @@ describe('UserAdminResolver (GraphQL)', () => {
   });
 
   // ---------------------------------------------------------------------------
+  // adminUsersStats
+  // ---------------------------------------------------------------------------
+  describe('Query adminUsersStats', () => {
+    const query = /* GraphQL */ `
+      query AdminUsersStats {
+        adminUsersStats {
+          __typename
+          ... on AdminUsersStats {
+            totalCount
+            enabledCount
+            adminCount
+          }
+          ... on ForbiddenRejection {
+            message
+          }
+        }
+      }
+    `;
+
+    it('should reject a BASE_USER with ForbiddenRejection', async () => {
+      const baseRequest = await getRequest({ signedAs: 'BASE_USER' });
+      const res = await baseRequest.post(GRAPHQL_PATH).send({ query }).expect(200);
+      expect(res.body.data.adminUsersStats).toMatchObject({ __typename: 'ForbiddenRejection' });
+    });
+
+    describe('when user is authenticated as ADMIN_USER', () => {
+      beforeEach(async () => {
+        request = await getRequest({ signedAs: 'ADMIN_USER' });
+      });
+
+      it('should return user counts', async () => {
+        await fixtures.insertUser({ email: 'stats-user@test.fr', firstname: 'Stats', lastname: 'User' });
+        await fixtures.insertUser({
+          email: 'stats-admin@test.fr',
+          firstname: 'Stats',
+          lastname: 'Admin',
+          authorities: [Authorities.ROLE_ADMIN],
+        });
+
+        const res = await request.post(GRAPHQL_PATH).send({ query }).expect(200);
+
+        expect(res.body.data.adminUsersStats.__typename).toBe('AdminUsersStats');
+        expect(res.body.data.adminUsersStats.totalCount).toBeGreaterThanOrEqual(3);
+        expect(res.body.data.adminUsersStats.adminCount).toBeGreaterThanOrEqual(2);
+        expect(res.body.data.adminUsersStats.enabledCount).toBeLessThanOrEqual(
+          res.body.data.adminUsersStats.totalCount,
+        );
+      });
+    });
+  });
+
+  // ---------------------------------------------------------------------------
   // adminUpdateUserProfile
   // ---------------------------------------------------------------------------
   describe('Mutation adminUpdateUserProfile', () => {

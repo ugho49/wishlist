@@ -21,6 +21,7 @@ import { EmailChangeVerificationCreatedHandler } from './event/email-change-veri
 import { EmailChangedhandler } from './event/email-changed.handler';
 import { PasswordVerificationCreatedHandler } from './event/password-verification-created.handler';
 import { UserCreatedHandler } from './event/user-created.handler';
+import { GetAdminUsersStatsUseCase } from './query/get-admin-users-stats.use-case';
 import { GetClosestFriendsUseCase } from './query/get-closest-friends.use-case';
 import { GetPendingEmailChangeUseCase } from './query/get-pending-email-change.use-case';
 import { GetUserAccountsByIdsUseCase } from './query/get-user-accounts-by-ids.use-case';
@@ -58,6 +59,7 @@ export const handlers = [
   GetUsersByIdsUseCase,
   GetUsersByCriteriaUseCase,
   GetUsersPaginatedUseCase,
+  GetAdminUsersStatsUseCase,
   GetClosestFriendsUseCase,
   GetUserAccountsByUserIdsUseCase,
   GetUserAccountsByIdsUseCase,

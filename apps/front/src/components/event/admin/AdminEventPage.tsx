@@ -1,14 +1,17 @@
 import type { AttendeeId, EventId, SecretSantaUserId } from '@wishlist/common';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
 import DeleteIcon from '@mui/icons-material/Delete';
+import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
+import GroupsIcon from '@mui/icons-material/Groups';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import SaveIcon from '@mui/icons-material/Save';
-import WorkspacePremiumOutlinedIcon from '@mui/icons-material/WorkspacePremiumOutlined';
-import { Alert, Box, Button, List, ListItem, ListItemIcon, ListItemText, Stack, TextField } from '@mui/material';
+import { Alert, Box, Button, Stack, Tab, TextField } from '@mui/material';
 import { styled, useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useQueryClient } from '@tanstack/react-query';
+import { useNavigate, useSearch } from '@tanstack/react-router';
 import { ConfirmButton } from '@wishlist/front-components/common/ConfirmButton';
 import { WishlistDatePicker } from '@wishlist/front-components/common/DatePicker';
 import { EmojiSelector } from '@wishlist/front-components/common/EmojiSelector';
@@ -36,17 +39,34 @@ import {
 } from '../../../gql';
 import { useToast } from '../../../hooks';
 import { useSecretSanta } from '../../../hooks/domain/useSecretSanta';
-import { Card } from '../../common/Card';
+import { AdminEmptyState } from '../../admin/AdminEmptyState';
+import { AdminPageHeader } from '../../admin/AdminPageHeader';
+import { AdminSection } from '../../admin/AdminSection';
+import { AdminTabs } from '../../admin/AdminTabs';
 import { Loader } from '../../common/Loader';
-import { Subtitle } from '../../common/Subtitle';
-import { Title } from '../../common/Title';
 import { AdminSecretSanta } from '../../secret-santa/admin/AdminSecretSanta';
 import { AdminListWishlistsForEvent } from '../../wishlist/admin/AdminListWishlistsForEvent';
+import { EventIcon } from '../EventIcon';
 import { AdminListAttendees } from './AdminListAttendees';
 
-const CardStack = styled(Stack)(() => ({
-  gap: 32,
-}));
+export enum AdminEventTab {
+  info = 'info',
+  secretSanta = 'secret-santa',
+  attendees = 'attendees',
+  wishlists = 'wishlists',
+}
+
+const eventTabs = [
+  { value: AdminEventTab.info, label: 'Infos', icon: <InfoOutlinedIcon /> },
+  { value: AdminEventTab.secretSanta, label: 'Secret Santa', icon: <CardGiftcardIcon /> },
+  { value: AdminEventTab.attendees, label: 'Participants', icon: <GroupsIcon /> },
+  { value: AdminEventTab.wishlists, label: 'Listes', icon: <FormatListBulletedIcon /> },
+];
+
+const FormActions = styled(Stack)({
+  flexDirection: 'row',
+  justifyContent: 'flex-start',
+});
 
 const schema = z.object({
   icon: z.string().optional(),
@@ -69,7 +89,9 @@ export const AdminEventPage = ({ eventId }: AdminEventPageProps) => {
   const queryClient = useQueryClient();
   const { addToast } = useToast();
   const theme = useTheme();
-  const smallScreen = useMediaQuery(theme.breakpoints.down('md'));
+  const smallScreen = useMediaQuery(theme.breakpoints.down('sm'));
+  const { tab } = useSearch({ from: '/_authenticated/_with-layout/admin/events/$eventId' });
+  const navigate = useNavigate({ from: '/admin/events/$eventId' });
 
   const {
     register,
@@ -256,70 +278,68 @@ export const AdminEventPage = ({ eventId }: AdminEventPageProps) => {
     loadingUpdateEvent ||
     loadingDeleteEvent;
 
+  const eventTitle = event?.title ?? 'Évènement';
+  const eventDateLabel = event?.eventDate
+    ? DateTime.fromISO(event.eventDate).toLocaleString(DateTime.DATE_FULL)
+    : undefined;
+  const createdAtLabel = event?.createdAt
+    ? DateTime.fromISO(event.createdAt).toLocaleString(DateTime.DATETIME_MED)
+    : undefined;
+
   return (
-    <Box>
-      <Title>Editer l'évènement</Title>
+    <Loader loading={loadingEvent}>
+      <AdminPageHeader
+        title={eventTitle}
+        breadcrumbs={[
+          { label: 'Admin', to: '/admin' },
+          { label: 'Évènements', to: '/admin/events' },
+          { label: eventTitle },
+        ]}
+        avatar={<EventIcon icon={event?.icon ?? undefined} size="medium" />}
+        meta={[
+          eventDateLabel,
+          creatorName ? `créé par ${creatorName}` : null,
+          createdAtLabel ? `le ${createdAtLabel}` : null,
+        ]
+          .filter(Boolean)
+          .join(' · ')}
+        actions={
+          <ConfirmButton
+            confirmTitle="Supprimer l'évènement"
+            confirmText="Etes vous sûr de supprimer l'évènement ? Cela supprimera toutes les listes associés !"
+            variant="outlined"
+            color="error"
+            size="small"
+            startIcon={<DeleteIcon />}
+            onClick={() => deleteEvent()}
+          >
+            Supprimer
+          </ConfirmButton>
+        }
+      />
 
-      <CardStack>
-        {queryRejection && <Alert severity="error">{rejectionMessage(queryRejection)}</Alert>}
-        <Card>
-          <Loader loading={loadingEvent}>
-            <Stack
-              direction="row"
-              sx={{
-                flexWrap: 'wrap',
-                gap: smallScreen ? 0 : 3,
-              }}
-            >
-              <List dense sx={{ flexGrow: 1 }}>
-                <ListItem>
-                  <ListItemIcon>
-                    <WorkspacePremiumOutlinedIcon />
-                  </ListItemIcon>
-                  <ListItemText primary="Créé par" secondary={creatorName} />
-                </ListItem>
-              </List>
+      {queryRejection && <Alert severity="error">{rejectionMessage(queryRejection)}</Alert>}
 
-              <List dense sx={{ flexGrow: 1 }}>
-                <ListItem>
-                  <ListItemIcon>
-                    <AccessTimeIcon />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary="Créé le"
-                    secondary={DateTime.fromISO(event?.createdAt || '').toLocaleString(
-                      DateTime.DATETIME_MED_WITH_SECONDS,
-                    )}
-                  />
-                </ListItem>
-              </List>
+      <AdminTabs
+        value={tab}
+        onChange={(_, newValue) => void navigate({ search: { tab: newValue as AdminEventTab } })}
+        variant="scrollable"
+        scrollButtons="auto"
+        allowScrollButtonsMobile
+      >
+        {eventTabs.map(tabItem => (
+          <Tab
+            key={tabItem.value}
+            value={tabItem.value}
+            label={smallScreen ? undefined : tabItem.label}
+            iconPosition="start"
+            icon={tabItem.icon}
+          />
+        ))}
+      </AdminTabs>
 
-              <Stack
-                sx={{
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexGrow: 1,
-                }}
-              >
-                <ConfirmButton
-                  confirmTitle="Supprimer l'évènement"
-                  confirmText="Etes vous sûr de supprimer l'évènement ? Cela supprimera toutes les listes associés !"
-                  variant="outlined"
-                  color="error"
-                  size="small"
-                  startIcon={<DeleteIcon />}
-                  onClick={() => deleteEvent()}
-                >
-                  Supprimer l'évènement
-                </ConfirmButton>
-              </Stack>
-            </Stack>
-          </Loader>
-        </Card>
-
-        <Card>
-          <Subtitle>Modifier les informations</Subtitle>
-
+      {tab === AdminEventTab.info && (
+        <AdminSection>
           <Stack
             component="form"
             onSubmit={handleSubmit(onSubmit)}
@@ -397,14 +417,8 @@ export const AdminEventPage = ({ eventId }: AdminEventPageProps) => {
               />
             </Stack>
 
-            <Stack
-              direction="row"
-              sx={{
-                justifyContent: 'center',
-              }}
-            >
+            <FormActions>
               <Button
-                sx={{ marginTop: '8px' }}
                 type="submit"
                 variant="contained"
                 size="small"
@@ -415,14 +429,15 @@ export const AdminEventPage = ({ eventId }: AdminEventPageProps) => {
               >
                 Mettre à jour
               </Button>
-            </Stack>
+            </FormActions>
           </Stack>
-        </Card>
+        </AdminSection>
+      )}
 
-        <Card>
+      {tab === AdminEventTab.secretSanta && (
+        <AdminSection>
           <Loader loading={loadingSecretSanta}>
-            <Subtitle>Secret Santa</Subtitle>
-            {secretSanta && (
+            {secretSanta ? (
               <AdminSecretSanta
                 secretSanta={secretSanta}
                 loading={loadingEdit}
@@ -432,29 +447,31 @@ export const AdminEventPage = ({ eventId }: AdminEventPageProps) => {
                 deleteSecretSanta={() => deleteSecretSanta()}
                 removeSecretSantaUser={secretSantaUserId => removeSecretSantaUser(secretSantaUserId)}
               />
+            ) : (
+              <AdminEmptyState
+                title="Pas de secret santa"
+                description="Il n'y a pas de secret santa pour cet évènement."
+              />
             )}
-            {!secretSanta && <div>Il n'y a pas de secret santa pour cet évènement</div>}
           </Loader>
-        </Card>
+        </AdminSection>
+      )}
 
-        <Card>
-          <Loader loading={loadingEvent}>
-            <Subtitle>Participants ({event?.attendees.length})</Subtitle>
-            <AdminListAttendees
-              attendees={event?.attendees ?? []}
-              loading={loadingEdit}
-              deleteAttendee={attendeeId => deleteAttendee(attendeeId)}
-            />
-          </Loader>
-        </Card>
+      {tab === AdminEventTab.attendees && (
+        <AdminSection>
+          <AdminListAttendees
+            attendees={event?.attendees ?? []}
+            loading={loadingEdit}
+            deleteAttendee={attendeeId => deleteAttendee(attendeeId)}
+          />
+        </AdminSection>
+      )}
 
-        <Card>
-          <Loader loading={loadingEvent}>
-            <Subtitle>Wishlists ({event?.wishlists.length})</Subtitle>
-            <AdminListWishlistsForEvent wishlists={event?.wishlists ?? []} />
-          </Loader>
-        </Card>
-      </CardStack>
-    </Box>
+      {tab === AdminEventTab.wishlists && (
+        <AdminSection>
+          <AdminListWishlistsForEvent wishlists={event?.wishlists ?? []} />
+        </AdminSection>
+      )}
+    </Loader>
   );
 };

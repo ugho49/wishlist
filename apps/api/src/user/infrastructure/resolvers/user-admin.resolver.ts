@@ -19,12 +19,14 @@ import {
   type AdminRevokeUserSessionResult,
   type AdminUpdateUserProfileInput,
   type AdminUpdateUserProfileResult,
+  type AdminUsersStatsResult,
 } from '../../../gql/generated-types';
 import { AdminRevokeAllUserSessionsUseCase } from '../../application/command/admin-revoke-all-user-sessions.use-case';
 import { AdminRevokeUserSessionUseCase } from '../../application/command/admin-revoke-user-session.use-case';
 import { DeleteUserUseCase } from '../../application/command/delete-user.use-case';
 import { RemoveUserPictureUseCase } from '../../application/command/remove-user-picture.use-case';
 import { UpdateUserFullUseCase } from '../../application/command/update-user-full.use-case';
+import { GetAdminUsersStatsUseCase } from '../../application/query/get-admin-users-stats.use-case';
 import { GetUsersPaginatedUseCase } from '../../application/query/get-users-paginated.use-case';
 import { userMapper } from '../user.mapper';
 import { UserIdSchema, UserSessionIdSchema } from '../user.schema';
@@ -35,6 +37,7 @@ import { AdminGetAllUsersPaginationFiltersSchema, AdminUpdateUserProfileInputSch
 export class UserAdminResolver {
   constructor(
     private readonly getUsersPaginatedUseCase: GetUsersPaginatedUseCase,
+    private readonly getAdminUsersStatsUseCase: GetAdminUsersStatsUseCase,
     private readonly updateUserFullUseCase: UpdateUserFullUseCase,
     private readonly deleteUserUseCase: DeleteUserUseCase,
     private readonly removeUserPictureUseCase: RemoveUserPictureUseCase,
@@ -84,6 +87,17 @@ export class UserAdminResolver {
         pageNumber: pagedResponse.pagination.page_number,
         pageSize: pagedResponse.pagination.pages_size,
       },
+    };
+  }
+
+  @Query()
+  async adminUsersStats(): Promise<AdminUsersStatsResult> {
+    const stats = await this.getAdminUsersStatsUseCase.execute();
+    return {
+      __typename: 'AdminUsersStats',
+      totalCount: stats.totalCount,
+      enabledCount: stats.enabledCount,
+      adminCount: stats.adminCount,
     };
   }
 

@@ -32,6 +32,12 @@ type GetEventsPagedResponse {
   pagination: Pagination!
 }
 
+type AdminEventsStats {
+  totalCount: Int!
+  upcomingCount: Int!
+  pastCount: Int!
+}
+
 input EventPaginationFilters {
   page: Int
   limit: Int
@@ -149,6 +155,8 @@ union AdminGetEventsResult =
   | ForbiddenRejection
   | InternalErrorRejection
 
+union AdminEventsStatsResult = AdminEventsStats | UnauthorizedRejection | ForbiddenRejection | InternalErrorRejection
+
 union AdminUpdateEventResult =
   | VoidOutput
   | ValidationRejection
@@ -178,6 +186,7 @@ extend type Query {
   events(filters: EventPaginationFilters!): GetMyEventsResult!
   adminEvent(id: EventId!): AdminGetEventByIdResult!
   adminEvents(filters: AdminEventPaginationFilters!): AdminGetEventsResult!
+  adminEventsStats: AdminEventsStatsResult!
 }
 
 extend type Mutation {

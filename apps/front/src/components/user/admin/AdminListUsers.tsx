@@ -2,61 +2,87 @@ import type { GridColDef } from '@mui/x-data-grid';
 import type { FormEvent } from 'react';
 import type { AdminUsersListQuery } from '../../../gql';
 
-import { Alert, Avatar, Box, Button, Stack, styled, TextField } from '@mui/material';
-import { DataGrid } from '@mui/x-data-grid';
+import { Alert, Avatar, Button, Chip, styled, TextField } from '@mui/material';
 import { useNavigate, useSearch } from '@tanstack/react-router';
-import { Card } from '@wishlist/front-components/common/Card';
-import { Title } from '@wishlist/front-components/common/Title';
 import { DateTime } from 'luxon';
 import { useEffect, useState } from 'react';
 
-import { isRejection, rejectionMessage, useAdminUsersListQuery } from '../../../gql';
-import { Status } from '../../common/Status';
+import {
+  isRejection,
+  rejectionMessage,
+  UserAuthorities,
+  useAdminUsersListQuery,
+  useAdminUsersStatsQuery,
+} from '../../../gql';
+import { AdminDataGrid } from '../../admin/AdminDataGrid';
+import { AdminPageHeader } from '../../admin/AdminPageHeader';
+import { AdminSection } from '../../admin/AdminSection';
+import { AdminStats } from '../../admin/AdminStats';
 
 type AdminUserRow = Extract<AdminUsersListQuery['adminUsers'], { __typename: 'AdminGetAllUsers' }>['data'][number];
 
+const SearchForm = styled('form')(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  gap: theme.spacing(2),
+  marginBottom: theme.spacing(2),
+}));
+
 const SearchButton = styled(Button)(() => ({
   padding: '8px 10px',
+  flexShrink: 0,
 }));
+
+const UserAvatar = styled(Avatar)({
+  width: 28,
+  height: 28,
+});
 
 const columns: GridColDef<AdminUserRow>[] = [
   {
     field: 'isEnabled',
-    headerName: '',
-    width: 20,
-    sortable: false,
-    filterable: false,
-    display: 'flex',
-    renderCell: ({ row: user }) => <Status color={user.isEnabled ? 'success' : 'error'} />,
-  },
-  {
-    field: 'pictureUrl',
-    headerName: '',
-    width: 20,
+    headerName: 'Statut',
+    width: 120,
     sortable: false,
     filterable: false,
     display: 'flex',
     renderCell: ({ row: user }) => (
-      <Avatar src={user.pictureUrl ?? undefined} sx={{ width: '30px', height: '30px' }}>
-        {user.firstName.substring(0, 1).toUpperCase()}
-      </Avatar>
+      <Chip
+        size="small"
+        color={user.isEnabled ? 'success' : 'default'}
+        label={user.isEnabled ? 'Actif' : 'Désactivé'}
+      />
     ),
   },
-  { field: 'firstName', headerName: 'First name', width: 170 },
-  { field: 'lastName', headerName: 'Last name', width: 170 },
+  {
+    field: 'pictureUrl',
+    headerName: '',
+    width: 44,
+    sortable: false,
+    filterable: false,
+    display: 'flex',
+    renderCell: ({ row: user }) => (
+      <UserAvatar src={user.pictureUrl ?? undefined}>{user.firstName.substring(0, 1).toUpperCase()}</UserAvatar>
+    ),
+  },
+  { field: 'firstName', headerName: 'Prénom', width: 170 },
+  { field: 'lastName', headerName: 'Nom', width: 170 },
   { field: 'email', headerName: 'Email', flex: 1, minWidth: 250 },
   {
     field: 'admin',
-    headerName: 'Is Admin',
-    width: 100,
+    headerName: 'Admin',
+    width: 90,
     type: 'boolean',
-    valueGetter: (_, row) => row.authorities.some(a => a === 'ROLE_ADMIN' || a === 'ROLE_SUPERADMIN'),
+    valueGetter: (_, row) =>
+      row.authorities.some(a => a === UserAuthorities.RoleAdmin || a === UserAuthorities.RoleSuperadmin),
   },
   {
     field: 'createdAt',
-    headerName: 'Created At',
+    headerName: 'Créé le',
     type: 'dateTime',
-    width: 200,
+    width: 180,
     valueGetter: (_, row) => new Date(row.createdAt),
     renderCell: ({ value }) => DateTime.fromJSDate(value).toLocaleString(DateTime.DATETIME_MED),
   },
@@ -64,7 +90,7 @@ const columns: GridColDef<AdminUserRow>[] = [
 
 export const AdminListUsers = () => {
   const [totalElements, setTotalElements] = useState(0);
-  const [pageSize, setPageSize] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
   const { page: currentPage, search } = useSearch({ from: '/_authenticated/_with-layout/admin/users/' });
   const [inputSearch, setInputSearch] = useState(search);
   const navigate = useNavigate();
@@ -73,8 +99,10 @@ export const AdminListUsers = () => {
     { input: { page: currentPage, criteria: search } },
     { select: d => d.adminUsers },
   );
+  const { data: statsData } = useAdminUsersStatsQuery({}, { select: d => d.adminUsersStats });
   const value = data?.__typename === 'AdminGetAllUsers' ? data : undefined;
   const queryRejection = data && isRejection(data) ? data : undefined;
+  const stats = statsData?.__typename === 'AdminUsersStats' ? statsData : undefined;
 
   useEffect(() => {
     if (value) {
@@ -92,22 +120,24 @@ export const AdminListUsers = () => {
   };
 
   return (
-    <Box>
-      <Title>Liste des utilisateurs</Title>
+    <>
+      <AdminPageHeader
+        title="Utilisateurs"
+        breadcrumbs={[{ label: 'Admin', to: '/admin' }, { label: 'Utilisateurs' }]}
+      />
 
-      <Card>
-        <Stack
-          direction="row"
-          component="form"
-          noValidate
-          onSubmit={applySearch}
-          sx={{
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            gap: 2,
-            mb: 5,
-          }}
-        >
+      {stats && (
+        <AdminStats
+          items={[
+            { label: 'Utilisateurs', value: stats.totalCount },
+            { label: 'Actifs', value: stats.enabledCount },
+            { label: 'Admins', value: stats.adminCount },
+          ]}
+        />
+      )}
+
+      <AdminSection>
+        <SearchForm noValidate onSubmit={applySearch}>
           <TextField
             size="small"
             label="Rechercher un utilisateur"
@@ -119,21 +149,18 @@ export const AdminListUsers = () => {
           <SearchButton variant="outlined" type="submit" size="small">
             Rechercher
           </SearchButton>
-        </Stack>
+        </SearchForm>
 
         {queryRejection && <Alert severity="error">{rejectionMessage(queryRejection)}</Alert>}
 
         {!queryRejection && (
-          <DataGrid
+          <AdminDataGrid
+            clickableRows
             isRowSelectable={() => true}
-            disableMultipleRowSelection={true}
-            disableColumnSelector={true}
-            isCellEditable={() => false}
             localeText={{
               noRowsLabel: 'Aucun utilisateur',
             }}
             onRowClick={({ row }) => navigate({ to: '/admin/users/$userId', params: { userId: row.id } })}
-            density="standard"
             rows={value?.data || []}
             loading={loading}
             columns={columns}
@@ -153,7 +180,7 @@ export const AdminListUsers = () => {
             hideFooter={totalElements <= pageSize}
           />
         )}
-      </Card>
-    </Box>
+      </AdminSection>
+    </>
   );
 };

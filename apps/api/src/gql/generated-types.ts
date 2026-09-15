@@ -62,6 +62,15 @@ export type AdminEventPaginationFilters = {
   userId?: InputMaybe<Scalars['UserId']['input']>;
 };
 
+export type AdminEventsStats = {
+  __typename: 'AdminEventsStats';
+  pastCount: Scalars['Int']['output'];
+  totalCount: Scalars['Int']['output'];
+  upcomingCount: Scalars['Int']['output'];
+};
+
+export type AdminEventsStatsResult = AdminEventsStats | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection;
+
 export type AdminGetAllUsers = {
   __typename: 'AdminGetAllUsers';
   data: Array<UserFull>;
@@ -108,6 +117,15 @@ export type AdminUpdateUserProfileInput = {
 };
 
 export type AdminUpdateUserProfileResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+
+export type AdminUsersStats = {
+  __typename: 'AdminUsersStats';
+  adminCount: Scalars['Int']['output'];
+  enabledCount: Scalars['Int']['output'];
+  totalCount: Scalars['Int']['output'];
+};
+
+export type AdminUsersStatsResult = AdminUsersStats | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection;
 
 export type AdminWishlistPaginationFilters = {
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -719,8 +737,10 @@ export type Query = {
   __typename: 'Query';
   adminEvent: AdminGetEventByIdResult;
   adminEvents: AdminGetEventsResult;
+  adminEventsStats: AdminEventsStatsResult;
   adminUser: AdminGetUserByIdResult;
   adminUsers: AdminGetAllUsersResult;
+  adminUsersStats: AdminUsersStatsResult;
   adminWishlists: AdminGetWishlistsResult;
   closestFriends: ClosestFriendsResult;
   currentUser: GetCurrentUserResult;

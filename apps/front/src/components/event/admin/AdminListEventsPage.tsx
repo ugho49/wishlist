@@ -1,22 +1,38 @@
-import { Box } from '@mui/material';
 import { useNavigate, useSearch } from '@tanstack/react-router';
-import { Title } from '@wishlist/front-components/common/Title';
 
+import { useAdminEventsStatsQuery } from '../../../gql';
+import { AdminPageHeader } from '../../admin/AdminPageHeader';
+import { AdminSection } from '../../admin/AdminSection';
+import { AdminStats } from '../../admin/AdminStats';
 import { AdminListEvents } from './AdminListEvents';
 
 export const AdminListEventsPage = () => {
   const { page: currentPage } = useSearch({ from: '/_authenticated/_with-layout/admin/events/' });
   const navigate = useNavigate({ from: '/admin/events/' });
+  const { data: statsData } = useAdminEventsStatsQuery({}, { select: d => d.adminEventsStats });
+  const stats = statsData?.__typename === 'AdminEventsStats' ? statsData : undefined;
 
   const changeCurrentPage = (page: number) => {
     void navigate({ search: prev => ({ ...prev, page }) });
   };
 
   return (
-    <Box>
-      <Title>Liste des évènements</Title>
+    <>
+      <AdminPageHeader title="Évènements" breadcrumbs={[{ label: 'Admin', to: '/admin' }, { label: 'Évènements' }]} />
 
-      <AdminListEvents currentPage={currentPage} changeCurrentPage={changeCurrentPage} />
-    </Box>
+      {stats && (
+        <AdminStats
+          items={[
+            { label: 'Évènements', value: stats.totalCount },
+            { label: 'À venir', value: stats.upcomingCount },
+            { label: 'Passés', value: stats.pastCount },
+          ]}
+        />
+      )}
+
+      <AdminSection>
+        <AdminListEvents currentPage={currentPage} changeCurrentPage={changeCurrentPage} />
+      </AdminSection>
+    </>
   );
 };

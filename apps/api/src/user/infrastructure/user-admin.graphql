@@ -24,6 +24,12 @@ type AdminGetAllUsers {
   pagination: Pagination!
 }
 
+type AdminUsersStats {
+  totalCount: Int!
+  enabledCount: Int!
+  adminCount: Int!
+}
+
 input AdminGetAllUsersPaginationFilters {
   page: Int
   limit: Int
@@ -52,6 +58,8 @@ union AdminGetAllUsersResult =
   | UnauthorizedRejection
   | ForbiddenRejection
   | InternalErrorRejection
+
+union AdminUsersStatsResult = AdminUsersStats | UnauthorizedRejection | ForbiddenRejection | InternalErrorRejection
 
 union AdminUpdateUserProfileResult =
   | VoidOutput
@@ -93,6 +101,7 @@ union AdminRevokeAllUserSessionsResult =
 extend type Query {
   adminUser(userId: UserId!): AdminGetUserByIdResult!
   adminUsers(input: AdminGetAllUsersPaginationFilters): AdminGetAllUsersResult!
+  adminUsersStats: AdminUsersStatsResult!
 }
 
 extend type Mutation {

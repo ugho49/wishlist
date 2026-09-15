@@ -75,6 +75,17 @@ query AdminEventGetEvent($id: EventId!) {
   }
 }
 
+query AdminEventsStats {
+  adminEventsStats {
+    __typename
+    ... on AdminEventsStats {
+      totalCount
+      upcomingCount
+      pastCount
+    }
+  }
+}
+
 mutation AdminUpdateEvent($id: EventId!, $input: UpdateEventInput!) {
   adminUpdateEvent(id: $id, input: $input) {
     __typename

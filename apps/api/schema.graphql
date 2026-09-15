@@ -45,6 +45,14 @@ input AdminEventPaginationFilters {
   userId: UserId
 }
 
+type AdminEventsStats {
+  pastCount: Int!
+  totalCount: Int!
+  upcomingCount: Int!
+}
+
+union AdminEventsStatsResult = AdminEventsStats | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection
+
 type AdminGetAllUsers {
   data: [UserFull!]!
   pagination: Pagination!
@@ -89,6 +97,14 @@ input AdminUpdateUserProfileInput {
 }
 
 union AdminUpdateUserProfileResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
+type AdminUsersStats {
+  adminCount: Int!
+  enabledCount: Int!
+  totalCount: Int!
+}
+
+union AdminUsersStatsResult = AdminUsersStats | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection
 
 input AdminWishlistPaginationFilters {
   limit: Int
@@ -413,8 +429,10 @@ type PendingEmailChange {
 type Query {
   adminEvent(id: EventId!): AdminGetEventByIdResult!
   adminEvents(filters: AdminEventPaginationFilters!): AdminGetEventsResult!
+  adminEventsStats: AdminEventsStatsResult!
   adminUser(userId: UserId!): AdminGetUserByIdResult!
   adminUsers(input: AdminGetAllUsersPaginationFilters): AdminGetAllUsersResult!
+  adminUsersStats: AdminUsersStatsResult!
   adminWishlists(filters: AdminWishlistPaginationFilters!): AdminGetWishlistsResult!
   closestFriends(limit: Int): ClosestFriendsResult!
   currentUser: GetCurrentUserResult!

@@ -107,6 +107,17 @@ mutation AdminRevokeUserSession($userId: UserId!, $sessionId: UserSessionId!) {
   }
 }
 
+query AdminUsersStats {
+  adminUsersStats {
+    __typename
+    ... on AdminUsersStats {
+      totalCount
+      enabledCount
+      adminCount
+    }
+  }
+}
+
 mutation AdminRevokeAllUserSessions($userId: UserId!) {
   adminRevokeAllUserSessions(userId: $userId) {
     __typename

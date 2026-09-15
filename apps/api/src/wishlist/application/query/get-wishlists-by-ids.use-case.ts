@@ -16,6 +16,10 @@ export class GetWishlistsByIdsUseCase {
   constructor(@Inject(REPOSITORIES.WISHLIST) private readonly wishlistRepository: WishlistRepository) {}
 
   async execute(input: GetWishlistsByIdsInput): Promise<Wishlist[]> {
+    if (input.currentUser.isAdmin) {
+      return this.wishlistRepository.findByIds(input.wishlistIds);
+    }
+
     const wishlistIds = (
       await Promise.all(
         input.wishlistIds.map(wishlistId =>

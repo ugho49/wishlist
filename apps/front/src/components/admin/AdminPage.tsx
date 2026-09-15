@@ -1,93 +1,69 @@
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import GroupsIcon from '@mui/icons-material/Groups';
 import ManageHistoryIcon from '@mui/icons-material/ManageHistory';
-import { Box, Grid, styled, Typography } from '@mui/material';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import { List, ListItemButton, ListItemIcon, ListItemText, styled } from '@mui/material';
 import { useNavigate } from '@tanstack/react-router';
 
-import { Card } from '../common/Card';
-import { Title } from '../common/Title';
+import { environment } from '../../environment';
+import { AdminPageHeader } from './AdminPageHeader';
+import { AdminSection } from './AdminSection';
 
-const AdminCard = styled(Card)(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  justifyContent: 'center',
-  alignItems: 'center',
-  height: '100%',
-  gap: theme.spacing(2),
+const DestinationList = styled(List)(() => ({
+  padding: 0,
 }));
 
-const IconWrapper = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  width: 80,
-  height: 80,
-  borderRadius: '50%',
-  backgroundColor: theme.palette.grey[100],
-  color: theme.palette.primary.main,
-  '& svg': {
-    fontSize: 40,
+const DestinationButton = styled(ListItemButton)(({ theme }) => ({
+  borderRadius: theme.shape.borderRadius,
+  paddingTop: theme.spacing(1.5),
+  paddingBottom: theme.spacing(1.5),
+  '& + &': {
+    marginTop: theme.spacing(0.5),
   },
+}));
+
+const DestinationIcon = styled(ListItemIcon)(({ theme }) => ({
+  minWidth: 40,
+  color: theme.palette.primary.main,
+}));
+
+const ExternalHint = styled('span')(({ theme }) => ({
+  display: 'inline-flex',
+  color: theme.palette.text.secondary,
 }));
 
 export const AdminPage = () => {
   const navigate = useNavigate();
 
-  const adminSections = [
-    {
-      id: 'users',
-      title: 'Utilisateurs',
-      description: 'Gérer les utilisateurs de la plateforme',
-      icon: <GroupsIcon />,
-      onClick: () => navigate({ to: '/admin/users' }),
-    },
-    {
-      id: 'events',
-      title: 'Évènements',
-      description: 'Gérer les évènements créés',
-      icon: <CalendarMonthIcon />,
-      onClick: () => navigate({ to: '/admin/events' }),
-    },
-    {
-      id: 'queues',
-      title: 'Gestion des queues',
-      description: 'Accéder au dashboard de gestion des queues bullMQ',
-      icon: <ManageHistoryIcon />,
-      onClick: () => window.open('http://wishlist-durabull.tailf24158.ts.net:3000', '_blank'),
-    },
-  ];
-
   return (
-    <Box>
-      <Title>Administration</Title>
+    <>
+      <AdminPageHeader title="Administration" breadcrumbs={[{ label: 'Admin' }]} />
 
-      <Grid container spacing={3}>
-        {adminSections.map(section => (
-          <Grid key={section.id} size={{ xs: 12, sm: 6, lg: 4 }}>
-            <AdminCard hoverable onClick={() => section.onClick()}>
-              <IconWrapper>{section.icon}</IconWrapper>
-              <Typography
-                variant="h6"
-                align="center"
-                sx={{
-                  fontWeight: 600,
-                }}
-              >
-                {section.title}
-              </Typography>
-              <Typography
-                variant="body2"
-                align="center"
-                sx={{
-                  color: 'text.secondary',
-                }}
-              >
-                {section.description}
-              </Typography>
-            </AdminCard>
-          </Grid>
-        ))}
-      </Grid>
-    </Box>
+      <AdminSection>
+        <DestinationList>
+          <DestinationButton onClick={() => navigate({ to: '/admin/users' })}>
+            <DestinationIcon>
+              <GroupsIcon />
+            </DestinationIcon>
+            <ListItemText primary="Utilisateurs" secondary="Gérer les comptes, sessions et listes" />
+          </DestinationButton>
+          <DestinationButton onClick={() => navigate({ to: '/admin/events' })}>
+            <DestinationIcon>
+              <CalendarMonthIcon />
+            </DestinationIcon>
+            <ListItemText primary="Évènements" secondary="Gérer les évènements, participants et secret santa" />
+          </DestinationButton>
+          <DestinationButton onClick={() => window.open(environment.bullMqDashboardUrl, '_blank', 'noopener')}>
+            <DestinationIcon>
+              <ManageHistoryIcon />
+            </DestinationIcon>
+            <ListItemText primary="Queues" secondary="Dashboard BullMQ" />
+            <ExternalHint>
+              <OpenInNewIcon fontSize="small" />
+            </ExternalHint>
+          </DestinationButton>
+        </DestinationList>
+      </AdminSection>
+    </>
   );
 };

@@ -13,6 +13,7 @@ import {
   type AdminDeleteEventAttendeeResult,
   type AdminDeleteEventResult,
   type AdminEventPaginationFilters,
+  type AdminEventsStatsResult,
   type AdminGetEventByIdResult,
   type AdminGetEventsResult,
   type AdminUpdateEventResult,
@@ -21,6 +22,7 @@ import {
 import { DeleteAttendeeUseCase } from '../../application/command/delete-attendee.use-case';
 import { DeleteEventUseCase } from '../../application/command/delete-event.use-case';
 import { UpdateEventUseCase } from '../../application/command/update-event.use-case';
+import { GetAdminEventsStatsUseCase } from '../../application/query/get-admin-events-stats.use-case';
 import { GetEventsUseCase } from '../../application/query/get-events.use-case';
 import { GetEventsForUserUseCase } from '../../application/query/get-events-for-user.use-case';
 import { eventMapper } from '../event.mapper';
@@ -36,6 +38,7 @@ import {
 export class EventAdminResolver {
   constructor(
     private readonly getEventsUseCase: GetEventsUseCase,
+    private readonly getAdminEventsStatsUseCase: GetAdminEventsStatsUseCase,
     private readonly getEventsForUserUseCase: GetEventsForUserUseCase,
     private readonly updateEventUseCase: UpdateEventUseCase,
     private readonly deleteEventUseCase: DeleteEventUseCase,
@@ -91,6 +94,17 @@ export class EventAdminResolver {
         pageNumber: pagedResponse.pagination.page_number,
         pageSize: pagedResponse.pagination.pages_size,
       },
+    };
+  }
+
+  @Query()
+  async adminEventsStats(): Promise<AdminEventsStatsResult> {
+    const stats = await this.getAdminEventsStatsUseCase.execute();
+    return {
+      __typename: 'AdminEventsStats',
+      totalCount: stats.totalCount,
+      upcomingCount: stats.upcomingCount,
+      pastCount: stats.pastCount,
     };
   }
 
