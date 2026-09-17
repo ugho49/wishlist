@@ -3,8 +3,10 @@ import type { UserId } from '@wishlist/common';
 import type { AdminEventListItem } from './admin.types';
 
 import { Alert } from '@mui/material';
+import { keepPreviousData } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import { DateTime } from 'luxon';
+import { useEffect, useState } from 'react';
 
 import { AttendeeRole, isRejection, rejectionMessage, useAdminEventListEventsQuery } from '../../../gql';
 import { AdminDataGrid } from '../../admin/AdminDataGrid';
@@ -71,16 +73,23 @@ type AdminListEventsProps = {
 
 export const AdminListEvents = ({ userId, currentPage, changeCurrentPage }: AdminListEventsProps) => {
   const navigate = useNavigate();
+  const [totalElements, setTotalElements] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
   const { data, isLoading: loading } = useAdminEventListEventsQuery(
     { filters: { page: currentPage, userId } },
-    { select: d => d.adminEvents },
+    { select: d => d.adminEvents, placeholderData: keepPreviousData },
   );
   const pagedEvents = data?.__typename === 'GetEventsPagedResponse' ? data : undefined;
   const queryRejection = data && isRejection(data) ? data : undefined;
 
   const events = pagedEvents?.data ?? [];
-  const totalElements = pagedEvents?.pagination.totalElements ?? 0;
-  const pageSize = pagedEvents?.pagination.pageSize ?? 10;
+
+  useEffect(() => {
+    if (pagedEvents) {
+      setTotalElements(pagedEvents.pagination.totalElements);
+      setPageSize(pagedEvents.pagination.pageSize);
+    }
+  }, [pagedEvents]);
 
   if (queryRejection) {
     return <Alert severity="error">{rejectionMessage(queryRejection)}</Alert>;
@@ -104,7 +113,11 @@ export const AdminListEvents = ({ userId, currentPage, changeCurrentPage }: Admi
         pageSize,
       }}
       pageSizeOptions={[pageSize]}
-      onPaginationModelChange={({ page }) => void changeCurrentPage(page + 1)}
+      onPaginationModelChange={({ page }) => {
+        const nextPage = page + 1;
+        if (nextPage === currentPage) return;
+        changeCurrentPage(nextPage);
+      }}
       hideFooter={totalElements <= pageSize}
     />
   );

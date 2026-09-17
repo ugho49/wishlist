@@ -4,8 +4,9 @@ import type { AdminUserWishlistRow } from '../wishlist.types';
 
 import ListIcon from '@mui/icons-material/List';
 import { Alert, Avatar, Stack, styled } from '@mui/material';
+import { keepPreviousData } from '@tanstack/react-query';
 import { DateTime } from 'luxon';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { isRejection, rejectionMessage, useAdminListWishlistsForUserQuery } from '../../../gql';
 import { AdminDataGrid } from '../../admin/AdminDataGrid';
@@ -84,16 +85,23 @@ type AdminListWishlistsForUserProps = {
 
 export const AdminListWishlistsForUser = ({ userId }: AdminListWishlistsForUserProps) => {
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalElements, setTotalElements] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+  const columns = useMemo(() => getColumns(userId), [userId]);
 
   const { data, isLoading: loading } = useAdminListWishlistsForUserQuery(
     { filters: { page: currentPage, userId } },
-    { select: d => d.adminWishlists },
+    { select: d => d.adminWishlists, placeholderData: keepPreviousData },
   );
   const wishlists = data?.__typename === 'AdminGetWishlists' ? data : undefined;
   const queryRejection = data && isRejection(data) ? data : undefined;
 
-  const totalElements = wishlists?.pagination.totalElements ?? 0;
-  const pageSize = wishlists?.pagination.pageSize ?? 10;
+  useEffect(() => {
+    if (wishlists) {
+      setTotalElements(wishlists.pagination.totalElements);
+      setPageSize(wishlists.pagination.pageSize);
+    }
+  }, [wishlists]);
 
   return (
     <>
@@ -102,7 +110,7 @@ export const AdminListWishlistsForUser = ({ userId }: AdminListWishlistsForUserP
         isRowSelectable={() => false}
         rows={wishlists?.data ?? []}
         loading={loading}
-        columns={getColumns(userId)}
+        columns={columns}
         paginationMode="server"
         localeText={{
           noRowsLabel: 'Aucune liste',
@@ -113,7 +121,11 @@ export const AdminListWishlistsForUser = ({ userId }: AdminListWishlistsForUserP
           pageSize,
         }}
         pageSizeOptions={[pageSize]}
-        onPaginationModelChange={({ page }) => setCurrentPage(page + 1)}
+        onPaginationModelChange={({ page }) => {
+          const nextPage = page + 1;
+          if (nextPage === currentPage) return;
+          setCurrentPage(nextPage);
+        }}
         hideFooter={totalElements <= pageSize}
       />
     </>
