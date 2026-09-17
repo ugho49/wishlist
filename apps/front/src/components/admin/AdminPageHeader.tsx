@@ -21,11 +21,12 @@ export type AdminPageHeaderProps = {
 };
 
 const HeaderRoot = styled('header')(({ theme }) => ({
-  marginBottom: theme.spacing(2),
+  marginBottom: theme.spacing(3),
+  flexShrink: 0,
 }));
 
 const BreadcrumbsStyled = styled(Breadcrumbs)(({ theme }) => ({
-  marginBottom: theme.spacing(1),
+  marginBottom: theme.spacing(2),
   '& .MuiBreadcrumbs-separator': {
     marginLeft: theme.spacing(0.5),
     marginRight: theme.spacing(0.5),
@@ -43,14 +44,17 @@ const CurrentCrumb = styled('span')(({ theme }) => ({
   fontWeight: 500,
 }));
 
-const IdentityRow = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  gap: theme.spacing(1.5),
-  [theme.breakpoints.down('sm')]: {
-    flexWrap: 'wrap',
-  },
-}));
+const IdentityRow = styled(Box, { shouldForwardProp: prop => prop !== 'hasAvatar' })<{ hasAvatar?: boolean }>(
+  ({ theme, hasAvatar }) => ({
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing(hasAvatar ? 2 : 1.5),
+    overflow: 'visible',
+    [theme.breakpoints.down('sm')]: {
+      flexWrap: 'wrap',
+    },
+  }),
+);
 
 const IdentityBody = styled(Box)({
   display: 'flex',
@@ -66,13 +70,15 @@ const TitleRow = styled(Box)(({ theme }) => ({
   gap: theme.spacing(0.75),
 }));
 
-const TitleText = styled('h1')(({ theme }) => ({
-  fontWeight: 600,
-  fontSize: '1.25rem',
-  lineHeight: 1.3,
-  color: theme.palette.text.primary,
-  margin: 0,
-}));
+const TitleText = styled('h1', { shouldForwardProp: prop => prop !== 'hasAvatar' })<{ hasAvatar?: boolean }>(
+  ({ theme, hasAvatar }) => ({
+    fontWeight: 600,
+    fontSize: hasAvatar ? '1.5rem' : '1.25rem',
+    lineHeight: 1.3,
+    color: theme.palette.text.primary,
+    margin: 0,
+  }),
+);
 
 const TitleCount = styled('span')(({ theme }) => ({
   fontSize: '0.7em',
@@ -137,11 +143,11 @@ export const AdminPageHeader = ({ title, count, breadcrumbs, avatar, chips, meta
       </BreadcrumbsStyled>
     ) : null}
 
-    <IdentityRow>
+    <IdentityRow hasAvatar={Boolean(avatar)}>
       {avatar}
       <IdentityBody>
         <TitleRow>
-          <TitleText>
+          <TitleText hasAvatar={Boolean(avatar)}>
             {title}
             {count === undefined ? null : <TitleCount>{count.toLocaleString('fr-FR')}</TitleCount>}
           </TitleText>

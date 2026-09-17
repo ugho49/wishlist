@@ -9,8 +9,8 @@ import { useEffect, useState } from 'react';
 
 import { isRejection, rejectionMessage, useAdminUsersListQuery, useAdminUsersStatsQuery } from '../../../gql';
 import { AdminDataGrid } from '../../admin/AdminDataGrid';
+import { AdminListPage } from '../../admin/AdminListPage';
 import { AdminPageHeader } from '../../admin/AdminPageHeader';
-import { AdminSection } from '../../admin/AdminSection';
 
 type AdminUserRow = Extract<AdminUsersListQuery['adminUsers'], { __typename: 'AdminGetAllUsers' }>['data'][number];
 
@@ -21,6 +21,7 @@ const SearchForm = styled('form')(({ theme }) => ({
   alignItems: 'center',
   gap: theme.spacing(2),
   marginBottom: theme.spacing(2),
+  flexShrink: 0,
 }));
 
 const SearchButton = styled(Button)(() => ({
@@ -122,58 +123,59 @@ export const AdminListUsers = () => {
   };
 
   return (
-    <>
-      <AdminPageHeader
-        title="Utilisateurs"
-        breadcrumbs={[{ label: 'Admin', to: '/admin' }, { label: 'Utilisateurs' }]}
-        count={stats?.totalCount}
-      />
+    <AdminListPage
+      header={
+        <AdminPageHeader
+          title="Utilisateurs"
+          breadcrumbs={[{ label: 'Admin', to: '/admin' }, { label: 'Utilisateurs' }]}
+          count={stats?.totalCount}
+        />
+      }
+    >
+      <SearchForm noValidate onSubmit={applySearch}>
+        <TextField
+          size="small"
+          label="Rechercher un utilisateur"
+          fullWidth
+          placeholder="John Doe, john@doe.fr, john, etc..."
+          value={inputSearch}
+          onChange={e => setInputSearch(e.target.value)}
+        />
+        <SearchButton variant="outlined" type="submit" size="small">
+          Rechercher
+        </SearchButton>
+      </SearchForm>
 
-      <AdminSection>
-        <SearchForm noValidate onSubmit={applySearch}>
-          <TextField
-            size="small"
-            label="Rechercher un utilisateur"
-            fullWidth
-            placeholder="John Doe, john@doe.fr, john, etc..."
-            value={inputSearch}
-            onChange={e => setInputSearch(e.target.value)}
-          />
-          <SearchButton variant="outlined" type="submit" size="small">
-            Rechercher
-          </SearchButton>
-        </SearchForm>
+      {queryRejection && <Alert severity="error">{rejectionMessage(queryRejection)}</Alert>}
 
-        {queryRejection && <Alert severity="error">{rejectionMessage(queryRejection)}</Alert>}
-
-        {!queryRejection && (
-          <AdminDataGrid
-            clickableRows
-            isRowSelectable={() => true}
-            localeText={{
-              noRowsLabel: 'Aucun utilisateur',
-            }}
-            onRowClick={({ row }) => navigate({ to: '/admin/users/$userId', params: { userId: row.id } })}
-            rows={value?.data || []}
-            loading={loading}
-            columns={columns}
-            paginationMode="server"
-            rowCount={totalElements}
-            paginationModel={{
-              page: currentPage - 1,
-              pageSize,
-            }}
-            pageSizeOptions={[pageSize]}
-            onPaginationModelChange={({ page }) =>
-              navigate({
-                to: '/admin/users',
-                search: prev => ({ ...prev, page: page + 1, search }),
-              })
-            }
-            hideFooter={totalElements <= pageSize}
-          />
-        )}
-      </AdminSection>
-    </>
+      {!queryRejection && (
+        <AdminDataGrid
+          fill
+          clickableRows
+          isRowSelectable={() => true}
+          localeText={{
+            noRowsLabel: 'Aucun utilisateur',
+          }}
+          onRowClick={({ row }) => navigate({ to: '/admin/users/$userId', params: { userId: row.id } })}
+          rows={value?.data || []}
+          loading={loading}
+          columns={columns}
+          paginationMode="server"
+          rowCount={totalElements}
+          paginationModel={{
+            page: currentPage - 1,
+            pageSize,
+          }}
+          pageSizeOptions={[pageSize]}
+          onPaginationModelChange={({ page }) =>
+            navigate({
+              to: '/admin/users',
+              search: prev => ({ ...prev, page: page + 1, search }),
+            })
+          }
+          hideFooter={totalElements <= pageSize}
+        />
+      )}
+    </AdminListPage>
   );
 };

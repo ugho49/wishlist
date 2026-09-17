@@ -122,3 +122,12 @@ mutation AdminDeleteEventAttendee($eventId: EventId!, $attendeeId: AttendeeId!) 
     }
   }
 }
+
+mutation AdminUpdateEventAttendeeRole($eventId: EventId!, $attendeeId: AttendeeId!, $role: AttendeeRole!) {
+  adminUpdateEventAttendeeRole(eventId: $eventId, attendeeId: $attendeeId, role: $role) {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+  }
+}

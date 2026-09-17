@@ -88,17 +88,19 @@ const LogoTextStyled = styled(LogoTextSvg)(() => ({
   color: 'white',
 }));
 
-const AdminModeBadge = styled('span')({
-  fontSize: '0.65rem',
-  fontWeight: 600,
-  letterSpacing: '0.06em',
-  textTransform: 'uppercase',
-  color: 'white',
-  backgroundColor: 'rgba(255, 255, 255, 0.18)',
-  border: '1px solid rgba(255, 255, 255, 0.35)',
-  borderRadius: 4,
-  padding: '2px 8px',
-});
+const AdminModeBadge = styled('span', { shouldForwardProp: prop => prop !== 'elevated' })<{ elevated?: boolean }>(
+  ({ elevated }) => ({
+    fontSize: '0.65rem',
+    fontWeight: 600,
+    letterSpacing: '0.06em',
+    textTransform: 'uppercase',
+    color: 'white',
+    backgroundColor: elevated ? 'rgba(255, 193, 7, 0.35)' : 'rgba(255, 255, 255, 0.18)',
+    border: elevated ? '1px solid rgba(255, 213, 79, 0.7)' : '1px solid rgba(255, 255, 255, 0.35)',
+    borderRadius: 4,
+    padding: '2px 8px',
+  }),
+);
 
 const MainListStyled = styled(List)(({ theme }) => ({
   flex: 1,
@@ -294,7 +296,9 @@ export const SideNavigation = () => {
           <LogoIconStyled />
           <LogoTextStyled />
         </LogoRow>
-        {user?.isAdmin && <AdminModeBadge>Admin</AdminModeBadge>}
+        {user?.isAdmin ? (
+          <AdminModeBadge elevated={user.isSuperAdmin}>{user.isSuperAdmin ? 'Super-admin' : 'Admin'}</AdminModeBadge>
+        ) : null}
       </LogoSectionStyled>
 
       {/* Main navigation items */}

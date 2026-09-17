@@ -206,6 +206,50 @@ describe('EventAdminResolver (GraphQL)', () => {
           expect.objectContaining({ id: targetEventId, title: 'Target Event' }),
         ]);
       });
+
+      it('should filter events by title criteria', async () => {
+        const ownerId = await fixtures.insertUser({ email: 'search-owner@test.com', firstname: 'S', lastname: 'O' });
+        const { eventId: matchingEventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Noël en famille',
+          maintainerId: ownerId,
+        });
+        await fixtures.insertEventWithMaintainer({ title: 'Anniversaire', maintainerId: ownerId });
+
+        const res = await request
+          .post(GRAPHQL_PATH)
+          .send({ query, variables: { filters: { criteria: 'noël' } } })
+          .expect(200);
+
+        expect(res.body.data.adminEvents.__typename).toBe('GetEventsPagedResponse');
+        expect(res.body.data.adminEvents.data).toEqual([
+          expect.objectContaining({ id: matchingEventId, title: 'Noël en famille' }),
+        ]);
+      });
+
+      it('should filter events by title criteria and userId', async () => {
+        const targetUserId = await fixtures.insertUser({
+          email: 'title-target@test.com',
+          firstname: 'T',
+          lastname: 'U',
+        });
+        const otherUserId = await fixtures.insertUser({ email: 'title-other@test.com', firstname: 'O', lastname: 'U' });
+        const { eventId: matchingEventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Anniversaire de T',
+          maintainerId: targetUserId,
+        });
+        await fixtures.insertEventWithMaintainer({ title: 'Anniversaire de O', maintainerId: otherUserId });
+        await fixtures.insertEventWithMaintainer({ title: 'Noël', maintainerId: targetUserId });
+
+        const res = await request
+          .post(GRAPHQL_PATH)
+          .send({ query, variables: { filters: { userId: targetUserId, criteria: 'Anniv' } } })
+          .expect(200);
+
+        expect(res.body.data.adminEvents.__typename).toBe('GetEventsPagedResponse');
+        expect(res.body.data.adminEvents.data).toEqual([
+          expect.objectContaining({ id: matchingEventId, title: 'Anniversaire de T' }),
+        ]);
+      });
     });
   });
 
@@ -455,6 +499,85 @@ describe('EventAdminResolver (GraphQL)', () => {
           .expect(200);
 
         expect(res.body.data.adminDeleteEventAttendee.__typename).toBe('NotFoundRejection');
+      });
+    });
+  });
+
+  describe('Mutation adminUpdateEventAttendeeRole', () => {
+    const mutation = /* GraphQL */ `
+      mutation AdminUpdateEventAttendeeRole($eventId: EventId!, $attendeeId: AttendeeId!, $role: AttendeeRole!) {
+        adminUpdateEventAttendeeRole(eventId: $eventId, attendeeId: $attendeeId, role: $role) {
+          __typename
+          ... on VoidOutput {
+            success
+          }
+          ... on ForbiddenRejection {
+            message
+          }
+        }
+      }
+    `;
+
+    it('should reject with ForbiddenRejection for a non-admin user', async () => {
+      const request = await getRequest({ signedAs: 'BASE_USER' });
+      const res = await request
+        .post(GRAPHQL_PATH)
+        .send({ query: mutation, variables: { eventId: uuid(), attendeeId: uuid(), role: 'ADMIN' } })
+        .expect(200);
+
+      expect(res.body.data.adminUpdateEventAttendeeRole.__typename).toBe('ForbiddenRejection');
+    });
+
+    describe('when user is admin', () => {
+      let request: RequestApp;
+
+      beforeEach(async () => {
+        request = await getRequest({ signedAs: 'ADMIN_USER' });
+      });
+
+      it('should update an attendee role on any event', async () => {
+        const ownerId = await fixtures.insertUser({ email: 'owner@test.com', firstname: 'O', lastname: 'W' });
+        const { eventId } = await fixtures.insertEventWithMaintainer({ title: 'Event', maintainerId: ownerId });
+        const attendeeId = await fixtures.insertPendingAttendee({ eventId, tempUserEmail: 'pending@test.com' });
+
+        const res = await request
+          .post(GRAPHQL_PATH)
+          .send({ query: mutation, variables: { eventId, attendeeId, role: 'ADMIN' } })
+          .expect(200);
+
+        expect(res.body.data.adminUpdateEventAttendeeRole).toEqual({ __typename: 'VoidOutput', success: true });
+
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(2).row(1).toMatchObject({
+          id: attendeeId,
+          role: 'admin',
+        });
+      });
+
+      it('should return NotFoundRejection when the attendee does not exist', async () => {
+        const ownerId = await fixtures.insertUser({ email: 'owner@test.com', firstname: 'O', lastname: 'W' });
+        const { eventId } = await fixtures.insertEventWithMaintainer({ title: 'Event', maintainerId: ownerId });
+
+        const res = await request
+          .post(GRAPHQL_PATH)
+          .send({ query: mutation, variables: { eventId, attendeeId: uuid(), role: 'ADMIN' } })
+          .expect(200);
+
+        expect(res.body.data.adminUpdateEventAttendeeRole.__typename).toBe('NotFoundRejection');
+      });
+
+      it('should reject when changing the creator role', async () => {
+        const ownerId = await fixtures.insertUser({ email: 'owner@test.com', firstname: 'O', lastname: 'W' });
+        const { eventId, attendeeId } = await fixtures.insertEventWithMaintainer({
+          title: 'Event',
+          maintainerId: ownerId,
+        });
+
+        const res = await request
+          .post(GRAPHQL_PATH)
+          .send({ query: mutation, variables: { eventId, attendeeId, role: 'ADMIN' } })
+          .expect(200);
+
+        expect(res.body.data.adminUpdateEventAttendeeRole.__typename).not.toBe('VoidOutput');
       });
     });
   });

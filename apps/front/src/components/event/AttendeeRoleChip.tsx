@@ -89,6 +89,7 @@ export const AttendeeRoleChip = ({ role, editable = false, disabled = false, onR
           anchorEl={anchorEl}
           open={Boolean(anchorEl)}
           onClose={() => setAnchorEl(null)}
+          onClick={event => event.stopPropagation()}
           anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
           transformOrigin={{ vertical: 'top', horizontal: 'left' }}
         >

@@ -1,7 +1,20 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { schema } from '@wishlist/api-drizzle';
 import { type EventId, type UserId, uuid } from '@wishlist/common';
-import { and, count, desc, eq, gte, inArray, isNotNull, isNull, or, type SelectedFields, sql } from 'drizzle-orm';
+import {
+  and,
+  count,
+  desc,
+  eq,
+  gte,
+  ilike,
+  inArray,
+  isNotNull,
+  isNull,
+  or,
+  type SelectedFields,
+  sql,
+} from 'drizzle-orm';
 import { DateTime } from 'luxon';
 
 import { DatabaseService } from '../../core/database/database.service';
@@ -11,6 +24,12 @@ import { type EventRepository } from '../../event/domain/repository/event.reposi
 import { type EventAttendeeRepository } from '../../event/domain/repository/event-attendee.repository';
 import { REPOSITORIES } from '../repositories.constants';
 import { PostgresEventAttendeeRepository } from './postgres-event-attendee.repository';
+
+const titleMatches = (criteria?: string) => {
+  if (!criteria) return;
+  const searchKey = criteria.trim().normalize('NFC');
+  return ilike(schema.event.title, `%${searchKey}%`);
+};
 
 type RowType = typeof schema.event.$inferSelect & {
   attendees: (typeof schema.eventAttendee.$inferSelect & { user: typeof schema.user.$inferSelect | null })[];
@@ -58,16 +77,20 @@ export class PostgresEventRepository implements EventRepository {
 
   async findAllPaginated(params: {
     pagination: { take: number; skip: number };
+    criteria?: string;
   }): Promise<{ events: Event[]; totalCount: number }> {
-    // Get total count
-    const totalCountResult = await this.databaseService.db.select({ count: count() }).from(schema.event);
+    const titleCondition = titleMatches(params.criteria);
+    const totalCountResult = await this.databaseService.db
+      .select({ count: count() })
+      .from(schema.event)
+      .where(titleCondition);
 
     const totalCount = totalCountResult[0]?.count ?? 0;
 
     if (totalCount === 0) return { events: [], totalCount };
 
-    // Get full event data with attendees
     const result = await this.databaseService.db.query.event.findMany({
+      where: titleCondition,
       with: { attendees: { with: { user: true } }, eventWishlists: true },
       orderBy: desc(schema.event.createdAt),
       limit: params.pagination.take,
@@ -113,6 +136,7 @@ export class PostgresEventRepository implements EventRepository {
     userId: UserId;
     pagination: { take: number; skip: number };
     onlyFuture: boolean;
+    criteria?: string;
   }): Promise<{ events: Event[]; totalCount: number }> {
     // biome-ignore lint/suspicious/noExplicitAny: type is too complex
     const baseQuery = (selectFields: SelectedFields<any, typeof schema.event>) =>
@@ -124,6 +148,7 @@ export class PostgresEventRepository implements EventRepository {
           and(
             eq(schema.eventAttendee.userId, params.userId),
             ...(params.onlyFuture ? [gte(schema.event.eventDate, DateTime.now().toISODate())] : []),
+            titleMatches(params.criteria),
           ),
         );
 

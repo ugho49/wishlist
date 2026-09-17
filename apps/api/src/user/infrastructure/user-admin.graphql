@@ -99,6 +99,14 @@ union AdminRevokeAllUserSessionsResult =
   | NotFoundRejection
   | InternalErrorRejection
 
+union AdminSetUserAdminResult =
+  | VoidOutput
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | NotFoundRejection
+  | InternalErrorRejection
+
 extend type Query {
   adminUser(userId: UserId!): AdminGetUserByIdResult!
   adminUsers(input: AdminGetAllUsersPaginationFilters): AdminGetAllUsersResult!
@@ -111,4 +119,5 @@ extend type Mutation {
   adminRemoveUserPicture(userId: UserId!): AdminRemoveUserPictureResult!
   adminRevokeUserSession(userId: UserId!, sessionId: UserSessionId!): AdminRevokeUserSessionResult!
   adminRevokeAllUserSessions(userId: UserId!): AdminRevokeAllUserSessionsResult!
+  adminSetUserAdmin(userId: UserId!, isAdmin: Boolean!): AdminSetUserAdminResult!
 }

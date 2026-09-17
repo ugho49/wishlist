@@ -32,7 +32,7 @@ export class Event {
     this.description = props.description;
     this.icon = props.icon;
     this.eventDate = props.eventDate;
-    this.attendees = props.attendees;
+    this.attendees = orderedAttendees(props.attendees);
     this.wishlistIds = props.wishlistIds;
     this.createdAt = props.createdAt;
     this.updatedAt = props.updatedAt;
@@ -102,4 +102,13 @@ export class Event {
     if (!attendee) return false;
     return acceptedRoles.includes(attendee.role);
   }
+}
+
+function orderedAttendees(attendees: EventAttendee[]): EventAttendee[] {
+  return [...attendees].sort((left, right) => {
+    if (left.isCreator() !== right.isCreator()) {
+      return left.isCreator() ? -1 : 1;
+    }
+    return left.id.localeCompare(right.id);
+  });
 }

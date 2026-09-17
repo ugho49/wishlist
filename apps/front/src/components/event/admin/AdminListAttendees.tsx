@@ -15,6 +15,7 @@ import { getAttendeeRoleLabel } from '../attendee-role';
 type AdminListAttendeesProps = {
   attendees: AdminEventAttendee[];
   deleteAttendee: (attendeeId: AttendeeId) => void;
+  updateAttendeeRole: (attendeeId: AttendeeId, role: AttendeeRole) => void;
   loading?: boolean;
 };
 
@@ -23,7 +24,12 @@ const AttendeeAvatar = styled(Avatar)({
   height: 28,
 });
 
-export const AdminListAttendees = ({ attendees, deleteAttendee, loading = false }: AdminListAttendeesProps) => (
+export const AdminListAttendees = ({
+  attendees,
+  deleteAttendee,
+  updateAttendeeRole,
+  loading = false,
+}: AdminListAttendeesProps) => (
   <AdminDataGrid
     isRowSelectable={() => false}
     localeText={{
@@ -74,10 +80,17 @@ export const AdminListAttendees = ({ attendees, deleteAttendee, loading = false 
       {
         field: 'role',
         headerName: 'Rôle',
-        width: 150,
+        width: 170,
         display: 'flex',
         valueGetter: (_, row) => getAttendeeRoleLabel(row.role),
-        renderCell: ({ row }) => <AttendeeRoleChip role={row.role} />,
+        renderCell: ({ row }) => (
+          <AttendeeRoleChip
+            role={row.role}
+            editable={row.role !== AttendeeRole.Creator}
+            disabled={loading}
+            onRoleChange={role => updateAttendeeRole(row.id, role)}
+          />
+        ),
       },
       {
         field: 'pending',

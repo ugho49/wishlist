@@ -128,3 +128,21 @@ mutation AdminRevokeAllUserSessions($userId: UserId!) {
     }
   }
 }
+
+mutation AdminSetUserAdmin($userId: UserId!, $isAdmin: Boolean!) {
+  adminSetUserAdmin(userId: $userId, isAdmin: $isAdmin) {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+    ... on UnauthorizedRejection {
+      message
+    }
+    ... on ForbiddenRejection {
+      message
+    }
+    ... on NotFoundRejection {
+      message
+    }
+  }
+}

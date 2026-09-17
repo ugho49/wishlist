@@ -15,7 +15,7 @@ import { afterAll, beforeAll, beforeEach } from 'bun:test';
 
 export type RequestApp = InstanceType<(typeof request)['agent']>;
 
-export type SignedAs = 'BASE_USER' | 'ADMIN_USER';
+export type SignedAs = 'BASE_USER' | 'ADMIN_USER' | 'SUPERADMIN_USER';
 
 export function useTestApp() {
   let app: INestApplication;
@@ -108,6 +108,11 @@ export function useTestApp() {
       if (options?.signedAs === 'ADMIN_USER') {
         await fixtures.insertAdminUser();
         token = await loginViaGraphql(Fixtures.ADMIN_USER_EMAIL, Fixtures.DEFAULT_USER_PASSWORD);
+      }
+
+      if (options?.signedAs === 'SUPERADMIN_USER') {
+        await fixtures.insertSuperAdminUser();
+        token = await loginViaGraphql(Fixtures.SUPERADMIN_USER_EMAIL, Fixtures.DEFAULT_USER_PASSWORD);
       }
 
       return token ? requestAppServer.auth(token, { type: 'bearer' }) : requestAppServer;

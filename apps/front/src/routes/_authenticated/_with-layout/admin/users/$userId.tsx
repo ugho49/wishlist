@@ -11,6 +11,7 @@ export const Route = createFileRoute('/_authenticated/_with-layout/admin/users/$
   },
   validateSearch: z.object({
     eventPage: z.number().optional().default(1),
+    eventSearch: z.string().optional().default(''),
     tab: z.enum(AdminUserTab).optional().catch(AdminUserTab.profile).default(AdminUserTab.profile),
   }),
   component: () => {

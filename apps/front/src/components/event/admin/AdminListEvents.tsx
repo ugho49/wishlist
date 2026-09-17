@@ -1,8 +1,9 @@
 import type { GridColDef } from '@mui/x-data-grid';
 import type { UserId } from '@wishlist/common';
+import type { FormEvent } from 'react';
 import type { AdminEventListItem } from './admin.types';
 
-import { Alert, Chip } from '@mui/material';
+import { Alert, Button, Chip, styled, TextField } from '@mui/material';
 import { keepPreviousData } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import { DateTime } from 'luxon';
@@ -17,6 +18,21 @@ import {
 } from '../../../gql';
 import { AdminDataGrid } from '../../admin/AdminDataGrid';
 import { EventIcon } from '../EventIcon';
+
+const SearchForm = styled('form')(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  gap: theme.spacing(2),
+  marginBottom: theme.spacing(2),
+  flexShrink: 0,
+}));
+
+const SearchButton = styled(Button)(() => ({
+  padding: '8px 10px',
+  flexShrink: 0,
+}));
 
 const columns: GridColDef<AdminEventListItem>[] = [
   {
@@ -94,15 +110,26 @@ const columns: GridColDef<AdminEventListItem>[] = [
 type AdminListEventsProps = {
   userId?: UserId;
   currentPage: number;
+  search: string;
   changeCurrentPage: (page: number) => void;
+  changeSearch: (search: string) => void;
+  fill?: boolean;
 };
 
-export const AdminListEvents = ({ userId, currentPage, changeCurrentPage }: AdminListEventsProps) => {
+export const AdminListEvents = ({
+  userId,
+  currentPage,
+  search,
+  changeCurrentPage,
+  changeSearch,
+  fill = false,
+}: AdminListEventsProps) => {
   const navigate = useNavigate();
   const [totalElements, setTotalElements] = useState(0);
   const [pageSize, setPageSize] = useState(10);
+  const [inputSearch, setInputSearch] = useState(search);
   const { data, isLoading: loading } = useAdminEventListEventsQuery(
-    { filters: { page: currentPage, userId } },
+    { filters: { page: currentPage, userId, criteria: search || undefined } },
     { select: d => d.adminEvents, placeholderData: keepPreviousData },
   );
   const pagedEvents = data?.__typename === 'GetEventsPagedResponse' ? data : undefined;
@@ -117,34 +144,56 @@ export const AdminListEvents = ({ userId, currentPage, changeCurrentPage }: Admi
     }
   }, [pagedEvents]);
 
-  if (queryRejection) {
-    return <Alert severity="error">{rejectionMessage(queryRejection)}</Alert>;
-  }
+  const applySearch = (e: FormEvent) => {
+    e.preventDefault();
+    changeSearch(inputSearch);
+  };
 
   return (
-    <AdminDataGrid
-      clickableRows
-      isRowSelectable={() => true}
-      onRowClick={({ row }) => navigate({ to: `/admin/events/${row.id}` })}
-      rows={events}
-      loading={loading}
-      columns={columns}
-      paginationMode="server"
-      localeText={{
-        noRowsLabel: 'Aucun évènement',
-      }}
-      rowCount={totalElements}
-      paginationModel={{
-        page: currentPage - 1,
-        pageSize,
-      }}
-      pageSizeOptions={[pageSize]}
-      onPaginationModelChange={({ page }) => {
-        const nextPage = page + 1;
-        if (nextPage === currentPage) return;
-        changeCurrentPage(nextPage);
-      }}
-      hideFooter={totalElements <= pageSize}
-    />
+    <>
+      <SearchForm noValidate onSubmit={applySearch}>
+        <TextField
+          size="small"
+          label="Rechercher un évènement"
+          fullWidth
+          placeholder="Noël, anniversaire, etc..."
+          value={inputSearch}
+          onChange={e => setInputSearch(e.target.value)}
+        />
+        <SearchButton variant="outlined" type="submit" size="small">
+          Rechercher
+        </SearchButton>
+      </SearchForm>
+
+      {queryRejection && <Alert severity="error">{rejectionMessage(queryRejection)}</Alert>}
+
+      {!queryRejection && (
+        <AdminDataGrid
+          fill={fill}
+          clickableRows
+          isRowSelectable={() => true}
+          onRowClick={({ row }) => navigate({ to: `/admin/events/${row.id}` })}
+          rows={events}
+          loading={loading}
+          columns={columns}
+          paginationMode="server"
+          localeText={{
+            noRowsLabel: 'Aucun évènement',
+          }}
+          rowCount={totalElements}
+          paginationModel={{
+            page: currentPage - 1,
+            pageSize,
+          }}
+          pageSizeOptions={[pageSize]}
+          onPaginationModelChange={({ page }) => {
+            const nextPage = page + 1;
+            if (nextPage === currentPage) return;
+            changeCurrentPage(nextPage);
+          }}
+          hideFooter={totalElements <= pageSize}
+        />
+      )}
+    </>
   );
 };

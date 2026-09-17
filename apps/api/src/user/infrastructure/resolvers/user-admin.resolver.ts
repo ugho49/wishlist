@@ -17,6 +17,7 @@ import {
   type AdminRemoveUserPictureResult,
   type AdminRevokeAllUserSessionsResult,
   type AdminRevokeUserSessionResult,
+  type AdminSetUserAdminResult,
   type AdminUpdateUserProfileInput,
   type AdminUpdateUserProfileResult,
   type AdminUsersStatsResult,
@@ -25,12 +26,17 @@ import { AdminRevokeAllUserSessionsUseCase } from '../../application/command/adm
 import { AdminRevokeUserSessionUseCase } from '../../application/command/admin-revoke-user-session.use-case';
 import { DeleteUserUseCase } from '../../application/command/delete-user.use-case';
 import { RemoveUserPictureUseCase } from '../../application/command/remove-user-picture.use-case';
+import { SetUserAdminUseCase } from '../../application/command/set-user-admin.use-case';
 import { UpdateUserFullUseCase } from '../../application/command/update-user-full.use-case';
 import { GetAdminUsersStatsUseCase } from '../../application/query/get-admin-users-stats.use-case';
 import { GetUsersPaginatedUseCase } from '../../application/query/get-users-paginated.use-case';
 import { userMapper } from '../user.mapper';
 import { UserIdSchema, UserSessionIdSchema } from '../user.schema';
-import { AdminGetAllUsersPaginationFiltersSchema, AdminUpdateUserProfileInputSchema } from '../user-admin.schema';
+import {
+  AdminGetAllUsersPaginationFiltersSchema,
+  AdminSetUserAdminIsAdminSchema,
+  AdminUpdateUserProfileInputSchema,
+} from '../user-admin.schema';
 
 @IsAdmin()
 @Resolver()
@@ -43,6 +49,7 @@ export class UserAdminResolver {
     private readonly removeUserPictureUseCase: RemoveUserPictureUseCase,
     private readonly adminRevokeUserSessionUseCase: AdminRevokeUserSessionUseCase,
     private readonly adminRevokeAllUserSessionsUseCase: AdminRevokeAllUserSessionsUseCase,
+    private readonly setUserAdminUseCase: SetUserAdminUseCase,
   ) {}
 
   @Query()
@@ -162,6 +169,16 @@ export class UserAdminResolver {
     @GqlCurrentUser() currentUser: ICurrentUser,
   ): Promise<AdminRevokeAllUserSessionsResult> {
     await this.adminRevokeAllUserSessionsUseCase.execute({ currentUser, userId });
+    return { __typename: 'VoidOutput', success: true };
+  }
+
+  @Mutation()
+  async adminSetUserAdmin(
+    @Args('userId', new ZodPipe(UserIdSchema)) userId: UserId,
+    @Args('isAdmin', new ZodPipe(AdminSetUserAdminIsAdminSchema)) isAdmin: boolean,
+    @GqlCurrentUser() currentUser: ICurrentUser,
+  ): Promise<AdminSetUserAdminResult> {
+    await this.setUserAdminUseCase.execute({ currentUser, userId, isAdmin });
     return { __typename: 'VoidOutput', success: true };
   }
 }

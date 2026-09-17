@@ -104,6 +104,36 @@ describe('UpdateAttendeeRoleUseCase', () => {
     expect(attendeeRepository.save).not.toHaveBeenCalled();
   });
 
+  it('should allow a platform admin to change their own attendee role', async () => {
+    const platformAdmin = new UserBuilder().withEmail('platform-admin@test.fr').asAdmin().build();
+    event = new EventBuilder().withCreator(creator).withAttendee(platformAdmin).build();
+    eventRepository.findByIdOrFail.mockResolvedValueOnce(event);
+
+    await useCase.execute({
+      currentUser: toCurrentUser(platformAdmin),
+      eventId: event.id,
+      attendeeId: attendeeForUser(event, platformAdmin).id,
+      role: AttendeeRole.ADMIN,
+    });
+
+    expect(attendeeRepository.save).toHaveBeenCalledTimes(1);
+    expect(attendeeRepository.save.mock.calls[0]?.[0]?.role).toBe(AttendeeRole.ADMIN);
+  });
+
+  it('should allow a platform admin who is not an attendee to update a role', async () => {
+    const platformAdmin = new UserBuilder().withEmail('ops@test.fr').asAdmin().build();
+
+    await useCase.execute({
+      currentUser: toCurrentUser(platformAdmin),
+      eventId: event.id,
+      attendeeId: participantAttendee.id,
+      role: AttendeeRole.ADMIN,
+    });
+
+    expect(attendeeRepository.save).toHaveBeenCalledTimes(1);
+    expect(attendeeRepository.save.mock.calls[0]?.[0]?.role).toBe(AttendeeRole.ADMIN);
+  });
+
   it('should reject when changing the creator role', async () => {
     const admin = new UserBuilder().withEmail('admin@test.fr').build();
     event = new EventBuilder().withCreator(creator).withAttendee(admin, AttendeeRole.ADMIN).build();

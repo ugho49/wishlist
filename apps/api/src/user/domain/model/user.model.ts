@@ -71,6 +71,30 @@ export class User {
     return this.isSuperAdmin() || this.authorities.includes(Authorities.ROLE_ADMIN);
   }
 
+  grantAdmin(): User {
+    if (this.isSuperAdmin() || this.authorities.includes(Authorities.ROLE_ADMIN)) {
+      return this;
+    }
+
+    return new User({
+      ...this,
+      authorities: [Authorities.ROLE_ADMIN],
+      updatedAt: new Date(),
+    });
+  }
+
+  revokeAdmin(): User {
+    if (this.isSuperAdmin() || !this.authorities.includes(Authorities.ROLE_ADMIN)) {
+      return this;
+    }
+
+    return new User({
+      ...this,
+      authorities: [Authorities.ROLE_USER],
+      updatedAt: new Date(),
+    });
+  }
+
   updateFirstName(firstName: string): User {
     return new User({
       ...this,

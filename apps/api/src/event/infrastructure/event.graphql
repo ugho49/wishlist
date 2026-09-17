@@ -88,6 +88,7 @@ input AdminEventPaginationFilters {
   page: Int
   limit: Int
   userId: UserId
+  criteria: String
 }
 
 ########################################################
@@ -183,6 +184,14 @@ union AdminDeleteEventAttendeeResult =
   | NotFoundRejection
   | InternalErrorRejection
 
+union AdminUpdateEventAttendeeRoleResult =
+  | VoidOutput
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | NotFoundRejection
+  | InternalErrorRejection
+
 extend type Query {
   event(id: EventId!): GetEventByIdResult
   events(filters: EventPaginationFilters!): GetMyEventsResult!
@@ -205,4 +214,9 @@ extend type Mutation {
   adminUpdateEvent(id: EventId!, input: UpdateEventInput!): AdminUpdateEventResult!
   adminDeleteEvent(id: EventId!): AdminDeleteEventResult!
   adminDeleteEventAttendee(eventId: EventId!, attendeeId: AttendeeId!): AdminDeleteEventAttendeeResult!
+  adminUpdateEventAttendeeRole(
+    eventId: EventId!
+    attendeeId: AttendeeId!
+    role: AttendeeRole!
+  ): AdminUpdateEventAttendeeRoleResult!
 }

@@ -40,6 +40,7 @@ union AdminDeleteEventResult = ForbiddenRejection | InternalErrorRejection | Not
 union AdminDeleteUserResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
 input AdminEventPaginationFilters {
+  criteria: String
   limit: Int
   page: Int
   userId: UserId
@@ -90,6 +91,10 @@ union AdminRemoveUserPictureResult = ForbiddenRejection | InternalErrorRejection
 union AdminRevokeAllUserSessionsResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
 union AdminRevokeUserSessionResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
+union AdminSetUserAdminResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
+union AdminUpdateEventAttendeeRoleResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
 union AdminUpdateEventResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
@@ -368,7 +373,9 @@ type Mutation {
   adminRemoveUserPicture(userId: UserId!): AdminRemoveUserPictureResult!
   adminRevokeAllUserSessions(userId: UserId!): AdminRevokeAllUserSessionsResult!
   adminRevokeUserSession(sessionId: UserSessionId!, userId: UserId!): AdminRevokeUserSessionResult!
+  adminSetUserAdmin(isAdmin: Boolean!, userId: UserId!): AdminSetUserAdminResult!
   adminUpdateEvent(id: EventId!, input: UpdateEventInput!): AdminUpdateEventResult!
+  adminUpdateEventAttendeeRole(attendeeId: AttendeeId!, eventId: EventId!, role: AttendeeRole!): AdminUpdateEventAttendeeRoleResult!
   adminUpdateUserProfile(input: AdminUpdateUserProfileInput!, userId: UserId!): AdminUpdateUserProfileResult!
   cancelSecretSanta(id: SecretSantaId!): CancelSecretSantaResult!
   changeUserPassword(input: ChangeUserPasswordInput!): ChangeUserPasswordResult!

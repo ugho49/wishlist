@@ -49,7 +49,7 @@ export class UpdateAttendeeRoleUseCase {
       throw new NotFoundException('Attendee not found');
     }
 
-    if (attendee.user?.id === currentUser.id) {
+    if (!currentUser.isAdmin && attendee.user?.id === currentUser.id) {
       throw new ConflictException('You cannot change your own role');
     }
 

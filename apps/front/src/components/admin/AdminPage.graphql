@@ -1,4 +1,4 @@
-query AdminDashboard {
+query AdminDashboardUsersStats {
   adminUsersStats {
     __typename
     ... on AdminUsersStats {
@@ -11,6 +11,9 @@ query AdminDashboard {
       }
     }
   }
+}
+
+query AdminDashboardEventsStats {
   adminEventsStats {
     __typename
     ... on AdminEventsStats {

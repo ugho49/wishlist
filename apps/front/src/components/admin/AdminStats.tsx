@@ -8,21 +8,17 @@ export type AdminStatItem = {
 const StatsRow = styled(Box)(({ theme }) => ({
   display: 'flex',
   flexWrap: 'wrap',
-  gap: theme.spacing(1.5),
+  gap: theme.spacing(2),
 }));
 
-const StatCard = styled(Box)(({ theme }) => ({
-  flex: '1 1 140px',
-  minWidth: 140,
-  backgroundColor: theme.palette.background.paper,
-  border: `1px solid ${theme.palette.grey[200]}`,
-  borderRadius: theme.shape.borderRadius,
-  padding: theme.spacing(1.5, 2),
-}));
+const StatItem = styled(Box)({
+  flex: '1 1 0',
+  minWidth: 0,
+});
 
 const StatValue = styled('p')(({ theme }) => ({
   margin: 0,
-  fontSize: '1.375rem',
+  fontSize: '1.25rem',
   fontWeight: 600,
   lineHeight: 1.2,
   color: theme.palette.text.primary,
@@ -42,10 +38,10 @@ type AdminStatsProps = {
 export const AdminStats = ({ items }: AdminStatsProps) => (
   <StatsRow>
     {items.map(item => (
-      <StatCard key={item.label}>
+      <StatItem key={item.label}>
         <StatValue>{item.value.toLocaleString('fr-FR')}</StatValue>
         <StatLabel>{item.label}</StatLabel>
-      </StatCard>
+      </StatItem>
     ))}
   </StatsRow>
 );

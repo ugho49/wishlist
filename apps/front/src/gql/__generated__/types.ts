@@ -50,6 +50,7 @@ export type AdminDeleteEventResult = ForbiddenRejection | InternalErrorRejection
 export type AdminDeleteUserResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
 export type AdminEventPaginationFilters = {
+  criteria?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['Int']['input']>;
   page?: InputMaybe<Scalars['Int']['input']>;
   userId?: InputMaybe<Scalars['UserId']['input']>;
@@ -104,6 +105,10 @@ export type AdminRemoveUserPictureResult = ForbiddenRejection | InternalErrorRej
 export type AdminRevokeAllUserSessionsResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
 export type AdminRevokeUserSessionResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+
+export type AdminSetUserAdminResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+
+export type AdminUpdateEventAttendeeRoleResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
 export type AdminUpdateEventResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
@@ -394,7 +399,9 @@ export type Mutation = {
   adminRemoveUserPicture: AdminRemoveUserPictureResult;
   adminRevokeAllUserSessions: AdminRevokeAllUserSessionsResult;
   adminRevokeUserSession: AdminRevokeUserSessionResult;
+  adminSetUserAdmin: AdminSetUserAdminResult;
   adminUpdateEvent: AdminUpdateEventResult;
+  adminUpdateEventAttendeeRole: AdminUpdateEventAttendeeRoleResult;
   adminUpdateUserProfile: AdminUpdateUserProfileResult;
   cancelSecretSanta: CancelSecretSantaResult;
   changeUserPassword: ChangeUserPasswordResult;
@@ -490,9 +497,22 @@ export type MutationAdminRevokeUserSessionArgs = {
 };
 
 
+export type MutationAdminSetUserAdminArgs = {
+  isAdmin: Scalars['Boolean']['input'];
+  userId: Scalars['UserId']['input'];
+};
+
+
 export type MutationAdminUpdateEventArgs = {
   id: Scalars['EventId']['input'];
   input: UpdateEventInput;
+};
+
+
+export type MutationAdminUpdateEventAttendeeRoleArgs = {
+  attendeeId: Scalars['AttendeeId']['input'];
+  eventId: Scalars['EventId']['input'];
+  role: AttendeeRole;
 };
 
 

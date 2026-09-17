@@ -2,8 +2,6 @@ import { styled, useTheme } from '@mui/material/styles';
 import { BarChart } from '@mui/x-charts/BarChart';
 import { DateTime } from 'luxon';
 
-import { AdminSection } from './AdminSection';
-
 export type AdminGrowthPoint = {
   month: string;
   count: number;
@@ -16,10 +14,10 @@ type AdminGrowthChartProps = {
 
 const ChartTitle = styled('h2')(({ theme }) => ({
   margin: 0,
-  marginBottom: theme.spacing(1),
-  fontSize: '0.95rem',
+  marginBottom: theme.spacing(0.25),
+  fontSize: '0.75rem',
   fontWeight: 600,
-  color: theme.palette.text.primary,
+  color: theme.palette.text.secondary,
 }));
 
 const formatMonthLabel = (month: string) =>
@@ -31,22 +29,32 @@ export const AdminGrowthChart = ({ title, data }: AdminGrowthChartProps) => {
   const values = data.map(point => point.count);
 
   return (
-    <AdminSection>
+    <>
       <ChartTitle>{title}</ChartTitle>
       <BarChart
-        height={260}
+        height={80}
         hideLegend
-        grid={{ horizontal: true }}
-        margin={{ left: 8, right: 8, top: 12, bottom: 4 }}
+        margin={{ left: 2, right: 2, top: 4, bottom: 0 }}
         xAxis={[
           {
             scaleType: 'band',
             data: labels,
-            height: 32,
-            tickLabelStyle: { fontSize: 11 },
+            height: 16,
+            disableLine: true,
+            disableTicks: true,
+            tickLabelStyle: { fontSize: 9 },
           },
         ]}
-        yAxis={[{ min: 0, tickMinStep: 1, width: 36 }]}
+        yAxis={[
+          {
+            min: 0,
+            tickMinStep: 1,
+            tickNumber: 3,
+            width: 20,
+            disableLine: true,
+            disableTicks: true,
+          },
+        ]}
         series={[
           {
             data: values,
@@ -55,6 +63,6 @@ export const AdminGrowthChart = ({ title, data }: AdminGrowthChartProps) => {
           },
         ]}
       />
-    </AdminSection>
+    </>
   );
 };

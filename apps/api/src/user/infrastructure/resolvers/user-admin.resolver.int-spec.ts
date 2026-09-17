@@ -1018,4 +1018,229 @@ describe('UserAdminResolver (GraphQL)', () => {
       });
     });
   });
+
+  describe('Mutation adminSetUserAdmin', () => {
+    const mutation = /* GraphQL */ `
+      mutation AdminSetUserAdmin($userId: UserId!, $isAdmin: Boolean!) {
+        adminSetUserAdmin(userId: $userId, isAdmin: $isAdmin) {
+          __typename
+          ... on VoidOutput {
+            success
+          }
+          ... on ForbiddenRejection {
+            message
+          }
+          ... on UnauthorizedRejection {
+            message
+          }
+          ... on NotFoundRejection {
+            message
+          }
+        }
+      }
+    `;
+
+    it('should not succeed when unauthenticated', async () => {
+      const unauthenticatedRequest = await getRequest();
+      const targetUserId = await fixtures.insertUser({
+        email: 'target@test.fr',
+        firstname: 'Target',
+        lastname: 'User',
+      });
+
+      const res = await unauthenticatedRequest
+        .post(GRAPHQL_PATH)
+        .send({ query: mutation, variables: { userId: targetUserId, isAdmin: true } })
+        .expect(200);
+
+      expect(res.body.data?.adminSetUserAdmin?.__typename).not.toBe('VoidOutput');
+
+      await expectTable(Fixtures.USER_TABLE)
+        .hasNumberOfRows(1)
+        .row(0)
+        .toMatchObject({ id: targetUserId, authorities: [Authorities.ROLE_USER] });
+    });
+
+    it('should reject a BASE_USER with ForbiddenRejection and not modify the user', async () => {
+      const baseRequest = await getRequest({ signedAs: 'BASE_USER' });
+      const targetUserId = await fixtures.insertUser({
+        email: 'target@test.fr',
+        firstname: 'Target',
+        lastname: 'User',
+      });
+
+      const res = await baseRequest
+        .post(GRAPHQL_PATH)
+        .send({ query: mutation, variables: { userId: targetUserId, isAdmin: true } })
+        .expect(200);
+
+      expect(res.body.data.adminSetUserAdmin).toMatchObject({ __typename: 'ForbiddenRejection' });
+
+      await expectTable(Fixtures.USER_TABLE, { email: 'ASC' })
+        .hasNumberOfRows(2)
+        .row(0)
+        .toMatchObject({ id: targetUserId, authorities: [Authorities.ROLE_USER] });
+    });
+
+    describe('when user is authenticated as ADMIN_USER', () => {
+      beforeEach(async () => {
+        request = await getRequest({ signedAs: 'ADMIN_USER' });
+      });
+
+      it('should return UnauthorizedRejection and not grant admin', async () => {
+        const targetUserId = await fixtures.insertUser({
+          email: 'target@test.fr',
+          firstname: 'Target',
+          lastname: 'User',
+        });
+
+        const res = await request
+          .post(GRAPHQL_PATH)
+          .send({ query: mutation, variables: { userId: targetUserId, isAdmin: true } })
+          .expect(200);
+
+        expect(res.body.data.adminSetUserAdmin).toMatchObject({ __typename: 'UnauthorizedRejection' });
+
+        await expectTable(Fixtures.USER_TABLE, { email: 'ASC' })
+          .row(1)
+          .toMatchObject({ id: targetUserId, authorities: [Authorities.ROLE_USER] });
+      });
+    });
+
+    describe('when user is authenticated as SUPERADMIN_USER', () => {
+      let superAdminUserId: string;
+
+      beforeEach(async () => {
+        request = await getRequest({ signedAs: 'SUPERADMIN_USER' });
+        superAdminUserId = await fixtures.getSignedUserId('SUPERADMIN_USER');
+      });
+
+      it('should grant ROLE_ADMIN to a regular user', async () => {
+        const targetUserId = await fixtures.insertUser({
+          email: 'target@test.fr',
+          firstname: 'Target',
+          lastname: 'User',
+        });
+
+        const res = await request
+          .post(GRAPHQL_PATH)
+          .send({ query: mutation, variables: { userId: targetUserId, isAdmin: true } })
+          .expect(200);
+
+        expect(res.body.data.adminSetUserAdmin).toEqual({ __typename: 'VoidOutput', success: true });
+
+        await expectTable(Fixtures.USER_TABLE, { email: 'ASC' })
+          .row(1)
+          .toMatchObject({ id: targetUserId, authorities: [Authorities.ROLE_ADMIN] });
+      });
+
+      it('should revoke ROLE_ADMIN from an admin and revoke their sessions', async () => {
+        const password = Fixtures.DEFAULT_USER_PASSWORD;
+        const email = 'other-admin@test.fr';
+        const targetUserId = await fixtures.insertUser({
+          email,
+          firstname: 'Other',
+          lastname: 'Admin',
+          authorities: [Authorities.ROLE_ADMIN],
+          password,
+        });
+
+        const loginRes = await request
+          .post(GRAPHQL_PATH)
+          .send({
+            query: /* GraphQL */ `
+              mutation Login($input: LoginInput!) {
+                login(input: $input) {
+                  __typename
+                  ... on LoginOutput {
+                    refreshToken
+                  }
+                }
+              }
+            `,
+            variables: { input: { email, password } },
+          })
+          .expect(200);
+
+        expect(loginRes.body.data.login.__typename).toBe('LoginOutput');
+
+        const res = await request
+          .post(GRAPHQL_PATH)
+          .send({ query: mutation, variables: { userId: targetUserId, isAdmin: false } })
+          .expect(200);
+
+        expect(res.body.data.adminSetUserAdmin).toEqual({ __typename: 'VoidOutput', success: true });
+
+        await expectTable(Fixtures.USER_TABLE, { email: 'ASC' })
+          .row(0)
+          .toMatchObject({ id: targetUserId, authorities: [Authorities.ROLE_USER] });
+
+        const sessionsRes = await request
+          .post(GRAPHQL_PATH)
+          .send({
+            query: /* GraphQL */ `
+              query AdminGetUserSessions($userId: UserId!) {
+                adminUser(userId: $userId) {
+                  __typename
+                  ... on UserFull {
+                    sessions {
+                      id
+                    }
+                  }
+                }
+              }
+            `,
+            variables: { userId: targetUserId },
+          })
+          .expect(200);
+
+        expect(sessionsRes.body.data.adminUser).toMatchObject({
+          __typename: 'UserFull',
+          sessions: [],
+        });
+      });
+
+      it('should return UnauthorizedRejection when super-admin updates themselves', async () => {
+        const res = await request
+          .post(GRAPHQL_PATH)
+          .send({ query: mutation, variables: { userId: superAdminUserId, isAdmin: false } })
+          .expect(200);
+
+        expect(res.body.data.adminSetUserAdmin).toMatchObject({ __typename: 'UnauthorizedRejection' });
+
+        await expectTable(Fixtures.USER_TABLE)
+          .row(0)
+          .toMatchObject({ id: superAdminUserId, authorities: [Authorities.ROLE_SUPERADMIN] });
+      });
+
+      it('should return UnauthorizedRejection when targeting another super-admin', async () => {
+        const otherSuperAdminId = await fixtures.insertUser({
+          email: 'other-super@test.fr',
+          firstname: 'Other',
+          lastname: 'Super',
+          authorities: [Authorities.ROLE_SUPERADMIN],
+        });
+
+        const res = await request
+          .post(GRAPHQL_PATH)
+          .send({ query: mutation, variables: { userId: otherSuperAdminId, isAdmin: false } })
+          .expect(200);
+
+        expect(res.body.data.adminSetUserAdmin).toMatchObject({ __typename: 'UnauthorizedRejection' });
+
+        await expectTable(Fixtures.USER_TABLE, { email: 'ASC' })
+          .row(0)
+          .toMatchObject({ id: otherSuperAdminId, authorities: [Authorities.ROLE_SUPERADMIN] });
+      });
+
+      it('should return NotFoundRejection when user does not exist', async () => {
+        const res = await request
+          .post(GRAPHQL_PATH)
+          .send({ query: mutation, variables: { userId: uuid(), isAdmin: true } })
+          .expect(200);
+
+        expect(res.body.data.adminSetUserAdmin).toMatchObject({ __typename: 'NotFoundRejection' });
+      });
+    });
+  });
 });

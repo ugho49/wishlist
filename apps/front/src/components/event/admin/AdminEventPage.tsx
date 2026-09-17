@@ -23,6 +23,7 @@ import { match } from 'ts-pattern';
 import z from 'zod';
 
 import {
+  type AdminEventGetEventQuery,
   AttendeeRole,
   isRejection,
   rejectionMessage,
@@ -30,6 +31,7 @@ import {
   useAdminDeleteEventAttendeeMutation,
   useAdminDeleteEventMutation,
   useAdminEventGetEventQuery,
+  useAdminUpdateEventAttendeeRoleMutation,
   useAdminUpdateEventMutation,
   useCancelSecretSantaMutation,
   useDeleteSecretSantaMutation,
@@ -109,9 +111,26 @@ export const AdminEventPage = ({ eventId }: AdminEventPageProps) => {
 
   const { secretSanta, loading: loadingSecretSanta } = useSecretSanta(eventId);
 
-  const invalidateEvent = () => queryClient.invalidateQueries({ queryKey: ['AdminEventGetEvent', { id: eventId }] });
+  const eventQueryKey = ['AdminEventGetEvent', { id: eventId }] as const;
+  const invalidateEvent = () => queryClient.invalidateQueries({ queryKey: eventQueryKey });
   const invalidateSecretSanta = () =>
     queryClient.invalidateQueries({ queryKey: ['GetSecretSantaForEvent', { eventId }] });
+
+  const patchAttendeeRole = (attendeeId: AttendeeId, role: AttendeeRole) => {
+    queryClient.setQueryData<AdminEventGetEventQuery>(eventQueryKey, current => {
+      const cachedEvent = current?.adminEvent;
+      if (cachedEvent?.__typename !== 'Event') return current;
+      return {
+        ...current,
+        adminEvent: {
+          ...cachedEvent,
+          attendees: cachedEvent.attendees.map(attendee =>
+            attendee.id === attendeeId ? { ...attendee, role } : attendee,
+          ),
+        },
+      };
+    });
+  };
 
   const { mutateAsync: deleteAttendeeMutation, isPending: loadingDeleteAttendee } = useAdminDeleteEventAttendeeMutation(
     {
@@ -129,6 +148,22 @@ export const AdminEventPage = ({ eventId }: AdminEventPageProps) => {
         addToast({ message: 'Participant supprimé avec succès', variant: 'success' });
         void invalidateEvent();
         void invalidateSecretSanta();
+      })
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive();
+  };
+
+  const { mutateAsync: updateAttendeeRoleMutation, isPending: loadingUpdateAttendeeRole } =
+    useAdminUpdateEventAttendeeRoleMutation({
+      onError: () => addToast({ message: 'Impossible de modifier le rôle', variant: 'error' }),
+    });
+
+  const updateAttendeeRole = async (attendeeId: AttendeeId, role: AttendeeRole) => {
+    const res = await updateAttendeeRoleMutation({ eventId, attendeeId, role });
+    match(res.adminUpdateEventAttendeeRole)
+      .with({ __typename: 'VoidOutput' }, () => {
+        addToast({ message: 'Rôle mis à jour', variant: 'success' });
+        patchAttendeeRole(attendeeId, role);
       })
       .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
       .exhaustive();
@@ -275,6 +310,7 @@ export const AdminEventPage = ({ eventId }: AdminEventPageProps) => {
     loadingRemoveSecretSantaUser ||
     loadingUpdateSecretSanta ||
     loadingDeleteAttendee ||
+    loadingUpdateAttendeeRole ||
     loadingUpdateEvent ||
     loadingDeleteEvent;
 
@@ -295,7 +331,7 @@ export const AdminEventPage = ({ eventId }: AdminEventPageProps) => {
           { label: 'Évènements', to: '/admin/events' },
           { label: eventTitle },
         ]}
-        avatar={<EventIcon icon={event?.icon ?? undefined} size="medium" />}
+        avatar={<EventIcon icon={event?.icon ?? undefined} size="large" />}
         meta={[
           eventDateLabel,
           creatorName ? `créé par ${creatorName}` : null,
@@ -462,7 +498,8 @@ export const AdminEventPage = ({ eventId }: AdminEventPageProps) => {
           <AdminListAttendees
             attendees={event?.attendees ?? []}
             loading={loadingEdit}
-            deleteAttendee={attendeeId => deleteAttendee(attendeeId)}
+            deleteAttendee={deleteAttendee}
+            updateAttendeeRole={updateAttendeeRole}
           />
         </AdminSection>
       )}

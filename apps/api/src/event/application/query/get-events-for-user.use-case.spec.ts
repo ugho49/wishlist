@@ -1,6 +1,6 @@
 import type { EventRepository } from '../../domain/repository/event.repository';
 
-import { Logger } from '@nestjs/common';
+import { BadRequestException, Logger } from '@nestjs/common';
 
 import { EventBuilder } from '../../../../test-utils/builders/event.builder';
 import { UserBuilder } from '../../../../test-utils/builders/user.builder';
@@ -44,6 +44,38 @@ describe('GetEventsForUserUseCase', () => {
       userId: user.id,
       pagination: { take: 10, skip: 10 },
       onlyFuture: false,
+      criteria: undefined,
+    });
+  });
+
+  it('should reject when the criteria is shorter than 2 characters', async () => {
+    await expect(
+      useCase.execute({
+        userId: user.id,
+        pageNumber: 1,
+        pageSize: 10,
+        ignorePastEvents: false,
+        criteria: 'a',
+      }),
+    ).rejects.toThrow(BadRequestException);
+    expect(eventRepository.findByUserIdPaginated).not.toHaveBeenCalled();
+  });
+
+  it('should return paginated events matching the criteria', async () => {
+    const result = await useCase.execute({
+      userId: user.id,
+      pageNumber: 1,
+      pageSize: 10,
+      ignorePastEvents: true,
+      criteria: 'anniv',
+    });
+
+    expect(result).toEqual({ events: [event], totalCount: 1 });
+    expect(eventRepository.findByUserIdPaginated).toHaveBeenCalledWith({
+      userId: user.id,
+      pagination: { take: 10, skip: 0 },
+      onlyFuture: true,
+      criteria: 'anniv',
     });
   });
 });
