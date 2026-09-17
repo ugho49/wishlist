@@ -1,5 +1,6 @@
 import type { AttendeeId, EventId } from '@wishlist/common';
 import type { RootState } from '../../core/store';
+import type { EventPageGetEventQuery } from '../../gql';
 import type { EventAttendee } from './event.types';
 
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -42,7 +43,22 @@ export const EditEventAttendees = ({ eventId, attendees }: EditEventAttendeesPro
     [attendees],
   );
 
-  const invalidateEvent = () => queryClient.invalidateQueries({ queryKey: ['EventPageGetEvent', { eventId }] });
+  const eventQueryKey = ['EventPageGetEvent', { eventId }] as const;
+  const invalidateEvent = () => queryClient.invalidateQueries({ queryKey: eventQueryKey });
+
+  const patchAttendeeRole = (attendeeId: AttendeeId, role: AttendeeRole) => {
+    queryClient.setQueryData<EventPageGetEventQuery>(eventQueryKey, current => {
+      const event = current?.event;
+      if (event?.__typename !== 'Event') return current;
+      return {
+        ...current,
+        event: {
+          ...event,
+          attendees: event.attendees.map(attendee => (attendee.id === attendeeId ? { ...attendee, role } : attendee)),
+        },
+      };
+    });
+  };
 
   const { mutateAsync: addAttendeeMutation, isPending: addAttendeePending } = useAddEventAttendeeMutation({
     onError: () => addToast({ message: "Impossible d'ajouter ce participant", variant: 'error' }),
@@ -81,7 +97,7 @@ export const EditEventAttendees = ({ eventId, attendees }: EditEventAttendeesPro
     match(res.updateEventAttendeeRole)
       .with({ __typename: 'VoidOutput' }, () => {
         addToast({ message: 'Rôle mis à jour', variant: 'info' });
-        void invalidateEvent();
+        patchAttendeeRole(attendeeId, role);
       })
       .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
       .exhaustive();

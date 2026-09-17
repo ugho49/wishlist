@@ -16,3 +16,5 @@ export const AdminUpdateUserProfileInputSchema = z.object({
   birthday: z.iso.date({ message: 'must be in format YYYY-MM-DD' }).optional(),
   isEnabled: z.boolean().optional(),
 }) satisfies z.ZodType<AdminUpdateUserProfileInput>;
+
+export const AdminSetUserAdminIsAdminSchema = z.boolean();

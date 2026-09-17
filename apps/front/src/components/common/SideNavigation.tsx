@@ -58,16 +58,24 @@ const DrawerContentStyled = styled(Box)(() => ({
 }));
 
 const LogoSectionStyled = styled(Box)(({ theme }) => ({
-  padding: theme.spacing(3),
+  padding: theme.spacing(2.5, 3, 2, 3),
   borderBottom: `1px solid ${theme.palette.primary.dark}`,
   backgroundColor: theme.palette.primary.main,
   color: 'white',
   display: 'flex',
+  flexDirection: 'column',
   alignItems: 'center',
   justifyContent: 'center',
   cursor: 'pointer',
-  gap: 20,
+  gap: theme.spacing(1),
 }));
+
+const LogoRow = styled(Box)({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: 20,
+});
 
 const LogoIconStyled = styled(LogoSvg)(() => ({
   height: 38,
@@ -79,6 +87,20 @@ const LogoTextStyled = styled(LogoTextSvg)(() => ({
   height: 60,
   color: 'white',
 }));
+
+const AdminModeBadge = styled('span', { shouldForwardProp: prop => prop !== 'elevated' })<{ elevated?: boolean }>(
+  ({ elevated }) => ({
+    fontSize: '0.65rem',
+    fontWeight: 600,
+    letterSpacing: '0.06em',
+    textTransform: 'uppercase',
+    color: 'white',
+    backgroundColor: elevated ? 'rgba(255, 193, 7, 0.35)' : 'rgba(255, 255, 255, 0.18)',
+    border: elevated ? '1px solid rgba(255, 213, 79, 0.7)' : '1px solid rgba(255, 255, 255, 0.35)',
+    borderRadius: 4,
+    padding: '2px 8px',
+  }),
+);
 
 const MainListStyled = styled(List)(({ theme }) => ({
   flex: 1,
@@ -270,8 +292,13 @@ export const SideNavigation = () => {
   const drawerContent = (
     <DrawerContentStyled>
       <LogoSectionStyled onClick={() => navigate({ to: '/' })}>
-        <LogoIconStyled />
-        <LogoTextStyled />
+        <LogoRow>
+          <LogoIconStyled />
+          <LogoTextStyled />
+        </LogoRow>
+        {user?.isAdmin ? (
+          <AdminModeBadge elevated={user.isSuperAdmin}>{user.isSuperAdmin ? 'Super-admin' : 'Admin'}</AdminModeBadge>
+        ) : null}
       </LogoSectionStyled>
 
       {/* Main navigation items */}

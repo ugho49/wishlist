@@ -2,7 +2,7 @@ import type { SeedDb, UserEmailSettingSeed, UserSeed } from './types';
 
 import * as schema from '../schema';
 import { seedConfig } from './config';
-import { chance, uuid } from './helpers';
+import { chance, insertInBatches, uuid } from './helpers';
 
 export async function seedUserEmailSettings(
   db: SeedDb,
@@ -14,6 +14,6 @@ export async function seedUserEmailSettings(
     dailyNewItemNotification: chance(seedConfig.users.dailyNewItemNotificationProbability),
   }));
 
-  await db.insert(schema.userEmailSetting).values(settings);
+  await insertInBatches(db, schema.userEmailSetting, settings);
   return settings;
 }

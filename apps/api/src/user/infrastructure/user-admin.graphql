@@ -24,6 +24,13 @@ type AdminGetAllUsers {
   pagination: Pagination!
 }
 
+type AdminUsersStats {
+  totalCount: Int!
+  enabledCount: Int!
+  adminCount: Int!
+  createdByMonth: [AdminMonthlyCount!]!
+}
+
 input AdminGetAllUsersPaginationFilters {
   page: Int
   limit: Int
@@ -52,6 +59,8 @@ union AdminGetAllUsersResult =
   | UnauthorizedRejection
   | ForbiddenRejection
   | InternalErrorRejection
+
+union AdminUsersStatsResult = AdminUsersStats | UnauthorizedRejection | ForbiddenRejection | InternalErrorRejection
 
 union AdminUpdateUserProfileResult =
   | VoidOutput
@@ -90,9 +99,18 @@ union AdminRevokeAllUserSessionsResult =
   | NotFoundRejection
   | InternalErrorRejection
 
+union AdminSetUserAdminResult =
+  | VoidOutput
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | NotFoundRejection
+  | InternalErrorRejection
+
 extend type Query {
   adminUser(userId: UserId!): AdminGetUserByIdResult!
   adminUsers(input: AdminGetAllUsersPaginationFilters): AdminGetAllUsersResult!
+  adminUsersStats: AdminUsersStatsResult!
 }
 
 extend type Mutation {
@@ -101,4 +119,5 @@ extend type Mutation {
   adminRemoveUserPicture(userId: UserId!): AdminRemoveUserPictureResult!
   adminRevokeUserSession(userId: UserId!, sessionId: UserSessionId!): AdminRevokeUserSessionResult!
   adminRevokeAllUserSessions(userId: UserId!): AdminRevokeAllUserSessionsResult!
+  adminSetUserAdmin(userId: UserId!, isAdmin: Boolean!): AdminSetUserAdminResult!
 }

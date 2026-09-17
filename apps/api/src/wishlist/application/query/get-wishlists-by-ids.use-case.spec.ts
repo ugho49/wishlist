@@ -54,4 +54,18 @@ describe('GetWishlistsByIdsUseCase', () => {
     expect(wishlistRepository.findByIds).toHaveBeenCalledWith([]);
     expect(result).toEqual([]);
   });
+
+  it('should skip access checks for admins', async () => {
+    const admin = new UserBuilder().asAdmin().build();
+    wishlistRepository.hasAccess.mockResolvedValueOnce(false);
+
+    const result = await useCase.execute({
+      currentUser: toCurrentUser(admin),
+      wishlistIds: [wishlist.id],
+    });
+
+    expect(wishlistRepository.hasAccess).not.toHaveBeenCalled();
+    expect(wishlistRepository.findByIds).toHaveBeenCalledWith([wishlist.id]);
+    expect(result).toEqual([wishlist]);
+  });
 });

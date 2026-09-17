@@ -6,8 +6,28 @@ import type { Ids } from '@wishlist/common'
 import type * as Types from './types';
 
 import { DocumentTypeDecoration } from '@graphql-typed-document-node/core';
-import { useMutation, useQuery, UseMutationOptions, UseQueryOptions } from '@tanstack/react-query';
+import { useQuery, useMutation, UseQueryOptions, UseMutationOptions } from '@tanstack/react-query';
 import { fetchGql } from '../fetcher';
+export type AdminDashboardUsersStatsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type AdminDashboardUsersStatsQuery = { adminUsersStats:
+    | { __typename: 'AdminUsersStats', totalCount: number, enabledCount: number, adminCount: number, createdByMonth: Array<{ month: string, count: number }> }
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+   };
+
+export type AdminDashboardEventsStatsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type AdminDashboardEventsStatsQuery = { adminEventsStats:
+    | { __typename: 'AdminEventsStats', totalCount: number, upcomingCount: number, pastCount: number, createdByMonth: Array<{ month: string, count: number }> }
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+   };
+
 export type AuthLoginMutationVariables = Exact<{
   input: Types.LoginInput;
 }>;
@@ -241,7 +261,7 @@ export type AdminEventListEventsQueryVariables = Exact<{
 
 export type AdminEventListEventsQuery = { adminEvents:
     | { __typename: 'ForbiddenRejection' }
-    | { __typename: 'GetEventsPagedResponse', data: Array<{ id: Ids["EventId"], title: string, icon: string | null, eventDate: string, wishlistIds: Array<Ids["WishlistId"]>, createdAt: string, attendees: Array<{ id: Ids["AttendeeId"], role: Types.AttendeeRole, user: { id: Ids["UserId"], firstName: string, lastName: string } | null }> }>, pagination: { totalPages: number, totalElements: number, pageNumber: number, pageSize: number } }
+    | { __typename: 'GetEventsPagedResponse', data: Array<{ id: Ids["EventId"], title: string, icon: string | null, eventDate: string, wishlistIds: Array<Ids["WishlistId"]>, createdAt: string, attendees: Array<{ id: Ids["AttendeeId"], role: Types.AttendeeRole, user: { id: Ids["UserId"], firstName: string, lastName: string } | null }>, secretSanta: { id: Ids["SecretSantaId"], status: Types.SecretSantaStatus } | null }>, pagination: { totalPages: number, totalElements: number, pageNumber: number, pageSize: number } }
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'UnauthorizedRejection' }
     | { __typename: 'ValidationRejection' }
@@ -259,6 +279,16 @@ export type AdminEventGetEventQuery = { adminEvent:
     | { __typename: 'NotFoundRejection' }
     | { __typename: 'UnauthorizedRejection' }
     | { __typename: 'ValidationRejection' }
+   };
+
+export type AdminEventsStatsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type AdminEventsStatsQuery = { adminEventsStats:
+    | { __typename: 'AdminEventsStats', totalCount: number, upcomingCount: number, pastCount: number }
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
    };
 
 export type AdminUpdateEventMutationVariables = Exact<{
@@ -297,6 +327,22 @@ export type AdminDeleteEventAttendeeMutationVariables = Exact<{
 
 
 export type AdminDeleteEventAttendeeMutation = { adminDeleteEventAttendee:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'NotFoundRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection' }
+    | { __typename: 'VoidOutput', success: boolean }
+   };
+
+export type AdminUpdateEventAttendeeRoleMutationVariables = Exact<{
+  eventId: Ids["EventId"];
+  attendeeId: Ids["AttendeeId"];
+  role: Types.AttendeeRole;
+}>;
+
+
+export type AdminUpdateEventAttendeeRoleMutation = { adminUpdateEventAttendeeRole:
     | { __typename: 'ForbiddenRejection' }
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'NotFoundRejection' }
@@ -536,7 +582,7 @@ export type AdminUsersListQueryVariables = Exact<{
 
 
 export type AdminUsersListQuery = { adminUsers:
-    | { __typename: 'AdminGetAllUsers', data: Array<{ id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null, isEnabled: boolean, authorities: Array<Types.UserAuthorities>, createdAt: string }>, pagination: { totalPages: number, totalElements: number, pageNumber: number, pageSize: number } }
+    | { __typename: 'AdminGetAllUsers', data: Array<{ id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null, isEnabled: boolean, createdAt: string, sessions: Array<{ lastUsedAt: string }> }>, pagination: { totalPages: number, totalElements: number, pageNumber: number, pageSize: number } }
     | { __typename: 'ForbiddenRejection' }
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'UnauthorizedRejection' }
@@ -611,6 +657,16 @@ export type AdminRevokeUserSessionMutation = { adminRevokeUserSession:
     | { __typename: 'VoidOutput', success: boolean }
    };
 
+export type AdminUsersStatsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type AdminUsersStatsQuery = { adminUsersStats:
+    | { __typename: 'AdminUsersStats', totalCount: number, enabledCount: number, adminCount: number }
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+   };
+
 export type AdminRevokeAllUserSessionsMutationVariables = Exact<{
   userId: Ids["UserId"];
 }>;
@@ -621,6 +677,21 @@ export type AdminRevokeAllUserSessionsMutation = { adminRevokeAllUserSessions:
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'NotFoundRejection' }
     | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection' }
+    | { __typename: 'VoidOutput', success: boolean }
+   };
+
+export type AdminSetUserAdminMutationVariables = Exact<{
+  userId: Ids["UserId"];
+  isAdmin: boolean;
+}>;
+
+
+export type AdminSetUserAdminMutation = { adminSetUserAdmin:
+    | { __typename: 'ForbiddenRejection', message: string }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'NotFoundRejection', message: string }
+    | { __typename: 'UnauthorizedRejection', message: string }
     | { __typename: 'ValidationRejection' }
     | { __typename: 'VoidOutput', success: boolean }
    };
@@ -1006,6 +1077,72 @@ export const SecretSantaItemFragmentDoc = new TypedDocumentString(`
     }
   }
 }`, {"fragmentName":"SecretSantaItem"});
+export const AdminDashboardUsersStatsDocument = new TypedDocumentString(`
+    query AdminDashboardUsersStats {
+  adminUsersStats {
+    __typename
+    ... on AdminUsersStats {
+      totalCount
+      enabledCount
+      adminCount
+      createdByMonth {
+        month
+        count
+      }
+    }
+  }
+}
+    `);
+
+export const useAdminDashboardUsersStatsQuery = <
+      TData = AdminDashboardUsersStatsQuery,
+      TError = unknown
+    >(
+      variables?: AdminDashboardUsersStatsQueryVariables,
+      options?: Omit<UseQueryOptions<AdminDashboardUsersStatsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<AdminDashboardUsersStatsQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<AdminDashboardUsersStatsQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['AdminDashboardUsersStats'] : ['AdminDashboardUsersStats', variables],
+    queryFn: fetchGql<AdminDashboardUsersStatsQuery, AdminDashboardUsersStatsQueryVariables>(AdminDashboardUsersStatsDocument, variables),
+    ...options
+  }
+    )};
+
+export const AdminDashboardEventsStatsDocument = new TypedDocumentString(`
+    query AdminDashboardEventsStats {
+  adminEventsStats {
+    __typename
+    ... on AdminEventsStats {
+      totalCount
+      upcomingCount
+      pastCount
+      createdByMonth {
+        month
+        count
+      }
+    }
+  }
+}
+    `);
+
+export const useAdminDashboardEventsStatsQuery = <
+      TData = AdminDashboardEventsStatsQuery,
+      TError = unknown
+    >(
+      variables?: AdminDashboardEventsStatsQueryVariables,
+      options?: Omit<UseQueryOptions<AdminDashboardEventsStatsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<AdminDashboardEventsStatsQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<AdminDashboardEventsStatsQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['AdminDashboardEventsStats'] : ['AdminDashboardEventsStats', variables],
+    queryFn: fetchGql<AdminDashboardEventsStatsQuery, AdminDashboardEventsStatsQueryVariables>(AdminDashboardEventsStatsDocument, variables),
+    ...options
+  }
+    )};
+
 export const AuthLoginDocument = new TypedDocumentString(`
     mutation AuthLogin($input: LoginInput!) {
   login(input: $input) {
@@ -1575,6 +1712,10 @@ export const AdminEventListEventsDocument = new TypedDocumentString(`
             lastName
           }
         }
+        secretSanta {
+          id
+          status
+        }
       }
       pagination {
         totalPages
@@ -1667,6 +1808,35 @@ export const useAdminEventGetEventQuery = <
   }
     )};
 
+export const AdminEventsStatsDocument = new TypedDocumentString(`
+    query AdminEventsStats {
+  adminEventsStats {
+    __typename
+    ... on AdminEventsStats {
+      totalCount
+      upcomingCount
+      pastCount
+    }
+  }
+}
+    `);
+
+export const useAdminEventsStatsQuery = <
+      TData = AdminEventsStatsQuery,
+      TError = unknown
+    >(
+      variables?: AdminEventsStatsQueryVariables,
+      options?: Omit<UseQueryOptions<AdminEventsStatsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<AdminEventsStatsQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<AdminEventsStatsQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['AdminEventsStats'] : ['AdminEventsStats', variables],
+    queryFn: fetchGql<AdminEventsStatsQuery, AdminEventsStatsQueryVariables>(AdminEventsStatsDocument, variables),
+    ...options
+  }
+    )};
+
 export const AdminUpdateEventDocument = new TypedDocumentString(`
     mutation AdminUpdateEvent($id: EventId!, $input: UpdateEventInput!) {
   adminUpdateEvent(id: $id, input: $input) {
@@ -1741,6 +1911,34 @@ export const useAdminDeleteEventAttendeeMutation = <
       {
     mutationKey: ['AdminDeleteEventAttendee'],
     mutationFn: (variables?: AdminDeleteEventAttendeeMutationVariables) => fetchGql<AdminDeleteEventAttendeeMutation, AdminDeleteEventAttendeeMutationVariables>(AdminDeleteEventAttendeeDocument, variables)(),
+    ...options
+  }
+    )};
+
+export const AdminUpdateEventAttendeeRoleDocument = new TypedDocumentString(`
+    mutation AdminUpdateEventAttendeeRole($eventId: EventId!, $attendeeId: AttendeeId!, $role: AttendeeRole!) {
+  adminUpdateEventAttendeeRole(
+    eventId: $eventId
+    attendeeId: $attendeeId
+    role: $role
+  ) {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+  }
+}
+    `);
+
+export const useAdminUpdateEventAttendeeRoleMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<AdminUpdateEventAttendeeRoleMutation, TError, AdminUpdateEventAttendeeRoleMutationVariables, TContext>) => {
+    
+    return useMutation<AdminUpdateEventAttendeeRoleMutation, TError, AdminUpdateEventAttendeeRoleMutationVariables, TContext>(
+      {
+    mutationKey: ['AdminUpdateEventAttendeeRole'],
+    mutationFn: (variables?: AdminUpdateEventAttendeeRoleMutationVariables) => fetchGql<AdminUpdateEventAttendeeRoleMutation, AdminUpdateEventAttendeeRoleMutationVariables>(AdminUpdateEventAttendeeRoleDocument, variables)(),
     ...options
   }
     )};
@@ -2369,8 +2567,10 @@ export const AdminUsersListDocument = new TypedDocumentString(`
         email
         pictureUrl
         isEnabled
-        authorities
         createdAt
+        sessions {
+          lastUsedAt
+        }
       }
       pagination {
         totalPages
@@ -2562,6 +2762,35 @@ export const useAdminRevokeUserSessionMutation = <
   }
     )};
 
+export const AdminUsersStatsDocument = new TypedDocumentString(`
+    query AdminUsersStats {
+  adminUsersStats {
+    __typename
+    ... on AdminUsersStats {
+      totalCount
+      enabledCount
+      adminCount
+    }
+  }
+}
+    `);
+
+export const useAdminUsersStatsQuery = <
+      TData = AdminUsersStatsQuery,
+      TError = unknown
+    >(
+      variables?: AdminUsersStatsQueryVariables,
+      options?: Omit<UseQueryOptions<AdminUsersStatsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<AdminUsersStatsQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<AdminUsersStatsQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['AdminUsersStats'] : ['AdminUsersStats', variables],
+    queryFn: fetchGql<AdminUsersStatsQuery, AdminUsersStatsQueryVariables>(AdminUsersStatsDocument, variables),
+    ...options
+  }
+    )};
+
 export const AdminRevokeAllUserSessionsDocument = new TypedDocumentString(`
     mutation AdminRevokeAllUserSessions($userId: UserId!) {
   adminRevokeAllUserSessions(userId: $userId) {
@@ -2582,6 +2811,39 @@ export const useAdminRevokeAllUserSessionsMutation = <
       {
     mutationKey: ['AdminRevokeAllUserSessions'],
     mutationFn: (variables?: AdminRevokeAllUserSessionsMutationVariables) => fetchGql<AdminRevokeAllUserSessionsMutation, AdminRevokeAllUserSessionsMutationVariables>(AdminRevokeAllUserSessionsDocument, variables)(),
+    ...options
+  }
+    )};
+
+export const AdminSetUserAdminDocument = new TypedDocumentString(`
+    mutation AdminSetUserAdmin($userId: UserId!, $isAdmin: Boolean!) {
+  adminSetUserAdmin(userId: $userId, isAdmin: $isAdmin) {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+    ... on UnauthorizedRejection {
+      message
+    }
+    ... on ForbiddenRejection {
+      message
+    }
+    ... on NotFoundRejection {
+      message
+    }
+  }
+}
+    `);
+
+export const useAdminSetUserAdminMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<AdminSetUserAdminMutation, TError, AdminSetUserAdminMutationVariables, TContext>) => {
+    
+    return useMutation<AdminSetUserAdminMutation, TError, AdminSetUserAdminMutationVariables, TContext>(
+      {
+    mutationKey: ['AdminSetUserAdmin'],
+    mutationFn: (variables?: AdminSetUserAdminMutationVariables) => fetchGql<AdminSetUserAdminMutation, AdminSetUserAdminMutationVariables>(AdminSetUserAdminDocument, variables)(),
     ...options
   }
     )};

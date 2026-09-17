@@ -7,5 +7,6 @@ export const Route = createFileRoute('/_authenticated/_with-layout/admin/events/
   component: () => <AdminListEventsPage />,
   validateSearch: z.object({
     page: z.number().optional().default(1),
+    search: z.string().optional().default(''),
   }),
 });

@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { schema } from '@wishlist/api-drizzle';
 import { type UserId, uuid } from '@wishlist/common';
-import { and, asc, count, desc, eq, inArray, like, ne, or, type SQL, sql } from 'drizzle-orm';
+import { and, asc, count, desc, eq, gte, inArray, like, ne, or, type SQL, sql } from 'drizzle-orm';
 
 import { DEFAULT_RESULT_NUMBER } from '../../core/common/pagination';
 import { DatabaseService } from '../../core/database/database.service';
@@ -98,6 +98,35 @@ export class PostgresUserRepository implements UserRepository {
     });
 
     return { users: users.map(user => PostgresUserRepository.toModel(user)), totalCount };
+  }
+
+  async countAdminStats(): Promise<{ totalCount: number; enabledCount: number; adminCount: number }> {
+    const [stats] = await this.databaseService.db
+      .select({
+        totalCount: sql<number>`cast(count(*) as int)`,
+        enabledCount: sql<number>`cast(count(*) filter (where ${schema.user.isEnabled}) as int)`,
+        adminCount: sql<number>`cast(count(*) filter (where 'ROLE_ADMIN' = any(${schema.user.authorities}) or 'ROLE_SUPERADMIN' = any(${schema.user.authorities})) as int)`,
+      })
+      .from(schema.user);
+
+    return {
+      totalCount: stats?.totalCount ?? 0,
+      enabledCount: stats?.enabledCount ?? 0,
+      adminCount: stats?.adminCount ?? 0,
+    };
+  }
+
+  countCreatedByMonth(since: Date): Promise<Array<{ month: string; count: number }>> {
+    const month = sql<string>`to_char(date_trunc('month', ${schema.user.createdAt}), 'YYYY-MM')`;
+    return this.databaseService.db
+      .select({
+        month,
+        count: sql<number>`cast(count(*) as int)`,
+      })
+      .from(schema.user)
+      .where(gte(schema.user.createdAt, since))
+      .groupBy(month)
+      .orderBy(month);
   }
 
   async save(user: User, tx?: DrizzleTransaction): Promise<void> {

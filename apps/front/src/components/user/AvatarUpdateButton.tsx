@@ -33,6 +33,10 @@ const AvatarSection = styled(Box)(({ theme }) => ({
   alignItems: 'center',
   justifyContent: 'center',
   gap: theme.spacing(2),
+  '&.compact': {
+    display: 'block',
+    gap: 0,
+  },
 }));
 
 const AvatarContainer = styled(Box)(() => ({
@@ -49,6 +53,9 @@ const StyledAvatar = styled(Avatar)(({ theme }) => ({
   },
   '&.with-picture': {
     border: `4px solid ${theme.palette.primary.main}`,
+  },
+  '&.compact.with-picture': {
+    borderWidth: 2,
   },
 }));
 
@@ -75,6 +82,7 @@ export type AvatarUpdateButtonProps = {
   pictureUrl?: string;
   accounts: UserAccount[];
   size?: string;
+  compact?: boolean;
 };
 
 export const AvatarUpdateButton = ({
@@ -85,6 +93,7 @@ export const AvatarUpdateButton = ({
   deletePictureHandler,
   onPictureUpdated,
   size = '60px',
+  compact = false,
 }: AvatarUpdateButtonProps) => {
   const [loading, setLoading] = useState(false);
   const [imageSrc, setImageSrc] = useState<string | undefined>(undefined);
@@ -112,6 +121,14 @@ export const AvatarUpdateButton = ({
   const selectAPicture = () => {
     closeMenu();
     inputFileRef.current?.click();
+  };
+
+  const onAvatarClick = (event: React.MouseEvent<HTMLElement>) => {
+    if (!pictureUrl) {
+      selectAPicture();
+      return;
+    }
+    if (compact) openMenu(event);
   };
 
   const onFileInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -172,12 +189,16 @@ export const AvatarUpdateButton = ({
         />
       )}
 
-      <AvatarSection>
+      <AvatarSection className={clsx(compact && 'compact')}>
         <AvatarContainer>
           <StyledAvatar
             src={loading ? undefined : pictureUrl}
-            className={clsx(!pictureUrl && 'clickable', pictureUrl && 'with-picture')}
-            onClick={pictureUrl ? undefined : () => selectAPicture()}
+            className={clsx(
+              (!pictureUrl || compact) && 'clickable',
+              pictureUrl && 'with-picture',
+              compact && 'compact',
+            )}
+            onClick={onAvatarClick}
             sx={{ width: size, height: size }}
           >
             {loading && (
@@ -197,7 +218,7 @@ export const AvatarUpdateButton = ({
           )}
         </AvatarContainer>
 
-        {!pictureUrl && (
+        {!pictureUrl && !compact && (
           <Stack
             sx={{
               alignItems: 'center',

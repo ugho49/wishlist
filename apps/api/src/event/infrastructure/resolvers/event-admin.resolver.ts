@@ -13,14 +13,19 @@ import {
   type AdminDeleteEventAttendeeResult,
   type AdminDeleteEventResult,
   type AdminEventPaginationFilters,
+  type AdminEventsStatsResult,
   type AdminGetEventByIdResult,
   type AdminGetEventsResult,
+  type AdminUpdateEventAttendeeRoleResult,
   type AdminUpdateEventResult,
+  AttendeeRole as GqlAttendeeRole,
   type UpdateEventInput,
 } from '../../../gql/generated-types';
 import { DeleteAttendeeUseCase } from '../../application/command/delete-attendee.use-case';
 import { DeleteEventUseCase } from '../../application/command/delete-event.use-case';
+import { UpdateAttendeeRoleUseCase } from '../../application/command/update-attendee-role.use-case';
 import { UpdateEventUseCase } from '../../application/command/update-event.use-case';
+import { GetAdminEventsStatsUseCase } from '../../application/query/get-admin-events-stats.use-case';
 import { GetEventsUseCase } from '../../application/query/get-events.use-case';
 import { GetEventsForUserUseCase } from '../../application/query/get-events-for-user.use-case';
 import { eventMapper } from '../event.mapper';
@@ -28,6 +33,8 @@ import {
   AdminEventPaginationFiltersSchema,
   AttendeeIdSchema,
   EventIdSchema,
+  GqlAttendeeRoleSchema,
+  toDomainAttendeeRole,
   UpdateEventInputSchema,
 } from '../event.schema';
 
@@ -36,10 +43,12 @@ import {
 export class EventAdminResolver {
   constructor(
     private readonly getEventsUseCase: GetEventsUseCase,
+    private readonly getAdminEventsStatsUseCase: GetAdminEventsStatsUseCase,
     private readonly getEventsForUserUseCase: GetEventsForUserUseCase,
     private readonly updateEventUseCase: UpdateEventUseCase,
     private readonly deleteEventUseCase: DeleteEventUseCase,
     private readonly deleteAttendeeUseCase: DeleteAttendeeUseCase,
+    private readonly updateAttendeeRoleUseCase: UpdateAttendeeRoleUseCase,
   ) {}
 
   @Query()
@@ -69,8 +78,13 @@ export class EventAdminResolver {
           pageNumber,
           pageSize,
           ignorePastEvents: false,
+          criteria: filters.criteria ?? undefined,
         })
-      : await this.getEventsUseCase.execute({ pageNumber, pageSize });
+      : await this.getEventsUseCase.execute({
+          pageNumber,
+          pageSize,
+          criteria: filters.criteria ?? undefined,
+        });
 
     const pagedResponse = createPagedResponse({
       resources: events.map(event => eventMapper.toGqlEvent(event)),
@@ -91,6 +105,22 @@ export class EventAdminResolver {
         pageNumber: pagedResponse.pagination.page_number,
         pageSize: pagedResponse.pagination.pages_size,
       },
+    };
+  }
+
+  @Query()
+  async adminEventsStats(): Promise<AdminEventsStatsResult> {
+    const stats = await this.getAdminEventsStatsUseCase.execute();
+    return {
+      __typename: 'AdminEventsStats',
+      totalCount: stats.totalCount,
+      upcomingCount: stats.upcomingCount,
+      pastCount: stats.pastCount,
+      createdByMonth: stats.createdByMonth.map(point => ({
+        __typename: 'AdminMonthlyCount' as const,
+        month: point.month,
+        count: point.count,
+      })),
     };
   }
 
@@ -130,6 +160,22 @@ export class EventAdminResolver {
     @GqlCurrentUser() currentUser: ICurrentUser,
   ): Promise<AdminDeleteEventAttendeeResult> {
     await this.deleteAttendeeUseCase.execute({ currentUser, eventId, attendeeId });
+    return { __typename: 'VoidOutput', success: true };
+  }
+
+  @Mutation()
+  async adminUpdateEventAttendeeRole(
+    @Args('eventId', new ZodPipe(EventIdSchema)) eventId: EventId,
+    @Args('attendeeId', new ZodPipe(AttendeeIdSchema)) attendeeId: AttendeeId,
+    @Args('role', new ZodPipe(GqlAttendeeRoleSchema)) role: GqlAttendeeRole,
+    @GqlCurrentUser() currentUser: ICurrentUser,
+  ): Promise<AdminUpdateEventAttendeeRoleResult> {
+    await this.updateAttendeeRoleUseCase.execute({
+      currentUser,
+      eventId,
+      attendeeId,
+      role: toDomainAttendeeRole(role),
+    });
     return { __typename: 'VoidOutput', success: true };
   }
 }

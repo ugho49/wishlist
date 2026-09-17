@@ -29,6 +29,7 @@ export const AdminEventPaginationFiltersSchema = z.object({
   page: z.number().int().min(1).optional(),
   limit: z.number().int().min(1).optional(),
   userId: UserIdSchema.optional(),
+  criteria: z.string().optional(),
 }) satisfies z.ZodType<AdminEventPaginationFilters>;
 
 const iconSchema = z

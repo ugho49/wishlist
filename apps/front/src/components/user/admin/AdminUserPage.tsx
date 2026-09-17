@@ -2,9 +2,31 @@ import type { UserId, UserSessionId } from '@wishlist/common';
 import type { FormEvent } from 'react';
 import type { RootState } from '../../../core/store';
 
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import DevicesIcon from '@mui/icons-material/Devices';
+import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
+import LinkIcon from '@mui/icons-material/Link';
+import PortraitIcon from '@mui/icons-material/Portrait';
 import SaveIcon from '@mui/icons-material/Save';
-import { Alert, Box, Button, Chip, Stack, TextField } from '@mui/material';
-import { styled } from '@mui/material/styles';
+import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Stack,
+  Switch,
+  Tab,
+  TextField,
+} from '@mui/material';
+import { alpha, styled, useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useSearch } from '@tanstack/react-router';
 import { AdminListEvents } from '@wishlist/front-components/event/admin/AdminListEvents';
@@ -18,20 +40,22 @@ import {
   isRejection,
   rejectionMessage,
   rejectionPattern,
+  UserAuthorities,
   useAdminRemoveUserPictureMutation,
   useAdminRevokeAllUserSessionsMutation,
   useAdminRevokeUserSessionMutation,
+  useAdminSetUserAdminMutation,
   useAdminUpdateUserProfileMutation,
   useAdminUserDetailQuery,
 } from '../../../gql';
 import { useToast } from '../../../hooks';
-import { Card } from '../../common/Card';
+import { AdminPageHeader } from '../../admin/AdminPageHeader';
+import { AdminSection } from '../../admin/AdminSection';
+import { AdminTabs } from '../../admin/AdminTabs';
 import { CharsRemaining } from '../../common/CharsRemaining';
 import { ConfirmButton } from '../../common/ConfirmButton';
 import { WishlistDatePicker } from '../../common/DatePicker';
 import { Loader } from '../../common/Loader';
-import { Subtitle } from '../../common/Subtitle';
-import { Title } from '../../common/Title';
 import { AdminListWishlistsForUser } from '../../wishlist/admin/AdminListWishlistsForUser';
 import { AvatarUpdateButton } from '../AvatarUpdateButton';
 import { AdminListUserAccounts } from './AdminListUserAccounts';
@@ -40,51 +64,88 @@ import { UpdatePasswordModal } from './UpdatePasswordModal';
 
 const mapState = (state: RootState) => state.auth;
 
-const Header = styled('div')(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  gap: theme.spacing(0.5),
-  marginBottom: theme.spacing(5),
+export enum AdminUserTab {
+  profile = 'profile',
+  accounts = 'accounts',
+  sessions = 'sessions',
+  events = 'events',
+  wishlists = 'wishlists',
+}
+
+const userTabs = [
+  { value: AdminUserTab.profile, label: 'Profil', icon: <PortraitIcon /> },
+  { value: AdminUserTab.accounts, label: 'Comptes', icon: <LinkIcon /> },
+  { value: AdminUserTab.sessions, label: 'Sessions', icon: <DevicesIcon /> },
+  { value: AdminUserTab.events, label: 'Évènements', icon: <CalendarMonthIcon /> },
+  { value: AdminUserTab.wishlists, label: 'Listes', icon: <FormatListBulletedIcon /> },
+];
+
+const FormActions = styled(Stack)(({ theme }) => ({
+  flexDirection: 'row',
+  justifyContent: 'flex-start',
+  marginTop: theme.spacing(1),
 }));
 
-const NameRow = styled('div')(({ theme }) => ({
-  display: 'flex',
+const SessionsHeader = styled(Stack)(({ theme }) => ({
+  flexDirection: 'row',
+  justifyContent: 'flex-end',
   alignItems: 'center',
-  justifyContent: 'center',
-  flexWrap: 'wrap',
-  gap: theme.spacing(1),
+  marginBottom: theme.spacing(2),
 }));
 
-const Name = styled('div')(({ theme }) => ({
-  fontWeight: 500,
-  fontSize: '1.3rem',
+const HeaderUserAvatar = styled(Avatar)(({ theme }) => ({
+  width: 88,
+  height: 88,
+  fontSize: '2rem',
+  backgroundColor: theme.palette.primary.main,
+  flexShrink: 0,
+}));
+
+const ReadOnlyAlert = styled(Alert)(({ theme }) => ({
+  marginBottom: theme.spacing(2),
+}));
+
+const AccessRow = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing(2),
+  padding: theme.spacing(2, 2.5),
+  backgroundColor: theme.palette.grey[50],
+}));
+
+const AccessIcon = styled('span', { shouldForwardProp: prop => prop !== 'active' })<{ active: boolean }>(
+  ({ theme, active }) => ({
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 40,
+    height: 40,
+    borderRadius: theme.shape.borderRadius,
+    flexShrink: 0,
+    color: active ? theme.palette.primary.main : theme.palette.text.secondary,
+    backgroundColor: active ? alpha(theme.palette.primary.main, 0.1) : theme.palette.grey[100],
+  }),
+);
+
+const AccessCopy = styled('div')({
+  flex: 1,
+  minWidth: 0,
+});
+
+const AccessTitle = styled('p')(({ theme }) => ({
+  margin: 0,
+  fontWeight: 600,
+  fontSize: '0.875rem',
+  lineHeight: 1.3,
   color: theme.palette.text.primary,
 }));
 
-const Email = styled('div')(({ theme }) => ({
-  fontSize: '0.9rem',
+const AccessHint = styled('p')(({ theme }) => ({
+  margin: 0,
+  marginTop: theme.spacing(0.25),
+  fontSize: '0.75rem',
+  lineHeight: 1.4,
   color: theme.palette.text.secondary,
-}));
-
-const Meta = styled('div')(({ theme }) => ({
-  fontSize: '0.85rem',
-  color: theme.palette.text.secondary,
-}));
-
-const HeaderActions = styled('div')(({ theme }) => ({
-  display: 'flex',
-  justifyContent: 'center',
-  flexWrap: 'wrap',
-  gap: theme.spacing(1),
-  marginTop: theme.spacing(1.5),
-  '& .MuiButton-root': {
-    padding: '3px 10px',
-  },
-}));
-
-const CardStack = styled(Stack)(() => ({
-  gap: 32,
 }));
 
 interface AdminUserPageProps {
@@ -95,6 +156,8 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
   const { addToast } = useToast();
   const { user: currentUser } = useSelector(mapState);
   const queryClient = useQueryClient();
+  const theme = useTheme();
+  const smallScreen = useMediaQuery(theme.breakpoints.down('sm'));
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [firstname, setFirstname] = useState('');
@@ -103,11 +166,15 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
   const [enabled, setEnabled] = useState(true);
   const [birthday, setBirthday] = useState<DateTime | null>(null);
   const [updatePasswordModalOpen, setUpdatePasswordModalOpen] = useState(false);
-  const { eventPage } = useSearch({ from: '/_authenticated/_with-layout/admin/users/$userId' });
-  const navigate = useNavigate();
+  const { eventPage, eventSearch, tab } = useSearch({ from: '/_authenticated/_with-layout/admin/users/$userId' });
+  const navigate = useNavigate({ from: '/admin/users/$userId' });
 
   const changeEventPage = (page: number) => {
-    void navigate({ to: '/admin/users/$userId', params: { userId }, search: prev => ({ ...prev, eventPage: page }) });
+    void navigate({ search: prev => ({ ...prev, eventPage: page }) });
+  };
+
+  const changeEventSearch = (search: string) => {
+    void navigate({ search: prev => ({ ...prev, eventPage: 1, eventSearch: search }) });
   };
 
   const { data, isLoading: loadingUser } = useAdminUserDetailQuery({ userId }, { select: d => d.adminUser });
@@ -121,6 +188,10 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
   const { mutateAsync: removeUserPicture } = useAdminRemoveUserPictureMutation();
   const { mutateAsync: revokeSession, isPending: revokingSession } = useAdminRevokeUserSessionMutation();
   const { mutateAsync: revokeAllSessions, isPending: revokingAllSessions } = useAdminRevokeAllUserSessionsMutation();
+  const { mutateAsync: setUserAdminStatus, isPending: settingAdmin } = useAdminSetUserAdminMutation({
+    onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
+    onSettled: () => setLoading(false),
+  });
 
   const invalidateUser = () => queryClient.invalidateQueries({ queryKey: ['AdminUserDetail', { userId }] });
 
@@ -147,6 +218,21 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
   };
 
   const isCurrentUser = currentUser?.id === userId;
+  const isSuperAdmin = value?.authorities.includes(UserAuthorities.RoleSuperadmin) ?? false;
+  const isAdmin = value?.authorities.includes(UserAuthorities.RoleAdmin) ?? false;
+  const canManageTarget = !isSuperAdmin && (Boolean(currentUser?.isSuperAdmin) || !isAdmin);
+  const canEditUser = !isCurrentUser && canManageTarget;
+  const canToggleAdmin = Boolean(currentUser?.isSuperAdmin) && !isCurrentUser && !isSuperAdmin;
+  const readOnlyMessage = match({ canEditUser, isCurrentUser, isSuperAdmin })
+    .with({ canEditUser: true }, () => undefined)
+    .with({ isCurrentUser: true }, () => undefined)
+    .with({ isSuperAdmin: true }, () => 'Un super-admin ne peut pas être modifié.')
+    .otherwise(() => 'Vous ne pouvez pas modifier un autre admin.');
+  const displayName = [firstname, lastname].filter(Boolean).join(' ') || 'Utilisateur';
+  const roleChip = match({ isSuperAdmin, isAdmin })
+    .with({ isSuperAdmin: true }, () => <Chip size="small" color="warning" label="Super-admin" />)
+    .with({ isAdmin: true }, () => <Chip size="small" color="primary" label="Admin" />)
+    .otherwise(() => null);
 
   useEffect(() => {
     if (value) {
@@ -175,6 +261,22 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
   const disableUser = () => setUserEnabled(false);
   const enableUser = () => setUserEnabled(true);
 
+  const setUserAdmin = async (nextIsAdmin: boolean) => {
+    setLoading(true);
+    const res = await setUserAdminStatus({ userId, isAdmin: nextIsAdmin });
+    match(res.adminSetUserAdmin)
+      .with({ __typename: 'VoidOutput' }, () => {
+        void invalidateUser();
+        void queryClient.invalidateQueries({ queryKey: ['AdminUsersStats'] });
+        addToast({
+          message: nextIsAdmin ? 'Utilisateur nommé admin' : 'Accès admin retiré',
+          variant: 'success',
+        });
+      })
+      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
+      .exhaustive();
+  };
+
   const updateProfile = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -198,89 +300,130 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
 
   return (
     <Loader loading={loadingUser}>
-      <Title>Editer l'utilisateur</Title>
-
-      {queryRejection && <Alert severity="error">{rejectionMessage(queryRejection)}</Alert>}
-
       <UpdatePasswordModal
         userId={userId}
         open={updatePasswordModalOpen}
         onClose={() => setUpdatePasswordModalOpen(false)}
       />
 
-      <Stack
-        direction="row"
-        sx={{
-          justifyContent: 'center',
-          flexWrap: 'wrap',
-          mb: 2,
-        }}
-      >
-        <AvatarUpdateButton
-          size="120px"
-          pictureUrl={pictureUrl}
-          accounts={[]}
-          onPictureUpdated={url => {
-            setPictureUrl(url || '');
-            void invalidateUser();
-          }}
-          uploadPictureHandler={file => uploadAdminUserPicture(userId, file)}
-          updatePictureFromAccountHandler={() => Promise.resolve()}
-          deletePictureHandler={async () => {
-            const res = await removeUserPicture({ userId });
-            // AvatarUpdateButton owns the error UI for this handler: throwing keeps
-            // its catch path (error toast) and prevents it from clearing the picture.
-            match(res.adminRemoveUserPicture)
-              .with({ __typename: 'VoidOutput' }, () => undefined)
-              .with(rejectionPattern, rejection => {
-                throw new Error(rejectionMessage(rejection));
-              })
-              .exhaustive();
-          }}
-        />
-      </Stack>
-
-      <Header>
-        <NameRow>
-          <Name>
-            {firstname} {lastname}
-          </Name>
-          {value ? (
+      <AdminPageHeader
+        title={displayName}
+        breadcrumbs={[
+          { label: 'Admin', to: '/admin' },
+          { label: 'Utilisateurs', to: '/admin/users' },
+          { label: displayName },
+        ]}
+        avatar={
+          canEditUser ? (
+            <AvatarUpdateButton
+              compact
+              size="88px"
+              pictureUrl={pictureUrl}
+              accounts={[]}
+              onPictureUpdated={url => {
+                setPictureUrl(url || '');
+                void invalidateUser();
+              }}
+              uploadPictureHandler={file => uploadAdminUserPicture(userId, file)}
+              updatePictureFromAccountHandler={() => Promise.resolve()}
+              deletePictureHandler={async () => {
+                const res = await removeUserPicture({ userId });
+                match(res.adminRemoveUserPicture)
+                  .with({ __typename: 'VoidOutput' }, () => undefined)
+                  .with(rejectionPattern, rejection => {
+                    throw new Error(rejectionMessage(rejection));
+                  })
+                  .exhaustive();
+              }}
+            />
+          ) : (
+            <HeaderUserAvatar src={pictureUrl || undefined}>
+              {(firstname || displayName).substring(0, 1).toUpperCase()}
+            </HeaderUserAvatar>
+          )
+        }
+        chips={
+          <>
             <Chip size="small" color={enabled ? 'success' : 'default'} label={enabled ? 'Actif' : 'Désactivé'} />
-          ) : null}
-        </NameRow>
-        <Email>{email}</Email>
-        {value?.createdAt ? (
-          <Meta>Inscrit le {DateTime.fromISO(value.createdAt).toLocaleString(DateTime.DATETIME_MED)}</Meta>
-        ) : null}
-        {!isCurrentUser && (
-          <HeaderActions>
-            <ConfirmButton
-              confirmTitle={enabled ? "Désactiver l'utilisateur" : "Activer l'utilisateur"}
-              confirmText={
-                enabled
-                  ? 'Êtes-vous sûr de vouloir désactiver cet utilisateur ?'
-                  : 'Êtes-vous sûr de vouloir activer cet utilisateur ?'
-              }
-              onClick={() => (enabled ? disableUser() : enableUser())}
-              disabled={loading}
-              size="small"
-              variant="outlined"
-              color={enabled ? 'error' : 'success'}
-            >
-              {enabled ? 'Désactiver' : 'Activer'}
-            </ConfirmButton>
-            <Button variant="outlined" size="small" disabled={loading} onClick={() => setUpdatePasswordModalOpen(true)}>
-              Changer le mot de passe
-            </Button>
-          </HeaderActions>
-        )}
-      </Header>
+            {roleChip}
+          </>
+        }
+        meta={
+          <>
+            {email}
+            {value?.createdAt
+              ? ` · Inscrit le ${DateTime.fromISO(value.createdAt).toLocaleString(DateTime.DATETIME_MED)}`
+              : ''}
+          </>
+        }
+        actions={
+          isCurrentUser ? undefined : (
+            <>
+              <ConfirmButton
+                confirmTitle={enabled ? "Désactiver l'utilisateur" : "Activer l'utilisateur"}
+                confirmText={
+                  enabled
+                    ? 'Êtes-vous sûr de vouloir désactiver cet utilisateur ?'
+                    : 'Êtes-vous sûr de vouloir activer cet utilisateur ?'
+                }
+                onClick={() => (enabled ? disableUser() : enableUser())}
+                disabled={loading || !canEditUser}
+                size="small"
+                variant="outlined"
+                color={enabled ? 'error' : 'success'}
+              >
+                {enabled ? 'Désactiver' : 'Activer'}
+              </ConfirmButton>
+              <Button
+                variant="outlined"
+                size="small"
+                disabled={loading || !canEditUser}
+                onClick={() => setUpdatePasswordModalOpen(true)}
+              >
+                Changer le mot de passe
+              </Button>
+            </>
+          )
+        }
+      />
 
-      <CardStack>
-        <Card>
-          <Subtitle>Modifier les informations</Subtitle>
+      {queryRejection && <Alert severity="error">{rejectionMessage(queryRejection)}</Alert>}
+      {readOnlyMessage ? <ReadOnlyAlert severity="info">{readOnlyMessage}</ReadOnlyAlert> : null}
 
+      <AdminTabs
+        value={tab}
+        onChange={(_, newValue) =>
+          void navigate({
+            search: prev => ({ ...prev, tab: newValue as AdminUserTab }),
+          })
+        }
+        variant="scrollable"
+        scrollButtons="auto"
+        allowScrollButtonsMobile
+      >
+        {userTabs.map(tabItem => (
+          <Tab
+            key={tabItem.value}
+            value={tabItem.value}
+            label={smallScreen ? undefined : tabItem.label}
+            iconPosition="start"
+            icon={tabItem.icon}
+          />
+        ))}
+      </AdminTabs>
+
+      {tab === AdminUserTab.profile && (
+        <AdminSection
+          footer={
+            canToggleAdmin ? (
+              <AdminAccessToggle
+                isAdmin={isAdmin}
+                disabled={loading || settingAdmin}
+                onConfirm={nextIsAdmin => void setUserAdmin(nextIsAdmin)}
+              />
+            ) : undefined
+          }
+        >
           <Stack
             component="form"
             onSubmit={updateProfile}
@@ -299,7 +442,7 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
                 <TextField
                   autoComplete="off"
                   label="Prénom"
-                  disabled={loading || isCurrentUser}
+                  disabled={loading || !canEditUser}
                   fullWidth
                   value={firstname}
                   slotProps={{ htmlInput: { maxLength: 50 } }}
@@ -314,7 +457,7 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
                 <TextField
                   autoComplete="off"
                   label="Nom"
-                  disabled={loading || isCurrentUser}
+                  disabled={loading || !canEditUser}
                   fullWidth
                   value={lastname}
                   slotProps={{ htmlInput: { maxLength: 50 } }}
@@ -338,7 +481,7 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
                   label="Email"
                   type="email"
                   autoComplete="off"
-                  disabled={loading || isCurrentUser}
+                  disabled={loading || !canEditUser}
                   fullWidth
                   value={email}
                   placeholder="john@doe.fr"
@@ -351,7 +494,7 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
                 <WishlistDatePicker
                   label="Date de naissance"
                   value={birthday}
-                  disabled={loading || isCurrentUser}
+                  disabled={loading || !canEditUser}
                   onChange={date => setBirthday(date)}
                   disableFuture
                   fullWidth
@@ -359,48 +502,35 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
               </Box>
             </Stack>
 
-            {!isCurrentUser && (
-              <Stack
-                direction="row"
-                sx={{
-                  justifyContent: 'center',
-                }}
-              >
+            {canEditUser && (
+              <FormActions>
                 <Button
-                  sx={{ marginTop: '8px' }}
                   type="submit"
                   variant="contained"
                   size="small"
                   loading={loading}
                   loadingPosition="start"
-                  disabled={loading || isCurrentUser}
+                  disabled={loading}
                   startIcon={<SaveIcon />}
                 >
                   Mettre à jour
                 </Button>
-              </Stack>
+              </FormActions>
             )}
           </Stack>
-        </Card>
+        </AdminSection>
+      )}
 
-        <Card>
-          <Subtitle>Comptes de connexion ({value?.accounts.length ?? 0})</Subtitle>
+      {tab === AdminUserTab.accounts && (
+        <AdminSection>
           <AdminListUserAccounts accounts={value?.accounts ?? []} />
-        </Card>
+        </AdminSection>
+      )}
 
-        <Card>
-          <Stack
-            direction="row"
-            sx={{
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              gap: 2,
-              flexWrap: 'wrap',
-              mb: 2,
-            }}
-          >
-            <Subtitle sx={{ mb: 0 }}>Sessions ({value?.sessions.length ?? 0})</Subtitle>
-            {(value?.sessions.length ?? 0) > 0 && !isCurrentUser && (
+      {tab === AdminUserTab.sessions && (
+        <AdminSection>
+          {(value?.sessions.length ?? 0) > 0 && canEditUser && (
+            <SessionsHeader>
               <ConfirmButton
                 confirmTitle="Révoquer toutes les sessions"
                 confirmText="L'utilisateur devra se reconnecter sur tous ses appareils."
@@ -413,25 +543,93 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
               >
                 Révoquer toutes
               </ConfirmButton>
-            )}
-          </Stack>
+            </SessionsHeader>
+          )}
           <AdminListUserSessions
             sessions={value?.sessions ?? []}
-            disabled={isCurrentUser || loading || revokingSession || revokingAllSessions}
+            disabled={!canEditUser || loading || revokingSession || revokingAllSessions}
             onRevoke={sessionId => void revokeUserSession(sessionId)}
           />
-        </Card>
+        </AdminSection>
+      )}
 
-        <Card>
-          <Subtitle>Evènements</Subtitle>
-          <AdminListEvents userId={userId} currentPage={eventPage} changeCurrentPage={changeEventPage} />
-        </Card>
+      {tab === AdminUserTab.events && (
+        <AdminSection>
+          <AdminListEvents
+            userId={userId}
+            currentPage={eventPage}
+            search={eventSearch}
+            changeCurrentPage={changeEventPage}
+            changeSearch={changeEventSearch}
+          />
+        </AdminSection>
+      )}
 
-        <Card>
-          <Subtitle>Wishlists</Subtitle>
+      {tab === AdminUserTab.wishlists && (
+        <AdminSection>
           <AdminListWishlistsForUser userId={userId} />
-        </Card>
-      </CardStack>
+        </AdminSection>
+      )}
     </Loader>
+  );
+};
+
+type AdminAccessToggleProps = {
+  isAdmin: boolean;
+  disabled: boolean;
+  onConfirm: (nextIsAdmin: boolean) => void;
+};
+
+const AdminAccessToggle = ({ isAdmin, disabled, onConfirm }: AdminAccessToggleProps) => {
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const nextIsAdmin = !isAdmin;
+
+  return (
+    <>
+      <AccessRow>
+        <AccessIcon active={isAdmin}>
+          <AdminPanelSettingsIcon fontSize="small" />
+        </AccessIcon>
+        <AccessCopy>
+          <AccessTitle>Accès administration</AccessTitle>
+          <AccessHint>
+            {isAdmin
+              ? 'Peut gérer les utilisateurs, les évènements et les listes.'
+              : "Donne accès à l'espace d'administration."}
+          </AccessHint>
+        </AccessCopy>
+        <Switch
+          checked={isAdmin}
+          disabled={disabled}
+          color="primary"
+          edge="end"
+          slotProps={{ input: { 'aria-label': 'Accès administration' } }}
+          onChange={() => setConfirmOpen(true)}
+        />
+      </AccessRow>
+      <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)} disableScrollLock>
+        <DialogTitle>{nextIsAdmin ? 'Nommer admin' : "Retirer l'accès admin"}</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            {nextIsAdmin
+              ? "Cet utilisateur pourra accéder à l'espace d'administration."
+              : "Cet utilisateur n'aura plus accès à l'espace d'administration. Ses sessions seront révoquées."}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConfirmOpen(false)}>Annuler</Button>
+          <Button
+            color={nextIsAdmin ? 'primary' : 'error'}
+            onClick={() => {
+              setConfirmOpen(false);
+              onConfirm(nextIsAdmin);
+            }}
+            autoFocus
+          >
+            {nextIsAdmin ? 'Nommer admin' : 'Retirer'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 };

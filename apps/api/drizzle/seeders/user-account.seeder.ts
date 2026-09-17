@@ -4,7 +4,7 @@ import { PasswordManager } from '../../src/auth/infrastructure/util/password-man
 import { UserAccountProvider } from '../../src/user/domain/user-account-provider.enum';
 import * as schema from '../schema';
 import { seedConfig } from './config';
-import { uuid } from './helpers';
+import { insertInBatches, uuid } from './helpers';
 
 export async function seedUserAccounts(db: SeedDb, deps: { users: readonly UserSeed[] }): Promise<UserAccountSeed[]> {
   const passwordHash = await PasswordManager.hash(seedConfig.users.password);
@@ -17,6 +17,6 @@ export async function seedUserAccounts(db: SeedDb, deps: { users: readonly UserS
     passwordHash,
   }));
 
-  await db.insert(schema.userAccount).values(accounts);
+  await insertInBatches(db, schema.userAccount, accounts);
   return accounts;
 }

@@ -10,11 +10,13 @@ import { SecretSantaCancelledHandler } from './event/secret-santa-cancelled.hand
 import { SecretSantaStartedHandler } from './event/secret-santa-started.handler';
 import { GetSecretSantaUseCase } from './query/get-secret-santa.use-case';
 import { GetSecretSantaDrawUseCase } from './query/get-secret-santa-draw.use-case';
+import { GetSecretSantasByEventIdsUseCase } from './query/get-secret-santas-by-event-ids.use-case';
 
 export const handlers = [
   // Queries
   GetSecretSantaUseCase,
   GetSecretSantaDrawUseCase,
+  GetSecretSantasByEventIdsUseCase,
   // Commands
   CreateSecretSantaUseCase,
   UpdateSecretSantaUseCase,

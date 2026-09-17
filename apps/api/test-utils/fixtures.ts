@@ -32,6 +32,7 @@ export class Fixtures {
   static readonly DEFAULT_USER_PASSWORD = 'Password123';
   static readonly BASE_USER_EMAIL = 'test@test.fr';
   static readonly ADMIN_USER_EMAIL = 'admin@admin.fr';
+  static readonly SUPERADMIN_USER_EMAIL = 'superadmin@admin.fr';
 
   constructor(private readonly sql: SQL) {}
 
@@ -44,6 +45,9 @@ export class Fixtures {
         break;
       case 'ADMIN_USER':
         email = Fixtures.ADMIN_USER_EMAIL;
+        break;
+      case 'SUPERADMIN_USER':
+        email = Fixtures.SUPERADMIN_USER_EMAIL;
         break;
       default:
         throw new Error(`Unknown signedAs value: ${signedAs}`);
@@ -136,6 +140,15 @@ export class Fixtures {
       firstname: 'Admin',
       lastname: 'ADMIN',
       authorities: [Authorities.ROLE_ADMIN],
+    });
+  }
+
+  insertSuperAdminUser(): Promise<string> {
+    return this.insertUser({
+      email: Fixtures.SUPERADMIN_USER_EMAIL,
+      firstname: 'Super',
+      lastname: 'Admin',
+      authorities: [Authorities.ROLE_SUPERADMIN],
     });
   }
 

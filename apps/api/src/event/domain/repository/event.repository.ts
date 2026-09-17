@@ -11,10 +11,14 @@ export interface EventRepository {
     userId: UserId;
     pagination: { take: number; skip: number };
     onlyFuture: boolean;
+    criteria?: string;
   }): Promise<{ events: Event[]; totalCount: number }>;
   findAllPaginated(params: {
     pagination: { take: number; skip: number };
+    criteria?: string;
   }): Promise<{ events: Event[]; totalCount: number }>;
+  countAdminStats(): Promise<{ totalCount: number; upcomingCount: number; pastCount: number }>;
+  countCreatedByMonth(since: Date): Promise<Array<{ month: string; count: number }>>;
   findEmailsToNotify(eventId: EventId): Promise<Array<{ userId: UserId; email: string }>>;
   save(event: Event, tx?: DrizzleTransaction): Promise<void>;
   delete(id: EventId, tx?: DrizzleTransaction): Promise<void>;

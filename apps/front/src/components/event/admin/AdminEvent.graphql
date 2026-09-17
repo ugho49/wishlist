@@ -18,6 +18,10 @@ query AdminEventListEvents($filters: AdminEventPaginationFilters!) {
             lastName
           }
         }
+        secretSanta {
+          id
+          status
+        }
       }
       pagination {
         totalPages
@@ -75,6 +79,17 @@ query AdminEventGetEvent($id: EventId!) {
   }
 }
 
+query AdminEventsStats {
+  adminEventsStats {
+    __typename
+    ... on AdminEventsStats {
+      totalCount
+      upcomingCount
+      pastCount
+    }
+  }
+}
+
 mutation AdminUpdateEvent($id: EventId!, $input: UpdateEventInput!) {
   adminUpdateEvent(id: $id, input: $input) {
     __typename
@@ -101,6 +116,15 @@ mutation AdminDeleteEvent($id: EventId!) {
 
 mutation AdminDeleteEventAttendee($eventId: EventId!, $attendeeId: AttendeeId!) {
   adminDeleteEventAttendee(eventId: $eventId, attendeeId: $attendeeId) {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+  }
+}
+
+mutation AdminUpdateEventAttendeeRole($eventId: EventId!, $attendeeId: AttendeeId!, $role: AttendeeRole!) {
+  adminUpdateEventAttendeeRole(eventId: $eventId, attendeeId: $attendeeId, role: $role) {
     __typename
     ... on VoidOutput {
       success

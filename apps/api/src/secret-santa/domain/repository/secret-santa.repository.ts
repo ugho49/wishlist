@@ -7,6 +7,7 @@ export interface SecretSantaRepository {
   findById(id: SecretSantaId): Promise<SecretSanta | undefined>;
   findByIdOrFail(id: SecretSantaId): Promise<SecretSanta>;
   findForEvent(param: { eventId: EventId }): Promise<SecretSanta | undefined>;
+  findByEventIds(eventIds: EventId[]): Promise<SecretSanta[]>;
   existsForEvent(eventId: EventId): Promise<boolean>;
   save(secretSanta: SecretSanta, tx?: DrizzleTransaction): Promise<void>;
   delete(id: SecretSantaId, tx?: DrizzleTransaction): Promise<void>;

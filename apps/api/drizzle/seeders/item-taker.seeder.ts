@@ -4,7 +4,7 @@ import { faker } from '@faker-js/faker';
 
 import * as schema from '../schema';
 import { seedConfig } from './config';
-import { chance, intBetween } from './helpers';
+import { chance, insertInBatches, intBetween } from './helpers';
 
 export async function seedItemTakers(
   db: SeedDb,
@@ -37,6 +37,6 @@ export async function seedItemTakers(
 
   if (takers.length === 0) return takers;
 
-  await db.insert(schema.itemTaker).values(takers);
+  await insertInBatches(db, schema.itemTaker, takers);
   return takers;
 }

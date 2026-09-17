@@ -1,5 +1,5 @@
 import { Box, Container, containerClasses, styled, useMediaQuery, useTheme } from '@mui/material';
-import { Outlet } from '@tanstack/react-router';
+import { Outlet, useLocation } from '@tanstack/react-router';
 import { useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 
@@ -34,8 +34,10 @@ export const AuthenticatedContainerOutlet = () => {
   const { data } = useUserProfileCurrentUserQuery(undefined, { select: d => d.currentUser });
   const user = data?.__typename === 'User' ? data : undefined;
   const theme = useTheme();
+  const location = useLocation();
   const dispatch = useDispatch();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isAdminRoute = location.pathname.startsWith('/admin');
   const { shouldShowPrompt, handlePromptClosed } = useProfilePicturePrompt();
   const { addToast } = useToast();
   const logout = useLogout();
@@ -74,9 +76,13 @@ export const AuthenticatedContainerOutlet = () => {
       {isMobile && <MobileTopBar />}
 
       <MainWrapper as="main">
-        <ContainerStyled fixed maxWidth="lg">
+        {isAdminRoute ? (
           <Outlet />
-        </ContainerStyled>
+        ) : (
+          <ContainerStyled fixed maxWidth="lg">
+            <Outlet />
+          </ContainerStyled>
+        )}
       </MainWrapper>
 
       {isMobile && <MobileBottomNavigation />}

@@ -166,7 +166,7 @@ Most int-specs target GraphQL resolvers (`*.resolver.int-spec.ts`). A few REST c
 
    const { getRequest, getFixtures, expectTable } = useTestApp()
    ```
-   `getRequest({ signedAs: 'BASE_USER' | 'ADMIN_USER' })` authenticates via GraphQL `login`.
+   `getRequest({ signedAs: 'BASE_USER' | 'ADMIN_USER' | 'SUPERADMIN_USER' })` authenticates via GraphQL `login`.
 3. **GraphQL** — HTTP 200 even for resolver-level rejections. Assert `__typename` (and still verify the database for mutations).
 4. **Validation** — GraphQL failures are `ValidationRejection`, not HTTP 400. Use `it.each`. REST multipart: HTTP 400 + `class-validator`, JSON via `.field('data', JSON.stringify(payload))`.
 5. **Database** — every create/update/delete **must** use `expectTable`.

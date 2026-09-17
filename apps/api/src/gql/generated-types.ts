@@ -57,10 +57,21 @@ export type AdminDeleteEventResult = ForbiddenRejection | InternalErrorRejection
 export type AdminDeleteUserResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
 export type AdminEventPaginationFilters = {
+  criteria?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['Int']['input']>;
   page?: InputMaybe<Scalars['Int']['input']>;
   userId?: InputMaybe<Scalars['UserId']['input']>;
 };
+
+export type AdminEventsStats = {
+  __typename: 'AdminEventsStats';
+  createdByMonth: Array<AdminMonthlyCount>;
+  pastCount: Scalars['Int']['output'];
+  totalCount: Scalars['Int']['output'];
+  upcomingCount: Scalars['Int']['output'];
+};
+
+export type AdminEventsStatsResult = AdminEventsStats | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection;
 
 export type AdminGetAllUsers = {
   __typename: 'AdminGetAllUsers';
@@ -90,11 +101,21 @@ export type AdminGetWishlists = {
 
 export type AdminGetWishlistsResult = AdminGetWishlists | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection;
 
+export type AdminMonthlyCount = {
+  __typename: 'AdminMonthlyCount';
+  count: Scalars['Int']['output'];
+  month: Scalars['String']['output'];
+};
+
 export type AdminRemoveUserPictureResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
 export type AdminRevokeAllUserSessionsResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
 export type AdminRevokeUserSessionResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+
+export type AdminSetUserAdminResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+
+export type AdminUpdateEventAttendeeRoleResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
 export type AdminUpdateEventResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
@@ -108,6 +129,16 @@ export type AdminUpdateUserProfileInput = {
 };
 
 export type AdminUpdateUserProfileResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+
+export type AdminUsersStats = {
+  __typename: 'AdminUsersStats';
+  adminCount: Scalars['Int']['output'];
+  createdByMonth: Array<AdminMonthlyCount>;
+  enabledCount: Scalars['Int']['output'];
+  totalCount: Scalars['Int']['output'];
+};
+
+export type AdminUsersStatsResult = AdminUsersStats | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection;
 
 export type AdminWishlistPaginationFilters = {
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -372,7 +403,9 @@ export type Mutation = {
   adminRemoveUserPicture: AdminRemoveUserPictureResult;
   adminRevokeAllUserSessions: AdminRevokeAllUserSessionsResult;
   adminRevokeUserSession: AdminRevokeUserSessionResult;
+  adminSetUserAdmin: AdminSetUserAdminResult;
   adminUpdateEvent: AdminUpdateEventResult;
+  adminUpdateEventAttendeeRole: AdminUpdateEventAttendeeRoleResult;
   adminUpdateUserProfile: AdminUpdateUserProfileResult;
   cancelSecretSanta: CancelSecretSantaResult;
   changeUserPassword: ChangeUserPasswordResult;
@@ -468,9 +501,22 @@ export type MutationAdminRevokeUserSessionArgs = {
 };
 
 
+export type MutationAdminSetUserAdminArgs = {
+  isAdmin: Scalars['Boolean']['input'];
+  userId: Scalars['UserId']['input'];
+};
+
+
 export type MutationAdminUpdateEventArgs = {
   id: Scalars['EventId']['input'];
   input: UpdateEventInput;
+};
+
+
+export type MutationAdminUpdateEventAttendeeRoleArgs = {
+  attendeeId: Scalars['AttendeeId']['input'];
+  eventId: Scalars['EventId']['input'];
+  role: AttendeeRole;
 };
 
 
@@ -719,8 +765,10 @@ export type Query = {
   __typename: 'Query';
   adminEvent: AdminGetEventByIdResult;
   adminEvents: AdminGetEventsResult;
+  adminEventsStats: AdminEventsStatsResult;
   adminUser: AdminGetUserByIdResult;
   adminUsers: AdminGetAllUsersResult;
+  adminUsersStats: AdminUsersStatsResult;
   adminWishlists: AdminGetWishlistsResult;
   closestFriends: ClosestFriendsResult;
   currentUser: GetCurrentUserResult;

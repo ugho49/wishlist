@@ -2,10 +2,10 @@ import type { GridColDef } from '@mui/x-data-grid';
 import type { UserId, WishlistId } from '@wishlist/common';
 
 import ListIcon from '@mui/icons-material/List';
-import { Avatar } from '@mui/material';
-import { DataGrid } from '@mui/x-data-grid';
+import { Avatar, styled } from '@mui/material';
 import { DateTime } from 'luxon';
 
+import { AdminDataGrid } from '../../admin/AdminDataGrid';
 import { RouterLink } from '../../common/RouterLink';
 
 /**
@@ -23,25 +23,30 @@ export type AdminEventWishlist = {
   coOwner?: { id: UserId; firstName: string; lastName: string } | null;
 };
 
+const WishlistAvatar = styled(Avatar)({
+  width: 28,
+  height: 28,
+});
+
 const columns: GridColDef<AdminEventWishlist>[] = [
   {
     field: 'logoUrl',
     headerName: '',
-    width: 20,
+    width: 44,
     sortable: false,
     filterable: false,
     display: 'flex',
     renderCell: ({ row: wishlist }) => (
-      <Avatar src={wishlist.logoUrl ?? undefined} sx={{ width: '30px', height: '30px' }}>
+      <WishlistAvatar src={wishlist.logoUrl ?? undefined}>
         <ListIcon />
-      </Avatar>
+      </WishlistAvatar>
     ),
   },
-  { field: 'title', headerName: 'Title', flex: 1, minWidth: 250 },
+  { field: 'title', headerName: 'Titre', flex: 1, minWidth: 250 },
   {
     field: 'owner',
-    headerName: 'Owner',
-    width: 300,
+    headerName: 'Propriétaire',
+    width: 220,
     valueGetter: (_, row) => `${row.owner.firstName} ${row.owner.lastName}`,
     renderCell: ({ row }) => (
       <RouterLink key={row.owner.id} to="/admin/users/$userId" params={{ userId: row.owner.id }}>
@@ -51,8 +56,8 @@ const columns: GridColDef<AdminEventWishlist>[] = [
   },
   {
     field: 'coOwner',
-    headerName: 'Co-owner',
-    width: 300,
+    headerName: 'Co-propriétaire',
+    width: 220,
     valueGetter: (_, row) => `${row.coOwner?.firstName} ${row.coOwner?.lastName}`,
     renderCell: ({ row }) => {
       if (!row.coOwner) return '-';
@@ -65,8 +70,8 @@ const columns: GridColDef<AdminEventWishlist>[] = [
   },
   {
     field: 'config.hideItems',
-    headerName: 'Is Public',
-    width: 100,
+    headerName: 'Public',
+    width: 90,
     sortable: false,
     filterable: false,
     type: 'boolean',
@@ -74,9 +79,9 @@ const columns: GridColDef<AdminEventWishlist>[] = [
   },
   {
     field: 'createdAt',
-    headerName: 'Created At',
+    headerName: 'Créé le',
     type: 'dateTime',
-    width: 200,
+    width: 180,
     valueGetter: (_, row) => new Date(row.createdAt),
     renderCell: ({ value }) => DateTime.fromJSDate(value).toLocaleString(DateTime.DATETIME_MED),
   },
@@ -87,18 +92,15 @@ type AdminListWishlistsForEventProps = {
 };
 
 export const AdminListWishlistsForEvent = ({ wishlists }: AdminListWishlistsForEventProps) => (
-  <div style={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
-    <DataGrid
-      isRowSelectable={() => false}
-      density="standard"
-      rows={wishlists}
-      columns={columns}
-      paginationMode="client"
-      localeText={{
-        noRowsLabel: 'Aucune liste',
-      }}
-      hideFooter
-      disableColumnMenu
-    />
-  </div>
+  <AdminDataGrid
+    isRowSelectable={() => false}
+    rows={wishlists}
+    columns={columns}
+    paginationMode="client"
+    localeText={{
+      noRowsLabel: 'Aucune liste',
+    }}
+    hideFooter
+    disableColumnMenu
+  />
 );

@@ -40,10 +40,20 @@ union AdminDeleteEventResult = ForbiddenRejection | InternalErrorRejection | Not
 union AdminDeleteUserResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
 input AdminEventPaginationFilters {
+  criteria: String
   limit: Int
   page: Int
   userId: UserId
 }
+
+type AdminEventsStats {
+  createdByMonth: [AdminMonthlyCount!]!
+  pastCount: Int!
+  totalCount: Int!
+  upcomingCount: Int!
+}
+
+union AdminEventsStatsResult = AdminEventsStats | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection
 
 type AdminGetAllUsers {
   data: [UserFull!]!
@@ -71,11 +81,20 @@ type AdminGetWishlists {
 
 union AdminGetWishlistsResult = AdminGetWishlists | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection
 
+type AdminMonthlyCount {
+  count: Int!
+  month: String!
+}
+
 union AdminRemoveUserPictureResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
 union AdminRevokeAllUserSessionsResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
 union AdminRevokeUserSessionResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
+union AdminSetUserAdminResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
+union AdminUpdateEventAttendeeRoleResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
 union AdminUpdateEventResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
@@ -89,6 +108,15 @@ input AdminUpdateUserProfileInput {
 }
 
 union AdminUpdateUserProfileResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
+type AdminUsersStats {
+  adminCount: Int!
+  createdByMonth: [AdminMonthlyCount!]!
+  enabledCount: Int!
+  totalCount: Int!
+}
+
+union AdminUsersStatsResult = AdminUsersStats | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection
 
 input AdminWishlistPaginationFilters {
   limit: Int
@@ -186,6 +214,7 @@ type Event {
   eventDate: String!
   icon: String
   id: EventId!
+  secretSanta: SecretSanta @resolved
   title: String!
   updatedAt: String!
   wishlistIds: [WishlistId!]!
@@ -344,7 +373,9 @@ type Mutation {
   adminRemoveUserPicture(userId: UserId!): AdminRemoveUserPictureResult!
   adminRevokeAllUserSessions(userId: UserId!): AdminRevokeAllUserSessionsResult!
   adminRevokeUserSession(sessionId: UserSessionId!, userId: UserId!): AdminRevokeUserSessionResult!
+  adminSetUserAdmin(isAdmin: Boolean!, userId: UserId!): AdminSetUserAdminResult!
   adminUpdateEvent(id: EventId!, input: UpdateEventInput!): AdminUpdateEventResult!
+  adminUpdateEventAttendeeRole(attendeeId: AttendeeId!, eventId: EventId!, role: AttendeeRole!): AdminUpdateEventAttendeeRoleResult!
   adminUpdateUserProfile(input: AdminUpdateUserProfileInput!, userId: UserId!): AdminUpdateUserProfileResult!
   cancelSecretSanta(id: SecretSantaId!): CancelSecretSantaResult!
   changeUserPassword(input: ChangeUserPasswordInput!): ChangeUserPasswordResult!
@@ -413,8 +444,10 @@ type PendingEmailChange {
 type Query {
   adminEvent(id: EventId!): AdminGetEventByIdResult!
   adminEvents(filters: AdminEventPaginationFilters!): AdminGetEventsResult!
+  adminEventsStats: AdminEventsStatsResult!
   adminUser(userId: UserId!): AdminGetUserByIdResult!
   adminUsers(input: AdminGetAllUsersPaginationFilters): AdminGetAllUsersResult!
+  adminUsersStats: AdminUsersStatsResult!
   adminWishlists(filters: AdminWishlistPaginationFilters!): AdminGetWishlistsResult!
   closestFriends(limit: Int): ClosestFriendsResult!
   currentUser: GetCurrentUserResult!

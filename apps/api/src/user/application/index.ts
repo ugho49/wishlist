@@ -10,6 +10,7 @@ import { LinkUserToGoogleUseCase } from './command/link-user-to-google.use-case'
 import { RemoveUserPictureUseCase } from './command/remove-user-picture.use-case';
 import { ResetUserPasswordUseCase } from './command/reset-user-password.use-case';
 import { RevokeUserSessionUseCase } from './command/revoke-user-session.use-case';
+import { SetUserAdminUseCase } from './command/set-user-admin.use-case';
 import { UnlinkUserAccountUseCase } from './command/unlink-user-account.use-case';
 import { UpdateUserUseCase } from './command/update-user.use-case';
 import { UpdateUserEmailSettingUseCase } from './command/update-user-email-setting.use-case';
@@ -21,6 +22,7 @@ import { EmailChangeVerificationCreatedHandler } from './event/email-change-veri
 import { EmailChangedhandler } from './event/email-changed.handler';
 import { PasswordVerificationCreatedHandler } from './event/password-verification-created.handler';
 import { UserCreatedHandler } from './event/user-created.handler';
+import { GetAdminUsersStatsUseCase } from './query/get-admin-users-stats.use-case';
 import { GetClosestFriendsUseCase } from './query/get-closest-friends.use-case';
 import { GetPendingEmailChangeUseCase } from './query/get-pending-email-change.use-case';
 import { GetUserAccountsByIdsUseCase } from './query/get-user-accounts-by-ids.use-case';
@@ -47,6 +49,7 @@ export const handlers = [
   UpdateUserEmailSettingUseCase,
   UpdateUserUseCase,
   UpdateUserFullUseCase,
+  SetUserAdminUseCase,
   UpdateUserPictureFromAccountUseCase,
   UpdateUserPictureUseCase,
   UpdateUserPasswordUseCase,
@@ -58,6 +61,7 @@ export const handlers = [
   GetUsersByIdsUseCase,
   GetUsersByCriteriaUseCase,
   GetUsersPaginatedUseCase,
+  GetAdminUsersStatsUseCase,
   GetClosestFriendsUseCase,
   GetUserAccountsByUserIdsUseCase,
   GetUserAccountsByIdsUseCase,

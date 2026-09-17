@@ -23,6 +23,7 @@ type Event {
   wishlistIds: [WishlistId!]!
   wishlists: [Wishlist!]! @resolved
   attendees: [EventAttendee!]!
+  secretSanta: SecretSanta @resolved
   createdAt: String!
   updatedAt: String!
 }
@@ -30,6 +31,13 @@ type Event {
 type GetEventsPagedResponse {
   data: [Event!]!
   pagination: Pagination!
+}
+
+type AdminEventsStats {
+  totalCount: Int!
+  upcomingCount: Int!
+  pastCount: Int!
+  createdByMonth: [AdminMonthlyCount!]!
 }
 
 input EventPaginationFilters {
@@ -80,6 +88,7 @@ input AdminEventPaginationFilters {
   page: Int
   limit: Int
   userId: UserId
+  criteria: String
 }
 
 ########################################################
@@ -149,6 +158,8 @@ union AdminGetEventsResult =
   | ForbiddenRejection
   | InternalErrorRejection
 
+union AdminEventsStatsResult = AdminEventsStats | UnauthorizedRejection | ForbiddenRejection | InternalErrorRejection
+
 union AdminUpdateEventResult =
   | VoidOutput
   | ValidationRejection
@@ -173,11 +184,20 @@ union AdminDeleteEventAttendeeResult =
   | NotFoundRejection
   | InternalErrorRejection
 
+union AdminUpdateEventAttendeeRoleResult =
+  | VoidOutput
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | NotFoundRejection
+  | InternalErrorRejection
+
 extend type Query {
   event(id: EventId!): GetEventByIdResult
   events(filters: EventPaginationFilters!): GetMyEventsResult!
   adminEvent(id: EventId!): AdminGetEventByIdResult!
   adminEvents(filters: AdminEventPaginationFilters!): AdminGetEventsResult!
+  adminEventsStats: AdminEventsStatsResult!
 }
 
 extend type Mutation {
@@ -194,4 +214,9 @@ extend type Mutation {
   adminUpdateEvent(id: EventId!, input: UpdateEventInput!): AdminUpdateEventResult!
   adminDeleteEvent(id: EventId!): AdminDeleteEventResult!
   adminDeleteEventAttendee(eventId: EventId!, attendeeId: AttendeeId!): AdminDeleteEventAttendeeResult!
+  adminUpdateEventAttendeeRole(
+    eventId: EventId!
+    attendeeId: AttendeeId!
+    role: AttendeeRole!
+  ): AdminUpdateEventAttendeeRoleResult!
 }

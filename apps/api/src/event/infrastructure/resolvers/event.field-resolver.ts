@@ -4,7 +4,7 @@ import { Context, Parent, ResolveField, Resolver } from '@nestjs/graphql';
 
 import { GqlCurrentUser } from '../../../auth/infrastructure/decorators/user.decorator';
 import { type GraphQLContext } from '../../../core/graphql/graphql.context';
-import { type Event, type Wishlist } from '../../../gql/generated-types';
+import { type Event, type SecretSanta, type Wishlist } from '../../../gql/generated-types';
 
 @Resolver('Event')
 export class EventFieldResolver {
@@ -17,5 +17,10 @@ export class EventFieldResolver {
     if (event.wishlistIds.length === 0) return [];
     const wishlists = await ctx.loaders.getWishlistDataLoader(currentUser).loadMany(event.wishlistIds);
     return wishlists.filter((wishlist): wishlist is Wishlist => wishlist !== null);
+  }
+
+  @ResolveField()
+  secretSanta(@Parent() event: Event, @Context() ctx: GraphQLContext): Promise<SecretSanta | null> {
+    return ctx.loaders.secretSantaByEvent.load(event.id);
   }
 }

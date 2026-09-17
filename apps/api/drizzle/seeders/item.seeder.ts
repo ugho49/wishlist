@@ -4,7 +4,7 @@ import { faker } from '@faker-js/faker';
 
 import * as schema from '../schema';
 import { seedConfig } from './config';
-import { chance, intBetween, maybe, uuid } from './helpers';
+import { chance, insertInBatches, intBetween, maybe, uuid } from './helpers';
 
 export async function seedItems(db: SeedDb, deps: { wishlists: readonly WishlistSeed[] }): Promise<ItemSeed[]> {
   const items: ItemSeed[] = [];
@@ -30,6 +30,6 @@ export async function seedItems(db: SeedDb, deps: { wishlists: readonly Wishlist
 
   if (items.length === 0) return items;
 
-  await db.insert(schema.item).values(items);
+  await insertInBatches(db, schema.item, items);
   return items;
 }

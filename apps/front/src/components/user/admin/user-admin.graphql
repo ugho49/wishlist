@@ -9,8 +9,10 @@ query AdminUsersList($input: AdminGetAllUsersPaginationFilters) {
         email
         pictureUrl
         isEnabled
-        authorities
         createdAt
+        sessions {
+          lastUsedAt
+        }
       }
       pagination {
         totalPages
@@ -107,11 +109,40 @@ mutation AdminRevokeUserSession($userId: UserId!, $sessionId: UserSessionId!) {
   }
 }
 
+query AdminUsersStats {
+  adminUsersStats {
+    __typename
+    ... on AdminUsersStats {
+      totalCount
+      enabledCount
+      adminCount
+    }
+  }
+}
+
 mutation AdminRevokeAllUserSessions($userId: UserId!) {
   adminRevokeAllUserSessions(userId: $userId) {
     __typename
     ... on VoidOutput {
       success
+    }
+  }
+}
+
+mutation AdminSetUserAdmin($userId: UserId!, $isAdmin: Boolean!) {
+  adminSetUserAdmin(userId: $userId, isAdmin: $isAdmin) {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+    ... on UnauthorizedRejection {
+      message
+    }
+    ... on ForbiddenRejection {
+      message
+    }
+    ... on NotFoundRejection {
+      message
     }
   }
 }

@@ -3,7 +3,7 @@ import type { UserId } from '@wishlist/common';
 import { createFileRoute } from '@tanstack/react-router';
 import z from 'zod';
 
-import { AdminUserPage } from '../../../../../components/user/admin/AdminUserPage';
+import { AdminUserPage, AdminUserTab } from '../../../../../components/user/admin/AdminUserPage';
 
 export const Route = createFileRoute('/_authenticated/_with-layout/admin/users/$userId')({
   params: {
@@ -11,6 +11,8 @@ export const Route = createFileRoute('/_authenticated/_with-layout/admin/users/$
   },
   validateSearch: z.object({
     eventPage: z.number().optional().default(1),
+    eventSearch: z.string().optional().default(''),
+    tab: z.enum(AdminUserTab).optional().catch(AdminUserTab.profile).default(AdminUserTab.profile),
   }),
   component: () => {
     const { userId } = Route.useParams();

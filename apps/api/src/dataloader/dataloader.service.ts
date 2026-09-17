@@ -16,6 +16,7 @@ import { EventAttendeeDataLoaderFactory } from '../event/infrastructure/event-at
 import {
   type Event,
   type EventAttendee,
+  type SecretSanta,
   type User,
   type UserAccount,
   type UserFull,
@@ -23,6 +24,7 @@ import {
   type Wishlist,
 } from '../gql/generated-types';
 import { ItemDataLoaderFactory } from '../item/infrastructure/item.dataloader';
+import { SecretSantaDataLoaderFactory } from '../secret-santa/infrastructure/secret-santa.dataloader';
 import { UserDataLoaderFactory } from '../user/infrastructure/user.dataloader';
 import { WishlistDataLoaderFactory } from '../wishlist/infrastructure/wishlist.dataloader';
 
@@ -35,6 +37,7 @@ export type DataLoaders = {
   getWishlistDataLoader: (currentUser: ICurrentUser) => DataLoader<WishlistId, Wishlist | null>;
   getEventDataLoader: (currentUser: ICurrentUser) => DataLoader<EventId, Event | null>;
   eventAttendee: DataLoader<AttendeeId, EventAttendee | null>;
+  secretSantaByEvent: DataLoader<EventId, SecretSanta | null>;
   createItemsByWishlistLoader: (currentUser: ICurrentUser) => DataLoader<WishlistId, WishlistItem[]>;
 };
 
@@ -46,6 +49,7 @@ export class DataLoaderService {
     private readonly eventDataLoaderFactory: EventDataLoaderFactory,
     private readonly eventAttendeeDataLoaderFactory: EventAttendeeDataLoaderFactory,
     private readonly itemDataLoaderFactory: ItemDataLoaderFactory,
+    private readonly secretSantaDataLoaderFactory: SecretSantaDataLoaderFactory,
   ) {}
 
   createLoaders(): DataLoaders {
@@ -58,6 +62,7 @@ export class DataLoaderService {
       getWishlistDataLoader: (currentUser: ICurrentUser) => this.wishlistDataLoaderFactory.createLoader(currentUser),
       getEventDataLoader: (currentUser: ICurrentUser) => this.eventDataLoaderFactory.createLoader(currentUser),
       eventAttendee: this.eventAttendeeDataLoaderFactory.createLoader(),
+      secretSantaByEvent: this.secretSantaDataLoaderFactory.createByEventLoader(),
       createItemsByWishlistLoader: (currentUser: ICurrentUser) =>
         this.itemDataLoaderFactory.createLoaderByWishlists(currentUser),
     };

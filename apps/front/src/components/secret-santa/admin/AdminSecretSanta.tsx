@@ -14,6 +14,7 @@ import TuneIcon from '@mui/icons-material/Tune';
 import {
   Avatar,
   Button,
+  Chip,
   List,
   ListItem,
   ListItemIcon,
@@ -22,12 +23,13 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material';
-import { DataGrid } from '@mui/x-data-grid';
 import { DateTime } from 'luxon';
 import { useState } from 'react';
+import { match } from 'ts-pattern';
 
 import { SecretSantaStatus } from '../../../gql';
 import { eurosFormatter } from '../../../utils/currency.utils';
+import { AdminDataGrid } from '../../admin/AdminDataGrid';
 import { BreaklineText } from '../../common/BreaklineText';
 import { ConfirmButton } from '../../common/ConfirmButton';
 import { ConfirmIconButton } from '../../common/ConfirmIconButton';
@@ -43,6 +45,15 @@ type AdminSecretSantaProps = {
   removeSecretSantaUser: (secretSantaUserId: SecretSantaUserId) => void;
 };
 
+const secretSantaStatusLabel = (status: SecretSantaStatus) =>
+  match(status)
+    .with(SecretSantaStatus.Created, () => 'Brouillon')
+    .with(SecretSantaStatus.Started, () => 'Tirage effectué')
+    .exhaustive();
+
+const secretSantaStatusColor = (status: SecretSantaStatus) =>
+  status === SecretSantaStatus.Started ? 'success' : 'default';
+
 export const AdminSecretSanta = ({
   secretSanta,
   loading = false,
@@ -57,7 +68,7 @@ export const AdminSecretSanta = ({
   const [openEditModal, setOpenEditModal] = useState(false);
 
   return (
-    <div style={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
+    <>
       <EditSecretSantaFormDialog
         title="Modifier le secret santa"
         open={openEditModal}
@@ -77,11 +88,19 @@ export const AdminSecretSanta = ({
         }}
       >
         <List dense sx={{ flexGrow: 1 }}>
-          <ListItem>
+          <ListItem
+            secondaryAction={
+              <Chip
+                size="small"
+                color={secretSantaStatusColor(secretSanta.status)}
+                label={secretSantaStatusLabel(secretSanta.status)}
+              />
+            }
+          >
             <ListItemIcon>
               <InfoIcon />
             </ListItemIcon>
-            <ListItemText primary="Status" secondary={secretSanta.status} />
+            <ListItemText primary="Statut" />
           </ListItem>
           <ListItem>
             <ListItemIcon>
@@ -199,9 +218,8 @@ export const AdminSecretSanta = ({
           </ConfirmButton>
         )}
       </Stack>
-      <DataGrid
+      <AdminDataGrid
         isRowSelectable={() => false}
-        density="standard"
         paginationMode="client"
         hideFooter
         disableColumnMenu
@@ -256,6 +274,6 @@ export const AdminSecretSanta = ({
           },
         ]}
       />
-    </div>
+    </>
   );
 };

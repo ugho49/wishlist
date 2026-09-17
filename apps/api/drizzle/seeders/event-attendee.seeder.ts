@@ -5,7 +5,7 @@ import { faker } from '@faker-js/faker';
 import { AttendeeRole } from '../../src/event/domain/attendee-role.enum';
 import * as schema from '../schema';
 import { seedConfig } from './config';
-import { chance, intBetween, pickOne, uuid } from './helpers';
+import { chance, insertInBatches, intBetween, pickOne, uuid } from './helpers';
 
 export async function seedEventAttendees(
   db: SeedDb,
@@ -52,6 +52,6 @@ export async function seedEventAttendees(
     }
   }
 
-  await db.insert(schema.eventAttendee).values(attendees);
+  await insertInBatches(db, schema.eventAttendee, attendees);
   return attendees;
 }

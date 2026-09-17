@@ -12,7 +12,7 @@ export const seedConfig = {
     dailyNewItemNotificationProbability: 0.9,
   },
   events: {
-    count: 1000,
+    count: 10000,
     pastProbability: 0.3,
     descriptionProbability: 0.3,
     iconProbability: 0.5,
@@ -23,7 +23,7 @@ export const seedConfig = {
   },
   wishlists: {
     ownerHasWishlistProbability: 0.8,
-    perOwner: { min: 1, max: 5 },
+    perOwner: { min: 2, max: 10 },
     descriptionProbability: 0.3,
     hideItemsProbability: 0.99,
     multipleEventsProbability: 0.2,
