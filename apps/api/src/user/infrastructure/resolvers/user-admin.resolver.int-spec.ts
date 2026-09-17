@@ -476,6 +476,10 @@ describe('UserAdminResolver (GraphQL)', () => {
             totalCount
             enabledCount
             adminCount
+            createdByMonth {
+              month
+              count
+            }
           }
           ... on ForbiddenRejection {
             message
@@ -512,6 +516,8 @@ describe('UserAdminResolver (GraphQL)', () => {
         expect(res.body.data.adminUsersStats.enabledCount).toBeLessThanOrEqual(
           res.body.data.adminUsersStats.totalCount,
         );
+        expect(res.body.data.adminUsersStats.createdByMonth).toHaveLength(12);
+        expect(res.body.data.adminUsersStats.createdByMonth.at(-1).count).toBeGreaterThanOrEqual(1);
       });
     });
   });

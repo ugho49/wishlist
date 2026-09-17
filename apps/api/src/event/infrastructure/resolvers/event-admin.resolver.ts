@@ -105,6 +105,11 @@ export class EventAdminResolver {
       totalCount: stats.totalCount,
       upcomingCount: stats.upcomingCount,
       pastCount: stats.pastCount,
+      createdByMonth: stats.createdByMonth.map(point => ({
+        __typename: 'AdminMonthlyCount' as const,
+        month: point.month,
+        count: point.count,
+      })),
     };
   }
 

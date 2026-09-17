@@ -4,7 +4,7 @@ import { faker } from '@faker-js/faker';
 
 import * as schema from '../schema';
 import { seedConfig } from './config';
-import { chance, groupByKey, intBetween, maybe, uuid } from './helpers';
+import { chance, groupByKey, insertInBatches, intBetween, maybe, uuid } from './helpers';
 
 export async function seedWishlists(
   db: SeedDb,
@@ -37,6 +37,6 @@ export async function seedWishlists(
 
   if (wishlists.length === 0) return wishlists;
 
-  await db.insert(schema.wishlist).values(wishlists);
+  await insertInBatches(db, schema.wishlist, wishlists);
   return wishlists;
 }

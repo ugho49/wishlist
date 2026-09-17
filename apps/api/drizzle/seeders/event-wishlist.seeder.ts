@@ -5,7 +5,7 @@ import { MAX_EVENTS_BY_LIST } from '@wishlist/common';
 
 import * as schema from '../schema';
 import { seedConfig } from './config';
-import { chance, groupByKey, pickOne } from './helpers';
+import { chance, groupByKey, insertInBatches, pickOne } from './helpers';
 
 export async function seedEventWishlists(
   db: SeedDb,
@@ -49,6 +49,6 @@ export async function seedEventWishlists(
 
   if (links.length === 0) return links;
 
-  await db.insert(schema.eventWishlist).values(links);
+  await insertInBatches(db, schema.eventWishlist, links);
   return links;
 }

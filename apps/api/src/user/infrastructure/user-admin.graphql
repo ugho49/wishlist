@@ -28,6 +28,7 @@ type AdminUsersStats {
   totalCount: Int!
   enabledCount: Int!
   adminCount: Int!
+  createdByMonth: [AdminMonthlyCount!]!
 }
 
 input AdminGetAllUsersPaginationFilters {

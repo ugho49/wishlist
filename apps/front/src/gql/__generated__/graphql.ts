@@ -6,8 +6,23 @@ import type { Ids } from '@wishlist/common'
 import type * as Types from './types';
 
 import { DocumentTypeDecoration } from '@graphql-typed-document-node/core';
-import { useMutation, useQuery, UseMutationOptions, UseQueryOptions } from '@tanstack/react-query';
+import { useQuery, useMutation, UseQueryOptions, UseMutationOptions } from '@tanstack/react-query';
 import { fetchGql } from '../fetcher';
+export type AdminDashboardQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type AdminDashboardQuery = { adminUsersStats:
+    | { __typename: 'AdminUsersStats', totalCount: number, enabledCount: number, adminCount: number, createdByMonth: Array<{ month: string, count: number }> }
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+  , adminEventsStats:
+    | { __typename: 'AdminEventsStats', totalCount: number, upcomingCount: number, pastCount: number, createdByMonth: Array<{ month: string, count: number }> }
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+   };
+
 export type AuthLoginMutationVariables = Exact<{
   input: Types.LoginInput;
 }>;
@@ -1026,6 +1041,51 @@ export const SecretSantaItemFragmentDoc = new TypedDocumentString(`
     }
   }
 }`, {"fragmentName":"SecretSantaItem"});
+export const AdminDashboardDocument = new TypedDocumentString(`
+    query AdminDashboard {
+  adminUsersStats {
+    __typename
+    ... on AdminUsersStats {
+      totalCount
+      enabledCount
+      adminCount
+      createdByMonth {
+        month
+        count
+      }
+    }
+  }
+  adminEventsStats {
+    __typename
+    ... on AdminEventsStats {
+      totalCount
+      upcomingCount
+      pastCount
+      createdByMonth {
+        month
+        count
+      }
+    }
+  }
+}
+    `);
+
+export const useAdminDashboardQuery = <
+      TData = AdminDashboardQuery,
+      TError = unknown
+    >(
+      variables?: AdminDashboardQueryVariables,
+      options?: Omit<UseQueryOptions<AdminDashboardQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<AdminDashboardQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<AdminDashboardQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['AdminDashboard'] : ['AdminDashboard', variables],
+    queryFn: fetchGql<AdminDashboardQuery, AdminDashboardQueryVariables>(AdminDashboardDocument, variables),
+    ...options
+  }
+    )};
+
 export const AuthLoginDocument = new TypedDocumentString(`
     mutation AuthLogin($input: LoginInput!) {
   login(input: $input) {

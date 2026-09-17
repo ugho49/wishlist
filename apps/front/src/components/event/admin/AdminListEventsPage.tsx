@@ -1,9 +1,9 @@
+import { Chip } from '@mui/material';
 import { useNavigate, useSearch } from '@tanstack/react-router';
 
 import { useAdminEventsStatsQuery } from '../../../gql';
 import { AdminPageHeader } from '../../admin/AdminPageHeader';
 import { AdminSection } from '../../admin/AdminSection';
-import { AdminStats } from '../../admin/AdminStats';
 import { AdminListEvents } from './AdminListEvents';
 
 export const AdminListEventsPage = () => {
@@ -18,17 +18,13 @@ export const AdminListEventsPage = () => {
 
   return (
     <>
-      <AdminPageHeader title="Évènements" breadcrumbs={[{ label: 'Admin', to: '/admin' }, { label: 'Évènements' }]} />
-
-      {stats && (
-        <AdminStats
-          items={[
-            { label: 'Évènements', value: stats.totalCount },
-            { label: 'À venir', value: stats.upcomingCount },
-            { label: 'Passés', value: stats.pastCount },
-          ]}
-        />
-      )}
+      <AdminPageHeader
+        title="Évènements"
+        breadcrumbs={[{ label: 'Admin', to: '/admin' }, { label: 'Évènements' }]}
+        chips={
+          stats ? <Chip size="small" variant="outlined" label={stats.totalCount.toLocaleString('fr-FR')} /> : undefined
+        }
+      />
 
       <AdminSection>
         <AdminListEvents currentPage={currentPage} changeCurrentPage={changeCurrentPage} />

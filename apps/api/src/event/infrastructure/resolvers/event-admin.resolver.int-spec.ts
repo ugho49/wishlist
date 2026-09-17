@@ -218,6 +218,10 @@ describe('EventAdminResolver (GraphQL)', () => {
             totalCount
             upcomingCount
             pastCount
+            createdByMonth {
+              month
+              count
+            }
           }
           ... on ForbiddenRejection {
             message
@@ -258,6 +262,8 @@ describe('EventAdminResolver (GraphQL)', () => {
         expect(res.body.data.adminEventsStats.totalCount).toBeGreaterThanOrEqual(2);
         expect(res.body.data.adminEventsStats.upcomingCount).toBeGreaterThanOrEqual(1);
         expect(res.body.data.adminEventsStats.pastCount).toBeGreaterThanOrEqual(1);
+        expect(res.body.data.adminEventsStats.createdByMonth).toHaveLength(12);
+        expect(res.body.data.adminEventsStats.createdByMonth.at(-1).count).toBeGreaterThanOrEqual(1);
       });
     });
   });

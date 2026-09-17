@@ -1,0 +1,26 @@
+query AdminDashboard {
+  adminUsersStats {
+    __typename
+    ... on AdminUsersStats {
+      totalCount
+      enabledCount
+      adminCount
+      createdByMonth {
+        month
+        count
+      }
+    }
+  }
+  adminEventsStats {
+    __typename
+    ... on AdminEventsStats {
+      totalCount
+      upcomingCount
+      pastCount
+      createdByMonth {
+        month
+        count
+      }
+    }
+  }
+}

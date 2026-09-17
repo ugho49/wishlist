@@ -37,6 +37,7 @@
     "@hookform/resolvers": "5.9.1",
     "@mui/icons-material": "9.4.0",
     "@mui/material": "9.4.0",
+    "@mui/x-charts": "9.13.0",
     "@mui/x-data-grid": "9.13.0",
     "@mui/x-date-pickers": "9.13.0",
     "@nestjs-architects/typed-cqrs": "2.1.0",

@@ -96,6 +96,19 @@ export class PostgresEventRepository implements EventRepository {
     };
   }
 
+  countCreatedByMonth(since: Date): Promise<Array<{ month: string; count: number }>> {
+    const month = sql<string>`to_char(date_trunc('month', ${schema.event.createdAt}), 'YYYY-MM')`;
+    return this.databaseService.db
+      .select({
+        month,
+        count: sql<number>`cast(count(*) as int)`,
+      })
+      .from(schema.event)
+      .where(gte(schema.event.createdAt, since))
+      .groupBy(month)
+      .orderBy(month);
+  }
+
   async findByUserIdPaginated(params: {
     userId: UserId;
     pagination: { take: number; skip: number };

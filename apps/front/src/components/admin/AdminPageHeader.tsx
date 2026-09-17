@@ -12,7 +12,7 @@ export type AdminBreadcrumb = {
 
 export type AdminPageHeaderProps = {
   title: string;
-  breadcrumbs: AdminBreadcrumb[];
+  breadcrumbs?: AdminBreadcrumb[];
   avatar?: ReactNode;
   chips?: ReactNode;
   meta?: ReactNode;
@@ -106,19 +106,21 @@ const ActionsRow = styled(Box)(({ theme }) => ({
 
 export const AdminPageHeader = ({ title, breadcrumbs, avatar, chips, meta, actions }: AdminPageHeaderProps) => (
   <HeaderRoot>
-    <BreadcrumbsStyled separator={<NavigateNextIcon fontSize="small" />} aria-label="Fil d'ariane">
-      {breadcrumbs.map((crumb, index) => {
-        const isLast = index === breadcrumbs.length - 1;
-        if (isLast || !crumb.to) {
-          return <CurrentCrumb key={`${crumb.label}-${index}`}>{crumb.label}</CurrentCrumb>;
-        }
-        return (
-          <RouterLink key={`${crumb.label}-${index}`} to={crumb.to} underline="hover" color="inherit">
-            <CrumbText>{crumb.label}</CrumbText>
-          </RouterLink>
-        );
-      })}
-    </BreadcrumbsStyled>
+    {breadcrumbs && breadcrumbs.length > 0 ? (
+      <BreadcrumbsStyled separator={<NavigateNextIcon fontSize="small" />} aria-label="Fil d'ariane">
+        {breadcrumbs.map((crumb, index) => {
+          const isLast = index === breadcrumbs.length - 1;
+          if (isLast || !crumb.to) {
+            return <CurrentCrumb key={`${crumb.label}-${index}`}>{crumb.label}</CurrentCrumb>;
+          }
+          return (
+            <RouterLink key={`${crumb.label}-${index}`} to={crumb.to} underline="hover" color="inherit">
+              <CrumbText>{crumb.label}</CrumbText>
+            </RouterLink>
+          );
+        })}
+      </BreadcrumbsStyled>
+    ) : null}
 
     <IdentityRow>
       {avatar}

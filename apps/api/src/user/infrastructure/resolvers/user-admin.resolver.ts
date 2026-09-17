@@ -98,6 +98,11 @@ export class UserAdminResolver {
       totalCount: stats.totalCount,
       enabledCount: stats.enabledCount,
       adminCount: stats.adminCount,
+      createdByMonth: stats.createdByMonth.map(point => ({
+        __typename: 'AdminMonthlyCount' as const,
+        month: point.month,
+        count: point.count,
+      })),
     };
   }
 

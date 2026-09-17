@@ -46,6 +46,7 @@ input AdminEventPaginationFilters {
 }
 
 type AdminEventsStats {
+  createdByMonth: [AdminMonthlyCount!]!
   pastCount: Int!
   totalCount: Int!
   upcomingCount: Int!
@@ -79,6 +80,11 @@ type AdminGetWishlists {
 
 union AdminGetWishlistsResult = AdminGetWishlists | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection
 
+type AdminMonthlyCount {
+  count: Int!
+  month: String!
+}
+
 union AdminRemoveUserPictureResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
 union AdminRevokeAllUserSessionsResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
@@ -100,6 +106,7 @@ union AdminUpdateUserProfileResult = ForbiddenRejection | InternalErrorRejection
 
 type AdminUsersStats {
   adminCount: Int!
+  createdByMonth: [AdminMonthlyCount!]!
   enabledCount: Int!
   totalCount: Int!
 }

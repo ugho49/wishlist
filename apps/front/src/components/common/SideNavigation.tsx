@@ -1,9 +1,8 @@
 import type { RootState } from '../../core/store';
 
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import EventNoteIcon from '@mui/icons-material/EventNote';
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
-import GroupsIcon from '@mui/icons-material/Groups';
 import LogoutIcon from '@mui/icons-material/Logout';
 import PersonIcon from '@mui/icons-material/Person';
 import {
@@ -15,7 +14,6 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  ListSubheader,
   styled,
   useMediaQuery,
   useTheme,
@@ -101,23 +99,6 @@ const AdminModeBadge = styled('span')({
   borderRadius: 4,
   padding: '2px 8px',
 });
-
-const AdminSectionHeader = styled(ListSubheader, {
-  shouldForwardProp: prop => prop !== 'active',
-})<{ active?: boolean }>(({ theme, active }) => ({
-  backgroundColor: 'transparent',
-  lineHeight: '32px',
-  fontSize: '0.7rem',
-  fontWeight: 600,
-  textTransform: 'uppercase',
-  letterSpacing: '0.08em',
-  color: active ? theme.palette.primary.main : theme.palette.text.secondary,
-  marginTop: theme.spacing(1),
-  cursor: 'pointer',
-  '&:hover': {
-    color: theme.palette.primary.main,
-  },
-}));
 
 const MainListStyled = styled(List)(({ theme }) => ({
   flex: 1,
@@ -264,10 +245,9 @@ export const SideNavigation = () => {
     dispatch(closeDrawer());
   };
 
-  const isRouteActive = (route: string, exact = false) => {
+  const isRouteActive = (route: string) => {
     const pathname = location.pathname;
     if (route === pathname) return true;
-    if (exact) return false;
     // Handle nested routes (e.g., /events/123 should activate /events)
     if (route !== '/' && pathname.startsWith(`${route}/`)) return true;
     return false;
@@ -286,20 +266,13 @@ export const SideNavigation = () => {
     },
   ];
 
-  const adminMenuItems = user?.isAdmin
-    ? [
-        {
-          label: 'Utilisateurs',
-          value: '/admin/users',
-          icon: <GroupsIcon />,
-        },
-        {
-          label: 'Évènements',
-          value: '/admin/events',
-          icon: <EventNoteIcon />,
-        },
-      ]
-    : [];
+  if (user?.isAdmin) {
+    mainMenuItems.push({
+      label: 'Admin',
+      value: '/admin',
+      icon: <AdminPanelSettingsIcon />,
+    });
+  }
 
   const bottomMenuItems = [
     {
@@ -321,7 +294,7 @@ export const SideNavigation = () => {
           <LogoIconStyled />
           <LogoTextStyled />
         </LogoRow>
-        {location.pathname.startsWith('/admin') && <AdminModeBadge>Admin</AdminModeBadge>}
+        {user?.isAdmin && <AdminModeBadge>Admin</AdminModeBadge>}
       </LogoSectionStyled>
 
       {/* Main navigation items */}
@@ -350,41 +323,6 @@ export const SideNavigation = () => {
             </ListItemButtonStyled>
           </ListItemStyled>
         ))}
-        {adminMenuItems.length > 0 && (
-          <>
-            <AdminSectionHeader
-              disableSticky
-              active={isRouteActive('/admin', true)}
-              onClick={() => handleNavigation('/admin')}
-            >
-              Admin
-            </AdminSectionHeader>
-            {adminMenuItems.map(item => (
-              <ListItemStyled key={item.value} disablePadding>
-                <ListItemButtonStyled selected={isRouteActive(item.value)} onClick={() => handleNavigation(item.value)}>
-                  <ListItemIconStyled
-                    sx={{
-                      color: isRouteActive(item.value) ? 'primary.main' : 'text.secondary',
-                    }}
-                  >
-                    {item.icon}
-                  </ListItemIconStyled>
-                  <ListItemText
-                    primary={item.label}
-                    slotProps={{
-                      primary: {
-                        style: {
-                          fontSize: '0.95rem',
-                          fontWeight: isRouteActive(item.value) ? 600 : 400,
-                        },
-                      },
-                    }}
-                  />
-                </ListItemButtonStyled>
-              </ListItemStyled>
-            ))}
-          </>
-        )}
       </MainListStyled>
 
       {/* Bottom section - Profile and Logout */}

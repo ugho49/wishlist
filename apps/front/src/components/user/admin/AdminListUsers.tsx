@@ -17,7 +17,6 @@ import {
 import { AdminDataGrid } from '../../admin/AdminDataGrid';
 import { AdminPageHeader } from '../../admin/AdminPageHeader';
 import { AdminSection } from '../../admin/AdminSection';
-import { AdminStats } from '../../admin/AdminStats';
 
 type AdminUserRow = Extract<AdminUsersListQuery['adminUsers'], { __typename: 'AdminGetAllUsers' }>['data'][number];
 
@@ -124,17 +123,10 @@ export const AdminListUsers = () => {
       <AdminPageHeader
         title="Utilisateurs"
         breadcrumbs={[{ label: 'Admin', to: '/admin' }, { label: 'Utilisateurs' }]}
+        chips={
+          stats ? <Chip size="small" variant="outlined" label={stats.totalCount.toLocaleString('fr-FR')} /> : undefined
+        }
       />
-
-      {stats && (
-        <AdminStats
-          items={[
-            { label: 'Utilisateurs', value: stats.totalCount },
-            { label: 'Actifs', value: stats.enabledCount },
-            { label: 'Admins', value: stats.adminCount },
-          ]}
-        />
-      )}
 
       <AdminSection>
         <SearchForm noValidate onSubmit={applySearch}>

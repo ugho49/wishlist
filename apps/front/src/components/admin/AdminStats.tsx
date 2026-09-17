@@ -9,7 +9,6 @@ const StatsRow = styled(Box)(({ theme }) => ({
   display: 'flex',
   flexWrap: 'wrap',
   gap: theme.spacing(1.5),
-  marginBottom: theme.spacing(2),
 }));
 
 const StatCard = styled(Box)(({ theme }) => ({

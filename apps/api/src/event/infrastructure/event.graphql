@@ -36,6 +36,7 @@ type AdminEventsStats {
   totalCount: Int!
   upcomingCount: Int!
   pastCount: Int!
+  createdByMonth: [AdminMonthlyCount!]!
 }
 
 input EventPaginationFilters {

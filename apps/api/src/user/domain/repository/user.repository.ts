@@ -15,6 +15,7 @@ export interface UserRepository {
     pagination: { take: number; skip: number };
   }): Promise<{ users: User[]; totalCount: number }>;
   countAdminStats(): Promise<{ totalCount: number; enabledCount: number; adminCount: number }>;
+  countCreatedByMonth(since: Date): Promise<Array<{ month: string; count: number }>>;
   findClosestFriends(userId: UserId, limit: number): Promise<User[]>;
   save(user: User, tx?: DrizzleTransaction): Promise<void>;
   delete(userId: UserId): Promise<void>;

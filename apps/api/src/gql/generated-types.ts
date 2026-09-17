@@ -64,6 +64,7 @@ export type AdminEventPaginationFilters = {
 
 export type AdminEventsStats = {
   __typename: 'AdminEventsStats';
+  createdByMonth: Array<AdminMonthlyCount>;
   pastCount: Scalars['Int']['output'];
   totalCount: Scalars['Int']['output'];
   upcomingCount: Scalars['Int']['output'];
@@ -99,6 +100,12 @@ export type AdminGetWishlists = {
 
 export type AdminGetWishlistsResult = AdminGetWishlists | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection;
 
+export type AdminMonthlyCount = {
+  __typename: 'AdminMonthlyCount';
+  count: Scalars['Int']['output'];
+  month: Scalars['String']['output'];
+};
+
 export type AdminRemoveUserPictureResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
 export type AdminRevokeAllUserSessionsResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
@@ -121,6 +128,7 @@ export type AdminUpdateUserProfileResult = ForbiddenRejection | InternalErrorRej
 export type AdminUsersStats = {
   __typename: 'AdminUsersStats';
   adminCount: Scalars['Int']['output'];
+  createdByMonth: Array<AdminMonthlyCount>;
   enabledCount: Scalars['Int']['output'];
   totalCount: Scalars['Int']['output'];
 };
