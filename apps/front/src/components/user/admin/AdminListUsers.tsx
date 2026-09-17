@@ -7,13 +7,7 @@ import { useNavigate, useSearch } from '@tanstack/react-router';
 import { DateTime } from 'luxon';
 import { useEffect, useState } from 'react';
 
-import {
-  isRejection,
-  rejectionMessage,
-  UserAuthorities,
-  useAdminUsersListQuery,
-  useAdminUsersStatsQuery,
-} from '../../../gql';
+import { isRejection, rejectionMessage, useAdminUsersListQuery, useAdminUsersStatsQuery } from '../../../gql';
 import { AdminDataGrid } from '../../admin/AdminDataGrid';
 import { AdminPageHeader } from '../../admin/AdminPageHeader';
 import { AdminSection } from '../../admin/AdminSection';
@@ -38,6 +32,15 @@ const UserAvatar = styled(Avatar)({
   width: 28,
   height: 28,
 });
+
+const lastSessionUsedAt = (sessions: AdminUserRow['sessions']): Date | undefined => {
+  let latest: Date | undefined;
+  for (const session of sessions) {
+    const date = new Date(session.lastUsedAt);
+    if (!latest || date > latest) latest = date;
+  }
+  return latest;
+};
 
 const columns: GridColDef<AdminUserRow>[] = [
   {
@@ -70,12 +73,12 @@ const columns: GridColDef<AdminUserRow>[] = [
   { field: 'lastName', headerName: 'Nom', width: 170 },
   { field: 'email', headerName: 'Email', flex: 1, minWidth: 250 },
   {
-    field: 'admin',
-    headerName: 'Admin',
-    width: 90,
-    type: 'boolean',
-    valueGetter: (_, row) =>
-      row.authorities.some(a => a === UserAuthorities.RoleAdmin || a === UserAuthorities.RoleSuperadmin),
+    field: 'lastSeenAt',
+    headerName: 'Dernière activité',
+    type: 'dateTime',
+    width: 180,
+    valueGetter: (_, row) => lastSessionUsedAt(row.sessions),
+    renderCell: ({ value }) => (value ? DateTime.fromJSDate(value).toLocaleString(DateTime.DATETIME_MED) : 'Jamais'),
   },
   {
     field: 'createdAt',
@@ -123,9 +126,7 @@ export const AdminListUsers = () => {
       <AdminPageHeader
         title="Utilisateurs"
         breadcrumbs={[{ label: 'Admin', to: '/admin' }, { label: 'Utilisateurs' }]}
-        chips={
-          stats ? <Chip size="small" variant="outlined" label={stats.totalCount.toLocaleString('fr-FR')} /> : undefined
-        }
+        count={stats?.totalCount}
       />
 
       <AdminSection>

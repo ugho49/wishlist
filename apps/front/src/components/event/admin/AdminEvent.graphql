@@ -18,6 +18,10 @@ query AdminEventListEvents($filters: AdminEventPaginationFilters!) {
             lastName
           }
         }
+        secretSanta {
+          id
+          status
+        }
       }
       pagination {
         totalPages

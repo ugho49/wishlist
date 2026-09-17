@@ -1,4 +1,3 @@
-import { Chip } from '@mui/material';
 import { useNavigate, useSearch } from '@tanstack/react-router';
 
 import { useAdminEventsStatsQuery } from '../../../gql';
@@ -21,9 +20,7 @@ export const AdminListEventsPage = () => {
       <AdminPageHeader
         title="Évènements"
         breadcrumbs={[{ label: 'Admin', to: '/admin' }, { label: 'Évènements' }]}
-        chips={
-          stats ? <Chip size="small" variant="outlined" label={stats.totalCount.toLocaleString('fr-FR')} /> : undefined
-        }
+        count={stats?.totalCount}
       />
 
       <AdminSection>

@@ -9,8 +9,10 @@ query AdminUsersList($input: AdminGetAllUsersPaginationFilters) {
         email
         pictureUrl
         isEnabled
-        authorities
         createdAt
+        sessions {
+          lastUsedAt
+        }
       }
       pagination {
         totalPages

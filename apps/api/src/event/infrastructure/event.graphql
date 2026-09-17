@@ -23,6 +23,7 @@ type Event {
   wishlistIds: [WishlistId!]!
   wishlists: [Wishlist!]! @resolved
   attendees: [EventAttendee!]!
+  secretSanta: SecretSanta @resolved
   createdAt: String!
   updatedAt: String!
 }

@@ -3,7 +3,7 @@ import type { DrizzleTransaction } from '../../core/database/transaction-manager
 
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { type EventId, type SecretSantaId, uuid } from '@wishlist/common';
-import { eq } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 
 import { DatabaseService } from '../../core/database/database.service';
 import { SecretSanta } from '../../secret-santa/domain/model/secret-santa.model';
@@ -89,6 +89,18 @@ export class PostgresSecretSantaRepository implements SecretSantaRepository {
     if (!secretSanta) return undefined;
 
     return PostgresSecretSantaRepository.toModel(secretSanta);
+  }
+
+  async findByEventIds(eventIds: EventId[]): Promise<SecretSanta[]> {
+    if (eventIds.length === 0) return [];
+
+    const { schema, db } = this.databaseService;
+    const secretSantas = await db.query.secretSanta.findMany({
+      where: inArray(schema.secretSanta.eventId, eventIds),
+      with: { secretSantaUsers: true },
+    });
+
+    return secretSantas.map(secretSanta => PostgresSecretSantaRepository.toModel(secretSanta));
   }
 
   async delete(id: SecretSantaId, tx?: DrizzleTransaction): Promise<void> {

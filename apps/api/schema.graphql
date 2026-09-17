@@ -209,6 +209,7 @@ type Event {
   eventDate: String!
   icon: String
   id: EventId!
+  secretSanta: SecretSanta @resolved
   title: String!
   updatedAt: String!
   wishlistIds: [WishlistId!]!

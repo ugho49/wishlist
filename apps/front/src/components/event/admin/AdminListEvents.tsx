@@ -2,13 +2,19 @@ import type { GridColDef } from '@mui/x-data-grid';
 import type { UserId } from '@wishlist/common';
 import type { AdminEventListItem } from './admin.types';
 
-import { Alert } from '@mui/material';
+import { Alert, Chip } from '@mui/material';
 import { keepPreviousData } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import { DateTime } from 'luxon';
 import { useEffect, useState } from 'react';
 
-import { AttendeeRole, isRejection, rejectionMessage, useAdminEventListEventsQuery } from '../../../gql';
+import {
+  AttendeeRole,
+  isRejection,
+  rejectionMessage,
+  SecretSantaStatus,
+  useAdminEventListEventsQuery,
+} from '../../../gql';
 import { AdminDataGrid } from '../../admin/AdminDataGrid';
 import { EventIcon } from '../EventIcon';
 
@@ -45,6 +51,8 @@ const columns: GridColDef<AdminEventListItem>[] = [
     field: 'nbWishlists',
     headerName: 'Listes',
     type: 'number',
+    headerAlign: 'center',
+    align: 'center',
     width: 90,
     valueGetter: (_, row) => row.wishlistIds.length,
   },
@@ -52,8 +60,26 @@ const columns: GridColDef<AdminEventListItem>[] = [
     field: 'attendees',
     headerName: 'Participants',
     type: 'number',
+    headerAlign: 'center',
+    align: 'center',
     width: 120,
     valueGetter: (_, row) => row.attendees.length,
+  },
+  {
+    field: 'secretSanta',
+    headerName: 'Secret Santa',
+    headerAlign: 'center',
+    align: 'center',
+    width: 150,
+    sortable: false,
+    filterable: false,
+    display: 'flex',
+    valueGetter: (_, row) => row.secretSanta?.status,
+    renderCell: ({ row }) => {
+      if (!row.secretSanta) return '—';
+      const isActive = row.secretSanta.status === SecretSantaStatus.Started;
+      return <Chip size="small" color={isActive ? 'success' : 'default'} label={isActive ? 'Actif' : 'Brouillon'} />;
+    },
   },
   {
     field: 'createdAt',

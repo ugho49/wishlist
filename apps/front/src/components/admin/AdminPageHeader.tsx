@@ -12,6 +12,7 @@ export type AdminBreadcrumb = {
 
 export type AdminPageHeaderProps = {
   title: string;
+  count?: number;
   breadcrumbs?: AdminBreadcrumb[];
   avatar?: ReactNode;
   chips?: ReactNode;
@@ -73,6 +74,20 @@ const TitleText = styled('h1')(({ theme }) => ({
   margin: 0,
 }));
 
+const TitleCount = styled('span')(({ theme }) => ({
+  fontSize: '0.7em',
+  fontWeight: 500,
+  color: theme.palette.text.secondary,
+  fontVariantNumeric: 'tabular-nums',
+  marginLeft: theme.spacing(1),
+  '&::before': {
+    content: '"·"',
+    marginRight: theme.spacing(0.75),
+    color: theme.palette.text.disabled,
+    fontWeight: 400,
+  },
+}));
+
 const MetaText = styled(Box)(({ theme }) => ({
   marginTop: theme.spacing(0.25),
   fontSize: '0.8125rem',
@@ -104,7 +119,7 @@ const ActionsRow = styled(Box)(({ theme }) => ({
   },
 }));
 
-export const AdminPageHeader = ({ title, breadcrumbs, avatar, chips, meta, actions }: AdminPageHeaderProps) => (
+export const AdminPageHeader = ({ title, count, breadcrumbs, avatar, chips, meta, actions }: AdminPageHeaderProps) => (
   <HeaderRoot>
     {breadcrumbs && breadcrumbs.length > 0 ? (
       <BreadcrumbsStyled separator={<NavigateNextIcon fontSize="small" />} aria-label="Fil d'ariane">
@@ -126,7 +141,10 @@ export const AdminPageHeader = ({ title, breadcrumbs, avatar, chips, meta, actio
       {avatar}
       <IdentityBody>
         <TitleRow>
-          <TitleText>{title}</TitleText>
+          <TitleText>
+            {title}
+            {count === undefined ? null : <TitleCount>{count.toLocaleString('fr-FR')}</TitleCount>}
+          </TitleText>
           {chips}
         </TitleRow>
         {meta ? <MetaText>{meta}</MetaText> : null}

@@ -256,7 +256,7 @@ export type AdminEventListEventsQueryVariables = Exact<{
 
 export type AdminEventListEventsQuery = { adminEvents:
     | { __typename: 'ForbiddenRejection' }
-    | { __typename: 'GetEventsPagedResponse', data: Array<{ id: Ids["EventId"], title: string, icon: string | null, eventDate: string, wishlistIds: Array<Ids["WishlistId"]>, createdAt: string, attendees: Array<{ id: Ids["AttendeeId"], role: Types.AttendeeRole, user: { id: Ids["UserId"], firstName: string, lastName: string } | null }> }>, pagination: { totalPages: number, totalElements: number, pageNumber: number, pageSize: number } }
+    | { __typename: 'GetEventsPagedResponse', data: Array<{ id: Ids["EventId"], title: string, icon: string | null, eventDate: string, wishlistIds: Array<Ids["WishlistId"]>, createdAt: string, attendees: Array<{ id: Ids["AttendeeId"], role: Types.AttendeeRole, user: { id: Ids["UserId"], firstName: string, lastName: string } | null }>, secretSanta: { id: Ids["SecretSantaId"], status: Types.SecretSantaStatus } | null }>, pagination: { totalPages: number, totalElements: number, pageNumber: number, pageSize: number } }
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'UnauthorizedRejection' }
     | { __typename: 'ValidationRejection' }
@@ -561,7 +561,7 @@ export type AdminUsersListQueryVariables = Exact<{
 
 
 export type AdminUsersListQuery = { adminUsers:
-    | { __typename: 'AdminGetAllUsers', data: Array<{ id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null, isEnabled: boolean, authorities: Array<Types.UserAuthorities>, createdAt: string }>, pagination: { totalPages: number, totalElements: number, pageNumber: number, pageSize: number } }
+    | { __typename: 'AdminGetAllUsers', data: Array<{ id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null, isEnabled: boolean, createdAt: string, sessions: Array<{ lastUsedAt: string }> }>, pagination: { totalPages: number, totalElements: number, pageNumber: number, pageSize: number } }
     | { __typename: 'ForbiddenRejection' }
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'UnauthorizedRejection' }
@@ -1655,6 +1655,10 @@ export const AdminEventListEventsDocument = new TypedDocumentString(`
             lastName
           }
         }
+        secretSanta {
+          id
+          status
+        }
       }
       pagination {
         totalPages
@@ -2478,8 +2482,10 @@ export const AdminUsersListDocument = new TypedDocumentString(`
         email
         pictureUrl
         isEnabled
-        authorities
         createdAt
+        sessions {
+          lastUsedAt
+        }
       }
       pagination {
         totalPages

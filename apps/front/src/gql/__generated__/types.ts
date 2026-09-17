@@ -225,6 +225,7 @@ export type Event = {
   eventDate: Scalars['String']['output'];
   icon?: Maybe<Scalars['String']['output']>;
   id: Scalars['EventId']['output'];
+  secretSanta?: Maybe<SecretSanta>;
   title: Scalars['String']['output'];
   updatedAt: Scalars['String']['output'];
   wishlistIds: Array<Scalars['WishlistId']['output']>;
