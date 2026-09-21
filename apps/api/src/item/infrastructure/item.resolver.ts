@@ -1,17 +1,22 @@
 import type { ICurrentUser, WishlistId } from '@wishlist/common';
 
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { type ItemId } from '@wishlist/common';
+import { createPagedResponse, type ItemId, type UserId } from '@wishlist/common';
+import { match } from 'ts-pattern';
 
 import { GqlCurrentUser } from '../../auth/infrastructure/decorators/user.decorator';
+import { DEFAULT_RESULT_NUMBER } from '../../core/common/pagination';
 import { ZodPipe } from '../../core/graphql/zod-pipe';
 import {
   type CreateItemInput,
   type CreateItemResult,
   type DeleteItemResult,
   type GetImportableItemsOutput,
+  type GetMyReservedItemsResult,
+  ReservedItemPeriod as GqlReservedItemPeriod,
   type ImportItemsInput,
   type ImportItemsResult,
+  type MyReservedItemsFilters,
   type ScanItemUrlInput,
   type ScanItemUrlResult,
   type ToggleItemResult,
@@ -24,16 +29,26 @@ import { ImportItemsUseCase } from '../application/command/import-items.use-case
 import { ToggleItemUseCase } from '../application/command/toggle-item.use-case';
 import { UpdateItemUseCase } from '../application/command/update-item.use-case';
 import { GetImportableItemsUseCase } from '../application/query/get-importable-items.use-case';
+import { GetMyReservedItemsUseCase } from '../application/query/get-my-reserved-items.use-case';
 import { ScanItemUrlUseCase } from '../application/query/scan-item-url.use-case';
+import { type ReservedItemPeriod } from '../domain/wishlist-item.repository';
 import { itemMapper } from './item.mapper';
 import {
   CreateItemInputSchema,
   ImportItemsInputSchema,
   ItemIdSchema,
+  MyReservedItemsFiltersSchema,
   ScanItemUrlInputSchema,
   UpdateItemInputSchema,
   WishlistIdSchema,
 } from './item.schema';
+
+const toReservedItemPeriod = (period: GqlReservedItemPeriod): ReservedItemPeriod =>
+  match(period)
+    .with(GqlReservedItemPeriod.All, () => 'all' as const)
+    .with(GqlReservedItemPeriod.Reserved, () => 'reserved' as const)
+    .with(GqlReservedItemPeriod.Past, () => 'past' as const)
+    .exhaustive();
 
 @Resolver('Item')
 export class ItemResolver {
@@ -44,6 +59,7 @@ export class ItemResolver {
     private readonly toggleItemUseCase: ToggleItemUseCase,
     private readonly scanItemUrlUseCase: ScanItemUrlUseCase,
     private readonly getImportableItemsUseCase: GetImportableItemsUseCase,
+    private readonly getMyReservedItemsUseCase: GetMyReservedItemsUseCase,
     private readonly importItemsUseCase: ImportItemsUseCase,
   ) {}
 
@@ -57,6 +73,39 @@ export class ItemResolver {
     return {
       __typename: 'GetImportableItemsOutput',
       items: items.map(item => itemMapper.toGqlItem({ item, displayUserAndSuggested: false })),
+    };
+  }
+
+  @Query()
+  async myReservedItems(
+    @Args('filters', new ZodPipe(MyReservedItemsFiltersSchema)) filters: MyReservedItemsFilters,
+    @GqlCurrentUser('id') currentUserId: UserId,
+  ): Promise<GetMyReservedItemsResult> {
+    const pageSize = filters.limit ?? DEFAULT_RESULT_NUMBER;
+    const pageNumber = filters.page ?? 1;
+
+    const { items, totalCount } = await this.getMyReservedItemsUseCase.execute({
+      userId: currentUserId,
+      period: toReservedItemPeriod(filters.period ?? GqlReservedItemPeriod.Reserved),
+      pageNumber,
+      pageSize,
+    });
+
+    const pagedResponse = createPagedResponse({
+      resources: items.map(itemMapper.toGqlReservedItem),
+      options: { pageSize, totalElements: totalCount, pageNumber },
+    });
+
+    return {
+      __typename: 'GetReservedItemsPagedResponse',
+      data: pagedResponse.resources,
+      pagination: {
+        __typename: 'Pagination',
+        totalPages: pagedResponse.pagination.total_pages,
+        totalElements: pagedResponse.pagination.total_elements,
+        pageNumber: pagedResponse.pagination.page_number,
+        pageSize: pagedResponse.pagination.pages_size,
+      },
     };
   }
 

@@ -442,6 +442,18 @@ export type ImportItemsMutation = { importItems:
     | { __typename: 'ValidationRejection', errors: Array<{ field: string, message: string }> }
    };
 
+export type ReservedItemsListPageQueryVariables = Exact<{
+  filters: Types.MyReservedItemsFilters;
+}>;
+
+
+export type ReservedItemsListPageQuery = { myReservedItems:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'GetReservedItemsPagedResponse', data: Array<{ id: Ids["ItemId"], name: string, description: string | null, url: string | null, pictureUrl: string | null, takenAt: string, wishlistId: Ids["WishlistId"], wishlistTitle: string, ownerFirstName: string, ownerLastName: string, events: Array<{ id: Ids["EventId"], title: string, eventDate: string }>, takers: Array<{ userId: Ids["UserId"], firstName: string, lastName: string, pictureUrl: string | null, takenAt: string }> }>, pagination: { totalPages: number, totalElements: number, pageNumber: number, pageSize: number } }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+   };
+
 export type SecretSantaUserItemFragment = { id: Ids["SecretSantaUserId"], attendeeId: Ids["AttendeeId"], exclusions: Array<Ids["SecretSantaUserId"]>, attendee: { id: Ids["AttendeeId"], pendingEmail: string | null, role: Types.AttendeeRole, user: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null } | null } };
 
 export type SecretSantaItemFragment = { id: Ids["SecretSantaId"], eventId: Ids["EventId"], description: string | null, budget: number | null, status: Types.SecretSantaStatus, createdAt: string, updatedAt: string, users: Array<{ id: Ids["SecretSantaUserId"], attendeeId: Ids["AttendeeId"], exclusions: Array<Ids["SecretSantaUserId"]>, attendee: { id: Ids["AttendeeId"], pendingEmail: string | null, role: Types.AttendeeRole, user: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null } | null } }> };
@@ -2213,6 +2225,62 @@ export const useImportItemsMutation = <
       {
     mutationKey: ['ImportItems'],
     mutationFn: (variables?: ImportItemsMutationVariables) => fetchGql<ImportItemsMutation, ImportItemsMutationVariables>(ImportItemsDocument, variables)(),
+    ...options
+  }
+    )};
+
+export const ReservedItemsListPageDocument = new TypedDocumentString(`
+    query ReservedItemsListPage($filters: MyReservedItemsFilters!) {
+  myReservedItems(filters: $filters) {
+    __typename
+    ... on GetReservedItemsPagedResponse {
+      data {
+        id
+        name
+        description
+        url
+        pictureUrl
+        takenAt
+        wishlistId
+        wishlistTitle
+        ownerFirstName
+        ownerLastName
+        events {
+          id
+          title
+          eventDate
+        }
+        takers {
+          userId
+          firstName
+          lastName
+          pictureUrl
+          takenAt
+        }
+      }
+      pagination {
+        totalPages
+        totalElements
+        pageNumber
+        pageSize
+      }
+    }
+  }
+}
+    `);
+
+export const useReservedItemsListPageQuery = <
+      TData = ReservedItemsListPageQuery,
+      TError = unknown
+    >(
+      variables: ReservedItemsListPageQueryVariables,
+      options?: Omit<UseQueryOptions<ReservedItemsListPageQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<ReservedItemsListPageQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<ReservedItemsListPageQuery, TError, TData>(
+      {
+    queryKey: ['ReservedItemsListPage', variables],
+    queryFn: fetchGql<ReservedItemsListPageQuery, ReservedItemsListPageQueryVariables>(ReservedItemsListPageDocument, variables),
     ...options
   }
     )};

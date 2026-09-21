@@ -1301,4 +1301,297 @@ describe('ItemResolver (GraphQL)', () => {
       });
     });
   });
+
+  describe('Query myReservedItems', () => {
+    const query = /* GraphQL */ `
+      query GetMyReservedItems($filters: MyReservedItemsFilters!) {
+        myReservedItems(filters: $filters) {
+          __typename
+          ... on GetReservedItemsPagedResponse {
+            data {
+              id
+              name
+              description
+              url
+              score
+              pictureUrl
+              takenAt
+              wishlistId
+              wishlistTitle
+              ownerFirstName
+              ownerLastName
+              events {
+                id
+                title
+                eventDate
+              }
+              takers {
+                userId
+                firstName
+                lastName
+                pictureUrl
+                takenAt
+              }
+            }
+            pagination {
+              totalPages
+              totalElements
+              pageNumber
+              pageSize
+            }
+          }
+          ... on UnauthorizedRejection {
+            message
+          }
+        }
+      }
+    `;
+
+    it('should not succeed when not authenticated', async () => {
+      const request = await getRequest();
+
+      const res = await request
+        .post('/graphql')
+        .send({ query, variables: { filters: {} } })
+        .expect(200);
+
+      expect(res.body.data?.myReservedItems?.__typename).not.toBe('GetReservedItemsPagedResponse');
+    });
+
+    describe('when user is authenticated', () => {
+      let request: RequestApp;
+      let currentUserId: string;
+
+      beforeEach(async () => {
+        request = await getRequest({ signedAs: 'BASE_USER' });
+        currentUserId = await fixtures.getSignedUserId('BASE_USER');
+      });
+
+      it('should return an empty page when the user reserved nothing', async () => {
+        const res = await request
+          .post('/graphql')
+          .send({ query, variables: { filters: {} } })
+          .expect(200);
+
+        expect(res.body.data.myReservedItems).toMatchObject({
+          __typename: 'GetReservedItemsPagedResponse',
+          data: [],
+          pagination: { totalElements: 0, totalPages: 0, pageNumber: 1 },
+        });
+      });
+
+      it('should return gifts reserved on someone else wishlist and ignore own lists and other takers', async () => {
+        const ownerId = await fixtures.insertUser({
+          email: 'owner@test.fr',
+          firstname: 'Ada',
+          lastname: 'Lovelace',
+        });
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Noël',
+          eventDate: new Date('2026-12-25T12:00:00.000Z'),
+          maintainerId: ownerId,
+        });
+        const wishlistId = await fixtures.insertWishlist({
+          eventIds: [eventId],
+          userId: ownerId,
+          title: 'Liste d Ada',
+        });
+        const takenAt = new Date('2026-09-01T10:00:00.000Z');
+        const itemId = await fixtures.insertItem({
+          wishlistId,
+          name: 'Un livre',
+          description: 'Edition illustrée',
+          url: 'https://example.com/book',
+          pictureUrl: 'https://example.com/book.jpg',
+          takerId: currentUserId,
+          takenAt,
+        });
+
+        const ownWishlistId = await fixtures.insertWishlist({
+          eventIds: [eventId],
+          userId: currentUserId,
+          title: 'Ma liste',
+        });
+        await fixtures.insertItem({
+          wishlistId: ownWishlistId,
+          name: 'Mon cadeau',
+          takerId: currentUserId,
+        });
+
+        const otherUserId = await fixtures.insertUser({
+          email: 'other-taker@test.fr',
+          firstname: 'Other',
+          lastname: 'Taker',
+        });
+        const coTakerTakenAt = new Date('2026-09-02T11:00:00.000Z');
+        await fixtures.insertItemTaker({ itemId, userId: otherUserId, takenAt: coTakerTakenAt });
+        await fixtures.insertItem({
+          wishlistId,
+          name: 'Réservé par un autre',
+          takerId: otherUserId,
+        });
+
+        const res = await request
+          .post('/graphql')
+          .send({ query, variables: { filters: {} } })
+          .expect(200);
+
+        expect(res.body.data.myReservedItems).toMatchObject({
+          __typename: 'GetReservedItemsPagedResponse',
+          data: [
+            {
+              id: itemId,
+              name: 'Un livre',
+              description: 'Edition illustrée',
+              url: 'https://example.com/book',
+              pictureUrl: 'https://example.com/book.jpg',
+              takenAt: takenAt.toISOString(),
+              wishlistId,
+              wishlistTitle: 'Liste d Ada',
+              ownerFirstName: 'Ada',
+              ownerLastName: 'Lovelace',
+              events: [{ id: eventId, title: 'Noël', eventDate: '2026-12-25' }],
+              takers: [
+                {
+                  userId: currentUserId,
+                  firstName: 'John',
+                  lastName: 'Doe',
+                  takenAt: takenAt.toISOString(),
+                },
+                {
+                  userId: otherUserId,
+                  firstName: 'Other',
+                  lastName: 'Taker',
+                  takenAt: coTakerTakenAt.toISOString(),
+                },
+              ],
+            },
+          ],
+          pagination: { totalElements: 1, totalPages: 1, pageNumber: 1 },
+        });
+      });
+
+      it('should paginate reserved gifts by soonest event date', async () => {
+        const ownerId = await fixtures.insertUser({
+          email: 'pages@test.fr',
+          firstname: 'Page',
+          lastname: 'Owner',
+        });
+        const noonOn = (date: DateTime) => new Date(`${date.toFormat('yyyy-MM-dd')}T12:00:00.000Z`);
+        const daysFromNow = [30, 5, 15];
+        const ids: string[] = [];
+
+        for (const days of daysFromNow) {
+          const { eventId } = await fixtures.insertEventWithMaintainer({
+            title: `Dans ${days} jours`,
+            eventDate: noonOn(DateTime.now().plus({ days })),
+            maintainerId: ownerId,
+          });
+          const wishlistId = await fixtures.insertWishlist({
+            eventIds: [eventId],
+            userId: ownerId,
+            title: `Liste ${days}`,
+          });
+          ids.push(
+            await fixtures.insertItem({
+              wishlistId,
+              name: `Cadeau ${days}`,
+              takerId: currentUserId,
+              takenAt: new Date(Date.now() - (30 - days) * 86_400_000),
+            }),
+          );
+        }
+
+        const firstPage = await request
+          .post('/graphql')
+          .send({ query, variables: { filters: { page: 1, limit: 2 } } })
+          .expect(200);
+
+        expect(firstPage.body.data.myReservedItems).toMatchObject({
+          __typename: 'GetReservedItemsPagedResponse',
+          pagination: { totalElements: 3, totalPages: 2, pageNumber: 1, pageSize: 2 },
+        });
+        expect(firstPage.body.data.myReservedItems.data.map((item: { id: string }) => item.id)).toEqual([
+          ids[1],
+          ids[2],
+        ]);
+
+        const secondPage = await request
+          .post('/graphql')
+          .send({ query, variables: { filters: { page: 2, limit: 2 } } })
+          .expect(200);
+
+        expect(secondPage.body.data.myReservedItems.data.map((item: { id: string }) => item.id)).toEqual([ids[0]]);
+      });
+
+      it('should split reserved gifts between upcoming and past events', async () => {
+        const ownerId = await fixtures.insertUser({
+          email: 'period@test.fr',
+          firstname: 'Period',
+          lastname: 'Owner',
+        });
+        const noonOn = (date: DateTime) => new Date(`${date.toFormat('yyyy-MM-dd')}T12:00:00.000Z`);
+        const { eventId: futureEventId } = await fixtures.insertEventWithMaintainer({
+          title: 'À venir',
+          eventDate: noonOn(DateTime.now().plus({ days: 10 })),
+          maintainerId: ownerId,
+        });
+        const { eventId: pastEventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Passé',
+          eventDate: noonOn(DateTime.now().minus({ days: 10 })),
+          maintainerId: ownerId,
+        });
+        const futureWishlistId = await fixtures.insertWishlist({
+          eventIds: [futureEventId],
+          userId: ownerId,
+          title: 'Liste à venir',
+        });
+        const pastWishlistId = await fixtures.insertWishlist({
+          eventIds: [pastEventId],
+          userId: ownerId,
+          title: 'Liste passée',
+        });
+        const unlinkedWishlistId = await fixtures.insertWishlist({
+          eventIds: [],
+          userId: ownerId,
+          title: 'Sans évènement',
+        });
+        const futureItemId = await fixtures.insertItem({
+          wishlistId: futureWishlistId,
+          name: 'Cadeau à venir',
+          takerId: currentUserId,
+        });
+        const pastItemId = await fixtures.insertItem({
+          wishlistId: pastWishlistId,
+          name: 'Cadeau passé',
+          takerId: currentUserId,
+        });
+        const unlinkedItemId = await fixtures.insertItem({
+          wishlistId: unlinkedWishlistId,
+          name: 'Cadeau sans date',
+          takerId: currentUserId,
+        });
+
+        const reserved = await request
+          .post('/graphql')
+          .send({ query, variables: { filters: { period: 'RESERVED' } } })
+          .expect(200);
+        const past = await request
+          .post('/graphql')
+          .send({ query, variables: { filters: { period: 'PAST' } } })
+          .expect(200);
+        const all = await request
+          .post('/graphql')
+          .send({ query, variables: { filters: { period: 'ALL' } } })
+          .expect(200);
+
+        const idsOf = (res: typeof reserved) =>
+          res.body.data.myReservedItems.data.map((item: { id: string }) => item.id).toSorted();
+
+        expect(idsOf(reserved)).toEqual([futureItemId, unlinkedItemId].toSorted());
+        expect(idsOf(past)).toEqual([pastItemId]);
+        expect(idsOf(all)).toEqual([futureItemId, pastItemId, unlinkedItemId].toSorted());
+      });
+    });
+  });
 });

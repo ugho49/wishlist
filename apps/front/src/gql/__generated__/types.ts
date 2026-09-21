@@ -281,6 +281,8 @@ export type GetImportableItemsResult = ForbiddenRejection | GetImportableItemsOu
 
 export type GetMyEventsResult = ForbiddenRejection | GetEventsPagedResponse | InternalErrorRejection | UnauthorizedRejection;
 
+export type GetMyReservedItemsResult = ForbiddenRejection | GetReservedItemsPagedResponse | InternalErrorRejection | UnauthorizedRejection;
+
 export type GetMySecretSantaDrawResult = EventAttendee | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection;
 
 export type GetMySecretSantasResult = ForbiddenRejection | GetSecretSantasPagedResponse | InternalErrorRejection | UnauthorizedRejection;
@@ -288,6 +290,12 @@ export type GetMySecretSantasResult = ForbiddenRejection | GetSecretSantasPagedR
 export type GetMyWishlistsResult = ForbiddenRejection | GetWishlistsPagedResponse | InternalErrorRejection | UnauthorizedRejection;
 
 export type GetPendingEmailChangeResult = ForbiddenRejection | InternalErrorRejection | PendingEmailChange | UnauthorizedRejection;
+
+export type GetReservedItemsPagedResponse = {
+  __typename?: 'GetReservedItemsPagedResponse';
+  data: Array<ReservedItem>;
+  pagination: Pagination;
+};
 
 export type GetSecretSantaForEventResult = ForbiddenRejection | InternalErrorRejection | SecretSanta | UnauthorizedRejection;
 
@@ -741,6 +749,12 @@ export type MutationUpdateWishlistArgs = {
   input: UpdateWishlistInput;
 };
 
+export type MyReservedItemsFilters = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  page?: InputMaybe<Scalars['Int']['input']>;
+  period?: InputMaybe<ReservedItemPeriod>;
+};
+
 export type NotFoundRejection = {
   __typename?: 'NotFoundRejection';
   message: Scalars['String']['output'];
@@ -780,6 +794,7 @@ export type Query = {
   events: GetMyEventsResult;
   health: HealthResult;
   importableItems: GetImportableItemsResult;
+  myReservedItems: GetMyReservedItemsResult;
   mySecretSantaDraw?: Maybe<GetMySecretSantaDrawResult>;
   mySecretSantas: GetMySecretSantasResult;
   pendingEmailChange?: Maybe<GetPendingEmailChangeResult>;
@@ -832,6 +847,11 @@ export type QueryEventsArgs = {
 
 export type QueryImportableItemsArgs = {
   wishlistId: Scalars['WishlistId']['input'];
+};
+
+
+export type QueryMyReservedItemsArgs = {
+  filters: MyReservedItemsFilters;
 };
 
 
@@ -893,6 +913,45 @@ export type RequestEmailChangeInput = {
 };
 
 export type RequestEmailChangeResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+
+export type ReservedItem = {
+  __typename?: 'ReservedItem';
+  description?: Maybe<Scalars['String']['output']>;
+  events: Array<ReservedItemEvent>;
+  id: Scalars['ItemId']['output'];
+  name: Scalars['String']['output'];
+  ownerFirstName: Scalars['String']['output'];
+  ownerLastName: Scalars['String']['output'];
+  pictureUrl?: Maybe<Scalars['String']['output']>;
+  score?: Maybe<Scalars['Int']['output']>;
+  takenAt: Scalars['String']['output'];
+  takers: Array<ReservedItemTaker>;
+  url?: Maybe<Scalars['String']['output']>;
+  wishlistId: Scalars['WishlistId']['output'];
+  wishlistTitle: Scalars['String']['output'];
+};
+
+export type ReservedItemEvent = {
+  __typename?: 'ReservedItemEvent';
+  eventDate: Scalars['String']['output'];
+  id: Scalars['EventId']['output'];
+  title: Scalars['String']['output'];
+};
+
+export enum ReservedItemPeriod {
+  All = 'ALL',
+  Past = 'PAST',
+  Reserved = 'RESERVED'
+}
+
+export type ReservedItemTaker = {
+  __typename?: 'ReservedItemTaker';
+  firstName: Scalars['String']['output'];
+  lastName: Scalars['String']['output'];
+  pictureUrl?: Maybe<Scalars['String']['output']>;
+  takenAt: Scalars['String']['output'];
+  userId: Scalars['UserId']['output'];
+};
 
 export type ResetPasswordInput = {
   email: Scalars['String']['input'];

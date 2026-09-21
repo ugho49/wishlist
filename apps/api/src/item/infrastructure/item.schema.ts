@@ -1,7 +1,16 @@
-import type { CreateItemInput, ImportItemsInput, ScanItemUrlInput, UpdateItemInput } from '../../gql/generated-types';
+import type {
+  CreateItemInput,
+  ImportItemsInput,
+  MyReservedItemsFilters,
+  ScanItemUrlInput,
+  UpdateItemInput,
+} from '../../gql/generated-types';
 
 import { type ItemId, type WishlistId } from '@wishlist/common';
 import z from 'zod';
+
+import { PaginationFiltersSchema } from '../../core/graphql/common-type.schema';
+import { ReservedItemPeriod } from '../../gql/generated-types';
 
 export const ItemIdSchema = z.string().transform(val => val as ItemId);
 export const WishlistIdSchema = z.string().transform(val => val as WishlistId);
@@ -26,6 +35,10 @@ export const UpdateItemInputSchema = z.object({
 export const ScanItemUrlInputSchema = z.object({
   url: z.url(),
 }) satisfies z.ZodType<ScanItemUrlInput>;
+
+export const MyReservedItemsFiltersSchema = PaginationFiltersSchema.extend({
+  period: z.enum(ReservedItemPeriod).default(ReservedItemPeriod.Reserved),
+}) satisfies z.ZodType<MyReservedItemsFilters>;
 
 export const ImportItemsInputSchema = z.object({
   wishlistId: WishlistIdSchema,

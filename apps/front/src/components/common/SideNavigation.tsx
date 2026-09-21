@@ -2,10 +2,11 @@ import type { RootState } from '../../core/store';
 
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
+import ForestIcon from '@mui/icons-material/Forest';
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 import LogoutIcon from '@mui/icons-material/Logout';
 import PersonIcon from '@mui/icons-material/Person';
+import RedeemIcon from '@mui/icons-material/Redeem';
 import {
   Avatar,
   Box,
@@ -270,7 +271,12 @@ export const SideNavigation = () => {
     {
       label: 'Secret Santa',
       value: '/secret-santas',
-      icon: <CardGiftcardIcon />,
+      icon: <ForestIcon />,
+    },
+    {
+      label: 'Cadeaux réservés',
+      value: '/reserved-items',
+      icon: <RedeemIcon />,
     },
   ];
 
