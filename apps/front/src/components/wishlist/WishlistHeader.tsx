@@ -20,7 +20,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import { useNavigate } from '@tanstack/react-router';
+import { useNavigate, useSearch } from '@tanstack/react-router';
 import { useCallback, useState } from 'react';
 
 import { getAvatarUrl } from '../../utils/wishlist.utils';
@@ -28,6 +28,7 @@ import { PageBreadcrumbs } from '../common/PageBreadcrumbs';
 import { ImportItemsButton } from './ImportItemsButton';
 import { WishlistAvatar } from './WishlistAvatar';
 import { filterOptions, sortOptions } from './WishlistFilterAndSortItems';
+import { wishlistBreadcrumbs } from './wishlist-breadcrumbs';
 
 const HeaderContent = styled(Box)(({ theme }) => ({
   display: 'flex',
@@ -157,9 +158,14 @@ export const WishlistHeader = ({
   const [sortAnchorEl, setSortAnchorEl] = useState<null | HTMLElement>(null);
   const [filterAnchorEl, setFilterAnchorEl] = useState<null | HTMLElement>(null);
   const navigate = useNavigate();
+  const { fromEvent } = useSearch({ from: '/_authenticated/_with-layout/wishlists/$wishlistId/' });
   const handleNavigateToEdit = useCallback(() => {
-    void navigate({ to: '/wishlists/$wishlistId/edit', params: { wishlistId: wishlist.id } });
-  }, [navigate, wishlist]);
+    void navigate({
+      to: '/wishlists/$wishlistId/edit',
+      params: { wishlistId: wishlist.id },
+      search: fromEvent ? { fromEvent } : {},
+    });
+  }, [navigate, wishlist, fromEvent]);
 
   const sortMenuOpen = Boolean(sortAnchorEl);
   const filterMenuOpen = Boolean(filterAnchorEl);
@@ -194,7 +200,7 @@ export const WishlistHeader = ({
 
   return (
     <Container maxWidth="lg">
-      <PageBreadcrumbs items={[{ label: 'Mes listes', to: '/wishlists' }, { label: wishlist.title }]} />
+      <PageBreadcrumbs items={wishlistBreadcrumbs(wishlist, fromEvent, 'wishlist')} />
       <HeaderContent>
         {/* Left section - Avatar, Title and Metadata */}
         <LeftSection>

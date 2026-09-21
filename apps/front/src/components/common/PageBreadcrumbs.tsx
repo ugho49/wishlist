@@ -25,6 +25,7 @@ export type PageBreadcrumb =
       label: string;
       to: '/wishlists/$wishlistId';
       params: { wishlistId: WishlistId };
+      search?: { fromEvent: EventId };
     };
 
 type PageBreadcrumbsProps = {
@@ -71,6 +72,7 @@ const CrumbLink = ({ crumb }: { crumb: Exclude<PageBreadcrumb, { to?: undefined 
         <RouterLink
           to="/wishlists/$wishlistId"
           params={crumb.params}
+          search={crumb.search}
           activeOptions={{ exact: true }}
           underline="hover"
           color="inherit"

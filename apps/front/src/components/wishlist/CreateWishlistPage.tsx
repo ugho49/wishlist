@@ -171,7 +171,11 @@ export const CreateWishlistPage = () => {
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
     onSuccess: wishlist => {
       addToast({ message: 'Liste créé avec succès', variant: 'success' });
-      void navigate({ to: '/wishlists/$wishlistId', params: { wishlistId: wishlist.id } });
+      void navigate({
+        to: '/wishlists/$wishlistId',
+        params: { wishlistId: wishlist.id },
+        search: fromEvent ? { fromEvent } : {},
+      });
     },
   });
 
