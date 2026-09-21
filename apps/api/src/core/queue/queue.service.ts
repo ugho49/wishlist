@@ -111,7 +111,7 @@ export class QueueService implements OnModuleInit, OnModuleDestroy {
   private startAllWorkers() {
     this.logger.log('Starting all workers');
     for (const worker of this.workers) {
-      worker.run();
+      void worker.run();
     }
     this.logger.log('All workers started');
   }
