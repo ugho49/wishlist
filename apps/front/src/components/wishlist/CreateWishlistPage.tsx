@@ -171,13 +171,19 @@ export const CreateWishlistPage = () => {
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
     onSuccess: wishlist => {
       addToast({ message: 'Liste créé avec succès', variant: 'success' });
-      void navigate({ to: '/wishlists/$wishlistId', params: { wishlistId: wishlist.id } });
+      void navigate({
+        to: '/wishlists/$wishlistId',
+        params: { wishlistId: wishlist.id },
+        search: fromEvent ? { fromEvent } : {},
+      });
     },
   });
 
   return (
     <Box>
-      <Title>Créer une liste</Title>
+      <Title breadcrumbs={[{ label: 'Mes listes', to: '/wishlists' }, { label: 'Créer une liste' }]}>
+        Créer une liste
+      </Title>
       <Box sx={{ width: '100%' }}>
         <Stepper activeStep={step - 1} alternativeLabel>
           {(fromEvent ? steps.slice(0, -1) : steps).map((label, i) => (

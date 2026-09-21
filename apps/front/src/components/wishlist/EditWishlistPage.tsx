@@ -17,6 +17,7 @@ import { EditWishlistEvent } from './EditWishlistEvents';
 import { EditWishlistInformations } from './EditWishlistInformations';
 import { EditWishlistManagement } from './EditWishlistManagement';
 import { WishlistNotFound } from './WishlistNotFound';
+import { wishlistBreadcrumbs } from './wishlist-breadcrumbs';
 
 export enum TabValues {
   informations = 'informations',
@@ -51,7 +52,7 @@ interface EditWishlistPageProps {
 
 export const EditWishlistPage = ({ wishlistId }: EditWishlistPageProps) => {
   const [tabs, setTabs] = useState(BASE_TABS);
-  const { tab } = useSearch({ from: '/_authenticated/_with-layout/wishlists/$wishlistId/edit' });
+  const { tab, fromEvent } = useSearch({ from: '/_authenticated/_with-layout/wishlists/$wishlistId/edit' });
   const { data, isLoading: loading } = useWishlistPageQuery({ wishlistId }, { select: d => d.wishlist });
   const wishlist = data?.__typename === 'Wishlist' ? data : undefined;
   const queryRejection = data && isRejection(data) && data.__typename !== 'NotFoundRejection' ? data : undefined;
@@ -61,6 +62,8 @@ export const EditWishlistPage = ({ wishlistId }: EditWishlistPageProps) => {
     !!wishlist && (wishlist.owner.id === currentUserId || wishlist.coOwner?.id === currentUserId);
   const isOwner = wishlist?.owner.id === currentUserId;
   const isPublic = wishlist?.config.hideItems === false;
+
+  const breadcrumbs = wishlistBreadcrumbs(wishlist, fromEvent, 'edit');
 
   useEffect(() => {
     if (isPublic && isOwner) {
@@ -76,7 +79,7 @@ export const EditWishlistPage = ({ wishlistId }: EditWishlistPageProps) => {
         canonical={`/wishlists/${wishlistId}/edit`}
       />
       <Box>
-        <Title>Modifier la liste</Title>
+        <Title breadcrumbs={breadcrumbs}>Modifier la liste</Title>
         <Loader loading={loading}>
           {queryRejection && <Alert severity="error">{rejectionMessage(queryRejection)}</Alert>}
           {!queryRejection && (!wishlist || !currentUserCanEdit) && <WishlistNotFound />}
@@ -85,7 +88,7 @@ export const EditWishlistPage = ({ wishlistId }: EditWishlistPageProps) => {
               <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: '20px' }}>
                 <Tabs
                   value={tab}
-                  onChange={(_, newValue) => navigate({ search: { tab: newValue as TabValues } })}
+                  onChange={(_, newValue) => navigate({ search: prev => ({ ...prev, tab: newValue as TabValues }) })}
                   variant="fullWidth"
                   scrollButtons="auto"
                   allowScrollButtonsMobile

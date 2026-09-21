@@ -1,4 +1,4 @@
-import type { WishlistId } from '@wishlist/common';
+import type { EventId, WishlistId } from '@wishlist/common';
 
 import PublicIcon from '@mui/icons-material/Public';
 import { styled, Typography } from '@mui/material';
@@ -24,6 +24,7 @@ export type WishlistCardWithOwnerWishlist = {
 
 export type WishlistCardWithOwnerProps = {
   wishlist: WishlistCardWithOwnerWishlist;
+  eventId?: EventId;
 };
 
 const WishlistCardContent = styled(Card)(({ theme }) => ({
@@ -103,13 +104,19 @@ const PublicIconStyled = styled(PublicIcon)(() => ({
   color: 'white',
 }));
 
-export const WishlistCardWithOwner = ({ wishlist }: WishlistCardWithOwnerProps) => {
+export const WishlistCardWithOwner = ({ wishlist, eventId }: WishlistCardWithOwnerProps) => {
   const navigate = useNavigate();
   const isPublic = !wishlist.config.hideItems;
 
   return (
     <WishlistCardContent
-      onClick={() => navigate({ to: '/wishlists/$wishlistId', params: { wishlistId: wishlist.id } })}
+      onClick={() =>
+        navigate({
+          to: '/wishlists/$wishlistId',
+          params: { wishlistId: wishlist.id },
+          search: eventId ? { fromEvent: eventId } : {},
+        })
+      }
       className={clsx('animated fadeIn fast')}
       hoverable
     >

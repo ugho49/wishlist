@@ -5,7 +5,9 @@ import { Title } from '../common/Title';
 
 export const WishlistNotFound = () => (
   <Box>
-    <Title>Liste introuvable</Title>
+    <Title breadcrumbs={[{ label: 'Mes listes', to: '/wishlists' }, { label: 'Liste introuvable' }]}>
+      Liste introuvable
+    </Title>
     <Stack
       sx={{
         alignItems: 'center',

@@ -1,4 +1,4 @@
-import type { WishlistId } from '@wishlist/common';
+import type { EventId, WishlistId } from '@wishlist/common';
 
 import { createFileRoute } from '@tanstack/react-router';
 import z from 'zod';
@@ -11,6 +11,7 @@ export const Route = createFileRoute('/_authenticated/_with-layout/wishlists/$wi
   },
   validateSearch: z.object({
     tab: z.enum(TabValues).optional().catch(TabValues.informations).default(TabValues.informations),
+    fromEvent: z.optional(z.custom<EventId>()),
   }),
   component: () => {
     const { wishlistId } = Route.useParams();
