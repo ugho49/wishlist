@@ -118,6 +118,13 @@ export const applyFilter = (item: WishlistItem, filter: FilterType): boolean => 
 };
 
 export const applySort = (a: WishlistItem, b: WishlistItem, sort: SortType): number => {
+  const primary = compareItems(a, b, sort);
+  // Items of a list often share the same createdAt. Without a tie-break the
+  // grid follows the database row order, which moves the edited item on update.
+  return primary === 0 ? a.id.localeCompare(b.id) : primary;
+};
+
+const compareItems = (a: WishlistItem, b: WishlistItem, sort: SortType): number => {
   if (sort === SortType.NAME_DESC) {
     return b.name.localeCompare(a.name);
   }
@@ -138,7 +145,6 @@ export const applySort = (a: WishlistItem, b: WishlistItem, sort: SortType): num
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   }
 
-  // Default sort by name ASC
   return a.name.localeCompare(b.name);
 };
 
