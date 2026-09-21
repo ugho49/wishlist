@@ -23,6 +23,7 @@ export const UserTabNotifications = () => {
   const { addToast } = useToast();
   const queryClient = useQueryClient();
   const [dailyNewItemNotification, setDailyNewItemNotification] = useState(true);
+  const [birthdayReminder, setBirthdayReminder] = useState(true);
 
   const { data, isLoading: loadingNotificationSettings } = useUserProfileEmailSettingsQuery(undefined, {
     select: d => d.currentUser,
@@ -37,6 +38,7 @@ export const UserTabNotifications = () => {
   useEffect(() => {
     if (emailSettings) {
       setDailyNewItemNotification(emailSettings.dailyNewItemNotification);
+      setBirthdayReminder(emailSettings.birthdayReminder);
     }
   }, [emailSettings]);
 
@@ -46,6 +48,7 @@ export const UserTabNotifications = () => {
     const res = await updateEmailSettings({
       input: {
         dailyNewItemNotification,
+        birthdayReminder,
       },
     });
 
@@ -88,6 +91,23 @@ export const UserTabNotifications = () => {
                   <Typography variant="body1">Recevoir les mails quotidien d'ajout de nouveaux souhaits</Typography>
                   <Typography variant="caption">
                     Utile pour ne pas avoir à se connecter tous les jours si rien ne change
+                  </Typography>
+                </Stack>
+              }
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={birthdayReminder}
+                  onChange={e => setBirthdayReminder(e.target.checked)}
+                  disabled={loading}
+                />
+              }
+              label={
+                <Stack>
+                  <Typography variant="body1">Recevoir un rappel 30 jours avant mon anniversaire</Typography>
+                  <Typography variant="caption">
+                    Pour penser à créer l'événement et votre liste avant le jour J
                   </Typography>
                 </Stack>
               }

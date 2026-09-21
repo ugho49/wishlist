@@ -4,9 +4,11 @@ export const frontendRoutesBuilder = (baseUrl: string) => ({
   home: () => baseUrl,
   wishlist: {
     byId: (wishlistId: WishlistId) => `${baseUrl}/wishlists/${wishlistId}`,
+    create: () => `${baseUrl}/wishlists/new`,
   },
   event: {
     byId: (eventId: EventId) => `${baseUrl}/events/${eventId}`,
+    create: () => `${baseUrl}/events/new`,
   },
   user: {
     register: () => `${baseUrl}/register`,

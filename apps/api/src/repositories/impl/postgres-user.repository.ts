@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { schema } from '@wishlist/api-drizzle';
 import { type UserId, uuid } from '@wishlist/common';
-import { and, asc, count, desc, eq, gte, inArray, like, ne, or, type SQL, sql } from 'drizzle-orm';
+import { and, asc, count, desc, eq, gte, inArray, isNotNull, isNull, like, ne, or, type SQL, sql } from 'drizzle-orm';
 
 import { DEFAULT_RESULT_NUMBER } from '../../core/common/pagination';
 import { DatabaseService } from '../../core/database/database.service';
@@ -184,6 +184,31 @@ export class PostgresUserRepository implements UserRepository {
       .limit(limit);
 
     return result.map(row => PostgresUserRepository.toModel(row.user));
+  }
+
+  async findEnabledWithBirthdayOn(params: { month: number; day: number; includeLeapDay: boolean }): Promise<User[]> {
+    const birthdayOnTarget = and(
+      sql`extract(month from ${schema.user.birthday}) = ${params.month}`,
+      sql`extract(day from ${schema.user.birthday}) = ${params.day}`,
+    );
+    const leapDay = params.includeLeapDay
+      ? and(sql`extract(month from ${schema.user.birthday}) = 2`, sql`extract(day from ${schema.user.birthday}) = 29`)
+      : undefined;
+
+    const rows = await this.databaseService.db
+      .select({ user: schema.user })
+      .from(schema.user)
+      .leftJoin(schema.userEmailSetting, eq(schema.userEmailSetting.userId, schema.user.id))
+      .where(
+        and(
+          isNotNull(schema.user.birthday),
+          eq(schema.user.isEnabled, true),
+          or(isNull(schema.userEmailSetting.id), eq(schema.userEmailSetting.birthdayReminder, true)),
+          or(birthdayOnTarget, leapDay),
+        ),
+      );
+
+    return rows.map(row => PostgresUserRepository.toModel(row.user));
   }
 
   static toModel(row: typeof schema.user.$inferSelect): User {

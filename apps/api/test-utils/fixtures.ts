@@ -163,14 +163,14 @@ export class Fixtures {
 
   async insertUserEmailSettings(parameters: {
     userId: string;
-    emailSettings: { daily_new_item_notification: boolean };
+    emailSettings: { daily_new_item_notification: boolean; birthday_reminder: boolean };
   }): Promise<string> {
     const { userId, emailSettings } = parameters;
     const id = uuid();
 
     await this.sql.unsafe(
-      `INSERT INTO ${Fixtures.USER_EMAIL_SETTING_TABLE} (id, user_id, daily_new_item_notification) VALUES ($1, $2, $3)`,
-      [id, userId, emailSettings.daily_new_item_notification],
+      `INSERT INTO ${Fixtures.USER_EMAIL_SETTING_TABLE} (id, user_id, daily_new_item_notification, birthday_reminder) VALUES ($1, $2, $3, $4)`,
+      [id, userId, emailSettings.daily_new_item_notification, emailSettings.birthday_reminder],
     );
 
     return id;

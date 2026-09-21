@@ -10,6 +10,7 @@ export const seedConfig = {
     password: 'test',
     count: 500,
     dailyNewItemNotificationProbability: 0.9,
+    birthdayReminderProbability: 0.9,
   },
   events: {
     count: 10000,

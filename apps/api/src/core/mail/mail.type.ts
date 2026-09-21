@@ -19,6 +19,7 @@ export enum MailTemplate {
   EMAIL_CHANGE_NOTIFICATION = 'email-change-notification',
   EMAIL_CHANGED_CONFIRMATION = 'email-changed-confirmation',
   EMAIL_CHANGED_SUCCESS = 'email-changed-success',
+  BIRTHDAY_REMINDER = 'birthday-reminder',
 }
 
 export type WelcomeUserContext = {
@@ -87,6 +88,12 @@ export type EmailChangedSuccessContext = {
   email: string;
 };
 
+export type BirthdayReminderContext = {
+  firstName: string;
+  createEventUrl: string;
+  createWishlistUrl: string;
+};
+
 type BaseMailPayload = {
   to: string | string[];
   subject: string;
@@ -141,6 +148,10 @@ export type MailPayload = BaseMailPayload &
     | {
         template: MailTemplate.EMAIL_CHANGED_SUCCESS;
         context: EmailChangedSuccessContext;
+      }
+    | {
+        template: MailTemplate.BIRTHDAY_REMINDER;
+        context: BirthdayReminderContext;
       }
   );
 
