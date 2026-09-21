@@ -2,6 +2,7 @@ import type { RootState } from '../../core/store';
 
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 import LogoutIcon from '@mui/icons-material/Logout';
 import PersonIcon from '@mui/icons-material/Person';
@@ -265,6 +266,11 @@ export const SideNavigation = () => {
       label: 'Mes listes',
       value: '/wishlists',
       icon: <FormatListBulletedIcon />,
+    },
+    {
+      label: 'Secret Santa',
+      value: '/secret-santas',
+      icon: <CardGiftcardIcon />,
     },
   ];
 

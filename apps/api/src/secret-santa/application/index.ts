@@ -8,6 +8,7 @@ import { UpdateSecretSantaUseCase } from './command/update-secret-santa.use-case
 import { UpdateSecretSantaUserUseCase } from './command/update-secret-santa-user.use-case';
 import { SecretSantaCancelledHandler } from './event/secret-santa-cancelled.handler';
 import { SecretSantaStartedHandler } from './event/secret-santa-started.handler';
+import { GetMySecretSantasUseCase } from './query/get-my-secret-santas.use-case';
 import { GetSecretSantaUseCase } from './query/get-secret-santa.use-case';
 import { GetSecretSantaDrawUseCase } from './query/get-secret-santa-draw.use-case';
 import { GetSecretSantasByEventIdsUseCase } from './query/get-secret-santas-by-event-ids.use-case';
@@ -16,6 +17,7 @@ export const handlers = [
   // Queries
   GetSecretSantaUseCase,
   GetSecretSantaDrawUseCase,
+  GetMySecretSantasUseCase,
   GetSecretSantasByEventIdsUseCase,
   // Commands
   CreateSecretSantaUseCase,
