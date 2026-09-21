@@ -419,6 +419,7 @@ type Mutation {
   revokeSession(input: RevokeSessionInput!): RevokeSessionResult!
   scanItemUrl(input: ScanItemUrlInput!): ScanItemUrlResult!
   sendResetPasswordEmail(input: SendResetPasswordEmailInput!): SendResetPasswordEmailResult!
+  setSignupSource(input: SetSignupSourceInput!): SetSignupSourceResult!
   startSecretSanta(id: SecretSantaId!): StartSecretSantaResult!
   toggleItem(itemId: ItemId!): ToggleItemResult!
   unlinkCurrentUserAccount(accountId: UserAccountId!): UnlinkCurrentUserAccountResult!
@@ -615,6 +616,20 @@ input SendResetPasswordEmailInput {
 
 union SendResetPasswordEmailResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
+input SetSignupSourceInput {
+  detail: String
+  source: SignupSource!
+}
+
+union SetSignupSourceResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | User | ValidationRejection
+
+enum SignupSource {
+  FRIENDS
+  GOOGLE
+  OTHER
+  SOCIAL
+}
+
 union StartSecretSantaResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
 type ToggleItemOutput {
@@ -705,6 +720,8 @@ type User {
   lastName: String!
   pictureUrl: String
   sessions: [UserSession!] @resolved
+  signupSource: SignupSource
+  signupSourceDetail: String
   updatedAt: String!
 }
 
@@ -748,6 +765,8 @@ type UserFull {
   lastName: String!
   pictureUrl: String
   sessions: [UserSession!]! @resolved
+  signupSource: SignupSource
+  signupSourceDetail: String
   updatedAt: String!
 }
 

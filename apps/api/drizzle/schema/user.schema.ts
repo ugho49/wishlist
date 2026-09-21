@@ -2,6 +2,7 @@ import { relations, sql } from 'drizzle-orm';
 import { boolean, date, pgEnum, pgTable, uniqueIndex, varchar } from 'drizzle-orm/pg-core';
 
 import { Authorities } from '../../src/user/domain/authorities.enum';
+import { SignupSource } from '../../src/user/domain/signup-source.enum';
 import { tsEnumToPgEnum } from '../enum';
 import { timestamps } from '../helpers';
 import { userId } from '../ids';
@@ -15,6 +16,8 @@ import { wishlist } from './wishlist.schema';
 
 export const userAuthoritiesEnum = pgEnum('user_authorities', tsEnumToPgEnum(Authorities));
 
+export const signupSourceEnum = pgEnum('signup_source', tsEnumToPgEnum(SignupSource));
+
 export const user = pgTable(
   'user',
   {
@@ -23,6 +26,8 @@ export const user = pgTable(
     firstName: varchar('first_name', { length: 50 }).notNull(),
     lastName: varchar('last_name', { length: 50 }).notNull(),
     birthday: date(),
+    signupSource: signupSourceEnum('signup_source'),
+    signupSourceDetail: varchar('signup_source_detail', { length: 200 }),
     isEnabled: boolean('is_enabled').default(true).notNull(),
     authorities: userAuthoritiesEnum().array().default([Authorities.ROLE_USER]).notNull(),
     pictureUrl: varchar('picture_url', { length: 1000 }),

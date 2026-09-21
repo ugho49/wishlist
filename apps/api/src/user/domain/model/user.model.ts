@@ -1,6 +1,7 @@
 import type { UserId } from '@wishlist/common';
 
 import { Authorities } from '../authorities.enum';
+import { SignupSource } from '../signup-source.enum';
 
 export type UserProps = {
   id: UserId;
@@ -8,6 +9,8 @@ export type UserProps = {
   firstName: string;
   lastName: string;
   birthday?: Date;
+  signupSource?: SignupSource;
+  signupSourceDetail?: string;
   isEnabled: boolean;
   authorities: Authorities[];
   pictureUrl?: string;
@@ -21,6 +24,8 @@ export class User {
   public readonly firstName: string;
   public readonly lastName: string;
   public readonly birthday?: Date;
+  public readonly signupSource?: SignupSource;
+  public readonly signupSourceDetail?: string;
   public readonly isEnabled: boolean;
   public readonly authorities: Authorities[];
   public readonly pictureUrl?: string;
@@ -33,6 +38,8 @@ export class User {
     this.firstName = props.firstName;
     this.lastName = props.lastName;
     this.birthday = props.birthday;
+    this.signupSource = props.signupSource;
+    this.signupSourceDetail = props.signupSourceDetail;
     this.isEnabled = props.isEnabled;
     this.authorities = props.authorities;
     this.pictureUrl = props.pictureUrl;
@@ -115,6 +122,15 @@ export class User {
     return new User({
       ...this,
       birthday,
+      updatedAt: new Date(),
+    });
+  }
+
+  updateSignupSource(params: { source: SignupSource; detail?: string }): User {
+    return new User({
+      ...this,
+      signupSource: params.source,
+      signupSourceDetail: params.source === SignupSource.OTHER ? params.detail : undefined,
       updatedAt: new Date(),
     });
   }

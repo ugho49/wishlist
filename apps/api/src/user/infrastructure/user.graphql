@@ -8,6 +8,13 @@ enum UserAccountProvider {
   FACEBOOK
 }
 
+enum SignupSource {
+  GOOGLE
+  FRIENDS
+  SOCIAL
+  OTHER
+}
+
 type UserAccount {
   id: UserAccountId!
   email: String!
@@ -52,6 +59,8 @@ type User {
   email: String!
   pictureUrl: String
   birthday: String
+  signupSource: SignupSource
+  signupSourceDetail: String
   isEnabled: Boolean!
   createdAt: String!
   updatedAt: String!
@@ -118,6 +127,11 @@ input UpdateUserProfileInput {
   birthday: String
 }
 
+input SetSignupSourceInput {
+  source: SignupSource!
+  detail: String
+}
+
 input ChangeUserPasswordInput {
   oldPassword: String!
   newPassword: String!
@@ -170,6 +184,13 @@ union LinkUserToGoogleResult =
   | InternalErrorRejection
 
 union UpdateUserProfileResult =
+  | User
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+
+union SetSignupSourceResult =
   | User
   | ValidationRejection
   | UnauthorizedRejection
@@ -260,6 +281,7 @@ extend type Mutation {
   linkCurrentUserWithGoogle(input: LinkUserToGoogleInput!): LinkUserToGoogleResult!
   unlinkCurrentUserAccount(accountId: UserAccountId!): UnlinkCurrentUserAccountResult!
   updateUserProfile(input: UpdateUserProfileInput!): UpdateUserProfileResult!
+  setSignupSource(input: SetSignupSourceInput!): SetSignupSourceResult!
   changeUserPassword(input: ChangeUserPasswordInput!): ChangeUserPasswordResult!
   updateUserPictureFromAccount(input: UpdateUserPictureFromAccountInput!): UpdateUserPictureFromAccountResult!
   removeUserPicture: RemoveUserPictureResult!

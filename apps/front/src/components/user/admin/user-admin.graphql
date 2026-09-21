@@ -33,6 +33,8 @@ query AdminUserDetail($userId: UserId!) {
       lastName
       email
       birthday
+      signupSource
+      signupSourceDetail
       pictureUrl
       isEnabled
       authorities

@@ -437,6 +437,98 @@ describe('UserResolver (GraphQL)', () => {
     });
   });
 
+  describe('Mutation setSignupSource', () => {
+    const mutation = /* GraphQL */ `
+      mutation SetSignupSource($input: SetSignupSourceInput!) {
+        setSignupSource(input: $input) {
+          __typename
+          ... on User {
+            id
+            signupSource
+            signupSourceDetail
+          }
+          ... on ValidationRejection {
+            errors {
+              field
+              message
+            }
+          }
+          ... on UnauthorizedRejection {
+            message
+          }
+        }
+      }
+    `;
+
+    it('should not succeed when not authenticated', async () => {
+      const anon = await getRequest();
+      const res = await anon
+        .post('/graphql')
+        .send({ query: mutation, variables: { input: { source: 'GOOGLE' } } })
+        .expect(200);
+
+      expect(res.body.data?.setSignupSource?.__typename).not.toBe('User');
+      await expectTable(Fixtures.USER_TABLE).row(0).toMatchObject({
+        signup_source: null,
+        signup_source_detail: null,
+      });
+    });
+
+    it('should persist a known source and ignore a detail', async () => {
+      const res = await request
+        .post('/graphql')
+        .send({ query: mutation, variables: { input: { source: 'FRIENDS', detail: 'ignored' } } })
+        .expect(200);
+
+      expect(res.body.data.setSignupSource).toMatchObject({
+        __typename: 'User',
+        id: currentUserId,
+        signupSource: 'FRIENDS',
+        signupSourceDetail: null,
+      });
+
+      await expectTable(Fixtures.USER_TABLE).row(0).toMatchObject({
+        id: currentUserId,
+        signup_source: 'friends',
+        signup_source_detail: null,
+      });
+    });
+
+    it('should persist the free-text detail when the source is other', async () => {
+      const res = await request
+        .post('/graphql')
+        .send({ query: mutation, variables: { input: { source: 'OTHER', detail: '  podcast  ' } } })
+        .expect(200);
+
+      expect(res.body.data.setSignupSource).toMatchObject({
+        __typename: 'User',
+        signupSource: 'OTHER',
+        signupSourceDetail: 'podcast',
+      });
+
+      await expectTable(Fixtures.USER_TABLE).row(0).toMatchObject({
+        signup_source: 'other',
+        signup_source_detail: 'podcast',
+      });
+    });
+
+    it.each([
+      { case: 'other without detail', input: { source: 'OTHER' } },
+      { case: 'other with blank detail', input: { source: 'OTHER', detail: '   ' } },
+      { case: 'other detail too long', input: { source: 'OTHER', detail: 'a'.repeat(201) } },
+    ])('should reject with ValidationRejection: $case', async ({ input }) => {
+      const res = await request.post('/graphql').send({ query: mutation, variables: { input } }).expect(200);
+
+      expect(res.body.data.setSignupSource.__typename).toBe('ValidationRejection');
+      const errorFields = res.body.data.setSignupSource.errors.map((error: { field: string }) => error.field);
+      expect(errorFields).toContain('detail');
+
+      await expectTable(Fixtures.USER_TABLE).row(0).toMatchObject({
+        signup_source: null,
+      });
+    });
+  });
+
   describe('Mutation changeUserPassword', () => {
     const mutation = /* GraphQL */ `
       mutation ChangeUserPassword($input: ChangeUserPasswordInput!) {

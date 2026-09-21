@@ -56,6 +56,7 @@ import { CharsRemaining } from '../../common/CharsRemaining';
 import { ConfirmButton } from '../../common/ConfirmButton';
 import { WishlistDatePicker } from '../../common/DatePicker';
 import { Loader } from '../../common/Loader';
+import { formatSignupSource } from '../../onboarding/signup-source';
 import { AdminListWishlistsForUser } from '../../wishlist/admin/AdminListWishlistsForUser';
 import { AvatarUpdateButton } from '../AvatarUpdateButton';
 import { AdminListUserAccounts } from './AdminListUserAccounts';
@@ -501,6 +502,13 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
                 />
               </Box>
             </Stack>
+
+            <TextField
+              label="Comment le site a été connu"
+              value={formatSignupSource(value?.signupSource, value?.signupSourceDetail)}
+              fullWidth
+              disabled
+            />
 
             {canEditUser && (
               <FormActions>

@@ -7,6 +7,7 @@ import { DateTime } from 'luxon';
 import { match } from 'ts-pattern';
 
 import {
+  SignupSource as GqlSignupSource,
   type User as GqlUser,
   type UserAccount as GqlUserAccount,
   UserAccountProvider as GqlUserAccountProvider,
@@ -18,8 +19,18 @@ import {
   UserSessionDeviceType as GqlUserSessionDeviceType,
 } from '../../gql/generated-types';
 import { Authorities } from '../domain/authorities.enum';
+import { SignupSource } from '../domain/signup-source.enum';
 import { UserAccountProvider } from '../domain/user-account-provider.enum';
 import { UserSessionDeviceType } from '../domain/user-session-device-type.enum';
+
+function toGqlSignupSource(source: SignupSource): GqlSignupSource {
+  return match(source)
+    .with(SignupSource.GOOGLE, () => GqlSignupSource.Google)
+    .with(SignupSource.FRIENDS, () => GqlSignupSource.Friends)
+    .with(SignupSource.SOCIAL, () => GqlSignupSource.Social)
+    .with(SignupSource.OTHER, () => GqlSignupSource.Other)
+    .exhaustive();
+}
 
 function toGqlUser(user: User): GqlUser {
   return {
@@ -30,6 +41,8 @@ function toGqlUser(user: User): GqlUser {
     email: user.email,
     pictureUrl: user.pictureUrl,
     birthday: user.birthday ? DateTime.fromJSDate(user.birthday).toISODate() || '' : undefined,
+    signupSource: user.signupSource ? toGqlSignupSource(user.signupSource) : undefined,
+    signupSourceDetail: user.signupSourceDetail,
     isEnabled: user.isEnabled,
     createdAt: user.createdAt.toISOString(),
     updatedAt: user.updatedAt.toISOString(),

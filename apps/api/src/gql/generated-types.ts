@@ -451,6 +451,7 @@ export type Mutation = {
   revokeSession: RevokeSessionResult;
   scanItemUrl: ScanItemUrlResult;
   sendResetPasswordEmail: SendResetPasswordEmailResult;
+  setSignupSource: SetSignupSourceResult;
   startSecretSanta: StartSecretSantaResult;
   toggleItem: ToggleItemResult;
   unlinkCurrentUserAccount: UnlinkCurrentUserAccountResult;
@@ -677,6 +678,11 @@ export type MutationScanItemUrlArgs = {
 
 export type MutationSendResetPasswordEmailArgs = {
   input: SendResetPasswordEmailInput;
+};
+
+
+export type MutationSetSignupSourceArgs = {
+  input: SetSignupSourceInput;
 };
 
 
@@ -1019,6 +1025,20 @@ export type SendResetPasswordEmailInput = {
 
 export type SendResetPasswordEmailResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
+export type SetSignupSourceInput = {
+  detail?: InputMaybe<Scalars['String']['input']>;
+  source: SignupSource;
+};
+
+export type SetSignupSourceResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | User | ValidationRejection;
+
+export enum SignupSource {
+  Friends = 'FRIENDS',
+  Google = 'GOOGLE',
+  Other = 'OTHER',
+  Social = 'SOCIAL'
+}
+
 export type StartSecretSantaResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
 export type ToggleItemOutput = {
@@ -1109,6 +1129,8 @@ export type User = {
   isEnabled: Scalars['Boolean']['output'];
   lastName: Scalars['String']['output'];
   pictureUrl?: Maybe<Scalars['String']['output']>;
+  signupSource?: Maybe<SignupSource>;
+  signupSourceDetail?: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['String']['output'];
 };
 
@@ -1151,6 +1173,8 @@ export type UserFull = {
   isEnabled: Scalars['Boolean']['output'];
   lastName: Scalars['String']['output'];
   pictureUrl?: Maybe<Scalars['String']['output']>;
+  signupSource?: Maybe<SignupSource>;
+  signupSourceDetail?: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['String']['output'];
 };
 
