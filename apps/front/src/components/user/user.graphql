@@ -7,6 +7,8 @@ query UserProfileCurrentUser {
       firstName
       lastName
       birthday
+      signupSource
+      signupSourceDetail
       pictureUrl
       createdAt
       accounts {
@@ -85,6 +87,23 @@ query UserClosestFriends($limit: Int) {
         lastName
         email
         pictureUrl
+      }
+    }
+  }
+}
+
+mutation SetSignupSource($input: SetSignupSourceInput!) {
+  setSignupSource(input: $input) {
+    __typename
+    ... on User {
+      id
+      signupSource
+      signupSourceDetail
+    }
+    ... on ValidationRejection {
+      errors {
+        field
+        message
       }
     }
   }

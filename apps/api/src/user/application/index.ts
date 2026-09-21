@@ -11,6 +11,7 @@ import { NotifyUpcomingBirthdaysUseCase } from './command/notify-upcoming-birthd
 import { RemoveUserPictureUseCase } from './command/remove-user-picture.use-case';
 import { ResetUserPasswordUseCase } from './command/reset-user-password.use-case';
 import { RevokeUserSessionUseCase } from './command/revoke-user-session.use-case';
+import { SetSignupSourceUseCase } from './command/set-signup-source.use-case';
 import { SetUserAdminUseCase } from './command/set-user-admin.use-case';
 import { UnlinkUserAccountUseCase } from './command/unlink-user-account.use-case';
 import { UpdateUserUseCase } from './command/update-user.use-case';
@@ -50,6 +51,7 @@ export const handlers = [
   AdminRevokeAllUserSessionsUseCase,
   UpdateUserEmailSettingUseCase,
   UpdateUserUseCase,
+  SetSignupSourceUseCase,
   UpdateUserFullUseCase,
   SetUserAdminUseCase,
   UpdateUserPictureFromAccountUseCase,

@@ -11,6 +11,8 @@ type UserFull {
   email: String!
   pictureUrl: String
   birthday: String
+  signupSource: SignupSource
+  signupSourceDetail: String
   isEnabled: Boolean!
   createdAt: String!
   updatedAt: String!

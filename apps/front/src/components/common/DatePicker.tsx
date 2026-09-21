@@ -30,6 +30,7 @@ export const WishlistDatePicker = ({
   inputRef,
   format,
   label,
+  referenceDate,
   disabled,
   onChange,
   disablePast,
@@ -63,6 +64,7 @@ export const WishlistDatePicker = ({
       <MobileDatePicker
         format={format}
         value={value}
+        referenceDate={referenceDate}
         disabled={disabled}
         open={datePickerOpen}
         onClose={() => setDatePickerOpen(false)}

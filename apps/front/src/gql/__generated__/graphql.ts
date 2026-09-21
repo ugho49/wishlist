@@ -622,7 +622,7 @@ export type AdminUserDetailQuery = { adminUser:
     | { __typename: 'ForbiddenRejection' }
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'UnauthorizedRejection' }
-    | { __typename: 'UserFull', id: Ids["UserId"], firstName: string, lastName: string, email: string, birthday: string | null, pictureUrl: string | null, isEnabled: boolean, authorities: Array<Types.UserAuthorities>, createdAt: string, accounts: Array<{ id: Ids["UserAccountId"], provider: Types.UserAccountProvider, email: string, pictureUrl: string | null, createdAt: string }>, sessions: Array<{ id: Ids["UserSessionId"], ip: string | null, createdAt: string, lastUsedAt: string, expiresAt: string, current: boolean, device: { browser: string, browserVersion: string | null, os: string, osVersion: string | null, type: Types.UserSessionDeviceType, label: string } }> }
+    | { __typename: 'UserFull', id: Ids["UserId"], firstName: string, lastName: string, email: string, birthday: string | null, signupSource: Types.SignupSource | null, signupSourceDetail: string | null, pictureUrl: string | null, isEnabled: boolean, authorities: Array<Types.UserAuthorities>, createdAt: string, accounts: Array<{ id: Ids["UserAccountId"], provider: Types.UserAccountProvider, email: string, pictureUrl: string | null, createdAt: string }>, sessions: Array<{ id: Ids["UserSessionId"], ip: string | null, createdAt: string, lastUsedAt: string, expiresAt: string, current: boolean, device: { browser: string, browserVersion: string | null, os: string, osVersion: string | null, type: Types.UserSessionDeviceType, label: string } }> }
     | { __typename: 'ValidationRejection' }
    };
 
@@ -727,7 +727,7 @@ export type UserProfileCurrentUserQuery = { currentUser:
     | { __typename: 'ForbiddenRejection' }
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'UnauthorizedRejection' }
-    | { __typename: 'User', id: Ids["UserId"], email: string, firstName: string, lastName: string, birthday: string | null, pictureUrl: string | null, createdAt: string, accounts: Array<{ id: Ids["UserAccountId"], provider: Types.UserAccountProvider, email: string, pictureUrl: string | null, createdAt: string, updatedAt: string }> | null, sessions: Array<{ id: Ids["UserSessionId"], ip: string | null, createdAt: string, lastUsedAt: string, expiresAt: string, current: boolean, device: { browser: string, browserVersion: string | null, os: string, osVersion: string | null, type: Types.UserSessionDeviceType, label: string } }> | null }
+    | { __typename: 'User', id: Ids["UserId"], email: string, firstName: string, lastName: string, birthday: string | null, signupSource: Types.SignupSource | null, signupSourceDetail: string | null, pictureUrl: string | null, createdAt: string, accounts: Array<{ id: Ids["UserAccountId"], provider: Types.UserAccountProvider, email: string, pictureUrl: string | null, createdAt: string, updatedAt: string }> | null, sessions: Array<{ id: Ids["UserSessionId"], ip: string | null, createdAt: string, lastUsedAt: string, expiresAt: string, current: boolean, device: { browser: string, browserVersion: string | null, os: string, osVersion: string | null, type: Types.UserSessionDeviceType, label: string } }> | null }
    };
 
 export type UserProfileEmailSettingsQueryVariables = Exact<{ [key: string]: never; }>;
@@ -774,6 +774,19 @@ export type UserClosestFriendsQuery = { closestFriends:
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'UnauthorizedRejection' }
     | { __typename: 'ValidationRejection' }
+   };
+
+export type SetSignupSourceMutationVariables = Exact<{
+  input: Types.SetSignupSourceInput;
+}>;
+
+
+export type SetSignupSourceMutation = { setSignupSource:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'User', id: Ids["UserId"], signupSource: Types.SignupSource | null, signupSourceDetail: string | null }
+    | { __typename: 'ValidationRejection', errors: Array<{ field: string, message: string }> }
    };
 
 export type UpdateUserProfileMutationVariables = Exact<{
@@ -2745,6 +2758,8 @@ export const AdminUserDetailDocument = new TypedDocumentString(`
       lastName
       email
       birthday
+      signupSource
+      signupSourceDetail
       pictureUrl
       isEnabled
       authorities
@@ -2994,6 +3009,8 @@ export const UserProfileCurrentUserDocument = new TypedDocumentString(`
       firstName
       lastName
       birthday
+      signupSource
+      signupSourceDetail
       pictureUrl
       createdAt
       accounts {
@@ -3162,6 +3179,38 @@ export const useUserClosestFriendsQuery = <
       {
     queryKey: variables === undefined ? ['UserClosestFriends'] : ['UserClosestFriends', variables],
     queryFn: fetchGql<UserClosestFriendsQuery, UserClosestFriendsQueryVariables>(UserClosestFriendsDocument, variables),
+    ...options
+  }
+    )};
+
+export const SetSignupSourceDocument = new TypedDocumentString(`
+    mutation SetSignupSource($input: SetSignupSourceInput!) {
+  setSignupSource(input: $input) {
+    __typename
+    ... on User {
+      id
+      signupSource
+      signupSourceDetail
+    }
+    ... on ValidationRejection {
+      errors {
+        field
+        message
+      }
+    }
+  }
+}
+    `);
+
+export const useSetSignupSourceMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<SetSignupSourceMutation, TError, SetSignupSourceMutationVariables, TContext>) => {
+    
+    return useMutation<SetSignupSourceMutation, TError, SetSignupSourceMutationVariables, TContext>(
+      {
+    mutationKey: ['SetSignupSource'],
+    mutationFn: (variables?: SetSignupSourceMutationVariables) => fetchGql<SetSignupSourceMutation, SetSignupSourceMutationVariables>(SetSignupSourceDocument, variables)(),
     ...options
   }
     )};

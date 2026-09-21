@@ -1,19 +1,23 @@
-import type {
-  ChangeUserPasswordInput,
-  ConfirmEmailChangeInput,
-  LinkUserToGoogleInput,
-  RegisterUserInput,
-  RequestEmailChangeInput,
-  ResetPasswordInput,
-  RevokeSessionInput,
-  SendResetPasswordEmailInput,
-  UpdateUserEmailSettingsInput,
-  UpdateUserPictureFromAccountInput,
-  UpdateUserProfileInput,
-} from '../../gql/generated-types';
-
 import { type UserAccountId, type UserId, type UserSessionId } from '@wishlist/common';
+import { match } from 'ts-pattern';
 import z from 'zod';
+
+import {
+  type ChangeUserPasswordInput,
+  type ConfirmEmailChangeInput,
+  SignupSource as GqlSignupSource,
+  type LinkUserToGoogleInput,
+  type RegisterUserInput,
+  type RequestEmailChangeInput,
+  type ResetPasswordInput,
+  type RevokeSessionInput,
+  type SendResetPasswordEmailInput,
+  type SetSignupSourceInput,
+  type UpdateUserEmailSettingsInput,
+  type UpdateUserPictureFromAccountInput,
+  type UpdateUserProfileInput,
+} from '../../gql/generated-types';
+import { SignupSource } from '../domain/signup-source.enum';
 
 export const UserIdSchema = z.string().transform(val => val as UserId);
 
@@ -28,6 +32,44 @@ export const UpdateUserProfileInputSchema = z.object({
   lastname: z.string().nonempty().max(50),
   birthday: z.iso.date({ message: 'must be in format YYYY-MM-DD' }).optional(),
 }) satisfies z.ZodType<UpdateUserProfileInput>;
+
+export const SetSignupSourceInputSchema = z
+  .object({
+    source: z.enum(GqlSignupSource),
+    detail: z.string().nullish(),
+  })
+  .superRefine((value, ctx) => {
+    if (value.source !== GqlSignupSource.Other) {
+      return;
+    }
+
+    const detail = value.detail?.trim() ?? '';
+    if (detail.length === 0) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['detail'],
+        message: 'required when source is OTHER',
+      });
+      return;
+    }
+
+    if (detail.length > 200) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['detail'],
+        message: '200 characters maximum',
+      });
+    }
+  }) satisfies z.ZodType<SetSignupSourceInput>;
+
+export function toDomainSignupSource(source: GqlSignupSource): SignupSource {
+  return match(source)
+    .with(GqlSignupSource.Google, () => SignupSource.GOOGLE)
+    .with(GqlSignupSource.Friends, () => SignupSource.FRIENDS)
+    .with(GqlSignupSource.Social, () => SignupSource.SOCIAL)
+    .with(GqlSignupSource.Other, () => SignupSource.OTHER)
+    .exhaustive();
+}
 
 export const RegisterUserInputSchema = z.object({
   firstname: z.string().nonempty().max(50),

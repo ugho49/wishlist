@@ -29,6 +29,8 @@ import {
   type SearchUsersResult,
   type SendResetPasswordEmailInput,
   type SendResetPasswordEmailResult,
+  type SetSignupSourceInput,
+  type SetSignupSourceResult,
   type UnlinkCurrentUserAccountResult,
   type UpdateUserEmailSettingsInput,
   type UpdateUserEmailSettingsResult,
@@ -46,6 +48,7 @@ import { LinkUserToGoogleUseCase } from '../../application/command/link-user-to-
 import { RemoveUserPictureUseCase } from '../../application/command/remove-user-picture.use-case';
 import { ResetUserPasswordUseCase } from '../../application/command/reset-user-password.use-case';
 import { RevokeUserSessionUseCase } from '../../application/command/revoke-user-session.use-case';
+import { SetSignupSourceUseCase } from '../../application/command/set-signup-source.use-case';
 import { UnlinkUserAccountUseCase } from '../../application/command/unlink-user-account.use-case';
 import { UpdateUserUseCase } from '../../application/command/update-user.use-case';
 import { UpdateUserEmailSettingUseCase } from '../../application/command/update-user-email-setting.use-case';
@@ -54,6 +57,7 @@ import { UpdateUserPictureFromAccountUseCase } from '../../application/command/u
 import { GetClosestFriendsUseCase } from '../../application/query/get-closest-friends.use-case';
 import { GetPendingEmailChangeUseCase } from '../../application/query/get-pending-email-change.use-case';
 import { GetUsersByCriteriaUseCase } from '../../application/query/get-users-by-criteria.use-case';
+import { SignupSource } from '../../domain/signup-source.enum';
 import { userMapper } from '../user.mapper';
 import {
   ChangeUserPasswordInputSchema,
@@ -66,6 +70,8 @@ import {
   RevokeSessionInputSchema,
   SearchUsersKeywordSchema,
   SendResetPasswordEmailInputSchema,
+  SetSignupSourceInputSchema,
+  toDomainSignupSource,
   UpdateUserEmailSettingsInputSchema,
   UpdateUserPictureFromAccountInputSchema,
   UpdateUserProfileInputSchema,
@@ -78,6 +84,7 @@ export class UserResolver {
     private readonly linkUserToGoogleUseCase: LinkUserToGoogleUseCase,
     private readonly unlinkUserAccountUseCase: UnlinkUserAccountUseCase,
     private readonly updateUserUseCase: UpdateUserUseCase,
+    private readonly setSignupSourceUseCase: SetSignupSourceUseCase,
     private readonly updateUserPasswordUseCase: UpdateUserPasswordUseCase,
     private readonly updateUserPictureFromAccountUseCase: UpdateUserPictureFromAccountUseCase,
     private readonly removeUserPictureUseCase: RemoveUserPictureUseCase,
@@ -180,6 +187,26 @@ export class UserResolver {
         lastname: input.lastname,
         birthday: input.birthday ? new Date(input.birthday) : undefined,
       },
+    });
+
+    const loadedUser = await ctx.loaders.user.load(currentUserId);
+    if (!loadedUser) {
+      throw new Error('Failed to load user');
+    }
+    return loadedUser;
+  }
+
+  @Mutation()
+  async setSignupSource(
+    @Args('input', new ZodPipe(SetSignupSourceInputSchema)) input: SetSignupSourceInput,
+    @GqlCurrentUser('id') currentUserId: UserId,
+    @Context() ctx: GraphQLContext,
+  ): Promise<SetSignupSourceResult> {
+    const source = toDomainSignupSource(input.source);
+    await this.setSignupSourceUseCase.execute({
+      userId: currentUserId,
+      source,
+      detail: source === SignupSource.OTHER ? input.detail?.trim() : undefined,
     });
 
     const loadedUser = await ctx.loaders.user.load(currentUserId);
