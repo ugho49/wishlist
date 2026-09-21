@@ -152,7 +152,7 @@ export const SecretSantaTimelineItem = ({ secretSanta }: SecretSantaTimelineItem
   const action = match(secretSanta.status)
     .with(SecretSantaStatus.Created, () => ({
       label: 'Tirage non effectué',
-      color: 'default' as const,
+      color: 'warning' as const,
       go: () =>
         navigate({
           to: '/events/$eventId/edit',

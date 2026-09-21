@@ -44,7 +44,7 @@ export class EventResolver {
       userId: currentUserId,
       pageNumber,
       pageSize,
-      ignorePastEvents: false,
+      ignorePastEvents: filters.onlyFuture ?? false,
     });
 
     const pagedResponse = createPagedResponse({

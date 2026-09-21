@@ -7,6 +7,15 @@ query EventSelectAvailableEvents($filters: EventPaginationFilters!) {
         title
         icon
         eventDate
+        attendees {
+          role
+          user {
+            id
+          }
+        }
+        secretSanta {
+          id
+        }
       }
     }
   }

@@ -22,7 +22,7 @@ import { DateTime } from 'luxon';
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
-import { AttendeeRole, isRejection, rejectionMessage, useSecretSantaListPageGetAdminEventsQuery } from '../../gql';
+import { AttendeeRole, isRejection, rejectionMessage, useEventSelectAvailableEventsQuery } from '../../gql';
 import { TabValues } from '../../routes/_authenticated/_with-layout/events/$eventId/edit';
 import { Loader } from '../common/Loader';
 import { EventIcon } from '../event/EventIcon';
@@ -39,8 +39,8 @@ export type CreateSecretSantaFromEventDialogProps = {
 export const CreateSecretSantaFromEventDialog = ({ open, onClose }: CreateSecretSantaFromEventDialogProps) => {
   const currentUserId = useSelector(mapCurrentUserId);
   const navigate = useNavigate();
-  const { data, isLoading: loading } = useSecretSantaListPageGetAdminEventsQuery(
-    { filters: { page: 1, limit: 100 } },
+  const { data, isLoading: loading } = useEventSelectAvailableEventsQuery(
+    { filters: { limit: 100, onlyFuture: true } },
     { enabled: open, select: d => d.events },
   );
   const pagedEvents = data?.__typename === 'GetEventsPagedResponse' ? data : undefined;
@@ -75,7 +75,8 @@ export const CreateSecretSantaFromEventDialog = ({ open, onClose }: CreateSecret
       </DialogTitle>
       <DialogContent>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          Un Secret Santa se lance depuis un évènement pour lequel vous êtes organisateur. Choisissez un évènement :
+          Un Secret Santa se lance depuis un évènement à venir pour lequel vous êtes organisateur. Choisissez un
+          évènement :
         </Typography>
 
         {queryRejection && <Alert severity="error">{rejectionMessage(queryRejection)}</Alert>}
@@ -84,7 +85,8 @@ export const CreateSecretSantaFromEventDialog = ({ open, onClose }: CreateSecret
           {adminEvents.length === 0 && !queryRejection && (
             <>
               <Typography variant="body2" color="text.secondary">
-                Vous n&apos;êtes organisateur d&apos;aucun évènement. Créez-en un pour pouvoir lancer un Secret Santa.
+                Vous n&apos;êtes organisateur d&apos;aucun évènement à venir. Créez-en un pour pouvoir lancer un Secret
+                Santa.
               </Typography>
               <DialogActions sx={{ px: 0, justifyContent: 'flex-start' }}>
                 <Button
