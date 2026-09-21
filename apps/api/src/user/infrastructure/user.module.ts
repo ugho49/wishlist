@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
 import { handlers } from '../application';
+import { BirthdayReminderProcessor } from './birthday-reminder.processor';
 import { UserController } from './controllers/user.controller';
 import { UserAdminController } from './controllers/user-admin.controller';
 import { UserFieldResolver } from './resolvers/user.field-resolver';
@@ -25,6 +26,7 @@ import { UserSessionCleanupProcessor } from './user-session-cleanup.processor';
     UserSessionFieldResolver,
     UserDataLoaderFactory,
     UserSessionCleanupProcessor,
+    BirthdayReminderProcessor,
   ],
   exports: [UserDataLoaderFactory],
 })

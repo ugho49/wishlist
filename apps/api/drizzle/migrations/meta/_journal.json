@@ -113,6 +113,13 @@
       "when": 1789680355917,
       "tag": "0015_add-event-title-trgm-index",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1790022088893,
+      "tag": "0016_add-birthday-reminder-email-setting",
+      "breakpoints": true
     }
   ]
 }

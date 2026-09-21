@@ -77,6 +77,7 @@ function toGqlUserEmailSettings(userEmailSetting: UserEmailSetting): GqlUserEmai
   return {
     __typename: 'UserEmailSettings',
     dailyNewItemNotification: userEmailSetting.dailyNewItemNotification,
+    birthdayReminder: userEmailSetting.birthdayReminder,
   };
 }
 

@@ -12,6 +12,7 @@ export async function seedUserEmailSettings(
     id: uuid(),
     userId: user.id,
     dailyNewItemNotification: chance(seedConfig.users.dailyNewItemNotificationProbability),
+    birthdayReminder: chance(seedConfig.users.birthdayReminderProbability),
   }));
 
   await insertInBatches(db, schema.userEmailSetting, settings);

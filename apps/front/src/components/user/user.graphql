@@ -44,6 +44,7 @@ query UserProfileEmailSettings {
       id
       emailSettings {
         dailyNewItemNotification
+        birthdayReminder
       }
     }
   }
@@ -131,6 +132,7 @@ mutation UpdateUserEmailSettings($input: UpdateUserEmailSettingsInput!) {
     __typename
     ... on UserEmailSettings {
       dailyNewItemNotification
+      birthdayReminder
     }
     ... on ValidationRejection {
       errors {

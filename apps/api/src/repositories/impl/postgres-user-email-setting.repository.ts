@@ -35,6 +35,7 @@ export class PostgresUserEmailSettingRepository implements UserEmailSettingRepos
         id: userEmailSetting.id,
         userId: userEmailSetting.user.id,
         dailyNewItemNotification: userEmailSetting.dailyNewItemNotification,
+        birthdayReminder: userEmailSetting.birthdayReminder,
         createdAt: userEmailSetting.createdAt,
         updatedAt: userEmailSetting.updatedAt,
       })
@@ -42,6 +43,7 @@ export class PostgresUserEmailSettingRepository implements UserEmailSettingRepos
         target: schema.userEmailSetting.id,
         set: {
           dailyNewItemNotification: userEmailSetting.dailyNewItemNotification,
+          birthdayReminder: userEmailSetting.birthdayReminder,
           updatedAt: userEmailSetting.updatedAt,
         },
       });
@@ -54,6 +56,7 @@ export class PostgresUserEmailSettingRepository implements UserEmailSettingRepos
       id: row.id,
       user: PostgresUserRepository.toModel(row.user),
       dailyNewItemNotification: row.dailyNewItemNotification,
+      birthdayReminder: row.birthdayReminder,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     });

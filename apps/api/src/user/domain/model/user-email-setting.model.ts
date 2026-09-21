@@ -5,6 +5,7 @@ export type UserEmailSettingProps = {
   id: UserEmailSettingId;
   user: User;
   dailyNewItemNotification: boolean;
+  birthdayReminder: boolean;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -13,6 +14,7 @@ export class UserEmailSetting {
   public readonly id: UserEmailSettingId;
   public readonly user: User;
   public readonly dailyNewItemNotification: boolean;
+  public readonly birthdayReminder: boolean;
   public readonly createdAt: Date;
   public readonly updatedAt: Date;
 
@@ -20,25 +22,33 @@ export class UserEmailSetting {
     this.id = props.id;
     this.user = props.user;
     this.dailyNewItemNotification = props.dailyNewItemNotification;
+    this.birthdayReminder = props.birthdayReminder;
     this.createdAt = props.createdAt;
     this.updatedAt = props.updatedAt;
   }
 
-  static create(params: { id: UserEmailSettingId; user: User; dailyNewItemNotification?: boolean }): UserEmailSetting {
+  static create(params: {
+    id: UserEmailSettingId;
+    user: User;
+    dailyNewItemNotification?: boolean;
+    birthdayReminder?: boolean;
+  }): UserEmailSetting {
     const now = new Date();
     return new UserEmailSetting({
       id: params.id,
       user: params.user,
       dailyNewItemNotification: params.dailyNewItemNotification === undefined ? true : params.dailyNewItemNotification,
+      birthdayReminder: params.birthdayReminder === undefined ? true : params.birthdayReminder,
       createdAt: now,
       updatedAt: now,
     });
   }
 
-  updatePreferences(params: { dailyNewItemNotification: boolean }): UserEmailSetting {
+  updatePreferences(params: { dailyNewItemNotification: boolean; birthdayReminder: boolean }): UserEmailSetting {
     return new UserEmailSetting({
       ...this,
       dailyNewItemNotification: params.dailyNewItemNotification,
+      birthdayReminder: params.birthdayReminder,
       updatedAt: new Date(),
     });
   }

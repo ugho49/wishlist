@@ -9,12 +9,14 @@ import { UserBuilder } from './user.builder';
 type UserEmailSettingBuilderData = {
   user: User;
   dailyNewItemNotification: boolean;
+  birthdayReminder: boolean;
 };
 
 export class UserEmailSettingBuilder {
   private readonly data: UserEmailSettingBuilderData = {
     user: new UserBuilder().build(),
     dailyNewItemNotification: true,
+    birthdayReminder: true,
   };
 
   withUser(user: User): this {
@@ -27,11 +29,17 @@ export class UserEmailSettingBuilder {
     return this;
   }
 
+  withBirthdayReminder(birthdayReminder: boolean): this {
+    this.data.birthdayReminder = birthdayReminder;
+    return this;
+  }
+
   build(): UserEmailSetting {
     return UserEmailSetting.create({
       id: uuid() as UserEmailSettingId,
       user: this.data.user,
       dailyNewItemNotification: this.data.dailyNewItemNotification,
+      birthdayReminder: this.data.birthdayReminder,
     });
   }
 }

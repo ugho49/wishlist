@@ -1,0 +1,1 @@
+ALTER TABLE "user_email_setting" ADD COLUMN "birthday_reminder" boolean DEFAULT true NOT NULL;

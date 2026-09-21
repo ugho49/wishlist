@@ -35,7 +35,7 @@ describe('UpdateUserEmailSettingUseCase', () => {
     userEmailSettingRepository.findByUserId.mockResolvedValueOnce(undefined);
 
     await expect(
-      useCase.execute({ currentUser: toCurrentUser(user), dailyNewItemNotification: false }),
+      useCase.execute({ currentUser: toCurrentUser(user), dailyNewItemNotification: false, birthdayReminder: true }),
     ).rejects.toThrow(NotFoundException);
     expect(userEmailSettingRepository.save).not.toHaveBeenCalled();
   });
@@ -44,9 +44,11 @@ describe('UpdateUserEmailSettingUseCase', () => {
     const { userEmailSetting: updated } = await useCase.execute({
       currentUser: toCurrentUser(user),
       dailyNewItemNotification: false,
+      birthdayReminder: false,
     });
 
     expect(updated.dailyNewItemNotification).toBe(false);
+    expect(updated.birthdayReminder).toBe(false);
     expect(userEmailSettingRepository.save).toHaveBeenCalledWith(updated);
   });
 });

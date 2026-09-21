@@ -17,6 +17,7 @@ export interface UserRepository {
   countAdminStats(): Promise<{ totalCount: number; enabledCount: number; adminCount: number }>;
   countCreatedByMonth(since: Date): Promise<Array<{ month: string; count: number }>>;
   findClosestFriends(userId: UserId, limit: number): Promise<User[]>;
+  findEnabledWithBirthdayOn(params: { month: number; day: number; includeLeapDay: boolean }): Promise<User[]>;
   save(user: User, tx?: DrizzleTransaction): Promise<void>;
   delete(userId: UserId): Promise<void>;
 }
