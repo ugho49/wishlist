@@ -5,7 +5,9 @@ import { Title } from '../common/Title';
 
 export const EventNotFound = () => (
   <Box>
-    <Title>Évènement introuvable</Title>
+    <Title breadcrumbs={[{ label: 'Évènements', to: '/events' }, { label: 'Évènement introuvable' }]}>
+      Évènement introuvable
+    </Title>
     <Stack
       sx={{
         alignItems: 'center',

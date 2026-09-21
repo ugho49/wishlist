@@ -26,6 +26,7 @@ import { DateTime } from 'luxon';
 import { useCallback, useState } from 'react';
 
 import { TabValues } from '../../routes/_authenticated/_with-layout/events/$eventId/edit';
+import { PageBreadcrumbs } from '../common/PageBreadcrumbs';
 import { EventIcon } from './EventIcon';
 
 const HeaderContent = styled(Box)(({ theme }) => ({
@@ -191,6 +192,7 @@ export const EventHeader = ({
 
   return (
     <Container maxWidth="lg">
+      <PageBreadcrumbs items={[{ label: 'Évènements', to: '/events' }, { label: title }]} />
       <HeaderContent>
         {/* Left section - Avatar, Title and Metadata */}
         <LeftSection>

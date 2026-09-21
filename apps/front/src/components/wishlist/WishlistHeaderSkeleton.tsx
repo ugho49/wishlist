@@ -22,6 +22,12 @@ const LeftSection = styled(Stack)(({ theme }) => ({
   width: '100%',
 }));
 
+const BreadcrumbSkeleton = styled(Skeleton)(({ theme }) => ({
+  fontSize: '0.75rem',
+  width: 140,
+  marginBottom: theme.spacing(2),
+}));
+
 const TitleContainer = styled(Stack)(({ theme }) => ({
   gap: theme.spacing(1),
   flex: 1,
@@ -30,6 +36,7 @@ const TitleContainer = styled(Stack)(({ theme }) => ({
 
 export const WishlistHeaderSkeleton = () => (
   <Container maxWidth="lg">
+    <BreadcrumbSkeleton animation="wave" variant="text" />
     <HeaderContent>
       <LeftSection>
         <Skeleton animation="wave" variant="circular" width={75} height={75} />

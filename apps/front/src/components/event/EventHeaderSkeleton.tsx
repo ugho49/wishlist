@@ -28,6 +28,12 @@ const TitleContainer = styled(Stack)(({ theme }) => ({
   minWidth: 0,
 }));
 
+const BreadcrumbSkeleton = styled(Skeleton)(({ theme }) => ({
+  fontSize: '0.75rem',
+  width: 140,
+  marginBottom: theme.spacing(2),
+}));
+
 const MetadataStack = styled(Stack)(({ theme }) => ({
   flexDirection: 'row',
   gap: theme.spacing(3),
@@ -43,6 +49,7 @@ const MetadataStack = styled(Stack)(({ theme }) => ({
 
 export const EventHeaderSkeleton = () => (
   <Container maxWidth="lg">
+    <BreadcrumbSkeleton animation="wave" variant="text" />
     <HeaderContent>
       <LeftSection>
         <Skeleton animation="wave" variant="circular" width={48} height={48} />

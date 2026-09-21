@@ -1,4 +1,5 @@
 import type { EventId } from '@wishlist/common';
+import type { PageBreadcrumb } from '@wishlist/front-components/common/PageBreadcrumbs';
 import type { RootState } from '../../../../../core/store';
 
 import ForestIcon from '@mui/icons-material/Forest';
@@ -65,6 +66,12 @@ function RouteComponent() {
   const currentUserCanEdit = canEditEvent(event?.attendees ?? [], currentUserId);
   const navigate = useNavigate({ from: '/events/$eventId/edit' });
 
+  const breadcrumbs: PageBreadcrumb[] = [{ label: 'Évènements', to: '/events' }];
+  if (event) {
+    breadcrumbs.push({ label: event.title, to: '/events/$eventId', params: { eventId: event.id } });
+  }
+  breadcrumbs.push({ label: 'Modifier' });
+
   const handleTabChange = (newValue: TabValues) => {
     void navigate({ search: { tab: newValue } });
   };
@@ -77,7 +84,7 @@ function RouteComponent() {
         canonical={`/events/${eventId}/edit`}
       />
       <Box>
-        <Title>Modifier l'évènement</Title>
+        <Title breadcrumbs={breadcrumbs}>Modifier l'évènement</Title>
         <Loader loading={loading}>
           {queryRejection && <Alert severity="error">{rejectionMessage(queryRejection)}</Alert>}
           {!queryRejection && (!event || !currentUserCanEdit) && <EventNotFound />}

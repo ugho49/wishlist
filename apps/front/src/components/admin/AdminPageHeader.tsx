@@ -1,19 +1,14 @@
 import type { ReactNode } from 'react';
+import type { PageBreadcrumb } from '../common/PageBreadcrumbs';
 
-import NavigateNextIcon from '@mui/icons-material/NavigateNext';
-import { Box, Breadcrumbs, styled } from '@mui/material';
+import { Box, styled } from '@mui/material';
 
-import { RouterLink } from '../common/RouterLink';
-
-export type AdminBreadcrumb = {
-  label: string;
-  to?: '/admin' | '/admin/users' | '/admin/events';
-};
+import { PageBreadcrumbs } from '../common/PageBreadcrumbs';
 
 export type AdminPageHeaderProps = {
   title: string;
   count?: number;
-  breadcrumbs?: AdminBreadcrumb[];
+  breadcrumbs?: PageBreadcrumb[];
   avatar?: ReactNode;
   chips?: ReactNode;
   meta?: ReactNode;
@@ -23,25 +18,6 @@ export type AdminPageHeaderProps = {
 const HeaderRoot = styled('header')(({ theme }) => ({
   marginBottom: theme.spacing(3),
   flexShrink: 0,
-}));
-
-const BreadcrumbsStyled = styled(Breadcrumbs)(({ theme }) => ({
-  marginBottom: theme.spacing(2),
-  '& .MuiBreadcrumbs-separator': {
-    marginLeft: theme.spacing(0.5),
-    marginRight: theme.spacing(0.5),
-  },
-}));
-
-const CrumbText = styled('span')(({ theme }) => ({
-  fontSize: '0.75rem',
-  color: theme.palette.text.secondary,
-}));
-
-const CurrentCrumb = styled('span')(({ theme }) => ({
-  fontSize: '0.75rem',
-  color: theme.palette.text.primary,
-  fontWeight: 500,
 }));
 
 const IdentityRow = styled(Box, { shouldForwardProp: prop => prop !== 'hasAvatar' })<{ hasAvatar?: boolean }>(
@@ -127,21 +103,7 @@ const ActionsRow = styled(Box)(({ theme }) => ({
 
 export const AdminPageHeader = ({ title, count, breadcrumbs, avatar, chips, meta, actions }: AdminPageHeaderProps) => (
   <HeaderRoot>
-    {breadcrumbs && breadcrumbs.length > 0 ? (
-      <BreadcrumbsStyled separator={<NavigateNextIcon fontSize="small" />} aria-label="Fil d'ariane">
-        {breadcrumbs.map((crumb, index) => {
-          const isLast = index === breadcrumbs.length - 1;
-          if (isLast || !crumb.to) {
-            return <CurrentCrumb key={`${crumb.label}-${index}`}>{crumb.label}</CurrentCrumb>;
-          }
-          return (
-            <RouterLink key={`${crumb.label}-${index}`} to={crumb.to} underline="hover" color="inherit">
-              <CrumbText>{crumb.label}</CrumbText>
-            </RouterLink>
-          );
-        })}
-      </BreadcrumbsStyled>
-    ) : null}
+    {breadcrumbs ? <PageBreadcrumbs items={breadcrumbs} /> : null}
 
     <IdentityRow hasAvatar={Boolean(avatar)}>
       {avatar}

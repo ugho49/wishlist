@@ -1,5 +1,6 @@
 import type { WishlistId } from '@wishlist/common';
 import type { RootState } from '../../core/store';
+import type { PageBreadcrumb } from '../common/PageBreadcrumbs';
 
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
@@ -62,6 +63,12 @@ export const EditWishlistPage = ({ wishlistId }: EditWishlistPageProps) => {
   const isOwner = wishlist?.owner.id === currentUserId;
   const isPublic = wishlist?.config.hideItems === false;
 
+  const breadcrumbs: PageBreadcrumb[] = [{ label: 'Mes listes', to: '/wishlists' }];
+  if (wishlist) {
+    breadcrumbs.push({ label: wishlist.title, to: '/wishlists/$wishlistId', params: { wishlistId: wishlist.id } });
+  }
+  breadcrumbs.push({ label: 'Modifier' });
+
   useEffect(() => {
     if (isPublic && isOwner) {
       setTabs(prev => [...prev, MANAGEMENT_TAB]);
@@ -76,7 +83,7 @@ export const EditWishlistPage = ({ wishlistId }: EditWishlistPageProps) => {
         canonical={`/wishlists/${wishlistId}/edit`}
       />
       <Box>
-        <Title>Modifier la liste</Title>
+        <Title breadcrumbs={breadcrumbs}>Modifier la liste</Title>
         <Loader loading={loading}>
           {queryRejection && <Alert severity="error">{rejectionMessage(queryRejection)}</Alert>}
           {!queryRejection && (!wishlist || !currentUserCanEdit) && <WishlistNotFound />}

@@ -24,6 +24,7 @@ import { useNavigate } from '@tanstack/react-router';
 import { useCallback, useState } from 'react';
 
 import { getAvatarUrl } from '../../utils/wishlist.utils';
+import { PageBreadcrumbs } from '../common/PageBreadcrumbs';
 import { ImportItemsButton } from './ImportItemsButton';
 import { WishlistAvatar } from './WishlistAvatar';
 import { filterOptions, sortOptions } from './WishlistFilterAndSortItems';
@@ -193,6 +194,7 @@ export const WishlistHeader = ({
 
   return (
     <Container maxWidth="lg">
+      <PageBreadcrumbs items={[{ label: 'Mes listes', to: '/wishlists' }, { label: wishlist.title }]} />
       <HeaderContent>
         {/* Left section - Avatar, Title and Metadata */}
         <LeftSection>

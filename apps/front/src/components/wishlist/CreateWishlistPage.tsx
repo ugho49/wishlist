@@ -177,7 +177,9 @@ export const CreateWishlistPage = () => {
 
   return (
     <Box>
-      <Title>Créer une liste</Title>
+      <Title breadcrumbs={[{ label: 'Mes listes', to: '/wishlists' }, { label: 'Créer une liste' }]}>
+        Créer une liste
+      </Title>
       <Box sx={{ width: '100%' }}>
         <Stepper activeStep={step - 1} alternativeLabel>
           {(fromEvent ? steps.slice(0, -1) : steps).map((label, i) => (

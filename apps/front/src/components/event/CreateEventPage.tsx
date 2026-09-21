@@ -132,7 +132,9 @@ export const CreateEventPage = () => {
 
   return (
     <Box>
-      <Title>Créer un évènement</Title>
+      <Title breadcrumbs={[{ label: 'Évènements', to: '/events' }, { label: 'Créer un évènement' }]}>
+        Créer un évènement
+      </Title>
       <Box sx={{ width: '100%' }}>
         <Stepper activeStep={step - 1} alternativeLabel>
           {steps.map((label, i) => (
