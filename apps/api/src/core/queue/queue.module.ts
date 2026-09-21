@@ -1,6 +1,6 @@
-import { DiscoveryModule } from '@golevelup/nestjs-discovery';
 import { Global, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { DiscoveryModule } from '@nestjs/core';
 
 import queueConfig from './queue.config';
 import { QueueService } from './queue.service';

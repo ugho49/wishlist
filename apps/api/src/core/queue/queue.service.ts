@@ -1,7 +1,7 @@
 import type { ConfigType } from '@nestjs/config';
 
-import { DiscoveryService } from '@golevelup/nestjs-discovery';
 import { Inject, Injectable, Logger, type OnModuleDestroy, type OnModuleInit } from '@nestjs/common';
+import { DiscoveryService } from '@nestjs/core';
 import { Job, type JobsOptions, Queue, Worker } from 'bullmq';
 import Redis from 'ioredis';
 import { PinoLogger } from 'pino-nestjs';
@@ -55,9 +55,9 @@ export class QueueService implements OnModuleInit, OnModuleDestroy {
   }
 
   async onModuleInit() {
-    const allProviders = await this.discoveryService.providers(
-      provider => provider.instance instanceof QueueProcessorBase,
-    );
+    const allProviders = this.discoveryService
+      .getProviders()
+      .filter(provider => provider.instance instanceof QueueProcessorBase);
 
     for (const queueName of Object.values(QueueName)) {
       const matchingProcessors = allProviders.filter(
@@ -78,8 +78,9 @@ export class QueueService implements OnModuleInit, OnModuleDestroy {
       }
 
       const processor = discovered.instance as QueueProcessorBase;
+      const processorName = typeof discovered.name === 'string' ? discovered.name : processor.constructor.name;
 
-      const worker = this.createWorker(queueName, discovered.name, processor);
+      const worker = this.createWorker(queueName, processorName, processor);
       this.workers.push(worker);
 
       const queue = this.createQueue(queueName);
@@ -111,7 +112,7 @@ export class QueueService implements OnModuleInit, OnModuleDestroy {
   private startAllWorkers() {
     this.logger.log('Starting all workers');
     for (const worker of this.workers) {
-      worker.run();
+      void worker.run();
     }
     this.logger.log('All workers started');
   }
