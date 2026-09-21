@@ -39,8 +39,6 @@ const WelcomeStage = styled(Box)(({ theme }) => ({
 }));
 
 const Panel = styled(Stack)(({ theme }) => ({
-  position: 'relative',
-  overflow: 'hidden',
   width: '100%',
   maxWidth: 520,
   gap: theme.spacing(3),
@@ -54,38 +52,7 @@ const Panel = styled(Stack)(({ theme }) => ({
   },
 }));
 
-const confettiPieces = [
-  { emoji: '🎉', left: '8%', delay: '0s', duration: '1.5s' },
-  { emoji: '✨', left: '22%', delay: '0.12s', duration: '1.7s' },
-  { emoji: '🎁', left: '40%', delay: '0.05s', duration: '1.45s' },
-  { emoji: '🎂', left: '58%', delay: '0.18s', duration: '1.6s' },
-  { emoji: '✨', left: '74%', delay: '0.08s', duration: '1.55s' },
-  { emoji: '🎉', left: '88%', delay: '0.22s', duration: '1.65s' },
-];
-
-const ConfettiPiece = styled('span', {
-  shouldForwardProp: prop => prop !== 'left' && prop !== 'delay' && prop !== 'duration',
-})<{ left: string; delay: string; duration: string }>(({ left, delay, duration }) => ({
-  position: 'absolute',
-  top: -24,
-  left,
-  zIndex: 1,
-  fontSize: '1.35rem',
-  pointerEvents: 'none',
-  animationName: 'welcomeConfetti',
-  animationDuration: duration,
-  animationDelay: delay,
-  animationTimingFunction: 'ease-in',
-  animationFillMode: 'forwards',
-  '@keyframes welcomeConfetti': {
-    from: { transform: 'translateY(0) rotate(0deg)', opacity: 1 },
-    to: { transform: 'translateY(420px) rotate(18deg)', opacity: 0 },
-  },
-}));
-
 const Celebration = styled(Stack)(({ theme }) => ({
-  position: 'relative',
-  zIndex: 2,
   alignItems: 'center',
   textAlign: 'center',
   gap: theme.spacing(1.5),
@@ -372,13 +339,6 @@ export const WelcomePage = () => {
   return (
     <WelcomeStage>
       <Panel>
-        {celebrating
-          ? confettiPieces.map(piece => (
-              <ConfettiPiece key={piece.left} left={piece.left} delay={piece.delay} duration={piece.duration}>
-                {piece.emoji}
-              </ConfettiPiece>
-            ))
-          : null}
         {celebrating ? (
           <Celebration>
             <CelebrationMark>🎉</CelebrationMark>
