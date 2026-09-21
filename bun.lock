@@ -9,7 +9,6 @@
         "@emoji-mart/react": "1.1.1",
         "@emotion/react": "11.14.0",
         "@emotion/styled": "11.14.1",
-        "@golevelup/nestjs-discovery": "7.0.3",
         "@graphql-typed-document-node/core": "3.2.0",
         "@graphql-yoga/nestjs": "3.25.1",
         "@graphql-yoga/plugin-disable-introspection": "2.25.1",
@@ -702,8 +701,6 @@
     "@floating-ui/dom": ["@floating-ui/dom@1.8.0", "", { "dependencies": { "@floating-ui/core": "^1.8.0", "@floating-ui/utils": "^0.2.12" } }, "sha512-yXSrzeHZBTZadLOlfyhCkJHNeLJnHRnRInwdZ40L7ZiaAtrBwoYlsDrX3v5zB1Utk7CLfzcOVnVVWoXEky7Ceg=="],
 
     "@floating-ui/utils": ["@floating-ui/utils@0.2.12", "", {}, "sha512-HpCo8tmWzLVad5s2d19EhAz5zqrrQ6s69qd6moPMQvkOuSwDT1YgRfWSVuc4ennqrgv3OHppiOGMQ7oC13yIww=="],
-
-    "@golevelup/nestjs-discovery": ["@golevelup/nestjs-discovery@7.0.3", "", { "peerDependencies": { "@nestjs/common": "^11.1.21", "@nestjs/core": "^11.1.21" } }, "sha512-wBlSxU1wgBS+x4adwgp2qklXKCC9sufn8zrrSJ1WSCEHb48OBMrn0FskU862CFPwyotJaElRrirHTICAOsl1Mg=="],
 
     "@google-cloud/firestore": ["@google-cloud/firestore@9.2.0", "", { "dependencies": { "@google-cloud/firestore-api": "^0.2.0", "@opentelemetry/api": "^1.9.0", "fast-deep-equal": "^3.1.3", "functional-red-black-tree": "^1.0.1", "google-gax": "^6.0.1", "protobufjs": "^7.5.3" } }, "sha512-4BI2686ygMkef0Pe4QnX9hnWeGCUjaAP5m+Ow5/yNWwGxGadO741Ct28MRXW9czg0pnvz919INKbQdCgUMcfeA=="],
 
