@@ -25,6 +25,7 @@ import { Route as AuthenticatedWithLayoutAdminRouteImport } from './routes/_auth
 import { Route as AuthenticatedWithLayoutAdminIndexRouteImport } from './routes/_authenticated/_with-layout/admin/index'
 import { Route as AuthenticatedWithLayoutEventsIndexRouteImport } from './routes/_authenticated/_with-layout/events/index'
 import { Route as AuthenticatedWithLayoutEventsNewRouteImport } from './routes/_authenticated/_with-layout/events/new'
+import { Route as AuthenticatedWithLayoutSecretSantasIndexRouteImport } from './routes/_authenticated/_with-layout/secret-santas/index'
 import { Route as AuthenticatedWithLayoutUserProfileRouteImport } from './routes/_authenticated/_with-layout/user/profile'
 import { Route as AuthenticatedWithLayoutWishlistsIndexRouteImport } from './routes/_authenticated/_with-layout/wishlists/index'
 import { Route as AuthenticatedWithLayoutWishlistsNewRouteImport } from './routes/_authenticated/_with-layout/wishlists/new'
@@ -122,6 +123,12 @@ const AuthenticatedWithLayoutEventsNewRoute =
     path: '/events/new',
     getParentRoute: () => AuthenticatedWithLayoutRoute,
   } as any)
+const AuthenticatedWithLayoutSecretSantasIndexRoute =
+  AuthenticatedWithLayoutSecretSantasIndexRouteImport.update({
+    id: '/secret-santas/',
+    path: '/secret-santas/',
+    getParentRoute: () => AuthenticatedWithLayoutRoute,
+  } as any)
 const AuthenticatedWithLayoutUserProfileRoute =
   AuthenticatedWithLayoutUserProfileRouteImport.update({
     id: '/user/profile',
@@ -205,6 +212,7 @@ export interface FileRoutesByFullPath {
   '/wishlists/new': typeof AuthenticatedWithLayoutWishlistsNewRoute
   '/admin/': typeof AuthenticatedWithLayoutAdminIndexRoute
   '/events/': typeof AuthenticatedWithLayoutEventsIndexRoute
+  '/secret-santas/': typeof AuthenticatedWithLayoutSecretSantasIndexRoute
   '/wishlists/': typeof AuthenticatedWithLayoutWishlistsIndexRoute
   '/admin/events/$eventId': typeof AuthenticatedWithLayoutAdminEventsEventIdRoute
   '/admin/users/$userId': typeof AuthenticatedWithLayoutAdminUsersUserIdRoute
@@ -230,6 +238,7 @@ export interface FileRoutesByTo {
   '/wishlists/new': typeof AuthenticatedWithLayoutWishlistsNewRoute
   '/admin': typeof AuthenticatedWithLayoutAdminIndexRoute
   '/events': typeof AuthenticatedWithLayoutEventsIndexRoute
+  '/secret-santas': typeof AuthenticatedWithLayoutSecretSantasIndexRoute
   '/wishlists': typeof AuthenticatedWithLayoutWishlistsIndexRoute
   '/admin/events/$eventId': typeof AuthenticatedWithLayoutAdminEventsEventIdRoute
   '/admin/users/$userId': typeof AuthenticatedWithLayoutAdminUsersUserIdRoute
@@ -260,6 +269,7 @@ export interface FileRoutesById {
   '/_authenticated/_with-layout/wishlists/new': typeof AuthenticatedWithLayoutWishlistsNewRoute
   '/_authenticated/_with-layout/admin/': typeof AuthenticatedWithLayoutAdminIndexRoute
   '/_authenticated/_with-layout/events/': typeof AuthenticatedWithLayoutEventsIndexRoute
+  '/_authenticated/_with-layout/secret-santas/': typeof AuthenticatedWithLayoutSecretSantasIndexRoute
   '/_authenticated/_with-layout/wishlists/': typeof AuthenticatedWithLayoutWishlistsIndexRoute
   '/_authenticated/_with-layout/admin/events/$eventId': typeof AuthenticatedWithLayoutAdminEventsEventIdRoute
   '/_authenticated/_with-layout/admin/users/$userId': typeof AuthenticatedWithLayoutAdminUsersUserIdRoute
@@ -288,6 +298,7 @@ export interface FileRouteTypes {
     | '/wishlists/new'
     | '/admin/'
     | '/events/'
+    | '/secret-santas/'
     | '/wishlists/'
     | '/admin/events/$eventId'
     | '/admin/users/$userId'
@@ -313,6 +324,7 @@ export interface FileRouteTypes {
     | '/wishlists/new'
     | '/admin'
     | '/events'
+    | '/secret-santas'
     | '/wishlists'
     | '/admin/events/$eventId'
     | '/admin/users/$userId'
@@ -342,6 +354,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_with-layout/wishlists/new'
     | '/_authenticated/_with-layout/admin/'
     | '/_authenticated/_with-layout/events/'
+    | '/_authenticated/_with-layout/secret-santas/'
     | '/_authenticated/_with-layout/wishlists/'
     | '/_authenticated/_with-layout/admin/events/$eventId'
     | '/_authenticated/_with-layout/admin/users/$userId'
@@ -476,6 +489,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedWithLayoutEventsNewRouteImport
       parentRoute: typeof AuthenticatedWithLayoutRoute
     }
+    '/_authenticated/_with-layout/secret-santas/': {
+      id: '/_authenticated/_with-layout/secret-santas/'
+      path: '/secret-santas'
+      fullPath: '/secret-santas/'
+      preLoaderRoute: typeof AuthenticatedWithLayoutSecretSantasIndexRouteImport
+      parentRoute: typeof AuthenticatedWithLayoutRoute
+    }
     '/_authenticated/_with-layout/user/profile': {
       id: '/_authenticated/_with-layout/user/profile'
       path: '/user/profile'
@@ -608,6 +628,7 @@ interface AuthenticatedWithLayoutRouteChildren {
   AuthenticatedWithLayoutUserProfileRoute: typeof AuthenticatedWithLayoutUserProfileRoute
   AuthenticatedWithLayoutWishlistsNewRoute: typeof AuthenticatedWithLayoutWishlistsNewRoute
   AuthenticatedWithLayoutEventsIndexRoute: typeof AuthenticatedWithLayoutEventsIndexRoute
+  AuthenticatedWithLayoutSecretSantasIndexRoute: typeof AuthenticatedWithLayoutSecretSantasIndexRoute
   AuthenticatedWithLayoutWishlistsIndexRoute: typeof AuthenticatedWithLayoutWishlistsIndexRoute
   AuthenticatedWithLayoutEventsEventIdEditRoute: typeof AuthenticatedWithLayoutEventsEventIdEditRoute
   AuthenticatedWithLayoutWishlistsWishlistIdEditRoute: typeof AuthenticatedWithLayoutWishlistsWishlistIdEditRoute
@@ -627,6 +648,8 @@ const AuthenticatedWithLayoutRouteChildren: AuthenticatedWithLayoutRouteChildren
       AuthenticatedWithLayoutWishlistsNewRoute,
     AuthenticatedWithLayoutEventsIndexRoute:
       AuthenticatedWithLayoutEventsIndexRoute,
+    AuthenticatedWithLayoutSecretSantasIndexRoute:
+      AuthenticatedWithLayoutSecretSantasIndexRoute,
     AuthenticatedWithLayoutWishlistsIndexRoute:
       AuthenticatedWithLayoutWishlistsIndexRoute,
     AuthenticatedWithLayoutEventsEventIdEditRoute:

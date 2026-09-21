@@ -1,9 +1,17 @@
 import type { ICurrentUser } from '@wishlist/common';
 
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { type EventId, type SecretSantaId, type SecretSantaUserId } from '@wishlist/common';
+import {
+  createPagedResponse,
+  type EventId,
+  type SecretSantaId,
+  type SecretSantaUserId,
+  type UserId,
+} from '@wishlist/common';
 
 import { GqlCurrentUser } from '../../../auth/infrastructure/decorators/user.decorator';
+import { DEFAULT_RESULT_NUMBER } from '../../../core/common/pagination';
+import { PaginationFiltersSchema } from '../../../core/graphql/common-type.schema';
 import { ZodPipe } from '../../../core/graphql/zod-pipe';
 import { eventMapper } from '../../../event/infrastructure/event.mapper';
 import {
@@ -15,7 +23,9 @@ import {
   type DeleteSecretSantaResult,
   type DeleteSecretSantaUserResult,
   type GetMySecretSantaDrawResult,
+  type GetMySecretSantasResult,
   type GetSecretSantaForEventResult,
+  type PaginationFilters,
   type StartSecretSantaResult,
   type UpdateSecretSantaInput,
   type UpdateSecretSantaResult,
@@ -30,6 +40,7 @@ import { DeleteSecretSantaUserUseCase } from '../../application/command/delete-s
 import { StartSecretSantaUseCase } from '../../application/command/start-secret-santa.use-case';
 import { UpdateSecretSantaUseCase } from '../../application/command/update-secret-santa.use-case';
 import { UpdateSecretSantaUserUseCase } from '../../application/command/update-secret-santa-user.use-case';
+import { GetMySecretSantasUseCase } from '../../application/query/get-my-secret-santas.use-case';
 import { GetSecretSantaUseCase } from '../../application/query/get-secret-santa.use-case';
 import { GetSecretSantaDrawUseCase } from '../../application/query/get-secret-santa-draw.use-case';
 import { secretSantaMapper } from '../secret-santa.mapper';
@@ -48,6 +59,7 @@ export class SecretSantaResolver {
   constructor(
     private readonly getSecretSantaUseCase: GetSecretSantaUseCase,
     private readonly getSecretSantaDrawUseCase: GetSecretSantaDrawUseCase,
+    private readonly getMySecretSantasUseCase: GetMySecretSantasUseCase,
     private readonly createSecretSantaUseCase: CreateSecretSantaUseCase,
     private readonly updateSecretSantaUseCase: UpdateSecretSantaUseCase,
     private readonly deleteSecretSantaUseCase: DeleteSecretSantaUseCase,
@@ -76,6 +88,38 @@ export class SecretSantaResolver {
     const { attendee } = await this.getSecretSantaDrawUseCase.execute({ currentUser, eventId });
     if (!attendee) return null;
     return eventMapper.toGqlEventAttendee(attendee);
+  }
+
+  @Query()
+  async mySecretSantas(
+    @Args('filters', new ZodPipe(PaginationFiltersSchema)) filters: PaginationFilters,
+    @GqlCurrentUser('id') currentUserId: UserId,
+  ): Promise<GetMySecretSantasResult> {
+    const pageSize = filters.limit ?? DEFAULT_RESULT_NUMBER;
+    const pageNumber = filters.page ?? 1;
+
+    const { secretSantas, totalCount } = await this.getMySecretSantasUseCase.execute({
+      userId: currentUserId,
+      pageNumber,
+      pageSize,
+    });
+
+    const pagedResponse = createPagedResponse({
+      resources: secretSantas.map(secretSantaMapper.toGqlSecretSanta),
+      options: { pageSize, totalElements: totalCount, pageNumber },
+    });
+
+    return {
+      __typename: 'GetSecretSantasPagedResponse',
+      data: pagedResponse.resources,
+      pagination: {
+        __typename: 'Pagination',
+        totalPages: pagedResponse.pagination.total_pages,
+        totalElements: pagedResponse.pagination.total_elements,
+        pageNumber: pagedResponse.pagination.page_number,
+        pageSize: pagedResponse.pagination.pages_size,
+      },
+    };
   }
 
   @Mutation()

@@ -2,7 +2,9 @@ import type { RequestApp } from '@wishlist/api-test-utils';
 
 import { Fixtures, useTestApp } from '@wishlist/api-test-utils';
 import { uuid } from '@wishlist/common';
+import { DateTime } from 'luxon';
 
+import { AttendeeRole } from '../../../event/domain/attendee-role.enum';
 import { SecretSantaStatus } from '../../domain/secret-santa-status.enum';
 
 const SUCCESS_TYPENAMES = ['SecretSanta', 'EventAttendee', 'VoidOutput', 'AddSecretSantaUsersOutput'];
@@ -1290,6 +1292,258 @@ describe('SecretSantaResolver (GraphQL)', () => {
 
       expect(res.body.data.deleteSecretSantaUser).toMatchObject({ __typename: 'ForbiddenRejection' });
       await expectTable(Fixtures.SECRET_SANTA_USER_TABLE).hasNumberOfRows(1);
+    });
+  });
+
+  describe('Query mySecretSantas', () => {
+    const query = /* GraphQL */ `
+      query GetMySecretSantas($filters: PaginationFilters!) {
+        mySecretSantas(filters: $filters) {
+          __typename
+          ... on GetSecretSantasPagedResponse {
+            data {
+              id
+              eventId
+              status
+              budget
+              description
+              event {
+                id
+                title
+              }
+            }
+            pagination {
+              totalPages
+              totalElements
+              pageNumber
+              pageSize
+            }
+          }
+          ... on UnauthorizedRejection {
+            message
+          }
+        }
+      }
+    `;
+
+    it('should not succeed when not authenticated', async () => {
+      const unauthenticatedRequest = await getRequest();
+
+      const res = await unauthenticatedRequest
+        .post('/graphql')
+        .send({ query, variables: { filters: {} } })
+        .expect(200);
+
+      expect(res.body.data?.mySecretSantas?.__typename).not.toBe('GetSecretSantasPagedResponse');
+    });
+
+    it('should return an empty paged response when user has no secret santas', async () => {
+      const res = await request
+        .post('/graphql')
+        .send({ query, variables: { filters: {} } })
+        .expect(200);
+
+      expect(res.body.data.mySecretSantas).toMatchObject({
+        __typename: 'GetSecretSantasPagedResponse',
+        data: [],
+        pagination: {
+          totalElements: 0,
+          totalPages: 0,
+          pageNumber: 1,
+        },
+      });
+    });
+
+    it('should return a draft secret santa to the event organizer even if they are not a draw participant', async () => {
+      const { eventId } = await fixtures.insertEventWithMaintainer({
+        title: 'Noël',
+        maintainerId: currentUserId,
+      });
+
+      const secretSantaId = await fixtures.insertSecretSanta({
+        eventId,
+        description: 'Tirage famille',
+        budget: 30,
+        status: SecretSantaStatus.CREATED,
+      });
+
+      const otherUserId = await fixtures.insertUser({
+        email: 'other@test.fr',
+        firstname: 'Other',
+        lastname: 'User',
+      });
+      const { eventId: otherEventId, attendeeId: otherAttendeeId } = await fixtures.insertEventWithMaintainer({
+        title: 'Not mine',
+        maintainerId: otherUserId,
+      });
+      const otherSecretSantaId = await fixtures.insertSecretSanta({
+        eventId: otherEventId,
+        status: SecretSantaStatus.CREATED,
+      });
+      await fixtures.insertSecretSantaUser({ secretSantaId: otherSecretSantaId, attendeeId: otherAttendeeId });
+
+      const res = await request
+        .post('/graphql')
+        .send({ query, variables: { filters: {} } })
+        .expect(200);
+
+      const result = res.body.data.mySecretSantas;
+      expect(result.__typename).toBe('GetSecretSantasPagedResponse');
+      expect(result.data).toHaveLength(1);
+      expect(result.data[0]).toMatchObject({
+        id: secretSantaId,
+        eventId,
+        status: 'CREATED',
+        budget: 30,
+        description: 'Tirage famille',
+        event: { id: eventId, title: 'Noël' },
+      });
+      expect(result.pagination).toMatchObject({
+        totalElements: 1,
+        totalPages: 1,
+        pageNumber: 1,
+      });
+    });
+
+    it('should not return a draft secret santa to a participant who is not an event organizer', async () => {
+      const organizerId = await fixtures.insertUser({
+        email: 'organizer@test.fr',
+        firstname: 'Org',
+        lastname: 'Anizer',
+      });
+      const { eventId } = await fixtures.insertEventWithMaintainer({
+        title: 'Draft event',
+        maintainerId: organizerId,
+      });
+      const participantAttendeeId = await fixtures.insertActiveAttendee({
+        eventId,
+        userId: currentUserId,
+        role: AttendeeRole.PARTICIPANT,
+      });
+      const secretSantaId = await fixtures.insertSecretSanta({ eventId, status: SecretSantaStatus.CREATED });
+      await fixtures.insertSecretSantaUser({ secretSantaId, attendeeId: participantAttendeeId });
+
+      const res = await request
+        .post('/graphql')
+        .send({ query, variables: { filters: {} } })
+        .expect(200);
+
+      expect(res.body.data.mySecretSantas).toMatchObject({
+        __typename: 'GetSecretSantasPagedResponse',
+        data: [],
+        pagination: { totalElements: 0 },
+      });
+    });
+
+    it('should return a started secret santa to a participant who is not an event organizer', async () => {
+      const organizerId = await fixtures.insertUser({
+        email: 'started-org@test.fr',
+        firstname: 'Started',
+        lastname: 'Org',
+      });
+      const { eventId } = await fixtures.insertEventWithMaintainer({
+        title: 'Started event',
+        maintainerId: organizerId,
+      });
+      const participantAttendeeId = await fixtures.insertActiveAttendee({
+        eventId,
+        userId: currentUserId,
+        role: AttendeeRole.PARTICIPANT,
+      });
+      const secretSantaId = await fixtures.insertSecretSanta({ eventId, status: SecretSantaStatus.STARTED });
+      await fixtures.insertSecretSantaUser({ secretSantaId, attendeeId: participantAttendeeId });
+
+      const res = await request
+        .post('/graphql')
+        .send({ query, variables: { filters: {} } })
+        .expect(200);
+
+      const result = res.body.data.mySecretSantas;
+      expect(result.__typename).toBe('GetSecretSantasPagedResponse');
+      expect(result.data).toHaveLength(1);
+      expect(result.data[0]).toMatchObject({
+        id: secretSantaId,
+        eventId,
+        status: 'STARTED',
+        event: { id: eventId, title: 'Started event' },
+      });
+    });
+
+    it('should not return a started secret santa when the user is an event attendee but not a draw participant', async () => {
+      const { eventId } = await fixtures.insertEventWithMaintainer({
+        title: 'Event without me in the draw',
+        maintainerId: currentUserId,
+      });
+
+      const otherUserId = await fixtures.insertUser({
+        email: 'draw-only@test.fr',
+        firstname: 'Draw',
+        lastname: 'Only',
+      });
+      const otherAttendeeId = await fixtures.insertActiveAttendee({ eventId, userId: otherUserId });
+      const secretSantaId = await fixtures.insertSecretSanta({ eventId, status: SecretSantaStatus.STARTED });
+      await fixtures.insertSecretSantaUser({ secretSantaId, attendeeId: otherAttendeeId });
+
+      const res = await request
+        .post('/graphql')
+        .send({ query, variables: { filters: {} } })
+        .expect(200);
+
+      expect(res.body.data.mySecretSantas).toMatchObject({
+        __typename: 'GetSecretSantasPagedResponse',
+        data: [],
+        pagination: { totalElements: 0 },
+      });
+    });
+
+    it('should paginate results using filters { page, limit }', async () => {
+      for (let i = 0; i < 3; i++) {
+        const { eventId, attendeeId } = await fixtures.insertEventWithMaintainer({
+          title: `Event ${i}`,
+          eventDate: DateTime.now()
+            .plus({ days: i + 1 })
+            .toJSDate(),
+          maintainerId: currentUserId,
+        });
+        const secretSantaId = await fixtures.insertSecretSanta({ eventId, status: SecretSantaStatus.CREATED });
+        await fixtures.insertSecretSantaUser({ secretSantaId, attendeeId });
+      }
+
+      const firstPage = await request
+        .post('/graphql')
+        .send({ query, variables: { filters: { page: 1, limit: 2 } } })
+        .expect(200);
+
+      expect(firstPage.body.data.mySecretSantas).toMatchObject({
+        __typename: 'GetSecretSantasPagedResponse',
+        pagination: {
+          totalElements: 3,
+          totalPages: 2,
+          pageNumber: 1,
+          pageSize: 2,
+        },
+      });
+      expect(firstPage.body.data.mySecretSantas.data).toHaveLength(2);
+
+      const secondPage = await request
+        .post('/graphql')
+        .send({ query, variables: { filters: { page: 2, limit: 2 } } })
+        .expect(200);
+
+      expect(secondPage.body.data.mySecretSantas).toMatchObject({
+        __typename: 'GetSecretSantasPagedResponse',
+        pagination: {
+          totalElements: 3,
+          totalPages: 2,
+          pageNumber: 2,
+          pageSize: 2,
+        },
+      });
+      expect(secondPage.body.data.mySecretSantas.data).toHaveLength(1);
+
+      const firstPageIds = firstPage.body.data.mySecretSantas.data.map((item: { id: string }) => item.id);
+      const secondPageIds = secondPage.body.data.mySecretSantas.data.map((item: { id: string }) => item.id);
+      expect(firstPageIds).not.toEqual(expect.arrayContaining(secondPageIds));
     });
   });
 });

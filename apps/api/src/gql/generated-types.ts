@@ -288,11 +288,19 @@ export type GetMyEventsResult = ForbiddenRejection | GetEventsPagedResponse | In
 
 export type GetMySecretSantaDrawResult = EventAttendee | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection;
 
+export type GetMySecretSantasResult = ForbiddenRejection | GetSecretSantasPagedResponse | InternalErrorRejection | UnauthorizedRejection;
+
 export type GetMyWishlistsResult = ForbiddenRejection | GetWishlistsPagedResponse | InternalErrorRejection | UnauthorizedRejection;
 
 export type GetPendingEmailChangeResult = ForbiddenRejection | InternalErrorRejection | PendingEmailChange | UnauthorizedRejection;
 
 export type GetSecretSantaForEventResult = ForbiddenRejection | InternalErrorRejection | SecretSanta | UnauthorizedRejection;
+
+export type GetSecretSantasPagedResponse = {
+  __typename: 'GetSecretSantasPagedResponse';
+  data: Array<SecretSanta>;
+  pagination: Pagination;
+};
 
 export type GetWishlistByIdResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | Wishlist;
 
@@ -777,6 +785,7 @@ export type Query = {
   health: HealthResult;
   importableItems: GetImportableItemsResult;
   mySecretSantaDraw?: Maybe<GetMySecretSantaDrawResult>;
+  mySecretSantas: GetMySecretSantasResult;
   pendingEmailChange?: Maybe<GetPendingEmailChangeResult>;
   searchUsers: SearchUsersResult;
   secretSanta?: Maybe<GetSecretSantaForEventResult>;
@@ -832,6 +841,11 @@ export type QueryImportableItemsArgs = {
 
 export type QueryMySecretSantaDrawArgs = {
   eventId: Scalars['EventId']['input'];
+};
+
+
+export type QueryMySecretSantasArgs = {
+  filters: PaginationFilters;
 };
 
 
