@@ -753,6 +753,12 @@ export type MutationUpdateWishlistArgs = {
   input: UpdateWishlistInput;
 };
 
+export type MyReservedItemsFilters = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  page?: InputMaybe<Scalars['Int']['input']>;
+  period?: InputMaybe<ReservedItemPeriod>;
+};
+
 export type NotFoundRejection = {
   __typename: 'NotFoundRejection';
   message: Scalars['String']['output'];
@@ -849,7 +855,7 @@ export type QueryImportableItemsArgs = {
 
 
 export type QueryMyReservedItemsArgs = {
-  filters: PaginationFilters;
+  filters: MyReservedItemsFilters;
 };
 
 
@@ -935,6 +941,12 @@ export type ReservedItemEvent = {
   id: Scalars['EventId']['output'];
   title: Scalars['String']['output'];
 };
+
+export enum ReservedItemPeriod {
+  All = 'ALL',
+  Past = 'PAST',
+  Reserved = 'RESERVED'
+}
 
 export type ReservedItemTaker = {
   __typename: 'ReservedItemTaker';

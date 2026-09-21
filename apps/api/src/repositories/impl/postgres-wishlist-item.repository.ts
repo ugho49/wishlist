@@ -1,7 +1,25 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { schema } from '@wishlist/api-drizzle';
 import { type ItemId, type UserId, uuid, type WishlistId } from '@wishlist/common';
-import { and, asc, count, desc, eq, gt, inArray, isNull, lt, max, ne, notExists, or, sql } from 'drizzle-orm';
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  exists,
+  gt,
+  gte,
+  inArray,
+  isNull,
+  lt,
+  max,
+  min,
+  ne,
+  notExists,
+  or,
+  sql,
+} from 'drizzle-orm';
 import { DateTime } from 'luxon';
 
 import { DatabaseService } from '../../core/database/database.service';
@@ -10,6 +28,7 @@ import { WishlistItem } from '../../item/domain/wishlist-item.model';
 import {
   type NewItemsForEventWishlist,
   type ReservedItem,
+  type ReservedItemPeriod,
   type WishlistItemRepository,
 } from '../../item/domain/wishlist-item.repository';
 
@@ -165,12 +184,14 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
 
   async findReservedByUserPaginated(params: {
     userId: UserId;
+    period: ReservedItemPeriod;
     pagination: { take: number; skip: number };
   }): Promise<{ items: ReservedItem[]; totalCount: number }> {
     const reservedForSomeoneElse = and(
       eq(schema.itemTaker.userId, params.userId),
       ne(schema.wishlist.ownerId, params.userId),
       or(isNull(schema.wishlist.coOwnerId), ne(schema.wishlist.coOwnerId, params.userId)),
+      this.reservedItemPeriodCondition(params.period),
     );
 
     const totalCountResult = await this.databaseService.db
@@ -189,7 +210,7 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
       .innerJoin(schema.item, eq(schema.item.id, schema.itemTaker.itemId))
       .innerJoin(schema.wishlist, eq(schema.wishlist.id, schema.item.wishlistId))
       .where(reservedForSomeoneElse)
-      .orderBy(desc(schema.itemTaker.takenAt), desc(schema.item.createdAt))
+      .orderBy(...this.reservedItemOrderBy())
       .limit(params.pagination.take)
       .offset(params.pagination.skip);
 
@@ -247,15 +268,63 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
             .map(event => ({
               id: event.id,
               title: event.title,
-              eventDate:
-                typeof event.eventDate === 'string' ? event.eventDate : event.eventDate.toISOString().slice(0, 10),
+              eventDate: event.eventDate,
             }))
-            .toSorted((left, right) => right.eventDate.localeCompare(left.eventDate)),
+            .toSorted((left, right) => left.eventDate.localeCompare(right.eventDate)),
         },
       ];
     });
 
     return { items, totalCount };
+  }
+
+  private reservedItemOrderBy() {
+    const today = DateTime.now().toFormat('yyyy-MM-dd');
+    const eventDates = (aggregate: 'upcoming' | 'latest') =>
+      this.databaseService.db
+        .select({
+          value: aggregate === 'upcoming' ? min(schema.event.eventDate) : max(schema.event.eventDate),
+        })
+        .from(schema.eventWishlist)
+        .innerJoin(schema.event, eq(schema.event.id, schema.eventWishlist.eventId))
+        .where(
+          and(
+            eq(schema.eventWishlist.wishlistId, schema.wishlist.id),
+            aggregate === 'upcoming' ? gte(schema.event.eventDate, today) : undefined,
+          ),
+        );
+    const upcomingEventDate = eventDates('upcoming');
+    const latestEventDate = eventDates('latest');
+
+    // Soonest upcoming event first. Gifts whose events are all past follow, most recent first.
+    // Gifts with no event stay at the end. Reservation time is not a sort key.
+    return [
+      sql`(${upcomingEventDate} is null)`,
+      sql`${upcomingEventDate} asc nulls last`,
+      sql`${latestEventDate} desc nulls last`,
+      asc(schema.item.id),
+    ];
+  }
+
+  private reservedItemPeriodCondition(period: ReservedItemPeriod) {
+    if (period === 'all') return;
+
+    const today = DateTime.now().toFormat('yyyy-MM-dd');
+    const linkedEvents = this.databaseService.db
+      .select({ id: schema.event.id })
+      .from(schema.eventWishlist)
+      .innerJoin(schema.event, eq(schema.event.id, schema.eventWishlist.eventId))
+      .where(eq(schema.eventWishlist.wishlistId, schema.wishlist.id));
+    const upcomingEvents = this.databaseService.db
+      .select({ id: schema.event.id })
+      .from(schema.eventWishlist)
+      .innerJoin(schema.event, eq(schema.event.id, schema.eventWishlist.eventId))
+      .where(and(eq(schema.eventWishlist.wishlistId, schema.wishlist.id), gte(schema.event.eventDate, today)));
+
+    // A gift stays reserved while its wishlist has no event, or at least one event still ahead.
+    // It becomes past only once every linked event date is before today.
+    if (period === 'past') return and(exists(linkedEvents), notExists(upcomingEvents));
+    return or(notExists(linkedEvents), exists(upcomingEvents));
   }
 
   async save(item: WishlistItem, tx?: DrizzleTransaction): Promise<void> {

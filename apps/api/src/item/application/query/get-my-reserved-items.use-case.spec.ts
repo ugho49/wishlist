@@ -44,12 +44,13 @@ describe('GetMyReservedItemsUseCase', () => {
   });
 
   it('should return the gifts the user reserved, paginated', async () => {
-    const result = await useCase.execute({ userId: user.id, pageNumber: 2, pageSize: 10 });
+    const result = await useCase.execute({ userId: user.id, period: 'reserved', pageNumber: 2, pageSize: 10 });
 
     expect(result.totalCount).toBe(1);
     expect(result.items).toHaveLength(1);
     expect(itemRepository.findReservedByUserPaginated).toHaveBeenCalledWith({
       userId: user.id,
+      period: 'reserved',
       pagination: { take: 10, skip: 10 },
     });
   });

@@ -434,6 +434,12 @@ type Mutation {
   updateWishlist(id: WishlistId!, input: UpdateWishlistInput!): UpdateWishlistResult!
 }
 
+input MyReservedItemsFilters {
+  limit: Int
+  page: Int
+  period: ReservedItemPeriod = RESERVED
+}
+
 type NotFoundRejection {
   message: String!
 }
@@ -469,7 +475,7 @@ type Query {
   events(filters: EventPaginationFilters!): GetMyEventsResult!
   health: HealthResult!
   importableItems(wishlistId: WishlistId!): GetImportableItemsResult!
-  myReservedItems(filters: PaginationFilters!): GetMyReservedItemsResult!
+  myReservedItems(filters: MyReservedItemsFilters!): GetMyReservedItemsResult!
   mySecretSantaDraw(eventId: EventId!): GetMySecretSantaDrawResult
   mySecretSantas(filters: PaginationFilters!): GetMySecretSantasResult!
   pendingEmailChange: GetPendingEmailChangeResult
@@ -529,6 +535,12 @@ type ReservedItemEvent {
   eventDate: String!
   id: EventId!
   title: String!
+}
+
+enum ReservedItemPeriod {
+  ALL
+  PAST
+  RESERVED
 }
 
 type ReservedItemTaker {

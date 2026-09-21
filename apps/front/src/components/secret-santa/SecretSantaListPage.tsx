@@ -20,7 +20,9 @@ const Timeline = styled('ol')({
 });
 
 export const SecretSantaListPage = () => {
-  const { page: currentPage } = useSearch({ from: '/_authenticated/_with-layout/secret-santas/' });
+  const { page: currentPage } = useSearch({
+    from: '/_authenticated/_with-layout/secret-santas/',
+  });
   const navigate = useNavigate();
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const { data, isLoading: loading } = useSecretSantaListPageQuery(
@@ -65,7 +67,12 @@ export const SecretSantaListPage = () => {
             currentPage={currentPage}
             disabled={loading}
             hide={totalPages === 1}
-            onChange={value => navigate({ from: '/secret-santas/', search: prev => ({ ...prev, page: value }) })}
+            onChange={value =>
+              navigate({
+                from: '/secret-santas/',
+                search: prev => ({ ...prev, page: value }),
+              })
+            }
           />
 
           <FabAutoGrow label="Créer un secret santa" icon={<AddIcon />} color="primary" onClick={openCreateDialog} />

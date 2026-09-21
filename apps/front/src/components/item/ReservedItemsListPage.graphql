@@ -1,4 +1,4 @@
-query ReservedItemsListPage($filters: PaginationFilters!) {
+query ReservedItemsListPage($filters: MyReservedItemsFilters!) {
   myReservedItems(filters: $filters) {
     __typename
     ... on GetReservedItemsPagedResponse {
@@ -7,7 +7,6 @@ query ReservedItemsListPage($filters: PaginationFilters!) {
         name
         description
         url
-        score
         pictureUrl
         takenAt
         wishlistId

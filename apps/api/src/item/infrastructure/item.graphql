@@ -167,6 +167,18 @@ type ReservedItem {
   takers: [ReservedItemTaker!]!
 }
 
+enum ReservedItemPeriod {
+  ALL
+  RESERVED
+  PAST
+}
+
+input MyReservedItemsFilters {
+  page: Int
+  limit: Int
+  period: ReservedItemPeriod = RESERVED
+}
+
 type GetReservedItemsPagedResponse {
   data: [ReservedItem!]!
   pagination: Pagination!
@@ -184,5 +196,5 @@ union GetMyReservedItemsResult =
 
 extend type Query {
   importableItems(wishlistId: WishlistId!): GetImportableItemsResult!
-  myReservedItems(filters: PaginationFilters!): GetMyReservedItemsResult!
+  myReservedItems(filters: MyReservedItemsFilters!): GetMyReservedItemsResult!
 }

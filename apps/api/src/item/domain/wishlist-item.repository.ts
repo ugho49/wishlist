@@ -26,6 +26,8 @@ export type ReservedItemTaker = {
   takenAt: Date;
 };
 
+export type ReservedItemPeriod = 'all' | 'reserved' | 'past';
+
 export type ReservedItem = {
   id: ItemId;
   name: string;
@@ -53,6 +55,7 @@ export interface WishlistItemRepository {
   findImportableItems(params: { userId: UserId; wishlistId: WishlistId }): Promise<WishlistItem[]>;
   findReservedByUserPaginated(params: {
     userId: UserId;
+    period: ReservedItemPeriod;
     pagination: { take: number; skip: number };
   }): Promise<{ items: ReservedItem[]; totalCount: number }>;
   save(item: WishlistItem, tx?: DrizzleTransaction): Promise<void>;

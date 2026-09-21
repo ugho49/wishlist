@@ -443,13 +443,13 @@ export type ImportItemsMutation = { importItems:
    };
 
 export type ReservedItemsListPageQueryVariables = Exact<{
-  filters: Types.PaginationFilters;
+  filters: Types.MyReservedItemsFilters;
 }>;
 
 
 export type ReservedItemsListPageQuery = { myReservedItems:
     | { __typename: 'ForbiddenRejection' }
-    | { __typename: 'GetReservedItemsPagedResponse', data: Array<{ id: Ids["ItemId"], name: string, description: string | null, url: string | null, score: number | null, pictureUrl: string | null, takenAt: string, wishlistId: Ids["WishlistId"], wishlistTitle: string, ownerFirstName: string, ownerLastName: string, events: Array<{ id: Ids["EventId"], title: string, eventDate: string }>, takers: Array<{ userId: Ids["UserId"], firstName: string, lastName: string, pictureUrl: string | null, takenAt: string }> }>, pagination: { totalPages: number, totalElements: number, pageNumber: number, pageSize: number } }
+    | { __typename: 'GetReservedItemsPagedResponse', data: Array<{ id: Ids["ItemId"], name: string, description: string | null, url: string | null, pictureUrl: string | null, takenAt: string, wishlistId: Ids["WishlistId"], wishlistTitle: string, ownerFirstName: string, ownerLastName: string, events: Array<{ id: Ids["EventId"], title: string, eventDate: string }>, takers: Array<{ userId: Ids["UserId"], firstName: string, lastName: string, pictureUrl: string | null, takenAt: string }> }>, pagination: { totalPages: number, totalElements: number, pageNumber: number, pageSize: number } }
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'UnauthorizedRejection' }
    };
@@ -2230,7 +2230,7 @@ export const useImportItemsMutation = <
     )};
 
 export const ReservedItemsListPageDocument = new TypedDocumentString(`
-    query ReservedItemsListPage($filters: PaginationFilters!) {
+    query ReservedItemsListPage($filters: MyReservedItemsFilters!) {
   myReservedItems(filters: $filters) {
     __typename
     ... on GetReservedItemsPagedResponse {
@@ -2239,7 +2239,6 @@ export const ReservedItemsListPageDocument = new TypedDocumentString(`
         name
         description
         url
-        score
         pictureUrl
         takenAt
         wishlistId

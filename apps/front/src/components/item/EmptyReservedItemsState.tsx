@@ -33,15 +33,17 @@ const EmptyStateSubtitle = styled(Typography)(({ theme }) => ({
 }));
 
 export type EmptyReservedItemsStateProps = {
+  title: string;
+  subtitle: string;
   sx?: SxProps<Theme>;
 };
 
-export const EmptyReservedItemsState = ({ sx }: EmptyReservedItemsStateProps) => (
+export const EmptyReservedItemsState = ({ title, subtitle, sx }: EmptyReservedItemsStateProps) => (
   <EmptyStateContainer sx={sx}>
     <Illustration src={EmptyReservedItemsIllustration} alt="" />
     <Box sx={{ textAlign: 'center' }}>
-      <EmptyStateTitle>Aucun cadeau réservé</EmptyStateTitle>
-      <EmptyStateSubtitle>Les cadeaux que vous réservez sur les listes des autres apparaîtront ici.</EmptyStateSubtitle>
+      <EmptyStateTitle>{title}</EmptyStateTitle>
+      <EmptyStateSubtitle>{subtitle}</EmptyStateSubtitle>
     </Box>
   </EmptyStateContainer>
 );
