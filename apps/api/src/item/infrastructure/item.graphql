@@ -137,6 +137,52 @@ extend type Mutation {
 ###############   Queries   ###########################
 ########################################################
 
+type ReservedItemEvent {
+  id: EventId!
+  title: String!
+  eventDate: String!
+}
+
+type ReservedItemTaker {
+  userId: UserId!
+  firstName: String!
+  lastName: String!
+  pictureUrl: String
+  takenAt: String!
+}
+
+type ReservedItem {
+  id: ItemId!
+  name: String!
+  description: String
+  url: String
+  score: Int
+  pictureUrl: String
+  takenAt: String!
+  wishlistId: WishlistId!
+  wishlistTitle: String!
+  ownerFirstName: String!
+  ownerLastName: String!
+  events: [ReservedItemEvent!]!
+  takers: [ReservedItemTaker!]!
+}
+
+type GetReservedItemsPagedResponse {
+  data: [ReservedItem!]!
+  pagination: Pagination!
+}
+
+union GetMyReservedItemsResult =
+  | GetReservedItemsPagedResponse
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+
+########################################################
+###############   Queries   ###########################
+########################################################
+
 extend type Query {
   importableItems(wishlistId: WishlistId!): GetImportableItemsResult!
+  myReservedItems(filters: PaginationFilters!): GetMyReservedItemsResult!
 }

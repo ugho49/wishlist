@@ -25,6 +25,7 @@ import { Route as AuthenticatedWithLayoutAdminRouteImport } from './routes/_auth
 import { Route as AuthenticatedWithLayoutAdminIndexRouteImport } from './routes/_authenticated/_with-layout/admin/index'
 import { Route as AuthenticatedWithLayoutEventsIndexRouteImport } from './routes/_authenticated/_with-layout/events/index'
 import { Route as AuthenticatedWithLayoutEventsNewRouteImport } from './routes/_authenticated/_with-layout/events/new'
+import { Route as AuthenticatedWithLayoutReservedItemsIndexRouteImport } from './routes/_authenticated/_with-layout/reserved-items/index'
 import { Route as AuthenticatedWithLayoutSecretSantasIndexRouteImport } from './routes/_authenticated/_with-layout/secret-santas/index'
 import { Route as AuthenticatedWithLayoutUserProfileRouteImport } from './routes/_authenticated/_with-layout/user/profile'
 import { Route as AuthenticatedWithLayoutWishlistsIndexRouteImport } from './routes/_authenticated/_with-layout/wishlists/index'
@@ -123,6 +124,12 @@ const AuthenticatedWithLayoutEventsNewRoute =
     path: '/events/new',
     getParentRoute: () => AuthenticatedWithLayoutRoute,
   } as any)
+const AuthenticatedWithLayoutReservedItemsIndexRoute =
+  AuthenticatedWithLayoutReservedItemsIndexRouteImport.update({
+    id: '/reserved-items/',
+    path: '/reserved-items/',
+    getParentRoute: () => AuthenticatedWithLayoutRoute,
+  } as any)
 const AuthenticatedWithLayoutSecretSantasIndexRoute =
   AuthenticatedWithLayoutSecretSantasIndexRouteImport.update({
     id: '/secret-santas/',
@@ -212,6 +219,7 @@ export interface FileRoutesByFullPath {
   '/wishlists/new': typeof AuthenticatedWithLayoutWishlistsNewRoute
   '/admin/': typeof AuthenticatedWithLayoutAdminIndexRoute
   '/events/': typeof AuthenticatedWithLayoutEventsIndexRoute
+  '/reserved-items/': typeof AuthenticatedWithLayoutReservedItemsIndexRoute
   '/secret-santas/': typeof AuthenticatedWithLayoutSecretSantasIndexRoute
   '/wishlists/': typeof AuthenticatedWithLayoutWishlistsIndexRoute
   '/admin/events/$eventId': typeof AuthenticatedWithLayoutAdminEventsEventIdRoute
@@ -238,6 +246,7 @@ export interface FileRoutesByTo {
   '/wishlists/new': typeof AuthenticatedWithLayoutWishlistsNewRoute
   '/admin': typeof AuthenticatedWithLayoutAdminIndexRoute
   '/events': typeof AuthenticatedWithLayoutEventsIndexRoute
+  '/reserved-items': typeof AuthenticatedWithLayoutReservedItemsIndexRoute
   '/secret-santas': typeof AuthenticatedWithLayoutSecretSantasIndexRoute
   '/wishlists': typeof AuthenticatedWithLayoutWishlistsIndexRoute
   '/admin/events/$eventId': typeof AuthenticatedWithLayoutAdminEventsEventIdRoute
@@ -269,6 +278,7 @@ export interface FileRoutesById {
   '/_authenticated/_with-layout/wishlists/new': typeof AuthenticatedWithLayoutWishlistsNewRoute
   '/_authenticated/_with-layout/admin/': typeof AuthenticatedWithLayoutAdminIndexRoute
   '/_authenticated/_with-layout/events/': typeof AuthenticatedWithLayoutEventsIndexRoute
+  '/_authenticated/_with-layout/reserved-items/': typeof AuthenticatedWithLayoutReservedItemsIndexRoute
   '/_authenticated/_with-layout/secret-santas/': typeof AuthenticatedWithLayoutSecretSantasIndexRoute
   '/_authenticated/_with-layout/wishlists/': typeof AuthenticatedWithLayoutWishlistsIndexRoute
   '/_authenticated/_with-layout/admin/events/$eventId': typeof AuthenticatedWithLayoutAdminEventsEventIdRoute
@@ -298,6 +308,7 @@ export interface FileRouteTypes {
     | '/wishlists/new'
     | '/admin/'
     | '/events/'
+    | '/reserved-items/'
     | '/secret-santas/'
     | '/wishlists/'
     | '/admin/events/$eventId'
@@ -324,6 +335,7 @@ export interface FileRouteTypes {
     | '/wishlists/new'
     | '/admin'
     | '/events'
+    | '/reserved-items'
     | '/secret-santas'
     | '/wishlists'
     | '/admin/events/$eventId'
@@ -354,6 +366,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_with-layout/wishlists/new'
     | '/_authenticated/_with-layout/admin/'
     | '/_authenticated/_with-layout/events/'
+    | '/_authenticated/_with-layout/reserved-items/'
     | '/_authenticated/_with-layout/secret-santas/'
     | '/_authenticated/_with-layout/wishlists/'
     | '/_authenticated/_with-layout/admin/events/$eventId'
@@ -487,6 +500,13 @@ declare module '@tanstack/react-router' {
       path: '/events/new'
       fullPath: '/events/new'
       preLoaderRoute: typeof AuthenticatedWithLayoutEventsNewRouteImport
+      parentRoute: typeof AuthenticatedWithLayoutRoute
+    }
+    '/_authenticated/_with-layout/reserved-items/': {
+      id: '/_authenticated/_with-layout/reserved-items/'
+      path: '/reserved-items'
+      fullPath: '/reserved-items/'
+      preLoaderRoute: typeof AuthenticatedWithLayoutReservedItemsIndexRouteImport
       parentRoute: typeof AuthenticatedWithLayoutRoute
     }
     '/_authenticated/_with-layout/secret-santas/': {
@@ -628,6 +648,7 @@ interface AuthenticatedWithLayoutRouteChildren {
   AuthenticatedWithLayoutUserProfileRoute: typeof AuthenticatedWithLayoutUserProfileRoute
   AuthenticatedWithLayoutWishlistsNewRoute: typeof AuthenticatedWithLayoutWishlistsNewRoute
   AuthenticatedWithLayoutEventsIndexRoute: typeof AuthenticatedWithLayoutEventsIndexRoute
+  AuthenticatedWithLayoutReservedItemsIndexRoute: typeof AuthenticatedWithLayoutReservedItemsIndexRoute
   AuthenticatedWithLayoutSecretSantasIndexRoute: typeof AuthenticatedWithLayoutSecretSantasIndexRoute
   AuthenticatedWithLayoutWishlistsIndexRoute: typeof AuthenticatedWithLayoutWishlistsIndexRoute
   AuthenticatedWithLayoutEventsEventIdEditRoute: typeof AuthenticatedWithLayoutEventsEventIdEditRoute
@@ -648,6 +669,8 @@ const AuthenticatedWithLayoutRouteChildren: AuthenticatedWithLayoutRouteChildren
       AuthenticatedWithLayoutWishlistsNewRoute,
     AuthenticatedWithLayoutEventsIndexRoute:
       AuthenticatedWithLayoutEventsIndexRoute,
+    AuthenticatedWithLayoutReservedItemsIndexRoute:
+      AuthenticatedWithLayoutReservedItemsIndexRoute,
     AuthenticatedWithLayoutSecretSantasIndexRoute:
       AuthenticatedWithLayoutSecretSantasIndexRoute,
     AuthenticatedWithLayoutWishlistsIndexRoute:

@@ -12,6 +12,36 @@ export interface NewItemsForEventWishlist {
   nbNewItems: number;
 }
 
+export type ReservedItemEvent = {
+  id: EventId;
+  title: string;
+  eventDate: string;
+};
+
+export type ReservedItemTaker = {
+  userId: UserId;
+  firstName: string;
+  lastName: string;
+  pictureUrl?: string;
+  takenAt: Date;
+};
+
+export type ReservedItem = {
+  id: ItemId;
+  name: string;
+  description?: string;
+  url?: string;
+  score?: number;
+  pictureUrl?: string;
+  takenAt: Date;
+  wishlistId: WishlistId;
+  wishlistTitle: string;
+  ownerFirstName: string;
+  ownerLastName: string;
+  events: ReservedItemEvent[];
+  takers: ReservedItemTaker[];
+};
+
 export interface WishlistItemRepository {
   newId(): ItemId;
   findById(id: ItemId): Promise<WishlistItem | undefined>;
@@ -21,6 +51,10 @@ export interface WishlistItemRepository {
   findByWishlistIds(wishlistIds: WishlistId[]): Promise<WishlistItem[]>;
   findAllNewItems(since: Date): Promise<NewItemsForEventWishlist[]>;
   findImportableItems(params: { userId: UserId; wishlistId: WishlistId }): Promise<WishlistItem[]>;
+  findReservedByUserPaginated(params: {
+    userId: UserId;
+    pagination: { take: number; skip: number };
+  }): Promise<{ items: ReservedItem[]; totalCount: number }>;
   save(item: WishlistItem, tx?: DrizzleTransaction): Promise<void>;
   delete(id: ItemId, tx?: DrizzleTransaction): Promise<void>;
 }

@@ -1,0 +1,38 @@
+query ReservedItemsListPage($filters: PaginationFilters!) {
+  myReservedItems(filters: $filters) {
+    __typename
+    ... on GetReservedItemsPagedResponse {
+      data {
+        id
+        name
+        description
+        url
+        score
+        pictureUrl
+        takenAt
+        wishlistId
+        wishlistTitle
+        ownerFirstName
+        ownerLastName
+        events {
+          id
+          title
+          eventDate
+        }
+        takers {
+          userId
+          firstName
+          lastName
+          pictureUrl
+          takenAt
+        }
+      }
+      pagination {
+        totalPages
+        totalElements
+        pageNumber
+        pageSize
+      }
+    }
+  }
+}

@@ -262,6 +262,8 @@ union GetImportableItemsResult = ForbiddenRejection | GetImportableItemsOutput |
 
 union GetMyEventsResult = ForbiddenRejection | GetEventsPagedResponse | InternalErrorRejection | UnauthorizedRejection
 
+union GetMyReservedItemsResult = ForbiddenRejection | GetReservedItemsPagedResponse | InternalErrorRejection | UnauthorizedRejection
+
 union GetMySecretSantaDrawResult = EventAttendee | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection
 
 union GetMySecretSantasResult = ForbiddenRejection | GetSecretSantasPagedResponse | InternalErrorRejection | UnauthorizedRejection
@@ -269,6 +271,11 @@ union GetMySecretSantasResult = ForbiddenRejection | GetSecretSantasPagedRespons
 union GetMyWishlistsResult = ForbiddenRejection | GetWishlistsPagedResponse | InternalErrorRejection | UnauthorizedRejection
 
 union GetPendingEmailChangeResult = ForbiddenRejection | InternalErrorRejection | PendingEmailChange | UnauthorizedRejection
+
+type GetReservedItemsPagedResponse {
+  data: [ReservedItem!]!
+  pagination: Pagination!
+}
 
 union GetSecretSantaForEventResult = ForbiddenRejection | InternalErrorRejection | SecretSanta | UnauthorizedRejection
 
@@ -462,6 +469,7 @@ type Query {
   events(filters: EventPaginationFilters!): GetMyEventsResult!
   health: HealthResult!
   importableItems(wishlistId: WishlistId!): GetImportableItemsResult!
+  myReservedItems(filters: PaginationFilters!): GetMyReservedItemsResult!
   mySecretSantaDraw(eventId: EventId!): GetMySecretSantaDrawResult
   mySecretSantas(filters: PaginationFilters!): GetMySecretSantasResult!
   pendingEmailChange: GetPendingEmailChangeResult
@@ -500,6 +508,36 @@ input RequestEmailChangeInput {
 }
 
 union RequestEmailChangeResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
+type ReservedItem {
+  description: String
+  events: [ReservedItemEvent!]!
+  id: ItemId!
+  name: String!
+  ownerFirstName: String!
+  ownerLastName: String!
+  pictureUrl: String
+  score: Int
+  takenAt: String!
+  takers: [ReservedItemTaker!]!
+  url: String
+  wishlistId: WishlistId!
+  wishlistTitle: String!
+}
+
+type ReservedItemEvent {
+  eventDate: String!
+  id: EventId!
+  title: String!
+}
+
+type ReservedItemTaker {
+  firstName: String!
+  lastName: String!
+  pictureUrl: String
+  takenAt: String!
+  userId: UserId!
+}
 
 input ResetPasswordInput {
   email: String!
