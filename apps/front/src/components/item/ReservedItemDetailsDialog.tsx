@@ -2,7 +2,6 @@ import type { ReactNode } from 'react';
 import type { ReservedItemsListPageQuery } from '../../gql';
 
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import CloseIcon from '@mui/icons-material/Close';
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
@@ -66,97 +65,62 @@ const ProductLink = styled('a')(({ theme }) => ({
 const formatTakenAt = (takenAt: string) => DateTime.fromISO(takenAt).setLocale('fr').toFormat("d MMMM yyyy 'à' HH:mm");
 
 const formatEventDate = (eventDate: string) =>
-  DateTime.fromISO(eventDate).setLocale('fr').toLocaleString(DateTime.DATE_FULL);
+  DateTime.fromISO(eventDate).setLocale('fr').toLocaleString(DateTime.DATE_MED);
 
-const Context = styled('div')(({ theme }) => ({
+const Meta = styled('div')(({ theme }) => ({
   display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing(1),
-  marginTop: theme.spacing(2),
-}));
-
-const ForWhom = styled('p')(({ theme }) => ({
-  margin: 0,
-  marginBottom: theme.spacing(0.5),
-  color: theme.palette.text.secondary,
-  '& strong': {
-    color: theme.palette.text.primary,
-    fontWeight: 600,
-  },
-}));
-
-const DestinationButton = styled('button')(({ theme }) => ({
-  display: 'flex',
+  flexWrap: 'wrap',
   alignItems: 'center',
-  gap: theme.spacing(1.5),
-  width: '100%',
-  padding: theme.spacing(1.25, 1.5),
-  border: `1px solid ${theme.palette.divider}`,
-  borderRadius: 16,
-  backgroundColor: theme.palette.background.paper,
-  textAlign: 'left',
-  cursor: 'pointer',
+  gap: theme.spacing(0.75),
+  marginTop: theme.spacing(1.5),
+}));
+
+const ForWhom = styled('span')(({ theme }) => ({
+  color: theme.palette.text.secondary,
+  fontSize: '0.8125rem',
+}));
+
+const LinkChip = styled('button')(({ theme }) => ({
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: theme.spacing(0.5),
+  maxWidth: '100%',
+  padding: theme.spacing(0.25, 1),
+  border: 'none',
+  borderRadius: 999,
+  backgroundColor: theme.palette.action.hover,
+  color: theme.palette.text.secondary,
   font: 'inherit',
-  color: 'inherit',
+  fontSize: '0.8125rem',
+  lineHeight: 1.6,
+  cursor: 'pointer',
+  '& svg': {
+    fontSize: '0.95rem',
+  },
   '&:hover, &:focus-visible': {
-    borderColor: theme.palette.primary.main,
-    backgroundColor: alpha(theme.palette.primary.main, 0.06),
+    backgroundColor: alpha(theme.palette.primary.main, 0.12),
+    color: theme.palette.primary.dark,
     outline: 'none',
   },
 }));
 
-const IconBadge = styled('span')(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  width: 36,
-  height: 36,
-  borderRadius: 12,
-  flexShrink: 0,
-  backgroundColor: alpha(theme.palette.primary.main, 0.12),
-  color: theme.palette.primary.main,
-}));
-
-const DestinationText = styled('span')({
-  display: 'flex',
-  flexDirection: 'column',
-  flex: 1,
-  minWidth: 0,
-});
-
-const DestinationTitle = styled('span')({
-  fontWeight: 600,
+const ChipLabel = styled('span')({
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
 });
 
-const DestinationSubtitle = styled('span')(({ theme }) => ({
-  color: theme.palette.text.secondary,
-  fontSize: '0.85rem',
-}));
-
-const DestinationChevron = styled(ChevronRightIcon)(({ theme }) => ({
-  color: theme.palette.text.secondary,
-  flexShrink: 0,
-}));
-
 type DestinationProps = {
   icon: ReactNode;
-  title: string;
-  subtitle: string;
+  label: string;
   onOpen: () => void;
 };
 
-const Destination = ({ icon, title, subtitle, onOpen }: DestinationProps) => (
-  <DestinationButton type="button" onClick={onOpen}>
-    <IconBadge>{icon}</IconBadge>
-    <DestinationText>
-      <DestinationTitle>{title}</DestinationTitle>
-      <DestinationSubtitle>{subtitle}</DestinationSubtitle>
-    </DestinationText>
-    <DestinationChevron />
-  </DestinationButton>
+const Destination = ({ icon, label, onOpen }: DestinationProps) => (
+  <LinkChip type="button" onClick={onOpen}>
+    {icon}
+    <ChipLabel>{label}</ChipLabel>
+  </LinkChip>
 );
 
 type EventDestinationProps = {
@@ -173,9 +137,8 @@ const EventDestination = ({ event, onClose }: EventDestinationProps) => {
 
   return (
     <Destination
-      icon={<CalendarMonthIcon fontSize="small" />}
-      title={event.title}
-      subtitle={formatEventDate(event.eventDate)}
+      icon={<CalendarMonthIcon fontSize="inherit" />}
+      label={`${event.title} · ${formatEventDate(event.eventDate)}`}
       onOpen={openEvent}
     />
   );
@@ -208,23 +171,19 @@ export const ReservedItemDetailsDialog = ({ item, onClose }: ReservedItemDetails
           </DialogTitle>
           <DialogContent>
             {item.pictureUrl && <Picture src={item.pictureUrl} alt="" />}
-            <Context>
+            <Meta>
               <ForWhom>
-                Pour{' '}
-                <strong>
-                  {item.ownerFirstName} {item.ownerLastName}
-                </strong>
+                Pour {item.ownerFirstName} {item.ownerLastName}
               </ForWhom>
               <Destination
-                icon={<FormatListBulletedIcon fontSize="small" />}
-                title={item.wishlistTitle}
-                subtitle="Liste"
+                icon={<FormatListBulletedIcon fontSize="inherit" />}
+                label={item.wishlistTitle}
                 onOpen={openWishlist}
               />
               {item.events.map(event => (
                 <EventDestination key={event.id} event={event} onClose={onClose} />
               ))}
-            </Context>
+            </Meta>
             {item.description && (
               <>
                 <SectionLabel>Description</SectionLabel>
