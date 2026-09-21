@@ -249,7 +249,7 @@ export type EventSelectAvailableEventsQueryVariables = Exact<{
 
 export type EventSelectAvailableEventsQuery = { events:
     | { __typename: 'ForbiddenRejection' }
-    | { __typename: 'GetEventsPagedResponse', data: Array<{ id: Ids["EventId"], title: string, icon: string | null, eventDate: string }> }
+    | { __typename: 'GetEventsPagedResponse', data: Array<{ id: Ids["EventId"], title: string, icon: string | null, eventDate: string, attendees: Array<{ role: Types.AttendeeRole, user: { id: Ids["UserId"] } | null }>, secretSanta: { id: Ids["SecretSantaId"] } | null }> }
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'UnauthorizedRejection' }
    };
@@ -584,18 +584,6 @@ export type SecretSantaListPageQueryVariables = Exact<{
 export type SecretSantaListPageQuery = { mySecretSantas:
     | { __typename: 'ForbiddenRejection' }
     | { __typename: 'GetSecretSantasPagedResponse', data: Array<{ id: Ids["SecretSantaId"], status: Types.SecretSantaStatus, budget: number | null, description: string | null, users: Array<{ id: Ids["SecretSantaUserId"] }>, event: { id: Ids["EventId"], title: string, icon: string | null, eventDate: string } }>, pagination: { totalPages: number, totalElements: number, pageNumber: number, pageSize: number } }
-    | { __typename: 'InternalErrorRejection' }
-    | { __typename: 'UnauthorizedRejection' }
-   };
-
-export type SecretSantaListPageGetAdminEventsQueryVariables = Exact<{
-  filters: Types.EventPaginationFilters;
-}>;
-
-
-export type SecretSantaListPageGetAdminEventsQuery = { events:
-    | { __typename: 'ForbiddenRejection' }
-    | { __typename: 'GetEventsPagedResponse', data: Array<{ id: Ids["EventId"], title: string, icon: string | null, eventDate: string, attendees: Array<{ role: Types.AttendeeRole, user: { id: Ids["UserId"] } | null }>, secretSanta: { id: Ids["SecretSantaId"] } | null }> }
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'UnauthorizedRejection' }
    };
@@ -1693,6 +1681,15 @@ export const EventSelectAvailableEventsDocument = new TypedDocumentString(`
         title
         icon
         eventDate
+        attendees {
+          role
+          user {
+            id
+          }
+        }
+        secretSanta {
+          id
+        }
       }
     }
   }
@@ -2622,47 +2619,6 @@ export const useSecretSantaListPageQuery = <
       {
     queryKey: ['SecretSantaListPage', variables],
     queryFn: fetchGql<SecretSantaListPageQuery, SecretSantaListPageQueryVariables>(SecretSantaListPageDocument, variables),
-    ...options
-  }
-    )};
-
-export const SecretSantaListPageGetAdminEventsDocument = new TypedDocumentString(`
-    query SecretSantaListPageGetAdminEvents($filters: EventPaginationFilters!) {
-  events(filters: $filters) {
-    __typename
-    ... on GetEventsPagedResponse {
-      data {
-        id
-        title
-        icon
-        eventDate
-        attendees {
-          role
-          user {
-            id
-          }
-        }
-        secretSanta {
-          id
-        }
-      }
-    }
-  }
-}
-    `);
-
-export const useSecretSantaListPageGetAdminEventsQuery = <
-      TData = SecretSantaListPageGetAdminEventsQuery,
-      TError = unknown
-    >(
-      variables: SecretSantaListPageGetAdminEventsQueryVariables,
-      options?: Omit<UseQueryOptions<SecretSantaListPageGetAdminEventsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<SecretSantaListPageGetAdminEventsQuery, TError, TData>['queryKey'] }
-    ) => {
-    
-    return useQuery<SecretSantaListPageGetAdminEventsQuery, TError, TData>(
-      {
-    queryKey: ['SecretSantaListPageGetAdminEvents', variables],
-    queryFn: fetchGql<SecretSantaListPageGetAdminEventsQuery, SecretSantaListPageGetAdminEventsQueryVariables>(SecretSantaListPageGetAdminEventsDocument, variables),
     ...options
   }
     )};

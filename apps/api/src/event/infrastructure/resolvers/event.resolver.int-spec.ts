@@ -345,6 +345,37 @@ describe('EventResolver (GraphQL)', () => {
       expect(firstPageIds).not.toEqual(expect.arrayContaining(secondPageIds));
     });
 
+    it('should exclude past events when onlyFuture is true', async () => {
+      const { eventId: futureEventId } = await fixtures.insertEventWithMaintainer({
+        title: 'Future event',
+        eventDate: DateTime.now().plus({ days: 10 }).toJSDate(),
+        maintainerId: currentUserId,
+      });
+      await fixtures.insertEventWithMaintainer({
+        title: 'Past event',
+        eventDate: DateTime.now().minus({ days: 10 }).toJSDate(),
+        maintainerId: currentUserId,
+      });
+
+      const allEvents = await request
+        .post('/graphql')
+        .send({ query, variables: { filters: {} } })
+        .expect(200);
+
+      expect(allEvents.body.data.events.data).toHaveLength(2);
+
+      const futureEvents = await request
+        .post('/graphql')
+        .send({ query, variables: { filters: { onlyFuture: true } } })
+        .expect(200);
+
+      expect(futureEvents.body.data.events).toMatchObject({
+        __typename: 'GetEventsPagedResponse',
+        data: [{ id: futureEventId, title: 'Future event' }],
+        pagination: { totalElements: 1, totalPages: 1, pageNumber: 1 },
+      });
+    });
+
     it('should return an empty paged response when user has no events', async () => {
       const res = await request
         .post('/graphql')
