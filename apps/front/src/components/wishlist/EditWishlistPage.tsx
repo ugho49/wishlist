@@ -88,7 +88,9 @@ export const EditWishlistPage = ({ wishlistId }: EditWishlistPageProps) => {
               <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: '20px' }}>
                 <Tabs
                   value={tab}
-                  onChange={(_, newValue) => navigate({ search: prev => ({ ...prev, tab: newValue as TabValues }) })}
+                  onChange={(_, newValue) =>
+                    navigate({ search: prev => ({ ...prev, tab: newValue as TabValues }), replace: true })
+                  }
                   variant="fullWidth"
                   scrollButtons="auto"
                   allowScrollButtonsMobile

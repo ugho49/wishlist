@@ -88,7 +88,9 @@ export const ReservedItemsListPage = () => {
           currentPage={currentPage}
           disabled={loading}
           hide={totalPages === 1}
-          onChange={value => navigate({ from: '/reserved-items/', search: prev => ({ ...prev, page: value }) })}
+          onChange={value =>
+            navigate({ from: '/reserved-items/', search: prev => ({ ...prev, page: value }), replace: true })
+          }
         />
       )}
 

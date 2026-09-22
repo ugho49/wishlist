@@ -171,11 +171,11 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
   const navigate = useNavigate({ from: '/admin/users/$userId' });
 
   const changeEventPage = (page: number) => {
-    void navigate({ search: prev => ({ ...prev, eventPage: page }) });
+    void navigate({ search: prev => ({ ...prev, eventPage: page }), replace: true });
   };
 
   const changeEventSearch = (search: string) => {
-    void navigate({ search: prev => ({ ...prev, eventPage: 1, eventSearch: search }) });
+    void navigate({ search: prev => ({ ...prev, eventPage: 1, eventSearch: search }), replace: true });
   };
 
   const { data, isLoading: loadingUser } = useAdminUserDetailQuery({ userId }, { select: d => d.adminUser });
@@ -396,6 +396,7 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
         onChange={(_, newValue) =>
           void navigate({
             search: prev => ({ ...prev, tab: newValue as AdminUserTab }),
+            replace: true,
           })
         }
         variant="scrollable"
