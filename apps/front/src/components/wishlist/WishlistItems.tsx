@@ -5,7 +5,7 @@ import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { Box, Fade, Grid, IconButton, Modal, Stack, useMediaQuery, useTheme } from '@mui/material';
-import { useNavigate, useSearch } from '@tanstack/react-router';
+import { useSearch } from '@tanstack/react-router';
 import { useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 
@@ -148,22 +148,14 @@ const WishlistItemsLoaded = ({
   onImportItems: () => void;
 }) => {
   const currentUserId = useSelector(mapState);
-  const {
-    displayAddItemFormDialog: openItemFormDialog,
-    sort,
-    filter,
-  } = useSearch({
+  const { sort, filter } = useSearch({
     from: '/_authenticated/_with-layout/wishlists/$wishlistId/',
   });
   const nbOfItems = useMemo(() => wishlist.items.length, [wishlist.items]);
   const ownerOrCoOwnerOfTheList = currentUserId === wishlist.owner.id || wishlist.coOwner?.id === currentUserId;
   const canReserveItems = !ownerOrCoOwnerOfTheList || !wishlist.config.hideItems;
   const [currentItem, setCurrentItem] = useState<WishlistItem | null>(null);
-  const navigate = useNavigate({ from: '/wishlists/$wishlistId/' });
-
-  const setOpenItemFormDialog = (open: boolean) => {
-    void navigate({ search: prev => ({ ...prev, displayAddItemFormDialog: open }) });
-  };
+  const [openItemFormDialog, setOpenItemFormDialog] = useState(false);
 
   // Apply filter and sort to items
   const itemsFilteredAndSorted = useMemo(

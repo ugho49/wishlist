@@ -358,7 +358,7 @@ export const AdminEventPage = ({ eventId }: AdminEventPageProps) => {
 
       <AdminTabs
         value={tab}
-        onChange={(_, newValue) => void navigate({ search: { tab: newValue as AdminEventTab } })}
+        onChange={(_, newValue) => void navigate({ search: { tab: newValue as AdminEventTab }, replace: true })}
         variant="scrollable"
         scrollButtons="auto"
         allowScrollButtonsMobile

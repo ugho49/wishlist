@@ -71,6 +71,7 @@ export const SecretSantaListPage = () => {
               navigate({
                 from: '/secret-santas/',
                 search: prev => ({ ...prev, page: value }),
+                replace: true,
               })
             }
           />

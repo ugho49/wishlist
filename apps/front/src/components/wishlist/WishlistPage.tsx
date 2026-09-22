@@ -4,7 +4,7 @@ import type { RootState } from '../../core/store';
 import { Alert, Box, Container, Stack } from '@mui/material';
 import { useNavigate, useSearch } from '@tanstack/react-router';
 import { FeatureFlags } from '@wishlist/common';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 import { isRejection, rejectionMessage, useImportableItemsQuery, useWishlistPageQuery } from '../../gql';
@@ -26,10 +26,12 @@ const mapState = (state: RootState) => state.auth.user?.id;
 
 export const WishlistPage = ({ wishlistId }: WishlistPageProps) => {
   const importItemsEnabled = useFeatureFlag(FeatureFlags.FRONTEND_WISHLIST_IMPORT_ITEMS_ENABLED);
-  const { showEventDialog, showImportDialog, sort, filter } = useSearch({
+  const { sort, filter } = useSearch({
     from: '/_authenticated/_with-layout/wishlists/$wishlistId/',
   });
   const navigate = useNavigate();
+  const [showEventDialog, setShowEventDialog] = useState(false);
+  const [showImportDialog, setShowImportDialog] = useState(false);
   const currentUserId = useSelector(mapState);
 
   const { data, isLoading: loading } = useWishlistPageQuery({ wishlistId }, { select: d => d.wishlist });
@@ -50,30 +52,24 @@ export const WishlistPage = ({ wishlistId }: WishlistPageProps) => {
     },
   );
 
-  const setShowEventDialog = useCallback(
-    (show: boolean) => {
-      void navigate({ from: '/wishlists/$wishlistId/', search: prev => ({ ...prev, showEventDialog: show }) });
-    },
-    [navigate],
-  );
-
-  const setShowImportDialog = useCallback(
-    (show: boolean) => {
-      void navigate({ from: '/wishlists/$wishlistId/', search: prev => ({ ...prev, showImportDialog: show }) });
-    },
-    [navigate],
-  );
-
   const setSort = useCallback(
     (newSort: typeof sort) => {
-      void navigate({ from: '/wishlists/$wishlistId/', search: prev => ({ ...prev, sort: newSort }) });
+      void navigate({
+        from: '/wishlists/$wishlistId/',
+        search: prev => ({ ...prev, sort: newSort }),
+        replace: true,
+      });
     },
     [navigate],
   );
 
   const setFilter = useCallback(
     (newFilter: typeof filter) => {
-      void navigate({ from: '/wishlists/$wishlistId/', search: prev => ({ ...prev, filter: newFilter }) });
+      void navigate({
+        from: '/wishlists/$wishlistId/',
+        search: prev => ({ ...prev, filter: newFilter }),
+        replace: true,
+      });
     },
     [navigate],
   );

@@ -103,7 +103,7 @@ export const UserProfilePage = () => {
       >
         <Tabs
           value={tab}
-          onChange={(_, newValue) => navigate({ search: { tab: newValue as TabValues } })}
+          onChange={(_, newValue) => navigate({ search: { tab: newValue as TabValues }, replace: true })}
           variant="fullWidth"
           scrollButtons="auto"
           allowScrollButtonsMobile

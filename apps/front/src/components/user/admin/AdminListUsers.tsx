@@ -119,6 +119,7 @@ export const AdminListUsers = () => {
     void navigate({
       to: '/admin/users',
       search: prev => ({ ...prev, page: 1, search: inputSearch }),
+      replace: true,
     });
   };
 
@@ -171,6 +172,7 @@ export const AdminListUsers = () => {
             navigate({
               to: '/admin/users',
               search: prev => ({ ...prev, page: page + 1, search }),
+              replace: true,
             })
           }
           hideFooter={totalElements <= pageSize}

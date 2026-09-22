@@ -60,7 +60,9 @@ export const WishlistListPage = () => {
             currentPage={currentPage}
             disabled={loading}
             hide={totalPages === 1}
-            onChange={value => navigate({ from: '/wishlists/', search: prev => ({ ...prev, page: value }) })}
+            onChange={value =>
+              navigate({ from: '/wishlists/', search: prev => ({ ...prev, page: value }), replace: true })
+            }
           />
 
           <FabAutoGrow label="Créer une liste" icon={<AddIcon />} color="primary" onClick={() => handleAddList()} />

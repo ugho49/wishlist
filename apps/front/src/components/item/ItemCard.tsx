@@ -26,10 +26,9 @@ import {
   Typography,
 } from '@mui/material';
 import { useQueryClient } from '@tanstack/react-query';
-import { useNavigate, useSearch } from '@tanstack/react-router';
 import clsx from 'clsx';
 import { DateTime } from 'luxon';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { match } from 'ts-pattern';
 
@@ -379,17 +378,9 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
   const { addToast } = useToast();
   const queryClient = useQueryClient();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const { currentItemId } = useSearch({ from: '/_authenticated/_with-layout/wishlists/$wishlistId/' });
   const [takers, setTakers] = useState<ItemTakerDetails[]>(() => toTakers(item.takers));
   const [takersDialogOpen, setTakersDialogOpen] = useState(false);
-  const isDialogOpen = useMemo(() => currentItemId === item.id, [currentItemId, item.id]);
-  const navigate = useNavigate({ from: '/wishlists/$wishlistId/' });
-  const setDialogOpen = useCallback(
-    (open: boolean) => {
-      void navigate({ search: prev => ({ ...prev, currentItemId: open ? item.id : undefined }) });
-    },
-    [item.id, navigate],
-  );
+  const [isDialogOpen, setDialogOpen] = useState(false);
 
   const isTaken = takers.length > 0;
   const isOwnerOrCoOwner = currentUserId === wishlist.ownerId || wishlist.coOwnerId === currentUserId;

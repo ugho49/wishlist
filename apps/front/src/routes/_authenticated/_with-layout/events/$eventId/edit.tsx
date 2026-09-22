@@ -73,7 +73,7 @@ function RouteComponent() {
   breadcrumbs.push({ label: 'Modifier' });
 
   const handleTabChange = (newValue: TabValues) => {
-    void navigate({ search: { tab: newValue } });
+    void navigate({ search: { tab: newValue }, replace: true });
   };
 
   return (

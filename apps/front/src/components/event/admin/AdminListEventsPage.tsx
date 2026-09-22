@@ -12,11 +12,11 @@ export const AdminListEventsPage = () => {
   const stats = statsData?.__typename === 'AdminEventsStats' ? statsData : undefined;
 
   const changeCurrentPage = (page: number) => {
-    void navigate({ search: prev => ({ ...prev, page }) });
+    void navigate({ search: prev => ({ ...prev, page }), replace: true });
   };
 
   const changeSearch = (nextSearch: string) => {
-    void navigate({ search: prev => ({ ...prev, page: 1, search: nextSearch }) });
+    void navigate({ search: prev => ({ ...prev, page: 1, search: nextSearch }), replace: true });
   };
 
   return (
