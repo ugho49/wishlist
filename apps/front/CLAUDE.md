@@ -17,6 +17,10 @@ React app (Vite, MUI, TanStack Router). Server data comes from GraphQL; REST is 
 - **Build**: Vite + SWC, SVGR for SVG imports
 - **Uploads**: `src/api/upload.ts` for the remaining multipart REST calls
 
+## Search params
+
+Updating query params on the current route (page, search, sort, filter, tab) passes `replace: true`, so back leaves the page. A new history entry per change makes back step through each update and feels broken. Navigating to a different route still pushes an entry.
+
 ## GraphQL
 
 - Colocate operations next to the UI: `src/components/**/*.graphql`
