@@ -18,6 +18,7 @@ import { Provider as ReduxProvider } from 'react-redux';
 
 import { store } from './core/store';
 import { environment } from './environment';
+import { startPwa } from './pwa/pwa-install';
 import { router } from './router';
 import { theme } from './theme';
 
@@ -37,6 +38,8 @@ function main() {
     window.location.replace('https://wishlistapp.fr');
     return;
   }
+
+  startPwa();
 
   const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
   const queryClient = new QueryClient({
