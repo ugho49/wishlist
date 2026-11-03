@@ -10,6 +10,7 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import { useNavigate, useSearch } from '@tanstack/react-router';
 import { useSelector } from 'react-redux';
 
+import { InstallAppBanner } from '../pwa/InstallAppBanner';
 import { ProfilePictureSection } from './ProfilePictureSection';
 import { UserTabConnections } from './UserTabConnections';
 import { UserTabInformations } from './UserTabInformations';
@@ -93,6 +94,8 @@ export const UserProfilePage = () => {
           <Email>{userState.email}</Email>
         </UserNameAndEmail>
       </ProfileSection>
+
+      <InstallAppBanner />
 
       <Box
         sx={{
