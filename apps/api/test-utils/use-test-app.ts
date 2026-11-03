@@ -3,6 +3,7 @@ import type { SQL } from 'bun';
 import type { TableAssertSortOptions } from './table-assert';
 
 import { Logger } from '@nestjs/common';
+import { sleep } from '@wishlist/common';
 import axios, { type AxiosInstance } from 'axios';
 import request from 'supertest';
 
@@ -67,7 +68,7 @@ export function useTestApp() {
   }
 
   async function clearMails(): Promise<void> {
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await sleep(100);
     await http.delete('/api/email/all');
     logger.log('Mails cleared ✅');
   }

@@ -37,7 +37,7 @@ export class Fixtures {
   constructor(private readonly sql: SQL) {}
 
   async getSignedUserId(signedAs: SignedAs): Promise<string> {
-    let email = '';
+    let email: string;
 
     switch (signedAs) {
       case 'BASE_USER':

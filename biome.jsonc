@@ -29,7 +29,22 @@
         // "useExplicitType": "warn",
         "noUnsafePlusOperands": "error",
         "noFloatingPromises": "error",
-        "noMisusedPromises": "error"
+        "noMisusedPromises": "error",
+        "noAccidentalBitwiseOperators": "error",
+        "noArraySortForMinMax": "error",
+        "noDoubleComparison": "error",
+        "noInvalidThis": "error",
+        "noObjectConstructor": "error",
+        "noPromiseExecutorReturn": "error",
+        "noReturnArrayPush": "error",
+        "noUnsafeUnaryMinus": "error",
+        "noUselessAssignment": "error",
+        "noUselessCall": "error",
+        "noUselessDateGetTime": "error",
+        "noUselessRecursion": "error",
+        "useBigintLiterals": "error",
+        "useSimplifiedBooleanReturn": "error",
+        "useWhileLoopCondition": "error"
       },
       "complexity": {
         "noStaticOnlyClass": "off",
