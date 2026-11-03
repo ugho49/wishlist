@@ -68,7 +68,7 @@ export function useTestApp() {
 
   async function clearMails(): Promise<void> {
     await new Promise(resolve => setTimeout(resolve, 100));
-    await http.delete('/email/all');
+    await http.delete('/api/email/all');
     logger.log('Mails cleared ✅');
   }
 

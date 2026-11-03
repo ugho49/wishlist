@@ -139,7 +139,7 @@ export class MailsAssert {
       return this.mailsCached;
     }
 
-    const { data } = await this.http.get<MaildevEmailDto[]>('/email');
+    const { data } = await this.http.get<MaildevEmailDto[]>('/api/email');
 
     this.mailsCached = data;
     this.dataFetched = true;

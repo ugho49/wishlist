@@ -4,12 +4,12 @@ This replaces the previous CircleCI setup (`.circleci/`).
 
 ## Workflows
 
-| File | Trigger | Purpose |
-| --- | --- | --- |
-| `pr-checks.yml` | `pull_request` → `main`, and `workflow_call` | Install, biome check, typecheck, unit tests, integration tests, API codegen check, API Docker build, front build. Computes the calendar version and the Nx affected projects. |
-| `deployments.yml` | `push` → `main` | Runs `pr-checks` (which pushes the API image + builds the front), then deploys whatever is affected. **No manual approval** — merge to `main` deploys automatically. |
-| `deploy-api.yml` | `workflow_call` | Runs Drizzle migrations, **then** deploys the API to the VPS (Dokploy), then creates an `api@<version>` GitHub release. |
-| `deploy-front.yml` | `workflow_call` | Deploys the front bundle to Firebase Hosting, then creates a `front@<version>` GitHub release. |
+| File               | Trigger                                      | Purpose                                                                                                                                                                       |
+| ------------------ | -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pr-checks.yml`    | `pull_request` → `main`, and `workflow_call` | Install, biome check, typecheck, unit tests, integration tests, API codegen check, API Docker build, front build. Computes the calendar version and the Nx affected projects. |
+| `deployments.yml`  | `push` → `main`                              | Runs `pr-checks` (which pushes the API image + builds the front), then deploys whatever is affected. **No manual approval** — merge to `main` deploys automatically.          |
+| `deploy-api.yml`   | `workflow_call`                              | Runs Drizzle migrations, **then** deploys the API to the VPS (Dokploy), then creates an `api@<version>` GitHub release.                                                       |
+| `deploy-front.yml` | `workflow_call`                              | Deploys the front bundle to Firebase Hosting, then creates a `front@<version>` GitHub release.                                                                                |
 
 The `claude.yml` / `claude-code-review.yml` workflows are unrelated and left untouched.
 
@@ -28,15 +28,18 @@ tag, the `VITE_APP_VERSION` of the front bundle, and the GitHub release tag.
 Set these as repository secrets (and/or on the `production` environment for the deploy jobs):
 
 ### Docker Hub (API image push)
+
 - `DOCKERHUB_USERNAME`
 - `DOCKERHUB_TOKEN`
 
 ### VPS / Dokploy (API deploy)
+
 - `VPS_API_URL`
 - `VPS_API_KEY`
 - `DOKPLOY_API_APPLICATION_ID`
 
 ### Database (Drizzle migrations — `production` environment)
+
 - `DB_HOST`
 - `DB_PORT`
 - `DB_USERNAME`
@@ -47,6 +50,7 @@ Set these as repository secrets (and/or on the `production` environment for the 
 > from GitHub-hosted runners (no Tailscale).
 
 ### Firebase (front deploy)
+
 - `FIREBASE_SERVICE_ACCOUNT` — the service-account JSON (the previous `FIREBASE_JSON`).
 
 The built-in `GITHUB_TOKEN` is used to create releases (no GitHub App token needed).

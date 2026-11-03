@@ -3,6 +3,7 @@
 React app (Vite, MUI, TanStack Router). Server data comes from GraphQL; REST is only used for the four multipart uploads.
 
 ## Running
+
 - `bun serve:front` — React frontend (port 4200)
 - `bun serve:front:with-codegen` — Frontend + GraphQL codegen in watch mode
 
@@ -81,9 +82,11 @@ Problematic:
 ```jsx
 <OuterContainer>
   <InnerList>
-    {items.map(item => <Item key={item.id} />)}
+    {items.map(item => (
+      <Item key={item.id} />
+    ))}
   </InnerList>
-</OuterContainer>
+</OuterContainer>;
 ```
 
 If `OuterContainer` only contains `InnerList`, merge their styles into one component.

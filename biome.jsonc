@@ -28,18 +28,15 @@
       "nursery": {
         // "useExplicitType": "warn",
         "noUnsafePlusOperands": "error",
-        "noIdenticalTestTitle": "error",
-        "noUnnecessaryTemplateExpression": "error",
-        "useTestHooksOnTop": "error",
         "noFloatingPromises": "error",
-        "noMisusedPromises": "error",
-        "noDuplicateFieldDefinitionNames": "error"
+        "noMisusedPromises": "error"
       },
       "complexity": {
         "noStaticOnlyClass": "off",
         "noEmptyTypeParameters": "error",
         "noUselessUndefined": "error",
-        "noUselessCatchBinding": "error"
+        "noUselessCatchBinding": "error",
+        "noUnnecessaryTemplateExpression": "error"
       },
       "correctness": {
         "noUnusedPrivateClassMembers": "error",
@@ -50,7 +47,8 @@
         "noDuplicateVariableNames": "error",
         "noDuplicateArgumentNames": "error",
         "noDuplicateEnumValueNames": "error",
-        "noDuplicateInputFieldNames": "error"
+        "noDuplicateInputFieldNames": "error",
+        "noDuplicateFieldDefinitionNames": "error"
       },
       "style": {
         "useForOf": "error",
@@ -70,7 +68,8 @@
         "useConst": "error",
         "useThrowOnlyError": "error",
         "useNodejsImportProtocol": "error",
-        "useConsistentArrowReturn": "error"
+        "useConsistentArrowReturn": "error",
+        "useTestHooksOnTop": "error"
       },
       "performance": {
         "noAccumulatingSpread": "off",
@@ -88,7 +87,8 @@
         "noImportCycles": "error",
         "noDuplicateDependencies": "error",
         "noDuplicateGraphqlOperationName": "error",
-        "noShadow": "error"
+        "noShadow": "error",
+        "noIdenticalTestTitle": "error"
       }
     }
   },
