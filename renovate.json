@@ -20,5 +20,13 @@
   "github-actions": {
     "managerFilePatterns": ["/^\\.github/workflows/[^/]+\\.ya?ml$/", "/^\\.github/actions/.+/action\\.ya?ml$/"]
   },
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/^\\.github/workflows/[^/]+\\.ya?ml$/"],
+      "matchStrings": ["npx -y (?<depName>firebase-tools)@(?<currentValue>[^\\s]+)"],
+      "datasourceTemplate": "npm"
+    }
+  ],
   "ignoreDeps": ["postgres", "prodrigestivill/postgres-backup-local", "valkey/valkey", "traefik"]
 }
