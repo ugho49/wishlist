@@ -16,13 +16,13 @@ Share wishlists for birthdays, holidays, and other events. Invite people, reserv
 
 Nx monorepo, **Bun** runtime.
 
-| Layer | Tech |
-| --- | --- |
-| API | NestJS, GraphQL (Yoga), PostgreSQL, Drizzle |
-| Front | React, Vite, MUI, TanStack Router / Query |
-| Mail | react-email |
-| Auth | JWT + Google OAuth |
-| Uploads | Firebase |
+| Layer   | Tech                                        |
+| ------- | ------------------------------------------- |
+| API     | NestJS, GraphQL (Yoga), PostgreSQL, Drizzle |
+| Front   | React, Vite, MUI, TanStack Router / Query   |
+| Mail    | react-email                                 |
+| Auth    | JWT + Google OAuth                          |
+| Uploads | Firebase                                    |
 
 The public API is GraphQL (`POST /graphql`). REST is only used for file uploads and `GET /health`.
 
@@ -49,12 +49,12 @@ bun db:seed                                # optional
 bun serve:all
 ```
 
-| Service | URL |
-| --- | --- |
-| Front | http://localhost:4200 |
-| API | http://localhost:8080 |
+| Service                   | URL                           |
+| ------------------------- | ----------------------------- |
+| Front                     | http://localhost:4200         |
+| API                       | http://localhost:8080         |
 | GraphQL (GraphiQL in dev) | http://localhost:8080/graphql |
-| MailDev | http://localhost:1080 |
+| MailDev                   | http://localhost:1080         |
 
 ## 📝 Commands
 

@@ -8,13 +8,13 @@ NestJS backend with Domain-Driven Design. GraphQL is the public API; REST is onl
 
 REST is **only** kept for multipart/form-data (GraphQL here is JSON-only) and a health check:
 
-| Method | Path | Why REST |
-| --- | --- | --- |
-| `GET` | `/health` | Nest Terminus (also GraphQL `health`) |
-| `POST` | `/user/upload-picture` | User avatar (`file` field) |
-| `POST` | `/admin/user/:id/upload-picture` | Admin avatar (`file` field) |
-| `POST` | `/wishlist` | Create wishlist with optional logo (`data` JSON + `image` file) |
-| `POST` | `/wishlist/:id/upload-logo` | Wishlist logo (`file` field) |
+| Method | Path                             | Why REST                                                        |
+| ------ | -------------------------------- | --------------------------------------------------------------- |
+| `GET`  | `/health`                        | Nest Terminus (also GraphQL `health`)                           |
+| `POST` | `/user/upload-picture`           | User avatar (`file` field)                                      |
+| `POST` | `/admin/user/:id/upload-picture` | Admin avatar (`file` field)                                     |
+| `POST` | `/wishlist`                      | Create wishlist with optional logo (`data` JSON + `image` file) |
+| `POST` | `/wishlist/:id/upload-logo`      | Wishlist logo (`file` field)                                    |
 
 Do **not** add new REST endpoints unless the operation requires a file upload. Swagger (`/swagger`) only documents the remaining REST.
 
@@ -34,6 +34,7 @@ Reference domain: `src/event/`.
 ## GraphQL conventions
 
 ### Schema
+
 - Schema-first: `{domain}.graphql` under `src/{domain}/infrastructure/`
 - Shared scalars, pagination, rejections: `src/core/graphql/base.graphql`
 - Operations return **result unions** (success + rejection types), not thrown GraphQL errors for expected failures
@@ -42,22 +43,25 @@ Reference domain: `src/event/`.
 After schema changes: `nx run api:codegen` (from the repo root). Output: `src/gql/generated-types.ts` and `schema.graphql`.
 
 ### Errors
+
 Yoga plugin `useErrorTransformPlugin` maps thrown Nest exceptions onto the field as a typed rejection (`data.<field>.__typename`). GraphQL still returns **HTTP 200**.
 
-| Exception | `__typename` |
-| --- | --- |
-| `ZodValidationException` | `ValidationRejection` |
-| `BusinessRuleException` | `BusinessRuleRejection` |
-| `UnauthorizedException` | `UnauthorizedRejection` |
-| `NotFoundException` | `NotFoundRejection` |
-| `ForbiddenException` | `ForbiddenRejection` |
+| Exception                          | `__typename`             |
+| ---------------------------------- | ------------------------ |
+| `ZodValidationException`           | `ValidationRejection`    |
+| `BusinessRuleException`            | `BusinessRuleRejection`  |
+| `UnauthorizedException`            | `UnauthorizedRejection`  |
+| `NotFoundException`                | `NotFoundRejection`      |
+| `ForbiddenException`               | `ForbiddenRejection`     |
 | other `HttpException` / unexpected | `InternalErrorRejection` |
 
 ### Validation
+
 - GraphQL inputs: Zod schemas in `{domain}.schema.ts` + `ZodPipe` on `@Args`
 - Remaining REST multipart bodies: `class-validator` DTOs in `@wishlist/common` (e.g. `CreateWishlistHttpRequest`)
 
 ### Resolvers, mappers, loaders
+
 - Query / mutation resolvers inject use cases (or loaders for by-id reads)
 - Field resolvers load relations from `ctx.loaders`
 - Mappers convert domain models to GraphQL types: `eventMapper.toGqlEvent(...)`
@@ -77,6 +81,7 @@ Yoga plugin `useErrorTransformPlugin` maps thrown Nest exceptions onto the field
 - **Audit fields**: `createdAt` / `updatedAt` with timezone handling
 
 ## Running
+
 - `bun serve:api` — NestJS API
 - `bun serve:api:with-codegen` — API + GraphQL codegen in watch mode
 
@@ -103,41 +108,41 @@ src/item/application/command/toggle-item.use-case.spec.ts
 
 ```typescript
 describe('ToggleItemUseCase', () => {
-  const itemRepository = createMock<WishlistItemRepository>()
-  const wishlistRepository = createMock<WishlistRepository>()
-  const userRepository = createMock<UserRepository>()
+  const itemRepository = createMock<WishlistItemRepository>();
+  const wishlistRepository = createMock<WishlistRepository>();
+  const userRepository = createMock<UserRepository>();
 
-  let useCase: ToggleItemUseCase
-  let owner: User
-  let item: WishlistItem
+  let useCase: ToggleItemUseCase;
+  let owner: User;
+  let item: WishlistItem;
 
   beforeAll(() => {
-    Logger.overrideLogger(false)
-  })
+    Logger.overrideLogger(false);
+  });
 
   beforeEach(() => {
-    mock.clearAllMocks()
-    owner = new UserBuilder().withEmail('owner@test.fr').build()
-    const wishlist = new WishlistBuilder().withOwner(owner).build()
-    item = new WishlistItemBuilder().withWishlistId(wishlist.id).build()
+    mock.clearAllMocks();
+    owner = new UserBuilder().withEmail('owner@test.fr').build();
+    const wishlist = new WishlistBuilder().withOwner(owner).build();
+    item = new WishlistItemBuilder().withWishlistId(wishlist.id).build();
 
-    itemRepository.findByIdOrFail.mockResolvedValue(item)
-    wishlistRepository.hasAccess.mockResolvedValue(true)
-    wishlistRepository.findByIdOrFail.mockResolvedValue(wishlist)
-    userRepository.findByIdOrFail.mockResolvedValue(owner)
+    itemRepository.findByIdOrFail.mockResolvedValue(item);
+    wishlistRepository.hasAccess.mockResolvedValue(true);
+    wishlistRepository.findByIdOrFail.mockResolvedValue(wishlist);
+    userRepository.findByIdOrFail.mockResolvedValue(owner);
 
-    useCase = new ToggleItemUseCase(itemRepository, wishlistRepository, userRepository)
-  })
+    useCase = new ToggleItemUseCase(itemRepository, wishlistRepository, userRepository);
+  });
 
   it('should reject when the user has no access to the wishlist', async () => {
-    wishlistRepository.hasAccess.mockResolvedValueOnce(false)
+    wishlistRepository.hasAccess.mockResolvedValueOnce(false);
 
     await expect(useCase.execute({ currentUser: toCurrentUser(owner), itemId: item.id })).rejects.toThrow(
       UnauthorizedException,
-    )
-    expect(itemRepository.save).not.toHaveBeenCalled()
-  })
-})
+    );
+    expect(itemRepository.save).not.toHaveBeenCalled();
+  });
+});
 ```
 
 **Builders** (`test-utils/builders/`) — fluent `with*()` / `as*()` methods, `build()` creates the domain model (`Model.create()` when possible). Keep auto-generated fields (`id`, `createdAt`, `updatedAt`) inside `build()`, not on the builder API. Convert a `User` to `ICurrentUser` with `toCurrentUser(user)`.
@@ -161,17 +166,20 @@ Most int-specs target GraphQL resolvers (`*.resolver.int-spec.ts`). A few REST c
 
 1. **Structure** — `.int-spec.ts` suffix. GraphQL: group by operation (`Query events`, `Mutation createEvent`). REST (uploads only): group by method and path. Always test unauthenticated requests first. `beforeEach` to reset fixtures.
 2. **Utilities**
+
    ```typescript
    import { useTestApp } from '@wishlist/api-test-utils'
 
    const { getRequest, getFixtures, expectTable } = useTestApp()
    ```
+
    `getRequest({ signedAs: 'BASE_USER' | 'ADMIN_USER' | 'SUPERADMIN_USER' })` authenticates via GraphQL `login`.
 3. **GraphQL** — HTTP 200 even for resolver-level rejections. Assert `__typename` (and still verify the database for mutations).
 4. **Validation** — GraphQL failures are `ValidationRejection`, not HTTP 400. Use `it.each`. REST multipart: HTTP 400 + `class-validator`, JSON via `.field('data', JSON.stringify(payload))`.
 5. **Database** — every create/update/delete **must** use `expectTable`.
 6. **Permissions** — prefer **404 / `NotFoundRejection`** over 403 when the resource must stay hidden.
 7. **REST multipart on Bun** — `FileInterceptor` + an empty POST hangs up the socket (`socket hang up`) before AuthGuard can return 401. Unauthenticated upload tests must send a dummy multipart field:
+
    ```typescript
    await request.post('/user/upload-picture').field('file', 'not-a-file').expect(401)
    ```
@@ -180,7 +188,7 @@ Most int-specs target GraphQL resolvers (`*.resolver.int-spec.ts`). A few REST c
 ### GraphQL pattern
 
 ```typescript
-const GRAPHQL_PATH = '/graphql'
+const GRAPHQL_PATH = '/graphql';
 
 describe('Mutation createEvent', () => {
   const mutation = /* GraphQL */ `
@@ -192,22 +200,23 @@ describe('Mutation createEvent', () => {
         ... on UnauthorizedRejection { message }
       }
     }
-  `
+  `;
 
   it('should not succeed when not authenticated', async () => {
-    const request = await getRequest()
+    const request = await getRequest();
     const res = await request
       .post(GRAPHQL_PATH)
       .send({ query: mutation, variables: { input: { title: 'My Event', eventDate: futureDate() } } })
-      .expect(200)
+      .expect(200);
 
-    expect(res.body.data?.createEvent?.__typename).not.toBe('Event')
-    await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(0)
-  })
-})
+    expect(res.body.data?.createEvent?.__typename).not.toBe('Event');
+    await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(0);
+  });
+});
 ```
 
 ### Checklist
+
 - [ ] Unauthenticated case first (GraphQL: not the success `__typename`; REST: 401)
 - [ ] Dynamic validation with `it.each`
 - [ ] `expectTable` for all mutations
@@ -218,6 +227,7 @@ describe('Mutation createEvent', () => {
 - [ ] Fixtures usage and cleanup
 
 ### Examples
+
 - GraphQL: `src/event/infrastructure/resolvers/event-mutation.resolver.int-spec.ts`
 - GraphQL: `src/user/infrastructure/resolvers/user.resolver.int-spec.ts`
 - REST multipart: `src/wishlist/infrastructure/controllers/wishlist.controller.int-spec.ts`
@@ -252,6 +262,7 @@ src/{domain-name}/
 ```
 
 ### Naming
+
 - Use case: `{Action}{EntityName}UseCase` — `{kebab-case-action}-{kebab-case-entity}.use-case.ts`
 - Input / output: `{Action}{EntityName}Input` / `{Action}{EntityName}Output`
 - Event: `{EntityName}{PastTenseAction}Event` — handler `{EntityName}{PastTenseAction}Handler` with `@EventsHandler`
@@ -275,9 +286,9 @@ export class CreateEventUseCase {
       description: input.newEvent.description,
       eventDate: input.newEvent.eventDate,
       attendees: [],
-    })
-    await this.eventRepository.save(event)
-    return { event }
+    });
+    await this.eventRepository.save(event);
+    return { event };
   }
 }
 ```
@@ -307,6 +318,7 @@ REST controllers (uploads only) inject the same use cases and use `@CurrentUser(
 Register new command/query/event-handler classes in `application/index.ts` `handlers`.
 
 ### Rules
+
 1. **Security** — always pass `currentUser` (or `currentUserId`) on user-scoped use cases. Authorization in domain models (`canBeViewedBy`, `canBeModifiedBy`). Return 404 / `NotFoundRejection` instead of 403.
 2. **Types** — branded IDs, input/output next to the use case, readonly domain props. GraphQL parents must not include `@resolved` fields.
 3. **Transactions** — `TransactionManager.runInTransaction` only for multiple SQL queries. Pass tx context when needed.

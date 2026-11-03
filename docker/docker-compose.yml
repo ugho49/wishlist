@@ -12,7 +12,7 @@ services:
       retries: 10
 
   mail:
-    image: maildev/maildev:2.2.1
+    image: maildev/maildev:3.0.0
     healthcheck:
       test: wget --spider http://localhost:1080 || exit 1
       interval: 2s
@@ -22,7 +22,7 @@ services:
   valkey:
     image: valkey/valkey:9.0-alpine
     healthcheck:
-      test: ["CMD", "valkey-cli", "ping"]
+      test: [ "CMD", "valkey-cli", "ping" ]
       interval: 2s
       timeout: 5s
       retries: 10

@@ -18,7 +18,7 @@
       "drizzle": "recommended"
     },
     "rules": {
-      "nursery": {
+      "suspicious": {
         "noDrizzleDeleteWithoutWhere": "error",
         "noDrizzleUpdateWithoutWhere": "error"
       },

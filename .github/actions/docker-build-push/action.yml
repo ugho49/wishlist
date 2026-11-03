@@ -11,14 +11,14 @@ inputs:
   context:
     description: Docker build context
     required: false
-    default: '.'
+    default: "."
   version:
     description: Version tag for the image
     required: true
   build-args:
     description: Build arguments (newline-separated KEY=VALUE)
     required: false
-    default: ''
+    default: ""
   username:
     description: Docker Hub username
     required: true
@@ -28,7 +28,7 @@ inputs:
   push:
     description: Whether to push the image to the registry
     required: false
-    default: 'false'
+    default: "false"
 
 runs:
   using: composite
