@@ -4,6 +4,7 @@ import {
   getPwaInstallServerSnapshot,
   getPwaInstallSnapshot,
   promptPwaInstall,
+  shouldOfferInstall,
   subscribePwaInstall,
 } from '../pwa/pwa-install';
 
@@ -11,8 +12,7 @@ export function usePwaInstall() {
   const snapshot = useSyncExternalStore(subscribePwaInstall, getPwaInstallSnapshot, getPwaInstallServerSnapshot);
 
   return {
-    installed: snapshot.installed,
-    dismissed: snapshot.dismissed,
+    canOfferInstall: shouldOfferInstall(snapshot),
     canNativeInstall: snapshot.canNativeInstall,
     ios: snapshot.ios,
     promptInstall: promptPwaInstall,

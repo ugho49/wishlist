@@ -9,7 +9,6 @@ import { useSelector } from 'react-redux';
 
 import { MaintenancePage } from '../components/common/MaintenancePage';
 import { ScrollToTop } from '../components/common/ScrollToTop';
-import { PwaInstallPrompt } from '../components/pwa/PwaInstallPrompt';
 import { SEO } from '../components/SEO';
 import { SessionWatcher } from '../core/router/SessionWatcher';
 import { environment } from '../environment';
@@ -47,7 +46,6 @@ export const Route = createRootRoute({
         <SessionWatcher />
         <GoogleOAuthProvider clientId={environment.googleClientId}>
           <Outlet />
-          <PwaInstallPrompt />
         </GoogleOAuthProvider>
       </>
     );

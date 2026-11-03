@@ -1,5 +1,3 @@
-const STORAGE_KEY = 'wl_pwa_install_dismissed';
-
 export type BeforeInstallPromptEvent = Event & {
   readonly platforms: string[];
   readonly userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
@@ -8,76 +6,21 @@ export type BeforeInstallPromptEvent = Event & {
 
 export type PwaInstallSnapshot = {
   installed: boolean;
-  dismissed: boolean;
   canNativeInstall: boolean;
   ios: boolean;
 };
 
-type ReadableStorage = Pick<Storage, 'getItem'>;
-type WritableStorage = Pick<Storage, 'setItem'>;
-
 const serverSnapshot: PwaInstallSnapshot = {
   installed: false,
-  dismissed: false,
   canNativeInstall: false,
   ios: false,
 };
 
 let deferredPrompt: BeforeInstallPromptEvent | null = null;
-let dismissedInMemory = false;
 let installedInMemory = false;
 let listening = false;
 let currentSnapshot: PwaInstallSnapshot = serverSnapshot;
 const listeners = new Set<() => void>();
-
-function defaultStorage(): Storage | null {
-  try {
-    if (typeof localStorage === 'undefined') {
-      return null;
-    }
-
-    return localStorage;
-  } catch {
-    return null;
-  }
-}
-
-export function readInstallPromptDismissed(storage: ReadableStorage | null = defaultStorage()): boolean {
-  if (!storage) {
-    return false;
-  }
-
-  try {
-    return storage.getItem(STORAGE_KEY) === '1';
-  } catch {
-    return false;
-  }
-}
-
-export function markInstallPromptDismissed(storage: WritableStorage | null = defaultStorage()): void {
-  if (!storage) {
-    return;
-  }
-
-  try {
-    storage.setItem(STORAGE_KEY, '1');
-  } catch {
-    // Private mode or blocked storage: the in-memory flag still covers this session.
-  }
-}
-
-export function isPhoneUserAgent(userAgent: string): boolean {
-  if (/iPad|Tablet|PlayBook|Silk/i.test(userAgent)) {
-    return false;
-  }
-
-  // Android tablets omit "Mobile".
-  if (/Android/i.test(userAgent) && !/Mobile/i.test(userAgent)) {
-    return false;
-  }
-
-  return /iPhone|iPod|Android.+Mobile|Windows Phone|IEMobile|webOS/i.test(userAgent);
-}
 
 export function isIosDevice(userAgent: string, maxTouchPoints = 0, platform = ''): boolean {
   if (/iPhone|iPad|iPod/i.test(userAgent)) {
@@ -104,57 +47,14 @@ export function isStandaloneDisplay(displayModeMatches: boolean, navigatorStanda
   return displayModeMatches || navigatorStandalone === true;
 }
 
-function isElementTreeVisible(element: HTMLElement): boolean {
-  let current: HTMLElement | null = element;
-
-  while (current) {
-    if (current.getAttribute('aria-hidden') === 'true' || current.hasAttribute('hidden')) {
-      return false;
-    }
-
-    // Closed MUI drawers stay mounted on mobile and keep role="dialog".
-    if (current.classList.contains('MuiModal-hidden')) {
-      return false;
-    }
-
-    const view = current.ownerDocument.defaultView;
-    if (view) {
-      const style = view.getComputedStyle(current);
-      if (style.display === 'none' || style.visibility === 'hidden') {
-        return false;
-      }
-    }
-
-    current = current.parentElement;
-  }
-
-  return true;
-}
-
-export function hasBlockingDialog(doc: Document = document): boolean {
-  return Array.from(doc.querySelectorAll<HTMLElement>('[role="dialog"]')).some(dialog => {
-    if (dialog.getAttribute('aria-labelledby') === 'install-app-title') {
-      return false;
-    }
-
-    return isElementTreeVisible(dialog);
-  });
-}
-
-export function shouldAutoPrompt(input: {
-  isPhone: boolean;
-  installed: boolean;
-  dismissed: boolean;
-  canNativeInstall: boolean;
-  isIos: boolean;
-}): boolean {
-  if (!input.isPhone || input.installed || input.dismissed) {
+export function shouldOfferInstall(snapshot: PwaInstallSnapshot): boolean {
+  if (snapshot.installed) {
     return false;
   }
 
-  // iOS has no beforeinstallprompt. Other phones wait for the native event so
-  // the popup can actually start the installation.
-  return input.canNativeInstall || input.isIos;
+  // Chromium only fires beforeinstallprompt while the app is not installed yet.
+  // iOS has no such event, so the offer stays until the app runs standalone.
+  return snapshot.canNativeInstall || snapshot.ios;
 }
 
 function isDisplayModeInstalled(): boolean {
@@ -183,7 +83,6 @@ function readSnapshot(): PwaInstallSnapshot {
 
   return {
     installed: installedInMemory || isDisplayModeInstalled(),
-    dismissed: dismissedInMemory || readInstallPromptDismissed(),
     canNativeInstall: deferredPrompt !== null,
     ios: isIosDevice(window.navigator.userAgent, window.navigator.maxTouchPoints, window.navigator.platform),
   };
@@ -194,7 +93,6 @@ export function getPwaInstallSnapshot(): PwaInstallSnapshot {
 
   if (
     currentSnapshot.installed === next.installed &&
-    currentSnapshot.dismissed === next.dismissed &&
     currentSnapshot.canNativeInstall === next.canNativeInstall &&
     currentSnapshot.ios === next.ios
   ) {
@@ -216,12 +114,6 @@ export function subscribePwaInstall(listener: () => void): () => void {
   };
 }
 
-export function dismissInstallPrompt(): void {
-  dismissedInMemory = true;
-  markInstallPromptDismissed();
-  emit();
-}
-
 export function initPwaInstallListener(): void {
   if (listening || typeof window === 'undefined') {
     return;
@@ -230,9 +122,8 @@ export function initPwaInstallListener(): void {
   listening = true;
 
   window.addEventListener('beforeinstallprompt', event => {
-    // Keep the event so the settings action can call prompt() later.
-    // Preventing the default also hides the browser mini-infobar, which would
-    // show again after the in-app popup has already been dismissed.
+    // Keep the event so the profile banner can call prompt() later, and hide
+    // the browser mini-infobar in favour of that banner.
     event.preventDefault();
     deferredPrompt = event as BeforeInstallPromptEvent;
     emit();
@@ -241,7 +132,7 @@ export function initPwaInstallListener(): void {
   window.addEventListener('appinstalled', () => {
     deferredPrompt = null;
     installedInMemory = true;
-    dismissInstallPrompt();
+    emit();
   });
 }
 
@@ -258,11 +149,10 @@ export async function promptPwaInstall(): Promise<'accepted' | 'dismissed' | 'un
     deferredPrompt = null;
 
     if (choice.outcome === 'accepted') {
-      dismissInstallPrompt();
-    } else {
-      emit();
+      installedInMemory = true;
     }
 
+    emit();
     return choice.outcome;
   } catch {
     deferredPrompt = null;
