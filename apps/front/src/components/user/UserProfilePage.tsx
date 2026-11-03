@@ -10,6 +10,7 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import { useNavigate, useSearch } from '@tanstack/react-router';
 import { useSelector } from 'react-redux';
 
+import { InstallAppSettings } from '../pwa/InstallAppSettings';
 import { ProfilePictureSection } from './ProfilePictureSection';
 import { UserTabConnections } from './UserTabConnections';
 import { UserTabInformations } from './UserTabInformations';
@@ -125,6 +126,8 @@ export const UserProfilePage = () => {
         {tab === TabValues.notifications && <UserTabNotifications />}
         {tab === TabValues.password && <UserTabPassword />}
       </Stack>
+
+      <InstallAppSettings />
     </Box>
   );
 };
