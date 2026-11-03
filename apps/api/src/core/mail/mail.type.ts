@@ -43,13 +43,12 @@ export type ResetPasswordContext = {
 };
 
 export type NewItemsReminderContext = {
-  eventTitle: string;
-  eventUrl: string;
   updates: Array<{
     ownerName: string;
     wishlistTitle: string;
     wishlistUrl: string;
     nbItems: number;
+    eventTitles: string[];
   }>;
 };
 
@@ -97,6 +96,7 @@ export type BirthdayReminderContext = {
 type BaseMailPayload = {
   to: string | string[];
   subject: string;
+  idempotencyKey?: string;
 };
 
 export type MailPayload = BaseMailPayload &

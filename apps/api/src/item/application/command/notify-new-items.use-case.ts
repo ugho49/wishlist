@@ -1,19 +1,29 @@
-import type { NewItemsForEventWishlist, WishlistItemRepository } from '../../domain/wishlist-item.repository';
+import type { ItemDigestReceiptRepository } from '../../domain/item-digest-receipt.repository';
+import type { NewItemNotificationRow, WishlistItemRepository } from '../../domain/wishlist-item.repository';
 
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { type EventId } from '@wishlist/common';
+import { type EventId, type UserId, type WishlistId } from '@wishlist/common';
 import { DateTime } from 'luxon';
 
 import { FrontendRoutesService } from '../../../core/frontend-routes/frontend-routes.service';
 import { MailService } from '../../../core/mail/mail.service';
 import { MailTemplate } from '../../../core/mail/mail.type';
-import { type EventRepository } from '../../../event/domain/repository/event.repository';
 import { REPOSITORIES } from '../../../repositories/repositories.constants';
 
-type EventDigest = {
-  eventId: EventId;
-  eventTitle: string;
-  updates: NewItemsForEventWishlist[];
+const DIGEST_TIME_ZONE = 'Europe/Paris';
+
+type WishlistUpdate = {
+  wishlistId: WishlistId;
+  wishlistTitle: string;
+  ownerName: string;
+  nbNewItems: number;
+  events: Array<{ id: EventId; title: string }>;
+};
+
+type RecipientDigest = {
+  userId: UserId;
+  email: string;
+  updates: WishlistUpdate[];
 };
 
 @Injectable()
@@ -22,130 +32,118 @@ export class NotifyNewItemsUseCase {
 
   constructor(
     @Inject(REPOSITORIES.WISHLIST_ITEM) private readonly itemRepository: WishlistItemRepository,
-    @Inject(REPOSITORIES.EVENT) private readonly eventRepository: EventRepository,
+    @Inject(REPOSITORIES.ITEM_DIGEST_RECEIPT) private readonly receiptRepository: ItemDigestReceiptRepository,
     private readonly mailService: MailService,
     private readonly frontendRoutes: FrontendRoutesService,
   ) {}
 
-  async execute(): Promise<void> {
+  async execute(now: DateTime = DateTime.now()): Promise<void> {
     try {
-      const oneDayAgo = DateTime.now().minus({ days: 1 }).toJSDate();
+      const since = now.minus({ days: 1 }).toJSDate();
+      const digestDate = now.setZone(DIGEST_TIME_ZONE).toISODate();
 
-      this.logger.log(`Fetching new items to send daily notification since "${oneDayAgo.toISOString()}" ...`);
+      if (!digestDate) {
+        this.logger.error('Unable to resolve the Paris digest date');
+        return;
+      }
 
-      const rows = await this.itemRepository.findAllNewItems(oneDayAgo);
+      this.logger.log(`Fetching new items to send daily notification since "${since.toISOString()}" ...`);
 
-      if (rows.length === 0) {
+      const rows = await this.itemRepository.findNewItemNotifications(since);
+      const digests = this.groupByRecipient(rows);
+
+      if (digests.length === 0) {
         this.logger.log('No new items to send daily notification');
         return;
       }
 
-      const digests = this.groupByEvent(rows);
-      this.logger.log(`Found new items across ${digests.length} event(s) to send daily notification`);
+      this.logger.log(`Found new items for ${digests.length} recipient(s) to send daily notification`);
 
       for (const digest of digests) {
-        await this.notify(digest);
+        await this.notify(digest, digestDate);
       }
-    } catch (e) {
-      this.logger.error('Fail to send new item notification', e);
+    } catch (error) {
+      this.logger.error('Fail to send new item notification', error);
     }
   }
 
-  private async notify(digest: EventDigest) {
+  private async notify(digest: RecipientDigest, digestDate: string) {
+    const claimed = await this.receiptRepository.claim({ userId: digest.userId, digestDate });
+
+    if (!claimed) {
+      this.logger.log(`New items digest already sent to user ${digest.userId} on ${digestDate}`);
+      return;
+    }
+
     try {
-      this.logger.log(`Notifying event "${digest.eventId}" ...`, {
-        eventId: digest.eventId,
-        nbWishlists: digest.updates.length,
-      });
-
-      const recipients = await this.eventRepository.findEmailsToNotify(digest.eventId);
-
-      if (recipients.length === 0) {
-        this.logger.log(`No emails to notify for event ${digest.eventId}`);
-        return;
+      await this.sendNotifyEmail(digest, digestDate);
+      this.logger.log(`New items digest queued for user ${digest.userId}`);
+    } catch (error) {
+      this.logger.error(`Fail to queue new items digest for user ${digest.userId}`, error);
+      try {
+        await this.receiptRepository.release({ userId: digest.userId, digestDate });
+      } catch (releaseError) {
+        this.logger.error(`Fail to release new items digest claim for user ${digest.userId}`, releaseError);
       }
-
-      const recapGroups = new Map<string, { emails: string[]; updates: NewItemsForEventWishlist[] }>();
-
-      for (const recipient of recipients) {
-        const updates = digest.updates.filter(update => update.ownerId !== recipient.userId);
-        if (updates.length === 0) continue;
-
-        const key = updates
-          .map(update => update.wishlistId)
-          .sort((a, b) => a.localeCompare(b))
-          .join(',');
-        const group = recapGroups.get(key);
-        if (group) {
-          group.emails.push(recipient.email);
-        } else {
-          recapGroups.set(key, { emails: [recipient.email], updates });
-        }
-      }
-
-      if (recapGroups.size === 0) {
-        this.logger.log(`No personalized recaps to send for event ${digest.eventId}`);
-        return;
-      }
-
-      for (const group of recapGroups.values()) {
-        this.logger.log(`Notifying ${group.emails.length} people for new items in event "${digest.eventId}" ...`, {
-          eventId: digest.eventId,
-        });
-
-        await this.sendNotifyEmail({
-          emails: group.emails,
-          eventId: digest.eventId,
-          eventTitle: digest.eventTitle,
-          updates: group.updates,
-        });
-      }
-
-      this.logger.log(`✅ New items notification sent successfully for event "${digest.eventId}"`);
-    } catch (e) {
-      this.logger.error(`Fail to notify new items for event ${digest.eventId}`, e);
     }
   }
 
-  private async sendNotifyEmail(param: {
-    emails: string[];
-    eventId: EventId;
-    eventTitle: string;
-    updates: NewItemsForEventWishlist[];
-  }) {
+  private async sendNotifyEmail(digest: RecipientDigest, digestDate: string) {
     await this.mailService.sendMail({
-      to: param.emails,
-      subject: `Nouveautés sur ${param.eventTitle}`,
+      to: digest.email,
+      subject: subjectFor(digest.updates),
       template: MailTemplate.NEW_ITEMS_REMINDER,
+      idempotencyKey: `new-items/${digest.userId}/${digestDate}`,
       context: {
-        eventTitle: param.eventTitle,
-        eventUrl: this.frontendRoutes.routes.event.byId(param.eventId),
-        updates: param.updates.map(update => ({
+        updates: digest.updates.map(update => ({
           ownerName: update.ownerName,
           wishlistTitle: update.wishlistTitle,
           wishlistUrl: this.frontendRoutes.routes.wishlist.byId(update.wishlistId),
           nbItems: update.nbNewItems,
+          eventTitles: update.events.map(event => event.title),
         })),
       },
     });
   }
 
-  private groupByEvent(rows: NewItemsForEventWishlist[]): EventDigest[] {
-    const byEvent = new Map<EventId, EventDigest>();
+  private groupByRecipient(rows: NewItemNotificationRow[]): RecipientDigest[] {
+    const byRecipient = new Map<UserId, RecipientDigest>();
 
     for (const row of rows) {
-      const existing = byEvent.get(row.eventId);
-      if (existing) {
-        existing.updates.push(row);
-      } else {
-        byEvent.set(row.eventId, {
-          eventId: row.eventId,
-          eventTitle: row.eventTitle,
-          updates: [row],
-        });
+      if (row.recipientUserId === row.ownerId) continue;
+
+      let digest = byRecipient.get(row.recipientUserId);
+      if (!digest) {
+        digest = { userId: row.recipientUserId, email: row.recipientEmail, updates: [] };
+        byRecipient.set(row.recipientUserId, digest);
+      }
+
+      let update = digest.updates.find(candidate => candidate.wishlistId === row.wishlistId);
+      if (!update) {
+        update = {
+          wishlistId: row.wishlistId,
+          wishlistTitle: row.wishlistTitle,
+          ownerName: row.ownerName,
+          nbNewItems: row.nbNewItems,
+          events: [],
+        };
+        digest.updates.push(update);
+      }
+
+      if (!update.events.some(event => event.id === row.eventId)) {
+        update.events.push({ id: row.eventId, title: row.eventTitle });
       }
     }
 
-    return [...byEvent.values()];
+    return [...byRecipient.values()];
   }
+}
+
+function subjectFor(updates: WishlistUpdate[]): string {
+  const ownerNames = new Set(updates.map(update => update.ownerName));
+  if (ownerNames.size === 1) {
+    return `${updates[0]?.ownerName ?? 'Un proche'} a ajouté des souhaits`;
+  }
+
+  return 'Nouveautés sur les listes';
 }

@@ -2,6 +2,7 @@ import { Global, Module, type Type } from '@nestjs/common';
 
 import { PostgresEventRepository } from './impl/postgres-event.repository';
 import { PostgresEventAttendeeRepository } from './impl/postgres-event-attendee.repository';
+import { PostgresItemDigestReceiptRepository } from './impl/postgres-item-digest-receipt.repository';
 import { PostgresSecretSantaRepository } from './impl/postgres-secret-santa.repository';
 import { PostgresSecretSantaUserRepository } from './impl/postgres-secret-santa-user.repository';
 import { PostgresUserRepository } from './impl/postgres-user.repository';
@@ -27,6 +28,7 @@ const repositoryProviders: Record<keyof typeof REPOSITORIES, Type<unknown>> = {
   USER_SESSION: PostgresUserSessionRepository,
   WISHLIST: PostgresWishlistRepository,
   WISHLIST_ITEM: PostgresWishlistItemRepository,
+  ITEM_DIGEST_RECEIPT: PostgresItemDigestReceiptRepository,
 };
 
 @Global()

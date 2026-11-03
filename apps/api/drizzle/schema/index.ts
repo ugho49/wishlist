@@ -2,6 +2,7 @@ export * from './event.schema';
 export * from './event-attendee.schema';
 export * from './event-wishlist.schema';
 export * from './item.schema';
+export * from './item-digest-receipt.schema';
 export * from './item-taker.schema';
 export * from './secret-santa.schema';
 export * from './secret-santa-user.schema';

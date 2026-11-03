@@ -26,12 +26,15 @@ export class ResendMailProvider implements MailProvider {
 
     const { from, html } = await getMailPayloadFromMailOptions(options);
 
-    const { data, error } = await this.resend.emails.send({
-      from,
-      to: options.to,
-      subject: options.subject,
-      html,
-    });
+    const { data, error } = await this.resend.emails.send(
+      {
+        from,
+        to: options.to,
+        subject: options.subject,
+        html,
+      },
+      options.idempotencyKey ? { idempotencyKey: options.idempotencyKey } : undefined,
+    );
 
     if (error) {
       this.logger.error('Failed to send email with Resend', { error });
