@@ -11,6 +11,7 @@ import {
   gt,
   gte,
   inArray,
+  isNotNull,
   isNull,
   lt,
   max,
@@ -20,13 +21,14 @@ import {
   or,
   sql,
 } from 'drizzle-orm';
+import { alias } from 'drizzle-orm/pg-core';
 import { DateTime } from 'luxon';
 
 import { DatabaseService } from '../../core/database/database.service';
 import { type DrizzleTransaction } from '../../core/database/transaction-manager';
 import { WishlistItem } from '../../item/domain/wishlist-item.model';
 import {
-  type NewItemsForEventWishlist,
+  type NewItemNotificationRow,
   type ReservedItem,
   type ReservedItemPeriod,
   type WishlistItemRepository,
@@ -90,41 +92,62 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
     return result.map(PostgresWishlistItemRepository.toModel);
   }
 
-  async findAllNewItems(since: Date): Promise<NewItemsForEventWishlist[]> {
-    const rows = await this.databaseService.db
+  async findNewItemNotifications(since: Date): Promise<NewItemNotificationRow[]> {
+    const owner = alias(schema.user, 'owner');
+    const recipient = alias(schema.user, 'recipient');
+
+    // Count items before joining events and attendees, otherwise each extra link multiplies nbNewItems.
+    const newItems = this.databaseService.db
       .select({
-        eventId: schema.event.id,
-        eventTitle: schema.event.title,
         wishlistId: schema.item.wishlistId,
-        wishlistTitle: schema.wishlist.title,
-        ownerId: schema.wishlist.ownerId,
-        ownerName: sql<string>`CONCAT(${schema.user.firstName}, ' ', ${schema.user.lastName})`,
-        nbNewItems: sql<number>`COUNT(${schema.item.id})`,
+        nbNewItems: count(schema.item.id).as('nb_new_items'),
       })
       .from(schema.item)
-      .innerJoin(schema.wishlist, eq(schema.wishlist.id, schema.item.wishlistId))
-      .innerJoin(schema.user, eq(schema.user.id, schema.wishlist.ownerId))
+      .where(and(eq(schema.item.isSuggested, false), gt(schema.item.createdAt, since)))
+      .groupBy(schema.item.wishlistId)
+      .as('new_items');
+
+    const rows = await this.databaseService.db
+      .select({
+        wishlistId: schema.wishlist.id,
+        wishlistTitle: schema.wishlist.title,
+        ownerId: schema.wishlist.ownerId,
+        ownerName: sql<string>`CONCAT(${owner.firstName}, ' ', ${owner.lastName})`,
+        nbNewItems: newItems.nbNewItems,
+        eventId: schema.event.id,
+        eventTitle: schema.event.title,
+        recipientUserId: recipient.id,
+        recipientEmail: recipient.email,
+      })
+      .from(newItems)
+      .innerJoin(schema.wishlist, eq(schema.wishlist.id, newItems.wishlistId))
+      .innerJoin(owner, eq(owner.id, schema.wishlist.ownerId))
       .innerJoin(schema.eventWishlist, eq(schema.eventWishlist.wishlistId, schema.wishlist.id))
       .innerJoin(schema.event, eq(schema.event.id, schema.eventWishlist.eventId))
-      .where(and(eq(schema.item.isSuggested, false), gt(schema.item.createdAt, since)))
-      .groupBy(
-        schema.event.id,
-        schema.event.title,
-        schema.item.wishlistId,
-        schema.wishlist.title,
-        schema.wishlist.ownerId,
-        schema.user.firstName,
-        schema.user.lastName,
-      );
+      .innerJoin(
+        schema.eventAttendee,
+        and(eq(schema.eventAttendee.eventId, schema.event.id), isNotNull(schema.eventAttendee.userId)),
+      )
+      .innerJoin(recipient, eq(recipient.id, schema.eventAttendee.userId))
+      .leftJoin(schema.userEmailSetting, eq(schema.userEmailSetting.userId, recipient.id))
+      .where(
+        and(
+          ne(recipient.id, schema.wishlist.ownerId),
+          or(isNull(schema.userEmailSetting.id), eq(schema.userEmailSetting.dailyNewItemNotification, true)),
+        ),
+      )
+      .orderBy(asc(recipient.email), asc(schema.wishlist.title), asc(schema.event.title));
 
     return rows.map(row => ({
-      eventId: row.eventId,
-      eventTitle: row.eventTitle,
       wishlistId: row.wishlistId,
       wishlistTitle: row.wishlistTitle,
       ownerId: row.ownerId,
       ownerName: row.ownerName,
       nbNewItems: Number(row.nbNewItems),
+      eventId: row.eventId,
+      eventTitle: row.eventTitle,
+      recipientUserId: row.recipientUserId,
+      recipientEmail: row.recipientEmail,
     }));
   }
 

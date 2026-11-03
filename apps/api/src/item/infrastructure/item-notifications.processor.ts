@@ -9,7 +9,7 @@ export class ItemNotificationsProcessor extends QueueProcessor(QueueName.ITEMS_N
   private readonly logger = new Logger(ItemNotificationsProcessor.name);
 
   constructor(private readonly notifyNewItemsUseCase: NotifyNewItemsUseCase) {
-    super({ concurrency: 1, repeat: { pattern: '15 10 * * *' } });
+    super({ concurrency: 1, repeat: { pattern: '15 10 * * *', tz: 'Europe/Paris' } });
   }
 
   async process(): Promise<void> {

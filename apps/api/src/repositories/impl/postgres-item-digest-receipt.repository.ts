@@ -1,0 +1,33 @@
+import { Injectable } from '@nestjs/common';
+import { schema } from '@wishlist/api-drizzle';
+import { type UserId } from '@wishlist/common';
+import { and, eq } from 'drizzle-orm';
+
+import { DatabaseService } from '../../core/database/database.service';
+import { type ItemDigestReceiptRepository } from '../../item/domain/item-digest-receipt.repository';
+
+@Injectable()
+export class PostgresItemDigestReceiptRepository implements ItemDigestReceiptRepository {
+  constructor(private readonly databaseService: DatabaseService) {}
+
+  async claim(params: { userId: UserId; digestDate: string }): Promise<boolean> {
+    const inserted = await this.databaseService.db
+      .insert(schema.itemDigestReceipt)
+      .values({ userId: params.userId, digestDate: params.digestDate })
+      .onConflictDoNothing()
+      .returning({ userId: schema.itemDigestReceipt.userId });
+
+    return inserted.length > 0;
+  }
+
+  async release(params: { userId: UserId; digestDate: string }): Promise<void> {
+    await this.databaseService.db
+      .delete(schema.itemDigestReceipt)
+      .where(
+        and(
+          eq(schema.itemDigestReceipt.userId, params.userId),
+          eq(schema.itemDigestReceipt.digestDate, params.digestDate),
+        ),
+      );
+  }
+}
