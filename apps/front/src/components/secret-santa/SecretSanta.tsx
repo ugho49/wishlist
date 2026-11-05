@@ -236,6 +236,14 @@ export const SecretSanta = ({ secretSanta, event }: SecretSantaProps) => {
         onCancel={() => void cancelSecretSanta()}
       />
 
+      <SecretSantaSettingsCard
+        budget={budget}
+        description={description}
+        editable={!started}
+        loading={loading}
+        onEdit={() => setOpenEditModal(true)}
+      />
+
       <SecretSantaParticipantsCard
         users={secretSantaUsers}
         editable={!started}
@@ -244,14 +252,6 @@ export const SecretSanta = ({ secretSanta, event }: SecretSantaProps) => {
         onAdd={() => setOpenSecretSantaUsersModal(true)}
         onManageExclusions={setCurrentUserIdModalExclusion}
         onRemove={id => void removeSecretSantaUser(id)}
-      />
-
-      <SecretSantaSettingsCard
-        budget={budget}
-        description={description}
-        editable={!started}
-        loading={loading}
-        onEdit={() => setOpenEditModal(true)}
       />
 
       {!started && (

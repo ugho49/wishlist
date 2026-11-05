@@ -118,16 +118,17 @@ const Subtitle = styled('p')(({ theme }) => ({
 const Action = styled('div')(({ theme }) => ({
   gridArea: 'action',
   display: 'flex',
-  [theme.breakpoints.down('sm')]: {
-    width: '100%',
-    '& > .MuiButton-root': { flex: 1 },
-  },
+  justifyContent: 'center',
   '& > .MuiButton-root': {
-    height: 44,
-    padding: theme.spacing(0, 3),
+    height: 36,
+    padding: theme.spacing(0, 2.25),
     borderRadius: 999,
-    fontWeight: 700,
+    fontSize: '0.875rem',
+    fontWeight: 600,
     whiteSpace: 'nowrap',
+  },
+  '& > .MuiButton-outlined': {
+    backgroundColor: theme.palette.background.paper,
   },
 }));
 
@@ -293,7 +294,7 @@ export const SecretSantaStatusCard = ({
             confirmButton="Annuler le tirage"
             cancelButton="Garder le tirage"
             variant="outlined"
-            color="warning"
+            color="success"
             startIcon={<ReplayIcon />}
             loading={loading}
             disabled={loading}
