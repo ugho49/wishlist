@@ -85,21 +85,24 @@ export const EventPage = ({ eventId }: EventPageProps) => {
               attendees={attendees}
               currentUserCanEdit={currentUserCanEdit}
               openAttendeesDialog={() => setOpenAttendeesDialog(true)}
+              secretSanta={
+                shouldShowSuggestion ? (
+                  <SecretSantaSuggestionCard eventId={event.id} onDismiss={dismissSuggestion} />
+                ) : (
+                  <MySecretSantaDraw
+                    eventId={event.id}
+                    eventTitle={event.title}
+                    eventDate={event.eventDate}
+                    secretSanta={event.secretSanta}
+                    currentAttendeeId={currentAttendeeId}
+                    currentUserId={currentUserId}
+                  />
+                )
+              }
             />
 
             <Container maxWidth="lg">
               <PageBody>
-                {shouldShowSuggestion && <SecretSantaSuggestionCard eventId={event.id} onDismiss={dismissSuggestion} />}
-
-                <MySecretSantaDraw
-                  eventId={event.id}
-                  eventTitle={event.title}
-                  eventDate={event.eventDate}
-                  secretSanta={event.secretSanta}
-                  currentAttendeeId={currentAttendeeId}
-                  currentUserId={currentUserId}
-                />
-
                 <section>
                   <SectionHeader>
                     <SectionTitle>

@@ -23,7 +23,7 @@ import {
 } from '@mui/material';
 import { useNavigate } from '@tanstack/react-router';
 import { DateTime } from 'luxon';
-import { useState } from 'react';
+import { type ReactNode, useState } from 'react';
 
 import { TabValues } from '../../routes/_authenticated/_with-layout/events/$eventId/edit';
 import { Description } from '../common/Description';
@@ -87,6 +87,7 @@ export type EventHeaderProps = {
   attendees: EventAttendee[];
   currentUserCanEdit: boolean;
   openAttendeesDialog: () => void;
+  secretSanta?: ReactNode;
 };
 
 export const EventHeader = ({
@@ -98,6 +99,7 @@ export const EventHeader = ({
   attendees,
   currentUserCanEdit,
   openAttendeesDialog,
+  secretSanta,
 }: EventHeaderProps) => {
   const navigate = useNavigate();
   const isUpSm = useMediaQuery(theme => theme.breakpoints.up('sm'));
@@ -170,6 +172,8 @@ export const EventHeader = ({
             </Tooltip>
           </PageHeroActions>
         )}
+
+        {secretSanta}
 
         {description && (
           <PageHeroAbout>

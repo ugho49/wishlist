@@ -8,7 +8,6 @@ export const PageHero = styled('header')(({ theme }) => ({
   gridTemplateAreas: `
     "media title actions"
     "meta meta meta"
-    "about about about"
   `,
   alignItems: 'center',
   columnGap: theme.spacing(1.5),
@@ -36,7 +35,6 @@ export const PageHero = styled('header')(({ theme }) => ({
     gridTemplateAreas: `
       "media title actions"
       "media meta actions"
-      "about about about"
     `,
     columnGap: theme.spacing(2.5),
     rowGap: theme.spacing(1),
@@ -111,8 +109,17 @@ export const PageHeroActions = styled('div')(({ theme }) => ({
   },
 }));
 
+// Full-width rows below the meta are auto-placed in render order, so an absent row leaves no gap.
+export const PageHeroRow = styled('div')(({ theme }) => ({
+  gridColumn: '1 / -1',
+  minWidth: 0,
+  [theme.breakpoints.up('md')]: {
+    marginTop: theme.spacing(1.5),
+  },
+}));
+
 export const PageHeroAbout = styled('div')(({ theme }) => ({
-  gridArea: 'about',
+  gridColumn: '1 / -1',
   paddingTop: theme.spacing(1.5),
   marginTop: theme.spacing(0.5),
   borderTop: `1px dashed ${alpha(theme.palette.primary.main, 0.2)}`,

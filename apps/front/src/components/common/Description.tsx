@@ -34,15 +34,17 @@ const Content = styled(MarkdownContent)({
 });
 
 const ToggleButton = styled(Button)(({ theme }) => ({
-  marginTop: theme.spacing(0.5),
-  marginLeft: theme.spacing(-1),
-  padding: theme.spacing(0.5, 1),
+  marginTop: theme.spacing(1),
+  padding: theme.spacing(0.5, 1.5),
   minHeight: 32,
-  fontSize: '0.85rem',
+  borderRadius: 999,
+  fontSize: '0.8125rem',
   fontWeight: 600,
-  color: 'inherit',
+  color: theme.palette.primary.main,
+  backgroundColor: alpha(theme.palette.primary.main, 0.08),
+  border: `1px solid ${alpha(theme.palette.primary.main, 0.16)}`,
   '&:hover': {
-    backgroundColor: alpha(theme.palette.text.primary, 0.06),
+    backgroundColor: alpha(theme.palette.primary.main, 0.14),
     boxShadow: 'none',
   },
   '& .MuiButton-endIcon': {

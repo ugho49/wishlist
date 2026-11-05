@@ -2,143 +2,99 @@ import type { EventId } from '@wishlist/common';
 
 import CloseIcon from '@mui/icons-material/Close';
 import ForestIcon from '@mui/icons-material/Forest';
-import { alpha, Button, IconButton, keyframes, Stack, styled, Typography } from '@mui/material';
+import { alpha, Button, IconButton, styled } from '@mui/material';
 import { useNavigate } from '@tanstack/react-router';
 
 import { TabValues } from '../../routes/_authenticated/_with-layout/events/$eventId/edit';
+import { PageHeroRow } from '../common/PageHero';
+
+const FOREST = '#1b5e20';
+
+const Band = styled(PageHeroRow)(({ theme }) => ({
+  display: 'grid',
+  gridTemplateColumns: 'auto minmax(0, 1fr) auto',
+  gridTemplateAreas: `
+    "icon text close"
+    "action action action"
+  `,
+  alignItems: 'center',
+  columnGap: theme.spacing(1.5),
+  rowGap: theme.spacing(1.5),
+  padding: theme.spacing(1.5),
+  borderRadius: 16,
+  color: FOREST,
+  background: `linear-gradient(135deg, ${alpha('#81c784', 0.22)} 0%, ${alpha('#f1f8f4', 0.9)} 55%, ${alpha('#ef5350', 0.08)} 100%)`,
+  border: `1px solid ${alpha('#66bb6a', 0.35)}`,
+
+  [theme.breakpoints.up('sm')]: {
+    gridTemplateAreas: '"icon text action close"',
+    gridTemplateColumns: 'auto minmax(0, 1fr) auto auto',
+    padding: theme.spacing(1.5, 1.5, 1.5, 2),
+  },
+}));
+
+const IconTile = styled('div')(({ theme }) => ({
+  gridArea: 'icon',
+  alignSelf: 'start',
+  [theme.breakpoints.up('sm')]: {
+    alignSelf: 'center',
+  },
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: 40,
+  height: 40,
+  borderRadius: 12,
+  color: '#43a047',
+  backgroundColor: '#ffffff',
+  boxShadow: `0 2px 8px -2px ${alpha('#2e7d32', 0.35)}`,
+}));
+
+const Text = styled('div')({
+  gridArea: 'text',
+  minWidth: 0,
+});
+
+const Title = styled('div')({
+  fontSize: '0.95rem',
+  fontWeight: 700,
+  lineHeight: 1.3,
+});
+
+const Subtitle = styled('div')({
+  fontSize: '0.8125rem',
+  lineHeight: 1.4,
+  color: alpha(FOREST, 0.8),
+});
+
+const ActionButton = styled(Button)({
+  gridArea: 'action',
+  height: 36,
+  borderRadius: 999,
+  fontWeight: 600,
+  whiteSpace: 'nowrap',
+  color: '#ffffff',
+  backgroundColor: '#43a047',
+  '&:hover': {
+    backgroundColor: '#388e3c',
+    boxShadow: `0 4px 12px ${alpha('#2e7d32', 0.3)}`,
+  },
+});
+
+const CloseButton = styled(IconButton)({
+  gridArea: 'close',
+  alignSelf: 'start',
+  color: alpha(FOREST, 0.6),
+  '&:hover': {
+    color: FOREST,
+    backgroundColor: alpha(FOREST, 0.08),
+  },
+});
 
 interface SecretSantaSuggestionCardProps {
   eventId: EventId;
   onDismiss: () => void;
 }
-
-const glow = keyframes`
-  0% {
-    filter: drop-shadow(0 0 4px ${alpha('#66bb6a', 0.6)});
-  }
-  50% {
-    filter: drop-shadow(0 0 8px ${alpha('#66bb6a', 0.8)});
-  }
-  100% {
-    filter: drop-shadow(0 0 4px ${alpha('#66bb6a', 0.6)});
-  }
-`;
-
-const GradientCard = styled(Stack)(({ theme }) => ({
-  background: alpha('#f1f8f4', 1),
-  border: `2px solid ${alpha('#81c784', 0.3)}`,
-  borderRadius: '16px',
-  padding: theme.spacing(2),
-  position: 'relative',
-  overflow: 'hidden',
-  boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)',
-
-  '&::before': {
-    content: '""',
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    background: `linear-gradient(135deg, ${alpha('#81c784', 0.15)} 0%, transparent 50%, ${alpha('#ef5350', 0.08)} 100%)`,
-  },
-}));
-
-const IconContainer = styled('div')(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  width: '80px',
-  height: '80px',
-  borderRadius: '50%',
-  zIndex: 1,
-  margin: '0 !important',
-
-  [theme.breakpoints.down('md')]: {
-    width: '64px',
-    height: '64px',
-  },
-}));
-
-const StyledIcon = styled(ForestIcon)({
-  fontSize: '48px',
-  color: '#66bb6a',
-});
-
-const ContentStack = styled(Stack)(({ theme }) => ({
-  flex: 1,
-  gap: '32px',
-  flexDirection: 'row',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-
-  [theme.breakpoints.down('lg')]: {
-    flexDirection: 'column',
-  },
-}));
-
-const Title = styled(Typography)({
-  color: '#1b5e20',
-  fontWeight: 700,
-  fontSize: '24px',
-  position: 'relative',
-  zIndex: 1,
-});
-
-const Description = styled(Typography)({
-  color: '#1b5e20',
-  fontSize: '16px',
-  lineHeight: 1.5,
-  position: 'relative',
-  zIndex: 1,
-});
-
-const TextContainer = styled(Stack)({
-  flex: 1,
-  gap: '12px',
-});
-
-const ActionButton = styled(Button)(({ theme }) => ({
-  backgroundColor: theme.palette.mode === 'dark' ? '#2e7d32' : '#4caf50',
-  color: '#ffffff',
-  fontWeight: 600,
-  padding: '12px 32px',
-  borderRadius: '12px',
-  textTransform: 'none',
-  fontSize: '16px',
-  boxShadow: theme.palette.mode === 'dark' ? '0 4px 12px rgba(0, 0, 0, 0.4)' : '0 4px 12px rgba(46, 125, 50, 0.25)',
-  flexShrink: 0,
-  whiteSpace: 'nowrap',
-  position: 'relative',
-  zIndex: 1,
-  transition: 'all 0.2s ease-in-out',
-  animation: `${glow} 1s ease-in-out infinite`,
-  alignSelf: 'flex-end',
-
-  '&:hover': {
-    backgroundColor: theme.palette.mode === 'dark' ? '#1b5e20' : '#388e3c',
-    boxShadow: theme.palette.mode === 'dark' ? '0 6px 16px rgba(0, 0, 0, 0.5)' : '0 6px 16px rgba(46, 125, 50, 0.35)',
-  },
-
-  [theme.breakpoints.down('lg')]: {
-    padding: '10px 24px',
-    alignSelf: 'stretch',
-  },
-}));
-
-const CloseButton = styled(IconButton)(({ theme }) => ({
-  position: 'absolute',
-  top: theme.spacing(1),
-  right: theme.spacing(1),
-  color: alpha('#1b5e20', 0.6),
-  zIndex: 2,
-  transition: 'all 0.2s ease-in-out',
-
-  '&:hover': {
-    color: '#1b5e20',
-    backgroundColor: alpha('#1b5e20', 0.08),
-  },
-}));
 
 export function SecretSantaSuggestionCard({ eventId, onDismiss }: SecretSantaSuggestionCardProps) {
   const navigate = useNavigate();
@@ -148,31 +104,20 @@ export function SecretSantaSuggestionCard({ eventId, onDismiss }: SecretSantaSug
   };
 
   return (
-    <GradientCard
-      direction={{ xs: 'column', sm: 'row' }}
-      spacing={3}
-      sx={{ alignItems: { xs: 'center', sm: 'center' } }}
-    >
-      <CloseButton onClick={onDismiss} aria-label="Fermer la suggestion">
-        <CloseIcon />
+    <Band as="section" aria-label="Suggestion Secret Santa">
+      <IconTile>
+        <ForestIcon />
+      </IconTile>
+      <Text>
+        <Title>Organisez un Secret Santa !</Title>
+        <Subtitle>Tirez au sort qui offre à qui, en fixant un budget max.</Subtitle>
+      </Text>
+      <ActionButton variant="contained" disableElevation onClick={handleCreateSecretSanta}>
+        Créer un Secret Santa
+      </ActionButton>
+      <CloseButton size="small" onClick={onDismiss} aria-label="Fermer la suggestion">
+        <CloseIcon fontSize="small" />
       </CloseButton>
-
-      <IconContainer>
-        <StyledIcon />
-      </IconContainer>
-
-      <ContentStack>
-        <TextContainer>
-          <Title variant="h5">Organisez un Secret Santa !</Title>
-          <Description variant="body1">
-            Ajoutez de la magie à votre événement en organisant un Secret Santa. Tirez au sort les participants et créez
-            des souvenirs inoubliables !
-          </Description>
-        </TextContainer>
-        <ActionButton variant="contained" onClick={handleCreateSecretSanta}>
-          Créer un Secret Santa
-        </ActionButton>
-      </ContentStack>
-    </GradientCard>
+    </Band>
   );
 }
