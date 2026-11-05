@@ -1,4 +1,5 @@
 /** biome-ignore-all lint/performance/noBarrelFile: This is the public hooks entry point */
+export { useCreateSecretSanta } from './domain/useCreateSecretSanta';
 export { useMySecretSantaDraw } from './domain/useMySecretSantaDraw';
 export { useSecretSanta } from './domain/useSecretSanta';
 export { useSecretSantaDrawReveal } from './domain/useSecretSantaDrawReveal';

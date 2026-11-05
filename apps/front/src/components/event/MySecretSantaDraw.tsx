@@ -166,7 +166,7 @@ export const MySecretSantaDraw = ({
           }}
         >
           <RateReviewOutlinedIcon />
-          {isUpSm ? "Le mot de l'organisateur" : "Mot de l'orga"}
+          Le mot de l'organisateur
         </MetaChipButton>
       ) : (
         <MetaChip>
