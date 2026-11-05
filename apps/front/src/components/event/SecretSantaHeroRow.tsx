@@ -1,9 +1,9 @@
 import type { ReactNode } from 'react';
 
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
-import { alpha, Button, keyframes, styled } from '@mui/material';
+import { alpha, keyframes, styled } from '@mui/material';
 
-import { PageHeroRow } from '../common/PageHero';
+import { MetaChipButton, PageHeroRow } from '../common/PageHero';
 
 const wiggle = keyframes`
   0%, 82%, 100% { transform: rotate(0deg) scale(1); }
@@ -45,15 +45,17 @@ const Visual = styled('div')(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  color: theme.palette.primary.main,
+  color: theme.palette.success.main,
   backgroundColor: theme.palette.background.paper,
-  boxShadow: `0 4px 14px -4px ${alpha(theme.palette.primary.main, 0.3)}`,
+  boxShadow: `0 0 0 1px ${alpha(theme.palette.success.main, 0.18)}, 0 4px 14px -4px ${alpha(theme.palette.success.main, 0.35)}`,
   '& > .MuiAvatar-root': {
     width: '100%',
     height: '100%',
     borderRadius: 14,
     fontSize: '0.95rem',
     fontWeight: 700,
+    color: theme.palette.success.dark,
+    backgroundColor: alpha(theme.palette.success.main, 0.14),
   },
   [theme.breakpoints.up('md')]: {
     width: 52,
@@ -74,7 +76,7 @@ const GiftBadge = styled('span')(({ theme }) => ({
   alignItems: 'center',
   justifyContent: 'center',
   color: theme.palette.common.white,
-  backgroundColor: theme.palette.primary.main,
+  backgroundColor: theme.palette.success.main,
   border: `2px solid ${theme.palette.background.paper}`,
   animation: `${wiggle} 4s ease-in-out infinite`,
   '& > .MuiSvgIcon-root': { fontSize: 12 },
@@ -92,14 +94,14 @@ const Eyebrow = styled('div')(({ theme }) => ({
   fontWeight: 700,
   letterSpacing: '0.1em',
   textTransform: 'uppercase',
-  color: theme.palette.primary.main,
+  color: theme.palette.success.main,
 }));
 
 const Title = styled('div')(({ theme }) => ({
   fontSize: '1.05rem',
   fontWeight: 700,
   lineHeight: 1.3,
-  color: theme.palette.text.primary,
+  color: theme.palette.success.dark,
   overflowWrap: 'anywhere',
   [theme.breakpoints.up('md')]: {
     fontSize: '1.25rem',
@@ -117,6 +119,16 @@ export const SecretSantaRowActions = styled('div')(({ theme }) => ({
   flexWrap: 'wrap',
   alignItems: 'center',
   gap: theme.spacing(1),
+  '& > span > .MuiSvgIcon-root, & > button:not(.MuiButtonBase-root) > .MuiSvgIcon-root': {
+    color: theme.palette.success.main,
+  },
+  '& > button:not(.MuiButtonBase-root):hover:enabled': {
+    borderColor: theme.palette.success.main,
+    color: theme.palette.success.dark,
+  },
+  '& > button:not(.MuiButtonBase-root):focus-visible': {
+    outlineColor: theme.palette.success.main,
+  },
   '&.cta': {
     [theme.breakpoints.down('sm')]: {
       width: '100%',
@@ -125,13 +137,13 @@ export const SecretSantaRowActions = styled('div')(({ theme }) => ({
   },
 }));
 
-export const SecretSantaRowButton = styled(Button)(({ theme }) => ({
-  height: 32,
-  padding: theme.spacing(0, 2),
-  borderRadius: 999,
-  fontSize: '0.8125rem',
+export const SecretSantaRowButton = styled(MetaChipButton)(({ theme }) => ({
+  color: theme.palette.success.dark,
   fontWeight: 600,
-  whiteSpace: 'nowrap',
+  '&:disabled': {
+    cursor: 'default',
+    opacity: 0.6,
+  },
 }));
 
 type SecretSantaRowLeadProps = {

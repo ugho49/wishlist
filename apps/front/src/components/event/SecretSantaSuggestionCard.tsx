@@ -1,5 +1,6 @@
 import type { EventId } from '@wishlist/common';
 
+import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
 import ForestIcon from '@mui/icons-material/Forest';
 import { IconButton, styled, Tooltip } from '@mui/material';
@@ -49,12 +50,8 @@ export function SecretSantaSuggestionCard({ eventId, onDismiss }: SecretSantaSug
           subtitle="Tirez au sort qui offre à qui, avec un budget max."
         />
         <SecretSantaRowActions className="cta">
-          <SecretSantaRowButton
-            variant="contained"
-            disableElevation
-            loading={loading}
-            onClick={() => setOpenDialog(true)}
-          >
+          <SecretSantaRowButton type="button" disabled={loading} onClick={() => setOpenDialog(true)}>
+            <AddIcon />
             Créer un Secret Santa
           </SecretSantaRowButton>
           <Tooltip title="Ne plus suggérer">

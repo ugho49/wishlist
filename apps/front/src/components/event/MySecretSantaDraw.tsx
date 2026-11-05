@@ -152,7 +152,7 @@ export const MySecretSantaDraw = ({
   const budget = secretSanta?.budget ? wholeEurosFormatter.format(secretSanta.budget) : undefined;
   const facts = secretSanta && (
     <SecretSantaRowActions>
-      <MetaChip className={budget ? 'accent' : undefined}>
+      <MetaChip className={budget ? 'success' : undefined}>
         <EuroIcon />
         {getBudgetLabel(budget, isUpSm)}
       </MetaChip>

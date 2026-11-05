@@ -1,6 +1,7 @@
 import type { EventId } from '@wishlist/common';
 
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import { useNavigate } from '@tanstack/react-router';
 
 import { TabValues } from '../../routes/_authenticated/_with-layout/events/$eventId/edit';
@@ -30,12 +31,12 @@ export const SecretSantaLaunchSuggestion = ({ eventId, participantsCount }: Secr
       />
       <SecretSantaRowActions className="cta">
         <SecretSantaRowButton
-          variant="contained"
-          disableElevation
+          type="button"
           onClick={() =>
             navigate({ to: '/events/$eventId/edit', params: { eventId }, search: { tab: TabValues.secretSanta } })
           }
         >
+          <SettingsOutlinedIcon />
           Gérer mon Secret Santa
         </SecretSantaRowButton>
       </SecretSantaRowActions>
