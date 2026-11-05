@@ -1,21 +1,10 @@
 import type { SecretSantaUserId } from '@wishlist/common';
 import type { SecretSantaFormInput } from './EditSecretSantaFormDialog';
+import type { SecretSantaStep } from './SecretSantaStatusCard';
 import type { SecretSantaEvent, SecretSantaItem } from './secret-santa.types';
 
-import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
-import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt';
-import CancelIcon from '@mui/icons-material/Cancel';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import DeleteIcon from '@mui/icons-material/Delete';
-import GroupIcon from '@mui/icons-material/Group';
-import InfoIcon from '@mui/icons-material/Info';
-import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt';
-import PersonOffIcon from '@mui/icons-material/PersonOff';
-import TuneIcon from '@mui/icons-material/Tune';
-import { Alert, AlertTitle, Avatar, Button, Chip, IconButton, Stack, Tooltip, Typography } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
-import useMediaQuery from '@mui/material/useMediaQuery';
-import { DataGrid } from '@mui/x-data-grid';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined';
+import { styled } from '@mui/material';
 import { useQueryClient } from '@tanstack/react-query';
 import { SecretSantaDrawService } from '@wishlist/common';
 import { DateTime } from 'luxon';
@@ -33,13 +22,25 @@ import {
   useUpdateSecretSantaMutation,
 } from '../../gql';
 import { useToast } from '../../hooks';
-import { eurosFormatter } from '../../utils/currency.utils';
+import { wholeEurosFormatter } from '../../utils/currency.utils';
 import { ConfirmButton } from '../common/ConfirmButton';
-import { ConfirmIconButton } from '../common/ConfirmIconButton';
-import { Description } from '../common/Description';
 import { AddSecretSantaUsersFormDialog } from './AddSecretSantaUsersFormDialog';
 import { EditSecretSantaFormDialog } from './EditSecretSantaFormDialog';
 import { ManageUserExclusionsDialog } from './ManageUserExclusionsDialog';
+import { ManageStack } from './SecretSantaManageCard';
+import { SecretSantaParticipantsCard } from './SecretSantaParticipantsCard';
+import { SecretSantaSettingsCard } from './SecretSantaSettingsCard';
+import { SecretSantaStatusCard } from './SecretSantaStatusCard';
+
+const DangerZone = styled('div')(({ theme }) => ({
+  display: 'flex',
+  justifyContent: 'center',
+  paddingTop: theme.spacing(1),
+  '& > .MuiButton-root': {
+    borderRadius: 999,
+    fontWeight: 600,
+  },
+}));
 
 type SecretSantaProps = {
   secretSanta: SecretSantaItem;
@@ -51,14 +52,18 @@ type SecretSantaProps = {
 const validationMessage = (rejection: { __typename: 'ValidationRejection'; errors: { message: string }[] }) =>
   rejection.errors.length > 0 ? rejection.errors.map(error => error.message).join(', ') : rejectionMessage(rejection);
 
+const MIN_PARTICIPANTS = 2;
+
+const getDrawStepState = (started: boolean, participantsReady: boolean): SecretSantaStep['state'] => {
+  if (started) return 'done';
+  return participantsReady ? 'current' : 'todo';
+};
+
 export const SecretSanta = ({ secretSanta, event }: SecretSantaProps) => {
   const queryClient = useQueryClient();
   const { addToast } = useToast();
-  const theme = useTheme();
-  const smallScreen = useMediaQuery(theme.breakpoints.down('md'));
   const [openEditModal, setOpenEditModal] = useState(false);
   const [openSecretSantaUsersModal, setOpenSecretSantaUsersModal] = useState(false);
-  const [drawFinishedPopup, setDrawFinishedPopup] = useState(false);
   const [status, setStatus] = useState(secretSanta.status);
   const [description, setDescription] = useState(secretSanta.description);
   const [budget, setBudget] = useState(secretSanta.budget);
@@ -67,6 +72,7 @@ export const SecretSanta = ({ secretSanta, event }: SecretSantaProps) => {
   const eventAttendees = useMemo(() => event.attendees || [], [event]);
   const eventId = event.id;
   const eventInPast = DateTime.fromISO(event.eventDate) < DateTime.now();
+  const started = status === SecretSantaStatus.Started;
 
   useEffect(() => {
     setStatus(secretSanta.status);
@@ -162,12 +168,18 @@ export const SecretSanta = ({ secretSanta, event }: SecretSantaProps) => {
     [removeUserMutation, secretSanta.id, invalidate, addToast],
   );
 
-  const startSecretSanta = useCallback(async () => {
-    const secretSantaService = new SecretSantaDrawService(secretSantaUsers);
-    const { reason, isPossible } = secretSantaService.isDrawPossible();
+  const drawBlockedReason = useMemo(() => {
+    if (started) return;
+    if (secretSantaUsers.length < MIN_PARTICIPANTS) {
+      return `Ajoutez au moins ${MIN_PARTICIPANTS} participants pour pouvoir lancer le tirage.`;
+    }
+    const { isPossible, reason } = new SecretSantaDrawService(secretSantaUsers).isDrawPossible();
+    return isPossible ? undefined : reason;
+  }, [started, secretSantaUsers]);
 
-    if (!isPossible) {
-      addToast({ message: reason, variant: 'warning' });
+  const startSecretSanta = useCallback(async () => {
+    if (drawBlockedReason) {
+      addToast({ message: drawBlockedReason, variant: 'warning' });
       return;
     }
 
@@ -175,8 +187,7 @@ export const SecretSanta = ({ secretSanta, event }: SecretSantaProps) => {
     await match(res.startSecretSanta)
       .with({ __typename: 'VoidOutput' }, async () => {
         setStatus(SecretSantaStatus.Started);
-        setDrawFinishedPopup(true);
-        setTimeout(() => setDrawFinishedPopup(false), 10000);
+        addToast({ message: 'Tirage effectué, les participants ont reçu un email', variant: 'success' });
         await invalidate();
       })
       .with({ __typename: 'ValidationRejection' }, rejection =>
@@ -184,15 +195,84 @@ export const SecretSanta = ({ secretSanta, event }: SecretSantaProps) => {
       )
       .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
       .exhaustive();
-  }, [secretSantaUsers, startMutation, secretSanta.id, addToast, invalidate]);
+  }, [drawBlockedReason, startMutation, secretSanta.id, addToast, invalidate]);
 
-  const loading = useMemo(
-    () => loadingStart || loadingCancel || loadingDelete || loadingUpdate || loadingRemoveUser,
-    [loadingStart, loadingCancel, loadingDelete, loadingUpdate, loadingRemoveUser],
-  );
+  const loading = loadingStart || loadingCancel || loadingDelete || loadingUpdate || loadingRemoveUser;
+  const availableAttendeesCount = eventAttendees.filter(
+    attendee => !secretSantaUsers.some(user => user.attendee.id === attendee.id),
+  ).length;
+
+  const steps = useMemo<SecretSantaStep[]>(() => {
+    const participantsReady = secretSantaUsers.length >= MIN_PARTICIPANTS && !drawBlockedReason;
+    const participantsCount = `${secretSantaUsers.length} participant${secretSantaUsers.length > 1 ? 's' : ''}`;
+    return [
+      {
+        label: 'Réglages',
+        hint: budget ? `${wholeEurosFormatter.format(budget)} max` : 'Budget libre',
+        state: 'done',
+      },
+      {
+        label: 'Participants',
+        hint: participantsReady ? participantsCount : `${MIN_PARTICIPANTS} minimum`,
+        state: participantsReady || started ? 'done' : 'current',
+      },
+      {
+        label: 'Tirage',
+        hint: started ? 'Effectué' : 'À lancer',
+        state: getDrawStepState(started, participantsReady),
+      },
+    ];
+  }, [budget, secretSantaUsers.length, drawBlockedReason, started]);
 
   return (
-    <Stack>
+    <ManageStack>
+      <SecretSantaStatusCard
+        started={started}
+        eventInPast={eventInPast}
+        drawBlockedReason={drawBlockedReason}
+        steps={steps}
+        loading={loading}
+        onStart={() => void startSecretSanta()}
+        onCancel={() => void cancelSecretSanta()}
+      />
+
+      <SecretSantaSettingsCard
+        budget={budget}
+        description={description}
+        editable={!started}
+        loading={loading}
+        onEdit={() => setOpenEditModal(true)}
+      />
+
+      <SecretSantaParticipantsCard
+        users={secretSantaUsers}
+        editable={!started}
+        canAdd={availableAttendeesCount > 0}
+        loading={loading}
+        onAdd={() => setOpenSecretSantaUsersModal(true)}
+        onManageExclusions={setCurrentUserIdModalExclusion}
+        onRemove={id => void removeSecretSantaUser(id)}
+      />
+
+      {!started && (
+        <DangerZone>
+          <ConfirmButton
+            confirmTitle="Supprimer le Secret Santa ?"
+            confirmText="Les participants, exclusions et réglages seront définitivement supprimés."
+            confirmButton="Supprimer"
+            variant="text"
+            color="error"
+            size="small"
+            startIcon={<DeleteOutlineIcon />}
+            loading={loadingDelete}
+            disabled={loading}
+            onClick={() => void deleteSecretSanta()}
+          >
+            Supprimer le Secret Santa
+          </ConfirmButton>
+        </DangerZone>
+      )}
+
       <EditSecretSantaFormDialog
         title="Modifier le secret santa"
         open={openEditModal}
@@ -226,254 +306,6 @@ export const SecretSanta = ({ secretSanta, event }: SecretSantaProps) => {
         handleClose={() => setCurrentUserIdModalExclusion(undefined)}
         otherSecretSantaUser={secretSantaUsers.filter(u => u.id !== currentUserIdModalExclusion)}
       />
-
-      {drawFinishedPopup && (
-        <Stack
-          sx={{
-            mb: 4,
-          }}
-        >
-          <Alert severity="success" className="animated zoomIn faster">
-            <AlertTitle>Tirage effectué avec succès !</AlertTitle>
-            <Typography variant="body2">Les participants ont reçu un email avec leur tirage secret santa.</Typography>
-          </Alert>
-        </Stack>
-      )}
-
-      {eventInPast && (
-        <Stack
-          sx={{
-            mb: 4,
-          }}
-        >
-          <Alert severity="warning" className="animated zoomIn faster">
-            <AlertTitle>L'événement est passé</AlertTitle>
-            <Typography variant="body2">Vous ne pouvez plus lancer le tirage secret santa.</Typography>
-          </Alert>
-        </Stack>
-      )}
-
-      <Stack
-        sx={{
-          flexDirection: 'row',
-          alignItems: 'start',
-          justifyContent: 'space-between',
-          mb: 4,
-          gap: 1,
-        }}
-      >
-        <Stack
-          sx={{
-            alignItems: 'start',
-            gap: 1,
-          }}
-        >
-          <Stack
-            sx={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: 1,
-              flexWrap: 'wrap',
-            }}
-          >
-            <Chip
-              variant="outlined"
-              size="small"
-              icon={status === SecretSantaStatus.Created ? <InfoIcon /> : <CheckCircleIcon />}
-              label={status === SecretSantaStatus.Created ? 'Brouillon' : 'Tirage effectué'}
-            />
-            <Chip
-              variant="outlined"
-              size="small"
-              icon={<GroupIcon />}
-              label={`${secretSantaUsers.length} participant${secretSantaUsers.length > 1 ? 's' : ''}`}
-            />
-          </Stack>
-          {budget && (
-            <Chip
-              variant="outlined"
-              size="small"
-              icon={<AccountBalanceIcon />}
-              label={`Budget Max: ${eurosFormatter.format(budget)}`}
-            />
-          )}
-        </Stack>
-        <Stack
-          sx={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: smallScreen ? 2 : 4,
-            flexWrap: 'wrap',
-            justifyContent: 'end',
-          }}
-        >
-          {status === SecretSantaStatus.Created && (
-            <>
-              <Stack
-                sx={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: 1,
-                  flexWrap: 'wrap',
-                  justifyContent: 'end',
-                }}
-              >
-                <ConfirmButton
-                  confirmTitle="Confirmer la suppression du secret santa"
-                  confirmText="Êtes-vous sûr de vouloir supprimer le secret santa ? Cette action est irréversible."
-                  variant="contained"
-                  color="error"
-                  size="small"
-                  startIcon={<DeleteIcon />}
-                  loading={loading}
-                  disabled={loading}
-                  onClick={() => deleteSecretSanta()}
-                >
-                  Supprimer
-                </ConfirmButton>
-
-                <Button
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  startIcon={<TuneIcon />}
-                  loading={loading}
-                  disabled={loading}
-                  onClick={() => setOpenEditModal(true)}
-                >
-                  Modifier
-                </Button>
-              </Stack>
-
-              <ConfirmButton
-                confirmTitle="Confirmer le lancement du tirage"
-                confirmText="Êtes-vous sûr de vouloir lancer le tirage ?"
-                variant="contained"
-                color="info"
-                size="small"
-                endIcon={<ArrowRightAltIcon />}
-                loading={loading}
-                disabled={loading || eventInPast}
-                onClick={() => startSecretSanta()}
-              >
-                Lancer le tirage
-              </ConfirmButton>
-            </>
-          )}
-
-          {status === SecretSantaStatus.Started && (
-            <ConfirmButton
-              confirmTitle="Confirmer l'annulation du tirage"
-              confirmText="Êtes-vous sûr de vouloir annuler le tirage ? Cette action est irréversible."
-              color="warning"
-              variant="contained"
-              size="small"
-              startIcon={<CancelIcon />}
-              loading={loading}
-              disabled={loading}
-              onClick={() => cancelSecretSanta()}
-            >
-              Annuler le tirage
-            </ConfirmButton>
-          )}
-        </Stack>
-      </Stack>
-
-      {secretSanta.description && (
-        <Stack
-          sx={{
-            mb: 4,
-          }}
-        >
-          <Description text={secretSanta.description} />
-        </Stack>
-      )}
-
-      <Stack>
-        <Button
-          fullWidth
-          variant="text"
-          disabled={status === SecretSantaStatus.Started}
-          onClick={() => setOpenSecretSantaUsersModal(true)}
-          startIcon={<PersonAddAltIcon />}
-        >
-          Ajouter un participant
-        </Button>
-
-        <Stack direction="column">
-          <DataGrid
-            localeText={{
-              noRowsLabel: 'Aucun participant',
-            }}
-            rows={secretSantaUsers.map(u => ({
-              id: u.id,
-              firstname: u.attendee.user?.firstName,
-              lastname: u.attendee.user?.lastName,
-              email: u.attendee.user?.email ?? u.attendee.pendingEmail,
-              pictureUrl: u.attendee.user?.pictureUrl ?? undefined,
-              exclusions: u.exclusions.length,
-            }))}
-            columns={[
-              {
-                field: 'pictureUrl',
-                headerName: '',
-                sortable: false,
-                filterable: false,
-                width: 60,
-                display: 'flex',
-                align: 'center',
-                renderCell: ({ row }) => <Avatar src={row.pictureUrl} sx={{ width: '30px', height: '30px' }} />,
-              },
-              { field: 'firstname', headerName: 'Prénom', width: 170, valueGetter: value => value ?? '-' },
-              { field: 'lastname', headerName: 'Nom', width: 170, valueGetter: value => value ?? '-' },
-              { field: 'email', headerName: 'Email', minWidth: 250, flex: 1 },
-              { field: 'exclusions', headerName: 'Exclusions', headerAlign: 'center', align: 'center', width: 100 },
-              {
-                field: 'id',
-                sortable: false,
-                filterable: false,
-                headerName: 'Actions',
-                display: 'flex',
-                headerAlign: 'center',
-                align: 'center',
-                width: 150,
-                renderCell: ({ row }) => (
-                  <>
-                    {status === SecretSantaStatus.Created && (
-                      <Stack
-                        sx={{
-                          flexDirection: 'row',
-                          gap: 1,
-                        }}
-                      >
-                        {secretSantaUsers.length > 1 && (
-                          <IconButton color="info" size="small" onClick={() => setCurrentUserIdModalExclusion(row.id)}>
-                            <Tooltip title="Gérer les exclusions">
-                              <PersonOffIcon />
-                            </Tooltip>
-                          </IconButton>
-                        )}
-                        <ConfirmIconButton
-                          confirmTitle="Supprimer le participant"
-                          confirmText="Êtes-vous sûr de vouloir supprimer ce participant ?"
-                          onClick={() => removeSecretSantaUser(row.id)}
-                          disabled={loading}
-                          size="small"
-                          color="error"
-                        >
-                          <DeleteIcon />
-                        </ConfirmIconButton>
-                      </Stack>
-                    )}
-                  </>
-                ),
-              },
-            ]}
-            hideFooter
-            disableColumnMenu
-          />
-        </Stack>
-      </Stack>
-    </Stack>
+    </ManageStack>
   );
 };

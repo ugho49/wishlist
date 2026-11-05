@@ -1,105 +1,148 @@
-import { Avatar, Button, keyframes, Stack, styled } from '@mui/material';
-import { type PointerEvent, useCallback, useLayoutEffect, useRef, useState } from 'react';
+import { Avatar, alpha, keyframes, Stack, styled } from '@mui/material';
+import { type CSSProperties, type PointerEvent, useCallback, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
-const REVEAL_THRESHOLD = 0.8;
-const BRUSH_RADIUS = 34;
-const CELEBRATION_MS = 2800;
+const REVEAL_THRESHOLD = 0.75;
+const BRUSH_RADIUS = 30;
 const SAMPLE_STEP = 4;
 const INTERACTIVE_DELAY_MS = 400;
-const BAUBLE_SIZE = 'min(82vw, 52dvh, 400px)';
+const BAUBLE_SIZE = 'min(76vw, 46dvh, 360px)';
+const CONFETTI_COLORS = ['#2e7d32', '#66bb6a', '#a5d6a7', '#255376', '#7fa7c9', '#ffffff', '#f4c95d'];
 
 const sway = keyframes`
-  0%, 100% { transform: rotate(-1.8deg); }
-  50% { transform: rotate(1.8deg); }
+  0%, 100% { transform: rotate(-2deg); }
+  50% { transform: rotate(2deg); }
 `;
 
-const shine = keyframes`
-  0%, 100% { opacity: 0.55; }
-  50% { opacity: 0.85; }
+const fadeUp = keyframes`
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
 `;
 
 const popIn = keyframes`
-  0% { transform: scale(0.92); filter: brightness(0.9); }
-  60% { transform: scale(1.06); filter: brightness(1.12); }
-  100% { transform: scale(1); filter: brightness(1); }
+  0% { transform: scale(0.94); }
+  55% { transform: scale(1.05); }
+  100% { transform: scale(1); }
 `;
 
-const glowPulse = keyframes`
-  0%, 100% { box-shadow: 0 0 24px rgba(232, 197, 71, 0.25), 0 0 0 3px #c9a227, 0 0 0 7px rgba(90, 50, 10, 0.28); }
-  50% { box-shadow: 0 0 48px rgba(246, 231, 178, 0.55), 0 0 0 3px #f6e7b2, 0 0 0 8px rgba(232, 197, 71, 0.35); }
+const revealIn = keyframes`
+  from { opacity: 0; transform: scale(0.85); }
+  to { opacity: 1; transform: scale(1); }
 `;
 
 const fall = keyframes`
-  0% { transform: translate3d(0, -12vh, 0) rotate(0deg); opacity: 0; }
-  10% { opacity: 1; }
-  100% { transform: translate3d(var(--drift), 108vh, 0) rotate(240deg); opacity: 0.15; }
+  0% { transform: translate3d(0, -10vh, 0) rotate(0deg); opacity: 0; }
+  8% { opacity: 1; }
+  100% { transform: translate3d(var(--drift), 110vh, 0) rotate(var(--spin)); opacity: 0.9; }
 `;
 
-const burst = keyframes`
-  0% { transform: translate(0, 0) scale(0.2) rotate(0deg); opacity: 1; }
-  100% { transform: translate(var(--tx), var(--ty)) scale(1) rotate(160deg); opacity: 0; }
+const burstOut = keyframes`
+  0% { transform: translate(-50%, -50%) scale(0.3); opacity: 1; }
+  100% { transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(1); opacity: 0; }
 `;
 
-const twinkle = keyframes`
-  0%, 100% { opacity: 0; transform: scale(0.4); }
-  40% { opacity: 1; transform: scale(1); }
-  70% { opacity: 0.35; transform: scale(0.8); }
-`;
-
-const Overlay = styled('div')({
+const Overlay = styled('div')(({ theme }) => ({
   position: 'fixed',
   inset: 0,
-  zIndex: 1400,
+  zIndex: theme.zIndex.modal + 100,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
   overflow: 'hidden',
-  backgroundColor: 'rgba(6, 14, 11, 0.92)',
-  backdropFilter: 'blur(12px)',
-});
-
-const Content = styled(Stack)(({ theme }) => ({
-  outline: 'none',
-  alignItems: 'center',
-  gap: theme.spacing(2.5),
-  padding: theme.spacing(3, 2),
-  width: '100%',
-  maxHeight: '100dvh',
-  userSelect: 'none',
-  position: 'relative',
-  zIndex: 1,
-}));
-
-const Hint = styled('p')(({ theme }) => ({
-  margin: 0,
-  textAlign: 'center',
-  fontFamily: 'Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif',
-  fontSize: '1.35rem',
-  fontWeight: 600,
-  letterSpacing: '0.02em',
-  color: '#f3e0b0',
-  textShadow: '0 2px 12px rgba(0, 0, 0, 0.45)',
-  padding: theme.spacing(0, 2),
-  maxWidth: 560,
-  [theme.breakpoints.down('sm')]: {
-    fontSize: '1.05rem',
+  fontFamily: theme.typography.fontFamily,
+  color: theme.palette.common.white,
+  background: 'radial-gradient(120% 90% at 50% 0%, #2c6189 0%, #173a56 45%, #0b1d2c 100%)',
+  animation: `${fadeUp} 0.35s ease-out`,
+  '&::before, &::after': {
+    content: '""',
+    position: 'absolute',
+    borderRadius: '50%',
+    filter: 'blur(80px)',
+    pointerEvents: 'none',
+  },
+  '&::before': {
+    width: '60vmax',
+    height: '60vmax',
+    top: '-25vmax',
+    left: '-20vmax',
+    background: alpha(theme.palette.success.main, 0.35),
+  },
+  '&::after': {
+    width: '50vmax',
+    height: '50vmax',
+    bottom: '-25vmax',
+    right: '-20vmax',
+    background: alpha('#7fa7c9', 0.3),
   },
 }));
+
+const Content = styled(Stack)(({ theme }) => ({
+  position: 'relative',
+  zIndex: 1,
+  alignItems: 'center',
+  gap: theme.spacing(3),
+  width: '100%',
+  maxHeight: '100dvh',
+  padding: theme.spacing(3, 2),
+  userSelect: 'none',
+  [theme.breakpoints.up('md')]: {
+    gap: theme.spacing(4),
+  },
+}));
+
+const Header = styled('div')(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  gap: theme.spacing(1),
+  maxWidth: 520,
+  padding: theme.spacing(0, 2),
+  textAlign: 'center',
+}));
+
+const Eyebrow = styled('div')(({ theme }) => ({
+  maxWidth: '100%',
+  padding: theme.spacing(0.5, 1.5),
+  borderRadius: 999,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+  fontSize: '0.7rem',
+  fontWeight: 700,
+  letterSpacing: '0.1em',
+  textTransform: 'uppercase',
+  color: '#c8e6c9',
+  backgroundColor: alpha(theme.palette.common.white, 0.08),
+  border: `1px solid ${alpha(theme.palette.common.white, 0.14)}`,
+}));
+
+const Title = styled('h2')(({ theme }) => ({
+  margin: 0,
+  fontSize: '1.5rem',
+  fontWeight: 800,
+  lineHeight: 1.2,
+  letterSpacing: '-0.01em',
+  [theme.breakpoints.up('md')]: {
+    fontSize: '2rem',
+  },
+}));
+
+const Subtitle = styled('p')({
+  margin: 0,
+  fontSize: '0.95rem',
+  color: 'rgba(255, 255, 255, 0.7)',
+});
 
 const Stage = styled('div')({
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
-  width: BAUBLE_SIZE,
 });
 
 const HangingString = styled('div')({
-  width: 3,
-  height: 'clamp(28px, 7vw, 40px)',
-  background: 'linear-gradient(180deg, #e8c547 0%, #9a7018 100%)',
-  borderRadius: 1,
-  boxShadow: '0 0 8px rgba(212, 175, 55, 0.55)',
+  width: 2,
+  height: 'clamp(20px, 5dvh, 40px)',
+  background: 'linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.55) 100%)',
 });
 
 const Ornament = styled('div')<{ $paused: boolean }>(({ $paused }) => ({
@@ -107,7 +150,7 @@ const Ornament = styled('div')<{ $paused: boolean }>(({ $paused }) => ({
   flexDirection: 'column',
   alignItems: 'center',
   transformOrigin: 'top center',
-  animation: $paused ? 'none' : `${sway} 3.6s ease-in-out infinite`,
+  animation: $paused ? 'none' : `${sway} 4s ease-in-out infinite`,
   '@media (prefers-reduced-motion: reduce)': {
     animation: 'none',
   },
@@ -116,88 +159,107 @@ const Ornament = styled('div')<{ $paused: boolean }>(({ $paused }) => ({
 const Cap = styled('div')({
   position: 'relative',
   zIndex: 2,
-  width: '32%',
-  height: 'clamp(20px, 5.5vw, 28px)',
-  marginBottom: -6,
-  background: 'linear-gradient(180deg, #f7e7a4 0%, #d4a017 42%, #8a6414 100%)',
-  borderRadius: '6px 6px 4px 4px',
-  boxShadow: '0 3px 6px rgba(80, 50, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.55)',
+  width: 'calc(0.22 * min(76vw, 46dvh, 360px))',
+  height: 'clamp(16px, 3.4dvh, 24px)',
+  marginBottom: -4,
+  borderRadius: '6px 6px 3px 3px',
+  background: 'linear-gradient(90deg, #b8c4cf 0%, #f5f8fa 45%, #9aa8b5 100%)',
+  boxShadow: '0 2px 6px rgba(0, 0, 0, 0.35)',
   '&::before': {
     content: '""',
     position: 'absolute',
-    top: -12,
+    top: -11,
     left: '50%',
-    width: 16,
-    height: 16,
-    marginLeft: -8,
+    width: 14,
+    height: 14,
+    marginLeft: -7,
     borderRadius: '50%',
-    border: '2.5px solid #d4a017',
-    background: 'transparent',
-    boxShadow: 'inset 0 0 0 2px rgba(247, 231, 164, 0.7)',
+    border: '2px solid #dfe6ec',
   },
 });
 
-const Sphere = styled('div')<{ $complete: boolean }>(({ $complete }) => ({
+const SphereFrame = styled('div')({
   position: 'relative',
   width: BAUBLE_SIZE,
   height: BAUBLE_SIZE,
-  flexShrink: 0,
+});
+
+const ProgressRing = styled('svg')(({ theme }) => ({
+  position: 'absolute',
+  inset: -12,
+  width: 'calc(100% + 24px)',
+  height: 'calc(100% + 24px)',
+  transform: 'rotate(-90deg)',
+  pointerEvents: 'none',
+  overflow: 'visible',
+  '& circle': {
+    fill: 'none',
+    strokeWidth: 1.6,
+  },
+  '& .track': {
+    stroke: alpha(theme.palette.common.white, 0.12),
+  },
+  '& .value': {
+    stroke: '#81c784',
+    strokeLinecap: 'round',
+    filter: 'drop-shadow(0 0 4px rgba(129, 199, 132, 0.8))',
+    transition: 'stroke-dashoffset 0.25s ease-out',
+  },
+}));
+
+const Sphere = styled('div')<{ $complete: boolean }>(({ theme, $complete }) => ({
+  position: 'relative',
+  width: '100%',
+  height: '100%',
   borderRadius: '50%',
   overflow: 'hidden',
-  background: `
-    radial-gradient(circle at 32% 26%, rgba(255, 255, 255, 0.38) 0%, transparent 28%),
-    radial-gradient(circle at 50% 58%, #1f5a3a 0%, #123526 58%, #0a2418 100%)
-  `,
-  boxShadow: `
-    inset 0 -22px 34px rgba(0, 20, 10, 0.45),
-    inset 0 12px 22px rgba(255, 255, 255, 0.12),
-    0 18px 36px rgba(18, 53, 38, 0.45),
-    0 0 0 4px #c9a227,
-    0 0 0 8px rgba(90, 50, 10, 0.28)
-  `,
-  animation: $complete ? `${popIn} 0.55s ease-out, ${glowPulse} 1.4s ease-in-out 0.4s 2` : 'none',
+  background: 'radial-gradient(circle at 50% 38%, #ffffff 0%, #f3f7f4 60%, #dfe9e2 100%)',
+  boxShadow: `0 24px 60px -12px rgba(0, 0, 0, 0.55), 0 0 80px -10px ${alpha(theme.palette.success.main, 0.55)}`,
+  animation: $complete ? `${popIn} 0.5s ease-out` : 'none',
   cursor: $complete ? 'default' : 'grab',
   '&:active': {
     cursor: $complete ? 'default' : 'grabbing',
   },
 }));
 
-const InnerReveal = styled(Stack)({
+const InnerReveal = styled('div')<{ $complete: boolean }>(({ theme, $complete }) => ({
   position: 'absolute',
-  inset: '15%',
-  borderRadius: '50%',
+  inset: '14%',
+  display: 'flex',
+  flexDirection: 'column',
   alignItems: 'center',
   justifyContent: 'center',
-  gap: 12,
-  background: `
-    radial-gradient(circle at 40% 30%, #fff6de 0%, #f3e0b0 55%, #e6c878 100%)
-  `,
-  boxShadow: 'inset 0 0 0 2px rgba(184, 134, 11, 0.35), 0 0 22px rgba(255, 220, 140, 0.3)',
-  padding: '12%',
+  gap: theme.spacing(1),
   textAlign: 'center',
-  zIndex: 0,
-});
+  animation: $complete ? `${revealIn} 0.5s ease-out` : 'none',
+}));
 
-const DrawName = styled('div')({
-  fontFamily: 'Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif',
+const RevealEyebrow = styled('div')(({ theme }) => ({
+  fontSize: 'clamp(0.62rem, 2.4vw, 0.75rem)',
   fontWeight: 700,
-  fontSize: 'clamp(1.05rem, 5vw, 1.55rem)',
-  lineHeight: 1.2,
-  color: '#3d1f14',
-  wordBreak: 'break-word',
+  letterSpacing: '0.12em',
+  textTransform: 'uppercase',
+  color: theme.palette.success.main,
+}));
+
+const DrawName = styled('div')(({ theme }) => ({
   maxWidth: '100%',
-});
+  fontSize: 'clamp(1.05rem, 5vw, 1.5rem)',
+  fontWeight: 800,
+  lineHeight: 1.2,
+  color: theme.palette.text.primary,
+  overflowWrap: 'anywhere',
+}));
 
-const StyledAvatar = styled(Avatar)({
-  width: 'clamp(64px, 22vw, 96px)',
-  height: 'clamp(64px, 22vw, 96px)',
-  backgroundColor: '#1f5a3a',
-  border: '3px solid #c9a227',
-  boxShadow: '0 3px 10px rgba(61, 31, 20, 0.25)',
-  fontFamily: 'Palatino, "Palatino Linotype", Georgia, serif',
+const DrawAvatar = styled(Avatar)(({ theme }) => ({
+  width: 'clamp(60px, 20vw, 92px)',
+  height: 'clamp(60px, 20vw, 92px)',
+  fontSize: '1.5rem',
   fontWeight: 700,
-  fontSize: '1.6rem',
-});
+  color: theme.palette.success.dark,
+  backgroundColor: alpha(theme.palette.success.main, 0.14),
+  boxShadow: `0 0 0 3px ${theme.palette.common.white}, 0 0 0 5px ${alpha(theme.palette.success.main, 0.5)}`,
+}));
 
 const ScratchCanvas = styled('canvas')<{ $fading: boolean }>(({ $fading }) => ({
   position: 'absolute',
@@ -210,7 +272,7 @@ const ScratchCanvas = styled('canvas')<{ $fading: boolean }>(({ $fading }) => ({
   WebkitUserSelect: 'none',
   WebkitTouchCallout: 'none',
   opacity: $fading ? 0 : 1,
-  transition: 'opacity 0.7s ease',
+  transition: 'opacity 0.6s ease',
   pointerEvents: $fading ? 'none' : 'auto',
   zIndex: 2,
 }));
@@ -218,29 +280,58 @@ const ScratchCanvas = styled('canvas')<{ $fading: boolean }>(({ $fading }) => ({
 const GlassShine = styled('div')({
   position: 'absolute',
   inset: 0,
+  zIndex: 3,
   borderRadius: '50%',
   pointerEvents: 'none',
   background: `
-    radial-gradient(circle at 30% 22%, rgba(255, 255, 255, 0.42) 0%, rgba(255, 255, 255, 0.08) 22%, transparent 42%),
-    linear-gradient(160deg, transparent 55%, rgba(255, 255, 255, 0.08) 100%)
+    radial-gradient(circle at 30% 22%, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.1) 18%, transparent 36%),
+    radial-gradient(circle at 72% 84%, rgba(255, 255, 255, 0.14) 0%, transparent 30%)
   `,
-  zIndex: 3,
-  animation: `${shine} 4.5s ease-in-out infinite`,
-  '@media (prefers-reduced-motion: reduce)': {
-    animation: 'none',
-  },
 });
 
-const RevealLink = styled(Button)({
-  textTransform: 'none',
-  color: '#e0b85a',
-  fontSize: '0.95rem',
-  minHeight: 40,
-  padding: '6px 16px',
-  '&:hover': {
-    backgroundColor: 'rgba(224, 184, 90, 0.12)',
-  },
+const Footer = styled('div')({
+  minHeight: 44,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
 });
+
+const GhostButton = styled('button')(({ theme }) => ({
+  height: 40,
+  padding: theme.spacing(0, 2.5),
+  borderRadius: 999,
+  border: `1px solid ${alpha(theme.palette.common.white, 0.22)}`,
+  backgroundColor: alpha(theme.palette.common.white, 0.06),
+  color: alpha(theme.palette.common.white, 0.85),
+  fontFamily: 'inherit',
+  fontSize: '0.875rem',
+  fontWeight: 600,
+  cursor: 'pointer',
+  transition: 'background-color 0.2s ease, border-color 0.2s ease',
+  '&:hover': {
+    backgroundColor: alpha(theme.palette.common.white, 0.12),
+    borderColor: alpha(theme.palette.common.white, 0.4),
+  },
+  '&:focus-visible': {
+    outline: `2px solid ${theme.palette.common.white}`,
+    outlineOffset: 2,
+  },
+}));
+
+const DoneButton = styled(GhostButton)(({ theme }) => ({
+  height: 44,
+  padding: theme.spacing(0, 3.5),
+  border: 'none',
+  color: theme.palette.success.dark,
+  backgroundColor: theme.palette.common.white,
+  fontSize: '0.95rem',
+  fontWeight: 700,
+  boxShadow: `0 10px 30px -8px ${alpha(theme.palette.success.main, 0.8)}`,
+  animation: `${fadeUp} 0.4s ease-out 0.3s both`,
+  '&:hover': {
+    backgroundColor: '#f1f8f2',
+  },
+}));
 
 const LiveRegion = styled('div')({
   position: 'absolute',
@@ -257,103 +348,54 @@ const LiveRegion = styled('div')({
 const CelebrationLayer = styled('div')({
   position: 'absolute',
   inset: 0,
-  pointerEvents: 'none',
-  overflow: 'hidden',
   zIndex: 2,
+  overflow: 'hidden',
+  pointerEvents: 'none',
 });
 
-const particleBase = {
-  position: 'absolute' as const,
-  lineHeight: 1,
-  fontFamily: 'Georgia, serif',
-  pointerEvents: 'none' as const,
-  filter: 'drop-shadow(0 0 6px rgba(246, 231, 178, 0.65))',
-};
-
-const SnowParticle = styled('span')<{
-  $left: string;
-  $drift: string;
-  $duration: string;
-  $delay: string;
-  $size: number;
-  $color: string;
-}>(({ $left, $drift, $duration, $delay, $size, $color }) => ({
-  ...particleBase,
+const ConfettiPiece = styled('span')({
+  position: 'absolute',
   top: 0,
-  left: $left,
-  color: $color,
-  fontSize: $size,
-  animation: `${fall} ${$duration} ${$delay} linear forwards`,
-  '--drift': $drift,
-}));
+  borderRadius: 2,
+  animationName: fall,
+  animationTimingFunction: 'cubic-bezier(0.25, 0.6, 0.4, 1)',
+  animationFillMode: 'forwards',
+});
 
-const BurstParticle = styled('span')<{
-  $tx: string;
-  $ty: string;
-  $duration: string;
-  $delay: string;
-  $size: number;
-  $color: string;
-}>(({ $tx, $ty, $duration, $delay, $size, $color }) => ({
-  ...particleBase,
-  top: '48%',
+const BurstDot = styled('span')({
+  position: 'absolute',
+  top: '50%',
   left: '50%',
-  color: $color,
-  fontSize: $size,
-  animation: `${burst} ${$duration} ${$delay} ease-out forwards`,
-  '--tx': $tx,
-  '--ty': $ty,
-}));
+  borderRadius: '50%',
+  animationName: burstOut,
+  animationTimingFunction: 'ease-out',
+  animationFillMode: 'forwards',
+});
 
-const SparkleParticle = styled('span')<{
-  $top: string;
-  $left: string;
-  $duration: string;
-  $delay: string;
-  $size: number;
-}>(({ $top, $left, $duration, $delay, $size }) => ({
-  ...particleBase,
-  top: $top,
-  left: $left,
-  color: '#fff8e7',
-  fontSize: $size,
-  animation: `${twinkle} ${$duration} ${$delay} ease-in-out forwards`,
-}));
-
-type SnowSpec = {
+type ConfettiSpec = {
   id: number;
-  glyph: string;
   left: string;
+  width: number;
+  height: number;
+  color: string;
   drift: string;
+  spin: string;
   duration: string;
   delay: string;
-  size: number;
-  color: string;
 };
+
 type BurstSpec = {
   id: number;
-  glyph: string;
+  size: number;
+  color: string;
   tx: string;
   ty: string;
   duration: string;
-  delay: string;
-  size: number;
-  color: string;
-};
-type SparkleSpec = {
-  id: number;
-  glyph: string;
-  top: string;
-  left: string;
-  duration: string;
-  delay: string;
-  size: number;
 };
 
 type CelebrationParticles = {
-  snow: SnowSpec[];
+  confetti: ConfettiSpec[];
   burst: BurstSpec[];
-  sparkle: SparkleSpec[];
 };
 
 type SecretSantaBaubleScratchProps = {
@@ -371,6 +413,7 @@ export function SecretSantaBaubleScratch({
 }: SecretSantaBaubleScratchProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const sphereRef = useRef<HTMLDivElement>(null);
+  const doneButtonRef = useRef<HTMLButtonElement>(null);
   const lastPointRef = useRef<{ x: number; y: number } | null>(null);
   const lastSizeRef = useRef(0);
   const completeRef = useRef(false);
@@ -379,9 +422,9 @@ export function SecretSantaBaubleScratch({
   const scratchingRef = useRef(false);
   const lastMeasureAtRef = useRef(0);
   const mountedAtRef = useRef(Date.now());
-  const handoffTimerRef = useRef<number | undefined>(undefined);
   const [scratching, setScratching] = useState(false);
   const [complete, setComplete] = useState(false);
+  const [progress, setProgress] = useState(0);
   const [particles, setParticles] = useState<CelebrationParticles | undefined>();
 
   const finishReveal = useCallback(() => {
@@ -390,53 +433,9 @@ export function SecretSantaBaubleScratch({
     scratchingRef.current = false;
     setComplete(true);
     setScratching(false);
+    setProgress(1);
     setParticles(createCelebrationParticles());
-    handoffTimerRef.current = window.setTimeout(() => {
-      onRevealed();
-    }, CELEBRATION_MS);
-  }, [onRevealed]);
-
-  const paintFrost = useCallback((ctx: CanvasRenderingContext2D, size: number) => {
-    const cx = size / 2;
-    const cy = size / 2;
-    const radius = size / 2;
-    const rng = mulberry32(2026);
-
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-    ctx.clip();
-
-    const gradient = ctx.createRadialGradient(cx - radius * 0.22, cy - radius * 0.28, radius * 0.08, cx, cy, radius);
-    gradient.addColorStop(0, '#f6e7b2');
-    gradient.addColorStop(0.32, '#e0b85a');
-    gradient.addColorStop(0.68, '#c4922a');
-    gradient.addColorStop(1, '#8a6414');
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, size, size);
-
-    for (let i = 0; i < 220; i++) {
-      const angle = rng() * Math.PI * 2;
-      const dist = Math.sqrt(rng()) * radius;
-      ctx.fillStyle = `rgba(255, 250, 230, ${0.12 + rng() * 0.38})`;
-      ctx.beginPath();
-      ctx.arc(cx + Math.cos(angle) * dist, cy + Math.sin(angle) * dist, 0.7 + rng() * 2.4, 0, Math.PI * 2);
-      ctx.fill();
-    }
-
-    ctx.strokeStyle = 'rgba(255, 248, 220, 0.5)';
-    ctx.lineWidth = 1.1;
-    ctx.lineCap = 'round';
-    for (let i = 0; i < 9; i++) {
-      drawSnowflake(ctx, cx + (rng() - 0.5) * radius * 1.45, cy + (rng() - 0.5) * radius * 1.45, 5 + rng() * 9);
-    }
-
-    ctx.fillStyle = 'rgba(74, 44, 8, 0.78)';
-    ctx.font = `700 ${Math.round(size * 0.078)}px Palatino, Georgia, serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('GRATTE-MOI', cx, cy);
-    ctx.restore();
+    window.setTimeout(() => doneButtonRef.current?.focus(), 400);
   }, []);
 
   const setupCanvas = useCallback(() => {
@@ -457,11 +456,11 @@ export function SecretSantaBaubleScratch({
     if (!ctx) return false;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.globalCompositeOperation = 'source-over';
-    paintFrost(ctx, size);
+    paintBauble(ctx, size, getComputedStyle(sphere).fontFamily);
     lastSizeRef.current = size;
     paintedRef.current = true;
     return true;
-  }, [paintFrost]);
+  }, []);
 
   useLayoutEffect(() => {
     mountedAtRef.current = Date.now();
@@ -497,7 +496,6 @@ export function SecretSantaBaubleScratch({
       cancelAnimationFrame(raf);
       observer?.disconnect();
       document.body.style.overflow = previousOverflow;
-      if (handoffTimerRef.current) window.clearTimeout(handoffTimerRef.current);
     };
   }, [setupCanvas]);
 
@@ -549,8 +547,8 @@ export function SecretSantaBaubleScratch({
         const dy = y - cy;
         if (dx * dx + dy * dy > radiusSq) continue;
         inside++;
-        const alpha = data[(y * width + x) * 4 + 3];
-        if (alpha !== undefined && alpha < 128) cleared++;
+        const alphaValue = data[(y * width + x) * 4 + 3];
+        if (alphaValue !== undefined && alphaValue < 128) cleared++;
       }
     }
 
@@ -562,7 +560,9 @@ export function SecretSantaBaubleScratch({
     const now = performance.now();
     if (!force && now - lastMeasureAtRef.current < 80) return;
     lastMeasureAtRef.current = now;
-    if (measureClearedRatio(ctx) >= REVEAL_THRESHOLD) {
+    const ratio = measureClearedRatio(ctx);
+    setProgress(Math.min(1, ratio / REVEAL_THRESHOLD));
+    if (ratio >= REVEAL_THRESHOLD) {
       finishReveal();
     }
   };
@@ -624,81 +624,103 @@ export function SecretSantaBaubleScratch({
   return createPortal(
     <Overlay role="dialog" aria-modal="true" aria-labelledby="secret-santa-reveal-title">
       <Content>
-        <Hint id="secret-santa-reveal-title">
-          Gratte la boule pour découvrir ton Secret Santa pour l'événement : {eventTitle}
-        </Hint>
+        <Header>
+          <Eyebrow>Secret Santa · {eventTitle}</Eyebrow>
+          <Title id="secret-santa-reveal-title">{complete ? 'Et voilà !' : 'À qui vas-tu offrir ?'}</Title>
+          <Subtitle>
+            {complete ? 'Chut, ça reste entre nous !' : 'Gratte la boule du bout du doigt pour le découvrir'}
+          </Subtitle>
+        </Header>
+
         <Stage>
           <HangingString />
           <Ornament $paused={scratching || complete}>
             <Cap />
-            <Sphere ref={bindSphere} $complete={complete}>
-              <InnerReveal aria-hidden={!complete}>
-                <StyledAvatar src={pictureUrl} alt="">
-                  {initials}
-                </StyledAvatar>
-                <DrawName>{displayName}</DrawName>
-              </InnerReveal>
-              <ScratchCanvas
-                ref={canvasRef}
-                $fading={complete}
-                aria-label="Zone à gratter pour découvrir ton Secret Santa"
-                aria-hidden={complete}
-                onPointerDown={handlePointerDown}
-                onPointerMove={handlePointerMove}
-                onPointerUp={handlePointerUp}
-                onPointerCancel={handlePointerUp}
-                onLostPointerCapture={handlePointerUp}
-              />
-              <GlassShine />
-            </Sphere>
+            <SphereFrame>
+              <ProgressRing viewBox="0 0 100 100" aria-hidden>
+                <circle className="track" cx="50" cy="50" r="49" />
+                <circle
+                  className="value"
+                  cx="50"
+                  cy="50"
+                  r="49"
+                  pathLength={1}
+                  strokeDasharray="1"
+                  strokeDashoffset={1 - progress}
+                />
+              </ProgressRing>
+              <Sphere ref={bindSphere} $complete={complete}>
+                <InnerReveal $complete={complete} aria-hidden={!complete}>
+                  <DrawAvatar src={pictureUrl} alt="">
+                    {initials}
+                  </DrawAvatar>
+                  <RevealEyebrow>Tu offres à</RevealEyebrow>
+                  <DrawName>{displayName}</DrawName>
+                </InnerReveal>
+                <ScratchCanvas
+                  ref={canvasRef}
+                  $fading={complete}
+                  aria-label="Zone à gratter pour découvrir ton Secret Santa"
+                  aria-hidden={complete}
+                  onPointerDown={handlePointerDown}
+                  onPointerMove={handlePointerMove}
+                  onPointerUp={handlePointerUp}
+                  onPointerCancel={handlePointerUp}
+                  onLostPointerCapture={handlePointerUp}
+                />
+                <GlassShine />
+              </Sphere>
+            </SphereFrame>
           </Ornament>
         </Stage>
-        {!complete && (
-          <RevealLink variant="text" onClick={finishReveal}>
-            Révéler
-          </RevealLink>
-        )}
-        <LiveRegion aria-live="polite">{complete ? `Votre Secret Santa est ${displayName}` : ''}</LiveRegion>
+
+        <Footer>
+          {complete ? (
+            <DoneButton ref={doneButtonRef} type="button" onClick={onRevealed}>
+              C'est noté !
+            </DoneButton>
+          ) : (
+            <GhostButton type="button" onClick={finishReveal}>
+              Révéler d'un coup
+            </GhostButton>
+          )}
+        </Footer>
+        <LiveRegion aria-live="polite">{complete ? `Tu offres à ${displayName}` : ''}</LiveRegion>
       </Content>
+
       {particles && (
         <CelebrationLayer aria-hidden>
-          {particles.snow.map(particle => (
-            <SnowParticle
-              key={particle.id}
-              $left={particle.left}
-              $drift={particle.drift}
-              $duration={particle.duration}
-              $delay={particle.delay}
-              $size={particle.size}
-              $color={particle.color}
-            >
-              {particle.glyph}
-            </SnowParticle>
+          {particles.confetti.map(piece => (
+            <ConfettiPiece
+              key={piece.id}
+              style={
+                {
+                  left: piece.left,
+                  width: piece.width,
+                  height: piece.height,
+                  backgroundColor: piece.color,
+                  animationDuration: piece.duration,
+                  animationDelay: piece.delay,
+                  '--drift': piece.drift,
+                  '--spin': piece.spin,
+                } as CSSProperties
+              }
+            />
           ))}
-          {particles.burst.map(particle => (
-            <BurstParticle
-              key={particle.id}
-              $tx={particle.tx}
-              $ty={particle.ty}
-              $duration={particle.duration}
-              $delay={particle.delay}
-              $size={particle.size}
-              $color={particle.color}
-            >
-              {particle.glyph}
-            </BurstParticle>
-          ))}
-          {particles.sparkle.map(particle => (
-            <SparkleParticle
-              key={particle.id}
-              $top={particle.top}
-              $left={particle.left}
-              $duration={particle.duration}
-              $delay={particle.delay}
-              $size={particle.size}
-            >
-              {particle.glyph}
-            </SparkleParticle>
+          {particles.burst.map(dot => (
+            <BurstDot
+              key={dot.id}
+              style={
+                {
+                  width: dot.size,
+                  height: dot.size,
+                  backgroundColor: dot.color,
+                  animationDuration: dot.duration,
+                  '--tx': dot.tx,
+                  '--ty': dot.ty,
+                } as CSSProperties
+              }
+            />
           ))}
         </CelebrationLayer>
       )}
@@ -707,48 +729,92 @@ export function SecretSantaBaubleScratch({
   );
 }
 
-function createCelebrationParticles(): CelebrationParticles {
-  const colors = ['#f6e7b2', '#e8c547', '#fff8e7', '#c4922a', '#ef9a9a', '#a5d6a7'];
-  const snowGlyphs = ['❄', '✦', '·'];
-  const burstGlyphs = ['✦', '★', '✧'];
+function paintBauble(ctx: CanvasRenderingContext2D, size: number, fontFamily: string) {
+  const cx = size / 2;
+  const cy = size / 2;
+  const radius = size / 2;
+  const rng = mulberry32(2026);
 
-  const snow: SnowSpec[] = Array.from({ length: 28 }, (_, i) => ({
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+  ctx.clip();
+
+  const base = ctx.createRadialGradient(cx - radius * 0.3, cy - radius * 0.35, radius * 0.05, cx, cy, radius * 1.05);
+  base.addColorStop(0, '#5fb865');
+  base.addColorStop(0.4, '#2e7d32');
+  base.addColorStop(0.8, '#1b5e20');
+  base.addColorStop(1, '#0f3d14');
+  ctx.fillStyle = base;
+  ctx.fillRect(0, 0, size, size);
+
+  const bands = [
+    { y: cy - radius * 0.42, width: radius * 0.07, dash: [] as number[] },
+    { y: cy - radius * 0.3, width: radius * 0.025, dash: [radius * 0.01, radius * 0.06] },
+    { y: cy + radius * 0.32, width: radius * 0.025, dash: [radius * 0.01, radius * 0.06] },
+    { y: cy + radius * 0.44, width: radius * 0.07, dash: [] as number[] },
+  ];
+  ctx.lineCap = 'round';
+  for (const band of bands) {
+    ctx.setLineDash(band.dash);
+    ctx.lineWidth = band.width;
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
+    ctx.beginPath();
+    ctx.ellipse(cx, band.y, radius * 1.1, radius * 0.16, 0, 0, Math.PI);
+    ctx.stroke();
+  }
+  ctx.setLineDash([]);
+
+  for (let i = 0; i < 70; i++) {
+    const angle = rng() * Math.PI * 2;
+    const dist = Math.sqrt(rng()) * radius;
+    ctx.fillStyle = `rgba(255, 255, 255, ${0.15 + rng() * 0.45})`;
+    ctx.beginPath();
+    ctx.arc(cx + Math.cos(angle) * dist, cy + Math.sin(angle) * dist, 0.6 + rng() * 1.6, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  ctx.fillStyle = '#ffffff';
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+  ctx.shadowBlur = 8;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.font = `800 ${Math.round(size * 0.085)}px ${fontFamily}`;
+  ctx.fillText('Gratte-moi', cx, cy - size * 0.02);
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
+  ctx.font = `600 ${Math.round(size * 0.042)}px ${fontFamily}`;
+  ctx.fillText('ton tirage est caché ici', cx, cy + size * 0.07);
+  ctx.restore();
+}
+
+function createCelebrationParticles(): CelebrationParticles {
+  const confetti: ConfettiSpec[] = Array.from({ length: 70 }, (_, i) => ({
     id: i,
-    glyph: snowGlyphs[i % snowGlyphs.length] ?? '❄',
     left: `${Math.random() * 100}%`,
-    drift: `${(Math.random() - 0.5) * 80}px`,
-    duration: `${1.8 + Math.random() * 1.2}s`,
-    delay: `${Math.random() * 0.45}s`,
-    size: 12 + Math.random() * 16,
-    color: colors[i % colors.length] ?? '#f6e7b2',
+    width: 6 + Math.random() * 5,
+    height: 10 + Math.random() * 8,
+    color: CONFETTI_COLORS[i % CONFETTI_COLORS.length] ?? '#ffffff',
+    drift: `${(Math.random() - 0.5) * 160}px`,
+    spin: `${(Math.random() > 0.5 ? 1 : -1) * (360 + Math.random() * 540)}deg`,
+    duration: `${2.6 + Math.random() * 1.8}s`,
+    delay: `${Math.random() * 0.6}s`,
   }));
 
-  const burstParticles: BurstSpec[] = Array.from({ length: 22 }, (_, i) => {
-    const angle = (Math.PI * 2 * i) / 22 + Math.random() * 0.3;
-    const dist = 90 + Math.random() * 160;
+  const burst: BurstSpec[] = Array.from({ length: 24 }, (_, i) => {
+    const angle = (Math.PI * 2 * i) / 24 + Math.random() * 0.2;
+    const dist = 140 + Math.random() * 140;
     return {
       id: 100 + i,
-      glyph: burstGlyphs[i % burstGlyphs.length] ?? '✦',
+      size: 5 + Math.random() * 6,
+      color: CONFETTI_COLORS[(i + 3) % CONFETTI_COLORS.length] ?? '#ffffff',
       tx: `${Math.cos(angle) * dist}px`,
       ty: `${Math.sin(angle) * dist}px`,
-      duration: `${0.9 + Math.random() * 0.7}s`,
-      delay: `${Math.random() * 0.12}s`,
-      size: 14 + Math.random() * 18,
-      color: colors[(i + 2) % colors.length] ?? '#e8c547',
+      duration: `${0.8 + Math.random() * 0.5}s`,
     };
   });
 
-  const sparkle: SparkleSpec[] = Array.from({ length: 16 }, (_, i) => ({
-    id: 200 + i,
-    glyph: '✧',
-    top: `${12 + Math.random() * 70}%`,
-    left: `${8 + Math.random() * 84}%`,
-    duration: `${0.8 + Math.random() * 0.6}s`,
-    delay: `${0.15 + Math.random() * 0.5}s`,
-    size: 10 + Math.random() * 12,
-  }));
-
-  return { snow, burst: burstParticles, sparkle };
+  return { confetti, burst };
 }
 
 function mulberry32(seed: number) {
@@ -760,14 +826,4 @@ function mulberry32(seed: number) {
     x ^= x + Math.imul(x ^ (x >>> 7), x | 61);
     return ((x ^ (x >>> 14)) >>> 0) / 4294967296;
   };
-}
-
-function drawSnowflake(ctx: CanvasRenderingContext2D, x: number, y: number, size: number) {
-  ctx.beginPath();
-  for (let i = 0; i < 6; i++) {
-    const angle = (Math.PI / 3) * i;
-    ctx.moveTo(x, y);
-    ctx.lineTo(x + Math.cos(angle) * size, y + Math.sin(angle) * size);
-  }
-  ctx.stroke();
 }

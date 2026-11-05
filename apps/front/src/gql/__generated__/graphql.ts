@@ -235,7 +235,7 @@ export type EventPageGetEventQueryVariables = Exact<{
 
 
 export type EventPageGetEventQuery = { event:
-    | { __typename: 'Event', id: Ids["EventId"], title: string, description: string | null, icon: string | null, eventDate: string, attendees: Array<{ id: Ids["AttendeeId"], pendingEmail: string | null, role: Types.AttendeeRole, user: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null } | null }>, wishlists: Array<{ id: Ids["WishlistId"], title: string, logoUrl: string | null, config: { hideItems: boolean }, owner: { id: Ids["UserId"], firstName: string, lastName: string, pictureUrl: string | null } }>, secretSanta: { id: Ids["SecretSantaId"], description: string | null, budget: number | null, status: Types.SecretSantaStatus, users: Array<{ id: Ids["SecretSantaUserId"], attendeeId: Ids["AttendeeId"] }> } | null }
+    | { __typename: 'Event', id: Ids["EventId"], title: string, description: string | null, icon: string | null, eventDate: string, attendees: Array<{ id: Ids["AttendeeId"], pendingEmail: string | null, role: Types.AttendeeRole, user: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null } | null }>, wishlists: Array<{ id: Ids["WishlistId"], title: string, logoUrl: string | null, config: { hideItems: boolean }, owner: { id: Ids["UserId"], firstName: string, lastName: string, pictureUrl: string | null } }>, secretSanta: { id: Ids["SecretSantaId"], description: string | null, budget: number | null, status: Types.SecretSantaStatus, updatedAt: string, users: Array<{ id: Ids["SecretSantaUserId"], attendeeId: Ids["AttendeeId"] }> } | null }
     | { __typename: 'ForbiddenRejection' }
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'NotFoundRejection', message: string }
@@ -1677,6 +1677,7 @@ export const EventPageGetEventDocument = new TypedDocumentString(`
         description
         budget
         status
+        updatedAt
         users {
           id
           attendeeId

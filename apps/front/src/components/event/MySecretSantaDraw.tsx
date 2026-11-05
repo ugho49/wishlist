@@ -121,7 +121,9 @@ export const MySecretSantaDraw = ({
   currentUserId,
 }: MySecretSantaDrawProps) => {
   const { mySecretSantaDraw: draw } = useMySecretSantaDraw(eventId);
-  const { isRevealed, markRevealed } = useSecretSantaDrawReveal(eventId, currentUserId);
+  const drawSignature =
+    secretSanta?.status === SecretSantaStatus.Started ? `${secretSanta.id}:${secretSanta.updatedAt}` : undefined;
+  const { isRevealed, markRevealed } = useSecretSantaDrawReveal(eventId, currentUserId, drawSignature);
   const prefersReducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)');
   const isUpSm = useMediaQuery(theme => theme.breakpoints.up('sm'));
   const [replayScratch, setReplayScratch] = useState(false);
