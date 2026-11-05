@@ -38,6 +38,7 @@ query EventPageGetEvent($eventId: EventId!) {
         description
         budget
         status
+        updatedAt
         users {
           id
           attendeeId
