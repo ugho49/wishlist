@@ -1,15 +1,11 @@
 import type { EventId } from '@wishlist/common';
-import type { SecretSantaFormInput } from './EditSecretSantaFormDialog';
 
 import AddIcon from '@mui/icons-material/Add';
 import { Box, Button, Stack, styled, Typography } from '@mui/material';
-import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { match } from 'ts-pattern';
 
 import EmptySecretSantaIllustration from '../../assets/illustrations/secret-santa.png';
-import { rejectionMessage, rejectionPattern, useCreateSecretSantaMutation } from '../../gql';
-import { useToast } from '../../hooks';
+import { useCreateSecretSanta } from '../../hooks';
 import { EditSecretSantaFormDialog } from './EditSecretSantaFormDialog';
 
 const EmptyStateContainer = styled(Stack)(({ theme }) => ({
@@ -73,35 +69,8 @@ type NoSecretSantaProps = {
 };
 
 export const NoSecretSanta = ({ eventId }: NoSecretSantaProps) => {
-  const queryClient = useQueryClient();
-  const { addToast } = useToast();
   const [openModal, setOpenModal] = useState(false);
-
-  const { mutateAsync: createSecretSantaMutation, isPending: loading } = useCreateSecretSantaMutation({
-    onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
-  });
-
-  const createSecretSanta = async (input: SecretSantaFormInput) => {
-    const res = await createSecretSantaMutation({
-      input: { eventId, budget: input.budget, description: input.description },
-    });
-    await match(res.createSecretSanta)
-      .with({ __typename: 'SecretSanta' }, async () => {
-        addToast({ message: 'Secret santa créé avec succès', variant: 'success' });
-        await queryClient.invalidateQueries({ queryKey: ['GetSecretSantaForEvent', { eventId }] });
-      })
-      .with({ __typename: 'ValidationRejection' }, rejection =>
-        addToast({
-          message:
-            rejection.errors.length > 0
-              ? rejection.errors.map(error => error.message).join(', ')
-              : rejectionMessage(rejection),
-          variant: 'error',
-        }),
-      )
-      .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
-      .exhaustive();
-  };
+  const { createSecretSanta, loading } = useCreateSecretSanta(eventId);
 
   return (
     <>

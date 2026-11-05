@@ -1,13 +1,15 @@
 import type { EventId } from '@wishlist/common';
 import type { RootState } from '../../core/store';
+import type { EventDetail } from './event.types';
 
-import { Alert, Box, Container, Stack } from '@mui/material';
+import { Alert, Box, Container, Stack, styled } from '@mui/material';
+import { DateTime } from 'luxon';
 import { useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 
-import { isRejection, rejectionMessage, useEventPageGetEventQuery } from '../../gql';
+import { isRejection, rejectionMessage, SecretSantaStatus, useEventPageGetEventQuery } from '../../gql';
 import { useSecretSantaSuggestion } from '../../hooks';
-import { Description } from '../common/Description';
+import { SectionHeader, SectionTitle } from '../common/PageHero';
 import { SEO } from '../SEO';
 import { EventAttendeesDialog } from './EventAttendeesDialog';
 import { EventHeader } from './EventHeader';
@@ -16,9 +18,19 @@ import { EventNotFound } from './EventNotFound';
 import { EventWishlists } from './EventWishlists';
 import { canEditEvent } from './event-permissions';
 import { MySecretSantaDraw } from './MySecretSantaDraw';
+import { SecretSantaLaunchSuggestion } from './SecretSantaLaunchSuggestion';
 import { SecretSantaSuggestionCard } from './SecretSantaSuggestionCard';
 
 const mapState = (state: RootState) => state.auth.user?.id;
+
+const PageBody = styled(Stack)(({ theme }) => ({
+  gap: theme.spacing(3),
+  paddingTop: theme.spacing(2),
+  [theme.breakpoints.up('md')]: {
+    gap: theme.spacing(4),
+    paddingTop: theme.spacing(3),
+  },
+}));
 
 interface EventPageProps {
   eventId: EventId;
@@ -33,12 +45,43 @@ export const EventPage = ({ eventId }: EventPageProps) => {
 
   const attendees = useMemo(() => event?.attendees ?? [], [event]);
   const currentUserCanEdit = useMemo(() => canEditEvent(attendees, currentUserId), [attendees, currentUserId]);
+  const currentAttendeeId = useMemo(
+    () => attendees.find(attendee => attendee.user?.id === currentUserId)?.id,
+    [attendees, currentUserId],
+  );
   const { shouldShowSuggestion, dismissSuggestion } = useSecretSantaSuggestion({
     eventId: eventId,
     eventTitle: event?.title,
     eventDate: event?.eventDate,
     currentUserCanEdit,
   });
+
+  const renderSecretSantaRow = (loadedEvent: EventDetail) => {
+    if (shouldShowSuggestion) {
+      return <SecretSantaSuggestionCard eventId={loadedEvent.id} onDismiss={dismissSuggestion} />;
+    }
+
+    const eventIsPast = DateTime.fromISO(loadedEvent.eventDate).startOf('day') < DateTime.now().startOf('day');
+    if (currentUserCanEdit && loadedEvent.secretSanta?.status === SecretSantaStatus.Created && !eventIsPast) {
+      return (
+        <SecretSantaLaunchSuggestion
+          eventId={loadedEvent.id}
+          participantsCount={loadedEvent.secretSanta.users.length}
+        />
+      );
+    }
+
+    return (
+      <MySecretSantaDraw
+        eventId={loadedEvent.id}
+        eventTitle={loadedEvent.title}
+        eventDate={loadedEvent.eventDate}
+        secretSanta={loadedEvent.secretSanta}
+        currentAttendeeId={currentAttendeeId}
+        currentUserId={currentUserId}
+      />
+    );
+  };
 
   return (
     <>
@@ -52,14 +95,9 @@ export const EventPage = ({ eventId }: EventPageProps) => {
           <>
             <EventHeaderSkeleton />
             <Container maxWidth="lg">
-              <Stack
-                sx={{
-                  gap: '20px',
-                  paddingTop: 3,
-                }}
-              >
+              <PageBody>
                 <EventWishlists loading />
-              </Stack>
+              </PageBody>
             </Container>
           </>
         )}
@@ -71,33 +109,27 @@ export const EventPage = ({ eventId }: EventPageProps) => {
             <EventHeader
               icon={event.icon ?? undefined}
               title={event.title}
+              description={event.description ?? undefined}
               eventId={event.id}
               eventDate={event.eventDate}
               attendees={attendees}
               currentUserCanEdit={currentUserCanEdit}
               openAttendeesDialog={() => setOpenAttendeesDialog(true)}
+              secretSanta={renderSecretSantaRow(event)}
             />
 
             <Container maxWidth="lg">
-              <Stack
-                sx={{
-                  gap: '20px',
-                  paddingTop: 3,
-                }}
-              >
-                {shouldShowSuggestion && <SecretSantaSuggestionCard eventId={event.id} onDismiss={dismissSuggestion} />}
-
-                <MySecretSantaDraw
-                  eventId={event.id}
-                  eventTitle={event.title}
-                  eventDate={event.eventDate}
-                  currentUserId={currentUserId}
-                />
-
-                {event.description && <Description text={event.description} />}
-
-                <EventWishlists eventId={event.id} wishlists={event.wishlists} />
-              </Stack>
+              <PageBody>
+                <section>
+                  <SectionHeader>
+                    <SectionTitle>
+                      Listes
+                      <span className="count">{event.wishlists.length}</span>
+                    </SectionTitle>
+                  </SectionHeader>
+                  <EventWishlists eventId={event.id} wishlists={event.wishlists} />
+                </section>
+              </PageBody>
             </Container>
 
             <EventAttendeesDialog

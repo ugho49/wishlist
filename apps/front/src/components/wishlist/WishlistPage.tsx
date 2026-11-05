@@ -1,7 +1,7 @@
 import type { WishlistId } from '@wishlist/common';
 import type { RootState } from '../../core/store';
 
-import { Alert, Box, Container, Stack } from '@mui/material';
+import { Alert, Box, Container, Stack, styled } from '@mui/material';
 import { useNavigate, useSearch } from '@tanstack/react-router';
 import { FeatureFlags } from '@wishlist/common';
 import { useCallback, useMemo, useState } from 'react';
@@ -9,14 +9,21 @@ import { useSelector } from 'react-redux';
 
 import { isRejection, rejectionMessage, useImportableItemsQuery, useWishlistPageQuery } from '../../gql';
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
-import { Description } from '../common/Description';
 import { ImportItemsDialog } from '../item/ImportItemsDialog';
 import { SEO } from '../SEO';
 import { WishlistEventsDialog } from './WishlistEventsDialog';
 import { WishlistHeader } from './WishlistHeader';
 import { WishlistHeaderSkeleton } from './WishlistHeaderSkeleton';
 import { WishlistItems } from './WishlistItems';
+import { WishlistItemsToolbar } from './WishlistItemsToolbar';
 import { WishlistNotFound } from './WishlistNotFound';
+
+const PageBody = styled(Stack)(({ theme }) => ({
+  paddingTop: theme.spacing(2),
+  [theme.breakpoints.up('md')]: {
+    paddingTop: theme.spacing(3),
+  },
+}));
 
 interface WishlistPageProps {
   wishlistId: WishlistId;
@@ -86,14 +93,9 @@ export const WishlistPage = ({ wishlistId }: WishlistPageProps) => {
           <>
             <WishlistHeaderSkeleton />
             <Container maxWidth="lg">
-              <Stack
-                sx={{
-                  gap: '20px',
-                  paddingTop: 3,
-                }}
-              >
+              <PageBody>
                 <WishlistItems loading />
-              </Stack>
+              </PageBody>
             </Container>
           </>
         )}
@@ -108,29 +110,26 @@ export const WishlistPage = ({ wishlistId }: WishlistPageProps) => {
               currentUserCanEdit={currentUserCanEdit}
               isPublic={isPublic}
               hasImportableItems={importableItems.length > 0}
-              sort={sort}
-              filter={filter}
-              onSortChange={setSort}
-              onFilterChange={setFilter}
               onOpenEventDialog={() => setShowEventDialog(true)}
               onOpenImportDialog={() => setShowImportDialog(true)}
             />
 
             <Container maxWidth="lg">
-              <Stack
-                sx={{
-                  gap: '20px',
-                  paddingTop: 3,
-                }}
-              >
-                {wishlist.description && <Description text={wishlist.description} />}
-
+              <PageBody>
+                <WishlistItemsToolbar
+                  itemsCount={wishlist.items.length}
+                  canFilter={!currentUserCanEdit}
+                  sort={sort}
+                  filter={filter}
+                  onSortChange={setSort}
+                  onFilterChange={setFilter}
+                />
                 <WishlistItems
                   wishlist={wishlist}
                   hasImportableItems={importableItems.length > 0}
                   onImportItems={() => setShowImportDialog(true)}
                 />
-              </Stack>
+              </PageBody>
             </Container>
 
             <WishlistEventsDialog

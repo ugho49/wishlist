@@ -76,7 +76,12 @@ export const SecretSanta = ({ secretSanta, event }: SecretSantaProps) => {
   }, [secretSanta]);
 
   const invalidate = useCallback(
-    () => queryClient.invalidateQueries({ queryKey: ['GetSecretSantaForEvent', { eventId }] }),
+    () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['GetSecretSantaForEvent', { eventId }] }),
+        queryClient.invalidateQueries({ queryKey: ['EventPageGetEvent', { eventId }] }),
+        queryClient.invalidateQueries({ queryKey: ['GetMySecretSantaDraw', { eventId }] }),
+      ]),
     [queryClient, eventId],
   );
 
