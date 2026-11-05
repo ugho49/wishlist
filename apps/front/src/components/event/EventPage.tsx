@@ -1,11 +1,13 @@
 import type { EventId } from '@wishlist/common';
 import type { RootState } from '../../core/store';
+import type { EventDetail } from './event.types';
 
 import { Alert, Box, Container, Stack, styled } from '@mui/material';
+import { DateTime } from 'luxon';
 import { useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 
-import { isRejection, rejectionMessage, useEventPageGetEventQuery } from '../../gql';
+import { isRejection, rejectionMessage, SecretSantaStatus, useEventPageGetEventQuery } from '../../gql';
 import { useSecretSantaSuggestion } from '../../hooks';
 import { SectionHeader, SectionTitle } from '../common/PageHero';
 import { SEO } from '../SEO';
@@ -16,6 +18,7 @@ import { EventNotFound } from './EventNotFound';
 import { EventWishlists } from './EventWishlists';
 import { canEditEvent } from './event-permissions';
 import { MySecretSantaDraw } from './MySecretSantaDraw';
+import { SecretSantaLaunchSuggestion } from './SecretSantaLaunchSuggestion';
 import { SecretSantaSuggestionCard } from './SecretSantaSuggestionCard';
 
 const mapState = (state: RootState) => state.auth.user?.id;
@@ -53,6 +56,33 @@ export const EventPage = ({ eventId }: EventPageProps) => {
     currentUserCanEdit,
   });
 
+  const renderSecretSantaRow = (loadedEvent: EventDetail) => {
+    if (shouldShowSuggestion) {
+      return <SecretSantaSuggestionCard eventId={loadedEvent.id} onDismiss={dismissSuggestion} />;
+    }
+
+    const eventIsPast = DateTime.fromISO(loadedEvent.eventDate).startOf('day') < DateTime.now().startOf('day');
+    if (currentUserCanEdit && loadedEvent.secretSanta?.status === SecretSantaStatus.Created && !eventIsPast) {
+      return (
+        <SecretSantaLaunchSuggestion
+          eventId={loadedEvent.id}
+          participantsCount={loadedEvent.secretSanta.users.length}
+        />
+      );
+    }
+
+    return (
+      <MySecretSantaDraw
+        eventId={loadedEvent.id}
+        eventTitle={loadedEvent.title}
+        eventDate={loadedEvent.eventDate}
+        secretSanta={loadedEvent.secretSanta}
+        currentAttendeeId={currentAttendeeId}
+        currentUserId={currentUserId}
+      />
+    );
+  };
+
   return (
     <>
       <SEO
@@ -85,20 +115,7 @@ export const EventPage = ({ eventId }: EventPageProps) => {
               attendees={attendees}
               currentUserCanEdit={currentUserCanEdit}
               openAttendeesDialog={() => setOpenAttendeesDialog(true)}
-              secretSanta={
-                shouldShowSuggestion ? (
-                  <SecretSantaSuggestionCard eventId={event.id} onDismiss={dismissSuggestion} />
-                ) : (
-                  <MySecretSantaDraw
-                    eventId={event.id}
-                    eventTitle={event.title}
-                    eventDate={event.eventDate}
-                    secretSanta={event.secretSanta}
-                    currentAttendeeId={currentAttendeeId}
-                    currentUserId={currentUserId}
-                  />
-                )
-              }
+              secretSanta={renderSecretSantaRow(event)}
             />
 
             <Container maxWidth="lg">

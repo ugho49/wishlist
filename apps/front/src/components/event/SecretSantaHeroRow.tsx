@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
-import { alpha, keyframes, styled } from '@mui/material';
+import { alpha, Button, keyframes, styled } from '@mui/material';
 
 import { PageHeroRow } from '../common/PageHero';
 
@@ -117,6 +117,21 @@ export const SecretSantaRowActions = styled('div')(({ theme }) => ({
   flexWrap: 'wrap',
   alignItems: 'center',
   gap: theme.spacing(1),
+  '&.cta': {
+    [theme.breakpoints.down('sm')]: {
+      width: '100%',
+      justifyContent: 'center',
+    },
+  },
+}));
+
+export const SecretSantaRowButton = styled(Button)(({ theme }) => ({
+  height: 32,
+  padding: theme.spacing(0, 2),
+  borderRadius: 999,
+  fontSize: '0.8125rem',
+  fontWeight: 600,
+  whiteSpace: 'nowrap',
 }));
 
 type SecretSantaRowLeadProps = {
@@ -124,15 +139,24 @@ type SecretSantaRowLeadProps = {
   eyebrow: string;
   title: string;
   subtitle?: string;
+  withGiftBadge?: boolean;
 };
 
-export const SecretSantaRowLead = ({ visual, eyebrow, title, subtitle }: SecretSantaRowLeadProps) => (
+export const SecretSantaRowLead = ({
+  visual,
+  eyebrow,
+  title,
+  subtitle,
+  withGiftBadge = true,
+}: SecretSantaRowLeadProps) => (
   <Lead>
     <Visual>
       {visual}
-      <GiftBadge aria-hidden>
-        <CardGiftcardIcon />
-      </GiftBadge>
+      {withGiftBadge && (
+        <GiftBadge aria-hidden>
+          <CardGiftcardIcon />
+        </GiftBadge>
+      )}
     </Visual>
     <Text>
       <Eyebrow>{eyebrow}</Eyebrow>
