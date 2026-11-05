@@ -15,7 +15,7 @@ export const EditSecretSanta = ({ event }: EditSecretSantaProps) => {
   return (
     <Stack
       sx={{
-        marginTop: 5,
+        marginTop: 1,
       }}
     >
       <Loader loading={loading}>
