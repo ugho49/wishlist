@@ -34,7 +34,8 @@ const Content = styled(MarkdownContent)({
 });
 
 const ToggleButton = styled(Button)(({ theme }) => ({
-  marginTop: theme.spacing(1),
+  display: 'flex',
+  margin: theme.spacing(1, 'auto', 0),
   padding: theme.spacing(0.5, 1.5),
   minHeight: 32,
   borderRadius: 999,

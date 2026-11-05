@@ -15,174 +15,55 @@ import { SecretSantaStatus } from '../../gql';
 import { useMySecretSantaDraw, useSecretSantaDrawReveal } from '../../hooks';
 import { wholeEurosFormatter } from '../../utils/currency.utils';
 import { MarkdownContent } from '../common/MarkdownContent';
-import { PageHeroRow } from '../common/PageHero';
+import { MetaChip, MetaChipButton } from '../common/PageHero';
 import { SecretSantaBaubleScratch } from './SecretSantaBaubleScratch';
+import { SecretSantaRow, SecretSantaRowActions, SecretSantaRowLead } from './SecretSantaHeroRow';
 
 const EASTER_EGG_CLICKS = 4;
 const EASTER_EGG_CLICK_MS = 450;
-
-const GOLD = '#e8c547';
-const CREAM = '#f6ecd0';
-const FOREST_GRADIENT = `
-  radial-gradient(120% 160% at 100% 0%, ${alpha(GOLD, 0.2)} 0%, transparent 45%),
-  linear-gradient(135deg, #1f5a3a 0%, #123526 60%, #0a2418 100%)
-`;
-
-const Band = styled(PageHeroRow)(({ theme }) => ({
-  position: 'relative',
-  isolation: 'isolate',
-  overflow: 'hidden',
-  display: 'flex',
-  flexWrap: 'wrap',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  gap: theme.spacing(1.5),
-  padding: theme.spacing(1.5),
-  borderRadius: 16,
-  color: CREAM,
-  userSelect: 'none',
-  background: FOREST_GRADIENT,
-  boxShadow: `0 10px 24px -16px ${alpha('#0a2418', 0.8)}, inset 0 0 0 1px ${alpha(GOLD, 0.25)}`,
-
-  '&::before': {
-    content: '""',
-    position: 'absolute',
-    inset: 0,
-    zIndex: -1,
-    backgroundImage: `radial-gradient(${alpha('#ffffff', 0.2)} 1px, transparent 1.6px)`,
-    backgroundSize: '22px 22px',
-    maskImage: 'linear-gradient(to left, #000 0%, transparent 70%)',
-    pointerEvents: 'none',
-  },
-
-  [theme.breakpoints.up('md')]: {
-    padding: theme.spacing(1.5, 2.5),
-  },
-}));
-
-const Recipient = styled('div')(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  gap: theme.spacing(1.5),
-  minWidth: 0,
-}));
-
-const RecipientAvatar = styled(Avatar)(({ theme }) => ({
-  width: 40,
-  height: 40,
-  flexShrink: 0,
-  fontWeight: 700,
-  color: '#3d1f14',
-  backgroundColor: '#f3e0b0',
-  boxShadow: `0 0 0 2px ${GOLD}, 0 0 0 5px ${alpha(GOLD, 0.2)}`,
-  [theme.breakpoints.up('md')]: {
-    width: 44,
-    height: 44,
-  },
-}));
-
-const Eyebrow = styled('div')({
-  fontSize: '0.68rem',
-  fontWeight: 700,
-  letterSpacing: '0.1em',
-  textTransform: 'uppercase',
-  color: GOLD,
-});
-
-const RecipientName = styled('div')(({ theme }) => ({
-  fontFamily: 'Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif',
-  fontSize: '1.1rem',
-  fontWeight: 700,
-  lineHeight: 1.25,
-  color: '#ffffff',
-  overflowWrap: 'anywhere',
-  [theme.breakpoints.up('md')]: {
-    fontSize: '1.25rem',
-  },
-}));
-
-const Facts = styled('div')(({ theme }) => ({
-  display: 'flex',
-  flexWrap: 'wrap',
-  gap: theme.spacing(1),
-}));
-
-const factStyles = {
-  display: 'inline-flex',
-  alignItems: 'center',
-  gap: 6,
-  minHeight: 30,
-  padding: '4px 10px',
-  borderRadius: 999,
-  fontFamily: 'inherit',
-  fontSize: '0.75rem',
-  fontWeight: 600,
-  lineHeight: 1.2,
-  whiteSpace: 'nowrap',
-  color: CREAM,
-  backgroundColor: alpha('#ffffff', 0.08),
-  border: `1px solid ${alpha(GOLD, 0.3)}`,
-  '& > .MuiSvgIcon-root': {
-    fontSize: 16,
-    color: GOLD,
-  },
-} as const;
-
-const Fact = styled('span')(({ theme }) => ({
-  ...factStyles,
-  '&.highlight': {
-    color: '#3d1f14',
-    backgroundColor: GOLD,
-    borderColor: GOLD,
-    '& > .MuiSvgIcon-root': { color: '#3d1f14' },
-  },
-  [theme.breakpoints.up('sm')]: {
-    fontSize: '0.8125rem',
-    padding: '4px 12px',
-  },
-}));
-
-const FactButton = styled('button')(({ theme }) => ({
-  ...factStyles,
-  cursor: 'pointer',
-  transition: 'background-color 0.2s ease, border-color 0.2s ease',
-  '&:hover': {
-    backgroundColor: alpha('#ffffff', 0.16),
-    borderColor: GOLD,
-  },
-  '&:focus-visible': {
-    outline: `2px solid ${GOLD}`,
-    outlineOffset: 2,
-  },
-  [theme.breakpoints.up('sm')]: {
-    fontSize: '0.8125rem',
-    padding: '4px 12px',
-  },
-}));
 
 const NoteHeader = styled('div')(({ theme }) => ({
   position: 'relative',
   display: 'flex',
   alignItems: 'center',
   gap: theme.spacing(1.5),
-  padding: theme.spacing(2.5, 6, 2.5, 3),
-  color: CREAM,
-  background: FOREST_GRADIENT,
+  padding: theme.spacing(2.5, 6, 2, 3),
+  borderBottom: `1px dashed ${alpha(theme.palette.primary.main, 0.2)}`,
+  background: `linear-gradient(160deg, ${alpha(theme.palette.primary.main, 0.08)} 0%, ${theme.palette.background.paper} 100%)`,
 }));
 
-const NoteTitle = styled('h2')({
-  margin: 0,
-  fontFamily: 'Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif',
-  fontSize: '1.25rem',
+const NoteIcon = styled('div')(({ theme }) => ({
+  width: 40,
+  height: 40,
+  borderRadius: 12,
+  flexShrink: 0,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  color: theme.palette.primary.main,
+  backgroundColor: theme.palette.background.paper,
+  boxShadow: `0 4px 14px -4px ${alpha(theme.palette.primary.main, 0.3)}`,
+}));
+
+const NoteEyebrow = styled('div')(({ theme }) => ({
+  fontSize: '0.68rem',
   fontWeight: 700,
-  color: '#ffffff',
-});
+  letterSpacing: '0.1em',
+  textTransform: 'uppercase',
+  color: theme.palette.primary.main,
+}));
+
+const NoteTitle = styled('h2')(({ theme }) => ({
+  margin: 0,
+  fontSize: '1.15rem',
+  fontWeight: 700,
+  color: theme.palette.text.primary,
+}));
 
 const NoteCloseButton = styled(IconButton)(({ theme }) => ({
   position: 'absolute',
   top: theme.spacing(1.5),
   right: theme.spacing(1.5),
-  color: CREAM,
 }));
 
 const NoteContent = styled(DialogContent)(({ theme }) => ({
@@ -190,11 +71,6 @@ const NoteContent = styled(DialogContent)(({ theme }) => ({
   fontSize: '0.95rem',
   lineHeight: 1.65,
 }));
-
-const getBudgetLabel = (budget: string | undefined, long: boolean) => {
-  if (!budget) return 'Budget libre';
-  return long ? `Budget max ${budget}` : `${budget} max`;
-};
 
 type OrganizerNoteDialogProps = {
   open: boolean;
@@ -205,9 +81,11 @@ type OrganizerNoteDialogProps = {
 const OrganizerNoteDialog = ({ open, onClose, note }: OrganizerNoteDialogProps) => (
   <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm" aria-labelledby="organizer-note-title">
     <NoteHeader>
-      <CardGiftcardIcon sx={{ color: GOLD }} />
+      <NoteIcon>
+        <CardGiftcardIcon />
+      </NoteIcon>
       <div>
-        <Eyebrow>Secret Santa</Eyebrow>
+        <NoteEyebrow>Secret Santa</NoteEyebrow>
         <NoteTitle id="organizer-note-title">Le mot de l'organisateur</NoteTitle>
       </div>
       <NoteCloseButton aria-label="Fermer" onClick={onClose}>
@@ -219,6 +97,11 @@ const OrganizerNoteDialog = ({ open, onClose, note }: OrganizerNoteDialogProps) 
     </NoteContent>
   </Dialog>
 );
+
+const getBudgetLabel = (budget: string | undefined, long: boolean) => {
+  if (!budget) return 'Budget libre';
+  return long ? `Budget max ${budget}` : `${budget} max`;
+};
 
 type MySecretSantaDrawProps = {
   eventId: EventId;
@@ -245,7 +128,7 @@ export const MySecretSantaDraw = ({
   const [noteOpen, setNoteOpen] = useState(false);
   const clickStreakRef = useRef({ count: 0, lastAt: 0 });
 
-  const handleBandClick = useCallback(() => {
+  const handleRowClick = useCallback(() => {
     const now = Date.now();
     const { count, lastAt } = clickStreakRef.current;
     const nextCount = now - lastAt > EASTER_EGG_CLICK_MS ? 1 : count + 1;
@@ -267,15 +150,14 @@ export const MySecretSantaDraw = ({
 
   const note = secretSanta?.description;
   const budget = secretSanta?.budget ? wholeEurosFormatter.format(secretSanta.budget) : undefined;
-  const budgetLabel = getBudgetLabel(budget, isUpSm);
   const facts = secretSanta && (
-    <Facts>
-      <Fact className={budget ? 'highlight' : undefined}>
+    <SecretSantaRowActions>
+      <MetaChip className={budget ? 'accent' : undefined}>
         <EuroIcon />
-        {budgetLabel}
-      </Fact>
+        {getBudgetLabel(budget, isUpSm)}
+      </MetaChip>
       {note ? (
-        <FactButton
+        <MetaChipButton
           type="button"
           aria-haspopup="dialog"
           onClick={event => {
@@ -285,32 +167,28 @@ export const MySecretSantaDraw = ({
         >
           <RateReviewOutlinedIcon />
           {isUpSm ? "Le mot de l'organisateur" : "Mot de l'orga"}
-        </FactButton>
+        </MetaChipButton>
       ) : (
-        <Fact>
+        <MetaChip>
           <PeopleIcon />
           {secretSanta.users.length} participants
-        </Fact>
+        </MetaChip>
       )}
-    </Facts>
+    </SecretSantaRowActions>
   );
   const noteDialog = note && <OrganizerNoteDialog open={noteOpen} onClose={() => setNoteOpen(false)} note={note} />;
 
   if (!draw) {
     return (
       <>
-        <Band as="section" aria-label="Secret Santa">
-          <Recipient>
-            <RecipientAvatar>
-              <HourglassTopIcon fontSize="small" />
-            </RecipientAvatar>
-            <div>
-              <Eyebrow>Secret Santa · tirage en préparation</Eyebrow>
-              <RecipientName>Tu découvriras bientôt à qui offrir</RecipientName>
-            </div>
-          </Recipient>
+        <SecretSantaRow as="section" aria-label="Secret Santa">
+          <SecretSantaRowLead
+            visual={<HourglassTopIcon />}
+            eyebrow="Secret Santa · tirage en préparation"
+            title="Tu découvriras bientôt à qui offrir"
+          />
           {facts}
-        </Band>
+        </SecretSantaRow>
         {noteDialog}
       </>
     );
@@ -343,18 +221,18 @@ export const MySecretSantaDraw = ({
           onRevealed={() => setReplayScratch(false)}
         />
       )}
-      <Band as="section" aria-label="Mon Secret Santa" onClick={handleBandClick}>
-        <Recipient>
-          <RecipientAvatar src={pictureUrl} alt="">
-            {initials}
-          </RecipientAvatar>
-          <div>
-            <Eyebrow>Secret Santa · tu offres à</Eyebrow>
-            <RecipientName>{displayName}</RecipientName>
-          </div>
-        </Recipient>
+      <SecretSantaRow as="section" aria-label="Mon Secret Santa" onClick={handleRowClick}>
+        <SecretSantaRowLead
+          visual={
+            <Avatar src={pictureUrl} alt="">
+              {initials}
+            </Avatar>
+          }
+          eyebrow="Secret Santa · tu offres à"
+          title={displayName}
+        />
         {facts}
-      </Band>
+      </SecretSantaRow>
       {noteDialog}
     </>
   );
