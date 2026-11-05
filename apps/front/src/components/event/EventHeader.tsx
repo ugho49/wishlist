@@ -1,13 +1,15 @@
 import type { EventId } from '@wishlist/common';
 import type { EventAttendee } from './event.types';
 
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
 import EditIcon from '@mui/icons-material/Edit';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import HourglassTopIcon from '@mui/icons-material/HourglassTop';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 import PeopleIcon from '@mui/icons-material/People';
 import {
-  Box,
+  Avatar,
+  AvatarGroup,
   Button,
   Container,
   IconButton,
@@ -15,143 +17,71 @@ import {
   ListItemText,
   Menu,
   MenuItem,
-  Stack,
   styled,
   Tooltip,
-  Typography,
   useMediaQuery,
 } from '@mui/material';
 import { useNavigate } from '@tanstack/react-router';
 import { DateTime } from 'luxon';
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 
 import { TabValues } from '../../routes/_authenticated/_with-layout/events/$eventId/edit';
+import { Description } from '../common/Description';
 import { PageBreadcrumbs } from '../common/PageBreadcrumbs';
+import {
+  MetaChip,
+  MetaChipButton,
+  PageHero,
+  PageHeroAbout,
+  PageHeroActions,
+  PageHeroMedia,
+  PageHeroMeta,
+  PageHeroTitle,
+} from '../common/PageHero';
 import { EventIcon } from './EventIcon';
 
-const HeaderContent = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  paddingBottom: theme.spacing(2),
-  borderBottom: `1px solid ${theme.palette.divider}`,
-  flexDirection: 'row',
-  alignItems: 'center',
-  gap: theme.spacing(3),
-
-  [theme.breakpoints.down('sm')]: {
-    flexDirection: 'column',
-    gap: theme.spacing(2),
-  },
-}));
-
-const LeftSection = styled(Stack)(({ theme }) => ({
-  flexDirection: 'row',
-  gap: theme.spacing(3),
-  alignItems: 'center',
-  flex: 1,
-}));
-
-const TitleContainer = styled(Stack)(({ theme }) => ({
-  gap: theme.spacing(1),
-  flex: 1,
-  minWidth: 0,
-}));
-
-const EventTitle = styled(Box)(({ theme }) => ({
-  fontWeight: 400,
-  color: theme.palette.primary.main,
-  marginTop: 0,
-  lineHeight: 1.2,
-  wordBreak: 'break-word',
-  overflow: 'hidden',
-
-  [theme.breakpoints.down('md')]: {
-    fontSize: '1.25rem',
-  },
-  [theme.breakpoints.up('md')]: {
-    fontSize: '1.5rem',
-  },
-}));
-
-const MetadataStack = styled(Stack)(({ theme }) => ({
-  flexDirection: 'row',
-  gap: theme.spacing(3),
-  flexWrap: 'wrap',
-  alignItems: 'flex-start',
-
-  [theme.breakpoints.down('lg')]: {
-    flexDirection: 'column',
-    gap: theme.spacing(1),
-  },
-}));
-
-const MetadataBox = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  gap: theme.spacing(0.5),
-  color: theme.palette.text.secondary,
-}));
-
-const ClickableMetadataBox = styled(MetadataBox)(({ theme }) => ({
-  cursor: 'pointer',
-  transition: 'color 0.2s',
-  '&:hover': {
-    color: theme.palette.primary.main,
-  },
-}));
-
-const RightSection = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  gap: theme.spacing(1),
-  alignItems: 'center',
-}));
-
-const UpdateButton = styled(Button)(({ theme }) => ({
-  textTransform: 'none',
-  height: '40px',
-  fontWeight: 500,
-  fontSize: '0.875rem',
-  padding: theme.spacing(1, 2),
+const SquareIconButton = styled(IconButton)(({ theme }) => ({
+  width: 40,
+  height: 40,
+  borderRadius: 12,
   border: `1px solid ${theme.palette.divider}`,
+  backgroundColor: theme.palette.background.paper,
 }));
 
-const CompactIconButton = styled(IconButton)(({ theme }) => ({
-  border: `1px solid ${theme.palette.divider}`,
-  borderRadius: theme.shape.borderRadius,
-  padding: theme.spacing(1),
-  height: '40px',
-  width: '40px',
+const EditButton = styled(Button)(({ theme }) => ({
+  height: 40,
+  borderRadius: 12,
+  padding: theme.spacing(0, 2),
+  backgroundColor: theme.palette.background.paper,
 }));
 
-const ReponsiveUpdateButton = (props: { eventId: EventId }) => {
-  const { eventId } = props;
-  const isDownMd = useMediaQuery(theme => theme.breakpoints.down('md'));
-  const isUpSm = useMediaQuery(theme => theme.breakpoints.up('sm'));
-  const navigate = useNavigate();
+const AttendeeAvatars = styled(AvatarGroup)(({ theme }) => ({
+  '& .MuiAvatar-root': {
+    width: 20,
+    height: 20,
+    fontSize: '0.6rem',
+    borderWidth: 1.5,
+    borderColor: theme.palette.background.paper,
+  },
+}));
 
-  const handleNavigateToEdit = useCallback(() => {
-    void navigate({ to: '/events/$eventId/edit', params: { eventId } });
-  }, [navigate, eventId]);
-
-  if (isDownMd && isUpSm) {
-    return (
-      <Tooltip title="Modifier les informations de l'événement">
-        <CompactIconButton size="small" onClick={handleNavigateToEdit}>
-          <EditIcon fontSize="small" />
-        </CompactIconButton>
-      </Tooltip>
-    );
-  }
-
-  return (
-    <UpdateButton variant="outlined" color="primary" startIcon={<EditIcon />} onClick={handleNavigateToEdit}>
-      Modifier
-    </UpdateButton>
-  );
+const getCountdown = (eventDate: string): { label: string; className?: string } => {
+  const days = Math.round(DateTime.fromISO(eventDate).startOf('day').diff(DateTime.now().startOf('day'), 'days').days);
+  if (days < 0) return { label: 'Terminé' };
+  if (days === 0) return { label: "C'est aujourd'hui !", className: 'success' };
+  if (days === 1) return { label: 'Demain', className: 'accent' };
+  return { label: `Dans ${days} jours`, className: 'accent' };
 };
+
+const attendeeInitials = (attendee: EventAttendee) =>
+  attendee.user
+    ? `${attendee.user.firstName[0] ?? ''}${attendee.user.lastName[0] ?? ''}`.toUpperCase()
+    : (attendee.pendingEmail?.[0]?.toUpperCase() ?? '?');
 
 export type EventHeaderProps = {
   icon?: string;
   title: string;
+  description?: string;
   eventDate: string;
   eventId: EventId;
   attendees: EventAttendee[];
@@ -162,6 +92,7 @@ export type EventHeaderProps = {
 export const EventHeader = ({
   icon,
   title,
+  description,
   eventDate,
   eventId,
   attendees,
@@ -169,93 +100,99 @@ export const EventHeader = ({
   openAttendeesDialog,
 }: EventHeaderProps) => {
   const navigate = useNavigate();
+  const isUpSm = useMediaQuery(theme => theme.breakpoints.up('sm'));
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const menuOpen = Boolean(anchorEl);
+  const countdown = getCountdown(eventDate);
 
-  const handleOpenMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleCloseMenu = () => {
+  const goToEdit = (tab?: TabValues) => {
     setAnchorEl(null);
-  };
-
-  const handleSecretSanta = () => {
-    handleCloseMenu();
-    void navigate({ to: '/events/$eventId/edit', params: { eventId }, search: { tab: TabValues.secretSanta } });
-  };
-
-  const handleAttendees = () => {
-    handleCloseMenu();
-    void navigate({ to: '/events/$eventId/edit', params: { eventId }, search: { tab: TabValues.attendees } });
+    void navigate({ to: '/events/$eventId/edit', params: { eventId }, search: tab ? { tab } : {} });
   };
 
   return (
     <Container maxWidth="lg">
       <PageBreadcrumbs items={[{ label: 'Évènements', to: '/events' }, { label: title }]} />
-      <HeaderContent>
-        {/* Left section - Avatar, Title and Metadata */}
-        <LeftSection>
+
+      <PageHero>
+        <PageHeroMedia>
           <EventIcon icon={icon} size="large" />
+        </PageHeroMedia>
 
-          <TitleContainer>
-            <EventTitle>{title}</EventTitle>
+        <PageHeroTitle>{title}</PageHeroTitle>
 
-            {/* Metadata */}
-            <MetadataStack>
-              <MetadataBox>
-                <AccessTimeIcon fontSize="small" />
-                <Typography variant="body2">
-                  {DateTime.fromISO(eventDate).toLocaleString(DateTime.DATE_HUGE)}
-                </Typography>
-              </MetadataBox>
+        <PageHeroMeta>
+          <MetaChip>
+            <CalendarMonthIcon />
+            {DateTime.fromISO(eventDate).toLocaleString(isUpSm ? DateTime.DATE_HUGE : DateTime.DATE_MED)}
+          </MetaChip>
+          <MetaChip className={countdown.className}>
+            <HourglassTopIcon />
+            {countdown.label}
+          </MetaChip>
+          <MetaChipButton type="button" onClick={openAttendeesDialog}>
+            {attendees.length > 0 ? (
+              <AttendeeAvatars max={4} spacing="small">
+                {attendees.map(attendee => (
+                  <Avatar key={attendee.id} src={attendee.user?.pictureUrl ?? undefined}>
+                    {attendeeInitials(attendee)}
+                  </Avatar>
+                ))}
+              </AttendeeAvatars>
+            ) : (
+              <PeopleIcon />
+            )}
+            {attendees.length} {attendees.length > 1 ? 'participants' : 'participant'}
+          </MetaChipButton>
+        </PageHeroMeta>
 
-              <ClickableMetadataBox onClick={() => openAttendeesDialog()}>
-                <PeopleIcon fontSize="small" />
-                <Typography variant="body2">
-                  {attendees.length} {attendees.length > 1 ? 'participants' : 'participant'}
-                </Typography>
-              </ClickableMetadataBox>
-            </MetadataStack>
-          </TitleContainer>
-        </LeftSection>
-
-        {/* Right section - Action Button with Dropdown */}
         {currentUserCanEdit && (
-          <RightSection>
-            <ReponsiveUpdateButton eventId={eventId} />
-
+          <PageHeroActions>
+            {isUpSm ? (
+              <EditButton variant="outlined" startIcon={<EditIcon />} onClick={() => goToEdit()}>
+                Modifier
+              </EditButton>
+            ) : (
+              <Tooltip title="Modifier l'événement">
+                <SquareIconButton size="small" color="primary" onClick={() => goToEdit()}>
+                  <EditIcon fontSize="small" />
+                </SquareIconButton>
+              </Tooltip>
+            )}
             <Tooltip title="Plus d'options">
-              <CompactIconButton size="small" onClick={handleOpenMenu}>
-                <KeyboardArrowDownIcon />
-              </CompactIconButton>
+              <SquareIconButton
+                size="small"
+                aria-controls={anchorEl ? 'event-actions-menu' : undefined}
+                aria-haspopup="true"
+                onClick={e => setAnchorEl(e.currentTarget)}
+              >
+                <MoreVertIcon fontSize="small" />
+              </SquareIconButton>
             </Tooltip>
-          </RightSection>
+          </PageHeroActions>
         )}
-      </HeaderContent>
 
-      {/* Actions Menu */}
+        {description && (
+          <PageHeroAbout>
+            <Description text={description} variant="plain" />
+          </PageHeroAbout>
+        )}
+      </PageHero>
+
       <Menu
         id="event-actions-menu"
         anchorEl={anchorEl}
-        open={menuOpen}
-        onClose={handleCloseMenu}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'right',
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
-        }}
+        open={Boolean(anchorEl)}
+        onClose={() => setAnchorEl(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
       >
-        <MenuItem onClick={handleAttendees}>
+        <MenuItem onClick={() => goToEdit(TabValues.attendees)}>
           <ListItemIcon>
             <PeopleIcon fontSize="small" />
           </ListItemIcon>
           <ListItemText>Gérer les participants</ListItemText>
         </MenuItem>
-        <MenuItem onClick={handleSecretSanta}>
+        <MenuItem onClick={() => goToEdit(TabValues.secretSanta)}>
           <ListItemIcon>
             <CardGiftcardIcon fontSize="small" />
           </ListItemIcon>

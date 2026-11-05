@@ -33,6 +33,16 @@ query EventPageGetEvent($eventId: EventId!) {
           pictureUrl
         }
       }
+      secretSanta {
+        id
+        description
+        budget
+        status
+        users {
+          id
+          attendeeId
+        }
+      }
     }
     ... on NotFoundRejection {
       message

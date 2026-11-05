@@ -1,133 +1,103 @@
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import { alpha, Box, Collapse, Stack, styled } from '@mui/material';
+import { alpha, Button, Collapse, styled } from '@mui/material';
+import clsx from 'clsx';
 import { useLayoutEffect, useRef, useState } from 'react';
 
-import { Card } from './Card';
 import { MarkdownContent } from './MarkdownContent';
 
-const DescriptionCard = styled(Card)<{ collapsable: boolean }>(({ theme, collapsable }) => ({
-  position: 'relative',
-  padding: '12px',
-  paddingBottom: collapsable ? '25px' : undefined,
-  borderRadius: '12px',
-  color: theme.palette.text.primary,
-  backgroundColor: alpha(theme.palette.primary.main, 0.04),
-  border: `1px solid ${alpha(theme.palette.primary.main, 0.12)}`,
-  fontSize: '16px',
-  lineHeight: 1.6,
-  fontWeight: 400,
-  textAlign: 'left',
-  borderLeft: `8px solid ${theme.palette.primary.main}`,
-  cursor: collapsable ? 'pointer' : 'default',
-  transition: 'background-color 0.2s ease-in-out',
+const DEFAULT_COLLAPSED_HEIGHT = 96;
+// Avoid collapsing text that would only hide a line or two.
+const COLLAPSE_TOLERANCE = 1.3;
+
+const Root = styled('section')(({ theme }) => ({
+  minWidth: 0,
+  '&.card': {
+    padding: theme.spacing(2),
+    borderRadius: 16,
+    backgroundColor: theme.palette.background.paper,
+    border: `1px solid ${theme.palette.divider}`,
+    [theme.breakpoints.up('md')]: {
+      padding: theme.spacing(2.5, 3),
+    },
+  },
 }));
 
-const DescriptionContainer = styled(Stack)(() => ({
-  flexDirection: 'row',
-  alignItems: 'flex-start',
-  gap: '16px',
-}));
-
-const IconWrapper = styled(Box)(({ theme }) => ({
-  color: theme.palette.primary.main,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  width: '24px',
-  height: '24px',
-  paddingTop: '6px',
-  flexShrink: 0,
-}));
-
-const ContentWrapper = styled(Box)({
-  flex: 1,
-  overflow: 'hidden',
-  position: 'relative',
+const Content = styled(MarkdownContent)({
+  fontSize: '0.95rem',
+  lineHeight: 1.65,
+  maxWidth: '75ch',
+  overflowWrap: 'anywhere',
+  transition: 'mask-image 0.3s ease',
+  '&.faded': {
+    maskImage: 'linear-gradient(to bottom, #000 45%, transparent 100%)',
+  },
 });
 
-const EllipsisOverlay = styled(Box)(() => ({
-  position: 'absolute',
-  bottom: 0,
-  left: 0,
-  right: 0,
-  height: '25px',
-  pointerEvents: 'none',
-  display: 'flex',
-  alignItems: 'flex-end',
-  justifyContent: 'center',
-  paddingBottom: '4px',
+const ToggleButton = styled(Button)(({ theme }) => ({
+  marginTop: theme.spacing(0.5),
+  marginLeft: theme.spacing(-1),
+  padding: theme.spacing(0.5, 1),
+  minHeight: 32,
+  fontSize: '0.85rem',
+  fontWeight: 600,
+  color: 'inherit',
+  '&:hover': {
+    backgroundColor: alpha(theme.palette.text.primary, 0.06),
+    boxShadow: 'none',
+  },
+  '& .MuiButton-endIcon': {
+    marginLeft: 2,
+    transition: 'transform 0.2s ease',
+  },
+  '&.expanded .MuiButton-endIcon': {
+    transform: 'rotate(180deg)',
+  },
 }));
 
-const MAX_HEIGHT = 110; // Maximum height in pixels before showing collapse button
+export type DescriptionProps = {
+  text: string;
+  variant?: 'card' | 'plain';
+  collapsedHeight?: number;
+  className?: string;
+};
 
-export const Description = ({ text }: { text: string }) => {
-  const [isCollapsable, setIsCollapsable] = useState<boolean | null>(null);
-  const [isExpanded, setIsExpanded] = useState(false);
+export const Description = ({
+  text,
+  variant = 'card',
+  collapsedHeight = DEFAULT_COLLAPSED_HEIGHT,
+  className,
+}: DescriptionProps) => {
   const contentRef = useRef<HTMLDivElement>(null);
-  const isInitialized = useRef(false);
+  const [collapsable, setCollapsable] = useState(false);
+  const [expanded, setExpanded] = useState(false);
 
   useLayoutEffect(() => {
-    if (contentRef.current && !isInitialized.current) {
-      const contentHeight = contentRef.current.scrollHeight;
-      setIsCollapsable(contentHeight > MAX_HEIGHT);
-      isInitialized.current = true;
-    }
-  }, []);
-
-  const toggleExpanded = () => {
-    if (isCollapsable) {
-      setIsExpanded(prev => !prev);
-    }
-  };
-
-  // Don't render until we know if it's collapsable or not
-  if (isCollapsable === null) {
-    return (
-      <DescriptionCard collapsable={false} onClick={undefined}>
-        <DescriptionContainer>
-          <IconWrapper>
-            <InfoOutlinedIcon fontSize="small" />
-          </IconWrapper>
-          <ContentWrapper>
-            <Box ref={contentRef} sx={{ opacity: 0 }}>
-              <MarkdownContent text={text} />
-            </Box>
-          </ContentWrapper>
-        </DescriptionContainer>
-      </DescriptionCard>
-    );
-  }
+    const node = contentRef.current;
+    if (!node) return;
+    const measure = () => setCollapsable(node.scrollHeight > collapsedHeight * COLLAPSE_TOLERANCE);
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [collapsedHeight]);
 
   return (
-    <DescriptionCard collapsable={isCollapsable} onClick={toggleExpanded}>
-      <DescriptionContainer>
-        <IconWrapper>
-          <InfoOutlinedIcon fontSize="small" />
-        </IconWrapper>
-        <ContentWrapper>
-          <Collapse
-            in={isExpanded || !isCollapsable}
-            collapsedSize={isCollapsable ? MAX_HEIGHT : undefined}
-            timeout={300}
-          >
-            <Box ref={contentRef}>
-              <MarkdownContent text={text} />
-            </Box>
-          </Collapse>
-        </ContentWrapper>
-      </DescriptionContainer>
-      {isCollapsable && (
-        <EllipsisOverlay>
-          <ExpandMoreIcon
-            fontSize="small"
-            sx={{
-              transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-              transition: 'transform 0.2s ease-in-out',
-            }}
-          />
-        </EllipsisOverlay>
+    <Root className={clsx(variant, className)}>
+      <Collapse in={expanded || !collapsable} collapsedSize={collapsable ? collapsedHeight : undefined} timeout={300}>
+        <Content ref={contentRef} text={text} className={clsx(collapsable && !expanded && 'faded')} />
+      </Collapse>
+      {collapsable && (
+        <ToggleButton
+          size="small"
+          variant="text"
+          className={clsx(expanded && 'expanded')}
+          endIcon={<ExpandMoreIcon />}
+          aria-expanded={expanded}
+          onClick={() => setExpanded(prev => !prev)}
+        >
+          {expanded ? 'Voir moins' : 'Voir plus'}
+        </ToggleButton>
       )}
-    </DescriptionCard>
+    </Root>
   );
 };

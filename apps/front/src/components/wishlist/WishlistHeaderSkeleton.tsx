@@ -1,26 +1,6 @@
-import { Box, Container, Skeleton, Stack, styled } from '@mui/material';
+import { Container, Skeleton, styled } from '@mui/material';
 
-const HeaderContent = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  paddingBottom: theme.spacing(2),
-  borderBottom: `1px solid ${theme.palette.divider}`,
-  flexDirection: 'row',
-  alignItems: 'center',
-  gap: theme.spacing(3),
-
-  [theme.breakpoints.down('md')]: {
-    flexDirection: 'column',
-    gap: theme.spacing(2),
-  },
-}));
-
-const LeftSection = styled(Stack)(({ theme }) => ({
-  flexDirection: 'row',
-  gap: theme.spacing(3),
-  alignItems: 'center',
-  flex: 1,
-  width: '100%',
-}));
+import { PageHero, PageHeroMedia, PageHeroMeta, PageHeroTitle } from '../common/PageHero';
 
 const BreadcrumbSkeleton = styled(Skeleton)(({ theme }) => ({
   fontSize: '0.75rem',
@@ -28,24 +8,20 @@ const BreadcrumbSkeleton = styled(Skeleton)(({ theme }) => ({
   marginBottom: theme.spacing(2),
 }));
 
-const TitleContainer = styled(Stack)(({ theme }) => ({
-  gap: theme.spacing(1),
-  flex: 1,
-  minWidth: 0,
-}));
-
 export const WishlistHeaderSkeleton = () => (
   <Container maxWidth="lg">
     <BreadcrumbSkeleton animation="wave" variant="text" />
-    <HeaderContent>
-      <LeftSection>
-        <Skeleton animation="wave" variant="circular" width={75} height={75} />
-
-        <TitleContainer>
-          <Skeleton animation="wave" variant="text" width="45%" sx={{ fontSize: '1.5rem' }} />
-          <Skeleton animation="wave" variant="text" width={160} sx={{ fontSize: '0.875rem' }} />
-        </TitleContainer>
-      </LeftSection>
-    </HeaderContent>
+    <PageHero aria-busy>
+      <PageHeroMedia className="round">
+        <Skeleton animation="wave" variant="circular" width="100%" height="100%" />
+      </PageHeroMedia>
+      <PageHeroTitle>
+        <Skeleton animation="wave" variant="text" width="50%" />
+      </PageHeroTitle>
+      <PageHeroMeta>
+        <Skeleton animation="wave" variant="rounded" width={150} height={30} sx={{ borderRadius: 999 }} />
+        <Skeleton animation="wave" variant="rounded" width={120} height={30} sx={{ borderRadius: 999 }} />
+      </PageHeroMeta>
+    </PageHero>
   </Container>
 );
