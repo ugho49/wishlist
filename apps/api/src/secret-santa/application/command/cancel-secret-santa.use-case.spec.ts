@@ -87,7 +87,7 @@ describe('CancelSecretSantaUseCase', () => {
 
     const savedSanta = secretSantaRepository.save.mock.calls[0]?.[0];
     expect(savedSanta?.isCreated()).toBe(true);
-    expect(savedSanta?.users.every(user => user.drawUserId === undefined)).toBe(true);
+    expect(savedSanta?.users.every(user => user.drawUserId === undefined && !user.hasRevealedDraw())).toBe(true);
 
     expect(eventBus.publish).toHaveBeenCalledTimes(1);
     const published = eventBus.publish.mock.calls[0]?.[0];
@@ -97,5 +97,22 @@ describe('CancelSecretSantaUseCase', () => {
       eventId: event.id,
       attendeeEmails: event.attendees.map(attendee => attendee.getEmail()),
     });
+  });
+
+  it('should clear an already revealed draw', async () => {
+    const giver = new SecretSantaUserBuilder().withAttendeeId(event.attendees[0]!.id).build();
+    const receiver = new SecretSantaUserBuilder()
+      .withAttendeeId(event.attendees[1]!.id)
+      .withDraw(giver.id)
+      .revealed()
+      .build();
+    secretSantaRepository.findByIdOrFail.mockResolvedValueOnce(
+      new SecretSantaBuilder().withEventId(event.id).withUsers([giver, receiver]).started().build(),
+    );
+
+    await useCase.execute({ currentUser: toCurrentUser(creator), secretSantaId: santa.id });
+
+    const savedUsers = secretSantaUserRepository.saveAll.mock.calls[0]?.[0];
+    expect(savedUsers?.every(user => user.drawUserId === undefined && !user.hasRevealedDraw())).toBe(true);
   });
 });

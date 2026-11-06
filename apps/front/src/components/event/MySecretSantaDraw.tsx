@@ -1,4 +1,4 @@
-import type { AttendeeId, EventId, UserId } from '@wishlist/common';
+import type { AttendeeId, EventId } from '@wishlist/common';
 import type { EventDetail } from './event.types';
 
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
@@ -109,7 +109,6 @@ type MySecretSantaDrawProps = {
   eventDate: string;
   secretSanta?: EventDetail['secretSanta'];
   currentAttendeeId?: AttendeeId;
-  currentUserId?: UserId;
 };
 
 export const MySecretSantaDraw = ({
@@ -118,12 +117,9 @@ export const MySecretSantaDraw = ({
   eventDate,
   secretSanta,
   currentAttendeeId,
-  currentUserId,
 }: MySecretSantaDrawProps) => {
-  const { mySecretSantaDraw: draw } = useMySecretSantaDraw(eventId);
-  const drawSignature =
-    secretSanta?.status === SecretSantaStatus.Started ? `${secretSanta.id}:${secretSanta.updatedAt}` : undefined;
-  const { isRevealed, markRevealed } = useSecretSantaDrawReveal(eventId, currentUserId, drawSignature);
+  const { mySecretSantaDraw: draw, revealed } = useMySecretSantaDraw(eventId);
+  const { isRevealed, markRevealed } = useSecretSantaDrawReveal(eventId, revealed);
   const prefersReducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)');
   const isUpSm = useMediaQuery(theme => theme.breakpoints.up('sm'));
   const [replayScratch, setReplayScratch] = useState(false);
@@ -200,7 +196,7 @@ export const MySecretSantaDraw = ({
   const pictureUrl = draw.user?.pictureUrl ?? undefined;
   const initials = draw.user ? `${draw.user.firstName[0] ?? ''}${draw.user.lastName[0] ?? ''}`.toUpperCase() : '?';
   const eventIsPast = DateTime.fromISO(eventDate).startOf('day') < DateTime.now().startOf('day');
-  const firstVisitScratch = Boolean(currentUserId) && !isRevealed && !prefersReducedMotion && !eventIsPast;
+  const firstVisitScratch = !isRevealed && !prefersReducedMotion && !eventIsPast;
 
   if (firstVisitScratch) {
     return (

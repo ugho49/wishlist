@@ -1,7 +1,7 @@
 import { relations } from 'drizzle-orm';
 import { foreignKey, pgTable, uniqueIndex } from 'drizzle-orm/pg-core';
 
-import { timestamps } from '../helpers';
+import { timestamps, timestampWithTimezone } from '../helpers';
 import { attendeeId, secretSantaId, secretSantaUserId } from '../ids';
 import { eventAttendee } from './event-attendee.schema';
 import { secretSanta } from './secret-santa.schema';
@@ -13,6 +13,7 @@ export const secretSantaUser = pgTable(
     secretSantaId: secretSantaId('secret_santa_id').notNull(),
     attendeeId: attendeeId('attendee_id').notNull(),
     drawUserId: secretSantaUserId('draw_user_id'),
+    drawRevealedAt: timestampWithTimezone('draw_revealed_at'),
     exclusions: secretSantaUserId().array().default([]).notNull(),
     ...timestamps,
   },

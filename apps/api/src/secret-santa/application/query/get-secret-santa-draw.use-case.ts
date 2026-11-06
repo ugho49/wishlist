@@ -14,6 +14,7 @@ export type GetSecretSantaDrawInput = {
 
 export type GetSecretSantaDrawResult = {
   attendee: EventAttendee | undefined;
+  revealed: boolean;
 };
 
 @Injectable()
@@ -24,15 +25,21 @@ export class GetSecretSantaDrawUseCase {
   ) {}
 
   async execute(query: GetSecretSantaDrawInput): Promise<GetSecretSantaDrawResult> {
-    const secretSantaUser = await this.secretSantaUserRepository.findDrawSecretSantaUserForEvent({
+    const participant = await this.secretSantaUserRepository.findParticipantForEvent({
       eventId: query.eventId,
       userId: query.currentUser.id,
     });
 
-    if (!secretSantaUser) return { attendee: undefined };
+    if (!participant?.drawUserId) return { attendee: undefined, revealed: false };
 
-    const attendee = await this.attendeeRepository.findById(secretSantaUser.attendeeId);
+    const drawnUser = await this.secretSantaUserRepository.findById(participant.drawUserId);
 
-    return { attendee };
+    if (!drawnUser) return { attendee: undefined, revealed: false };
+
+    const attendee = await this.attendeeRepository.findById(drawnUser.attendeeId);
+
+    if (!attendee) return { attendee: undefined, revealed: false };
+
+    return { attendee, revealed: participant.hasRevealedDraw() };
   }
 }

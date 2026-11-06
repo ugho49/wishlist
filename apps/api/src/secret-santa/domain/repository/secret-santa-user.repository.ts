@@ -4,8 +4,9 @@ import type { SecretSantaUser } from '../model/secret-santa-user.model';
 
 export interface SecretSantaUserRepository {
   newId(): SecretSantaUserId;
+  findById(id: SecretSantaUserId): Promise<SecretSantaUser | undefined>;
   findBySecretSantaId(secretSantaId: SecretSantaId): Promise<SecretSantaUser[]>;
-  findDrawSecretSantaUserForEvent(param: { eventId: EventId; userId: UserId }): Promise<SecretSantaUser | undefined>;
+  findParticipantForEvent(param: { eventId: EventId; userId: UserId }): Promise<SecretSantaUser | undefined>;
   saveAll(users: SecretSantaUser[], tx?: DrizzleTransaction): Promise<void>;
   delete(id: SecretSantaUserId, tx?: DrizzleTransaction): Promise<void>;
 }
