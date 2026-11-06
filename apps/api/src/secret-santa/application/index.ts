@@ -3,6 +3,7 @@ import { CancelSecretSantaUseCase } from './command/cancel-secret-santa.use-case
 import { CreateSecretSantaUseCase } from './command/create-secret-santa.use-case';
 import { DeleteSecretSantaUseCase } from './command/delete-secret-santa.use-case';
 import { DeleteSecretSantaUserUseCase } from './command/delete-secret-santa-user.use-case';
+import { RevealSecretSantaDrawUseCase } from './command/reveal-secret-santa-draw.use-case';
 import { StartSecretSantaUseCase } from './command/start-secret-santa.use-case';
 import { UpdateSecretSantaUseCase } from './command/update-secret-santa.use-case';
 import { UpdateSecretSantaUserUseCase } from './command/update-secret-santa-user.use-case';
@@ -25,6 +26,7 @@ export const handlers = [
   DeleteSecretSantaUseCase,
   StartSecretSantaUseCase,
   CancelSecretSantaUseCase,
+  RevealSecretSantaDrawUseCase,
   AddSecretSantaUsersUseCase,
   UpdateSecretSantaUserUseCase,
   DeleteSecretSantaUserUseCase,

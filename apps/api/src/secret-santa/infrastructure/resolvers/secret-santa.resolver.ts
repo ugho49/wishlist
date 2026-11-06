@@ -26,6 +26,7 @@ import {
   type GetMySecretSantasResult,
   type GetSecretSantaForEventResult,
   type PaginationFilters,
+  type RevealMySecretSantaDrawResult,
   type StartSecretSantaResult,
   type UpdateSecretSantaInput,
   type UpdateSecretSantaResult,
@@ -37,6 +38,7 @@ import { CancelSecretSantaUseCase } from '../../application/command/cancel-secre
 import { CreateSecretSantaUseCase } from '../../application/command/create-secret-santa.use-case';
 import { DeleteSecretSantaUseCase } from '../../application/command/delete-secret-santa.use-case';
 import { DeleteSecretSantaUserUseCase } from '../../application/command/delete-secret-santa-user.use-case';
+import { RevealSecretSantaDrawUseCase } from '../../application/command/reveal-secret-santa-draw.use-case';
 import { StartSecretSantaUseCase } from '../../application/command/start-secret-santa.use-case';
 import { UpdateSecretSantaUseCase } from '../../application/command/update-secret-santa.use-case';
 import { UpdateSecretSantaUserUseCase } from '../../application/command/update-secret-santa-user.use-case';
@@ -68,6 +70,7 @@ export class SecretSantaResolver {
     private readonly addSecretSantaUsersUseCase: AddSecretSantaUsersUseCase,
     private readonly updateSecretSantaUserUseCase: UpdateSecretSantaUserUseCase,
     private readonly deleteSecretSantaUserUseCase: DeleteSecretSantaUserUseCase,
+    private readonly revealSecretSantaDrawUseCase: RevealSecretSantaDrawUseCase,
   ) {}
 
   @Query()
@@ -85,9 +88,13 @@ export class SecretSantaResolver {
     @Args('eventId', new ZodPipe(EventIdSchema)) eventId: EventId,
     @GqlCurrentUser() currentUser: ICurrentUser,
   ): Promise<GetMySecretSantaDrawResult | null> {
-    const { attendee } = await this.getSecretSantaDrawUseCase.execute({ currentUser, eventId });
+    const { attendee, revealed } = await this.getSecretSantaDrawUseCase.execute({ currentUser, eventId });
     if (!attendee) return null;
-    return eventMapper.toGqlEventAttendee(attendee);
+    return {
+      __typename: 'MySecretSantaDraw',
+      attendee: eventMapper.toGqlEventAttendee(attendee),
+      revealed,
+    };
   }
 
   @Query()
@@ -222,6 +229,15 @@ export class SecretSantaResolver {
     @GqlCurrentUser() currentUser: ICurrentUser,
   ): Promise<DeleteSecretSantaUserResult> {
     await this.deleteSecretSantaUserUseCase.execute({ secretSantaId: id, secretSantaUserId, currentUser });
+    return { __typename: 'VoidOutput', success: true };
+  }
+
+  @Mutation()
+  async revealMySecretSantaDraw(
+    @Args('eventId', new ZodPipe(EventIdSchema)) eventId: EventId,
+    @GqlCurrentUser() currentUser: ICurrentUser,
+  ): Promise<RevealMySecretSantaDrawResult> {
+    await this.revealSecretSantaDrawUseCase.execute({ currentUser, eventId });
     return { __typename: 'VoidOutput', success: true };
   }
 }

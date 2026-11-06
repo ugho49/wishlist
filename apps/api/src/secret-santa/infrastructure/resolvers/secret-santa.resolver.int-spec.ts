@@ -7,7 +7,7 @@ import { DateTime } from 'luxon';
 import { AttendeeRole } from '../../../event/domain/attendee-role.enum';
 import { SecretSantaStatus } from '../../domain/secret-santa-status.enum';
 
-const SUCCESS_TYPENAMES = ['SecretSanta', 'EventAttendee', 'VoidOutput', 'AddSecretSantaUsersOutput'];
+const SUCCESS_TYPENAMES = ['SecretSanta', 'MySecretSantaDraw', 'VoidOutput', 'AddSecretSantaUsersOutput'];
 
 describe('SecretSantaResolver (GraphQL)', () => {
   const { getRequest, getFixtures, expectTable, expectMail } = useTestApp();
@@ -142,14 +142,17 @@ describe('SecretSantaResolver (GraphQL)', () => {
       query GetMySecretSantaDraw($eventId: EventId!) {
         mySecretSantaDraw(eventId: $eventId) {
           __typename
-          ... on EventAttendee {
-            id
-            role
-            user {
+          ... on MySecretSantaDraw {
+            revealed
+            attendee {
               id
-              email
-              firstName
-              lastName
+              role
+              user {
+                id
+                email
+                firstName
+                lastName
+              }
             }
           }
         }
@@ -219,16 +222,146 @@ describe('SecretSantaResolver (GraphQL)', () => {
       const res = await request.post('/graphql').send({ query, variables: { eventId } }).expect(200);
 
       expect(res.body.data.mySecretSantaDraw).toMatchObject({
-        __typename: 'EventAttendee',
-        id: targetAttendeeId,
-        role: 'PARTICIPANT',
-        user: {
-          id: targetUserId,
-          email: 'target@test.fr',
-          firstName: 'Target',
-          lastName: 'User',
+        __typename: 'MySecretSantaDraw',
+        revealed: false,
+        attendee: {
+          id: targetAttendeeId,
+          role: 'PARTICIPANT',
+          user: {
+            id: targetUserId,
+            email: 'target@test.fr',
+            firstName: 'Target',
+            lastName: 'User',
+          },
         },
       });
+    });
+
+    it('should return the draw as already revealed when the participant scratched it', async () => {
+      const { eventId, attendeeId } = await fixtures.insertEventWithMaintainer({
+        title: 'Test Event',
+        description: 'Test Description',
+        maintainerId: currentUserId,
+      });
+
+      const targetUserId = await fixtures.insertUser({
+        email: 'revealed-target@test.fr',
+        firstname: 'Revealed',
+        lastname: 'Target',
+      });
+      const targetAttendeeId = await fixtures.insertActiveAttendee({ eventId, userId: targetUserId });
+
+      const secretSantaId = await fixtures.insertSecretSanta({
+        eventId,
+        status: SecretSantaStatus.STARTED,
+      });
+
+      const targetSecretSantaUserId = await fixtures.insertSecretSantaUser({
+        secretSantaId,
+        attendeeId: targetAttendeeId,
+      });
+
+      await fixtures.insertSecretSantaUser({
+        secretSantaId,
+        attendeeId,
+        drawUserId: targetSecretSantaUserId,
+        drawRevealedAt: new Date('2026-01-01T00:00:00.000Z'),
+      });
+
+      const res = await request.post('/graphql').send({ query, variables: { eventId } }).expect(200);
+
+      expect(res.body.data.mySecretSantaDraw).toMatchObject({
+        __typename: 'MySecretSantaDraw',
+        revealed: true,
+        attendee: { id: targetAttendeeId },
+      });
+    });
+  });
+
+  describe('Mutation revealMySecretSantaDraw', () => {
+    const query = /* GraphQL */ `
+      mutation RevealMySecretSantaDraw($eventId: EventId!) {
+        revealMySecretSantaDraw(eventId: $eventId) {
+          __typename
+          ... on VoidOutput {
+            success
+          }
+          ... on NotFoundRejection {
+            message
+          }
+        }
+      }
+    `;
+
+    it('should not succeed when not authenticated', async () => {
+      const unauthenticatedRequest = await getRequest();
+
+      const res = await unauthenticatedRequest
+        .post('/graphql')
+        .send({ query, variables: { eventId: uuid() } })
+        .expect(200);
+
+      expectNotSuccess(res, 'revealMySecretSantaDraw');
+    });
+
+    it('should return NotFoundRejection when the current user has no draw', async () => {
+      const { eventId, attendeeId } = await fixtures.insertEventWithMaintainer({
+        title: 'Test Event',
+        maintainerId: currentUserId,
+      });
+      const secretSantaId = await fixtures.insertSecretSanta({
+        eventId,
+        status: SecretSantaStatus.CREATED,
+      });
+      await fixtures.insertSecretSantaUser({ secretSantaId, attendeeId });
+
+      const res = await request.post('/graphql').send({ query, variables: { eventId } }).expect(200);
+
+      expect(res.body.data.revealMySecretSantaDraw).toMatchObject({ __typename: 'NotFoundRejection' });
+      await expectTable(Fixtures.SECRET_SANTA_USER_TABLE)
+        .row(0)
+        .expectColumn('draw_revealed_at', value => {
+          expect(value).toBeNull();
+        });
+    });
+
+    it('should store the reveal on the current participant', async () => {
+      const { eventId, attendeeId } = await fixtures.insertEventWithMaintainer({
+        title: 'Test Event',
+        maintainerId: currentUserId,
+      });
+      const targetUserId = await fixtures.insertUser({
+        email: 'reveal-target@test.fr',
+        firstname: 'Reveal',
+        lastname: 'Target',
+      });
+      const targetAttendeeId = await fixtures.insertActiveAttendee({ eventId, userId: targetUserId });
+      const secretSantaId = await fixtures.insertSecretSanta({
+        eventId,
+        status: SecretSantaStatus.STARTED,
+      });
+      const targetSecretSantaUserId = await fixtures.insertSecretSantaUser({
+        secretSantaId,
+        attendeeId: targetAttendeeId,
+      });
+      const currentSecretSantaUserId = await fixtures.insertSecretSantaUser({
+        secretSantaId,
+        attendeeId,
+        drawUserId: targetSecretSantaUserId,
+      });
+
+      const res = await request.post('/graphql').send({ query, variables: { eventId } }).expect(200);
+
+      expect(res.body.data.revealMySecretSantaDraw).toMatchObject({ __typename: 'VoidOutput', success: true });
+      await expectTable(Fixtures.SECRET_SANTA_USER_TABLE, { ctid: 'ASC' }).row(1).toMatchObject({
+        id: currentSecretSantaUserId,
+        draw_user_id: targetSecretSantaUserId,
+      });
+      await expectTable(Fixtures.SECRET_SANTA_USER_TABLE, { ctid: 'ASC' })
+        .row(1)
+        .expectColumn('draw_revealed_at', value => {
+          expect(value).toBeTruthy();
+        });
     });
   });
 
@@ -943,6 +1076,7 @@ describe('SecretSantaResolver (GraphQL)', () => {
         secret_santa_id: secretSantaId,
         attendee_id: attendee2Id,
         draw_user_id: null,
+        draw_revealed_at: null,
         exclusions: [],
         created_at: expect.toBeDate(),
         updated_at: expect.toBeDate(),

@@ -20,8 +20,9 @@ describe('GetSecretSantaDrawUseCase', () => {
   let useCase: GetSecretSantaDrawUseCase;
   let creator: User;
   let participant: User;
-  let attendee: EventAttendee;
-  let santaUser: SecretSantaUser;
+  let drawnAttendee: EventAttendee;
+  let participantSantaUser: SecretSantaUser;
+  let drawnSantaUser: SecretSantaUser;
 
   beforeAll(() => {
     Logger.overrideLogger(false);
@@ -33,40 +34,77 @@ describe('GetSecretSantaDrawUseCase', () => {
     creator = new UserBuilder().withEmail('creator@test.fr').build();
     participant = new UserBuilder().withEmail('participant@test.fr').build();
     const event = new EventBuilder().withCreator(creator).withAttendee(participant).build();
-    attendee = event.attendees[1]!;
-    santaUser = new SecretSantaUserBuilder().withAttendeeId(attendee.id).build();
+    drawnAttendee = event.attendees[1]!;
+    drawnSantaUser = new SecretSantaUserBuilder().withAttendeeId(drawnAttendee.id).build();
+    participantSantaUser = new SecretSantaUserBuilder()
+      .withAttendeeId(event.attendees[0]!.id)
+      .withDraw(drawnSantaUser.id)
+      .build();
 
-    secretSantaUserRepository.findDrawSecretSantaUserForEvent.mockResolvedValue(santaUser);
-    attendeeRepository.findById.mockResolvedValue(attendee);
+    secretSantaUserRepository.findParticipantForEvent.mockResolvedValue(participantSantaUser);
+    secretSantaUserRepository.findById.mockResolvedValue(drawnSantaUser);
+    attendeeRepository.findById.mockResolvedValue(drawnAttendee);
 
     useCase = new GetSecretSantaDrawUseCase(secretSantaUserRepository, attendeeRepository);
   });
 
-  it('should return undefined when there is no draw for the current user', async () => {
-    secretSantaUserRepository.findDrawSecretSantaUserForEvent.mockResolvedValueOnce(undefined);
+  it('should return no draw when the current user is not in the secret santa', async () => {
+    secretSantaUserRepository.findParticipantForEvent.mockResolvedValueOnce(undefined);
 
-    const result = await useCase.execute({ currentUser: toCurrentUser(creator), eventId: attendee.eventId });
+    const result = await useCase.execute({ currentUser: toCurrentUser(creator), eventId: drawnAttendee.eventId });
 
-    expect(result.attendee).toBeUndefined();
+    expect(result).toEqual({ attendee: undefined, revealed: false });
+    expect(secretSantaUserRepository.findById).not.toHaveBeenCalled();
     expect(attendeeRepository.findById).not.toHaveBeenCalled();
   });
 
-  it('should return undefined when the drawn attendee cannot be found', async () => {
-    attendeeRepository.findById.mockResolvedValueOnce(undefined);
+  it('should return no draw when the secret santa has not been started', async () => {
+    secretSantaUserRepository.findParticipantForEvent.mockResolvedValueOnce(
+      new SecretSantaUserBuilder().withAttendeeId(drawnAttendee.id).build(),
+    );
 
-    const result = await useCase.execute({ currentUser: toCurrentUser(creator), eventId: attendee.eventId });
+    const result = await useCase.execute({ currentUser: toCurrentUser(creator), eventId: drawnAttendee.eventId });
 
-    expect(result.attendee).toBeUndefined();
-    expect(attendeeRepository.findById).toHaveBeenCalledWith(santaUser.attendeeId);
+    expect(result).toEqual({ attendee: undefined, revealed: false });
+    expect(secretSantaUserRepository.findById).not.toHaveBeenCalled();
+    expect(attendeeRepository.findById).not.toHaveBeenCalled();
   });
 
-  it('should return the drawn attendee', async () => {
-    const result = await useCase.execute({ currentUser: toCurrentUser(creator), eventId: attendee.eventId });
+  it('should return no draw when the drawn participant cannot be found', async () => {
+    secretSantaUserRepository.findById.mockResolvedValueOnce(undefined);
 
-    expect(result.attendee).toBe(attendee);
-    expect(secretSantaUserRepository.findDrawSecretSantaUserForEvent).toHaveBeenCalledWith({
-      eventId: attendee.eventId,
+    const result = await useCase.execute({ currentUser: toCurrentUser(creator), eventId: drawnAttendee.eventId });
+
+    expect(result).toEqual({ attendee: undefined, revealed: false });
+    expect(attendeeRepository.findById).not.toHaveBeenCalled();
+  });
+
+  it('should return no draw when the drawn attendee cannot be found', async () => {
+    attendeeRepository.findById.mockResolvedValueOnce(undefined);
+
+    const result = await useCase.execute({ currentUser: toCurrentUser(creator), eventId: drawnAttendee.eventId });
+
+    expect(result).toEqual({ attendee: undefined, revealed: false });
+    expect(attendeeRepository.findById).toHaveBeenCalledWith(drawnSantaUser.attendeeId);
+  });
+
+  it('should return the drawn attendee as not yet revealed', async () => {
+    const result = await useCase.execute({ currentUser: toCurrentUser(creator), eventId: drawnAttendee.eventId });
+
+    expect(result).toEqual({ attendee: drawnAttendee, revealed: false });
+    expect(secretSantaUserRepository.findParticipantForEvent).toHaveBeenCalledWith({
+      eventId: drawnAttendee.eventId,
       userId: creator.id,
     });
+    expect(secretSantaUserRepository.findById).toHaveBeenCalledWith(drawnSantaUser.id);
+  });
+
+  it('should return the drawn attendee as already revealed', async () => {
+    secretSantaUserRepository.findParticipantForEvent.mockResolvedValueOnce(participantSantaUser.revealDraw());
+
+    const result = await useCase.execute({ currentUser: toCurrentUser(creator), eventId: drawnAttendee.eventId });
+
+    expect(result.attendee).toBe(drawnAttendee);
+    expect(result.revealed).toBe(true);
   });
 });

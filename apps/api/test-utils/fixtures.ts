@@ -345,13 +345,14 @@ export class Fixtures {
     attendeeId: string;
     drawUserId?: string;
     exclusions?: string[];
+    drawRevealedAt?: Date;
   }): Promise<string> {
     const id = uuid();
-    const { secretSantaId, attendeeId, drawUserId, exclusions } = parameters;
+    const { secretSantaId, attendeeId, drawUserId, exclusions, drawRevealedAt } = parameters;
 
     await this.sql.unsafe(
-      `INSERT INTO ${Fixtures.SECRET_SANTA_USER_TABLE} (id, secret_santa_id, attendee_id, draw_user_id, exclusions) VALUES ($1, $2, $3, $4, $5)`,
-      [id, secretSantaId, attendeeId, drawUserId, toSqlArray(exclusions ?? [])],
+      `INSERT INTO ${Fixtures.SECRET_SANTA_USER_TABLE} (id, secret_santa_id, attendee_id, draw_user_id, exclusions, draw_revealed_at) VALUES ($1, $2, $3, $4, $5, $6)`,
+      [id, secretSantaId, attendeeId, drawUserId, toSqlArray(exclusions ?? []), drawRevealedAt ?? null],
     );
 
     return id;

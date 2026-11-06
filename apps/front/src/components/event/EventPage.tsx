@@ -78,7 +78,6 @@ export const EventPage = ({ eventId }: EventPageProps) => {
         eventDate={loadedEvent.eventDate}
         secretSanta={loadedEvent.secretSanta}
         currentAttendeeId={currentAttendeeId}
-        currentUserId={currentUserId}
       />
     );
   };

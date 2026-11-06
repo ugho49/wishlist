@@ -18,7 +18,7 @@ export const useMySecretSantaDraw = (eventId: EventId) => {
   );
 
   const rejection = data && isRejection(data) ? data : undefined;
-  const mySecretSantaDraw = data && !isRejection(data) ? data : undefined;
+  const draw = data && !isRejection(data) ? data : undefined;
 
   useEffect(() => {
     if (rejection) {
@@ -26,5 +26,10 @@ export const useMySecretSantaDraw = (eventId: EventId) => {
     }
   }, [rejection, addToast]);
 
-  return { mySecretSantaDraw, rejection, loading: isLoading };
+  return {
+    mySecretSantaDraw: draw?.attendee,
+    revealed: draw?.revealed ?? false,
+    rejection,
+    loading: isLoading,
+  };
 };

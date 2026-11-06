@@ -134,6 +134,13 @@
       "when": 1793698800958,
       "tag": "0018_add-item-digest-receipt",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1793957444564,
+      "tag": "0019_add-secret-santa-draw-revealed-at",
+      "breakpoints": true
     }
   ]
 }

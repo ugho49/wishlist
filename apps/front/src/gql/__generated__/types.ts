@@ -283,7 +283,7 @@ export type GetMyEventsResult = ForbiddenRejection | GetEventsPagedResponse | In
 
 export type GetMyReservedItemsResult = ForbiddenRejection | GetReservedItemsPagedResponse | InternalErrorRejection | UnauthorizedRejection;
 
-export type GetMySecretSantaDrawResult = EventAttendee | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection;
+export type GetMySecretSantaDrawResult = ForbiddenRejection | InternalErrorRejection | MySecretSantaDraw | UnauthorizedRejection;
 
 export type GetMySecretSantasResult = ForbiddenRejection | GetSecretSantasPagedResponse | InternalErrorRejection | UnauthorizedRejection;
 
@@ -444,6 +444,7 @@ export type Mutation = {
   removeWishlistLogo: RemoveWishlistLogoResult;
   requestEmailChange: RequestEmailChangeResult;
   resetPassword: ResetPasswordResult;
+  revealMySecretSantaDraw: RevealMySecretSantaDrawResult;
   revokeSession: RevokeSessionResult;
   scanItemUrl: ScanItemUrlResult;
   sendResetPasswordEmail: SendResetPasswordEmailResult;
@@ -662,6 +663,11 @@ export type MutationResetPasswordArgs = {
 };
 
 
+export type MutationRevealMySecretSantaDrawArgs = {
+  eventId: Scalars['EventId']['input'];
+};
+
+
 export type MutationRevokeSessionArgs = {
   input: RevokeSessionInput;
 };
@@ -759,6 +765,12 @@ export type MyReservedItemsFilters = {
   limit?: InputMaybe<Scalars['Int']['input']>;
   page?: InputMaybe<Scalars['Int']['input']>;
   period?: InputMaybe<ReservedItemPeriod>;
+};
+
+export type MySecretSantaDraw = {
+  __typename?: 'MySecretSantaDraw';
+  attendee: EventAttendee;
+  revealed: Scalars['Boolean']['output'];
 };
 
 export type NotFoundRejection = {
@@ -966,6 +978,8 @@ export type ResetPasswordInput = {
 };
 
 export type ResetPasswordResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+
+export type RevealMySecretSantaDrawResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | VoidOutput;
 
 export type RevokeSessionInput = {
   sessionId: Scalars['UserSessionId']['input'];

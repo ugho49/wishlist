@@ -7,6 +7,8 @@ import { SecretSantaUser } from '../../src/secret-santa/domain/model/secret-sant
 type SecretSantaUserBuilderData = {
   attendeeId: AttendeeId;
   secretSantaId: SecretSantaId;
+  drawUserId?: SecretSantaUserId;
+  revealed: boolean;
   exclusions: SecretSantaUserId[];
 };
 
@@ -14,6 +16,7 @@ export class SecretSantaUserBuilder {
   private readonly data: SecretSantaUserBuilderData = {
     attendeeId: uuid() as AttendeeId,
     secretSantaId: uuid() as SecretSantaId,
+    revealed: false,
     exclusions: [],
   };
 
@@ -32,11 +35,31 @@ export class SecretSantaUserBuilder {
     return this;
   }
 
+  withDraw(drawUserId: SecretSantaUserId): this {
+    this.data.drawUserId = drawUserId;
+    return this;
+  }
+
+  revealed(): this {
+    this.data.revealed = true;
+    return this;
+  }
+
   build(): SecretSantaUser {
-    return SecretSantaUser.create({
+    let user = SecretSantaUser.create({
       id: uuid() as SecretSantaUserId,
       attendeeId: this.data.attendeeId,
       secretSantaId: this.data.secretSantaId,
     }).updateExclusions(this.data.exclusions);
+
+    if (this.data.drawUserId) {
+      user = user.assignDraw(this.data.drawUserId);
+    }
+
+    if (this.data.revealed) {
+      user = user.revealDraw();
+    }
+
+    return user;
   }
 }

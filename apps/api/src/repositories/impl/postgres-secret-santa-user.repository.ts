@@ -17,6 +17,16 @@ export class PostgresSecretSantaUserRepository implements SecretSantaUserReposit
     return uuid() as SecretSantaUserId;
   }
 
+  async findById(id: SecretSantaUserId): Promise<SecretSantaUser | undefined> {
+    const { schema, db } = this.databaseService;
+
+    const user = await db.query.secretSantaUser.findFirst({
+      where: eq(schema.secretSantaUser.id, id),
+    });
+
+    return user ? PostgresSecretSantaUserRepository.toModel(user) : undefined;
+  }
+
   async findBySecretSantaId(secretSantaId: SecretSantaId): Promise<SecretSantaUser[]> {
     const { schema, db } = this.databaseService;
 
@@ -41,6 +51,7 @@ export class PostgresSecretSantaUserRepository implements SecretSantaUserReposit
           secretSantaId: user.secretSantaId,
           attendeeId: user.attendeeId,
           drawUserId: user.drawUserId,
+          drawRevealedAt: user.drawRevealedAt ?? null,
           exclusions: user.exclusions,
           createdAt: user.createdAt,
           updatedAt: user.updatedAt,
@@ -50,19 +61,17 @@ export class PostgresSecretSantaUserRepository implements SecretSantaUserReposit
         target: schema.secretSantaUser.id,
         set: {
           drawUserId: sql`excluded.draw_user_id`,
+          drawRevealedAt: sql`excluded.draw_revealed_at`,
           exclusions: sql`excluded.exclusions`,
           updatedAt: sql`excluded.updated_at`,
         },
       });
   }
 
-  async findDrawSecretSantaUserForEvent(param: {
-    eventId: EventId;
-    userId: UserId;
-  }): Promise<SecretSantaUser | undefined> {
+  async findParticipantForEvent(param: { eventId: EventId; userId: UserId }): Promise<SecretSantaUser | undefined> {
     const { schema, db } = this.databaseService;
 
-    const currentUser = await db
+    const rows = await db
       .select({
         user: schema.secretSantaUser,
       })
@@ -72,17 +81,8 @@ export class PostgresSecretSantaUserRepository implements SecretSantaUserReposit
       .where(and(eq(schema.secretSanta.eventId, param.eventId), eq(schema.eventAttendee.userId, param.userId)))
       .limit(1);
 
-    const drawUserId = currentUser.length === 0 ? undefined : currentUser[0]!.user.drawUserId;
-
-    if (!drawUserId) return undefined;
-
-    const drawUser = await db.query.secretSantaUser.findFirst({
-      where: eq(schema.secretSantaUser.id, drawUserId),
-    });
-
-    if (!drawUser) return undefined;
-
-    return PostgresSecretSantaUserRepository.toModel(drawUser);
+    const user = rows[0]?.user;
+    return user ? PostgresSecretSantaUserRepository.toModel(user) : undefined;
   }
 
   async delete(id: SecretSantaUserId, tx?: DrizzleTransaction): Promise<void> {
@@ -109,6 +109,7 @@ export class PostgresSecretSantaUserRepository implements SecretSantaUserReposit
       attendeeId: row.attendeeId,
       secretSantaId: row.secretSantaId,
       drawUserId: row.drawUserId || undefined,
+      drawRevealedAt: row.drawRevealedAt ?? undefined,
       exclusions: row.exclusions,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,

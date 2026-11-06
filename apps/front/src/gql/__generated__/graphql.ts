@@ -476,11 +476,24 @@ export type GetMySecretSantaDrawQueryVariables = Exact<{
 
 
 export type GetMySecretSantaDrawQuery = { mySecretSantaDraw:
-    | { __typename: 'EventAttendee', id: Ids["AttendeeId"], pendingEmail: string | null, role: Types.AttendeeRole, user: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null } | null }
     | { __typename: 'ForbiddenRejection' }
     | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'MySecretSantaDraw', revealed: boolean, attendee: { id: Ids["AttendeeId"], pendingEmail: string | null, role: Types.AttendeeRole, user: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null } | null } }
     | { __typename: 'UnauthorizedRejection' }
    | null };
+
+export type RevealMySecretSantaDrawMutationVariables = Exact<{
+  eventId: Ids["EventId"];
+}>;
+
+
+export type RevealMySecretSantaDrawMutation = { revealMySecretSantaDraw:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'NotFoundRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'VoidOutput', success: boolean }
+   };
 
 export type CreateSecretSantaMutationVariables = Exact<{
   input: Types.CreateSecretSantaInput;
@@ -2366,16 +2379,19 @@ export const GetMySecretSantaDrawDocument = new TypedDocumentString(`
     query GetMySecretSantaDraw($eventId: EventId!) {
   mySecretSantaDraw(eventId: $eventId) {
     __typename
-    ... on EventAttendee {
-      id
-      pendingEmail
-      role
-      user {
+    ... on MySecretSantaDraw {
+      revealed
+      attendee {
         id
-        firstName
-        lastName
-        email
-        pictureUrl
+        pendingEmail
+        role
+        user {
+          id
+          firstName
+          lastName
+          email
+          pictureUrl
+        }
       }
     }
   }
@@ -2394,6 +2410,30 @@ export const useGetMySecretSantaDrawQuery = <
       {
     queryKey: ['GetMySecretSantaDraw', variables],
     queryFn: fetchGql<GetMySecretSantaDrawQuery, GetMySecretSantaDrawQueryVariables>(GetMySecretSantaDrawDocument, variables),
+    ...options
+  }
+    )};
+
+export const RevealMySecretSantaDrawDocument = new TypedDocumentString(`
+    mutation RevealMySecretSantaDraw($eventId: EventId!) {
+  revealMySecretSantaDraw(eventId: $eventId) {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+  }
+}
+    `);
+
+export const useRevealMySecretSantaDrawMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<RevealMySecretSantaDrawMutation, TError, RevealMySecretSantaDrawMutationVariables, TContext>) => {
+    
+    return useMutation<RevealMySecretSantaDrawMutation, TError, RevealMySecretSantaDrawMutationVariables, TContext>(
+      {
+    mutationKey: ['RevealMySecretSantaDraw'],
+    mutationFn: (variables?: RevealMySecretSantaDrawMutationVariables) => fetchGql<RevealMySecretSantaDrawMutation, RevealMySecretSantaDrawMutationVariables>(RevealMySecretSantaDrawDocument, variables)(),
     ...options
   }
     )};

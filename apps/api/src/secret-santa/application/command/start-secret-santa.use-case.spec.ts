@@ -120,7 +120,7 @@ describe('StartSecretSantaUseCase', () => {
 
     const savedSanta = secretSantaRepository.save.mock.calls[0]?.[0];
     expect(savedSanta?.isStarted()).toBe(true);
-    expect(savedSanta?.users.every(user => user.drawUserId !== undefined)).toBe(true);
+    expect(savedSanta?.users.every(user => user.drawUserId !== undefined && !user.hasRevealedDraw())).toBe(true);
 
     expect(eventBus.publish).toHaveBeenCalledTimes(1);
     const published = eventBus.publish.mock.calls[0]?.[0];

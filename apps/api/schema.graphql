@@ -264,7 +264,7 @@ union GetMyEventsResult = ForbiddenRejection | GetEventsPagedResponse | Internal
 
 union GetMyReservedItemsResult = ForbiddenRejection | GetReservedItemsPagedResponse | InternalErrorRejection | UnauthorizedRejection
 
-union GetMySecretSantaDrawResult = EventAttendee | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection
+union GetMySecretSantaDrawResult = ForbiddenRejection | InternalErrorRejection | MySecretSantaDraw | UnauthorizedRejection
 
 union GetMySecretSantasResult = ForbiddenRejection | GetSecretSantasPagedResponse | InternalErrorRejection | UnauthorizedRejection
 
@@ -416,6 +416,7 @@ type Mutation {
   removeWishlistLogo(id: WishlistId!): RemoveWishlistLogoResult!
   requestEmailChange(input: RequestEmailChangeInput!): RequestEmailChangeResult!
   resetPassword(input: ResetPasswordInput!): ResetPasswordResult!
+  revealMySecretSantaDraw(eventId: EventId!): RevealMySecretSantaDrawResult!
   revokeSession(input: RevokeSessionInput!): RevokeSessionResult!
   scanItemUrl(input: ScanItemUrlInput!): ScanItemUrlResult!
   sendResetPasswordEmail(input: SendResetPasswordEmailInput!): SendResetPasswordEmailResult!
@@ -439,6 +440,11 @@ input MyReservedItemsFilters {
   limit: Int
   page: Int
   period: ReservedItemPeriod = RESERVED
+}
+
+type MySecretSantaDraw {
+  attendee: EventAttendee!
+  revealed: Boolean!
 }
 
 type NotFoundRejection {
@@ -559,6 +565,8 @@ input ResetPasswordInput {
 }
 
 union ResetPasswordResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
+union RevealMySecretSantaDrawResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | VoidOutput
 
 input RevokeSessionInput {
   sessionId: UserSessionId!

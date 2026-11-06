@@ -5,6 +5,7 @@ export type SecretSantaUserProps = {
   attendeeId: AttendeeId;
   secretSantaId: SecretSantaId;
   drawUserId?: SecretSantaUserId;
+  drawRevealedAt?: Date;
   exclusions: SecretSantaUserId[];
   createdAt: Date;
   updatedAt: Date;
@@ -15,6 +16,7 @@ export class SecretSantaUser {
   public readonly attendeeId: AttendeeId;
   public readonly secretSantaId: SecretSantaId;
   public readonly drawUserId?: SecretSantaUserId;
+  public readonly drawRevealedAt?: Date;
   public readonly exclusions: SecretSantaUserId[];
   public readonly createdAt: Date;
   public readonly updatedAt: Date;
@@ -24,6 +26,7 @@ export class SecretSantaUser {
     this.attendeeId = props.attendeeId;
     this.secretSantaId = props.secretSantaId;
     this.drawUserId = props.drawUserId;
+    this.drawRevealedAt = props.drawRevealedAt;
     this.exclusions = props.exclusions;
     this.createdAt = props.createdAt;
     this.updatedAt = props.updatedAt;
@@ -49,6 +52,10 @@ export class SecretSantaUser {
     return this.drawUserId !== undefined;
   }
 
+  hasRevealedDraw(): boolean {
+    return this.drawRevealedAt !== undefined;
+  }
+
   isExcluded(userId: SecretSantaUserId): boolean {
     return this.exclusions.includes(userId);
   }
@@ -65,6 +72,23 @@ export class SecretSantaUser {
     return new SecretSantaUser({
       ...this,
       drawUserId,
+      drawRevealedAt: undefined,
+      updatedAt: new Date(),
+    });
+  }
+
+  revealDraw(): SecretSantaUser {
+    if (!this.hasDrawnUser()) {
+      throw new Error('Cannot reveal a draw that has not been assigned');
+    }
+
+    if (this.hasRevealedDraw()) {
+      return this;
+    }
+
+    return new SecretSantaUser({
+      ...this,
+      drawRevealedAt: new Date(),
       updatedAt: new Date(),
     });
   }
@@ -107,6 +131,7 @@ export class SecretSantaUser {
     return new SecretSantaUser({
       ...this,
       drawUserId: undefined,
+      drawRevealedAt: undefined,
       updatedAt: new Date(),
     });
   }
