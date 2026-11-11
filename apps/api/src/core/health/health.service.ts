@@ -4,7 +4,7 @@ import { DatabaseHealthIndicator, type HealthIndicatorResult } from './database.
 
 export type HealthCheckStatus = 'ok' | 'error';
 
-/** The body of `GET /health`, the shape of the previous NestJS Terminus check. */
+/** The body of `GET /health`, the shape of the previous Terminus health check. */
 export type HealthCheckResult = {
   status: HealthCheckStatus;
   info: HealthIndicatorResult;

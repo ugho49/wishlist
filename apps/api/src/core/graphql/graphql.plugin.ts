@@ -79,6 +79,9 @@ export class GraphQLOperationLogger implements OnStart {
 
   onStart(): void {
     this.hooks.on('graphql:operation', event => {
+      // Like the previous Yoga plugin: only executed operations (not parse or validation failures)
+      if (event.outcome === 'rejected' || event.operationType === undefined) return;
+
       const context = event.context as GraphQLContext | undefined;
       const document = context?.document;
       const logArgs = {

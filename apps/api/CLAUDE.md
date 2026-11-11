@@ -1,35 +1,53 @@
 # API (`apps/api`)
 
-NestJS backend with Domain-Driven Design. GraphQL is the public API; REST is only for file uploads and health.
+[Znight](https://znight-org.github.io/znight/) backend with Domain-Driven Design. GraphQL is the public API; REST is only for file uploads and health.
+
+Znight resolves dependency injection **at build time**: the compiler (`@znight/compiler`) scans `src/`, binds every constructor parameter to a provider and writes `src/.znight/container.generated.ts` (git-ignored, never edited by hand). Wiring errors are `ZNIGHTxxx` diagnostics with a location. Decorators are markers (no-ops at runtime): no `reflect-metadata`, no `emitDecoratorMetadata`.
 
 ## API surface (GraphQL-first)
 
-**GraphQL** (Yoga + `@nestjs/graphql`) at `POST /graphql`. Domain traffic (auth, users, events, wishlists, items, secret santa, admin, health) goes through GraphQL.
+**GraphQL** (`@znight/graphql`, schema-first) at `POST /graphql`. Domain traffic (auth, users, events, wishlists, items, secret santa, admin, health) goes through GraphQL.
 
 REST is **only** kept for multipart/form-data (GraphQL here is JSON-only) and a health check:
 
 | Method | Path                             | Why REST                                                        |
 | ------ | -------------------------------- | --------------------------------------------------------------- |
-| `GET`  | `/health`                        | Nest Terminus (also GraphQL `health`)                           |
+| `GET`  | `/health`                        | Database ping, 503 when down (also GraphQL `health`)            |
 | `POST` | `/user/upload-picture`           | User avatar (`file` field)                                      |
 | `POST` | `/admin/user/:id/upload-picture` | Admin avatar (`file` field)                                     |
 | `POST` | `/wishlist`                      | Create wishlist with optional logo (`data` JSON + `image` file) |
 | `POST` | `/wishlist/:id/upload-logo`      | Wishlist logo (`file` field)                                    |
 
-Do **not** add new REST endpoints unless the operation requires a file upload. Swagger (`/swagger`) only documents the remaining REST.
+Do **not** add new REST endpoints unless the operation requires a file upload. Swagger (`/swagger`, `@znight/openapi`) only documents the remaining REST.
 
 ## Architecture
 
 - **DDD** — application, domain, and infrastructure layers
-- **Use cases** — Nest `Injectable` classes with `execute(input)`; resolvers inject them directly (no `CommandBus` / `QueryBus`)
-- **`EventBus`** (`@nestjs/cqrs`) — domain events and side effects (emails, etc.)
-- **GraphQL** — schema-first `.graphql` files, codegen types, Zod input validation, DataLoaders for relations
-- **Core modules** — database (Drizzle), mail (react-email + Nodemailer), bucket (Firebase), health, GraphQL
-- **Domain modules** — auth (JWT + Google OAuth), user, event, attendee, wishlist, item, secret-santa
+- **Flat DI** — no modules: every `@Injectable()` class of `src/` is a provider. An interface with one implementation is injected without token (`constructor(private readonly eventRepository: EventRepository)` binds `PostgresEventRepository`)
+- **Use cases** — `@Injectable()` classes (`@znight/core`) with `execute(input)`; resolvers inject them directly (no `CommandBus` / `QueryBus`)
+- **`EventPublisher`** (`@znight/events`) — domain events and side effects (emails, etc.); listeners are `@OnEvent({ detached: true })` methods
+- **GraphQL** — schema-first `.graphql` files, codegen types, Zod input validation, `BatchLoad` loaders for relations
+- **Config** — `@Config` classes (`@znight/config`) read from the environment (Bun loads `.env`): `CoreConfig`, `DatabaseConfig`, `AuthConfig`, `QueueConfig`, `UserConfig`, `MailConfig`, `BucketConfig`. A missing or invalid value fails the boot with `ZNIGHT006`
+- **Core** — database (Drizzle), mail (react-email + Nodemailer, provider chosen by `MailFactory`), bucket (Firebase, `BucketFactory`), queues (BullMQ on Valkey), health, GraphQL
+- **Domains** — auth (JWT + Google OAuth), user, event, attendee, wishlist, item, secret-santa
 - **Database** — PostgreSQL + Drizzle, branded UUIDs
 - **Transactions** — `TransactionManager`
 
 Reference domain: `src/event/`.
+
+### Bootstrap
+
+- `src/app.ts` — `createPlugins()`: the plugins shared by `main.ts` and the integration tests (`ConfigPlugin`, `ObservabilityPlugin`, `EventsPlugin`, `HttpPlugin` with the guards and exception mappers, `GraphQLPlugin` with the result mappers, `OpenApiPlugin`)
+- `src/main.ts` — `createApplication({ plugins: createPlugins() })` from the generated module, then `app.start()` (SIGINT / SIGTERM stop it gracefully)
+- `znight.config.ts` — compiler options (GraphQL schema-first: `schema: 'src/**/*.graphql'`), read by the Bun preload and `znight generate`
+- Generation: the Bun preload `@znight/compiler/bun` (`serve`, `test:int`) or `bun nx run api:generate` (`znight generate`, also run by `typecheck`). The Docker image generates at build time
+
+### Auth
+
+- `AuthenticationGuard` (global HTTP guard) reads the bearer token (`TokenService`, `jose`) and stores the user or the token error in the request state; it never denies
+- Route decisions of the required `access` group (`createRouteDecorator`): `@Public()`, `@Authenticated()`, `@IsAdmin()`. Every REST route and GraphQL root field must take one (`ZNIGHT023` at build time). Put `@Authenticated()` (or `@IsAdmin()`) on the resolver / controller class, `@Public()` on the open methods
+- `AccessGuard` enforces them on routes and root fields (default deny); a missing or invalid token is an `UnauthorizedRejection`
+- `@CurrentUser()` / `@CurrentUserId()` param decorators work on REST routes and GraphQL fields
 
 ## GraphQL conventions
 
@@ -44,28 +62,29 @@ After schema changes: `nx run api:codegen` (from the repo root). Output: `src/gq
 
 ### Errors
 
-Yoga plugin `useErrorTransformPlugin` maps thrown Nest exceptions onto the field as a typed rejection (`data.<field>.__typename`). GraphQL still returns **HTTP 200**.
+Result mappers (`src/core/graphql/rejection.mapper.ts`, Znight "errors as data") map the errors of a root field (guards, `@Args` validation, resolver) onto the rejection member of its result union (`data.<field>.__typename`). GraphQL still returns **HTTP 200**. A rejection the union does not declare falls back to `InternalErrorRejection`; an error of a nested field resolver stays in `errors[]`.
 
-| Exception                          | `__typename`             |
-| ---------------------------------- | ------------------------ |
-| `ZodValidationException`           | `ValidationRejection`    |
-| `BusinessRuleException`            | `BusinessRuleRejection`  |
-| `UnauthorizedException`            | `UnauthorizedRejection`  |
-| `NotFoundException`                | `NotFoundRejection`      |
-| `ForbiddenException`               | `ForbiddenRejection`     |
-| other `HttpException` / unexpected | `InternalErrorRejection` |
+| Exception                                 | `__typename`             |
+| ----------------------------------------- | ------------------------ |
+| `@Args` schema failure (`BAD_USER_INPUT`) | `ValidationRejection`    |
+| `BusinessRuleException`                   | `BusinessRuleRejection`  |
+| `UnauthorizedException`                   | `UnauthorizedRejection`  |
+| `NotFoundException`                       | `NotFoundRejection`      |
+| `ForbiddenException`                      | `ForbiddenRejection`     |
+| other `HttpException` / unexpected        | `InternalErrorRejection` |
 
 ### Validation
 
-- GraphQL inputs: Zod schemas in `{domain}.schema.ts` + `ZodPipe` on `@Args`
-- Remaining REST multipart bodies: `class-validator` DTOs in `@wishlist/common` (e.g. `CreateWishlistHttpRequest`)
+- GraphQL inputs: Zod schemas in `{domain}.schema.ts`, passed to `@Args('input', Schema)` (the resolver receives the schema output)
+- Remaining REST multipart bodies: `@Body(Schema)` (Zod) on the text fields, `@UploadedFile('file', { maxSize, mimeTypes })` for the files (Web `File`). `UploadExceptionMapper` keeps the 400 + French messages and the `message: string[]` validation body
 
 ### Resolvers, mappers, loaders
 
 - Query / mutation resolvers inject use cases (or loaders for by-id reads)
-- Field resolvers load relations from `ctx.loaders`
+- Field resolvers load relations with `@Loader() users: Loader<UsersById>` (one DataLoader per operation)
 - Mappers convert domain models to GraphQL types: `eventMapper.toGqlEvent(...)`
-- DataLoader factories live next to the domain and are registered on `DataLoaderService`
+- Loaders are `BatchLoad` providers in `{domain}.dataloader.ts`; those that depend on the current user are `@Injectable({ scope: 'request' })` and read it from the `HttpContext`
+- Resolver decorators come from `@znight/graphql` (`@Resolver`, `@Query`, `@Mutation`, `@ResolveField`, `@Parent`, `@Args`, `@Ctx`, `@Loader`); `@Resolver('Event')` binds the field resolvers of a type
 
 ## Database
 
@@ -82,12 +101,12 @@ Yoga plugin `useErrorTransformPlugin` maps thrown Nest exceptions onto the field
 
 ## Running
 
-- `bun serve:api` — NestJS API
+- `bun serve:api` — API (`bun --watch` with the Znight preload)
 - `bun serve:api:with-codegen` — API + GraphQL codegen in watch mode
 
 ## Unit tests
 
-Business logic branches (every `throw`, guard clause, conditional, early return in `execute()`) belong in **unit tests**. Integration tests cover wiring: auth guards, Zod pipes, GraphQL round-trips, and database state. Do not re-test use-case branches in int-specs.
+Business logic branches (every `throw`, guard clause, conditional, early return in `execute()`) belong in **unit tests**. Integration tests cover wiring: auth guards, Zod `@Args` validation, GraphQL round-trips, and database state. Do not re-test use-case branches in int-specs.
 
 **A new use case is not done until it has a colocated unit spec.** Add `{name}.use-case.spec.ts` next to `{name}.use-case.ts` in the same PR. Cover every authorization check, business-rule `throw`, and happy path in `execute()`.
 
@@ -103,8 +122,8 @@ src/item/application/command/toggle-item.use-case.spec.ts
 - Mock dependencies with `createMock<T>()` from `test-utils/mocks`
 - Reset with `mock.clearAllMocks()` in `beforeEach`
 - Default happy-path `mockResolvedValue` in `beforeEach`; error cases override with `mockResolvedValueOnce`
-- Real domain models via builders; mock only repositories / `EventBus` / infrastructure
-- `Logger.overrideLogger(false)` in `beforeAll` to keep Nest logs out of the output
+- Real domain models via builders; mock only repositories / `EventPublisher` / infrastructure
+- Logs stay quiet: `test-utils/logger-setup.ts` (preloaded) sets a silent fallback logger for `getLogger()`
 
 ```typescript
 describe('ToggleItemUseCase', () => {
@@ -115,10 +134,6 @@ describe('ToggleItemUseCase', () => {
   let useCase: ToggleItemUseCase;
   let owner: User;
   let item: WishlistItem;
-
-  beforeAll(() => {
-    Logger.overrideLogger(false);
-  });
 
   beforeEach(() => {
     mock.clearAllMocks();
@@ -157,7 +172,7 @@ describe('ToggleItemUseCase', () => {
 Most int-specs target GraphQL resolvers (`*.resolver.int-spec.ts`). A few REST controller specs remain for multipart routes and `GET /health`.
 
 - **Unit tests**: `bun nx run api:test`
-- **Int tests**: `bun nx run api:test:int` (need docker to be up, auto create containers at start)
+- **Int tests**: `bun nx run api:test:int` (need docker to be up, auto create containers at start). `useTestApp()` boots the application with `TestApp` (`@znight/testing`) on a free port
 - **Utilities**: `test-utils/` (`createMock`, builders for unit tests; `useTestApp` / fixtures for int tests)
 - **No parallel files**: disabled for stability with shared resources
 - **Auth**: `getRequest({ signedAs })` logs in via the GraphQL `login` mutation
@@ -175,10 +190,10 @@ Most int-specs target GraphQL resolvers (`*.resolver.int-spec.ts`). A few REST c
 
    `getRequest({ signedAs: 'BASE_USER' | 'ADMIN_USER' | 'SUPERADMIN_USER' })` authenticates via GraphQL `login`.
 3. **GraphQL** — HTTP 200 even for resolver-level rejections. Assert `__typename` (and still verify the database for mutations).
-4. **Validation** — GraphQL failures are `ValidationRejection`, not HTTP 400. Use `it.each`. REST multipart: HTTP 400 + `class-validator`, JSON via `.field('data', JSON.stringify(payload))`.
+4. **Validation** — GraphQL failures are `ValidationRejection`, not HTTP 400 (invalid variables answer HTTP 200 with `errors[]`). Use `it.each`. REST multipart: HTTP 400 with `message: string[]`, JSON via `.field('data', JSON.stringify(payload))`.
 5. **Database** — every create/update/delete **must** use `expectTable`.
 6. **Permissions** — prefer **404 / `NotFoundRejection`** over 403 when the resource must stay hidden.
-7. **REST multipart on Bun** — `FileInterceptor` + an empty POST hangs up the socket (`socket hang up`) before AuthGuard can return 401. Unauthenticated upload tests must send a dummy multipart field:
+7. **REST multipart** — the guards run before the body is read, so an unauthenticated upload answers 401 whatever the body:
 
    ```typescript
    await request.post('/user/upload-picture').field('file', 'not-a-file').expect(401)
@@ -247,9 +262,8 @@ src/{domain-name}/
 │   └── repository/       # Interfaces
 ├── application/
 │   ├── command/
-│   ├── event/            # EventBus handlers (@EventsHandler)
-│   ├── query/
-│   └── index.ts          # `handlers` array on the Nest module
+│   ├── event/            # Event listeners (@OnEvent({ detached: true }))
+│   └── query/
 └── infrastructure/
     ├── resolvers/
     ├── controllers/      # Only if a remaining REST upload lives here
@@ -257,15 +271,14 @@ src/{domain-name}/
     ├── {domain}.schema.ts
     ├── {domain}.mapper.ts
     ├── {domain}.dataloader.ts
-    ├── repository/
-    └── {domain}.module.ts
+    └── repository/
 ```
 
 ### Naming
 
 - Use case: `{Action}{EntityName}UseCase` — `{kebab-case-action}-{kebab-case-entity}.use-case.ts`
 - Input / output: `{Action}{EntityName}Input` / `{Action}{EntityName}Output`
-- Event: `{EntityName}{PastTenseAction}Event` — handler `{EntityName}{PastTenseAction}Handler` with `@EventsHandler`
+- Event: `{EntityName}{PastTenseAction}Event` — listener class `{EntityName}{PastTenseAction}Handler` with an `@OnEvent({ detached: true }) handle(event)` method
 - GraphQL: `{domain}.graphql`, `{domain}.schema.ts`, `{domain}.mapper.ts` (`toGql*` methods)
 - Resolvers: `{entity}.resolver.ts`, `{entity}-mutation.resolver.ts`, `{entity}-admin.resolver.ts`, `{entity}.field-resolver.ts`
 
@@ -275,8 +288,8 @@ src/{domain-name}/
 @Injectable()
 export class CreateEventUseCase {
   constructor(
-    @Inject(REPOSITORIES.EVENT) private readonly eventRepository: EventRepository,
-    private readonly eventBus: EventBus, // only if a domain event is published
+    private readonly eventRepository: EventRepository, // the interface: bound to its single implementation
+    private readonly eventBus: EventPublisher, // only if a domain event is published
   ) {}
 
   async execute(input: CreateEventInput): Promise<CreateEventOutput> {
@@ -298,8 +311,8 @@ export class CreateEventUseCase {
 ```typescript
 @Mutation()
 async createEvent(
-  @Args('input', new ZodPipe(CreateEventInputSchema)) input: CreateEventInput,
-  @GqlCurrentUser() currentUser: ICurrentUser,
+  @Args('input', CreateEventInputSchema) input: CreateEventInput,
+  @CurrentUser() currentUser: ICurrentUser,
 ): Promise<CreateEventResult> {
   const { event } = await this.createEventUseCase.execute({
     currentUser,
@@ -313,23 +326,25 @@ async createEvent(
 }
 ```
 
-REST controllers (uploads only) inject the same use cases and use `@CurrentUser()` (HTTP), not `@GqlCurrentUser()`.
+REST controllers (uploads only) inject the same use cases and use the same `@CurrentUser()` / `@CurrentUserId()`.
 
-Register new command/query/event-handler classes in `application/index.ts` `handlers`.
+Nothing to register: `@Injectable()` classes, resolvers, controllers and `@OnEvent` listeners are discovered by the compiler.
 
 ### Rules
 
 1. **Security** — always pass `currentUser` (or `currentUserId`) on user-scoped use cases. Authorization in domain models (`canBeViewedBy`, `canBeModifiedBy`). Return 404 / `NotFoundRejection` instead of 403.
 2. **Types** — branded IDs, input/output next to the use case, readonly domain props. GraphQL parents must not include `@resolved` fields.
 3. **Transactions** — `TransactionManager.runInTransaction` only for multiple SQL queries. Pass tx context when needed.
-4. **Events** — publish after successful commands via `EventBus`; use for emails and other side effects.
-5. **Errors** — domain / Nest exceptions (`BusinessRuleException`, `NotFoundException`). Validate GraphQL input with Zod + `ZodPipe` in resolvers, not inside every use case.
+4. **Events** — `await this.eventBus.publish(...)` (`EventPublisher`) after successful commands; use for emails and other side effects.
+5. **Errors** — domain / `@znight/http` exceptions (`BusinessRuleException`, `NotFoundException`). Validate GraphQL input with Zod on `@Args` in resolvers, not inside every use case.
 6. **Tests** — every new use case **must** ship with a colocated `*.use-case.spec.ts` covering its branches. Integration tests cover GraphQL wiring, not those branches. See the unit-test section above.
 
-### Repository tokens
+### Logging
 
-`REPOSITORIES` from `src/repositories/repositories.constants.ts`:
+`private readonly logger = getLogger(MyClass.name)` (`@znight/observability`): `info`, `warn`, `error`, `debug` with a message and an object of fields (`this.logger.error('Fail to send mail', { error })`). Request entries carry `requestId`, `ip` and `currentUser`; `/health` is not logged.
 
-```typescript
-@Inject(REPOSITORIES.EVENT) private readonly eventRepository: EventRepository
-```
+### Dependency injection
+
+- Inject repositories by their interface (`private readonly eventRepository: EventRepository`): no token, no `@Inject`
+- A dependency cycle is a build error (`ZNIGHT002`): break it with `Lazy<T>` (see `MailService`)
+- Several implementations of a type (bucket, mail provider) are chosen by a `@Factory()` with `@Provides()` methods

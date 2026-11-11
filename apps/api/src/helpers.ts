@@ -24,7 +24,8 @@ export function loggingOptions(serviceName: string): LoggingOptions {
     level: 'info',
     name: serviceName,
     messageKey: 'message', // For Datadog
-    timestamp: 'iso',
+    // `timestamp` key in ISO format, for Datadog (set through the raw pino options below)
+    timestamp: false,
     base: { service: serviceName },
     pretty,
     scopeFields: {
@@ -36,6 +37,7 @@ export function loggingOptions(serviceName: string): LoggingOptions {
     requests: { ignore: event => event.path === DEFAULT_HEALTHCHECK_PATH },
     pino: {
       errorKey: 'error', // For Datadog's error tracking
+      timestamp: () => `,"timestamp":"${new Date().toISOString()}"`,
       formatters: { level: (label: string) => ({ level: label }) },
     },
   };

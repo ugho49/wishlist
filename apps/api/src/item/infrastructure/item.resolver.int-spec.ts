@@ -11,9 +11,9 @@ import { AttendeeRole } from '../../event/domain/attendee-role.enum';
  *
  * Notes on GraphQL error handling in this codebase:
  * - GraphQL always returns HTTP 200, even for resolver-level rejections.
- * - The useErrorTransformPlugin converts thrown Nest exceptions into a typed
+ * - The rejection result mappers converts thrown exceptions into a typed
  *   rejection placed at data.<field>:
- *     - ZodValidationException  -> ValidationRejection
+ *     - @Args schema failure  -> ValidationRejection
  *     - UnauthorizedException   -> UnauthorizedRejection
  *     - NotFoundException       -> NotFoundRejection
  *     - ForbiddenException      -> ForbiddenRejection

@@ -37,6 +37,10 @@ ENV DD_LOGS_INJECTION=true
 ENV DD_TRACE_SAMPLE_RATE=1
 ENV DD_RUNTIME_METRICS_ENABLED=true
 
+# Generate the Znight container (src/.znight/container.generated.ts) at build time, in build mode:
+# a wiring error fails the image build instead of the boot.
+RUN bun --preload @znight/compiler/bun --eval '0'
+
 EXPOSE 3000
 
 CMD ["bun", "run", "src/main.ts"]

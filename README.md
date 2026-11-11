@@ -16,18 +16,18 @@ Share wishlists for birthdays, holidays, and other events. Invite people, reserv
 
 Nx monorepo, **Bun** runtime.
 
-| Layer   | Tech                                        |
-| ------- | ------------------------------------------- |
-| API     | NestJS, GraphQL (Yoga), PostgreSQL, Drizzle |
-| Front   | React, Vite, MUI, TanStack Router / Query   |
-| Mail    | react-email                                 |
-| Auth    | JWT + Google OAuth                          |
-| Uploads | Firebase                                    |
+| Layer   | Tech                                      |
+| ------- | ----------------------------------------- |
+| API     | Znight, GraphQL, PostgreSQL, Drizzle      |
+| Front   | React, Vite, MUI, TanStack Router / Query |
+| Mail    | react-email                               |
+| Auth    | JWT + Google OAuth                        |
+| Uploads | Firebase                                  |
 
 The public API is GraphQL (`POST /graphql`). REST is only used for file uploads and `GET /health`.
 
 ```
-apps/api      NestJS backend
+apps/api      Znight backend
 apps/front    React frontend
 libs/common   Shared IDs and types
 libs/mail     Email templates
