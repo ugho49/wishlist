@@ -38,7 +38,6 @@ import {
   type UpdateUserProfileResult,
   type User,
 } from '../../../gql/generated-types';
-import { UsersById } from '../../../user/infrastructure/user.dataloader';
 import { ConfirmEmailChangeUseCase } from '../../application/command/confirm-email-change.use-case';
 import { CreateEmailChangeVerificationUseCase } from '../../application/command/create-email-change-verification.use-case';
 import { CreatePasswordVerificationUseCase } from '../../application/command/create-password-verification.use-case';
@@ -57,6 +56,7 @@ import { GetClosestFriendsUseCase } from '../../application/query/get-closest-fr
 import { GetPendingEmailChangeUseCase } from '../../application/query/get-pending-email-change.use-case';
 import { GetUsersByCriteriaUseCase } from '../../application/query/get-users-by-criteria.use-case';
 import { SignupSource } from '../../domain/signup-source.enum';
+import { UsersById } from '../user.dataloader';
 import { userMapper } from '../user.mapper';
 import {
   ChangeUserPasswordInputSchema,
@@ -98,6 +98,7 @@ export class UserResolver {
     private readonly getUsersByCriteriaUseCase: GetUsersByCriteriaUseCase,
     private readonly getClosestFriendsUseCase: GetClosestFriendsUseCase,
   ) {}
+
   @Query()
   async currentUser(@CurrentUserId() currentUserId: UserId, @Loader() usersLoader: Loader<UsersById>): Promise<User> {
     const user = await usersLoader.load(currentUserId);

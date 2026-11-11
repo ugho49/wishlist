@@ -12,14 +12,15 @@ import {
   type PaginationFilters,
   type Wishlist,
 } from '../../../gql/generated-types';
-import { WishlistsById } from '../../../wishlist/infrastructure/wishlist.dataloader';
 import { GetWishlistsByUserUseCase } from '../../application/query/get-wishlists-by-user.use-case';
+import { WishlistsById } from '../wishlist.dataloader';
 import { wishlistMapper } from '../wishlist.mapper';
 
 @Resolver()
 @Authenticated()
 export class WishlistResolver {
   constructor(private readonly getWishlistsByUserUseCase: GetWishlistsByUserUseCase) {}
+
   @Query()
   async wishlist(
     @Args('id') id: WishlistId,

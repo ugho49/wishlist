@@ -1,7 +1,7 @@
 import { Loader, Parent, ResolveField, Resolver } from '@znight/graphql';
 
 import { type UserAccount, type UserFull, type UserSession } from '../../../gql/generated-types';
-import { UserAccountsByUserId, UserSessionsByUserId } from '../../../user/infrastructure/user.dataloader';
+import { UserAccountsByUserId, UserSessionsByUserId } from '../user.dataloader';
 
 @Resolver('UserFull')
 export class UserAdminFieldResolver {

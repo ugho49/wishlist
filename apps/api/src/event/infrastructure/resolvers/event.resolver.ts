@@ -5,13 +5,13 @@ import { NotFoundException } from '@znight/http';
 import { Authenticated } from '../../../auth/infrastructure/decorators/public.metadata';
 import { CurrentUserId } from '../../../auth/infrastructure/decorators/user.decorator';
 import { DEFAULT_RESULT_NUMBER } from '../../../core/common/pagination';
-import { EventsById } from '../../../event/infrastructure/event.dataloader';
 import {
   type EventPaginationFilters,
   type GetEventByIdResult,
   type GetMyEventsResult,
 } from '../../../gql/generated-types';
 import { GetEventsByUserUseCase } from '../../application/query/get-events-by-user.use-case';
+import { EventsById } from '../event.dataloader';
 import { eventMapper } from '../event.mapper';
 import { EventPaginationFiltersSchema } from '../event.schema';
 
@@ -19,6 +19,7 @@ import { EventPaginationFiltersSchema } from '../event.schema';
 @Authenticated()
 export class EventResolver {
   constructor(private readonly getEventsByUserUseCase: GetEventsByUserUseCase) {}
+
   @Query()
   async event(@Args('id') id: EventId, @Loader() eventsLoader: Loader<EventsById>): Promise<GetEventByIdResult> {
     const event = await eventsLoader.load(id);

@@ -7,7 +7,6 @@ import { NotFoundException } from '@znight/http';
 import { IsAdmin } from '../../../auth/infrastructure/decorators/admin.decorator';
 import { CurrentUser } from '../../../auth/infrastructure/decorators/user.decorator';
 import { DEFAULT_RESULT_NUMBER } from '../../../core/common/pagination';
-import { EventsById } from '../../../event/infrastructure/event.dataloader';
 import {
   type AdminDeleteEventAttendeeResult,
   type AdminDeleteEventResult,
@@ -27,6 +26,7 @@ import { UpdateEventUseCase } from '../../application/command/update-event.use-c
 import { GetAdminEventsStatsUseCase } from '../../application/query/get-admin-events-stats.use-case';
 import { GetEventsUseCase } from '../../application/query/get-events.use-case';
 import { GetEventsForUserUseCase } from '../../application/query/get-events-for-user.use-case';
+import { EventsById } from '../event.dataloader';
 import { eventMapper } from '../event.mapper';
 import {
   AdminEventPaginationFiltersSchema,
@@ -49,6 +49,7 @@ export class EventAdminResolver {
     private readonly deleteAttendeeUseCase: DeleteAttendeeUseCase,
     private readonly updateAttendeeRoleUseCase: UpdateAttendeeRoleUseCase,
   ) {}
+
   @Query()
   async adminEvent(
     @Args('id', EventIdSchema) id: EventId,

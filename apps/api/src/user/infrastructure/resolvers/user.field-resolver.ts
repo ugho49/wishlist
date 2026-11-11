@@ -11,13 +11,14 @@ import {
   type UserEmailSettings,
   type UserSession,
 } from '../../../gql/generated-types';
-import { UserAccountsByUserId, UserSessionsByUserId } from '../../../user/infrastructure/user.dataloader';
 import { GetUserEmailSettingUseCase } from '../../application/query/get-user-email-setting.use-case';
+import { UserAccountsByUserId, UserSessionsByUserId } from '../user.dataloader';
 import { userMapper } from '../user.mapper';
 
 @Resolver('User')
 export class UserFieldResolver {
   constructor(private readonly getUserEmailSettingUseCase: GetUserEmailSettingUseCase) {}
+
   @ResolveField()
   async accounts(
     @Parent() user: User,

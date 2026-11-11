@@ -20,7 +20,6 @@ import {
   type AdminUpdateUserProfileResult,
   type AdminUsersStatsResult,
 } from '../../../gql/generated-types';
-import { UsersFullById } from '../../../user/infrastructure/user.dataloader';
 import { AdminRevokeAllUserSessionsUseCase } from '../../application/command/admin-revoke-all-user-sessions.use-case';
 import { AdminRevokeUserSessionUseCase } from '../../application/command/admin-revoke-user-session.use-case';
 import { DeleteUserUseCase } from '../../application/command/delete-user.use-case';
@@ -29,6 +28,7 @@ import { SetUserAdminUseCase } from '../../application/command/set-user-admin.us
 import { UpdateUserFullUseCase } from '../../application/command/update-user-full.use-case';
 import { GetAdminUsersStatsUseCase } from '../../application/query/get-admin-users-stats.use-case';
 import { GetUsersPaginatedUseCase } from '../../application/query/get-users-paginated.use-case';
+import { UsersFullById } from '../user.dataloader';
 import { userMapper } from '../user.mapper';
 import { UserIdSchema, UserSessionIdSchema } from '../user.schema';
 import {
@@ -50,6 +50,7 @@ export class UserAdminResolver {
     private readonly adminRevokeAllUserSessionsUseCase: AdminRevokeAllUserSessionsUseCase,
     private readonly setUserAdminUseCase: SetUserAdminUseCase,
   ) {}
+
   @Query()
   async adminUser(
     @Args('userId', UserIdSchema) userId: UserId,
