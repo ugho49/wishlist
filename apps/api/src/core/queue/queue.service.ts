@@ -1,9 +1,10 @@
-import { Injectable, type OnStart, type OnStop } from '@znight/core';
+import { Container, Injectable, type OnStart, type OnStop } from '@znight/core';
 import { getLogger } from '@znight/observability';
 import { Job, type JobsOptions, Queue, Worker } from 'bullmq';
 import Redis from 'ioredis';
 
 import { QueueConfig } from './queue.config';
+import { QUEUE_JOB_SCOPE_TOKEN, QUEUE_MESSAGE_ID_SCOPE_TOKEN } from './queue.context';
 import { QueueProcessorBase } from './queue.type';
 import { QueueName, type QueueNamePayloadMap } from './queues.definitions';
 
@@ -25,6 +26,7 @@ export class QueueService implements OnStart, OnStop {
   constructor(
     private readonly processors: QueueProcessorBase[],
     private readonly config: QueueConfig,
+    private readonly container: Container,
   ) {
     this.connection = new Redis({
       host: this.config.host,
@@ -94,6 +96,10 @@ export class QueueService implements OnStart, OnStop {
   async onStop() {
     await this.stopAllWorkers();
     await Promise.all([...this.queues.values()].map(queue => queue.close()));
+  }
+
+  /** Also runs when the application failed to start (onStop did not run): closes the Redis connection. */
+  [Symbol.dispose]() {
     this.connection.disconnect();
   }
 
@@ -116,20 +122,23 @@ export class QueueService implements OnStart, OnStop {
       queueName,
       async (job: Job<QueueNamePayloadMap[QueueName]>) => {
         const messageId = Bun.randomUUIDv7();
-        const resourceName = `${processorName}.process`;
-        const logger = this.logger.child({
-          messageId,
-          job: { id: job.id, name: job.name, handler: resourceName, queueName },
-        });
+        const jobContext = { id: job.id, name: job.name, handler: `${processorName}.process`, queueName };
 
-        logger.info(`Message ${messageId} received, forwarding to handlers`, { payload: job.data });
+        // The logger reads messageId and job from the scope (scopeFields): every entry written while
+        // the job runs (processor, use cases, mail providers) carries them.
+        await this.container.runInScope(async () => {
+          this.logger.info(`Message ${messageId} received, forwarding to handlers`, { payload: job.data });
 
-        try {
-          await processor.process(job);
-        } catch (error) {
-          logger.error(`Message ${messageId} rejected due to handler error.`, { error });
-          throw error;
-        }
+          try {
+            await processor.process(job);
+          } catch (error) {
+            this.logger.error(`Message ${messageId} rejected due to handler error.`, { error });
+            throw error;
+          }
+        }, [
+          [QUEUE_MESSAGE_ID_SCOPE_TOKEN, messageId],
+          [QUEUE_JOB_SCOPE_TOKEN, jobContext],
+        ]);
       },
       {
         connection: this.connection,
