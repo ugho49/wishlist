@@ -1,13 +1,15 @@
-import type { INestApplication } from '@nestjs/common';
 import type { SQL } from 'bun';
 import type { TableAssertSortOptions } from './table-assert';
 
 import { sleep } from '@wishlist/common';
+import { HttpPlugin } from '@znight/http';
 import { getLogger } from '@znight/observability';
+import { TestApp } from '@znight/testing';
 import axios, { type AxiosInstance } from 'axios';
 import request from 'supertest';
 
-import { createApp } from '../src/bootstrap';
+import { metadata } from '../src/.znight/container.generated';
+import { createPlugins } from '../src/app';
 import { DatabaseService } from '../src/core/database/database.service';
 import { Fixtures } from './fixtures';
 import { MailsAssert } from './mail-assert';
@@ -19,17 +21,21 @@ export type RequestApp = InstanceType<(typeof request)['agent']>;
 export type SignedAs = 'BASE_USER' | 'ADMIN_USER' | 'SUPERADMIN_USER';
 
 export function useTestApp() {
-  let app: INestApplication;
+  let app: TestApp;
+  let baseUrl: string;
   let sql: SQL;
-  let logger: Logger;
+  let logger: ReturnType<typeof getLogger>;
   let fixtures: Fixtures;
   let needToClearMails = false;
   let http: AxiosInstance;
 
   beforeAll(async () => {
-    app = await createApp();
-    const databaseService = app.get<DatabaseService>(DatabaseService);
-    await app.init();
+    // only: 'all' so that every provider with lifecycle hooks (QueueService) starts like in production
+    app = await TestApp.create({ metadata, plugins: createPlugins({ port: 0, logLevel: 'silent' }), only: 'all' });
+    const databaseService = app.get(DatabaseService);
+    const address = app.get(HttpPlugin).address;
+    if (!address) throw new Error('The HTTP server is not listening');
+    baseUrl = `http://127.0.0.1:${address.port}`;
     logger = getLogger('UseTestApp');
 
     sql = databaseService.sql;
@@ -81,7 +87,7 @@ export function useTestApp() {
     },
     getFixtures: () => fixtures,
     getRequest: async (options?: { signedAs?: SignedAs }): Promise<RequestApp> => {
-      const requestAppServer = request.agent(app.getHttpServer());
+      const requestAppServer = request.agent(baseUrl);
       let token = '';
 
       const loginViaGraphql = async (email: string, password: string) => {

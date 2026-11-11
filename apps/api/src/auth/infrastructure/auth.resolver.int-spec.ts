@@ -151,10 +151,11 @@ describe('AuthResolver (GraphQL)', () => {
 
     it('should not succeed when a required field is missing from the input', async () => {
       // password is missing -> GraphQL variable coercion (non-nullable) fails before the resolver,
-      // so the request is rejected at the HTTP layer (400) with top-level errors and no data.
+      // so the request is rejected with top-level errors and no data (HTTP 200 for an `application/json`
+      // client, as GraphQL over HTTP specifies).
       const res = await request.post('/graphql').send({ query, variables: { input: { email: 'someone@test.fr' } } });
 
-      expect(res.status).toBe(400);
+      expect(res.status).toBe(200);
       expect(res.body.errors).toBeDefined();
       expect(res.body.data?.login?.__typename).not.toBe('LoginOutput');
     });
@@ -197,20 +198,22 @@ describe('AuthResolver (GraphQL)', () => {
       },
     ])('should not succeed when input is invalid: $case', async ({ input }) => {
       // Wrong scalar types are caught during GraphQL variable coercion, before the resolver runs,
-      // so the request is rejected at the HTTP layer (400) with top-level errors and no data.
+      // so the request is rejected with top-level errors and no data (HTTP 200 for an `application/json`
+      // client, as GraphQL over HTTP specifies).
       const res = await request.post('/graphql').send({ query, variables: { input } });
 
-      expect(res.status).toBe(400);
+      expect(res.status).toBe(200);
       expect(res.body.errors).toBeDefined();
       expect(res.body.data?.loginWithGoogle?.__typename).not.toBe('LoginWithGoogleOutput');
     });
 
     it('should not succeed when a required field is missing', async () => {
       // createUserIfNotExists is missing -> non-nullable variable coercion fails before the resolver,
-      // so the request is rejected at the HTTP layer (400) with top-level errors and no data.
+      // so the request is rejected with top-level errors and no data (HTTP 200 for an `application/json`
+      // client, as GraphQL over HTTP specifies).
       const res = await request.post('/graphql').send({ query, variables: { input: { code: 'some-code' } } });
 
-      expect(res.status).toBe(400);
+      expect(res.status).toBe(200);
       expect(res.body.errors).toBeDefined();
       expect(res.body.data?.loginWithGoogle?.__typename).not.toBe('LoginWithGoogleOutput');
     });
