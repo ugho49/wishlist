@@ -3,7 +3,7 @@ import { Controller, Param, Post, UploadedFile } from '@znight/http';
 import { ApiExclude } from '@znight/openapi';
 
 import { IsAdmin } from '../../../auth/infrastructure/decorators/admin.decorator';
-import { ACCEPTED_IMAGE_MIME_TYPES, ImageResizer, MAX_IMAGE_SIZE } from '../../../core/bucket/image-resizer';
+import { ImageResizer, MAX_IMAGE_SIZE } from '../../../core/bucket/image-resizer';
 import { UpdateUserPictureUseCase } from '../../application/command/update-user-picture.use-case';
 
 @IsAdmin()
@@ -18,7 +18,7 @@ export class UserAdminController {
   @Post('/:id/upload-picture')
   async uploadPicture(
     @Param('id') userId: UserId,
-    @UploadedFile('file', { maxSize: MAX_IMAGE_SIZE, mimeTypes: ACCEPTED_IMAGE_MIME_TYPES }) file: File,
+    @UploadedFile('file', { maxSize: MAX_IMAGE_SIZE }) file: File,
   ): Promise<UpdateUserPictureHttpResponse> {
     const resized = await this.imageResizer.resize(file, { width: 500, height: 500 });
     const result = await this.updateUserPictureUseCase.execute({ userId, file: resized });

@@ -76,7 +76,7 @@ Result mappers (`src/core/graphql/rejection.mapper.ts`, Znight "errors as data")
 ### Validation
 
 - GraphQL inputs: Zod schemas in `{domain}.schema.ts`, passed to `@Args('input', Schema)` (the resolver receives the schema output)
-- Remaining REST multipart bodies: `@Body(Schema)` (Zod) on the text fields, `@UploadedFile('file', { maxSize, mimeTypes })` for the files (Web `File`). `UploadExceptionMapper` keeps the 400 + French messages and the `message: string[]` validation body
+- Remaining REST multipart bodies: `@Body(Schema)` (Zod) on the text fields, `@UploadedFile('file', { maxSize })` for the files (Web `File`); `ImageResizer.resize` checks the picture's magic numbers (never the declared media type) before re-encoding it to WebP. `UploadExceptionMapper` keeps the 400 + French messages and the `message: string[]` validation body
 
 ### Resolvers, mappers, loaders
 

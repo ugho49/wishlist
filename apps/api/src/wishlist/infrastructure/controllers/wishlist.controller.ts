@@ -9,7 +9,7 @@ import { ApiTags } from '@znight/openapi';
 
 import { Authenticated } from '../../../auth/infrastructure/decorators/public.metadata';
 import { CurrentUser } from '../../../auth/infrastructure/decorators/user.decorator';
-import { ACCEPTED_IMAGE_MIME_TYPES, ImageResizer, MAX_IMAGE_SIZE } from '../../../core/bucket/image-resizer';
+import { ImageResizer, MAX_IMAGE_SIZE } from '../../../core/bucket/image-resizer';
 import { CreateWishlistUseCase } from '../../application/command/create-wishlist.use-case';
 import { UploadWishlistLogoUseCase } from '../../application/command/upload-wishlist-logo.use-case';
 import { type CreateWishlistForm, CreateWishlistFormSchema } from '../wishlist-http.schema';
@@ -30,7 +30,7 @@ export class WishlistController {
   async createWishlistWithLogo(
     @CurrentUser() currentUser: ICurrentUser,
     @Body(CreateWishlistFormSchema) form: CreateWishlistForm,
-    @UploadedFile('image', { maxSize: MAX_IMAGE_SIZE, mimeTypes: ACCEPTED_IMAGE_MIME_TYPES }) imageFile?: File,
+    @UploadedFile('image', { maxSize: MAX_IMAGE_SIZE }) imageFile?: File,
   ): Promise<CreateWishlistHttpResponse> {
     const dto = form.data;
     const wishlist = await this.createWishlistUseCase.execute({
@@ -51,7 +51,7 @@ export class WishlistController {
   async uploadLogo(
     @Param('id') wishlistId: WishlistId,
     @CurrentUser() currentUser: ICurrentUser,
-    @UploadedFile('file', { maxSize: MAX_IMAGE_SIZE, mimeTypes: ACCEPTED_IMAGE_MIME_TYPES }) file: File,
+    @UploadedFile('file', { maxSize: MAX_IMAGE_SIZE }) file: File,
   ): Promise<UploadWishlistLogoHttpResponse> {
     const resized = await this.imageResizer.resize(file, LOGO_SIZE);
     const { logoUrl } = await this.uploadWishlistLogoUseCase.execute({ wishlistId, currentUser, file: resized });
