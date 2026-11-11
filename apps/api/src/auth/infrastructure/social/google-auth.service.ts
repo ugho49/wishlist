@@ -52,7 +52,8 @@ export class GoogleAuthService {
       const response = await this.client.getToken({ code });
       return response.tokens.id_token;
     } catch (error) {
-      throw new InternalServerErrorException('Error getting token from code', undefined, { cause: error });
+      const message = error instanceof Error && error.message ? error.message : 'Error getting token from code';
+      throw new InternalServerErrorException(message, undefined, { cause: error });
     }
   }
 }
