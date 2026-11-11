@@ -1,9 +1,10 @@
 import type { WishlistItemRepository } from '../../domain/wishlist-item.repository';
 
-import { Inject, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { type ICurrentUser, type ItemId } from '@wishlist/common';
+import { Injectable } from '@znight/core';
+import { NotFoundException, UnauthorizedException } from '@znight/http';
+import { getLogger } from '@znight/observability';
 
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { type UserRepository } from '../../../user/domain/repository/user.repository';
 import { Wishlist } from '../../../wishlist/domain/wishlist.model';
 import { type WishlistRepository } from '../../../wishlist/domain/wishlist.repository';
@@ -20,16 +21,16 @@ export type ToggleItemOutput = {
 
 @Injectable()
 export class ToggleItemUseCase {
-  private readonly logger = new Logger(ToggleItemUseCase.name);
+  private readonly logger = getLogger(ToggleItemUseCase.name);
 
   constructor(
-    @Inject(REPOSITORIES.WISHLIST_ITEM) private readonly itemRepository: WishlistItemRepository,
-    @Inject(REPOSITORIES.WISHLIST) private readonly wishlistRepository: WishlistRepository,
-    @Inject(REPOSITORIES.USER) private readonly userRepository: UserRepository,
+    private readonly itemRepository: WishlistItemRepository,
+    private readonly wishlistRepository: WishlistRepository,
+    private readonly userRepository: UserRepository,
   ) {}
 
   async execute(command: ToggleItemInput): Promise<ToggleItemOutput> {
-    this.logger.log('Toggle item request received', { command });
+    this.logger.info('Toggle item request received', { command });
     const item = await this.itemRepository.findByIdOrFail(command.itemId);
     const hasAccess = await this.wishlistRepository.hasAccess({
       wishlistId: item.wishlistId,
@@ -58,7 +59,7 @@ export class ToggleItemUseCase {
     wishlist: Wishlist;
     currentUser: ICurrentUser;
   }): Promise<WishlistItem> {
-    this.logger.log('Checking item...', { itemId: params.item.id });
+    this.logger.info('Checking item...', { itemId: params.item.id });
     const { item, currentUser, wishlist } = params;
 
     if (wishlist.isOwner(currentUser.id) && wishlist.hideItems) {
@@ -82,7 +83,7 @@ export class ToggleItemUseCase {
     wishlist: Wishlist;
     currentUser: ICurrentUser;
   }): Promise<WishlistItem> {
-    this.logger.log('Unchecking item...', { itemId: params.item.id });
+    this.logger.info('Unchecking item...', { itemId: params.item.id });
     const { item, wishlist, currentUser } = params;
 
     if (wishlist.isOwner(currentUser.id) && wishlist.hideItems) {

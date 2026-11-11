@@ -1,10 +1,5 @@
 /** biome-ignore-all lint/performance/noBarrelFile: This is a library index file */
 
-// class-validator / class-transformer call Reflect.getMetadata when DTO modules
-// evaluate. Vite 8 (Rolldown) may load a split chunk with this barrel before
-// the app entry, so the polyfill must be a real dependency of this module.
-import 'reflect-metadata';
-
 export * from './api/common.api';
 export * from './api/user.api';
 export * from './api/wishlist.api';

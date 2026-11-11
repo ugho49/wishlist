@@ -1,12 +1,13 @@
 import type { UserRepository } from '../../domain/repository/user.repository';
 import type { UserAccountRepository } from '../../domain/repository/user-account.repository';
 
-import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
-import { EventBus } from '@nestjs/cqrs';
+import { Injectable } from '@znight/core';
+import { EventPublisher } from '@znight/events';
+import { UnauthorizedException } from '@znight/http';
+import { getLogger } from '@znight/observability';
 
 import { PasswordManager } from '../../../auth/infrastructure/util/password-manager';
 import { TransactionManager } from '../../../core/database/transaction-manager';
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { UserCreatedEvent } from '../../domain/event/user-created.event';
 import { User } from '../../domain/model/user.model';
 import { UserAccount } from '../../domain/model/user-account.model';
@@ -27,19 +28,17 @@ export type CreateUserOutput = {
 
 @Injectable()
 export class CreateUserUseCase {
-  private readonly logger = new Logger(CreateUserUseCase.name);
+  private readonly logger = getLogger(CreateUserUseCase.name);
 
   constructor(
-    @Inject(REPOSITORIES.USER)
     private readonly userRepository: UserRepository,
-    @Inject(REPOSITORIES.USER_ACCOUNT)
     private readonly userAccountRepository: UserAccountRepository,
     private readonly transactionManager: TransactionManager,
-    private readonly eventBus: EventBus,
+    private readonly eventBus: EventPublisher,
   ) {}
 
   async execute(input: CreateUserInput): Promise<CreateUserOutput> {
-    this.logger.log('Create user request received', {
+    this.logger.info('Create user request received', {
       payload: {
         newUser: {
           ...input.newUser,
@@ -69,7 +68,7 @@ export class CreateUserUseCase {
       passwordHash: await PasswordManager.hash(newUser.password),
     });
 
-    this.logger.log('Creating user...', { userId: user.id });
+    this.logger.info('Creating user...', { userId: user.id });
     await this.transactionManager.runInTransaction(async tx => {
       await this.userRepository.save(user, tx);
       await this.userAccountRepository.save(passwordAccount, tx);

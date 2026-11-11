@@ -1,10 +1,10 @@
 import type { ICurrentUser } from '@wishlist/common';
 
-import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { type AttendeeId, type EventId } from '@wishlist/common';
+import { Args, Mutation, Resolver } from '@znight/graphql';
 
-import { GqlCurrentUser } from '../../../auth/infrastructure/decorators/user.decorator';
-import { ZodPipe } from '../../../core/graphql/zod-pipe';
+import { Authenticated } from '../../../auth/infrastructure/decorators/public.metadata';
+import { CurrentUser } from '../../../auth/infrastructure/decorators/user.decorator';
 import {
   type AddEventAttendeeInput,
   type AddEventAttendeeResult,
@@ -35,6 +35,7 @@ import {
 } from '../event.schema';
 
 @Resolver()
+@Authenticated()
 export class EventMutationResolver {
   constructor(
     private readonly createEventUseCase: CreateEventUseCase,
@@ -47,8 +48,8 @@ export class EventMutationResolver {
 
   @Mutation()
   async createEvent(
-    @Args('input', new ZodPipe(CreateEventInputSchema)) input: CreateEventInput,
-    @GqlCurrentUser() currentUser: ICurrentUser,
+    @Args('input', CreateEventInputSchema) input: CreateEventInput,
+    @CurrentUser() currentUser: ICurrentUser,
   ): Promise<CreateEventResult> {
     const { event } = await this.createEventUseCase.execute({
       currentUser,
@@ -69,9 +70,9 @@ export class EventMutationResolver {
 
   @Mutation()
   async updateEvent(
-    @Args('id', new ZodPipe(EventIdSchema)) id: EventId,
-    @Args('input', new ZodPipe(UpdateEventInputSchema)) input: UpdateEventInput,
-    @GqlCurrentUser() currentUser: ICurrentUser,
+    @Args('id', EventIdSchema) id: EventId,
+    @Args('input', UpdateEventInputSchema) input: UpdateEventInput,
+    @CurrentUser() currentUser: ICurrentUser,
   ): Promise<UpdateEventResult> {
     await this.updateEventUseCase.execute({
       currentUser,
@@ -89,8 +90,8 @@ export class EventMutationResolver {
 
   @Mutation()
   async deleteEvent(
-    @Args('id', new ZodPipe(EventIdSchema)) id: EventId,
-    @GqlCurrentUser() currentUser: ICurrentUser,
+    @Args('id', EventIdSchema) id: EventId,
+    @CurrentUser() currentUser: ICurrentUser,
   ): Promise<DeleteEventResult> {
     await this.deleteEventUseCase.execute({ currentUser, eventId: id });
     return { __typename: 'VoidOutput', success: true };
@@ -98,9 +99,9 @@ export class EventMutationResolver {
 
   @Mutation()
   async addEventAttendee(
-    @Args('eventId', new ZodPipe(EventIdSchema)) eventId: EventId,
-    @Args('input', new ZodPipe(AddEventAttendeeInputSchema)) input: AddEventAttendeeInput,
-    @GqlCurrentUser() currentUser: ICurrentUser,
+    @Args('eventId', EventIdSchema) eventId: EventId,
+    @Args('input', AddEventAttendeeInputSchema) input: AddEventAttendeeInput,
+    @CurrentUser() currentUser: ICurrentUser,
   ): Promise<AddEventAttendeeResult> {
     const { attendee } = await this.addAttendeeUseCase.execute({
       currentUser,
@@ -116,9 +117,9 @@ export class EventMutationResolver {
 
   @Mutation()
   async removeEventAttendee(
-    @Args('eventId', new ZodPipe(EventIdSchema)) eventId: EventId,
-    @Args('attendeeId', new ZodPipe(AttendeeIdSchema)) attendeeId: AttendeeId,
-    @GqlCurrentUser() currentUser: ICurrentUser,
+    @Args('eventId', EventIdSchema) eventId: EventId,
+    @Args('attendeeId', AttendeeIdSchema) attendeeId: AttendeeId,
+    @CurrentUser() currentUser: ICurrentUser,
   ): Promise<RemoveEventAttendeeResult> {
     await this.deleteAttendeeUseCase.execute({ currentUser, eventId, attendeeId });
     return { __typename: 'VoidOutput', success: true };
@@ -126,10 +127,10 @@ export class EventMutationResolver {
 
   @Mutation()
   async updateEventAttendeeRole(
-    @Args('eventId', new ZodPipe(EventIdSchema)) eventId: EventId,
-    @Args('attendeeId', new ZodPipe(AttendeeIdSchema)) attendeeId: AttendeeId,
-    @Args('role', new ZodPipe(GqlAttendeeRoleSchema)) role: GqlAttendeeRole,
-    @GqlCurrentUser() currentUser: ICurrentUser,
+    @Args('eventId', EventIdSchema) eventId: EventId,
+    @Args('attendeeId', AttendeeIdSchema) attendeeId: AttendeeId,
+    @Args('role', GqlAttendeeRoleSchema) role: GqlAttendeeRole,
+    @CurrentUser() currentUser: ICurrentUser,
   ): Promise<UpdateEventAttendeeRoleResult> {
     await this.updateAttendeeRoleUseCase.execute({
       currentUser,

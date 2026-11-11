@@ -1,11 +1,12 @@
 import type { EventRepository } from '../../domain/repository/event.repository';
 import type { EventAttendeeRepository } from '../../domain/repository/event-attendee.repository';
 
-import { BadRequestException, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
-import { EventBus } from '@nestjs/cqrs';
 import { type EventId, type ICurrentUser } from '@wishlist/common';
+import { Injectable } from '@znight/core';
+import { EventPublisher } from '@znight/events';
+import { BadRequestException, UnauthorizedException } from '@znight/http';
+import { getLogger } from '@znight/observability';
 
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { type UserRepository } from '../../../user/domain/repository/user.repository';
 import { AttendeeRole } from '../../domain/attendee-role.enum';
 import { AttendeeAddedEvent } from '../../domain/event/attendee-added.event';
@@ -26,21 +27,18 @@ export type AddAttendeeOutput = {
 
 @Injectable()
 export class AddAttendeeUseCase {
-  private readonly logger = new Logger(AddAttendeeUseCase.name);
+  private readonly logger = getLogger(AddAttendeeUseCase.name);
 
   constructor(
-    @Inject(REPOSITORIES.EVENT)
     private readonly eventRepository: EventRepository,
-    @Inject(REPOSITORIES.EVENT_ATTENDEE)
     private readonly attendeeRepository: EventAttendeeRepository,
-    @Inject(REPOSITORIES.USER)
     private readonly userRepository: UserRepository,
-    private readonly eventBus: EventBus,
+    private readonly eventBus: EventPublisher,
   ) {}
 
   async execute(input: AddAttendeeInput): Promise<AddAttendeeOutput> {
     const { eventId, currentUser } = input;
-    this.logger.log('Add attendee request received', { eventId, currentUser });
+    this.logger.info('Add attendee request received', { eventId, currentUser });
 
     const event = await this.eventRepository.findByIdOrFail(eventId);
 
@@ -76,7 +74,7 @@ export class AddAttendeeUseCase {
           role,
         });
 
-    this.logger.log('Saving attendee...', { newAttendee });
+    this.logger.info('Saving attendee...', { newAttendee });
     await this.attendeeRepository.save(newAttendee);
 
     const invitedBy = await this.userRepository.findByIdOrFail(currentUser.id);

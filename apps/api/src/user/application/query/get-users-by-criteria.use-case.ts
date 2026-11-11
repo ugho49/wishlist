@@ -1,11 +1,10 @@
 import type { User } from '../../domain/model/user.model';
 import type { UserRepository } from '../../domain/repository/user.repository';
 
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { type ICurrentUser } from '@wishlist/common';
+import { Injectable } from '@znight/core';
+import { BadRequestException } from '@znight/http';
 import { isEmpty } from 'lodash';
-
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
 
 export type GetUsersByCriteriaInput = {
   currentUser: ICurrentUser;
@@ -18,10 +17,7 @@ export type GetUsersByCriteriaOutput = {
 
 @Injectable()
 export class GetUsersByCriteriaUseCase {
-  constructor(
-    @Inject(REPOSITORIES.USER)
-    private readonly userRepository: UserRepository,
-  ) {}
+  constructor(private readonly userRepository: UserRepository) {}
 
   async execute(query: GetUsersByCriteriaInput): Promise<GetUsersByCriteriaOutput> {
     const { criteria } = query;

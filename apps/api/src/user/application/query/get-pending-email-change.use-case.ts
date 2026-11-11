@@ -1,9 +1,7 @@
 import type { UserEmailChangeVerificationRepository } from '../../domain/repository/user-email-change-verification.repository';
 
-import { Inject, Injectable } from '@nestjs/common';
 import { type ICurrentUser } from '@wishlist/common';
-
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
+import { Injectable } from '@znight/core';
 
 export type GetPendingEmailChangeResult = { newEmail: string; expiredAt: string } | undefined;
 
@@ -13,10 +11,7 @@ export type GetPendingEmailChangeInput = {
 
 @Injectable()
 export class GetPendingEmailChangeUseCase {
-  constructor(
-    @Inject(REPOSITORIES.USER_EMAIL_CHANGE_VERIFICATION)
-    private readonly emailChangeVerificationRepository: UserEmailChangeVerificationRepository,
-  ) {}
+  constructor(private readonly emailChangeVerificationRepository: UserEmailChangeVerificationRepository) {}
 
   async execute(query: GetPendingEmailChangeInput): Promise<GetPendingEmailChangeResult> {
     const verifications = await this.emailChangeVerificationRepository.findByUserId(query.currentUser.id);

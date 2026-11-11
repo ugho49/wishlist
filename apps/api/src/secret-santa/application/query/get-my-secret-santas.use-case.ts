@@ -1,10 +1,8 @@
 import type { SecretSanta } from '../../domain/model/secret-santa.model';
 import type { SecretSantaRepository } from '../../domain/repository/secret-santa.repository';
 
-import { Inject, Injectable } from '@nestjs/common';
 import { type UserId } from '@wishlist/common';
-
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
+import { Injectable } from '@znight/core';
 
 export type GetMySecretSantasInput = {
   userId: UserId;
@@ -19,7 +17,7 @@ export type GetMySecretSantasOutput = {
 
 @Injectable()
 export class GetMySecretSantasUseCase {
-  constructor(@Inject(REPOSITORIES.SECRET_SANTA) private readonly secretSantaRepository: SecretSantaRepository) {}
+  constructor(private readonly secretSantaRepository: SecretSantaRepository) {}
 
   async execute(input: GetMySecretSantasInput): Promise<GetMySecretSantasOutput> {
     const skip = (input.pageNumber - 1) * input.pageSize;

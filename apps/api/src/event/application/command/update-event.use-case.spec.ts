@@ -1,6 +1,6 @@
 import type { EventRepository } from '../../domain/repository/event.repository';
 
-import { Logger, UnauthorizedException } from '@nestjs/common';
+import { UnauthorizedException } from '@znight/http';
 
 import { EventBuilder } from '../../../../test-utils/builders/event.builder';
 import { toCurrentUser, UserBuilder } from '../../../../test-utils/builders/user.builder';
@@ -8,7 +8,7 @@ import { createMock } from '../../../../test-utils/mocks';
 import { User } from '../../../user/domain/model/user.model';
 import { Event } from '../../domain/model/event.model';
 import { UpdateEventUseCase } from './update-event.use-case';
-import { beforeAll, beforeEach, describe, expect, it, mock } from 'bun:test';
+import { beforeEach, describe, expect, it, mock } from 'bun:test';
 
 describe('UpdateEventUseCase', () => {
   const eventRepository = createMock<EventRepository>();
@@ -16,10 +16,6 @@ describe('UpdateEventUseCase', () => {
   let useCase: UpdateEventUseCase;
   let creator: User;
   let event: Event;
-
-  beforeAll(() => {
-    Logger.overrideLogger(false);
-  });
 
   beforeEach(() => {
     mock.clearAllMocks();

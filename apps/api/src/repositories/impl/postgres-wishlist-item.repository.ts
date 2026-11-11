@@ -1,6 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
 import { schema } from '@wishlist/api-drizzle';
 import { type ItemId, type UserId, uuid, type WishlistId } from '@wishlist/common';
+import { Injectable } from '@znight/core';
+import { NotFoundException } from '@znight/http';
 import {
   and,
   asc,

@@ -1,11 +1,12 @@
 import type { UserRepository } from '../../domain/repository/user.repository';
 import type { UserEmailChangeVerificationRepository } from '../../domain/repository/user-email-change-verification.repository';
 
-import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
-import { EventBus } from '@nestjs/cqrs';
+import { Injectable } from '@znight/core';
+import { EventPublisher } from '@znight/events';
+import { UnauthorizedException } from '@znight/http';
+import { getLogger } from '@znight/observability';
 
 import { TransactionManager } from '../../../core/database/transaction-manager';
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { EmailChangedEvent } from '../../domain/event/email-changed.event';
 
 export type ConfirmEmailChangeInput = {
@@ -15,19 +16,17 @@ export type ConfirmEmailChangeInput = {
 
 @Injectable()
 export class ConfirmEmailChangeUseCase {
-  private readonly logger = new Logger(ConfirmEmailChangeUseCase.name);
+  private readonly logger = getLogger(ConfirmEmailChangeUseCase.name);
 
   constructor(
-    @Inject(REPOSITORIES.USER)
     private readonly userRepository: UserRepository,
-    @Inject(REPOSITORIES.USER_EMAIL_CHANGE_VERIFICATION)
     private readonly emailChangeVerificationRepository: UserEmailChangeVerificationRepository,
     private readonly transactionManager: TransactionManager,
-    private readonly eventBus: EventBus,
+    private readonly eventBus: EventPublisher,
   ) {}
 
   async execute(input: ConfirmEmailChangeInput): Promise<void> {
-    this.logger.log('Confirm email change request received', { input });
+    this.logger.info('Confirm email change request received', { input });
     // Normalize email to lowercase
     const newEmail = input.newEmail.toLowerCase();
 
@@ -52,7 +51,7 @@ export class ConfirmEmailChangeUseCase {
     const updatedUser = verification.user.updateEmail(newEmail);
     const invalidatedVerification = verification.invalidate();
 
-    this.logger.log('Updating user email and invalidating verification...', {
+    this.logger.info('Updating user email and invalidating verification...', {
       userId: updatedUser.id,
       oldEmail,
       newEmail,
@@ -64,7 +63,7 @@ export class ConfirmEmailChangeUseCase {
     });
 
     // Publish event to notify of email change
-    this.eventBus.publish(
+    await this.eventBus.publish(
       new EmailChangedEvent({
         userId: updatedUser.id,
         oldEmail,

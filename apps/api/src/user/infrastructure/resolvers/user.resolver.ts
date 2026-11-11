@@ -1,12 +1,10 @@
 import type { ICurrentUser } from '@wishlist/common';
 
-import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { type UserAccountId, type UserId } from '@wishlist/common';
+import { Args, Loader, Mutation, Query, Resolver } from '@znight/graphql';
 
-import { Public } from '../../../auth/infrastructure/decorators/public.metadata';
-import { GqlCurrentUser } from '../../../auth/infrastructure/decorators/user.decorator';
-import { type GraphQLContext } from '../../../core/graphql/graphql.context';
-import { ZodPipe } from '../../../core/graphql/zod-pipe';
+import { Authenticated, Public } from '../../../auth/infrastructure/decorators/public.metadata';
+import { CurrentUser, CurrentUserId } from '../../../auth/infrastructure/decorators/user.decorator';
 import {
   type ChangeUserPasswordInput,
   type ChangeUserPasswordResult,
@@ -40,6 +38,7 @@ import {
   type UpdateUserProfileResult,
   type User,
 } from '../../../gql/generated-types';
+import { UsersById } from '../../../user/infrastructure/user.dataloader';
 import { ConfirmEmailChangeUseCase } from '../../application/command/confirm-email-change.use-case';
 import { CreateEmailChangeVerificationUseCase } from '../../application/command/create-email-change-verification.use-case';
 import { CreatePasswordVerificationUseCase } from '../../application/command/create-password-verification.use-case';
@@ -78,6 +77,7 @@ import {
 } from '../user.schema';
 
 @Resolver()
+@Authenticated()
 export class UserResolver {
   constructor(
     private readonly createUserUseCase: CreateUserUseCase,
@@ -98,10 +98,9 @@ export class UserResolver {
     private readonly getUsersByCriteriaUseCase: GetUsersByCriteriaUseCase,
     private readonly getClosestFriendsUseCase: GetClosestFriendsUseCase,
   ) {}
-
   @Query()
-  async currentUser(@GqlCurrentUser('id') currentUserId: UserId, @Context() ctx: GraphQLContext): Promise<User> {
-    const user = await ctx.loaders.user.load(currentUserId);
+  async currentUser(@CurrentUserId() currentUserId: UserId, @Loader() usersLoader: Loader<UsersById>): Promise<User> {
+    const user = await usersLoader.load(currentUserId);
     if (!user) {
       throw new Error('User not found');
     }
@@ -110,8 +109,8 @@ export class UserResolver {
 
   @Query()
   async searchUsers(
-    @Args('keyword', new ZodPipe(SearchUsersKeywordSchema)) keyword: string,
-    @GqlCurrentUser() currentUser: ICurrentUser,
+    @Args('keyword', SearchUsersKeywordSchema) keyword: string,
+    @CurrentUser() currentUser: ICurrentUser,
   ): Promise<SearchUsersResult> {
     const { users } = await this.getUsersByCriteriaUseCase.execute({ currentUser, criteria: keyword });
 
@@ -123,8 +122,8 @@ export class UserResolver {
 
   @Query()
   async closestFriends(
-    @Args('limit', new ZodPipe(ClosestFriendsLimitSchema)) limit: number | undefined,
-    @GqlCurrentUser('id') currentUserId: UserId,
+    @Args('limit', ClosestFriendsLimitSchema) limit: number | undefined,
+    @CurrentUserId() currentUserId: UserId,
   ): Promise<ClosestFriendsResult> {
     const { users } = await this.getClosestFriendsUseCase.execute({ userId: currentUserId, limit: limit ?? 20 });
 
@@ -136,9 +135,7 @@ export class UserResolver {
 
   @Public()
   @Mutation()
-  async registerUser(
-    @Args('input', new ZodPipe(RegisterUserInputSchema)) input: RegisterUserInput,
-  ): Promise<RegisterUserResult> {
+  async registerUser(@Args('input', RegisterUserInputSchema) input: RegisterUserInput): Promise<RegisterUserResult> {
     const { user } = await this.createUserUseCase.execute({
       newUser: {
         email: input.email,
@@ -154,8 +151,8 @@ export class UserResolver {
 
   @Mutation()
   async linkCurrentUserWithGoogle(
-    @Args('input', new ZodPipe(LinkUserToGoogleInputSchema)) input: LinkUserToGoogleInput,
-    @GqlCurrentUser('id') currentUserId: UserId,
+    @Args('input', LinkUserToGoogleInputSchema) input: LinkUserToGoogleInput,
+    @CurrentUserId() currentUserId: UserId,
   ): Promise<LinkUserToGoogleResult> {
     const { userAccount } = await this.linkUserToGoogleUseCase.execute({
       code: input.code,
@@ -167,8 +164,8 @@ export class UserResolver {
 
   @Mutation()
   async unlinkCurrentUserAccount(
-    @Args('accountId', { type: () => String }) id: UserAccountId,
-    @GqlCurrentUser('id') currentUserId: UserId,
+    @Args('accountId') id: UserAccountId,
+    @CurrentUserId() currentUserId: UserId,
   ): Promise<UnlinkCurrentUserAccountResult> {
     await this.unlinkUserAccountUseCase.execute({ userId: currentUserId, accountId: id });
     return { __typename: 'VoidOutput', success: true };
@@ -176,9 +173,9 @@ export class UserResolver {
 
   @Mutation()
   async updateUserProfile(
-    @Args('input', new ZodPipe(UpdateUserProfileInputSchema)) input: UpdateUserProfileInput,
-    @GqlCurrentUser('id') currentUserId: UserId,
-    @Context() ctx: GraphQLContext,
+    @Args('input', UpdateUserProfileInputSchema) input: UpdateUserProfileInput,
+    @CurrentUserId() currentUserId: UserId,
+    @Loader() usersLoader: Loader<UsersById>,
   ): Promise<UpdateUserProfileResult> {
     await this.updateUserUseCase.execute({
       userId: currentUserId,
@@ -189,7 +186,7 @@ export class UserResolver {
       },
     });
 
-    const loadedUser = await ctx.loaders.user.load(currentUserId);
+    const loadedUser = await usersLoader.load(currentUserId);
     if (!loadedUser) {
       throw new Error('Failed to load user');
     }
@@ -198,9 +195,9 @@ export class UserResolver {
 
   @Mutation()
   async setSignupSource(
-    @Args('input', new ZodPipe(SetSignupSourceInputSchema)) input: SetSignupSourceInput,
-    @GqlCurrentUser('id') currentUserId: UserId,
-    @Context() ctx: GraphQLContext,
+    @Args('input', SetSignupSourceInputSchema) input: SetSignupSourceInput,
+    @CurrentUserId() currentUserId: UserId,
+    @Loader() usersLoader: Loader<UsersById>,
   ): Promise<SetSignupSourceResult> {
     const source = toDomainSignupSource(input.source);
     await this.setSignupSourceUseCase.execute({
@@ -209,7 +206,7 @@ export class UserResolver {
       detail: source === SignupSource.OTHER ? input.detail?.trim() : undefined,
     });
 
-    const loadedUser = await ctx.loaders.user.load(currentUserId);
+    const loadedUser = await usersLoader.load(currentUserId);
     if (!loadedUser) {
       throw new Error('Failed to load user');
     }
@@ -218,8 +215,8 @@ export class UserResolver {
 
   @Mutation()
   async changeUserPassword(
-    @Args('input', new ZodPipe(ChangeUserPasswordInputSchema)) input: ChangeUserPasswordInput,
-    @GqlCurrentUser() currentUser: ICurrentUser,
+    @Args('input', ChangeUserPasswordInputSchema) input: ChangeUserPasswordInput,
+    @CurrentUser() currentUser: ICurrentUser,
   ): Promise<ChangeUserPasswordResult> {
     await this.updateUserPasswordUseCase.execute({
       currentUser,
@@ -231,8 +228,8 @@ export class UserResolver {
 
   @Mutation()
   async updateUserPictureFromAccount(
-    @Args('input', new ZodPipe(UpdateUserPictureFromAccountInputSchema)) input: UpdateUserPictureFromAccountInput,
-    @GqlCurrentUser('id') currentUserId: UserId,
+    @Args('input', UpdateUserPictureFromAccountInputSchema) input: UpdateUserPictureFromAccountInput,
+    @CurrentUserId() currentUserId: UserId,
   ): Promise<UpdateUserPictureFromAccountResult> {
     await this.updateUserPictureFromAccountUseCase.execute({
       userId: currentUserId,
@@ -242,13 +239,13 @@ export class UserResolver {
   }
 
   @Mutation()
-  async removeUserPicture(@GqlCurrentUser('id') currentUserId: UserId): Promise<RemoveUserPictureResult> {
+  async removeUserPicture(@CurrentUserId() currentUserId: UserId): Promise<RemoveUserPictureResult> {
     await this.removeUserPictureUseCase.execute({ userId: currentUserId });
     return { __typename: 'VoidOutput', success: true };
   }
 
   @Query()
-  async pendingEmailChange(@GqlCurrentUser() currentUser: ICurrentUser): Promise<GetPendingEmailChangeResult | null> {
+  async pendingEmailChange(@CurrentUser() currentUser: ICurrentUser): Promise<GetPendingEmailChangeResult | null> {
     const result = await this.getPendingEmailChangeUseCase.execute({ currentUser });
 
     if (!result) {
@@ -266,8 +263,8 @@ export class UserResolver {
 
   @Mutation()
   async requestEmailChange(
-    @Args('input', new ZodPipe(RequestEmailChangeInputSchema)) input: RequestEmailChangeInput,
-    @GqlCurrentUser() currentUser: ICurrentUser,
+    @Args('input', RequestEmailChangeInputSchema) input: RequestEmailChangeInput,
+    @CurrentUser() currentUser: ICurrentUser,
   ): Promise<RequestEmailChangeResult> {
     await this.createEmailChangeVerificationUseCase.execute({
       currentUser,
@@ -279,7 +276,7 @@ export class UserResolver {
   @Public()
   @Mutation()
   async confirmEmailChange(
-    @Args('input', new ZodPipe(ConfirmEmailChangeInputSchema)) input: ConfirmEmailChangeInput,
+    @Args('input', ConfirmEmailChangeInputSchema) input: ConfirmEmailChangeInput,
   ): Promise<ConfirmEmailChangeResult> {
     await this.confirmEmailChangeUseCase.execute({
       newEmail: input.newEmail,
@@ -290,8 +287,8 @@ export class UserResolver {
 
   @Mutation()
   async updateUserEmailSettings(
-    @Args('input', new ZodPipe(UpdateUserEmailSettingsInputSchema)) input: UpdateUserEmailSettingsInput,
-    @GqlCurrentUser() currentUser: ICurrentUser,
+    @Args('input', UpdateUserEmailSettingsInputSchema) input: UpdateUserEmailSettingsInput,
+    @CurrentUser() currentUser: ICurrentUser,
   ): Promise<UpdateUserEmailSettingsResult> {
     const { userEmailSetting } = await this.updateUserEmailSettingUseCase.execute({
       currentUser,
@@ -305,7 +302,7 @@ export class UserResolver {
   @Public()
   @Mutation()
   async sendResetPasswordEmail(
-    @Args('input', new ZodPipe(SendResetPasswordEmailInputSchema)) input: SendResetPasswordEmailInput,
+    @Args('input', SendResetPasswordEmailInputSchema) input: SendResetPasswordEmailInput,
   ): Promise<SendResetPasswordEmailResult> {
     await this.createPasswordVerificationUseCase.execute({ email: input.email });
     return { __typename: 'VoidOutput', success: true };
@@ -314,7 +311,7 @@ export class UserResolver {
   @Public()
   @Mutation()
   async resetPassword(
-    @Args('input', new ZodPipe(ResetPasswordInputSchema)) input: ResetPasswordInput,
+    @Args('input', ResetPasswordInputSchema) input: ResetPasswordInput,
   ): Promise<ResetPasswordResult> {
     await this.resetUserPasswordUseCase.execute({
       email: input.email,
@@ -326,8 +323,8 @@ export class UserResolver {
 
   @Mutation()
   async revokeSession(
-    @Args('input', new ZodPipe(RevokeSessionInputSchema)) input: RevokeSessionInput,
-    @GqlCurrentUser() currentUser: ICurrentUser,
+    @Args('input', RevokeSessionInputSchema) input: RevokeSessionInput,
+    @CurrentUser() currentUser: ICurrentUser,
   ): Promise<RevokeSessionResult> {
     await this.revokeUserSessionUseCase.execute({
       currentUser,

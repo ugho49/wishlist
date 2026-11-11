@@ -1,9 +1,8 @@
 import type { UserRepository } from '../../domain/repository/user.repository';
 
-import { Inject, Injectable, Logger } from '@nestjs/common';
 import { type UserId } from '@wishlist/common';
-
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
+import { Injectable } from '@znight/core';
+import { getLogger } from '@znight/observability';
 
 export type UpdateUserInput = {
   userId: UserId;
@@ -16,15 +15,12 @@ export type UpdateUserInput = {
 
 @Injectable()
 export class UpdateUserUseCase {
-  private readonly logger = new Logger(UpdateUserUseCase.name);
+  private readonly logger = getLogger(UpdateUserUseCase.name);
 
-  constructor(
-    @Inject(REPOSITORIES.USER)
-    private readonly userRepository: UserRepository,
-  ) {}
+  constructor(private readonly userRepository: UserRepository) {}
 
   async execute(input: UpdateUserInput): Promise<void> {
-    this.logger.log('Update user request received', { input });
+    this.logger.info('Update user request received', { input });
     const { userId, updateUser } = input;
 
     const user = await this.userRepository.findByIdOrFail(userId);
@@ -34,7 +30,7 @@ export class UpdateUserUseCase {
       .updateLastName(updateUser.lastname)
       .updateBirthday(updateUser.birthday);
 
-    this.logger.log('Updating user...', { userId, updatedFields: ['firstname', 'lastname', 'birthday'] });
+    this.logger.info('Updating user...', { userId, updatedFields: ['firstname', 'lastname', 'birthday'] });
     await this.userRepository.save(updatedUser);
   }
 }

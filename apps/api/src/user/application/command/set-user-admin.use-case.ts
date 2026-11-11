@@ -1,11 +1,12 @@
 import type { UserRepository } from '../../domain/repository/user.repository';
 import type { UserSessionRepository } from '../../domain/repository/user-session.repository';
 
-import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { type ICurrentUser, type UserId } from '@wishlist/common';
+import { Injectable } from '@znight/core';
+import { UnauthorizedException } from '@znight/http';
+import { getLogger } from '@znight/observability';
 
 import { TransactionManager } from '../../../core/database/transaction-manager';
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
 
 export type SetUserAdminInput = {
   currentUser: ICurrentUser;
@@ -15,18 +16,16 @@ export type SetUserAdminInput = {
 
 @Injectable()
 export class SetUserAdminUseCase {
-  private readonly logger = new Logger(SetUserAdminUseCase.name);
+  private readonly logger = getLogger(SetUserAdminUseCase.name);
 
   constructor(
-    @Inject(REPOSITORIES.USER)
     private readonly userRepository: UserRepository,
-    @Inject(REPOSITORIES.USER_SESSION)
     private readonly sessionRepository: UserSessionRepository,
     private readonly transactionManager: TransactionManager,
   ) {}
 
   async execute(input: SetUserAdminInput): Promise<void> {
-    this.logger.log('Set user admin request received', { userId: input.userId, isAdmin: input.isAdmin });
+    this.logger.info('Set user admin request received', { userId: input.userId, isAdmin: input.isAdmin });
     const { userId, currentUser, isAdmin } = input;
 
     if (userId === currentUser.id) {
@@ -46,11 +45,11 @@ export class SetUserAdminUseCase {
     const updatedUser = isAdmin ? user.grantAdmin() : user.revokeAdmin();
 
     if (updatedUser === user) {
-      this.logger.log('User admin status already up to date', { userId, isAdmin });
+      this.logger.info('User admin status already up to date', { userId, isAdmin });
       return;
     }
 
-    this.logger.log('Updating user admin status...', { userId, isAdmin });
+    this.logger.info('Updating user admin status...', { userId, isAdmin });
     await this.transactionManager.runInTransaction(async tx => {
       await this.userRepository.save(updatedUser, tx);
       if (!isAdmin) {

@@ -4,9 +4,9 @@
     "outDir": "../../dist/out-tsc",
     "types": ["node", "bun"],
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
+    "emitDecoratorMetadata": false,
     "verbatimModuleSyntax": true
   },
   "exclude": ["src/**/*.int-spec.ts", "src/**/*.spec.ts"],
-  "include": ["src/**/*.ts", "codegen.ts"]
+  "include": ["src/**/*.ts", "src/.znight/*.ts", "codegen.ts", "znight.config.ts"]
 }

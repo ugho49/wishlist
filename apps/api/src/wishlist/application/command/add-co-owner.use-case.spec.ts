@@ -1,8 +1,8 @@
-import type { EventBus } from '@nestjs/cqrs';
 import type { UserRepository } from '../../../user/domain/repository/user.repository';
 import type { WishlistRepository } from '../../domain/wishlist.repository';
 
-import { BadRequestException, Logger, UnauthorizedException } from '@nestjs/common';
+import { EventPublisher } from '@znight/events';
+import { BadRequestException, UnauthorizedException } from '@znight/http';
 
 import { toCurrentUser, UserBuilder } from '../../../../test-utils/builders/user.builder';
 import { WishlistBuilder } from '../../../../test-utils/builders/wishlist.builder';
@@ -11,21 +11,17 @@ import { User } from '../../../user/domain/model/user.model';
 import { UserAddedAsCoOwnerToWishlistEvent } from '../../domain/event/user-added-as-co-owner-to-wishlist.event';
 import { Wishlist } from '../../domain/wishlist.model';
 import { AddCoOwnerUseCase } from './add-co-owner.use-case';
-import { beforeAll, beforeEach, describe, expect, it, mock } from 'bun:test';
+import { beforeEach, describe, expect, it, mock } from 'bun:test';
 
 describe('AddCoOwnerUseCase', () => {
   const wishlistRepository = createMock<WishlistRepository>();
   const userRepository = createMock<UserRepository>();
-  const eventBus = createMock<EventBus>();
+  const eventBus = createMock<EventPublisher>();
 
   let useCase: AddCoOwnerUseCase;
   let owner: User;
   let coOwner: User;
   let wishlist: Wishlist;
-
-  beforeAll(() => {
-    Logger.overrideLogger(false);
-  });
 
   beforeEach(() => {
     mock.clearAllMocks();

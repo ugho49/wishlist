@@ -1,13 +1,13 @@
 import type { UserRepository } from '../../domain/repository/user.repository';
 import type { UserSessionRepository } from '../../domain/repository/user-session.repository';
 
-import { Logger, UnauthorizedException } from '@nestjs/common';
+import { UnauthorizedException } from '@znight/http';
 
 import { toCurrentUser, UserBuilder } from '../../../../test-utils/builders/user.builder';
 import { createMock } from '../../../../test-utils/mocks';
 import { User } from '../../domain/model/user.model';
 import { AdminRevokeAllUserSessionsUseCase } from './admin-revoke-all-user-sessions.use-case';
-import { beforeAll, beforeEach, describe, expect, it, mock } from 'bun:test';
+import { beforeEach, describe, expect, it, mock } from 'bun:test';
 
 describe('AdminRevokeAllUserSessionsUseCase', () => {
   const userRepository = createMock<UserRepository>();
@@ -16,10 +16,6 @@ describe('AdminRevokeAllUserSessionsUseCase', () => {
   let useCase: AdminRevokeAllUserSessionsUseCase;
   let admin: User;
   let target: User;
-
-  beforeAll(() => {
-    Logger.overrideLogger(false);
-  });
 
   beforeEach(() => {
     mock.clearAllMocks();

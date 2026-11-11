@@ -1,36 +1,18 @@
-import type { Algorithm } from 'jsonwebtoken';
-import type { StringValue } from 'ms';
+import { Config, Env, Secret } from '@znight/config';
 
-import { registerAs } from '@nestjs/config';
-import { mapConfigOrThrow } from '@wishlist/common';
-import { z } from 'zod';
-
-const schema = z.object({
-  AUTH_ISSUER: z.string('Missing AUTH_ISSUER environment variable'),
-  AUTH_ACCESS_TOKEN_SECRET: z.string('Missing AUTH_ACCESS_TOKEN_SECRET environment variable'),
-  AUTH_ACCESS_TOKEN_DURATION: z.string().optional().default('15m'),
-  AUTH_ACCESS_TOKEN_ALGORITHM: z.string().optional().default('HS512'),
-  AUTH_REFRESH_TOKEN_DURATION: z.string().optional().default('30d'),
-  GOOGLE_OAUTH_CLIENT_ID: z.string('Missing GOOGLE_OAUTH_CLIENT_ID environment variable'),
-  GOOGLE_OAUTH_CLIENT_SECRET: z.string('Missing GOOGLE_OAUTH_CLIENT_SECRET environment variable'),
-});
-
-export default registerAs('auth', () =>
-  mapConfigOrThrow(schema, process.env, data => ({
-    issuer: data.AUTH_ISSUER,
-    accessToken: {
-      secret: data.AUTH_ACCESS_TOKEN_SECRET,
-      duration: data.AUTH_ACCESS_TOKEN_DURATION as StringValue,
-      algorithm: data.AUTH_ACCESS_TOKEN_ALGORITHM as Algorithm,
-    },
-    refreshToken: {
-      duration: data.AUTH_REFRESH_TOKEN_DURATION as StringValue,
-    },
-    social: {
-      google: {
-        clientId: data.GOOGLE_OAUTH_CLIENT_ID,
-        clientSecret: data.GOOGLE_OAUTH_CLIENT_SECRET,
-      },
-    },
-  })),
-);
+/** Authentication settings: JWT access tokens, refresh tokens and Google OAuth. */
+@Config('auth')
+export class AuthConfig {
+  /** AUTH_ISSUER */
+  issuer!: string;
+  /** AUTH_ACCESS_TOKEN_SECRET */
+  @Secret() accessTokenSecret!: string;
+  /** AUTH_ACCESS_TOKEN_DURATION, a `ms` duration */
+  accessTokenDuration = '15m';
+  /** AUTH_ACCESS_TOKEN_ALGORITHM */
+  accessTokenAlgorithm: 'HS256' | 'HS384' | 'HS512' = 'HS512';
+  /** AUTH_REFRESH_TOKEN_DURATION, a `ms` duration */
+  refreshTokenDuration = '30d';
+  @Env('GOOGLE_OAUTH_CLIENT_ID') googleClientId!: string;
+  @Secret('GOOGLE_OAUTH_CLIENT_SECRET') googleClientSecret!: string;
+}

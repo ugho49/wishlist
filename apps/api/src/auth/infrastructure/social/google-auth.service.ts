@@ -1,31 +1,29 @@
-import type { ConfigType } from '@nestjs/config';
-
-import { Inject, Injectable, InternalServerErrorException, Logger, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@znight/core';
+import { InternalServerErrorException, UnauthorizedException } from '@znight/http';
+import { getLogger } from '@znight/observability';
 import { OAuth2Client, type TokenPayload } from 'google-auth-library';
 
-import authConfig from '../auth.config';
+import { AuthConfig } from '../auth.config';
 
 @Injectable()
 export class GoogleAuthService {
-  private readonly logger = new Logger(GoogleAuthService.name);
+  private readonly logger = getLogger(GoogleAuthService.name);
   private readonly client: OAuth2Client;
 
-  constructor(@Inject(authConfig.KEY) config: ConfigType<typeof authConfig>) {
-    const googleConfig = config.social.google;
-
+  constructor(config: AuthConfig) {
     this.client = new OAuth2Client({
-      clientId: googleConfig.clientId,
-      clientSecret: googleConfig.clientSecret,
+      clientId: config.googleClientId,
+      clientSecret: config.googleClientSecret,
       redirectUri: 'postmessage',
     });
 
-    this.logger.log('Created Google OAuth2Client', {
-      clientId: googleConfig.clientId,
+    this.logger.info('Created Google OAuth2Client', {
+      clientId: config.googleClientId,
     });
   }
 
   async getGoogleAccountFromCode(code: string): Promise<TokenPayload> {
-    this.logger.log('Exchange code to ID token...');
+    this.logger.info('Exchange code to ID token...');
     const idToken = await this.exchangeCodeToIdToken(code);
 
     if (!idToken) {
@@ -36,7 +34,7 @@ export class GoogleAuthService {
   }
 
   private async verify(token: string) {
-    this.logger.log('Verifying ID token...');
+    this.logger.info('Verifying ID token...');
     const ticket = await this.client.verifyIdToken({
       idToken: token,
     });
@@ -54,7 +52,7 @@ export class GoogleAuthService {
       const response = await this.client.getToken({ code });
       return response.tokens.id_token;
     } catch (error) {
-      throw new InternalServerErrorException(error, 'Error getting token from code');
+      throw new InternalServerErrorException('Error getting token from code', undefined, { cause: error });
     }
   }
 }

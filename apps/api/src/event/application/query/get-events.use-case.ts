@@ -1,9 +1,8 @@
 import type { Event } from '../../domain/model/event.model';
 import type { EventRepository } from '../../domain/repository/event.repository';
 
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
-
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
+import { Injectable } from '@znight/core';
+import { BadRequestException } from '@znight/http';
 
 export type GetEventsInput = {
   pageNumber: number;
@@ -18,7 +17,7 @@ export type GetEventsOutput = {
 
 @Injectable()
 export class GetEventsUseCase {
-  constructor(@Inject(REPOSITORIES.EVENT) private readonly eventRepository: EventRepository) {}
+  constructor(private readonly eventRepository: EventRepository) {}
 
   async execute(input: GetEventsInput): Promise<GetEventsOutput> {
     const { pageNumber, pageSize, criteria } = input;

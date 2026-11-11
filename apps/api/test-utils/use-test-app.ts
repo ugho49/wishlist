@@ -2,8 +2,8 @@ import type { INestApplication } from '@nestjs/common';
 import type { SQL } from 'bun';
 import type { TableAssertSortOptions } from './table-assert';
 
-import { Logger } from '@nestjs/common';
 import { sleep } from '@wishlist/common';
+import { getLogger } from '@znight/observability';
 import axios, { type AxiosInstance } from 'axios';
 import request from 'supertest';
 
@@ -30,7 +30,7 @@ export function useTestApp() {
     app = await createApp();
     const databaseService = app.get<DatabaseService>(DatabaseService);
     await app.init();
-    logger = new Logger('UseTestApp');
+    logger = getLogger('UseTestApp');
 
     sql = databaseService.sql;
     http = axios.create({
@@ -53,7 +53,7 @@ export function useTestApp() {
   });
 
   async function truncateDatabase(): Promise<void> {
-    logger.log('Truncating database ...');
+    logger.info('Truncating database ...');
 
     const allTables = await sql<{ schemaname: string; tablename: string }[]>`
       SELECT schemaname, tablename FROM pg_catalog.pg_tables WHERE schemaname = 'public'
@@ -64,13 +64,13 @@ export function useTestApp() {
       await sql.unsafe(`TRUNCATE TABLE ${table} CASCADE`);
     }
 
-    logger.log(`Database truncated (${tables.length} tables) ✅`);
+    logger.info(`Database truncated (${tables.length} tables) ✅`);
   }
 
   async function clearMails(): Promise<void> {
     await sleep(100);
     await http.delete('/api/email/all');
-    logger.log('Mails cleared ✅');
+    logger.info('Mails cleared ✅');
   }
 
   return {

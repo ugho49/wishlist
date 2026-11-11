@@ -1,10 +1,10 @@
 import type { UserEmailSetting } from '../../domain/model/user-email-setting.model';
 import type { UserEmailSettingRepository } from '../../domain/repository/user-email-setting.repository';
 
-import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { type ICurrentUser } from '@wishlist/common';
-
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
+import { Injectable } from '@znight/core';
+import { NotFoundException } from '@znight/http';
+import { getLogger } from '@znight/observability';
 
 export type UpdateUserEmailSettingInput = {
   currentUser: ICurrentUser;
@@ -18,15 +18,12 @@ export type UpdateUserEmailSettingOutput = {
 
 @Injectable()
 export class UpdateUserEmailSettingUseCase {
-  private readonly logger = new Logger(UpdateUserEmailSettingUseCase.name);
+  private readonly logger = getLogger(UpdateUserEmailSettingUseCase.name);
 
-  constructor(
-    @Inject(REPOSITORIES.USER_EMAIL_SETTING)
-    private readonly userEmailSettingRepository: UserEmailSettingRepository,
-  ) {}
+  constructor(private readonly userEmailSettingRepository: UserEmailSettingRepository) {}
 
   async execute(input: UpdateUserEmailSettingInput): Promise<UpdateUserEmailSettingOutput> {
-    this.logger.log('Update user email setting request received', { input });
+    this.logger.info('Update user email setting request received', { input });
     const { currentUser, dailyNewItemNotification, birthdayReminder } = input;
 
     const userEmailSetting = await this.userEmailSettingRepository.findByUserId(currentUser.id);
@@ -40,7 +37,7 @@ export class UpdateUserEmailSettingUseCase {
       birthdayReminder,
     });
 
-    this.logger.log('Saving user email setting...', {
+    this.logger.info('Saving user email setting...', {
       userId: currentUser.id,
       updatedFields: ['dailyNewItemNotification', 'birthdayReminder'],
     });

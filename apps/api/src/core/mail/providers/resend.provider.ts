@@ -1,22 +1,25 @@
-import { Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import type { MailConfig } from '../mail.config';
+
+import { getLogger } from '@znight/observability';
 import { Resend } from 'resend';
 
 import { type MailPayload, type MailProvider } from '../mail.type';
 import { getMailPayloadFromMailOptions } from './mail-provider.utils';
 
 export class ResendMailProvider implements MailProvider {
-  private readonly logger = new Logger(ResendMailProvider.name);
+  private readonly logger = getLogger(ResendMailProvider.name);
   private readonly resend: Resend;
 
-  constructor(configService: ConfigService) {
-    const resendApiKey = configService.getOrThrow('RESEND_API_KEY');
+  constructor(config: MailConfig) {
+    if (!config.resendApiKey) {
+      throw new Error('Missing RESEND_API_KEY environment variable');
+    }
 
-    this.resend = new Resend(resendApiKey);
+    this.resend = new Resend(config.resendApiKey);
   }
 
   async send(options: MailPayload): Promise<void> {
-    this.logger.log('Sending mail with Resend', {
+    this.logger.info('Sending mail with Resend', {
       mail: {
         to: options.to,
         template: options.template,

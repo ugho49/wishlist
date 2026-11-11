@@ -1,10 +1,10 @@
-import type { EventBus } from '@nestjs/cqrs';
 import type { UserPasswordVerificationId } from '@wishlist/common';
 import type { UserRepository } from '../../domain/repository/user.repository';
 import type { UserPasswordVerificationRepository } from '../../domain/repository/user-password-verification.repository';
 
-import { Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { uuid } from '@wishlist/common';
+import { EventPublisher } from '@znight/events';
+import { NotFoundException, UnauthorizedException } from '@znight/http';
 
 import { UserBuilder } from '../../../../test-utils/builders/user.builder';
 import { UserPasswordVerificationBuilder } from '../../../../test-utils/builders/user-password-verification.builder';
@@ -12,12 +12,12 @@ import { createMock } from '../../../../test-utils/mocks';
 import { PasswordVerificationCreatedEvent } from '../../domain/event/password-verification-created.event';
 import { User } from '../../domain/model/user.model';
 import { CreatePasswordVerificationUseCase } from './create-password-verification.use-case';
-import { beforeAll, beforeEach, describe, expect, it, mock } from 'bun:test';
+import { beforeEach, describe, expect, it, mock } from 'bun:test';
 
 describe('CreatePasswordVerificationUseCase', () => {
   const userRepository = createMock<UserRepository>();
   const verificationEntityRepository = createMock<UserPasswordVerificationRepository>();
-  const eventBus = createMock<EventBus>();
+  const eventBus = createMock<EventPublisher>();
   const config = {
     resetPasswordTokenDurationInMinutes: 15,
     emailChangeVerificationTokenDurationInMinutes: 60,
@@ -26,10 +26,6 @@ describe('CreatePasswordVerificationUseCase', () => {
   let useCase: CreatePasswordVerificationUseCase;
   let user: User;
   let verificationId: UserPasswordVerificationId;
-
-  beforeAll(() => {
-    Logger.overrideLogger(false);
-  });
 
   beforeEach(() => {
     mock.clearAllMocks();

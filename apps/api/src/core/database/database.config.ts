@@ -1,21 +1,12 @@
-import { IsBoolean, IsNumber, IsString } from 'class-validator';
+import { Config, Env, Secret } from '@znight/config';
 
+/** PostgreSQL connection (DB_HOST, DB_PORT, DB_USERNAME, DB_PASSWORD, DB_NAME, DB_VERBOSE). */
+@Config('db')
 export class DatabaseConfig {
-  @IsString()
   host!: string;
-
-  @IsNumber()
-  port!: number;
-
-  @IsString()
+  port = 5432;
   username!: string;
-
-  @IsString()
-  password!: string;
-
-  @IsString()
-  database!: string;
-
-  @IsBoolean()
-  verbose!: boolean;
+  @Secret() password!: string;
+  @Env('DB_NAME') database!: string;
+  verbose = false;
 }

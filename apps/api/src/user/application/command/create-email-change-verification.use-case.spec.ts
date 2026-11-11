@@ -1,10 +1,10 @@
-import type { EventBus } from '@nestjs/cqrs';
 import type { UserEmailChangeVerificationId } from '@wishlist/common';
 import type { UserRepository } from '../../domain/repository/user.repository';
 import type { UserEmailChangeVerificationRepository } from '../../domain/repository/user-email-change-verification.repository';
 
-import { BadRequestException, Logger, UnauthorizedException } from '@nestjs/common';
 import { uuid } from '@wishlist/common';
+import { EventPublisher } from '@znight/events';
+import { BadRequestException, UnauthorizedException } from '@znight/http';
 
 import { toCurrentUser, UserBuilder } from '../../../../test-utils/builders/user.builder';
 import { UserEmailChangeVerificationBuilder } from '../../../../test-utils/builders/user-email-change-verification.builder';
@@ -12,12 +12,12 @@ import { createMock } from '../../../../test-utils/mocks';
 import { EmailChangeVerificationCreatedEvent } from '../../domain/event/email-change-verification-created.event';
 import { User } from '../../domain/model/user.model';
 import { CreateEmailChangeVerificationUseCase } from './create-email-change-verification.use-case';
-import { beforeAll, beforeEach, describe, expect, it, mock } from 'bun:test';
+import { beforeEach, describe, expect, it, mock } from 'bun:test';
 
 describe('CreateEmailChangeVerificationUseCase', () => {
   const userRepository = createMock<UserRepository>();
   const emailChangeVerificationRepository = createMock<UserEmailChangeVerificationRepository>();
-  const eventBus = createMock<EventBus>();
+  const eventBus = createMock<EventPublisher>();
   const config = {
     resetPasswordTokenDurationInMinutes: 15,
     emailChangeVerificationTokenDurationInMinutes: 60,
@@ -26,10 +26,6 @@ describe('CreateEmailChangeVerificationUseCase', () => {
   let useCase: CreateEmailChangeVerificationUseCase;
   let user: User;
   let verificationId: UserEmailChangeVerificationId;
-
-  beforeAll(() => {
-    Logger.overrideLogger(false);
-  });
 
   beforeEach(() => {
     mock.clearAllMocks();

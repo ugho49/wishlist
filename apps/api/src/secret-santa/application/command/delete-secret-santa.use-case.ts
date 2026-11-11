@@ -1,10 +1,11 @@
 import type { ICurrentUser, SecretSantaId } from '@wishlist/common';
 import type { SecretSantaRepository } from '../../domain/repository/secret-santa.repository';
 
-import { ForbiddenException, Inject, Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@znight/core';
+import { ForbiddenException } from '@znight/http';
+import { getLogger } from '@znight/observability';
 
 import { type EventRepository } from '../../../event/domain/repository/event.repository';
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
 
 export type DeleteSecretSantaInput = {
   currentUser: ICurrentUser;
@@ -13,15 +14,15 @@ export type DeleteSecretSantaInput = {
 
 @Injectable()
 export class DeleteSecretSantaUseCase {
-  private readonly logger = new Logger(DeleteSecretSantaUseCase.name);
+  private readonly logger = getLogger(DeleteSecretSantaUseCase.name);
 
   constructor(
-    @Inject(REPOSITORIES.SECRET_SANTA) private readonly secretSantaRepository: SecretSantaRepository,
-    @Inject(REPOSITORIES.EVENT) private readonly eventRepository: EventRepository,
+    private readonly secretSantaRepository: SecretSantaRepository,
+    private readonly eventRepository: EventRepository,
   ) {}
 
   async execute(command: DeleteSecretSantaInput): Promise<void> {
-    this.logger.log('Delete secret santa request received', { command });
+    this.logger.info('Delete secret santa request received', { command });
     const secretSanta = await this.secretSantaRepository.findByIdOrFail(command.secretSantaId);
     const event = await this.eventRepository.findByIdOrFail(secretSanta.eventId);
 
@@ -33,7 +34,7 @@ export class DeleteSecretSantaUseCase {
       throw new ForbiddenException('Secret santa already started, it needs to be cancelled first');
     }
 
-    this.logger.log('Deleting secret santa...', { secretSantaId: secretSanta.id });
+    this.logger.info('Deleting secret santa...', { secretSantaId: secretSanta.id });
     await this.secretSantaRepository.delete(secretSanta.id);
   }
 }

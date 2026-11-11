@@ -1,20 +1,15 @@
 import type { UserSessionRepository } from '../../domain/repository/user-session.repository';
 
-import { Logger } from '@nestjs/common';
 import { DateTime } from 'luxon';
 
 import { createMock } from '../../../../test-utils/mocks';
 import { CleanupRevokedUserSessionsUseCase } from './cleanup-revoked-user-sessions.use-case';
-import { beforeAll, beforeEach, describe, expect, it, mock } from 'bun:test';
+import { beforeEach, describe, expect, it, mock } from 'bun:test';
 
 describe('CleanupRevokedUserSessionsUseCase', () => {
   const sessionRepository = createMock<UserSessionRepository>();
 
   let useCase: CleanupRevokedUserSessionsUseCase;
-
-  beforeAll(() => {
-    Logger.overrideLogger(false);
-  });
 
   beforeEach(() => {
     mock.clearAllMocks();

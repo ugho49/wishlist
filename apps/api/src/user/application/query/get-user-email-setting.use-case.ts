@@ -1,10 +1,9 @@
 import type { UserEmailSetting } from '../../domain/model/user-email-setting.model';
 import type { UserEmailSettingRepository } from '../../domain/repository/user-email-setting.repository';
 
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { type ICurrentUser } from '@wishlist/common';
-
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
+import { Injectable } from '@znight/core';
+import { NotFoundException } from '@znight/http';
 
 export type GetUserEmailSettingInput = {
   currentUser: ICurrentUser;
@@ -16,10 +15,7 @@ export type GetUserEmailSettingOutput = {
 
 @Injectable()
 export class GetUserEmailSettingUseCase {
-  constructor(
-    @Inject(REPOSITORIES.USER_EMAIL_SETTING)
-    private readonly userEmailSettingRepository: UserEmailSettingRepository,
-  ) {}
+  constructor(private readonly userEmailSettingRepository: UserEmailSettingRepository) {}
 
   async execute(query: GetUserEmailSettingInput): Promise<GetUserEmailSettingOutput> {
     const userEmailSetting = await this.userEmailSettingRepository.findByUserId(query.currentUser.id);

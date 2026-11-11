@@ -1,8 +1,9 @@
 import type * as drizzleSchema from '../../../drizzle/schema';
 import type { DrizzleTransaction } from '../../core/database/transaction-manager';
 
-import { Injectable, NotFoundException } from '@nestjs/common';
 import { type EventId, type SecretSantaId, type UserId, uuid } from '@wishlist/common';
+import { Injectable } from '@znight/core';
+import { NotFoundException } from '@znight/http';
 import { and, count, desc, eq, exists, inArray, or, type SQL } from 'drizzle-orm';
 
 import { DatabaseService } from '../../core/database/database.service';

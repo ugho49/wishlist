@@ -1,15 +1,15 @@
-import type { ConfigType } from '@nestjs/config';
 import type { UserRepository } from '../../domain/repository/user.repository';
 import type { UserPasswordVerificationRepository } from '../../domain/repository/user-password-verification.repository';
 
-import { Inject, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
-import { EventBus } from '@nestjs/cqrs';
+import { Injectable } from '@znight/core';
+import { EventPublisher } from '@znight/events';
+import { NotFoundException, UnauthorizedException } from '@znight/http';
+import { getLogger } from '@znight/observability';
 import { DateTime } from 'luxon';
 
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { PasswordVerificationCreatedEvent } from '../../domain/event/password-verification-created.event';
 import { UserPasswordVerification } from '../../domain/model/user-password-verification.model';
-import userConfig from '../../infrastructure/user.config';
+import { UserConfig } from '../../infrastructure/user.config';
 
 export type CreatePasswordVerificationInput = {
   email: string;
@@ -17,20 +17,17 @@ export type CreatePasswordVerificationInput = {
 
 @Injectable()
 export class CreatePasswordVerificationUseCase {
-  private readonly logger = new Logger(CreatePasswordVerificationUseCase.name);
+  private readonly logger = getLogger(CreatePasswordVerificationUseCase.name);
 
   constructor(
-    @Inject(REPOSITORIES.USER)
     private readonly userRepository: UserRepository,
-    @Inject(REPOSITORIES.USER_PASSWORD_VERIFICATION)
     private readonly verificationEntityRepository: UserPasswordVerificationRepository,
-    @Inject(userConfig.KEY)
-    private readonly config: ConfigType<typeof userConfig>,
-    private readonly eventBus: EventBus,
+    private readonly config: UserConfig,
+    private readonly eventBus: EventPublisher,
   ) {}
 
   async execute(input: CreatePasswordVerificationInput): Promise<void> {
-    this.logger.log('Create password verification request received', { input });
+    this.logger.info('Create password verification request received', { input });
 
     const user = await this.userRepository.findByEmail(input.email);
 
@@ -51,10 +48,10 @@ export class CreatePasswordVerificationUseCase {
       expiredAt: DateTime.now().plus({ minute: this.config.resetPasswordTokenDurationInMinutes }).toJSDate(),
     });
 
-    this.logger.log('Saving password verification...', { userId: user.id, passwordVerification });
+    this.logger.info('Saving password verification...', { userId: user.id, passwordVerification });
     await this.verificationEntityRepository.save(passwordVerification);
 
-    this.eventBus.publish(
+    await this.eventBus.publish(
       new PasswordVerificationCreatedEvent({ email: user.email, token: passwordVerification.token }),
     );
   }

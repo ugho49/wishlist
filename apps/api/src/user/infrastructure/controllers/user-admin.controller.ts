@@ -1,29 +1,27 @@
-import { Controller, Param, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { type UpdateUserPictureHttpResponse, type UserId } from '@wishlist/common';
+import { Controller, Param, Post, UploadedFile } from '@znight/http';
+import { ApiExclude } from '@znight/openapi';
 
 import { IsAdmin } from '../../../auth/infrastructure/decorators/admin.decorator';
+import { ACCEPTED_IMAGE_MIME_TYPES, ImageResizer, MAX_IMAGE_SIZE } from '../../../core/bucket/image-resizer';
 import { UpdateUserPictureUseCase } from '../../application/command/update-user-picture.use-case';
-import { userPictureFileValidators, userPictureResizePipe } from '../user.validator';
-
-import 'multer';
 
 @IsAdmin()
-@ApiTags('ADMIN - User')
+@ApiExclude()
 @Controller('/admin/user')
 export class UserAdminController {
-  constructor(private readonly updateUserPictureUseCase: UpdateUserPictureUseCase) {}
+  constructor(
+    private readonly updateUserPictureUseCase: UpdateUserPictureUseCase,
+    private readonly imageResizer: ImageResizer,
+  ) {}
 
   @Post('/:id/upload-picture')
-  @ApiConsumes('multipart/form-data')
-  @UseInterceptors(FileInterceptor('file'))
   async uploadPicture(
     @Param('id') userId: UserId,
-    @UploadedFile(userPictureFileValidators, userPictureResizePipe)
-    file: Express.Multer.File,
+    @UploadedFile('file', { maxSize: MAX_IMAGE_SIZE, mimeTypes: ACCEPTED_IMAGE_MIME_TYPES }) file: File,
   ): Promise<UpdateUserPictureHttpResponse> {
-    const result = await this.updateUserPictureUseCase.execute({ userId, file });
+    const resized = await this.imageResizer.resize(file, { width: 500, height: 500 });
+    const result = await this.updateUserPictureUseCase.execute({ userId, file: resized });
     return { picture_url: result.pictureUrl };
   }
 }

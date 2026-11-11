@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException } from '@znight/http';
 
 /**
  * Codes must stay in sync with the `BusinessRuleCode` enum in core/graphql/base.graphql.

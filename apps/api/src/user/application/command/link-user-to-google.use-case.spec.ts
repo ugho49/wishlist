@@ -2,8 +2,8 @@ import type { UserAccountId } from '@wishlist/common';
 import type { UserRepository } from '../../domain/repository/user.repository';
 import type { UserAccountRepository } from '../../domain/repository/user-account.repository';
 
-import { BadRequestException, Logger, UnauthorizedException } from '@nestjs/common';
 import { uuid } from '@wishlist/common';
+import { BadRequestException, UnauthorizedException } from '@znight/http';
 
 import { UserBuilder } from '../../../../test-utils/builders/user.builder';
 import { UserAccountBuilder } from '../../../../test-utils/builders/user-account.builder';
@@ -13,7 +13,7 @@ import { TransactionManager } from '../../../core/database/transaction-manager';
 import { User } from '../../domain/model/user.model';
 import { UserAccountProvider } from '../../domain/user-account-provider.enum';
 import { LinkUserToGoogleUseCase } from './link-user-to-google.use-case';
-import { beforeAll, beforeEach, describe, expect, it, mock } from 'bun:test';
+import { beforeEach, describe, expect, it, mock } from 'bun:test';
 
 describe('LinkUserToGoogleUseCase', () => {
   const userRepository = createMock<UserRepository>();
@@ -31,10 +31,6 @@ describe('LinkUserToGoogleUseCase', () => {
     name: 'Jean Dupont',
     picture: 'https://google/pic.png',
   };
-
-  beforeAll(() => {
-    Logger.overrideLogger(false);
-  });
 
   beforeEach(() => {
     mock.clearAllMocks();

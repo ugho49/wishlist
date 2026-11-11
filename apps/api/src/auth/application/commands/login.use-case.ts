@@ -1,16 +1,15 @@
-import type { ConfigType } from '@nestjs/config';
 import type { UserSessionRepository } from '../../../user/domain/repository/user-session.repository';
 import type { LoginOutput } from '../login.types';
 
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
+import { Injectable } from '@znight/core';
+import { UnauthorizedException } from '@znight/http';
 
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { User } from '../../../user/domain/model/user.model';
 import { type UserRepository } from '../../../user/domain/repository/user.repository';
 import { type UserAccountRepository } from '../../../user/domain/repository/user-account.repository';
 import { UserAccountProvider } from '../../../user/domain/user-account-provider.enum';
-import authConfig from '../../infrastructure/auth.config';
+import { AuthConfig } from '../../infrastructure/auth.config';
+import { TokenService } from '../../infrastructure/token.service';
 import { PasswordManager } from '../../infrastructure/util/password-manager';
 import { CommonLoginUseCase } from './common-login.use-case';
 
@@ -24,32 +23,28 @@ export type LoginInput = {
 @Injectable()
 export class LoginUseCase extends CommonLoginUseCase {
   constructor(
-    @Inject(REPOSITORIES.USER)
     private readonly userRepository: UserRepository,
-    @Inject(REPOSITORIES.USER_ACCOUNT)
     private readonly userAccountRepository: UserAccountRepository,
-    @Inject(REPOSITORIES.USER_SESSION)
     sessionRepository: UserSessionRepository,
-    @Inject(authConfig.KEY)
-    config: ConfigType<typeof authConfig>,
-    jwtService: JwtService,
+    config: AuthConfig,
+    tokenService: TokenService,
   ) {
     super({
-      jwtService,
+      tokenService,
       loggerName: LoginUseCase.name,
       sessionRepository,
-      refreshTokenDuration: config.refreshToken.duration,
+      refreshTokenDuration: config.refreshTokenDuration,
     });
   }
 
   async execute(command: LoginInput): Promise<LoginOutput> {
     const { email, password, ip, userAgent } = command;
-    this.logger.log('Login request received', { email });
+    this.logger.info('Login request received', { email });
 
     const user = await this.validateUserByEmailPassword(email, password);
     const tokens = await this.issueTokens({ user, ip, userAgent });
 
-    this.logger.log('Login successful', { email });
+    this.logger.info('Login successful', { email });
 
     return tokens;
   }

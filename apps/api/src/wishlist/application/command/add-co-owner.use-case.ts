@@ -1,10 +1,11 @@
 import type { WishlistRepository } from '../../domain/wishlist.repository';
 
-import { BadRequestException, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
-import { EventBus } from '@nestjs/cqrs';
 import { type ICurrentUser, type UserId, type WishlistId } from '@wishlist/common';
+import { Injectable } from '@znight/core';
+import { EventPublisher } from '@znight/events';
+import { BadRequestException, UnauthorizedException } from '@znight/http';
+import { getLogger } from '@znight/observability';
 
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { type UserRepository } from '../../../user/domain/repository/user.repository';
 import { UserAddedAsCoOwnerToWishlistEvent } from '../../domain/event/user-added-as-co-owner-to-wishlist.event';
 
@@ -16,16 +17,16 @@ export type AddCoOwnerInput = {
 
 @Injectable()
 export class AddCoOwnerUseCase {
-  private readonly logger = new Logger(AddCoOwnerUseCase.name);
+  private readonly logger = getLogger(AddCoOwnerUseCase.name);
 
   constructor(
-    @Inject(REPOSITORIES.WISHLIST) private readonly wishlistRepository: WishlistRepository,
-    @Inject(REPOSITORIES.USER) private readonly userRepository: UserRepository,
-    private readonly eventBus: EventBus,
+    private readonly wishlistRepository: WishlistRepository,
+    private readonly userRepository: UserRepository,
+    private readonly eventBus: EventPublisher,
   ) {}
 
   async execute(command: AddCoOwnerInput): Promise<void> {
-    this.logger.log('Add co-owner request received', { command });
+    this.logger.info('Add co-owner request received', { command });
     const wishlist = await this.wishlistRepository.findByIdOrFail(command.wishlistId);
 
     // Only the owner can add a co-owner
@@ -48,7 +49,7 @@ export class AddCoOwnerUseCase {
 
     const updatedWishlist = wishlist.addCoOwner(coOwner);
 
-    this.logger.log('Saving wishlist...', { wishlistId: updatedWishlist.id, updatedFields: ['coOwner'] });
+    this.logger.info('Saving wishlist...', { wishlistId: updatedWishlist.id, updatedFields: ['coOwner'] });
     await this.wishlistRepository.save(updatedWishlist);
 
     await this.eventBus.publish(new UserAddedAsCoOwnerToWishlistEvent({ wishlist: updatedWishlist, coOwner }));

@@ -1,9 +1,8 @@
 import type { WishlistRepository } from '../../domain/wishlist.repository';
 
-import { Inject, Injectable } from '@nestjs/common';
 import { type UserId } from '@wishlist/common';
+import { Injectable } from '@znight/core';
 
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { Wishlist } from '../../domain/wishlist.model';
 
 export type GetWishlistsByUserInput = {
@@ -19,7 +18,7 @@ type GetWishlistsByUserResult = {
 
 @Injectable()
 export class GetWishlistsByUserUseCase {
-  constructor(@Inject(REPOSITORIES.WISHLIST) private readonly wishlistRepository: WishlistRepository) {}
+  constructor(private readonly wishlistRepository: WishlistRepository) {}
 
   async execute(input: GetWishlistsByUserInput): Promise<GetWishlistsByUserResult> {
     const pageSize = input.pageSize;

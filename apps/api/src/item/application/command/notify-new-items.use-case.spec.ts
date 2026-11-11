@@ -1,7 +1,6 @@
 import type { ItemDigestReceiptRepository } from '../../domain/item-digest-receipt.repository';
 import type { NewItemNotificationRow, WishlistItemRepository } from '../../domain/wishlist-item.repository';
 
-import { Logger } from '@nestjs/common';
 import { uuid } from '@wishlist/common';
 import { DateTime } from 'luxon';
 
@@ -10,7 +9,7 @@ import { FrontendRoutesService } from '../../../core/frontend-routes/frontend-ro
 import { MailService } from '../../../core/mail/mail.service';
 import { MailTemplate } from '../../../core/mail/mail.type';
 import { NotifyNewItemsUseCase } from './notify-new-items.use-case';
-import { beforeAll, beforeEach, describe, expect, it, mock } from 'bun:test';
+import { beforeEach, describe, expect, it, mock } from 'bun:test';
 
 const now = DateTime.fromISO('2026-11-03T08:00:00.000Z');
 const digestDate = '2026-11-03';
@@ -26,10 +25,6 @@ describe('NotifyNewItemsUseCase', () => {
   } as never);
 
   let useCase: NotifyNewItemsUseCase;
-
-  beforeAll(() => {
-    Logger.overrideLogger(false);
-  });
 
   beforeEach(() => {
     mock.clearAllMocks();

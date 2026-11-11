@@ -2,8 +2,8 @@ import type { EventId } from '@wishlist/common';
 import type { EventRepository } from '../../../event/domain/repository/event.repository';
 import type { WishlistRepository } from '../../domain/wishlist.repository';
 
-import { BadRequestException, Logger, UnauthorizedException } from '@nestjs/common';
 import { MAX_EVENTS_BY_LIST, uuid } from '@wishlist/common';
+import { BadRequestException, UnauthorizedException } from '@znight/http';
 
 import { EventBuilder } from '../../../../test-utils/builders/event.builder';
 import { toCurrentUser, UserBuilder } from '../../../../test-utils/builders/user.builder';
@@ -13,7 +13,7 @@ import { Event } from '../../../event/domain/model/event.model';
 import { User } from '../../../user/domain/model/user.model';
 import { Wishlist } from '../../domain/wishlist.model';
 import { LinkWishlistToEventUseCase } from './link-wishlist-to-event.use-case';
-import { beforeAll, beforeEach, describe, expect, it, mock } from 'bun:test';
+import { beforeEach, describe, expect, it, mock } from 'bun:test';
 
 describe('LinkWishlistToEventUseCase', () => {
   const wishlistRepository = createMock<WishlistRepository>();
@@ -25,10 +25,6 @@ describe('LinkWishlistToEventUseCase', () => {
   let stranger: User;
   let wishlist: Wishlist;
   let event: Event;
-
-  beforeAll(() => {
-    Logger.overrideLogger(false);
-  });
 
   beforeEach(() => {
     mock.clearAllMocks();

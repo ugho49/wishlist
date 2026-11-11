@@ -1,12 +1,12 @@
 import type { ICurrentUser, WishlistId } from '@wishlist/common';
 
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { createPagedResponse, type ItemId, type UserId } from '@wishlist/common';
+import { Args, Mutation, Query, Resolver } from '@znight/graphql';
 import { match } from 'ts-pattern';
 
-import { GqlCurrentUser } from '../../auth/infrastructure/decorators/user.decorator';
+import { Authenticated } from '../../auth/infrastructure/decorators/public.metadata';
+import { CurrentUser, CurrentUserId } from '../../auth/infrastructure/decorators/user.decorator';
 import { DEFAULT_RESULT_NUMBER } from '../../core/common/pagination';
-import { ZodPipe } from '../../core/graphql/zod-pipe';
 import {
   type CreateItemInput,
   type CreateItemResult,
@@ -50,7 +50,8 @@ const toReservedItemPeriod = (period: GqlReservedItemPeriod): ReservedItemPeriod
     .with(GqlReservedItemPeriod.Past, () => 'past' as const)
     .exhaustive();
 
-@Resolver('Item')
+@Resolver()
+@Authenticated()
 export class ItemResolver {
   constructor(
     private readonly createItemUseCase: CreateItemUseCase,
@@ -65,8 +66,8 @@ export class ItemResolver {
 
   @Query()
   async importableItems(
-    @Args('wishlistId', new ZodPipe(WishlistIdSchema)) wishlistId: WishlistId,
-    @GqlCurrentUser() currentUser: ICurrentUser,
+    @Args('wishlistId', WishlistIdSchema) wishlistId: WishlistId,
+    @CurrentUser() currentUser: ICurrentUser,
   ): Promise<GetImportableItemsOutput> {
     const items = await this.getImportableItemsUseCase.execute({ userId: currentUser.id, wishlistId });
 
@@ -78,8 +79,8 @@ export class ItemResolver {
 
   @Query()
   async myReservedItems(
-    @Args('filters', new ZodPipe(MyReservedItemsFiltersSchema)) filters: MyReservedItemsFilters,
-    @GqlCurrentUser('id') currentUserId: UserId,
+    @Args('filters', MyReservedItemsFiltersSchema) filters: MyReservedItemsFilters,
+    @CurrentUserId() currentUserId: UserId,
   ): Promise<GetMyReservedItemsResult> {
     const pageSize = filters.limit ?? DEFAULT_RESULT_NUMBER;
     const pageNumber = filters.page ?? 1;
@@ -111,8 +112,8 @@ export class ItemResolver {
 
   @Mutation()
   async importItems(
-    @Args('input', new ZodPipe(ImportItemsInputSchema)) input: ImportItemsInput,
-    @GqlCurrentUser() currentUser: ICurrentUser,
+    @Args('input', ImportItemsInputSchema) input: ImportItemsInput,
+    @CurrentUser() currentUser: ICurrentUser,
   ): Promise<ImportItemsResult> {
     const items = await this.importItemsUseCase.execute({
       currentUser,
@@ -128,8 +129,8 @@ export class ItemResolver {
 
   @Mutation()
   async createItem(
-    @Args('input', new ZodPipe(CreateItemInputSchema)) input: CreateItemInput,
-    @GqlCurrentUser() currentUser: ICurrentUser,
+    @Args('input', CreateItemInputSchema) input: CreateItemInput,
+    @CurrentUser() currentUser: ICurrentUser,
   ): Promise<CreateItemResult> {
     const item = await this.createItemUseCase.execute({
       currentUser,
@@ -148,9 +149,9 @@ export class ItemResolver {
 
   @Mutation()
   async updateItem(
-    @Args('itemId', new ZodPipe(ItemIdSchema)) itemId: ItemId,
-    @Args('input', new ZodPipe(UpdateItemInputSchema)) input: UpdateItemInput,
-    @GqlCurrentUser() currentUser: ICurrentUser,
+    @Args('itemId', ItemIdSchema) itemId: ItemId,
+    @Args('input', UpdateItemInputSchema) input: UpdateItemInput,
+    @CurrentUser() currentUser: ICurrentUser,
   ): Promise<UpdateItemResult> {
     await this.updateItemUseCase.execute({
       itemId,
@@ -169,8 +170,8 @@ export class ItemResolver {
 
   @Mutation()
   async deleteItem(
-    @Args('itemId', new ZodPipe(ItemIdSchema)) itemId: ItemId,
-    @GqlCurrentUser() currentUser: ICurrentUser,
+    @Args('itemId', ItemIdSchema) itemId: ItemId,
+    @CurrentUser() currentUser: ICurrentUser,
   ): Promise<DeleteItemResult> {
     await this.deleteItemUseCase.execute({ itemId, currentUser });
     return { __typename: 'VoidOutput', success: true };
@@ -178,8 +179,8 @@ export class ItemResolver {
 
   @Mutation()
   async toggleItem(
-    @Args('itemId', new ZodPipe(ItemIdSchema)) itemId: ItemId,
-    @GqlCurrentUser() currentUser: ICurrentUser,
+    @Args('itemId', ItemIdSchema) itemId: ItemId,
+    @CurrentUser() currentUser: ICurrentUser,
   ): Promise<ToggleItemResult> {
     const { takers } = await this.toggleItemUseCase.execute({ itemId, currentUser });
 
@@ -190,9 +191,7 @@ export class ItemResolver {
   }
 
   @Mutation()
-  async scanItemUrl(
-    @Args('input', new ZodPipe(ScanItemUrlInputSchema)) input: ScanItemUrlInput,
-  ): Promise<ScanItemUrlResult> {
+  async scanItemUrl(@Args('input', ScanItemUrlInputSchema) input: ScanItemUrlInput): Promise<ScanItemUrlResult> {
     const { pictureUrl } = await this.scanItemUrlUseCase.execute({ url: input.url });
 
     return {

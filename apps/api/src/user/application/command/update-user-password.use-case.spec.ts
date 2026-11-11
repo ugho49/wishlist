@@ -2,8 +2,6 @@ import type { UserRepository } from '../../domain/repository/user.repository';
 import type { UserAccountRepository } from '../../domain/repository/user-account.repository';
 import type { UserSessionRepository } from '../../domain/repository/user-session.repository';
 
-import { Logger } from '@nestjs/common';
-
 import { toCurrentUser, UserBuilder } from '../../../../test-utils/builders/user.builder';
 import { UserAccountBuilder } from '../../../../test-utils/builders/user-account.builder';
 import { createMock } from '../../../../test-utils/mocks';
@@ -11,7 +9,7 @@ import { PasswordManager } from '../../../auth/infrastructure/util/password-mana
 import { BusinessRuleException } from '../../../core/common/business-rule.exception';
 import { User } from '../../domain/model/user.model';
 import { UpdateUserPasswordUseCase } from './update-user-password.use-case';
-import { beforeAll, beforeEach, describe, expect, it, mock } from 'bun:test';
+import { beforeEach, describe, expect, it, mock } from 'bun:test';
 
 const OLD_PASSWORD = 'Secret123!';
 const NEW_PASSWORD = 'NewSecret456!';
@@ -23,10 +21,6 @@ describe('UpdateUserPasswordUseCase', () => {
 
   let useCase: UpdateUserPasswordUseCase;
   let user: User;
-
-  beforeAll(() => {
-    Logger.overrideLogger(false);
-  });
 
   beforeEach(async () => {
     mock.clearAllMocks();

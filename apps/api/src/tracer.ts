@@ -5,7 +5,6 @@ tracer.init();
 tracer.use('pino');
 tracer.use('pg', { service: 'wishlist-api-database' });
 tracer.use('redis', { service: 'wishlist-api-redis' });
-tracer.use('express', { middleware: false });
 
 // remove healthcheck traces
 tracer.use('http', { blocklist: ['/health'] });

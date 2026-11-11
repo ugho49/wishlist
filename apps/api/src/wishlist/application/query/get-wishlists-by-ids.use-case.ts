@@ -1,9 +1,8 @@
 import type { WishlistRepository } from '../../domain/wishlist.repository';
 
-import { Inject, Injectable } from '@nestjs/common';
 import { type ICurrentUser, type WishlistId } from '@wishlist/common';
+import { Injectable } from '@znight/core';
 
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { Wishlist } from '../../domain/wishlist.model';
 
 export type GetWishlistsByIdsInput = {
@@ -13,7 +12,7 @@ export type GetWishlistsByIdsInput = {
 
 @Injectable()
 export class GetWishlistsByIdsUseCase {
-  constructor(@Inject(REPOSITORIES.WISHLIST) private readonly wishlistRepository: WishlistRepository) {}
+  constructor(private readonly wishlistRepository: WishlistRepository) {}
 
   async execute(input: GetWishlistsByIdsInput): Promise<Wishlist[]> {
     if (input.currentUser.isAdmin) {

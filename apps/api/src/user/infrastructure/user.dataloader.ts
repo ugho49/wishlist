@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import type { BatchLoad } from '@znight/graphql';
+
 import { type UserAccountId, type UserId } from '@wishlist/common';
-import DataLoader from 'dataloader';
+import { Injectable } from '@znight/core';
 
 import { type User, type UserAccount, type UserFull, type UserSession } from '../../gql/generated-types';
 import { GetUserAccountsByIdsUseCase } from '../application/query/get-user-accounts-by-ids.use-case';
@@ -10,53 +11,58 @@ import { GetUsersByIdsUseCase } from '../application/query/get-users-by-ids.use-
 import { userMapper } from './user.mapper';
 
 @Injectable()
-export class UserDataLoaderFactory {
-  constructor(
-    private readonly getUsersByIdsUseCase: GetUsersByIdsUseCase,
-    private readonly getUserAccountsByUserIdsUseCase: GetUserAccountsByUserIdsUseCase,
-    private readonly getUserAccountsByIdsUseCase: GetUserAccountsByIdsUseCase,
-    private readonly getUserSessionsByUserIdsUseCase: GetUserSessionsByUserIdsUseCase,
-  ) {}
+export class UsersById implements BatchLoad<UserId, User | null> {
+  constructor(private readonly getUsersByIdsUseCase: GetUsersByIdsUseCase) {}
 
-  createUserLoader() {
-    return new DataLoader<UserId, User | null>(async (userIds: readonly UserId[]) => {
-      const users = await this.getUsersByIdsUseCase.execute({ userIds: [...userIds] });
-      const userMap = new Map(users.map(user => [user.id, userMapper.toGqlUser(user)]));
-      return userIds.map(id => userMap.get(id) ?? null);
-    });
+  async load(userIds: readonly UserId[]): Promise<readonly (User | null)[]> {
+    const users = await this.getUsersByIdsUseCase.execute({ userIds: [...userIds] });
+    const userMap = new Map(users.map(user => [user.id, userMapper.toGqlUser(user)]));
+    return userIds.map(id => userMap.get(id) ?? null);
   }
+}
 
-  createUserFullLoader() {
-    return new DataLoader<UserId, UserFull | null>(async (userIds: readonly UserId[]) => {
-      const users = await this.getUsersByIdsUseCase.execute({ userIds: [...userIds] });
-      const userMap = new Map(users.map(user => [user.id, userMapper.toGqlUserFull(user)]));
-      return userIds.map(id => userMap.get(id) ?? null);
-    });
+@Injectable()
+export class UsersFullById implements BatchLoad<UserId, UserFull | null> {
+  constructor(private readonly getUsersByIdsUseCase: GetUsersByIdsUseCase) {}
+
+  async load(userIds: readonly UserId[]): Promise<readonly (UserFull | null)[]> {
+    const users = await this.getUsersByIdsUseCase.execute({ userIds: [...userIds] });
+    const userMap = new Map(users.map(user => [user.id, userMapper.toGqlUserFull(user)]));
+    return userIds.map(id => userMap.get(id) ?? null);
   }
+}
 
-  createUserAccountsByUserLoader() {
-    return new DataLoader<UserId, UserAccount[]>(async (userIds: readonly UserId[]) => {
-      const userAccountMap = await this.getUserAccountsByUserIdsUseCase.execute({ userIds: [...userIds] });
-      return userIds.map(id =>
-        (userAccountMap.get(id) ?? []).map(userAccount => userMapper.toGqlUserAccount(userAccount)),
-      );
-    });
+@Injectable()
+export class UserAccountsByUserId implements BatchLoad<UserId, UserAccount[]> {
+  constructor(private readonly getUserAccountsByUserIdsUseCase: GetUserAccountsByUserIdsUseCase) {}
+
+  async load(userIds: readonly UserId[]): Promise<readonly UserAccount[][]> {
+    const userAccountMap = await this.getUserAccountsByUserIdsUseCase.execute({ userIds: [...userIds] });
+    return userIds.map(id =>
+      (userAccountMap.get(id) ?? []).map(userAccount => userMapper.toGqlUserAccount(userAccount)),
+    );
   }
+}
 
-  createUserAccountLoader() {
-    return new DataLoader<UserAccountId, UserAccount | null>(async (userAccountIds: readonly UserAccountId[]) => {
-      const userAccounts = await this.getUserAccountsByIdsUseCase.execute({ userAccountIds: [...userAccountIds] });
-      const userAccountMap = new Map(
-        userAccounts.map(userAccount => [userAccount.id, userMapper.toGqlUserAccount(userAccount)]),
-      );
-      return userAccountIds.map(id => userAccountMap.get(id) ?? null);
-    });
+@Injectable()
+export class UserAccountsById implements BatchLoad<UserAccountId, UserAccount | null> {
+  constructor(private readonly getUserAccountsByIdsUseCase: GetUserAccountsByIdsUseCase) {}
+
+  async load(userAccountIds: readonly UserAccountId[]): Promise<readonly (UserAccount | null)[]> {
+    const userAccounts = await this.getUserAccountsByIdsUseCase.execute({ userAccountIds: [...userAccountIds] });
+    const userAccountMap = new Map(
+      userAccounts.map(userAccount => [userAccount.id, userMapper.toGqlUserAccount(userAccount)]),
+    );
+    return userAccountIds.map(id => userAccountMap.get(id) ?? null);
   }
+}
 
-  createUserSessionsByUserLoader() {
-    return new DataLoader<UserId, UserSession[]>(async (userIds: readonly UserId[]) => {
-      const sessionMap = await this.getUserSessionsByUserIdsUseCase.execute({ userIds: [...userIds] });
-      return userIds.map(id => (sessionMap.get(id) ?? []).map(session => userMapper.toGqlUserSession(session)));
-    });
+@Injectable()
+export class UserSessionsByUserId implements BatchLoad<UserId, UserSession[]> {
+  constructor(private readonly getUserSessionsByUserIdsUseCase: GetUserSessionsByUserIdsUseCase) {}
+
+  async load(userIds: readonly UserId[]): Promise<readonly UserSession[][]> {
+    const sessionMap = await this.getUserSessionsByUserIdsUseCase.execute({ userIds: [...userIds] });
+    return userIds.map(id => (sessionMap.get(id) ?? []).map(session => userMapper.toGqlUserSession(session)));
   }
 }

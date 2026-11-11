@@ -1,13 +1,9 @@
-import { registerAs } from '@nestjs/config';
-import { mapConfigOrThrow } from '@wishlist/common';
-import { z } from 'zod';
+import { Config, Env } from '@znight/config';
 
-const schema = z.object({
-  API_VERSION: z.string('Missing API_VERSION environment variable'),
-});
-
-export default registerAs('core', () =>
-  mapConfigOrThrow(schema, process.env, data => ({
-    apiVersion: data.API_VERSION,
-  })),
-);
+/** Global settings of the API. */
+@Config()
+export class CoreConfig {
+  @Env('PORT') port = 3000;
+  @Env('API_VERSION') apiVersion!: string;
+  @Env('FRONTEND_BASE_URL') frontendBaseUrl!: string;
+}

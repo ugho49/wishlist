@@ -1,9 +1,10 @@
 import type { WishlistItemRepository } from '../../domain/wishlist-item.repository';
 
-import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { type ICurrentUser, type ItemId } from '@wishlist/common';
+import { Injectable } from '@znight/core';
+import { UnauthorizedException } from '@znight/http';
+import { getLogger } from '@znight/observability';
 
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { type WishlistRepository } from '../../../wishlist/domain/wishlist.repository';
 
 export type DeleteItemInput = {
@@ -13,15 +14,15 @@ export type DeleteItemInput = {
 
 @Injectable()
 export class DeleteItemUseCase {
-  private readonly logger = new Logger(DeleteItemUseCase.name);
+  private readonly logger = getLogger(DeleteItemUseCase.name);
 
   constructor(
-    @Inject(REPOSITORIES.WISHLIST_ITEM) private readonly itemRepository: WishlistItemRepository,
-    @Inject(REPOSITORIES.WISHLIST) private readonly wishlistRepository: WishlistRepository,
+    private readonly itemRepository: WishlistItemRepository,
+    private readonly wishlistRepository: WishlistRepository,
   ) {}
 
   async execute(command: DeleteItemInput): Promise<void> {
-    this.logger.log('Delete item request received', { command });
+    this.logger.info('Delete item request received', { command });
     const item = await this.itemRepository.findByIdOrFail(command.itemId);
     const hasAccess = await this.wishlistRepository.hasAccess({
       wishlistId: item.wishlistId,
@@ -55,7 +56,7 @@ export class DeleteItemUseCase {
       return;
     }
 
-    this.logger.log('Deleting item...', { itemId: item.id });
+    this.logger.info('Deleting item...', { itemId: item.id });
     await this.itemRepository.delete(item.id);
   }
 }

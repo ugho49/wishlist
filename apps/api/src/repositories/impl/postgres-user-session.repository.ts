@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
 import { schema } from '@wishlist/api-drizzle';
 import { type UserId, type UserSessionId, uuid } from '@wishlist/common';
+import { Injectable } from '@znight/core';
 import { and, desc, eq, gt, inArray, isNotNull, isNull, lt, ne } from 'drizzle-orm';
 
 import { DatabaseService } from '../../core/database/database.service';

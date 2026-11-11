@@ -1,9 +1,9 @@
 import type { WishlistRepository } from '../../domain/wishlist.repository';
 
-import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { type ICurrentUser, type WishlistId } from '@wishlist/common';
-
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
+import { Injectable } from '@znight/core';
+import { UnauthorizedException } from '@znight/http';
+import { getLogger } from '@znight/observability';
 
 export type UpdateWishlistInput = {
   currentUser: ICurrentUser;
@@ -16,12 +16,12 @@ export type UpdateWishlistInput = {
 
 @Injectable()
 export class UpdateWishlistUseCase {
-  private readonly logger = new Logger(UpdateWishlistUseCase.name);
+  private readonly logger = getLogger(UpdateWishlistUseCase.name);
 
-  constructor(@Inject(REPOSITORIES.WISHLIST) private readonly wishlistRepository: WishlistRepository) {}
+  constructor(private readonly wishlistRepository: WishlistRepository) {}
 
   async execute(command: UpdateWishlistInput): Promise<void> {
-    this.logger.log('Update wishlist request received', { command });
+    this.logger.info('Update wishlist request received', { command });
     const wishlist = await this.wishlistRepository.findByIdOrFail(command.wishlistId);
 
     if (!wishlist.isOwnerOrCoOwner(command.currentUser.id)) {
@@ -33,7 +33,7 @@ export class UpdateWishlistUseCase {
       description: command.updateWishlist.description,
     });
 
-    this.logger.log('Saving wishlist...', { wishlistId: updatedWishlist.id, updatedFields: ['title', 'description'] });
+    this.logger.info('Saving wishlist...', { wishlistId: updatedWishlist.id, updatedFields: ['title', 'description'] });
     await this.wishlistRepository.save(updatedWishlist);
   }
 }

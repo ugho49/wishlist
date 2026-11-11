@@ -1,6 +1,7 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { schema } from '@wishlist/api-drizzle';
 import { type EventId, type UserId, uuid } from '@wishlist/common';
+import { Injectable } from '@znight/core';
+import { NotFoundException } from '@znight/http';
 import { and, count, desc, eq, gte, ilike, inArray, type SelectedFields, sql } from 'drizzle-orm';
 import { DateTime } from 'luxon';
 
@@ -9,7 +10,6 @@ import { type DrizzleTransaction } from '../../core/database/transaction-manager
 import { Event } from '../../event/domain/model/event.model';
 import { type EventRepository } from '../../event/domain/repository/event.repository';
 import { type EventAttendeeRepository } from '../../event/domain/repository/event-attendee.repository';
-import { REPOSITORIES } from '../repositories.constants';
 import { PostgresEventAttendeeRepository } from './postgres-event-attendee.repository';
 
 const titleMatches = (criteria?: string) => {
@@ -27,7 +27,7 @@ type RowType = typeof schema.event.$inferSelect & {
 export class PostgresEventRepository implements EventRepository {
   constructor(
     private readonly databaseService: DatabaseService,
-    @Inject(REPOSITORIES.EVENT_ATTENDEE) private readonly attendeeRepository: EventAttendeeRepository,
+    private readonly attendeeRepository: EventAttendeeRepository,
   ) {}
 
   newId(): EventId {

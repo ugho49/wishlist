@@ -1,10 +1,11 @@
 import type { EventId, ICurrentUser } from '@wishlist/common';
 import type { SecretSantaRepository } from '../../domain/repository/secret-santa.repository';
 
-import { ConflictException, ForbiddenException, Inject, Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@znight/core';
+import { ConflictException, ForbiddenException } from '@znight/http';
+import { getLogger } from '@znight/observability';
 
 import { type EventRepository } from '../../../event/domain/repository/event.repository';
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { SecretSanta } from '../../domain/model/secret-santa.model';
 
 export type CreateSecretSantaInput = {
@@ -20,15 +21,15 @@ export type CreateSecretSantaResult = {
 
 @Injectable()
 export class CreateSecretSantaUseCase {
-  private readonly logger = new Logger(CreateSecretSantaUseCase.name);
+  private readonly logger = getLogger(CreateSecretSantaUseCase.name);
 
   constructor(
-    @Inject(REPOSITORIES.EVENT) private readonly eventRepository: EventRepository,
-    @Inject(REPOSITORIES.SECRET_SANTA) private readonly secretSantaRepository: SecretSantaRepository,
+    private readonly eventRepository: EventRepository,
+    private readonly secretSantaRepository: SecretSantaRepository,
   ) {}
 
   async execute(command: CreateSecretSantaInput): Promise<CreateSecretSantaResult> {
-    this.logger.log('Create secret santa request received', { command });
+    this.logger.info('Create secret santa request received', { command });
     const alreadyExists = await this.secretSantaRepository.existsForEvent(command.eventId);
 
     if (alreadyExists) {
@@ -48,7 +49,7 @@ export class CreateSecretSantaUseCase {
       description: command.description,
     });
 
-    this.logger.log('Saving secret santa...', { secretSantaId: secretSanta.id, secretSanta });
+    this.logger.info('Saving secret santa...', { secretSantaId: secretSanta.id, secretSanta });
     await this.secretSantaRepository.save(secretSanta);
 
     return { secretSanta };

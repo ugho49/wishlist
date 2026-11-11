@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable } from '@znight/core';
 
 import { DatabaseService, type DrizzleDatabase } from './database.service';
 

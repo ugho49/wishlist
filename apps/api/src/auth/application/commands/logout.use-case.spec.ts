@@ -1,22 +1,16 @@
 import type { UserSessionRepository } from '../../../user/domain/repository/user-session.repository';
 
-import { Logger } from '@nestjs/common';
-
 import { UserBuilder } from '../../../../test-utils/builders/user.builder';
 import { UserSessionBuilder } from '../../../../test-utils/builders/user-session.builder';
 import { createMock } from '../../../../test-utils/mocks';
 import { RefreshTokenManager } from '../../infrastructure/util/refresh-token';
 import { LogoutUseCase } from './logout.use-case';
-import { beforeAll, beforeEach, describe, expect, it, mock } from 'bun:test';
+import { beforeEach, describe, expect, it, mock } from 'bun:test';
 
 describe('LogoutUseCase', () => {
   const sessionRepository = createMock<UserSessionRepository>();
 
   let useCase: LogoutUseCase;
-
-  beforeAll(() => {
-    Logger.overrideLogger(false);
-  });
 
   beforeEach(() => {
     mock.clearAllMocks();

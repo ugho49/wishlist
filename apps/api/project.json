@@ -5,6 +5,14 @@
   "projectType": "application",
   "tags": [],
   "targets": {
+    "generate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "znight generate",
+        "cwd": "{projectRoot}",
+        "forwardAllArgs": true
+      }
+    },
     "codegen": {
       "executor": "nx:run-commands",
       "options": {
@@ -17,7 +25,7 @@
       "continuous": true,
       "executor": "nx:run-commands",
       "options": {
-        "command": "bun --watch run src/main.ts",
+        "command": "bun --preload @znight/compiler/bun --watch run src/main.ts",
         "cwd": "{projectRoot}"
       }
     },
@@ -33,7 +41,7 @@
       "inputs": ["production", "^production", { "externalDependencies": ["typescript"] }],
       "executor": "nx:run-commands",
       "options": {
-        "command": "tsc --noEmit -p tsconfig.app.json",
+        "command": "znight generate && tsc --noEmit -p tsconfig.app.json",
         "cwd": "{projectRoot}"
       }
     },
@@ -48,7 +56,7 @@
     "test:int": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "mkdir -p ../../junit_reports/integration && bun test $(find . -type f -name '*.int-spec.ts') --preload ./test-utils/global-setup.ts --preload ../../bun.matchers.ts --timeout 30000 --max-concurrency 1 --pass-with-no-tests --reporter=junit --reporter-outfile=../../junit_reports/integration/api.xml",
+        "command": "mkdir -p ../../junit_reports/integration && bun test $(find . -type f -name '*.int-spec.ts') --preload @znight/compiler/bun --preload ./test-utils/global-setup.ts --preload ../../bun.matchers.ts --timeout 30000 --max-concurrency 1 --pass-with-no-tests --reporter=junit --reporter-outfile=../../junit_reports/integration/api.xml",
         "cwd": "{projectRoot}",
         "forwardAllArgs": true
       }

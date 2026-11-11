@@ -1,9 +1,8 @@
-import { Args, Query, Resolver } from '@nestjs/graphql';
 import { createPagedResponse } from '@wishlist/common';
+import { Args, Query, Resolver } from '@znight/graphql';
 
 import { IsAdmin } from '../../../auth/infrastructure/decorators/admin.decorator';
 import { DEFAULT_RESULT_NUMBER } from '../../../core/common/pagination';
-import { ZodPipe } from '../../../core/graphql/zod-pipe';
 import { type AdminGetWishlistsResult, type AdminWishlistPaginationFilters } from '../../../gql/generated-types';
 import { GetWishlistsByUserUseCase } from '../../application/query/get-wishlists-by-user.use-case';
 import { wishlistMapper } from '../wishlist.mapper';
@@ -16,7 +15,7 @@ export class WishlistAdminResolver {
 
   @Query()
   async adminWishlists(
-    @Args('filters', new ZodPipe(AdminWishlistPaginationFiltersSchema)) filters: AdminWishlistPaginationFilters,
+    @Args('filters', AdminWishlistPaginationFiltersSchema) filters: AdminWishlistPaginationFilters,
   ): Promise<AdminGetWishlistsResult> {
     const pageSize = filters.limit ?? DEFAULT_RESULT_NUMBER;
     const pageNumber = filters.page ?? 1;

@@ -1,7 +1,6 @@
 import type { WishlistId } from '@wishlist/common';
 import type { WishlistItemRepository } from '../../domain/wishlist-item.repository';
 
-import { Logger } from '@nestjs/common';
 import { uuid } from '@wishlist/common';
 
 import { toCurrentUser, UserBuilder } from '../../../../test-utils/builders/user.builder';
@@ -9,7 +8,7 @@ import { WishlistItemBuilder } from '../../../../test-utils/builders/wishlist-it
 import { createMock } from '../../../../test-utils/mocks';
 import { User } from '../../../user/domain/model/user.model';
 import { GetItemsByWishlistsUseCase } from './get-items-by-wishlists.use-case';
-import { beforeAll, beforeEach, describe, expect, it, mock } from 'bun:test';
+import { beforeEach, describe, expect, it, mock } from 'bun:test';
 
 describe('GetItemsByWishlistsUseCase', () => {
   const itemRepository = createMock<WishlistItemRepository>();
@@ -18,10 +17,6 @@ describe('GetItemsByWishlistsUseCase', () => {
   let user: User;
   let firstWishlistId: WishlistId;
   let secondWishlistId: WishlistId;
-
-  beforeAll(() => {
-    Logger.overrideLogger(false);
-  });
 
   beforeEach(() => {
     mock.clearAllMocks();

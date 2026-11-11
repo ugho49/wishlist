@@ -1,9 +1,8 @@
 import type { UserSessionRepository } from '../../domain/repository/user-session.repository';
 
-import { Inject, Injectable } from '@nestjs/common';
 import { type UserId } from '@wishlist/common';
+import { Injectable } from '@znight/core';
 
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { UserSession } from '../../domain/model/user-session.model';
 
 export type GetUserSessionsByUserIdsInput = {
@@ -12,10 +11,7 @@ export type GetUserSessionsByUserIdsInput = {
 
 @Injectable()
 export class GetUserSessionsByUserIdsUseCase {
-  constructor(
-    @Inject(REPOSITORIES.USER_SESSION)
-    private readonly sessionRepository: UserSessionRepository,
-  ) {}
+  constructor(private readonly sessionRepository: UserSessionRepository) {}
 
   async execute(query: GetUserSessionsByUserIdsInput): Promise<Map<UserId, UserSession[]>> {
     const sessions = await this.sessionRepository.findActiveByUserIds(query.userIds);

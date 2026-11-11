@@ -1,9 +1,9 @@
 import type { WishlistRepository } from '../../domain/wishlist.repository';
 
-import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { type ICurrentUser, type WishlistId } from '@wishlist/common';
-
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
+import { Injectable } from '@znight/core';
+import { UnauthorizedException } from '@znight/http';
+import { getLogger } from '@znight/observability';
 
 export type RemoveCoOwnerInput = {
   currentUser: ICurrentUser;
@@ -12,12 +12,12 @@ export type RemoveCoOwnerInput = {
 
 @Injectable()
 export class RemoveCoOwnerUseCase {
-  private readonly logger = new Logger(RemoveCoOwnerUseCase.name);
+  private readonly logger = getLogger(RemoveCoOwnerUseCase.name);
 
-  constructor(@Inject(REPOSITORIES.WISHLIST) private readonly wishlistRepository: WishlistRepository) {}
+  constructor(private readonly wishlistRepository: WishlistRepository) {}
 
   async execute(command: RemoveCoOwnerInput): Promise<void> {
-    this.logger.log('Remove co-owner request received', { command });
+    this.logger.info('Remove co-owner request received', { command });
     const wishlist = await this.wishlistRepository.findByIdOrFail(command.wishlistId);
 
     // Only the owner can remove the co-owner
@@ -27,7 +27,7 @@ export class RemoveCoOwnerUseCase {
 
     const updatedWishlist = wishlist.removeCoOwner();
 
-    this.logger.log('Saving wishlist...', { wishlistId: updatedWishlist.id, updatedFields: ['coOwner'] });
+    this.logger.info('Saving wishlist...', { wishlistId: updatedWishlist.id, updatedFields: ['coOwner'] });
     await this.wishlistRepository.save(updatedWishlist);
   }
 }

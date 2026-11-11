@@ -1,10 +1,11 @@
 import type { WishlistItemRepository } from '../../domain/wishlist-item.repository';
 
-import { Inject, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { type ICurrentUser, type ItemId } from '@wishlist/common';
+import { Injectable } from '@znight/core';
+import { NotFoundException, UnauthorizedException } from '@znight/http';
+import { getLogger } from '@znight/observability';
 import { TidyURL } from 'tidy-url';
 
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { type WishlistRepository } from '../../../wishlist/domain/wishlist.repository';
 
 export type UpdateItemInput = {
@@ -21,15 +22,15 @@ export type UpdateItemInput = {
 
 @Injectable()
 export class UpdateItemUseCase {
-  private readonly logger = new Logger(UpdateItemUseCase.name);
+  private readonly logger = getLogger(UpdateItemUseCase.name);
 
   constructor(
-    @Inject(REPOSITORIES.WISHLIST_ITEM) private readonly itemRepository: WishlistItemRepository,
-    @Inject(REPOSITORIES.WISHLIST) private readonly wishlistRepository: WishlistRepository,
+    private readonly itemRepository: WishlistItemRepository,
+    private readonly wishlistRepository: WishlistRepository,
   ) {}
 
   async execute(command: UpdateItemInput): Promise<void> {
-    this.logger.log('Update item request received', { command });
+    this.logger.info('Update item request received', { command });
     const item = await this.itemRepository.findByIdOrFail(command.itemId);
     const hasAccess = await this.wishlistRepository.hasAccess({
       wishlistId: item.wishlistId,
@@ -65,7 +66,7 @@ export class UpdateItemUseCase {
       score: command.updateItem.score,
     });
 
-    this.logger.log('Saving item...', { itemId: item.id, updatedItem });
+    this.logger.info('Saving item...', { itemId: item.id, updatedItem });
     await this.itemRepository.save(updatedItem);
   }
 }

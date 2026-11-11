@@ -1,18 +1,11 @@
 import type { EventRepository } from '../../domain/repository/event.repository';
 import type { EventAttendeeRepository } from '../../domain/repository/event-attendee.repository';
 
-import {
-  BadRequestException,
-  ConflictException,
-  Inject,
-  Injectable,
-  Logger,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
 import { type AttendeeId, type EventId, type ICurrentUser } from '@wishlist/common';
+import { Injectable } from '@znight/core';
+import { BadRequestException, ConflictException, NotFoundException, UnauthorizedException } from '@znight/http';
+import { getLogger } from '@znight/observability';
 
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { AttendeeRole } from '../../domain/attendee-role.enum';
 
 export type UpdateAttendeeRoleInput = {
@@ -24,17 +17,15 @@ export type UpdateAttendeeRoleInput = {
 
 @Injectable()
 export class UpdateAttendeeRoleUseCase {
-  private readonly logger = new Logger(UpdateAttendeeRoleUseCase.name);
+  private readonly logger = getLogger(UpdateAttendeeRoleUseCase.name);
 
   constructor(
-    @Inject(REPOSITORIES.EVENT)
     private readonly eventRepository: EventRepository,
-    @Inject(REPOSITORIES.EVENT_ATTENDEE)
     private readonly attendeeRepository: EventAttendeeRepository,
   ) {}
 
   async execute(input: UpdateAttendeeRoleInput): Promise<void> {
-    this.logger.log('Update attendee role request received', { input });
+    this.logger.info('Update attendee role request received', { input });
     const { attendeeId, currentUser, eventId, role } = input;
 
     const event = await this.eventRepository.findByIdOrFail(eventId);
@@ -67,7 +58,7 @@ export class UpdateAttendeeRoleUseCase {
 
     const updatedAttendee = attendee.updateRole(role);
 
-    this.logger.log('Saving attendee role...', { attendeeId, eventId, role });
+    this.logger.info('Saving attendee role...', { attendeeId, eventId, role });
     await this.attendeeRepository.save(updatedAttendee);
   }
 }

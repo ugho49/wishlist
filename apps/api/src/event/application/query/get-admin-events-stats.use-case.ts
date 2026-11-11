@@ -1,9 +1,8 @@
 import type { EventRepository } from '../../domain/repository/event.repository';
 
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@znight/core';
 
 import { buildMonthlySeries, type MonthlyCount, monthlySeriesStart } from '../../../core/common/monthly-counts';
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
 
 export type GetAdminEventsStatsOutput = {
   totalCount: number;
@@ -14,7 +13,7 @@ export type GetAdminEventsStatsOutput = {
 
 @Injectable()
 export class GetAdminEventsStatsUseCase {
-  constructor(@Inject(REPOSITORIES.EVENT) private readonly eventRepository: EventRepository) {}
+  constructor(private readonly eventRepository: EventRepository) {}
 
   async execute(): Promise<GetAdminEventsStatsOutput> {
     const [stats, createdByMonth] = await Promise.all([

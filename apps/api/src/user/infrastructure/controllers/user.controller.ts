@@ -1,28 +1,28 @@
-import { Controller, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { type UpdateUserPictureHttpResponse, type UserId } from '@wishlist/common';
+import { Controller, Post, UploadedFile } from '@znight/http';
+import { ApiTags } from '@znight/openapi';
 
-import { CurrentUser } from '../../../auth/infrastructure/decorators/user.decorator';
+import { Authenticated } from '../../../auth/infrastructure/decorators/public.metadata';
+import { CurrentUserId } from '../../../auth/infrastructure/decorators/user.decorator';
+import { ACCEPTED_IMAGE_MIME_TYPES, ImageResizer, MAX_IMAGE_SIZE } from '../../../core/bucket/image-resizer';
 import { UpdateUserPictureUseCase } from '../../application/command/update-user-picture.use-case';
-import { userPictureFileValidators, userPictureResizePipe } from '../user.validator';
-
-import 'multer';
 
 @ApiTags('User')
 @Controller('/user')
+@Authenticated()
 export class UserController {
-  constructor(private readonly updateUserPictureUseCase: UpdateUserPictureUseCase) {}
+  constructor(
+    private readonly updateUserPictureUseCase: UpdateUserPictureUseCase,
+    private readonly imageResizer: ImageResizer,
+  ) {}
 
   @Post('/upload-picture')
-  @ApiConsumes('multipart/form-data')
-  @UseInterceptors(FileInterceptor('file'))
   async uploadPicture(
-    @CurrentUser('id') currentUserId: UserId,
-    @UploadedFile(userPictureFileValidators, userPictureResizePipe)
-    file: Express.Multer.File,
+    @CurrentUserId() currentUserId: UserId,
+    @UploadedFile('file', { maxSize: MAX_IMAGE_SIZE, mimeTypes: ACCEPTED_IMAGE_MIME_TYPES }) file: File,
   ): Promise<UpdateUserPictureHttpResponse> {
-    const result = await this.updateUserPictureUseCase.execute({ userId: currentUserId, file });
+    const resized = await this.imageResizer.resize(file, { width: 500, height: 500 });
+    const result = await this.updateUserPictureUseCase.execute({ userId: currentUserId, file: resized });
     return { picture_url: result.pictureUrl };
   }
 }

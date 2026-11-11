@@ -1,36 +1,33 @@
 import type { UserEmailSettingRepository } from '../../domain/repository/user-email-setting.repository';
 
-import { Inject, Logger } from '@nestjs/common';
-import { EventsHandler, type IEventHandler } from '@nestjs/cqrs';
+import { OnEvent } from '@znight/events';
+import { getLogger } from '@znight/observability';
 
 import { TransactionManager } from '../../../core/database/transaction-manager';
 import { FrontendRoutesService } from '../../../core/frontend-routes/frontend-routes.service';
 import { MailService } from '../../../core/mail/mail.service';
 import { MailTemplate } from '../../../core/mail/mail.type';
 import { type EventAttendeeRepository } from '../../../event/domain/repository/event-attendee.repository';
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { UserCreatedEvent } from '../../domain/event/user-created.event';
 import { UserEmailSetting } from '../../domain/model/user-email-setting.model';
 
-@EventsHandler(UserCreatedEvent)
-export class UserCreatedHandler implements IEventHandler<UserCreatedEvent> {
-  private readonly logger = new Logger(UserCreatedHandler.name);
+export class UserCreatedHandler {
+  private readonly logger = getLogger(UserCreatedHandler.name);
 
   constructor(
     private readonly mailService: MailService,
-    @Inject(REPOSITORIES.USER_EMAIL_SETTING)
     private readonly userEmailSettingRepository: UserEmailSettingRepository,
-    @Inject(REPOSITORIES.EVENT_ATTENDEE)
     private readonly eventAttendeeRepository: EventAttendeeRepository,
     private readonly transactionManager: TransactionManager,
     private readonly frontendRoutes: FrontendRoutesService,
   ) {}
 
+  @OnEvent({ detached: true })
   async handle(params: UserCreatedEvent) {
-    this.logger.log('User created event received', { userId: params.user.id });
+    this.logger.info('User created event received', { userId: params.user.id });
     const settings = UserEmailSetting.create({ id: this.userEmailSettingRepository.newId(), user: params.user });
 
-    this.logger.log('Creating event attendees from temporary attendees for this user email...', {
+    this.logger.info('Creating event attendees from temporary attendees for this user email...', {
       userId: params.user.id,
     });
     const eventAttendeeByUserEmail = await this.eventAttendeeRepository
@@ -46,7 +43,7 @@ export class UserCreatedHandler implements IEventHandler<UserCreatedEvent> {
     });
 
     try {
-      this.logger.log('Sending welcome email to user...', { userId: params.user.id });
+      this.logger.info('Sending welcome email to user...', { userId: params.user.id });
       await this.mailService.sendMail({
         to: params.user.email,
         subject: 'Bienvenue !!!',
@@ -56,7 +53,7 @@ export class UserCreatedHandler implements IEventHandler<UserCreatedEvent> {
         },
       });
     } catch (error) {
-      this.logger.error('Fail to send welcome mail to user', error);
+      this.logger.error('Fail to send welcome mail to user', { error: error });
     }
   }
 }

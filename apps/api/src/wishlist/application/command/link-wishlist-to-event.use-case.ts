@@ -1,10 +1,11 @@
 import type { WishlistRepository } from '../../domain/wishlist.repository';
 
-import { BadRequestException, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { type EventId, type ICurrentUser, MAX_EVENTS_BY_LIST, type WishlistId } from '@wishlist/common';
+import { Injectable } from '@znight/core';
+import { BadRequestException, UnauthorizedException } from '@znight/http';
+import { getLogger } from '@znight/observability';
 
 import { type EventRepository } from '../../../event/domain/repository/event.repository';
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
 
 export type LinkWishlistToEventInput = {
   currentUser: ICurrentUser;
@@ -14,17 +15,15 @@ export type LinkWishlistToEventInput = {
 
 @Injectable()
 export class LinkWishlistToEventUseCase {
-  private readonly logger = new Logger(LinkWishlistToEventUseCase.name);
+  private readonly logger = getLogger(LinkWishlistToEventUseCase.name);
 
   constructor(
-    @Inject(REPOSITORIES.WISHLIST)
     private readonly wishlistRepository: WishlistRepository,
-    @Inject(REPOSITORIES.EVENT)
     private readonly eventRepository: EventRepository,
   ) {}
 
   async execute(command: LinkWishlistToEventInput): Promise<void> {
-    this.logger.log('Link wishlist to event request received', { command });
+    this.logger.info('Link wishlist to event request received', { command });
     const { currentUser, wishlistId, eventId } = command;
 
     const wishlist = await this.wishlistRepository.findByIdOrFail(wishlistId);
@@ -49,7 +48,7 @@ export class LinkWishlistToEventUseCase {
 
     const updatedWishlist = wishlist.linkEvent(eventId);
 
-    this.logger.log('Saving wishlist...', { wishlistId: updatedWishlist.id, updatedFields: ['eventIds'] });
+    this.logger.info('Saving wishlist...', { wishlistId: updatedWishlist.id, updatedFields: ['eventIds'] });
     await this.wishlistRepository.save(updatedWishlist);
   }
 }

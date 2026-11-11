@@ -3,28 +3,28 @@ import type { Authorities } from '../../../user/domain/authorities.enum';
 import type { UserSessionRepository } from '../../../user/domain/repository/user-session.repository';
 import type { LoginOutput } from '../login.types';
 
-import { Logger } from '@nestjs/common';
-import { type JwtService } from '@nestjs/jwt';
+import { getLogger, type StaticLogger } from '@znight/observability';
 
 import { User } from '../../../user/domain/model/user.model';
 import { UserSession } from '../../../user/domain/model/user-session.model';
+import { type TokenService } from '../../infrastructure/token.service';
 import { RefreshTokenManager } from '../../infrastructure/util/refresh-token';
 
 export abstract class CommonLoginUseCase {
-  protected readonly logger: Logger;
+  protected readonly logger: StaticLogger;
 
-  private readonly jwtService: JwtService;
+  private readonly tokenService: TokenService;
   private readonly sessionRepository: UserSessionRepository;
   private readonly refreshTokenDuration: string;
 
   constructor(params: {
-    jwtService: JwtService;
+    tokenService: TokenService;
     loggerName: string;
     sessionRepository: UserSessionRepository;
     refreshTokenDuration: string;
   }) {
-    this.logger = new Logger(params.loggerName);
-    this.jwtService = params.jwtService;
+    this.logger = getLogger(params.loggerName);
+    this.tokenService = params.tokenService;
     this.sessionRepository = params.sessionRepository;
     this.refreshTokenDuration = params.refreshTokenDuration;
   }
@@ -34,9 +34,9 @@ export abstract class CommonLoginUseCase {
     email: string;
     authorities: Authorities[];
     sessionId: UserSessionId;
-  }): string {
+  }): Promise<string> {
     const { id, email, authorities, sessionId } = params;
-    this.logger.log('Creating access token...', { id, email, authorities, sessionId });
+    this.logger.info('Creating access token...', { id, email, authorities, sessionId });
     const payload: AccessTokenJwtPayload = {
       sub: id,
       email,
@@ -44,7 +44,7 @@ export abstract class CommonLoginUseCase {
       sid: sessionId,
     };
 
-    return this.jwtService.sign(payload);
+    return this.tokenService.sign(payload);
   }
 
   protected async issueTokens(params: { user: User; ip?: string; userAgent?: string }): Promise<LoginOutput> {
@@ -62,7 +62,7 @@ export abstract class CommonLoginUseCase {
     await this.sessionRepository.save(session);
 
     return {
-      accessToken: this.createAccessToken({
+      accessToken: await this.createAccessToken({
         id: user.id,
         email: user.email,
         authorities: user.authorities,

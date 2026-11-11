@@ -1,8 +1,9 @@
 import type { ICurrentUser, UserId } from '@wishlist/common';
 
-import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@znight/core';
+import { UnauthorizedException } from '@znight/http';
+import { getLogger } from '@znight/observability';
 
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { type UserRepository } from '../../domain/repository/user.repository';
 import { type UserSessionRepository } from '../../domain/repository/user-session.repository';
 
@@ -13,17 +14,15 @@ export type AdminRevokeAllUserSessionsInput = {
 
 @Injectable()
 export class AdminRevokeAllUserSessionsUseCase {
-  private readonly logger = new Logger(AdminRevokeAllUserSessionsUseCase.name);
+  private readonly logger = getLogger(AdminRevokeAllUserSessionsUseCase.name);
 
   constructor(
-    @Inject(REPOSITORIES.USER)
     private readonly userRepository: UserRepository,
-    @Inject(REPOSITORIES.USER_SESSION)
     private readonly sessionRepository: UserSessionRepository,
   ) {}
 
   async execute(input: AdminRevokeAllUserSessionsInput): Promise<void> {
-    this.logger.log('Admin revoke all sessions request received', { userId: input.userId });
+    this.logger.info('Admin revoke all sessions request received', { userId: input.userId });
 
     const user = await this.userRepository.findByIdOrFail(input.userId);
     const canManageUser = (input.currentUser.isSuperAdmin && !user.isSuperAdmin()) || !user.isAdmin();

@@ -1,8 +1,8 @@
 import type { UserRepository } from '../../domain/repository/user.repository';
 
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@znight/core';
+import { BadRequestException } from '@znight/http';
 
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { User } from '../../domain/model/user.model';
 
 export type GetUsersPaginatedInput = {
@@ -18,10 +18,7 @@ export type GetUsersPaginatedOutput = {
 
 @Injectable()
 export class GetUsersPaginatedUseCase {
-  constructor(
-    @Inject(REPOSITORIES.USER)
-    private readonly userRepository: UserRepository,
-  ) {}
+  constructor(private readonly userRepository: UserRepository) {}
 
   async execute(query: GetUsersPaginatedInput): Promise<GetUsersPaginatedOutput> {
     const { criteria, pageNumber, pageSize } = query;

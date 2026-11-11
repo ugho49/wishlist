@@ -2,9 +2,8 @@ import type { ICurrentUser, WishlistId } from '@wishlist/common';
 import type { WishlistItem } from '../../domain/wishlist-item.model';
 import type { WishlistItemRepository } from '../../domain/wishlist-item.repository';
 
-import { Inject, Injectable, Logger } from '@nestjs/common';
-
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
+import { Injectable } from '@znight/core';
+import { getLogger } from '@znight/observability';
 
 export type GetItemsByWishlistsInput = {
   currentUser: ICurrentUser;
@@ -17,12 +16,12 @@ export type GetItemsByWishlistsOutput = {
 
 @Injectable()
 export class GetItemsByWishlistsUseCase {
-  private readonly logger = new Logger(GetItemsByWishlistsUseCase.name);
+  private readonly logger = getLogger(GetItemsByWishlistsUseCase.name);
 
-  constructor(@Inject(REPOSITORIES.WISHLIST_ITEM) private readonly itemRepository: WishlistItemRepository) {}
+  constructor(private readonly itemRepository: WishlistItemRepository) {}
 
   async execute(input: GetItemsByWishlistsInput): Promise<GetItemsByWishlistsOutput> {
-    this.logger.log('Get items by wishlists request received', { input });
+    this.logger.info('Get items by wishlists request received', { input });
     const items = await this.itemRepository.findByWishlistIds(input.wishlistIds);
     const itemsByWishlistId = new Map<WishlistId, WishlistItem[]>();
 

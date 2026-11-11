@@ -1,11 +1,11 @@
-import type { EventBus } from '@nestjs/cqrs';
 import type { AttendeeId, EventId } from '@wishlist/common';
 import type { UserRepository } from '../../../user/domain/repository/user.repository';
 import type { EventRepository } from '../../domain/repository/event.repository';
 import type { EventAttendeeRepository } from '../../domain/repository/event-attendee.repository';
 
-import { BadRequestException, Logger } from '@nestjs/common';
 import { uuid } from '@wishlist/common';
+import { EventPublisher } from '@znight/events';
+import { BadRequestException } from '@znight/http';
 
 import { toCurrentUser, UserBuilder } from '../../../../test-utils/builders/user.builder';
 import { createMock } from '../../../../test-utils/mocks';
@@ -13,21 +13,17 @@ import { User } from '../../../user/domain/model/user.model';
 import { AttendeeRole } from '../../domain/attendee-role.enum';
 import { AttendeeAddedEvent } from '../../domain/event/attendee-added.event';
 import { CreateEventUseCase } from './create-event.use-case';
-import { beforeAll, beforeEach, describe, expect, it, mock } from 'bun:test';
+import { beforeEach, describe, expect, it, mock } from 'bun:test';
 
 describe('CreateEventUseCase', () => {
   const eventRepository = createMock<EventRepository>();
   const attendeeRepository = createMock<EventAttendeeRepository>();
   const userRepository = createMock<UserRepository>();
-  const eventBus = createMock<EventBus>();
+  const eventBus = createMock<EventPublisher>();
 
   let useCase: CreateEventUseCase;
   let creator: User;
   let eventId: EventId;
-
-  beforeAll(() => {
-    Logger.overrideLogger(false);
-  });
 
   beforeEach(() => {
     mock.clearAllMocks();

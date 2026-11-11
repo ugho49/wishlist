@@ -1,6 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
 import { schema } from '@wishlist/api-drizzle';
 import { type AttendeeId, type EventId, uuid } from '@wishlist/common';
+import { Injectable } from '@znight/core';
+import { NotFoundException } from '@znight/http';
 import { and, eq, inArray, or } from 'drizzle-orm';
 
 import { DatabaseService } from '../../core/database/database.service';

@@ -1,12 +1,13 @@
 import type { EventRepository } from '../../domain/repository/event.repository';
 import type { EventAttendeeRepository } from '../../domain/repository/event-attendee.repository';
 
-import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common';
-import { EventBus } from '@nestjs/cqrs';
 import { type ICurrentUser } from '@wishlist/common';
+import { Injectable } from '@znight/core';
+import { EventPublisher } from '@znight/events';
+import { BadRequestException } from '@znight/http';
+import { getLogger } from '@znight/observability';
 import { uniq } from 'lodash';
 
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { type UserRepository } from '../../../user/domain/repository/user.repository';
 import { AttendeeRole } from '../../domain/attendee-role.enum';
 import { AttendeeAddedEvent } from '../../domain/event/attendee-added.event';
@@ -37,17 +38,17 @@ export type CreateEventOutput = {
 
 @Injectable()
 export class CreateEventUseCase {
-  private readonly logger = new Logger(CreateEventUseCase.name);
+  private readonly logger = getLogger(CreateEventUseCase.name);
 
   constructor(
-    @Inject(REPOSITORIES.EVENT) private readonly eventRepository: EventRepository,
-    @Inject(REPOSITORIES.EVENT_ATTENDEE) private readonly attendeeRepository: EventAttendeeRepository,
-    @Inject(REPOSITORIES.USER) private readonly userRepository: UserRepository,
-    private readonly eventBus: EventBus,
+    private readonly eventRepository: EventRepository,
+    private readonly attendeeRepository: EventAttendeeRepository,
+    private readonly userRepository: UserRepository,
+    private readonly eventBus: EventPublisher,
   ) {}
 
   async execute(input: CreateEventInput): Promise<CreateEventOutput> {
-    this.logger.log('Create event request received', { input });
+    this.logger.info('Create event request received', { input });
     const attendeeEmails = uniq(input.newEvent.attendees?.map(a => a.email) ?? [])
       // Remove the current user from the list of attendees
       .filter(email => email !== input.currentUser.email);
@@ -97,7 +98,7 @@ export class CreateEventUseCase {
       attendees,
     });
 
-    this.logger.log('Saving event...', { event });
+    this.logger.info('Saving event...', { event });
     await this.eventRepository.save(event);
 
     for (const attendee of attendees.filter(a => a.user?.id !== currentUser.id)) {

@@ -1,34 +1,29 @@
-import type { ConfigType } from '@nestjs/config';
-import type { JwtService } from '@nestjs/jwt';
 import type { UserRepository } from '../../../user/domain/repository/user.repository';
 import type { UserSessionRepository } from '../../../user/domain/repository/user-session.repository';
+import type { AuthConfig } from '../../infrastructure/auth.config';
+import type { TokenService } from '../../infrastructure/token.service';
 
-import { Logger, UnauthorizedException } from '@nestjs/common';
+import { UnauthorizedException } from '@znight/http';
 
 import { UserBuilder } from '../../../../test-utils/builders/user.builder';
 import { UserSessionBuilder } from '../../../../test-utils/builders/user-session.builder';
 import { createMock } from '../../../../test-utils/mocks';
 import { User } from '../../../user/domain/model/user.model';
 import { UserSession } from '../../../user/domain/model/user-session.model';
-import authConfig from '../../infrastructure/auth.config';
 import { RefreshTokenManager } from '../../infrastructure/util/refresh-token';
 import { RefreshSessionUseCase } from './refresh-session.use-case';
-import { beforeAll, beforeEach, describe, expect, it, mock } from 'bun:test';
+import { beforeEach, describe, expect, it, mock } from 'bun:test';
 
 describe('RefreshSessionUseCase', () => {
   const userRepository = createMock<UserRepository>();
   const sessionRepository = createMock<UserSessionRepository>();
-  const jwtService = createMock<JwtService>();
-  const config = { refreshToken: { duration: '30d' } } as ConfigType<typeof authConfig>;
+  const tokenService = createMock<TokenService>();
+  const config = { refreshTokenDuration: '30d' } as AuthConfig;
 
   let useCase: RefreshSessionUseCase;
   let user: User;
   let session: UserSession;
   let rawToken: string;
-
-  beforeAll(() => {
-    Logger.overrideLogger(false);
-  });
 
   beforeEach(() => {
     mock.clearAllMocks();
@@ -39,9 +34,9 @@ describe('RefreshSessionUseCase', () => {
 
     sessionRepository.findByTokenHash.mockResolvedValue(session);
     userRepository.findById.mockResolvedValue(user);
-    jwtService.sign.mockReturnValue('new-access-token');
+    tokenService.sign.mockResolvedValue('new-access-token');
 
-    useCase = new RefreshSessionUseCase(userRepository, sessionRepository, config, jwtService);
+    useCase = new RefreshSessionUseCase(userRepository, sessionRepository, config, tokenService);
   });
 
   it('should reject when the refresh token is unknown', async () => {
@@ -88,7 +83,7 @@ describe('RefreshSessionUseCase', () => {
 
     expect(result.accessToken).toBe('new-access-token');
     expect(result.refreshToken).not.toBe(rawToken);
-    expect(jwtService.sign).toHaveBeenCalledWith({
+    expect(tokenService.sign).toHaveBeenCalledWith({
       sub: user.id,
       email: user.email,
       authorities: user.authorities,

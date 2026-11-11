@@ -1,9 +1,9 @@
 import type { WishlistItemRepository } from '../../domain/wishlist-item.repository';
 
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { type UserId, type WishlistId } from '@wishlist/common';
+import { Injectable } from '@znight/core';
+import { UnauthorizedException } from '@znight/http';
 
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { type WishlistRepository } from '../../../wishlist/domain/wishlist.repository';
 import { WishlistItem } from '../../domain/wishlist-item.model';
 
@@ -15,8 +15,8 @@ export type GetImportableItemsInput = {
 @Injectable()
 export class GetImportableItemsUseCase {
   constructor(
-    @Inject(REPOSITORIES.WISHLIST_ITEM) private readonly itemRepository: WishlistItemRepository,
-    @Inject(REPOSITORIES.WISHLIST) private readonly wishlistRepository: WishlistRepository,
+    private readonly itemRepository: WishlistItemRepository,
+    private readonly wishlistRepository: WishlistRepository,
   ) {}
 
   async execute(query: GetImportableItemsInput): Promise<WishlistItem[]> {

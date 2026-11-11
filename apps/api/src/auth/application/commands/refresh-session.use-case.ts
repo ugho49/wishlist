@@ -1,14 +1,14 @@
-import type { ConfigType } from '@nestjs/config';
 import type { LoginOutput } from '../login.types';
 
-import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import { type AccessTokenJwtPayload } from '@wishlist/common';
+import { Injectable } from '@znight/core';
+import { UnauthorizedException } from '@znight/http';
+import { getLogger } from '@znight/observability';
 
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { type UserRepository } from '../../../user/domain/repository/user.repository';
 import { type UserSessionRepository } from '../../../user/domain/repository/user-session.repository';
-import authConfig from '../../infrastructure/auth.config';
+import { AuthConfig } from '../../infrastructure/auth.config';
+import { TokenService } from '../../infrastructure/token.service';
 import { RefreshTokenManager } from '../../infrastructure/util/refresh-token';
 
 export type RefreshSessionInput = {
@@ -19,20 +19,17 @@ export type RefreshSessionInput = {
 
 @Injectable()
 export class RefreshSessionUseCase {
-  private readonly logger = new Logger(RefreshSessionUseCase.name);
+  private readonly logger = getLogger(RefreshSessionUseCase.name);
 
   constructor(
-    @Inject(REPOSITORIES.USER)
     private readonly userRepository: UserRepository,
-    @Inject(REPOSITORIES.USER_SESSION)
     private readonly sessionRepository: UserSessionRepository,
-    @Inject(authConfig.KEY)
-    private readonly config: ConfigType<typeof authConfig>,
-    private readonly jwtService: JwtService,
+    private readonly config: AuthConfig,
+    private readonly tokenService: TokenService,
   ) {}
 
   async execute(input: RefreshSessionInput): Promise<LoginOutput> {
-    this.logger.log('Refresh session request received');
+    this.logger.info('Refresh session request received');
 
     const session = await this.sessionRepository.findByTokenHash(RefreshTokenManager.hash(input.refreshToken));
 
@@ -49,7 +46,7 @@ export class RefreshSessionUseCase {
     const rawRefreshToken = RefreshTokenManager.generateRaw();
     const rotatedSession = session.rotate({
       tokenHash: RefreshTokenManager.hash(rawRefreshToken),
-      expiresAt: RefreshTokenManager.durationToDate(this.config.refreshToken.duration),
+      expiresAt: RefreshTokenManager.durationToDate(this.config.refreshTokenDuration),
       ip: input.ip,
     });
     await this.sessionRepository.save(rotatedSession);
@@ -61,10 +58,10 @@ export class RefreshSessionUseCase {
       sid: session.id,
     };
 
-    this.logger.log('Session refreshed', { userId: user.id, sessionId: session.id });
+    this.logger.info('Session refreshed', { userId: user.id, sessionId: session.id });
 
     return {
-      accessToken: this.jwtService.sign(payload),
+      accessToken: await this.tokenService.sign(payload),
       refreshToken: rawRefreshToken,
     };
   }

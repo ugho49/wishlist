@@ -1,7 +1,7 @@
 import type { UserRepository } from '../../domain/repository/user.repository';
 import type { UserSessionRepository } from '../../domain/repository/user-session.repository';
 
-import { Logger, UnauthorizedException } from '@nestjs/common';
+import { UnauthorizedException } from '@znight/http';
 
 import { toCurrentUser, UserBuilder } from '../../../../test-utils/builders/user.builder';
 import { createMock } from '../../../../test-utils/mocks';
@@ -9,7 +9,7 @@ import { TransactionManager } from '../../../core/database/transaction-manager';
 import { Authorities } from '../../domain/authorities.enum';
 import { User } from '../../domain/model/user.model';
 import { SetUserAdminUseCase } from './set-user-admin.use-case';
-import { beforeAll, beforeEach, describe, expect, it, mock } from 'bun:test';
+import { beforeEach, describe, expect, it, mock } from 'bun:test';
 
 describe('SetUserAdminUseCase', () => {
   const userRepository = createMock<UserRepository>();
@@ -19,10 +19,6 @@ describe('SetUserAdminUseCase', () => {
   let useCase: SetUserAdminUseCase;
   let superAdmin: User;
   let target: User;
-
-  beforeAll(() => {
-    Logger.overrideLogger(false);
-  });
 
   beforeEach(() => {
     mock.clearAllMocks();

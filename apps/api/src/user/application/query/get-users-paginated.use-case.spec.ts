@@ -1,22 +1,18 @@
 import type { UserRepository } from '../../domain/repository/user.repository';
 
-import { BadRequestException, Logger } from '@nestjs/common';
+import { BadRequestException } from '@znight/http';
 
 import { UserBuilder } from '../../../../test-utils/builders/user.builder';
 import { createMock } from '../../../../test-utils/mocks';
 import { User } from '../../domain/model/user.model';
 import { GetUsersPaginatedUseCase } from './get-users-paginated.use-case';
-import { beforeAll, beforeEach, describe, expect, it, mock } from 'bun:test';
+import { beforeEach, describe, expect, it, mock } from 'bun:test';
 
 describe('GetUsersPaginatedUseCase', () => {
   const userRepository = createMock<UserRepository>();
 
   let useCase: GetUsersPaginatedUseCase;
   let user: User;
-
-  beforeAll(() => {
-    Logger.overrideLogger(false);
-  });
 
   beforeEach(() => {
     mock.clearAllMocks();

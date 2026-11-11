@@ -3,11 +3,12 @@ import type { UserAccountRepository } from '../../domain/repository/user-account
 import type { UserPasswordVerificationRepository } from '../../domain/repository/user-password-verification.repository';
 import type { UserSessionRepository } from '../../domain/repository/user-session.repository';
 
-import { Inject, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@znight/core';
+import { NotFoundException, UnauthorizedException } from '@znight/http';
+import { getLogger } from '@znight/observability';
 
 import { PasswordManager } from '../../../auth/infrastructure/util/password-manager';
 import { TransactionManager } from '../../../core/database/transaction-manager';
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { UserAccount } from '../../domain/model/user-account.model';
 import { UserAccountProvider } from '../../domain/user-account-provider.enum';
 
@@ -19,22 +20,18 @@ export type ResetUserPasswordInput = {
 
 @Injectable()
 export class ResetUserPasswordUseCase {
-  private readonly logger = new Logger(ResetUserPasswordUseCase.name);
+  private readonly logger = getLogger(ResetUserPasswordUseCase.name);
 
   constructor(
-    @Inject(REPOSITORIES.USER)
     private readonly userRepository: UserRepository,
-    @Inject(REPOSITORIES.USER_ACCOUNT)
     private readonly userAccountRepository: UserAccountRepository,
-    @Inject(REPOSITORIES.USER_PASSWORD_VERIFICATION)
     private readonly passwordVerificationRepository: UserPasswordVerificationRepository,
-    @Inject(REPOSITORIES.USER_SESSION)
     private readonly sessionRepository: UserSessionRepository,
     private readonly transactionManager: TransactionManager,
   ) {}
 
   async execute(input: ResetUserPasswordInput): Promise<void> {
-    this.logger.log('Reset user password request received', { email: input.email, token: input.token });
+    this.logger.info('Reset user password request received', { email: input.email, token: input.token });
     const user = await this.userRepository.findByEmail(input.email);
 
     if (!user) {
@@ -67,7 +64,7 @@ export class ResetUserPasswordUseCase {
           passwordHash,
         });
 
-    this.logger.log('Saving password account and deleting password verification...', { userId: user.id });
+    this.logger.info('Saving password account and deleting password verification...', { userId: user.id });
     await this.transactionManager.runInTransaction(async tx => {
       await this.userAccountRepository.save(passwordAccount, tx);
       await this.passwordVerificationRepository.delete(passwordVerification.id, tx);

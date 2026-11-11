@@ -1,19 +1,22 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@znight/core';
+import { getLogger } from '@znight/observability';
 
-import { QueueProcessor } from '../../core/queue/queue.type';
+import { QueueProcessorBase } from '../../core/queue/queue.type';
 import { QueueName } from '../../core/queue/queues.definitions';
 import { NotifyNewItemsUseCase } from '../application/command/notify-new-items.use-case';
 
 @Injectable()
-export class ItemNotificationsProcessor extends QueueProcessor(QueueName.ITEMS_NOTIFICATIONS) {
-  private readonly logger = new Logger(ItemNotificationsProcessor.name);
+export class ItemNotificationsProcessor extends QueueProcessorBase {
+  readonly queueName = QueueName.ITEMS_NOTIFICATIONS;
+
+  private readonly logger = getLogger(ItemNotificationsProcessor.name);
 
   constructor(private readonly notifyNewItemsUseCase: NotifyNewItemsUseCase) {
     super({ concurrency: 1, repeat: { pattern: '15 10 * * *', tz: 'Europe/Paris' } });
   }
 
   async process(): Promise<void> {
-    this.logger.log('Processing item notifications job ...');
+    this.logger.info('Processing item notifications job ...');
     await this.notifyNewItemsUseCase.execute();
   }
 }

@@ -1,10 +1,11 @@
 import type { ICurrentUser, SecretSantaId } from '@wishlist/common';
 import type { SecretSantaRepository } from '../../domain/repository/secret-santa.repository';
 
-import { ConflictException, ForbiddenException, Inject, Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@znight/core';
+import { ConflictException, ForbiddenException } from '@znight/http';
+import { getLogger } from '@znight/observability';
 
 import { type EventRepository } from '../../../event/domain/repository/event.repository';
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
 
 export type UpdateSecretSantaInput = {
   currentUser: ICurrentUser;
@@ -15,15 +16,15 @@ export type UpdateSecretSantaInput = {
 
 @Injectable()
 export class UpdateSecretSantaUseCase {
-  private readonly logger = new Logger(UpdateSecretSantaUseCase.name);
+  private readonly logger = getLogger(UpdateSecretSantaUseCase.name);
 
   constructor(
-    @Inject(REPOSITORIES.SECRET_SANTA) private readonly secretSantaRepository: SecretSantaRepository,
-    @Inject(REPOSITORIES.EVENT) private readonly eventRepository: EventRepository,
+    private readonly secretSantaRepository: SecretSantaRepository,
+    private readonly eventRepository: EventRepository,
   ) {}
 
   async execute(command: UpdateSecretSantaInput): Promise<void> {
-    this.logger.log('Update secret santa request received', { command });
+    this.logger.info('Update secret santa request received', { command });
     const secretSanta = await this.secretSantaRepository.findByIdOrFail(command.secretSantaId);
     const event = await this.eventRepository.findByIdOrFail(secretSanta.eventId);
 
@@ -40,7 +41,7 @@ export class UpdateSecretSantaUseCase {
       budget: command.budget,
     });
 
-    this.logger.log('Saving secret santa...', { secretSantaId: secretSanta.id, updatedSecretSanta });
+    this.logger.info('Saving secret santa...', { secretSantaId: secretSanta.id, updatedSecretSanta });
     await this.secretSantaRepository.save(updatedSecretSanta);
   }
 }

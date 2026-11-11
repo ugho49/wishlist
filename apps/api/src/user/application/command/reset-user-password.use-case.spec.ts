@@ -3,7 +3,7 @@ import type { UserAccountRepository } from '../../domain/repository/user-account
 import type { UserPasswordVerificationRepository } from '../../domain/repository/user-password-verification.repository';
 import type { UserSessionRepository } from '../../domain/repository/user-session.repository';
 
-import { Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { NotFoundException, UnauthorizedException } from '@znight/http';
 
 import { UserBuilder } from '../../../../test-utils/builders/user.builder';
 import { UserAccountBuilder } from '../../../../test-utils/builders/user-account.builder';
@@ -15,7 +15,7 @@ import { User } from '../../domain/model/user.model';
 import { UserPasswordVerification } from '../../domain/model/user-password-verification.model';
 import { UserAccountProvider } from '../../domain/user-account-provider.enum';
 import { ResetUserPasswordUseCase } from './reset-user-password.use-case';
-import { beforeAll, beforeEach, describe, expect, it, mock } from 'bun:test';
+import { beforeEach, describe, expect, it, mock } from 'bun:test';
 
 describe('ResetUserPasswordUseCase', () => {
   const userRepository = createMock<UserRepository>();
@@ -27,10 +27,6 @@ describe('ResetUserPasswordUseCase', () => {
   let useCase: ResetUserPasswordUseCase;
   let user: User;
   let verification: UserPasswordVerification;
-
-  beforeAll(() => {
-    Logger.overrideLogger(false);
-  });
 
   beforeEach(() => {
     mock.clearAllMocks();

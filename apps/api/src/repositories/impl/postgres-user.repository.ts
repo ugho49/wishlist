@@ -1,6 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
 import { schema } from '@wishlist/api-drizzle';
 import { type UserId, uuid } from '@wishlist/common';
+import { Injectable } from '@znight/core';
+import { NotFoundException } from '@znight/http';
 import { and, asc, count, desc, eq, gte, inArray, isNotNull, isNull, like, ne, or, type SQL, sql } from 'drizzle-orm';
 
 import { DEFAULT_RESULT_NUMBER } from '../../core/common/pagination';

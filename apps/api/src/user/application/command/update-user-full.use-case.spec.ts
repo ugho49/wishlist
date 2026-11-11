@@ -2,7 +2,7 @@ import type { UserRepository } from '../../domain/repository/user.repository';
 import type { UserAccountRepository } from '../../domain/repository/user-account.repository';
 import type { UserSessionRepository } from '../../domain/repository/user-session.repository';
 
-import { BadRequestException, Logger, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, UnauthorizedException } from '@znight/http';
 
 import { toCurrentUser, UserBuilder } from '../../../../test-utils/builders/user.builder';
 import { createMock } from '../../../../test-utils/mocks';
@@ -12,7 +12,7 @@ import { User } from '../../domain/model/user.model';
 import { UserAccount } from '../../domain/model/user-account.model';
 import { UserAccountProvider } from '../../domain/user-account-provider.enum';
 import { UpdateUserFullUseCase } from './update-user-full.use-case';
-import { beforeAll, beforeEach, describe, expect, it, mock } from 'bun:test';
+import { beforeEach, describe, expect, it, mock } from 'bun:test';
 
 describe('UpdateUserFullUseCase', () => {
   const userRepository = createMock<UserRepository>();
@@ -23,10 +23,6 @@ describe('UpdateUserFullUseCase', () => {
   let useCase: UpdateUserFullUseCase;
   let admin: User;
   let target: User;
-
-  beforeAll(() => {
-    Logger.overrideLogger(false);
-  });
 
   beforeEach(() => {
     mock.clearAllMocks();

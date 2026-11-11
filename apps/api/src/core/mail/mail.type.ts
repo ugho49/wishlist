@@ -155,6 +155,6 @@ export type MailPayload = BaseMailPayload &
       }
   );
 
-export type MailProvider = {
+export interface MailProvider {
   send(options: MailPayload): Promise<void>;
-};
+}

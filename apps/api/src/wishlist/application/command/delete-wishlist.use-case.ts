@@ -1,10 +1,11 @@
 import type { WishlistRepository } from '../../domain/wishlist.repository';
 
-import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { type ICurrentUser, type WishlistId } from '@wishlist/common';
+import { Injectable } from '@znight/core';
+import { UnauthorizedException } from '@znight/http';
+import { getLogger } from '@znight/observability';
 
 import { BucketService } from '../../../core/bucket/bucket.service';
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
 
 export type DeleteWishlistInput = {
   currentUser: ICurrentUser;
@@ -13,16 +14,15 @@ export type DeleteWishlistInput = {
 
 @Injectable()
 export class DeleteWishlistUseCase {
-  private readonly logger = new Logger(DeleteWishlistUseCase.name);
+  private readonly logger = getLogger(DeleteWishlistUseCase.name);
 
   constructor(
-    @Inject(REPOSITORIES.WISHLIST)
     private readonly wishlistRepository: WishlistRepository,
     private readonly bucketService: BucketService,
   ) {}
 
   async execute(command: DeleteWishlistInput): Promise<void> {
-    this.logger.log('Delete wishlist request received', { command });
+    this.logger.info('Delete wishlist request received', { command });
     const { currentUser, wishlistId } = command;
 
     // 1. Find wishlist and check permissions
@@ -35,12 +35,12 @@ export class DeleteWishlistUseCase {
     }
 
     // 2. Delete wishlist
-    this.logger.log('Deleting wishlist...', { wishlistId });
+    this.logger.info('Deleting wishlist...', { wishlistId });
     await this.wishlistRepository.delete(wishlistId);
 
     // 3. Clean up logo from bucket if exists
     const logoDest = this.bucketService.getLogoDestination(wishlistId);
-    this.logger.log('Removing logo from bucket...', { wishlistId, logoDest });
+    this.logger.info('Removing logo from bucket...', { wishlistId, logoDest });
     await this.bucketService.removeIfExist({ destination: logoDest });
   }
 }

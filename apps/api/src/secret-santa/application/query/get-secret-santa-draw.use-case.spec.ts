@@ -1,8 +1,6 @@
 import type { EventAttendeeRepository } from '../../../event/domain/repository/event-attendee.repository';
 import type { SecretSantaUserRepository } from '../../domain/repository/secret-santa-user.repository';
 
-import { Logger } from '@nestjs/common';
-
 import { EventBuilder } from '../../../../test-utils/builders/event.builder';
 import { SecretSantaUserBuilder } from '../../../../test-utils/builders/secret-santa-user.builder';
 import { toCurrentUser, UserBuilder } from '../../../../test-utils/builders/user.builder';
@@ -11,7 +9,7 @@ import { EventAttendee } from '../../../event/domain/model/event-attendee.model'
 import { User } from '../../../user/domain/model/user.model';
 import { SecretSantaUser } from '../../domain/model/secret-santa-user.model';
 import { GetSecretSantaDrawUseCase } from './get-secret-santa-draw.use-case';
-import { beforeAll, beforeEach, describe, expect, it, mock } from 'bun:test';
+import { beforeEach, describe, expect, it, mock } from 'bun:test';
 
 describe('GetSecretSantaDrawUseCase', () => {
   const secretSantaUserRepository = createMock<SecretSantaUserRepository>();
@@ -23,10 +21,6 @@ describe('GetSecretSantaDrawUseCase', () => {
   let drawnAttendee: EventAttendee;
   let participantSantaUser: SecretSantaUser;
   let drawnSantaUser: SecretSantaUser;
-
-  beforeAll(() => {
-    Logger.overrideLogger(false);
-  });
 
   beforeEach(() => {
     mock.clearAllMocks();
