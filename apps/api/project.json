@@ -25,7 +25,7 @@
       "continuous": true,
       "executor": "nx:run-commands",
       "options": {
-        "command": "bun --preload @znight/compiler/bun --watch run src/main.ts",
+        "command": "bun run --preload @znight/compiler/bun --watch src/main.ts",
         "cwd": "{projectRoot}"
       }
     },
