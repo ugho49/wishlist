@@ -19,21 +19,17 @@ import { loggingOptions } from './helpers';
 export const SERVICE_NAME = 'wishlist-api';
 
 export type AppPluginsOptions = {
-  /** HTTP port; `CoreConfig.port` (`PORT`) when omitted, `0` for a free port in tests. */
   port?: number;
-  /** Logger level; `info` when omitted. */
   logLevel?: 'silent' | 'info' | 'debug';
 };
 
-/** The plugins of the API, shared by `main.ts` and the integration tests. */
 export function createPlugins(options: AppPluginsOptions = {}): Plugin[] {
   return [
     // Bun already loads `.env` into process.env (with ${VAR} expansion)
     ConfigPlugin.configure({ loaders: [env({ env: process.env })] }),
     ObservabilityPlugin.configure(container => ({
       logging: {
-        // human-readable logs outside production (NODE_ENV), JSON logs for Datadog in production
-        ...loggingOptions(SERVICE_NAME, { pretty: !container.get(CoreConfig).isProduction }),
+        ...loggingOptions({ serviceName: SERVICE_NAME, pretty: !container.get(CoreConfig).isProduction }),
         ...(options.logLevel ? { level: options.logLevel } : {}),
       },
       // dd-trace instruments the server (see tracer.ts)
@@ -51,11 +47,9 @@ export function createPlugins(options: AppPluginsOptions = {}): Plugin[] {
       exceptionMappers: [DatadogErrorTracker, UploadExceptionMapper],
     })),
     GraphQLPlugin.configure(container => ({
-      // The endpoint is open: decisions are taken per root field by the AccessGuard
       http: { meta: [Public.meta()], get: false },
       guards: [AccessGuard],
       resultMappers: [RejectionResultMapper, InternalErrorResultMapper],
-      // GraphiQL on GET /graphql (accept: text/html) outside production; introspection follows NODE_ENV too
       graphiql: !container.get(CoreConfig).isProduction,
       introspection: !container.get(CoreConfig).isProduction,
     })),

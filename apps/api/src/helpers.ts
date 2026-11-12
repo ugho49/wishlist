@@ -46,7 +46,9 @@ export function renameErrKey(entry: Record<string, unknown>): Record<string, unk
  * and job in the BullMQ job entries, Datadog trace ids, `/health` not logged. `pretty`: human-readable
  * output through pino-pretty (outside production), JSON otherwise.
  */
-export function loggingOptions(serviceName: string, { pretty }: { pretty: boolean }): LoggingOptions {
+export function loggingOptions(options: { pretty: boolean; serviceName: string }): LoggingOptions {
+  const { pretty, serviceName } = options;
+
   return {
     level: 'info',
     name: serviceName,
