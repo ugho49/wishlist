@@ -1,3 +1,4 @@
+import type { ICurrentUser } from '@wishlist/common';
 import type { GraphQLGuard, ResolverContext } from '@znight/graphql';
 
 import { Injectable } from '@znight/core';
@@ -16,23 +17,27 @@ export class AccessGuard implements CanActivate, GraphQLGuard {
   static readonly enforces = [Public, Authenticated, IsAdmin];
 
   canActivate(ctx: HttpContext): boolean {
-    return this.decide(ctx, ctx);
+    return this.decide(ctx, () => requireCurrentUser(ctx));
   }
 
   canResolve(ctx: ResolverContext): boolean {
-    return this.decide(ctx, ctx.http);
+    return this.decide(ctx, () => requireCurrentUser(ctx.http));
   }
 
-  private decide(carrier: RouteMetaCarrier, http: HttpContext | undefined): boolean {
-    if (Public.get(carrier) === true) return true;
+  /**
+   * `route` carries the decisions (a REST route or a GraphQL root field); `currentUser` reads the user of
+   * the request and throws a 401 without a valid token, called only when the route is not public.
+   */
+  private decide(route: RouteMetaCarrier, currentUser: () => ICurrentUser): boolean {
+    if (Public.get(route) === true) return true;
 
-    const user = requireCurrentUser(http);
+    const user = currentUser();
 
-    if (IsAdmin.get(carrier) === true) {
+    if (IsAdmin.get(route) === true) {
       if (!user.isAdmin) throw new ForbiddenException('Insufficient rights');
       return true;
     }
 
-    return Authenticated.get(carrier) === true;
+    return Authenticated.get(route) === true;
   }
 }

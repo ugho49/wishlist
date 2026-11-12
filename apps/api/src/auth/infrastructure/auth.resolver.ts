@@ -1,6 +1,5 @@
-import { Args, Ctx, Mutation, Resolver } from '@znight/graphql';
+import { Args, Ctx, type GraphQLContext, Mutation, Resolver } from '@znight/graphql';
 
-import { type GraphQLContext } from '../../core/graphql/graphql.context';
 import {
   type LoginInput,
   type LoginResult,
