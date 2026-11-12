@@ -11,7 +11,7 @@ export const JwtAuth = securityScheme('JWT-Auth', { type: 'http', scheme: 'beare
  * The Wishlist API: the remaining REST routes (multipart uploads and health). Everything else is GraphQL.
  */
 @OpenApiDocument({
-  info: { title: 'Wishlist', version: '1.0.0' },
+  info: { title: 'Wishlist', description: 'Wishlist API', version: '1.0.0' },
   security: [JwtAuth],
   decisions: [{ when: Public, security: [] }],
 })

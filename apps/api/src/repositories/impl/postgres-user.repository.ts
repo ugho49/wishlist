@@ -1,3 +1,5 @@
+import type { DrizzleDatabase } from '../../core/database/database.factory';
+
 import { schema } from '@wishlist/api-drizzle';
 import { type UserId, uuid } from '@wishlist/common';
 import { Injectable } from '@znight/core';
@@ -5,26 +7,25 @@ import { NotFoundException } from '@znight/http';
 import { and, asc, count, desc, eq, gte, inArray, isNotNull, isNull, like, ne, or, type SQL, sql } from 'drizzle-orm';
 
 import { DEFAULT_RESULT_NUMBER } from '../../core/common/pagination';
-import { DatabaseService } from '../../core/database/database.service';
 import { type DrizzleTransaction } from '../../core/database/transaction-manager';
 import { User } from '../../user/domain/model/user.model';
 import { type UserRepository } from '../../user/domain/repository/user.repository';
 
 @Injectable()
 export class PostgresUserRepository implements UserRepository {
-  constructor(private readonly databaseService: DatabaseService) {}
+  constructor(private readonly db: DrizzleDatabase) {}
 
   newId(): UserId {
     return uuid() as UserId;
   }
 
   async findById(id: UserId): Promise<User | undefined> {
-    const user = await this.databaseService.db.query.user.findFirst({ where: eq(schema.user.id, id) });
+    const user = await this.db.query.user.findFirst({ where: eq(schema.user.id, id) });
     return user ? PostgresUserRepository.toModel(user) : undefined;
   }
 
   async findByIds(userIds: UserId[]): Promise<User[]> {
-    const users = await this.databaseService.db.query.user.findMany({ where: inArray(schema.user.id, userIds) });
+    const users = await this.db.query.user.findMany({ where: inArray(schema.user.id, userIds) });
     return users.map(user => PostgresUserRepository.toModel(user));
   }
 
@@ -35,12 +36,12 @@ export class PostgresUserRepository implements UserRepository {
   }
 
   async findByEmail(email: string): Promise<User | undefined> {
-    const user = await this.databaseService.db.query.user.findFirst({ where: eq(schema.user.email, email) });
+    const user = await this.db.query.user.findFirst({ where: eq(schema.user.email, email) });
     return user ? PostgresUserRepository.toModel(user) : undefined;
   }
 
   async findByEmails(emails: string[]): Promise<User[]> {
-    const users = await this.databaseService.db.query.user.findMany({ where: inArray(schema.user.email, emails) });
+    const users = await this.db.query.user.findMany({ where: inArray(schema.user.email, emails) });
     return users.map(user => PostgresUserRepository.toModel(user));
   }
 
@@ -49,7 +50,7 @@ export class PostgresUserRepository implements UserRepository {
 
     const searchKey = criteria.trim().toLowerCase().normalize('NFC');
 
-    const users = await this.databaseService.db.query.user.findMany({
+    const users = await this.db.query.user.findMany({
       where: and(
         ignoreUserId ? ne(schema.user.id, ignoreUserId) : undefined,
         or(
@@ -82,16 +83,13 @@ export class PostgresUserRepository implements UserRepository {
     }
 
     // Get total count
-    const totalCountResult = await this.databaseService.db
-      .select({ count: count() })
-      .from(schema.user)
-      .where(whereCondition);
+    const totalCountResult = await this.db.select({ count: count() }).from(schema.user).where(whereCondition);
 
     const totalCount = totalCountResult[0]?.count ?? 0;
 
     if (totalCount === 0) return { users: [], totalCount };
 
-    const users = await this.databaseService.db.query.user.findMany({
+    const users = await this.db.query.user.findMany({
       where: whereCondition,
       limit: params.pagination.take,
       offset: params.pagination.skip,
@@ -102,7 +100,7 @@ export class PostgresUserRepository implements UserRepository {
   }
 
   async countAdminStats(): Promise<{ totalCount: number; enabledCount: number; adminCount: number }> {
-    const [stats] = await this.databaseService.db
+    const [stats] = await this.db
       .select({
         totalCount: sql<number>`cast(count(*) as int)`,
         enabledCount: sql<number>`cast(count(*) filter (where ${schema.user.isEnabled}) as int)`,
@@ -119,7 +117,7 @@ export class PostgresUserRepository implements UserRepository {
 
   countCreatedByMonth(since: Date): Promise<Array<{ month: string; count: number }>> {
     const month = sql<string>`to_char(date_trunc('month', ${schema.user.createdAt}), 'YYYY-MM')`;
-    return this.databaseService.db
+    return this.db
       .select({
         month,
         count: sql<number>`cast(count(*) as int)`,
@@ -131,7 +129,7 @@ export class PostgresUserRepository implements UserRepository {
   }
 
   async save(user: User, tx?: DrizzleTransaction): Promise<void> {
-    const client = tx ?? this.databaseService.db;
+    const client = tx ?? this.db;
 
     await client
       .insert(schema.user)
@@ -167,16 +165,16 @@ export class PostgresUserRepository implements UserRepository {
   }
 
   async delete(userId: UserId): Promise<void> {
-    await this.databaseService.db.delete(schema.user).where(eq(schema.user.id, userId));
+    await this.db.delete(schema.user).where(eq(schema.user.id, userId));
   }
 
   async findClosestFriends(userId: UserId, limit: number): Promise<User[]> {
-    const userEventsSubquery = this.databaseService.db
+    const userEventsSubquery = this.db
       .select({ eventId: schema.eventAttendee.eventId })
       .from(schema.eventAttendee)
       .where(eq(schema.eventAttendee.userId, userId));
 
-    const result = await this.databaseService.db
+    const result = await this.db
       .select({
         user: schema.user,
         commonEventsCount: count().as('common_events_count'),
@@ -200,7 +198,7 @@ export class PostgresUserRepository implements UserRepository {
       ? and(sql`extract(month from ${schema.user.birthday}) = 2`, sql`extract(day from ${schema.user.birthday}) = 29`)
       : undefined;
 
-    const rows = await this.databaseService.db
+    const rows = await this.db
       .select({ user: schema.user })
       .from(schema.user)
       .leftJoin(schema.userEmailSetting, eq(schema.userEmailSetting.userId, schema.user.id))

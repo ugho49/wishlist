@@ -1,23 +1,24 @@
+import type { DrizzleDatabase } from '../../core/database/database.factory';
+
 import { schema } from '@wishlist/api-drizzle';
 import { type UserId, type UserSessionId, uuid } from '@wishlist/common';
 import { Injectable } from '@znight/core';
 import { and, desc, eq, gt, inArray, isNotNull, isNull, lt, ne } from 'drizzle-orm';
 
-import { DatabaseService } from '../../core/database/database.service';
 import { type DrizzleTransaction } from '../../core/database/transaction-manager';
 import { UserSession } from '../../user/domain/model/user-session.model';
 import { type UserSessionRepository } from '../../user/domain/repository/user-session.repository';
 
 @Injectable()
 export class PostgresUserSessionRepository implements UserSessionRepository {
-  constructor(private readonly databaseService: DatabaseService) {}
+  constructor(private readonly db: DrizzleDatabase) {}
 
   newId(): UserSessionId {
     return uuid() as UserSessionId;
   }
 
   async findById(id: UserSessionId): Promise<UserSession | undefined> {
-    const row = await this.databaseService.db.query.userSession.findFirst({
+    const row = await this.db.query.userSession.findFirst({
       where: eq(schema.userSession.id, id),
     });
 
@@ -25,7 +26,7 @@ export class PostgresUserSessionRepository implements UserSessionRepository {
   }
 
   async findByTokenHash(tokenHash: string): Promise<UserSession | undefined> {
-    const row = await this.databaseService.db.query.userSession.findFirst({
+    const row = await this.db.query.userSession.findFirst({
       where: eq(schema.userSession.tokenHash, tokenHash),
     });
 
@@ -39,7 +40,7 @@ export class PostgresUserSessionRepository implements UserSessionRepository {
   async findActiveByUserIds(userIds: UserId[]): Promise<UserSession[]> {
     if (userIds.length === 0) return [];
 
-    const rows = await this.databaseService.db.query.userSession.findMany({
+    const rows = await this.db.query.userSession.findMany({
       where: and(
         inArray(schema.userSession.userId, userIds),
         isNull(schema.userSession.revokedAt),
@@ -52,7 +53,7 @@ export class PostgresUserSessionRepository implements UserSessionRepository {
   }
 
   async save(session: UserSession, tx?: DrizzleTransaction): Promise<void> {
-    const client = tx ?? this.databaseService.db;
+    const client = tx ?? this.db;
 
     const values = {
       id: session.id,
@@ -101,7 +102,7 @@ export class PostgresUserSessionRepository implements UserSessionRepository {
     userId: UserId,
     params?: { exceptId?: UserSessionId; tx?: DrizzleTransaction },
   ): Promise<void> {
-    const client = params?.tx ?? this.databaseService.db;
+    const client = params?.tx ?? this.db;
 
     await client
       .update(schema.userSession)
@@ -116,7 +117,7 @@ export class PostgresUserSessionRepository implements UserSessionRepository {
   }
 
   async deleteRevokedOlderThan(date: Date): Promise<number> {
-    const deleted = await this.databaseService.db
+    const deleted = await this.db
       .delete(schema.userSession)
       .where(and(isNotNull(schema.userSession.revokedAt), lt(schema.userSession.revokedAt, date)))
       .returning({ id: schema.userSession.id });

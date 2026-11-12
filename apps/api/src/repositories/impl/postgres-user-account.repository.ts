@@ -1,9 +1,10 @@
+import type { DrizzleDatabase } from '../../core/database/database.factory';
+
 import { schema } from '@wishlist/api-drizzle';
 import { type UserAccountId, type UserId, uuid } from '@wishlist/common';
 import { Injectable } from '@znight/core';
 import { and, eq, inArray, sql } from 'drizzle-orm';
 
-import { DatabaseService } from '../../core/database/database.service';
 import { type DrizzleTransaction } from '../../core/database/transaction-manager';
 import { UserAccount } from '../../user/domain/model/user-account.model';
 import { type UserAccountRepository } from '../../user/domain/repository/user-account.repository';
@@ -11,7 +12,7 @@ import { type UserAccountProvider } from '../../user/domain/user-account-provide
 
 @Injectable()
 export class PostgresUserAccountRepository implements UserAccountRepository {
-  constructor(private readonly databaseService: DatabaseService) {}
+  constructor(private readonly db: DrizzleDatabase) {}
 
   newId(): UserAccountId {
     return uuid() as UserAccountId;
@@ -21,7 +22,7 @@ export class PostgresUserAccountRepository implements UserAccountRepository {
     providerAccountId: string,
     provider: UserAccountProvider,
   ): Promise<UserAccount | undefined> {
-    const userAccount = await this.databaseService.db.query.userAccount.findFirst({
+    const userAccount = await this.db.query.userAccount.findFirst({
       where: and(
         eq(schema.userAccount.providerAccountId, providerAccountId),
         eq(schema.userAccount.provider, provider),
@@ -32,7 +33,7 @@ export class PostgresUserAccountRepository implements UserAccountRepository {
   }
 
   async findByUserIdAndProvider(userId: UserId, provider: UserAccountProvider): Promise<UserAccount | undefined> {
-    const userAccount = await this.databaseService.db.query.userAccount.findFirst({
+    const userAccount = await this.db.query.userAccount.findFirst({
       where: and(eq(schema.userAccount.userId, userId), eq(schema.userAccount.provider, provider)),
     });
 
@@ -40,7 +41,7 @@ export class PostgresUserAccountRepository implements UserAccountRepository {
   }
 
   async findByUserId(userId: UserId): Promise<UserAccount[]> {
-    const userAccounts = await this.databaseService.db.query.userAccount.findMany({
+    const userAccounts = await this.db.query.userAccount.findMany({
       where: eq(schema.userAccount.userId, userId),
     });
 
@@ -48,7 +49,7 @@ export class PostgresUserAccountRepository implements UserAccountRepository {
   }
 
   async findByUserIds(userIds: UserId[]): Promise<UserAccount[]> {
-    const userAccounts = await this.databaseService.db.query.userAccount.findMany({
+    const userAccounts = await this.db.query.userAccount.findMany({
       where: inArray(schema.userAccount.userId, userIds),
     });
 
@@ -56,7 +57,7 @@ export class PostgresUserAccountRepository implements UserAccountRepository {
   }
 
   async findByIds(userAccountIds: UserAccountId[]): Promise<UserAccount[]> {
-    const userAccounts = await this.databaseService.db.query.userAccount.findMany({
+    const userAccounts = await this.db.query.userAccount.findMany({
       where: inArray(schema.userAccount.id, userAccountIds),
     });
 
@@ -64,7 +65,7 @@ export class PostgresUserAccountRepository implements UserAccountRepository {
   }
 
   async save(userAccount: UserAccount, tx?: DrizzleTransaction): Promise<void> {
-    const client = tx ?? this.databaseService.db;
+    const client = tx ?? this.db;
 
     const values = {
       id: userAccount.id,
@@ -107,7 +108,7 @@ export class PostgresUserAccountRepository implements UserAccountRepository {
   }
 
   async delete(id: UserAccountId, tx?: DrizzleTransaction): Promise<void> {
-    const client = tx ?? this.databaseService.db;
+    const client = tx ?? this.db;
 
     await client.delete(schema.userAccount).where(eq(schema.userAccount.id, id));
   }

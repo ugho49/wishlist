@@ -1,7 +1,14 @@
+import type { BunSQLDatabase } from 'drizzle-orm/bun-sql';
+
+import { schema } from '@wishlist/api-drizzle';
 import { Factory, Provides } from '@znight/core';
 import { SQL } from 'bun';
+import { drizzle } from 'drizzle-orm/bun-sql';
+import { EnhancedQueryLogger } from 'drizzle-query-logger';
 
 import { DatabaseConfig } from './database.config';
+
+export type DrizzleDatabase = BunSQLDatabase<typeof schema>;
 
 @Factory()
 export class DatabaseFactory {
@@ -15,6 +22,16 @@ export class DatabaseFactory {
       username: config.username,
       password: config.password,
       database: config.database,
+    });
+  }
+
+  /** The Drizzle database on top of the pool (the pool is closed by `sqlClient`'s disposal). */
+  @Provides()
+  database(sql: SQL, config: DatabaseConfig): DrizzleDatabase {
+    return drizzle(sql, {
+      schema,
+      casing: 'snake_case',
+      logger: config.verbose ? new EnhancedQueryLogger() : false,
     });
   }
 }

@@ -1,12 +1,14 @@
 import type { BucketConfig } from './bucket.config';
 
 import { uuid } from '@wishlist/common';
+import { getLogger } from '@znight/observability';
 import { cert, initializeApp } from 'firebase-admin/app';
 import { getStorage, Storage } from 'firebase-admin/storage';
 
 import { BucketService } from './bucket.service';
 
 export class BucketRealService extends BucketService {
+  private readonly logger = getLogger(BucketRealService.name);
   private readonly storage: Storage;
 
   constructor(config: BucketConfig) {

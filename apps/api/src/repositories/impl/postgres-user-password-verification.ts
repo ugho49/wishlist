@@ -1,9 +1,10 @@
+import type { DrizzleDatabase } from '../../core/database/database.factory';
+
 import { schema } from '@wishlist/api-drizzle';
 import { type UserId, type UserPasswordVerificationId, uuid } from '@wishlist/common';
 import { Injectable } from '@znight/core';
 import { eq } from 'drizzle-orm';
 
-import { DatabaseService } from '../../core/database/database.service';
 import { type DrizzleTransaction } from '../../core/database/transaction-manager';
 import { UserPasswordVerification } from '../../user/domain/model/user-password-verification.model';
 import { type UserPasswordVerificationRepository } from '../../user/domain/repository/user-password-verification.repository';
@@ -11,14 +12,14 @@ import { PostgresUserRepository } from './postgres-user.repository';
 
 @Injectable()
 export class PostgresUserPasswordVerificationRepository implements UserPasswordVerificationRepository {
-  constructor(private readonly databaseService: DatabaseService) {}
+  constructor(private readonly db: DrizzleDatabase) {}
 
   newId(): UserPasswordVerificationId {
     return uuid() as UserPasswordVerificationId;
   }
 
   async findByUserId(userId: UserId): Promise<UserPasswordVerification[]> {
-    const userPasswordVerifications = await this.databaseService.db.query.userPasswordVerification.findMany({
+    const userPasswordVerifications = await this.db.query.userPasswordVerification.findMany({
       where: eq(schema.userPasswordVerification.userId, userId),
       with: { user: true },
     });
@@ -27,7 +28,7 @@ export class PostgresUserPasswordVerificationRepository implements UserPasswordV
   }
 
   async save(userPasswordVerification: UserPasswordVerification, tx?: DrizzleTransaction): Promise<void> {
-    const client = tx || this.databaseService.db;
+    const client = tx || this.db;
 
     await client
       .insert(schema.userPasswordVerification)
@@ -50,7 +51,7 @@ export class PostgresUserPasswordVerificationRepository implements UserPasswordV
   }
 
   async delete(id: UserPasswordVerificationId, tx?: DrizzleTransaction): Promise<void> {
-    const client = tx || this.databaseService.db;
+    const client = tx || this.db;
 
     await client.delete(schema.userPasswordVerification).where(eq(schema.userPasswordVerification.id, id));
   }

@@ -10,7 +10,6 @@ import request from 'supertest';
 
 import { metadata } from '../src/.znight/container.generated';
 import { createPlugins } from '../src/app';
-import { DatabaseService } from '../src/core/database/database.service';
 import { Fixtures } from './fixtures';
 import { MailsAssert } from './mail-assert';
 import { TableAssert } from './table-assert';
@@ -32,13 +31,13 @@ export function useTestApp() {
   beforeAll(async () => {
     // only: 'all' so that every provider with lifecycle hooks (QueueService) starts like in production
     app = await TestApp.create({ metadata, plugins: createPlugins({ port: 0, logLevel: 'silent' }), only: 'all' });
-    const databaseService = app.get(DatabaseService);
     const address = app.get(HttpPlugin).address;
     if (!address) throw new Error('The HTTP server is not listening');
     baseUrl = `http://127.0.0.1:${address.port}`;
     logger = getLogger('UseTestApp');
 
-    sql = databaseService.sql;
+    // the Postgres pool provided by DatabaseFactory (canonical token of Bun's SQL class)
+    sql = app.get<SQL>('bun#SQL');
     http = axios.create({
       baseURL: `http://localhost:${process.env['DOCKER_MAIL_PORT_1080']}`,
     });

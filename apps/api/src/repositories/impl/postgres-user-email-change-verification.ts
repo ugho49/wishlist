@@ -1,9 +1,10 @@
+import type { DrizzleDatabase } from '../../core/database/database.factory';
+
 import { schema } from '@wishlist/api-drizzle';
 import { type UserEmailChangeVerificationId, type UserId, uuid } from '@wishlist/common';
 import { Injectable } from '@znight/core';
 import { and, eq } from 'drizzle-orm';
 
-import { DatabaseService } from '../../core/database/database.service';
 import { type DrizzleTransaction } from '../../core/database/transaction-manager';
 import { UserEmailChangeVerification } from '../../user/domain/model/user-email-change-verification.model';
 import { type UserEmailChangeVerificationRepository } from '../../user/domain/repository/user-email-change-verification.repository';
@@ -11,14 +12,14 @@ import { PostgresUserRepository } from './postgres-user.repository';
 
 @Injectable()
 export class PostgresUserEmailChangeVerificationRepository implements UserEmailChangeVerificationRepository {
-  constructor(private readonly databaseService: DatabaseService) {}
+  constructor(private readonly db: DrizzleDatabase) {}
 
   newId(): UserEmailChangeVerificationId {
     return uuid() as UserEmailChangeVerificationId;
   }
 
   async findByUserId(userId: UserId): Promise<UserEmailChangeVerification[]> {
-    const verifications = await this.databaseService.db.query.userEmailChangeVerification.findMany({
+    const verifications = await this.db.query.userEmailChangeVerification.findMany({
       where: eq(schema.userEmailChangeVerification.userId, userId),
       with: { user: true },
     });
@@ -27,7 +28,7 @@ export class PostgresUserEmailChangeVerificationRepository implements UserEmailC
   }
 
   async findByTokenAndEmail(token: string, email: string): Promise<UserEmailChangeVerification | undefined> {
-    const verification = await this.databaseService.db.query.userEmailChangeVerification.findFirst({
+    const verification = await this.db.query.userEmailChangeVerification.findFirst({
       where: and(
         eq(schema.userEmailChangeVerification.token, token),
         eq(schema.userEmailChangeVerification.newEmail, email),
@@ -39,7 +40,7 @@ export class PostgresUserEmailChangeVerificationRepository implements UserEmailC
   }
 
   async save(verification: UserEmailChangeVerification, tx?: DrizzleTransaction): Promise<void> {
-    const client = tx || this.databaseService.db;
+    const client = tx || this.db;
 
     await client
       .insert(schema.userEmailChangeVerification)

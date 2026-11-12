@@ -1,6 +1,10 @@
+import { getLogger } from '@znight/observability';
+
 import { BucketService } from './bucket.service';
 
 export class BucketMockService extends BucketService {
+  private readonly logger = getLogger(BucketMockService.name);
+
   removeIfExist(param: { destination: string }): Promise<void> {
     this.logger.info({ destination: param.destination }, 'Remove file');
     return Promise.resolve();

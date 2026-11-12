@@ -1,16 +1,15 @@
 import { Injectable } from '@znight/core';
-
-import { DatabaseService } from '../database/database.service';
+import { SQL } from 'bun';
 
 export type HealthIndicatorResult = Record<string, { status: 'up' | 'down' }>;
 
 @Injectable()
 export class DatabaseHealthIndicator {
-  constructor(private readonly databaseService: DatabaseService) {}
+  constructor(private readonly sql: SQL) {}
 
   async pingCheck(): Promise<HealthIndicatorResult> {
     try {
-      await this.databaseService.ping();
+      await this.sql`SELECT 1`;
       return { database: { status: 'up' } };
     } catch {
       return { database: { status: 'down' } };
