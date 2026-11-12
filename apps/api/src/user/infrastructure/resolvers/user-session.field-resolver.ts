@@ -1,14 +1,14 @@
 import type { ICurrentUser } from '@wishlist/common';
 
-import { Parent, ResolveField, Resolver } from '@nestjs/graphql';
+import { Parent, ResolveField, Resolver } from '@znight/graphql';
 
-import { GqlCurrentUser } from '../../../auth/infrastructure/decorators/user.decorator';
+import { CurrentUser } from '../../../auth/infrastructure/decorators/user.decorator';
 import { type UserSession } from '../../../gql/generated-types';
 
 @Resolver('UserSession')
 export class UserSessionFieldResolver {
   @ResolveField()
-  current(@Parent() session: UserSession, @GqlCurrentUser() currentUser: ICurrentUser): boolean {
+  current(@Parent() session: UserSession, @CurrentUser() currentUser: ICurrentUser): boolean {
     return currentUser.sessionId === session.id;
   }
 }

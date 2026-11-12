@@ -1,22 +1,21 @@
-import type { ConfigType } from '@nestjs/config';
 import type { UserSessionRepository } from '../../../user/domain/repository/user-session.repository';
 import type { LoginOutput } from '../login.types';
 
-import { BadRequestException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
-import { EventBus } from '@nestjs/cqrs';
-import { JwtService } from '@nestjs/jwt';
+import { Injectable } from '@znight/core';
+import { EventPublisher } from '@znight/events';
+import { BadRequestException, UnauthorizedException } from '@znight/http';
 import { type TokenPayload } from 'google-auth-library';
 
 import { TransactionManager } from '../../../core/database/transaction-manager';
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { UserCreatedEvent } from '../../../user/domain/event/user-created.event';
 import { User } from '../../../user/domain/model/user.model';
 import { UserAccount } from '../../../user/domain/model/user-account.model';
 import { type UserRepository } from '../../../user/domain/repository/user.repository';
 import { type UserAccountRepository } from '../../../user/domain/repository/user-account.repository';
 import { UserAccountProvider } from '../../../user/domain/user-account-provider.enum';
-import authConfig from '../../infrastructure/auth.config';
+import { AuthConfig } from '../../infrastructure/auth.config';
 import { GoogleAuthService } from '../../infrastructure/social/google-auth.service';
+import { TokenService } from '../../infrastructure/token.service';
 import { CommonLoginUseCase } from './common-login.use-case';
 
 export type LoginWithGoogleInput = {
@@ -29,30 +28,26 @@ export type LoginWithGoogleInput = {
 @Injectable()
 export class LoginWithGoogleUseCase extends CommonLoginUseCase {
   constructor(
-    @Inject(REPOSITORIES.USER)
     private readonly userRepository: UserRepository,
-    @Inject(REPOSITORIES.USER_ACCOUNT)
     private readonly userAccountRepository: UserAccountRepository,
-    @Inject(REPOSITORIES.USER_SESSION)
     sessionRepository: UserSessionRepository,
-    @Inject(authConfig.KEY)
-    config: ConfigType<typeof authConfig>,
+    config: AuthConfig,
     private readonly googleAuthService: GoogleAuthService,
     private readonly transactionManager: TransactionManager,
-    private readonly eventBus: EventBus,
-    jwtService: JwtService,
+    private readonly eventBus: EventPublisher,
+    tokenService: TokenService,
   ) {
     super({
-      jwtService,
+      tokenService,
       loggerName: LoginWithGoogleUseCase.name,
       sessionRepository,
-      refreshTokenDuration: config.refreshToken.duration,
+      refreshTokenDuration: config.refreshTokenDuration,
     });
   }
 
   async execute(command: LoginWithGoogleInput): Promise<LoginOutput> {
     const { code, ip, userAgent, createUserIfNotExists } = command;
-    this.logger.log('Login with Google request received', { code });
+    this.logger.info('Login with Google request received', { code });
     const payload = await this.googleAuthService.getGoogleAccountFromCode(code);
 
     if (!payload.email) {
@@ -91,7 +86,7 @@ export class LoginWithGoogleUseCase extends CommonLoginUseCase {
     ip?: string;
     userAgent?: string;
   }): Promise<LoginOutput> {
-    this.logger.log('Login with Google and update...');
+    this.logger.info('Login with Google and update...');
     const { userAccount, payload, ip, userAgent } = params;
     const user = await this.userRepository.findByIdOrFail(userAccount.userId);
 
@@ -122,7 +117,7 @@ export class LoginWithGoogleUseCase extends CommonLoginUseCase {
     userAgent?: string;
   }): Promise<LoginOutput> {
     const { payload, ip, userAgent } = params;
-    this.logger.log('Creating user with Google and login...', { payload, ip });
+    this.logger.info('Creating user with Google and login...', { payload, ip });
 
     if (!payload.given_name) {
       throw new BadRequestException('Given name is not given by Google');
@@ -167,7 +162,7 @@ export class LoginWithGoogleUseCase extends CommonLoginUseCase {
     userAgent?: string;
   }): Promise<LoginOutput> {
     const { user, payload, ip, userAgent } = params;
-    this.logger.log('Linking user to Google and login...', { user, payload, ip });
+    this.logger.info('Linking user to Google and login...', { user, payload, ip });
 
     this.checkUserIsEnabled(user);
 

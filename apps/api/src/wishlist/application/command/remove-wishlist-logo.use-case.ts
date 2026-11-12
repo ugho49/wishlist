@@ -1,10 +1,11 @@
 import type { WishlistRepository } from '../../domain/wishlist.repository';
 
-import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { type ICurrentUser, type WishlistId } from '@wishlist/common';
+import { Injectable } from '@znight/core';
+import { UnauthorizedException } from '@znight/http';
+import { getLogger } from '@znight/observability';
 
 import { BucketService } from '../../../core/bucket/bucket.service';
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
 
 export type RemoveWishlistLogoInput = {
   currentUser: ICurrentUser;
@@ -13,15 +14,15 @@ export type RemoveWishlistLogoInput = {
 
 @Injectable()
 export class RemoveWishlistLogoUseCase {
-  private readonly logger = new Logger(RemoveWishlistLogoUseCase.name);
+  private readonly logger = getLogger(RemoveWishlistLogoUseCase.name);
 
   constructor(
-    @Inject(REPOSITORIES.WISHLIST) private readonly wishlistRepository: WishlistRepository,
+    private readonly wishlistRepository: WishlistRepository,
     private readonly bucketService: BucketService,
   ) {}
 
   async execute(command: RemoveWishlistLogoInput): Promise<void> {
-    this.logger.log('Remove wishlist logo request received', { command });
+    this.logger.info('Remove wishlist logo request received', { command });
     const wishlist = await this.wishlistRepository.findByIdOrFail(command.wishlistId);
 
     if (!wishlist.isOwnerOrCoOwner(command.currentUser.id)) {
@@ -29,12 +30,12 @@ export class RemoveWishlistLogoUseCase {
     }
 
     const destination = this.bucketService.getLogoDestination(command.wishlistId);
-    this.logger.log('Removing logo from bucket...', { wishlistId: command.wishlistId, destination });
+    this.logger.info('Removing logo from bucket...', { wishlistId: command.wishlistId, destination });
     await this.bucketService.removeIfExist({ destination });
 
     const updatedWishlist = wishlist.updateLogoUrl(undefined);
 
-    this.logger.log('Saving wishlist...', { wishlistId: updatedWishlist.id, updatedFields: ['logoUrl'] });
+    this.logger.info('Saving wishlist...', { wishlistId: updatedWishlist.id, updatedFields: ['logoUrl'] });
     await this.wishlistRepository.save(updatedWishlist);
   }
 }

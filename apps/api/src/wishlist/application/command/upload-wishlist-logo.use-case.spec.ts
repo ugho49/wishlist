@@ -1,7 +1,7 @@
 import type { BucketService } from '../../../core/bucket/bucket.service';
 import type { WishlistRepository } from '../../domain/wishlist.repository';
 
-import { Logger, UnauthorizedException } from '@nestjs/common';
+import { UnauthorizedException } from '@znight/http';
 
 import { toCurrentUser, UserBuilder } from '../../../../test-utils/builders/user.builder';
 import { WishlistBuilder } from '../../../../test-utils/builders/wishlist.builder';
@@ -9,7 +9,7 @@ import { createMock } from '../../../../test-utils/mocks';
 import { User } from '../../../user/domain/model/user.model';
 import { Wishlist } from '../../domain/wishlist.model';
 import { UploadWishlistLogoUseCase } from './upload-wishlist-logo.use-case';
-import { beforeAll, beforeEach, describe, expect, it, mock } from 'bun:test';
+import { beforeEach, describe, expect, it, mock } from 'bun:test';
 
 describe('UploadWishlistLogoUseCase', () => {
   const wishlistRepository = createMock<WishlistRepository>();
@@ -20,11 +20,7 @@ describe('UploadWishlistLogoUseCase', () => {
   let coOwner: User;
   let stranger: User;
   let wishlist: Wishlist;
-  let file: Express.Multer.File;
-
-  beforeAll(() => {
-    Logger.overrideLogger(false);
-  });
+  let file: File;
 
   beforeEach(() => {
     mock.clearAllMocks();
@@ -33,7 +29,7 @@ describe('UploadWishlistLogoUseCase', () => {
     coOwner = new UserBuilder().withEmail('coowner@test.fr').build();
     stranger = new UserBuilder().withEmail('stranger@test.fr').build();
     wishlist = new WishlistBuilder().withOwner(owner).withCoOwner(coOwner).build();
-    file = { originalname: 'logo.png' } as Express.Multer.File;
+    file = new File(['logo'], 'logo.png', { type: 'image/png' });
 
     wishlistRepository.findByIdOrFail.mockResolvedValue(wishlist);
     bucketService.getLogoDestination.mockReturnValue(`pictures/wishlists/${wishlist.id}/logo`);

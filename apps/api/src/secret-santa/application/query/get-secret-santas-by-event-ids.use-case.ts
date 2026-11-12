@@ -2,9 +2,7 @@ import type { EventId } from '@wishlist/common';
 import type { SecretSanta } from '../../domain/model/secret-santa.model';
 import type { SecretSantaRepository } from '../../domain/repository/secret-santa.repository';
 
-import { Inject, Injectable } from '@nestjs/common';
-
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
+import { Injectable } from '@znight/core';
 
 export type GetSecretSantasByEventIdsInput = {
   eventIds: EventId[];
@@ -12,7 +10,7 @@ export type GetSecretSantasByEventIdsInput = {
 
 @Injectable()
 export class GetSecretSantasByEventIdsUseCase {
-  constructor(@Inject(REPOSITORIES.SECRET_SANTA) private readonly secretSantaRepository: SecretSantaRepository) {}
+  constructor(private readonly secretSantaRepository: SecretSantaRepository) {}
 
   async execute(query: GetSecretSantasByEventIdsInput): Promise<Map<EventId, SecretSanta>> {
     const secretSantas = await this.secretSantaRepository.findByEventIds(query.eventIds);

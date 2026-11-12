@@ -1,6 +1,5 @@
 import type { UserRepository } from '../../domain/repository/user.repository';
 
-import { Logger } from '@nestjs/common';
 import { DateTime } from 'luxon';
 
 import { UserBuilder } from '../../../../test-utils/builders/user.builder';
@@ -9,7 +8,7 @@ import { FrontendRoutesService } from '../../../core/frontend-routes/frontend-ro
 import { MailService } from '../../../core/mail/mail.service';
 import { MailTemplate } from '../../../core/mail/mail.type';
 import { NotifyUpcomingBirthdaysUseCase } from './notify-upcoming-birthdays.use-case';
-import { beforeAll, beforeEach, describe, expect, it, mock } from 'bun:test';
+import { beforeEach, describe, expect, it, mock } from 'bun:test';
 
 describe('NotifyUpcomingBirthdaysUseCase', () => {
   const userRepository = createMock<UserRepository>();
@@ -22,10 +21,6 @@ describe('NotifyUpcomingBirthdaysUseCase', () => {
   } as never);
 
   let useCase: NotifyUpcomingBirthdaysUseCase;
-
-  beforeAll(() => {
-    Logger.overrideLogger(false);
-  });
 
   beforeEach(() => {
     mock.clearAllMocks();

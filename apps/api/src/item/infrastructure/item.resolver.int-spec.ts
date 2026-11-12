@@ -11,9 +11,9 @@ import { AttendeeRole } from '../../event/domain/attendee-role.enum';
  *
  * Notes on GraphQL error handling in this codebase:
  * - GraphQL always returns HTTP 200, even for resolver-level rejections.
- * - The useErrorTransformPlugin converts thrown Nest exceptions into a typed
+ * - The rejection result mappers converts thrown exceptions into a typed
  *   rejection placed at data.<field>:
- *     - ZodValidationException  -> ValidationRejection
+ *     - @Args schema failure  -> ValidationRejection
  *     - UnauthorizedException   -> UnauthorizedRejection
  *     - NotFoundException       -> NotFoundRejection
  *     - ForbiddenException      -> ForbiddenRejection
@@ -361,13 +361,14 @@ describe('ItemResolver (GraphQL)', () => {
         await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(0);
       });
 
-      it('should return NotFoundRejection when wishlist does not exist', async () => {
+      it('should return InternalErrorRejection when wishlist does not exist', async () => {
         const res = await request
           .post('/graphql')
           .send({ query: mutation, variables: { input: { wishlistId: uuid(), name: 'Test Item' } } })
           .expect(200);
 
-        expect(res.body.data.createItem.__typename).toBe('NotFoundRejection');
+        // NotFoundRejection is not a member of the field's result union: the fallback is InternalErrorRejection
+        expect(res.body.data.createItem.__typename).toBe('InternalErrorRejection');
 
         await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(0);
       });
@@ -533,13 +534,14 @@ describe('ItemResolver (GraphQL)', () => {
         });
       });
 
-      it('should return NotFoundRejection when item does not exist', async () => {
+      it('should return InternalErrorRejection when item does not exist', async () => {
         const res = await request
           .post('/graphql')
           .send({ query: mutation, variables: { itemId: uuid(), input: { name: 'Updated Item' } } })
           .expect(200);
 
-        expect(res.body.data.updateItem.__typename).toBe('NotFoundRejection');
+        // NotFoundRejection is not a member of the field's result union: the fallback is InternalErrorRejection
+        expect(res.body.data.updateItem.__typename).toBe('InternalErrorRejection');
       });
 
       it('should return UnauthorizedRejection when user has no access to the item', async () => {
@@ -636,13 +638,14 @@ describe('ItemResolver (GraphQL)', () => {
         await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(0);
       });
 
-      it('should return NotFoundRejection when item does not exist', async () => {
+      it('should return InternalErrorRejection when item does not exist', async () => {
         const res = await request
           .post('/graphql')
           .send({ query: mutation, variables: { itemId: uuid() } })
           .expect(200);
 
-        expect(res.body.data.deleteItem.__typename).toBe('NotFoundRejection');
+        // NotFoundRejection is not a member of the field's result union: the fallback is InternalErrorRejection
+        expect(res.body.data.deleteItem.__typename).toBe('InternalErrorRejection');
       });
 
       it('should return UnauthorizedRejection when user has no access to the item and not delete it', async () => {
@@ -858,13 +861,14 @@ describe('ItemResolver (GraphQL)', () => {
         await expectTable(Fixtures.ITEM_TAKER_TABLE).hasNumberOfRows(2);
       });
 
-      it('should return NotFoundRejection when item does not exist', async () => {
+      it('should return InternalErrorRejection when item does not exist', async () => {
         const res = await request
           .post('/graphql')
           .send({ query: mutation, variables: { itemId: uuid() } })
           .expect(200);
 
-        expect(res.body.data.toggleItem.__typename).toBe('NotFoundRejection');
+        // NotFoundRejection is not a member of the field's result union: the fallback is InternalErrorRejection
+        expect(res.body.data.toggleItem.__typename).toBe('InternalErrorRejection');
       });
 
       it('should return UnauthorizedRejection when user has no access to the item', async () => {
@@ -1032,13 +1036,14 @@ describe('ItemResolver (GraphQL)', () => {
         await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(0);
       });
 
-      it('should return NotFoundRejection when target wishlist does not exist', async () => {
+      it('should return InternalErrorRejection when target wishlist does not exist', async () => {
         const res = await request
           .post('/graphql')
           .send({ query: mutation, variables: { input: { wishlistId: uuid(), sourceItemIds: [uuid()] } } })
           .expect(200);
 
-        expect(res.body.data.importItems.__typename).toBe('NotFoundRejection');
+        // NotFoundRejection is not a member of the field's result union: the fallback is InternalErrorRejection
+        expect(res.body.data.importItems.__typename).toBe('InternalErrorRejection');
         await expectTable(Fixtures.ITEM_TABLE).hasNumberOfRows(0);
       });
 

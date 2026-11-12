@@ -9,7 +9,7 @@ alwaysApply: true
 Project guidance lives in CLAUDE.md files:
 
 - Root `CLAUDE.md` — monorepo commands, overview, where to look next
-- `apps/api/CLAUDE.md` — NestJS API, GraphQL, use cases, tests
+- `apps/api/CLAUDE.md` — Znight API, GraphQL, use cases, tests
 - `apps/front/CLAUDE.md` — React frontend
 - `libs/common/CLAUDE.md` and `libs/mail/CLAUDE.md` — shared libraries
 

@@ -1,31 +1,28 @@
-import { NotFoundException } from '@nestjs/common';
-import { Args, Context, Query, Resolver } from '@nestjs/graphql';
-import { createPagedResponse, type EventId, type ICurrentUser, type UserId } from '@wishlist/common';
+import { createPagedResponse, type EventId, type UserId } from '@wishlist/common';
+import { Args, Loader, Query, Resolver } from '@znight/graphql';
+import { NotFoundException } from '@znight/http';
 
-import { GqlCurrentUser } from '../../../auth/infrastructure/decorators/user.decorator';
+import { Authenticated } from '../../../auth/infrastructure/decorators/public.metadata';
+import { CurrentUserId } from '../../../auth/infrastructure/decorators/user.decorator';
 import { DEFAULT_RESULT_NUMBER } from '../../../core/common/pagination';
-import { type GraphQLContext } from '../../../core/graphql/graphql.context';
-import { ZodPipe } from '../../../core/graphql/zod-pipe';
 import {
   type EventPaginationFilters,
   type GetEventByIdResult,
   type GetMyEventsResult,
 } from '../../../gql/generated-types';
 import { GetEventsByUserUseCase } from '../../application/query/get-events-by-user.use-case';
+import { EventsById } from '../event.dataloader';
 import { eventMapper } from '../event.mapper';
 import { EventPaginationFiltersSchema } from '../event.schema';
 
 @Resolver()
+@Authenticated()
 export class EventResolver {
   constructor(private readonly getEventsByUserUseCase: GetEventsByUserUseCase) {}
 
   @Query()
-  async event(
-    @Args('id', { type: () => String }) id: EventId,
-    @GqlCurrentUser() currentUser: ICurrentUser,
-    @Context() ctx: GraphQLContext,
-  ): Promise<GetEventByIdResult> {
-    const event = await ctx.loaders.getEventDataLoader(currentUser).load(id);
+  async event(@Args('id') id: EventId, @Loader() eventsLoader: Loader<EventsById>): Promise<GetEventByIdResult> {
+    const event = await eventsLoader.load(id);
     if (!event) {
       throw new NotFoundException(`Event with id ${id} not found`);
     }
@@ -34,8 +31,8 @@ export class EventResolver {
 
   @Query()
   async events(
-    @Args('filters', new ZodPipe(EventPaginationFiltersSchema)) filters: EventPaginationFilters,
-    @GqlCurrentUser('id') currentUserId: UserId,
+    @Args('filters', EventPaginationFiltersSchema) filters: EventPaginationFilters,
+    @CurrentUserId() currentUserId: UserId,
   ): Promise<GetMyEventsResult> {
     const pageSize = filters.limit ?? DEFAULT_RESULT_NUMBER;
     const pageNumber = filters.page ?? 1;

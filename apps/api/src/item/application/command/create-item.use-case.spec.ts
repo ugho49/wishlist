@@ -2,8 +2,8 @@ import type { ItemId } from '@wishlist/common';
 import type { WishlistRepository } from '../../../wishlist/domain/wishlist.repository';
 import type { WishlistItemRepository } from '../../domain/wishlist-item.repository';
 
-import { Logger, UnauthorizedException } from '@nestjs/common';
 import { uuid } from '@wishlist/common';
+import { UnauthorizedException } from '@znight/http';
 
 import { toCurrentUser, UserBuilder } from '../../../../test-utils/builders/user.builder';
 import { WishlistBuilder } from '../../../../test-utils/builders/wishlist.builder';
@@ -11,7 +11,7 @@ import { createMock } from '../../../../test-utils/mocks';
 import { User } from '../../../user/domain/model/user.model';
 import { Wishlist } from '../../../wishlist/domain/wishlist.model';
 import { CreateItemUseCase } from './create-item.use-case';
-import { beforeAll, beforeEach, describe, expect, it, mock } from 'bun:test';
+import { beforeEach, describe, expect, it, mock } from 'bun:test';
 
 describe('CreateItemUseCase', () => {
   const wishlistRepository = createMock<WishlistRepository>();
@@ -21,10 +21,6 @@ describe('CreateItemUseCase', () => {
   let owner: User;
   let wishlist: Wishlist;
   let itemId: ItemId;
-
-  beforeAll(() => {
-    Logger.overrideLogger(false);
-  });
 
   beforeEach(() => {
     mock.clearAllMocks();

@@ -1,7 +1,8 @@
-import type { Plugin } from 'graphql-yoga';
+import type { GraphQLContext } from '@znight/graphql';
 
-import { Logger } from '@nestjs/common';
-import { type DocumentNode, type GraphQLError, print as graphqlPrint, Kind, visit } from 'graphql';
+import { Hooks, Injectable, type OnStart } from '@znight/core';
+import { getLogger } from '@znight/observability';
+import { type DocumentNode, print as graphqlPrint, Kind, visit } from 'graphql';
 
 const SENSITIVE_FIELDS = new Set([
   'password',
@@ -66,57 +67,39 @@ export function obfuscateSensitiveData(data: unknown): unknown {
   return data;
 }
 
-export function useLoggingPlugin(): Plugin {
-  const logger = new Logger('GraphQLLoggerPlugin');
+/**
+ * One log entry per GraphQL operation, with the redacted query and variables (the previous Yoga
+ * logging plugin).
+ */
+@Injectable()
+export class GraphQLOperationLogger implements OnStart {
+  private readonly logger = getLogger('GraphQLLoggerPlugin');
 
-  return {
-    onExecute({ args }) {
-      const operationName = args.operationName || 'anonymous';
-      const operation = args.document.definitions.find((def: { kind: string }) => def.kind === 'OperationDefinition');
+  constructor(private readonly hooks: Hooks) {}
 
-      if (!operation || operation.kind !== 'OperationDefinition') {
+  onStart(): void {
+    this.hooks.on('graphql:operation', event => {
+      // Like the previous Yoga plugin: only executed operations (not parse or validation failures)
+      if (event.outcome === 'rejected' || event.operationType === undefined) return;
+
+      const context = event.context as GraphQLContext | undefined;
+      const document = context?.document;
+      const logArgs = {
+        query: document ? obfuscateQuery(document) : undefined,
+        operationType: event.operationType,
+        operationName: event.operationName ?? 'anonymous',
+        variables: obfuscateSensitiveData(context?.variables),
+      };
+
+      if (event.errors && event.errors.length > 0) {
+        this.logger.error(`GraphQL ${event.operationType} errors`, {
+          ...logArgs,
+          errors: event.errors.map(error => ({ code: error.code, message: error.message })),
+        });
         return;
       }
 
-      const operationType = operation.operation;
-      const query = obfuscateQuery(args.document);
-      const variables = obfuscateSensitiveData(args.variableValues);
-
-      const logArgs = {
-        query,
-        operationType,
-        operationName,
-        variables,
-      };
-
-      logger.log(`Executing GraphQL ${operationType}`, logArgs);
-
-      return {
-        onExecuteDone({ result }) {
-          if ('errors' in result && result.errors) {
-            logger.error(`GraphQL ${operationType} errors`, {
-              ...logArgs,
-              errors: result.errors.map((e: GraphQLError) => ({
-                code: e.extensions?.code,
-                message: e.message,
-              })),
-            });
-          }
-        },
-      };
-    },
-  };
+      this.logger.info(`Executed GraphQL ${event.operationType}`, logArgs);
+    });
+  }
 }
-
-export const useBlockGetRequests = (): Plugin => ({
-  onRequest({ endResponse, request }) {
-    if (request.method === 'GET') {
-      endResponse(
-        new Response('Only POST requests are allowed', {
-          headers: { 'Content-Type': 'text/plain' },
-          status: 405,
-        }),
-      );
-    }
-  },
-});

@@ -1,39 +1,26 @@
-import type { ExecutionContext } from '@nestjs/common';
-import type { ICurrentUser } from '@wishlist/common';
-import type { GraphQLContext } from '../../../core/graphql/graphql.context';
+import type { ICurrentUser, UserId } from '@wishlist/common';
 
-import { createParamDecorator } from '@nestjs/common';
-import { GqlExecutionContext } from '@nestjs/graphql';
+import { createParamDecorator } from '@znight/core';
+
+import { requireCurrentUser } from '../auth.context';
 
 /**
- * REST decorator to get the current authenticated user
+ * The authenticated user, on REST routes and GraphQL fields.
  * @example
  * ```typescript
- * @Get('/me')
- * getMe(@CurrentUser() user: ICurrentUser) {
+ * @Query()
+ * me(@CurrentUser() user: ICurrentUser) {
  *   return "hello " + user.email
  * }
  * ```
  */
-export const CurrentUser = createParamDecorator((data: keyof ICurrentUser, ctx: ExecutionContext) => {
-  const request = ctx.switchToHttp().getRequest();
-  const user = request.user as ICurrentUser;
-  return data ? user?.[data] : user;
+export const CurrentUser = createParamDecorator<ICurrentUser>({
+  http: ctx => requireCurrentUser(ctx),
+  graphql: ctx => requireCurrentUser(ctx.http),
 });
 
-/**
- * GraphQL decorator to get the current authenticated user
- * @example
- * ```typescript
- * @Query(() => String)
- * me(@GqlCurrentUser() user: ICurrentUser) {
- *   return "hello " + user.email
- * }
- * ```
- */
-export const GqlCurrentUser = createParamDecorator((data: keyof ICurrentUser, context: ExecutionContext) => {
-  const ctx = GqlExecutionContext.create(context);
-  const gqlContext = ctx.getContext() as GraphQLContext;
-  const user = gqlContext.user as ICurrentUser;
-  return data ? user?.[data] : user;
+/** The id of the authenticated user. */
+export const CurrentUserId = createParamDecorator<UserId>({
+  http: ctx => requireCurrentUser(ctx).id,
+  graphql: ctx => requireCurrentUser(ctx.http).id,
 });

@@ -1,10 +1,10 @@
-import type { EventBus } from '@nestjs/cqrs';
 import type { TransactionManager } from '../../../core/database/transaction-manager';
 import type { EventRepository } from '../../../event/domain/repository/event.repository';
 import type { SecretSantaRepository } from '../../domain/repository/secret-santa.repository';
 import type { SecretSantaUserRepository } from '../../domain/repository/secret-santa-user.repository';
 
-import { ForbiddenException, Logger } from '@nestjs/common';
+import { EventPublisher } from '@znight/events';
+import { ForbiddenException } from '@znight/http';
 
 import { EventBuilder } from '../../../../test-utils/builders/event.builder';
 import { SecretSantaBuilder } from '../../../../test-utils/builders/secret-santa.builder';
@@ -16,24 +16,20 @@ import { User } from '../../../user/domain/model/user.model';
 import { SecretSantaCancelledEvent } from '../../domain/event/secret-santa-cancelled.event';
 import { SecretSanta } from '../../domain/model/secret-santa.model';
 import { CancelSecretSantaUseCase } from './cancel-secret-santa.use-case';
-import { beforeAll, beforeEach, describe, expect, it, mock } from 'bun:test';
+import { beforeEach, describe, expect, it, mock } from 'bun:test';
 
 describe('CancelSecretSantaUseCase', () => {
   const secretSantaRepository = createMock<SecretSantaRepository>();
   const secretSantaUserRepository = createMock<SecretSantaUserRepository>();
   const eventRepository = createMock<EventRepository>();
   const transactionManager = createMock<TransactionManager>();
-  const eventBus = createMock<EventBus>();
+  const eventBus = createMock<EventPublisher>();
 
   let useCase: CancelSecretSantaUseCase;
   let creator: User;
   let participant: User;
   let event: Event;
   let santa: SecretSanta;
-
-  beforeAll(() => {
-    Logger.overrideLogger(false);
-  });
 
   beforeEach(() => {
     mock.clearAllMocks();

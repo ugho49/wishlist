@@ -1,15 +1,16 @@
 import type { MailPayload, MailProvider } from './mail.type';
 
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@znight/core';
 import { Job } from 'bullmq';
 
-import { QueueProcessor } from '../queue/queue.type';
+import { QueueProcessorBase } from '../queue/queue.type';
 import { QueueName } from '../queue/queues.definitions';
-import { MAIL_PROVIDER } from './mail.constants';
 
 @Injectable()
-export class MailProcessor extends QueueProcessor(QueueName.MAILS) {
-  constructor(@Inject(MAIL_PROVIDER) private readonly mailProvider: MailProvider) {
+export class MailProcessor extends QueueProcessorBase {
+  readonly queueName = QueueName.MAILS;
+
+  constructor(private readonly mailProvider: MailProvider) {
     super({ concurrency: 5 });
   }
 

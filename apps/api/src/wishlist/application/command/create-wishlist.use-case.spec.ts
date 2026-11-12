@@ -4,8 +4,8 @@ import type { EventRepository } from '../../../event/domain/repository/event.rep
 import type { UserRepository } from '../../../user/domain/repository/user.repository';
 import type { WishlistRepository } from '../../domain/wishlist.repository';
 
-import { Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { uuid } from '@wishlist/common';
+import { NotFoundException, UnauthorizedException } from '@znight/http';
 
 import { EventBuilder } from '../../../../test-utils/builders/event.builder';
 import { toCurrentUser, UserBuilder } from '../../../../test-utils/builders/user.builder';
@@ -13,7 +13,7 @@ import { createMock } from '../../../../test-utils/mocks';
 import { Event } from '../../../event/domain/model/event.model';
 import { User } from '../../../user/domain/model/user.model';
 import { CreateWishlistUseCase } from './create-wishlist.use-case';
-import { beforeAll, beforeEach, describe, expect, it, mock } from 'bun:test';
+import { beforeEach, describe, expect, it, mock } from 'bun:test';
 
 describe('CreateWishlistUseCase', () => {
   const wishlistRepository = createMock<WishlistRepository>();
@@ -25,10 +25,6 @@ describe('CreateWishlistUseCase', () => {
   let owner: User;
   let event: Event;
   let wishlistId: WishlistId;
-
-  beforeAll(() => {
-    Logger.overrideLogger(false);
-  });
 
   beforeEach(() => {
     mock.clearAllMocks();
@@ -99,7 +95,7 @@ describe('CreateWishlistUseCase', () => {
   });
 
   it('should upload the logo and persist its url when an image file is provided', async () => {
-    const imageFile = { originalname: 'logo.png' } as Express.Multer.File;
+    const imageFile = new File(['logo'], 'logo.png', { type: 'image/png' });
 
     const wishlist = await useCase.execute({
       currentUser: toCurrentUser(owner),

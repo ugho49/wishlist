@@ -1,16 +1,15 @@
-import type { ConfigType } from '@nestjs/config';
 import type { UserRepository } from '../../domain/repository/user.repository';
 import type { UserEmailChangeVerificationRepository } from '../../domain/repository/user-email-change-verification.repository';
 
-import { BadRequestException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
-import { EventBus } from '@nestjs/cqrs';
 import { type ICurrentUser } from '@wishlist/common';
+import { Injectable } from '@znight/core';
+import { EventPublisher } from '@znight/events';
+import { BadRequestException, UnauthorizedException } from '@znight/http';
 import { DateTime } from 'luxon';
 
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { EmailChangeVerificationCreatedEvent } from '../../domain/event/email-change-verification-created.event';
 import { UserEmailChangeVerification } from '../../domain/model/user-email-change-verification.model';
-import userConfig from '../../infrastructure/user.config';
+import { UserConfig } from '../../infrastructure/user.config';
 
 export type CreateEmailChangeVerificationInput = {
   currentUser: ICurrentUser;
@@ -20,13 +19,10 @@ export type CreateEmailChangeVerificationInput = {
 @Injectable()
 export class CreateEmailChangeVerificationUseCase {
   constructor(
-    @Inject(REPOSITORIES.USER)
     private readonly userRepository: UserRepository,
-    @Inject(REPOSITORIES.USER_EMAIL_CHANGE_VERIFICATION)
     private readonly emailChangeVerificationRepository: UserEmailChangeVerificationRepository,
-    @Inject(userConfig.KEY)
-    private readonly config: ConfigType<typeof userConfig>,
-    private readonly eventBus: EventBus,
+    private readonly config: UserConfig,
+    private readonly eventBus: EventPublisher,
   ) {}
 
   async execute(input: CreateEmailChangeVerificationInput): Promise<void> {
@@ -65,7 +61,7 @@ export class CreateEmailChangeVerificationUseCase {
     await this.emailChangeVerificationRepository.save(emailChangeVerification);
 
     // Publish event to send notification emails
-    this.eventBus.publish(
+    await this.eventBus.publish(
       new EmailChangeVerificationCreatedEvent({
         userId: currentUser.id,
         oldEmail: currentUser.email,

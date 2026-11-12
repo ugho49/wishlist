@@ -4,7 +4,7 @@ Guidance for Claude Code when working in this repository.
 
 Nested docs (read the one that matches the files you are changing):
 
-- [`apps/api/CLAUDE.md`](apps/api/CLAUDE.md) — NestJS API, GraphQL, use cases, Drizzle, unit and integration tests
+- [`apps/api/CLAUDE.md`](apps/api/CLAUDE.md) — Znight API, GraphQL, use cases, Drizzle, unit and integration tests
 - [`apps/front/CLAUDE.md`](apps/front/CLAUDE.md) — React frontend, MUI, GraphQL documents, uploads
 - [`libs/common/CLAUDE.md`](libs/common/CLAUDE.md) — shared branded IDs and remaining HTTP types
 - [`libs/mail/CLAUDE.md`](libs/mail/CLAUDE.md) — react-email templates
@@ -17,7 +17,7 @@ Nested docs (read the one that matches the files you are changing):
 - `bun serve:all` — All applications concurrently
 - `bun serve:front` — React frontend (port 4200)
 - `bun serve:front:with-codegen` — Frontend + GraphQL codegen in watch mode
-- `bun serve:api` — NestJS API
+- `bun serve:api` — Znight API
 - `bun serve:api:with-codegen` — API + GraphQL codegen in watch mode
 - `bun mail:preview` — Preview email templates
 
@@ -69,7 +69,7 @@ Nx monorepo, **Bun** as runtime and package manager.
 
 | Path           | Role                                                          |
 | -------------- | ------------------------------------------------------------- |
-| `apps/api/`    | NestJS backend (DDD + GraphQL)                                |
+| `apps/api/`    | Znight backend (DDD + GraphQL)                                |
 | `apps/front/`  | React frontend (Vite, MUI, Redux Toolkit)                     |
 | `libs/common/` | Branded IDs, interfaces, leftover HTTP types for REST uploads |
 | `libs/mail/`   | react-email templates consumed by the API                     |

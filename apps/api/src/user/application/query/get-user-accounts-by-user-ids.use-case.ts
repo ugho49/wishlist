@@ -1,9 +1,8 @@
 import type { UserAccountRepository } from '../../domain/repository/user-account.repository';
 
-import { Inject, Injectable } from '@nestjs/common';
 import { type UserId } from '@wishlist/common';
+import { Injectable } from '@znight/core';
 
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { UserAccount } from '../../domain/model/user-account.model';
 
 export type GetUserAccountsByUserIdsInput = {
@@ -12,10 +11,7 @@ export type GetUserAccountsByUserIdsInput = {
 
 @Injectable()
 export class GetUserAccountsByUserIdsUseCase {
-  constructor(
-    @Inject(REPOSITORIES.USER_ACCOUNT)
-    private readonly userAccountRepository: UserAccountRepository,
-  ) {}
+  constructor(private readonly userAccountRepository: UserAccountRepository) {}
 
   async execute(query: GetUserAccountsByUserIdsInput): Promise<Map<UserId, UserAccount[]>> {
     const userAccounts = await this.userAccountRepository.findByUserIds(query.userIds);

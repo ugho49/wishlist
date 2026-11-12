@@ -1,11 +1,11 @@
-import type { Params as PinoParams } from 'pino-nestjs';
+import type { LoggingOptions } from '@znight/observability';
 
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { RequestMethod } from '@nestjs/common';
-import { getClientIp } from '@supercharge/request-ip';
-import { uuid } from '@wishlist/common';
-import { kinds, tags, types } from 'dd-trace/ext';
+import tracer from 'dd-trace';
+
+import { CLIENT_IP_SCOPE_TOKEN, CURRENT_USER_SCOPE_TOKEN } from './auth/infrastructure/auth.context';
+import { QUEUE_JOB_SCOPE_TOKEN, QUEUE_MESSAGE_ID_SCOPE_TOKEN } from './core/queue/queue.context';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = resolve(__filename, '../..');
@@ -14,103 +14,62 @@ export const path = (...paths: string[]) => join(__dirname, ...paths);
 
 const DEFAULT_HEALTHCHECK_PATH = '/health';
 
-export function pinoLoggerConfig(serviceName: string): PinoParams {
-  const excludePaths = [DEFAULT_HEALTHCHECK_PATH];
-  const pretty = process.env.NODE_ENV !== 'production';
+/**
+ * Fields computed for every entry: the API version and, inside a dd-trace span, the Datadog trace
+ * correlation (`dd.trace_id`, `dd.span_id`...). dd-trace's own pino hook patches `require('pino')`,
+ * which never sees the ESM import of @znight/observability under Bun, so the ids are injected here.
+ */
+export function logMixin(): Record<string, unknown> {
+  const record: Record<string, unknown> = { version: process.env.API_VERSION };
+  const span = tracer.scope().active();
+  if (span) {
+    tracer.inject(span.context(), 'log', record);
+  }
+  return record;
+}
+
+/**
+ * Datadog's error tracking reads `error`: the framework's entries (5xx requests, failed messages)
+ * put the error under `err`, renamed here (the `error` serializer still applies after this formatter).
+ */
+export function renameErrKey(entry: Record<string, unknown>): Record<string, unknown> {
+  if (entry.err === undefined || entry.error !== undefined) {
+    return entry;
+  }
+  const { err, ...rest } = entry;
+  return { ...rest, error: err };
+}
+
+/**
+ * Logs shaped for Datadog, close to the previous pino-http setup: `message` / `error` keys, ISO
+ * `timestamp`, level label, request id, client IP and current user in the request entries, message id
+ * and job in the BullMQ job entries, Datadog trace ids, `/health` not logged. `pretty`: human-readable
+ * output through pino-pretty (outside production), JSON otherwise.
+ */
+export function loggingOptions(options: { pretty: boolean; serviceName: string }): LoggingOptions {
+  const { pretty, serviceName } = options;
 
   return {
-    pinoHttp: {
-      name: serviceName,
-      level: 'info',
-      messageKey: 'message', // For Datadog
-      errorKey: 'error', // For Datadog
-      timestamp: () => `,"timestamp":"${new Date(Date.now()).toISOString()}"`,
-      genReqId: (req, res) => {
-        const existingId = req.id ?? req.headers['x-request-id'];
-        if (existingId) return existingId as string;
-        const id = uuid();
-        res.setHeader('X-Request-Id', id);
-        return id;
-      },
-      autoLogging: {
-        ignore: req => excludePaths.includes(req.url || ''),
-      },
-      transport: pretty
-        ? {
-            target: 'pino-pretty',
-            options: {
-              colorize: true,
-              messageKey: 'message',
-              singleLine: true,
-              ignore: 'pid,hostname,context,context_name,service,req,res',
-            },
-          }
-        : undefined,
-      formatters: {
-        level: (label: string) => ({ level: label }),
-        log: ({ responseTime, ...rest }) => ({
-          duration: responseTime ? Number(responseTime) / 1000 : undefined,
-          ...rest,
-        }),
-      },
-      customAttributeKeys: {
-        err: 'error', // For Datadog's error tracking
-      },
-      customLogLevel: (_message, res, error) => {
-        if (res.statusCode >= 400 && res.statusCode < 500) {
-          return 'warn';
-        }
-        if (res.statusCode >= 500 || error) {
-          return 'error';
-        }
-
-        return 'info';
-      },
-      customSuccessMessage: (req, res) => {
-        const { method, url } = req;
-        const originalUrl = (req as unknown as { originalUrl?: string }).originalUrl;
-        const contextString = `[${method}] [${originalUrl || url}]`;
-        const { statusCode } = res;
-
-        return `${contextString} - [${statusCode}] `;
-      },
-      customErrorMessage: (_req, _res, error) => error?.message,
-      customProps: (req, res) => {
-        // biome-ignore lint/suspicious/noExplicitAny: res is too complex
-        const customProps = (res as any).locals ?? {};
-
-        // Extract IP address (handles proxied requests)
-        const ip = getClientIp(req);
-
-        return {
-          ...customProps,
-          requestId: req.id,
-          ip: ip ?? 'unknown',
-          version: process.env.API_VERSION,
-          // For Datadog's APM (https://docs.datadoghq.com/logs/log_configuration/attributes_naming_convention/)
-          [tags.RESOURCE_NAME]: req.url,
-          [tags.SPAN_TYPE]: types.WEB,
-          [tags.SPAN_KIND]: kinds.SERVER,
-          [tags.HTTP_STATUS_CODE]: res.writableEnded ? res.statusCode : undefined,
-          [tags.HTTP_URL]: req.url,
-          [tags.HTTP_METHOD]: req.method,
-          [tags.HTTP_USERAGENT]: req.headers['user-agent'],
-          'http.version': req.httpVersion,
-          context_name: 'express.request',
-        };
-      },
-      redact: {
-        paths: ['req.headers', 'res.headers'], // Hide headers on Datadog
-        remove: true,
-      },
-      base: {
-        service: serviceName,
-      },
+    level: 'info',
+    name: serviceName,
+    messageKey: 'message', // For Datadog
+    // `timestamp` key in ISO format, for Datadog (set through the raw pino options below)
+    timestamp: false,
+    base: { service: serviceName },
+    pretty,
+    scopeFields: {
+      requestId: '@znight/http#RequestId',
+      currentUser: CURRENT_USER_SCOPE_TOKEN,
+      ip: CLIENT_IP_SCOPE_TOKEN,
+      messageId: QUEUE_MESSAGE_ID_SCOPE_TOKEN,
+      job: QUEUE_JOB_SCOPE_TOKEN,
     },
-    renameContext: 'caller', // For pino-pretty
-    exclude: excludePaths.map(excludePath => ({
-      method: RequestMethod.ALL,
-      path: excludePath,
-    })),
-  } satisfies PinoParams;
+    mixin: logMixin,
+    requests: { ignore: event => event.path === DEFAULT_HEALTHCHECK_PATH },
+    pino: {
+      errorKey: 'error', // For Datadog's error tracking
+      timestamp: () => `,"timestamp":"${new Date().toISOString()}"`,
+      formatters: { level: (label: string) => ({ level: label }), log: renameErrKey },
+    },
+  };
 }

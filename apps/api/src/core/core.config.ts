@@ -1,13 +1,16 @@
-import { registerAs } from '@nestjs/config';
-import { mapConfigOrThrow } from '@wishlist/common';
-import { z } from 'zod';
+import { Config, Env } from '@znight/config';
 
-const schema = z.object({
-  API_VERSION: z.string('Missing API_VERSION environment variable'),
-});
+/** Global settings of the API. */
+@Config()
+export class CoreConfig {
+  @Env('PORT') port = 3000;
+  @Env('API_VERSION') apiVersion!: string;
+  @Env('FRONTEND_BASE_URL') frontendBaseUrl!: string;
+  /** Runtime environment: `development` locally, `test` in the integration tests; unset, the API runs as in production. */
+  @Env('NODE_ENV') environment = 'production';
 
-export default registerAs('core', () =>
-  mapConfigOrThrow(schema, process.env, data => ({
-    apiVersion: data.API_VERSION,
-  })),
-);
+  /** Production (or `NODE_ENV` unset): JSON logs, no GraphiQL. */
+  get isProduction(): boolean {
+    return this.environment === 'production';
+  }
+}

@@ -1,14 +1,15 @@
-import type { INestApplication } from '@nestjs/common';
 import type { SQL } from 'bun';
 import type { TableAssertSortOptions } from './table-assert';
 
-import { Logger } from '@nestjs/common';
 import { sleep } from '@wishlist/common';
+import { HttpPlugin } from '@znight/http';
+import { getLogger } from '@znight/observability';
+import { TestApp } from '@znight/testing';
 import axios, { type AxiosInstance } from 'axios';
 import request from 'supertest';
 
-import { createApp } from '../src/bootstrap';
-import { DatabaseService } from '../src/core/database/database.service';
+import { metadata } from '../src/.znight/container.generated';
+import { createPlugins } from '../src/app';
 import { Fixtures } from './fixtures';
 import { MailsAssert } from './mail-assert';
 import { TableAssert } from './table-assert';
@@ -19,20 +20,24 @@ export type RequestApp = InstanceType<(typeof request)['agent']>;
 export type SignedAs = 'BASE_USER' | 'ADMIN_USER' | 'SUPERADMIN_USER';
 
 export function useTestApp() {
-  let app: INestApplication;
+  let app: TestApp;
+  let baseUrl: string;
   let sql: SQL;
-  let logger: Logger;
+  let logger: ReturnType<typeof getLogger>;
   let fixtures: Fixtures;
   let needToClearMails = false;
   let http: AxiosInstance;
 
   beforeAll(async () => {
-    app = await createApp();
-    const databaseService = app.get<DatabaseService>(DatabaseService);
-    await app.init();
-    logger = new Logger('UseTestApp');
+    // only: 'all' so that every provider with lifecycle hooks (QueueService) starts like in production
+    app = await TestApp.create({ metadata, plugins: createPlugins({ port: 0, logLevel: 'silent' }), only: 'all' });
+    const address = app.get(HttpPlugin).address;
+    if (!address) throw new Error('The HTTP server is not listening');
+    baseUrl = `http://127.0.0.1:${address.port}`;
+    logger = getLogger('UseTestApp');
 
-    sql = databaseService.sql;
+    // the Postgres pool provided by DatabaseFactory (canonical token of Bun's SQL class)
+    sql = app.get<SQL>('bun#SQL');
     http = axios.create({
       baseURL: `http://localhost:${process.env['DOCKER_MAIL_PORT_1080']}`,
     });
@@ -53,7 +58,7 @@ export function useTestApp() {
   });
 
   async function truncateDatabase(): Promise<void> {
-    logger.log('Truncating database ...');
+    logger.info('Truncating database ...');
 
     const allTables = await sql<{ schemaname: string; tablename: string }[]>`
       SELECT schemaname, tablename FROM pg_catalog.pg_tables WHERE schemaname = 'public'
@@ -64,13 +69,13 @@ export function useTestApp() {
       await sql.unsafe(`TRUNCATE TABLE ${table} CASCADE`);
     }
 
-    logger.log(`Database truncated (${tables.length} tables) ✅`);
+    logger.info(`Database truncated (${tables.length} tables) ✅`);
   }
 
   async function clearMails(): Promise<void> {
     await sleep(100);
     await http.delete('/api/email/all');
-    logger.log('Mails cleared ✅');
+    logger.info('Mails cleared ✅');
   }
 
   return {
@@ -81,7 +86,7 @@ export function useTestApp() {
     },
     getFixtures: () => fixtures,
     getRequest: async (options?: { signedAs?: SignedAs }): Promise<RequestApp> => {
-      const requestAppServer = request.agent(app.getHttpServer());
+      const requestAppServer = request.agent(baseUrl);
       let token = '';
 
       const loginViaGraphql = async (email: string, password: string) => {

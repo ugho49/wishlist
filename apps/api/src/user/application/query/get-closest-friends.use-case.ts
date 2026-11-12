@@ -1,10 +1,9 @@
 import type { User } from '../../domain/model/user.model';
 import type { UserRepository } from '../../domain/repository/user.repository';
 
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { type UserId } from '@wishlist/common';
-
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
+import { Injectable } from '@znight/core';
+import { BadRequestException } from '@znight/http';
 
 const MAX_LIMIT = 50;
 
@@ -19,10 +18,7 @@ export type GetClosestFriendsOutput = {
 
 @Injectable()
 export class GetClosestFriendsUseCase {
-  constructor(
-    @Inject(REPOSITORIES.USER)
-    private readonly userRepository: UserRepository,
-  ) {}
+  constructor(private readonly userRepository: UserRepository) {}
 
   async execute(query: GetClosestFriendsInput): Promise<GetClosestFriendsOutput> {
     const { userId, limit } = query;

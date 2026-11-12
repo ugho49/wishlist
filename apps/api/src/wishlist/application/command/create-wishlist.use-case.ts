@@ -1,12 +1,13 @@
 import type { WishlistRepository } from '../../domain/wishlist.repository';
 
-import { Inject, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { type EventId, type ICurrentUser } from '@wishlist/common';
+import { Injectable } from '@znight/core';
+import { NotFoundException, UnauthorizedException } from '@znight/http';
+import { getLogger } from '@znight/observability';
 import { uniq } from 'lodash';
 
 import { BucketService } from '../../../core/bucket/bucket.service';
 import { type EventRepository } from '../../../event/domain/repository/event.repository';
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { type UserRepository } from '../../../user/domain/repository/user.repository';
 import { Wishlist } from '../../domain/wishlist.model';
 
@@ -17,23 +18,23 @@ export type CreateWishlistInput = {
     description?: string;
     eventIds: EventId[];
     hideItems?: boolean;
-    imageFile?: Express.Multer.File;
+    imageFile?: File;
   };
 };
 
 @Injectable()
 export class CreateWishlistUseCase {
-  private readonly logger = new Logger(CreateWishlistUseCase.name);
+  private readonly logger = getLogger(CreateWishlistUseCase.name);
 
   constructor(
-    @Inject(REPOSITORIES.WISHLIST) private readonly wishlistRepository: WishlistRepository,
-    @Inject(REPOSITORIES.EVENT) private readonly eventRepository: EventRepository,
-    @Inject(REPOSITORIES.USER) private readonly userRepository: UserRepository,
+    private readonly wishlistRepository: WishlistRepository,
+    private readonly eventRepository: EventRepository,
+    private readonly userRepository: UserRepository,
     private readonly bucketService: BucketService,
   ) {}
 
   async execute(command: CreateWishlistInput): Promise<Wishlist> {
-    this.logger.log('Create wishlist request received', { command });
+    this.logger.info('Create wishlist request received', { command });
 
     const eventIds = uniq(command.newWishlist.eventIds);
     const events = await this.eventRepository.findByIds(eventIds);
@@ -69,7 +70,7 @@ export class CreateWishlistUseCase {
       wishlist = wishlist.updateLogoUrl(logoUrl);
     }
 
-    this.logger.log('Saving wishlist...', { wishlistId: wishlist.id });
+    this.logger.info('Saving wishlist...', { wishlistId: wishlist.id });
     await this.wishlistRepository.save(wishlist);
 
     return wishlist;

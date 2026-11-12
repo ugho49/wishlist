@@ -1,4 +1,5 @@
 {
   "name": "@wishlist/api",
-  "private": true
+  "private": true,
+  "type": "module"
 }

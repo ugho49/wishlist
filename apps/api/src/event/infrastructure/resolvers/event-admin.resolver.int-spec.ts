@@ -7,7 +7,7 @@ import { DateTime } from 'luxon';
 /**
  * Integration tests for the GraphQL EventAdminResolver (@IsAdmin()).
  *
- * GraphQL always returns HTTP 200; thrown Nest exceptions map to typed
+ * GraphQL always returns HTTP 200; thrown exceptions map to typed
  * rejections placed at data.<field>. Non-admin users are rejected by the admin
  * guard (ForbiddenRejection).
  */

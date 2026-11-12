@@ -1,7 +1,7 @@
 import type { BucketService } from '../../../core/bucket/bucket.service';
 import type { WishlistRepository } from '../../domain/wishlist.repository';
 
-import { Logger, UnauthorizedException } from '@nestjs/common';
+import { UnauthorizedException } from '@znight/http';
 
 import { toCurrentUser, UserBuilder } from '../../../../test-utils/builders/user.builder';
 import { WishlistBuilder } from '../../../../test-utils/builders/wishlist.builder';
@@ -9,7 +9,7 @@ import { createMock } from '../../../../test-utils/mocks';
 import { User } from '../../../user/domain/model/user.model';
 import { Wishlist } from '../../domain/wishlist.model';
 import { DeleteWishlistUseCase } from './delete-wishlist.use-case';
-import { beforeAll, beforeEach, describe, expect, it, mock } from 'bun:test';
+import { beforeEach, describe, expect, it, mock } from 'bun:test';
 
 describe('DeleteWishlistUseCase', () => {
   const wishlistRepository = createMock<WishlistRepository>();
@@ -20,10 +20,6 @@ describe('DeleteWishlistUseCase', () => {
   let coOwner: User;
   let stranger: User;
   let wishlist: Wishlist;
-
-  beforeAll(() => {
-    Logger.overrideLogger(false);
-  });
 
   beforeEach(() => {
     mock.clearAllMocks();

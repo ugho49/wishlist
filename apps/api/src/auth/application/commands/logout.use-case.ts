@@ -1,6 +1,6 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@znight/core';
+import { getLogger } from '@znight/observability';
 
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { type UserSessionRepository } from '../../../user/domain/repository/user-session.repository';
 import { RefreshTokenManager } from '../../infrastructure/util/refresh-token';
 
@@ -10,15 +10,12 @@ export type LogoutInput = {
 
 @Injectable()
 export class LogoutUseCase {
-  private readonly logger = new Logger(LogoutUseCase.name);
+  private readonly logger = getLogger(LogoutUseCase.name);
 
-  constructor(
-    @Inject(REPOSITORIES.USER_SESSION)
-    private readonly sessionRepository: UserSessionRepository,
-  ) {}
+  constructor(private readonly sessionRepository: UserSessionRepository) {}
 
   async execute(input: LogoutInput): Promise<void> {
-    this.logger.log('Logout request received');
+    this.logger.info('Logout request received');
 
     const session = await this.sessionRepository.findByTokenHash(RefreshTokenManager.hash(input.refreshToken));
 
@@ -27,6 +24,6 @@ export class LogoutUseCase {
     }
 
     await this.sessionRepository.save(session.revoke());
-    this.logger.log('Session revoked', { sessionId: session.id });
+    this.logger.info('Session revoked', { sessionId: session.id });
   }
 }

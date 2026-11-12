@@ -1,8 +1,9 @@
 import type { ICurrentUser, UserSessionId } from '@wishlist/common';
 
-import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@znight/core';
+import { NotFoundException } from '@znight/http';
+import { getLogger } from '@znight/observability';
 
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { type UserSessionRepository } from '../../domain/repository/user-session.repository';
 
 export type RevokeUserSessionInput = {
@@ -12,15 +13,12 @@ export type RevokeUserSessionInput = {
 
 @Injectable()
 export class RevokeUserSessionUseCase {
-  private readonly logger = new Logger(RevokeUserSessionUseCase.name);
+  private readonly logger = getLogger(RevokeUserSessionUseCase.name);
 
-  constructor(
-    @Inject(REPOSITORIES.USER_SESSION)
-    private readonly sessionRepository: UserSessionRepository,
-  ) {}
+  constructor(private readonly sessionRepository: UserSessionRepository) {}
 
   async execute(input: RevokeUserSessionInput): Promise<void> {
-    this.logger.log('Revoke session request received', { sessionId: input.sessionId });
+    this.logger.info('Revoke session request received', { sessionId: input.sessionId });
 
     const session = await this.sessionRepository.findById(input.sessionId);
 
@@ -33,6 +31,6 @@ export class RevokeUserSessionUseCase {
     }
 
     await this.sessionRepository.save(session.revoke());
-    this.logger.log('Session revoked', { sessionId: session.id });
+    this.logger.info('Session revoked', { sessionId: session.id });
   }
 }

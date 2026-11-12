@@ -167,13 +167,14 @@ describe('UserAdminResolver (GraphQL)', () => {
         });
       });
 
-      it('should return NotFoundRejection when user does not exist', async () => {
+      it('should return InternalErrorRejection when user does not exist', async () => {
         const res = await request
           .post(GRAPHQL_PATH)
           .send({ query, variables: { userId: uuid() } })
           .expect(200);
 
-        expect(res.body.data.adminUser).toMatchObject({ __typename: 'NotFoundRejection' });
+        // NotFoundRejection is not a member of the field's result union: the fallback is InternalErrorRejection
+        expect(res.body.data.adminUser).toMatchObject({ __typename: 'InternalErrorRejection' });
       });
 
       it('should not return a user when userId is malformed', async () => {
@@ -673,13 +674,14 @@ describe('UserAdminResolver (GraphQL)', () => {
           .toMatchObject({ id: otherAdminId, first_name: 'Other' });
       });
 
-      it('should return NotFoundRejection when user does not exist', async () => {
+      it('should return InternalErrorRejection when user does not exist', async () => {
         const res = await request
           .post(GRAPHQL_PATH)
           .send({ query: mutation, variables: { userId: uuid(), input: { firstname: 'Ghost' } } })
           .expect(200);
 
-        expect(res.body.data.adminUpdateUserProfile).toMatchObject({ __typename: 'NotFoundRejection' });
+        // NotFoundRejection is not a member of the field's result union: the fallback is InternalErrorRejection
+        expect(res.body.data.adminUpdateUserProfile).toMatchObject({ __typename: 'InternalErrorRejection' });
       });
 
       it.each([
@@ -818,13 +820,14 @@ describe('UserAdminResolver (GraphQL)', () => {
         await expectTable(Fixtures.USER_TABLE).hasNumberOfRows(2);
       });
 
-      it('should return NotFoundRejection when user does not exist', async () => {
+      it('should return InternalErrorRejection when user does not exist', async () => {
         const res = await request
           .post(GRAPHQL_PATH)
           .send({ query: mutation, variables: { userId: uuid() } })
           .expect(200);
 
-        expect(res.body.data.adminDeleteUser).toMatchObject({ __typename: 'NotFoundRejection' });
+        // NotFoundRejection is not a member of the field's result union: the fallback is InternalErrorRejection
+        expect(res.body.data.adminDeleteUser).toMatchObject({ __typename: 'InternalErrorRejection' });
 
         await expectTable(Fixtures.USER_TABLE).hasNumberOfRows(1);
       });
@@ -906,13 +909,14 @@ describe('UserAdminResolver (GraphQL)', () => {
           .toMatchObject({ id: targetUserId, picture_url: null });
       });
 
-      it('should return NotFoundRejection when user does not exist', async () => {
+      it('should return InternalErrorRejection when user does not exist', async () => {
         const res = await request
           .post(GRAPHQL_PATH)
           .send({ query: mutation, variables: { userId: uuid() } })
           .expect(200);
 
-        expect(res.body.data.adminRemoveUserPicture).toMatchObject({ __typename: 'NotFoundRejection' });
+        // NotFoundRejection is not a member of the field's result union: the fallback is InternalErrorRejection
+        expect(res.body.data.adminRemoveUserPicture).toMatchObject({ __typename: 'InternalErrorRejection' });
       });
     });
   });

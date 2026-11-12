@@ -2,10 +2,10 @@ import type { EventId, ICurrentUser } from '@wishlist/common';
 import type { SecretSanta } from '../../domain/model/secret-santa.model';
 import type { SecretSantaRepository } from '../../domain/repository/secret-santa.repository';
 
-import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@znight/core';
+import { ForbiddenException } from '@znight/http';
 
 import { type EventRepository } from '../../../event/domain/repository/event.repository';
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
 
 export type GetSecretSantaInput = {
   currentUser: ICurrentUser;
@@ -19,8 +19,8 @@ export type GetSecretSantaResult = {
 @Injectable()
 export class GetSecretSantaUseCase {
   constructor(
-    @Inject(REPOSITORIES.SECRET_SANTA) private readonly secretSantaRepository: SecretSantaRepository,
-    @Inject(REPOSITORIES.EVENT) private readonly eventRepository: EventRepository,
+    private readonly secretSantaRepository: SecretSantaRepository,
+    private readonly eventRepository: EventRepository,
   ) {}
 
   async execute(query: GetSecretSantaInput): Promise<GetSecretSantaResult> {

@@ -1,22 +1,16 @@
 import type { UserRepository } from '../../domain/repository/user.repository';
 
-import { Logger } from '@nestjs/common';
-
 import { UserBuilder } from '../../../../test-utils/builders/user.builder';
 import { createMock } from '../../../../test-utils/mocks';
 import { User } from '../../domain/model/user.model';
 import { UpdateUserUseCase } from './update-user.use-case';
-import { beforeAll, beforeEach, describe, expect, it, mock } from 'bun:test';
+import { beforeEach, describe, expect, it, mock } from 'bun:test';
 
 describe('UpdateUserUseCase', () => {
   const userRepository = createMock<UserRepository>();
 
   let useCase: UpdateUserUseCase;
   let user: User;
-
-  beforeAll(() => {
-    Logger.overrideLogger(false);
-  });
 
   beforeEach(() => {
     mock.clearAllMocks();

@@ -1,14 +1,14 @@
 import type { ItemDigestReceiptRepository } from '../../domain/item-digest-receipt.repository';
 import type { NewItemNotificationRow, WishlistItemRepository } from '../../domain/wishlist-item.repository';
 
-import { Inject, Injectable, Logger } from '@nestjs/common';
 import { type EventId, type UserId, type WishlistId } from '@wishlist/common';
+import { Injectable } from '@znight/core';
+import { getLogger } from '@znight/observability';
 import { DateTime } from 'luxon';
 
 import { FrontendRoutesService } from '../../../core/frontend-routes/frontend-routes.service';
 import { MailService } from '../../../core/mail/mail.service';
 import { MailTemplate } from '../../../core/mail/mail.type';
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
 
 const DIGEST_TIME_ZONE = 'Europe/Paris';
 
@@ -28,11 +28,11 @@ type RecipientDigest = {
 
 @Injectable()
 export class NotifyNewItemsUseCase {
-  private readonly logger = new Logger(NotifyNewItemsUseCase.name);
+  private readonly logger = getLogger(NotifyNewItemsUseCase.name);
 
   constructor(
-    @Inject(REPOSITORIES.WISHLIST_ITEM) private readonly itemRepository: WishlistItemRepository,
-    @Inject(REPOSITORIES.ITEM_DIGEST_RECEIPT) private readonly receiptRepository: ItemDigestReceiptRepository,
+    private readonly itemRepository: WishlistItemRepository,
+    private readonly receiptRepository: ItemDigestReceiptRepository,
     private readonly mailService: MailService,
     private readonly frontendRoutes: FrontendRoutesService,
   ) {}
@@ -47,23 +47,23 @@ export class NotifyNewItemsUseCase {
         return;
       }
 
-      this.logger.log(`Fetching new items to send daily notification since "${since.toISOString()}" ...`);
+      this.logger.info(`Fetching new items to send daily notification since "${since.toISOString()}" ...`);
 
       const rows = await this.itemRepository.findNewItemNotifications(since);
       const digests = this.groupByRecipient(rows);
 
       if (digests.length === 0) {
-        this.logger.log('No new items to send daily notification');
+        this.logger.info('No new items to send daily notification');
         return;
       }
 
-      this.logger.log(`Found new items for ${digests.length} recipient(s) to send daily notification`);
+      this.logger.info(`Found new items for ${digests.length} recipient(s) to send daily notification`);
 
       for (const digest of digests) {
         await this.notify(digest, digestDate);
       }
     } catch (error) {
-      this.logger.error('Fail to send new item notification', error);
+      this.logger.error('Fail to send new item notification', { error: error });
     }
   }
 
@@ -71,19 +71,19 @@ export class NotifyNewItemsUseCase {
     const claimed = await this.receiptRepository.claim({ userId: digest.userId, digestDate });
 
     if (!claimed) {
-      this.logger.log(`New items digest already sent to user ${digest.userId} on ${digestDate}`);
+      this.logger.info(`New items digest already sent to user ${digest.userId} on ${digestDate}`);
       return;
     }
 
     try {
       await this.sendNotifyEmail(digest, digestDate);
-      this.logger.log(`New items digest queued for user ${digest.userId}`);
+      this.logger.info(`New items digest queued for user ${digest.userId}`);
     } catch (error) {
-      this.logger.error(`Fail to queue new items digest for user ${digest.userId}`, error);
+      this.logger.error(`Fail to queue new items digest for user ${digest.userId}`, { error: error });
       try {
         await this.receiptRepository.release({ userId: digest.userId, digestDate });
       } catch (releaseError) {
-        this.logger.error(`Fail to release new items digest claim for user ${digest.userId}`, releaseError);
+        this.logger.error(`Fail to release new items digest claim for user ${digest.userId}`, { error: releaseError });
       }
     }
   }

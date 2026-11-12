@@ -1,8 +1,8 @@
-import type { EventBus } from '@nestjs/cqrs';
 import type { UserRepository } from '../../domain/repository/user.repository';
 import type { UserEmailChangeVerificationRepository } from '../../domain/repository/user-email-change-verification.repository';
 
-import { Logger, UnauthorizedException } from '@nestjs/common';
+import { EventPublisher } from '@znight/events';
+import { UnauthorizedException } from '@znight/http';
 
 import { UserBuilder } from '../../../../test-utils/builders/user.builder';
 import { UserEmailChangeVerificationBuilder } from '../../../../test-utils/builders/user-email-change-verification.builder';
@@ -12,21 +12,17 @@ import { EmailChangedEvent } from '../../domain/event/email-changed.event';
 import { User } from '../../domain/model/user.model';
 import { UserEmailChangeVerification } from '../../domain/model/user-email-change-verification.model';
 import { ConfirmEmailChangeUseCase } from './confirm-email-change.use-case';
-import { beforeAll, beforeEach, describe, expect, it, mock } from 'bun:test';
+import { beforeEach, describe, expect, it, mock } from 'bun:test';
 
 describe('ConfirmEmailChangeUseCase', () => {
   const userRepository = createMock<UserRepository>();
   const emailChangeVerificationRepository = createMock<UserEmailChangeVerificationRepository>();
   const transactionManager = createMock<TransactionManager>();
-  const eventBus = createMock<EventBus>();
+  const eventBus = createMock<EventPublisher>();
 
   let useCase: ConfirmEmailChangeUseCase;
   let user: User;
   let verification: UserEmailChangeVerification;
-
-  beforeAll(() => {
-    Logger.overrideLogger(false);
-  });
 
   beforeEach(() => {
     mock.clearAllMocks();

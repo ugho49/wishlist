@@ -1,11 +1,13 @@
 import type * as drizzleSchema from '../../../drizzle/schema';
+import type { DrizzleDatabase } from '../../core/database/database.factory';
 import type { DrizzleTransaction } from '../../core/database/transaction-manager';
 
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { schema } from '@wishlist/api-drizzle';
 import { type EventId, type SecretSantaId, type UserId, uuid } from '@wishlist/common';
+import { Injectable } from '@znight/core';
+import { NotFoundException } from '@znight/http';
 import { and, count, desc, eq, exists, inArray, or, type SQL } from 'drizzle-orm';
 
-import { DatabaseService } from '../../core/database/database.service';
 import { AttendeeRole } from '../../event/domain/attendee-role.enum';
 import { SecretSanta } from '../../secret-santa/domain/model/secret-santa.model';
 import { type SecretSantaRepository } from '../../secret-santa/domain/repository/secret-santa.repository';
@@ -14,15 +16,14 @@ import { PostgresSecretSantaUserRepository } from './postgres-secret-santa-user.
 
 @Injectable()
 export class PostgresSecretSantaRepository implements SecretSantaRepository {
-  constructor(private readonly databaseService: DatabaseService) {}
+  constructor(private readonly db: DrizzleDatabase) {}
 
   newId(): SecretSantaId {
     return uuid() as SecretSantaId;
   }
 
   async save(secretSanta: SecretSanta, tx?: DrizzleTransaction): Promise<void> {
-    const { schema, db } = this.databaseService;
-    const client = tx || db;
+    const client = tx || this.db;
 
     await client
       .insert(schema.secretSanta)
@@ -47,9 +48,7 @@ export class PostgresSecretSantaRepository implements SecretSantaRepository {
   }
 
   async existsForEvent(eventId: EventId): Promise<boolean> {
-    const { schema, db } = this.databaseService;
-
-    const result = await db.query.secretSanta.findFirst({
+    const result = await this.db.query.secretSanta.findFirst({
       columns: { id: true },
       where: eq(schema.secretSanta.eventId, eventId),
     });
@@ -58,9 +57,7 @@ export class PostgresSecretSantaRepository implements SecretSantaRepository {
   }
 
   async findById(id: SecretSantaId): Promise<SecretSanta | undefined> {
-    const { schema, db } = this.databaseService;
-
-    const secretSanta = await db.query.secretSanta.findFirst({
+    const secretSanta = await this.db.query.secretSanta.findFirst({
       where: eq(schema.secretSanta.id, id),
       with: { secretSantaUsers: true },
     });
@@ -81,9 +78,7 @@ export class PostgresSecretSantaRepository implements SecretSantaRepository {
   }
 
   async findForEvent(param: { eventId: EventId }): Promise<SecretSanta | undefined> {
-    const { schema, db } = this.databaseService;
-
-    const secretSanta = await db.query.secretSanta.findFirst({
+    const secretSanta = await this.db.query.secretSanta.findFirst({
       where: eq(schema.secretSanta.eventId, param.eventId),
       with: { secretSantaUsers: true },
     });
@@ -96,8 +91,7 @@ export class PostgresSecretSantaRepository implements SecretSantaRepository {
   async findByEventIds(eventIds: EventId[]): Promise<SecretSanta[]> {
     if (eventIds.length === 0) return [];
 
-    const { schema, db } = this.databaseService;
-    const secretSantas = await db.query.secretSanta.findMany({
+    const secretSantas = await this.db.query.secretSanta.findMany({
       where: inArray(schema.secretSanta.eventId, eventIds),
       with: { secretSantaUsers: true },
     });
@@ -109,16 +103,15 @@ export class PostgresSecretSantaRepository implements SecretSantaRepository {
     userId: UserId;
     pagination: { take: number; skip: number };
   }): Promise<{ secretSantas: SecretSanta[]; totalCount: number }> {
-    const { schema, db } = this.databaseService;
     const visibleToUser = this.visibleToUserCondition(params.userId);
 
-    const totalCountResult = await db.select({ count: count() }).from(schema.secretSanta).where(visibleToUser);
+    const totalCountResult = await this.db.select({ count: count() }).from(schema.secretSanta).where(visibleToUser);
 
     const totalCount = totalCountResult[0]?.count ?? 0;
 
     if (totalCount === 0) return { secretSantas: [], totalCount };
 
-    const orderedIds = await db
+    const orderedIds = await this.db
       .select({ id: schema.secretSanta.id })
       .from(schema.secretSanta)
       .innerJoin(schema.event, eq(schema.event.id, schema.secretSanta.eventId))
@@ -127,7 +120,7 @@ export class PostgresSecretSantaRepository implements SecretSantaRepository {
       .limit(params.pagination.take)
       .offset(params.pagination.skip);
 
-    const rows = await db.query.secretSanta.findMany({
+    const rows = await this.db.query.secretSanta.findMany({
       where: inArray(
         schema.secretSanta.id,
         orderedIds.map(row => row.id),
@@ -145,12 +138,10 @@ export class PostgresSecretSantaRepository implements SecretSantaRepository {
   }
 
   private visibleToUserCondition(userId: UserId): SQL | undefined {
-    const { schema, db } = this.databaseService;
-
     const isStartedParticipant = and(
       eq(schema.secretSanta.status, SecretSantaStatus.STARTED),
       exists(
-        db
+        this.db
           .select({ id: schema.secretSantaUser.id })
           .from(schema.secretSantaUser)
           .innerJoin(schema.eventAttendee, eq(schema.eventAttendee.id, schema.secretSantaUser.attendeeId))
@@ -166,7 +157,7 @@ export class PostgresSecretSantaRepository implements SecretSantaRepository {
     const isDraftOrganizer = and(
       eq(schema.secretSanta.status, SecretSantaStatus.CREATED),
       exists(
-        db
+        this.db
           .select({ id: schema.eventAttendee.id })
           .from(schema.eventAttendee)
           .where(
@@ -183,8 +174,7 @@ export class PostgresSecretSantaRepository implements SecretSantaRepository {
   }
 
   async delete(id: SecretSantaId, tx?: DrizzleTransaction): Promise<void> {
-    const { schema, db } = this.databaseService;
-    const client = tx || db;
+    const client = tx || this.db;
 
     await client.delete(schema.secretSanta).where(eq(schema.secretSanta.id, id));
   }

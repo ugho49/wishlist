@@ -1,14 +1,12 @@
 import type { ICurrentUser } from '@wishlist/common';
 
-import { NotFoundException } from '@nestjs/common';
-import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { createPagedResponse, type UserId, type UserSessionId } from '@wishlist/common';
+import { Args, Loader, Mutation, Query, Resolver } from '@znight/graphql';
+import { NotFoundException } from '@znight/http';
 
 import { IsAdmin } from '../../../auth/infrastructure/decorators/admin.decorator';
-import { GqlCurrentUser } from '../../../auth/infrastructure/decorators/user.decorator';
+import { CurrentUser } from '../../../auth/infrastructure/decorators/user.decorator';
 import { DEFAULT_RESULT_NUMBER } from '../../../core/common/pagination';
-import { type GraphQLContext } from '../../../core/graphql/graphql.context';
-import { ZodPipe } from '../../../core/graphql/zod-pipe';
 import {
   type AdminDeleteUserResult,
   type AdminGetAllUsersPaginationFilters,
@@ -30,6 +28,7 @@ import { SetUserAdminUseCase } from '../../application/command/set-user-admin.us
 import { UpdateUserFullUseCase } from '../../application/command/update-user-full.use-case';
 import { GetAdminUsersStatsUseCase } from '../../application/query/get-admin-users-stats.use-case';
 import { GetUsersPaginatedUseCase } from '../../application/query/get-users-paginated.use-case';
+import { UsersFullById } from '../user.dataloader';
 import { userMapper } from '../user.mapper';
 import { UserIdSchema, UserSessionIdSchema } from '../user.schema';
 import {
@@ -54,10 +53,10 @@ export class UserAdminResolver {
 
   @Query()
   async adminUser(
-    @Args('userId', new ZodPipe(UserIdSchema)) userId: UserId,
-    @Context() ctx: GraphQLContext,
+    @Args('userId', UserIdSchema) userId: UserId,
+    @Loader() usersFullLoader: Loader<UsersFullById>,
   ): Promise<AdminGetUserByIdResult> {
-    const result = await ctx.loaders.userFull.load(userId);
+    const result = await usersFullLoader.load(userId);
 
     if (!result) {
       throw new NotFoundException(`User with id ${userId} not found`);
@@ -68,7 +67,7 @@ export class UserAdminResolver {
 
   @Query()
   async adminUsers(
-    @Args('input', new ZodPipe(AdminGetAllUsersPaginationFiltersSchema)) input: AdminGetAllUsersPaginationFilters,
+    @Args('input', AdminGetAllUsersPaginationFiltersSchema) input: AdminGetAllUsersPaginationFilters,
   ): Promise<AdminGetAllUsersResult> {
     const pageSize = input.limit ?? DEFAULT_RESULT_NUMBER;
     const pageNumber = input.page ?? 1;
@@ -115,10 +114,10 @@ export class UserAdminResolver {
 
   @Mutation()
   async adminUpdateUserProfile(
-    @Args('userId', new ZodPipe(UserIdSchema)) userId: UserId,
-    @Args('input', new ZodPipe(AdminUpdateUserProfileInputSchema))
+    @Args('userId', UserIdSchema) userId: UserId,
+    @Args('input', AdminUpdateUserProfileInputSchema)
     input: AdminUpdateUserProfileInput,
-    @GqlCurrentUser() currentUser: ICurrentUser,
+    @CurrentUser() currentUser: ICurrentUser,
   ): Promise<AdminUpdateUserProfileResult> {
     await this.updateUserFullUseCase.execute({
       userId,
@@ -138,26 +137,24 @@ export class UserAdminResolver {
 
   @Mutation()
   async adminDeleteUser(
-    @Args('userId', new ZodPipe(UserIdSchema)) userId: UserId,
-    @GqlCurrentUser() currentUser: ICurrentUser,
+    @Args('userId', UserIdSchema) userId: UserId,
+    @CurrentUser() currentUser: ICurrentUser,
   ): Promise<AdminDeleteUserResult> {
     await this.deleteUserUseCase.execute({ userId, currentUser });
     return { __typename: 'VoidOutput', success: true };
   }
 
   @Mutation()
-  async adminRemoveUserPicture(
-    @Args('userId', new ZodPipe(UserIdSchema)) userId: UserId,
-  ): Promise<AdminRemoveUserPictureResult> {
+  async adminRemoveUserPicture(@Args('userId', UserIdSchema) userId: UserId): Promise<AdminRemoveUserPictureResult> {
     await this.removeUserPictureUseCase.execute({ userId });
     return { __typename: 'VoidOutput', success: true };
   }
 
   @Mutation()
   async adminRevokeUserSession(
-    @Args('userId', new ZodPipe(UserIdSchema)) userId: UserId,
-    @Args('sessionId', new ZodPipe(UserSessionIdSchema)) sessionId: UserSessionId,
-    @GqlCurrentUser() currentUser: ICurrentUser,
+    @Args('userId', UserIdSchema) userId: UserId,
+    @Args('sessionId', UserSessionIdSchema) sessionId: UserSessionId,
+    @CurrentUser() currentUser: ICurrentUser,
   ): Promise<AdminRevokeUserSessionResult> {
     await this.adminRevokeUserSessionUseCase.execute({ currentUser, userId, sessionId });
     return { __typename: 'VoidOutput', success: true };
@@ -165,8 +162,8 @@ export class UserAdminResolver {
 
   @Mutation()
   async adminRevokeAllUserSessions(
-    @Args('userId', new ZodPipe(UserIdSchema)) userId: UserId,
-    @GqlCurrentUser() currentUser: ICurrentUser,
+    @Args('userId', UserIdSchema) userId: UserId,
+    @CurrentUser() currentUser: ICurrentUser,
   ): Promise<AdminRevokeAllUserSessionsResult> {
     await this.adminRevokeAllUserSessionsUseCase.execute({ currentUser, userId });
     return { __typename: 'VoidOutput', success: true };
@@ -174,9 +171,9 @@ export class UserAdminResolver {
 
   @Mutation()
   async adminSetUserAdmin(
-    @Args('userId', new ZodPipe(UserIdSchema)) userId: UserId,
-    @Args('isAdmin', new ZodPipe(AdminSetUserAdminIsAdminSchema)) isAdmin: boolean,
-    @GqlCurrentUser() currentUser: ICurrentUser,
+    @Args('userId', UserIdSchema) userId: UserId,
+    @Args('isAdmin', AdminSetUserAdminIsAdminSchema) isAdmin: boolean,
+    @CurrentUser() currentUser: ICurrentUser,
   ): Promise<AdminSetUserAdminResult> {
     await this.setUserAdminUseCase.execute({ currentUser, userId, isAdmin });
     return { __typename: 'VoidOutput', success: true };

@@ -5,21 +5,15 @@ import type { EventAttendee } from '../../domain/model/event-attendee.model';
 import type { EventRepository } from '../../domain/repository/event.repository';
 import type { EventAttendeeRepository } from '../../domain/repository/event-attendee.repository';
 
-import {
-  BadRequestException,
-  ConflictException,
-  Logger,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
 import { uuid } from '@wishlist/common';
+import { BadRequestException, ConflictException, NotFoundException, UnauthorizedException } from '@znight/http';
 
 import { EventBuilder } from '../../../../test-utils/builders/event.builder';
 import { toCurrentUser, UserBuilder } from '../../../../test-utils/builders/user.builder';
 import { createMock } from '../../../../test-utils/mocks';
 import { AttendeeRole } from '../../domain/attendee-role.enum';
 import { UpdateAttendeeRoleUseCase } from './update-attendee-role.use-case';
-import { beforeAll, beforeEach, describe, expect, it, mock } from 'bun:test';
+import { beforeEach, describe, expect, it, mock } from 'bun:test';
 
 function attendeeForUser(event: Event, user: User): EventAttendee {
   const attendee = event.attendees.find(a => a.user?.id === user.id);
@@ -46,10 +40,6 @@ describe('UpdateAttendeeRoleUseCase', () => {
   let participant: User;
   let event: Event;
   let participantAttendee: EventAttendee;
-
-  beforeAll(() => {
-    Logger.overrideLogger(false);
-  });
 
   beforeEach(() => {
     mock.clearAllMocks();

@@ -1,23 +1,17 @@
 import type { UserEmailChangeVerificationRepository } from '../../domain/repository/user-email-change-verification.repository';
 
-import { Logger } from '@nestjs/common';
-
 import { toCurrentUser, UserBuilder } from '../../../../test-utils/builders/user.builder';
 import { UserEmailChangeVerificationBuilder } from '../../../../test-utils/builders/user-email-change-verification.builder';
 import { createMock } from '../../../../test-utils/mocks';
 import { User } from '../../domain/model/user.model';
 import { GetPendingEmailChangeUseCase } from './get-pending-email-change.use-case';
-import { beforeAll, beforeEach, describe, expect, it, mock } from 'bun:test';
+import { beforeEach, describe, expect, it, mock } from 'bun:test';
 
 describe('GetPendingEmailChangeUseCase', () => {
   const emailChangeVerificationRepository = createMock<UserEmailChangeVerificationRepository>();
 
   let useCase: GetPendingEmailChangeUseCase;
   let user: User;
-
-  beforeAll(() => {
-    Logger.overrideLogger(false);
-  });
 
   beforeEach(() => {
     mock.clearAllMocks();

@@ -1,6 +1,5 @@
 import type { ICurrentUser } from '@wishlist/common';
 
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import {
   createPagedResponse,
   type EventId,
@@ -8,11 +7,12 @@ import {
   type SecretSantaUserId,
   type UserId,
 } from '@wishlist/common';
+import { Args, Mutation, Query, Resolver } from '@znight/graphql';
 
-import { GqlCurrentUser } from '../../../auth/infrastructure/decorators/user.decorator';
+import { Authenticated } from '../../../auth/infrastructure/decorators/public.metadata';
+import { CurrentUser, CurrentUserId } from '../../../auth/infrastructure/decorators/user.decorator';
 import { DEFAULT_RESULT_NUMBER } from '../../../core/common/pagination';
 import { PaginationFiltersSchema } from '../../../core/graphql/common-type.schema';
-import { ZodPipe } from '../../../core/graphql/zod-pipe';
 import { eventMapper } from '../../../event/infrastructure/event.mapper';
 import {
   type AddSecretSantaUsersInput,
@@ -57,6 +57,7 @@ import {
 } from '../secret-santa.schema';
 
 @Resolver()
+@Authenticated()
 export class SecretSantaResolver {
   constructor(
     private readonly getSecretSantaUseCase: GetSecretSantaUseCase,
@@ -75,8 +76,8 @@ export class SecretSantaResolver {
 
   @Query()
   async secretSanta(
-    @Args('eventId', new ZodPipe(EventIdSchema)) eventId: EventId,
-    @GqlCurrentUser() currentUser: ICurrentUser,
+    @Args('eventId', EventIdSchema) eventId: EventId,
+    @CurrentUser() currentUser: ICurrentUser,
   ): Promise<GetSecretSantaForEventResult | null> {
     const { secretSanta } = await this.getSecretSantaUseCase.execute({ currentUser, eventId });
     if (!secretSanta) return null;
@@ -85,8 +86,8 @@ export class SecretSantaResolver {
 
   @Query()
   async mySecretSantaDraw(
-    @Args('eventId', new ZodPipe(EventIdSchema)) eventId: EventId,
-    @GqlCurrentUser() currentUser: ICurrentUser,
+    @Args('eventId', EventIdSchema) eventId: EventId,
+    @CurrentUser() currentUser: ICurrentUser,
   ): Promise<GetMySecretSantaDrawResult | null> {
     const { attendee, revealed } = await this.getSecretSantaDrawUseCase.execute({ currentUser, eventId });
     if (!attendee) return null;
@@ -99,8 +100,8 @@ export class SecretSantaResolver {
 
   @Query()
   async mySecretSantas(
-    @Args('filters', new ZodPipe(PaginationFiltersSchema)) filters: PaginationFilters,
-    @GqlCurrentUser('id') currentUserId: UserId,
+    @Args('filters', PaginationFiltersSchema) filters: PaginationFilters,
+    @CurrentUserId() currentUserId: UserId,
   ): Promise<GetMySecretSantasResult> {
     const pageSize = filters.limit ?? DEFAULT_RESULT_NUMBER;
     const pageNumber = filters.page ?? 1;
@@ -131,8 +132,8 @@ export class SecretSantaResolver {
 
   @Mutation()
   async createSecretSanta(
-    @Args('input', new ZodPipe(CreateSecretSantaInputSchema)) input: CreateSecretSantaInput,
-    @GqlCurrentUser() currentUser: ICurrentUser,
+    @Args('input', CreateSecretSantaInputSchema) input: CreateSecretSantaInput,
+    @CurrentUser() currentUser: ICurrentUser,
   ): Promise<CreateSecretSantaResult> {
     const { secretSanta } = await this.createSecretSantaUseCase.execute({
       currentUser,
@@ -146,9 +147,9 @@ export class SecretSantaResolver {
 
   @Mutation()
   async updateSecretSanta(
-    @Args('id', new ZodPipe(SecretSantaIdSchema)) id: SecretSantaId,
-    @Args('input', new ZodPipe(UpdateSecretSantaInputSchema)) input: UpdateSecretSantaInput,
-    @GqlCurrentUser() currentUser: ICurrentUser,
+    @Args('id', SecretSantaIdSchema) id: SecretSantaId,
+    @Args('input', UpdateSecretSantaInputSchema) input: UpdateSecretSantaInput,
+    @CurrentUser() currentUser: ICurrentUser,
   ): Promise<UpdateSecretSantaResult> {
     await this.updateSecretSantaUseCase.execute({
       secretSantaId: id,
@@ -162,8 +163,8 @@ export class SecretSantaResolver {
 
   @Mutation()
   async deleteSecretSanta(
-    @Args('id', new ZodPipe(SecretSantaIdSchema)) id: SecretSantaId,
-    @GqlCurrentUser() currentUser: ICurrentUser,
+    @Args('id', SecretSantaIdSchema) id: SecretSantaId,
+    @CurrentUser() currentUser: ICurrentUser,
   ): Promise<DeleteSecretSantaResult> {
     await this.deleteSecretSantaUseCase.execute({ currentUser, secretSantaId: id });
     return { __typename: 'VoidOutput', success: true };
@@ -171,8 +172,8 @@ export class SecretSantaResolver {
 
   @Mutation()
   async startSecretSanta(
-    @Args('id', new ZodPipe(SecretSantaIdSchema)) id: SecretSantaId,
-    @GqlCurrentUser() currentUser: ICurrentUser,
+    @Args('id', SecretSantaIdSchema) id: SecretSantaId,
+    @CurrentUser() currentUser: ICurrentUser,
   ): Promise<StartSecretSantaResult> {
     await this.startSecretSantaUseCase.execute({ secretSantaId: id, currentUser });
     return { __typename: 'VoidOutput', success: true };
@@ -180,8 +181,8 @@ export class SecretSantaResolver {
 
   @Mutation()
   async cancelSecretSanta(
-    @Args('id', new ZodPipe(SecretSantaIdSchema)) id: SecretSantaId,
-    @GqlCurrentUser() currentUser: ICurrentUser,
+    @Args('id', SecretSantaIdSchema) id: SecretSantaId,
+    @CurrentUser() currentUser: ICurrentUser,
   ): Promise<CancelSecretSantaResult> {
     await this.cancelSecretSantaUseCase.execute({ secretSantaId: id, currentUser });
     return { __typename: 'VoidOutput', success: true };
@@ -189,9 +190,9 @@ export class SecretSantaResolver {
 
   @Mutation()
   async addSecretSantaUsers(
-    @Args('id', new ZodPipe(SecretSantaIdSchema)) id: SecretSantaId,
-    @Args('input', new ZodPipe(AddSecretSantaUsersInputSchema)) input: AddSecretSantaUsersInput,
-    @GqlCurrentUser() currentUser: ICurrentUser,
+    @Args('id', SecretSantaIdSchema) id: SecretSantaId,
+    @Args('input', AddSecretSantaUsersInputSchema) input: AddSecretSantaUsersInput,
+    @CurrentUser() currentUser: ICurrentUser,
   ): Promise<AddSecretSantaUsersResult> {
     const { users } = await this.addSecretSantaUsersUseCase.execute({
       secretSantaId: id,
@@ -207,10 +208,10 @@ export class SecretSantaResolver {
 
   @Mutation()
   async updateSecretSantaUser(
-    @Args('id', new ZodPipe(SecretSantaIdSchema)) id: SecretSantaId,
-    @Args('secretSantaUserId', new ZodPipe(SecretSantaUserIdSchema)) secretSantaUserId: SecretSantaUserId,
-    @Args('input', new ZodPipe(UpdateSecretSantaUserInputSchema)) input: UpdateSecretSantaUserInput,
-    @GqlCurrentUser() currentUser: ICurrentUser,
+    @Args('id', SecretSantaIdSchema) id: SecretSantaId,
+    @Args('secretSantaUserId', SecretSantaUserIdSchema) secretSantaUserId: SecretSantaUserId,
+    @Args('input', UpdateSecretSantaUserInputSchema) input: UpdateSecretSantaUserInput,
+    @CurrentUser() currentUser: ICurrentUser,
   ): Promise<UpdateSecretSantaUserResult> {
     await this.updateSecretSantaUserUseCase.execute({
       secretSantaId: id,
@@ -224,9 +225,9 @@ export class SecretSantaResolver {
 
   @Mutation()
   async deleteSecretSantaUser(
-    @Args('id', new ZodPipe(SecretSantaIdSchema)) id: SecretSantaId,
-    @Args('secretSantaUserId', new ZodPipe(SecretSantaUserIdSchema)) secretSantaUserId: SecretSantaUserId,
-    @GqlCurrentUser() currentUser: ICurrentUser,
+    @Args('id', SecretSantaIdSchema) id: SecretSantaId,
+    @Args('secretSantaUserId', SecretSantaUserIdSchema) secretSantaUserId: SecretSantaUserId,
+    @CurrentUser() currentUser: ICurrentUser,
   ): Promise<DeleteSecretSantaUserResult> {
     await this.deleteSecretSantaUserUseCase.execute({ secretSantaId: id, secretSantaUserId, currentUser });
     return { __typename: 'VoidOutput', success: true };
@@ -234,8 +235,8 @@ export class SecretSantaResolver {
 
   @Mutation()
   async revealMySecretSantaDraw(
-    @Args('eventId', new ZodPipe(EventIdSchema)) eventId: EventId,
-    @GqlCurrentUser() currentUser: ICurrentUser,
+    @Args('eventId', EventIdSchema) eventId: EventId,
+    @CurrentUser() currentUser: ICurrentUser,
   ): Promise<RevealMySecretSantaDrawResult> {
     await this.revealSecretSantaDrawUseCase.execute({ currentUser, eventId });
     return { __typename: 'VoidOutput', success: true };

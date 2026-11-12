@@ -1,18 +1,18 @@
-import { Logger } from '@nestjs/common';
-import { EventsHandler, type IEventHandler } from '@nestjs/cqrs';
+import { OnEvent } from '@znight/events';
+import { getLogger } from '@znight/observability';
 
 import { MailService } from '../../../core/mail/mail.service';
 import { MailTemplate } from '../../../core/mail/mail.type';
 import { EmailChangedEvent } from '../../domain/event/email-changed.event';
 
-@EventsHandler(EmailChangedEvent)
-export class EmailChangedhandler implements IEventHandler<EmailChangedEvent> {
-  private readonly logger = new Logger(EmailChangedhandler.name);
+export class EmailChangedhandler {
+  private readonly logger = getLogger(EmailChangedhandler.name);
 
   constructor(private readonly mailService: MailService) {}
 
+  @OnEvent({ detached: true })
   async handle(params: EmailChangedEvent) {
-    this.logger.log('Email changed event received, sending confirmation emails...', { params });
+    this.logger.info('Email changed event received, sending confirmation emails...', { params });
 
     await Promise.all([
       // Send confirmation email to the old email address

@@ -39,8 +39,8 @@ const config: UserConfig = {
     },
     rolldownOptions: {
       output: {
-        // TanStack Router code-splitting can evaluate @wishlist/common DTOs
-        // (Reflect.getMetadata) before the entry's reflect-metadata polyfill.
+        // Evaluates the modules in import order, like the dev server, even across
+        // the TanStack Router split chunks (side effects of the entry run first).
         // https://rolldown.rs/reference/OutputOptions.strictExecutionOrder
         strictExecutionOrder: true,
       },

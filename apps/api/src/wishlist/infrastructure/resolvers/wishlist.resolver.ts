@@ -1,12 +1,11 @@
-import { NotFoundException } from '@nestjs/common';
-import { Args, Context, Query, Resolver } from '@nestjs/graphql';
-import { createPagedResponse, type ICurrentUser, type UserId, type WishlistId } from '@wishlist/common';
+import { createPagedResponse, type UserId, type WishlistId } from '@wishlist/common';
+import { Args, Loader, Query, Resolver } from '@znight/graphql';
+import { NotFoundException } from '@znight/http';
 
-import { GqlCurrentUser } from '../../../auth/infrastructure/decorators/user.decorator';
+import { Authenticated } from '../../../auth/infrastructure/decorators/public.metadata';
+import { CurrentUserId } from '../../../auth/infrastructure/decorators/user.decorator';
 import { DEFAULT_RESULT_NUMBER } from '../../../core/common/pagination';
 import { PaginationFiltersSchema } from '../../../core/graphql/common-type.schema';
-import { type GraphQLContext } from '../../../core/graphql/graphql.context';
-import { ZodPipe } from '../../../core/graphql/zod-pipe';
 import {
   type GetMyWishlistsResult,
   type GetWishlistByIdResult,
@@ -14,19 +13,20 @@ import {
   type Wishlist,
 } from '../../../gql/generated-types';
 import { GetWishlistsByUserUseCase } from '../../application/query/get-wishlists-by-user.use-case';
+import { WishlistsById } from '../wishlist.dataloader';
 import { wishlistMapper } from '../wishlist.mapper';
 
 @Resolver()
+@Authenticated()
 export class WishlistResolver {
   constructor(private readonly getWishlistsByUserUseCase: GetWishlistsByUserUseCase) {}
 
   @Query()
   async wishlist(
-    @Args('id', { type: () => String }) id: WishlistId,
-    @GqlCurrentUser() currentUser: ICurrentUser,
-    @Context() ctx: GraphQLContext,
+    @Args('id') id: WishlistId,
+    @Loader() wishlistsLoader: Loader<WishlistsById>,
   ): Promise<GetWishlistByIdResult> {
-    const wishlist = await ctx.loaders.getWishlistDataLoader(currentUser).load(id);
+    const wishlist = await wishlistsLoader.load(id);
     if (!wishlist) {
       throw new NotFoundException('Wishlist not found');
     }
@@ -35,8 +35,8 @@ export class WishlistResolver {
 
   @Query()
   async wishlists(
-    @Args('filters', new ZodPipe(PaginationFiltersSchema)) filters: PaginationFilters,
-    @GqlCurrentUser('id') currentUserId: UserId,
+    @Args('filters', PaginationFiltersSchema) filters: PaginationFilters,
+    @CurrentUserId() currentUserId: UserId,
   ): Promise<GetMyWishlistsResult> {
     const pageSize = filters.limit ?? DEFAULT_RESULT_NUMBER;
     const pageNumber = filters.page ?? 1;

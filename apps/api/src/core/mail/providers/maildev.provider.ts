@@ -1,27 +1,25 @@
-import { Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import type { MailConfig } from '../mail.config';
+
+import { getLogger } from '@znight/observability';
 import { createTransport, type SMTPSentMessageInfo, type Transporter } from 'nodemailer';
 
 import { type MailPayload, type MailProvider } from '../mail.type';
 import { getMailPayloadFromMailOptions } from './mail-provider.utils';
 
 export class MaildevMailProvider implements MailProvider {
-  private readonly logger = new Logger(MaildevMailProvider.name);
+  private readonly logger = getLogger(MaildevMailProvider.name);
   private readonly transporter: Transporter<SMTPSentMessageInfo>;
 
-  constructor(configService: ConfigService) {
-    const maildevUrl = configService.get('MAILDEV_HOST', 'localhost');
-    const maildevPort = Number(configService.get('MAILDEV_PORT', '1025'));
-
+  constructor(config: MailConfig) {
     this.transporter = createTransport({
-      host: maildevUrl,
-      port: maildevPort,
+      host: config.maildevHost,
+      port: config.maildevPort,
       secure: false,
     });
   }
 
   async send(options: MailPayload): Promise<void> {
-    this.logger.log('Sending mail with Maildev', {
+    this.logger.info('Sending mail with Maildev', {
       mail: {
         to: options.to,
         template: options.template,

@@ -1,9 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import type { DrizzleDatabase } from '../../core/database/database.factory';
+
 import { schema } from '@wishlist/api-drizzle';
 import { type AttendeeId, type EventId, uuid } from '@wishlist/common';
+import { Injectable } from '@znight/core';
+import { NotFoundException } from '@znight/http';
 import { and, eq, inArray, or } from 'drizzle-orm';
 
-import { DatabaseService } from '../../core/database/database.service';
 import { type DrizzleTransaction } from '../../core/database/transaction-manager';
 import { EventAttendee } from '../../event/domain/model/event-attendee.model';
 import { type EventAttendeeRepository } from '../../event/domain/repository/event-attendee.repository';
@@ -11,14 +13,14 @@ import { PostgresUserRepository } from './postgres-user.repository';
 
 @Injectable()
 export class PostgresEventAttendeeRepository implements EventAttendeeRepository {
-  constructor(private readonly databaseService: DatabaseService) {}
+  constructor(private readonly db: DrizzleDatabase) {}
 
   newId(): AttendeeId {
     return uuid() as AttendeeId;
   }
 
   async findById(id: AttendeeId): Promise<EventAttendee | undefined> {
-    const attendee = await this.databaseService.db.query.eventAttendee.findFirst({
+    const attendee = await this.db.query.eventAttendee.findFirst({
       where: eq(schema.eventAttendee.id, id),
       with: { user: true },
     });
@@ -37,7 +39,7 @@ export class PostgresEventAttendeeRepository implements EventAttendeeRepository 
   async findByIds(ids: AttendeeId[]): Promise<EventAttendee[]> {
     if (ids.length === 0) return [];
 
-    const attendees = await this.databaseService.db.query.eventAttendee.findMany({
+    const attendees = await this.db.query.eventAttendee.findMany({
       where: inArray(schema.eventAttendee.id, ids),
       with: { user: true },
     });
@@ -46,7 +48,7 @@ export class PostgresEventAttendeeRepository implements EventAttendeeRepository 
   }
 
   async findByEventId(eventId: EventId): Promise<EventAttendee[]> {
-    const attendees = await this.databaseService.db.query.eventAttendee.findMany({
+    const attendees = await this.db.query.eventAttendee.findMany({
       where: eq(schema.eventAttendee.eventId, eventId),
       with: { user: true },
     });
@@ -55,7 +57,7 @@ export class PostgresEventAttendeeRepository implements EventAttendeeRepository 
   }
 
   async findByTempEmail(email: string): Promise<EventAttendee[]> {
-    const attendees = await this.databaseService.db.query.eventAttendee.findMany({
+    const attendees = await this.db.query.eventAttendee.findMany({
       where: eq(schema.eventAttendee.tempUserEmail, email),
       with: { user: true },
     });
@@ -64,7 +66,7 @@ export class PostgresEventAttendeeRepository implements EventAttendeeRepository 
   }
 
   async existByEventAndEmail(param: { eventId: EventId; email: string }): Promise<boolean> {
-    const attendee = await this.databaseService.db.query.eventAttendee.findFirst({
+    const attendee = await this.db.query.eventAttendee.findFirst({
       columns: { id: true },
       where: and(
         eq(schema.eventAttendee.eventId, param.eventId),
@@ -76,7 +78,7 @@ export class PostgresEventAttendeeRepository implements EventAttendeeRepository 
   }
 
   async save(attendee: EventAttendee, tx?: DrizzleTransaction): Promise<void> {
-    const client = tx ?? this.databaseService.db;
+    const client = tx ?? this.db;
 
     await client
       .insert(schema.eventAttendee)
@@ -98,7 +100,7 @@ export class PostgresEventAttendeeRepository implements EventAttendeeRepository 
   }
 
   async delete(id: AttendeeId, tx?: DrizzleTransaction): Promise<void> {
-    const client = tx ?? this.databaseService.db;
+    const client = tx ?? this.db;
 
     await client.delete(schema.eventAttendee).where(eq(schema.eventAttendee.id, id));
   }

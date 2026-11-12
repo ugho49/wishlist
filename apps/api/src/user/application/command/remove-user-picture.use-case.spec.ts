@@ -1,13 +1,11 @@
 import type { UserRepository } from '../../domain/repository/user.repository';
 
-import { Logger } from '@nestjs/common';
-
 import { UserBuilder } from '../../../../test-utils/builders/user.builder';
 import { createMock } from '../../../../test-utils/mocks';
 import { BucketService } from '../../../core/bucket/bucket.service';
 import { User } from '../../domain/model/user.model';
 import { RemoveUserPictureUseCase } from './remove-user-picture.use-case';
-import { beforeAll, beforeEach, describe, expect, it, mock } from 'bun:test';
+import { beforeEach, describe, expect, it, mock } from 'bun:test';
 
 describe('RemoveUserPictureUseCase', () => {
   const userRepository = createMock<UserRepository>();
@@ -15,10 +13,6 @@ describe('RemoveUserPictureUseCase', () => {
 
   let useCase: RemoveUserPictureUseCase;
   let user: User;
-
-  beforeAll(() => {
-    Logger.overrideLogger(false);
-  });
 
   beforeEach(() => {
     mock.clearAllMocks();

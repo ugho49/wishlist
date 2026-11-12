@@ -1,6 +1,7 @@
 import type { Element } from 'domhandler';
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@znight/core';
+import { getLogger } from '@znight/observability';
 import { type Cheerio, load as loadHtml } from 'cheerio';
 
 export type ScanItemUrlInput = {
@@ -13,7 +14,7 @@ export type ScanItemUrlOutput = {
 
 @Injectable()
 export class ScanItemUrlUseCase {
-  private readonly logger = new Logger(ScanItemUrlUseCase.name);
+  private readonly logger = getLogger(ScanItemUrlUseCase.name);
 
   async execute(query: ScanItemUrlInput): Promise<ScanItemUrlOutput> {
     const pictureUrl = await this.scanUrl(query.url);
@@ -22,7 +23,7 @@ export class ScanItemUrlUseCase {
 
   private async scanUrl(url: string) {
     try {
-      this.logger.log('Scrap img for => ', { url });
+      this.logger.info('Scrap img for => ', { url });
 
       const response = await this.fetch(url, { timeout: 3_000, method: 'GET' });
       const html = await response.text();
@@ -33,7 +34,7 @@ export class ScanItemUrlUseCase {
       }
 
       if (this.hasBotDetection(html)) {
-        this.logger.log('Bot detection detected.');
+        this.logger.info('Bot detection detected.');
         return null;
       }
 
@@ -62,10 +63,10 @@ export class ScanItemUrlUseCase {
         return await this.sanitizeAndCheckUrl({ imageUrl: titleImageUrl, websiteUrl: url });
       }
 
-      this.logger.log('Aucune image principale trouvée.', response);
+      this.logger.info('Aucune image principale trouvée.', { url });
       return null;
     } catch (error) {
-      this.logger.error("Une erreur s'est produite lors de la récupération de l'image:", error);
+      this.logger.error("Une erreur s'est produite lors de la récupération de l'image:", { error: error });
       return null;
     }
   }
@@ -193,7 +194,7 @@ export class ScanItemUrlUseCase {
     // Extraire la partie de droite de l'URL
     const rightPart = this.extractRightPart(sanitizedImageUrl);
 
-    this.logger.log('Image principale trouvée:', rightPart);
+    this.logger.info('Image principale trouvée:', { imageUrl: rightPart });
 
     // Vérifier si l'image est accessible
     // const imageResponse = await this.fetch(rightPart, { method: 'HEAD', timeout: 1_500 });
@@ -202,7 +203,7 @@ export class ScanItemUrlUseCase {
     //   return null;
     // }
 
-    this.logger.log("L'image est accessible.");
+    this.logger.info("L'image est accessible.");
 
     return rightPart;
   }

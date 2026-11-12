@@ -1,5 +1,5 @@
-import { Logger } from '@nestjs/common';
-import { EventsHandler, type IEventHandler } from '@nestjs/cqrs';
+import { OnEvent } from '@znight/events';
+import { getLogger } from '@znight/observability';
 import { chunk as createChunks } from 'lodash';
 
 import { FrontendRoutesService } from '../../../core/frontend-routes/frontend-routes.service';
@@ -7,17 +7,17 @@ import { MailService } from '../../../core/mail/mail.service';
 import { MailTemplate } from '../../../core/mail/mail.type';
 import { SecretSantaStartedEvent } from '../../domain/event/secret-santa-started.event';
 
-@EventsHandler(SecretSantaStartedEvent)
-export class SecretSantaStartedHandler implements IEventHandler<SecretSantaStartedEvent> {
-  private readonly logger = new Logger(SecretSantaStartedHandler.name);
+export class SecretSantaStartedHandler {
+  private readonly logger = getLogger(SecretSantaStartedHandler.name);
 
   constructor(
     private readonly mailService: MailService,
     private readonly frontendRoutes: FrontendRoutesService,
   ) {}
 
+  @OnEvent({ detached: true })
   async handle(params: SecretSantaStartedEvent) {
-    this.logger.log('Secret santa started event received', { params });
+    this.logger.info('Secret santa started event received', { params });
     const { eventTitle, eventId, drawns, budget, description } = params;
     const eventUrl = this.frontendRoutes.routes.event.byId(eventId);
     const eurosFormatter = Intl.NumberFormat('fr-FR', {
@@ -29,7 +29,7 @@ export class SecretSantaStartedHandler implements IEventHandler<SecretSantaStart
 
     const chunks = createChunks(drawns, 10);
 
-    this.logger.log('Sending emails to attendees...', { eventTitle, eventId, drawns });
+    this.logger.info('Sending emails to attendees...', { eventTitle, eventId, drawns });
     for (const chunk of chunks) {
       await Promise.all(
         chunk.map(({ email }) =>
@@ -47,6 +47,6 @@ export class SecretSantaStartedHandler implements IEventHandler<SecretSantaStart
         ),
       );
     }
-    this.logger.log('Emails sent to attendees', { eventTitle, eventId, drawns });
+    this.logger.info('Emails sent to attendees', { eventTitle, eventId, drawns });
   }
 }

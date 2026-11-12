@@ -1,5 +1,5 @@
-import { Logger } from '@nestjs/common';
-import { EventsHandler, type IEventHandler } from '@nestjs/cqrs';
+import { OnEvent } from '@znight/events';
+import { getLogger } from '@znight/observability';
 
 import { FrontendRoutesService } from '../../../core/frontend-routes/frontend-routes.service';
 import { MailService } from '../../../core/mail/mail.service';
@@ -7,17 +7,17 @@ import { MailTemplate } from '../../../core/mail/mail.type';
 import { AttendeeAddedEvent } from '../../domain/event/attendee-added.event';
 import { Event } from '../../domain/model/event.model';
 
-@EventsHandler(AttendeeAddedEvent)
-export class AttendeeAddedHandler implements IEventHandler<AttendeeAddedEvent> {
-  private readonly logger = new Logger(AttendeeAddedHandler.name);
+export class AttendeeAddedHandler {
+  private readonly logger = getLogger(AttendeeAddedHandler.name);
 
   constructor(
     private readonly mailService: MailService,
     private readonly frontendRoutes: FrontendRoutesService,
   ) {}
 
+  @OnEvent({ detached: true })
   async handle(event: AttendeeAddedEvent): Promise<void> {
-    this.logger.log('Attendee added event received', { event });
+    this.logger.info('Attendee added event received', { event });
 
     const params = {
       email: event.newAttendee.getEmail(),
@@ -32,7 +32,7 @@ export class AttendeeAddedHandler implements IEventHandler<AttendeeAddedEvent> {
         await this.sendEmailForNotExistingAttendee(params);
       }
     } catch (e) {
-      this.logger.error('Fail to send mail to new attendee', e);
+      this.logger.error('Fail to send mail to new attendee', { error: e });
     }
   }
 

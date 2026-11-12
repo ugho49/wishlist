@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import type { DrizzleDatabase } from '../../core/database/database.factory';
+
 import { schema } from '@wishlist/api-drizzle';
 import { type UserEmailSettingId, type UserId, uuid } from '@wishlist/common';
+import { Injectable } from '@znight/core';
 import { eq } from 'drizzle-orm';
 
-import { DatabaseService } from '../../core/database/database.service';
 import { type DrizzleTransaction } from '../../core/database/transaction-manager';
 import { UserEmailSetting } from '../../user/domain/model/user-email-setting.model';
 import { type UserEmailSettingRepository } from '../../user/domain/repository/user-email-setting.repository';
@@ -11,14 +12,14 @@ import { PostgresUserRepository } from './postgres-user.repository';
 
 @Injectable()
 export class PostgresUserEmailSettingRepository implements UserEmailSettingRepository {
-  constructor(private readonly databaseService: DatabaseService) {}
+  constructor(private readonly db: DrizzleDatabase) {}
 
   newId(): UserEmailSettingId {
     return uuid() as UserEmailSettingId;
   }
 
   async findByUserId(userId: UserId): Promise<UserEmailSetting | undefined> {
-    const userEmailSetting = await this.databaseService.db.query.userEmailSetting.findFirst({
+    const userEmailSetting = await this.db.query.userEmailSetting.findFirst({
       where: eq(schema.userEmailSetting.userId, userId),
       with: { user: true },
     });
@@ -27,7 +28,7 @@ export class PostgresUserEmailSettingRepository implements UserEmailSettingRepos
   }
 
   async save(userEmailSetting: UserEmailSetting, tx?: DrizzleTransaction): Promise<void> {
-    const client = tx || this.databaseService.db;
+    const client = tx || this.db;
 
     await client
       .insert(schema.userEmailSetting)

@@ -2,8 +2,8 @@ import type { SecretSantaId } from '@wishlist/common';
 import type { EventRepository } from '../../../event/domain/repository/event.repository';
 import type { SecretSantaRepository } from '../../domain/repository/secret-santa.repository';
 
-import { ConflictException, ForbiddenException, Logger } from '@nestjs/common';
 import { uuid } from '@wishlist/common';
+import { ConflictException, ForbiddenException } from '@znight/http';
 
 import { EventBuilder } from '../../../../test-utils/builders/event.builder';
 import { toCurrentUser, UserBuilder } from '../../../../test-utils/builders/user.builder';
@@ -11,7 +11,7 @@ import { createMock } from '../../../../test-utils/mocks';
 import { Event } from '../../../event/domain/model/event.model';
 import { User } from '../../../user/domain/model/user.model';
 import { CreateSecretSantaUseCase } from './create-secret-santa.use-case';
-import { beforeAll, beforeEach, describe, expect, it, mock } from 'bun:test';
+import { beforeEach, describe, expect, it, mock } from 'bun:test';
 
 describe('CreateSecretSantaUseCase', () => {
   const eventRepository = createMock<EventRepository>();
@@ -22,10 +22,6 @@ describe('CreateSecretSantaUseCase', () => {
   let participant: User;
   let event: Event;
   let secretSantaId: SecretSantaId;
-
-  beforeAll(() => {
-    Logger.overrideLogger(false);
-  });
 
   beforeEach(() => {
     mock.clearAllMocks();

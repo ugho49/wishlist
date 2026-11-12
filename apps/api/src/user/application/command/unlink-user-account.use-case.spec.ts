@@ -1,6 +1,6 @@
 import type { UserAccountRepository } from '../../domain/repository/user-account.repository';
 
-import { BadRequestException, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@znight/http';
 
 import { UserBuilder } from '../../../../test-utils/builders/user.builder';
 import { UserAccountBuilder } from '../../../../test-utils/builders/user-account.builder';
@@ -8,7 +8,7 @@ import { createMock } from '../../../../test-utils/mocks';
 import { User } from '../../domain/model/user.model';
 import { UserAccount } from '../../domain/model/user-account.model';
 import { UnlinkUserAccountUseCase } from './unlink-user-account.use-case';
-import { beforeAll, beforeEach, describe, expect, it, mock } from 'bun:test';
+import { beforeEach, describe, expect, it, mock } from 'bun:test';
 
 describe('UnlinkUserAccountUseCase', () => {
   const userAccountRepository = createMock<UserAccountRepository>();
@@ -16,10 +16,6 @@ describe('UnlinkUserAccountUseCase', () => {
   let useCase: UnlinkUserAccountUseCase;
   let user: User;
   let account: UserAccount;
-
-  beforeAll(() => {
-    Logger.overrideLogger(false);
-  });
 
   beforeEach(() => {
     mock.clearAllMocks();

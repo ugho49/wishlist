@@ -1,9 +1,9 @@
 import type { EventRepository } from '../../domain/repository/event.repository';
 
-import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { type EventId, type ICurrentUser } from '@wishlist/common';
-
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
+import { Injectable } from '@znight/core';
+import { UnauthorizedException } from '@znight/http';
+import { getLogger } from '@znight/observability';
 
 export type UpdateEventInput = {
   currentUser: ICurrentUser;
@@ -18,12 +18,12 @@ export type UpdateEventInput = {
 
 @Injectable()
 export class UpdateEventUseCase {
-  private readonly logger = new Logger(UpdateEventUseCase.name);
+  private readonly logger = getLogger(UpdateEventUseCase.name);
 
-  constructor(@Inject(REPOSITORIES.EVENT) private readonly eventRepository: EventRepository) {}
+  constructor(private readonly eventRepository: EventRepository) {}
 
   async execute(input: UpdateEventInput): Promise<void> {
-    this.logger.log('Update event request received', { input });
+    this.logger.info('Update event request received', { input });
     const event = await this.eventRepository.findByIdOrFail(input.eventId);
 
     if (!event.canEdit(input.currentUser)) {
@@ -37,7 +37,7 @@ export class UpdateEventUseCase {
       eventDate: input.updateEvent.eventDate,
     });
 
-    this.logger.log('Saving event...', { eventId: input.eventId, updatedEvent });
+    this.logger.info('Saving event...', { eventId: input.eventId, updatedEvent });
     await this.eventRepository.save(updatedEvent);
   }
 }

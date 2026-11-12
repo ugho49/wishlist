@@ -7,9 +7,9 @@ import { DateTime } from 'luxon';
 /**
  * Integration tests for the GraphQL EventMutationResolver.
  *
- * GraphQL always returns HTTP 200; thrown Nest exceptions are mapped by the
+ * GraphQL always returns HTTP 200; thrown exceptions are mapped by the
  * error transform plugin to typed rejections placed at data.<field>:
- *   ZodValidationException  -> ValidationRejection
+ *   @Args schema failure  -> ValidationRejection
  *   UnauthorizedException   -> UnauthorizedRejection
  *   NotFoundException       -> NotFoundRejection
  *   ForbiddenException      -> ForbiddenRejection

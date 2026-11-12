@@ -2,10 +2,11 @@ import type { ICurrentUser, SecretSantaId, SecretSantaUserId } from '@wishlist/c
 import type { SecretSantaRepository } from '../../domain/repository/secret-santa.repository';
 import type { SecretSantaUserRepository } from '../../domain/repository/secret-santa-user.repository';
 
-import { BadRequestException, ForbiddenException, Inject, Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@znight/core';
+import { BadRequestException, ForbiddenException } from '@znight/http';
+import { getLogger } from '@znight/observability';
 
 import { type EventRepository } from '../../../event/domain/repository/event.repository';
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
 
 export type UpdateSecretSantaUserInput = {
   currentUser: ICurrentUser;
@@ -16,16 +17,16 @@ export type UpdateSecretSantaUserInput = {
 
 @Injectable()
 export class UpdateSecretSantaUserUseCase {
-  private readonly logger = new Logger(UpdateSecretSantaUserUseCase.name);
+  private readonly logger = getLogger(UpdateSecretSantaUserUseCase.name);
 
   constructor(
-    @Inject(REPOSITORIES.SECRET_SANTA) private readonly secretSantaRepository: SecretSantaRepository,
-    @Inject(REPOSITORIES.SECRET_SANTA_USER) private readonly secretSantaUserRepository: SecretSantaUserRepository,
-    @Inject(REPOSITORIES.EVENT) private readonly eventRepository: EventRepository,
+    private readonly secretSantaRepository: SecretSantaRepository,
+    private readonly secretSantaUserRepository: SecretSantaUserRepository,
+    private readonly eventRepository: EventRepository,
   ) {}
 
   async execute(command: UpdateSecretSantaUserInput): Promise<void> {
-    this.logger.log('Update secret santa user request received', { command });
+    this.logger.info('Update secret santa user request received', { command });
     const secretSanta = await this.secretSantaRepository.findByIdOrFail(command.secretSantaId);
     const event = await this.eventRepository.findByIdOrFail(secretSanta.eventId);
 
@@ -42,7 +43,7 @@ export class UpdateSecretSantaUserUseCase {
     }
 
     const updatedSecretSanta = secretSanta.updateUserExclusions(command.secretSantaUserId, command.exclusions);
-    this.logger.log('Saving secret santa users...', { secretSantaId: secretSanta.id, updatedSecretSanta });
+    this.logger.info('Saving secret santa users...', { secretSantaId: secretSanta.id, updatedSecretSanta });
     await this.secretSantaUserRepository.saveAll(updatedSecretSanta);
   }
 }

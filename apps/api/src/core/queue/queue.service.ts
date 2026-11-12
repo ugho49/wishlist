@@ -1,13 +1,10 @@
-import type { ConfigType } from '@nestjs/config';
-
-import { Inject, Injectable, Logger, type OnModuleDestroy, type OnModuleInit } from '@nestjs/common';
-import { DiscoveryService } from '@nestjs/core';
+import { Container, Injectable, type OnStart, type OnStop } from '@znight/core';
+import { getLogger } from '@znight/observability';
 import { Job, type JobsOptions, Queue, Worker } from 'bullmq';
 import Redis from 'ioredis';
-import { PinoLogger } from 'pino-nestjs';
-import { Store, storage } from 'pino-nestjs/dist/storage';
 
-import queueConfig from './queue.config';
+import { QueueConfig } from './queue.config';
+import { QUEUE_JOB_SCOPE_TOKEN, QUEUE_MESSAGE_ID_SCOPE_TOKEN } from './queue.context';
 import { QueueProcessorBase } from './queue.type';
 import { QueueName, type QueueNamePayloadMap } from './queues.definitions';
 
@@ -16,26 +13,26 @@ const DEFAULT_REMOVE_ON_FAIL_AGE = 60 * 60 * 24 * 90; // 90 days
 const DEFAULT_NUMBER_OF_ATTEMPTS = 5;
 
 @Injectable()
-export class QueueService implements OnModuleInit, OnModuleDestroy {
+export class QueueService implements OnStart, OnStop {
   private readonly REMOVE_ON_COMPLETE_AGE = DEFAULT_REMOVE_ON_COMPLETE_AGE;
   private readonly REMOVE_ON_FAIL_AGE = DEFAULT_REMOVE_ON_FAIL_AGE;
   private readonly NUMBER_OF_ATTEMPTS = DEFAULT_NUMBER_OF_ATTEMPTS;
 
-  private readonly logger = new Logger(QueueService.name);
+  private readonly logger = getLogger(QueueService.name);
   private readonly workers: Worker[] = [];
   private readonly queues: Map<QueueName, Queue> = new Map();
   private readonly connection: Redis;
 
   constructor(
-    private readonly discoveryService: DiscoveryService,
-    private readonly pinoLogger: PinoLogger,
-    @Inject(queueConfig.KEY) private readonly config: ConfigType<typeof queueConfig>,
+    private readonly processors: QueueProcessorBase[],
+    private readonly config: QueueConfig,
+    private readonly container: Container,
   ) {
     this.connection = new Redis({
-      host: this.config.valkey.host,
-      port: this.config.valkey.port,
-      password: this.config.valkey.password || undefined,
-      db: this.config.valkey.db,
+      host: this.config.host,
+      port: this.config.port,
+      password: this.config.password || undefined,
+      db: this.config.db,
       maxRetriesPerRequest: null,
     });
   }
@@ -54,15 +51,9 @@ export class QueueService implements OnModuleInit, OnModuleDestroy {
     await queue.add(jobName, payload, options);
   }
 
-  async onModuleInit() {
-    const allProviders = this.discoveryService
-      .getProviders()
-      .filter(provider => provider.instance instanceof QueueProcessorBase);
-
+  async onStart() {
     for (const queueName of Object.values(QueueName)) {
-      const matchingProcessors = allProviders.filter(
-        provider => (provider.instance as QueueProcessorBase).queueName === queueName,
-      );
+      const matchingProcessors = this.processors.filter(candidate => candidate.queueName === queueName);
 
       if (matchingProcessors.length === 0) {
         throw new Error(`No queue processor found for queue ${queueName}`);
@@ -72,13 +63,12 @@ export class QueueService implements OnModuleInit, OnModuleDestroy {
         throw new Error(`Multiple queue processors found for queue ${queueName}`);
       }
 
-      const discovered = matchingProcessors[0];
-      if (!discovered) {
+      const processor = matchingProcessors[0];
+      if (!processor) {
         throw new Error(`No queue processor found for queue ${queueName}`);
       }
 
-      const processor = discovered.instance as QueueProcessorBase;
-      const processorName = typeof discovered.name === 'string' ? discovered.name : processor.constructor.name;
+      const processorName = processor.constructor.name;
 
       const worker = this.createWorker(queueName, processorName, processor);
       this.workers.push(worker);
@@ -88,7 +78,7 @@ export class QueueService implements OnModuleInit, OnModuleDestroy {
 
       if (processor.options.repeat) {
         if (!this.config.scheduledJobsEnabled) {
-          this.logger.log(`Scheduled jobs are not enabled, skipping repeatable job for queue ${queueName}`);
+          this.logger.info(`Scheduled jobs are not enabled, skipping repeatable job for queue ${queueName}`);
           continue;
         }
 
@@ -96,54 +86,48 @@ export class QueueService implements OnModuleInit, OnModuleDestroy {
           name: queueName,
           data: {},
         });
-        this.logger.log(`Registered repeatable job for queue ${queueName}`);
+        this.logger.info(`Registered repeatable job for queue ${queueName}`);
       }
     }
 
     this.startAllWorkers();
   }
 
-  async onModuleDestroy() {
+  async onStop() {
     await this.stopAllWorkers();
     await Promise.all([...this.queues.values()].map(queue => queue.close()));
+  }
+
+  /** Also runs when the application failed to start (onStop did not run): closes the Redis connection. */
+  [Symbol.dispose]() {
     this.connection.disconnect();
   }
 
   private startAllWorkers() {
-    this.logger.log('Starting all workers');
+    this.logger.info('Starting all workers');
     for (const worker of this.workers) {
       void worker.run();
     }
-    this.logger.log('All workers started');
+    this.logger.info('All workers started');
   }
 
   private async stopAllWorkers() {
-    this.logger.log('Stopping all workers');
+    this.logger.info('Stopping all workers');
     await Promise.all(this.workers.map(worker => worker.close()));
-    this.logger.log('All workers are stopped');
+    this.logger.info('All workers are stopped');
   }
 
   private createWorker(queueName: QueueName, processorName: string, processor: QueueProcessorBase) {
     return new Worker(
       queueName,
       async (job: Job<QueueNamePayloadMap[QueueName]>) => {
-        await storage.run(new Store(PinoLogger.root.child({})), async () => {
-          const messageId = Bun.randomUUIDv7();
-          const resourceName = `${processorName}.process`;
+        const messageId = Bun.randomUUIDv7();
+        const jobContext = { id: job.id, name: job.name, handler: `${processorName}.process`, queueName };
 
-          this.pinoLogger.assign({
-            messageId,
-            job: {
-              id: job.id,
-              name: job.name,
-              handler: resourceName,
-              queueName,
-            },
-          });
-
-          this.logger.log(`Message ${messageId} received, forwarding to handlers`, {
-            payload: job.data,
-          });
+        // The logger reads messageId and job from the scope (scopeFields): every entry written while
+        // the job runs (processor, use cases, mail providers) carries them.
+        await this.container.runInScope(async () => {
+          this.logger.info(`Message ${messageId} received, forwarding to handlers`, { payload: job.data });
 
           try {
             await processor.process(job);
@@ -151,7 +135,10 @@ export class QueueService implements OnModuleInit, OnModuleDestroy {
             this.logger.error(`Message ${messageId} rejected due to handler error.`, { error });
             throw error;
           }
-        });
+        }, [
+          [QUEUE_MESSAGE_ID_SCOPE_TOKEN, messageId],
+          [QUEUE_JOB_SCOPE_TOKEN, jobContext],
+        ]);
       },
       {
         connection: this.connection,

@@ -1,6 +1,6 @@
 import type { EventRepository } from '../../domain/repository/event.repository';
 
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException } from '@znight/http';
 
 import { EventBuilder } from '../../../../test-utils/builders/event.builder';
 import { UserBuilder } from '../../../../test-utils/builders/user.builder';

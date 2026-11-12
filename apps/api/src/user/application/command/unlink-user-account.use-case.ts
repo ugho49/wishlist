@@ -1,9 +1,10 @@
 import type { UserAccountRepository } from '../../domain/repository/user-account.repository';
 
-import { BadRequestException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { type UserAccountId, type UserId } from '@wishlist/common';
+import { Injectable } from '@znight/core';
+import { BadRequestException, NotFoundException } from '@znight/http';
+import { getLogger } from '@znight/observability';
 
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { UserAccountProvider } from '../../domain/user-account-provider.enum';
 
 export type UnlinkUserAccountInput = {
@@ -13,15 +14,12 @@ export type UnlinkUserAccountInput = {
 
 @Injectable()
 export class UnlinkUserAccountUseCase {
-  private readonly logger = new Logger(UnlinkUserAccountUseCase.name);
+  private readonly logger = getLogger(UnlinkUserAccountUseCase.name);
 
-  constructor(
-    @Inject(REPOSITORIES.USER_ACCOUNT)
-    private readonly userAccountRepository: UserAccountRepository,
-  ) {}
+  constructor(private readonly userAccountRepository: UserAccountRepository) {}
 
   async execute(input: UnlinkUserAccountInput): Promise<void> {
-    this.logger.log('Unlink user account request received', { input });
+    this.logger.info('Unlink user account request received', { input });
     const { userId, accountId } = input;
 
     const accounts = await this.userAccountRepository.findByUserId(userId);
@@ -33,7 +31,7 @@ export class UnlinkUserAccountUseCase {
       throw new BadRequestException('Cannot unlink a password account');
     }
 
-    this.logger.log('Deleting user account...', { userId, accountId });
+    this.logger.info('Deleting user account...', { userId, accountId });
     await this.userAccountRepository.delete(accountId);
   }
 }

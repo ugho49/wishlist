@@ -1,19 +1,18 @@
-import { Controller, Get } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
-import { HealthCheck } from '@nestjs/terminus';
+import { Controller, Get, HttpResponse } from '@znight/http';
+import { ApiTags } from '@znight/openapi';
 
 import { Public } from '../../auth/infrastructure/decorators/public.metadata';
-import { HealthService } from './health.service';
+import { type HealthCheckResult, HealthService } from './health.service';
 
 @ApiTags('Health')
 @Controller('/health')
+@Public()
 export class HealthController {
   constructor(private readonly healthService: HealthService) {}
 
   @Get()
-  @Public()
-  @HealthCheck()
-  check() {
-    return this.healthService.check();
+  async check(): Promise<HttpResponse<HealthCheckResult>> {
+    const result = await this.healthService.check();
+    return new HttpResponse(result, { status: result.status === 'ok' ? 200 : 503 });
   }
 }

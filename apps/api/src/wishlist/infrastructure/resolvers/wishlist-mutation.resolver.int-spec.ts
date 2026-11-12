@@ -8,9 +8,9 @@ const GRAPHQL_PATH = '/graphql';
 /**
  * Integration tests for the GraphQL WishlistMutationResolver.
  *
- * GraphQL always returns HTTP 200; thrown Nest exceptions are mapped to typed
+ * GraphQL always returns HTTP 200; thrown exceptions are mapped to typed
  * rejections placed at data.<field>:
- *   ZodValidationException -> ValidationRejection
+ *   @Args schema failure -> ValidationRejection
  *   UnauthorizedException  -> UnauthorizedRejection
  *   NotFoundException      -> NotFoundRejection
  *   ForbiddenException     -> ForbiddenRejection

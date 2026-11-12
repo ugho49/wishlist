@@ -1,7 +1,7 @@
 import type { UserRepository } from '../../domain/repository/user.repository';
 import type { UserAccountRepository } from '../../domain/repository/user-account.repository';
 
-import { Logger, NotFoundException } from '@nestjs/common';
+import { NotFoundException } from '@znight/http';
 
 import { UserBuilder } from '../../../../test-utils/builders/user.builder';
 import { UserAccountBuilder } from '../../../../test-utils/builders/user-account.builder';
@@ -10,7 +10,7 @@ import { BucketService } from '../../../core/bucket/bucket.service';
 import { User } from '../../domain/model/user.model';
 import { UserAccount } from '../../domain/model/user-account.model';
 import { UpdateUserPictureFromAccountUseCase } from './update-user-picture-from-account.use-case';
-import { beforeAll, beforeEach, describe, expect, it, mock } from 'bun:test';
+import { beforeEach, describe, expect, it, mock } from 'bun:test';
 
 describe('UpdateUserPictureFromAccountUseCase', () => {
   const userRepository = createMock<UserRepository>();
@@ -20,10 +20,6 @@ describe('UpdateUserPictureFromAccountUseCase', () => {
   let useCase: UpdateUserPictureFromAccountUseCase;
   let user: User;
   let account: UserAccount;
-
-  beforeAll(() => {
-    Logger.overrideLogger(false);
-  });
 
   beforeEach(() => {
     mock.clearAllMocks();

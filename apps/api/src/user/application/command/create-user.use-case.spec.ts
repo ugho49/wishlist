@@ -1,10 +1,10 @@
-import type { EventBus } from '@nestjs/cqrs';
 import type { UserId } from '@wishlist/common';
 import type { UserRepository } from '../../domain/repository/user.repository';
 import type { UserAccountRepository } from '../../domain/repository/user-account.repository';
 
-import { Logger, UnauthorizedException } from '@nestjs/common';
 import { uuid } from '@wishlist/common';
+import { EventPublisher } from '@znight/events';
+import { UnauthorizedException } from '@znight/http';
 
 import { UserBuilder } from '../../../../test-utils/builders/user.builder';
 import { createMock } from '../../../../test-utils/mocks';
@@ -14,20 +14,16 @@ import { User } from '../../domain/model/user.model';
 import { UserAccount } from '../../domain/model/user-account.model';
 import { UserAccountProvider } from '../../domain/user-account-provider.enum';
 import { CreateUserUseCase } from './create-user.use-case';
-import { beforeAll, beforeEach, describe, expect, it, mock } from 'bun:test';
+import { beforeEach, describe, expect, it, mock } from 'bun:test';
 
 describe('CreateUserUseCase', () => {
   const userRepository = createMock<UserRepository>();
   const userAccountRepository = createMock<UserAccountRepository>();
   const transactionManager = createMock<TransactionManager>();
-  const eventBus = createMock<EventBus>();
+  const eventBus = createMock<EventPublisher>();
 
   let useCase: CreateUserUseCase;
   let userId: UserId;
-
-  beforeAll(() => {
-    Logger.overrideLogger(false);
-  });
 
   beforeEach(() => {
     mock.clearAllMocks();

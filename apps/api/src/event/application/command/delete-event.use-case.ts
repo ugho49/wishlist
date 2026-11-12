@@ -1,11 +1,12 @@
 import type { EventRepository } from '../../domain/repository/event.repository';
 import type { EventAttendeeRepository } from '../../domain/repository/event-attendee.repository';
 
-import { BadRequestException, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { type EventId, type ICurrentUser } from '@wishlist/common';
+import { Injectable } from '@znight/core';
+import { BadRequestException, UnauthorizedException } from '@znight/http';
+import { getLogger } from '@znight/observability';
 
 import { TransactionManager } from '../../../core/database/transaction-manager';
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { type WishlistRepository } from '../../../wishlist/domain/wishlist.repository';
 
 export type DeleteEventInput = {
@@ -15,17 +16,17 @@ export type DeleteEventInput = {
 
 @Injectable()
 export class DeleteEventUseCase {
-  private readonly logger = new Logger(DeleteEventUseCase.name);
+  private readonly logger = getLogger(DeleteEventUseCase.name);
 
   constructor(
-    @Inject(REPOSITORIES.EVENT) private readonly eventRepository: EventRepository,
-    @Inject(REPOSITORIES.EVENT_ATTENDEE) private readonly attendeeRepository: EventAttendeeRepository,
-    @Inject(REPOSITORIES.WISHLIST) private readonly wishlistRepository: WishlistRepository,
+    private readonly eventRepository: EventRepository,
+    private readonly attendeeRepository: EventAttendeeRepository,
+    private readonly wishlistRepository: WishlistRepository,
     private readonly transactionManager: TransactionManager,
   ) {}
 
   async execute(input: DeleteEventInput): Promise<void> {
-    this.logger.log('Delete event request received', { input });
+    this.logger.info('Delete event request received', { input });
     const { currentUser, eventId } = input;
 
     const event = await this.eventRepository.findByIdOrFail(eventId);
@@ -41,12 +42,12 @@ export class DeleteEventUseCase {
     }
 
     await this.transactionManager.runInTransaction(async tx => {
-      this.logger.log('Deleting attendees...', { eventId });
+      this.logger.info('Deleting attendees...', { eventId });
       for (const attendee of event.attendees) {
         await this.attendeeRepository.delete(attendee.id, tx);
       }
 
-      this.logger.log('Deleting event...', { eventId });
+      this.logger.info('Deleting event...', { eventId });
       await this.eventRepository.delete(event.id, tx);
     });
   }

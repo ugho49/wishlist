@@ -1,10 +1,11 @@
 import type { WishlistItemRepository } from '../../domain/wishlist-item.repository';
 
-import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { type ICurrentUser, type ItemId, type WishlistId } from '@wishlist/common';
+import { Injectable } from '@znight/core';
+import { UnauthorizedException } from '@znight/http';
+import { getLogger } from '@znight/observability';
 
 import { TransactionManager } from '../../../core/database/transaction-manager';
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { type WishlistRepository } from '../../../wishlist/domain/wishlist.repository';
 import { WishlistItem } from '../../domain/wishlist-item.model';
 
@@ -16,18 +17,16 @@ export type ImportItemsInput = {
 
 @Injectable()
 export class ImportItemsUseCase {
-  private readonly logger = new Logger(ImportItemsUseCase.name);
+  private readonly logger = getLogger(ImportItemsUseCase.name);
 
   constructor(
-    @Inject(REPOSITORIES.WISHLIST)
     private readonly wishlistRepository: WishlistRepository,
-    @Inject(REPOSITORIES.WISHLIST_ITEM)
     private readonly itemRepository: WishlistItemRepository,
     private readonly transactionManager: TransactionManager,
   ) {}
 
   async execute(command: ImportItemsInput): Promise<WishlistItem[]> {
-    this.logger.log('Import items request received', { command });
+    this.logger.info('Import items request received', { command });
     const wishlist = await this.wishlistRepository.findByIdOrFail(command.wishlistId);
     const hasAccess = await this.wishlistRepository.hasAccess({
       wishlistId: wishlist.id,
@@ -53,7 +52,7 @@ export class ImportItemsUseCase {
       item.exportTo({ id: this.itemRepository.newId(), wishlistId: wishlist.id }),
     );
 
-    this.logger.log('Creating items to import...', {
+    this.logger.info('Creating items to import...', {
       wishlistId: wishlist.id,
       itemsToImport: itemsToImport.map(item => item.id),
     });

@@ -1,19 +1,19 @@
-import { Inject, Injectable } from '@nestjs/common';
+import type { BucketConfig } from './bucket.config';
+
 import { uuid } from '@wishlist/common';
+import { getLogger } from '@znight/observability';
 import { cert, initializeApp } from 'firebase-admin/app';
 import { getStorage, Storage } from 'firebase-admin/storage';
 
-import { BucketConfig } from './bucket.config';
-import { BUCKET_CONFIG_TOKEN } from './bucket.module-definitions';
 import { BucketService } from './bucket.service';
 
-@Injectable()
 export class BucketRealService extends BucketService {
+  private readonly logger = getLogger(BucketRealService.name);
   private readonly storage: Storage;
 
-  constructor(@Inject(BUCKET_CONFIG_TOKEN) config: BucketConfig) {
-    super('real');
-    this.logger.log('Initializing firebase app ...', { certPath: config.firebaseServiceAccountKeyPath });
+  constructor(config: BucketConfig) {
+    super();
+    this.logger.info('Initializing firebase app ...', { certPath: config.firebaseServiceAccountKeyPath });
 
     const app = initializeApp({
       credential: cert(config.firebaseServiceAccountKeyPath),
@@ -23,7 +23,7 @@ export class BucketRealService extends BucketService {
   }
 
   async removeIfExist(param: { destination: string }): Promise<void> {
-    this.logger.log('Removing file...', { destination: param.destination });
+    this.logger.info('Removing file...', { destination: param.destination });
     await this.storage.bucket().deleteFiles({
       prefix: param.destination,
     });
@@ -31,7 +31,7 @@ export class BucketRealService extends BucketService {
 
   async upload(param: { destination: string; data: Buffer; contentType: string }): Promise<string> {
     try {
-      this.logger.log('Uploading file...', { destination: param.destination });
+      this.logger.info('Uploading file...', { destination: param.destination });
       const file = this.storage.bucket().file(param.destination);
       await file.save(param.data, { contentType: param.contentType, public: true });
       return file.publicUrl();
@@ -41,11 +41,11 @@ export class BucketRealService extends BucketService {
     }
   }
 
-  uploadFile(param: { destination: string; file: Express.Multer.File }): Promise<string> {
+  async uploadFile(param: { destination: string; file: File }): Promise<string> {
     return this.upload({
       destination: `${param.destination}/${uuid()}`,
-      data: param.file.buffer,
-      contentType: param.file.mimetype,
+      data: Buffer.from(await param.file.arrayBuffer()),
+      contentType: param.file.type,
     });
   }
 }

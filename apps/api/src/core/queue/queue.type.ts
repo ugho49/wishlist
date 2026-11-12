@@ -1,6 +1,5 @@
 import type { Job, RepeatOptions } from 'bullmq';
-
-import { QueueName, type QueueNamePayloadMap } from './queues.definitions';
+import type { QueueName } from './queues.definitions';
 
 export type QueueProcessorOptions = {
   concurrency: number;
@@ -18,12 +17,4 @@ export abstract class QueueProcessorBase {
   constructor(options: QueueProcessorOptions = defaultOptions) {
     this.options = { ...defaultOptions, ...options };
   }
-}
-
-export function QueueProcessor<T extends QueueName>(queueName: T) {
-  abstract class QueueProcessorImpl extends QueueProcessorBase {
-    override readonly queueName = queueName;
-    abstract override process(job: Job<QueueNamePayloadMap[T]>): Promise<void>;
-  }
-  return QueueProcessorImpl;
 }

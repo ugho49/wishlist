@@ -1,9 +1,9 @@
 import type { EventId, ICurrentUser } from '@wishlist/common';
 import type { SecretSantaUserRepository } from '../../domain/repository/secret-santa-user.repository';
 
-import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
-
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
+import { Injectable } from '@znight/core';
+import { NotFoundException } from '@znight/http';
+import { getLogger } from '@znight/observability';
 
 export type RevealSecretSantaDrawInput = {
   currentUser: ICurrentUser;
@@ -12,14 +12,12 @@ export type RevealSecretSantaDrawInput = {
 
 @Injectable()
 export class RevealSecretSantaDrawUseCase {
-  private readonly logger = new Logger(RevealSecretSantaDrawUseCase.name);
+  private readonly logger = getLogger(RevealSecretSantaDrawUseCase.name);
 
-  constructor(
-    @Inject(REPOSITORIES.SECRET_SANTA_USER) private readonly secretSantaUserRepository: SecretSantaUserRepository,
-  ) {}
+  constructor(private readonly secretSantaUserRepository: SecretSantaUserRepository) {}
 
   async execute(input: RevealSecretSantaDrawInput): Promise<void> {
-    this.logger.log('Reveal secret santa draw request received', {
+    this.logger.info('Reveal secret santa draw request received', {
       eventId: input.eventId,
       userId: input.currentUser.id,
     });

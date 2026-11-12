@@ -1,9 +1,9 @@
 import type { WishlistRepository } from '../../domain/wishlist.repository';
 
-import { BadRequestException, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { type EventId, type ICurrentUser, type WishlistId } from '@wishlist/common';
-
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
+import { Injectable } from '@znight/core';
+import { BadRequestException, UnauthorizedException } from '@znight/http';
+import { getLogger } from '@znight/observability';
 
 export type UnlinkWishlistFromEventInput = {
   currentUser: ICurrentUser;
@@ -13,15 +13,12 @@ export type UnlinkWishlistFromEventInput = {
 
 @Injectable()
 export class UnlinkWishlistFromEventUseCase {
-  private readonly logger = new Logger(UnlinkWishlistFromEventUseCase.name);
+  private readonly logger = getLogger(UnlinkWishlistFromEventUseCase.name);
 
-  constructor(
-    @Inject(REPOSITORIES.WISHLIST)
-    private readonly wishlistRepository: WishlistRepository,
-  ) {}
+  constructor(private readonly wishlistRepository: WishlistRepository) {}
 
   async execute(command: UnlinkWishlistFromEventInput): Promise<void> {
-    this.logger.log('Unlink wishlist from event request received', { command });
+    this.logger.info('Unlink wishlist from event request received', { command });
     const { currentUser, wishlistId, eventId } = command;
 
     // 1. Find wishlist and check ownership
@@ -43,7 +40,7 @@ export class UnlinkWishlistFromEventUseCase {
 
     // 4. Unlink wishlist from event
     const updatedWishlist = wishlist.unlinkEvent(eventId);
-    this.logger.log('Saving wishlist...', { wishlistId: updatedWishlist.id, updatedFields: ['eventIds'] });
+    this.logger.info('Saving wishlist...', { wishlistId: updatedWishlist.id, updatedFields: ['eventIds'] });
     await this.wishlistRepository.save(updatedWishlist);
   }
 }

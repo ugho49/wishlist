@@ -2,21 +2,17 @@
 // (see: https://docs.datadoghq.com/tracing/setup_overview/setup/nodejs?tabs=containers#installation-and-getting-started)
 import './tracer';
 
-import { Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { getLogger } from '@znight/observability';
 
-import { createApp } from './bootstrap';
+import { createApplication } from './.znight/container.generated';
+import { createPlugins } from './app';
+import { CoreConfig } from './core/core.config';
 
-async function bootstrap() {
-  const app = await createApp();
-  const configService = app.get(ConfigService);
-  const port = configService.get('PORT');
+const app = await createApplication({ plugins: createPlugins() });
+await app.start();
 
-  await app.listen(port, '0.0.0.0');
-
-  Logger.log(`📚 Swagger available on: http://localhost:${port}/swagger`);
-  Logger.log(`🚀 Application is running on: http://localhost:${port}`);
-  Logger.log(`🔗 GraphQL available on: http://localhost:${port}/graphql`);
-}
-
-void bootstrap();
+const port = app.container.get(CoreConfig).port;
+const logger = getLogger('Bootstrap');
+logger.info(`📚 Swagger available on: http://localhost:${port}/swagger`);
+logger.info(`🚀 Application is running on: http://localhost:${port}`);
+logger.info(`🔗 GraphQL available on: http://localhost:${port}/graphql`);

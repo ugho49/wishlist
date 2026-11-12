@@ -1,4 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, type Lazy } from '@znight/core';
+import { getLogger } from '@znight/observability';
 
 import { QueueService } from '../queue/queue.service';
 import { QueueName } from '../queue/queues.definitions';
@@ -6,13 +7,14 @@ import { type MailPayload } from './mail.type';
 
 @Injectable()
 export class MailService {
-  private readonly logger = new Logger(MailService.name);
+  private readonly logger = getLogger(MailService.name);
 
-  constructor(private readonly queueService: QueueService) {}
+  // Lazy: QueueService -> processors -> use cases -> MailService
+  constructor(private readonly queueService: Lazy<QueueService>) {}
 
   async sendMail(param: MailPayload) {
-    this.logger.log(`Publishing to queue ${QueueName.MAILS} in order to be processed`, { param });
+    this.logger.info(`Publishing to queue ${QueueName.MAILS} in order to be processed`, { param });
 
-    await this.queueService.addJob(QueueName.MAILS, 'send-mail', param);
+    await this.queueService.get().addJob(QueueName.MAILS, 'send-mail', param);
   }
 }

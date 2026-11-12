@@ -1,9 +1,7 @@
 import type { ReservedItem, ReservedItemPeriod, WishlistItemRepository } from '../../domain/wishlist-item.repository';
 
-import { Inject, Injectable } from '@nestjs/common';
 import { type UserId } from '@wishlist/common';
-
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
+import { Injectable } from '@znight/core';
 
 export type GetMyReservedItemsInput = {
   userId: UserId;
@@ -19,7 +17,7 @@ export type GetMyReservedItemsOutput = {
 
 @Injectable()
 export class GetMyReservedItemsUseCase {
-  constructor(@Inject(REPOSITORIES.WISHLIST_ITEM) private readonly itemRepository: WishlistItemRepository) {}
+  constructor(private readonly itemRepository: WishlistItemRepository) {}
 
   async execute(input: GetMyReservedItemsInput): Promise<GetMyReservedItemsOutput> {
     const skip = (input.pageNumber - 1) * input.pageSize;

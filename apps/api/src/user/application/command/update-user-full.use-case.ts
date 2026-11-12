@@ -2,12 +2,13 @@ import type { UserRepository } from '../../domain/repository/user.repository';
 import type { UserAccountRepository } from '../../domain/repository/user-account.repository';
 import type { UserSessionRepository } from '../../domain/repository/user-session.repository';
 
-import { BadRequestException, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { type ICurrentUser, type UserId } from '@wishlist/common';
+import { Injectable } from '@znight/core';
+import { BadRequestException, UnauthorizedException } from '@znight/http';
+import { getLogger } from '@znight/observability';
 
 import { PasswordManager } from '../../../auth/infrastructure/util/password-manager';
 import { TransactionManager } from '../../../core/database/transaction-manager';
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { UserAccount } from '../../domain/model/user-account.model';
 import { UserAccountProvider } from '../../domain/user-account-provider.enum';
 
@@ -26,20 +27,17 @@ export type UpdateUserFullInput = {
 
 @Injectable()
 export class UpdateUserFullUseCase {
-  private readonly logger = new Logger(UpdateUserFullUseCase.name);
+  private readonly logger = getLogger(UpdateUserFullUseCase.name);
 
   constructor(
-    @Inject(REPOSITORIES.USER)
     private readonly userRepository: UserRepository,
-    @Inject(REPOSITORIES.USER_ACCOUNT)
     private readonly userAccountRepository: UserAccountRepository,
-    @Inject(REPOSITORIES.USER_SESSION)
     private readonly sessionRepository: UserSessionRepository,
     private readonly transactionManager: TransactionManager,
   ) {}
 
   async execute(input: UpdateUserFullInput): Promise<void> {
-    this.logger.log('Update user full request received', { userId: input.userId });
+    this.logger.info('Update user full request received', { userId: input.userId });
     const { userId, currentUser, updateUser } = input;
 
     if (userId === currentUser.id) {
@@ -104,7 +102,7 @@ export class UpdateUserFullUseCase {
       updatedFields.push('isEnabled');
     }
 
-    this.logger.log('Updating user...', { userId, updatedFields });
+    this.logger.info('Updating user...', { userId, updatedFields });
     const shouldRevokeSessions = Boolean(updateUser.newPassword) || updateUser.isEnabled === false;
     await this.transactionManager.runInTransaction(async tx => {
       await this.userRepository.save(user, tx);

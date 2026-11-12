@@ -1,14 +1,12 @@
 import type { ICurrentUser } from '@wishlist/common';
 
-import { NotFoundException } from '@nestjs/common';
-import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { type AttendeeId, createPagedResponse, type EventId } from '@wishlist/common';
+import { Args, Loader, Mutation, Query, Resolver } from '@znight/graphql';
+import { NotFoundException } from '@znight/http';
 
 import { IsAdmin } from '../../../auth/infrastructure/decorators/admin.decorator';
-import { GqlCurrentUser } from '../../../auth/infrastructure/decorators/user.decorator';
+import { CurrentUser } from '../../../auth/infrastructure/decorators/user.decorator';
 import { DEFAULT_RESULT_NUMBER } from '../../../core/common/pagination';
-import { type GraphQLContext } from '../../../core/graphql/graphql.context';
-import { ZodPipe } from '../../../core/graphql/zod-pipe';
 import {
   type AdminDeleteEventAttendeeResult,
   type AdminDeleteEventResult,
@@ -28,6 +26,7 @@ import { UpdateEventUseCase } from '../../application/command/update-event.use-c
 import { GetAdminEventsStatsUseCase } from '../../application/query/get-admin-events-stats.use-case';
 import { GetEventsUseCase } from '../../application/query/get-events.use-case';
 import { GetEventsForUserUseCase } from '../../application/query/get-events-for-user.use-case';
+import { EventsById } from '../event.dataloader';
 import { eventMapper } from '../event.mapper';
 import {
   AdminEventPaginationFiltersSchema,
@@ -53,12 +52,11 @@ export class EventAdminResolver {
 
   @Query()
   async adminEvent(
-    @Args('id', new ZodPipe(EventIdSchema)) id: EventId,
-    @GqlCurrentUser() currentUser: ICurrentUser,
-    @Context() ctx: GraphQLContext,
+    @Args('id', EventIdSchema) id: EventId,
+    @Loader() eventsLoader: Loader<EventsById>,
   ): Promise<AdminGetEventByIdResult> {
     // canView returns true for admins, so the dataloader resolves any event.
-    const event = await ctx.loaders.getEventDataLoader(currentUser).load(id);
+    const event = await eventsLoader.load(id);
     if (!event) {
       throw new NotFoundException(`Event with id ${id} not found`);
     }
@@ -67,7 +65,7 @@ export class EventAdminResolver {
 
   @Query()
   async adminEvents(
-    @Args('filters', new ZodPipe(AdminEventPaginationFiltersSchema)) filters: AdminEventPaginationFilters,
+    @Args('filters', AdminEventPaginationFiltersSchema) filters: AdminEventPaginationFilters,
   ): Promise<AdminGetEventsResult> {
     const pageSize = filters.limit ?? DEFAULT_RESULT_NUMBER;
     const pageNumber = filters.page ?? 1;
@@ -126,9 +124,9 @@ export class EventAdminResolver {
 
   @Mutation()
   async adminUpdateEvent(
-    @Args('id', new ZodPipe(EventIdSchema)) id: EventId,
-    @Args('input', new ZodPipe(UpdateEventInputSchema)) input: UpdateEventInput,
-    @GqlCurrentUser() currentUser: ICurrentUser,
+    @Args('id', EventIdSchema) id: EventId,
+    @Args('input', UpdateEventInputSchema) input: UpdateEventInput,
+    @CurrentUser() currentUser: ICurrentUser,
   ): Promise<AdminUpdateEventResult> {
     await this.updateEventUseCase.execute({
       currentUser,
@@ -146,8 +144,8 @@ export class EventAdminResolver {
 
   @Mutation()
   async adminDeleteEvent(
-    @Args('id', new ZodPipe(EventIdSchema)) id: EventId,
-    @GqlCurrentUser() currentUser: ICurrentUser,
+    @Args('id', EventIdSchema) id: EventId,
+    @CurrentUser() currentUser: ICurrentUser,
   ): Promise<AdminDeleteEventResult> {
     await this.deleteEventUseCase.execute({ currentUser, eventId: id });
     return { __typename: 'VoidOutput', success: true };
@@ -155,9 +153,9 @@ export class EventAdminResolver {
 
   @Mutation()
   async adminDeleteEventAttendee(
-    @Args('eventId', new ZodPipe(EventIdSchema)) eventId: EventId,
-    @Args('attendeeId', new ZodPipe(AttendeeIdSchema)) attendeeId: AttendeeId,
-    @GqlCurrentUser() currentUser: ICurrentUser,
+    @Args('eventId', EventIdSchema) eventId: EventId,
+    @Args('attendeeId', AttendeeIdSchema) attendeeId: AttendeeId,
+    @CurrentUser() currentUser: ICurrentUser,
   ): Promise<AdminDeleteEventAttendeeResult> {
     await this.deleteAttendeeUseCase.execute({ currentUser, eventId, attendeeId });
     return { __typename: 'VoidOutput', success: true };
@@ -165,10 +163,10 @@ export class EventAdminResolver {
 
   @Mutation()
   async adminUpdateEventAttendeeRole(
-    @Args('eventId', new ZodPipe(EventIdSchema)) eventId: EventId,
-    @Args('attendeeId', new ZodPipe(AttendeeIdSchema)) attendeeId: AttendeeId,
-    @Args('role', new ZodPipe(GqlAttendeeRoleSchema)) role: GqlAttendeeRole,
-    @GqlCurrentUser() currentUser: ICurrentUser,
+    @Args('eventId', EventIdSchema) eventId: EventId,
+    @Args('attendeeId', AttendeeIdSchema) attendeeId: AttendeeId,
+    @Args('role', GqlAttendeeRoleSchema) role: GqlAttendeeRole,
+    @CurrentUser() currentUser: ICurrentUser,
   ): Promise<AdminUpdateEventAttendeeRoleResult> {
     await this.updateAttendeeRoleUseCase.execute({
       currentUser,

@@ -1,11 +1,12 @@
-import { Query, Resolver } from '@nestjs/graphql';
+import { Query, Resolver } from '@znight/graphql';
 import { match } from 'ts-pattern';
 
-import { Public } from '../../auth/infrastructure/decorators/public.metadata';
+import { Authenticated, Public } from '../../auth/infrastructure/decorators/public.metadata';
 import { type HealthResult, HealthStatus } from '../../gql/generated-types';
 import { HealthService } from './health.service';
 
 @Resolver()
+@Authenticated()
 export class HealthResolver {
   constructor(private readonly healthService: HealthService) {}
 
@@ -16,8 +17,6 @@ export class HealthResolver {
     const status = match(health.status)
       .with('error', () => HealthStatus.Error)
       .with('ok', () => HealthStatus.Ok)
-      .with('shutting_down', () => HealthStatus.ShuttingDown)
-      .with('degraded', () => HealthStatus.Degraded)
       .exhaustive();
 
     return { __typename: 'HealthResult', status };

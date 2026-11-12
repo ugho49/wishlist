@@ -2,10 +2,11 @@ import type { AttendeeId, ICurrentUser, SecretSantaId } from '@wishlist/common';
 import type { SecretSantaRepository } from '../../domain/repository/secret-santa.repository';
 import type { SecretSantaUserRepository } from '../../domain/repository/secret-santa-user.repository';
 
-import { BadRequestException, ForbiddenException, Inject, Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@znight/core';
+import { BadRequestException, ForbiddenException } from '@znight/http';
+import { getLogger } from '@znight/observability';
 
 import { type EventRepository } from '../../../event/domain/repository/event.repository';
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { SecretSantaUser } from '../../domain/model/secret-santa-user.model';
 
 export type AddSecretSantaUsersInput = {
@@ -20,16 +21,16 @@ export type AddSecretSantaUsersResult = {
 
 @Injectable()
 export class AddSecretSantaUsersUseCase {
-  private readonly logger = new Logger(AddSecretSantaUsersUseCase.name);
+  private readonly logger = getLogger(AddSecretSantaUsersUseCase.name);
 
   constructor(
-    @Inject(REPOSITORIES.SECRET_SANTA) private readonly secretSantaRepository: SecretSantaRepository,
-    @Inject(REPOSITORIES.SECRET_SANTA_USER) private readonly secretSantaUserRepository: SecretSantaUserRepository,
-    @Inject(REPOSITORIES.EVENT) private readonly eventRepository: EventRepository,
+    private readonly secretSantaRepository: SecretSantaRepository,
+    private readonly secretSantaUserRepository: SecretSantaUserRepository,
+    private readonly eventRepository: EventRepository,
   ) {}
 
   async execute(command: AddSecretSantaUsersInput): Promise<AddSecretSantaUsersResult> {
-    this.logger.log('Add secret santa users request received', { command });
+    this.logger.info('Add secret santa users request received', { command });
     const secretSanta = await this.secretSantaRepository.findByIdOrFail(command.secretSantaId);
     const event = await this.eventRepository.findByIdOrFail(secretSanta.eventId);
 
@@ -59,7 +60,7 @@ export class AddSecretSantaUsersUseCase {
       }),
     );
 
-    this.logger.log('Creating secret santa users...', { secretSantaId: secretSanta.id, users });
+    this.logger.info('Creating secret santa users...', { secretSantaId: secretSanta.id, users });
     await this.secretSantaUserRepository.saveAll(users);
 
     return { users };

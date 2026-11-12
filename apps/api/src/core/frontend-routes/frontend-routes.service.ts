@@ -1,14 +1,13 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@znight/core';
 
+import { CoreConfig } from '../core.config';
 import { frontendRoutesBuilder } from './frontend-routes.builder';
-import { FrontendRoutesConfig } from './frontend-routes.config';
-import { FRONTEND_ROUTES_CONFIG_TOKEN } from './frontend-routes.module-definitions';
 
 @Injectable()
 export class FrontendRoutesService {
-  constructor(@Inject(FRONTEND_ROUTES_CONFIG_TOKEN) public readonly config: FrontendRoutesConfig) {}
+  constructor(private readonly config: CoreConfig) {}
 
   get routes() {
-    return frontendRoutesBuilder(this.config.baseUrl);
+    return frontendRoutesBuilder(this.config.frontendBaseUrl);
   }
 }

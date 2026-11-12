@@ -8,7 +8,7 @@ const GRAPHQL_PATH = '/graphql';
 /**
  * Integration tests for the GraphQL WishlistAdminResolver (@IsAdmin).
  *
- * GraphQL always returns HTTP 200; thrown Nest exceptions are mapped to typed
+ * GraphQL always returns HTTP 200; thrown exceptions are mapped to typed
  * rejections placed at data.<field>. A non-admin authenticated user is rejected
  * with a ForbiddenRejection.
  */

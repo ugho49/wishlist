@@ -1,6 +1,6 @@
 import type { UserEmailSettingRepository } from '../../domain/repository/user-email-setting.repository';
 
-import { Logger, NotFoundException } from '@nestjs/common';
+import { NotFoundException } from '@znight/http';
 
 import { toCurrentUser, UserBuilder } from '../../../../test-utils/builders/user.builder';
 import { UserEmailSettingBuilder } from '../../../../test-utils/builders/user-email-setting.builder';
@@ -8,7 +8,7 @@ import { createMock } from '../../../../test-utils/mocks';
 import { User } from '../../domain/model/user.model';
 import { UserEmailSetting } from '../../domain/model/user-email-setting.model';
 import { GetUserEmailSettingUseCase } from './get-user-email-setting.use-case';
-import { beforeAll, beforeEach, describe, expect, it, mock } from 'bun:test';
+import { beforeEach, describe, expect, it, mock } from 'bun:test';
 
 describe('GetUserEmailSettingUseCase', () => {
   const userEmailSettingRepository = createMock<UserEmailSettingRepository>();
@@ -16,10 +16,6 @@ describe('GetUserEmailSettingUseCase', () => {
   let useCase: GetUserEmailSettingUseCase;
   let user: User;
   let userEmailSetting: UserEmailSetting;
-
-  beforeAll(() => {
-    Logger.overrideLogger(false);
-  });
 
   beforeEach(() => {
     mock.clearAllMocks();

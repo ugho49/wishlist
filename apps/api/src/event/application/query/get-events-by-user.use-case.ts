@@ -1,10 +1,8 @@
 import type { Event } from '../../domain/model/event.model';
 import type { EventRepository } from '../../domain/repository/event.repository';
 
-import { Inject, Injectable } from '@nestjs/common';
 import { type UserId } from '@wishlist/common';
-
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
+import { Injectable } from '@znight/core';
 
 type GetEventsByUserInput = {
   userId: UserId;
@@ -20,7 +18,7 @@ type GetEventsByUserResult = {
 
 @Injectable()
 export class GetEventsByUserUseCase {
-  constructor(@Inject(REPOSITORIES.EVENT) private readonly eventRepository: EventRepository) {}
+  constructor(private readonly eventRepository: EventRepository) {}
 
   async execute(input: GetEventsByUserInput): Promise<GetEventsByUserResult> {
     const { userId, pageNumber, pageSize, ignorePastEvents } = input;

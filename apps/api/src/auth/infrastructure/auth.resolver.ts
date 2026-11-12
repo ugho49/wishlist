@@ -1,7 +1,5 @@
-import { Args, Context, Mutation, Resolver } from '@nestjs/graphql';
+import { Args, Ctx, type GraphQLContext, Mutation, Resolver } from '@znight/graphql';
 
-import { type GraphQLContext } from '../../core/graphql/graphql.context';
-import { ZodPipe } from '../../core/graphql/zod-pipe';
 import {
   type LoginInput,
   type LoginResult,
@@ -35,15 +33,12 @@ export class AuthResolver {
   ) {}
 
   @Mutation()
-  async login(
-    @Args('input', new ZodPipe(LoginInputSchema)) input: LoginInput,
-    @Context() ctx: GraphQLContext,
-  ): Promise<LoginResult> {
+  async login(@Args('input', LoginInputSchema) input: LoginInput, @Ctx() ctx: GraphQLContext): Promise<LoginResult> {
     const result = await this.loginUseCase.execute({
       email: input.email,
       password: input.password,
-      ip: ctx.parsedRequest.ip,
-      userAgent: ctx.parsedRequest.userAgent,
+      ip: ctx.http?.ip,
+      userAgent: ctx.http?.header('user-agent'),
     });
 
     return {
@@ -55,14 +50,14 @@ export class AuthResolver {
 
   @Mutation()
   async loginWithGoogle(
-    @Args('input', new ZodPipe(LoginWithGoogleInputSchema)) input: LoginWithGoogleInput,
-    @Context() ctx: GraphQLContext,
+    @Args('input', LoginWithGoogleInputSchema) input: LoginWithGoogleInput,
+    @Ctx() ctx: GraphQLContext,
   ): Promise<LoginWithGoogleResult> {
     const result = await this.loginWithGoogleUseCase.execute({
       code: input.code,
       createUserIfNotExists: input.createUserIfNotExists,
-      ip: ctx.parsedRequest.ip,
-      userAgent: ctx.parsedRequest.userAgent,
+      ip: ctx.http?.ip,
+      userAgent: ctx.http?.header('user-agent'),
     });
 
     return {
@@ -76,13 +71,13 @@ export class AuthResolver {
 
   @Mutation()
   async refreshSession(
-    @Args('input', new ZodPipe(RefreshSessionInputSchema)) input: RefreshSessionInput,
-    @Context() ctx: GraphQLContext,
+    @Args('input', RefreshSessionInputSchema) input: RefreshSessionInput,
+    @Ctx() ctx: GraphQLContext,
   ): Promise<RefreshSessionResult> {
     const result = await this.refreshSessionUseCase.execute({
       refreshToken: input.refreshToken,
-      ip: ctx.parsedRequest.ip,
-      userAgent: ctx.parsedRequest.userAgent,
+      ip: ctx.http?.ip,
+      userAgent: ctx.http?.header('user-agent'),
     });
 
     return {
@@ -93,7 +88,7 @@ export class AuthResolver {
   }
 
   @Mutation()
-  async logout(@Args('input', new ZodPipe(LogoutInputSchema)) input: LogoutInput): Promise<LogoutResult> {
+  async logout(@Args('input', LogoutInputSchema) input: LogoutInput): Promise<LogoutResult> {
     await this.logoutUseCase.execute({ refreshToken: input.refreshToken });
     return { __typename: 'VoidOutput', success: true };
   }

@@ -2,18 +2,12 @@ import type { WishlistItemRepository } from '../../../item/domain/wishlist-item.
 import type { EventRepository } from '../../domain/repository/event.repository';
 import type { EventAttendeeRepository } from '../../domain/repository/event-attendee.repository';
 
-import {
-  ConflictException,
-  Inject,
-  Injectable,
-  Logger,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
 import { type AttendeeId, type EventId, type ICurrentUser } from '@wishlist/common';
+import { Injectable } from '@znight/core';
+import { ConflictException, NotFoundException, UnauthorizedException } from '@znight/http';
+import { getLogger } from '@znight/observability';
 
 import { TransactionManager } from '../../../core/database/transaction-manager';
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { type WishlistRepository } from '../../../wishlist/domain/wishlist.repository';
 
 export type DeleteAttendeeInput = {
@@ -24,22 +18,18 @@ export type DeleteAttendeeInput = {
 
 @Injectable()
 export class DeleteAttendeeUseCase {
-  private readonly logger = new Logger(DeleteAttendeeUseCase.name);
+  private readonly logger = getLogger(DeleteAttendeeUseCase.name);
 
   constructor(
-    @Inject(REPOSITORIES.EVENT_ATTENDEE)
     private readonly attendeeRepository: EventAttendeeRepository,
-    @Inject(REPOSITORIES.EVENT)
     private readonly eventRepository: EventRepository,
-    @Inject(REPOSITORIES.WISHLIST)
     private readonly wishlistRepository: WishlistRepository,
-    @Inject(REPOSITORIES.WISHLIST_ITEM)
     private readonly itemRepository: WishlistItemRepository,
     private readonly transactionManager: TransactionManager,
   ) {}
 
   async execute(input: DeleteAttendeeInput): Promise<void> {
-    this.logger.log('Delete attendee request received', { input });
+    this.logger.info('Delete attendee request received', { input });
     const { attendeeId, currentUser, eventId } = input;
 
     const event = await this.eventRepository.findByIdOrFail(eventId);
@@ -72,33 +62,33 @@ export class DeleteAttendeeUseCase {
           );
 
     await this.transactionManager.runInTransaction(async tx => {
-      this.logger.log('Removing attendee from event...', { attendeeId, eventId });
+      this.logger.info('Removing attendee from event...', { attendeeId, eventId });
       // Remove the attendee from the event
       await this.attendeeRepository.delete(attendeeId, tx);
 
-      this.logger.log('Checking wishlists where the attendee is the owner...', { eventId, attendeeId });
+      this.logger.info('Checking wishlists where the attendee is the owner...', { eventId, attendeeId });
       // Check if this is ok for the wishlists
       for (const wishlist of attendeeWishlistsForEvent) {
         if (wishlist.eventIds.length > 1) {
-          this.logger.log('Unlinking event from wishlist...', { wishlistId: wishlist.id, eventId: attendee.eventId });
+          this.logger.info('Unlinking event from wishlist...', { wishlistId: wishlist.id, eventId: attendee.eventId });
           const updatedWishlist = wishlist.unlinkEvent(attendee.eventId);
           await this.wishlistRepository.save(updatedWishlist, tx);
           continue;
         }
 
         if (wishlist.eventIds.length === 1) {
-          this.logger.log('Checking if the wishlist has items...', { wishlistId: wishlist.id });
+          this.logger.info('Checking if the wishlist has items...', { wishlistId: wishlist.id });
           const items = await this.itemRepository.findByWishlist(wishlist.id);
 
           if (items.length > 0) {
-            this.logger.log('The wishlist has items...', { wishlistId: wishlist.id });
+            this.logger.info('The wishlist has items...', { wishlistId: wishlist.id });
             throw new ConflictException(
               'You cannot remove this attendee from the event because he have a list in this event and the list have only this event attached',
             );
           }
         }
 
-        this.logger.log('Deleting wishlist...', { wishlistId: wishlist.id });
+        this.logger.info('Deleting wishlist...', { wishlistId: wishlist.id });
         await this.wishlistRepository.delete(wishlist.id, tx);
       }
     });

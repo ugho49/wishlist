@@ -2,12 +2,13 @@ import type { ICurrentUser, SecretSantaId } from '@wishlist/common';
 import type { SecretSantaRepository } from '../../domain/repository/secret-santa.repository';
 import type { SecretSantaUserRepository } from '../../domain/repository/secret-santa-user.repository';
 
-import { BadRequestException, ForbiddenException, Inject, Injectable, Logger } from '@nestjs/common';
-import { EventBus } from '@nestjs/cqrs';
+import { Injectable } from '@znight/core';
+import { EventPublisher } from '@znight/events';
+import { BadRequestException, ForbiddenException } from '@znight/http';
+import { getLogger } from '@znight/observability';
 
 import { TransactionManager } from '../../../core/database/transaction-manager';
 import { type EventRepository } from '../../../event/domain/repository/event.repository';
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { SecretSantaStartedEvent } from '../../domain/event/secret-santa-started.event';
 
 export type StartSecretSantaInput = {
@@ -17,18 +18,18 @@ export type StartSecretSantaInput = {
 
 @Injectable()
 export class StartSecretSantaUseCase {
-  private readonly logger = new Logger(StartSecretSantaUseCase.name);
+  private readonly logger = getLogger(StartSecretSantaUseCase.name);
 
   constructor(
-    @Inject(REPOSITORIES.SECRET_SANTA) private readonly secretSantaRepository: SecretSantaRepository,
-    @Inject(REPOSITORIES.SECRET_SANTA_USER) private readonly secretSantaUserRepository: SecretSantaUserRepository,
-    @Inject(REPOSITORIES.EVENT) private readonly eventRepository: EventRepository,
-    private readonly eventBus: EventBus,
+    private readonly secretSantaRepository: SecretSantaRepository,
+    private readonly secretSantaUserRepository: SecretSantaUserRepository,
+    private readonly eventRepository: EventRepository,
+    private readonly eventBus: EventPublisher,
     private readonly transactionManager: TransactionManager,
   ) {}
 
   async execute(command: StartSecretSantaInput): Promise<void> {
-    this.logger.log('Start secret santa request received', { command });
+    this.logger.info('Start secret santa request received', { command });
     let secretSanta = await this.secretSantaRepository.findByIdOrFail(command.secretSantaId);
 
     const event = await this.eventRepository.findByIdOrFail(secretSanta.eventId);
@@ -46,13 +47,15 @@ export class StartSecretSantaUseCase {
     }
 
     try {
-      this.logger.log('Starting secret santa and assigning draw...', { secretSantaId: secretSanta.id });
+      this.logger.info('Starting secret santa and assigning draw...', { secretSantaId: secretSanta.id });
       secretSanta = secretSanta.startAndAssignDraw();
     } catch (error) {
-      throw new BadRequestException(error);
+      throw new BadRequestException(error instanceof Error ? error.message : String(error), undefined, {
+        cause: error,
+      });
     }
 
-    this.logger.log('Saving secret santa...', { secretSantaId: secretSanta.id, secretSanta });
+    this.logger.info('Saving secret santa...', { secretSantaId: secretSanta.id, secretSanta });
     await this.transactionManager.runInTransaction(async tx => {
       await this.secretSantaUserRepository.saveAll(secretSanta.users, tx);
       await this.secretSantaRepository.save(secretSanta, tx);

@@ -1,22 +1,21 @@
-import type { ConfigType } from '@nestjs/config';
-import type { JwtService } from '@nestjs/jwt';
 import type { UserSessionId } from '@wishlist/common';
 import type { UserRepository } from '../../../user/domain/repository/user.repository';
 import type { UserAccountRepository } from '../../../user/domain/repository/user-account.repository';
 import type { UserSessionRepository } from '../../../user/domain/repository/user-session.repository';
+import type { AuthConfig } from '../../infrastructure/auth.config';
+import type { TokenService } from '../../infrastructure/token.service';
 
-import { Logger, UnauthorizedException } from '@nestjs/common';
 import { uuid } from '@wishlist/common';
+import { UnauthorizedException } from '@znight/http';
 
 import { UserBuilder } from '../../../../test-utils/builders/user.builder';
 import { UserAccountBuilder } from '../../../../test-utils/builders/user-account.builder';
 import { createMock } from '../../../../test-utils/mocks';
 import { User } from '../../../user/domain/model/user.model';
 import { UserSession } from '../../../user/domain/model/user-session.model';
-import authConfig from '../../infrastructure/auth.config';
 import { PasswordManager } from '../../infrastructure/util/password-manager';
 import { LoginUseCase } from './login.use-case';
-import { beforeAll, beforeEach, describe, expect, it, mock } from 'bun:test';
+import { beforeEach, describe, expect, it, mock } from 'bun:test';
 
 const PASSWORD = 'Secret123!';
 
@@ -24,17 +23,13 @@ describe('LoginUseCase', () => {
   const userRepository = createMock<UserRepository>();
   const userAccountRepository = createMock<UserAccountRepository>();
   const sessionRepository = createMock<UserSessionRepository>();
-  const jwtService = createMock<JwtService>();
-  const config = { refreshToken: { duration: '30d' } } as ConfigType<typeof authConfig>;
+  const tokenService = createMock<TokenService>();
+  const config = { refreshTokenDuration: '30d' } as AuthConfig;
 
   let useCase: LoginUseCase;
   let user: User;
   let passwordHash: string;
   let sessionId: UserSessionId;
-
-  beforeAll(() => {
-    Logger.overrideLogger(false);
-  });
 
   beforeEach(async () => {
     mock.clearAllMocks();
@@ -47,9 +42,9 @@ describe('LoginUseCase', () => {
       new UserAccountBuilder().buildPassword(user, passwordHash),
     );
     sessionRepository.newId.mockReturnValue(sessionId);
-    jwtService.sign.mockReturnValue('token');
+    tokenService.sign.mockResolvedValue('token');
 
-    useCase = new LoginUseCase(userRepository, userAccountRepository, sessionRepository, config, jwtService);
+    useCase = new LoginUseCase(userRepository, userAccountRepository, sessionRepository, config, tokenService);
   });
 
   it('should reject when the user does not exist', async () => {
@@ -59,7 +54,7 @@ describe('LoginUseCase', () => {
       UnauthorizedException,
     );
     expect(sessionRepository.save).not.toHaveBeenCalled();
-    expect(jwtService.sign).not.toHaveBeenCalled();
+    expect(tokenService.sign).not.toHaveBeenCalled();
   });
 
   it('should reject when the user is disabled', async () => {
@@ -98,7 +93,7 @@ describe('LoginUseCase', () => {
     expect(result.accessToken).toBe('token');
     expect(result.refreshToken).toBeString();
     expect(result.refreshToken.length).toBeGreaterThan(0);
-    expect(jwtService.sign).toHaveBeenCalledWith({
+    expect(tokenService.sign).toHaveBeenCalledWith({
       sub: user.id,
       email: user.email,
       authorities: user.authorities,

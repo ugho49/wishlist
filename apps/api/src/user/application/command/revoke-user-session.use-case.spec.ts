@@ -1,23 +1,19 @@
 import type { UserSessionRepository } from '../../domain/repository/user-session.repository';
 
-import { Logger, NotFoundException } from '@nestjs/common';
+import { NotFoundException } from '@znight/http';
 
 import { toCurrentUser, UserBuilder } from '../../../../test-utils/builders/user.builder';
 import { UserSessionBuilder } from '../../../../test-utils/builders/user-session.builder';
 import { createMock } from '../../../../test-utils/mocks';
 import { User } from '../../domain/model/user.model';
 import { RevokeUserSessionUseCase } from './revoke-user-session.use-case';
-import { beforeAll, beforeEach, describe, expect, it, mock } from 'bun:test';
+import { beforeEach, describe, expect, it, mock } from 'bun:test';
 
 describe('RevokeUserSessionUseCase', () => {
   const sessionRepository = createMock<UserSessionRepository>();
 
   let useCase: RevokeUserSessionUseCase;
   let user: User;
-
-  beforeAll(() => {
-    Logger.overrideLogger(false);
-  });
 
   beforeEach(() => {
     mock.clearAllMocks();

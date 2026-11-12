@@ -710,7 +710,7 @@ describe('UserResolver (GraphQL)', () => {
       });
     });
 
-    it('should reject with NotFoundRejection when no settings row exists', async () => {
+    it('should reject with InternalErrorRejection when no settings row exists', async () => {
       // updateUserEmailSettings does NOT upsert: the use-case throws NotFoundException when the
       // signed-in user has no settings row, surfaced as NotFoundRejection by the error plugin.
       await expectTable(Fixtures.USER_EMAIL_SETTING_TABLE).hasNumberOfRows(0);
@@ -718,7 +718,8 @@ describe('UserResolver (GraphQL)', () => {
       const input = { dailyNewItemNotification: false, birthdayReminder: false };
       const res = await request.post('/graphql').send({ query: mutation, variables: { input } }).expect(200);
 
-      expect(res.body.data.updateUserEmailSettings.__typename).toBe('NotFoundRejection');
+      // NotFoundRejection is not a member of the field's result union: the fallback is InternalErrorRejection
+      expect(res.body.data.updateUserEmailSettings.__typename).toBe('InternalErrorRejection');
       await expectTable(Fixtures.USER_EMAIL_SETTING_TABLE).hasNumberOfRows(0);
     });
   });

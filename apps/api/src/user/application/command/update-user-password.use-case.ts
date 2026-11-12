@@ -2,12 +2,12 @@ import type { UserRepository } from '../../domain/repository/user.repository';
 import type { UserAccountRepository } from '../../domain/repository/user-account.repository';
 import type { UserSessionRepository } from '../../domain/repository/user-session.repository';
 
-import { Inject, Injectable, Logger } from '@nestjs/common';
 import { type ICurrentUser } from '@wishlist/common';
+import { Injectable } from '@znight/core';
+import { getLogger } from '@znight/observability';
 
 import { PasswordManager } from '../../../auth/infrastructure/util/password-manager';
 import { BusinessRuleException } from '../../../core/common/business-rule.exception';
-import { REPOSITORIES } from '../../../repositories/repositories.constants';
 import { UserAccountProvider } from '../../domain/user-account-provider.enum';
 
 export type UpdateUserPasswordInput = {
@@ -18,19 +18,16 @@ export type UpdateUserPasswordInput = {
 
 @Injectable()
 export class UpdateUserPasswordUseCase {
-  private readonly logger = new Logger(UpdateUserPasswordUseCase.name);
+  private readonly logger = getLogger(UpdateUserPasswordUseCase.name);
 
   constructor(
-    @Inject(REPOSITORIES.USER)
     private readonly userRepository: UserRepository,
-    @Inject(REPOSITORIES.USER_ACCOUNT)
     private readonly userAccountRepository: UserAccountRepository,
-    @Inject(REPOSITORIES.USER_SESSION)
     private readonly sessionRepository: UserSessionRepository,
   ) {}
 
   async execute(input: UpdateUserPasswordInput): Promise<void> {
-    this.logger.log('Update user password request received', { userId: input.currentUser.id });
+    this.logger.info('Update user password request received', { userId: input.currentUser.id });
     const { currentUser, oldPassword, newPassword } = input;
     const userId = currentUser.id;
 
@@ -50,7 +47,7 @@ export class UpdateUserPasswordUseCase {
 
     const updatedAccount = passwordAccount.updatePasswordHash(await PasswordManager.hash(newPassword));
 
-    this.logger.log('Saving password account...', { userId, updatedFields: ['password'] });
+    this.logger.info('Saving password account...', { userId, updatedFields: ['password'] });
     await this.userAccountRepository.save(updatedAccount);
     await this.sessionRepository.revokeAllByUserId(userId, { exceptId: currentUser.sessionId });
   }

@@ -1,17 +1,4 @@
-import { applyDecorators, SetMetadata, UseGuards } from '@nestjs/common';
-import { ApiExcludeController } from '@nestjs/swagger';
+import { createRouteDecorator } from '@znight/http';
 
-import { Authorities } from '../../../user/domain/authorities.enum';
-import { AuthorityGuard } from '../guards/authority.guard';
-import { HasAuthoritiesMetadataKey, type HasAuthoritiesMetadataParamType } from './authority.metadata';
-
-export function IsAdmin() {
-  return applyDecorators(
-    SetMetadata<string, HasAuthoritiesMetadataParamType>(HasAuthoritiesMetadataKey, {
-      authorities: [Authorities.ROLE_SUPERADMIN, Authorities.ROLE_ADMIN],
-      condition: 'OR',
-    }),
-    UseGuards(AuthorityGuard),
-    ApiExcludeController(),
-  );
-}
+/** Needs a valid access token carrying `ROLE_ADMIN` or `ROLE_SUPERADMIN`. */
+export const IsAdmin = createRouteDecorator('admin', { group: 'access', required: true });
