@@ -10,7 +10,7 @@ export class BucketRealService extends BucketService {
   private readonly storage: Storage;
 
   constructor(config: BucketConfig) {
-    super('real');
+    super();
     this.logger.info('Initializing firebase app ...', { certPath: config.firebaseServiceAccountKeyPath });
 
     const app = initializeApp({

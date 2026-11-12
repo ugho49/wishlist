@@ -1,10 +1,6 @@
 import { BucketService } from './bucket.service';
 
 export class BucketMockService extends BucketService {
-  constructor() {
-    super('mock');
-  }
-
   removeIfExist(param: { destination: string }): Promise<void> {
     this.logger.info({ destination: param.destination }, 'Remove file');
     return Promise.resolve();
