@@ -30,12 +30,16 @@ export function createPlugins(options: AppPluginsOptions = {}): Plugin[] {
   return [
     // Bun already loads `.env` into process.env (with ${VAR} expansion)
     ConfigPlugin.configure({ loaders: [env({ env: process.env })] }),
-    ObservabilityPlugin.configure({
-      logging: { ...loggingOptions(SERVICE_NAME), ...(options.logLevel ? { level: options.logLevel } : {}) },
+    ObservabilityPlugin.configure(container => ({
+      logging: {
+        // human-readable logs outside production (NODE_ENV), JSON logs for Datadog in production
+        ...loggingOptions(SERVICE_NAME, { pretty: !container.get(CoreConfig).isProduction }),
+        ...(options.logLevel ? { level: options.logLevel } : {}),
+      },
       // dd-trace instruments the server (see tracer.ts)
       tracing: false,
       metrics: false,
-    }),
+    })),
     EventsPlugin.configure(),
     HttpPlugin.configure(container => ({
       port: options.port ?? container.get(CoreConfig).port,
@@ -46,13 +50,15 @@ export function createPlugins(options: AppPluginsOptions = {}): Plugin[] {
       guards: [AuthenticationGuard, AccessGuard],
       exceptionMappers: [DatadogErrorTracker, UploadExceptionMapper],
     })),
-    GraphQLPlugin.configure({
+    GraphQLPlugin.configure(container => ({
       // The endpoint is open: decisions are taken per root field by the AccessGuard
       http: { meta: [Public.meta()], get: false },
       guards: [AccessGuard],
       resultMappers: [RejectionResultMapper, InternalErrorResultMapper],
-      graphiql: false,
-    }),
+      // GraphiQL on GET /graphql (accept: text/html) outside production; introspection follows NODE_ENV too
+      graphiql: !container.get(CoreConfig).isProduction,
+      introspection: !container.get(CoreConfig).isProduction,
+    })),
     OpenApiPlugin.configure({ ui: 'swagger', uiPath: '/swagger', meta: [Public.meta()] }),
   ];
 }

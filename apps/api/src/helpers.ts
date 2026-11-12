@@ -43,12 +43,10 @@ export function renameErrKey(entry: Record<string, unknown>): Record<string, unk
 /**
  * Logs shaped for Datadog, close to the previous pino-http setup: `message` / `error` keys, ISO
  * `timestamp`, level label, request id, client IP and current user in the request entries, message id
- * and job in the BullMQ job entries, Datadog trace ids, pretty output outside production, `/health`
- * not logged.
+ * and job in the BullMQ job entries, Datadog trace ids, `/health` not logged. `pretty`: human-readable
+ * output through pino-pretty (outside production), JSON otherwise.
  */
-export function loggingOptions(serviceName: string): LoggingOptions {
-  const pretty = process.env.NODE_ENV !== 'production';
-
+export function loggingOptions(serviceName: string, { pretty }: { pretty: boolean }): LoggingOptions {
   return {
     level: 'info',
     name: serviceName,
