@@ -4,7 +4,6 @@ import dotenv from 'dotenv';
 import { drizzle } from 'drizzle-orm/bun-sql';
 import { reset } from 'drizzle-seed';
 
-import { createSqlClient } from '../src/core/database/create-sql-client';
 import * as schema from './schema';
 import { seedEvents } from './seeders/event.seeder';
 import { seedEventAttendees } from './seeders/event-attendee.seeder';
@@ -48,8 +47,9 @@ async function checkDatabaseConnection(client: SQL) {
 async function main() {
   consola.box('Database seeding');
 
-  const client = createSqlClient({
-    host: requiredEnv('DB_HOST'),
+  const client = new SQL({
+    adapter: 'postgres',
+    hostname: requiredEnv('DB_HOST'),
     port: Number.parseInt(requiredEnv('DB_PORT'), 10),
     username: requiredEnv('DB_USERNAME'),
     password: requiredEnv('DB_PASSWORD'),
