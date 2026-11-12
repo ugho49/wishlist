@@ -23,14 +23,14 @@
         "@tanstack/react-query-devtools": "5.105.3",
         "@tanstack/react-router": "1.170.46",
         "@tanstack/router-devtools": "1.167.2",
-        "@znight/compiler": "0.9.0",
-        "@znight/config": "0.9.0",
-        "@znight/core": "0.9.0",
-        "@znight/events": "0.9.0",
-        "@znight/graphql": "0.9.0",
-        "@znight/http": "0.9.0",
-        "@znight/observability": "0.9.0",
-        "@znight/openapi": "0.9.0",
+        "@znight/compiler": "0.9.1",
+        "@znight/config": "0.9.1",
+        "@znight/core": "0.9.1",
+        "@znight/events": "0.9.1",
+        "@znight/graphql": "0.9.1",
+        "@znight/http": "0.9.1",
+        "@znight/observability": "0.9.1",
+        "@znight/openapi": "0.9.1",
         "axios": "1.21.0",
         "bullmq": "6.5.4",
         "cheerio": "1.2.0",
@@ -109,8 +109,8 @@
         "@vitejs/plugin-react": "6.2.1",
         "@vitest/coverage-v8": "5.1.0",
         "@vitest/ui": "5.1.0",
-        "@znight/cli": "0.9.0",
-        "@znight/testing": "0.9.0",
+        "@znight/cli": "0.9.1",
+        "@znight/testing": "0.9.1",
         "browserslist-to-esbuild": "2.1.1",
         "consola": "3.4.2",
         "drizzle-kit": "0.31.11",
@@ -1767,25 +1767,25 @@
 
     "@zkochan/js-yaml": ["@zkochan/js-yaml@0.0.7", "", { "dependencies": { "argparse": "^2.0.1" }, "bin": { "js-yaml": "bin/js-yaml.js" } }, "sha512-nrUSn7hzt7J6JWgWGz78ZYI8wj+gdIJdk0Ynjpp8l+trkn58Uqsf6RYrYkEK+3X18EX+TNdtJI0WxAtc+L84SQ=="],
 
-    "@znight/cli": ["@znight/cli@0.9.0", "", { "dependencies": { "@clack/prompts": "^1.8.1", "@znight/core": "0.9.0", "citty": "^0.2.2", "picocolors": "^1.1.1" }, "peerDependencies": { "@znight/compiler": "^0.9.0", "@znight/openapi": "^0.9.0", "vite": "^8.0.0" }, "optionalPeers": ["@znight/compiler", "@znight/openapi", "vite"], "bin": { "znight": "bin/znight.mjs" } }, "sha512-6VrbCMjFxSKibqoKAWpzPCJF2xo9bmcn/brHlZ2P9K7RWqL27bbQqq07LkDUKseyLhDbqlF4tGNRTaAafvgYMQ=="],
+    "@znight/cli": ["@znight/cli@0.9.1", "", { "dependencies": { "@clack/prompts": "^1.8.1", "@znight/core": "0.9.1", "citty": "^0.2.2", "picocolors": "^1.1.1" }, "peerDependencies": { "@znight/compiler": "^0.9.1", "@znight/openapi": "^0.9.1", "vite": "^8.0.0" }, "optionalPeers": ["@znight/compiler", "@znight/openapi", "vite"], "bin": { "znight": "bin/znight.mjs" } }, "sha512-PbzOemvyYg/QbJTRY1LXpfjArRHMvIhgXktCezix0Vfga3Fx+NRS8ivm5Q9QPjGOV5E9kSGYH7DYrNdOBbL7/Q=="],
 
-    "@znight/compiler": ["@znight/compiler@0.9.0", "", { "dependencies": { "@znight/core": "0.9.0", "magic-string": "^1.4.5", "oxc-parser": "^0.157.0", "oxc-resolver": "^11.24.2", "picocolors": "^1.1.1", "tinyglobby": "^0.2.17" }, "peerDependencies": { "vite": "^8.0.0" }, "optionalPeers": ["vite"] }, "sha512-j91jyYR6P53phA2ZL7fAWpl3o2ZXdenQeNsOXDiIcvNPDF/ojbfDtr24Y+NBM9U7n859xY/QnVKSfddBUF20KA=="],
+    "@znight/compiler": ["@znight/compiler@0.9.1", "", { "dependencies": { "@znight/core": "0.9.1", "magic-string": "^1.4.5", "oxc-parser": "^0.157.0", "oxc-resolver": "^11.24.2", "picocolors": "^1.1.1", "tinyglobby": "^0.2.17" }, "peerDependencies": { "vite": "^8.0.0" }, "optionalPeers": ["vite"] }, "sha512-YnTe/2oXzOyOBKiEsd8CZXMetxCAwJkCniWx6hbMAmNljFgxPuJl/yJpmhVb0by2uIOJqdjwPwmNMEZvwb8r1g=="],
 
-    "@znight/config": ["@znight/config@0.9.0", "", { "dependencies": { "@znight/core": "0.9.0" }, "peerDependencies": { "@aws-sdk/client-secrets-manager": "^3.0.0", "@azure/identity": "^4.0.0", "@azure/keyvault-secrets": "^4.0.0", "@google-cloud/secret-manager": "^6.0.0 || ^7.0.0 || ^8.0.0", "@znight/compiler": "^0.9.0", "oci-common": "^2.0.0", "oci-secrets": "^2.0.0", "yaml": "^2.0.0" }, "optionalPeers": ["@aws-sdk/client-secrets-manager", "@azure/identity", "@azure/keyvault-secrets", "@google-cloud/secret-manager", "@znight/compiler", "oci-common", "oci-secrets", "yaml"] }, "sha512-Wqx2J2B9sS1hmLM2IOgyiPMzQ4pjh9gvEodQQkb/2WkJXriFF3BU9xNiyP0uuqjbFaWAsOHsnqlcd9nj5fRVwA=="],
+    "@znight/config": ["@znight/config@0.9.1", "", { "dependencies": { "@znight/core": "0.9.1" }, "peerDependencies": { "@aws-sdk/client-secrets-manager": "^3.0.0", "@azure/identity": "^4.0.0", "@azure/keyvault-secrets": "^4.0.0", "@google-cloud/secret-manager": "^6.0.0 || ^7.0.0 || ^8.0.0", "@znight/compiler": "^0.9.1", "oci-common": "^2.0.0", "oci-secrets": "^2.0.0", "yaml": "^2.0.0" }, "optionalPeers": ["@aws-sdk/client-secrets-manager", "@azure/identity", "@azure/keyvault-secrets", "@google-cloud/secret-manager", "@znight/compiler", "oci-common", "oci-secrets", "yaml"] }, "sha512-hKrEY/XDDz+diU900Gy/xoIcaSXB7aiUhPl2J/ExlWrjycP9z9KLC8G3brC6q6CTPUIqJktirEfAMQXQ1I9bfQ=="],
 
-    "@znight/core": ["@znight/core@0.9.0", "", {}, "sha512-+KIJ1TamAK6W5MM7c7ufX+cHFIomYCwoneuR2GrPMnW5+enqsYDE324q7qnH+Is/yABwDZKREXKBBCHYdgst7Q=="],
+    "@znight/core": ["@znight/core@0.9.1", "", {}, "sha512-eam2TOdTOrkXypyuuLGsaAsZKs0sf3O3jRG8GcehAH7lQ7y2MlPWzxNOej9R0U1ArlNXSxZkBqtZWX1PVDEpig=="],
 
-    "@znight/events": ["@znight/events@0.9.0", "", { "dependencies": { "@znight/core": "0.9.0" }, "peerDependencies": { "@znight/compiler": "^0.9.0" }, "optionalPeers": ["@znight/compiler"] }, "sha512-jNnbxsPtvzgPmpctfCUxdBOZDTzgt0i6UP9pU0XAznGmgUmso9vv/q1T/+b+SyUi1SwdXD1znjO1mBfYZNkvJw=="],
+    "@znight/events": ["@znight/events@0.9.1", "", { "dependencies": { "@znight/core": "0.9.1" }, "peerDependencies": { "@znight/compiler": "^0.9.1" }, "optionalPeers": ["@znight/compiler"] }, "sha512-9Rb3IEEYAua3Og1mVHakW4WkEYLxVDFMx//DdL7MH7+3GfxCYaK5w5reTmT6ZvBkmG7X2meD6z59PQOKp22oMA=="],
 
-    "@znight/graphql": ["@znight/graphql@0.9.0", "", { "dependencies": { "@znight/core": "0.9.0", "dataloader": "^2.2.3" }, "peerDependencies": { "@znight/compiler": "^0.9.0", "@znight/http": "^0.9.0", "@znight/testing": "^0.9.0", "graphql": "^17.0.2", "graphql-yoga": "^6.0.1" }, "optionalPeers": ["@znight/compiler", "@znight/testing", "graphql-yoga"] }, "sha512-e74Q8q1Vr1ELHLEvQa18A0pG83rj3TTWCqrOrXjn31UiMmoMh51X8LMWznuRt77QzQmW92JBAPM9QXXi3xJ/tA=="],
+    "@znight/graphql": ["@znight/graphql@0.9.1", "", { "dependencies": { "@znight/core": "0.9.1", "dataloader": "^2.2.3" }, "peerDependencies": { "@znight/compiler": "^0.9.1", "@znight/http": "^0.9.1", "@znight/testing": "^0.9.1", "graphql": "^17.0.2", "graphql-yoga": "^6.0.1" }, "optionalPeers": ["@znight/compiler", "@znight/testing", "graphql-yoga"] }, "sha512-L/R4GO1kIxwTKnI0TZV0yOrmZc2cEreGtrWnMmgrugZuEtREHq5PDraCvMjqdwU+z3HsKmZnvPkXprlrc8gvqw=="],
 
-    "@znight/http": ["@znight/http@0.9.0", "", { "dependencies": { "@znight/core": "0.9.0" }, "peerDependencies": { "@hono/node-server": "^2.1.5", "@znight/compiler": "^0.9.0", "express": "^5.3.0", "fastify": "^5.12.7", "hono": "^4.13.14", "light-my-request": "^6.8.0" }, "optionalPeers": ["@hono/node-server", "@znight/compiler", "express", "fastify", "hono", "light-my-request"] }, "sha512-I2ZhS/4aFgnUfaoZ0+xT+4rtEo4oEQFaNR49gcJi+47CxfV1Rs7LyTtJTh3P1IAJvm5W/tqTdEMwra3rWomOmA=="],
+    "@znight/http": ["@znight/http@0.9.1", "", { "dependencies": { "@znight/core": "0.9.1" }, "peerDependencies": { "@hono/node-server": "^2.1.5", "@znight/compiler": "^0.9.1", "express": "^5.3.0", "fastify": "^5.12.7", "hono": "^4.13.14", "light-my-request": "^6.8.0" }, "optionalPeers": ["@hono/node-server", "@znight/compiler", "express", "fastify", "hono", "light-my-request"] }, "sha512-VFy5Mdt9y97Elzj6YixMEIz5UK7RNKLEH3JADYoD5jYfo86heaxy52ZI8u0kABwZZmUtsJXHYFXcvfewJkvj4w=="],
 
-    "@znight/observability": ["@znight/observability@0.9.0", "", { "dependencies": { "@opentelemetry/api": "^1.10.0", "@znight/core": "0.9.0", "pino": "^10.4.0" }, "peerDependencies": { "pino-pretty": "^13.0.0", "prom-client": "^15.0.0" }, "optionalPeers": ["pino-pretty", "prom-client"] }, "sha512-3dqJ1dJxsolNp9Oml3wWgw0TuojE8cm5cf3rVgf1eWV1Qah8vzg2qJ/NNmh6RZOgx8c4rgzMiOS60ykjUcAnVw=="],
+    "@znight/observability": ["@znight/observability@0.9.1", "", { "dependencies": { "@opentelemetry/api": "^1.10.0", "@znight/core": "0.9.1", "pino": "^10.4.0" }, "peerDependencies": { "pino-pretty": "^13.0.0", "prom-client": "^15.0.0" }, "optionalPeers": ["pino-pretty", "prom-client"] }, "sha512-y0Kk4m8jS2qqhbfui9IXaNM61CGly7GDJE36Kx3Fd8ZMGvWe2HZ7Ayk+l+cTBi+5vzduDG4dV0mgaRWl3oe4Eg=="],
 
-    "@znight/openapi": ["@znight/openapi@0.9.0", "", { "dependencies": { "@znight/core": "0.9.0" }, "peerDependencies": { "@cfworker/json-schema": "^4.1.0", "@scalar/api-reference": "^1.0.0", "@valibot/to-json-schema": "^1.5.0", "@znight/compiler": "^0.9.0", "@znight/http": "^0.9.0", "swagger-ui-dist": "^5.0.0", "vite": "^8.0.0", "yaml": "^2.0.0" }, "optionalPeers": ["@cfworker/json-schema", "@scalar/api-reference", "@valibot/to-json-schema", "@znight/compiler", "swagger-ui-dist", "vite", "yaml"] }, "sha512-YlvndeAHOp09WYwjwDCHT0/AL5gAli7atuLL9VBpdyulaaqMZMywQc35TGvYQsnA677JQTwq8kJyihMKnuEgzg=="],
+    "@znight/openapi": ["@znight/openapi@0.9.1", "", { "dependencies": { "@znight/core": "0.9.1" }, "peerDependencies": { "@cfworker/json-schema": "^4.1.0", "@scalar/api-reference": "^1.0.0", "@valibot/to-json-schema": "^1.5.0", "@znight/compiler": "^0.9.1", "@znight/http": "^0.9.1", "swagger-ui-dist": "^5.0.0", "vite": "^8.0.0", "yaml": "^2.0.0" }, "optionalPeers": ["@cfworker/json-schema", "@scalar/api-reference", "@valibot/to-json-schema", "@znight/compiler", "swagger-ui-dist", "vite", "yaml"] }, "sha512-gQbW8m6aSBtZNWrmQu8Gb105Pqn3DyQOcDtLEqLqw33xryqQz5PcAlvnPgL+EdXNHZhS/L/PXN4pt4Gdfh0W+A=="],
 
-    "@znight/testing": ["@znight/testing@0.9.0", "", { "dependencies": { "@znight/core": "0.9.0" } }, "sha512-ed5OB46G8Fxs7Iv+EjkE6afPYps1Qo7uwWDO5rOG6YZuoq18JqIGyjAaetE4NRIUvla6jRaZm2/zEtK5IvFD+Q=="],
+    "@znight/testing": ["@znight/testing@0.9.1", "", { "dependencies": { "@znight/core": "0.9.1" } }, "sha512-2Xm8SNo2zs8O8wbhuk9qEtz++b3u14Ci51Qp9T/rci1QCi+0B/MainkosyOkVxTOMnLxPKi53A25DiV2TrC+ww=="],
 
     "abort-controller": ["abort-controller@3.0.0", "", { "dependencies": { "event-target-shim": "^5.0.0" } }, "sha512-h8lQ8tacZYnR3vNQTgibj+tODHI5/+l06Au2Pcriv/Gmet0eaj4TwWH41sO9wnHDiQsEj19q0drzdWdeAHtweg=="],
 
