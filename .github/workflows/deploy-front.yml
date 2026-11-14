@@ -34,7 +34,7 @@ jobs:
           echo "$FIREBASE_JSON" > firebase_auth.json
           export GOOGLE_APPLICATION_CREDENTIALS="$(pwd)/firebase_auth.json"
           SHORT_SHA=$(echo "${GITHUB_SHA}" | cut -c1-7)
-          npx -y firebase-tools@15.34.2 deploy \
+          npx -y firebase-tools@15.36.0 deploy \
             -P production \
             --only hosting \
             -m "Version ${{ inputs.version }} (commit: ${SHORT_SHA})" \
