@@ -79,6 +79,16 @@ export class PostgresSecretSantaUserRepository implements SecretSantaUserReposit
     return user ? PostgresSecretSantaUserRepository.toModel(user) : undefined;
   }
 
+  async findByUserId(userId: UserId): Promise<SecretSantaUser[]> {
+    const rows = await this.db
+      .select({ user: schema.secretSantaUser })
+      .from(schema.secretSantaUser)
+      .innerJoin(schema.eventAttendee, eq(schema.secretSantaUser.attendeeId, schema.eventAttendee.id))
+      .where(eq(schema.eventAttendee.userId, userId));
+
+    return rows.map(row => PostgresSecretSantaUserRepository.toModel(row.user));
+  }
+
   async delete(id: SecretSantaUserId, tx?: DrizzleTransaction): Promise<void> {
     const client = tx || this.db;
 

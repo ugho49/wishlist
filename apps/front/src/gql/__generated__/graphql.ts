@@ -705,6 +705,7 @@ export type AdminDeleteUserMutationVariables = Exact<{
 
 
 export type AdminDeleteUserMutation = { adminDeleteUser:
+    | { __typename: 'BusinessRuleRejection' }
     | { __typename: 'ForbiddenRejection' }
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'UnauthorizedRejection' }

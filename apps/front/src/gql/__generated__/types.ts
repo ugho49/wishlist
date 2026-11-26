@@ -47,7 +47,7 @@ export type AdminDeleteEventAttendeeResult = ForbiddenRejection | InternalErrorR
 
 export type AdminDeleteEventResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
-export type AdminDeleteUserResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+export type AdminDeleteUserResult = BusinessRuleRejection | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
 export type AdminEventPaginationFilters = {
   criteria?: InputMaybe<Scalars['String']['input']>;
@@ -208,6 +208,7 @@ export enum AttendeeRole {
 
 export enum BusinessRuleCode {
   InvalidUserMerge = 'INVALID_USER_MERGE',
+  UserInStartedSecretSanta = 'USER_IN_STARTED_SECRET_SANTA',
   WrongOldPassword = 'WRONG_OLD_PASSWORD'
 }
 
