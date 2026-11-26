@@ -26,6 +26,7 @@ import { DateTime } from 'luxon';
 import { type ReactNode, useState } from 'react';
 
 import { TabValues } from '../../routes/_authenticated/_with-layout/events/$eventId/edit';
+import { getCountdown } from '../../utils/countdown.utils';
 import { Description } from '../common/Description';
 import { PageBreadcrumbs } from '../common/PageBreadcrumbs';
 import {
@@ -64,14 +65,6 @@ const AttendeeAvatars = styled(AvatarGroup)(({ theme }) => ({
     borderColor: theme.palette.background.paper,
   },
 }));
-
-const getCountdown = (eventDate: string): { label: string; className?: string } => {
-  const days = Math.round(DateTime.fromISO(eventDate).startOf('day').diff(DateTime.now().startOf('day'), 'days').days);
-  if (days < 0) return { label: 'Terminé' };
-  if (days === 0) return { label: "C'est aujourd'hui !", className: 'success' };
-  if (days === 1) return { label: 'Demain', className: 'accent' };
-  return { label: `Dans ${days} jours`, className: 'accent' };
-};
 
 const attendeeInitials = (attendee: EventAttendee) =>
   attendee.user

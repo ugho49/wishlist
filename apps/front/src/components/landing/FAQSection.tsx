@@ -1,372 +1,253 @@
-import { Box, Container, Typography, useMediaQuery, useTheme } from '@mui/material';
-import { styled } from '@mui/material/styles';
-import { useEffect, useMemo, useRef } from 'react';
+import type { ElementType } from 'react';
 
-const FAQSectionContainer = styled(Box)(({ theme }) => ({
-  padding: theme.spacing(8, 0, 12),
-  backgroundColor: 'white',
-  borderTop: '1px solid #e5e7eb',
-  borderBottom: '1px solid #e5e7eb',
-}));
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  accordionSummaryClasses,
+  Container,
+  Link,
+  styled,
+  Typography,
+  useMediaQuery,
+} from '@mui/material';
 
-const FAQTitle = styled(Typography)(({ theme }) => ({
-  textAlign: 'center',
-  marginBottom: theme.spacing(6),
-  fontSize: '2.25rem',
-  fontWeight: 600,
-  color: theme.palette.text.primary,
-  [theme.breakpoints.down('md')]: {
-    fontSize: '1.75rem',
-    marginBottom: theme.spacing(5),
-  },
-}));
+import { brandColors } from '../../theme';
+import { Genie } from '../common/Genie';
 
-const FAQContainerWrapper = styled(Box)(({ theme }) => ({
-  position: 'relative',
-  // Masques de fondu sur les côtés
-  '&::before': {
-    content: '""',
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    width: `${FAQ_ANIMATION_CONFIG.FADE_WIDTH}px`,
-    height: '100%',
-    background: 'linear-gradient(to right, white 0%, rgba(255, 255, 255, 0) 100%)',
-    zIndex: 10,
-    pointerEvents: 'none',
-    [theme.breakpoints.down('sm')]: {
-      width: `${FAQ_ANIMATION_CONFIG.FADE_WIDTH_MOBILE}px`,
-    },
-  },
-  '&::after': {
-    content: '""',
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    width: `${FAQ_ANIMATION_CONFIG.FADE_WIDTH}px`,
-    height: '100%',
-    background: 'linear-gradient(to left, white 0%, rgba(255, 255, 255, 0) 100%)',
-    zIndex: 10,
-    pointerEvents: 'none',
-    [theme.breakpoints.down('sm')]: {
-      width: `${FAQ_ANIMATION_CONFIG.FADE_WIDTH_MOBILE}px`,
-    },
-  },
-}));
+type Faq = { question: string; answer: string };
 
-const FAQContainer = styled(Box)(() => ({
-  overflowX: 'auto',
-  overflowY: 'hidden',
-  position: 'relative',
-  paddingBottom: '16px',
-  scrollbarWidth: 'none',
-  msOverflowStyle: 'none',
-  WebkitOverflowScrolling: 'touch',
-  '&::-webkit-scrollbar': {
-    display: 'none',
-  },
-  '&:hover': {
-    cursor: 'grab',
-  },
-  '&:active': {
-    cursor: 'grabbing',
-  },
-}));
-
-const FAQScrollWrapper = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  gap: `${FAQ_ANIMATION_CONFIG.CARD_GAP}px`,
-  [theme.breakpoints.down('md')]: {
-    gap: theme.spacing(3),
-  },
-  [theme.breakpoints.down('sm')]: {
-    gap: `${FAQ_ANIMATION_CONFIG.CARD_GAP_MOBILE}px`,
-  },
-}));
-
-const FAQCard = styled(Box)(({ theme }) => ({
-  backgroundColor: '#fafafa',
-  borderRadius: theme.spacing(2),
-  padding: theme.spacing(4),
-  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-  border: '1px solid #e5e7eb',
-  transition: 'all 0.3s ease',
-  minWidth: `${FAQ_ANIMATION_CONFIG.CARD_WIDTH}px`,
-  maxWidth: `${FAQ_ANIMATION_CONFIG.CARD_WIDTH}px`,
-  scrollSnapAlign: 'start',
-  flexShrink: 0,
-  [theme.breakpoints.down('md')]: {
-    minWidth: '320px',
-    maxWidth: '320px',
-  },
-  [theme.breakpoints.down('sm')]: {
-    minWidth: `${FAQ_ANIMATION_CONFIG.CARD_WIDTH_MOBILE}px`,
-    maxWidth: `${FAQ_ANIMATION_CONFIG.CARD_WIDTH_MOBILE}px`,
-    padding: theme.spacing(3),
-  },
-}));
-
-const FAQQuestion = styled(Typography)(({ theme }) => ({
-  fontWeight: 600,
-  marginBottom: theme.spacing(2),
-  color: theme.palette.text.primary,
-  fontSize: '1.1rem',
-  [theme.breakpoints.down('sm')]: {
-    fontSize: '1rem',
-    marginBottom: theme.spacing(1.5),
-  },
-}));
-
-const FAQAnswer = styled(Typography)(({ theme }) => ({
-  color: theme.palette.text.secondary,
-  lineHeight: 1.6,
-  [theme.breakpoints.down('sm')]: {
-    fontSize: '0.9rem',
-    lineHeight: 1.5,
-  },
-}));
-
-// Configuration de l'animation FAQ
-const FAQ_ANIMATION_CONFIG = {
-  SCROLL_SPEED: 0.3, // pixels par frame
-  SCROLL_SPEED_MOBILE: 0.2, // pixels par frame sur mobile (plus lent)
-  CARD_WIDTH: 380, // largeur des cartes FAQ
-  CARD_GAP: 32, // espacement entre les cartes
-  PAUSE_AFTER_INTERACTION: 500, // délai avant reprise de l'animation (ms)
-  USER_SCROLL_DETECTION_DELAY: 100, // délai pour détecter la fin du scroll utilisateur (ms)
-  DRAG_SENSITIVITY: 1, // multiplicateur de sensibilité pour le drag
-  INITIAL_DELAY: 3000, // délai initial avant démarrage de l'animation (ms)
-  FADE_WIDTH: 80, // largeur du fondu sur les côtés (px)
-  FADE_WIDTH_MOBILE: 20, // largeur du fondu sur les côtés sur mobile (px)
-  CARD_WIDTH_MOBILE: 260, // largeur des cartes FAQ sur mobile
-  CARD_GAP_MOBILE: 16, // espacement entre les cartes sur mobile
-} as const;
-
-const InfiniteScrollFAQ = ({ faqs }: { faqs: Array<{ question: string; answer: string }> }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const wrapperRef = useRef<HTMLDivElement>(null);
-  const animationRef = useRef<number>(0);
-  const isUserScrollingRef = useRef(false);
-  const isHoveringRef = useRef(false);
-  const lastUserScrollTime = useRef(Date.now() - FAQ_ANIMATION_CONFIG.INITIAL_DELAY);
-  const isDraggingRef = useRef(false);
-  const startXRef = useRef(0);
-  const scrollLeftRef = useRef(0);
-  const scrollAccumulator = useRef(0);
-
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-
-  const scrollSpeed = useMemo(
-    () => (isMobile ? FAQ_ANIMATION_CONFIG.SCROLL_SPEED_MOBILE : FAQ_ANIMATION_CONFIG.SCROLL_SPEED),
-    [isMobile],
-  );
-
-  const cardWidth = useMemo(
-    () =>
-      (isMobile ? FAQ_ANIMATION_CONFIG.CARD_WIDTH_MOBILE : FAQ_ANIMATION_CONFIG.CARD_WIDTH) +
-      (isMobile ? FAQ_ANIMATION_CONFIG.CARD_GAP_MOBILE : FAQ_ANIMATION_CONFIG.CARD_GAP),
-    [isMobile],
-  );
-
-  useEffect(() => {
-    const container = containerRef.current;
-    const wrapper = wrapperRef.current;
-    if (!container || !wrapper) return;
-
-    const totalWidth = cardWidth * faqs.length;
-
-    const animate = () => {
-      const currentTime = Date.now();
-
-      // Si l'utilisateur a scrollé récemment ou hover, attendre avant de reprendre l'animation
-      if (
-        currentTime - lastUserScrollTime.current < FAQ_ANIMATION_CONFIG.PAUSE_AFTER_INTERACTION ||
-        isDraggingRef.current ||
-        isHoveringRef.current
-      ) {
-        animationRef.current = requestAnimationFrame(animate);
-        return;
-      }
-
-      if (!isUserScrollingRef.current && !isDraggingRef.current && !isHoveringRef.current) {
-        // Accumuler les petites valeurs de scroll pour gérer les vitesses très lentes
-        scrollAccumulator.current += scrollSpeed;
-
-        // N'appliquer le scroll que quand on a au moins 1 pixel à déplacer
-        if (scrollAccumulator.current >= 1) {
-          const scrollAmount = Math.floor(scrollAccumulator.current);
-          container.scrollLeft += scrollAmount;
-          scrollAccumulator.current -= scrollAmount;
-        }
-      }
-
-      animationRef.current = requestAnimationFrame(animate);
-    };
-
-    // Détecter le scroll utilisateur (wheel, touch)
-    const handleWheel = () => {
-      isUserScrollingRef.current = true;
-      lastUserScrollTime.current = Date.now();
-      setTimeout(() => {
-        isUserScrollingRef.current = false;
-      }, FAQ_ANIMATION_CONFIG.USER_SCROLL_DETECTION_DELAY);
-    };
-
-    // Gérer le scroll infini sans interférer avec l'animation
-    const handleScroll = () => {
-      const { scrollLeft, scrollWidth, clientWidth } = container;
-
-      if (scrollLeft <= 0) {
-        container.scrollLeft = totalWidth - 1;
-      } else if (scrollLeft >= scrollWidth - clientWidth - 1) {
-        container.scrollLeft = totalWidth + 1;
-      }
-    };
-
-    // Gestionnaires pour le drag scroll
-    const handleMouseDown = (e: MouseEvent) => {
-      isDraggingRef.current = true;
-      startXRef.current = e.pageX - container.offsetLeft;
-      scrollLeftRef.current = container.scrollLeft;
-      lastUserScrollTime.current = Date.now();
-      container.style.cursor = 'grabbing';
-      container.style.userSelect = 'none';
-    };
-
-    const handleMouseUp = () => {
-      isDraggingRef.current = false;
-      container.style.cursor = 'grab';
-      container.style.userSelect = 'auto';
-    };
-
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!isDraggingRef.current) return;
-      e.preventDefault();
-      const x = e.pageX - container.offsetLeft;
-      const walk = (x - startXRef.current) * FAQ_ANIMATION_CONFIG.DRAG_SENSITIVITY;
-      container.scrollLeft = scrollLeftRef.current - walk;
-      lastUserScrollTime.current = Date.now();
-    };
-
-    // Gestionnaires pour le hover
-    const handleMouseEnter = () => {
-      isHoveringRef.current = true;
-      lastUserScrollTime.current = Date.now();
-    };
-
-    const handleMouseLeaveContainer = () => {
-      isHoveringRef.current = false;
-      // Arrêter le drag si on sort du container
-      if (isDraggingRef.current) {
-        isDraggingRef.current = false;
-        container.style.cursor = 'grab';
-        container.style.userSelect = 'auto';
-      }
-    };
-
-    container.addEventListener('scroll', handleScroll, { passive: true });
-    container.addEventListener('wheel', handleWheel, { passive: true });
-    container.addEventListener('touchstart', handleWheel, { passive: true });
-    container.addEventListener('mouseenter', handleMouseEnter, { passive: true });
-    container.addEventListener('mouseleave', handleMouseLeaveContainer, { passive: true });
-    container.addEventListener('mousedown', handleMouseDown);
-    container.addEventListener('mouseup', handleMouseUp);
-    container.addEventListener('mousemove', handleMouseMove);
-
-    // Positionner au milieu au démarrage
-    container.scrollLeft = totalWidth;
-
-    // Démarrer l'animation immédiatement
-    animationRef.current = requestAnimationFrame(animate);
-
-    return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
-      container.removeEventListener('scroll', handleScroll);
-      container.removeEventListener('wheel', handleWheel);
-      container.removeEventListener('touchstart', handleWheel);
-      container.removeEventListener('mouseenter', handleMouseEnter);
-      container.removeEventListener('mouseleave', handleMouseLeaveContainer);
-      container.removeEventListener('mousedown', handleMouseDown);
-      container.removeEventListener('mouseup', handleMouseUp);
-      container.removeEventListener('mousemove', handleMouseMove);
-    };
-  }, [faqs.length, cardWidth, scrollSpeed]);
-
-  return (
-    <FAQContainerWrapper>
-      <FAQContainer ref={containerRef}>
-        <FAQScrollWrapper ref={wrapperRef}>
-          {/* Première série */}
-          {faqs.map((faq, index) => (
-            <FAQCard key={`first-${index}`}>
-              <FAQQuestion>{faq.question}</FAQQuestion>
-              <FAQAnswer>{faq.answer}</FAQAnswer>
-            </FAQCard>
-          ))}
-          {/* Série dupliquée pour l'effet infini */}
-          {faqs.map((faq, index) => (
-            <FAQCard key={`second-${index}`}>
-              <FAQQuestion>{faq.question}</FAQQuestion>
-              <FAQAnswer>{faq.answer}</FAQAnswer>
-            </FAQCard>
-          ))}
-          {/* Troisième série pour un scroll plus fluide */}
-          {faqs.map((faq, index) => (
-            <FAQCard key={`third-${index}`}>
-              <FAQQuestion>{faq.question}</FAQQuestion>
-              <FAQAnswer>{faq.answer}</FAQAnswer>
-            </FAQCard>
-          ))}
-        </FAQScrollWrapper>
-      </FAQContainer>
-    </FAQContainerWrapper>
-  );
-};
-
-const DEFAULT_FAQS = [
+/** Honest answers to the real objections: everything here must match what the app does. */
+const FAQS: Faq[] = [
   {
-    question: 'Est-ce que Wishlist est gratuit ?',
-    answer: 'Oui, Wishlist est entièrement gratuit à utiliser pour tous vos événements et listes de souhaits.',
+    question: "C'est vraiment gratuit\u00a0?",
+    answer: "Oui. Wishlist est entièrement gratuit et sans publicité, et il n'y a aucun paiement dans l'application.",
   },
   {
-    question: 'Comment inviter mes proches ?',
-    answer: 'Vous pouvez facilement inviter vos proches par email ou en partageant un lien vers votre événement.',
-  },
-  {
-    question: 'Puis-je créer plusieurs listes ?',
-    answer: 'Absolument ! Vous pouvez créer autant de listes que vous voulez pour différents événements.',
-  },
-  {
-    question: 'Comment fonctionne le Secret Santa ?',
-    answer: 'Notre système effectue automatiquement le tirage au sort en respectant vos contraintes et exclusions.',
-  },
-  {
-    question: 'Mes données sont-elles sécurisées ?',
+    question: "Vais-je voir ce qu'on va m'offrir\u00a0?",
     answer:
-      'Absolument ! Nous utilisons un chiffrement de niveau bancaire pour protéger toutes vos informations personnelles.',
+      "Non. Sur une liste faite pour vous, vous ne voyez ni les réservations ni les suggestions de vos proches. Même si vous supprimez un souhait déjà réservé, il reste visible pour ceux qui l'offrent.",
   },
   {
-    question: 'Puis-je modifier mes listes après création ?',
-    answer: 'Oui, vous pouvez modifier, ajouter ou supprimer des articles de vos listes à tout moment.',
+    question: 'Mes proches doivent-ils créer un compte\u00a0?',
+    answer:
+      "Oui, pour voir les listes. Invitez-les par email depuis votre événement\u00a0: ils reçoivent une invitation, s'inscrivent avec cette adresse (ou avec Google) et retrouvent l'événement automatiquement.",
   },
   {
-    question: 'Comment réserver un cadeau ?',
-    answer: 'Cliquez simplement sur un article dans une liste pour le réserver et éviter les doublons.',
+    question: 'Qui peut voir ma liste\u00a0?',
+    answer:
+      "Uniquement les participants des événements auxquels vous l'avez liée. Il n'existe pas de lien public\u00a0: personne d'autre ne peut y accéder.",
+  },
+  {
+    question: 'Et si deux personnes veulent offrir le même cadeau\u00a0?',
+    answer:
+      "Elles l'offrent ensemble\u00a0: la seconde clique sur «\u00a0Participer\u00a0» au lieu de «\u00a0Réserver\u00a0», et chacun voit qui est déjà sur le coup. Wishlist ne gère pas d'argent\u00a0: le partage des frais se règle entre vous.",
+  },
+  {
+    question: "Puis-je ajouter un produit de n'importe quel site\u00a0?",
+    answer:
+      "Oui, collez simplement le lien. L'image est récupérée automatiquement quand le site le permet\u00a0; sinon, vous pouvez indiquer l'adresse d'une image. Le titre et les détails (taille, couleur…), c'est vous qui les écrivez.",
+  },
+  {
+    question: 'Puis-je faire une liste pour mon enfant\u00a0?',
+    answer:
+      "Oui. Choisissez «\u00a0Pour une autre personne\u00a0» et ajoutez son prénom et sa photo. Vous décidez si vous voulez voir les réservations\u00a0; dans ce cas, vous pouvez ajouter l'autre parent comme co-gestionnaire.",
+  },
+  {
+    question: 'Comment fonctionne le Secret Santa\u00a0?',
+    answer:
+      "Depuis un événement à venir, choisissez au moins deux participants parmi les invités, un budget et d'éventuelles exclusions, puis lancez le tirage. Chacun reçoit un email et découvre son destinataire dans l'app, en grattant une boule de Noël.",
+  },
+  {
+    question: 'Y a-t-il une application mobile\u00a0?',
+    answer:
+      "Wishlist fonctionne dans le navigateur, sur mobile comme sur ordinateur. Vous pouvez aussi l'installer sur l'écran d'accueil de votre téléphone, sans passer par un store.",
   },
 ];
 
-interface FAQSectionProps {
-  faqs?: Array<{ question: string; answer: string }>;
-}
+const CONTACT_EMAIL = 'contact@wishlistapp.fr';
 
-export const FAQSection = ({ faqs = DEFAULT_FAQS }: FAQSectionProps) => (
-  <FAQSectionContainer id="faq">
-    <Container maxWidth="xl" sx={{ px: { xs: 2, sm: 3, md: 4 } }}>
-      <FAQTitle>Questions fréquentes</FAQTitle>
-      <InfiniteScrollFAQ faqs={faqs} />
-    </Container>
-  </FAQSectionContainer>
-);
+/** FAQPage structured data built from the same answers, so search engines never read stale copy. */
+const FAQ_JSON_LD = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: FAQS.map(({ question, answer }) => ({
+    '@type': 'Question',
+    name: question,
+    acceptedAnswer: { '@type': 'Answer', text: answer },
+  })),
+}).replace(/</g, '\\u003c');
+
+const DIVIDER_COLOR = '#E3ECEF';
+
+const FaqSectionStyled = styled(Container)<{ component: ElementType }>(({ theme }) => ({
+  scrollMarginTop: 80,
+  display: 'grid',
+  gridTemplateColumns: 'minmax(0, 1fr) auto',
+  gridTemplateAreas: '"title genie" "list list" "contact contact"',
+  alignItems: 'center',
+  columnGap: theme.spacing(2),
+  rowGap: theme.spacing(4),
+  paddingTop: theme.spacing(8),
+  paddingBottom: theme.spacing(8),
+  [theme.breakpoints.up('md')]: {
+    gridTemplateColumns: 'minmax(0, 4fr) minmax(0, 8fr)',
+    gridTemplateAreas: '"intro list"',
+    alignItems: 'start',
+    columnGap: theme.spacing(8),
+    paddingTop: theme.spacing(12),
+    paddingBottom: theme.spacing(12),
+  },
+}));
+
+/** Left column on desktop (sticky while the answers scroll); on mobile its children join the section grid. */
+const FaqIntroStyled = styled('div')(({ theme }) => ({
+  display: 'contents',
+  [theme.breakpoints.up('md')]: {
+    gridArea: 'intro',
+    position: 'sticky',
+    top: 96,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    gap: theme.spacing(2.5),
+  },
+}));
+
+const FaqTitleStyled = styled(Typography)(({ theme }) => ({
+  gridArea: 'title',
+  margin: 0,
+  fontSize: '1.75rem',
+  lineHeight: 1.2,
+  color: theme.palette.primary.main,
+  [theme.breakpoints.up('md')]: {
+    fontSize: '2.25rem',
+  },
+}));
+
+const FaqContactStyled = styled(Typography)(({ theme }) => ({
+  gridArea: 'contact',
+  margin: 0,
+  fontSize: 15,
+  lineHeight: 1.6,
+  color: theme.palette.text.secondary,
+  '& a': {
+    fontWeight: 600,
+    overflowWrap: 'anywhere',
+  },
+}));
+
+const FaqGenieStyled = styled(Genie)(({ theme }) => ({
+  gridArea: 'genie',
+  [theme.breakpoints.up('md')]: {
+    marginTop: theme.spacing(2),
+  },
+}));
+
+const FaqListStyled = styled('div')({
+  gridArea: 'list',
+  borderTop: `1px solid ${DIVIDER_COLOR}`,
+});
+
+const FaqAccordionStyled = styled(Accordion)({
+  backgroundColor: 'transparent',
+  borderBottom: `1px solid ${DIVIDER_COLOR}`,
+  '&::before': {
+    display: 'none',
+  },
+});
+
+const FaqQuestionStyled = styled(AccordionSummary)(({ theme }) => ({
+  minHeight: 56,
+  padding: theme.spacing(2, 0),
+  gap: theme.spacing(2),
+  fontFamily: theme.typography.h1.fontFamily,
+  fontSize: 17,
+  fontWeight: 600,
+  lineHeight: 1.35,
+  color: theme.palette.primary.main,
+  [`& .${accordionSummaryClasses.content}`]: {
+    margin: 0,
+  },
+  [`& .${accordionSummaryClasses.expandIconWrapper}`]: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 28,
+    height: 28,
+    borderRadius: '50%',
+    color: theme.palette.primary.main,
+    backgroundColor: brandColors.mistLight,
+    transition: theme.transitions.create(['transform', 'background-color'], {
+      duration: theme.transitions.duration.shorter,
+    }),
+  },
+  [`&:hover .${accordionSummaryClasses.expandIconWrapper}`]: {
+    backgroundColor: brandColors.mist,
+  },
+  [`&.${accordionSummaryClasses.focusVisible}`]: {
+    backgroundColor: 'transparent',
+    outline: `2px solid ${theme.palette.primary.main}`,
+    outlineOffset: 2,
+    borderRadius: 8,
+  },
+  '@media (prefers-reduced-motion: reduce)': {
+    [`& .${accordionSummaryClasses.expandIconWrapper}`]: {
+      transition: 'none',
+    },
+  },
+}));
+
+const FaqAnswerStyled = styled(AccordionDetails)(({ theme }) => ({
+  padding: theme.spacing(0, 0, 2.5),
+  fontSize: 15,
+  lineHeight: 1.65,
+  color: theme.palette.text.secondary,
+  [theme.breakpoints.up('md')]: {
+    paddingRight: theme.spacing(5.5),
+  },
+}));
+
+export const FAQSection = () => {
+  const isDesktop = useMediaQuery(theme => theme.breakpoints.up('md'), { noSsr: true });
+  const reduceMotion = useMediaQuery('(prefers-reduced-motion: reduce)', { noSsr: true });
+
+  return (
+    <FaqSectionStyled maxWidth="lg" component="section" id="faq" aria-labelledby="faq-title">
+      {/* Rendered in place: search engines read JSON-LD anywhere in the page, <head> adds nothing. */}
+      <script type="application/ld+json">{FAQ_JSON_LD}</script>
+
+      <FaqIntroStyled>
+        <FaqTitleStyled variant="h2" id="faq-title">
+          Les questions qu'on nous pose souvent
+        </FaqTitleStyled>
+        <FaqContactStyled>
+          Une autre question&nbsp;? Écrivez-nous à <Link href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</Link>
+        </FaqContactStyled>
+        <FaqGenieStyled variant="lost" size={isDesktop ? 140 : 88} grounded />
+      </FaqIntroStyled>
+
+      <FaqListStyled>
+        {FAQS.map(({ question, answer }, index) => (
+          <FaqAccordionStyled
+            key={question}
+            defaultExpanded={index === 0}
+            disableGutters
+            elevation={0}
+            square
+            slotProps={reduceMotion ? { transition: { timeout: 0 } } : undefined}
+          >
+            <FaqQuestionStyled
+              id={`faq-question-${index}`}
+              aria-controls={`faq-answer-${index}`}
+              expandIcon={<ExpandMoreIcon fontSize="small" />}
+            >
+              {question}
+            </FaqQuestionStyled>
+            <FaqAnswerStyled>{answer}</FaqAnswerStyled>
+          </FaqAccordionStyled>
+        ))}
+      </FaqListStyled>
+    </FaqSectionStyled>
+  );
+};

@@ -2,19 +2,24 @@ import type { SxProps, Theme } from '@mui/material';
 
 import { alpha, keyframes, styled } from '@mui/material';
 
-import genieCalendar from '../../assets/mascot/genie-calendar.png';
-import genieHello from '../../assets/mascot/genie-hello.png';
-import genieLost from '../../assets/mascot/genie-lost.png';
-import genieSanta from '../../assets/mascot/genie-santa.png';
-import genieWishlist from '../../assets/mascot/genie-wishlist.png';
+import genieCalendar from '../../assets/mascot/genie-calendar.webp';
+import genieHello from '../../assets/mascot/genie-hello.webp';
+import genieLost from '../../assets/mascot/genie-lost.webp';
+import geniePeek from '../../assets/mascot/genie-peek.webp';
+import genieSanta from '../../assets/mascot/genie-santa.webp';
+import genieShh from '../../assets/mascot/genie-shh.webp';
+import genieWishlist from '../../assets/mascot/genie-wishlist.webp';
 
-/** The genie's poses, one per situation. */
+/** The genie's poses, one per situation, with their natural size so the browser reserves the room before loading. */
 const GENIE_ARTWORK = {
-  hello: genieHello,
-  calendar: genieCalendar,
-  wishlist: genieWishlist,
-  santa: genieSanta,
-  lost: genieLost,
+  hello: { src: genieHello, width: 604, height: 560 },
+  calendar: { src: genieCalendar, width: 344, height: 377 },
+  wishlist: { src: genieWishlist, width: 375, height: 385 },
+  santa: { src: genieSanta, width: 357, height: 400 },
+  lost: { src: genieLost, width: 349, height: 411 },
+  shh: { src: genieShh, width: 361, height: 480 },
+  /** Head and hands resting on an edge: the bottom of the artwork is cut flat to sit on a frame. */
+  peek: { src: geniePeek, width: 440, height: 360 },
 } as const;
 
 export type GenieVariant = keyof typeof GENIE_ARTWORK;
@@ -60,6 +65,8 @@ export type GenieProps = {
   grounded?: boolean;
   /** White outline for navy backgrounds. */
   onDark?: boolean;
+  /** Load the artwork right away (above the fold); otherwise the browser loads it when it gets close. */
+  eager?: boolean;
   className?: string;
   sx?: SxProps<Theme>;
 };
@@ -110,10 +117,18 @@ export const Genie = ({
   floating = false,
   grounded = false,
   onDark = false,
+  eager = false,
   className,
   sx,
 }: GenieProps) => (
   <GenieRoot size={size} floating={floating} grounded={grounded} onDark={onDark} className={className} sx={sx}>
-    <img src={GENIE_ARTWORK[variant]} alt="" />
+    <img
+      src={GENIE_ARTWORK[variant].src}
+      width={GENIE_ARTWORK[variant].width}
+      height={GENIE_ARTWORK[variant].height}
+      alt=""
+      loading={eager ? 'eager' : 'lazy'}
+      decoding="async"
+    />
   </GenieRoot>
 );

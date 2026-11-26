@@ -1,8 +1,8 @@
 <p align="center">
   <a href="https://wishlistapp.fr">
     <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="apps/front/src/assets/logo/logo-dark.png" />
-      <img src="apps/front/src/assets/logo/logo-light.png" alt="Wishlist" height="120" />
+      <source media="(prefers-color-scheme: dark)" srcset="apps/front/src/assets/logo/logo-dark.webp" />
+      <img src="apps/front/src/assets/logo/logo-light.webp" alt="Wishlist" height="120" />
     </picture>
   </a>
 </p>
@@ -28,11 +28,11 @@
 - 🔐 Email and Google sign-in
 
 <p align="center">
-  <img src="apps/front/src/assets/mascot/genie-hello.png" alt="" height="88" />
-  <img src="apps/front/src/assets/mascot/genie-calendar.png" alt="" height="88" />
-  <img src="apps/front/src/assets/mascot/genie-wishlist.png" alt="" height="88" />
-  <img src="apps/front/src/assets/mascot/genie-santa.png" alt="" height="88" />
-  <img src="apps/front/src/assets/mascot/genie-lost.png" alt="" height="88" />
+  <img src="apps/front/src/assets/mascot/genie-hello.webp" alt="" height="88" />
+  <img src="apps/front/src/assets/mascot/genie-calendar.webp" alt="" height="88" />
+  <img src="apps/front/src/assets/mascot/genie-wishlist.webp" alt="" height="88" />
+  <img src="apps/front/src/assets/mascot/genie-santa.webp" alt="" height="88" />
+  <img src="apps/front/src/assets/mascot/genie-lost.webp" alt="" height="88" />
 </p>
 
 ## 🛠️ Stack
