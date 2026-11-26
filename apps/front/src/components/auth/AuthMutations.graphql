@@ -63,7 +63,7 @@ mutation AuthLogout($input: LogoutInput!) {
 mutation AuthRegisterUser($input: RegisterUserInput!) {
   registerUser(input: $input) {
     __typename
-    ... on User {
+    ... on CurrentUser {
       id
       email
     }

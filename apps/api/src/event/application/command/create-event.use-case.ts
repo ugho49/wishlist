@@ -1,3 +1,4 @@
+import type { RateLimiter } from '../../../core/rate-limit/rate-limiter';
 import type { EventRepository } from '../../domain/repository/event.repository';
 import type { EventAttendeeRepository } from '../../domain/repository/event-attendee.repository';
 
@@ -6,13 +7,15 @@ import { Injectable } from '@znight/core';
 import { EventPublisher } from '@znight/events';
 import { BadRequestException } from '@znight/http';
 import { getLogger } from '@znight/observability';
-import { uniq } from 'lodash';
+import { uniqBy } from 'lodash';
 
+import { RateLimitConfig } from '../../../core/rate-limit/rate-limit.config';
 import { type UserRepository } from '../../../user/domain/repository/user.repository';
 import { AttendeeRole } from '../../domain/attendee-role.enum';
 import { AttendeeAddedEvent } from '../../domain/event/attendee-added.event';
 import { Event } from '../../domain/model/event.model';
 import { EventAttendee } from '../../domain/model/event-attendee.model';
+import { invitationRateLimitRule } from '../invitation-rate-limit';
 
 type NewEventAttendee = {
   email: string;
@@ -45,14 +48,27 @@ export class CreateEventUseCase {
     private readonly attendeeRepository: EventAttendeeRepository,
     private readonly userRepository: UserRepository,
     private readonly eventBus: EventPublisher,
+    private readonly rateLimiter: RateLimiter,
+    private readonly rateLimitConfig: RateLimitConfig,
   ) {}
 
   async execute(input: CreateEventInput): Promise<CreateEventOutput> {
     this.logger.info('Create event request received', { input });
-    const attendeeEmails = uniq(input.newEvent.attendees?.map(a => a.email) ?? [])
-      // Remove the current user from the list of attendees
-      .filter(email => email !== input.currentUser.email);
-    const existingUsers = await this.userRepository.findByEmails(attendeeEmails);
+    // Each email once, and never the current user (added below as creator)
+    const invitedAttendees = uniqBy(input.newEvent.attendees ?? [], attendee => attendee.email).filter(
+      attendee => attendee.email !== input.currentUser.email,
+    );
+
+    if (invitedAttendees.some(attendee => attendee.role === AttendeeRole.CREATOR)) {
+      throw new BadRequestException('Cannot assign the creator role to an invited attendee');
+    }
+
+    await this.rateLimiter.consume(
+      [invitationRateLimitRule(input.currentUser.id, this.rateLimitConfig)],
+      invitedAttendees.length,
+    );
+
+    const existingUsers = await this.userRepository.findByEmails(invitedAttendees.map(attendee => attendee.email));
     const eventId = this.eventRepository.newId();
     const attendees: EventAttendee[] = [];
 
@@ -68,14 +84,10 @@ export class CreateEventUseCase {
       }),
     );
 
-    for (const attendee of input.newEvent.attendees ?? []) {
+    for (const attendee of invitedAttendees) {
       const user = existingUsers.find(u => u.email === attendee.email);
       const id = this.attendeeRepository.newId();
       const role = attendee.role ?? AttendeeRole.PARTICIPANT;
-
-      if (role === AttendeeRole.CREATOR) {
-        throw new BadRequestException('Cannot assign the creator role to an invited attendee');
-      }
 
       const newAttendee = user
         ? EventAttendee.createFromExistingUser({ id, eventId, user, role })

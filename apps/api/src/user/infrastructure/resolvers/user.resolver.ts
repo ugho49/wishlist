@@ -4,6 +4,7 @@ import { type UserAccountId, type UserId } from '@wishlist/common';
 import { Args, Loader, Mutation, Query, Resolver } from '@znight/graphql';
 
 import { Authenticated, Public } from '../../../auth/infrastructure/decorators/public.metadata';
+import { RateLimit } from '../../../auth/infrastructure/decorators/rate-limit.decorator';
 import { CurrentUser, CurrentUserId } from '../../../auth/infrastructure/decorators/user.decorator';
 import {
   type ChangeUserPasswordInput,
@@ -12,6 +13,7 @@ import {
   type ConfirmEmailChangeInput,
   type ConfirmEmailChangeResult,
   type GetPendingEmailChangeResult,
+  type CurrentUser as GqlCurrentUser,
   type LinkUserToGoogleInput,
   type LinkUserToGoogleResult,
   type PendingEmailChange,
@@ -36,7 +38,7 @@ import {
   type UpdateUserPictureFromAccountResult,
   type UpdateUserProfileInput,
   type UpdateUserProfileResult,
-  type User,
+  type UserByEmailResult,
 } from '../../../gql/generated-types';
 import { ConfirmEmailChangeUseCase } from '../../application/command/confirm-email-change.use-case';
 import { CreateEmailChangeVerificationUseCase } from '../../application/command/create-email-change-verification.use-case';
@@ -52,11 +54,12 @@ import { UpdateUserUseCase } from '../../application/command/update-user.use-cas
 import { UpdateUserEmailSettingUseCase } from '../../application/command/update-user-email-setting.use-case';
 import { UpdateUserPasswordUseCase } from '../../application/command/update-user-password.use-case';
 import { UpdateUserPictureFromAccountUseCase } from '../../application/command/update-user-picture-from-account.use-case';
+import { FindUserByEmailUseCase } from '../../application/query/find-user-by-email.use-case';
 import { GetClosestFriendsUseCase } from '../../application/query/get-closest-friends.use-case';
 import { GetPendingEmailChangeUseCase } from '../../application/query/get-pending-email-change.use-case';
-import { GetUsersByCriteriaUseCase } from '../../application/query/get-users-by-criteria.use-case';
+import { SearchUsersInCircleUseCase } from '../../application/query/search-users-in-circle.use-case';
 import { SignupSource } from '../../domain/signup-source.enum';
-import { UsersById } from '../user.dataloader';
+import { CurrentUsersById } from '../user.dataloader';
 import { userMapper } from '../user.mapper';
 import {
   ChangeUserPasswordInputSchema,
@@ -74,6 +77,7 @@ import {
   UpdateUserEmailSettingsInputSchema,
   UpdateUserPictureFromAccountInputSchema,
   UpdateUserProfileInputSchema,
+  UserByEmailSchema,
 } from '../user.schema';
 
 @Resolver()
@@ -95,13 +99,17 @@ export class UserResolver {
     private readonly createPasswordVerificationUseCase: CreatePasswordVerificationUseCase,
     private readonly resetUserPasswordUseCase: ResetUserPasswordUseCase,
     private readonly revokeUserSessionUseCase: RevokeUserSessionUseCase,
-    private readonly getUsersByCriteriaUseCase: GetUsersByCriteriaUseCase,
+    private readonly searchUsersInCircleUseCase: SearchUsersInCircleUseCase,
+    private readonly findUserByEmailUseCase: FindUserByEmailUseCase,
     private readonly getClosestFriendsUseCase: GetClosestFriendsUseCase,
   ) {}
 
   @Query()
-  async currentUser(@CurrentUserId() currentUserId: UserId, @Loader() usersLoader: Loader<UsersById>): Promise<User> {
-    const user = await usersLoader.load(currentUserId);
+  async currentUser(
+    @CurrentUserId() currentUserId: UserId,
+    @Loader() currentUsersLoader: Loader<CurrentUsersById>,
+  ): Promise<GqlCurrentUser> {
+    const user = await currentUsersLoader.load(currentUserId);
     if (!user) {
       throw new Error('User not found');
     }
@@ -113,11 +121,25 @@ export class UserResolver {
     @Args('keyword', SearchUsersKeywordSchema) keyword: string,
     @CurrentUser() currentUser: ICurrentUser,
   ): Promise<SearchUsersResult> {
-    const { users } = await this.getUsersByCriteriaUseCase.execute({ currentUser, criteria: keyword });
+    const { users } = await this.searchUsersInCircleUseCase.execute({ currentUser, keyword });
 
     return {
       __typename: 'SearchUsersOutput',
       users: users.map(user => userMapper.toGqlUser(user)),
+    };
+  }
+
+  @Query()
+  @RateLimit('userByEmail')
+  async userByEmail(
+    @Args('email', UserByEmailSchema) email: string,
+    @CurrentUser() currentUser: ICurrentUser,
+  ): Promise<UserByEmailResult> {
+    const { user } = await this.findUserByEmailUseCase.execute({ currentUser, email });
+
+    return {
+      __typename: 'UserByEmailOutput',
+      user: user ? userMapper.toGqlUser(user) : undefined,
     };
   }
 
@@ -147,7 +169,7 @@ export class UserResolver {
       },
     });
 
-    return userMapper.toGqlUser(user);
+    return userMapper.toGqlCurrentUser(user);
   }
 
   @Mutation()
@@ -176,7 +198,7 @@ export class UserResolver {
   async updateUserProfile(
     @Args('input', UpdateUserProfileInputSchema) input: UpdateUserProfileInput,
     @CurrentUserId() currentUserId: UserId,
-    @Loader() usersLoader: Loader<UsersById>,
+    @Loader() currentUsersLoader: Loader<CurrentUsersById>,
   ): Promise<UpdateUserProfileResult> {
     await this.updateUserUseCase.execute({
       userId: currentUserId,
@@ -187,7 +209,7 @@ export class UserResolver {
       },
     });
 
-    const loadedUser = await usersLoader.load(currentUserId);
+    const loadedUser = await currentUsersLoader.load(currentUserId);
     if (!loadedUser) {
       throw new Error('Failed to load user');
     }
@@ -198,7 +220,7 @@ export class UserResolver {
   async setSignupSource(
     @Args('input', SetSignupSourceInputSchema) input: SetSignupSourceInput,
     @CurrentUserId() currentUserId: UserId,
-    @Loader() usersLoader: Loader<UsersById>,
+    @Loader() currentUsersLoader: Loader<CurrentUsersById>,
   ): Promise<SetSignupSourceResult> {
     const source = toDomainSignupSource(input.source);
     await this.setSignupSourceUseCase.execute({
@@ -207,7 +229,7 @@ export class UserResolver {
       detail: source === SignupSource.OTHER ? input.detail?.trim() : undefined,
     });
 
-    const loadedUser = await usersLoader.load(currentUserId);
+    const loadedUser = await currentUsersLoader.load(currentUserId);
     if (!loadedUser) {
       throw new Error('Failed to load user');
     }

@@ -39,6 +39,9 @@ const iconSchema = z
     message: 'icon must be a valid emoji',
   });
 
+/** Every invitation sends an email: an event cannot be created with more invitations than that. */
+export const MAX_INVITED_ATTENDEES = 100;
+
 export const CreateEventInputSchema = z.object({
   title: z.string().nonempty().max(100),
   description: z.string().max(2000).optional(),
@@ -51,6 +54,7 @@ export const CreateEventInputSchema = z.object({
         role: GqlAttendeeRoleSchema.optional(),
       }),
     )
+    .max(MAX_INVITED_ATTENDEES)
     .optional(),
 }) satisfies z.ZodType<CreateEventInput>;
 

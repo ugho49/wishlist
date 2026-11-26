@@ -3,7 +3,13 @@ import type { BatchLoad } from '@znight/graphql';
 import { type UserAccountId, type UserId } from '@wishlist/common';
 import { Injectable } from '@znight/core';
 
-import { type User, type UserAccount, type UserFull, type UserSession } from '../../gql/generated-types';
+import {
+  type CurrentUser,
+  type User,
+  type UserAccount,
+  type UserFull,
+  type UserSession,
+} from '../../gql/generated-types';
 import { GetUserAccountsByIdsUseCase } from '../application/query/get-user-accounts-by-ids.use-case';
 import { GetUserAccountsByUserIdsUseCase } from '../application/query/get-user-accounts-by-user-ids.use-case';
 import { GetUserSessionsByUserIdsUseCase } from '../application/query/get-user-sessions-by-user-ids.use-case';
@@ -17,6 +23,18 @@ export class UsersById implements BatchLoad<UserId, User | null> {
   async load(userIds: readonly UserId[]): Promise<readonly (User | null)[]> {
     const users = await this.getUsersByIdsUseCase.execute({ userIds: [...userIds] });
     const userMap = new Map(users.map(user => [user.id, userMapper.toGqlUser(user)]));
+    return userIds.map(id => userMap.get(id) ?? null);
+  }
+}
+
+/** Only for the logged-in user: CurrentUser carries their private data. */
+@Injectable()
+export class CurrentUsersById implements BatchLoad<UserId, CurrentUser | null> {
+  constructor(private readonly getUsersByIdsUseCase: GetUsersByIdsUseCase) {}
+
+  async load(userIds: readonly UserId[]): Promise<readonly (CurrentUser | null)[]> {
+    const users = await this.getUsersByIdsUseCase.execute({ userIds: [...userIds] });
+    const userMap = new Map(users.map(user => [user.id, userMapper.toGqlCurrentUser(user)]));
     return userIds.map(id => userMap.get(id) ?? null);
   }
 }

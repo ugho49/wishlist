@@ -7,6 +7,7 @@ import { NotFoundException } from '@znight/http';
 import { and, count, desc, eq, gte, ilike, inArray, type SelectedFields, sql } from 'drizzle-orm';
 import { DateTime } from 'luxon';
 
+import { containsPattern } from '../../core/database/like-pattern';
 import { type DrizzleTransaction } from '../../core/database/transaction-manager';
 import { Event } from '../../event/domain/model/event.model';
 import { type EventRepository } from '../../event/domain/repository/event.repository';
@@ -15,8 +16,7 @@ import { PostgresEventAttendeeRepository } from './postgres-event-attendee.repos
 
 const titleMatches = (criteria?: string) => {
   if (!criteria) return;
-  const searchKey = criteria.trim().normalize('NFC');
-  return ilike(schema.event.title, `%${searchKey}%`);
+  return ilike(schema.event.title, containsPattern(criteria.trim().normalize('NFC')));
 };
 
 type RowType = typeof schema.event.$inferSelect & {

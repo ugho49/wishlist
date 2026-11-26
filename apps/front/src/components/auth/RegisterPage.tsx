@@ -95,7 +95,7 @@ export const RegisterPage = () => {
     const registerRes = await registerUserMutation({ input: data });
     const registered = match(registerRes.registerUser)
       .returnType<boolean>()
-      .with({ __typename: 'User' }, () => true)
+      .with({ __typename: 'CurrentUser' }, () => true)
       .with({ __typename: 'ValidationRejection' }, () => {
         setError('root', { message: 'Cet email est déjà utilisé' });
         return false;

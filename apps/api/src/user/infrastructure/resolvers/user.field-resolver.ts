@@ -5,7 +5,7 @@ import { Loader, Parent, ResolveField, Resolver } from '@znight/graphql';
 
 import { CurrentUser, CurrentUserId } from '../../../auth/infrastructure/decorators/user.decorator';
 import {
-  type User,
+  type CurrentUser as GqlCurrentUser,
   type UserAccount,
   UserAccountProvider,
   type UserEmailSettings,
@@ -15,13 +15,13 @@ import { GetUserEmailSettingUseCase } from '../../application/query/get-user-ema
 import { UserAccountsByUserId, UserSessionsByUserId } from '../user.dataloader';
 import { userMapper } from '../user.mapper';
 
-@Resolver('User')
+@Resolver('CurrentUser')
 export class UserFieldResolver {
   constructor(private readonly getUserEmailSettingUseCase: GetUserEmailSettingUseCase) {}
 
   @ResolveField()
   async accounts(
-    @Parent() user: User,
+    @Parent() user: GqlCurrentUser,
     @CurrentUserId() currentUserId: UserId,
     @Loader() userAccountsLoader: Loader<UserAccountsByUserId>,
   ): Promise<UserAccount[] | null> {
@@ -33,7 +33,7 @@ export class UserFieldResolver {
 
   @ResolveField()
   async sessions(
-    @Parent() user: User,
+    @Parent() user: GqlCurrentUser,
     @CurrentUserId() currentUserId: UserId,
     @Loader() userSessionsLoader: Loader<UserSessionsByUserId>,
   ): Promise<UserSession[] | null> {
@@ -44,7 +44,7 @@ export class UserFieldResolver {
 
   @ResolveField()
   async emailSettings(
-    @Parent() user: User,
+    @Parent() user: GqlCurrentUser,
     @CurrentUser() currentUser: ICurrentUser,
   ): Promise<UserEmailSettings | null> {
     if (user.id !== currentUser.id) return null;

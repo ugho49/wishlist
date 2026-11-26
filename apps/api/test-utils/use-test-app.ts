@@ -6,10 +6,13 @@ import { HttpPlugin } from '@znight/http';
 import { getLogger } from '@znight/observability';
 import { TestApp } from '@znight/testing';
 import axios, { type AxiosInstance } from 'axios';
+import Redis from 'ioredis';
 import request from 'supertest';
 
 import { metadata } from '../src/.znight/container.generated';
 import { createPlugins } from '../src/app';
+import { QueueConfig } from '../src/core/queue/queue.config';
+import { RATE_LIMIT_KEY_PREFIX } from '../src/core/rate-limit/valkey-rate-limiter';
 import { Fixtures } from './fixtures';
 import { MailsAssert } from './mail-assert';
 import { TableAssert } from './table-assert';
@@ -27,6 +30,7 @@ export function useTestApp() {
   let fixtures: Fixtures;
   let needToClearMails = false;
   let http: AxiosInstance;
+  let valkey: Redis;
 
   beforeAll(async () => {
     // only: 'all' so that every provider with lifecycle hooks (QueueService) starts like in production
@@ -44,16 +48,25 @@ export function useTestApp() {
     await clearMails();
 
     fixtures = new Fixtures(sql);
+
+    const queueConfig = app.get(QueueConfig);
+    valkey = new Redis({
+      host: queueConfig.host,
+      port: queueConfig.port,
+      password: queueConfig.password || undefined,
+      db: queueConfig.db,
+    });
   });
 
   beforeEach(async () => {
-    const promises = [truncateDatabase()];
+    const promises = [truncateDatabase(), clearRateLimits()];
     if (needToClearMails) promises.push(clearMails());
     await Promise.all(promises);
     needToClearMails = false;
   });
 
   afterAll(async () => {
+    await valkey.quit();
     await app.close();
   });
 
@@ -72,6 +85,12 @@ export function useTestApp() {
     logger.info(`Database truncated (${tables.length} tables) ✅`);
   }
 
+  /** Every test starts with fresh rate limit counters (they live in Valkey, not in the database). */
+  async function clearRateLimits(): Promise<void> {
+    const keys = await valkey.keys(`${RATE_LIMIT_KEY_PREFIX}*`);
+    if (keys.length > 0) await valkey.del(...keys);
+  }
+
   async function clearMails(): Promise<void> {
     await sleep(100);
     await http.delete('/api/email/all');
@@ -85,6 +104,10 @@ export function useTestApp() {
       return new MailsAssert(http);
     },
     getFixtures: () => fixtures,
+    /** Counts `hits` on a rate limit counter (key without the `rl:` prefix), as if they had already been made. */
+    fillRateLimit: async (key: string, hits: number): Promise<void> => {
+      await valkey.set(`${RATE_LIMIT_KEY_PREFIX}${key}`, hits, 'EX', 3600);
+    },
     /** Runs raw SQL with several statements allowed, such as a data migration file. */
     runSql: async (query: string): Promise<void> => {
       await sql.unsafe(query);

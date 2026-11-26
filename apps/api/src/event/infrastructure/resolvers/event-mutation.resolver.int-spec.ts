@@ -22,7 +22,7 @@ const GRAPHQL_PATH = '/graphql';
 const futureDate = () => DateTime.now().plus({ days: 30 }).toISODate() as string;
 
 describe('EventMutationResolver (GraphQL)', () => {
-  const { getRequest, getFixtures, expectTable } = useTestApp();
+  const { getRequest, getFixtures, expectTable, fillRateLimit } = useTestApp();
   let fixtures: Fixtures;
 
   beforeEach(() => {
@@ -43,6 +43,9 @@ describe('EventMutationResolver (GraphQL)', () => {
             attendees {
               id
             }
+          }
+          ... on BusinessRuleRejection {
+            code
           }
           ... on ValidationRejection {
             errors {
@@ -147,6 +150,15 @@ describe('EventMutationResolver (GraphQL)', () => {
           input: { title: 'Event', eventDate: futureDate(), attendees: [{ email: 'not-an-email' }] },
           field: 'attendees',
         },
+        {
+          case: 'more than 100 attendees',
+          input: {
+            title: 'Event',
+            eventDate: futureDate(),
+            attendees: Array.from({ length: 101 }, (_, index) => ({ email: `invited${index}@test.com` })),
+          },
+          field: 'attendees',
+        },
       ])('should return ValidationRejection when invalid input: $case', async ({ input, field }) => {
         const res = await request.post(GRAPHQL_PATH).send({ query: mutation, variables: { input } }).expect(200);
 
@@ -155,6 +167,21 @@ describe('EventMutationResolver (GraphQL)', () => {
           expect.arrayContaining([expect.objectContaining({ field: expect.stringContaining(field) })]),
         );
 
+        await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(0);
+      });
+
+      it('should return BusinessRuleRejection RATE_LIMITED when the daily invitation quota is reached', async () => {
+        await fillRateLimit(`invitation:user:${currentUserId}`, 100);
+
+        const res = await request
+          .post(GRAPHQL_PATH)
+          .send({
+            query: mutation,
+            variables: { input: { title: 'Event', eventDate: futureDate(), attendees: [{ email: 'a@test.com' }] } },
+          })
+          .expect(200);
+
+        expect(res.body.data.createEvent).toEqual({ __typename: 'BusinessRuleRejection', code: 'RATE_LIMITED' });
         await expectTable(Fixtures.EVENT_TABLE).hasNumberOfRows(0);
       });
     });
@@ -367,6 +394,9 @@ describe('EventMutationResolver (GraphQL)', () => {
             pendingEmail
             role
           }
+          ... on BusinessRuleRejection {
+            code
+          }
           ... on ValidationRejection {
             errors {
               field
@@ -422,6 +452,22 @@ describe('EventMutationResolver (GraphQL)', () => {
 
         // 1 maintainer + 1 new attendee
         await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(2);
+      });
+
+      it('should return BusinessRuleRejection RATE_LIMITED when the daily invitation quota is reached', async () => {
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Event',
+          maintainerId: currentUserId,
+        });
+        await fillRateLimit(`invitation:user:${currentUserId}`, 100);
+
+        const res = await request
+          .post(GRAPHQL_PATH)
+          .send({ query: mutation, variables: { eventId, input: { email: 'invited@test.com' } } })
+          .expect(200);
+
+        expect(res.body.data.addEventAttendee).toEqual({ __typename: 'BusinessRuleRejection', code: 'RATE_LIMITED' });
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(1);
       });
 
       it('should return ValidationRejection when the email is invalid', async () => {

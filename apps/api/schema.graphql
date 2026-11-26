@@ -15,7 +15,7 @@ input AddEventAttendeeInput {
   role: AttendeeRole
 }
 
-union AddEventAttendeeResult = EventAttendee | ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection
+union AddEventAttendeeResult = BusinessRuleRejection | EventAttendee | ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection
 
 input AddSecretSantaUsersInput {
   attendeeIds: [AttendeeId!]!
@@ -201,6 +201,7 @@ enum AttendeeRole {
 
 enum BusinessRuleCode {
   INVALID_USER_MERGE
+  RATE_LIMITED
   USER_IN_STARTED_SECRET_SANTA
   WRONG_OLD_PASSWORD
 }
@@ -245,7 +246,7 @@ input CreateEventInput {
   title: String!
 }
 
-union CreateEventResult = Event | ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection
+union CreateEventResult = BusinessRuleRejection | Event | ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection
 
 input CreateItemInput {
   description: String
@@ -265,6 +266,26 @@ input CreateSecretSantaInput {
 }
 
 union CreateSecretSantaResult = ForbiddenRejection | InternalErrorRejection | SecretSanta | UnauthorizedRejection | ValidationRejection
+
+"""
+The logged-in user, with their private data. Only returned to that user.
+"""
+type CurrentUser {
+  accounts: [UserAccount!] @resolved
+  birthday: String
+  createdAt: String!
+  email: String!
+  emailSettings: UserEmailSettings @resolved
+  firstName: String!
+  id: UserId!
+  isEnabled: Boolean!
+  lastName: String!
+  pictureUrl: String
+  sessions: [UserSession!] @resolved
+  signupSource: SignupSource
+  signupSourceDetail: String
+  updatedAt: String!
+}
 
 union DeleteEventResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
@@ -314,7 +335,7 @@ type ForbiddenRejection {
   message: String!
 }
 
-union GetCurrentUserResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | User
+union GetCurrentUserResult = CurrentUser | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection
 
 union GetEventByIdResult = Event | ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection
 
@@ -575,8 +596,15 @@ type Query {
   mySecretSantaDraw(eventId: EventId!): GetMySecretSantaDrawResult
   mySecretSantas(filters: PaginationFilters!): GetMySecretSantasResult!
   pendingEmailChange: GetPendingEmailChangeResult
+  """
+  Users of the current user's circle (who attend an event with them) matching the keyword
+  """
   searchUsers(keyword: String!): SearchUsersResult!
   secretSanta(eventId: EventId!): GetSecretSantaForEventResult
+  """
+  The account owning that exact email, rate limited (RATE_LIMITED business rule)
+  """
+  userByEmail(email: String!): UserByEmailResult!
   wishlist(id: WishlistId!): GetWishlistByIdResult
   wishlists(filters: PaginationFilters!): GetMyWishlistsResult!
 }
@@ -595,7 +623,7 @@ input RegisterUserInput {
   password: String!
 }
 
-union RegisterUserResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | User | ValidationRejection
+union RegisterUserResult = CurrentUser | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection
 
 union RemoveEventAttendeeResult = BusinessRuleRejection | ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
@@ -732,7 +760,7 @@ input SetSignupSourceInput {
   source: SignupSource!
 }
 
-union SetSignupSourceResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | User | ValidationRejection
+union SetSignupSourceResult = CurrentUser | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection
 
 enum SignupSource {
   FRIENDS
@@ -810,7 +838,7 @@ input UpdateUserProfileInput {
   lastname: String!
 }
 
-union UpdateUserProfileResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | User | ValidationRejection
+union UpdateUserProfileResult = CurrentUser | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection
 
 input UpdateWishlistInput {
   description: String
@@ -819,21 +847,16 @@ input UpdateWishlistInput {
 
 union UpdateWishlistResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
+"""
+What any other user may know about a user: never add private data here, it is sent to every
+attendee, wishlist owner or picker that shows this user. Put it on CurrentUser instead.
+"""
 type User {
-  accounts: [UserAccount!] @resolved
-  birthday: String
-  createdAt: String!
   email: String!
-  emailSettings: UserEmailSettings @resolved
   firstName: String!
   id: UserId!
-  isEnabled: Boolean!
   lastName: String!
   pictureUrl: String
-  sessions: [UserSession!] @resolved
-  signupSource: SignupSource
-  signupSourceDetail: String
-  updatedAt: String!
 }
 
 type UserAccount {
@@ -858,6 +881,15 @@ enum UserAuthorities {
   ROLE_SUPERADMIN
   ROLE_USER
 }
+
+type UserByEmailOutput {
+  """
+  The enabled account owning that exact email, other than the current user; null otherwise
+  """
+  user: User
+}
+
+union UserByEmailResult = BusinessRuleRejection | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | UserByEmailOutput | ValidationRejection
 
 type UserEmailSettings {
   birthdayReminder: Boolean!

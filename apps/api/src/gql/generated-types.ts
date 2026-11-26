@@ -31,7 +31,7 @@ export type AddEventAttendeeInput = {
   role?: InputMaybe<AttendeeRole>;
 };
 
-export type AddEventAttendeeResult = EventAttendee | ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection;
+export type AddEventAttendeeResult = BusinessRuleRejection | EventAttendee | ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection;
 
 export type AddSecretSantaUsersInput = {
   attendeeIds: Array<Scalars['AttendeeId']['input']>;
@@ -225,6 +225,7 @@ export enum AttendeeRole {
 
 export enum BusinessRuleCode {
   InvalidUserMerge = 'INVALID_USER_MERGE',
+  RateLimited = 'RATE_LIMITED',
   UserInStartedSecretSanta = 'USER_IN_STARTED_SECRET_SANTA',
   WrongOldPassword = 'WRONG_OLD_PASSWORD'
 }
@@ -271,7 +272,7 @@ export type CreateEventInput = {
   title: Scalars['String']['input'];
 };
 
-export type CreateEventResult = Event | ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection;
+export type CreateEventResult = BusinessRuleRejection | Event | ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection;
 
 export type CreateItemInput = {
   description?: InputMaybe<Scalars['String']['input']>;
@@ -291,6 +292,22 @@ export type CreateSecretSantaInput = {
 };
 
 export type CreateSecretSantaResult = ForbiddenRejection | InternalErrorRejection | SecretSanta | UnauthorizedRejection | ValidationRejection;
+
+/** The logged-in user, with their private data. Only returned to that user. */
+export type CurrentUser = {
+  __typename: 'CurrentUser';
+  birthday?: Maybe<Scalars['String']['output']>;
+  createdAt: Scalars['String']['output'];
+  email: Scalars['String']['output'];
+  firstName: Scalars['String']['output'];
+  id: Scalars['UserId']['output'];
+  isEnabled: Scalars['Boolean']['output'];
+  lastName: Scalars['String']['output'];
+  pictureUrl?: Maybe<Scalars['String']['output']>;
+  signupSource?: Maybe<SignupSource>;
+  signupSourceDetail?: Maybe<Scalars['String']['output']>;
+  updatedAt: Scalars['String']['output'];
+};
 
 export type DeleteEventResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
@@ -340,7 +357,7 @@ export type ForbiddenRejection = {
   message: Scalars['String']['output'];
 };
 
-export type GetCurrentUserResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | User;
+export type GetCurrentUserResult = CurrentUser | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection;
 
 export type GetEventByIdResult = Event | ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection;
 
@@ -941,8 +958,11 @@ export type Query = {
   mySecretSantaDraw?: Maybe<GetMySecretSantaDrawResult>;
   mySecretSantas: GetMySecretSantasResult;
   pendingEmailChange?: Maybe<GetPendingEmailChangeResult>;
+  /** Users of the current user's circle (who attend an event with them) matching the keyword */
   searchUsers: SearchUsersResult;
   secretSanta?: Maybe<GetSecretSantaForEventResult>;
+  /** The account owning that exact email, rate limited (RATE_LIMITED business rule) */
+  userByEmail: UserByEmailResult;
   wishlist?: Maybe<GetWishlistByIdResult>;
   wishlists: GetMyWishlistsResult;
 };
@@ -1029,6 +1049,11 @@ export type QuerySecretSantaArgs = {
 };
 
 
+export type QueryUserByEmailArgs = {
+  email: Scalars['String']['input'];
+};
+
+
 export type QueryWishlistArgs = {
   id: Scalars['WishlistId']['input'];
 };
@@ -1052,7 +1077,7 @@ export type RegisterUserInput = {
   password: Scalars['String']['input'];
 };
 
-export type RegisterUserResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | User | ValidationRejection;
+export type RegisterUserResult = CurrentUser | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection;
 
 export type RemoveEventAttendeeResult = BusinessRuleRejection | ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
@@ -1191,7 +1216,7 @@ export type SetSignupSourceInput = {
   source: SignupSource;
 };
 
-export type SetSignupSourceResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | User | ValidationRejection;
+export type SetSignupSourceResult = CurrentUser | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection;
 
 export enum SignupSource {
   Friends = 'FRIENDS',
@@ -1271,7 +1296,7 @@ export type UpdateUserProfileInput = {
   lastname: Scalars['String']['input'];
 };
 
-export type UpdateUserProfileResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | User | ValidationRejection;
+export type UpdateUserProfileResult = CurrentUser | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection;
 
 export type UpdateWishlistInput = {
   description?: InputMaybe<Scalars['String']['input']>;
@@ -1280,19 +1305,17 @@ export type UpdateWishlistInput = {
 
 export type UpdateWishlistResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
+/**
+ * What any other user may know about a user: never add private data here, it is sent to every
+ * attendee, wishlist owner or picker that shows this user. Put it on CurrentUser instead.
+ */
 export type User = {
   __typename: 'User';
-  birthday?: Maybe<Scalars['String']['output']>;
-  createdAt: Scalars['String']['output'];
   email: Scalars['String']['output'];
   firstName: Scalars['String']['output'];
   id: Scalars['UserId']['output'];
-  isEnabled: Scalars['Boolean']['output'];
   lastName: Scalars['String']['output'];
   pictureUrl?: Maybe<Scalars['String']['output']>;
-  signupSource?: Maybe<SignupSource>;
-  signupSourceDetail?: Maybe<Scalars['String']['output']>;
-  updatedAt: Scalars['String']['output'];
 };
 
 export type UserAccount = {
@@ -1316,6 +1339,14 @@ export enum UserAuthorities {
   RoleSuperadmin = 'ROLE_SUPERADMIN',
   RoleUser = 'ROLE_USER'
 }
+
+export type UserByEmailOutput = {
+  __typename: 'UserByEmailOutput';
+  /** The enabled account owning that exact email, other than the current user; null otherwise */
+  user?: Maybe<User>;
+};
+
+export type UserByEmailResult = BusinessRuleRejection | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | UserByEmailOutput | ValidationRejection;
 
 export type UserEmailSettings = {
   __typename: 'UserEmailSettings';

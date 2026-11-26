@@ -117,7 +117,7 @@ export const UserTabNotifications = () => {
   const { data, isLoading: loadingNotificationSettings } = useUserProfileEmailSettingsQuery(undefined, {
     select: d => d.currentUser,
   });
-  const emailSettings = data?.__typename === 'User' ? data.emailSettings : undefined;
+  const emailSettings = data?.__typename === 'CurrentUser' ? data.emailSettings : undefined;
   const queryRejection = data && isRejection(data) ? data : undefined;
 
   const { mutateAsync: updateEmailSettings, isPending: loading } = useUpdateUserEmailSettingsMutation({

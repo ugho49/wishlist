@@ -78,7 +78,7 @@ describe('useLogout', () => {
     const tokensSeenByQuery: (string | null)[] = [];
     const queryFn = vi.fn(() => {
       tokensSeenByQuery.push(localStorage.getItem(LS_KEYS.ACCESS_TOKEN));
-      return Promise.resolve({ currentUser: { __typename: 'User' } });
+      return Promise.resolve({ currentUser: { __typename: 'CurrentUser' } });
     });
 
     // An authenticated page: it reads the auth state, like the layout does, so a logout re-renders it.

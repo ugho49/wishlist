@@ -83,7 +83,7 @@ export const WelcomeSignupSourceStep = ({ ref, disabled = false }: WelcomeSignup
   const { data } = useUserProfileCurrentUserQuery(undefined, {
     select: query => query.currentUser,
   });
-  const user = data?.__typename === 'User' ? data : undefined;
+  const user = data?.__typename === 'CurrentUser' ? data : undefined;
   const [source, setSource] = useState<SignupSource | null>(null);
   const [detail, setDetail] = useState('');
   const [detailError, setDetailError] = useState<string>();
@@ -129,7 +129,7 @@ export const WelcomeSignupSourceStep = ({ ref, disabled = false }: WelcomeSignup
     });
 
     return match(sourceResult.setSignupSource)
-      .with({ __typename: 'User' }, () => {
+      .with({ __typename: 'CurrentUser' }, () => {
         void queryClient.invalidateQueries({ queryKey: ['UserProfileCurrentUser'] });
         return true;
       })

@@ -6,7 +6,7 @@ import { Injectable } from '@znight/core';
 import { NotFoundException } from '@znight/http';
 import { and, asc, count, desc, eq, gte, inArray, isNotNull, isNull, like, ne, or, type SQL, sql } from 'drizzle-orm';
 
-import { DEFAULT_RESULT_NUMBER } from '../../core/common/pagination';
+import { containsPattern } from '../../core/database/like-pattern';
 import { type DrizzleTransaction } from '../../core/database/transaction-manager';
 import { User } from '../../user/domain/model/user.model';
 import { type UserRepository } from '../../user/domain/repository/user.repository';
@@ -45,22 +45,23 @@ export class PostgresUserRepository implements UserRepository {
     return users.map(user => PostgresUserRepository.toModel(user));
   }
 
-  async findAllByCriteria(params: { criteria: string; ignoreUserId?: UserId; limit?: number }): Promise<User[]> {
-    const { criteria, ignoreUserId, limit } = params;
-
-    const searchKey = criteria.trim().toLowerCase().normalize('NFC');
+  async searchInCircle(params: { userId: UserId; keyword: string; limit: number }): Promise<User[]> {
+    const { userId, keyword, limit } = params;
+    const pattern = containsPattern(keyword.trim().toLowerCase().normalize('NFC'));
 
     const users = await this.db.query.user.findMany({
       where: and(
-        ignoreUserId ? ne(schema.user.id, ignoreUserId) : undefined,
+        ne(schema.user.id, userId),
+        eq(schema.user.isEnabled, true),
+        inArray(schema.user.id, this.circleUserIds(userId)),
         or(
-          like(sql`lower(${schema.user.firstName})`, `%${searchKey}%`),
-          like(sql`lower(${schema.user.lastName})`, `%${searchKey}%`),
-          like(sql`lower(${schema.user.email})`, `%${searchKey}%`),
+          like(sql`lower(${schema.user.firstName})`, pattern),
+          like(sql`lower(${schema.user.lastName})`, pattern),
+          like(sql`lower(${schema.user.email})`, pattern),
         ),
       ),
-      limit: limit ?? DEFAULT_RESULT_NUMBER,
-      orderBy: [asc(schema.user.firstName)],
+      limit,
+      orderBy: [asc(schema.user.firstName), asc(schema.user.lastName)],
     });
 
     return users.map(user => PostgresUserRepository.toModel(user));
@@ -73,12 +74,12 @@ export class PostgresUserRepository implements UserRepository {
     let whereCondition: SQL | undefined;
 
     if (params.criteria) {
-      const searchKey = params.criteria.trim().toLowerCase().normalize('NFC');
+      const pattern = containsPattern(params.criteria.trim().toLowerCase().normalize('NFC'));
 
       whereCondition = or(
-        like(sql`lower(${schema.user.firstName})`, `%${searchKey}%`),
-        like(sql`lower(${schema.user.lastName})`, `%${searchKey}%`),
-        like(sql`lower(${schema.user.email})`, `%${searchKey}%`),
+        like(sql`lower(${schema.user.firstName})`, pattern),
+        like(sql`lower(${schema.user.lastName})`, pattern),
+        like(sql`lower(${schema.user.email})`, pattern),
       );
     }
 
@@ -170,11 +171,6 @@ export class PostgresUserRepository implements UserRepository {
   }
 
   async findClosestFriends(userId: UserId, limit: number): Promise<User[]> {
-    const userEventsSubquery = this.db
-      .select({ eventId: schema.eventAttendee.eventId })
-      .from(schema.eventAttendee)
-      .where(eq(schema.eventAttendee.userId, userId));
-
     const result = await this.db
       .select({
         user: schema.user,
@@ -182,7 +178,13 @@ export class PostgresUserRepository implements UserRepository {
       })
       .from(schema.user)
       .innerJoin(schema.eventAttendee, eq(schema.user.id, schema.eventAttendee.userId))
-      .where(and(ne(schema.user.id, userId), inArray(schema.eventAttendee.eventId, userEventsSubquery)))
+      .where(
+        and(
+          ne(schema.user.id, userId),
+          eq(schema.user.isEnabled, true),
+          inArray(schema.eventAttendee.eventId, this.eventIdsOf(userId)),
+        ),
+      )
       .groupBy(schema.user.id)
       .orderBy(desc(count()))
       .limit(limit);
@@ -213,6 +215,27 @@ export class PostgresUserRepository implements UserRepository {
       );
 
     return rows.map(row => PostgresUserRepository.toModel(row.user));
+  }
+
+  /** Events the user attends. */
+  private eventIdsOf(userId: UserId) {
+    return this.db
+      .select({ eventId: schema.eventAttendee.eventId })
+      .from(schema.eventAttendee)
+      .where(eq(schema.eventAttendee.userId, userId));
+  }
+
+  /**
+   * The user's circle: the users who attend at least one event with them. Searching other users is
+   * restricted to it, so the user base can never be listed.
+   */
+  private circleUserIds(userId: UserId) {
+    return this.db
+      .selectDistinct({ userId: schema.eventAttendee.userId })
+      .from(schema.eventAttendee)
+      .where(
+        and(isNotNull(schema.eventAttendee.userId), inArray(schema.eventAttendee.eventId, this.eventIdsOf(userId))),
+      );
   }
 
   static toModel(row: typeof schema.user.$inferSelect): User {

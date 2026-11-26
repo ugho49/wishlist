@@ -25,6 +25,7 @@ import { ConfirmIconButton } from '../common/ConfirmIconButton';
 import { Subtitle } from '../common/Subtitle';
 import { SearchUserSelect } from '../user/SearchUserSelect';
 import { AttendeeRolesHint } from './AttendeeRolesHint';
+import { INVITATIONS_RATE_LIMITED_MESSAGE } from './event.messages';
 import { AttendeeListItem, ListItemAttendee } from './ListItemAttendee';
 
 export type EditEventAttendeesProps = {
@@ -80,6 +81,9 @@ export const EditEventAttendees = ({ eventId, attendees }: EditEventAttendeesPro
         addToast({ message: "Participant ajouté à l'évènement !", variant: 'info' });
         void invalidateEvent();
       })
+      .with({ __typename: 'BusinessRuleRejection', code: BusinessRuleCode.RateLimited }, () =>
+        addToast({ message: INVITATIONS_RATE_LIMITED_MESSAGE, variant: 'error' }),
+      )
       .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
       .exhaustive();
   };

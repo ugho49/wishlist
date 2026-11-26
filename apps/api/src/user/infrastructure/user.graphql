@@ -52,7 +52,22 @@ type UserSession {
   current: Boolean! @resolved
 }
 
+"""
+What any other user may know about a user: never add private data here, it is sent to every
+attendee, wishlist owner or picker that shows this user. Put it on CurrentUser instead.
+"""
 type User {
+  id: UserId!
+  firstName: String!
+  lastName: String!
+  email: String!
+  pictureUrl: String
+}
+
+"""
+The logged-in user, with their private data. Only returned to that user.
+"""
+type CurrentUser {
   id: UserId!
   firstName: String!
   lastName: String!
@@ -79,7 +94,7 @@ type UserEmailSettings {
   birthdayReminder: Boolean!
 }
 
-union GetCurrentUserResult = User | UnauthorizedRejection | ForbiddenRejection | InternalErrorRejection
+union GetCurrentUserResult = CurrentUser | UnauthorizedRejection | ForbiddenRejection | InternalErrorRejection
 
 type SearchUsersOutput {
   users: [User!]!
@@ -87,6 +102,13 @@ type SearchUsersOutput {
 
 type ClosestFriendsOutput {
   users: [User!]!
+}
+
+type UserByEmailOutput {
+  """
+  The enabled account owning that exact email, other than the current user; null otherwise
+  """
+  user: User
 }
 
 union SearchUsersResult =
@@ -99,6 +121,14 @@ union SearchUsersResult =
 union ClosestFriendsResult =
   | ClosestFriendsOutput
   | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+
+union UserByEmailResult =
+  | UserByEmailOutput
+  | ValidationRejection
+  | BusinessRuleRejection
   | UnauthorizedRejection
   | ForbiddenRejection
   | InternalErrorRejection
@@ -170,7 +200,7 @@ input RevokeSessionInput {
 }
 
 union RegisterUserResult =
-  | User
+  | CurrentUser
   | ValidationRejection
   | UnauthorizedRejection
   | ForbiddenRejection
@@ -184,14 +214,14 @@ union LinkUserToGoogleResult =
   | InternalErrorRejection
 
 union UpdateUserProfileResult =
-  | User
+  | CurrentUser
   | ValidationRejection
   | UnauthorizedRejection
   | ForbiddenRejection
   | InternalErrorRejection
 
 union SetSignupSourceResult =
-  | User
+  | CurrentUser
   | ValidationRejection
   | UnauthorizedRejection
   | ForbiddenRejection
@@ -272,7 +302,14 @@ union RevokeSessionResult =
 extend type Query {
   currentUser: GetCurrentUserResult!
   pendingEmailChange: GetPendingEmailChangeResult
+  """
+  Users of the current user's circle (who attend an event with them) matching the keyword
+  """
   searchUsers(keyword: String!): SearchUsersResult!
+  """
+  The account owning that exact email, rate limited (RATE_LIMITED business rule)
+  """
+  userByEmail(email: String!): UserByEmailResult!
   closestFriends(limit: Int): ClosestFriendsResult!
 }
 

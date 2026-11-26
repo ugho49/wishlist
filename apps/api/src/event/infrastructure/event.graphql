@@ -98,6 +98,7 @@ input AdminEventPaginationFilters {
 union CreateEventResult =
   | Event
   | ValidationRejection
+  | BusinessRuleRejection
   | UnauthorizedRejection
   | ForbiddenRejection
   | NotFoundRejection
@@ -122,6 +123,7 @@ union DeleteEventResult =
 union AddEventAttendeeResult =
   | EventAttendee
   | ValidationRejection
+  | BusinessRuleRejection
   | UnauthorizedRejection
   | ForbiddenRejection
   | NotFoundRejection

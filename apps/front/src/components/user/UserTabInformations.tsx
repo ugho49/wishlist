@@ -66,7 +66,7 @@ export const UserTabInformations = () => {
     });
 
     match(res.updateUserProfile)
-      .with({ __typename: 'User' }, () => {
+      .with({ __typename: 'CurrentUser' }, () => {
         addToast({ message: 'Profil mis à jour', variant: 'info' });
 
         dispatch(

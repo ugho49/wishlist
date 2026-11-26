@@ -10,6 +10,7 @@ import { OpenApiPlugin } from '@znight/openapi';
 import { Public } from './auth/infrastructure/decorators/public.metadata';
 import { AccessGuard } from './auth/infrastructure/guards/access.guard';
 import { AuthenticationGuard } from './auth/infrastructure/guards/authentication.guard';
+import { RateLimitGuard } from './auth/infrastructure/guards/rate-limit.guard';
 import { UploadExceptionMapper } from './core/bucket/upload-exception.mapper';
 import { CoreConfig } from './core/core.config';
 import { DatadogErrorTracker } from './core/filters/datadog-error.tracker';
@@ -48,7 +49,8 @@ export function createPlugins(options: AppPluginsOptions = {}): Plugin[] {
     })),
     GraphQLPlugin.configure(container => ({
       http: { meta: [Public.meta()], get: false },
-      guards: [AccessGuard],
+      // AccessGuard first: a call refused for access never counts against a rate limit
+      guards: [AccessGuard, RateLimitGuard],
       resultMappers: [RejectionResultMapper, InternalErrorResultMapper],
       graphiql: !container.get(CoreConfig).isProduction,
       introspection: !container.get(CoreConfig).isProduction,

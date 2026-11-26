@@ -1,28 +1,36 @@
-import type {
-  SearchUsersSelectQuery,
-  SearchUsersSelectQueryVariables,
-  UserClosestFriendsQuery,
-  UserClosestFriendsQueryVariables,
-} from '../../gql';
+import type { SearchUsersSelectQuery } from '../../gql';
 
 import PersonIcon from '@mui/icons-material/Person';
-import { Autocomplete, Avatar, createFilterOptions, Stack, TextField } from '@mui/material';
+import { Autocomplete, Avatar, Stack, TextField } from '@mui/material';
 import { blue, grey, orange } from '@mui/material/colors';
 import { styled } from '@mui/material/styles';
 import { isValidEmail } from '@wishlist/common';
-import { debounce, uniqBy } from 'lodash';
-import { useEffect, useState } from 'react';
+import { uniqBy } from 'lodash';
+import { useEffect, useMemo, useState } from 'react';
 
-import { fetchGql, isRejection, SearchUsersSelectDocument, UserClosestFriendsDocument } from '../../gql';
+import {
+  BusinessRuleCode,
+  useSearchUsersSelectQuery,
+  useUserByEmailQuery,
+  useUserClosestFriendsQuery,
+} from '../../gql';
 
 type MiniUser = Extract<SearchUsersSelectQuery['searchUsers'], { __typename: 'SearchUsersOutput' }>['users'][number];
 
-type UsualUserOptionType = MiniUser & { type: 'usual' };
-type FriendUserOptionType = MiniUser & { type: 'friend'; order: number };
-type UserOptionType = UsualUserOptionType | FriendUserOptionType;
+/** `circle`: people the user already attends an event with; `email`: account found by its exact email. */
+type UserOptionType = MiniUser & { group: 'circle' | 'email' };
 
-type OptionType = UserOptionType | string;
-const filter = createFilterOptions<OptionType>();
+export type OptionType = UserOptionType | string;
+
+const SEARCH_MIN_LENGTH = 2;
+const SEARCH_DEBOUNCE_MS = 400;
+const CLOSEST_FRIENDS_LIMIT = 20;
+
+const GROUP_LABELS: Record<UserOptionType['group'] | 'invite', string> = {
+  circle: 'Amis récurrents',
+  email: 'Compte trouvé par email',
+  invite: 'Invitation par email',
+};
 
 const GroupHeader = styled('div')(({ theme }) => ({
   position: 'sticky',
@@ -56,6 +64,14 @@ const GroupItems = styled('ul')({
   },
 });
 
+const normalize = (value: string) => value.trim().toLowerCase();
+
+const matchesInput = (user: MiniUser, input: string) =>
+  normalize(`${user.firstName} ${user.lastName} ${user.email}`).includes(normalize(input));
+
+const byName = (a: MiniUser, b: MiniUser) =>
+  `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`, 'fr', { sensitivity: 'base' });
+
 export type SearchUserSelectProps = {
   label?: string;
   disabled?: boolean;
@@ -64,6 +80,11 @@ export type SearchUserSelectProps = {
   acceptNewUsers?: boolean;
 };
 
+/**
+ * Picks a user among the people the current user already attends an event with (searched by name or
+ * email), or by the exact email of any account. The rest of the user base is never searchable: the
+ * exact-email lookup is rate limited by the API.
+ */
 export const SearchUserSelect = ({
   disabled,
   onChange,
@@ -71,163 +92,144 @@ export const SearchUserSelect = ({
   label,
   acceptNewUsers = true,
 }: SearchUserSelectProps) => {
-  const [loading, setLoading] = useState(false);
-  const [options, setOptions] = useState<OptionType[]>([]);
   const [inputValue, setInputValue] = useState('');
-
-  const searchUser = async (keyword: string) => {
-    setLoading(true);
-    try {
-      if (keyword.trim() === '' || keyword.trim().length < 2) {
-        return;
-      }
-      const res = await fetchGql<SearchUsersSelectQuery, SearchUsersSelectQueryVariables>(SearchUsersSelectDocument, {
-        keyword,
-      })();
-      if (isRejection(res.searchUsers)) {
-        return;
-      }
-      const usualUsers = res.searchUsers.users.map<UsualUserOptionType>(user => ({ type: 'usual', ...user }));
-      setOptions(prev => {
-        const combined = uniqBy([...(prev as UserOptionType[]), ...usualUsers], v => v.id);
-        return sortOptionsForGrouping(combined);
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getClosestFriends = async () => {
-    const res = await fetchGql<UserClosestFriendsQuery, UserClosestFriendsQueryVariables>(UserClosestFriendsDocument, {
-      limit: 20,
-    })();
-    if (isRejection(res.closestFriends)) {
-      return;
-    }
-    const friends = res.closestFriends.users.map<FriendUserOptionType>((user, index) => ({
-      type: 'friend',
-      order: index,
-      ...user,
-    }));
-    setOptions(prev => {
-      const combined = uniqBy([...(prev as UserOptionType[]), ...friends], v => v.id);
-      return sortOptionsForGrouping(combined);
-    });
-  };
-
-  const sortOptionsForGrouping = (userOptions: UserOptionType[]): UserOptionType[] => {
-    const friends: FriendUserOptionType[] = [];
-    const others: UsualUserOptionType[] = [];
-
-    userOptions.forEach(option => {
-      if (option.type === 'friend') {
-        friends.push(option);
-      } else {
-        others.push(option);
-      }
-    });
-
-    // Tri des amis récurrents : par order, puis alphabétique en cas d'égalité
-    friends.sort((a, b) => {
-      if (a.order !== b.order) {
-        return a.order - b.order;
-      }
-      // En cas d'égalité d'ordre, tri alphabétique
-      const nameA = `${a.firstName} ${a.lastName}`.toLowerCase();
-      const nameB = `${b.firstName} ${b.lastName}`.toLowerCase();
-      return nameA.localeCompare(nameB);
-    });
-
-    // Tri des autres utilisateurs par ordre alphabétique
-    others.sort((a, b) => {
-      const nameA = `${a.firstName} ${a.lastName}`.toLowerCase();
-      const nameB = `${b.firstName} ${b.lastName}`.toLowerCase();
-      return nameA.localeCompare(nameB);
-    });
-
-    // Retourner d'abord les amis, puis les autres
-    return [...friends, ...others];
-  };
-
-  const getGroupByFunction = (option: OptionType): string => {
-    if (typeof option === 'string') {
-      return 'Invitation par email';
-    }
-    if (option.type === 'friend') {
-      return 'Amis récurrents';
-    }
-    return 'Autres utilisateurs';
-  };
+  const [keyword, setKeyword] = useState('');
 
   useEffect(() => {
-    void getClosestFriends();
-  }, []);
+    const timeout = setTimeout(() => setKeyword(inputValue.trim()), SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(timeout);
+  }, [inputValue]);
 
-  const searchUserDebounced = debounce(searchUser, 400);
+  const { data: closestFriends = [] } = useUserClosestFriendsQuery(
+    { limit: CLOSEST_FRIENDS_LIMIT },
+    { select: d => (d.closestFriends.__typename === 'ClosestFriendsOutput' ? d.closestFriends.users : []) },
+  );
+
+  const searchEnabled = keyword.length >= SEARCH_MIN_LENGTH;
+  const { data: circleResults = [], isFetching: searching } = useSearchUsersSelectQuery(
+    { keyword },
+    {
+      enabled: searchEnabled,
+      staleTime: 60_000,
+      select: d => (d.searchUsers.__typename === 'SearchUsersOutput' ? d.searchUsers.users : []),
+    },
+  );
+
+  const circleUsers = useMemo(
+    () => uniqBy([...closestFriends, ...circleResults], user => user.id),
+    [closestFriends, circleResults],
+  );
+
+  // Only look an exact email up when nobody of the circle has it: every lookup counts against a quota
+  const email = isValidEmail(keyword) ? normalize(keyword) : '';
+  const emailInCircle = circleUsers.some(user => normalize(user.email) === email);
+  const lookupEnabled = email !== '' && !emailInCircle && !excludedEmails.includes(email);
+  const { data: emailLookup, isFetching: lookingUp } = useUserByEmailQuery(
+    { email },
+    {
+      enabled: lookupEnabled,
+      // A lookup is never repeated for the same email (window focus, remount...)
+      staleTime: Number.POSITIVE_INFINITY,
+      gcTime: Number.POSITIVE_INFINITY,
+      retry: false,
+      refetchOnWindowFocus: false,
+      select: d => d.userByEmail,
+    },
+  );
+
+  const emailLookupDone = lookupEnabled && emailLookup !== undefined && !lookingUp;
+  const emailUser = emailLookupDone && emailLookup?.__typename === 'UserByEmailOutput' ? emailLookup.user : null;
+  const rateLimited =
+    emailLookupDone &&
+    emailLookup?.__typename === 'BusinessRuleRejection' &&
+    emailLookup.code === BusinessRuleCode.RateLimited;
+
+  const options = useMemo<OptionType[]>(() => {
+    const input = inputValue.trim();
+    const circleOptions = circleUsers
+      .filter(user => input === '' || matchesInput(user, input))
+      .map<UserOptionType>(user => ({ ...user, group: 'circle' }));
+
+    // Closest friends first (by number of shared events), then the other search results by name
+    const friendIds = new Set(closestFriends.map(user => user.id));
+    const sortedCircleOptions = [
+      ...circleOptions.filter(user => friendIds.has(user.id)),
+      ...circleOptions.filter(user => !friendIds.has(user.id)).sort(byName),
+    ];
+
+    const result: OptionType[] = [...sortedCircleOptions];
+
+    if (emailUser && normalize(input) === email) {
+      result.push({ ...emailUser, group: 'email' });
+    }
+
+    // No account found (or the lookup was refused): the address can still be invited
+    const canInvite = acceptNewUsers && emailLookupDone && !emailUser && normalize(input) === email;
+    if (canInvite) {
+      result.push(email);
+    }
+
+    return result;
+  }, [inputValue, circleUsers, closestFriends, emailUser, email, emailLookupDone, acceptNewUsers]);
+
+  const loading = searching || lookingUp || inputValue.trim() !== keyword;
+
+  const noOptionsText = (() => {
+    if (email && emailLookupDone && !emailUser && !acceptNewUsers) return 'Aucun compte avec cet email';
+    if (inputValue.trim().length < SEARCH_MIN_LENGTH) return 'Tapez un nom ou un email';
+    return 'Aucun résultat';
+  })();
+
+  const helperText = (() => {
+    if (rateLimited) return 'Trop de recherches par email, réessayez plus tard';
+    if (acceptNewUsers) {
+      return "Vous ne trouvez pas la personne ? Entrez son email complet pour l'inviter sur Wishlist";
+    }
+    return 'Recherchez parmi vos amis, ou entrez un email complet';
+  })();
 
   return (
-    <Autocomplete
+    <Autocomplete<OptionType>
       fullWidth
       clearOnBlur={false}
       blurOnSelect={false}
       disableCloseOnSelect={true}
       value={null}
       inputValue={inputValue}
-      onInputChange={(_, newInputValue) => {
-        setInputValue(newInputValue);
+      onInputChange={(_, newInputValue, reason) => {
+        // MUI resets the input to the selected label on selection: we clear it in onChange instead
+        if (reason !== 'reset') setInputValue(newInputValue);
       }}
       loadingText="Chargement..."
-      noOptionsText="Aucun résultat"
+      noOptionsText={noOptionsText}
       disabled={disabled}
       options={options}
       loading={loading}
+      filterOptions={values => values}
       onChange={(_, value) => {
         if (value) {
           onChange(value);
-          setInputValue(''); // Vider l'input après sélection
+          setInputValue('');
         }
       }}
-      filterOptions={(values, params) => {
-        const filtered = filter(values, params) as OptionType[];
-        const { inputValue: searchText } = params;
-
-        const containValue = filtered.some(option => {
-          if (typeof option === 'string') return option === searchText;
-          return option.email === searchText;
-        });
-
-        if (!containValue && searchText && isValidEmail(searchText) && acceptNewUsers) {
-          filtered.push(searchText.toLowerCase());
-        }
-
-        // Trier les options filtrées en maintenant le groupement
-        const userOptions = filtered.filter((option): option is UserOptionType => typeof option !== 'string');
-        const emailOptions = filtered.filter((option): option is string => typeof option === 'string');
-        const sortedUserOptions = sortOptionsForGrouping(userOptions);
-
-        return [...sortedUserOptions, ...emailOptions];
-      }}
-      groupBy={getGroupByFunction}
+      groupBy={option => (typeof option === 'string' ? GROUP_LABELS.invite : GROUP_LABELS[option.group])}
       renderGroup={params => (
         <li key={params.key}>
           <GroupHeader>{params.group}</GroupHeader>
           <GroupItems>{params.children}</GroupItems>
         </li>
       )}
-      getOptionDisabled={option => {
-        const email = typeof option === 'string' ? option : option.email;
-        return excludedEmails.includes(email);
-      }}
-      getOptionLabel={option => {
-        if (typeof option === 'string') {
-          if (acceptNewUsers) return `Inviter le participant par son email: ${option}`;
-          return `Utilisateur inconnu: ${option}`;
-        }
-
-        return `${option.firstName} ${option.lastName} (${option.email})`;
-      }}
-      renderOption={(props, option) => (
-        <li {...props}>
+      getOptionDisabled={option => excludedEmails.includes(typeof option === 'string' ? option : option.email)}
+      getOptionLabel={option =>
+        typeof option === 'string'
+          ? `Inviter le participant par son email: ${option}`
+          : `${option.firstName} ${option.lastName} (${option.email})`
+      }
+      isOptionEqualToValue={(option, value) =>
+        typeof option === 'string' || typeof value === 'string' ? option === value : option.id === value.id
+      }
+      renderOption={({ key, ...props }, option) => (
+        <li key={key} {...props}>
           <Stack
             direction="row"
             sx={{
@@ -242,7 +244,7 @@ export const SearchUserSelect = ({
                 bgcolor: typeof option === 'string' ? orange[100] : blue[100],
                 color: typeof option === 'string' ? orange[600] : blue[600],
               }}
-              src={typeof option === 'string' ? undefined : (option?.pictureUrl ?? undefined)}
+              src={typeof option === 'string' ? undefined : (option.pictureUrl ?? undefined)}
             >
               <PersonIcon />
             </Avatar>
@@ -266,19 +268,9 @@ export const SearchUserSelect = ({
         <TextField
           {...params}
           label={label}
-          slotProps={params.slotProps}
-          onChange={e => {
-            const value = e.target.value;
-            setInputValue(value);
-            if (value.length > 1) setLoading(true);
-            searchUserDebounced(value);
-          }}
           placeholder="Rechercher un participant ..."
-          helperText={
-            acceptNewUsers
-              ? "Si vous ne trouvez pas le participant, vous pouvez l'inviter sur wishlist en entrant son email dans la barre de recherche"
-              : undefined
-          }
+          helperText={helperText}
+          error={rateLimited}
         />
       )}
     />
