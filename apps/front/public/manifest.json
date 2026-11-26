@@ -13,43 +13,43 @@
   "prefer_related_applications": false,
   "icons": [
     {
-      "src": "/icon_50x50.png",
+      "src": "/icon_50x50.png?v=4",
       "sizes": "50x50",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icon_100x100.png",
+      "src": "/icon_100x100.png?v=4",
       "sizes": "100x100",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icon_192x192.png",
+      "src": "/icon_192x192.png?v=4",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icon_200x200.png",
+      "src": "/icon_200x200.png?v=4",
       "sizes": "200x200",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icon.png",
+      "src": "/icon.png?v=4",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icon_maskable_192.png",
+      "src": "/icon_maskable_192.png?v=4",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "/icon_maskable_512.png",
+      "src": "/icon_maskable_512.png?v=4",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
@@ -64,7 +64,7 @@
       "url": "/events",
       "icons": [
         {
-          "src": "/icon_100x100.png",
+          "src": "/icon_100x100.png?v=4",
           "sizes": "100x100",
           "type": "image/png"
         }
@@ -77,7 +77,7 @@
       "url": "/wishlists",
       "icons": [
         {
-          "src": "/icon_100x100.png",
+          "src": "/icon_100x100.png?v=4",
           "sizes": "100x100",
           "type": "image/png"
         }
