@@ -4,7 +4,7 @@ import type { EventPageGetEventQuery } from '../../gql';
 import type { EventAttendee } from './event.types';
 
 import DeleteIcon from '@mui/icons-material/Delete';
-import { Box, Divider, List, Stack } from '@mui/material';
+import { Divider, List, Stack } from '@mui/material';
 import { useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
@@ -24,7 +24,7 @@ import { Card } from '../common/Card';
 import { ConfirmIconButton } from '../common/ConfirmIconButton';
 import { Subtitle } from '../common/Subtitle';
 import { SearchUserSelect } from '../user/SearchUserSelect';
-import { AttendeeRolesGuide } from './AttendeeRolesGuide';
+import { AttendeeRolesHint } from './AttendeeRolesHint';
 import { AttendeeListItem, ListItemAttendee } from './ListItemAttendee';
 
 export type EditEventAttendeesProps = {
@@ -119,74 +119,68 @@ export const EditEventAttendees = ({ eventId, attendees }: EditEventAttendeesPro
   );
 
   return (
-    <Stack
-      sx={{
-        gap: 2,
-      }}
-    >
-      <AttendeeRolesGuide />
+    <Card>
+      <Stack sx={{ gap: 2 }}>
+        <Subtitle sx={{ marginBottom: 0 }}>Gérer les participants</Subtitle>
 
-      <Card>
-        <Subtitle>Gérer les participants</Subtitle>
+        <AttendeeRolesHint />
 
-        <Box>
-          <SearchUserSelect
-            label="Ajouter un nouveau participant à l'évènement ?"
-            disabled={loading}
-            excludedEmails={[...attendeeEmails, currentUserEmail || '']}
-            onChange={value => addAttendee(typeof value === 'string' ? value : value.email)}
-          />
-        </Box>
+        <SearchUserSelect
+          label="Ajouter un participant"
+          disabled={loading}
+          excludedEmails={[...attendeeEmails, currentUserEmail || '']}
+          onChange={value => addAttendee(typeof value === 'string' ? value : value.email)}
+        />
+      </Stack>
 
-        <Divider sx={{ marginBlock: '20px' }} />
+      <Divider sx={{ marginBlock: '20px' }} />
 
-        <List disablePadding>
-          {attendees.map(attendee => {
-            const isCurrentUser = attendee.user?.id === currentUserId;
-            const isCreator = attendee.role === AttendeeRole.Creator;
-            const canDelete = !isCurrentUser && !isCreator;
-            const canChangeRole = !isCurrentUser && !isCreator;
+      <List disablePadding>
+        {attendees.map(attendee => {
+          const isCurrentUser = attendee.user?.id === currentUserId;
+          const isCreator = attendee.role === AttendeeRole.Creator;
+          const canDelete = !isCurrentUser && !isCreator;
+          const canChangeRole = !isCurrentUser && !isCreator;
 
-            return (
-              <AttendeeListItem
-                key={attendee.id}
-                className="animated zoomIn fast"
-                secondaryAction={
-                  <ConfirmIconButton
-                    disabled={!canDelete || loading}
-                    confirmTitle="Enlever ce participant ?"
-                    confirmText={
-                      <>
-                        Êtes-vous sur de retirer le participant{' '}
-                        <b>
-                          {attendee.pendingEmail
-                            ? attendee.pendingEmail
-                            : `${attendee.user?.firstName} ${attendee.user?.lastName}`}
-                        </b>{' '}
-                        de l'évènement ?
-                      </>
-                    }
-                    onClick={() => deleteAttendee(attendee.id)}
-                  >
-                    <DeleteIcon />
-                  </ConfirmIconButton>
-                }
-              >
-                <ListItemAttendee
-                  role={attendee.role}
-                  userName={`${attendee.user?.firstName} ${attendee.user?.lastName}`}
-                  isPending={!!attendee.pendingEmail}
-                  email={attendee.pendingEmail ?? attendee.user?.email ?? ''}
-                  pictureUrl={attendee.user?.pictureUrl ?? undefined}
-                  roleEditable={canChangeRole}
-                  roleDisabled={loading}
-                  onRoleChange={role => updateRole(attendee.id, role)}
-                />
-              </AttendeeListItem>
-            );
-          })}
-        </List>
-      </Card>
-    </Stack>
+          return (
+            <AttendeeListItem
+              key={attendee.id}
+              className="animated zoomIn fast"
+              secondaryAction={
+                <ConfirmIconButton
+                  disabled={!canDelete || loading}
+                  confirmTitle="Enlever ce participant ?"
+                  confirmText={
+                    <>
+                      Êtes-vous sur de retirer le participant{' '}
+                      <b>
+                        {attendee.pendingEmail
+                          ? attendee.pendingEmail
+                          : `${attendee.user?.firstName} ${attendee.user?.lastName}`}
+                      </b>{' '}
+                      de l'évènement ?
+                    </>
+                  }
+                  onClick={() => deleteAttendee(attendee.id)}
+                >
+                  <DeleteIcon />
+                </ConfirmIconButton>
+              }
+            >
+              <ListItemAttendee
+                role={attendee.role}
+                userName={`${attendee.user?.firstName} ${attendee.user?.lastName}`}
+                isPending={!!attendee.pendingEmail}
+                email={attendee.pendingEmail ?? attendee.user?.email ?? ''}
+                pictureUrl={attendee.user?.pictureUrl ?? undefined}
+                roleEditable={canChangeRole}
+                roleDisabled={loading}
+                onRoleChange={role => updateRole(attendee.id, role)}
+              />
+            </AttendeeListItem>
+          );
+        })}
+      </List>
+    </Card>
   );
 };

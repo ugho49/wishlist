@@ -36,7 +36,7 @@ import { Subtitle } from '../common/Subtitle';
 import { TextareaMarkdown } from '../common/TextareaMarkdown';
 import { Title } from '../common/Title';
 import { SearchUserSelect } from '../user/SearchUserSelect';
-import { AttendeeRolesGuide } from './AttendeeRolesGuide';
+import { AttendeeRolesHint } from './AttendeeRolesHint';
 import { AttendeeListItem, ListItemAttendee } from './ListItemAttendee';
 
 const steps = ['Informations', 'Participants'];
@@ -237,7 +237,7 @@ export const CreateEventPage = () => {
             >
               <Subtitle sx={{ marginBottom: 0 }}>Gérer les participants</Subtitle>
 
-              <AttendeeRolesGuide />
+              <AttendeeRolesHint />
 
               <Box>
                 {/*TODO: add a way to add all attendees from a specific event
