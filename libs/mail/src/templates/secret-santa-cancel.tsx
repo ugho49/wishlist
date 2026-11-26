@@ -11,7 +11,7 @@ export interface SecretSantaCancelEmailProps {
 
 export default function SecretSantaCancelEmail({ eventTitle, eventUrl }: SecretSantaCancelEmailProps) {
   return (
-    <EmailLayout preview="Le Secret Santa de votre événement a été annulé">
+    <EmailLayout preview="Le Secret Santa de votre événement a été annulé" genie="lost">
       <ContentSection>
         <Heading>Annulation du Secret Santa</Heading>
         <Paragraph style={{ margin: 0 }}>

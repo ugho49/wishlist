@@ -13,7 +13,7 @@ export interface SecretSantaDrawEmailProps {
 
 export default function SecretSantaDrawEmail({ eventTitle, eventUrl, budget, description }: SecretSantaDrawEmailProps) {
   return (
-    <EmailLayout preview="Le tirage Secret Santa a eu lieu — viens découvrir le tien">
+    <EmailLayout preview="Le tirage Secret Santa a eu lieu — viens découvrir le tien" genie="santa">
       <ContentSection>
         <Heading>🎅 Le tirage Secret Santa a eu lieu !</Heading>
         <Paragraph style={{ textAlign: 'center' }}>Le tirage au sort a eu lieu pour l'événement :</Paragraph>

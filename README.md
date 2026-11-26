@@ -19,7 +19,7 @@
 ## ✨ Features
 
 - 📅 Events with dates and attendees, invited by email even before they sign up
-- 📝 Wishlists with optional link scraping, co-owners, and imports from past lists
+- 📝 Wishlists with product links (the image is fetched automatically), co-owners, and imports from past lists
 - 🔒 Hidden reservations, which several people can share for one gift
 - 💡 Wish suggestions on someone else's list
 - 🎅 Secret Santa (exclusions, budget, automatic draw)

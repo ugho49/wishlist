@@ -16,7 +16,7 @@ export default function AddedToWishlistAsCoOwnerEmail({
   invitedBy,
 }: AddedToWishlistAsCoOwnerEmailProps) {
   return (
-    <EmailLayout preview={`${invitedBy} vous a ajouté(e) comme co-gestionnaire d'une liste`}>
+    <EmailLayout preview={`${invitedBy} vous a ajouté(e) comme co-gestionnaire d'une liste`} genie="wishlist">
       <ContentSection>
         <Heading>Vous êtes co-gestionnaire ! 🤝</Heading>
         <Paragraph style={{ margin: 0 }}>

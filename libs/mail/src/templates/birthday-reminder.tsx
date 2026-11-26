@@ -16,7 +16,7 @@ export default function BirthdayReminderEmail({
   createWishlistUrl,
 }: BirthdayReminderEmailProps) {
   return (
-    <EmailLayout preview="Votre anniversaire est dans 30 jours">
+    <EmailLayout preview="Votre anniversaire est dans 30 jours" genie="hello">
       <ContentSection>
         <Heading>Votre anniversaire approche ! 🎂</Heading>
         <Paragraph style={{ margin: 0 }}>

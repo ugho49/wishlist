@@ -1,25 +1,31 @@
 import type { CSSProperties } from 'react';
 
 /**
- * Shared email styles for Wishlist transactional emails.
- *
- * Palette mirrors the previous MJML templates so the visual identity stays
- * unchanged after the migration to react-email:
- *   - primary:    #224158 (deep blue, headings & buttons)
+ * Shared email styles for Wishlist transactional emails, aligned on the app's genie branding:
+ *   - primary:    #255376 (navy, headings & buttons)
+ *   - mist:       #BFD4D7 / #E8F0F2 (blue-grey of the genie, soft surfaces)
  *   - text:       #55575d (body copy)
- *   - footer:     #9d9d9d (legal footer)
- *   - body bg:    #F4F4F4
+ *   - body bg:    #F2F6F7 (light mist)
+ * Fredoka (headings) and Inter (body) load where the mail client allows web fonts; Gmail and
+ * Outlook fall back to Trebuchet MS / Arial.
  */
 export const colors = {
-  primary: '#224158',
+  primary: '#255376',
+  mist: '#BFD4D7',
+  mistLight: '#E8F0F2',
   text: '#55575d',
   hint: '#888888',
-  footer: '#9d9d9d',
+  footer: '#8a9aa3',
   white: '#ffffff',
-  bodyBackground: '#F4F4F4',
+  bodyBackground: '#F2F6F7',
 } as const;
 
-export const fontFamily = 'Arial, sans-serif';
+export const fontFamily = "'Inter', Arial, sans-serif";
+
+export const headingFontFamily = "'Fredoka', 'Trebuchet MS', Arial, sans-serif";
+
+/** Public assets (lettering, genie poses) live on the front: apps/front/public/email. */
+export const assetsBaseUrl = 'https://wishlistapp.fr/email';
 
 export const main: CSSProperties = {
   backgroundColor: colors.bodyBackground,
@@ -35,8 +41,19 @@ export const container: CSSProperties = {
 };
 
 export const logoSection: CSSProperties = {
-  padding: '20px 0',
+  padding: '28px 0 22px 0',
   textAlign: 'center',
+};
+
+export const genieSection: CSSProperties = {
+  backgroundColor: colors.white,
+  padding: '32px 30px 0 30px',
+  textAlign: 'center',
+};
+
+export const genie: CSSProperties = {
+  margin: '0 auto',
+  height: 'auto',
 };
 
 export const logo: CSSProperties = {
@@ -50,10 +67,10 @@ export const contentSection: CSSProperties = {
 
 export const heading: CSSProperties = {
   color: colors.primary,
-  fontFamily,
+  fontFamily: headingFontFamily,
   fontSize: '26px',
   lineHeight: '32px',
-  fontWeight: 'bold',
+  fontWeight: 600,
   textAlign: 'center',
   margin: '0 0 20px 0',
 };
@@ -68,10 +85,10 @@ export const paragraph: CSSProperties = {
 
 export const sectionTitle: CSSProperties = {
   color: colors.primary,
-  fontFamily,
+  fontFamily: headingFontFamily,
   fontSize: '18px',
   lineHeight: '24px',
-  fontWeight: 'bold',
+  fontWeight: 600,
   margin: '0 0 15px 0',
 };
 
@@ -100,7 +117,7 @@ export const button: CSSProperties = {
   fontFamily,
   fontSize: '16px',
   fontWeight: 'bold',
-  borderRadius: '6px',
+  borderRadius: '10px',
   padding: '15px 40px',
   textDecoration: 'none',
   textAlign: 'center',
@@ -163,9 +180,9 @@ export const palette = {
   warning: { background: '#fff3cd', text: '#856404' },
   success: { background: '#d4edda', text: '#155724' },
   danger: { background: '#f8d7da', text: '#721c24' },
-  info: { background: '#d1ecf1', text: '#0c5460' },
-  neutral: { background: '#f8f9fa', text: colors.primary },
-  blue: { background: '#e7f3ff', text: '#004085' },
-  event: { background: '#f0f4f8', text: colors.primary },
+  info: { background: colors.mistLight, text: colors.primary },
+  neutral: { background: colors.mistLight, text: colors.primary },
+  blue: { background: colors.mistLight, text: colors.primary },
+  event: { background: colors.mistLight, text: colors.primary },
   reminder: { background: '#fff9e6', text: '#856404' },
 } as const;
