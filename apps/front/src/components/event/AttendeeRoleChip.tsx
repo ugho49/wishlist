@@ -1,12 +1,17 @@
 import type { MouseEvent } from 'react';
 
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import { Chip, Menu, MenuItem, Stack, styled } from '@mui/material';
+import { Chip, ListItemIcon, ListItemText, Menu, MenuItem, styled } from '@mui/material';
 import { useState } from 'react';
 import { match } from 'ts-pattern';
 
 import { AttendeeRole } from '../../gql';
-import { ASSIGNABLE_ATTENDEE_ROLES, getAttendeeRoleIcon, getAttendeeRoleLabel } from './attendee-role';
+import {
+  ASSIGNABLE_ATTENDEE_ROLES,
+  getAttendeeRoleDescription,
+  getAttendeeRoleIcon,
+  getAttendeeRoleLabel,
+} from './attendee-role';
 
 export type AttendeeRoleChipProps = {
   role: AttendeeRole;
@@ -60,6 +65,15 @@ const DropdownIcon = styled(KeyboardArrowDownIcon)({
   display: 'block',
 });
 
+const RoleMenuItem = styled(MenuItem)(({ theme }) => ({
+  alignItems: 'flex-start',
+  whiteSpace: 'normal',
+  maxWidth: 320,
+  '& .MuiListItemIcon-root': {
+    marginTop: theme.spacing(0.5),
+  },
+}));
+
 export const AttendeeRoleChip = ({ role, editable = false, disabled = false, onRoleChange }: AttendeeRoleChipProps) => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const canOpenMenu = editable && !disabled && !!onRoleChange;
@@ -96,7 +110,7 @@ export const AttendeeRoleChip = ({ role, editable = false, disabled = false, onR
           {ASSIGNABLE_ATTENDEE_ROLES.map(assignableRole => {
             const OptionIcon = getAttendeeRoleIcon(assignableRole);
             return (
-              <MenuItem
+              <RoleMenuItem
                 key={assignableRole}
                 selected={assignableRole === role}
                 onClick={() => {
@@ -104,17 +118,14 @@ export const AttendeeRoleChip = ({ role, editable = false, disabled = false, onR
                   if (assignableRole !== role) onRoleChange?.(assignableRole);
                 }}
               >
-                <Stack
-                  direction="row"
-                  sx={{
-                    alignItems: 'center',
-                    gap: 1,
-                  }}
-                >
+                <ListItemIcon>
                   <OptionIcon fontSize="small" />
-                  {getAttendeeRoleLabel(assignableRole)}
-                </Stack>
-              </MenuItem>
+                </ListItemIcon>
+                <ListItemText
+                  primary={getAttendeeRoleLabel(assignableRole)}
+                  secondary={getAttendeeRoleDescription(assignableRole)}
+                />
+              </RoleMenuItem>
             );
           })}
         </Menu>
