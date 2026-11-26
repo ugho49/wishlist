@@ -204,6 +204,7 @@ union RegisterUserResult =
   | ValidationRejection
   | UnauthorizedRejection
   | ForbiddenRejection
+  | BusinessRuleRejection
   | InternalErrorRejection
 
 union LinkUserToGoogleResult =
@@ -282,6 +283,7 @@ union SendResetPasswordEmailResult =
   | ValidationRejection
   | UnauthorizedRejection
   | ForbiddenRejection
+  | BusinessRuleRejection
   | InternalErrorRejection
 
 union ResetPasswordResult =

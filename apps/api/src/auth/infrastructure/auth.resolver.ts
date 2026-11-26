@@ -21,6 +21,7 @@ import {
   RefreshSessionInputSchema,
 } from './auth.schema';
 import { Public } from './decorators/public.metadata';
+import { RateLimit } from './decorators/rate-limit.decorator';
 
 @Public()
 @Resolver()
@@ -33,6 +34,7 @@ export class AuthResolver {
   ) {}
 
   @Mutation()
+  @RateLimit('login')
   async login(@Args('input', LoginInputSchema) input: LoginInput, @Ctx() ctx: GraphQLContext): Promise<LoginResult> {
     const result = await this.loginUseCase.execute({
       email: input.email,

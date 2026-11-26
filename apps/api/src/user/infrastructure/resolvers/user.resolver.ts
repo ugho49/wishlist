@@ -158,6 +158,7 @@ export class UserResolver {
 
   @Public()
   @Mutation()
+  @RateLimit('signUp')
   async registerUser(@Args('input', RegisterUserInputSchema) input: RegisterUserInput): Promise<RegisterUserResult> {
     const { user } = await this.createUserUseCase.execute({
       newUser: {
@@ -324,6 +325,7 @@ export class UserResolver {
 
   @Public()
   @Mutation()
+  @RateLimit('resetPasswordEmail')
   async sendResetPasswordEmail(
     @Args('input', SendResetPasswordEmailInputSchema) input: SendResetPasswordEmailInput,
   ): Promise<SendResetPasswordEmailResult> {

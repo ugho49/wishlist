@@ -14,6 +14,10 @@ mutation AuthLogin($input: LoginInput!) {
     ... on UnauthorizedRejection {
       message
     }
+    ... on BusinessRuleRejection {
+      code
+      message
+    }
   }
 }
 
@@ -33,6 +37,10 @@ mutation AuthLoginWithGoogle($input: LoginWithGoogleInput!) {
       }
     }
     ... on UnauthorizedRejection {
+      message
+    }
+    ... on BusinessRuleRejection {
+      code
       message
     }
   }
@@ -73,6 +81,10 @@ mutation AuthRegisterUser($input: RegisterUserInput!) {
         message
       }
     }
+    ... on BusinessRuleRejection {
+      code
+      message
+    }
   }
 }
 
@@ -87,6 +99,10 @@ mutation AuthSendResetPasswordEmail($input: SendResetPasswordEmailInput!) {
         field
         message
       }
+    }
+    ... on BusinessRuleRejection {
+      code
+      message
     }
   }
 }

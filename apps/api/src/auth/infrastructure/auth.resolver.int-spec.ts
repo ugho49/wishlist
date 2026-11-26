@@ -3,10 +3,11 @@ import type { RequestApp } from '@wishlist/api-test-utils';
 import { Fixtures, useTestApp } from '@wishlist/api-test-utils';
 import { DateTime } from 'luxon';
 
+import { emailSubject } from '../../core/rate-limit/rate-limit.policies';
 import { RefreshTokenManager } from './util/refresh-token';
 
 describe('AuthResolver (GraphQL)', () => {
-  const { getRequest, getFixtures, expectTable } = useTestApp();
+  const { getRequest, getFixtures, expectTable, fillRateLimit, runSql } = useTestApp();
   let fixtures: Fixtures;
   let request: RequestApp;
 
@@ -33,6 +34,9 @@ describe('AuthResolver (GraphQL)', () => {
           }
           ... on UnauthorizedRejection {
             message
+          }
+          ... on BusinessRuleRejection {
+            code
           }
         }
       }
@@ -121,6 +125,84 @@ describe('AuthResolver (GraphQL)', () => {
       expect(res.body.data.login).toMatchObject({
         __typename: 'UnauthorizedRejection',
         message: 'Incorrect login',
+      });
+    });
+
+    it('should reject a disabled user with the message of a wrong password, even with the right password', async () => {
+      const email = 'disabled@test.fr';
+      const password = 'GoodPassword123';
+      const userId = await fixtures.insertUser({ email, firstname: 'Dis', lastname: 'Abled', password });
+      await runSql(`UPDATE "user" SET is_enabled = false WHERE id = '${userId}'`);
+
+      const res = await request
+        .post('/graphql')
+        .send({ query, variables: { input: { email, password } } })
+        .expect(200);
+
+      expect(res.body.data.login).toEqual({ __typename: 'UnauthorizedRejection', message: 'Incorrect login' });
+      await expectTable(Fixtures.USER_SESSION_TABLE).hasNumberOfRows(0);
+    });
+
+    describe('rate limit', () => {
+      const email = 'brute-force@test.fr';
+      const password = 'GoodPassword123';
+
+      beforeEach(async () => {
+        await fixtures.insertUser({ email, firstname: 'Brute', lastname: 'Force', password });
+      });
+
+      it('should refuse the 11th attempt on one email within 15 minutes, even with the right password', async () => {
+        // Every alias is one attempt, and the casing of the email does not open a new counter
+        const attempts = Array.from(
+          { length: 10 },
+          (_, index) =>
+            `a${index}: login(input: { email: "${index % 2 ? email.toUpperCase() : email}", password: "Wrong${index}" }) { __typename }`,
+        ).join('\n');
+        const batch = await request
+          .post('/graphql')
+          .send({ query: `mutation Attempts { ${attempts} }` })
+          .expect(200);
+        expect(Object.values(batch.body.data)).toEqual(
+          Array.from({ length: 10 }, () => ({ __typename: 'UnauthorizedRejection' })),
+        );
+
+        const res = await request
+          .post('/graphql')
+          .send({ query, variables: { input: { email, password } } })
+          .expect(200);
+
+        expect(res.body.data.login).toEqual({ __typename: 'BusinessRuleRejection', code: 'RATE_LIMITED' });
+        await expectTable(Fixtures.USER_SESSION_TABLE).hasNumberOfRows(0);
+      });
+
+      it('should refuse an unknown email the same way once its counter is full', async () => {
+        await fillRateLimit(`login:email:${emailSubject('nobody@test.fr')}`, 10);
+
+        const res = await request
+          .post('/graphql')
+          .send({ query, variables: { input: { email: 'nobody@test.fr', password } } })
+          .expect(200);
+
+        expect(res.body.data.login).toEqual({ __typename: 'BusinessRuleRejection', code: 'RATE_LIMITED' });
+      });
+
+      it('should refuse a client address after 30 attempts within 15 minutes, on any email', async () => {
+        await fillRateLimit('login:ip:203.0.113.7', 30);
+
+        const limited = await request
+          .post('/graphql')
+          .set('X-Forwarded-For', '203.0.113.7')
+          .send({ query, variables: { input: { email, password } } })
+          .expect(200);
+        const otherAddress = await request
+          .post('/graphql')
+          .set('X-Forwarded-For', '203.0.113.8')
+          .send({ query, variables: { input: { email, password } } })
+          .expect(200);
+
+        expect(limited.body.data.login).toEqual({ __typename: 'BusinessRuleRejection', code: 'RATE_LIMITED' });
+        expect(otherAddress.body.data.login.__typename).toBe('LoginOutput');
+        await expectTable(Fixtures.USER_SESSION_TABLE).hasNumberOfRows(1);
       });
     });
 

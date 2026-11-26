@@ -104,6 +104,8 @@ export function useTestApp() {
       return new MailsAssert(http);
     },
     getFixtures: () => fixtures,
+    /** Empties the mailbox now, for a test that counts the emails it sends whatever the previous tests sent. */
+    clearMails,
     /** Counts `hits` on a rate limit counter (key without the `rl:` prefix), as if they had already been made. */
     fillRateLimit: async (key: string, hits: number): Promise<void> => {
       await valkey.set(`${RATE_LIMIT_KEY_PREFIX}${key}`, hits, 'EX', 3600);

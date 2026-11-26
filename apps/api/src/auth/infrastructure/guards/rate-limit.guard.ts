@@ -1,4 +1,4 @@
-import type { GraphQLGuard, ResolverContext } from '@znight/graphql';
+import type { GraphQLArgs, GraphQLGuard, ResolverContext } from '@znight/graphql';
 import type { RateLimiter } from '../../../core/rate-limit/rate-limiter';
 
 import { Injectable } from '@znight/core';
@@ -7,6 +7,16 @@ import { RateLimitConfig } from '../../../core/rate-limit/rate-limit.config';
 import { rateLimitRules } from '../../../core/rate-limit/rate-limit.policies';
 import { findCurrentUser } from '../auth.context';
 import { RateLimit } from '../decorators/rate-limit.decorator';
+
+/**
+ * The `input.email` argument of the field (login, reset password email), as the client sent it:
+ * the guard runs before the `@Args` validation, so it may be anything.
+ */
+function emailArgument(args: GraphQLArgs): string | undefined {
+  const input: unknown = args.input;
+  if (typeof input !== 'object' || input === null || !('email' in input)) return undefined;
+  return typeof input.email === 'string' ? input.email : undefined;
+}
 
 /**
  * Enforces `@RateLimit(policy)` on GraphQL fields. It runs for every call of the field, so each alias
@@ -32,6 +42,7 @@ export class RateLimitGuard implements GraphQLGuard {
     const rules = rateLimitRules(policy, this.rateLimitConfig, {
       userId: findCurrentUser(ctx.http)?.id,
       ip: ctx.http?.ip,
+      email: emailArgument(ctx.args),
     });
     await this.rateLimiter.consume(rules);
 

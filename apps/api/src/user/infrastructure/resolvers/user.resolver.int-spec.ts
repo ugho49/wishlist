@@ -5,6 +5,7 @@ import { Fixtures, useTestApp } from '@wishlist/api-test-utils';
 import { DateTime } from 'luxon';
 
 import { PasswordManager } from '../../../auth/infrastructure/util/password-manager';
+import { emailSubject } from '../../../core/rate-limit/rate-limit.policies';
 
 function signAccessToken(payload: Record<string, unknown>): string {
   const header = Buffer.from(JSON.stringify({ alg: 'HS512', typ: 'JWT' })).toString('base64url');
@@ -32,7 +33,7 @@ function signAccessToken(payload: Record<string, unknown>): string {
  *
  * COVERED operations:
  *  - currentUser (Query)              -> unauthenticated + happy path + accounts field
- *  - registerUser (Mutation)          -> happy path + DB verify, duplicate-email conflict, validation (it.each)
+ *  - registerUser (Mutation)          -> happy path + DB verify, duplicate-email conflict, validation (it.each), RATE_LIMITED
  *  - updateUserProfile (Mutation)     -> unauthenticated + happy path + DB verify + validation (it.each)
  *  - changeUserPassword (Mutation)    -> happy path + DB verify, wrong old password, validation (it.each)
  *  - CurrentUser.emailSettings field resolver -> unauthenticated + happy path (with seeded settings), via currentUser
@@ -40,17 +41,18 @@ function signAccessToken(payload: Record<string, unknown>): string {
  *  - CurrentUser.accounts field resolver -> returns own accounts shape
  *  - searchUsers (Query)              -> circle only, literal keyword, disabled users excluded
  *  - userByEmail (Query)              -> exact email, public fields only, RATE_LIMITED
+ *  - sendResetPasswordEmail (Mutation)-> same answer whether the email has an account or not, pending code sent again, RATE_LIMITED
  *
  * INTENTIONALLY SKIPPED (require external integrations / OAuth / mail-token round-trips
  * that are out of scope for this high-value subset):
  *  - linkCurrentUserWithGoogle / unlinkCurrentUserAccount (Google OAuth dependency)
  *  - updateUserPictureFromAccount / removeUserPicture (bucket + account dependency)
  *  - requestEmailChange / confirmEmailChange (mail token round-trip)
- *  - sendResetPasswordEmail / resetPassword (mail token round-trip)
+ *  - resetPassword (mail token round-trip)
  *  - pendingEmailChange (depends on requestEmailChange flow)
  */
 describe('UserResolver (GraphQL)', () => {
-  const { getRequest, getFixtures, expectTable, runSql } = useTestApp();
+  const { getRequest, getFixtures, expectTable, expectMail, clearMails, fillRateLimit, runSql } = useTestApp();
   let fixtures: Fixtures;
   let request: RequestApp;
   let currentUserId: string;
@@ -223,6 +225,9 @@ describe('UserResolver (GraphQL)', () => {
           ... on UnauthorizedRejection {
             message
           }
+          ... on BusinessRuleRejection {
+            code
+          }
         }
       }
     `;
@@ -304,6 +309,30 @@ describe('UserResolver (GraphQL)', () => {
 
       // No extra user created.
       await expectTable(Fixtures.USER_TABLE).hasNumberOfRows(1);
+    });
+
+    it('should refuse a sign-up once the client address has used its 10 hourly sign-ups', async () => {
+      const anon = await getRequest();
+      const input = { email: 'new.user@test.fr', password: 'Password123', firstname: 'New', lastname: 'User' };
+      await fillRateLimit('signUp:ip:203.0.113.7', 10);
+
+      const limited = await anon
+        .post('/graphql')
+        .set('X-Forwarded-For', '203.0.113.7')
+        .send({ query: mutation, variables: { input } })
+        .expect(200);
+
+      expect(limited.body.data.registerUser).toEqual({ __typename: 'BusinessRuleRejection', code: 'RATE_LIMITED' });
+      await expectTable(Fixtures.USER_TABLE).hasNumberOfRows(1);
+
+      const otherAddress = await anon
+        .post('/graphql')
+        .set('X-Forwarded-For', '203.0.113.8')
+        .send({ query: mutation, variables: { input } })
+        .expect(200);
+
+      expect(otherAddress.body.data.registerUser.__typename).toBe('CurrentUser');
+      await expectTable(Fixtures.USER_TABLE).hasNumberOfRows(2);
     });
 
     it.each([
@@ -981,6 +1010,104 @@ describe('UserResolver (GraphQL)', () => {
         ),
       ).toBe(true);
       expect(await lookup('one-more@test.fr')).toEqual({ __typename: 'BusinessRuleRejection', code: 'RATE_LIMITED' });
+    });
+  });
+
+  describe('Mutation sendResetPasswordEmail', () => {
+    const mutation = /* GraphQL */ `
+      mutation SendResetPasswordEmail($input: SendResetPasswordEmailInput!) {
+        sendResetPasswordEmail(input: $input) {
+          __typename
+          ... on BusinessRuleRejection {
+            code
+          }
+        }
+      }
+    `;
+    const resetEmailSubject = 'Reinitialiser le mot de passe';
+
+    beforeEach(async () => {
+      // Earlier tests may have sent emails without checking them: count only the ones of this test
+      await clearMails();
+    });
+
+    const sendResetEmail = async (email: string, ip?: string) => {
+      const anon = await getRequest();
+      const call = anon.post('/graphql');
+      if (ip) call.set('X-Forwarded-For', ip);
+      const res = await call.send({ query: mutation, variables: { input: { email } } }).expect(200);
+      return res.body.data.sendResetPasswordEmail;
+    };
+
+    it('should answer the same way for an unknown email, without email nor reset code', async () => {
+      expect(await sendResetEmail('nobody@test.fr')).toEqual({ __typename: 'VoidOutput' });
+
+      await expectTable(Fixtures.USER_PASSWORD_VERIFICATION_TABLE).hasNumberOfRows(0);
+      await expectMail().waitFor(500).hasNumberOfEmails(0);
+    });
+
+    it('should answer the same way for a known email, and email it a new reset code', async () => {
+      expect(await sendResetEmail(Fixtures.BASE_USER_EMAIL)).toEqual({ __typename: 'VoidOutput' });
+
+      await expectTable(Fixtures.USER_PASSWORD_VERIFICATION_TABLE)
+        .hasNumberOfRows(1)
+        .row(0)
+        .toMatchObject({ user_id: currentUserId, token: expect.stringMatching(/^[0-9a-z]{20}$/) });
+      await expectMail()
+        .waitFor(500)
+        .hasNumberOfEmails(1)
+        .hasSubject(resetEmailSubject)
+        .hasReceivers([Fixtures.BASE_USER_EMAIL]);
+    });
+
+    it('should answer the same way when a reset code is still valid, and email that code again', async () => {
+      await fixtures.insertUserPasswordVerification({
+        userId: currentUserId,
+        token: 'pendingtoken',
+        expiredAt: DateTime.now().plus({ minutes: 10 }).toJSDate(),
+      });
+
+      expect(await sendResetEmail(Fixtures.BASE_USER_EMAIL)).toEqual({ __typename: 'VoidOutput' });
+
+      await expectTable(Fixtures.USER_PASSWORD_VERIFICATION_TABLE)
+        .hasNumberOfRows(1)
+        .row(0)
+        .toMatchObject({ token: 'pendingtoken' });
+      await expectMail()
+        .waitFor(500)
+        .hasNumberOfEmails(1)
+        .hasSubject(resetEmailSubject)
+        .hasReceivers([Fixtures.BASE_USER_EMAIL]);
+    });
+
+    it('should refuse the 4th request of the hour for one email, whether it has an account or not', async () => {
+      for (const email of ['nobody@test.fr', Fixtures.BASE_USER_EMAIL]) {
+        for (let attempt = 0; attempt < 3; attempt++) {
+          expect(await sendResetEmail(email)).toEqual({ __typename: 'VoidOutput' });
+        }
+        expect(await sendResetEmail(email)).toEqual({ __typename: 'BusinessRuleRejection', code: 'RATE_LIMITED' });
+      }
+
+      await expectMail().waitFor(500).hasNumberOfEmails(3).hasReceivers([Fixtures.BASE_USER_EMAIL]);
+    });
+
+    it('should count the casing of an email on the same counter', async () => {
+      await fillRateLimit(`resetPasswordEmail:email:${emailSubject('nobody@test.fr')}`, 3);
+
+      expect(await sendResetEmail('NoBody@Test.fr')).toEqual({
+        __typename: 'BusinessRuleRejection',
+        code: 'RATE_LIMITED',
+      });
+    });
+
+    it('should refuse a client address after 10 requests within the hour, on any email', async () => {
+      await fillRateLimit('resetPasswordEmail:ip:203.0.113.9', 10);
+
+      expect(await sendResetEmail('someone@test.fr', '203.0.113.9')).toEqual({
+        __typename: 'BusinessRuleRejection',
+        code: 'RATE_LIMITED',
+      });
+      expect(await sendResetEmail('someone@test.fr', '203.0.113.10')).toEqual({ __typename: 'VoidOutput' });
     });
   });
 

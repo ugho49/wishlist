@@ -7,10 +7,17 @@ import { useForm } from 'react-hook-form';
 import { match, P } from 'ts-pattern';
 import { z } from 'zod';
 
-import { rejectionMessage, rejectionPattern, useAuthLoginMutation, useAuthLoginWithGoogleMutation } from '../../gql';
+import {
+  BusinessRuleCode,
+  rejectionMessage,
+  rejectionPattern,
+  useAuthLoginMutation,
+  useAuthLoginWithGoogleMutation,
+} from '../../gql';
 import { useStartSession } from '../../hooks/useStartSession';
 import { useToast } from '../../hooks/useToast';
 import { RouterLink } from '../common/RouterLink';
+import { LOGIN_RATE_LIMITED_MESSAGE } from './auth.messages';
 import { GoogleButton } from './GoogleButton';
 
 const schema = z.object({
@@ -85,6 +92,9 @@ export const LoginPage = () => {
     const res = await loginMutation({ input: data });
     match(res.login)
       .with({ __typename: 'LoginOutput' }, output => handleLoginSuccess(output.accessToken, output.refreshToken))
+      .with({ __typename: 'BusinessRuleRejection', code: BusinessRuleCode.RateLimited }, () =>
+        setError('root', { message: LOGIN_RATE_LIMITED_MESSAGE }),
+      )
       .with({ __typename: P.union('UnauthorizedRejection', 'ValidationRejection') }, () =>
         setError('root', { message: 'Email ou mot de passe incorrect' }),
       )
