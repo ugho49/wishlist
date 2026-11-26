@@ -3,6 +3,7 @@ import type { PageBreadcrumb } from './PageBreadcrumbs';
 
 import { Box, Stack, type StackProps, styled } from '@mui/material';
 
+import { brandColors } from '../../theme';
 import { PageBreadcrumbs } from './PageBreadcrumbs';
 
 const TitleRoot = styled(Stack)(() => ({
@@ -17,12 +18,21 @@ const HeadingRow = styled(Stack)(() => ({
 
 const Content = styled(Box)(({ theme }) => ({
   color: theme.palette.primary.main,
-  textTransform: 'uppercase',
-  fontWeight: 300,
-  fontSize: '1.6rem',
-  letterSpacing: '.05em',
+  fontFamily: theme.typography.h1.fontFamily,
+  fontWeight: 600,
+  fontSize: '1.75rem',
+  lineHeight: 1.25,
   margin: 0,
   textAlign: 'center',
+  '&::after': {
+    content: '""',
+    display: 'block',
+    width: 48,
+    height: 4,
+    margin: `${theme.spacing(1)} auto 0`,
+    borderRadius: 2,
+    backgroundColor: brandColors.mist,
+  },
 }));
 
 export type TitleProps = StackProps & {

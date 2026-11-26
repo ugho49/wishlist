@@ -62,12 +62,12 @@ const ContentContainer = styled('div')({
 
 const WishlistTitle = styled(Typography)(({ theme }) => ({
   color: theme.palette.primary.main,
-  fontWeight: 500,
-  fontSize: '1rem',
+  fontFamily: theme.typography.h1.fontFamily,
+  fontWeight: 600,
+  fontSize: '1.125rem',
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
-  textTransform: 'uppercase',
   transition: 'all 0.3s ease',
 }));
 

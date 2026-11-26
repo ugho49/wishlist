@@ -1,6 +1,20 @@
-import { createTheme } from '@mui/material/styles';
+import { alpha, createTheme, type Theme } from '@mui/material/styles';
 
-// A custom theme for this app - simplified palette
+/** Colors of the genie logo (`src/assets/logo`). */
+export const brandColors = {
+  navy: '#255376',
+  mist: '#BFD4D7',
+  mistLight: '#E8F0F2',
+} as const;
+
+/** Navy page background used behind the white genie (auth pages, 404, maintenance). */
+export const navyBackdrop = ({ palette }: Theme) =>
+  `radial-gradient(900px 520px at 50% 0%, ${alpha(palette.common.white, 0.12)}, transparent 70%), linear-gradient(160deg, ${palette.primary.dark} 0%, ${palette.primary.main} 55%, ${palette.primary.dark} 100%)`;
+
+const headingFontFamily = '"Fredoka", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+
+// Navy-dominant theme built around the genie logo: navy for text and actions,
+// its blue-grey "mist" for soft surfaces, Fredoka for headings.
 export const theme = createTheme({
   palette: {
     mode: 'light',
@@ -9,11 +23,11 @@ export const theme = createTheme({
       secondary: '#6b7280', // Medium gray for secondary text
     },
     background: {
-      default: '#ffffff', // Pure white background
+      default: '#ffffff',
       paper: '#ffffff',
     },
     primary: {
-      main: '#255376', // WishlistBlue
+      main: brandColors.navy,
     },
     secondary: {
       main: '#64748b', // Slate gray
@@ -21,8 +35,9 @@ export const theme = createTheme({
       dark: '#475569',
     },
     grey: {
-      50: '#f9fafb',
-      100: '#f3f4f6',
+      // 50/100 are tinted with the logo blue-grey so soft surfaces echo the genie
+      50: '#f6f9fa',
+      100: '#eef3f5',
       200: '#e5e7eb',
       300: '#d1d5db',
       400: '#9ca3af',
@@ -34,17 +49,32 @@ export const theme = createTheme({
     },
   },
   shape: {
-    borderRadius: 8,
+    borderRadius: 10,
   },
   typography: {
     fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
     h1: {
-      fontWeight: 700,
+      fontFamily: headingFontFamily,
+      fontWeight: 600,
     },
     h2: {
+      fontFamily: headingFontFamily,
       fontWeight: 600,
     },
     h3: {
+      fontFamily: headingFontFamily,
+      fontWeight: 600,
+    },
+    h4: {
+      fontFamily: headingFontFamily,
+      fontWeight: 600,
+    },
+    h5: {
+      fontFamily: headingFontFamily,
+      fontWeight: 600,
+    },
+    h6: {
+      fontFamily: headingFontFamily,
       fontWeight: 600,
     },
     button: {
@@ -56,7 +86,7 @@ export const theme = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: 8,
+          borderRadius: 10,
           padding: '10px 20px',
           boxShadow: 'none',
           '&:hover': {
@@ -80,7 +110,7 @@ export const theme = createTheme({
         root: {
           '& .MuiOutlinedInput-root': {
             '&:hover fieldset': {
-              borderColor: '#255376',
+              borderColor: brandColors.navy,
             },
           },
         },

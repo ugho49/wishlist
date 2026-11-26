@@ -1,7 +1,7 @@
 import { AppBar, Box, styled, Toolbar } from '@mui/material';
 import { useNavigate } from '@tanstack/react-router';
 
-import LogoTextSvg from '../../assets/logo/logo_text.svg?react';
+import { Logo } from './Logo';
 
 const AppBarStyled = styled(AppBar)(({ theme }) => ({
   backgroundColor: theme.palette.primary.main,
@@ -25,11 +25,6 @@ const LogoContainerStyled = styled(Box)(() => ({
   cursor: 'pointer',
 }));
 
-const LogoSvgStyled = styled(LogoTextSvg)(() => ({
-  height: 50,
-  color: 'white',
-}));
-
 export const MobileTopBar = () => {
   const navigate = useNavigate();
 
@@ -37,7 +32,7 @@ export const MobileTopBar = () => {
     <AppBarStyled position="fixed">
       <ToolbarStyled>
         <LogoContainerStyled onClick={() => navigate({ to: '/' })}>
-          <LogoSvgStyled />
+          <Logo height={40} />
         </LogoContainerStyled>
       </ToolbarStyled>
     </AppBarStyled>

@@ -75,11 +75,11 @@ export const PageHeroMedia = styled('div')(({ theme }) => ({
 export const PageHeroTitle = styled('h1')(({ theme }) => ({
   gridArea: 'title',
   margin: 0,
+  fontFamily: theme.typography.h1.fontFamily,
   fontSize: '1.35rem',
-  fontWeight: 700,
+  fontWeight: 600,
   lineHeight: 1.2,
-  letterSpacing: '-0.01em',
-  color: theme.palette.text.primary,
+  color: theme.palette.primary.main,
   overflowWrap: 'anywhere',
   [theme.breakpoints.up('md')]: {
     alignSelf: 'end',
@@ -198,9 +198,10 @@ export const SectionTitle = styled('h2')(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   gap: theme.spacing(1),
-  fontSize: '1.05rem',
-  fontWeight: 700,
-  color: theme.palette.text.primary,
+  fontFamily: theme.typography.h1.fontFamily,
+  fontSize: '1.1rem',
+  fontWeight: 600,
+  color: theme.palette.primary.main,
   '& .count': {
     minWidth: 24,
     height: 24,

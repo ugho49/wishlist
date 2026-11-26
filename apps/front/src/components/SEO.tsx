@@ -14,7 +14,7 @@ const DEFAULT_TITLE = 'Wishlist - Créez et partagez vos listes de souhaits';
 const DEFAULT_DESCRIPTION =
   'Créez, gérez et partagez facilement vos listes de souhaits pour tous vos événements : anniversaires, mariages, Noël. Organisez vos cadeaux et faites plaisir à vos proches.';
 const DEFAULT_KEYWORDS = 'liste de souhaits, wishlist, cadeaux, anniversaire, mariage, noël, partage, événements';
-const DEFAULT_OG_IMAGE = 'https://wishlistapp.fr/logo_text_350x150.png';
+const DEFAULT_OG_IMAGE = 'https://wishlistapp.fr/og-image.png';
 const SITE_URL = 'https://wishlistapp.fr';
 
 /**

@@ -170,8 +170,9 @@ const ItemContent = styled(Box)({
 // Item title with modern typography and link styling
 const ItemTitle = styled('div')(({ theme }) => ({
   color: theme.palette.primary.main,
+  fontFamily: theme.typography.h1.fontFamily,
   fontWeight: 600,
-  fontSize: '1.1rem',
+  fontSize: '1.15rem',
   textAlign: 'center',
   lineHeight: 1.3,
   overflow: 'hidden',

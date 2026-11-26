@@ -19,6 +19,7 @@ import {
   useUserProfileCurrentUserQuery,
 } from '../../gql';
 import { useToast } from '../../hooks/useToast';
+import { Genie } from '../common/Genie';
 import { AvatarUpdateButton } from '../user/AvatarUpdateButton';
 import { ProfilePicturePromptModal } from '../user/ProfilePicturePromptModal';
 import { WelcomeBirthdayStep, type WelcomeBirthdayStepHandle } from './WelcomeBirthdayStep';
@@ -60,8 +61,7 @@ const Celebration = styled(Stack)(({ theme }) => ({
 }));
 
 const CelebrationMark = styled(Box)({
-  fontSize: '4.5rem',
-  lineHeight: 1,
+  marginBottom: 8,
   animation: 'welcomePop 520ms cubic-bezier(0.2, 0.8, 0.2, 1)',
   '@keyframes welcomePop': {
     from: { transform: 'scale(0.35)', opacity: 0 },
@@ -341,7 +341,9 @@ export const WelcomePage = () => {
       <Panel>
         {celebrating ? (
           <Celebration>
-            <CelebrationMark>🎉</CelebrationMark>
+            <CelebrationMark>
+              <Genie size={170} floating grounded />
+            </CelebrationMark>
             <Kicker>Bravo</Kicker>
             <Headline variant="h1">Vous y êtes{user?.firstName ? `, ${user.firstName}` : ''} !</Headline>
             <Lead>Wishlist vous attend. On vous emmène vers vos évènements.</Lead>

@@ -1,6 +1,7 @@
-import { Box, Container, Stack, styled } from '@mui/material';
+import { Box, Container, GlobalStyles, Stack, styled, useMediaQuery, useTheme } from '@mui/material';
 import { Outlet, useNavigate } from '@tanstack/react-router';
 
+import { navyBackdrop } from '../../../../theme';
 import { Card } from '../../Card';
 import { Logo } from '../../Logo';
 
@@ -9,27 +10,32 @@ const Root = styled(Box)(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   paddingBlock: theme.spacing(4),
+  background: navyBackdrop(theme),
 }));
 
 const LogoContainer = styled(Box)({
   cursor: 'pointer',
-  color: 'primary.main',
+  transition: 'transform 0.2s ease-in-out',
   '&:hover': {
-    opacity: 0.8,
+    transform: 'translateY(-2px)',
   },
 });
 
 const OutletContainer = styled(Card)(() => ({
   borderRadius: 24,
   padding: 32,
-  boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important',
+  boxShadow: '0 20px 40px rgba(0, 0, 0, 0.2) !important',
 }));
 
 export const AnonymousContainerOutlet = () => {
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'), { noSsr: true });
 
   return (
     <Root>
+      {/* Navy overscroll and canvas behind the navy page instead of the light app background */}
+      <GlobalStyles styles={{ html: { backgroundColor: theme.palette.primary.dark } }} />
       <Container component="main" maxWidth="sm">
         <Stack
           direction="column"
@@ -39,7 +45,7 @@ export const AnonymousContainerOutlet = () => {
           }}
         >
           <LogoContainer onClick={() => navigate({ to: '/' })}>
-            <Logo height={48} variant="full" />
+            <Logo height={isSmallScreen ? 80 : 120} />
           </LogoContainer>
 
           <OutletContainer>

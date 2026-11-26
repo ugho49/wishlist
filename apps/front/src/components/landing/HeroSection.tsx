@@ -2,9 +2,11 @@ import type { ButtonProps } from '@mui/material';
 import type { LinkProps } from '@tanstack/react-router';
 
 import { Box, Button, Container, Typography } from '@mui/material';
-import { keyframes, styled } from '@mui/material/styles';
+import { alpha, keyframes, styled } from '@mui/material/styles';
 import { Link } from '@tanstack/react-router';
 
+import { brandColors } from '../../theme';
+import { Genie } from '../common/Genie';
 import { Logo } from '../common/Logo';
 
 // Animations
@@ -116,7 +118,7 @@ const MainContent = styled(Box)(() => ({
 }));
 
 const GradientTitle = styled(Typography)(({ theme }) => ({
-  background: 'linear-gradient(135deg, #ffffff 0%, #e0f2fe 100%)',
+  background: `linear-gradient(135deg, #ffffff 0%, ${brandColors.mistLight} 100%)`,
   backgroundClip: 'text',
   WebkitBackgroundClip: 'text',
   WebkitTextFillColor: 'transparent',
@@ -187,7 +189,27 @@ const SecondaryButton = styled(Button)<ButtonProps & LinkProps>(({ theme }) => (
   },
 }));
 
+const HeroAside = styled(Box)(() => ({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+}));
+
+const FloatingGenie = styled(Genie)(({ theme }) => ({
+  position: 'relative',
+  zIndex: 1,
+  marginBottom: -24,
+  filter: 'drop-shadow(0 16px 24px rgba(0, 0, 0, 0.25))',
+  [theme.breakpoints.down('md')]: {
+    marginBottom: -28,
+    '& > img': {
+      height: 180,
+    },
+  },
+}));
+
 const FeaturesSidebar = styled(Box)(({ theme }) => ({
+  width: '100%',
   backgroundColor: 'rgba(255, 255, 255, 0.95)',
   borderRadius: theme.spacing(2),
   padding: theme.spacing(4),
@@ -374,7 +396,7 @@ export const HeroSection = () => {
 
       <NavBar>
         <NavContent maxWidth="lg">
-          <Logo variant="full" color="white" />
+          <Logo />
           <NavRightGroup>
             <NavLinks>
               {navItems.map(item => (
@@ -397,11 +419,11 @@ export const HeroSection = () => {
             <br />
             <span
               style={{
-                background: 'linear-gradient(135deg, #60a5fa 0%, #93c5fd 50%, #dbeafe 100%)',
+                background: `linear-gradient(135deg, ${brandColors.mist} 0%, #ffffff 100%)`,
                 backgroundClip: 'text',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
-                textShadow: '0 0 30px rgba(147, 197, 253, 0.8)',
+                textShadow: `0 0 30px ${alpha(brandColors.mist, 0.45)}`,
               }}
             >
               moments magiques
@@ -423,17 +445,20 @@ export const HeroSection = () => {
           </ButtonGroup>
         </MainContent>
 
-        <FeaturesSidebar>
-          {features.map((feature, index) => (
-            <FeatureItem key={index}>
-              <FeatureIcon style={{ backgroundColor: feature.bgColor }}>{feature.icon}</FeatureIcon>
-              <FeatureContent>
-                <FeatureTitle>{feature.title}</FeatureTitle>
-                <FeatureDescription>{feature.description}</FeatureDescription>
-              </FeatureContent>
-            </FeatureItem>
-          ))}
-        </FeaturesSidebar>
+        <HeroAside>
+          <FloatingGenie size={240} floating onDark />
+          <FeaturesSidebar>
+            {features.map((feature, index) => (
+              <FeatureItem key={index}>
+                <FeatureIcon style={{ backgroundColor: feature.bgColor }}>{feature.icon}</FeatureIcon>
+                <FeatureContent>
+                  <FeatureTitle>{feature.title}</FeatureTitle>
+                  <FeatureDescription>{feature.description}</FeatureDescription>
+                </FeatureContent>
+              </FeatureItem>
+            ))}
+          </FeaturesSidebar>
+        </HeroAside>
       </ContentWrapper>
     </HeroContainer>
   );

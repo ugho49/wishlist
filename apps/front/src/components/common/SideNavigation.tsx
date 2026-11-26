@@ -24,11 +24,10 @@ import { useLocation, useNavigate } from '@tanstack/react-router';
 import { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import LogoSvg from '../../assets/logo/logo.svg?react';
-import LogoTextSvg from '../../assets/logo/logo_text.svg?react';
 import { closeDrawer } from '../../core/store/features/drawerSlice';
 import { useLogout } from '../../hooks/useLogout';
 import { useToast } from '../../hooks/useToast';
+import { Logo } from './Logo';
 
 const mapAuthState = (state: RootState) => state.auth;
 const mapUserProfileState = (state: RootState) => state.userProfile;
@@ -70,24 +69,6 @@ const LogoSectionStyled = styled(Box)(({ theme }) => ({
   justifyContent: 'center',
   cursor: 'pointer',
   gap: theme.spacing(1),
-}));
-
-const LogoRow = styled(Box)({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  gap: 20,
-});
-
-const LogoIconStyled = styled(LogoSvg)(() => ({
-  height: 38,
-  width: 38,
-  color: 'white',
-}));
-
-const LogoTextStyled = styled(LogoTextSvg)(() => ({
-  height: 60,
-  color: 'white',
 }));
 
 const AdminModeBadge = styled('span', { shouldForwardProp: prop => prop !== 'elevated' })<{ elevated?: boolean }>(
@@ -304,10 +285,7 @@ export const SideNavigation = () => {
   const drawerContent = (
     <DrawerContentStyled>
       <LogoSectionStyled onClick={() => navigate({ to: '/' })}>
-        <LogoRow>
-          <LogoIconStyled />
-          <LogoTextStyled />
-        </LogoRow>
+        <Logo height={52} />
         {user?.isAdmin ? (
           <AdminModeBadge elevated={user.isSuperAdmin}>{user.isSuperAdmin ? 'Super-admin' : 'Admin'}</AdminModeBadge>
         ) : null}
