@@ -1,16 +1,39 @@
-# 🎁 Wishlist
+<p align="center">
+  <a href="https://wishlistapp.fr">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="apps/front/src/assets/logo/logo-dark.png" />
+      <img src="apps/front/src/assets/logo/logo-light.png" alt="Wishlist" height="120" />
+    </picture>
+  </a>
+</p>
 
-Share wishlists for birthdays, holidays, and other events. Invite people, reserve gifts without spoiling the surprise, and run Secret Santa draws.
+<p align="center">
+  Share wishlists for birthdays, holidays, and other events.<br />
+  Invite people, reserve gifts without spoiling the surprise, and run Secret Santa draws.
+</p>
 
-**Live app:** [wishlistapp.fr](https://wishlistapp.fr)
+<p align="center">
+  <a href="https://wishlistapp.fr"><b>wishlistapp.fr</b></a>
+</p>
 
 ## ✨ Features
 
-- 📅 Events with dates and attendees
-- 📝 Wishlists with optional link scraping
-- 🔒 Hidden item reservations
-- 🎅 Secret Santa (exclusions + budget)
-- 🔐 Email + Google sign-in
+- 📅 Events with dates and attendees, invited by email even before they sign up
+- 📝 Wishlists with optional link scraping, co-owners, and imports from past lists
+- 🔒 Hidden reservations, which several people can share for one gift
+- 💡 Wish suggestions on someone else's list
+- 🎅 Secret Santa (exclusions, budget, automatic draw)
+- 🔔 Birthday and new-wish email reminders
+- 📱 Installable as a PWA
+- 🔐 Email and Google sign-in
+
+<p align="center">
+  <img src="apps/front/src/assets/mascot/genie-hello.png" alt="" height="88" />
+  <img src="apps/front/src/assets/mascot/genie-calendar.png" alt="" height="88" />
+  <img src="apps/front/src/assets/mascot/genie-wishlist.png" alt="" height="88" />
+  <img src="apps/front/src/assets/mascot/genie-santa.png" alt="" height="88" />
+  <img src="apps/front/src/assets/mascot/genie-lost.png" alt="" height="88" />
+</p>
 
 ## 🛠️ Stack
 
@@ -32,6 +55,16 @@ apps/front    React frontend
 libs/common   Shared IDs and types
 libs/mail     Email templates
 ```
+
+## 🧞 Brand
+
+The genie is the mascot. Navy (`#255376`) leads the UI, with the mist blue-grey (`#BFD4D7`) for soft surfaces. Headings use Fredoka and body text uses Inter.
+
+| Asset                                                         | Where                                                                     |
+| ------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| Logos: `logo-*` (genie + lettering), `wordmark-*` (lettering) | `apps/front/src/assets/logo`, `-light` on white, `-dark` on navy          |
+| Genie poses: hello, calendar, wishlist, santa, lost           | `apps/front/src/assets/mascot`, rendered by `components/common/Genie.tsx` |
+| Favicon, PWA icons, OG image, email logo                      | `apps/front/public`                                                       |
 
 ## 🚀 Quick start
 
