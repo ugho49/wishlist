@@ -25,6 +25,7 @@ import { Route as AuthenticatedWithLayoutAdminRouteImport } from './routes/_auth
 import { Route as AuthenticatedWithLayoutAdminIndexRouteImport } from './routes/_authenticated/_with-layout/admin/index'
 import { Route as AuthenticatedWithLayoutEventsIndexRouteImport } from './routes/_authenticated/_with-layout/events/index'
 import { Route as AuthenticatedWithLayoutEventsNewRouteImport } from './routes/_authenticated/_with-layout/events/new'
+import { Route as AuthenticatedWithLayoutFriendsIndexRouteImport } from './routes/_authenticated/_with-layout/friends/index'
 import { Route as AuthenticatedWithLayoutReservedItemsIndexRouteImport } from './routes/_authenticated/_with-layout/reserved-items/index'
 import { Route as AuthenticatedWithLayoutSecretSantasIndexRouteImport } from './routes/_authenticated/_with-layout/secret-santas/index'
 import { Route as AuthenticatedWithLayoutUserProfileRouteImport } from './routes/_authenticated/_with-layout/user/profile'
@@ -124,6 +125,12 @@ const AuthenticatedWithLayoutEventsNewRoute =
   AuthenticatedWithLayoutEventsNewRouteImport.update({
     id: '/events/new',
     path: '/events/new',
+    getParentRoute: () => AuthenticatedWithLayoutRoute,
+  } as any)
+const AuthenticatedWithLayoutFriendsIndexRoute =
+  AuthenticatedWithLayoutFriendsIndexRouteImport.update({
+    id: '/friends/',
+    path: '/friends/',
     getParentRoute: () => AuthenticatedWithLayoutRoute,
   } as any)
 const AuthenticatedWithLayoutReservedItemsIndexRoute =
@@ -233,6 +240,7 @@ export interface FileRoutesByFullPath {
   '/wishlists/new': typeof AuthenticatedWithLayoutWishlistsNewRoute
   '/admin/': typeof AuthenticatedWithLayoutAdminIndexRoute
   '/events/': typeof AuthenticatedWithLayoutEventsIndexRoute
+  '/friends/': typeof AuthenticatedWithLayoutFriendsIndexRoute
   '/reserved-items/': typeof AuthenticatedWithLayoutReservedItemsIndexRoute
   '/secret-santas/': typeof AuthenticatedWithLayoutSecretSantasIndexRoute
   '/wishlists/': typeof AuthenticatedWithLayoutWishlistsIndexRoute
@@ -262,6 +270,7 @@ export interface FileRoutesByTo {
   '/wishlists/new': typeof AuthenticatedWithLayoutWishlistsNewRoute
   '/admin': typeof AuthenticatedWithLayoutAdminIndexRoute
   '/events': typeof AuthenticatedWithLayoutEventsIndexRoute
+  '/friends': typeof AuthenticatedWithLayoutFriendsIndexRoute
   '/reserved-items': typeof AuthenticatedWithLayoutReservedItemsIndexRoute
   '/secret-santas': typeof AuthenticatedWithLayoutSecretSantasIndexRoute
   '/wishlists': typeof AuthenticatedWithLayoutWishlistsIndexRoute
@@ -296,6 +305,7 @@ export interface FileRoutesById {
   '/_authenticated/_with-layout/wishlists/new': typeof AuthenticatedWithLayoutWishlistsNewRoute
   '/_authenticated/_with-layout/admin/': typeof AuthenticatedWithLayoutAdminIndexRoute
   '/_authenticated/_with-layout/events/': typeof AuthenticatedWithLayoutEventsIndexRoute
+  '/_authenticated/_with-layout/friends/': typeof AuthenticatedWithLayoutFriendsIndexRoute
   '/_authenticated/_with-layout/reserved-items/': typeof AuthenticatedWithLayoutReservedItemsIndexRoute
   '/_authenticated/_with-layout/secret-santas/': typeof AuthenticatedWithLayoutSecretSantasIndexRoute
   '/_authenticated/_with-layout/wishlists/': typeof AuthenticatedWithLayoutWishlistsIndexRoute
@@ -328,6 +338,7 @@ export interface FileRouteTypes {
     | '/wishlists/new'
     | '/admin/'
     | '/events/'
+    | '/friends/'
     | '/reserved-items/'
     | '/secret-santas/'
     | '/wishlists/'
@@ -357,6 +368,7 @@ export interface FileRouteTypes {
     | '/wishlists/new'
     | '/admin'
     | '/events'
+    | '/friends'
     | '/reserved-items'
     | '/secret-santas'
     | '/wishlists'
@@ -390,6 +402,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_with-layout/wishlists/new'
     | '/_authenticated/_with-layout/admin/'
     | '/_authenticated/_with-layout/events/'
+    | '/_authenticated/_with-layout/friends/'
     | '/_authenticated/_with-layout/reserved-items/'
     | '/_authenticated/_with-layout/secret-santas/'
     | '/_authenticated/_with-layout/wishlists/'
@@ -526,6 +539,13 @@ declare module '@tanstack/react-router' {
       path: '/events/new'
       fullPath: '/events/new'
       preLoaderRoute: typeof AuthenticatedWithLayoutEventsNewRouteImport
+      parentRoute: typeof AuthenticatedWithLayoutRoute
+    }
+    '/_authenticated/_with-layout/friends/': {
+      id: '/_authenticated/_with-layout/friends/'
+      path: '/friends'
+      fullPath: '/friends/'
+      preLoaderRoute: typeof AuthenticatedWithLayoutFriendsIndexRouteImport
       parentRoute: typeof AuthenticatedWithLayoutRoute
     }
     '/_authenticated/_with-layout/reserved-items/': {
@@ -694,6 +714,7 @@ interface AuthenticatedWithLayoutRouteChildren {
   AuthenticatedWithLayoutUserProfileRoute: typeof AuthenticatedWithLayoutUserProfileRoute
   AuthenticatedWithLayoutWishlistsNewRoute: typeof AuthenticatedWithLayoutWishlistsNewRoute
   AuthenticatedWithLayoutEventsIndexRoute: typeof AuthenticatedWithLayoutEventsIndexRoute
+  AuthenticatedWithLayoutFriendsIndexRoute: typeof AuthenticatedWithLayoutFriendsIndexRoute
   AuthenticatedWithLayoutReservedItemsIndexRoute: typeof AuthenticatedWithLayoutReservedItemsIndexRoute
   AuthenticatedWithLayoutSecretSantasIndexRoute: typeof AuthenticatedWithLayoutSecretSantasIndexRoute
   AuthenticatedWithLayoutWishlistsIndexRoute: typeof AuthenticatedWithLayoutWishlistsIndexRoute
@@ -715,6 +736,8 @@ const AuthenticatedWithLayoutRouteChildren: AuthenticatedWithLayoutRouteChildren
       AuthenticatedWithLayoutWishlistsNewRoute,
     AuthenticatedWithLayoutEventsIndexRoute:
       AuthenticatedWithLayoutEventsIndexRoute,
+    AuthenticatedWithLayoutFriendsIndexRoute:
+      AuthenticatedWithLayoutFriendsIndexRoute,
     AuthenticatedWithLayoutReservedItemsIndexRoute:
       AuthenticatedWithLayoutReservedItemsIndexRoute,
     AuthenticatedWithLayoutSecretSantasIndexRoute:

@@ -5,6 +5,7 @@ import type {
   SecretSantaId,
   SecretSantaUserId,
   UserAccountId,
+  UserContactId,
   UserEmailChangeVerificationId,
   UserEmailSettingId,
   UserId,
@@ -23,6 +24,7 @@ export const userEmailChangeVerificationId = brandedUuid<UserEmailChangeVerifica
 export const userEmailSettingId = brandedUuid<UserEmailSettingId>();
 export const userAccountId = brandedUuid<UserAccountId>();
 export const userSessionId = brandedUuid<UserSessionId>();
+export const userContactId = brandedUuid<UserContactId>();
 export const secretSantaId = brandedUuid<SecretSantaId>();
 export const secretSantaUserId = brandedUuid<SecretSantaUserId>();
 export const wishlistId = brandedUuid<WishlistId>();

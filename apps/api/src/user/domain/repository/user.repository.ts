@@ -9,7 +9,7 @@ export interface UserRepository {
   findByIdOrFail(id: UserId): Promise<User>;
   findByEmail(email: string): Promise<User | undefined>;
   findByEmails(emails: string[]): Promise<User[]>;
-  /** Enabled users of the user's circle (who attend an event with them) whose name or email contains the keyword. */
+  /** Users of the user's circle (see circle.sql.ts) whose name or email contains the keyword. */
   searchInCircle(params: { userId: UserId; keyword: string; limit: number }): Promise<User[]>;
   findAllPaginated(params: {
     criteria?: string;
@@ -17,6 +17,7 @@ export interface UserRepository {
   }): Promise<{ users: User[]; totalCount: number }>;
   countAdminStats(): Promise<{ totalCount: number; enabledCount: number; adminCount: number }>;
   countCreatedByMonth(since: Date): Promise<Array<{ month: string; count: number }>>;
+  /** Users of the user's circle, the ones sharing the most events with them first. */
   findClosestFriends(userId: UserId, limit: number): Promise<User[]>;
   findEnabledWithBirthdayOn(params: { month: number; day: number; includeLeapDay: boolean }): Promise<User[]>;
   save(user: User, tx?: DrizzleTransaction): Promise<void>;

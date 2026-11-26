@@ -21,6 +21,9 @@ import { SignupSource } from '../domain/signup-source.enum';
 
 export const UserIdSchema = z.string().transform(val => val as UserId);
 
+/** A user id coming from a regular user: checked as a UUID before reaching the database. */
+export const FriendUserIdSchema = z.uuid().transform(val => val as UserId);
+
 export const UserSessionIdSchema = z.string().transform(val => val as UserSessionId);
 
 export const SearchUsersKeywordSchema = z.string().trim().min(2).max(100);

@@ -8,6 +8,7 @@ export * from './secret-santa.schema';
 export * from './secret-santa-user.schema';
 export * from './user.schema';
 export * from './user-account.schema';
+export * from './user-contact.schema';
 export * from './user-email-change-verification.schema';
 export * from './user-email-setting.schema';
 export * from './user-password-verification.schema';

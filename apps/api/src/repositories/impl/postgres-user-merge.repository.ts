@@ -84,6 +84,8 @@ export class PostgresUserMergeRepository implements UserMergeRepository {
         );
     }
 
+    await this.transferContacts(transfer, tx, now);
+
     if (transfer.transferReservations) {
       // A reservation both users hold stays the target's one (primary key: item_id, user_id)
       await tx
@@ -103,6 +105,59 @@ export class PostgresUserMergeRepository implements UserMergeRepository {
 
       await tx.update(schema.itemTaker).set({ userId: targetUserId }).where(eq(schema.itemTaker.userId, sourceUserId));
     }
+  }
+
+  /**
+   * Friends added or hidden, on both sides: the target keeps its own decision when both users have one
+   * about the same person, and a decision that would be about oneself is dropped.
+   */
+  private async transferContacts(transfer: UserMergeTransfer, tx: DrizzleTransaction, now: Date): Promise<void> {
+    const { sourceUserId, targetUserId } = transfer;
+    const { userContact } = schema;
+
+    await tx
+      .delete(userContact)
+      .where(
+        and(
+          eq(userContact.ownerUserId, sourceUserId),
+          or(
+            eq(userContact.contactUserId, targetUserId),
+            inArray(
+              userContact.contactUserId,
+              tx
+                .select({ id: userContact.contactUserId })
+                .from(userContact)
+                .where(eq(userContact.ownerUserId, targetUserId)),
+            ),
+          ),
+        ),
+      );
+    await tx
+      .update(userContact)
+      .set({ ownerUserId: targetUserId, updatedAt: now })
+      .where(eq(userContact.ownerUserId, sourceUserId));
+
+    await tx
+      .delete(userContact)
+      .where(
+        and(
+          eq(userContact.contactUserId, sourceUserId),
+          or(
+            eq(userContact.ownerUserId, targetUserId),
+            inArray(
+              userContact.ownerUserId,
+              tx
+                .select({ id: userContact.ownerUserId })
+                .from(userContact)
+                .where(eq(userContact.contactUserId, targetUserId)),
+            ),
+          ),
+        ),
+      );
+    await tx
+      .update(userContact)
+      .set({ contactUserId: targetUserId, updatedAt: now })
+      .where(eq(userContact.contactUserId, sourceUserId));
   }
 
   private async findAttendances(userId: UserId): Promise<UserMergeAttendance[]> {

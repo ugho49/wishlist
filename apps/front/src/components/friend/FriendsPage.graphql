@@ -1,0 +1,53 @@
+query FriendsPage {
+  friends {
+    __typename
+    ... on FriendsOutput {
+      friends {
+        source
+        sharedEventsCount
+        user {
+          id
+          firstName
+          lastName
+          email
+          pictureUrl
+        }
+      }
+      hidden {
+        id
+        firstName
+        lastName
+        email
+        pictureUrl
+      }
+    }
+  }
+}
+
+mutation AddFriend($email: String!) {
+  addFriend(email: $email) {
+    __typename
+    ... on BusinessRuleRejection {
+      code
+      message
+    }
+    ... on ValidationRejection {
+      errors {
+        field
+        message
+      }
+    }
+  }
+}
+
+mutation HideFriend($userId: UserId!) {
+  hideFriend(userId: $userId) {
+    __typename
+  }
+}
+
+mutation UnhideFriend($userId: UserId!) {
+  unhideFriend(userId: $userId) {
+    __typename
+  }
+}

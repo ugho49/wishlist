@@ -279,6 +279,39 @@ describe('UserMergeAdminResolver (GraphQL)', () => {
           .toMatchObject({ user_id: sourceUserId, role: 'creator' });
       });
 
+      it('should give the friends of the merged user to the kept one, the kept decisions winning', async () => {
+        const xId = await fixtures.insertUser({ email: 'x@test.fr', firstname: 'X', lastname: 'Test' });
+        const yId = await fixtures.insertUser({ email: 'y@test.fr', firstname: 'Y', lastname: 'Test' });
+        const zId = await fixtures.insertUser({ email: 'z@test.fr', firstname: 'Z', lastname: 'Test' });
+        // Decisions of the merged user: X added (the kept user hid X), Y added, the kept user added
+        await fixtures.insertUserContact({ ownerUserId: sourceUserId, contactUserId: xId, status: 'added' });
+        await fixtures.insertUserContact({ ownerUserId: sourceUserId, contactUserId: yId, status: 'added' });
+        await fixtures.insertUserContact({ ownerUserId: sourceUserId, contactUserId: targetUserId, status: 'added' });
+        await fixtures.insertUserContact({ ownerUserId: targetUserId, contactUserId: xId, status: 'hidden' });
+        // Decisions about the merged user: Z added them, the kept user hid them
+        await fixtures.insertUserContact({ ownerUserId: zId, contactUserId: sourceUserId, status: 'added' });
+        await fixtures.insertUserContact({ ownerUserId: targetUserId, contactUserId: sourceUserId, status: 'hidden' });
+
+        const res = await request
+          .post(GRAPHQL_PATH)
+          .send({ query: mutation, variables: { input: mergeInput() } })
+          .expect(200);
+
+        expect(res.body.data.adminMergeUsers.__typename).toBe('VoidOutput');
+        await expectTable(Fixtures.USER_CONTACT_TABLE).hasNumberOfRows(3);
+        // Sorted by status ('added' first), then by owner id (uuid order is the hex string order)
+        const added = [
+          { owner_user_id: targetUserId, contact_user_id: yId, status: 'added' },
+          { owner_user_id: zId, contact_user_id: targetUserId, status: 'added' },
+        ].sort((a, b) => (a.owner_user_id < b.owner_user_id ? -1 : 1));
+        const expected = [...added, { owner_user_id: targetUserId, contact_user_id: xId, status: 'hidden' }];
+        for (const [index, row] of expected.entries()) {
+          await expectTable(Fixtures.USER_CONTACT_TABLE, { status: 'ASC', owner_user_id: 'ASC' })
+            .row(index)
+            .toMatchObject(row);
+        }
+      });
+
       it('should move the selection to the kept user and delete the merged one', async () => {
         // Shared event: the source created it and takes part in its secret santa
         const shared = await fixtures.insertEventWithCreator({ title: 'Noël', creatorId: sourceUserId });

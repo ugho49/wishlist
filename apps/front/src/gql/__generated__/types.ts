@@ -26,6 +26,8 @@ export type AddEventAttendeeInput = {
 
 export type AddEventAttendeeResult = BusinessRuleRejection | EventAttendee | ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection;
 
+export type AddFriendResult = BusinessRuleRejection | ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+
 export type AddSecretSantaUsersInput = {
   attendeeIds: Array<Scalars['AttendeeId']['input']>;
 };
@@ -355,6 +357,30 @@ export type ForbiddenRejection = {
   message: Scalars['String']['output'];
 };
 
+export type Friend = {
+  __typename?: 'Friend';
+  sharedEventsCount: Scalars['Int']['output'];
+  source: FriendSource;
+  user: User;
+};
+
+export enum FriendSource {
+  /** Added by the current user with their email (may also share events) */
+  Added = 'ADDED',
+  /** Shares at least one event with the current user */
+  Event = 'EVENT'
+}
+
+export type FriendsOutput = {
+  __typename?: 'FriendsOutput';
+  /** The circle of the current user, sorted by name */
+  friends: Array<Friend>;
+  /** The users the current user hid from their circle, sorted by name */
+  hidden: Array<User>;
+};
+
+export type FriendsResult = ForbiddenRejection | FriendsOutput | InternalErrorRejection | UnauthorizedRejection;
+
 export type GetCurrentUserResult = CurrentUser | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection;
 
 export type GetEventByIdResult = Event | ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection;
@@ -419,6 +445,8 @@ export enum HealthStatus {
   Ok = 'OK',
   ShuttingDown = 'SHUTTING_DOWN'
 }
+
+export type HideFriendResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
 export type ImportItemsInput = {
   sourceItemIds: Array<Scalars['ItemId']['input']>;
@@ -508,6 +536,8 @@ export type LogoutResult = InternalErrorRejection | UnauthorizedRejection | Vali
 export type Mutation = {
   __typename?: 'Mutation';
   addEventAttendee: AddEventAttendeeResult;
+  /** Adds the account owning that exact email to the circle; rate limited like userByEmail (RATE_LIMITED) */
+  addFriend: AddFriendResult;
   addSecretSantaUsers: AddSecretSantaUsersResult;
   addWishlistCoOwner: AddWishlistCoOwnerResult;
   adminDeleteEvent: AdminDeleteEventResult;
@@ -536,6 +566,8 @@ export type Mutation = {
   deleteSecretSanta: DeleteSecretSantaResult;
   deleteSecretSantaUser: DeleteSecretSantaUserResult;
   deleteWishlist: DeleteWishlistResult;
+  /** Takes someone out of the circle (friends page, picker suggestions and search), even when they share events */
+  hideFriend: HideFriendResult;
   importItems: ImportItemsResult;
   linkCurrentUserWithGoogle: LinkUserToGoogleResult;
   linkWishlistToEvent: LinkWishlistToEventResult;
@@ -559,6 +591,8 @@ export type Mutation = {
   setSignupSource: SetSignupSourceResult;
   startSecretSanta: StartSecretSantaResult;
   toggleItem: ToggleItemResult;
+  /** Brings a hidden user back into the circle, as an added friend */
+  unhideFriend: UnhideFriendResult;
   unlinkCurrentUserAccount: UnlinkCurrentUserAccountResult;
   unlinkWishlistFromEvent: UnlinkWishlistFromEventResult;
   updateEvent: UpdateEventResult;
@@ -576,6 +610,11 @@ export type Mutation = {
 export type MutationAddEventAttendeeArgs = {
   eventId: Scalars['EventId']['input'];
   input: AddEventAttendeeInput;
+};
+
+
+export type MutationAddFriendArgs = {
+  email: Scalars['String']['input'];
 };
 
 
@@ -730,6 +769,11 @@ export type MutationDeleteWishlistArgs = {
 };
 
 
+export type MutationHideFriendArgs = {
+  userId: Scalars['UserId']['input'];
+};
+
+
 export type MutationImportItemsArgs = {
   input: ImportItemsInput;
 };
@@ -834,6 +878,11 @@ export type MutationStartSecretSantaArgs = {
 
 export type MutationToggleItemArgs = {
   itemId: Scalars['ItemId']['input'];
+};
+
+
+export type MutationUnhideFriendArgs = {
+  userId: Scalars['UserId']['input'];
 };
 
 
@@ -951,6 +1000,8 @@ export type Query = {
   currentUser: GetCurrentUserResult;
   event?: Maybe<GetEventByIdResult>;
   events: GetMyEventsResult;
+  /** The circle of the current user: who they attend an event with or added, minus who they hid */
+  friends: FriendsResult;
   health: HealthResult;
   importableItems: GetImportableItemsResult;
   myReservedItems: GetMyReservedItemsResult;
@@ -1239,6 +1290,8 @@ export type UnauthorizedRejection = {
   __typename?: 'UnauthorizedRejection';
   message: Scalars['String']['output'];
 };
+
+export type UnhideFriendResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
 export type UnlinkCurrentUserAccountResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 

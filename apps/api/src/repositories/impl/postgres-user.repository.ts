@@ -4,12 +4,13 @@ import { schema } from '@wishlist/api-drizzle';
 import { type UserId, uuid } from '@wishlist/common';
 import { Injectable } from '@znight/core';
 import { NotFoundException } from '@znight/http';
-import { and, asc, count, desc, eq, gte, inArray, isNotNull, isNull, like, ne, or, type SQL, sql } from 'drizzle-orm';
+import { and, asc, count, desc, eq, gte, inArray, isNotNull, isNull, like, or, type SQL, sql } from 'drizzle-orm';
 
 import { containsPattern } from '../../core/database/like-pattern';
 import { type DrizzleTransaction } from '../../core/database/transaction-manager';
 import { User } from '../../user/domain/model/user.model';
 import { type UserRepository } from '../../user/domain/repository/user.repository';
+import { eventIdsOf, inCircleOf } from './circle.sql';
 
 @Injectable()
 export class PostgresUserRepository implements UserRepository {
@@ -51,9 +52,7 @@ export class PostgresUserRepository implements UserRepository {
 
     const users = await this.db.query.user.findMany({
       where: and(
-        ne(schema.user.id, userId),
-        eq(schema.user.isEnabled, true),
-        inArray(schema.user.id, this.circleUserIds(userId)),
+        inCircleOf(this.db, userId),
         or(
           like(sql`lower(${schema.user.firstName})`, pattern),
           like(sql`lower(${schema.user.lastName})`, pattern),
@@ -171,22 +170,22 @@ export class PostgresUserRepository implements UserRepository {
   }
 
   async findClosestFriends(userId: UserId, limit: number): Promise<User[]> {
+    const sharedEventsCount = count(schema.eventAttendee.id);
+
+    // Left join: a friend added by email may share no event (0), they come last
     const result = await this.db
-      .select({
-        user: schema.user,
-        commonEventsCount: count().as('common_events_count'),
-      })
+      .select({ user: schema.user })
       .from(schema.user)
-      .innerJoin(schema.eventAttendee, eq(schema.user.id, schema.eventAttendee.userId))
-      .where(
+      .leftJoin(
+        schema.eventAttendee,
         and(
-          ne(schema.user.id, userId),
-          eq(schema.user.isEnabled, true),
-          inArray(schema.eventAttendee.eventId, this.eventIdsOf(userId)),
+          eq(schema.eventAttendee.userId, schema.user.id),
+          inArray(schema.eventAttendee.eventId, eventIdsOf(this.db, userId)),
         ),
       )
+      .where(inCircleOf(this.db, userId))
       .groupBy(schema.user.id)
-      .orderBy(desc(count()))
+      .orderBy(desc(sharedEventsCount), asc(schema.user.firstName), asc(schema.user.lastName))
       .limit(limit);
 
     return result.map(row => PostgresUserRepository.toModel(row.user));
@@ -215,27 +214,6 @@ export class PostgresUserRepository implements UserRepository {
       );
 
     return rows.map(row => PostgresUserRepository.toModel(row.user));
-  }
-
-  /** Events the user attends. */
-  private eventIdsOf(userId: UserId) {
-    return this.db
-      .select({ eventId: schema.eventAttendee.eventId })
-      .from(schema.eventAttendee)
-      .where(eq(schema.eventAttendee.userId, userId));
-  }
-
-  /**
-   * The user's circle: the users who attend at least one event with them. Searching other users is
-   * restricted to it, so the user base can never be listed.
-   */
-  private circleUserIds(userId: UserId) {
-    return this.db
-      .selectDistinct({ userId: schema.eventAttendee.userId })
-      .from(schema.eventAttendee)
-      .where(
-        and(isNotNull(schema.eventAttendee.userId), inArray(schema.eventAttendee.eventId, this.eventIdsOf(userId))),
-      );
   }
 
   static toModel(row: typeof schema.user.$inferSelect): User {

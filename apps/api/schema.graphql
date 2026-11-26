@@ -17,6 +17,8 @@ input AddEventAttendeeInput {
 
 union AddEventAttendeeResult = BusinessRuleRejection | EventAttendee | ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection
 
+union AddFriendResult = BusinessRuleRejection | ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
 input AddSecretSantaUsersInput {
   attendeeIds: [AttendeeId!]!
 }
@@ -335,6 +337,28 @@ type ForbiddenRejection {
   message: String!
 }
 
+type Friend {
+  sharedEventsCount: Int!
+  source: FriendSource!
+  user: User!
+}
+
+enum FriendSource {
+  """Added by the current user with their email (may also share events)"""
+  ADDED
+  """Shares at least one event with the current user"""
+  EVENT
+}
+
+type FriendsOutput {
+  """The circle of the current user, sorted by name"""
+  friends: [Friend!]!
+  """The users the current user hid from their circle, sorted by name"""
+  hidden: [User!]!
+}
+
+union FriendsResult = ForbiddenRejection | FriendsOutput | InternalErrorRejection | UnauthorizedRejection
+
 union GetCurrentUserResult = CurrentUser | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection
 
 union GetEventByIdResult = Event | ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection
@@ -395,6 +419,8 @@ enum HealthStatus {
   OK
   SHUTTING_DOWN
 }
+
+union HideFriendResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
 input ImportItemsInput {
   sourceItemIds: [ItemId!]!
@@ -478,6 +504,10 @@ union LogoutResult = InternalErrorRejection | UnauthorizedRejection | Validation
 
 type Mutation {
   addEventAttendee(eventId: EventId!, input: AddEventAttendeeInput!): AddEventAttendeeResult!
+  """
+  Adds the account owning that exact email to the circle; rate limited like userByEmail (RATE_LIMITED)
+  """
+  addFriend(email: String!): AddFriendResult!
   addSecretSantaUsers(id: SecretSantaId!, input: AddSecretSantaUsersInput!): AddSecretSantaUsersResult!
   addWishlistCoOwner(id: WishlistId!, input: AddWishlistCoOwnerInput!): AddWishlistCoOwnerResult!
   adminDeleteEvent(id: EventId!): AdminDeleteEventResult!
@@ -506,6 +536,10 @@ type Mutation {
   deleteSecretSanta(id: SecretSantaId!): DeleteSecretSantaResult!
   deleteSecretSantaUser(id: SecretSantaId!, secretSantaUserId: SecretSantaUserId!): DeleteSecretSantaUserResult!
   deleteWishlist(id: WishlistId!): DeleteWishlistResult!
+  """
+  Takes someone out of the circle (friends page, picker suggestions and search), even when they share events
+  """
+  hideFriend(userId: UserId!): HideFriendResult!
   importItems(input: ImportItemsInput!): ImportItemsResult!
   linkCurrentUserWithGoogle(input: LinkUserToGoogleInput!): LinkUserToGoogleResult!
   linkWishlistToEvent(eventId: EventId!, id: WishlistId!): LinkWishlistToEventResult!
@@ -531,6 +565,8 @@ type Mutation {
   setSignupSource(input: SetSignupSourceInput!): SetSignupSourceResult!
   startSecretSanta(id: SecretSantaId!): StartSecretSantaResult!
   toggleItem(itemId: ItemId!): ToggleItemResult!
+  """Brings a hidden user back into the circle, as an added friend"""
+  unhideFriend(userId: UserId!): UnhideFriendResult!
   unlinkCurrentUserAccount(accountId: UserAccountId!): UnlinkCurrentUserAccountResult!
   unlinkWishlistFromEvent(eventId: EventId!, id: WishlistId!): UnlinkWishlistFromEventResult!
   updateEvent(id: EventId!, input: UpdateEventInput!): UpdateEventResult!
@@ -590,6 +626,10 @@ type Query {
   currentUser: GetCurrentUserResult!
   event(id: EventId!): GetEventByIdResult
   events(filters: EventPaginationFilters!): GetMyEventsResult!
+  """
+  The circle of the current user: who they attend an event with or added, minus who they hid
+  """
+  friends: FriendsResult!
   health: HealthResult!
   importableItems(wishlistId: WishlistId!): GetImportableItemsResult!
   myReservedItems(filters: MyReservedItemsFilters!): GetMyReservedItemsResult!
@@ -780,6 +820,8 @@ union ToggleItemResult = ForbiddenRejection | InternalErrorRejection | ToggleIte
 type UnauthorizedRejection {
   message: String!
 }
+
+union UnhideFriendResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
 union UnlinkCurrentUserAccountResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 

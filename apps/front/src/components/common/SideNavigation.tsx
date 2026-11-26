@@ -5,6 +5,7 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import ForestIcon from '@mui/icons-material/Forest';
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 import LogoutIcon from '@mui/icons-material/Logout';
+import PeopleIcon from '@mui/icons-material/People';
 import PersonIcon from '@mui/icons-material/Person';
 import RedeemIcon from '@mui/icons-material/Redeem';
 import {
@@ -243,6 +244,11 @@ export const SideNavigation = () => {
       label: 'Évènements',
       value: '/events',
       icon: <CalendarMonthIcon />,
+    },
+    {
+      label: 'Amis',
+      value: '/friends',
+      icon: <PeopleIcon />,
     },
     {
       label: 'Mes listes',

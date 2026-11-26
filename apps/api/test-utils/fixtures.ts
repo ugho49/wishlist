@@ -20,6 +20,7 @@ export class Fixtures {
   static readonly USER_ACCOUNT_TABLE = 'user_account';
   static readonly USER_SESSION_TABLE = 'user_session';
   static readonly USER_EMAIL_SETTING_TABLE = 'user_email_setting';
+  static readonly USER_CONTACT_TABLE = 'user_contact';
   static readonly USER_PASSWORD_VERIFICATION_TABLE = 'user_password_verification';
   static readonly USER_EMAIL_CHANGE_VERIFICATION_TABLE = 'user_email_change_verification';
   static readonly EVENT_TABLE = 'event';
@@ -337,6 +338,22 @@ export class Fixtures {
     await this.sql.unsafe(
       `INSERT INTO ${Fixtures.SECRET_SANTA_TABLE} (id, event_id, description, budget, status) VALUES ($1, $2, $3, $4, $5)`,
       [id, eventId, description ?? null, budget, status],
+    );
+
+    return id;
+  }
+
+  async insertUserContact(parameters: {
+    ownerUserId: string;
+    contactUserId: string;
+    status: 'added' | 'hidden';
+  }): Promise<string> {
+    const id = uuid();
+    const { ownerUserId, contactUserId, status } = parameters;
+
+    await this.sql.unsafe(
+      `INSERT INTO ${Fixtures.USER_CONTACT_TABLE} (id, owner_user_id, contact_user_id, status) VALUES ($1, $2, $3, $4)`,
+      [id, ownerUserId, contactUserId, status],
     );
 
     return id;

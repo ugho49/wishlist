@@ -1,0 +1,76 @@
+enum FriendSource {
+  """
+  Shares at least one event with the current user
+  """
+  EVENT
+  """
+  Added by the current user with their email (may also share events)
+  """
+  ADDED
+}
+
+type Friend {
+  user: User!
+  source: FriendSource!
+  sharedEventsCount: Int!
+}
+
+type FriendsOutput {
+  """
+  The circle of the current user, sorted by name
+  """
+  friends: [Friend!]!
+  """
+  The users the current user hid from their circle, sorted by name
+  """
+  hidden: [User!]!
+}
+
+union FriendsResult = FriendsOutput | UnauthorizedRejection | ForbiddenRejection | InternalErrorRejection
+
+union AddFriendResult =
+  | VoidOutput
+  | ValidationRejection
+  | BusinessRuleRejection
+  | NotFoundRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+
+union HideFriendResult =
+  | VoidOutput
+  | ValidationRejection
+  | NotFoundRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+
+union UnhideFriendResult =
+  | VoidOutput
+  | ValidationRejection
+  | NotFoundRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | InternalErrorRejection
+
+extend type Query {
+  """
+  The circle of the current user: who they attend an event with or added, minus who they hid
+  """
+  friends: FriendsResult!
+}
+
+extend type Mutation {
+  """
+  Adds the account owning that exact email to the circle; rate limited like userByEmail (RATE_LIMITED)
+  """
+  addFriend(email: String!): AddFriendResult!
+  """
+  Takes someone out of the circle (friends page, picker suggestions and search), even when they share events
+  """
+  hideFriend(userId: UserId!): HideFriendResult!
+  """
+  Brings a hidden user back into the circle, as an added friend
+  """
+  unhideFriend(userId: UserId!): UnhideFriendResult!
+}

@@ -359,6 +359,59 @@ export type AdminUpdateEventAttendeeRoleMutation = { adminUpdateEventAttendeeRol
     | { __typename: 'VoidOutput', success: boolean }
    };
 
+export type FriendsPageQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type FriendsPageQuery = { friends:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'FriendsOutput', friends: Array<{ source: Types.FriendSource, sharedEventsCount: number, user: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null } }>, hidden: Array<{ id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null }> }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+   };
+
+export type AddFriendMutationVariables = Exact<{
+  email: string;
+}>;
+
+
+export type AddFriendMutation = { addFriend:
+    | { __typename: 'BusinessRuleRejection', code: Types.BusinessRuleCode, message: string }
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'NotFoundRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection', errors: Array<{ field: string, message: string }> }
+    | { __typename: 'VoidOutput' }
+   };
+
+export type HideFriendMutationVariables = Exact<{
+  userId: Ids["UserId"];
+}>;
+
+
+export type HideFriendMutation = { hideFriend:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'NotFoundRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection' }
+    | { __typename: 'VoidOutput' }
+   };
+
+export type UnhideFriendMutationVariables = Exact<{
+  userId: Ids["UserId"];
+}>;
+
+
+export type UnhideFriendMutation = { unhideFriend:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'NotFoundRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection' }
+    | { __typename: 'VoidOutput' }
+   };
+
 export type ImportableItemsQueryVariables = Exact<{
   wishlistId: Ids["WishlistId"];
 }>;
@@ -2228,6 +2281,123 @@ export const useAdminUpdateEventAttendeeRoleMutation = <
       {
     mutationKey: ['AdminUpdateEventAttendeeRole'],
     mutationFn: (variables?: AdminUpdateEventAttendeeRoleMutationVariables) => fetchGql<AdminUpdateEventAttendeeRoleMutation, AdminUpdateEventAttendeeRoleMutationVariables>(AdminUpdateEventAttendeeRoleDocument, variables)(),
+    ...options
+  }
+    )};
+
+export const FriendsPageDocument = new TypedDocumentString(`
+    query FriendsPage {
+  friends {
+    __typename
+    ... on FriendsOutput {
+      friends {
+        source
+        sharedEventsCount
+        user {
+          id
+          firstName
+          lastName
+          email
+          pictureUrl
+        }
+      }
+      hidden {
+        id
+        firstName
+        lastName
+        email
+        pictureUrl
+      }
+    }
+  }
+}
+    `);
+
+export const useFriendsPageQuery = <
+      TData = FriendsPageQuery,
+      TError = unknown
+    >(
+      variables?: FriendsPageQueryVariables,
+      options?: Omit<UseQueryOptions<FriendsPageQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<FriendsPageQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<FriendsPageQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['FriendsPage'] : ['FriendsPage', variables],
+    queryFn: fetchGql<FriendsPageQuery, FriendsPageQueryVariables>(FriendsPageDocument, variables),
+    ...options
+  }
+    )};
+
+export const AddFriendDocument = new TypedDocumentString(`
+    mutation AddFriend($email: String!) {
+  addFriend(email: $email) {
+    __typename
+    ... on BusinessRuleRejection {
+      code
+      message
+    }
+    ... on ValidationRejection {
+      errors {
+        field
+        message
+      }
+    }
+  }
+}
+    `);
+
+export const useAddFriendMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<AddFriendMutation, TError, AddFriendMutationVariables, TContext>) => {
+    
+    return useMutation<AddFriendMutation, TError, AddFriendMutationVariables, TContext>(
+      {
+    mutationKey: ['AddFriend'],
+    mutationFn: (variables?: AddFriendMutationVariables) => fetchGql<AddFriendMutation, AddFriendMutationVariables>(AddFriendDocument, variables)(),
+    ...options
+  }
+    )};
+
+export const HideFriendDocument = new TypedDocumentString(`
+    mutation HideFriend($userId: UserId!) {
+  hideFriend(userId: $userId) {
+    __typename
+  }
+}
+    `);
+
+export const useHideFriendMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<HideFriendMutation, TError, HideFriendMutationVariables, TContext>) => {
+    
+    return useMutation<HideFriendMutation, TError, HideFriendMutationVariables, TContext>(
+      {
+    mutationKey: ['HideFriend'],
+    mutationFn: (variables?: HideFriendMutationVariables) => fetchGql<HideFriendMutation, HideFriendMutationVariables>(HideFriendDocument, variables)(),
+    ...options
+  }
+    )};
+
+export const UnhideFriendDocument = new TypedDocumentString(`
+    mutation UnhideFriend($userId: UserId!) {
+  unhideFriend(userId: $userId) {
+    __typename
+  }
+}
+    `);
+
+export const useUnhideFriendMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<UnhideFriendMutation, TError, UnhideFriendMutationVariables, TContext>) => {
+    
+    return useMutation<UnhideFriendMutation, TError, UnhideFriendMutationVariables, TContext>(
+      {
+    mutationKey: ['UnhideFriend'],
+    mutationFn: (variables?: UnhideFriendMutationVariables) => fetchGql<UnhideFriendMutation, UnhideFriendMutationVariables>(UnhideFriendDocument, variables)(),
     ...options
   }
     )};
