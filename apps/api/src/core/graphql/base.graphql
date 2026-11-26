@@ -19,6 +19,7 @@ enum BusinessRuleCode {
   WRONG_OLD_PASSWORD
   INVALID_USER_MERGE
   USER_IN_STARTED_SECRET_SANTA
+  RATE_LIMITED
 }
 
 type BusinessRuleRejection {

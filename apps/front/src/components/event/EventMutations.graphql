@@ -4,6 +4,10 @@ mutation CreateEvent($input: CreateEventInput!) {
     ... on Event {
       id
     }
+    ... on BusinessRuleRejection {
+      code
+      message
+    }
     ... on ValidationRejection {
       errors {
         field
@@ -51,6 +55,10 @@ mutation AddEventAttendee($eventId: EventId!, $input: AddEventAttendeeInput!) {
         email
         pictureUrl
       }
+    }
+    ... on BusinessRuleRejection {
+      code
+      message
     }
     ... on ValidationRejection {
       errors {

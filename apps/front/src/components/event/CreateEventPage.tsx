@@ -11,6 +11,7 @@ import {
   Button,
   Container,
   Divider,
+  FormHelperText,
   IconButton,
   List,
   Stack,
@@ -26,7 +27,7 @@ import { useSelector } from 'react-redux';
 import { match } from 'ts-pattern';
 import { z } from 'zod';
 
-import { AttendeeRole, rejectionMessage, rejectionPattern, useCreateEventMutation } from '../../gql';
+import { AttendeeRole, BusinessRuleCode, rejectionMessage, rejectionPattern, useCreateEventMutation } from '../../gql';
 import { useToast } from '../../hooks/useToast';
 import { Card } from '../common/Card';
 import { CharsRemaining } from '../common/CharsRemaining';
@@ -37,6 +38,7 @@ import { TextareaMarkdown } from '../common/TextareaMarkdown';
 import { Title } from '../common/Title';
 import { SearchUserSelect } from '../user/SearchUserSelect';
 import { AttendeeRolesHint } from './AttendeeRolesHint';
+import { INVITATIONS_RATE_LIMITED_MESSAGE } from './event.messages';
 import { AttendeeListItem, ListItemAttendee } from './ListItemAttendee';
 
 const steps = ['Informations', 'Participants'];
@@ -68,6 +70,9 @@ type FormInput = z.input<typeof schema>;
 type FormFields = z.output<typeof schema>;
 
 const mapState = (state: RootState) => state.auth.user?.email;
+
+/** Same limit as the API (CreateEventInputSchema): every invitation sends an email. */
+const MAX_INVITED_ATTENDEES = 100;
 
 export const CreateEventPage = () => {
   const currentUserEmail = useSelector(mapState);
@@ -126,9 +131,14 @@ export const CreateEventPage = () => {
         addToast({ message: 'Evènement créé avec succès', variant: 'success' });
         void navigate({ to: '/events/$eventId', params: { eventId: created.id } });
       })
+      .with({ __typename: 'BusinessRuleRejection', code: BusinessRuleCode.RateLimited }, () =>
+        addToast({ message: INVITATIONS_RATE_LIMITED_MESSAGE, variant: 'error' }),
+      )
       .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
       .exhaustive();
   };
+
+  const maxAttendeesReached = attendees.length >= MAX_INVITED_ATTENDEES;
 
   return (
     <Box>
@@ -247,7 +257,7 @@ export const CreateEventPage = () => {
 
                 <SearchUserSelect
                   label="Rechercher un participant"
-                  disabled={loading}
+                  disabled={loading || maxAttendeesReached}
                   onChange={val => {
                     setAttendees(prevState => [
                       {
@@ -259,6 +269,12 @@ export const CreateEventPage = () => {
                   }}
                   excludedEmails={[...attendeeEmails, currentUserEmail || '']}
                 />
+                {maxAttendeesReached && (
+                  <FormHelperText>
+                    {MAX_INVITED_ATTENDEES} participants maximum à la création, vous pourrez en ajouter d'autres
+                    ensuite.
+                  </FormHelperText>
+                )}
               </Box>
 
               {attendees.length > 0 && (

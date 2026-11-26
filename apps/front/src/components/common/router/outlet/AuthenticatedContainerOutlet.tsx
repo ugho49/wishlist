@@ -32,7 +32,7 @@ const ContainerStyled = styled(Container)(({ theme }) => ({
 export const AuthenticatedContainerOutlet = () => {
   const currentUserQuery = useUserProfileCurrentUserQuery(undefined, { select: d => d.currentUser });
   const { data } = currentUserQuery;
-  const user = data?.__typename === 'User' ? data : undefined;
+  const user = data?.__typename === 'CurrentUser' ? data : undefined;
   const theme = useTheme();
   const location = useLocation();
   const dispatch = useDispatch();

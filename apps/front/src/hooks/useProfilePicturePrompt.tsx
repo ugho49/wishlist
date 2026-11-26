@@ -15,7 +15,7 @@ export const useProfilePicturePrompt = () => {
   const { data } = useUserProfileCurrentUserQuery(undefined, {
     select: d => d.currentUser,
   });
-  const user = data?.__typename === 'User' ? data : undefined;
+  const user = data?.__typename === 'CurrentUser' ? data : undefined;
   const { pictureUrl, userId } = useSelector(mapState);
   const [shouldShowPrompt, setShouldShowPrompt] = useState(false);
 

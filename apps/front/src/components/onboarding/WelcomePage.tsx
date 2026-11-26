@@ -154,7 +154,7 @@ const ProfileStep = () => {
   const { data } = useUserProfileCurrentUserQuery(undefined, {
     select: d => d.currentUser,
   });
-  const user = data?.__typename === 'User' ? data : undefined;
+  const user = data?.__typename === 'CurrentUser' ? data : undefined;
   const dispatch = useDispatch();
   const queryClient = useQueryClient();
 
@@ -252,7 +252,7 @@ export const WelcomePage = () => {
   const { data } = useUserProfileCurrentUserQuery(undefined, {
     select: d => d.currentUser,
   });
-  const user = data?.__typename === 'User' ? data : undefined;
+  const user = data?.__typename === 'CurrentUser' ? data : undefined;
   const [activeStep, setActiveStep] = useState(0);
   const [saving, setSaving] = useState(false);
   const [celebrating, setCelebrating] = useState(false);

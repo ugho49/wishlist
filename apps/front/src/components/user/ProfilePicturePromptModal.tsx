@@ -95,7 +95,7 @@ export const ProfilePicturePromptModal = ({ open, onClose }: ProfilePicturePromp
   const { data } = useUserProfileCurrentUserQuery(undefined, {
     select: d => d.currentUser,
   });
-  const user = data?.__typename === 'User' ? data : undefined;
+  const user = data?.__typename === 'CurrentUser' ? data : undefined;
   const pictureUrl = useSelector(mapState);
 
   const { mutateAsync: updatePictureFromAccount } = useUpdateUserPictureFromAccountMutation();

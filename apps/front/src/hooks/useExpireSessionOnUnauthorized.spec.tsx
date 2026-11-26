@@ -15,7 +15,7 @@ vi.mock('./useLogout', () => ({ useLogout: () => logout }));
 vi.mock('./useToast', () => ({ useToast: () => ({ addToast }) }));
 
 const QUERY_KEY = ['UserProfileCurrentUser'];
-const user = { __typename: 'User' };
+const user = { __typename: 'CurrentUser' };
 const rejection = { __typename: 'UnauthorizedRejection' };
 
 function setup({ accessToken }: { accessToken?: string }) {

@@ -30,7 +30,7 @@ export const WelcomeBirthdayStep = ({ ref, disabled = false }: WelcomeBirthdaySt
   const { data } = useUserProfileCurrentUserQuery(undefined, {
     select: query => query.currentUser,
   });
-  const user = data?.__typename === 'User' ? data : undefined;
+  const user = data?.__typename === 'CurrentUser' ? data : undefined;
   const [birthday, setBirthday] = useState<DateTime | null>(null);
   const [initialized, setInitialized] = useState(false);
 
@@ -72,7 +72,7 @@ export const WelcomeBirthdayStep = ({ ref, disabled = false }: WelcomeBirthdaySt
     });
 
     const saved = match(profileResult.updateUserProfile)
-      .with({ __typename: 'User' }, () => {
+      .with({ __typename: 'CurrentUser' }, () => {
         dispatch(
           updateUserAction({
             firstName: user.firstName,

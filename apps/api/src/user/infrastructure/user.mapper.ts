@@ -7,6 +7,7 @@ import { DateTime } from 'luxon';
 import { match } from 'ts-pattern';
 
 import {
+  type CurrentUser as GqlCurrentUser,
   SignupSource as GqlSignupSource,
   type User as GqlUser,
   type UserAccount as GqlUserAccount,
@@ -32,9 +33,22 @@ function toGqlSignupSource(source: SignupSource): GqlSignupSource {
     .exhaustive();
 }
 
+/** What other users may see: keep it to the public fields (see the `User` type of user.graphql). */
 function toGqlUser(user: User): GqlUser {
   return {
     __typename: 'User',
+    id: user.id,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    email: user.email,
+    pictureUrl: user.pictureUrl,
+  };
+}
+
+/** The logged-in user with their private data: only for that user. */
+function toGqlCurrentUser(user: User): GqlCurrentUser {
+  return {
+    __typename: 'CurrentUser',
     id: user.id,
     firstName: user.firstName,
     lastName: user.lastName,
@@ -61,10 +75,9 @@ function toGqlUserFull(user: User): GqlUserFull {
   });
 
   return {
-    ...toGqlUser(user),
+    ...toGqlCurrentUser(user),
     __typename: 'UserFull',
     authorities,
-    isEnabled: user.isEnabled,
   };
 }
 
@@ -129,6 +142,7 @@ function toGqlUserSession(session: UserSession): GqlUserSession {
 
 export const userMapper = {
   toGqlUser,
+  toGqlCurrentUser,
   toGqlUserFull,
   toGqlUserAccount,
   toGqlUserEmailSettings,

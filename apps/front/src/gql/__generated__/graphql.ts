@@ -82,10 +82,10 @@ export type AuthRegisterUserMutationVariables = Exact<{
 
 
 export type AuthRegisterUserMutation = { registerUser:
+    | { __typename: 'CurrentUser', id: Ids["UserId"], email: string }
     | { __typename: 'ForbiddenRejection' }
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'UnauthorizedRejection' }
-    | { __typename: 'User', id: Ids["UserId"], email: string }
     | { __typename: 'ValidationRejection', errors: Array<{ field: string, message: string }> }
    };
 
@@ -146,6 +146,7 @@ export type CreateEventMutationVariables = Exact<{
 
 
 export type CreateEventMutation = { createEvent:
+    | { __typename: 'BusinessRuleRejection', code: Types.BusinessRuleCode, message: string }
     | { __typename: 'Event', id: Ids["EventId"] }
     | { __typename: 'ForbiddenRejection' }
     | { __typename: 'InternalErrorRejection' }
@@ -190,6 +191,7 @@ export type AddEventAttendeeMutationVariables = Exact<{
 
 
 export type AddEventAttendeeMutation = { addEventAttendee:
+    | { __typename: 'BusinessRuleRejection', code: Types.BusinessRuleCode, message: string }
     | { __typename: 'EventAttendee', id: Ids["AttendeeId"], pendingEmail: string | null, role: Types.AttendeeRole, user: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null } | null }
     | { __typename: 'ForbiddenRejection' }
     | { __typename: 'InternalErrorRejection' }
@@ -799,20 +801,20 @@ export type UserProfileCurrentUserQueryVariables = Exact<{ [key: string]: never;
 
 
 export type UserProfileCurrentUserQuery = { currentUser:
+    | { __typename: 'CurrentUser', id: Ids["UserId"], email: string, firstName: string, lastName: string, birthday: string | null, signupSource: Types.SignupSource | null, signupSourceDetail: string | null, pictureUrl: string | null, createdAt: string, accounts: Array<{ id: Ids["UserAccountId"], provider: Types.UserAccountProvider, email: string, pictureUrl: string | null, createdAt: string, updatedAt: string }> | null, sessions: Array<{ id: Ids["UserSessionId"], ip: string | null, createdAt: string, lastUsedAt: string, expiresAt: string, current: boolean, device: { browser: string, browserVersion: string | null, os: string, osVersion: string | null, type: Types.UserSessionDeviceType, label: string } }> | null }
     | { __typename: 'ForbiddenRejection' }
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'UnauthorizedRejection' }
-    | { __typename: 'User', id: Ids["UserId"], email: string, firstName: string, lastName: string, birthday: string | null, signupSource: Types.SignupSource | null, signupSourceDetail: string | null, pictureUrl: string | null, createdAt: string, accounts: Array<{ id: Ids["UserAccountId"], provider: Types.UserAccountProvider, email: string, pictureUrl: string | null, createdAt: string, updatedAt: string }> | null, sessions: Array<{ id: Ids["UserSessionId"], ip: string | null, createdAt: string, lastUsedAt: string, expiresAt: string, current: boolean, device: { browser: string, browserVersion: string | null, os: string, osVersion: string | null, type: Types.UserSessionDeviceType, label: string } }> | null }
    };
 
 export type UserProfileEmailSettingsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type UserProfileEmailSettingsQuery = { currentUser:
+    | { __typename: 'CurrentUser', id: Ids["UserId"], emailSettings: { dailyNewItemNotification: boolean, birthdayReminder: boolean } | null }
     | { __typename: 'ForbiddenRejection' }
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'UnauthorizedRejection' }
-    | { __typename: 'User', id: Ids["UserId"], emailSettings: { dailyNewItemNotification: boolean, birthdayReminder: boolean } | null }
    };
 
 export type UserPendingEmailChangeQueryVariables = Exact<{ [key: string]: never; }>;
@@ -838,6 +840,20 @@ export type SearchUsersSelectQuery = { searchUsers:
     | { __typename: 'ValidationRejection' }
    };
 
+export type UserByEmailQueryVariables = Exact<{
+  email: string;
+}>;
+
+
+export type UserByEmailQuery = { userByEmail:
+    | { __typename: 'BusinessRuleRejection', code: Types.BusinessRuleCode, message: string }
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'UserByEmailOutput', user: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null } | null }
+    | { __typename: 'ValidationRejection' }
+   };
+
 export type UserClosestFriendsQueryVariables = Exact<{
   limit?: number | null | undefined;
 }>;
@@ -857,10 +873,10 @@ export type SetSignupSourceMutationVariables = Exact<{
 
 
 export type SetSignupSourceMutation = { setSignupSource:
+    | { __typename: 'CurrentUser', id: Ids["UserId"], signupSource: Types.SignupSource | null, signupSourceDetail: string | null }
     | { __typename: 'ForbiddenRejection' }
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'UnauthorizedRejection' }
-    | { __typename: 'User', id: Ids["UserId"], signupSource: Types.SignupSource | null, signupSourceDetail: string | null }
     | { __typename: 'ValidationRejection', errors: Array<{ field: string, message: string }> }
    };
 
@@ -870,10 +886,10 @@ export type UpdateUserProfileMutationVariables = Exact<{
 
 
 export type UpdateUserProfileMutation = { updateUserProfile:
+    | { __typename: 'CurrentUser', id: Ids["UserId"], firstName: string, lastName: string, birthday: string | null }
     | { __typename: 'ForbiddenRejection' }
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'UnauthorizedRejection' }
-    | { __typename: 'User', id: Ids["UserId"], firstName: string, lastName: string, birthday: string | null }
     | { __typename: 'ValidationRejection', errors: Array<{ field: string, message: string }> }
    };
 
@@ -1490,7 +1506,7 @@ export const AuthRegisterUserDocument = new TypedDocumentString(`
     mutation AuthRegisterUser($input: RegisterUserInput!) {
   registerUser(input: $input) {
     __typename
-    ... on User {
+    ... on CurrentUser {
       id
       email
     }
@@ -1656,6 +1672,10 @@ export const CreateEventDocument = new TypedDocumentString(`
     ... on Event {
       id
     }
+    ... on BusinessRuleRejection {
+      code
+      message
+    }
     ... on ValidationRejection {
       errors {
         field
@@ -1748,6 +1768,10 @@ export const AddEventAttendeeDocument = new TypedDocumentString(`
         email
         pictureUrl
       }
+    }
+    ... on BusinessRuleRejection {
+      code
+      message
     }
     ... on ValidationRejection {
       errors {
@@ -3409,7 +3433,7 @@ export const UserProfileCurrentUserDocument = new TypedDocumentString(`
     query UserProfileCurrentUser {
   currentUser {
     __typename
-    ... on User {
+    ... on CurrentUser {
       id
       email
       firstName
@@ -3468,7 +3492,7 @@ export const UserProfileEmailSettingsDocument = new TypedDocumentString(`
     query UserProfileEmailSettings {
   currentUser {
     __typename
-    ... on User {
+    ... on CurrentUser {
       id
       emailSettings {
         dailyNewItemNotification
@@ -3556,6 +3580,43 @@ export const useSearchUsersSelectQuery = <
   }
     )};
 
+export const UserByEmailDocument = new TypedDocumentString(`
+    query UserByEmail($email: String!) {
+  userByEmail(email: $email) {
+    __typename
+    ... on UserByEmailOutput {
+      user {
+        id
+        firstName
+        lastName
+        email
+        pictureUrl
+      }
+    }
+    ... on BusinessRuleRejection {
+      code
+      message
+    }
+  }
+}
+    `);
+
+export const useUserByEmailQuery = <
+      TData = UserByEmailQuery,
+      TError = unknown
+    >(
+      variables: UserByEmailQueryVariables,
+      options?: Omit<UseQueryOptions<UserByEmailQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<UserByEmailQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<UserByEmailQuery, TError, TData>(
+      {
+    queryKey: ['UserByEmail', variables],
+    queryFn: fetchGql<UserByEmailQuery, UserByEmailQueryVariables>(UserByEmailDocument, variables),
+    ...options
+  }
+    )};
+
 export const UserClosestFriendsDocument = new TypedDocumentString(`
     query UserClosestFriends($limit: Int) {
   closestFriends(limit: $limit) {
@@ -3593,7 +3654,7 @@ export const SetSignupSourceDocument = new TypedDocumentString(`
     mutation SetSignupSource($input: SetSignupSourceInput!) {
   setSignupSource(input: $input) {
     __typename
-    ... on User {
+    ... on CurrentUser {
       id
       signupSource
       signupSourceDetail
@@ -3625,7 +3686,7 @@ export const UpdateUserProfileDocument = new TypedDocumentString(`
     mutation UpdateUserProfile($input: UpdateUserProfileInput!) {
   updateUserProfile(input: $input) {
     __typename
-    ... on User {
+    ... on CurrentUser {
       id
       firstName
       lastName

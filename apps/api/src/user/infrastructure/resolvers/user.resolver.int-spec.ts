@@ -35,9 +35,11 @@ function signAccessToken(payload: Record<string, unknown>): string {
  *  - registerUser (Mutation)          -> happy path + DB verify, duplicate-email conflict, validation (it.each)
  *  - updateUserProfile (Mutation)     -> unauthenticated + happy path + DB verify + validation (it.each)
  *  - changeUserPassword (Mutation)    -> happy path + DB verify, wrong old password, validation (it.each)
- *  - User.emailSettings field resolver -> unauthenticated + happy path (with seeded settings), via currentUser
+ *  - CurrentUser.emailSettings field resolver -> unauthenticated + happy path (with seeded settings), via currentUser
  *  - updateUserEmailSettings (Mutation)-> happy path + DB verify
- *  - User.accounts field resolver     -> returns own accounts shape; returns null for another user's record
+ *  - CurrentUser.accounts field resolver -> returns own accounts shape
+ *  - searchUsers (Query)              -> circle only, literal keyword, disabled users excluded
+ *  - userByEmail (Query)              -> exact email, public fields only, RATE_LIMITED
  *
  * INTENTIONALLY SKIPPED (require external integrations / OAuth / mail-token round-trips
  * that are out of scope for this high-value subset):
@@ -48,7 +50,7 @@ function signAccessToken(payload: Record<string, unknown>): string {
  *  - pendingEmailChange (depends on requestEmailChange flow)
  */
 describe('UserResolver (GraphQL)', () => {
-  const { getRequest, getFixtures, expectTable } = useTestApp();
+  const { getRequest, getFixtures, expectTable, runSql } = useTestApp();
   let fixtures: Fixtures;
   let request: RequestApp;
   let currentUserId: string;
@@ -64,7 +66,7 @@ describe('UserResolver (GraphQL)', () => {
       query CurrentUser {
         currentUser {
           __typename
-          ... on User {
+          ... on CurrentUser {
             id
             firstName
             lastName
@@ -86,7 +88,7 @@ describe('UserResolver (GraphQL)', () => {
 
       const hasTopLevelError = Array.isArray(res.body.errors) && res.body.errors.length > 0;
       const typename = res.body.data?.currentUser?.__typename;
-      expect(typename !== 'User' || hasTopLevelError).toBe(true);
+      expect(typename !== 'CurrentUser' || hasTopLevelError).toBe(true);
     });
 
     it('should reject an access token without a session id', async () => {
@@ -110,14 +112,14 @@ describe('UserResolver (GraphQL)', () => {
 
       const hasTopLevelError = Array.isArray(res.body.errors) && res.body.errors.length > 0;
       const typename = res.body.data?.currentUser?.__typename;
-      expect(typename !== 'User' || hasTopLevelError).toBe(true);
+      expect(typename !== 'CurrentUser' || hasTopLevelError).toBe(true);
     });
 
     it('should return the current user when authenticated', async () => {
       const res = await request.post('/graphql').send({ query }).expect(200);
 
       expect(res.body.data.currentUser).toMatchObject({
-        __typename: 'User',
+        __typename: 'CurrentUser',
         id: currentUserId,
         firstName: 'John',
         lastName: 'Doe',
@@ -131,7 +133,7 @@ describe('UserResolver (GraphQL)', () => {
         query CurrentUserWithSessions {
           currentUser {
             __typename
-            ... on User {
+            ... on CurrentUser {
               id
               sessions {
                 id
@@ -155,7 +157,7 @@ describe('UserResolver (GraphQL)', () => {
       const res = await request.post('/graphql').send({ query: queryWithSessions }).expect(200);
 
       const user = res.body.data.currentUser;
-      expect(user.__typename).toBe('User');
+      expect(user.__typename).toBe('CurrentUser');
       expect(user.sessions).toHaveLength(1);
       expect(user.sessions[0]).toMatchObject({
         id: expect.toBeString(),
@@ -177,7 +179,7 @@ describe('UserResolver (GraphQL)', () => {
         query CurrentUserWithAccounts {
           currentUser {
             __typename
-            ... on User {
+            ... on CurrentUser {
               id
               accounts {
                 id
@@ -192,7 +194,7 @@ describe('UserResolver (GraphQL)', () => {
       const res = await request.post('/graphql').send({ query: queryWithAccounts }).expect(200);
 
       const user = res.body.data.currentUser;
-      expect(user.__typename).toBe('User');
+      expect(user.__typename).toBe('CurrentUser');
       expect(user.id).toBe(currentUserId);
       // Password accounts are not exposed; no social accounts seeded -> empty array, never null.
       expect(Array.isArray(user.accounts)).toBe(true);
@@ -205,7 +207,7 @@ describe('UserResolver (GraphQL)', () => {
       mutation RegisterUser($input: RegisterUserInput!) {
         registerUser(input: $input) {
           __typename
-          ... on User {
+          ... on CurrentUser {
             id
             firstName
             lastName
@@ -238,7 +240,7 @@ describe('UserResolver (GraphQL)', () => {
 
       const created = res.body.data.registerUser;
       expect(created).toMatchObject({
-        __typename: 'User',
+        __typename: 'CurrentUser',
         id: expect.toBeString(),
         firstName: 'New',
         lastName: 'User',
@@ -346,7 +348,7 @@ describe('UserResolver (GraphQL)', () => {
       mutation UpdateUserProfile($input: UpdateUserProfileInput!) {
         updateUserProfile(input: $input) {
           __typename
-          ... on User {
+          ... on CurrentUser {
             id
             firstName
             lastName
@@ -373,7 +375,7 @@ describe('UserResolver (GraphQL)', () => {
 
       const hasTopLevelError = Array.isArray(res.body.errors) && res.body.errors.length > 0;
       const typename = res.body.data?.updateUserProfile?.__typename;
-      expect(typename !== 'User' || hasTopLevelError).toBe(true);
+      expect(typename !== 'CurrentUser' || hasTopLevelError).toBe(true);
 
       // Seeded user unchanged.
       await expectTable(Fixtures.USER_TABLE).row(0).toMatchObject({
@@ -389,7 +391,7 @@ describe('UserResolver (GraphQL)', () => {
       const res = await request.post('/graphql').send({ query: mutation, variables: { input } }).expect(200);
 
       expect(res.body.data.updateUserProfile).toMatchObject({
-        __typename: 'User',
+        __typename: 'CurrentUser',
         id: currentUserId,
         firstName: 'Updated',
         lastName: 'UPDATED',
@@ -442,7 +444,7 @@ describe('UserResolver (GraphQL)', () => {
       mutation SetSignupSource($input: SetSignupSourceInput!) {
         setSignupSource(input: $input) {
           __typename
-          ... on User {
+          ... on CurrentUser {
             id
             signupSource
             signupSourceDetail
@@ -467,7 +469,7 @@ describe('UserResolver (GraphQL)', () => {
         .send({ query: mutation, variables: { input: { source: 'GOOGLE' } } })
         .expect(200);
 
-      expect(res.body.data?.setSignupSource?.__typename).not.toBe('User');
+      expect(res.body.data?.setSignupSource?.__typename).not.toBe('CurrentUser');
       await expectTable(Fixtures.USER_TABLE).row(0).toMatchObject({
         signup_source: null,
         signup_source_detail: null,
@@ -481,7 +483,7 @@ describe('UserResolver (GraphQL)', () => {
         .expect(200);
 
       expect(res.body.data.setSignupSource).toMatchObject({
-        __typename: 'User',
+        __typename: 'CurrentUser',
         id: currentUserId,
         signupSource: 'FRIENDS',
         signupSourceDetail: null,
@@ -501,7 +503,7 @@ describe('UserResolver (GraphQL)', () => {
         .expect(200);
 
       expect(res.body.data.setSignupSource).toMatchObject({
-        __typename: 'User',
+        __typename: 'CurrentUser',
         signupSource: 'OTHER',
         signupSourceDetail: 'podcast',
       });
@@ -622,17 +624,15 @@ describe('UserResolver (GraphQL)', () => {
     });
   });
 
-  describe('User.emailSettings field resolver', () => {
-    // emailSettings is now a @ResolveField on the User type, reached through the
-    // currentUser query (the only schema entry point returning a User). The field
-    // resolver only resolves settings when the resolved User.id equals the current
-    // user's id (returns null otherwise); currentUser always resolves the signed-in
-    // user so the id-equality guard always passes here.
+  describe('CurrentUser.emailSettings field resolver', () => {
+    // emailSettings is a @ResolveField on the CurrentUser type, only returned to the
+    // signed-in user (currentUser query). The field resolver still checks that the
+    // resolved id is the current user's id (returns null otherwise).
     const query = /* GraphQL */ `
       query CurrentUserEmailSettings {
         currentUser {
           __typename
-          ... on User {
+          ... on CurrentUser {
             id
             emailSettings {
               dailyNewItemNotification
@@ -652,7 +652,7 @@ describe('UserResolver (GraphQL)', () => {
 
       const hasTopLevelError = Array.isArray(res.body.errors) && res.body.errors.length > 0;
       const typename = res.body.data?.currentUser?.__typename;
-      expect(typename !== 'User' || hasTopLevelError).toBe(true);
+      expect(typename !== 'CurrentUser' || hasTopLevelError).toBe(true);
     });
 
     it('should return the email settings when they exist', async () => {
@@ -664,7 +664,7 @@ describe('UserResolver (GraphQL)', () => {
       const res = await request.post('/graphql').send({ query }).expect(200);
 
       const user = res.body.data.currentUser;
-      expect(user.__typename).toBe('User');
+      expect(user.__typename).toBe('CurrentUser');
       expect(user.id).toBe(currentUserId);
       expect(user.emailSettings).toEqual({
         dailyNewItemNotification: true,
@@ -724,7 +724,7 @@ describe('UserResolver (GraphQL)', () => {
     });
   });
 
-  describe('User.accounts field resolver', () => {
+  describe('CurrentUser.accounts field resolver', () => {
     // The field resolver only exposes accounts when the resolved User.id equals the
     // current user's id (returns null otherwise). The only schema entry point that
     // returns a User and supports the accounts field is currentUser, which always
@@ -736,7 +736,7 @@ describe('UserResolver (GraphQL)', () => {
       const query = /* GraphQL */ `
         query OwnAccounts {
           currentUser {
-            ... on User {
+            ... on CurrentUser {
               id
               accounts {
                 id
@@ -781,6 +781,18 @@ describe('UserResolver (GraphQL)', () => {
       }
     `;
 
+    const searchIds = async (keyword: string): Promise<string[]> => {
+      const res = await request.post('/graphql').send({ query, variables: { keyword } }).expect(200);
+      expect(res.body.data.searchUsers.__typename).toBe('SearchUsersOutput');
+      return res.body.data.searchUsers.users.map((u: { id: string }) => u.id);
+    };
+
+    let eventId: string;
+
+    beforeEach(async () => {
+      ({ eventId } = await fixtures.insertEventWithCreator({ title: 'Noël', creatorId: currentUserId }));
+    });
+
     it('should not succeed when not authenticated', async () => {
       const anon = await getRequest();
       const res = await anon
@@ -791,22 +803,78 @@ describe('UserResolver (GraphQL)', () => {
       expect(res.body.data?.searchUsers?.__typename).not.toBe('SearchUsersOutput');
     });
 
-    it('should return matching users excluding the current user', async () => {
-      const targetId = await fixtures.insertUser({
+    it('should return the matching users of the circle, never the current user', async () => {
+      const { userId: friendId } = await fixtures.insertUserAndAddItToEventAsAttendee({
         email: 'zorglub@test.fr',
         firstname: 'Zorglub',
         lastname: 'Searchable',
+        eventId,
       });
 
-      const res = await request
-        .post('/graphql')
-        .send({ query, variables: { keyword: 'Zorglub' } })
-        .expect(200);
+      expect(await searchIds('Zorglub')).toEqual([friendId]);
+      expect(await searchIds('zorglub@test')).toEqual([friendId]);
+      expect(await searchIds('test')).not.toContain(currentUserId);
+    });
 
-      expect(res.body.data.searchUsers.__typename).toBe('SearchUsersOutput');
-      const ids = res.body.data.searchUsers.users.map((u: { id: string }) => u.id);
-      expect(ids).toContain(targetId);
-      expect(ids).not.toContain(currentUserId);
+    it('should never return a user who attends no event with the current user', async () => {
+      await fixtures.insertUser({ email: 'stranger@gmail.com', firstname: 'Zorglub', lastname: 'Stranger' });
+      const { eventId: otherEventId } = await fixtures.insertEventWithCreator({
+        title: 'Other',
+        creatorId: await fixtures.insertUser({ email: 'other@gmail.com', firstname: 'Other', lastname: 'Creator' }),
+      });
+      await fixtures.insertUserAndAddItToEventAsAttendee({
+        email: 'guest@gmail.com',
+        firstname: 'Zorglub',
+        lastname: 'Guest',
+        eventId: otherEventId,
+      });
+
+      expect(await searchIds('Zorglub')).toEqual([]);
+      expect(await searchIds('gmail')).toEqual([]);
+      expect(await searchIds('stranger@gmail.com')).toEqual([]);
+    });
+
+    it.each(['__', '%%', '_%', '\\\\'])('should match the keyword %s literally, not as a wildcard', async keyword => {
+      await fixtures.insertUserAndAddItToEventAsAttendee({
+        email: 'friend@test.fr',
+        firstname: 'Friend',
+        lastname: 'Circle',
+        eventId,
+      });
+
+      expect(await searchIds(keyword)).toEqual([]);
+    });
+
+    it('should not return a disabled user of the circle', async () => {
+      const { userId: disabledId } = await fixtures.insertUserAndAddItToEventAsAttendee({
+        email: 'disabled@test.fr',
+        firstname: 'Zorglub',
+        lastname: 'Disabled',
+        eventId,
+      });
+      await runSql(`UPDATE "user" SET is_enabled = false WHERE id = '${disabledId}'`);
+
+      expect(await searchIds('Zorglub')).toEqual([]);
+    });
+
+    it('should not expose the private fields of the users', async () => {
+      const res = await request.post('/graphql').send({
+        query: /* GraphQL */ `
+            query SearchUsersPrivateFields {
+              searchUsers(keyword: "zorglub") {
+                ... on SearchUsersOutput {
+                  users {
+                    id
+                    birthday
+                  }
+                }
+              }
+            }
+          `,
+      });
+
+      expect(res.body.data?.searchUsers).toBeUndefined();
+      expect(res.body.errors?.[0]?.message).toContain('Cannot query field "birthday" on type "User"');
     });
 
     it.each([
@@ -816,6 +884,103 @@ describe('UserResolver (GraphQL)', () => {
       const res = await request.post('/graphql').send({ query, variables: { keyword } }).expect(200);
 
       expect(res.body.data.searchUsers.__typename).toBe('ValidationRejection');
+    });
+  });
+
+  describe('Query userByEmail', () => {
+    const query = /* GraphQL */ `
+      query UserByEmail($email: String!) {
+        userByEmail(email: $email) {
+          __typename
+          ... on UserByEmailOutput {
+            user {
+              __typename
+              id
+              firstName
+              lastName
+              email
+              pictureUrl
+            }
+          }
+          ... on BusinessRuleRejection {
+            code
+          }
+          ... on ValidationRejection {
+            errors {
+              field
+              message
+            }
+          }
+        }
+      }
+    `;
+
+    const lookup = async (email: string) => {
+      const res = await request.post('/graphql').send({ query, variables: { email } }).expect(200);
+      return res.body.data.userByEmail;
+    };
+
+    it('should not succeed when not authenticated', async () => {
+      const anon = await getRequest();
+      const res = await anon
+        .post('/graphql')
+        .send({ query, variables: { email: 'someone@test.fr' } })
+        .expect(200);
+
+      expect(res.body.data?.userByEmail?.__typename).not.toBe('UserByEmailOutput');
+    });
+
+    it('should return the public profile of the account owning the exact email', async () => {
+      const userId = await fixtures.insertUser({ email: 'paul@test.fr', firstname: 'Paul', lastname: 'Martin' });
+
+      expect(await lookup('Paul@Test.fr')).toEqual({
+        __typename: 'UserByEmailOutput',
+        user: {
+          __typename: 'User',
+          id: userId,
+          firstName: 'Paul',
+          lastName: 'Martin',
+          email: 'paul@test.fr',
+          pictureUrl: null,
+        },
+      });
+    });
+
+    it('should not match a part of an email', async () => {
+      await fixtures.insertUser({ email: 'paul@test.fr', firstname: 'Paul', lastname: 'Martin' });
+
+      expect(await lookup('aul@test.fr')).toEqual({ __typename: 'UserByEmailOutput', user: null });
+    });
+
+    it('should return no user for an unknown email, a disabled account or the current user', async () => {
+      const disabledId = await fixtures.insertUser({ email: 'off@test.fr', firstname: 'Off', lastname: 'Line' });
+      await runSql(`UPDATE "user" SET is_enabled = false WHERE id = '${disabledId}'`);
+
+      expect(await lookup('nobody@test.fr')).toEqual({ __typename: 'UserByEmailOutput', user: null });
+      expect(await lookup('off@test.fr')).toEqual({ __typename: 'UserByEmailOutput', user: null });
+      expect(await lookup(Fixtures.BASE_USER_EMAIL)).toEqual({ __typename: 'UserByEmailOutput', user: null });
+    });
+
+    it('should return ValidationRejection when the email is invalid', async () => {
+      expect((await lookup('not-an-email')).__typename).toBe('ValidationRejection');
+    });
+
+    it('should count every alias against the hourly quota and reject past 30 lookups', async () => {
+      const aliases = Array.from(
+        { length: 30 },
+        (_, index) => `l${index}: userByEmail(email: "nobody${index}@test.fr") { __typename }`,
+      ).join('\n');
+      const batch = await request
+        .post('/graphql')
+        .send({ query: `query Batch { ${aliases} }` })
+        .expect(200);
+
+      expect(
+        Object.values(batch.body.data).every(
+          result => (result as { __typename: string }).__typename === 'UserByEmailOutput',
+        ),
+      ).toBe(true);
+      expect(await lookup('one-more@test.fr')).toEqual({ __typename: 'BusinessRuleRejection', code: 'RATE_LIMITED' });
     });
   });
 

@@ -1,4 +1,5 @@
 import type { AttendeeId, EventId } from '@wishlist/common';
+import type { RateLimiter } from '../../../core/rate-limit/rate-limiter';
 import type { UserRepository } from '../../../user/domain/repository/user.repository';
 import type { EventRepository } from '../../domain/repository/event.repository';
 import type { EventAttendeeRepository } from '../../domain/repository/event-attendee.repository';
@@ -9,6 +10,8 @@ import { BadRequestException } from '@znight/http';
 
 import { toCurrentUser, UserBuilder } from '../../../../test-utils/builders/user.builder';
 import { createMock } from '../../../../test-utils/mocks';
+import { BusinessRuleException } from '../../../core/common/business-rule.exception';
+import { RateLimitConfig } from '../../../core/rate-limit/rate-limit.config';
 import { User } from '../../../user/domain/model/user.model';
 import { AttendeeRole } from '../../domain/attendee-role.enum';
 import { AttendeeAddedEvent } from '../../domain/event/attendee-added.event';
@@ -20,6 +23,8 @@ describe('CreateEventUseCase', () => {
   const attendeeRepository = createMock<EventAttendeeRepository>();
   const userRepository = createMock<UserRepository>();
   const eventBus = createMock<EventPublisher>();
+  const rateLimiter = createMock<RateLimiter>();
+  const rateLimitConfig = new RateLimitConfig();
 
   let useCase: CreateEventUseCase;
   let creator: User;
@@ -35,8 +40,16 @@ describe('CreateEventUseCase', () => {
     attendeeRepository.newId.mockImplementation(() => uuid() as AttendeeId);
     userRepository.findByEmails.mockResolvedValue([]);
     userRepository.findByIdOrFail.mockResolvedValue(creator);
+    rateLimiter.consume.mockResolvedValue(undefined);
 
-    useCase = new CreateEventUseCase(eventRepository, attendeeRepository, userRepository, eventBus);
+    useCase = new CreateEventUseCase(
+      eventRepository,
+      attendeeRepository,
+      userRepository,
+      eventBus,
+      rateLimiter,
+      rateLimitConfig,
+    );
   });
 
   it('should reject when assigning the creator role to an invited attendee', async () => {
@@ -50,8 +63,54 @@ describe('CreateEventUseCase', () => {
         },
       }),
     ).rejects.toThrow(BadRequestException);
+    expect(rateLimiter.consume).not.toHaveBeenCalled();
     expect(eventRepository.save).not.toHaveBeenCalled();
     expect(eventBus.publish).not.toHaveBeenCalled();
+  });
+
+  it('should not create the event when the invitation quota of the current user is reached', async () => {
+    rateLimiter.consume.mockRejectedValueOnce(new BusinessRuleException('RATE_LIMITED', 'Too many requests'));
+
+    await expect(
+      useCase.execute({
+        currentUser: toCurrentUser(creator),
+        newEvent: {
+          title: 'Anniversaire',
+          eventDate: new Date(Date.now() + 86_400_000),
+          attendees: [{ email: 'invite@test.fr' }],
+        },
+      }),
+    ).rejects.toThrow(BusinessRuleException);
+    expect(userRepository.findByEmails).not.toHaveBeenCalled();
+    expect(eventRepository.save).not.toHaveBeenCalled();
+    expect(eventBus.publish).not.toHaveBeenCalled();
+  });
+
+  it('should count each invited email once against the invitation quota, never the creator', async () => {
+    const { event } = await useCase.execute({
+      currentUser: toCurrentUser(creator),
+      newEvent: {
+        title: 'Anniversaire',
+        eventDate: new Date(Date.now() + 86_400_000),
+        attendees: [
+          { email: 'pending@test.fr' },
+          { email: 'pending@test.fr', role: AttendeeRole.ADMIN },
+          { email: creator.email },
+          { email: 'other@test.fr' },
+        ],
+      },
+    });
+
+    expect(rateLimiter.consume).toHaveBeenCalledWith(
+      [{ key: `invitation:user:${creator.id}`, limit: rateLimitConfig.invitationsPerUser, windowSeconds: 86_400 }],
+      2,
+    );
+    expect(userRepository.findByEmails).toHaveBeenCalledWith(['pending@test.fr', 'other@test.fr']);
+    expect(event.attendees.map(a => a.pendingEmail ?? a.user?.email).sort()).toEqual(
+      [creator.email, 'pending@test.fr', 'other@test.fr'].sort(),
+    );
+    expect(event.attendees.find(a => a.pendingEmail === 'pending@test.fr')?.role).toBe(AttendeeRole.PARTICIPANT);
+    expect(eventBus.publish).toHaveBeenCalledTimes(2);
   });
 
   it('should create the event with the current user as creator and publish nothing', async () => {

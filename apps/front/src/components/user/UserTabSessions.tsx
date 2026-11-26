@@ -20,7 +20,7 @@ import { Subtitle } from '../common/Subtitle';
 import { SessionDeviceIcon } from './SessionDeviceIcon';
 
 type UserSessionItem = NonNullable<
-  Extract<UserProfileCurrentUserQuery['currentUser'], { __typename: 'User' }>['sessions']
+  Extract<UserProfileCurrentUserQuery['currentUser'], { __typename: 'CurrentUser' }>['sessions']
 >[number];
 
 const SessionsList = styled(Stack)(({ theme }) => ({
@@ -80,7 +80,8 @@ export const UserTabSessions = () => {
   const { data, isLoading } = useUserProfileCurrentUserQuery();
   const { mutateAsync: revokeSession, isPending: revokingOne } = useRevokeUserSessionMutation();
 
-  const sessions: UserSessionItem[] = data?.currentUser.__typename === 'User' ? (data.currentUser.sessions ?? []) : [];
+  const sessions: UserSessionItem[] =
+    data?.currentUser.__typename === 'CurrentUser' ? (data.currentUser.sessions ?? []) : [];
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['UserProfileCurrentUser'] });
 

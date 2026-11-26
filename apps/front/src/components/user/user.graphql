@@ -1,7 +1,7 @@
 query UserProfileCurrentUser {
   currentUser {
     __typename
-    ... on User {
+    ... on CurrentUser {
       id
       email
       firstName
@@ -42,7 +42,7 @@ query UserProfileCurrentUser {
 query UserProfileEmailSettings {
   currentUser {
     __typename
-    ... on User {
+    ... on CurrentUser {
       id
       emailSettings {
         dailyNewItemNotification
@@ -77,6 +77,25 @@ query SearchUsersSelect($keyword: String!) {
   }
 }
 
+query UserByEmail($email: String!) {
+  userByEmail(email: $email) {
+    __typename
+    ... on UserByEmailOutput {
+      user {
+        id
+        firstName
+        lastName
+        email
+        pictureUrl
+      }
+    }
+    ... on BusinessRuleRejection {
+      code
+      message
+    }
+  }
+}
+
 query UserClosestFriends($limit: Int) {
   closestFriends(limit: $limit) {
     __typename
@@ -95,7 +114,7 @@ query UserClosestFriends($limit: Int) {
 mutation SetSignupSource($input: SetSignupSourceInput!) {
   setSignupSource(input: $input) {
     __typename
-    ... on User {
+    ... on CurrentUser {
       id
       signupSource
       signupSourceDetail
@@ -112,7 +131,7 @@ mutation SetSignupSource($input: SetSignupSourceInput!) {
 mutation UpdateUserProfile($input: UpdateUserProfileInput!) {
   updateUserProfile(input: $input) {
     __typename
-    ... on User {
+    ... on CurrentUser {
       id
       firstName
       lastName

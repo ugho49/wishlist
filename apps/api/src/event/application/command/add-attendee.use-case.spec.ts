@@ -1,4 +1,5 @@
 import type { AttendeeId } from '@wishlist/common';
+import type { RateLimiter } from '../../../core/rate-limit/rate-limiter';
 import type { UserRepository } from '../../../user/domain/repository/user.repository';
 import type { EventRepository } from '../../domain/repository/event.repository';
 import type { EventAttendeeRepository } from '../../domain/repository/event-attendee.repository';
@@ -10,6 +11,8 @@ import { BadRequestException, UnauthorizedException } from '@znight/http';
 import { EventBuilder } from '../../../../test-utils/builders/event.builder';
 import { toCurrentUser, UserBuilder } from '../../../../test-utils/builders/user.builder';
 import { createMock } from '../../../../test-utils/mocks';
+import { BusinessRuleException } from '../../../core/common/business-rule.exception';
+import { RateLimitConfig } from '../../../core/rate-limit/rate-limit.config';
 import { User } from '../../../user/domain/model/user.model';
 import { AttendeeRole } from '../../domain/attendee-role.enum';
 import { AttendeeAddedEvent } from '../../domain/event/attendee-added.event';
@@ -22,6 +25,8 @@ describe('AddAttendeeUseCase', () => {
   const attendeeRepository = createMock<EventAttendeeRepository>();
   const userRepository = createMock<UserRepository>();
   const eventBus = createMock<EventPublisher>();
+  const rateLimiter = createMock<RateLimiter>();
+  const rateLimitConfig = new RateLimitConfig();
 
   let useCase: AddAttendeeUseCase;
   let creator: User;
@@ -39,8 +44,16 @@ describe('AddAttendeeUseCase', () => {
     attendeeRepository.newId.mockReturnValue(attendeeId);
     userRepository.findByEmail.mockResolvedValue(undefined);
     userRepository.findByIdOrFail.mockResolvedValue(creator);
+    rateLimiter.consume.mockResolvedValue(undefined);
 
-    useCase = new AddAttendeeUseCase(eventRepository, attendeeRepository, userRepository, eventBus);
+    useCase = new AddAttendeeUseCase(
+      eventRepository,
+      attendeeRepository,
+      userRepository,
+      eventBus,
+      rateLimiter,
+      rateLimitConfig,
+    );
   });
 
   it('should reject when the current user cannot edit the event', async () => {
@@ -77,6 +90,24 @@ describe('AddAttendeeUseCase', () => {
       }),
     ).rejects.toThrow(BadRequestException);
     expect(attendeeRepository.save).not.toHaveBeenCalled();
+  });
+
+  it('should not look the email up when the invitation quota of the current user is reached', async () => {
+    rateLimiter.consume.mockRejectedValueOnce(new BusinessRuleException('RATE_LIMITED', 'Too many requests'));
+
+    await expect(
+      useCase.execute({
+        currentUser: toCurrentUser(creator),
+        eventId: event.id,
+        newAttendee: { email: 'invite@test.fr' },
+      }),
+    ).rejects.toThrow(BusinessRuleException);
+    expect(rateLimiter.consume).toHaveBeenCalledWith([
+      { key: `invitation:user:${creator.id}`, limit: rateLimitConfig.invitationsPerUser, windowSeconds: 86_400 },
+    ]);
+    expect(userRepository.findByEmail).not.toHaveBeenCalled();
+    expect(attendeeRepository.save).not.toHaveBeenCalled();
+    expect(eventBus.publish).not.toHaveBeenCalled();
   });
 
   it('should add an existing user as attendee and publish an event', async () => {

@@ -9,7 +9,8 @@ export interface UserRepository {
   findByIdOrFail(id: UserId): Promise<User>;
   findByEmail(email: string): Promise<User | undefined>;
   findByEmails(emails: string[]): Promise<User[]>;
-  findAllByCriteria(params: { criteria: string; ignoreUserId?: UserId; limit?: number }): Promise<User[]>;
+  /** Enabled users of the user's circle (who attend an event with them) whose name or email contains the keyword. */
+  searchInCircle(params: { userId: UserId; keyword: string; limit: number }): Promise<User[]>;
   findAllPaginated(params: {
     criteria?: string;
     pagination: { take: number; skip: number };

@@ -25,6 +25,8 @@ export const UserSessionIdSchema = z.string().transform(val => val as UserSessio
 
 export const SearchUsersKeywordSchema = z.string().trim().min(2).max(100);
 
+export const UserByEmailSchema = z.email().max(200).toLowerCase();
+
 export const ClosestFriendsLimitSchema = z.number().int().min(1).max(50).optional();
 
 export const UpdateUserProfileInputSchema = z.object({
