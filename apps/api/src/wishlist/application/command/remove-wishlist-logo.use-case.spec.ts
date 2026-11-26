@@ -69,4 +69,16 @@ describe('RemoveWishlistLogoUseCase', () => {
     expect(bucketService.removeIfExist).toHaveBeenCalledTimes(1);
     expect(wishlistRepository.save).toHaveBeenCalledTimes(1);
   });
+
+  it('should allow an admin to remove the logo', async () => {
+    const admin = new UserBuilder().withEmail('admin@test.fr').asAdmin().build();
+
+    await useCase.execute({
+      currentUser: toCurrentUser(admin),
+      wishlistId: wishlist.id,
+    });
+
+    expect(bucketService.removeIfExist).toHaveBeenCalledTimes(1);
+    expect(wishlistRepository.save).toHaveBeenCalledTimes(1);
+  });
 });

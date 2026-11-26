@@ -1,5 +1,6 @@
 import type {
   AdminListWishlistsForUserQuery,
+  AdminWishlistGetWishlistQuery,
   WishlistListPageQuery,
   WishlistPageQuery,
 } from '../../gql/__generated__/graphql';
@@ -31,3 +32,12 @@ export type AdminUserWishlistRow = Extract<
   AdminListWishlistsForUserQuery['adminWishlists'],
   { __typename: 'AdminGetWishlists' }
 >['data'][number];
+
+/** The success member of the `AdminWishlistGetWishlist` query union — the admin wishlist detail page. */
+export type AdminWishlistDetail = Extract<AdminWishlistGetWishlistQuery['adminWishlist'], { __typename: 'Wishlist' }>;
+
+/** A row in the admin wishlist items table. */
+export type AdminWishlistItem = AdminWishlistDetail['items'][number];
+
+/** A row in the admin wishlist events table. */
+export type AdminWishlistEvent = AdminWishlistDetail['events'][number];

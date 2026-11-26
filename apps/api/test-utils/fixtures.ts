@@ -224,13 +224,14 @@ export class Fixtures {
     description?: string;
     mode?: WishlistMode;
     coOwnerId?: string;
+    logoUrl?: string;
   }): Promise<string> {
     const id = uuid();
-    const { eventIds, title, description, userId, mode, coOwnerId } = parameters;
+    const { eventIds, title, description, userId, mode, coOwnerId, logoUrl } = parameters;
 
     await this.sql.unsafe(
-      `INSERT INTO ${Fixtures.WISHLIST_TABLE} (id, title, description, owner_id, mode, co_owner_id) VALUES ($1, $2, $3, $4, $5, $6)`,
-      [id, title, description, userId, mode ?? WishlistMode.SURPRISE, coOwnerId ?? null],
+      `INSERT INTO ${Fixtures.WISHLIST_TABLE} (id, title, description, owner_id, mode, co_owner_id, logo_url) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      [id, title, description, userId, mode ?? WishlistMode.SURPRISE, coOwnerId ?? null, logoUrl ?? null],
     );
 
     for (const eventId of eventIds) {

@@ -155,6 +155,54 @@ union AdminGetWishlistsResult =
   | ForbiddenRejection
   | InternalErrorRejection
 
+union AdminGetWishlistByIdResult =
+  | Wishlist
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | NotFoundRejection
+  | InternalErrorRejection
+
+union AdminUpdateWishlistResult =
+  | VoidOutput
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | NotFoundRejection
+  | InternalErrorRejection
+
+union AdminDeleteWishlistResult =
+  | VoidOutput
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | NotFoundRejection
+  | InternalErrorRejection
+
+union AdminRemoveWishlistLogoResult =
+  | VoidOutput
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | NotFoundRejection
+  | InternalErrorRejection
+
+union AdminRemoveWishlistCoOwnerResult =
+  | VoidOutput
+  | ValidationRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | NotFoundRejection
+  | InternalErrorRejection
+
 extend type Query {
+  adminWishlist(id: WishlistId!): AdminGetWishlistByIdResult!
   adminWishlists(filters: AdminWishlistPaginationFilters!): AdminGetWishlistsResult!
+}
+
+extend type Mutation {
+  adminUpdateWishlist(id: WishlistId!, input: UpdateWishlistInput!): AdminUpdateWishlistResult!
+  adminDeleteWishlist(id: WishlistId!): AdminDeleteWishlistResult!
+  adminRemoveWishlistLogo(id: WishlistId!): AdminRemoveWishlistLogoResult!
+  adminRemoveWishlistCoOwner(id: WishlistId!): AdminRemoveWishlistCoOwnerResult!
 }

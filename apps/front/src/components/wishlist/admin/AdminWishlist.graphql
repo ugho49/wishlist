@@ -1,0 +1,94 @@
+query AdminWishlistGetWishlist($id: WishlistId!) {
+  adminWishlist(id: $id) {
+    __typename
+    ... on Wishlist {
+      id
+      title
+      description
+      logoUrl
+      mode
+      createdAt
+      updatedAt
+      owner {
+        id
+        firstName
+        lastName
+        email
+        pictureUrl
+      }
+      coOwner {
+        id
+        firstName
+        lastName
+        email
+        pictureUrl
+      }
+      events {
+        id
+        title
+        icon
+        eventDate
+      }
+      items {
+        id
+        name
+        url
+        score
+        isSuggested
+        pictureUrl
+        createdAt
+        takers {
+          userId
+          takenAt
+          user {
+            id
+            firstName
+            lastName
+          }
+        }
+      }
+    }
+  }
+}
+
+mutation AdminUpdateWishlist($id: WishlistId!, $input: UpdateWishlistInput!) {
+  adminUpdateWishlist(id: $id, input: $input) {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+    ... on ValidationRejection {
+      errors {
+        field
+        message
+      }
+    }
+  }
+}
+
+mutation AdminDeleteWishlist($id: WishlistId!) {
+  adminDeleteWishlist(id: $id) {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+  }
+}
+
+mutation AdminRemoveWishlistLogo($id: WishlistId!) {
+  adminRemoveWishlistLogo(id: $id) {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+  }
+}
+
+mutation AdminRemoveWishlistCoOwner($id: WishlistId!) {
+  adminRemoveWishlistCoOwner(id: $id) {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+  }
+}

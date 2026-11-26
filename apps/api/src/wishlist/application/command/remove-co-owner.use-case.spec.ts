@@ -50,4 +50,17 @@ describe('RemoveCoOwnerUseCase', () => {
     const savedWishlist = wishlistRepository.save.mock.calls[0]?.[0];
     expect(savedWishlist?.coOwnerId).toBeUndefined();
   });
+
+  it('should remove the co-owner when an admin requests it', async () => {
+    const admin = new UserBuilder().withEmail('admin@test.fr').asAdmin().build();
+
+    await useCase.execute({
+      currentUser: toCurrentUser(admin),
+      wishlistId: wishlist.id,
+    });
+
+    expect(wishlistRepository.save).toHaveBeenCalledTimes(1);
+    const savedWishlist = wishlistRepository.save.mock.calls[0]?.[0];
+    expect(savedWishlist?.coOwnerId).toBeUndefined();
+  });
 });

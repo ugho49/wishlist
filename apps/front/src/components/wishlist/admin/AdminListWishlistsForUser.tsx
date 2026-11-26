@@ -31,7 +31,16 @@ const getColumns = (userId: UserId): GridColDef<AdminUserWishlistRow>[] => [
       </WishlistAvatar>
     ),
   },
-  { field: 'title', headerName: 'Titre', width: 250 },
+  {
+    field: 'title',
+    headerName: 'Titre',
+    width: 250,
+    renderCell: ({ row }) => (
+      <RouterLink to="/admin/wishlists/$wishlistId" params={{ wishlistId: row.id }}>
+        {row.title}
+      </RouterLink>
+    ),
+  },
   {
     field: 'events',
     headerName: 'Évènements',

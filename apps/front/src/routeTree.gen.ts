@@ -35,6 +35,7 @@ import { Route as AuthenticatedWithLayoutAdminEventsEventIdRouteImport } from '.
 import { Route as AuthenticatedWithLayoutAdminUsersIndexRouteImport } from './routes/_authenticated/_with-layout/admin/users/index'
 import { Route as AuthenticatedWithLayoutAdminUsersUserIdRouteImport } from './routes/_authenticated/_with-layout/admin/users/$userId'
 import { Route as AuthenticatedWithLayoutAdminUsersMergeRouteImport } from './routes/_authenticated/_with-layout/admin/users/merge'
+import { Route as AuthenticatedWithLayoutAdminWishlistsWishlistIdRouteImport } from './routes/_authenticated/_with-layout/admin/wishlists/$wishlistId'
 import { Route as AuthenticatedWithLayoutEventsEventIdIndexRouteImport } from './routes/_authenticated/_with-layout/events/$eventId/index'
 import { Route as AuthenticatedWithLayoutEventsEventIdEditRouteImport } from './routes/_authenticated/_with-layout/events/$eventId/edit'
 import { Route as AuthenticatedWithLayoutWishlistsWishlistIdIndexRouteImport } from './routes/_authenticated/_with-layout/wishlists/$wishlistId/index'
@@ -185,6 +186,12 @@ const AuthenticatedWithLayoutAdminUsersMergeRoute =
     path: '/users/merge',
     getParentRoute: () => AuthenticatedWithLayoutAdminRoute,
   } as any)
+const AuthenticatedWithLayoutAdminWishlistsWishlistIdRoute =
+  AuthenticatedWithLayoutAdminWishlistsWishlistIdRouteImport.update({
+    id: '/wishlists/$wishlistId',
+    path: '/wishlists/$wishlistId',
+    getParentRoute: () => AuthenticatedWithLayoutAdminRoute,
+  } as any)
 const AuthenticatedWithLayoutEventsEventIdIndexRoute =
   AuthenticatedWithLayoutEventsEventIdIndexRouteImport.update({
     id: '/events/$eventId/',
@@ -232,6 +239,7 @@ export interface FileRoutesByFullPath {
   '/admin/events/$eventId': typeof AuthenticatedWithLayoutAdminEventsEventIdRoute
   '/admin/users/$userId': typeof AuthenticatedWithLayoutAdminUsersUserIdRoute
   '/admin/users/merge': typeof AuthenticatedWithLayoutAdminUsersMergeRoute
+  '/admin/wishlists/$wishlistId': typeof AuthenticatedWithLayoutAdminWishlistsWishlistIdRoute
   '/events/$eventId/edit': typeof AuthenticatedWithLayoutEventsEventIdEditRoute
   '/wishlists/$wishlistId/edit': typeof AuthenticatedWithLayoutWishlistsWishlistIdEditRoute
   '/admin/events/': typeof AuthenticatedWithLayoutAdminEventsIndexRoute
@@ -260,6 +268,7 @@ export interface FileRoutesByTo {
   '/admin/events/$eventId': typeof AuthenticatedWithLayoutAdminEventsEventIdRoute
   '/admin/users/$userId': typeof AuthenticatedWithLayoutAdminUsersUserIdRoute
   '/admin/users/merge': typeof AuthenticatedWithLayoutAdminUsersMergeRoute
+  '/admin/wishlists/$wishlistId': typeof AuthenticatedWithLayoutAdminWishlistsWishlistIdRoute
   '/events/$eventId/edit': typeof AuthenticatedWithLayoutEventsEventIdEditRoute
   '/wishlists/$wishlistId/edit': typeof AuthenticatedWithLayoutWishlistsWishlistIdEditRoute
   '/admin/events': typeof AuthenticatedWithLayoutAdminEventsIndexRoute
@@ -293,6 +302,7 @@ export interface FileRoutesById {
   '/_authenticated/_with-layout/admin/events/$eventId': typeof AuthenticatedWithLayoutAdminEventsEventIdRoute
   '/_authenticated/_with-layout/admin/users/$userId': typeof AuthenticatedWithLayoutAdminUsersUserIdRoute
   '/_authenticated/_with-layout/admin/users/merge': typeof AuthenticatedWithLayoutAdminUsersMergeRoute
+  '/_authenticated/_with-layout/admin/wishlists/$wishlistId': typeof AuthenticatedWithLayoutAdminWishlistsWishlistIdRoute
   '/_authenticated/_with-layout/events/$eventId/edit': typeof AuthenticatedWithLayoutEventsEventIdEditRoute
   '/_authenticated/_with-layout/wishlists/$wishlistId/edit': typeof AuthenticatedWithLayoutWishlistsWishlistIdEditRoute
   '/_authenticated/_with-layout/admin/events/': typeof AuthenticatedWithLayoutAdminEventsIndexRoute
@@ -324,6 +334,7 @@ export interface FileRouteTypes {
     | '/admin/events/$eventId'
     | '/admin/users/$userId'
     | '/admin/users/merge'
+    | '/admin/wishlists/$wishlistId'
     | '/events/$eventId/edit'
     | '/wishlists/$wishlistId/edit'
     | '/admin/events/'
@@ -352,6 +363,7 @@ export interface FileRouteTypes {
     | '/admin/events/$eventId'
     | '/admin/users/$userId'
     | '/admin/users/merge'
+    | '/admin/wishlists/$wishlistId'
     | '/events/$eventId/edit'
     | '/wishlists/$wishlistId/edit'
     | '/admin/events'
@@ -384,6 +396,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_with-layout/admin/events/$eventId'
     | '/_authenticated/_with-layout/admin/users/$userId'
     | '/_authenticated/_with-layout/admin/users/merge'
+    | '/_authenticated/_with-layout/admin/wishlists/$wishlistId'
     | '/_authenticated/_with-layout/events/$eventId/edit'
     | '/_authenticated/_with-layout/wishlists/$wishlistId/edit'
     | '/_authenticated/_with-layout/admin/events/'
@@ -585,6 +598,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedWithLayoutAdminUsersMergeRouteImport
       parentRoute: typeof AuthenticatedWithLayoutAdminRoute
     }
+    '/_authenticated/_with-layout/admin/wishlists/$wishlistId': {
+      id: '/_authenticated/_with-layout/admin/wishlists/$wishlistId'
+      path: '/wishlists/$wishlistId'
+      fullPath: '/admin/wishlists/$wishlistId'
+      preLoaderRoute: typeof AuthenticatedWithLayoutAdminWishlistsWishlistIdRouteImport
+      parentRoute: typeof AuthenticatedWithLayoutAdminRoute
+    }
     '/_authenticated/_with-layout/events/$eventId/': {
       id: '/_authenticated/_with-layout/events/$eventId/'
       path: '/events/$eventId'
@@ -640,6 +660,7 @@ interface AuthenticatedWithLayoutAdminRouteChildren {
   AuthenticatedWithLayoutAdminEventsEventIdRoute: typeof AuthenticatedWithLayoutAdminEventsEventIdRoute
   AuthenticatedWithLayoutAdminUsersUserIdRoute: typeof AuthenticatedWithLayoutAdminUsersUserIdRoute
   AuthenticatedWithLayoutAdminUsersMergeRoute: typeof AuthenticatedWithLayoutAdminUsersMergeRoute
+  AuthenticatedWithLayoutAdminWishlistsWishlistIdRoute: typeof AuthenticatedWithLayoutAdminWishlistsWishlistIdRoute
   AuthenticatedWithLayoutAdminEventsIndexRoute: typeof AuthenticatedWithLayoutAdminEventsIndexRoute
   AuthenticatedWithLayoutAdminUsersIndexRoute: typeof AuthenticatedWithLayoutAdminUsersIndexRoute
 }
@@ -654,6 +675,8 @@ const AuthenticatedWithLayoutAdminRouteChildren: AuthenticatedWithLayoutAdminRou
       AuthenticatedWithLayoutAdminUsersUserIdRoute,
     AuthenticatedWithLayoutAdminUsersMergeRoute:
       AuthenticatedWithLayoutAdminUsersMergeRoute,
+    AuthenticatedWithLayoutAdminWishlistsWishlistIdRoute:
+      AuthenticatedWithLayoutAdminWishlistsWishlistIdRoute,
     AuthenticatedWithLayoutAdminEventsIndexRoute:
       AuthenticatedWithLayoutAdminEventsIndexRoute,
     AuthenticatedWithLayoutAdminUsersIndexRoute:

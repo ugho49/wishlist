@@ -1118,6 +1118,77 @@ export type AdminListWishlistsForUserQuery = { adminWishlists:
     | { __typename: 'ValidationRejection' }
    };
 
+export type AdminWishlistGetWishlistQueryVariables = Exact<{
+  id: Ids["WishlistId"];
+}>;
+
+
+export type AdminWishlistGetWishlistQuery = { adminWishlist:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'NotFoundRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection' }
+    | { __typename: 'Wishlist', id: Ids["WishlistId"], title: string, description: string | null, logoUrl: string | null, mode: Types.WishlistMode, createdAt: string, updatedAt: string, owner: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null }, coOwner: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null } | null, events: Array<{ id: Ids["EventId"], title: string, icon: string | null, eventDate: string }>, items: Array<{ id: Ids["ItemId"], name: string, url: string | null, score: number | null, isSuggested: boolean | null, pictureUrl: string | null, createdAt: string, takers: Array<{ userId: Ids["UserId"], takenAt: string, user: { id: Ids["UserId"], firstName: string, lastName: string } }> }> }
+   };
+
+export type AdminUpdateWishlistMutationVariables = Exact<{
+  id: Ids["WishlistId"];
+  input: Types.UpdateWishlistInput;
+}>;
+
+
+export type AdminUpdateWishlistMutation = { adminUpdateWishlist:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'NotFoundRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection', errors: Array<{ field: string, message: string }> }
+    | { __typename: 'VoidOutput', success: boolean }
+   };
+
+export type AdminDeleteWishlistMutationVariables = Exact<{
+  id: Ids["WishlistId"];
+}>;
+
+
+export type AdminDeleteWishlistMutation = { adminDeleteWishlist:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'NotFoundRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection' }
+    | { __typename: 'VoidOutput', success: boolean }
+   };
+
+export type AdminRemoveWishlistLogoMutationVariables = Exact<{
+  id: Ids["WishlistId"];
+}>;
+
+
+export type AdminRemoveWishlistLogoMutation = { adminRemoveWishlistLogo:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'NotFoundRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection' }
+    | { __typename: 'VoidOutput', success: boolean }
+   };
+
+export type AdminRemoveWishlistCoOwnerMutationVariables = Exact<{
+  id: Ids["WishlistId"];
+}>;
+
+
+export type AdminRemoveWishlistCoOwnerMutation = { adminRemoveWishlistCoOwner:
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'NotFoundRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection' }
+    | { __typename: 'VoidOutput', success: boolean }
+   };
+
 
 export class TypedDocumentString<TResult, TVariables>
   extends String
@@ -4156,6 +4227,179 @@ export const useAdminListWishlistsForUserQuery = <
       {
     queryKey: ['AdminListWishlistsForUser', variables],
     queryFn: fetchGql<AdminListWishlistsForUserQuery, AdminListWishlistsForUserQueryVariables>(AdminListWishlistsForUserDocument, variables),
+    ...options
+  }
+    )};
+
+export const AdminWishlistGetWishlistDocument = new TypedDocumentString(`
+    query AdminWishlistGetWishlist($id: WishlistId!) {
+  adminWishlist(id: $id) {
+    __typename
+    ... on Wishlist {
+      id
+      title
+      description
+      logoUrl
+      mode
+      createdAt
+      updatedAt
+      owner {
+        id
+        firstName
+        lastName
+        email
+        pictureUrl
+      }
+      coOwner {
+        id
+        firstName
+        lastName
+        email
+        pictureUrl
+      }
+      events {
+        id
+        title
+        icon
+        eventDate
+      }
+      items {
+        id
+        name
+        url
+        score
+        isSuggested
+        pictureUrl
+        createdAt
+        takers {
+          userId
+          takenAt
+          user {
+            id
+            firstName
+            lastName
+          }
+        }
+      }
+    }
+  }
+}
+    `);
+
+export const useAdminWishlistGetWishlistQuery = <
+      TData = AdminWishlistGetWishlistQuery,
+      TError = unknown
+    >(
+      variables: AdminWishlistGetWishlistQueryVariables,
+      options?: Omit<UseQueryOptions<AdminWishlistGetWishlistQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<AdminWishlistGetWishlistQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<AdminWishlistGetWishlistQuery, TError, TData>(
+      {
+    queryKey: ['AdminWishlistGetWishlist', variables],
+    queryFn: fetchGql<AdminWishlistGetWishlistQuery, AdminWishlistGetWishlistQueryVariables>(AdminWishlistGetWishlistDocument, variables),
+    ...options
+  }
+    )};
+
+export const AdminUpdateWishlistDocument = new TypedDocumentString(`
+    mutation AdminUpdateWishlist($id: WishlistId!, $input: UpdateWishlistInput!) {
+  adminUpdateWishlist(id: $id, input: $input) {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+    ... on ValidationRejection {
+      errors {
+        field
+        message
+      }
+    }
+  }
+}
+    `);
+
+export const useAdminUpdateWishlistMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<AdminUpdateWishlistMutation, TError, AdminUpdateWishlistMutationVariables, TContext>) => {
+    
+    return useMutation<AdminUpdateWishlistMutation, TError, AdminUpdateWishlistMutationVariables, TContext>(
+      {
+    mutationKey: ['AdminUpdateWishlist'],
+    mutationFn: (variables?: AdminUpdateWishlistMutationVariables) => fetchGql<AdminUpdateWishlistMutation, AdminUpdateWishlistMutationVariables>(AdminUpdateWishlistDocument, variables)(),
+    ...options
+  }
+    )};
+
+export const AdminDeleteWishlistDocument = new TypedDocumentString(`
+    mutation AdminDeleteWishlist($id: WishlistId!) {
+  adminDeleteWishlist(id: $id) {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+  }
+}
+    `);
+
+export const useAdminDeleteWishlistMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<AdminDeleteWishlistMutation, TError, AdminDeleteWishlistMutationVariables, TContext>) => {
+    
+    return useMutation<AdminDeleteWishlistMutation, TError, AdminDeleteWishlistMutationVariables, TContext>(
+      {
+    mutationKey: ['AdminDeleteWishlist'],
+    mutationFn: (variables?: AdminDeleteWishlistMutationVariables) => fetchGql<AdminDeleteWishlistMutation, AdminDeleteWishlistMutationVariables>(AdminDeleteWishlistDocument, variables)(),
+    ...options
+  }
+    )};
+
+export const AdminRemoveWishlistLogoDocument = new TypedDocumentString(`
+    mutation AdminRemoveWishlistLogo($id: WishlistId!) {
+  adminRemoveWishlistLogo(id: $id) {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+  }
+}
+    `);
+
+export const useAdminRemoveWishlistLogoMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<AdminRemoveWishlistLogoMutation, TError, AdminRemoveWishlistLogoMutationVariables, TContext>) => {
+    
+    return useMutation<AdminRemoveWishlistLogoMutation, TError, AdminRemoveWishlistLogoMutationVariables, TContext>(
+      {
+    mutationKey: ['AdminRemoveWishlistLogo'],
+    mutationFn: (variables?: AdminRemoveWishlistLogoMutationVariables) => fetchGql<AdminRemoveWishlistLogoMutation, AdminRemoveWishlistLogoMutationVariables>(AdminRemoveWishlistLogoDocument, variables)(),
+    ...options
+  }
+    )};
+
+export const AdminRemoveWishlistCoOwnerDocument = new TypedDocumentString(`
+    mutation AdminRemoveWishlistCoOwner($id: WishlistId!) {
+  adminRemoveWishlistCoOwner(id: $id) {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+  }
+}
+    `);
+
+export const useAdminRemoveWishlistCoOwnerMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<AdminRemoveWishlistCoOwnerMutation, TError, AdminRemoveWishlistCoOwnerMutationVariables, TContext>) => {
+    
+    return useMutation<AdminRemoveWishlistCoOwnerMutation, TError, AdminRemoveWishlistCoOwnerMutationVariables, TContext>(
+      {
+    mutationKey: ['AdminRemoveWishlistCoOwner'],
+    mutationFn: (variables?: AdminRemoveWishlistCoOwnerMutationVariables) => fetchGql<AdminRemoveWishlistCoOwnerMutation, AdminRemoveWishlistCoOwnerMutationVariables>(AdminRemoveWishlistCoOwnerDocument, variables)(),
     ...options
   }
     )};

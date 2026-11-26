@@ -1,4 +1,5 @@
-import type { EventId, WishlistId } from '@wishlist/common';
+import type { EventId, UserId, WishlistId } from '@wishlist/common';
+import type { AdminUserTab } from '../user/admin/AdminUserPage';
 
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import { Breadcrumbs, styled } from '@mui/material';
@@ -20,6 +21,12 @@ export type PageBreadcrumb =
       label: string;
       to: '/events/$eventId';
       params: { eventId: EventId };
+    }
+  | {
+      label: string;
+      to: '/admin/users/$userId';
+      params: { userId: UserId };
+      search?: { tab: AdminUserTab };
     }
   | {
       label: string;
@@ -60,6 +67,19 @@ const CrumbLink = ({ crumb }: { crumb: Exclude<PageBreadcrumb, { to?: undefined 
         <RouterLink
           to="/events/$eventId"
           params={crumb.params}
+          activeOptions={{ exact: true }}
+          underline="hover"
+          color="inherit"
+        >
+          {content}
+        </RouterLink>
+      );
+    case '/admin/users/$userId':
+      return (
+        <RouterLink
+          to="/admin/users/$userId"
+          params={crumb.params}
+          search={crumb.search}
           activeOptions={{ exact: true }}
           underline="hover"
           color="inherit"

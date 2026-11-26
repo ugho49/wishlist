@@ -67,4 +67,18 @@ describe('UpdateWishlistUseCase', () => {
     const savedWishlist = wishlistRepository.save.mock.calls[0]?.[0];
     expect(savedWishlist?.title).toBe('Titre co-owner');
   });
+
+  it('should update the wishlist when an admin requests it', async () => {
+    const admin = new UserBuilder().withEmail('admin@test.fr').asAdmin().build();
+
+    await useCase.execute({
+      currentUser: toCurrentUser(admin),
+      wishlistId: wishlist.id,
+      updateWishlist: { title: 'Titre admin' },
+    });
+
+    expect(wishlistRepository.save).toHaveBeenCalledTimes(1);
+    const savedWishlist = wishlistRepository.save.mock.calls[0]?.[0];
+    expect(savedWishlist?.title).toBe('Titre admin');
+  });
 });

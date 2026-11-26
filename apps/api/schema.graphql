@@ -39,6 +39,8 @@ union AdminDeleteEventResult = ForbiddenRejection | InternalErrorRejection | Not
 
 union AdminDeleteUserResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
+union AdminDeleteWishlistResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
 input AdminEventPaginationFilters {
   criteria: String
   limit: Int
@@ -74,6 +76,8 @@ union AdminGetEventsResult = ForbiddenRejection | GetEventsPagedResponse | Inter
 
 union AdminGetUserByIdResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | UserFull | ValidationRejection
 
+union AdminGetWishlistByIdResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | Wishlist
+
 type AdminGetWishlists {
   data: [Wishlist!]!
   pagination: Pagination!
@@ -108,6 +112,10 @@ type AdminMonthlyCount {
 
 union AdminRemoveUserPictureResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
+union AdminRemoveWishlistCoOwnerResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
+union AdminRemoveWishlistLogoResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
 union AdminRevokeAllUserSessionsResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
 union AdminRevokeUserSessionResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
@@ -128,6 +136,8 @@ input AdminUpdateUserProfileInput {
 }
 
 union AdminUpdateUserProfileResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
+union AdminUpdateWishlistResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
 type AdminUserMergeCandidate {
   events: [AdminUserMergeEvent!]!
@@ -451,14 +461,18 @@ type Mutation {
   adminDeleteEvent(id: EventId!): AdminDeleteEventResult!
   adminDeleteEventAttendee(attendeeId: AttendeeId!, eventId: EventId!): AdminDeleteEventAttendeeResult!
   adminDeleteUser(userId: UserId!): AdminDeleteUserResult!
+  adminDeleteWishlist(id: WishlistId!): AdminDeleteWishlistResult!
   adminMergeUsers(input: AdminMergeUsersInput!): AdminMergeUsersResult!
   adminRemoveUserPicture(userId: UserId!): AdminRemoveUserPictureResult!
+  adminRemoveWishlistCoOwner(id: WishlistId!): AdminRemoveWishlistCoOwnerResult!
+  adminRemoveWishlistLogo(id: WishlistId!): AdminRemoveWishlistLogoResult!
   adminRevokeAllUserSessions(userId: UserId!): AdminRevokeAllUserSessionsResult!
   adminRevokeUserSession(sessionId: UserSessionId!, userId: UserId!): AdminRevokeUserSessionResult!
   adminSetUserAdmin(isAdmin: Boolean!, userId: UserId!): AdminSetUserAdminResult!
   adminUpdateEvent(id: EventId!, input: UpdateEventInput!): AdminUpdateEventResult!
   adminUpdateEventAttendeeRole(attendeeId: AttendeeId!, eventId: EventId!, role: AttendeeRole!): AdminUpdateEventAttendeeRoleResult!
   adminUpdateUserProfile(input: AdminUpdateUserProfileInput!, userId: UserId!): AdminUpdateUserProfileResult!
+  adminUpdateWishlist(id: WishlistId!, input: UpdateWishlistInput!): AdminUpdateWishlistResult!
   cancelSecretSanta(id: SecretSantaId!): CancelSecretSantaResult!
   changeUserPassword(input: ChangeUserPasswordInput!): ChangeUserPasswordResult!
   confirmEmailChange(input: ConfirmEmailChangeInput!): ConfirmEmailChangeResult!
@@ -548,6 +562,7 @@ type Query {
   adminUserMergePreview(sourceUserId: UserId!, targetUserId: UserId!): AdminUserMergePreviewResult!
   adminUsers(input: AdminGetAllUsersPaginationFilters): AdminGetAllUsersResult!
   adminUsersStats: AdminUsersStatsResult!
+  adminWishlist(id: WishlistId!): AdminGetWishlistByIdResult!
   adminWishlists(filters: AdminWishlistPaginationFilters!): AdminGetWishlistsResult!
   closestFriends(limit: Int): ClosestFriendsResult!
   currentUser: GetCurrentUserResult!

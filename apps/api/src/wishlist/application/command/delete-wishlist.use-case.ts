@@ -28,9 +28,7 @@ export class DeleteWishlistUseCase {
     // 1. Find wishlist and check permissions
     const wishlist = await this.wishlistRepository.findByIdOrFail(wishlistId);
 
-    const userCanDeleteList = wishlist.isOwnerOrCoOwner(currentUser.id) || currentUser.isAdmin;
-
-    if (!userCanDeleteList) {
+    if (!wishlist.canBeModifiedBy(currentUser)) {
       throw new UnauthorizedException('Only the owner or co-owner of the list can delete it');
     }
 

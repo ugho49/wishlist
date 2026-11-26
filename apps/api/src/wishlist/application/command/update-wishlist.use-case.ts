@@ -24,7 +24,7 @@ export class UpdateWishlistUseCase {
     this.logger.info('Update wishlist request received', { command });
     const wishlist = await this.wishlistRepository.findByIdOrFail(command.wishlistId);
 
-    if (!wishlist.isOwnerOrCoOwner(command.currentUser.id)) {
+    if (!wishlist.canBeModifiedBy(command.currentUser)) {
       throw new UnauthorizedException('You cannot modify this wishlist');
     }
 

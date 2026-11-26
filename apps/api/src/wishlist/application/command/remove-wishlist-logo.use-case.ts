@@ -25,7 +25,7 @@ export class RemoveWishlistLogoUseCase {
     this.logger.info('Remove wishlist logo request received', { command });
     const wishlist = await this.wishlistRepository.findByIdOrFail(command.wishlistId);
 
-    if (!wishlist.isOwnerOrCoOwner(command.currentUser.id)) {
+    if (!wishlist.canBeModifiedBy(command.currentUser)) {
       throw new UnauthorizedException('You cannot modify this wishlist');
     }
 
