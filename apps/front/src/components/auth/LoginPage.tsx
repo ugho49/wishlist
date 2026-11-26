@@ -4,12 +4,11 @@ import { Alert, Button, Divider, Stack, styled, TextField, Typography } from '@m
 import { useNavigate, useSearch } from '@tanstack/react-router';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useDispatch } from 'react-redux';
 import { match, P } from 'ts-pattern';
 import { z } from 'zod';
 
-import { setTokens } from '../../core/store/features/authSlice';
 import { rejectionMessage, rejectionPattern, useAuthLoginMutation, useAuthLoginWithGoogleMutation } from '../../gql';
+import { useStartSession } from '../../hooks/useStartSession';
 import { useToast } from '../../hooks/useToast';
 import { RouterLink } from '../common/RouterLink';
 import { GoogleButton } from './GoogleButton';
@@ -47,7 +46,7 @@ const DividerStyled = styled(Divider)(() => ({
 }));
 
 export const LoginPage = () => {
-  const dispatch = useDispatch();
+  const startSession = useStartSession();
   const { addToast } = useToast();
   const [socialLoading, setSocialLoading] = useState(false);
   const navigate = useNavigate();
@@ -65,12 +64,7 @@ export const LoginPage = () => {
   const handleLoginSuccess = (accessToken: string, refreshToken: string) => {
     addToast({ message: 'Heureux de vous revoir 🤓', variant: 'default' });
 
-    dispatch(
-      setTokens({
-        accessToken,
-        refreshToken,
-      }),
-    );
+    startSession({ accessToken, refreshToken });
 
     void navigate({ to: redirectUrl });
   };

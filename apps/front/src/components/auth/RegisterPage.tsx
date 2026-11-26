@@ -4,11 +4,9 @@ import { Alert, Button, Divider, Stack, styled, TextField, Typography } from '@m
 import { useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useDispatch } from 'react-redux';
 import { match } from 'ts-pattern';
 import { z } from 'zod';
 
-import { setTokens } from '../../core/store/features/authSlice';
 import {
   rejectionMessage,
   rejectionPattern,
@@ -16,6 +14,7 @@ import {
   useAuthLoginWithGoogleMutation,
   useAuthRegisterUserMutation,
 } from '../../gql';
+import { useStartSession } from '../../hooks/useStartSession';
 import { useToast } from '../../hooks/useToast';
 import { zodRequiredString } from '../../utils/validation';
 import { RouterLink } from '../common/RouterLink';
@@ -56,7 +55,7 @@ const DividerStyled = styled(Divider)(() => ({
 }));
 
 export const RegisterPage = () => {
-  const dispatch = useDispatch();
+  const startSession = useStartSession();
   const navigate = useNavigate();
   const { addToast } = useToast();
   const [socialLoading, setSocialLoading] = useState(false);
@@ -71,12 +70,7 @@ export const RegisterPage = () => {
   const handleRegisterSuccess = (accessToken: string, refreshToken: string, from: 'social' | 'email') => {
     addToast({ message: 'Bienvenue sur wishlist 👋', variant: 'default' });
 
-    dispatch(
-      setTokens({
-        accessToken,
-        refreshToken,
-      }),
-    );
+    startSession({ accessToken, refreshToken });
 
     // Redirect to welcome page for new users
     void navigate({ to: '/welcome', search: { from } });

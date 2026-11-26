@@ -4,45 +4,33 @@ import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { AuthService } from '../core/services/auth.service';
+import { revokeSession } from '../core/services/session-refresh';
 import { resetStore } from '../core/store/features/resetStore';
-import { environment } from '../environment';
 
-const LOGOUT_MUTATION = /* GraphQL */ `
-  mutation AuthLogout($input: LogoutInput!) {
-    logout(input: $input) {
-      __typename
-    }
-  }
-`;
+const authService = new AuthService();
 
 export function useLogout() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const redirectToLogin = useCallback(() => navigate({ to: '/login' }), [navigate]);
   const queryClient = useQueryClient();
-  const authService = new AuthService();
 
-  return async () => {
+  return useCallback(async () => {
     const refreshToken = authService.refreshTokenService.getTokenFromLocalStorage();
-    if (refreshToken) {
-      try {
-        await fetch(`${environment.apiBaseUrl}/graphql`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            query: LOGOUT_MUTATION,
-            variables: { input: { refreshToken } },
-          }),
-        });
-      } catch {
-        // Best effort: always clear the local session even if the server call fails.
-      }
+
+    // Drop the tokens first: no request can use them anymore, and the authenticated layout
+    // sees a logout instead of an expired session.
+    resetStore(dispatch);
+    const revocation = refreshToken ? revokeSession(refreshToken) : Promise.resolve();
+
+    // Keep the cache while the authenticated pages are mounted: clearing it under them makes
+    // their queries refetch right away without a token and cache the UnauthorizedRejection.
+    await queryClient.cancelQueries();
+    try {
+      await navigate({ to: '/login' });
+    } finally {
+      queryClient.clear();
     }
 
-    await queryClient.cancelQueries();
-    await queryClient.invalidateQueries();
-    queryClient.getQueryCache().clear();
-    resetStore(dispatch);
-    void redirectToLogin();
-  };
+    await revocation;
+  }, [dispatch, navigate, queryClient]);
 }
