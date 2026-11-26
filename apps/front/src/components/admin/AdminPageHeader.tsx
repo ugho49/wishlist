@@ -26,7 +26,7 @@ const IdentityRow = styled(Box, { shouldForwardProp: prop => prop !== 'hasAvatar
     alignItems: 'center',
     gap: theme.spacing(hasAvatar ? 2 : 1.5),
     overflow: 'visible',
-    [theme.breakpoints.down('sm')]: {
+    [theme.breakpoints.down('md')]: {
       flexWrap: 'wrap',
     },
   }),
@@ -74,6 +74,8 @@ const MetaText = styled(Box)(({ theme }) => ({
   marginTop: theme.spacing(0.25),
   fontSize: '0.8125rem',
   color: theme.palette.text.secondary,
+  // Long emails have no break opportunity and would run under the actions
+  overflowWrap: 'anywhere',
 }));
 
 const ActionsRow = styled(Box)(({ theme }) => ({
@@ -93,7 +95,7 @@ const ActionsRow = styled(Box)(({ theme }) => ({
     marginLeft: 0,
     marginRight: theme.spacing(0.75),
   },
-  [theme.breakpoints.down('sm')]: {
+  [theme.breakpoints.down('md')]: {
     marginLeft: 0,
     width: '100%',
     justifyContent: 'flex-start',

@@ -34,6 +34,7 @@ import { Route as AuthenticatedWithLayoutAdminEventsIndexRouteImport } from './r
 import { Route as AuthenticatedWithLayoutAdminEventsEventIdRouteImport } from './routes/_authenticated/_with-layout/admin/events/$eventId'
 import { Route as AuthenticatedWithLayoutAdminUsersIndexRouteImport } from './routes/_authenticated/_with-layout/admin/users/index'
 import { Route as AuthenticatedWithLayoutAdminUsersUserIdRouteImport } from './routes/_authenticated/_with-layout/admin/users/$userId'
+import { Route as AuthenticatedWithLayoutAdminUsersMergeRouteImport } from './routes/_authenticated/_with-layout/admin/users/merge'
 import { Route as AuthenticatedWithLayoutEventsEventIdIndexRouteImport } from './routes/_authenticated/_with-layout/events/$eventId/index'
 import { Route as AuthenticatedWithLayoutEventsEventIdEditRouteImport } from './routes/_authenticated/_with-layout/events/$eventId/edit'
 import { Route as AuthenticatedWithLayoutWishlistsWishlistIdIndexRouteImport } from './routes/_authenticated/_with-layout/wishlists/$wishlistId/index'
@@ -178,6 +179,12 @@ const AuthenticatedWithLayoutAdminUsersUserIdRoute =
     path: '/users/$userId',
     getParentRoute: () => AuthenticatedWithLayoutAdminRoute,
   } as any)
+const AuthenticatedWithLayoutAdminUsersMergeRoute =
+  AuthenticatedWithLayoutAdminUsersMergeRouteImport.update({
+    id: '/users/merge',
+    path: '/users/merge',
+    getParentRoute: () => AuthenticatedWithLayoutAdminRoute,
+  } as any)
 const AuthenticatedWithLayoutEventsEventIdIndexRoute =
   AuthenticatedWithLayoutEventsEventIdIndexRouteImport.update({
     id: '/events/$eventId/',
@@ -224,6 +231,7 @@ export interface FileRoutesByFullPath {
   '/wishlists/': typeof AuthenticatedWithLayoutWishlistsIndexRoute
   '/admin/events/$eventId': typeof AuthenticatedWithLayoutAdminEventsEventIdRoute
   '/admin/users/$userId': typeof AuthenticatedWithLayoutAdminUsersUserIdRoute
+  '/admin/users/merge': typeof AuthenticatedWithLayoutAdminUsersMergeRoute
   '/events/$eventId/edit': typeof AuthenticatedWithLayoutEventsEventIdEditRoute
   '/wishlists/$wishlistId/edit': typeof AuthenticatedWithLayoutWishlistsWishlistIdEditRoute
   '/admin/events/': typeof AuthenticatedWithLayoutAdminEventsIndexRoute
@@ -251,6 +259,7 @@ export interface FileRoutesByTo {
   '/wishlists': typeof AuthenticatedWithLayoutWishlistsIndexRoute
   '/admin/events/$eventId': typeof AuthenticatedWithLayoutAdminEventsEventIdRoute
   '/admin/users/$userId': typeof AuthenticatedWithLayoutAdminUsersUserIdRoute
+  '/admin/users/merge': typeof AuthenticatedWithLayoutAdminUsersMergeRoute
   '/events/$eventId/edit': typeof AuthenticatedWithLayoutEventsEventIdEditRoute
   '/wishlists/$wishlistId/edit': typeof AuthenticatedWithLayoutWishlistsWishlistIdEditRoute
   '/admin/events': typeof AuthenticatedWithLayoutAdminEventsIndexRoute
@@ -283,6 +292,7 @@ export interface FileRoutesById {
   '/_authenticated/_with-layout/wishlists/': typeof AuthenticatedWithLayoutWishlistsIndexRoute
   '/_authenticated/_with-layout/admin/events/$eventId': typeof AuthenticatedWithLayoutAdminEventsEventIdRoute
   '/_authenticated/_with-layout/admin/users/$userId': typeof AuthenticatedWithLayoutAdminUsersUserIdRoute
+  '/_authenticated/_with-layout/admin/users/merge': typeof AuthenticatedWithLayoutAdminUsersMergeRoute
   '/_authenticated/_with-layout/events/$eventId/edit': typeof AuthenticatedWithLayoutEventsEventIdEditRoute
   '/_authenticated/_with-layout/wishlists/$wishlistId/edit': typeof AuthenticatedWithLayoutWishlistsWishlistIdEditRoute
   '/_authenticated/_with-layout/admin/events/': typeof AuthenticatedWithLayoutAdminEventsIndexRoute
@@ -313,6 +323,7 @@ export interface FileRouteTypes {
     | '/wishlists/'
     | '/admin/events/$eventId'
     | '/admin/users/$userId'
+    | '/admin/users/merge'
     | '/events/$eventId/edit'
     | '/wishlists/$wishlistId/edit'
     | '/admin/events/'
@@ -340,6 +351,7 @@ export interface FileRouteTypes {
     | '/wishlists'
     | '/admin/events/$eventId'
     | '/admin/users/$userId'
+    | '/admin/users/merge'
     | '/events/$eventId/edit'
     | '/wishlists/$wishlistId/edit'
     | '/admin/events'
@@ -371,6 +383,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_with-layout/wishlists/'
     | '/_authenticated/_with-layout/admin/events/$eventId'
     | '/_authenticated/_with-layout/admin/users/$userId'
+    | '/_authenticated/_with-layout/admin/users/merge'
     | '/_authenticated/_with-layout/events/$eventId/edit'
     | '/_authenticated/_with-layout/wishlists/$wishlistId/edit'
     | '/_authenticated/_with-layout/admin/events/'
@@ -565,6 +578,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedWithLayoutAdminUsersUserIdRouteImport
       parentRoute: typeof AuthenticatedWithLayoutAdminRoute
     }
+    '/_authenticated/_with-layout/admin/users/merge': {
+      id: '/_authenticated/_with-layout/admin/users/merge'
+      path: '/users/merge'
+      fullPath: '/admin/users/merge'
+      preLoaderRoute: typeof AuthenticatedWithLayoutAdminUsersMergeRouteImport
+      parentRoute: typeof AuthenticatedWithLayoutAdminRoute
+    }
     '/_authenticated/_with-layout/events/$eventId/': {
       id: '/_authenticated/_with-layout/events/$eventId/'
       path: '/events/$eventId'
@@ -619,6 +639,7 @@ interface AuthenticatedWithLayoutAdminRouteChildren {
   AuthenticatedWithLayoutAdminIndexRoute: typeof AuthenticatedWithLayoutAdminIndexRoute
   AuthenticatedWithLayoutAdminEventsEventIdRoute: typeof AuthenticatedWithLayoutAdminEventsEventIdRoute
   AuthenticatedWithLayoutAdminUsersUserIdRoute: typeof AuthenticatedWithLayoutAdminUsersUserIdRoute
+  AuthenticatedWithLayoutAdminUsersMergeRoute: typeof AuthenticatedWithLayoutAdminUsersMergeRoute
   AuthenticatedWithLayoutAdminEventsIndexRoute: typeof AuthenticatedWithLayoutAdminEventsIndexRoute
   AuthenticatedWithLayoutAdminUsersIndexRoute: typeof AuthenticatedWithLayoutAdminUsersIndexRoute
 }
@@ -631,6 +652,8 @@ const AuthenticatedWithLayoutAdminRouteChildren: AuthenticatedWithLayoutAdminRou
       AuthenticatedWithLayoutAdminEventsEventIdRoute,
     AuthenticatedWithLayoutAdminUsersUserIdRoute:
       AuthenticatedWithLayoutAdminUsersUserIdRoute,
+    AuthenticatedWithLayoutAdminUsersMergeRoute:
+      AuthenticatedWithLayoutAdminUsersMergeRoute,
     AuthenticatedWithLayoutAdminEventsIndexRoute:
       AuthenticatedWithLayoutAdminEventsIndexRoute,
     AuthenticatedWithLayoutAdminUsersIndexRoute:

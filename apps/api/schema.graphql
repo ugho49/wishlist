@@ -81,6 +81,26 @@ type AdminGetWishlists {
 
 union AdminGetWishlistsResult = AdminGetWishlists | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection
 
+input AdminMergeUsersInput {
+  accountIds: [UserAccountId!]!
+  eventIds: [EventId!]!
+  profile: AdminMergeUsersProfileInput!
+  sourceUserId: UserId!
+  targetUserId: UserId!
+  transferReservations: Boolean!
+  wishlistIds: [WishlistId!]!
+}
+
+input AdminMergeUsersProfileInput {
+  birthday: AdminUserMergeSide!
+  email: AdminUserMergeSide!
+  firstName: AdminUserMergeSide!
+  lastName: AdminUserMergeSide!
+  picture: AdminUserMergeSide!
+}
+
+union AdminMergeUsersResult = BusinessRuleRejection | ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
 type AdminMonthlyCount {
   count: Int!
   month: String!
@@ -109,6 +129,43 @@ input AdminUpdateUserProfileInput {
 
 union AdminUpdateUserProfileResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
+type AdminUserMergeCandidate {
+  events: [AdminUserMergeEvent!]!
+  reservedItemCount: Int!
+  user: UserFull!
+  wishlists: [AdminUserMergeWishlist!]!
+}
+
+type AdminUserMergeEvent {
+  eventDate: String!
+  icon: String
+  id: EventId!
+  inSecretSanta: Boolean!
+  role: AttendeeRole!
+  title: String!
+}
+
+type AdminUserMergePreview {
+  source: AdminUserMergeCandidate!
+  target: AdminUserMergeCandidate!
+}
+
+union AdminUserMergePreviewResult = AdminUserMergePreview | BusinessRuleRejection | ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection
+
+enum AdminUserMergeSide {
+  SOURCE
+  TARGET
+}
+
+type AdminUserMergeWishlist {
+  eventIds: [EventId!]!
+  id: WishlistId!
+  isCoOwner: Boolean!
+  itemCount: Int!
+  logoUrl: String
+  title: String!
+}
+
 type AdminUsersStats {
   adminCount: Int!
   createdByMonth: [AdminMonthlyCount!]!
@@ -133,6 +190,7 @@ enum AttendeeRole {
 }
 
 enum BusinessRuleCode {
+  INVALID_USER_MERGE
   WRONG_OLD_PASSWORD
 }
 
@@ -384,6 +442,7 @@ type Mutation {
   adminDeleteEvent(id: EventId!): AdminDeleteEventResult!
   adminDeleteEventAttendee(attendeeId: AttendeeId!, eventId: EventId!): AdminDeleteEventAttendeeResult!
   adminDeleteUser(userId: UserId!): AdminDeleteUserResult!
+  adminMergeUsers(input: AdminMergeUsersInput!): AdminMergeUsersResult!
   adminRemoveUserPicture(userId: UserId!): AdminRemoveUserPictureResult!
   adminRevokeAllUserSessions(userId: UserId!): AdminRevokeAllUserSessionsResult!
   adminRevokeUserSession(sessionId: UserSessionId!, userId: UserId!): AdminRevokeUserSessionResult!
@@ -473,6 +532,7 @@ type Query {
   adminEvents(filters: AdminEventPaginationFilters!): AdminGetEventsResult!
   adminEventsStats: AdminEventsStatsResult!
   adminUser(userId: UserId!): AdminGetUserByIdResult!
+  adminUserMergePreview(sourceUserId: UserId!, targetUserId: UserId!): AdminUserMergePreviewResult!
   adminUsers(input: AdminGetAllUsersPaginationFilters): AdminGetAllUsersResult!
   adminUsersStats: AdminUsersStatsResult!
   adminWishlists(filters: AdminWishlistPaginationFilters!): AdminGetWishlistsResult!

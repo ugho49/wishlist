@@ -2,6 +2,7 @@ import type { GridColDef } from '@mui/x-data-grid';
 import type { FormEvent } from 'react';
 import type { AdminUsersListQuery } from '../../../gql';
 
+import MergeTypeIcon from '@mui/icons-material/MergeType';
 import { Alert, Avatar, Button, Chip, styled, TextField } from '@mui/material';
 import { useNavigate, useSearch } from '@tanstack/react-router';
 import { DateTime } from 'luxon';
@@ -130,6 +131,16 @@ export const AdminListUsers = () => {
           title="Utilisateurs"
           breadcrumbs={[{ label: 'Admin', to: '/admin' }, { label: 'Utilisateurs' }]}
           count={stats?.totalCount}
+          actions={
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<MergeTypeIcon />}
+              onClick={() => navigate({ to: '/admin/users/merge' })}
+            >
+              Fusionner des comptes
+            </Button>
+          }
         />
       }
     >

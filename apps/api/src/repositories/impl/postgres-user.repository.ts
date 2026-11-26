@@ -164,8 +164,9 @@ export class PostgresUserRepository implements UserRepository {
       });
   }
 
-  async delete(userId: UserId): Promise<void> {
-    await this.db.delete(schema.user).where(eq(schema.user.id, userId));
+  async delete(userId: UserId, tx?: DrizzleTransaction): Promise<void> {
+    const client = tx ?? this.db;
+    await client.delete(schema.user).where(eq(schema.user.id, userId));
   }
 
   async findClosestFriends(userId: UserId, limit: number): Promise<User[]> {

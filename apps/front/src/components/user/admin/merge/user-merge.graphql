@@ -1,0 +1,100 @@
+query AdminUserMergePicker($input: AdminGetAllUsersPaginationFilters) {
+  adminUsers(input: $input) {
+    __typename
+    ... on AdminGetAllUsers {
+      data {
+        id
+        firstName
+        lastName
+        email
+        pictureUrl
+      }
+    }
+  }
+}
+
+fragment AdminUserMergeCandidateFields on AdminUserMergeCandidate {
+  user {
+    id
+    firstName
+    lastName
+    email
+    birthday
+    pictureUrl
+    isEnabled
+    authorities
+    createdAt
+    accounts {
+      id
+      provider
+      email
+      pictureUrl
+    }
+  }
+  events {
+    id
+    title
+    icon
+    eventDate
+    role
+    inSecretSanta
+  }
+  wishlists {
+    id
+    title
+    logoUrl
+    isCoOwner
+    eventIds
+    itemCount
+  }
+  reservedItemCount
+}
+
+query AdminUserMergePreview($sourceUserId: UserId!, $targetUserId: UserId!) {
+  adminUserMergePreview(sourceUserId: $sourceUserId, targetUserId: $targetUserId) {
+    __typename
+    ... on AdminUserMergePreview {
+      source {
+        ...AdminUserMergeCandidateFields
+      }
+      target {
+        ...AdminUserMergeCandidateFields
+      }
+    }
+    ... on BusinessRuleRejection {
+      code
+      message
+    }
+    ... on UnauthorizedRejection {
+      message
+    }
+    ... on NotFoundRejection {
+      message
+    }
+  }
+}
+
+mutation AdminMergeUsers($input: AdminMergeUsersInput!) {
+  adminMergeUsers(input: $input) {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+    ... on ValidationRejection {
+      errors {
+        field
+        message
+      }
+    }
+    ... on BusinessRuleRejection {
+      code
+      message
+    }
+    ... on UnauthorizedRejection {
+      message
+    }
+    ... on NotFoundRejection {
+      message
+    }
+  }
+}
