@@ -293,9 +293,7 @@ export const CreateWishlistPage = () => {
                         <OptionTitle>Moi</OptionTitle>
                         <ModeBadge>{WISHLIST_MODE_LABELS.surprise}</ModeBadge>
                       </OptionHeader>
-                      <OptionDescription>
-                        Votre liste de souhaits pour un anniversaire, Noël… ou une liste à deux.
-                      </OptionDescription>
+                      <OptionDescription>Votre liste de souhaits pour un anniversaire, Noël…</OptionDescription>
                       <OptionFacts>
                         <span>
                           <VisibilityOutlinedIcon />
