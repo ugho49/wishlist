@@ -205,6 +205,7 @@ export type RemoveEventAttendeeMutationVariables = Exact<{
 
 
 export type RemoveEventAttendeeMutation = { removeEventAttendee:
+    | { __typename: 'BusinessRuleRejection', code: Types.BusinessRuleCode, message: string }
     | { __typename: 'ForbiddenRejection' }
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'NotFoundRejection' }
@@ -327,6 +328,7 @@ export type AdminDeleteEventAttendeeMutationVariables = Exact<{
 
 
 export type AdminDeleteEventAttendeeMutation = { adminDeleteEventAttendee:
+    | { __typename: 'BusinessRuleRejection', code: Types.BusinessRuleCode, message: string }
     | { __typename: 'ForbiddenRejection' }
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'NotFoundRejection' }
@@ -1693,6 +1695,10 @@ export const RemoveEventAttendeeDocument = new TypedDocumentString(`
     ... on VoidOutput {
       success
     }
+    ... on BusinessRuleRejection {
+      code
+      message
+    }
   }
 }
     `);
@@ -2052,6 +2058,10 @@ export const AdminDeleteEventAttendeeDocument = new TypedDocumentString(`
     __typename
     ... on VoidOutput {
       success
+    }
+    ... on BusinessRuleRejection {
+      code
+      message
     }
   }
 }

@@ -4,6 +4,8 @@ import { Fixtures, useTestApp } from '@wishlist/api-test-utils';
 import { uuid } from '@wishlist/common';
 import { DateTime } from 'luxon';
 
+import { SecretSantaStatus } from '../../../secret-santa/domain/secret-santa-status.enum';
+
 /**
  * Integration tests for the GraphQL EventMutationResolver.
  *
@@ -482,6 +484,9 @@ describe('EventMutationResolver (GraphQL)', () => {
           ... on VoidOutput {
             success
           }
+          ... on BusinessRuleRejection {
+            code
+          }
           ... on UnauthorizedRejection {
             message
           }
@@ -531,6 +536,65 @@ describe('EventMutationResolver (GraphQL)', () => {
           user_id: currentUserId,
           role: 'creator',
         });
+      });
+
+      it('should take the attendee out of a secret santa that has not been drawn yet', async () => {
+        const { eventId, attendeeId: maintainerAttendeeId } = await fixtures.insertEventWithMaintainer({
+          title: 'Event',
+          maintainerId: currentUserId,
+        });
+        const attendeeId = await fixtures.insertPendingAttendee({ eventId, tempUserEmail: 'pending@test.com' });
+        const secretSantaId = await fixtures.insertSecretSanta({ eventId, status: SecretSantaStatus.CREATED });
+        const attendeeSecretSantaUserId = await fixtures.insertSecretSantaUser({ secretSantaId, attendeeId });
+        const maintainerSecretSantaUserId = await fixtures.insertSecretSantaUser({
+          secretSantaId,
+          attendeeId: maintainerAttendeeId,
+          exclusions: [attendeeSecretSantaUserId],
+        });
+
+        const res = await request
+          .post(GRAPHQL_PATH)
+          .send({ query: mutation, variables: { eventId, attendeeId } })
+          .expect(200);
+
+        expect(res.body.data.removeEventAttendee).toEqual({ __typename: 'VoidOutput', success: true });
+
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+          id: maintainerAttendeeId,
+        });
+        await expectTable(Fixtures.SECRET_SANTA_TABLE).hasNumberOfRows(1);
+        await expectTable(Fixtures.SECRET_SANTA_USER_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+          id: maintainerSecretSantaUserId,
+          exclusions: [],
+        });
+      });
+
+      it('should return BusinessRuleRejection and keep the attendee when the secret santa draw has started', async () => {
+        const { eventId, attendeeId: maintainerAttendeeId } = await fixtures.insertEventWithMaintainer({
+          title: 'Event',
+          maintainerId: currentUserId,
+        });
+        const attendeeId = await fixtures.insertPendingAttendee({ eventId, tempUserEmail: 'pending@test.com' });
+        const secretSantaId = await fixtures.insertSecretSanta({ eventId, status: SecretSantaStatus.STARTED });
+        const attendeeSecretSantaUserId = await fixtures.insertSecretSantaUser({ secretSantaId, attendeeId });
+        await fixtures.insertSecretSantaUser({
+          secretSantaId,
+          attendeeId: maintainerAttendeeId,
+          drawUserId: attendeeSecretSantaUserId,
+        });
+
+        const res = await request
+          .post(GRAPHQL_PATH)
+          .send({ query: mutation, variables: { eventId, attendeeId } })
+          .expect(200);
+
+        expect(res.body.data.removeEventAttendee).toEqual({
+          __typename: 'BusinessRuleRejection',
+          code: 'USER_IN_STARTED_SECRET_SANTA',
+        });
+
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(2);
+        await expectTable(Fixtures.SECRET_SANTA_USER_TABLE).hasNumberOfRows(2);
       });
 
       it('should return NotFoundRejection when the attendee does not exist on the event', async () => {

@@ -1,4 +1,6 @@
 import type { WishlistItemRepository } from '../../../item/domain/wishlist-item.repository';
+import type { SecretSantaRepository } from '../../../secret-santa/domain/repository/secret-santa.repository';
+import type { SecretSantaUserRepository } from '../../../secret-santa/domain/repository/secret-santa-user.repository';
 import type { EventRepository } from '../../domain/repository/event.repository';
 import type { EventAttendeeRepository } from '../../domain/repository/event-attendee.repository';
 
@@ -7,6 +9,7 @@ import { Injectable } from '@znight/core';
 import { ConflictException, NotFoundException, UnauthorizedException } from '@znight/http';
 import { getLogger } from '@znight/observability';
 
+import { BusinessRuleException } from '../../../core/common/business-rule.exception';
 import { TransactionManager } from '../../../core/database/transaction-manager';
 import { type WishlistRepository } from '../../../wishlist/domain/wishlist.repository';
 
@@ -25,6 +28,8 @@ export class DeleteAttendeeUseCase {
     private readonly eventRepository: EventRepository,
     private readonly wishlistRepository: WishlistRepository,
     private readonly itemRepository: WishlistItemRepository,
+    private readonly secretSantaRepository: SecretSantaRepository,
+    private readonly secretSantaUserRepository: SecretSantaUserRepository,
     private readonly transactionManager: TransactionManager,
   ) {}
 
@@ -52,6 +57,18 @@ export class DeleteAttendeeUseCase {
       throw new ConflictException('You cannot delete the creator of the event');
     }
 
+    // A secret santa participation references the attendee without cascade: leave a secret santa that
+    // is not drawn yet, refuse when its draw has started (removing someone breaks the chain).
+    const secretSanta = await this.secretSantaRepository.findForEvent({ eventId: attendee.eventId });
+    const secretSantaParticipation = secretSanta?.users.find(user => user.attendeeId === attendeeId);
+
+    if (secretSantaParticipation && secretSanta?.isStarted()) {
+      throw new BusinessRuleException(
+        'USER_IN_STARTED_SECRET_SANTA',
+        'This attendee takes part in the secret santa whose draw has started: cancel the draw before removing them',
+      );
+    }
+
     const attendeeUserId = attendee.user?.id;
 
     const attendeeWishlistsForEvent =
@@ -62,6 +79,15 @@ export class DeleteAttendeeUseCase {
           );
 
     await this.transactionManager.runInTransaction(async tx => {
+      if (secretSantaParticipation) {
+        this.logger.info('Removing attendee from secret santa...', {
+          attendeeId,
+          secretSantaId: secretSantaParticipation.secretSantaId,
+          secretSantaUserId: secretSantaParticipation.id,
+        });
+        await this.secretSantaUserRepository.delete(secretSantaParticipation.id, tx);
+      }
+
       this.logger.info('Removing attendee from event...', { attendeeId, eventId });
       // Remove the attendee from the event
       await this.attendeeRepository.delete(attendeeId, tx);
