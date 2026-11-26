@@ -1,0 +1,23 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "front",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": ["serve:front"],
+      "port": 4200
+    },
+    {
+      "name": "api",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": ["serve:api"],
+      "port": 8080
+    },
+    {
+      "name": "mail",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": ["mail:preview"],
+      "port": 3030
+    }
+  ]
+}
