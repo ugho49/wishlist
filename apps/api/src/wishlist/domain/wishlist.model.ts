@@ -1,4 +1,4 @@
-import type { EventId, UserId, WishlistId } from '@wishlist/common';
+import type { EventId, ICurrentUser, UserId, WishlistId } from '@wishlist/common';
 import type { User } from '../../user/domain/model/user.model';
 
 import { WishlistMode } from './wishlist-mode.enum';
@@ -112,6 +112,16 @@ export class Wishlist {
 
   isOwnerOrCoOwner(userId: UserId) {
     return this.isOwner(userId) || this.isCoOwner(userId);
+  }
+
+  /** The managers (owner and co-owner) and the admins can edit or delete the list. */
+  canBeModifiedBy(currentUser: ICurrentUser): boolean {
+    return this.isOwnerOrCoOwner(currentUser.id) || currentUser.isAdmin;
+  }
+
+  /** Only the owner (or an admin) can remove the co-owner. */
+  canRemoveCoOwner(currentUser: ICurrentUser): boolean {
+    return this.isOwner(currentUser.id) || currentUser.isAdmin;
   }
 
   /**

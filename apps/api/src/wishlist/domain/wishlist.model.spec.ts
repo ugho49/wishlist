@@ -1,4 +1,4 @@
-import { UserBuilder } from '../../../test-utils/builders/user.builder';
+import { toCurrentUser, UserBuilder } from '../../../test-utils/builders/user.builder';
 import { WishlistBuilder } from '../../../test-utils/builders/wishlist.builder';
 import { WishlistItemBuilder } from '../../../test-utils/builders/wishlist-item.builder';
 import { WishlistItem } from '../../item/domain/wishlist-item.model';
@@ -34,6 +34,25 @@ describe('Wishlist mode', () => {
 
     it('should allow a co-owner', () => {
       expect(wishlist.canHaveCoOwner()).toBe(true);
+    });
+  });
+
+  describe('permissions', () => {
+    const admin = new UserBuilder().withEmail('admin@test.fr').asAdmin().build();
+    const wishlist = new WishlistBuilder().withOwner(owner).withCoOwner(coOwner).withMode(WishlistMode.SHARED).build();
+
+    it('should let the managers and the admins modify the list', () => {
+      expect(wishlist.canBeModifiedBy(toCurrentUser(owner))).toBe(true);
+      expect(wishlist.canBeModifiedBy(toCurrentUser(coOwner))).toBe(true);
+      expect(wishlist.canBeModifiedBy(toCurrentUser(admin))).toBe(true);
+      expect(wishlist.canBeModifiedBy(toCurrentUser(participant))).toBe(false);
+    });
+
+    it('should let only the owner and the admins remove the co-owner', () => {
+      expect(wishlist.canRemoveCoOwner(toCurrentUser(owner))).toBe(true);
+      expect(wishlist.canRemoveCoOwner(toCurrentUser(admin))).toBe(true);
+      expect(wishlist.canRemoveCoOwner(toCurrentUser(coOwner))).toBe(false);
+      expect(wishlist.canRemoveCoOwner(toCurrentUser(participant))).toBe(false);
     });
   });
 

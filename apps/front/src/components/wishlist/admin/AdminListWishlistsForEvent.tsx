@@ -43,7 +43,17 @@ const columns: GridColDef<AdminEventWishlist>[] = [
       </WishlistAvatar>
     ),
   },
-  { field: 'title', headerName: 'Titre', flex: 1, minWidth: 250 },
+  {
+    field: 'title',
+    headerName: 'Titre',
+    flex: 1,
+    minWidth: 250,
+    renderCell: ({ row }) => (
+      <RouterLink to="/admin/wishlists/$wishlistId" params={{ wishlistId: row.id }}>
+        {row.title}
+      </RouterLink>
+    ),
+  },
   {
     field: 'owner',
     headerName: 'Propriétaire',

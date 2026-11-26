@@ -20,8 +20,7 @@ export class RemoveCoOwnerUseCase {
     this.logger.info('Remove co-owner request received', { command });
     const wishlist = await this.wishlistRepository.findByIdOrFail(command.wishlistId);
 
-    // Only the owner can remove the co-owner
-    if (!wishlist.isOwner(command.currentUser.id)) {
+    if (!wishlist.canRemoveCoOwner(command.currentUser)) {
       throw new UnauthorizedException('Only the owner can remove the co-owner');
     }
 

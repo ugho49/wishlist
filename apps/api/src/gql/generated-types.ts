@@ -56,6 +56,8 @@ export type AdminDeleteEventResult = ForbiddenRejection | InternalErrorRejection
 
 export type AdminDeleteUserResult = BusinessRuleRejection | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
+export type AdminDeleteWishlistResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+
 export type AdminEventPaginationFilters = {
   criteria?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -93,6 +95,8 @@ export type AdminGetEventsResult = ForbiddenRejection | GetEventsPagedResponse |
 
 export type AdminGetUserByIdResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | UserFull | ValidationRejection;
 
+export type AdminGetWishlistByIdResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | Wishlist;
+
 export type AdminGetWishlists = {
   __typename: 'AdminGetWishlists';
   data: Array<Wishlist>;
@@ -129,6 +133,10 @@ export type AdminMonthlyCount = {
 
 export type AdminRemoveUserPictureResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
+export type AdminRemoveWishlistCoOwnerResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+
+export type AdminRemoveWishlistLogoResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+
 export type AdminRevokeAllUserSessionsResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
 export type AdminRevokeUserSessionResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
@@ -149,6 +157,8 @@ export type AdminUpdateUserProfileInput = {
 };
 
 export type AdminUpdateUserProfileResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+
+export type AdminUpdateWishlistResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
 export type AdminUserMergeCandidate = {
   __typename: 'AdminUserMergeCandidate';
@@ -487,14 +497,18 @@ export type Mutation = {
   adminDeleteEvent: AdminDeleteEventResult;
   adminDeleteEventAttendee: AdminDeleteEventAttendeeResult;
   adminDeleteUser: AdminDeleteUserResult;
+  adminDeleteWishlist: AdminDeleteWishlistResult;
   adminMergeUsers: AdminMergeUsersResult;
   adminRemoveUserPicture: AdminRemoveUserPictureResult;
+  adminRemoveWishlistCoOwner: AdminRemoveWishlistCoOwnerResult;
+  adminRemoveWishlistLogo: AdminRemoveWishlistLogoResult;
   adminRevokeAllUserSessions: AdminRevokeAllUserSessionsResult;
   adminRevokeUserSession: AdminRevokeUserSessionResult;
   adminSetUserAdmin: AdminSetUserAdminResult;
   adminUpdateEvent: AdminUpdateEventResult;
   adminUpdateEventAttendeeRole: AdminUpdateEventAttendeeRoleResult;
   adminUpdateUserProfile: AdminUpdateUserProfileResult;
+  adminUpdateWishlist: AdminUpdateWishlistResult;
   cancelSecretSanta: CancelSecretSantaResult;
   changeUserPassword: ChangeUserPasswordResult;
   confirmEmailChange: ConfirmEmailChangeResult;
@@ -577,6 +591,11 @@ export type MutationAdminDeleteUserArgs = {
 };
 
 
+export type MutationAdminDeleteWishlistArgs = {
+  id: Scalars['WishlistId']['input'];
+};
+
+
 export type MutationAdminMergeUsersArgs = {
   input: AdminMergeUsersInput;
 };
@@ -584,6 +603,16 @@ export type MutationAdminMergeUsersArgs = {
 
 export type MutationAdminRemoveUserPictureArgs = {
   userId: Scalars['UserId']['input'];
+};
+
+
+export type MutationAdminRemoveWishlistCoOwnerArgs = {
+  id: Scalars['WishlistId']['input'];
+};
+
+
+export type MutationAdminRemoveWishlistLogoArgs = {
+  id: Scalars['WishlistId']['input'];
 };
 
 
@@ -620,6 +649,12 @@ export type MutationAdminUpdateEventAttendeeRoleArgs = {
 export type MutationAdminUpdateUserProfileArgs = {
   input: AdminUpdateUserProfileInput;
   userId: Scalars['UserId']['input'];
+};
+
+
+export type MutationAdminUpdateWishlistArgs = {
+  id: Scalars['WishlistId']['input'];
+  input: UpdateWishlistInput;
 };
 
 
@@ -894,6 +929,7 @@ export type Query = {
   adminUserMergePreview: AdminUserMergePreviewResult;
   adminUsers: AdminGetAllUsersResult;
   adminUsersStats: AdminUsersStatsResult;
+  adminWishlist: AdminGetWishlistByIdResult;
   adminWishlists: AdminGetWishlistsResult;
   closestFriends: ClosestFriendsResult;
   currentUser: GetCurrentUserResult;
@@ -935,6 +971,11 @@ export type QueryAdminUserMergePreviewArgs = {
 
 export type QueryAdminUsersArgs = {
   input?: InputMaybe<AdminGetAllUsersPaginationFilters>;
+};
+
+
+export type QueryAdminWishlistArgs = {
+  id: Scalars['WishlistId']['input'];
 };
 
 
