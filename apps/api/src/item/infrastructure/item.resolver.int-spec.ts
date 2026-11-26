@@ -861,6 +861,56 @@ describe('ItemResolver (GraphQL)', () => {
         await expectTable(Fixtures.ITEM_TAKER_TABLE).hasNumberOfRows(2);
       });
 
+      it('should keep the purchase of the other takers when joining a gift', async () => {
+        const ownerId = await fixtures.insertUser({
+          email: 'other@test.com',
+          firstname: 'Other',
+          lastname: 'User',
+        });
+        const coTakerId = await fixtures.insertUser({
+          email: 'co-taker@test.com',
+          firstname: 'Co',
+          lastname: 'Taker',
+        });
+
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Test Event',
+          maintainerId: ownerId,
+        });
+
+        await fixtures.insertActiveAttendee({
+          eventId,
+          userId: currentUserId,
+          role: AttendeeRole.PARTICIPANT,
+        });
+
+        const wishlistId = await fixtures.insertWishlist({
+          eventIds: [eventId],
+          userId: ownerId,
+          title: 'Other Wishlist',
+        });
+
+        const purchasedAt = new Date('2026-11-20T10:00:00.000Z');
+        const itemId = await fixtures.insertItem({ wishlistId, name: 'Test Item' });
+        await fixtures.insertItemTaker({
+          itemId,
+          userId: coTakerId,
+          takenAt: new Date('2026-11-01T10:00:00.000Z'),
+          purchasedAt,
+        });
+
+        const res = await request.post('/graphql').send({ query: mutation, variables: { itemId } }).expect(200);
+
+        expect(res.body.data.toggleItem.__typename).toBe('ToggleItemOutput');
+
+        await expectTable(Fixtures.ITEM_TAKER_TABLE, { taken_at: 'ASC' })
+          .hasNumberOfRows(2)
+          .row(0)
+          .toMatchObject({ user_id: coTakerId, purchased_at: purchasedAt })
+          .row(1)
+          .toMatchObject({ user_id: currentUserId, purchased_at: null });
+      });
+
       it('should return InternalErrorRejection when item does not exist', async () => {
         const res = await request
           .post('/graphql')
@@ -901,6 +951,139 @@ describe('ItemResolver (GraphQL)', () => {
         });
 
         await expectTable(Fixtures.ITEM_TAKER_TABLE).hasNumberOfRows(0);
+      });
+    });
+  });
+
+  describe('Mutation setItemsPurchased', () => {
+    const mutation = /* GraphQL */ `
+      mutation SetItemsPurchased($input: SetItemsPurchasedInput!) {
+        setItemsPurchased(input: $input) {
+          __typename
+          ... on SetItemsPurchasedOutput {
+            items {
+              itemId
+              purchasedAt
+            }
+          }
+          ... on ValidationRejection {
+            errors {
+              field
+              message
+            }
+          }
+          ... on NotFoundRejection {
+            message
+          }
+        }
+      }
+    `;
+
+    it('should not succeed when not authenticated', async () => {
+      const request = await getRequest();
+      const res = await request
+        .post('/graphql')
+        .send({ query: mutation, variables: { input: { itemIds: [uuid()], purchased: true } } })
+        .expect(200);
+
+      expect(res.body.data?.setItemsPurchased?.__typename).not.toBe('SetItemsPurchasedOutput');
+    });
+
+    describe('when user is authenticated', () => {
+      let request: RequestApp;
+      let currentUserId: string;
+      let wishlistId: string;
+
+      beforeEach(async () => {
+        request = await getRequest({ signedAs: 'BASE_USER' });
+        currentUserId = await fixtures.getSignedUserId('BASE_USER');
+
+        const ownerId = await fixtures.insertUser({
+          email: 'owner@test.fr',
+          firstname: 'Ada',
+          lastname: 'Lovelace',
+        });
+        const { eventId } = await fixtures.insertEventWithMaintainer({ title: 'Noël', maintainerId: ownerId });
+        await fixtures.insertActiveAttendee({ eventId, userId: currentUserId, role: AttendeeRole.PARTICIPANT });
+        wishlistId = await fixtures.insertWishlist({ eventIds: [eventId], userId: ownerId, title: 'Liste d Ada' });
+      });
+
+      it.each([
+        { name: 'no item', input: { itemIds: [], purchased: true } },
+        { name: 'an item id that is not a uuid', input: { itemIds: ['not-a-uuid'], purchased: true } },
+        {
+          name: 'more than 100 items',
+          input: { itemIds: Array.from({ length: 101 }, () => uuid()), purchased: true },
+        },
+      ])('should return ValidationRejection with $name', async ({ input }) => {
+        const res = await request.post('/graphql').send({ query: mutation, variables: { input } }).expect(200);
+
+        expect(res.body.data.setItemsPurchased.__typename).toBe('ValidationRejection');
+      });
+
+      it('should mark several reserved gifts as purchased at once', async () => {
+        const bookId = await fixtures.insertItem({ wishlistId, name: 'Un livre', takerId: currentUserId });
+        const scarfId = await fixtures.insertItem({ wishlistId, name: 'Une écharpe', takerId: currentUserId });
+
+        const res = await request
+          .post('/graphql')
+          .send({ query: mutation, variables: { input: { itemIds: [bookId, scarfId], purchased: true } } })
+          .expect(200);
+
+        expect(res.body.data.setItemsPurchased).toEqual({
+          __typename: 'SetItemsPurchasedOutput',
+          items: expect.arrayContaining([
+            { itemId: bookId, purchasedAt: expect.toBeString() },
+            { itemId: scarfId, purchasedAt: expect.toBeString() },
+          ]),
+        });
+
+        await expectTable(Fixtures.ITEM_TAKER_TABLE)
+          .hasNumberOfRows(2)
+          .row(0)
+          .toMatchObject({ user_id: currentUserId, purchased_at: expect.toBeDate() })
+          .row(1)
+          .toMatchObject({ user_id: currentUserId, purchased_at: expect.toBeDate() });
+      });
+
+      it('should unmark purchased gifts', async () => {
+        const itemId = await fixtures.insertItem({ wishlistId, name: 'Un livre' });
+        await fixtures.insertItemTaker({ itemId, userId: currentUserId, purchasedAt: new Date() });
+
+        const res = await request
+          .post('/graphql')
+          .send({ query: mutation, variables: { input: { itemIds: [itemId], purchased: false } } })
+          .expect(200);
+
+        expect(res.body.data.setItemsPurchased).toEqual({
+          __typename: 'SetItemsPurchasedOutput',
+          items: [{ itemId, purchasedAt: null }],
+        });
+
+        await expectTable(Fixtures.ITEM_TAKER_TABLE)
+          .hasNumberOfRows(1)
+          .row(0)
+          .toMatchObject({ item_id: itemId, user_id: currentUserId, purchased_at: null });
+      });
+
+      it('should return NotFoundRejection and change nothing when a gift is not reserved by the user', async () => {
+        const reservedId = await fixtures.insertItem({ wishlistId, name: 'Un livre', takerId: currentUserId });
+        const notReservedId = await fixtures.insertItem({ wishlistId, name: 'Pas à moi' });
+
+        const res = await request
+          .post('/graphql')
+          .send({
+            query: mutation,
+            variables: { input: { itemIds: [reservedId, notReservedId], purchased: true } },
+          })
+          .expect(200);
+
+        expect(res.body.data.setItemsPurchased.__typename).toBe('NotFoundRejection');
+
+        await expectTable(Fixtures.ITEM_TAKER_TABLE)
+          .hasNumberOfRows(1)
+          .row(0)
+          .toMatchObject({ item_id: reservedId, purchased_at: null });
       });
     });
   });
@@ -1321,6 +1504,7 @@ describe('ItemResolver (GraphQL)', () => {
               score
               pictureUrl
               takenAt
+              purchasedAt
               wishlistId
               wishlistTitle
               ownerFirstName
@@ -1336,6 +1520,7 @@ describe('ItemResolver (GraphQL)', () => {
                 lastName
                 pictureUrl
                 takenAt
+                purchasedAt
               }
             }
             pagination {
@@ -1344,6 +1529,7 @@ describe('ItemResolver (GraphQL)', () => {
               pageNumber
               pageSize
             }
+            purchasedCount
           }
           ... on UnauthorizedRejection {
             message
@@ -1527,6 +1713,51 @@ describe('ItemResolver (GraphQL)', () => {
           .expect(200);
 
         expect(secondPage.body.data.myReservedItems.data.map((item: { id: string }) => item.id)).toEqual([ids[0]]);
+      });
+
+      it('should return the purchases and list the gifts still to buy first', async () => {
+        const ownerId = await fixtures.insertUser({
+          email: 'todo@test.fr',
+          firstname: 'Todo',
+          lastname: 'Owner',
+        });
+        const coTakerId = await fixtures.insertUser({
+          email: 'co-taker@test.fr',
+          firstname: 'Co',
+          lastname: 'Taker',
+        });
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Noël',
+          eventDate: new Date(`${DateTime.now().plus({ days: 10 }).toFormat('yyyy-MM-dd')}T12:00:00.000Z`),
+          maintainerId: ownerId,
+        });
+        const wishlistId = await fixtures.insertWishlist({ eventIds: [eventId], userId: ownerId, title: 'Todo' });
+
+        const purchasedAt = new Date('2026-11-20T10:00:00.000Z');
+        const coTakerPurchasedAt = new Date('2026-11-21T10:00:00.000Z');
+        const purchasedId = await fixtures.insertItem({ wishlistId, name: 'Déjà acheté' });
+        await fixtures.insertItemTaker({ itemId: purchasedId, userId: currentUserId, purchasedAt });
+        const toBuyId = await fixtures.insertItem({ wishlistId, name: 'À acheter' });
+        await fixtures.insertItemTaker({ itemId: toBuyId, userId: currentUserId });
+        await fixtures.insertItemTaker({ itemId: toBuyId, userId: coTakerId, purchasedAt: coTakerPurchasedAt });
+
+        const res = await request
+          .post('/graphql')
+          .send({ query, variables: { filters: {} } })
+          .expect(200);
+
+        expect(res.body.data.myReservedItems.purchasedCount).toBe(1);
+        expect(res.body.data.myReservedItems.data).toMatchObject([
+          {
+            id: toBuyId,
+            purchasedAt: null,
+            takers: expect.arrayContaining([
+              expect.objectContaining({ userId: currentUserId, purchasedAt: null }),
+              expect.objectContaining({ userId: coTakerId, purchasedAt: coTakerPurchasedAt.toISOString() }),
+            ]),
+          },
+          { id: purchasedId, purchasedAt: purchasedAt.toISOString() },
+        ]);
       });
 
       it('should split reserved gifts between upcoming and past events', async () => {

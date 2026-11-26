@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import type { ReservedItemsListPageQuery } from '../../gql';
+import type { ReservedItem } from './reserved-items-purchase';
 
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import CloseIcon from '@mui/icons-material/Close';
@@ -8,9 +8,11 @@ import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import {
   Avatar,
   alpha,
+  Checkbox,
   Dialog,
   DialogContent,
   DialogTitle,
+  FormControlLabel,
   IconButton,
   List,
   ListItem,
@@ -23,10 +25,7 @@ import {
 import { useNavigate } from '@tanstack/react-router';
 import { DateTime } from 'luxon';
 
-type ReservedItem = Extract<
-  ReservedItemsListPageQuery['myReservedItems'],
-  { __typename: 'GetReservedItemsPagedResponse' }
->['data'][number];
+import { isPurchased } from './reserved-items-purchase';
 
 const Picture = styled('img')(({ theme }) => ({
   width: '100%',
@@ -63,6 +62,19 @@ const ProductLink = styled('a')(({ theme }) => ({
 }));
 
 const formatTakenAt = (takenAt: string) => DateTime.fromISO(takenAt).setLocale('fr').toFormat("d MMMM yyyy 'à' HH:mm");
+
+const formatDay = (isoDate: string) => DateTime.fromISO(isoDate).setLocale('fr').toFormat('d MMMM yyyy');
+
+const takerStatus = (params: { taker: ReservedItem['takers'][number]; isFirst: boolean }) => {
+  const { taker, isFirst } = params;
+  const reserved = `${isFirst ? 'Réservé' : 'Participé'} le ${formatTakenAt(taker.takenAt)}`;
+  return taker.purchasedAt ? `${reserved} · acheté le ${formatDay(taker.purchasedAt)}` : reserved;
+};
+
+const PurchaseToggle = styled(FormControlLabel)(({ theme }) => ({
+  marginTop: theme.spacing(1.5),
+  marginLeft: theme.spacing(-1),
+}));
 
 const formatEventDate = (eventDate: string) =>
   DateTime.fromISO(eventDate).setLocale('fr').toLocaleString(DateTime.DATE_MED);
@@ -147,9 +159,10 @@ const EventDestination = ({ event, onClose }: EventDestinationProps) => {
 export type ReservedItemDetailsDialogProps = {
   item: ReservedItem | undefined;
   onClose: () => void;
+  onPurchasedChange: (purchased: boolean) => void;
 };
 
-export const ReservedItemDetailsDialog = ({ item, onClose }: ReservedItemDetailsDialogProps) => {
+export const ReservedItemDetailsDialog = ({ item, onClose, onPurchasedChange }: ReservedItemDetailsDialogProps) => {
   const navigate = useNavigate();
   const openWishlist = () => {
     if (!item) return;
@@ -184,6 +197,10 @@ export const ReservedItemDetailsDialog = ({ item, onClose }: ReservedItemDetails
                 <EventDestination key={event.id} event={event} onClose={onClose} />
               ))}
             </Meta>
+            <PurchaseToggle
+              control={<Checkbox checked={isPurchased(item)} onChange={(_, checked) => onPurchasedChange(checked)} />}
+              label={item.purchasedAt ? `Acheté le ${formatDay(item.purchasedAt)}` : "Je l'ai acheté"}
+            />
             {item.description && (
               <>
                 <SectionLabel>Description</SectionLabel>
@@ -205,7 +222,7 @@ export const ReservedItemDetailsDialog = ({ item, onClose }: ReservedItemDetails
                   </ListItemAvatar>
                   <ListItemText
                     primary={`${taker.firstName} ${taker.lastName}`}
-                    secondary={`${index === 0 ? 'Réservé' : 'Participé'} le ${formatTakenAt(taker.takenAt)}`}
+                    secondary={takerStatus({ taker, isFirst: index === 0 })}
                   />
                 </ListItem>
               ))}

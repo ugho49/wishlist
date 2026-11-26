@@ -3,6 +3,7 @@ import type {
   ImportItemsInput,
   MyReservedItemsFilters,
   ScanItemUrlInput,
+  SetItemsPurchasedInput,
   UpdateItemInput,
 } from '../../gql/generated-types';
 
@@ -44,3 +45,13 @@ export const ImportItemsInputSchema = z.object({
   wishlistId: WishlistIdSchema,
   sourceItemIds: z.array(ItemIdSchema).min(1),
 }) satisfies z.ZodType<ImportItemsInput>;
+
+export const MAX_PURCHASED_ITEMS_PER_CALL = 100;
+
+export const SetItemsPurchasedInputSchema = z.object({
+  itemIds: z
+    .array(z.uuid().transform(val => val as ItemId))
+    .min(1)
+    .max(MAX_PURCHASED_ITEMS_PER_CALL),
+  purchased: z.boolean(),
+}) satisfies z.ZodType<SetItemsPurchasedInput>;

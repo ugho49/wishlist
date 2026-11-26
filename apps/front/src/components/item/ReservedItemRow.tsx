@@ -1,17 +1,17 @@
-import type { ReservedItemsListPageQuery } from '../../gql';
+import type { ReservedItem } from './reserved-items-purchase';
 
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-import { Skeleton, styled } from '@mui/material';
+import { Checkbox, Skeleton, styled } from '@mui/material';
 import { DateTime } from 'luxon';
 import { useState } from 'react';
 
 import { ReservedItemDetailsDialog } from './ReservedItemDetailsDialog';
+import { isPurchased } from './reserved-items-purchase';
 
-type ReservedItem = Extract<
-  ReservedItemsListPageQuery['myReservedItems'],
-  { __typename: 'GetReservedItemsPagedResponse' }
->['data'][number];
+type PurchasedProps = { purchased?: boolean };
+
+const forwardUnlessPurchased = { shouldForwardProp: (prop: PropertyKey) => prop !== 'purchased' };
 
 const Row = styled('li')(({ theme }) => ({
   display: 'flex',
@@ -23,7 +23,10 @@ const Row = styled('li')(({ theme }) => ({
   },
 }));
 
-const RowButton = styled('button')(({ theme }) => ({
+const RowButton = styled(
+  'button',
+  forwardUnlessPurchased,
+)<PurchasedProps>(({ theme, purchased }) => ({
   flex: 1,
   minWidth: 0,
   display: 'flex',
@@ -35,6 +38,8 @@ const RowButton = styled('button')(({ theme }) => ({
   textAlign: 'left',
   cursor: 'pointer',
   borderRadius: theme.spacing(1),
+  opacity: purchased ? 0.6 : 1,
+  transition: 'opacity 180ms ease',
   '&:hover, &:focus-visible': {
     backgroundColor: theme.palette.action.hover,
     outline: 'none',
@@ -70,8 +75,12 @@ const RowText = styled('div')({
   gap: 2,
 });
 
-const ItemName = styled('div')(({ theme }) => ({
-  color: theme.palette.text.primary,
+const ItemName = styled(
+  'div',
+  forwardUnlessPurchased,
+)<PurchasedProps>(({ theme, purchased }) => ({
+  color: purchased ? theme.palette.text.secondary : theme.palette.text.primary,
+  textDecoration: purchased ? 'line-through' : 'none',
   fontWeight: 600,
   overflow: 'hidden',
   textOverflow: 'ellipsis',
@@ -103,16 +112,27 @@ const ExternalLink = styled('a')(({ theme }) => ({
 
 export type ReservedItemRowProps = {
   item: ReservedItem;
+  onPurchasedChange: (purchased: boolean) => void;
 };
 
-export const ReservedItemRow = ({ item }: ReservedItemRowProps) => {
+const formatDay = (isoDate: string) => DateTime.fromISO(isoDate).toLocaleString(DateTime.DATE_MED);
+
+export const ReservedItemRow = ({ item, onPurchasedChange }: ReservedItemRowProps) => {
   const [detailsOpen, setDetailsOpen] = useState(false);
-  const reservedOn = DateTime.fromISO(item.takenAt).toLocaleString(DateTime.DATE_MED);
+  const purchased = isPurchased(item);
+  const status = item.purchasedAt
+    ? `Acheté le ${formatDay(item.purchasedAt)}`
+    : `Réservé le ${formatDay(item.takenAt)}`;
   const events = item.events.map(event => event.title).join(', ');
 
   return (
     <Row>
-      <RowButton type="button" onClick={() => setDetailsOpen(true)}>
+      <Checkbox
+        checked={purchased}
+        onChange={(_, checked) => onPurchasedChange(checked)}
+        slotProps={{ input: { 'aria-label': `${item.name} acheté` } }}
+      />
+      <RowButton type="button" purchased={purchased} onClick={() => setDetailsOpen(true)}>
         {item.pictureUrl ? (
           <Picture src={item.pictureUrl} alt="" />
         ) : (
@@ -121,12 +141,12 @@ export const ReservedItemRow = ({ item }: ReservedItemRowProps) => {
           </PictureFallback>
         )}
         <RowText>
-          <ItemName>{item.name}</ItemName>
+          <ItemName purchased={purchased}>{item.name}</ItemName>
           <ItemMeta>
             Pour {item.ownerFirstName} {item.ownerLastName} · {item.wishlistTitle}
           </ItemMeta>
           <ItemMeta>
-            Réservé le {reservedOn}
+            {status}
             {events ? ` · ${events}` : ''}
           </ItemMeta>
         </RowText>
@@ -136,13 +156,18 @@ export const ReservedItemRow = ({ item }: ReservedItemRowProps) => {
           <OpenInNewIcon fontSize="small" />
         </ExternalLink>
       )}
-      <ReservedItemDetailsDialog item={detailsOpen ? item : undefined} onClose={() => setDetailsOpen(false)} />
+      <ReservedItemDetailsDialog
+        item={detailsOpen ? item : undefined}
+        onClose={() => setDetailsOpen(false)}
+        onPurchasedChange={onPurchasedChange}
+      />
     </Row>
   );
 };
 
 export const ReservedItemRowSkeleton = () => (
   <Row aria-hidden>
+    <Skeleton variant="rounded" width={18} height={18} sx={{ margin: '12px' }} />
     <RowButton type="button" disabled>
       <Skeleton variant="rounded" width={56} height={56} />
       <RowText>

@@ -48,6 +48,11 @@ input ImportItemsInput {
   sourceItemIds: [ItemId!]!
 }
 
+input SetItemsPurchasedInput {
+  itemIds: [ItemId!]!
+  purchased: Boolean!
+}
+
 ########################################################
 ###############   Output Types   #######################
 ########################################################
@@ -66,6 +71,15 @@ type GetImportableItemsOutput {
 
 type ImportItemsOutput {
   items: [Item!]!
+}
+
+type ItemPurchaseState {
+  itemId: ItemId!
+  purchasedAt: String
+}
+
+type SetItemsPurchasedOutput {
+  items: [ItemPurchaseState!]!
 }
 
 ########################################################
@@ -120,6 +134,13 @@ union ImportItemsResult =
   | ForbiddenRejection
   | InternalErrorRejection
 
+union SetItemsPurchasedResult =
+  | SetItemsPurchasedOutput
+  | ValidationRejection
+  | UnauthorizedRejection
+  | NotFoundRejection
+  | InternalErrorRejection
+
 ########################################################
 ###############   Mutations   ##########################
 ########################################################
@@ -131,6 +152,8 @@ extend type Mutation {
   toggleItem(itemId: ItemId!): ToggleItemResult!
   scanItemUrl(input: ScanItemUrlInput!): ScanItemUrlResult!
   importItems(input: ImportItemsInput!): ImportItemsResult!
+  "Marks or unmarks as bought gifts the current user reserved. All or nothing: one unknown or unreserved gift rejects the whole call."
+  setItemsPurchased(input: SetItemsPurchasedInput!): SetItemsPurchasedResult!
 }
 
 ########################################################
@@ -149,6 +172,7 @@ type ReservedItemTaker {
   lastName: String!
   pictureUrl: String
   takenAt: String!
+  purchasedAt: String
 }
 
 type ReservedItem {
@@ -159,6 +183,8 @@ type ReservedItem {
   score: Int
   pictureUrl: String
   takenAt: String!
+  "When the current user marked the gift as bought."
+  purchasedAt: String
   wishlistId: WishlistId!
   wishlistTitle: String!
   ownerFirstName: String!
@@ -182,6 +208,8 @@ input MyReservedItemsFilters {
 type GetReservedItemsPagedResponse {
   data: [ReservedItem!]!
   pagination: Pagination!
+  "Gifts of the period the current user already bought, across every page."
+  purchasedCount: Int!
 }
 
 union GetMyReservedItemsResult =

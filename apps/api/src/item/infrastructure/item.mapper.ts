@@ -48,6 +48,7 @@ function toGqlReservedItem(item: ReservedItem): GqlReservedItem {
     score: item.score,
     pictureUrl: item.pictureUrl,
     takenAt: item.takenAt.toISOString(),
+    purchasedAt: item.purchasedAt?.toISOString(),
     wishlistId: item.wishlistId,
     wishlistTitle: item.wishlistTitle,
     ownerFirstName: item.ownerFirstName,
@@ -65,6 +66,7 @@ function toGqlReservedItem(item: ReservedItem): GqlReservedItem {
       lastName: taker.lastName,
       pictureUrl: taker.pictureUrl,
       takenAt: taker.takenAt.toISOString(),
+      purchasedAt: taker.purchasedAt?.toISOString(),
     })),
   };
 }

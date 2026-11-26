@@ -275,6 +275,10 @@ union GetPendingEmailChangeResult = ForbiddenRejection | InternalErrorRejection 
 type GetReservedItemsPagedResponse {
   data: [ReservedItem!]!
   pagination: Pagination!
+  """
+  Gifts of the period the current user already bought, across every page.
+  """
+  purchasedCount: Int!
 }
 
 union GetSecretSantaForEventResult = ForbiddenRejection | InternalErrorRejection | SecretSanta | UnauthorizedRejection
@@ -330,6 +334,11 @@ type Item {
 }
 
 scalar ItemId
+
+type ItemPurchaseState {
+  itemId: ItemId!
+  purchasedAt: String
+}
 
 type ItemTaker {
   takenAt: String!
@@ -420,6 +429,10 @@ type Mutation {
   revokeSession(input: RevokeSessionInput!): RevokeSessionResult!
   scanItemUrl(input: ScanItemUrlInput!): ScanItemUrlResult!
   sendResetPasswordEmail(input: SendResetPasswordEmailInput!): SendResetPasswordEmailResult!
+  """
+  Marks or unmarks as bought gifts the current user reserved. All or nothing: one unknown or unreserved gift rejects the whole call.
+  """
+  setItemsPurchased(input: SetItemsPurchasedInput!): SetItemsPurchasedResult!
   setSignupSource(input: SetSignupSourceInput!): SetSignupSourceResult!
   startSecretSanta(id: SecretSantaId!): StartSecretSantaResult!
   toggleItem(itemId: ItemId!): ToggleItemResult!
@@ -530,6 +543,8 @@ type ReservedItem {
   ownerFirstName: String!
   ownerLastName: String!
   pictureUrl: String
+  """When the current user marked the gift as bought."""
+  purchasedAt: String
   score: Int
   takenAt: String!
   takers: [ReservedItemTaker!]!
@@ -554,6 +569,7 @@ type ReservedItemTaker {
   firstName: String!
   lastName: String!
   pictureUrl: String
+  purchasedAt: String
   takenAt: String!
   userId: UserId!
 }
@@ -623,6 +639,17 @@ input SendResetPasswordEmailInput {
 }
 
 union SendResetPasswordEmailResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
+input SetItemsPurchasedInput {
+  itemIds: [ItemId!]!
+  purchased: Boolean!
+}
+
+type SetItemsPurchasedOutput {
+  items: [ItemPurchaseState!]!
+}
+
+union SetItemsPurchasedResult = InternalErrorRejection | NotFoundRejection | SetItemsPurchasedOutput | UnauthorizedRejection | ValidationRejection
 
 input SetSignupSourceInput {
   detail: String

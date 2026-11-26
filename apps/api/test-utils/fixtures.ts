@@ -384,13 +384,17 @@ export class Fixtures {
     return id;
   }
 
-  async insertItemTaker(parameters: { itemId: string; userId: string; takenAt?: Date }): Promise<void> {
-    const { itemId, userId, takenAt } = parameters;
+  async insertItemTaker(parameters: {
+    itemId: string;
+    userId: string;
+    takenAt?: Date;
+    purchasedAt?: Date;
+  }): Promise<void> {
+    const { itemId, userId, takenAt, purchasedAt } = parameters;
 
-    await this.sql.unsafe(`INSERT INTO ${Fixtures.ITEM_TAKER_TABLE} (item_id, user_id, taken_at) VALUES ($1, $2, $3)`, [
-      itemId,
-      userId,
-      takenAt ?? new Date(),
-    ]);
+    await this.sql.unsafe(
+      `INSERT INTO ${Fixtures.ITEM_TAKER_TABLE} (item_id, user_id, taken_at, purchased_at) VALUES ($1, $2, $3, $4)`,
+      [itemId, userId, takenAt ?? new Date(), purchasedAt ?? null],
+    );
   }
 }

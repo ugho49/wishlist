@@ -9,6 +9,7 @@ query ReservedItemsListPage($filters: MyReservedItemsFilters!) {
         url
         pictureUrl
         takenAt
+        purchasedAt
         wishlistId
         wishlistTitle
         ownerFirstName
@@ -24,6 +25,7 @@ query ReservedItemsListPage($filters: MyReservedItemsFilters!) {
           lastName
           pictureUrl
           takenAt
+          purchasedAt
         }
       }
       pagination {
@@ -31,6 +33,19 @@ query ReservedItemsListPage($filters: MyReservedItemsFilters!) {
         totalElements
         pageNumber
         pageSize
+      }
+      purchasedCount
+    }
+  }
+}
+
+mutation SetItemsPurchased($input: SetItemsPurchasedInput!) {
+  setItemsPurchased(input: $input) {
+    __typename
+    ... on SetItemsPurchasedOutput {
+      items {
+        itemId
+        purchasedAt
       }
     }
   }
