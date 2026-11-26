@@ -42,7 +42,9 @@ export const SessionWatcher: React.FC = () => {
     }
 
     const nextAccessToken = await refreshSessionTokens();
-    if (!nextAccessToken) {
+    // A logout or a new login while refreshing: the session we checked is gone, not expired.
+    const sameSession = authService.refreshTokenService.getTokenFromLocalStorage() === refreshToken;
+    if (!nextAccessToken && sameSession) {
       await expireSession();
     }
   }, [accessToken, expireSession]);

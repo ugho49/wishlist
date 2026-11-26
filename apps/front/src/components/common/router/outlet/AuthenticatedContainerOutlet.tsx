@@ -1,13 +1,12 @@
 import { Box, Container, containerClasses, styled, useMediaQuery, useTheme } from '@mui/material';
 import { Outlet, useLocation } from '@tanstack/react-router';
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { setUser } from '../../../../core/store/features/userProfileSlice';
 import { useUserProfileCurrentUserQuery } from '../../../../gql';
-import { useLogout } from '../../../../hooks/useLogout';
+import { useExpireSessionOnUnauthorized } from '../../../../hooks/useExpireSessionOnUnauthorized';
 import { useProfilePicturePrompt } from '../../../../hooks/useProfilePicturePrompt';
-import { useToast } from '../../../../hooks/useToast';
 import { ProfilePicturePromptModal } from '../../../user/ProfilePicturePromptModal';
 import { MobileBottomNavigation } from '../../MobileBottomNavigation';
 import { MobileTopBar } from '../../MobileTopBar';
@@ -31,7 +30,8 @@ const ContainerStyled = styled(Container)(({ theme }) => ({
 }));
 
 export const AuthenticatedContainerOutlet = () => {
-  const { data } = useUserProfileCurrentUserQuery(undefined, { select: d => d.currentUser });
+  const currentUserQuery = useUserProfileCurrentUserQuery(undefined, { select: d => d.currentUser });
+  const { data } = currentUserQuery;
   const user = data?.__typename === 'User' ? data : undefined;
   const theme = useTheme();
   const location = useLocation();
@@ -39,19 +39,9 @@ export const AuthenticatedContainerOutlet = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const isAdminRoute = location.pathname.startsWith('/admin');
   const { shouldShowPrompt, handlePromptClosed } = useProfilePicturePrompt();
-  const { addToast } = useToast();
-  const logout = useLogout();
-  const sessionInvalidatedRef = useRef(false);
 
-  // An UnauthorizedRejection here means the stored token is no longer valid:
-  // end the session instead of leaving the layout in a half-logged-in state.
-  useEffect(() => {
-    if (data?.__typename === 'UnauthorizedRejection' && !sessionInvalidatedRef.current) {
-      sessionInvalidatedRef.current = true;
-      addToast({ message: 'Votre session a expiré, veuillez vous reconnecter', variant: 'warning' });
-      void logout();
-    }
-  }, [data, addToast, logout]);
+  // A rejected token leaves the layout half logged in: end the session instead.
+  useExpireSessionOnUnauthorized(currentUserQuery);
 
   useEffect(() => {
     if (user) {
