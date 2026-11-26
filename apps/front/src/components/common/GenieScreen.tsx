@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react';
 
-import { Box, GlobalStyles, styled, Typography, useMediaQuery, useTheme } from '@mui/material';
+import { Box, styled, Typography, useMediaQuery, useTheme } from '@mui/material';
 
-import { brandColors, navyBackdrop } from '../../theme';
+import { brandColors } from '../../theme';
 import { Genie, type GenieVariant } from './Genie';
 
 const ScreenRoot = styled('main')(({ theme }) => ({
@@ -14,8 +14,7 @@ const ScreenRoot = styled('main')(({ theme }) => ({
   gap: theme.spacing(3),
   padding: theme.spacing(4, 3),
   textAlign: 'center',
-  color: theme.palette.common.white,
-  background: navyBackdrop(theme),
+  color: theme.palette.primary.main,
 }));
 
 const Eyebrow = styled(Typography)(({ theme }) => ({
@@ -24,6 +23,7 @@ const Eyebrow = styled(Typography)(({ theme }) => ({
   fontWeight: 700,
   lineHeight: 1,
   color: brandColors.mist,
+  WebkitTextStroke: `1.5px ${theme.palette.primary.main}`,
 }));
 
 const ScreenTitle = styled('h1')(({ theme }) => ({
@@ -41,7 +41,7 @@ const ScreenSubtitle = styled(Typography)(({ theme }) => ({
   maxWidth: 440,
   marginTop: theme.spacing(1),
   fontSize: '1.05rem',
-  color: brandColors.mistLight,
+  color: theme.palette.text.secondary,
 }));
 
 export type GenieScreenProps = {
@@ -53,16 +53,14 @@ export type GenieScreenProps = {
   genieVariant?: GenieVariant;
 };
 
-/** Full-page navy screen with the genie, for situations outside the normal layouts (404, maintenance). */
+/** Full-page screen with the genie, for situations outside the normal layouts (404, maintenance). */
 export const GenieScreen = ({ eyebrow, title, subtitle, action, genieVariant }: GenieScreenProps) => {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'), { noSsr: true });
 
   return (
     <ScreenRoot>
-      {/* Navy overscroll and canvas behind the navy page instead of the light app background */}
-      <GlobalStyles styles={{ html: { backgroundColor: theme.palette.primary.dark } }} />
-      <Genie variant={genieVariant} size={isSmallScreen ? 180 : 240} floating onDark />
+      <Genie variant={genieVariant} size={isSmallScreen ? 180 : 240} floating grounded />
       <Box>
         {eyebrow ? <Eyebrow>{eyebrow}</Eyebrow> : null}
         <ScreenTitle>{title}</ScreenTitle>

@@ -1,4 +1,4 @@
-import { alpha, createTheme, type Theme } from '@mui/material/styles';
+import { createTheme } from '@mui/material/styles';
 
 /** Colors of the genie logo (`src/assets/logo`). */
 export const brandColors = {
@@ -6,10 +6,6 @@ export const brandColors = {
   mist: '#BFD4D7',
   mistLight: '#E8F0F2',
 } as const;
-
-/** Navy page background used behind the white genie (auth pages, 404, maintenance). */
-export const navyBackdrop = ({ palette }: Theme) =>
-  `radial-gradient(900px 520px at 50% 0%, ${alpha(palette.common.white, 0.12)}, transparent 70%), linear-gradient(160deg, ${palette.primary.dark} 0%, ${palette.primary.main} 55%, ${palette.primary.dark} 100%)`;
 
 const headingFontFamily = '"Fredoka", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 
