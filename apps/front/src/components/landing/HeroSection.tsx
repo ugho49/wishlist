@@ -396,7 +396,7 @@ export const HeroSection = () => {
 
       <NavBar>
         <NavContent maxWidth="lg">
-          <Logo />
+          <Logo variant="wordmark" height={34} />
           <NavRightGroup>
             <NavLinks>
               {navItems.map(item => (

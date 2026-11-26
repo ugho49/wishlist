@@ -32,7 +32,7 @@ export const MobileTopBar = () => {
     <AppBarStyled position="fixed">
       <ToolbarStyled>
         <LogoContainerStyled onClick={() => navigate({ to: '/' })}>
-          <Logo height={40} />
+          <Logo variant="wordmark" height={28} />
         </LogoContainerStyled>
       </ToolbarStyled>
     </AppBarStyled>

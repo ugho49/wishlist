@@ -285,7 +285,7 @@ export const SideNavigation = () => {
   const drawerContent = (
     <DrawerContentStyled>
       <LogoSectionStyled onClick={() => navigate({ to: '/' })}>
-        <Logo height={52} />
+        <Logo variant="wordmark" height={40} />
         {user?.isAdmin ? (
           <AdminModeBadge elevated={user.isSuperAdmin}>{user.isSuperAdmin ? 'Super-admin' : 'Admin'}</AdminModeBadge>
         ) : null}
