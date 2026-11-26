@@ -357,22 +357,25 @@ export const CreateWishlistPage = () => {
                     onLogoRemove={() => setLogo(undefined)}
                   />
 
-                  <Stack direction="row" sx={{ gap: 3, alignItems: 'center' }}>
-                    <ListOfTitle>Liste de</ListOfTitle>
-                    <Box sx={{ flex: 1 }}>
-                      <TextField
-                        label={mode === 'surprise' ? 'Nom affiché' : 'Prénom de la personne'}
-                        required
-                        autoComplete="off"
-                        disabled={loading}
-                        fullWidth
-                        value={ownerName}
-                        slotProps={{ htmlInput: { maxLength: 90 } }}
-                        placeholder={namePlaceholder}
-                        onChange={e => setOwnerName(e.target.value)}
-                      />
-                    </Box>
-                  </Stack>
+                  {/* In surprise mode the list takes the user's first name, shown in the preview (editable later) */}
+                  {mode === 'shared' && (
+                    <Stack direction="row" sx={{ gap: 3, alignItems: 'center' }}>
+                      <ListOfTitle>Liste de</ListOfTitle>
+                      <Box sx={{ flex: 1 }}>
+                        <TextField
+                          label="Prénom de la personne"
+                          required
+                          autoComplete="off"
+                          disabled={loading}
+                          fullWidth
+                          value={ownerName}
+                          slotProps={{ htmlInput: { maxLength: 90 } }}
+                          placeholder={namePlaceholder}
+                          onChange={e => setOwnerName(e.target.value)}
+                        />
+                      </Box>
+                    </Stack>
+                  )}
 
                   <Box>
                     <TextareaMarkdown
