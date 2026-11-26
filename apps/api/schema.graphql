@@ -334,6 +334,10 @@ union GetPendingEmailChangeResult = ForbiddenRejection | InternalErrorRejection 
 type GetReservedItemsPagedResponse {
   data: [ReservedItem!]!
   pagination: Pagination!
+  """
+  Gifts of the period the current user already bought, across every page.
+  """
+  purchasedCount: Int!
 }
 
 union GetSecretSantaForEventResult = ForbiddenRejection | InternalErrorRejection | SecretSanta | UnauthorizedRejection
@@ -389,6 +393,11 @@ type Item {
 }
 
 scalar ItemId
+
+type ItemPurchaseState {
+  itemId: ItemId!
+  purchasedAt: String
+}
 
 type ItemTaker {
   takenAt: String!
@@ -480,6 +489,10 @@ type Mutation {
   revokeSession(input: RevokeSessionInput!): RevokeSessionResult!
   scanItemUrl(input: ScanItemUrlInput!): ScanItemUrlResult!
   sendResetPasswordEmail(input: SendResetPasswordEmailInput!): SendResetPasswordEmailResult!
+  """
+  Marks or unmarks as bought gifts the current user reserved. All or nothing: one unknown or unreserved gift rejects the whole call.
+  """
+  setItemsPurchased(input: SetItemsPurchasedInput!): SetItemsPurchasedResult!
   setSignupSource(input: SetSignupSourceInput!): SetSignupSourceResult!
   startSecretSanta(id: SecretSantaId!): StartSecretSantaResult!
   toggleItem(itemId: ItemId!): ToggleItemResult!
@@ -591,6 +604,8 @@ type ReservedItem {
   ownerFirstName: String!
   ownerLastName: String!
   pictureUrl: String
+  """When the current user marked the gift as bought."""
+  purchasedAt: String
   score: Int
   takenAt: String!
   takers: [ReservedItemTaker!]!
@@ -615,6 +630,7 @@ type ReservedItemTaker {
   firstName: String!
   lastName: String!
   pictureUrl: String
+  purchasedAt: String
   takenAt: String!
   userId: UserId!
 }
@@ -684,6 +700,17 @@ input SendResetPasswordEmailInput {
 }
 
 union SendResetPasswordEmailResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+
+input SetItemsPurchasedInput {
+  itemIds: [ItemId!]!
+  purchased: Boolean!
+}
+
+type SetItemsPurchasedOutput {
+  items: [ItemPurchaseState!]!
+}
+
+union SetItemsPurchasedResult = InternalErrorRejection | NotFoundRejection | SetItemsPurchasedOutput | UnauthorizedRejection | ValidationRejection
 
 input SetSignupSourceInput {
   detail: String
@@ -882,7 +909,6 @@ type VoidOutput {
 type Wishlist {
   coOwner: User @resolved
   coOwnerId: UserId
-  config: WishlistConfig!
   createdAt: String!
   description: String
   eventIds: [EventId!]!
@@ -890,14 +916,25 @@ type Wishlist {
   id: WishlistId!
   items: [Item!]! @resolved
   logoUrl: String
+  mode: WishlistMode!
   owner: User! @resolved
   ownerId: UserId!
   title: String!
   updatedAt: String!
 }
 
-type WishlistConfig {
-  hideItems: Boolean!
-}
-
 scalar WishlistId
+
+"""
+What the managers (owner and co-owner) of a list see. The participants see the list and who reserved what in both modes.
+"""
+enum WishlistMode {
+  """
+  The managers see everything, like the participants. A list managed for someone else; allows a co-owner.
+  """
+  SHARED
+  """
+  The managers do not see who reserved what, nor the items suggested by the others. A list for oneself.
+  """
+  SURPRISE
+}

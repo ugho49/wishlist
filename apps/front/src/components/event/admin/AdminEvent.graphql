@@ -59,9 +59,7 @@ query AdminEventGetEvent($id: EventId!) {
         id
         title
         logoUrl
-        config {
-          hideItems
-        }
+        mode
         createdAt
         owner {
           id

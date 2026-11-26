@@ -1,0 +1,1 @@
+ALTER TABLE "item_taker" ADD COLUMN "purchased_at" timestamp with time zone;

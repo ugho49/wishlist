@@ -9,6 +9,7 @@ import { useSearch } from '@tanstack/react-router';
 import { useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 
+import { WishlistMode } from '../../gql';
 import { FabAutoGrow } from '../common/FabAutoGrow';
 import { ItemCard } from '../item/ItemCard';
 import { ItemCardSkeleton } from '../item/ItemCardSkeleton';
@@ -153,7 +154,7 @@ const WishlistItemsLoaded = ({
   });
   const nbOfItems = useMemo(() => wishlist.items.length, [wishlist.items]);
   const ownerOrCoOwnerOfTheList = currentUserId === wishlist.owner.id || wishlist.coOwner?.id === currentUserId;
-  const canReserveItems = !ownerOrCoOwnerOfTheList || !wishlist.config.hideItems;
+  const canReserveItems = !ownerOrCoOwnerOfTheList || wishlist.mode === WishlistMode.Shared;
   const [currentItem, setCurrentItem] = useState<WishlistItem | null>(null);
   const [openItemFormDialog, setOpenItemFormDialog] = useState(false);
 
@@ -176,7 +177,7 @@ const WishlistItemsLoaded = ({
                     id: wishlist.id,
                     ownerId: wishlist.owner.id,
                     coOwnerId: wishlist.coOwner?.id,
-                    hideItems: wishlist.config.hideItems,
+                    mode: wishlist.mode,
                   }}
                   item={item}
                   onImageClick={() => setCurrentItem(item)}

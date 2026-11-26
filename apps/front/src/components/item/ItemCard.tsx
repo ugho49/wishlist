@@ -17,7 +17,13 @@ import React, { useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { match } from 'ts-pattern';
 
-import { rejectionMessage, rejectionPattern, useDeleteItemMutation, useToggleItemMutation } from '../../gql';
+import {
+  rejectionMessage,
+  rejectionPattern,
+  useDeleteItemMutation,
+  useToggleItemMutation,
+  WishlistMode,
+} from '../../gql';
 import { useToast } from '../../hooks';
 import { ConfirmMenuItem } from '../common/ConfirmMenuItem';
 import { Rating } from '../common/Rating';
@@ -50,7 +56,7 @@ export type ItemCardProps = {
     id: WishlistId;
     ownerId: string;
     coOwnerId?: string;
-    hideItems: boolean;
+    mode: WishlistMode;
   };
   item: WishlistItem;
   onImageClick?: () => void;
@@ -88,7 +94,7 @@ export const ItemCard = ({ item, wishlist, onImageClick }: ItemCardProps) => {
 
   const isTaken = takers.length > 0;
   const isOwnerOrCoOwner = currentUserId === wishlist.ownerId || wishlist.coOwnerId === currentUserId;
-  const canReserve = !isOwnerOrCoOwner || !wishlist.hideItems;
+  const canReserve = !isOwnerOrCoOwner || wishlist.mode === WishlistMode.Shared;
   const canEdit = (isOwnerOrCoOwner || item.isSuggested) && !isTaken;
   const isReservedByCurrentUser = takers.some(taker => taker.id === currentUserId);
 

@@ -27,10 +27,14 @@ export async function seedItemTakers(
     });
 
     for (const taker of faker.helpers.arrayElements(eligibleUsers, count)) {
+      const takenAt = faker.date.recent({ days: 30 });
       takers.push({
         itemId: item.id,
         userId: taker.id,
-        takenAt: faker.date.recent({ days: 30 }),
+        takenAt,
+        purchasedAt: chance(seedConfig.itemTakers.purchasedProbability)
+          ? faker.date.between({ from: takenAt, to: new Date() })
+          : null,
       });
     }
   }

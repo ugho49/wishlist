@@ -1,0 +1,1 @@
+ALTER TABLE "wishlist" DROP COLUMN "hide_items";

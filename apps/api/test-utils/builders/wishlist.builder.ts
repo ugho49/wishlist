@@ -4,13 +4,14 @@ import { uuid } from '@wishlist/common';
 
 import { User } from '../../src/user/domain/model/user.model';
 import { Wishlist } from '../../src/wishlist/domain/wishlist.model';
+import { WishlistMode } from '../../src/wishlist/domain/wishlist-mode.enum';
 import { UserBuilder } from './user.builder';
 
 type WishlistBuilderData = {
   title: string;
   owner: User;
   coOwner?: User;
-  hideItems: boolean;
+  mode: WishlistMode;
   eventIds: EventId[];
 };
 
@@ -18,7 +19,7 @@ export class WishlistBuilder {
   private readonly data: WishlistBuilderData = {
     title: 'Ma liste',
     owner: new UserBuilder().build(),
-    hideItems: true,
+    mode: WishlistMode.SURPRISE,
     eventIds: [],
   };
 
@@ -37,8 +38,8 @@ export class WishlistBuilder {
     return this;
   }
 
-  withHideItems(hideItems: boolean): this {
-    this.data.hideItems = hideItems;
+  withMode(mode: WishlistMode): this {
+    this.data.mode = mode;
     return this;
   }
 
@@ -53,7 +54,7 @@ export class WishlistBuilder {
       title: this.data.title,
       eventIds: this.data.eventIds,
       ownerId: this.data.owner.id,
-      hideItems: this.data.hideItems,
+      mode: this.data.mode,
     });
 
     return this.data.coOwner ? wishlist.addCoOwner(this.data.coOwner) : wishlist;

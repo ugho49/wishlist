@@ -35,6 +35,7 @@ import {
   type ReservedItemPeriod,
   type WishlistItemRepository,
 } from '../../item/domain/wishlist-item.repository';
+import { WishlistMode } from '../../wishlist/domain/wishlist-mode.enum';
 
 type ItemRowWithTakers = typeof schema.item.$inferSelect & {
   takers: (typeof schema.itemTaker.$inferSelect)[];
@@ -169,7 +170,7 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
         and(
           ne(schema.wishlist.id, wishlistId),
           eq(schema.wishlist.ownerId, userId),
-          eq(schema.wishlist.hideItems, true),
+          eq(schema.wishlist.mode, WishlistMode.SURPRISE),
         ),
       )
       .groupBy(schema.eventWishlist.wishlistId)
@@ -209,7 +210,7 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
     userId: UserId;
     period: ReservedItemPeriod;
     pagination: { take: number; skip: number };
-  }): Promise<{ items: ReservedItem[]; totalCount: number }> {
+  }): Promise<{ items: ReservedItem[]; totalCount: number; purchasedCount: number }> {
     const reservedForSomeoneElse = and(
       eq(schema.itemTaker.userId, params.userId),
       ne(schema.wishlist.ownerId, params.userId),
@@ -217,23 +218,29 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
       this.reservedItemPeriodCondition(params.period),
     );
 
-    const totalCountResult = await this.db
-      .select({ count: count() })
+    const countResult = await this.db
+      .select({ count: count(), purchasedCount: count(schema.itemTaker.purchasedAt) })
       .from(schema.itemTaker)
       .innerJoin(schema.item, eq(schema.item.id, schema.itemTaker.itemId))
       .innerJoin(schema.wishlist, eq(schema.wishlist.id, schema.item.wishlistId))
       .where(reservedForSomeoneElse);
 
-    const totalCount = totalCountResult[0]?.count ?? 0;
-    if (totalCount === 0) return { items: [], totalCount };
+    const totalCount = countResult[0]?.count ?? 0;
+    const purchasedCount = countResult[0]?.purchasedCount ?? 0;
+    if (totalCount === 0) return { items: [], totalCount, purchasedCount };
 
     const orderedRows = await this.db
-      .select({ id: schema.item.id, takenAt: schema.itemTaker.takenAt })
+      .select({
+        id: schema.item.id,
+        takenAt: schema.itemTaker.takenAt,
+        purchasedAt: schema.itemTaker.purchasedAt,
+      })
       .from(schema.itemTaker)
       .innerJoin(schema.item, eq(schema.item.id, schema.itemTaker.itemId))
       .innerJoin(schema.wishlist, eq(schema.wishlist.id, schema.item.wishlistId))
       .where(reservedForSomeoneElse)
-      .orderBy(...this.reservedItemOrderBy())
+      // Gifts still to buy come first, like the open tasks of a to-do list.
+      .orderBy(sql`(${schema.itemTaker.purchasedAt} is not null)`, ...this.reservedItemOrderBy())
       .limit(params.pagination.take)
       .offset(params.pagination.skip);
 
@@ -267,6 +274,7 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
           score: row.score ?? undefined,
           pictureUrl: row.pictureUrl ?? undefined,
           takenAt: ordered.takenAt,
+          purchasedAt: ordered.purchasedAt ?? undefined,
           wishlistId: row.wishlist.id,
           wishlistTitle: row.wishlist.title,
           ownerFirstName: row.wishlist.owner.firstName,
@@ -281,6 +289,7 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
                   lastName: taker.user.lastName,
                   pictureUrl: taker.user.pictureUrl ?? undefined,
                   takenAt: taker.takenAt,
+                  purchasedAt: taker.purchasedAt ?? undefined,
                 },
               ];
             })
@@ -298,7 +307,7 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
       ];
     });
 
-    return { items, totalCount };
+    return { items, totalCount, purchasedCount };
   }
 
   private reservedItemOrderBy() {
@@ -391,6 +400,7 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
             itemId: item.id,
             userId: taker.userId,
             takenAt: taker.takenAt,
+            purchasedAt: taker.purchasedAt ?? null,
           })),
         );
       }
@@ -416,6 +426,7 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
       takers: row.takers.map(taker => ({
         userId: taker.userId,
         takenAt: taker.takenAt,
+        purchasedAt: taker.purchasedAt ?? undefined,
       })),
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,

@@ -358,6 +358,8 @@ export type GetReservedItemsPagedResponse = {
   __typename?: 'GetReservedItemsPagedResponse';
   data: Array<ReservedItem>;
   pagination: Pagination;
+  /** Gifts of the period the current user already bought, across every page. */
+  purchasedCount: Scalars['Int']['output'];
 };
 
 export type GetSecretSantaForEventResult = ForbiddenRejection | InternalErrorRejection | SecretSanta | UnauthorizedRejection;
@@ -416,6 +418,12 @@ export type Item = {
   score?: Maybe<Scalars['Int']['output']>;
   takers: Array<ItemTaker>;
   url?: Maybe<Scalars['String']['output']>;
+};
+
+export type ItemPurchaseState = {
+  __typename?: 'ItemPurchaseState';
+  itemId: Scalars['ItemId']['output'];
+  purchasedAt?: Maybe<Scalars['String']['output']>;
 };
 
 export type ItemTaker = {
@@ -512,6 +520,8 @@ export type Mutation = {
   revokeSession: RevokeSessionResult;
   scanItemUrl: ScanItemUrlResult;
   sendResetPasswordEmail: SendResetPasswordEmailResult;
+  /** Marks or unmarks as bought gifts the current user reserved. All or nothing: one unknown or unreserved gift rejects the whole call. */
+  setItemsPurchased: SetItemsPurchasedResult;
   setSignupSource: SetSignupSourceResult;
   startSecretSanta: StartSecretSantaResult;
   toggleItem: ToggleItemResult;
@@ -749,6 +759,11 @@ export type MutationScanItemUrlArgs = {
 
 export type MutationSendResetPasswordEmailArgs = {
   input: SendResetPasswordEmailInput;
+};
+
+
+export type MutationSetItemsPurchasedArgs = {
+  input: SetItemsPurchasedInput;
 };
 
 
@@ -1017,6 +1032,8 @@ export type ReservedItem = {
   ownerFirstName: Scalars['String']['output'];
   ownerLastName: Scalars['String']['output'];
   pictureUrl?: Maybe<Scalars['String']['output']>;
+  /** When the current user marked the gift as bought. */
+  purchasedAt?: Maybe<Scalars['String']['output']>;
   score?: Maybe<Scalars['Int']['output']>;
   takenAt: Scalars['String']['output'];
   takers: Array<ReservedItemTaker>;
@@ -1043,6 +1060,7 @@ export type ReservedItemTaker = {
   firstName: Scalars['String']['output'];
   lastName: Scalars['String']['output'];
   pictureUrl?: Maybe<Scalars['String']['output']>;
+  purchasedAt?: Maybe<Scalars['String']['output']>;
   takenAt: Scalars['String']['output'];
   userId: Scalars['UserId']['output'];
 };
@@ -1112,6 +1130,18 @@ export type SendResetPasswordEmailInput = {
 };
 
 export type SendResetPasswordEmailResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+
+export type SetItemsPurchasedInput = {
+  itemIds: Array<Scalars['ItemId']['input']>;
+  purchased: Scalars['Boolean']['input'];
+};
+
+export type SetItemsPurchasedOutput = {
+  __typename?: 'SetItemsPurchasedOutput';
+  items: Array<ItemPurchaseState>;
+};
+
+export type SetItemsPurchasedResult = InternalErrorRejection | NotFoundRejection | SetItemsPurchasedOutput | UnauthorizedRejection | ValidationRejection;
 
 export type SetSignupSourceInput = {
   detail?: InputMaybe<Scalars['String']['input']>;
@@ -1315,7 +1345,6 @@ export type Wishlist = {
   __typename?: 'Wishlist';
   coOwner?: Maybe<User>;
   coOwnerId?: Maybe<Scalars['UserId']['output']>;
-  config: WishlistConfig;
   createdAt: Scalars['String']['output'];
   description?: Maybe<Scalars['String']['output']>;
   eventIds: Array<Scalars['EventId']['output']>;
@@ -1323,13 +1352,17 @@ export type Wishlist = {
   id: Scalars['WishlistId']['output'];
   items: Array<Item>;
   logoUrl?: Maybe<Scalars['String']['output']>;
+  mode: WishlistMode;
   owner: User;
   ownerId: Scalars['UserId']['output'];
   title: Scalars['String']['output'];
   updatedAt: Scalars['String']['output'];
 };
 
-export type WishlistConfig = {
-  __typename?: 'WishlistConfig';
-  hideItems: Scalars['Boolean']['output'];
-};
+/** What the managers (owner and co-owner) of a list see. The participants see the list and who reserved what in both modes. */
+export enum WishlistMode {
+  /** The managers see everything, like the participants. A list managed for someone else; allows a co-owner. */
+  Shared = 'SHARED',
+  /** The managers do not see who reserved what, nor the items suggested by the others. A list for oneself. */
+  Surprise = 'SURPRISE'
+}

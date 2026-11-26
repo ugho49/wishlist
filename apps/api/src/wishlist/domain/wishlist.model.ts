@@ -1,13 +1,15 @@
 import type { EventId, UserId, WishlistId } from '@wishlist/common';
 import type { User } from '../../user/domain/model/user.model';
 
+import { WishlistMode } from './wishlist-mode.enum';
+
 export type WishlistProps = {
   id: WishlistId;
   title: string;
   description?: string;
   ownerId: UserId;
   coOwnerId?: UserId;
-  hideItems: boolean;
+  mode: WishlistMode;
   logoUrl?: string;
   eventIds: EventId[];
   createdAt: Date;
@@ -20,7 +22,7 @@ export class Wishlist {
   public readonly description?: string;
   public readonly ownerId: UserId;
   public readonly coOwnerId?: UserId;
-  public readonly hideItems: boolean;
+  public readonly mode: WishlistMode;
   public readonly logoUrl?: string;
   public readonly eventIds: EventId[];
   public readonly createdAt: Date;
@@ -32,7 +34,7 @@ export class Wishlist {
     this.description = props.description;
     this.ownerId = props.ownerId;
     this.coOwnerId = props.coOwnerId;
-    this.hideItems = props.hideItems;
+    this.mode = props.mode;
     this.logoUrl = props.logoUrl;
     this.eventIds = props.eventIds;
     this.createdAt = props.createdAt;
@@ -45,7 +47,7 @@ export class Wishlist {
     eventIds: EventId[];
     description?: string;
     ownerId: UserId;
-    hideItems: boolean;
+    mode: WishlistMode;
     logoUrl?: string;
   }): Wishlist {
     const now = new Date();
@@ -55,7 +57,7 @@ export class Wishlist {
       title: params.title,
       description: params.description,
       ownerId: params.ownerId,
-      hideItems: params.hideItems,
+      mode: params.mode,
       logoUrl: params.logoUrl,
       eventIds: params.eventIds,
       createdAt: now,
@@ -110,6 +112,18 @@ export class Wishlist {
 
   isOwnerOrCoOwner(userId: UserId) {
     return this.isOwner(userId) || this.isCoOwner(userId);
+  }
+
+  /**
+   * Whether the reservations and the items suggested by the others are hidden from this user:
+   * true for the managers of a list in surprise mode.
+   */
+  isSurpriseFor(userId: UserId): boolean {
+    return this.mode === WishlistMode.SURPRISE && this.isOwnerOrCoOwner(userId);
+  }
+
+  canHaveCoOwner(): boolean {
+    return this.mode === WishlistMode.SHARED;
   }
 
   addCoOwner(coOwner: User) {

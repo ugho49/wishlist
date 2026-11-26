@@ -1,7 +1,13 @@
 scalar WishlistId
 
-type WishlistConfig {
-  hideItems: Boolean!
+"""
+What the managers (owner and co-owner) of a list see. The participants see the list and who reserved what in both modes.
+"""
+enum WishlistMode {
+  "The managers do not see who reserved what, nor the items suggested by the others. A list for oneself."
+  SURPRISE
+  "The managers see everything, like the participants. A list managed for someone else; allows a co-owner."
+  SHARED
 }
 
 type Wishlist {
@@ -16,7 +22,7 @@ type Wishlist {
   eventIds: [EventId!]!
   events: [Event!]! @resolved
   items: [Item!]! @resolved
-  config: WishlistConfig!
+  mode: WishlistMode!
   createdAt: String!
   updatedAt: String!
 }

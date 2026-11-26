@@ -5,6 +5,7 @@ import { styled, Typography } from '@mui/material';
 import { useNavigate } from '@tanstack/react-router';
 import clsx from 'clsx';
 
+import { WishlistMode } from '../../gql';
 import { getAvatarUrl } from '../../utils/wishlist.utils';
 import { Card } from '../common/Card';
 import { WishlistAvatar } from './WishlistAvatar';
@@ -18,7 +19,7 @@ export type WishlistCardWithOwnerWishlist = {
   id: WishlistId;
   title: string;
   logoUrl?: string | null;
-  config: { hideItems: boolean };
+  mode: WishlistMode;
   owner: { firstName: string; lastName: string; pictureUrl?: string | null };
 };
 
@@ -106,7 +107,7 @@ const PublicIconStyled = styled(PublicIcon)(() => ({
 
 export const WishlistCardWithOwner = ({ wishlist, eventId }: WishlistCardWithOwnerProps) => {
   const navigate = useNavigate();
-  const isPublic = !wishlist.config.hideItems;
+  const isShared = wishlist.mode === WishlistMode.Shared;
 
   return (
     <WishlistCardContent
@@ -125,7 +126,7 @@ export const WishlistCardWithOwner = ({ wishlist, eventId }: WishlistCardWithOwn
           src={getAvatarUrl({ wishlist, ownerPictureUrl: wishlist.owner.pictureUrl })}
           className="wishlist-avatar"
         />
-        {isPublic && (
+        {isShared && (
           <PublicBadge>
             <PublicIconStyled />
           </PublicBadge>

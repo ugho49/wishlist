@@ -62,7 +62,7 @@ export class ToggleItemUseCase {
     this.logger.info('Checking item...', { itemId: params.item.id });
     const { item, currentUser, wishlist } = params;
 
-    if (wishlist.isOwner(currentUser.id) && wishlist.hideItems) {
+    if (wishlist.isSurpriseFor(currentUser.id)) {
       if (item.isSuggested) {
         throw new NotFoundException('Item not found');
       }
@@ -86,7 +86,7 @@ export class ToggleItemUseCase {
     this.logger.info('Unchecking item...', { itemId: params.item.id });
     const { item, wishlist, currentUser } = params;
 
-    if (wishlist.isOwner(currentUser.id) && wishlist.hideItems) {
+    if (wishlist.isSurpriseFor(currentUser.id)) {
       if (item.isSuggested) {
         throw new NotFoundException('Item not found');
       }

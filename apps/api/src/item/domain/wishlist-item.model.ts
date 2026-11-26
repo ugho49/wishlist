@@ -4,6 +4,7 @@ import type { User } from '../../user/domain/model/user.model';
 export type ItemTaker = {
   userId: UserId;
   takenAt: Date;
+  purchasedAt?: Date;
 };
 
 export type WishlistItemProps = {
@@ -152,32 +153,47 @@ export class WishlistItem {
     });
   }
 
-  public static canDisplaySensitiveInformations(params: {
-    wishlist: { hideItems: boolean; isOwner: boolean; isCoOwner: boolean };
-  }): boolean {
-    const { wishlist } = params;
-
-    // If hideItems is false, we want to display all items, including suggested and with the taker
-    if (!wishlist.hideItems) return true;
-
-    // If we are the owner or co-owner of the list, we not want the information to be displayed
-    return !wishlist.isOwner && !wishlist.isCoOwner;
+  purchasedAtBy(userId: UserId): Date | undefined {
+    return this.takers.find(taker => taker.userId === userId)?.purchasedAt;
   }
 
-  public static canShowItem(params: {
-    item: WishlistItem;
-    wishlist: { hideItems: boolean; isOwner: boolean; isCoOwner: boolean };
-  }): boolean {
-    const { item, wishlist } = params;
+  markAsPurchasedBy(userId: UserId): WishlistItem {
+    return this.updatePurchase(userId, { purchased: true });
+  }
 
-    // If hideItems is false, we force items to be shown, even if they are suggested
-    if (!wishlist.hideItems) return true;
+  unmarkAsPurchasedBy(userId: UserId): WishlistItem {
+    return this.updatePurchase(userId, { purchased: false });
+  }
 
-    // If we are not the owner or co-owner of the list, display all items
-    if (!wishlist.isOwner && !wishlist.isCoOwner) return true;
+  // The purchase belongs to the taker: it is their private to-do, so it leaves updatedAt alone.
+  private updatePurchase(userId: UserId, params: { purchased: boolean }): WishlistItem {
+    if (!this.isTakenBy(userId)) {
+      throw new Error('Only a taker of the item can change its purchase');
+    }
 
-    // In this case, current user is owner or co-owner of the list
-    // we want to show him only the item that are not suggested
-    return !item.isSuggested;
+    const alreadyPurchased = this.purchasedAtBy(userId) !== undefined;
+    if (alreadyPurchased === params.purchased) {
+      return this;
+    }
+
+    return new WishlistItem({
+      ...this,
+      takers: this.takers.map(taker =>
+        taker.userId === userId ? { ...taker, purchasedAt: params.purchased ? new Date() : undefined } : taker,
+      ),
+    });
+  }
+
+  /**
+   * Who reserved an item, and whether it was suggested by someone else.
+   * Hidden from the managers of a list in surprise mode (`isSurpriseForUser`, see `Wishlist.isSurpriseFor`).
+   */
+  public static canDisplaySensitiveInformations(params: { isSurpriseForUser: boolean }): boolean {
+    return !params.isSurpriseForUser;
+  }
+
+  /** The managers of a list in surprise mode do not see the items suggested by the others. */
+  public static canShowItem(params: { item: WishlistItem; isSurpriseForUser: boolean }): boolean {
+    return !params.isSurpriseForUser || !params.item.isSuggested;
   }
 }

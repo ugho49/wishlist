@@ -19,6 +19,8 @@ import {
   type MyReservedItemsFilters,
   type ScanItemUrlInput,
   type ScanItemUrlResult,
+  type SetItemsPurchasedInput,
+  type SetItemsPurchasedResult,
   type ToggleItemResult,
   type UpdateItemInput,
   type UpdateItemResult,
@@ -26,6 +28,7 @@ import {
 import { CreateItemUseCase } from '../application/command/create-item.use-case';
 import { DeleteItemUseCase } from '../application/command/delete-item.use-case';
 import { ImportItemsUseCase } from '../application/command/import-items.use-case';
+import { SetItemsPurchasedUseCase } from '../application/command/set-items-purchased.use-case';
 import { ToggleItemUseCase } from '../application/command/toggle-item.use-case';
 import { UpdateItemUseCase } from '../application/command/update-item.use-case';
 import { GetImportableItemsUseCase } from '../application/query/get-importable-items.use-case';
@@ -39,6 +42,7 @@ import {
   ItemIdSchema,
   MyReservedItemsFiltersSchema,
   ScanItemUrlInputSchema,
+  SetItemsPurchasedInputSchema,
   UpdateItemInputSchema,
   WishlistIdSchema,
 } from './item.schema';
@@ -62,6 +66,7 @@ export class ItemResolver {
     private readonly getImportableItemsUseCase: GetImportableItemsUseCase,
     private readonly getMyReservedItemsUseCase: GetMyReservedItemsUseCase,
     private readonly importItemsUseCase: ImportItemsUseCase,
+    private readonly setItemsPurchasedUseCase: SetItemsPurchasedUseCase,
   ) {}
 
   @Query()
@@ -85,7 +90,7 @@ export class ItemResolver {
     const pageSize = filters.limit ?? DEFAULT_RESULT_NUMBER;
     const pageNumber = filters.page ?? 1;
 
-    const { items, totalCount } = await this.getMyReservedItemsUseCase.execute({
+    const { items, totalCount, purchasedCount } = await this.getMyReservedItemsUseCase.execute({
       userId: currentUserId,
       period: toReservedItemPeriod(filters.period ?? GqlReservedItemPeriod.Reserved),
       pageNumber,
@@ -107,6 +112,28 @@ export class ItemResolver {
         pageNumber: pagedResponse.pagination.page_number,
         pageSize: pagedResponse.pagination.pages_size,
       },
+      purchasedCount,
+    };
+  }
+
+  @Mutation()
+  async setItemsPurchased(
+    @Args('input', SetItemsPurchasedInputSchema) input: SetItemsPurchasedInput,
+    @CurrentUser() currentUser: ICurrentUser,
+  ): Promise<SetItemsPurchasedResult> {
+    const { items } = await this.setItemsPurchasedUseCase.execute({
+      currentUser,
+      itemIds: input.itemIds,
+      purchased: input.purchased,
+    });
+
+    return {
+      __typename: 'SetItemsPurchasedOutput',
+      items: items.map(item => ({
+        __typename: 'ItemPurchaseState',
+        itemId: item.itemId,
+        purchasedAt: item.purchasedAt?.toISOString(),
+      })),
     };
   }
 

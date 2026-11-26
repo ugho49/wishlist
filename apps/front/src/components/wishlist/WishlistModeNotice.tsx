@@ -1,18 +1,18 @@
 import type { ReactNode } from 'react';
-import type { WishlistMode } from './wishlist-mode';
 
 import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import { Alert } from '@mui/material';
 
+import { WishlistMode } from '../../gql';
 import { WISHLIST_MODE_LABELS } from './wishlist-mode';
 
 const NOTICES: Record<WishlistMode, { icon: ReactNode; text: string }> = {
-  surprise: {
+  [WishlistMode.Surprise]: {
     icon: <VisibilityOffOutlinedIcon />,
     text: "vos proches voient votre liste et réservent vos cadeaux. Vous ne verrez ni qui réserve quoi, ni les idées qu'ils ajoutent à votre liste.",
   },
-  shared: {
+  [WishlistMode.Shared]: {
     icon: <VisibilityOutlinedIcon />,
     text: 'vous voyez qui réserve quoi, comme tous les participants, et vous pouvez ajouter un co-gestionnaire.',
   },

@@ -26,7 +26,7 @@ export const seedConfig = {
     ownerHasWishlistProbability: 0.8,
     perOwner: { min: 2, max: 10 },
     descriptionProbability: 0.3,
-    hideItemsProbability: 0.99,
+    surpriseModeProbability: 0.99,
     multipleEventsProbability: 0.2,
   },
   items: {
@@ -37,6 +37,7 @@ export const seedConfig = {
   },
   itemTakers: {
     takenProbability: 0.35,
+    purchasedProbability: 0.4,
     perItem: { min: 1, max: 3 },
   },
 } as const;

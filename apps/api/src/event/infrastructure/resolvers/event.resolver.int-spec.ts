@@ -4,6 +4,8 @@ import { Fixtures, useTestApp } from '@wishlist/api-test-utils';
 import { uuid } from '@wishlist/common';
 import { DateTime } from 'luxon';
 
+import { WishlistMode } from '../../../wishlist/domain/wishlist-mode.enum';
+
 describe('EventResolver (GraphQL)', () => {
   const { getRequest, getFixtures } = useTestApp();
   let fixtures: Fixtures;
@@ -167,7 +169,7 @@ describe('EventResolver (GraphQL)', () => {
           userId: currentUserId,
           title: 'My wishlist',
           description: 'Wishlist description',
-          hideItems: false,
+          mode: WishlistMode.SHARED,
         });
 
         const res = await request

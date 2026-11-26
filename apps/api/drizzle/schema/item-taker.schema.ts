@@ -12,6 +12,7 @@ export const itemTaker = pgTable(
     itemId: itemId('item_id').notNull(),
     userId: userId('user_id').notNull(),
     takenAt: timestampWithTimezone('taken_at').notNull(),
+    purchasedAt: timestampWithTimezone('purchased_at'),
   },
   table => [
     primaryKey({ columns: [table.itemId, table.userId] }),

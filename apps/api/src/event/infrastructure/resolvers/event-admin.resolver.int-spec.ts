@@ -5,6 +5,7 @@ import { uuid } from '@wishlist/common';
 import { DateTime } from 'luxon';
 
 import { SecretSantaStatus } from '../../../secret-santa/domain/secret-santa-status.enum';
+import { WishlistMode } from '../../../wishlist/domain/wishlist-mode.enum';
 
 /**
  * Integration tests for the GraphQL EventAdminResolver (@IsAdmin()).
@@ -93,7 +94,7 @@ describe('EventAdminResolver (GraphQL)', () => {
           eventIds: [eventId],
           userId: ownerId,
           title: 'Owner list',
-          hideItems: false,
+          mode: WishlistMode.SHARED,
         });
 
         const queryWithWishlists = /* GraphQL */ `

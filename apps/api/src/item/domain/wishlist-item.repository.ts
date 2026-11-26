@@ -26,6 +26,7 @@ export type ReservedItemTaker = {
   lastName: string;
   pictureUrl?: string;
   takenAt: Date;
+  purchasedAt?: Date;
 };
 
 export type ReservedItemPeriod = 'all' | 'reserved' | 'past';
@@ -38,6 +39,8 @@ export type ReservedItem = {
   score?: number;
   pictureUrl?: string;
   takenAt: Date;
+  /** When the current user marked the gift as bought. */
+  purchasedAt?: Date;
   wishlistId: WishlistId;
   wishlistTitle: string;
   ownerFirstName: string;
@@ -59,7 +62,7 @@ export interface WishlistItemRepository {
     userId: UserId;
     period: ReservedItemPeriod;
     pagination: { take: number; skip: number };
-  }): Promise<{ items: ReservedItem[]; totalCount: number }>;
+  }): Promise<{ items: ReservedItem[]; totalCount: number; purchasedCount: number }>;
   save(item: WishlistItem, tx?: DrizzleTransaction): Promise<void>;
   delete(id: ItemId, tx?: DrizzleTransaction): Promise<void>;
 }
