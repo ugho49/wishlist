@@ -4,6 +4,7 @@ import type { User } from '../../user/domain/model/user.model';
 export type ItemTaker = {
   userId: UserId;
   takenAt: Date;
+  purchasedAt?: Date;
 };
 
 export type WishlistItemProps = {
@@ -149,6 +150,37 @@ export class WishlistItem {
       ...this,
       takers: this.takers.filter(taker => taker.userId !== userId),
       updatedAt: new Date(),
+    });
+  }
+
+  purchasedAtBy(userId: UserId): Date | undefined {
+    return this.takers.find(taker => taker.userId === userId)?.purchasedAt;
+  }
+
+  markAsPurchasedBy(userId: UserId): WishlistItem {
+    return this.updatePurchase(userId, { purchased: true });
+  }
+
+  unmarkAsPurchasedBy(userId: UserId): WishlistItem {
+    return this.updatePurchase(userId, { purchased: false });
+  }
+
+  // The purchase belongs to the taker: it is their private to-do, so it leaves updatedAt alone.
+  private updatePurchase(userId: UserId, params: { purchased: boolean }): WishlistItem {
+    if (!this.isTakenBy(userId)) {
+      throw new Error('Only a taker of the item can change its purchase');
+    }
+
+    const alreadyPurchased = this.purchasedAtBy(userId) !== undefined;
+    if (alreadyPurchased === params.purchased) {
+      return this;
+    }
+
+    return new WishlistItem({
+      ...this,
+      takers: this.takers.map(taker =>
+        taker.userId === userId ? { ...taker, purchasedAt: params.purchased ? new Date() : undefined } : taker,
+      ),
     });
   }
 

@@ -13,6 +13,8 @@ export type GetMyReservedItemsInput = {
 export type GetMyReservedItemsOutput = {
   items: ReservedItem[];
   totalCount: number;
+  /** Reserved gifts of the period the user already bought, across every page. */
+  purchasedCount: number;
 };
 
 @Injectable()

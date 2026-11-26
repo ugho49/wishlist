@@ -33,6 +33,7 @@ describe('GetMyReservedItemsUseCase', () => {
         },
       ],
       totalCount: 1,
+      purchasedCount: 0,
     });
 
     useCase = new GetMyReservedItemsUseCase(itemRepository);

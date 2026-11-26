@@ -1,4 +1,4 @@
-import { Alert, Box, styled } from '@mui/material';
+import { Alert, Box, Checkbox, FormControlLabel, LinearProgress, styled } from '@mui/material';
 import { useNavigate, useSearch } from '@tanstack/react-router';
 
 import { isRejection, ReservedItemPeriod, rejectionMessage, useReservedItemsListPageQuery } from '../../gql';
@@ -7,6 +7,8 @@ import { Title } from '../common/Title';
 import { EmptyReservedItemsState } from './EmptyReservedItemsState';
 import { ReservedItemRow, ReservedItemRowSkeleton } from './ReservedItemRow';
 import { type ReservedItemsPeriod, ReservedItemsPeriodSwitch } from './ReservedItemsPeriodSwitch';
+import { bulkPurchaseState, nextBulkPurchase } from './reserved-items-purchase';
+import { useSetReservedItemsPurchased } from './useSetReservedItemsPurchased';
 
 const SKELETON_KEYS = ['s1', 's2', 's3', 's4', 's5', 's6'] as const;
 
@@ -36,19 +38,54 @@ const List = styled('ul')({
   padding: 0,
 });
 
+const Toolbar = styled('div')(({ theme }) => ({
+  display: 'flex',
+  flexWrap: 'wrap',
+  alignItems: 'center',
+  columnGap: theme.spacing(2),
+  rowGap: theme.spacing(0.5),
+  paddingBottom: theme.spacing(1),
+  marginBottom: theme.spacing(1),
+  borderBottom: `1px solid ${theme.palette.divider}`,
+}));
+
+const Progress = styled('div')(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing(1.5),
+  flex: '1 1 200px',
+  justifyContent: 'flex-end',
+  color: theme.palette.text.secondary,
+  fontSize: '0.85rem',
+  fontWeight: 600,
+  whiteSpace: 'nowrap',
+}));
+
+const ProgressBar = styled(LinearProgress)({
+  flex: '0 1 160px',
+  height: 6,
+  borderRadius: 999,
+});
+
+const progressLabel = (purchasedCount: number, totalElements: number) =>
+  purchasedCount === totalElements
+    ? 'Tout est acheté'
+    : `${purchasedCount} / ${totalElements} acheté${purchasedCount > 1 ? 's' : ''}`;
+
 export const ReservedItemsListPage = () => {
   const { page: currentPage, period } = useSearch({ from: '/_authenticated/_with-layout/reserved-items/' });
   const navigate = useNavigate();
-  const { data, isLoading: loading } = useReservedItemsListPageQuery(
-    { filters: { page: currentPage, period: PERIOD_TO_GQL[period] } },
-    { select: d => d.myReservedItems },
-  );
+  const variables = { filters: { page: currentPage, period: PERIOD_TO_GQL[period] } };
+  const { data, isLoading: loading } = useReservedItemsListPageQuery(variables, { select: d => d.myReservedItems });
+  const setPurchased = useSetReservedItemsPurchased(variables);
   const pagedItems = data?.__typename === 'GetReservedItemsPagedResponse' ? data : undefined;
   const queryRejection = data && isRejection(data) ? data : undefined;
 
   const items = pagedItems?.data ?? [];
   const totalElements = pagedItems?.pagination.totalElements ?? 0;
   const totalPages = pagedItems?.pagination.totalPages;
+  const purchasedCount = pagedItems?.purchasedCount ?? 0;
+  const pageState = bulkPurchaseState(items);
   const emptyCopy = EMPTY_COPY[period];
 
   const selectPeriod = (nextPeriod: ReservedItemsPeriod) => {
@@ -75,11 +112,37 @@ export const ReservedItemsListPage = () => {
       )}
 
       {!loading && items.length > 0 && (
-        <List>
-          {items.map(item => (
-            <ReservedItemRow key={item.id} item={item} />
-          ))}
-        </List>
+        <>
+          <Toolbar>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={pageState === 'all'}
+                  indeterminate={pageState === 'some'}
+                  onChange={() => setPurchased(nextBulkPurchase(items))}
+                />
+              }
+              label={`${pageState === 'all' ? 'Tout décocher' : 'Tout cocher'}${(totalPages ?? 1) > 1 ? ' (cette page)' : ''}`}
+            />
+            <Progress>
+              <span>{progressLabel(purchasedCount, totalElements)}</span>
+              <ProgressBar
+                variant="determinate"
+                value={totalElements > 0 ? (purchasedCount / totalElements) * 100 : 0}
+                aria-label="Cadeaux achetés"
+              />
+            </Progress>
+          </Toolbar>
+          <List>
+            {items.map(item => (
+              <ReservedItemRow
+                key={item.id}
+                item={item}
+                onPurchasedChange={purchased => setPurchased({ itemIds: [item.id], purchased })}
+              />
+            ))}
+          </List>
+        </>
       )}
 
       {totalElements > 0 && (

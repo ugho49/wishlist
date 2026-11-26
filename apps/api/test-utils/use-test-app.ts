@@ -85,6 +85,10 @@ export function useTestApp() {
       return new MailsAssert(http);
     },
     getFixtures: () => fixtures,
+    /** Runs raw SQL with several statements allowed, such as a data migration file. */
+    runSql: async (query: string): Promise<void> => {
+      await sql.unsafe(query);
+    },
     getRequest: async (options?: { signedAs?: SignedAs }): Promise<RequestApp> => {
       const requestAppServer = request.agent(baseUrl);
       let token = '';
