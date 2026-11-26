@@ -1,3 +1,4 @@
+import type { RateLimiter } from '../../../core/rate-limit/rate-limiter';
 import type { UserSessionRepository } from '../../../user/domain/repository/user-session.repository';
 import type { LoginOutput } from '../login.types';
 
@@ -7,6 +8,8 @@ import { BadRequestException, UnauthorizedException } from '@znight/http';
 import { type TokenPayload } from 'google-auth-library';
 
 import { TransactionManager } from '../../../core/database/transaction-manager';
+import { RateLimitConfig } from '../../../core/rate-limit/rate-limit.config';
+import { rateLimitRules } from '../../../core/rate-limit/rate-limit.policies';
 import { UserCreatedEvent } from '../../../user/domain/event/user-created.event';
 import { User } from '../../../user/domain/model/user.model';
 import { UserAccount } from '../../../user/domain/model/user-account.model';
@@ -36,6 +39,8 @@ export class LoginWithGoogleUseCase extends CommonLoginUseCase {
     private readonly transactionManager: TransactionManager,
     private readonly eventBus: EventPublisher,
     tokenService: TokenService,
+    private readonly rateLimiter: RateLimiter,
+    private readonly rateLimitConfig: RateLimitConfig,
   ) {
     super({
       tokenService,
@@ -126,6 +131,9 @@ export class LoginWithGoogleUseCase extends CommonLoginUseCase {
     if (!payload.family_name) {
       throw new BadRequestException('Family name is not given by Google');
     }
+
+    // Only a creation counts (a login of a known Google account is free), on the sign-up counter
+    await this.rateLimiter.consume(rateLimitRules('signUp', this.rateLimitConfig, { ip }));
 
     const user = User.create({
       id: this.userRepository.newId(),

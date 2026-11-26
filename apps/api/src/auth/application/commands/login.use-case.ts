@@ -49,32 +49,29 @@ export class LoginUseCase extends CommonLoginUseCase {
     return tokens;
   }
 
+  /**
+   * Every failure answers the same `Incorrect login` after a password check (a fake one without
+   * account), so that neither the message nor the response time tells whether the email has an
+   * account, or a disabled one.
+   */
   private async validateUserByEmailPassword(email: string, password: string): Promise<User> {
     const user = await this.userRepository.findByEmail(email);
 
-    if (!user) {
+    const passwordAccount = user
+      ? await this.userAccountRepository.findByUserIdAndProvider(user.id, UserAccountProvider.PASSWORD)
+      : undefined;
+
+    const passwordVerified = passwordAccount?.passwordHash
+      ? await PasswordManager.verify({ hash: passwordAccount.passwordHash, plainPassword: password })
+      : await PasswordManager.verifyWithoutHash(password);
+
+    if (!user || !passwordVerified) {
+      this.logger.info('Login refused', { email, reason: user ? 'wrong password or no password' : 'unknown email' });
       throw new UnauthorizedException('Incorrect login');
     }
 
     if (!user.isEnabled) {
-      throw new UnauthorizedException('User is disabled');
-    }
-
-    const passwordAccount = await this.userAccountRepository.findByUserIdAndProvider(
-      user.id,
-      UserAccountProvider.PASSWORD,
-    );
-
-    if (!passwordAccount?.passwordHash) {
-      throw new UnauthorizedException('Incorrect login');
-    }
-
-    const passwordVerified = await PasswordManager.verify({
-      hash: passwordAccount.passwordHash,
-      plainPassword: password,
-    });
-
-    if (!passwordVerified) {
+      this.logger.info('Login refused', { email, reason: 'disabled user' });
       throw new UnauthorizedException('Incorrect login');
     }
 

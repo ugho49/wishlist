@@ -29,6 +29,11 @@ export class UserPasswordVerificationBuilder {
     return this;
   }
 
+  expiringIn(duration: { minutes: number }): this {
+    this.data.expiredAt = new Date(Date.now() + duration.minutes * 60_000);
+    return this;
+  }
+
   expired(): this {
     this.data.expiredAt = new Date(Date.now() - 1000);
     return this;

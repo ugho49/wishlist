@@ -8,6 +8,7 @@ import { match } from 'ts-pattern';
 import { z } from 'zod';
 
 import {
+  BusinessRuleCode,
   rejectionMessage,
   rejectionPattern,
   useAuthLoginMutation,
@@ -18,6 +19,7 @@ import { useStartSession } from '../../hooks/useStartSession';
 import { useToast } from '../../hooks/useToast';
 import { zodRequiredString } from '../../utils/validation';
 import { RouterLink } from '../common/RouterLink';
+import { SIGN_UP_RATE_LIMITED_MESSAGE } from './auth.messages';
 import { GoogleButton } from './GoogleButton';
 
 const schema = z.object({
@@ -96,6 +98,10 @@ export const RegisterPage = () => {
     const registered = match(registerRes.registerUser)
       .returnType<boolean>()
       .with({ __typename: 'CurrentUser' }, () => true)
+      .with({ __typename: 'BusinessRuleRejection', code: BusinessRuleCode.RateLimited }, () => {
+        setError('root', { message: SIGN_UP_RATE_LIMITED_MESSAGE });
+        return false;
+      })
       .with({ __typename: 'ValidationRejection' }, () => {
         setError('root', { message: 'Cet email est déjà utilisé' });
         return false;
@@ -127,6 +133,10 @@ export const RegisterPage = () => {
       .with({ __typename: 'LoginWithGoogleOutput' }, output =>
         handleRegisterSuccess(output.accessToken, output.refreshToken, 'social'),
       )
+      .with({ __typename: 'BusinessRuleRejection', code: BusinessRuleCode.RateLimited }, () => {
+        setSocialLoading(false);
+        addToast({ message: SIGN_UP_RATE_LIMITED_MESSAGE, variant: 'error' });
+      })
       .with(rejectionPattern, rejection => {
         setSocialLoading(false);
         addToast({ message: rejectionMessage(rejection), variant: 'error' });

@@ -6,9 +6,10 @@ import { useForm } from 'react-hook-form';
 import { match } from 'ts-pattern';
 import { z } from 'zod';
 
-import { rejectionMessage, rejectionPattern, useAuthSendResetPasswordEmailMutation } from '../../gql';
+import { BusinessRuleCode, rejectionMessage, rejectionPattern, useAuthSendResetPasswordEmailMutation } from '../../gql';
 import { useToast } from '../../hooks/useToast';
 import { RouterLink } from '../common/RouterLink';
+import { RESET_PASSWORD_EMAIL_SENT_MESSAGE, RESET_PASSWORD_RATE_LIMITED_MESSAGE } from './auth.messages';
 
 const schema = z.object({
   email: z.email('Email invalide').max(200, '200 caractères maximum'),
@@ -64,8 +65,11 @@ export const ForgotPasswordPage = () => {
     match(res.sendResetPasswordEmail)
       .with({ __typename: 'VoidOutput' }, () => {
         setResetCodeSent(true);
-        addToast({ message: 'Un email vient de vous être envoyé pour réinitialiser le mot de passe', variant: 'info' });
+        addToast({ message: RESET_PASSWORD_EMAIL_SENT_MESSAGE, variant: 'info' });
       })
+      .with({ __typename: 'BusinessRuleRejection', code: BusinessRuleCode.RateLimited }, () =>
+        addToast({ message: RESET_PASSWORD_RATE_LIMITED_MESSAGE, variant: 'error' }),
+      )
       .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
       .exhaustive();
   };
@@ -80,8 +84,8 @@ export const ForgotPasswordPage = () => {
       {resetCodeSent ? (
         <MessageBoxStyled>
           <Typography variant="body1" gutterBottom>
-            Un email 📩 vient de vous être envoyé pour réinitialiser le mot de passe. Aller regarder dans votre boite
-            mail 😊
+            Si un compte existe pour cette adresse, un email 📩 vient de vous être envoyé pour réinitialiser le mot de
+            passe. Allez regarder dans votre boîte mail 😊
           </Typography>
           <Typography
             variant="body2"

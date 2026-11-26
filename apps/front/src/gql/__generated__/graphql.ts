@@ -34,6 +34,7 @@ export type AuthLoginMutationVariables = Exact<{
 
 
 export type AuthLoginMutation = { login:
+    | { __typename: 'BusinessRuleRejection', code: Types.BusinessRuleCode, message: string }
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'LoginOutput', accessToken: string, refreshToken: string }
     | { __typename: 'UnauthorizedRejection', message: string }
@@ -46,6 +47,7 @@ export type AuthLoginWithGoogleMutationVariables = Exact<{
 
 
 export type AuthLoginWithGoogleMutation = { loginWithGoogle:
+    | { __typename: 'BusinessRuleRejection', code: Types.BusinessRuleCode, message: string }
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'LoginWithGoogleOutput', accessToken: string, refreshToken: string, newUserCreated: boolean | null, linkedToExistingUser: boolean | null }
     | { __typename: 'UnauthorizedRejection', message: string }
@@ -82,6 +84,7 @@ export type AuthRegisterUserMutationVariables = Exact<{
 
 
 export type AuthRegisterUserMutation = { registerUser:
+    | { __typename: 'BusinessRuleRejection', code: Types.BusinessRuleCode, message: string }
     | { __typename: 'CurrentUser', id: Ids["UserId"], email: string }
     | { __typename: 'ForbiddenRejection' }
     | { __typename: 'InternalErrorRejection' }
@@ -95,6 +98,7 @@ export type AuthSendResetPasswordEmailMutationVariables = Exact<{
 
 
 export type AuthSendResetPasswordEmailMutation = { sendResetPasswordEmail:
+    | { __typename: 'BusinessRuleRejection', code: Types.BusinessRuleCode, message: string }
     | { __typename: 'ForbiddenRejection' }
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'UnauthorizedRejection' }
@@ -1397,6 +1401,10 @@ export const AuthLoginDocument = new TypedDocumentString(`
     ... on UnauthorizedRejection {
       message
     }
+    ... on BusinessRuleRejection {
+      code
+      message
+    }
   }
 }
     `);
@@ -1431,6 +1439,10 @@ export const AuthLoginWithGoogleDocument = new TypedDocumentString(`
       }
     }
     ... on UnauthorizedRejection {
+      message
+    }
+    ... on BusinessRuleRejection {
+      code
       message
     }
   }
@@ -1516,6 +1528,10 @@ export const AuthRegisterUserDocument = new TypedDocumentString(`
         message
       }
     }
+    ... on BusinessRuleRejection {
+      code
+      message
+    }
   }
 }
     `);
@@ -1545,6 +1561,10 @@ export const AuthSendResetPasswordEmailDocument = new TypedDocumentString(`
         field
         message
       }
+    }
+    ... on BusinessRuleRejection {
+      code
+      message
     }
   }
 }

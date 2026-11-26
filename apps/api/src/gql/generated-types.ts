@@ -483,7 +483,7 @@ export type LoginOutput = {
   refreshToken: Scalars['String']['output'];
 };
 
-export type LoginResult = InternalErrorRejection | LoginOutput | UnauthorizedRejection | ValidationRejection;
+export type LoginResult = BusinessRuleRejection | InternalErrorRejection | LoginOutput | UnauthorizedRejection | ValidationRejection;
 
 export type LoginWithGoogleInput = {
   code: Scalars['String']['input'];
@@ -498,7 +498,7 @@ export type LoginWithGoogleOutput = {
   refreshToken: Scalars['String']['output'];
 };
 
-export type LoginWithGoogleResult = InternalErrorRejection | LoginWithGoogleOutput | UnauthorizedRejection | ValidationRejection;
+export type LoginWithGoogleResult = BusinessRuleRejection | InternalErrorRejection | LoginWithGoogleOutput | UnauthorizedRejection | ValidationRejection;
 
 export type LogoutInput = {
   refreshToken: Scalars['String']['input'];
@@ -1077,7 +1077,7 @@ export type RegisterUserInput = {
   password: Scalars['String']['input'];
 };
 
-export type RegisterUserResult = CurrentUser | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection;
+export type RegisterUserResult = BusinessRuleRejection | CurrentUser | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection;
 
 export type RemoveEventAttendeeResult = BusinessRuleRejection | ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
@@ -1197,7 +1197,7 @@ export type SendResetPasswordEmailInput = {
   email: Scalars['String']['input'];
 };
 
-export type SendResetPasswordEmailResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+export type SendResetPasswordEmailResult = BusinessRuleRejection | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
 export type SetItemsPurchasedInput = {
   itemIds: Array<Scalars['ItemId']['input']>;

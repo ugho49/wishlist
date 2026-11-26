@@ -1,5 +1,5 @@
 import { RateLimitConfig } from './rate-limit.config';
-import { rateLimitRules } from './rate-limit.policies';
+import { emailSubject, rateLimitRules } from './rate-limit.policies';
 import { describe, expect, it } from 'bun:test';
 
 describe('rateLimitRules', () => {
@@ -17,5 +17,52 @@ describe('rateLimitRules', () => {
       { key: 'userByEmail:user:user-1', limit: 5, windowSeconds: 3600 },
     ]);
     expect(rateLimitRules('userByEmail', config, {})).toEqual([]);
+  });
+
+  describe('email subject', () => {
+    const jeanSubject = emailSubject('jean@test.fr');
+
+    it('should key a counter by the hashed email, never the address itself', () => {
+      const rules = rateLimitRules('login', new RateLimitConfig(), { email: 'jean@test.fr', ip: '::1' });
+
+      expect(rules).toEqual([
+        { key: `login:email:${jeanSubject}`, limit: 10, windowSeconds: 900 },
+        { key: 'login:ip:::1', limit: 30, windowSeconds: 900 },
+      ]);
+      expect(jeanSubject).toMatch(/^[0-9a-f]{64}$/);
+    });
+
+    it('should share the counter of an email whatever its case or surrounding spaces', () => {
+      expect(emailSubject(' Jean@TEST.fr ')).toBe(jeanSubject);
+      expect(emailSubject('paul@test.fr')).not.toBe(jeanSubject);
+    });
+  });
+
+  it.each([
+    {
+      policy: 'login' as const,
+      expected: [
+        { by: 'email', limit: 10, windowSeconds: 900 },
+        { by: 'ip', limit: 30, windowSeconds: 900 },
+      ],
+    },
+    { policy: 'signUp' as const, expected: [{ by: 'ip', limit: 10, windowSeconds: 3600 }] },
+    {
+      policy: 'resetPasswordEmail' as const,
+      expected: [
+        { by: 'email', limit: 3, windowSeconds: 3600 },
+        { by: 'ip', limit: 10, windowSeconds: 3600 },
+      ],
+    },
+  ])('should apply the default limits of the $policy policy', ({ policy, expected }) => {
+    const rules = rateLimitRules(policy, new RateLimitConfig(), { email: 'jean@test.fr', ip: '::1' });
+
+    expect(rules).toEqual(
+      expected.map(({ by, limit, windowSeconds }) => ({
+        key: `${policy}:${by}:${by === 'email' ? emailSubject('jean@test.fr') : '::1'}`,
+        limit,
+        windowSeconds,
+      })),
+    );
   });
 });

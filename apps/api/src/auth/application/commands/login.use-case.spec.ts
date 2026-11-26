@@ -15,7 +15,7 @@ import { User } from '../../../user/domain/model/user.model';
 import { UserSession } from '../../../user/domain/model/user-session.model';
 import { PasswordManager } from '../../infrastructure/util/password-manager';
 import { LoginUseCase } from './login.use-case';
-import { beforeEach, describe, expect, it, mock } from 'bun:test';
+import { afterEach, beforeEach, describe, expect, it, mock, spyOn } from 'bun:test';
 
 const PASSWORD = 'Secret123!';
 
@@ -47,38 +47,58 @@ describe('LoginUseCase', () => {
     useCase = new LoginUseCase(userRepository, userAccountRepository, sessionRepository, config, tokenService);
   });
 
-  it('should reject when the user does not exist', async () => {
+  afterEach(() => {
+    mock.restore();
+  });
+
+  it('should reject an unknown email after a fake password check', async () => {
     userRepository.findByEmail.mockResolvedValueOnce(undefined);
+    const verifyWithoutHash = spyOn(PasswordManager, 'verifyWithoutHash');
 
     await expect(useCase.execute({ email: 'unknown@test.fr', password: PASSWORD, ip: '127.0.0.1' })).rejects.toThrow(
-      UnauthorizedException,
+      new UnauthorizedException('Incorrect login'),
     );
+    expect(verifyWithoutHash).toHaveBeenCalledWith(PASSWORD);
+    expect(userAccountRepository.findByUserIdAndProvider).not.toHaveBeenCalled();
     expect(sessionRepository.save).not.toHaveBeenCalled();
     expect(tokenService.sign).not.toHaveBeenCalled();
   });
 
-  it('should reject when the user is disabled', async () => {
+  it('should reject a disabled user with the same message, even with the right password', async () => {
     userRepository.findByEmail.mockResolvedValueOnce(new UserBuilder().withEmail('jean@test.fr').disabled().build());
+    const verify = spyOn(PasswordManager, 'verify');
 
     await expect(useCase.execute({ email: 'jean@test.fr', password: PASSWORD, ip: '127.0.0.1' })).rejects.toThrow(
-      UnauthorizedException,
+      new UnauthorizedException('Incorrect login'),
     );
+    expect(verify).toHaveBeenCalledTimes(1);
+    expect(sessionRepository.save).not.toHaveBeenCalled();
+  });
+
+  it('should reject a disabled user with a wrong password with the same message', async () => {
+    userRepository.findByEmail.mockResolvedValueOnce(new UserBuilder().withEmail('jean@test.fr').disabled().build());
+
+    await expect(
+      useCase.execute({ email: 'jean@test.fr', password: 'WrongPassword1!', ip: '127.0.0.1' }),
+    ).rejects.toThrow(new UnauthorizedException('Incorrect login'));
     expect(sessionRepository.save).not.toHaveBeenCalled();
   });
 
   it('should reject when the password is incorrect', async () => {
     await expect(
       useCase.execute({ email: 'jean@test.fr', password: 'WrongPassword1!', ip: '127.0.0.1' }),
-    ).rejects.toThrow(UnauthorizedException);
+    ).rejects.toThrow(new UnauthorizedException('Incorrect login'));
     expect(sessionRepository.save).not.toHaveBeenCalled();
   });
 
-  it('should reject when the user has no password', async () => {
+  it('should reject a user without password after a fake password check', async () => {
     userAccountRepository.findByUserIdAndProvider.mockResolvedValueOnce(undefined);
+    const verifyWithoutHash = spyOn(PasswordManager, 'verifyWithoutHash');
 
     await expect(useCase.execute({ email: 'jean@test.fr', password: PASSWORD, ip: '127.0.0.1' })).rejects.toThrow(
-      UnauthorizedException,
+      new UnauthorizedException('Incorrect login'),
     );
+    expect(verifyWithoutHash).toHaveBeenCalledWith(PASSWORD);
     expect(sessionRepository.save).not.toHaveBeenCalled();
   });
 

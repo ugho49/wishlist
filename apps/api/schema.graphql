@@ -454,7 +454,7 @@ type LoginOutput {
   refreshToken: String!
 }
 
-union LoginResult = InternalErrorRejection | LoginOutput | UnauthorizedRejection | ValidationRejection
+union LoginResult = BusinessRuleRejection | InternalErrorRejection | LoginOutput | UnauthorizedRejection | ValidationRejection
 
 input LoginWithGoogleInput {
   code: String!
@@ -468,7 +468,7 @@ type LoginWithGoogleOutput {
   refreshToken: String!
 }
 
-union LoginWithGoogleResult = InternalErrorRejection | LoginWithGoogleOutput | UnauthorizedRejection | ValidationRejection
+union LoginWithGoogleResult = BusinessRuleRejection | InternalErrorRejection | LoginWithGoogleOutput | UnauthorizedRejection | ValidationRejection
 
 input LogoutInput {
   refreshToken: String!
@@ -623,7 +623,7 @@ input RegisterUserInput {
   password: String!
 }
 
-union RegisterUserResult = CurrentUser | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection
+union RegisterUserResult = BusinessRuleRejection | CurrentUser | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection
 
 union RemoveEventAttendeeResult = BusinessRuleRejection | ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
@@ -742,7 +742,7 @@ input SendResetPasswordEmailInput {
   email: String!
 }
 
-union SendResetPasswordEmailResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
+union SendResetPasswordEmailResult = BusinessRuleRejection | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 
 input SetItemsPurchasedInput {
   itemIds: [ItemId!]!

@@ -1,6 +1,8 @@
 import type { UserPasswordVerificationId } from '@wishlist/common';
 import type { User } from './user.model';
 
+import { generateRandomToken } from '../../../core/common/random-token';
+
 export type UserPasswordVerificationProps = {
   id: UserPasswordVerificationId;
   user: User;
@@ -37,15 +39,11 @@ export class UserPasswordVerification {
     return new UserPasswordVerification({
       id: params.id,
       user: params.user,
-      token: params.token ?? UserPasswordVerification.generateToken(20),
+      token: params.token ?? generateRandomToken(20),
       expiredAt: params.expiredAt,
       createdAt: now,
       updatedAt: now,
     });
-  }
-
-  static generateToken(length: number): string {
-    return [...Array(length)].map(() => (~~(Math.random() * 36)).toString(36)).join('');
   }
 
   isExpired(): boolean {

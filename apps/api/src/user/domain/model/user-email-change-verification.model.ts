@@ -1,6 +1,8 @@
 import type { UserEmailChangeVerificationId } from '@wishlist/common';
 import type { User } from './user.model';
 
+import { generateRandomToken } from '../../../core/common/random-token';
+
 export type UserEmailChangeVerificationProps = {
   id: UserEmailChangeVerificationId;
   user: User;
@@ -42,15 +44,11 @@ export class UserEmailChangeVerification {
       id: params.id,
       user: params.user,
       newEmail: params.newEmail,
-      token: params.token ?? UserEmailChangeVerification.generateToken(20),
+      token: params.token ?? generateRandomToken(20),
       expiredAt: params.expiredAt,
       createdAt: now,
       updatedAt: now,
     });
-  }
-
-  static generateToken(length: number): string {
-    return [...Array(length)].map(() => (~~(Math.random() * 36)).toString(36)).join('');
   }
 
   isExpired(): boolean {

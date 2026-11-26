@@ -32,9 +32,15 @@ union LoginWithGoogleResult =
   | LoginWithGoogleOutput
   | ValidationRejection
   | UnauthorizedRejection
+  | BusinessRuleRejection
   | InternalErrorRejection
 
-union LoginResult = LoginOutput | ValidationRejection | UnauthorizedRejection | InternalErrorRejection
+union LoginResult =
+  | LoginOutput
+  | ValidationRejection
+  | UnauthorizedRejection
+  | BusinessRuleRejection
+  | InternalErrorRejection
 
 union RefreshSessionResult = LoginOutput | ValidationRejection | UnauthorizedRejection | InternalErrorRejection
 
