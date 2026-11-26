@@ -20,6 +20,8 @@ export interface NewItemsReminderEmailProps {
 // clients) so readers see each list is clickable.
 const wishlistLink: CSSProperties = {
   color: styles.colors.primary,
+  fontSize: '14px',
+  lineHeight: '20px',
   fontWeight: 'bold',
   textDecorationLine: 'underline',
   textDecoration: 'underline',
@@ -67,14 +69,11 @@ export default function NewItemsReminderEmail({ updates }: NewItemsReminderEmail
               margin: index === updates.length - 1 ? 0 : '0 0 16px 0',
             }}
           >
-            <b>{update.ownerName}</b> a ajouté <b>{itemsLabel(update.nbItems)}</b> sur{' '}
-            <Link href={update.wishlistUrl} style={wishlistLink}>
-              {update.wishlistTitle}
-            </Link>
+            <b>{update.ownerName}</b> a ajouté <b>{itemsLabel(update.nbItems)}</b> sur <b>{update.wishlistTitle}</b>
             <br />
             <span style={{ fontSize: '14px', lineHeight: '20px' }}>{eventsLabel(update.eventTitles)}</span>
             <br />
-            <Link href={update.wishlistUrl} style={{ ...wishlistLink, fontSize: '14px', lineHeight: '20px' }}>
+            <Link href={update.wishlistUrl} style={wishlistLink}>
               {`Voir la liste de ${update.ownerName} →`}
             </Link>
           </Text>
