@@ -217,6 +217,7 @@ export enum AttendeeRole {
 }
 
 export enum BusinessRuleCode {
+  EmailAlreadyTaken = 'EMAIL_ALREADY_TAKEN',
   InvalidUserMerge = 'INVALID_USER_MERGE',
   RateLimited = 'RATE_LIMITED',
   UserInStartedSecretSanta = 'USER_IN_STARTED_SECRET_SANTA',

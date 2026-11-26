@@ -288,7 +288,7 @@ describe('UserResolver (GraphQL)', () => {
       });
     });
 
-    it('should reject with UnauthorizedRejection when email already taken and not create a user', async () => {
+    it('should reject with an EMAIL_ALREADY_TAKEN BusinessRuleRejection when email already taken and not create a user', async () => {
       const anon = await getRequest();
       const input = {
         // BASE_USER already exists from beforeEach.
@@ -302,10 +302,7 @@ describe('UserResolver (GraphQL)', () => {
 
       const res = await anon.post('/graphql').send({ query: mutation, variables: { input } }).expect(200);
 
-      expect(res.body.data.registerUser).toMatchObject({
-        __typename: 'UnauthorizedRejection',
-        message: 'User email already taken',
-      });
+      expect(res.body.data.registerUser).toEqual({ __typename: 'BusinessRuleRejection', code: 'EMAIL_ALREADY_TAKEN' });
 
       // No extra user created.
       await expectTable(Fixtures.USER_TABLE).hasNumberOfRows(1);
