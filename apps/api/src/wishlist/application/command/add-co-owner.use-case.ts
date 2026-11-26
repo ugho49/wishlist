@@ -34,9 +34,9 @@ export class AddCoOwnerUseCase {
       throw new UnauthorizedException('Only the owner can add a co-owner');
     }
 
-    // Cannot add co-owner to private lists
-    if (wishlist.hideItems) {
-      throw new BadRequestException('Cannot add co-owner to private lists');
+    // A list in surprise mode is for its owner only
+    if (!wishlist.canHaveCoOwner()) {
+      throw new BadRequestException('Cannot add a co-owner to a list in surprise mode');
     }
 
     // Cannot add the owner as co-owner

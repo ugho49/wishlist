@@ -10,6 +10,7 @@ import {
   type Item as GqlItem,
   type User as GqlUser,
   type Wishlist as GqlWishlist,
+  WishlistMode as GqlWishlistMode,
 } from '../../../gql/generated-types';
 import { WishlistItem } from '../../../item/domain/wishlist-item.model';
 import { ItemsByWishlistId } from '../../../item/infrastructure/item.dataloader';
@@ -55,16 +56,13 @@ export class WishlistFieldResolver {
     @Loader() itemsLoader: Loader<ItemsByWishlistId>,
   ): Promise<GqlItem[]> {
     const items = await itemsLoader.load(wishlist.id);
-    const isOwner = currentUser.id === wishlist.ownerId;
-    const isCoOwner = currentUser.id === wishlist.coOwnerId;
-    const hideItems = wishlist.config.hideItems;
+    const isManager = currentUser.id === wishlist.ownerId || currentUser.id === wishlist.coOwnerId;
+    const isSurpriseForUser = wishlist.mode === GqlWishlistMode.Surprise && isManager;
 
-    const displayUserAndSuggested = WishlistItem.canDisplaySensitiveInformations({
-      wishlist: { hideItems, isOwner, isCoOwner },
-    });
+    const displayUserAndSuggested = WishlistItem.canDisplaySensitiveInformations({ isSurpriseForUser });
 
     return items
-      .filter(item => WishlistItem.canShowItem({ item, wishlist: { hideItems, isOwner, isCoOwner } }))
+      .filter(item => WishlistItem.canShowItem({ item, isSurpriseForUser }))
       .map(item => itemMapper.toGqlItem({ item, displayUserAndSuggested }));
   }
 }

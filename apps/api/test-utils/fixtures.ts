@@ -9,6 +9,7 @@ import { AttendeeRole } from '../src/event/domain/attendee-role.enum';
 import { type SecretSantaStatus } from '../src/secret-santa/domain/secret-santa-status.enum';
 import { Authorities } from '../src/user/domain/authorities.enum';
 import { parseUserAgent } from '../src/user/infrastructure/user-agent.parser';
+import { WishlistMode } from '../src/wishlist/domain/wishlist-mode.enum';
 
 function toSqlArray(values: readonly string[]): string {
   return `{${values.map(value => `"${value.replaceAll('\\', '\\\\').replaceAll('"', '\\"')}"`).join(',')}}`;
@@ -221,15 +222,15 @@ export class Fixtures {
     userId: string;
     title: string;
     description?: string;
-    hideItems?: boolean;
+    mode?: WishlistMode;
     coOwnerId?: string;
   }): Promise<string> {
     const id = uuid();
-    const { eventIds, title, description, userId, hideItems, coOwnerId } = parameters;
+    const { eventIds, title, description, userId, mode, coOwnerId } = parameters;
 
     await this.sql.unsafe(
-      `INSERT INTO ${Fixtures.WISHLIST_TABLE} (id, title, description, owner_id, hide_items, co_owner_id) VALUES ($1, $2, $3, $4, $5, $6)`,
-      [id, title, description, userId, hideItems ?? true, coOwnerId ?? null],
+      `INSERT INTO ${Fixtures.WISHLIST_TABLE} (id, title, description, owner_id, mode, co_owner_id) VALUES ($1, $2, $3, $4, $5, $6)`,
+      [id, title, description, userId, mode ?? WishlistMode.SURPRISE, coOwnerId ?? null],
     );
 
     for (const eventId of eventIds) {

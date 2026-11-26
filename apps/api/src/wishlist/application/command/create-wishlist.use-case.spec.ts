@@ -12,6 +12,7 @@ import { toCurrentUser, UserBuilder } from '../../../../test-utils/builders/user
 import { createMock } from '../../../../test-utils/mocks';
 import { Event } from '../../../event/domain/model/event.model';
 import { User } from '../../../user/domain/model/user.model';
+import { WishlistMode } from '../../domain/wishlist-mode.enum';
 import { CreateWishlistUseCase } from './create-wishlist.use-case';
 import { beforeEach, describe, expect, it, mock } from 'bun:test';
 
@@ -48,7 +49,7 @@ describe('CreateWishlistUseCase', () => {
     await expect(
       useCase.execute({
         currentUser: toCurrentUser(owner),
-        newWishlist: { title: 'Ma liste', eventIds: [event.id] },
+        newWishlist: { title: 'Ma liste', eventIds: [event.id], mode: WishlistMode.SURPRISE },
       }),
     ).rejects.toThrow(NotFoundException);
     expect(wishlistRepository.save).not.toHaveBeenCalled();
@@ -61,36 +62,41 @@ describe('CreateWishlistUseCase', () => {
     await expect(
       useCase.execute({
         currentUser: toCurrentUser(owner),
-        newWishlist: { title: 'Ma liste', eventIds: [event.id] },
+        newWishlist: { title: 'Ma liste', eventIds: [event.id], mode: WishlistMode.SURPRISE },
       }),
     ).rejects.toThrow(UnauthorizedException);
     expect(wishlistRepository.save).not.toHaveBeenCalled();
   });
 
-  it('should create a wishlist with hideItems defaulting to true', async () => {
+  it('should create a wishlist in surprise mode', async () => {
     const wishlist = await useCase.execute({
       currentUser: toCurrentUser(owner),
-      newWishlist: { title: 'Ma liste', description: 'Anniversaire', eventIds: [event.id] },
+      newWishlist: {
+        title: 'Ma liste',
+        description: 'Anniversaire',
+        eventIds: [event.id],
+        mode: WishlistMode.SURPRISE,
+      },
     });
 
     expect(wishlist.id).toBe(wishlistId);
     expect(wishlist.title).toBe('Ma liste');
     expect(wishlist.description).toBe('Anniversaire');
     expect(wishlist.ownerId).toBe(owner.id);
-    expect(wishlist.hideItems).toBe(true);
+    expect(wishlist.mode).toBe(WishlistMode.SURPRISE);
     expect(wishlist.eventIds).toEqual([event.id]);
     expect(wishlist.logoUrl).toBeUndefined();
     expect(wishlistRepository.save).toHaveBeenCalledWith(wishlist);
     expect(bucketService.uploadFile).not.toHaveBeenCalled();
   });
 
-  it('should create a wishlist with hideItems set to false when provided', async () => {
+  it('should create a wishlist in shared mode', async () => {
     const wishlist = await useCase.execute({
       currentUser: toCurrentUser(owner),
-      newWishlist: { title: 'Liste publique', eventIds: [event.id], hideItems: false },
+      newWishlist: { title: 'Liste de Léo', eventIds: [event.id], mode: WishlistMode.SHARED },
     });
 
-    expect(wishlist.hideItems).toBe(false);
+    expect(wishlist.mode).toBe(WishlistMode.SHARED);
     expect(wishlistRepository.save).toHaveBeenCalledWith(wishlist);
   });
 
@@ -99,7 +105,7 @@ describe('CreateWishlistUseCase', () => {
 
     const wishlist = await useCase.execute({
       currentUser: toCurrentUser(owner),
-      newWishlist: { title: 'Ma liste', eventIds: [event.id], imageFile },
+      newWishlist: { title: 'Ma liste', eventIds: [event.id], mode: WishlistMode.SURPRISE, imageFile },
     });
 
     expect(bucketService.getLogoDestination).toHaveBeenCalledWith(wishlistId);

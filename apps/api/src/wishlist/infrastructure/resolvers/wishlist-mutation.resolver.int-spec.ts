@@ -3,6 +3,8 @@ import type { RequestApp } from '@wishlist/api-test-utils';
 import { Fixtures, useTestApp } from '@wishlist/api-test-utils';
 import { uuid } from '@wishlist/common';
 
+import { WishlistMode } from '../../domain/wishlist-mode.enum';
+
 const GRAPHQL_PATH = '/graphql';
 
 /**
@@ -550,8 +552,8 @@ describe('WishlistMutationResolver (GraphQL)', () => {
         const wishlistId = await fixtures.insertWishlist({
           eventIds: [eventId],
           userId: currentUserId,
-          title: 'Public Wishlist',
-          hideItems: false,
+          title: 'Shared Wishlist',
+          mode: WishlistMode.SHARED,
         });
 
         const res = await request
@@ -604,7 +606,7 @@ describe('WishlistMutationResolver (GraphQL)', () => {
           eventIds: [eventId],
           userId: otherUserId,
           title: 'Other Wishlist',
-          hideItems: false,
+          mode: WishlistMode.SHARED,
         });
 
         const res = await request
@@ -674,8 +676,8 @@ describe('WishlistMutationResolver (GraphQL)', () => {
         const wishlistId = await fixtures.insertWishlist({
           eventIds: [eventId],
           userId: currentUserId,
-          title: 'Public Wishlist',
-          hideItems: false,
+          title: 'Shared Wishlist',
+          mode: WishlistMode.SHARED,
           coOwnerId,
         });
 
@@ -723,7 +725,7 @@ describe('WishlistMutationResolver (GraphQL)', () => {
           eventIds: [eventId],
           userId: otherUserId,
           title: 'Other Wishlist',
-          hideItems: false,
+          mode: WishlistMode.SHARED,
           coOwnerId,
         });
 

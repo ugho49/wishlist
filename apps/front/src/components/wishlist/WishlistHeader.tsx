@@ -8,6 +8,7 @@ import PublicIcon from '@mui/icons-material/Public';
 import { Button, Container, IconButton, styled, Tooltip, useMediaQuery } from '@mui/material';
 import { useNavigate, useSearch } from '@tanstack/react-router';
 
+import { WishlistMode } from '../../gql';
 import { getAvatarUrl } from '../../utils/wishlist.utils';
 import { Description } from '../common/Description';
 import { PageBreadcrumbs } from '../common/PageBreadcrumbs';
@@ -50,7 +51,7 @@ const ImportIconButton = styled(SquareIconButton)({
 export type WishlistHeaderProps = {
   wishlist: DetailedWishlist;
   currentUserCanEdit: boolean;
-  isPublic: boolean;
+  isShared: boolean;
   hasImportableItems: boolean;
   onOpenEventDialog: () => void;
   onOpenImportDialog: () => void;
@@ -59,7 +60,7 @@ export type WishlistHeaderProps = {
 export const WishlistHeader = ({
   wishlist,
   currentUserCanEdit,
-  isPublic,
+  isShared,
   hasImportableItems,
   onOpenEventDialog,
   onOpenImportDialog,
@@ -104,11 +105,11 @@ export const WishlistHeader = ({
             <CalendarMonthIcon />
             {eventsCount} {eventsCount > 1 ? 'évènements' : 'évènement'}
           </MetaChipButton>
-          {isPublic && (
+          {isShared && (
             <Tooltip title="Tout le monde peut ajouter, cocher ou voir les souhaits cochés, même les gestionnaires de la liste">
               <MetaChip className="success" tabIndex={0}>
                 <PublicIcon />
-                {WISHLIST_MODE_LABELS.shared}
+                {WISHLIST_MODE_LABELS[WishlistMode.Shared]}
               </MetaChip>
             </Tooltip>
           )}

@@ -12,6 +12,7 @@ import { CurrentUser } from '../../../auth/infrastructure/decorators/user.decora
 import { ImageResizer, MAX_IMAGE_SIZE } from '../../../core/bucket/image-resizer';
 import { CreateWishlistUseCase } from '../../application/command/create-wishlist.use-case';
 import { UploadWishlistLogoUseCase } from '../../application/command/upload-wishlist-logo.use-case';
+import { WishlistMode } from '../../domain/wishlist-mode.enum';
 import { type CreateWishlistForm, CreateWishlistFormSchema } from '../wishlist-http.schema';
 
 const LOGO_SIZE = { width: 500, height: 500 };
@@ -39,7 +40,7 @@ export class WishlistController {
         title: dto.title,
         description: dto.description,
         eventIds: dto.event_ids,
-        hideItems: dto.hide_items,
+        mode: dto.mode === 'SHARED' ? WishlistMode.SHARED : WishlistMode.SURPRISE,
         imageFile: imageFile ? await this.imageResizer.resize(imageFile, LOGO_SIZE) : undefined,
       },
     });

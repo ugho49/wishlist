@@ -9,6 +9,7 @@ import { WishlistItemBuilder } from '../../../../test-utils/builders/wishlist-it
 import { createMock } from '../../../../test-utils/mocks';
 import { User } from '../../../user/domain/model/user.model';
 import { Wishlist } from '../../../wishlist/domain/wishlist.model';
+import { WishlistMode } from '../../../wishlist/domain/wishlist-mode.enum';
 import { WishlistItem } from '../../domain/wishlist-item.model';
 import { DeleteItemUseCase } from './delete-item.use-case';
 import { beforeEach, describe, expect, it, mock } from 'bun:test';
@@ -28,7 +29,7 @@ describe('DeleteItemUseCase', () => {
 
     owner = new UserBuilder().withEmail('owner@test.fr').build();
     participant = new UserBuilder().withEmail('participant@test.fr').build();
-    wishlist = new WishlistBuilder().withOwner(owner).withHideItems(true).build();
+    wishlist = new WishlistBuilder().withOwner(owner).withMode(WishlistMode.SURPRISE).build();
     item = new WishlistItemBuilder().withWishlistId(wishlist.id).build();
 
     itemRepository.findByIdOrFail.mockResolvedValue(item);

@@ -8,9 +8,7 @@ query WishlistPage($wishlistId: WishlistId!) {
       logoUrl
       ownerId
       coOwnerId
-      config {
-        hideItems
-      }
+      mode
       owner {
         id
         firstName

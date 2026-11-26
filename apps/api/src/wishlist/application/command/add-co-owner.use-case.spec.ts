@@ -10,6 +10,7 @@ import { createMock } from '../../../../test-utils/mocks';
 import { User } from '../../../user/domain/model/user.model';
 import { UserAddedAsCoOwnerToWishlistEvent } from '../../domain/event/user-added-as-co-owner-to-wishlist.event';
 import { Wishlist } from '../../domain/wishlist.model';
+import { WishlistMode } from '../../domain/wishlist-mode.enum';
 import { AddCoOwnerUseCase } from './add-co-owner.use-case';
 import { beforeEach, describe, expect, it, mock } from 'bun:test';
 
@@ -28,7 +29,7 @@ describe('AddCoOwnerUseCase', () => {
 
     owner = new UserBuilder().withEmail('owner@test.fr').build();
     coOwner = new UserBuilder().withEmail('coowner@test.fr').build();
-    wishlist = new WishlistBuilder().withOwner(owner).withHideItems(false).build();
+    wishlist = new WishlistBuilder().withOwner(owner).withMode(WishlistMode.SHARED).build();
 
     wishlistRepository.findByIdOrFail.mockResolvedValue(wishlist);
     userRepository.findByIdOrFail.mockResolvedValue(coOwner);
@@ -50,7 +51,7 @@ describe('AddCoOwnerUseCase', () => {
 
   it('should reject when the wishlist is private', async () => {
     wishlistRepository.findByIdOrFail.mockResolvedValueOnce(
-      new WishlistBuilder().withOwner(owner).withHideItems(true).build(),
+      new WishlistBuilder().withOwner(owner).withMode(WishlistMode.SURPRISE).build(),
     );
 
     await expect(

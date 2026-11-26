@@ -3,6 +3,8 @@ import type { RequestApp } from '@wishlist/api-test-utils';
 import { Fixtures, useTestApp } from '@wishlist/api-test-utils';
 import { uuid } from '@wishlist/common';
 
+import { WishlistMode } from '../../domain/wishlist-mode.enum';
+
 type GraphQLResponseBody = {
   data?: Record<string, unknown>;
   errors?: { message: string; path?: string[] }[];
@@ -48,9 +50,7 @@ describe('WishlistResolver (GraphQL)', () => {
             ownerId
             coOwnerId
             eventIds
-            config {
-              hideItems
-            }
+            mode
             owner {
               id
               email
@@ -115,7 +115,7 @@ describe('WishlistResolver (GraphQL)', () => {
         userId: currentUserId,
         title: 'My wishlist',
         description: 'My wishlist description',
-        hideItems: false,
+        mode: WishlistMode.SHARED,
         coOwnerId,
       });
 
@@ -133,7 +133,7 @@ describe('WishlistResolver (GraphQL)', () => {
         ownerId: currentUserId,
         coOwnerId,
         eventIds: [eventId],
-        config: { hideItems: false },
+        mode: 'SHARED',
         owner: {
           id: currentUserId,
           email: Fixtures.BASE_USER_EMAIL,

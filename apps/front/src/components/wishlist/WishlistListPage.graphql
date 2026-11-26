@@ -7,9 +7,7 @@ query WishlistListPage($filters: PaginationFilters!) {
         title
         description
         logoUrl
-        config {
-          hideItems
-        }
+        mode
         events {
           id
           title

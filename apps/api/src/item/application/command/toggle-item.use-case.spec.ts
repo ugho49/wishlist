@@ -10,6 +10,7 @@ import { WishlistItemBuilder } from '../../../../test-utils/builders/wishlist-it
 import { createMock } from '../../../../test-utils/mocks';
 import { User } from '../../../user/domain/model/user.model';
 import { Wishlist } from '../../../wishlist/domain/wishlist.model';
+import { WishlistMode } from '../../../wishlist/domain/wishlist-mode.enum';
 import { WishlistItem } from '../../domain/wishlist-item.model';
 import { ToggleItemUseCase } from './toggle-item.use-case';
 import { beforeEach, describe, expect, it, mock } from 'bun:test';
@@ -30,7 +31,7 @@ describe('ToggleItemUseCase', () => {
 
     owner = new UserBuilder().withEmail('owner@test.fr').build();
     participant = new UserBuilder().withEmail('participant@test.fr').build();
-    wishlist = new WishlistBuilder().withOwner(owner).withHideItems(true).build();
+    wishlist = new WishlistBuilder().withOwner(owner).withMode(WishlistMode.SURPRISE).build();
     item = new WishlistItemBuilder().withWishlistId(wishlist.id).build();
 
     itemRepository.findByIdOrFail.mockResolvedValue(item);
@@ -85,7 +86,7 @@ describe('ToggleItemUseCase', () => {
     });
   });
 
-  describe('when the current user is the owner and hideItems is enabled', () => {
+  describe('when the current user is the owner of a list in surprise mode', () => {
     it('should reject checking their own items', async () => {
       await expect(useCase.execute({ currentUser: toCurrentUser(owner), itemId: item.id })).rejects.toThrow(
         UnauthorizedException,
@@ -127,10 +128,10 @@ describe('ToggleItemUseCase', () => {
     });
   });
 
-  describe('when the current user is the owner and hideItems is disabled', () => {
+  describe('when the current user is the owner of a list in shared mode', () => {
     it('should allow checking their own items', async () => {
-      const publicWishlist = new WishlistBuilder().withOwner(owner).withHideItems(false).build();
-      wishlistRepository.findByIdOrFail.mockResolvedValueOnce(publicWishlist);
+      const sharedWishlist = new WishlistBuilder().withOwner(owner).withMode(WishlistMode.SHARED).build();
+      wishlistRepository.findByIdOrFail.mockResolvedValueOnce(sharedWishlist);
       userRepository.findByIdOrFail.mockResolvedValueOnce(owner);
 
       const result = await useCase.execute({ currentUser: toCurrentUser(owner), itemId: item.id });

@@ -2,6 +2,7 @@ import type { EventAttendeeSeed, SeedDb, UserSeed, WishlistSeed } from './types'
 
 import { faker } from '@faker-js/faker';
 
+import { WishlistMode } from '../../src/wishlist/domain/wishlist-mode.enum';
 import * as schema from '../schema';
 import { seedConfig } from './config';
 import { chance, groupByKey, insertInBatches, intBetween, maybe, uuid } from './helpers';
@@ -30,7 +31,7 @@ export async function seedWishlists(
         title: `Liste de ${user.firstName} ${user.lastName}`,
         ownerId: user.id,
         description: maybe(seedConfig.wishlists.descriptionProbability, () => faker.lorem.paragraph()),
-        hideItems: chance(seedConfig.wishlists.hideItemsProbability),
+        mode: chance(seedConfig.wishlists.surpriseModeProbability) ? WishlistMode.SURPRISE : WishlistMode.SHARED,
       });
     }
   }

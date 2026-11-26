@@ -1,6 +1,5 @@
 import type { RootState } from '../../core/store';
 import type { SelectableEvent } from '../event/SearchEventSelect';
-import type { WishlistMode } from './wishlist-mode';
 
 import AccountCircleTwoToneIcon from '@mui/icons-material/AccountCircleTwoTone';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -43,7 +42,7 @@ import { useSelector } from 'react-redux';
 import { useInterval } from 'usehooks-ts';
 
 import { createWishlistMultipart } from '../../api/upload';
-import { isRejection, rejectionMessage, useEventSelectAvailableEventsQuery } from '../../gql';
+import { isRejection, rejectionMessage, useEventSelectAvailableEventsQuery, WishlistMode } from '../../gql';
 import { useObjectUrl, useToast } from '../../hooks';
 import { getRandomPlaceholderName } from '../../utils/wishlist.utils';
 import { Card } from '../common/Card';
@@ -196,7 +195,6 @@ export const CreateWishlistPage = () => {
   const [namePlaceholder, setNamePlaceholder] = useState<string>(getRandomPlaceholderName());
   const [logo, setLogo] = useState<File | undefined>();
   const logoUrl = useObjectUrl(logo);
-  const hideItems = mode !== 'shared';
 
   useInterval(() => {
     setNamePlaceholder(getRandomPlaceholderName());
@@ -231,7 +229,7 @@ export const CreateWishlistPage = () => {
   const chooseMode = (newMode: WishlistMode) => {
     if (newMode !== mode) {
       setMode(newMode);
-      setOwnerName(newMode === 'surprise' ? (userFirstName ?? '') : '');
+      setOwnerName(newMode === WishlistMode.Surprise ? (userFirstName ?? '') : '');
       setLogo(undefined);
     }
     setStep(2);
@@ -243,7 +241,7 @@ export const CreateWishlistPage = () => {
         {
           title: `Liste de ${ownerName.trim()}`,
           description: description === '' ? undefined : description,
-          hide_items: hideItems,
+          mode,
           event_ids: uniq(events.map(e => e.id)),
         },
         logo,
@@ -282,8 +280,8 @@ export const CreateWishlistPage = () => {
 
                 <Stack sx={{ gap: 2 }}>
                   <OptionCard
-                    className={clsx(mode === 'surprise' && 'selected')}
-                    onClick={() => chooseMode('surprise')}
+                    className={clsx(mode === WishlistMode.Surprise && 'selected')}
+                    onClick={() => chooseMode(WishlistMode.Surprise)}
                   >
                     <IconWrapper>
                       <AccountCircleTwoToneIcon />
@@ -291,7 +289,7 @@ export const CreateWishlistPage = () => {
                     <OptionBody>
                       <OptionHeader>
                         <OptionTitle>Moi</OptionTitle>
-                        <ModeBadge>{WISHLIST_MODE_LABELS.surprise}</ModeBadge>
+                        <ModeBadge>{WISHLIST_MODE_LABELS[WishlistMode.Surprise]}</ModeBadge>
                       </OptionHeader>
                       <OptionDescription>Votre liste de souhaits pour un anniversaire, Noël…</OptionDescription>
                       <OptionFacts>
@@ -307,14 +305,17 @@ export const CreateWishlistPage = () => {
                     </OptionBody>
                   </OptionCard>
 
-                  <OptionCard className={clsx(mode === 'shared' && 'selected')} onClick={() => chooseMode('shared')}>
+                  <OptionCard
+                    className={clsx(mode === WishlistMode.Shared && 'selected')}
+                    onClick={() => chooseMode(WishlistMode.Shared)}
+                  >
                     <IconWrapper>
                       <Diversity1TwoToneIcon />
                     </IconWrapper>
                     <OptionBody>
                       <OptionHeader>
                         <OptionTitle>Quelqu'un d'autre</OptionTitle>
-                        <ModeBadge>{WISHLIST_MODE_LABELS.shared}</ModeBadge>
+                        <ModeBadge>{WISHLIST_MODE_LABELS[WishlistMode.Shared]}</ModeBadge>
                       </OptionHeader>
                       <OptionDescription>
                         Un enfant, un proche sans compte… Vous gérez sa liste à sa place.
@@ -348,7 +349,7 @@ export const CreateWishlistPage = () => {
                   <WishlistPreview
                     title={`Liste de ${ownerName.trim() || '…'}`}
                     logoUrl={logoUrl}
-                    hideItems={hideItems}
+                    mode={mode}
                     ownerPictureUrl={userPictureUrl}
                     loading={loading}
                     onLogoChange={file => setLogo(file)}
@@ -356,7 +357,7 @@ export const CreateWishlistPage = () => {
                   />
 
                   {/* In surprise mode the list takes the user's first name, shown in the preview (editable later) */}
-                  {mode === 'shared' && (
+                  {mode === WishlistMode.Shared && (
                     <Stack direction="row" sx={{ gap: 3, alignItems: 'center' }}>
                       <ListOfTitle>Liste de</ListOfTitle>
                       <Box sx={{ flex: 1 }}>

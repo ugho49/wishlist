@@ -235,7 +235,7 @@ export type EventPageGetEventQueryVariables = Exact<{
 
 
 export type EventPageGetEventQuery = { event:
-    | { __typename: 'Event', id: Ids["EventId"], title: string, description: string | null, icon: string | null, eventDate: string, attendees: Array<{ id: Ids["AttendeeId"], pendingEmail: string | null, role: Types.AttendeeRole, user: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null } | null }>, wishlists: Array<{ id: Ids["WishlistId"], title: string, logoUrl: string | null, config: { hideItems: boolean }, owner: { id: Ids["UserId"], firstName: string, lastName: string, pictureUrl: string | null } }>, secretSanta: { id: Ids["SecretSantaId"], description: string | null, budget: number | null, status: Types.SecretSantaStatus, updatedAt: string, users: Array<{ id: Ids["SecretSantaUserId"], attendeeId: Ids["AttendeeId"] }> } | null }
+    | { __typename: 'Event', id: Ids["EventId"], title: string, description: string | null, icon: string | null, eventDate: string, attendees: Array<{ id: Ids["AttendeeId"], pendingEmail: string | null, role: Types.AttendeeRole, user: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null } | null }>, wishlists: Array<{ id: Ids["WishlistId"], title: string, logoUrl: string | null, mode: Types.WishlistMode, owner: { id: Ids["UserId"], firstName: string, lastName: string, pictureUrl: string | null } }>, secretSanta: { id: Ids["SecretSantaId"], description: string | null, budget: number | null, status: Types.SecretSantaStatus, updatedAt: string, users: Array<{ id: Ids["SecretSantaUserId"], attendeeId: Ids["AttendeeId"] }> } | null }
     | { __typename: 'ForbiddenRejection' }
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'NotFoundRejection', message: string }
@@ -273,7 +273,7 @@ export type AdminEventGetEventQueryVariables = Exact<{
 
 
 export type AdminEventGetEventQuery = { adminEvent:
-    | { __typename: 'Event', id: Ids["EventId"], title: string, description: string | null, icon: string | null, eventDate: string, createdAt: string, attendees: Array<{ id: Ids["AttendeeId"], pendingEmail: string | null, role: Types.AttendeeRole, user: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null } | null }>, wishlists: Array<{ id: Ids["WishlistId"], title: string, logoUrl: string | null, createdAt: string, config: { hideItems: boolean }, owner: { id: Ids["UserId"], firstName: string, lastName: string, pictureUrl: string | null }, coOwner: { id: Ids["UserId"], firstName: string, lastName: string } | null }> }
+    | { __typename: 'Event', id: Ids["EventId"], title: string, description: string | null, icon: string | null, eventDate: string, createdAt: string, attendees: Array<{ id: Ids["AttendeeId"], pendingEmail: string | null, role: Types.AttendeeRole, user: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null } | null }>, wishlists: Array<{ id: Ids["WishlistId"], title: string, logoUrl: string | null, mode: Types.WishlistMode, createdAt: string, owner: { id: Ids["UserId"], firstName: string, lastName: string, pictureUrl: string | null }, coOwner: { id: Ids["UserId"], firstName: string, lastName: string } | null }> }
     | { __typename: 'ForbiddenRejection' }
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'NotFoundRejection' }
@@ -926,7 +926,7 @@ export type WishlistListPageQueryVariables = Exact<{
 
 export type WishlistListPageQuery = { wishlists:
     | { __typename: 'ForbiddenRejection' }
-    | { __typename: 'GetWishlistsPagedResponse', data: Array<{ id: Ids["WishlistId"], title: string, description: string | null, logoUrl: string | null, config: { hideItems: boolean }, events: Array<{ id: Ids["EventId"], title: string, icon: string | null, eventDate: string }> }>, pagination: { totalPages: number, totalElements: number, pageNumber: number, pageSize: number } }
+    | { __typename: 'GetWishlistsPagedResponse', data: Array<{ id: Ids["WishlistId"], title: string, description: string | null, logoUrl: string | null, mode: Types.WishlistMode, events: Array<{ id: Ids["EventId"], title: string, icon: string | null, eventDate: string }> }>, pagination: { totalPages: number, totalElements: number, pageNumber: number, pageSize: number } }
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'UnauthorizedRejection' }
    };
@@ -1043,7 +1043,7 @@ export type WishlistPageQuery = { wishlist:
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'NotFoundRejection' }
     | { __typename: 'UnauthorizedRejection' }
-    | { __typename: 'Wishlist', id: Ids["WishlistId"], title: string, description: string | null, logoUrl: string | null, ownerId: Ids["UserId"], coOwnerId: Ids["UserId"] | null, createdAt: string, updatedAt: string, config: { hideItems: boolean }, owner: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null }, coOwner: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null } | null, events: Array<{ id: Ids["EventId"], title: string, icon: string | null, eventDate: string }>, items: Array<{ id: Ids["ItemId"], name: string, description: string | null, url: string | null, score: number | null, isSuggested: boolean | null, pictureUrl: string | null, createdAt: string, takers: Array<{ userId: Ids["UserId"], takenAt: string, user: { id: Ids["UserId"], firstName: string, lastName: string, pictureUrl: string | null } }> }> }
+    | { __typename: 'Wishlist', id: Ids["WishlistId"], title: string, description: string | null, logoUrl: string | null, ownerId: Ids["UserId"], coOwnerId: Ids["UserId"] | null, mode: Types.WishlistMode, createdAt: string, updatedAt: string, owner: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null }, coOwner: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null } | null, events: Array<{ id: Ids["EventId"], title: string, icon: string | null, eventDate: string }>, items: Array<{ id: Ids["ItemId"], name: string, description: string | null, url: string | null, score: number | null, isSuggested: boolean | null, pictureUrl: string | null, createdAt: string, takers: Array<{ userId: Ids["UserId"], takenAt: string, user: { id: Ids["UserId"], firstName: string, lastName: string, pictureUrl: string | null } }> }> }
    | null };
 
 export type AdminListWishlistsForUserQueryVariables = Exact<{
@@ -1052,7 +1052,7 @@ export type AdminListWishlistsForUserQueryVariables = Exact<{
 
 
 export type AdminListWishlistsForUserQuery = { adminWishlists:
-    | { __typename: 'AdminGetWishlists', data: Array<{ id: Ids["WishlistId"], title: string, logoUrl: string | null, coOwnerId: Ids["UserId"] | null, createdAt: string, config: { hideItems: boolean }, events: Array<{ id: Ids["EventId"], title: string }> }>, pagination: { totalPages: number, totalElements: number, pageNumber: number, pageSize: number } }
+    | { __typename: 'AdminGetWishlists', data: Array<{ id: Ids["WishlistId"], title: string, logoUrl: string | null, coOwnerId: Ids["UserId"] | null, mode: Types.WishlistMode, createdAt: string, events: Array<{ id: Ids["EventId"], title: string }> }>, pagination: { totalPages: number, totalElements: number, pageNumber: number, pageSize: number } }
     | { __typename: 'ForbiddenRejection' }
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'UnauthorizedRejection' }
@@ -1675,9 +1675,7 @@ export const EventPageGetEventDocument = new TypedDocumentString(`
         id
         title
         logoUrl
-        config {
-          hideItems
-        }
+        mode
         owner {
           id
           firstName
@@ -1841,9 +1839,7 @@ export const AdminEventGetEventDocument = new TypedDocumentString(`
         id
         title
         logoUrl
-        config {
-          hideItems
-        }
+        mode
         createdAt
         owner {
           id
@@ -3538,9 +3534,7 @@ export const WishlistListPageDocument = new TypedDocumentString(`
         title
         description
         logoUrl
-        config {
-          hideItems
-        }
+        mode
         events {
           id
           title
@@ -3778,9 +3772,7 @@ export const WishlistPageDocument = new TypedDocumentString(`
       logoUrl
       ownerId
       coOwnerId
-      config {
-        hideItems
-      }
+      mode
       owner {
         id
         firstName
@@ -3857,9 +3849,7 @@ export const AdminListWishlistsForUserDocument = new TypedDocumentString(`
         title
         logoUrl
         coOwnerId
-        config {
-          hideItems
-        }
+        mode
         createdAt
         events {
           id

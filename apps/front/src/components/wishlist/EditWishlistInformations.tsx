@@ -27,7 +27,6 @@ import { Subtitle } from '../common/Subtitle';
 import { TextareaMarkdown } from '../common/TextareaMarkdown';
 import { WishlistModeNotice } from './WishlistModeNotice';
 import { WishlistPreview } from './WishlistPreview';
-import { wishlistModeOf } from './wishlist-mode';
 
 export type EditWishlistInformationsProps = {
   wishlist: DetailedWishlist;
@@ -139,7 +138,7 @@ export const EditWishlistInformations = ({ wishlist }: EditWishlistInformationsP
           <WishlistPreview
             title={watchedTitle?.trim() || wishlist.title}
             logoUrl={logoUrl}
-            hideItems={wishlist.config.hideItems}
+            mode={wishlist.mode}
             ownerPictureUrl={wishlist.owner.pictureUrl}
             loading={loadingLogoUpdate}
             onLogoChange={async file => {
@@ -149,7 +148,7 @@ export const EditWishlistInformations = ({ wishlist }: EditWishlistInformationsP
               await removeLogo();
             }}
           />
-          <WishlistModeNotice mode={wishlistModeOf(wishlist.config.hideItems)} locked />
+          <WishlistModeNotice mode={wishlist.mode} locked />
           <Stack
             component="form"
             onSubmit={handleSubmit(onSubmit)}

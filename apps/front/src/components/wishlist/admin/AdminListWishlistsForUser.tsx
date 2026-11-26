@@ -8,7 +8,7 @@ import { keepPreviousData } from '@tanstack/react-query';
 import { DateTime } from 'luxon';
 import { useEffect, useMemo, useState } from 'react';
 
-import { isRejection, rejectionMessage, useAdminListWishlistsForUserQuery } from '../../../gql';
+import { isRejection, rejectionMessage, useAdminListWishlistsForUserQuery, WishlistMode } from '../../../gql';
 import { AdminDataGrid } from '../../admin/AdminDataGrid';
 import { RouterLink } from '../../common/RouterLink';
 
@@ -61,13 +61,13 @@ const getColumns = (userId: UserId): GridColDef<AdminUserWishlistRow>[] => [
     valueGetter: (_, row) => (userId === row.coOwnerId ? 'Co-propriétaire' : 'Propriétaire'),
   },
   {
-    field: 'config.hideItems',
-    headerName: 'Public',
+    field: 'mode',
+    headerName: 'Partagée',
     width: 90,
     sortable: false,
     filterable: false,
     type: 'boolean',
-    valueGetter: (_, row) => !row.config.hideItems,
+    valueGetter: (_, row) => row.mode === WishlistMode.Shared,
   },
   {
     field: 'createdAt',
