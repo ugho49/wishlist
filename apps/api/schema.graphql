@@ -200,6 +200,7 @@ enum AttendeeRole {
 }
 
 enum BusinessRuleCode {
+  EMAIL_ALREADY_TAKEN
   INVALID_USER_MERGE
   RATE_LIMITED
   USER_IN_STARTED_SECRET_SANTA

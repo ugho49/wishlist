@@ -8,6 +8,7 @@ export const BUSINESS_RULE_CODES = [
   'INVALID_USER_MERGE',
   'USER_IN_STARTED_SECRET_SANTA',
   'RATE_LIMITED',
+  'EMAIL_ALREADY_TAKEN',
 ] as const;
 
 export type BusinessRuleCode = (typeof BUSINESS_RULE_CODES)[number];

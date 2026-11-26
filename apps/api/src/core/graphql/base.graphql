@@ -20,6 +20,7 @@ enum BusinessRuleCode {
   INVALID_USER_MERGE
   USER_IN_STARTED_SECRET_SANTA
   RATE_LIMITED
+  EMAIL_ALREADY_TAKEN
 }
 
 type BusinessRuleRejection {

@@ -3,10 +3,10 @@ import type { UserAccountRepository } from '../../domain/repository/user-account
 
 import { Injectable } from '@znight/core';
 import { EventPublisher } from '@znight/events';
-import { UnauthorizedException } from '@znight/http';
 import { getLogger } from '@znight/observability';
 
 import { PasswordManager } from '../../../auth/infrastructure/util/password-manager';
+import { BusinessRuleException } from '../../../core/common/business-rule.exception';
 import { TransactionManager } from '../../../core/database/transaction-manager';
 import { UserCreatedEvent } from '../../domain/event/user-created.event';
 import { User } from '../../domain/model/user.model';
@@ -50,7 +50,7 @@ export class CreateUserUseCase {
     const { newUser } = input;
 
     if (await this.userRepository.findByEmail(newUser.email)) {
-      throw new UnauthorizedException('User email already taken');
+      throw new BusinessRuleException('EMAIL_ALREADY_TAKEN', 'User email already taken');
     }
 
     const user = User.create({

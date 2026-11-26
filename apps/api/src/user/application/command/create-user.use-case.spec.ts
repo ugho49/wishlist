@@ -4,10 +4,10 @@ import type { UserAccountRepository } from '../../domain/repository/user-account
 
 import { uuid } from '@wishlist/common';
 import { EventPublisher } from '@znight/events';
-import { UnauthorizedException } from '@znight/http';
 
 import { UserBuilder } from '../../../../test-utils/builders/user.builder';
 import { createMock } from '../../../../test-utils/mocks';
+import { BusinessRuleException } from '../../../core/common/business-rule.exception';
 import { TransactionManager } from '../../../core/database/transaction-manager';
 import { UserCreatedEvent } from '../../domain/event/user-created.event';
 import { User } from '../../domain/model/user.model';
@@ -40,16 +40,17 @@ describe('CreateUserUseCase', () => {
   it('should reject when the email is already taken', async () => {
     userRepository.findByEmail.mockResolvedValueOnce(new UserBuilder().withEmail('taken@test.fr').build());
 
-    await expect(
-      useCase.execute({
-        newUser: {
-          firstname: 'Jean',
-          lastname: 'Dupont',
-          email: 'taken@test.fr',
-          password: 'Secret123!',
-        },
-      }),
-    ).rejects.toThrow(UnauthorizedException);
+    const execution = useCase.execute({
+      newUser: {
+        firstname: 'Jean',
+        lastname: 'Dupont',
+        email: 'taken@test.fr',
+        password: 'Secret123!',
+      },
+    });
+
+    await expect(execution).rejects.toThrow(BusinessRuleException);
+    await expect(execution).rejects.toMatchObject({ code: 'EMAIL_ALREADY_TAKEN' });
     expect(userRepository.save).not.toHaveBeenCalled();
     expect(userAccountRepository.save).not.toHaveBeenCalled();
     expect(eventBus.publish).not.toHaveBeenCalled();

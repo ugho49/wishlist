@@ -102,8 +102,8 @@ export const RegisterPage = () => {
         setError('root', { message: SIGN_UP_RATE_LIMITED_MESSAGE });
         return false;
       })
-      .with({ __typename: 'ValidationRejection' }, () => {
-        setError('root', { message: 'Cet email est déjà utilisé' });
+      .with({ __typename: 'BusinessRuleRejection', code: BusinessRuleCode.EmailAlreadyTaken }, () => {
+        setError('email', { message: 'Cet email est déjà utilisé' });
         return false;
       })
       .with(rejectionPattern, rejection => {
