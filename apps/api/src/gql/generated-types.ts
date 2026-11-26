@@ -300,6 +300,8 @@ export type GetReservedItemsPagedResponse = {
   __typename: 'GetReservedItemsPagedResponse';
   data: Array<ReservedItem>;
   pagination: Pagination;
+  /** Gifts of the period the current user already bought, across every page. */
+  purchasedCount: Scalars['Int']['output'];
 };
 
 export type GetSecretSantaForEventResult = ForbiddenRejection | InternalErrorRejection | SecretSanta | UnauthorizedRejection;
@@ -358,6 +360,12 @@ export type Item = {
   score?: Maybe<Scalars['Int']['output']>;
   takers: Array<ItemTaker>;
   url?: Maybe<Scalars['String']['output']>;
+};
+
+export type ItemPurchaseState = {
+  __typename: 'ItemPurchaseState';
+  itemId: Scalars['ItemId']['output'];
+  purchasedAt?: Maybe<Scalars['String']['output']>;
 };
 
 export type ItemTaker = {
@@ -452,6 +460,8 @@ export type Mutation = {
   revokeSession: RevokeSessionResult;
   scanItemUrl: ScanItemUrlResult;
   sendResetPasswordEmail: SendResetPasswordEmailResult;
+  /** Marks or unmarks as bought gifts the current user reserved. All or nothing: one unknown or unreserved gift rejects the whole call. */
+  setItemsPurchased: SetItemsPurchasedResult;
   setSignupSource: SetSignupSourceResult;
   startSecretSanta: StartSecretSantaResult;
   toggleItem: ToggleItemResult;
@@ -684,6 +694,11 @@ export type MutationScanItemUrlArgs = {
 
 export type MutationSendResetPasswordEmailArgs = {
   input: SendResetPasswordEmailInput;
+};
+
+
+export type MutationSetItemsPurchasedArgs = {
+  input: SetItemsPurchasedInput;
 };
 
 
@@ -945,6 +960,8 @@ export type ReservedItem = {
   ownerFirstName: Scalars['String']['output'];
   ownerLastName: Scalars['String']['output'];
   pictureUrl?: Maybe<Scalars['String']['output']>;
+  /** When the current user marked the gift as bought. */
+  purchasedAt?: Maybe<Scalars['String']['output']>;
   score?: Maybe<Scalars['Int']['output']>;
   takenAt: Scalars['String']['output'];
   takers: Array<ReservedItemTaker>;
@@ -971,6 +988,7 @@ export type ReservedItemTaker = {
   firstName: Scalars['String']['output'];
   lastName: Scalars['String']['output'];
   pictureUrl?: Maybe<Scalars['String']['output']>;
+  purchasedAt?: Maybe<Scalars['String']['output']>;
   takenAt: Scalars['String']['output'];
   userId: Scalars['UserId']['output'];
 };
@@ -1038,6 +1056,18 @@ export type SendResetPasswordEmailInput = {
 };
 
 export type SendResetPasswordEmailResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+
+export type SetItemsPurchasedInput = {
+  itemIds: Array<Scalars['ItemId']['input']>;
+  purchased: Scalars['Boolean']['input'];
+};
+
+export type SetItemsPurchasedOutput = {
+  __typename: 'SetItemsPurchasedOutput';
+  items: Array<ItemPurchaseState>;
+};
+
+export type SetItemsPurchasedResult = InternalErrorRejection | NotFoundRejection | SetItemsPurchasedOutput | UnauthorizedRejection | ValidationRejection;
 
 export type SetSignupSourceInput = {
   detail?: InputMaybe<Scalars['String']['input']>;

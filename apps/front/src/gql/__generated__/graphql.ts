@@ -449,9 +449,22 @@ export type ReservedItemsListPageQueryVariables = Exact<{
 
 export type ReservedItemsListPageQuery = { myReservedItems:
     | { __typename: 'ForbiddenRejection' }
-    | { __typename: 'GetReservedItemsPagedResponse', data: Array<{ id: Ids["ItemId"], name: string, description: string | null, url: string | null, pictureUrl: string | null, takenAt: string, wishlistId: Ids["WishlistId"], wishlistTitle: string, ownerFirstName: string, ownerLastName: string, events: Array<{ id: Ids["EventId"], title: string, eventDate: string }>, takers: Array<{ userId: Ids["UserId"], firstName: string, lastName: string, pictureUrl: string | null, takenAt: string }> }>, pagination: { totalPages: number, totalElements: number, pageNumber: number, pageSize: number } }
+    | { __typename: 'GetReservedItemsPagedResponse', purchasedCount: number, data: Array<{ id: Ids["ItemId"], name: string, description: string | null, url: string | null, pictureUrl: string | null, takenAt: string, purchasedAt: string | null, wishlistId: Ids["WishlistId"], wishlistTitle: string, ownerFirstName: string, ownerLastName: string, events: Array<{ id: Ids["EventId"], title: string, eventDate: string }>, takers: Array<{ userId: Ids["UserId"], firstName: string, lastName: string, pictureUrl: string | null, takenAt: string, purchasedAt: string | null }> }>, pagination: { totalPages: number, totalElements: number, pageNumber: number, pageSize: number } }
     | { __typename: 'InternalErrorRejection' }
     | { __typename: 'UnauthorizedRejection' }
+   };
+
+export type SetItemsPurchasedMutationVariables = Exact<{
+  input: Types.SetItemsPurchasedInput;
+}>;
+
+
+export type SetItemsPurchasedMutation = { setItemsPurchased:
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'NotFoundRejection' }
+    | { __typename: 'SetItemsPurchasedOutput', items: Array<{ itemId: Ids["ItemId"], purchasedAt: string | null }> }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection' }
    };
 
 export type SecretSantaUserItemFragment = { id: Ids["SecretSantaUserId"], attendeeId: Ids["AttendeeId"], exclusions: Array<Ids["SecretSantaUserId"]>, attendee: { id: Ids["AttendeeId"], pendingEmail: string | null, role: Types.AttendeeRole, user: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null } | null } };
@@ -2274,6 +2287,7 @@ export const ReservedItemsListPageDocument = new TypedDocumentString(`
         url
         pictureUrl
         takenAt
+        purchasedAt
         wishlistId
         wishlistTitle
         ownerFirstName
@@ -2289,6 +2303,7 @@ export const ReservedItemsListPageDocument = new TypedDocumentString(`
           lastName
           pictureUrl
           takenAt
+          purchasedAt
         }
       }
       pagination {
@@ -2297,6 +2312,7 @@ export const ReservedItemsListPageDocument = new TypedDocumentString(`
         pageNumber
         pageSize
       }
+      purchasedCount
     }
   }
 }
@@ -2314,6 +2330,33 @@ export const useReservedItemsListPageQuery = <
       {
     queryKey: ['ReservedItemsListPage', variables],
     queryFn: fetchGql<ReservedItemsListPageQuery, ReservedItemsListPageQueryVariables>(ReservedItemsListPageDocument, variables),
+    ...options
+  }
+    )};
+
+export const SetItemsPurchasedDocument = new TypedDocumentString(`
+    mutation SetItemsPurchased($input: SetItemsPurchasedInput!) {
+  setItemsPurchased(input: $input) {
+    __typename
+    ... on SetItemsPurchasedOutput {
+      items {
+        itemId
+        purchasedAt
+      }
+    }
+  }
+}
+    `);
+
+export const useSetItemsPurchasedMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<SetItemsPurchasedMutation, TError, SetItemsPurchasedMutationVariables, TContext>) => {
+    
+    return useMutation<SetItemsPurchasedMutation, TError, SetItemsPurchasedMutationVariables, TContext>(
+      {
+    mutationKey: ['SetItemsPurchased'],
+    mutationFn: (variables?: SetItemsPurchasedMutationVariables) => fetchGql<SetItemsPurchasedMutation, SetItemsPurchasedMutationVariables>(SetItemsPurchasedDocument, variables)(),
     ...options
   }
     )};

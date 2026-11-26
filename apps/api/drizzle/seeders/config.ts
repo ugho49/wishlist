@@ -37,6 +37,7 @@ export const seedConfig = {
   },
   itemTakers: {
     takenProbability: 0.35,
+    purchasedProbability: 0.4,
     perItem: { min: 1, max: 3 },
   },
 } as const;

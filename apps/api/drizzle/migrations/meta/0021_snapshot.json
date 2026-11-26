@@ -1,6 +1,6 @@
 {
-  "id": "6305b785-aa10-4456-a463-a9abb9d33401",
-  "prevId": "8254c824-5b4d-44e2-b5c1-a4c059546a4d",
+  "id": "464c244d-a96f-44e1-94fb-7c76216f1f00",
+  "prevId": "049b4818-8787-48bc-9720-e8f0027654d8",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -59,15 +59,15 @@
           "columns": [
             {
               "expression": "\"title\" gin_trgm_ops",
-              "asc": true,
               "isExpression": true,
+              "asc": true,
               "nulls": "last"
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "gin",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {},
@@ -119,28 +119,28 @@
         "event_attendee_event_id_event_id_fk": {
           "name": "event_attendee_event_id_event_id_fk",
           "tableFrom": "event_attendee",
-          "tableTo": "event",
           "columnsFrom": ["event_id"],
+          "tableTo": "event",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "event_attendee_user_id_user_id_fk": {
           "name": "event_attendee_user_id_user_id_fk",
           "tableFrom": "event_attendee",
-          "tableTo": "user",
           "columnsFrom": ["user_id"],
+          "tableTo": "user",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "event_attendee_event_id_user_id_temp_user_email_key": {
           "name": "event_attendee_event_id_user_id_temp_user_email_key",
-          "nullsNotDistinct": false,
-          "columns": ["event_id", "user_id", "temp_user_email"]
+          "columns": ["event_id", "user_id", "temp_user_email"],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -174,20 +174,20 @@
         "event_wishlist_wishlist_id_wishlist_id_fk": {
           "name": "event_wishlist_wishlist_id_wishlist_id_fk",
           "tableFrom": "event_wishlist",
-          "tableTo": "wishlist",
           "columnsFrom": ["wishlist_id"],
+          "tableTo": "wishlist",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "event_wishlist_event_id_event_id_fk": {
           "name": "event_wishlist_event_id_event_id_fk",
           "tableFrom": "event_wishlist",
-          "tableTo": "event",
           "columnsFrom": ["event_id"],
+          "tableTo": "event",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {
@@ -280,20 +280,20 @@
         "item_wishlist_id_wishlist_id_fk": {
           "name": "item_wishlist_id_wishlist_id_fk",
           "tableFrom": "item",
-          "tableTo": "wishlist",
           "columnsFrom": ["wishlist_id"],
+          "tableTo": "wishlist",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "item_import_source_id_item_id_fk": {
           "name": "item_import_source_id_item_id_fk",
           "tableFrom": "item",
-          "tableTo": "item",
           "columnsFrom": ["import_source_id"],
+          "tableTo": "item",
           "columnsTo": ["id"],
-          "onDelete": "set null",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "set null"
         }
       },
       "compositePrimaryKeys": {},
@@ -329,11 +329,11 @@
         "item_digest_receipt_user_id_fkey": {
           "name": "item_digest_receipt_user_id_fkey",
           "tableFrom": "item_digest_receipt",
-          "tableTo": "user",
           "columnsFrom": ["user_id"],
+          "tableTo": "user",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {
@@ -368,6 +368,12 @@
           "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true
+        },
+        "purchased_at": {
+          "name": "purchased_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},
@@ -375,20 +381,20 @@
         "item_taker_item_id_item_id_fk": {
           "name": "item_taker_item_id_item_id_fk",
           "tableFrom": "item_taker",
-          "tableTo": "item",
           "columnsFrom": ["item_id"],
+          "tableTo": "item",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "item_taker_user_id_user_id_fk": {
           "name": "item_taker_user_id_user_id_fk",
           "tableFrom": "item_taker",
-          "tableTo": "user",
           "columnsFrom": ["user_id"],
+          "tableTo": "user",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {
@@ -457,19 +463,19 @@
         "secret_santa_event_id_event_id_fk": {
           "name": "secret_santa_event_id_event_id_fk",
           "tableFrom": "secret_santa",
-          "tableTo": "event",
           "columnsFrom": ["event_id"],
+          "tableTo": "event",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "secret_santa_event_id_unique": {
           "name": "secret_santa_event_id_unique",
-          "nullsNotDistinct": false,
-          "columns": ["event_id"]
+          "columns": ["event_id"],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -550,29 +556,29 @@
             }
           ],
           "isUnique": true,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "secret_santa_user_secret_santa_id_secret_santa_id_fk": {
           "name": "secret_santa_user_secret_santa_id_secret_santa_id_fk",
           "tableFrom": "secret_santa_user",
-          "tableTo": "secret_santa",
           "columnsFrom": ["secret_santa_id"],
+          "tableTo": "secret_santa",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "secret_santa_user_attendee_id_event_attendee_id_fk": {
           "name": "secret_santa_user_attendee_id_event_attendee_id_fk",
           "tableFrom": "secret_santa_user",
-          "tableTo": "event_attendee",
           "columnsFrom": ["attendee_id"],
+          "tableTo": "event_attendee",
           "columnsTo": ["id"],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -670,15 +676,15 @@
           "columns": [
             {
               "expression": "lower((email)::text)",
-              "asc": true,
               "isExpression": true,
+              "asc": true,
               "nulls": "last"
             }
           ],
           "isUnique": true,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {},
@@ -768,29 +774,29 @@
             }
           ],
           "isUnique": true,
-          "where": "\"user_account\".\"provider_account_id\" IS NOT NULL",
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "where": "\"user_account\".\"provider_account_id\" IS NOT NULL",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "user_account_user_id_fkey": {
           "name": "user_account_user_id_fkey",
           "tableFrom": "user_account",
-          "tableTo": "user",
           "columnsFrom": ["user_id"],
+          "tableTo": "user",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "user_account_user_id_provider_key": {
           "name": "user_account_user_id_provider_key",
-          "nullsNotDistinct": false,
-          "columns": ["user_id", "provider"]
+          "columns": ["user_id", "provider"],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -851,11 +857,11 @@
         "user_email_change_verification_user_id_fkey": {
           "name": "user_email_change_verification_user_id_fkey",
           "tableFrom": "user_email_change_verification",
-          "tableTo": "user",
           "columnsFrom": ["user_id"],
+          "tableTo": "user",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -914,19 +920,19 @@
         "user_email_setting_user_id_fkey": {
           "name": "user_email_setting_user_id_fkey",
           "tableFrom": "user_email_setting",
-          "tableTo": "user",
           "columnsFrom": ["user_id"],
+          "tableTo": "user",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "user_email_setting_user_id_key": {
           "name": "user_email_setting_user_id_key",
-          "nullsNotDistinct": false,
-          "columns": ["user_id"]
+          "columns": ["user_id"],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -981,11 +987,11 @@
         "user_password_verification_user_id_fkey": {
           "name": "user_password_verification_user_id_fkey",
           "tableFrom": "user_password_verification",
-          "tableTo": "user",
           "columnsFrom": ["user_id"],
+          "tableTo": "user",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -1120,9 +1126,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "user_session_user_id_active_idx": {
           "name": "user_session_user_id_active_idx",
@@ -1135,10 +1141,10 @@
             }
           ],
           "isUnique": false,
-          "where": "\"user_session\".\"revoked_at\" IS NULL",
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "where": "\"user_session\".\"revoked_at\" IS NULL",
+          "concurrently": false
         },
         "user_session_revoked_at_idx": {
           "name": "user_session_revoked_at_idx",
@@ -1151,29 +1157,29 @@
             }
           ],
           "isUnique": false,
-          "where": "\"user_session\".\"revoked_at\" IS NOT NULL",
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "where": "\"user_session\".\"revoked_at\" IS NOT NULL",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "user_session_user_id_fkey": {
           "name": "user_session_user_id_fkey",
           "tableFrom": "user_session",
-          "tableTo": "user",
           "columnsFrom": ["user_id"],
+          "tableTo": "user",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "user_session_token_hash_key": {
           "name": "user_session_token_hash_key",
-          "nullsNotDistinct": false,
-          "columns": ["token_hash"]
+          "columns": ["token_hash"],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -1214,13 +1220,12 @@
           "primaryKey": false,
           "notNull": false
         },
-        "mode": {
-          "name": "mode",
-          "type": "wishlist_mode",
-          "typeSchema": "public",
+        "hide_items": {
+          "name": "hide_items",
+          "type": "boolean",
           "primaryKey": false,
           "notNull": true,
-          "default": "'surprise'"
+          "default": true
         },
         "logo_url": {
           "name": "logo_url",
@@ -1248,20 +1253,20 @@
         "wishlist_owner_id_user_id_fk": {
           "name": "wishlist_owner_id_user_id_fk",
           "tableFrom": "wishlist",
-          "tableTo": "user",
           "columnsFrom": ["owner_id"],
+          "tableTo": "user",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "wishlist_co_owner_id_user_id_fk": {
           "name": "wishlist_co_owner_id_user_id_fk",
           "tableFrom": "wishlist",
-          "tableTo": "user",
           "columnsFrom": ["co_owner_id"],
+          "tableTo": "user",
           "columnsTo": ["id"],
-          "onDelete": "set null",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "set null"
         }
       },
       "compositePrimaryKeys": {},
@@ -1306,18 +1311,13 @@
       "name": "user_session_device_type",
       "schema": "public",
       "values": ["mobile", "tablet", "desktop", "unknown"]
-    },
-    "public.wishlist_mode": {
-      "name": "wishlist_mode",
-      "schema": "public",
-      "values": ["surprise", "shared"]
     }
   },
   "schemas": {},
+  "views": {},
   "sequences": {},
   "roles": {},
   "policies": {},
-  "views": {},
   "_meta": {
     "columns": {},
     "schemas": {},

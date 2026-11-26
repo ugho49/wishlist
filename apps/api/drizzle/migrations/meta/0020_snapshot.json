@@ -1,5 +1,5 @@
 {
-  "id": "8254c824-5b4d-44e2-b5c1-a4c059546a4d",
+  "id": "049b4818-8787-48bc-9720-e8f0027654d8",
   "prevId": "0fe3b977-b81c-4bb5-b4fc-c9f734336071",
   "version": "7",
   "dialect": "postgresql",
@@ -368,6 +368,12 @@
           "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true
+        },
+        "purchased_at": {
+          "name": "purchased_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},
@@ -1221,14 +1227,6 @@
           "notNull": true,
           "default": true
         },
-        "mode": {
-          "name": "mode",
-          "type": "wishlist_mode",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'surprise'"
-        },
         "logo_url": {
           "name": "logo_url",
           "type": "varchar(1000)",
@@ -1313,11 +1311,6 @@
       "name": "user_session_device_type",
       "schema": "public",
       "values": ["mobile", "tablet", "desktop", "unknown"]
-    },
-    "public.wishlist_mode": {
-      "name": "wishlist_mode",
-      "schema": "public",
-      "values": ["surprise", "shared"]
     }
   },
   "schemas": {},
