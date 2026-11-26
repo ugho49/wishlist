@@ -12,7 +12,7 @@ export interface AddedToEventEmailProps {
 
 export default function AddedToEventEmail({ eventTitle, eventUrl, invitedBy }: AddedToEventEmailProps) {
   return (
-    <EmailLayout preview={`${invitedBy} vous a invité(e) à un événement sur Wishlist`}>
+    <EmailLayout preview={`${invitedBy} vous a invité(e) à un événement sur Wishlist`} genie="calendar">
       <ContentSection>
         <Heading>Nouvelle invitation à un événement ! 🎊</Heading>
         <Paragraph style={{ margin: 0 }}>

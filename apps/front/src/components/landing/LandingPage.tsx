@@ -1,17 +1,32 @@
-import { Box } from '@mui/material';
+import { styled } from '@mui/material';
 
 import { FAQSection } from './FAQSection';
-import { FeaturesGridSection } from './FeaturesGrid';
+import { FeaturesSection } from './FeaturesSection';
+import { FinalCtaSection } from './FinalCtaSection';
 import { FooterSection } from './FooterSection';
-import { GetStartedSection } from './GetStartedSection';
 import { HeroSection } from './HeroSection';
+import { HowItWorksSection } from './HowItWorksSection';
+import { LandingNav } from './LandingNav';
+import { SecretSantaSection } from './SecretSantaSection';
+import { SurpriseSection } from './SurpriseSection';
+
+const LandingRoot = styled('div')(({ theme }) => ({
+  backgroundColor: theme.palette.common.white,
+  overflowX: 'clip',
+}));
 
 export const LandingPage = () => (
-  <Box>
-    <HeroSection />
-    <FeaturesGridSection />
-    <GetStartedSection />
-    <FAQSection />
+  <LandingRoot id="top">
+    <LandingNav />
+    <main>
+      <HeroSection />
+      <HowItWorksSection />
+      <SurpriseSection />
+      <FeaturesSection />
+      <SecretSantaSection />
+      <FAQSection />
+      <FinalCtaSection />
+    </main>
     <FooterSection />
-  </Box>
+  </LandingRoot>
 );

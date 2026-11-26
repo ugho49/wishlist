@@ -36,7 +36,7 @@ export default function NewItemsReminderEmail({ updates }: NewItemsReminderEmail
   const title = digestTitle(updates);
 
   return (
-    <EmailLayout preview={title}>
+    <EmailLayout preview={title} genie="wishlist">
       <ContentSection>
         <Heading>{title}</Heading>
         <Paragraph style={{ margin: 0 }}>

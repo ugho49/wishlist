@@ -238,7 +238,7 @@ export const ImportItemsDialog = ({
     >
       <AppBar sx={{ position: 'sticky', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%)' }}>
         <Toolbar sx={{ justifyContent: 'space-between' }}>
-          <Typography sx={{ ml: 2, flex: 1, textTransform: 'uppercase' }} variant="h6" component="div">
+          <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
             Importer des souhaits
           </Typography>
           <IconButton edge="start" color="inherit" onClick={handleSkip} aria-label="close">

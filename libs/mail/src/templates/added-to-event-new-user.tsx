@@ -16,7 +16,7 @@ export default function AddedToEventNewUserEmail({
   invitedBy,
 }: AddedToEventNewUserEmailProps) {
   return (
-    <EmailLayout preview={`${invitedBy} vous invite à rejoindre Wishlist`}>
+    <EmailLayout preview={`${invitedBy} vous invite à rejoindre Wishlist`} genie="calendar">
       <ContentSection>
         <Heading>Vous êtes invité(e) ! 🎉</Heading>
         <Paragraph style={{ margin: 0 }}>

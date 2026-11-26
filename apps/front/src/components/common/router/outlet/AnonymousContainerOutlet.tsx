@@ -1,4 +1,4 @@
-import { Box, Container, Stack, styled } from '@mui/material';
+import { Box, Container, Stack, styled, useMediaQuery, useTheme } from '@mui/material';
 import { Outlet, useNavigate } from '@tanstack/react-router';
 
 import { Card } from '../../Card';
@@ -13,9 +13,9 @@ const Root = styled(Box)(({ theme }) => ({
 
 const LogoContainer = styled(Box)({
   cursor: 'pointer',
-  color: 'primary.main',
+  transition: 'transform 0.2s ease-in-out',
   '&:hover': {
-    opacity: 0.8,
+    transform: 'translateY(-2px)',
   },
 });
 
@@ -27,6 +27,8 @@ const OutletContainer = styled(Card)(() => ({
 
 export const AnonymousContainerOutlet = () => {
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'), { noSsr: true });
 
   return (
     <Root>
@@ -39,7 +41,7 @@ export const AnonymousContainerOutlet = () => {
           }}
         >
           <LogoContainer onClick={() => navigate({ to: '/' })}>
-            <Logo height={48} variant="full" />
+            <Logo tone="light" height={isSmallScreen ? 72 : 100} />
           </LogoContainer>
 
           <OutletContainer>

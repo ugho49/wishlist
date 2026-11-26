@@ -1,13 +1,14 @@
 import type { RootState } from '../core/store';
 
 import { GoogleOAuthProvider } from '@react-oauth/google';
-import { createRootRoute, Navigate, Outlet } from '@tanstack/react-router';
+import { createRootRoute, Outlet } from '@tanstack/react-router';
 import { FeatureFlags } from '@wishlist/common';
 import { useLDClient } from 'launchdarkly-react-client-sdk';
 import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 
 import { MaintenancePage } from '../components/common/MaintenancePage';
+import { NotFoundPage } from '../components/common/NotFoundPage';
 import { ScrollToTop } from '../components/common/ScrollToTop';
 import { SEO } from '../components/SEO';
 import { SessionWatcher } from '../core/router/SessionWatcher';
@@ -17,7 +18,7 @@ import { useFeatureFlag } from '../hooks/useFeatureFlag';
 const mapUserProfileState = (state: RootState) => state.userProfile;
 
 export const Route = createRootRoute({
-  notFoundComponent: () => <Navigate to="/" />,
+  notFoundComponent: NotFoundPage,
   component: () => {
     const maintenancePageEnabled = useFeatureFlag(FeatureFlags.FRONTEND_MAINTENANCE_PAGE_ENABLED);
     const ldClient = useLDClient();

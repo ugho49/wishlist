@@ -11,7 +11,8 @@ export type SubtitleProps = {
 const TypographyStyled = styled(Typography)(({ theme }) => ({
   marginBottom: 28,
   color: theme.palette.primary.dark,
-  fontWeight: 400,
+  fontFamily: theme.typography.h1.fontFamily,
+  fontWeight: 500,
   fontSize: '1.4rem',
   lineHeight: '1.334',
 }));

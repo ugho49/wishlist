@@ -10,7 +10,7 @@ export interface WelcomeUserEmailProps {
 
 export default function WelcomeUserEmail({ mainUrl }: WelcomeUserEmailProps) {
   return (
-    <EmailLayout preview="Bienvenue sur Wishlist !">
+    <EmailLayout preview="Bienvenue sur Wishlist !" genie="hello">
       <ContentSection style={{ padding: '40px 30px 20px 30px' }}>
         <Heading style={{ fontSize: '28px', lineHeight: '34px' }}>Bienvenue sur Wishlist ! 🎉</Heading>
         <Paragraph style={{ textAlign: 'center', margin: '0 0 10px 0' }}>

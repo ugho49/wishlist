@@ -75,13 +75,12 @@ const WishlistTitleContainer = styled('div')({
 
 const WishlistTitle = styled('div')(({ theme }) => ({
   color: theme.palette.primary.main,
+  fontFamily: theme.typography.h1.fontFamily,
   fontWeight: 600,
-  fontSize: '1rem',
+  fontSize: '1.125rem',
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
-  textTransform: 'uppercase',
-  letterSpacing: '0.05em',
   textAlign: 'center',
   maxWidth: '100%',
 }));

@@ -163,7 +163,7 @@ export const AddSecretSantaUsersFormDialog = ({
     >
       <AppBar sx={{ position: 'sticky' }}>
         <Toolbar sx={{ justifyContent: 'space-between' }}>
-          <Typography sx={{ ml: 2, flex: 1, textTransform: 'uppercase' }} variant="h6" component="div">
+          <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
             Ajouter des participants
           </Typography>
           <IconButton edge="start" color="inherit" disabled={loading} onClick={handleClose} aria-label="close">

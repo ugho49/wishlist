@@ -1,5 +1,6 @@
-import { Box, Button, Stack } from '@mui/material';
+import { Box, Button } from '@mui/material';
 
+import { EmptyState } from '../common/EmptyState';
 import { RouterLink } from '../common/RouterLink';
 import { Title } from '../common/Title';
 
@@ -8,19 +9,16 @@ export const EventNotFound = () => (
     <Title breadcrumbs={[{ label: 'Évènements', to: '/events' }, { label: 'Évènement introuvable' }]}>
       Évènement introuvable
     </Title>
-    <Stack
-      sx={{
-        alignItems: 'center',
-      }}
-    >
-      <p>Cet évènement n'existe pas ou bien n'est pas accessible</p>
-      <p>
-        <b>Plusieurs raison possible :</b> celui ci à été supprimé, vous n'avez pas les droits pour y accéder ou bien il
-        n'existe pas.
-      </p>
-      <Button variant="contained" component={RouterLink} to="/events" color="secondary">
-        Voir mes évènements
-      </Button>
-    </Stack>
+    <EmptyState
+      genieVariant="lost"
+      sx={{ marginTop: 4 }}
+      title="Même le génie ne le trouve pas…"
+      subtitle="Cet évènement a peut-être été supprimé, ou vous n'avez pas les droits pour y accéder."
+      actions={
+        <Button variant="contained" size="large" component={RouterLink} to="/events">
+          Voir mes évènements
+        </Button>
+      }
+    />
   </Box>
 );

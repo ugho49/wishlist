@@ -2,7 +2,6 @@ import type { PropsWithChildren } from 'react';
 
 import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
 import { Button, type ButtonProps, styled } from '@mui/material';
-import clsx from 'clsx';
 
 const ButtonStyled = styled(Button)({
   background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
@@ -16,30 +15,12 @@ const ButtonStyled = styled(Button)({
     color: 'white',
     opacity: 0.5,
   },
-  '&.rounded': {
-    borderRadius: '24px',
-  },
 });
 
-export type ImportButtonProps = PropsWithChildren<
-  ButtonProps & {
-    rounded?: boolean;
-  }
->;
+export type ImportButtonProps = PropsWithChildren<ButtonProps>;
 
-export const ImportItemsButton = ({
-  children,
-  size = 'small',
-  rounded = false,
-  className,
-  ...props
-}: ImportButtonProps) => (
-  <ButtonStyled
-    startIcon={<AutoFixHighIcon />}
-    size={size}
-    className={clsx(className, rounded && 'rounded')}
-    {...props}
-  >
+export const ImportItemsButton = ({ children, size = 'small', ...props }: ImportButtonProps) => (
+  <ButtonStyled startIcon={<AutoFixHighIcon />} size={size} {...props}>
     {children}
   </ButtonStyled>
 );
