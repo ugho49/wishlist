@@ -1,9 +1,10 @@
 import type { ICurrentUser } from '@wishlist/common';
 
 import { type UserAccountId, type UserId } from '@wishlist/common';
-import { Args, Ctx, type GraphQLContext, Loader, Mutation, Query, Resolver } from '@znight/graphql';
+import { Args, Loader, Mutation, Query, Resolver } from '@znight/graphql';
 
 import { Authenticated, Public } from '../../../auth/infrastructure/decorators/public.metadata';
+import { RateLimit } from '../../../auth/infrastructure/decorators/rate-limit.decorator';
 import { CurrentUser, CurrentUserId } from '../../../auth/infrastructure/decorators/user.decorator';
 import {
   type ChangeUserPasswordInput,
@@ -129,12 +130,12 @@ export class UserResolver {
   }
 
   @Query()
+  @RateLimit('userByEmail')
   async userByEmail(
     @Args('email', UserByEmailSchema) email: string,
     @CurrentUser() currentUser: ICurrentUser,
-    @Ctx() ctx: GraphQLContext,
   ): Promise<UserByEmailResult> {
-    const { user } = await this.findUserByEmailUseCase.execute({ currentUser, email, ip: ctx.http?.ip });
+    const { user } = await this.findUserByEmailUseCase.execute({ currentUser, email });
 
     return {
       __typename: 'UserByEmailOutput',
