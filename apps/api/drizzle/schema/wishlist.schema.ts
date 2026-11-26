@@ -1,11 +1,15 @@
 import { relations, sql } from 'drizzle-orm';
-import { boolean, check, foreignKey, pgTable, text, varchar } from 'drizzle-orm/pg-core';
+import { check, foreignKey, pgEnum, pgTable, text, varchar } from 'drizzle-orm/pg-core';
 
+import { WishlistMode } from '../../src/wishlist/domain/wishlist-mode.enum';
+import { tsEnumToPgEnum } from '../enum';
 import { timestamps } from '../helpers';
 import { userId, wishlistId } from '../ids';
 import { eventWishlist } from './event-wishlist.schema';
 import { item } from './item.schema';
 import { user } from './user.schema';
+
+export const wishlistModeEnum = pgEnum('wishlist_mode', tsEnumToPgEnum(WishlistMode));
 
 export const wishlist = pgTable(
   'wishlist',
@@ -15,7 +19,7 @@ export const wishlist = pgTable(
     description: text(),
     ownerId: userId('owner_id').notNull(),
     coOwnerId: userId('co_owner_id'),
-    hideItems: boolean('hide_items').default(true).notNull(),
+    mode: wishlistModeEnum().default(WishlistMode.SURPRISE).notNull(),
     logoUrl: varchar('logo_url', { length: 1000 }),
     ...timestamps,
   },

@@ -23,9 +23,7 @@ query EventPageGetEvent($eventId: EventId!) {
         id
         title
         logoUrl
-        config {
-          hideItems
-        }
+        mode
         owner {
           id
           firstName

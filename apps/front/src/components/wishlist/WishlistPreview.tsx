@@ -4,6 +4,7 @@ import CameraAltOutlinedIcon from '@mui/icons-material/CameraAltOutlined';
 import { Button, ButtonBase, Stack, styled } from '@mui/material';
 import { useRef, useState } from 'react';
 
+import { WishlistMode } from '../../gql';
 import { ACCEPT_IMG, sanitizeImgToUrl } from '../../utils/images.utils';
 import { getAvatarUrl } from '../../utils/wishlist.utils';
 import { AvatarCropperModal } from '../common/AvatarCropperModal';
@@ -75,10 +76,10 @@ const PreviewCaptionStyled = styled('span')(({ theme }) => ({
   color: theme.palette.text.secondary,
 }));
 
-const logoCaption = (params: { hasLogo: boolean; hideItems: boolean }): string => {
+const logoCaption = (params: { hasLogo: boolean; mode: WishlistMode }): string => {
   if (params.hasLogo) return 'Image personnalisée';
   // Same fallback as getAvatarUrl: only the lists in surprise mode show the owner's picture
-  if (params.hideItems) return 'Par défaut, votre photo de profil';
+  if (params.mode === WishlistMode.Surprise) return 'Par défaut, votre photo de profil';
   return 'Ajoutez une photo de la personne';
 };
 
@@ -86,7 +87,7 @@ export type WishlistPreviewProps = {
   title: string;
   /** Custom logo of the list, if any. */
   logoUrl?: string;
-  hideItems: boolean;
+  mode: WishlistMode;
   ownerPictureUrl?: string | null;
   loading: boolean;
   onLogoChange: (file: File) => void | Promise<void>;
@@ -98,11 +99,11 @@ export type WishlistPreviewProps = {
  * Without a custom logo, it shows the same fallback as the list cards and header.
  */
 export const WishlistPreview = (props: WishlistPreviewProps) => {
-  const { title, logoUrl, hideItems, ownerPictureUrl, loading, onLogoChange, onLogoRemove } = props;
+  const { title, logoUrl, mode, ownerPictureUrl, loading, onLogoChange, onLogoRemove } = props;
   const [tmpLogoSrc, setTmpLogoSrc] = useState<string | undefined>();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const avatarUrl = getAvatarUrl({ wishlist: { logoUrl, config: { hideItems } }, ownerPictureUrl });
+  const avatarUrl = getAvatarUrl({ wishlist: { logoUrl, mode }, ownerPictureUrl });
   const openFilePicker = () => fileInputRef.current?.click();
 
   const onLogoInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -138,7 +139,7 @@ export const WishlistPreview = (props: WishlistPreviewProps) => {
 
         <PreviewTextStyled>
           <PreviewTitleStyled>{title}</PreviewTitleStyled>
-          <PreviewCaptionStyled>{logoCaption({ hasLogo: !!logoUrl, hideItems })}</PreviewCaptionStyled>
+          <PreviewCaptionStyled>{logoCaption({ hasLogo: !!logoUrl, mode })}</PreviewCaptionStyled>
           <Stack direction="row" sx={{ gap: 1, marginTop: 0.5, marginLeft: -1 }}>
             <Button size="small" onClick={openFilePicker} disabled={loading}>
               Changer l'image

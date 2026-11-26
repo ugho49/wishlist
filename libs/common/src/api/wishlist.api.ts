@@ -12,6 +12,7 @@ export type CreateWishlistHttpResponse = {
 export type CreateWishlistHttpRequest = {
   title: string;
   description?: string;
-  hide_items?: boolean;
+  /** Same values as the GraphQL `WishlistMode` enum. Defaults to `SURPRISE`. */
+  mode?: 'SURPRISE' | 'SHARED';
   event_ids: EventId[];
 };

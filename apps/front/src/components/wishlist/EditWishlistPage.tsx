@@ -9,7 +9,7 @@ import { useNavigate, useSearch } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 
-import { isRejection, rejectionMessage, useWishlistPageQuery } from '../../gql';
+import { isRejection, rejectionMessage, useWishlistPageQuery, WishlistMode } from '../../gql';
 import { Loader } from '../common/Loader';
 import { Title } from '../common/Title';
 import { SEO } from '../SEO';
@@ -61,15 +61,15 @@ export const EditWishlistPage = ({ wishlistId }: EditWishlistPageProps) => {
   const currentUserCanEdit =
     !!wishlist && (wishlist.owner.id === currentUserId || wishlist.coOwner?.id === currentUserId);
   const isOwner = wishlist?.owner.id === currentUserId;
-  const isPublic = wishlist?.config.hideItems === false;
+  const isShared = wishlist?.mode === WishlistMode.Shared;
 
   const breadcrumbs = wishlistBreadcrumbs(wishlist, fromEvent, 'edit');
 
   useEffect(() => {
-    if (isPublic && isOwner) {
+    if (isShared && isOwner) {
       setTabs(prev => [...prev, MANAGEMENT_TAB]);
     }
-  }, [isPublic, isOwner]);
+  }, [isShared, isOwner]);
 
   return (
     <>

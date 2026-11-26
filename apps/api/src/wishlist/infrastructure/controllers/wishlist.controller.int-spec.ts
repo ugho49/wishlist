@@ -72,6 +72,15 @@ describe('WishlistController', () => {
           case: 'empty event_ids array',
           message: ['event_ids should not be empty'],
         },
+        {
+          body: {
+            title: 'Valid Title',
+            event_ids: [uuid()],
+            mode: 'PUBLIC',
+          },
+          case: 'unknown mode',
+          message: ['mode must be one of the following values: SURPRISE, SHARED'],
+        },
       ])('should return 400 when invalid input: $case', async ({ body: payload, message }) => {
         await request
           .post(path)
@@ -149,7 +158,7 @@ describe('WishlistController', () => {
           title: 'Test Wishlist',
           description: null,
           logo_url: null,
-          hide_items: true,
+          mode: 'surprise',
           owner_id: currentUserId,
           created_at: expect.toBeDate(),
           updated_at: expect.toBeDate(),
@@ -177,7 +186,7 @@ describe('WishlistController', () => {
               title: 'Test Wishlist',
               description: 'Test Description',
               event_ids: [eventId],
-              hide_items: false,
+              mode: 'SHARED',
             }),
           )
           .expect(201)
@@ -194,7 +203,7 @@ describe('WishlistController', () => {
           title: 'Test Wishlist',
           description: 'Test Description',
           logo_url: null,
-          hide_items: false,
+          mode: 'shared',
           owner_id: currentUserId,
           created_at: expect.toBeDate(),
           updated_at: expect.toBeDate(),

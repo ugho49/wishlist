@@ -1,3 +1,5 @@
+import { WishlistMode } from '../gql';
+
 const PLACEHOLDER_NAMES = [
   'John',
   'Léo',
@@ -34,12 +36,13 @@ export const getRandomPlaceholderName = (): string => {
 };
 
 export const getAvatarUrl = (params: {
-  wishlist: { logoUrl?: string | null; config: { hideItems: boolean } };
+  wishlist: { logoUrl?: string | null; mode: WishlistMode };
   ownerPictureUrl?: string | null;
 }): string | undefined => {
   const { wishlist, ownerPictureUrl } = params;
 
-  if (wishlist.config.hideItems) {
+  // Only a list in surprise mode is the owner's own list: show their picture by default
+  if (wishlist.mode === WishlistMode.Surprise) {
     return wishlist.logoUrl ?? ownerPictureUrl ?? undefined;
   }
 

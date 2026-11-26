@@ -10,6 +10,7 @@ import { BucketService } from '../../../core/bucket/bucket.service';
 import { type EventRepository } from '../../../event/domain/repository/event.repository';
 import { type UserRepository } from '../../../user/domain/repository/user.repository';
 import { Wishlist } from '../../domain/wishlist.model';
+import { WishlistMode } from '../../domain/wishlist-mode.enum';
 
 export type CreateWishlistInput = {
   currentUser: ICurrentUser;
@@ -17,7 +18,7 @@ export type CreateWishlistInput = {
     title: string;
     description?: string;
     eventIds: EventId[];
-    hideItems?: boolean;
+    mode: WishlistMode;
     imageFile?: File;
   };
 };
@@ -57,7 +58,7 @@ export class CreateWishlistUseCase {
       description: command.newWishlist.description,
       ownerId: owner.id,
       eventIds,
-      hideItems: command.newWishlist.hideItems === undefined ? true : command.newWishlist.hideItems,
+      mode: command.newWishlist.mode,
     });
 
     if (command.newWishlist.imageFile) {

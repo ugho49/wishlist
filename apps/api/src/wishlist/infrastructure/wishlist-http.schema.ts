@@ -11,7 +11,9 @@ export const CreateWishlistHttpRequestSchema = z.object({
     .string({ error: 'description must be a string' })
     .max(2000, 'description must be shorter than or equal to 2000 characters')
     .optional(),
-  hide_items: z.boolean({ error: 'hide_items must be a boolean value' }).optional(),
+  mode: z
+    .enum(['SURPRISE', 'SHARED'], { error: 'mode must be one of the following values: SURPRISE, SHARED' })
+    .optional(),
   event_ids: z
     .array(
       z.string({ error: 'each value in event_ids must be a string' }).transform(id => id as EventId),

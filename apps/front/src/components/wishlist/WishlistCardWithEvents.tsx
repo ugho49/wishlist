@@ -8,6 +8,7 @@ import clsx from 'clsx';
 import { DateTime } from 'luxon';
 import { useSelector } from 'react-redux';
 
+import { WishlistMode } from '../../gql';
 import { getAvatarUrl } from '../../utils/wishlist.utils';
 import { Card } from '../common/Card';
 import { EventIcon } from '../event/EventIcon';
@@ -143,7 +144,7 @@ export const WishlistCardWithEvents = ({ wishlist }: WishlistCardWithEventsProps
     wishlist.events.filter(e => DateTime.fromISO(e.eventDate) < DateTime.now().minus({ days: 1 })).length ===
     wishlist.events.length;
 
-  const isPublic = !wishlist.config.hideItems;
+  const isShared = wishlist.mode === WishlistMode.Shared;
   const maxEventsToShow = 1;
   const eventsToShow = wishlist.events
     .toSorted((a, b) => DateTime.fromISO(a.eventDate).toMillis() - DateTime.fromISO(b.eventDate).toMillis())
@@ -166,7 +167,7 @@ export const WishlistCardWithEvents = ({ wishlist }: WishlistCardWithEventsProps
         <WishlistTitleContainer>
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <WishlistTitle className="wishlist-title">{wishlist.title}</WishlistTitle>
-            {isPublic && <PublicIndicator className="wishlist-icon" />}
+            {isShared && <PublicIndicator className="wishlist-icon" />}
           </div>
         </WishlistTitleContainer>
       </WishlistHeader>

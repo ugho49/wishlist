@@ -1269,7 +1269,6 @@ export type Wishlist = {
   __typename?: 'Wishlist';
   coOwner?: Maybe<User>;
   coOwnerId?: Maybe<Scalars['UserId']['output']>;
-  config: WishlistConfig;
   createdAt: Scalars['String']['output'];
   description?: Maybe<Scalars['String']['output']>;
   eventIds: Array<Scalars['EventId']['output']>;
@@ -1277,13 +1276,17 @@ export type Wishlist = {
   id: Scalars['WishlistId']['output'];
   items: Array<Item>;
   logoUrl?: Maybe<Scalars['String']['output']>;
+  mode: WishlistMode;
   owner: User;
   ownerId: Scalars['UserId']['output'];
   title: Scalars['String']['output'];
   updatedAt: Scalars['String']['output'];
 };
 
-export type WishlistConfig = {
-  __typename?: 'WishlistConfig';
-  hideItems: Scalars['Boolean']['output'];
-};
+/** What the managers (owner and co-owner) of a list see. The participants see the list and who reserved what in both modes. */
+export enum WishlistMode {
+  /** The managers see everything, like the participants. A list managed for someone else; allows a co-owner. */
+  Shared = 'SHARED',
+  /** The managers do not see who reserved what, nor the items suggested by the others. A list for oneself. */
+  Surprise = 'SURPRISE'
+}

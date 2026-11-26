@@ -5,6 +5,7 @@ import ListIcon from '@mui/icons-material/List';
 import { Avatar, styled } from '@mui/material';
 import { DateTime } from 'luxon';
 
+import { WishlistMode } from '../../../gql';
 import { AdminDataGrid } from '../../admin/AdminDataGrid';
 import { RouterLink } from '../../common/RouterLink';
 
@@ -17,7 +18,7 @@ export type AdminEventWishlist = {
   id: WishlistId;
   title: string;
   logoUrl?: string | null;
-  config: { hideItems: boolean };
+  mode: WishlistMode;
   createdAt: string;
   owner: { id: UserId; firstName: string; lastName: string };
   coOwner?: { id: UserId; firstName: string; lastName: string } | null;
@@ -69,13 +70,13 @@ const columns: GridColDef<AdminEventWishlist>[] = [
     },
   },
   {
-    field: 'config.hideItems',
-    headerName: 'Public',
+    field: 'mode',
+    headerName: 'Partagée',
     width: 90,
     sortable: false,
     filterable: false,
     type: 'boolean',
-    valueGetter: (_, row) => !row.config.hideItems,
+    valueGetter: (_, row) => row.mode === WishlistMode.Shared,
   },
   {
     field: 'createdAt',

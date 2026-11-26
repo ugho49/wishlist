@@ -46,7 +46,7 @@ export class UpdateItemUseCase {
     const wishlist = await this.wishlistRepository.findByIdOrFail(item.wishlistId);
     const isOwnerOrCoOwnerOfList = wishlist.isOwnerOrCoOwner(command.currentUser.id);
 
-    if (item.isSuggested && isOwnerOrCoOwnerOfList && wishlist.hideItems) {
+    if (item.isSuggested && wishlist.isSurpriseFor(command.currentUser.id)) {
       throw new NotFoundException('Item not found');
     }
 

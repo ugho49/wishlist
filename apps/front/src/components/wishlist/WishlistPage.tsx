@@ -7,7 +7,7 @@ import { FeatureFlags } from '@wishlist/common';
 import { useCallback, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 
-import { isRejection, rejectionMessage, useImportableItemsQuery, useWishlistPageQuery } from '../../gql';
+import { isRejection, rejectionMessage, useImportableItemsQuery, useWishlistPageQuery, WishlistMode } from '../../gql';
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { ImportItemsDialog } from '../item/ImportItemsDialog';
 import { SEO } from '../SEO';
@@ -49,12 +49,12 @@ export const WishlistPage = ({ wishlistId }: WishlistPageProps) => {
     () => !!wishlist && (wishlist.owner.id === currentUserId || wishlist.coOwner?.id === currentUserId),
     [wishlist, currentUserId],
   );
-  const isPublic = useMemo(() => wishlist?.config.hideItems === false, [wishlist]);
+  const isShared = useMemo(() => wishlist?.mode === WishlistMode.Shared, [wishlist]);
 
   const { data: importableItems = [] } = useImportableItemsQuery(
     { wishlistId },
     {
-      enabled: currentUserCanEdit && !isPublic && importItemsEnabled,
+      enabled: currentUserCanEdit && !isShared && importItemsEnabled,
       select: d => (d.importableItems.__typename === 'GetImportableItemsOutput' ? d.importableItems.items : []),
     },
   );
@@ -108,7 +108,7 @@ export const WishlistPage = ({ wishlistId }: WishlistPageProps) => {
             <WishlistHeader
               wishlist={wishlist}
               currentUserCanEdit={currentUserCanEdit}
-              isPublic={isPublic}
+              isShared={isShared}
               hasImportableItems={importableItems.length > 0}
               onOpenEventDialog={() => setShowEventDialog(true)}
               onOpenImportDialog={() => setShowImportDialog(true)}

@@ -35,6 +35,7 @@ import {
   type ReservedItemPeriod,
   type WishlistItemRepository,
 } from '../../item/domain/wishlist-item.repository';
+import { WishlistMode } from '../../wishlist/domain/wishlist-mode.enum';
 
 type ItemRowWithTakers = typeof schema.item.$inferSelect & {
   takers: (typeof schema.itemTaker.$inferSelect)[];
@@ -169,7 +170,7 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
         and(
           ne(schema.wishlist.id, wishlistId),
           eq(schema.wishlist.ownerId, userId),
-          eq(schema.wishlist.hideItems, true),
+          eq(schema.wishlist.mode, WishlistMode.SURPRISE),
         ),
       )
       .groupBy(schema.eventWishlist.wishlistId)

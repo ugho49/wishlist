@@ -848,7 +848,6 @@ type VoidOutput {
 type Wishlist {
   coOwner: User @resolved
   coOwnerId: UserId
-  config: WishlistConfig!
   createdAt: String!
   description: String
   eventIds: [EventId!]!
@@ -856,14 +855,25 @@ type Wishlist {
   id: WishlistId!
   items: [Item!]! @resolved
   logoUrl: String
+  mode: WishlistMode!
   owner: User! @resolved
   ownerId: UserId!
   title: String!
   updatedAt: String!
 }
 
-type WishlistConfig {
-  hideItems: Boolean!
-}
-
 scalar WishlistId
+
+"""
+What the managers (owner and co-owner) of a list see. The participants see the list and who reserved what in both modes.
+"""
+enum WishlistMode {
+  """
+  The managers see everything, like the participants. A list managed for someone else; allows a co-owner.
+  """
+  SHARED
+  """
+  The managers do not see who reserved what, nor the items suggested by the others. A list for oneself.
+  """
+  SURPRISE
+}

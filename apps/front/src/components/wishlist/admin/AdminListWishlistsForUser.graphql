@@ -7,9 +7,7 @@ query AdminListWishlistsForUser($filters: AdminWishlistPaginationFilters!) {
         title
         logoUrl
         coOwnerId
-        config {
-          hideItems
-        }
+        mode
         createdAt
         events {
           id
