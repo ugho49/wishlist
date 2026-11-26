@@ -19,5 +19,5 @@ export interface UserRepository {
   findClosestFriends(userId: UserId, limit: number): Promise<User[]>;
   findEnabledWithBirthdayOn(params: { month: number; day: number; includeLeapDay: boolean }): Promise<User[]>;
   save(user: User, tx?: DrizzleTransaction): Promise<void>;
-  delete(userId: UserId): Promise<void>;
+  delete(userId: UserId, tx?: DrizzleTransaction): Promise<void>;
 }

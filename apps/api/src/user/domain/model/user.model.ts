@@ -1,7 +1,16 @@
-import type { UserId } from '@wishlist/common';
+import type { ICurrentUser, UserId } from '@wishlist/common';
 
 import { Authorities } from '../authorities.enum';
 import { SignupSource } from '../signup-source.enum';
+import { UserMergeSide } from '../user-merge-side.enum';
+
+export type UserMergeProfileSelection = {
+  email: UserMergeSide;
+  firstName: UserMergeSide;
+  lastName: UserMergeSide;
+  birthday: UserMergeSide;
+  picture: UserMergeSide;
+};
 
 export type UserProps = {
   id: UserId;
@@ -76,6 +85,39 @@ export class User {
 
   isAdmin(): boolean {
     return this.isSuperAdmin() || this.authorities.includes(Authorities.ROLE_ADMIN);
+  }
+
+  /**
+   * An admin manages regular users; only a super-admin manages admins, and nobody manages a super-admin.
+   */
+  canBeManagedBy(currentUser: ICurrentUser): boolean {
+    if (this.isSuperAdmin()) {
+      return false;
+    }
+
+    return !this.isAdmin() || currentUser.isSuperAdmin;
+  }
+
+  /**
+   * Profile of this (kept) user once `source` is merged into it. Identity, access rights and status stay
+   * the kept user's; the signup source falls back to the merged user's when the kept user has none.
+   */
+  absorbProfile(source: User, selection: UserMergeProfileSelection): User {
+    const pick = <K extends keyof UserProps>(side: UserMergeSide, key: K): UserProps[K] =>
+      side === UserMergeSide.SOURCE ? source[key] : this[key];
+    const signupSourceOwner = this.signupSource ? this : source;
+
+    return new User({
+      ...this,
+      email: pick(selection.email, 'email'),
+      firstName: pick(selection.firstName, 'firstName'),
+      lastName: pick(selection.lastName, 'lastName'),
+      birthday: pick(selection.birthday, 'birthday'),
+      pictureUrl: pick(selection.picture, 'pictureUrl'),
+      signupSource: signupSourceOwner.signupSource,
+      signupSourceDetail: signupSourceOwner.signupSourceDetail,
+      updatedAt: new Date(),
+    });
   }
 
   grantAdmin(): User {

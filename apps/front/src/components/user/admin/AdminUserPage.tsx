@@ -7,6 +7,7 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import DevicesIcon from '@mui/icons-material/Devices';
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 import LinkIcon from '@mui/icons-material/Link';
+import MergeTypeIcon from '@mui/icons-material/MergeType';
 import PortraitIcon from '@mui/icons-material/Portrait';
 import SaveIcon from '@mui/icons-material/Save';
 import {
@@ -382,6 +383,15 @@ export const AdminUserPage = ({ userId }: AdminUserPageProps) => {
                 onClick={() => setUpdatePasswordModalOpen(true)}
               >
                 Changer le mot de passe
+              </Button>
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<MergeTypeIcon />}
+                disabled={loading || !canEditUser}
+                onClick={() => void navigate({ to: '/admin/users/merge', search: { targetId: userId } })}
+              >
+                Fusionner
               </Button>
             </>
           )

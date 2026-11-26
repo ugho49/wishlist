@@ -101,6 +101,26 @@ export type AdminGetWishlists = {
 
 export type AdminGetWishlistsResult = AdminGetWishlists | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection;
 
+export type AdminMergeUsersInput = {
+  accountIds: Array<Scalars['UserAccountId']['input']>;
+  eventIds: Array<Scalars['EventId']['input']>;
+  profile: AdminMergeUsersProfileInput;
+  sourceUserId: Scalars['UserId']['input'];
+  targetUserId: Scalars['UserId']['input'];
+  transferReservations: Scalars['Boolean']['input'];
+  wishlistIds: Array<Scalars['WishlistId']['input']>;
+};
+
+export type AdminMergeUsersProfileInput = {
+  birthday: AdminUserMergeSide;
+  email: AdminUserMergeSide;
+  firstName: AdminUserMergeSide;
+  lastName: AdminUserMergeSide;
+  picture: AdminUserMergeSide;
+};
+
+export type AdminMergeUsersResult = BusinessRuleRejection | ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+
 export type AdminMonthlyCount = {
   __typename: 'AdminMonthlyCount';
   count: Scalars['Int']['output'];
@@ -130,6 +150,47 @@ export type AdminUpdateUserProfileInput = {
 
 export type AdminUpdateUserProfileResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
+export type AdminUserMergeCandidate = {
+  __typename: 'AdminUserMergeCandidate';
+  events: Array<AdminUserMergeEvent>;
+  reservedItemCount: Scalars['Int']['output'];
+  user: UserFull;
+  wishlists: Array<AdminUserMergeWishlist>;
+};
+
+export type AdminUserMergeEvent = {
+  __typename: 'AdminUserMergeEvent';
+  eventDate: Scalars['String']['output'];
+  icon?: Maybe<Scalars['String']['output']>;
+  id: Scalars['EventId']['output'];
+  inSecretSanta: Scalars['Boolean']['output'];
+  role: AttendeeRole;
+  title: Scalars['String']['output'];
+};
+
+export type AdminUserMergePreview = {
+  __typename: 'AdminUserMergePreview';
+  source: AdminUserMergeCandidate;
+  target: AdminUserMergeCandidate;
+};
+
+export type AdminUserMergePreviewResult = AdminUserMergePreview | BusinessRuleRejection | ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection;
+
+export enum AdminUserMergeSide {
+  Source = 'SOURCE',
+  Target = 'TARGET'
+}
+
+export type AdminUserMergeWishlist = {
+  __typename: 'AdminUserMergeWishlist';
+  eventIds: Array<Scalars['EventId']['output']>;
+  id: Scalars['WishlistId']['output'];
+  isCoOwner: Scalars['Boolean']['output'];
+  itemCount: Scalars['Int']['output'];
+  logoUrl?: Maybe<Scalars['String']['output']>;
+  title: Scalars['String']['output'];
+};
+
 export type AdminUsersStats = {
   __typename: 'AdminUsersStats';
   adminCount: Scalars['Int']['output'];
@@ -153,6 +214,7 @@ export enum AttendeeRole {
 }
 
 export enum BusinessRuleCode {
+  InvalidUserMerge = 'INVALID_USER_MERGE',
   WrongOldPassword = 'WRONG_OLD_PASSWORD'
 }
 
@@ -424,6 +486,7 @@ export type Mutation = {
   adminDeleteEvent: AdminDeleteEventResult;
   adminDeleteEventAttendee: AdminDeleteEventAttendeeResult;
   adminDeleteUser: AdminDeleteUserResult;
+  adminMergeUsers: AdminMergeUsersResult;
   adminRemoveUserPicture: AdminRemoveUserPictureResult;
   adminRevokeAllUserSessions: AdminRevokeAllUserSessionsResult;
   adminRevokeUserSession: AdminRevokeUserSessionResult;
@@ -510,6 +573,11 @@ export type MutationAdminDeleteEventAttendeeArgs = {
 
 export type MutationAdminDeleteUserArgs = {
   userId: Scalars['UserId']['input'];
+};
+
+
+export type MutationAdminMergeUsersArgs = {
+  input: AdminMergeUsersInput;
 };
 
 
@@ -822,6 +890,7 @@ export type Query = {
   adminEvents: AdminGetEventsResult;
   adminEventsStats: AdminEventsStatsResult;
   adminUser: AdminGetUserByIdResult;
+  adminUserMergePreview: AdminUserMergePreviewResult;
   adminUsers: AdminGetAllUsersResult;
   adminUsersStats: AdminUsersStatsResult;
   adminWishlists: AdminGetWishlistsResult;
@@ -854,6 +923,12 @@ export type QueryAdminEventsArgs = {
 
 export type QueryAdminUserArgs = {
   userId: Scalars['UserId']['input'];
+};
+
+
+export type QueryAdminUserMergePreviewArgs = {
+  sourceUserId: Scalars['UserId']['input'];
+  targetUserId: Scalars['UserId']['input'];
 };
 
 

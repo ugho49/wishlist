@@ -17,6 +17,7 @@ type ValidationRejection {
 
 enum BusinessRuleCode {
   WRONG_OLD_PASSWORD
+  INVALID_USER_MERGE
 }
 
 type BusinessRuleRejection {

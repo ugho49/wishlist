@@ -27,23 +27,26 @@ function toGqlEvent(event: Event): GqlEvent {
   };
 }
 
-function toGqlEventAttendee(eventAttendee: EventAttendee): GqlEventAttendee {
-  const role = match(eventAttendee.role)
+function toGqlAttendeeRole(role: AttendeeRole): GqlAttendeeRole {
+  return match(role)
     .with(AttendeeRole.CREATOR, () => GqlAttendeeRole.Creator)
     .with(AttendeeRole.ADMIN, () => GqlAttendeeRole.Admin)
     .with(AttendeeRole.PARTICIPANT, () => GqlAttendeeRole.Participant)
     .exhaustive();
+}
 
+function toGqlEventAttendee(eventAttendee: EventAttendee): GqlEventAttendee {
   return {
     __typename: 'EventAttendee',
     id: eventAttendee.id,
     user: eventAttendee.user ? userMapper.toGqlUser(eventAttendee.user) : undefined,
     pendingEmail: eventAttendee.pendingEmail,
-    role,
+    role: toGqlAttendeeRole(eventAttendee.role),
   };
 }
 
 export const eventMapper = {
   toGqlEvent,
   toGqlEventAttendee,
+  toGqlAttendeeRole,
 };

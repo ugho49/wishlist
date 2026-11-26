@@ -626,6 +626,52 @@ export type SecretSantaListPageQuery = { mySecretSantas:
     | { __typename: 'UnauthorizedRejection' }
    };
 
+export type AdminUserMergePickerQueryVariables = Exact<{
+  input?: Types.AdminGetAllUsersPaginationFilters | null | undefined;
+}>;
+
+
+export type AdminUserMergePickerQuery = { adminUsers:
+    | { __typename: 'AdminGetAllUsers', data: Array<{ id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null }> }
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection' }
+   };
+
+export type AdminUserMergeCandidateFieldsFragment = { reservedItemCount: number, user: { id: Ids["UserId"], firstName: string, lastName: string, email: string, birthday: string | null, pictureUrl: string | null, isEnabled: boolean, authorities: Array<Types.UserAuthorities>, createdAt: string, accounts: Array<{ id: Ids["UserAccountId"], provider: Types.UserAccountProvider, email: string, pictureUrl: string | null }> }, events: Array<{ id: Ids["EventId"], title: string, icon: string | null, eventDate: string, role: Types.AttendeeRole, inSecretSanta: boolean }>, wishlists: Array<{ id: Ids["WishlistId"], title: string, logoUrl: string | null, isCoOwner: boolean, eventIds: Array<Ids["EventId"]>, itemCount: number }> };
+
+export type AdminUserMergePreviewQueryVariables = Exact<{
+  sourceUserId: Ids["UserId"];
+  targetUserId: Ids["UserId"];
+}>;
+
+
+export type AdminUserMergePreviewQuery = { adminUserMergePreview:
+    | { __typename: 'AdminUserMergePreview', source: { reservedItemCount: number, user: { id: Ids["UserId"], firstName: string, lastName: string, email: string, birthday: string | null, pictureUrl: string | null, isEnabled: boolean, authorities: Array<Types.UserAuthorities>, createdAt: string, accounts: Array<{ id: Ids["UserAccountId"], provider: Types.UserAccountProvider, email: string, pictureUrl: string | null }> }, events: Array<{ id: Ids["EventId"], title: string, icon: string | null, eventDate: string, role: Types.AttendeeRole, inSecretSanta: boolean }>, wishlists: Array<{ id: Ids["WishlistId"], title: string, logoUrl: string | null, isCoOwner: boolean, eventIds: Array<Ids["EventId"]>, itemCount: number }> }, target: { reservedItemCount: number, user: { id: Ids["UserId"], firstName: string, lastName: string, email: string, birthday: string | null, pictureUrl: string | null, isEnabled: boolean, authorities: Array<Types.UserAuthorities>, createdAt: string, accounts: Array<{ id: Ids["UserAccountId"], provider: Types.UserAccountProvider, email: string, pictureUrl: string | null }> }, events: Array<{ id: Ids["EventId"], title: string, icon: string | null, eventDate: string, role: Types.AttendeeRole, inSecretSanta: boolean }>, wishlists: Array<{ id: Ids["WishlistId"], title: string, logoUrl: string | null, isCoOwner: boolean, eventIds: Array<Ids["EventId"]>, itemCount: number }> } }
+    | { __typename: 'BusinessRuleRejection', code: Types.BusinessRuleCode, message: string }
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'NotFoundRejection', message: string }
+    | { __typename: 'UnauthorizedRejection', message: string }
+    | { __typename: 'ValidationRejection' }
+   };
+
+export type AdminMergeUsersMutationVariables = Exact<{
+  input: Types.AdminMergeUsersInput;
+}>;
+
+
+export type AdminMergeUsersMutation = { adminMergeUsers:
+    | { __typename: 'BusinessRuleRejection', code: Types.BusinessRuleCode, message: string }
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'NotFoundRejection', message: string }
+    | { __typename: 'UnauthorizedRejection', message: string }
+    | { __typename: 'ValidationRejection', errors: Array<{ field: string, message: string }> }
+    | { __typename: 'VoidOutput', success: boolean }
+   };
+
 export type AdminUsersListQueryVariables = Exact<{
   input?: Types.AdminGetAllUsersPaginationFilters | null | undefined;
 }>;
@@ -1140,6 +1186,44 @@ export const SecretSantaItemFragmentDoc = new TypedDocumentString(`
     }
   }
 }`, {"fragmentName":"SecretSantaItem"});
+export const AdminUserMergeCandidateFieldsFragmentDoc = new TypedDocumentString(`
+    fragment AdminUserMergeCandidateFields on AdminUserMergeCandidate {
+  user {
+    id
+    firstName
+    lastName
+    email
+    birthday
+    pictureUrl
+    isEnabled
+    authorities
+    createdAt
+    accounts {
+      id
+      provider
+      email
+      pictureUrl
+    }
+  }
+  events {
+    id
+    title
+    icon
+    eventDate
+    role
+    inSecretSanta
+  }
+  wishlists {
+    id
+    title
+    logoUrl
+    isCoOwner
+    eventIds
+    itemCount
+  }
+  reservedItemCount
+}
+    `, {"fragmentName":"AdminUserMergeCandidateFields"});
 export const AdminDashboardUsersStatsDocument = new TypedDocumentString(`
     query AdminDashboardUsersStats {
   adminUsersStats {
@@ -2790,6 +2874,156 @@ export const useSecretSantaListPageQuery = <
       {
     queryKey: ['SecretSantaListPage', variables],
     queryFn: fetchGql<SecretSantaListPageQuery, SecretSantaListPageQueryVariables>(SecretSantaListPageDocument, variables),
+    ...options
+  }
+    )};
+
+export const AdminUserMergePickerDocument = new TypedDocumentString(`
+    query AdminUserMergePicker($input: AdminGetAllUsersPaginationFilters) {
+  adminUsers(input: $input) {
+    __typename
+    ... on AdminGetAllUsers {
+      data {
+        id
+        firstName
+        lastName
+        email
+        pictureUrl
+      }
+    }
+  }
+}
+    `);
+
+export const useAdminUserMergePickerQuery = <
+      TData = AdminUserMergePickerQuery,
+      TError = unknown
+    >(
+      variables?: AdminUserMergePickerQueryVariables,
+      options?: Omit<UseQueryOptions<AdminUserMergePickerQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<AdminUserMergePickerQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<AdminUserMergePickerQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['AdminUserMergePicker'] : ['AdminUserMergePicker', variables],
+    queryFn: fetchGql<AdminUserMergePickerQuery, AdminUserMergePickerQueryVariables>(AdminUserMergePickerDocument, variables),
+    ...options
+  }
+    )};
+
+export const AdminUserMergePreviewDocument = new TypedDocumentString(`
+    query AdminUserMergePreview($sourceUserId: UserId!, $targetUserId: UserId!) {
+  adminUserMergePreview(sourceUserId: $sourceUserId, targetUserId: $targetUserId) {
+    __typename
+    ... on AdminUserMergePreview {
+      source {
+        ...AdminUserMergeCandidateFields
+      }
+      target {
+        ...AdminUserMergeCandidateFields
+      }
+    }
+    ... on BusinessRuleRejection {
+      code
+      message
+    }
+    ... on UnauthorizedRejection {
+      message
+    }
+    ... on NotFoundRejection {
+      message
+    }
+  }
+}
+    fragment AdminUserMergeCandidateFields on AdminUserMergeCandidate {
+  user {
+    id
+    firstName
+    lastName
+    email
+    birthday
+    pictureUrl
+    isEnabled
+    authorities
+    createdAt
+    accounts {
+      id
+      provider
+      email
+      pictureUrl
+    }
+  }
+  events {
+    id
+    title
+    icon
+    eventDate
+    role
+    inSecretSanta
+  }
+  wishlists {
+    id
+    title
+    logoUrl
+    isCoOwner
+    eventIds
+    itemCount
+  }
+  reservedItemCount
+}`);
+
+export const useAdminUserMergePreviewQuery = <
+      TData = AdminUserMergePreviewQuery,
+      TError = unknown
+    >(
+      variables: AdminUserMergePreviewQueryVariables,
+      options?: Omit<UseQueryOptions<AdminUserMergePreviewQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<AdminUserMergePreviewQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<AdminUserMergePreviewQuery, TError, TData>(
+      {
+    queryKey: ['AdminUserMergePreview', variables],
+    queryFn: fetchGql<AdminUserMergePreviewQuery, AdminUserMergePreviewQueryVariables>(AdminUserMergePreviewDocument, variables),
+    ...options
+  }
+    )};
+
+export const AdminMergeUsersDocument = new TypedDocumentString(`
+    mutation AdminMergeUsers($input: AdminMergeUsersInput!) {
+  adminMergeUsers(input: $input) {
+    __typename
+    ... on VoidOutput {
+      success
+    }
+    ... on ValidationRejection {
+      errors {
+        field
+        message
+      }
+    }
+    ... on BusinessRuleRejection {
+      code
+      message
+    }
+    ... on UnauthorizedRejection {
+      message
+    }
+    ... on NotFoundRejection {
+      message
+    }
+  }
+}
+    `);
+
+export const useAdminMergeUsersMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<AdminMergeUsersMutation, TError, AdminMergeUsersMutationVariables, TContext>) => {
+    
+    return useMutation<AdminMergeUsersMutation, TError, AdminMergeUsersMutationVariables, TContext>(
+      {
+    mutationKey: ['AdminMergeUsers'],
+    mutationFn: (variables?: AdminMergeUsersMutationVariables) => fetchGql<AdminMergeUsersMutation, AdminMergeUsersMutationVariables>(AdminMergeUsersDocument, variables)(),
     ...options
   }
     )};

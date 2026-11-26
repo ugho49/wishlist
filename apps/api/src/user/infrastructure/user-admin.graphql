@@ -33,6 +33,41 @@ type AdminUsersStats {
   createdByMonth: [AdminMonthlyCount!]!
 }
 
+type AdminUserMergeEvent {
+  id: EventId!
+  title: String!
+  icon: String
+  eventDate: String!
+  role: AttendeeRole!
+  inSecretSanta: Boolean!
+}
+
+type AdminUserMergeWishlist {
+  id: WishlistId!
+  title: String!
+  logoUrl: String
+  isCoOwner: Boolean!
+  eventIds: [EventId!]!
+  itemCount: Int!
+}
+
+type AdminUserMergeCandidate {
+  user: UserFull!
+  events: [AdminUserMergeEvent!]!
+  wishlists: [AdminUserMergeWishlist!]!
+  reservedItemCount: Int!
+}
+
+type AdminUserMergePreview {
+  source: AdminUserMergeCandidate!
+  target: AdminUserMergeCandidate!
+}
+
+enum AdminUserMergeSide {
+  SOURCE
+  TARGET
+}
+
 input AdminGetAllUsersPaginationFilters {
   page: Int
   limit: Int
@@ -46,6 +81,24 @@ input AdminUpdateUserProfileInput {
   lastname: String
   birthday: String
   isEnabled: Boolean
+}
+
+input AdminMergeUsersProfileInput {
+  email: AdminUserMergeSide!
+  firstName: AdminUserMergeSide!
+  lastName: AdminUserMergeSide!
+  birthday: AdminUserMergeSide!
+  picture: AdminUserMergeSide!
+}
+
+input AdminMergeUsersInput {
+  sourceUserId: UserId!
+  targetUserId: UserId!
+  profile: AdminMergeUsersProfileInput!
+  accountIds: [UserAccountId!]!
+  eventIds: [EventId!]!
+  wishlistIds: [WishlistId!]!
+  transferReservations: Boolean!
 }
 
 union AdminGetUserByIdResult =
@@ -109,10 +162,29 @@ union AdminSetUserAdminResult =
   | NotFoundRejection
   | InternalErrorRejection
 
+union AdminUserMergePreviewResult =
+  | AdminUserMergePreview
+  | ValidationRejection
+  | BusinessRuleRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | NotFoundRejection
+  | InternalErrorRejection
+
+union AdminMergeUsersResult =
+  | VoidOutput
+  | ValidationRejection
+  | BusinessRuleRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | NotFoundRejection
+  | InternalErrorRejection
+
 extend type Query {
   adminUser(userId: UserId!): AdminGetUserByIdResult!
   adminUsers(input: AdminGetAllUsersPaginationFilters): AdminGetAllUsersResult!
   adminUsersStats: AdminUsersStatsResult!
+  adminUserMergePreview(sourceUserId: UserId!, targetUserId: UserId!): AdminUserMergePreviewResult!
 }
 
 extend type Mutation {
@@ -122,4 +194,5 @@ extend type Mutation {
   adminRevokeUserSession(userId: UserId!, sessionId: UserSessionId!): AdminRevokeUserSessionResult!
   adminRevokeAllUserSessions(userId: UserId!): AdminRevokeAllUserSessionsResult!
   adminSetUserAdmin(userId: UserId!, isAdmin: Boolean!): AdminSetUserAdminResult!
+  adminMergeUsers(input: AdminMergeUsersInput!): AdminMergeUsersResult!
 }
