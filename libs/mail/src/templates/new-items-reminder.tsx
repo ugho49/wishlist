@@ -1,3 +1,5 @@
+import type { CSSProperties } from 'react';
+
 import { Link, Section, Text } from 'react-email';
 
 import { EmailLayout } from '../components/layout';
@@ -13,6 +15,17 @@ export interface NewItemsReminderEmailProps {
     readonly eventTitles: readonly string[];
   }>;
 }
+
+// react-email's Link sets `text-decoration-line: none`; override it (plus the shorthand for older
+// clients) so readers see each list is clickable.
+const wishlistLink: CSSProperties = {
+  color: styles.colors.primary,
+  fontSize: '14px',
+  lineHeight: '20px',
+  fontWeight: 'bold',
+  textDecorationLine: 'underline',
+  textDecoration: 'underline',
+};
 
 function itemsLabel(nbItems: number): string {
   return nbItems === 1 ? '1 nouveau souhait' : `${nbItems} nouveaux souhaits`;
@@ -56,12 +69,13 @@ export default function NewItemsReminderEmail({ updates }: NewItemsReminderEmail
               margin: index === updates.length - 1 ? 0 : '0 0 16px 0',
             }}
           >
-            <b>{update.ownerName}</b> a ajouté <b>{itemsLabel(update.nbItems)}</b> sur{' '}
-            <Link href={update.wishlistUrl} style={{ color: styles.palette.reminder.text }}>
-              {update.wishlistTitle}
-            </Link>
+            <b>{update.ownerName}</b> a ajouté <b>{itemsLabel(update.nbItems)}</b> sur <b>{update.wishlistTitle}</b>
             <br />
             <span style={{ fontSize: '14px', lineHeight: '20px' }}>{eventsLabel(update.eventTitles)}</span>
+            <br />
+            <Link href={update.wishlistUrl} style={wishlistLink}>
+              {`Voir la liste de ${update.ownerName} →`}
+            </Link>
           </Text>
         ))}
       </Callout>

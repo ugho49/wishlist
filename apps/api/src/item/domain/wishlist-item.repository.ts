@@ -10,6 +10,8 @@ export interface NewItemNotificationRow {
   nbNewItems: number;
   eventId: EventId;
   eventTitle: string;
+  /** ISO date (yyyy-MM-dd). */
+  eventDate: string;
   recipientUserId: UserId;
   recipientEmail: string;
 }

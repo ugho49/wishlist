@@ -197,6 +197,102 @@ describe('NotifyNewItemsUseCase', () => {
     });
   });
 
+  describe('with past events', () => {
+    it('should only mention the events still ahead when the list is linked to a past one', async () => {
+      const recipientId = uuid();
+      const wishlistId = uuid();
+      itemRepository.findNewItemNotifications.mockResolvedValueOnce([
+        notificationRow({
+          recipientUserId: recipientId,
+          wishlistId,
+          ownerName: 'Marie',
+          eventTitle: 'Anniversaire de Marie',
+          eventDate: '2026-11-02',
+        }),
+        notificationRow({
+          recipientUserId: recipientId,
+          wishlistId,
+          ownerName: 'Marie',
+          eventTitle: 'Noël',
+          eventDate: '2026-12-25',
+        }),
+      ]);
+
+      await useCase.execute(now);
+
+      expect(mailService.sendMail).toHaveBeenCalledTimes(1);
+      expect(mailService.sendMail.mock.calls[0]?.[0]).toMatchObject({
+        context: { updates: [{ ownerName: 'Marie', eventTitles: ['Noël'] }] },
+      });
+    });
+
+    it('should keep an event happening on the digest day', async () => {
+      itemRepository.findNewItemNotifications.mockResolvedValueOnce([
+        notificationRow({ eventTitle: 'Anniversaire de Marie', eventDate: digestDate }),
+      ]);
+
+      await useCase.execute(now);
+
+      expect(mailService.sendMail).toHaveBeenCalledTimes(1);
+      expect(mailService.sendMail.mock.calls[0]?.[0]).toMatchObject({
+        context: { updates: [{ eventTitles: ['Anniversaire de Marie'] }] },
+      });
+    });
+
+    it('should drop a list whose shared events are all over', async () => {
+      const recipientId = uuid();
+      const paulWishlistId = uuid();
+      itemRepository.findNewItemNotifications.mockResolvedValueOnce([
+        notificationRow({
+          recipientUserId: recipientId,
+          ownerName: 'Marie',
+          wishlistTitle: 'Liste Marie',
+          eventTitle: 'Anniversaire de Marie',
+          eventDate: '2026-11-02',
+        }),
+        notificationRow({
+          recipientUserId: recipientId,
+          wishlistId: paulWishlistId,
+          ownerName: 'Paul',
+          wishlistTitle: 'Liste Paul',
+          eventTitle: 'Noël',
+          eventDate: '2026-12-25',
+        }),
+      ]);
+
+      await useCase.execute(now);
+
+      expect(mailService.sendMail).toHaveBeenCalledTimes(1);
+      expect(mailService.sendMail.mock.calls[0]?.[0]).toMatchObject({
+        subject: 'Paul a ajouté des souhaits',
+        context: { updates: [{ wishlistTitle: 'Liste Paul' }] },
+      });
+      expect(mailService.sendMail.mock.calls[0]?.[0].context.updates).toHaveLength(1);
+    });
+
+    it('should not email a recipient when every new item belongs to past events', async () => {
+      itemRepository.findNewItemNotifications.mockResolvedValueOnce([
+        notificationRow({ eventTitle: 'Anniversaire de Marie', eventDate: '2026-11-02' }),
+      ]);
+
+      await useCase.execute(now);
+
+      expect(mailService.sendMail).not.toHaveBeenCalled();
+      expect(receiptRepository.claim).not.toHaveBeenCalled();
+    });
+
+    it('should resolve the digest day in Paris time', async () => {
+      // 23:30 UTC on Nov 2 is already Nov 3 in Paris: the Nov 2 event is over.
+      itemRepository.findNewItemNotifications.mockResolvedValueOnce([
+        notificationRow({ eventTitle: 'Anniversaire de Marie', eventDate: '2026-11-02' }),
+      ]);
+
+      await useCase.execute(DateTime.fromISO('2026-11-02T23:30:00.000Z'));
+
+      expect(mailService.sendMail).not.toHaveBeenCalled();
+    });
+  });
+
   it('should exclude the recipient own list from the recap', async () => {
     const marieId = uuid();
     const paulWishlistId = uuid();
@@ -302,6 +398,7 @@ function notificationRow(overrides: Partial<NewItemNotificationRow> = {}): NewIt
     nbNewItems: 2,
     eventId: uuid(),
     eventTitle: 'Noël',
+    eventDate: '2026-12-25',
     recipientUserId: uuid(),
     recipientEmail: 'jean@test.fr',
     ...overrides,

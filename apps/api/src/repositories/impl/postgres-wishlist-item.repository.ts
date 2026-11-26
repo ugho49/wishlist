@@ -119,6 +119,7 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
         nbNewItems: newItems.nbNewItems,
         eventId: schema.event.id,
         eventTitle: schema.event.title,
+        eventDate: schema.event.eventDate,
         recipientUserId: recipient.id,
         recipientEmail: recipient.email,
       })
@@ -149,6 +150,7 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
       nbNewItems: Number(row.nbNewItems),
       eventId: row.eventId,
       eventTitle: row.eventTitle,
+      eventDate: row.eventDate,
       recipientUserId: row.recipientUserId,
       recipientEmail: row.recipientEmail,
     }));

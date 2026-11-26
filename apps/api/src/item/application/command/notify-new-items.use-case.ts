@@ -50,7 +50,9 @@ export class NotifyNewItemsUseCase {
       this.logger.info(`Fetching new items to send daily notification since "${since.toISOString()}" ...`);
 
       const rows = await this.itemRepository.findNewItemNotifications(since);
-      const digests = this.groupByRecipient(rows);
+      // A list stays linked to its past events (a birthday list reused for Christmas): only mention
+      // the events still ahead, and drop the list when all the events the recipient shares are over.
+      const digests = this.groupByRecipient(rows.filter(row => row.eventDate >= digestDate));
 
       if (digests.length === 0) {
         this.logger.info('No new items to send daily notification');
