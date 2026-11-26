@@ -7,6 +7,7 @@ export interface SecretSantaUserRepository {
   findById(id: SecretSantaUserId): Promise<SecretSantaUser | undefined>;
   findBySecretSantaId(secretSantaId: SecretSantaId): Promise<SecretSantaUser[]>;
   findParticipantForEvent(param: { eventId: EventId; userId: UserId }): Promise<SecretSantaUser | undefined>;
+  findByUserId(userId: UserId): Promise<SecretSantaUser[]>;
   saveAll(users: SecretSantaUser[], tx?: DrizzleTransaction): Promise<void>;
   delete(id: SecretSantaUserId, tx?: DrizzleTransaction): Promise<void>;
 }

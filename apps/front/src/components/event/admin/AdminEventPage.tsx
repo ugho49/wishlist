@@ -25,6 +25,7 @@ import z from 'zod';
 import {
   type AdminEventGetEventQuery,
   AttendeeRole,
+  BusinessRuleCode,
   isRejection,
   rejectionMessage,
   rejectionPattern,
@@ -149,6 +150,12 @@ export const AdminEventPage = ({ eventId }: AdminEventPageProps) => {
         void invalidateEvent();
         void invalidateSecretSanta();
       })
+      .with({ __typename: 'BusinessRuleRejection', code: BusinessRuleCode.UserInStartedSecretSanta }, () =>
+        addToast({
+          message: 'Ce participant fait partie du secret santa déjà tiré : annulez le tirage avant de le retirer',
+          variant: 'error',
+        }),
+      )
       .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
       .exhaustive();
   };

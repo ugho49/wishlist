@@ -4,6 +4,7 @@ import { Fixtures, useTestApp } from '@wishlist/api-test-utils';
 import { uuid } from '@wishlist/common';
 import { DateTime } from 'luxon';
 
+import { SecretSantaStatus } from '../../../secret-santa/domain/secret-santa-status.enum';
 import { Authorities } from '../../domain/authorities.enum';
 
 const GRAPHQL_PATH = '/graphql';
@@ -717,6 +718,9 @@ describe('UserAdminResolver (GraphQL)', () => {
           ... on VoidOutput {
             success
           }
+          ... on BusinessRuleRejection {
+            code
+          }
           ... on ForbiddenRejection {
             message
           }
@@ -789,6 +793,84 @@ describe('UserAdminResolver (GraphQL)', () => {
 
         // Only the signed-in admin remains.
         await expectTable(Fixtures.USER_TABLE).hasNumberOfRows(1).row(0).toMatchObject({ id: adminUserId });
+      });
+
+      it('should take the user out of a secret santa that has not been drawn yet', async () => {
+        const targetUserId = await fixtures.insertUser({
+          email: 'target@test.fr',
+          firstname: 'Target',
+          lastname: 'User',
+        });
+        const otherUserId = await fixtures.insertUser({
+          email: 'other@test.fr',
+          firstname: 'Other',
+          lastname: 'User',
+        });
+        const { eventId } = await fixtures.insertEventWithCreator({ title: 'Christmas', creatorId: otherUserId });
+        const targetAttendeeId = await fixtures.insertActiveAttendee({ eventId, userId: targetUserId });
+        const otherAttendeeId = await fixtures.insertActiveAttendee({ eventId, userId: adminUserId });
+        const secretSantaId = await fixtures.insertSecretSanta({ eventId, status: SecretSantaStatus.CREATED });
+        const targetSecretSantaUserId = await fixtures.insertSecretSantaUser({
+          secretSantaId,
+          attendeeId: targetAttendeeId,
+        });
+        const otherSecretSantaUserId = await fixtures.insertSecretSantaUser({
+          secretSantaId,
+          attendeeId: otherAttendeeId,
+          exclusions: [targetSecretSantaUserId],
+        });
+
+        const res = await request
+          .post(GRAPHQL_PATH)
+          .send({ query: mutation, variables: { userId: targetUserId } })
+          .expect(200);
+
+        expect(res.body.data.adminDeleteUser).toEqual({ __typename: 'VoidOutput', success: true });
+
+        await expectTable(Fixtures.USER_TABLE).hasNumberOfRows(2);
+        await expectTable(Fixtures.SECRET_SANTA_TABLE).hasNumberOfRows(1);
+        await expectTable(Fixtures.SECRET_SANTA_USER_TABLE).hasNumberOfRows(1).row(0).toMatchObject({
+          id: otherSecretSantaUserId,
+          attendee_id: otherAttendeeId,
+          exclusions: [],
+        });
+      });
+
+      it('should return BusinessRuleRejection and keep the user when they play a secret santa whose draw has started', async () => {
+        const targetUserId = await fixtures.insertUser({
+          email: 'target@test.fr',
+          firstname: 'Target',
+          lastname: 'User',
+        });
+        const { eventId, attendeeId: adminAttendeeId } = await fixtures.insertEventWithCreator({
+          title: 'Christmas',
+          creatorId: adminUserId,
+        });
+        const targetAttendeeId = await fixtures.insertActiveAttendee({ eventId, userId: targetUserId });
+        const secretSantaId = await fixtures.insertSecretSanta({ eventId, status: SecretSantaStatus.STARTED });
+        const targetSecretSantaUserId = await fixtures.insertSecretSantaUser({
+          secretSantaId,
+          attendeeId: targetAttendeeId,
+        });
+        await fixtures.insertSecretSantaUser({
+          secretSantaId,
+          attendeeId: adminAttendeeId,
+          drawUserId: targetSecretSantaUserId,
+        });
+
+        const res = await request
+          .post(GRAPHQL_PATH)
+          .send({ query: mutation, variables: { userId: targetUserId } })
+          .expect(200);
+
+        expect(res.body.data.adminDeleteUser).toEqual({
+          __typename: 'BusinessRuleRejection',
+          code: 'USER_IN_STARTED_SECRET_SANTA',
+        });
+
+        await expectTable(Fixtures.USER_TABLE).hasNumberOfRows(2);
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE).hasNumberOfRows(2);
+        await expectTable(Fixtures.SECRET_SANTA_USER_TABLE).hasNumberOfRows(2);
       });
 
       it('should return UnauthorizedRejection when admin deletes themselves', async () => {

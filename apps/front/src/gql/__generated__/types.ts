@@ -43,11 +43,11 @@ export type AddWishlistCoOwnerInput = {
 
 export type AddWishlistCoOwnerResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
-export type AdminDeleteEventAttendeeResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+export type AdminDeleteEventAttendeeResult = BusinessRuleRejection | ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
 export type AdminDeleteEventResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
-export type AdminDeleteUserResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+export type AdminDeleteUserResult = BusinessRuleRejection | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
 export type AdminEventPaginationFilters = {
   criteria?: InputMaybe<Scalars['String']['input']>;
@@ -208,6 +208,7 @@ export enum AttendeeRole {
 
 export enum BusinessRuleCode {
   InvalidUserMerge = 'INVALID_USER_MERGE',
+  UserInStartedSecretSanta = 'USER_IN_STARTED_SECRET_SANTA',
   WrongOldPassword = 'WRONG_OLD_PASSWORD'
 }
 
@@ -1008,7 +1009,7 @@ export type RegisterUserInput = {
 
 export type RegisterUserResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | User | ValidationRejection;
 
-export type RemoveEventAttendeeResult = ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
+export type RemoveEventAttendeeResult = BusinessRuleRejection | ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 
 export type RemoveUserPictureResult = ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 

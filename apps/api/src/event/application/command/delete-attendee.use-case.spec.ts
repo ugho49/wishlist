@@ -1,6 +1,8 @@
 import type { AttendeeId, EventId } from '@wishlist/common';
 import type { TransactionManager } from '../../../core/database/transaction-manager';
 import type { WishlistItemRepository } from '../../../item/domain/wishlist-item.repository';
+import type { SecretSantaRepository } from '../../../secret-santa/domain/repository/secret-santa.repository';
+import type { SecretSantaUserRepository } from '../../../secret-santa/domain/repository/secret-santa-user.repository';
 import type { User } from '../../../user/domain/model/user.model';
 import type { WishlistRepository } from '../../../wishlist/domain/wishlist.repository';
 import type { Event } from '../../domain/model/event.model';
@@ -12,10 +14,13 @@ import { uuid } from '@wishlist/common';
 import { ConflictException, NotFoundException, UnauthorizedException } from '@znight/http';
 
 import { EventBuilder } from '../../../../test-utils/builders/event.builder';
+import { SecretSantaBuilder } from '../../../../test-utils/builders/secret-santa.builder';
+import { SecretSantaUserBuilder } from '../../../../test-utils/builders/secret-santa-user.builder';
 import { toCurrentUser, UserBuilder } from '../../../../test-utils/builders/user.builder';
 import { WishlistBuilder } from '../../../../test-utils/builders/wishlist.builder';
 import { WishlistItemBuilder } from '../../../../test-utils/builders/wishlist-item.builder';
 import { createMock } from '../../../../test-utils/mocks';
+import { BusinessRuleException } from '../../../core/common/business-rule.exception';
 import { AttendeeRole } from '../../domain/attendee-role.enum';
 import { DeleteAttendeeUseCase } from './delete-attendee.use-case';
 import { beforeEach, describe, expect, it, mock } from 'bun:test';
@@ -49,7 +54,10 @@ describe('DeleteAttendeeUseCase', () => {
   const eventRepository = createMock<EventRepository>();
   const wishlistRepository = createMock<WishlistRepository>();
   const itemRepository = createMock<WishlistItemRepository>();
+  const secretSantaRepository = createMock<SecretSantaRepository>();
+  const secretSantaUserRepository = createMock<SecretSantaUserRepository>();
   const transactionManager = createMock<TransactionManager>();
+  const tx = {} as never;
 
   let useCase: DeleteAttendeeUseCase;
   let creator: User;
@@ -68,13 +76,16 @@ describe('DeleteAttendeeUseCase', () => {
     eventRepository.findByIdOrFail.mockResolvedValue(event);
     wishlistRepository.findByEvent.mockResolvedValue([]);
     itemRepository.findByWishlist.mockResolvedValue([]);
-    transactionManager.runInTransaction.mockImplementation(async fn => fn({} as never));
+    secretSantaRepository.findForEvent.mockResolvedValue(undefined);
+    transactionManager.runInTransaction.mockImplementation(async fn => fn(tx));
 
     useCase = new DeleteAttendeeUseCase(
       attendeeRepository,
       eventRepository,
       wishlistRepository,
       itemRepository,
+      secretSantaRepository,
+      secretSantaUserRepository,
       transactionManager,
     );
   });
@@ -200,5 +211,83 @@ describe('DeleteAttendeeUseCase', () => {
     expect(attendeeRepository.delete).toHaveBeenCalledWith(pendingAttendee.id, expect.anything());
     expect(wishlistRepository.delete).not.toHaveBeenCalled();
     expect(wishlistRepository.save).not.toHaveBeenCalled();
+  });
+
+  describe('when the event has a secret santa', () => {
+    it('should take the attendee out of a secret santa whose draw has not started, before removing them', async () => {
+      const participation = new SecretSantaUserBuilder().withAttendeeId(participantAttendee.id).build();
+      const otherParticipation = new SecretSantaUserBuilder().withAttendeeId(creatorAttendeeOf(event).id).build();
+      const secretSanta = new SecretSantaBuilder()
+        .withEventId(event.id)
+        .withUsers([participation, otherParticipation])
+        .build();
+      secretSantaRepository.findForEvent.mockResolvedValueOnce(secretSanta);
+
+      await useCase.execute({
+        currentUser: toCurrentUser(creator),
+        eventId: event.id,
+        attendeeId: participantAttendee.id,
+      });
+
+      expect(secretSantaRepository.findForEvent).toHaveBeenCalledWith({ eventId: event.id });
+      expect(secretSantaUserRepository.delete).toHaveBeenCalledTimes(1);
+      expect(secretSantaUserRepository.delete).toHaveBeenCalledWith(participation.id, tx);
+      expect(attendeeRepository.delete).toHaveBeenCalledWith(participantAttendee.id, tx);
+      const [participationDeletion] = secretSantaUserRepository.delete.mock.invocationCallOrder;
+      const [attendeeDeletion] = attendeeRepository.delete.mock.invocationCallOrder;
+      expect(participationDeletion).toBeLessThan(attendeeDeletion as number);
+    });
+
+    it('should not touch a secret santa the attendee does not take part in', async () => {
+      const otherParticipation = new SecretSantaUserBuilder().withAttendeeId(creatorAttendeeOf(event).id).build();
+      const secretSanta = new SecretSantaBuilder().withEventId(event.id).withUsers([otherParticipation]).build();
+      secretSantaRepository.findForEvent.mockResolvedValueOnce(secretSanta);
+
+      await useCase.execute({
+        currentUser: toCurrentUser(creator),
+        eventId: event.id,
+        attendeeId: participantAttendee.id,
+      });
+
+      expect(secretSantaUserRepository.delete).not.toHaveBeenCalled();
+      expect(attendeeRepository.delete).toHaveBeenCalledWith(participantAttendee.id, tx);
+    });
+
+    it('should remove an attendee who does not take part in a secret santa whose draw has started', async () => {
+      const otherParticipation = new SecretSantaUserBuilder().withAttendeeId(creatorAttendeeOf(event).id).build();
+      const secretSanta = new SecretSantaBuilder()
+        .withEventId(event.id)
+        .withUsers([otherParticipation])
+        .started()
+        .build();
+      secretSantaRepository.findForEvent.mockResolvedValueOnce(secretSanta);
+
+      await useCase.execute({
+        currentUser: toCurrentUser(creator),
+        eventId: event.id,
+        attendeeId: participantAttendee.id,
+      });
+
+      expect(secretSantaUserRepository.delete).not.toHaveBeenCalled();
+      expect(attendeeRepository.delete).toHaveBeenCalledWith(participantAttendee.id, tx);
+    });
+
+    it('should refuse with a business rule when the attendee takes part in a secret santa whose draw has started', async () => {
+      const participation = new SecretSantaUserBuilder().withAttendeeId(participantAttendee.id).build();
+      const secretSanta = new SecretSantaBuilder().withEventId(event.id).withUsers([participation]).started().build();
+      secretSantaRepository.findForEvent.mockResolvedValueOnce(secretSanta);
+
+      const execution = useCase.execute({
+        currentUser: toCurrentUser(creator),
+        eventId: event.id,
+        attendeeId: participantAttendee.id,
+      });
+
+      await expect(execution).rejects.toThrow(BusinessRuleException);
+      await expect(execution).rejects.toMatchObject({ code: 'USER_IN_STARTED_SECRET_SANTA' });
+      expect(transactionManager.runInTransaction).not.toHaveBeenCalled();
+      expect(secretSantaUserRepository.delete).not.toHaveBeenCalled();
+      expect(attendeeRepository.delete).not.toHaveBeenCalled();
+    });
   });
 });

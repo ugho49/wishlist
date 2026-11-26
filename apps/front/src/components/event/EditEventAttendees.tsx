@@ -12,6 +12,7 @@ import { match } from 'ts-pattern';
 
 import {
   AttendeeRole,
+  BusinessRuleCode,
   rejectionMessage,
   rejectionPattern,
   useAddEventAttendeeMutation,
@@ -45,6 +46,8 @@ export const EditEventAttendees = ({ eventId, attendees }: EditEventAttendeesPro
 
   const eventQueryKey = ['EventPageGetEvent', { eventId }] as const;
   const invalidateEvent = () => queryClient.invalidateQueries({ queryKey: eventQueryKey });
+  const invalidateSecretSanta = () =>
+    queryClient.invalidateQueries({ queryKey: ['GetSecretSantaForEvent', { eventId }] });
 
   const patchAttendeeRole = (attendeeId: AttendeeId, role: AttendeeRole) => {
     queryClient.setQueryData<EventPageGetEventQuery>(eventQueryKey, current => {
@@ -87,7 +90,14 @@ export const EditEventAttendees = ({ eventId, attendees }: EditEventAttendeesPro
       .with({ __typename: 'VoidOutput' }, () => {
         addToast({ message: "Participant supprimé de l'évènement !", variant: 'info' });
         void invalidateEvent();
+        void invalidateSecretSanta();
       })
+      .with({ __typename: 'BusinessRuleRejection', code: BusinessRuleCode.UserInStartedSecretSanta }, () =>
+        addToast({
+          message: 'Ce participant fait partie du secret santa déjà tiré : annulez le tirage avant de le retirer',
+          variant: 'error',
+        }),
+      )
       .with(rejectionPattern, rejection => addToast({ message: rejectionMessage(rejection), variant: 'error' }))
       .exhaustive();
   };

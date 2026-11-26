@@ -3,7 +3,11 @@ import { BadRequestException } from '@znight/http';
 /**
  * Codes must stay in sync with the `BusinessRuleCode` enum in core/graphql/base.graphql.
  */
-export const BUSINESS_RULE_CODES = ['WRONG_OLD_PASSWORD', 'INVALID_USER_MERGE'] as const;
+export const BUSINESS_RULE_CODES = [
+  'WRONG_OLD_PASSWORD',
+  'INVALID_USER_MERGE',
+  'USER_IN_STARTED_SECRET_SANTA',
+] as const;
 
 export type BusinessRuleCode = (typeof BUSINESS_RULE_CODES)[number];
 

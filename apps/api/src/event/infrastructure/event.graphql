@@ -130,6 +130,7 @@ union AddEventAttendeeResult =
 union RemoveEventAttendeeResult =
   | VoidOutput
   | ValidationRejection
+  | BusinessRuleRejection
   | UnauthorizedRejection
   | ForbiddenRejection
   | NotFoundRejection
@@ -179,6 +180,7 @@ union AdminDeleteEventResult =
 union AdminDeleteEventAttendeeResult =
   | VoidOutput
   | ValidationRejection
+  | BusinessRuleRejection
   | UnauthorizedRejection
   | ForbiddenRejection
   | NotFoundRejection

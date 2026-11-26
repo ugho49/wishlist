@@ -67,6 +67,10 @@ mutation RemoveEventAttendee($eventId: EventId!, $attendeeId: AttendeeId!) {
     ... on VoidOutput {
       success
     }
+    ... on BusinessRuleRejection {
+      code
+      message
+    }
   }
 }
 

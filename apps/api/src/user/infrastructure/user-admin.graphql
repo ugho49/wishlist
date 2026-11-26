@@ -127,6 +127,7 @@ union AdminUpdateUserProfileResult =
 union AdminDeleteUserResult =
   | VoidOutput
   | ValidationRejection
+  | BusinessRuleRejection
   | UnauthorizedRejection
   | ForbiddenRejection
   | InternalErrorRejection
