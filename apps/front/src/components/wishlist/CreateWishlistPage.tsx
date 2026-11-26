@@ -1,20 +1,24 @@
 import type { RootState } from '../../core/store';
 import type { SelectableEvent } from '../event/SearchEventSelect';
+import type { WishlistMode } from './wishlist-mode';
 
 import AccountCircleTwoToneIcon from '@mui/icons-material/AccountCircleTwoTone';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Diversity1TwoToneIcon from '@mui/icons-material/Diversity1TwoTone';
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import PersonAddAltOutlinedIcon from '@mui/icons-material/PersonAddAltOutlined';
 import SaveIcon from '@mui/icons-material/Save';
+import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import {
   Alert,
+  alpha,
   Box,
   Button,
-  Checkbox,
   Container,
   Divider,
-  FormControlLabel,
   IconButton,
   List,
   ListItem,
@@ -31,6 +35,7 @@ import {
 import { useMutation } from '@tanstack/react-query';
 import { useNavigate, useSearch } from '@tanstack/react-router';
 import { MAX_EVENTS_BY_LIST } from '@wishlist/common';
+import clsx from 'clsx';
 import uniq from 'lodash/uniq';
 import { DateTime } from 'luxon';
 import { useEffect, useMemo, useState } from 'react';
@@ -39,17 +44,18 @@ import { useInterval } from 'usehooks-ts';
 
 import { createWishlistMultipart } from '../../api/upload';
 import { isRejection, rejectionMessage, useEventSelectAvailableEventsQuery } from '../../gql';
-import { useToast } from '../../hooks';
+import { useObjectUrl, useToast } from '../../hooks';
 import { getRandomPlaceholderName } from '../../utils/wishlist.utils';
 import { Card } from '../common/Card';
-import { InputLabel } from '../common/InputLabel';
 import { Loader } from '../common/Loader';
 import { Subtitle } from '../common/Subtitle';
 import { TextareaMarkdown } from '../common/TextareaMarkdown';
 import { Title } from '../common/Title';
 import { EventIcon } from '../event/EventIcon';
 import { SearchEventSelect } from '../event/SearchEventSelect';
-import { WishlistLogoActions } from './WishlistLogoActions';
+import { WishlistModeNotice } from './WishlistModeNotice';
+import { WishlistPreview } from './WishlistPreview';
+import { WISHLIST_MODE_LABELS } from './wishlist-mode';
 
 const steps = ['Type de liste', 'Informations', 'Evènements'];
 
@@ -61,28 +67,54 @@ const OptionCard = styled(Button)(({ theme }) => ({
   cursor: 'pointer',
   transition: 'all 0.3s ease',
   display: 'flex',
-  alignItems: 'center',
+  alignItems: 'flex-start',
   justifyContent: 'flex-start',
   gap: 24,
   textTransform: 'none',
   minHeight: 'auto',
   width: '100%',
   textAlign: 'left',
-  '&:hover, &:focus': {
+  '&:hover, &:focus, &.selected': {
     borderColor: theme.palette.primary.main,
     backgroundColor: theme.palette.primary.main + '08',
+  },
+  '&:hover, &:focus': {
     transform: 'translateY(-1px)',
     boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
   },
 }));
+
+const OptionBody = styled('span')({
+  display: 'flex',
+  flexDirection: 'column',
+  flex: 1,
+  minWidth: 0,
+});
+
+const OptionHeader = styled('span')({
+  display: 'flex',
+  flexWrap: 'wrap',
+  alignItems: 'center',
+  columnGap: 12,
+  rowGap: 4,
+  marginBottom: 4,
+});
 
 const OptionTitle = styled('span')(({ theme }) => ({
   fontSize: '1rem',
   fontWeight: 600,
   color: theme.palette.text.primary,
   lineHeight: 1.4,
-  display: 'block',
-  marginBottom: '4px',
+}));
+
+const ModeBadge = styled('span')(({ theme }) => ({
+  padding: '2px 10px',
+  borderRadius: 999,
+  fontSize: '0.75rem',
+  fontWeight: 500,
+  lineHeight: 1.6,
+  color: theme.palette.primary.main,
+  backgroundColor: alpha(theme.palette.primary.main, 0.08),
 }));
 
 const OptionDescription = styled('span')(({ theme }) => ({
@@ -93,8 +125,29 @@ const OptionDescription = styled('span')(({ theme }) => ({
   display: 'block',
 }));
 
-const IconWrapper = styled(Box)(({ theme }) => ({
+const OptionFacts = styled('span')(({ theme }) => ({
   display: 'flex',
+  flexDirection: 'column',
+  gap: 4,
+  marginTop: 10,
+  fontSize: '0.825rem',
+  lineHeight: 1.4,
+  color: theme.palette.text.primary,
+  '& > span': {
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: 8,
+  },
+  '& svg': {
+    flexShrink: 0,
+    fontSize: 18,
+    color: theme.palette.primary.main,
+  },
+}));
+
+const IconWrapper = styled('span')(({ theme }) => ({
+  display: 'flex',
+  flexShrink: 0,
   alignItems: 'center',
   justifyContent: 'center',
   width: 50,
@@ -105,6 +158,22 @@ const IconWrapper = styled(Box)(({ theme }) => ({
   '& svg': {
     fontSize: 24,
   },
+  // Leaves the room to the text on small screens
+  [theme.breakpoints.down('sm')]: {
+    display: 'none',
+  },
+}));
+
+const LockedHint = styled('p')(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: 6,
+  margin: 0,
+  fontSize: '0.8rem',
+  color: theme.palette.text.secondary,
+  '& svg': {
+    fontSize: 16,
+  },
 }));
 
 const ListOfTitle = styled(Box)(({ theme }) => ({
@@ -113,20 +182,21 @@ const ListOfTitle = styled(Box)(({ theme }) => ({
   lineHeight: 1.4,
 }));
 
-const mapState = (state: RootState) => state.userProfile.firstName;
+const mapState = (state: RootState) => state.userProfile;
 
 export const CreateWishlistPage = () => {
   const { addToast } = useToast();
   const navigate = useNavigate();
-  const userFirstName = useSelector(mapState);
+  const { firstName: userFirstName, pictureUrl: userPictureUrl } = useSelector(mapState);
   const [step, setStep] = useState(1);
+  const [mode, setMode] = useState<WishlistMode | undefined>();
   const [ownerName, setOwnerName] = useState('');
   const [description, setDescription] = useState('');
-  const [isListForSomeoneElse, setIsListForSomeoneElse] = useState(false);
-  const [hideItems, setHideItems] = useState(true);
   const [events, setEvents] = useState<SelectableEvent[]>([]);
   const [namePlaceholder, setNamePlaceholder] = useState<string>(getRandomPlaceholderName());
   const [logo, setLogo] = useState<File | undefined>();
+  const logoUrl = useObjectUrl(logo);
+  const hideItems = mode !== 'shared';
 
   useInterval(() => {
     setNamePlaceholder(getRandomPlaceholderName());
@@ -157,11 +227,21 @@ export const CreateWishlistPage = () => {
     }
   }, [eventFromUrl]);
 
+  // Coming back to step 1 and picking the same mode keeps what was already typed
+  const chooseMode = (newMode: WishlistMode) => {
+    if (newMode !== mode) {
+      setMode(newMode);
+      setOwnerName(newMode === 'surprise' ? (userFirstName ?? '') : '');
+      setLogo(undefined);
+    }
+    setStep(2);
+  };
+
   const { mutateAsync: createWishlist, isPending: loading } = useMutation({
     mutationFn: () =>
       createWishlistMultipart(
         {
-          title: `Liste de ${ownerName}`,
+          title: `Liste de ${ownerName.trim()}`,
           description: description === '' ? undefined : description,
           hide_items: hideItems,
           event_ids: uniq(events.map(e => e.id)),
@@ -198,85 +278,102 @@ export const CreateWishlistPage = () => {
           <Card>
             {step === 1 && (
               <Box>
-                <Subtitle>Pour qui créer la liste ?</Subtitle>
+                <Subtitle>Qui va recevoir les cadeaux ?</Subtitle>
 
-                <Stack
-                  sx={{
-                    gap: 2,
-                  }}
-                >
+                <Stack sx={{ gap: 2 }}>
                   <OptionCard
-                    onClick={() => {
-                      setStep(2);
-                      setOwnerName(userFirstName!);
-                      setHideItems(true);
-                      setIsListForSomeoneElse(false);
-                      setLogo(undefined);
-                    }}
+                    className={clsx(mode === 'surprise' && 'selected')}
+                    onClick={() => chooseMode('surprise')}
                   >
                     <IconWrapper>
                       <AccountCircleTwoToneIcon />
                     </IconWrapper>
-                    <Box sx={{ flex: 1 }}>
-                      <OptionTitle>Pour moi</OptionTitle>
-                      <OptionDescription>Je garde le secret et je fais ma liste pour moi-même</OptionDescription>
-                    </Box>
+                    <OptionBody>
+                      <OptionHeader>
+                        <OptionTitle>Moi</OptionTitle>
+                        <ModeBadge>{WISHLIST_MODE_LABELS.surprise}</ModeBadge>
+                      </OptionHeader>
+                      <OptionDescription>Votre liste de souhaits pour un anniversaire, Noël…</OptionDescription>
+                      <OptionFacts>
+                        <span>
+                          <VisibilityOutlinedIcon />
+                          Les participants de vos évènements voient vos souhaits et les réservent
+                        </span>
+                        <span>
+                          <VisibilityOffOutlinedIcon />
+                          Vous ne voyez pas qui offre quoi : la surprise reste entière
+                        </span>
+                      </OptionFacts>
+                    </OptionBody>
                   </OptionCard>
 
-                  <OptionCard
-                    onClick={() => {
-                      setStep(2);
-                      setOwnerName('');
-                      setHideItems(false);
-                      setIsListForSomeoneElse(true);
-                    }}
-                  >
+                  <OptionCard className={clsx(mode === 'shared' && 'selected')} onClick={() => chooseMode('shared')}>
                     <IconWrapper>
                       <Diversity1TwoToneIcon />
                     </IconWrapper>
-                    <Box sx={{ flex: 1 }}>
-                      <OptionTitle>Pour une autre personne</OptionTitle>
+                    <OptionBody>
+                      <OptionHeader>
+                        <OptionTitle>Quelqu'un d'autre</OptionTitle>
+                        <ModeBadge>{WISHLIST_MODE_LABELS.shared}</ModeBadge>
+                      </OptionHeader>
                       <OptionDescription>
-                        Je crée la liste pour quelqu'un d'autre. Je peux choisir si je souhaite voir ou non les
-                        sélections faites par les autres participants
+                        Un enfant, un proche sans compte… Vous gérez sa liste à sa place.
                       </OptionDescription>
-                    </Box>
+                      <OptionFacts>
+                        <span>
+                          <VisibilityOutlinedIcon />
+                          Vous voyez qui réserve quoi, pour coordonner les cadeaux
+                        </span>
+                        <span>
+                          <PersonAddAltOutlinedIcon />
+                          Vous pouvez ajouter un co-gestionnaire, l'autre parent par exemple
+                        </span>
+                      </OptionFacts>
+                    </OptionBody>
                   </OptionCard>
+
+                  <LockedHint>
+                    <LockOutlinedIcon />
+                    Ce choix ne pourra plus être modifié après la création.
+                  </LockedHint>
                 </Stack>
               </Box>
             )}
 
-            {step === 2 && (
+            {step === 2 && mode && (
               <Box component="form" noValidate>
                 <Subtitle>Ajouter les informations</Subtitle>
 
-                <Stack
-                  sx={{
-                    gap: 3,
-                  }}
-                >
-                  <Stack
-                    direction="row"
-                    sx={{
-                      gap: 3,
-                      alignItems: 'center',
-                    }}
-                  >
-                    <ListOfTitle>Liste de</ListOfTitle>
-                    <Box sx={{ flex: 1 }}>
-                      <TextField
-                        label="Nom de la personne"
-                        required
-                        autoComplete="off"
-                        disabled={loading}
-                        fullWidth
-                        value={ownerName}
-                        slotProps={{ htmlInput: { maxLength: 90 } }}
-                        placeholder={namePlaceholder}
-                        onChange={e => setOwnerName(e.target.value)}
-                      />
-                    </Box>
-                  </Stack>
+                <Stack sx={{ gap: 3 }}>
+                  <WishlistPreview
+                    title={`Liste de ${ownerName.trim() || '…'}`}
+                    logoUrl={logoUrl}
+                    hideItems={hideItems}
+                    ownerPictureUrl={userPictureUrl}
+                    loading={loading}
+                    onLogoChange={file => setLogo(file)}
+                    onLogoRemove={() => setLogo(undefined)}
+                  />
+
+                  {/* In surprise mode the list takes the user's first name, shown in the preview (editable later) */}
+                  {mode === 'shared' && (
+                    <Stack direction="row" sx={{ gap: 3, alignItems: 'center' }}>
+                      <ListOfTitle>Liste de</ListOfTitle>
+                      <Box sx={{ flex: 1 }}>
+                        <TextField
+                          label="Prénom de la personne"
+                          required
+                          autoComplete="off"
+                          disabled={loading}
+                          fullWidth
+                          value={ownerName}
+                          slotProps={{ htmlInput: { maxLength: 90 } }}
+                          placeholder={namePlaceholder}
+                          onChange={e => setOwnerName(e.target.value)}
+                        />
+                      </Box>
+                    </Stack>
+                  )}
 
                   <Box>
                     <TextareaMarkdown
@@ -291,35 +388,7 @@ export const CreateWishlistPage = () => {
                     />
                   </Box>
 
-                  {isListForSomeoneElse && (
-                    <>
-                      <Box>
-                        <InputLabel>Révéler les Sélections</InputLabel>
-                        {!hideItems && (
-                          <Alert severity="warning" icon={false} sx={{ marginBlock: '15px' }}>
-                            En activant cette option, vous et tous les participants pourrez voir qui a coché quoi sur
-                            cette liste.
-                          </Alert>
-                        )}
-                        <FormControlLabel
-                          label="Je veux voir ce que les gens cochent sur cette liste"
-                          control={
-                            <Checkbox
-                              checked={!hideItems}
-                              onChange={() => setHideItems(prev => !prev)}
-                              disabled={loading}
-                            />
-                          }
-                        />
-                      </Box>
-                      <WishlistLogoActions
-                        logoUrl={logo ? URL.createObjectURL(logo) : undefined}
-                        loading={loading}
-                        onLogoChange={file => setLogo(file)}
-                        onLogoRemove={() => setLogo(undefined)}
-                      />
-                    </>
-                  )}
+                  <WishlistModeNotice mode={mode} />
                 </Stack>
               </Box>
             )}

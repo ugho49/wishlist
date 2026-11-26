@@ -3,12 +3,12 @@ import type { ReactNode } from 'react';
 import type { MockPerson } from './mockups/mock-data';
 
 import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
-import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import CheckroomIcon from '@mui/icons-material/Checkroom';
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import GoogleIcon from '@mui/icons-material/Google';
 import InstallMobileIcon from '@mui/icons-material/InstallMobile';
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import { alpha, Container, styled, useMediaQuery, useTheme } from '@mui/material';
 import { Link } from '@tanstack/react-router';
 import clsx from 'clsx';
@@ -453,7 +453,7 @@ const ChildListTitleStyled = styled('div')(({ theme }) => ({
   color: theme.palette.primary.main,
 }));
 
-const MockCheckboxStyled = styled('div')(({ theme }) => ({
+const MockModeStyled = styled('div')(({ theme }) => ({
   display: 'flex',
   alignItems: 'flex-start',
   gap: theme.spacing(0.75),
@@ -490,10 +490,10 @@ const ChildListMock = () => (
       <MockAvatar person={people.gabin} size={48} />
       Liste de Gabin
     </ChildListTitleStyled>
-    <MockCheckboxStyled>
-      <CheckBoxIcon />
-      Je veux voir ce que les gens cochent sur cette liste
-    </MockCheckboxStyled>
+    <MockModeStyled>
+      <VisibilityOutlinedIcon />
+      Mode partagé : vous voyez qui réserve quoi
+    </MockModeStyled>
     <CoOwnerStyled>
       <span className="subtitle">Co-gestionnaire</span>
       <MockAvatar person={people.thomas} size={20} />
@@ -962,10 +962,10 @@ export const FeaturesSection = () => {
           <FeatureTile
             title="La liste de votre enfant, gérée à deux"
             preview={<ChildListMock />}
-            summary="Aperçu : la « Liste de Gabin », avec l'option « Je veux voir ce que les gens cochent sur cette liste » cochée et Thomas Martin en co-gestionnaire."
+            summary="Aperçu : la « Liste de Gabin », en mode partagé, avec Thomas Martin en co-gestionnaire."
           >
-            Créez une liste «&nbsp;Pour une autre personne&nbsp;», avec son prénom et sa photo. Si vous choisissez de
-            voir les réservations, l'autre parent peut la gérer avec vous en co-gestionnaire.
+            Créez une liste pour «&nbsp;Quelqu'un d'autre&nbsp;», avec son prénom et sa photo. Vous voyez qui réserve
+            quoi, et l'autre parent peut la gérer avec vous en co-gestionnaire.
           </FeatureTile>
 
           <FeatureTile

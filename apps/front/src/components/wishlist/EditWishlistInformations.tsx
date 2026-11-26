@@ -7,7 +7,7 @@ import { Box, Button, Stack, TextField } from '@mui/material';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import { useMemo, useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import { match } from 'ts-pattern';
 import { z } from 'zod';
 
@@ -25,7 +25,9 @@ import { Card } from '../common/Card';
 import { ConfirmButton } from '../common/ConfirmButton';
 import { Subtitle } from '../common/Subtitle';
 import { TextareaMarkdown } from '../common/TextareaMarkdown';
-import { WishlistLogoActions } from './WishlistLogoActions';
+import { WishlistModeNotice } from './WishlistModeNotice';
+import { WishlistPreview } from './WishlistPreview';
+import { wishlistModeOf } from './wishlist-mode';
 
 export type EditWishlistInformationsProps = {
   wishlist: DetailedWishlist;
@@ -58,6 +60,8 @@ export const EditWishlistInformations = ({ wishlist }: EditWishlistInformationsP
       description: wishlist.description ?? undefined,
     },
   });
+
+  const watchedTitle = useWatch({ control, name: 'title' });
 
   const { mutateAsync: updateWishlistMutation } = useUpdateWishlistMutation({
     onError: () => addToast({ message: "Une erreur s'est produite", variant: 'error' }),
@@ -131,23 +135,21 @@ export const EditWishlistInformations = ({ wishlist }: EditWishlistInformationsP
     >
       <Card>
         <Subtitle>Modifier les informations</Subtitle>
-        <Stack>
-          <Box
-            sx={{
-              marginBottom: 3,
+        <Stack sx={{ gap: 3 }}>
+          <WishlistPreview
+            title={watchedTitle?.trim() || wishlist.title}
+            logoUrl={logoUrl}
+            hideItems={wishlist.config.hideItems}
+            ownerPictureUrl={wishlist.owner.pictureUrl}
+            loading={loadingLogoUpdate}
+            onLogoChange={async file => {
+              await uploadLogo(file);
             }}
-          >
-            <WishlistLogoActions
-              loading={loadingLogoUpdate}
-              logoUrl={logoUrl}
-              onLogoChange={async file => {
-                await uploadLogo(file);
-              }}
-              onLogoRemove={async () => {
-                await removeLogo();
-              }}
-            />
-          </Box>
+            onLogoRemove={async () => {
+              await removeLogo();
+            }}
+          />
+          <WishlistModeNotice mode={wishlistModeOf(wishlist.config.hideItems)} locked />
           <Stack
             component="form"
             onSubmit={handleSubmit(onSubmit)}

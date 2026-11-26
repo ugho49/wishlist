@@ -24,6 +24,7 @@ import {
 import { ImportItemsButton } from './ImportItemsButton';
 import { WishlistAvatar } from './WishlistAvatar';
 import { wishlistBreadcrumbs } from './wishlist-breadcrumbs';
+import { WISHLIST_MODE_LABELS } from './wishlist-mode';
 
 const SquareIconButton = styled(IconButton)(({ theme }) => ({
   width: 40,
@@ -104,10 +105,10 @@ export const WishlistHeader = ({
             {eventsCount} {eventsCount > 1 ? 'évènements' : 'évènement'}
           </MetaChipButton>
           {isPublic && (
-            <Tooltip title="Tout le monde peut ajouter, cocher ou voir les souhaits cochés, même le créateur de la liste">
+            <Tooltip title="Tout le monde peut ajouter, cocher ou voir les souhaits cochés, même les gestionnaires de la liste">
               <MetaChip className="success" tabIndex={0}>
                 <PublicIcon />
-                Liste publique
+                {WISHLIST_MODE_LABELS.shared}
               </MetaChip>
             </Tooltip>
           )}

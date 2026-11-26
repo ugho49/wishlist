@@ -70,7 +70,7 @@ export const EditWishlistManagement = ({ wishlist }: EditWishlistManagementProps
             color: 'text.secondary',
           }}
         >
-          Pour les listes publiques, vous pouvez ajouter un co-gestionnaire qui pourra gérer la liste comme vous
+          En mode partagé, vous pouvez ajouter un co-gestionnaire qui pourra gérer la liste comme vous
           (ajouter/supprimer des items, modifier la liste, etc.).
         </Typography>
 

@@ -52,7 +52,7 @@ const FAQS: Faq[] = [
   {
     question: 'Puis-je faire une liste pour mon enfant\u00a0?',
     answer:
-      "Oui. Choisissez «\u00a0Pour une autre personne\u00a0» et ajoutez son prénom et sa photo. Vous décidez si vous voulez voir les réservations\u00a0; dans ce cas, vous pouvez ajouter l'autre parent comme co-gestionnaire.",
+      "Oui. Choisissez «\u00a0Quelqu'un d'autre\u00a0» et ajoutez son prénom et sa photo. Vous voyez qui réserve quoi pour coordonner les cadeaux, et vous pouvez ajouter l'autre parent comme co-gestionnaire.",
   },
   {
     question: 'Comment fonctionne le Secret Santa\u00a0?',

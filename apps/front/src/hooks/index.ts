@@ -5,4 +5,5 @@ export { useSecretSanta } from './domain/useSecretSanta';
 export { useSecretSantaDrawReveal } from './domain/useSecretSantaDrawReveal';
 export { useSecretSantaSuggestion } from './domain/useSecretSantaSuggestion';
 export { useLogout } from './useLogout';
+export { useObjectUrl } from './useObjectUrl';
 export { useToast } from './useToast';
