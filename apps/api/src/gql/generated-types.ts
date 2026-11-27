@@ -335,7 +335,11 @@ export type Event = {
 
 export type EventAttendee = {
   __typename: 'EventAttendee';
+  /** False while the last wishlist reminder is too recent to send another one. */
+  canBeReminded: Scalars['Boolean']['output'];
   id: Scalars['AttendeeId']['output'];
+  /** When an admin of the event last reminded the attendee to fill their wishlist. */
+  lastRemindedAt?: Maybe<Scalars['String']['output']>;
   pendingEmail?: Maybe<Scalars['String']['output']>;
   role: AttendeeRole;
   user?: Maybe<User>;
@@ -546,6 +550,7 @@ export type Mutation = {
   logout: LogoutResult;
   refreshSession: RefreshSessionResult;
   registerUser: RegisterUserResult;
+  remindEventAttendees: RemindEventAttendeesResult;
   removeEventAttendee: RemoveEventAttendeeResult;
   removeUserPicture: RemoveUserPictureResult;
   removeWishlistCoOwner: RemoveWishlistCoOwnerResult;
@@ -770,6 +775,12 @@ export type MutationRefreshSessionArgs = {
 
 export type MutationRegisterUserArgs = {
   input: RegisterUserInput;
+};
+
+
+export type MutationRemindEventAttendeesArgs = {
+  attendeeIds: Array<Scalars['AttendeeId']['input']>;
+  eventId: Scalars['EventId']['input'];
 };
 
 
@@ -1079,6 +1090,14 @@ export type RegisterUserInput = {
 };
 
 export type RegisterUserResult = BusinessRuleRejection | CurrentUser | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection;
+
+export type RemindEventAttendeesOutput = {
+  __typename: 'RemindEventAttendeesOutput';
+  /** Attendees actually emailed: the ones who filled their list or were reminded too recently are skipped. */
+  remindedCount: Scalars['Int']['output'];
+};
+
+export type RemindEventAttendeesResult = BusinessRuleRejection | ForbiddenRejection | InternalErrorRejection | NotFoundRejection | RemindEventAttendeesOutput | UnauthorizedRejection | ValidationRejection;
 
 export type RemoveEventAttendeeResult = BusinessRuleRejection | ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput;
 

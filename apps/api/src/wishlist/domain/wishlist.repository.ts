@@ -8,6 +8,8 @@ export interface WishlistRepository {
   findByIdOrFail(wishlistId: WishlistId): Promise<Wishlist>;
   findByIds(wishlistIds: WishlistId[]): Promise<Wishlist[]>;
   findByEvent(eventId: EventId): Promise<Wishlist[]>;
+  /** The lists linked to one of these events with at least one item added by their managers (not suggested). */
+  findFilledByEventIds(eventIds: EventId[]): Promise<Wishlist[]>;
   findByUserPaginated(params: {
     userId: UserId;
     pagination: { take: number; skip: number };

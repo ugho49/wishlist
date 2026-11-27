@@ -169,6 +169,13 @@
       "when": 1795724899427,
       "tag": "0023_drop-wishlist-hide-items",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1795767892070,
+      "tag": "0024_add-attendee-last-reminded-at",
+      "breakpoints": true
     }
   ]
 }

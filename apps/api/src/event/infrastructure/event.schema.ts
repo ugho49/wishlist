@@ -65,6 +65,8 @@ export const UpdateEventInputSchema = z.object({
   eventDate: z.iso.date({ message: 'eventDate must be in format YYYY-MM-DD' }),
 }) satisfies z.ZodType<UpdateEventInput>;
 
+export const RemindEventAttendeeIdsSchema = z.array(AttendeeIdSchema).min(1).max(MAX_INVITED_ATTENDEES);
+
 export const AddEventAttendeeInputSchema = z.object({
   email: z.email().max(200).toLowerCase(),
   role: GqlAttendeeRoleSchema.optional(),

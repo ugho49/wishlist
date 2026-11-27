@@ -14,7 +14,7 @@ export class RateLimitConfig {
   userByEmailPerUser = 30;
   /** RATE_LIMIT_USER_BY_EMAIL_PER_IP: account lookups by exact email, per client address and per hour */
   userByEmailPerIp = 60;
-  /** RATE_LIMIT_INVITATIONS_PER_USER: event attendees invited, per user and per day */
+  /** RATE_LIMIT_INVITATIONS_PER_USER: event attendees invited or reminded to fill their wishlist, per user and per day */
   invitationsPerUser = 100;
   /** RATE_LIMIT_LOGIN_PER_EMAIL: login attempts on one email, per 15 minutes */
   loginPerEmail = 10;

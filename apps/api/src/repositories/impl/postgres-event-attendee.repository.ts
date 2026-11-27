@@ -88,6 +88,7 @@ export class PostgresEventAttendeeRepository implements EventAttendeeRepository 
         userId: attendee.user?.id ?? null,
         tempUserEmail: attendee.pendingEmail ?? null,
         role: attendee.role,
+        lastRemindedAt: attendee.lastRemindedAt ?? null,
       })
       .onConflictDoUpdate({
         target: schema.eventAttendee.id,
@@ -95,6 +96,7 @@ export class PostgresEventAttendeeRepository implements EventAttendeeRepository 
           userId: attendee.user?.id ?? null,
           tempUserEmail: attendee.pendingEmail ?? null,
           role: attendee.role,
+          lastRemindedAt: attendee.lastRemindedAt ?? null,
         },
       });
   }
@@ -114,6 +116,7 @@ export class PostgresEventAttendeeRepository implements EventAttendeeRepository 
       user: attendee.user ? PostgresUserRepository.toModel(attendee.user) : undefined,
       pendingEmail: attendee.tempUserEmail ?? undefined,
       role: attendee.role,
+      lastRemindedAt: attendee.lastRemindedAt ?? undefined,
     });
   }
 }

@@ -300,6 +300,10 @@ union DeleteWishlistResult = ForbiddenRejection | InternalErrorRejection | NotFo
 
 type Event {
   attendees: [EventAttendee!]!
+  """
+  Attendees who manage no list of this event with a wish of their own yet (pending invitees included).
+  """
+  attendeesWithoutWishlist: [EventAttendee!]! @resolved
   createdAt: String!
   description: String
   eventDate: String!
@@ -313,7 +317,15 @@ type Event {
 }
 
 type EventAttendee {
+  """
+  False while the last wishlist reminder is too recent to send another one.
+  """
+  canBeReminded: Boolean!
   id: AttendeeId!
+  """
+  When an admin of the event last reminded the attendee to fill their wishlist.
+  """
+  lastRemindedAt: String
   pendingEmail: String
   role: AttendeeRole!
   user: User
@@ -515,6 +527,7 @@ type Mutation {
   logout(input: LogoutInput!): LogoutResult!
   refreshSession(input: RefreshSessionInput!): RefreshSessionResult!
   registerUser(input: RegisterUserInput!): RegisterUserResult!
+  remindEventAttendees(attendeeIds: [AttendeeId!]!, eventId: EventId!): RemindEventAttendeesResult!
   removeEventAttendee(attendeeId: AttendeeId!, eventId: EventId!): RemoveEventAttendeeResult!
   removeUserPicture: RemoveUserPictureResult!
   removeWishlistCoOwner(id: WishlistId!): RemoveWishlistCoOwnerResult!
@@ -625,6 +638,15 @@ input RegisterUserInput {
 }
 
 union RegisterUserResult = BusinessRuleRejection | CurrentUser | ForbiddenRejection | InternalErrorRejection | UnauthorizedRejection | ValidationRejection
+
+type RemindEventAttendeesOutput {
+  """
+  Attendees actually emailed: the ones who filled their list or were reminded too recently are skipped.
+  """
+  remindedCount: Int!
+}
+
+union RemindEventAttendeesResult = BusinessRuleRejection | ForbiddenRejection | InternalErrorRejection | NotFoundRejection | RemindEventAttendeesOutput | UnauthorizedRejection | ValidationRejection
 
 union RemoveEventAttendeeResult = BusinessRuleRejection | ForbiddenRejection | InternalErrorRejection | NotFoundRejection | UnauthorizedRejection | ValidationRejection | VoidOutput
 

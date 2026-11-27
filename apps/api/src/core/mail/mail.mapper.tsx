@@ -16,6 +16,7 @@ import {
   SecretSantaCancelEmail,
   SecretSantaDrawEmail,
   WelcomeUserEmail,
+  WishlistReminderEmail,
 } from '@wishlist/mail';
 import { match } from 'ts-pattern';
 
@@ -77,6 +78,15 @@ export const mapPayloadToTemplate = (payload: MailPayload): ReactElement =>
         createEventUrl={context.createEventUrl}
         createWishlistUrl={context.createWishlistUrl}
         firstName={context.firstName}
+      />
+    ))
+    .with({ template: MailTemplate.WISHLIST_REMINDER }, ({ context }) => (
+      <WishlistReminderEmail
+        daysLeft={context.daysLeft}
+        eventTitle={context.eventTitle}
+        hasAccount={context.hasAccount}
+        remindedBy={context.remindedBy}
+        url={context.url}
       />
     ))
     .exhaustive();

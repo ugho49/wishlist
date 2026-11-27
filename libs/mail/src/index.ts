@@ -44,3 +44,4 @@ export { default as SecretSantaDrawEmail, type SecretSantaDrawEmailProps } from 
 // backend mapper can import them by name. The default exports are kept for the
 // `react-email` preview server (which discovers templates by file).
 export { default as WelcomeUserEmail, type WelcomeUserEmailProps } from './templates/welcome-user';
+export { default as WishlistReminderEmail, type WishlistReminderEmailProps } from './templates/wishlist-reminder';

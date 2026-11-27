@@ -3,6 +3,7 @@ import { check, foreignKey, pgEnum, pgTable, unique, varchar } from 'drizzle-orm
 
 import { AttendeeRole } from '../../src/event/domain/attendee-role.enum';
 import { tsEnumToPgEnum } from '../enum';
+import { timestampWithTimezone } from '../helpers';
 import { attendeeId, eventId, userId } from '../ids';
 import { event } from './event.schema';
 import { secretSantaUser } from './secret-santa-user.schema';
@@ -18,6 +19,7 @@ export const eventAttendee = pgTable(
     userId: userId('user_id'),
     tempUserEmail: varchar('temp_user_email', { length: 200 }),
     role: attendeeRoleEnum().default(AttendeeRole.PARTICIPANT).notNull(),
+    lastRemindedAt: timestampWithTimezone('last_reminded_at'),
   },
   table => [
     foreignKey({ columns: [table.eventId], foreignColumns: [event.id] }).onDelete('cascade'),

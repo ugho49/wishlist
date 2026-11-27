@@ -4,6 +4,7 @@ import type { EventAttendee } from './event.types';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
 import EditIcon from '@mui/icons-material/Edit';
+import ForwardToInboxIcon from '@mui/icons-material/ForwardToInbox';
 import HourglassTopIcon from '@mui/icons-material/HourglassTop';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import PeopleIcon from '@mui/icons-material/People';
@@ -80,6 +81,8 @@ export type EventHeaderProps = {
   attendees: EventAttendee[];
   currentUserCanEdit: boolean;
   openAttendeesDialog: () => void;
+  /** Left out when the attendees cannot be reminded (finished event). */
+  openRemindAttendeesDialog?: () => void;
   secretSanta?: ReactNode;
 };
 
@@ -92,6 +95,7 @@ export const EventHeader = ({
   attendees,
   currentUserCanEdit,
   openAttendeesDialog,
+  openRemindAttendeesDialog,
   secretSanta,
 }: EventHeaderProps) => {
   const navigate = useNavigate();
@@ -189,6 +193,19 @@ export const EventHeader = ({
           </ListItemIcon>
           <ListItemText>Gérer les participants</ListItemText>
         </MenuItem>
+        {openRemindAttendeesDialog ? (
+          <MenuItem
+            onClick={() => {
+              setAnchorEl(null);
+              openRemindAttendeesDialog();
+            }}
+          >
+            <ListItemIcon>
+              <ForwardToInboxIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Relancer les participants</ListItemText>
+          </MenuItem>
+        ) : null}
         <MenuItem onClick={() => goToEdit(TabValues.secretSanta)}>
           <ListItemIcon>
             <CardGiftcardIcon fontSize="small" />

@@ -12,6 +12,7 @@ import {
   type CreateEventResult,
   type DeleteEventResult,
   AttendeeRole as GqlAttendeeRole,
+  type RemindEventAttendeesResult,
   type RemoveEventAttendeeResult,
   type UpdateEventAttendeeRoleResult,
   type UpdateEventInput,
@@ -21,6 +22,7 @@ import { AddAttendeeUseCase } from '../../application/command/add-attendee.use-c
 import { CreateEventUseCase } from '../../application/command/create-event.use-case';
 import { DeleteAttendeeUseCase } from '../../application/command/delete-attendee.use-case';
 import { DeleteEventUseCase } from '../../application/command/delete-event.use-case';
+import { RemindAttendeesUseCase } from '../../application/command/remind-attendees.use-case';
 import { UpdateAttendeeRoleUseCase } from '../../application/command/update-attendee-role.use-case';
 import { UpdateEventUseCase } from '../../application/command/update-event.use-case';
 import { eventMapper } from '../event.mapper';
@@ -30,6 +32,7 @@ import {
   CreateEventInputSchema,
   EventIdSchema,
   GqlAttendeeRoleSchema,
+  RemindEventAttendeeIdsSchema,
   toDomainAttendeeRole,
   UpdateEventInputSchema,
 } from '../event.schema';
@@ -44,6 +47,7 @@ export class EventMutationResolver {
     private readonly addAttendeeUseCase: AddAttendeeUseCase,
     private readonly deleteAttendeeUseCase: DeleteAttendeeUseCase,
     private readonly updateAttendeeRoleUseCase: UpdateAttendeeRoleUseCase,
+    private readonly remindAttendeesUseCase: RemindAttendeesUseCase,
   ) {}
 
   @Mutation()
@@ -139,5 +143,15 @@ export class EventMutationResolver {
       role: toDomainAttendeeRole(role),
     });
     return { __typename: 'VoidOutput', success: true };
+  }
+
+  @Mutation()
+  async remindEventAttendees(
+    @Args('eventId', EventIdSchema) eventId: EventId,
+    @Args('attendeeIds', RemindEventAttendeeIdsSchema) attendeeIds: AttendeeId[],
+    @CurrentUser() currentUser: ICurrentUser,
+  ): Promise<RemindEventAttendeesResult> {
+    const { remindedAttendees } = await this.remindAttendeesUseCase.execute({ currentUser, eventId, attendeeIds });
+    return { __typename: 'RemindEventAttendeesOutput', remindedCount: remindedAttendees.length };
   }
 }

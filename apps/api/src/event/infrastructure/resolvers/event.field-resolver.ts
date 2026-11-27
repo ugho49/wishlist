@@ -1,8 +1,9 @@
 import { Loader, Parent, ResolveField, Resolver } from '@znight/graphql';
 
-import { type Event, type SecretSanta, type Wishlist } from '../../../gql/generated-types';
+import { type Event, type EventAttendee, type SecretSanta, type Wishlist } from '../../../gql/generated-types';
 import { SecretSantasByEventId } from '../../../secret-santa/infrastructure/secret-santa.dataloader';
 import { WishlistsById } from '../../../wishlist/infrastructure/wishlist.dataloader';
+import { AttendeesWithoutWishlistByEventId } from '../event.dataloader';
 
 @Resolver('Event')
 export class EventFieldResolver {
@@ -19,5 +20,13 @@ export class EventFieldResolver {
     @Loader() secretSantasLoader: Loader<SecretSantasByEventId>,
   ): Promise<SecretSanta | null> {
     return secretSantasLoader.load(event.id);
+  }
+
+  @ResolveField()
+  attendeesWithoutWishlist(
+    @Parent() event: Event,
+    @Loader() attendeesWithoutWishlistLoader: Loader<AttendeesWithoutWishlistByEventId>,
+  ): Promise<EventAttendee[]> {
+    return attendeesWithoutWishlistLoader.load(event.id);
   }
 }

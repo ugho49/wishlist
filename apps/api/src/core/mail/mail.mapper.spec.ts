@@ -67,6 +67,16 @@ const payloads: MailPayload[] = [
       createWishlistUrl: 'https://wishlistapp.fr/wishlists/new',
     },
   },
+  {
+    ...base,
+    template: MailTemplate.WISHLIST_REMINDER,
+    context: { eventTitle: 'Noël', remindedBy: 'Marie', daysLeft: 3, url: 'https://x/e', hasAccount: true },
+  },
+  {
+    ...base,
+    template: MailTemplate.WISHLIST_REMINDER,
+    context: { eventTitle: 'Noël', remindedBy: 'Marie', daysLeft: 0, url: 'https://x/r', hasAccount: false },
+  },
 ];
 
 describe('mapPayloadToTemplate', () => {
