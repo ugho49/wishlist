@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/nursery/useTopLevelDescribe: preloaded before every test file, this afterAll is the global teardown */
 import { dirname, join } from 'node:path';
 import * as dotenv from 'dotenv';
 
