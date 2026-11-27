@@ -5,6 +5,7 @@ import { uuid } from '@wishlist/common';
 import { DateTime } from 'luxon';
 
 import { AttendeeRole } from '../../event/domain/attendee-role.enum';
+import { WishlistMode } from '../../wishlist/domain/wishlist-mode.enum';
 
 /**
  * Integration tests for the GraphQL ItemResolver.
@@ -1571,7 +1572,7 @@ describe('ItemResolver (GraphQL)', () => {
         });
       });
 
-      it('should return gifts reserved on someone else wishlist and ignore own lists and other takers', async () => {
+      it('should return gifts reserved on someone else wishlist and ignore own surprise lists and other takers', async () => {
         const ownerId = await fixtures.insertUser({
           email: 'owner@test.fr',
           firstname: 'Ada',
@@ -1660,6 +1661,56 @@ describe('ItemResolver (GraphQL)', () => {
           ],
           pagination: { totalElements: 1, totalPages: 1, pageNumber: 1 },
         });
+      });
+
+      it('should return gifts reserved on own and co-owned shared lists', async () => {
+        const partnerId = await fixtures.insertUser({
+          email: 'partner@test.fr',
+          firstname: 'Grace',
+          lastname: 'Hopper',
+        });
+        const { eventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Mariage',
+          eventDate: new Date('2026-12-20T12:00:00.000Z'),
+          maintainerId: currentUserId,
+        });
+        const ownSharedWishlistId = await fixtures.insertWishlist({
+          eventIds: [eventId],
+          userId: currentUserId,
+          title: 'Notre liste',
+          mode: WishlistMode.SHARED,
+          coOwnerId: partnerId,
+        });
+        const coOwnedSharedWishlistId = await fixtures.insertWishlist({
+          eventIds: [eventId],
+          userId: partnerId,
+          title: 'Liste de Grace',
+          mode: WishlistMode.SHARED,
+          coOwnerId: currentUserId,
+        });
+        const ownSharedItemId = await fixtures.insertItem({
+          wishlistId: ownSharedWishlistId,
+          name: 'Service à thé',
+          takerId: currentUserId,
+        });
+        const coOwnedSharedItemId = await fixtures.insertItem({
+          wishlistId: coOwnedSharedWishlistId,
+          name: 'Plaid',
+          takerId: currentUserId,
+        });
+
+        const res = await request
+          .post('/graphql')
+          .send({ query, variables: { filters: {} } })
+          .expect(200);
+
+        expect(res.body.data.myReservedItems).toMatchObject({
+          __typename: 'GetReservedItemsPagedResponse',
+          pagination: { totalElements: 2, totalPages: 1, pageNumber: 1 },
+        });
+        expect(res.body.data.myReservedItems.data.map((item: { id: string }) => item.id)).toEqual(
+          expect.arrayContaining([ownSharedItemId, coOwnedSharedItemId]),
+        );
       });
 
       it('should paginate reserved gifts by soonest event date', async () => {

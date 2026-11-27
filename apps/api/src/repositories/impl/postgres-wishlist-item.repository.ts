@@ -213,10 +213,16 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
     period: ReservedItemPeriod;
     pagination: { take: number; skip: number };
   }): Promise<{ items: ReservedItem[]; totalCount: number; purchasedCount: number }> {
-    const reservedForSomeoneElse = and(
+    // The managers (owner and co-owner) of a shared list can reserve its gifts, so only their surprise lists are left out.
+    const reservedByUser = and(
       eq(schema.itemTaker.userId, params.userId),
-      ne(schema.wishlist.ownerId, params.userId),
-      or(isNull(schema.wishlist.coOwnerId), ne(schema.wishlist.coOwnerId, params.userId)),
+      or(
+        eq(schema.wishlist.mode, WishlistMode.SHARED),
+        and(
+          ne(schema.wishlist.ownerId, params.userId),
+          or(isNull(schema.wishlist.coOwnerId), ne(schema.wishlist.coOwnerId, params.userId)),
+        ),
+      ),
       this.reservedItemPeriodCondition(params.period),
     );
 
@@ -225,7 +231,7 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
       .from(schema.itemTaker)
       .innerJoin(schema.item, eq(schema.item.id, schema.itemTaker.itemId))
       .innerJoin(schema.wishlist, eq(schema.wishlist.id, schema.item.wishlistId))
-      .where(reservedForSomeoneElse);
+      .where(reservedByUser);
 
     const totalCount = countResult[0]?.count ?? 0;
     const purchasedCount = countResult[0]?.purchasedCount ?? 0;
@@ -240,7 +246,7 @@ export class PostgresWishlistItemRepository implements WishlistItemRepository {
       .from(schema.itemTaker)
       .innerJoin(schema.item, eq(schema.item.id, schema.itemTaker.itemId))
       .innerJoin(schema.wishlist, eq(schema.wishlist.id, schema.item.wishlistId))
-      .where(reservedForSomeoneElse)
+      .where(reservedByUser)
       // Gifts still to buy come first, like the open tasks of a to-do list.
       .orderBy(sql`(${schema.itemTaker.purchasedAt} is not null)`, ...this.reservedItemOrderBy())
       .limit(params.pagination.take)
