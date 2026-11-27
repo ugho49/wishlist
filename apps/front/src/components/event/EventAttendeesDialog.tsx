@@ -22,6 +22,8 @@ export interface EventAttendeesDialogProps {
   eventId: string;
   currentUserCanEdit: boolean;
   attendees: EventAttendee[];
+  /** Left out when the attendees cannot be reminded (finished event). */
+  openRemindAttendeesDialog?: () => void;
 }
 
 export const EventAttendeesDialog = ({
@@ -30,6 +32,7 @@ export const EventAttendeesDialog = ({
   handleClose,
   eventId,
   currentUserCanEdit,
+  openRemindAttendeesDialog,
 }: EventAttendeesDialogProps) => (
   <Dialog onClose={() => handleClose()} open={open} fullWidth maxWidth="xs">
     <DialogTitle>
@@ -63,6 +66,11 @@ export const EventAttendeesDialog = ({
     </DialogContent>
     {currentUserCanEdit && (
       <DialogActions>
+        {openRemindAttendeesDialog ? (
+          <Button variant="text" onClick={openRemindAttendeesDialog}>
+            Relancer
+          </Button>
+        ) : null}
         <Button variant="text" component={RouterLink} to={`/events/${eventId}/edit?tab=attendees`}>
           Gérer les participants
         </Button>

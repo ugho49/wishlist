@@ -12,6 +12,10 @@ type EventAttendee {
   user: User
   pendingEmail: String
   role: AttendeeRole!
+  "When an admin of the event last reminded the attendee to fill their wishlist."
+  lastRemindedAt: String
+  "False while the last wishlist reminder is too recent to send another one."
+  canBeReminded: Boolean!
 }
 
 type Event {
@@ -24,8 +28,15 @@ type Event {
   wishlists: [Wishlist!]! @resolved
   attendees: [EventAttendee!]!
   secretSanta: SecretSanta @resolved
+  "Attendees who manage no list of this event with a wish of their own yet (pending invitees included)."
+  attendeesWithoutWishlist: [EventAttendee!]! @resolved
   createdAt: String!
   updatedAt: String!
+}
+
+type RemindEventAttendeesOutput {
+  "Attendees actually emailed: the ones who filled their list or were reminded too recently are skipped."
+  remindedCount: Int!
 }
 
 type GetEventsPagedResponse {
@@ -146,6 +157,15 @@ union UpdateEventAttendeeRoleResult =
   | NotFoundRejection
   | InternalErrorRejection
 
+union RemindEventAttendeesResult =
+  | RemindEventAttendeesOutput
+  | ValidationRejection
+  | BusinessRuleRejection
+  | UnauthorizedRejection
+  | ForbiddenRejection
+  | NotFoundRejection
+  | InternalErrorRejection
+
 union AdminGetEventByIdResult =
   | Event
   | ValidationRejection
@@ -215,6 +235,7 @@ extend type Mutation {
     attendeeId: AttendeeId!
     role: AttendeeRole!
   ): UpdateEventAttendeeRoleResult!
+  remindEventAttendees(eventId: EventId!, attendeeIds: [AttendeeId!]!): RemindEventAttendeesResult!
   adminUpdateEvent(id: EventId!, input: UpdateEventInput!): AdminUpdateEventResult!
   adminDeleteEvent(id: EventId!): AdminDeleteEventResult!
   adminDeleteEventAttendee(eventId: EventId!, attendeeId: AttendeeId!): AdminDeleteEventAttendeeResult!

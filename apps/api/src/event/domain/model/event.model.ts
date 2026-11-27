@@ -1,4 +1,5 @@
 import type { EventId, ICurrentUser, UserId, WishlistId } from '@wishlist/common';
+import type { Wishlist } from '../../../wishlist/domain/wishlist.model';
 import type { EventAttendee } from './event-attendee.model';
 
 import { AttendeeRole } from '../attendee-role.enum';
@@ -93,6 +94,22 @@ export class Event {
 
   canAddWishlist(currentUserId: UserId): boolean {
     return this.attendees.some(a => a.user?.id === currentUserId);
+  }
+
+  /**
+   * The attendees who have not filled a wishlist for this event yet: they manage (own or co-own) none of the
+   * `filledWishlists` linked to the event. Pending invitees (no account yet) never have one.
+   *
+   * @param filledWishlists lists with at least one wish added by their managers (suggestions do not count)
+   */
+  attendeesWithoutWishlist(filledWishlists: Wishlist[]): EventAttendee[] {
+    const eventWishlists = filledWishlists.filter(wishlist => wishlist.isLinkedToEvent(this.id));
+
+    return this.attendees.filter(attendee => {
+      const userId = attendee.user?.id;
+      if (!userId) return true;
+      return !eventWishlists.some(wishlist => wishlist.isOwnerOrCoOwner(userId));
+    });
   }
 
   private canAccessByRole(params: { currentUser: ICurrentUser; acceptedRoles: AttendeeRole[] }): boolean {

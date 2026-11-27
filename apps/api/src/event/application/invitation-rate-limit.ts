@@ -6,6 +6,7 @@ import { ONE_DAY_IN_SECONDS, type RateLimitConfig } from '../../core/rate-limit/
 /**
  * Inviting an attendee tells whether the email has an account (the response carries the user) and
  * sends an email to any address: every invitation counts against a daily quota of the inviter.
+ * Reminding attendees to fill their wishlist emails them too: every reminder counts against the same quota.
  */
 export function invitationRateLimitRule(userId: UserId, config: RateLimitConfig): RateLimitRule {
   return {

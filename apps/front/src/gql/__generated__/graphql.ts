@@ -249,6 +249,35 @@ export type EventPageGetEventQuery = { event:
     | { __typename: 'UnauthorizedRejection' }
    | null };
 
+export type EventAttendeesWithoutWishlistQueryVariables = Exact<{
+  eventId: Ids["EventId"];
+}>;
+
+
+export type EventAttendeesWithoutWishlistQuery = { event:
+    | { __typename: 'Event', id: Ids["EventId"], attendeesWithoutWishlist: Array<{ id: Ids["AttendeeId"], pendingEmail: string | null, lastRemindedAt: string | null, canBeReminded: boolean, user: { id: Ids["UserId"], firstName: string, lastName: string, email: string, pictureUrl: string | null } | null }> }
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'NotFoundRejection' }
+    | { __typename: 'UnauthorizedRejection' }
+   | null };
+
+export type RemindEventAttendeesMutationVariables = Exact<{
+  eventId: Ids["EventId"];
+  attendeeIds: Array<Ids["AttendeeId"]> | Ids["AttendeeId"];
+}>;
+
+
+export type RemindEventAttendeesMutation = { remindEventAttendees:
+    | { __typename: 'BusinessRuleRejection', code: Types.BusinessRuleCode, message: string }
+    | { __typename: 'ForbiddenRejection' }
+    | { __typename: 'InternalErrorRejection' }
+    | { __typename: 'NotFoundRejection' }
+    | { __typename: 'RemindEventAttendeesOutput', remindedCount: number }
+    | { __typename: 'UnauthorizedRejection' }
+    | { __typename: 'ValidationRejection', errors: Array<{ field: string, message: string }> }
+   };
+
 export type EventSelectAvailableEventsQueryVariables = Exact<{
   filters: Types.EventPaginationFilters;
 }>;
@@ -1933,6 +1962,80 @@ export const useEventPageGetEventQuery = <
       {
     queryKey: ['EventPageGetEvent', variables],
     queryFn: fetchGql<EventPageGetEventQuery, EventPageGetEventQueryVariables>(EventPageGetEventDocument, variables),
+    ...options
+  }
+    )};
+
+export const EventAttendeesWithoutWishlistDocument = new TypedDocumentString(`
+    query EventAttendeesWithoutWishlist($eventId: EventId!) {
+  event(id: $eventId) {
+    __typename
+    ... on Event {
+      id
+      attendeesWithoutWishlist {
+        id
+        pendingEmail
+        lastRemindedAt
+        canBeReminded
+        user {
+          id
+          firstName
+          lastName
+          email
+          pictureUrl
+        }
+      }
+    }
+  }
+}
+    `);
+
+export const useEventAttendeesWithoutWishlistQuery = <
+      TData = EventAttendeesWithoutWishlistQuery,
+      TError = unknown
+    >(
+      variables: EventAttendeesWithoutWishlistQueryVariables,
+      options?: Omit<UseQueryOptions<EventAttendeesWithoutWishlistQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<EventAttendeesWithoutWishlistQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<EventAttendeesWithoutWishlistQuery, TError, TData>(
+      {
+    queryKey: ['EventAttendeesWithoutWishlist', variables],
+    queryFn: fetchGql<EventAttendeesWithoutWishlistQuery, EventAttendeesWithoutWishlistQueryVariables>(EventAttendeesWithoutWishlistDocument, variables),
+    ...options
+  }
+    )};
+
+export const RemindEventAttendeesDocument = new TypedDocumentString(`
+    mutation RemindEventAttendees($eventId: EventId!, $attendeeIds: [AttendeeId!]!) {
+  remindEventAttendees(eventId: $eventId, attendeeIds: $attendeeIds) {
+    __typename
+    ... on RemindEventAttendeesOutput {
+      remindedCount
+    }
+    ... on BusinessRuleRejection {
+      code
+      message
+    }
+    ... on ValidationRejection {
+      errors {
+        field
+        message
+      }
+    }
+  }
+}
+    `);
+
+export const useRemindEventAttendeesMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<RemindEventAttendeesMutation, TError, RemindEventAttendeesMutationVariables, TContext>) => {
+    
+    return useMutation<RemindEventAttendeesMutation, TError, RemindEventAttendeesMutationVariables, TContext>(
+      {
+    mutationKey: ['RemindEventAttendees'],
+    mutationFn: (variables?: RemindEventAttendeesMutationVariables) => fetchGql<RemindEventAttendeesMutation, RemindEventAttendeesMutationVariables>(RemindEventAttendeesDocument, variables)(),
     ...options
   }
     )};

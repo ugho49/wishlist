@@ -18,6 +18,7 @@ import { EventNotFound } from './EventNotFound';
 import { EventWishlists } from './EventWishlists';
 import { canEditEvent } from './event-permissions';
 import { MySecretSantaDraw } from './MySecretSantaDraw';
+import { RemindAttendeesDialog } from './RemindAttendeesDialog';
 import { SecretSantaLaunchSuggestion } from './SecretSantaLaunchSuggestion';
 import { SecretSantaSuggestionCard } from './SecretSantaSuggestionCard';
 
@@ -39,6 +40,7 @@ interface EventPageProps {
 export const EventPage = ({ eventId }: EventPageProps) => {
   const currentUserId = useSelector(mapState);
   const [openAttendeesDialog, setOpenAttendeesDialog] = useState(false);
+  const [openRemindAttendeesDialog, setOpenRemindAttendeesDialog] = useState(false);
   const { data, isLoading: loading } = useEventPageGetEventQuery({ eventId }, { select: d => d.event });
   const event = data?.__typename === 'Event' ? data : undefined;
   const queryRejection = data && isRejection(data) && data.__typename !== 'NotFoundRejection' ? data : undefined;
@@ -49,6 +51,15 @@ export const EventPage = ({ eventId }: EventPageProps) => {
     () => attendees.find(attendee => attendee.user?.id === currentUserId)?.id,
     [attendees, currentUserId],
   );
+  const eventIsPast = useMemo(
+    () => !!event && DateTime.fromISO(event.eventDate).startOf('day') < DateTime.now().startOf('day'),
+    [event],
+  );
+  const canRemindAttendees = currentUserCanEdit && !eventIsPast;
+  const remindAttendees = () => {
+    setOpenAttendeesDialog(false);
+    setOpenRemindAttendeesDialog(true);
+  };
   const { shouldShowSuggestion, dismissSuggestion } = useSecretSantaSuggestion({
     eventId: eventId,
     eventTitle: event?.title,
@@ -61,7 +72,6 @@ export const EventPage = ({ eventId }: EventPageProps) => {
       return <SecretSantaSuggestionCard eventId={loadedEvent.id} onDismiss={dismissSuggestion} />;
     }
 
-    const eventIsPast = DateTime.fromISO(loadedEvent.eventDate).startOf('day') < DateTime.now().startOf('day');
     if (currentUserCanEdit && loadedEvent.secretSanta?.status === SecretSantaStatus.Created && !eventIsPast) {
       return (
         <SecretSantaLaunchSuggestion
@@ -114,6 +124,7 @@ export const EventPage = ({ eventId }: EventPageProps) => {
               attendees={attendees}
               currentUserCanEdit={currentUserCanEdit}
               openAttendeesDialog={() => setOpenAttendeesDialog(true)}
+              openRemindAttendeesDialog={canRemindAttendees ? remindAttendees : undefined}
               secretSanta={renderSecretSantaRow(event)}
             />
 
@@ -137,7 +148,16 @@ export const EventPage = ({ eventId }: EventPageProps) => {
               currentUserCanEdit={currentUserCanEdit}
               eventId={event.id}
               attendees={attendees}
+              openRemindAttendeesDialog={canRemindAttendees ? remindAttendees : undefined}
             />
+
+            {canRemindAttendees && (
+              <RemindAttendeesDialog
+                open={openRemindAttendeesDialog}
+                onClose={() => setOpenRemindAttendeesDialog(false)}
+                eventId={event.id}
+              />
+            )}
           </>
         )}
       </Box>

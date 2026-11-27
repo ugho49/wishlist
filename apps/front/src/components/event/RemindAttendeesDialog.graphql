@@ -1,0 +1,40 @@
+query EventAttendeesWithoutWishlist($eventId: EventId!) {
+  event(id: $eventId) {
+    __typename
+    ... on Event {
+      id
+      attendeesWithoutWishlist {
+        id
+        pendingEmail
+        lastRemindedAt
+        canBeReminded
+        user {
+          id
+          firstName
+          lastName
+          email
+          pictureUrl
+        }
+      }
+    }
+  }
+}
+
+mutation RemindEventAttendees($eventId: EventId!, $attendeeIds: [AttendeeId!]!) {
+  remindEventAttendees(eventId: $eventId, attendeeIds: $attendeeIds) {
+    __typename
+    ... on RemindEventAttendeesOutput {
+      remindedCount
+    }
+    ... on BusinessRuleRejection {
+      code
+      message
+    }
+    ... on ValidationRejection {
+      errors {
+        field
+        message
+      }
+    }
+  }
+}

@@ -42,6 +42,8 @@ function toGqlEventAttendee(eventAttendee: EventAttendee): GqlEventAttendee {
     user: eventAttendee.user ? userMapper.toGqlUser(eventAttendee.user) : undefined,
     pendingEmail: eventAttendee.pendingEmail,
     role: toGqlAttendeeRole(eventAttendee.role),
+    lastRemindedAt: eventAttendee.lastRemindedAt?.toISOString(),
+    canBeReminded: eventAttendee.canBeRemindedAt(new Date()),
   };
 }
 

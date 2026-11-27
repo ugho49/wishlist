@@ -6,6 +6,8 @@ import { DateTime } from 'luxon';
 
 import { WishlistMode } from '../../../wishlist/domain/wishlist-mode.enum';
 
+const byText = (left: string, right: string) => left.localeCompare(right);
+
 describe('EventResolver (GraphQL)', () => {
   const { getRequest, getFixtures } = useTestApp();
   let fixtures: Fixtures;
@@ -228,6 +230,101 @@ describe('EventResolver (GraphQL)', () => {
         expect(event.__typename).toBe('Event');
         expect(event.wishlists).toEqual([]);
         expect(event.attendees).toHaveLength(1);
+      });
+    });
+  });
+
+  describe('Field Event.attendeesWithoutWishlist', () => {
+    const query = /* GraphQL */ `
+      query GetEventAttendeesWithoutWishlist($id: EventId!) {
+        event(id: $id) {
+          __typename
+          ... on Event {
+            attendeesWithoutWishlist {
+              id
+              pendingEmail
+              lastRemindedAt
+              canBeReminded
+            }
+          }
+        }
+      }
+    `;
+
+    it('should list the attendees who manage no list with a wish of their own', async () => {
+      const { eventId, attendeeId: maintainerAttendeeId } = await fixtures.insertEventWithMaintainer({
+        title: 'Christmas',
+        maintainerId: currentUserId,
+      });
+      const { userId: ownerId } = await fixtures.insertUserAndAddItToEventAsAttendee({
+        eventId,
+        email: 'owner@test.fr',
+        firstname: 'Owner',
+        lastname: 'Filled',
+      });
+      const { userId: coOwnerId } = await fixtures.insertUserAndAddItToEventAsAttendee({
+        eventId,
+        email: 'co-owner@test.fr',
+        firstname: 'Co',
+        lastname: 'Owner',
+      });
+      const { userId: emptyListUserId, attendeeId: emptyListAttendeeId } =
+        await fixtures.insertUserAndAddItToEventAsAttendee({
+          eventId,
+          email: 'empty@test.fr',
+          firstname: 'Empty',
+          lastname: 'List',
+        });
+      const { userId: suggestedOnlyUserId, attendeeId: suggestedOnlyAttendeeId } =
+        await fixtures.insertUserAndAddItToEventAsAttendee({
+          eventId,
+          email: 'suggested@test.fr',
+          firstname: 'Suggested',
+          lastname: 'Only',
+        });
+      const pendingAttendeeId = await fixtures.insertPendingAttendee({ eventId, tempUserEmail: 'pending@test.fr' });
+
+      const filledWishlistId = await fixtures.insertWishlist({
+        eventIds: [eventId],
+        userId: ownerId,
+        title: 'Filled',
+        mode: WishlistMode.SHARED,
+        coOwnerId,
+      });
+      await fixtures.insertItem({ wishlistId: filledWishlistId, name: 'Book' });
+      await fixtures.insertWishlist({ eventIds: [eventId], userId: emptyListUserId, title: 'Empty' });
+      const suggestedOnlyWishlistId = await fixtures.insertWishlist({
+        eventIds: [eventId],
+        userId: suggestedOnlyUserId,
+        title: 'Suggested only',
+      });
+      await fixtures.insertItem({ wishlistId: suggestedOnlyWishlistId, name: 'Idea', isSuggested: true });
+      const otherEventId = await fixtures.insertEvent({
+        title: 'Other',
+        eventDate: DateTime.now().plus({ days: 10 }).toJSDate(),
+      });
+      const otherEventWishlistId = await fixtures.insertWishlist({
+        eventIds: [otherEventId],
+        userId: currentUserId,
+        title: 'Other event',
+      });
+      await fixtures.insertItem({ wishlistId: otherEventWishlistId, name: 'Bike' });
+
+      const res = await request
+        .post('/graphql')
+        .send({ query, variables: { id: eventId } })
+        .expect(200);
+
+      expect(res.body.data.event.__typename).toBe('Event');
+      const attendees = res.body.data.event.attendeesWithoutWishlist as Array<{ id: string }>;
+      expect(attendees.map(attendee => attendee.id).toSorted(byText)).toEqual(
+        [maintainerAttendeeId, emptyListAttendeeId, suggestedOnlyAttendeeId, pendingAttendeeId].toSorted(byText),
+      );
+      expect(attendees).toContainEqual({
+        id: pendingAttendeeId,
+        pendingEmail: 'pending@test.fr',
+        lastRemindedAt: null,
+        canBeReminded: true,
       });
     });
   });

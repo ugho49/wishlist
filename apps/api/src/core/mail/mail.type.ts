@@ -20,6 +20,7 @@ export enum MailTemplate {
   EMAIL_CHANGED_CONFIRMATION = 'email-changed-confirmation',
   EMAIL_CHANGED_SUCCESS = 'email-changed-success',
   BIRTHDAY_REMINDER = 'birthday-reminder',
+  WISHLIST_REMINDER = 'wishlist-reminder',
 }
 
 export type WelcomeUserContext = {
@@ -93,6 +94,14 @@ export type BirthdayReminderContext = {
   createWishlistUrl: string;
 };
 
+export type WishlistReminderContext = {
+  eventTitle: string;
+  remindedBy: string;
+  daysLeft: number;
+  url: string;
+  hasAccount: boolean;
+};
+
 type BaseMailPayload = {
   to: string | string[];
   subject: string;
@@ -152,6 +161,10 @@ export type MailPayload = BaseMailPayload &
     | {
         template: MailTemplate.BIRTHDAY_REMINDER;
         context: BirthdayReminderContext;
+      }
+    | {
+        template: MailTemplate.WISHLIST_REMINDER;
+        context: WishlistReminderContext;
       }
   );
 

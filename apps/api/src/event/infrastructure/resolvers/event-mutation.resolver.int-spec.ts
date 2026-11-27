@@ -22,7 +22,7 @@ const GRAPHQL_PATH = '/graphql';
 const futureDate = () => DateTime.now().plus({ days: 30 }).toISODate() as string;
 
 describe('EventMutationResolver (GraphQL)', () => {
-  const { getRequest, getFixtures, expectTable, fillRateLimit } = useTestApp();
+  const { getRequest, getFixtures, expectTable, expectMail, clearMails, fillRateLimit } = useTestApp();
   let fixtures: Fixtures;
 
   beforeEach(() => {
@@ -766,6 +766,181 @@ describe('EventMutationResolver (GraphQL)', () => {
           .expect(200);
 
         expect(res.body.data.updateEventAttendeeRole.__typename).toBe('UnauthorizedRejection');
+      });
+    });
+  });
+
+  describe('Mutation remindEventAttendees', () => {
+    const mutation = /* GraphQL */ `
+      mutation RemindEventAttendees($eventId: EventId!, $attendeeIds: [AttendeeId!]!) {
+        remindEventAttendees(eventId: $eventId, attendeeIds: $attendeeIds) {
+          __typename
+          ... on RemindEventAttendeesOutput {
+            remindedCount
+          }
+          ... on BusinessRuleRejection {
+            code
+          }
+          ... on ValidationRejection {
+            errors {
+              field
+              message
+            }
+          }
+        }
+      }
+    `;
+
+    const reminderSubject = "N'oubliez pas votre liste pour Christmas";
+
+    it('should not succeed when not authenticated', async () => {
+      const request = await getRequest();
+      const res = await request
+        .post(GRAPHQL_PATH)
+        .send({ query: mutation, variables: { eventId: uuid(), attendeeIds: [uuid()] } })
+        .expect(200);
+
+      expect(res.body.data?.remindEventAttendees?.__typename).not.toBe('RemindEventAttendeesOutput');
+    });
+
+    describe('when user is authenticated', () => {
+      let request: RequestApp;
+      let currentUserId: string;
+      let eventId: string;
+      let lazyAttendeeId: string;
+      let filledAttendeeId: string;
+      let pendingAttendeeId: string;
+
+      beforeEach(async () => {
+        request = await getRequest({ signedAs: 'BASE_USER' });
+        currentUserId = await fixtures.getSignedUserId('BASE_USER');
+        ({ eventId } = await fixtures.insertEventWithMaintainer({ title: 'Christmas', maintainerId: currentUserId }));
+        ({ attendeeId: lazyAttendeeId } = await fixtures.insertUserAndAddItToEventAsAttendee({
+          eventId,
+          email: 'lazy@test.fr',
+          firstname: 'Lazy',
+          lastname: 'Attendee',
+        }));
+        const filled = await fixtures.insertUserAndAddItToEventAsAttendee({
+          eventId,
+          email: 'filled@test.fr',
+          firstname: 'Filled',
+          lastname: 'Attendee',
+        });
+        filledAttendeeId = filled.attendeeId;
+        const wishlistId = await fixtures.insertWishlist({ eventIds: [eventId], userId: filled.userId, title: 'List' });
+        await fixtures.insertItem({ wishlistId, name: 'Book' });
+        pendingAttendeeId = await fixtures.insertPendingAttendee({ eventId, tempUserEmail: 'pending@test.fr' });
+      });
+
+      it.each([
+        { name: 'no attendee', attendeeIds: [] },
+        { name: 'more than 100 attendees', attendeeIds: Array.from({ length: 101 }, () => uuid()) },
+      ])('should return ValidationRejection with $name', async ({ attendeeIds }) => {
+        const res = await request
+          .post(GRAPHQL_PATH)
+          .send({ query: mutation, variables: { eventId, attendeeIds } })
+          .expect(200);
+
+        expect(res.body.data.remindEventAttendees.__typename).toBe('ValidationRejection');
+      });
+
+      it('should return NotFoundRejection when the event does not exist', async () => {
+        const res = await request
+          .post(GRAPHQL_PATH)
+          .send({ query: mutation, variables: { eventId: uuid(), attendeeIds: [pendingAttendeeId] } })
+          .expect(200);
+
+        expect(res.body.data.remindEventAttendees.__typename).toBe('NotFoundRejection');
+      });
+
+      it('should return UnauthorizedRejection when the user is a simple participant', async () => {
+        const { eventId: otherEventId } = await fixtures.insertEventWithMaintainer({
+          title: 'Not mine',
+          maintainerId: await fixtures.insertUser({ email: 'owner@test.fr', firstname: 'Event', lastname: 'Owner' }),
+        });
+        await fixtures.insertActiveAttendee({ eventId: otherEventId, userId: currentUserId });
+        const otherPendingAttendeeId = await fixtures.insertPendingAttendee({
+          eventId: otherEventId,
+          tempUserEmail: 'other-pending@test.fr',
+        });
+
+        const res = await request
+          .post(GRAPHQL_PATH)
+          .send({ query: mutation, variables: { eventId: otherEventId, attendeeIds: [otherPendingAttendeeId] } })
+          .expect(200);
+
+        expect(res.body.data.remindEventAttendees.__typename).toBe('UnauthorizedRejection');
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE, { last_reminded_at: 'ASC' })
+          .row(0)
+          .toMatchObject({ last_reminded_at: null });
+      });
+
+      it('should email the selected attendees without a filled wishlist and remember the reminder', async () => {
+        await clearMails();
+
+        const res = await request
+          .post(GRAPHQL_PATH)
+          .send({
+            query: mutation,
+            variables: { eventId, attendeeIds: [lazyAttendeeId, filledAttendeeId, pendingAttendeeId] },
+          })
+          .expect(200);
+
+        expect(res.body.data.remindEventAttendees).toEqual({
+          __typename: 'RemindEventAttendeesOutput',
+          remindedCount: 2,
+        });
+        // Reminded rows first (NULLs last), the pending attendee before the lazy user (temp email set first).
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE, { last_reminded_at: 'ASC', temp_user_email: 'ASC' })
+          .hasNumberOfRows(4)
+          .row(0)
+          .toMatchObject({ id: pendingAttendeeId, last_reminded_at: expect.any(Date) })
+          .row(1)
+          .toMatchObject({ id: lazyAttendeeId, last_reminded_at: expect.any(Date) })
+          .row(2)
+          .toMatchObject({ last_reminded_at: null })
+          .row(3)
+          .toMatchObject({ last_reminded_at: null });
+        await expectMail()
+          .waitFor(500)
+          .hasNumberOfEmails(2)
+          .hasSubject(reminderSubject)
+          .hasReceivers(['lazy@test.fr', 'pending@test.fr']);
+      });
+
+      it('should not remind the same attendees twice in a row', async () => {
+        await request
+          .post(GRAPHQL_PATH)
+          .send({ query: mutation, variables: { eventId, attendeeIds: [lazyAttendeeId] } })
+          .expect(200);
+
+        const res = await request
+          .post(GRAPHQL_PATH)
+          .send({ query: mutation, variables: { eventId, attendeeIds: [lazyAttendeeId] } })
+          .expect(200);
+
+        expect(res.body.data.remindEventAttendees).toEqual({
+          __typename: 'RemindEventAttendeesOutput',
+          remindedCount: 0,
+        });
+      });
+
+      it('should return BusinessRuleRejection RATE_LIMITED when the daily invitation quota is reached', async () => {
+        await fillRateLimit(`invitation:user:${currentUserId}`, 100);
+
+        const res = await request
+          .post(GRAPHQL_PATH)
+          .send({ query: mutation, variables: { eventId, attendeeIds: [lazyAttendeeId] } })
+          .expect(200);
+
+        expect(res.body.data.remindEventAttendees).toEqual({
+          __typename: 'BusinessRuleRejection',
+          code: 'RATE_LIMITED',
+        });
+        await expectTable(Fixtures.EVENT_ATTENDEE_TABLE, { last_reminded_at: 'ASC' })
+          .row(0)
+          .toMatchObject({ last_reminded_at: null });
       });
     });
   });

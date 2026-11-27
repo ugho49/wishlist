@@ -57,6 +57,33 @@ export class PostgresWishlistRepository implements WishlistRepository {
     return result.map(PostgresWishlistRepository.toModel);
   }
 
+  async findFilledByEventIds(eventIds: EventId[]): Promise<Wishlist[]> {
+    if (eventIds.length === 0) return [];
+
+    const result = await this.db.query.wishlist.findMany({
+      where: wishlist =>
+        and(
+          exists(
+            this.db
+              .select()
+              .from(schema.eventWishlist)
+              .where(
+                and(inArray(schema.eventWishlist.eventId, eventIds), eq(schema.eventWishlist.wishlistId, wishlist.id)),
+              ),
+          ),
+          exists(
+            this.db
+              .select()
+              .from(schema.item)
+              .where(and(eq(schema.item.wishlistId, wishlist.id), eq(schema.item.isSuggested, false))),
+          ),
+        ),
+      with: { eventWishlists: true },
+    });
+
+    return result.map(PostgresWishlistRepository.toModel);
+  }
+
   async findByUserPaginated(params: {
     userId: UserId;
     pagination: { take: number; skip: number };

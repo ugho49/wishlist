@@ -4,12 +4,19 @@ import { type AttendeeId, type EventId } from '@wishlist/common';
 
 import { AttendeeRole } from '../attendee-role.enum';
 
+/** Minimum delay between two wishlist reminders sent to the same attendee. */
+export const WISHLIST_REMINDER_COOLDOWN_IN_HOURS = 72;
+
+const WISHLIST_REMINDER_COOLDOWN_IN_MS = WISHLIST_REMINDER_COOLDOWN_IN_HOURS * 60 * 60 * 1000;
+
 export type EventAttendeeProps = {
   id: AttendeeId;
   eventId: EventId;
   user?: User;
   pendingEmail?: string;
   role: AttendeeRole;
+  /** When an admin of the event last reminded the attendee to fill their wishlist. */
+  lastRemindedAt?: Date;
 };
 
 export class EventAttendee {
@@ -18,6 +25,7 @@ export class EventAttendee {
   public readonly user?: User;
   public readonly pendingEmail?: string;
   public readonly role: AttendeeRole;
+  public readonly lastRemindedAt?: Date;
 
   constructor(props: EventAttendeeProps) {
     if (props.user && props.pendingEmail) {
@@ -29,6 +37,7 @@ export class EventAttendee {
     this.user = props.user;
     this.pendingEmail = props.pendingEmail;
     this.role = props.role;
+    this.lastRemindedAt = props.lastRemindedAt;
   }
 
   static createFromExistingUser(param: {
@@ -99,6 +108,23 @@ export class EventAttendee {
     return new EventAttendee({
       ...this,
       role,
+    });
+  }
+
+  /** False while the last wishlist reminder is under the cooldown: the attendee is not reminded twice in a row. */
+  canBeRemindedAt(now: Date): boolean {
+    if (!this.lastRemindedAt) return true;
+    return now.getTime() - this.lastRemindedAt.getTime() >= WISHLIST_REMINDER_COOLDOWN_IN_MS;
+  }
+
+  remind(now: Date): EventAttendee {
+    if (!this.canBeRemindedAt(now)) {
+      throw new Error('Attendee was reminded too recently');
+    }
+
+    return new EventAttendee({
+      ...this,
+      lastRemindedAt: now,
     });
   }
 }
