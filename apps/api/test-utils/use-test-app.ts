@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/nursery/useTopLevelDescribe: useTestApp() is called inside a describe block, its hooks belong to that block */
 import type { SQL } from 'bun';
 import type { TableAssertSortOptions } from './table-assert';
 

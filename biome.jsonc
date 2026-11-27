@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.6.4/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.6.9/schema.json",
   "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
   "files": {
     "ignoreUnknown": false,
@@ -31,19 +31,23 @@
         "noFloatingPromises": "error",
         "noMisusedPromises": "error",
         "noAccidentalBitwiseOperators": "error",
+        "noArrayDelete": "error",
         "noArraySortForMinMax": "error",
         "noDoubleComparison": "error",
+        "noImmediateMutation": "error",
         "noInvalidThis": "error",
         "noObjectConstructor": "error",
         "noPromiseExecutorReturn": "error",
         "noReturnArrayPush": "error",
         "noUnsafeUnaryMinus": "error",
         "noUselessAssignment": "error",
+        "noUselessBind": "error",
         "noUselessCall": "error",
         "noUselessDateGetTime": "error",
         "noUselessRecursion": "error",
         "useBigintLiterals": "error",
         "useSimplifiedBooleanReturn": "error",
+        "useTopLevelDescribe": "error",
         "useWhileLoopCondition": "error"
       },
       "complexity": {

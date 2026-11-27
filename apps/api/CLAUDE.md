@@ -163,6 +163,7 @@ describe('ToggleItemUseCase', () => {
 **Builders** (`test-utils/builders/`) — fluent `with*()` / `as*()` methods, `build()` creates the domain model (`Model.create()` when possible). Keep auto-generated fields (`id`, `createdAt`, `updatedAt`) inside `build()`, not on the builder API. Convert a `User` to `ICurrentUser` with `toCurrentUser(user)`.
 
 **Examples**
+
 - `src/item/application/command/toggle-item.use-case.spec.ts`
 - `src/item/application/command/delete-item.use-case.spec.ts`
 - `src/event/application/command/add-attendee.use-case.spec.ts`

@@ -24,6 +24,7 @@ Nested docs (read the one that matches the files you are changing):
 ### GraphQL Codegen
 
 After changing API `.graphql` schema files or frontend operation documents:
+
 - `nx run api:codegen` — API types (`apps/api/src/gql/generated-types.ts`) and stitched schema (`apps/api/schema.graphql`)
 - `nx run front:codegen` — Frontend types and React Query hooks from `apps/api/schema.graphql` + `apps/front/src/**/*.graphql`
 
